@@ -1,0 +1,20 @@
+package: github.com/giantswarm/aws-operator
+import:
+- package: github.com/giantswarm/microkit
+  subpackages:
+  - command
+  - error
+  - logger
+  - server
+  - transaction
+- package: github.com/go-kit/kit
+  version: ~0.3.0
+  subpackages:
+  - endpoint
+  - transport/http
+- package: github.com/gorilla/mux
+  version: ^1.1.0
+- package: github.com/juju/errgo
+- package: golang.org/x/net
+  subpackages:
+  - context
