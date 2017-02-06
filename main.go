@@ -22,10 +22,12 @@ var (
 // This is used to bundle configuration for the command, server and service
 // initialisation.
 var Flags = struct {
-	Service struct {
-		Operator struct {
-			Foo string
-		}
+	Kubernetes struct {
+		APIServer   string
+		Username    string
+		Password    string
+		BearerToken string
+		Insecure    bool
 	}
 }{}
 
@@ -53,7 +55,11 @@ func main() {
 
 			serviceConfig.Logger = newLogger
 
-			serviceConfig.OperatorFoo = Flags.Service.Operator.Foo
+			serviceConfig.KubernetesAPIServer = Flags.Kubernetes.APIServer
+			serviceConfig.KubernetesUsername = Flags.Kubernetes.Username
+			serviceConfig.KubernetesPassword = Flags.Kubernetes.Password
+			serviceConfig.KubernetesBearerToken = Flags.Kubernetes.BearerToken
+			serviceConfig.KubernetesInsecure = Flags.Kubernetes.Insecure
 
 			serviceConfig.Description = description
 			serviceConfig.GitCommit = gitCommit
@@ -107,7 +113,11 @@ func main() {
 
 	daemonCommand := newCommand.DaemonCommand().CobraCommand()
 
-	daemonCommand.PersistentFlags().StringVar(&Flags.Service.Operator.Foo, "service.operator.foo", "bar", "TODO")
+	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.APIServer, "kubernetes.apiserver", "http://127.0.0.1:8080", "Address and port of Giantnetes API server")
+	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.Username, "kubernetes.username", "", "Username (if the Kubernetes cluster is using basic authentication)")
+	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.Password, "kubernetes.password", "", "Password (if Kubernetes cluster is using basic authentication")
+	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.BearerToken, "kubernetes.token", "", "Token (if needed for Kubernetes authentication)")
+	daemonCommand.PersistentFlags().BoolVar(&Flags.Kubernetes.Insecure, "kubernetes.insecure", false, "Insecure SSL connection")
 
 	newCommand.CobraCommand().Execute()
 }

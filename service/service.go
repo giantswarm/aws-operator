@@ -8,7 +8,9 @@ import (
 
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
+	"k8s.io/client-go/kubernetes"
 
+	k8sutil "github.com/giantswarm/aws-operator/client/k8s"
 	"github.com/giantswarm/aws-operator/service/operator"
 	"github.com/giantswarm/aws-operator/service/version"
 )
@@ -18,8 +20,12 @@ type Config struct {
 	// Dependencies.
 	Logger micrologger.Logger
 
-	// Settings.
-	OperatorFoo string
+	// Kubernetes.
+	KubernetesAPIServer   string
+	KubernetesUsername    string
+	KubernetesPassword    string
+	KubernetesBearerToken string
+	KubernetesInsecure    bool
 
 	Description string
 	GitCommit   string
@@ -34,8 +40,12 @@ func DefaultConfig() Config {
 		// Dependencies.
 		Logger: nil,
 
-		// Settings.
-		OperatorFoo: "",
+		// Kubernetes.
+		KubernetesAPIServer:   "",
+		KubernetesUsername:    "",
+		KubernetesPassword:    "",
+		KubernetesBearerToken: "",
+		KubernetesInsecure:    false,
 
 		Description: "",
 		GitCommit:   "",
@@ -54,13 +64,26 @@ func New(config Config) (*Service, error) {
 
 	var err error
 
+	var k8sclient kubernetes.Interface
+	{
+		k8sclient, err = k8sutil.NewClient(
+			config.KubernetesAPIServer,
+			config.KubernetesUsername,
+			config.KubernetesPassword,
+			config.KubernetesBearerToken,
+			config.KubernetesInsecure,
+		)
+		if err != nil {
+			return nil, microerror.MaskAny(err)
+		}
+	}
+
 	var operatorService *operator.Service
 	{
 		operatorConfig := operator.DefaultConfig()
 
 		operatorConfig.Logger = config.Logger
-
-		operatorConfig.Foo = config.OperatorFoo
+		operatorConfig.K8sclient = k8sclient
 
 		operatorService, err = operator.New(operatorConfig)
 		if err != nil {
