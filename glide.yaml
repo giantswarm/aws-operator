@@ -18,3 +18,13 @@ import:
 - package: golang.org/x/net
   subpackages:
   - context
+- package: k8s.io/client-go
+  version: v2.0.0-alpha.1
+- package: github.com/giantswarm/clusterspec
+  repo: git@github.com:giantswarm/clusterspec.git
+- package: github.com/golang/protobuf
+  version: 8ee79997227bf9b34611aee7946ae64735e6fd93
+  subpackages:
+  - jsonpb
+  - proto
+  - sortkeys
