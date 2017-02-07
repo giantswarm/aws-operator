@@ -1,0 +1,88 @@
+apiVersion: "giantswarm.io/v1"
+kind: Cluster
+metadata:
+  name: test
+spec:
+  customer: "test"
+  clusterId: "test"
+
+  k8sVersion: "v1.5.1_coreos.0"
+  k8sVmVersion: "master-2016-12-07-16-20-30"
+  certctlVersion: "0.5.0"
+  kubectlVersion: "1.4.0"
+  pingVersion: "3.3.6"
+  ingressControllerVersion: "0.13.1"
+
+  ## Networking configuration for flannel client and calico
+  flannelConfiguration:
+    version: "v0.6.2"
+    clusterVNI: 2
+    clusterBackend: "vxlan"
+    clusterNetwork: "10.2.0.0/16"
+
+  giantnetesConfiguration:
+    hostSubnetRange: "10.0.4.0/22"
+    etcdPort: "2379"
+    vaultAddr: "https://leaseweb-vault-private.giantswarm.io:8200"
+    networkInterface: "bond0.3"
+    domain: "g8s.giantswarm.fra-1"
+    dnsIp: "172.31.0.10"
+    apiIp: "172.31.0.1"
+    cloudflareDomain: "fra-1.giantswarm.io"
+
+  certificates:
+    vaultToken: "xxxxxxx"
+    masterServiceName: "test-k8s-master-vm"
+    apiAltNames: "kubernetes,kubernetes.default,kubernetes.default.svc,kubernetes.default.svc.test.g8s.giantswarm.fra-1"
+
+  worker:
+    registry: ""
+    replicas: 2
+    capabilities:
+      memory: "512"
+      CpuCores: 1
+    dockerExtraArgs: ""
+    nodeLabels: ""
+    networkSetupVersion: "0.1"
+    k8sCalicoMtu: "1430"
+    workerServicePort: "4194"
+    masterPort: "6443"
+    securePort: "6443"
+    insecurePort: "8080"
+    dnsIp: "172.29.0.10"
+    domain: "test.giantswarm.fra-1"
+    etcdDomainName: "etcd.test.g8s.fra-1.giantswarm.io"
+    masterDomainName: "api.test.g8s.fra-1.giantswarm.io"
+
+  master:
+    registry: ""
+    capabilities:
+      memory: "512"
+      CpuCores: 1
+    calicoSubnet: "192.168.0.0"
+    calicoCidr: "16"
+    networkSetupVersion: "0.1"
+    clusterIpRange: "172.29.0.0"
+    clusterIpSubnet: "16"
+    securePort: "6443"
+    insecurePort: "8080"
+    dnsIp: "172.29.0.10"
+    domain: "test.giantswarm.fra-1"
+    etcdDomainName: "etcd.test.g8s.fra-1.giantswarm.io"
+    masterDomainName: "api.test.g8s.fra-1.giantswarm.io"
+
+  ingressController:
+    ## Ingress controller configuration properties
+    kempVsIp: "178.162.217.219"
+    kempVsName: "ingress-controller-test-k8s-giantswarm-io"
+    kempVsPorts:  "80"
+    kempVsSslAcceleration: "false"
+    kempRsPort: "30101"
+    kempVsCheckPort: "30100"
+    kempUser: "ddmmadmin"
+    kempPassword: "xxxxx"
+    kempEndpoint: "https://178.162.217.249:8443/access/"
+    cloudflareIp: "178.162.217.219"
+    cloudflareDomain: "gigantic.io"
+    cloudflareToken: "xxxxxxx"
+    cloudflareEmail: "accounts@giantswarm.io"
