@@ -1,4 +1,4 @@
-package operator
+package create
 
 import (
 	"github.com/juju/errgo"

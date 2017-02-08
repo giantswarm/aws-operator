@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/giantswarm/clusterspec"
+	"github.com/giantswarm/awstpr"
 	"k8s.io/client-go/pkg/runtime"
 	"k8s.io/client-go/pkg/watch"
 )
@@ -18,7 +18,7 @@ func (d *ClusterDecoder) Decode() (action watch.EventType, object runtime.Object
 
 	var e struct {
 		Type   watch.EventType
-		Object clusterspec.Cluster
+		Object awstpr.CustomObject
 	}
 	if err := decoder.Decode(&e); err != nil {
 		return watch.Error, nil, err

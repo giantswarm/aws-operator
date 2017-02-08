@@ -7,6 +7,8 @@ import (
 	"github.com/giantswarm/microkit/logger"
 	microserver "github.com/giantswarm/microkit/server"
 
+	awsclient "github.com/giantswarm/aws-operator/client/aws"
+	k8sclient "github.com/giantswarm/aws-operator/client/k8s"
 	"github.com/giantswarm/aws-operator/server"
 	"github.com/giantswarm/aws-operator/service"
 )
@@ -22,6 +24,13 @@ var (
 // This is used to bundle configuration for the command, server and service
 // initialisation.
 var Flags = struct {
+	Aws struct {
+		AccessKey struct {
+			ID     string
+			Secret string
+		}
+		Region string
+	}
 	Kubernetes struct {
 		APIServer   string
 		Username    string
@@ -55,11 +64,18 @@ func main() {
 
 			serviceConfig.Logger = newLogger
 
-			serviceConfig.KubernetesAPIServer = Flags.Kubernetes.APIServer
-			serviceConfig.KubernetesUsername = Flags.Kubernetes.Username
-			serviceConfig.KubernetesPassword = Flags.Kubernetes.Password
-			serviceConfig.KubernetesBearerToken = Flags.Kubernetes.BearerToken
-			serviceConfig.KubernetesInsecure = Flags.Kubernetes.Insecure
+			serviceConfig.AwsConfig = awsclient.Config{
+				AccessKeyID:     Flags.Aws.AccessKey.ID,
+				AccessKeySecret: Flags.Aws.AccessKey.Secret,
+				Region:          Flags.Aws.Region,
+			}
+			serviceConfig.K8sConfig = k8sclient.Config{
+				Host:        Flags.Kubernetes.APIServer,
+				Username:    Flags.Kubernetes.Username,
+				Password:    Flags.Kubernetes.Password,
+				BearerToken: Flags.Kubernetes.BearerToken,
+				Insecure:    Flags.Kubernetes.Insecure,
+			}
 
 			serviceConfig.Description = description
 			serviceConfig.GitCommit = gitCommit
@@ -112,6 +128,10 @@ func main() {
 	}
 
 	daemonCommand := newCommand.DaemonCommand().CobraCommand()
+
+	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.AccessKey.ID, "aws.accesskey.id", "", "ID of the AWS access key")
+	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.AccessKey.Secret, "aws.accesskey.secret", "", "Secret of the AWS access key")
+	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.Region, "aws.region", "", "Region in EC2 service")
 
 	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.APIServer, "kubernetes.apiserver", "http://127.0.0.1:8080", "Address and port of Giantnetes API server")
 	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.Username, "kubernetes.username", "", "Username (if the Kubernetes cluster is using basic authentication)")
