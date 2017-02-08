@@ -6,12 +6,15 @@ import (
 	"fmt"
 	"sync"
 
+	awssession "github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
 	"k8s.io/client-go/kubernetes"
 
+	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	k8sutil "github.com/giantswarm/aws-operator/client/k8s"
-	"github.com/giantswarm/aws-operator/service/operator"
+	"github.com/giantswarm/aws-operator/service/create"
 	"github.com/giantswarm/aws-operator/service/version"
 )
 
@@ -20,12 +23,9 @@ type Config struct {
 	// Dependencies.
 	Logger micrologger.Logger
 
-	// Kubernetes.
-	KubernetesAPIServer   string
-	KubernetesUsername    string
-	KubernetesPassword    string
-	KubernetesBearerToken string
-	KubernetesInsecure    bool
+	// Sub-dependencies configs.
+	AwsConfig awsutil.Config
+	K8sConfig k8sutil.Config
 
 	Description string
 	GitCommit   string
@@ -40,12 +40,9 @@ func DefaultConfig() Config {
 		// Dependencies.
 		Logger: nil,
 
-		// Kubernetes.
-		KubernetesAPIServer:   "",
-		KubernetesUsername:    "",
-		KubernetesPassword:    "",
-		KubernetesBearerToken: "",
-		KubernetesInsecure:    false,
+		// Sub-dependencies configs.
+		AwsConfig: awsutil.Config{},
+		K8sConfig: k8sutil.Config{},
 
 		Description: "",
 		GitCommit:   "",
@@ -64,28 +61,30 @@ func New(config Config) (*Service, error) {
 
 	var err error
 
-	var k8sclient kubernetes.Interface
+	var awsSession *awssession.Session
+	var ec2Client *ec2.EC2
 	{
-		k8sclient, err = k8sutil.NewClient(
-			config.KubernetesAPIServer,
-			config.KubernetesUsername,
-			config.KubernetesPassword,
-			config.KubernetesBearerToken,
-			config.KubernetesInsecure,
-		)
+		awsSession, ec2Client = awsutil.NewClient(config.AwsConfig)
+	}
+
+	var k8sClient kubernetes.Interface
+	{
+		k8sClient, err = k8sutil.NewClient(config.K8sConfig)
 		if err != nil {
 			return nil, microerror.MaskAny(err)
 		}
 	}
 
-	var operatorService *operator.Service
+	var createService *create.Service
 	{
-		operatorConfig := operator.DefaultConfig()
+		createConfig := create.DefaultConfig()
 
-		operatorConfig.Logger = config.Logger
-		operatorConfig.K8sclient = k8sclient
+		createConfig.AwsSession = awsSession
+		createConfig.EC2Client = ec2Client
+		createConfig.K8sClient = k8sClient
+		createConfig.Logger = config.Logger
 
-		operatorService, err = operator.New(operatorConfig)
+		createService, err = create.New(createConfig)
 		if err != nil {
 			return nil, microerror.MaskAny(err)
 		}
@@ -108,8 +107,8 @@ func New(config Config) (*Service, error) {
 
 	newService := &Service{
 		// Dependencies.
-		Operator: operatorService,
-		Version:  versionService,
+		Create:  createService,
+		Version: versionService,
 
 		// Internals
 		bootOnce: sync.Once{},
@@ -120,8 +119,8 @@ func New(config Config) (*Service, error) {
 
 type Service struct {
 	// Dependencies.
-	Operator *operator.Service
-	Version  *version.Service
+	Create  *create.Service
+	Version *version.Service
 
 	// Internals.
 	bootOnce sync.Once
@@ -129,6 +128,6 @@ type Service struct {
 
 func (s *Service) Boot() {
 	s.bootOnce.Do(func() {
-		s.Operator.Boot()
+		s.Create.Boot()
 	})
 }
