@@ -1,8 +1,16 @@
 package k8s
 
 import (
+	"fmt"
+	"os"
+
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/auth"
+)
+
+var (
+	filename string = fmt.Sprintf("%s/.kube/config", os.Getenv("HOME"))
 )
 
 type Config struct {
@@ -23,9 +31,18 @@ func NewClient(config Config) (kubernetes.Interface, error) {
 		BearerToken: config.BearerToken,
 		Insecure:    config.Insecure,
 	}
+
+	info, err := auth.LoadFromFile(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	rawClientConfig = info.MergeWithConfig()
+
 	client, err := kubernetes.NewForConfig(rawClientConfig)
 	if err != nil {
 		return nil, err
 	}
+
 	return client, nil
 }
