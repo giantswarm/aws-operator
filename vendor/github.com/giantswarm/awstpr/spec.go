@@ -1,6 +1,7 @@
 package awstpr
 
 import (
+	"github.com/giantswarm/awstpr/spec/aws"
 	"github.com/giantswarm/awstpr/spec/calico"
 	"github.com/giantswarm/awstpr/spec/cloudflare"
 	"github.com/giantswarm/awstpr/spec/cluster"
@@ -14,6 +15,7 @@ import (
 )
 
 type Spec struct {
+	Aws        aws.Aws               `json:"aws"`
 	Calico     calico.Calico         `json:"calico"`
 	Cloudflare cloudflare.Cloudflare `json:"cloudflare"`
 	Cluster    cluster.Cluster       `json:"cluster"`
