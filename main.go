@@ -32,11 +32,17 @@ var Flags = struct {
 		Region string
 	}
 	Kubernetes struct {
+		InCluster   bool
 		APIServer   string
 		Username    string
 		Password    string
 		BearerToken string
-		Insecure    bool
+		TLS         struct {
+			CrtFile string
+			KeyFile string
+			CaFile  string
+		}
+		Insecure bool
 	}
 }{}
 
@@ -69,12 +75,19 @@ func main() {
 				AccessKeySecret: Flags.Aws.AccessKey.Secret,
 				Region:          Flags.Aws.Region,
 			}
+			k8sTlsClientConfig := k8sclient.TLSClientConfig{
+				CertFile: Flags.Kubernetes.TLS.CrtFile,
+				KeyFile:  Flags.Kubernetes.TLS.KeyFile,
+				CAFile:   Flags.Kubernetes.TLS.CaFile,
+			}
 			serviceConfig.K8sConfig = k8sclient.Config{
-				Host:        Flags.Kubernetes.APIServer,
-				Username:    Flags.Kubernetes.Username,
-				Password:    Flags.Kubernetes.Password,
-				BearerToken: Flags.Kubernetes.BearerToken,
-				Insecure:    Flags.Kubernetes.Insecure,
+				InCluster:       Flags.Kubernetes.InCluster,
+				Host:            Flags.Kubernetes.APIServer,
+				Username:        Flags.Kubernetes.Username,
+				Password:        Flags.Kubernetes.Password,
+				BearerToken:     Flags.Kubernetes.BearerToken,
+				Insecure:        Flags.Kubernetes.Insecure,
+				TLSClientConfig: k8sTlsClientConfig,
 			}
 
 			serviceConfig.Description = description
@@ -133,10 +146,14 @@ func main() {
 	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.AccessKey.Secret, "aws.accesskey.secret", "", "Secret of the AWS access key")
 	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.Region, "aws.region", "", "Region in EC2 service")
 
+	daemonCommand.PersistentFlags().BoolVar(&Flags.Kubernetes.InCluster, "kubernetes.incluster", false, "Whether to use the in-cluster config to authenticate with Kubernetes")
 	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.APIServer, "kubernetes.apiserver", "http://127.0.0.1:8080", "Address and port of Giantnetes API server")
 	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.Username, "kubernetes.username", "", "Username (if the Kubernetes cluster is using basic authentication)")
 	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.Password, "kubernetes.password", "", "Password (if Kubernetes cluster is using basic authentication")
 	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.BearerToken, "kubernetes.token", "", "Token (if needed for Kubernetes authentication)")
+	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.TLS.CrtFile, "kubernetes.tls.crtfile", "", "TLS Client certificate file")
+	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.TLS.KeyFile, "kubernetes.tls.keyfile", "", "TLS Client key file")
+	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.TLS.CaFile, "kubernetes.tls.cafile", "", "TLS Authority certificate file")
 	daemonCommand.PersistentFlags().BoolVar(&Flags.Kubernetes.Insecure, "kubernetes.insecure", false, "Insecure SSL connection")
 
 	newCommand.CobraCommand().Execute()
