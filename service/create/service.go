@@ -36,6 +36,11 @@ const (
 	tagKeyCluster string = "Cluster"
 )
 
+const (
+	// http://docs.aws.amazon.com/sdk-for-go/api/service/ec2/#InstanceState
+	EC2TerminatedState = 48
+)
+
 // Config represents the configuration used to create a version service.
 type Config struct {
 	// Dependencies.
@@ -222,8 +227,14 @@ func (s *Service) runMachine(machine node.Node, clusterName, name string) error 
 	// TODO(nhlfr): Check whether the instance has correct parameters. That will be most probably done when we
 	// will introduce the interface for creating, deleting and updating resources.
 	if instances.Reservations != nil {
-		s.logger.Log("info", fmt.Sprintf("instance '%s' already exists", name))
-		return nil
+		for _, r := range instances.Reservations {
+			for _, i := range r.Instances {
+				if *i.State.Code != EC2TerminatedState {
+					s.logger.Log("info", fmt.Sprintf("instance '%s' already exists", name))
+					return nil
+				}
+			}
+		}
 	}
 
 	reservation, err := s.ec2Client.RunInstances(&ec2.RunInstancesInput{
