@@ -1,5 +1,5 @@
-hash: a8f2b2d44a0f74235dd51dbcbdb12acd1a8840c0f1d5324bffc5ae34e800ff09
-updated: 2017-02-17T14:32:03.647224435+01:00
+hash: e04ee3e6e2bd149240ed7c2fcb41777ccb59eef4e3c71d83416f13a4cb803ec2
+updated: 2017-02-21T12:26:42.580295627+01:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aws/aws-sdk-go
-  version: 2d3b3bc3aae6a09a9b194aa6eb71326fcbe2e918
+  version: ab16e115479efb695e122bc4bb3e0ad52419d1ba
   subpackages:
   - aws
   - aws/awserr
@@ -41,7 +41,7 @@ imports:
 - name: github.com/blang/semver
   version: 31b736133b98f26d5e078ec9eb591666edfd091f
 - name: github.com/coreos/etcd
-  version: 8ba2897a21e4fc51b298ca553d251318425f93ae
+  version: ac1c7eba21545c4ee025f2c340e143cacb53c754
   subpackages:
   - auth/authpb
   - client
@@ -243,6 +243,11 @@ imports:
   version: f1f1a805ed361a0e078bb537e4ea78cd37dcf065
   subpackages:
   - codec
+- name: github.con/stretchr/testify
+  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
+  repo: git://github.com/stretchr/testify.git
+  subpackages:
+  - assert
 - name: golang.org/x/net
   version: e90d6d0afc4c315a0d87a568ae68577cc15149a0
   subpackages:
@@ -416,4 +421,12 @@ imports:
   - tools/clientcmd/api
   - tools/metrics
   - transport
-testImports: []
+testImports:
+- name: github.com/pmezard/go-difflib
+  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
+  subpackages:
+  - difflib
+- name: github.com/stretchr/testify
+  version: e3a8ff8ce36581f87a15341206f205b1da467059
+  subpackages:
+  - assert
