@@ -1,4 +1,4 @@
-.PHONY: verify-glide-installation install-vendor update-vendor all install
+.PHONY: verify-glide-installation install-vendor update-vendor all install check
 
 all:
 	go build github.com/giantswarm/aws-operator
@@ -9,8 +9,11 @@ verify-glide-installation:
 
 install-vendor: verify-glide-installation
 	glide install --strip-vendor
-	glide-vc
+	glide-vc --use-lock-file
 
 update-vendor: verify-glide-installation
 	glide update --strip-vendor
-	glide-vc
+	glide-vc --use-lock-file
+
+check:
+	go test `glide novendor`
