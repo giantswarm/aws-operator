@@ -29,7 +29,9 @@ var Flags = struct {
 			ID     string
 			Secret string
 		}
-		Region string
+		CertsDir              string
+		CloudconfigMasterPath string
+		CloudconfigWorkerPath string
 	}
 	Kubernetes struct {
 		APIServer   string
@@ -67,7 +69,6 @@ func main() {
 			serviceConfig.AwsConfig = awsclient.Config{
 				AccessKeyID:     Flags.Aws.AccessKey.ID,
 				AccessKeySecret: Flags.Aws.AccessKey.Secret,
-				Region:          Flags.Aws.Region,
 			}
 			serviceConfig.K8sConfig = k8sclient.Config{
 				Host:        Flags.Kubernetes.APIServer,
@@ -81,6 +82,9 @@ func main() {
 			serviceConfig.GitCommit = gitCommit
 			serviceConfig.Name = name
 			serviceConfig.Source = source
+			serviceConfig.CertsDir = Flags.Aws.CertsDir
+			serviceConfig.CloudconfigMasterPath = Flags.Aws.CloudconfigMasterPath
+			serviceConfig.CloudconfigWorkerPath = Flags.Aws.CloudconfigWorkerPath
 
 			newService, err = service.New(serviceConfig)
 			if err != nil {
@@ -131,7 +135,10 @@ func main() {
 
 	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.AccessKey.ID, "aws.accesskey.id", "", "ID of the AWS access key")
 	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.AccessKey.Secret, "aws.accesskey.secret", "", "Secret of the AWS access key")
-	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.Region, "aws.region", "", "Region in EC2 service")
+	// TODO move this to the TPR
+	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.CertsDir, "aws.certsdir", "", "Certificates to be placed in /etc/kubernetes/ssl")
+	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.CloudconfigMasterPath, "aws.cloudconfigMasterPath", "", "Path to the master node cloudconfig template")
+	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.CloudconfigWorkerPath, "aws.cloudconfigWorkerPath", "", "Path to the master node cloudconfig template")
 
 	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.APIServer, "kubernetes.apiserver", "http://127.0.0.1:8080", "Address and port of Giantnetes API server")
 	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.Username, "kubernetes.username", "", "Username (if the Kubernetes cluster is using basic authentication)")

@@ -1,5 +1,5 @@
 package docker
 
 type Daemon struct {
-	ExtraArgs string `json:"extra_args"`
+	ExtraArgs string `json:"extraArgs"`
 }

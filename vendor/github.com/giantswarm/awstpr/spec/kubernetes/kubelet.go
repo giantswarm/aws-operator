@@ -5,7 +5,7 @@ type Kubelet struct {
 	// Kubernetes kubelet. These are usually the alternative names of the API
 	// server plus the service name of the API server. The addition is important
 	// to make kubelets able to connect to the API servers.
-	AltNames string `json:"alt_names"`
+	AltNames string `json:"altNames"`
 	Labels   string `json:"labels"`
 	// Port is the kubelet service port, used in the Kubernetes service definition
 	// of the worker nodes.

@@ -1,7 +1,7 @@
 package operator
 
 type Operator struct {
-	CertctlVersion      string `json:"certctl_ersion"`
-	KubectlVersion      string `json:"kubectl_version"`
+	CertctlVersion      string `json:"certctlVersion"`
+	KubectlVersion      string `json:"kubectlVersion"`
 	NetworkSetupVersion string `json:"networkSetupVersion"`
 }

@@ -2,7 +2,11 @@ package: github.com/giantswarm/aws-operator
 import:
 - package: github.com/aws/aws-sdk-go
   version: master
+  subpackages:
+  - service/kms
+  - service/iam
 - package: github.com/giantswarm/microkit
+  version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
   - command
   - error
@@ -24,7 +28,7 @@ import:
   version: v2.0.0-alpha.1
 - package: github.com/giantswarm/awstpr
   repo: git@github.com:giantswarm/awstpr.git
-  version: 3d98b40a2bc399a6a20f3b19c634d56d99a69e81
+  version: master
 - package: github.com/golang/protobuf
   version: 8ee79997227bf9b34611aee7946ae64735e6fd93
   subpackages:
