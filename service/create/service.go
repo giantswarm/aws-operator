@@ -7,9 +7,13 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	awssession "github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/iam"
+	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/awstpr"
+	tpraws "github.com/giantswarm/awstpr/spec/aws"
 	"github.com/giantswarm/awstpr/spec/node"
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
@@ -28,12 +32,8 @@ const (
 	// Period or re-synchronizing the list of objects in k8s watcher. 0 means that re-sync will be
 	// delayed as long as possible, until the watch will be closed or timed out.
 	resyncPeriod time.Duration = 0
-	// Prefixes used for machine names.
-	prefixMaster string = "master"
-	prefixWorker string = "worker"
-	// EC2 instance tag keys.
-	tagKeyName    string = "Name"
-	tagKeyCluster string = "Cluster"
+	prefixMaster               = "master"
+	prefixWorker               = "worker"
 )
 
 const (
@@ -41,13 +41,36 @@ const (
 	EC2TerminatedState = 48
 )
 
+const (
+	// EC2 instance tag keys.
+	tagKeyName    = "Name"
+	tagKeyCluster = "Cluster"
+)
+
 // Config represents the configuration used to create a version service.
 type Config struct {
 	// Dependencies.
-	AwsSession *awssession.Session
-	EC2Client  *ec2.EC2
-	K8sClient  kubernetes.Interface
-	Logger     micrologger.Logger
+	AwsConfig             awsutil.Config
+	K8sClient             kubernetes.Interface
+	Logger                micrologger.Logger
+	CertsDir              string
+	CloudconfigMasterPath string
+	CloudconfigWorkerPath string
+}
+
+// awsNode combines the generic node information of the TPR with the aws
+// specific one
+type awsNode struct {
+	Node    node.Node
+	AwsInfo tpraws.Node
+}
+
+// cloudconfigTemplateParams represents the parameters for a cloudconfig
+// template for a particular node
+type cloudconfigTemplateParams struct {
+	Spec      awstpr.Spec
+	Node      awsNode
+	TLSAssets CompactTLSAssets
 }
 
 // DefaultConfig provides a default configuration to create a new version service
@@ -55,10 +78,12 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
-		AwsSession: nil,
-		EC2Client:  nil,
-		K8sClient:  nil,
-		Logger:     nil,
+		AwsConfig:             awsutil.Config{},
+		K8sClient:             nil,
+		Logger:                nil,
+		CertsDir:              "",
+		CloudconfigMasterPath: "",
+		CloudconfigWorkerPath: "",
 	}
 }
 
@@ -71,10 +96,12 @@ func New(config Config) (*Service, error) {
 
 	newService := &Service{
 		// Dependencies.
-		awsSession: config.AwsSession,
-		ec2Client:  config.EC2Client,
-		k8sClient:  config.K8sClient,
-		logger:     config.Logger,
+		awsConfig:             config.AwsConfig,
+		k8sClient:             config.K8sClient,
+		logger:                config.Logger,
+		certsDir:              config.CertsDir,
+		cloudconfigMasterPath: config.CloudconfigMasterPath,
+		cloudconfigWorkerPath: config.CloudconfigWorkerPath,
 
 		// Internals
 		bootOnce: sync.Once{},
@@ -86,10 +113,12 @@ func New(config Config) (*Service, error) {
 // Service implements the version service interface.
 type Service struct {
 	// Dependencies.
-	awsSession *awssession.Session
-	ec2Client  *ec2.EC2
-	k8sClient  kubernetes.Interface
-	logger     micrologger.Logger
+	awsConfig             awsutil.Config
+	k8sClient             kubernetes.Interface
+	logger                micrologger.Logger
+	certsDir              string
+	cloudconfigMasterPath string
+	cloudconfigWorkerPath string
 
 	// Internals.
 	bootOnce sync.Once
@@ -159,13 +188,13 @@ func (s *Service) Boot() {
 					}
 
 					// Run masters
-					if err := s.runMachines(cluster.Spec.Masters, cluster.Name, "master"); err != nil {
+					if err := s.runMachines(cluster.Spec, cluster.Name, prefixMaster); err != nil {
 						s.logger.Log("error", microerror.MaskAny(err))
 						return
 					}
 
 					// Run workers
-					if err := s.runMachines(cluster.Spec.Workers, cluster.Name, "worker"); err != nil {
+					if err := s.runMachines(cluster.Spec, cluster.Name, prefixWorker); err != nil {
 						s.logger.Log("error", microerror.MaskAny(err))
 						return
 					}
@@ -191,18 +220,144 @@ func (s *Service) Boot() {
 	})
 }
 
-func (s *Service) runMachines(machines []node.Node, clusterName, prefix string) error {
+func (s *Service) runMachines(spec awstpr.Spec, clusterName string, prefix string) error {
+	var (
+		machines        []node.Node
+		awsMachines     []tpraws.Node
+		cloudconfigPath string
+	)
+
+	switch prefix {
+	case prefixMaster:
+		machines = spec.Masters
+		awsMachines = spec.Aws.Masters
+		cloudconfigPath = s.cloudconfigMasterPath
+	case prefixWorker:
+		machines = spec.Workers
+		awsMachines = spec.Aws.Workers
+		cloudconfigPath = s.cloudconfigWorkerPath
+	default:
+		return microerror.MaskAny(fmt.Errorf("invalid prefix %q", prefix))
+	}
+
+	if len(machines) != len(awsMachines) {
+		return microerror.MaskAny(fmt.Errorf("mismatched number of %q machines in the 'spec' and 'aws' sections: %d != %d",
+			prefix,
+			len(machines),
+			len(awsMachines)))
+	}
+
 	for no, machine := range machines {
 		name := fmt.Sprintf("%s-%d", prefix, no)
-		if err := s.runMachine(machine, clusterName, name); err != nil {
+		m := awsNode{
+			Node:    machine,
+			AwsInfo: awsMachines[no],
+		}
+		if err := s.runMachine(m, spec, clusterName, cloudconfigPath, name); err != nil {
 			return microerror.MaskAny(err)
 		}
 	}
 	return nil
 }
 
-func (s *Service) runMachine(machine node.Node, clusterName, name string) error {
-	instances, err := s.ec2Client.DescribeInstances(&ec2.DescribeInstancesInput{
+const (
+	roleName                 = "EC2-K8S-Role"
+	policyName               = "EC2-K8S-Policy"
+	profileName              = "EC2-DecryptTLSCerts"
+	assumeRolePolicyDocument = `{
+		"Version": "2012-10-17",
+		"Statement": {
+			"Effect": "Allow",
+			"Principal": {
+				"Service": "ec2.amazonaws.com"
+			},
+			"Action": "sts:AssumeRole"
+		}
+	}`
+	policyDocumentTempl = `{
+		"Version": "2012-10-17",
+		"Statement": [
+			{
+				"Effect": "Allow",
+				"Action": "kms:Decrypt",
+				"Resource": %q
+			}
+		]
+	}`
+)
+
+func (s *Service) encodeTLSAssets(awsSession *session.Session, kmsKeyArn string) (*CompactTLSAssets, error) {
+	rawTLS, err := readRawTLSAssets(s.certsDir)
+	if err != nil {
+		return nil, microerror.MaskAny(err)
+	}
+
+	policyDocument := fmt.Sprintf(policyDocumentTempl, kmsKeyArn)
+
+	svc := iam.New(awsSession)
+
+	if _, err := svc.CreateRole(&iam.CreateRoleInput{
+		RoleName:                 aws.String(roleName),
+		AssumeRolePolicyDocument: aws.String(assumeRolePolicyDocument),
+	}); err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case iam.ErrCodeEntityAlreadyExistsException:
+				s.logger.Log("info", fmt.Sprintf("role '%s' already exists, reusing", roleName))
+			default:
+				return nil, microerror.MaskAny(err)
+			}
+		}
+	}
+
+	if _, err := svc.PutRolePolicy(&iam.PutRolePolicyInput{
+		PolicyName:     aws.String(policyName),
+		RoleName:       aws.String(roleName),
+		PolicyDocument: aws.String(policyDocument),
+	}); err != nil {
+		return nil, microerror.MaskAny(err)
+	}
+
+	_, err = svc.CreateInstanceProfile(&iam.CreateInstanceProfileInput{
+		InstanceProfileName: aws.String(profileName),
+	})
+	switch {
+	case err != nil:
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case iam.ErrCodeEntityAlreadyExistsException:
+				s.logger.Log("info", fmt.Sprintf("instance profile '%s' already exists, reusing", roleName))
+			default:
+				return nil, microerror.MaskAny(err)
+			}
+		}
+	default:
+		if _, err := svc.AddRoleToInstanceProfile(&iam.AddRoleToInstanceProfileInput{
+			InstanceProfileName: aws.String(profileName),
+			RoleName:            aws.String(roleName),
+		}); err != nil {
+			return nil, microerror.MaskAny(err)
+		}
+	}
+
+	encTLS, err := rawTLS.encrypt(awsSession, kmsKeyArn)
+	if err != nil {
+		return nil, microerror.MaskAny(err)
+	}
+
+	compTLS, err := encTLS.compact()
+	if err != nil {
+		return nil, microerror.MaskAny(err)
+	}
+
+	return compTLS, nil
+}
+
+func (s *Service) runMachine(machine awsNode, spec awstpr.Spec, clusterName, cloudconfigPath, name string) error {
+	s.awsConfig.Region = spec.Aws.Region
+	awsSession, ec2Client := awsutil.NewClient(s.awsConfig)
+
+	instances, err := ec2Client.DescribeInstances(&ec2.DescribeInstancesInput{
 		Filters: []*ec2.Filter{
 			&ec2.Filter{
 				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
@@ -237,11 +392,36 @@ func (s *Service) runMachine(machine node.Node, clusterName, name string) error 
 		}
 	}
 
-	reservation, err := s.ec2Client.RunInstances(&ec2.RunInstancesInput{
-		ImageId:      aws.String(machine.ImageID),
-		InstanceType: aws.String(machine.InstanceType),
+	tlsAssets, err := s.encodeTLSAssets(awsSession, spec.Aws.KMSKeyArn)
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	params := cloudconfigTemplateParams{
+		Spec:      spec,
+		Node:      machine,
+		TLSAssets: *tlsAssets,
+	}
+
+	cloudconfig, err := newCloudConfig(cloudconfigPath, params)
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
+	if err := cloudconfig.executeTemplate(); err != nil {
+		return microerror.MaskAny(err)
+	}
+	cloudconfigBase64 := cloudconfig.base64()
+
+	// add instance profile to reservation
+	reservation, err := ec2Client.RunInstances(&ec2.RunInstancesInput{
+		ImageId:      aws.String(machine.AwsInfo.ImageID),
+		InstanceType: aws.String(machine.AwsInfo.InstanceType),
 		MinCount:     aws.Int64(int64(1)),
 		MaxCount:     aws.Int64(int64(1)),
+		UserData:     &cloudconfigBase64,
+		IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
+			Name: aws.String(profileName),
+		},
 	})
 	if err != nil {
 		return microerror.MaskAny(err)
@@ -249,7 +429,7 @@ func (s *Service) runMachine(machine node.Node, clusterName, name string) error 
 
 	s.logger.Log("info", fmt.Sprintf("instance '%s' reserved", name))
 
-	if _, err := s.ec2Client.CreateTags(&ec2.CreateTagsInput{
+	if _, err := ec2Client.CreateTags(&ec2.CreateTagsInput{
 		Resources: []*string{reservation.Instances[0].InstanceId},
 		Tags: []*ec2.Tag{
 			{

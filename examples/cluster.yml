@@ -3,20 +3,59 @@ kind: Aws
 metadata:
   name: test
 spec:
+  calico:
+    cidr: "16"
+    mtu: "1430"
+    subnet: "192.168.0.0/16"
   cluster:
     id: "example-cluster"
 
   customer:
     id: "example-customer"
 
+  docker:
+    registry:
+    daemon:
+      extraArgs: "--log-opt labels=io.kubernetes.container.hash,io.kubernetes.container.name,io.kubernetes.pod.name,io.kubernetes.pod.namespace,io.kubernetes.pod.uid"
+    imageNamespace: "example"
+
+  etcd:
+    domain: "test-etcd.example.org"
+    prefix: "test"
+
+  kubernetes:
+    api:
+      clusterIPRange: "172.0.0.0/24"
+      domain: "example.org"
+      insecurePort: "8080"
+      securePort: "6443"
+    dns:
+      ip: "172.0.0.1"
+    domain: "test.example.org"
+    hyperkube:
+        version: "1.5.0"
+
+  operator:
+    networkSetupVersion: "0.1"
+
   masters:
-  - imageid: "ami-6f68cf0f"
-    instancetype: "t2.medium"
-  - imageid: "ami-6f68cf0f"
-    instancetype: "t2.medium"
-  - imageid: "ami-6f68cf0f"
-    instancetype: "t2.medium"
+  - hostname: "master1.example.org"
+  - hostname: "master2.example.org"
+  - hostname: "master3.example.org"
 
   workers:
-  - imageid: "ami-6f68cf0f"
-    instancetype: "t2.medium"
+  - hostname: "worker1.example.org"
+
+  aws:
+    kmsKeyArn: "arn:aws:kms:eu-central-1:000000000000:key/01234567-89ab-cdef-0123-456789abcdef"
+    region: "eu-central-1"
+    masters:
+    - imageID: "ami-9501c8fa"
+      instanceType: "t2.medium"
+    - imageID: "ami-9501c8fa"
+      instanceType: "t2.medium"
+    - imageID: "ami-9501c8fa"
+      instanceType: "t2.medium"
+    workers:
+    - imageID: "ami-9501c8fa"
+      instanceType: "t2.medium"

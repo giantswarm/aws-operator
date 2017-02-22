@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"sync"
 
-	awssession "github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ec2"
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
 	"k8s.io/client-go/kubernetes"
@@ -27,10 +25,13 @@ type Config struct {
 	AwsConfig awsutil.Config
 	K8sConfig k8sutil.Config
 
-	Description string
-	GitCommit   string
-	Name        string
-	Source      string
+	Description           string
+	GitCommit             string
+	Name                  string
+	Source                string
+	CertsDir              string
+	CloudconfigMasterPath string
+	CloudconfigWorkerPath string
 }
 
 // DefaultConfig provides a default configuration to create a new service by
@@ -44,10 +45,13 @@ func DefaultConfig() Config {
 		AwsConfig: awsutil.Config{},
 		K8sConfig: k8sutil.Config{},
 
-		Description: "",
-		GitCommit:   "",
-		Name:        "",
-		Source:      "",
+		Description:           "",
+		GitCommit:             "",
+		Name:                  "",
+		Source:                "",
+		CertsDir:              "",
+		CloudconfigMasterPath: "",
+		CloudconfigWorkerPath: "",
 	}
 }
 
@@ -61,12 +65,6 @@ func New(config Config) (*Service, error) {
 
 	var err error
 
-	var awsSession *awssession.Session
-	var ec2Client *ec2.EC2
-	{
-		awsSession, ec2Client = awsutil.NewClient(config.AwsConfig)
-	}
-
 	var k8sClient kubernetes.Interface
 	{
 		k8sClient, err = k8sutil.NewClient(config.K8sConfig)
@@ -79,10 +77,12 @@ func New(config Config) (*Service, error) {
 	{
 		createConfig := create.DefaultConfig()
 
-		createConfig.AwsSession = awsSession
-		createConfig.EC2Client = ec2Client
 		createConfig.K8sClient = k8sClient
+		createConfig.AwsConfig = config.AwsConfig
 		createConfig.Logger = config.Logger
+		createConfig.CertsDir = config.CertsDir
+		createConfig.CloudconfigMasterPath = config.CloudconfigMasterPath
+		createConfig.CloudconfigWorkerPath = config.CloudconfigWorkerPath
 
 		createService, err = create.New(createConfig)
 		if err != nil {
