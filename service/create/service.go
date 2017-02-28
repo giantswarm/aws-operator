@@ -36,9 +36,16 @@ const (
 	tagKeyCluster string = "Cluster"
 )
 
+type EC2StateCode int
+
 const (
 	// http://docs.aws.amazon.com/sdk-for-go/api/service/ec2/#InstanceState
-	EC2TerminatedState = 48
+	EC2PendingState      EC2StateCode = 0
+	EC2RunningState      EC2StateCode = 16
+	EC2ShuttingDownState EC2StateCode = 32
+	EC2TerminatedState   EC2StateCode = 48
+	EC2StoppingState     EC2StateCode = 64
+	EC2StoppedState      EC2StateCode = 80
 )
 
 // Config represents the configuration used to create a version service.
@@ -201,6 +208,23 @@ func (s *Service) runMachines(machines []node.Node, clusterName, prefix string) 
 	return nil
 }
 
+func allExistingInstancesMatch(instances *ec2.DescribeInstancesOutput, state EC2StateCode) bool {
+	// If the instance doesn't exist, then the Reservation field should be nil.
+	// Otherwise, it will contain a slice of instances (which is going to contain our one instance we queried for).
+	// TODO(nhlfr): Check whether the instance has correct parameters. That will be most probably done when we
+	// will introduce the interface for creating, deleting and updating resources.
+	if instances.Reservations != nil {
+		for _, r := range instances.Reservations {
+			for _, i := range r.Instances {
+				if *i.State.Code != int64(state) {
+					return false
+				}
+			}
+		}
+	}
+	return true
+}
+
 func (s *Service) runMachine(machine node.Node, clusterName, name string) error {
 	instances, err := s.ec2Client.DescribeInstances(&ec2.DescribeInstancesInput{
 		Filters: []*ec2.Filter{
@@ -222,19 +246,9 @@ func (s *Service) runMachine(machine node.Node, clusterName, name string) error 
 		return microerror.MaskAny(err)
 	}
 
-	// If the instance doesn't exist, then the Reservation field should be nil.
-	// Otherwise, it will contain a slice of instances (which is going to contain our one instance we queried for).
-	// TODO(nhlfr): Check whether the instance has correct parameters. That will be most probably done when we
-	// will introduce the interface for creating, deleting and updating resources.
-	if instances.Reservations != nil {
-		for _, r := range instances.Reservations {
-			for _, i := range r.Instances {
-				if *i.State.Code != EC2TerminatedState {
-					s.logger.Log("info", fmt.Sprintf("instance '%s' already exists", name))
-					return nil
-				}
-			}
-		}
+	if !allExistingInstancesMatch(instances, EC2TerminatedState) {
+		s.logger.Log("info", fmt.Sprintf("instance '%s' already exists", name))
+		return nil
 	}
 
 	reservation, err := s.ec2Client.RunInstances(&ec2.RunInstancesInput{
