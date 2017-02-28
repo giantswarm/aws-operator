@@ -31,7 +31,8 @@ import:
   - jsonpb
   - proto
   - sortkeys
-- package: github.con/stretchr/testify
+testImport:
+- package: github.com/stretchr/testify
   repo: git://github.com/stretchr/testify.git
   version: v1.1.4
   subpackages:
