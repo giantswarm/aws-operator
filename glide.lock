@@ -1,5 +1,5 @@
-hash: ddc09d480aeb31b3a8f05f361ae26fb472bbaf278eae21444e895eaf3e864659
-updated: 2017-02-28T14:37:05.807524539+01:00
+hash: f34acd14ee00003eab94182b760676b6f0d78cb4ff97992c5c70419398040011
+updated: 2017-03-06T15:53:07.475500773+01:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -81,23 +81,27 @@ imports:
   - log
   - swagger
 - name: github.com/fsnotify/fsnotify
-  version: a904159b9206978bb6d53fcc7a769e5cd726c737
+  version: 7d7316ed6e1ed2de075aab8dfc76de5d158d66e1
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: 3d98b40a2bc399a6a20f3b19c634d56d99a69e81
-  repo: git@github.com:giantswarm/awstpr.git
+  version: 99da9c8f8583749d0fef89d14b3cfa420e13ebc1
   subpackages:
-  - spec/calico
-  - spec/cloudflare
-  - spec/cluster
-  - spec/customer
-  - spec/docker
-  - spec/etcd
-  - spec/kubernetes
-  - spec/node
-  - spec/operator
-  - spec/vault
+  - aws
+- name: github.com/giantswarm/clustertpr
+  version: 16f7b5230a6850c1b7b62bad4f6002607f8ad3c2
+  subpackages:
+  - calico
+  - cloudflare
+  - cluster
+  - customer
+  - docker
+  - etcd
+  - flannel
+  - kubernetes
+  - node
+  - operator
+  - vault
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
@@ -201,7 +205,7 @@ imports:
 - name: github.com/pelletier/go-buffruneio
   version: c37440a7cf42ac63b919c752ca73a85067e05992
 - name: github.com/pelletier/go-toml
-  version: 361678322880708ac144df8575e6f01144ba1404
+  version: 13d49d4606eb801b8f01ae542b4afc4c6ee3d84a
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
@@ -230,9 +234,9 @@ imports:
   subpackages:
   - mem
 - name: github.com/spf13/cast
-  version: f820543c3592e283e311a60d2a600a664e39f6f7
+  version: ce135a4ebeee6cfe9a26c93ee0d37825f26113c7
 - name: github.com/spf13/cobra
-  version: 92ea23a837e66f46ac9e7d04fa826602b7b0a42d
+  version: fcd0c5a1df88f5d6784cb4feead962c3f3d0b66c
 - name: github.com/spf13/jwalterweatherman
   version: fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66
 - name: github.com/spf13/pflag
