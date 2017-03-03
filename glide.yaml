@@ -3,6 +3,7 @@ import:
 - package: github.com/aws/aws-sdk-go
   version: master
 - package: github.com/giantswarm/microkit
+  version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
   - command
   - error
@@ -25,6 +26,8 @@ import:
 - package: github.com/giantswarm/awstpr
   version: 99da9c8f8583749d0fef89d14b3cfa420e13ebc1
 - package: github.com/giantswarm/clustertpr
+- package: github.com/giantswarm/k8scloudconfig
+  version: 22d2a23487fd96b2616c4d41d48bbfafc5bb1416
 - package: github.com/golang/protobuf
   version: 8ee79997227bf9b34611aee7946ae64735e6fd93
   subpackages:

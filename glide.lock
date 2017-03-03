@@ -102,6 +102,8 @@ imports:
   - node
   - operator
   - vault
+- name: github.com/giantswarm/k8scloudconfig
+  version: 22d2a23487fd96b2616c4d41d48bbfafc5bb1416
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
