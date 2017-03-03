@@ -1,5 +1,5 @@
-hash: 8b527e2cca76e2fe25c892e59878f333b35f065798fab4a5edcb08835887dc9b
-updated: 2017-02-14T15:07:25.144956169+01:00
+hash: 68f1ff97f3f9e0073e8bd440d3fa11b6bf12a40b52e044065df767f801224b5d
+updated: 2017-02-24T12:29:44.781299344+01:00
 imports:
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
@@ -17,6 +17,20 @@ imports:
   - swagger
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
+- name: github.com/giantswarm/clustertpr
+  version: 16f7b5230a6850c1b7b62bad4f6002607f8ad3c2
+  subpackages:
+  - calico
+  - cloudflare
+  - cluster
+  - customer
+  - docker
+  - etcd
+  - flannel
+  - kubernetes
+  - node
+  - operator
+  - vault
 - name: github.com/go-openapi/jsonpointer
   version: 46af16f9f7b149af66e5d1bd010e3574dc06de98
 - name: github.com/go-openapi/jsonreference
@@ -79,7 +93,7 @@ imports:
 - name: gopkg.in/yaml.v2
   version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/client-go
-  version: d81cb85237595f720d83eda492bae8f6162fc5c0
+  version: e121606b0d09b2e1c467183ee46217fa85a6b672
   subpackages:
   - pkg/api
   - pkg/api/meta
