@@ -1,24 +1,24 @@
 package create
 
 import (
-	"github.com/giantswarm/awstpr"
+	"github.com/giantswarm/clustertpr"
 	microerror "github.com/giantswarm/microkit/error"
 	"k8s.io/client-go/pkg/api/errors"
 	"k8s.io/client-go/pkg/api/unversioned"
 	"k8s.io/client-go/pkg/api/v1"
 )
 
-func (s *Service) createClusterNamespace(cluster awstpr.CustomObject) error {
+func (s *Service) createClusterNamespace(cluster clustertpr.Cluster) error {
 	namespace := v1.Namespace{
 		TypeMeta: unversioned.TypeMeta{
 			Kind:       "Namespace",
 			APIVersion: "v1",
 		},
 		ObjectMeta: v1.ObjectMeta{
-			Name: cluster.Name,
+			Name: cluster.Cluster.ID,
 			Labels: map[string]string{
-				"cluster":  cluster.Name,
-				"customer": cluster.Spec.Customer.ID,
+				"cluster":  cluster.Cluster.ID,
+				"customer": cluster.Customer.ID,
 			},
 		},
 	}
@@ -29,6 +29,6 @@ func (s *Service) createClusterNamespace(cluster awstpr.CustomObject) error {
 	return nil
 }
 
-func (s *Service) deleteClusterNamespace(cluster awstpr.CustomObject) error {
-	return s.k8sClient.Core().Namespaces().Delete(cluster.Name, v1.NewDeleteOptions(0))
+func (s *Service) deleteClusterNamespace(cluster clustertpr.Cluster) error {
+	return s.k8sClient.Core().Namespaces().Delete(cluster.Cluster.ID, v1.NewDeleteOptions(0))
 }

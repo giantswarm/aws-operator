@@ -29,7 +29,6 @@ var Flags = struct {
 			ID     string
 			Secret string
 		}
-		Region string
 	}
 	Kubernetes struct {
 		InCluster   bool
@@ -73,7 +72,6 @@ func main() {
 			serviceConfig.AwsConfig = awsclient.Config{
 				AccessKeyID:     Flags.Aws.AccessKey.ID,
 				AccessKeySecret: Flags.Aws.AccessKey.Secret,
-				Region:          Flags.Aws.Region,
 			}
 			k8sTlsClientConfig := k8sclient.TLSClientConfig{
 				CertFile: Flags.Kubernetes.TLS.CrtFile,
@@ -144,7 +142,6 @@ func main() {
 
 	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.AccessKey.ID, "aws.accesskey.id", "", "ID of the AWS access key")
 	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.AccessKey.Secret, "aws.accesskey.secret", "", "Secret of the AWS access key")
-	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.Region, "aws.region", "", "Region in EC2 service")
 
 	daemonCommand.PersistentFlags().BoolVar(&Flags.Kubernetes.InCluster, "kubernetes.incluster", false, "Whether to use the in-cluster config to authenticate with Kubernetes")
 	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.APIServer, "kubernetes.apiserver", "http://127.0.0.1:8080", "Address and port of Giantnetes API server")

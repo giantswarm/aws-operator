@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	awssession "github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/awstpr"
-	"github.com/giantswarm/awstpr/spec/node"
+	awsinfo "github.com/giantswarm/awstpr/aws"
+	"github.com/giantswarm/clustertpr/node"
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
 	"k8s.io/client-go/kubernetes"
@@ -19,12 +19,15 @@ import (
 	"k8s.io/client-go/pkg/watch"
 	"k8s.io/client-go/tools/cache"
 
+	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	k8sutil "github.com/giantswarm/aws-operator/client/k8s"
 )
 
 const (
 	ClusterListAPIEndpoint  string = "/apis/cluster.giantswarm.io/v1/awses"
 	ClusterWatchAPIEndpoint string = "/apis/cluster.giantswarm.io/v1/watch/awses"
+	// The format of instance's name is "[name of cluster]-[prefix ('master' or 'worker')]-[number]".
+	instanceNameFormat string = "%s-%s-%d"
 	// Period or re-synchronizing the list of objects in k8s watcher. 0 means that re-sync will be
 	// delayed as long as possible, until the watch will be closed or timed out.
 	resyncPeriod time.Duration = 0
@@ -51,10 +54,9 @@ const (
 // Config represents the configuration used to create a version service.
 type Config struct {
 	// Dependencies.
-	AwsSession *awssession.Session
-	EC2Client  *ec2.EC2
-	K8sClient  kubernetes.Interface
-	Logger     micrologger.Logger
+	AwsConfig awsutil.Config
+	K8sClient kubernetes.Interface
+	Logger    micrologger.Logger
 }
 
 // DefaultConfig provides a default configuration to create a new version service
@@ -62,10 +64,8 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
-		AwsSession: nil,
-		EC2Client:  nil,
-		K8sClient:  nil,
-		Logger:     nil,
+		K8sClient: nil,
+		Logger:    nil,
 	}
 }
 
@@ -78,10 +78,9 @@ func New(config Config) (*Service, error) {
 
 	newService := &Service{
 		// Dependencies.
-		awsSession: config.AwsSession,
-		ec2Client:  config.EC2Client,
-		k8sClient:  config.K8sClient,
-		logger:     config.Logger,
+		awsConfig: config.AwsConfig,
+		k8sClient: config.K8sClient,
+		logger:    config.Logger,
 
 		// Internals
 		bootOnce: sync.Once{},
@@ -93,10 +92,9 @@ func New(config Config) (*Service, error) {
 // Service implements the version service interface.
 type Service struct {
 	// Dependencies.
-	awsSession *awssession.Session
-	ec2Client  *ec2.EC2
-	k8sClient  kubernetes.Interface
-	logger     micrologger.Logger
+	awsConfig awsutil.Config
+	k8sClient kubernetes.Interface
+	logger    micrologger.Logger
 
 	// Internals.
 	bootOnce sync.Once
@@ -160,19 +158,19 @@ func (s *Service) Boot() {
 					cluster := obj.(*awstpr.CustomObject)
 					s.logger.Log("info", fmt.Sprintf("creating cluster '%s'", cluster.Name))
 
-					if err := s.createClusterNamespace(*cluster); err != nil {
+					if err := s.createClusterNamespace(cluster.Spec.Cluster); err != nil {
 						s.logger.Log("error", fmt.Sprintf("could not create cluster namespace: %s", err))
 						return
 					}
 
 					// Run masters
-					if err := s.runMachines(cluster.Spec.Masters, cluster.Name, "master"); err != nil {
+					if err := s.runMachines(cluster.Spec, cluster.Name, "master"); err != nil {
 						s.logger.Log("error", microerror.MaskAny(err))
 						return
 					}
 
 					// Run workers
-					if err := s.runMachines(cluster.Spec.Workers, cluster.Name, "worker"); err != nil {
+					if err := s.runMachines(cluster.Spec, cluster.Name, "worker"); err != nil {
 						s.logger.Log("error", microerror.MaskAny(err))
 						return
 					}
@@ -183,7 +181,7 @@ func (s *Service) Boot() {
 					cluster := obj.(*awstpr.CustomObject)
 					s.logger.Log("info", fmt.Sprintf("cluster '%s' deleted", cluster.Name))
 
-					if err := s.deleteClusterNamespace(*cluster); err != nil {
+					if err := s.deleteClusterNamespace(cluster.Spec.Cluster); err != nil {
 						s.logger.Log("error", "could not delete cluster namespace:", err)
 					}
 				},
@@ -198,10 +196,32 @@ func (s *Service) Boot() {
 	})
 }
 
-func (s *Service) runMachines(machines []node.Node, clusterName, prefix string) error {
-	for no, machine := range machines {
-		name := fmt.Sprintf("%s-%d", prefix, no)
-		if err := s.runMachine(machine, clusterName, name); err != nil {
+func (s *Service) runMachines(spec awstpr.Spec, clusterName, prefix string) error {
+	var (
+		machines    []node.Node
+		awsMachines []awsinfo.Node
+	)
+
+	switch prefix {
+	case prefixMaster:
+		machines = spec.Cluster.Masters
+		awsMachines = spec.AWS.Masters
+	case prefixWorker:
+		machines = spec.Cluster.Workers
+		awsMachines = spec.AWS.Workers
+	}
+
+	// TODO(nhlfr): Create a separate module for validating specs and execute on the earlier stages.
+	if len(machines) != len(awsMachines) {
+		return microerror.MaskAny(fmt.Errorf("mismatched number of %s machines in the 'spec' and 'aws' sections: %d != %d",
+			prefix,
+			len(machines),
+			len(awsMachines)))
+	}
+
+	for i := 0; i < len(machines); i++ {
+		name := fmt.Sprintf(instanceNameFormat, clusterName, prefix, i)
+		if err := s.runMachine(spec, machines[i], awsMachines[i], clusterName, name); err != nil {
 			return microerror.MaskAny(err)
 		}
 	}
@@ -225,8 +245,11 @@ func allExistingInstancesMatch(instances *ec2.DescribeInstancesOutput, state EC2
 	return true
 }
 
-func (s *Service) runMachine(machine node.Node, clusterName, name string) error {
-	instances, err := s.ec2Client.DescribeInstances(&ec2.DescribeInstancesInput{
+func (s *Service) runMachine(spec awstpr.Spec, machine node.Node, awsNode awsinfo.Node, clusterName, name string) error {
+	s.awsConfig.Region = spec.AWS.Region
+	_, ec2Client := awsutil.NewClient(s.awsConfig)
+
+	instances, err := ec2Client.DescribeInstances(&ec2.DescribeInstancesInput{
 		Filters: []*ec2.Filter{
 			&ec2.Filter{
 				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
@@ -243,6 +266,7 @@ func (s *Service) runMachine(machine node.Node, clusterName, name string) error 
 		},
 	})
 	if err != nil {
+		fmt.Println(s.awsConfig)
 		return microerror.MaskAny(err)
 	}
 
@@ -251,19 +275,20 @@ func (s *Service) runMachine(machine node.Node, clusterName, name string) error 
 		return nil
 	}
 
-	reservation, err := s.ec2Client.RunInstances(&ec2.RunInstancesInput{
-		ImageId:      aws.String(machine.ImageID),
-		InstanceType: aws.String(machine.InstanceType),
+	reservation, err := ec2Client.RunInstances(&ec2.RunInstancesInput{
+		ImageId:      aws.String(awsNode.ImageID),
+		InstanceType: aws.String(awsNode.InstanceType),
 		MinCount:     aws.Int64(int64(1)),
 		MaxCount:     aws.Int64(int64(1)),
 	})
 	if err != nil {
+		fmt.Println("ayy lmao")
 		return microerror.MaskAny(err)
 	}
 
 	s.logger.Log("info", fmt.Sprintf("instance '%s' reserved", name))
 
-	if _, err := s.ec2Client.CreateTags(&ec2.CreateTagsInput{
+	if _, err := ec2Client.CreateTags(&ec2.CreateTagsInput{
 		Resources: []*string{reservation.Instances[0].InstanceId},
 		Tags: []*ec2.Tag{
 			{

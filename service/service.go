@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"sync"
 
-	awssession "github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ec2"
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
 	"k8s.io/client-go/kubernetes"
@@ -61,12 +59,6 @@ func New(config Config) (*Service, error) {
 
 	var err error
 
-	var awsSession *awssession.Session
-	var ec2Client *ec2.EC2
-	{
-		awsSession, ec2Client = awsutil.NewClient(config.AwsConfig)
-	}
-
 	var k8sClient kubernetes.Interface
 	{
 		k8sClient, err = k8sutil.NewClient(config.K8sConfig)
@@ -79,8 +71,7 @@ func New(config Config) (*Service, error) {
 	{
 		createConfig := create.DefaultConfig()
 
-		createConfig.AwsSession = awsSession
-		createConfig.EC2Client = ec2Client
+		createConfig.AwsConfig = config.AwsConfig
 		createConfig.K8sClient = k8sClient
 		createConfig.Logger = config.Logger
 
@@ -89,6 +80,7 @@ func New(config Config) (*Service, error) {
 			return nil, microerror.MaskAny(err)
 		}
 	}
+	fmt.Println(config.AwsConfig)
 
 	var versionService *version.Service
 	{
