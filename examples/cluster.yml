@@ -4,19 +4,30 @@ metadata:
   name: test
 spec:
   cluster:
-    id: "example-cluster"
+    cluster:
+      id: "example-cluster"
 
-  customer:
-    id: "example-customer"
+    customer:
+      id: "example-customer"
 
-  masters:
-  - imageid: "ami-6f68cf0f"
-    instancetype: "t2.medium"
-  - imageid: "ami-6f68cf0f"
-    instancetype: "t2.medium"
-  - imageid: "ami-6f68cf0f"
-    instancetype: "t2.medium"
+    masters:
+    - hostname: "master-1"
+    - hostname: "master-2"
+    - hostname: "master-3"
 
-  workers:
-  - imageid: "ami-6f68cf0f"
-    instancetype: "t2.medium"
+    workers:
+    - hostname: "worker-1"
+
+  aws:
+    region: "eu-central-1"
+    masters:
+    - imageid: "ami-9501c8fa"
+      instancetype: "t2.medium"
+    - imageid: "ami-9501c8fa"
+      instancetype: "t2.medium"
+    - imageid: "ami-9501c8fa"
+      instancetype: "t2.medium"
+
+    workers:
+    - imageid: "ami-9501c8fa"
+      instancetype: "t2.medium"
