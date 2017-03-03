@@ -1,0 +1,5 @@
+[Unit]
+Description=Decrypt TLS certificates
+
+[Service]
+ExecStart=/opt/bin/decrypt-tls-assets
