@@ -219,9 +219,14 @@ func (s *Service) runMachines(spec awstpr.Spec, clusterName, prefix string) erro
 			len(awsMachines)))
 	}
 
+	cloudConfig, err := s.cloudConfig(prefix)
+	if err != nil {
+		return err
+	}
+
 	for i := 0; i < len(machines); i++ {
 		name := fmt.Sprintf(instanceNameFormat, clusterName, prefix, i)
-		if err := s.runMachine(spec, machines[i], awsMachines[i], clusterName, name); err != nil {
+		if err := s.runMachine(spec, machines[i], awsMachines[i], clusterName, name, cloudConfig); err != nil {
 			return microerror.MaskAny(err)
 		}
 	}
@@ -245,7 +250,7 @@ func allExistingInstancesMatch(instances *ec2.DescribeInstancesOutput, state EC2
 	return true
 }
 
-func (s *Service) runMachine(spec awstpr.Spec, machine node.Node, awsNode awsinfo.Node, clusterName, name string) error {
+func (s *Service) runMachine(spec awstpr.Spec, machine node.Node, awsNode awsinfo.Node, clusterName, name, cloudConfig string) error {
 	s.awsConfig.Region = spec.AWS.Region
 	_, ec2Client := awsutil.NewClient(s.awsConfig)
 
@@ -280,6 +285,7 @@ func (s *Service) runMachine(spec awstpr.Spec, machine node.Node, awsNode awsinf
 		InstanceType: aws.String(awsNode.InstanceType),
 		MinCount:     aws.Int64(int64(1)),
 		MaxCount:     aws.Int64(int64(1)),
+		UserData:     aws.String(cloudConfig),
 	})
 	if err != nil {
 		fmt.Println("ayy lmao")
