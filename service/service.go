@@ -25,6 +25,9 @@ type Config struct {
 	AwsConfig awsutil.Config
 	K8sConfig k8sutil.Config
 
+	// AWS cerfificates options.
+	CertsDir string
+
 	Description string
 	GitCommit   string
 	Name        string
@@ -41,6 +44,9 @@ func DefaultConfig() Config {
 		// Sub-dependencies configs.
 		AwsConfig: awsutil.Config{},
 		K8sConfig: k8sutil.Config{},
+
+		// AWS certificates optionts.
+		CertsDir: "",
 
 		Description: "",
 		GitCommit:   "",
@@ -74,6 +80,7 @@ func New(config Config) (*Service, error) {
 		createConfig.AwsConfig = config.AwsConfig
 		createConfig.K8sClient = k8sClient
 		createConfig.Logger = config.Logger
+		createConfig.CertsDir = config.CertsDir
 
 		createService, err = create.New(createConfig)
 		if err != nil {

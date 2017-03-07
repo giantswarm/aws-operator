@@ -29,6 +29,7 @@ var Flags = struct {
 			ID     string
 			Secret string
 		}
+		CertsDir string
 	}
 	Kubernetes struct {
 		InCluster   bool
@@ -88,6 +89,8 @@ func main() {
 				TLSClientConfig: k8sTlsClientConfig,
 			}
 
+			serviceConfig.CertsDir = Flags.Aws.CertsDir
+
 			serviceConfig.Description = description
 			serviceConfig.GitCommit = gitCommit
 			serviceConfig.Name = name
@@ -142,6 +145,8 @@ func main() {
 
 	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.AccessKey.ID, "aws.accesskey.id", "", "ID of the AWS access key")
 	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.AccessKey.Secret, "aws.accesskey.secret", "", "Secret of the AWS access key")
+	// TODO(nhlfr): Deprecate this option when cert-operator will be implemented.
+	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.CertsDir, "aws.certsdir", "", "Certificated to be placed in /etc/kubernetes/ssl")
 
 	daemonCommand.PersistentFlags().BoolVar(&Flags.Kubernetes.InCluster, "kubernetes.incluster", false, "Whether to use the in-cluster config to authenticate with Kubernetes")
 	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.APIServer, "kubernetes.apiserver", "http://127.0.0.1:8080", "Address and port of Giantnetes API server")

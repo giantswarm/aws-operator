@@ -86,13 +86,11 @@ func (c *CloudConfigExtension) Units() ([]cloudconfig.UnitAsset, error) {
 	return units, nil
 }
 
-func (s *Service) cloudConfig(prefix string) (string, error) {
+func (s *Service) cloudConfig(prefix string, params cloudconfig.CloudConfigTemplateParams) (string, error) {
 	template, err := cloudconfig.Asset(fmt.Sprintf("templates/%s.yaml", prefix))
 	if err != nil {
 		return "", err
 	}
-
-	params := cloudconfig.CloudConfigTemplateParams{}
 
 	extension := NewCloudConfigExtension()
 

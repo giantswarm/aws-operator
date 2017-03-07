@@ -7,10 +7,13 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	awssession "github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/awstpr"
 	awsinfo "github.com/giantswarm/awstpr/aws"
 	"github.com/giantswarm/clustertpr/node"
+	"github.com/giantswarm/k8scloudconfig"
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
 	"k8s.io/client-go/kubernetes"
@@ -57,6 +60,7 @@ type Config struct {
 	AwsConfig awsutil.Config
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
+	CertsDir  string
 }
 
 // DefaultConfig provides a default configuration to create a new version service
@@ -66,6 +70,7 @@ func DefaultConfig() Config {
 		// Dependencies.
 		K8sClient: nil,
 		Logger:    nil,
+		CertsDir:  "",
 	}
 }
 
@@ -82,6 +87,9 @@ func New(config Config) (*Service, error) {
 		k8sClient: config.K8sClient,
 		logger:    config.Logger,
 
+		// AWS certificates options.
+		certsDir: config.CertsDir,
+
 		// Internals
 		bootOnce: sync.Once{},
 	}
@@ -95,6 +103,9 @@ type Service struct {
 	awsConfig awsutil.Config
 	k8sClient kubernetes.Interface
 	logger    micrologger.Logger
+
+	// AWS certificates options.
+	certsDir string
 
 	// Internals.
 	bootOnce sync.Once
@@ -163,14 +174,47 @@ func (s *Service) Boot() {
 						return
 					}
 
+					// Create AWS client
+					s.awsConfig.Region = cluster.Spec.AWS.Region
+					awsSession, ec2Client := awsutil.NewClient(s.awsConfig)
+
+					// Create KMS key
+					kmsSvc := kms.New(awsSession)
+					key, err := kmsSvc.CreateKey(&kms.CreateKeyInput{})
+					if err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not create KMS service client: %s", err))
+						return
+					}
+
+					// Encode TLS assets
+					tlsAssets, err := s.encodeTLSAssets(awsSession, *key.KeyMetadata.Arn)
+					if err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not encode TLS assets: %s", err))
+						return
+					}
+
 					// Run masters
-					if err := s.runMachines(cluster.Spec, cluster.Name, "master"); err != nil {
+					if err := s.runMachines(runMachinesInput{
+						awsSession:  awsSession,
+						ec2Client:   ec2Client,
+						spec:        cluster.Spec,
+						tlsAssets:   tlsAssets,
+						clusterName: cluster.Name,
+						prefix:      prefixMaster,
+					}); err != nil {
 						s.logger.Log("error", microerror.MaskAny(err))
 						return
 					}
 
 					// Run workers
-					if err := s.runMachines(cluster.Spec, cluster.Name, "worker"); err != nil {
+					if err := s.runMachines(runMachinesInput{
+						awsSession:  awsSession,
+						ec2Client:   ec2Client,
+						spec:        cluster.Spec,
+						tlsAssets:   tlsAssets,
+						clusterName: cluster.Name,
+						prefix:      prefixWorker,
+					}); err != nil {
 						s.logger.Log("error", microerror.MaskAny(err))
 						return
 					}
@@ -196,37 +240,51 @@ func (s *Service) Boot() {
 	})
 }
 
-func (s *Service) runMachines(spec awstpr.Spec, clusterName, prefix string) error {
+type runMachinesInput struct {
+	awsSession  *awssession.Session
+	ec2Client   *ec2.EC2
+	spec        awstpr.Spec
+	tlsAssets   *cloudconfig.CompactTLSAssets
+	clusterName string
+	prefix      string
+}
+
+func (s *Service) runMachines(input runMachinesInput) error {
 	var (
 		machines    []node.Node
 		awsMachines []awsinfo.Node
 	)
 
-	switch prefix {
+	switch input.prefix {
 	case prefixMaster:
-		machines = spec.Cluster.Masters
-		awsMachines = spec.AWS.Masters
+		machines = input.spec.Cluster.Masters
+		awsMachines = input.spec.AWS.Masters
 	case prefixWorker:
-		machines = spec.Cluster.Workers
-		awsMachines = spec.AWS.Workers
+		machines = input.spec.Cluster.Workers
+		awsMachines = input.spec.AWS.Workers
 	}
 
 	// TODO(nhlfr): Create a separate module for validating specs and execute on the earlier stages.
 	if len(machines) != len(awsMachines) {
 		return microerror.MaskAny(fmt.Errorf("mismatched number of %s machines in the 'spec' and 'aws' sections: %d != %d",
-			prefix,
+			input.prefix,
 			len(machines),
 			len(awsMachines)))
 	}
 
-	cloudConfig, err := s.cloudConfig(prefix)
-	if err != nil {
-		return err
-	}
-
 	for i := 0; i < len(machines); i++ {
-		name := fmt.Sprintf(instanceNameFormat, clusterName, prefix, i)
-		if err := s.runMachine(spec, machines[i], awsMachines[i], clusterName, name, cloudConfig); err != nil {
+		name := fmt.Sprintf(instanceNameFormat, input.clusterName, input.prefix, i)
+		if err := s.runMachine(runMachineInput{
+			awsSession:  input.awsSession,
+			ec2Client:   input.ec2Client,
+			spec:        input.spec,
+			machine:     machines[i],
+			awsNode:     awsMachines[i],
+			tlsAssets:   input.tlsAssets,
+			clusterName: input.clusterName,
+			name:        name,
+			prefix:      input.prefix,
+		}); err != nil {
 			return microerror.MaskAny(err)
 		}
 	}
@@ -250,67 +308,85 @@ func allExistingInstancesMatch(instances *ec2.DescribeInstancesOutput, state EC2
 	return true
 }
 
-func (s *Service) runMachine(spec awstpr.Spec, machine node.Node, awsNode awsinfo.Node, clusterName, name, cloudConfig string) error {
-	s.awsConfig.Region = spec.AWS.Region
-	_, ec2Client := awsutil.NewClient(s.awsConfig)
+type runMachineInput struct {
+	awsSession  *awssession.Session
+	ec2Client   *ec2.EC2
+	spec        awstpr.Spec
+	machine     node.Node
+	awsNode     awsinfo.Node
+	tlsAssets   *cloudconfig.CompactTLSAssets
+	clusterName string
+	name        string
+	prefix      string
+}
 
-	instances, err := ec2Client.DescribeInstances(&ec2.DescribeInstancesInput{
+func (s *Service) runMachine(input runMachineInput) error {
+	instances, err := input.ec2Client.DescribeInstances(&ec2.DescribeInstancesInput{
 		Filters: []*ec2.Filter{
 			&ec2.Filter{
 				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
 				Values: []*string{
-					aws.String(name),
+					aws.String(input.name),
 				},
 			},
 			&ec2.Filter{
 				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyCluster)),
 				Values: []*string{
-					aws.String(clusterName),
+					aws.String(input.clusterName),
 				},
 			},
 		},
 	})
 	if err != nil {
-		fmt.Println(s.awsConfig)
 		return microerror.MaskAny(err)
 	}
 
+	cloudConfigParams := cloudconfig.CloudConfigTemplateParams{
+		Cluster:   input.spec.Cluster,
+		Node:      input.machine,
+		TLSAssets: *input.tlsAssets,
+	}
+
+	cloudConfig, err := s.cloudConfig(input.prefix, cloudConfigParams)
+	if err != nil {
+		return err
+	}
+
 	if !allExistingInstancesMatch(instances, EC2TerminatedState) {
-		s.logger.Log("info", fmt.Sprintf("instance '%s' already exists", name))
+		s.logger.Log("info", fmt.Sprintf("instance '%s' already exists", input.name))
 		return nil
 	}
 
-	reservation, err := ec2Client.RunInstances(&ec2.RunInstancesInput{
-		ImageId:      aws.String(awsNode.ImageID),
-		InstanceType: aws.String(awsNode.InstanceType),
+	reservation, err := input.ec2Client.RunInstances(&ec2.RunInstancesInput{
+		ImageId:      aws.String(input.awsNode.ImageID),
+		InstanceType: aws.String(input.awsNode.InstanceType),
 		MinCount:     aws.Int64(int64(1)),
 		MaxCount:     aws.Int64(int64(1)),
 		UserData:     aws.String(cloudConfig),
 	})
 	if err != nil {
-		fmt.Println("ayy lmao")
 		return microerror.MaskAny(err)
 	}
 
-	s.logger.Log("info", fmt.Sprintf("instance '%s' reserved", name))
+	s.logger.Log("info", fmt.Sprintf("instance '%s' reserved", input.name))
 
-	if _, err := ec2Client.CreateTags(&ec2.CreateTagsInput{
+	if _, err := input.ec2Client.CreateTags(&ec2.CreateTagsInput{
 		Resources: []*string{reservation.Instances[0].InstanceId},
 		Tags: []*ec2.Tag{
 			{
 				Key:   aws.String(tagKeyName),
-				Value: aws.String(name),
+				Value: aws.String(input.name),
 			},
 			{
 				Key:   aws.String(tagKeyCluster),
-				Value: aws.String(clusterName),
+				Value: aws.String(input.clusterName),
 			},
 		},
 	}); err != nil {
 		return microerror.MaskAny(err)
 	}
 
-	s.logger.Log("info", fmt.Sprintf("instance '%s' tagged", name))
+	s.logger.Log("info", fmt.Sprintf("instance '%s' tagged", input.name))
 
 	return nil
 }
