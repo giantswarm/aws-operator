@@ -1,5 +1,5 @@
-hash: f34acd14ee00003eab94182b760676b6f0d78cb4ff97992c5c70419398040011
-updated: 2017-03-06T15:53:07.475500773+01:00
+hash: 0a84a3d3eaffe951631fcf18b1b792b99531a50d7f4a1f178d68b52611acb44a
+updated: 2017-03-07T16:41:06.009797668+01:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aws/aws-sdk-go
-  version: 78568b07950e5e7948496878fe99b9436add41d4
+  version: 0700d99edb91ab11ba748f096cbdcf424e53446b
   subpackages:
   - aws
   - aws/awserr
@@ -27,12 +27,16 @@ imports:
   - aws/signer/v4
   - private/protocol
   - private/protocol/ec2query
+  - private/protocol/json/jsonutil
+  - private/protocol/jsonrpc
   - private/protocol/query
   - private/protocol/query/queryutil
   - private/protocol/rest
   - private/protocol/xml/xmlutil
   - private/waiter
   - service/ec2
+  - service/iam
+  - service/kms
   - service/sts
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
