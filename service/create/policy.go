@@ -28,13 +28,34 @@ const (
 				"Effect": "Allow",
 				"Action": "kms:Decrypt",
 				"Resource": %q
+			},
+			{
+				"Effect": "Allow",
+				"Action": [
+					"s3:GetBucketLocation",
+					"s3:ListAllMyBuckets"
+				],
+				"Resource": "*"
+			},
+			{
+				"Effect": "Allow",
+				"Action": [
+					"s3:ListBucket"
+				],
+				"Resource": "arn:aws:s3:::%s"
+			},
+			{
+				"Effect": "Allow",
+				"Action": "s3:GetObject",
+				"Resource": "arn:aws:s3:::%s/%s/*"
 			}
 		]
 	}`
 )
 
-func createRole(svc *iam.IAM, kmsKeyArn, clusterID string) error {
-	policyDocument := fmt.Sprintf(PolicyDocumentTempl, kmsKeyArn)
+func createRole(svc *iam.IAM, kmsKeyArn, s3Bucket, clusterID string) error {
+	// TODO switch to using a file and Go templates
+	policyDocument := fmt.Sprintf(PolicyDocumentTempl, kmsKeyArn, s3Bucket, s3Bucket, clusterID)
 
 	clusterRoleName := fmt.Sprintf("%s-%s", clusterID, RoleNameTemplate)
 

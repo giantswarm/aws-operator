@@ -32,8 +32,10 @@ type CloudConfigExtension struct {
 	AwsInfo awstpr.Spec
 }
 
-func NewCloudConfigExtension() *CloudConfigExtension {
-	return &CloudConfigExtension{}
+func NewCloudConfigExtension(awsSpec awstpr.Spec) *CloudConfigExtension {
+	return &CloudConfigExtension{
+		AwsInfo: awsSpec,
+	}
 }
 
 func (c *CloudConfigExtension) Files() ([]cloudconfig.FileAsset, error) {
@@ -86,13 +88,13 @@ func (c *CloudConfigExtension) Units() ([]cloudconfig.UnitAsset, error) {
 	return units, nil
 }
 
-func (s *Service) cloudConfig(prefix string, params cloudconfig.CloudConfigTemplateParams) (string, error) {
+func (s *Service) cloudConfig(prefix string, params cloudconfig.CloudConfigTemplateParams, awsSpec awstpr.Spec) (string, error) {
 	template, err := cloudconfig.Asset(fmt.Sprintf("templates/%s.yaml", prefix))
 	if err != nil {
 		return "", err
 	}
 
-	extension := NewCloudConfigExtension()
+	extension := NewCloudConfigExtension(awsSpec)
 
 	cloudconfig, err := cloudconfig.NewCloudConfig(template, params, extension)
 	if err != nil {

@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/awstpr"
 	awsinfo "github.com/giantswarm/awstpr/aws"
 	"github.com/giantswarm/clustertpr/node"
@@ -65,6 +66,7 @@ type Config struct {
 	AwsConfig  awsutil.Config
 	K8sClient  kubernetes.Interface
 	Logger     micrologger.Logger
+	S3Bucket   string
 	CertsDir   string
 	PubKeyFile string
 }
@@ -76,6 +78,7 @@ func DefaultConfig() Config {
 		// Dependencies.
 		K8sClient:  nil,
 		Logger:     nil,
+		S3Bucket:   "",
 		CertsDir:   "",
 		PubKeyFile: "",
 	}
@@ -98,6 +101,8 @@ func New(config Config) (*Service, error) {
 		certsDir:   config.CertsDir,
 		pubKeyFile: config.PubKeyFile,
 
+		s3Bucket: config.S3Bucket,
+
 		// Internals
 		bootOnce: sync.Once{},
 	}
@@ -115,6 +120,8 @@ type Service struct {
 	// AWS certificates options.
 	certsDir   string
 	pubKeyFile string
+
+	s3Bucket string
 
 	// Internals.
 	bootOnce sync.Once
@@ -205,7 +212,7 @@ func (s *Service) Boot() {
 						return
 					}
 
-					if err := createRole(clients.IAM, *key.KeyMetadata.Arn, cluster.Spec.Cluster.Cluster.ID); err != nil {
+					if err := createRole(clients.IAM, *key.KeyMetadata.Arn, s.s3Bucket, cluster.Spec.Cluster.Cluster.ID); err != nil {
 						s.logger.Log("error", fmt.Sprintf("error creating role: %s", err))
 						return
 					}
@@ -217,14 +224,21 @@ func (s *Service) Boot() {
 						return
 					}
 
+					instanceProfileName, err := createInstanceProfile(clients.IAM, cluster.Spec.Cluster.Cluster.ID)
+					if err != nil {
+						s.logger.Log("error", fmt.Sprintf("error creating instance profile: %s", err))
+						return
+					}
+
 					// Run masters
 					if err := s.runMachines(runMachinesInput{
-						clients:     clients,
-						spec:        cluster.Spec,
-						tlsAssets:   tlsAssets,
-						clusterName: cluster.Name,
-						keyPairName: keyPairName,
-						prefix:      prefixMaster,
+						clients:             clients,
+						spec:                cluster.Spec,
+						tlsAssets:           tlsAssets,
+						clusterName:         cluster.Name,
+						keyPairName:         keyPairName,
+						instanceProfileName: instanceProfileName,
+						prefix:              prefixMaster,
 					}); err != nil {
 						s.logger.Log("error", microerror.MaskAny(err))
 						return
@@ -232,12 +246,13 @@ func (s *Service) Boot() {
 
 					// Run workers
 					if err := s.runMachines(runMachinesInput{
-						clients:     clients,
-						spec:        cluster.Spec,
-						tlsAssets:   tlsAssets,
-						clusterName: cluster.Name,
-						keyPairName: keyPairName,
-						prefix:      prefixWorker,
+						clients:             clients,
+						spec:                cluster.Spec,
+						tlsAssets:           tlsAssets,
+						clusterName:         cluster.Name,
+						keyPairName:         keyPairName,
+						instanceProfileName: instanceProfileName,
+						prefix:              prefixWorker,
 					}); err != nil {
 						s.logger.Log("error", microerror.MaskAny(err))
 						return
@@ -265,12 +280,13 @@ func (s *Service) Boot() {
 }
 
 type runMachinesInput struct {
-	clients     awsutil.Clients
-	spec        awstpr.Spec
-	tlsAssets   *cloudconfig.CompactTLSAssets
-	clusterName string
-	keyPairName string
-	prefix      string
+	clients             awsutil.Clients
+	spec                awstpr.Spec
+	tlsAssets           *cloudconfig.CompactTLSAssets
+	clusterName         string
+	keyPairName         string
+	instanceProfileName string
+	prefix              string
 }
 
 func (s *Service) runMachines(input runMachinesInput) error {
@@ -299,15 +315,16 @@ func (s *Service) runMachines(input runMachinesInput) error {
 	for i := 0; i < len(machines); i++ {
 		name := fmt.Sprintf(instanceNameFormat, input.clusterName, input.prefix, i)
 		if err := s.runMachine(runMachineInput{
-			clients:     input.clients,
-			spec:        input.spec,
-			machine:     machines[i],
-			awsNode:     awsMachines[i],
-			tlsAssets:   input.tlsAssets,
-			clusterName: input.clusterName,
-			keyPairName: input.keyPairName,
-			name:        name,
-			prefix:      input.prefix,
+			clients:             input.clients,
+			spec:                input.spec,
+			machine:             machines[i],
+			awsNode:             awsMachines[i],
+			tlsAssets:           input.tlsAssets,
+			clusterName:         input.clusterName,
+			keyPairName:         input.keyPairName,
+			instanceProfileName: input.instanceProfileName,
+			name:                name,
+			prefix:              input.prefix,
 		}); err != nil {
 			return microerror.MaskAny(err)
 		}
@@ -332,16 +349,30 @@ func allExistingInstancesMatch(instances *ec2.DescribeInstancesOutput, state EC2
 	return true
 }
 
+func (s *Service) uploadCloudconfigToS3(svc *s3.S3, s3Bucket, path, data string) error {
+	if _, err := svc.PutObject(&s3.PutObjectInput{
+		Body:          strings.NewReader(data),
+		Bucket:        aws.String(s3Bucket),
+		Key:           aws.String(path),
+		ContentLength: aws.Int64(int64(len(data))),
+	}); err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	return nil
+}
+
 type runMachineInput struct {
-	clients     awsutil.Clients
-	spec        awstpr.Spec
-	machine     node.Node
-	awsNode     awsinfo.Node
-	tlsAssets   *cloudconfig.CompactTLSAssets
-	clusterName string
-	keyPairName string
-	name        string
-	prefix      string
+	clients             awsutil.Clients
+	spec                awstpr.Spec
+	machine             node.Node
+	awsNode             awsinfo.Node
+	tlsAssets           *cloudconfig.CompactTLSAssets
+	clusterName         string
+	keyPairName         string
+	instanceProfileName string
+	name                string
+	prefix              string
 }
 
 func (s *Service) runMachine(input runMachineInput) error {
@@ -372,7 +403,7 @@ func (s *Service) runMachine(input runMachineInput) error {
 		TLSAssets: *input.tlsAssets,
 	}
 
-	cloudConfig, err := s.cloudConfig(input.prefix, cloudConfigParams)
+	cloudConfig, err := s.cloudConfig(input.prefix, cloudConfigParams, input.spec)
 	if err != nil {
 		return err
 	}
@@ -382,7 +413,30 @@ func (s *Service) runMachine(input runMachineInput) error {
 		return nil
 	}
 
-	instanceProfileName, err := createInstanceProfile(input.clients.IAM, input.spec.Cluster.Cluster.ID)
+	// We now upload the instance cloudconfig to S3 and create a "small
+	// cloudconfig" that just fetches the previously uploaded "final
+	// cloudconfig" and executes coreos-cloudinit with it as argument.
+	// We do this to circumvent the 16KB limit on user-data for EC2 instances.
+	clusterID := input.spec.Cluster.Cluster.ID
+	cloudconfigConfig := SmallCloudconfigConfig{
+		MachineType: input.prefix,
+		Region:      input.spec.AWS.Region,
+		S3Bucket:    s.s3Bucket,
+		ClusterID:   clusterID,
+	}
+
+	cloudconfigS3Path := fmt.Sprintf("%s/cloudconfig/%s",
+		cloudconfigConfig.ClusterID,
+		cloudconfigConfig.MachineType)
+	if err := s.uploadCloudconfigToS3(input.clients.S3,
+		s.s3Bucket,
+		cloudconfigS3Path,
+		cloudConfig); err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	provider := newFsSmallCloudconfigProvider(smallCloudconfigPath)
+	smallCloudconfig, err := s.SmallCloudconfig(provider, cloudconfigConfig)
 	if err != nil {
 		return microerror.MaskAny(err)
 	}
@@ -395,9 +449,9 @@ func (s *Service) runMachine(input runMachineInput) error {
 			KeyName:      aws.String(input.keyPairName),
 			MinCount:     aws.Int64(int64(1)),
 			MaxCount:     aws.Int64(int64(1)),
-			UserData:     aws.String(cloudConfig),
+			UserData:     aws.String(smallCloudconfig),
 			IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
-				Name: aws.String(instanceProfileName),
+				Name: aws.String(input.instanceProfileName),
 			},
 		})
 		if err != nil {
