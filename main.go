@@ -30,6 +30,7 @@ var Flags = struct {
 			ID     string
 			Secret string
 		}
+		S3Bucket   string
 		CertsDir   string
 		PubKeyFile string
 	}
@@ -91,6 +92,7 @@ func main() {
 				TLSClientConfig: k8sTlsClientConfig,
 			}
 
+			serviceConfig.S3Bucket = Flags.Aws.S3Bucket
 			serviceConfig.CertsDir = Flags.Aws.CertsDir
 			serviceConfig.PubKeyFile = Flags.Aws.PubKeyFile
 
@@ -148,6 +150,7 @@ func main() {
 
 	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.AccessKey.ID, "aws.accesskey.id", "", "ID of the AWS access key")
 	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.AccessKey.Secret, "aws.accesskey.secret", "", "Secret of the AWS access key")
+	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.S3Bucket, "aws.s3bucket", "", "S3 bucket in which to store cloudconfigs")
 	// TODO(nhlfr): Deprecate these options when cert-operator will be implemented.
 	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.CertsDir, "aws.certsdir", "", "Certificates to be placed in /etc/kubernetes/ssl")
 	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.PubKeyFile, "aws.pubkeyfile", path.Join(os.Getenv("HOME"), ".ssh", "id_rsa.pub"), "Public key to be imported as a keypair in AWS")

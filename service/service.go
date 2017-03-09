@@ -29,6 +29,8 @@ type Config struct {
 	CertsDir   string
 	PubKeyFile string
 
+	S3Bucket string
+
 	Description string
 	GitCommit   string
 	Name        string
@@ -46,6 +48,7 @@ func DefaultConfig() Config {
 		AwsConfig: awsutil.Config{},
 		K8sConfig: k8sutil.Config{},
 
+		S3Bucket: "",
 		// AWS certificates optionts.
 		CertsDir:   "",
 		PubKeyFile: "",
@@ -82,6 +85,7 @@ func New(config Config) (*Service, error) {
 		createConfig.AwsConfig = config.AwsConfig
 		createConfig.K8sClient = k8sClient
 		createConfig.Logger = config.Logger
+		createConfig.S3Bucket = config.S3Bucket
 		createConfig.CertsDir = config.CertsDir
 		createConfig.PubKeyFile = config.PubKeyFile
 

@@ -2,6 +2,7 @@
 // sources:
 // templates/decrypt-tls-assets
 // templates/decrypt-tls-assets.service
+// templates/user-data.sh
 // DO NOT EDIT!
 
 package bindata
@@ -84,7 +85,7 @@ func templatesDecryptTlsAssets() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "templates/decrypt-tls-assets", size: 864, mode: os.FileMode(436), modTime: time.Unix(1488818822, 0)}
+	info := bindataFileInfo{name: "templates/decrypt-tls-assets", size: 864, mode: os.FileMode(420), modTime: time.Unix(1489420306, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -104,7 +105,27 @@ func templatesDecryptTlsAssetsService() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "templates/decrypt-tls-assets.service", size: 92, mode: os.FileMode(436), modTime: time.Unix(1488818822, 0)}
+	info := bindataFileInfo{name: "templates/decrypt-tls-assets.service", size: 92, mode: os.FileMode(420), modTime: time.Unix(1489420306, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _templatesUserDataSh = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\x84\x92\x41\x6f\x13\x31\x10\x85\xef\xfb\x2b\x06\xc1\x31\x5e\x1f\x82\x38\x54\x5a\xa4\x88\x16\xa9\x12\x08\xa9\x2d\x37\x24\xe4\x78\x27\x89\x15\xef\x78\x99\x19\x6f\x1a\x16\xff\x77\x94\xa5\x0d\x24\x01\x71\x1b\x79\xde\x7b\xdf\x8c\xed\x97\x2f\xec\x32\x90\x5d\x3a\xd9\x54\x55\x0d\x16\xd5\x5b\xa4\x21\x70\xa2\x0e\x49\xab\xcf\xf7\x37\x77\xd7\x8b\x87\xc5\xd7\xf7\xb7\x1f\x6e\x9a\x71\xac\x3f\x3a\xbf\x09\x84\x0f\xfb\x1e\x4b\xa9\x2a\x9b\x85\xa7\x04\xde\x2a\x70\x26\xf8\x52\x01\x00\x18\x43\xa8\xcd\x26\x89\x1e\x0f\x86\x14\x73\x87\x4d\x4b\x32\xdb\x06\x6a\xa7\xe6\x4c\x52\x66\x8f\xcd\x84\x65\x94\x14\x87\xda\x27\x5a\xcd\x18\x5d\xfb\x89\xe2\xbe\x51\xce\x08\xc6\x74\x29\x93\xc2\x1f\x11\xea\x78\x8d\x7a\x61\x84\x73\x9c\xdb\x09\xd2\xf0\x17\xe2\xe0\xd8\x72\x26\xeb\x13\x63\x92\xdf\xc0\x95\x8b\x72\x41\x7c\x4a\x79\x86\x9e\x7a\x8f\x48\xe5\x2c\x6a\xb6\xb8\x17\xb3\xe2\xd4\x99\x8d\x6a\xff\xdc\xfd\x96\xdd\xbe\x0e\xe9\xc9\x62\xdd\x4e\x7c\x0c\x57\xd1\x29\x8a\x82\x31\xe0\x76\x02\x32\x07\x63\x18\xd7\x21\x11\x8c\x63\x7d\x37\x55\xa5\x80\xef\x41\xe6\x57\xd6\x8e\x63\x7d\x3f\x5f\x30\x95\x72\x28\xdf\xc5\x2c\x8a\x7c\x7b\x5d\x8a\xf5\x31\xe5\xf6\xb0\x7f\x58\xdb\x57\x27\x4f\x06\x67\xc3\x5a\xc5\xae\xaf\xf5\x51\xab\xa5\x13\x7c\xf3\x1a\x4c\xfb\x4f\x09\xfc\x80\x75\xa6\xef\xa1\x87\xb7\x17\x9a\x53\x4a\x85\x8f\xe8\xe1\xf8\x17\x7e\x69\xcc\x34\x55\xa0\x70\x58\x70\xba\x90\x55\x88\xf8\x9f\xa4\x9f\x01\x00\x00\xff\xff\x6d\xeb\xe2\x3a\x90\x02\x00\x00")
+
+func templatesUserDataShBytes() ([]byte, error) {
+	return bindataRead(
+		_templatesUserDataSh,
+		"templates/user-data.sh",
+	)
+}
+
+func templatesUserDataSh() (*asset, error) {
+	bytes, err := templatesUserDataShBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "templates/user-data.sh", size: 656, mode: os.FileMode(420), modTime: time.Unix(1489420306, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -163,6 +184,7 @@ func AssetNames() []string {
 var _bindata = map[string]func() (*asset, error){
 	"templates/decrypt-tls-assets": templatesDecryptTlsAssets,
 	"templates/decrypt-tls-assets.service": templatesDecryptTlsAssetsService,
+	"templates/user-data.sh": templatesUserDataSh,
 }
 
 // AssetDir returns the file names below a certain
@@ -208,6 +230,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"templates": &bintree{nil, map[string]*bintree{
 		"decrypt-tls-assets": &bintree{templatesDecryptTlsAssets, map[string]*bintree{}},
 		"decrypt-tls-assets.service": &bintree{templatesDecryptTlsAssetsService, map[string]*bintree{}},
+		"user-data.sh": &bintree{templatesUserDataSh, map[string]*bintree{}},
 	}},
 }}
 
