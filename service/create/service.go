@@ -59,10 +59,11 @@ const (
 // Config represents the configuration used to create a version service.
 type Config struct {
 	// Dependencies.
-	AwsConfig awsutil.Config
-	K8sClient kubernetes.Interface
-	Logger    micrologger.Logger
-	CertsDir  string
+	AwsConfig  awsutil.Config
+	K8sClient  kubernetes.Interface
+	Logger     micrologger.Logger
+	CertsDir   string
+	PubKeyFile string
 }
 
 // DefaultConfig provides a default configuration to create a new version service
@@ -70,9 +71,10 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
-		K8sClient: nil,
-		Logger:    nil,
-		CertsDir:  "",
+		K8sClient:  nil,
+		Logger:     nil,
+		CertsDir:   "",
+		PubKeyFile: "",
 	}
 }
 
@@ -90,7 +92,8 @@ func New(config Config) (*Service, error) {
 		logger:    config.Logger,
 
 		// AWS certificates options.
-		certsDir: config.CertsDir,
+		certsDir:   config.CertsDir,
+		pubKeyFile: config.PubKeyFile,
 
 		// Internals
 		bootOnce: sync.Once{},
@@ -107,7 +110,8 @@ type Service struct {
 	logger    micrologger.Logger
 
 	// AWS certificates options.
-	certsDir string
+	certsDir   string
+	pubKeyFile string
 
 	// Internals.
 	bootOnce sync.Once
@@ -180,6 +184,16 @@ func (s *Service) Boot() {
 					s.awsConfig.Region = cluster.Spec.AWS.Region
 					awsSession, ec2Client := awsutil.NewClient(s.awsConfig)
 
+					// Create keypair
+					keyPairName, err := s.keyPair(keyPairInput{
+						ec2Client:   ec2Client,
+						clusterName: cluster.Name,
+						provider:    newFsKeyPairProvider(s.pubKeyFile),
+					})
+					if err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not create keypair: %s", err))
+					}
+
 					// Create KMS key
 					kmsSvc := kms.New(awsSession)
 					key, err := kmsSvc.CreateKey(&kms.CreateKeyInput{})
@@ -207,6 +221,7 @@ func (s *Service) Boot() {
 						spec:        cluster.Spec,
 						tlsAssets:   tlsAssets,
 						clusterName: cluster.Name,
+						keyPairName: keyPairName,
 						prefix:      prefixMaster,
 					}); err != nil {
 						s.logger.Log("error", microerror.MaskAny(err))
@@ -220,6 +235,7 @@ func (s *Service) Boot() {
 						spec:        cluster.Spec,
 						tlsAssets:   tlsAssets,
 						clusterName: cluster.Name,
+						keyPairName: keyPairName,
 						prefix:      prefixWorker,
 					}); err != nil {
 						s.logger.Log("error", microerror.MaskAny(err))
@@ -253,6 +269,7 @@ type runMachinesInput struct {
 	spec        awstpr.Spec
 	tlsAssets   *cloudconfig.CompactTLSAssets
 	clusterName string
+	keyPairName string
 	prefix      string
 }
 
@@ -289,6 +306,7 @@ func (s *Service) runMachines(input runMachinesInput) error {
 			awsNode:     awsMachines[i],
 			tlsAssets:   input.tlsAssets,
 			clusterName: input.clusterName,
+			keyPairName: input.keyPairName,
 			name:        name,
 			prefix:      input.prefix,
 		}); err != nil {
@@ -323,6 +341,7 @@ type runMachineInput struct {
 	awsNode     awsinfo.Node
 	tlsAssets   *cloudconfig.CompactTLSAssets
 	clusterName string
+	keyPairName string
 	name        string
 	prefix      string
 }
@@ -374,6 +393,7 @@ func (s *Service) runMachine(input runMachineInput) error {
 		reservation, err = input.ec2Client.RunInstances(&ec2.RunInstancesInput{
 			ImageId:      aws.String(input.awsNode.ImageID),
 			InstanceType: aws.String(input.awsNode.InstanceType),
+			KeyName:      aws.String(input.keyPairName),
 			MinCount:     aws.Int64(int64(1)),
 			MaxCount:     aws.Int64(int64(1)),
 			UserData:     aws.String(cloudConfig),

@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"path"
 
 	"github.com/giantswarm/microkit/command"
 	"github.com/giantswarm/microkit/logger"
@@ -29,7 +30,8 @@ var Flags = struct {
 			ID     string
 			Secret string
 		}
-		CertsDir string
+		CertsDir   string
+		PubKeyFile string
 	}
 	Kubernetes struct {
 		InCluster   bool
@@ -90,6 +92,7 @@ func main() {
 			}
 
 			serviceConfig.CertsDir = Flags.Aws.CertsDir
+			serviceConfig.PubKeyFile = Flags.Aws.PubKeyFile
 
 			serviceConfig.Description = description
 			serviceConfig.GitCommit = gitCommit
@@ -145,8 +148,9 @@ func main() {
 
 	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.AccessKey.ID, "aws.accesskey.id", "", "ID of the AWS access key")
 	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.AccessKey.Secret, "aws.accesskey.secret", "", "Secret of the AWS access key")
-	// TODO(nhlfr): Deprecate this option when cert-operator will be implemented.
-	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.CertsDir, "aws.certsdir", "", "Certificated to be placed in /etc/kubernetes/ssl")
+	// TODO(nhlfr): Deprecate these options when cert-operator will be implemented.
+	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.CertsDir, "aws.certsdir", "", "Certificates to be placed in /etc/kubernetes/ssl")
+	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.PubKeyFile, "aws.pubkeyfile", path.Join(os.Getenv("HOME"), ".ssh", "id_rsa.pub"), "Public key to be imported as a keypair in AWS")
 
 	daemonCommand.PersistentFlags().BoolVar(&Flags.Kubernetes.InCluster, "kubernetes.incluster", false, "Whether to use the in-cluster config to authenticate with Kubernetes")
 	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.APIServer, "kubernetes.apiserver", "http://127.0.0.1:8080", "Address and port of Giantnetes API server")
