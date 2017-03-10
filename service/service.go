@@ -26,7 +26,8 @@ type Config struct {
 	K8sConfig k8sutil.Config
 
 	// AWS cerfificates options.
-	CertsDir string
+	CertsDir   string
+	PubKeyFile string
 
 	Description string
 	GitCommit   string
@@ -46,7 +47,8 @@ func DefaultConfig() Config {
 		K8sConfig: k8sutil.Config{},
 
 		// AWS certificates optionts.
-		CertsDir: "",
+		CertsDir:   "",
+		PubKeyFile: "",
 
 		Description: "",
 		GitCommit:   "",
@@ -81,13 +83,13 @@ func New(config Config) (*Service, error) {
 		createConfig.K8sClient = k8sClient
 		createConfig.Logger = config.Logger
 		createConfig.CertsDir = config.CertsDir
+		createConfig.PubKeyFile = config.PubKeyFile
 
 		createService, err = create.New(createConfig)
 		if err != nil {
 			return nil, microerror.MaskAny(err)
 		}
 	}
-	fmt.Println(config.AwsConfig)
 
 	var versionService *version.Service
 	{
