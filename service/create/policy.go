@@ -11,7 +11,7 @@ import (
 const (
 	RoleName                 = "EC2-K8S-Role"
 	PolicyName               = "EC2-K8S-Policy"
-	ProfileName              = "EC2-DecryptTLSCerts"
+	ProfileName              = "EC2-K8S-Role"
 	AssumeRolePolicyDocument = `{
 		"Version": "2012-10-17",
 		"Statement": {
