@@ -363,6 +363,9 @@ func (s *Service) runMachine(input runMachineInput) error {
 		MinCount:     aws.Int64(int64(1)),
 		MaxCount:     aws.Int64(int64(1)),
 		UserData:     aws.String(cloudConfig),
+		IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
+			Name: aws.String(ProfileName),
+		},
 	})
 	if err != nil {
 		return microerror.MaskAny(err)
