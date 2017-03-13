@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/base64"
-	"html/template"
+	"text/template"
 
 	"github.com/giantswarm/clustertpr"
 	"github.com/giantswarm/clustertpr/node"
