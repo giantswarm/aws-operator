@@ -1,5 +1,5 @@
-hash: 1b4121ba1b3cee0b00dffb37d9d00336a4e61137e545bd08e72215073897fbed
-updated: 2017-03-13T12:05:32.516839437+01:00
+hash: 1fd60a2787474475dbc06a663e362d39d1d458d3920ab9f76422f6a9495d7246
+updated: 2017-03-13T15:08:53.048806583+01:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -89,22 +89,38 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: 99da9c8f8583749d0fef89d14b3cfa420e13ebc1
+  version: 288f3d1dff098b1cca30c3d88c461b71b203bbd0
   subpackages:
   - aws
 - name: github.com/giantswarm/clustertpr
-  version: 16f7b5230a6850c1b7b62bad4f6002607f8ad3c2
+  version: 47bae764f0a168b9dac27e274515b1a5d03eea6b
   subpackages:
   - calico
   - cloudflare
   - cluster
   - customer
   - docker
+  - docker/daemon
+  - docker/registry
   - etcd
   - flannel
+  - flannel/docker
   - kubernetes
+  - kubernetes/api
+  - kubernetes/dns
+  - kubernetes/hyperkube
+  - kubernetes/hyperkube/docker
+  - kubernetes/kubelet
   - node
   - operator
+  - operator/certctl
+  - operator/certctl/docker
+  - operator/k8svm
+  - operator/k8svm/docker
+  - operator/kubectl
+  - operator/kubectl/googleapi
+  - operator/networksetup
+  - operator/networksetup/docker
   - vault
 - name: github.com/giantswarm/k8scloudconfig
   version: a47f73927ec58d675c6a43c131dc017aaff56280
