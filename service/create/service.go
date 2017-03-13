@@ -11,7 +11,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	awssession "github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/awstpr"
 	awsinfo "github.com/giantswarm/awstpr/aws"
@@ -189,16 +188,9 @@ func (s *Service) Boot() {
 						return
 					}
 
-					if err := createRole(awsSession, *key.KeyMetadata.Arn); err != nil {
-						if aerr, ok := err.(awserr.Error); ok {
-							switch aerr.Code() {
-							case iam.ErrCodeEntityAlreadyExistsException:
-								s.logger.Log("info", fmt.Sprintf("role '%s' already exists, reusing", RoleName))
-							default:
-								s.logger.Log("error", fmt.Sprintf("error creating role: %s", err))
-								return
-							}
-						}
+					if err := createRole(awsSession, *key.KeyMetadata.Arn, cluster.Spec.Cluster.Cluster.ID); err != nil {
+						s.logger.Log("error", fmt.Sprintf("error creating role: %s", err))
+						return
 					}
 
 					// Encode TLS assets
@@ -372,16 +364,9 @@ func (s *Service) runMachine(input runMachineInput) error {
 		return nil
 	}
 
-	instanceProfile, err := createInstanceProfile(input.awsSession)
+	instanceProfileName, err := createInstanceProfile(input.awsSession, input.spec.Cluster.Cluster.ID)
 	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			switch aerr.Code() {
-			case iam.ErrCodeEntityAlreadyExistsException:
-				s.logger.Log("info", fmt.Sprintf("instance profile '%s' already exists, reusing", ProfileName))
-			default:
-				return microerror.MaskAny(err)
-			}
-		}
+		return microerror.MaskAny(err)
 	}
 
 	var reservation *ec2.Reservation
@@ -393,7 +378,7 @@ func (s *Service) runMachine(input runMachineInput) error {
 			MaxCount:     aws.Int64(int64(1)),
 			UserData:     aws.String(cloudConfig),
 			IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
-				Name: aws.String(instanceProfile),
+				Name: aws.String(instanceProfileName),
 			},
 		})
 		if err != nil {
