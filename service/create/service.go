@@ -403,9 +403,8 @@ func (s *Service) runMachine(input runMachineInput) error {
 					time.Sleep(2 * time.Second)
 					continue
 				}
-			} else {
-				return microerror.MaskAny(err)
 			}
+			return microerror.MaskAny(err)
 		}
 		break
 	}
