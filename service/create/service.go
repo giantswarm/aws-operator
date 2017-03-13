@@ -12,13 +12,13 @@ import (
 	awssession "github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/ericchiang/k8s"
 	"github.com/giantswarm/awstpr"
 	awsinfo "github.com/giantswarm/awstpr/aws"
 	"github.com/giantswarm/clustertpr/node"
 	"github.com/giantswarm/k8scloudconfig"
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api"
 	"k8s.io/client-go/pkg/runtime"
 	"k8s.io/client-go/pkg/watch"
@@ -60,7 +60,7 @@ const (
 type Config struct {
 	// Dependencies.
 	AwsConfig awsutil.Config
-	K8sClient kubernetes.Interface
+	K8sClient *k8s.Client
 	Logger    micrologger.Logger
 	CertsDir  string
 }
@@ -103,7 +103,7 @@ func New(config Config) (*Service, error) {
 type Service struct {
 	// Dependencies.
 	awsConfig awsutil.Config
-	k8sClient kubernetes.Interface
+	k8sClient *k8s.Client
 	logger    micrologger.Logger
 
 	// AWS certificates options.

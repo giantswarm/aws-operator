@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/ericchiang/k8s"
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
-	"k8s.io/client-go/kubernetes"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	k8sutil "github.com/giantswarm/aws-operator/client/k8s"
@@ -65,7 +65,7 @@ func New(config Config) (*Service, error) {
 
 	var err error
 
-	var k8sClient kubernetes.Interface
+	var k8sClient *k8s.Client
 	{
 		k8sClient, err = k8sutil.NewClient(config.K8sConfig)
 		if err != nil {
