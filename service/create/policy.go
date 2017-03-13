@@ -14,10 +14,10 @@ const (
 	ProfileName              = "EC2-DecryptTLSCerts"
 	AssumeRolePolicyDocument = `{
 		"Version": "2012-10-17",
-		"Statement:" {
+		"Statement": {
 			"Effect": "Allow",
 			"Principal": {
-				"Service": "ec2.amazonaws.com",
+				"Service": "ec2.amazonaws.com"
 			},
 			"Action": "sts:AssumeRole"
 		}
