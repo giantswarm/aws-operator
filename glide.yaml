@@ -27,7 +27,7 @@ import:
   version: 99da9c8f8583749d0fef89d14b3cfa420e13ebc1
 - package: github.com/giantswarm/clustertpr
 - package: github.com/giantswarm/k8scloudconfig
-  version: 22d2a23487fd96b2616c4d41d48bbfafc5bb1416
+  version: a47f73927ec58d675c6a43c131dc017aaff56280
 - package: github.com/golang/protobuf
   version: 8ee79997227bf9b34611aee7946ae64735e6fd93
   subpackages:

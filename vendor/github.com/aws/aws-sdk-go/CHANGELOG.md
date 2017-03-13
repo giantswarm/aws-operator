@@ -1,3 +1,42 @@
+Release v1.7.8 (2017-03-10)
+===
+
+Service Client Updates
+---
+* `service/codedeploy`: Updates service paginators
+  * Add paginators for Codedeploy
+* `service/emr`: Updates service API, documentation, and paginators
+  * This release includes support for instance fleets in Amazon EMR.
+
+Release v1.7.7 (2017-03-09)
+===
+
+Service Client Updates
+---
+* `service/apigateway`: Updates service API, documentation, and paginators
+  * API Gateway has added support for ACM certificates on custom domain names. Both Amazon-issued certificates and uploaded third-part certificates are supported.
+* `service/clouddirectory`: Updates service API, documentation, and paginators
+  * Introduces a new Cloud Directory API that enables you to retrieve all available parent paths for any type of object (a node, leaf node, policy node, and index node) in a hierarchy.
+
+Release v1.7.6 (2017-03-09)
+===
+
+Service Client Updates
+---
+* `service/organizations`: Updates service documentation and examples
+  * Doc-only Update for Organizations: Add SDK Code Snippets
+* `service/workdocs`: Adds new service
+  * The Administrative SDKs for Amazon WorkDocs provides full administrator level access to WorkDocs site resources, allowing developers to integrate their applications to manage WorkDocs users, content and permissions programmatically
+
+Release v1.7.5 (2017-03-08)
+===
+
+Service Client Updates
+---
+* `aws/endpoints`: Updated Regions and Endpoints metadata.
+* `service/rds`: Updates service API and documentation
+  * Add support to using encrypted clusters as cross-region replication masters. Update CopyDBClusterSnapshot API to support encrypted cross region copy of Aurora cluster snapshots.
+
 Release v1.7.4 (2017-03-06)
 ===
 

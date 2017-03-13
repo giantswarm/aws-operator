@@ -20,5 +20,3 @@ test:
     override:
         - cd $GS_WD && go test -v $(glide novendor)
         - cd $GS_WD && go build -a -v -tags netgo -ldflags "-w -X main.gitCommit=$(git rev-parse --short HEAD)"
-        - cd $GS_WD && docker build --rm=false -t registry.giantswarm.io/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1 .
-        - cd $GS_WD && docker run registry.giantswarm.io/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1 version

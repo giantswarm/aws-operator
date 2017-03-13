@@ -2,8 +2,8 @@ package cloudconfig
 
 import (
 	"bytes"
-	"html/template"
 	"strings"
+	"text/template"
 )
 
 type FileMetadata struct {

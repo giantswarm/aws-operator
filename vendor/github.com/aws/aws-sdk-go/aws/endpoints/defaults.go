@@ -107,6 +107,7 @@ const (
 	MturkRequesterServiceID               = "mturk-requester"              // MturkRequester.
 	OpsworksServiceID                     = "opsworks"                     // Opsworks.
 	OpsworksCmServiceID                   = "opsworks-cm"                  // OpsworksCm.
+	OrganizationsServiceID                = "organizations"                // Organizations.
 	PinpointServiceID                     = "pinpoint"                     // Pinpoint.
 	PollyServiceID                        = "polly"                        // Polly.
 	RdsServiceID                          = "rds"                          // Rds.
@@ -132,6 +133,7 @@ const (
 	SwfServiceID                          = "swf"                          // Swf.
 	WafServiceID                          = "waf"                          // Waf.
 	WafRegionalServiceID                  = "waf-regional"                 // WafRegional.
+	WorkdocsServiceID                     = "workdocs"                     // Workdocs.
 	WorkspacesServiceID                   = "workspaces"                   // Workspaces.
 	XrayServiceID                         = "xray"                         // Xray.
 )
@@ -489,6 +491,7 @@ var awsPartition = partition{
 				"ap-southeast-2": endpoint{},
 				"eu-central-1":   endpoint{},
 				"eu-west-1":      endpoint{},
+				"eu-west-2":      endpoint{},
 				"us-east-1":      endpoint{},
 				"us-east-2":      endpoint{},
 				"us-west-2":      endpoint{},
@@ -502,6 +505,7 @@ var awsPartition = partition{
 				"ap-southeast-2": endpoint{},
 				"eu-central-1":   endpoint{},
 				"eu-west-1":      endpoint{},
+				"eu-west-2":      endpoint{},
 				"us-east-1":      endpoint{},
 				"us-east-2":      endpoint{},
 				"us-west-2":      endpoint{},
@@ -515,6 +519,7 @@ var awsPartition = partition{
 				"ap-southeast-2": endpoint{},
 				"eu-central-1":   endpoint{},
 				"eu-west-1":      endpoint{},
+				"eu-west-2":      endpoint{},
 				"us-east-1":      endpoint{},
 				"us-east-2":      endpoint{},
 				"us-west-2":      endpoint{},
@@ -959,6 +964,7 @@ var awsPartition = partition{
 				"ap-southeast-2": endpoint{},
 				"eu-central-1":   endpoint{},
 				"eu-west-1":      endpoint{},
+				"eu-west-2":      endpoint{},
 				"us-east-1":      endpoint{},
 				"us-east-2":      endpoint{},
 				"us-west-2":      endpoint{},
@@ -1148,6 +1154,19 @@ var awsPartition = partition{
 				"eu-west-1": endpoint{},
 				"us-east-1": endpoint{},
 				"us-west-2": endpoint{},
+			},
+		},
+		"organizations": service{
+			PartitionEndpoint: "aws-global",
+			IsRegionalized:    boxedFalse,
+
+			Endpoints: endpoints{
+				"aws-global": endpoint{
+					Hostname: "organizations.us-east-1.amazonaws.com",
+					CredentialScope: credentialScope{
+						Region: "us-east-1",
+					},
+				},
 			},
 		},
 		"pinpoint": service{
@@ -1435,6 +1454,7 @@ var awsPartition = partition{
 
 			Endpoints: endpoints{
 				"ap-northeast-1": endpoint{},
+				"eu-central-1":   endpoint{},
 				"eu-west-1":      endpoint{},
 				"us-east-1":      endpoint{},
 				"us-east-2":      endpoint{},
@@ -1563,6 +1583,17 @@ var awsPartition = partition{
 
 			Endpoints: endpoints{
 				"ap-northeast-1": endpoint{},
+				"eu-west-1":      endpoint{},
+				"us-east-1":      endpoint{},
+				"us-west-2":      endpoint{},
+			},
+		},
+		"workdocs": service{
+
+			Endpoints: endpoints{
+				"ap-northeast-1": endpoint{},
+				"ap-southeast-1": endpoint{},
+				"ap-southeast-2": endpoint{},
 				"eu-west-1":      endpoint{},
 				"us-east-1":      endpoint{},
 				"us-west-2":      endpoint{},

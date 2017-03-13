@@ -1,5 +1,5 @@
-hash: 0a84a3d3eaffe951631fcf18b1b792b99531a50d7f4a1f178d68b52611acb44a
-updated: 2017-03-07T16:41:06.009797668+01:00
+hash: 1b4121ba1b3cee0b00dffb37d9d00336a4e61137e545bd08e72215073897fbed
+updated: 2017-03-13T12:05:32.516839437+01:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aws/aws-sdk-go
-  version: 0700d99edb91ab11ba748f096cbdcf424e53446b
+  version: 963d664c4279debae251c0f336e247571dc614db
   subpackages:
   - aws
   - aws/awserr
@@ -45,7 +45,7 @@ imports:
 - name: github.com/blang/semver
   version: 31b736133b98f26d5e078ec9eb591666edfd091f
 - name: github.com/coreos/etcd
-  version: 714e7ec8db7f8398880197be10771fe89c480ee5
+  version: 21fdcc6443f3267111051240f0eca839acc96a39
   subpackages:
   - auth/authpb
   - client
@@ -107,7 +107,7 @@ imports:
   - operator
   - vault
 - name: github.com/giantswarm/k8scloudconfig
-  version: 22d2a23487fd96b2616c4d41d48bbfafc5bb1416
+  version: a47f73927ec58d675c6a43c131dc017aaff56280
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
@@ -125,7 +125,7 @@ imports:
   - transaction/context/id
   - transaction/context/tracked
 - name: github.com/go-ini/ini
-  version: c437d20015c2ab6454b7a66a13109ff0fb99e17a
+  version: 300e940a926eb277d3901b20bdfcc54928ad3642
 - name: github.com/go-kit/kit
   version: f66b0e13579bfc5a48b9e2a94b1209c107ea1f41
   subpackages:
@@ -205,7 +205,7 @@ imports:
   subpackages:
   - pbutil
 - name: github.com/mitchellh/mapstructure
-  version: db1efb556f84b25a0a13a04aad883943538ad2e0
+  version: 53818660ed4955e899c0bcafa97299a388bd7c8e
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/pelletier/go-buffruneio
@@ -242,7 +242,7 @@ imports:
 - name: github.com/spf13/cast
   version: ce135a4ebeee6cfe9a26c93ee0d37825f26113c7
 - name: github.com/spf13/cobra
-  version: fcd0c5a1df88f5d6784cb4feead962c3f3d0b66c
+  version: 16c014f1a19d865b765b420e74508f80eb831ada
 - name: github.com/spf13/jwalterweatherman
   version: fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66
 - name: github.com/spf13/pflag
