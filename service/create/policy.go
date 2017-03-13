@@ -73,5 +73,11 @@ func createInstanceProfile(awsSession *session.Session) (string, error) {
 		}
 	}
 
+	if err := svc.WaitUntilInstanceProfileExists(&iam.GetInstanceProfileInput{
+		InstanceProfileName: aws.String(ProfileName),
+	}); err != nil {
+		return "", err
+	}
+
 	return ProfileName, nil
 }
