@@ -6,4 +6,4 @@ import:
   - pkg/api/unversioned
   - pkg/api/v1
 - package: github.com/giantswarm/clustertpr
-  version: 16f7b5230a6850c1b7b62bad4f6002607f8ad3c2
+  version: 47bae764f0a168b9dac27e274515b1a5d03eea6b
