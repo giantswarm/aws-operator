@@ -3,6 +3,7 @@ package create
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -383,18 +384,30 @@ func (s *Service) runMachine(input runMachineInput) error {
 		}
 	}
 
-	reservation, err := input.ec2Client.RunInstances(&ec2.RunInstancesInput{
-		ImageId:      aws.String(input.awsNode.ImageID),
-		InstanceType: aws.String(input.awsNode.InstanceType),
-		MinCount:     aws.Int64(int64(1)),
-		MaxCount:     aws.Int64(int64(1)),
-		UserData:     aws.String(cloudConfig),
-		IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
-			Name: aws.String(instanceProfile),
-		},
-	})
-	if err != nil {
-		return microerror.MaskAny(err)
+	var reservation *ec2.Reservation
+	for i := 0; i < 5; i++ {
+		reservation, err = input.ec2Client.RunInstances(&ec2.RunInstancesInput{
+			ImageId:      aws.String(input.awsNode.ImageID),
+			InstanceType: aws.String(input.awsNode.InstanceType),
+			MinCount:     aws.Int64(int64(1)),
+			MaxCount:     aws.Int64(int64(1)),
+			UserData:     aws.String(cloudConfig),
+			IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
+				Name: aws.String(instanceProfile),
+			},
+		})
+		if err != nil {
+			if aerr, ok := err.(awserr.Error); ok {
+				if aerr.Code() == "InvalidParameterValue" && strings.Contains(aerr.Message(), "Invalid IAM Instance Profile") {
+					s.logger.Log("debug", "Invalid IAM Instance Profile referenced, retrying...")
+					time.Sleep(2 * time.Second)
+					continue
+				}
+			} else {
+				return microerror.MaskAny(err)
+			}
+		}
+		break
 	}
 
 	s.logger.Log("info", fmt.Sprintf("instance '%s' reserved", input.name))
