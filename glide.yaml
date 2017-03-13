@@ -34,6 +34,10 @@ import:
   - jsonpb
   - proto
   - sortkeys
+- package: github.com/ericchiang/k8s
+  version: nhlfr/api-watcher
+  repo: git://github.com/kinvolk/k8s.git
+  vcs: git
 testImport:
 - package: github.com/stretchr/testify
   repo: git://github.com/stretchr/testify.git

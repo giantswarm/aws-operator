@@ -1,13 +1,8 @@
-hash: 1fd60a2787474475dbc06a663e362d39d1d458d3920ab9f76422f6a9495d7246
-updated: 2017-03-13T15:08:53.048806583+01:00
+hash: 57465ce6607a30209c5386993835ad493dfaf051ea7c38355d700b6de68032e7
+updated: 2017-03-14T17:37:50.2211004+01:00
 imports:
-- name: cloud.google.com/go
-  version: 3b1ae45394a234c385be014e9a488f2bb6eef821
-  subpackages:
-  - compute/metadata
-  - internal
 - name: github.com/aws/aws-sdk-go
-  version: 963d664c4279debae251c0f336e247571dc614db
+  version: 05de8bee0d7efef0507aeffccb4e65c2592eb174
   subpackages:
   - aws
   - aws/awserr
@@ -56,20 +51,6 @@ imports:
   - pkg/pathutil
   - pkg/tlsutil
   - pkg/types
-- name: github.com/coreos/go-oidc
-  version: 5644a2f50e2d2d5ba0b474bc5bc55fea1925936d
-  subpackages:
-  - http
-  - jose
-  - key
-  - oauth2
-  - oidc
-- name: github.com/coreos/pkg
-  version: fa29b1d70f0beaddd4c7021607cc3c3be8ce94b8
-  subpackages:
-  - health
-  - httputil
-  - timeutil
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
   subpackages:
@@ -84,6 +65,31 @@ imports:
   subpackages:
   - log
   - swagger
+- name: github.com/ericchiang/k8s
+  version: 2d1004e580d7c160b3fefdb7f691d1c7cdb75ef3
+  repo: git://github.com/kinvolk/k8s.git
+  vcs: git
+  subpackages:
+  - api/resource
+  - api/unversioned
+  - api/v1
+  - apis/apps/v1alpha1
+  - apis/apps/v1beta1
+  - apis/authentication/v1beta1
+  - apis/authorization/v1beta1
+  - apis/autoscaling/v1
+  - apis/batch/v1
+  - apis/batch/v2alpha1
+  - apis/certificates/v1alpha1
+  - apis/extensions/v1beta1
+  - apis/imagepolicy/v1alpha1
+  - apis/policy/v1alpha1
+  - apis/policy/v1beta1
+  - apis/rbac/v1alpha1
+  - apis/storage/v1beta1
+  - runtime
+  - util/intstr
+  - watch/versioned
 - name: github.com/fsnotify/fsnotify
   version: 7d7316ed6e1ed2de075aab8dfc76de5d158d66e1
 - name: github.com/ghodss/yaml
@@ -141,7 +147,7 @@ imports:
   - transaction/context/id
   - transaction/context/tracked
 - name: github.com/go-ini/ini
-  version: 300e940a926eb277d3901b20bdfcc54928ad3642
+  version: 98c45284d68a05a0e0a576de574bd975946ef9ad
 - name: github.com/go-kit/kit
   version: f66b0e13579bfc5a48b9e2a94b1209c107ea1f41
   subpackages:
@@ -202,8 +208,6 @@ imports:
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/jmespath/go-jmespath
   version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
-- name: github.com/jonboulle/clockwork
-  version: 72f9bd7c4e0c2a40055ab3d0f09654f730cce982
 - name: github.com/juju/errgo
   version: 08cceb5d0b5331634b9826762a8fd53b29b86ad8
 - name: github.com/kr/logfmt
@@ -227,7 +231,7 @@ imports:
 - name: github.com/pelletier/go-buffruneio
   version: c37440a7cf42ac63b919c752ca73a85067e05992
 - name: github.com/pelletier/go-toml
-  version: 13d49d4606eb801b8f01ae542b4afc4c6ee3d84a
+  version: 3b00596b2e9ee541bbd72dc50cc0c60e2b46c69c
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
@@ -282,13 +286,6 @@ imports:
   - internal/timeseries
   - lex/httplex
   - trace
-- name: golang.org/x/oauth2
-  version: 3c3a985cb79f52a3190fbc056984415ca6763d01
-  subpackages:
-  - google
-  - internal
-  - jws
-  - jwt
 - name: golang.org/x/sys
   version: 8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9
   subpackages:
@@ -306,18 +303,6 @@ imports:
   - unicode/bidi
   - unicode/norm
   - width
-- name: google.golang.org/appengine
-  version: 4f7eeb5305a4ba1966344836ba4af9996b7b4e05
-  subpackages:
-  - internal
-  - internal/app_identity
-  - internal/base
-  - internal/datastore
-  - internal/log
-  - internal/modules
-  - internal/remote_api
-  - internal/urlfetch
-  - urlfetch
 - name: google.golang.org/grpc
   version: 777daa17ff9b5daef1cfdf915088a2ada3332bf0
   subpackages:
@@ -336,63 +321,18 @@ imports:
 - name: k8s.io/client-go
   version: d81cb85237595f720d83eda492bae8f6162fc5c0
   subpackages:
-  - discovery
-  - kubernetes
-  - kubernetes/typed/apps/v1beta1
-  - kubernetes/typed/authentication/v1beta1
-  - kubernetes/typed/authorization/v1beta1
-  - kubernetes/typed/autoscaling/v1
-  - kubernetes/typed/batch/v1
-  - kubernetes/typed/batch/v2alpha1
-  - kubernetes/typed/certificates/v1alpha1
-  - kubernetes/typed/core/v1
-  - kubernetes/typed/extensions/v1beta1
-  - kubernetes/typed/policy/v1beta1
-  - kubernetes/typed/rbac/v1alpha1
-  - kubernetes/typed/storage/v1beta1
   - pkg/api
   - pkg/api/errors
-  - pkg/api/install
   - pkg/api/meta
   - pkg/api/meta/metatypes
   - pkg/api/resource
   - pkg/api/unversioned
   - pkg/api/v1
   - pkg/api/validation/path
-  - pkg/apimachinery
-  - pkg/apimachinery/announced
-  - pkg/apimachinery/registered
-  - pkg/apis/apps
-  - pkg/apis/apps/install
-  - pkg/apis/apps/v1beta1
-  - pkg/apis/authentication
-  - pkg/apis/authentication/install
-  - pkg/apis/authentication/v1beta1
-  - pkg/apis/authorization
-  - pkg/apis/authorization/install
-  - pkg/apis/authorization/v1beta1
   - pkg/apis/autoscaling
-  - pkg/apis/autoscaling/install
-  - pkg/apis/autoscaling/v1
   - pkg/apis/batch
-  - pkg/apis/batch/install
-  - pkg/apis/batch/v1
-  - pkg/apis/batch/v2alpha1
   - pkg/apis/certificates
-  - pkg/apis/certificates/install
-  - pkg/apis/certificates/v1alpha1
   - pkg/apis/extensions
-  - pkg/apis/extensions/install
-  - pkg/apis/extensions/v1beta1
-  - pkg/apis/policy
-  - pkg/apis/policy/install
-  - pkg/apis/policy/v1beta1
-  - pkg/apis/rbac
-  - pkg/apis/rbac/install
-  - pkg/apis/rbac/v1alpha1
-  - pkg/apis/storage
-  - pkg/apis/storage/install
-  - pkg/apis/storage/v1beta1
   - pkg/auth/user
   - pkg/conversion
   - pkg/conversion/queryparams
@@ -408,19 +348,16 @@ imports:
   - pkg/runtime/serializer/versioning
   - pkg/selection
   - pkg/third_party/forked/golang/reflect
-  - pkg/third_party/forked/golang/template
   - pkg/types
   - pkg/util
   - pkg/util/cert
   - pkg/util/clock
-  - pkg/util/diff
   - pkg/util/errors
   - pkg/util/flowcontrol
   - pkg/util/framer
   - pkg/util/integer
   - pkg/util/intstr
   - pkg/util/json
-  - pkg/util/jsonpath
   - pkg/util/labels
   - pkg/util/net
   - pkg/util/parsers
@@ -436,11 +373,7 @@ imports:
   - pkg/version
   - pkg/watch
   - pkg/watch/versioned
-  - plugin/pkg/client/auth
-  - plugin/pkg/client/auth/gcp
-  - plugin/pkg/client/auth/oidc
   - rest
-  - tools/cache
   - tools/clientcmd/api
   - tools/metrics
   - transport

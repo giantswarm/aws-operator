@@ -1,7 +1,7 @@
 package create
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
 	"strings"
 	"sync"
@@ -11,21 +11,16 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	awssession "github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/ericchiang/k8s"
 	"github.com/giantswarm/awstpr"
 	awsinfo "github.com/giantswarm/awstpr/aws"
 	"github.com/giantswarm/clustertpr/node"
 	"github.com/giantswarm/k8scloudconfig"
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/pkg/api"
-	"k8s.io/client-go/pkg/runtime"
-	"k8s.io/client-go/pkg/watch"
-	"k8s.io/client-go/tools/cache"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
-	k8sutil "github.com/giantswarm/aws-operator/client/k8s"
+	// k8sutil "github.com/giantswarm/aws-operator/client/k8s"
 )
 
 const (
@@ -60,7 +55,7 @@ const (
 type Config struct {
 	// Dependencies.
 	AwsConfig awsutil.Config
-	K8sClient kubernetes.Interface
+	K8sClient *k8s.Client
 	Logger    micrologger.Logger
 	CertsDir  string
 }
@@ -103,7 +98,7 @@ func New(config Config) (*Service, error) {
 type Service struct {
 	// Dependencies.
 	awsConfig awsutil.Config
-	k8sClient kubernetes.Interface
+	k8sClient *k8s.Client
 	logger    micrologger.Logger
 
 	// AWS certificates options.
@@ -118,7 +113,7 @@ type Event struct {
 	Object *awstpr.CustomObject
 }
 
-func (s *Service) newClusterListWatch() *cache.ListWatch {
+/* func (s *Service) newClusterListWatch() *cache.ListWatch {
 	client := s.k8sClient.Core().RESTClient()
 
 	listWatch := &cache.ListWatch{
@@ -153,16 +148,17 @@ func (s *Service) newClusterListWatch() *cache.ListWatch {
 	}
 
 	return listWatch
-}
+} */
 
 func (s *Service) Boot() {
 	s.bootOnce.Do(func() {
 		if err := s.createTPR(); err != nil {
-			panic(err)
+			// panic(err)
+			fmt.Printf("%#v\n", err)
 		}
 		s.logger.Log("info", "successfully created third-party resource")
 
-		_, clusterInformer := cache.NewInformer(
+		/* _, clusterInformer := cache.NewInformer(
 			s.newClusterListWatch(),
 			&awstpr.CustomObject{},
 			resyncPeriod,
@@ -237,13 +233,43 @@ func (s *Service) Boot() {
 					}
 				},
 			},
-		)
+		) */
+
+		// watcher, err := s.k8sClient.ExtensionsV1Beta1().WatchThirdPartyResources(context.Background())
+		/* watcher, err := s.k8sClient.ExtensionsV1Beta1().WatchThirdPartyResourceDatas(context.Background(), "cluster.giantswarm.io")
+		if err != nil {
+			s.logger.Log("error", err)
+		} */
+
+		// tprClient := s.k8sClient.ThirdPartyResources("cluster.giantswarm.io", "v1")
+
+		lst := new(awstpr.List)
+		if err := s.k8sClient.ThirdPartyResources("cluster.giantswarm.io", "v1").List(context.Background(), "awses", "default", lst); err != nil {
+			fmt.Println("jeden rabin")
+			panic(err)
+		}
+		fmt.Println(lst)
+
+		watcher, err := s.k8sClient.ThirdPartyResources("cluster.giantswarm.io", "v1").Watch(context.Background(), "awses", "default")
+		if err != nil {
+			fmt.Println("drugi rabin")
+			panic(err)
+		}
+
+		for {
+			fmt.Println(watcher.Next())
+		}
+
+		/* watcher, err := s.k8sClient.Discovery().APIWatch(context.Background(), "cluster.giantswarm.io", "v1")
+		if err != nil {
+			s.logger.Log("error", err)
+		} */
 
 		s.logger.Log("info", "starting watch")
 
 		// Cluster informer lifecycle can be interrupted by putting a value into a "stop channel".
 		// We aren't currently using that functionality, so we are passing a nil here.
-		clusterInformer.Run(nil)
+		// clusterInformer.Run(nil)
 	})
 }
 
