@@ -1,8 +1,8 @@
 package k8s
 
 import (
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
+	"github.com/ericchiang/k8s"
+	microerror "github.com/giantswarm/microkit/error"
 )
 
 type TLSClientConfig struct {
@@ -20,62 +20,48 @@ type Config struct {
 	BearerToken string
 	Insecure    bool
 	TLSClientConfig
-	inClusterConfigProvider func() (*rest.Config, error)
 }
 
-func getInClusterConfig(config Config) (*rest.Config, error) {
-	if config.inClusterConfigProvider == nil {
-		config.inClusterConfigProvider = rest.InClusterConfig
-	}
-
-	return config.inClusterConfigProvider()
-}
-
-func newRawClientConfig(config Config) *rest.Config {
-	tlsClientConfig := rest.TLSClientConfig{
-		CertFile: config.CertFile,
-		KeyFile:  config.KeyFile,
-		CAFile:   config.CAFile,
-	}
-	rawClientConfig := &rest.Config{
-		Host:            config.Host,
-		QPS:             100,
-		Burst:           100,
-		Username:        config.Username,
-		Password:        config.Password,
-		BearerToken:     config.BearerToken,
-		Insecure:        config.Insecure,
-		TLSClientConfig: tlsClientConfig,
+func newRawClientConfig(config Config) *k8s.Config {
+	rawClientConfig := &k8s.Config{
+		Preferences: k8s.Preferences{},
+		Clusters: []k8s.NamedCluster{k8s.NamedCluster{
+			Name: "",
+			Cluster: k8s.Cluster{
+				Server:               config.Host,
+				CertificateAuthority: config.CAFile,
+			},
+		}},
+		AuthInfos: []k8s.NamedAuthInfo{k8s.NamedAuthInfo{
+			Name: "",
+			AuthInfo: k8s.AuthInfo{
+				ClientCertificate: config.CertFile,
+				ClientKey:         config.KeyFile,
+				Token:             config.BearerToken,
+				Username:          config.Username,
+				Password:          config.Password,
+			},
+		}},
 	}
 
 	return rawClientConfig
 }
 
-func getRawClientConfig(config Config) (*rest.Config, error) {
-	var rawClientConfig *rest.Config
-	var err error
-
+func NewClient(config Config) (*k8s.Client, error) {
 	if config.InCluster {
-		rawClientConfig, err = getInClusterConfig(config)
+		client, err := k8s.NewInClusterClient()
 		if err != nil {
-			return nil, err
+			return nil, microerror.MaskAny(err)
 		}
-	} else {
-		rawClientConfig = newRawClientConfig(config)
+
+		return client, nil
 	}
 
-	return rawClientConfig, nil
-}
+	rawClientConfig := newRawClientConfig(config)
 
-func NewClient(config Config) (kubernetes.Interface, error) {
-	rawClientConfig, err := getRawClientConfig(config)
+	client, err := k8s.NewClient(rawClientConfig)
 	if err != nil {
-		return nil, err
-	}
-
-	client, err := kubernetes.NewForConfig(rawClientConfig)
-	if err != nil {
-		return nil, err
+		return nil, microerror.MaskAny(err)
 	}
 
 	return client, nil
