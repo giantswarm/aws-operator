@@ -1,4 +1,4 @@
-package kubernetes
+package kubelet
 
 type Kubelet struct {
 	// AltNames is the alternative names used to generate certificates for the

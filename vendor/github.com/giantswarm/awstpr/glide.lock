@@ -1,5 +1,5 @@
-hash: 68f1ff97f3f9e0073e8bd440d3fa11b6bf12a40b52e044065df767f801224b5d
-updated: 2017-02-24T12:29:44.781299344+01:00
+hash: d83d546fc87189161cb4e272bade867aa4517e84304d8c82f6a783ec0bd4ff8c
+updated: 2017-03-13T14:59:02.233207093+01:00
 imports:
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
@@ -18,18 +18,34 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/clustertpr
-  version: 16f7b5230a6850c1b7b62bad4f6002607f8ad3c2
+  version: 47bae764f0a168b9dac27e274515b1a5d03eea6b
   subpackages:
   - calico
   - cloudflare
   - cluster
   - customer
   - docker
+  - docker/daemon
+  - docker/registry
   - etcd
   - flannel
+  - flannel/docker
   - kubernetes
+  - kubernetes/api
+  - kubernetes/dns
+  - kubernetes/hyperkube
+  - kubernetes/hyperkube/docker
+  - kubernetes/kubelet
   - node
   - operator
+  - operator/certctl
+  - operator/certctl/docker
+  - operator/k8svm
+  - operator/k8svm/docker
+  - operator/kubectl
+  - operator/kubectl/googleapi
+  - operator/networksetup
+  - operator/networksetup/docker
   - vault
 - name: github.com/go-openapi/jsonpointer
   version: 46af16f9f7b149af66e5d1bd010e3574dc06de98

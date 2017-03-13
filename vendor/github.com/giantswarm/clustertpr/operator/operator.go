@@ -1,8 +1,15 @@
 package operator
 
+import (
+	"github.com/giantswarm/clustertpr/operator/certctl"
+	"github.com/giantswarm/clustertpr/operator/k8svm"
+	"github.com/giantswarm/clustertpr/operator/kubectl"
+	"github.com/giantswarm/clustertpr/operator/networksetup"
+)
+
 type Operator struct {
-	CertctlVersion      string `json:"certctlVersion" yaml:"certctlVersion"`
-	K8sVmVersion        string `json:"k8sVmVersion" yaml:"k8sVmVersion"`
-	KubectlVersion      string `json:"kubectlVersion" yaml:"kubectlVersion"`
-	NetworkSetupVersion string `json:"networkSetupVersion" yaml:"networkSetupVersion"`
+	Certctl      certctl.Certctl
+	K8sVM        k8svm.K8sVM
+	Kubectl      kubectl.Kubectl
+	NetworkSetup networksetup.NetworkSetup
 }
