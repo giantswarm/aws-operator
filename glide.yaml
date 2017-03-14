@@ -2,6 +2,8 @@ package: github.com/giantswarm/aws-operator
 import:
 - package: github.com/aws/aws-sdk-go
   version: master
+  subpackages:
+  - service/s3
 - package: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
@@ -36,7 +38,7 @@ import:
   - sortkeys
 testImport:
 - package: github.com/stretchr/testify
-  repo: git://github.com/stretchr/testify.git
   version: v1.1.4
+  repo: git://github.com/stretchr/testify.git
   subpackages:
   - assert
