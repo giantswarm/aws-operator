@@ -2,6 +2,7 @@ package create
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -41,6 +42,9 @@ const (
 	// EC2 instance tag keys.
 	tagKeyName    string = "Name"
 	tagKeyCluster string = "Cluster"
+	// Number of retries of RunInstances to wait for Roles to propagate to
+	// Instance Profiles
+	runInstancesRetries = 10
 )
 
 type EC2StateCode int
@@ -384,7 +388,7 @@ func (s *Service) runMachine(input runMachineInput) error {
 	}
 
 	var reservation *ec2.Reservation
-	for i := 0; i < 5; i++ {
+	for i := 0; i < runInstancesRetries; i++ {
 		reservation, err = ec2Client.RunInstances(&ec2.RunInstancesInput{
 			ImageId:      aws.String(input.awsNode.ImageID),
 			InstanceType: aws.String(input.awsNode.InstanceType),
@@ -407,6 +411,10 @@ func (s *Service) runMachine(input runMachineInput) error {
 			return microerror.MaskAny(err)
 		}
 		break
+	}
+
+	if reservation == nil {
+		return microerror.MaskAny(errors.New("timeout waiting for a valid IAM Instance Profile"))
 	}
 
 	s.logger.Log("info", fmt.Sprintf("instance '%s' reserved", input.name))
