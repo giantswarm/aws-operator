@@ -418,16 +418,14 @@ func (s *Service) runMachine(input runMachineInput) error {
 	// cloudconfig" and executes coreos-cloudinit with it as argument.
 	// We do this to circumvent the 16KB limit on user-data for EC2 instances.
 	clusterID := input.spec.Cluster.Cluster.ID
+	cloudconfigS3DirPath := fmt.Sprintf("%s/cloudconfig", clusterID)
 	cloudconfigConfig := SmallCloudconfigConfig{
 		MachineType: input.prefix,
 		Region:      input.spec.AWS.Region,
-		S3Bucket:    s.s3Bucket,
-		ClusterID:   clusterID,
+		S3DirURI:    fmt.Sprintf("%s/%s", s.s3Bucket, cloudconfigS3DirPath),
 	}
 
-	cloudconfigS3Path := fmt.Sprintf("%s/cloudconfig/%s",
-		cloudconfigConfig.ClusterID,
-		cloudconfigConfig.MachineType)
+	cloudconfigS3Path := fmt.Sprintf("%s/%s", cloudconfigS3DirPath, cloudconfigConfig.MachineType)
 	if err := s.uploadCloudconfigToS3(input.clients.S3,
 		s.s3Bucket,
 		cloudconfigS3Path,
