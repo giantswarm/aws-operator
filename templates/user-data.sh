@@ -1,5 +1,19 @@
 #!/bin/bash
 
+# user-data in EC2 instances has a 16KB limit.
+# To circumvent this limit, we:
+#
+# 1. Upload the final cloudconfig to s3
+# 2. Generate a "small cloudconfig" whose only task is fetching the
+#    final cloudconfig from s3
+# 3. Configure the instance to be able to access the s3 URI where the
+#    final cloudconfig is stored
+# 4. Start the instance with the "small cloudconfig"
+#
+# This file is the "small cloudconfig" mentioned before. Here we simply fetch a
+# gzip+base64 file (the final cloudconfig) from AWS S3 and run coreos-cloudinit
+# with it as an argument.
+
 . /etc/environment
 USERDATA_FILE={{.MachineType}}
 
