@@ -34,8 +34,7 @@ func (f *fsSmallCloudconfigProvider) smallCloudconfigContent() ([]byte, error) {
 type SmallCloudconfigConfig struct {
 	MachineType string
 	Region      string
-	S3Bucket    string
-	ClusterID   string
+	S3DirURI    string
 }
 
 func (s *Service) SmallCloudconfig(provider smallCloudconfigProvider, config SmallCloudconfigConfig) (string, error) {
