@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 )
 
@@ -34,9 +33,7 @@ const (
 	}`
 )
 
-func createRole(awsSession *session.Session, kmsKeyArn, clusterID string) error {
-	svc := iam.New(awsSession)
-
+func createRole(svc *iam.IAM, kmsKeyArn, clusterID string) error {
 	policyDocument := fmt.Sprintf(PolicyDocumentTempl, kmsKeyArn)
 
 	clusterRoleName := fmt.Sprintf("%s-%s", clusterID, RoleNameTemplate)
@@ -59,9 +56,7 @@ func createRole(awsSession *session.Session, kmsKeyArn, clusterID string) error 
 	return nil
 }
 
-func createInstanceProfile(awsSession *session.Session, clusterID string) (string, error) {
-	svc := iam.New(awsSession)
-
+func createInstanceProfile(svc *iam.IAM, clusterID string) (string, error) {
 	clusterRoleName := fmt.Sprintf("%s-%s", clusterID, RoleNameTemplate)
 	clusterProfileName := fmt.Sprintf("%s-%s", clusterID, ProfileNameTemplate)
 

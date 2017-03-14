@@ -9,7 +9,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
-	awssession "github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/awstpr"
@@ -182,11 +181,11 @@ func (s *Service) Boot() {
 
 					// Create AWS client
 					s.awsConfig.Region = cluster.Spec.AWS.Region
-					awsSession, ec2Client := awsutil.NewClient(s.awsConfig)
+					clients := awsutil.NewClients(s.awsConfig)
 
 					// Create keypair
 					keyPairName, err := s.keyPair(keyPairInput{
-						ec2Client:   ec2Client,
+						ec2Client:   clients.EC2,
 						clusterName: cluster.Name,
 						provider:    newFsKeyPairProvider(s.pubKeyFile),
 					})
@@ -195,20 +194,20 @@ func (s *Service) Boot() {
 					}
 
 					// Create KMS key
-					kmsSvc := kms.New(awsSession)
+					kmsSvc := clients.KMS
 					key, err := kmsSvc.CreateKey(&kms.CreateKeyInput{})
 					if err != nil {
 						s.logger.Log("error", fmt.Sprintf("could not create KMS service client: %s", err))
 						return
 					}
 
-					if err := createRole(awsSession, *key.KeyMetadata.Arn, cluster.Spec.Cluster.Cluster.ID); err != nil {
+					if err := createRole(clients.IAM, *key.KeyMetadata.Arn, cluster.Spec.Cluster.Cluster.ID); err != nil {
 						s.logger.Log("error", fmt.Sprintf("error creating role: %s", err))
 						return
 					}
 
 					// Encode TLS assets
-					tlsAssets, err := s.encodeTLSAssets(awsSession, *key.KeyMetadata.Arn)
+					tlsAssets, err := s.encodeTLSAssets(clients.KMS, *key.KeyMetadata.Arn)
 					if err != nil {
 						s.logger.Log("error", fmt.Sprintf("could not encode TLS assets: %s", err))
 						return
@@ -216,8 +215,7 @@ func (s *Service) Boot() {
 
 					// Run masters
 					if err := s.runMachines(runMachinesInput{
-						awsSession:  awsSession,
-						ec2Client:   ec2Client,
+						clients:     clients,
 						spec:        cluster.Spec,
 						tlsAssets:   tlsAssets,
 						clusterName: cluster.Name,
@@ -230,8 +228,7 @@ func (s *Service) Boot() {
 
 					// Run workers
 					if err := s.runMachines(runMachinesInput{
-						awsSession:  awsSession,
-						ec2Client:   ec2Client,
+						clients:     clients,
 						spec:        cluster.Spec,
 						tlsAssets:   tlsAssets,
 						clusterName: cluster.Name,
@@ -264,8 +261,7 @@ func (s *Service) Boot() {
 }
 
 type runMachinesInput struct {
-	awsSession  *awssession.Session
-	ec2Client   *ec2.EC2
+	clients     awsutil.Clients
 	spec        awstpr.Spec
 	tlsAssets   *cloudconfig.CompactTLSAssets
 	clusterName string
@@ -299,8 +295,7 @@ func (s *Service) runMachines(input runMachinesInput) error {
 	for i := 0; i < len(machines); i++ {
 		name := fmt.Sprintf(instanceNameFormat, input.clusterName, input.prefix, i)
 		if err := s.runMachine(runMachineInput{
-			awsSession:  input.awsSession,
-			ec2Client:   input.ec2Client,
+			clients:     input.clients,
 			spec:        input.spec,
 			machine:     machines[i],
 			awsNode:     awsMachines[i],
@@ -334,8 +329,7 @@ func allExistingInstancesMatch(instances *ec2.DescribeInstancesOutput, state EC2
 }
 
 type runMachineInput struct {
-	awsSession  *awssession.Session
-	ec2Client   *ec2.EC2
+	clients     awsutil.Clients
 	spec        awstpr.Spec
 	machine     node.Node
 	awsNode     awsinfo.Node
@@ -347,7 +341,8 @@ type runMachineInput struct {
 }
 
 func (s *Service) runMachine(input runMachineInput) error {
-	instances, err := input.ec2Client.DescribeInstances(&ec2.DescribeInstancesInput{
+	ec2Client := input.clients.EC2
+	instances, err := ec2Client.DescribeInstances(&ec2.DescribeInstancesInput{
 		Filters: []*ec2.Filter{
 			&ec2.Filter{
 				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
@@ -383,14 +378,14 @@ func (s *Service) runMachine(input runMachineInput) error {
 		return nil
 	}
 
-	instanceProfileName, err := createInstanceProfile(input.awsSession, input.spec.Cluster.Cluster.ID)
+	instanceProfileName, err := createInstanceProfile(input.clients.IAM, input.spec.Cluster.Cluster.ID)
 	if err != nil {
 		return microerror.MaskAny(err)
 	}
 
 	var reservation *ec2.Reservation
 	for i := 0; i < 5; i++ {
-		reservation, err = input.ec2Client.RunInstances(&ec2.RunInstancesInput{
+		reservation, err = ec2Client.RunInstances(&ec2.RunInstancesInput{
 			ImageId:      aws.String(input.awsNode.ImageID),
 			InstanceType: aws.String(input.awsNode.InstanceType),
 			KeyName:      aws.String(input.keyPairName),
@@ -416,7 +411,7 @@ func (s *Service) runMachine(input runMachineInput) error {
 
 	s.logger.Log("info", fmt.Sprintf("instance '%s' reserved", input.name))
 
-	if _, err := input.ec2Client.CreateTags(&ec2.CreateTagsInput{
+	if _, err := ec2Client.CreateTags(&ec2.CreateTagsInput{
 		Resources: []*string{reservation.Instances[0].InstanceId},
 		Tags: []*ec2.Tag{
 			{

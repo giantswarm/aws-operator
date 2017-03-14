@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 
 	"github.com/aws/aws-sdk-go/aws"
-	awssession "github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/k8scloudconfig"
 	microerror "github.com/giantswarm/microkit/error"
@@ -76,8 +75,7 @@ func readRawTLSAssets(tlsAssetsDir string) (*rawTLSAssets, error) {
 	return r, nil
 }
 
-func (r *rawTLSAssets) encrypt(awsSession *awssession.Session, kmsKeyARN string) (*encryptedTLSAssets, error) {
-	kmsSvc := kms.New(awsSession)
+func (r *rawTLSAssets) encrypt(svc *kms.KMS, kmsKeyARN string) (*encryptedTLSAssets, error) {
 	var err error
 	encrypt := func(data []byte) []byte {
 		if err != nil {
@@ -90,7 +88,7 @@ func (r *rawTLSAssets) encrypt(awsSession *awssession.Session, kmsKeyARN string)
 		}
 
 		var encryptOutput *kms.EncryptOutput
-		if encryptOutput, err = kmsSvc.Encrypt(&encryptInput); err != nil {
+		if encryptOutput, err = svc.Encrypt(&encryptInput); err != nil {
 			return []byte{}
 		}
 		return encryptOutput.CiphertextBlob
