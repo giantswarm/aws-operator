@@ -1,5 +1,7 @@
 package aws
 
 const (
-	KeyPairDuplicate = "InvalidKeyPair.Duplicate"
+	BucketAlreadyExists     = "BucketAlreadyExists"
+	BucketAlreadyOwnedByYou = "BucketAlreadyOwnedByYou"
+	KeyPairDuplicate        = "InvalidKeyPair.Duplicate"
 )
