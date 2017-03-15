@@ -231,6 +231,14 @@ func (s *Service) Boot() {
 						return
 					}
 
+					// Create S3 bucket
+					if err := clients.S3.WaitUntilBucketExists(&s3.HeadBucketInput{
+						Bucket: aws.String(s.s3Bucket),
+					}); err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not create bucket: %s", err))
+						return
+					}
+
 					// Run masters
 					if err := s.runMachines(runMachinesInput{
 						clients:             clients,
