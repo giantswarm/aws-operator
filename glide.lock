@@ -1,5 +1,5 @@
-hash: b8f36a99997c9fd86c02e9f015bbe921ee14fb7e35712e5b63180feb38cc9512
-updated: 2017-03-14T14:38:51.423502638+01:00
+hash: 94e5d66030060ee2eab00556f56d071bb3d6d61d1ff303e5d0b7c0bb32016038
+updated: 2017-03-15T17:40:09.993798163+01:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aws/aws-sdk-go
-  version: 05de8bee0d7efef0507aeffccb4e65c2592eb174
+  version: 62c16d8bf2fd6ee59f2bf11ae8268d045470ccf6
   subpackages:
   - aws
   - aws/awserr
@@ -125,7 +125,7 @@ imports:
   - operator/networksetup/docker
   - vault
 - name: github.com/giantswarm/k8scloudconfig
-  version: 2afcdc25c44ca95fa8fc0ac8568edf08bc7d12ab
+  version: 320f5299dee64aa91e1d9ca6d20afaf3a20c7148
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
@@ -229,7 +229,7 @@ imports:
 - name: github.com/pelletier/go-buffruneio
   version: c37440a7cf42ac63b919c752ca73a85067e05992
 - name: github.com/pelletier/go-toml
-  version: 3b00596b2e9ee541bbd72dc50cc0c60e2b46c69c
+  version: fee7787d3f811af92276f5ff10107092e95b7a1d
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
@@ -260,13 +260,13 @@ imports:
 - name: github.com/spf13/cast
   version: ce135a4ebeee6cfe9a26c93ee0d37825f26113c7
 - name: github.com/spf13/cobra
-  version: 16c014f1a19d865b765b420e74508f80eb831ada
+  version: 7be4beda01ec05d0b93d80b3facd2b6f44080d94
 - name: github.com/spf13/jwalterweatherman
   version: fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66
 - name: github.com/spf13/pflag
   version: 5ccb023bc27df288a957c5e994cd44fd19619465
 - name: github.com/spf13/viper
-  version: 7538d73b4eb9511d85a9f1dfef202eeb8ac260f4
+  version: 84f94806c67f59dd7ae87bc5351f7a9c94a4558d
 - name: github.com/tylerb/graceful
   version: 4654dfbb6ad53cb5e27f37d99b02e16c1872fbbb
 - name: github.com/ugorji/go
