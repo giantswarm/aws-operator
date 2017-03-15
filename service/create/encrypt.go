@@ -52,7 +52,7 @@ func readRawTLSAssets(tlsAssetsDir string) (*rawTLSAssets, error) {
 	for _, file := range files {
 		caPath := filepath.Join(tlsAssetsDir, file.name+"-ca.pem")
 		keyPath := filepath.Join(tlsAssetsDir, file.name+"-key.pem")
-		certPath := filepath.Join(tlsAssetsDir, file.name+".pem")
+		certPath := filepath.Join(tlsAssetsDir, file.name+"-crt.pem")
 
 		caData, err := ioutil.ReadFile(caPath)
 		if err != nil {
