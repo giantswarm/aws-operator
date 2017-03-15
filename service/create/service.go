@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/awstpr"
 	awsinfo "github.com/giantswarm/awstpr/aws"
 	"github.com/giantswarm/clustertpr/node"
@@ -440,7 +440,7 @@ func (s *Service) runMachine(input runMachineInput) error {
 	}
 
 	var reservation *ec2.Reservation
-	for i := 0; i < runInstancesRetries; i++ {
+	reserveOperation := func() error {
 		reservation, err = ec2Client.RunInstances(&ec2.RunInstancesInput{
 			ImageId:      aws.String(input.awsNode.ImageID),
 			InstanceType: aws.String(input.awsNode.InstanceType),
@@ -453,16 +453,13 @@ func (s *Service) runMachine(input runMachineInput) error {
 			},
 		})
 		if err != nil {
-			if aerr, ok := err.(awserr.Error); ok {
-				if aerr.Code() == "InvalidParameterValue" && strings.Contains(aerr.Message(), "Invalid IAM Instance Profile") {
-					s.logger.Log("debug", "Invalid IAM Instance Profile referenced, retrying...")
-					time.Sleep(2 * time.Second)
-					continue
-				}
-			}
 			return microerror.MaskAny(err)
 		}
-		break
+		return nil
+	}
+
+	if err := backoff.Retry(reserveOperation, backoff.NewExponentialBackOff()); err != nil {
+		return err
 	}
 
 	if reservation == nil {
