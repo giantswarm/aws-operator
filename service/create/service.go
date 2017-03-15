@@ -2,16 +2,13 @@ package create
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/awstpr"
 	awsinfo "github.com/giantswarm/awstpr/aws"
@@ -28,6 +25,8 @@ import (
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	k8sutil "github.com/giantswarm/aws-operator/client/k8s"
+	"github.com/giantswarm/aws-operator/resources"
+	awsresources "github.com/giantswarm/aws-operator/resources/aws"
 )
 
 const (
@@ -35,6 +34,8 @@ const (
 	ClusterWatchAPIEndpoint string = "/apis/cluster.giantswarm.io/v1/watch/awses"
 	// The format of instance's name is "[name of cluster]-[prefix ('master' or 'worker')]-[number]".
 	instanceNameFormat string = "%s-%s-%d"
+	// The format of prefix inside a cluster "[name of cluster]-[prefix ('master' or 'worker')]".
+	instanceClusterPrefixFormat string = "%s-%s"
 	// Period or re-synchronizing the list of objects in k8s watcher. 0 means that re-sync will be
 	// delayed as long as possible, until the watch will be closed or timed out.
 	resyncPeriod time.Duration = 0
@@ -187,7 +188,7 @@ func (s *Service) Boot() {
 					s.logger.Log("info", fmt.Sprintf("creating cluster '%s'", cluster.Name))
 
 					if err := s.createClusterNamespace(cluster.Spec.Cluster); err != nil {
-						s.logger.Log("error", fmt.Sprintf("could not create cluster namespace: %s", err))
+						s.logger.Log("error", fmt.Sprintf("could not create cluster namespace: %s", errgo.Details(err)))
 						return
 					}
 
@@ -196,86 +197,178 @@ func (s *Service) Boot() {
 					clients := awsutil.NewClients(s.awsConfig)
 
 					// Create keypair
-					keyPairName, err := s.keyPair(keyPairInput{
-						ec2Client:   clients.EC2,
-						clusterName: cluster.Name,
-						provider:    newFsKeyPairProvider(s.pubKeyFile),
-					})
-					if err != nil {
-						s.logger.Log("error", fmt.Sprintf("could not create keypair: %s", err))
+					var keyPair resources.Resource
+					var keyPairCreated bool
+					{
+						var err error
+						keyPair = &awsresources.KeyPair{
+							ClusterName: cluster.Name,
+							Provider:    awsresources.NewFSKeyPairProvider(s.pubKeyFile),
+							AWSEntity:   awsresources.AWSEntity{Clients: clients},
+						}
+						keyPairCreated, err = keyPair.CreateIfNotExists()
+						if err != nil {
+							s.logger.Log("error", fmt.Sprintf("could not create keypair: %s", errgo.Details(err)))
+							return
+						}
+					}
+
+					if keyPairCreated {
+						s.logger.Log("info", fmt.Sprintf("created keypair '%s'", cluster.Name))
+					} else {
+						s.logger.Log("info", fmt.Sprintf("keypair '%s' already exists, reusing", cluster.Name))
 					}
 
 					// Create KMS key
-					kmsSvc := clients.KMS
-					key, err := kmsSvc.CreateKey(&kms.CreateKeyInput{})
-					if err != nil {
-						s.logger.Log("error", fmt.Sprintf("could not create KMS service client: %s", err))
-						return
-					}
-
-					if err := createRole(clients.IAM, *key.KeyMetadata.Arn, s.s3Bucket, cluster.Spec.Cluster.Cluster.ID); err != nil {
-						s.logger.Log("error", fmt.Sprintf("error creating role: %s", err))
-						return
+					var kmsKey resources.ArnResource
+					var kmsKeyErr error
+					{
+						kmsKey = &awsresources.KMSKey{
+							AWSEntity: awsresources.AWSEntity{Clients: clients},
+						}
+						kmsKeyErr = kmsKey.CreateOrFail()
 					}
 
 					// Encode TLS assets
-					tlsAssets, err := s.encodeTLSAssets(clients.KMS, *key.KeyMetadata.Arn)
+					tlsAssets, err := s.encodeTLSAssets(clients.KMS, kmsKey.Arn())
 					if err != nil {
-						s.logger.Log("error", fmt.Sprintf("could not encode TLS assets: %s", err))
+						s.logger.Log("error", fmt.Sprintf("could not encode TLS assets: %s", errgo.Details(err)))
 						return
 					}
 
-					instanceProfileName, err := createInstanceProfile(clients.IAM, cluster.Spec.Cluster.Cluster.ID)
-					if err != nil {
-						s.logger.Log("error", fmt.Sprintf("error creating instance profile: %s", err))
-						return
+					// Create policy
+					var policy resources.NamedResource
+					var policyErr error
+					{
+						policy = &awsresources.Policy{
+							ClusterID: cluster.Spec.Cluster.Cluster.ID,
+							KMSKeyArn: kmsKey.Arn(),
+							S3Bucket:  s.s3Bucket,
+							AWSEntity: awsresources.AWSEntity{Clients: clients},
+						}
+						policyErr = policy.CreateOrFail()
+					}
+
+					// Create S3 bucket
+					var bucket resources.Resource
+					var bucketCreated bool
+					{
+						var err error
+						bucket = &awsresources.Bucket{
+							Name:      s.s3Bucket,
+							AWSEntity: awsresources.AWSEntity{Clients: clients},
+						}
+						bucketCreated, err = bucket.CreateIfNotExists()
+						if err != nil {
+							s.logger.Log("error", fmt.Sprintf("could not create S3 bucket: %s", errgo.Details(err)))
+							return
+						}
+					}
+
+					if bucketCreated {
+						s.logger.Log("info", fmt.Sprintf("created bucket '%s'", s.s3Bucket))
+					} else {
+						s.logger.Log("info", fmt.Sprintf("bucket '%s' already exists, reusing", s.s3Bucket))
 					}
 
 					// Run masters
-					if err := s.runMachines(runMachinesInput{
+					anyMastersCreated, err := s.runMachines(runMachinesInput{
 						clients:             clients,
 						spec:                cluster.Spec,
 						tlsAssets:           tlsAssets,
 						clusterName:         cluster.Name,
-						keyPairName:         keyPairName,
-						instanceProfileName: instanceProfileName,
+						keyPairName:         cluster.Name,
+						instanceProfileName: policy.Name(),
 						prefix:              prefixMaster,
-					}); err != nil {
-						s.logger.Log("error", microerror.MaskAny(err))
+					})
+					if err != nil {
+						s.logger.Log("error", errgo.Details(err))
 						return
 					}
 
 					// Run workers
-					if err := s.runMachines(runMachinesInput{
+					anyWorkersCreated, err := s.runMachines(runMachinesInput{
 						clients:             clients,
 						spec:                cluster.Spec,
 						tlsAssets:           tlsAssets,
 						clusterName:         cluster.Name,
-						keyPairName:         keyPairName,
-						instanceProfileName: instanceProfileName,
+						keyPairName:         cluster.Name,
+						instanceProfileName: policy.Name(),
 						prefix:              prefixWorker,
-					}); err != nil {
-						s.logger.Log("error", microerror.MaskAny(err))
+					})
+					if err != nil {
+						s.logger.Log("error", errgo.Details(err))
+						return
+					}
+
+					// If the policy couldn't be created and some instances didn't exist before, that means that the cluster
+					// is inconsistent and most problably its deployment broke in the middle during the previous run of
+					// aws-operator.
+					if (anyMastersCreated || anyWorkersCreated) && (kmsKeyErr != nil || policyErr != nil) {
+						s.logger.Log("error", fmt.Sprintf("cluster '%s' is inconsistent, KMS keys and policies were not created, but EC2 instances were missing, please consider deleting this cluster", cluster.Name))
 						return
 					}
 
 					s.logger.Log("info", fmt.Sprintf("cluster '%s' processed", cluster.Name))
 				},
 				DeleteFunc: func(obj interface{}) {
+					// TODO(nhlfr): Move this to a separate operator.
 					cluster := obj.(*awstpr.CustomObject)
-					s.logger.Log("info", fmt.Sprintf("cluster '%s' deleted", cluster.Name))
 
 					if err := s.deleteClusterNamespace(cluster.Spec.Cluster); err != nil {
 						s.logger.Log("error", "could not delete cluster namespace:", err)
 					}
 
 					clients := awsutil.NewClients(s.awsConfig)
-					if err := deletePolicyResources(clients.IAM, cluster.Spec.Cluster.Cluster.ID); err != nil {
+
+					// Delete masters
+					if err := s.deleteMachines(deleteMachinesInput{
+						clients:     clients,
+						clusterName: cluster.Name,
+						prefix:      prefixMaster,
+					}); err != nil {
 						s.logger.Log("error", errgo.Details(err))
 						return
 					}
+					s.logger.Log("info", "deleted masters")
 
+					// Delete workers
+					if err := s.deleteMachines(deleteMachinesInput{
+						clients:     clients,
+						clusterName: cluster.Name,
+						prefix:      prefixWorker,
+					}); err != nil {
+						s.logger.Log("error", errgo.Details(err))
+						return
+					}
+					s.logger.Log("info", "deleted workers")
+
+					// Delete policy
+					var policy resources.NamedResource
+					policy = &awsresources.Policy{
+						ClusterID: cluster.Spec.Cluster.Cluster.ID,
+						S3Bucket:  s.s3Bucket,
+						AWSEntity: awsresources.AWSEntity{Clients: clients},
+					}
+					if err := policy.Delete(); err != nil {
+						s.logger.Log("error", errgo.Details(err))
+						return
+					}
 					s.logger.Log("info", "deleted roles, policies, instance profiles")
+
+					// Delete keypair
+					var keyPair resources.Resource
+					keyPair = &awsresources.KeyPair{
+						ClusterName: cluster.Name,
+						AWSEntity:   awsresources.AWSEntity{Clients: clients},
+					}
+					if err := keyPair.Delete(); err != nil {
+						s.logger.Log("error", errgo.Details(err))
+						return
+					}
+					s.logger.Log("info", "deleted keypair")
+
+					s.logger.Log("info", fmt.Sprintf("cluster '%s' deleted", cluster.Name))
 				},
 			},
 		)
@@ -288,6 +381,25 @@ func (s *Service) Boot() {
 	})
 }
 
+type instanceNameInput struct {
+	clusterName string
+	prefix      string
+	no          int
+}
+
+func instanceName(input instanceNameInput) string {
+	return fmt.Sprintf(instanceNameFormat, input.clusterName, input.prefix, input.no)
+}
+
+type clusterPrefixInput struct {
+	clusterName string
+	prefix      string
+}
+
+func clusterPrefix(input clusterPrefixInput) string {
+	return fmt.Sprintf(instanceClusterPrefixFormat, input.clusterName, input.prefix)
+}
+
 type runMachinesInput struct {
 	clients             awsutil.Clients
 	spec                awstpr.Spec
@@ -298,8 +410,10 @@ type runMachinesInput struct {
 	prefix              string
 }
 
-func (s *Service) runMachines(input runMachinesInput) error {
+func (s *Service) runMachines(input runMachinesInput) (bool, error) {
 	var (
+		anyCreated bool
+
 		machines    []node.Node
 		awsMachines []awsinfo.Node
 	)
@@ -315,15 +429,19 @@ func (s *Service) runMachines(input runMachinesInput) error {
 
 	// TODO(nhlfr): Create a separate module for validating specs and execute on the earlier stages.
 	if len(machines) != len(awsMachines) {
-		return microerror.MaskAny(fmt.Errorf("mismatched number of %s machines in the 'spec' and 'aws' sections: %d != %d",
+		return false, microerror.MaskAny(fmt.Errorf("mismatched number of %s machines in the 'spec' and 'aws' sections: %d != %d",
 			input.prefix,
 			len(machines),
 			len(awsMachines)))
 	}
 
 	for i := 0; i < len(machines); i++ {
-		name := fmt.Sprintf(instanceNameFormat, input.clusterName, input.prefix, i)
-		if err := s.runMachine(runMachineInput{
+		name := instanceName(instanceNameInput{
+			clusterName: input.clusterName,
+			prefix:      input.prefix,
+			no:          i,
+		})
+		created, err := s.runMachine(runMachineInput{
 			clients:             input.clients,
 			spec:                input.spec,
 			machine:             machines[i],
@@ -334,11 +452,15 @@ func (s *Service) runMachines(input runMachinesInput) error {
 			instanceProfileName: input.instanceProfileName,
 			name:                name,
 			prefix:              input.prefix,
-		}); err != nil {
-			return microerror.MaskAny(err)
+		})
+		if err != nil {
+			return false, microerror.MaskAny(err)
+		}
+		if created {
+			anyCreated = true
 		}
 	}
-	return nil
+	return anyCreated, nil
 }
 
 func allExistingInstancesMatch(instances *ec2.DescribeInstancesOutput, state EC2StateCode) bool {
@@ -384,28 +506,7 @@ type runMachineInput struct {
 	prefix              string
 }
 
-func (s *Service) runMachine(input runMachineInput) error {
-	ec2Client := input.clients.EC2
-	instances, err := ec2Client.DescribeInstances(&ec2.DescribeInstancesInput{
-		Filters: []*ec2.Filter{
-			&ec2.Filter{
-				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
-				Values: []*string{
-					aws.String(input.name),
-				},
-			},
-			&ec2.Filter{
-				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyCluster)),
-				Values: []*string{
-					aws.String(input.clusterName),
-				},
-			},
-		},
-	})
-	if err != nil {
-		return microerror.MaskAny(err)
-	}
-
+func (s *Service) runMachine(input runMachineInput) (bool, error) {
 	cloudConfigParams := cloudconfig.CloudConfigTemplateParams{
 		Cluster:   input.spec.Cluster,
 		Node:      input.machine,
@@ -414,12 +515,7 @@ func (s *Service) runMachine(input runMachineInput) error {
 
 	cloudConfig, err := s.cloudConfig(input.prefix, cloudConfigParams, input.spec)
 	if err != nil {
-		return err
-	}
-
-	if !allExistingInstancesMatch(instances, EC2TerminatedState) {
-		s.logger.Log("info", fmt.Sprintf("instance '%s' already exists", input.name))
-		return nil
+		return false, microerror.MaskAny(err)
 	}
 
 	// We now upload the instance cloudconfig to S3 and create a "small
@@ -439,66 +535,93 @@ func (s *Service) runMachine(input runMachineInput) error {
 		s.s3Bucket,
 		cloudconfigS3Path,
 		cloudConfig); err != nil {
-		return microerror.MaskAny(err)
+		return false, microerror.MaskAny(err)
 	}
 
 	smallCloudconfig, err := s.SmallCloudconfig(cloudconfigConfig)
 	if err != nil {
-		return microerror.MaskAny(err)
+		return false, microerror.MaskAny(err)
 	}
 
-	var reservation *ec2.Reservation
-	for i := 0; i < runInstancesRetries; i++ {
-		reservation, err = ec2Client.RunInstances(&ec2.RunInstancesInput{
-			ImageId:      aws.String(input.awsNode.ImageID),
-			InstanceType: aws.String(input.awsNode.InstanceType),
-			KeyName:      aws.String(input.keyPairName),
-			MinCount:     aws.Int64(int64(1)),
-			MaxCount:     aws.Int64(int64(1)),
-			UserData:     aws.String(smallCloudconfig),
-			IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
-				Name: aws.String(input.instanceProfileName),
-			},
-			Placement: &ec2.Placement{
-				AvailabilityZone: aws.String(input.spec.AWS.AZ),
-			},
-		})
-		if err != nil {
-			if aerr, ok := err.(awserr.Error); ok {
-				if aerr.Code() == "InvalidParameterValue" && strings.Contains(aerr.Message(), "Invalid IAM Instance Profile") {
-					s.logger.Log("debug", "Invalid IAM Instance Profile referenced, retrying...")
-					time.Sleep(2 * time.Second)
-					continue
-				}
-			}
-			return microerror.MaskAny(err)
+	var instance resources.Resource
+	var instanceCreated bool
+	{
+		var err error
+		instance = &awsresources.Instance{
+			Name:                   input.name,
+			ClusterName:            input.clusterName,
+			ImageID:                input.awsNode.ImageID,
+			InstanceType:           input.awsNode.InstanceType,
+			KeyName:                input.keyPairName,
+			MinCount:               1,
+			MaxCount:               1,
+			SmallCloudconfig:       smallCloudconfig,
+			IamInstanceProfileName: input.instanceProfileName,
+			PlacementAZ:            input.spec.AWS.AZ,
+			AWSEntity:              awsresources.AWSEntity{Clients: input.clients},
 		}
-		break
+		instanceCreated, err = instance.CreateIfNotExists()
+		if err != nil {
+			return false, microerror.MaskAny(err)
+		}
 	}
 
-	if reservation == nil {
-		return microerror.MaskAny(errors.New("timeout waiting for a valid IAM Instance Profile"))
-	}
-
-	s.logger.Log("info", fmt.Sprintf("instance '%s' reserved", input.name))
-
-	if _, err := ec2Client.CreateTags(&ec2.CreateTagsInput{
-		Resources: []*string{reservation.Instances[0].InstanceId},
-		Tags: []*ec2.Tag{
-			{
-				Key:   aws.String(tagKeyName),
-				Value: aws.String(input.name),
-			},
-			{
-				Key:   aws.String(tagKeyCluster),
-				Value: aws.String(input.clusterName),
-			},
-		},
-	}); err != nil {
-		return microerror.MaskAny(err)
+	if instanceCreated {
+		s.logger.Log("info", fmt.Sprintf("instance '%s' reserved", input.name))
+	} else {
+		s.logger.Log("info", fmt.Sprintf("instance '%s' already exists, reusing", input.name))
 	}
 
 	s.logger.Log("info", fmt.Sprintf("instance '%s' tagged", input.name))
+
+	return instanceCreated, nil
+}
+
+type deleteMachinesInput struct {
+	clients     awsutil.Clients
+	spec        awstpr.Spec
+	clusterName string
+	prefix      string
+}
+
+func (s *Service) deleteMachines(input deleteMachinesInput) error {
+	pattern := clusterPrefix(clusterPrefixInput{
+		clusterName: input.clusterName,
+		prefix:      input.prefix,
+	})
+	instances, err := awsresources.FindInstances(awsresources.FindInstancesInput{
+		Clients: input.clients,
+		Pattern: pattern,
+	})
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	for _, instance := range instances {
+		if err := instance.Delete(); err != nil {
+			return microerror.MaskAny(err)
+		}
+	}
+
+	return nil
+}
+
+type deleteMachineInput struct {
+	name    string
+	clients awsutil.Clients
+	machine node.Node
+}
+
+func (s *Service) deleteMachine(input deleteMachineInput) error {
+	var instance resources.Resource
+	instance = &awsresources.Instance{
+		Name: input.name,
+	}
+	if err := instance.Delete(); err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	s.logger.Log("info", fmt.Sprintf("instance '%s' removed", input.name))
 
 	return nil
 }
