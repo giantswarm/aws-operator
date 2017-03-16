@@ -267,6 +267,14 @@ func (s *Service) Boot() {
 					if err := s.deleteClusterNamespace(cluster.Spec.Cluster); err != nil {
 						s.logger.Log("error", "could not delete cluster namespace:", err)
 					}
+
+					clients := awsutil.NewClients(s.awsConfig)
+					if err := deletePolicyResources(clients.IAM, cluster.Spec.Cluster.Cluster.ID); err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not delete policy resources: %v", err))
+						return
+					}
+
+					s.logger.Log("info", "deleted roles, policies, instance profiles")
 				},
 			},
 		)

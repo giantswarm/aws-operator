@@ -79,6 +79,18 @@ func createRole(svc *iam.IAM, kmsKeyArn, s3Bucket, clusterID string) error {
 	return nil
 }
 
+func deleteRole(svc *iam.IAM, clusterID string) error {
+	clusterRoleName := fmt.Sprintf("%s-%s", clusterID, RoleNameTemplate)
+
+	if _, err := svc.DeleteRole(&iam.DeleteRoleInput{
+		RoleName: aws.String(clusterRoleName),
+	}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func createInstanceProfile(svc *iam.IAM, clusterID string) (string, error) {
 	clusterRoleName := fmt.Sprintf("%s-%s", clusterID, RoleNameTemplate)
 	clusterProfileName := fmt.Sprintf("%s-%s", clusterID, ProfileNameTemplate)
@@ -103,4 +115,70 @@ func createInstanceProfile(svc *iam.IAM, clusterID string) (string, error) {
 	}
 
 	return clusterProfileName, nil
+}
+
+func deleteInstanceProfile(svc *iam.IAM, clusterID string) error {
+	clusterProfileName := fmt.Sprintf("%s-%s", clusterID, ProfileNameTemplate)
+
+	_, err := svc.DeleteInstanceProfile(&iam.DeleteInstanceProfileInput{
+		InstanceProfileName: aws.String(clusterProfileName),
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func removeRoleFromInstanceProfile(svc *iam.IAM, clusterID string) error {
+	clusterRoleName := fmt.Sprintf("%s-%s", clusterID, RoleNameTemplate)
+	clusterProfileName := fmt.Sprintf("%s-%s", clusterID, ProfileNameTemplate)
+
+	_, err := svc.RemoveRoleFromInstanceProfile(&iam.RemoveRoleFromInstanceProfileInput{
+		InstanceProfileName: aws.String(clusterProfileName),
+		RoleName:            aws.String(clusterRoleName),
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func deletePolicy(svc *iam.IAM, clusterID string) error {
+	clusterRoleName := fmt.Sprintf("%s-%s", clusterID, RoleNameTemplate)
+	clusterPolicyName := fmt.Sprintf("%s-%s", clusterID, PolicyNameTemplate)
+
+	_, err := svc.DeleteRolePolicy(&iam.DeleteRolePolicyInput{
+		RoleName:   aws.String(clusterRoleName),
+		PolicyName: aws.String(clusterPolicyName),
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func deletePolicyResources(svc *iam.IAM, clusterID string) error {
+	if err := removeRoleFromInstanceProfile(svc, clusterID); err != nil {
+		return err
+	}
+
+	if err := deleteInstanceProfile(svc, clusterID); err != nil {
+		return err
+	}
+
+	if err := deletePolicy(svc, clusterID); err != nil {
+		return err
+	}
+
+	if err := deleteRole(svc, clusterID); err != nil {
+		return err
+	}
+
+	return nil
 }
