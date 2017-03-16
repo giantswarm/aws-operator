@@ -12,6 +12,7 @@ dependencies:
       fi
     - chmod +x ./architect
     - ./architect version
+    - go generate github.com/giantswarm/aws-operator/bindata
 
 test:
   override:
