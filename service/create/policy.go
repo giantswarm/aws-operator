@@ -120,11 +120,9 @@ func createInstanceProfile(svc *iam.IAM, clusterID string) (string, error) {
 func deleteInstanceProfile(svc *iam.IAM, clusterID string) error {
 	clusterProfileName := fmt.Sprintf("%s-%s", clusterID, ProfileNameTemplate)
 
-	_, err := svc.DeleteInstanceProfile(&iam.DeleteInstanceProfileInput{
+	if _, err := svc.DeleteInstanceProfile(&iam.DeleteInstanceProfileInput{
 		InstanceProfileName: aws.String(clusterProfileName),
-	})
-
-	if err != nil {
+	}); err != nil {
 		return err
 	}
 
@@ -135,12 +133,10 @@ func removeRoleFromInstanceProfile(svc *iam.IAM, clusterID string) error {
 	clusterRoleName := fmt.Sprintf("%s-%s", clusterID, RoleNameTemplate)
 	clusterProfileName := fmt.Sprintf("%s-%s", clusterID, ProfileNameTemplate)
 
-	_, err := svc.RemoveRoleFromInstanceProfile(&iam.RemoveRoleFromInstanceProfileInput{
+	if _, err := svc.RemoveRoleFromInstanceProfile(&iam.RemoveRoleFromInstanceProfileInput{
 		InstanceProfileName: aws.String(clusterProfileName),
 		RoleName:            aws.String(clusterRoleName),
-	})
-
-	if err != nil {
+	}); err != nil {
 		return err
 	}
 
@@ -151,12 +147,10 @@ func deletePolicy(svc *iam.IAM, clusterID string) error {
 	clusterRoleName := fmt.Sprintf("%s-%s", clusterID, RoleNameTemplate)
 	clusterPolicyName := fmt.Sprintf("%s-%s", clusterID, PolicyNameTemplate)
 
-	_, err := svc.DeleteRolePolicy(&iam.DeleteRolePolicyInput{
+	if _, err := svc.DeleteRolePolicy(&iam.DeleteRolePolicyInput{
 		RoleName:   aws.String(clusterRoleName),
 		PolicyName: aws.String(clusterPolicyName),
-	})
-
-	if err != nil {
+	}); err != nil {
 		return err
 	}
 
