@@ -66,8 +66,10 @@ func createRole(svc *iam.IAM, kmsKeyArn, s3Bucket, clusterID string) error {
 		return err
 	}
 
+	clusterPolicyName := fmt.Sprintf("%s-%s", clusterID, PolicyNameTemplate)
+
 	if _, err := svc.PutRolePolicy(&iam.PutRolePolicyInput{
-		PolicyName:     aws.String(fmt.Sprintf("%s-%s", clusterID, PolicyNameTemplate)),
+		PolicyName:     aws.String(clusterPolicyName),
 		RoleName:       aws.String(clusterRoleName),
 		PolicyDocument: aws.String(policyDocument),
 	}); err != nil {
