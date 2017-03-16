@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
+	microerror "github.com/giantswarm/microkit/error"
 )
 
 const (
@@ -85,7 +86,7 @@ func deleteRole(svc *iam.IAM, clusterID string) error {
 	if _, err := svc.DeleteRole(&iam.DeleteRoleInput{
 		RoleName: aws.String(clusterRoleName),
 	}); err != nil {
-		return err
+		return microerror.MaskAny(err)
 	}
 
 	return nil
@@ -123,7 +124,7 @@ func deleteInstanceProfile(svc *iam.IAM, clusterID string) error {
 	if _, err := svc.DeleteInstanceProfile(&iam.DeleteInstanceProfileInput{
 		InstanceProfileName: aws.String(clusterProfileName),
 	}); err != nil {
-		return err
+		return microerror.MaskAny(err)
 	}
 
 	return nil
@@ -137,7 +138,7 @@ func removeRoleFromInstanceProfile(svc *iam.IAM, clusterID string) error {
 		InstanceProfileName: aws.String(clusterProfileName),
 		RoleName:            aws.String(clusterRoleName),
 	}); err != nil {
-		return err
+		return microerror.MaskAny(err)
 	}
 
 	return nil
@@ -151,7 +152,7 @@ func deletePolicy(svc *iam.IAM, clusterID string) error {
 		RoleName:   aws.String(clusterRoleName),
 		PolicyName: aws.String(clusterPolicyName),
 	}); err != nil {
-		return err
+		return microerror.MaskAny(err)
 	}
 
 	return nil
@@ -159,19 +160,19 @@ func deletePolicy(svc *iam.IAM, clusterID string) error {
 
 func deletePolicyResources(svc *iam.IAM, clusterID string) error {
 	if err := removeRoleFromInstanceProfile(svc, clusterID); err != nil {
-		return err
+		return microerror.MaskAny(err)
 	}
 
 	if err := deleteInstanceProfile(svc, clusterID); err != nil {
-		return err
+		return microerror.MaskAny(err)
 	}
 
 	if err := deletePolicy(svc, clusterID); err != nil {
-		return err
+		return microerror.MaskAny(err)
 	}
 
 	if err := deleteRole(svc, clusterID); err != nil {
-		return err
+		return microerror.MaskAny(err)
 	}
 
 	return nil

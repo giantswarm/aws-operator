@@ -19,6 +19,7 @@ import (
 	"github.com/giantswarm/k8scloudconfig"
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
+	"github.com/juju/errgo"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api"
 	"k8s.io/client-go/pkg/runtime"
@@ -270,7 +271,7 @@ func (s *Service) Boot() {
 
 					clients := awsutil.NewClients(s.awsConfig)
 					if err := deletePolicyResources(clients.IAM, cluster.Spec.Cluster.Cluster.ID); err != nil {
-						s.logger.Log("error", fmt.Sprintf("could not delete policy resources: %v", microerror.MaskAny(err)))
+						s.logger.Log("error", errgo.Details(err))
 						return
 					}
 
