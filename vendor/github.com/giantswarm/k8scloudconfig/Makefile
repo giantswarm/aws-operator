@@ -21,7 +21,7 @@ verify-go-bindata-installation:
 
 update-bindata: verify-go-bindata-installation
 	find templates/ -type f -exec perl -i -pe "chomp if eof" {} \;
-	go-bindata -pkg cloudconfig templates/...
+	go-bindata -modtime 1 -mode 420 -pkg cloudconfig templates/...
 
 check:
 	go test `glide novendor`

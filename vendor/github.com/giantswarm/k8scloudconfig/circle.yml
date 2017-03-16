@@ -6,6 +6,7 @@ machine:
         GOOS: "linux"
         GOARCH: "amd64"
         GOPATH: "$HOME/go"
+        PATH: "$PATH:$HOME/go/bin"
         GS_WD: "$HOME/go/src/github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
 
 dependencies:
@@ -15,8 +16,13 @@ dependencies:
         - sudo apt-get install glide -y
         - mkdir -p $HOME/go/src/github.com/$CIRCLE_PROJECT_USERNAME
         - cp -rf $HOME/$CIRCLE_PROJECT_REPONAME $HOME/go/src/github.com/$CIRCLE_PROJECT_USERNAME
+        - go get -v github.com/jteeuwen/go-bindata
 
 test:
     override:
         - cd $GS_WD && go test -v $(glide novendor)
         - cd $GS_WD && go build -a -v -tags netgo -ldflags "-w -X main.gitCommit=$(git rev-parse --short HEAD)"
+        - cd $GS_WD &&
+          cp bindata.go bindata-repo.go &&
+          make update-bindata &&
+          cmp bindata.go bindata-repo.go
