@@ -270,7 +270,7 @@ func (s *Service) Boot() {
 
 					clients := awsutil.NewClients(s.awsConfig)
 					if err := deletePolicyResources(clients.IAM, cluster.Spec.Cluster.Cluster.ID); err != nil {
-						s.logger.Log("error", fmt.Sprintf("could not delete policy resources: %v", err))
+						s.logger.Log("error", fmt.Sprintf("could not delete policy resources: %v", microerror.MaskAny(err)))
 						return
 					}
 
