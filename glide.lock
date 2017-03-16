@@ -177,6 +177,8 @@ imports:
   - sortkeys
 - name: github.com/google/gofuzz
   version: bbcb9da2d746f8bdbd6a936686a0a6067ada0ec5
+- name: github.com/google/uuid
+  version: 6a5e28554805e78ea6141142aba763936c4761c0
 - name: github.com/gorilla/context
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
