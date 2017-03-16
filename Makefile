@@ -1,6 +1,7 @@
 .PHONY: verify-glide-installation install-vendor update-vendor all install check
 
 all:
+	go generate github.com/giantswarm/aws-operator/bindata
 	go build github.com/giantswarm/aws-operator
 
 verify-glide-installation:
@@ -17,10 +18,6 @@ update-vendor: verify-glide-installation
 
 verify-go-bindata-installation:
 	@which go-bindata || go get -u github.com/jteeuwen/go-bindata/...
-
-update-bindata: verify-go-bindata-installation
-	find templates/ -type f -exec perl -i -pe "chomp if eof" {} \;
-	go-bindata -pkg bindata -o ./bindata/bindata.go templates/...
 
 check:
 	go test `glide novendor`
