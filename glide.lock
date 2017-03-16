@@ -1,5 +1,5 @@
-hash: 94e5d66030060ee2eab00556f56d071bb3d6d61d1ff303e5d0b7c0bb32016038
-updated: 2017-03-15T17:40:09.993798163+01:00
+hash: d0d0a125061c18240ccb8cd7519d2d7dfa983e25eb613fca870d52ce2dc2aa5a
+updated: 2017-03-16T15:31:21.285476867+01:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aws/aws-sdk-go
-  version: 62c16d8bf2fd6ee59f2bf11ae8268d045470ccf6
+  version: 2b26ad567f305510849d93c5d2025a8b561f2367
   subpackages:
   - aws
   - aws/awserr
@@ -125,7 +125,7 @@ imports:
   - operator/networksetup/docker
   - vault
 - name: github.com/giantswarm/k8scloudconfig
-  version: 320f5299dee64aa91e1d9ca6d20afaf3a20c7148
+  version: 100a4c97092257f5615f6bdc02d88836ceb42c71
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
@@ -143,7 +143,7 @@ imports:
   - transaction/context/id
   - transaction/context/tracked
 - name: github.com/go-ini/ini
-  version: 98c45284d68a05a0e0a576de574bd975946ef9ad
+  version: 1730955e3146956d6a087861380f9b4667ed5071
 - name: github.com/go-kit/kit
   version: f66b0e13579bfc5a48b9e2a94b1209c107ea1f41
   subpackages:
