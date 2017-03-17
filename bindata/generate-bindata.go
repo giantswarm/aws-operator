@@ -1,0 +1,3 @@
+package bindata
+
+//go:generate go-bindata -pkg bindata -o bindata.go ../templates/...

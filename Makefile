@@ -1,6 +1,7 @@
 .PHONY: verify-glide-installation install-vendor update-vendor all install check
 
 all:
+	go generate github.com/giantswarm/aws-operator/bindata
 	go build github.com/giantswarm/aws-operator
 
 verify-glide-installation:
