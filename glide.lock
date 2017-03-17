@@ -46,6 +46,8 @@ imports:
   - quantile
 - name: github.com/blang/semver
   version: 31b736133b98f26d5e078ec9eb591666edfd091f
+- name: github.com/cenkalti/backoff
+  version: 3db60c813733fce657c114634171689bbf1f8dee
 - name: github.com/coreos/etcd
   version: 21fdcc6443f3267111051240f0eca839acc96a39
   subpackages:
@@ -177,6 +179,8 @@ imports:
   - sortkeys
 - name: github.com/google/gofuzz
   version: bbcb9da2d746f8bdbd6a936686a0a6067ada0ec5
+- name: github.com/google/uuid
+  version: 6a5e28554805e78ea6141142aba763936c4761c0
 - name: github.com/gorilla/context
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
