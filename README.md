@@ -6,6 +6,9 @@ The aws-operator handles Kubernetes clusters running on a Kubernetes cluster ins
 
 ## Prerequisites
 
+This project requires Go 1.7. Go 1.8 is currently [not
+supported](https://github.com/giantswarm/k8scloudconfig/issues/22#issuecomment-287315423).
+
 ## Getting Project
 
 Download the latest release: https://github.com/giantswarm/aws-operator/releases/latest
