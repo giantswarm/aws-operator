@@ -19,7 +19,6 @@ verify-go-bindata-installation:
 	@which go-bindata || go get -u github.com/jteeuwen/go-bindata/...
 
 update-bindata: verify-go-bindata-installation
-	find templates/ -type f -exec perl -i -pe "chomp if eof" {} \;
 	go-bindata -pkg bindata -o ./bindata/bindata.go templates/...
 
 check:
