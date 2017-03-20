@@ -527,18 +527,18 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       LimitNOFILE=40000
-      EnvironmentFile=/etc/network-environment
-      ExecStartPre=/usr/bin/etcdctl --endpoint=http://{{.Node.Hostname}}:2379 set /k8s/master/{{.Cluster.Etcd.Prefix}} '${DEFAULT_IPV4}'
+      EnvironmentFile=/etc/environment
       ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/etcd/server-ca.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/etcd/server-ca.pem to be written' && sleep 1; done"
       ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/etcd/server.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/etcd/server.pem to be written' && sleep 1; done"
       ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/etcd/server-key.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/etcd/server-key.pem to be written' && sleep 1; done"
-      ExecStart=/usr/bin/etcd2 --advertise-client-urls=https://{{.Cluster.Etcd.Domain}}:443,http://127.0.0.1:2383 \
+
+      # TODO, switch to {{.Cluster.Etcd.Domain}}:443 when the ingress controllers are set up
+      ExecStart=/usr/bin/etcd2 --advertise-client-urls=https://${COREOS_PRIVATE_IPV4}:2379,http://127.0.0.1:2383 \
                                --data-dir=/etc/kubernetes/data/etcd/ \
-                               --initial-advertise-peer-urls=https://{{.Cluster.Etcd.Domain}}:443 \
                                --listen-client-urls=https://0.0.0.0:2379,http://127.0.0.1:2383 \
-                               --listen-peer-urls=https://${DEFAULT_IPV4}:2380 \
+                               --listen-peer-urls=https://${COREOS_PRIVATE_IPV4}:2380 \
                                --initial-cluster-token k8s-etcd-cluster \
-                               --initial-cluster etcd0=https://{{.Cluster.Etcd.Domain}}:443 \
+                               --initial-cluster etcd0=https://${COREOS_PRIVATE_IPV4}:2379
                                --initial-cluster-state new \
                                --ca-file=/etc/kubernetes/ssl/etcd/server-ca.pem \
                                --cert-file=/etc/kubernetes/ssl/etcd/server.pem \
