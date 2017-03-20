@@ -1,5 +1,5 @@
-hash: d0d0a125061c18240ccb8cd7519d2d7dfa983e25eb613fca870d52ce2dc2aa5a
-updated: 2017-03-16T15:31:21.285476867+01:00
+hash: 38fa02f4a527029c4494e0f5c6d30c6b0157abcc131580c20178a29a03bd6e3e
+updated: 2017-03-20T18:22:55.99768747+01:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aws/aws-sdk-go
-  version: 2b26ad567f305510849d93c5d2025a8b561f2367
+  version: 5b99715ae2945a2434a2371f4e6c5542e839a32d
   subpackages:
   - aws
   - aws/awserr
@@ -125,7 +125,7 @@ imports:
   - operator/networksetup/docker
   - vault
 - name: github.com/giantswarm/k8scloudconfig
-  version: 100a4c97092257f5615f6bdc02d88836ceb42c71
+  version: 032560f38c6cf4da1f0aba776d9957eeb6d2a06b
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
@@ -211,7 +211,7 @@ imports:
 - name: github.com/kr/logfmt
   version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
 - name: github.com/magiconair/properties
-  version: b3b15ef068fd0b17ddf408a23669f20811d194d2
+  version: 6806cf261c13880f296ed31331873191e4d87b47
 - name: github.com/mailru/easyjson
   version: d5b7844b561a7bc640052f1b935f7b800330d7e0
   subpackages:
