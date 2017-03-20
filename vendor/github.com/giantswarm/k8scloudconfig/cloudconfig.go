@@ -25,7 +25,7 @@ type CloudConfig struct {
 	template  string
 }
 
-func NewCloudConfig(template []byte, params CloudConfigTemplateParams, extension OperatorExtension) (*CloudConfig, error) {
+func NewCloudConfig(template string, params CloudConfigTemplateParams, extension OperatorExtension) (*CloudConfig, error) {
 	files, err := extension.Files()
 	if err != nil {
 		return nil, err
@@ -40,7 +40,7 @@ func NewCloudConfig(template []byte, params CloudConfigTemplateParams, extension
 	params.Units = units
 
 	return &CloudConfig{
-		template: string(template),
+		template: template,
 		params:   params,
 	}, nil
 }

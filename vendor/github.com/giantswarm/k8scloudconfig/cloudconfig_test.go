@@ -6,27 +6,18 @@ import (
 )
 
 func TestCloudConfig(t *testing.T) {
-	masterTemplate, err := Asset("templates/master.yaml")
-	if err != nil {
-		t.Fatal(err)
-	}
-	workerTemplate, err := Asset("templates/worker.yaml")
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	tests := []struct {
-		template  []byte
+		template  string
 		params    CloudConfigTemplateParams
 		extension OperatorExtension
 	}{
 		{
-			template:  masterTemplate,
+			template:  MasterTemplate,
 			params:    CloudConfigTemplateParams{},
 			extension: &FakeOperatorExtension{},
 		},
 		{
-			template:  workerTemplate,
+			template:  WorkerTemplate,
 			params:    CloudConfigTemplateParams{},
 			extension: &FakeOperatorExtension{},
 		},
