@@ -7,10 +7,10 @@ import (
 )
 
 type FileMetadata struct {
-	AssetPath   string
-	Path        string
-	Owner       string
-	Permissions int
+	AssetContent string
+	Path         string
+	Owner        string
+	Permissions  int
 }
 
 type FileAsset struct {
@@ -19,10 +19,10 @@ type FileAsset struct {
 }
 
 type UnitMetadata struct {
-	AssetPath string
-	Name      string
-	Enable    bool
-	Command   string
+	AssetContent string
+	Name         string
+	Enable       bool
+	Command      string
 }
 
 type UnitAsset struct {
@@ -35,8 +35,8 @@ type OperatorExtension interface {
 	Units() ([]UnitAsset, error)
 }
 
-func RenderAssetContent(rawAssetContent []byte, params interface{}) ([]string, error) {
-	tmpl, err := template.New("").Parse(string(rawAssetContent[:]))
+func RenderAssetContent(assetContent string, params interface{}) ([]string, error) {
+	tmpl, err := template.New("").Parse(assetContent)
 	if err != nil {
 		return nil, err
 	}
