@@ -5,8 +5,6 @@ import (
 
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/k8scloudconfig"
-
-	"github.com/giantswarm/aws-operator/bindata"
 )
 
 var (
@@ -42,10 +40,7 @@ func (c *CloudConfigExtension) Files() ([]cloudconfig.FileAsset, error) {
 	files := make([]cloudconfig.FileAsset, 0, len(filesMeta))
 
 	for _, fileMeta := range filesMeta {
-		rawContent, err := bindata.Asset(fileMeta.AssetPath)
-		if err != nil {
-			return nil, err
-		}
+		rawContent := []byte(assetMapping[fileMeta.AssetPath])
 
 		content, err := cloudconfig.RenderAssetContent(rawContent, c.AwsInfo)
 		if err != nil {
@@ -67,10 +62,7 @@ func (c *CloudConfigExtension) Units() ([]cloudconfig.UnitAsset, error) {
 	units := make([]cloudconfig.UnitAsset, 0, len(unitsMeta))
 
 	for _, unitMeta := range unitsMeta {
-		rawContent, err := bindata.Asset(unitMeta.AssetPath)
-		if err != nil {
-			return nil, err
-		}
+		rawContent := []byte(assetMapping[unitMeta.AssetPath])
 
 		content, err := cloudconfig.RenderAssetContent(rawContent, c.AwsInfo)
 		if err != nil {
