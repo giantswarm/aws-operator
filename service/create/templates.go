@@ -64,9 +64,3 @@ USERDATA_FILE={{.MachineType}}
 base64 -d /var/run/coreos/temp.txt | gunzip > /var/run/coreos/$USERDATA_FILE
 exec /usr/bin/coreos-cloudinit --from-file /var/run/coreos/$USERDATA_FILE`
 )
-
-// TODO remove this when we change k8scloudconfig's structures
-var assetMapping = map[string]string{
-	"templates/decrypt-tls-assets":         decryptTLSAssetsScriptTemplate,
-	"templates/decrypt-tls-assets.service": decryptTLSAssetsServiceTemplate,
-}

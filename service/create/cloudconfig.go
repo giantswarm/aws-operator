@@ -1,8 +1,6 @@
 package create
 
 import (
-	"fmt"
-
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/k8scloudconfig"
 )
@@ -10,19 +8,26 @@ import (
 var (
 	filesMeta []cloudconfig.FileMetadata = []cloudconfig.FileMetadata{
 		cloudconfig.FileMetadata{
-			AssetPath:   "templates/decrypt-tls-assets",
-			Path:        "/opt/bin/decrypt-tls-assets",
-			Owner:       "root:root",
-			Permissions: 0700,
+			AssetContent: decryptTLSAssetsScriptTemplate,
+			Path:         "/opt/bin/decrypt-tls-assets",
+			Owner:        "root:root",
+			Permissions:  0700,
 		},
 	}
 	unitsMeta []cloudconfig.UnitMetadata = []cloudconfig.UnitMetadata{
 		cloudconfig.UnitMetadata{
-			AssetPath: "templates/decrypt-tls-assets.service",
-			Name:      "decrypt-tls-assets.service",
-			Enable:    true,
-			Command:   "start",
+			AssetContent: decryptTLSAssetsServiceTemplate,
+			Name:         "decrypt-tls-assets.service",
+			Enable:       true,
+			Command:      "start",
 		},
+	}
+)
+
+var (
+	assetTemplates = map[string]string{
+		prefixMaster: cloudconfig.MasterTemplate,
+		prefixWorker: cloudconfig.WorkerTemplate,
 	}
 )
 
@@ -40,9 +45,7 @@ func (c *CloudConfigExtension) Files() ([]cloudconfig.FileAsset, error) {
 	files := make([]cloudconfig.FileAsset, 0, len(filesMeta))
 
 	for _, fileMeta := range filesMeta {
-		rawContent := []byte(assetMapping[fileMeta.AssetPath])
-
-		content, err := cloudconfig.RenderAssetContent(rawContent, c.AwsInfo)
+		content, err := cloudconfig.RenderAssetContent(fileMeta.AssetContent, c.AwsInfo)
 		if err != nil {
 			return nil, err
 		}
@@ -62,9 +65,7 @@ func (c *CloudConfigExtension) Units() ([]cloudconfig.UnitAsset, error) {
 	units := make([]cloudconfig.UnitAsset, 0, len(unitsMeta))
 
 	for _, unitMeta := range unitsMeta {
-		rawContent := []byte(assetMapping[unitMeta.AssetPath])
-
-		content, err := cloudconfig.RenderAssetContent(rawContent, c.AwsInfo)
+		content, err := cloudconfig.RenderAssetContent(unitMeta.AssetContent, c.AwsInfo)
 		if err != nil {
 			return nil, err
 		}
@@ -81,14 +82,9 @@ func (c *CloudConfigExtension) Units() ([]cloudconfig.UnitAsset, error) {
 }
 
 func (s *Service) cloudConfig(prefix string, params cloudconfig.CloudConfigTemplateParams, awsSpec awstpr.Spec) (string, error) {
-	template, err := cloudconfig.Asset(fmt.Sprintf("templates/%s.yaml", prefix))
-	if err != nil {
-		return "", err
-	}
-
 	extension := NewCloudConfigExtension(awsSpec)
 
-	cloudconfig, err := cloudconfig.NewCloudConfig(template, params, extension)
+	cloudconfig, err := cloudconfig.NewCloudConfig(assetTemplates[prefix], params, extension)
 	if err != nil {
 		return "", err
 	}
