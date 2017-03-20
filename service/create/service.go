@@ -442,8 +442,7 @@ func (s *Service) runMachine(input runMachineInput) error {
 		return microerror.MaskAny(err)
 	}
 
-	provider := newFsSmallCloudconfigProvider(smallCloudconfigPath)
-	smallCloudconfig, err := s.SmallCloudconfig(provider, cloudconfigConfig)
+	smallCloudconfig, err := s.SmallCloudconfig(cloudconfigConfig)
 	if err != nil {
 		return microerror.MaskAny(err)
 	}

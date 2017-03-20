@@ -4,32 +4,9 @@ import (
 	"bytes"
 	"encoding/base64"
 	"html/template"
-	"io/ioutil"
 
 	microerror "github.com/giantswarm/microkit/error"
 )
-
-var (
-	smallCloudconfigPath = "templates/user-data.sh"
-)
-
-type smallCloudconfigProvider interface {
-	smallCloudconfigContent() ([]byte, error)
-}
-
-type fsSmallCloudconfigProvider struct {
-	smallCloudconfigFile string
-}
-
-func newFsSmallCloudconfigProvider(file string) *fsSmallCloudconfigProvider {
-	return &fsSmallCloudconfigProvider{
-		smallCloudconfigFile: file,
-	}
-}
-
-func (f *fsSmallCloudconfigProvider) smallCloudconfigContent() ([]byte, error) {
-	return ioutil.ReadFile(f.smallCloudconfigFile)
-}
 
 type SmallCloudconfigConfig struct {
 	MachineType string
@@ -37,13 +14,8 @@ type SmallCloudconfigConfig struct {
 	S3DirURI    string
 }
 
-func (s *Service) SmallCloudconfig(provider smallCloudconfigProvider, config SmallCloudconfigConfig) (string, error) {
-	b, err := provider.smallCloudconfigContent()
-	if err != nil {
-		return "", microerror.MaskAny(err)
-	}
-
-	tmpl, err := template.New("smallCloudconfig").Parse(string(b))
+func (s *Service) SmallCloudconfig(config SmallCloudconfigConfig) (string, error) {
+	tmpl, err := template.New("smallCloudconfig").Parse(userDataScriptTemplate)
 	if err != nil {
 		return "", microerror.MaskAny(err)
 	}
