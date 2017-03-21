@@ -29,8 +29,7 @@ rkt run \
 
 rkt rm --uuid-file=/var/run/coreos/decrypt-tls-assets.uuid || :`
 
-	decryptTLSAssetsServiceTemplate = `
-[Unit]
+	decryptTLSAssetsServiceTemplate = `[Unit]
 Description=Decrypt TLS certificates
 
 [Service]
