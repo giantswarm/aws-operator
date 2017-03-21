@@ -34,8 +34,9 @@ rkt rm --uuid-file=/var/run/coreos/decrypt-tls-assets.uuid || :`
 Description=Decrypt TLS certificates
 
 [Service]
+Type=oneshot
 ExecStart=/opt/bin/decrypt-tls-assets
-ExecStartPost=/usr/bin/chown -R etcd:etcd /etc/kubernetes/ssl/etcd`
+ExecStart=/usr/bin/chown -R etcd:etcd /etc/kubernetes/ssl/etcd`
 
 	userDataScriptTemplate = `#!/bin/bash
 
