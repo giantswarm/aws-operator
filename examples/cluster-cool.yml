@@ -1,0 +1,42 @@
+apiVersion: "cluster.giantswarm.io/v1"
+kind: Aws
+metadata:
+  name: test-iago-cluster
+spec:
+  cluster:
+    docker:
+      imageNamespace: "giantswarm"
+    etcd:
+      domain: "k8s.cluster.giantswarm.io"
+      prefix: "test-iago-cluster"
+    calico:
+      subnet: "192.168.0.0"
+      cidr: "24"
+    operator:
+      networkSetup:
+        docker:
+          image: "giantswarm/setup-network-env:0.1"
+    cluster:
+      id: "test-iago-cluster"
+
+    customer:
+      id: "iago"
+
+    masters:
+    - hostname: "master-1"
+
+    kubernetes:
+      api:
+        domain: "k8s.cluster.giantswarm.io"
+        insecurePort: 8080
+        securePort: 6443
+        clusterIPRange: "192.168.0.0/24"
+      hyperkube:
+        docker:
+          image: "giantswarm/hyperkube:v1.5.2_coreos.0"
+
+  aws:
+    region: "eu-central-1"
+    masters:
+    - imageid: "ami-9501c8fa"
+      instancetype: "t2.medium"
