@@ -516,8 +516,8 @@ coreos:
     content: |
       [Unit]
       Description=etcd2
-      Requires=k8s-setup-network-env.service
-      After=k8s-setup-network-env.service
+      Requires=k8s-setup-network-env.service decrypt-tls-assets.service
+      After=k8s-setup-network-env.service decrypt-tls-assets.service
       Conflicts=etcd.service
       Wants=calico-node.service
       StartLimitIntervalSec=0
