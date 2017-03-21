@@ -680,6 +680,7 @@ coreos:
       ExecStartPre=/usr/bin/ln -sf /etc/kubernetes/ssl/apiserver-crt.pem /etc/kubernetes/ssl/apiserver.pem
       # TODO change 0.0.0.0 to ${DEFAULT_IP}
       # TODO change 2379 to 443
+      ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/secrets/token_sign_key.pem ]; do echo 'Waiting for /etc/kubernetes/secrets/token_sign_key.pem to be written' && sleep 1; done"
       ExecStart=/usr/bin/docker run --rm --name $NAME --net=host \
       -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
       -v /etc/kubernetes/secrets/token_sign_key.pem:/etc/kubernetes/secrets/token_sign_key.pem \
@@ -772,6 +773,7 @@ coreos:
       ExecStartPre=/usr/bin/docker pull $IMAGE
       ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
       ExecStartPre=-/usr/bin/docker rm -f $NAME
+      ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/secrets/token_sign_key.pem ]; do echo 'Waiting for /etc/kubernetes/secrets/token_sign_key.pem to be written' && sleep 1; done"
       ExecStart=/usr/bin/docker run --rm --net=host --name $NAME \
       -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
