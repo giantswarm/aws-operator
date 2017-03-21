@@ -660,8 +660,8 @@ coreos:
     content: |
       [Unit]
       Description=k8s-api-server
-      Requires=calico-node.service
-      After=calico-node.service
+      Requires=calico-node.service k8s-key-generator.service
+      After=calico-node.service k8s-key-generator.service
       StartLimitIntervalSec=0
 
       [Service]
@@ -758,8 +758,8 @@ coreos:
     content: |
       [Unit]
       Description=k8s-controller-manager Service
-      Requires=calico-node.service
-      After=calico-node.service
+      Requires=calico-node.service k8s-key-generator.service
+      After=calico-node.service k8s-key-generator.service
       StartLimitIntervalSec=0
 
       [Service]
