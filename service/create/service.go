@@ -447,6 +447,7 @@ func (s *Service) runMachine(input runMachineInput) error {
 		return microerror.MaskAny(err)
 	}
 
+	az := input.spec.AWS.Region + input.spec.AWS.AZ
 	var reservation *ec2.Reservation
 	for i := 0; i < runInstancesRetries; i++ {
 		reservation, err = ec2Client.RunInstances(&ec2.RunInstancesInput{
@@ -458,6 +459,9 @@ func (s *Service) runMachine(input runMachineInput) error {
 			UserData:     aws.String(smallCloudconfig),
 			IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
 				Name: aws.String(input.instanceProfileName),
+			},
+			Placement: &ec2.Placement{
+				AvailabilityZone: aws.String(az),
 			},
 		})
 		if err != nil {

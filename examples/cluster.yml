@@ -20,6 +20,7 @@ spec:
 
   aws:
     region: "eu-central-1"
+    az: "a"
     masters:
     - imageid: "ami-9501c8fa"
       instancetype: "t2.medium"
