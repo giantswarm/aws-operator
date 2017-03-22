@@ -589,8 +589,8 @@ coreos:
     content: |
       [Unit]
       Description=Calico per-host agent
-      Requires=etcd2.service
-      After=etcd2.service
+      Requires=etcd2.service decrypt-tls-assets.service
+      After=etcd2.service decrypt-tls-assets.service
       Wants=k8s-api-server.service k8s-controller-manager.service k8s-scheduler.service
       StartLimitIntervalSec=0
 
@@ -1141,7 +1141,7 @@ coreos:
       Type=oneshot
       RemainAfterExit=yes
       TimeoutStartSec=0
-      Environment="IMAGE={{.Cluster.Operator.NetworkSetup.Docker.Image}}
+      Environment="IMAGE={{.Cluster.Operator.NetworkSetup.Docker.Image}}"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/mkdir -p /etc/kubernetes/cni/net.d/
@@ -1160,8 +1160,8 @@ coreos:
     content: |
       [Unit]
       Description=calicoctl node
-      Requires=k8s-setup-network-env.service
-      After=k8s-setup-network-env.service
+      Requires=k8s-setup-network-env.service decrypt-tls-assets.service
+      After=k8s-setup-network-env.service decrypt-tls-assets.service
       Wants=k8s-proxy.service k8s-kubelet.service
       StartLimitIntervalSec=0
 
