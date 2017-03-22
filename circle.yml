@@ -15,5 +15,5 @@ dependencies:
 
 test:
   override:
-    - ./architect build 
+    - ./architect --organisation=giantswarm build 
 
