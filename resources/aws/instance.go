@@ -34,6 +34,7 @@ type Instance struct {
 	ClusterName            string
 	ImageID                string
 	InstanceType           string
+	InstanceID             string
 	KeyName                string
 	MinCount               int
 	MaxCount               int
@@ -119,6 +120,8 @@ func (i *Instance) CreateOrFail() error {
 	}
 
 	for _, rawInstance := range reservation.Instances {
+		i.InstanceID = *rawInstance.InstanceId
+
 		if _, err := i.Clients.EC2.CreateTags(&ec2.CreateTagsInput{
 			Resources: []*string{rawInstance.InstanceId},
 			Tags: []*ec2.Tag{
