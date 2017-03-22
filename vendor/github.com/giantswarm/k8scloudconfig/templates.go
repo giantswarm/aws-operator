@@ -1120,21 +1120,6 @@ coreos:
   - name: systemd-networkd-wait-online.service
     enable: true
     command: start
-  - name: etc-kubernetes-ssl.mount
-    enable: true
-    command: start
-    content: |
-      [Unit]
-      Description=Mount ssl volume
-
-      [Mount]
-      What=sslshare
-      Where=/etc/kubernetes/ssl/
-      Options=trans=virtio,version=9p2000.L
-      Type=9p
-
-      [Install]
-      WantedBy=multi-user.target
   - name: docker.service
     enable: true
     command: start
