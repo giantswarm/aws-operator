@@ -307,11 +307,33 @@ func (s *Service) Boot() {
 						return
 					}
 
+					reservations, err := clients.EC2.DescribeInstances(&ec2.DescribeInstancesInput{
+						Filters: []*ec2.Filter{
+							&ec2.Filter{
+								Name: aws.String("instance-id"),
+								Values: []*string{
+									aws.String(masterID),
+								},
+							},
+						},
+					})
+					if err != nil {
+						s.logger.Log("error", fmt.Sprintf("couldn't get master's data: %s", errgo.Details(err)))
+					}
+
+					var privateIP string
+					for _, reservation := range reservations.Reservations {
+						for _, rawInstance := range reservation.Instances {
+							privateIP = *rawInstance.PrivateIpAddress
+						}
+					}
+
 					// Run workers
 					anyWorkersCreated, _, err := s.runMachines(runMachinesInput{
 						clients:             clients,
 						spec:                cluster.Spec,
 						tlsAssets:           tlsAssets,
+						privateIP:           privateIP,
 						clusterName:         cluster.Name,
 						keyPairName:         cluster.Name,
 						instanceProfileName: policy.Name(),
@@ -425,6 +447,7 @@ type runMachinesInput struct {
 	clients             awsutil.Clients
 	spec                awstpr.Spec
 	tlsAssets           *cloudconfig.CompactTLSAssets
+	privateIP           string
 	clusterName         string
 	keyPairName         string
 	instanceProfileName string
@@ -469,6 +492,7 @@ func (s *Service) runMachines(input runMachinesInput) (bool, []string, error) {
 			machine:             machines[i],
 			awsNode:             awsMachines[i],
 			tlsAssets:           input.tlsAssets,
+			privateIP:           input.privateIP,
 			clusterName:         input.clusterName,
 			keyPairName:         input.keyPairName,
 			instanceProfileName: input.instanceProfileName,
@@ -525,6 +549,7 @@ type runMachineInput struct {
 	machine             node.Node
 	awsNode             awsinfo.Node
 	tlsAssets           *cloudconfig.CompactTLSAssets
+	privateIP           string
 	clusterName         string
 	keyPairName         string
 	instanceProfileName string
@@ -537,6 +562,7 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 		Cluster:   input.spec.Cluster,
 		Node:      input.machine,
 		TLSAssets: *input.tlsAssets,
+		PrivateIP: input.privateIP,
 	}
 
 	cloudConfig, err := s.cloudConfig(input.prefix, cloudConfigParams, input.spec)

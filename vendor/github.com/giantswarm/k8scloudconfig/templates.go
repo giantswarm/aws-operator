@@ -11,7 +11,7 @@ write_files:
     127.0.0.1 localhost
     127.0.0.1 {{.Node.Hostname}}
     127.0.0.1 etcd.giantswarm
-    127.0.0.1 k8s.cluster.giantswarm.io
+    127.0.0.1 {{.Cluster.Kubernetes.API.Domain}}
 - path: /etc/resolv.conf
   permissions: 0644
   owner: root
@@ -989,6 +989,7 @@ write_files:
     127.0.0.1 localhost
     127.0.0.1 {{.Node.Hostname}}
     127.0.0.1 etcd.giantswarm
+    {{.PrivateIP}} {{.Cluster.Kubernetes.API.Domain}}
 - path: /srv/10-calico.conf
   owner: root
   permissions: 0755
@@ -1171,7 +1172,7 @@ coreos:
       TimeoutStopSec=10
       StartLimitIntervalSec=0
       EnvironmentFile=/etc/environment
-      Environment="ETCD_AUTHORITY=${COREOS_PRIVATE_IPV4}:2379"
+      Environment="ETCD_AUTHORITY={{.Cluster.Kubernetes.API.Domain}}:2379"
       Environment="ETCD_SCHEME=https"
       Environment="ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/calico/client-ca.pem"
       Environment="ETCD_CERT_FILE=/etc/kubernetes/ssl/calico/client-crt.pem"
@@ -1189,7 +1190,6 @@ coreos:
       ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/calico/client-key.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/calico/client-key.pem to be written' && sleep 1; done"
       ExecStartPre=/bin/bash -c "while ! curl --output /dev/null --silent --fail --cacert /etc/kubernetes/ssl/calico/client-ca.pem --cert /etc/kubernetes/ssl/calico/client-crt.pem --key /etc/kubernetes/ssl/calico/client-key.pem https://{{.Cluster.Etcd.Domain}}:2379/version; do sleep 1 && echo 'Waiting for etcd master to be responsive'; done"
       ExecStart=/opt/bin/calicoctl node --ip=${COREOS_PRIVATE_IPV4} --detach=false --node-image=giantswarm/node:v0.22.0
-      ExecStartPost=/bin/bash -c "/opt/bin/calicoctl bgp peer add $(echo ${IP_BRIDGE}} | cut -d'.' -f1-3).0 as $(/opt/bin/calicoctl bgp default-node-as)"
       ExecStop=/opt/bin/calicoctl node stop --force
       ExecStopPost=/bin/bash -c "find /tmp/ -name '_MEI*' | xargs -I {} rm -rf {}"
 

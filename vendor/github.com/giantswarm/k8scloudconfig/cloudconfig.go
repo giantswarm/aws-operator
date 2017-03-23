@@ -14,6 +14,7 @@ type CloudConfigTemplateParams struct {
 	Cluster   clustertpr.Cluster
 	Node      node.Node
 	TLSAssets CompactTLSAssets
+	PrivateIP string
 	Files     []FileAsset
 	Units     []UnitAsset
 }
