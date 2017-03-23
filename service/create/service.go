@@ -272,7 +272,7 @@ func (s *Service) Boot() {
 					}
 
 					// Run masters
-					anyMastersCreated, err := s.runMachines(runMachinesInput{
+					anyMastersCreated, masterIDs, err := s.runMachines(runMachinesInput{
 						clients:             clients,
 						spec:                cluster.Spec,
 						tlsAssets:           tlsAssets,
@@ -283,11 +283,32 @@ func (s *Service) Boot() {
 					})
 					if err != nil {
 						s.logger.Log("error", errgo.Details(err))
+					}
+
+					if !validateIDs(masterIDs) {
+						s.logger.Log("error", "master nodes had invalid instance IDs")
+						return
+					}
+
+					// Add an elastic IP to the master
+					masterID := masterIDs[0]
+					s.logger.Log("debug", fmt.Sprintf("waiting for %s to be ready", masterID))
+					if err := clients.EC2.WaitUntilInstanceRunning(&ec2.DescribeInstancesInput{
+						InstanceIds: []*string{
+							aws.String(masterID),
+						},
+					}); err != nil {
+						s.logger.Log("error", fmt.Sprintf("master took too long to get running, aborting: %v", err))
+						return
+					}
+
+					if err := s.associateElasticIP(clients.EC2, masterIDs[0]); err != nil {
+						s.logger.Log("error", microerror.MaskAny(err))
 						return
 					}
 
 					// Run workers
-					anyWorkersCreated, err := s.runMachines(runMachinesInput{
+					anyWorkersCreated, _, err := s.runMachines(runMachinesInput{
 						clients:             clients,
 						spec:                cluster.Spec,
 						tlsAssets:           tlsAssets,
@@ -410,12 +431,13 @@ type runMachinesInput struct {
 	prefix              string
 }
 
-func (s *Service) runMachines(input runMachinesInput) (bool, error) {
+func (s *Service) runMachines(input runMachinesInput) (bool, []string, error) {
 	var (
 		anyCreated bool
 
 		machines    []node.Node
 		awsMachines []awsinfo.Node
+		instanceIDs []string
 	)
 
 	switch input.prefix {
@@ -429,7 +451,7 @@ func (s *Service) runMachines(input runMachinesInput) (bool, error) {
 
 	// TODO(nhlfr): Create a separate module for validating specs and execute on the earlier stages.
 	if len(machines) != len(awsMachines) {
-		return false, microerror.MaskAny(fmt.Errorf("mismatched number of %s machines in the 'spec' and 'aws' sections: %d != %d",
+		return false, nil, microerror.MaskAny(fmt.Errorf("mismatched number of %s machines in the 'spec' and 'aws' sections: %d != %d",
 			input.prefix,
 			len(machines),
 			len(awsMachines)))
@@ -441,7 +463,7 @@ func (s *Service) runMachines(input runMachinesInput) (bool, error) {
 			prefix:      input.prefix,
 			no:          i,
 		})
-		created, err := s.runMachine(runMachineInput{
+		created, instanceID, err := s.runMachine(runMachineInput{
 			clients:             input.clients,
 			spec:                input.spec,
 			machine:             machines[i],
@@ -454,17 +476,21 @@ func (s *Service) runMachines(input runMachinesInput) (bool, error) {
 			prefix:              input.prefix,
 		})
 		if err != nil {
-			return false, microerror.MaskAny(err)
+			return false, nil, microerror.MaskAny(err)
 		}
 		if created {
 			anyCreated = true
 		}
+
+		instanceIDs = append(instanceIDs, instanceID)
 	}
-	return anyCreated, nil
+	return anyCreated, instanceIDs, nil
 }
 
-func allExistingInstancesMatch(instances *ec2.DescribeInstancesOutput, state EC2StateCode) bool {
-	// If the instance doesn't exist, then the Reservation field should be nil.
+// if the instance already exists, return (instanceID, false)
+// otherwise (nil, true)
+func allExistingInstancesMatch(instances *ec2.DescribeInstancesOutput, state EC2StateCode) (*string, bool) {
+	// If the instance doesn't exist, then the Reservations field should be nil.
 	// Otherwise, it will contain a slice of instances (which is going to contain our one instance we queried for).
 	// TODO(nhlfr): Check whether the instance has correct parameters. That will be most probably done when we
 	// will introduce the interface for creating, deleting and updating resources.
@@ -472,12 +498,12 @@ func allExistingInstancesMatch(instances *ec2.DescribeInstancesOutput, state EC2
 		for _, r := range instances.Reservations {
 			for _, i := range r.Instances {
 				if *i.State.Code != int64(state) {
-					return false
+					return i.InstanceId, false
 				}
 			}
 		}
 	}
-	return true
+	return nil, true
 }
 
 func (s *Service) uploadCloudconfigToS3(svc *s3.S3, s3Bucket, path, data string) error {
@@ -506,7 +532,7 @@ type runMachineInput struct {
 	prefix              string
 }
 
-func (s *Service) runMachine(input runMachineInput) (bool, error) {
+func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 	cloudConfigParams := cloudconfig.CloudConfigTemplateParams{
 		Cluster:   input.spec.Cluster,
 		Node:      input.machine,
@@ -515,7 +541,7 @@ func (s *Service) runMachine(input runMachineInput) (bool, error) {
 
 	cloudConfig, err := s.cloudConfig(input.prefix, cloudConfigParams, input.spec)
 	if err != nil {
-		return false, microerror.MaskAny(err)
+		return false, "", microerror.MaskAny(err)
 	}
 
 	// We now upload the instance cloudconfig to S3 and create a "small
@@ -535,15 +561,15 @@ func (s *Service) runMachine(input runMachineInput) (bool, error) {
 		s.s3Bucket,
 		cloudconfigS3Path,
 		cloudConfig); err != nil {
-		return false, microerror.MaskAny(err)
+		return false, "", microerror.MaskAny(err)
 	}
 
 	smallCloudconfig, err := s.SmallCloudconfig(cloudconfigConfig)
 	if err != nil {
-		return false, microerror.MaskAny(err)
+		return false, "", microerror.MaskAny(err)
 	}
 
-	var instance resources.Resource
+	var instance *awsresources.Instance
 	var instanceCreated bool
 	{
 		var err error
@@ -562,7 +588,7 @@ func (s *Service) runMachine(input runMachineInput) (bool, error) {
 		}
 		instanceCreated, err = instance.CreateIfNotExists()
 		if err != nil {
-			return false, microerror.MaskAny(err)
+			return false, "", microerror.MaskAny(err)
 		}
 	}
 
@@ -574,7 +600,7 @@ func (s *Service) runMachine(input runMachineInput) (bool, error) {
 
 	s.logger.Log("info", fmt.Sprintf("instance '%s' tagged", input.name))
 
-	return instanceCreated, nil
+	return instanceCreated, instance.InstanceID, nil
 }
 
 type deleteMachinesInput struct {
@@ -624,4 +650,17 @@ func (s *Service) deleteMachine(input deleteMachineInput) error {
 	s.logger.Log("info", fmt.Sprintf("instance '%s' removed", input.name))
 
 	return nil
+}
+
+func validateIDs(ids []string) bool {
+	if len(ids) == 0 {
+		return false
+	}
+	for _, id := range ids {
+		if id == "" {
+			return false
+		}
+	}
+
+	return true
 }
