@@ -29,12 +29,13 @@ rkt run \
 
 rkt rm --uuid-file=/var/run/coreos/decrypt-tls-assets.uuid || :`
 
-	decryptTLSAssetsServiceTemplate = `
-[Unit]
+	decryptTLSAssetsServiceTemplate = `[Unit]
 Description=Decrypt TLS certificates
 
 [Service]
-ExecStart=/opt/bin/decrypt-tls-assets`
+Type=oneshot
+ExecStart=/opt/bin/decrypt-tls-assets
+ExecStart=/usr/bin/chown -R etcd:etcd /etc/kubernetes/ssl/etcd`
 
 	userDataScriptTemplate = `#!/bin/bash
 
