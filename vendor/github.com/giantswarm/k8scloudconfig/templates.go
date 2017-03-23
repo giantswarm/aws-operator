@@ -1187,7 +1187,7 @@ coreos:
       ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/calico/client-ca.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/calico/client-ca.pem to be written' && sleep 1; done"
       ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/calico/client-crt.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/calico/client-crt.pem to be written' && sleep 1; done"
       ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/calico/client-key.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/calico/client-key.pem to be written' && sleep 1; done"
-      ExecStartPre=/bin/bash -c "while ! curl --output /dev/null --silent --fail --cacert /etc/kubernetes/ssl/calico/client-ca.pem --cert /etc/kubernetes/ssl/calico/client-crt.pem --key /etc/kubernetes/ssl/calico/client-key.pem https://{{.Cluster.Etcd.Domain}}/version; do sleep 1 && echo 'Waiting for etcd master to be responsive'; done"
+      ExecStartPre=/bin/bash -c "while ! curl --output /dev/null --silent --fail --cacert /etc/kubernetes/ssl/calico/client-ca.pem --cert /etc/kubernetes/ssl/calico/client-crt.pem --key /etc/kubernetes/ssl/calico/client-key.pem https://{{.Cluster.Etcd.Domain}}:2379/version; do sleep 1 && echo 'Waiting for etcd master to be responsive'; done"
       ExecStart=/opt/bin/calicoctl node --ip=${COREOS_PRIVATE_IPV4} --detach=false --node-image=giantswarm/node:v0.22.0
       ExecStartPost=/bin/bash -c "/opt/bin/calicoctl bgp peer add $(echo ${IP_BRIDGE}} | cut -d'.' -f1-3).0 as $(/opt/bin/calicoctl bgp default-node-as)"
       ExecStop=/opt/bin/calicoctl node stop --force
