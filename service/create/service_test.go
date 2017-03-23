@@ -233,7 +233,57 @@ func TestAllExistingInstancesMatch(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		res := allExistingInstancesMatch(tc.instances, tc.state)
+		_, res := allExistingInstancesMatch(tc.instances, tc.state)
 		assert.Equal(t, tc.res, res, fmt.Sprintf("[%s] Some instance didn't match the expected state", tc.name))
+	}
+}
+
+func TestAllInstancesPresent(t *testing.T) {
+	tests := []struct {
+		name string
+		ids  []string
+		res  bool
+	}{
+		{
+			name: "Empty slice",
+			ids:  []string{},
+			res:  false,
+		},
+		{
+			name: "First element in slice is empty",
+			ids: []string{
+				"",
+			},
+			res: false,
+		},
+		{
+			name: "Last element in slice is empty",
+			ids: []string{
+				"foo",
+				"",
+			},
+			res: false,
+		},
+		{
+			name: "No empty strings",
+			ids: []string{
+				"foo",
+				"bar",
+			},
+			res: true,
+		},
+		{
+			name: "All empty",
+			ids: []string{
+				"",
+				"",
+			},
+			res: false,
+		},
+	}
+
+	for _, tc := range tests {
+		res := validateIDs(tc.ids)
+		assert.Equal(t, tc.res, res, fmt.Sprintf("[%s] The input values didn't produce the expected output", tc.name))
 	}
 }
