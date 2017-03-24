@@ -603,7 +603,7 @@ coreos:
       ExecStartPre=/usr/bin/wget -O /opt/bin/calicoctl https://s3-eu-west-1.amazonaws.com/downloads.giantswarm.io/calicoctl/v0.22.0/calicoctl
       ExecStartPre=/usr/bin/chmod +x /opt/bin/calicoctl
       ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/calico/client-ca.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/calico/client-ca.pem to be written' && sleep 1; done"
-      ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/calico/client-crt.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/calico/client.pem to be written' && sleep 1; done"
+      ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/calico/client-crt.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/calico/client-crt.pem to be written' && sleep 1; done"
       ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/calico/client-key.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/calico/client-key.pem to be written' && sleep 1; done"
       # TODO remove 2379 when we use ingress controllers
       ExecStartPre=/bin/bash -c "while ! curl --output /dev/null --silent --fail --cacert /etc/kubernetes/ssl/calico/client-ca.pem --cert /etc/kubernetes/ssl/calico/client-crt.pem --key /etc/kubernetes/ssl/calico/client-key.pem https://{{.Cluster.Etcd.Domain}}:2379/version; do sleep 1 && echo 'Waiting for etcd master to be responsive'; done"
@@ -997,7 +997,7 @@ write_files:
     {
         "name": "calico-k8s-network",
         "type": "calico",
-        "etcd_endpoints": "https://{{.Cluster.Etcd.Domain}}:443",
+        "etcd_endpoints": "https://{{.Cluster.Etcd.Domain}}:2379",
         "log_level": "info",
         "ipam": {
             "type": "calico-ipam"
@@ -1005,8 +1005,8 @@ write_files:
         "mtu": {{.Cluster.Calico.MTU}},
         "policy": {
             "type": "k8s",
-            "k8s_api_root": "https://{{.Cluster.Kubernetes.API.Domain}}/api/v1/",
-            "k8s_client_certificate": "/etc/kubernetes/ssl/calico/client.pem",
+            "k8s_api_root": "https://{{.Cluster.Kubernetes.API.Domain}}:6443/api/v1/",
+            "k8s_client_certificate": "/etc/kubernetes/ssl/calico/client-crt.pem",
             "k8s_client_key": "/etc/kubernetes/ssl/calico/client-key.pem",
             "k8s_certificate_authority": "/etc/kubernetes/ssl/calico/client-ca.pem"
         }
@@ -1047,12 +1047,13 @@ write_files:
     users:
     - name: kubelet
       user:
-        client-certificate: /etc/kubernetes/ssl/worker.pem
-        client-key: /etc/kubernetes/ssl/worker-key.pem
+        client-certificate: /etc/kubernetes/ssl/apiserver-crt.pem
+        client-key: /etc/kubernetes/ssl/apiserver-key.pem
     clusters:
     - name: local
       cluster:
-        certificate-authority: /etc/kubernetes/ssl/worker-ca.pem
+        certificate-authority: /etc/kubernetes/ssl/apiserver-ca.pem
+        server: https://{{.Cluster.Kubernetes.API.Domain}}:6443
     contexts:
     - context:
         cluster: local
@@ -1189,6 +1190,7 @@ coreos:
       ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/calico/client-crt.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/calico/client-crt.pem to be written' && sleep 1; done"
       ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/calico/client-key.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/calico/client-key.pem to be written' && sleep 1; done"
       ExecStartPre=/bin/bash -c "while ! curl --output /dev/null --silent --fail --cacert /etc/kubernetes/ssl/calico/client-ca.pem --cert /etc/kubernetes/ssl/calico/client-crt.pem --key /etc/kubernetes/ssl/calico/client-key.pem https://{{.Cluster.Etcd.Domain}}:2379/version; do sleep 1 && echo 'Waiting for etcd master to be responsive'; done"
+      ExecStartPre=/opt/bin/calicoctl pool add {{.Cluster.Calico.Subnet}}/{{.Cluster.Calico.CIDR}} --ipip --nat-outgoing
       ExecStart=/opt/bin/calicoctl node --ip=${COREOS_PRIVATE_IPV4} --detach=false --node-image=giantswarm/node:v0.22.0
       ExecStop=/opt/bin/calicoctl node stop --force
       ExecStopPost=/bin/bash -c "find /tmp/ -name '_MEI*' | xargs -I {} rm -rf {}"
@@ -1324,9 +1326,9 @@ coreos:
       -v /etc/kubernetes/cni/:/etc/kubernetes/cni/ \
       -v /opt/cni/bin/calico:/opt/cni/bin/calico \
       -v /opt/cni/bin/calico-ipam:/opt/cni/bin/calico-ipam \
-      -e ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/client-ca.pem \
-      -e ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/client.pem \
-      -e ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/client-key.pem \
+      -e ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/server-ca.pem \
+      -e ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/server-crt.pem \
+      -e ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/server-key.pem \
       --name $NAME \
       $IMAGE \
       /hyperkube kubelet \
@@ -1334,7 +1336,7 @@ coreos:
       --port=10250 \
       --hostname-override=${DEFAULT_IPV4} \
       --node-ip=${DEFAULT_IPV4} \
-      --api-servers=https://{{.Cluster.Kubernetes.API.Domain}} \
+      --api-servers=https://{{.Cluster.Kubernetes.API.Domain}}:6443 \
       --containerized \
       --enable-server \
       --logtostderr=true \
@@ -1342,7 +1344,6 @@ coreos:
       --cadvisor-port=4194 \
       --healthz-bind-address=${DEFAULT_IPV4} \
       --healthz-port=10248 \
-      --cluster-dns={{.Cluster.Kubernetes.DNS}} \
       --cluster-domain={{.Cluster.Kubernetes.API.Domain}} \
       --network-plugin-dir=/etc/kubernetes/cni/net.d \
       --network-plugin=cni \
