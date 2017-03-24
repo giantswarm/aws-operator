@@ -1,13 +1,16 @@
 package cloudconfig
 
 type CompactTLSAssets struct {
-	APIServerCACrt    string
-	APIServerKey      string
-	APIServerCrt      string
-	CalicoClientCACrt string
-	CalicoClientKey   string
-	CalicoClientCrt   string
-	EtcdServerCACrt   string
-	EtcdServerKey     string
-	EtcdServerCrt     string
+	APIServerCA     string
+	APIServerKey    string
+	APIServerCrt    string
+	WorkerCA        string
+	WorkerKey       string
+	WorkerCrt       string
+	CalicoClientCA  string
+	CalicoClientKey string
+	CalicoClientCrt string
+	EtcdServerCA    string
+	EtcdServerKey   string
+	EtcdServerCrt   string
 }

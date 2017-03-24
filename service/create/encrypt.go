@@ -15,28 +15,28 @@ import (
 
 // PEM encoded TLS assets.
 type rawTLSAssets struct {
-	APIServerCACrt    []byte
-	APIServerKey      []byte
-	APIServerCrt      []byte
-	CalicoClientCACrt []byte
-	CalicoClientKey   []byte
-	CalicoClientCrt   []byte
-	EtcdServerCACrt   []byte
-	EtcdServerKey     []byte
-	EtcdServerCrt     []byte
+	APIServerCA     []byte
+	APIServerKey    []byte
+	APIServerCrt    []byte
+	CalicoClientCA  []byte
+	CalicoClientKey []byte
+	CalicoClientCrt []byte
+	EtcdServerCA    []byte
+	EtcdServerKey   []byte
+	EtcdServerCrt   []byte
 }
 
 // Encrypted PEM encoded TLS assets
 type encryptedTLSAssets struct {
-	APIServerCACrt    []byte
-	APIServerKey      []byte
-	APIServerCrt      []byte
-	CalicoClientCACrt []byte
-	CalicoClientKey   []byte
-	CalicoClientCrt   []byte
-	EtcdServerCACrt   []byte
-	EtcdServerKey     []byte
-	EtcdServerCrt     []byte
+	APIServerCA     []byte
+	APIServerKey    []byte
+	APIServerCrt    []byte
+	CalicoClientCA  []byte
+	CalicoClientKey []byte
+	CalicoClientCrt []byte
+	EtcdServerCA    []byte
+	EtcdServerKey   []byte
+	EtcdServerCrt   []byte
 }
 
 func readRawTLSAssets(tlsAssetsDir string) (*rawTLSAssets, error) {
@@ -45,9 +45,9 @@ func readRawTLSAssets(tlsAssetsDir string) (*rawTLSAssets, error) {
 		name          string
 		ca, key, cert *[]byte
 	}{
-		{"apiserver", &r.APIServerCACrt, &r.APIServerKey, &r.APIServerCrt},
-		{"calico/client", &r.CalicoClientCACrt, &r.CalicoClientKey, &r.CalicoClientCrt},
-		{"etcd/server", &r.EtcdServerCACrt, &r.EtcdServerKey, &r.EtcdServerCrt},
+		{"apiserver", &r.APIServerCA, &r.APIServerKey, &r.APIServerCrt},
+		{"calico/client", &r.CalicoClientCA, &r.CalicoClientKey, &r.CalicoClientCrt},
+		{"etcd/server", &r.EtcdServerCA, &r.EtcdServerKey, &r.EtcdServerCrt},
 	}
 	for _, file := range files {
 		caPath := filepath.Join(tlsAssetsDir, file.name+"-ca.pem")
@@ -94,15 +94,15 @@ func (r *rawTLSAssets) encrypt(svc *kms.KMS, kmsKeyARN string) (*encryptedTLSAss
 		return encryptOutput.CiphertextBlob
 	}
 	encryptedAssets := encryptedTLSAssets{
-		APIServerCACrt:    encrypt(r.APIServerCACrt),
-		APIServerKey:      encrypt(r.APIServerKey),
-		APIServerCrt:      encrypt(r.APIServerCrt),
-		CalicoClientCACrt: encrypt(r.CalicoClientCACrt),
-		CalicoClientKey:   encrypt(r.CalicoClientKey),
-		CalicoClientCrt:   encrypt(r.CalicoClientCrt),
-		EtcdServerCACrt:   encrypt(r.EtcdServerCACrt),
-		EtcdServerKey:     encrypt(r.EtcdServerKey),
-		EtcdServerCrt:     encrypt(r.EtcdServerCrt),
+		APIServerCA:     encrypt(r.APIServerCA),
+		APIServerKey:    encrypt(r.APIServerKey),
+		APIServerCrt:    encrypt(r.APIServerCrt),
+		CalicoClientCA:  encrypt(r.CalicoClientCA),
+		CalicoClientKey: encrypt(r.CalicoClientKey),
+		CalicoClientCrt: encrypt(r.CalicoClientCrt),
+		EtcdServerCA:    encrypt(r.EtcdServerCA),
+		EtcdServerKey:   encrypt(r.EtcdServerKey),
+		EtcdServerCrt:   encrypt(r.EtcdServerCrt),
 	}
 	if err != nil {
 		return nil, microerror.MaskAny(err)
@@ -129,15 +129,15 @@ func (r *encryptedTLSAssets) compact() (*cloudconfig.CompactTLSAssets, error) {
 	}
 
 	compactAssets := cloudconfig.CompactTLSAssets{
-		APIServerCACrt:    compact(r.APIServerCACrt),
-		APIServerKey:      compact(r.APIServerKey),
-		APIServerCrt:      compact(r.APIServerCrt),
-		CalicoClientCACrt: compact(r.CalicoClientCACrt),
-		CalicoClientKey:   compact(r.CalicoClientKey),
-		CalicoClientCrt:   compact(r.CalicoClientCrt),
-		EtcdServerCACrt:   compact(r.EtcdServerCACrt),
-		EtcdServerKey:     compact(r.EtcdServerKey),
-		EtcdServerCrt:     compact(r.EtcdServerCrt),
+		APIServerCA:     compact(r.APIServerCA),
+		APIServerKey:    compact(r.APIServerKey),
+		APIServerCrt:    compact(r.APIServerCrt),
+		CalicoClientCA:  compact(r.CalicoClientCA),
+		CalicoClientKey: compact(r.CalicoClientKey),
+		CalicoClientCrt: compact(r.CalicoClientCrt),
+		EtcdServerCA:    compact(r.EtcdServerCA),
+		EtcdServerKey:   compact(r.EtcdServerKey),
+		EtcdServerCrt:   compact(r.EtcdServerCrt),
 	}
 
 	if err != nil {

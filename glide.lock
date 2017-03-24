@@ -1,5 +1,5 @@
-hash: 38fa02f4a527029c4494e0f5c6d30c6b0157abcc131580c20178a29a03bd6e3e
-updated: 2017-03-20T18:22:55.99768747+01:00
+hash: 5d71c7bcd8f6232160ac44f98db0018bc98545a80f1fa1bbe681f541cd08b310
+updated: 2017-03-24T15:13:46.806721225+01:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aws/aws-sdk-go
-  version: 5b99715ae2945a2434a2371f4e6c5542e839a32d
+  version: 2c0ef11c03b8f28d694021d4a6bda2e24b040cd4
   subpackages:
   - aws
   - aws/awserr
@@ -34,7 +34,6 @@ imports:
   - private/protocol/rest
   - private/protocol/restxml
   - private/protocol/xml/xmlutil
-  - private/waiter
   - service/ec2
   - service/iam
   - service/kms
@@ -49,7 +48,7 @@ imports:
 - name: github.com/cenkalti/backoff
   version: 3db60c813733fce657c114634171689bbf1f8dee
 - name: github.com/coreos/etcd
-  version: 21fdcc6443f3267111051240f0eca839acc96a39
+  version: 41e52ebc22add2f9b91a59f90db8e31f7e5c0538
   subpackages:
   - auth/authpb
   - client
@@ -89,7 +88,7 @@ imports:
   - log
   - swagger
 - name: github.com/fsnotify/fsnotify
-  version: 7d7316ed6e1ed2de075aab8dfc76de5d158d66e1
+  version: ff7bc41d4007f67e5456703c34342df4e0113f64
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
@@ -127,7 +126,7 @@ imports:
   - operator/networksetup/docker
   - vault
 - name: github.com/giantswarm/k8scloudconfig
-  version: 032560f38c6cf4da1f0aba776d9957eeb6d2a06b
+  version: b31c9407200797ca4be735c3a73ec51ae34b31fd
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
@@ -215,7 +214,7 @@ imports:
 - name: github.com/kr/logfmt
   version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
 - name: github.com/magiconair/properties
-  version: 6806cf261c13880f296ed31331873191e4d87b47
+  version: 51463bfca2576e06c62a8504b5c0f06d61312647
 - name: github.com/mailru/easyjson
   version: d5b7844b561a7bc640052f1b935f7b800330d7e0
   subpackages:
@@ -233,7 +232,7 @@ imports:
 - name: github.com/pelletier/go-buffruneio
   version: c37440a7cf42ac63b919c752ca73a85067e05992
 - name: github.com/pelletier/go-toml
-  version: fee7787d3f811af92276f5ff10107092e95b7a1d
+  version: f6e7596e8daafd44dc9e5c208dc73035020c8481
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
