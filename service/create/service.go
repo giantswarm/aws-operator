@@ -100,8 +100,6 @@ func New(config Config) (*Service, error) {
 		// AWS certificates options.
 		pubKeyFile: config.PubKeyFile,
 
-		s3Bucket: config.S3Bucket,
-
 		// Internals
 		bootOnce: sync.Once{},
 	}
@@ -118,8 +116,6 @@ type Service struct {
 
 	// AWS certificates options.
 	pubKeyFile string
-
-	s3Bucket string
 
 	// Internals.
 	bootOnce sync.Once
@@ -180,7 +176,7 @@ func (s *Service) Boot() {
 			resyncPeriod,
 			cache.ResourceEventHandlerFuncs{
 				AddFunc: func(obj interface{}) {
-					cluster := obj.(*awstpr.CustomObject)
+					cluster := *obj.(*awstpr.CustomObject)
 					s.logger.Log("info", fmt.Sprintf("creating cluster '%s'", cluster.Name))
 
 					if err := s.createClusterNamespace(cluster.Spec.Cluster); err != nil {
@@ -246,7 +242,7 @@ func (s *Service) Boot() {
 						policy = &awsresources.Policy{
 							ClusterID: cluster.Spec.Cluster.Cluster.ID,
 							KMSKeyArn: kmsKey.Arn(),
-							S3Bucket:  s.s3Bucket,
+							S3Bucket:  awsresources.BucketName(cluster),
 							AWSEntity: awsresources.AWSEntity{Clients: clients},
 						}
 						policyErr = policy.CreateOrFail()
@@ -258,7 +254,7 @@ func (s *Service) Boot() {
 					{
 						var err error
 						bucket = &awsresources.Bucket{
-							Name:      s.s3Bucket,
+							Name:      awsresources.BucketName(cluster),
 							AWSEntity: awsresources.AWSEntity{Clients: clients},
 						}
 						bucketCreated, err = bucket.CreateIfNotExists()
@@ -269,17 +265,18 @@ func (s *Service) Boot() {
 					}
 
 					if bucketCreated {
-						s.logger.Log("info", fmt.Sprintf("created bucket '%s'", s.s3Bucket))
+						s.logger.Log("info", fmt.Sprintf("created bucket '%s'", awsresources.BucketName(cluster)))
 					} else {
-						s.logger.Log("info", fmt.Sprintf("bucket '%s' already exists, reusing", s.s3Bucket))
+						s.logger.Log("info", fmt.Sprintf("bucket '%s' already exists, reusing", awsresources.BucketName(cluster)))
 					}
 
 					// Run masters
 					anyMastersCreated, masterIDs, err := s.runMachines(runMachinesInput{
 						clients:             clients,
-						spec:                cluster.Spec,
+						cluster:             cluster,
 						tlsAssets:           tlsAssets,
 						clusterName:         cluster.Name,
+						bucket:              bucket,
 						keyPairName:         cluster.Name,
 						instanceProfileName: policy.Name(),
 						prefix:              prefixMaster,
@@ -320,8 +317,9 @@ func (s *Service) Boot() {
 					// Run workers
 					anyWorkersCreated, _, err := s.runMachines(runMachinesInput{
 						clients:             clients,
-						spec:                cluster.Spec,
+						cluster:             cluster,
 						tlsAssets:           tlsAssets,
+						bucket:              bucket,
 						clusterName:         cluster.Name,
 						keyPairName:         cluster.Name,
 						instanceProfileName: policy.Name(),
@@ -344,7 +342,7 @@ func (s *Service) Boot() {
 				},
 				DeleteFunc: func(obj interface{}) {
 					// TODO(nhlfr): Move this to a separate operator.
-					cluster := obj.(*awstpr.CustomObject)
+					cluster := *obj.(*awstpr.CustomObject)
 
 					if err := s.deleteClusterNamespace(cluster.Spec.Cluster); err != nil {
 						s.logger.Log("error", "could not delete cluster namespace:", err)
@@ -374,11 +372,42 @@ func (s *Service) Boot() {
 					}
 					s.logger.Log("info", "deleted workers")
 
+					// Delete S3 bucket objects
+					var bucket resources.Resource
+					bucket = &awsresources.Bucket{
+						Name:      awsresources.BucketName(cluster),
+						AWSEntity: awsresources.AWSEntity{Clients: clients},
+					}
+
+					var masterBucketObject resources.Resource
+					masterBucketObject = &awsresources.BucketObject{
+						Name:      awsresources.BucketObjectName(cluster, prefixMaster),
+						Bucket:    bucket.(*awsresources.Bucket),
+						AWSEntity: awsresources.AWSEntity{Clients: clients},
+					}
+					if err := masterBucketObject.Delete(); err != nil {
+						s.logger.Log("error", errgo.Details(err))
+						return
+					}
+
+					var workerBucketObject resources.Resource
+					workerBucketObject = &awsresources.BucketObject{
+						Name:      awsresources.BucketObjectName(cluster, prefixWorker),
+						Bucket:    bucket.(*awsresources.Bucket),
+						AWSEntity: awsresources.AWSEntity{Clients: clients},
+					}
+					if err := workerBucketObject.Delete(); err != nil {
+						s.logger.Log("error", errgo.Details(err))
+						return
+					}
+
+					s.logger.Log("info", "deleted bucket objects")
+
 					// Delete policy
 					var policy resources.NamedResource
 					policy = &awsresources.Policy{
 						ClusterID: cluster.Spec.Cluster.Cluster.ID,
-						S3Bucket:  s.s3Bucket,
+						S3Bucket:  awsresources.BucketName(cluster),
 						AWSEntity: awsresources.AWSEntity{Clients: clients},
 					}
 					if err := policy.Delete(); err != nil {
@@ -433,8 +462,9 @@ func clusterPrefix(input clusterPrefixInput) string {
 
 type runMachinesInput struct {
 	clients             awsutil.Clients
-	spec                awstpr.Spec
+	cluster             awstpr.CustomObject
 	tlsAssets           *cloudconfig.CompactTLSAssets
+	bucket              resources.Resource
 	clusterName         string
 	keyPairName         string
 	instanceProfileName string
@@ -452,11 +482,11 @@ func (s *Service) runMachines(input runMachinesInput) (bool, []string, error) {
 
 	switch input.prefix {
 	case prefixMaster:
-		machines = input.spec.Cluster.Masters
-		awsMachines = input.spec.AWS.Masters
+		machines = input.cluster.Spec.Cluster.Masters
+		awsMachines = input.cluster.Spec.AWS.Masters
 	case prefixWorker:
-		machines = input.spec.Cluster.Workers
-		awsMachines = input.spec.AWS.Workers
+		machines = input.cluster.Spec.Cluster.Workers
+		awsMachines = input.cluster.Spec.AWS.Workers
 	}
 
 	// TODO(nhlfr): Create a separate module for validating specs and execute on the earlier stages.
@@ -475,10 +505,11 @@ func (s *Service) runMachines(input runMachinesInput) (bool, []string, error) {
 		})
 		created, instanceID, err := s.runMachine(runMachineInput{
 			clients:             input.clients,
-			spec:                input.spec,
+			cluster:             input.cluster,
 			machine:             machines[i],
 			awsNode:             awsMachines[i],
 			tlsAssets:           input.tlsAssets,
+			bucket:              input.bucket,
 			clusterName:         input.clusterName,
 			keyPairName:         input.keyPairName,
 			instanceProfileName: input.instanceProfileName,
@@ -531,10 +562,11 @@ func (s *Service) uploadCloudconfigToS3(svc *s3.S3, s3Bucket, path, data string)
 
 type runMachineInput struct {
 	clients             awsutil.Clients
-	spec                awstpr.Spec
+	cluster             awstpr.CustomObject
 	machine             node.Node
 	awsNode             awsinfo.Node
 	tlsAssets           *cloudconfig.CompactTLSAssets
+	bucket              resources.Resource
 	clusterName         string
 	keyPairName         string
 	instanceProfileName string
@@ -544,12 +576,12 @@ type runMachineInput struct {
 
 func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 	cloudConfigParams := cloudconfig.CloudConfigTemplateParams{
-		Cluster:   input.spec.Cluster,
+		Cluster:   input.cluster.Spec.Cluster,
 		Node:      input.machine,
 		TLSAssets: *input.tlsAssets,
 	}
 
-	cloudConfig, err := s.cloudConfig(input.prefix, cloudConfigParams, input.spec)
+	cloudConfig, err := s.cloudConfig(input.prefix, cloudConfigParams, input.cluster.Spec)
 	if err != nil {
 		return false, "", microerror.MaskAny(err)
 	}
@@ -558,19 +590,20 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 	// cloudconfig" that just fetches the previously uploaded "final
 	// cloudconfig" and executes coreos-cloudinit with it as argument.
 	// We do this to circumvent the 16KB limit on user-data for EC2 instances.
-	clusterID := input.spec.Cluster.Cluster.ID
-	cloudconfigS3DirPath := fmt.Sprintf("%s/cloudconfig", clusterID)
 	cloudconfigConfig := SmallCloudconfigConfig{
 		MachineType: input.prefix,
-		Region:      input.spec.AWS.Region,
-		S3DirURI:    fmt.Sprintf("%s/%s", s.s3Bucket, cloudconfigS3DirPath),
+		Region:      input.cluster.Spec.AWS.Region,
+		S3DirURI:    awsresources.BucketObjectFullDirPath(input.cluster),
 	}
 
-	cloudconfigS3Path := fmt.Sprintf("%s/%s", cloudconfigS3DirPath, cloudconfigConfig.MachineType)
-	if err := s.uploadCloudconfigToS3(input.clients.S3,
-		s.s3Bucket,
-		cloudconfigS3Path,
-		cloudConfig); err != nil {
+	var cloudconfigS3 resources.Resource
+	cloudconfigS3 = &awsresources.BucketObject{
+		Name:      awsresources.BucketObjectName(input.cluster, input.prefix),
+		Data:      cloudConfig,
+		Bucket:    input.bucket.(*awsresources.Bucket),
+		AWSEntity: awsresources.AWSEntity{Clients: input.clients},
+	}
+	if err := cloudconfigS3.CreateOrFail(); err != nil {
 		return false, "", microerror.MaskAny(err)
 	}
 
@@ -593,7 +626,7 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 			MaxCount:               1,
 			SmallCloudconfig:       smallCloudconfig,
 			IamInstanceProfileName: input.instanceProfileName,
-			PlacementAZ:            input.spec.AWS.AZ,
+			PlacementAZ:            input.cluster.Spec.AWS.AZ,
 			AWSEntity:              awsresources.AWSEntity{Clients: input.clients},
 		}
 		instanceCreated, err = instance.CreateIfNotExists()
