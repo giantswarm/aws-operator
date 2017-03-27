@@ -63,6 +63,15 @@ func allExistingInstancesMatch(instances *ec2.DescribeInstancesOutput, state EC2
 	return true
 }
 
+func existingInstanceID(instances *ec2.DescribeInstancesOutput) string {
+	for _, r := range instances.Reservations {
+		for _, i := range r.Instances {
+			return *i.InstanceId
+		}
+	}
+	return ""
+}
+
 func (i *Instance) CreateIfNotExists() (bool, error) {
 	instances, err := i.Clients.EC2.DescribeInstances(&ec2.DescribeInstancesInput{
 		Filters: []*ec2.Filter{
@@ -85,6 +94,7 @@ func (i *Instance) CreateIfNotExists() (bool, error) {
 	}
 
 	if !allExistingInstancesMatch(instances, EC2TerminatedState) {
+		i.InstanceID = existingInstanceID(instances)
 		return false, nil
 	}
 
