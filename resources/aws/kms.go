@@ -26,7 +26,7 @@ func (kk *KMSKey) CreateOrFail() error {
 }
 
 func (kms *KMSKey) Delete() error {
-	return fmt.Errorf("not implemented")
+	return microerror.MaskAny(notImplementedMethodError)
 }
 
 func (kms *KMSKey) Arn() string {

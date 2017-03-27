@@ -7,7 +7,6 @@ import (
 	"github.com/giantswarm/microkit/command"
 	"github.com/giantswarm/microkit/logger"
 	microserver "github.com/giantswarm/microkit/server"
-	"github.com/google/uuid"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	k8sclient "github.com/giantswarm/aws-operator/client/k8s"
@@ -31,7 +30,6 @@ var Flags = struct {
 			ID     string
 			Secret string
 		}
-		S3Bucket   string
 		PubKeyFile string
 	}
 	Kubernetes struct {
@@ -92,7 +90,6 @@ func main() {
 				TLSClientConfig: k8sTlsClientConfig,
 			}
 
-			serviceConfig.S3Bucket = Flags.Aws.S3Bucket
 			serviceConfig.PubKeyFile = Flags.Aws.PubKeyFile
 
 			serviceConfig.Description = description
@@ -149,7 +146,6 @@ func main() {
 
 	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.AccessKey.ID, "aws.accesskey.id", "", "ID of the AWS access key")
 	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.AccessKey.Secret, "aws.accesskey.secret", "", "Secret of the AWS access key")
-	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.S3Bucket, "aws.s3bucket", uuid.New().String(), "S3 bucket in which to store cloudconfigs")
 	// TODO(nhlfr): Deprecate these options when cert-operator will be implemented.
 	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.PubKeyFile, "aws.pubkeyfile", path.Join(os.Getenv("HOME"), ".ssh", "id_rsa.pub"), "Public key to be imported as a keypair in AWS")
 

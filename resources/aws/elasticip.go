@@ -1,8 +1,6 @@
 package aws
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	microerror "github.com/giantswarm/microkit/error"
@@ -20,7 +18,7 @@ type ElasticIP struct {
 }
 
 func (e *ElasticIP) CreateIfNotExists() (bool, error) {
-	return false, fmt.Errorf("not implemented")
+	return false, microerror.MaskAny(notImplementedMethodError)
 }
 
 func (e *ElasticIP) CreateOrFail() error {
@@ -37,7 +35,7 @@ func (e *ElasticIP) CreateOrFail() error {
 }
 
 func (e *ElasticIP) Delete() error {
-	return fmt.Errorf("not implemented")
+	return microerror.MaskAny(notImplementedMethodError)
 }
 
 func (e *ElasticIP) Name() string {
