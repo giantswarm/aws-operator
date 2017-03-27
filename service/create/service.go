@@ -302,10 +302,17 @@ func (s *Service) Boot() {
 						return
 					}
 
-					if err := s.associateElasticIP(clients.EC2, masterIDs[0]); err != nil {
-						s.logger.Log("error", microerror.MaskAny(err))
-						return
+					var elasticIP resources.NamedResource
+					{
+						elasticIP = &awsresources.ElasticIP{
+							InstanceID: masterID,
+							AWSEntity:  awsresources.AWSEntity{Clients: clients},
+						}
+						if err := elasticIP.CreateOrFail(); err != nil {
+							s.logger.Log("error", errgo.Details(err))
+						}
 					}
+					s.logger.Log("info", fmt.Sprintf("attached ip %v to instance %v", elasticIP.Name(), masterID))
 
 					// Run workers
 					anyWorkersCreated, _, err := s.runMachines(runMachinesInput{
