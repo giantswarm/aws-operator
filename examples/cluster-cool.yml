@@ -12,6 +12,7 @@ spec:
     calico:
       subnet: "192.168.0.0"
       cidr: "24"
+      mtu: "1500"
     operator:
       networkSetup:
         docker:
@@ -24,6 +25,9 @@ spec:
 
     masters:
     - hostname: "master-1"
+
+    workers:
+    - hostname: "worker-1"
 
     kubernetes:
       api:
@@ -38,5 +42,8 @@ spec:
   aws:
     region: "eu-central-1"
     masters:
+    - imageid: "ami-9501c8fa"
+      instancetype: "t2.medium"
+    workers:
     - imageid: "ami-9501c8fa"
       instancetype: "t2.medium"
