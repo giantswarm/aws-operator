@@ -11,12 +11,6 @@ import (
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 )
 
-const (
-	// EC2 instance tag keys.
-	tagKeyName    string = "Name"
-	tagKeyCluster string = "Cluster"
-)
-
 type EC2StateCode int
 
 const (
@@ -42,6 +36,8 @@ type Instance struct {
 	SmallCloudconfig       string
 	IamInstanceProfileName string
 	PlacementAZ            string
+	SecurityGroupID        string
+	SubnetID               string
 	id                     string
 	AWSEntity
 }
@@ -118,6 +114,10 @@ func (i *Instance) CreateOrFail() error {
 			Placement: &ec2.Placement{
 				AvailabilityZone: aws.String(i.PlacementAZ),
 			},
+			SecurityGroupIds: []*string{
+				aws.String(i.SecurityGroupID),
+			},
+			SubnetId: aws.String(i.SubnetID),
 		})
 		if err != nil {
 			return microerror.MaskAny(err)
@@ -154,6 +154,14 @@ func (i *Instance) CreateOrFail() error {
 
 func (i *Instance) Delete() error {
 	if _, err := i.Clients.EC2.TerminateInstances(&ec2.TerminateInstancesInput{
+		InstanceIds: []*string{
+			aws.String(i.id),
+		},
+	}); err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	if err := i.Clients.EC2.WaitUntilInstanceTerminated(&ec2.DescribeInstancesInput{
 		InstanceIds: []*string{
 			aws.String(i.id),
 		},

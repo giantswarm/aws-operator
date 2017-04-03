@@ -3,8 +3,10 @@ package aws
 import "github.com/juju/errgo"
 
 const (
+	AlreadyAssociated       = "Resource.AlreadyAssociated"
 	BucketAlreadyExists     = "BucketAlreadyExists"
 	BucketAlreadyOwnedByYou = "BucketAlreadyOwnedByYou"
+	InvalidSubnetConflict   = "InvalidSubnet.Conflict"
 	KeyPairDuplicate        = "InvalidKeyPair.Duplicate"
 	SecurityGroupDuplicate  = "InvalidGroup.Duplicate"
 )

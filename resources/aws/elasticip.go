@@ -38,6 +38,6 @@ func (e *ElasticIP) Delete() error {
 	return microerror.MaskAny(notImplementedMethodError)
 }
 
-func (e *ElasticIP) Name() string {
+func (e ElasticIP) Name() string {
 	return e.name
 }

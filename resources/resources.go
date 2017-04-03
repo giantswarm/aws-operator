@@ -15,3 +15,8 @@ type ArnResource interface {
 	Arn() string
 	Resource
 }
+
+type ResourceWithID interface {
+	ID() string
+	Resource
+}
