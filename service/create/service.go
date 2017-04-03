@@ -274,6 +274,14 @@ func (s *Service) Boot() {
 						s.logger.Log("info", fmt.Sprintf("bucket '%s' already exists, reusing", s.s3Bucket))
 					}
 
+					// Create S3 bucket
+					if err := clients.S3.WaitUntilBucketExists(&s3.HeadBucketInput{
+						Bucket: aws.String(s.s3Bucket),
+					}); err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not create bucket: %s", err))
+						return
+					}
+
 					// Run masters
 					anyMastersCreated, masterIDs, err := s.runMachines(runMachinesInput{
 						clients:             clients,
