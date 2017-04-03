@@ -69,7 +69,6 @@ type Config struct {
 	K8sClient  kubernetes.Interface
 	Logger     micrologger.Logger
 	S3Bucket   string
-	CertsDir   string
 	PubKeyFile string
 }
 
@@ -81,7 +80,6 @@ func DefaultConfig() Config {
 		K8sClient:  nil,
 		Logger:     nil,
 		S3Bucket:   "",
-		CertsDir:   "",
 		PubKeyFile: "",
 	}
 }
@@ -100,7 +98,6 @@ func New(config Config) (*Service, error) {
 		logger:    config.Logger,
 
 		// AWS certificates options.
-		certsDir:   config.CertsDir,
 		pubKeyFile: config.PubKeyFile,
 
 		s3Bucket: config.S3Bucket,
@@ -120,7 +117,6 @@ type Service struct {
 	logger    micrologger.Logger
 
 	// AWS certificates options.
-	certsDir   string
 	pubKeyFile string
 
 	s3Bucket string
@@ -219,6 +215,13 @@ func (s *Service) Boot() {
 						s.logger.Log("info", fmt.Sprintf("keypair '%s' already exists, reusing", cluster.Name))
 					}
 
+					clusterID := cluster.Spec.Cluster.Cluster.ID
+					certs, err := s.getCertsFromSecrets(clusterID)
+					if err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not get certificates from secrets: %v", errgo.Details(err)))
+						return
+					}
+
 					// Create KMS key
 					var kmsKey resources.ArnResource
 					var kmsKeyErr error
@@ -230,7 +233,7 @@ func (s *Service) Boot() {
 					}
 
 					// Encode TLS assets
-					tlsAssets, err := s.encodeTLSAssets(clients.KMS, kmsKey.Arn())
+					tlsAssets, err := s.encodeTLSAssets(certs, clients.KMS, kmsKey.Arn())
 					if err != nil {
 						s.logger.Log("error", fmt.Sprintf("could not encode TLS assets: %s", errgo.Details(err)))
 						return
@@ -286,7 +289,7 @@ func (s *Service) Boot() {
 					}
 
 					if !validateIDs(masterIDs) {
-						s.logger.Log("error", "master nodes had invalid instance IDs")
+						s.logger.Log("error", fmt.Sprintf("master nodes had invalid instance IDs: %v", masterIDs))
 						return
 					}
 
