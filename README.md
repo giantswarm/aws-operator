@@ -52,6 +52,47 @@ Afterwards, you can run:
 In the future, we are going to use aws-operator as a Kubernetes pod and that would be the standard
 way of usage.
 
+## Architecture
+
+### S3 buckets
+
+S3 buckets are used for storing cloudconfigs, which are fetched by the EC2 instances and executed. Then cloud-init, by using those
+cloudconfigs, takes care of running the needed systemd services and containers. The result of successful execution of cloud-init
+on each EC2 instance should be the working Kubernetes cluster.
+
+Buckets are created for each customer, then inside the buckets there are folders for each cluster.
+
+Each cluster contains the cloudconfig for master and worker instances.
+
+For example, assuming that we have the following customers with clusters:
+
+- first-customer
+  - first-customers-cluster-1
+  - first-customers-cluster-2
+- second-customer
+  - second-customers-cluster-1
+
+we will have the following buckets with contents:
+
+```
+first-customer
+|- first-customers-cluster-1
+|  |- cloudconfig
+|     |- master
+|     |- worker
+|- first-customers-cluster-2
+|  |- cloudconfig
+|     |- master
+|     |- worker
+
+second-customer
+|- second-customers-cluster
+|  |- cloudconfig
+|     |- master
+|     |- worker
+
+```
+
 ## Contact
 
 - Mailing list: [giantswarm](https://groups.google.com/forum/!forum/giantswarm)
