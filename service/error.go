@@ -4,7 +4,9 @@ import (
 	"github.com/juju/errgo"
 )
 
-var invalidConfigError = errgo.New("invalid config")
+var (
+	invalidConfigError = errgo.New("invalid config")
+)
 
 // IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {

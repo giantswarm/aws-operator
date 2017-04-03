@@ -28,6 +28,8 @@ import:
 - package: github.com/giantswarm/awstpr
   version: 288f3d1dff098b1cca30c3d88c461b71b203bbd0
 - package: github.com/giantswarm/clustertpr
+- package: github.com/giantswarm/certificatetpr
+  version: fa554d09f0137a91aa6ef007b92e170b31dbefd2
 - package: github.com/giantswarm/k8scloudconfig
   version: b31c9407200797ca4be735c3a73ec51ae34b31fd
 - package: github.com/golang/protobuf

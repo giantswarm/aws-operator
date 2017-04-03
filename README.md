@@ -30,8 +30,20 @@ go build github.com/giantswarm/awstpr
 
 ## Running aws-operator
 
-After building the project, the `aws-operator` binary will be there. To use it in very standard way,
-we recommend to do:
+After building the project, you will have a `aws-operator` binary.
+
+The operator needs some Kubernetes secrets to be present. The secrets contain
+the TLS assets (CAs, keys, certificates) for the various components of the
+cluster.
+
+An easy way to create these secrets for development is running:
+
+
+```
+kubectl create -f examples/secrets.yml
+```
+
+Afterwards, you can run:
 
 ```
 ./aws-operator daemon --aws.accesskey.id <aws_acces_key_id> --aws.accesskey.secret <aws_access_key_secret> --aws.region <aws_region>

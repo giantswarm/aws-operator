@@ -26,7 +26,6 @@ type Config struct {
 	K8sConfig k8sutil.Config
 
 	// AWS cerfificates options.
-	CertsDir   string
 	PubKeyFile string
 
 	S3Bucket string
@@ -50,7 +49,6 @@ func DefaultConfig() Config {
 
 		S3Bucket: "",
 		// AWS certificates optionts.
-		CertsDir:   "",
 		PubKeyFile: "",
 
 		Description: "",
@@ -86,7 +84,6 @@ func New(config Config) (*Service, error) {
 		createConfig.K8sClient = k8sClient
 		createConfig.Logger = config.Logger
 		createConfig.S3Bucket = config.S3Bucket
-		createConfig.CertsDir = config.CertsDir
 		createConfig.PubKeyFile = config.PubKeyFile
 
 		createService, err = create.New(createConfig)
