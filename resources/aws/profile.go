@@ -61,6 +61,6 @@ func (ip *InstanceProfile) Delete() error {
 	return nil
 }
 
-func (ip *InstanceProfile) Name() string {
+func (ip InstanceProfile) Name() string {
 	return ip.name
 }

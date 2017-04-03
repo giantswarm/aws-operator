@@ -42,6 +42,16 @@ const (
 	// Prefixes used for machine names.
 	prefixMaster string = "master"
 	prefixWorker string = "worker"
+	// Suffixes used for subnets
+	suffixPublic  string = "public"
+	suffixPrivate string = "private"
+	// SSH port to open in security group
+	portSSH int = 22
+	// Subnet CIDRs
+	// TODO(nhlfr): Make them configurable, include them in awstpr
+	vpcCidrBlock      = "10.0.0.0/16"
+	privateSubnetCidr = "10.0.0.0/19"
+	publicSubnetCidr  = "10.0.128.0/20"
 	// EC2 instance tag keys.
 	tagKeyName    string = "Name"
 	tagKeyCluster string = "Cluster"
@@ -278,6 +288,124 @@ func (s *Service) Boot() {
 						s.logger.Log("info", fmt.Sprintf("bucket '%s' already exists, reusing", bucketName))
 					}
 
+					// Create VPC
+					var vpc resources.ResourceWithID
+					vpc = &awsresources.VPC{
+						CidrBlock: vpcCidrBlock,
+						Name:      cluster.Name,
+						AWSEntity: awsresources.AWSEntity{Clients: clients},
+					}
+					vpcCreated, err := vpc.CreateIfNotExists()
+					if err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not create VPC: %s", errgo.Details(err)))
+						return
+					}
+					if vpcCreated {
+						s.logger.Log("info", fmt.Sprintf("created vpc for cluster '%s'", cluster.Name))
+					} else {
+						s.logger.Log("info", fmt.Sprintf("vpc for cluster '%s' already exists, reusing", cluster.Name))
+					}
+
+					// Create gateway
+					var gateway resources.ResourceWithID
+					gateway = &awsresources.Gateway{
+						Name:      cluster.Name,
+						VpcID:     vpc.ID(),
+						AWSEntity: awsresources.AWSEntity{Clients: clients},
+					}
+					gatewayCreated, err := gateway.CreateIfNotExists()
+					if err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not create gateway: %s", errgo.Details(err)))
+						return
+					}
+					if gatewayCreated {
+						s.logger.Log("info", fmt.Sprintf("created gateway for cluster '%s'", cluster.Name))
+					} else {
+						s.logger.Log("info", fmt.Sprintf("gateway for cluster '%s' already exists, reusing", cluster.Name))
+					}
+
+					// Create security group
+					var securityGroup resources.ResourceWithID
+					securityGroup = &awsresources.SecurityGroup{
+						Description: cluster.Name,
+						GroupName:   cluster.Name,
+						VpcID:       vpc.ID(),
+						PortsToOpen: []int{
+							portSSH,
+						},
+						AWSEntity: awsresources.AWSEntity{Clients: clients},
+					}
+					securityGroupCreated, err := securityGroup.CreateIfNotExists()
+					if err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not create security group: %s", errgo.Details(err)))
+						return
+					}
+					if securityGroupCreated {
+						s.logger.Log("info", fmt.Sprintf("created security group '%s'", cluster.Name))
+					} else {
+						s.logger.Log("info", fmt.Sprintf("security group '%s' already exists, reusing", cluster.Name))
+					}
+
+					// Create route table
+					routeTable := &awsresources.RouteTable{
+						Name:      cluster.Name,
+						VpcID:     vpc.ID(),
+						AWSEntity: awsresources.AWSEntity{Clients: clients},
+					}
+					routeTableCreated, err := routeTable.CreateIfNotExists()
+					if err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not create route table: %s", errgo.Details(err)))
+						return
+					}
+					if routeTableCreated {
+						s.logger.Log("info", "created route table")
+					} else {
+						s.logger.Log("info", "route table already exists, reusing")
+					}
+
+					// Create public subnet
+					publicSubnet := &awsresources.Subnet{
+						AvailabilityZone: cluster.Spec.AWS.AZ,
+						CidrBlock:        publicSubnetCidr,
+						Name:             subnetName(cluster, suffixPublic),
+						VpcID:            vpc.ID(),
+						AWSEntity:        awsresources.AWSEntity{Clients: clients},
+					}
+					publicSubnetCreated, err := publicSubnet.CreateIfNotExists()
+					if err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not create public subnet: %s", errgo.Details(err)))
+						return
+					}
+					if publicSubnetCreated {
+						s.logger.Log("info", fmt.Sprintf("created public subnet for cluster '%s'", cluster.Name))
+					} else {
+						s.logger.Log("info", fmt.Sprintf("public subnet for cluster '%s' already exists, reusing", cluster.Name))
+					}
+
+					if err := publicSubnet.MakePublic(routeTable); err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not make subnet public, %s", errgo.Details(err)))
+						return
+					}
+
+					// Create private subnet
+					privateSubnet := &awsresources.Subnet{
+						AvailabilityZone: cluster.Spec.AWS.AZ,
+						CidrBlock:        privateSubnetCidr,
+						Name:             subnetName(cluster, suffixPrivate),
+						VpcID:            vpc.ID(),
+						AWSEntity:        awsresources.AWSEntity{Clients: clients},
+					}
+					privateSubnetCreated, err := privateSubnet.CreateIfNotExists()
+					if err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not create private subnet: %s", errgo.Details(err)))
+						return
+					}
+					if privateSubnetCreated {
+						s.logger.Log("info", fmt.Sprintf("created private subnet for cluster '%s'", cluster.Name))
+					} else {
+						s.logger.Log("info", fmt.Sprintf("private subnet for cluster '%s' already exists, reusing", cluster.Name))
+					}
+
 					// Run masters
 					anyMastersCreated, masterIDs, err := s.runMachines(runMachinesInput{
 						clients:             clients,
@@ -285,6 +413,8 @@ func (s *Service) Boot() {
 						tlsAssets:           tlsAssets,
 						clusterName:         cluster.Name,
 						bucket:              bucket,
+						securityGroup:       securityGroup,
+						subnet:              publicSubnet,
 						keyPairName:         cluster.Name,
 						instanceProfileName: policy.Name(),
 						prefix:              prefixMaster,
@@ -318,6 +448,7 @@ func (s *Service) Boot() {
 						}
 						if err := elasticIP.CreateOrFail(); err != nil {
 							s.logger.Log("error", errgo.Details(err))
+							return
 						}
 					}
 					s.logger.Log("info", fmt.Sprintf("attached ip %v to instance %v", elasticIP.Name(), masterID))
@@ -328,6 +459,8 @@ func (s *Service) Boot() {
 						cluster:             cluster,
 						tlsAssets:           tlsAssets,
 						bucket:              bucket,
+						securityGroup:       securityGroup,
+						subnet:              privateSubnet,
 						clusterName:         cluster.Name,
 						keyPairName:         cluster.Name,
 						instanceProfileName: policy.Name(),
@@ -365,26 +498,93 @@ func (s *Service) Boot() {
 					}
 
 					// Delete masters
+					s.logger.Log("info", "deleting masters")
 					if err := s.deleteMachines(deleteMachinesInput{
 						clients:     clients,
 						clusterName: cluster.Name,
 						prefix:      prefixMaster,
 					}); err != nil {
 						s.logger.Log("error", errgo.Details(err))
-						return
 					}
 					s.logger.Log("info", "deleted masters")
 
 					// Delete workers
+					s.logger.Log("info", "deleting workers")
 					if err := s.deleteMachines(deleteMachinesInput{
 						clients:     clients,
 						clusterName: cluster.Name,
 						prefix:      prefixWorker,
 					}); err != nil {
 						s.logger.Log("error", errgo.Details(err))
-						return
 					}
 					s.logger.Log("info", "deleted workers")
+
+					// Delete public subnet
+					var publicSubnet resources.ResourceWithID
+					publicSubnet = &awsresources.Subnet{
+						Name:      subnetName(cluster, suffixPublic),
+						AWSEntity: awsresources.AWSEntity{Clients: clients},
+					}
+					if err := publicSubnet.Delete(); err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not delete public subnet: %s", errgo.Details(err)))
+					}
+					s.logger.Log("info", "deleted public subnet")
+
+					// Delete private subnet
+					var privateSubnet resources.ResourceWithID
+					privateSubnet = &awsresources.Subnet{
+						Name:      subnetName(cluster, suffixPrivate),
+						AWSEntity: awsresources.AWSEntity{Clients: clients},
+					}
+					if err := privateSubnet.Delete(); err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not delete private subnet: %s", errgo.Details(err)))
+					}
+					s.logger.Log("info", "deleted private subnet")
+
+					// Delete security group
+					var securityGroup resources.ResourceWithID
+					securityGroup = &awsresources.SecurityGroup{
+						Description: cluster.Name,
+						GroupName:   cluster.Name,
+						AWSEntity:   awsresources.AWSEntity{Clients: clients},
+					}
+					if err := securityGroup.Delete(); err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not delete security group: %s", errgo.Details(err)))
+					}
+					s.logger.Log("info", "deleted security group")
+
+					// Delete route table
+					var routeTable resources.ResourceWithID
+					routeTable = &awsresources.RouteTable{
+						Name:      cluster.Name,
+						AWSEntity: awsresources.AWSEntity{Clients: clients},
+					}
+					if err := routeTable.Delete(); err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not delete route table: %s", errgo.Details(err)))
+					}
+					s.logger.Log("info", "deleted route table")
+
+					// Delete gateway
+					var gateway resources.ResourceWithID
+					gateway = &awsresources.Gateway{
+						Name:      cluster.Name,
+						AWSEntity: awsresources.AWSEntity{Clients: clients},
+					}
+					if err := gateway.Delete(); err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not delete gateway: %s", errgo.Details(err)))
+					}
+					s.logger.Log("info", "deleted gateway")
+
+					// Delete VPC
+					var vpc resources.ResourceWithID
+					vpc = &awsresources.VPC{
+						Name:      cluster.Name,
+						AWSEntity: awsresources.AWSEntity{Clients: clients},
+					}
+					if err := vpc.Delete(); err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not delete vpc: %s", errgo.Details(err)))
+					}
+					s.logger.Log("info", "deleted vpc")
 
 					// Delete S3 bucket objects
 					bucketName := s.bucketName(cluster)
@@ -403,7 +603,6 @@ func (s *Service) Boot() {
 					}
 					if err := masterBucketObject.Delete(); err != nil {
 						s.logger.Log("error", errgo.Details(err))
-						return
 					}
 
 					var workerBucketObject resources.Resource
@@ -414,7 +613,6 @@ func (s *Service) Boot() {
 					}
 					if err := workerBucketObject.Delete(); err != nil {
 						s.logger.Log("error", errgo.Details(err))
-						return
 					}
 
 					s.logger.Log("info", "deleted bucket objects")
@@ -428,7 +626,6 @@ func (s *Service) Boot() {
 					}
 					if err := policy.Delete(); err != nil {
 						s.logger.Log("error", errgo.Details(err))
-						return
 					}
 					s.logger.Log("info", "deleted roles, policies, instance profiles")
 
@@ -440,7 +637,6 @@ func (s *Service) Boot() {
 					}
 					if err := keyPair.Delete(); err != nil {
 						s.logger.Log("error", errgo.Details(err))
-						return
 					}
 					s.logger.Log("info", "deleted keypair")
 
@@ -481,6 +677,8 @@ type runMachinesInput struct {
 	cluster             awstpr.CustomObject
 	tlsAssets           *cloudconfig.CompactTLSAssets
 	bucket              resources.Resource
+	securityGroup       resources.ResourceWithID
+	subnet              *awsresources.Subnet
 	clusterName         string
 	keyPairName         string
 	instanceProfileName string
@@ -526,6 +724,8 @@ func (s *Service) runMachines(input runMachinesInput) (bool, []string, error) {
 			awsNode:             awsMachines[i],
 			tlsAssets:           input.tlsAssets,
 			bucket:              input.bucket,
+			securityGroup:       input.securityGroup,
+			subnet:              input.subnet,
 			clusterName:         input.clusterName,
 			keyPairName:         input.keyPairName,
 			instanceProfileName: input.instanceProfileName,
@@ -583,6 +783,8 @@ type runMachineInput struct {
 	awsNode             awsinfo.Node
 	tlsAssets           *cloudconfig.CompactTLSAssets
 	bucket              resources.Resource
+	securityGroup       resources.ResourceWithID
+	subnet              *awsresources.Subnet
 	clusterName         string
 	keyPairName         string
 	instanceProfileName string
@@ -643,6 +845,8 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 			SmallCloudconfig:       smallCloudconfig,
 			IamInstanceProfileName: input.instanceProfileName,
 			PlacementAZ:            input.cluster.Spec.AWS.AZ,
+			SecurityGroupID:        input.securityGroup.ID(),
+			SubnetID:               input.subnet.ID(),
 			AWSEntity:              awsresources.AWSEntity{Clients: input.clients},
 		}
 		instanceCreated, err = instance.CreateIfNotExists()

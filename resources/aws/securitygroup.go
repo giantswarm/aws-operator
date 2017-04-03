@@ -19,17 +19,17 @@ type SecurityGroup struct {
 	AWSEntity
 }
 
-func (s *SecurityGroup) existingSecurityGroupID() (string, error) {
+func (s SecurityGroup) findExisting() (*ec2.SecurityGroup, error) {
 	securityGroups, err := s.Clients.EC2.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
 		Filters: []*ec2.Filter{
 			&ec2.Filter{
-				Name: aws.String("description"),
+				Name: aws.String(subnetDescription),
 				Values: []*string{
 					aws.String(s.Description),
 				},
 			},
 			&ec2.Filter{
-				Name: aws.String("group-name"),
+				Name: aws.String(subnetGroupName),
 				Values: []*string{
 					aws.String(s.GroupName),
 				},
@@ -37,24 +37,24 @@ func (s *SecurityGroup) existingSecurityGroupID() (string, error) {
 		},
 	})
 	if err != nil {
-		return "", microerror.MaskAny(err)
+		return nil, microerror.MaskAny(err)
 	}
 
 	if len(securityGroups.SecurityGroups) < 1 {
-		return "", microerror.MaskAny(securityGroupCreateAndFindError)
+		return nil, microerror.MaskAny(securityGroupFindError)
 	}
 
-	return *securityGroups.SecurityGroups[0].GroupId, nil
+	return securityGroups.SecurityGroups[0], nil
 }
 
 func (s *SecurityGroup) CreateIfNotExists() (bool, error) {
 	if err := s.CreateOrFail(); err != nil {
 		if strings.Contains(err.Error(), awsclient.SecurityGroupDuplicate) {
-			id, err := s.existingSecurityGroupID()
+			securityGroup, err := s.findExisting()
 			if err != nil {
 				return false, microerror.MaskAny(err)
 			}
-			s.id = id
+			s.id = *securityGroup.GroupId
 
 			return false, nil
 		}
@@ -101,8 +101,13 @@ func (s *SecurityGroup) CreateOrFail() error {
 }
 
 func (s *SecurityGroup) Delete() error {
+	securityGroup, err := s.findExisting()
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
+
 	if _, err := s.Clients.EC2.DeleteSecurityGroup(&ec2.DeleteSecurityGroupInput{
-		GroupId: aws.String(s.ID()),
+		GroupId: securityGroup.GroupId,
 	}); err != nil {
 		return microerror.MaskAny(err)
 	}
@@ -110,6 +115,6 @@ func (s *SecurityGroup) Delete() error {
 	return nil
 }
 
-func (s *SecurityGroup) ID() string {
+func (s SecurityGroup) ID() string {
 	return s.id
 }
