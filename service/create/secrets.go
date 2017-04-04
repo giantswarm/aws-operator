@@ -31,7 +31,7 @@ func (s *Service) getCertsFromSecrets(clusterID string) (certificatetpr.AssetsBu
 
 // gets the secret for a single cluster component, and saves in the shared assets bundle
 func (s *Service) getComponentSecret(componentName, clusterID string, bundle certificatetpr.AssetsBundle) (certificatetpr.AssetsBundle, error) {
-	watcher, err := s.k8sClient.Core().Secrets(api.NamespaceDefault).Watch(v1.ListOptions{
+	watcher, err := s.K8sClient.Core().Secrets(api.NamespaceDefault).Watch(v1.ListOptions{
 		// select only secrets that pertain to the component AND have a matching clusterID
 		LabelSelector: fmt.Sprintf("%s=%s, %s=%s", certificatetpr.ComponentLabel, componentName, certificatetpr.ClusterIDLabel, clusterID),
 	})
