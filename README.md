@@ -93,6 +93,33 @@ second-customer
 
 ```
 
+## Secret
+
+Here the plain passwords/tokens have to be inserted.
+```
+aws:
+  accesskey:
+    id: 'TODO'
+    secret: 'TODO'
+```
+
+Here the base64 representation of the data structure above has to be inserted.
+```
+apiVersion: v1
+kind: Secret
+metadata:
+  name: aws-operator-secret
+  namespace: giantswarm
+type: Opaque
+data:
+  secret.yml: 'TODO'
+```
+
+To create the secret manually do this.
+```
+kubectl create -f ./path/to/secret.yml
+```
+
 ## Contact
 
 - Mailing list: [giantswarm](https://groups.google.com/forum/!forum/giantswarm)
