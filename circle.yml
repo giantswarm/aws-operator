@@ -17,3 +17,8 @@ test:
   override:
     - ./architect --organisation=giantswarm build 
 
+deployment:
+  master:
+    branch: master
+    commands:
+      - ./architect --organisation=giantswarm deploy

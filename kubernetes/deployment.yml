@@ -32,7 +32,7 @@ spec:
           path: /etc/ssl/certs/ca-certificates.crt
       containers:
       - name: aws-operator
-        image: registry.giantswarm.io/giantswarm/aws-operator:%%DOCKER_TAG%%
+        image: registry.giantswarm.io/giantswarm/aws-operator:{{ .BuildInfo.SHA }}
         volumeMounts:
         - name: aws-operator-configmap
           mountPath: /var/run/aws-operator/configmap/
