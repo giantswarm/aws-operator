@@ -10,10 +10,35 @@ spec:
     customer:
       id: "example-customer"
 
+    docker:
+      imageNamespace: "giantswarm"
+
+    etcd:
+      domain: "k8s.cluster.giantswarm.io"
+      prefix: "example-cluster"
+
+    calico:
+      subnet: "192.168.0.0"
+      cidr: 24
+      mtu: 1500
+
+    kubernetes:
+      api:
+        domain: "k8s.cluster.giantswarm.io"
+        insecurePort: 8080
+        securePort: 443
+        clusterIPRange: "192.168.0.0/24"
+      hyperkube:
+        docker:
+          image: "giantswarm/hyperkube:v1.5.2_coreos.0"
+
+    operator:
+      networkSetup:
+        docker:
+          image: "giantswarm/setup-network-env:0.1"
+
     masters:
     - hostname: "master-1"
-    - hostname: "master-2"
-    - hostname: "master-3"
 
     workers:
     - hostname: "worker-1"
@@ -22,10 +47,6 @@ spec:
     region: "eu-central-1"
     az: "eu-central-1a"
     masters:
-    - imageid: "ami-9501c8fa"
-      instancetype: "t2.medium"
-    - imageid: "ami-9501c8fa"
-      instancetype: "t2.medium"
     - imageid: "ami-9501c8fa"
       instancetype: "t2.medium"
 
