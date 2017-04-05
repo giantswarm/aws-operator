@@ -6,6 +6,11 @@ type Resource interface {
 	Delete() error
 }
 
+type ResourceWithID interface {
+	ID() string
+	Resource
+}
+
 type NamedResource interface {
 	Name() string
 	Resource
