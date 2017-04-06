@@ -18,7 +18,7 @@ func (s *Service) createTPR() error {
 		},
 		Description: "Managed Kubernetes on AWS clusters",
 	}
-	_, err := s.k8sClient.Extensions().ThirdPartyResources().Create(tpr)
+	_, err := s.K8sClient.Extensions().ThirdPartyResources().Create(tpr)
 	if err != nil && !errors.IsAlreadyExists(err) {
 		return microerror.MaskAny(err)
 	}

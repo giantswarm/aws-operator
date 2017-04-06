@@ -48,7 +48,7 @@ func (s *Service) keyPair(input keyPairInput) (string, error) {
 	})
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok && aerr.Code() == awsclient.KeyPairDuplicate {
-			s.logger.Log("info", fmt.Sprintf("keypair '%s' exists, reusing", input.clusterName))
+			s.Logger.Log("info", fmt.Sprintf("keypair '%s' exists, reusing", input.clusterName))
 			return input.clusterName, nil
 		} else {
 			return "", microerror.MaskAny(err)

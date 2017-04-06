@@ -12,6 +12,7 @@ import (
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	k8sutil "github.com/giantswarm/aws-operator/client/k8s"
+	"github.com/giantswarm/aws-operator/service/common"
 	"github.com/giantswarm/aws-operator/service/create"
 	"github.com/giantswarm/aws-operator/service/version"
 )
@@ -75,12 +76,14 @@ func New(config Config) (*Service, error) {
 
 	var createService *create.Service
 	{
-		createConfig := create.DefaultConfig()
-
-		createConfig.AwsConfig = config.AwsConfig
-		createConfig.K8sClient = k8sClient
-		createConfig.Logger = config.Logger
-		createConfig.PubKeyFile = config.PubKeyFile
+		createConfig := create.Config{
+			PubKeyFile: config.PubKeyFile,
+			Config: common.Config{
+				AwsConfig: config.AwsConfig,
+				K8sClient: k8sClient,
+				Logger:    config.Logger,
+			},
+		}
 
 		createService, err = create.New(createConfig)
 		if err != nil {

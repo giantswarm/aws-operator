@@ -1,7 +1,6 @@
 package create
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"sync"
@@ -15,23 +14,17 @@ import (
 	"github.com/giantswarm/clustertpr/node"
 	"github.com/giantswarm/k8scloudconfig"
 	microerror "github.com/giantswarm/microkit/error"
-	micrologger "github.com/giantswarm/microkit/logger"
+	// micrologger "github.com/giantswarm/microkit/logger"
 	"github.com/juju/errgo"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/pkg/api"
-	"k8s.io/client-go/pkg/runtime"
-	"k8s.io/client-go/pkg/watch"
 	"k8s.io/client-go/tools/cache"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
-	k8sutil "github.com/giantswarm/aws-operator/client/k8s"
 	"github.com/giantswarm/aws-operator/resources"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
+	"github.com/giantswarm/aws-operator/service/common"
 )
 
 const (
-	ClusterListAPIEndpoint  string = "/apis/cluster.giantswarm.io/v1/awses"
-	ClusterWatchAPIEndpoint string = "/apis/cluster.giantswarm.io/v1/watch/awses"
 	// The format of instance's name is "[name of cluster]-[prefix ('master' or 'worker')]-[number]".
 	instanceNameFormat string = "%s-%s-%d"
 	// The format of prefix inside a cluster "[name of cluster]-[prefix ('master' or 'worker')]".
@@ -64,44 +57,29 @@ const (
 
 // Config represents the configuration used to create a version service.
 type Config struct {
-	// Dependencies.
-	AwsConfig  awsutil.Config
-	K8sClient  kubernetes.Interface
-	Logger     micrologger.Logger
-	S3Bucket   string
 	PubKeyFile string
-}
-
-// DefaultConfig provides a default configuration to create a new version service
-// by best effort.
-func DefaultConfig() Config {
-	return Config{
-		// Dependencies.
-		K8sClient:  nil,
-		Logger:     nil,
-		S3Bucket:   "",
-		PubKeyFile: "",
-	}
+	common.Config
 }
 
 // New creates a new configured version service.
 func New(config Config) (*Service, error) {
 	// Dependencies.
 	if config.Logger == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "logger must not be empty")
+		return nil, microerror.MaskAnyf(invalidConfigError, "Logger must not be empty")
 	}
 
 	newService := &Service{
-		// Dependencies.
-		awsConfig: config.AwsConfig,
-		k8sClient: config.K8sClient,
-		logger:    config.Logger,
-
 		// AWS certificates options.
 		pubKeyFile: config.PubKeyFile,
 
-		// Internals
-		bootOnce: sync.Once{},
+		Service: common.Service{
+			// Dependencies.
+			AwsConfig: config.AwsConfig,
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+			// Internals
+			BootOnce: sync.Once{},
+		},
 	}
 
 	return newService, nil
@@ -109,84 +87,36 @@ func New(config Config) (*Service, error) {
 
 // Service implements the version service interface.
 type Service struct {
-	// Dependencies.
-	awsConfig awsutil.Config
-	k8sClient kubernetes.Interface
-	logger    micrologger.Logger
-
 	// AWS certificates options.
 	pubKeyFile string
 
-	// Internals.
-	bootOnce sync.Once
-}
-
-type Event struct {
-	Type   string
-	Object *awstpr.CustomObject
-}
-
-func (s *Service) newClusterListWatch() *cache.ListWatch {
-	client := s.k8sClient.Core().RESTClient()
-
-	listWatch := &cache.ListWatch{
-		ListFunc: func(options api.ListOptions) (runtime.Object, error) {
-			req := client.Get().AbsPath(ClusterListAPIEndpoint)
-			b, err := req.DoRaw()
-			if err != nil {
-				return nil, err
-			}
-
-			var c awstpr.List
-			if err := json.Unmarshal(b, &c); err != nil {
-				return nil, err
-			}
-
-			return &c, nil
-		},
-
-		WatchFunc: func(options api.ListOptions) (watch.Interface, error) {
-			req := client.Get().AbsPath(ClusterWatchAPIEndpoint)
-			stream, err := req.Stream()
-			if err != nil {
-				return nil, err
-			}
-
-			watcher := watch.NewStreamWatcher(&k8sutil.ClusterDecoder{
-				Stream: stream,
-			})
-
-			return watcher, nil
-		},
-	}
-
-	return listWatch
+	common.Service
 }
 
 func (s *Service) Boot() {
-	s.bootOnce.Do(func() {
+	s.BootOnce.Do(func() {
 		if err := s.createTPR(); err != nil {
 			panic(err)
 		}
-		s.logger.Log("info", "successfully created third-party resource")
+		s.Logger.Log("info", "successfully created third-party resource")
 
 		_, clusterInformer := cache.NewInformer(
-			s.newClusterListWatch(),
+			s.NewClusterListWatch(),
 			&awstpr.CustomObject{},
 			resyncPeriod,
 			cache.ResourceEventHandlerFuncs{
 				AddFunc: func(obj interface{}) {
 					cluster := *obj.(*awstpr.CustomObject)
-					s.logger.Log("info", fmt.Sprintf("creating cluster '%s'", cluster.Name))
+					s.Logger.Log("info", fmt.Sprintf("creating cluster '%s'", cluster.Name))
 
 					if err := s.createClusterNamespace(cluster.Spec.Cluster); err != nil {
-						s.logger.Log("error", fmt.Sprintf("could not create cluster namespace: %s", errgo.Details(err)))
+						s.Logger.Log("error", fmt.Sprintf("could not create cluster namespace: %s", errgo.Details(err)))
 						return
 					}
 
 					// Create AWS client
-					s.awsConfig.Region = cluster.Spec.AWS.Region
-					clients := awsutil.NewClients(s.awsConfig)
+					s.AwsConfig.Region = cluster.Spec.AWS.Region
+					clients := awsutil.NewClients(s.AwsConfig)
 
 					// Create keypair
 					var keyPair resources.Resource
@@ -200,21 +130,21 @@ func (s *Service) Boot() {
 						}
 						keyPairCreated, err = keyPair.CreateIfNotExists()
 						if err != nil {
-							s.logger.Log("error", fmt.Sprintf("could not create keypair: %s", errgo.Details(err)))
+							s.Logger.Log("error", fmt.Sprintf("could not create keypair: %s", errgo.Details(err)))
 							return
 						}
 					}
 
 					if keyPairCreated {
-						s.logger.Log("info", fmt.Sprintf("created keypair '%s'", cluster.Name))
+						s.Logger.Log("info", fmt.Sprintf("created keypair '%s'", cluster.Name))
 					} else {
-						s.logger.Log("info", fmt.Sprintf("keypair '%s' already exists, reusing", cluster.Name))
+						s.Logger.Log("info", fmt.Sprintf("keypair '%s' already exists, reusing", cluster.Name))
 					}
 
 					clusterID := cluster.Spec.Cluster.Cluster.ID
 					certs, err := s.getCertsFromSecrets(clusterID)
 					if err != nil {
-						s.logger.Log("error", fmt.Sprintf("could not get certificates from secrets: %v", errgo.Details(err)))
+						s.Logger.Log("error", fmt.Sprintf("could not get certificates from secrets: %v", errgo.Details(err)))
 						return
 					}
 
@@ -231,7 +161,7 @@ func (s *Service) Boot() {
 					// Encode TLS assets
 					tlsAssets, err := s.encodeTLSAssets(certs, clients.KMS, kmsKey.Arn())
 					if err != nil {
-						s.logger.Log("error", fmt.Sprintf("could not encode TLS assets: %s", errgo.Details(err)))
+						s.Logger.Log("error", fmt.Sprintf("could not encode TLS assets: %s", errgo.Details(err)))
 						return
 					}
 
@@ -259,15 +189,15 @@ func (s *Service) Boot() {
 						}
 						bucketCreated, err = bucket.CreateIfNotExists()
 						if err != nil {
-							s.logger.Log("error", fmt.Sprintf("could not create S3 bucket: %s", errgo.Details(err)))
+							s.Logger.Log("error", fmt.Sprintf("could not create S3 bucket: %s", errgo.Details(err)))
 							return
 						}
 					}
 
 					if bucketCreated {
-						s.logger.Log("info", fmt.Sprintf("created bucket '%s'", awsresources.BucketName(cluster)))
+						s.Logger.Log("info", fmt.Sprintf("created bucket '%s'", awsresources.BucketName(cluster)))
 					} else {
-						s.logger.Log("info", fmt.Sprintf("bucket '%s' already exists, reusing", awsresources.BucketName(cluster)))
+						s.Logger.Log("info", fmt.Sprintf("bucket '%s' already exists, reusing", awsresources.BucketName(cluster)))
 					}
 
 					// Run masters
@@ -282,23 +212,23 @@ func (s *Service) Boot() {
 						prefix:              prefixMaster,
 					})
 					if err != nil {
-						s.logger.Log("error", errgo.Details(err))
+						s.Logger.Log("error", errgo.Details(err))
 					}
 
 					if !validateIDs(masterIDs) {
-						s.logger.Log("error", fmt.Sprintf("master nodes had invalid instance IDs: %v", masterIDs))
+						s.Logger.Log("error", fmt.Sprintf("master nodes had invalid instance IDs: %v", masterIDs))
 						return
 					}
 
 					// Add an elastic IP to the master
 					masterID := masterIDs[0]
-					s.logger.Log("debug", fmt.Sprintf("waiting for %s to be ready", masterID))
+					s.Logger.Log("debug", fmt.Sprintf("waiting for %s to be ready", masterID))
 					if err := clients.EC2.WaitUntilInstanceRunning(&ec2.DescribeInstancesInput{
 						InstanceIds: []*string{
 							aws.String(masterID),
 						},
 					}); err != nil {
-						s.logger.Log("error", fmt.Sprintf("master took too long to get running, aborting: %v", err))
+						s.Logger.Log("error", fmt.Sprintf("master took too long to get running, aborting: %v", err))
 						return
 					}
 
@@ -309,10 +239,10 @@ func (s *Service) Boot() {
 							AWSEntity:  awsresources.AWSEntity{Clients: clients},
 						}
 						if err := elasticIP.CreateOrFail(); err != nil {
-							s.logger.Log("error", errgo.Details(err))
+							s.Logger.Log("error", errgo.Details(err))
 						}
 					}
-					s.logger.Log("info", fmt.Sprintf("attached ip %v to instance %v", elasticIP.Name(), masterID))
+					s.Logger.Log("info", fmt.Sprintf("attached ip %v to instance %v", elasticIP.Name(), masterID))
 
 					// Run workers
 					anyWorkersCreated, _, err := s.runMachines(runMachinesInput{
@@ -326,7 +256,7 @@ func (s *Service) Boot() {
 						prefix:              prefixWorker,
 					})
 					if err != nil {
-						s.logger.Log("error", errgo.Details(err))
+						s.Logger.Log("error", errgo.Details(err))
 						return
 					}
 
@@ -334,21 +264,21 @@ func (s *Service) Boot() {
 					// is inconsistent and most problably its deployment broke in the middle during the previous run of
 					// aws-operator.
 					if (anyMastersCreated || anyWorkersCreated) && (kmsKeyErr != nil || policyErr != nil) {
-						s.logger.Log("error", fmt.Sprintf("cluster '%s' is inconsistent, KMS keys and policies were not created, but EC2 instances were missing, please consider deleting this cluster", cluster.Name))
+						s.Logger.Log("error", fmt.Sprintf("cluster '%s' is inconsistent, KMS keys and policies were not created, but EC2 instances were missing, please consider deleting this cluster", cluster.Name))
 						return
 					}
 
-					s.logger.Log("info", fmt.Sprintf("cluster '%s' processed", cluster.Name))
+					s.Logger.Log("info", fmt.Sprintf("cluster '%s' processed", cluster.Name))
 				},
 				DeleteFunc: func(obj interface{}) {
 					// TODO(nhlfr): Move this to a separate operator.
 					cluster := *obj.(*awstpr.CustomObject)
 
 					if err := s.deleteClusterNamespace(cluster.Spec.Cluster); err != nil {
-						s.logger.Log("error", "could not delete cluster namespace:", err)
+						s.Logger.Log("error", "could not delete cluster namespace:", err)
 					}
 
-					clients := awsutil.NewClients(s.awsConfig)
+					clients := awsutil.NewClients(s.AwsConfig)
 
 					// Delete masters
 					if err := s.deleteMachines(deleteMachinesInput{
@@ -356,10 +286,10 @@ func (s *Service) Boot() {
 						clusterName: cluster.Name,
 						prefix:      prefixMaster,
 					}); err != nil {
-						s.logger.Log("error", errgo.Details(err))
+						s.Logger.Log("error", errgo.Details(err))
 						return
 					}
-					s.logger.Log("info", "deleted masters")
+					s.Logger.Log("info", "deleted masters")
 
 					// Delete workers
 					if err := s.deleteMachines(deleteMachinesInput{
@@ -367,10 +297,10 @@ func (s *Service) Boot() {
 						clusterName: cluster.Name,
 						prefix:      prefixWorker,
 					}); err != nil {
-						s.logger.Log("error", errgo.Details(err))
+						s.Logger.Log("error", errgo.Details(err))
 						return
 					}
-					s.logger.Log("info", "deleted workers")
+					s.Logger.Log("info", "deleted workers")
 
 					// Delete S3 bucket objects
 					var bucket resources.Resource
@@ -386,7 +316,7 @@ func (s *Service) Boot() {
 						AWSEntity: awsresources.AWSEntity{Clients: clients},
 					}
 					if err := masterBucketObject.Delete(); err != nil {
-						s.logger.Log("error", errgo.Details(err))
+						s.Logger.Log("error", errgo.Details(err))
 						return
 					}
 
@@ -397,11 +327,11 @@ func (s *Service) Boot() {
 						AWSEntity: awsresources.AWSEntity{Clients: clients},
 					}
 					if err := workerBucketObject.Delete(); err != nil {
-						s.logger.Log("error", errgo.Details(err))
+						s.Logger.Log("error", errgo.Details(err))
 						return
 					}
 
-					s.logger.Log("info", "deleted bucket objects")
+					s.Logger.Log("info", "deleted bucket objects")
 
 					// Delete policy
 					var policy resources.NamedResource
@@ -411,10 +341,10 @@ func (s *Service) Boot() {
 						AWSEntity: awsresources.AWSEntity{Clients: clients},
 					}
 					if err := policy.Delete(); err != nil {
-						s.logger.Log("error", errgo.Details(err))
+						s.Logger.Log("error", errgo.Details(err))
 						return
 					}
-					s.logger.Log("info", "deleted roles, policies, instance profiles")
+					s.Logger.Log("info", "deleted roles, policies, instance profiles")
 
 					// Delete keypair
 					var keyPair resources.Resource
@@ -423,17 +353,17 @@ func (s *Service) Boot() {
 						AWSEntity:   awsresources.AWSEntity{Clients: clients},
 					}
 					if err := keyPair.Delete(); err != nil {
-						s.logger.Log("error", errgo.Details(err))
+						s.Logger.Log("error", errgo.Details(err))
 						return
 					}
-					s.logger.Log("info", "deleted keypair")
+					s.Logger.Log("info", "deleted keypair")
 
-					s.logger.Log("info", fmt.Sprintf("cluster '%s' deleted", cluster.Name))
+					s.Logger.Log("info", fmt.Sprintf("cluster '%s' deleted", cluster.Name))
 				},
 			},
 		)
 
-		s.logger.Log("info", "starting watch")
+		s.Logger.Log("info", "starting watch")
 
 		// Cluster informer lifecycle can be interrupted by putting a value into a "stop channel".
 		// We aren't currently using that functionality, so we are passing a nil here.
@@ -636,12 +566,12 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 	}
 
 	if instanceCreated {
-		s.logger.Log("info", fmt.Sprintf("instance '%s' reserved", input.name))
+		s.Logger.Log("info", fmt.Sprintf("instance '%s' reserved", input.name))
 	} else {
-		s.logger.Log("info", fmt.Sprintf("instance '%s' already exists, reusing", input.name))
+		s.Logger.Log("info", fmt.Sprintf("instance '%s' already exists, reusing", input.name))
 	}
 
-	s.logger.Log("info", fmt.Sprintf("instance '%s' tagged", input.name))
+	s.Logger.Log("info", fmt.Sprintf("instance '%s' tagged", input.name))
 
 	return instanceCreated, instance.InstanceID, nil
 }
@@ -690,7 +620,7 @@ func (s *Service) deleteMachine(input deleteMachineInput) error {
 		return microerror.MaskAny(err)
 	}
 
-	s.logger.Log("info", fmt.Sprintf("instance '%s' removed", input.name))
+	s.Logger.Log("info", fmt.Sprintf("instance '%s' removed", input.name))
 
 	return nil
 }

@@ -23,12 +23,12 @@ func (s *Service) createClusterNamespace(cluster clustertpr.Cluster) error {
 		},
 	}
 
-	if _, err := s.k8sClient.Core().Namespaces().Create(&namespace); err != nil && !errors.IsAlreadyExists(err) {
+	if _, err := s.K8sClient.Core().Namespaces().Create(&namespace); err != nil && !errors.IsAlreadyExists(err) {
 		return microerror.MaskAny(err)
 	}
 	return nil
 }
 
 func (s *Service) deleteClusterNamespace(cluster clustertpr.Cluster) error {
-	return s.k8sClient.Core().Namespaces().Delete(cluster.Cluster.ID, v1.NewDeleteOptions(0))
+	return s.K8sClient.Core().Namespaces().Delete(cluster.Cluster.ID, v1.NewDeleteOptions(0))
 }
