@@ -1,9 +1,13 @@
 package aws
 
 import (
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	microerror "github.com/giantswarm/microkit/error"
+
+	awsclient "github.com/giantswarm/aws-operator/client/aws"
 )
 
 type SecurityGroup struct {
@@ -15,8 +19,50 @@ type SecurityGroup struct {
 	AWSEntity
 }
 
+func (s *SecurityGroup) existingSecurityGroupID() (string, error) {
+	securityGroups, err := s.Clients.EC2.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
+		Filters: []*ec2.Filter{
+			&ec2.Filter{
+				Name: aws.String("description"),
+				Values: []*string{
+					aws.String(s.Description),
+				},
+			},
+			&ec2.Filter{
+				Name: aws.String("group-name"),
+				Values: []*string{
+					aws.String(s.GroupName),
+				},
+			},
+		},
+	})
+	if err != nil {
+		return "", microerror.MaskAny(err)
+	}
+
+	if len(securityGroups.SecurityGroups) < 1 {
+		return "", microerror.MaskAny(securityGroupCreateAndFindError)
+	}
+
+	return *securityGroups.SecurityGroups[0].GroupId, nil
+}
+
 func (s *SecurityGroup) CreateIfNotExists() (bool, error) {
-	return false, microerror.MaskAny(notImplementedMethodError)
+	if err := s.CreateOrFail(); err != nil {
+		if strings.Contains(err.Error(), awsclient.SecurityGroupDuplicate) {
+			id, err := s.existingSecurityGroupID()
+			if err != nil {
+				return false, microerror.MaskAny(err)
+			}
+			s.id = id
+
+			return false, nil
+		}
+
+		return false, microerror.MaskAny(err)
+	}
+
+	return true, nil
 }
 
 func (s *SecurityGroup) openPort(port int) error {
