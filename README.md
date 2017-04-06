@@ -120,19 +120,6 @@ To create the secret manually do this.
 kubectl create -f ./path/to/secret.yml
 ```
 
-We also need a key to hold the SSH public key
-
-```
-apiVersion: v1
-kind: Secret
-metadata:
-  name: aws-operator-ssh-key-secret
-  namespace: giantswarm
-type: Opaque
-data:
-  id_rsa.pub: 'TODO'
-```
-
 ## Contact
 
 - Mailing list: [giantswarm](https://groups.google.com/forum/!forum/giantswarm)
