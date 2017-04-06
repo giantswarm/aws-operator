@@ -188,6 +188,12 @@ func (s *Service) Boot() {
 					s.awsConfig.Region = cluster.Spec.AWS.Region
 					clients := awsutil.NewClients(s.awsConfig)
 
+					err := s.awsConfig.SetAccountID(clients.IAM)
+					if err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not retrieve amazon account id: %s", errgo.Details(err)))
+						return
+					}
+
 					// Create keypair
 					var keyPair resources.Resource
 					var keyPairCreated bool
@@ -236,13 +242,15 @@ func (s *Service) Boot() {
 					}
 
 					// Create policy
+					bucketName := s.bucketName(cluster)
+
 					var policy resources.NamedResource
 					var policyErr error
 					{
 						policy = &awsresources.Policy{
 							ClusterID: cluster.Spec.Cluster.Cluster.ID,
 							KMSKeyArn: kmsKey.Arn(),
-							S3Bucket:  awsresources.BucketName(cluster),
+							S3Bucket:  bucketName,
 							AWSEntity: awsresources.AWSEntity{Clients: clients},
 						}
 						policyErr = policy.CreateOrFail()
@@ -254,7 +262,7 @@ func (s *Service) Boot() {
 					{
 						var err error
 						bucket = &awsresources.Bucket{
-							Name:      awsresources.BucketName(cluster),
+							Name:      bucketName,
 							AWSEntity: awsresources.AWSEntity{Clients: clients},
 						}
 						bucketCreated, err = bucket.CreateIfNotExists()
@@ -265,9 +273,9 @@ func (s *Service) Boot() {
 					}
 
 					if bucketCreated {
-						s.logger.Log("info", fmt.Sprintf("created bucket '%s'", awsresources.BucketName(cluster)))
+						s.logger.Log("info", fmt.Sprintf("created bucket '%s'", bucketName))
 					} else {
-						s.logger.Log("info", fmt.Sprintf("bucket '%s' already exists, reusing", awsresources.BucketName(cluster)))
+						s.logger.Log("info", fmt.Sprintf("bucket '%s' already exists, reusing", bucketName))
 					}
 
 					// Run masters
@@ -350,6 +358,12 @@ func (s *Service) Boot() {
 
 					clients := awsutil.NewClients(s.awsConfig)
 
+					err := s.awsConfig.SetAccountID(clients.IAM)
+					if err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not retrieve amazon account id: %s", errgo.Details(err)))
+						return
+					}
+
 					// Delete masters
 					if err := s.deleteMachines(deleteMachinesInput{
 						clients:     clients,
@@ -373,15 +387,17 @@ func (s *Service) Boot() {
 					s.logger.Log("info", "deleted workers")
 
 					// Delete S3 bucket objects
+					bucketName := s.bucketName(cluster)
+
 					var bucket resources.Resource
 					bucket = &awsresources.Bucket{
-						Name:      awsresources.BucketName(cluster),
 						AWSEntity: awsresources.AWSEntity{Clients: clients},
+						Name:      bucketName,
 					}
 
 					var masterBucketObject resources.Resource
 					masterBucketObject = &awsresources.BucketObject{
-						Name:      awsresources.BucketObjectName(cluster, prefixMaster),
+						Name:      s.bucketObjectName(cluster, prefixMaster),
 						Bucket:    bucket.(*awsresources.Bucket),
 						AWSEntity: awsresources.AWSEntity{Clients: clients},
 					}
@@ -392,7 +408,7 @@ func (s *Service) Boot() {
 
 					var workerBucketObject resources.Resource
 					workerBucketObject = &awsresources.BucketObject{
-						Name:      awsresources.BucketObjectName(cluster, prefixWorker),
+						Name:      s.bucketObjectName(cluster, prefixWorker),
 						Bucket:    bucket.(*awsresources.Bucket),
 						AWSEntity: awsresources.AWSEntity{Clients: clients},
 					}
@@ -407,7 +423,7 @@ func (s *Service) Boot() {
 					var policy resources.NamedResource
 					policy = &awsresources.Policy{
 						ClusterID: cluster.Spec.Cluster.Cluster.ID,
-						S3Bucket:  awsresources.BucketName(cluster),
+						S3Bucket:  bucketName,
 						AWSEntity: awsresources.AWSEntity{Clients: clients},
 					}
 					if err := policy.Delete(); err != nil {
@@ -593,12 +609,12 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 	cloudconfigConfig := SmallCloudconfigConfig{
 		MachineType: input.prefix,
 		Region:      input.cluster.Spec.AWS.Region,
-		S3DirURI:    awsresources.BucketObjectFullDirPath(input.cluster),
+		S3DirURI:    s.bucketObjectFullDirPath(input.cluster),
 	}
 
 	var cloudconfigS3 resources.Resource
 	cloudconfigS3 = &awsresources.BucketObject{
-		Name:      awsresources.BucketObjectName(input.cluster, input.prefix),
+		Name:      s.bucketObjectName(input.cluster, input.prefix),
 		Data:      cloudConfig,
 		Bucket:    input.bucket.(*awsresources.Bucket),
 		AWSEntity: awsresources.AWSEntity{Clients: input.clients},
