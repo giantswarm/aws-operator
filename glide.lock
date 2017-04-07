@@ -1,5 +1,5 @@
-hash: d17b627d6fb76fe1f67660578bc74c7a98674607650f87a303703054f8b2cbdc
-updated: 2017-03-31T16:08:54.090907655+02:00
+hash: 7f97a4f5840cdc62c616577277aa45813a86434d212632e2134de2085f9d26dd
+updated: 2017-04-07T11:26:49.549183271+02:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aws/aws-sdk-go
-  version: 38dd25dcbd6cec1983fe05abc880d6a3aa49a962
+  version: 4c307b6c988d40b9601a86768b29c28e8fb033eb
   subpackages:
   - aws
   - aws/awserr
@@ -92,16 +92,15 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: 288f3d1dff098b1cca30c3d88c461b71b203bbd0
+  version: 89bfacfd3d4cbc2a9bc732ba2fdfe34fc0b5e73a
   subpackages:
   - aws
 - name: github.com/giantswarm/certificatetpr
   version: fa554d09f0137a91aa6ef007b92e170b31dbefd2
 - name: github.com/giantswarm/clustertpr
-  version: 47bae764f0a168b9dac27e274515b1a5d03eea6b
+  version: ab6482e53e6c7d22fc5d4fa77f3762cac6914ec3
   subpackages:
   - calico
-  - cloudflare
   - cluster
   - customer
   - docker
@@ -109,6 +108,7 @@ imports:
   - docker/registry
   - etcd
   - flannel
+  - flannel/client
   - flannel/docker
   - kubernetes
   - kubernetes/api
@@ -232,7 +232,7 @@ imports:
 - name: github.com/pelletier/go-buffruneio
   version: c37440a7cf42ac63b919c752ca73a85067e05992
 - name: github.com/pelletier/go-toml
-  version: e32a2e04744250647a72bf17da1b09befc03b6b1
+  version: fe206efb84b2bc8e8cfafe6b4c1826622be969e3
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
@@ -263,7 +263,7 @@ imports:
 - name: github.com/spf13/cast
   version: ce135a4ebeee6cfe9a26c93ee0d37825f26113c7
 - name: github.com/spf13/cobra
-  version: 7be4beda01ec05d0b93d80b3facd2b6f44080d94
+  version: 7aeaa2cce6ae7e18d2a6ee597b60ee137e999bd9
 - name: github.com/spf13/jwalterweatherman
   version: fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66
 - name: github.com/spf13/pflag
