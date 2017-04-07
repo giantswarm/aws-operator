@@ -2,7 +2,6 @@ package clustertpr
 
 import (
 	"github.com/giantswarm/clustertpr/calico"
-	"github.com/giantswarm/clustertpr/cloudflare"
 	"github.com/giantswarm/clustertpr/cluster"
 	"github.com/giantswarm/clustertpr/customer"
 	"github.com/giantswarm/clustertpr/docker"
@@ -16,7 +15,6 @@ import (
 
 type Cluster struct {
 	Calico     calico.Calico         `json:"calico" yaml:"calico"`
-	Cloudflare cloudflare.Cloudflare `json:"cloudflare" yaml:"cloudflare"`
 	Cluster    cluster.Cluster       `json:"cluster" yaml:"cluster"`
 	Customer   customer.Customer     `json:"customer" yaml:"customer"`
 	Docker     docker.Docker         `json:"docker" yaml:"docker"`

@@ -1,5 +1,5 @@
-hash: d83d546fc87189161cb4e272bade867aa4517e84304d8c82f6a783ec0bd4ff8c
-updated: 2017-03-13T14:59:02.233207093+01:00
+hash: 801b1d5681068e31ae1148b6dc19c22033940a5e50b3434db3d134d9dd7be655
+updated: 2017-04-06T17:59:43.903778317+02:00
 imports:
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
@@ -18,10 +18,9 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/clustertpr
-  version: 47bae764f0a168b9dac27e274515b1a5d03eea6b
+  version: ab6482e53e6c7d22fc5d4fa77f3762cac6914ec3
   subpackages:
   - calico
-  - cloudflare
   - cluster
   - customer
   - docker
@@ -29,6 +28,7 @@ imports:
   - docker/registry
   - etcd
   - flannel
+  - flannel/client
   - flannel/docker
   - kubernetes
   - kubernetes/api

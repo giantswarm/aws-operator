@@ -1,3 +1,47 @@
+Release v1.8.10 (2017-04-06)
+===
+
+### Service Client Updates
+* `service/elbv2`: Updates service documentation
+
+Release v1.8.9 (2017-04-05)
+===
+
+### Service Client Updates
+* `service/elasticache`: Updates service API, documentation, paginators, and examples
+  * ElastiCache added support for testing the Elasticache Multi-AZ feature with Automatic Failover.
+
+Release v1.8.8 (2017-04-04)
+===
+
+### Service Client Updates
+* `service/cloudwatch`: Updates service API, documentation, and paginators
+  * Amazon Web Services announced the immediate availability of two additional alarm configuration rules for Amazon CloudWatch Alarms. The first rule is for configuring missing data treatment. Customers have the options to treat missing data as alarm threshold breached, alarm threshold not breached, maintain alarm state and the current default treatment. The second rule is for alarms based on percentiles metrics that can trigger unnecassarily if the percentile is calculated from a small number of samples. The new rule can treat percentiles with low sample counts as same as missing data. If the first rule is enabled, the same treatment will be applied when an alarm encounters a percentile with low sample counts.
+
+Release v1.8.7 (2017-04-03)
+===
+
+### Service Client Updates
+* `service/lexruntimeservice`: Updates service API and documentation
+  * Adds support to PostContent for speech input
+
+### SDK Enhancements
+* `aws/request`: Improve handler copy, push back, push front performance (#1171)
+  * Minor optimization to the handler list's handling of copying and pushing request handlers to the handler list.
+* Update codegen header to use Go std wording (#1172)
+  * Go recently accepted the proposal for standard generated file header wording in, https://golang.org/s/generatedcode.
+
+### SDK Bugs
+* `service/dynamodb`: Fix DynamoDB using custom retryer (#1170)
+  * Fixes (#1139) the DynamoDB service client clobbering any custom retryer that was passed into the service client or Session's config.
+Release v1.8.6 (2017-04-01)
+===
+
+### Service Client Updates
+* `service/clouddirectory`: Updates service API and documentation
+  * ListObjectAttributes now supports filtering by facet.
+* `aws/endpoints`: Updated Regions and Endpoints metadata.
+
 Release v1.8.5 (2017-03-30)
 ===
 
