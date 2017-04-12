@@ -227,6 +227,7 @@ func (s *Service) Boot() {
 						s.logger.Log("info", fmt.Sprintf("keypair '%s' already exists, reusing", cluster.Name))
 					}
 
+					s.logger.Log("info", fmt.Sprintf("waiting for k8s secrets..."))
 					clusterID := cluster.Spec.Cluster.Cluster.ID
 					certs, err := s.getCertsFromSecrets(clusterID)
 					if err != nil {
@@ -363,7 +364,7 @@ func (s *Service) Boot() {
 						s.logger.Log("info", "route table already exists, reusing")
 					}
 
-					// Create public subnet
+					// Create public subnet for the masters
 					publicSubnet := &awsresources.Subnet{
 						AvailabilityZone: cluster.Spec.AWS.AZ,
 						CidrBlock:        publicSubnetCidr,
@@ -387,7 +388,7 @@ func (s *Service) Boot() {
 						return
 					}
 
-					// Create private subnet
+					// Create private subnet for the workers
 					privateSubnet := &awsresources.Subnet{
 						AvailabilityZone: cluster.Spec.AWS.AZ,
 						CidrBlock:        privateSubnetCidr,
@@ -428,30 +429,20 @@ func (s *Service) Boot() {
 						return
 					}
 
-					// Add an elastic IP to the master
-					masterID := masterIDs[0]
-					s.logger.Log("debug", fmt.Sprintf("waiting for %s to be ready", masterID))
-					if err := clients.EC2.WaitUntilInstanceRunning(&ec2.DescribeInstancesInput{
-						InstanceIds: []*string{
-							aws.String(masterID),
-						},
-					}); err != nil {
-						s.logger.Log("error", fmt.Sprintf("master took too long to get running, aborting: %v", err))
+					lbInput := LoadBalancerInput{
+						Clients:         clients,
+						Cluster:         cluster,
+						InstanceIDs:     masterIDs,
+						SecurityGroupID: securityGroup.ID(),
+						SubnetID:        publicSubnet.ID(),
+					}
+
+					if err := s.createLoadBalancer(lbInput); err != nil {
+						s.logger.Log("error", errgo.Details(err))
 						return
 					}
 
-					var elasticIP resources.NamedResource
-					{
-						elasticIP = &awsresources.ElasticIP{
-							InstanceID: masterID,
-							AWSEntity:  awsresources.AWSEntity{Clients: clients},
-						}
-						if err := elasticIP.CreateOrFail(); err != nil {
-							s.logger.Log("error", errgo.Details(err))
-							return
-						}
-					}
-					s.logger.Log("info", fmt.Sprintf("attached ip %v to instance %v", elasticIP.Name(), masterID))
+					s.logger.Log("info", fmt.Sprintf("created load balancer"))
 
 					// Run workers
 					anyWorkersCreated, _, err := s.runMachines(runMachinesInput{
@@ -498,26 +489,28 @@ func (s *Service) Boot() {
 					}
 
 					// Delete masters
-					s.logger.Log("info", "deleting masters")
+					s.logger.Log("info", "deleting masters...")
 					if err := s.deleteMachines(deleteMachinesInput{
 						clients:     clients,
 						clusterName: cluster.Name,
 						prefix:      prefixMaster,
 					}); err != nil {
 						s.logger.Log("error", errgo.Details(err))
+					} else {
+						s.logger.Log("info", "deleted masters")
 					}
-					s.logger.Log("info", "deleted masters")
 
 					// Delete workers
-					s.logger.Log("info", "deleting workers")
+					s.logger.Log("info", "deleting workers...")
 					if err := s.deleteMachines(deleteMachinesInput{
 						clients:     clients,
 						clusterName: cluster.Name,
 						prefix:      prefixWorker,
 					}); err != nil {
 						s.logger.Log("error", errgo.Details(err))
+					} else {
+						s.logger.Log("info", "deleted workers")
 					}
-					s.logger.Log("info", "deleted workers")
 
 					// Delete public subnet
 					var publicSubnet resources.ResourceWithID
@@ -527,8 +520,9 @@ func (s *Service) Boot() {
 					}
 					if err := publicSubnet.Delete(); err != nil {
 						s.logger.Log("error", fmt.Sprintf("could not delete public subnet: %s", errgo.Details(err)))
+					} else {
+						s.logger.Log("info", "deleted public subnet")
 					}
-					s.logger.Log("info", "deleted public subnet")
 
 					// Delete private subnet
 					var privateSubnet resources.ResourceWithID
@@ -538,8 +532,9 @@ func (s *Service) Boot() {
 					}
 					if err := privateSubnet.Delete(); err != nil {
 						s.logger.Log("error", fmt.Sprintf("could not delete private subnet: %s", errgo.Details(err)))
+					} else {
+						s.logger.Log("info", "deleted private subnet")
 					}
-					s.logger.Log("info", "deleted private subnet")
 
 					// Delete security group
 					var securityGroup resources.ResourceWithID
@@ -550,8 +545,9 @@ func (s *Service) Boot() {
 					}
 					if err := securityGroup.Delete(); err != nil {
 						s.logger.Log("error", fmt.Sprintf("could not delete security group: %s", errgo.Details(err)))
+					} else {
+						s.logger.Log("info", "deleted security group")
 					}
-					s.logger.Log("info", "deleted security group")
 
 					// Delete route table
 					var routeTable resources.ResourceWithID
@@ -561,8 +557,9 @@ func (s *Service) Boot() {
 					}
 					if err := routeTable.Delete(); err != nil {
 						s.logger.Log("error", fmt.Sprintf("could not delete route table: %s", errgo.Details(err)))
+					} else {
+						s.logger.Log("info", "deleted route table")
 					}
-					s.logger.Log("info", "deleted route table")
 
 					// Delete gateway
 					var gateway resources.ResourceWithID
@@ -572,8 +569,9 @@ func (s *Service) Boot() {
 					}
 					if err := gateway.Delete(); err != nil {
 						s.logger.Log("error", fmt.Sprintf("could not delete gateway: %s", errgo.Details(err)))
+					} else {
+						s.logger.Log("info", "deleted gateway")
 					}
-					s.logger.Log("info", "deleted gateway")
 
 					// Delete VPC
 					var vpc resources.ResourceWithID
@@ -583,8 +581,9 @@ func (s *Service) Boot() {
 					}
 					if err := vpc.Delete(); err != nil {
 						s.logger.Log("error", fmt.Sprintf("could not delete vpc: %s", errgo.Details(err)))
+					} else {
+						s.logger.Log("info", "deleted vpc")
 					}
-					s.logger.Log("info", "deleted vpc")
 
 					// Delete S3 bucket objects
 					bucketName := s.bucketName(cluster)
@@ -616,6 +615,17 @@ func (s *Service) Boot() {
 					}
 
 					s.logger.Log("info", "deleted bucket objects")
+
+					lbInput := LoadBalancerInput{
+						Clients: clients,
+						Cluster: cluster,
+					}
+
+					if err != s.deleteLoadBalancer(lbInput) {
+						s.logger.Log("error", errgo.Details(err))
+					} else {
+						s.logger.Log("info", "deleted ELB")
+					}
 
 					// Delete policy
 					var policy resources.NamedResource

@@ -52,9 +52,6 @@ func tomlValueStringRepresentation(v interface{}) (string, error) {
 		return strconv.FormatFloat(value, 'f', -1, 32), nil
 	case string:
 		return "\"" + encodeTomlString(value) + "\"", nil
-	case []byte:
-		b, _ := v.([]byte)
-		return tomlValueStringRepresentation(string(b))
 	case bool:
 		if value {
 			return "true", nil

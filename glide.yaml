@@ -4,6 +4,9 @@ import:
   version: master
   subpackages:
   - service/s3
+  - service/elb
+  - service/route53
+  - awserr
 - package: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:

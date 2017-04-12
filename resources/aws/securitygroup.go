@@ -5,9 +5,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	microerror "github.com/giantswarm/microkit/error"
-
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
+	microerror "github.com/giantswarm/microkit/error"
 )
 
 type SecurityGroup struct {

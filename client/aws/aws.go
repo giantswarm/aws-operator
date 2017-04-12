@@ -8,8 +8,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
 
 	microerror "github.com/giantswarm/microkit/error"
@@ -23,10 +25,12 @@ type Config struct {
 }
 
 type Clients struct {
-	EC2 *ec2.EC2
-	IAM *iam.IAM
-	S3  *s3.S3
-	KMS *kms.KMS
+	EC2     *ec2.EC2
+	IAM     *iam.IAM
+	S3      *s3.S3
+	KMS     *kms.KMS
+	ELB     *elb.ELB
+	Route53 *route53.Route53
 }
 
 const (
@@ -41,10 +45,12 @@ func NewClients(config Config) Clients {
 	}
 	s := session.New(awsCfg)
 	clients := Clients{
-		EC2: ec2.New(s),
-		IAM: iam.New(s),
-		S3:  s3.New(s),
-		KMS: kms.New(s),
+		EC2:     ec2.New(s),
+		IAM:     iam.New(s),
+		S3:      s3.New(s),
+		KMS:     kms.New(s),
+		ELB:     elb.New(s),
+		Route53: route53.New(s),
 	}
 
 	return clients

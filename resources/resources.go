@@ -20,3 +20,9 @@ type ResourceWithID interface {
 	ID() string
 	Resource
 }
+
+type DNSNamedResource interface {
+	DNSName() string
+	HostedZoneID() string
+	Resource
+}
