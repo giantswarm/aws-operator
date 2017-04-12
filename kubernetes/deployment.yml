@@ -30,6 +30,13 @@ spec:
       - name: certs
         hostPath:
           path: /etc/ssl/certs/ca-certificates.crt
+      # See https://github.com/giantswarm/aws-operator/pull/36#discussion_r105404746
+      - name: ssh-key
+        secret:
+          secretName: aws-operator-ssh-key-secret
+          items:
+          - key: id_rsa.pub
+            path: id_rsa.pub
       containers:
       - name: aws-operator
         image: registry.giantswarm.io/giantswarm/aws-operator:{{ .BuildInfo.SHA }}
@@ -41,6 +48,9 @@ spec:
           readOnly: true
         - name: certs
           mountPath: /etc/ssl/certs/ca-certificates.crt
+        - name: ssh-key
+          mountPath: /.ssh/
+          readOnly: true
         ports:
         - name: http
           containerPort: 8000
