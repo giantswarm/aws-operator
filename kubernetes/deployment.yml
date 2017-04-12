@@ -70,5 +70,12 @@ spec:
             port: 8000
           initialDelaySeconds: 30
           timeoutSeconds: 1
+        resources:
+          requests:
+            cpu: 100m
+            memory: 20Mi
+          limits:
+            cpu: 250m
+            memory: 250Mi
       imagePullSecrets:
       - name: circleci-giantswarm-registry
