@@ -17,7 +17,6 @@ func (kk *KMSKey) CreateIfNotExists() (bool, error) {
 }
 
 func (kk *KMSKey) CreateOrFail() error {
-	// TODO we should give it a name
 	key, err := kk.Clients.KMS.CreateKey(&kms.CreateKeyInput{})
 	if err != nil {
 		return microerror.MaskAny(err)

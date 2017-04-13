@@ -109,7 +109,15 @@ func (hz *HostedZone) findExisting() (*route53.HostedZone, error) {
 		return nil, microerror.MaskAny(DomainNamedResourceNotFoundError{Domain: hz.Name})
 	}
 
-	return hostedZones[0], nil
+	// this AWS endpoint returns all hosted zones, even ones that don't match the query
+	// if there was a HZ that matched the DNSName, it will be the first one returned
+	// so we need to match the first result by name
+	hostedZone := hostedZones[0]
+	if *hostedZone.Name != hz.Name {
+		return nil, microerror.MaskAny(DomainNamedResourceNotFoundError{Domain: hz.Name})
+	}
+
+	return hostedZone, nil
 }
 
 func (hz *HostedZone) checkIfExists() (bool, error) {
