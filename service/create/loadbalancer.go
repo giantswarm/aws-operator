@@ -49,8 +49,9 @@ func (s *Service) createLoadBalancer(input LoadBalancerInput) error {
 	}
 
 	hz := awsresources.HostedZone{
-		Name:   hzName,
-		Client: input.Clients.Route53,
+		Name:    hzName,
+		Comment: hostedZoneComment(input.Cluster),
+		Client:  input.Clients.Route53,
 	}
 
 	hzCreated, err := hz.CreateIfNotExists()
@@ -59,7 +60,7 @@ func (s *Service) createLoadBalancer(input LoadBalancerInput) error {
 	}
 
 	if hzCreated {
-		s.logger.Log("debug", fmt.Sprintf("created hosted zone"))
+		s.logger.Log("debug", fmt.Sprintf("created hosted zone '%s'", hz.Name))
 	} else {
 		s.logger.Log("debug", fmt.Sprintf("hosted zone '%s' already exists, reusing", hz.Name))
 	}
@@ -156,4 +157,8 @@ func hostedZoneName(cluster awstpr.CustomObject) (string, error) {
 	}
 
 	return strings.Join(tmp[1:], ""), nil
+}
+
+func hostedZoneComment(cluster awstpr.CustomObject) string {
+	return fmt.Sprintf("Hosted zone for cluster %s", cluster.Spec.Cluster.Cluster.ID)
 }

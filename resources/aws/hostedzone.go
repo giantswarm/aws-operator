@@ -1,6 +1,7 @@
 package aws
 
 import (
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -113,7 +114,9 @@ func (hz *HostedZone) findExisting() (*route53.HostedZone, error) {
 	// if there was a HZ that matched the DNSName, it will be the first one returned
 	// so we need to match the first result by name
 	hostedZone := hostedZones[0]
-	if *hostedZone.Name != hz.Name {
+
+	// AWS returns the proper DNS name, i.e. with a trailing dot
+	if strings.TrimRight(*hostedZone.Name, ".") != hz.Name {
 		return nil, microerror.MaskAny(DomainNamedResourceNotFoundError{Domain: hz.Name})
 	}
 
