@@ -214,12 +214,14 @@ func (s *Service) Boot() {
 						s.logger.Log("error", fmt.Sprintf("could not get certificates from secrets: %v", errgo.Details(err)))
 						return
 					}
+					s.logger.Log("info", fmt.Sprintf("created KMS key for cluster '%s'", cluster.Name))
 
 					// Create KMS key
 					var kmsKey resources.ArnResource
 					var kmsKeyErr error
 					{
 						kmsKey = &awsresources.KMSKey{
+							Name:      cluster.Name,
 							AWSEntity: awsresources.AWSEntity{Clients: clients},
 						}
 						kmsKeyErr = kmsKey.CreateOrFail()
@@ -616,6 +618,17 @@ func (s *Service) Boot() {
 						s.logger.Log("error", errgo.Details(err))
 					}
 					s.logger.Log("info", "deleted roles, policies, instance profiles")
+
+					// Delete KMS key
+					var kmsKey resources.ArnResource
+					kmsKey = &awsresources.KMSKey{
+						Name:      cluster.Name,
+						AWSEntity: awsresources.AWSEntity{Clients: clients},
+					}
+					if err := kmsKey.Delete(); err != nil {
+						s.logger.Log("error", errgo.Details(err))
+					}
+					s.logger.Log("info", "deleted KMS key")
 
 					// Delete keypair
 					var keyPair resources.Resource
