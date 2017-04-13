@@ -61,7 +61,7 @@ func (s *Service) createLoadBalancer(input LoadBalancerInput) error {
 	if hzCreated {
 		s.logger.Log("debug", fmt.Sprintf("created hosted zone"))
 	} else {
-		s.logger.Log("debug", fmt.Sprintf("hosted zone already exists, reusing"))
+		s.logger.Log("debug", fmt.Sprintf("hosted zone '%s' already exists, reusing", hz.Name))
 	}
 
 	recordSet := &awsresources.RecordSet{
