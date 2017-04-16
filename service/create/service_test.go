@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	awsresources "github.com/giantswarm/aws-operator/resources/aws"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,7 +14,7 @@ func TestAllExistingInstancesMatch(t *testing.T) {
 	tests := []struct {
 		name      string
 		instances *ec2.DescribeInstancesOutput
-		state     EC2StateCode
+		state     awsresources.EC2StateCode
 		res       bool
 	}{
 		{
@@ -24,14 +25,14 @@ func TestAllExistingInstancesMatch(t *testing.T) {
 						Instances: []*ec2.Instance{
 							{
 								State: &ec2.InstanceState{
-									Code: aws.Int64(int64(EC2TerminatedState)),
+									Code: aws.Int64(int64(awsresources.EC2TerminatedState)),
 								},
 							},
 						},
 					},
 				},
 			},
-			state: EC2TerminatedState,
+			state: awsresources.EC2TerminatedState,
 			res:   true,
 		},
 		{
@@ -42,24 +43,24 @@ func TestAllExistingInstancesMatch(t *testing.T) {
 						Instances: []*ec2.Instance{
 							{
 								State: &ec2.InstanceState{
-									Code: aws.Int64(int64(EC2TerminatedState)),
+									Code: aws.Int64(int64(awsresources.EC2TerminatedState)),
 								},
 							},
 							{
 								State: &ec2.InstanceState{
-									Code: aws.Int64(int64(EC2TerminatedState)),
+									Code: aws.Int64(int64(awsresources.EC2TerminatedState)),
 								},
 							},
 							{
 								State: &ec2.InstanceState{
-									Code: aws.Int64(int64(EC2TerminatedState)),
+									Code: aws.Int64(int64(awsresources.EC2TerminatedState)),
 								},
 							},
 						},
 					},
 				},
 			},
-			state: EC2TerminatedState,
+			state: awsresources.EC2TerminatedState,
 			res:   true,
 		},
 		{
@@ -70,19 +71,19 @@ func TestAllExistingInstancesMatch(t *testing.T) {
 						Instances: []*ec2.Instance{
 							{
 								State: &ec2.InstanceState{
-									Code: aws.Int64(int64(EC2TerminatedState)),
+									Code: aws.Int64(int64(awsresources.EC2TerminatedState)),
 								},
 							},
 							{
 								State: &ec2.InstanceState{
-									Code: aws.Int64(int64(EC2RunningState)),
+									Code: aws.Int64(int64(awsresources.EC2RunningState)),
 								},
 							},
 						},
 					},
 				},
 			},
-			state: EC2TerminatedState,
+			state: awsresources.EC2TerminatedState,
 			res:   false,
 		},
 		{
@@ -93,14 +94,14 @@ func TestAllExistingInstancesMatch(t *testing.T) {
 						Instances: []*ec2.Instance{
 							{
 								State: &ec2.InstanceState{
-									Code: aws.Int64(int64(EC2RunningState)),
+									Code: aws.Int64(int64(awsresources.EC2RunningState)),
 								},
 							},
 						},
 					},
 				},
 			},
-			state: EC2StoppedState,
+			state: awsresources.EC2StoppedState,
 			res:   false,
 		},
 		{
@@ -111,14 +112,14 @@ func TestAllExistingInstancesMatch(t *testing.T) {
 						Instances: []*ec2.Instance{
 							{
 								State: &ec2.InstanceState{
-									Code: aws.Int64(int64(EC2RunningState)),
+									Code: aws.Int64(int64(awsresources.EC2RunningState)),
 								},
 							},
 						},
 					},
 				},
 			},
-			state: EC2RunningState,
+			state: awsresources.EC2RunningState,
 			res:   true,
 		},
 		{
@@ -129,7 +130,7 @@ func TestAllExistingInstancesMatch(t *testing.T) {
 						Instances: []*ec2.Instance{
 							{
 								State: &ec2.InstanceState{
-									Code: aws.Int64(int64(EC2TerminatedState)),
+									Code: aws.Int64(int64(awsresources.EC2TerminatedState)),
 								},
 							},
 						},
@@ -138,14 +139,14 @@ func TestAllExistingInstancesMatch(t *testing.T) {
 						Instances: []*ec2.Instance{
 							{
 								State: &ec2.InstanceState{
-									Code: aws.Int64(int64(EC2TerminatedState)),
+									Code: aws.Int64(int64(awsresources.EC2TerminatedState)),
 								},
 							},
 						},
 					},
 				},
 			},
-			state: EC2TerminatedState,
+			state: awsresources.EC2TerminatedState,
 			res:   true,
 		},
 		{
@@ -156,7 +157,7 @@ func TestAllExistingInstancesMatch(t *testing.T) {
 						Instances: []*ec2.Instance{
 							{
 								State: &ec2.InstanceState{
-									Code: aws.Int64(int64(EC2TerminatedState)),
+									Code: aws.Int64(int64(awsresources.EC2TerminatedState)),
 								},
 							},
 						},
@@ -165,7 +166,7 @@ func TestAllExistingInstancesMatch(t *testing.T) {
 						Instances: []*ec2.Instance{
 							{
 								State: &ec2.InstanceState{
-									Code: aws.Int64(int64(EC2StoppingState)),
+									Code: aws.Int64(int64(awsresources.EC2StoppingState)),
 								},
 							},
 						},
@@ -174,14 +175,14 @@ func TestAllExistingInstancesMatch(t *testing.T) {
 						Instances: []*ec2.Instance{
 							{
 								State: &ec2.InstanceState{
-									Code: aws.Int64(int64(EC2TerminatedState)),
+									Code: aws.Int64(int64(awsresources.EC2TerminatedState)),
 								},
 							},
 						},
 					},
 				},
 			},
-			state: EC2TerminatedState,
+			state: awsresources.EC2TerminatedState,
 			res:   false,
 		},
 		{
@@ -192,26 +193,12 @@ func TestAllExistingInstancesMatch(t *testing.T) {
 						Instances: []*ec2.Instance{
 							{
 								State: &ec2.InstanceState{
-									Code: aws.Int64(int64(EC2TerminatedState)),
+									Code: aws.Int64(int64(awsresources.EC2TerminatedState)),
 								},
 							},
 							{
 								State: &ec2.InstanceState{
-									Code: aws.Int64(int64(EC2TerminatedState)),
-								},
-							},
-						},
-					},
-					{
-						Instances: []*ec2.Instance{
-							{
-								State: &ec2.InstanceState{
-									Code: aws.Int64(int64(EC2TerminatedState)),
-								},
-							},
-							{
-								State: &ec2.InstanceState{
-									Code: aws.Int64(int64(EC2StoppingState)),
+									Code: aws.Int64(int64(awsresources.EC2TerminatedState)),
 								},
 							},
 						},
@@ -220,14 +207,28 @@ func TestAllExistingInstancesMatch(t *testing.T) {
 						Instances: []*ec2.Instance{
 							{
 								State: &ec2.InstanceState{
-									Code: aws.Int64(int64(EC2TerminatedState)),
+									Code: aws.Int64(int64(awsresources.EC2TerminatedState)),
+								},
+							},
+							{
+								State: &ec2.InstanceState{
+									Code: aws.Int64(int64(awsresources.EC2StoppingState)),
+								},
+							},
+						},
+					},
+					{
+						Instances: []*ec2.Instance{
+							{
+								State: &ec2.InstanceState{
+									Code: aws.Int64(int64(awsresources.EC2TerminatedState)),
 								},
 							},
 						},
 					},
 				},
 			},
-			state: EC2TerminatedState,
+			state: awsresources.EC2TerminatedState,
 			res:   false,
 		},
 	}

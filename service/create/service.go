@@ -60,18 +60,6 @@ const (
 	runInstancesRetries = 10
 )
 
-type EC2StateCode int
-
-const (
-	// http://docs.aws.amazon.com/sdk-for-go/api/service/ec2/#InstanceState
-	EC2PendingState      EC2StateCode = 0
-	EC2RunningState      EC2StateCode = 16
-	EC2ShuttingDownState EC2StateCode = 32
-	EC2TerminatedState   EC2StateCode = 48
-	EC2StoppingState     EC2StateCode = 64
-	EC2StoppedState      EC2StateCode = 80
-)
-
 // Config represents the configuration used to create a version service.
 type Config struct {
 	// Dependencies.
@@ -756,7 +744,7 @@ func (s *Service) runMachines(input runMachinesInput) (bool, []string, error) {
 
 // if the instance already exists, return (instanceID, false)
 // otherwise (nil, true)
-func allExistingInstancesMatch(instances *ec2.DescribeInstancesOutput, state EC2StateCode) (*string, bool) {
+func allExistingInstancesMatch(instances *ec2.DescribeInstancesOutput, state awsresources.EC2StateCode) (*string, bool) {
 	// If the instance doesn't exist, then the Reservations field should be nil.
 	// Otherwise, it will contain a slice of instances (which is going to contain our one instance we queried for).
 	// TODO(nhlfr): Check whether the instance has correct parameters. That will be most probably done when we
