@@ -16,6 +16,7 @@ var (
 	securityGroupFindError = errgo.New("Couldn't find security group")
 	subnetFindError        = errgo.New("Couldn't find subnet")
 	vpcFindError           = errgo.New("Couldn't find VPC")
+	instanceFindError      = errgo.New("Couldn't find EC2 instance")
 
 	resourceDeleteError       = errgo.New("Couldn't delete resource, it lacks the necessary data (ID)")
 	clientNotInitializedError = errgo.New("The client has not been initialized")

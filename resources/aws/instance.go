@@ -42,30 +42,13 @@ type Instance struct {
 	AWSEntity
 }
 
-func allExistingInstancesMatch(instances *ec2.DescribeInstancesOutput, state EC2StateCode) bool {
-	// If the instance doesn't exist, then the Reservation field should be nil.
-	// Otherwise, it will contain a slice of instances (which is going to contain our one instance we queried for).
-	// TODO(nhlfr): Check whether the instance has correct parameters. That will be most probably done when we
-	// will introduce the interface for creating, deleting and updating resources.
-	if instances.Reservations != nil {
-		for _, r := range instances.Reservations {
-			for _, i := range r.Instances {
-				if *i.State.Code != int64(state) {
-					return false
-				}
-			}
-		}
-	}
-	return true
-}
-
-func existingInstanceID(instances *ec2.DescribeInstancesOutput) string {
+func existingInstanceID(instances ec2.DescribeInstancesOutput) (string, error) {
 	for _, r := range instances.Reservations {
 		for _, i := range r.Instances {
-			return *i.InstanceId
+			return *i.InstanceId, nil
 		}
 	}
-	return ""
+	return "", microerror.MaskAny(instanceFindError)
 }
 
 func (i *Instance) CreateIfNotExists() (bool, error) {
@@ -83,14 +66,32 @@ func (i *Instance) CreateIfNotExists() (bool, error) {
 					aws.String(i.ClusterName),
 				},
 			},
+			&ec2.Filter{
+				Name: aws.String("instance-state-code"),
+				Values: []*string{
+					aws.String(fmt.Sprintf("%d", EC2RunningState)),
+				},
+			},
+			&ec2.Filter{
+				Name: aws.String("instance-state-code"),
+				Values: []*string{
+					aws.String(fmt.Sprintf("%d", EC2PendingState)),
+				},
+			},
 		},
 	})
 	if err != nil {
 		return false, microerror.MaskAny(err)
 	}
 
-	if !allExistingInstancesMatch(instances, EC2TerminatedState) {
-		i.InstanceID = existingInstanceID(instances)
+	if len(instances.Reservations) > 0 {
+		instanceID, err := existingInstanceID(*instances)
+		if err != nil {
+			return false, microerror.MaskAny(err)
+		}
+
+		i.InstanceID = instanceID
+
 		return false, nil
 	}
 
