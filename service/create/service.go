@@ -52,9 +52,6 @@ const (
 	vpcCidrBlock      = "10.0.0.0/16"
 	privateSubnetCidr = "10.0.0.0/19"
 	publicSubnetCidr  = "10.0.128.0/20"
-	// EC2 instance tag keys.
-	tagKeyName    string = "Name"
-	tagKeyCluster string = "Cluster"
 	// Number of retries of RunInstances to wait for Roles to propagate to
 	// Instance Profiles
 	runInstancesRetries = 10
