@@ -18,8 +18,8 @@ type SecurityGroup struct {
 	AWSEntity
 }
 
-func (s SecurityGroup) findExisting() (*ec2.SecurityGroup, error) {
-	securityGroups, err := s.Clients.EC2.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
+func (s SecurityGroup) list() ([]*ec2.SecurityGroup, error) {
+	out, err := s.Clients.EC2.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
 		Filters: []*ec2.Filter{
 			&ec2.Filter{
 				Name: aws.String(subnetDescription),
@@ -35,27 +35,17 @@ func (s SecurityGroup) findExisting() (*ec2.SecurityGroup, error) {
 			},
 		},
 	})
-	if err != nil {
-		return nil, microerror.MaskAny(err)
-	}
-
-	if len(securityGroups.SecurityGroups) < 1 {
-		return nil, microerror.MaskAny(securityGroupFindError)
-	}
-
-	return securityGroups.SecurityGroups[0], nil
+	return out.SecurityGroups, microerror.MaskAny(err)
 }
 
 func (s *SecurityGroup) CreateIfNotExists() (bool, error) {
 	if err := s.CreateOrFail(); err != nil {
 		if strings.Contains(err.Error(), awsclient.SecurityGroupDuplicate) {
-			securityGroup, err := s.findExisting()
-			if err != nil {
-				return false, microerror.MaskAny(err)
+			securityGroups, err := s.list()
+			if err == nil && len(securityGroups) > 0 {
+				s.id = *securityGroups[0].GroupId
 			}
-			s.id = *securityGroup.GroupId
-
-			return false, nil
+			return false, microerror.MaskAny(err)
 		}
 
 		return false, microerror.MaskAny(err)
@@ -100,15 +90,18 @@ func (s *SecurityGroup) CreateOrFail() error {
 }
 
 func (s *SecurityGroup) Delete() error {
-	securityGroup, err := s.findExisting()
+	securityGroups, err := s.list()
 	if err != nil {
 		return microerror.MaskAny(err)
 	}
 
-	if _, err := s.Clients.EC2.DeleteSecurityGroup(&ec2.DeleteSecurityGroupInput{
-		GroupId: securityGroup.GroupId,
-	}); err != nil {
-		return microerror.MaskAny(err)
+	for _, securityGroup := range securityGroups {
+		_, err := s.Clients.EC2.DeleteSecurityGroup(&ec2.DeleteSecurityGroupInput{
+			GroupId: securityGroup.GroupId,
+		})
+		if err != nil {
+			return microerror.MaskAny(err)
+		}
 	}
 
 	return nil

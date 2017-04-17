@@ -1,7 +1,6 @@
 package aws
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -20,39 +19,26 @@ type Subnet struct {
 	AWSEntity
 }
 
-func (s Subnet) findExisting() (*ec2.Subnet, error) {
-	subnets, err := s.Clients.EC2.DescribeSubnets(&ec2.DescribeSubnetsInput{
+func (s *Subnet) list() ([]*ec2.Subnet, error) {
+	out, err := s.Clients.EC2.DescribeSubnets(&ec2.DescribeSubnetsInput{
 		Filters: []*ec2.Filter{
 			&ec2.Filter{
-				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
+				Name: aws.String("tag:" + tagKeyName),
 				Values: []*string{
 					aws.String(s.Name),
 				},
 			},
 		},
 	})
-	if err != nil {
-		return nil, microerror.MaskAny(err)
-	}
-
-	if len(subnets.Subnets) < 1 {
-		return nil, microerror.MaskAny(subnetFindError)
-	}
-
-	return subnets.Subnets[0], nil
+	return out.Subnets, microerror.MaskAny(err)
 }
 
 func (s *Subnet) checkIfExists() (bool, error) {
-	subnet, err := s.findExisting()
-	if err != nil {
-		if strings.Contains(err.Error(), subnetFindError.Error()) {
-			return false, nil
-		}
-		return false, microerror.MaskAny(err)
+	subnets, err := s.list()
+	if err == nil && len(subnets) > 0 {
+		s.id = *subnets[0].SubnetId
 	}
-
-	s.id = *subnet.SubnetId
-	return true, nil
+	return len(subnets) > 0, microerror.MaskAny(err)
 }
 
 func (s *Subnet) CreateIfNotExists() (bool, error) {
@@ -100,15 +86,18 @@ func (s *Subnet) CreateOrFail() error {
 }
 
 func (s *Subnet) Delete() error {
-	subnet, err := s.findExisting()
+	subnets, err := s.list()
 	if err != nil {
 		return microerror.MaskAny(err)
 	}
 
-	if _, err := s.Clients.EC2.DeleteSubnet(&ec2.DeleteSubnetInput{
-		SubnetId: subnet.SubnetId,
-	}); err != nil {
-		return microerror.MaskAny(err)
+	for _, subnet := range subnets {
+		_, err := s.Clients.EC2.DeleteSubnet(&ec2.DeleteSubnetInput{
+			SubnetId: subnet.SubnetId,
+		})
+		if err != nil {
+			return microerror.MaskAny(err)
+		}
 	}
 
 	return nil

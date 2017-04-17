@@ -2,7 +2,6 @@ package aws
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -16,8 +15,8 @@ type RouteTable struct {
 	AWSEntity
 }
 
-func (r RouteTable) findExisting() (*ec2.RouteTable, error) {
-	routeTables, err := r.Clients.EC2.DescribeRouteTables(&ec2.DescribeRouteTablesInput{
+func (r RouteTable) list() ([]*ec2.RouteTable, error) {
+	out, err := r.Clients.EC2.DescribeRouteTables(&ec2.DescribeRouteTablesInput{
 		Filters: []*ec2.Filter{
 			&ec2.Filter{
 				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
@@ -27,29 +26,15 @@ func (r RouteTable) findExisting() (*ec2.RouteTable, error) {
 			},
 		},
 	})
-	if err != nil {
-		return nil, microerror.MaskAny(err)
-	}
-
-	if len(routeTables.RouteTables) < 1 {
-		return nil, microerror.MaskAny(routeTableFindError)
-	}
-
-	return routeTables.RouteTables[0], nil
+	return out.RouteTables, microerror.MaskAny(err)
 }
 
 func (r *RouteTable) checkIfExists() (bool, error) {
-	routeTable, err := r.findExisting()
-	if err != nil {
-		if strings.Contains(err.Error(), routeTableFindError.Error()) {
-			return false, nil
-		}
-		return false, microerror.MaskAny(err)
+	routeTables, err := r.list()
+	if err == nil && len(routeTables) > 0 {
+		r.id = *routeTables[0].RouteTableId
 	}
-
-	r.id = *routeTable.RouteTableId
-
-	return true, nil
+	return len(routeTables) > 0, microerror.MaskAny(err)
 }
 
 func (r *RouteTable) CreateIfNotExists() (bool, error) {
@@ -95,15 +80,18 @@ func (r *RouteTable) CreateOrFail() error {
 }
 
 func (r *RouteTable) Delete() error {
-	routeTable, err := r.findExisting()
+	routeTables, err := r.list()
 	if err != nil {
 		return microerror.MaskAny(err)
 	}
 
-	if _, err := r.Clients.EC2.DeleteRouteTable(&ec2.DeleteRouteTableInput{
-		RouteTableId: routeTable.RouteTableId,
-	}); err != nil {
-		return microerror.MaskAny(err)
+	for _, routeTable := range routeTables {
+		_, err := r.Clients.EC2.DeleteRouteTable(&ec2.DeleteRouteTableInput{
+			RouteTableId: routeTable.RouteTableId,
+		})
+		if err != nil {
+			return microerror.MaskAny(err)
+		}
 	}
 
 	return nil
