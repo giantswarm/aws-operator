@@ -5,8 +5,6 @@ import "github.com/juju/errgo"
 const (
 	AlreadyAssociated        = "Resource.AlreadyAssociated"
 	InvalidSubnetConflict    = "InvalidSubnet.Conflict"
-	BucketAlreadyExists      = "BucketAlreadyExists"
-	BucketAlreadyOwnedByYou  = "BucketAlreadyOwnedByYou"
 	KeyPairDuplicate         = "InvalidKeyPair.Duplicate"
 	SecurityGroupDuplicate   = "InvalidGroup.Duplicate"
 	ELBAlreadyExists         = "DuplicateLoadBalancerName"

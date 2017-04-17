@@ -4,10 +4,10 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
 	microerror "github.com/giantswarm/microkit/error"
-
-	awsclient "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/juju/errgo"
 )
 
 type Bucket struct {
@@ -17,9 +17,13 @@ type Bucket struct {
 
 func (b *Bucket) CreateIfNotExists() (bool, error) {
 	if err := b.CreateOrFail(); err != nil {
-		if strings.Contains(err.Error(), awsclient.BucketAlreadyExists) || strings.Contains(err.Error(), awsclient.BucketAlreadyOwnedByYou) {
-			return false, nil
+		underlying := errgo.Cause(err)
+		if awserr, ok := underlying.(awserr.Error); ok {
+			if awserr.Code() == s3.ErrCodeBucketAlreadyOwnedByYou {
+				return false, nil
+			}
 		}
+
 		return false, microerror.MaskAny(err)
 	}
 	return true, nil
