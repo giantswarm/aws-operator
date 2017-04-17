@@ -2,7 +2,6 @@ package aws
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -16,8 +15,8 @@ type VPC struct {
 	AWSEntity
 }
 
-func (v VPC) findExisting() (*ec2.Vpc, error) {
-	vpcs, err := v.Clients.EC2.DescribeVpcs(&ec2.DescribeVpcsInput{
+func (v VPC) list() ([]*ec2.Vpc, error) {
+	out, err := v.Clients.EC2.DescribeVpcs(&ec2.DescribeVpcsInput{
 		Filters: []*ec2.Filter{
 			&ec2.Filter{
 				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
@@ -27,28 +26,15 @@ func (v VPC) findExisting() (*ec2.Vpc, error) {
 			},
 		},
 	})
-	if err != nil {
-		return nil, microerror.MaskAny(err)
-	}
-
-	if len(vpcs.Vpcs) < 1 {
-		return nil, microerror.MaskAny(vpcFindError)
-	}
-
-	return vpcs.Vpcs[0], nil
+	return out.Vpcs, microerror.MaskAny(err)
 }
 
 func (v *VPC) checkIfExists() (bool, error) {
-	vpc, err := v.findExisting()
-	if err != nil {
-		if strings.Contains(err.Error(), vpcFindError.Error()) {
-			return false, nil
-		}
-		return false, microerror.MaskAny(err)
+	vpcs, err := v.list()
+	if err == nil && len(vpcs) > 0 {
+		v.id = *vpcs[0].VpcId
 	}
-
-	v.id = *vpc.VpcId
-	return true, nil
+	return len(vpcs) > 0, microerror.MaskAny(err)
 }
 
 func (v *VPC) CreateIfNotExists() (bool, error) {
@@ -105,15 +91,18 @@ func (v *VPC) CreateOrFail() error {
 }
 
 func (v *VPC) Delete() error {
-	vpc, err := v.findExisting()
+	vpcs, err := v.list()
 	if err != nil {
 		return microerror.MaskAny(err)
 	}
 
-	if _, err := v.Clients.EC2.DeleteVpc(&ec2.DeleteVpcInput{
-		VpcId: vpc.VpcId,
-	}); err != nil {
-		return microerror.MaskAny(err)
+	for _, vpc := range vpcs {
+		_, err := v.Clients.EC2.DeleteVpc(&ec2.DeleteVpcInput{
+			VpcId: vpc.VpcId,
+		})
+		if err != nil {
+			return microerror.MaskAny(err)
+		}
 	}
 
 	return nil

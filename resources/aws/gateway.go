@@ -2,7 +2,6 @@ package aws
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -16,8 +15,8 @@ type Gateway struct {
 	AWSEntity
 }
 
-func (g Gateway) findExisting() (*ec2.InternetGateway, error) {
-	gateways, err := g.Clients.EC2.DescribeInternetGateways(&ec2.DescribeInternetGatewaysInput{
+func (g Gateway) list() ([]*ec2.InternetGateway, error) {
+	out, err := g.Clients.EC2.DescribeInternetGateways(&ec2.DescribeInternetGatewaysInput{
 		Filters: []*ec2.Filter{
 			&ec2.Filter{
 				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
@@ -27,29 +26,15 @@ func (g Gateway) findExisting() (*ec2.InternetGateway, error) {
 			},
 		},
 	})
-	if err != nil {
-		return nil, microerror.MaskAny(err)
-	}
-
-	if len(gateways.InternetGateways) < 1 {
-		return nil, microerror.MaskAny(gatewayFindError)
-	}
-
-	return gateways.InternetGateways[0], nil
+	return out.InternetGateways, microerror.MaskAny(err)
 }
 
 func (g *Gateway) checkIfExists() (bool, error) {
-	gateway, err := g.findExisting()
-	if err != nil {
-		if strings.Contains(err.Error(), gatewayFindError.Error()) {
-			return false, nil
-		}
-		return false, microerror.MaskAny(err)
+	gateways, err := g.list()
+	if err == nil && len(gateways) > 0 {
+		g.id = *gateways[0].InternetGatewayId
 	}
-
-	g.id = *gateway.InternetGatewayId
-
-	return true, nil
+	return len(gateways) > 0, microerror.MaskAny(err)
 }
 
 func (g *Gateway) CreateIfNotExists() (bool, error) {
@@ -103,15 +88,18 @@ func (g *Gateway) CreateOrFail() error {
 }
 
 func (g *Gateway) Delete() error {
-	gateway, err := g.findExisting()
+	gateways, err := g.list()
 	if err != nil {
 		return microerror.MaskAny(err)
 	}
 
-	if _, err := g.Clients.EC2.DeleteInternetGateway(&ec2.DeleteInternetGatewayInput{
-		InternetGatewayId: gateway.InternetGatewayId,
-	}); err != nil {
-		return microerror.MaskAny(err)
+	for _, gateway := range gateways {
+		_, err := g.Clients.EC2.DeleteInternetGateway(&ec2.DeleteInternetGatewayInput{
+			InternetGatewayId: gateway.InternetGatewayId,
+		})
+		if err != nil {
+			return microerror.MaskAny(err)
+		}
 	}
 
 	return nil
