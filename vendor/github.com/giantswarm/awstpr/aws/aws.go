@@ -1,9 +1,11 @@
 package aws
 
+import "github.com/giantswarm/awstpr/aws/vpc"
+
 type AWS struct {
-	KMSKeyArn string `json:"kmsKeyArn" yaml:"kmsKeyArn"`
-	Masters   []Node `json:"masters" yaml:"masters"`
-	Region    string `json:"region" yaml:"region"`
-	AZ        string `json:"az" yaml:"az"`
-	Workers   []Node `json:"workers" yaml:"workers"`
+	Masters []Node  `json:"masters" yaml:"masters"`
+	Workers []Node  `json:"workers" yaml:"workers"`
+	Region  string  `json:"region" yaml:"region"`
+	AZ      string  `json:"az" yaml:"az"`
+	VPC     vpc.VPC `json:"vpc" yaml:"vpc"`
 }

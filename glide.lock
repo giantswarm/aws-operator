@@ -1,5 +1,5 @@
-hash: 41f7269412d345c7f418a328ca4eef1a681d998ef96f831120841a1da9f7b1c7
-updated: 2017-04-12T18:40:41.126866673+02:00
+hash: e6235167dd1703176564832e64b706e0fd63e0557b7ca513df7a54392413a617
+updated: 2017-04-18T11:35:58.930576412+02:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aws/aws-sdk-go
-  version: 93d79a6f6ee488a2f5ca622a8d39628e10e2f41d
+  version: baba9e786eae5ba978f2007f8e718557b29157c8
   subpackages:
   - aws
   - aws/awserr
@@ -95,9 +95,10 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: 89bfacfd3d4cbc2a9bc732ba2fdfe34fc0b5e73a
+  version: 35aee66d289de3a7e551e4accc41dbc7931410bb
   subpackages:
   - aws
+  - aws/vpc
 - name: github.com/giantswarm/certificatetpr
   version: fa554d09f0137a91aa6ef007b92e170b31dbefd2
 - name: github.com/giantswarm/clustertpr
