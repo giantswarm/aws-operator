@@ -28,7 +28,6 @@ type Instance struct {
 	ClusterName            string
 	ImageID                string
 	InstanceType           string
-	InstanceID             string
 	KeyName                string
 	MinCount               int
 	MaxCount               int
@@ -42,60 +41,90 @@ type Instance struct {
 	AWSEntity
 }
 
-func existingInstanceID(instances ec2.DescribeInstancesOutput) (string, error) {
-	for _, r := range instances.Reservations {
-		for _, i := range r.Instances {
-			return *i.InstanceId, nil
+func statePendingOrRunning(instance *ec2.Instance) bool {
+	stateCode := *instance.State.Code
+	switch stateCode {
+	case int64(EC2PendingState), int64(EC2RunningState):
+		return true
+	}
+
+	return false
+}
+
+func (i Instance) findExisting() (*ec2.Instance, error) {
+	filters := []*ec2.Filter{}
+	if i.ClusterName != "" {
+		filters = append(filters, &ec2.Filter{
+			Name: aws.String(fmt.Sprintf("tag:%s", tagKeyCluster)),
+			Values: []*string{
+				aws.String(i.ClusterName),
+			},
+		})
+	}
+	if i.Name != "" {
+		filters = append(filters, &ec2.Filter{
+			Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
+			Values: []*string{
+				aws.String(i.Name),
+			},
+		})
+	}
+	if i.id != "" {
+		filters = append(filters, &ec2.Filter{
+			Name: aws.String("instance-id"),
+			Values: []*string{
+				aws.String(i.id),
+			},
+		})
+	}
+
+	reservations, err := i.Clients.EC2.DescribeInstances(&ec2.DescribeInstancesInput{
+		Filters: filters,
+	})
+	if err != nil {
+		return nil, microerror.MaskAny(err)
+	}
+
+	for _, reservation := range reservations.Reservations {
+		for _, instance := range reservation.Instances {
+			if statePendingOrRunning(instance) {
+				return instance, nil
+			}
 		}
 	}
-	return "", microerror.MaskAny(instanceFindError)
+
+	return nil, microerror.MaskAny(instanceFindError)
+}
+
+func (i *Instance) checkIfExists() (bool, error) {
+	instance, err := i.findExisting()
+	if err != nil {
+		if IsInstanceFindError(err) {
+			return false, nil
+		}
+		return false, microerror.MaskAny(err)
+	}
+
+	i.id = *instance.InstanceId
+
+	return true, nil
 }
 
 func (i *Instance) CreateIfNotExists() (bool, error) {
-	instances, err := i.Clients.EC2.DescribeInstances(&ec2.DescribeInstancesInput{
-		Filters: []*ec2.Filter{
-			&ec2.Filter{
-				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
-				Values: []*string{
-					aws.String(i.Name),
-				},
-			},
-			&ec2.Filter{
-				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyCluster)),
-				Values: []*string{
-					aws.String(i.ClusterName),
-				},
-			},
-			&ec2.Filter{
-				Name: aws.String("instance-state-code"),
-				Values: []*string{
-					aws.String(fmt.Sprintf("%d", EC2RunningState)),
-				},
-			},
-			&ec2.Filter{
-				Name: aws.String("instance-state-code"),
-				Values: []*string{
-					aws.String(fmt.Sprintf("%d", EC2PendingState)),
-				},
-			},
-		},
-	})
+	exists, err := i.checkIfExists()
 	if err != nil {
 		return false, microerror.MaskAny(err)
 	}
 
-	if len(instances.Reservations) > 0 {
-		instanceID, err := existingInstanceID(*instances)
-		if err != nil {
-			return false, microerror.MaskAny(err)
-		}
-
-		i.InstanceID = instanceID
-
+	if exists {
 		return false, nil
 	}
 
-	return true, i.CreateOrFail()
+	if err := i.CreateOrFail(); err != nil {
+		return false, microerror.MaskAny(err)
+	}
+
+	return true, nil
 }
 
 func (i *Instance) CreateOrFail() error {
@@ -131,7 +160,7 @@ func (i *Instance) CreateOrFail() error {
 	}
 
 	for _, rawInstance := range reservation.Instances {
-		i.InstanceID = *rawInstance.InstanceId
+		i.id = *rawInstance.InstanceId
 
 		if _, err := i.Clients.EC2.CreateTags(&ec2.CreateTagsInput{
 			Resources: []*string{rawInstance.InstanceId},
@@ -154,9 +183,14 @@ func (i *Instance) CreateOrFail() error {
 }
 
 func (i *Instance) Delete() error {
+	instance, err := i.findExisting()
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
+
 	if _, err := i.Clients.EC2.TerminateInstances(&ec2.TerminateInstancesInput{
 		InstanceIds: []*string{
-			aws.String(i.id),
+			instance.InstanceId,
 		},
 	}); err != nil {
 		return microerror.MaskAny(err)
@@ -164,13 +198,17 @@ func (i *Instance) Delete() error {
 
 	if err := i.Clients.EC2.WaitUntilInstanceTerminated(&ec2.DescribeInstancesInput{
 		InstanceIds: []*string{
-			aws.String(i.id),
+			instance.InstanceId,
 		},
 	}); err != nil {
 		return microerror.MaskAny(err)
 	}
 
 	return nil
+}
+
+func (i Instance) ID() string {
+	return i.id
 }
 
 type FindInstancesInput struct {
@@ -197,6 +235,9 @@ func FindInstances(input FindInstancesInput) ([]*Instance, error) {
 
 	for _, reservation := range reservations.Reservations {
 		for _, rawInstance := range reservation.Instances {
+			if !statePendingOrRunning(rawInstance) {
+				continue
+			}
 			instances = append(instances, &Instance{
 				id:        *rawInstance.InstanceId,
 				AWSEntity: AWSEntity{Clients: input.Clients},
