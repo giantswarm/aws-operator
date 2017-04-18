@@ -47,11 +47,6 @@ const (
 	suffixPrivate string = "private"
 	// SSH port to open in security group
 	portSSH int = 22
-	// Subnet CIDRs
-	// TODO(nhlfr): Make them configurable, include them in awstpr
-	vpcCidrBlock      = "10.0.0.0/16"
-	privateSubnetCidr = "10.0.0.0/19"
-	publicSubnetCidr  = "10.0.128.0/20"
 	// Number of retries of RunInstances to wait for Roles to propagate to
 	// Instance Profiles
 	runInstancesRetries = 10
@@ -277,7 +272,7 @@ func (s *Service) Boot() {
 					// Create VPC
 					var vpc resources.ResourceWithID
 					vpc = &awsresources.VPC{
-						CidrBlock: vpcCidrBlock,
+						CidrBlock: cluster.Spec.AWS.VPC.CIDR,
 						Name:      cluster.Name,
 						AWSEntity: awsresources.AWSEntity{Clients: clients},
 					}
@@ -352,7 +347,7 @@ func (s *Service) Boot() {
 					// Create public subnet for the masters
 					publicSubnet := &awsresources.Subnet{
 						AvailabilityZone: cluster.Spec.AWS.AZ,
-						CidrBlock:        publicSubnetCidr,
+						CidrBlock:        cluster.Spec.AWS.VPC.PublicSubnetCIDR,
 						Name:             subnetName(cluster, suffixPublic),
 						VpcID:            vpc.ID(),
 						AWSEntity:        awsresources.AWSEntity{Clients: clients},
@@ -376,7 +371,7 @@ func (s *Service) Boot() {
 					// Create private subnet for the workers
 					privateSubnet := &awsresources.Subnet{
 						AvailabilityZone: cluster.Spec.AWS.AZ,
-						CidrBlock:        privateSubnetCidr,
+						CidrBlock:        cluster.Spec.AWS.VPC.PrivateSubnetCIDR,
 						Name:             subnetName(cluster, suffixPrivate),
 						VpcID:            vpc.ID(),
 						AWSEntity:        awsresources.AWSEntity{Clients: clients},
