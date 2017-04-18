@@ -37,3 +37,7 @@ type NamedResourceNotFoundError struct {
 func (e NamedResourceNotFoundError) Error() string {
 	return fmt.Sprintf("The resource was not found: %s", e.Name)
 }
+
+func IsInstanceFindError(err error) bool {
+	return errgo.Cause(err) == instanceFindError
+}

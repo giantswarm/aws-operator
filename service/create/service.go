@@ -851,7 +851,7 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 
 	s.logger.Log("info", fmt.Sprintf("instance '%s' tagged", input.name))
 
-	return instanceCreated, instance.InstanceID, nil
+	return instanceCreated, instance.ID(), nil
 }
 
 type deleteMachinesInput struct {
