@@ -12,6 +12,7 @@ var (
 	noBucketInBucketObjectError = errgo.New("Object needs to belong to some bucket")
 
 	gatewayFindError       = errgo.New("Couldn't find gateway")
+	routeFindError         = errgo.New("couldn't find route")
 	routeTableFindError    = errgo.New("Couldn't find route table")
 	securityGroupFindError = errgo.New("Couldn't find security group")
 	subnetFindError        = errgo.New("Couldn't find subnet")
@@ -40,4 +41,9 @@ func (e NamedResourceNotFoundError) Error() string {
 
 func IsInstanceFindError(err error) bool {
 	return errgo.Cause(err) == instanceFindError
+}
+
+// IsRouteFindError asserts routeFindError.
+func IsRouteFindError(err error) bool {
+	return errgo.Cause(err) == routeFindError
 }

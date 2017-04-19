@@ -329,9 +329,9 @@ func (s *Service) Boot() {
 
 					// Create route table
 					routeTable := &awsresources.RouteTable{
-						Name:      cluster.Name,
-						VpcID:     vpc.ID(),
-						AWSEntity: awsresources.AWSEntity{Clients: clients},
+						Name:   cluster.Name,
+						VpcID:  vpc.ID(),
+						Client: clients.EC2,
 					}
 					routeTableCreated, err := routeTable.CreateIfNotExists()
 					if err != nil {
@@ -342,6 +342,11 @@ func (s *Service) Boot() {
 						s.logger.Log("info", "created route table")
 					} else {
 						s.logger.Log("info", "route table already exists, reusing")
+					}
+
+					if err := routeTable.MakePublic(); err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not make route table public: %s", errgo.Details(err)))
+						return
 					}
 
 					// Create public subnet for the masters
@@ -532,8 +537,8 @@ func (s *Service) Boot() {
 					// Delete route table
 					var routeTable resources.ResourceWithID
 					routeTable = &awsresources.RouteTable{
-						Name:      cluster.Name,
-						AWSEntity: awsresources.AWSEntity{Clients: clients},
+						Name:   cluster.Name,
+						Client: clients.EC2,
 					}
 					if err := routeTable.Delete(); err != nil {
 						s.logger.Log("error", fmt.Sprintf("could not delete route table: %s", errgo.Details(err)))
