@@ -311,10 +311,8 @@ func (s *Service) Boot() {
 						Description: cluster.Name,
 						GroupName:   cluster.Name,
 						VpcID:       vpc.ID(),
-						PortsToOpen: []int{
-							portSSH,
-						},
-						AWSEntity: awsresources.AWSEntity{Clients: clients},
+						PortsToOpen: extractPortsFromTPR(cluster),
+						AWSEntity:   awsresources.AWSEntity{Clients: clients},
 					}
 					securityGroupCreated, err := securityGroup.CreateIfNotExists()
 					if err != nil {
