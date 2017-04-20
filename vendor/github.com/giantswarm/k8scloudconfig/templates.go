@@ -532,13 +532,13 @@ coreos:
       ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/etcd/server-ca.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/etcd/server-ca.pem to be written' && sleep 1; done"
       ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/etcd/server-crt.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/etcd/server-crt.pem to be written' && sleep 1; done"
       ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/etcd/server-key.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/etcd/server-key.pem to be written' && sleep 1; done"
-      ExecStart=/usr/bin/etcd2 --advertise-client-urls=https://{{.Cluster.Etcd.Domain}}:443,http://127.0.0.1:2383 \
+      ExecStart=/usr/bin/etcd2 --advertise-client-urls=https://{{.Cluster.Etcd.Domain}}:2379,http://127.0.0.1:2383 \
                                --data-dir=/etc/kubernetes/data/etcd/ \
-                               --initial-advertise-peer-urls=https://{{.Cluster.Etcd.Domain}}:443 \
+                               --initial-advertise-peer-urls=https://{{.Cluster.Etcd.Domain}}:2380 \
                                --listen-client-urls=https://0.0.0.0:2379,http://127.0.0.1:2383 \
                                --listen-peer-urls=https://${DEFAULT_IPV4}:2380 \
                                --initial-cluster-token k8s-etcd-cluster \
-                               --initial-cluster etcd0=https://{{.Cluster.Etcd.Domain}}:443 \
+                               --initial-cluster etcd0=https://{{.Cluster.Etcd.Domain}}:2380\
                                --initial-cluster-state new \
                                --ca-file=/etc/kubernetes/ssl/etcd/server-ca.pem \
                                --cert-file=/etc/kubernetes/ssl/etcd/server-crt.pem \
@@ -691,7 +691,7 @@ coreos:
       --etcd-prefix={{.Cluster.Etcd.Prefix}} \
       --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota \
       --service-cluster-ip-range={{.Cluster.Kubernetes.API.ClusterIPRange}} \
-      --etcd_servers=https://{{.Cluster.Etcd.Domain}}:443 \
+      --etcd-servers=https://{{.Cluster.Etcd.Domain}}:2379 \
       --etcd-cafile=/etc/kubernetes/ssl/etcd/server-ca.pem \
       --etcd-certfile=/etc/kubernetes/ssl/etcd/server-crt.pem \
       --etcd-keyfile=/etc/kubernetes/ssl/etcd/server-key.pem \
@@ -973,7 +973,7 @@ write_files:
     {
         "name": "calico-k8s-network",
         "type": "calico",
-        "etcd_endpoints": "https://{{.Cluster.Etcd.Domain}}:443",
+        "etcd_endpoints": "https://{{.Cluster.Etcd.Domain}}:2379",
         "log_level": "info",
         "ipam": {
             "type": "calico-ipam"
@@ -1089,29 +1089,15 @@ coreos:
     command: stop
     mask: true
   - name: etcd2.service
-    enable: true
-    command: start
+    enable: false
+    command: stop
+    mask: true
   - name: fleet.service
     command: stop
     mask: true
   - name: systemd-networkd-wait-online.service
     enable: true
     command: start
-  - name: etc-kubernetes-ssl.mount
-    enable: true
-    command: start
-    content: |
-      [Unit]
-      Description=Mount ssl volume
-
-      [Mount]
-      What=sslshare
-      Where=/etc/kubernetes/ssl/
-      Options=trans=virtio,version=9p2000.L
-      Type=9p
-
-      [Install]
-      WantedBy=multi-user.target
   - name: docker.service
     enable: true
     command: start
@@ -1162,7 +1148,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="ETCD_AUTHORITY={{.Cluster.Etcd.Domain}}:443"
+      Environment="ETCD_AUTHORITY={{.Cluster.Etcd.Domain}}:2379"
       Environment="ETCD_SCHEME=https"
       Environment="ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/calico/client-ca.pem"
       Environment="ETCD_CERT_FILE=/etc/kubernetes/ssl/calico/client-crt.pem"
@@ -1179,13 +1165,14 @@ coreos:
       ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/calico/client-crt.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/calico/client-crt.pem to be written' && sleep 1; done"
       ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/calico/client-key.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/calico/client-key.pem to be written' && sleep 1; done"
       ExecStartPre=/bin/bash -c "while ! curl --output /dev/null --silent --fail --cacert /etc/kubernetes/ssl/calico/client-ca.pem --cert /etc/kubernetes/ssl/calico/client-crt.pem --key /etc/kubernetes/ssl/calico/client-key.pem https://{{.Cluster.Etcd.Domain}}/version; do sleep 1 && echo 'Waiting for etcd master to be responsive'; done"
+      ExecStartPre=/opt/bin/calicoctl pool add {{.Cluster.Calico.Subnet}}/{{.Cluster.Calico.CIDR}} --ipip --nat-outgoing
       ExecStart=/opt/bin/calicoctl node --ip=${DEFAULT_IPV4} --detach=false --node-image=giantswarm/node:v0.22.0
       ExecStartPost=/bin/bash -c "/opt/bin/calicoctl bgp peer add $(echo ${IP_BRIDGE}} | cut -d'.' -f1-3).0 as $(/opt/bin/calicoctl bgp default-node-as)"
-      ExecStartPost=/bin/bash -c "/usr/bin/etcdctl --endpoints=https://{{.Cluster.Etcd.Domain}}/443 --ca-file=/etc/kubernetes/ssl/calico/client-ca.pem --cert-file=/etc/kubernetes/ssl/calico/client-crt.pem --key-file=/etc/kubernetes/ssl/calico/client-key.pem set /calico/v1/host/{{.Node.Hostname}}-flannel/bird_ip $(echo ${IP_BRIDGE} | cut -d'.' -f1-3).0"
+      ExecStartPost=/bin/bash -c "/usr/bin/etcdctl --endpoints=https://{{.Cluster.Etcd.Domain}}:2379 --ca-file=/etc/kubernetes/ssl/calico/client-ca.pem --cert-file=/etc/kubernetes/ssl/calico/client-crt.pem --key-file=/etc/kubernetes/ssl/calico/client-key.pem set /calico/v1/host/{{.Node.Hostname}}-flannel/bird_ip $(echo ${IP_BRIDGE} | cut -d'.' -f1-3).0"
       ExecStop=/opt/bin/calicoctl node stop --force
       ExecStopPost=/bin/bash -c "find /tmp/ -name '_MEI*' | xargs -I {} rm -rf {}"
       ExecStopPost=/bin/bash -c "/opt/bin/calicoctl bgp peer remove $(echo ${IP_BRIDGE} | cut -d'.' -f1-3).0"
-      ExecStopPost=/usr/bin/etcdctl --endpoints=https://{{.Cluster.Etcd.Domain}}:443 --ca-file=/etc/kubernetes/ssl/calico/client-ca.pem --cert-file=/etc/kubernetes/ssl/calico/client-crt.pem --key-file=/etc/kubernetes/ssl/calico/client-key.pem rm /calico/v1/host/{{.Node.Hostname}}-flannel/bird_ip
+      ExecStopPost=/usr/bin/etcdctl --endpoints=https://{{.Cluster.Etcd.Domain}}:2379 --ca-file=/etc/kubernetes/ssl/calico/client-ca.pem --cert-file=/etc/kubernetes/ssl/calico/client-crt.pem --key-file=/etc/kubernetes/ssl/calico/client-key.pem rm /calico/v1/host/{{.Node.Hostname}}-flannel/bird_ip
 
       [Install]
       WantedBy=multi-user.target

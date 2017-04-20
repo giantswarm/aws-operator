@@ -1,3 +1,58 @@
+Release v1.8.15 (2017-04-20)
+===
+
+### Service Client Updates
+* `service/devicefarm`: Updates service API and documentation
+  * API Update for AWS Device Farm: Support for Deals and Promotions
+* `service/directconnect`: Updates service documentation
+  * Documentation updates for AWS Direct Connect.
+* `service/elbv2`: Updates service waiters
+* `service/kms`: Updates service documentation and examples
+  * Doc-only update for Key Management Service (KMS): Update docs for GrantConstraints and GenerateRandom
+* `service/route53`: Updates service documentation
+  * Release notes: SDK documentation now includes examples for ChangeResourceRecordSets for all types of resource record set, such as weighted, alias, and failover.
+* `service/route53domains`: Updates service API, documentation, and paginators
+  * Adding examples and other documentation updates.
+
+### SDK Enhancements
+* `service/s3`: Add utilities to make getting a bucket's region easier (#1207)
+  * Adds two features which make it easier to get a bucket's region, `s3.NormalizeBucketLocation` and `s3manager.GetBucketRegion`.
+
+### SDK Bugs
+* `service/s3`: Fix HeadObject's incorrect documented error codes (#1213)
+  * The HeadObject's model incorrectly states that the operation can return the NoSuchKey error code.
+  * Fixes #1208
+Release v1.8.14 (2017-04-19)
+===
+
+### Service Client Updates
+* `service/apigateway`: Updates service API and documentation
+  * Add support for "embed" property.
+* `service/codestar`: Adds new service
+  * AWS CodeStar is a cloud-based service for creating, managing, and working with software development projects on AWS. An AWS CodeStar project creates and integrates AWS services for your project development toolchain. AWS CodeStar also manages the permissions required for project users.
+* `service/ec2`: Updates service API and documentation
+  * Adds support for creating an Amazon FPGA Image (AFI) from a specified design checkpoint (DCP).
+* `service/iam`: Updates service API and documentation
+  * This changes introduces a new IAM role type, Service Linked Role, which works like a normal role but must be managed via services' control.
+* `service/lambda`: Updates service API and documentation
+  * Lambda integration with CloudDebugger service to enable customers to enable tracing for the Lambda functions and send trace information to the CloudDebugger service.
+* `service/lexmodelbuildingservice`: Adds new service
+* `service/polly`: Updates service API, documentation, and paginators
+  * API Update for Amazon Polly: Add support for speech marks
+* `service/rekognition`: Updates service API and documentation
+  * Given an image, the API detects explicit or suggestive adult content in the image and returns a list of corresponding labels with confidence scores, as well as a taxonomy (parent-child relation) for each label.
+
+Release v1.8.13 (2017-04-18)
+===
+
+### Service Client Updates
+* `service/lambda`: Updates service API and documentation
+  * You can use tags to group and filter your Lambda functions, making it easier to analyze them for billing allocation purposes. For more information, see Tagging Lambda Functions.  You can now write or upgrade your Lambda functions using Python version 3.6. For more information, see Programming Model for Authoring Lambda Functions in Python. Note: Features will be rolled out in the US regions on 4/19.
+
+### SDK Enhancements
+* `aws/request`: add support for appengine's custom standard library (#1190)
+  * Remove syscall error checking on appengine platforms.
+
 Release v1.8.12 (2017-04-11)
 ===
 
