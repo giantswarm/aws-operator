@@ -34,13 +34,19 @@ import:
 - package: github.com/giantswarm/certificatetpr
   version: fa554d09f0137a91aa6ef007b92e170b31dbefd2
 - package: github.com/giantswarm/k8scloudconfig
-  version: b31c9407200797ca4be735c3a73ec51ae34b31fd
+  version: f194c3c15b3218dd5e21606cd5dd190818a64ab3
 - package: github.com/golang/protobuf
   version: 8ee79997227bf9b34611aee7946ae64735e6fd93
   subpackages:
   - jsonpb
   - proto
   - sortkeys
+# The version of pflag was previously indicated by kubernetes/go-client, but using it with the current cobra version results in the following error:
+# vendor/github.com/spf13/cobra/command.go:1092: c.lflags.SortFlags undefined (type *pflag.FlagSet has no field or method SortFlags)
+# vendor/github.com/spf13/cobra/command.go:1092: c.Flags().SortFlags undefined (type *pflag.FlagSet has no field or method SortFlags)
+# vendor/github.com/spf13/cobra/command.go:1240: c.parentsPflags.SortFlags undefined (type *pflag.FlagSet has no field or method SortFlags)
+- package: github.com/spf13/pflag
+  version: 2300d0f8576fe575f71aaa5b9bbe4e1b0dc2eb51
 testImport:
 - package: github.com/stretchr/testify
   version: v1.1.4
