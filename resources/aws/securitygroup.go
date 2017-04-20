@@ -69,7 +69,7 @@ func (s *SecurityGroup) openPort(port int) error {
 		CidrIp:     aws.String("0.0.0.0/0"),
 		GroupId:    aws.String(s.ID()),
 		IpProtocol: aws.String("tcp"),
-		FromPort:   aws.Int64(0),
+		FromPort:   aws.Int64(int64(port)),
 		ToPort:     aws.Int64(int64(port)),
 	}); err != nil {
 		return microerror.MaskAny(err)
