@@ -69,9 +69,6 @@ type DecoderConfig struct {
 	//   - empty array = empty map and vice versa
 	//   - negative numbers to overflowed uint values (base 10)
 	//   - slice of maps to a merged map
-	//   - single values are converted to slices if required. Each
-	//     element is weakly decoded. For example: "4" can become []int{4}
-	//     if the target type is an int slice.
 	//
 	WeaklyTypedInput bool
 
@@ -587,28 +584,17 @@ func (d *Decoder) decodeSlice(name string, data interface{}, val reflect.Value) 
 
 	valSlice := val
 	if valSlice.IsNil() || d.config.ZeroFields {
+
 		// Check input type
 		if dataValKind != reflect.Array && dataValKind != reflect.Slice {
-			if d.config.WeaklyTypedInput {
-				switch {
-				// Empty maps turn into empty slices
-				case dataValKind == reflect.Map:
-					if dataVal.Len() == 0 {
-						val.Set(reflect.MakeSlice(sliceType, 0, 0))
-						return nil
-					}
-
-				// All other types we try to convert to the slice type
-				// and "lift" it into it. i.e. a string becomes a string slice.
-				default:
-					// Just re-try this function with data as a slice.
-					return d.decodeSlice(name, []interface{}{data}, val)
-				}
+			// Accept empty map instead of array/slice in weakly typed mode
+			if d.config.WeaklyTypedInput && dataVal.Kind() == reflect.Map && dataVal.Len() == 0 {
+				val.Set(reflect.MakeSlice(sliceType, 0, 0))
+				return nil
+			} else {
+				return fmt.Errorf(
+					"'%s': source data must be an array or slice, got %s", name, dataValKind)
 			}
-
-			return fmt.Errorf(
-				"'%s': source data must be an array or slice, got %s", name, dataValKind)
-
 		}
 
 		// Make a new slice to hold our result, same size as the original data.
@@ -620,9 +606,6 @@ func (d *Decoder) decodeSlice(name string, data interface{}, val reflect.Value) 
 
 	for i := 0; i < dataVal.Len(); i++ {
 		currentData := dataVal.Index(i).Interface()
-		for valSlice.Len() <= i {
-			valSlice = reflect.Append(valSlice, reflect.Zero(valElemType))
-		}
 		currentField := valSlice.Index(i)
 
 		fieldName := fmt.Sprintf("%s[%d]", name, i)

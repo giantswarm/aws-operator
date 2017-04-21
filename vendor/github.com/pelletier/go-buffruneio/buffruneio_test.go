@@ -1,18 +1,9 @@
 package buffruneio
 
 import (
-	"runtime/debug"
 	"strings"
 	"testing"
 )
-
-func assertNoError(t *testing.T, err error) {
-	if err != nil {
-		t.Log("unexpected error", err)
-		debug.PrintStack()
-		t.FailNow()
-	}
-}
 
 func assumeRunesArray(t *testing.T, expected []rune, got []rune) {
 	if len(expected) != len(got) {
@@ -26,15 +17,15 @@ func assumeRunesArray(t *testing.T, expected []rune, got []rune) {
 }
 
 func assumeRune(t *testing.T, rd *Reader, r rune) {
-	gotRune, size, err := rd.ReadRune()
-	assertNoError(t, err)
+	gotRune, err := rd.ReadRune()
+	if err != nil {
+		t.Fatal("unexpected error", err)
+	}
 	if gotRune != r {
 		t.Fatal("got", string(gotRune),
 			"(", []byte(string(gotRune)), ")",
 			"expected", string(r),
 			"(", []byte(string(r)), ")")
-		t.Fatal("got size", size,
-			"expected", len([]byte(string(r))))
 	}
 }
 
@@ -64,7 +55,7 @@ func TestUnread(t *testing.T) {
 
 	assumeRune(t, rd, 'a')
 	assumeRune(t, rd, 'b')
-	assertNoError(t, rd.UnreadRune())
+	rd.UnreadRune()
 	assumeRune(t, rd, 'b')
 	assumeRune(t, rd, EOF)
 }
@@ -73,10 +64,10 @@ func TestUnreadEOF(t *testing.T) {
 	s := ""
 	rd := NewReader(strings.NewReader(s))
 
-	_ = rd.UnreadRune()
+	rd.UnreadRune()
 	assumeRune(t, rd, EOF)
 	assumeRune(t, rd, EOF)
-	assertNoError(t, rd.UnreadRune())
+	rd.UnreadRune()
 	assumeRune(t, rd, EOF)
 }
 
@@ -107,7 +98,7 @@ func TestPeekEmpty(t *testing.T) {
 	s := ""
 	rd := NewReader(strings.NewReader(s))
 
-	runes := rd.PeekRunes(1)
+	runes := rd.Peek(1)
 	if len(runes) != 1 {
 		t.Fatal("incorrect number of runes", len(runes))
 	}
@@ -120,14 +111,14 @@ func TestPeek(t *testing.T) {
 	s := "a"
 	rd := NewReader(strings.NewReader(s))
 
-	runes := rd.PeekRunes(1)
+	runes := rd.Peek(1)
 	assumeRunesArray(t, []rune{'a'}, runes)
 
-	runes = rd.PeekRunes(1)
+	runes = rd.Peek(1)
 	assumeRunesArray(t, []rune{'a'}, runes)
 
 	assumeRune(t, rd, 'a')
-	runes = rd.PeekRunes(1)
+	runes = rd.Peek(1)
 	assumeRunesArray(t, []rune{EOF}, runes)
 
 	assumeRune(t, rd, EOF)
@@ -137,7 +128,7 @@ func TestPeekLarge(t *testing.T) {
 	s := "abcdefg"
 	rd := NewReader(strings.NewReader(s))
 
-	runes := rd.PeekRunes(100)
+	runes := rd.Peek(100)
 	if len(runes) != len(s)+1 {
 		t.Fatal("incorrect number of runes", len(runes))
 	}

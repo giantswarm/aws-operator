@@ -12,6 +12,7 @@ func TestMountStats(t *testing.T) {
 	tests := []struct {
 		name    string
 		s       string
+		fs      bool
 		mounts  []*Mount
 		invalid bool
 	}{
@@ -112,6 +113,7 @@ func TestMountStats(t *testing.T) {
 		},
 		{
 			name: "fixtures OK",
+			fs:   true,
 			mounts: []*Mount{
 				{
 					Device: "rootfs",
@@ -199,9 +201,10 @@ func TestMountStats(t *testing.T) {
 
 		if tt.s != "" {
 			mounts, err = parseMountStats(strings.NewReader(tt.s))
-		} else {
-			proc, e := FS("fixtures").NewProc(26231)
-			if e != nil {
+		}
+		if tt.fs {
+			proc, err := FS("fixtures").NewProc(26231)
+			if err != nil {
 				t.Fatalf("failed to create proc: %v", err)
 			}
 
