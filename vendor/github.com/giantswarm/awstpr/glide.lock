@@ -1,5 +1,5 @@
-hash: 801b1d5681068e31ae1148b6dc19c22033940a5e50b3434db3d134d9dd7be655
-updated: 2017-04-06T17:59:43.903778317+02:00
+hash: 01a0b3b1bf35a4de0bdaff2b926702d48d839e25e1c9520525cbc0fbcf9b5a3e
+updated: 2017-04-20T16:45:00.629199117+02:00
 imports:
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
@@ -18,7 +18,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/clustertpr
-  version: ab6482e53e6c7d22fc5d4fa77f3762cac6914ec3
+  version: b0021f9dd11f55eb3bd1ee60d9cc3dc844b89462
   subpackages:
   - calico
   - cluster
@@ -35,6 +35,7 @@ imports:
   - kubernetes/dns
   - kubernetes/hyperkube
   - kubernetes/hyperkube/docker
+  - kubernetes/ingress
   - kubernetes/kubelet
   - node
   - operator
