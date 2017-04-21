@@ -27,7 +27,9 @@ rkt run \
 		done;
 		echo done.'
 
-rkt rm --uuid-file=/var/run/coreos/decrypt-tls-assets.uuid || :`
+rkt rm --uuid-file=/var/run/coreos/decrypt-tls-assets.uuid || :
+
+chown -R etcd:etcd /etc/kubernetes/ssl/etcd`
 
 	decryptTLSAssetsServiceTemplate = `
 [Unit]
