@@ -29,8 +29,9 @@ import:
 - package: k8s.io/client-go
   version: v2.0.0-alpha.1
 - package: github.com/giantswarm/awstpr
-  version: 35aee66d289de3a7e551e4accc41dbc7931410bb
+  version: 1c095b6b954ece42372552d39e076b3353023d8c
 - package: github.com/giantswarm/clustertpr
+  version: b0021f9dd11f55eb3bd1ee60d9cc3dc844b89462
 - package: github.com/giantswarm/certificatetpr
   version: fa554d09f0137a91aa6ef007b92e170b31dbefd2
 - package: github.com/giantswarm/k8scloudconfig
