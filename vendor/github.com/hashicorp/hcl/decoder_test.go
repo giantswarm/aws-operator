@@ -208,16 +208,6 @@ func TestDecode_interface(t *testing.T) {
 			},
 		},
 		{
-			"list_of_lists.hcl",
-			false,
-			map[string]interface{}{
-				"foo": []interface{}{
-					[]interface{}{"foo"},
-					[]interface{}{"bar"},
-				},
-			},
-		},
-		{
 			"list_of_maps.hcl",
 			false,
 			map[string]interface{}{
