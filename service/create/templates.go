@@ -34,7 +34,11 @@ rkt rm --uuid-file=/var/run/coreos/decrypt-tls-assets.uuid || :`
 Description=Decrypt TLS certificates
 
 [Service]
-ExecStart=/opt/bin/decrypt-tls-assets`
+Type=oneshot
+ExecStart=/opt/bin/decrypt-tls-assets
+
+[Install]
+WantedBy=multi-user.target`
 
 	userDataScriptTemplate = `#!/bin/bash
 
