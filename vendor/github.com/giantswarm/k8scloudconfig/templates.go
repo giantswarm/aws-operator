@@ -4,13 +4,6 @@ const (
 	MasterTemplate = `#cloud-config
 hostname: {{.Node.Hostname}}
 write_files:
-- path: /etc/hosts
-  permissions: 0644
-  owner: root
-  content: |
-    127.0.0.1 localhost
-    127.0.0.1 {{.Node.Hostname}}
-    127.0.0.1 etcd.giantswarm
 - path: /etc/resolv.conf
   permissions: 0644
   owner: root
@@ -595,7 +588,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="ETCD_AUTHORITY=127.0.0.1:2383"
+      Environment="ETCD_AUTHORITY=127.0.0.1:2380"
       ExecStartPre=/usr/bin/wget -O /opt/bin/calicoctl https://s3-eu-west-1.amazonaws.com/downloads.giantswarm.io/calicoctl/v0.22.0/calicoctl
       ExecStartPre=/usr/bin/chmod +x /opt/bin/calicoctl
       ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/calico/client-ca.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/calico/client-ca.pem to be written' && sleep 1; done"
@@ -605,11 +598,11 @@ coreos:
       ExecStartPre=/opt/bin/calicoctl pool add {{.Cluster.Calico.Subnet}}/{{.Cluster.Calico.CIDR}} --ipip --nat-outgoing
       ExecStart=/opt/bin/calicoctl node --ip=${DEFAULT_IPV4}  --detach=false --node-image=giantswarm/node:v0.22.0
       ExecStartPost=/bin/bash -c "/opt/bin/calicoctl bgp peer add $(echo ${BRIDGE_IP} | cut -d'.' -f1-3).0 as $(/opt/bin/calicoctl bgp default-node-as)"
-      ExecStartPost=/bin/bash -c "/usr/bin/etcdctl --endpoints=http://127.0.0.1:2383 set /calico/v1/host/{{.Node.Hostname}}-flannel/bird_ip $(echo ${BRIDGE_IP} | cut -d'.' -f1-3).0"
+      ExecStartPost=/bin/bash -c "/usr/bin/etcdctl --endpoints=http://127.0.0.1:2380 set /calico/v1/host/{{.Node.Hostname}}-flannel/bird_ip $(echo ${BRIDGE_IP} | cut -d'.' -f1-3).0"
       ExecStop=/opt/bin/calicoctl node stop --force
       ExecStopPost=/bin/bash -c "find /tmp/ -name '_MEI*' | xargs -I {} rm -rf {}"
       ExecStopPost=/bin/bash -c "/opt/bin/calicoctl bgp peer remove $(echo ${BRIDGE_IP} | cut -d'.' -f1-3).0"
-      ExecStopPost=/usr/bin/etcdctl --endpoints=http://127.0.0.1:2383 rm /calico/v1/host/{{.Node.Hostname}}-flannel/bird_ip
+      ExecStopPost=/usr/bin/etcdctl --endpoints=http://127.0.0.1:2380 rm /calico/v1/host/{{.Node.Hostname}}-flannel/bird_ip
 
       [Install]
       WantedBy=multi-user.target
@@ -886,7 +879,7 @@ coreos:
       ExecStartPre=-/usr/bin/docker rm -f $NAME
       ExecStart=/usr/bin/docker run --rm --net=host \
       --name $NAME \
-      -e ETCD_ENDPOINTS=http://127.0.0.1:2383 \
+      -e ETCD_ENDPOINTS=http://127.0.0.1:2380 \
       -e K8S_API=http://localhost:{{.Cluster.Kubernetes.API.InsecurePort}} \
       -e LEADER_ELECTION=true \
       $IMAGE
@@ -958,13 +951,6 @@ coreos:
 	WorkerTemplate = `#cloud-config
 hostname: {{.Node.Hostname}}
 write_files:
-- path: /etc/hosts
-  permissions: 0644
-  owner: root
-  content: |
-    127.0.0.1 localhost
-    127.0.0.1 {{.Node.Hostname}}
-    127.0.0.1 etcd.giantswarm
 - path: /srv/10-calico.conf
   owner: root
   permissions: 0755
