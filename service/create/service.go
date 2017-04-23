@@ -307,24 +307,30 @@ func (s *Service) Boot() {
 						s.logger.Log("info", fmt.Sprintf("gateway for cluster '%s' already exists, reusing", cluster.Name))
 					}
 
-					// Create security group
-					var securityGroup resources.ResourceWithID
-					securityGroup = &awsresources.SecurityGroup{
-						Description: cluster.Name,
-						GroupName:   cluster.Name,
-						VpcID:       vpc.ID(),
-						PortsToOpen: extractPortsFromTPR(cluster),
-						AWSEntity:   awsresources.AWSEntity{Clients: clients},
+					// Create masters security group
+					mastersSGInput := securityGroupInput{
+						Clients:     clients,
+						GroupName:   securityGroupName(cluster.Name, prefixMaster),
+						PortsToOpen: extractMasterPortsFromTPR(cluster),
+						VPCID:       vpc.ID(),
 					}
-					securityGroupCreated, err := securityGroup.CreateIfNotExists()
+					mastersSecurityGroup, err := s.createSecurityGroup(mastersSGInput)
 					if err != nil {
-						s.logger.Log("error", fmt.Sprintf("could not create security group: %s", errgo.Details(err)))
+						s.logger.Log("error", fmt.Sprintf("could not create security group '%s': %s", mastersSGInput.GroupName, errgo.Details(err)))
 						return
 					}
-					if securityGroupCreated {
-						s.logger.Log("info", fmt.Sprintf("created security group '%s'", cluster.Name))
-					} else {
-						s.logger.Log("info", fmt.Sprintf("security group '%s' already exists, reusing", cluster.Name))
+
+					// Create workers security group
+					workersSGInput := securityGroupInput{
+						Clients:     clients,
+						GroupName:   securityGroupName(cluster.Name, prefixWorker),
+						PortsToOpen: extractWorkerPortsFromTPR(cluster),
+						VPCID:       vpc.ID(),
+					}
+					workersSecurityGroup, err := s.createSecurityGroup(workersSGInput)
+					if err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not create security group '%s': %s", workersSGInput.GroupName, errgo.Details(err)))
+						return
 					}
 
 					// Create route table
@@ -399,7 +405,7 @@ func (s *Service) Boot() {
 						tlsAssets:           tlsAssets,
 						clusterName:         cluster.Name,
 						bucket:              bucket,
-						securityGroup:       securityGroup,
+						securityGroup:       mastersSecurityGroup,
 						subnet:              publicSubnet,
 						keyPairName:         cluster.Name,
 						instanceProfileName: policy.Name(),
@@ -418,7 +424,7 @@ func (s *Service) Boot() {
 						Clients:         clients,
 						Cluster:         cluster,
 						InstanceIDs:     masterIDs,
-						SecurityGroupID: securityGroup.ID(),
+						SecurityGroupID: mastersSecurityGroup.ID(),
 						SubnetID:        publicSubnet.ID(),
 					}
 
@@ -435,7 +441,7 @@ func (s *Service) Boot() {
 						cluster:             cluster,
 						tlsAssets:           tlsAssets,
 						bucket:              bucket,
-						securityGroup:       securityGroup,
+						securityGroup:       workersSecurityGroup,
 						subnet:              privateSubnet,
 						clusterName:         cluster.Name,
 						keyPairName:         cluster.Name,
@@ -521,17 +527,22 @@ func (s *Service) Boot() {
 						s.logger.Log("info", "deleted private subnet")
 					}
 
-					// Delete security group
-					var securityGroup resources.ResourceWithID
-					securityGroup = &awsresources.SecurityGroup{
-						Description: cluster.Name,
-						GroupName:   cluster.Name,
-						AWSEntity:   awsresources.AWSEntity{Clients: clients},
+					// Delete masters security group
+					mastersSGInput := securityGroupInput{
+						Clients:   clients,
+						GroupName: securityGroupName(cluster.Name, prefixMaster),
 					}
-					if err := securityGroup.Delete(); err != nil {
-						s.logger.Log("error", fmt.Sprintf("could not delete security group: %s", errgo.Details(err)))
-					} else {
-						s.logger.Log("info", "deleted security group")
+					if err := s.deleteSecurityGroup(mastersSGInput); err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': %s", mastersSGInput.GroupName, errgo.Details(err)))
+					}
+
+					// Delete workers security group
+					workersSGInput := securityGroupInput{
+						Clients:   clients,
+						GroupName: securityGroupName(cluster.Name, prefixWorker),
+					}
+					if err := s.deleteSecurityGroup(workersSGInput); err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': %s", workersSGInput.GroupName, errgo.Details(err)))
 					}
 
 					// Delete route table
