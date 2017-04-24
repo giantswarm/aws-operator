@@ -18,7 +18,6 @@ type securityGroupInput struct {
 }
 
 func (s *Service) createSecurityGroup(input securityGroupInput) (resources.ResourceWithID, error) {
-
 	var securityGroup resources.ResourceWithID
 	securityGroup = &awsresources.SecurityGroup{
 		Description: input.GroupName,
@@ -41,7 +40,6 @@ func (s *Service) createSecurityGroup(input securityGroupInput) (resources.Resou
 }
 
 func (s *Service) deleteSecurityGroup(input securityGroupInput) error {
-
 	var securityGroup resources.ResourceWithID
 	securityGroup = &awsresources.SecurityGroup{
 		Description: input.GroupName,
