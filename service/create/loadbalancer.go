@@ -23,12 +23,14 @@ type LoadBalancerInput struct {
 
 func (s *Service) createLoadBalancer(input LoadBalancerInput) error {
 	lb := &awsresources.ELB{
-		Name:             input.Cluster.Spec.Cluster.Cluster.ID,
-		SecurityGroup:    input.SecurityGroupID,
-		SubnetID:         input.SubnetID,
-		InstancePort:     input.Cluster.Spec.Cluster.Kubernetes.API.SecurePort,
-		LoadBalancerPort: input.Cluster.Spec.Cluster.Kubernetes.API.SecurePort,
-		Client:           input.Clients.ELB,
+		Name:          input.Cluster.Spec.Cluster.Cluster.ID,
+		SecurityGroup: input.SecurityGroupID,
+		SubnetID:      input.SubnetID,
+		PortsToOpen: []int{
+			input.Cluster.Spec.Cluster.Kubernetes.API.SecurePort,
+			input.Cluster.Spec.Cluster.Etcd.Port,
+		},
+		Client: input.Clients.ELB,
 	}
 
 	lbCreated, err := lb.CreateIfNotExists()

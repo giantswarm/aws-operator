@@ -11,16 +11,15 @@ import (
 
 // ELB is an Elastic Load Balancer
 type ELB struct {
-	Name             string
-	dnsName          string
-	hostedZoneID     string
-	AZ               string
-	SecurityGroup    string
-	SubnetID         string
-	Tags             []string
-	Client           *elb.ELB
-	LoadBalancerPort int
-	InstancePort     int
+	Name          string
+	dnsName       string
+	hostedZoneID  string
+	AZ            string
+	SecurityGroup string
+	SubnetID      string
+	Tags          []string
+	PortsToOpen   []int
+	Client        *elb.ELB
 }
 
 func (lb *ELB) CreateIfNotExists() (bool, error) {
@@ -47,16 +46,21 @@ func (lb *ELB) CreateOrFail() error {
 		return microerror.MaskAny(clientNotInitializedError)
 	}
 
+	var listeners []*elb.Listener
+	for _, portToOpen := range lb.PortsToOpen {
+		listener := &elb.Listener{
+			InstancePort:     aws.Int64(int64(lb.PortsToOpen[portToOpen])),
+			LoadBalancerPort: aws.Int64(int64(lb.PortsToOpen[portToOpen])),
+			// TCP because we want to do SSL passthrough, not termination
+			Protocol: aws.String("TCP"),
+		}
+
+		listeners = append(listeners, listener)
+	}
+
 	if _, err := lb.Client.CreateLoadBalancer(&elb.CreateLoadBalancerInput{
 		LoadBalancerName: aws.String(lb.Name),
-		Listeners: []*elb.Listener{
-			{
-				InstancePort:     aws.Int64(int64(lb.InstancePort)),
-				LoadBalancerPort: aws.Int64(int64(lb.LoadBalancerPort)),
-				// TCP because we want to do SSL passthrough, not termination
-				Protocol: aws.String("TCP"),
-			},
-		},
+		Listeners:        listeners,
 		// we use the Subnet ID instead, since only one of either can be specified
 		// AvailabilityZones: []*string{
 		// 	aws.String(lb.AZ),
