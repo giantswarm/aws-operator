@@ -44,7 +44,7 @@ func (s *Service) createLoadBalancer(input LoadBalancerInput) error {
 		s.logger.Log("debug", fmt.Sprintf("ELB '%s' already exists, reusing", lb.Name))
 	}
 
-	// create DNS record for LB
+	// create DNS records for LB
 	hzName, err := hostedZoneName(input.Cluster)
 	if err != nil {
 		return microerror.MaskAny(fmt.Errorf("could not generate hosted zone name: %s", err))
@@ -67,18 +67,31 @@ func (s *Service) createLoadBalancer(input LoadBalancerInput) error {
 		s.logger.Log("debug", fmt.Sprintf("hosted zone '%s' already exists, reusing", hz.Name))
 	}
 
-	recordSet := &awsresources.RecordSet{
+	apiRecordSet := &awsresources.RecordSet{
 		Client:       input.Clients.Route53,
 		Resource:     lb,
 		Domain:       input.Cluster.Spec.Cluster.Kubernetes.API.Domain,
 		HostedZoneID: hz.ID(),
 	}
 
-	if err := recordSet.CreateOrFail(); err != nil {
+	if err := apiRecordSet.CreateOrFail(); err != nil {
 		return microerror.MaskAny(fmt.Errorf("error registering DNS '%s'", errgo.Details(err)))
 	}
 
-	s.logger.Log("debug", fmt.Sprintf("created or reused DNS record for ELB"))
+	s.logger.Log("debug", fmt.Sprintf("created or reused DNS record for api"))
+
+	etcdRecordSet := &awsresources.RecordSet{
+		Client:       input.Clients.Route53,
+		Resource:     lb,
+		Domain:       input.Cluster.Spec.Cluster.Etcd.Domain,
+		HostedZoneID: hz.ID(),
+	}
+
+	if err := etcdRecordSet.CreateOrFail(); err != nil {
+		return microerror.MaskAny(fmt.Errorf("error registering DNS '%s'", errgo.Details(err)))
+	}
+
+	s.logger.Log("debug", fmt.Sprintf("created or reused DNS record for etcd"))
 
 	s.logger.Log("debug", fmt.Sprintf("waiting for masters to be ready..."))
 
