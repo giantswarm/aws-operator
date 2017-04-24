@@ -34,7 +34,7 @@ import:
 - package: github.com/giantswarm/certificatetpr
   version: fa554d09f0137a91aa6ef007b92e170b31dbefd2
 - package: github.com/giantswarm/k8scloudconfig
-  version: 0c372638f8eaa3788717b317b6a9c1604f86a9f1
+  version: 8a20e5e3895796d91b4f1b7dad9d68e0cab7db04
 - package: github.com/golang/protobuf
   version: 8ee79997227bf9b34611aee7946ae64735e6fd93
   subpackages:
