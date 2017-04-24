@@ -16,6 +16,7 @@ spec:
     etcd:
       domain: "k8s.cluster.giantswarm.io"
       prefix: "example-cluster"
+      port: 2379
 
     calico:
       subnet: "192.168.0.0"
