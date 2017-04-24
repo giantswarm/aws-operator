@@ -145,18 +145,31 @@ func (s *Service) deleteLoadBalancer(input LoadBalancerInput) error {
 
 	// Delete DNS record, if the Hosted Zone was found
 	if hz != nil {
-		recordSet := &awsresources.RecordSet{
+		apiRecordSet := &awsresources.RecordSet{
 			Client:       input.Clients.Route53,
 			Resource:     lb,
 			Domain:       input.Cluster.Spec.Cluster.Kubernetes.API.Domain,
 			HostedZoneID: hz.ID(),
 		}
 
-		if err := recordSet.Delete(); err != nil {
+		if err := apiRecordSet.Delete(); err != nil {
 			return microerror.MaskAny(err)
 		}
 
-		s.logger.Log("debug", fmt.Sprintf("deleted DNS entry for ELB"))
+		s.logger.Log("debug", fmt.Sprintf("deleted DNS entry for api"))
+
+		etcdRecordSet := &awsresources.RecordSet{
+			Client:       input.Clients.Route53,
+			Resource:     lb,
+			Domain:       input.Cluster.Spec.Cluster.Etcd.Domain,
+			HostedZoneID: hz.ID(),
+		}
+
+		if err := etcdRecordSet.Delete(); err != nil {
+			return microerror.MaskAny(err)
+		}
+
+		s.logger.Log("debug", fmt.Sprintf("deleted DNS entry for etcd"))
 	}
 
 	return nil
