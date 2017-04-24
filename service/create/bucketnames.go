@@ -8,10 +8,10 @@ import (
 
 func (s *Service) bucketName(cluster awstpr.CustomObject) string {
 	accountID := s.awsConfig.AccountID()
-	region := cluster.Spec.AWS.Region
 	customerID := cluster.Spec.Cluster.Customer.ID
+	region := cluster.Spec.AWS.Region
 
-	name := fmt.Sprintf("%s-g8s-%s-%s", accountID, region, customerID)
+	name := fmt.Sprintf("%s-g8s-%s-%s", accountID, customerID, region)
 
 	return name
 }
