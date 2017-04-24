@@ -52,9 +52,9 @@ spec:
       publicSubnetCidr: "10.0.128.0/20"
 
     masters:
-    - imageid: "ami-9501c8fa"
+    - imageid: "ami-f6a49b90"
       instancetype: "t2.medium"
 
     workers:
-    - imageid: "ami-9501c8fa"
+    - imageid: "ami-f6a49b90"
       instancetype: "t2.medium"
