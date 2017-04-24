@@ -588,7 +588,11 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="ETCD_AUTHORITY=127.0.0.1:2380"
+      Environment="ETCD_AUTHORITY=127.0.0.1:2379"
+      Environment="ETCD_SCHEME=https"
+      Environment="ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/calico/client-ca.pem"
+      Environment="ETCD_CERT_FILE=/etc/kubernetes/ssl/calico/client-crt.pem"
+      Environment="ETCD_KEY_FILE=/etc/kubernetes/ssl/calico/client-key.pem"
       ExecStartPre=/usr/bin/wget -O /opt/bin/calicoctl https://s3-eu-west-1.amazonaws.com/downloads.giantswarm.io/calicoctl/v0.22.0/calicoctl
       ExecStartPre=/usr/bin/chmod +x /opt/bin/calicoctl
       ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/calico/client-ca.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/calico/client-ca.pem to be written' && sleep 1; done"
@@ -1133,7 +1137,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="ETCD_AUTHORITY=https://127.0.0.1:2379"
+      Environment="ETCD_AUTHORITY=127.0.0.1:2379"
       Environment="ETCD_SCHEME=https"
       Environment="ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/calico/client-ca.pem"
       Environment="ETCD_CERT_FILE=/etc/kubernetes/ssl/calico/client-crt.pem"
@@ -1375,15 +1379,6 @@ coreos:
 
       [Install]
       WantedBy=multi-user.target
-  - name: decrypt-tls-certs.service
-    enable: true
-    command: start
-    content: |
-      [Unit]
-      Description=Decrypt TLS certificates
-
-      [Service]
-      ExecStart=/opt/bin/decrypt-tls-assets
   {{range .Units}}- name: {{.Metadata.Name}}
     enable: {{.Metadata.Enable}}
     command: {{.Metadata.Command}}
