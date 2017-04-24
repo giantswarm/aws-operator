@@ -57,7 +57,8 @@ func (kk *KMSKey) Delete() error {
 
 	// AWS API doesn't allow to delete the KMS key immediately, but we can schedule its deletion
 	if _, err := kk.Clients.KMS.ScheduleKeyDeletion(&kms.ScheduleKeyDeletionInput{
-		KeyId: key.KeyMetadata.KeyId,
+		KeyId:               key.KeyMetadata.KeyId,
+		PendingWindowInDays: aws.Int64(7),
 	}); err != nil {
 		return microerror.MaskAny(err)
 	}
