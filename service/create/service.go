@@ -217,14 +217,15 @@ func (s *Service) Boot() {
 					s.logger.Log("info", fmt.Sprintf("created KMS key for cluster '%s'", cluster.Name))
 
 					// Create KMS key
-					var kmsKey resources.ArnResource
-					var kmsKeyErr error
-					{
-						kmsKey = &awsresources.KMSKey{
-							Name:      cluster.Name,
-							AWSEntity: awsresources.AWSEntity{Clients: clients},
-						}
-						kmsKeyErr = kmsKey.CreateOrFail()
+					kmsKey := &awsresources.KMSKey{
+						Name:      cluster.Name,
+						AWSEntity: awsresources.AWSEntity{Clients: clients},
+					}
+
+					kmsKeyErr := kmsKey.CreateOrFail()
+					if kmsKeyErr != nil {
+						s.logger.Log("error", fmt.Sprintf("could not create KMS key: %v", errgo.Details(kmsKeyErr)))
+						return
 					}
 
 					// Encode TLS assets
