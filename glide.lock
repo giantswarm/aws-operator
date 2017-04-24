@@ -1,5 +1,5 @@
-hash: f10fed9e4f456fd5186ef985039659cc3a04dcb0e4e41c4414eb21a692e27388
-updated: 2017-04-21T17:06:46.413045055+02:00
+hash: 8f5c96ab27a3848b9f8d9f15e2691ca4660415e4f47e4cf65727d7a7841fa6de
+updated: 2017-04-24T16:27:49.890664497+02:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aws/aws-sdk-go
-  version: 40bc7761a9f06daa574d20f2ad5454db02a05953
+  version: 0e1d7f7c9ff58350ce8f53866ba45487e7153d46
   subpackages:
   - aws
   - aws/awserr
@@ -133,7 +133,7 @@ imports:
   - operator/networksetup/docker
   - vault
 - name: github.com/giantswarm/k8scloudconfig
-  version: 0c372638f8eaa3788717b317b6a9c1604f86a9f1
+  version: 8a20e5e3895796d91b4f1b7dad9d68e0cab7db04
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
@@ -198,7 +198,7 @@ imports:
   - runtime/internal
   - utilities
 - name: github.com/hashicorp/hcl
-  version: 630949a3c5fa3c613328e1b8256052cbc2327c9b
+  version: 7fa7fff964d035e8a162cce3a164b3ad02ad651b
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -231,7 +231,7 @@ imports:
   subpackages:
   - pbutil
 - name: github.com/mitchellh/mapstructure
-  version: 53818660ed4955e899c0bcafa97299a388bd7c8e
+  version: cc8532a8e9a55ea36402aa21efdf403a60d34096
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/pelletier/go-buffruneio
@@ -254,7 +254,7 @@ imports:
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: 1e2146578273cef808354faa16a1922e0b5d6b2f
+  version: 332f6238064950a97bc3ed3f5421f6418537e707
   subpackages:
   - xfs
 - name: github.com/PuerkitoBio/purell
@@ -268,7 +268,7 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: f58a8d6bd383c1594da70068e4c236136adc5496
+  version: 0a4540b161984c70bc56a12a7b796cb867d5e39d
 - name: github.com/spf13/jwalterweatherman
   version: fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66
 - name: github.com/spf13/pflag
