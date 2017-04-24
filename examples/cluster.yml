@@ -31,6 +31,9 @@ spec:
       hyperkube:
         docker:
           image: "giantswarm/hyperkube:v1.5.2_coreos.0"
+      ingressController:
+        insecurePort: 30010
+        securePort: 30011
 
     operator:
       networkSetup:
