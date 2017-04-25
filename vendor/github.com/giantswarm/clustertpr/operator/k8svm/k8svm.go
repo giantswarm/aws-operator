@@ -5,5 +5,5 @@ import (
 )
 
 type K8sVM struct {
-	Docker docker.Docker
+	Docker docker.Docker `json:"docker" yaml:"docker"`
 }
