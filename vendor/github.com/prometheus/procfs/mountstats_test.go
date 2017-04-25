@@ -12,6 +12,7 @@ func TestMountStats(t *testing.T) {
 	tests := []struct {
 		name    string
 		s       string
+		fs      bool
 		mounts  []*Mount
 		invalid bool
 	}{
@@ -90,30 +91,6 @@ func TestMountStats(t *testing.T) {
 			invalid: true,
 		},
 		{
-			name: "NFSv3 device with transport stats version 1.0 OK",
-			s:    "device 192.168.1.1:/srv mounted on /mnt/nfs with fstype nfs statvers=1.0\nxprt: tcp 1 2 3 4 5 6 7 8 9 10",
-			mounts: []*Mount{{
-				Device: "192.168.1.1:/srv",
-				Mount:  "/mnt/nfs",
-				Type:   "nfs",
-				Stats: &MountStatsNFS{
-					StatVersion: "1.0",
-					Transport: NFSTransportStats{
-						Port:                     1,
-						Bind:                     2,
-						Connect:                  3,
-						ConnectIdleTime:          4,
-						IdleTime:                 5 * time.Second,
-						Sends:                    6,
-						Receives:                 7,
-						BadTransactionIDs:        8,
-						CumulativeActiveRequests: 9,
-						CumulativeBacklog:        10,
-					},
-				},
-			}},
-		},
-		{
 			name: "device rootfs OK",
 			s:    `device rootfs mounted on / with fstype rootfs`,
 			mounts: []*Mount{{
@@ -136,6 +113,7 @@ func TestMountStats(t *testing.T) {
 		},
 		{
 			name: "fixtures OK",
+			fs:   true,
 			mounts: []*Mount{
 				{
 					Device: "rootfs",
@@ -223,9 +201,10 @@ func TestMountStats(t *testing.T) {
 
 		if tt.s != "" {
 			mounts, err = parseMountStats(strings.NewReader(tt.s))
-		} else {
-			proc, e := FS("fixtures").NewProc(26231)
-			if e != nil {
+		}
+		if tt.fs {
+			proc, err := FS("fixtures").NewProc(26231)
+			if err != nil {
 				t.Fatalf("failed to create proc: %v", err)
 			}
 
