@@ -49,9 +49,9 @@ func (lb *ELB) CreateOrFail() error {
 	var listeners []*elb.Listener
 	for _, portToOpen := range lb.PortsToOpen {
 		listener := &elb.Listener{
-			InstancePort:     aws.Int64(int64(lb.PortsToOpen[portToOpen])),
-			LoadBalancerPort: aws.Int64(int64(lb.PortsToOpen[portToOpen])),
-			// Use TCP because we want to do SSL passthrough and not termination.
+			InstancePort:     aws.Int64(int64(portToOpen)),
+			LoadBalancerPort: aws.Int64(int64(portToOpen)),
+			// We use TCP and not HTTP(S) because we want to do SSL passthrough and not termination.
 			Protocol: aws.String("TCP"),
 		}
 
