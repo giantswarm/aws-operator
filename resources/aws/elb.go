@@ -51,7 +51,7 @@ func (lb *ELB) CreateOrFail() error {
 		listener := &elb.Listener{
 			InstancePort:     aws.Int64(int64(lb.PortsToOpen[portToOpen])),
 			LoadBalancerPort: aws.Int64(int64(lb.PortsToOpen[portToOpen])),
-			// TCP because we want to do SSL passthrough, not termination
+			// Use TCP because we want to do SSL passthrough and not termination.
 			Protocol: aws.String("TCP"),
 		}
 
@@ -61,7 +61,7 @@ func (lb *ELB) CreateOrFail() error {
 	if _, err := lb.Client.CreateLoadBalancer(&elb.CreateLoadBalancerInput{
 		LoadBalancerName: aws.String(lb.Name),
 		Listeners:        listeners,
-		// we use the Subnet ID instead, since only one of either can be specified
+		// We use the Subnet ID instead of the AZ since only one of either can be specified.
 		// AvailabilityZones: []*string{
 		// 	aws.String(lb.AZ),
 		// },
@@ -75,7 +75,7 @@ func (lb *ELB) CreateOrFail() error {
 		return microerror.MaskAny(err)
 	}
 
-	// we have to populate some additional fields
+	// We have to populate some additional fields.
 	lbDescription, err := lb.findExisting()
 	if err != nil {
 		return microerror.MaskAny(err)
