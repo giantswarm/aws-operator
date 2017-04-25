@@ -8,8 +8,8 @@ import (
 )
 
 type Operator struct {
-	Certctl      certctl.Certctl
-	K8sVM        k8svm.K8sVM
-	Kubectl      kubectl.Kubectl
-	NetworkSetup networksetup.NetworkSetup
+	Certctl      certctl.Certctl           `json:"certctl" yaml:"certctl"`
+	K8sVM        k8svm.K8sVM               `json:"k8sVM" yaml:"k8sVM"`
+	Kubectl      kubectl.Kubectl           `json:"kubectl" yaml:"kubectl"`
+	NetworkSetup networksetup.NetworkSetup `json:"networkSetup" yaml:"networkSetup"`
 }

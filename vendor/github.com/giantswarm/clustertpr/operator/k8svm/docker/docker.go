@@ -1,5 +1,5 @@
 package docker
 
 type Docker struct {
-	Image string
+	Image string `json:"image" yaml:"image"`
 }
