@@ -175,16 +175,16 @@ func (s *Service) deleteLoadBalancer(input LoadBalancerInput) error {
 	return nil
 }
 
-// hostedZoneName removes the last subdomain from the API domain
-// e.g.  foobar.aws.giantswarm.io -> aws.giantswarm.io
+// hostedZoneName removes the first 2 subdomains from the API domain
+// e.g.  apiserver.foobar.aws.giantswarm.io -> aws.giantswarm.io
 func hostedZoneName(cluster awstpr.CustomObject) (string, error) {
-	tmp := strings.SplitN(cluster.Spec.Cluster.Kubernetes.API.Domain, ".", 2)
+	tmp := strings.SplitN(cluster.Spec.Cluster.Kubernetes.API.Domain, ".", 3)
 
 	if len(tmp) == 0 {
 		return "", microerror.MaskAny(malformedDNSNameError)
 	}
 
-	return strings.Join(tmp[1:], ""), nil
+	return strings.Join(tmp[2:], ""), nil
 }
 
 func hostedZoneComment(cluster awstpr.CustomObject) string {
