@@ -78,7 +78,7 @@ func (s *Service) createLoadBalancer(input LoadBalancerInput) error {
 		return microerror.MaskAny(fmt.Errorf("error registering DNS '%s'", errgo.Details(err)))
 	}
 
-	s.logger.Log("debug", fmt.Sprintf("created or reused DNS record for api"))
+	s.logger.Log("debug", "created or reused DNS record for api")
 
 	etcdRecordSet := &awsresources.RecordSet{
 		Client:       input.Clients.Route53,
@@ -91,9 +91,9 @@ func (s *Service) createLoadBalancer(input LoadBalancerInput) error {
 		return microerror.MaskAny(fmt.Errorf("error registering DNS '%s'", errgo.Details(err)))
 	}
 
-	s.logger.Log("debug", fmt.Sprintf("created or reused DNS record for etcd"))
+	s.logger.Log("debug", "created or reused DNS record for etcd")
 
-	s.logger.Log("debug", fmt.Sprintf("waiting for masters to be ready..."))
+	s.logger.Log("debug", "waiting for masters to be ready...")
 
 	var awsFlavouredInstanceIDs []*string
 	for _, instanceID := range input.InstanceIDs {
@@ -156,7 +156,7 @@ func (s *Service) deleteLoadBalancer(input LoadBalancerInput) error {
 			return microerror.MaskAny(err)
 		}
 
-		s.logger.Log("debug", fmt.Sprintf("deleted DNS entry for api"))
+		s.logger.Log("debug", "deleted DNS entry for api")
 
 		etcdRecordSet := &awsresources.RecordSet{
 			Client:       input.Clients.Route53,
@@ -169,7 +169,7 @@ func (s *Service) deleteLoadBalancer(input LoadBalancerInput) error {
 			return microerror.MaskAny(err)
 		}
 
-		s.logger.Log("debug", fmt.Sprintf("deleted DNS entry for etcd"))
+		s.logger.Log("debug", "deleted DNS entry for etcd")
 	}
 
 	return nil
