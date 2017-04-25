@@ -1,5 +1,5 @@
-hash: 01a0b3b1bf35a4de0bdaff2b926702d48d839e25e1c9520525cbc0fbcf9b5a3e
-updated: 2017-04-20T16:45:00.629199117+02:00
+hash: 86fa47fe2faeb415c354dcac7936fe873640ab650fb0a2e6a9b664ebf242e762
+updated: 2017-04-25T11:20:03.603675599+02:00
 imports:
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
@@ -18,7 +18,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/clustertpr
-  version: b0021f9dd11f55eb3bd1ee60d9cc3dc844b89462
+  version: f99c37dcf8193975174753f4722a9091eb6242fe
   subpackages:
   - calico
   - cluster
