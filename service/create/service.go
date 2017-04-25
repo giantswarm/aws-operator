@@ -633,8 +633,9 @@ func (s *Service) Boot() {
 					}
 					if err := policy.Delete(); err != nil {
 						s.logger.Log("error", errgo.Details(err))
+					} else {
+						s.logger.Log("info", "deleted roles, policies, instance profiles")
 					}
-					s.logger.Log("info", "deleted roles, policies, instance profiles")
 
 					// Delete KMS key
 					var kmsKey resources.ArnResource
@@ -644,8 +645,9 @@ func (s *Service) Boot() {
 					}
 					if err := kmsKey.Delete(); err != nil {
 						s.logger.Log("error", errgo.Details(err))
+					} else {
+						s.logger.Log("info", "deleted KMS key")
 					}
-					s.logger.Log("info", "deleted KMS key")
 
 					// Delete keypair
 					var keyPair resources.Resource
@@ -655,8 +657,9 @@ func (s *Service) Boot() {
 					}
 					if err := keyPair.Delete(); err != nil {
 						s.logger.Log("error", errgo.Details(err))
+					} else {
+						s.logger.Log("info", "deleted keypair")
 					}
-					s.logger.Log("info", "deleted keypair")
 
 					s.logger.Log("info", fmt.Sprintf("cluster '%s' deleted", cluster.Name))
 				},
