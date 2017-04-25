@@ -44,7 +44,7 @@ func (s *Service) createLoadBalancer(input LoadBalancerInput) error {
 		s.logger.Log("debug", fmt.Sprintf("ELB '%s' already exists, reusing", lb.Name))
 	}
 
-	// create DNS records for LB
+	// Create DNS records for LB.
 	hzName, err := hostedZoneName(input.Cluster)
 	if err != nil {
 		return microerror.MaskAny(fmt.Errorf("could not generate hosted zone name: %s", err))
