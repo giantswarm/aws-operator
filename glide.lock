@@ -1,5 +1,5 @@
-hash: 8f5c96ab27a3848b9f8d9f15e2691ca4660415e4f47e4cf65727d7a7841fa6de
-updated: 2017-04-24T16:27:49.890664497+02:00
+hash: 00a70a4c75d5307ddad16092ad8cbb3fe9dad9383151b8457404980c68f151fe
+updated: 2017-04-25T11:33:00.530042062+02:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -95,14 +95,14 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: 1c095b6b954ece42372552d39e076b3353023d8c
+  version: 4ff473f2157079d2c0d3371437a82d5abfec124d
   subpackages:
   - aws
   - aws/vpc
 - name: github.com/giantswarm/certificatetpr
   version: fa554d09f0137a91aa6ef007b92e170b31dbefd2
 - name: github.com/giantswarm/clustertpr
-  version: b0021f9dd11f55eb3bd1ee60d9cc3dc844b89462
+  version: f99c37dcf8193975174753f4722a9091eb6242fe
   subpackages:
   - calico
   - cluster
@@ -254,7 +254,7 @@ imports:
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: 332f6238064950a97bc3ed3f5421f6418537e707
+  version: 6ac8c5d890d415025dd5aae7595bcb2a6e7e2fad
   subpackages:
   - xfs
 - name: github.com/PuerkitoBio/purell

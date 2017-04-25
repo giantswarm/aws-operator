@@ -29,7 +29,7 @@ import:
 - package: k8s.io/client-go
   version: v2.0.0-alpha.1
 - package: github.com/giantswarm/awstpr
-  version: 1c095b6b954ece42372552d39e076b3353023d8c
+  version: 4ff473f2157079d2c0d3371437a82d5abfec124d
 - package: github.com/giantswarm/clustertpr
 - package: github.com/giantswarm/certificatetpr
   version: fa554d09f0137a91aa6ef007b92e170b31dbefd2
