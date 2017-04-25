@@ -129,8 +129,11 @@ func (s *Sample) Equal(o *Sample) bool {
 	if !s.Timestamp.Equal(o.Timestamp) {
 		return false
 	}
+	if s.Value.Equal(o.Value) {
+		return false
+	}
 
-	return s.Value.Equal(o.Value)
+	return true
 }
 
 func (s Sample) String() string {
