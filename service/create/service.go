@@ -380,25 +380,6 @@ func (s *Service) Boot() {
 						return
 					}
 
-					// Create private subnet for the workers
-					privateSubnet := &awsresources.Subnet{
-						AvailabilityZone: cluster.Spec.AWS.AZ,
-						CidrBlock:        cluster.Spec.AWS.VPC.PrivateSubnetCIDR,
-						Name:             subnetName(cluster, suffixPrivate),
-						VpcID:            vpc.ID(),
-						AWSEntity:        awsresources.AWSEntity{Clients: clients},
-					}
-					privateSubnetCreated, err := privateSubnet.CreateIfNotExists()
-					if err != nil {
-						s.logger.Log("error", fmt.Sprintf("could not create private subnet: %s", errgo.Details(err)))
-						return
-					}
-					if privateSubnetCreated {
-						s.logger.Log("info", fmt.Sprintf("created private subnet for cluster '%s'", cluster.Name))
-					} else {
-						s.logger.Log("info", fmt.Sprintf("private subnet for cluster '%s' already exists, reusing", cluster.Name))
-					}
-
 					// Run masters
 					anyMastersCreated, masterIDs, err := s.runMachines(runMachinesInput{
 						clients:             clients,
@@ -443,7 +424,7 @@ func (s *Service) Boot() {
 						tlsAssets:           tlsAssets,
 						bucket:              bucket,
 						securityGroup:       workersSecurityGroup,
-						subnet:              privateSubnet,
+						subnet:              publicSubnet,
 						clusterName:         cluster.Name,
 						keyPairName:         cluster.Name,
 						instanceProfileName: policy.Name(),
@@ -514,18 +495,6 @@ func (s *Service) Boot() {
 						s.logger.Log("error", fmt.Sprintf("could not delete public subnet: %s", errgo.Details(err)))
 					} else {
 						s.logger.Log("info", "deleted public subnet")
-					}
-
-					// Delete private subnet
-					var privateSubnet resources.ResourceWithID
-					privateSubnet = &awsresources.Subnet{
-						Name:      subnetName(cluster, suffixPrivate),
-						AWSEntity: awsresources.AWSEntity{Clients: clients},
-					}
-					if err := privateSubnet.Delete(); err != nil {
-						s.logger.Log("error", fmt.Sprintf("could not delete private subnet: %s", errgo.Details(err)))
-					} else {
-						s.logger.Log("info", "deleted private subnet")
 					}
 
 					// Delete masters security group
