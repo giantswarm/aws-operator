@@ -16,6 +16,10 @@ import (
 	"github.com/giantswarm/aws-operator/service/version"
 )
 
+const (
+	RedactedString = "[REDACTED]"
+)
+
 // Config represents the configuration used to create a new service.
 type Config struct {
 	// Dependencies.
@@ -32,6 +36,22 @@ type Config struct {
 	GitCommit   string
 	Name        string
 	Source      string
+}
+
+func (c Config) String() string {
+	if c.AwsConfig.AccessKeySecret != "" {
+		c.AwsConfig.AccessKeySecret = RedactedString
+	}
+
+	if c.K8sConfig.Password != "" {
+		c.K8sConfig.Password = RedactedString
+	}
+
+	if c.K8sConfig.BearerToken != "" {
+		c.K8sConfig.BearerToken = RedactedString
+	}
+
+	return fmt.Sprintf("%#v", c)
 }
 
 // DefaultConfig provides a default configuration to create a new service by
@@ -61,7 +81,7 @@ func New(config Config) (*Service, error) {
 	if config.Logger == nil {
 		return nil, microerror.MaskAnyf(invalidConfigError, "logger must not be empty")
 	}
-	config.Logger.Log("debug", fmt.Sprintf("creating aws-operator service with config: %#v", config))
+	config.Logger.Log("debug", fmt.Sprintf("creating aws-operator service with config: %s", config))
 
 	var err error
 
