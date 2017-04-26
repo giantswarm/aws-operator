@@ -5,5 +5,5 @@ import (
 )
 
 type Kubectl struct {
-	GoogleAPI googleapi.GoogleAPI `json:"googleAPI" yaml:"googleAPI"`
+	GoogleAPI googleapi.GoogleAPI
 }
