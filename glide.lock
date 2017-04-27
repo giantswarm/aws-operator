@@ -1,5 +1,5 @@
-hash: f44d0458a620b8771d23718d34f4f90cad0075eccbcb2061246410883f8d8964
-updated: 2017-04-25T15:16:00.95762907+02:00
+hash: 15b4ec61904e0993927c96f0bfc85fe551e452ef523b7b2b5b8c10e5da92806e
+updated: 2017-04-26T18:00:06.18410507+02:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aws/aws-sdk-go
-  version: 0e1d7f7c9ff58350ce8f53866ba45487e7153d46
+  version: fe4c33d5e201f595b450d08d9d7e36fedb2cbcf8
   subpackages:
   - aws
   - aws/awserr
@@ -95,14 +95,14 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: cfdf0a51e47428df4b842799a97f9d3cfbb96eb1
+  version: 1c095b6b954ece42372552d39e076b3353023d8c
   subpackages:
   - aws
   - aws/vpc
 - name: github.com/giantswarm/certificatetpr
-  version: 47a844363c25027d0c114042ec1503c5d743ef99
+  version: fa554d09f0137a91aa6ef007b92e170b31dbefd2
 - name: github.com/giantswarm/clustertpr
-  version: bc3c7a26ee5fce2814d03ee61dacb719bc88d822
+  version: b0021f9dd11f55eb3bd1ee60d9cc3dc844b89462
   subpackages:
   - calico
   - cluster
@@ -133,7 +133,7 @@ imports:
   - operator/networksetup/docker
   - vault
 - name: github.com/giantswarm/k8scloudconfig
-  version: c2967997687117297869ed793566d20c082aadb7
+  version: 417fccb6d62c8c9825598953292783bfc22dbee2
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
@@ -268,7 +268,7 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: f4f10f6873175e78bb1503da7e78c260a7f3ef63
+  version: c29ece4386f74084680e5e6d02d7b943ae630f63
 - name: github.com/spf13/jwalterweatherman
   version: fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66
 - name: github.com/spf13/pflag

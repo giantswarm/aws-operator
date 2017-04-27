@@ -5,7 +5,7 @@ type IngressController struct {
 	// Kubernetes cluster, e.g. <cluster-id>.fra-1.gigantic.io.
 	Domain string `json:"domain" yaml:"domain"`
 	// InsecurePort is the HTTP node port of the Ingress Controller.
-	InsecurePort int `json:"insecurePort" yaml:"insecurePort"`
+	InsecurePort int `json:"insecure_port" yaml:"insecurePort"`
 	// SecurePort is the HTTPS node port of the Ingress Controller.
-	SecurePort int `json:"securePort" yaml:"securePort"`
+	SecurePort int `json:"secure_port" yaml:"securePort"`
 }
