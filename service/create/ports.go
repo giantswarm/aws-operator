@@ -7,6 +7,7 @@ const sshPort = 22
 func extractMasterPortsFromTPR(cluster awstpr.CustomObject) []int {
 	var ports = []int{
 		cluster.Spec.Cluster.Kubernetes.API.SecurePort,
+		cluster.Spec.Cluster.Etcd.Port,
 		sshPort,
 	}
 
