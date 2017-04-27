@@ -1,5 +1,5 @@
 hash: 15b4ec61904e0993927c96f0bfc85fe551e452ef523b7b2b5b8c10e5da92806e
-updated: 2017-04-26T18:00:06.18410507+02:00
+updated: 2017-04-27T12:36:44.332009852+02:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aws/aws-sdk-go
-  version: fe4c33d5e201f595b450d08d9d7e36fedb2cbcf8
+  version: 80dd71257d3f3b4edc647af948315f82b6262958
   subpackages:
   - aws
   - aws/awserr
@@ -95,14 +95,14 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: 1c095b6b954ece42372552d39e076b3353023d8c
+  version: cfdf0a51e47428df4b842799a97f9d3cfbb96eb1
   subpackages:
   - aws
   - aws/vpc
 - name: github.com/giantswarm/certificatetpr
-  version: fa554d09f0137a91aa6ef007b92e170b31dbefd2
+  version: 87347c8640c969e28529b52af635b1a16a72bfb3
 - name: github.com/giantswarm/clustertpr
-  version: b0021f9dd11f55eb3bd1ee60d9cc3dc844b89462
+  version: bc3c7a26ee5fce2814d03ee61dacb719bc88d822
   subpackages:
   - calico
   - cluster
@@ -248,7 +248,7 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: 9e0844febd9e2856f839c9cb974fbd676d1755a8
+  version: 13ba4ddd0caa9c28ca7b7bffe1dfa9ed8d5ef207
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
@@ -268,7 +268,7 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: c29ece4386f74084680e5e6d02d7b943ae630f63
+  version: 6dd90846ba124894ee1206c89021e90e8179f1a4
 - name: github.com/spf13/jwalterweatherman
   version: fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66
 - name: github.com/spf13/pflag

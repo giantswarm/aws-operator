@@ -1,5 +1,5 @@
 package googleapi
 
 type GoogleAPI struct {
-	URL string
+	URL string `json:"url" yaml:"url"`
 }

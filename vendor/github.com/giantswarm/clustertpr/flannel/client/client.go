@@ -1,5 +1,5 @@
 package client
 
 type Client struct {
-	SubnetLen int
+	SubnetLen int `json:"subnetLen" yaml:"subnetLen"`
 }
