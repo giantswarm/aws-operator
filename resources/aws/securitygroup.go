@@ -1,11 +1,10 @@
 package aws
 
 import (
-	"strings"
+	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	microerror "github.com/giantswarm/microkit/error"
 )
 
@@ -19,8 +18,32 @@ type SecurityGroup struct {
 }
 
 func (s SecurityGroup) findExisting() (*ec2.SecurityGroup, error) {
-	securityGroups, err := s.Clients.EC2.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
-		Filters: []*ec2.Filter{
+	portRuleFilters := []*ec2.Filter{
+		&ec2.Filter{
+			Name: aws.String(subnetVpcID),
+			Values: []*string{
+				aws.String(s.VpcID),
+			},
+		},
+	}
+
+	for _, port := range s.PortsToOpen {
+		portRuleFilters = append(portRuleFilters, &ec2.Filter{
+			Name: aws.String(securityGroupIPPermissionFromPort),
+			Values: []*string{
+				aws.String(strconv.Itoa(port)),
+			},
+		}, &ec2.Filter{
+			Name: aws.String(securityGroupIPPermissionToPort),
+			Values: []*string{
+				aws.String(strconv.Itoa(port)),
+			},
+		})
+	}
+
+	filters := [][]*ec2.Filter{
+		portRuleFilters,
+		{
 			&ec2.Filter{
 				Name: aws.String(subnetDescription),
 				Values: []*string{
@@ -34,30 +57,50 @@ func (s SecurityGroup) findExisting() (*ec2.SecurityGroup, error) {
 				},
 			},
 		},
-	})
-	if err != nil {
-		return nil, microerror.MaskAny(err)
 	}
 
-	if len(securityGroups.SecurityGroups) < 1 {
-		return nil, microerror.MaskAny(securityGroupFindError)
+	for _, filter := range filters {
+		securityGroups, err := s.Clients.EC2.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
+			Filters: filter,
+		})
+		if err != nil {
+			return nil, microerror.MaskAny(err)
+		}
+
+		if len(securityGroups.SecurityGroups) < 1 {
+			continue
+		}
+
+		return securityGroups.SecurityGroups[0], nil
 	}
 
-	return securityGroups.SecurityGroups[0], nil
+	return nil, microerror.MaskAny(securityGroupFindError)
+}
+
+func (s *SecurityGroup) checkIfExists() (bool, error) {
+	securityGroup, err := s.findExisting()
+	if IsSecurityGroupFind(err) {
+		return false, nil
+	} else if err != nil {
+		return false, microerror.MaskAny(err)
+	}
+
+	s.id = *securityGroup.GroupId
+
+	return true, nil
 }
 
 func (s *SecurityGroup) CreateIfNotExists() (bool, error) {
+	exists, err := s.checkIfExists()
+	if err != nil {
+		return false, microerror.MaskAny(err)
+	}
+
+	if exists {
+		return false, nil
+	}
+
 	if err := s.CreateOrFail(); err != nil {
-		if strings.Contains(err.Error(), awsclient.SecurityGroupDuplicate) {
-			securityGroup, err := s.findExisting()
-			if err != nil {
-				return false, microerror.MaskAny(err)
-			}
-			s.id = *securityGroup.GroupId
-
-			return false, nil
-		}
-
 		return false, microerror.MaskAny(err)
 	}
 
