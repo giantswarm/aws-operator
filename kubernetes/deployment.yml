@@ -56,8 +56,10 @@ spec:
           containerPort: 8000
         args:
         - daemon
-        - --config.dirs=/var/run/aws-operator/configmap/,/var/run/aws-operator/secret/
-        - --config.files=config,secret
+        - --config.dirs=/var/run/aws-operator/configmap/
+        - --config.dirs=/var/run/aws-operator/secret/
+        - --config.files=config
+        - --config.files=secret
         livenessProbe:
           httpGet:
             path: /
