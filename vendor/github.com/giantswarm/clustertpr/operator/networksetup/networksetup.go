@@ -5,5 +5,5 @@ import (
 )
 
 type NetworkSetup struct {
-	Docker docker.Docker
+	Docker docker.Docker `json:"docker" yaml:"docker"`
 }

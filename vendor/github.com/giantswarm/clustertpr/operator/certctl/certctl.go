@@ -5,5 +5,5 @@ import (
 )
 
 type Certctl struct {
-	Docker docker.Docker
+	Docker docker.Docker `json:"docker" yaml:"docker"`
 }
