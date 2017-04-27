@@ -47,3 +47,7 @@ func IsInstanceFindError(err error) bool {
 func IsRouteFindError(err error) bool {
 	return errgo.Cause(err) == routeFindError
 }
+
+func IsSecurityGroupFind(err error) bool {
+	return errgo.Cause(err) == securityGroupFindError
+}
