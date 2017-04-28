@@ -403,7 +403,7 @@ func (s *Service) Boot() {
 						return
 					}
 
-					// Create masters Load Balancer.
+					// Create apiserver Load Balancer.
 					lbInput := LoadBalancerInput{
 						Name:        cluster.Spec.Cluster.Kubernetes.API.Domain,
 						Clients:     clients,
@@ -414,6 +414,24 @@ func (s *Service) Boot() {
 								PortELB:      cluster.Spec.Cluster.Kubernetes.API.SecurePort,
 								PortInstance: cluster.Spec.Cluster.Kubernetes.API.SecurePort,
 							},
+						},
+						SecurityGroupID: mastersSecurityGroup.ID(),
+						SubnetID:        publicSubnet.ID(),
+					}
+
+					apiLB, err := s.createLoadBalancer(lbInput)
+					if err != nil {
+						s.logger.Log("error", errgo.Details(err))
+						return
+					}
+
+					// Create etcd Load Balancer.
+					lbInput = LoadBalancerInput{
+						Name:        cluster.Spec.Cluster.Etcd.Domain,
+						Clients:     clients,
+						Cluster:     cluster,
+						InstanceIDs: masterIDs,
+						PortsToOpen: awsresources.PortPairs{
 							{
 								PortELB:      cluster.Spec.Cluster.Etcd.Port,
 								PortInstance: cluster.Spec.Cluster.Etcd.Port,
@@ -423,7 +441,7 @@ func (s *Service) Boot() {
 						SubnetID:        publicSubnet.ID(),
 					}
 
-					mastersLB, err := s.createLoadBalancer(lbInput)
+					etcdLB, err := s.createLoadBalancer(lbInput)
 					if err != nil {
 						s.logger.Log("error", errgo.Details(err))
 						return
@@ -514,14 +532,14 @@ func (s *Service) Boot() {
 						recordSetInput{
 							Cluster:      cluster,
 							Client:       clients.Route53,
-							Resource:     mastersLB,
+							Resource:     apiLB,
 							Domain:       cluster.Spec.Cluster.Kubernetes.API.Domain,
 							HostedZoneID: adminHZ.ID(),
 						},
 						recordSetInput{
 							Cluster:      cluster,
 							Client:       clients.Route53,
-							Resource:     mastersLB,
+							Resource:     etcdLB,
 							Domain:       cluster.Spec.Cluster.Etcd.Domain,
 							HostedZoneID: adminHZ.ID(),
 						},
