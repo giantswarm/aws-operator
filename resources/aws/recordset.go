@@ -8,10 +8,14 @@ import (
 )
 
 type RecordSet struct {
-	Domain       string
+	// Domain is the domain name for the record.
+	Domain string
+	// HostedZoneID is the ID of the Hosted Zone the record should be created in.
 	HostedZoneID string
-	Client       *route53.Route53
-	Resource     resources.DNSNamedResource
+	// Client is the AWS client.
+	Client *route53.Route53
+	// Resource is the AWS resource the record should be created for.
+	Resource resources.DNSNamedResource
 }
 
 // CreateIfNotExists is not implemented because AWS provides UPSERT functionality for DNS records

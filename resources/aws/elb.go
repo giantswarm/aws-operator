@@ -18,9 +18,20 @@ type ELB struct {
 	SecurityGroup string
 	SubnetID      string
 	Tags          []string
-	PortsToOpen   []int
+	PortsToOpen   PortPairs
 	Client        *elb.ELB
 }
+
+// PortPair is a pair of ports.
+type PortPair struct {
+	// PortELB is the port the ELB should listen on.
+	PortELB int
+	// PortInstance is the port on the instance the ELB forwards traffic to.
+	PortInstance int
+}
+
+// PortPairs is an array of PortPair.
+type PortPairs []PortPair
 
 func (lb *ELB) CreateIfNotExists() (bool, error) {
 	if lb.Client == nil {
@@ -47,10 +58,10 @@ func (lb *ELB) CreateOrFail() error {
 	}
 
 	var listeners []*elb.Listener
-	for _, portToOpen := range lb.PortsToOpen {
+	for _, portPair := range lb.PortsToOpen {
 		listener := &elb.Listener{
-			InstancePort:     aws.Int64(int64(portToOpen)),
-			LoadBalancerPort: aws.Int64(int64(portToOpen)),
+			InstancePort:     aws.Int64(int64(portPair.PortInstance)),
+			LoadBalancerPort: aws.Int64(int64(portPair.PortELB)),
 			// We use TCP and not HTTP(S) because we want to do SSL passthrough and not termination.
 			Protocol: aws.String("TCP"),
 		}
@@ -61,10 +72,6 @@ func (lb *ELB) CreateOrFail() error {
 	if _, err := lb.Client.CreateLoadBalancer(&elb.CreateLoadBalancerInput{
 		LoadBalancerName: aws.String(lb.Name),
 		Listeners:        listeners,
-		// We use the Subnet ID instead of the AZ since only one of either can be specified.
-		// AvailabilityZones: []*string{
-		// 	aws.String(lb.AZ),
-		// },
 		SecurityGroups: []*string{
 			aws.String(lb.SecurityGroup),
 		},
@@ -128,6 +135,25 @@ func (lb ELB) HostedZoneID() string {
 	return lb.hostedZoneID
 }
 
+// NewELBFromExisting initializes an ELB struct with some fields retrieved from the API,
+// such as its FQDN and its Hosted Zone ID. We need these fields when deleting a Record Set.
+// This method doesn't create a new ELB on AWS.
+func NewELBFromExisting(name string, client *elb.ELB) (*ELB, error) {
+	lb := ELB{
+		Name:   name,
+		Client: client,
+	}
+
+	lbDescription, err := lb.findExisting()
+	if err != nil {
+		return nil, err
+	}
+
+	lb.setDNSFields(*lbDescription)
+
+	return &lb, nil
+}
+
 func (lb ELB) findExisting() (*elb.LoadBalancerDescription, error) {
 	resp, err := lb.Client.DescribeLoadBalancers(&elb.DescribeLoadBalancersInput{
 		LoadBalancerNames: []*string{
@@ -147,24 +173,6 @@ func (lb ELB) findExisting() (*elb.LoadBalancerDescription, error) {
 	}
 
 	return descriptions[0], nil
-}
-
-// NewExistingELB retrieves and sets additional fields that deal with the ELB's location in the DNS,
-// such as its FQDN and its Hosted Zone ID.
-func NewExistingELB(name string, client *elb.ELB) (*ELB, error) {
-	lb := ELB{
-		Name:   name,
-		Client: client,
-	}
-
-	lbDescription, err := lb.findExisting()
-	if err != nil {
-		return nil, err
-	}
-
-	lb.setDNSFields(*lbDescription)
-
-	return &lb, nil
 }
 
 func (lb *ELB) setDNSFields(desc elb.LoadBalancerDescription) {
