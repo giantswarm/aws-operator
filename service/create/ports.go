@@ -2,7 +2,11 @@ package create
 
 import "github.com/giantswarm/awstpr"
 
-const sshPort = 22
+const (
+	sshPort   = 22
+	httpPort  = 80
+	httpsPort = 443
+)
 
 func extractMasterPortsFromTPR(cluster awstpr.CustomObject) []int {
 	var ports = []int{

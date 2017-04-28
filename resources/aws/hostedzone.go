@@ -72,9 +72,9 @@ func (hz HostedZone) Delete() error {
 
 }
 
-// NewExistingHostedZone initializes a struct with some fields fetched from the API
-// It's used to delete Hosted Zones, since at deletion time, we don't know the ID.
-func NewExistingHostedZone(name string, client *route53.Route53) (*HostedZone, error) {
+// NewHostedZoneFromExisting initializes a Hosted Zone, setting some fields it has retrieved from an existing HZ
+// It's used when deleting a RecordSet. It does not create a new HZ on AWS.
+func NewHostedZoneFromExisting(name string, client *route53.Route53) (*HostedZone, error) {
 	hz := HostedZone{
 		Name:   name,
 		Client: client,

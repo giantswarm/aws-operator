@@ -45,8 +45,6 @@ const (
 	// Suffixes used for subnets
 	suffixPublic  string = "public"
 	suffixPrivate string = "private"
-	// SSH port to open in security group
-	portSSH int = 22
 	// Number of retries of RunInstances to wait for Roles to propagate to
 	// Instance Profiles
 	runInstancesRetries = 10
@@ -249,6 +247,9 @@ func (s *Service) Boot() {
 						}
 						policyErr = policy.CreateOrFail()
 					}
+					if policyErr != nil {
+						s.logger.Log("error", fmt.Sprintf("could not create policy: %s", errgo.Details(policyErr)))
+					}
 
 					// Create S3 bucket
 					var bucket resources.Resource
@@ -402,23 +403,60 @@ func (s *Service) Boot() {
 						return
 					}
 
+					// Create masters Load Balancer.
 					lbInput := LoadBalancerInput{
-						Clients:         clients,
-						Cluster:         cluster,
-						InstanceIDs:     masterIDs,
+						Name:        cluster.Spec.Cluster.Kubernetes.API.Domain,
+						Clients:     clients,
+						Cluster:     cluster,
+						InstanceIDs: masterIDs,
+						PortsToOpen: awsresources.PortPairs{
+							{
+								PortELB:      cluster.Spec.Cluster.Kubernetes.API.SecurePort,
+								PortInstance: cluster.Spec.Cluster.Kubernetes.API.SecurePort,
+							},
+							{
+								PortELB:      cluster.Spec.Cluster.Etcd.Port,
+								PortInstance: cluster.Spec.Cluster.Etcd.Port,
+							},
+						},
 						SecurityGroupID: mastersSecurityGroup.ID(),
 						SubnetID:        publicSubnet.ID(),
 					}
 
-					if err := s.createLoadBalancer(lbInput); err != nil {
+					mastersLB, err := s.createLoadBalancer(lbInput)
+					if err != nil {
 						s.logger.Log("error", errgo.Details(err))
 						return
 					}
 
-					s.logger.Log("info", fmt.Sprintf("created load balancer"))
+					// Create Hosted Zone for admin traffic.
+					adminHZInput := hostedZoneInput{
+						Cluster: cluster,
+						Domain:  cluster.Spec.Cluster.Kubernetes.API.Domain,
+						Client:  clients.Route53,
+					}
+
+					adminHZ, err := s.createHostedZone(adminHZInput)
+					if err != nil {
+						s.logger.Log("error", errgo.Details(err))
+						return
+					}
+
+					// Create Hosted Zone for customer traffic.
+					customerHZInput := hostedZoneInput{
+						Cluster: cluster,
+						Domain:  cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+						Client:  clients.Route53,
+					}
+
+					customerHZ, err := s.createHostedZone(customerHZInput)
+					if err != nil {
+						s.logger.Log("error", errgo.Details(err))
+						return
+					}
 
 					// Run workers
-					anyWorkersCreated, _, err := s.runMachines(runMachinesInput{
+					anyWorkersCreated, workerIDs, err := s.runMachines(runMachinesInput{
 						clients:             clients,
 						cluster:             cluster,
 						tlsAssets:           tlsAssets,
@@ -443,6 +481,70 @@ func (s *Service) Boot() {
 						return
 					}
 
+					// Create Ingress Load Balancer.
+					lbInput = LoadBalancerInput{
+						Name:        cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+						Clients:     clients,
+						Cluster:     cluster,
+						InstanceIDs: workerIDs,
+						PortsToOpen: awsresources.PortPairs{
+							{
+								PortELB:      cluster.Spec.Cluster.Kubernetes.IngressController.SecurePort,
+								PortInstance: httpsPort,
+							},
+							{
+								PortELB:      cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
+								PortInstance: httpPort,
+							},
+						},
+						SecurityGroupID: workersSecurityGroup.ID(),
+						SubnetID:        publicSubnet.ID(),
+					}
+
+					ingressLB, err := s.createLoadBalancer(lbInput)
+					if err != nil {
+						s.logger.Log("error", errgo.Details(err))
+						return
+					}
+
+					s.logger.Log("info", fmt.Sprintf("created ingress load balancer"))
+
+					// Create Record Sets for the Load Balancers.
+					recordSetInputs := []recordSetInput{
+						recordSetInput{
+							Cluster:      cluster,
+							Client:       clients.Route53,
+							Resource:     mastersLB,
+							Domain:       cluster.Spec.Cluster.Kubernetes.API.Domain,
+							HostedZoneID: adminHZ.ID(),
+						},
+						recordSetInput{
+							Cluster:      cluster,
+							Client:       clients.Route53,
+							Resource:     mastersLB,
+							Domain:       cluster.Spec.Cluster.Etcd.Domain,
+							HostedZoneID: adminHZ.ID(),
+						},
+						recordSetInput{
+							Cluster:      cluster,
+							Client:       clients.Route53,
+							Resource:     ingressLB,
+							Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+							HostedZoneID: customerHZ.ID(),
+						},
+					}
+
+					var rsErr error
+					for _, input := range recordSetInputs {
+						if rsErr = s.createRecordSet(input); rsErr != nil {
+							s.logger.Log("error", errgo.Details(rsErr))
+							return
+						}
+					}
+					if rsErr == nil {
+						s.logger.Log("info", fmt.Sprintf("created DNS records for load balancer"))
+					}
+
 					s.logger.Log("info", fmt.Sprintf("cluster '%s' processed", cluster.Name))
 				},
 				DeleteFunc: func(obj interface{}) {
@@ -461,7 +563,7 @@ func (s *Service) Boot() {
 						return
 					}
 
-					// Delete masters
+					// Delete masters.
 					s.logger.Log("info", "deleting masters...")
 					if err := s.deleteMachines(deleteMachinesInput{
 						clients:     clients,
@@ -473,7 +575,7 @@ func (s *Service) Boot() {
 						s.logger.Log("info", "deleted masters")
 					}
 
-					// Delete workers
+					// Delete workers.
 					s.logger.Log("info", "deleting workers...")
 					if err := s.deleteMachines(deleteMachinesInput{
 						clients:     clients,
@@ -485,7 +587,7 @@ func (s *Service) Boot() {
 						s.logger.Log("info", "deleted workers")
 					}
 
-					// Delete public subnet
+					// Delete public subnet.
 					var publicSubnet resources.ResourceWithID
 					publicSubnet = &awsresources.Subnet{
 						Name:      subnetName(cluster, suffixPublic),
@@ -497,7 +599,7 @@ func (s *Service) Boot() {
 						s.logger.Log("info", "deleted public subnet")
 					}
 
-					// Delete masters security group
+					// Delete masters security group.
 					mastersSGInput := securityGroupInput{
 						Clients:   clients,
 						GroupName: securityGroupName(cluster.Name, prefixMaster),
@@ -506,7 +608,7 @@ func (s *Service) Boot() {
 						s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': %s", mastersSGInput.GroupName, errgo.Details(err)))
 					}
 
-					// Delete workers security group
+					// Delete workers security group.
 					workersSGInput := securityGroupInput{
 						Clients:   clients,
 						GroupName: securityGroupName(cluster.Name, prefixWorker),
@@ -515,7 +617,7 @@ func (s *Service) Boot() {
 						s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': %s", workersSGInput.GroupName, errgo.Details(err)))
 					}
 
-					// Delete route table
+					// Delete route table.
 					var routeTable resources.ResourceWithID
 					routeTable = &awsresources.RouteTable{
 						Name:   cluster.Name,
@@ -527,7 +629,7 @@ func (s *Service) Boot() {
 						s.logger.Log("info", "deleted route table")
 					}
 
-					// Delete gateway
+					// Delete gateway.
 					var gateway resources.ResourceWithID
 					gateway = &awsresources.Gateway{
 						Name:      cluster.Name,
@@ -539,7 +641,7 @@ func (s *Service) Boot() {
 						s.logger.Log("info", "deleted gateway")
 					}
 
-					// Delete VPC
+					// Delete VPC.
 					var vpc resources.ResourceWithID
 					vpc = &awsresources.VPC{
 						Name:      cluster.Name,
@@ -551,7 +653,7 @@ func (s *Service) Boot() {
 						s.logger.Log("info", "deleted vpc")
 					}
 
-					// Delete S3 bucket objects
+					// Delete S3 bucket objects.
 					bucketName := s.bucketName(cluster)
 
 					var bucket resources.Resource
@@ -582,18 +684,97 @@ func (s *Service) Boot() {
 
 					s.logger.Log("info", "deleted bucket objects")
 
-					lbInput := LoadBalancerInput{
-						Clients: clients,
-						Cluster: cluster,
-					}
-
-					if err != s.deleteLoadBalancer(lbInput) {
+					// Delete API server Record Sets.
+					apiLBName, err := loadBalancerName(cluster.Spec.Cluster.Kubernetes.API.Domain, cluster)
+					if err != nil {
 						s.logger.Log("error", errgo.Details(err))
 					} else {
-						s.logger.Log("info", "deleted ELB")
+						lb, err := awsresources.NewELBFromExisting(apiLBName, clients.ELB)
+						if err != nil {
+							s.logger.Log("error", errgo.Details(err))
+						} else {
+							recordSetInputs := []recordSetInput{
+								recordSetInput{
+									Cluster:  cluster,
+									Client:   clients.Route53,
+									Resource: lb,
+									Domain:   cluster.Spec.Cluster.Kubernetes.API.Domain,
+								},
+								recordSetInput{
+									Cluster:  cluster,
+									Client:   clients.Route53,
+									Resource: lb,
+									Domain:   cluster.Spec.Cluster.Etcd.Domain,
+								},
+							}
+
+							var rsErr error
+							for _, input := range recordSetInputs {
+								if rsErr = s.deleteRecordSet(input); rsErr != nil {
+									s.logger.Log("error", errgo.Details(rsErr))
+								}
+							}
+							if rsErr == nil {
+								s.logger.Log("info", "deleted record sets")
+							}
+						}
 					}
 
-					// Delete policy
+					// Delete Ingress Record Sets.
+					ingressLBName, err := loadBalancerName(cluster.Spec.Cluster.Kubernetes.IngressController.Domain, cluster)
+					if err != nil {
+						s.logger.Log("error", errgo.Details(err))
+					} else {
+						lb, err := awsresources.NewELBFromExisting(ingressLBName, clients.ELB)
+						if err != nil {
+							s.logger.Log("error", errgo.Details(err))
+						} else {
+							recordSetInputs := []recordSetInput{
+								recordSetInput{
+									Cluster:  cluster,
+									Client:   clients.Route53,
+									Resource: lb,
+									Domain:   cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+								},
+							}
+
+							var rsErr error
+							for _, input := range recordSetInputs {
+								if rsErr = s.deleteRecordSet(input); rsErr != nil {
+									s.logger.Log("error", errgo.Details(rsErr))
+								}
+							}
+							if rsErr == nil {
+								s.logger.Log("info", "deleted record sets")
+							}
+						}
+					}
+
+					// Delete Load Balancers.
+					loadBalancerInputs := []LoadBalancerInput{
+						LoadBalancerInput{
+							Name:    cluster.Spec.Cluster.Kubernetes.API.Domain,
+							Clients: clients,
+							Cluster: cluster,
+						},
+						LoadBalancerInput{
+							Name:    cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+							Clients: clients,
+							Cluster: cluster,
+						},
+					}
+
+					var elbErr error
+					for _, lbInput := range loadBalancerInputs {
+						if elbErr = s.deleteLoadBalancer(lbInput); elbErr != nil {
+							s.logger.Log("error", errgo.Details(elbErr))
+						}
+					}
+					if elbErr == nil {
+						s.logger.Log("info", "deleted ELBs")
+					}
+
+					// Delete policy.
 					var policy resources.NamedResource
 					policy = &awsresources.Policy{
 						ClusterID: cluster.Spec.Cluster.Cluster.ID,
@@ -606,7 +787,7 @@ func (s *Service) Boot() {
 						s.logger.Log("info", "deleted roles, policies, instance profiles")
 					}
 
-					// Delete KMS key
+					// Delete KMS key.
 					var kmsKey resources.ArnResource
 					kmsKey = &awsresources.KMSKey{
 						Name:      cluster.Name,
@@ -618,7 +799,7 @@ func (s *Service) Boot() {
 						s.logger.Log("info", "deleted KMS key")
 					}
 
-					// Delete keypair
+					// Delete keypair.
 					var keyPair resources.Resource
 					keyPair = &awsresources.KeyPair{
 						ClusterName: cluster.Name,

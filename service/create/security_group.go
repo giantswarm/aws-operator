@@ -49,7 +49,7 @@ func (s *Service) deleteSecurityGroup(input securityGroupInput) error {
 	if err := securityGroup.Delete(); err != nil {
 		return microerror.MaskAny(err)
 	} else {
-		s.logger.Log("info", "deleted security group '%s'", input.GroupName)
+		s.logger.Log("info", fmt.Sprintf("deleted security group '%s'", input.GroupName))
 	}
 
 	return nil
