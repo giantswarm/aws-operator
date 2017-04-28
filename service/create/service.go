@@ -776,6 +776,11 @@ func (s *Service) Boot() {
 							Cluster: cluster,
 						},
 						LoadBalancerInput{
+							Name:    cluster.Spec.Cluster.Etcd.Domain,
+							Clients: clients,
+							Cluster: cluster,
+						},
+						LoadBalancerInput{
 							Name:    cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
 							Clients: clients,
 							Cluster: cluster,
