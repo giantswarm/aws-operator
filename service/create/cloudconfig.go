@@ -13,6 +13,12 @@ var (
 			Owner:        "root:root",
 			Permissions:  0700,
 		},
+		cloudconfig.FileMetadata{
+			AssetContent: calicoEnvironmentFileTemplate,
+			Path:         "/etc/calico-environment",
+			Owner:        "root:root",
+			Permissions:  0644,
+		},
 	}
 	unitsMeta []cloudconfig.UnitMetadata = []cloudconfig.UnitMetadata{
 		cloudconfig.UnitMetadata{
