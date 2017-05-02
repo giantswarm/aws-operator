@@ -4,12 +4,6 @@ const (
 	MasterTemplate = `#cloud-config
 hostname: "{{.Node.Hostname}}"
 write_files:
-- path: /etc/resolv.conf
-  permissions: 0644
-  owner: root
-  content: |
-    nameserver 8.8.8.8
-    nameserver 8.8.4.4
 - path: /srv/kubedns-dep.yaml
   owner: root
   permissions: 0644
@@ -607,11 +601,11 @@ coreos:
       ExecStartPre=/opt/bin/calicoctl pool add {{.Cluster.Calico.Subnet}}/{{.Cluster.Calico.CIDR}} --ipip --nat-outgoing
       ExecStart=/opt/bin/calicoctl node --ip=${DEFAULT_IPV4}  --detach=false --node-image=giantswarm/node:v0.22.0
       ExecStartPost=/bin/bash -c "/opt/bin/calicoctl bgp peer add $(echo ${BRIDGE_IP} | cut -d'.' -f1-3).0 as $(/opt/bin/calicoctl bgp default-node-as)"
-      ExecStartPost=/bin/bash -c "/usr/bin/etcdctl --endpoints=http://{{ .Cluster.Etcd.Domain }}:2379 set /calico/v1/host/{{.Node.Hostname}}-flannel/bird_ip $(echo ${BRIDGE_IP} | cut -d'.' -f1-3).0"
+      ExecStartPost=/bin/bash -c "/usr/bin/etcdctl --endpoints=https://{{ .Cluster.Etcd.Domain }}:2379 set /calico/v1/host/{{.Node.Hostname}}-flannel/bird_ip $(echo ${BRIDGE_IP} | cut -d'.' -f1-3).0"
       ExecStop=/opt/bin/calicoctl node stop --force
       ExecStopPost=/bin/bash -c "find /tmp/ -name '_MEI*' | xargs -I {} rm -rf {}"
       ExecStopPost=/bin/bash -c "/opt/bin/calicoctl bgp peer remove $(echo ${BRIDGE_IP} | cut -d'.' -f1-3).0"
-      ExecStopPost=/usr/bin/etcdctl --endpoints=http://{{ .Cluster.Etcd.Domain }}:2379 rm /calico/v1/host/{{.Node.Hostname}}-flannel/bird_ip
+      ExecStopPost=/usr/bin/etcdctl --endpoints=https://{{ .Cluster.Etcd.Domain }}:2379 rm /calico/v1/host/{{.Node.Hostname}}-flannel/bird_ip
 
       [Install]
       WantedBy=multi-user.target
@@ -888,7 +882,7 @@ coreos:
       ExecStartPre=-/usr/bin/docker rm -f $NAME
       ExecStart=/usr/bin/docker run --rm --net=host \
       --name $NAME \
-      -e ETCD_ENDPOINTS=http://{{ .Cluster.Etcd.Domain }}:2379 \
+      -e ETCD_ENDPOINTS=https://{{ .Cluster.Etcd.Domain }}:2379 \
       -e K8S_API=http://localhost:{{.Cluster.Kubernetes.API.InsecurePort}} \
       -e LEADER_ELECTION=true \
       $IMAGE
@@ -975,12 +969,6 @@ write_files:
             "k8s_certificate_authority": "/etc/kubernetes/ssl/calico/client-ca.pem"
         }
     }
-- path: /etc/resolv.conf
-  permissions: 0644
-  owner: root
-  content: |
-    nameserver 8.8.8.8
-    nameserver 8.8.4.4
 - path: /etc/kubernetes/config/proxy-kubeconfig.yml
   owner: root
   permissions: 0644
