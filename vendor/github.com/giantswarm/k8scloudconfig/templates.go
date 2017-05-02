@@ -318,6 +318,19 @@ write_files:
         nodePort: 30011
       selector:
         app: ingress-controller
+- path: /opt/wait-for-domains
+  permissions: 0544
+  content: |
+      #!/bin/bash
+      until nslookup {{.Cluster.Etcd.Domain}}; do
+          echo "Waiting for domain {{.Cluster.Etcd.Domain}} to be available"
+          sleep 5
+      done
+
+      until nslookup {{.Cluster.Kubernetes.API.Domain}}; do
+          echo "Waiting for domain {{.Cluster.Kubernetes.API.Domain}} to be available"
+          sleep 5
+      done
 - path: /opt/k8s-addons
   permissions: 0544
   content: |
@@ -455,6 +468,19 @@ coreos:
     content: |
       {{range .Content}}{{.}}
       {{end}}{{end}}
+  - name: wait-for-domains.service
+    enable: true
+    command: start
+    content: |
+      [Unit]
+      Description=Wait for etcd and k8s API domains to be available
+
+      [Service]
+      Type=oneshot
+      ExecStart=/opt/wait-for-domains
+
+      [Install]
+      WantedBy=multi-user.target
   - name: set-ownership-etcd-data-dir.service
     enable: true
     command: start
@@ -506,8 +532,8 @@ coreos:
     content: |
       [Unit]
       Description=etcd2
-      Requires=k8s-setup-network-env.service
-      After=k8s-setup-network-env.service
+      Requires=wait-for-domains.service k8s-setup-network-env.service
+      After=wait-for-domains.service k8s-setup-network-env.service
       Conflicts=etcd.service
       Wants=calico-node.service
       StartLimitIntervalSec=0
@@ -1011,6 +1037,19 @@ write_files:
         user: kubelet
       name: service-account-context
     current-context: service-account-context
+- path: /opt/wait-for-domains
+  permissions: 0544
+  content: |
+      #!/bin/bash
+      until nslookup {{.Cluster.Etcd.Domain}}; do
+          echo "Waiting for domain {{.Cluster.Etcd.Domain}} to be available"
+          sleep 5
+      done
+
+      until nslookup {{.Cluster.Kubernetes.API.Domain}}; do
+          echo "Waiting for domain {{.Cluster.Kubernetes.API.Domain}} to be available"
+          sleep 5
+      done
 
 - path: /etc/kubernetes/ssl/worker-crt.pem.enc
   encoding: gzip+base64
@@ -1063,6 +1102,19 @@ coreos:
     content: |
       {{range .Content}}{{.}}
       {{end}}{{end}}
+  - name: wait-for-domains.service
+    enable: true
+    command: start
+    content: |
+      [Unit]
+      Description=Wait for etcd and k8s API domains to be available
+
+      [Service]
+      Type=oneshot
+      ExecStart=/opt/wait-for-domains
+
+      [Install]
+      WantedBy=multi-user.target
   - name: update-engine.service
     enable: false
     command: stop
@@ -1121,8 +1173,8 @@ coreos:
       [Unit]
       Description=calicoctl node
       Requires=k8s-setup-network-env.service
-      After=k8s-setup-network-env.service
-      Wants=k8s-proxy.service k8s-kubelet.service
+      After=wait-for-domains.service k8s-setup-network-env.service
+      Wants=wait-for-domains.service k8s-proxy.service k8s-kubelet.service
       StartLimitIntervalSec=0
 
       [Service]
