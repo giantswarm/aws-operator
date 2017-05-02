@@ -1,5 +1,5 @@
-hash: 15b4ec61904e0993927c96f0bfc85fe551e452ef523b7b2b5b8c10e5da92806e
-updated: 2017-04-27T12:36:44.332009852+02:00
+hash: 72be97f8ed68900751baf9a242b1e6ed666e3a060fdbdbb4a13f4f09d987e892
+updated: 2017-05-02T10:02:23.308462479+02:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aws/aws-sdk-go
-  version: 80dd71257d3f3b4edc647af948315f82b6262958
+  version: 19c3b41d33e0ccdfdf53b486a86f4d316758acc3
   subpackages:
   - aws
   - aws/awserr
@@ -51,7 +51,7 @@ imports:
 - name: github.com/cenkalti/backoff
   version: 5d150e7eec023ce7a124856b37c68e54b4050ac7
 - name: github.com/coreos/etcd
-  version: e5b7ee2d03627ca33201da428b8110ef7c3e95f1
+  version: 43b75072bfaca5a7c35c718179defbcabd9a0886
   subpackages:
   - auth/authpb
   - client
@@ -133,7 +133,7 @@ imports:
   - operator/networksetup/docker
   - vault
 - name: github.com/giantswarm/k8scloudconfig
-  version: 417fccb6d62c8c9825598953292783bfc22dbee2
+  version: cf63e2dbdfd2562df222aaf0356d44fa8e6b587d
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
@@ -268,7 +268,7 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 6dd90846ba124894ee1206c89021e90e8179f1a4
+  version: 8f0203be891287870100e4af46262cdf4a4261d1
 - name: github.com/spf13/jwalterweatherman
   version: fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66
 - name: github.com/spf13/pflag
