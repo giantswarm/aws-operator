@@ -1,5 +1,5 @@
 hash: 72be97f8ed68900751baf9a242b1e6ed666e3a060fdbdbb4a13f4f09d987e892
-updated: 2017-05-02T10:02:23.308462479+02:00
+updated: 2017-05-02T17:01:00.094279669+02:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -133,7 +133,7 @@ imports:
   - operator/networksetup/docker
   - vault
 - name: github.com/giantswarm/k8scloudconfig
-  version: cf63e2dbdfd2562df222aaf0356d44fa8e6b587d
+  version: aed06e0b2e1e57b3796b2c0b7740d3e606664a7b
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
@@ -254,7 +254,7 @@ imports:
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: 6ac8c5d890d415025dd5aae7595bcb2a6e7e2fad
+  version: d098ca18df8bc825079013daf7bacefbb1ee877e
   subpackages:
   - xfs
 - name: github.com/PuerkitoBio/purell
