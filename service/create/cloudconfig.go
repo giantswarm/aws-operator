@@ -14,16 +14,22 @@ var (
 			Permissions:  0700,
 		},
 		cloudconfig.FileMetadata{
-			AssetContent: calicoEnvironmentFileTemplate,
-			Path:         "/etc/calico-environment",
+			AssetContent: createCalicoEnvFileScriptTemplate,
+			Path:         "/opt/bin/create-calico-env-file",
 			Owner:        "root:root",
-			Permissions:  0644,
+			Permissions:  0700,
 		},
 	}
 	unitsMeta []cloudconfig.UnitMetadata = []cloudconfig.UnitMetadata{
 		cloudconfig.UnitMetadata{
 			AssetContent: decryptTLSAssetsServiceTemplate,
 			Name:         "decrypt-tls-assets.service",
+			Enable:       true,
+			Command:      "start",
+		},
+		cloudconfig.UnitMetadata{
+			AssetContent: createCalicoEnvFileServiceTemplate,
+			Name:         "create-calico-env-file.service",
 			Enable:       true,
 			Command:      "start",
 		},

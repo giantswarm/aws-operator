@@ -70,6 +70,23 @@ USERDATA_FILE={{.MachineType}}
 base64 -d /var/run/coreos/temp.txt | gunzip > /var/run/coreos/$USERDATA_FILE
 exec /usr/bin/coreos-cloudinit --from-file /var/run/coreos/$USERDATA_FILE`
 
-	calicoEnvironmentFileTemplate = `# On AWS use internal IP as bridge IP
-BRIDGE_IP=$DEFAULT_IPV4`
+	createCalicoEnvFileScriptTemplate = `#!/bin/bash
+
+# On AWS use internal IP as the bridge IP.
+echo "BRIDGE_IP=$DEFAULT_IPV4" > /etc/calico-environment
+`
+
+	createCalicoEnvFileServiceTemplate = `
+[Unit]
+Description=Create Calico env file
+Requires=k8s-setup-network-env.service
+After=k8s-setup-network-env.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/network-environment
+ExecStart=/opt/bin/create-calico-env-file
+
+[Install]
+WantedBy=multi-user.target`
 )
