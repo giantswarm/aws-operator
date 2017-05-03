@@ -453,7 +453,8 @@ write_files:
   encoding: gzip+base64
   content: {{.TLSAssets.EtcdServerKey}}
 
-{{range .Files}}- path: {{.Metadata.Path}}
+{{range .Files}}
+- path: {{.Metadata.Path}}
   owner: {{.Metadata.Owner}}
   permissions: {{printf "%#o" .Metadata.Permissions}}
   content: |
@@ -613,6 +614,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
+      EnvironmentFile=/etc/calico-environment
       Environment="ETCD_AUTHORITY={{ .Cluster.Etcd.Domain }}:2379"
       Environment="ETCD_SCHEME=https"
       Environment="ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/calico/client-ca.pem"
@@ -626,12 +628,12 @@ coreos:
       ExecStartPre=/bin/bash -c "while ! curl --output /dev/null --silent --fail --cacert /etc/kubernetes/ssl/calico/client-ca.pem --cert /etc/kubernetes/ssl/calico/client-crt.pem --key /etc/kubernetes/ssl/calico/client-key.pem https://{{ .Cluster.Etcd.Domain }}:2379/version; do sleep 1 && echo 'Waiting for etcd master to be responsive'; done"
       ExecStartPre=/opt/bin/calicoctl pool add {{.Cluster.Calico.Subnet}}/{{.Cluster.Calico.CIDR}} --ipip --nat-outgoing
       ExecStart=/opt/bin/calicoctl node --ip=${DEFAULT_IPV4}  --detach=false --node-image=giantswarm/node:v0.22.0
-      ExecStartPost=/bin/bash -c "/opt/bin/calicoctl bgp peer add $(echo ${BRIDGE_IP} | cut -d'.' -f1-3).0 as $(/opt/bin/calicoctl bgp default-node-as)"
-      ExecStartPost=/bin/bash -c "/usr/bin/etcdctl --endpoints=https://{{ .Cluster.Etcd.Domain }}:2379 set /calico/v1/host/{{.Node.Hostname}}-flannel/bird_ip $(echo ${BRIDGE_IP} | cut -d'.' -f1-3).0"
+      ExecStartPost=/bin/bash -c "/opt/bin/calicoctl bgp peer add $BRIDGE_IP as $(/opt/bin/calicoctl bgp default-node-as)"
+      ExecStartPost=/bin/bash -c "/usr/bin/etcdctl --endpoints=https://{{ .Cluster.Etcd.Domain }}:2379 --ca-file=/etc/kubernetes/ssl/calico/client-ca.pem --cert-file=/etc/kubernetes/ssl/calico/client-crt.pem --key-file=/etc/kubernetes/ssl/calico/client-key.pem set /calico/v1/host/{{.Node.Hostname}}-flannel/bird_ip $BRIDGE_IP"
       ExecStop=/opt/bin/calicoctl node stop --force
       ExecStopPost=/bin/bash -c "find /tmp/ -name '_MEI*' | xargs -I {} rm -rf {}"
-      ExecStopPost=/bin/bash -c "/opt/bin/calicoctl bgp peer remove $(echo ${BRIDGE_IP} | cut -d'.' -f1-3).0"
-      ExecStopPost=/usr/bin/etcdctl --endpoints=https://{{ .Cluster.Etcd.Domain }}:2379 rm /calico/v1/host/{{.Node.Hostname}}-flannel/bird_ip
+      ExecStopPost=/usr/bin/etcdctl --endpoints=https://{{ .Cluster.Etcd.Domain }}:2379 --ca-file=/etc/kubernetes/ssl/calico/client-ca.pem --cert-file=/etc/kubernetes/ssl/calico/client-crt.pem --key-file=/etc/kubernetes/ssl/calico/client-key.pem rm /calico/v1/host/{{.Node.Hostname}}-flannel/bird_ip
+      ExecStopPost=/bin/bash -c "/opt/bin/calicoctl bgp peer remove $BRIDGE_IP"
 
       [Install]
       WantedBy=multi-user.target
@@ -1087,7 +1089,8 @@ write_files:
   encoding: gzip+base64
   content: {{.TLSAssets.EtcdServerKey}}
 
-{{range .Files}}- path: {{.Metadata.Path}}
+{{range .Files}}
+- path: {{.Metadata.Path}}
   owner: {{.Metadata.Owner}}
   permissions: {{printf "%#o" .Metadata.Permissions}}
   content: |
@@ -1182,6 +1185,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
+      EnvironmentFile=/etc/calico-environment
       Environment="ETCD_AUTHORITY={{ .Cluster.Etcd.Domain }}:2379"
       Environment="ETCD_SCHEME=https"
       Environment="ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/calico/client-ca.pem"
@@ -1201,11 +1205,11 @@ coreos:
       ExecStartPre=/bin/bash -c "while ! curl --output /dev/null --silent --fail --cacert /etc/kubernetes/ssl/calico/client-ca.pem --cert /etc/kubernetes/ssl/calico/client-crt.pem --key /etc/kubernetes/ssl/calico/client-key.pem https://{{ .Cluster.Etcd.Domain }}:2379/version; do sleep 1 && echo 'Waiting for etcd master to be responsive'; done"
       ExecStartPre=/opt/bin/calicoctl pool add {{.Cluster.Calico.Subnet}}/{{.Cluster.Calico.CIDR}} --ipip --nat-outgoing
       ExecStart=/opt/bin/calicoctl node --ip=${DEFAULT_IPV4} --detach=false --node-image=giantswarm/node:v0.22.0
-      ExecStartPost=/bin/bash -c "/opt/bin/calicoctl bgp peer add $(echo ${IP_BRIDGE}} | cut -d'.' -f1-3).0 as $(/opt/bin/calicoctl bgp default-node-as)"
-      ExecStartPost=/bin/bash -c "/usr/bin/etcdctl --endpoints=https://{{ .Cluster.Etcd.Domain }}:2379 --ca-file=/etc/kubernetes/ssl/calico/client-ca.pem --cert-file=/etc/kubernetes/ssl/calico/client-crt.pem --key-file=/etc/kubernetes/ssl/calico/client-key.pem set /calico/v1/host/{{.Node.Hostname}}-flannel/bird_ip $(echo ${IP_BRIDGE} | cut -d'.' -f1-3).0"
+      ExecStartPost=/bin/bash -c "/opt/bin/calicoctl bgp peer add $BRIDGE_IP as $(/opt/bin/calicoctl bgp default-node-as)"
+      ExecStartPost=/bin/bash -c "/usr/bin/etcdctl --endpoints=https://{{ .Cluster.Etcd.Domain }}:2379 --ca-file=/etc/kubernetes/ssl/calico/client-ca.pem --cert-file=/etc/kubernetes/ssl/calico/client-crt.pem --key-file=/etc/kubernetes/ssl/calico/client-key.pem set /calico/v1/host/{{.Node.Hostname}}-flannel/bird_ip $BRIDGE_IP"
       ExecStop=/opt/bin/calicoctl node stop --force
       ExecStopPost=/bin/bash -c "find /tmp/ -name '_MEI*' | xargs -I {} rm -rf {}"
-      ExecStopPost=/bin/bash -c "/opt/bin/calicoctl bgp peer remove $(echo ${IP_BRIDGE} | cut -d'.' -f1-3).0"
+      ExecStopPost=/bin/bash -c "/opt/bin/calicoctl bgp peer remove $BRIDGE_IP"
       ExecStopPost=/usr/bin/etcdctl --endpoints=https://{{ .Cluster.Etcd.Domain }}:2379 --ca-file=/etc/kubernetes/ssl/calico/client-ca.pem --cert-file=/etc/kubernetes/ssl/calico/client-crt.pem --key-file=/etc/kubernetes/ssl/calico/client-key.pem rm /calico/v1/host/{{.Node.Hostname}}-flannel/bird_ip
 
       [Install]
