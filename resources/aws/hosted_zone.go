@@ -90,7 +90,7 @@ func NewHostedZoneFromExisting(name string, client *route53.Route53) (*HostedZon
 	return &hz, nil
 }
 
-func (hz HostedZone) ID() string {
+func (hz HostedZone) GetID() string {
 	return hz.id
 }
 

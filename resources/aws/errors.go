@@ -39,6 +39,10 @@ func (e NamedResourceNotFoundError) Error() string {
 	return fmt.Sprintf("The resource was not found: %s", e.Name)
 }
 
+func IsGatewayFind(err error) bool {
+	return errgo.Cause(err) == gatewayFindError
+}
+
 func IsInstanceFindError(err error) bool {
 	return errgo.Cause(err) == instanceFindError
 }
@@ -50,4 +54,12 @@ func IsRouteFindError(err error) bool {
 
 func IsSecurityGroupFind(err error) bool {
 	return errgo.Cause(err) == securityGroupFindError
+}
+
+func IsSubnetFind(err error) bool {
+	return errgo.Cause(err) == subnetFindError
+}
+
+func IsVpcFindError(err error) bool {
+	return errgo.Cause(err) == vpcFindError
 }
