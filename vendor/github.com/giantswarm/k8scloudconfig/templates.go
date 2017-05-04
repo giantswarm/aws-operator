@@ -530,7 +530,7 @@ coreos:
       Type=oneshot
       RemainAfterExit=yes
       TimeoutStartSec=0
-      Environment="IMAGE={{.Cluster.Operator.NetworkSetup.Docker.Image}}"
+      Environment="IMAGE={{.Cluster.Kubernetes.NetworkSetup.Docker.Image}}"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/mkdir -p /opt/bin/
@@ -1170,7 +1170,7 @@ coreos:
       Type=oneshot
       RemainAfterExit=yes
       TimeoutStartSec=0
-      Environment="IMAGE={{.Cluster.Operator.NetworkSetup.Docker.Image}}"
+      Environment="IMAGE={{.Cluster.Kubernetes.NetworkSetup.Docker.Image}}"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/mkdir -p /etc/kubernetes/cni/net.d/
