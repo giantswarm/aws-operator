@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/cenkalti/backoff"
 	microerror "github.com/giantswarm/microkit/error"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
@@ -43,15 +44,13 @@ func (s Subnet) findExisting() (*ec2.Subnet, error) {
 }
 
 func (s *Subnet) checkIfExists() (bool, error) {
-	subnet, err := s.findExisting()
-	if err != nil {
-		if strings.Contains(err.Error(), subnetFindError.Error()) {
-			return false, nil
-		}
+	_, err := s.findExisting()
+	if IsSubnetFind(err) {
+		return false, nil
+	} else if err != nil {
 		return false, microerror.MaskAny(err)
 	}
 
-	s.id = *subnet.SubnetId
 	return true, nil
 }
 
@@ -100,28 +99,53 @@ func (s *Subnet) CreateOrFail() error {
 }
 
 func (s *Subnet) Delete() error {
-	subnet, err := s.findExisting()
+	subnetID, err := s.GetID()
 	if err != nil {
 		return microerror.MaskAny(err)
 	}
 
-	if _, err := s.Clients.EC2.DeleteSubnet(&ec2.DeleteSubnetInput{
-		SubnetId: subnet.SubnetId,
-	}); err != nil {
+	deleteOperation := func() error {
+		if _, err := s.Clients.EC2.DeleteSubnet(&ec2.DeleteSubnetInput{
+			SubnetId: aws.String(subnetID),
+		}); err != nil {
+			return microerror.MaskAny(err)
+		}
+		return nil
+	}
+	if err := backoff.Retry(deleteOperation, backoff.NewExponentialBackOff()); err != nil {
 		return microerror.MaskAny(err)
 	}
 
 	return nil
 }
 
-func (s Subnet) ID() string {
-	return s.id
+func (s Subnet) GetID() (string, error) {
+	if s.id != "" {
+		return s.id, nil
+	}
+
+	subnet, err := s.findExisting()
+	if err != nil {
+		return "", microerror.MaskAny(err)
+	}
+
+	return *subnet.SubnetId, nil
 }
 
 func (s *Subnet) MakePublic(routeTable *RouteTable) error {
+	routeTableID, err := routeTable.GetID()
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	subnetID, err := s.GetID()
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
+
 	if _, err := s.Clients.EC2.AssociateRouteTable(&ec2.AssociateRouteTableInput{
-		RouteTableId: aws.String(routeTable.ID()),
-		SubnetId:     aws.String(s.ID()),
+		RouteTableId: aws.String(routeTableID),
+		SubnetId:     aws.String(subnetID),
 	}); err != nil {
 		if !strings.Contains(err.Error(), awsclient.AlreadyAssociated) {
 			return microerror.MaskAny(err)
@@ -132,7 +156,7 @@ func (s *Subnet) MakePublic(routeTable *RouteTable) error {
 		MapPublicIpOnLaunch: &ec2.AttributeBooleanValue{
 			Value: aws.Bool(true),
 		},
-		SubnetId: aws.String(s.ID()),
+		SubnetId: aws.String(subnetID),
 	}); err != nil {
 		return microerror.MaskAny(err)
 	}
