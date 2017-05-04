@@ -36,11 +36,9 @@ spec:
         insecurePort: 30010
         securePort: 30011
         domain: "ingress.example.aws.gigantic.io"
-
-    operator:
       networkSetup:
         docker:
-          image: "giantswarm/setup-network-env:0.1"
+          image: "giantswarm/k8s-setup-network-environment:ba2b57155d859a1fc5d378c2a09a77d7c2c755ed"
 
     masters:
     - hostname: "master-1"
