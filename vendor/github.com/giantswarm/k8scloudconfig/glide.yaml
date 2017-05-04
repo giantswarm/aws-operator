@@ -1,10 +1,10 @@
 package: github.com/giantswarm/k8scloudconfig
 import:
 - package: github.com/giantswarm/awstpr
-  version: 53a87e1ea925f110af13155a09aae4ae09435bb4
+  version: master
   subpackages:
   - aws
 - package: github.com/giantswarm/clustertpr
-  version: d37272e743efe07525093b92d449f4b60102d1af
+  version: master
   subpackages:
   - node

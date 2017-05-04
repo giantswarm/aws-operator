@@ -6,6 +6,7 @@ import (
 	"github.com/giantswarm/clustertpr/kubernetes/hyperkube"
 	"github.com/giantswarm/clustertpr/kubernetes/ingress"
 	"github.com/giantswarm/clustertpr/kubernetes/kubelet"
+	"github.com/giantswarm/clustertpr/kubernetes/networksetup"
 )
 
 type Kubernetes struct {
@@ -17,4 +18,5 @@ type Kubernetes struct {
 	Hyperkube         hyperkube.Hyperkube       `json:"hyperkube" yaml:"hyperkube"`
 	IngressController ingress.IngressController `json:"ingressController" yaml:"ingressController"`
 	Kubelet           kubelet.Kubelet           `json:"kubelet" yaml:"kubelet"`
+	NetworkSetup      networksetup.NetworkSetup `json:"networkSetup" yaml:"networkSetup"`
 }

@@ -1,15 +1,14 @@
-hash: 4b38b7733262df7a1e932ce0f72663f84e10d0a7ac3144ad28244c97852d5a3c
-updated: 2017-03-10T09:45:18.422520352+01:00
+hash: 9b751a013a655d9853ad510d8e2fc690c856ac5f644cec8afcaf24280db0f6a9
+updated: 2017-05-04T18:21:12.685086107+02:00
 imports:
 - name: github.com/giantswarm/awstpr
-  version: 53a87e1ea925f110af13155a09aae4ae09435bb4
+  version: 2c564633fbbe90f6607227761f2aecc7e575c8f7
   subpackages:
   - aws
 - name: github.com/giantswarm/clustertpr
-  version: d37272e743efe07525093b92d449f4b60102d1af
+  version: 81d44901ce63086368ddcf639dffd1c8b4344190
   subpackages:
   - calico
-  - cloudflare
   - cluster
   - customer
   - docker
@@ -17,34 +16,29 @@ imports:
   - docker/registry
   - etcd
   - flannel
+  - flannel/client
   - flannel/docker
   - kubernetes
   - kubernetes/api
   - kubernetes/dns
   - kubernetes/hyperkube
   - kubernetes/hyperkube/docker
+  - kubernetes/ingress
   - kubernetes/kubelet
+  - kubernetes/networksetup
+  - kubernetes/networksetup/docker
   - node
-  - operator
-  - operator/certctl
-  - operator/certctl/docker
-  - operator/k8svm
-  - operator/k8svm/docker
-  - operator/kubectl
-  - operator/kubectl/googleapi
-  - operator/networksetup
-  - operator/networksetup/docker
   - vault
 testImports:
 - name: github.com/davecgh/go-spew
-  version: 346938d642f2ec3594ed81d874461961cd0faa76
+  version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
   subpackages:
   - spew
 - name: github.com/pmezard/go-difflib
-  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: 4d4bfba8f1d1027c4fdbe371823030df51419987
+  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
   subpackages:
   - assert
