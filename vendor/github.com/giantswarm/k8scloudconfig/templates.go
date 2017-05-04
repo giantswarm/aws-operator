@@ -1112,7 +1112,8 @@ write_files:
 
 coreos:
   units:
-  {{range .Units}}- name: {{.Metadata.Name}}
+  {{range .Units}}
+  - name: {{.Metadata.Name}}
     enable: {{.Metadata.Enable}}
     command: {{.Metadata.Command}}
     content: |

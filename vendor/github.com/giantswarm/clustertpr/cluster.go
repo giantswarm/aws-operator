@@ -9,7 +9,6 @@ import (
 	"github.com/giantswarm/clustertpr/flannel"
 	"github.com/giantswarm/clustertpr/kubernetes"
 	"github.com/giantswarm/clustertpr/node"
-	"github.com/giantswarm/clustertpr/operator"
 	"github.com/giantswarm/clustertpr/vault"
 )
 
@@ -22,7 +21,6 @@ type Cluster struct {
 	Flannel    flannel.Flannel       `json:"flannel" yaml:"flannel"`
 	Kubernetes kubernetes.Kubernetes `json:"kubernetes" yaml:"kubernetes"`
 	Masters    []node.Node           `json:"masters" yaml:"masters"`
-	Operator   operator.Operator     `json:"operator" yaml:"operator"`
 	Vault      vault.Vault           `json:"vault" yaml:"vault"`
 	Workers    []node.Node           `json:"workers" yaml:"workers"`
 }
