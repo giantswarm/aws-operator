@@ -1,5 +1,5 @@
 hash: 72be97f8ed68900751baf9a242b1e6ed666e3a060fdbdbb4a13f4f09d987e892
-updated: 2017-05-04T15:20:08.474999402+02:00
+updated: 2017-05-04T17:08:14.504821937+02:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -102,7 +102,7 @@ imports:
 - name: github.com/giantswarm/certificatetpr
   version: 8e24e223b213128be8b87039e26001bb88284452
 - name: github.com/giantswarm/clustertpr
-  version: bc3c7a26ee5fce2814d03ee61dacb719bc88d822
+  version: 7cebfea7ab7606a6db62e60048293f96c18cdb97
   subpackages:
   - calico
   - cluster
@@ -122,18 +122,9 @@ imports:
   - kubernetes/ingress
   - kubernetes/kubelet
   - node
-  - operator
-  - operator/certctl
-  - operator/certctl/docker
-  - operator/k8svm
-  - operator/k8svm/docker
-  - operator/kubectl
-  - operator/kubectl/googleapi
-  - operator/networksetup
-  - operator/networksetup/docker
   - vault
 - name: github.com/giantswarm/k8scloudconfig
-  version: 250143cb667b43239154618419bc35b6361e3053
+  version: d74f696253b95c92dda9df9b01927c5b2e5755f1
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
