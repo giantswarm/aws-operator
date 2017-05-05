@@ -1,5 +1,5 @@
 hash: 72be97f8ed68900751baf9a242b1e6ed666e3a060fdbdbb4a13f4f09d987e892
-updated: 2017-05-04T20:40:40.624197297+02:00
+updated: 2017-05-05T18:39:49.068521034+02:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aws/aws-sdk-go
-  version: ce7c5f65c4030a9a832fd87e550e9c6976db0500
+  version: a5b389b7b05c59adf7ac44f50d0d8be6e0c85710
   subpackages:
   - aws
   - aws/awserr
@@ -76,6 +76,10 @@ imports:
   - health
   - httputil
   - timeutil
+- name: github.com/cpuguy83/go-md2man
+  version: a65d4d2de4d5f7c74868dfa9b202a3c8be315aaa
+  subpackages:
+  - md2man
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
   subpackages:
@@ -95,7 +99,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: 2c564633fbbe90f6607227761f2aecc7e575c8f7
+  version: 2a9b74f9462593e89ce05d88cacbd8aff433ce08
   subpackages:
   - aws
   - aws/vpc
@@ -126,7 +130,7 @@ imports:
   - node
   - vault
 - name: github.com/giantswarm/k8scloudconfig
-  version: e1a0fb38dfa56c0d1d34179a70403dd155ec571b
+  version: e07f3230eea5e617a6aeff23dbc5ad3b172c9e44
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
@@ -191,7 +195,7 @@ imports:
   - runtime/internal
   - utilities
 - name: github.com/hashicorp/hcl
-  version: 7fa7fff964d035e8a162cce3a164b3ad02ad651b
+  version: a4b07c25de5ff55ad3b8936cea69a79a3d95a855
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -254,6 +258,10 @@ imports:
   version: 8a290539e2e8629dbc4e6bad948158f790ec31f4
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
+- name: github.com/russross/blackfriday
+  version: b253417e1cb644d645a0a3bb1fa5034c8030127c
+- name: github.com/shurcooL/sanitized_anchor_name
+  version: 79c90efaf01eddc01945af5bc1797859189b830b
 - name: github.com/spf13/afero
   version: 9be650865eab0c12963d8753212f4f9c66cdcf12
   subpackages:
@@ -261,7 +269,7 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 8f0203be891287870100e4af46262cdf4a4261d1
+  version: 83773614293e6c9406454a53ce5e263500ce6e44
 - name: github.com/spf13/jwalterweatherman
   version: fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66
 - name: github.com/spf13/pflag

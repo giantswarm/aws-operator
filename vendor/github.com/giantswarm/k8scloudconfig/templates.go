@@ -799,7 +799,7 @@ coreos:
       --v=2 \
       --kubeconfig=/etc/kubernetes/config/controller-manager-kubeconfig.yml \
       --root-ca-file=/etc/kubernetes/ssl/apiserver-ca.pem \
-      --service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem
+      --service-account-private-key-file=/etc/kubernetes/ssl/service-account-key.pem
       ExecStop=-/usr/bin/docker stop -t 10 $NAME
       ExecStopPost=-/usr/bin/docker rm -f $NAME
   - name: k8s-controller-manager-restart.service
@@ -1090,15 +1090,15 @@ write_files:
   encoding: gzip+base64
   content: {{.TLSAssets.CalicoClientKey}}
 
-- path: /etc/kubernetes/ssl/etcd/server-crt.pem.enc
+- path: /etc/kubernetes/ssl/etcd/client-crt.pem.enc
   encoding: gzip+base64
   content: {{.TLSAssets.EtcdServerCrt}}
 
-- path: /etc/kubernetes/ssl/etcd/server-ca.pem.enc
+- path: /etc/kubernetes/ssl/etcd/client-ca.pem.enc
   encoding: gzip+base64
   content: {{.TLSAssets.EtcdServerCA}}
 
-- path: /etc/kubernetes/ssl/etcd/server-key.pem.enc
+- path: /etc/kubernetes/ssl/etcd/client-key.pem.enc
   encoding: gzip+base64
   content: {{.TLSAssets.EtcdServerKey}}
 
