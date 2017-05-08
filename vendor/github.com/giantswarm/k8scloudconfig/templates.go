@@ -923,7 +923,11 @@ coreos:
       ExecStartPre=-/usr/bin/docker rm -f $NAME
       ExecStart=/usr/bin/docker run --rm --net=host \
       --name $NAME \
+      -v /etc/kubernetes/ssl/calico/:/etc/kubernetes/ssl/calico/ \
       -e ETCD_ENDPOINTS=https://{{ .Cluster.Etcd.Domain }}:2379 \
+      -e ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/calico/client-ca.pem \
+      -e ETCD_CERT_FILE=/etc/kubernetes/ssl/calico/client-crt.pem \
+      -e ETCD_KEY_FILE=/etc/kubernetes/ssl/calico/client-key.pem \
       -e K8S_API=http://localhost:{{.Cluster.Kubernetes.API.InsecurePort}} \
       -e LEADER_ELECTION=true \
       $IMAGE
