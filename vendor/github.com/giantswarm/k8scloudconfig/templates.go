@@ -357,21 +357,21 @@ write_files:
       curl -H "Content-Type: application/yaml" \
         -XPOST -d"$(cat /srv/fallback-server-dep.yml)" \
         --cacert /etc/kubernetes/ssl/apiserver-ca.pem --cert /etc/kubernetes/ssl/apiserver-crt.pem --key /etc/kubernetes/ssl/apiserver-key.pem \
-        "https://%%K8S_MASTER_DOMAIN_NAME%%:443/apis/extensions/v1beta1/namespaces/kube-system/deployments"
+        "https://{{.Cluster.Kubernetes.API.Domain}}:443/apis/extensions/v1beta1/namespaces/kube-system/deployments"
       curl -H "Content-Type: application/yaml" \
         -XPOST -d"$(cat /srv/fallback-server-svc.yml)" \
         --cacert /etc/kubernetes/ssl/apiserver-ca.pem --cert /etc/kubernetes/ssl/apiserver-crt.pem --key /etc/kubernetes/ssl/apiserver-key.pem \
-        "https://%%K8S_MASTER_DOMAIN_NAME%%:443/api/v1/namespaces/kube-system/services"
+        "https://{{.Cluster.Kubernetes.API.Domain}}:443/api/v1/namespaces/kube-system/services"
 
       echo "K8S: Ingress Controller"
       curl -H "Content-Type: application/yaml" \
         -XPOST -d"$(cat /srv/ingress-controller-dep.yml)" \
         --cacert /etc/kubernetes/ssl/apiserver-ca.pem --cert /etc/kubernetes/ssl/apiserver-crt.pem --key /etc/kubernetes/ssl/apiserver-key.pem \
-        "https://%%K8S_MASTER_DOMAIN_NAME%%:443/apis/extensions/v1beta1/namespaces/kube-system/deployments"
+        "https://{{.Cluster.Kubernetes.API.Domain}}:443/apis/extensions/v1beta1/namespaces/kube-system/deployments"
       curl -H "Content-Type: application/yaml" \
         -XPOST -d"$(cat /srv/ingress-controller-svc.yml)" \
         --cacert /etc/kubernetes/ssl/apiserver-ca.pem --cert /etc/kubernetes/ssl/apiserver-crt.pem --key /etc/kubernetes/ssl/apiserver-key.pem \
-        "https://%%K8S_MASTER_DOMAIN_NAME%%:443/api/v1/namespaces/kube-system/services"
+        "https://{{.Cluster.Kubernetes.API.Domain}}:443/api/v1/namespaces/kube-system/services"
 
       echo "Addons successfully installed"
 - path: /etc/kubernetes/config/controller-manager-kubeconfig.yml
