@@ -1,7 +1,7 @@
 apiVersion: "cluster.giantswarm.io/v1"
 kind: Aws
 metadata:
-  name: test
+  name: example-cluster
 spec:
   cluster:
     cluster:
@@ -29,6 +29,8 @@ spec:
         insecurePort: 8080
         securePort: 443
         clusterIPRange: "192.168.0.0/24"
+      dns:
+        ip: "172.29.0.10"
       hyperkube:
         docker:
           image: "giantswarm/hyperkube:v1.5.2_coreos.0"
