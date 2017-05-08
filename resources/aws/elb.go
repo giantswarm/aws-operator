@@ -1,6 +1,7 @@
 package aws
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -32,6 +33,15 @@ type PortPair struct {
 
 // PortPairs is an array of PortPair.
 type PortPairs []PortPair
+
+const (
+	// proxyProtocolPolicyTypeName is the name of the ProxyProtocolPolicy type.
+	proxyProtocolPolicyTypeName = "ProxyProtocolPolicyType"
+	// proxyProtocolPolicyNameSuffix is the suffix we use for the name of our ProxyProtocol policy.
+	proxyProtocolPolicyNameSuffix = "-proxy-protocol-policy"
+	// proxyProtocolAttributeName is the name of the ProxyProtocol attribute we set on the policy.
+	proxyProtocolAttributeName = "ProxyProtocol"
+)
 
 func (lb *ELB) CreateIfNotExists() (bool, error) {
 	if lb.Client == nil {
@@ -120,6 +130,31 @@ func (lb *ELB) RegisterInstances(instanceIDs []string) error {
 	if _, err := lb.Client.RegisterInstancesWithLoadBalancer(&elb.RegisterInstancesWithLoadBalancerInput{
 		Instances:        instances,
 		LoadBalancerName: aws.String(lb.Name),
+	}); err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	return nil
+}
+
+// AssignProxyPolicy creates a ProxyProtocol policy and assigns it to the Load Balancer.
+// This is needed for ELBs that listen/forward over TCP, in order to add
+// a header with the address, port of the source and destination.
+// Without this, `kubectl log/exec` don't work.
+// See https://github.com/kubernetes/ingress/tree/4601775c18f5c6968e56e1eeaa26efc629590bb0/controllers/nginx#proxy-protocol
+func (lb *ELB) AssignProxyProtocolPolicy() error {
+	policyName := fmt.Sprintf("%s-%s", lb.Name, proxyProtocolPolicyNameSuffix)
+
+	if _, err := lb.Client.CreateLoadBalancerPolicy(&elb.CreateLoadBalancerPolicyInput{
+		LoadBalancerName: aws.String(lb.Name),
+		PolicyName:       aws.String(policyName),
+		PolicyTypeName:   aws.String(proxyProtocolPolicyTypeName),
+		PolicyAttributes: []*elb.PolicyAttribute{
+			{
+				AttributeName:  aws.String(proxyProtocolAttributeName),
+				AttributeValue: aws.String("true"),
+			},
+		},
 	}); err != nil {
 		return microerror.MaskAny(err)
 	}
