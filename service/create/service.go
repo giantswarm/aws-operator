@@ -513,12 +513,12 @@ func (s *Service) Boot() {
 						InstanceIDs: workerIDs,
 						PortsToOpen: awsresources.PortPairs{
 							{
-								PortELB:      cluster.Spec.Cluster.Kubernetes.IngressController.SecurePort,
-								PortInstance: httpsPort,
+								PortELB:      httpsPort,
+								PortInstance: cluster.Spec.Cluster.Kubernetes.IngressController.SecurePort,
 							},
 							{
-								PortELB:      cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
-								PortInstance: httpPort,
+								PortELB:      httpPort,
+								PortInstance: cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
 							},
 						},
 						SecurityGroupID: workersSecurityGroup.ID(),
