@@ -38,7 +38,7 @@ const (
 	// proxyProtocolPolicyTypeName is the name of the ProxyProtocolPolicy type.
 	proxyProtocolPolicyTypeName = "ProxyProtocolPolicyType"
 	// proxyProtocolPolicyNameSuffix is the suffix we use for the name of our ProxyProtocol policy.
-	proxyProtocolPolicyNameSuffix = "-proxy-protocol-policy"
+	proxyProtocolPolicyNameSuffix = "proxy-protocol-policy"
 	// proxyProtocolAttributeName is the name of the ProxyProtocol attribute we set on the policy.
 	proxyProtocolAttributeName = "ProxyProtocol"
 )
