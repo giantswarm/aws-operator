@@ -13,10 +13,22 @@ type SecurityGroup struct {
 	Description string
 	GroupName   string
 	VpcID       string
-	PortsToOpen []int
+	Rules       Rules
 	id          string
 	AWSEntity
 }
+
+// Rule is a Security Group rule.
+type Rule struct {
+	Port int
+	// SourceCIDR is the CIDR of the source. Conflicts with SourceCIDR.
+	SourceCIDR string
+	// SecurityGroupID is the ID of the Security Group. Conflicts with SecurityGroupID.
+	SecurityGroupID string
+}
+
+// Rules is a slice of Rule structs.
+type Rules []Rule
 
 func (s SecurityGroup) findExisting() (*ec2.SecurityGroup, error) {
 	securityGroups, err := s.Clients.EC2.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
@@ -64,18 +76,18 @@ func (s *SecurityGroup) CreateIfNotExists() (bool, error) {
 	return true, nil
 }
 
-func (s *SecurityGroup) openPort(port int) error {
+func (s *SecurityGroup) createRule(rule Rule) error {
 	groupID, err := s.GetID()
 	if err != nil {
 		return microerror.MaskAny(err)
 	}
 
 	if _, err := s.Clients.EC2.AuthorizeSecurityGroupIngress(&ec2.AuthorizeSecurityGroupIngressInput{
-		CidrIp:     aws.String("0.0.0.0/0"),
+		CidrIp:     aws.String(rule.SourceCIDR),
 		GroupId:    aws.String(groupID),
 		IpProtocol: aws.String("tcp"),
-		FromPort:   aws.Int64(int64(port)),
-		ToPort:     aws.Int64(int64(port)),
+		FromPort:   aws.Int64(int64(rule.Port)),
+		ToPort:     aws.Int64(int64(rule.Port)),
 	}); err != nil {
 		return microerror.MaskAny(err)
 	}
@@ -95,8 +107,8 @@ func (s *SecurityGroup) CreateOrFail() error {
 
 	s.id = *securityGroup.GroupId
 
-	for _, port := range s.PortsToOpen {
-		if err := s.openPort(port); err != nil {
+	for _, rule := range s.Rules {
+		if err := s.createRule(rule); err != nil {
 			return microerror.MaskAny(err)
 		}
 	}
