@@ -317,7 +317,7 @@ func (s *Service) Boot() {
 					mastersSGInput := securityGroupInput{
 						Clients:     clients,
 						GroupName:   securityGroupName(cluster.Name, prefixMaster),
-						PortsToOpen: extractMasterPortsFromTPR(cluster),
+						PortsToOpen: extractMastersSecurityGroupPorts(cluster),
 						VPCID:       vpcID,
 					}
 					mastersSecurityGroup, err := s.createSecurityGroup(mastersSGInput)
@@ -335,7 +335,7 @@ func (s *Service) Boot() {
 					workersSGInput := securityGroupInput{
 						Clients:     clients,
 						GroupName:   securityGroupName(cluster.Name, prefixWorker),
-						PortsToOpen: extractWorkerPortsFromTPR(cluster),
+						PortsToOpen: extractWorkersSecurityGroupPorts(cluster),
 						VPCID:       vpcID,
 					}
 					workersSecurityGroup, err := s.createSecurityGroup(workersSGInput)
