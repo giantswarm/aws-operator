@@ -2,10 +2,10 @@ package aws
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/cenkalti/backoff"
 	microerror "github.com/giantswarm/microkit/error"
 )
 
@@ -39,15 +39,12 @@ func (g Gateway) findExisting() (*ec2.InternetGateway, error) {
 }
 
 func (g *Gateway) checkIfExists() (bool, error) {
-	gateway, err := g.findExisting()
-	if err != nil {
-		if strings.Contains(err.Error(), gatewayFindError.Error()) {
-			return false, nil
-		}
+	_, err := g.findExisting()
+	if IsGatewayFind(err) {
+		return false, nil
+	} else if err != nil {
 		return false, microerror.MaskAny(err)
 	}
-
-	g.id = *gateway.InternetGatewayId
 
 	return true, nil
 }
@@ -108,15 +105,43 @@ func (g *Gateway) Delete() error {
 		return microerror.MaskAny(err)
 	}
 
-	if _, err := g.Clients.EC2.DeleteInternetGateway(&ec2.DeleteInternetGatewayInput{
-		InternetGatewayId: gateway.InternetGatewayId,
-	}); err != nil {
+	detachOperation := func() error {
+		if _, err := g.Clients.EC2.DetachInternetGateway(&ec2.DetachInternetGatewayInput{
+			InternetGatewayId: gateway.InternetGatewayId,
+			VpcId:             aws.String(g.VpcID),
+		}); err != nil {
+			return microerror.MaskAny(err)
+		}
+		return nil
+	}
+	if err := backoff.Retry(detachOperation, backoff.NewExponentialBackOff()); err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	deleteOperation := func() error {
+		if _, err := g.Clients.EC2.DeleteInternetGateway(&ec2.DeleteInternetGatewayInput{
+			InternetGatewayId: gateway.InternetGatewayId,
+		}); err != nil {
+			return microerror.MaskAny(err)
+		}
+		return nil
+	}
+	if err := backoff.Retry(deleteOperation, backoff.NewExponentialBackOff()); err != nil {
 		return microerror.MaskAny(err)
 	}
 
 	return nil
 }
 
-func (g Gateway) ID() string {
-	return g.id
+func (g Gateway) GetID() (string, error) {
+	if g.id != "" {
+		return g.id, nil
+	}
+
+	gateway, err := g.findExisting()
+	if err != nil {
+		return "", microerror.MaskAny(err)
+	}
+
+	return *gateway.InternetGatewayId, nil
 }

@@ -78,14 +78,12 @@ func (s SecurityGroup) findExisting() (*ec2.SecurityGroup, error) {
 }
 
 func (s *SecurityGroup) checkIfExists() (bool, error) {
-	securityGroup, err := s.findExisting()
+	_, err := s.findExisting()
 	if IsSecurityGroupFind(err) {
 		return false, nil
 	} else if err != nil {
 		return false, microerror.MaskAny(err)
 	}
-
-	s.id = *securityGroup.GroupId
 
 	return true, nil
 }
@@ -108,9 +106,14 @@ func (s *SecurityGroup) CreateIfNotExists() (bool, error) {
 }
 
 func (s *SecurityGroup) openPort(port int) error {
+	groupID, err := s.GetID()
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
+
 	if _, err := s.Clients.EC2.AuthorizeSecurityGroupIngress(&ec2.AuthorizeSecurityGroupIngressInput{
 		CidrIp:     aws.String("0.0.0.0/0"),
-		GroupId:    aws.String(s.ID()),
+		GroupId:    aws.String(groupID),
 		IpProtocol: aws.String("tcp"),
 		FromPort:   aws.Int64(int64(port)),
 		ToPort:     aws.Int64(int64(port)),
@@ -157,6 +160,15 @@ func (s *SecurityGroup) Delete() error {
 	return nil
 }
 
-func (s SecurityGroup) ID() string {
-	return s.id
+func (s SecurityGroup) GetID() (string, error) {
+	if s.id != "" {
+		return s.id, nil
+	}
+
+	securityGroup, err := s.findExisting()
+	if err != nil {
+		return "", microerror.MaskAny(err)
+	}
+
+	return *securityGroup.GroupId, nil
 }

@@ -3,27 +3,28 @@ package create
 import "github.com/giantswarm/awstpr"
 
 const (
-	sshPort   = 22
-	httpPort  = 80
-	httpsPort = 443
+	calicoBGPNetworkPort = 179
+	httpPort             = 80
+	httpsPort            = 443
+	sshPort              = 22
 )
 
-func extractMasterPortsFromTPR(cluster awstpr.CustomObject) []int {
-	var ports = []int{
+// extractMastersSecurityGroupPorts returns the ports that must be opened on the masters security group.
+func extractMastersSecurityGroupPorts(cluster awstpr.CustomObject) []int {
+	return []int{
 		cluster.Spec.Cluster.Kubernetes.API.SecurePort,
 		cluster.Spec.Cluster.Etcd.Port,
 		sshPort,
 	}
-
-	return ports
 }
 
-func extractWorkerPortsFromTPR(cluster awstpr.CustomObject) []int {
-	var ports = []int{
+// extractMastersSecurityGroupPorts returns the ports that must be opened on the workers security group.
+func extractWorkersSecurityGroupPorts(cluster awstpr.CustomObject) []int {
+	return []int{
 		cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
 		cluster.Spec.Cluster.Kubernetes.IngressController.SecurePort,
+		cluster.Spec.Cluster.Kubernetes.Kubelet.Port,
 		sshPort,
+		calicoBGPNetworkPort,
 	}
-
-	return ports
 }

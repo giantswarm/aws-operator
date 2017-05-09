@@ -66,7 +66,7 @@ func (s *Service) deleteRecordSet(input recordSetInput) error {
 		Client:       input.Client,
 		Resource:     input.Resource,
 		Domain:       input.Domain,
-		HostedZoneID: hz.ID(),
+		HostedZoneID: hz.GetID(),
 	}
 
 	if err := rs.Delete(); err != nil {

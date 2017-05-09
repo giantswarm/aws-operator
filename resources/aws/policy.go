@@ -203,6 +203,6 @@ func (p *Policy) Delete() error {
 	return nil
 }
 
-func (p Policy) Name() string {
+func (p Policy) GetName() string {
 	return p.name
 }

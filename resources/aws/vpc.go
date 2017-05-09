@@ -2,7 +2,6 @@ package aws
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -39,15 +38,13 @@ func (v VPC) findExisting() (*ec2.Vpc, error) {
 }
 
 func (v *VPC) checkIfExists() (bool, error) {
-	vpc, err := v.findExisting()
-	if err != nil {
-		if strings.Contains(err.Error(), vpcFindError.Error()) {
-			return false, nil
-		}
+	_, err := v.findExisting()
+	if IsVpcFindError(err) {
+		return false, nil
+	} else if err != nil {
 		return false, microerror.MaskAny(err)
 	}
 
-	v.id = *vpc.VpcId
 	return true, nil
 }
 
@@ -119,6 +116,15 @@ func (v *VPC) Delete() error {
 	return nil
 }
 
-func (v VPC) ID() string {
-	return v.id
+func (v VPC) GetID() (string, error) {
+	if v.id != "" {
+		return v.id, nil
+	}
+
+	vpc, err := v.findExisting()
+	if err != nil {
+		return "", microerror.MaskAny(err)
+	}
+
+	return *vpc.VpcId, nil
 }

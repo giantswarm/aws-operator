@@ -18,10 +18,6 @@ func (kk KMSKey) fullAlias() string {
 	return fmt.Sprintf("alias/%s", kk.Name)
 }
 
-func (kk *KMSKey) CreateIfNotExists() (bool, error) {
-	return false, fmt.Errorf("KMS keys cannot be reused")
-}
-
 func (kk *KMSKey) CreateOrFail() error {
 	key, err := kk.Clients.KMS.CreateKey(&kms.CreateKeyInput{})
 	if err != nil {

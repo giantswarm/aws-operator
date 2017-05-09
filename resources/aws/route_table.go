@@ -100,6 +100,14 @@ func (r *RouteTable) Delete() error {
 		return microerror.MaskAny(err)
 	}
 
+	for _, association := range routeTable.Associations {
+		if _, err := r.Client.DisassociateRouteTable(&ec2.DisassociateRouteTableInput{
+			AssociationId: association.RouteTableAssociationId,
+		}); err != nil {
+			return microerror.MaskAny(err)
+		}
+	}
+
 	if _, err := r.Client.DeleteRouteTable(&ec2.DeleteRouteTableInput{
 		RouteTableId: routeTable.RouteTableId,
 	}); err != nil {
@@ -109,8 +117,17 @@ func (r *RouteTable) Delete() error {
 	return nil
 }
 
-func (r RouteTable) ID() string {
-	return r.id
+func (r RouteTable) GetID() (string, error) {
+	if r.id != "" {
+		return r.id, nil
+	}
+
+	routeTable, err := r.findExisting()
+	if err != nil {
+		return "", microerror.MaskAny(err)
+	}
+
+	return *routeTable.RouteTableId, nil
 }
 
 // MakePublic creates a route that allows traffic from outside the VPC.
