@@ -38,6 +38,8 @@ spec:
         insecurePort: 30010
         securePort: 30011
         domain: "ingress.example.aws.gigantic.io"
+      kubelet:
+        port: 10250
       networkSetup:
         docker:
           image: "giantswarm/k8s-setup-network-environment:ba2b57155d859a1fc5d378c2a09a77d7c2c755ed"
