@@ -10,8 +10,4 @@ const (
 	subnetDescription      string = "description"
 	subnetGroupName        string = "group-name"
 	subnetVpcID            string = "vpc-id"
-	// Security group keys
-	securityGroupIPPermissionCIDR     string = "ip-permission.cidr"
-	securityGroupIPPermissionFromPort string = "ip-permission.from-port"
-	securityGroupIPPermissionToPort   string = "ip-permission.to-port"
 )
