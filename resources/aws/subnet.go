@@ -112,7 +112,7 @@ func (s *Subnet) Delete() error {
 		}
 		return nil
 	}
-	if err := backoff.Retry(deleteOperation, backoff.NewExponentialBackOff()); err != nil {
+	if err := backoff.Retry(deleteOperation, NewCustomExponentialBackoff()); err != nil {
 		return microerror.MaskAny(err)
 	}
 

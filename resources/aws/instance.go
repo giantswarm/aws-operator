@@ -155,7 +155,7 @@ func (i *Instance) CreateOrFail() error {
 		return nil
 	}
 
-	if err := backoff.Retry(reserveOperation, backoff.NewExponentialBackOff()); err != nil {
+	if err := backoff.Retry(reserveOperation, NewCustomExponentialBackoff()); err != nil {
 		return microerror.MaskAny(err)
 	}
 
