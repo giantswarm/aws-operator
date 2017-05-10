@@ -38,12 +38,12 @@ import:
   - jsonpb
   - proto
   - sortkeys
-# The version of pflag was previously indicated by kubernetes/go-client, but using it with the current cobra version results in the following error:
-# vendor/github.com/spf13/cobra/command.go:1092: c.lflags.SortFlags undefined (type *pflag.FlagSet has no field or method SortFlags)
-# vendor/github.com/spf13/cobra/command.go:1092: c.Flags().SortFlags undefined (type *pflag.FlagSet has no field or method SortFlags)
-# vendor/github.com/spf13/cobra/command.go:1240: c.parentsPflags.SortFlags undefined (type *pflag.FlagSet has no field or method SortFlags)
+# The versions of pflag and cobra were previously indicated by kubernetes/client-go, but due to continuously appearing
+# errors on upgrades, we decided to pin them by ourselves.
+- package: github.com/spf13/cobra
+  version: 4c05eb1145f16d0e6bb4a3e1b6d769f4713cb41f
 - package: github.com/spf13/pflag
-  version: 2300d0f8576fe575f71aaa5b9bbe4e1b0dc2eb51
+  version: 08b1a584251b5b62f458943640fc8ebd4d50aaa5
 testImport:
 - package: github.com/stretchr/testify
   version: v1.1.4
