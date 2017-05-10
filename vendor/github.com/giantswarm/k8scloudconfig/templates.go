@@ -287,13 +287,13 @@ write_files:
             readinessProbe:
               httpGet:
                 path: /healthz
-                port: 80
+                port: 10254
               initialDelaySeconds: 30
               timeoutSeconds: 1
             livenessProbe:
               httpGet:
                 path: /healthz
-                port: 80
+                port: 10254
               initialDelaySeconds: 30
               timeoutSeconds: 1
 - path: /srv/ingress-controller-svc.yml
