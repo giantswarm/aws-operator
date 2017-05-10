@@ -86,10 +86,10 @@ func (s *Service) createRecordSet(input recordSetInput) error {
 	}
 
 	if err := apiRecordSet.CreateOrFail(); err != nil {
-		return microerror.MaskAnyf(err, "error registering DNS record for '%s'", apiRecordSet.Domain)
+		return microerror.MaskAnyf(err, "error registering DNS record '%s'", apiRecordSet.Domain)
 	}
 
-	s.logger.Log("debug", "created or reused DNS record for api")
+	s.logger.Log("debug", fmt.Sprintf("created or reused DNS record '%s'", apiRecordSet.Domain))
 
 	return nil
 }

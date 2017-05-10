@@ -82,13 +82,34 @@ func (s *SecurityGroup) createRule(rule Rule) error {
 		return microerror.MaskAny(err)
 	}
 
-	if _, err := s.Clients.EC2.AuthorizeSecurityGroupIngress(&ec2.AuthorizeSecurityGroupIngressInput{
-		CidrIp:     aws.String(rule.SourceCIDR),
-		GroupId:    aws.String(groupID),
-		IpProtocol: aws.String("tcp"),
-		FromPort:   aws.Int64(int64(rule.Port)),
-		ToPort:     aws.Int64(int64(rule.Port)),
-	}); err != nil {
+	var params *ec2.AuthorizeSecurityGroupIngressInput
+	if rule.SourceCIDR != "" {
+		params = &ec2.AuthorizeSecurityGroupIngressInput{
+			CidrIp:     aws.String(rule.SourceCIDR),
+			GroupId:    aws.String(groupID),
+			IpProtocol: aws.String("tcp"),
+			FromPort:   aws.Int64(int64(rule.Port)),
+			ToPort:     aws.Int64(int64(rule.Port)),
+		}
+	} else {
+		params = &ec2.AuthorizeSecurityGroupIngressInput{
+			GroupId: aws.String(groupID),
+			IpPermissions: []*ec2.IpPermission{
+				{
+					FromPort:   aws.Int64(int64(rule.Port)),
+					ToPort:     aws.Int64(int64(rule.Port)),
+					IpProtocol: aws.String("tcp"),
+					UserIdGroupPairs: []*ec2.UserIdGroupPair{
+						{
+							GroupId: aws.String(rule.SecurityGroupID),
+						},
+					},
+				},
+			},
+		}
+	}
+
+	if _, err := s.Clients.EC2.AuthorizeSecurityGroupIngress(params); err != nil {
 		return microerror.MaskAny(err)
 	}
 
@@ -107,7 +128,13 @@ func (s *SecurityGroup) CreateOrFail() error {
 
 	s.id = *securityGroup.GroupId
 
-	for _, rule := range s.Rules {
+	s.ApplyRules(s.Rules)
+
+	return nil
+}
+
+func (s SecurityGroup) ApplyRules(rules Rules) error {
+	for _, rule := range rules {
 		if err := s.createRule(rule); err != nil {
 			return microerror.MaskAny(err)
 		}
