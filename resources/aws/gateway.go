@@ -114,7 +114,7 @@ func (g *Gateway) Delete() error {
 		}
 		return nil
 	}
-	if err := backoff.Retry(detachOperation, backoff.NewExponentialBackOff()); err != nil {
+	if err := backoff.Retry(detachOperation, NewCustomExponentialBackoff()); err != nil {
 		return microerror.MaskAny(err)
 	}
 
@@ -126,7 +126,7 @@ func (g *Gateway) Delete() error {
 		}
 		return nil
 	}
-	if err := backoff.Retry(deleteOperation, backoff.NewExponentialBackOff()); err != nil {
+	if err := backoff.Retry(deleteOperation, NewCustomExponentialBackoff()); err != nil {
 		return microerror.MaskAny(err)
 	}
 
