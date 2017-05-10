@@ -26,5 +26,7 @@ func extractWorkersSecurityGroupPorts(cluster awstpr.CustomObject) []int {
 		cluster.Spec.Cluster.Kubernetes.Kubelet.Port,
 		sshPort,
 		calicoBGPNetworkPort,
+		httpsPort, // TODO Move the https and http ports to a separate security group for Ingress ELB.
+		httpPort,
 	}
 }
