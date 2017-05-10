@@ -39,7 +39,7 @@ spec:
             path: id_rsa.pub
       containers:
       - name: aws-operator
-        image: registry.giantswarm.io/giantswarm/aws-operator:{{ .BuildInfo.SHA }}
+        image: quay.io/giantswarm/aws-operator:{{ .BuildInfo.SHA }}
         volumeMounts:
         - name: aws-operator-configmap
           mountPath: /var/run/aws-operator/configmap/
@@ -80,4 +80,4 @@ spec:
             cpu: 250m
             memory: 250Mi
       imagePullSecrets:
-      - name: circleci-giantswarm-registry
+      - name: giantswarm-registry
