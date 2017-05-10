@@ -54,7 +54,7 @@ func (s *Service) createLoadBalancer(input LoadBalancerInput) (*awsresources.ELB
 		s.logger.Log("debug", fmt.Sprintf("ELB '%s' already exists, reusing", lb.Name))
 	}
 
-	s.logger.Log("debug", "waiting for masters to be ready...")
+	s.logger.Log("debug", "waiting for instances to be ready...")
 
 	var awsFlavouredInstanceIDs []*string
 	for _, instanceID := range input.InstanceIDs {

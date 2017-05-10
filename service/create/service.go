@@ -40,8 +40,9 @@ const (
 	// delayed as long as possible, until the watch will be closed or timed out.
 	resyncPeriod time.Duration = 0
 	// Prefixes used for machine names.
-	prefixMaster string = "master"
-	prefixWorker string = "worker"
+	prefixMaster  string = "master"
+	prefixWorker  string = "worker"
+	prefixIngress string = "ingress"
 	// Suffixes used for subnets
 	suffixPublic  string = "public"
 	suffixPrivate string = "private"
@@ -313,12 +314,11 @@ func (s *Service) Boot() {
 						s.logger.Log("info", fmt.Sprintf("gateway for cluster '%s' already exists, reusing", cluster.Name))
 					}
 
-					// Create masters security group
+					// Create masters security group.
 					mastersSGInput := securityGroupInput{
-						Clients:     clients,
-						GroupName:   securityGroupName(cluster.Name, prefixMaster),
-						PortsToOpen: extractMastersSecurityGroupPorts(cluster),
-						VPCID:       vpcID,
+						Clients:   clients,
+						GroupName: securityGroupName(cluster.Name, prefixMaster),
+						VPCID:     vpcID,
 					}
 					mastersSecurityGroup, err := s.createSecurityGroup(mastersSGInput)
 					if err != nil {
@@ -331,12 +331,11 @@ func (s *Service) Boot() {
 						return
 					}
 
-					// Create workers security group
+					// Create workers security group.
 					workersSGInput := securityGroupInput{
-						Clients:     clients,
-						GroupName:   securityGroupName(cluster.Name, prefixWorker),
-						PortsToOpen: extractWorkersSecurityGroupPorts(cluster),
-						VPCID:       vpcID,
+						Clients:   clients,
+						GroupName: securityGroupName(cluster.Name, prefixWorker),
+						VPCID:     vpcID,
 					}
 					workersSecurityGroup, err := s.createSecurityGroup(workersSGInput)
 					if err != nil {
@@ -349,7 +348,48 @@ func (s *Service) Boot() {
 						return
 					}
 
-					// Create route table
+					// Create ingress security group.
+					ingressSGInput := securityGroupInput{
+						Clients:   clients,
+						GroupName: securityGroupName(cluster.Name, prefixIngress),
+						VPCID:     vpcID,
+					}
+					ingressSecurityGroup, err := s.createSecurityGroup(ingressSGInput)
+					if err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not create security group '%s': %s", ingressSGInput.GroupName, errgo.Details(err)))
+						return
+					}
+					ingressSecurityGroupID, err := ingressSecurityGroup.GetID()
+					if err != nil {
+						s.logger.Log("error", errgo.Details(err))
+						return
+					}
+
+					// Create rules for the security groups.
+					masterRulesInput := rulesInput{
+						Cluster:            cluster,
+						OwnSecurityGroupID: mastersSecurityGroupID,
+					}
+					masterRules := masterRules(masterRulesInput)
+					mastersSecurityGroup.ApplyRules(masterRules)
+
+					workerRulesInput := rulesInput{
+						Cluster:                cluster,
+						OwnSecurityGroupID:     workersSecurityGroupID,
+						MastersSecurityGroupID: mastersSecurityGroupID,
+						IngressSecurityGroupID: ingressSecurityGroupID,
+					}
+					workerRules := workerRules(workerRulesInput)
+					workersSecurityGroup.ApplyRules(workerRules)
+
+					ingressRulesInput := rulesInput{
+						Cluster:                cluster,
+						MastersSecurityGroupID: mastersSecurityGroupID,
+					}
+					ingressRules := ingressRules(ingressRulesInput)
+					ingressSecurityGroup.ApplyRules(ingressRules)
+
+					// Create route table.
 					routeTable := &awsresources.RouteTable{
 						Name:   cluster.Name,
 						VpcID:  vpcID,
@@ -542,7 +582,7 @@ func (s *Service) Boot() {
 								PortInstance: cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
 							},
 						},
-						SecurityGroupID: workersSecurityGroupID,
+						SecurityGroupID: ingressSecurityGroupID,
 						SubnetID:        publicSubnetID,
 					}
 
@@ -593,7 +633,7 @@ func (s *Service) Boot() {
 						}
 					}
 					if rsErr == nil {
-						s.logger.Log("info", fmt.Sprintf("created DNS records for load balancer"))
+						s.logger.Log("info", fmt.Sprintf("created DNS records for load balancers"))
 					}
 
 					s.logger.Log("info", fmt.Sprintf("cluster '%s' processed", cluster.Name))
@@ -798,6 +838,15 @@ func (s *Service) Boot() {
 					}
 					if err := s.deleteSecurityGroup(workersSGInput); err != nil {
 						s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': %s", workersSGInput.GroupName, errgo.Details(err)))
+					}
+
+					// Delete ingress security group.
+					ingressSGInput := securityGroupInput{
+						Clients:   clients,
+						GroupName: securityGroupName(cluster.Name, prefixIngress),
+					}
+					if err := s.deleteSecurityGroup(ingressSGInput); err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': %s", ingressSGInput.GroupName, errgo.Details(err)))
 					}
 
 					// Delete VPC.

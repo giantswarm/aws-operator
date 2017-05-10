@@ -3,6 +3,7 @@ package create
 import (
 	"fmt"
 
+	"github.com/giantswarm/awstpr"
 	microerror "github.com/giantswarm/microkit/error"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
@@ -11,19 +12,32 @@ import (
 )
 
 type securityGroupInput struct {
-	Clients     awsutil.Clients
-	GroupName   string
-	PortsToOpen []int
-	VPCID       string
+	Clients   awsutil.Clients
+	GroupName string
+	VPCID     string
 }
 
-func (s *Service) createSecurityGroup(input securityGroupInput) (resources.ResourceWithID, error) {
-	var securityGroup resources.ResourceWithID
-	securityGroup = &awsresources.SecurityGroup{
+type rulesInput struct {
+	Cluster                awstpr.CustomObject
+	Rules                  awsresources.Rules
+	OwnSecurityGroupID     string
+	MastersSecurityGroupID string
+	IngressSecurityGroupID string
+}
+
+const (
+	calicoBGPNetworkPort = 179
+	httpPort             = 80
+	httpsPort            = 443
+	sshPort              = 22
+	defaultCIDR          = "0.0.0.0/0"
+)
+
+func (s *Service) createSecurityGroup(input securityGroupInput) (*awsresources.SecurityGroup, error) {
+	securityGroup := &awsresources.SecurityGroup{
 		Description: input.GroupName,
 		GroupName:   input.GroupName,
 		VpcID:       input.VPCID,
-		PortsToOpen: input.PortsToOpen,
 		AWSEntity:   awsresources.AWSEntity{Clients: input.Clients},
 	}
 	securityGroupCreated, err := securityGroup.CreateIfNotExists()
@@ -53,6 +67,68 @@ func (s *Service) deleteSecurityGroup(input securityGroupInput) error {
 	}
 
 	return nil
+}
+
+// masterRules returns the rules for the masters security group.
+func masterRules(input rulesInput) awsresources.Rules {
+	return awsresources.Rules{
+		{
+			Port:       input.Cluster.Spec.Cluster.Kubernetes.API.SecurePort,
+			SourceCIDR: defaultCIDR,
+		},
+		{
+			Port:            input.Cluster.Spec.Cluster.Etcd.Port,
+			SecurityGroupID: input.OwnSecurityGroupID,
+		},
+		{
+			Port:       sshPort,
+			SourceCIDR: defaultCIDR,
+		},
+	}
+}
+
+// workerRules returns the rules for the workers security group.
+func workerRules(input rulesInput) awsresources.Rules {
+	return awsresources.Rules{
+		{
+			Port:            input.Cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
+			SecurityGroupID: input.IngressSecurityGroupID,
+		},
+		{
+			Port:            input.Cluster.Spec.Cluster.Kubernetes.IngressController.SecurePort,
+			SecurityGroupID: input.IngressSecurityGroupID,
+		},
+		{
+			Port:            input.Cluster.Spec.Cluster.Kubernetes.Kubelet.Port,
+			SecurityGroupID: input.MastersSecurityGroupID,
+		},
+		{
+			Port:       sshPort,
+			SourceCIDR: defaultCIDR,
+		},
+		{
+			Port:            calicoBGPNetworkPort,
+			SecurityGroupID: input.OwnSecurityGroupID,
+		},
+	}
+}
+
+// ingressRules returns the rules for the ingress security group.
+func ingressRules(input rulesInput) awsresources.Rules {
+	return awsresources.Rules{
+		{
+			Port:            input.Cluster.Spec.Cluster.Kubernetes.Kubelet.Port,
+			SecurityGroupID: input.MastersSecurityGroupID,
+		},
+		{
+			Port:       httpPort,
+			SourceCIDR: defaultCIDR,
+		},
+		{
+			Port:       httpsPort,
+			SourceCIDR: defaultCIDR,
+		},
+	}
 }
 
 func securityGroupName(clusterName string, groupName string) string {
