@@ -51,17 +51,17 @@ spec:
     - hostname: "worker-1"
 
   aws:
-    region: "eu-central-1"
-    az: "eu-central-1a"
+    region: "eu-west-1"
+    az: "eu-west-1a"
     vpc:
       cidr: "10.0.0.0/16"
       privateSubnetCidr: "10.0.0.0/19"
       publicSubnetCidr: "10.0.128.0/20"
 
     masters:
-    - imageid: "ami-9501c8fa"
+    - imageid: "ami-0bcbcb6d"
       instancetype: "t2.medium"
 
     workers:
-    - imageid: "ami-9501c8fa"
+    - imageid: "ami-0bcbcb6d"
       instancetype: "t2.medium"
