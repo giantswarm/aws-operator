@@ -11,6 +11,13 @@ func IsInvalidConfig(err error) bool {
 	return errgo.Cause(err) == invalidConfigError
 }
 
+var invalidCloudconfigExtensionNameError = errgo.New("invalid cloudconfig extension name")
+
+//  asserts invalidCloudconfigExtensionNameError.
+func IsInvalidCloudconfigExtensionName(err error) bool {
+	return errgo.Cause(err) == invalidCloudconfigExtensionNameError
+}
+
 var malformedCloudConfigKeyError = errgo.New("malformed key in the cloudconfig")
 
 // IsMalformedCloudConfigKey asserts malformedCloudConfigKeyError.
