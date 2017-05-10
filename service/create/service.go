@@ -370,7 +370,7 @@ func (s *Service) Boot() {
 						Cluster:            cluster,
 						OwnSecurityGroupID: mastersSecurityGroupID,
 					}
-					masterRules := masterRules(masterRulesInput)
+					masterRules := masterRulesInput.masterRules()
 					mastersSecurityGroup.ApplyRules(masterRules)
 
 					workerRulesInput := rulesInput{
@@ -379,14 +379,14 @@ func (s *Service) Boot() {
 						MastersSecurityGroupID: mastersSecurityGroupID,
 						IngressSecurityGroupID: ingressSecurityGroupID,
 					}
-					workerRules := workerRules(workerRulesInput)
+					workerRules := workerRulesInput.workerRules()
 					workersSecurityGroup.ApplyRules(workerRules)
 
 					ingressRulesInput := rulesInput{
 						Cluster:                cluster,
 						MastersSecurityGroupID: mastersSecurityGroupID,
 					}
-					ingressRules := ingressRules(ingressRulesInput)
+					ingressRules := ingressRulesInput.ingressRules()
 					ingressSecurityGroup.ApplyRules(ingressRules)
 
 					// Create route table.
