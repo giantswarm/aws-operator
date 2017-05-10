@@ -19,6 +19,10 @@ func (kk KMSKey) fullAlias() string {
 }
 
 func (kk *KMSKey) CreateOrFail() error {
+	if kk.Name == "" {
+		return microerror.MaskAny(kmsKeyAliasEmptyError)
+	}
+
 	key, err := kk.Clients.KMS.CreateKey(&kms.CreateKeyInput{})
 	if err != nil {
 		return microerror.MaskAny(err)

@@ -21,6 +21,8 @@ var (
 
 	resourceDeleteError       = errgo.New("Couldn't delete resource, it lacks the necessary data (ID)")
 	clientNotInitializedError = errgo.New("The client has not been initialized")
+
+	kmsKeyAliasEmptyError = errgo.New("the KMS key alias cannot be empty")
 )
 
 type DomainNamedResourceNotFoundError struct {
@@ -62,4 +64,8 @@ func IsSubnetFind(err error) bool {
 
 func IsVpcFindError(err error) bool {
 	return errgo.Cause(err) == vpcFindError
+}
+
+func IsKMSKeyAliasEmpty(err error) bool {
+	return errgo.Cause(err) == kmsKeyAliasEmptyError
 }
