@@ -13,7 +13,7 @@ type SecurityGroup struct {
 	Description string
 	GroupName   string
 	VpcID       string
-	Rules       Rules
+	Rules       []Rule
 	id          string
 	AWSEntity
 }
@@ -21,14 +21,11 @@ type SecurityGroup struct {
 // Rule is a Security Group rule.
 type Rule struct {
 	Port int
-	// SourceCIDR is the CIDR of the source. Conflicts with SourceCIDR.
+	// SourceCIDR is the CIDR of the source.
 	SourceCIDR string
-	// SecurityGroupID is the ID of the Security Group. Conflicts with SecurityGroupID.
+	// SecurityGroupID is the ID of the source Security Group.
 	SecurityGroupID string
 }
-
-// Rules is a slice of Rule structs.
-type Rules []Rule
 
 func (s SecurityGroup) findExisting() (*ec2.SecurityGroup, error) {
 	securityGroups, err := s.Clients.EC2.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
@@ -51,7 +48,7 @@ func (s SecurityGroup) findExisting() (*ec2.SecurityGroup, error) {
 		return nil, microerror.MaskAny(err)
 	}
 
-	if len(securityGroups.SecurityGroups) < 1 {
+	if len(securityGroups.SecurityGroups) != 1 {
 		return nil, microerror.MaskAny(securityGroupFindError)
 	}
 
@@ -76,6 +73,8 @@ func (s *SecurityGroup) CreateIfNotExists() (bool, error) {
 	return true, nil
 }
 
+// createRule creates a security group rule.
+// SourceCIDR always takes precedence over SecurityGroupID.
 func (s *SecurityGroup) createRule(rule Rule) error {
 	groupID, err := s.GetID()
 	if err != nil {
@@ -133,7 +132,7 @@ func (s *SecurityGroup) CreateOrFail() error {
 	return nil
 }
 
-func (s SecurityGroup) ApplyRules(rules Rules) error {
+func (s SecurityGroup) ApplyRules(rules []Rule) error {
 	for _, rule := range rules {
 		if err := s.createRule(rule); err != nil {
 			return microerror.MaskAny(err)

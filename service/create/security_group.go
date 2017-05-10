@@ -19,7 +19,7 @@ type securityGroupInput struct {
 
 type rulesInput struct {
 	Cluster                awstpr.CustomObject
-	Rules                  awsresources.Rules
+	Rules                  []awsresources.Rule
 	OwnSecurityGroupID     string
 	MastersSecurityGroupID string
 	IngressSecurityGroupID string
@@ -30,7 +30,8 @@ const (
 	httpPort             = 80
 	httpsPort            = 443
 	sshPort              = 22
-	defaultCIDR          = "0.0.0.0/0"
+
+	defaultCIDR = "0.0.0.0/0"
 )
 
 func (s *Service) createSecurityGroup(input securityGroupInput) (*awsresources.SecurityGroup, error) {
@@ -70,8 +71,8 @@ func (s *Service) deleteSecurityGroup(input securityGroupInput) error {
 }
 
 // masterRules returns the rules for the masters security group.
-func masterRules(input rulesInput) awsresources.Rules {
-	return awsresources.Rules{
+func masterRules(input rulesInput) []awsresources.Rule {
+	return []awsresources.Rule{
 		{
 			Port:       input.Cluster.Spec.Cluster.Kubernetes.API.SecurePort,
 			SourceCIDR: defaultCIDR,
@@ -84,12 +85,16 @@ func masterRules(input rulesInput) awsresources.Rules {
 			Port:       sshPort,
 			SourceCIDR: defaultCIDR,
 		},
+		{
+			Port:       calicoBGPNetworkPort,
+			SourceCIDR: defaultCIDR,
+		},
 	}
 }
 
 // workerRules returns the rules for the workers security group.
-func workerRules(input rulesInput) awsresources.Rules {
-	return awsresources.Rules{
+func workerRules(input rulesInput) []awsresources.Rule {
+	return []awsresources.Rule{
 		{
 			Port:            input.Cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
 			SecurityGroupID: input.IngressSecurityGroupID,
@@ -107,25 +112,25 @@ func workerRules(input rulesInput) awsresources.Rules {
 			SourceCIDR: defaultCIDR,
 		},
 		{
-			Port:            calicoBGPNetworkPort,
-			SecurityGroupID: input.OwnSecurityGroupID,
+			Port:       calicoBGPNetworkPort,
+			SourceCIDR: defaultCIDR,
 		},
 	}
 }
 
 // ingressRules returns the rules for the ingress security group.
-func ingressRules(input rulesInput) awsresources.Rules {
-	return awsresources.Rules{
-		{
-			Port:            input.Cluster.Spec.Cluster.Kubernetes.Kubelet.Port,
-			SecurityGroupID: input.MastersSecurityGroupID,
-		},
+func ingressRules(input rulesInput) []awsresources.Rule {
+	return []awsresources.Rule{
 		{
 			Port:       httpPort,
 			SourceCIDR: defaultCIDR,
 		},
 		{
 			Port:       httpsPort,
+			SourceCIDR: defaultCIDR,
+		},
+		{
+			Port:       calicoBGPNetworkPort,
 			SourceCIDR: defaultCIDR,
 		},
 	}
