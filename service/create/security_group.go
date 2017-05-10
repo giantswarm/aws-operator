@@ -71,15 +71,15 @@ func (s *Service) deleteSecurityGroup(input securityGroupInput) error {
 }
 
 // masterRules returns the rules for the masters security group.
-func masterRules(input rulesInput) []awsresources.Rule {
+func (ri rulesInput) masterRules() []awsresources.Rule {
 	return []awsresources.Rule{
 		{
-			Port:       input.Cluster.Spec.Cluster.Kubernetes.API.SecurePort,
+			Port:       ri.Cluster.Spec.Cluster.Kubernetes.API.SecurePort,
 			SourceCIDR: defaultCIDR,
 		},
 		{
-			Port:            input.Cluster.Spec.Cluster.Etcd.Port,
-			SecurityGroupID: input.OwnSecurityGroupID,
+			Port:            ri.Cluster.Spec.Cluster.Etcd.Port,
+			SecurityGroupID: ri.OwnSecurityGroupID,
 		},
 		{
 			Port:       sshPort,
@@ -93,19 +93,19 @@ func masterRules(input rulesInput) []awsresources.Rule {
 }
 
 // workerRules returns the rules for the workers security group.
-func workerRules(input rulesInput) []awsresources.Rule {
+func (ri rulesInput) workerRules() []awsresources.Rule {
 	return []awsresources.Rule{
 		{
-			Port:            input.Cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
-			SecurityGroupID: input.IngressSecurityGroupID,
+			Port:            ri.Cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
+			SecurityGroupID: ri.IngressSecurityGroupID,
 		},
 		{
-			Port:            input.Cluster.Spec.Cluster.Kubernetes.IngressController.SecurePort,
-			SecurityGroupID: input.IngressSecurityGroupID,
+			Port:            ri.Cluster.Spec.Cluster.Kubernetes.IngressController.SecurePort,
+			SecurityGroupID: ri.IngressSecurityGroupID,
 		},
 		{
-			Port:            input.Cluster.Spec.Cluster.Kubernetes.Kubelet.Port,
-			SecurityGroupID: input.MastersSecurityGroupID,
+			Port:            ri.Cluster.Spec.Cluster.Kubernetes.Kubelet.Port,
+			SecurityGroupID: ri.MastersSecurityGroupID,
 		},
 		{
 			Port:       sshPort,
@@ -119,7 +119,7 @@ func workerRules(input rulesInput) []awsresources.Rule {
 }
 
 // ingressRules returns the rules for the ingress security group.
-func ingressRules(input rulesInput) []awsresources.Rule {
+func (ri rulesInput) ingressRules() []awsresources.Rule {
 	return []awsresources.Rule{
 		{
 			Port:       httpPort,
