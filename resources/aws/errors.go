@@ -7,8 +7,6 @@ import (
 )
 
 var (
-	notImplementedMethodError = errgo.New("not implemented")
-
 	noBucketInBucketObjectError = errgo.New("Object needs to belong to some bucket")
 
 	routeTableFindError    = errgo.New("Couldn't find route table")
@@ -50,6 +48,13 @@ var instanceNotFoundError = errgo.New("instance not found")
 // IsInstanceNotFoundError asserts instanceNotFoundError.
 func IsInstanceNotFoundError(err error) bool {
 	return errgo.Cause(err) == instanceNotFoundError
+}
+
+var notImplementedMethodError = errgo.New("not implemented method")
+
+// IsNotImplementedMethod asserts notImplementedMethodError.
+func IsNotImplementedMethod(err error) bool {
+	return errgo.Cause(err) == notImplementedMethodError
 }
 
 var routeNotFoundError = errgo.New("route not found")
