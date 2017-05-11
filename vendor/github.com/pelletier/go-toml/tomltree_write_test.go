@@ -40,7 +40,7 @@ func assertErrorString(t *testing.T, expected string, err error) {
 	}
 }
 
-func TestTreeWriteToTomlString(t *testing.T) {
+func TestTomlTreeWriteToTomlString(t *testing.T) {
 	toml, err := Load(`name = { first = "Tom", last = "Preston-Werner" }
 points = { x = 1, y = 2 }`)
 
@@ -63,7 +63,7 @@ points = { x = 1, y = 2 }`)
 	})
 }
 
-func TestTreeWriteToTomlStringSimple(t *testing.T) {
+func TestTomlTreeWriteToTomlStringSimple(t *testing.T) {
 	tree, err := Load("[foo]\n\n[[foo.bar]]\na = 42\n\n[[foo.bar]]\na = 69\n")
 	if err != nil {
 		t.Errorf("Test failed to parse: %v", err)
@@ -79,7 +79,7 @@ func TestTreeWriteToTomlStringSimple(t *testing.T) {
 	}
 }
 
-func TestTreeWriteToTomlStringKeysOrders(t *testing.T) {
+func TestTomlTreeWriteToTomlStringKeysOrders(t *testing.T) {
 	for i := 0; i < 100; i++ {
 		tree, _ := Load(`
 		foobar = true
@@ -119,7 +119,7 @@ func testMaps(t *testing.T, actual, expected map[string]interface{}) {
 	}
 }
 
-func TestTreeWriteToMapSimple(t *testing.T) {
+func TestTomlTreeWriteToMapSimple(t *testing.T) {
 	tree, _ := Load("a = 42\nb = 17")
 
 	expected := map[string]interface{}{
@@ -130,32 +130,32 @@ func TestTreeWriteToMapSimple(t *testing.T) {
 	testMaps(t, tree.ToMap(), expected)
 }
 
-func TestTreeWriteToInvalidTreeSimpleValue(t *testing.T) {
-	tree := Tree{values: map[string]interface{}{"foo": int8(1)}}
+func TestTomlTreeWriteToInvalidTreeSimpleValue(t *testing.T) {
+	tree := TomlTree{values: map[string]interface{}{"foo": int8(1)}}
 	_, err := tree.ToTomlString()
 	assertErrorString(t, "invalid value type at foo: int8", err)
 }
 
-func TestTreeWriteToInvalidTreeTomlValue(t *testing.T) {
-	tree := Tree{values: map[string]interface{}{"foo": &tomlValue{int8(1), Position{}}}}
+func TestTomlTreeWriteToInvalidTreeTomlValue(t *testing.T) {
+	tree := TomlTree{values: map[string]interface{}{"foo": &tomlValue{int8(1), Position{}}}}
 	_, err := tree.ToTomlString()
 	assertErrorString(t, "unsupported value type int8: 1", err)
 }
 
-func TestTreeWriteToInvalidTreeTomlValueArray(t *testing.T) {
-	tree := Tree{values: map[string]interface{}{"foo": &tomlValue{[]interface{}{int8(1)}, Position{}}}}
+func TestTomlTreeWriteToInvalidTreeTomlValueArray(t *testing.T) {
+	tree := TomlTree{values: map[string]interface{}{"foo": &tomlValue{[]interface{}{int8(1)}, Position{}}}}
 	_, err := tree.ToTomlString()
 	assertErrorString(t, "unsupported value type int8: 1", err)
 }
 
-func TestTreeWriteToFailingWriterInSimpleValue(t *testing.T) {
+func TestTomlTreeWriteToFailingWriterInSimpleValue(t *testing.T) {
 	toml, _ := Load(`a = 2`)
 	writer := failingWriter{failAt: 0, written: 0}
 	_, err := toml.WriteTo(writer)
 	assertErrorString(t, "failingWriter failed after writting 0 bytes", err)
 }
 
-func TestTreeWriteToFailingWriterInTable(t *testing.T) {
+func TestTomlTreeWriteToFailingWriterInTable(t *testing.T) {
 	toml, _ := Load(`
 [b]
 a = 2`)
@@ -168,7 +168,7 @@ a = 2`)
 	assertErrorString(t, "failingWriter failed after writting 13 bytes", err)
 }
 
-func TestTreeWriteToFailingWriterInArray(t *testing.T) {
+func TestTomlTreeWriteToFailingWriterInArray(t *testing.T) {
 	toml, _ := Load(`
 [[b]]
 a = 2`)
@@ -181,7 +181,7 @@ a = 2`)
 	assertErrorString(t, "failingWriter failed after writting 15 bytes", err)
 }
 
-func TestTreeWriteToMapExampleFile(t *testing.T) {
+func TestTomlTreeWriteToMapExampleFile(t *testing.T) {
 	tree, _ := LoadFile("example.toml")
 	expected := map[string]interface{}{
 		"title": "TOML Example",
@@ -217,7 +217,7 @@ func TestTreeWriteToMapExampleFile(t *testing.T) {
 	testMaps(t, tree.ToMap(), expected)
 }
 
-func TestTreeWriteToMapWithTablesInMultipleChunks(t *testing.T) {
+func TestTomlTreeWriteToMapWithTablesInMultipleChunks(t *testing.T) {
 	tree, _ := Load(`
 	[[menu.main]]
         a = "menu 1"
@@ -238,7 +238,7 @@ func TestTreeWriteToMapWithTablesInMultipleChunks(t *testing.T) {
 	testMaps(t, treeMap, expected)
 }
 
-func TestTreeWriteToMapWithArrayOfInlineTables(t *testing.T) {
+func TestTomlTreeWriteToMapWithArrayOfInlineTables(t *testing.T) {
 	tree, _ := Load(`
     	[params]
 	language_tabs = [
