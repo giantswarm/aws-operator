@@ -169,7 +169,7 @@ func (r RouteTable) getInternetGateway() (string, error) {
 	}
 
 	if len(resp.InternetGateways) == 0 {
-		return "", microerror.MaskAny(routeFindError)
+		return "", microerror.MaskAny(routeNotFoundError)
 	}
 
 	return *resp.InternetGateways[0].InternetGatewayId, nil

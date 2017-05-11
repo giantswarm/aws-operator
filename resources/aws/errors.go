@@ -11,7 +11,6 @@ var (
 
 	noBucketInBucketObjectError = errgo.New("Object needs to belong to some bucket")
 
-	routeFindError         = errgo.New("couldn't find route")
 	routeTableFindError    = errgo.New("Couldn't find route table")
 	securityGroupFindError = errgo.New("Couldn't find security group")
 	subnetFindError        = errgo.New("Couldn't find subnet")
@@ -51,9 +50,11 @@ func IsInstanceFindError(err error) bool {
 	return errgo.Cause(err) == instanceFindError
 }
 
-// IsRouteFindError asserts routeFindError.
-func IsRouteFindError(err error) bool {
-	return errgo.Cause(err) == routeFindError
+var routeNotFoundError = errgo.New("route not found")
+
+// IsRouteNotFoundError asserts routeNotFoundError.
+func IsRouteNotFoundError(err error) bool {
+	return errgo.Cause(err) == routeNotFoundError
 }
 
 func IsSecurityGroupFind(err error) bool {
