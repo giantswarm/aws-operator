@@ -13,13 +13,13 @@ type SecurityGroup struct {
 	Description string
 	GroupName   string
 	VpcID       string
-	Rules       []Rule
+	Rules       []SecurityGroupRule
 	id          string
 	AWSEntity
 }
 
-// Rule is a Security Group rule.
-type Rule struct {
+// SecurityGroupRule is an AWS security group rule.
+type SecurityGroupRule struct {
 	Port int
 	// SourceCIDR is the CIDR of the source.
 	SourceCIDR string
@@ -75,7 +75,7 @@ func (s *SecurityGroup) CreateIfNotExists() (bool, error) {
 
 // createRule creates a security group rule.
 // SourceCIDR always takes precedence over SecurityGroupID.
-func (s *SecurityGroup) createRule(rule Rule) error {
+func (s *SecurityGroup) createRule(rule SecurityGroupRule) error {
 	groupID, err := s.GetID()
 	if err != nil {
 		return microerror.MaskAny(err)
@@ -132,7 +132,7 @@ func (s *SecurityGroup) CreateOrFail() error {
 	return nil
 }
 
-func (s SecurityGroup) ApplyRules(rules []Rule) error {
+func (s SecurityGroup) ApplyRules(rules []SecurityGroupRule) error {
 	for _, rule := range rules {
 		if err := s.createRule(rule); err != nil {
 			return microerror.MaskAny(err)
