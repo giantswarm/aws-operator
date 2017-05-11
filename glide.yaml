@@ -44,6 +44,7 @@ import:
   version: 4c05eb1145f16d0e6bb4a3e1b6d769f4713cb41f
 - package: github.com/spf13/pflag
   version: 08b1a584251b5b62f458943640fc8ebd4d50aaa5
+- package: github.com/giantswarm/operatorkit
 testImport:
 - package: github.com/stretchr/testify
   version: v1.1.4
