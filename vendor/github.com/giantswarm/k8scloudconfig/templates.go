@@ -1380,7 +1380,7 @@ coreos:
       --healthz-bind-address=${DEFAULT_IPV4} \
       --healthz-port=10248 \
       --cluster-dns={{.Cluster.Kubernetes.DNS.IP}} \
-      --cluster-domain={{.Cluster.Kubernetes.API.Domain}} \
+      --cluster-domain={{.Cluster.Kubernetes.Domain}} \
       --network-plugin-dir=/etc/kubernetes/cni/net.d \
       --network-plugin=cni \
       --register-node=true \
