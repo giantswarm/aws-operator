@@ -1,5 +1,5 @@
 hash: d4c241af411b862c79a23db32498d0aa8413a7aa5adcdab9bd6775ef582eb245
-updated: 2017-05-10T17:00:03.034233682+02:00
+updated: 2017-05-11T11:20:49.569428967+02:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aws/aws-sdk-go
-  version: 2a4ef28e5761cdd06ab7fcab2615342d729ab756
+  version: 952498f4a390118ac65ad59cbe0c8b57ed69b6b5
   subpackages:
   - aws
   - aws/awserr
@@ -126,7 +126,7 @@ imports:
   - node
   - vault
 - name: github.com/giantswarm/k8scloudconfig
-  version: 1db8a87c005b44e254e2fba412705f14c36ae6c7
+  version: 49fedd3d56c2ad53622cf5559e5e2e61573f042b
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
@@ -162,7 +162,7 @@ imports:
 - name: github.com/go-openapi/swag
   version: 1d0bd113de87027671077d3c71eb3ac5d7dbba72
 - name: github.com/go-stack/stack
-  version: 100eb0c0a9c5b306ca2fb4f165df21d80ada4b82
+  version: 7a2f19628aabfe68f0766b59e74d6315f8347d22
 - name: github.com/gogo/protobuf
   version: e18d7aa8f8c624c915db340349aad4c49b10d173
   subpackages:
