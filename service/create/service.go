@@ -61,8 +61,8 @@ type Config struct {
 	PubKeyFile string
 }
 
-// DefaultConfig provides a default configuration to create a new version service
-// by best effort.
+// DefaultConfig provides a default configuration to create a new service by
+// best effort.
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
@@ -73,7 +73,7 @@ func DefaultConfig() Config {
 	}
 }
 
-// New creates a new configured version service.
+// New creates a new configured service.
 func New(config Config) (*Service, error) {
 	// Dependencies.
 	if config.Logger == nil {
