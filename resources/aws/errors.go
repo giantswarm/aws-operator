@@ -11,7 +11,6 @@ var (
 
 	noBucketInBucketObjectError = errgo.New("Object needs to belong to some bucket")
 
-	gatewayFindError       = errgo.New("Couldn't find gateway")
 	routeFindError         = errgo.New("couldn't find route")
 	routeTableFindError    = errgo.New("Couldn't find route table")
 	securityGroupFindError = errgo.New("Couldn't find security group")
@@ -41,8 +40,11 @@ func (e NamedResourceNotFoundError) Error() string {
 	return fmt.Sprintf("The resource was not found: %s", e.Name)
 }
 
-func IsGatewayFind(err error) bool {
-	return errgo.Cause(err) == gatewayFindError
+var gatewayNotFoundError = errgo.New("gateway not found")
+
+// IsGatewayNotFound asserts gatewayNotFoundError.
+func IsGatewayNotFound(err error) bool {
+	return errgo.Cause(err) == gatewayNotFoundError
 }
 
 func IsInstanceFindError(err error) bool {
