@@ -15,7 +15,6 @@ var (
 	securityGroupFindError = errgo.New("Couldn't find security group")
 	subnetFindError        = errgo.New("Couldn't find subnet")
 	vpcFindError           = errgo.New("Couldn't find VPC")
-	instanceFindError      = errgo.New("Couldn't find EC2 instance")
 
 	resourceDeleteError       = errgo.New("Couldn't delete resource, it lacks the necessary data (ID)")
 	clientNotInitializedError = errgo.New("The client has not been initialized")
@@ -46,8 +45,11 @@ func IsGatewayNotFound(err error) bool {
 	return errgo.Cause(err) == gatewayNotFoundError
 }
 
-func IsInstanceFindError(err error) bool {
-	return errgo.Cause(err) == instanceFindError
+var instanceNotFoundError = errgo.New("instance not found")
+
+// IsInstanceNotFoundError asserts instanceNotFoundError.
+func IsInstanceNotFoundError(err error) bool {
+	return errgo.Cause(err) == instanceNotFoundError
 }
 
 var routeNotFoundError = errgo.New("route not found")
