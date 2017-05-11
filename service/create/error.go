@@ -24,3 +24,10 @@ var missingCloudConfigKeyError = errgo.New("missing cloud config key")
 func IsMissingCloudConfigKey(err error) bool {
 	return errgo.Cause(err) == missingCloudConfigKeyError
 }
+
+var secretsRetrievalFailedError = errgo.New("secrets retrieval failed")
+
+// IsSecretsRetrievalFailed asserts secretsRetrievalFailedError.
+func IsSecretsRetrievalFailed(err error) bool {
+	return errgo.Cause(err) == secretsRetrievalFailedError
+}
