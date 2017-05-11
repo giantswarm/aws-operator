@@ -16,6 +16,7 @@ import (
 	"github.com/giantswarm/k8scloudconfig"
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
+	certkit "github.com/giantswarm/operatorkit/secret/cert"
 	"github.com/juju/errgo"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api"
@@ -54,11 +55,13 @@ const (
 // Config represents the configuration used to create a version service.
 type Config struct {
 	// Dependencies.
-	AwsConfig  awsutil.Config
-	K8sClient  kubernetes.Interface
-	Logger     micrologger.Logger
-	S3Bucket   string
-	PubKeyFile string
+	// TODO this is a setting, not a dependency.
+	AwsConfig   awsutil.Config
+	CertWatcher *certkit.Service
+	K8sClient   kubernetes.Interface
+	Logger      micrologger.Logger
+	S3Bucket    string
+	PubKeyFile  string
 }
 
 // DefaultConfig provides a default configuration to create a new service by
@@ -66,25 +69,31 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
-		K8sClient:  nil,
-		Logger:     nil,
-		S3Bucket:   "",
-		PubKeyFile: "",
+		CertWatcher: nil,
+		K8sClient:   nil,
+		Logger:      nil,
+		S3Bucket:    "",
+		PubKeyFile:  "",
 	}
 }
 
 // New creates a new configured service.
 func New(config Config) (*Service, error) {
 	// Dependencies.
+	// TODO other deps have to be checked as well
+	if config.CertWatcher == nil {
+		return nil, microerror.MaskAnyf(invalidConfigError, "config.CertWatcher must not be empty")
+	}
 	if config.Logger == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "logger must not be empty")
+		return nil, microerror.MaskAnyf(invalidConfigError, "config.Logger must not be empty")
 	}
 
 	newService := &Service{
 		// Dependencies.
-		awsConfig: config.AwsConfig,
-		k8sClient: config.K8sClient,
-		logger:    config.Logger,
+		awsConfig:   config.AwsConfig,
+		certWatcher: config.CertWatcher,
+		k8sClient:   config.K8sClient,
+		logger:      config.Logger,
 
 		// AWS certificates options.
 		pubKeyFile: config.PubKeyFile,
@@ -99,9 +108,10 @@ func New(config Config) (*Service, error) {
 // Service implements the version service interface.
 type Service struct {
 	// Dependencies.
-	awsConfig awsutil.Config
-	k8sClient kubernetes.Interface
-	logger    micrologger.Logger
+	awsConfig   awsutil.Config
+	certWatcher *certkit.Service
+	k8sClient   kubernetes.Interface
+	logger      micrologger.Logger
 
 	// AWS certificates options.
 	pubKeyFile string
@@ -208,7 +218,7 @@ func (s *Service) Boot() {
 
 					s.logger.Log("info", fmt.Sprintf("waiting for k8s secrets..."))
 					clusterID := cluster.Spec.Cluster.Cluster.ID
-					certs, err := s.getCertsFromSecrets(clusterID)
+					certs, err := s.certWatcher.SearchCerts(clusterID)
 					if err != nil {
 						s.logger.Log("error", fmt.Sprintf("could not get certificates from secrets: %v", errgo.Details(err)))
 						return

@@ -8,6 +8,7 @@ import (
 
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
+	certkit "github.com/giantswarm/operatorkit/secret/cert"
 	"k8s.io/client-go/kubernetes"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
@@ -85,9 +86,21 @@ func New(config Config) (*Service, error) {
 
 	var err error
 
+	// TODO this should come from operatorkit
 	var k8sClient kubernetes.Interface
 	{
 		k8sClient, err = k8sutil.NewClient(config.K8sConfig)
+		if err != nil {
+			return nil, microerror.MaskAny(err)
+		}
+	}
+
+	var certWatcher *certkit.Service
+	{
+		certConfig := certkit.DefaultConfig()
+		certConfig.K8sClient = k8sClient
+		certConfig.Logger = config.Logger
+		certWatcher, err = certkit.New(certConfig)
 		if err != nil {
 			return nil, microerror.MaskAny(err)
 		}
@@ -98,6 +111,7 @@ func New(config Config) (*Service, error) {
 		createConfig := create.DefaultConfig()
 
 		createConfig.AwsConfig = config.AwsConfig
+		createConfig.CertWatcher = certWatcher
 		createConfig.K8sClient = k8sClient
 		createConfig.Logger = config.Logger
 		createConfig.PubKeyFile = config.PubKeyFile
