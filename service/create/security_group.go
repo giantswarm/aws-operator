@@ -19,9 +19,9 @@ type securityGroupInput struct {
 
 type rulesInput struct {
 	Cluster                awstpr.CustomObject
-	Rules                  []awsresources.Rule
-	OwnSecurityGroupID     string
+	Rules                  []awsresources.SecurityGroupRule
 	MastersSecurityGroupID string
+	WorkersSecurityGroupID string
 	IngressSecurityGroupID string
 }
 
@@ -71,30 +71,34 @@ func (s *Service) deleteSecurityGroup(input securityGroupInput) error {
 }
 
 // masterRules returns the rules for the masters security group.
-func (ri rulesInput) masterRules() []awsresources.Rule {
-	return []awsresources.Rule{
+func (ri rulesInput) masterRules() []awsresources.SecurityGroupRule {
+	return []awsresources.SecurityGroupRule{
 		{
 			Port:       ri.Cluster.Spec.Cluster.Kubernetes.API.SecurePort,
 			SourceCIDR: defaultCIDR,
 		},
 		{
 			Port:            ri.Cluster.Spec.Cluster.Etcd.Port,
-			SecurityGroupID: ri.OwnSecurityGroupID,
+			SecurityGroupID: ri.MastersSecurityGroupID,
+		},
+		{
+			Port:            ri.Cluster.Spec.Cluster.Etcd.Port,
+			SecurityGroupID: ri.WorkersSecurityGroupID,
 		},
 		{
 			Port:       sshPort,
 			SourceCIDR: defaultCIDR,
 		},
 		{
-			Port:       calicoBGPNetworkPort,
-			SourceCIDR: defaultCIDR,
+			Port:            calicoBGPNetworkPort,
+			SecurityGroupID: ri.WorkersSecurityGroupID,
 		},
 	}
 }
 
 // workerRules returns the rules for the workers security group.
-func (ri rulesInput) workerRules() []awsresources.Rule {
-	return []awsresources.Rule{
+func (ri rulesInput) workerRules() []awsresources.SecurityGroupRule {
+	return []awsresources.SecurityGroupRule{
 		{
 			Port:            ri.Cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
 			SecurityGroupID: ri.IngressSecurityGroupID,
@@ -112,25 +116,21 @@ func (ri rulesInput) workerRules() []awsresources.Rule {
 			SourceCIDR: defaultCIDR,
 		},
 		{
-			Port:       calicoBGPNetworkPort,
-			SourceCIDR: defaultCIDR,
+			Port:            calicoBGPNetworkPort,
+			SecurityGroupID: ri.MastersSecurityGroupID,
 		},
 	}
 }
 
-// ingressRules returns the rules for the ingress security group.
-func (ri rulesInput) ingressRules() []awsresources.Rule {
-	return []awsresources.Rule{
+// ingressRules returns the rules for the ingress ELB security group.
+func (ri rulesInput) ingressRules() []awsresources.SecurityGroupRule {
+	return []awsresources.SecurityGroupRule{
 		{
 			Port:       httpPort,
 			SourceCIDR: defaultCIDR,
 		},
 		{
 			Port:       httpsPort,
-			SourceCIDR: defaultCIDR,
-		},
-		{
-			Port:       calicoBGPNetworkPort,
 			SourceCIDR: defaultCIDR,
 		},
 	}

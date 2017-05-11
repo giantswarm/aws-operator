@@ -348,7 +348,7 @@ func (s *Service) Boot() {
 						return
 					}
 
-					// Create ingress security group.
+					// Create ingress ELB security group.
 					ingressSGInput := securityGroupInput{
 						Clients:   clients,
 						GroupName: securityGroupName(cluster.Name, prefixIngress),
@@ -366,28 +366,27 @@ func (s *Service) Boot() {
 					}
 
 					// Create rules for the security groups.
-					masterRulesInput := rulesInput{
-						Cluster:            cluster,
-						OwnSecurityGroupID: mastersSecurityGroupID,
-					}
-					masterRules := masterRulesInput.masterRules()
-					mastersSecurityGroup.ApplyRules(masterRules)
-
-					workerRulesInput := rulesInput{
+					rulesInput := rulesInput{
 						Cluster:                cluster,
-						OwnSecurityGroupID:     workersSecurityGroupID,
 						MastersSecurityGroupID: mastersSecurityGroupID,
+						WorkersSecurityGroupID: workersSecurityGroupID,
 						IngressSecurityGroupID: ingressSecurityGroupID,
 					}
-					workerRules := workerRulesInput.workerRules()
-					workersSecurityGroup.ApplyRules(workerRules)
 
-					ingressRulesInput := rulesInput{
-						Cluster:                cluster,
-						MastersSecurityGroupID: mastersSecurityGroupID,
+					if err := mastersSecurityGroup.ApplyRules(rulesInput.masterRules()); err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not create rules for security group '%s': %s", mastersSecurityGroup.GroupName, errgo.Details(err)))
+						return
 					}
-					ingressRules := ingressRulesInput.ingressRules()
-					ingressSecurityGroup.ApplyRules(ingressRules)
+
+					if err := workersSecurityGroup.ApplyRules(rulesInput.workerRules()); err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not create rules for security group '%s': %s", workersSecurityGroup.GroupName, errgo.Details(err)))
+						return
+					}
+
+					if err := ingressSecurityGroup.ApplyRules(rulesInput.ingressRules()); err != nil {
+						s.logger.Log("error", fmt.Sprintf("could not create rules for security group '%s': %s", ingressSecurityGroup.GroupName, errgo.Details(err)))
+						return
+					}
 
 					// Create route table.
 					routeTable := &awsresources.RouteTable{
@@ -566,7 +565,7 @@ func (s *Service) Boot() {
 						return
 					}
 
-					// Create Ingress Load Balancer.
+					// Create Ingress load balancer.
 					lbInput = LoadBalancerInput{
 						Name:        cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
 						Clients:     clients,
