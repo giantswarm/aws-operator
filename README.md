@@ -25,7 +25,7 @@ make
 If you prefer, you may also build it using the standard `go build` command, like:
 
 ```
-go build github.com/giantswarm/awstpr
+go build github.com/giantswarm/aws-operator
 ```
 
 ## Running aws-operator
