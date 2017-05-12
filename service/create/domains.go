@@ -14,6 +14,7 @@ import (
 type hostedZoneInput struct {
 	Cluster awstpr.CustomObject
 	Domain  string
+	Private bool
 	Client  *route53.Route53
 }
 
@@ -34,6 +35,7 @@ func (s *Service) createHostedZone(input hostedZoneInput) (*awsresources.HostedZ
 	hz := &awsresources.HostedZone{
 		Name:    hzName,
 		Comment: hostedZoneComment(input.Cluster),
+		Private: input.Private,
 		Client:  input.Client,
 	}
 

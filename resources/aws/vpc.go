@@ -96,6 +96,18 @@ func (v *VPC) CreateOrFail() error {
 		return microerror.MaskAny(err)
 	}
 
+	// These attributes are required for a VPC with private Hosted Zones.
+	if _, err := v.Clients.EC2.ModifyVpcAttribute(&ec2.ModifyVpcAttributeInput{
+		EnableDnsHostnames: &ec2.AttributeBooleanValue{
+			Value: aws.Bool(true),
+		},
+		EnableDnsSupport: &ec2.AttributeBooleanValue{
+			Value: aws.Bool(true),
+		},
+	}); err != nil {
+		return microerror.MaskAny(err)
+	}
+
 	v.id = vpcID
 
 	return nil
