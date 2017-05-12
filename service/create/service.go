@@ -521,33 +521,48 @@ func (s *Service) Boot() {
 						return
 					}
 
-					// Create Hosted Zone for admin traffic.
-					adminHZInput := hostedZoneInput{
+					// Create public Hosted Zone for the API.
+					apiHZInput := hostedZoneInput{
 						Cluster: cluster,
 						Domain:  cluster.Spec.Cluster.Kubernetes.API.Domain,
 						Client:  clients.Route53,
 					}
 
-					adminHZ, err := s.createHostedZone(adminHZInput)
+					apiHZ, err := s.createHostedZone(apiHZInput)
 					if err != nil {
 						s.logger.Log("error", errgo.Details(err))
 						return
 					}
-					adminHZID := adminHZ.GetID()
+					apiHZID := apiHZ.GetID()
 
-					// Create Hosted Zone for customer traffic.
-					customerHZInput := hostedZoneInput{
+					// Create private Hosted Zone for etcd traffic.
+					etcdHZInput := hostedZoneInput{
+						Cluster: cluster,
+						Domain:  cluster.Spec.Cluster.Etcd.Domain,
+						Private: true,
+						Client:  clients.Route53,
+					}
+
+					etcdHZ, err := s.createHostedZone(etcdHZInput)
+					if err != nil {
+						s.logger.Log("error", errgo.Details(err))
+						return
+					}
+					etcdHZID := etcdHZ.GetID()
+
+					// Create public Hosted Zone for customer traffic.
+					ingressHZInput := hostedZoneInput{
 						Cluster: cluster,
 						Domain:  cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
 						Client:  clients.Route53,
 					}
 
-					customerHZ, err := s.createHostedZone(customerHZInput)
+					ingressHZ, err := s.createHostedZone(ingressHZInput)
 					if err != nil {
 						s.logger.Log("error", errgo.Details(err))
 						return
 					}
-					customerHZID := customerHZ.GetID()
+					ingressHZID := ingressHZ.GetID()
 
 					// Run workers
 					anyWorkersCreated, workerIDs, err := s.runMachines(runMachinesInput{
@@ -616,21 +631,21 @@ func (s *Service) Boot() {
 							Client:       clients.Route53,
 							Resource:     apiLB,
 							Domain:       cluster.Spec.Cluster.Kubernetes.API.Domain,
-							HostedZoneID: adminHZID,
+							HostedZoneID: apiHZID,
 						},
 						recordSetInput{
 							Cluster:      cluster,
 							Client:       clients.Route53,
 							Resource:     etcdLB,
 							Domain:       cluster.Spec.Cluster.Etcd.Domain,
-							HostedZoneID: adminHZID,
+							HostedZoneID: etcdHZID,
 						},
 						recordSetInput{
 							Cluster:      cluster,
 							Client:       clients.Route53,
 							Resource:     ingressLB,
 							Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-							HostedZoneID: customerHZID,
+							HostedZoneID: ingressHZID,
 						},
 					}
 

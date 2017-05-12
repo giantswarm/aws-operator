@@ -11,11 +11,11 @@ import (
 )
 
 type HostedZone struct {
-	Name              string
-	id                string
-	Comment           string
-	PrivateHostedZone bool
-	Client            *route53.Route53
+	Name    string
+	id      string
+	Private bool
+	Comment string
+	Client  *route53.Route53
 }
 
 func (hz *HostedZone) CreateOrFail() error {
@@ -26,7 +26,7 @@ func (hz *HostedZone) CreateOrFail() error {
 		Name:            aws.String(hz.Name),
 		HostedZoneConfig: &route53.HostedZoneConfig{
 			Comment:     aws.String(hz.Comment),
-			PrivateZone: aws.Bool(hz.PrivateHostedZone),
+			PrivateZone: aws.Bool(hz.Private),
 		},
 	})
 
