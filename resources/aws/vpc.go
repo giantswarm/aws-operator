@@ -104,6 +104,7 @@ func (v *VPC) CreateOrFail() error {
 		EnableDnsSupport: &ec2.AttributeBooleanValue{
 			Value: aws.Bool(true),
 		},
+		VpcId: aws.String(vpcID),
 	}); err != nil {
 		return microerror.MaskAny(err)
 	}
