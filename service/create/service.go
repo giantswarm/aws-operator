@@ -539,7 +539,6 @@ func (s *Service) Boot() {
 					etcdHZInput := hostedZoneInput{
 						Cluster: cluster,
 						Domain:  cluster.Spec.Cluster.Etcd.Domain,
-						Private: true,
 						Client:  clients.Route53,
 					}
 
