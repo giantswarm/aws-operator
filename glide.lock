@@ -1,5 +1,5 @@
 hash: e0a4e120144fe05a987ae6b5d015db7eb405fe8d6679f48511d3218a5609ebc3
-updated: 2017-05-11T19:24:03.025880056+02:00
+updated: 2017-05-16T14:50:18.702166288+02:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aws/aws-sdk-go
-  version: 952498f4a390118ac65ad59cbe0c8b57ed69b6b5
+  version: 1dc0171900ca37b76031153546f388b9beaf07c1
   subpackages:
   - aws
   - aws/awserr
@@ -100,7 +100,7 @@ imports:
   - aws
   - aws/vpc
 - name: github.com/giantswarm/certificatetpr
-  version: 8e24e223b213128be8b87039e26001bb88284452
+  version: 880d3a1d529cf58c0f56b3edd53cd6c36e6d2886
 - name: github.com/giantswarm/clustertpr
   version: 81d44901ce63086368ddcf639dffd1c8b4344190
   subpackages:
@@ -126,7 +126,7 @@ imports:
   - node
   - vault
 - name: github.com/giantswarm/k8scloudconfig
-  version: ad6b58e65051040f56948983cda095d89eca7e10
+  version: 3374a4f53dcf9e7bee3437fb61477b3e5b1e46da
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
@@ -195,7 +195,7 @@ imports:
   - runtime/internal
   - utilities
 - name: github.com/hashicorp/hcl
-  version: a4b07c25de5ff55ad3b8936cea69a79a3d95a855
+  version: 392dba7d905ed5d04a5794ba89f558b27e2ba1ca
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -234,7 +234,7 @@ imports:
 - name: github.com/pelletier/go-buffruneio
   version: c37440a7cf42ac63b919c752ca73a85067e05992
 - name: github.com/pelletier/go-toml
-  version: 97253b98df84f9eef872866d079e74b8265150f1
+  version: 685a1f1cb7a66b9cadbe8f1ac49d9f8f567d6a9d
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
@@ -267,7 +267,7 @@ imports:
 - name: github.com/spf13/cobra
   version: 4c05eb1145f16d0e6bb4a3e1b6d769f4713cb41f
 - name: github.com/spf13/jwalterweatherman
-  version: fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66
+  version: 8f07c835e5cc1450c082fe3a439cf87b0cbb2d99
 - name: github.com/spf13/pflag
   version: 08b1a584251b5b62f458943640fc8ebd4d50aaa5
 - name: github.com/spf13/viper

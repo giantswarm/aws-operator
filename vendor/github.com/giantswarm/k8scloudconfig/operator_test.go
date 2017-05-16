@@ -10,6 +10,26 @@ type FakeParams struct {
 	Foo string
 }
 
+func TestEncodingType(t *testing.T) {
+	tests := []struct {
+		encodingInstance encoding
+		expectedString   string
+	}{
+		{
+			encodingInstance: encoding(""),
+			expectedString:   "utf-8",
+		},
+		{
+			encodingInstance: encoding("gzip+base64"),
+			expectedString:   "gzip+base64",
+		},
+	}
+
+	for _, tc := range tests {
+		assert.Equal(t, tc.expectedString, tc.encodingInstance.String(), "encoding type returned inappropriate string")
+	}
+}
+
 func TestRenderAssetContent(t *testing.T) {
 	tests := []struct {
 		assetContent    string
