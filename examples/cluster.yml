@@ -51,7 +51,7 @@ spec:
     - hostname: "worker-1"
 
   aws:
-    region: "eu-west-1"
+    region: "eu-central-1"
     az: "eu-west-1a"
     vpc:
       cidr: "10.0.0.0/16"
@@ -59,9 +59,9 @@ spec:
       publicSubnetCidr: "10.0.128.0/20"
 
     masters:
-    - imageid: "ami-0bcbcb6d"
+    - imageid: "ami-d60ad6b9"
       instancetype: "t2.medium"
 
     workers:
-    - imageid: "ami-0bcbcb6d"
+    - imageid: "ami-d60ad6b9"
       instancetype: "t2.medium"
