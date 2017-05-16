@@ -11,11 +11,10 @@ import (
 )
 
 type CloudConfigTemplateParams struct {
-	Cluster   clustertpr.Cluster
-	Node      node.Node
-	TLSAssets CompactTLSAssets
-	Files     []FileAsset
-	Units     []UnitAsset
+	Cluster clustertpr.Cluster
+	Node    node.Node
+	Files   []FileAsset
+	Units   []UnitAsset
 }
 
 type CloudConfig struct {
