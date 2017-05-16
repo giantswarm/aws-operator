@@ -6,10 +6,26 @@ import (
 	"text/template"
 )
 
+type encoding string
+
+const (
+	UTF8       encoding = "utf-8"
+	GzipBase64 encoding = "gzip+base64"
+)
+
+func (e encoding) String() string {
+	if e == "" {
+		return string(UTF8)
+	}
+
+	return string(e)
+}
+
 type FileMetadata struct {
 	AssetContent string
 	Path         string
 	Owner        string
+	Encoding     encoding
 	Permissions  int
 }
 
