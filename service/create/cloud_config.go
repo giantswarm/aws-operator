@@ -308,16 +308,19 @@ func (w *WorkerCloudConfigExtension) Files() ([]cloudconfig.FileAsset, error) {
 
 func (s *Service) cloudConfig(prefix string, params cloudconfig.CloudConfigTemplateParams, awsSpec awstpr.Spec, tlsAssets *certificatetpr.CompactTLSAssets) (string, error) {
 	var extension cloudconfig.OperatorExtension
+	var template string
 	switch prefix {
 	case prefixMaster:
 		extension = NewMasterCloudConfigExtension(awsSpec, tlsAssets)
+		template = cloudconfig.MasterTemplate
 	case prefixWorker:
 		extension = NewWorkerCloudConfigExtension(awsSpec, tlsAssets)
+		template = cloudconfig.WorkerTemplate
 	default:
 		return "", invalidCloudconfigExtensionNameError
 	}
 
-	cc, err := cloudconfig.NewCloudConfig(cloudconfig.MasterTemplate, params, extension)
+	cc, err := cloudconfig.NewCloudConfig(template, params, extension)
 	if err != nil {
 		return "", microerror.MaskAny(err)
 	}
