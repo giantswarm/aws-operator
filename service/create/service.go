@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/awstpr"
 	awsinfo "github.com/giantswarm/awstpr/aws"
+	"github.com/giantswarm/certificatetpr"
 	"github.com/giantswarm/clustertpr/node"
 	"github.com/giantswarm/k8scloudconfig"
 	microerror "github.com/giantswarm/microkit/error"
@@ -982,7 +983,7 @@ func clusterPrefix(input clusterPrefixInput) string {
 type runMachinesInput struct {
 	clients             awsutil.Clients
 	cluster             awstpr.CustomObject
-	tlsAssets           *cloudconfig.CompactTLSAssets
+	tlsAssets           *certificatetpr.CompactTLSAssets
 	bucket              resources.Resource
 	securityGroup       resources.ResourceWithID
 	subnet              *awsresources.Subnet
@@ -1088,7 +1089,7 @@ type runMachineInput struct {
 	cluster             awstpr.CustomObject
 	machine             node.Node
 	awsNode             awsinfo.Node
-	tlsAssets           *cloudconfig.CompactTLSAssets
+	tlsAssets           *certificatetpr.CompactTLSAssets
 	bucket              resources.Resource
 	securityGroup       resources.ResourceWithID
 	subnet              *awsresources.Subnet

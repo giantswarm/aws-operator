@@ -8,7 +8,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/certificatetpr"
-	"github.com/giantswarm/k8scloudconfig"
 	microerror "github.com/giantswarm/microkit/error"
 )
 
@@ -98,7 +97,7 @@ func (r *rawTLSAssets) encrypt(svc *kms.KMS, kmsKeyARN string) (*encryptedTLSAss
 	return &encryptedAssets, nil
 }
 
-func (r *encryptedTLSAssets) compact() (*cloudconfig.CompactTLSAssets, error) {
+func (r *encryptedTLSAssets) compact() (*certificatetpr.CompactTLSAssets, error) {
 	var err error
 	compact := func(data []byte) string {
 		if err != nil {
@@ -116,7 +115,7 @@ func (r *encryptedTLSAssets) compact() (*cloudconfig.CompactTLSAssets, error) {
 		return base64.StdEncoding.EncodeToString(buf.Bytes())
 	}
 
-	compactAssets := cloudconfig.CompactTLSAssets{
+	compactAssets := certificatetpr.CompactTLSAssets{
 		APIServerCA:       compact(r.APIServerCA),
 		APIServerKey:      compact(r.APIServerKey),
 		APIServerCrt:      compact(r.APIServerCrt),
