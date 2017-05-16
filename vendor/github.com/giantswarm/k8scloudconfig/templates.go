@@ -437,7 +437,9 @@ write_files:
 {{range .Files}}
 - path: {{.Metadata.Path}}
   owner: {{.Metadata.Owner}}
+  {{ if .Metadata.Encoding }}
   encoding: {{.Metadata.Encoding}}
+  {{ end }}
   permissions: {{printf "%#o" .Metadata.Permissions}}
   content: |
     {{range .Content}}{{.}}
@@ -1060,7 +1062,9 @@ write_files:
 {{range .Files}}
 - path: {{.Metadata.Path}}
   owner: {{.Metadata.Owner}}
+  {{ if .Metadata.Encoding }}
   encoding: {{.Metadata.Encoding}}
+  {{ end }}
   permissions: {{printf "%#o" .Metadata.Permissions}}
   content: |
     {{range .Content}}{{.}}
