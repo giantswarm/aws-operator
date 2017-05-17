@@ -51,7 +51,7 @@ func simpleValueCoercion(object interface{}) (interface{}, error) {
 	case fmt.Stringer:
 		return original.String(), nil
 	default:
-		return nil, fmt.Errorf("cannot convert type %T to Tree", object)
+		return nil, fmt.Errorf("cannot convert type %T to TomlTree", object)
 	}
 }
 
@@ -59,7 +59,7 @@ func sliceToTree(object interface{}) (interface{}, error) {
 	// arrays are a bit tricky, since they can represent either a
 	// collection of simple values, which is represented by one
 	// *tomlValue, or an array of tables, which is represented by an
-	// array of *Tree.
+	// array of *TomlTree.
 
 	// holding the assumption that this function is called from toTree only when value.Kind() is Array or Slice
 	value := reflect.ValueOf(object)
@@ -70,14 +70,14 @@ func sliceToTree(object interface{}) (interface{}, error) {
 	}
 	if insideType.Kind() == reflect.Map {
 		// this is considered as an array of tables
-		tablesArray := make([]*Tree, 0, length)
+		tablesArray := make([]*TomlTree, 0, length)
 		for i := 0; i < length; i++ {
 			table := value.Index(i)
 			tree, err := toTree(table.Interface())
 			if err != nil {
 				return nil, err
 			}
-			tablesArray = append(tablesArray, tree.(*Tree))
+			tablesArray = append(tablesArray, tree.(*TomlTree))
 		}
 		return tablesArray, nil
 	}
@@ -120,7 +120,7 @@ func toTree(object interface{}) (interface{}, error) {
 			}
 			values[key.String()] = newValue
 		}
-		return &Tree{values, Position{}}, nil
+		return &TomlTree{values, Position{}}, nil
 	}
 
 	if value.Kind() == reflect.Array || value.Kind() == reflect.Slice {
