@@ -9,7 +9,6 @@ import (
 	"github.com/cenkalti/backoff"
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
-	"github.com/juju/errgo"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 )
@@ -112,12 +111,12 @@ func (s *Subnet) Delete() error {
 		if _, err := s.Clients.EC2.DeleteSubnet(&ec2.DeleteSubnetInput{
 			SubnetId: aws.String(subnetID),
 		}); err != nil {
-			s.Logger.Log("error", fmt.Sprintf("deleting subnet failed, retrying: %v", errgo.Details(err)))
 			return microerror.MaskAny(err)
 		}
 		return nil
 	}
-	if err := backoff.Retry(deleteOperation, NewCustomExponentialBackoff()); err != nil {
+	deleteNotify := NewNotify(s.Logger, "deleting subnet")
+	if err := backoff.RetryNotify(deleteOperation, NewCustomExponentialBackoff(), deleteNotify); err != nil {
 		return microerror.MaskAny(err)
 	}
 

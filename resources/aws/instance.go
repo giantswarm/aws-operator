@@ -8,7 +8,6 @@ import (
 	"github.com/cenkalti/backoff"
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
-	"github.com/juju/errgo"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 )
@@ -154,13 +153,13 @@ func (i *Instance) CreateOrFail() error {
 			SubnetId: aws.String(i.SubnetID),
 		})
 		if err != nil {
-			i.Logger.Log("error", fmt.Sprintf("creating instance failed, retrying: %v", errgo.Details(err)))
+
 			return microerror.MaskAny(err)
 		}
 		return nil
 	}
-
-	if err := backoff.Retry(reserveOperation, NewCustomExponentialBackoff()); err != nil {
+	reserveNotify := NewNotify(i.Logger, "creating instance")
+	if err := backoff.RetryNotify(reserveOperation, NewCustomExponentialBackoff(), reserveNotify); err != nil {
 		return microerror.MaskAny(err)
 	}
 
