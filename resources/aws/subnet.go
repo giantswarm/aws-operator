@@ -8,6 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/cenkalti/backoff"
 	microerror "github.com/giantswarm/microkit/error"
+	micrologger "github.com/giantswarm/microkit/logger"
+	"github.com/juju/errgo"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 )
@@ -18,6 +20,8 @@ type Subnet struct {
 	Name             string
 	VpcID            string
 	id               string
+	// Dependencies.
+	Logger micrologger.Logger
 	AWSEntity
 }
 
@@ -108,6 +112,7 @@ func (s *Subnet) Delete() error {
 		if _, err := s.Clients.EC2.DeleteSubnet(&ec2.DeleteSubnetInput{
 			SubnetId: aws.String(subnetID),
 		}); err != nil {
+			s.Logger.Log("error", fmt.Sprintf("deleting subnet failed, retrying: %v", errgo.Details(err)))
 			return microerror.MaskAny(err)
 		}
 		return nil

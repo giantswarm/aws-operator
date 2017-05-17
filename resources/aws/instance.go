@@ -7,6 +7,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/cenkalti/backoff"
 	microerror "github.com/giantswarm/microkit/error"
+	micrologger "github.com/giantswarm/microkit/logger"
+	"github.com/juju/errgo"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 )
@@ -38,6 +40,8 @@ type Instance struct {
 	SecurityGroupID        string
 	SubnetID               string
 	id                     string
+	// Dependencies.
+	Logger micrologger.Logger
 	AWSEntity
 }
 
@@ -150,6 +154,7 @@ func (i *Instance) CreateOrFail() error {
 			SubnetId: aws.String(i.SubnetID),
 		})
 		if err != nil {
+			i.Logger.Log("error", fmt.Sprintf("creating instance failed, retrying: %v", errgo.Details(err)))
 			return microerror.MaskAny(err)
 		}
 		return nil
@@ -213,6 +218,7 @@ func (i Instance) ID() string {
 
 type FindInstancesInput struct {
 	Clients awsutil.Clients
+	Logger  micrologger.Logger
 	Pattern string
 }
 
@@ -239,7 +245,9 @@ func FindInstances(input FindInstancesInput) ([]*Instance, error) {
 				continue
 			}
 			instances = append(instances, &Instance{
-				id:        *rawInstance.InstanceId,
+				id: *rawInstance.InstanceId,
+				// Dependencies.
+				Logger:    input.Logger,
 				AWSEntity: AWSEntity{Clients: input.Clients},
 			})
 		}
