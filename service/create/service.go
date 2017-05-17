@@ -56,13 +56,13 @@ const (
 // Config represents the configuration used to create a version service.
 type Config struct {
 	// Dependencies.
-	// TODO this is a setting, not a dependency.
-	AwsConfig   awsutil.Config
 	CertWatcher *certkit.Service
 	K8sClient   kubernetes.Interface
 	Logger      micrologger.Logger
-	S3Bucket    string
-	PubKeyFile  string
+
+	// Settings.
+	AwsConfig  awsutil.Config
+	PubKeyFile string
 }
 
 // DefaultConfig provides a default configuration to create a new service by
@@ -73,34 +73,47 @@ func DefaultConfig() Config {
 		CertWatcher: nil,
 		K8sClient:   nil,
 		Logger:      nil,
-		S3Bucket:    "",
-		PubKeyFile:  "",
+
+		// Settings.
+		AwsConfig:  awsutil.Config{},
+		PubKeyFile: "",
 	}
 }
 
 // New creates a new configured service.
 func New(config Config) (*Service, error) {
 	// Dependencies.
-	// TODO other deps have to be checked as well
 	if config.CertWatcher == nil {
 		return nil, microerror.MaskAnyf(invalidConfigError, "config.CertWatcher must not be empty")
+	}
+	if config.K8sClient == nil {
+		return nil, microerror.MaskAnyf(invalidConfigError, "config.K8sClient must not be empty")
 	}
 	if config.Logger == nil {
 		return nil, microerror.MaskAnyf(invalidConfigError, "config.Logger must not be empty")
 	}
 
+	// Settings.
+	var emptyAwsConfig awsutil.Config
+	if config.AwsConfig == emptyAwsConfig {
+		return nil, microerror.MaskAnyf(invalidConfigError, "config.AwsConfig must not be empty")
+	}
+	if config.PubKeyFile == "" {
+		return nil, microerror.MaskAnyf(invalidConfigError, "config.PubKeyFile must not be empty")
+	}
+
 	newService := &Service{
 		// Dependencies.
-		awsConfig:   config.AwsConfig,
 		certWatcher: config.CertWatcher,
 		k8sClient:   config.K8sClient,
 		logger:      config.Logger,
 
-		// AWS certificates options.
-		pubKeyFile: config.PubKeyFile,
-
 		// Internals
 		bootOnce: sync.Once{},
+
+		// Settings.
+		awsConfig:  config.AwsConfig,
+		pubKeyFile: config.PubKeyFile,
 	}
 
 	return newService, nil
@@ -109,16 +122,16 @@ func New(config Config) (*Service, error) {
 // Service implements the version service interface.
 type Service struct {
 	// Dependencies.
-	awsConfig   awsutil.Config
 	certWatcher *certkit.Service
 	k8sClient   kubernetes.Interface
 	logger      micrologger.Logger
 
-	// AWS certificates options.
-	pubKeyFile string
-
 	// Internals.
 	bootOnce sync.Once
+
+	// Settings.
+	awsConfig  awsutil.Config
+	pubKeyFile string
 }
 
 type Event struct {
