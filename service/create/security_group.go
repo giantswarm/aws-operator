@@ -96,6 +96,10 @@ func (ri rulesInput) masterRules() []awsresources.SecurityGroupRule {
 func (ri rulesInput) workerRules() []awsresources.SecurityGroupRule {
 	return []awsresources.SecurityGroupRule{
 		{
+			Port:       ri.Cluster.Spec.Cluster.Kubernetes.IngressController.SecurePort,
+			SourceCIDR: defaultCIDR,
+		},
+		{
 			Port:       ri.Cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
 			SourceCIDR: defaultCIDR,
 		},
