@@ -27,9 +27,12 @@ type rulesInput struct {
 
 const (
 	calicoBGPNetworkPort = 179
-	httpPort             = 80
-	httpsPort            = 443
-	sshPort              = 22
+	// This port is required in our current kubernetes/heapster setup, but will become unnecessary
+	// once we upgrade to kubernetes 1.6 and heapster 1.3 with apiserver deployment.
+	readOnlyKubeletPort = 10255
+	httpPort            = 80
+	httpsPort           = 443
+	sshPort             = 22
 
 	defaultCIDR = "0.0.0.0/0"
 )
@@ -105,6 +108,10 @@ func (ri rulesInput) workerRules() []awsresources.SecurityGroupRule {
 		},
 		{
 			Port:       ri.Cluster.Spec.Cluster.Kubernetes.Kubelet.Port,
+			SourceCIDR: defaultCIDR,
+		},
+		{
+			Port:       readOnlyKubeletPort,
 			SourceCIDR: defaultCIDR,
 		},
 		{
