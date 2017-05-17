@@ -1,7 +1,6 @@
 package toml
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"reflect"
@@ -10,14 +9,14 @@ import (
 )
 
 /*
-Tree structural types and corresponding marshal types
+TomlTree structural types and corresponding marshal types
 -------------------------------------------------------------------------------
-*Tree                        (*)struct, (*)map[string]interface{}
-[]*Tree                      (*)[](*)struct, (*)[](*)map[string]interface{}
+*TomlTree                        (*)struct, (*)map[string]interface{}
+[]*TomlTree                      (*)[](*)struct, (*)[](*)map[string]interface{}
 []interface{} (as interface{})   (*)[]primitive, (*)[]([]interface{})
 interface{}                      (*)primitive
 
-Tree primitive types and  corresponding marshal types
+TomlTree primitive types and  corresponding marshal types
 -----------------------------------------------------------
 uint64     uint, uint8-uint64, pointers to same
 int64      int, int8-uint64, pointers to same
@@ -36,7 +35,7 @@ type tomlOpts struct {
 var timeType = reflect.TypeOf(time.Time{})
 var marshalerType = reflect.TypeOf(new(Marshaler)).Elem()
 
-// Check if the given marshall type maps to a Tree primitive
+// Check if the given marshall type maps to a TomlTree primitive
 func isPrimitive(mtype reflect.Type) bool {
 	switch mtype.Kind() {
 	case reflect.Ptr:
@@ -58,7 +57,7 @@ func isPrimitive(mtype reflect.Type) bool {
 	}
 }
 
-// Check if the given marshall type maps to a Tree slice
+// Check if the given marshall type maps to a TomlTree slice
 func isTreeSlice(mtype reflect.Type) bool {
 	switch mtype.Kind() {
 	case reflect.Slice:
@@ -68,7 +67,7 @@ func isTreeSlice(mtype reflect.Type) bool {
 	}
 }
 
-// Check if the given marshall type maps to a non-Tree slice
+// Check if the given marshall type maps to a non-TomlTree slice
 func isOtherSlice(mtype reflect.Type) bool {
 	switch mtype.Kind() {
 	case reflect.Ptr:
@@ -80,7 +79,7 @@ func isOtherSlice(mtype reflect.Type) bool {
 	}
 }
 
-// Check if the given marshall type maps to a Tree
+// Check if the given marshall type maps to a TomlTree
 func isTree(mtype reflect.Type) bool {
 	switch mtype.Kind() {
 	case reflect.Map:
@@ -134,11 +133,11 @@ func Marshal(v interface{}) ([]byte, error) {
 }
 
 // Convert given marshal struct or map value to toml tree
-func valueToTree(mtype reflect.Type, mval reflect.Value) (*Tree, error) {
+func valueToTree(mtype reflect.Type, mval reflect.Value) (*TomlTree, error) {
 	if mtype.Kind() == reflect.Ptr {
 		return valueToTree(mtype.Elem(), mval.Elem())
 	}
-	tval := newTree()
+	tval := newTomlTree()
 	switch mtype.Kind() {
 	case reflect.Struct:
 		for i := 0; i < mtype.NumField(); i++ {
@@ -166,8 +165,8 @@ func valueToTree(mtype reflect.Type, mval reflect.Value) (*Tree, error) {
 }
 
 // Convert given marshal slice to slice of Toml trees
-func valueToTreeSlice(mtype reflect.Type, mval reflect.Value) ([]*Tree, error) {
-	tval := make([]*Tree, mval.Len(), mval.Len())
+func valueToTreeSlice(mtype reflect.Type, mval reflect.Value) ([]*TomlTree, error) {
+	tval := make([]*TomlTree, mval.Len(), mval.Len())
 	for i := 0; i < mval.Len(); i++ {
 		val, err := valueToTree(mtype.Elem(), mval.Index(i))
 		if err != nil {
@@ -225,13 +224,22 @@ func valueToToml(mtype reflect.Type, mval reflect.Value) (interface{}, error) {
 	}
 }
 
-// Unmarshal attempts to unmarshal the Tree into a Go struct pointed by v.
-// Neither Unmarshaler interfaces nor UnmarshalTOML functions are supported for
-// sub-structs, and only definite types can be unmarshaled.
-func (t *Tree) Unmarshal(v interface{}) error {
+/*
+Unmarshal parses the TOML-encoded data and stores the result in the value
+pointed to by v. Behavior is similar to the Go json encoder, except that there
+is no concept of an Unmarshaler interface or UnmarshalTOML function for
+sub-structs, and currently only definite types can be unmarshaled to (i.e. no
+`interface{}`).
+*/
+func Unmarshal(data []byte, v interface{}) error {
 	mtype := reflect.TypeOf(v)
 	if mtype.Kind() != reflect.Ptr || mtype.Elem().Kind() != reflect.Struct {
 		return errors.New("Only a pointer to struct can be unmarshaled from TOML")
+	}
+
+	t, err := Load(string(data))
+	if err != nil {
+		return err
 	}
 
 	sval, err := valueFromTree(mtype.Elem(), t)
@@ -242,21 +250,8 @@ func (t *Tree) Unmarshal(v interface{}) error {
 	return nil
 }
 
-// Unmarshal parses the TOML-encoded data and stores the result in the value
-// pointed to by v. Behavior is similar to the Go json encoder, except that there
-// is no concept of an Unmarshaler interface or UnmarshalTOML function for
-// sub-structs, and currently only definite types can be unmarshaled to (i.e. no
-// `interface{}`).
-func Unmarshal(data []byte, v interface{}) error {
-	t, err := LoadReader(bytes.NewReader(data))
-	if err != nil {
-		return err
-	}
-	return t.Unmarshal(v)
-}
-
 // Convert toml tree to marshal struct or map, using marshal type
-func valueFromTree(mtype reflect.Type, tval *Tree) (reflect.Value, error) {
+func valueFromTree(mtype reflect.Type, tval *TomlTree) (reflect.Value, error) {
 	if mtype.Kind() == reflect.Ptr {
 		return unwrapPointer(mtype, tval)
 	}
@@ -295,7 +290,7 @@ func valueFromTree(mtype reflect.Type, tval *Tree) (reflect.Value, error) {
 }
 
 // Convert toml value to marshal struct/map slice, using marshal type
-func valueFromTreeSlice(mtype reflect.Type, tval []*Tree) (reflect.Value, error) {
+func valueFromTreeSlice(mtype reflect.Type, tval []*TomlTree) (reflect.Value, error) {
 	mval := reflect.MakeSlice(mtype, len(tval), len(tval))
 	for i := 0; i < len(tval); i++ {
 		val, err := valueFromTree(mtype.Elem(), tval[i])
@@ -327,9 +322,9 @@ func valueFromToml(mtype reflect.Type, tval interface{}) (reflect.Value, error) 
 	}
 	switch {
 	case isTree(mtype):
-		return valueFromTree(mtype, tval.(*Tree))
+		return valueFromTree(mtype, tval.(*TomlTree))
 	case isTreeSlice(mtype):
-		return valueFromTreeSlice(mtype, tval.([]*Tree))
+		return valueFromTreeSlice(mtype, tval.([]*TomlTree))
 	case isOtherSlice(mtype):
 		return valueFromOtherSlice(mtype, tval.([]interface{}))
 	default:
