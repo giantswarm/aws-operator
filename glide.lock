@@ -1,5 +1,5 @@
 hash: e0a4e120144fe05a987ae6b5d015db7eb405fe8d6679f48511d3218a5609ebc3
-updated: 2017-05-16T16:45:04.696505423+02:00
+updated: 2017-05-17T11:27:47.128384142+02:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aws/aws-sdk-go
-  version: 1dc0171900ca37b76031153546f388b9beaf07c1
+  version: fed27f4bd16c8c63d01003b978e5bc85fe727519
   subpackages:
   - aws
   - aws/awserr
@@ -126,7 +126,7 @@ imports:
   - node
   - vault
 - name: github.com/giantswarm/k8scloudconfig
-  version: 29813c142a8e704c34d695cef6ddbc4f3292aee5
+  version: f6e35c3c7b2f87fe4ea37f828db64acb79ee5860
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
@@ -234,7 +234,7 @@ imports:
 - name: github.com/pelletier/go-buffruneio
   version: c37440a7cf42ac63b919c752ca73a85067e05992
 - name: github.com/pelletier/go-toml
-  version: 685a1f1cb7a66b9cadbe8f1ac49d9f8f567d6a9d
+  version: 5c26a6ff6fd178719e15decac1c8196da0d7d6d1
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
