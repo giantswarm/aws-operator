@@ -7,12 +7,16 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/cenkalti/backoff"
 	microerror "github.com/giantswarm/microkit/error"
+	micrologger "github.com/giantswarm/microkit/logger"
+	"github.com/juju/errgo"
 )
 
 type Gateway struct {
 	Name  string
 	VpcID string
 	id    string
+	// Dependencies.
+	Logger micrologger.Logger
 	AWSEntity
 }
 
@@ -110,6 +114,7 @@ func (g *Gateway) Delete() error {
 			InternetGatewayId: gateway.InternetGatewayId,
 			VpcId:             aws.String(g.VpcID),
 		}); err != nil {
+			g.Logger.Log("error", fmt.Sprintf("deleting gateway failed, retrying: %v", errgo.Details(err)))
 			return microerror.MaskAny(err)
 		}
 		return nil
@@ -122,6 +127,7 @@ func (g *Gateway) Delete() error {
 		if _, err := g.Clients.EC2.DeleteInternetGateway(&ec2.DeleteInternetGatewayInput{
 			InternetGatewayId: gateway.InternetGatewayId,
 		}); err != nil {
+			g.Logger.Log("error", fmt.Sprintf("deleting gateway failed, retrying %v", errgo.Details(err)))
 			return microerror.MaskAny(err)
 		}
 		return nil

@@ -323,8 +323,10 @@ func (s *Service) Boot() {
 					// Create gateway
 					var gateway resources.ResourceWithID
 					gateway = &awsresources.Gateway{
-						Name:      cluster.Name,
-						VpcID:     vpcID,
+						Name:  cluster.Name,
+						VpcID: vpcID,
+						// Dependencies.
+						Logger:    s.logger,
 						AWSEntity: awsresources.AWSEntity{Clients: clients},
 					}
 					gatewayCreated, err := gateway.CreateIfNotExists()
@@ -440,7 +442,9 @@ func (s *Service) Boot() {
 						CidrBlock:        cluster.Spec.AWS.VPC.PublicSubnetCIDR,
 						Name:             subnetName(cluster, suffixPublic),
 						VpcID:            vpcID,
-						AWSEntity:        awsresources.AWSEntity{Clients: clients},
+						// Dependencies.
+						Logger:    s.logger,
+						AWSEntity: awsresources.AWSEntity{Clients: clients},
 					}
 					publicSubnetCreated, err := publicSubnet.CreateIfNotExists()
 					if err != nil {
@@ -838,8 +842,10 @@ func (s *Service) Boot() {
 					// Delete gateway.
 					var gateway resources.ResourceWithID
 					gateway = &awsresources.Gateway{
-						Name:      cluster.Name,
-						VpcID:     vpcID,
+						Name:  cluster.Name,
+						VpcID: vpcID,
+						// Dependencies.
+						Logger:    s.logger,
 						AWSEntity: awsresources.AWSEntity{Clients: clients},
 					}
 					if err := gateway.Delete(); err != nil {
@@ -850,7 +856,9 @@ func (s *Service) Boot() {
 
 					// Delete public subnet.
 					publicSubnet := &awsresources.Subnet{
-						Name:      subnetName(cluster, suffixPublic),
+						Name: subnetName(cluster, suffixPublic),
+						// Dependencies.
+						Logger:    s.logger,
 						AWSEntity: awsresources.AWSEntity{Clients: clients},
 					}
 					if err := publicSubnet.Delete(); err != nil {
@@ -1177,6 +1185,7 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 			PlacementAZ:            input.cluster.Spec.AWS.AZ,
 			SecurityGroupID:        securityGroupID,
 			SubnetID:               subnetID,
+			Logger:                 s.logger,
 			AWSEntity:              awsresources.AWSEntity{Clients: input.clients},
 		}
 		instanceCreated, err = instance.CreateIfNotExists()
@@ -1210,6 +1219,7 @@ func (s *Service) deleteMachines(input deleteMachinesInput) error {
 	})
 	instances, err := awsresources.FindInstances(awsresources.FindInstancesInput{
 		Clients: input.clients,
+		Logger:  s.logger,
 		Pattern: pattern,
 	})
 	if err != nil {
@@ -1229,20 +1239,6 @@ type deleteMachineInput struct {
 	name    string
 	clients awsutil.Clients
 	machine node.Node
-}
-
-func (s *Service) deleteMachine(input deleteMachineInput) error {
-	var instance resources.Resource
-	instance = &awsresources.Instance{
-		Name: input.name,
-	}
-	if err := instance.Delete(); err != nil {
-		return microerror.MaskAny(err)
-	}
-
-	s.logger.Log("info", fmt.Sprintf("instance '%s' removed", input.name))
-
-	return nil
 }
 
 func validateIDs(ids []string) bool {
