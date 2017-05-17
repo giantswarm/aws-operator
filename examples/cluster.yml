@@ -52,7 +52,7 @@ spec:
 
   aws:
     region: "eu-central-1"
-    az: "eu-west-1a"
+    az: "eu-central-1a"
     vpc:
       cidr: "10.0.0.0/16"
       privateSubnetCidr: "10.0.0.0/19"
