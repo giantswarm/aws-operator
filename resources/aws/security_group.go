@@ -49,7 +49,7 @@ func (s SecurityGroup) findExisting() (*ec2.SecurityGroup, error) {
 	}
 
 	if len(securityGroups.SecurityGroups) != 1 {
-		return nil, microerror.MaskAny(securityGroupFindError)
+		return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, SecurityGroupType, s.GroupName)
 	}
 
 	return securityGroups.SecurityGroups[0], nil

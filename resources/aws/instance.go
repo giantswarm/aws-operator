@@ -96,15 +96,14 @@ func (i Instance) findExisting() (*ec2.Instance, error) {
 		}
 	}
 
-	return nil, microerror.MaskAny(instanceNotFoundError)
+	return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, InstanceType, i.Name)
 }
 
 func (i *Instance) checkIfExists() (bool, error) {
 	instance, err := i.findExisting()
-	if err != nil {
-		if IsInstanceNotFoundError(err) {
-			return false, nil
-		}
+	if IsNotFound(err) {
+		return false, nil
+	} else if err != nil {
 		return false, microerror.MaskAny(err)
 	}
 

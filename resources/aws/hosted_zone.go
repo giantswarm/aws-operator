@@ -7,7 +7,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/route53"
 	microerror "github.com/giantswarm/microkit/error"
-	"github.com/juju/errgo"
 )
 
 type HostedZone struct {
@@ -107,7 +106,7 @@ func (hz *HostedZone) findExisting() (*route53.HostedZone, error) {
 	hostedZones := resp.HostedZones
 
 	if len(hostedZones) == 0 {
-		return nil, microerror.MaskAny(DomainNamedResourceNotFoundError{Domain: hz.Name})
+		return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, HostedZoneType, hz.Name)
 	}
 
 	// this AWS endpoint returns all hosted zones, even ones that don't match the query
@@ -117,7 +116,7 @@ func (hz *HostedZone) findExisting() (*route53.HostedZone, error) {
 
 	// AWS returns the proper DNS name, i.e. with a trailing dot
 	if strings.TrimRight(*hostedZone.Name, ".") != hz.Name {
-		return nil, microerror.MaskAny(DomainNamedResourceNotFoundError{Domain: hz.Name})
+		return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, HostedZoneType, hz.Name)
 	}
 
 	return hostedZone, nil
@@ -125,13 +124,9 @@ func (hz *HostedZone) findExisting() (*route53.HostedZone, error) {
 
 func (hz *HostedZone) checkIfExists() (bool, error) {
 	existingHz, err := hz.findExisting()
-
-	if err != nil {
-		underlying := errgo.Cause(err)
-		if _, ok := underlying.(DomainNamedResourceNotFoundError); ok {
-			return false, nil
-		}
-
+	if IsNotFound(err) {
+		return false, nil
+	} else if err != nil {
 		return false, microerror.MaskAny(err)
 	}
 

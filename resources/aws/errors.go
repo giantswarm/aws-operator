@@ -1,53 +1,62 @@
 package aws
 
 import (
-	"fmt"
-
 	"github.com/juju/errgo"
 )
 
-var (
-	noBucketInBucketObjectError = errgo.New("Object needs to belong to some bucket")
-
-	routeTableFindError    = errgo.New("Couldn't find route table")
-	securityGroupFindError = errgo.New("Couldn't find security group")
-	subnetFindError        = errgo.New("Couldn't find subnet")
-	vpcFindError           = errgo.New("Couldn't find VPC")
-
-	resourceDeleteError       = errgo.New("Couldn't delete resource, it lacks the necessary data (ID)")
-	clientNotInitializedError = errgo.New("The client has not been initialized")
-
-	kmsKeyAliasEmptyError = errgo.New("the KMS key alias cannot be empty")
+const (
+	// Format for masked notFoundErrors.
+	notFoundErrorFormat string = "%s with name %s not found"
+	// Format for masked attributeEmptyError.
+	attributeEmptyErrorFormat string = "attribute %s cannot be empty"
 )
 
-type DomainNamedResourceNotFoundError struct {
-	Domain string
+type resourceType string
+
+const (
+	ELBType           resourceType = "elb"
+	HostedZoneType    resourceType = "hosted zone"
+	GatewayType       resourceType = "gateway"
+	InstanceType      resourceType = "instance"
+	RouteTableType    resourceType = "route table"
+	RouteType         resourceType = "route"
+	SecurityGroupType resourceType = "security group"
+	SubnetType        resourceType = "subnet"
+	VPCType           resourceType = "vpc"
+)
+
+// NotFound errors.
+
+var notFoundError = errgo.New("not found")
+
+// IsNotFound asserts NotFoundError.
+func IsNotFound(err error) bool {
+	return errgo.Cause(err) == notFoundError
 }
 
-func (e DomainNamedResourceNotFoundError) Error() string {
-	return fmt.Sprintf("No Hosted Zones found for domain %s", e.Domain)
+// Delete errors.
+
+var resourceDeleteError = errgo.New("couldn't delete resource, it lacks the necessary data (ID)")
+
+// IsResourceDelete asserts resourceDeleteError.
+func IsResourceDelete(err error) bool {
+	return errgo.Cause(err) == resourceDeleteError
 }
 
-type NamedResourceNotFoundError struct {
-	Name string
+// Other errors.
+
+var clientNotInitializedError = errgo.New("the client has not been initialized")
+
+// IsClientNotInitialized asserts clientNotInitializedError.
+func IsClientNotInitialized(err error) bool {
+	return errgo.Cause(err) == clientNotInitializedError
 }
 
-func (e NamedResourceNotFoundError) Error() string {
-	return fmt.Sprintf("The resource was not found: %s", e.Name)
-}
+var keyPairCannotCreateAndNotFoundError = errgo.New("couldn't create and find the keypair")
 
-var gatewayNotFoundError = errgo.New("gateway not found")
-
-// IsGatewayNotFound asserts gatewayNotFoundError.
-func IsGatewayNotFound(err error) bool {
-	return errgo.Cause(err) == gatewayNotFoundError
-}
-
-var instanceNotFoundError = errgo.New("instance not found")
-
-// IsInstanceNotFoundError asserts instanceNotFoundError.
-func IsInstanceNotFoundError(err error) bool {
-	return errgo.Cause(err) == instanceNotFoundError
+// IsKeyPairCannotCreateAndNotFound asserts keyPairCannotCreateAndNotFoundError.
+func IsKeyPairCannotCreateAndNotFound(err error) bool {
+	return errgo.Cause(err) == keyPairCannotCreateAndNotFoundError
 }
 
 var notImplementedMethodError = errgo.New("not implemented method")
@@ -57,31 +66,23 @@ func IsNotImplementedMethod(err error) bool {
 	return errgo.Cause(err) == notImplementedMethodError
 }
 
-var routeNotFoundError = errgo.New("route not found")
+var noBucketInBucketObjectError = errgo.New("object needs to belong to some bucket")
 
-// IsRouteNotFoundError asserts routeNotFoundError.
-func IsRouteNotFoundError(err error) bool {
-	return errgo.Cause(err) == routeNotFoundError
+// IsNoBucketInBucketObject asserts noBucketInBucketObjectError.
+func IsNoBucketInBucketObject(err error) bool {
+	return errgo.Cause(err) == noBucketInBucketObjectError
 }
 
-func IsSecurityGroupFind(err error) bool {
-	return errgo.Cause(err) == securityGroupFindError
-}
+var kmsKeyAliasEmptyError = errgo.New("the KMS key alias cannot be empty")
 
-func IsSubnetFind(err error) bool {
-	return errgo.Cause(err) == subnetFindError
-}
-
-func IsVpcFindError(err error) bool {
-	return errgo.Cause(err) == vpcFindError
-}
-
+// IsKMSKeyAliasEmpty asserts kmsKeyAliasEmptyError.
 func IsKMSKeyAliasEmpty(err error) bool {
 	return errgo.Cause(err) == kmsKeyAliasEmptyError
 }
 
-var portsToOpenEmptyError = errgo.New("the list of ports to open cannot be empty")
+var attributeEmptyError = errgo.New("attribute cannot be empty")
 
-func IsPortsToOpenEmpty(err error) bool {
-	return errgo.Cause(err) == portsToOpenEmptyError
+// IsPortsToOpenEmpty asserts portsToOpenEmptyError.
+func IsAttributeEmpty(err error) bool {
+	return errgo.Cause(err) == attributeEmptyError
 }
