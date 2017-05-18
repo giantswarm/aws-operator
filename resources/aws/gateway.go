@@ -8,7 +8,6 @@ import (
 	"github.com/cenkalti/backoff"
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
-	"github.com/juju/errgo"
 )
 
 type Gateway struct {
@@ -114,12 +113,12 @@ func (g *Gateway) Delete() error {
 			InternetGatewayId: gateway.InternetGatewayId,
 			VpcId:             aws.String(g.VpcID),
 		}); err != nil {
-			g.Logger.Log("error", fmt.Sprintf("deleting gateway failed, retrying: %v", errgo.Details(err)))
 			return microerror.MaskAny(err)
 		}
 		return nil
 	}
-	if err := backoff.Retry(detachOperation, NewCustomExponentialBackoff()); err != nil {
+	detachNotify := NewNotify(g.Logger, "detaching gateway")
+	if err := backoff.RetryNotify(detachOperation, NewCustomExponentialBackoff(), detachNotify); err != nil {
 		return microerror.MaskAny(err)
 	}
 
@@ -127,12 +126,12 @@ func (g *Gateway) Delete() error {
 		if _, err := g.Clients.EC2.DeleteInternetGateway(&ec2.DeleteInternetGatewayInput{
 			InternetGatewayId: gateway.InternetGatewayId,
 		}); err != nil {
-			g.Logger.Log("error", fmt.Sprintf("deleting gateway failed, retrying %v", errgo.Details(err)))
 			return microerror.MaskAny(err)
 		}
 		return nil
 	}
-	if err := backoff.Retry(deleteOperation, NewCustomExponentialBackoff()); err != nil {
+	deleteNotify := NewNotify(g.Logger, "deleting gateway")
+	if err := backoff.RetryNotify(deleteOperation, NewCustomExponentialBackoff(), deleteNotify); err != nil {
 		return microerror.MaskAny(err)
 	}
 
