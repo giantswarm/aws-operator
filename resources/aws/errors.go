@@ -79,3 +79,9 @@ func IsVpcFindError(err error) bool {
 func IsKMSKeyAliasEmpty(err error) bool {
 	return errgo.Cause(err) == kmsKeyAliasEmptyError
 }
+
+var portsToOpenEmptyError = errgo.New("the list of ports to open cannot be empty")
+
+func IsPortsToOpenEmpty(err error) bool {
+	return errgo.Cause(err) == portsToOpenEmptyError
+}

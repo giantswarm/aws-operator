@@ -41,6 +41,11 @@ const (
 	proxyProtocolPolicyNameSuffix = "proxy-protocol-policy"
 	// proxyProtocolAttributeName is the name of the ProxyProtocol attribute we set on the policy.
 	proxyProtocolAttributeName = "ProxyProtocol"
+	// Default values for health checks.
+	healthCheckHealthyThreshold   = 10
+	healthCheckInterval           = 5
+	healthCheckTimeout            = 3
+	healthCheckUnhealthyThreshold = 2
 )
 
 func (lb *ELB) CreateIfNotExists() (bool, error) {
@@ -66,6 +71,9 @@ func (lb *ELB) CreateOrFail() error {
 	if lb.Client == nil {
 		return microerror.MaskAny(clientNotInitializedError)
 	}
+	if len(lb.PortsToOpen) == 0 {
+		return microerror.MaskAny(portsToOpenEmptyError)
+	}
 
 	var listeners []*elb.Listener
 	for _, portPair := range lb.PortsToOpen {
@@ -88,6 +96,19 @@ func (lb *ELB) CreateOrFail() error {
 		Subnets: []*string{
 			aws.String(lb.SubnetID),
 		},
+	}); err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	if _, err := lb.Client.ConfigureHealthCheck(&elb.ConfigureHealthCheckInput{
+		HealthCheck: &elb.HealthCheck{
+			HealthyThreshold:   aws.Int64(int64(healthCheckHealthyThreshold)),
+			Interval:           aws.Int64(int64(healthCheckInterval)),
+			Target:             aws.String(fmt.Sprintf("TCP:%d", lb.PortsToOpen[0].PortELB)),
+			Timeout:            aws.Int64(int64(healthCheckTimeout)),
+			UnhealthyThreshold: aws.Int64(int64(healthCheckUnhealthyThreshold)),
+		},
+		LoadBalancerName: aws.String(lb.Name),
 	}); err != nil {
 		return microerror.MaskAny(err)
 	}
