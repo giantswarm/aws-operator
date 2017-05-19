@@ -237,7 +237,6 @@ func (s *Service) Boot() {
 						s.logger.Log("error", fmt.Sprintf("could not get certificates from secrets: %v", errgo.Details(err)))
 						return
 					}
-					s.logger.Log("info", fmt.Sprintf("created KMS key for cluster '%s'", cluster.Name))
 
 					// Create KMS key
 					kmsKey := &awsresources.KMSKey{
@@ -245,10 +244,16 @@ func (s *Service) Boot() {
 						AWSEntity: awsresources.AWSEntity{Clients: clients},
 					}
 
-					kmsKeyErr := kmsKey.CreateOrFail()
+					kmsCreated, kmsKeyErr := kmsKey.CreateIfNotExists()
 					if kmsKeyErr != nil {
 						s.logger.Log("error", fmt.Sprintf("could not create KMS key: %v", errgo.Details(kmsKeyErr)))
 						return
+					}
+
+					if kmsCreated {
+						s.logger.Log("info", fmt.Sprintf("created KMS key for cluster '%s'", cluster.Name))
+					} else {
+						s.logger.Log("info", fmt.Sprintf("kms key '%s' already exists, reusing", kmsKey.Name))
 					}
 
 					// Encode TLS assets
