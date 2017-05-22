@@ -14,7 +14,7 @@ spec:
       imageNamespace: "giantswarm"
 
     etcd:
-      domain: "etcd.example.aws.giantswarm.io"
+      domain: "etcd.example-cluster.g8s.eu-west-1.adidas.aws.giantswarm.io"
       prefix: "example-cluster"
       port: 2379
 
@@ -25,7 +25,7 @@ spec:
 
     kubernetes:
       api:
-        domain: "api.example.aws.giantswarm.io"
+        domain: "api.example-cluster.g8s.eu-west-1.adidas.aws.giantswarm.io"
         insecurePort: 8080
         securePort: 443
         clusterIPRange: "192.168.0.0/24"
@@ -37,7 +37,7 @@ spec:
       ingressController:
         insecurePort: 30010
         securePort: 30011
-        domain: "ingress.example.aws.gigantic.io"
+        domain: "ingress.example-cluster.g8s.eu-west-1.adidas.aws.gigantic.io"
       kubelet:
         port: 10250
       networkSetup:
