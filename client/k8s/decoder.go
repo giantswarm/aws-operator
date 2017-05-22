@@ -2,6 +2,7 @@ package k8s
 
 import (
 	"encoding/json"
+	"io"
 
 	"github.com/giantswarm/awstpr"
 	microerror "github.com/giantswarm/microkit/error"
@@ -14,10 +15,10 @@ type ClusterDecoder struct {
 	close   func() error
 }
 
-func NewClusterDecoder(decoder *json.Decoder, closeFunc func() error) *ClusterDecoder {
+func NewClusterDecoder(stream io.ReadCloser) *ClusterDecoder {
 	return &ClusterDecoder{
-		decoder: decoder,
-		close:   closeFunc,
+		decoder: json.NewDecoder(stream),
+		close:   stream.Close,
 	}
 }
 

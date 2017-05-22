@@ -167,7 +167,7 @@ func (s *Service) newClusterListWatch() *cache.ListWatch {
 				return nil, err
 			}
 
-			cd := k8sutil.NewClusterDecoder(json.NewDecoder(stream), stream.Close)
+			cd := k8sutil.NewClusterDecoder(stream)
 			watcher := watch.NewStreamWatcher(cd)
 
 			return watcher, nil
