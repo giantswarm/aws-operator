@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/s3"
+	k8sutil "github.com/giantswarm/aws-operator/client/k8s"
 	"github.com/giantswarm/awstpr"
 	awsinfo "github.com/giantswarm/awstpr/aws"
 	"github.com/giantswarm/certificatetpr"
@@ -166,10 +167,8 @@ func (s *Service) newClusterListWatch() *cache.ListWatch {
 				return nil, err
 			}
 
-			watcher := watch.NewStreamWatcher(&ClusterDecoder{
-				decoder: json.NewDecoder(stream),
-				close:   stream.Close,
-			})
+			cd := k8sutil.NewClusterDecoder(json.NewDecoder(stream), stream.Close)
+			watcher := watch.NewStreamWatcher(cd)
 
 			return watcher, nil
 		},
@@ -1263,25 +1262,4 @@ func (s *Service) handleDeleteCluster(obj interface{}) {
 	}
 
 	s.logger.Log("info", fmt.Sprintf("cluster '%s' deleted", cluster.Name))
-}
-
-type ClusterDecoder struct {
-	decoder *json.Decoder
-	close   func() error
-}
-
-func (cd *ClusterDecoder) Decode() (action watch.EventType, object runtime.Object, err error) {
-	var e struct {
-		Type   watch.EventType
-		Object awstpr.CustomObject
-	}
-	if err := cd.decoder.Decode(&e); err != nil {
-		return watch.Error, nil, microerror.MaskAnyf(err, "the message was %v", e)
-	}
-
-	return e.Type, &e.Object, nil
-}
-
-func (d *ClusterDecoder) Close() {
-	d.close()
 }
