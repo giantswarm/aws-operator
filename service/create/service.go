@@ -507,6 +507,7 @@ func (s *Service) Boot() {
 					}
 
 					// Assign the ProxyProtocol policy to the apiserver load balancer.
+					// It is needed for `kubectl logs` to work.
 					if err := apiLB.AssignProxyProtocolPolicy(); err != nil {
 						s.logger.Log("error", errgo.Details(err))
 						return
@@ -624,12 +625,6 @@ func (s *Service) Boot() {
 
 					ingressLB, err := s.createLoadBalancer(lbInput)
 					if err != nil {
-						s.logger.Log("error", errgo.Details(err))
-						return
-					}
-
-					// Assign the ProxyProtocol policy to the Ingress load balancer.
-					if err := ingressLB.AssignProxyProtocolPolicy(); err != nil {
 						s.logger.Log("error", errgo.Details(err))
 						return
 					}
