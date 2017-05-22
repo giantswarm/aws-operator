@@ -72,7 +72,7 @@ func (lb *ELB) CreateOrFail() error {
 		return microerror.MaskAny(clientNotInitializedError)
 	}
 	if len(lb.PortsToOpen) == 0 {
-		return microerror.MaskAny(portsToOpenEmptyError)
+		return microerror.MaskAnyf(attributeEmptyError, attributeEmptyErrorFormat, "portsToOpen")
 	}
 
 	var listeners []*elb.Listener
@@ -225,7 +225,7 @@ func (lb ELB) findExisting() (*elb.LoadBalancerDescription, error) {
 	descriptions := resp.LoadBalancerDescriptions
 
 	if len(descriptions) == 0 {
-		return nil, NamedResourceNotFoundError{Name: lb.Name}
+		return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, ELBType, lb.Name)
 	}
 
 	return descriptions[0], nil

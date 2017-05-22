@@ -40,7 +40,7 @@ func (s Subnet) findExisting() (*ec2.Subnet, error) {
 	}
 
 	if len(subnets.Subnets) < 1 {
-		return nil, microerror.MaskAny(subnetFindError)
+		return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, SubnetType, s.Name)
 	}
 
 	return subnets.Subnets[0], nil
@@ -48,7 +48,7 @@ func (s Subnet) findExisting() (*ec2.Subnet, error) {
 
 func (s *Subnet) checkIfExists() (bool, error) {
 	_, err := s.findExisting()
-	if IsSubnetFind(err) {
+	if IsNotFound(err) {
 		return false, nil
 	} else if err != nil {
 		return false, microerror.MaskAny(err)

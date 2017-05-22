@@ -2,7 +2,6 @@ package aws
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -32,7 +31,7 @@ func (r RouteTable) findExisting() (*ec2.RouteTable, error) {
 	}
 
 	if len(routeTables.RouteTables) < 1 {
-		return nil, microerror.MaskAny(routeTableFindError)
+		return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, RouteTableType, r.Name)
 	}
 
 	return routeTables.RouteTables[0], nil
@@ -40,10 +39,9 @@ func (r RouteTable) findExisting() (*ec2.RouteTable, error) {
 
 func (r *RouteTable) checkIfExists() (bool, error) {
 	routeTable, err := r.findExisting()
-	if err != nil {
-		if strings.Contains(err.Error(), routeTableFindError.Error()) {
-			return false, nil
-		}
+	if IsNotFound(err) {
+		return false, nil
+	} else if err != nil {
 		return false, microerror.MaskAny(err)
 	}
 
@@ -169,7 +167,7 @@ func (r RouteTable) getInternetGateway() (string, error) {
 	}
 
 	if len(resp.InternetGateways) == 0 {
-		return "", microerror.MaskAny(routeNotFoundError)
+		return "", microerror.MaskAnyf(notFoundError, notFoundErrorFormat, RouteTableType, r.Name)
 	}
 
 	return *resp.InternetGateways[0].InternetGatewayId, nil

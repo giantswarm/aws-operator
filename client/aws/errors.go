@@ -11,8 +11,23 @@ const (
 	ELBConfigurationMismatch = "already exists and it is configured with different parameters"
 )
 
-var (
-	malformedAmazonAccountIDError   = errgo.New("amazon account ID can only contain numbers")
-	wrongAmazonAccountIDLengthError = errgo.New("amazon account ID has the wrong size")
-	emptyAmazonAccountIDError       = errgo.New("amazon account ID cannot be empty")
-)
+var malformedAmazonAccountIDError = errgo.New("malformed amazon account ID")
+
+// IsMalformedAmazonAccountID asserts malformedAmazonAccountIDError.
+func IsMalformedAmazonAccountID(err error) bool {
+	return errgo.Cause(err) == malformedAmazonAccountIDError
+}
+
+var wrongAmazonAccountIDLengthError = errgo.New("wrong amazon account ID length")
+
+// IsWrongAmazonIDLength asserts wrongAmazonAccountIDLengthError.
+func IsWrongAmazonAccountIDLength(err error) bool {
+	return errgo.Cause(err) == wrongAmazonAccountIDLengthError
+}
+
+var emptyAmazonAccountIDError = errgo.New("empty amazon account ID")
+
+// IsEmptyAmazonAccountID asserts emptyAmazonAccountIDError.
+func IsEmptyAmazonAccountID(err error) bool {
+	return errgo.Cause(err) == emptyAmazonAccountIDError
+}

@@ -35,7 +35,7 @@ func (g Gateway) findExisting() (*ec2.InternetGateway, error) {
 	}
 
 	if len(gateways.InternetGateways) < 1 {
-		return nil, microerror.MaskAny(gatewayNotFoundError)
+		return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, GatewayType, g.Name)
 	}
 
 	return gateways.InternetGateways[0], nil
@@ -43,7 +43,7 @@ func (g Gateway) findExisting() (*ec2.InternetGateway, error) {
 
 func (g *Gateway) checkIfExists() (bool, error) {
 	_, err := g.findExisting()
-	if IsGatewayNotFound(err) {
+	if IsNotFound(err) {
 		return false, nil
 	} else if err != nil {
 		return false, microerror.MaskAny(err)
