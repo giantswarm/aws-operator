@@ -26,7 +26,6 @@ import (
 	"k8s.io/client-go/tools/cache"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
-	k8sutil "github.com/giantswarm/aws-operator/client/k8s"
 	"github.com/giantswarm/aws-operator/resources"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
 )
@@ -160,16 +159,7 @@ func (s *Service) newClusterListWatch() *cache.ListWatch {
 
 		WatchFunc: func(options api.ListOptions) (watch.Interface, error) {
 			req := client.Get().AbsPath(ClusterWatchAPIEndpoint)
-			stream, err := req.Stream()
-			if err != nil {
-				return nil, err
-			}
-
-			watcher := watch.NewStreamWatcher(&k8sutil.ClusterDecoder{
-				Stream: stream,
-			})
-
-			return watcher, nil
+			return req.Watch()
 		},
 	}
 
