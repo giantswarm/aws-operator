@@ -13,7 +13,7 @@ import (
 // specifications of the resource the AWS operator is interested in.
 type CustomObject struct {
 	unversioned.TypeMeta `json:",inline"`
-	Metadata             api.ObjectMeta `json:"metadata,omitempty"`
+	Metadata             api.ObjectMeta `json:"metadata"`
 	Spec                 Spec           `json:"spec" yaml:"spec"`
 }
 
