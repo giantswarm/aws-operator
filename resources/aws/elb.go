@@ -104,7 +104,7 @@ func (lb *ELB) CreateOrFail() error {
 		HealthCheck: &elb.HealthCheck{
 			HealthyThreshold:   aws.Int64(int64(healthCheckHealthyThreshold)),
 			Interval:           aws.Int64(int64(healthCheckInterval)),
-			Target:             aws.String(fmt.Sprintf("TCP:%d", lb.PortsToOpen[0].PortELB)),
+			Target:             aws.String(fmt.Sprintf("TCP:%d", lb.PortsToOpen[0].PortInstance)),
 			Timeout:            aws.Int64(int64(healthCheckTimeout)),
 			UnhealthyThreshold: aws.Int64(int64(healthCheckUnhealthyThreshold)),
 		},
