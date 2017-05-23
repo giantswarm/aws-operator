@@ -14,7 +14,7 @@ type List struct {
 	Items []*CustomObject `json:"items" yaml:"items"`
 }
 
-func (l *List) GetObjectMeta() unversioned.List {
+func (l *List) GetListMeta() unversioned.List {
 	return &l.Metadata
 }
 
