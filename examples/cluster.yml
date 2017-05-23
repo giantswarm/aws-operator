@@ -40,6 +40,7 @@ spec:
         insecurePort: 30010
         securePort: 30011
         domain: "ingress.example.aws.gigantic.io"
+        wildcardDomain: "*.example.aws.gigantic.io"
       kubelet:
         port: 10250
       networkSetup:
