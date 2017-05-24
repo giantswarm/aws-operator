@@ -15,12 +15,6 @@ var (
 			Enable:       true,
 			Command:      "start",
 		},
-		cloudconfig.UnitMetadata{
-			AssetContent: createCalicoEnvFileServiceTemplate,
-			Name:         "create-calico-env-file.service",
-			Enable:       true,
-			Command:      "start",
-		},
 	}
 )
 
@@ -103,12 +97,6 @@ func (m *MasterCloudConfigExtension) Files() ([]cloudconfig.FileAsset, error) {
 		cloudconfig.FileMetadata{
 			AssetContent: decryptTLSAssetsScriptTemplate,
 			Path:         "/opt/bin/decrypt-tls-assets",
-			Owner:        "root:root",
-			Permissions:  0700,
-		},
-		cloudconfig.FileMetadata{
-			AssetContent: createCalicoEnvFileScriptTemplate,
-			Path:         "/opt/bin/create-calico-env-file",
 			Owner:        "root:root",
 			Permissions:  0700,
 		},
@@ -224,12 +212,6 @@ func (w *WorkerCloudConfigExtension) Files() ([]cloudconfig.FileAsset, error) {
 		cloudconfig.FileMetadata{
 			AssetContent: decryptTLSAssetsScriptTemplate,
 			Path:         "/opt/bin/decrypt-tls-assets",
-			Owner:        "root:root",
-			Permissions:  0700,
-		},
-		cloudconfig.FileMetadata{
-			AssetContent: createCalicoEnvFileScriptTemplate,
-			Path:         "/opt/bin/create-calico-env-file",
 			Owner:        "root:root",
 			Permissions:  0700,
 		},
