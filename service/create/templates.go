@@ -69,24 +69,4 @@ USERDATA_FILE={{.MachineType}}
     quay.io/coreos/awscli:025a357f05242fdad6a81e8a6b520098aa65a600 -- aws s3 --region {{.Region}} cp s3://{{.S3DirURI}}/$USERDATA_FILE /var/run/coreos/temp.txt
 base64 -d /var/run/coreos/temp.txt | gunzip > /var/run/coreos/$USERDATA_FILE
 exec /usr/bin/coreos-cloudinit --from-file /var/run/coreos/$USERDATA_FILE`
-
-	createCalicoEnvFileScriptTemplate = `#!/bin/bash
-
-# On AWS use internal IP as the bridge IP.
-echo "BRIDGE_IP=$DEFAULT_IPV4" > /etc/calico-environment
-`
-
-	createCalicoEnvFileServiceTemplate = `
-[Unit]
-Description=Create Calico env file
-Requires=k8s-setup-network-env.service
-After=k8s-setup-network-env.service
-
-[Service]
-Type=oneshot
-EnvironmentFile=/etc/network-environment
-ExecStart=/opt/bin/create-calico-env-file
-
-[Install]
-WantedBy=multi-user.target`
 )

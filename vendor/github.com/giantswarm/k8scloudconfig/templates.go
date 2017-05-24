@@ -848,7 +848,6 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      EnvironmentFile=/etc/calico-environment
       Environment="ETCD_AUTHORITY={{ .Cluster.Etcd.Domain }}:2379"
       Environment="ETCD_SCHEME=https"
       Environment="ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/calico/client-ca.pem"
@@ -1402,7 +1401,6 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      EnvironmentFile=/etc/calico-environment
       Environment="ETCD_AUTHORITY={{ .Cluster.Etcd.Domain }}:2379"
       Environment="ETCD_SCHEME=https"
       Environment="ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/calico/client-ca.pem"

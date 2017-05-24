@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -18,6 +17,7 @@ import (
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
 	certkit "github.com/giantswarm/operatorkit/secret/cert"
+	"github.com/giantswarm/operatorkit/tpr"
 	"github.com/juju/errgo"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api"
@@ -37,9 +37,6 @@ const (
 	instanceNameFormat string = "%s-%s-%d"
 	// The format of prefix inside a cluster "[name of cluster]-[prefix ('master' or 'worker')]".
 	instanceClusterPrefixFormat string = "%s-%s"
-	// Period or re-synchronizing the list of objects in k8s watcher. 0 means that re-sync will be
-	// delayed as long as possible, until the watch will be closed or timed out.
-	resyncPeriod time.Duration = 0
 	// Prefixes used for machine names.
 	prefixMaster  string = "master"
 	prefixWorker  string = "worker"
@@ -176,7 +173,7 @@ func (s *Service) Boot() {
 		_, clusterInformer := cache.NewInformer(
 			s.newClusterListWatch(),
 			&awstpr.CustomObject{},
-			resyncPeriod,
+			tpr.ResyncPeriod,
 			cache.ResourceEventHandlerFuncs{
 				AddFunc:    s.onAdd,
 				DeleteFunc: s.onDelete,

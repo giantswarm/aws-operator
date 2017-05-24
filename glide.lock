@@ -1,5 +1,5 @@
 hash: e0a4e120144fe05a987ae6b5d015db7eb405fe8d6679f48511d3218a5609ebc3
-updated: 2017-05-24T10:44:33.910203671+02:00
+updated: 2017-05-24T16:07:04.125272549+02:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -126,7 +126,7 @@ imports:
   - node
   - vault
 - name: github.com/giantswarm/k8scloudconfig
-  version: 9c0f7e1e3459cd3f7f2391a426b41b37f2a0bcd6
+  version: b91e6722124d411190bd610cb9168f8757759122
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
@@ -144,9 +144,10 @@ imports:
   - transaction/context/id
   - transaction/context/tracked
 - name: github.com/giantswarm/operatorkit
-  version: 31b81e1c5609e7fc499570878e85009f7c7cf63f
+  version: a571e5d6b72f6e46caeeb716133fd02c16a8231d
   subpackages:
   - secret/cert
+  - tpr
 - name: github.com/go-ini/ini
   version: afbc45e87f3ba324c532d12c71918ef52e0fb194
 - name: github.com/go-kit/kit
