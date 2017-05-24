@@ -1,11 +1,14 @@
 [![CircleCI](https://circleci.com/gh/giantswarm/aws-operator.svg?&style=shield&circle-token=8f0fe6ad08c090afa36c35ba5d926ac6ffe797e8)](https://circleci.com/gh/giantswarm/aws-operator) [![Docker Repository on Quay](https://quay.io/repository/giantswarm/aws-operator/status "Docker Repository on Quay")](https://quay.io/repository/giantswarm/aws-operator)
 
+
 # aws-operator
 
 The aws-operator handles Kubernetes clusters running on a Kubernetes cluster
 inside of AWS.
 
+
 ## Prerequisites
+
 
 ## Getting Project
 
@@ -16,6 +19,7 @@ Clone the git repository: https://github.com/giantswarm/aws-operator.git
 
 Download the latest docker image from here:
 https://quay.io/repository/giantswarm/aws-operator
+
 
 ### How to build
 
@@ -32,31 +36,16 @@ like:
 go build github.com/giantswarm/aws-operator
 ```
 
+
 ## Running aws-operator
 
-After building the project, you will have a `aws-operator` binary.
+See [this guide][examples-local].
 
-The operator needs some Kubernetes secrets to be present. The secrets contain
-the TLS assets (CAs, keys, certificates) for the various components of the
-cluster.
+[examples-local]: https://github.com/giantswarm/aws-operator/blob/master/examples/local
 
-An easy way to create these secrets for development is running:
-
-
-```
-kubectl create -f examples/secrets.yml
-```
-
-Afterwards, you can run:
-
-```
-./aws-operator daemon --aws.accesskey.id <aws_acces_key_id> --aws.accesskey.secret <aws_access_key_secret> --aws.region <aws_region>
-```
-
-In the future, we are going to use aws-operator as a Kubernetes pod and that
-would be the standard way of usage.
 
 ## Architecture
+
 
 ### S3 buckets
 
