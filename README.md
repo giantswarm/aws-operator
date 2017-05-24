@@ -15,7 +15,7 @@ https://github.com/giantswarm/aws-operator/releases/latest
 Clone the git repository: https://github.com/giantswarm/aws-operator.git
 
 Download the latest docker image from here:
-https://hub.docker.com/r/giantswarm/aws-operator/
+https://quay.io/repository/giantswarm/aws-operator
 
 ### How to build
 
