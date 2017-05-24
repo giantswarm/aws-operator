@@ -1,11 +1,11 @@
 package cloudconfig
 
-type FakeOperatorExtension struct{}
+type FakeExtension struct{}
 
-func (f *FakeOperatorExtension) Files() ([]FileAsset, error) {
+func (f *FakeExtension) Files() ([]FileAsset, error) {
 	return nil, nil
 }
 
-func (f *FakeOperatorExtension) Units() ([]UnitAsset, error) {
+func (f *FakeExtension) Units() ([]UnitAsset, error) {
 	return nil, nil
 }

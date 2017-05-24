@@ -9,9 +9,9 @@ import (
 // List represents a list of CustomObject resources.
 type List struct {
 	unversioned.TypeMeta `json:",inline"`
-	Metadata             unversioned.ListMeta `json:"metadata"`
+	Metadata             unversioned.ListMeta `json:"metadata" yaml:"metadata"`
 
-	Items []CustomObject `json:"items"`
+	Items []CustomObject `json:"items" yaml:"items"`
 }
 
 // GetObjectKind is required to satisfy the Object interface.

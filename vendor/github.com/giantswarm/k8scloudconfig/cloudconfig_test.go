@@ -7,24 +7,25 @@ import (
 
 func TestCloudConfig(t *testing.T) {
 	tests := []struct {
-		template  string
-		params    CloudConfigTemplateParams
-		extension OperatorExtension
+		template string
+		params   Params
 	}{
 		{
-			template:  MasterTemplate,
-			params:    CloudConfigTemplateParams{},
-			extension: &FakeOperatorExtension{},
+			template: MasterTemplate,
+			params: Params{
+				Extension: &FakeExtension{},
+			},
 		},
 		{
-			template:  WorkerTemplate,
-			params:    CloudConfigTemplateParams{},
-			extension: &FakeOperatorExtension{},
+			template: WorkerTemplate,
+			params: Params{
+				Extension: &FakeExtension{},
+			},
 		},
 	}
 
 	for _, tc := range tests {
-		cloudConfig, err := NewCloudConfig(tc.template, tc.params, tc.extension)
+		cloudConfig, err := NewCloudConfig(tc.template, tc.params)
 		if err != nil {
 			t.Fatal(err)
 		}
