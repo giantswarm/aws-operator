@@ -4,3 +4,5 @@ TODO
 
 /examples/local/*.yaml
 !/examples/local/*.tmpl.yaml
+/examples/local/**.crt
+/examples/local/**.key

@@ -128,42 +128,29 @@ When log like this appears in the output the cluster is ready.
 ```
 
 Now it's time to connect the cluster with `kubectl`. This will require
-obtaining the new cluster's certificates. If [cert-operator] was used to create
-certificates [jq] comes in handy.
+obtaining the new cluster's certificates adding new `kubectl` configuration.
+Here [jq] comes in handy.
 
 ```bash
 export CLUSTER_NAME="example-cluster"
-export CERT_DIR="/cert/path"
+export COMMON_DOMAIN="internal.company.com"
+export CERT_DIR="./certs"
+
+mkdir -p ${CERT_DIR}
 
 kubectl get secret ${CLUSTER_NAME}-api -o json | jq -r .data.ca | base64 --decode > ${CERT_DIR}/ca.crt
 kubectl get secret ${CLUSTER_NAME}-api -o json | jq -r .data.crt | base64 --decode > ${CERT_DIR}/apiserver.crt
 kubectl get secret ${CLUSTER_NAME}-api -o json | jq -r .data.key | base64 --decode > ${CERT_DIR}/apiserver.key
+
+kubectl config set clusters.{CLUSTER_NAME}.certificate-authority "${CERT_DIR}/ca.crt"
+kubectl config set clusters.{CLUSTER_NAME}.server "https://api.${CLUSTER_NAME}.${COMMON_DOMAIN}"
+kubectl config set contexts.{CLUSTER_NAME}.cluster "${CLUSTER_NAME}"
+kubectl config set contexts.{CLUSTER_NAME}.user "${CLUSTER_NAME}"
+kubectl config set credentials ${CLUSTER_NAME}.client-certificate "${CERT_DIR}/apiserver.crt"
+kubectl config set credentials ${CLUSTER_NAME}.client-key "${CERT_DIR}/apiserver.key"
 ```
 
-Now let's add following configuration to `~/.kube/config`. Remember to change
-`${CLUSTER_NAME}`, `${COMMON_DOMAIN}`, and `${CERT_DIR}`.
-
-```
-clusters:
-- name: ${CLUSTER_NAME}
-  cluster:
-    certificate-authority: ${CERT_DIR}/ca.crt
-    server: https://api.${CLUSTER_NAME}.${COMMON_DOMAIN}:443
-
-contexts:
-- name: ${CLUSTER_NAME}
-  context:
-    cluster: ${CLUSTER_NAME}
-    user: ${CLUSTER_NAME}
-
-users:
-- name: ${CLUSTER_NAME}
-  user:
-    client-certificate: ${CERT_DIR}/apiserver.crt
-    client-key: ${CERT_DIR}/apiserver.key
-```
-
-It's time to connect to the newly created cluster.
+Now with `kubectl` configured let's display `cluster-info`.
 
 ```bash
 export CLUSTER_NAME="example-cluster"
@@ -175,14 +162,29 @@ kubectl cluster-info
 
 ## Cleaning Up
 
-Delete the certificate TPOs and the deployment.
+First delete the certificate TPOs.
 
 ```bash
+export CLUSTER_NAME="example-cluster"
+
 kubectl delete aws -l clusterID=${CLUSTER_NAME}
 ```
 
-```
+Wait for the operator to delete cluster, and then remove the operator's
+deployment.
+
+```bash
 kubectl delete -f ./deployment.yaml
+```
+
+Finally remove `kubectl` cluster configuration.
+
+```bash
+export CLUSTER_NAME="example-cluster"
+
+kubectl config unset clusters.${CLUSTER_NAME}
+kubectl config unset contexts.${CLUSTER_NAME}
+kubectl config unset users.${CLUSTER_NAME}
 ```
 
 [aws-operator]: https://github.com/giantswarm/aws-operator
