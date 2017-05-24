@@ -230,15 +230,19 @@ func (s *Service) runMachines(input runMachinesInput) (bool, []string, error) {
 		machines    []node.Node
 		awsMachines []awsinfo.Node
 		instanceIDs []string
+
+		extension cloudconfig.Extension
 	)
 
 	switch input.prefix {
 	case prefixMaster:
 		machines = input.cluster.Spec.Cluster.Masters
 		awsMachines = input.cluster.Spec.AWS.Masters
+		extension = NewMasterCloudConfigExtension(input.cluster.Spec, input.tlsAssets)
 	case prefixWorker:
 		machines = input.cluster.Spec.Cluster.Workers
 		awsMachines = input.cluster.Spec.AWS.Workers
+		extension = NewWorkerCloudConfigExtension(input.cluster.Spec, input.tlsAssets)
 	}
 
 	// TODO(nhlfr): Create a separate module for validating specs and execute on the earlier stages.
@@ -260,6 +264,7 @@ func (s *Service) runMachines(input runMachinesInput) (bool, []string, error) {
 			cluster:             input.cluster,
 			machine:             machines[i],
 			awsNode:             awsMachines[i],
+			extension:           extension,
 			tlsAssets:           input.tlsAssets,
 			bucket:              input.bucket,
 			securityGroup:       input.securityGroup,
@@ -319,6 +324,7 @@ type runMachineInput struct {
 	cluster             awstpr.CustomObject
 	machine             node.Node
 	awsNode             awsinfo.Node
+	extension           cloudconfig.Extension
 	tlsAssets           *certificatetpr.CompactTLSAssets
 	bucket              resources.Resource
 	securityGroup       resources.ResourceWithID
@@ -331,9 +337,10 @@ type runMachineInput struct {
 }
 
 func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
-	cloudConfigParams := cloudconfig.CloudConfigTemplateParams{
-		Cluster: input.cluster.Spec.Cluster,
-		Node:    input.machine,
+	cloudConfigParams := cloudconfig.Params{
+		Cluster:   input.cluster.Spec.Cluster,
+		Node:      input.machine,
+		Extension: input.extension,
 	}
 
 	cloudConfig, err := s.cloudConfig(input.prefix, cloudConfigParams, input.cluster.Spec, input.tlsAssets)
