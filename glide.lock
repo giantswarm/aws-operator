@@ -1,5 +1,5 @@
 hash: e0a4e120144fe05a987ae6b5d015db7eb405fe8d6679f48511d3218a5609ebc3
-updated: 2017-05-17T15:15:48.50370488+02:00
+updated: 2017-05-24T10:44:33.910203671+02:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aws/aws-sdk-go
-  version: fed27f4bd16c8c63d01003b978e5bc85fe727519
+  version: 2b8c4298b43558883ab1ff49a73c7c5aa99e3d1e
   subpackages:
   - aws
   - aws/awserr
@@ -51,7 +51,7 @@ imports:
 - name: github.com/cenkalti/backoff
   version: 5d150e7eec023ce7a124856b37c68e54b4050ac7
 - name: github.com/coreos/etcd
-  version: 43b75072bfaca5a7c35c718179defbcabd9a0886
+  version: d267ca9c184e953554257d0acdd1dc9c47d38229
   subpackages:
   - auth/authpb
   - client
@@ -100,9 +100,9 @@ imports:
   - aws
   - aws/vpc
 - name: github.com/giantswarm/certificatetpr
-  version: 880d3a1d529cf58c0f56b3edd53cd6c36e6d2886
+  version: 989414c916fafbc70d7e09fb48ef053b7290a9e4
 - name: github.com/giantswarm/clustertpr
-  version: 81d44901ce63086368ddcf639dffd1c8b4344190
+  version: fd3a829c4e5b6546d22457b969f8be65bcd3f548
   subpackages:
   - calico
   - cluster
@@ -126,7 +126,7 @@ imports:
   - node
   - vault
 - name: github.com/giantswarm/k8scloudconfig
-  version: c5200dfa95ee7c874b196302bd0d08f2d5c542d1
+  version: 9c0f7e1e3459cd3f7f2391a426b41b37f2a0bcd6
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
@@ -144,11 +144,11 @@ imports:
   - transaction/context/id
   - transaction/context/tracked
 - name: github.com/giantswarm/operatorkit
-  version: 2d3c599c5e848cf746667a89cac824f357d156fc
+  version: 31b81e1c5609e7fc499570878e85009f7c7cf63f
   subpackages:
   - secret/cert
 - name: github.com/go-ini/ini
-  version: e7fea39b01aea8d5671f6858f0532f56e8bff3a5
+  version: afbc45e87f3ba324c532d12c71918ef52e0fb194
 - name: github.com/go-kit/kit
   version: f66b0e13579bfc5a48b9e2a94b1209c107ea1f41
   subpackages:
@@ -195,7 +195,7 @@ imports:
   - runtime/internal
   - utilities
 - name: github.com/hashicorp/hcl
-  version: a4b07c25de5ff55ad3b8936cea69a79a3d95a855
+  version: 392dba7d905ed5d04a5794ba89f558b27e2ba1ca
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -228,13 +228,13 @@ imports:
   subpackages:
   - pbutil
 - name: github.com/mitchellh/mapstructure
-  version: cc8532a8e9a55ea36402aa21efdf403a60d34096
+  version: d0303fe809921458f417bcf828397a65db30a7e4
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/pelletier/go-buffruneio
   version: c37440a7cf42ac63b919c752ca73a85067e05992
 - name: github.com/pelletier/go-toml
-  version: 97253b98df84f9eef872866d079e74b8265150f1
+  version: 5c26a6ff6fd178719e15decac1c8196da0d7d6d1
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
@@ -251,7 +251,7 @@ imports:
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: d098ca18df8bc825079013daf7bacefbb1ee877e
+  version: 65c1f6f8f0fc1e2185eb9863a3bc751496404259
   subpackages:
   - xfs
 - name: github.com/PuerkitoBio/purell
@@ -267,7 +267,7 @@ imports:
 - name: github.com/spf13/cobra
   version: 4c05eb1145f16d0e6bb4a3e1b6d769f4713cb41f
 - name: github.com/spf13/jwalterweatherman
-  version: fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66
+  version: 0efa5202c04663c757d84f90f5219c1250baf94f
 - name: github.com/spf13/pflag
   version: 08b1a584251b5b62f458943640fc8ebd4d50aaa5
 - name: github.com/spf13/viper

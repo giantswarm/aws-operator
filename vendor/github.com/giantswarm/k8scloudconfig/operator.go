@@ -35,7 +35,7 @@ type UnitAsset struct {
 	Content  []string
 }
 
-type OperatorExtension interface {
+type Extension interface {
 	Files() ([]FileAsset, error)
 	Units() ([]UnitAsset, error)
 }
