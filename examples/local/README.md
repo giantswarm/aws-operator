@@ -181,10 +181,12 @@ kubectl delete aws -l clusterID=${CLUSTER_NAME}
 ```
 
 Wait for the operator to delete the cluster, and then remove the operator's
-deployment.
+deployment and configuration.
 
 ```bash
 kubectl delete -f ./deployment.yaml
+kubectl delete -f ./configmap.yaml
+kubectl delete -f ./configmap-ssh.yaml
 ```
 
 Finally remove `kubectl` cluster configuration.
