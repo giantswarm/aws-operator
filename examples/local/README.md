@@ -48,22 +48,22 @@ export AWS_INSTANCE_TYPE_WORKER="t2.medium"
 
 for f in *.tmpl.yaml; do
     sed \
-        -e 's\${CLUSTER_NAME}\'"${CLUSTER_NAME}"'\g' \
-        -e 's\${COMMON_DOMAIN}\'"${COMMON_DOMAIN}"'\g' \
-        -e 's\${COMMON_DOMAIN_INGRESS}\'"${COMMON_DOMAIN_INGRESS}"'\g' \
-        -e 's\${ID_RSA_PUB}\'"${ID_RSA_PUB}"'\g' \
-        -e 's\${AWS_ACCESS_KEY_ID}\'"${AWS_ACCESS_KEY_ID}"'\g' \
-        -e 's\${AWS_SECRET_ACCESS_KEY}\'"${AWS_SECRET_ACCESS_KEY}"'\g' \
-        -e 's\${AWS_REGION}\'"${AWS_REGION}"'\g' \
-        -e 's\${AWS_AZ}\'"${AWS_AZ}"'\g' \
-        -e 's\${AWS_AMI}\'"${AWS_AMI}"'\g' \
-        -e 's\${AWS_INSTANCE_TYPE_MASTER}\'"${AWS_INSTANCE_TYPE_MASTER}"'\g' \
-        -e 's\${AWS_INSTANCE_TYPE_WORKER}\'"${AWS_INSTANCE_TYPE_WORKER}"'\g' \
+        -e 's|${CLUSTER_NAME}|'"${CLUSTER_NAME}"'|g' \
+        -e 's|${COMMON_DOMAIN}|'"${COMMON_DOMAIN}"'|g' \
+        -e 's|${COMMON_DOMAIN_INGRESS}|'"${COMMON_DOMAIN_INGRESS}"'|g' \
+        -e 's|${ID_RSA_PUB}|'"${ID_RSA_PUB}"'|g' \
+        -e 's|${AWS_ACCESS_KEY_ID}|'"${AWS_ACCESS_KEY_ID}"'|g' \
+        -e 's|${AWS_SECRET_ACCESS_KEY}|'"${AWS_SECRET_ACCESS_KEY}"'|g' \
+        -e 's|${AWS_REGION}|'"${AWS_REGION}"'|g' \
+        -e 's|${AWS_AZ}|'"${AWS_AZ}"'|g' \
+        -e 's|${AWS_AMI}|'"${AWS_AMI}"'|g' \
+        -e 's|${AWS_INSTANCE_TYPE_MASTER}|'"${AWS_INSTANCE_TYPE_MASTER}"'|g' \
+        -e 's|${AWS_INSTANCE_TYPE_WORKER}|'"${AWS_INSTANCE_TYPE_WORKER}"'|g' \
         ./$f > ./${f%.tmpl.yaml}.yaml
 done
 ```
 
-- Note: `\` characters are used in `sed` substitubion to avoid escaping.
+- Note: `|` characters are used in `sed` substitubion to avoid escaping.
 
 
 ## Cluster Certificates
