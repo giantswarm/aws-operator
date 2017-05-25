@@ -34,27 +34,36 @@ all placeholders must be replaced with sensible values.
 Below is handy snippet than can be used to make that painless. It works in bash and zsh.
 
 ```bash
+export CLUSTER_NAME="example-cluster"
+export COMMON_DOMAIN="internal.company.com"
+export COMMON_DOMAIN_INGRESS="company.com"
+export ID_RSA_PUB="$(cat ~/.ssh/id_rsa.pub)"
+export AWS_ACCESS_KEY_ID="AKIAIXXXXXXXXXXXXXXX"
+export AWS_SECRET_ACCESS_KEY="XXXXXXXXXXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXX"
+export AWS_REGION="eu-central-1"
+export AWS_AZ="eu-central-1a"
+export AWS_AMI="ami-d60ad6b9"
+export AWS_INSTANCE_TYPE_MASTER="t2.medium"
+export AWS_INSTANCE_TYPE_WORKER="t2.medium"
+
 for f in *.tmpl.yaml; do
     sed \
-        -e 's/${CLUSTER_NAME}/example-cluster/g' \
-        -e 's/${COMMON_DOMAIN}/internal.company.com/g' \
-        -e 's/${COMMON_DOMAIN_INGRESS}/company.com/g' \
-        -e 's/${ID_RSA_PUB}/ssh-rsa AAsd user@company.com/g' \
-        -e 's/${AWS_ACCESS_KEY_ID}/AKIAIXXXXXXXXXXXXXXX/g' \
-        -e 's/${AWS_SECRET_ACCESS_KEY}/XXXXXXXXXXXXXXXXX\/XXXXXXXXXXXXXXXXXXXXXX/g' \
-        -e 's/${AWS_REGION}/eu-central-1/g' \
-        -e 's/${AWS_AZ}/eu-central-1a/g' \
-        -e 's/${AWS_AMI}/ami-d60ad6b9/g' \
-        -e 's/${AWS_INSTANCE_TYPE_MASTER}/t2.medium/g' \
-        -e 's/${AWS_INSTANCE_TYPE_WORKER}/t2.medium/g' \
+        -e 's\${CLUSTER_NAME}\'"${CLUSTER_NAME}"'\g' \
+        -e 's\${COMMON_DOMAIN}\'"${COMMON_DOMAIN}"'\g' \
+        -e 's\${COMMON_DOMAIN_INGRESS}\'"${COMMON_DOMAIN_INGRESS}"'\g' \
+        -e 's\${ID_RSA_PUB}\'"${ID_RSA_PUB}"'\g' \
+        -e 's\${AWS_ACCESS_KEY_ID}\'"${AWS_ACCESS_KEY_ID}"'\g' \
+        -e 's\${AWS_SECRET_ACCESS_KEY}\'"${AWS_SECRET_ACCESS_KEY}"'\g' \
+        -e 's\${AWS_REGION}\'"${AWS_REGION}"'\g' \
+        -e 's\${AWS_AZ}\'"${AWS_AZ}"'\g' \
+        -e 's\${AWS_AMI}\'"${AWS_AMI}"'\g' \
+        -e 's\${AWS_INSTANCE_TYPE_MASTER}\'"${AWS_INSTANCE_TYPE_MASTER}"'\g' \
+        -e 's\${AWS_INSTANCE_TYPE_WORKER}\'"${AWS_INSTANCE_TYPE_WORKER}"'\g' \
         ./$f > ./${f%.tmpl.yaml}.yaml
 done
 ```
 
-- Note: Single quotes are intentional. Strings like `${CLUSTER_NAME}` shouldn't
-  be interpolated. These are placeholders in the template files.
-- Note: `/` inside `ID_RSA_PUB` and `AWS_SECRET_ACCESS_KEY` must be escaped
-  with `\`.
+- Note: `\` characters are used in `sed` substitubion to avoid escaping.
 
 
 ## Cluster Certificates
@@ -143,12 +152,12 @@ kubectl get secret ${CLUSTER_NAME}-api -o json | jq -r .data.ca | base64 --decod
 kubectl get secret ${CLUSTER_NAME}-api -o json | jq -r .data.crt | base64 --decode > ${CERT_DIR}/apiserver.crt
 kubectl get secret ${CLUSTER_NAME}-api -o json | jq -r .data.key | base64 --decode > ${CERT_DIR}/apiserver.key
 
-kubectl config set clusters.{CLUSTER_NAME}.certificate-authority "${CERT_DIR}/ca.crt"
-kubectl config set clusters.{CLUSTER_NAME}.server "https://api.${CLUSTER_NAME}.${COMMON_DOMAIN}"
-kubectl config set contexts.{CLUSTER_NAME}.cluster "${CLUSTER_NAME}"
-kubectl config set contexts.{CLUSTER_NAME}.user "${CLUSTER_NAME}"
-kubectl config set credentials ${CLUSTER_NAME}.client-certificate "${CERT_DIR}/apiserver.crt"
-kubectl config set credentials ${CLUSTER_NAME}.client-key "${CERT_DIR}/apiserver.key"
+kubectl config set clusters.${CLUSTER_NAME}.certificate-authority "${CERT_DIR}/ca.crt"
+kubectl config set clusters.${CLUSTER_NAME}.server "https://api.${CLUSTER_NAME}.${COMMON_DOMAIN}"
+kubectl config set contexts.${CLUSTER_NAME}.cluster "${CLUSTER_NAME}"
+kubectl config set contexts.${CLUSTER_NAME}.user "${CLUSTER_NAME}"
+kubectl config set users.${CLUSTER_NAME}.client-certificate "${CERT_DIR}/apiserver.crt"
+kubectl config set users.${CLUSTER_NAME}.client-key "${CERT_DIR}/apiserver.key"
 ```
 
 Now with `kubectl` configured let's display `cluster-info`.
