@@ -7,17 +7,17 @@ a production ready configuration.
 [kubernetes-dir]: https://github.com/giantswarm/aws-operator/tree/master/kubernetes
 [secrets-doc]: https://github.com/giantswarm/aws-operator#secret
 
-This guide explains how to get running aws-operator locally. For example on
-minikube. Also how to create a managed Kubernetes cluster with single master
-and single worker using the operator.
+This guide explains how to get aws-operator running locally - on minikube, for
+example. Also how to create a managed Kubernetes cluster with single master and
+single worker using the operator.
 
 All commands are assumed to be run from `examples/local` directory.
 
 
 ## Preparing Templates
 
-All yaml files in this directory are templates. Before proceeding this guide
-all placeholders must be replaced with sensible values.
+All yaml files in this directory are templates. Before continuing with this
+guide, all placeholders must be replaced with sensible values.
 
 - *CLUSTER_NAME* - Cluster's name.
 - *COMMON_DOMAIN* - Cluster's etcd and API common domain.
@@ -31,7 +31,7 @@ all placeholders must be replaced with sensible values.
 - *AWS_INSTANCE_TYPE_MASTER* - Master machines instance type.
 - *AWS_INSTANCE_TYPE_WORKER* - Worker machines instance type.
 
-Below is handy snippet than can be used to make that painless. It works in bash and zsh.
+This is a handy snippet that makes it painless - works in bash and zsh.
 
 ```bash
 export CLUSTER_NAME="example-cluster"
@@ -63,25 +63,25 @@ for f in *.tmpl.yaml; do
 done
 ```
 
-- Note: `|` characters are used in `sed` substitubion to avoid escaping.
+- Note: `|` characters are used in `sed` substitution to avoid escaping.
 
 
 ## Cluster Certificates
 
-The easiest way to create certificates is to use local [cert-operator] setup.
-See [this guide][cert-operator-local-setup] for details.
+The easiest way to create certificates is to use the local [cert-operator]
+setup. See [this guide][cert-operator-local-setup] for details.
 
-- Note: `CLUSTER_NAME` and `COMMON_DOMAIN` values must match ones used during
-  this guide.
+- Note: `CLUSTER_NAME` and `COMMON_DOMAIN` values must match the values used
+  during this guide.
 
 ## Cluster-Local Docker Image
 
 The operator needs a connection to the K8s API. The simplest approach is to run
-as a deployment and use the "in cluster" configuration.
+the operator as a deployment and use the "in cluster" configuration.
 
 In that case the Docker image needs to be accessible from the K8s cluster
-running the operator. For Minikube `eval $(minikube docker-env)` before `docker
-build`, see [reusing the Docker daemon] for details.
+running the operator. For Minikube run `eval $(minikube docker-env)` before
+`docker build`, see [reusing the Docker daemon] for details.
 
 [reusing the docker daemon]: https://github.com/kubernetes/minikube/blob/master/docs/reusing_the_docker_daemon.md 
 
@@ -105,8 +105,8 @@ The operator requires some configuration:
 - AWS credentials
 - SSH public key to be installed
 
-One way is to provide these with ConfigMaps. Please read introduction of this
-guide if you want to do it more securely.
+One way is to provide these with ConfigMaps. Please read the introduction of
+this guide if you want to do it more securely.
 
 ```bash
 kubectl apply -f ./configmap.yaml
@@ -123,21 +123,21 @@ First, let's create an new cluster ThirdPartyObject.
 kubectl create -f ./cluster.yaml
 ```
 
-Creating ThirdPartyObject should eventually result in working K8s cluster on
-AWS. To learn if the cluster is ready check the operator's pod logs with the
+Creating ThirdPartyObject should eventually result in a working K8s cluster on
+AWS. To test if the cluster is ready check the operator's pod logs with the
 command below.
 
 ```bash
 kubectl logs -l app=aws-operator-local
 ```
 
-When log like this appears in the output the cluster is ready.
+When a similar message appears in the log output, the cluster is ready.
 
 ```
 {"caller":"github.com/giantswarm/aws-operator/service/create/service.go:967","info":"cluster 'pawel' processed","time":"17-05-24 15:24:08.537"}
 ```
 
-Now it's time to connect the cluster with `kubectl`. This will require
+Now it's time to connect to the cluster with `kubectl`. This will require
 obtaining the new cluster's certificates adding new `kubectl` configuration.
 Here [jq] comes in handy.
 
@@ -180,7 +180,7 @@ export CLUSTER_NAME="example-cluster"
 kubectl delete aws -l clusterID=${CLUSTER_NAME}
 ```
 
-Wait for the operator to delete cluster, and then remove the operator's
+Wait for the operator to delete the cluster, and then remove the operator's
 deployment.
 
 ```bash
