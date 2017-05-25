@@ -53,7 +53,8 @@ done
 
 - Note: Single quotes are intentional. Strings like `${CLUSTER_NAME}` shouldn't
   be interpolated. These are placeholders in the template files.
-- Note: `/` inside `AWS_SECRET_ACCESS_KEY` must be escaped.
+- Note: `/` inside `ID_RSA_PUB` and `AWS_SECRET_ACCESS_KEY` must be escaped
+  with `\`.
 
 
 ## Cluster Certificates
