@@ -1,3 +1,23 @@
+Release v1.8.30 (2017-05-25)
+===
+
+### Service Client Updates
+* `service/appstream`: Updates service API and documentation
+  * Support added for persistent user storage, backed by S3.
+* `service/rekognition`: Updates service API and documentation
+  * Updated the CompareFaces API response to include orientation information, unmatched faces, landmarks, pose, and quality of the compared faces.
+
+Release v1.8.29 (2017-05-24)
+===
+
+### Service Client Updates
+* `service/iam`: Updates service API
+  * The unique ID and access key lengths were extended from 32 to 128
+* `service/storagegateway`: Updates service API and documentation
+  * Two Storage Gateway data types, Tape and TapeArchive, each have a new response element, TapeUsedInBytes. This element helps you manage your virtual tapes. By using TapeUsedInBytes, you can see the amount of data written to each virtual tape.
+* `service/sts`: Updates service API, documentation, and paginators
+  * The unique ID and access key lengths were extended from 32 to 128.
+
 Release v1.8.28 (2017-05-23)
 ===
 
