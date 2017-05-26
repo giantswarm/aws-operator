@@ -1028,7 +1028,7 @@ func (s *Service) onDelete(obj interface{}) {
 				}
 			}
 			if rsErr == nil {
-				s.logger.Log("info", "deleted API record sets")
+				s.logger.Log("info", "deleted record sets")
 			}
 		}
 	}
