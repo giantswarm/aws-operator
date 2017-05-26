@@ -1041,8 +1041,7 @@ coreos:
       -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
       -v /etc/cni/net.d/:/etc/cni/net.d/ \
-      -v /opt/cni/bin/calico:/opt/cni/bin/calico \
-      -v /opt/cni/bin/calico-ipam:/opt/cni/bin/calico-ipam \
+      -v /opt/cni/bin/:/opt/cni/bin/ \
       -e ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/server-ca.pem \
       -e ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/server-crt.pem \
       -e ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/server-key.pem \
@@ -1464,8 +1463,7 @@ coreos:
       -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
       -v /etc/cni/net.d/:/etc/cni/net.d/ \
-      -v /opt/cni/bin/calico:/opt/cni/bin/calico \
-      -v /opt/cni/bin/calico-ipam:/opt/cni/bin/calico-ipam \
+      -v /opt/cni/bin/:/opt/cni/bin/ \
       -e ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/client-ca.pem \
       -e ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/client-crt.pem \
       -e ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/client-key.pem \
