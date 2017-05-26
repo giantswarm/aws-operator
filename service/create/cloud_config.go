@@ -184,6 +184,29 @@ func (m *MasterCloudConfigExtension) Files() ([]cloudconfig.FileAsset, error) {
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
+		// Add second copy of files for etcd client certs. Will be replaced by
+		// a separate client cert.
+		cloudconfig.FileMetadata{
+			AssetContent: m.TLSAssets.EtcdServerCrt,
+			Path:         "/etc/kubernetes/ssl/etcd/client-crt.pem.enc",
+			Owner:        "root:root",
+			Encoding:     cloudconfig.GzipBase64,
+			Permissions:  0700,
+		},
+		cloudconfig.FileMetadata{
+			AssetContent: m.TLSAssets.EtcdServerCA,
+			Path:         "/etc/kubernetes/ssl/etcd/client-ca.pem.enc",
+			Owner:        "root:root",
+			Encoding:     cloudconfig.GzipBase64,
+			Permissions:  0700,
+		},
+		cloudconfig.FileMetadata{
+			AssetContent: m.TLSAssets.EtcdServerKey,
+			Path:         "/etc/kubernetes/ssl/etcd/client-key.pem.enc",
+			Owner:        "root:root",
+			Encoding:     cloudconfig.GzipBase64,
+			Permissions:  0700,
+		},
 	}
 
 	files, err := m.renderFiles(masterFilesMeta)
