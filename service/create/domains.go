@@ -2,7 +2,6 @@ package create
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/giantswarm/aws-operator/resources"
@@ -10,13 +9,6 @@ import (
 	"github.com/giantswarm/awstpr"
 	microerror "github.com/giantswarm/microkit/error"
 )
-
-type hostedZoneInput struct {
-	Cluster awstpr.CustomObject
-	Domain  string
-	Private bool
-	Client  *route53.Route53
-}
 
 type recordSetInput struct {
 	Cluster      awstpr.CustomObject
@@ -54,21 +46,11 @@ func (s *Service) createHostedZone(input hostedZoneInput) (*awsresources.HostedZ
 }
 
 func (s *Service) deleteRecordSet(input recordSetInput) error {
-	hzName, err := hostedZoneName(input.Domain)
-	if err != nil {
-		return microerror.MaskAny(err)
-	}
-
-	hz, err := awsresources.NewHostedZoneFromExisting(hzName, input.Client)
-	if err != nil {
-		return microerror.MaskAny(err)
-	}
-
 	rs := &awsresources.RecordSet{
 		Client:       input.Client,
 		Resource:     input.Resource,
 		Domain:       input.Domain,
-		HostedZoneID: hz.GetID(),
+		HostedZoneID: input.HostedZoneID,
 	}
 
 	if err := rs.Delete(); err != nil {
