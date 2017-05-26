@@ -53,6 +53,10 @@ spec:
   aws:
     region: "eu-central-1"
     az: "eu-central-1a"
+    hostedZones:
+      api: "HOSTED-ZONE-ID"
+      etcd: "HOSTED-ZONE-ID"
+      ingress: "HOSTED-ZONE-ID"
     vpc:
       cidr: "10.0.0.0/16"
       privateSubnetCidr: "10.0.0.0/19"
