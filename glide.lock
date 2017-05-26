@@ -1,5 +1,5 @@
 hash: e0a4e120144fe05a987ae6b5d015db7eb405fe8d6679f48511d3218a5609ebc3
-updated: 2017-05-26T13:29:35.400042066+02:00
+updated: 2017-05-26T14:15:47.420286045+02:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -95,9 +95,10 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: 2a9b74f9462593e89ce05d88cacbd8aff433ce08
+  version: 52e80f58f72c312a145c9aac437a45c9ba69ef9a
   subpackages:
   - aws
+  - aws/hostedzones
   - aws/vpc
 - name: github.com/giantswarm/certificatetpr
   version: 989414c916fafbc70d7e09fb48ef053b7290a9e4
@@ -126,7 +127,7 @@ imports:
   - node
   - vault
 - name: github.com/giantswarm/k8scloudconfig
-  version: a5f2a34d7269bee46abb025ada14770d19ecb517
+  version: decf6025ecffe9764416549ff5ebe22f8738318b
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:

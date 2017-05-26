@@ -871,7 +871,7 @@ coreos:
     command: start
     content: |
       [Unit]
-      Description=Set ownership to etcd2 data dir
+      Description=Set ownership to etcd3 data dir
       Wants=network-online.target
 
       [Service]
@@ -912,70 +912,58 @@ coreos:
       ExecStop=-/usr/bin/docker stop -t 10 $NAME
       ExecStopPost=-/usr/bin/docker rm -f $NAME
   - name: etcd2.service
+    command: stop
+    enable: false
+    mask: true
+  - name: etcd3.service
     enable: true
     command: start
     content: |
       [Unit]
-      Description=etcd2
+      Description=etcd3
       Requires=k8s-setup-network-env.service
       After=k8s-setup-network-env.service
-      Conflicts=etcd.service
-      StartLimitIntervalSec=0
-
+      Conflicts=etcd.service etcd2.service
+      
       [Service]
-      User=etcd
-      Type=notify
+      StartLimitIntervalSec=0
       Restart=always
       RestartSec=0
       TimeoutStopSec=10
       LimitNOFILE=40000
+      Environment=IMAGE=quay.io/coreos/etcd:v3.1.8
+      Environment=NAME=%p.service
       EnvironmentFile=/etc/network-environment
+      ExecStartPre=-/usr/bin/docker stop  $NAME
+      ExecStartPre=-/usr/bin/docker rm  $NAME
+      ExecStartPre=-/usr/bin/docker pull $IMAGE
       ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/etcd/server-ca.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/etcd/server-ca.pem to be written' && sleep 1; done"
       ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/etcd/server-crt.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/etcd/server-crt.pem to be written' && sleep 1; done"
       ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/etcd/server-key.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/etcd/server-key.pem to be written' && sleep 1; done"
-      ExecStart=/usr/bin/etcd2 --advertise-client-urls=https://{{ .Cluster.Etcd.Domain }}:2379 \
-                               --data-dir=/etc/kubernetes/data/etcd/ \
-                               --initial-advertise-peer-urls=https://127.0.0.1:2380 \
-                               --listen-client-urls=https://0.0.0.0:2379 \
-                               --listen-peer-urls=https://${DEFAULT_IPV4}:2380 \
-                               --initial-cluster-token k8s-etcd-cluster \
-                               --initial-cluster etcd0=https://127.0.0.1:2380 \
-                               --initial-cluster-state new \
-                               --ca-file=/etc/kubernetes/ssl/etcd/server-ca.pem \
-                               --cert-file=/etc/kubernetes/ssl/etcd/server-crt.pem \
-                               --key-file=/etc/kubernetes/ssl/etcd/server-key.pem \
-                               --peer-ca-file=/etc/kubernetes/ssl/etcd/server-ca.pem \
-                               --peer-cert-file=/etc/kubernetes/ssl/etcd/server-crt.pem \
-                               --peer-key-file=/etc/kubernetes/ssl/etcd/server-key.pem \
-                               --peer-client-cert-auth=true \
-                               --name etcd0
-
-      [Install]
-      WantedBy=multi-user.target
-  - name: etcd2-restart.service
-    enable: true
-    content: |
-      [Unit]
-      Description=etcd2-restart
-
-      [Service]
-      Type=oneshot
-      ExecStartPre=/usr/bin/systemctl stop etcd2.service
-      ExecStartPre=/usr/bin/bash -c 'while systemctl is-active --quiet etcd2.service; do sleep 1 && echo waiting for etcd2 to stop; done'
-      ExecStart=/usr/bin/systemctl start etcd2.service
-
-      [Install]
-      WantedBy=multi-user.target
-  - name: etcd2-restart.timer
-    enable: true
-    command: start
-    content: |
-      [Unit]
-      Description=Timer
-
-      [Timer]
-      OnCalendar=13:00
-      Unit=etcd2-restart.service
+      ExecStart=/usr/bin/docker run \
+          -v /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt \
+          -v /etc/kubernetes/ssl/etcd/:/etc/etcd \
+          -v /etc/kubernetes/data/etcd/:/var/lib/etcd  \
+          --net=host  \
+          --name $NAME \
+          $IMAGE \
+          etcd \
+          --name etcd0 \
+          --trusted-ca-file /etc/etcd/server-ca.pem \
+          --cert-file /etc/etcd/server-crt.pem \
+          --key-file /etc/etcd/server-key.pem\
+          --peer-trusted-ca-file /etc/etcd/server-ca.pem \
+          --peer-cert-file /etc/etcd/server-crt.pem \
+          --peer-key-file /etc/etcd/server-key.pem \
+          --peer-client-cert-auth=true \
+          --advertise-client-urls=https://{{ .Cluster.Etcd.Domain }}:2379 \
+          --initial-advertise-peer-urls=https://127.0.0.1:2380 \
+          --listen-client-urls=https://0.0.0.0:2379 \
+          --listen-peer-urls=https://${DEFAULT_IPV4}:2380 \
+          --initial-cluster-token k8s-etcd-cluster \
+          --initial-cluster etcd0=https://127.0.0.1:2380 \
+          --initial-cluster-state new \
+          --data-dir=/var/lib/etcd
 
       [Install]
       WantedBy=multi-user.target
