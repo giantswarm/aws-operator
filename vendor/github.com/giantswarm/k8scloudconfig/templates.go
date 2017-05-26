@@ -880,7 +880,7 @@ coreos:
     - name: 10-giantswarm-extra-args.conf
       content: |
         [Service]
-        Environment="DOCKER_CGROUPS=--exec-opt native.cgroupdriver=systemd {{.Cluster.Docker.Daemon.ExtraArgs}}"
+        Environment="DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs {{.Cluster.Docker.Daemon.ExtraArgs}}"
   - name: k8s-setup-network-env.service
     enable: true
     command: start
@@ -1356,7 +1356,7 @@ coreos:
     - name: 10-giantswarm-extra-args.conf
       content: |
         [Service]
-        Environment="DOCKER_CGROUPS=--exec-opt native.cgroupdriver=systemd {{.Cluster.Docker.Daemon.ExtraArgs}}"
+        Environment="DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs {{.Cluster.Docker.Daemon.ExtraArgs}}"
   - name: k8s-setup-network-env.service
     enable: true
     command: start
