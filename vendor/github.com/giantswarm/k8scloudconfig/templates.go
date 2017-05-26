@@ -660,6 +660,9 @@ write_files:
   content: |
       #!/bin/bash
       while ! curl --output /dev/null --silent --head --fail --cacert /etc/kubernetes/ssl/apiserver-ca.pem --cert /etc/kubernetes/ssl/apiserver-crt.pem --key /etc/kubernetes/ssl/apiserver-key.pem "https://{{.Cluster.Kubernetes.API.Domain}}:443"; do sleep 1 && echo 'Waiting for master'; done
+      curl -o /opt/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kubectl 
+      chmod +x /opt/bin/kubectl
+      while [ "$(/opt/bin/kubectl get cs | grep Healthy | wc -l)" -ne "3" ];do sleep 1 && echo 'Waiting for healthy k8s'; done
 
       echo "K8S: Calico node config map"
       curl -H "Content-Type: application/yaml" \
@@ -686,10 +689,6 @@ write_files:
         -XPOST -d"$(cat /srv/calico-policy-controller.yaml)" \
         --cacert /etc/kubernetes/ssl/apiserver-ca.pem --cert /etc/kubernetes/ssl/apiserver-crt.pem --key /etc/kubernetes/ssl/apiserver-key.pem \
         "https://{{.Cluster.Kubernetes.API.Domain}}:443/apis/extensions/v1beta1/namespaces/kube-system/deployments"
-      curl -H "Content-Type: application/json" \
-        -XPOST -d"$(cat /srv/calico-system.json)" \
-        --cacert /etc/kubernetes/ssl/apiserver-ca.pem --cert /etc/kubernetes/ssl/apiserver-crt.pem --key /etc/kubernetes/ssl/apiserver-key.pem \
-        "https://{{.Cluster.Kubernetes.API.Domain}}:443/api/v1/namespaces/"
 
       echo "K8S: DNS addons"
       curl -H "Content-Type: application/yaml" \
@@ -700,12 +699,6 @@ write_files:
         -XPOST -d"$(cat /srv/kubedns-svc.yaml)" \
         --cacert /etc/kubernetes/ssl/apiserver-ca.pem --cert /etc/kubernetes/ssl/apiserver-crt.pem --key /etc/kubernetes/ssl/apiserver-key.pem \
         "https://{{.Cluster.Kubernetes.API.Domain}}:443/api/v1/namespaces/kube-system/services"
-
-      echo "K8S: Calico Policy"
-      curl -H "Content-Type: application/json" \
-        -XPOST -d"$(cat /srv/calico-system.json)" \
-        --cacert /etc/kubernetes/ssl/apiserver-ca.pem --cert /etc/kubernetes/ssl/apiserver-crt.pem --key /etc/kubernetes/ssl/apiserver-key.pem \
-        "https://{{.Cluster.Kubernetes.API.Domain}}:443/api/v1/namespaces/"
 
       echo "K8S: Fallback Server"
       curl -H "Content-Type: application/yaml" \
