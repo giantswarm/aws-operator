@@ -2,6 +2,9 @@ package cloudconfig
 
 const (
 	MasterTemplate = `#cloud-config
+ssh_authorized_keys:
+{{range .Cluster.Kubernetes.SSH.PublicKeys}}
+- '{{.}}'{{end}}
 write_files:
 - path: /srv/calico-policy-controller-sa.yaml
   owner: root
@@ -44,7 +47,7 @@ write_files:
 
       # Configure the Calico backend to use.
       calico_backend: "bird"
-    
+
       # The CNI network configuration to install on each node.
       # TODO: Do we still need to set MTU manually?
       cni_network_config: |-
@@ -70,16 +73,16 @@ write_files:
                 "kubeconfig": "__KUBECONFIG_FILEPATH__"
             }
         }
-    
+
       etcd_ca: "/etc/kubernetes/ssl/etcd/client-ca.pem"
       etcd_cert: "/etc/kubernetes/ssl/etcd/client-crt.pem"
       etcd_key: "/etc/kubernetes/ssl/etcd/client-key.pem"
-    
+
 - path: /srv/calico-ds.yaml
   owner: root
   permissions: 644
   content: |
-    
+
     # This manifest installs the calico/node container, as well
     # as the Calico CNI plugins and network config on
     # each master and worker node in a Kubernetes cluster.
@@ -691,7 +694,7 @@ write_files:
       # wait for healthy calico - we check for pods - desired vs ready
       while
           # result of this is 'eval [ "$DESIRED_POD_COUNT" -eq "$READY_POD_COUNT" ]'
-          eval $(/opt/bin/kubectl --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml -n kube-system get ds calico-node | tail -1 | awk '{print "[ \"" $2"\" -eq \""$3"\" ] "}')
+          eval $(/opt/bin/kubectl --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml -n kube-system get ds calico-node | tail -1 | awk '{print "[ \"" $2"\" -eq \""$4"\" ] "}')
           [ "$?" -ne "0" ]
       do
           echo "Waiting for calico to be ready . . "
@@ -904,7 +907,7 @@ coreos:
       Requires=k8s-setup-network-env.service
       After=k8s-setup-network-env.service
       Conflicts=etcd.service etcd2.service
-      
+
       [Service]
       StartLimitIntervalSec=0
       Restart=always
@@ -1212,6 +1215,9 @@ coreos:
 `
 
 	WorkerTemplate = `#cloud-config
+ssh_authorized_keys:
+{{range .Cluster.Kubernetes.SSH.PublicKeys}}
+- '{{.}}'{{end}}
 write_files:
 - path: /etc/kubernetes/config/proxy-kubeconfig.yml
   owner: root
