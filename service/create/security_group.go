@@ -89,8 +89,8 @@ func (ri rulesInput) masterRules() []awsresources.SecurityGroupRule {
 			SourceCIDR: defaultCIDR,
 		},
 		{
-			Port:       calicoBGPNetworkPort,
-			SourceCIDR: defaultCIDR,
+			Port:            calicoBGPNetworkPort,
+			SecurityGroupID: ri.WorkersSecurityGroupID,
 		},
 	}
 }
@@ -99,28 +99,28 @@ func (ri rulesInput) masterRules() []awsresources.SecurityGroupRule {
 func (ri rulesInput) workerRules() []awsresources.SecurityGroupRule {
 	return []awsresources.SecurityGroupRule{
 		{
-			Port:       ri.Cluster.Spec.Cluster.Kubernetes.IngressController.SecurePort,
-			SourceCIDR: defaultCIDR,
+			Port:            ri.Cluster.Spec.Cluster.Kubernetes.IngressController.SecurePort,
+			SecurityGroupID: ri.IngressSecurityGroupID,
 		},
 		{
-			Port:       ri.Cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
-			SourceCIDR: defaultCIDR,
+			Port:            ri.Cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
+			SecurityGroupID: ri.IngressSecurityGroupID,
 		},
 		{
-			Port:       ri.Cluster.Spec.Cluster.Kubernetes.Kubelet.Port,
-			SourceCIDR: defaultCIDR,
+			Port:            ri.Cluster.Spec.Cluster.Kubernetes.Kubelet.Port,
+			SecurityGroupID: ri.MastersSecurityGroupID,
 		},
 		{
-			Port:       readOnlyKubeletPort,
-			SourceCIDR: defaultCIDR,
+			Port:            readOnlyKubeletPort,
+			SecurityGroupID: ri.MastersSecurityGroupID,
 		},
 		{
 			Port:       sshPort,
 			SourceCIDR: defaultCIDR,
 		},
 		{
-			Port:       calicoBGPNetworkPort,
-			SourceCIDR: defaultCIDR,
+			Port:            calicoBGPNetworkPort,
+			SecurityGroupID: ri.MastersSecurityGroupID,
 		},
 	}
 }
