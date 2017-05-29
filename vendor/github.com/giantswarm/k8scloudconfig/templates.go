@@ -504,6 +504,15 @@ write_files:
                 scheme: HTTP
               initialDelaySeconds: 30
               timeoutSeconds: 5
+            ports:
+            - containerPort: 8080
+            resources:
+              limits:
+                cpu: 10m
+                memory: 20Mi
+              requests:
+                cpu: 10m
+                memory: 20Mi
 - path: /srv/default-backend-svc.yml
   owner: root
   permissions: 0644
