@@ -32,6 +32,8 @@ func (r RouteTable) findExisting() (*ec2.RouteTable, error) {
 
 	if len(routeTables.RouteTables) < 1 {
 		return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, RouteTableType, r.Name)
+	} else if len(routeTables.RouteTables) > 1 {
+		return nil, microerror.MaskAny(tooManyResultsError)
 	}
 
 	return routeTables.RouteTables[0], nil

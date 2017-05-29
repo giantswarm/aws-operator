@@ -48,8 +48,10 @@ func (s SecurityGroup) findExisting() (*ec2.SecurityGroup, error) {
 		return nil, microerror.MaskAny(err)
 	}
 
-	if len(securityGroups.SecurityGroups) != 1 {
+	if len(securityGroups.SecurityGroups) < 1 {
 		return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, SecurityGroupType, s.GroupName)
+	} else if len(securityGroups.SecurityGroups) > 1 {
+		return nil, microerror.MaskAny(tooManyResultsError)
 	}
 
 	return securityGroups.SecurityGroups[0], nil

@@ -36,6 +36,8 @@ func (g Gateway) findExisting() (*ec2.InternetGateway, error) {
 
 	if len(gateways.InternetGateways) < 1 {
 		return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, GatewayType, g.Name)
+	} else if len(gateways.InternetGateways) > 1 {
+		return nil, microerror.MaskAny(tooManyResultsError)
 	}
 
 	return gateways.InternetGateways[0], nil
