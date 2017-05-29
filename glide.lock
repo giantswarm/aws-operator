@@ -1,5 +1,5 @@
 hash: e0a4e120144fe05a987ae6b5d015db7eb405fe8d6679f48511d3218a5609ebc3
-updated: 2017-05-26T17:18:24.545624267+02:00
+updated: 2017-05-29T11:53:45.854525535+02:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -49,7 +49,7 @@ imports:
 - name: github.com/blang/semver
   version: 31b736133b98f26d5e078ec9eb591666edfd091f
 - name: github.com/cenkalti/backoff
-  version: 32cd0c5b3aef12c76ed64aaf678f6c79736be7dc
+  version: 5d150e7eec023ce7a124856b37c68e54b4050ac7
 - name: github.com/coreos/etcd
   version: d267ca9c184e953554257d0acdd1dc9c47d38229
   subpackages:
@@ -95,7 +95,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: 52e80f58f72c312a145c9aac437a45c9ba69ef9a
+  version: 7e74ed90b558746591e4b22132a9e481f263fb1d
   subpackages:
   - aws
   - aws/hostedzones
@@ -103,7 +103,7 @@ imports:
 - name: github.com/giantswarm/certificatetpr
   version: 989414c916fafbc70d7e09fb48ef053b7290a9e4
 - name: github.com/giantswarm/clustertpr
-  version: fd3a829c4e5b6546d22457b969f8be65bcd3f548
+  version: 3725e2e96aad0963224cef95b0cad534d94cb4cb
   subpackages:
   - calico
   - cluster
@@ -112,9 +112,6 @@ imports:
   - docker/daemon
   - docker/registry
   - etcd
-  - flannel
-  - flannel/client
-  - flannel/docker
   - kubernetes
   - kubernetes/api
   - kubernetes/dns
@@ -127,7 +124,7 @@ imports:
   - node
   - vault
 - name: github.com/giantswarm/k8scloudconfig
-  version: d653a67d1352a0148b2aa42b721d8408a690a5c9
+  version: 01304ceb96374f4427423b6c83e424e6636fe455
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
