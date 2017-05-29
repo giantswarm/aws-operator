@@ -674,8 +674,32 @@ write_files:
       # wait for healthy master
       while [ "$(/opt/bin/kubectl get cs | grep Healthy | wc -l)" -ne "3" ];do sleep 1 && echo 'Waiting for healthy k8s'; done
 
-      # apply manifests
-      MANIFESTS="calico-configmap.yaml calico-node-sa.yaml calico-policy-controller-sa.yaml calico-ds.yaml calico-policy-controller.yaml kubedns-dep.yaml kubedns-svc.yaml default-backend-dep.yml default-backend-svc.yml ingress-controller-cm.yml ingress-controller-dep.yml ingress-controller-svc.yml"
+      # apply calico CNI
+      CALICO_FILES="calico-configmap.yaml calico-node-sa.yaml calico-policy-controller-sa.yaml calico-ds.yaml calico-policy-controller.yaml"
+
+     for manifest in $CALICO_FILES
+      do
+          while
+              /opt/bin/kubectl --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml apply -f /srv/$manifest
+              [ "$?" -ne "0" ]
+          do
+              echo "failed to apply /src/$manifest, retrying in 5 sec"
+              sleep 5s
+          done
+      done
+
+      # wait for healthy calico - we check for pods - desired vs ready
+      while
+          # result of this is 'eval [ "$DESIRED_POD_COUNT" -eq "$READY_POD_COUNT" ]'
+          eval $(/opt/bin/kubectl --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml -n kube-system get ds calico-node | tail -1 | awk '{print "[ \"" $2"\" -eq \""$3"\" ] "}')
+          [ "$?" -ne "0" ]
+      do
+          echo "Waiting for calico to be ready . . "
+          sleep 3s
+      done
+
+      # apply k8s addons
+      MANIFESTS="kubedns-dep.yaml kubedns-svc.yaml default-backend-dep.yml default-backend-svc.yml ingress-controller-cm.yml ingress-controller-dep.yml ingress-controller-svc.yml"
 
       for manifest in $MANIFESTS
       do
