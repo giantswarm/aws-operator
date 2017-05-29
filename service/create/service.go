@@ -823,48 +823,6 @@ func (s *Service) onAdd(obj interface{}) {
 		return
 	}
 
-	// Create public Hosted Zone for the API.
-	apiHZInput := hostedZoneInput{
-		Cluster: cluster,
-		Domain:  cluster.Spec.Cluster.Kubernetes.API.Domain,
-		Client:  clients.Route53,
-	}
-
-	apiHZ, err := s.createHostedZone(apiHZInput)
-	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
-		return
-	}
-	apiHZID := apiHZ.GetID()
-
-	// Create private Hosted Zone for etcd traffic.
-	etcdHZInput := hostedZoneInput{
-		Cluster: cluster,
-		Domain:  cluster.Spec.Cluster.Etcd.Domain,
-		Client:  clients.Route53,
-	}
-
-	etcdHZ, err := s.createHostedZone(etcdHZInput)
-	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
-		return
-	}
-	etcdHZID := etcdHZ.GetID()
-
-	// Create public Hosted Zone for customer traffic.
-	ingressHZInput := hostedZoneInput{
-		Cluster: cluster,
-		Domain:  cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-		Client:  clients.Route53,
-	}
-
-	ingressHZ, err := s.createHostedZone(ingressHZInput)
-	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
-		return
-	}
-	ingressHZID := ingressHZ.GetID()
-
 	// Run workers
 	anyWorkersCreated, workerIDs, err := s.runMachines(runMachinesInput{
 		clients:             clients,
@@ -932,21 +890,21 @@ func (s *Service) onAdd(obj interface{}) {
 			Client:       clients.Route53,
 			Resource:     apiLB,
 			Domain:       cluster.Spec.Cluster.Kubernetes.API.Domain,
-			HostedZoneID: apiHZID,
+			HostedZoneID: cluster.Spec.AWS.HostedZones.API,
 		},
 		recordSetInput{
 			Cluster:      cluster,
 			Client:       clients.Route53,
 			Resource:     etcdLB,
 			Domain:       cluster.Spec.Cluster.Etcd.Domain,
-			HostedZoneID: etcdHZID,
+			HostedZoneID: cluster.Spec.AWS.HostedZones.Etcd,
 		},
 		recordSetInput{
 			Cluster:      cluster,
 			Client:       clients.Route53,
 			Resource:     ingressLB,
 			Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-			HostedZoneID: ingressHZID,
+			HostedZoneID: cluster.Spec.AWS.HostedZones.Ingress,
 		},
 	}
 
@@ -1041,22 +999,25 @@ func (s *Service) onDelete(obj interface{}) {
 		} else {
 			recordSetInputs := []recordSetInput{
 				recordSetInput{
-					Cluster:  cluster,
-					Client:   clients.Route53,
-					Resource: apiLB,
-					Domain:   cluster.Spec.Cluster.Kubernetes.API.Domain,
+					Cluster:      cluster,
+					Client:       clients.Route53,
+					Resource:     apiLB,
+					Domain:       cluster.Spec.Cluster.Kubernetes.API.Domain,
+					HostedZoneID: cluster.Spec.AWS.HostedZones.API,
 				},
 				recordSetInput{
-					Cluster:  cluster,
-					Client:   clients.Route53,
-					Resource: etcdLB,
-					Domain:   cluster.Spec.Cluster.Etcd.Domain,
+					Cluster:      cluster,
+					Client:       clients.Route53,
+					Resource:     etcdLB,
+					Domain:       cluster.Spec.Cluster.Etcd.Domain,
+					HostedZoneID: cluster.Spec.AWS.HostedZones.Etcd,
 				},
 				recordSetInput{
-					Cluster:  cluster,
-					Client:   clients.Route53,
-					Resource: ingressLB,
-					Domain:   cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+					Cluster:      cluster,
+					Client:       clients.Route53,
+					Resource:     ingressLB,
+					Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+					HostedZoneID: cluster.Spec.AWS.HostedZones.Ingress,
 				},
 			}
 
@@ -1067,7 +1028,7 @@ func (s *Service) onDelete(obj interface{}) {
 				}
 			}
 			if rsErr == nil {
-				s.logger.Log("info", "deleted API record sets")
+				s.logger.Log("info", "deleted record sets")
 			}
 		}
 	}

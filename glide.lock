@@ -49,7 +49,7 @@ imports:
 - name: github.com/blang/semver
   version: 31b736133b98f26d5e078ec9eb591666edfd091f
 - name: github.com/cenkalti/backoff
-  version: 5d150e7eec023ce7a124856b37c68e54b4050ac7
+  version: 32cd0c5b3aef12c76ed64aaf678f6c79736be7dc
 - name: github.com/coreos/etcd
   version: d267ca9c184e953554257d0acdd1dc9c47d38229
   subpackages:
