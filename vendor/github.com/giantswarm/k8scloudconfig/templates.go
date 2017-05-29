@@ -677,7 +677,7 @@ write_files:
       # apply calico CNI
       CALICO_FILES="calico-configmap.yaml calico-node-sa.yaml calico-policy-controller-sa.yaml calico-ds.yaml calico-policy-controller.yaml"
 
-     for manifest in $CALICO_FILES
+      for manifest in $CALICO_FILES
       do
           while
               /opt/bin/kubectl --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml apply -f /srv/$manifest
