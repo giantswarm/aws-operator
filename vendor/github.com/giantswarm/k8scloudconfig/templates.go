@@ -694,8 +694,11 @@ write_files:
       # wait for healthy calico - we check for pods - desired vs ready
       while
           # result of this is 'eval [ "$DESIRED_POD_COUNT" -eq "$READY_POD_COUNT" ]'
+          /opt/bin/kubectl --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml -n default  get ds calico-node 2>/dev/null >/dev/null
+          RET_CODE_1=$?
           eval $(/opt/bin/kubectl --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml -n kube-system get ds calico-node | tail -1 | awk '{print "[ \"" $2"\" -eq \""$4"\" ] "}')
-          [ "$?" -ne "0" ]
+          RET_CODE_2=$?
+          [ "$RET_CODE_1" -ne "0" ] || [ "$RET_CODE_2" -ne "0" ]
       do
           echo "Waiting for calico to be ready . . "
           sleep 3s
