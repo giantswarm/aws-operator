@@ -88,15 +88,24 @@ func (i Instance) findExisting() (*ec2.Instance, error) {
 		return nil, microerror.MaskAny(err)
 	}
 
+	var existingInstance *ec2.Instance
+	var instancesFound int
 	for _, reservation := range reservations.Reservations {
 		for _, instance := range reservation.Instances {
 			if statePendingOrRunning(instance) {
-				return instance, nil
+				existingInstance = instance
+				instancesFound++
 			}
 		}
 	}
 
-	return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, InstanceType, i.Name)
+	if instancesFound < 1 {
+		return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, InstanceType, i.Name)
+	} else if instancesFound > 1 {
+		return nil, microerror.MaskAny(tooManyResultsError)
+	}
+
+	return existingInstance, nil
 }
 
 func (i *Instance) checkIfExists() (bool, error) {

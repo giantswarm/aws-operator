@@ -224,8 +224,10 @@ func (lb ELB) findExisting() (*elb.LoadBalancerDescription, error) {
 
 	descriptions := resp.LoadBalancerDescriptions
 
-	if len(descriptions) == 0 {
+	if len(descriptions) < 1 {
 		return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, ELBType, lb.Name)
+	} else if len(descriptions) > 1 {
+		return nil, microerror.MaskAny(tooManyResultsError)
 	}
 
 	return descriptions[0], nil

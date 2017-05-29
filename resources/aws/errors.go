@@ -34,6 +34,13 @@ func IsNotFound(err error) bool {
 	return errgo.Cause(err) == notFoundError
 }
 
+var tooManyResultsError = errgo.New("too many results")
+
+// IsTooManyResults asserts tooManyResultsError.
+func IsTooManyResults(err error) bool {
+	return errgo.Cause(err) == tooManyResultsError
+}
+
 // Delete errors.
 
 var resourceDeleteError = errgo.New("couldn't delete resource, it lacks the necessary data (ID)")

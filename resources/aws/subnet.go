@@ -41,6 +41,8 @@ func (s Subnet) findExisting() (*ec2.Subnet, error) {
 
 	if len(subnets.Subnets) < 1 {
 		return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, SubnetType, s.Name)
+	} else if len(subnets.Subnets) > 1 {
+		return nil, microerror.MaskAny(tooManyResultsError)
 	}
 
 	return subnets.Subnets[0], nil

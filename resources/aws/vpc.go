@@ -32,6 +32,8 @@ func (v VPC) findExisting() (*ec2.Vpc, error) {
 
 	if len(vpcs.Vpcs) < 1 {
 		return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, VPCType, v.Name)
+	} else if len(vpcs.Vpcs) > 1 {
+		return nil, microerror.MaskAny(tooManyResultsError)
 	}
 
 	return vpcs.Vpcs[0], nil
