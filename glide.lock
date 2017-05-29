@@ -1,5 +1,5 @@
 hash: e0a4e120144fe05a987ae6b5d015db7eb405fe8d6679f48511d3218a5609ebc3
-updated: 2017-05-29T12:07:40.725260831+02:00
+updated: 2017-05-29T15:08:40.509803577+02:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -124,7 +124,7 @@ imports:
   - node
   - vault
 - name: github.com/giantswarm/k8scloudconfig
-  version: e7067e75486eae0d0e122cc7fab2b433efbed4ff
+  version: da9b03f26aa5dfa39511b1fd4f5651535121ff8f
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
