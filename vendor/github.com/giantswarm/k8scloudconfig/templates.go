@@ -452,6 +452,7 @@ write_files:
             - --cache-size=1000
             - --no-resolv
             - --log-facility=-
+            - --server=127.0.0.1#10053
             - --server=/{{.Cluster.Kubernetes.Domain}}/127.0.0.1#10053
             - --server=/in-addr.arpa/127.0.0.1#10053
             - --server=/ip6.arpa/127.0.0.1#10053
