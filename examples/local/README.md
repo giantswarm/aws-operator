@@ -30,6 +30,8 @@ guide, all placeholders must be replaced with sensible values.
 - *AWS_AMI* - AWS image to be used on both master and worker machines.
 - *AWS_INSTANCE_TYPE_MASTER* - Master machines instance type.
 - *AWS_INSTANCE_TYPE_WORKER* - Worker machines instance type.
+- *AWS_API_HOSTED_ZONE* - Route 53 hosted zone for API and Etcd
+- *AWS_INGRESS_HOSTED_ZONE* - Route 53 hosted zone for Ingress
 
 This is a handy snippet that makes it painless - works in bash and zsh.
 
@@ -45,6 +47,8 @@ export AWS_AZ="eu-central-1a"
 export AWS_AMI="ami-d60ad6b9"
 export AWS_INSTANCE_TYPE_MASTER="t2.medium"
 export AWS_INSTANCE_TYPE_WORKER="t2.medium"
+export AWS_API_HOSTED_ZONE="Z*************"
+export AWS_INGRESS_HOSTED_ZONE="Z*************"
 
 for f in *.tmpl.yaml; do
     sed \
@@ -59,6 +63,8 @@ for f in *.tmpl.yaml; do
         -e 's|${AWS_AMI}|'"${AWS_AMI}"'|g' \
         -e 's|${AWS_INSTANCE_TYPE_MASTER}|'"${AWS_INSTANCE_TYPE_MASTER}"'|g' \
         -e 's|${AWS_INSTANCE_TYPE_WORKER}|'"${AWS_INSTANCE_TYPE_WORKER}"'|g' \
+        -e 's|${AWS_API_HOSTED_ZONE}|'"${AWS_API_HOSTED_ZONE}"'|g' \
+        -e 's|${AWS_INGRESS_HOSTED_ZONE}|'"${AWS_INGRESS_HOSTED_ZONE}"'|g' \
         ./$f > ./${f%.tmpl.yaml}.yaml
 done
 ```
