@@ -35,7 +35,7 @@ spec:
       domain: "cluster.local"
       hyperkube:
         docker:
-          image: "giantswarm/hyperkube:v1.6.4_coreos.0"
+          image: "quay.io/giantswarm/hyperkube:v1.6.4_coreos.0"
       ingressController:
         insecurePort: 30010
         securePort: 30011
