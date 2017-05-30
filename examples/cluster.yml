@@ -57,6 +57,9 @@ spec:
       api: "HOSTED-ZONE-ID"
       etcd: "HOSTED-ZONE-ID"
       ingress: "HOSTED-ZONE-ID"
+    ssmAgent:
+      docker:
+        image: "rlister/amazon-ssm-agent"
     vpc:
       cidr: "10.0.0.0/16"
       privateSubnetCidr: "10.0.0.0/19"

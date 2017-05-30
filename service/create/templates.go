@@ -1,6 +1,20 @@
 package create
 
 const (
+	amazonSSMAgentServiceTemplate = `
+[Unit]
+Description=Amazon SSM Agent
+
+[Service]
+StartLimitIntervalSec=0
+Restart=always
+RestartSec=0
+TimeoutStopSec=10
+Environment="IMAGE={{.AWS.SSMAgent.Docker.Image}}"
+Environment="NAME=%p.service"
+ExecStart=/usr/bin/docker run --rm -v /var/run/dbus:/var/run/dbus -v /run/systemd:/run/systemd --name $NAME $IMAGE
+`
+
 	decryptTLSAssetsScriptTemplate = `#!/bin/bash -e
 
 rkt run \

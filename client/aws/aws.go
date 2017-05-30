@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/sns"
 
 	microerror "github.com/giantswarm/microkit/error"
 )
@@ -31,6 +32,7 @@ type Clients struct {
 	KMS     *kms.KMS
 	ELB     *elb.ELB
 	Route53 *route53.Route53
+	SNS     *sns.SNS
 }
 
 const (
@@ -51,6 +53,7 @@ func NewClients(config Config) Clients {
 		KMS:     kms.New(s),
 		ELB:     elb.New(s),
 		Route53: route53.New(s),
+		SNS:     sns.New(s),
 	}
 
 	return clients

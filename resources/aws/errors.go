@@ -22,6 +22,7 @@ const (
 	RouteType         resourceType = "route"
 	SecurityGroupType resourceType = "security group"
 	SubnetType        resourceType = "subnet"
+	TopicType         resourceType = "topic"
 	VPCType           resourceType = "vpc"
 )
 

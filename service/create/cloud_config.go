@@ -15,6 +15,12 @@ var (
 			Enable:       true,
 			Command:      "start",
 		},
+		cloudconfig.UnitMetadata{
+			AssetContent: amazonSSMAgentServiceTemplate,
+			Name:         "amazon-ssm-agent.service",
+			Enable:       true,
+			Command:      "start",
+		},
 	}
 )
 
