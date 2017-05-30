@@ -27,13 +27,15 @@ spec:
       api:
         domain: "api.${CLUSTER_NAME}.${COMMON_DOMAIN}"
         insecurePort: 8080
+        ip: "172.31.0.1" 
         securePort: 443
-        clusterIPRange: "192.168.0.0/24"
+        clusterIPRange: "172.31.0.0/24"
       dns:
-        ip: "172.29.0.10"
+        ip: "172.31.0.10"
+      domain: "cluster.local"
       hyperkube:
         docker:
-          image: "giantswarm/hyperkube:v1.5.2_coreos.0"
+          image: "quay.io/giantswarm/hyperkube:v1.6.4_coreos.0"
       ingressController:
         insecurePort: 30010
         securePort: 30011
@@ -53,6 +55,10 @@ spec:
   aws:
     region: "${AWS_REGION}"
     az: "${AWS_AZ}"
+    hostedZones:
+      api: "${AWS_API_HOSTED_ZONE}"
+      etcd: "${AWS_API_HOSTED_ZONE}"
+      ingress: "${AWS_INGRESS_HOSTED_ZONE}"
     vpc:
       cidr: "10.0.0.0/16"
       privateSubnetCidr: "10.0.0.0/19"
