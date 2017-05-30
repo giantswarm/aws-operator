@@ -1,5 +1,5 @@
 hash: e0a4e120144fe05a987ae6b5d015db7eb405fe8d6679f48511d3218a5609ebc3
-updated: 2017-05-29T18:05:46.537552836+02:00
+updated: 2017-05-30T16:19:25.833216563+02:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -41,6 +41,7 @@ imports:
   - service/kms
   - service/route53
   - service/s3
+  - service/sns
   - service/sts
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -95,15 +96,17 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: 7e74ed90b558746591e4b22132a9e481f263fb1d
+  version: 2ace4f24860c84784c5df90d94162400ead447b8
   subpackages:
   - aws
   - aws/hostedzones
+  - aws/ssm
+  - aws/ssm/docker
   - aws/vpc
 - name: github.com/giantswarm/certificatetpr
   version: 989414c916fafbc70d7e09fb48ef053b7290a9e4
 - name: github.com/giantswarm/clustertpr
-  version: 209745d7dd533b09dc3dace629aa50c328451018
+  version: 13ee60687afcd5e519d1d3e8a60c1c57d2d21ccf
   subpackages:
   - calico
   - cluster
@@ -118,6 +121,8 @@ imports:
   - kubernetes/hyperkube
   - kubernetes/hyperkube/docker
   - kubernetes/ingress
+  - kubernetes/kubectl
+  - kubernetes/kubectl/docker
   - kubernetes/kubelet
   - kubernetes/networksetup
   - kubernetes/networksetup/docker
@@ -125,7 +130,7 @@ imports:
   - node
   - vault
 - name: github.com/giantswarm/k8scloudconfig
-  version: ca5071b5a8a9a01c490fe255de0924ec4080f5b5
+  version: 7e3e30171c105a5d8b88fea3f89e283e40204d95
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
@@ -143,7 +148,7 @@ imports:
   - transaction/context/id
   - transaction/context/tracked
 - name: github.com/giantswarm/operatorkit
-  version: 253b2cac8d5cca3df855a6eb4a20783d0a61662d
+  version: 36e0e3721647690e12d26e2e2cf31da81b8559ff
   subpackages:
   - secret/cert
   - tpr
