@@ -320,6 +320,29 @@ write_files:
             - name: etcd-certs
               hostPath:
                 path: /etc/kubernetes/ssl/etcd
+- path: /srv/kubedns-cm.yaml
+  owner: root
+  permissions: 0644
+  content: |
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: kube-dns
+      namespace: kube-system
+      labels:
+        addonmanager.kubernetes.io/mode: EnsureExists
+- path: /srv/kubedns-sa.yaml
+  owner: root
+  permissions: 0644
+  content: |
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: kube-dns
+      namespace: kube-system
+      labels:
+        kubernetes.io/cluster-service: "true"
+        addonmanager.kubernetes.io/mode: Reconcile
 - path: /srv/kubedns-dep.yaml
   owner: root
   permissions: 0644
@@ -332,6 +355,7 @@ write_files:
       labels:
         k8s-app: kube-dns
         kubernetes.io/cluster-service: "true"
+        addonmanager.kubernetes.io/mode: Reconcile
     spec:
       strategy:
         rollingUpdate:
@@ -348,12 +372,16 @@ write_files:
             kubernetes.io/cluster-service: "true"
           annotations:
             scheduler.alpha.kubernetes.io/critical-pod: ''
-            scheduler.alpha.kubernetes.io/tolerations: '[{"key":"CriticalAddonsOnly", "operator":"Exists"}]'
         spec:
+          tolerations:
+          - key: "CriticalAddonsOnly"
+            operator: "Exists"
           containers:
           - name: kubedns
-            image: gcr.io/google_containers/kubedns-amd64:1.9
+            image: gcr.io/google_containers/k8s-dns-kube-dns-amd64:1.14.2
             volumeMounts:
+            - name: kube-dns-config
+              mountPath: /kube-dns-config
             - name: config
               mountPath: /etc/kubernetes/config/
               readOnly: false
@@ -362,7 +390,6 @@ write_files:
               readOnly: false
             resources:
               limits:
-                cpu: 100m
                 memory: 170Mi
               requests:
                 cpu: 100m
@@ -371,8 +398,13 @@ write_files:
             # command = "/kube-dns
             - --dns-port=10053
             - --domain={{.Cluster.Kubernetes.Domain}}
+            - --config-dir=/kube-dns-config
+            - --v=2
             - --kubecfg-file=/etc/kubernetes/config/kubelet-kubeconfig.yml
             - --kube-master-url=https://{{.Cluster.Kubernetes.API.Domain}}
+            env:
+            - name: PROMETHEUS_PORT
+              value: "10055"
             ports:
             - containerPort: 10053
               name: dns-local
@@ -380,10 +412,13 @@ write_files:
             - containerPort: 10053
               name: dns-tcp-local
               protocol: TCP
+            - containerPort: 10055
+              name: metrics
+              protocol: TCP
             livenessProbe:
               httpGet:
-                path: /healthz
-                port: 8080
+                path: /healthcheck/kubedns
+                port: 10054
                 scheme: HTTP
               initialDelaySeconds: 60
               successThreshold: 1
@@ -394,15 +429,32 @@ write_files:
                 path: /readiness
                 port: 8081
                 scheme: HTTP
-              initialDelaySeconds: 30
+              initialDelaySeconds: 3
               timeoutSeconds: 5
           - name: dnsmasq
-            image: gcr.io/google_containers/kube-dnsmasq-amd64:1.4
+            image: gcr.io/google_containers/k8s-dns-dnsmasq-nanny-amd64:1.14.2
+            livenessProbe:
+              httpGet:
+                path: /healthcheck/dnsmasq
+                port: 10054
+                scheme: HTTP
+              initialDelaySeconds: 60
+              timeoutSeconds: 5
+              successThreshold: 1
+              failureThreshold: 5
             args:
+            - -v=2
+            - -logtostderr
+            - -configDir=/etc/k8s/dns/dnsmasq-nanny
+            - -restartDnsmasq=true
+            - --
+            - -k
             - --cache-size=1000
             - --no-resolv
-            - --server=127.0.0.1#10053
             - --log-facility=-
+            - --server=/{{.Cluster.Kubernetes.Domain}}/127.0.0.1#10053
+            - --server=/in-addr.arpa/127.0.0.1#10053
+            - --server=/ip6.arpa/127.0.0.1#10053
             ports:
             - containerPort: 53
               name: dns
@@ -414,24 +466,40 @@ write_files:
               requests:
                 cpu: 150m
                 memory: 10Mi
-          - name: healthz
-            image: gcr.io/google_containers/exechealthz-amd64:1.2
-            resources:
-              limits:
-                cpu: 10m
-                memory: 50Mi
-              requests:
-                cpu: 10m
-                memory: 50Mi
+            volumeMounts:
+            - name: kube-dns-config
+              mountPath: /etc/k8s/dns/dnsmasq-nanny
+          - name: sidecar
+            image: gcr.io/google_containers/k8s-dns-sidecar-amd64:1.14.2
+            livenessProbe:
+              httpGet:
+                path: /metrics
+                port: 10054
+                scheme: HTTP
+              initialDelaySeconds: 60
+              timeoutSeconds: 5
+              successThreshold: 1
+              failureThreshold: 5
             args:
-            - -cmd=nslookup kubernetes.default.svc.{{.Cluster.Kubernetes.Domain}} 127.0.0.1 >/dev/null && nslookup kubernetes.default.svc.{{.Cluster.Kubernetes.Domain}} 127.0.0.1:10053 >/dev/null
-            - -port=8080
-            - -quiet
+            - --v=2
+            - --logtostderr
+            - --probe=kubedns,127.0.0.1:10053,kubernetes.default.svc.{{.Cluster.Kubernetes.Domain}},5,A
+            - --probe=dnsmasq,127.0.0.1:53,kubernetes.default.svc.{{.Cluster.Kubernetes.Domain}},5,A
             ports:
-            - containerPort: 8080
+            - containerPort: 10054
+              name: metrics
               protocol: TCP
+            resources:
+              requests:
+                memory: 20Mi
+                cpu: 10m
           dnsPolicy: Default  # Don't use cluster DNS.
+          serviceAccountName: kube-dns
           volumes:
+          - name: kube-dns-config
+            configMap:
+              name: kube-dns
+              optional: true
           - name: config
             hostPath:
               path: /etc/kubernetes/config/
@@ -450,6 +518,7 @@ write_files:
       labels:
         k8s-app: kube-dns
         kubernetes.io/cluster-service: "true"
+        addonmanager.kubernetes.io/mode: Reconcile
         kubernetes.io/name: "KubeDNS"
     spec:
       selector:
@@ -671,7 +740,7 @@ write_files:
   content: |
       #!/bin/bash
       # get kubectl
-      curl -o /opt/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kubectl
+      curl -o /opt/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.6.4/bin/linux/amd64/kubectl
       chmod +x /opt/bin/kubectl
 
       # wait for healthy master
@@ -705,7 +774,7 @@ write_files:
       done
 
       # apply k8s addons
-      MANIFESTS="kubedns-dep.yaml kubedns-svc.yaml default-backend-dep.yml default-backend-svc.yml ingress-controller-cm.yml ingress-controller-dep.yml ingress-controller-svc.yml"
+      MANIFESTS="kubedns-cm.yaml kubedns-sa.yaml kubedns-dep.yaml kubedns-svc.yaml default-backend-dep.yml default-backend-svc.yml ingress-controller-cm.yml ingress-controller-dep.yml ingress-controller-svc.yml"
 
       for manifest in $MANIFESTS
       do
