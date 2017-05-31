@@ -7,15 +7,22 @@ import (
 	microerror "github.com/giantswarm/microkit/error"
 )
 
+const (
+	// Default TTL for CNAME domains.
+	defaultTTL int64 = 900
+)
+
 type RecordSet struct {
 	// Domain is the domain name for the record.
 	Domain string
 	// HostedZoneID is the ID of the Hosted Zone the record should be created in.
 	HostedZoneID string
+	Type         string
 	// Client is the AWS client.
 	Client *route53.Route53
 	// Resource is the AWS resource the record should be created for.
 	Resource resources.DNSNamedResource
+	Value    string
 }
 
 // CreateIfNotExists is not implemented because AWS provides UPSERT functionality for DNS records
@@ -54,19 +61,35 @@ func (record RecordSet) perform(action string) error {
 }
 
 func (record RecordSet) buildParams(action string) *route53.ChangeResourceRecordSetsInput {
+	var aliasTarget *route53.AliasTarget
+	var resourceRecords []*route53.ResourceRecord
+	var ttl *int64
+
+	switch record.Type {
+	case route53.RRTypeA:
+		aliasTarget = &route53.AliasTarget{
+			HostedZoneId:         aws.String(record.Resource.HostedZoneID()),
+			DNSName:              aws.String(record.Resource.DNSName()),
+			EvaluateTargetHealth: aws.Bool(false),
+		}
+	case route53.RRTypeCname:
+		resourceRecords = append(resourceRecords, &route53.ResourceRecord{
+			Value: aws.String(record.Value),
+		})
+		ttl = aws.Int64(defaultTTL)
+	}
+
 	return &route53.ChangeResourceRecordSetsInput{
 		ChangeBatch: &route53.ChangeBatch{
 			Changes: []*route53.Change{
 				{
 					Action: aws.String(action),
 					ResourceRecordSet: &route53.ResourceRecordSet{
-						Name: aws.String(record.Domain),
-						Type: aws.String(route53.RRTypeA),
-						AliasTarget: &route53.AliasTarget{
-							HostedZoneId:         aws.String(record.Resource.HostedZoneID()),
-							DNSName:              aws.String(record.Resource.DNSName()),
-							EvaluateTargetHealth: aws.Bool(false),
-						},
+						Name:            aws.String(record.Domain),
+						Type:            aws.String(record.Type),
+						AliasTarget:     aliasTarget,
+						ResourceRecords: resourceRecords,
+						TTL:             ttl,
 					},
 				},
 			},

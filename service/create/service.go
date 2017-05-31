@@ -8,6 +8,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/awstpr"
 	awsinfo "github.com/giantswarm/awstpr/aws"
@@ -891,6 +892,7 @@ func (s *Service) onAdd(obj interface{}) {
 			Resource:     apiLB,
 			Domain:       cluster.Spec.Cluster.Kubernetes.API.Domain,
 			HostedZoneID: cluster.Spec.AWS.HostedZones.API,
+			Type:         route53.RRTypeA,
 		},
 		recordSetInput{
 			Cluster:      cluster,
@@ -898,6 +900,7 @@ func (s *Service) onAdd(obj interface{}) {
 			Resource:     etcdLB,
 			Domain:       cluster.Spec.Cluster.Etcd.Domain,
 			HostedZoneID: cluster.Spec.AWS.HostedZones.Etcd,
+			Type:         route53.RRTypeA,
 		},
 		recordSetInput{
 			Cluster:      cluster,
@@ -905,6 +908,15 @@ func (s *Service) onAdd(obj interface{}) {
 			Resource:     ingressLB,
 			Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
 			HostedZoneID: cluster.Spec.AWS.HostedZones.Ingress,
+			Type:         route53.RRTypeA,
+		},
+		recordSetInput{
+			Cluster:      cluster,
+			Client:       clients.Route53,
+			Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.WildcardDomain,
+			HostedZoneID: cluster.Spec.AWS.HostedZones.Ingress,
+			Value:        cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+			Type:         route53.RRTypeCname,
 		},
 	}
 
@@ -1018,6 +1030,12 @@ func (s *Service) onDelete(obj interface{}) {
 					Resource:     ingressLB,
 					Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
 					HostedZoneID: cluster.Spec.AWS.HostedZones.Ingress,
+				},
+				recordSetInput{
+					Cluster: cluster,
+					Client:  clients.Route53,
+					Value:   cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+					Domain:  cluster.Spec.Cluster.Kubernetes.IngressController.WildcardDomain,
 				},
 			}
 
