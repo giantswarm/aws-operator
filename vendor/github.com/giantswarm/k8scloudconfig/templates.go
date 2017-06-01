@@ -740,12 +740,12 @@ write_files:
   permissions: 0544
   content: |
       #!/bin/bash
-      # get kubectl
-      curl -o /opt/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.6.4/bin/linux/amd64/kubectl
-      chmod +x /opt/bin/kubectl
+      KUBECTL={{.Cluster.Kubernetes.Kubectl.Docker.Image}}
+
+      /usr/bin/docker pull $KUBECTL
 
       # wait for healthy master
-      while [ "$(/opt/bin/kubectl get cs | grep Healthy | wc -l)" -ne "3" ];do sleep 1 && echo 'Waiting for healthy k8s'; done
+      while [ "$(/usr/bin/docker run --net=host --rm $KUBECTL get cs | grep Healthy | wc -l)" -ne "3" ]; do sleep 1 && echo 'Waiting for healthy k8s'; done
 
       # apply calico CNI
       CALICO_FILES="calico-configmap.yaml calico-node-sa.yaml calico-policy-controller-sa.yaml calico-ds.yaml calico-policy-controller.yaml"
@@ -753,7 +753,7 @@ write_files:
       for manifest in $CALICO_FILES
       do
           while
-              /opt/bin/kubectl --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml apply -f /srv/$manifest
+              /usr/bin/docker run --net=host --rm -v /srv:/srv $KUBECTL apply -f /srv/$manifest
               [ "$?" -ne "0" ]
           do
               echo "failed to apply /src/$manifest, retrying in 5 sec"
@@ -764,9 +764,9 @@ write_files:
       # wait for healthy calico - we check for pods - desired vs ready
       while
           # result of this is 'eval [ "$DESIRED_POD_COUNT" -eq "$READY_POD_COUNT" ]'
-          /opt/bin/kubectl --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml -n kube-system  get ds calico-node 2>/dev/null >/dev/null
+          /usr/bin/docker run --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL -n kube-system  get ds calico-node 2>/dev/null >/dev/null
           RET_CODE_1=$?
-          eval $(/opt/bin/kubectl --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml -n kube-system get ds calico-node | tail -1 | awk '{print "[ \"" $2"\" -eq \""$4"\" ] "}')
+          eval $(/usr/bin/docker run --net=host --rm $KUBECTL -n kube-system get ds calico-node | tail -1 | awk '{print "[ \"" $2"\" -eq \""$4"\" ] "}')
           RET_CODE_2=$?
           [ "$RET_CODE_1" -ne "0" ] || [ "$RET_CODE_2" -ne "0" ]
       do
@@ -780,7 +780,7 @@ write_files:
       for manifest in $MANIFESTS
       do
           while
-              /opt/bin/kubectl --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml apply -f /srv/$manifest
+              /usr/bin/docker run --net=host --rm -v /srv:/srv $KUBECTL apply -f /srv/$manifest
               [ "$?" -ne "0" ]
           do
               echo "failed to apply /src/$manifest, retrying in 5 sec"
