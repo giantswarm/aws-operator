@@ -7,5 +7,5 @@ import (
 )
 
 func subnetName(cluster awstpr.CustomObject, prefix string) string {
-	return fmt.Sprintf("%s-%s", cluster.Name, prefix)
+	return fmt.Sprintf("%s-%s", cluster.Metadata.Name, prefix)
 }
