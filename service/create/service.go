@@ -470,10 +470,10 @@ func validateIDs(ids []string) bool {
 
 func (s *Service) onAdd(obj interface{}) {
 	cluster := *obj.(*awstpr.CustomObject)
-	s.logger.Log("info", fmt.Sprintf("creating cluster '%s'", cluster.Name))
+	s.logger.Log("info", fmt.Sprintf("creating cluster '%s'", cluster.Metadata.Name))
 
 	if err := s.createClusterNamespace(cluster.Spec.Cluster); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create cluster namespace: %s", errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not create cluster.Metadata.Namespace: %s", errgo.Details(err)))
 		return
 	}
 
@@ -493,7 +493,7 @@ func (s *Service) onAdd(obj interface{}) {
 	{
 		var err error
 		keyPair = &awsresources.KeyPair{
-			ClusterName: cluster.Name,
+			ClusterName: cluster.Metadata.Name,
 			Provider:    awsresources.NewFSKeyPairProvider(s.pubKeyFile),
 			AWSEntity:   awsresources.AWSEntity{Clients: clients},
 		}
@@ -505,9 +505,9 @@ func (s *Service) onAdd(obj interface{}) {
 	}
 
 	if keyPairCreated {
-		s.logger.Log("info", fmt.Sprintf("created keypair '%s'", cluster.Name))
+		s.logger.Log("info", fmt.Sprintf("created keypair '%s'", cluster.Metadata.Name))
 	} else {
-		s.logger.Log("info", fmt.Sprintf("keypair '%s' already exists, reusing", cluster.Name))
+		s.logger.Log("info", fmt.Sprintf("keypair '%s' already exists, reusing", cluster.Metadata.Name))
 	}
 
 	s.logger.Log("info", fmt.Sprintf("waiting for k8s secrets..."))
@@ -520,7 +520,7 @@ func (s *Service) onAdd(obj interface{}) {
 
 	// Create KMS key
 	kmsKey := &awsresources.KMSKey{
-		Name:      cluster.Name,
+		Name:      cluster.Metadata.Name,
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
 	}
 
@@ -531,7 +531,7 @@ func (s *Service) onAdd(obj interface{}) {
 	}
 
 	if kmsCreated {
-		s.logger.Log("info", fmt.Sprintf("created KMS key for cluster '%s'", cluster.Name))
+		s.logger.Log("info", fmt.Sprintf("created KMS key for cluster '%s'", cluster.Metadata.Name))
 	} else {
 		s.logger.Log("info", fmt.Sprintf("kms key '%s' already exists, reusing", kmsKey.Name))
 	}
@@ -587,7 +587,7 @@ func (s *Service) onAdd(obj interface{}) {
 	var vpc resources.ResourceWithID
 	vpc = &awsresources.VPC{
 		CidrBlock: cluster.Spec.AWS.VPC.CIDR,
-		Name:      cluster.Name,
+		Name:      cluster.Metadata.Name,
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
 	}
 	vpcCreated, err := vpc.CreateIfNotExists()
@@ -596,9 +596,9 @@ func (s *Service) onAdd(obj interface{}) {
 		return
 	}
 	if vpcCreated {
-		s.logger.Log("info", fmt.Sprintf("created vpc for cluster '%s'", cluster.Name))
+		s.logger.Log("info", fmt.Sprintf("created vpc for cluster '%s'", cluster.Metadata.Name))
 	} else {
-		s.logger.Log("info", fmt.Sprintf("vpc for cluster '%s' already exists, reusing", cluster.Name))
+		s.logger.Log("info", fmt.Sprintf("vpc for cluster '%s' already exists, reusing", cluster.Metadata.Name))
 	}
 	vpcID, err := vpc.GetID()
 	if err != nil {
@@ -608,7 +608,7 @@ func (s *Service) onAdd(obj interface{}) {
 	// Create gateway
 	var gateway resources.ResourceWithID
 	gateway = &awsresources.Gateway{
-		Name:  cluster.Name,
+		Name:  cluster.Metadata.Name,
 		VpcID: vpcID,
 		// Dependencies.
 		Logger:    s.logger,
@@ -620,15 +620,15 @@ func (s *Service) onAdd(obj interface{}) {
 		return
 	}
 	if gatewayCreated {
-		s.logger.Log("info", fmt.Sprintf("created gateway for cluster '%s'", cluster.Name))
+		s.logger.Log("info", fmt.Sprintf("created gateway for cluster '%s'", cluster.Metadata.Name))
 	} else {
-		s.logger.Log("info", fmt.Sprintf("gateway for cluster '%s' already exists, reusing", cluster.Name))
+		s.logger.Log("info", fmt.Sprintf("gateway for cluster '%s' already exists, reusing", cluster.Metadata.Name))
 	}
 
 	// Create masters security group.
 	mastersSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: securityGroupName(cluster.Name, prefixMaster),
+		GroupName: securityGroupName(cluster.Metadata.Name, prefixMaster),
 		VPCID:     vpcID,
 	}
 	mastersSecurityGroup, err := s.createSecurityGroup(mastersSGInput)
@@ -645,7 +645,7 @@ func (s *Service) onAdd(obj interface{}) {
 	// Create workers security group.
 	workersSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: securityGroupName(cluster.Name, prefixWorker),
+		GroupName: securityGroupName(cluster.Metadata.Name, prefixWorker),
 		VPCID:     vpcID,
 	}
 	workersSecurityGroup, err := s.createSecurityGroup(workersSGInput)
@@ -662,7 +662,7 @@ func (s *Service) onAdd(obj interface{}) {
 	// Create ingress ELB security group.
 	ingressSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: securityGroupName(cluster.Name, prefixIngress),
+		GroupName: securityGroupName(cluster.Metadata.Name, prefixIngress),
 		VPCID:     vpcID,
 	}
 	ingressSecurityGroup, err := s.createSecurityGroup(ingressSGInput)
@@ -701,7 +701,7 @@ func (s *Service) onAdd(obj interface{}) {
 
 	// Create route table.
 	routeTable := &awsresources.RouteTable{
-		Name:   cluster.Name,
+		Name:   cluster.Metadata.Name,
 		VpcID:  vpcID,
 		Client: clients.EC2,
 	}
@@ -737,9 +737,9 @@ func (s *Service) onAdd(obj interface{}) {
 		return
 	}
 	if publicSubnetCreated {
-		s.logger.Log("info", fmt.Sprintf("created public subnet for cluster '%s'", cluster.Name))
+		s.logger.Log("info", fmt.Sprintf("created public subnet for cluster '%s'", cluster.Metadata.Name))
 	} else {
-		s.logger.Log("info", fmt.Sprintf("public subnet for cluster '%s' already exists, reusing", cluster.Name))
+		s.logger.Log("info", fmt.Sprintf("public subnet for cluster '%s' already exists, reusing", cluster.Metadata.Name))
 	}
 	publicSubnetID, err := publicSubnet.GetID()
 	if err != nil {
@@ -757,11 +757,11 @@ func (s *Service) onAdd(obj interface{}) {
 		clients:             clients,
 		cluster:             cluster,
 		tlsAssets:           tlsAssets,
-		clusterName:         cluster.Name,
+		clusterName:         cluster.Metadata.Name,
 		bucket:              bucket,
 		securityGroup:       mastersSecurityGroup,
 		subnet:              publicSubnet,
-		keyPairName:         cluster.Name,
+		keyPairName:         cluster.Metadata.Name,
 		instanceProfileName: policy.GetName(),
 		prefix:              prefixMaster,
 	})
@@ -832,8 +832,8 @@ func (s *Service) onAdd(obj interface{}) {
 		bucket:              bucket,
 		securityGroup:       workersSecurityGroup,
 		subnet:              publicSubnet,
-		clusterName:         cluster.Name,
-		keyPairName:         cluster.Name,
+		clusterName:         cluster.Metadata.Name,
+		keyPairName:         cluster.Metadata.Name,
 		instanceProfileName: policy.GetName(),
 		prefix:              prefixWorker,
 	})
@@ -846,7 +846,7 @@ func (s *Service) onAdd(obj interface{}) {
 	// is inconsistent and most problably its deployment broke in the middle during the previous run of
 	// aws-operator.
 	if (anyMastersCreated || anyWorkersCreated) && (kmsKeyErr != nil || policyErr != nil) {
-		s.logger.Log("error", fmt.Sprintf("cluster '%s' is inconsistent, KMS keys and policies were not created, but EC2 instances were missing, please consider deleting this cluster", cluster.Name))
+		s.logger.Log("error", fmt.Sprintf("cluster '%s' is inconsistent, KMS keys and policies were not created, but EC2 instances were missing, please consider deleting this cluster", cluster.Metadata.Name))
 		return
 	}
 
@@ -931,7 +931,7 @@ func (s *Service) onAdd(obj interface{}) {
 		s.logger.Log("info", fmt.Sprintf("created DNS records for load balancers"))
 	}
 
-	s.logger.Log("info", fmt.Sprintf("cluster '%s' processed", cluster.Name))
+	s.logger.Log("info", fmt.Sprintf("cluster '%s' processed", cluster.Metadata.Name))
 }
 
 func (s *Service) onDelete(obj interface{}) {
@@ -961,7 +961,7 @@ func (s *Service) onDelete(obj interface{}) {
 	}
 
 	if err := s.deleteClusterNamespace(cluster.Spec.Cluster); err != nil {
-		s.logger.Log("error", "could not delete cluster namespace:", err)
+		s.logger.Log("error", "could not delete cluster.Metadata.Namespace:", err)
 	}
 
 	clients := awsutil.NewClients(s.awsConfig)
@@ -976,7 +976,7 @@ func (s *Service) onDelete(obj interface{}) {
 	s.logger.Log("info", "deleting masters...")
 	if err := s.deleteMachines(deleteMachinesInput{
 		clients:     clients,
-		clusterName: cluster.Name,
+		clusterName: cluster.Metadata.Name,
 		prefix:      prefixMaster,
 	}); err != nil {
 		s.logger.Log("error", errgo.Details(err))
@@ -988,7 +988,7 @@ func (s *Service) onDelete(obj interface{}) {
 	s.logger.Log("info", "deleting workers...")
 	if err := s.deleteMachines(deleteMachinesInput{
 		clients:     clients,
-		clusterName: cluster.Name,
+		clusterName: cluster.Metadata.Name,
 		prefix:      prefixWorker,
 	}); err != nil {
 		s.logger.Log("error", errgo.Details(err))
@@ -1083,7 +1083,7 @@ func (s *Service) onDelete(obj interface{}) {
 	// Delete route table.
 	var routeTable resources.ResourceWithID
 	routeTable = &awsresources.RouteTable{
-		Name:   cluster.Name,
+		Name:   cluster.Metadata.Name,
 		Client: clients.EC2,
 	}
 	if err := routeTable.Delete(); err != nil {
@@ -1095,7 +1095,7 @@ func (s *Service) onDelete(obj interface{}) {
 	// Sync VPC
 	var vpc resources.ResourceWithID
 	vpc = &awsresources.VPC{
-		Name:      cluster.Name,
+		Name:      cluster.Metadata.Name,
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
 	}
 	vpcID, err := vpc.GetID()
@@ -1106,7 +1106,7 @@ func (s *Service) onDelete(obj interface{}) {
 	// Delete gateway.
 	var gateway resources.ResourceWithID
 	gateway = &awsresources.Gateway{
-		Name:  cluster.Name,
+		Name:  cluster.Metadata.Name,
 		VpcID: vpcID,
 		// Dependencies.
 		Logger:    s.logger,
@@ -1134,7 +1134,7 @@ func (s *Service) onDelete(obj interface{}) {
 	// Delete masters security group.
 	mastersSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: securityGroupName(cluster.Name, prefixMaster),
+		GroupName: securityGroupName(cluster.Metadata.Name, prefixMaster),
 	}
 	if err := s.deleteSecurityGroup(mastersSGInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': %s", mastersSGInput.GroupName, errgo.Details(err)))
@@ -1143,7 +1143,7 @@ func (s *Service) onDelete(obj interface{}) {
 	// Delete workers security group.
 	workersSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: securityGroupName(cluster.Name, prefixWorker),
+		GroupName: securityGroupName(cluster.Metadata.Name, prefixWorker),
 	}
 	if err := s.deleteSecurityGroup(workersSGInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': %s", workersSGInput.GroupName, errgo.Details(err)))
@@ -1152,7 +1152,7 @@ func (s *Service) onDelete(obj interface{}) {
 	// Delete ingress security group.
 	ingressSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: securityGroupName(cluster.Name, prefixIngress),
+		GroupName: securityGroupName(cluster.Metadata.Name, prefixIngress),
 	}
 	if err := s.deleteSecurityGroup(ingressSGInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': %s", ingressSGInput.GroupName, errgo.Details(err)))
@@ -1212,7 +1212,7 @@ func (s *Service) onDelete(obj interface{}) {
 	// Delete KMS key.
 	var kmsKey resources.ArnResource
 	kmsKey = &awsresources.KMSKey{
-		Name:      cluster.Name,
+		Name:      cluster.Metadata.Name,
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
 	}
 	if err := kmsKey.Delete(); err != nil {
@@ -1224,7 +1224,7 @@ func (s *Service) onDelete(obj interface{}) {
 	// Delete keypair.
 	var keyPair resources.Resource
 	keyPair = &awsresources.KeyPair{
-		ClusterName: cluster.Name,
+		ClusterName: cluster.Metadata.Name,
 		AWSEntity:   awsresources.AWSEntity{Clients: clients},
 	}
 	if err := keyPair.Delete(); err != nil {
@@ -1233,5 +1233,5 @@ func (s *Service) onDelete(obj interface{}) {
 		s.logger.Log("info", "deleted keypair")
 	}
 
-	s.logger.Log("info", fmt.Sprintf("cluster '%s' deleted", cluster.Name))
+	s.logger.Log("info", fmt.Sprintf("cluster '%s' deleted", cluster.Metadata.Name))
 }

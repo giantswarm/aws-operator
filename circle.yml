@@ -19,6 +19,6 @@ test:
 
 deployment:
   master:
-    branch: master
+    branch: asymmetric/test-awstpr-ugoji
     commands:
       - ./architect --organisation=giantswarm deploy
