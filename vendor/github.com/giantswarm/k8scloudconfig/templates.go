@@ -612,6 +612,7 @@ write_files:
     apiVersion: v1
     metadata:
       name: ingress-nginx
+      namespace: kube-system
       labels:
         k8s-addon: ingress-nginx.addons.k8s.io
     data:
