@@ -1,5 +1,5 @@
 hash: e0a4e120144fe05a987ae6b5d015db7eb405fe8d6679f48511d3218a5609ebc3
-updated: 2017-06-01T11:47:33.490503113+02:00
+updated: 2017-06-02T12:45:20.083627489+02:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aws/aws-sdk-go
-  version: ef136b83f5b3916c0970f94500ba130e61809a6b
+  version: fa107560b5f3528a859a1a1511086646731bb1a8
   subpackages:
   - aws
   - aws/awserr
@@ -26,6 +26,7 @@ imports:
   - aws/session
   - aws/signer/v4
   - awserr
+  - internal/shareddefaults
   - private/protocol
   - private/protocol/ec2query
   - private/protocol/json/jsonutil
@@ -49,7 +50,7 @@ imports:
 - name: github.com/blang/semver
   version: 31b736133b98f26d5e078ec9eb591666edfd091f
 - name: github.com/cenkalti/backoff
-  version: 32cd0c5b3aef12c76ed64aaf678f6c79736be7dc
+  version: 5d150e7eec023ce7a124856b37c68e54b4050ac7
 - name: github.com/coreos/etcd
   version: d267ca9c184e953554257d0acdd1dc9c47d38229
   subpackages:
@@ -95,12 +96,10 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: 2ace4f24860c84784c5df90d94162400ead447b8
+  version: a767c89915537c003b450e804d787afcd60135ec
   subpackages:
   - aws
   - aws/hostedzones
-  - aws/ssm
-  - aws/ssm/docker
   - aws/vpc
 - name: github.com/giantswarm/certificatetpr
   version: 989414c916fafbc70d7e09fb48ef053b7290a9e4
@@ -238,7 +237,7 @@ imports:
 - name: github.com/pelletier/go-buffruneio
   version: c37440a7cf42ac63b919c752ca73a85067e05992
 - name: github.com/pelletier/go-toml
-  version: 5ccdfb18c776b740aecaf085c4d9a2779199c279
+  version: fe7536c3dee2596cdd23ee9976a17c22bdaae286
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
