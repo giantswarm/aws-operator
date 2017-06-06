@@ -27,6 +27,15 @@ func (lc *LaunchConfiguration) CreateIfNotExists() (bool, error) {
 		return false, microerror.MaskAny(clientNotInitializedError)
 	}
 
+	exists, err := lc.checkIfExists()
+	if err != nil {
+		return false, microerror.MaskAny(err)
+	}
+
+	if exists {
+		return false, nil
+	}
+
 	if err := lc.CreateOrFail(); err != nil {
 		return false, microerror.MaskAny(err)
 	}
@@ -72,4 +81,34 @@ func (lc *LaunchConfiguration) Delete() error {
 	}
 
 	return nil
+}
+
+func (lc *LaunchConfiguration) checkIfExists() (bool, error) {
+	_, err := lc.findExisting()
+	if IsNotFound(err) {
+		return false, nil
+	} else if err != nil {
+		return false, microerror.MaskAny(err)
+	}
+
+	return true, nil
+}
+
+func (lc *LaunchConfiguration) findExisting() (*autoscaling.LaunchConfiguration, error) {
+	launchConfigs, err := lc.Client.DescribeLaunchConfigurations(&autoscaling.DescribeLaunchConfigurationsInput{
+		LaunchConfigurationNames: []*string{
+			aws.String(lc.Name),
+		},
+	})
+	if err != nil {
+		return nil, microerror.MaskAny(err)
+	}
+
+	if len(launchConfigs.LaunchConfigurations) < 1 {
+		return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, LaunchConfigurationType, lc.Name)
+	} else if len(launchConfigs.LaunchConfigurations) > 1 {
+		return nil, microerror.MaskAny(tooManyResultsError)
+	}
+
+	return launchConfigs.LaunchConfigurations[0], nil
 }
