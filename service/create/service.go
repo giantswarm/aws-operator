@@ -887,7 +887,7 @@ func (s *Service) onAdd(obj interface{}) {
 	if lcCreated {
 		s.logger.Log("info", fmt.Sprintf("created worker launch config"))
 	} else {
-		s.logger.Log("info", fmt.Sprintf("launch config already exists, reusing", cluster.Name))
+		s.logger.Log("info", fmt.Sprintf("launch config %s already exists, reusing", cluster.Name))
 	}
 
 	workersLCName, err := launchConfigurationName(cluster, "worker", workersSecurityGroupID)
