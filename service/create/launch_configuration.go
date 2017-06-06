@@ -47,6 +47,8 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 		// image ID and instance type is provided.
 		imageID = input.cluster.Spec.AWS.Workers[0].ImageID
 		instanceType = input.cluster.Spec.AWS.Workers[0].InstanceType
+	default:
+		return false, microerror.MaskAnyf(invalidCloudconfigExtensionNameError, fmt.Sprintf("Invalid extension name '%s'", input.prefix))
 	}
 
 	cloudConfigParams := cloudconfig.Params{
