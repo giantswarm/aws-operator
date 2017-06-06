@@ -49,11 +49,11 @@ func NewClients(config Config) Clients {
 	clients := Clients{
 		AutoScaling: autoscaling.New(s),
 		EC2:         ec2.New(s),
-		IAM:         iam.New(s),
-		S3:          s3.New(s),
-		KMS:         kms.New(s),
 		ELB:         elb.New(s),
+		IAM:         iam.New(s),
+		KMS:         kms.New(s),
 		Route53:     route53.New(s),
+		S3:          s3.New(s),
 	}
 
 	return clients
