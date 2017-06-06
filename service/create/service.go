@@ -824,38 +824,19 @@ func (s *Service) onAdd(obj interface{}) {
 		return
 	}
 
-	// Run workers
-	anyWorkersCreated, workerIDs, err := s.runMachines(runMachinesInput{
-		clients:             clients,
-		cluster:             cluster,
-		tlsAssets:           tlsAssets,
-		bucket:              bucket,
-		securityGroup:       workersSecurityGroup,
-		subnet:              publicSubnet,
-		clusterName:         cluster.Name,
-		keyPairName:         cluster.Name,
-		instanceProfileName: policy.GetName(),
-		prefix:              prefixWorker,
-	})
-	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
-		return
-	}
-
 	// If the policy couldn't be created and some instances didn't exist before, that means that the cluster
 	// is inconsistent and most problably its deployment broke in the middle during the previous run of
 	// aws-operator.
-	if (anyMastersCreated || anyWorkersCreated) && (kmsKeyErr != nil || policyErr != nil) {
+	if anyMastersCreated && (kmsKeyErr != nil || policyErr != nil) {
 		s.logger.Log("error", fmt.Sprintf("cluster '%s' is inconsistent, KMS keys and policies were not created, but EC2 instances were missing, please consider deleting this cluster", cluster.Name))
 		return
 	}
 
 	// Create Ingress load balancer.
 	lbInput = LoadBalancerInput{
-		Name:        cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-		Clients:     clients,
-		Cluster:     cluster,
-		InstanceIDs: workerIDs,
+		Name:    cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+		Clients: clients,
+		Cluster: cluster,
 		PortsToOpen: awsresources.PortPairs{
 			{
 				PortELB:      httpsPort,
@@ -916,13 +897,15 @@ func (s *Service) onAdd(obj interface{}) {
 	}
 
 	// Create an Auto Scaling Group for the workers.
+	asgSize := len(cluster.Spec.AWS.Workers)
 	asg := awsresources.AutoScalingGroup{
 		Client:                  clients.AutoScaling,
 		Name:                    cluster.Name,
-		MinSize:                 len(cluster.Spec.AWS.Workers),
-		MaxSize:                 len(cluster.Spec.AWS.Workers),
+		MinSize:                 asgSize,
+		MaxSize:                 asgSize,
 		AvailabilityZone:        cluster.Spec.AWS.AZ,
 		LaunchConfigurationName: workersLCName,
+		LoadBalancerName:        ingressLB.Name,
 		VPCZoneIdentifier:       publicSubnetID,
 		HealthCheckGracePeriod:  10,
 	}
@@ -932,7 +915,7 @@ func (s *Service) onAdd(obj interface{}) {
 		return
 	}
 
-	s.logger.Log("info", fmt.Sprintf("created workers auto scaling group"))
+	s.logger.Log("info", fmt.Sprintf("created workers auto scaling group with size %v", asgSize))
 
 	// Create Record Sets for the Load Balancers.
 	recordSetInputs := []recordSetInput{

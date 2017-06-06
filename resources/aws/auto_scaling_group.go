@@ -13,6 +13,7 @@ type AutoScalingGroup struct {
 	MaxSize                 int
 	AvailabilityZone        string
 	LaunchConfigurationName string
+	LoadBalancerName        string
 	VPCZoneIdentifier       string
 	HealthCheckGracePeriod  int
 }
@@ -30,8 +31,11 @@ func (asg *AutoScalingGroup) CreateOrFail() error {
 			aws.String(asg.AvailabilityZone),
 		},
 		LaunchConfigurationName: aws.String(asg.LaunchConfigurationName),
-		VPCZoneIdentifier:       aws.String(asg.VPCZoneIdentifier),
-		HealthCheckGracePeriod:  aws.Int64(int64(asg.HealthCheckGracePeriod)),
+		LoadBalancerNames: []*string{
+			aws.String(asg.LoadBalancerName),
+		},
+		VPCZoneIdentifier:      aws.String(asg.VPCZoneIdentifier),
+		HealthCheckGracePeriod: aws.Int64(int64(asg.HealthCheckGracePeriod)),
 	}
 
 	if _, err := asg.Client.CreateAutoScalingGroup(params); err != nil {
