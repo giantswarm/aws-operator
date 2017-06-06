@@ -810,7 +810,7 @@ func (s *Service) onAdd(obj interface{}) {
 		InstanceIDs: masterIDs,
 		PortsToOpen: awsresources.PortPairs{
 			{
-				PortELB:      cluster.Spec.Cluster.Etcd.Port,
+				PortELB:      httpsPort,
 				PortInstance: cluster.Spec.Cluster.Etcd.Port,
 			},
 		},
