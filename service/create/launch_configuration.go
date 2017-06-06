@@ -71,8 +71,7 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 		S3DirURI:    s.bucketObjectFullDirPath(input.cluster),
 	}
 
-	var cloudconfigS3 resources.Resource
-	cloudconfigS3 = &awsresources.BucketObject{
+	cloudconfigS3 := &awsresources.BucketObject{
 		Name:      s.bucketObjectName(input.cluster, input.prefix),
 		Data:      cloudConfig,
 		Bucket:    input.bucket.(*awsresources.Bucket),
@@ -92,31 +91,24 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 		return false, microerror.MaskAny(err)
 	}
 
-	var launchConfig *awsresources.LaunchConfiguration
-	var launchConfigName string
-	var launchConfigCreated bool
-	{
-		var err error
+	launchConfigName, err := launchConfigurationName(input.cluster, input.prefix)
+	if err != nil {
+		return false, microerror.MaskAny(err)
+	}
 
-		launchConfigName, err = launchConfigurationName(input.cluster, input.prefix)
-		if err != nil {
-			return false, microerror.MaskAny(err)
-		}
-
-		launchConfig = &awsresources.LaunchConfiguration{
-			Client: input.clients.AutoScaling,
-			Name:   launchConfigName,
-			IamInstanceProfileName: input.instanceProfileName,
-			ImageID:                imageID,
-			InstanceType:           instanceType,
-			KeyName:                input.keypairName,
-			SecurityGroupID:        securityGroupID,
-			SmallCloudConfig:       smallCloudconfig,
-		}
-		launchConfigCreated, err = launchConfig.CreateIfNotExists()
-		if err != nil {
-			return false, microerror.MaskAny(err)
-		}
+	launchConfig := &awsresources.LaunchConfiguration{
+		Client: input.clients.AutoScaling,
+		Name:   launchConfigName,
+		IamInstanceProfileName: input.instanceProfileName,
+		ImageID:                imageID,
+		InstanceType:           instanceType,
+		KeyName:                input.keypairName,
+		SecurityGroupID:        securityGroupID,
+		SmallCloudConfig:       smallCloudconfig,
+	}
+	launchConfigCreated, err := launchConfig.CreateIfNotExists()
+	if err != nil {
+		return false, microerror.MaskAny(err)
 	}
 
 	return launchConfigCreated, nil
