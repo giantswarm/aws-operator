@@ -31,7 +31,7 @@ func (lc *LaunchConfiguration) CreateIfNotExists() (bool, error) {
 		return false, microerror.MaskAny(err)
 	}
 
-	return false, nil
+	return true, nil
 }
 
 // CreateOrFail creates the launch config or returns the error.
