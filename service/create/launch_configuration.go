@@ -93,7 +93,7 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 		return false, microerror.MaskAny(err)
 	}
 
-	launchConfigName, err := launchConfigurationName(input.cluster, input.prefix)
+	launchConfigName, err := launchConfigurationName(input.cluster, input.prefix, securityGroupID)
 	if err != nil {
 		return false, microerror.MaskAny(err)
 	}
@@ -132,7 +132,7 @@ func (s *Service) deleteLaunchConfiguration(input launchConfigurationInput) erro
 	return nil
 }
 
-func launchConfigurationName(cluster awstpr.CustomObject, prefix string) (string, error) {
+func launchConfigurationName(cluster awstpr.CustomObject, prefix, securityGroupID string) (string, error) {
 	if cluster.Spec.Cluster.Cluster.ID == "" {
 		return "", microerror.MaskAnyf(missingCloudConfigKeyError, "spec.cluster.cluster.id")
 	}
@@ -141,5 +141,9 @@ func launchConfigurationName(cluster awstpr.CustomObject, prefix string) (string
 		return "", microerror.MaskAnyf(missingCloudConfigKeyError, "launchConfiguration prefix")
 	}
 
-	return fmt.Sprintf("%s-%s", cluster.Spec.Cluster.Cluster.ID, prefix), nil
+	if securityGroupID == "" {
+		return "", microerror.MaskAnyf(missingCloudConfigKeyError, "launchConfiguration securityGroupID")
+	}
+
+	return fmt.Sprintf("%s-%s-%s", cluster.Spec.Cluster.Cluster.ID, prefix, securityGroupID), nil
 }

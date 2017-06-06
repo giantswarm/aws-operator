@@ -896,12 +896,43 @@ func (s *Service) onAdd(obj interface{}) {
 		instanceProfileName: policy.GetName(),
 		prefix:              prefixWorker,
 	}
-	if _, err := s.createLaunchConfiguration(lcInput); err != nil {
+
+	lcCreated, err := s.createLaunchConfiguration(lcInput)
+	if err != nil {
 		s.logger.Log("error", errgo.Details(err))
 		return
 	}
 
-	s.logger.Log("info", fmt.Sprintf("created worker launch config"))
+	if lcCreated {
+		s.logger.Log("info", fmt.Sprintf("created worker launch config"))
+	} else {
+		s.logger.Log("info", fmt.Sprintf("launch config already exists, reusing", cluster.Name))
+	}
+
+	workersLCName, err := launchConfigurationName(cluster, "worker", workersSecurityGroupID)
+	if err != nil {
+		s.logger.Log("error", errgo.Details(err))
+		return
+	}
+
+	// Create an Auto Scaling Group for the workers.
+	asg := awsresources.AutoScalingGroup{
+		Client:                  clients.AutoScaling,
+		Name:                    cluster.Name,
+		MinSize:                 len(cluster.Spec.AWS.Workers),
+		MaxSize:                 len(cluster.Spec.AWS.Workers),
+		AvailabilityZone:        cluster.Spec.AWS.AZ,
+		LaunchConfigurationName: workersLCName,
+		VPCZoneIdentifier:       publicSubnetID,
+		HealthCheckGracePeriod:  10,
+	}
+
+	if err := asg.CreateOrFail(); err != nil {
+		s.logger.Log("error", errgo.Details(err))
+		return
+	}
+
+	s.logger.Log("info", fmt.Sprintf("created workers auto scaling group"))
 
 	// Create Record Sets for the Load Balancers.
 	recordSetInputs := []recordSetInput{
@@ -1015,14 +1046,36 @@ func (s *Service) onDelete(obj interface{}) {
 		s.logger.Log("info", "deleted workers")
 	}
 
-	// Delete worker launch configuration.
-	workerLCName, err := launchConfigurationName(cluster, prefixWorker)
+	// Delete workers Auto Scaling Group.
+	asg := awsresources.AutoScalingGroup{
+		Client: clients.AutoScaling,
+		Name:   cluster.Name,
+	}
+
+	if err := asg.Delete(); err != nil {
+		s.logger.Log("error", errgo.Details(err))
+	} else {
+		s.logger.Log("info", "deleted workers auto scaling group")
+	}
+
+	// Delete workers launch configuration.
+	wSG := awsresources.SecurityGroup{
+		Description: securityGroupName(cluster.Name, prefixWorker),
+		GroupName:   securityGroupName(cluster.Name, prefixWorker),
+		AWSEntity:   awsresources.AWSEntity{Clients: clients},
+	}
+	wSGID, err := wSG.GetID()
+	if err != nil {
+		s.logger.Log("error", errgo.Details(err))
+	}
+
+	workersLCName, err := launchConfigurationName(cluster, prefixWorker, wSGID)
 	if err != nil {
 		s.logger.Log("error", errgo.Details(err))
 	} else {
 		if err := s.deleteLaunchConfiguration(launchConfigurationInput{
 			clients: clients,
-			name:    workerLCName,
+			name:    workersLCName,
 		}); err != nil {
 			s.logger.Log("error", errgo.Details(err))
 		} else {
