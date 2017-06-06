@@ -28,11 +28,11 @@ type Config struct {
 type Clients struct {
 	AutoScaling *autoscaling.AutoScaling
 	EC2         *ec2.EC2
-	IAM         *iam.IAM
-	S3          *s3.S3
-	KMS         *kms.KMS
 	ELB         *elb.ELB
+	IAM         *iam.IAM
+	KMS         *kms.KMS
 	Route53     *route53.Route53
+	S3          *s3.S3
 }
 
 const (
