@@ -884,6 +884,25 @@ func (s *Service) onAdd(obj interface{}) {
 
 	s.logger.Log("info", fmt.Sprintf("created ingress load balancer"))
 
+	// Create a launch configuration for the worker nodes.
+	lcInput := launchConfigurationInput{
+		clients:             clients,
+		cluster:             cluster,
+		tlsAssets:           tlsAssets,
+		bucket:              bucket,
+		securityGroup:       workersSecurityGroup,
+		subnet:              publicSubnet,
+		keypairName:         cluster.Name,
+		instanceProfileName: policy.GetName(),
+		prefix:              prefixWorker,
+	}
+	if _, err := s.createLaunchConfiguration(lcInput); err != nil {
+		s.logger.Log("error", errgo.Details(err))
+		return
+	}
+
+	s.logger.Log("info", fmt.Sprintf("created worker launch config"))
+
 	// Create Record Sets for the Load Balancers.
 	recordSetInputs := []recordSetInput{
 		recordSetInput{
@@ -994,6 +1013,21 @@ func (s *Service) onDelete(obj interface{}) {
 		s.logger.Log("error", errgo.Details(err))
 	} else {
 		s.logger.Log("info", "deleted workers")
+	}
+
+	// Delete worker launch configuration.
+	workerLCName, err := launchConfigurationName(cluster, prefixWorker)
+	if err != nil {
+		s.logger.Log("error", errgo.Details(err))
+	} else {
+		if err := s.deleteLaunchConfiguration(launchConfigurationInput{
+			clients: clients,
+			name:    workerLCName,
+		}); err != nil {
+			s.logger.Log("error", errgo.Details(err))
+		} else {
+			s.logger.Log("info", "deleted worker launch config")
+		}
 	}
 
 	// Delete Record Sets.
