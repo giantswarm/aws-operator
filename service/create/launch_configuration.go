@@ -120,7 +120,8 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 
 func (s *Service) deleteLaunchConfiguration(input launchConfigurationInput) error {
 	lc := awsresources.LaunchConfiguration{
-		Name: input.name,
+		Client: input.clients.AutoScaling,
+		Name:   input.name,
 	}
 
 	if err := lc.Delete(); err != nil {
