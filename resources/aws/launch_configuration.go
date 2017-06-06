@@ -40,7 +40,7 @@ func (lc *LaunchConfiguration) CreateOrFail() error {
 		return microerror.MaskAny(clientNotInitializedError)
 	}
 
-	if _, err := lc.Client.CreateLaunchConfiguration(&autoscaling.CreateLaunchConfigurationInput{
+	lcInput := &autoscaling.CreateLaunchConfigurationInput{
 		LaunchConfigurationName: aws.String(lc.Name),
 		IamInstanceProfile:      aws.String(lc.IamInstanceProfileName),
 		ImageId:                 aws.String(lc.ImageID),
@@ -50,7 +50,8 @@ func (lc *LaunchConfiguration) CreateOrFail() error {
 			aws.String(lc.SecurityGroupID),
 		},
 		UserData: aws.String(lc.SmallCloudConfig),
-	}); err != nil {
+	}
+	if _, err := lc.Client.CreateLaunchConfiguration(lcInput); err != nil {
 		return microerror.MaskAny(err)
 	}
 
@@ -63,9 +64,10 @@ func (lc *LaunchConfiguration) Delete() error {
 		return microerror.MaskAny(clientNotInitializedError)
 	}
 
-	if _, err := lc.Client.DeleteLaunchConfiguration(&autoscaling.DeleteLaunchConfigurationInput{
+	lcInput := &autoscaling.DeleteLaunchConfigurationInput{
 		LaunchConfigurationName: aws.String(lc.Name),
-	}); err != nil {
+	}
+	if _, err := lc.Client.DeleteLaunchConfiguration(lcInput); err != nil {
 		return microerror.MaskAny(err)
 	}
 
