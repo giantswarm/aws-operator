@@ -137,6 +137,7 @@ func (v *VPC) Delete() error {
 	return nil
 }
 
+// GetID retrieves the ID from the API if it isn't defined on the VPC struct.
 func (v VPC) GetID() (string, error) {
 	if v.id != "" {
 		return v.id, nil

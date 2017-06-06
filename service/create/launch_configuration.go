@@ -31,6 +31,7 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 		extension    cloudconfig.Extension
 		imageID      string
 		instanceType string
+		publicIP     bool
 	)
 
 	switch input.prefix {
@@ -47,6 +48,7 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 		// image ID and instance type is provided.
 		imageID = input.cluster.Spec.AWS.Workers[0].ImageID
 		instanceType = input.cluster.Spec.AWS.Workers[0].InstanceType
+		publicIP = true
 	default:
 		return false, microerror.MaskAnyf(invalidCloudconfigExtensionNameError, fmt.Sprintf("Invalid extension name '%s'", input.prefix))
 	}
@@ -99,13 +101,15 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 	launchConfig := &awsresources.LaunchConfiguration{
 		Client: input.clients.AutoScaling,
 		Name:   launchConfigName,
-		IamInstanceProfileName: input.instanceProfileName,
-		ImageID:                imageID,
-		InstanceType:           instanceType,
-		KeyName:                input.keypairName,
-		SecurityGroupID:        securityGroupID,
-		SmallCloudConfig:       smallCloudconfig,
+		IamInstanceProfileName:   input.instanceProfileName,
+		ImageID:                  imageID,
+		InstanceType:             instanceType,
+		KeyName:                  input.keypairName,
+		SecurityGroupID:          securityGroupID,
+		SmallCloudConfig:         smallCloudconfig,
+		AssociatePublicIpAddress: publicIP,
 	}
+
 	launchConfigCreated, err := launchConfig.CreateIfNotExists()
 	if err != nil {
 		return false, microerror.MaskAny(err)

@@ -9,13 +9,14 @@ import (
 // LaunchConfiguration is a template for launching EC2 instances into an auto
 // scaling group.
 type LaunchConfiguration struct {
-	Name                   string
-	IamInstanceProfileName string
-	ImageID                string
-	InstanceType           string
-	KeyName                string
-	SecurityGroupID        string
-	SmallCloudConfig       string
+	Name                     string
+	IamInstanceProfileName   string
+	ImageID                  string
+	InstanceType             string
+	KeyName                  string
+	SecurityGroupID          string
+	SmallCloudConfig         string
+	AssociatePublicIpAddress bool
 
 	// Dependencies
 	Client *autoscaling.AutoScaling
@@ -58,7 +59,8 @@ func (lc *LaunchConfiguration) CreateOrFail() error {
 		SecurityGroups: []*string{
 			aws.String(lc.SecurityGroupID),
 		},
-		UserData: aws.String(lc.SmallCloudConfig),
+		UserData:                 aws.String(lc.SmallCloudConfig),
+		AssociatePublicIpAddress: aws.Bool(lc.AssociatePublicIpAddress),
 	}
 	if _, err := lc.Client.CreateLaunchConfiguration(lcInput); err != nil {
 		return microerror.MaskAny(err)
