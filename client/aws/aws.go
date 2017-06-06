@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/iam"
@@ -25,12 +26,13 @@ type Config struct {
 }
 
 type Clients struct {
-	EC2     *ec2.EC2
-	IAM     *iam.IAM
-	S3      *s3.S3
-	KMS     *kms.KMS
-	ELB     *elb.ELB
-	Route53 *route53.Route53
+	AutoScaling *autoscaling.AutoScaling
+	EC2         *ec2.EC2
+	IAM         *iam.IAM
+	S3          *s3.S3
+	KMS         *kms.KMS
+	ELB         *elb.ELB
+	Route53     *route53.Route53
 }
 
 const (
@@ -45,12 +47,13 @@ func NewClients(config Config) Clients {
 	}
 	s := session.New(awsCfg)
 	clients := Clients{
-		EC2:     ec2.New(s),
-		IAM:     iam.New(s),
-		S3:      s3.New(s),
-		KMS:     kms.New(s),
-		ELB:     elb.New(s),
-		Route53: route53.New(s),
+		AutoScaling: autoscaling.New(s),
+		EC2:         ec2.New(s),
+		IAM:         iam.New(s),
+		S3:          s3.New(s),
+		KMS:         kms.New(s),
+		ELB:         elb.New(s),
+		Route53:     route53.New(s),
 	}
 
 	return clients
