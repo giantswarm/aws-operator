@@ -119,18 +119,19 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 }
 
 func (s *Service) deleteLaunchConfiguration(input launchConfigurationInput) error {
-	wSG := awsresources.SecurityGroup{
-		Description: securityGroupName(input.cluster.Name, prefixWorker),
-		GroupName:   securityGroupName(input.cluster.Name, prefixWorker),
+	groupName := securityGroupName(input.cluster.Name, input.prefix)
+	sg := awsresources.SecurityGroup{
+		Description: groupName,
+		GroupName:   groupName,
 		AWSEntity:   awsresources.AWSEntity{Clients: input.clients},
 	}
 
-	wSGID, err := wSG.GetID()
+	sgID, err := sg.GetID()
 	if err != nil {
 		return microerror.MaskAny(err)
 	}
 
-	workersLCName, err := launchConfigurationName(input.cluster, prefixWorker, wSGID)
+	workersLCName, err := launchConfigurationName(input.cluster, prefixWorker, sgID)
 	if err != nil {
 		return microerror.MaskAny(err)
 	}

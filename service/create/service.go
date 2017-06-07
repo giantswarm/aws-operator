@@ -1038,6 +1038,7 @@ func (s *Service) onDelete(obj interface{}) {
 	lcInput := launchConfigurationInput{
 		clients: clients,
 		cluster: cluster,
+		prefix:  "worker",
 	}
 	if err := s.deleteLaunchConfiguration(lcInput); err != nil {
 		s.logger.Log("error", errgo.Details(err))
