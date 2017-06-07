@@ -49,6 +49,18 @@ func (asg *AutoScalingGroup) CreateOrFail() error {
 		},
 		VPCZoneIdentifier:      aws.String(asg.VPCZoneIdentifier),
 		HealthCheckGracePeriod: aws.Int64(int64(asg.HealthCheckGracePeriod)),
+		Tags: []*autoscaling.Tag{
+			{
+				Key:               aws.String(tagKeyName),
+				PropagateAtLaunch: aws.Bool(true),
+				Value:             aws.String(asg.Name),
+			},
+			{
+				Key:               aws.String(tagKeyCluster),
+				PropagateAtLaunch: aws.Bool(true),
+				Value:             aws.String(asg.Name),
+			},
+		},
 	}
 
 	if _, err := asg.Client.CreateAutoScalingGroup(params); err != nil {
