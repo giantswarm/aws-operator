@@ -14,7 +14,8 @@ type AutoScalingGroup struct {
 	HealthCheckGracePeriod int
 	// LaunchConfigurationName is the name of the Launch Configuration used for the instances.
 	LaunchConfigurationName string
-	// LoadBalancerName is the name of the ELB that will front the instances.
+	// LoadBalancerName is the name of the existing ELB that will be placed in
+	// the ASG to front the instances.
 	LoadBalancerName string
 	// MaxSize is the maximum amount of instances that will be created in this ASG.
 	MaxSize int

@@ -908,7 +908,7 @@ func (s *Service) onAdd(obj interface{}) {
 
 	asg := awsresources.AutoScalingGroup{
 		Client:                  clients.AutoScaling,
-		Name:                    cluster.Name,
+		Name:                    fmt.Sprintf("%s-%s", cluster.Name, prefixWorker),
 		MinSize:                 asgSize,
 		MaxSize:                 asgSize,
 		AvailabilityZone:        cluster.Spec.AWS.AZ,
@@ -1028,7 +1028,7 @@ func (s *Service) onDelete(obj interface{}) {
 	// Delete workers Auto Scaling Group.
 	asg := awsresources.AutoScalingGroup{
 		Client: clients.AutoScaling,
-		Name:   cluster.Name,
+		Name:   fmt.Sprintf("%s-%s", cluster.Name, prefixWorker),
 	}
 
 	if err := asg.Delete(); err != nil {
