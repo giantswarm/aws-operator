@@ -14,16 +14,16 @@ import (
 )
 
 type launchConfigurationInput struct {
-	name                string
+	bucket              resources.Resource
 	clients             awsutil.Clients
 	cluster             awstpr.CustomObject
-	tlsAssets           *certificatetpr.CompactTLSAssets
-	bucket              resources.Resource
+	instanceProfileName string
+	keypairName         string
+	name                string
+	prefix              string
 	securityGroup       resources.ResourceWithID
 	subnet              *awsresources.Subnet
-	keypairName         string
-	instanceProfileName string
-	prefix              string
+	tlsAssets           *certificatetpr.CompactTLSAssets
 }
 
 func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (bool, error) {
@@ -31,6 +31,7 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 		extension    cloudconfig.Extension
 		imageID      string
 		instanceType string
+		publicIP     bool
 	)
 
 	switch input.prefix {
@@ -47,6 +48,7 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 		// image ID and instance type is provided.
 		imageID = input.cluster.Spec.AWS.Workers[0].ImageID
 		instanceType = input.cluster.Spec.AWS.Workers[0].InstanceType
+		publicIP = true
 	default:
 		return false, microerror.MaskAnyf(invalidCloudconfigExtensionNameError, fmt.Sprintf("Invalid extension name '%s'", input.prefix))
 	}
@@ -91,7 +93,7 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 		return false, microerror.MaskAny(err)
 	}
 
-	launchConfigName, err := launchConfigurationName(input.cluster, input.prefix)
+	launchConfigName, err := launchConfigurationName(input.cluster, input.prefix, securityGroupID)
 	if err != nil {
 		return false, microerror.MaskAny(err)
 	}
@@ -99,13 +101,15 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 	launchConfig := &awsresources.LaunchConfiguration{
 		Client: input.clients.AutoScaling,
 		Name:   launchConfigName,
-		IamInstanceProfileName: input.instanceProfileName,
-		ImageID:                imageID,
-		InstanceType:           instanceType,
-		KeyName:                input.keypairName,
-		SecurityGroupID:        securityGroupID,
-		SmallCloudConfig:       smallCloudconfig,
+		IamInstanceProfileName:   input.instanceProfileName,
+		ImageID:                  imageID,
+		InstanceType:             instanceType,
+		KeyName:                  input.keypairName,
+		SecurityGroupID:          securityGroupID,
+		SmallCloudConfig:         smallCloudconfig,
+		AssociatePublicIpAddress: publicIP,
 	}
+
 	launchConfigCreated, err := launchConfig.CreateIfNotExists()
 	if err != nil {
 		return false, microerror.MaskAny(err)
@@ -115,19 +119,40 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 }
 
 func (s *Service) deleteLaunchConfiguration(input launchConfigurationInput) error {
+	groupName := securityGroupName(input.cluster.Name, input.prefix)
+	sg := awsresources.SecurityGroup{
+		Description: groupName,
+		GroupName:   groupName,
+		AWSEntity:   awsresources.AWSEntity{Clients: input.clients},
+	}
+
+	sgID, err := sg.GetID()
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	workersLCName, err := launchConfigurationName(input.cluster, prefixWorker, sgID)
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
+
 	lc := awsresources.LaunchConfiguration{
-		Name: input.name,
+		Client: input.clients.AutoScaling,
+		Name:   workersLCName,
 	}
 
 	if err := lc.Delete(); err != nil {
 		return microerror.MaskAny(err)
 	}
-	s.logger.Log("debug", fmt.Sprintf("deleted launch configuration '%s'", input.name))
-
 	return nil
 }
 
-func launchConfigurationName(cluster awstpr.CustomObject, prefix string) (string, error) {
+// launchConfigurationName uses the cluster ID, a prefix and the security group
+// ID to produce a launch configuration name.  LC names are their unique
+// identifiers in AWS.  The reason we need the securityGroupID in the name is
+// that we can only reuse an LC if it has been created for the current SG.
+// Otherwise, the SG might not exist anymore.
+func launchConfigurationName(cluster awstpr.CustomObject, prefix, securityGroupID string) (string, error) {
 	if cluster.Spec.Cluster.Cluster.ID == "" {
 		return "", microerror.MaskAnyf(missingCloudConfigKeyError, "spec.cluster.cluster.id")
 	}
@@ -136,5 +161,9 @@ func launchConfigurationName(cluster awstpr.CustomObject, prefix string) (string
 		return "", microerror.MaskAnyf(missingCloudConfigKeyError, "launchConfiguration prefix")
 	}
 
-	return fmt.Sprintf("%s-%s", cluster.Spec.Cluster.Cluster.ID, prefix), nil
+	if securityGroupID == "" {
+		return "", microerror.MaskAnyf(missingCloudConfigKeyError, "launchConfiguration securityGroupID")
+	}
+
+	return fmt.Sprintf("%s-%s-%s", cluster.Spec.Cluster.Cluster.ID, prefix, securityGroupID), nil
 }

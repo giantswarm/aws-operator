@@ -25,7 +25,7 @@ func IsMalformedCloudConfigKey(err error) bool {
 	return errgo.Cause(err) == malformedCloudConfigKeyError
 }
 
-var missingCloudConfigKeyError = errgo.New("missing cloud config key")
+var missingCloudConfigKeyError = errgo.New("missing key in the cloudconfig")
 
 // IsMissingCloudConfigKey asserts missingCloudConfigKeyError.
 func IsMissingCloudConfigKey(err error) bool {

@@ -48,6 +48,9 @@ const (
 	// Number of retries of RunInstances to wait for Roles to propagate to
 	// Instance Profiles
 	runInstancesRetries = 10
+	// The number of seconds AWS will wait, before issuing a health check on
+	// instances in an Auto Scaling Group.
+	gracePeriodSeconds = 10
 )
 
 // Config represents the configuration used to create a version service.
@@ -824,38 +827,19 @@ func (s *Service) onAdd(obj interface{}) {
 		return
 	}
 
-	// Run workers
-	anyWorkersCreated, workerIDs, err := s.runMachines(runMachinesInput{
-		clients:             clients,
-		cluster:             cluster,
-		tlsAssets:           tlsAssets,
-		bucket:              bucket,
-		securityGroup:       workersSecurityGroup,
-		subnet:              publicSubnet,
-		clusterName:         cluster.Name,
-		keyPairName:         cluster.Name,
-		instanceProfileName: policy.GetName(),
-		prefix:              prefixWorker,
-	})
-	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
-		return
-	}
-
 	// If the policy couldn't be created and some instances didn't exist before, that means that the cluster
 	// is inconsistent and most problably its deployment broke in the middle during the previous run of
 	// aws-operator.
-	if (anyMastersCreated || anyWorkersCreated) && (kmsKeyErr != nil || policyErr != nil) {
+	if anyMastersCreated && (kmsKeyErr != nil || policyErr != nil) {
 		s.logger.Log("error", fmt.Sprintf("cluster '%s' is inconsistent, KMS keys and policies were not created, but EC2 instances were missing, please consider deleting this cluster", cluster.Name))
 		return
 	}
 
 	// Create Ingress load balancer.
 	lbInput = LoadBalancerInput{
-		Name:        cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-		Clients:     clients,
-		Cluster:     cluster,
-		InstanceIDs: workerIDs,
+		Name:    cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+		Clients: clients,
+		Cluster: cluster,
 		PortsToOpen: awsresources.PortPairs{
 			{
 				PortELB:      httpsPort,
@@ -896,12 +880,50 @@ func (s *Service) onAdd(obj interface{}) {
 		instanceProfileName: policy.GetName(),
 		prefix:              prefixWorker,
 	}
-	if _, err := s.createLaunchConfiguration(lcInput); err != nil {
+
+	lcCreated, err := s.createLaunchConfiguration(lcInput)
+	if err != nil {
 		s.logger.Log("error", errgo.Details(err))
 		return
 	}
 
-	s.logger.Log("info", fmt.Sprintf("created worker launch config"))
+	if lcCreated {
+		s.logger.Log("info", fmt.Sprintf("created worker launch config"))
+	} else {
+		s.logger.Log("info", fmt.Sprintf("launch config %s already exists, reusing", cluster.Name))
+	}
+
+	workersLCName, err := launchConfigurationName(cluster, "worker", workersSecurityGroupID)
+	if err != nil {
+		s.logger.Log("error", errgo.Details(err))
+		return
+	}
+
+	// Create an Auto Scaling Group for the workers.
+	asgSize := len(cluster.Spec.AWS.Workers)
+	if asgSize == 0 {
+		s.logger.Log("error", fmt.Sprintf("%s: %s", missingCloudConfigKeyError.Error(), "spec.cluster.aws.workers"))
+		return
+	}
+
+	asg := awsresources.AutoScalingGroup{
+		Client:                  clients.AutoScaling,
+		Name:                    fmt.Sprintf("%s-%s", cluster.Name, prefixWorker),
+		MinSize:                 asgSize,
+		MaxSize:                 asgSize,
+		AvailabilityZone:        cluster.Spec.AWS.AZ,
+		LaunchConfigurationName: workersLCName,
+		LoadBalancerName:        ingressLB.Name,
+		VPCZoneIdentifier:       publicSubnetID,
+		HealthCheckGracePeriod:  gracePeriodSeconds,
+	}
+
+	if err := asg.CreateOrFail(); err != nil {
+		s.logger.Log("error", errgo.Details(err))
+		return
+	}
+
+	s.logger.Log("info", fmt.Sprintf("created workers auto scaling group with size %v", asgSize))
 
 	// Create Record Sets for the Load Balancers.
 	recordSetInputs := []recordSetInput{
@@ -1003,31 +1025,28 @@ func (s *Service) onDelete(obj interface{}) {
 		s.logger.Log("info", "deleted masters")
 	}
 
-	// Delete workers.
-	s.logger.Log("info", "deleting workers...")
-	if err := s.deleteMachines(deleteMachinesInput{
-		clients:     clients,
-		clusterName: cluster.Name,
-		prefix:      prefixWorker,
-	}); err != nil {
-		s.logger.Log("error", errgo.Details(err))
-	} else {
-		s.logger.Log("info", "deleted workers")
+	// Delete workers Auto Scaling Group.
+	asg := awsresources.AutoScalingGroup{
+		Client: clients.AutoScaling,
+		Name:   fmt.Sprintf("%s-%s", cluster.Name, prefixWorker),
 	}
 
-	// Delete worker launch configuration.
-	workerLCName, err := launchConfigurationName(cluster, prefixWorker)
-	if err != nil {
+	if err := asg.Delete(); err != nil {
 		s.logger.Log("error", errgo.Details(err))
 	} else {
-		if err := s.deleteLaunchConfiguration(launchConfigurationInput{
-			clients: clients,
-			name:    workerLCName,
-		}); err != nil {
-			s.logger.Log("error", errgo.Details(err))
-		} else {
-			s.logger.Log("info", "deleted worker launch config")
-		}
+		s.logger.Log("info", "deleted workers auto scaling group")
+	}
+
+	// Delete workers launch configuration.
+	lcInput := launchConfigurationInput{
+		clients: clients,
+		cluster: cluster,
+		prefix:  "worker",
+	}
+	if err := s.deleteLaunchConfiguration(lcInput); err != nil {
+		s.logger.Log("error", errgo.Details(err))
+	} else {
+		s.logger.Log("info", "deleted worker launch config")
 	}
 
 	// Delete Record Sets.

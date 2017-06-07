@@ -54,25 +54,11 @@ func (s *Service) createLoadBalancer(input LoadBalancerInput) (*awsresources.ELB
 		s.logger.Log("debug", fmt.Sprintf("ELB '%s' already exists, reusing", lb.Name))
 	}
 
-	s.logger.Log("debug", "waiting for instances to be ready...")
-
-	var awsFlavouredInstanceIDs []*string
-	for _, instanceID := range input.InstanceIDs {
-		awsFlavouredInstanceIDs = append(awsFlavouredInstanceIDs, aws.String(instanceID))
+	if len(input.InstanceIDs) != 0 {
+		if err := s.registerInstances(lb, input); err != nil {
+			return nil, microerror.MaskAny(err)
+		}
 	}
-
-	if err := input.Clients.EC2.WaitUntilInstanceRunning(&ec2.DescribeInstancesInput{
-		InstanceIds: awsFlavouredInstanceIDs,
-	}); err != nil {
-		return nil, microerror.MaskAnyf(err, "masters took too long to get running, aborting")
-	}
-
-	if err := lb.RegisterInstances(input.InstanceIDs); err != nil {
-		return nil, microerror.MaskAnyf(err, "could not register instances with LB: %s")
-	}
-
-	s.logger.Log("debug", fmt.Sprintf("instances registered with ELB"))
-
 	return lb, nil
 }
 
@@ -123,4 +109,27 @@ func componentName(domainName string) (string, error) {
 	}
 
 	return splits[0], nil
+}
+
+func (s *Service) registerInstances(lb *awsresources.ELB, input LoadBalancerInput) error {
+	var awsFlavouredInstanceIDs []*string
+	for _, instanceID := range input.InstanceIDs {
+		awsFlavouredInstanceIDs = append(awsFlavouredInstanceIDs, aws.String(instanceID))
+	}
+
+	s.logger.Log("debug", "waiting for instances to be ready...")
+
+	if err := input.Clients.EC2.WaitUntilInstanceRunning(&ec2.DescribeInstancesInput{
+		InstanceIds: awsFlavouredInstanceIDs,
+	}); err != nil {
+		return microerror.MaskAnyf(err, "instances took too long to get running, aborting")
+	}
+
+	if err := lb.RegisterInstances(input.InstanceIDs); err != nil {
+		return microerror.MaskAnyf(err, "could not register instances with LB: %s")
+	}
+
+	s.logger.Log("debug", fmt.Sprintf("instances registered with ELB"))
+
+	return nil
 }
