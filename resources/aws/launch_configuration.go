@@ -9,14 +9,14 @@ import (
 // LaunchConfiguration is a template for launching EC2 instances into an auto
 // scaling group.
 type LaunchConfiguration struct {
-	Name                     string
+	AssociatePublicIpAddress bool
 	IamInstanceProfileName   string
 	ImageID                  string
 	InstanceType             string
 	KeyName                  string
+	Name                     string
 	SecurityGroupID          string
 	SmallCloudConfig         string
-	AssociatePublicIpAddress bool
 
 	// Dependencies
 	Client *autoscaling.AutoScaling

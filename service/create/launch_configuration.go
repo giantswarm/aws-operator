@@ -14,16 +14,16 @@ import (
 )
 
 type launchConfigurationInput struct {
-	name                string
+	bucket              resources.Resource
 	clients             awsutil.Clients
 	cluster             awstpr.CustomObject
-	tlsAssets           *certificatetpr.CompactTLSAssets
-	bucket              resources.Resource
+	instanceProfileName string
+	keypairName         string
+	name                string
+	prefix              string
 	securityGroup       resources.ResourceWithID
 	subnet              *awsresources.Subnet
-	keypairName         string
-	instanceProfileName string
-	prefix              string
+	tlsAssets           *certificatetpr.CompactTLSAssets
 }
 
 func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (bool, error) {
@@ -132,6 +132,11 @@ func (s *Service) deleteLaunchConfiguration(input launchConfigurationInput) erro
 	return nil
 }
 
+// launchConfigurationName uses the cluster ID, a prefix and the security group
+// ID to produce a launch configuration name.  LC names are their unique
+// identifiers in AWS.  The reason we need the securityGroupID in the name is
+// that we can only reuse an LC if it has been created for the current SG.
+// Otherwise, the SG might not exist anymore.
 func launchConfigurationName(cluster awstpr.CustomObject, prefix, securityGroupID string) (string, error) {
 	if cluster.Spec.Cluster.Cluster.ID == "" {
 		return "", microerror.MaskAnyf(missingCloudConfigKeyError, "spec.cluster.cluster.id")
