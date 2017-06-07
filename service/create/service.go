@@ -1022,18 +1022,6 @@ func (s *Service) onDelete(obj interface{}) {
 		s.logger.Log("info", "deleted masters")
 	}
 
-	// Delete workers.
-	s.logger.Log("info", "deleting workers...")
-	if err := s.deleteMachines(deleteMachinesInput{
-		clients:     clients,
-		clusterName: cluster.Name,
-		prefix:      prefixWorker,
-	}); err != nil {
-		s.logger.Log("error", errgo.Details(err))
-	} else {
-		s.logger.Log("info", "deleted workers")
-	}
-
 	// Delete workers Auto Scaling Group.
 	asg := awsresources.AutoScalingGroup{
 		Client: clients.AutoScaling,

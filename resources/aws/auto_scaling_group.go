@@ -65,7 +65,7 @@ func (asg *AutoScalingGroup) Delete() error {
 
 	params := &autoscaling.DeleteAutoScalingGroupInput{
 		AutoScalingGroupName: aws.String(asg.Name),
-		// We force deletion of the ASG even if instances are still terminating.
+		// Delete instances too.
 		ForceDelete: aws.Bool(true),
 	}
 
