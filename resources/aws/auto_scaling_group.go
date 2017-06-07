@@ -7,15 +7,28 @@ import (
 )
 
 type AutoScalingGroup struct {
-	Client                  *autoscaling.AutoScaling
-	Name                    string
-	MinSize                 int
-	MaxSize                 int
-	AvailabilityZone        string
+	// AvailabilityZone is the AZ the instances will be placed in.
+	AvailabilityZone string
+	// HealthCheckGracePeriod is the time, in seconds, that the instances are
+	// given after boot before the healtchecks start.
+	HealthCheckGracePeriod int
+	// LaunchConfigurationName is the name of the Launch Configuration used for the instances.
 	LaunchConfigurationName string
-	LoadBalancerName        string
-	VPCZoneIdentifier       string
-	HealthCheckGracePeriod  int
+	// LoadBalancerName is the name of the ELB that will front the instances.
+	LoadBalancerName string
+	// MaxSize is the maximum amount of insances that will be created in this ASG.
+	MaxSize int
+	// MinSize is the minimum amount of insances in this ASG. There will never be
+	// less than MinSize instances running.
+	MinSize int
+	// Name is the ASG name.
+	Name string
+	// VPCZoneIdentifier is the Subnet ID of the subnet the instances should be
+	// placed in.
+	VPCZoneIdentifier string
+
+	// Dependencies.
+	Client *autoscaling.AutoScaling
 }
 
 func (asg *AutoScalingGroup) CreateOrFail() error {
@@ -52,7 +65,8 @@ func (asg *AutoScalingGroup) Delete() error {
 
 	params := &autoscaling.DeleteAutoScalingGroupInput{
 		AutoScalingGroupName: aws.String(asg.Name),
-		ForceDelete:          aws.Bool(true),
+		// We force deletion of the ASG even if instances are still terminating.
+		ForceDelete: aws.Bool(true),
 	}
 
 	if _, err := asg.Client.DeleteAutoScalingGroup(params); err != nil {

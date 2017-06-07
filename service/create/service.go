@@ -898,6 +898,11 @@ func (s *Service) onAdd(obj interface{}) {
 
 	// Create an Auto Scaling Group for the workers.
 	asgSize := len(cluster.Spec.AWS.Workers)
+	if asgSize == 0 {
+		s.logger.Log("error", fmt.Sprintf("%s: %s", missingCloudConfigKeyError.Error(), "spec.cluster.aws.workers"))
+		return
+	}
+
 	asg := awsresources.AutoScalingGroup{
 		Client:                  clients.AutoScaling,
 		Name:                    cluster.Name,
