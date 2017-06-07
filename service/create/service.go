@@ -1047,28 +1047,14 @@ func (s *Service) onDelete(obj interface{}) {
 	}
 
 	// Delete workers launch configuration.
-	wSG := awsresources.SecurityGroup{
-		Description: securityGroupName(cluster.Name, prefixWorker),
-		GroupName:   securityGroupName(cluster.Name, prefixWorker),
-		AWSEntity:   awsresources.AWSEntity{Clients: clients},
+	lcInput := launchConfigurationInput{
+		clients: clients,
+		cluster: cluster,
 	}
-	wSGID, err := wSG.GetID()
-	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
-	}
-
-	workersLCName, err := launchConfigurationName(cluster, prefixWorker, wSGID)
-	if err != nil {
+	if err := s.deleteLaunchConfiguration(lcInput); err != nil {
 		s.logger.Log("error", errgo.Details(err))
 	} else {
-		if err := s.deleteLaunchConfiguration(launchConfigurationInput{
-			clients: clients,
-			name:    workersLCName,
-		}); err != nil {
-			s.logger.Log("error", errgo.Details(err))
-		} else {
-			s.logger.Log("info", "deleted worker launch config")
-		}
+		s.logger.Log("info", "deleted worker launch config")
 	}
 
 	// Delete Record Sets.
