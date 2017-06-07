@@ -10,15 +10,15 @@ type AutoScalingGroup struct {
 	// AvailabilityZone is the AZ the instances will be placed in.
 	AvailabilityZone string
 	// HealthCheckGracePeriod is the time, in seconds, that the instances are
-	// given after boot before the healtchecks start.
+	// given after boot before the healthchecks start.
 	HealthCheckGracePeriod int
 	// LaunchConfigurationName is the name of the Launch Configuration used for the instances.
 	LaunchConfigurationName string
 	// LoadBalancerName is the name of the ELB that will front the instances.
 	LoadBalancerName string
-	// MaxSize is the maximum amount of insances that will be created in this ASG.
+	// MaxSize is the maximum amount of instances that will be created in this ASG.
 	MaxSize int
-	// MinSize is the minimum amount of insances in this ASG. There will never be
+	// MinSize is the minimum amount of instances in this ASG. There will never be
 	// less than MinSize instances running.
 	MinSize int
 	// Name is the ASG name.

@@ -48,6 +48,9 @@ const (
 	// Number of retries of RunInstances to wait for Roles to propagate to
 	// Instance Profiles
 	runInstancesRetries = 10
+	// The number of seconds AWS will wait, before issuing a health check on
+	// instances in an Auto Scaling Group.
+	gracePeriodSeconds = 10
 )
 
 // Config represents the configuration used to create a version service.
@@ -912,7 +915,7 @@ func (s *Service) onAdd(obj interface{}) {
 		LaunchConfigurationName: workersLCName,
 		LoadBalancerName:        ingressLB.Name,
 		VPCZoneIdentifier:       publicSubnetID,
-		HealthCheckGracePeriod:  10,
+		HealthCheckGracePeriod:  gracePeriodSeconds,
 	}
 
 	if err := asg.CreateOrFail(); err != nil {
