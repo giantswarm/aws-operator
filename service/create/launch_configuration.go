@@ -44,8 +44,6 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 	case prefixWorker:
 		extension = NewWorkerCloudConfigExtension(input.cluster.Spec, input.tlsAssets)
 
-		// TODO Until multiple worker instance types supported check only a single
-		// image ID and instance type is provided.
 		imageID = input.cluster.Spec.AWS.Workers[0].ImageID
 		instanceType = input.cluster.Spec.AWS.Workers[0].InstanceType
 		publicIP = true
