@@ -38,3 +38,26 @@ var secretsRetrievalFailedError = errgo.New("secrets retrieval failed")
 func IsSecretsRetrievalFailed(err error) bool {
 	return errgo.Cause(err) == secretsRetrievalFailedError
 }
+
+// Validation errors
+
+var workersListEmptyError = errgo.New("workers list empty")
+
+// IsWorkersListEmpty asserts workersListEmptyError.
+func IsWorkersListEmpty(err error) bool {
+	return errgo.Cause(err) == workersListEmptyError
+}
+
+var differentImageIDsError = errgo.New("different image IDs")
+
+// IsDifferentImageIDs assert differentImageIDsError.
+func IsDifferentImageIDs(err error) bool {
+	return errgo.Cause(err) == differentImageIDsError
+}
+
+var differentInstanceTypesError = errgo.New("different instance types")
+
+// IsDifferentInstanceTypes asserts differentInstanceTypesError.
+func IsDifferentInstanceTypes(err error) bool {
+	return errgo.Cause(err) == differentInstanceTypesError
+}

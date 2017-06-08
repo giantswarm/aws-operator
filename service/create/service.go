@@ -475,6 +475,11 @@ func (s *Service) onAdd(obj interface{}) {
 	cluster := *obj.(*awstpr.CustomObject)
 	s.logger.Log("info", fmt.Sprintf("creating cluster '%s'", cluster.Name))
 
+	if err := validateCluster(cluster); err != nil {
+		s.logger.Log("error", "cluster spec is invalid: %s", errgo.Details(err))
+		return
+	}
+
 	if err := s.createClusterNamespace(cluster.Spec.Cluster); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not create cluster namespace: %s", errgo.Details(err)))
 		return
@@ -999,6 +1004,11 @@ func (s *Service) onDelete(obj interface{}) {
 			return
 		}
 		cluster = *clusterPtr
+	}
+
+	if err := validateCluster(cluster); err != nil {
+		s.logger.Log("error", "cluster spec is invalid: %s", errgo.Details(err))
+		return
 	}
 
 	if err := s.deleteClusterNamespace(cluster.Spec.Cluster); err != nil {
