@@ -15,6 +15,12 @@ var (
 			Enable:       true,
 			Command:      "start",
 		},
+		cloudconfig.UnitMetadata{
+			AssetContent: varLibDockerMountTemplate,
+			Name:         "var-lib-docker.mount",
+			Enable:       true,
+			Command:      "start",
+		},
 	}
 )
 
