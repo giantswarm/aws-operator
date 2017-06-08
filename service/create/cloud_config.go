@@ -213,6 +213,12 @@ func (m *MasterCloudConfigExtension) Files() ([]cloudconfig.FileAsset, error) {
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
+		cloudconfig.FileMetadata{
+			AssetContent: waitDockerConfTemplate,
+			Path:         "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
+			Owner:        "root:root",
+			Permissions:  0700,
+		},
 	}
 
 	files, err := m.renderFiles(masterFilesMeta)
@@ -305,6 +311,12 @@ func (w *WorkerCloudConfigExtension) Files() ([]cloudconfig.FileAsset, error) {
 			Path:         "/etc/kubernetes/ssl/etcd/client-key.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
+			Permissions:  0700,
+		},
+		cloudconfig.FileMetadata{
+			AssetContent: waitDockerConfTemplate,
+			Path:         "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
+			Owner:        "root:root",
 			Permissions:  0700,
 		},
 	}
