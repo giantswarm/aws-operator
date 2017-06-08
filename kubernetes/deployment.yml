@@ -74,10 +74,10 @@ spec:
           timeoutSeconds: 1
         resources:
           requests:
-            cpu: 100m
-            memory: 20Mi
+            cpu: 50m
+            memory: 200Mi
           limits:
-            cpu: 250m
-            memory: 250Mi
+            cpu: 50m
+            memory: 200Mi
       imagePullSecrets:
       - name: giantswarm-registry
