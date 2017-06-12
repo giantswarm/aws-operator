@@ -42,6 +42,34 @@ ExecStart=/opt/bin/decrypt-tls-assets
 [Install]
 WantedBy=multi-user.target`
 
+	varLibDockerMountTemplate = `
+[Unit]
+Description=Mount ephemeral to /var/lib/docker
+
+[Mount]
+What=/dev/xvdb
+Where=/var/lib/docker
+Type=ext3
+
+[Install]
+RequiredBy=local-fs.target
+`
+
+	waitDockerConfTemplate = `
+[Unit]
+After=var-lib-docker.mount
+Requires=var-lib-docker.mount`
+
+	instanceStorageTemplate = `
+storage:
+  filesystems:
+    - name: ephemeral1
+      mount:
+        device: /dev/xvdb
+        format: ext3
+        create:
+          force: true`
+
 	userDataScriptTemplate = `#!/bin/bash
 
 # user-data in EC2 instances has a 16KB limit.

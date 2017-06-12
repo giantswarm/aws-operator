@@ -35,9 +35,17 @@ type UnitAsset struct {
 	Content  []string
 }
 
+// VerbatimSection is a blob of YAML we want to add to the
+// CloudConfig, with no variable interpolation.
+type VerbatimSection struct {
+	Name    string
+	Content string
+}
+
 type Extension interface {
 	Files() ([]FileAsset, error)
 	Units() ([]UnitAsset, error)
+	VerbatimSections() []VerbatimSection
 }
 
 func RenderAssetContent(assetContent string, params interface{}) ([]string, error) {

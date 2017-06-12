@@ -1286,6 +1286,10 @@ coreos:
       WantedBy=multi-user.target
   update:
     reboot-strategy: off
+
+{{ range .Extension.VerbatimSections }}
+{{ .Content }}
+{{ end }}
 `
 
 	WorkerTemplate = `#cloud-config
@@ -1575,6 +1579,10 @@ coreos:
       WantedBy=multi-user.target
   update:
     reboot-strategy: off
+
+{{ range .Extension.VerbatimSections }}
+{{ .Content }}
+{{ end }}
 `
 
 	testTemplate = `foo: {{.Foo}}`

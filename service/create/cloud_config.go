@@ -15,6 +15,12 @@ var (
 			Enable:       true,
 			Command:      "start",
 		},
+		cloudconfig.UnitMetadata{
+			AssetContent: varLibDockerMountTemplate,
+			Name:         "var-lib-docker.mount",
+			Enable:       true,
+			Command:      "start",
+		},
 	}
 )
 
@@ -207,6 +213,12 @@ func (m *MasterCloudConfigExtension) Files() ([]cloudconfig.FileAsset, error) {
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
+		cloudconfig.FileMetadata{
+			AssetContent: waitDockerConfTemplate,
+			Path:         "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
+			Owner:        "root:root",
+			Permissions:  0700,
+		},
 	}
 
 	files, err := m.renderFiles(masterFilesMeta)
@@ -301,6 +313,12 @@ func (w *WorkerCloudConfigExtension) Files() ([]cloudconfig.FileAsset, error) {
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
+		cloudconfig.FileMetadata{
+			AssetContent: waitDockerConfTemplate,
+			Path:         "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
+			Owner:        "root:root",
+			Permissions:  0700,
+		},
 	}
 
 	files, err := w.renderFiles(workerFilesMeta)
@@ -309,6 +327,19 @@ func (w *WorkerCloudConfigExtension) Files() ([]cloudconfig.FileAsset, error) {
 	}
 
 	return files, nil
+}
+
+// VerbatimSections is defined on CloudConfigExtension since there's no difference
+// between master and workers sections.
+func (c *CloudConfigExtension) VerbatimSections() []cloudconfig.VerbatimSection {
+	sections := []cloudconfig.VerbatimSection{
+		{
+			Name:    "storage",
+			Content: instanceStorageTemplate,
+		},
+	}
+
+	return sections
 }
 
 func (s *Service) cloudConfig(prefix string, params cloudconfig.Params, awsSpec awstpr.Spec, tlsAssets *certificatetpr.CompactTLSAssets) (string, error) {

@@ -9,3 +9,7 @@ func (f *FakeExtension) Files() ([]FileAsset, error) {
 func (f *FakeExtension) Units() ([]UnitAsset, error) {
 	return nil, nil
 }
+
+func (f *FakeExtension) VerbatimSections() []VerbatimSection {
+	return nil
+}
