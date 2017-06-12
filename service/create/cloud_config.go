@@ -329,7 +329,7 @@ func (w *WorkerCloudConfigExtension) Files() ([]cloudconfig.FileAsset, error) {
 	return files, nil
 }
 
-// VerbatimSections  is defined on CloudConfigExtension since there's no difference
+// VerbatimSections is defined on CloudConfigExtension since there's no difference
 // between master and workers sections.
 func (c *CloudConfigExtension) VerbatimSections() []cloudconfig.VerbatimSection {
 	sections := []cloudconfig.VerbatimSection{
