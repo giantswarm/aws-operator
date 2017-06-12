@@ -52,7 +52,8 @@ Where=/var/lib/docker
 Type=ext3
 
 [Install]
-WantedBy=multi-user.target`
+RequiredBy=local-fs.target
+`
 
 	waitDockerConfTemplate = `
 [Unit]
