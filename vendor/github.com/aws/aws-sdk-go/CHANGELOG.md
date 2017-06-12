@@ -1,3 +1,43 @@
+Release v1.8.39 (2017-06-09)
+===
+
+### Service Client Updates
+* `aws/endpoints`: Updated Regions and Endpoints metadata.
+* `service/opsworks`: Updates service API and documentation
+  * Tagging Support for AWS OpsWorks Stacks
+
+Release v1.8.38 (2017-06-08)
+===
+
+### Service Client Updates
+* `service/iot`: Updates service API and documentation
+  * In addition to using certificate ID, AWS IoT customers can now obtain the description of a certificate with the certificate PEM.
+* `service/pinpoint`: Updates service API and documentation
+  * Starting today Amazon Pinpoint adds SMS Text and Email Messaging support in addition to Mobile Push Notifications, providing developers, product managers and marketers with multi-channel messaging capabilities to drive user engagement in their applications. Pinpoint also enables backend services and applications to message users directly and provides advanced user and app analytics to understand user behavior and messaging performance.
+* `service/rekognition`: Updates service API and documentation
+  * API Update for AmazonRekognition: Adding RecognizeCelebrities API
+
+Release v1.8.37 (2017-06-07)
+===
+
+### Service Client Updates
+* `service/codebuild`: Updates service API and documentation
+  * Add support to APIs for privileged containers. This change would allow performing privileged operations like starting the Docker daemon inside builds possible in custom docker images.
+* `service/greengrass`: Adds new service
+  * AWS Greengrass is software that lets you run local compute, messaging, and device state synchronization for connected devices in a secure way. With AWS Greengrass, connected devices can run AWS Lambda functions, keep device data in sync, and communicate with other devices securely even when not connected to the Internet. Using AWS Lambda, Greengrass ensures your IoT devices can respond quickly to local events, operate with intermittent connections, and minimize the cost of transmitting IoT data to the cloud.
+
+Release v1.8.36 (2017-06-06)
+===
+
+### Service Client Updates
+* `service/acm`: Updates service documentation
+  * Documentation update for AWS Certificate Manager.
+* `service/cloudfront`: Updates service documentation
+  * Doc update to fix incorrect prefix in S3OriginConfig
+* `aws/endpoints`: Updated Regions and Endpoints metadata.
+* `service/iot`: Updates service API
+  * Update client side validation for SalesForce action.
+
 Release v1.8.35 (2017-06-05)
 ===
 

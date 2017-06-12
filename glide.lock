@@ -1,5 +1,5 @@
 hash: 20314e2f920f12330791ded87554bd6ac69f8992cee6d79026654004d20ae596
-updated: 2017-06-06T16:23:35.329269507+02:00
+updated: 2017-06-12T11:39:25.218873615+02:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aws/aws-sdk-go
-  version: 33a65fdad4220416fbd92fa2982616d0f32f7505
+  version: 5327e5f9fb7f0115585c1f636282335e649f6c04
   subpackages:
   - aws
   - aws/awserr
@@ -53,7 +53,7 @@ imports:
 - name: github.com/cenkalti/backoff
   version: 5d150e7eec023ce7a124856b37c68e54b4050ac7
 - name: github.com/coreos/etcd
-  version: d267ca9c184e953554257d0acdd1dc9c47d38229
+  version: 0f4a535c2fb7a2920e13e2e19b9eaf6b2e9285e5
   subpackages:
   - auth/authpb
   - client
@@ -129,7 +129,7 @@ imports:
   - node
   - vault
 - name: github.com/giantswarm/k8scloudconfig
-  version: e96d5dc5aead3c13ddee337beeb55ec056ddd00b
+  version: 78bfc9b0298f6578d3014c316bdcd3df68a9a69d
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
@@ -255,7 +255,7 @@ imports:
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: 65c1f6f8f0fc1e2185eb9863a3bc751496404259
+  version: a3bfc74126ea9e45ee5d5c6f7fc86191b7d488fb
   subpackages:
   - xfs
 - name: github.com/PuerkitoBio/purell
@@ -275,7 +275,7 @@ imports:
 - name: github.com/spf13/pflag
   version: 08b1a584251b5b62f458943640fc8ebd4d50aaa5
 - name: github.com/spf13/viper
-  version: 0967fc9aceab2ce9da34061253ac10fb99bba5b2
+  version: a1ecfa6a20bd4ef9e9caded262ee1b1b26847675
 - name: github.com/tylerb/graceful
   version: 4654dfbb6ad53cb5e27f37d99b02e16c1872fbbb
 - name: github.com/ugorji/go
