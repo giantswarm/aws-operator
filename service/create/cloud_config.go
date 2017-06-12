@@ -329,6 +329,19 @@ func (w *WorkerCloudConfigExtension) Files() ([]cloudconfig.FileAsset, error) {
 	return files, nil
 }
 
+// VerbatimSections  is defined on CloudConfigExtension since there's no difference
+// between master and workers sections.
+func (c *CloudConfigExtension) VerbatimSections() []cloudconfig.VerbatimSection {
+	sections := []cloudconfig.VerbatimSection{
+		{
+			Name:    "storage",
+			Content: instanceStorageTemplate,
+		},
+	}
+
+	return sections
+}
+
 func (s *Service) cloudConfig(prefix string, params cloudconfig.Params, awsSpec awstpr.Spec, tlsAssets *certificatetpr.CompactTLSAssets) (string, error) {
 	var template string
 	switch prefix {
