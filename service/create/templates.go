@@ -45,13 +45,11 @@ WantedBy=multi-user.target`
 	varLibDockerMountTemplate = `
 [Unit]
 Description=Mount ephemeral to /var/lib/docker
-Requires=format-ephemeral.service
-After=format-ephemeral.service
 
 [Mount]
 What=/dev/xvdb
 Where=/var/lib/docker
-Type=ext4
+Type=ext3
 
 [Install]
 WantedBy=multi-user.target`
@@ -67,7 +65,7 @@ storage:
     - name: ephemeral1
       mount:
         device: /dev/xvdb
-        format: ext4
+        format: ext3
         create:
           force: true`
 
