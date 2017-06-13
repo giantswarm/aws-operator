@@ -59,7 +59,7 @@ WantedBy=multi-user.target
 
 	ephemeralVarLibDockerMountTemplate = `
 [Unit]
-Description=Mount ephemeral to /var/lib/docker
+Description=Mount ephemeral volume on /var/lib/docker
 
 [Mount]
 What=/dev/xvdb
@@ -71,7 +71,7 @@ RequiredBy=local-fs.target
 `
 	persistentVarLibDockerMountTemplate = `
 [Unit]
-Description=Mount persistent /var/lib/docker
+Description=Mount persistent volume on /var/lib/docker
 
 [Mount]
 What=/dev/xvdh
@@ -85,7 +85,8 @@ RequiredBy=local-fs.target
 	waitDockerConfTemplate = `
 [Unit]
 After=var-lib-docker.mount
-Requires=var-lib-docker.mount`
+Requires=var-lib-docker.mount
+`
 
 	instanceStorageTemplate = `
 storage:
@@ -95,7 +96,8 @@ storage:
         device: /dev/xvdb
         format: ext3
         create:
-          force: true`
+          force: true
+`
 
 	userDataScriptTemplate = `#!/bin/bash
 
