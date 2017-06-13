@@ -1079,6 +1079,7 @@ func (s *Service) onDelete(obj interface{}) {
 					Resource:     apiLB,
 					Domain:       cluster.Spec.Cluster.Kubernetes.API.Domain,
 					HostedZoneID: cluster.Spec.AWS.HostedZones.API,
+					Type:         route53.RRTypeA,
 				},
 				recordSetInput{
 					Cluster:      cluster,
@@ -1086,6 +1087,7 @@ func (s *Service) onDelete(obj interface{}) {
 					Resource:     etcdLB,
 					Domain:       cluster.Spec.Cluster.Etcd.Domain,
 					HostedZoneID: cluster.Spec.AWS.HostedZones.Etcd,
+					Type:         route53.RRTypeA,
 				},
 				recordSetInput{
 					Cluster:      cluster,
@@ -1093,12 +1095,14 @@ func (s *Service) onDelete(obj interface{}) {
 					Resource:     ingressLB,
 					Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
 					HostedZoneID: cluster.Spec.AWS.HostedZones.Ingress,
+					Type:         route53.RRTypeA,
 				},
 				recordSetInput{
 					Cluster: cluster,
 					Client:  clients.Route53,
 					Value:   cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
 					Domain:  cluster.Spec.Cluster.Kubernetes.IngressController.WildcardDomain,
+					Type:    route53.RRTypeCname,
 				},
 			}
 
