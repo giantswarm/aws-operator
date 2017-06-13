@@ -357,9 +357,7 @@ func (w *WorkerCloudConfigExtension) Units() ([]cloudconfig.UnitAsset, error) {
 	return units, nil
 }
 
-// VerbatimSections is defined on CloudConfigExtension since there's no difference
-// between master and workers sections.
-func (c *CloudConfigExtension) VerbatimSections() []cloudconfig.VerbatimSection {
+func (m *MasterCloudConfigExtension) VerbatimSections() []cloudconfig.VerbatimSection {
 	sections := []cloudconfig.VerbatimSection{
 		{
 			Name:    "storage",
@@ -368,6 +366,10 @@ func (c *CloudConfigExtension) VerbatimSections() []cloudconfig.VerbatimSection 
 	}
 
 	return sections
+}
+
+func (w *WorkerCloudConfigExtension) VerbatimSections() []cloudconfig.VerbatimSection {
+	return nil
 }
 
 func (s *Service) cloudConfig(prefix string, params cloudconfig.Params, awsSpec awstpr.Spec, tlsAssets *certificatetpr.CompactTLSAssets) (string, error) {
