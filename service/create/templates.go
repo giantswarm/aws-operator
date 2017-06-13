@@ -57,7 +57,7 @@ ExecStart=/usr/sbin/mkfs.xfs -f /dev/xvdh
 WantedBy=multi-user.target
 `
 
-	varLibDockerMountTemplate = `
+	ephemeralVarLibDockerMountTemplate = `
 [Unit]
 Description=Mount ephemeral to /var/lib/docker
 
@@ -65,6 +65,18 @@ Description=Mount ephemeral to /var/lib/docker
 What=/dev/xvdb
 Where=/var/lib/docker
 Type=ext3
+
+[Install]
+RequiredBy=local-fs.target
+`
+	persistentVarLibDockerMountTemplate = `
+[Unit]
+Description=Mount persistent /var/lib/docker
+
+[Mount]
+What=/dev/xvdh
+Where=/var/lib/docker
+Type=xfs
 
 [Install]
 RequiredBy=local-fs.target

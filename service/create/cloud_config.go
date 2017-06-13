@@ -212,7 +212,7 @@ func (m *MasterCloudConfigExtension) Units() ([]cloudconfig.UnitAsset, error) {
 			Command:      "start",
 		},
 		cloudconfig.UnitMetadata{
-			AssetContent: varLibDockerMountTemplate,
+			AssetContent: ephemeralVarLibDockerMountTemplate,
 			Name:         "var-lib-docker.mount",
 			Enable:       true,
 			Command:      "start",
@@ -342,7 +342,7 @@ func (w *WorkerCloudConfigExtension) Units() ([]cloudconfig.UnitAsset, error) {
 			Command:      "start",
 		},
 		cloudconfig.UnitMetadata{
-			AssetContent: varLibDockerMountTemplate,
+			AssetContent: persistentVarLibDockerMountTemplate,
 			Name:         "var-lib-docker.mount",
 			Enable:       true,
 			Command:      "start",
