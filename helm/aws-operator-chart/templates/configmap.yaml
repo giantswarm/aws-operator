@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-operator-configmap
+  namespace: giantswarm
+data:
+  config.yml: |
+    kubernetes:
+      incluster: true
+    server:
+      listen:
+        address: 'http://0.0.0.0:8000'
