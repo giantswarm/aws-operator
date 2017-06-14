@@ -20,6 +20,7 @@ type securityGroupInput struct {
 type rulesInput struct {
 	Cluster                awstpr.CustomObject
 	Rules                  []awsresources.SecurityGroupRule
+	APISecurityGroupID     string
 	MastersSecurityGroupID string
 	WorkersSecurityGroupID string
 	IngressSecurityGroupID string
@@ -73,13 +74,23 @@ func (s *Service) deleteSecurityGroup(input securityGroupInput) error {
 	return nil
 }
 
-// masterRules returns the rules for the masters security group.
-func (ri rulesInput) masterRules() []awsresources.SecurityGroupRule {
+// apiRules returns the rules for the api security group.
+func (ri rulesInput) apiRules() []awsresources.SecurityGroupRule {
 	return []awsresources.SecurityGroupRule{
 		{
 			Port:       ri.Cluster.Spec.Cluster.Kubernetes.API.SecurePort,
 			SourceCIDR: defaultCIDR,
 		},
+		{
+			Port:       sshPort,
+			SourceCIDR: defaultCIDR,
+		},
+	}
+}
+
+// masterRules returns the rules for the masters security group.
+func (ri rulesInput) masterRules() []awsresources.SecurityGroupRule {
+	return []awsresources.SecurityGroupRule{
 		{
 			Port:       ri.Cluster.Spec.Cluster.Etcd.Port,
 			SourceCIDR: defaultCIDR,

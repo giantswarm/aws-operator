@@ -633,6 +633,22 @@ func (s *Service) onAdd(obj interface{}) {
 		s.logger.Log("info", fmt.Sprintf("gateway for cluster '%s' already exists, reusing", cluster.Name))
 	}
 
+	apiSGInput := securityGroupInput{
+		Clients:   clients,
+		GroupName: securityGroupName(cluster.Name, "api"),
+		VPCID:     vpcID,
+	}
+	apiSecurityGroup, err := s.createSecurityGroup(apiSGInput)
+	if err != nil {
+		s.logger.Log()
+		return
+	}
+	apiSecurityGroupID, err := apiSecurityGroup.GetID()
+	if err != nil {
+		s.logger.Log("error", errgo.Details(err))
+		return
+	}
+
 	// Create masters security group.
 	mastersSGInput := securityGroupInput{
 		Clients:   clients,
@@ -687,9 +703,15 @@ func (s *Service) onAdd(obj interface{}) {
 	// Create rules for the security groups.
 	rulesInput := rulesInput{
 		Cluster:                cluster,
+		APISecurityGroupID:     apiSecurityGroupID,
 		MastersSecurityGroupID: mastersSecurityGroupID,
 		WorkersSecurityGroupID: workersSecurityGroupID,
 		IngressSecurityGroupID: ingressSecurityGroupID,
+	}
+
+	if err := apiSecurityGroup.ApplyRules(rulesInput.apiRules()); err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not create rules for security group '%s': %s", apiSecurityGroup.GroupName, errgo.Details(err)))
+		return
 	}
 
 	if err := mastersSecurityGroup.ApplyRules(rulesInput.masterRules()); err != nil {
@@ -794,7 +816,7 @@ func (s *Service) onAdd(obj interface{}) {
 				PortInstance: cluster.Spec.Cluster.Kubernetes.API.SecurePort,
 			},
 		},
-		SecurityGroupID: mastersSecurityGroupID,
+		SecurityGroupID: apiSecurityGroupID,
 		SubnetID:        publicSubnetID,
 	}
 
@@ -1192,6 +1214,15 @@ func (s *Service) onDelete(obj interface{}) {
 		s.logger.Log("error", fmt.Sprintf("could not delete public subnet: %s", errgo.Details(err)))
 	} else {
 		s.logger.Log("info", "deleted public subnet")
+	}
+
+	// Delete API security group.
+	apiSGInput := securityGroupInput{
+		Clients:   clients,
+		GroupName: securityGroupName(cluster.Name, "api"),
+	}
+	if err := s.deleteSecurityGroup(apiSGInput); err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': %s", apiSGInput.GroupName, errgo.Details(err)))
 	}
 
 	// Delete masters security group.
