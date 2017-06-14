@@ -10,6 +10,7 @@ import (
 // scaling group.
 type LaunchConfiguration struct {
 	AssociatePublicIpAddress bool
+	EBSStorage               bool
 	IamInstanceProfileName   string
 	ImageID                  string
 	InstanceType             string
@@ -21,6 +22,13 @@ type LaunchConfiguration struct {
 	// Dependencies
 	Client *autoscaling.AutoScaling
 }
+
+const (
+	defaultEBSVolumeMountPoint = "/dev/xvdh"
+	// defaultEBSVolumeSize is expressed in GB.
+	defaultEBSVolumeSize = 50
+	defaultEBSVolumeType = "gp2"
+)
 
 // CreateIfNotExists creates the launch config if it doesn't exist.
 func (lc *LaunchConfiguration) CreateIfNotExists() (bool, error) {
@@ -50,6 +58,18 @@ func (lc *LaunchConfiguration) CreateOrFail() error {
 		return microerror.MaskAny(clientNotInitializedError)
 	}
 
+	var ebsMount *autoscaling.BlockDeviceMapping
+	if lc.EBSStorage {
+		ebsMount = &autoscaling.BlockDeviceMapping{
+			DeviceName: aws.String(defaultEBSVolumeMountPoint),
+			Ebs: &autoscaling.Ebs{
+				DeleteOnTermination: aws.Bool(true),
+				VolumeSize:          aws.Int64(defaultEBSVolumeSize),
+				VolumeType:          aws.String(defaultEBSVolumeType),
+			},
+		}
+	}
+
 	lcInput := &autoscaling.CreateLaunchConfigurationInput{
 		LaunchConfigurationName: aws.String(lc.Name),
 		IamInstanceProfile:      aws.String(lc.IamInstanceProfileName),
@@ -61,7 +81,9 @@ func (lc *LaunchConfiguration) CreateOrFail() error {
 		},
 		UserData:                 aws.String(lc.SmallCloudConfig),
 		AssociatePublicIpAddress: aws.Bool(lc.AssociatePublicIpAddress),
+		BlockDeviceMappings:      []*autoscaling.BlockDeviceMapping{ebsMount},
 	}
+
 	if _, err := lc.Client.CreateLaunchConfiguration(lcInput); err != nil {
 		return microerror.MaskAny(err)
 	}
