@@ -884,6 +884,7 @@ func (s *Service) onAdd(obj interface{}) {
 		keypairName:         cluster.Name,
 		instanceProfileName: policy.GetName(),
 		prefix:              prefixWorker,
+		ebsStorage:          true,
 	}
 
 	lcCreated, err := s.createLaunchConfiguration(lcInput)
