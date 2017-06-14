@@ -212,6 +212,12 @@ func (m *MasterCloudConfigExtension) Units() ([]cloudconfig.UnitAsset, error) {
 			Command:      "start",
 		},
 		cloudconfig.UnitMetadata{
+			AssetContent: masterFormatVarLibDockerServiceTemplate,
+			Name:         "format-var-lib-docker.service",
+			Enable:       true,
+			Command:      "start",
+		},
+		cloudconfig.UnitMetadata{
 			AssetContent: ephemeralVarLibDockerMountTemplate,
 			Name:         "var-lib-docker.mount",
 			Enable:       true,
@@ -336,7 +342,7 @@ func (w *WorkerCloudConfigExtension) Units() ([]cloudconfig.UnitAsset, error) {
 			Command:      "start",
 		},
 		cloudconfig.UnitMetadata{
-			AssetContent: formatVarLibDockerServiceTemplate,
+			AssetContent: workerFormatVarLibDockerServiceTemplate,
 			Name:         "format-var-lib-docker.service",
 			Enable:       true,
 			Command:      "start",

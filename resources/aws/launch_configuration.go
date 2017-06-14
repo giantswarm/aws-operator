@@ -24,10 +24,10 @@ type LaunchConfiguration struct {
 }
 
 const (
-	defaultMountPoint = "/dev/xvdh"
-	// defaultVolumeSize is expressed in GB.
-	defaultVolumeSize = 50
-	defaultVolumeType = "gp2"
+	defaultEBSVolumeMountPoint = "/dev/xvdh"
+	// defaultEBSVolumeSize is expressed in GB.
+	defaultEBSVolumeSize = 50
+	defaultEBSVolumeType = "gp2"
 )
 
 // CreateIfNotExists creates the launch config if it doesn't exist.
@@ -61,11 +61,11 @@ func (lc *LaunchConfiguration) CreateOrFail() error {
 	var ebsMount *autoscaling.BlockDeviceMapping
 	if lc.EBSStorage {
 		ebsMount = &autoscaling.BlockDeviceMapping{
-			DeviceName: aws.String(defaultMountPoint),
+			DeviceName: aws.String(defaultEBSVolumeMountPoint),
 			Ebs: &autoscaling.Ebs{
 				DeleteOnTermination: aws.Bool(true),
-				VolumeSize:          aws.Int64(defaultVolumeSize),
-				VolumeType:          aws.String(defaultVolumeType),
+				VolumeSize:          aws.Int64(defaultEBSVolumeSize),
+				VolumeType:          aws.String(defaultEBSVolumeType),
 			},
 		}
 	}

@@ -43,7 +43,21 @@ ExecStart=/opt/bin/decrypt-tls-assets
 WantedBy=multi-user.target
 `
 
-	formatVarLibDockerServiceTemplate = `
+	masterFormatVarLibDockerServiceTemplate = `
+[Unit]
+Description=Format /var/lib/docker to XFS
+Before=docker.service var-lib-docker.mount
+ConditionPathExists=!/var/lib/docker
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/mkfs.xfs -f /dev/xvdb
+
+[Install]
+WantedBy=multi-user.target
+`
+
+	workerFormatVarLibDockerServiceTemplate = `
 [Unit]
 Description=Format /var/lib/docker to XFS
 Before=docker.service var-lib-docker.mount
@@ -64,7 +78,7 @@ Description=Mount ephemeral volume on /var/lib/docker
 [Mount]
 What=/dev/xvdb
 Where=/var/lib/docker
-Type=ext3
+Type=xfs
 
 [Install]
 RequiredBy=local-fs.target
