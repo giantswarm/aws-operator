@@ -22,6 +22,7 @@ type launchConfigurationInput struct {
 	name                string
 	prefix              string
 	securityGroup       resources.ResourceWithID
+	ebsStorage          bool
 	subnet              *awsresources.Subnet
 	tlsAssets           *certificatetpr.CompactTLSAssets
 }
@@ -106,6 +107,7 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 		SecurityGroupID:          securityGroupID,
 		SmallCloudConfig:         smallCloudconfig,
 		AssociatePublicIpAddress: publicIP,
+		EBSStorage:               input.ebsStorage,
 	}
 
 	launchConfigCreated, err := launchConfig.CreateIfNotExists()

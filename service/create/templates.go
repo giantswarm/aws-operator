@@ -40,16 +40,57 @@ Type=oneshot
 ExecStart=/opt/bin/decrypt-tls-assets
 
 [Install]
-WantedBy=multi-user.target`
+WantedBy=multi-user.target
+`
 
-	varLibDockerMountTemplate = `
+	masterFormatVarLibDockerServiceTemplate = `
 [Unit]
-Description=Mount ephemeral to /var/lib/docker
+Description=Format /var/lib/docker to XFS
+Before=docker.service var-lib-docker.mount
+ConditionPathExists=!/var/lib/docker
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/mkfs.xfs -f /dev/xvdb
+
+[Install]
+WantedBy=multi-user.target
+`
+
+	workerFormatVarLibDockerServiceTemplate = `
+[Unit]
+Description=Format /var/lib/docker to XFS
+Before=docker.service var-lib-docker.mount
+ConditionPathExists=!/var/lib/docker
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/mkfs.xfs -f /dev/xvdh
+
+[Install]
+WantedBy=multi-user.target
+`
+
+	ephemeralVarLibDockerMountTemplate = `
+[Unit]
+Description=Mount ephemeral volume on /var/lib/docker
 
 [Mount]
 What=/dev/xvdb
 Where=/var/lib/docker
-Type=ext3
+Type=xfs
+
+[Install]
+RequiredBy=local-fs.target
+`
+	persistentVarLibDockerMountTemplate = `
+[Unit]
+Description=Mount persistent volume on /var/lib/docker
+
+[Mount]
+What=/dev/xvdh
+Where=/var/lib/docker
+Type=xfs
 
 [Install]
 RequiredBy=local-fs.target
@@ -58,7 +99,8 @@ RequiredBy=local-fs.target
 	waitDockerConfTemplate = `
 [Unit]
 After=var-lib-docker.mount
-Requires=var-lib-docker.mount`
+Requires=var-lib-docker.mount
+`
 
 	instanceStorageTemplate = `
 storage:
@@ -68,7 +110,8 @@ storage:
         device: /dev/xvdb
         format: ext3
         create:
-          force: true`
+          force: true
+`
 
 	userDataScriptTemplate = `#!/bin/bash
 

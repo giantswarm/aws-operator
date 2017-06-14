@@ -8,23 +8,6 @@ import (
 )
 
 var (
-	unitsMeta []cloudconfig.UnitMetadata = []cloudconfig.UnitMetadata{
-		cloudconfig.UnitMetadata{
-			AssetContent: decryptTLSAssetsServiceTemplate,
-			Name:         "decrypt-tls-assets.service",
-			Enable:       true,
-			Command:      "start",
-		},
-		cloudconfig.UnitMetadata{
-			AssetContent: varLibDockerMountTemplate,
-			Name:         "var-lib-docker.mount",
-			Enable:       true,
-			Command:      "start",
-		},
-	}
-)
-
-var (
 	assetTemplates = map[string]string{
 		prefixMaster: cloudconfig.MasterTemplate,
 		prefixWorker: cloudconfig.WorkerTemplate,
@@ -71,15 +54,6 @@ func (c *CloudConfigExtension) renderUnits(unitsMeta []cloudconfig.UnitMetadata)
 		}
 
 		units = append(units, unitAsset)
-	}
-
-	return units, nil
-}
-
-func (c *CloudConfigExtension) Units() ([]cloudconfig.UnitAsset, error) {
-	units, err := c.renderUnits(unitsMeta)
-	if err != nil {
-		return nil, microerror.MaskAny(err)
 	}
 
 	return units, nil
@@ -229,6 +203,36 @@ func (m *MasterCloudConfigExtension) Files() ([]cloudconfig.FileAsset, error) {
 	return files, nil
 }
 
+func (m *MasterCloudConfigExtension) Units() ([]cloudconfig.UnitAsset, error) {
+	unitsMeta := []cloudconfig.UnitMetadata{
+		cloudconfig.UnitMetadata{
+			AssetContent: decryptTLSAssetsServiceTemplate,
+			Name:         "decrypt-tls-assets.service",
+			Enable:       true,
+			Command:      "start",
+		},
+		cloudconfig.UnitMetadata{
+			AssetContent: masterFormatVarLibDockerServiceTemplate,
+			Name:         "format-var-lib-docker.service",
+			Enable:       true,
+			Command:      "start",
+		},
+		cloudconfig.UnitMetadata{
+			AssetContent: ephemeralVarLibDockerMountTemplate,
+			Name:         "var-lib-docker.mount",
+			Enable:       true,
+			Command:      "start",
+		},
+	}
+
+	units, err := m.renderUnits(unitsMeta)
+	if err != nil {
+		return nil, microerror.MaskAny(err)
+	}
+
+	return units, nil
+}
+
 type WorkerCloudConfigExtension struct {
 	CloudConfigExtension
 }
@@ -329,9 +333,37 @@ func (w *WorkerCloudConfigExtension) Files() ([]cloudconfig.FileAsset, error) {
 	return files, nil
 }
 
-// VerbatimSections is defined on CloudConfigExtension since there's no difference
-// between master and workers sections.
-func (c *CloudConfigExtension) VerbatimSections() []cloudconfig.VerbatimSection {
+func (w *WorkerCloudConfigExtension) Units() ([]cloudconfig.UnitAsset, error) {
+	unitsMeta := []cloudconfig.UnitMetadata{
+		cloudconfig.UnitMetadata{
+			AssetContent: decryptTLSAssetsServiceTemplate,
+			Name:         "decrypt-tls-assets.service",
+			Enable:       true,
+			Command:      "start",
+		},
+		cloudconfig.UnitMetadata{
+			AssetContent: workerFormatVarLibDockerServiceTemplate,
+			Name:         "format-var-lib-docker.service",
+			Enable:       true,
+			Command:      "start",
+		},
+		cloudconfig.UnitMetadata{
+			AssetContent: persistentVarLibDockerMountTemplate,
+			Name:         "var-lib-docker.mount",
+			Enable:       true,
+			Command:      "start",
+		},
+	}
+
+	units, err := w.renderUnits(unitsMeta)
+	if err != nil {
+		return nil, microerror.MaskAny(err)
+	}
+
+	return units, nil
+}
+
+func (m *MasterCloudConfigExtension) VerbatimSections() []cloudconfig.VerbatimSection {
 	sections := []cloudconfig.VerbatimSection{
 		{
 			Name:    "storage",
@@ -340,6 +372,10 @@ func (c *CloudConfigExtension) VerbatimSections() []cloudconfig.VerbatimSection 
 	}
 
 	return sections
+}
+
+func (w *WorkerCloudConfigExtension) VerbatimSections() []cloudconfig.VerbatimSection {
+	return nil
 }
 
 func (s *Service) cloudConfig(prefix string, params cloudconfig.Params, awsSpec awstpr.Spec, tlsAssets *certificatetpr.CompactTLSAssets) (string, error) {
