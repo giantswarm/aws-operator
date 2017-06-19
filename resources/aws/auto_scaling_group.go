@@ -88,3 +88,20 @@ func (asg *AutoScalingGroup) Delete() error {
 
 	return nil
 }
+
+func (asg *AutoScalingGroup) Update() error {
+	if asg.Client == nil {
+		return microerror.MaskAny(clientNotInitializedError)
+	}
+
+	params := &autoscaling.UpdateAutoScalingGroupInput{
+		AutoScalingGroupName: aws.String(asg.Name),
+		MinSize:              aws.Int64(int64(asg.MinSize)),
+		MaxSize:              aws.Int64(int64(asg.MaxSize)),
+	}
+
+	if _, err := asg.Client.UpdateAutoScalingGroup(params); err != nil {
+		return microerror.MaskAny(err)
+	}
+	return nil
+}
