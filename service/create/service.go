@@ -180,6 +180,7 @@ func (s *Service) Boot() {
 			tpr.ResyncPeriod,
 			cache.ResourceEventHandlerFuncs{
 				AddFunc:    s.onAdd,
+				UpdateFunc: s.onUpdate,
 				DeleteFunc: s.onDelete,
 			},
 		)
@@ -907,10 +908,6 @@ func (s *Service) onAdd(obj interface{}) {
 
 	// Create an Auto Scaling Group for the workers.
 	asgSize := len(cluster.Spec.AWS.Workers)
-	if asgSize == 0 {
-		s.logger.Log("error", fmt.Sprintf("%s: %s", missingCloudConfigKeyError.Error(), "spec.cluster.aws.workers"))
-		return
-	}
 
 	asg := awsresources.AutoScalingGroup{
 		Client:                  clients.AutoScaling,
@@ -1298,4 +1295,49 @@ func (s *Service) onDelete(obj interface{}) {
 	}
 
 	s.logger.Log("info", fmt.Sprintf("cluster '%s' deleted", cluster.Name))
+}
+
+func (s *Service) onUpdate(oldObj, newObj interface{}) {
+	oldCluster := *oldObj.(*awstpr.CustomObject)
+	cluster := *newObj.(*awstpr.CustomObject)
+
+	if err := validateCluster(cluster); err != nil {
+		s.logger.Log("error", "cluster spec is invalid: %s", errgo.Details(err))
+		return
+	}
+
+	oldSize := len(oldCluster.Spec.AWS.Workers)
+	newSize := len(cluster.Spec.AWS.Workers)
+
+	if oldSize == newSize {
+		// We get update events for all sorts of changes. We are currently only
+		// interested in changes to one property, so we ignore all the others.
+		return
+	} else if oldSize > newSize {
+		s.logger.Log("clusterID", cluster.Spec.Cluster.Cluster.ID, "info", "cluster size reduction not supported")
+		return
+	}
+
+	s.awsConfig.Region = cluster.Spec.AWS.Region
+	clients := awsutil.NewClients(s.awsConfig)
+
+	err := s.awsConfig.SetAccountID(clients.IAM)
+	if err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not retrieve amazon account id: %s", errgo.Details(err)))
+		return
+	}
+
+	asg := awsresources.AutoScalingGroup{
+		Client:  clients.AutoScaling,
+		Name:    fmt.Sprintf("%s-%s", cluster.Name, prefixWorker),
+		MinSize: newSize,
+		MaxSize: newSize,
+	}
+
+	if err := asg.Update(); err != nil {
+		s.logger.Log("error", errgo.Details(err))
+		return
+	}
+
+	s.logger.Log("info", fmt.Sprintf("increased size of workers auto scaling group to %d", newSize))
 }
