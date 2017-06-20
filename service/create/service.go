@@ -1226,36 +1226,19 @@ func (s *Service) onDelete(obj interface{}) {
 		s.logger.Log("info", "deleted vpc")
 	}
 
-	// Delete S3 bucket objects.
+	// Delete S3 bucket.
 	bucketName := s.bucketName(cluster)
 
-	var bucket resources.Resource
-	bucket = &awsresources.Bucket{
+	bucket := &awsresources.Bucket{
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
 		Name:      bucketName,
 	}
 
-	var masterBucketObject resources.Resource
-	masterBucketObject = &awsresources.BucketObject{
-		Name:      s.bucketObjectName(cluster, prefixMaster),
-		Bucket:    bucket.(*awsresources.Bucket),
-		AWSEntity: awsresources.AWSEntity{Clients: clients},
-	}
-	if err := masterBucketObject.Delete(); err != nil {
+	if err := bucket.Delete(); err != nil {
 		s.logger.Log("error", errgo.Details(err))
 	}
 
-	var workerBucketObject resources.Resource
-	workerBucketObject = &awsresources.BucketObject{
-		Name:      s.bucketObjectName(cluster, prefixWorker),
-		Bucket:    bucket.(*awsresources.Bucket),
-		AWSEntity: awsresources.AWSEntity{Clients: clients},
-	}
-	if err := workerBucketObject.Delete(); err != nil {
-		s.logger.Log("error", errgo.Details(err))
-	}
-
-	s.logger.Log("info", "deleted bucket objects")
+	s.logger.Log("info", "deleted bucket")
 
 	// Delete policy.
 	var policy resources.NamedResource
