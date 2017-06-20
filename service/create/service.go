@@ -3,13 +3,10 @@ package create
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 	"sync"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/route53"
-	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/awstpr"
 	awsinfo "github.com/giantswarm/awstpr/aws"
 	"github.com/giantswarm/certificatetpr"
@@ -306,19 +303,6 @@ func allExistingInstancesMatch(instances *ec2.DescribeInstancesOutput, state aws
 		}
 	}
 	return nil, true
-}
-
-func (s *Service) uploadCloudconfigToS3(svc *s3.S3, s3Bucket, path, data string) error {
-	if _, err := svc.PutObject(&s3.PutObjectInput{
-		Body:          strings.NewReader(data),
-		Bucket:        aws.String(s3Bucket),
-		Key:           aws.String(path),
-		ContentLength: aws.Int64(int64(len(data))),
-	}); err != nil {
-		return microerror.MaskAny(err)
-	}
-
-	return nil
 }
 
 type runMachineInput struct {
