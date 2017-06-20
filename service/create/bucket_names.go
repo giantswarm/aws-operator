@@ -15,11 +15,6 @@ func (s *Service) bucketName(cluster awstpr.CustomObject) string {
 	return name
 }
 
-func (s *Service) bucketObjectDirPath(cluster awstpr.CustomObject) string {
-	clusterID := cluster.Spec.Cluster.Cluster.ID
-	return fmt.Sprintf("%s/cloudconfig", clusterID)
-}
-
 func (s *Service) bucketObjectName(prefix string) string {
-	return fmt.Sprintf("%s", prefix)
+	return fmt.Sprintf("cloudconfig/%s", prefix)
 }
