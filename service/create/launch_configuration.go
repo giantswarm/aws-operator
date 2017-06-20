@@ -1,6 +1,7 @@
 package create
 
 import (
+	"crypto/sha256"
 	"fmt"
 
 	"github.com/giantswarm/aws-operator/resources"
@@ -72,8 +73,11 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 		S3URI:       s.bucketName(input.cluster),
 	}
 
+	// Calculate the SHA256 checksum of the CloudConfig.
+	checksum := sha256.Sum256([]byte(cloudConfig))
+
 	cloudconfigS3 := &awsresources.BucketObject{
-		Name:      s.bucketObjectName(input.prefix),
+		Name:      s.bucketObjectName(input.prefix, checksum),
 		Data:      cloudConfig,
 		Bucket:    input.bucket.(*awsresources.Bucket),
 		AWSEntity: awsresources.AWSEntity{Clients: input.clients},
