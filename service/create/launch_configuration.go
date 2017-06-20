@@ -63,6 +63,9 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 		return false, microerror.MaskAny(err)
 	}
 
+	// use the hash in the filename
+	// use the new filename in the small cc
+
 	// We now upload the instance cloudconfig to S3 and create a "small
 	// cloudconfig" that just fetches the previously uploaded "final
 	// cloudconfig" and executes coreos-cloudinit with it as argument.

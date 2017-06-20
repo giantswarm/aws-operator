@@ -1,6 +1,7 @@
 package create
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"sync"
@@ -344,9 +345,14 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 		S3URI:       s.bucketName(input.cluster),
 	}
 
-	var cloudconfigS3 resources.Resource
-	cloudconfigS3 = &awsresources.BucketObject{
-		Name:      s.bucketObjectName(input.prefix),
+	// use the hash in the filename
+	// use the new filename in the small cc
+
+	// Calculate the SHA256 checksum of the CloudConfig.
+	checksum := sha256.Sum256([]byte(cloudConfig))
+
+	cloudconfigS3 := &awsresources.BucketObject{
+		Name:      s.bucketObjectName(input.prefix, checksum),
 		Data:      cloudConfig,
 		Bucket:    input.bucket.(*awsresources.Bucket),
 		AWSEntity: awsresources.AWSEntity{Clients: input.clients},

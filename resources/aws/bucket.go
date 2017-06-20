@@ -52,7 +52,6 @@ func (b *Bucket) Delete() error {
 		return microerror.MaskAny(err)
 	}
 
-<<<<<<< HEAD
 	for _, o := range objects.Contents {
 		if _, err := b.Clients.S3.DeleteObject(&s3.DeleteObjectInput{
 			Bucket: aws.String(b.Name),
@@ -68,7 +67,5 @@ func (b *Bucket) Delete() error {
 		return microerror.MaskAny(err)
 	}
 
-=======
->>>>>>> split BucketObject out into own file
 	return nil
 }

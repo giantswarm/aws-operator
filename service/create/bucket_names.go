@@ -15,6 +15,6 @@ func (s *Service) bucketName(cluster awstpr.CustomObject) string {
 	return name
 }
 
-func (s *Service) bucketObjectName(prefix string, checksum []byte) string {
+func (s *Service) bucketObjectName(prefix string, checksum [32]byte) string {
 	return fmt.Sprintf("cloudconfig/%s-%x", prefix, checksum)
 }
