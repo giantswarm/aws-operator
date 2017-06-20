@@ -21,14 +21,6 @@ func (s *Service) bucketObjectDirPath(cluster awstpr.CustomObject) string {
 	return fmt.Sprintf("%s/cloudconfig", clusterID)
 }
 
-func (s *Service) bucketObjectFullDirPath(cluster awstpr.CustomObject) string {
-	bucketName := s.bucketName(cluster)
-
-	dirPath := s.bucketObjectDirPath(cluster)
-	return fmt.Sprintf("%s/%s", bucketName, dirPath)
-}
-
-func (s *Service) bucketObjectName(cluster awstpr.CustomObject, prefix string) string {
-	dirPath := s.bucketObjectDirPath(cluster)
-	return fmt.Sprintf("%s/%s", dirPath, prefix)
+func (s *Service) bucketObjectName(prefix string) string {
+	return fmt.Sprintf("%s", prefix)
 }

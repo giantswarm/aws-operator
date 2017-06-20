@@ -69,11 +69,11 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 	cloudconfigConfig := SmallCloudconfigConfig{
 		MachineType: input.prefix,
 		Region:      input.cluster.Spec.AWS.Region,
-		S3DirURI:    s.bucketObjectFullDirPath(input.cluster),
+		S3URI:       s.bucketName(input.cluster),
 	}
 
 	cloudconfigS3 := &awsresources.BucketObject{
-		Name:      s.bucketObjectName(input.cluster, input.prefix),
+		Name:      s.bucketObjectName(input.prefix),
 		Data:      cloudConfig,
 		Bucket:    input.bucket.(*awsresources.Bucket),
 		AWSEntity: awsresources.AWSEntity{Clients: input.clients},

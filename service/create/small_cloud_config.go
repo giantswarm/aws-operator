@@ -11,7 +11,7 @@ import (
 type SmallCloudconfigConfig struct {
 	MachineType string
 	Region      string
-	S3DirURI    string
+	S3URI       string
 }
 
 func (s *Service) SmallCloudconfig(config SmallCloudconfigConfig) (string, error) {
