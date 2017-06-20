@@ -44,6 +44,23 @@ func (b *Bucket) CreateOrFail() error {
 }
 
 func (b *Bucket) Delete() error {
+	// List bucket objects and delete them one by one.
+	objects, err := b.Clients.S3.ListObjects(&s3.ListObjectsInput{
+		Bucket: aws.String(b.Name),
+	})
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	for _, o := range objects.Contents {
+		if _, err := b.Clients.S3.DeleteObject(&s3.DeleteObjectInput{
+			Bucket: aws.String(b.Name),
+			Key:    aws.String(*o.Key),
+		}); err != nil {
+			return microerror.MaskAny(err)
+		}
+	}
+
 	if _, err := b.Clients.S3.DeleteBucket(&s3.DeleteBucketInput{
 		Bucket: aws.String(b.Name),
 	}); err != nil {
