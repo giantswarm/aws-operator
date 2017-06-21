@@ -352,7 +352,7 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 	checksum := sha256.Sum256([]byte(cloudConfig))
 
 	cloudconfigS3 := &awsresources.BucketObject{
-		Name:      s.bucketObjectName(input.prefix, checksum),
+		Name:      s.cloudConfigName(input.prefix, checksum),
 		Data:      cloudConfig,
 		Bucket:    input.bucket.(*awsresources.Bucket),
 		AWSEntity: awsresources.AWSEntity{Clients: input.clients},
