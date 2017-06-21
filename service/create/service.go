@@ -339,20 +339,17 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 	// cloudconfig" that just fetches the previously uploaded "final
 	// cloudconfig" and executes coreos-cloudinit with it as argument.
 	// We do this to circumvent the 16KB limit on user-data for EC2 instances.
-	cloudconfigConfig := SmallCloudconfigConfig{
-		MachineType: input.prefix,
-		Region:      input.cluster.Spec.AWS.Region,
-		S3URI:       s.bucketName(input.cluster),
-	}
 
-	// use the hash in the filename
-	// use the new filename in the small cc
-
-	// Calculate the SHA256 checksum of the CloudConfig.
 	checksum := sha256.Sum256([]byte(cloudConfig))
 
+	cloudconfigConfig := SmallCloudconfigConfig{
+		Filename: s.cloudConfigName(input.prefix, checksum),
+		Region:   input.cluster.Spec.AWS.Region,
+		S3URI:    s.bucketName(input.cluster),
+	}
+
 	cloudconfigS3 := &awsresources.BucketObject{
-		Name:      s.cloudConfigName(input.prefix, checksum),
+		Name:      s.cloudConfigRelativePath(input.prefix, checksum),
 		Data:      cloudConfig,
 		Bucket:    input.bucket.(*awsresources.Bucket),
 		AWSEntity: awsresources.AWSEntity{Clients: input.clients},

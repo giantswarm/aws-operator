@@ -416,5 +416,11 @@ func (s *Service) cloudConfig(prefix string, params cloudconfig.Params, awsSpec 
 }
 
 func (s *Service) cloudConfigName(prefix string, checksum [sha256.Size]byte) string {
-	return fmt.Sprintf("cloudconfig/%s-%x", prefix, checksum)
+	return fmt.Sprintf("%s-%x", prefix, checksum)
+}
+
+func (s *Service) cloudConfigRelativePath(prefix string, checksum [sha256.Size]byte) string {
+	name := s.cloudConfigName(prefix, checksum)
+
+	return fmt.Sprintf("cloudconfig/%s", name)
 }
