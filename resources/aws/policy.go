@@ -48,7 +48,7 @@ const (
 			{
 				"Effect": "Allow",
 				"Action": "s3:GetObject",
-				"Resource": "arn:aws:s3:::%s/%s/*"
+				"Resource": "arn:aws:s3:::%s/*"
 			}
 		]
 	}`
@@ -80,7 +80,7 @@ func (p *Policy) CreateIfNotExists() (bool, error) {
 
 func (p *Policy) createRole() error {
 	// TODO switch to using a file and Go templates
-	policyDocument := fmt.Sprintf(PolicyDocumentTempl, p.KMSKeyArn, p.S3Bucket, p.S3Bucket, p.ClusterID)
+	policyDocument := fmt.Sprintf(PolicyDocumentTempl, p.KMSKeyArn, p.S3Bucket, p.S3Bucket)
 
 	clusterRoleName := fmt.Sprintf("%s-%s", p.ClusterID, RoleNameTemplate)
 
