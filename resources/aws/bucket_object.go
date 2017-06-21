@@ -9,10 +9,10 @@ import (
 )
 
 type BucketObject struct {
-	Name   string
-	Data   string
-	Bucket *Bucket
 	AWSEntity
+	Bucket *Bucket
+	Data   string
+	Name   string
 }
 
 // CreateIfNotExists is not implemeted because S3 overwrites bucket objects in
@@ -34,8 +34,8 @@ func (bo *BucketObject) CreateOrFail() error {
 	if _, err := bo.Clients.S3.PutObject(&s3.PutObjectInput{
 		Body:          strings.NewReader(bo.Data),
 		Bucket:        aws.String(bo.Bucket.Name),
-		Key:           aws.String(bo.Name),
 		ContentLength: aws.Int64(int64(len(bo.Data))),
+		Key:           aws.String(bo.Name),
 	}); err != nil {
 		return microerror.MaskAny(err)
 	}
