@@ -18,8 +18,6 @@ type BucketObject struct {
 // CreateIfNotExists is not implemeted because S3 overwrites bucket objects in
 // case of name clashes. This means that a newer CloudConfig with the same name
 // as an old one will always overwrite it.
-// This shouldn't be a problem, since we use the hash of the CloudConfig
-// contents in its name.
 // If we decide to use the S3 bucket for other types of files, we might have to
 // revisit this.
 func (bo *BucketObject) CreateIfNotExists() (bool, error) {
