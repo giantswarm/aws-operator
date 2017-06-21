@@ -8,27 +8,13 @@ import (
 
 func (s *Service) bucketName(cluster awstpr.CustomObject) string {
 	accountID := s.awsConfig.AccountID()
-	customerID := cluster.Spec.Cluster.Customer.ID
-	region := cluster.Spec.AWS.Region
+	clusterID := cluster.Spec.Cluster.Cluster.ID
 
-	name := fmt.Sprintf("%s-g8s-%s-%s", accountID, customerID, region)
+	name := fmt.Sprintf("%s-g8s-%s", accountID, clusterID)
 
 	return name
 }
 
-func (s *Service) bucketObjectDirPath(cluster awstpr.CustomObject) string {
-	clusterID := cluster.Spec.Cluster.Cluster.ID
-	return fmt.Sprintf("%s/cloudconfig", clusterID)
-}
-
-func (s *Service) bucketObjectFullDirPath(cluster awstpr.CustomObject) string {
-	bucketName := s.bucketName(cluster)
-
-	dirPath := s.bucketObjectDirPath(cluster)
-	return fmt.Sprintf("%s/%s", bucketName, dirPath)
-}
-
-func (s *Service) bucketObjectName(cluster awstpr.CustomObject, prefix string) string {
-	dirPath := s.bucketObjectDirPath(cluster)
-	return fmt.Sprintf("%s/%s", dirPath, prefix)
+func (s *Service) bucketObjectName(prefix string) string {
+	return fmt.Sprintf("cloudconfig/%s", prefix)
 }
