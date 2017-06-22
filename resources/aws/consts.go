@@ -3,7 +3,7 @@ package aws
 const (
 	// EC2 instance tag keys.
 	tagKeyName    string = "Name"
-	tagKeyCluster string = "Cluster"
+	tagKeyCluster string = "KubernetesCluster"
 	// Subnet keys
 	subnetAvailabilityZone string = "availabilityZone"
 	subnetCidrBlock        string = "cidrBlock"
