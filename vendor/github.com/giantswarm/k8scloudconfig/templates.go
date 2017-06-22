@@ -775,6 +775,19 @@ write_files:
           sleep 3s
       done
 
+      # apply default storage class
+      if [ -f /srv/default-storage-class.yaml]; then
+          while
+              /usr/bin/docker run --net=host --rm -v /srv:/srv $KUBECTL apply -f /srv/default-storage-class.yaml
+              [ "$?" -ne "0" ]
+          do
+              echo "failed to apply /srv/default-storage-class.yaml, retrying in 5 sec"
+              sleep 5s
+          done
+      else
+          echo "no default storage class to apply"
+      fi
+
       # apply k8s addons
       MANIFESTS="kubedns-cm.yaml kubedns-sa.yaml kubedns-dep.yaml kubedns-svc.yaml default-backend-dep.yml default-backend-svc.yml ingress-controller-cm.yml ingress-controller-dep.yml ingress-controller-svc.yml"
 
@@ -784,7 +797,7 @@ write_files:
               /usr/bin/docker run --net=host --rm -v /srv:/srv $KUBECTL apply -f /srv/$manifest
               [ "$?" -ne "0" ]
           do
-              echo "failed to apply /src/$manifest, retrying in 5 sec"
+              echo "failed to apply /srv/$manifest, retrying in 5 sec"
               sleep 5s
           done
       done
@@ -1107,6 +1120,7 @@ coreos:
       --logtostderr=true \
       --machine-id-file=/rootfs/etc/machine-id \
       --cadvisor-port=4194 \
+      --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
       --healthz-bind-address=${DEFAULT_IPV4} \
       --healthz-port=10248 \
       --cluster-dns={{.Cluster.Kubernetes.DNS.IP}} \
@@ -1165,7 +1179,8 @@ coreos:
       --secure_port={{.Cluster.Kubernetes.API.SecurePort}} \
       --bind-address=${DEFAULT_IPV4} \
       --etcd-prefix={{.Cluster.Etcd.Prefix}} \
-      --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota \
+      --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,DefaultStorageClass \
+      --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
       --service-cluster-ip-range={{.Cluster.Kubernetes.API.ClusterIPRange}} \
       --etcd-servers=https://{{ .Cluster.Etcd.Domain }}:443 \
       --etcd-cafile=/etc/kubernetes/ssl/etcd/server-ca.pem \
@@ -1208,6 +1223,7 @@ coreos:
       --master=https://{{.Cluster.Kubernetes.API.Domain}}:443 \
       --logtostderr=true \
       --v=2 \
+      --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
       --kubeconfig=/etc/kubernetes/config/controller-manager-kubeconfig.yml \
       --root-ca-file=/etc/kubernetes/ssl/apiserver-ca.pem \
       --service-account-private-key-file=/etc/kubernetes/ssl/service-account-key.pem
@@ -1536,6 +1552,7 @@ coreos:
       --logtostderr=true \
       --machine-id-file=/rootfs/etc/machine-id \
       --cadvisor-port=4194 \
+      --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
       --healthz-bind-address=${DEFAULT_IPV4} \
       --healthz-port=10248 \
       --cluster-dns={{.Cluster.Kubernetes.DNS.IP}} \

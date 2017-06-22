@@ -26,6 +26,11 @@ const (
 		"Version": "2012-10-17",
 		"Statement": [
 			{
+            	"Action": "ec2:*",
+            	"Effect": "Allow",
+                "Resource": "*"
+            },
+			{
 				"Effect": "Allow",
 				"Action": "kms:Decrypt",
 				"Resource": %q
