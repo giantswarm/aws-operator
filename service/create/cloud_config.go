@@ -3,7 +3,6 @@ package create
 import (
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/certificatetpr"
-	"github.com/giantswarm/k8scloudconfig"
 	microerror "github.com/giantswarm/microkit/error"
 )
 
@@ -369,13 +368,24 @@ func (m *MasterCloudConfigExtension) VerbatimSections() []cloudconfig.VerbatimSe
 			Name:    "storage",
 			Content: instanceStorageTemplate,
 		},
+		{
+			Name:    "storageclass",
+			Content: instanceStorageClassTemplate,
+		},
 	}
 
 	return sections
 }
 
 func (w *WorkerCloudConfigExtension) VerbatimSections() []cloudconfig.VerbatimSection {
-	return nil
+	sections := []cloudconfig.VerbatimSection{
+		{
+			Name:    "storageclass",
+			Content: instanceStorageClassTemplate,
+		},
+	}
+
+	return sections
 }
 
 func (s *Service) cloudConfig(prefix string, params cloudconfig.Params, awsSpec awstpr.Spec, tlsAssets *certificatetpr.CompactTLSAssets) (string, error) {
