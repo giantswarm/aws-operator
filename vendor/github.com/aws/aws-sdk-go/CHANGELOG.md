@@ -1,3 +1,88 @@
+Release v1.10.1 (2017-06-21)
+===
+
+### Service Client Updates
+* `service/dax`: Adds new service
+  * Amazon DynamoDB Accelerator (DAX) is a fully managed, highly available, in-memory cache for DynamoDB that delivers up to a 10x performance improvement - from milliseconds to microseconds - even at millions of requests per second. DAX does all the heavy lifting required to add in-memory acceleration to your DynamoDB tables, without requiring developers to manage cache invalidation, data population, or cluster management.
+* `service/route53`: Updates service API and documentation
+  * Amazon Route 53 now supports multivalue answers in response to DNS queries, which lets you route traffic approximately randomly to multiple resources, such as web servers. Create one multivalue answer record for each resource and, optionally, associate an Amazon Route 53 health check with each record, and Amazon Route 53 responds to DNS queries with up to eight healthy records.
+* `service/ssm`: Updates service API, documentation, and paginators
+  * Adding hierarchy support to the SSM Parameter Store API. Added support tor tagging. New APIs: GetParameter - retrieves one parameter, DeleteParameters - deletes multiple parameters (max number 10), GetParametersByPath - retrieves parameters located in the hierarchy. Updated APIs: PutParameter - added ability to enforce parameter value by applying regex (AllowedPattern), DescribeParameters - modified to support Tag filtering.
+* `service/waf`: Updates service API and documentation
+  * You can now create, edit, update, and delete a new type of WAF rule with a rate tracking component.
+* `service/waf-regional`: Updates service API and documentation
+
+Release v1.10.0 (2017-06-20)
+===
+
+### Service Client Updates
+* `service/workdocs`: Updates service API and documentation
+  * This release provides a new API to retrieve the activities performed by WorkDocs users.
+
+### SDK Features
+* `aws/credentials/plugincreds`: Add support for Go plugin for credentials [#1320](https://github.com/aws/aws-sdk-go/pull/1320)
+  * Adds support for using plugins to retrieve credentials for API requests. This change adds a new package plugincreds under aws/credentials. See the `example/aws/credentials/plugincreds` folder in the SDK for example usage.
+
+Release v1.9.00 (2017-06-19)
+===
+
+### Service Client Updates
+* `service/organizations`: Updates service API and documentation
+  * Improvements to Exception Modeling
+
+### SDK Features
+* `service/s3/s3manager`: Adds batch operations to s3manager [#1333](https://github.com/aws/aws-sdk-go/pull/1333)
+  * Allows for batch upload, download, and delete of objects. Also adds the interface pattern to allow for easy traversal of objects. E.G `DownloadWithIterator`, `UploadWithIterator`, and `BatchDelete`. `BatchDelete` also contains a utility iterator using the `ListObjects` API to easily delete a list of objects.
+  
+Release v1.8.44 (2017-06-16)
+===
+
+### Service Client Updates
+* `service/xray`: Updates service API, documentation, and paginators
+  * Add a response time histogram to the services in response of GetServiceGraph API.
+
+Release v1.8.43 (2017-06-15)
+===
+
+### Service Client Updates
+* `service/ec2`: Updates service API and documentation
+  * Adds API to describe Amazon FPGA Images (AFIs) available to customers, which includes public AFIs, private AFIs that you own, and AFIs owned by other AWS accounts for which you have load permissions.
+* `service/ecs`: Updates service API and documentation
+  * Added support for cpu, memory, and memory reservation container overrides on the RunTask and StartTask APIs.
+* `service/iot`: Updates service API and documentation
+  * Revert the last release: remove CertificatePem from DescribeCertificate API.
+* `service/servicecatalog`: Updates service API, documentation, and paginators
+  * Added ProvisioningArtifactSummaries to DescribeProductAsAdmin's output to show the provisioning artifacts belong to the product. Allow filtering by SourceProductId in SearchProductsAsAdmin for AWS Marketplace products. Added a verbose option to DescribeProvisioningArtifact to display the CloudFormation template used to create the provisioning artifact.Added DescribeProvisionedProduct API. Changed the type of ProvisionedProduct's Status to be distinct from Record's Status. New ProvisionedProduct's Status are AVAILABLE, UNDER_CHANGE, TAINTED, ERROR. Changed Record's Status set of values to CREATED, IN_PROGRESS, IN_PROGRESS_IN_ERROR, SUCCEEDED, FAILED.
+
+### SDK Bugs
+* `private/model/api`: Fix RESTXML support for XML Namespace [#1343](https://github.com/aws/aws-sdk-go/pull/1343)
+  * Fixes a bug with the SDK's generation of services using the REST XML protocol not annotating shape references with the XML Namespace attribute.
+  * Fixes [#1334](https://github.com/aws/aws-sdk-go/pull/1334)
+Release v1.8.42 (2017-06-14)
+===
+
+### Service Client Updates
+* `service/applicationautoscaling`: Updates service API and documentation
+* `service/clouddirectory`: Updates service documentation
+  * Documentation update for Cloud Directory
+
+Release v1.8.41 (2017-06-13)
+===
+
+### Service Client Updates
+* `service/configservice`: Updates service API
+
+Release v1.8.40 (2017-06-13)
+===
+
+### Service Client Updates
+* `service/rds`: Updates service API and documentation
+  * API Update for RDS: this update enables copy-on-write, a new Aurora MySQL Compatible Edition feature that allows users to restore their database, and support copy of TDE enabled snapshot cross region.
+
+### SDK Bugs
+* `aws/request`: Fix NewErrParamMinLen to use correct ParamMinLenErrCode [#1336](https://github.com/aws/aws-sdk-go/issues/1336)
+  * Fixes the `NewErrParamMinLen` function returning the wrong error code. `ParamMinLenErrCode` should be returned not `ParamMinValueErrCode`.
+  * Fixes [#1335](https://github.com/aws/aws-sdk-go/issues/1335)
 Release v1.8.39 (2017-06-09)
 ===
 

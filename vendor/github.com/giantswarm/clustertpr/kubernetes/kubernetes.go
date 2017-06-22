@@ -13,6 +13,10 @@ import (
 
 type Kubernetes struct {
 	API api.API `json:"api" yaml:"api"`
+	// CloudProvider enables cloud provider specific functionality
+	// can be aws, azure, gce, ... needs to be unset for baremetal
+	// see https://kubernetes.io/docs/getting-started-guides/scratch/#cloud-providers)
+	CloudProvider     string                    `json:"cloudProvider" yaml:"cloudProvider"`
 	DNS dns.DNS `json:"dns" yaml:"dns"`
 	// Domain is the base domain of the Kubernetes cluster, e.g.
 	// g8s.fra-1.giantswarm.io.
