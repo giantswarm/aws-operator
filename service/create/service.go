@@ -912,6 +912,7 @@ func (s *Service) onAdd(obj interface{}) {
 	asg := awsresources.AutoScalingGroup{
 		Client:                  clients.AutoScaling,
 		Name:                    fmt.Sprintf("%s-%s", cluster.Name, prefixWorker),
+		ClusterID:               cluster.Name,
 		MinSize:                 asgSize,
 		MaxSize:                 asgSize,
 		AvailabilityZone:        cluster.Spec.AWS.AZ,

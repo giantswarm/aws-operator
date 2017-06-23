@@ -9,6 +9,8 @@ import (
 type AutoScalingGroup struct {
 	// AvailabilityZone is the AZ the instances will be placed in.
 	AvailabilityZone string
+	// ClusterID is the ID of the cluster.
+	ClusterID string
 	// HealthCheckGracePeriod is the time, in seconds, that the instances are
 	// given after boot before the healthchecks start.
 	HealthCheckGracePeriod int
@@ -59,7 +61,7 @@ func (asg *AutoScalingGroup) CreateOrFail() error {
 			{
 				Key:               aws.String(tagKeyCluster),
 				PropagateAtLaunch: aws.Bool(true),
-				Value:             aws.String(asg.Name),
+				Value:             aws.String(asg.ClusterID),
 			},
 		},
 	}
