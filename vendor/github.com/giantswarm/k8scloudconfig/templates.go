@@ -776,7 +776,7 @@ write_files:
       done
 
       # apply default storage class
-      if [ -f /srv/default-storage-class.yaml]; then
+      if [ -f /srv/default-storage-class.yaml ]; then
           while
               /usr/bin/docker run --net=host --rm -v /srv:/srv $KUBECTL apply -f /srv/default-storage-class.yaml
               [ "$?" -ne "0" ]
