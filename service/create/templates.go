@@ -120,17 +120,17 @@ write_files:
   permissions: 644
   content: |
     apiVersion: storage.k8s.io/v1beta1
-  kind: StorageClass
-  metadata:
-  name: gp2
-  annotations:
-    storageclass.beta.kubernetes.io/is-default-class: "true"
-  labels:
-    kubernetes.io/cluster-service: "true"
-    addonmanager.kubernetes.io/mode: EnsureExists
-  provisioner: kubernetes.io/aws-ebs
-  parameters:
-  type: gp2
+    kind: StorageClass
+    metadata:
+      name: gp2
+      annotations:
+        storageclass.beta.kubernetes.io/is-default-class: "true"
+      labels:
+        kubernetes.io/cluster-service: "true"
+        addonmanager.kubernetes.io/mode: EnsureExists
+    provisioner: kubernetes.io/aws-ebs
+    parameters:
+    type: gp2
 `
 
 	userDataScriptTemplate = `#!/bin/bash
