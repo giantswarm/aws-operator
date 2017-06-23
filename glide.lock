@@ -1,5 +1,5 @@
 hash: 20314e2f920f12330791ded87554bd6ac69f8992cee6d79026654004d20ae596
-updated: 2017-06-22T17:00:28.616006975+02:00
+updated: 2017-06-23T14:39:30.681179163+02:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aws/aws-sdk-go
-  version: aa827991a3c164e7d129a20edf80028605195eef
+  version: 5525dcfc0f1a4183fcf97a4278e010b4a67c864e
   subpackages:
   - aws
   - aws/awserr
@@ -51,7 +51,7 @@ imports:
 - name: github.com/blang/semver
   version: 31b736133b98f26d5e078ec9eb591666edfd091f
 - name: github.com/cenkalti/backoff
-  version: 5d150e7eec023ce7a124856b37c68e54b4050ac7
+  version: 32cd0c5b3aef12c76ed64aaf678f6c79736be7dc
 - name: github.com/coreos/etcd
   version: 0f4a535c2fb7a2920e13e2e19b9eaf6b2e9285e5
   subpackages:
@@ -129,7 +129,7 @@ imports:
   - node
   - vault
 - name: github.com/giantswarm/k8scloudconfig
-  version: b6de4feec7e1ed372a648e0d711ae799a03602fe
+  version: 26726341fa96348d74d63fd66f4ac01795c929cb
 - name: github.com/giantswarm/microkit
   version: 27e3ac11e763712e0d0dc5294aea8937e66458da
   subpackages:
@@ -189,7 +189,7 @@ imports:
 - name: github.com/gorilla/context
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
-  version: bcd8bc72b08df0f70df986b97f95590779502d31
+  version: 0eeaf8392f5b04950925b8a69fe70f110fa7cbfc
 - name: github.com/grpc-ecosystem/go-grpc-prometheus
   version: 6b7015e65d366bf3f19b2b2a000a831940f0f7e0
 - name: github.com/grpc-ecosystem/grpc-gateway

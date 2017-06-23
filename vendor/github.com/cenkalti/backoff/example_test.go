@@ -1,53 +1,31 @@
 package backoff
 
-import (
-	"log"
+import "log"
 
-	"golang.org/x/net/context"
-)
-
-func ExampleRetry() {
-	// An operation that may fail.
+func ExampleRetry() error {
 	operation := func() error {
-		return nil // or an error
+		// An operation that might fail.
+		return nil // or return errors.New("some error")
 	}
 
 	err := Retry(operation, NewExponentialBackOff())
 	if err != nil {
 		// Handle error.
-		return
+		return err
 	}
 
 	// Operation is successful.
+	return nil
 }
 
-func ExampleRetryContext() {
-	// A context
-	ctx := context.Background()
-
-	// An operation that may fail.
+func ExampleTicker() error {
 	operation := func() error {
-		return nil // or an error
+		// An operation that might fail
+		return nil // or return errors.New("some error")
 	}
 
-	b := WithContext(NewExponentialBackOff(), ctx)
-
-	err := Retry(operation, b)
-	if err != nil {
-		// Handle error.
-		return
-	}
-
-	// Operation is successful.
-}
-
-func ExampleTicker() {
-	// An operation that may fail.
-	operation := func() error {
-		return nil // or an error
-	}
-
-	ticker := NewTicker(NewExponentialBackOff())
+	b := NewExponentialBackOff()
+	ticker := NewTicker(b)
 
 	var err error
 
@@ -65,9 +43,9 @@ func ExampleTicker() {
 
 	if err != nil {
 		// Operation has failed.
-		return
+		return err
 	}
 
 	// Operation is successful.
-	return
+	return nil
 }
