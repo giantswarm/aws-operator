@@ -130,7 +130,7 @@ write_files:
         addonmanager.kubernetes.io/mode: EnsureExists
     provisioner: kubernetes.io/aws-ebs
     parameters:
-    type: gp2
+      type: gp2
 `
 
 	userDataScriptTemplate = `#!/bin/bash
