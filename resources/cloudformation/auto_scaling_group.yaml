@@ -1,17 +1,15 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Workers ASG
 Parameters:
-  VpcId:
-    Type: 'AWS::EC2::VPC::Id'
-    Description: VpcId of your existing Virtual Private Cloud (VPC)
-    ConstraintDescription: must be the VPC Id of an existing Virtual Private Cloud.
-  Subnets:
-    Type: 'List<AWS::EC2::Subnet::Id>'
-    Description: The list of SubnetIds in your Virtual Private Cloud (VPC)
+  SubnetID:
+    Type: "AWS::EC2::Subnet::Id"
+    Description: The SubnetId in your Virtual Private Cloud (VPC)
     ConstraintDescription: >-
       must be a list of at least two existing subnets associated with at least
       two different availability zones. They should be residing in the selected
       Virtual Private Cloud.
+  AZ:
+    Type: "AWS::EC2::AvailabilityZone::Name"
   InstanceType:
     Description: Worker EC2 instance type
     Type: String
@@ -53,20 +51,41 @@ Parameters:
   ImageID:
     Description: The AMI for the worker instances
     Type: String
-  CloudConfig:
-    Description: The small Cloud Config
+  ASGMinSize:
+    Type: Number
+  ASGMaxSize:
+    Type: Number
+  HealthCheckGracePeriod:
+    Type: Number
+  WorkersLaunchConfigurationName:
     Type: String
 Resources:
-  SimpleConfig:
-    Type: AWS::AutoScaling::LaunchConfiguration
+  WorkersLaunchConfiguration:
+    Type: "AWS::AutoScaling::LaunchConfiguration"
+    Description: Workers LaunchConfiguration
     Properties:
       ImageId: !Ref ImageID
       SecurityGroups:
-      - Ref: SecurityGroupName
+      - !Ref SecurityGroupName
       InstanceType: !Ref InstanceType
       BlockDeviceMappings:
       - DeviceName: "/dev/sdk"
         Ebs:
           VolumeSize: '50'
-      - DeviceName: "/dev/sdc"
+          VolumeType: gp2
+      - DeviceName: "/dev/xvdh"
         VirtualName: ephemeral0
+      AssociatePublicIpAddress: true
+      UserData: !Ref SmallCloudConfig
+  WorkersASG:
+    Type: "AWS::AutoScaling::AutoScalingGroup"
+    Properties:
+      VPCZoneIdentifier:
+        - !Ref SubnetID
+      AvailabilityZones:
+        - !Ref AZ
+      MinSize: !Ref ASGMinSize
+      MaxSize: !Ref ASGMaxSize
+      LaunchConfigurationName: !Ref WorkersLaunchConfigurationName
+      LoadBalancerName: !Ref LoadBalancerName
+      HealthCheckGracePeriod: !Ref HealthCheckGracePeriod

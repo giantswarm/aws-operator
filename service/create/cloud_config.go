@@ -17,6 +17,8 @@ var (
 	}
 )
 
+const cloudConfigSubdir = "cloudconfig"
+
 type CloudConfigExtension struct {
 	AwsInfo   awstpr.Spec
 	TLSAssets *certificatetpr.CompactTLSAssets
@@ -422,5 +424,5 @@ func (s *Service) cloudConfigName(prefix string, checksum [sha256.Size]byte) str
 func (s *Service) cloudConfigRelativePath(prefix string, checksum [sha256.Size]byte) string {
 	name := s.cloudConfigName(prefix, checksum)
 
-	return fmt.Sprintf("cloudconfig/%s", name)
+	return fmt.Sprintf("%s/%s", cloudConfigSubdir, name)
 }

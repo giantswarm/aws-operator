@@ -9,7 +9,7 @@ import (
 )
 
 type BucketObject struct {
-	AWSEntity
+	Client *s3.S3
 	Bucket *Bucket
 	Data   string
 	Name   string
@@ -29,7 +29,7 @@ func (bo *BucketObject) CreateOrFail() error {
 		return microerror.MaskAny(noBucketInBucketObjectError)
 	}
 
-	if _, err := bo.Clients.S3.PutObject(&s3.PutObjectInput{
+	if _, err := bo.Client.PutObject(&s3.PutObjectInput{
 		Body:          strings.NewReader(bo.Data),
 		Bucket:        aws.String(bo.Bucket.Name),
 		ContentLength: aws.Int64(int64(len(bo.Data))),
@@ -42,7 +42,7 @@ func (bo *BucketObject) CreateOrFail() error {
 }
 
 func (bo *BucketObject) Delete() error {
-	if _, err := bo.Clients.S3.DeleteObject(&s3.DeleteObjectInput{
+	if _, err := bo.Client.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: aws.String(bo.Bucket.Name),
 		Key:    aws.String(bo.Name),
 	}); err != nil {

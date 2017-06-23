@@ -77,10 +77,10 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 	}
 
 	cloudconfigS3 := &awsresources.BucketObject{
-		Name:      s.cloudConfigRelativePath(input.prefix, checksum),
-		Data:      cloudConfig,
-		Bucket:    input.bucket.(*awsresources.Bucket),
-		AWSEntity: awsresources.AWSEntity{Clients: input.clients},
+		Name:   s.cloudConfigRelativePath(input.prefix, checksum),
+		Data:   cloudConfig,
+		Bucket: input.bucket.(*awsresources.Bucket),
+		Client: input.clients.S3,
 	}
 	if err := cloudconfigS3.CreateOrFail(); err != nil {
 		return false, microerror.MaskAny(err)

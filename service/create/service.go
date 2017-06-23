@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"sync"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -349,10 +350,10 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 	}
 
 	cloudconfigS3 := &awsresources.BucketObject{
-		Name:      s.cloudConfigRelativePath(input.prefix, checksum),
-		Data:      cloudConfig,
-		Bucket:    input.bucket.(*awsresources.Bucket),
-		AWSEntity: awsresources.AWSEntity{Clients: input.clients},
+		Name:   s.cloudConfigRelativePath(input.prefix, checksum),
+		Data:   cloudConfig,
+		Bucket: input.bucket.(*awsresources.Bucket),
+		Client: input.clients.S3,
 	}
 	if err := cloudconfigS3.CreateOrFail(); err != nil {
 		return false, "", microerror.MaskAny(err)
@@ -894,22 +895,44 @@ func (s *Service) onAdd(obj interface{}) {
 	}
 
 	// Create an Auto Scaling Group for the workers.
-	asgSize := len(cluster.Spec.AWS.Workers)
 
-	asg := awsresources.AutoScalingGroup{
-		Client:                  clients.AutoScaling,
-		Name:                    fmt.Sprintf("%s-%s", cluster.Name, prefixWorker),
-		ClusterID:               cluster.Name,
-		MinSize:                 asgSize,
-		MaxSize:                 asgSize,
-		AvailabilityZone:        cluster.Spec.AWS.AZ,
-		LaunchConfigurationName: workersLCName,
-		LoadBalancerName:        ingressLB.Name,
-		VPCZoneIdentifier:       publicSubnetID,
-		HealthCheckGracePeriod:  gracePeriodSeconds,
+	// Upload the CF template to an S3 bucket.
+	template, err := ioutil.ReadFile("resources/cloudformation/auto_scaling_group.yaml")
+	if err != nil {
+		s.logger.Log("error", errgo.Details(err))
+		return
 	}
 
-	if err := asg.CreateOrFail(); err != nil {
+	templateURL := s.bucketObjectURL(cluster, "templates/workersASG.yaml")
+
+	templateS3 := &awsresources.BucketObject{
+		Name:   "templates/workersASG.yaml",
+		Data:   string(template),
+		Bucket: bucket.(*awsresources.Bucket),
+		Client: clients.S3,
+	}
+	if err := templateS3.CreateOrFail(); err != nil {
+		s.logger.Log("error", errgo.Details(err))
+		return
+	}
+
+	asgSize := len(cluster.Spec.AWS.Workers)
+
+	stack := awsresources.Stack{
+		Client: clients.CloudFormation,
+		Name:   fmt.Sprintf("%s-%s", cluster.Name, prefixWorker),
+		LaunchConfigurationName: workersLCName,
+		AvailabilityZone:        cluster.Spec.AWS.AZ,
+		SubnetID:                publicSubnetID,
+		ASGMinSize:              asgSize,
+		ASGMaxSize:              asgSize,
+		LoadBalancerName:        ingressLB.Name,
+		HealthCheckGracePeriod:  gracePeriodSeconds,
+		TemplateURL:             templateURL,
+		securityGroupID:         workersSecurityGroupID,
+	}
+
+	if err := stack.CreateOrFail(); err != nil {
 		s.logger.Log("error", errgo.Details(err))
 		return
 	}

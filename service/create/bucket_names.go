@@ -14,3 +14,7 @@ func (s *Service) bucketName(cluster awstpr.CustomObject) string {
 
 	return name
 }
+
+func (s *Service) bucketObjectURL(cluster awstpr.CustomObject, objectRelativePath string) string {
+	return fmt.Sprintf("https://%s.s3.amazonaws.com/%s", s.bucketName(cluster), objectRelativePath)
+}
