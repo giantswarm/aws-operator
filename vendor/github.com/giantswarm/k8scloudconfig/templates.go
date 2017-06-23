@@ -1093,6 +1093,7 @@ coreos:
       ExecStart=/bin/sh -c "/usr/bin/docker run --rm --pid=host --net=host --privileged=true \
       -v /:/rootfs:ro \
       -v /sys:/sys:ro \
+      -v /dev:/dev:rw \
       -v /run/calico/:/run/calico/:rw \
       -v /run/docker/:/run/docker/:rw \
       -v /run/docker.sock:/run/docker.sock:rw \
@@ -1525,6 +1526,7 @@ coreos:
       ExecStart=/bin/sh -c "/usr/bin/docker run --rm --pid=host --net=host --privileged=true \
       -v /:/rootfs:ro \
       -v /sys:/sys:ro \
+      -v /dev:/dev:rw \
       -v /run/calico/:/run/calico/:rw \
       -v /run/docker/:/run/docker/:rw \
       -v /run/docker.sock:/run/docker.sock:rw \
