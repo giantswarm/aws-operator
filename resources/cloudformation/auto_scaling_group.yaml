@@ -60,6 +60,8 @@ Parameters:
   KeyName:
     Type: String
     Description: The name of the KeyPair containing the SSH key
+  AssociatePublicIPAddress:
+    Type: Boolean
 Resources:
   WorkersLaunchConfiguration:
     Type: "AWS::AutoScaling::LaunchConfiguration"
@@ -77,7 +79,7 @@ Resources:
           VolumeType: gp2
       - DeviceName: "/dev/xvdh"
         VirtualName: ephemeral0
-      AssociatePublicIpAddress: true
+      AssociatePublicIpAddress: !Ref AssociatePublicIPAddress
       UserData: !Ref SmallCloudConfig
       KeyName: !Ref KeyName
   WorkersASG:

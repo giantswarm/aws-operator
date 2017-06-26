@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"sync"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -863,95 +862,27 @@ func (s *Service) onAdd(obj interface{}) {
 	s.logger.Log("info", fmt.Sprintf("created ingress load balancer"))
 
 	// Create an Auto Scaling Group for the workers.
-	// Upload the CF template to an S3 bucket.
-	template, err := ioutil.ReadFile("resources/cloudformation/auto_scaling_group.yaml")
-	if err != nil {
+	asgStackInput := asgStackInput{
+		// Dependencies.
+		clients: clients,
+
+		bucket:                 bucket,
+		cluster:                cluster,
+		iamInstanceProfileName: policy.GetName(),
+		keyPairName:            cluster.Name,
+		loadBalancerName:       ingressLB.Name,
+		prefix:                 prefixWorker,
+		securityGroupID:        workersSecurityGroupID,
+		subnetID:               publicSubnetID,
+		tlsAssets:              tlsAssets,
+	}
+
+	if err := s.createASGStack(asgStackInput); err != nil {
 		s.logger.Log("error", errgo.Details(err))
 		return
 	}
 
-	templateURL := s.bucketObjectURL(cluster, "templates/workersASG.yaml")
-
-	templateS3 := &awsresources.BucketObject{
-		Name:   "templates/workersASG.yaml",
-		Data:   string(template),
-		Bucket: bucket.(*awsresources.Bucket),
-		Client: clients.S3,
-	}
-	if err := templateS3.CreateOrFail(); err != nil {
-		s.logger.Log("error", errgo.Details(err))
-		return
-	}
-
-	asgSize := len(cluster.Spec.AWS.Workers)
-
-	extension := NewWorkerCloudConfigExtension(cluster.Spec, tlsAssets)
-
-	cloudConfigParams := cloudconfig.Params{
-		Cluster:   cluster.Spec.Cluster,
-		Extension: extension,
-	}
-
-	cloudConfig, err := s.cloudConfig(prefixWorker, cloudConfigParams, cluster.Spec, tlsAssets)
-	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
-		return
-	}
-
-	// We now upload the instance cloudconfig to S3 and create a "small
-	// cloudconfig" that just fetches the previously uploaded "final
-	// cloudconfig" and executes coreos-cloudinit with it as argument.
-	// We do this to circumvent the 16KB limit on user-data for EC2 instances.
-
-	checksum := sha256.Sum256([]byte(cloudConfig))
-
-	cloudconfigConfig := SmallCloudconfigConfig{
-		Filename: s.cloudConfigName(prefixWorker, checksum),
-		Region:   cluster.Spec.AWS.Region,
-		S3URI:    s.bucketName(cluster),
-	}
-
-	cloudconfigS3 := &awsresources.BucketObject{
-		Name:   s.cloudConfigRelativePath(prefixWorker, checksum),
-		Data:   cloudConfig,
-		Bucket: bucket.(*awsresources.Bucket),
-		Client: clients.S3,
-	}
-	if err := cloudconfigS3.CreateOrFail(); err != nil {
-		s.logger.Log("error", errgo.Details(err))
-		return
-	}
-
-	smallCloudconfig, err := s.SmallCloudconfig(cloudconfigConfig)
-	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
-		return
-	}
-
-	stack := awsresources.Stack{
-		Client:                 clients.CloudFormation,
-		Name:                   fmt.Sprintf("%s-%s", cluster.Name, prefixWorker),
-		AvailabilityZone:       cluster.Spec.AWS.AZ,
-		SubnetID:               publicSubnetID,
-		ASGMinSize:             asgSize,
-		ASGMaxSize:             asgSize,
-		LoadBalancerName:       ingressLB.Name,
-		HealthCheckGracePeriod: gracePeriodSeconds,
-		TemplateURL:            templateURL,
-		SecurityGroupID:        workersSecurityGroupID,
-		ImageID:                cluster.Spec.AWS.Workers[0].ImageID,
-		SmallCloudConfig:       smallCloudconfig,
-		IAMInstanceProfileName: policy.GetName(),
-		ClusterID:              cluster.Spec.Cluster.Cluster.ID,
-		KeyName:                cluster.Name,
-	}
-
-	if err := stack.CreateOrFail(); err != nil {
-		s.logger.Log("error", errgo.Details(err))
-		return
-	}
-
-	s.logger.Log("info", fmt.Sprintf("created workers auto scaling group with size %v", asgSize))
+	s.logger.Log("info", fmt.Sprintf("created workers auto scaling group"))
 
 	// Create Record Sets for the Load Balancers.
 	recordSetInputs := []recordSetInput{
@@ -1059,7 +990,7 @@ func (s *Service) onDelete(obj interface{}) {
 	}
 
 	// Delete workers Auto Scaling Group stack.
-	stack := awsresources.Stack{
+	stack := awsresources.ASGStack{
 		Client: clients.CloudFormation,
 		Name:   fmt.Sprintf("%s-%s", cluster.Name, prefixWorker),
 	}

@@ -9,7 +9,7 @@ import (
 	microerror "github.com/giantswarm/microkit/error"
 )
 
-type Stack struct {
+type ASGStack struct {
 	Client *cloudformation.CloudFormation
 	Name   string
 	// TemplateURL is the URL of the S3 bucket where the template is stored.
@@ -29,10 +29,12 @@ type Stack struct {
 	IAMInstanceProfileName string
 	ClusterID              string
 	// KeyName is the name of the EC2 Keypair that contains the SSH key.
-	KeyName string
+	KeyName                  string
+	AssociatePublicIPAddress bool
+	InstanceType             string
 }
 
-func (s *Stack) CreateOrFail() error {
+func (s *ASGStack) CreateOrFail() error {
 	params := &cloudformation.CreateStackInput{
 		StackName:   aws.String(s.Name),
 		TemplateURL: aws.String(s.TemplateURL),
@@ -81,6 +83,14 @@ func (s *Stack) CreateOrFail() error {
 				ParameterKey:   aws.String("KeyName"),
 				ParameterValue: aws.String(s.KeyName),
 			},
+			{
+				ParameterKey:   aws.String("AssociatePublicIPAddress"),
+				ParameterValue: aws.String(fmt.Sprintf("%t", s.AssociatePublicIPAddress)),
+			},
+			{
+				ParameterKey:   aws.String("InstanceType"),
+				ParameterValue: aws.String(s.InstanceType),
+			},
 		},
 		Tags: []*cloudformation.Tag{
 			{
@@ -94,8 +104,6 @@ func (s *Stack) CreateOrFail() error {
 		},
 	}
 
-	fmt.Printf("params: %+v\n", params)
-
 	if _, err := s.Client.CreateStack(params); err != nil {
 		return microerror.MaskAny(err)
 	}
@@ -103,7 +111,7 @@ func (s *Stack) CreateOrFail() error {
 	return nil
 }
 
-func (s *Stack) Delete() error {
+func (s *ASGStack) Delete() error {
 	if _, err := s.Client.DeleteStack(&cloudformation.DeleteStackInput{
 		StackName: aws.String(s.Name),
 	}); err != nil {

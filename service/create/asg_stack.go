@@ -1,0 +1,145 @@
+package create
+
+import (
+	"crypto/sha256"
+	"fmt"
+	"io/ioutil"
+
+	"github.com/giantswarm/awstpr"
+	"github.com/giantswarm/certificatetpr"
+	cloudconfig "github.com/giantswarm/k8scloudconfig"
+
+	awsutil "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/resources"
+	awsresources "github.com/giantswarm/aws-operator/resources/aws"
+
+	microerror "github.com/giantswarm/microkit/error"
+)
+
+// TODO rename to ASGStackInput
+type asgStackInput struct {
+	// Stack parameters.
+	bucket                 resources.ReusableResource
+	cluster                awstpr.CustomObject
+	ebsStorage             bool
+	iamInstanceProfileName string
+	keyPairName            string
+	loadBalancerName       string
+	prefix                 string
+	securityGroupID        string
+	subnetID               string
+	tlsAssets              *certificatetpr.CompactTLSAssets
+
+	// Dependencies.
+	clients awsutil.Clients
+}
+
+// createASGStack creates a CloudFormation stack for an Auto Scaling Group.
+func (s *Service) createASGStack(input asgStackInput) error {
+	var (
+		extension    cloudconfig.Extension
+		imageID      string
+		instanceType string
+		publicIP     bool
+	)
+
+	switch input.prefix {
+	case prefixMaster:
+		extension = NewMasterCloudConfigExtension(input.cluster.Spec, input.tlsAssets)
+
+		// TODO Check only a single master node is provided.
+		imageID = input.cluster.Spec.AWS.Masters[0].ImageID
+		instanceType = input.cluster.Spec.AWS.Masters[0].InstanceType
+	case prefixWorker:
+		extension = NewWorkerCloudConfigExtension(input.cluster.Spec, input.tlsAssets)
+
+		imageID = input.cluster.Spec.AWS.Workers[0].ImageID
+		instanceType = input.cluster.Spec.AWS.Workers[0].InstanceType
+		publicIP = true
+	default:
+		return microerror.MaskAnyf(invalidCloudconfigExtensionNameError, fmt.Sprintf("Invalid extension name '%s'", input.prefix))
+	}
+
+	// Upload the CF template to an S3 bucket.
+	template, err := ioutil.ReadFile("resources/cloudformation/auto_scaling_group.yaml")
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	templateURL := s.bucketObjectURL(input.cluster, "templates/workersASG.yaml")
+
+	templateS3 := &awsresources.BucketObject{
+		Name:   "templates/workersASG.yaml",
+		Data:   string(template),
+		Bucket: input.bucket.(*awsresources.Bucket),
+		Client: input.clients.S3,
+	}
+	if err := templateS3.CreateOrFail(); err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	asgSize := len(input.cluster.Spec.AWS.Workers)
+
+	cloudConfigParams := cloudconfig.Params{
+		Cluster:   input.cluster.Spec.Cluster,
+		Extension: extension,
+	}
+
+	// We now upload the instance cloudconfig to S3 and create a "small
+	// cloudconfig" that just fetches the previously uploaded "final
+	// cloudconfig" and executes coreos-cloudinit with it as argument.
+	// We do this to circumvent the 16KB limit on user-data for EC2 instances.
+	cloudConfig, err := s.cloudConfig(prefixWorker, cloudConfigParams, input.cluster.Spec, input.tlsAssets)
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	checksum := sha256.Sum256([]byte(cloudConfig))
+
+	cloudconfigConfig := SmallCloudconfigConfig{
+		Filename: s.cloudConfigName(input.prefix, checksum),
+		Region:   input.cluster.Spec.AWS.Region,
+		S3URI:    s.bucketName(input.cluster),
+	}
+
+	cloudconfigS3 := &awsresources.BucketObject{
+		Name:   s.cloudConfigRelativePath(input.prefix, checksum),
+		Data:   cloudConfig,
+		Bucket: input.bucket.(*awsresources.Bucket),
+		Client: input.clients.S3,
+	}
+	if err := cloudconfigS3.CreateOrFail(); err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	smallCloudconfig, err := s.SmallCloudconfig(cloudconfigConfig)
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	stack := awsresources.ASGStack{
+		Client:                   input.clients.CloudFormation,
+		Name:                     fmt.Sprintf("%s-%s", input.cluster.Name, prefixWorker),
+		AvailabilityZone:         input.cluster.Spec.AWS.AZ,
+		SubnetID:                 input.subnetID,
+		ASGMinSize:               asgSize,
+		ASGMaxSize:               asgSize,
+		LoadBalancerName:         input.loadBalancerName,
+		HealthCheckGracePeriod:   gracePeriodSeconds,
+		TemplateURL:              templateURL,
+		SecurityGroupID:          input.securityGroupID,
+		ImageID:                  imageID,
+		InstanceType:             instanceType,
+		SmallCloudConfig:         smallCloudconfig,
+		IAMInstanceProfileName:   input.iamInstanceProfileName,
+		ClusterID:                input.cluster.Spec.Cluster.Cluster.ID,
+		KeyName:                  input.keyPairName,
+		AssociatePublicIPAddress: publicIP,
+	}
+
+	if err := stack.CreateOrFail(); err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	return nil
+}
