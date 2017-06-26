@@ -13,17 +13,16 @@ type Stack struct {
 	Client *cloudformation.CloudFormation
 	Name   string
 	// TemplateURL is the URL of the S3 bucket where the template is stored.
-	TemplateURL             string
-	SubnetID                string
-	AvailabilityZone        string
-	ASGMinSize              int
-	ASGMaxSize              int
-	LaunchConfigurationName string
-	LoadBalancerName        string
-	HealthCheckGracePeriod  int
-	SecurityGroupID         string
-	ImageID                 string
-	SmallCloudConfig        string
+	TemplateURL            string
+	SubnetID               string
+	AvailabilityZone       string
+	ASGMinSize             int
+	ASGMaxSize             int
+	LoadBalancerName       string
+	HealthCheckGracePeriod int
+	SecurityGroupID        string
+	ImageID                string
+	SmallCloudConfig       string
 }
 
 func (s *Stack) CreateOrFail() error {
@@ -46,10 +45,6 @@ func (s *Stack) CreateOrFail() error {
 			{
 				ParameterKey:   aws.String("ASGMaxSize"),
 				ParameterValue: aws.String(strconv.Itoa(s.ASGMaxSize)),
-			},
-			{
-				ParameterKey:   aws.String("WorkersLaunchConfigurationName"),
-				ParameterValue: aws.String(s.LaunchConfigurationName),
 			},
 			{
 				ParameterKey:   aws.String("LoadBalancerName"),

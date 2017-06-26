@@ -862,40 +862,7 @@ func (s *Service) onAdd(obj interface{}) {
 
 	s.logger.Log("info", fmt.Sprintf("created ingress load balancer"))
 
-	// Create a launch configuration for the worker nodes.
-	lcInput := launchConfigurationInput{
-		clients:             clients,
-		cluster:             cluster,
-		tlsAssets:           tlsAssets,
-		bucket:              bucket,
-		securityGroup:       workersSecurityGroup,
-		subnet:              publicSubnet,
-		keypairName:         cluster.Name,
-		instanceProfileName: policy.GetName(),
-		prefix:              prefixWorker,
-		ebsStorage:          true,
-	}
-
-	lcCreated, err := s.createLaunchConfiguration(lcInput)
-	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
-		return
-	}
-
-	if lcCreated {
-		s.logger.Log("info", fmt.Sprintf("created worker launch config"))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("launch config %s already exists, reusing", cluster.Name))
-	}
-
-	workersLCName, err := launchConfigurationName(cluster, "worker", workersSecurityGroupID)
-	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
-		return
-	}
-
 	// Create an Auto Scaling Group for the workers.
-
 	// Upload the CF template to an S3 bucket.
 	template, err := ioutil.ReadFile("resources/cloudformation/auto_scaling_group.yaml")
 	if err != nil {
@@ -962,19 +929,18 @@ func (s *Service) onAdd(obj interface{}) {
 	}
 
 	stack := awsresources.Stack{
-		Client: clients.CloudFormation,
-		Name:   fmt.Sprintf("%s-%s", cluster.Name, prefixWorker),
-		LaunchConfigurationName: workersLCName,
-		AvailabilityZone:        cluster.Spec.AWS.AZ,
-		SubnetID:                publicSubnetID,
-		ASGMinSize:              asgSize,
-		ASGMaxSize:              asgSize,
-		LoadBalancerName:        ingressLB.Name,
-		HealthCheckGracePeriod:  gracePeriodSeconds,
-		TemplateURL:             templateURL,
-		SecurityGroupID:         workersSecurityGroupID,
-		ImageID:                 cluster.Spec.AWS.Workers[0].ImageID,
-		SmallCloudConfig:        smallCloudconfig,
+		Client:                 clients.CloudFormation,
+		Name:                   fmt.Sprintf("%s-%s", cluster.Name, prefixWorker),
+		AvailabilityZone:       cluster.Spec.AWS.AZ,
+		SubnetID:               publicSubnetID,
+		ASGMinSize:             asgSize,
+		ASGMaxSize:             asgSize,
+		LoadBalancerName:       ingressLB.Name,
+		HealthCheckGracePeriod: gracePeriodSeconds,
+		TemplateURL:            templateURL,
+		SecurityGroupID:        workersSecurityGroupID,
+		ImageID:                cluster.Spec.AWS.Workers[0].ImageID,
+		SmallCloudConfig:       smallCloudconfig,
 	}
 
 	if err := stack.CreateOrFail(); err != nil {
@@ -1099,18 +1065,6 @@ func (s *Service) onDelete(obj interface{}) {
 		s.logger.Log("error", errgo.Details(err))
 	} else {
 		s.logger.Log("info", "deleted workers auto scaling group")
-	}
-
-	// Delete workers launch configuration.
-	lcInput := launchConfigurationInput{
-		clients: clients,
-		cluster: cluster,
-		prefix:  "worker",
-	}
-	if err := s.deleteLaunchConfiguration(lcInput); err != nil {
-		s.logger.Log("error", errgo.Details(err))
-	} else {
-		s.logger.Log("info", "deleted worker launch config")
 	}
 
 	// Delete Record Sets.

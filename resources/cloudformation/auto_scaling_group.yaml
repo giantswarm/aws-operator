@@ -53,8 +53,6 @@ Parameters:
     Type: Number
   HealthCheckGracePeriod:
     Type: Number
-  WorkersLaunchConfigurationName:
-    Type: String
   SmallCloudConfig:
     Type: String
 Resources:
@@ -84,6 +82,6 @@ Resources:
         - !Ref AZ
       MinSize: !Ref ASGMinSize
       MaxSize: !Ref ASGMaxSize
-      LaunchConfigurationName: !Ref WorkersLaunchConfigurationName
+      LaunchConfigurationName: !Ref WorkersLaunchConfiguration
       LoadBalancerName: !Ref LoadBalancerName
       HealthCheckGracePeriod: !Ref HealthCheckGracePeriod
