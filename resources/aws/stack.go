@@ -56,7 +56,7 @@ func (s *Stack) CreateOrFail() error {
 				ParameterValue: aws.String(strconv.Itoa(s.HealthCheckGracePeriod)),
 			},
 			{
-				ParameterKey:   aws.String("SecurityGroupName"),
+				ParameterKey:   aws.String("SecurityGroupID"),
 				ParameterValue: aws.String(s.SecurityGroupID),
 			},
 			{

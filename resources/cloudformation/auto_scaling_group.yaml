@@ -38,9 +38,9 @@ Parameters:
       - m4.4xlarge
       - m4.10xlarge
     ConstraintDescription: must be a valid EC2 instance type.
-  SecurityGroupName:
-    Description: The name of the workers security group
-    Type: AWS::EC2::SecurityGroup::GroupName
+  SecurityGroupID:
+    Description: The ID of the workers security group
+    Type: AWS::EC2::SecurityGroup::Id
   LoadBalancerName:
     Description: The name of the ingress load balancer
     Type: String
@@ -63,6 +63,8 @@ Resources:
     Description: Workers LaunchConfiguration
     Properties:
       ImageId: !Ref ImageID
+      SecurityGroups:
+      - !Ref "SecurityGroupID"
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref IAMInstanceProfileName
       BlockDeviceMappings:
