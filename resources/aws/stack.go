@@ -22,6 +22,8 @@ type Stack struct {
 	LoadBalancerName        string
 	HealthCheckGracePeriod  int
 	SecurityGroupID         string
+	ImageID                 string
+	SmallCloudConfig        string
 }
 
 func (s *Stack) CreateOrFail() error {
@@ -59,11 +61,15 @@ func (s *Stack) CreateOrFail() error {
 			},
 			{
 				ParameterKey:   aws.String("SecurityGroupName"),
-				ParameterValue: aws.String(strconv.Itoa(s.SecurityGroupID)),
+				ParameterValue: aws.String(s.SecurityGroupID),
 			},
 			{
 				ParameterKey:   aws.String("SmallCloudConfig"),
-				ParameterValue: aws.String(strconv.Itoa(s.SecurityGroupID)),
+				ParameterValue: aws.String(s.SmallCloudConfig),
+			},
+			{
+				ParameterKey:   aws.String("ImageID"),
+				ParameterValue: aws.String(s.ImageID),
 			},
 		},
 	}

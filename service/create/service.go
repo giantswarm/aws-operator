@@ -918,6 +918,49 @@ func (s *Service) onAdd(obj interface{}) {
 
 	asgSize := len(cluster.Spec.AWS.Workers)
 
+	extension := NewWorkerCloudConfigExtension(cluster.Spec, tlsAssets)
+
+	cloudConfigParams := cloudconfig.Params{
+		Cluster:   cluster.Spec.Cluster,
+		Extension: extension,
+	}
+
+	cloudConfig, err := s.cloudConfig(prefixWorker, cloudConfigParams, cluster.Spec, tlsAssets)
+	if err != nil {
+		s.logger.Log("error", errgo.Details(err))
+		return
+	}
+
+	// We now upload the instance cloudconfig to S3 and create a "small
+	// cloudconfig" that just fetches the previously uploaded "final
+	// cloudconfig" and executes coreos-cloudinit with it as argument.
+	// We do this to circumvent the 16KB limit on user-data for EC2 instances.
+
+	checksum := sha256.Sum256([]byte(cloudConfig))
+
+	cloudconfigConfig := SmallCloudconfigConfig{
+		Filename: s.cloudConfigName(prefixWorker, checksum),
+		Region:   cluster.Spec.AWS.Region,
+		S3URI:    s.bucketName(cluster),
+	}
+
+	cloudconfigS3 := &awsresources.BucketObject{
+		Name:   s.cloudConfigRelativePath(prefixWorker, checksum),
+		Data:   cloudConfig,
+		Bucket: bucket.(*awsresources.Bucket),
+		Client: clients.S3,
+	}
+	if err := cloudconfigS3.CreateOrFail(); err != nil {
+		s.logger.Log("error", errgo.Details(err))
+		return
+	}
+
+	smallCloudconfig, err := s.SmallCloudconfig(cloudconfigConfig)
+	if err != nil {
+		s.logger.Log("error", errgo.Details(err))
+		return
+	}
+
 	stack := awsresources.Stack{
 		Client: clients.CloudFormation,
 		Name:   fmt.Sprintf("%s-%s", cluster.Name, prefixWorker),
@@ -929,7 +972,9 @@ func (s *Service) onAdd(obj interface{}) {
 		LoadBalancerName:        ingressLB.Name,
 		HealthCheckGracePeriod:  gracePeriodSeconds,
 		TemplateURL:             templateURL,
-		securityGroupID:         workersSecurityGroupID,
+		SecurityGroupID:         workersSecurityGroupID,
+		ImageID:                 cluster.Spec.AWS.Workers[0].ImageID,
+		SmallCloudConfig:        smallCloudconfig,
 	}
 
 	if err := stack.CreateOrFail(); err != nil {

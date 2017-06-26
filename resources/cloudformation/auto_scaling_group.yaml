@@ -38,10 +38,6 @@ Parameters:
       - m4.4xlarge
       - m4.10xlarge
     ConstraintDescription: must be a valid EC2 instance type.
-  KeyName:
-    Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
-    Type: 'AWS::EC2::KeyPair::KeyName'
-    ConstraintDescription: must be the name of an existing EC2 KeyPair.
   SecurityGroupName:
     Description: The name of the workers security group
     Type: AWS::EC2::SecurityGroup::GroupName
@@ -58,6 +54,8 @@ Parameters:
   HealthCheckGracePeriod:
     Type: Number
   WorkersLaunchConfigurationName:
+    Type: String
+  SmallCloudConfig:
     Type: String
 Resources:
   WorkersLaunchConfiguration:
