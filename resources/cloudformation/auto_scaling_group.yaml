@@ -57,6 +57,9 @@ Parameters:
     Type: String
   IAMInstanceProfileName:
     Type: String
+  KeyName:
+    Type: String
+    Description: The name of the KeyPair containing the SSH key
 Resources:
   WorkersLaunchConfiguration:
     Type: "AWS::AutoScaling::LaunchConfiguration"
@@ -76,6 +79,7 @@ Resources:
         VirtualName: ephemeral0
       AssociatePublicIpAddress: true
       UserData: !Ref SmallCloudConfig
+      KeyName: !Ref KeyName
   WorkersASG:
     Type: "AWS::AutoScaling::AutoScalingGroup"
     Properties:

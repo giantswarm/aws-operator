@@ -23,7 +23,12 @@ type Stack struct {
 	SecurityGroupID        string
 	ImageID                string
 	SmallCloudConfig       string
+	// IAMInstanceProfileName is the name of the IAM Instance Profile, used to
+	// give the instances access to the KMS keys that the CloudConfig is
+	// encrypted with.
 	IAMInstanceProfileName string
+	// KeyName is the name of the EC2 Keypair that contains the SSH key.
+	KeyName string
 }
 
 func (s *Stack) CreateOrFail() error {
@@ -70,6 +75,10 @@ func (s *Stack) CreateOrFail() error {
 			{
 				ParameterKey:   aws.String("IAMInstanceProfileName"),
 				ParameterValue: aws.String(s.IAMInstanceProfileName),
+			},
+			{
+				ParameterKey:   aws.String("KeyName"),
+				ParameterValue: aws.String(s.KeyName),
 			},
 		},
 	}
