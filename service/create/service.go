@@ -1089,13 +1089,13 @@ func (s *Service) onDelete(obj interface{}) {
 		s.logger.Log("info", "deleted masters")
 	}
 
-	// Delete workers Auto Scaling Group.
-	asg := awsresources.AutoScalingGroup{
-		Client: clients.AutoScaling,
+	// Delete workers Auto Scaling Group stack.
+	stack := awsresources.Stack{
+		Client: clients.CloudFormation,
 		Name:   fmt.Sprintf("%s-%s", cluster.Name, prefixWorker),
 	}
 
-	if err := asg.Delete(); err != nil {
+	if err := stack.Delete(); err != nil {
 		s.logger.Log("error", errgo.Details(err))
 	} else {
 		s.logger.Log("info", "deleted workers auto scaling group")

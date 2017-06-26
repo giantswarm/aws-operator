@@ -82,3 +82,13 @@ func (s *Stack) CreateOrFail() error {
 
 	return nil
 }
+
+func (s *Stack) Delete() error {
+	if _, err := s.Client.DeleteStack(&cloudformation.DeleteStackInput{
+		StackName: aws.String(s.Name),
+	}); err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	return nil
+}
