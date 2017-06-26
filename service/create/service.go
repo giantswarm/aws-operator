@@ -941,6 +941,7 @@ func (s *Service) onAdd(obj interface{}) {
 		SecurityGroupID:        workersSecurityGroupID,
 		ImageID:                cluster.Spec.AWS.Workers[0].ImageID,
 		SmallCloudConfig:       smallCloudconfig,
+		IAMInstanceProfileName: policy.GetName(),
 	}
 
 	if err := stack.CreateOrFail(); err != nil {

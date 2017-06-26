@@ -55,15 +55,16 @@ Parameters:
     Type: Number
   SmallCloudConfig:
     Type: String
+  IAMInstanceProfileName:
+    Type: String
 Resources:
   WorkersLaunchConfiguration:
     Type: "AWS::AutoScaling::LaunchConfiguration"
     Description: Workers LaunchConfiguration
     Properties:
       ImageId: !Ref ImageID
-      SecurityGroups:
-      - !Ref SecurityGroupName
       InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref IAMInstanceProfileName
       BlockDeviceMappings:
       - DeviceName: "/dev/sdk"
         Ebs:

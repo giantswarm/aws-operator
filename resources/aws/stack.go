@@ -23,6 +23,7 @@ type Stack struct {
 	SecurityGroupID        string
 	ImageID                string
 	SmallCloudConfig       string
+	IAMInstanceProfileName string
 }
 
 func (s *Stack) CreateOrFail() error {
@@ -65,6 +66,10 @@ func (s *Stack) CreateOrFail() error {
 			{
 				ParameterKey:   aws.String("ImageID"),
 				ParameterValue: aws.String(s.ImageID),
+			},
+			{
+				ParameterKey:   aws.String("IAMInstanceProfileName"),
+				ParameterValue: aws.String(s.IAMInstanceProfileName),
 			},
 		},
 	}
