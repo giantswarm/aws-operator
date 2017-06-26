@@ -27,6 +27,7 @@ type Stack struct {
 	// give the instances access to the KMS keys that the CloudConfig is
 	// encrypted with.
 	IAMInstanceProfileName string
+	ClusterID              string
 	// KeyName is the name of the EC2 Keypair that contains the SSH key.
 	KeyName string
 }
@@ -79,6 +80,16 @@ func (s *Stack) CreateOrFail() error {
 			{
 				ParameterKey:   aws.String("KeyName"),
 				ParameterValue: aws.String(s.KeyName),
+			},
+		},
+		Tags: []*cloudformation.Tag{
+			{
+				Key:   aws.String(tagKeyName),
+				Value: aws.String(s.Name),
+			},
+			{
+				Key:   aws.String(tagKeyCluster),
+				Value: aws.String(s.ClusterID),
 			},
 		},
 	}
