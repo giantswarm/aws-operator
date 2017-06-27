@@ -119,7 +119,7 @@ func (s *Service) createASGStack(input asgStackInput) error {
 
 	stack := awsresources.ASGStack{
 		Client:                   input.clients.CloudFormation,
-		Name:                     fmt.Sprintf("%s-%s", input.cluster.Name, prefixWorker),
+		Name:                     s.asgName(input.cluster, prefixWorker),
 		AvailabilityZone:         input.cluster.Spec.AWS.AZ,
 		SubnetID:                 input.subnetID,
 		ASGMinSize:               asgSize,
@@ -142,4 +142,8 @@ func (s *Service) createASGStack(input asgStackInput) error {
 	}
 
 	return nil
+}
+
+func (s *Service) asgName(cluster awstpr.CustomObject, prefix string) string {
+	return fmt.Sprintf("%s-%s", cluster.Name, prefix)
 }

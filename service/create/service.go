@@ -1256,7 +1256,7 @@ func (s *Service) onUpdate(oldObj, newObj interface{}) {
 
 	asg := awsresources.AutoScalingGroup{
 		Client:  clients.AutoScaling,
-		Name:    fmt.Sprintf("%s-%s", cluster.Name, prefixWorker),
+		Name:    s.asgName(cluster, prefixWorker),
 		MinSize: newSize,
 		MaxSize: newSize,
 	}
