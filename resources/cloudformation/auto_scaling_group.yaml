@@ -61,7 +61,8 @@ Parameters:
     Type: String
     Description: The name of the KeyPair containing the SSH key
   AssociatePublicIPAddress:
-    Type: Boolean
+    Type: String
+    AllowedValues: [ true, false ]
 Resources:
   WorkersLaunchConfiguration:
     Type: "AWS::AutoScaling::LaunchConfiguration"
