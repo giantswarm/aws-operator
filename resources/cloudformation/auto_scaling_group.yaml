@@ -70,7 +70,7 @@ Resources:
     Properties:
       ImageId: !Ref ImageID
       SecurityGroups:
-      - !Ref "SecurityGroupID"
+      - !Ref SecurityGroupID
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref IAMInstanceProfileName
       BlockDeviceMappings:
