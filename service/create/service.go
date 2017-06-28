@@ -866,6 +866,7 @@ func (s *Service) onAdd(obj interface{}) {
 		// Dependencies.
 		clients: clients,
 
+		// Settings.
 		bucket:                 bucket,
 		cluster:                cluster,
 		iamInstanceProfileName: policy.GetName(),

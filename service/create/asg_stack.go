@@ -18,7 +18,7 @@ import (
 
 // TODO rename to ASGStackInput
 type asgStackInput struct {
-	// Stack parameters.
+	// Settings.
 	bucket                 resources.ReusableResource
 	cluster                awstpr.CustomObject
 	ebsStorage             bool
@@ -118,23 +118,26 @@ func (s *Service) createASGStack(input asgStackInput) error {
 	}
 
 	stack := awsresources.ASGStack{
-		Client:                   input.clients.CloudFormation,
-		Name:                     s.asgName(input.cluster, prefixWorker),
-		AvailabilityZone:         input.cluster.Spec.AWS.AZ,
-		SubnetID:                 input.subnetID,
-		ASGMinSize:               asgSize,
+		// Dependencies.
+		Client: input.clients.CloudFormation,
+
+		// Settings.
 		ASGMaxSize:               asgSize,
-		LoadBalancerName:         input.loadBalancerName,
+		ASGMinSize:               asgSize,
+		AssociatePublicIPAddress: publicIP,
+		AvailabilityZone:         input.cluster.Spec.AWS.AZ,
+		ClusterID:                input.cluster.Spec.Cluster.Cluster.ID,
 		HealthCheckGracePeriod:   gracePeriodSeconds,
-		TemplateURL:              templateURL,
-		SecurityGroupID:          input.securityGroupID,
+		IAMInstanceProfileName:   input.iamInstanceProfileName,
 		ImageID:                  imageID,
 		InstanceType:             instanceType,
-		SmallCloudConfig:         smallCloudconfig,
-		IAMInstanceProfileName:   input.iamInstanceProfileName,
-		ClusterID:                input.cluster.Spec.Cluster.Cluster.ID,
 		KeyName:                  input.keyPairName,
-		AssociatePublicIPAddress: publicIP,
+		LoadBalancerName:         input.loadBalancerName,
+		Name:                     s.asgName(input.cluster, prefixWorker),
+		SecurityGroupID:          input.securityGroupID,
+		SmallCloudConfig:         smallCloudconfig,
+		SubnetID:                 input.subnetID,
+		TemplateURL:              templateURL,
 	}
 
 	if err := stack.CreateOrFail(); err != nil {
