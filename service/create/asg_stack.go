@@ -122,7 +122,6 @@ func (s *Service) createASGStack(input asgStackInput) error {
 	stack := awsresources.ASGStack{
 		// Dependencies.
 		Client: input.clients.CloudFormation,
-		Logger: input.logger,
 
 		// Settings.
 		ASGMaxSize:               asgSize,

@@ -865,7 +865,6 @@ func (s *Service) onAdd(obj interface{}) {
 	asgStackInput := asgStackInput{
 		// Dependencies.
 		clients: clients,
-		logger:  s.logger,
 
 		// Settings.
 		bucket:                 bucket,
