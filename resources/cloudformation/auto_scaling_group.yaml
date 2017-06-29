@@ -96,3 +96,6 @@ Resources:
       LoadBalancerNames:
         - !Ref LoadBalancerName
       HealthCheckGracePeriod: !Ref HealthCheckGracePeriod
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        PauseTime: PT10S
