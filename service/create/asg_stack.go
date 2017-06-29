@@ -14,6 +14,7 @@ import (
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
 
 	microerror "github.com/giantswarm/microkit/error"
+	micrologger "github.com/giantswarm/microkit/logger"
 )
 
 // TODO rename to ASGStackInput
@@ -32,6 +33,7 @@ type asgStackInput struct {
 
 	// Dependencies.
 	clients awsutil.Clients
+	logger  micrologger.Logger
 }
 
 // createASGStack creates a CloudFormation stack for an Auto Scaling Group.
@@ -120,6 +122,7 @@ func (s *Service) createASGStack(input asgStackInput) error {
 	stack := awsresources.ASGStack{
 		// Dependencies.
 		Client: input.clients.CloudFormation,
+		Logger: input.logger,
 
 		// Settings.
 		ASGMaxSize:               asgSize,

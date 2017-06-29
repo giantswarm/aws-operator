@@ -6,13 +6,16 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/cenkalti/backoff"
 	microerror "github.com/giantswarm/microkit/error"
+	micrologger "github.com/giantswarm/microkit/logger"
 )
 
 // ASGStack represents a CloudFormation stack for an Auto Scaling Group.
 type ASGStack struct {
 	// Dependencies.
 	Client *cloudformation.CloudFormation
+	Logger micrologger.Logger
 
 	// Settings.
 	ASGMaxSize               int
@@ -113,6 +116,10 @@ func (s *ASGStack) CreateOrFail() error {
 		return microerror.MaskAny(err)
 	}
 
+	if err := s.waitUntilStackCompleted(s.Name); err != nil {
+		return microerror.MaskAny(err)
+	}
+
 	return nil
 }
 
@@ -120,6 +127,34 @@ func (s *ASGStack) Delete() error {
 	if _, err := s.Client.DeleteStack(&cloudformation.DeleteStackInput{
 		StackName: aws.String(s.Name),
 	}); err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	return nil
+}
+
+func (s *ASGStack) waitUntilStackCompleted(name string) error {
+	listOperation := func() error {
+		stacks, err := s.Client.ListStacks(&cloudformation.ListStacksInput{
+			StackStatusFilter: []*string{
+				aws.String("CREATE_COMPLETE"),
+			},
+		})
+		if err != nil {
+			return microerror.MaskAny(err)
+		}
+
+		for _, ss := range stacks.StackSummaries {
+			if *ss.StackName == s.Name {
+				return nil
+			}
+		}
+
+		return microerror.MaskAnyf(notFoundError, notFoundErrorFormat, "stack", s.Name)
+	}
+
+	listNotify := NewNotify(s.Logger, "waiting for stack to be created successfully")
+	if err := backoff.RetryNotify(listOperation, NewCustomExponentialBackoff(), listNotify); err != nil {
 		return microerror.MaskAny(err)
 	}
 
