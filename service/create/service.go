@@ -872,12 +872,22 @@ func (s *Service) onAdd(obj interface{}) {
 		cluster:                cluster,
 		iamInstanceProfileName: policy.GetName(),
 		keyPairName:            cluster.Name,
-		loadBalancerName:       ingressLB.Name,
 		prefix:                 prefixWorker,
-		securityGroupRules:     rulesInput.workerRules(),
-		subnetID:               publicSubnetID,
-		tlsAssets:              tlsAssets,
-		vpcID:                  vpcID,
+		workersSecurityGroupRules: rulesInput.workerRules(),
+		ingressSecurityGroupRules: rulesInput.ingressRules(),
+		subnetID:                  publicSubnetID,
+		tlsAssets:                 tlsAssets,
+		vpcID:                     vpcID,
+		elbListeners: []awsresources.PortPair{
+			{
+				PortELB:      httpsPort,
+				PortInstance: cluster.Spec.Cluster.Kubernetes.IngressController.SecurePort,
+			},
+			{
+				PortELB:      httpPort,
+				PortInstance: cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
+			},
+		},
 	}
 
 	if err := s.createASGStack(asgStackInput); err != nil {

@@ -33,7 +33,6 @@ type ASGStack struct {
 	InstanceType           string
 	// KeyName is the name of the EC2 Keypair that contains the SSH key.
 	KeyName          string
-	LoadBalancerName string
 	Name             string
 	SmallCloudConfig string
 	SubnetID         string
@@ -84,10 +83,6 @@ func (s *ASGStack) CreateOrFail() error {
 			{
 				ParameterKey:   aws.String("KeyName"),
 				ParameterValue: aws.String(s.KeyName),
-			},
-			{
-				ParameterKey:   aws.String("LoadBalancerName"),
-				ParameterValue: aws.String(s.LoadBalancerName),
 			},
 			{
 				ParameterKey:   aws.String("SmallCloudConfig"),

@@ -22,17 +22,18 @@ import (
 // TODO rename to ASGStackInput
 type asgStackInput struct {
 	// Settings.
-	bucket                 resources.ReusableResource
-	cluster                awstpr.CustomObject
-	ebsStorage             bool
-	iamInstanceProfileName string
-	keyPairName            string
-	loadBalancerName       string
-	prefix                 string
-	securityGroupRules     []awsresources.SecurityGroupRule
-	subnetID               string
-	tlsAssets              *certificatetpr.CompactTLSAssets
-	vpcID                  string
+	bucket                    resources.ReusableResource
+	cluster                   awstpr.CustomObject
+	ebsStorage                bool
+	iamInstanceProfileName    string
+	elbListeners              []awsresources.PortPair
+	keyPairName               string
+	prefix                    string
+	workersSecurityGroupRules []awsresources.SecurityGroupRule
+	ingressSecurityGroupRules []awsresources.SecurityGroupRule
+	subnetID                  string
+	tlsAssets                 *certificatetpr.CompactTLSAssets
+	vpcID                     string
 
 	// Dependencies.
 	clients awsutil.Clients
@@ -40,7 +41,9 @@ type asgStackInput struct {
 }
 
 type asgTemplateConfig struct {
-	SecurityGroupRules []awsresources.SecurityGroupRule
+	WorkersSecurityGroupRules []awsresources.SecurityGroupRule
+	IngressSecurityGroupRules []awsresources.SecurityGroupRule
+	Listeners                 []awsresources.PortPair
 }
 
 // createASGStack creates a CloudFormation stack for an Auto Scaling Group.
@@ -82,7 +85,9 @@ func (s *Service) createASGStack(input asgStackInput) error {
 
 	parsedTemplate := new(bytes.Buffer)
 	tc := asgTemplateConfig{
-		SecurityGroupRules: input.securityGroupRules,
+		WorkersSecurityGroupRules: input.workersSecurityGroupRules,
+		IngressSecurityGroupRules: input.ingressSecurityGroupRules,
+		Listeners:                 input.elbListeners,
 	}
 
 	if err := goTemplate.Execute(parsedTemplate, tc); err != nil {
@@ -160,7 +165,6 @@ func (s *Service) createASGStack(input asgStackInput) error {
 		ImageID:                  imageID,
 		InstanceType:             instanceType,
 		KeyName:                  input.keyPairName,
-		LoadBalancerName:         input.loadBalancerName,
 		Name:                     s.asgName(input.cluster, prefixWorker),
 		SmallCloudConfig:         smallCloudconfig,
 		SubnetID:                 input.subnetID,

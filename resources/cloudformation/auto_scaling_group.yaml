@@ -38,9 +38,6 @@ Parameters:
       - m4.4xlarge
       - m4.10xlarge
     ConstraintDescription: must be a valid EC2 instance type.
-  LoadBalancerName:
-    Description: The name of the ingress load balancer
-    Type: String
   ImageID:
     Description: The AMI for the worker instances
     Type: String
@@ -69,12 +66,43 @@ Resources:
       VpcId: !Ref VPCID
       GroupDescription: The workers security group
       SecurityGroupIngress:
-        {{ range .SecurityGroupRules }}
+        {{ range .WorkersSecurityGroupRules }}
         - IpProtocol: tcp
           FromPort: {{ .Port }}
           ToPort: {{ .Port }}
           CidrIp: {{ .SourceCIDR }}
         {{ end }}
+  IngressSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      VpcId: !Ref VPCID
+      GroupDescription: The Ingress ELB security group
+      SecurityGroupIngress:
+        {{ range .IngressSecurityGroupRules }}
+        - IpProtocol: tcp
+          FromPort: {{ .Port }}
+          ToPort: {{ .Port }}
+          CidrIp: {{ .SourceCIDR }}
+        {{ end }}
+  IngressLoadBalancer:
+    Type: "AWS::ElasticLoadBalancing::LoadBalancer"
+    Properties:
+      SecurityGroups:
+        - !Ref IngressSecurityGroup
+      Subnets:
+        - !Ref SubnetID
+      Listeners:
+        {{ range .Listeners }}
+          - InstancePort: {{ .PortInstance }}
+            LoadBalancerPort: {{ .PortELB }}
+            Protocol: tcp
+        {{ end }}
+      Policies:
+        - PolicyName: EnableProxyProtocolProxyProtocolPolicyType
+          PolicyType: ProxyProtocolPolicyType
+          Attributes:
+            - Name: ProxyProtocol
+              Value: true
   WorkersLaunchConfiguration:
     Type: "AWS::AutoScaling::LaunchConfiguration"
     Description: Workers LaunchConfiguration
@@ -103,7 +131,7 @@ Resources:
       MaxSize: !Ref ASGMaxSize
       LaunchConfigurationName: !Ref WorkersLaunchConfiguration
       LoadBalancerNames:
-        - !Ref LoadBalancerName
+        - !Ref IngressLoadBalancer
       HealthCheckGracePeriod: !Ref HealthCheckGracePeriod
     UpdatePolicy:
       AutoScalingRollingUpdate:
