@@ -96,4 +96,9 @@ Resources:
       HealthCheckGracePeriod: !Ref HealthCheckGracePeriod
     UpdatePolicy:
       AutoScalingRollingUpdate:
+        # minimum amount of instances that must always be running during a rolling update
+        MinInstancesInService: 2
+        # only do a rolling update of this amount of instances max
+        MaxBatchSize: 2
+        # after creating a new instance, pause operations on the ASG for this amount of time
         PauseTime: PT10S

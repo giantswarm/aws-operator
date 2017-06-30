@@ -861,6 +861,7 @@ func (s *Service) onAdd(obj interface{}) {
 
 	s.logger.Log("info", fmt.Sprintf("created ingress load balancer"))
 
+	s.logger.Log("info", fmt.Sprintf("creating workers auto scaling group..."))
 	// Create an Auto Scaling Group for the workers.
 	asgStackInput := asgStackInput{
 		// Dependencies.
