@@ -9,6 +9,10 @@ import (
 	microerror "github.com/giantswarm/microkit/error"
 )
 
+// defaultTimeout is the number of minutes after which a Stack creation gets
+// aborted.
+const defaultTimeout = 5
+
 // ASGStack represents a CloudFormation stack for an Auto Scaling Group.
 type ASGStack struct {
 	// Dependencies.
@@ -31,18 +35,19 @@ type ASGStack struct {
 	KeyName          string
 	LoadBalancerName string
 	Name             string
-	SecurityGroupID  string
 	SmallCloudConfig string
 	SubnetID         string
 	// TemplateURL is the URL of the S3 bucket where the CloudFormation template
 	// is stored.
 	TemplateURL string
+	VPCID       string
 }
 
 func (s *ASGStack) CreateOrFail() error {
 	params := &cloudformation.CreateStackInput{
-		StackName:   aws.String(s.Name),
-		TemplateURL: aws.String(s.TemplateURL),
+		StackName:        aws.String(s.Name),
+		TemplateURL:      aws.String(s.TemplateURL),
+		TimeoutInMinutes: aws.Int64(defaultTimeout),
 		Parameters: []*cloudformation.Parameter{
 			{
 				ParameterKey:   aws.String("ASGMinSize"),
