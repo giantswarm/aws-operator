@@ -74,12 +74,10 @@ Resources:
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref IAMInstanceProfileName
       BlockDeviceMappings:
-      - DeviceName: "/dev/sdk"
+      - DeviceName: "/dev/xvdh"
         Ebs:
           VolumeSize: '50'
           VolumeType: gp2
-      - DeviceName: "/dev/xvdh"
-        VirtualName: ephemeral0
       AssociatePublicIpAddress: !Ref AssociatePublicIPAddress
       UserData: !Ref SmallCloudConfig
       KeyName: !Ref KeyName
