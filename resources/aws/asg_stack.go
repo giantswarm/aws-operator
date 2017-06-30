@@ -90,16 +90,16 @@ func (s *ASGStack) CreateOrFail() error {
 				ParameterValue: aws.String(s.LoadBalancerName),
 			},
 			{
-				ParameterKey:   aws.String("SecurityGroupID"),
-				ParameterValue: aws.String(s.SecurityGroupID),
-			},
-			{
 				ParameterKey:   aws.String("SmallCloudConfig"),
 				ParameterValue: aws.String(s.SmallCloudConfig),
 			},
 			{
 				ParameterKey:   aws.String("SubnetID"),
 				ParameterValue: aws.String(s.SubnetID),
+			},
+			{
+				ParameterKey:   aws.String("VPCID"),
+				ParameterValue: aws.String(s.VPCID),
 			},
 		},
 		Tags: []*cloudformation.Tag{

@@ -1,9 +1,11 @@
 package create
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"fmt"
 	"io/ioutil"
+	"text/template"
 
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/certificatetpr"
@@ -27,13 +29,18 @@ type asgStackInput struct {
 	keyPairName            string
 	loadBalancerName       string
 	prefix                 string
-	securityGroupID        string
+	securityGroupRules     []awsresources.SecurityGroupRule
 	subnetID               string
 	tlsAssets              *certificatetpr.CompactTLSAssets
+	vpcID                  string
 
 	// Dependencies.
 	clients awsutil.Clients
 	logger  micrologger.Logger
+}
+
+type asgTemplateConfig struct {
+	SecurityGroupRules []awsresources.SecurityGroupRule
 }
 
 // createASGStack creates a CloudFormation stack for an Auto Scaling Group.
@@ -63,16 +70,32 @@ func (s *Service) createASGStack(input asgStackInput) error {
 	}
 
 	// Upload the CF template to an S3 bucket.
-	template, err := ioutil.ReadFile("resources/cloudformation/auto_scaling_group.yaml")
+	cfTemplate, err := ioutil.ReadFile("resources/cloudformation/auto_scaling_group.yaml")
 	if err != nil {
 		return microerror.MaskAny(err)
 	}
 
-	templateURL := s.bucketObjectURL(input.cluster, "templates/workersASG.yaml")
+	goTemplate, err := template.New("asg").Parse(string(cfTemplate))
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	parsedTemplate := new(bytes.Buffer)
+	tc := asgTemplateConfig{
+		SecurityGroupRules: input.securityGroupRules,
+	}
+
+	if err := goTemplate.Execute(parsedTemplate, tc); err != nil {
+		return microerror.MaskAny(err)
+	}
+
+	templateRelativePath := fmt.Sprintf("templates/%s.yaml", input.prefix)
+
+	templateURL := s.bucketObjectURL(input.cluster, templateRelativePath)
 
 	templateS3 := &awsresources.BucketObject{
-		Name:   "templates/workersASG.yaml",
-		Data:   string(template),
+		Name:   templateRelativePath,
+		Data:   parsedTemplate.String(),
 		Bucket: input.bucket.(*awsresources.Bucket),
 		Client: input.clients.S3,
 	}
@@ -96,6 +119,8 @@ func (s *Service) createASGStack(input asgStackInput) error {
 		return microerror.MaskAny(err)
 	}
 
+	// Calculate big CC checksum, to be referenced in small CC and used in the
+	// big CC's filename.
 	checksum := sha256.Sum256([]byte(cloudConfig))
 
 	cloudconfigConfig := SmallCloudconfigConfig{
@@ -119,6 +144,7 @@ func (s *Service) createASGStack(input asgStackInput) error {
 		return microerror.MaskAny(err)
 	}
 
+	// Create CloudFormation stack for the ASG.
 	stack := awsresources.ASGStack{
 		// Dependencies.
 		Client: input.clients.CloudFormation,
@@ -136,10 +162,10 @@ func (s *Service) createASGStack(input asgStackInput) error {
 		KeyName:                  input.keyPairName,
 		LoadBalancerName:         input.loadBalancerName,
 		Name:                     s.asgName(input.cluster, prefixWorker),
-		SecurityGroupID:          input.securityGroupID,
 		SmallCloudConfig:         smallCloudconfig,
 		SubnetID:                 input.subnetID,
 		TemplateURL:              templateURL,
+		VPCID:                    input.vpcID,
 	}
 
 	if err := stack.CreateOrFail(); err != nil {

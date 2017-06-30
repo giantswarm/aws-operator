@@ -874,9 +874,10 @@ func (s *Service) onAdd(obj interface{}) {
 		keyPairName:            cluster.Name,
 		loadBalancerName:       ingressLB.Name,
 		prefix:                 prefixWorker,
-		securityGroupID:        workersSecurityGroupID,
+		securityGroupRules:     rulesInput.workerRules(),
 		subnetID:               publicSubnetID,
 		tlsAssets:              tlsAssets,
+		vpcID:                  vpcID,
 	}
 
 	if err := s.createASGStack(asgStackInput); err != nil {

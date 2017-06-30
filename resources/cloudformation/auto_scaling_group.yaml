@@ -38,9 +38,6 @@ Parameters:
       - m4.4xlarge
       - m4.10xlarge
     ConstraintDescription: must be a valid EC2 instance type.
-  SecurityGroupID:
-    Description: The ID of the workers security group
-    Type: AWS::EC2::SecurityGroup::Id
   LoadBalancerName:
     Description: The name of the ingress load balancer
     Type: String
@@ -63,20 +60,34 @@ Parameters:
   AssociatePublicIPAddress:
     Type: String
     AllowedValues: [ true, false ]
+  VPCID:
+    Type: String
 Resources:
+  WorkersSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      VpcId: !Ref VPCID
+      GroupDescription: The workers security group
+      SecurityGroupIngress:
+        {{ range .SecurityGroupRules }}
+        - IpProtocol: tcp
+          FromPort: {{ .Port }}
+          ToPort: {{ .Port }}
+          CidrIp: {{ .SourceCIDR }}
+        {{ end }}
   WorkersLaunchConfiguration:
     Type: "AWS::AutoScaling::LaunchConfiguration"
     Description: Workers LaunchConfiguration
     Properties:
       ImageId: !Ref ImageID
       SecurityGroups:
-      - !Ref SecurityGroupID
+      - !Ref WorkersSecurityGroup
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref IAMInstanceProfileName
       BlockDeviceMappings:
       - DeviceName: "/dev/xvdh"
         Ebs:
-          VolumeSize: '50'
+          VolumeSize: 50
           VolumeType: gp2
       AssociatePublicIpAddress: !Ref AssociatePublicIPAddress
       UserData: !Ref SmallCloudConfig
