@@ -7,45 +7,20 @@ import (
 	"github.com/giantswarm/microkit/command"
 	"github.com/giantswarm/microkit/logger"
 	microserver "github.com/giantswarm/microkit/server"
+	"github.com/spf13/viper"
 
-	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	k8sclient "github.com/giantswarm/aws-operator/client/k8s"
+	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/aws-operator/server"
 	"github.com/giantswarm/aws-operator/service"
 )
 
 var (
-	description string = "The aws-operator handles Kubernetes clusters running on a Kubernetes cluster inside of AWS."
-	gitCommit   string = "n/a"
-	name        string = "aws-operator"
-	source      string = "https://github.com/giantswarm/aws-operator"
+	description string     = "The aws-operator handles Kubernetes clusters running on a Kubernetes cluster inside of AWS."
+	f           *flag.Flag = flag.New()
+	gitCommit   string     = "n/a"
+	name        string     = "aws-operator"
+	source      string     = "https://github.com/giantswarm/aws-operator"
 )
-
-// Flags is the global flag structure used to apply certain configuration to it.
-// This is used to bundle configuration for the command, server and service
-// initialisation.
-var Flags = struct {
-	Aws struct {
-		AccessKey struct {
-			ID     string
-			Secret string
-		}
-		PubKeyFile string
-	}
-	Kubernetes struct {
-		InCluster   bool
-		APIServer   string
-		Username    string
-		Password    string
-		BearerToken string
-		TLS         struct {
-			CrtFile string
-			KeyFile string
-			CaFile  string
-		}
-		Insecure bool
-	}
-}{}
 
 func main() {
 	var err error
@@ -63,34 +38,15 @@ func main() {
 
 	// We define a server factory to create the custom server once all command
 	// line flags are parsed and all microservice configuration is storted out.
-	newServerFactory := func() microserver.Server {
+	newServerFactory := func(v *viper.Viper) microserver.Server {
 		// Create a new custom service which implements business logic.
 		var newService *service.Service
 		{
 			serviceConfig := service.DefaultConfig()
 
+			serviceConfig.Flag = f
 			serviceConfig.Logger = newLogger
-
-			serviceConfig.AwsConfig = awsclient.Config{
-				AccessKeyID:     Flags.Aws.AccessKey.ID,
-				AccessKeySecret: Flags.Aws.AccessKey.Secret,
-			}
-			k8sTlsClientConfig := k8sclient.TLSClientConfig{
-				CertFile: Flags.Kubernetes.TLS.CrtFile,
-				KeyFile:  Flags.Kubernetes.TLS.KeyFile,
-				CAFile:   Flags.Kubernetes.TLS.CaFile,
-			}
-			serviceConfig.K8sConfig = k8sclient.Config{
-				InCluster:       Flags.Kubernetes.InCluster,
-				Host:            Flags.Kubernetes.APIServer,
-				Username:        Flags.Kubernetes.Username,
-				Password:        Flags.Kubernetes.Password,
-				BearerToken:     Flags.Kubernetes.BearerToken,
-				Insecure:        Flags.Kubernetes.Insecure,
-				TLSClientConfig: k8sTlsClientConfig,
-			}
-
-			serviceConfig.PubKeyFile = Flags.Aws.PubKeyFile
+			serviceConfig.Viper = v
 
 			serviceConfig.Description = description
 			serviceConfig.GitCommit = gitCommit
@@ -109,10 +65,10 @@ func main() {
 		{
 			serverConfig := server.DefaultConfig()
 
-			serverConfig.Logger = newLogger
+			serverConfig.MicroServerConfig.Logger = newLogger
+			serverConfig.MicroServerConfig.ServiceName = name
+			serverConfig.MicroServerConfig.Viper = v
 			serverConfig.Service = newService
-
-			serverConfig.ServiceName = name
 
 			newServer, err = server.New(serverConfig)
 			if err != nil {
@@ -144,20 +100,20 @@ func main() {
 
 	daemonCommand := newCommand.DaemonCommand().CobraCommand()
 
-	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.AccessKey.ID, "aws.accesskey.id", "", "ID of the AWS access key")
-	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.AccessKey.Secret, "aws.accesskey.secret", "", "Secret of the AWS access key")
+	daemonCommand.PersistentFlags().String(f.Service.AWS.AccessKey.ID, "", "ID of the AWS access key.")
+	daemonCommand.PersistentFlags().String(f.Service.AWS.AccessKey.Secret, "", "Secret of the AWS access key.")
 	// TODO(nhlfr): Deprecate these options when cert-operator will be implemented.
-	daemonCommand.PersistentFlags().StringVar(&Flags.Aws.PubKeyFile, "aws.pubkeyfile", path.Join(os.Getenv("HOME"), ".ssh", "id_rsa.pub"), "Public key to be imported as a keypair in AWS")
+	daemonCommand.PersistentFlags().String(f.Service.AWS.PubKeyFile, path.Join(os.Getenv("HOME"), ".ssh", "id_rsa.pub"), "Public key to be imported as a keypair in AWS.")
 
-	daemonCommand.PersistentFlags().BoolVar(&Flags.Kubernetes.InCluster, "kubernetes.incluster", false, "Whether to use the in-cluster config to authenticate with Kubernetes")
-	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.APIServer, "kubernetes.apiserver", "http://127.0.0.1:8080", "Address and port of Giantnetes API server")
-	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.Username, "kubernetes.username", "", "Username (if the Kubernetes cluster is using basic authentication)")
-	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.Password, "kubernetes.password", "", "Password (if Kubernetes cluster is using basic authentication")
-	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.BearerToken, "kubernetes.token", "", "Token (if needed for Kubernetes authentication)")
-	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.TLS.CrtFile, "kubernetes.tls.crtfile", "", "TLS Client certificate file")
-	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.TLS.KeyFile, "kubernetes.tls.keyfile", "", "TLS Client key file")
-	daemonCommand.PersistentFlags().StringVar(&Flags.Kubernetes.TLS.CaFile, "kubernetes.tls.cafile", "", "TLS Authority certificate file")
-	daemonCommand.PersistentFlags().BoolVar(&Flags.Kubernetes.Insecure, "kubernetes.insecure", false, "Insecure SSL connection")
+	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.Address, "http://127.0.0.1:6443", "Address used to connect to Kubernetes. When empty in-cluster config is created.")
+	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.BearerToken, "", "Token (if needed for Kubernetes authentication).")
+	daemonCommand.PersistentFlags().Bool(f.Service.Kubernetes.InCluster, false, "Whether to use the in-cluster config to authenticate with Kubernetes.")
+	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.Insecure, "", "Insecure SSL connection.")
+	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.Password, "", "Password (if Kubernetes cluster is using basic authentication.")
+	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.CaFile, "", "Certificate authority file path to use to authenticate with Kubernetes.")
+	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.CrtFile, "", "Certificate file path to use to authenticate with Kubernetes.")
+	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.KeyFile, "", "Key file path to use to authenticate with Kubernetes.")
+	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.Username, "", "Username (if the Kubernetes cluster is using basic authentication).")
 
 	newCommand.CobraCommand().Execute()
 }

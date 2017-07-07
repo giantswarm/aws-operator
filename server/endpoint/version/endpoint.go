@@ -1,6 +1,7 @@
 package version
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
@@ -8,7 +9,6 @@ import (
 	micrologger "github.com/giantswarm/microkit/logger"
 	kitendpoint "github.com/go-kit/kit/endpoint"
 	kithttp "github.com/go-kit/kit/transport/http"
-	"golang.org/x/net/context"
 
 	"github.com/giantswarm/aws-operator/server/middleware"
 	"github.com/giantswarm/aws-operator/service"

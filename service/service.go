@@ -3,15 +3,16 @@
 package service
 
 import (
+	"flag"
 	"fmt"
 	"sync"
 
+	"github.com/giantswarm/certificatetpr"
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
-	certkit "github.com/giantswarm/operatorkit/secret/cert"
+	"github.com/spf13/viper"
 	"k8s.io/client-go/kubernetes"
 
-	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	k8sutil "github.com/giantswarm/aws-operator/client/k8s"
 	"github.com/giantswarm/aws-operator/service/create"
 	"github.com/giantswarm/aws-operator/service/version"
@@ -26,33 +27,14 @@ type Config struct {
 	// Dependencies.
 	Logger micrologger.Logger
 
-	// Sub-dependencies configs.
-	AwsConfig awsutil.Config
-	K8sConfig k8sutil.Config
-
-	// AWS cerfificates options.
-	PubKeyFile string
+	// Settings.
+	Flag  *flag.Flag
+	Viper *viper.Viper
 
 	Description string
 	GitCommit   string
 	Name        string
 	Source      string
-}
-
-func (c Config) String() string {
-	if c.AwsConfig.AccessKeySecret != "" {
-		c.AwsConfig.AccessKeySecret = RedactedString
-	}
-
-	if c.K8sConfig.Password != "" {
-		c.K8sConfig.Password = RedactedString
-	}
-
-	if c.K8sConfig.BearerToken != "" {
-		c.K8sConfig.BearerToken = RedactedString
-	}
-
-	return fmt.Sprintf("%#v", c)
 }
 
 // DefaultConfig provides a default configuration to create a new service by
@@ -62,12 +44,9 @@ func DefaultConfig() Config {
 		// Dependencies.
 		Logger: nil,
 
-		// Sub-dependencies configs.
-		AwsConfig: awsutil.Config{},
-		K8sConfig: k8sutil.Config{},
-
-		// AWS certificates optionts.
-		PubKeyFile: "",
+		// Settings.
+		Flag:  nil,
+		Viper: nil,
 
 		Description: "",
 		GitCommit:   "",
@@ -95,12 +74,12 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var certWatcher *certkit.Service
+	var certWatcher *certificatetpr.Service
 	{
-		certConfig := certkit.DefaultConfig()
+		certConfig := certificatetpr.DefaultConfig()
 		certConfig.K8sClient = k8sClient
 		certConfig.Logger = config.Logger
-		certWatcher, err = certkit.New(certConfig)
+		certWatcher, err = certificatetpr.New(certConfig)
 		if err != nil {
 			return nil, microerror.MaskAny(err)
 		}

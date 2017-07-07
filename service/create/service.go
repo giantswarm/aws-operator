@@ -1,7 +1,6 @@
 package create
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"sync"
@@ -17,13 +16,10 @@ import (
 	"github.com/giantswarm/k8scloudconfig"
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
-	certkit "github.com/giantswarm/operatorkit/secret/cert"
 	"github.com/giantswarm/operatorkit/tpr"
 	"github.com/juju/errgo"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/pkg/api"
-	"k8s.io/client-go/pkg/runtime"
-	"k8s.io/client-go/pkg/watch"
 	"k8s.io/client-go/tools/cache"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
@@ -56,7 +52,7 @@ const (
 // Config represents the configuration used to create a version service.
 type Config struct {
 	// Dependencies.
-	CertWatcher *certkit.Service
+	CertWatcher *certificatetpr.Service
 	K8sClient   kubernetes.Interface
 	Logger      micrologger.Logger
 
@@ -122,7 +118,7 @@ func New(config Config) (*Service, error) {
 // Service implements the version service interface.
 type Service struct {
 	// Dependencies.
-	certWatcher *certkit.Service
+	certWatcher *certificatetpr.Service
 	k8sClient   kubernetes.Interface
 	logger      micrologger.Logger
 
@@ -139,57 +135,28 @@ type Event struct {
 	Object *awstpr.CustomObject
 }
 
-func (s *Service) newClusterListWatch() *cache.ListWatch {
-	client := s.k8sClient.Core().RESTClient()
-
-	listWatch := &cache.ListWatch{
-		ListFunc: func(options api.ListOptions) (runtime.Object, error) {
-			req := client.Get().AbsPath(ClusterListAPIEndpoint)
-			b, err := req.DoRaw()
-			if err != nil {
-				return nil, err
-			}
-
-			var c awstpr.List
-			if err := json.Unmarshal(b, &c); err != nil {
-				return nil, err
-			}
-
-			return &c, nil
-		},
-
-		WatchFunc: func(options api.ListOptions) (watch.Interface, error) {
-			req := client.Get().AbsPath(ClusterWatchAPIEndpoint)
-			return req.Watch()
-		},
-	}
-
-	return listWatch
-}
-
 func (s *Service) Boot() {
 	s.bootOnce.Do(func() {
-		if err := s.createTPR(); err != nil {
-			panic(err)
+		err := s.tpr.CreateAndWait()
+		if tpr.IsAlreadyExists(err) {
+			s.Logger.Log("debug", "third party resource already exists")
+		} else if err != nil {
+			s.Logger.Log("error", fmt.Sprintf("%#v", err))
+			return
 		}
-		s.logger.Log("info", "successfully created third-party resource")
 
-		_, clusterInformer := cache.NewInformer(
-			s.newClusterListWatch(),
-			&awstpr.CustomObject{},
-			tpr.ResyncPeriod,
-			cache.ResourceEventHandlerFuncs{
-				AddFunc:    s.onAdd,
-				UpdateFunc: s.onUpdate,
-				DeleteFunc: s.onDelete,
-			},
-		)
+		s.Logger.Log("debug", "starting list/watch")
 
-		s.logger.Log("info", "starting watch")
+		newResourceEventHandler := &cache.ResourceEventHandlerFuncs{
+			AddFunc:    s.addFunc,
+			DeleteFunc: s.deleteFunc,
+		}
+		newZeroObjectFactory := &tpr.ZeroObjectFactoryFuncs{
+			NewObjectFunc:     func() runtime.Object { return &awstpr.CustomObject{} },
+			NewObjectListFunc: func() runtime.Object { return &awstpr.List{} },
+		}
 
-		// Cluster informer lifecycle can be interrupted by putting a value into a "stop channel".
-		// We aren't currently using that functionality, so we are passing a nil here.
-		clusterInformer.Run(nil)
+		s.tpr.NewInformer(newResourceEventHandler, newZeroObjectFactory).Run(nil)
 	})
 }
 
@@ -472,7 +439,7 @@ func validateIDs(ids []string) bool {
 	return true
 }
 
-func (s *Service) onAdd(obj interface{}) {
+func (s *Service) addFunc(obj interface{}) {
 	cluster := *obj.(*awstpr.CustomObject)
 	s.logger.Log("info", fmt.Sprintf("creating cluster '%s'", cluster.Name))
 
@@ -979,7 +946,7 @@ func (s *Service) onAdd(obj interface{}) {
 	s.logger.Log("info", fmt.Sprintf("cluster '%s' processed", cluster.Name))
 }
 
-func (s *Service) onDelete(obj interface{}) {
+func (s *Service) deleteFunc(obj interface{}) {
 	// TODO(nhlfr): Move this to a separate operator.
 
 	// We can receive an instance of awstpr.CustomObject or cache.DeletedFinalStateUnknown.
@@ -1281,7 +1248,8 @@ func (s *Service) onDelete(obj interface{}) {
 	s.logger.Log("info", fmt.Sprintf("cluster '%s' deleted", cluster.Name))
 }
 
-func (s *Service) onUpdate(oldObj, newObj interface{}) {
+// TODO we need to support this in operatorkit.
+func (s *Service) updateFunc(oldObj, newObj interface{}) {
 	oldCluster := *oldObj.(*awstpr.CustomObject)
 	cluster := *newObj.(*awstpr.CustomObject)
 

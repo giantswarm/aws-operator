@@ -1,10 +1,10 @@
 package version
 
 import (
+	"context"
 	"runtime"
 
 	microerror "github.com/giantswarm/microkit/error"
-	"golang.org/x/net/context"
 )
 
 // Config represents the configuration used to create a version service.

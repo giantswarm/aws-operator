@@ -3,14 +3,14 @@ package create
 import (
 	"github.com/giantswarm/awstpr"
 	microerror "github.com/giantswarm/microkit/error"
-	"k8s.io/client-go/pkg/api/errors"
-	"k8s.io/client-go/pkg/api/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/pkg/apis/extensions/v1beta1"
 )
 
 func (s *Service) createTPR() error {
 	tpr := &v1beta1.ThirdPartyResource{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: apismetav1.ObjectMeta{
 			Name: awstpr.Name,
 		},
 		Versions: []v1beta1.APIVersion{
@@ -19,7 +19,7 @@ func (s *Service) createTPR() error {
 		Description: "Managed Kubernetes on AWS clusters",
 	}
 	_, err := s.k8sClient.Extensions().ThirdPartyResources().Create(tpr)
-	if err != nil && !errors.IsAlreadyExists(err) {
+	if err != nil && !apierrors.IsAlreadyExists(err) {
 		return microerror.MaskAny(err)
 	}
 	return nil
