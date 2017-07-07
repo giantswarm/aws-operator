@@ -150,6 +150,7 @@ func (s *Service) Boot() {
 		newResourceEventHandler := &cache.ResourceEventHandlerFuncs{
 			AddFunc:    s.addFunc,
 			DeleteFunc: s.deleteFunc,
+			UpdateFunc: s.updateFunc,
 		}
 		newZeroObjectFactory := &tpr.ZeroObjectFactoryFuncs{
 			NewObjectFunc:     func() runtime.Object { return &awstpr.CustomObject{} },
