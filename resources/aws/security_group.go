@@ -20,7 +20,10 @@ type SecurityGroup struct {
 
 // SecurityGroupRule is an AWS security group rule.
 type SecurityGroupRule struct {
+	// Port is the port to open.
 	Port int
+	// Protocol is the IP protocol.
+	Protocol string
 	// SourceCIDR is the CIDR of the source.
 	SourceCIDR string
 	// SecurityGroupID is the ID of the source Security Group.
@@ -88,7 +91,7 @@ func (s *SecurityGroup) createRule(rule SecurityGroupRule) error {
 		params = &ec2.AuthorizeSecurityGroupIngressInput{
 			CidrIp:     aws.String(rule.SourceCIDR),
 			GroupId:    aws.String(groupID),
-			IpProtocol: aws.String("tcp"),
+			IpProtocol: aws.String(rule.Protocol),
 			FromPort:   aws.Int64(int64(rule.Port)),
 			ToPort:     aws.Int64(int64(rule.Port)),
 		}
@@ -99,7 +102,7 @@ func (s *SecurityGroup) createRule(rule SecurityGroupRule) error {
 				{
 					FromPort:   aws.Int64(int64(rule.Port)),
 					ToPort:     aws.Int64(int64(rule.Port)),
-					IpProtocol: aws.String("tcp"),
+					IpProtocol: aws.String(rule.Protocol),
 					UserIdGroupPairs: []*ec2.UserIdGroupPair{
 						{
 							GroupId: aws.String(rule.SecurityGroupID),
