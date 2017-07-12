@@ -28,11 +28,11 @@ type rulesInput struct {
 const (
 	allowAllPorts        = -1
 	calicoBGPNetworkPort = 179
+	httpPort             = 80
+	httpsPort            = 443
 	// This port is required in our current kubernetes/heapster setup, but will become unnecessary
 	// once we upgrade to kubernetes 1.6 and heapster 1.3 with apiserver deployment.
 	readOnlyKubeletPort = 10255
-	httpPort            = 80
-	httpsPort           = 443
 	sshPort             = 22
 
 	allowAllProtocols = "-1"
