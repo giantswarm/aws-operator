@@ -1,15 +1,13 @@
 package create
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"strings"
 	"sync"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/route53"
-	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/awstpr"
 	awsinfo "github.com/giantswarm/awstpr/aws"
 	"github.com/giantswarm/certificatetpr"
@@ -308,19 +306,6 @@ func allExistingInstancesMatch(instances *ec2.DescribeInstancesOutput, state aws
 	return nil, true
 }
 
-func (s *Service) uploadCloudconfigToS3(svc *s3.S3, s3Bucket, path, data string) error {
-	if _, err := svc.PutObject(&s3.PutObjectInput{
-		Body:          strings.NewReader(data),
-		Bucket:        aws.String(s3Bucket),
-		Key:           aws.String(path),
-		ContentLength: aws.Int64(int64(len(data))),
-	}); err != nil {
-		return microerror.MaskAny(err)
-	}
-
-	return nil
-}
-
 type runMachineInput struct {
 	clients             awsutil.Clients
 	cluster             awstpr.CustomObject
@@ -354,18 +339,20 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 	// cloudconfig" that just fetches the previously uploaded "final
 	// cloudconfig" and executes coreos-cloudinit with it as argument.
 	// We do this to circumvent the 16KB limit on user-data for EC2 instances.
+
+	checksum := sha256.Sum256([]byte(cloudConfig))
+
 	cloudconfigConfig := SmallCloudconfigConfig{
-		MachineType: input.prefix,
-		Region:      input.cluster.Spec.AWS.Region,
-		S3URI:       s.bucketName(input.cluster),
+		Filename: s.cloudConfigName(input.prefix, checksum),
+		Region:   input.cluster.Spec.AWS.Region,
+		S3URI:    s.bucketName(input.cluster),
 	}
 
-	var cloudconfigS3 resources.Resource
-	cloudconfigS3 = &awsresources.BucketObject{
-		Name:      s.bucketObjectName(input.prefix),
-		Data:      cloudConfig,
-		Bucket:    input.bucket.(*awsresources.Bucket),
-		AWSEntity: awsresources.AWSEntity{Clients: input.clients},
+	cloudconfigS3 := &awsresources.BucketObject{
+		Name:   s.cloudConfigRelativePath(input.prefix, checksum),
+		Data:   cloudConfig,
+		Bucket: input.bucket.(*awsresources.Bucket),
+		Client: input.clients.S3,
 	}
 	if err := cloudconfigS3.CreateOrFail(); err != nil {
 		return false, "", microerror.MaskAny(err)
@@ -874,60 +861,41 @@ func (s *Service) onAdd(obj interface{}) {
 
 	s.logger.Log("info", fmt.Sprintf("created ingress load balancer"))
 
-	// Create a launch configuration for the worker nodes.
-	lcInput := launchConfigurationInput{
-		clients:             clients,
-		cluster:             cluster,
-		tlsAssets:           tlsAssets,
-		bucket:              bucket,
-		securityGroup:       workersSecurityGroup,
-		subnet:              publicSubnet,
-		keypairName:         cluster.Name,
-		instanceProfileName: policy.GetName(),
-		prefix:              prefixWorker,
-		ebsStorage:          true,
-	}
-
-	lcCreated, err := s.createLaunchConfiguration(lcInput)
-	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
-		return
-	}
-
-	if lcCreated {
-		s.logger.Log("info", fmt.Sprintf("created worker launch config"))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("launch config %s already exists, reusing", cluster.Name))
-	}
-
-	workersLCName, err := launchConfigurationName(cluster, "worker", workersSecurityGroupID)
-	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
-		return
-	}
-
+	s.logger.Log("info", fmt.Sprintf("creating workers auto scaling group..."))
 	// Create an Auto Scaling Group for the workers.
-	asgSize := len(cluster.Spec.AWS.Workers)
+	asgStackInput := asgStackInput{
+		// Dependencies.
+		clients: clients,
 
-	asg := awsresources.AutoScalingGroup{
-		Client:                  clients.AutoScaling,
-		Name:                    fmt.Sprintf("%s-%s", cluster.Name, prefixWorker),
-		ClusterID:               cluster.Name,
-		MinSize:                 asgSize,
-		MaxSize:                 asgSize,
-		AvailabilityZone:        cluster.Spec.AWS.AZ,
-		LaunchConfigurationName: workersLCName,
-		LoadBalancerName:        ingressLB.Name,
-		VPCZoneIdentifier:       publicSubnetID,
-		HealthCheckGracePeriod:  gracePeriodSeconds,
+		// Settings.
+		bucket:                 bucket,
+		cluster:                cluster,
+		iamInstanceProfileName: policy.GetName(),
+		keyPairName:            cluster.Name,
+		prefix:                 prefixWorker,
+		workersSecurityGroupRules: rulesInput.workerRules(),
+		ingressSecurityGroupRules: rulesInput.ingressRules(),
+		subnetID:                  publicSubnetID,
+		tlsAssets:                 tlsAssets,
+		vpcID:                     vpcID,
+		elbListeners: []awsresources.PortPair{
+			{
+				PortELB:      httpsPort,
+				PortInstance: cluster.Spec.Cluster.Kubernetes.IngressController.SecurePort,
+			},
+			{
+				PortELB:      httpPort,
+				PortInstance: cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
+			},
+		},
 	}
 
-	if err := asg.CreateOrFail(); err != nil {
+	if err := s.createASGStack(asgStackInput); err != nil {
 		s.logger.Log("error", errgo.Details(err))
 		return
 	}
 
-	s.logger.Log("info", fmt.Sprintf("created workers auto scaling group with size %v", asgSize))
+	s.logger.Log("info", fmt.Sprintf("created workers auto scaling group"))
 
 	// Create Record Sets for the Load Balancers.
 	recordSetInputs := []recordSetInput{
@@ -1034,28 +1002,16 @@ func (s *Service) onDelete(obj interface{}) {
 		s.logger.Log("info", "deleted masters")
 	}
 
-	// Delete workers Auto Scaling Group.
-	asg := awsresources.AutoScalingGroup{
-		Client: clients.AutoScaling,
+	// Delete workers Auto Scaling Group stack.
+	stack := awsresources.ASGStack{
+		Client: clients.CloudFormation,
 		Name:   fmt.Sprintf("%s-%s", cluster.Name, prefixWorker),
 	}
 
-	if err := asg.Delete(); err != nil {
+	if err := stack.Delete(); err != nil {
 		s.logger.Log("error", errgo.Details(err))
 	} else {
 		s.logger.Log("info", "deleted workers auto scaling group")
-	}
-
-	// Delete workers launch configuration.
-	lcInput := launchConfigurationInput{
-		clients: clients,
-		cluster: cluster,
-		prefix:  "worker",
-	}
-	if err := s.deleteLaunchConfiguration(lcInput); err != nil {
-		s.logger.Log("error", errgo.Details(err))
-	} else {
-		s.logger.Log("info", "deleted worker launch config")
 	}
 
 	// Delete Record Sets.
@@ -1310,7 +1266,7 @@ func (s *Service) onUpdate(oldObj, newObj interface{}) {
 
 	asg := awsresources.AutoScalingGroup{
 		Client:  clients.AutoScaling,
-		Name:    fmt.Sprintf("%s-%s", cluster.Name, prefixWorker),
+		Name:    s.asgName(cluster, prefixWorker),
 		MinSize: newSize,
 		MaxSize: newSize,
 	}

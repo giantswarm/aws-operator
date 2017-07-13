@@ -1,6 +1,9 @@
 package create
 
 import (
+	"crypto/sha256"
+	"fmt"
+
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/certificatetpr"
 	"github.com/giantswarm/k8scloudconfig"
@@ -13,6 +16,8 @@ var (
 		prefixWorker: cloudconfig.WorkerTemplate,
 	}
 )
+
+const cloudConfigSubdir = "cloudconfig"
 
 type CloudConfigExtension struct {
 	AwsInfo   awstpr.Spec
@@ -410,4 +415,14 @@ func (s *Service) cloudConfig(prefix string, params cloudconfig.Params, awsSpec 
 	}
 
 	return cc.Base64(), nil
+}
+
+func (s *Service) cloudConfigName(prefix string, checksum [sha256.Size]byte) string {
+	return fmt.Sprintf("%s-%x", prefix, checksum)
+}
+
+func (s *Service) cloudConfigRelativePath(prefix string, checksum [sha256.Size]byte) string {
+	name := s.cloudConfigName(prefix, checksum)
+
+	return fmt.Sprintf("%s/%s", cloudConfigSubdir, name)
 }

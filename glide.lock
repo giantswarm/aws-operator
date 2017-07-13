@@ -1,5 +1,5 @@
-hash: 20314e2f920f12330791ded87554bd6ac69f8992cee6d79026654004d20ae596
-updated: 2017-06-23T18:31:59.634549885+02:00
+hash: fb789572fe03bda908648481d42be268fcfb68c21393267d9f5e050856bccfed
+updated: 2017-06-26T12:39:42.213653882+02:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/aws/aws-sdk-go
-  version: 5525dcfc0f1a4183fcf97a4278e010b4a67c864e
+  version: 69836214e899aa2562455259e32bd48a412ed036
   subpackages:
   - aws
   - aws/awserr
@@ -37,6 +37,7 @@ imports:
   - private/protocol/restxml
   - private/protocol/xml/xmlutil
   - service/autoscaling
+  - service/cloudformation
   - service/ec2
   - service/elb
   - service/iam
@@ -51,7 +52,7 @@ imports:
 - name: github.com/blang/semver
   version: 31b736133b98f26d5e078ec9eb591666edfd091f
 - name: github.com/cenkalti/backoff
-  version: 32cd0c5b3aef12c76ed64aaf678f6c79736be7dc
+  version: 5d150e7eec023ce7a124856b37c68e54b4050ac7
 - name: github.com/coreos/etcd
   version: 0f4a535c2fb7a2920e13e2e19b9eaf6b2e9285e5
   subpackages:
@@ -238,7 +239,7 @@ imports:
 - name: github.com/pelletier/go-buffruneio
   version: c37440a7cf42ac63b919c752ca73a85067e05992
 - name: github.com/pelletier/go-toml
-  version: fe7536c3dee2596cdd23ee9976a17c22bdaae286
+  version: 4a000a21a414d139727f616a8bb97f847b1b310b
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
