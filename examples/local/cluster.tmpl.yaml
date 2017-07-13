@@ -40,6 +40,7 @@ spec:
         insecurePort: 30010
         securePort: 30011
         domain: "ingress.${CLUSTER_NAME}.${COMMON_DOMAIN_INGRESS}"
+        wildcardDomain: "*.${CLUSTER_NAME}.${COMMON_DOMAIN_INGRESS}"
       kubelet:
         port: 10250
       networkSetup:
