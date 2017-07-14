@@ -3,18 +3,18 @@ package create
 import (
 	"github.com/giantswarm/clustertpr"
 	microerror "github.com/giantswarm/microkit/error"
-	"k8s.io/client-go/pkg/api/errors"
-	"k8s.io/client-go/pkg/api/unversioned"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/pkg/api/v1"
 )
 
 func (s *Service) createClusterNamespace(cluster clustertpr.Cluster) error {
 	namespace := v1.Namespace{
-		TypeMeta: unversioned.TypeMeta{
+		TypeMeta: apismetav1.TypeMeta{
 			Kind:       "Namespace",
 			APIVersion: "v1",
 		},
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: apismetav1.ObjectMeta{
 			Name: cluster.Cluster.ID,
 			Labels: map[string]string{
 				"cluster":  cluster.Cluster.ID,
@@ -23,12 +23,12 @@ func (s *Service) createClusterNamespace(cluster clustertpr.Cluster) error {
 		},
 	}
 
-	if _, err := s.k8sClient.Core().Namespaces().Create(&namespace); err != nil && !errors.IsAlreadyExists(err) {
+	if _, err := s.k8sClient.Core().Namespaces().Create(&namespace); err != nil && !apierrors.IsAlreadyExists(err) {
 		return microerror.MaskAny(err)
 	}
 	return nil
 }
 
 func (s *Service) deleteClusterNamespace(cluster clustertpr.Cluster) error {
-	return s.k8sClient.Core().Namespaces().Delete(cluster.Cluster.ID, v1.NewDeleteOptions(0))
+	return s.k8sClient.Core().Namespaces().Delete(cluster.Cluster.ID, apismetav1.NewDeleteOptions(0))
 }
