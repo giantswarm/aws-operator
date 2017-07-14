@@ -1266,9 +1266,6 @@ func (s *Service) updateFunc(oldObj, newObj interface{}) {
 		// We get update events for all sorts of changes. We are currently only
 		// interested in changes to one property, so we ignore all the others.
 		return
-	} else if oldSize > newSize {
-		s.logger.Log("clusterID", cluster.Spec.Cluster.Cluster.ID, "info", "cluster size reduction not supported")
-		return
 	}
 
 	s.awsConfig.Region = cluster.Spec.AWS.Region
@@ -1292,5 +1289,5 @@ func (s *Service) updateFunc(oldObj, newObj interface{}) {
 		return
 	}
 
-	s.logger.Log("info", fmt.Sprintf("increased size of workers auto scaling group to %d", newSize))
+	s.logger.Log("info", fmt.Sprintf("scaling workers auto scaling group from %d to %d", oldSize, newSize))
 }
