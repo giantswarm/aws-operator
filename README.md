@@ -93,10 +93,11 @@ second-customer
 
 Here the plain passwords/tokens have to be inserted.
 ```
-aws:
-  accesskey:
-    id: 'TODO'
-    secret: 'TODO'
+service:
+  aws:
+    accesskey:
+      id: 'TODO'
+      secret: 'TODO'
 ```
 
 Here the base64 representation of the data structure above has to be inserted.
