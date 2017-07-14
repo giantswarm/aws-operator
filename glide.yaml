@@ -9,44 +9,17 @@ import:
   - service/route53
   - awserr
 - package: github.com/giantswarm/microkit
-  version: 27e3ac11e763712e0d0dc5294aea8937e66458da
+  version: master
   subpackages:
   - command
   - error
   - logger
   - server
   - transaction
-- package: github.com/go-kit/kit
-  version: ~0.3.0
-  subpackages:
-  - endpoint
-  - transport/http
-- package: github.com/gorilla/mux
-  version: ^1.1.0
-- package: github.com/juju/errgo
-- package: golang.org/x/net
-  subpackages:
-  - context
-- package: k8s.io/client-go
-  version: v2.0.0-alpha.1
 - package: github.com/giantswarm/awstpr
   version: master
 - package: github.com/giantswarm/k8scloudconfig
   version: master
-- package: github.com/golang/protobuf
-  version: 8ee79997227bf9b34611aee7946ae64735e6fd93
-  subpackages:
-  - jsonpb
-  - proto
-  - sortkeys
-# The versions of pflag and cobra were previously indicated by kubernetes/client-go, but due to continuously appearing
-# errors on upgrades, we decided to pin them by ourselves.
-- package: github.com/spf13/cobra
-  version: 4c05eb1145f16d0e6bb4a3e1b6d769f4713cb41f
-- package: github.com/spf13/pflag
-  version: 08b1a584251b5b62f458943640fc8ebd4d50aaa5
-- package: github.com/giantswarm/operatorkit
-testImport:
 - package: github.com/stretchr/testify
   version: v1.1.4
   repo: git://github.com/stretchr/testify.git

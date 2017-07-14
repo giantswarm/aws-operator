@@ -1,3 +1,69 @@
+Release v1.10.8 (2017-07-06)
+===
+
+### Service Client Updates
+* `service/ds`: Updates service API, documentation, and paginators
+  * You can now improve the resilience and performance of your Microsoft AD directory by deploying additional domain controllers. Added UpdateNumberofDomainControllers API that allows you to update the number of domain controllers you want for your directory, and DescribeDomainControllers API that allows you to describe the detailed information of each domain controller of your directory. Also added the 'DesiredNumberOfDomainControllers' field to the DescribeDirectories API output for Microsoft AD.
+* `aws/endpoints`: Updated Regions and Endpoints metadata.
+* `service/kinesis`: Updates service API and documentation
+  * You can now encrypt your data at rest within an Amazon Kinesis Stream using server-side encryption. Server-side encryption via AWS KMS makes it easy for customers to meet strict data management requirements by encrypting their data at rest within the Amazon Kinesis Streams, a fully managed real-time data processing service.
+* `service/kms`: Updates service API and documentation
+  * This release of AWS Key Management Service introduces the ability to determine whether a key is AWS managed or customer managed.
+* `service/ssm`: Updates service API and documentation
+  * Amazon EC2 Systems Manager now expands Patching support to Amazon Linux, Red Hat and Ubuntu in addition to the already supported Windows Server.
+
+Release v1.10.7 (2017-07-05)
+===
+
+### Service Client Updates
+* `service/monitoring`: Updates service API and documentation
+  * We are excited to announce the availability of APIs and CloudFormation support for CloudWatch Dashboards. You can use the new dashboard APIs or CloudFormation templates to dynamically build and maintain dashboards to monitor your infrastructure and applications. There are four new dashboard APIs - PutDashboard, GetDashboard, DeleteDashboards, and ListDashboards APIs. PutDashboard is used to create a new dashboard or modify an existing one whereas GetDashboard is the API to get the details of a specific dashboard. ListDashboards and DeleteDashboards are used to get the names or delete multiple dashboards respectively. Getting started with dashboard APIs is similar to any other AWS APIs. The APIs can be accessed through AWS SDK or through CLI tools.
+* `service/route53`: Updates service API and documentation
+  * Bug fix for InvalidChangeBatch exception.
+
+### SDK Enhancements
+* `service/s3/s3manager`: adding cleanup function to batch objects [#1375](https://github.com/aws/aws-sdk-go/issues/1375)
+  * This enhancement will add an After field that will be called after each iteration of the batch operation.
+
+Release v1.10.6 (2017-06-30)
+===
+
+### Service Client Updates
+* `service/marketplacecommerceanalytics`: Updates service documentation
+  * Documentation updates for AWS Marketplace Commerce Analytics.
+* `service/s3`: Updates service API and documentation
+  * API Update for S3: Adding Object Tagging Header to MultipartUpload Initialization
+
+Release v1.10.5 (2017-06-29)
+===
+
+### Service Client Updates
+* `aws/endpoints`: Updated Regions and Endpoints metadata.
+* `service/events`: Updates service API and documentation
+  * CloudWatch Events now allows different AWS accounts to share events with each other through a new resource called event bus. Event buses accept events from AWS services, other AWS accounts and PutEvents API calls. Currently all AWS accounts have one default event bus. To send events to another account, customers simply write rules to match the events of interest and attach an event bus in the receiving account as the target to the rule. The PutTargets API has been updated to allow adding cross account event buses as targets. In addition, we have released two new APIs - PutPermission and RemovePermission - that enables customers to add/remove permissions to their default event bus.
+* `service/gamelift`: Updates service API and documentation
+  * Allow developers to download GameLift fleet creation logs to assist with debugging.
+* `service/ssm`: Updates service API and documentation
+  * Adding Resource Data Sync support to SSM Inventory.  New APIs:  * CreateResourceDataSync - creates a new resource data sync configuration,  * ListResourceDataSync - lists existing resource data sync configurations,  * DeleteResourceDataSync - deletes an existing resource data sync configuration.
+
+Release v1.10.4 (2017-06-27)
+===
+
+### Service Client Updates
+* `service/servicecatalog`: Updates service API, documentation, and paginators
+  * Proper tagging of resources is critical to post-launch operations such as billing, cost allocation, and resource management. By using Service Catalog's TagOption Library, administrators can define a library of re-usable TagOptions that conform to company standards, and associate these with Service Catalog portfolios and products. Learn how to move your current tags to the new library, create new TagOptions, and view and associate your library items with portfolios and products. Understand how to ensure that the right tags are created on products launched through Service Catalog and how to provide users with defined selectable tags.
+
+### SDK Bugs
+* `aws/signer/v4`: checking length on `stripExcessSpaces` [#1372](https://github.com/aws/aws-sdk-go/issues/1372)
+  * Fixes a bug where `stripExcessSpaces` did not check length against the slice.
+  * Fixes: [#1371](https://github.com/aws/aws-sdk-go/issues/1371)
+Release v1.10.3 (2017-06-23)
+===
+
+### Service Client Updates
+* `service/lambda`: Updates service API and documentation
+  * The Lambda Invoke API will now throw new exception InvalidRuntimeException (status code 502) for invokes with deprecated runtimes.
+
 Release v1.10.2 (2017-06-22)
 ===
 
