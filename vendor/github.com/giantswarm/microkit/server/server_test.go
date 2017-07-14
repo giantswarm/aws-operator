@@ -1,22 +1,32 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	kitendpoint "github.com/go-kit/kit/endpoint"
 	kithttp "github.com/go-kit/kit/transport/http"
-	"golang.org/x/net/context"
 )
 
-func Test_Transaction_NoIDGiven(t *testing.T) {
-	e := testNewEndpoint(t)
+// Test_Server_Endpoints ensures the endpoint registration works as expected.
+// There have been issues with registering endpoints, where one endpoint
+// overwrote the other. This test makes sure this does not happen again. So we
+// register two endpoints and check if the endpoints are actually called as
+// expected. When they return the correct response, the registration is
+// considered correct.
+func Test_Server_Endpoints(t *testing.T) {
+	e1 := testNewEndpoint(t)
+	e1.(*testEndpoint).endpointResponseFormat = "e1-test-response-%d"
+	e1.(*testEndpoint).path = "/e1-test-path"
+	e2 := testNewEndpoint(t)
+	e2.(*testEndpoint).endpointResponseFormat = "e2-test-response-%d"
+	e2.(*testEndpoint).path = "/e2-test-path"
 
 	config := DefaultConfig()
-	config.Endpoints = []Endpoint{e}
+	config.Endpoints = []Endpoint{e1, e2}
 	newServer, err := New(config)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -25,74 +35,46 @@ func Test_Transaction_NoIDGiven(t *testing.T) {
 	newServer.Boot()
 	defer newServer.Shutdown()
 
-	// Here we make a request against our test endpoint. The endpoint is executed
-	// the first time. So the execution counts should be one.
 	{
-		r, err := http.NewRequest("GET", "/test-path", nil)
+		r, err := http.NewRequest("GET", "/e1-test-path", nil)
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
 		w := httptest.NewRecorder()
 
-		newServer.Router().ServeHTTP(w, r)
+		newServer.Config().Router.ServeHTTP(w, r)
 
 		if w.Code != http.StatusOK {
 			t.Fatal("expected", http.StatusOK, "got", w.Code)
 		}
 
-		decoderExecuted := e.(*testEndpoint).decoderExecuted
-		if decoderExecuted != 1 {
-			t.Fatal("expected", 1, "got", decoderExecuted)
-		}
-		endpointExecuted := e.(*testEndpoint).endpointExecuted
-		if endpointExecuted != 1 {
-			t.Fatal("expected", 1, "got", endpointExecuted)
-		}
-		encoderExecuted := e.(*testEndpoint).encoderExecuted
-		if encoderExecuted != 1 {
-			t.Fatal("expected", 1, "got", encoderExecuted)
-		}
-
-		if w.Body.String() != "test-response-1" {
-			t.Fatal("expected", "test-response-1", "got", w.Body.String())
+		if w.Body.String() != "e1-test-response-1" {
+			t.Fatal("expected", "e1-test-response-1", "got", w.Body.String())
 		}
 	}
 
-	// Here we make another request against our test endpoint. The endpoint is
-	// executed the second time. So the execution counts should be two.
 	{
-		r, err := http.NewRequest("GET", "/test-path", nil)
+		r, err := http.NewRequest("GET", "/e2-test-path", nil)
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
 		w := httptest.NewRecorder()
 
-		newServer.Router().ServeHTTP(w, r)
+		newServer.Config().Router.ServeHTTP(w, r)
 
 		if w.Code != http.StatusOK {
 			t.Fatal("expected", http.StatusOK, "got", w.Code)
 		}
 
-		decoderExecuted := e.(*testEndpoint).decoderExecuted
-		if decoderExecuted != 2 {
-			t.Fatal("expected", 2, "got", decoderExecuted)
-		}
-		endpointExecuted := e.(*testEndpoint).endpointExecuted
-		if endpointExecuted != 2 {
-			t.Fatal("expected", 2, "got", endpointExecuted)
-		}
-		encoderExecuted := e.(*testEndpoint).encoderExecuted
-		if encoderExecuted != 2 {
-			t.Fatal("expected", 2, "got", encoderExecuted)
-		}
-
-		if w.Body.String() != "test-response-2" {
-			t.Fatal("expected", "test-response-2", "got", w.Body.String())
+		if w.Body.String() != "e2-test-response-1" {
+			t.Fatal("expected", "e2-test-response-1", "got", w.Body.String())
 		}
 	}
 }
 
-func Test_Transaction_IDGiven(t *testing.T) {
+// Test_Server_Default_HandlerWrapper verifies the default HandlerWrapper does
+// not do anything. This is the negative test for Test_Server_Custom_HandlerWrapper.
+func Test_Server_Default_HandlerWrapper(t *testing.T) {
 	e := testNewEndpoint(t)
 
 	config := DefaultConfig()
@@ -105,84 +87,40 @@ func Test_Transaction_IDGiven(t *testing.T) {
 	newServer.Boot()
 	defer newServer.Shutdown()
 
-	// Here we make a request against our test endpoint. The endpoint is executed
-	// the first time. So the execution counts should be one.
 	{
 		r, err := http.NewRequest("GET", "/test-path", nil)
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
-		r.Header.Add(TransactionIDHeader, "my-very-valid-test-transaction-id")
 		w := httptest.NewRecorder()
 
-		newServer.Router().ServeHTTP(w, r)
+		newServer.Config().Router.ServeHTTP(w, r)
 
 		if w.Code != http.StatusOK {
 			t.Fatal("expected", http.StatusOK, "got", w.Code)
 		}
 
-		decoderExecuted := e.(*testEndpoint).decoderExecuted
-		if decoderExecuted != 1 {
-			t.Fatal("expected", 1, "got", decoderExecuted)
-		}
-		endpointExecuted := e.(*testEndpoint).endpointExecuted
-		if endpointExecuted != 1 {
-			t.Fatal("expected", 1, "got", endpointExecuted)
-		}
-		encoderExecuted := e.(*testEndpoint).encoderExecuted
-		if encoderExecuted != 1 {
-			t.Fatal("expected", 1, "got", encoderExecuted)
-		}
-
-		if w.Body.String() != "test-response-1" {
-			t.Fatal("expected", "test-response-1", "got", w.Body.String())
-		}
-	}
-
-	// Here we make another request against our test endpoint. In this request and
-	// the previous one we provided the same transaction ID. The endpoint is now
-	// being executed the second time. So because we have our transaction response
-	// tracked, the execution counts should still be one.
-	{
-		r, err := http.NewRequest("GET", "/test-path", nil)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
-		r.Header.Add(TransactionIDHeader, "my-very-valid-test-transaction-id")
-		w := httptest.NewRecorder()
-
-		newServer.Router().ServeHTTP(w, r)
-
-		if w.Code != http.StatusOK {
-			t.Fatal("expected", http.StatusOK, "got", w.Code)
-		}
-
-		decoderExecuted := e.(*testEndpoint).decoderExecuted
-		if decoderExecuted != 1 {
-			t.Fatal("expected", 1, "got", decoderExecuted)
-		}
-		endpointExecuted := e.(*testEndpoint).endpointExecuted
-		if endpointExecuted != 1 {
-			t.Fatal("expected", 1, "got", endpointExecuted)
-		}
-		encoderExecuted := e.(*testEndpoint).encoderExecuted
-		if encoderExecuted != 1 {
-			t.Fatal("expected", 1, "got", encoderExecuted)
-		}
-
-		if w.Body.String() != "test-response-1" {
-			t.Fatal("expected", "test-response-1", "got", w.Body.String())
+		h := w.HeaderMap.Get("X-Test-Header")
+		if h != "" {
+			t.Fatal("expected", "no header", "got", h)
 		}
 	}
 }
 
-func Test_Transaction_InvalidIDGiven(t *testing.T) {
+// Test_Server_Custom_HandlerWrapper verifies that the custom HandlerWrapper
+// does what it is supposed to do. In this test case it sets an additional
+// header to the request. In case our response recorder contains our expected
+// header, the test succeeds.
+func Test_Server_Custom_HandlerWrapper(t *testing.T) {
 	e := testNewEndpoint(t)
 
 	config := DefaultConfig()
 	config.Endpoints = []Endpoint{e}
-	config.ErrorEncoder = func(ctx context.Context, serverError error, w http.ResponseWriter) {
-		w.WriteHeader(http.StatusInternalServerError)
+	config.HandlerWrapper = func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("X-Test-Header", "test value")
+			h.ServeHTTP(w, r)
+		})
 	}
 	newServer, err := New(config)
 	if err != nil {
@@ -192,27 +130,35 @@ func Test_Transaction_InvalidIDGiven(t *testing.T) {
 	newServer.Boot()
 	defer newServer.Shutdown()
 
-	// Here we make a request against our test endpoint. The endpoint is provided
-	// with an invalid transaction ID. The server's error encoder returns status
-	// code 500 on all errors.
 	{
 		r, err := http.NewRequest("GET", "/test-path", nil)
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
-		r.Header.Add(TransactionIDHeader, "--my-invalid-transaction-id--")
 		w := httptest.NewRecorder()
 
-		newServer.Router().ServeHTTP(w, r)
+		newServer.Config().Router.ServeHTTP(w, r)
 
-		if w.Code != http.StatusInternalServerError {
-			t.Fatal("expected", http.StatusInternalServerError, "got", w.Code)
+		if w.Code != http.StatusOK {
+			t.Fatal("expected", http.StatusOK, "got", w.Code)
 		}
 
-		if !strings.Contains(w.Body.String(), "invalid transaction ID: does not match") {
-			t.Fatal("expected", "invalid transaction ID: does not match", "got", w.Body.String())
+		h := w.HeaderMap.Get("X-Test-Header")
+		if h != "test value" {
+			t.Fatal("expected", "no header", "got", h)
 		}
 	}
+}
+
+type testEndpoint struct {
+	decoderExecuted        int
+	decoderRequest         string
+	endpointExecuted       int
+	encoderExecuted        int
+	endpointResponseFormat string
+	method                 string
+	name                   string
+	path                   string
 }
 
 func testNewEndpoint(t *testing.T) Endpoint {
@@ -228,17 +174,6 @@ func testNewEndpoint(t *testing.T) Endpoint {
 	}
 
 	return newEndpoint
-}
-
-type testEndpoint struct {
-	decoderExecuted        int
-	decoderRequest         string
-	endpointExecuted       int
-	encoderExecuted        int
-	endpointResponseFormat string
-	method                 string
-	name                   string
-	path                   string
 }
 
 func (e *testEndpoint) Decoder() kithttp.DecodeRequestFunc {

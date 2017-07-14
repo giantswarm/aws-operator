@@ -2,7 +2,12 @@ package daemon
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
+	"github.com/giantswarm/microkit/server"
 )
+
+type ServerFactory func(v *viper.Viper) server.Server
 
 // Command represents the daemon command for any microservice.
 type Command interface {

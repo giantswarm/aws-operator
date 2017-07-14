@@ -3,16 +3,14 @@
 package server
 
 import (
+	"context"
 	"net/http"
 	"sync"
 
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
 	microserver "github.com/giantswarm/microkit/server"
-	microtransaction "github.com/giantswarm/microkit/transaction"
 	kithttp "github.com/go-kit/kit/transport/http"
-	"github.com/gorilla/mux"
-	"golang.org/x/net/context"
 
 	"github.com/giantswarm/aws-operator/server/endpoint"
 	"github.com/giantswarm/aws-operator/server/middleware"
@@ -22,67 +20,32 @@ import (
 // Config represents the configuration used to create a new server object.
 type Config struct {
 	// Dependencies.
-	Logger               micrologger.Logger
-	Router               *mux.Router
-	Service              *service.Service
-	TransactionResponder microtransaction.Responder
+	Service *service.Service
 
 	// Settings.
-	ServiceName string
+	MicroServerConfig microserver.Config
 }
 
 // DefaultConfig provides a default configuration to create a new server object
 // by best effort.
 func DefaultConfig() Config {
-	var err error
-
-	var transactionResponder microtransaction.Responder
-	{
-		transactionConfig := microtransaction.DefaultResponderConfig()
-		transactionResponder, err = microtransaction.NewResponder(transactionConfig)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	config := Config{
+	return Config{
 		// Dependencies.
-		Logger:               nil,
-		Router:               mux.NewRouter(),
-		Service:              nil,
-		TransactionResponder: transactionResponder,
+		Service: nil,
 
 		// Settings.
-		ServiceName: "",
+		MicroServerConfig: microserver.DefaultConfig(),
 	}
-
-	return config
 }
 
 // New creates a new configured server object.
 func New(config Config) (microserver.Server, error) {
-	// Dependencies.
-	if config.Logger == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "logger must not be empty")
-	}
-	if config.Router == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "router must not be empty")
-	}
-	if config.TransactionResponder == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "transaction responder must not be empty")
-	}
-
-	// Dependencies.
-	if config.ServiceName == "" {
-		return nil, microerror.MaskAnyf(invalidConfigError, "service name must not be empty")
-	}
-
 	var err error
 
 	var middlewareCollection *middleware.Middleware
 	{
 		middlewareConfig := middleware.DefaultConfig()
-		middlewareConfig.Logger = config.Logger
+		middlewareConfig.Logger = config.MicroServerConfig.Logger
 		middlewareConfig.Service = config.Service
 		middlewareCollection, err = middleware.New(middlewareConfig)
 		if err != nil {
@@ -93,7 +56,7 @@ func New(config Config) (microserver.Server, error) {
 	var endpointCollection *endpoint.Endpoint
 	{
 		endpointConfig := endpoint.DefaultConfig()
-		endpointConfig.Logger = config.Logger
+		endpointConfig.Logger = config.MicroServerConfig.Logger
 		endpointConfig.Middleware = middlewareCollection
 		endpointConfig.Service = config.Service
 		endpointCollection, err = endpoint.New(endpointConfig)
@@ -104,37 +67,31 @@ func New(config Config) (microserver.Server, error) {
 
 	newServer := &server{
 		// Dependencies.
-		logger:               config.Logger,
-		router:               config.Router,
-		transactionResponder: config.TransactionResponder,
+		logger: config.MicroServerConfig.Logger,
 
-		// Internals
-		bootOnce: sync.Once{},
-		endpoints: []microserver.Endpoint{
-			endpointCollection.Version,
-		},
+		// Internals.
+		bootOnce:     sync.Once{},
+		config:       config.MicroServerConfig,
 		shutdownOnce: sync.Once{},
-
-		// Settings.
-		serviceName: config.ServiceName,
 	}
+
+	// Apply internals to the micro server config.
+	newServer.config.Endpoints = []microserver.Endpoint{
+		endpointCollection.Version,
+	}
+	newServer.config.ErrorEncoder = newServer.newErrorEncoder()
 
 	return newServer, nil
 }
 
 type server struct {
 	// Dependencies.
-	logger               micrologger.Logger
-	router               *mux.Router
-	transactionResponder microtransaction.Responder
+	logger micrologger.Logger
 
 	// Internals.
 	bootOnce     sync.Once
-	endpoints    []microserver.Endpoint
+	config       microserver.Config
 	shutdownOnce sync.Once
-
-	// Settings.
-	serviceName string
 }
 
 func (s *server) Boot() {
@@ -144,57 +101,8 @@ func (s *server) Boot() {
 	})
 }
 
-func (s *server) Endpoints() []microserver.Endpoint {
-	return s.endpoints
-}
-
-// ErrorEncoder is a global error handler used for all endpoints. Errors
-// received here are encoded by go-kit and express in which area the error was
-// emitted. The underlying error defines the HTTP status code and the encoded
-// error message. The response is always a JSON object containing an error field
-// describing the error.
-func (s *server) ErrorEncoder() kithttp.ErrorEncoder {
-	return func(ctx context.Context, err error, w http.ResponseWriter) {
-		switch e := err.(type) {
-		case kithttp.Error:
-			err = e.Err
-
-			switch e.Domain {
-			case kithttp.DomainEncode:
-				w.WriteHeader(http.StatusBadRequest)
-			case kithttp.DomainDecode:
-				w.WriteHeader(http.StatusBadRequest)
-			case kithttp.DomainDo:
-				w.WriteHeader(http.StatusBadRequest)
-			default:
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-		default:
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-	}
-}
-
-func (s *server) Logger() micrologger.Logger {
-	return s.logger
-}
-
-func (s *server) RequestFuncs() []kithttp.RequestFunc {
-	return []kithttp.RequestFunc{
-		func(ctx context.Context, r *http.Request) context.Context {
-			// Your custom logic to enrich the request context with request specific
-			// information goes here.
-			return ctx
-		},
-	}
-}
-
-func (s *server) Router() *mux.Router {
-	return s.router
-}
-
-func (s *server) ServiceName() string {
-	return s.serviceName
+func (s *server) Config() microserver.Config {
+	return s.config
 }
 
 func (s *server) Shutdown() {
@@ -204,6 +112,13 @@ func (s *server) Shutdown() {
 	})
 }
 
-func (s *server) TransactionResponder() microtransaction.Responder {
-	return s.transactionResponder
+func (s *server) newErrorEncoder() kithttp.ErrorEncoder {
+	return func(ctx context.Context, err error, w http.ResponseWriter) {
+		rErr := err.(microserver.ResponseError)
+		uErr := rErr.Underlying()
+
+		rErr.SetCode(microserver.CodeInternalError)
+		rErr.SetMessage(uErr.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }

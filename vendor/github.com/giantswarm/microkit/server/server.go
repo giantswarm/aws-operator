@@ -3,6 +3,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -16,12 +17,13 @@ import (
 	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/spf13/viper"
 	"github.com/tylerb/graceful"
-	"golang.org/x/net/context"
 
 	microerror "github.com/giantswarm/microkit/error"
 	"github.com/giantswarm/microkit/logger"
 	micrologger "github.com/giantswarm/microkit/logger"
+	"github.com/giantswarm/microkit/tls"
 	"github.com/giantswarm/microkit/transaction"
 	microtransaction "github.com/giantswarm/microkit/transaction"
 	transactionid "github.com/giantswarm/microkit/transaction/context/id"
@@ -31,16 +33,47 @@ import (
 // Config represents the configuration used to create a new server object.
 type Config struct {
 	// Dependencies.
-	Endpoints            []Endpoint
-	ErrorEncoder         kithttp.ErrorEncoder
-	Logger               logger.Logger
-	RequestFuncs         []kithttp.RequestFunc
-	Router               *mux.Router
-	TransactionResponder transaction.Responder
+
+	// ErrorEncoder is the server's error encoder. This wraps the error encoder
+	// configured by the client. Clients should not implement error logging in
+	// here them self. This is done by the server itself. Clients must not
+	// implement error response writing them self. This is done by the server
+	// itself. Duplicated response writing will lead to runtime panics.
+	ErrorEncoder kithttp.ErrorEncoder
+	// Logger is the logger used to print log messages.
+	Logger micrologger.Logger
+	// Router is a HTTP handler for the server. The returned router will have all
+	// endpoints registered that are listed in the endpoint collection.
+	Router *mux.Router
+	// TransactionResponder is the responder used to reply to requests using
+	// persisted transaction results.
+	TransactionResponder microtransaction.Responder
 
 	// Settings.
+
+	// Endpoints is the server's configured list of endpoints. These are the
+	// custom endpoints configured by the client.
+	Endpoints []Endpoint
+	// HandlerWrapper is a wrapper provided to interact with the request on its
+	// roots.
+	HandlerWrapper func(h http.Handler) http.Handler
+	// ListenAddress is the address the server is listening on.
 	ListenAddress string
-	ServiceName   string
+	// RequestFuncs is the server's configured list of request functions. These
+	// are the custom request functions configured by the client.
+	RequestFuncs []kithttp.RequestFunc
+	// ServiceName is the name of the micro-service implementing the microkit
+	// server. This is used for logging and instrumentation.
+	ServiceName string
+	// TLSCAFile is the file path to the certificate root CA file, if any.
+	TLSCAFile string
+	// TLSKeyFilePath is the file path to the certificate public key file, if any.
+	TLSCrtFile string
+	// TLSKeyFilePath is the file path to the certificate private key file, if
+	// any.
+	TLSKeyFile string
+	// Viper is a configuration management object.
+	Viper *viper.Viper
 }
 
 // DefaultConfig provides a default configuration to create a new server object
@@ -68,33 +101,32 @@ func DefaultConfig() Config {
 
 	return Config{
 		// Dependencies.
-		Endpoints:            nil,
 		ErrorEncoder:         func(ctx context.Context, serverError error, w http.ResponseWriter) {},
 		Logger:               loggerService,
-		RequestFuncs:         []kithttp.RequestFunc{},
 		Router:               mux.NewRouter(),
 		TransactionResponder: responderService,
 
 		// Settings.
-		ListenAddress: "http://127.0.0.1:8000",
-		ServiceName:   "microkit",
+		Endpoints:      nil,
+		HandlerWrapper: func(h http.Handler) http.Handler { return h },
+		ListenAddress:  "http://127.0.0.1:8000",
+		RequestFuncs:   []kithttp.RequestFunc{},
+		ServiceName:    "microkit",
+		TLSCAFile:      "",
+		TLSCrtFile:     "",
+		TLSKeyFile:     "",
+		Viper:          viper.New(),
 	}
 }
 
 // New creates a new configured server object.
 func New(config Config) (Server, error) {
 	// Dependencies.
-	if config.Endpoints == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "endpoints must not be empty")
-	}
 	if config.ErrorEncoder == nil {
 		return nil, microerror.MaskAnyf(invalidConfigError, "error encoder must not be empty")
 	}
 	if config.Logger == nil {
 		return nil, microerror.MaskAnyf(invalidConfigError, "logger must not be empty")
-	}
-	if config.RequestFuncs == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "request funcs must not be empty")
 	}
 	if config.Router == nil {
 		return nil, microerror.MaskAnyf(invalidConfigError, "router must not be empty")
@@ -104,11 +136,26 @@ func New(config Config) (Server, error) {
 	}
 
 	// Settings.
+	if config.Endpoints == nil {
+		return nil, microerror.MaskAnyf(invalidConfigError, "endpoints must not be empty")
+	}
+	if config.HandlerWrapper == nil {
+		return nil, microerror.MaskAnyf(invalidConfigError, "handler wrapper must not be empty")
+	}
 	if config.ListenAddress == "" {
 		return nil, microerror.MaskAnyf(invalidConfigError, "listen address must not be empty")
 	}
+	if config.RequestFuncs == nil {
+		return nil, microerror.MaskAnyf(invalidConfigError, "request funcs must not be empty")
+	}
 	if config.ServiceName == "" {
 		return nil, microerror.MaskAnyf(invalidConfigError, "service name must not be empty")
+	}
+	if config.TLSCrtFile == "" && config.TLSKeyFile != "" {
+		return nil, microerror.MaskAnyf(invalidConfigError, "TLS public key must not be empty")
+	}
+	if config.TLSCrtFile != "" && config.TLSKeyFile == "" {
+		return nil, microerror.MaskAnyf(invalidConfigError, "TLS private key must not be empty")
 	}
 
 	listenURL, err := url.Parse(config.ListenAddress)
@@ -117,17 +164,29 @@ func New(config Config) (Server, error) {
 	}
 
 	newServer := &server{
-		bootOnce:             sync.Once{},
-		endpoints:            config.Endpoints,
+		// Dependencies.
 		errorEncoder:         config.ErrorEncoder,
-		httpServer:           nil,
-		listenURL:            listenURL,
 		logger:               config.Logger,
-		requestFuncs:         config.RequestFuncs,
 		router:               config.Router,
-		serviceName:          config.ServiceName,
-		shutdownOnce:         sync.Once{},
 		transactionResponder: config.TransactionResponder,
+
+		// Internals.
+		bootOnce:     sync.Once{},
+		config:       config,
+		httpServer:   nil,
+		listenURL:    listenURL,
+		shutdownOnce: sync.Once{},
+
+		// Settings.
+		endpoints:      config.Endpoints,
+		handlerWrapper: config.HandlerWrapper,
+		requestFuncs:   config.RequestFuncs,
+		serviceName:    config.ServiceName,
+		tlsCertFiles: tls.CertFiles{
+			RootCAs: []string{config.TLSCAFile},
+			Cert:    config.TLSCrtFile,
+			Key:     config.TLSKeyFile,
+		},
 	}
 
 	return newServer, nil
@@ -135,81 +194,103 @@ func New(config Config) (Server, error) {
 
 // server manages the transport logic and endpoint registration.
 type server struct {
-	bootOnce             sync.Once
-	endpoints            []Endpoint
+	// Dependencies.
 	errorEncoder         kithttp.ErrorEncoder
-	httpServer           *graceful.Server
-	listenURL            *url.URL
 	logger               logger.Logger
-	requestFuncs         []kithttp.RequestFunc
 	router               *mux.Router
-	serviceName          string
-	shutdownOnce         sync.Once
 	transactionResponder transaction.Responder
+
+	// Internals.
+	bootOnce     sync.Once
+	config       Config
+	httpServer   *graceful.Server
+	listenURL    *url.URL
+	shutdownOnce sync.Once
+
+	// Settings.
+	endpoints      []Endpoint
+	handlerWrapper func(h http.Handler) http.Handler
+	requestFuncs   []kithttp.RequestFunc
+	serviceName    string
+	tlsCertFiles   tls.CertFiles
 }
 
 func (s *server) Boot() {
 	s.bootOnce.Do(func() {
 		s.router.NotFoundHandler = s.newNotFoundHandler()
 
-		// Combine all options this server defines.
-		options := []kithttp.ServerOption{
-			kithttp.ServerBefore(s.RequestFuncs()...),
-			kithttp.ServerErrorEncoder(s.ErrorEncoder()),
-		}
-
 		// We go through all endpoints this server defines and register them to the
 		// router.
-		for _, e := range s.Endpoints() {
-			// Register all endpoints to the router depending on their HTTP methods and
-			// request paths. The registered http.Handler is instrumented using
-			// prometheus. We track counts of execution and duration it took to complete
-			// the http.Handler.
-			s.router.Methods(e.Method()).Path(e.Path()).Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				ctx, err := s.newRequestContext(w, r)
-				if err != nil {
-					s.ErrorEncoder()(ctx, err, w)
-					return
-				}
+		for _, e := range s.endpoints {
+			func(e Endpoint) {
+				// Register all endpoints to the router depending on their HTTP methods and
+				// request paths. The registered http.Handler is instrumented using
+				// prometheus. We track counts of execution and duration it took to complete
+				// the http.Handler.
+				s.router.Methods(e.Method()).Path(e.Path()).Handler(s.handlerWrapper(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					ctx, err := s.newRequestContext(w, r)
+					if err != nil {
+						s.newErrorEncoderWrapper()(ctx, err, w)
+						return
+					}
 
-				responseWriter, err := s.newResponseWriter(w, r)
-				if err != nil {
-					s.ErrorEncoder()(ctx, err, w)
-					return
-				}
+					responseWriter, err := s.newResponseWriter(w)
+					if err != nil {
+						s.newErrorEncoderWrapper()(ctx, err, w)
+						return
+					}
 
-				// Here we define the metrics labels. These will be used to instrument
-				// the current request. This defered callback is initialized with the
-				// timestamp of the beginning of the execution and will be executed at
-				// the very end of the request. When it is executed we know all
-				// necessary information to instrument the complete request, including
-				// its response status code.
-				defer func(t time.Time) {
-					endpointCode := strconv.Itoa(responseWriter.StatusCode())
-					endpointMethod := strings.ToLower(e.Method())
-					endpointName := strings.Replace(e.Name(), "/", "_", -1)
+					// Here we define the metrics labels. These will be used to instrument
+					// the current request. This defered callback is initialized with the
+					// timestamp of the beginning of the execution and will be executed at
+					// the very end of the request. When it is executed we know all
+					// necessary information to instrument the complete request, including
+					// its response status code.
+					defer func(t time.Time) {
+						endpointCode := strconv.Itoa(responseWriter.StatusCode())
+						endpointMethod := strings.ToLower(e.Method())
+						endpointName := strings.Replace(e.Name(), "/", "_", -1)
 
-					s.logger.Log("code", endpointCode, "endpoint", e.Name(), "method", endpointMethod, "path", r.URL.Path)
+						s.logger.Log("code", endpointCode, "endpoint", e.Name(), "method", endpointMethod, "path", r.URL.Path)
 
-					endpointTotal.WithLabelValues(endpointCode, endpointMethod, endpointName).Inc()
-					endpointTime.WithLabelValues(endpointCode, endpointMethod, endpointName).Set(float64(time.Since(t) / time.Millisecond))
-				}(time.Now())
+						endpointTotal.WithLabelValues(endpointCode, endpointMethod, endpointName).Inc()
+						endpointTime.WithLabelValues(endpointCode, endpointMethod, endpointName).Set(float64(time.Since(t) / time.Millisecond))
+					}(time.Now())
 
-				// Wrapp the custom implementations of the endpoint specific business
-				// logic.
-				wrappedDecoder := s.newDecoderWrapper(e, responseWriter)
-				wrappedEndpoint := s.newEndpointWrapper(e)
-				wrappedEncoder := s.newEncoderWrapper(e, responseWriter)
+					// Wrapp the custom implementations of the endpoint specific business
+					// logic.
+					wrappedDecoder := s.newDecoderWrapper(e, responseWriter)
+					wrappedEndpoint := s.newEndpointWrapper(e)
+					wrappedEncoder := s.newEncoderWrapper(e, responseWriter)
 
-				// Now we execute the actual go-kit endpoint handler.
-				kithttp.NewServer(
-					ctx,
-					wrappedEndpoint,
-					wrappedDecoder,
-					wrappedEncoder,
-					options...,
-				).ServeHTTP(responseWriter, r)
-			}))
+					// Combine all options this server defines. Since the interface of the
+					// go-kit server changed to not accept a context anymore we have to
+					// work around the context injection by injecting our context via the
+					// very first request function.
+					//
+					// NOTE this is rather an ugly hack and should be revisited. It would
+					// probably make sense to start decoupling from the go-kit code since
+					// there haven't been any benefits from its implementation, but only
+					// from its design ideas. Also note that some of the design ideas
+					// dictated by go-kit do not align with our own ideas and often stood
+					// in our way of making things work how they should be.
+					options := []kithttp.ServerOption{
+						kithttp.ServerBefore(func(context.Context, *http.Request) context.Context {
+							return ctx
+						}),
+						kithttp.ServerBefore(s.requestFuncs...),
+						kithttp.ServerErrorEncoder(s.newErrorEncoderWrapper()),
+					}
+
+					// Now we execute the actual go-kit endpoint handler.
+					kithttp.NewServer(
+						wrappedEndpoint,
+						wrappedDecoder,
+						wrappedEncoder,
+						options...,
+					).ServeHTTP(responseWriter, r)
+				})))
+			}(e)
 		}
 
 		// Register prometheus metrics endpoint.
@@ -227,19 +308,49 @@ func (s *server) Boot() {
 		}
 
 		go func() {
-			err := s.httpServer.ListenAndServe()
-			if err != nil {
-				panic(err)
+			if s.listenURL.Scheme == "https" {
+				tlsConfig, err := tls.LoadTLSConfig(s.tlsCertFiles)
+				if err != nil {
+					panic(err)
+				}
+				s.logger.Log("debug", "running HTTPS server with TLS config")
+				err = s.httpServer.ListenAndServeTLSConfig(tlsConfig)
+				if err != nil {
+					panic(err)
+				}
+			} else {
+				s.logger.Log("debug", "running HTTP server")
+				err := s.httpServer.ListenAndServe()
+				if err != nil {
+					panic(err)
+				}
 			}
 		}()
 	})
 }
 
-func (s *server) Endpoints() []Endpoint {
-	return s.endpoints
+func (s *server) Config() Config {
+	return s.config
 }
 
-func (s *server) ErrorEncoder() kithttp.ErrorEncoder {
+func (s *server) Shutdown() {
+	s.shutdownOnce.Do(func() {
+		var wg sync.WaitGroup
+
+		wg.Add(1)
+		go func() {
+			// Stop the HTTP server gracefully and wait some time for open connections
+			// to be closed. Then force it to be stopped.
+			s.httpServer.Stop(s.httpServer.Timeout)
+			<-s.httpServer.StopChan()
+			wg.Done()
+		}()
+
+		wg.Wait()
+	})
+}
+
+func (s *server) newErrorEncoderWrapper() kithttp.ErrorEncoder {
 	return func(ctx context.Context, serverError error, w http.ResponseWriter) {
 		var err error
 
@@ -264,69 +375,35 @@ func (s *server) ErrorEncoder() kithttp.ErrorEncoder {
 			}
 		}
 
+		rw, err := s.newResponseWriter(w)
+		if err != nil {
+			panic(err)
+		}
+
 		// Run the custom error encoder. This is used to let the implementing
 		// microservice do something with errors occured during runtime. Things like
-		// writing specific HTTP status codes to the given response writer can be
-		// done.
-		s.errorEncoder(ctx, responseError, w)
+		// writing specific HTTP status codes to the given response writer or
+		// writing data to the response body can be done.
+		s.errorEncoder(ctx, responseError, rw)
 
 		// Log the error and its errgo trace. This is really useful for debugging.
-		errDomain := errorDomain(serverError)
-		errMessage := errorMessage(serverError)
-		errTrace := errorTrace(serverError)
-		s.logger.Log("error", map[string]string{"domain": errDomain, "message": errMessage, "trace": errTrace})
+		s.logger.Log("error", serverError.Error(), "trace", errorTrace(serverError))
 
 		// Emit metrics about the occured errors. That way we can feed our
 		// instrumentation stack to have nice dashboards to get a picture about the
 		// general system health.
-		errorTotal.WithLabelValues(errDomain).Inc()
+		errorTotal.WithLabelValues().Inc()
 
-		// Write the actual response body.
-		json.NewEncoder(w).Encode(map[string]interface{}{
-			"code":  responseError.Code(),
-			"error": responseError.Message(),
-			"from":  s.ServiceName(),
-		})
+		// Write the actual response body in case no response was already written
+		// inside the error encoder.
+		if !rw.HasWritten() {
+			json.NewEncoder(rw).Encode(map[string]interface{}{
+				"code":  responseError.Code(),
+				"error": responseError.Message(),
+				"from":  s.serviceName,
+			})
+		}
 	}
-}
-
-func (s *server) Logger() micrologger.Logger {
-	return s.logger
-}
-
-func (s *server) RequestFuncs() []kithttp.RequestFunc {
-	return s.requestFuncs
-}
-
-// NewRouter returns a HTTP handler for the server. Here we register all
-// endpoints listed in the endpoint collection.
-func (s *server) Router() *mux.Router {
-	return s.router
-}
-
-func (s *server) ServiceName() string {
-	return s.serviceName
-}
-
-func (s *server) Shutdown() {
-	s.shutdownOnce.Do(func() {
-		var wg sync.WaitGroup
-
-		wg.Add(1)
-		go func() {
-			// Stop the HTTP server gracefully and wait some time for open connections
-			// to be closed. Then force it to be stopped.
-			s.httpServer.Stop(s.httpServer.Timeout)
-			<-s.httpServer.StopChan()
-			wg.Done()
-		}()
-
-		wg.Wait()
-	})
-}
-
-func (s *server) TransactionResponder() microtransaction.Responder {
-	return s.transactionResponder
 }
 
 // newDecoderWrapper creates a new wrappeed endpoint decoder. E.g. here we wrap
@@ -447,10 +524,8 @@ func (s *server) newEndpointWrapper(e Endpoint) kitendpoint.Endpoint {
 func (s *server) newNotFoundHandler() http.Handler {
 	return http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Log the error and its message. This is really useful for debugging.
-		errDomain := errorDomain(nil)
 		errMessage := fmt.Sprintf("not found: %s %s", r.Method, r.URL.Path)
-		errTrace := ""
-		s.logger.Log("error", map[string]string{"domain": errDomain, "message": errMessage, "trace": errTrace})
+		s.logger.Log("error", errMessage, "trace", "")
 
 		// This defered callback will be executed at the very end of the request.
 		defer func(t time.Time) {
@@ -461,7 +536,7 @@ func (s *server) newNotFoundHandler() http.Handler {
 			endpointTotal.WithLabelValues(endpointCode, endpointMethod, endpointName).Inc()
 			endpointTime.WithLabelValues(endpointCode, endpointMethod, endpointName).Set(float64(time.Since(t) / time.Millisecond))
 
-			errorTotal.WithLabelValues(errDomain).Inc()
+			errorTotal.WithLabelValues().Inc()
 		}(time.Now())
 
 		// Write the actual response body.
@@ -470,13 +545,13 @@ func (s *server) newNotFoundHandler() http.Handler {
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"code":  CodeResourceNotFound,
 			"error": errMessage,
-			"from":  s.ServiceName(),
+			"from":  s.serviceName,
 		})
 	}))
 }
 
 // newRequestContext creates a new request context and enriches it with request
-// relevant information. E.g. here we put the HTTP X-Transaction-ID header into
+// relevant information. E.g. here we put the HTTP X-Idempotency-Key header into
 // the request context, if any. We also check if there is a transaction response
 // already tracked for the given transaction ID. This information is then stored
 // within the given request context as well. Note that we initialize the
@@ -511,7 +586,7 @@ func (s *server) newRequestContext(w http.ResponseWriter, r *http.Request) (cont
 // inject it into the called http.Handler so it can track the status code we are
 // interested in. It will help us gathering the response status code after it
 // was written by the underlying http.ResponseWriter.
-func (s *server) newResponseWriter(w http.ResponseWriter, r *http.Request) (ResponseWriter, error) {
+func (s *server) newResponseWriter(w http.ResponseWriter) (ResponseWriter, error) {
 	responseConfig := DefaultResponseWriterConfig()
 	responseConfig.ResponseWriter = w
 	responseWriter, err := NewResponseWriter(responseConfig)

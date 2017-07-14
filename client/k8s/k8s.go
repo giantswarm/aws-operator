@@ -18,7 +18,6 @@ type Config struct {
 	Username    string
 	Password    string
 	BearerToken string
-	Insecure    bool
 	TLSClientConfig
 	inClusterConfigProvider func() (*rest.Config, error)
 }
@@ -44,7 +43,6 @@ func newRawClientConfig(config Config) *rest.Config {
 		Username:        config.Username,
 		Password:        config.Password,
 		BearerToken:     config.BearerToken,
-		Insecure:        config.Insecure,
 		TLSClientConfig: tlsClientConfig,
 	}
 

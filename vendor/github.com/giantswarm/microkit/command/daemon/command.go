@@ -7,17 +7,27 @@ import (
 	"sync"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
+	"github.com/giantswarm/microkit/command/daemon/flag"
 	microerror "github.com/giantswarm/microkit/error"
+	microflag "github.com/giantswarm/microkit/flag"
 	"github.com/giantswarm/microkit/logger"
 	"github.com/giantswarm/microkit/server"
+)
+
+var (
+	f = flag.New()
 )
 
 // Config represents the configuration used to create a new daemon command.
 type Config struct {
 	// Dependencies.
 	Logger        logger.Logger
-	ServerFactory func() server.Server
+	ServerFactory ServerFactory
+
+	// Settings.
+	Viper *viper.Viper
 }
 
 // DefaultConfig provides a default configuration to create a new daemon command
@@ -27,6 +37,9 @@ func DefaultConfig() Config {
 		// Dependencies.
 		Logger:        nil,
 		ServerFactory: nil,
+
+		// Settings.
+		Viper: viper.New(),
 	}
 }
 
@@ -39,12 +52,20 @@ func New(config Config) (Command, error) {
 	if config.ServerFactory == nil {
 		return nil, microerror.MaskAnyf(invalidConfigError, "server factory must not be empty")
 	}
+	if config.Viper == nil {
+		return nil, microerror.MaskAnyf(invalidConfigError, "viper must not be empty")
+	}
 
 	newCommand := &command{
-		// Internals.
-		cobraCommand:  nil,
+		// Dependencies.
 		logger:        config.Logger,
 		serverFactory: config.ServerFactory,
+
+		// Internals.
+		cobraCommand: nil,
+
+		// Settings.
+		viper: config.Viper,
 	}
 
 	newCommand.cobraCommand = &cobra.Command{
@@ -54,19 +75,27 @@ func New(config Config) (Command, error) {
 		Run:   newCommand.Execute,
 	}
 
-	newCommand.cobraCommand.PersistentFlags().StringSliceVar(&Flags.Config.Dirs, "config.dirs", []string{"."}, "List of config file directories.")
-	newCommand.cobraCommand.PersistentFlags().StringSliceVar(&Flags.Config.Files, "config.files", []string{"config"}, "List of the config file names. All viper supported extensions can be used.")
+	newCommand.cobraCommand.PersistentFlags().StringSlice(f.Config.Dirs, []string{"."}, "List of config file directories.")
+	newCommand.cobraCommand.PersistentFlags().StringSlice(f.Config.Files, []string{"config"}, "List of the config file names. All viper supported extensions can be used.")
 
-	newCommand.cobraCommand.PersistentFlags().StringVar(&Flags.Server.Listen.Address, "server.listen.address", "http://127.0.0.1:8000", "Address used to make the server listen to.")
+	newCommand.cobraCommand.PersistentFlags().String(f.Server.Listen.Address, "http://127.0.0.1:8000", "Address used to make the server listen to.")
+	newCommand.cobraCommand.PersistentFlags().String(f.Server.TLS.CaFile, "", "File path of the TLS root CA file, if any.")
+	newCommand.cobraCommand.PersistentFlags().String(f.Server.TLS.CrtFile, "", "File path of the TLS public key file, if any.")
+	newCommand.cobraCommand.PersistentFlags().String(f.Server.TLS.KeyFile, "", "File path of the TLS private key file, if any.")
 
 	return newCommand, nil
 }
 
 type command struct {
-	// Internals.
-	cobraCommand  *cobra.Command
+	// Dependencies.
 	logger        logger.Logger
-	serverFactory func() server.Server
+	serverFactory ServerFactory
+
+	// Internals.
+	cobraCommand *cobra.Command
+
+	// Settings.
+	viper *viper.Viper
 }
 
 func (c *command) CobraCommand() *cobra.Command {
@@ -74,29 +103,26 @@ func (c *command) CobraCommand() *cobra.Command {
 }
 
 func (c *command) Execute(cmd *cobra.Command, args []string) {
+	// We have to parse the flags given via command line first. Only that way we
+	// are able to use the flag configuration for the location of configuration
+	// directories and files in the next step below.
+	microflag.Parse(c.viper, cmd.Flags())
+
 	// Merge the given command line flags with the given environment variables and
-	// the given config file, if any. The merged flags will be applied to the
-	// global Flags struct.
-	err := MergeFlags(cmd.Flags())
+	// the given config files, if any. The merged flags will be applied to the
+	// given viper.
+	err := microflag.Merge(c.viper, cmd.Flags(), c.viper.GetStringSlice(f.Config.Dirs), c.viper.GetStringSlice(f.Config.Files))
 	if err != nil {
 		panic(err)
 	}
 
-	customServer := c.serverFactory()
-
 	var newServer server.Server
 	{
-		serverConfig := server.DefaultConfig()
-
-		serverConfig.Endpoints = customServer.Endpoints()
-		serverConfig.ErrorEncoder = customServer.ErrorEncoder()
-		serverConfig.ListenAddress = Flags.Server.Listen.Address
-		serverConfig.Logger = customServer.Logger()
-		serverConfig.RequestFuncs = customServer.RequestFuncs()
-		serverConfig.Router = customServer.Router()
-		serverConfig.ServiceName = customServer.ServiceName()
-		serverConfig.TransactionResponder = customServer.TransactionResponder()
-
+		serverConfig := c.serverFactory(c.viper).Config()
+		serverConfig.ListenAddress = c.viper.GetString(f.Server.Listen.Address)
+		serverConfig.TLSCAFile = c.viper.GetString(f.Server.TLS.CaFile)
+		serverConfig.TLSCrtFile = c.viper.GetString(f.Server.TLS.CrtFile)
+		serverConfig.TLSKeyFile = c.viper.GetString(f.Server.TLS.KeyFile)
 		newServer, err = server.New(serverConfig)
 		if err != nil {
 			panic(err)
