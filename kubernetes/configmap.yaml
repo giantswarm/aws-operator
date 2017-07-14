@@ -4,7 +4,7 @@ metadata:
   name: aws-operator-configmap
   namespace: giantswarm
 data:
-  config.yml: |
+  config.yaml: |
     kubernetes:
       incluster: true
     server:
