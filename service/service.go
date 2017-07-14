@@ -3,7 +3,6 @@
 package service
 
 import (
-	"flag"
 	"fmt"
 	"sync"
 
@@ -13,7 +12,10 @@ import (
 	"github.com/spf13/viper"
 	"k8s.io/client-go/kubernetes"
 
+	awsclient "github.com/giantswarm/aws-operator/client/aws"
+	k8sclient "github.com/giantswarm/aws-operator/client/k8s"
 	k8sutil "github.com/giantswarm/aws-operator/client/k8s"
+	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/aws-operator/service/create"
 	"github.com/giantswarm/aws-operator/service/version"
 )
@@ -68,7 +70,20 @@ func New(config Config) (*Service, error) {
 	// TODO this should come from operatorkit
 	var k8sClient kubernetes.Interface
 	{
-		k8sClient, err = k8sutil.NewClient(config.K8sConfig)
+		k8sConfig := k8sclient.Config{
+			InCluster:   config.Viper.GetBool(config.Flag.Service.Kubernetes.InCluster),
+			Host:        config.Viper.GetString(config.Flag.Service.Kubernetes.Address),
+			Username:    config.Viper.GetString(config.Flag.Service.Kubernetes.Username),
+			Password:    config.Viper.GetString(config.Flag.Service.Kubernetes.Password),
+			BearerToken: config.Viper.GetString(config.Flag.Service.Kubernetes.BearerToken),
+			TLSClientConfig: k8sclient.TLSClientConfig{
+				CAFile:   config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CAFile),
+				CertFile: config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CrtFile),
+				KeyFile:  config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.KeyFile),
+			},
+		}
+
+		k8sClient, err = k8sutil.NewClient(k8sConfig)
 		if err != nil {
 			return nil, microerror.MaskAny(err)
 		}
@@ -89,11 +104,14 @@ func New(config Config) (*Service, error) {
 	{
 		createConfig := create.DefaultConfig()
 
-		createConfig.AwsConfig = config.AwsConfig
+		createConfig.AwsConfig = awsclient.Config{
+			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
+			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
+		}
 		createConfig.CertWatcher = certWatcher
 		createConfig.K8sClient = k8sClient
 		createConfig.Logger = config.Logger
-		createConfig.PubKeyFile = config.PubKeyFile
+		createConfig.PubKeyFile = config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile)
 
 		createService, err = create.New(createConfig)
 		if err != nil {

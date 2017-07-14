@@ -5,10 +5,11 @@ import (
 	microerror "github.com/giantswarm/microkit/error"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/pkg/api/v1"
 )
 
 func (s *Service) createClusterNamespace(cluster clustertpr.Cluster) error {
-	namespace := apismetav1.Namespace{
+	namespace := v1.Namespace{
 		TypeMeta: apismetav1.TypeMeta{
 			Kind:       "Namespace",
 			APIVersion: "v1",

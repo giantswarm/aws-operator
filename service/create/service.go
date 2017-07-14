@@ -98,6 +98,25 @@ func New(config Config) (*Service, error) {
 		return nil, microerror.MaskAnyf(invalidConfigError, "config.PubKeyFile must not be empty")
 	}
 
+	var err error
+
+	var newTPR *tpr.TPR
+	{
+		tprConfig := tpr.DefaultConfig()
+
+		tprConfig.K8sClient = config.K8sClient
+		tprConfig.Logger = config.Logger
+
+		tprConfig.Description = awstpr.Description
+		tprConfig.Name = awstpr.Name
+		tprConfig.Version = awstpr.VersionV1
+
+		newTPR, err = tpr.New(tprConfig)
+		if err != nil {
+			return nil, microerror.MaskAny(err)
+		}
+	}
+
 	newService := &Service{
 		// Dependencies.
 		certWatcher: config.CertWatcher,
@@ -106,6 +125,7 @@ func New(config Config) (*Service, error) {
 
 		// Internals
 		bootOnce: sync.Once{},
+		tpr:      newTPR,
 
 		// Settings.
 		awsConfig:  config.AwsConfig,
@@ -124,6 +144,7 @@ type Service struct {
 
 	// Internals.
 	bootOnce sync.Once
+	tpr      *tpr.TPR
 
 	// Settings.
 	awsConfig  awsutil.Config
@@ -139,13 +160,13 @@ func (s *Service) Boot() {
 	s.bootOnce.Do(func() {
 		err := s.tpr.CreateAndWait()
 		if tpr.IsAlreadyExists(err) {
-			s.Logger.Log("debug", "third party resource already exists")
+			s.logger.Log("debug", "third party resource already exists")
 		} else if err != nil {
-			s.Logger.Log("error", fmt.Sprintf("%#v", err))
+			s.logger.Log("error", fmt.Sprintf("%#v", err))
 			return
 		}
 
-		s.Logger.Log("debug", "starting list/watch")
+		s.logger.Log("debug", "starting list/watch")
 
 		newResourceEventHandler := &cache.ResourceEventHandlerFuncs{
 			AddFunc:    s.addFunc,

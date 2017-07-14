@@ -7,7 +7,6 @@ import (
 type Kubernetes struct {
 	Address     string
 	InCluster   string
-	Insecure    string
 	Password    string
 	TLS         tls.TLS
 	BearerToken string
