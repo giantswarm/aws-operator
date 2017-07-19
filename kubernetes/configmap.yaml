@@ -4,7 +4,7 @@ metadata:
   name: aws-operator-configmap
   namespace: giantswarm
 data:
-  config.yml: |
+  config.yaml: |
     server:
       listen:
         address: 'http://0.0.0.0:8000'

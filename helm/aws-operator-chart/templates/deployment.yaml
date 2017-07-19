@@ -19,14 +19,14 @@ spec:
         configMap:
           name: aws-operator-configmap
           items:
-          - key: config.yml
-            path: config.yml
+          - key: config.yaml
+            path: config.yaml
       - name: aws-operator-secret
         secret:
           secretName: aws-operator-secret
           items:
-          - key: secret.yml
-            path: secret.yml
+          - key: secret.yaml
+            path: secret.yaml
       - name: certs
         hostPath:
           path: /etc/ssl/certs/ca-certificates.crt
@@ -80,4 +80,4 @@ spec:
             cpu: 250m
             memory: 250Mi
       imagePullSecrets:
-      - name: giantswarm-registry
+      - name: aws-operator-pull-secret
