@@ -39,7 +39,7 @@ spec:
             path: id_rsa.pub
       containers:
       - name: aws-operator
-        image: quay.io/giantswarm/aws-operator:{{ .SHA }}
+        image: quay.io/giantswarm/aws-operator:[[ .SHA ]]
         volumeMounts:
         - name: aws-operator-configmap
           mountPath: /var/run/aws-operator/configmap/
