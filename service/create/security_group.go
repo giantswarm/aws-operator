@@ -100,7 +100,12 @@ func (ri rulesInput) masterRules() []awsresources.SecurityGroupRule {
 			Protocol:   tcpProtocol,
 			SourceCIDR: defaultCIDR,
 		},
-		// Allow all traffic from the worker nodes for Calico.
+		// Allow all traffic between the masters and worker nodes for Calico.
+		{
+			Port:            allowAllPorts,
+			Protocol:        allowAllProtocols,
+			SecurityGroupID: ri.MastersSecurityGroupID,
+		},
 		{
 			Port:            allowAllPorts,
 			Protocol:        allowAllProtocols,
@@ -142,11 +147,16 @@ func (ri rulesInput) workerRules() []awsresources.SecurityGroupRule {
 			Protocol:   tcpProtocol,
 			SourceCIDR: defaultCIDR,
 		},
-		// Allow all traffic from the master nodes for Calico.
+		// Allow all traffic between the masters and worker nodes for Calico.
 		{
 			Port:            allowAllPorts,
 			Protocol:        allowAllProtocols,
 			SecurityGroupID: ri.MastersSecurityGroupID,
+		},
+		{
+			Port:            allowAllPorts,
+			Protocol:        allowAllProtocols,
+			SecurityGroupID: ri.WorkersSecurityGroupID,
 		},
 	}
 }
