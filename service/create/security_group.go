@@ -149,13 +149,13 @@ func (ri rulesInput) workerRules() []awsresources.SecurityGroupRule {
 		},
 		// Allow all traffic between the masters and worker nodes for Calico.
 		{
-			Port:            allowAllPorts,
-			Protocol:        allowAllProtocols,
+			Port:            allPorts,
+			Protocol:        allProtocols,
 			SecurityGroupID: ri.MastersSecurityGroupID,
 		},
 		{
-			Port:            allowAllPorts,
-			Protocol:        allowAllProtocols,
+			Port:            allPorts,
+			Protocol:        allProtocols,
 			SecurityGroupID: ri.WorkersSecurityGroupID,
 		},
 	}
