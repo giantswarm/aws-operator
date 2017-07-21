@@ -9,6 +9,7 @@ import (
 	microerror "github.com/giantswarm/microkit/error"
 )
 
+// SecurityGroup is an AWS security group.
 type SecurityGroup struct {
 	Description string
 	GroupName   string
@@ -20,7 +21,10 @@ type SecurityGroup struct {
 
 // SecurityGroupRule is an AWS security group rule.
 type SecurityGroupRule struct {
+	// Port is the port to open.
 	Port int
+	// Protocol is the IP protocol.
+	Protocol string
 	// SourceCIDR is the CIDR of the source.
 	SourceCIDR string
 	// SecurityGroupID is the ID of the source Security Group.
@@ -57,6 +61,7 @@ func (s SecurityGroup) findExisting() (*ec2.SecurityGroup, error) {
 	return securityGroups.SecurityGroups[0], nil
 }
 
+// CreateIfNotExists creates the security group if it does not exist.
 func (s *SecurityGroup) CreateIfNotExists() (bool, error) {
 	if err := s.CreateOrFail(); err != nil {
 		if strings.Contains(err.Error(), awsclient.SecurityGroupDuplicate) {
@@ -88,7 +93,7 @@ func (s *SecurityGroup) createRule(rule SecurityGroupRule) error {
 		params = &ec2.AuthorizeSecurityGroupIngressInput{
 			CidrIp:     aws.String(rule.SourceCIDR),
 			GroupId:    aws.String(groupID),
-			IpProtocol: aws.String("tcp"),
+			IpProtocol: aws.String(rule.Protocol),
 			FromPort:   aws.Int64(int64(rule.Port)),
 			ToPort:     aws.Int64(int64(rule.Port)),
 		}
@@ -99,7 +104,7 @@ func (s *SecurityGroup) createRule(rule SecurityGroupRule) error {
 				{
 					FromPort:   aws.Int64(int64(rule.Port)),
 					ToPort:     aws.Int64(int64(rule.Port)),
-					IpProtocol: aws.String("tcp"),
+					IpProtocol: aws.String(rule.Protocol),
 					UserIdGroupPairs: []*ec2.UserIdGroupPair{
 						{
 							GroupId: aws.String(rule.SecurityGroupID),
@@ -117,6 +122,7 @@ func (s *SecurityGroup) createRule(rule SecurityGroupRule) error {
 	return nil
 }
 
+// CreateOrFail creates the security group or returns an error.
 func (s *SecurityGroup) CreateOrFail() error {
 	securityGroup, err := s.Clients.EC2.CreateSecurityGroup(&ec2.CreateSecurityGroupInput{
 		Description: aws.String(s.Description),
@@ -134,6 +140,7 @@ func (s *SecurityGroup) CreateOrFail() error {
 	return nil
 }
 
+// ApplyRules creates the security group rules.
 func (s SecurityGroup) ApplyRules(rules []SecurityGroupRule) error {
 	for _, rule := range rules {
 		if err := s.createRule(rule); err != nil {
@@ -144,12 +151,14 @@ func (s SecurityGroup) ApplyRules(rules []SecurityGroupRule) error {
 	return nil
 }
 
+// Delete deletes the security group. A security group cannot be deleted if it
+// references another securty group. So first we delete any rules referencing
+// other groups.
 func (s *SecurityGroup) Delete() error {
 	securityGroup, err := s.findExisting()
 	if err != nil {
 		return microerror.MaskAny(err)
 	}
-
 	if _, err := s.Clients.EC2.DeleteSecurityGroup(&ec2.DeleteSecurityGroupInput{
 		GroupId: securityGroup.GroupId,
 	}); err != nil {
@@ -159,6 +168,7 @@ func (s *SecurityGroup) Delete() error {
 	return nil
 }
 
+// GetID gets the AWS security group ID.
 func (s SecurityGroup) GetID() (string, error) {
 	if s.id != "" {
 		return s.id, nil
