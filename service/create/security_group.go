@@ -26,7 +26,7 @@ type rulesInput struct {
 }
 
 const (
-	allowAllPorts        = -1
+	allPorts             = -1
 	calicoBGPNetworkPort = 179
 	httpPort             = 80
 	httpsPort            = 443
@@ -35,8 +35,8 @@ const (
 	readOnlyKubeletPort = 10255
 	sshPort             = 22
 
-	allowAllProtocols = "-1"
-	tcpProtocol       = "tcp"
+	allProtocols = "-1"
+	tcpProtocol  = "tcp"
 
 	defaultCIDR = "0.0.0.0/0"
 )
@@ -102,13 +102,13 @@ func (ri rulesInput) masterRules() []awsresources.SecurityGroupRule {
 		},
 		// Allow all traffic between the masters and worker nodes for Calico.
 		{
-			Port:            allowAllPorts,
-			Protocol:        allowAllProtocols,
+			Port:            allPorts,
+			Protocol:        allProtocols,
 			SecurityGroupID: ri.MastersSecurityGroupID,
 		},
 		{
-			Port:            allowAllPorts,
-			Protocol:        allowAllProtocols,
+			Port:            allPorts,
+			Protocol:        allProtocols,
 			SecurityGroupID: ri.WorkersSecurityGroupID,
 		},
 	}
