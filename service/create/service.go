@@ -1182,6 +1182,32 @@ func (s *Service) deleteFunc(obj interface{}) {
 		s.logger.Log("info", "deleted public subnet")
 	}
 
+	// Before the security groups can be deleted any rules referencing other
+	// groups must first be deleted.
+	mastersSGRulesInput := securityGroupRulesInput{
+		Clients:   clients,
+		GroupName: securityGroupName(cluster.Name, prefixMaster),
+	}
+	if err := s.deleteSecurityGroupRules(mastersSGRulesInput); err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': %s", mastersSGRulesInput.GroupName, errgo.Details(err)))
+	}
+
+	workersSGRulesInput := securityGroupRulesInput{
+		Clients:   clients,
+		GroupName: securityGroupName(cluster.Name, prefixWorker),
+	}
+	if err := s.deleteSecurityGroupRules(workersSGRulesInput); err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': %s", mastersSGRulesInput.GroupName, errgo.Details(err)))
+	}
+
+	ingressSGRulesInput := securityGroupRulesInput{
+		Clients:   clients,
+		GroupName: securityGroupName(cluster.Name, prefixIngress),
+	}
+	if err := s.deleteSecurityGroupRules(ingressSGRulesInput); err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': %s", mastersSGRulesInput.GroupName, errgo.Details(err)))
+	}
+
 	// Delete masters security group.
 	mastersSGInput := securityGroupInput{
 		Clients:   clients,
