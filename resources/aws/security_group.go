@@ -122,48 +122,6 @@ func (s *SecurityGroup) createRule(rule SecurityGroupRule) error {
 	return nil
 }
 
-// deleteRule creates a security group rule.
-// SourceCIDR always takes precedence over SecurityGroupID.
-func (s *SecurityGroup) deleteRule(rule SecurityGroupRule) error {
-	groupID, err := s.GetID()
-	if err != nil {
-		return microerror.MaskAny(err)
-	}
-
-	var params *ec2.RevokeSecurityGroupEgressInput
-	if rule.SourceCIDR != "" {
-		params = &ec2.RevokeSecurityGroupEgressInput{
-			CidrIp:     aws.String(rule.SourceCIDR),
-			GroupId:    aws.String(groupID),
-			IpProtocol: aws.String(rule.Protocol),
-			FromPort:   aws.Int64(int64(rule.Port)),
-			ToPort:     aws.Int64(int64(rule.Port)),
-		}
-	} else {
-		params = &ec2.RevokeSecurityGroupEgressInput{
-			GroupId: aws.String(groupID),
-			IpPermissions: []*ec2.IpPermission{
-				&ec2.IpPermission{
-					FromPort:   aws.Int64(int64(rule.Port)),
-					ToPort:     aws.Int64(int64(rule.Port)),
-					IpProtocol: aws.String(rule.Protocol),
-					UserIdGroupPairs: []*ec2.UserIdGroupPair{
-						{
-							GroupId: aws.String(rule.SecurityGroupID),
-						},
-					},
-				},
-			},
-		}
-	}
-
-	if _, err := s.Clients.EC2.RevokeSecurityGroupEgress(params); err != nil {
-		return microerror.MaskAny(err)
-	}
-
-	return nil
-}
-
 // CreateOrFail creates the security group or returns an error.
 func (s *SecurityGroup) CreateOrFail() error {
 	securityGroup, err := s.Clients.EC2.CreateSecurityGroup(&ec2.CreateSecurityGroupInput{
@@ -201,24 +159,6 @@ func (s *SecurityGroup) Delete() error {
 	if err != nil {
 		return microerror.MaskAny(err)
 	}
-
-	for _, ipPermission := range securityGroup.IpPermissions {
-		// Rule references a security group not a CIDR so it must be deleted.
-		if len(ipPermission.UserIdGroupPairs) > 0 {
-			for _, userIDGroupPair := range ipPermission.UserIdGroupPairs {
-				rule := SecurityGroupRule{
-					Port:            int(*ipPermission.FromPort),
-					Protocol:        *ipPermission.IpProtocol,
-					SecurityGroupID: *userIDGroupPair.GroupId,
-				}
-
-				if err := s.deleteRule(rule); err != nil {
-					return microerror.MaskAny(err)
-				}
-			}
-		}
-	}
-
 	if _, err := s.Clients.EC2.DeleteSecurityGroup(&ec2.DeleteSecurityGroupInput{
 		GroupId: securityGroup.GroupId,
 	}); err != nil {
