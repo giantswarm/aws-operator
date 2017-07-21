@@ -32,3 +32,7 @@ type DNSNamedResource interface {
 	HostedZoneID() string
 	Resource
 }
+
+type DeletableResource interface {
+	Delete() error
+}
