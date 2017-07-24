@@ -911,12 +911,17 @@ func (s *Service) addFunc(obj interface{}) {
 		HealthCheckGracePeriod:  gracePeriodSeconds,
 	}
 
-	if err := asg.CreateOrFail(); err != nil {
+	asgCreated, err := asg.CreateIfNotExists()
+	if err != nil {
 		s.logger.Log("error", errgo.Details(err))
 		return
 	}
 
-	s.logger.Log("info", fmt.Sprintf("created workers auto scaling group with size %v", asgSize))
+	if asgCreated {
+		s.logger.Log("info", fmt.Sprintf("created auto scaling group '%s' with size %v", asg.Name, asgSize))
+	} else {
+		s.logger.Log("info", fmt.Sprintf("auto scaling group '%s' already exists, reusing", asg.Name))
+	}
 
 	// Create Record Sets for the Load Balancers.
 	recordSetInputs := []recordSetInput{
