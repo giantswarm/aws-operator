@@ -1,6 +1,7 @@
 package aws
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -61,6 +62,94 @@ func (s SecurityGroup) findExisting() (*ec2.SecurityGroup, error) {
 	return securityGroups.SecurityGroups[0], nil
 }
 
+// findGroupWithRule checks if a security group exists with the specified name,
+// description and rule. SourceCIDR always takes precedence over SecurityGroupID.
+func (s SecurityGroup) findGroupWithRule(rule SecurityGroupRule) (*ec2.SecurityGroup, error) {
+	var filters []*ec2.Filter
+	if rule.SourceCIDR != "" {
+		filters = []*ec2.Filter{
+			&ec2.Filter{
+				Name: aws.String(subnetDescription),
+				Values: []*string{
+					aws.String(s.Description),
+				},
+			},
+			&ec2.Filter{
+				Name: aws.String(subnetGroupName),
+				Values: []*string{
+					aws.String(s.GroupName),
+				},
+			},
+			&ec2.Filter{
+				Name: aws.String(ipPermissionCIDR),
+				Values: []*string{
+					aws.String(rule.SourceCIDR),
+				},
+			},
+			&ec2.Filter{
+				Name: aws.String(ipPermissionFromPort),
+				Values: []*string{
+					aws.String(strconv.Itoa(rule.Port)),
+				},
+			},
+			&ec2.Filter{
+				Name: aws.String(ipPermissionProtocol),
+				Values: []*string{
+					aws.String(rule.Protocol),
+				},
+			},
+			&ec2.Filter{
+				Name: aws.String(ipPermissionToPort),
+				Values: []*string{
+					aws.String(strconv.Itoa(rule.Port)),
+				},
+			},
+		}
+	} else {
+		filters = []*ec2.Filter{
+			&ec2.Filter{
+				Name: aws.String(subnetDescription),
+				Values: []*string{
+					aws.String(s.Description),
+				},
+			},
+			&ec2.Filter{
+				Name: aws.String(subnetGroupName),
+				Values: []*string{
+					aws.String(s.GroupName),
+				},
+			},
+			&ec2.Filter{
+				Name: aws.String(ipPermissionGroupID),
+				Values: []*string{
+					aws.String(rule.SecurityGroupID),
+				},
+			},
+			&ec2.Filter{
+				Name: aws.String(ipPermissionProtocol),
+				Values: []*string{
+					aws.String(rule.Protocol),
+				},
+			},
+		}
+	}
+
+	securityGroups, err := s.Clients.EC2.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
+		Filters: filters,
+	})
+	if err != nil {
+		return nil, microerror.MaskAny(err)
+	}
+
+	if len(securityGroups.SecurityGroups) < 1 {
+		return nil, nil
+	} else if len(securityGroups.SecurityGroups) > 1 {
+		return nil, microerror.MaskAny(tooManyResultsError)
+	}
+
+	return securityGroups.SecurityGroups[0], nil
+}
+
 // CreateIfNotExists creates the security group if it does not exist.
 func (s *SecurityGroup) CreateIfNotExists() (bool, error) {
 	if err := s.CreateOrFail(); err != nil {
@@ -82,10 +171,18 @@ func (s *SecurityGroup) CreateIfNotExists() (bool, error) {
 
 // createRule creates a security group rule.
 // SourceCIDR always takes precedence over SecurityGroupID.
-func (s *SecurityGroup) createRule(rule SecurityGroupRule) error {
+func (s *SecurityGroup) createRuleIfNotExists(rule SecurityGroupRule) (bool, error) {
 	groupID, err := s.GetID()
 	if err != nil {
-		return microerror.MaskAny(err)
+		return false, microerror.MaskAny(err)
+	}
+
+	existingGroup, err := s.findGroupWithRule(rule)
+	if err != nil {
+		return false, microerror.MaskAny(err)
+	}
+	if existingGroup != nil {
+		return true, nil
 	}
 
 	var params *ec2.AuthorizeSecurityGroupIngressInput
@@ -116,10 +213,10 @@ func (s *SecurityGroup) createRule(rule SecurityGroupRule) error {
 	}
 
 	if _, err := s.Clients.EC2.AuthorizeSecurityGroupIngress(params); err != nil {
-		return microerror.MaskAny(err)
+		return false, microerror.MaskAny(err)
 	}
 
-	return nil
+	return true, nil
 }
 
 // CreateOrFail creates the security group or returns an error.
@@ -143,7 +240,7 @@ func (s *SecurityGroup) CreateOrFail() error {
 // ApplyRules creates the security group rules.
 func (s SecurityGroup) ApplyRules(rules []SecurityGroupRule) error {
 	for _, rule := range rules {
-		if err := s.createRule(rule); err != nil {
+		if _, err := s.createRuleIfNotExists(rule); err != nil {
 			return microerror.MaskAny(err)
 		}
 	}
