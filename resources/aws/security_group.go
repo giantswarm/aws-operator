@@ -33,21 +33,13 @@ type SecurityGroupRule struct {
 }
 
 func (s SecurityGroup) findExisting() (*ec2.SecurityGroup, error) {
+	filters, err := s.getGroupFilters()
+	if err != nil {
+		return nil, microerror.MaskAny(err)
+	}
+
 	securityGroups, err := s.Clients.EC2.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
-		Filters: []*ec2.Filter{
-			&ec2.Filter{
-				Name: aws.String(subnetDescription),
-				Values: []*string{
-					aws.String(s.Description),
-				},
-			},
-			&ec2.Filter{
-				Name: aws.String(subnetGroupName),
-				Values: []*string{
-					aws.String(s.GroupName),
-				},
-			},
-		},
+		Filters: filters,
 	})
 	if err != nil {
 		return nil, microerror.MaskAny(err)
@@ -65,21 +57,15 @@ func (s SecurityGroup) findExisting() (*ec2.SecurityGroup, error) {
 // findGroupWithRule checks if a security group exists with the specified name,
 // description and rule. SourceCIDR always takes precedence over SecurityGroupID.
 func (s SecurityGroup) findGroupWithRule(rule SecurityGroupRule) (*ec2.SecurityGroup, error) {
-	var filters []*ec2.Filter
+	filters, err := s.getGroupFilters()
+	if err != nil {
+		return nil, microerror.MaskAny(err)
+	}
+
+	var ruleFilters []*ec2.Filter
+
 	if rule.SourceCIDR != "" {
-		filters = []*ec2.Filter{
-			&ec2.Filter{
-				Name: aws.String(subnetDescription),
-				Values: []*string{
-					aws.String(s.Description),
-				},
-			},
-			&ec2.Filter{
-				Name: aws.String(subnetGroupName),
-				Values: []*string{
-					aws.String(s.GroupName),
-				},
-			},
+		ruleFilters = []*ec2.Filter{
 			&ec2.Filter{
 				Name: aws.String(ipPermissionCIDR),
 				Values: []*string{
@@ -106,19 +92,7 @@ func (s SecurityGroup) findGroupWithRule(rule SecurityGroupRule) (*ec2.SecurityG
 			},
 		}
 	} else {
-		filters = []*ec2.Filter{
-			&ec2.Filter{
-				Name: aws.String(subnetDescription),
-				Values: []*string{
-					aws.String(s.Description),
-				},
-			},
-			&ec2.Filter{
-				Name: aws.String(subnetGroupName),
-				Values: []*string{
-					aws.String(s.GroupName),
-				},
-			},
+		ruleFilters = []*ec2.Filter{
 			&ec2.Filter{
 				Name: aws.String(ipPermissionGroupID),
 				Values: []*string{
@@ -132,6 +106,10 @@ func (s SecurityGroup) findGroupWithRule(rule SecurityGroupRule) (*ec2.SecurityG
 				},
 			},
 		}
+	}
+
+	for _, filter := range ruleFilters {
+		filters = append(filters, filter)
 	}
 
 	securityGroups, err := s.Clients.EC2.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
@@ -277,4 +255,30 @@ func (s SecurityGroup) GetID() (string, error) {
 	}
 
 	return *securityGroup.GroupId, nil
+}
+
+func (s SecurityGroup) getGroupFilters() ([]*ec2.Filter, error) {
+	if s.Description == "" {
+		return nil, microerror.MaskAnyf(attributeEmptyError, attributeEmptyErrorFormat, "Description")
+	}
+	if s.GroupName == "" {
+		return nil, microerror.MaskAnyf(attributeEmptyError, attributeEmptyErrorFormat, "GroupName")
+	}
+
+	filters := []*ec2.Filter{
+		&ec2.Filter{
+			Name: aws.String(subnetDescription),
+			Values: []*string{
+				aws.String(s.Description),
+			},
+		},
+		&ec2.Filter{
+			Name: aws.String(subnetGroupName),
+			Values: []*string{
+				aws.String(s.GroupName),
+			},
+		},
+	}
+
+	return filters, nil
 }
