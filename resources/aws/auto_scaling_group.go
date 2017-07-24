@@ -34,6 +34,30 @@ type AutoScalingGroup struct {
 	Client *autoscaling.AutoScaling
 }
 
+const (
+	AutoScalingGroupType resourceType = "auto scaling group"
+)
+
+func (asg *AutoScalingGroup) CreateIfNotExists() (bool, error) {
+	if asg.Client == nil {
+		return false, microerror.MaskAny(clientNotInitializedError)
+	}
+
+	exists, err := asg.checkIfExists()
+	if err != nil {
+		return false, microerror.MaskAny(err)
+	}
+	if exists {
+		return false, nil
+	}
+
+	if err := asg.CreateOrFail(); err != nil {
+		return false, microerror.MaskAny(err)
+	}
+
+	return true, nil
+}
+
 func (asg *AutoScalingGroup) CreateOrFail() error {
 	if asg.Client == nil {
 		return microerror.MaskAny(clientNotInitializedError)
@@ -106,4 +130,34 @@ func (asg *AutoScalingGroup) Update() error {
 		return microerror.MaskAny(err)
 	}
 	return nil
+}
+
+func (asg *AutoScalingGroup) checkIfExists() (bool, error) {
+	_, err := asg.findExisting()
+	if IsNotFound(err) {
+		return false, nil
+	} else if err != nil {
+		return false, microerror.MaskAny(err)
+	}
+
+	return true, nil
+}
+
+func (asg *AutoScalingGroup) findExisting() (*autoscaling.Group, error) {
+	autoScalingGroups, err := asg.Client.DescribeAutoScalingGroups(&autoscaling.DescribeAutoScalingGroupsInput{
+		AutoScalingGroupNames: []*string{
+			aws.String(asg.Name),
+		},
+	})
+	if err != nil {
+		return nil, microerror.MaskAny(err)
+	}
+
+	if len(autoScalingGroups.AutoScalingGroups) < 1 {
+		return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, AutoScalingGroupType, asg.Name)
+	} else if len(autoScalingGroups.AutoScalingGroups) > 1 {
+		return nil, microerror.MaskAny(tooManyResultsError)
+	}
+
+	return autoScalingGroups.AutoScalingGroups[0], nil
 }
