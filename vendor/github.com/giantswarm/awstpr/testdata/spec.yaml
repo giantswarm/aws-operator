@@ -1,0 +1,82 @@
+cluster:
+  calico:
+    cidr: 16
+    domain: giantswarm.io
+    mtu: 1500
+    subnet: 10.1.2.3
+  cluster:
+    id: abc12
+  customer:
+    id: BooYa
+  docker:
+    daemon:
+      extraArgs: --log-opt max-file=1
+    imageNamespace: giantswarm
+    registry:
+      endpoint: http://giantswarm.io
+  etcd:
+    altNames: ""
+    domain: etcd.giantswarm.io
+    port: 2379
+    prefix: giantswarm.io
+  kubernetes:
+    api:
+      altNames: kubernetes,kubernetes.default
+      clusterIPRange: 172.31.0.0/24
+      domain: api.giantswarm.io
+      ip: 172.31.0.1
+      insecurePort: 8080
+      securePort: 443
+    cloudProvider: aws
+    dns:
+      ip: 172.31.0.10
+    domain: cluster.giantswarm.io
+    hyperkube:
+      docker:
+        image: quay.io/giantswarm/hyperkube
+    ingressController:
+      domain: ingress.giantswarm.io
+      wildcardDomain: '*.giantswarm.io'
+      insecurePort: 30010
+      securePort: 30011
+    kubectl:
+      docker:
+        image: quay.io/giantswarm/docker-kubectl
+    kubelet:
+      altNames: kubernetes,kubernetes.default,kubernetes.default.svc
+      domain: worker.giantswarm.io
+      labels: etcd.giantswarm.io
+      port: 10250
+    networkSetup:
+      docker:
+        image: quay.io/giantswarm/k8s-setup-network-environment
+    ssh:
+      publicKeys:
+      - ssh-rsa AAAAB3NzaC1yc
+  masters:
+  - id: fyz88
+  vault:
+    address: vault.giantswarm.io
+    token: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  workers:
+  - id: axx99
+  - id: cdd88
+aws:
+  region: eu-central-1
+  az: eu-central-1a
+  hostedZones:
+    api: xxxxxxxxxxxxxx
+    etcd: yyyyyyyyyyyyyy
+    ingress: zzzzzzzzzzzzzz
+  vpc:
+    cidr: 10.0.0.0/16
+    privateSubnetCidr: 10.0.0.0/19
+    publicSubnetCidr: 10.0.128.0/20
+  masters:
+  - imageID: ami-d60ad6b9
+    instanceType: m3.large
+  workers:
+  - imageID: ami-d60ad6b9
+    instanceType: m3.large
+  - imageID: ami-d60ad6b9
+    instanceType: m3.large

@@ -1,0 +1,12 @@
+allowBareDomains: true
+altNames:
+- kubernetes
+- kubernetes.default
+- kubernetes.default.svc
+- kubernetes.default.svc.cluster.local
+clusterComponent: api
+clusterID: 0yxr7
+commonName: api.giantswarm.io
+ipSans:
+- 172.31.0.1
+ttl: 4320h

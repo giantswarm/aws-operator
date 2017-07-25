@@ -1,8 +1,8 @@
-hash: 4d83639ac9cb9d641570ab1e97bec82823e4236e25525b419df36d8a77fc6a12
-updated: 2017-07-07T18:10:31.633098247+02:00
+hash: 9b562a91b51a3acc2f536b5f4ba861d6fec7f432a53884148d6a16192ada483e
+updated: 2017-07-25T12:42:25.33336854+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 68ee4df9ebc0459ab9b83e921037e621e70419db
+  version: 40f45e34986ba617a372d1590de273a0ca84a53d
   subpackages:
   - aws
   - aws/awserr
@@ -81,41 +81,25 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: 88e62208d456ab95351ee6c922f30cb6501f838a
+  version: c0a9d637a3b673a07037a92c305a57deb686b260
   subpackages:
-  - aws
-  - aws/hostedzones
-  - aws/vpc
+  - spec
+  - spec/aws
 - name: github.com/giantswarm/certificatetpr
-  version: 66eb917cb3e250992271ba44eacf93942e777cc0
+  version: 4621214c8364e0fc8234013911211e384bfd3ddf
 - name: github.com/giantswarm/clustertpr
-  version: e7fdf931e1699bc9480aaf6d27664b539889918e
+  version: 9eeb968a00813525e4a8addb158e802320119aef
   subpackages:
-  - calico
-  - cluster
-  - customer
-  - docker
-  - docker/daemon
-  - docker/registry
-  - etcd
-  - kubernetes
-  - kubernetes/api
-  - kubernetes/dns
-  - kubernetes/hyperkube
-  - kubernetes/hyperkube/docker
-  - kubernetes/ingress
-  - kubernetes/kubectl
-  - kubernetes/kubectl/docker
-  - kubernetes/kubelet
-  - kubernetes/networksetup
-  - kubernetes/networksetup/docker
-  - kubernetes/ssh
-  - node
-  - vault
+  - spec
+  - spec/docker
+  - spec/kubernetes
+  - spec/kubernetes/hyperkube
+  - spec/kubernetes/kubectl
+  - spec/kubernetes/networksetup
 - name: github.com/giantswarm/k8scloudconfig
-  version: 266a3f7485a933209f086df6550532eef2b289d3
+  version: abbec1404a3da3f268923dc3276e97605cd9838b
 - name: github.com/giantswarm/microkit
-  version: b6bf741b5c34be4fff51d944f973318d8b078284
+  version: c2f273484a749a94402dc3cfbd02913f57995484
   subpackages:
   - command
   - command/daemon
@@ -138,7 +122,7 @@ imports:
   - transaction/context/id
   - transaction/context/tracked
 - name: github.com/giantswarm/operatorkit
-  version: 7af6dc5a75bf865bf1dec080d26dc009d88b5b0b
+  version: 2ed2153269a30dc8331b2fca4b6a314dad02f9b6
   subpackages:
   - tpr
 - name: github.com/go-ini/ini
@@ -160,7 +144,7 @@ imports:
 - name: github.com/go-openapi/swag
   version: 1d0bd113de87027671077d3c71eb3ac5d7dbba72
 - name: github.com/go-stack/stack
-  version: 7a2f19628aabfe68f0766b59e74d6315f8347d22
+  version: 54be5f394ed2c3e19dac9134a40a95ba5a017f7b
 - name: github.com/gogo/protobuf
   version: e18d7aa8f8c624c915db340349aad4c49b10d173
   subpackages:
@@ -200,7 +184,7 @@ imports:
 - name: github.com/kr/logfmt
   version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
 - name: github.com/magiconair/properties
-  version: 51463bfca2576e06c62a8504b5c0f06d61312647
+  version: be5ece7dd465ab0765a9682137865547526d1dfb
 - name: github.com/mailru/easyjson
   version: d5b7844b561a7bc640052f1b935f7b800330d7e0
   subpackages:
@@ -245,13 +229,13 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 4c05eb1145f16d0e6bb4a3e1b6d769f4713cb41f
+  version: 90fc11bbc0a789c29272c21b5ff9e93db183f8dc
 - name: github.com/spf13/jwalterweatherman
   version: 0efa5202c04663c757d84f90f5219c1250baf94f
 - name: github.com/spf13/pflag
-  version: 08b1a584251b5b62f458943640fc8ebd4d50aaa5
+  version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
 - name: github.com/spf13/viper
-  version: c1de95864d73a5465492829d7cb2dd422b19ac96
+  version: 25b30aa063fc18e48662b86996252eabdcf2f0c7
 - name: github.com/stretchr/testify
   version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
   repo: git://github.com/stretchr/testify.git
@@ -309,9 +293,9 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
+  version: 25c4ec802a7d637f88d584ab26798e94ad14c13b
 - name: k8s.io/apimachinery
-  version: 75b8dd260ef0469d96d578705a87cffd0e09dab8
+  version: 85ace5365f33b16fc735c866a12e3c765b9700f2
   subpackages:
   - pkg/api/equality
   - pkg/api/errors
@@ -358,7 +342,7 @@ imports:
   - third_party/forked/golang/json
   - third_party/forked/golang/reflect
 - name: k8s.io/client-go
-  version: 3627aeb7d4f6ade38f995d2c923e459146493c7e
+  version: 21300e3e11c918b8e6a70fb7293b310683d6c046
   subpackages:
   - discovery
   - kubernetes

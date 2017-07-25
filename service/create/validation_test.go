@@ -3,7 +3,7 @@ package create
 import (
 	"testing"
 
-	"github.com/giantswarm/awstpr/aws"
+	"github.com/giantswarm/awstpr/spec/aws"
 	"github.com/juju/errgo"
 	"github.com/stretchr/testify/assert"
 )

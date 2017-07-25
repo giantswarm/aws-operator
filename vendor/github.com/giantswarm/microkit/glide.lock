@@ -1,5 +1,5 @@
-hash: d8c4aff00bd93a615367868b415edd8ca3ea02e2fddcf56f43703f0bd6e06646
-updated: 2017-07-06T18:00:35.09842818+02:00
+hash: 976507bd862c3f6a730d05fe45949d9c866fc9ad625ea914216757f5fbcea381
+updated: 2017-07-17T18:48:23.022377589+02:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -33,9 +33,9 @@ imports:
 - name: github.com/go-logfmt/logfmt
   version: 390ab7935ee28ec6b286364bba9b4dd6410cb3d5
 - name: github.com/go-stack/stack
-  version: 7a2f19628aabfe68f0766b59e74d6315f8347d22
+  version: 54be5f394ed2c3e19dac9134a40a95ba5a017f7b
 - name: github.com/golang/protobuf
-  version: 8ee79997227bf9b34611aee7946ae64735e6fd93
+  version: 8616e8ee5e20a1704615e6c8d7afcdac06087a67
   subpackages:
   - proto
 - name: github.com/gorilla/context
@@ -60,7 +60,7 @@ imports:
 - name: github.com/kr/logfmt
   version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
 - name: github.com/magiconair/properties
-  version: 51463bfca2576e06c62a8504b5c0f06d61312647
+  version: be5ece7dd465ab0765a9682137865547526d1dfb
 - name: github.com/matttproud/golang_protobuf_extensions
   version: c12348ce28de40eed0136aa2b644d0ee0650e56c
   subpackages:
@@ -95,11 +95,11 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 4c05eb1145f16d0e6bb4a3e1b6d769f4713cb41f
+  version: d994347edadc56d6a7f863775fb6887606685ae6
 - name: github.com/spf13/jwalterweatherman
   version: 0efa5202c04663c757d84f90f5219c1250baf94f
 - name: github.com/spf13/pflag
-  version: 08b1a584251b5b62f458943640fc8ebd4d50aaa5
+  version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
 - name: github.com/spf13/viper
   version: c1de95864d73a5465492829d7cb2dd422b19ac96
 - name: github.com/tylerb/graceful
@@ -144,5 +144,5 @@ imports:
   - tap
   - transport
 - name: gopkg.in/yaml.v2
-  version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
+  version: 3b4ad1db5b2a649883ff3782f5f9f6fb52be71af
 testImports: []
