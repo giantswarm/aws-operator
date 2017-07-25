@@ -10,4 +10,3 @@ var invalidConfigError = errgo.New("invalid config")
 func IsInvalidConfig(err error) bool {
 	return errgo.Cause(err) == invalidConfigError
 }
-
