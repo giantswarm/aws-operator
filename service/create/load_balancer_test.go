@@ -6,7 +6,7 @@ import (
 
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/clustertpr"
-	"github.com/giantswarm/clustertpr/cluster"
+	"github.com/giantswarm/clustertpr/spec"
 	"github.com/juju/errgo"
 	"github.com/stretchr/testify/assert"
 )
@@ -24,8 +24,8 @@ func TestLoadBalancerName(t *testing.T) {
 			domainName: "component.foo.bar.example.com",
 			tpo: awstpr.CustomObject{
 				Spec: awstpr.Spec{
-					Cluster: clustertpr.Cluster{
-						Cluster: cluster.Cluster{
+					Cluster: clustertpr.Spec{
+						Cluster: spec.Cluster{
 							ID: "foo-customer",
 						},
 					},
@@ -38,8 +38,8 @@ func TestLoadBalancerName(t *testing.T) {
 			domainName: "component.of.a.well.formed.domain",
 			tpo: awstpr.CustomObject{
 				Spec: awstpr.Spec{
-					Cluster: clustertpr.Cluster{
-						Cluster: cluster.Cluster{
+					Cluster: clustertpr.Spec{
+						Cluster: spec.Cluster{
 							ID: "quux-the-customer",
 						},
 					},
@@ -52,8 +52,8 @@ func TestLoadBalancerName(t *testing.T) {
 			domainName: "component.foo.bar.example.com",
 			tpo: awstpr.CustomObject{
 				Spec: awstpr.Spec{
-					Cluster: clustertpr.Cluster{
-						Cluster: cluster.Cluster{
+					Cluster: clustertpr.Spec{
+						Cluster: spec.Cluster{
 							ID: "",
 						},
 					},
@@ -67,8 +67,8 @@ func TestLoadBalancerName(t *testing.T) {
 			domainName: "not a domain name",
 			tpo: awstpr.CustomObject{
 				Spec: awstpr.Spec{
-					Cluster: clustertpr.Cluster{
-						Cluster: cluster.Cluster{
+					Cluster: clustertpr.Spec{
+						Cluster: spec.Cluster{
 							ID: "foo-customer",
 						},
 					},
@@ -82,8 +82,8 @@ func TestLoadBalancerName(t *testing.T) {
 			domainName: "",
 			tpo: awstpr.CustomObject{
 				Spec: awstpr.Spec{
-					Cluster: clustertpr.Cluster{
-						Cluster: cluster.Cluster{
+					Cluster: clustertpr.Spec{
+						Cluster: spec.Cluster{
 							ID: "foo-customer",
 						},
 					},

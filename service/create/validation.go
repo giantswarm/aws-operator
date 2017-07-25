@@ -2,7 +2,7 @@ package create
 
 import (
 	"github.com/giantswarm/awstpr"
-	"github.com/giantswarm/awstpr/aws"
+	"github.com/giantswarm/awstpr/spec/aws"
 	microerror "github.com/giantswarm/microkit/error"
 )
 
