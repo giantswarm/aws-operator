@@ -4,6 +4,7 @@ import (
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
 
+	"github.com/giantswarm/aws-operator/server/endpoint/healthz"
 	"github.com/giantswarm/aws-operator/server/endpoint/version"
 	"github.com/giantswarm/aws-operator/server/middleware"
 	"github.com/giantswarm/aws-operator/service"
@@ -32,6 +33,18 @@ func DefaultConfig() Config {
 func New(config Config) (*Endpoint, error) {
 	var err error
 
+	var healthzEndpoint *healthz.Endpoint
+	{
+		healthzConfig := healthz.DefaultConfig()
+		healthzConfig.Logger = config.Logger
+		healthzConfig.Middleware = config.Middleware
+		healthzConfig.Service = config.Service
+		healthzEndpoint, err = healthz.New(healthzConfig)
+		if err != nil {
+			return nil, microerror.MaskAny(err)
+		}
+	}
+
 	var versionEndpoint *version.Endpoint
 	{
 		versionConfig := version.DefaultConfig()
@@ -45,6 +58,7 @@ func New(config Config) (*Endpoint, error) {
 	}
 
 	newEndpoint := &Endpoint{
+		Healthz: healthzEndpoint,
 		Version: versionEndpoint,
 	}
 
@@ -53,5 +67,6 @@ func New(config Config) (*Endpoint, error) {
 
 // Endpoint is the endpoint collection.
 type Endpoint struct {
+	Healthz *healthz.Endpoint
 	Version *version.Endpoint
 }
