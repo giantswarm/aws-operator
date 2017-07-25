@@ -7,13 +7,13 @@ import (
 	"text/template"
 
 	"github.com/giantswarm/clustertpr"
-	"github.com/giantswarm/clustertpr/node"
+	"github.com/giantswarm/clustertpr/spec"
 )
 
 type Params struct {
-	Cluster   clustertpr.Cluster
+	Cluster   clustertpr.Spec
 	Extension Extension
-	Node      node.Node
+	Node      spec.Node
 }
 
 type CloudConfig struct {

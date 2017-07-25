@@ -16,6 +16,10 @@ import:
   - logger
   - server
   - transaction
+- package: github.com/giantswarm/operatorkit
+  verson: master
+- package: google.golang.org/grpc
+  version: v1.2.1
 - package: github.com/giantswarm/awstpr
   version: master
 - package: github.com/giantswarm/k8scloudconfig

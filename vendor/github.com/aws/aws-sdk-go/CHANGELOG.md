@@ -1,3 +1,75 @@
+Release v1.10.15 (2017-07-24)
+===
+
+### Service Client Updates
+* `service/appstream`: Updates service API, documentation, and waiters
+  * Amazon AppStream 2.0 image builders and fleets can now access applications and network resources that rely on Microsoft Active Directory (AD) for authentication and permissions. This new feature allows you to join your streaming instances to your AD, so you can use your existing AD user management tools.
+* `service/ec2`: Updates service API and documentation
+  * Spot Fleet tagging capability allows customers to automatically tag instances launched by Spot Fleet. You can use this feature to label or distinguish instances created by distinct Spot Fleets. Tagging your EC2 instances also enables you to see instance cost allocation by tag in your AWS bill.
+
+### SDK Bugs
+* `aws/signer/v4`: Fix out of bounds panic in stripExcessSpaces [#1412](https://github.com/aws/aws-sdk-go/pull/1412)
+  * Fixes the out of bands panic in stripExcessSpaces caused by an incorrect calculation of the stripToIdx value. Simplified to code also.
+  * Fixes [#1411](https://github.com/aws/aws-sdk-go/issues/1411)
+Release v1.10.14 (2017-07-20)
+===
+
+### Service Client Updates
+* `service/elasticmapreduce`: Updates service API and documentation
+  * Amazon EMR now includes the ability to use a custom Amazon Linux AMI and adjustable root volume size when launching a cluster.
+
+Release v1.10.13 (2017-07-19)
+===
+
+### Service Client Updates
+* `service/budgets`: Updates service API and documentation
+  * Update budget Management API's to list/create/update RI_UTILIZATION type budget. Update budget Management API's to support DAILY timeUnit for RI_UTILIZATION type budget.
+
+### SDK Enhancements
+* `service/s3`:  Use interfaces assertions instead of ValuesAtPath for S3 field lookups. [#1401](https://github.com/aws/aws-sdk-go/pull/1401)
+  * Improves the performance across the board for all S3 API calls by removing the usage of `ValuesAtPath` being used for every S3 API call.
+
+### SDK Bugs
+* `aws/request`: waiter test bug
+  * waiters_test.go file would sometimes fail due to travis hiccups. This occurs because a test would sometimes fail the cancel check and succeed the timeout. However, the timeout check should never occur in that test. This fix introduces a new field that dictates how waiters will sleep.
+Release v1.10.12 (2017-07-17)
+===
+
+### Service Client Updates
+* `service/cognito-idp`: Updates service API and documentation
+* `service/lambda`: Updates service API and documentation
+  * Lambda@Edge lets you run code closer to your end users without provisioning or managing servers. With Lambda@Edge, your code runs in AWS edge locations, allowing you to respond to your end users at the lowest latency. Your code is triggered by Amazon CloudFront events, such as requests to and from origin servers and viewers, and it is ready to execute at every AWS edge location whenever a request for content is received. You just upload your Node.js code to AWS Lambda and Lambda takes care of everything required to run and scale your code with high availability. You only pay for the compute time you consume - there is no charge when your code is not running.
+
+Release v1.10.11 (2017-07-14)
+===
+
+### Service Client Updates
+* `service/discovery`: Updates service API and documentation
+  * Adding feature to the Export API for Discovery Service to allow filters for the export task to allow export based on per agent id.
+* `service/ec2`: Updates service API
+  * New EC2 GPU Graphics instance
+* `service/marketplacecommerceanalytics`: Updates service documentation
+  * Update to Documentation Model For New Report Cadence / Reformat of Docs
+
+Release v1.10.10 (2017-07-13)
+===
+
+### Service Client Updates
+* `service/apigateway`: Updates service API and documentation
+  * Adds support for management of gateway responses.
+* `service/ec2`: Updates service API and documentation
+  * X-ENI (or Cross-Account ENI) is a new feature that allows the attachment or association of Elastic Network Interfaces (ENI) between VPCs in different AWS accounts located in the same availability zone. With this new capability, service providers and partners can deliver managed solutions in a variety of new architectural patterns where the provider and consumer of the service are in different AWS accounts.
+* `service/lex-models`: Updates service documentation
+
+Release v1.10.9 (2017-07-12)
+===
+
+### Service Client Updates
+* `service/autoscaling`: Updates service API and documentation
+  * Auto Scaling now supports a new type of scaling policy called target tracking scaling policies that you can use to set up dynamic scaling for your application.
+* `service/swf`: Updates service API, documentation, paginators, and examples
+  * Added support for attaching control data to Lambda tasks. Control data lets you attach arbitrary strings to your decisions and history events.
+
 Release v1.10.8 (2017-07-06)
 ===
 

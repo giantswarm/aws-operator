@@ -10,9 +10,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/awstpr"
-	awsinfo "github.com/giantswarm/awstpr/aws"
+	awsinfo "github.com/giantswarm/awstpr/spec/aws"
 	"github.com/giantswarm/certificatetpr"
-	"github.com/giantswarm/clustertpr/node"
+	"github.com/giantswarm/clustertpr/spec"
 	"github.com/giantswarm/k8scloudconfig"
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
@@ -218,7 +218,7 @@ func (s *Service) runMachines(input runMachinesInput) (bool, []string, error) {
 	var (
 		anyCreated bool
 
-		machines    []node.Node
+		machines    []spec.Node
 		awsMachines []awsinfo.Node
 		instanceIDs []string
 
@@ -313,7 +313,7 @@ func (s *Service) uploadCloudconfigToS3(svc *s3.S3, s3Bucket, path, data string)
 type runMachineInput struct {
 	clients             awsutil.Clients
 	cluster             awstpr.CustomObject
-	machine             node.Node
+	machine             spec.Node
 	awsNode             awsinfo.Node
 	extension           cloudconfig.Extension
 	tlsAssets           *certificatetpr.CompactTLSAssets
@@ -445,7 +445,7 @@ func (s *Service) deleteMachines(input deleteMachinesInput) error {
 type deleteMachineInput struct {
 	name    string
 	clients awsutil.Clients
-	machine node.Node
+	machine spec.Node
 }
 
 func validateIDs(ids []string) bool {
