@@ -77,10 +77,9 @@ type Service struct {
 	bootOnce sync.Once
 }
 
-// Check implements the health check which gets the current user and checks
-// it belongs to at least one group.
-// TODO Check the user is in the aws-operator group to make sure the
-// permissions are correct. This group needs to be created.
+// Check implements the health check which gets the current user to check
+// we can authenticate.
+// TODO Check the user has access to the correct set of AWS services.
 func (s *Service) Check(ctx context.Context, request Request) (*Response, error) {
 	start := time.Now()
 	defer func() {
