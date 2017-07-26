@@ -17,6 +17,7 @@ import (
 	k8sutil "github.com/giantswarm/aws-operator/client/k8s"
 	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/aws-operator/service/create"
+	"github.com/giantswarm/aws-operator/service/healthz"
 	"github.com/giantswarm/aws-operator/service/version"
 )
 
@@ -100,20 +101,36 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var createService *create.Service
+	var awsConfig awsclient.Config
 	{
-		createConfig := create.DefaultConfig()
-
-		createConfig.AwsConfig = awsclient.Config{
+		awsConfig = awsclient.Config{
 			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
 			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
 		}
+	}
+
+	var createService *create.Service
+	{
+		createConfig := create.DefaultConfig()
+		createConfig.AwsConfig = awsConfig
 		createConfig.CertWatcher = certWatcher
 		createConfig.K8sClient = k8sClient
 		createConfig.Logger = config.Logger
 		createConfig.PubKeyFile = config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile)
 
 		createService, err = create.New(createConfig)
+		if err != nil {
+			return nil, microerror.MaskAny(err)
+		}
+	}
+
+	var healthzService *healthz.Service
+	{
+		healthzConfig := healthz.DefaultConfig()
+		healthzConfig.AwsConfig = awsConfig
+		healthzConfig.Logger = config.Logger
+
+		healthzService, err = healthz.New(healthzConfig)
 		if err != nil {
 			return nil, microerror.MaskAny(err)
 		}
@@ -137,6 +154,7 @@ func New(config Config) (*Service, error) {
 	newService := &Service{
 		// Dependencies.
 		Create:  createService,
+		Healthz: healthzService,
 		Version: versionService,
 
 		// Internals
@@ -149,6 +167,7 @@ func New(config Config) (*Service, error) {
 type Service struct {
 	// Dependencies.
 	Create  *create.Service
+	Healthz *healthz.Service
 	Version *version.Service
 
 	// Internals.
