@@ -77,6 +77,7 @@ func New(config Config) (microserver.Server, error) {
 
 	// Apply internals to the micro server config.
 	newServer.config.Endpoints = []microserver.Endpoint{
+		endpointCollection.Healthz,
 		endpointCollection.Version,
 	}
 	newServer.config.ErrorEncoder = newServer.newErrorEncoder()
