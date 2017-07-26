@@ -1,8 +1,8 @@
-hash: 9b562a91b51a3acc2f536b5f4ba861d6fec7f432a53884148d6a16192ada483e
-updated: 2017-07-25T12:42:25.33336854+02:00
+hash: d042030dc9019fec187b3825891881c1d8bd73429fd3afb259ba817326825183
+updated: 2017-07-28T13:22:44.239379747+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 40f45e34986ba617a372d1590de273a0ca84a53d
+  version: df374c20d53ed082b8cf0d0da52b1a181abf387b
   subpackages:
   - aws
   - aws/awserr
@@ -44,7 +44,7 @@ imports:
   subpackages:
   - quantile
 - name: github.com/cenkalti/backoff
-  version: 32cd0c5b3aef12c76ed64aaf678f6c79736be7dc
+  version: 61153c768f31ee5f130071d08fc82b85208528de
 - name: github.com/coreos/etcd
   version: 61fc123e7a8b14a0a258aa3f5c4159861b1ec2e7
   subpackages:
@@ -97,9 +97,13 @@ imports:
   - spec/kubernetes/kubectl
   - spec/kubernetes/networksetup
 - name: github.com/giantswarm/k8scloudconfig
-  version: abbec1404a3da3f268923dc3276e97605cd9838b
+  version: bc4c700e534851a1ba0658e111d756e9800f39c5
+- name: github.com/giantswarm/kubeadmtokentpr
+  version: 6e58e1daa94e710e1d840ee9c281bb91530c64c5
+- name: github.com/giantswarm/microerror
+  version: 7bf6a0a6d24b1e3a03af3ed3a8e3531d792ea3e3
 - name: github.com/giantswarm/microkit
-  version: c2f273484a749a94402dc3cfbd02913f57995484
+  version: 4e085764fbe2e0301e2065bbb01d74847e47c4cc
   subpackages:
   - command
   - command/daemon
@@ -121,8 +125,10 @@ imports:
   - transaction
   - transaction/context/id
   - transaction/context/tracked
+- name: github.com/giantswarm/micrologger
+  version: 97740d3352f783c3b774db8bab314deff165f43b
 - name: github.com/giantswarm/operatorkit
-  version: 2ed2153269a30dc8331b2fca4b6a314dad02f9b6
+  version: 9002173eba12892f2c193ad2c33ea7dca291e8de
   subpackages:
   - tpr
 - name: github.com/go-ini/ini
@@ -209,13 +215,13 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: 49fee292b27bfff7f354ee0f64e1bc4850462edf
+  version: 3e6a7635bac6573d43f49f97b47eb9bda195dba8
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: a1dba9ce8baed984a2495b658c82687f8157b98f
+  version: e645f4e5aaa8506fc71d6edbc5c4ff02c04c46f2
   subpackages:
   - xfs
 - name: github.com/PuerkitoBio/purell
@@ -229,7 +235,7 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 90fc11bbc0a789c29272c21b5ff9e93db183f8dc
+  version: 34594c771f2c18301dc152640ad40ece28795373
 - name: github.com/spf13/jwalterweatherman
   version: 0efa5202c04663c757d84f90f5219c1250baf94f
 - name: github.com/spf13/pflag
@@ -297,7 +303,6 @@ imports:
 - name: k8s.io/apimachinery
   version: 85ace5365f33b16fc735c866a12e3c765b9700f2
   subpackages:
-  - pkg/api/equality
   - pkg/api/errors
   - pkg/api/meta
   - pkg/api/resource
@@ -324,22 +329,18 @@ imports:
   - pkg/util/diff
   - pkg/util/errors
   - pkg/util/framer
-  - pkg/util/httpstream
   - pkg/util/intstr
   - pkg/util/json
-  - pkg/util/mergepatch
   - pkg/util/net
   - pkg/util/rand
   - pkg/util/runtime
   - pkg/util/sets
-  - pkg/util/strategicpatch
   - pkg/util/validation
   - pkg/util/validation/field
   - pkg/util/wait
   - pkg/util/yaml
   - pkg/version
   - pkg/watch
-  - third_party/forked/golang/json
   - third_party/forked/golang/reflect
 - name: k8s.io/client-go
   version: 21300e3e11c918b8e6a70fb7293b310683d6c046

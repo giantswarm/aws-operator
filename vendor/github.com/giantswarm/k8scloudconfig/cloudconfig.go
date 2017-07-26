@@ -8,12 +8,15 @@ import (
 
 	"github.com/giantswarm/clustertpr"
 	"github.com/giantswarm/clustertpr/spec"
+	microerror "github.com/giantswarm/microkit/error"
 )
 
+// Params are the parameters which can be defined by the concrete operator which is using that library.
 type Params struct {
-	Cluster   clustertpr.Spec
-	Extension Extension
-	Node      spec.Node
+	Cluster      clustertpr.Spec
+	Extension    Extension
+	Node         spec.Node
+	KubeadmToken string
 }
 
 type CloudConfig struct {
@@ -35,13 +38,13 @@ func NewCloudConfig(template string, params Params) (*CloudConfig, error) {
 func (c *CloudConfig) ExecuteTemplate() error {
 	tmpl, err := template.New("cloudconfig").Parse(c.template)
 	if err != nil {
-		return err
+		return microerror.MaskAny(err)
 	}
 
 	buf := new(bytes.Buffer)
 	err = tmpl.Execute(buf, c.params)
 	if err != nil {
-		return err
+		return microerror.MaskAny(err)
 	}
 	c.config = buf.String()
 

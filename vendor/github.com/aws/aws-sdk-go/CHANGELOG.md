@@ -1,3 +1,35 @@
+Release v1.10.18 (2017-07-27)
+===
+
+### Service Client Updates
+* `service/ec2`: Updates service API and documentation
+  * The CreateDefaultVPC API enables you to create a new default VPC . You no longer need to contact AWS support, if your default VPC has been deleted.
+* `service/kinesisanalytics`: Updates service API and documentation
+  * Added additional exception types and clarified documentation.
+
+Release v1.10.17 (2017-07-27)
+===
+
+### Service Client Updates
+* `service/dynamodb`: Updates service documentation and examples
+  * Corrected a typo.
+* `service/ec2`: Updates service API and documentation
+  * Amazon EC2 Elastic GPUs allow you to easily attach low-cost graphics acceleration to current generation EC2 instances. With Amazon EC2 Elastic GPUs, you can configure the right amount of graphics acceleration to your particular workload without being constrained by fixed hardware configurations and limited GPU selection.
+* `service/monitoring`: Updates service documentation
+  * This release adds high resolution features to CloudWatch, with support for Custom Metrics down to 1 second and Alarms down to 10 seconds.
+
+Release v1.10.16 (2017-07-26)
+===
+
+### Service Client Updates
+* `service/clouddirectory`: Updates service API and documentation
+  * Cloud Directory adds support for additional batch operations.
+* `service/cloudformation`: Updates service API and documentation
+  * AWS CloudFormation StackSets enables you to manage stacks across multiple accounts and regions.
+
+### SDK Enhancements
+* `aws/signer/v4`: Optimize V4 signer's header duplicate space stripping. [#1417](https://github.com/aws/aws-sdk-go/pull/1417)
+
 Release v1.10.15 (2017-07-24)
 ===
 
