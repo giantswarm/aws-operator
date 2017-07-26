@@ -1091,11 +1091,12 @@ func (s *Service) deleteFunc(obj interface{}) {
 					Type:         route53.RRTypeA,
 				},
 				recordSetInput{
-					Cluster: cluster,
-					Client:  clients.Route53,
-					Value:   cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-					Domain:  cluster.Spec.Cluster.Kubernetes.IngressController.WildcardDomain,
-					Type:    route53.RRTypeCname,
+					Cluster:      cluster,
+					Client:       clients.Route53,
+					Value:        cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+					Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.WildcardDomain,
+					HostedZoneID: cluster.Spec.AWS.HostedZones.Ingress,
+					Type:         route53.RRTypeCname,
 				},
 			}
 
