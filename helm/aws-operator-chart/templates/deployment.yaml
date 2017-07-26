@@ -62,15 +62,15 @@ spec:
         - --config.files=secret
         livenessProbe:
           httpGet:
-            path: /
+            path: /healthz
             port: 8000
-          initialDelaySeconds: 30
+          initialDelaySeconds: 15
           timeoutSeconds: 1
         readinessProbe:
           httpGet:
-            path: /
+            path: /healthz
             port: 8000
-          initialDelaySeconds: 30
+          initialDelaySeconds: 15
           timeoutSeconds: 1
         resources:
           requests:
