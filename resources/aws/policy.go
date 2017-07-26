@@ -60,23 +60,24 @@ const (
 )
 
 type Policy struct {
-	ClusterID string
-	KMSKeyArn string
-	S3Bucket  string
-	name      string
+	ClusterID  string
+	KMSKeyArn  string
+	PolicyType string
+	S3Bucket   string
+	name       string
 	AWSEntity
 }
 
 func (p *Policy) clusterPolicyName() string {
-	return fmt.Sprintf("%s-%s", p.ClusterID, PolicyNameTemplate)
+	return fmt.Sprintf("%s-%s-%s", p.ClusterID, p.PolicyType, PolicyNameTemplate)
 }
 
 func (p *Policy) clusterProfileName() string {
-	return fmt.Sprintf("%s-%s", p.ClusterID, ProfileNameTemplate)
+	return fmt.Sprintf("%s-%s-%s", p.ClusterID, p.PolicyType, ProfileNameTemplate)
 }
 
 func (p *Policy) clusterRoleName() string {
-	return fmt.Sprintf("%s-%s", p.ClusterID, RoleNameTemplate)
+	return fmt.Sprintf("%s-%s-%s", p.ClusterID, p.PolicyType, RoleNameTemplate)
 }
 
 func (p *Policy) CreateIfNotExists() (bool, error) {
@@ -86,8 +87,7 @@ func (p *Policy) CreateIfNotExists() (bool, error) {
 func (p *Policy) createRole() error {
 	// TODO switch to using a file and Go templates
 	policyDocument := fmt.Sprintf(PolicyDocumentTempl, p.KMSKeyArn, p.S3Bucket, p.S3Bucket)
-
-	clusterRoleName := fmt.Sprintf("%s-%s", p.ClusterID, RoleNameTemplate)
+	clusterRoleName := p.clusterRoleName()
 
 	if _, err := p.Clients.IAM.CreateRole(&iam.CreateRoleInput{
 		RoleName:                 aws.String(clusterRoleName),
@@ -96,10 +96,8 @@ func (p *Policy) createRole() error {
 		return microerror.MaskAny(err)
 	}
 
-	clusterPolicyName := fmt.Sprintf("%s-%s", p.ClusterID, PolicyNameTemplate)
-
 	if _, err := p.Clients.IAM.PutRolePolicy(&iam.PutRolePolicyInput{
-		PolicyName:     aws.String(clusterPolicyName),
+		PolicyName:     aws.String(p.clusterPolicyName()),
 		RoleName:       aws.String(clusterRoleName),
 		PolicyDocument: aws.String(policyDocument),
 	}); err != nil {
