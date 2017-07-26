@@ -3,7 +3,6 @@ package healthz
 import (
 	"context"
 	"sync"
-	"time"
 
 	"github.com/aws/aws-sdk-go/service/iam"
 	microerror "github.com/giantswarm/microkit/error"
@@ -81,11 +80,6 @@ type Service struct {
 // we can authenticate.
 // TODO Check the user has access to the correct set of AWS services.
 func (s *Service) Check(ctx context.Context, request Request) (*Response, error) {
-	start := time.Now()
-	defer func() {
-		healthCheckRequestTime.Set(float64(time.Since(start) / time.Millisecond))
-	}()
-
 	// Set the region for the API client.
 	s.awsConfig.Region = awsRegion
 	clients := awsutil.NewClients(s.awsConfig)
@@ -93,11 +87,8 @@ func (s *Service) Check(ctx context.Context, request Request) (*Response, error)
 	// Get the current user.
 	_, err := clients.IAM.GetUser(&iam.GetUserInput{})
 	if err != nil {
-		healthCheckRequests.WithLabelValues(PrometheusFailedLabel).Inc()
 		return nil, microerror.MaskAny(err)
 	}
-
-	healthCheckRequests.WithLabelValues(PrometheusSuccessfulLabel).Inc()
 
 	return DefaultResponse(), nil
 }
