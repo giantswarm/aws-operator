@@ -2,11 +2,9 @@ package healthz
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
@@ -94,27 +92,8 @@ func (s *Service) Check(ctx context.Context, request Request) (*Response, error)
 	clients := awsutil.NewClients(s.awsConfig)
 
 	// Get the current user.
-	user, err := clients.IAM.GetUser(&iam.GetUserInput{})
+	_, err := clients.IAM.GetUser(&iam.GetUserInput{})
 	if err != nil {
-		healthCheckRequests.WithLabelValues(PrometheusFailedLabel).Inc()
-		return nil, microerror.MaskAny(err)
-	}
-
-	// Get the groups the current user belongs to.
-	userName := *user.User.UserName
-	groups, err := clients.IAM.ListGroupsForUser(&iam.ListGroupsForUserInput{
-		UserName: aws.String(userName),
-	})
-	if err != nil {
-		healthCheckRequests.WithLabelValues(PrometheusFailedLabel).Inc()
-		return nil, microerror.MaskAny(err)
-	}
-
-	// Check the user belongs to at least one group.
-	// TODO Check the user belongs to the aws-operator group.
-	if len(groups.Groups) == 0 {
-		s.logger.Log("info", fmt.Sprintf("Healthcheck failed. User '%s' belongs to 0 groups.", userName))
-
 		healthCheckRequests.WithLabelValues(PrometheusFailedLabel).Inc()
 		return nil, microerror.MaskAny(err)
 	}
