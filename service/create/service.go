@@ -544,19 +544,35 @@ func (s *Service) addFunc(obj interface{}) {
 	// Create policy
 	bucketName := s.bucketName(cluster)
 
-	var policy resources.NamedResource
+	var masterPolicy resources.NamedResource
 	var policyErr error
 	{
-		policy = &awsresources.Policy{
-			ClusterID: cluster.Spec.Cluster.Cluster.ID,
-			KMSKeyArn: kmsKey.Arn(),
-			S3Bucket:  bucketName,
-			AWSEntity: awsresources.AWSEntity{Clients: clients},
+		masterPolicy = &awsresources.Policy{
+			ClusterID:  cluster.Spec.Cluster.Cluster.ID,
+			KMSKeyArn:  kmsKey.Arn(),
+			PolicyType: prefixMaster,
+			S3Bucket:   bucketName,
+			AWSEntity:  awsresources.AWSEntity{Clients: clients},
 		}
-		policyErr = policy.CreateOrFail()
+		policyErr = masterPolicy.CreateOrFail()
 	}
 	if policyErr != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create policy: %s", errgo.Details(policyErr)))
+		s.logger.Log("error", fmt.Sprintf("could not create master policy: %s", errgo.Details(policyErr)))
+	}
+
+	var workerPolicy resources.NamedResource
+	{
+		workerPolicy = &awsresources.Policy{
+			ClusterID:  cluster.Spec.Cluster.Cluster.ID,
+			KMSKeyArn:  kmsKey.Arn(),
+			PolicyType: prefixWorker,
+			S3Bucket:   bucketName,
+			AWSEntity:  awsresources.AWSEntity{Clients: clients},
+		}
+		policyErr = workerPolicy.CreateOrFail()
+	}
+	if policyErr != nil {
+		s.logger.Log("error", fmt.Sprintf("could not create worker policy: %s", errgo.Details(policyErr)))
 	}
 
 	// Create S3 bucket
@@ -760,7 +776,7 @@ func (s *Service) addFunc(obj interface{}) {
 		securityGroup:       mastersSecurityGroup,
 		subnet:              publicSubnet,
 		keyPairName:         cluster.Name,
-		instanceProfileName: policy.GetName(),
+		instanceProfileName: masterPolicy.GetName(),
 		prefix:              prefixMaster,
 	})
 	if err != nil {
@@ -872,7 +888,7 @@ func (s *Service) addFunc(obj interface{}) {
 		securityGroup:       workersSecurityGroup,
 		subnet:              publicSubnet,
 		keypairName:         cluster.Name,
-		instanceProfileName: policy.GetName(),
+		instanceProfileName: workerPolicy.GetName(),
 		prefix:              prefixWorker,
 		ebsStorage:          true,
 	}
