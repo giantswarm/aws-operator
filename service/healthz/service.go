@@ -2,7 +2,6 @@ package healthz
 
 import (
 	"context"
-	"sync"
 
 	"github.com/aws/aws-sdk-go/service/iam"
 	microerror "github.com/giantswarm/microkit/error"
@@ -56,9 +55,6 @@ func New(config Config) (*Service, error) {
 
 		// Settings.
 		awsConfig: config.AwsConfig,
-
-		// Internals.
-		bootOnce: sync.Once{},
 	}
 
 	return newService, nil
@@ -71,9 +67,6 @@ type Service struct {
 
 	// Settings.
 	awsConfig awsutil.Config
-
-	// Internals.
-	bootOnce sync.Once
 }
 
 // Check implements the health check which gets the current user to check
