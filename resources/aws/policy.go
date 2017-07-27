@@ -1,7 +1,9 @@
 package aws
 
 import (
+	"bytes"
 	"fmt"
+	"text/template"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
@@ -11,6 +13,7 @@ import (
 const (
 	RoleNameTemplate         = "EC2-K8S-Role"
 	PolicyNameTemplate       = "EC2-K8S-Policy"
+	PolicyTemplateFile       = "/opt/templates/%s-iam-policy.tmpl"
 	ProfileNameTemplate      = "EC2-K8S-Role"
 	AssumeRolePolicyDocument = `{
 		"Version": "2012-10-17",
@@ -22,61 +25,31 @@ const (
 			"Action": "sts:AssumeRole"
 		}
 	}`
-	PolicyDocumentTempl = `{
-		"Version": "2012-10-17",
-		"Statement": [
-			{
-            	"Action": "ec2:*",
-            	"Effect": "Allow",
-                "Resource": "*"
-            },
-			{
-				"Effect": "Allow",
-				"Action": "kms:Decrypt",
-				"Resource": %q
-			},
-			{
-				"Effect": "Allow",
-				"Action": [
-					"s3:GetBucketLocation",
-					"s3:ListAllMyBuckets"
-				],
-				"Resource": "*"
-			},
-			{
-				"Effect": "Allow",
-				"Action": [
-					"s3:ListBucket"
-				],
-				"Resource": "arn:aws:s3:::%s"
-			},
-			{
-				"Effect": "Allow",
-				"Action": "s3:GetObject",
-				"Resource": "arn:aws:s3:::%s/*"
-			}
-		]
-	}`
 )
 
 type Policy struct {
-	ClusterID string
-	KMSKeyArn string
-	S3Bucket  string
-	name      string
+	ClusterID  string
+	KMSKeyArn  string
+	PolicyType string
+	S3Bucket   string
+	name       string
 	AWSEntity
 }
 
 func (p *Policy) clusterPolicyName() string {
-	return fmt.Sprintf("%s-%s", p.ClusterID, PolicyNameTemplate)
+	return fmt.Sprintf("%s-%s-%s", p.ClusterID, p.PolicyType, PolicyNameTemplate)
 }
 
 func (p *Policy) clusterProfileName() string {
-	return fmt.Sprintf("%s-%s", p.ClusterID, ProfileNameTemplate)
+	return fmt.Sprintf("%s-%s-%s", p.ClusterID, p.PolicyType, ProfileNameTemplate)
 }
 
 func (p *Policy) clusterRoleName() string {
-	return fmt.Sprintf("%s-%s", p.ClusterID, RoleNameTemplate)
+	return fmt.Sprintf("%s-%s-%s", p.ClusterID, p.PolicyType, RoleNameTemplate)
+}
+
+func (p *Policy) templateName() string {
+	return fmt.Sprintf(PolicyTemplateFile, p.PolicyType)
 }
 
 func (p *Policy) CreateIfNotExists() (bool, error) {
@@ -84,11 +57,18 @@ func (p *Policy) CreateIfNotExists() (bool, error) {
 }
 
 func (p *Policy) createRole() error {
-	// TODO switch to using a file and Go templates
-	policyDocument := fmt.Sprintf(PolicyDocumentTempl, p.KMSKeyArn, p.S3Bucket, p.S3Bucket)
+	t, err := template.ParseFiles(p.templateName())
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
 
-	clusterRoleName := fmt.Sprintf("%s-%s", p.ClusterID, RoleNameTemplate)
+	var policyDocument bytes.Buffer
+	err = t.Execute(&policyDocument, p)
+	if err != nil {
+		return microerror.MaskAny(err)
+	}
 
+	clusterRoleName := p.clusterRoleName()
 	if _, err := p.Clients.IAM.CreateRole(&iam.CreateRoleInput{
 		RoleName:                 aws.String(clusterRoleName),
 		AssumeRolePolicyDocument: aws.String(AssumeRolePolicyDocument),
@@ -96,12 +76,10 @@ func (p *Policy) createRole() error {
 		return microerror.MaskAny(err)
 	}
 
-	clusterPolicyName := fmt.Sprintf("%s-%s", p.ClusterID, PolicyNameTemplate)
-
 	if _, err := p.Clients.IAM.PutRolePolicy(&iam.PutRolePolicyInput{
-		PolicyName:     aws.String(clusterPolicyName),
+		PolicyName:     aws.String(p.clusterPolicyName()),
 		RoleName:       aws.String(clusterRoleName),
-		PolicyDocument: aws.String(policyDocument),
+		PolicyDocument: aws.String(policyDocument.String()),
 	}); err != nil {
 		return microerror.MaskAny(err)
 	}

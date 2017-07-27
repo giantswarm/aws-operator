@@ -544,19 +544,35 @@ func (s *Service) addFunc(obj interface{}) {
 	// Create policy
 	bucketName := s.bucketName(cluster)
 
-	var policy resources.NamedResource
+	var masterPolicy resources.NamedResource
 	var policyErr error
 	{
-		policy = &awsresources.Policy{
-			ClusterID: cluster.Spec.Cluster.Cluster.ID,
-			KMSKeyArn: kmsKey.Arn(),
-			S3Bucket:  bucketName,
-			AWSEntity: awsresources.AWSEntity{Clients: clients},
+		masterPolicy = &awsresources.Policy{
+			ClusterID:  cluster.Spec.Cluster.Cluster.ID,
+			KMSKeyArn:  kmsKey.Arn(),
+			PolicyType: prefixMaster,
+			S3Bucket:   bucketName,
+			AWSEntity:  awsresources.AWSEntity{Clients: clients},
 		}
-		policyErr = policy.CreateOrFail()
+		policyErr = masterPolicy.CreateOrFail()
 	}
 	if policyErr != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create policy: %s", errgo.Details(policyErr)))
+		s.logger.Log("error", fmt.Sprintf("could not create master policy: %s", errgo.Details(policyErr)))
+	}
+
+	var workerPolicy resources.NamedResource
+	{
+		workerPolicy = &awsresources.Policy{
+			ClusterID:  cluster.Spec.Cluster.Cluster.ID,
+			KMSKeyArn:  kmsKey.Arn(),
+			PolicyType: prefixWorker,
+			S3Bucket:   bucketName,
+			AWSEntity:  awsresources.AWSEntity{Clients: clients},
+		}
+		policyErr = workerPolicy.CreateOrFail()
+	}
+	if policyErr != nil {
+		s.logger.Log("error", fmt.Sprintf("could not create worker policy: %s", errgo.Details(policyErr)))
 	}
 
 	// Create S3 bucket
@@ -760,7 +776,7 @@ func (s *Service) addFunc(obj interface{}) {
 		securityGroup:       mastersSecurityGroup,
 		subnet:              publicSubnet,
 		keyPairName:         cluster.Name,
-		instanceProfileName: policy.GetName(),
+		instanceProfileName: masterPolicy.GetName(),
 		prefix:              prefixMaster,
 	})
 	if err != nil {
@@ -872,7 +888,7 @@ func (s *Service) addFunc(obj interface{}) {
 		securityGroup:       workersSecurityGroup,
 		subnet:              publicSubnet,
 		keypairName:         cluster.Name,
-		instanceProfileName: policy.GetName(),
+		instanceProfileName: workerPolicy.GetName(),
 		prefix:              prefixWorker,
 		ebsStorage:          true,
 	}
@@ -1266,17 +1282,32 @@ func (s *Service) deleteFunc(obj interface{}) {
 
 	s.logger.Log("info", "deleted bucket")
 
-	// Delete policy.
-	var policy resources.NamedResource
-	policy = &awsresources.Policy{
-		ClusterID: cluster.Spec.Cluster.Cluster.ID,
-		S3Bucket:  bucketName,
-		AWSEntity: awsresources.AWSEntity{Clients: clients},
+	// Delete master policy.
+	var masterPolicy resources.NamedResource
+	masterPolicy = &awsresources.Policy{
+		ClusterID:  cluster.Spec.Cluster.Cluster.ID,
+		PolicyType: prefixMaster,
+		S3Bucket:   bucketName,
+		AWSEntity:  awsresources.AWSEntity{Clients: clients},
 	}
-	if err := policy.Delete(); err != nil {
+	if err := masterPolicy.Delete(); err != nil {
 		s.logger.Log("error", errgo.Details(err))
 	} else {
-		s.logger.Log("info", "deleted roles, policies, instance profiles")
+		s.logger.Log("info", "deleted master roles, policies, instance profiles")
+	}
+
+	// Delete worker policy.
+	var workerPolicy resources.NamedResource
+	workerPolicy = &awsresources.Policy{
+		ClusterID:  cluster.Spec.Cluster.Cluster.ID,
+		PolicyType: prefixWorker,
+		S3Bucket:   bucketName,
+		AWSEntity:  awsresources.AWSEntity{Clients: clients},
+	}
+	if err := workerPolicy.Delete(); err != nil {
+		s.logger.Log("error", errgo.Details(err))
+	} else {
+		s.logger.Log("info", "deleted worker roles, policies, instance profiles")
 	}
 
 	// Delete KMS key.
