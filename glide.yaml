@@ -26,6 +26,10 @@ import:
   version: master
 - package: github.com/stretchr/testify
   version: v1.1.4
-  repo: git://github.com/stretchr/testify.git
   subpackages:
   - assert
+- package: k8s.io/client-go
+  version: v3.0.0
+# apimachinery is pinned to the version client-go uses.
+- package: k8s.io/apimachinery
+  version: 85ace5365f33b16fc735c866a12e3c765b9700f2
