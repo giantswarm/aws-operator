@@ -14,6 +14,7 @@ import (
 	"github.com/giantswarm/certificatetpr"
 	"github.com/giantswarm/clustertpr/spec"
 	"github.com/giantswarm/k8scloudconfig"
+	"github.com/giantswarm/kubeadmtokentpr"
 	microerror "github.com/giantswarm/microkit/error"
 	micrologger "github.com/giantswarm/microkit/logger"
 	"github.com/giantswarm/operatorkit/tpr"
@@ -212,6 +213,7 @@ type runMachinesInput struct {
 	keyPairName         string
 	instanceProfileName string
 	prefix              string
+	kubeadmToken        string
 }
 
 func (s *Service) runMachines(input runMachinesInput) (bool, []string, error) {
@@ -265,6 +267,7 @@ func (s *Service) runMachines(input runMachinesInput) (bool, []string, error) {
 			instanceProfileName: input.instanceProfileName,
 			name:                name,
 			prefix:              input.prefix,
+			kubeadmToken:        input.kubeadmToken,
 		})
 		if err != nil {
 			return false, nil, microerror.MaskAny(err)
@@ -325,42 +328,18 @@ type runMachineInput struct {
 	instanceProfileName string
 	name                string
 	prefix              string
+	kubeadmToken        string
 }
 
 func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 	cloudConfigParams := cloudconfig.Params{
-		Cluster:   input.cluster.Spec.Cluster,
-		Node:      input.machine,
-		Extension: input.extension,
+		Cluster:      input.cluster.Spec.Cluster,
+		Node:         input.machine,
+		Extension:    input.extension,
+		KubeadmToken: input.kubeadmToken,
 	}
 
 	cloudConfig, err := s.cloudConfig(input.prefix, cloudConfigParams, input.cluster.Spec, input.tlsAssets)
-	if err != nil {
-		return false, "", microerror.MaskAny(err)
-	}
-
-	// We now upload the instance cloudconfig to S3 and create a "small
-	// cloudconfig" that just fetches the previously uploaded "final
-	// cloudconfig" and executes coreos-cloudinit with it as argument.
-	// We do this to circumvent the 16KB limit on user-data for EC2 instances.
-	cloudconfigConfig := SmallCloudconfigConfig{
-		MachineType: input.prefix,
-		Region:      input.cluster.Spec.AWS.Region,
-		S3URI:       s.bucketName(input.cluster),
-	}
-
-	var cloudconfigS3 resources.Resource
-	cloudconfigS3 = &awsresources.BucketObject{
-		Name:      s.bucketObjectName(input.prefix),
-		Data:      cloudConfig,
-		Bucket:    input.bucket.(*awsresources.Bucket),
-		AWSEntity: awsresources.AWSEntity{Clients: input.clients},
-	}
-	if err := cloudconfigS3.CreateOrFail(); err != nil {
-		return false, "", microerror.MaskAny(err)
-	}
-
-	smallCloudconfig, err := s.SmallCloudconfig(cloudconfigConfig)
 	if err != nil {
 		return false, "", microerror.MaskAny(err)
 	}
@@ -387,7 +366,7 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 			KeyName:                input.keyPairName,
 			MinCount:               1,
 			MaxCount:               1,
-			SmallCloudconfig:       smallCloudconfig,
+			CloudConfig:            cloudConfig,
 			IamInstanceProfileName: input.instanceProfileName,
 			PlacementAZ:            input.cluster.Spec.AWS.AZ,
 			SecurityGroupID:        securityGroupID,
@@ -508,11 +487,18 @@ func (s *Service) addFunc(obj interface{}) {
 		s.logger.Log("info", fmt.Sprintf("keypair '%s' already exists, reusing", cluster.Name))
 	}
 
-	s.logger.Log("info", fmt.Sprintf("waiting for k8s secrets..."))
+	s.logger.Log("info", "waiting for k8s secrets...")
 	clusterID := cluster.Spec.Cluster.Cluster.ID
 	certs, err := s.certWatcher.SearchCerts(clusterID)
 	if err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not get certificates from secrets: %v", errgo.Details(err)))
+		return
+	}
+
+	s.logger.Log("info", "waiting for kubeadm token...")
+	kubeadmToken, err := kubeadmtokentpr.FindToken(s.k8sClient, cluster.Spec.Cluster.Cluster.ID)
+	if err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not get kubeadm token from secrets: %v", errgo.Details(err)))
 		return
 	}
 
@@ -762,6 +748,7 @@ func (s *Service) addFunc(obj interface{}) {
 		keyPairName:         cluster.Name,
 		instanceProfileName: policy.GetName(),
 		prefix:              prefixMaster,
+		kubeadmToken:        kubeadmToken,
 	})
 	if err != nil {
 		s.logger.Log("error", errgo.Details(err))

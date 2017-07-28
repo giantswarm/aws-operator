@@ -33,7 +33,7 @@ type Instance struct {
 	MinCount               int
 	MaxCount               int
 	UserData               string
-	SmallCloudconfig       string
+	CloudConfig            string
 	IamInstanceProfileName string
 	PlacementAZ            string
 	SecurityGroupID        string
@@ -148,7 +148,7 @@ func (i *Instance) CreateOrFail() error {
 			KeyName:      aws.String(i.KeyName),
 			MinCount:     aws.Int64(int64(1)),
 			MaxCount:     aws.Int64(int64(1)),
-			UserData:     aws.String(i.SmallCloudconfig),
+			UserData:     aws.String(i.CloudConfig),
 			IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
 				Name: aws.String(i.IamInstanceProfileName),
 			},
