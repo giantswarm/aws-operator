@@ -54,6 +54,19 @@ const (
 				"Effect": "Allow",
 				"Action": "s3:GetObject",
 				"Resource": "arn:aws:s3:::%s/*"
+			},
+			{
+				"Effect": "Allow",
+				"Action": [
+					"ecr:GetAuthorizationToken",
+					"ecr:BatchCheckLayerAvailability",
+					"ecr:GetDownloadUrlForLayer",
+					"ecr:GetRepositoryPolicy",
+					"ecr:DescribeRepositories",
+					"ecr:ListImages",
+					"ecr:BatchGetImage"
+				],
+				"Resource": "*"
 			}
 		]
 	}`
