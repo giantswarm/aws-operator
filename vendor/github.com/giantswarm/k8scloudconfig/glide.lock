@@ -1,14 +1,15 @@
 hash: 7376746e7885ea00032b53692824ac0d34d97e9efdf64bd756768c2298bef31e
-updated: 2017-07-24T17:52:29.089948561+02:00
+updated: 2017-08-01T14:01:08.633629569+02:00
 imports:
 - name: github.com/giantswarm/clustertpr
-  version: 9eeb968a00813525e4a8addb158e802320119aef
+  version: e00ef3f59c4d55ce1a2cf70b7739e34a0604d748
   subpackages:
   - node
   - spec
   - spec/docker
   - spec/kubernetes
   - spec/kubernetes/hyperkube
+  - spec/kubernetes/ingress
   - spec/kubernetes/kubectl
   - spec/kubernetes/networksetup
 testImports:

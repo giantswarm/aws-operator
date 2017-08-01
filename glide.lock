@@ -1,8 +1,8 @@
 hash: 9b562a91b51a3acc2f536b5f4ba861d6fec7f432a53884148d6a16192ada483e
-updated: 2017-07-25T12:42:25.33336854+02:00
+updated: 2017-08-01T14:28:28.806059091+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 40f45e34986ba617a372d1590de273a0ca84a53d
+  version: b7eb6853a2d4bf9238b6613874d62006e0d6c27a
   subpackages:
   - aws
   - aws/awserr
@@ -81,25 +81,28 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: c0a9d637a3b673a07037a92c305a57deb686b260
+  version: 46d936c38eba06537346d340d27c4927826c45fc
   subpackages:
   - spec
   - spec/aws
 - name: github.com/giantswarm/certificatetpr
   version: 4621214c8364e0fc8234013911211e384bfd3ddf
 - name: github.com/giantswarm/clustertpr
-  version: 9eeb968a00813525e4a8addb158e802320119aef
+  version: e00ef3f59c4d55ce1a2cf70b7739e34a0604d748
   subpackages:
   - spec
   - spec/docker
   - spec/kubernetes
   - spec/kubernetes/hyperkube
+  - spec/kubernetes/ingress
   - spec/kubernetes/kubectl
   - spec/kubernetes/networksetup
 - name: github.com/giantswarm/k8scloudconfig
-  version: abbec1404a3da3f268923dc3276e97605cd9838b
+  version: 3f295cf51350030d407d247daa2c7f7cf085efe0
+- name: github.com/giantswarm/microerror
+  version: 7bf6a0a6d24b1e3a03af3ed3a8e3531d792ea3e3
 - name: github.com/giantswarm/microkit
-  version: c2f273484a749a94402dc3cfbd02913f57995484
+  version: 4e085764fbe2e0301e2065bbb01d74847e47c4cc
   subpackages:
   - command
   - command/daemon
@@ -121,8 +124,10 @@ imports:
   - transaction
   - transaction/context/id
   - transaction/context/tracked
+- name: github.com/giantswarm/micrologger
+  version: 97740d3352f783c3b774db8bab314deff165f43b
 - name: github.com/giantswarm/operatorkit
-  version: 2ed2153269a30dc8331b2fca4b6a314dad02f9b6
+  version: be4331cdb2d518c233732b54a21093ae05231c84
   subpackages:
   - tpr
 - name: github.com/go-ini/ini
@@ -229,7 +234,7 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 90fc11bbc0a789c29272c21b5ff9e93db183f8dc
+  version: b26b538f693051ac6518e65672de3144ce3fbedc
 - name: github.com/spf13/jwalterweatherman
   version: 0efa5202c04663c757d84f90f5219c1250baf94f
 - name: github.com/spf13/pflag

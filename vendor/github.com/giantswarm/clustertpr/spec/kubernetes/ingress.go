@@ -1,6 +1,10 @@
 package kubernetes
 
+import "github.com/giantswarm/clustertpr/spec/kubernetes/ingress"
+
 type IngressController struct {
+	// Docker is the docker image for the Ingress Controller.
+	Docker ingress.Docker `json:"docker" yaml:"docker"`
 	// Domain is the external domain of the Ingress Controller running in the
 	// Kubernetes cluster, e.g. <cluster-id>.fra-1.gigantic.io.
 	Domain string `json:"domain" yaml:"domain"`
