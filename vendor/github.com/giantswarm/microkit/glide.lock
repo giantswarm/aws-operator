@@ -1,5 +1,5 @@
-hash: 976507bd862c3f6a730d05fe45949d9c866fc9ad625ea914216757f5fbcea381
-updated: 2017-07-17T18:48:23.022377589+02:00
+hash: 0396bc6572070c7b97993f3d2f96aa1c7516c10571d27606b4048e6afdcaaca2
+updated: 2017-07-28T11:31:33.479873673+02:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -35,7 +35,7 @@ imports:
 - name: github.com/go-stack/stack
   version: 54be5f394ed2c3e19dac9134a40a95ba5a017f7b
 - name: github.com/golang/protobuf
-  version: 8616e8ee5e20a1704615e6c8d7afcdac06087a67
+  version: 748d386b5c1ea99658fd69fe9f03991ce86a90c1
   subpackages:
   - proto
 - name: github.com/gorilla/context
@@ -95,13 +95,13 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: d994347edadc56d6a7f863775fb6887606685ae6
+  version: 34594c771f2c18301dc152640ad40ece28795373
 - name: github.com/spf13/jwalterweatherman
   version: 0efa5202c04663c757d84f90f5219c1250baf94f
 - name: github.com/spf13/pflag
   version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
 - name: github.com/spf13/viper
-  version: c1de95864d73a5465492829d7cb2dd422b19ac96
+  version: 25b30aa063fc18e48662b86996252eabdcf2f0c7
 - name: github.com/tylerb/graceful
   version: 4654dfbb6ad53cb5e27f37d99b02e16c1872fbbb
 - name: github.com/ugorji/go
@@ -144,5 +144,5 @@ imports:
   - tap
   - transport
 - name: gopkg.in/yaml.v2
-  version: 3b4ad1db5b2a649883ff3782f5f9f6fb52be71af
+  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 testImports: []
