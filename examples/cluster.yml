@@ -37,6 +37,8 @@ spec:
         docker:
           image: "quay.io/giantswarm/hyperkube:v1.6.4_coreos.0"
       ingressController:
+        docker:
+          image: "quay.io/giantswarm/nginx-ingress-controller:0.9.0-beta.1"
         insecurePort: 30010
         securePort: 30011
         domain: "ingress.example.aws.gigantic.io"
