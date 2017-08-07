@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 // Config represents the configuration used to create a memory service.
@@ -70,7 +70,7 @@ func (s *Service) List(ctx context.Context, key string) ([]string, error) {
 	var list []string
 
 	i := len(key)
-	for k, _ := range s.storage {
+	for k := range s.storage {
 		if len(k) <= i+1 {
 			continue
 		}
@@ -89,7 +89,7 @@ func (s *Service) List(ctx context.Context, key string) ([]string, error) {
 	}
 
 	if len(list) == 0 {
-		return nil, microerror.MaskAnyf(notFoundError, key)
+		return nil, microerror.Maskf(notFoundError, key)
 	}
 
 	return list, nil
@@ -104,5 +104,5 @@ func (s *Service) Search(ctx context.Context, key string) (string, error) {
 		return value, nil
 	}
 
-	return "", microerror.MaskAnyf(notFoundError, key)
+	return "", microerror.Maskf(notFoundError, key)
 }

@@ -1,4 +1,4 @@
-package logger
+package k8s
 
 import (
 	"github.com/juju/errgo"

@@ -1,7 +1,7 @@
 package server
 
 import (
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 // ResponseErrorConfig represents the configuration used to create a new
@@ -24,7 +24,7 @@ func DefaultResponseErrorConfig() ResponseErrorConfig {
 func NewResponseError(config ResponseErrorConfig) (ResponseError, error) {
 	// Settings.
 	if config.Underlying == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "underlying must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "underlying must not be empty")
 	}
 
 	newResponseError := &responseError{

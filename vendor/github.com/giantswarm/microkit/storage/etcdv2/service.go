@@ -8,7 +8,7 @@ import (
 
 	"github.com/coreos/etcd/client"
 
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 // Config represents the configuration used to create a service.
@@ -45,7 +45,7 @@ func DefaultConfig() Config {
 func New(config Config) (*Service, error) {
 	// Dependencies.
 	if config.EtcdClient == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "etcd client must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "etcd client must not be empty")
 	}
 
 	newService := &Service{
@@ -79,7 +79,7 @@ func (s *Service) Create(ctx context.Context, key, value string) error {
 	if IsEtcdKeyAlreadyExists(err) {
 		return nil
 	} else if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -91,9 +91,9 @@ func (s *Service) Delete(ctx context.Context, key string) error {
 	}
 	_, err := s.keyClient.Delete(ctx, s.key(key), options)
 	if client.IsKeyNotFound(err) {
-		return microerror.MaskAnyf(notFoundError, "%s", err)
+		return microerror.Maskf(notFoundError, "%s", err)
 	} else if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -107,7 +107,7 @@ func (s *Service) Exists(ctx context.Context, key string) (bool, error) {
 	if client.IsKeyNotFound(err) {
 		return false, nil
 	} else if err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	return true, nil
@@ -120,12 +120,12 @@ func (s *Service) List(ctx context.Context, key string) ([]string, error) {
 	}
 	resp, err := s.keyClient.Get(ctx, s.key(key), options)
 	if client.IsKeyNotFound(err) {
-		return nil, microerror.MaskAny(notFoundError)
+		return nil, microerror.Mask(notFoundError)
 	} else if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 	if resp.Node == nil || resp.Node.Dir == false {
-		return nil, microerror.MaskAny(notFoundError)
+		return nil, microerror.Mask(notFoundError)
 	}
 
 	var children []string
@@ -135,13 +135,13 @@ func (s *Service) List(ctx context.Context, key string) ([]string, error) {
 			continue
 		}
 		if !strings.HasPrefix(node.Key, s.key(key)) {
-			return nil, microerror.MaskAny(notFoundError)
+			return nil, microerror.Mask(notFoundError)
 		}
 		children = append(children, node.Key[len(s.key(key))+1:])
 	}
 
 	if len(children) == 0 {
-		return nil, microerror.MaskAny(notFoundError)
+		return nil, microerror.Mask(notFoundError)
 	}
 
 	return children, nil
@@ -153,9 +153,9 @@ func (s *Service) Search(ctx context.Context, key string) (string, error) {
 	}
 	clientResponse, err := s.keyClient.Get(ctx, s.key(key), options)
 	if client.IsKeyNotFound(err) {
-		return "", microerror.MaskAnyf(notFoundError, key)
+		return "", microerror.Maskf(notFoundError, key)
 	} else if err != nil {
-		return "", microerror.MaskAny(err)
+		return "", microerror.Mask(err)
 	}
 
 	return clientResponse.Node.Value, nil

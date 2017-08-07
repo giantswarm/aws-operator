@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"net/http"
 
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 // ResponseWriterConfig represents the configuration used to create a new
@@ -31,13 +31,13 @@ func DefaultResponseWriterConfig() ResponseWriterConfig {
 func NewResponseWriter(config ResponseWriterConfig) (ResponseWriter, error) {
 	// Settings.
 	if config.BodyBuffer == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "body buffer must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "body buffer must not be empty")
 	}
 	if config.ResponseWriter == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "response writer must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "response writer must not be empty")
 	}
 	if config.StatusCode == 0 {
-		return nil, microerror.MaskAnyf(invalidConfigError, "status code must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "status code must not be empty")
 	}
 
 	newResponseWriter := &responseWriter{
@@ -84,7 +84,7 @@ func (rw *responseWriter) Write(b []byte) (int, error) {
 
 	_, err := rw.bodyBuffer.Write(b)
 	if err != nil {
-		return 0, microerror.MaskAny(err)
+		return 0, microerror.Mask(err)
 	}
 
 	return rw.responseWriter.Write(b)

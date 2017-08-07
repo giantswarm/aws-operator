@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	microerror "github.com/giantswarm/microkit/error"
-	micrologger "github.com/giantswarm/microkit/logger"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
@@ -41,10 +41,10 @@ func DefaultConfig() Config {
 func New(config Config) (*Service, error) {
 	// Dependencies.
 	if config.K8sClient == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "config.K8sClient must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "config.K8sClient must not be empty")
 	}
 	if config.Logger == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "config.Logger must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
 
 	newService := &Service{
@@ -71,7 +71,7 @@ func (s *Service) SearchCerts(clusterID string) (AssetsBundle, error) {
 	for _, componentName := range ClusterComponents {
 		ab, err := s.SearchCertsForComponent(clusterID, componentName.String())
 		if err != nil {
-			return nil, microerror.MaskAny(err)
+			return nil, microerror.Mask(err)
 		}
 
 		for k, v := range ab {
@@ -99,7 +99,7 @@ func (s *Service) SearchCertsForComponent(clusterID, componentName string) (Asse
 		),
 	})
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	assetsBundle := make(AssetsBundle)
@@ -109,7 +109,7 @@ func (s *Service) SearchCertsForComponent(clusterID, componentName string) (Asse
 		select {
 		case event, ok := <-watcher.ResultChan():
 			if !ok {
-				return nil, microerror.MaskAnyf(secretsRetrievalFailedError, "secrets channel was already closed")
+				return nil, microerror.Maskf(secretsRetrievalFailedError, "secrets channel was already closed")
 			}
 
 			switch event.Type {
@@ -118,13 +118,13 @@ func (s *Service) SearchCertsForComponent(clusterID, componentName string) (Asse
 				component := ClusterComponent(secret.Labels[ComponentLabel])
 
 				if !ValidComponent(component, ClusterComponents) {
-					return nil, microerror.MaskAnyf(secretsRetrievalFailedError, "unknown clusterComponent %s", component)
+					return nil, microerror.Maskf(secretsRetrievalFailedError, "unknown clusterComponent %s", component)
 				}
 
 				for _, assetType := range TLSAssetTypes {
 					asset, ok := secret.Data[assetType.String()]
 					if !ok {
-						return nil, microerror.MaskAnyf(secretsRetrievalFailedError, "malformed secret was missing %v asset", assetType)
+						return nil, microerror.Maskf(secretsRetrievalFailedError, "malformed secret was missing %v asset", assetType)
 					}
 
 					assetsBundle[AssetsBundleKey{component, assetType}] = asset
@@ -135,10 +135,10 @@ func (s *Service) SearchCertsForComponent(clusterID, componentName string) (Asse
 				// Noop. Ignore deleted events. These are handled by the certificate
 				// operator.
 			case watch.Error:
-				return nil, microerror.MaskAnyf(secretsRetrievalFailedError, "there was an error in the watcher: %v", apierrors.FromObject(event.Object))
+				return nil, microerror.Maskf(secretsRetrievalFailedError, "there was an error in the watcher: %v", apierrors.FromObject(event.Object))
 			}
 		case <-time.After(WatchTimeOut):
-			return nil, microerror.MaskAnyf(secretsRetrievalFailedError, "timed out waiting for secrets")
+			return nil, microerror.Maskf(secretsRetrievalFailedError, "timed out waiting for secrets")
 		}
 	}
 }

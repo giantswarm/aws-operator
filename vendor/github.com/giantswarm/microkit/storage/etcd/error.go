@@ -1,33 +1,33 @@
 package etcd
 
 import (
-	"github.com/juju/errgo"
+	"github.com/giantswarm/microerror"
 )
 
-var createFailedError = errgo.New("create failed")
+var createFailedError = microerror.New("create failed")
 
 // IsCreateFailed asserts createFailedError.
 func IsCreateFailed(err error) bool {
-	return errgo.Cause(err) == createFailedError
+	return microerror.Cause(err) == createFailedError
 }
 
-var invalidConfigError = errgo.New("invalid config")
+var invalidConfigError = microerror.New("invalid config")
 
 // IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
-	return errgo.Cause(err) == invalidConfigError
+	return microerror.Cause(err) == invalidConfigError
 }
 
-var multipleValuesError = errgo.New("multiple values")
+var multipleValuesError = microerror.New("multiple values")
 
 // IsMultipleValuesFound asserts multipleValuesError.
 func IsMultipleValuesFound(err error) bool {
-	return errgo.Cause(err) == multipleValuesError
+	return microerror.Cause(err) == multipleValuesError
 }
 
-var notFoundError = errgo.New("not found")
+var notFoundError = microerror.New("not found")
 
 // IsNotFound asserts notFoundError.
 func IsNotFound(err error) bool {
-	return errgo.Cause(err) == notFoundError
+	return microerror.Cause(err) == notFoundError
 }

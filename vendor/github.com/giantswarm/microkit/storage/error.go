@@ -1,14 +1,14 @@
 package storage
 
 import (
-	"github.com/juju/errgo"
+	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/microkit/storage/etcd"
 	"github.com/giantswarm/microkit/storage/etcdv2"
 	"github.com/giantswarm/microkit/storage/memory"
 )
 
-var invalidConfigError = errgo.New("invalid config")
+var invalidConfigError = microerror.New("invalid config")
 
 // IsInvalidConfig represents the error matcher for public use. Services using
 // the storage service internally should use this public key matcher to verify
@@ -17,7 +17,7 @@ var invalidConfigError = errgo.New("invalid config")
 // matcher groups all necessary error matchers of more specific storage
 // implementations.
 func IsInvalidConfig(err error) bool {
-	return errgo.Cause(err) == invalidConfigError || etcd.IsInvalidConfig(err) || etcdv2.IsInvalidConfig(err)
+	return microerror.Cause(err) == invalidConfigError || etcd.IsInvalidConfig(err) || etcdv2.IsInvalidConfig(err)
 }
 
 // IsNotFound represents the error matcher for public use. Services using the

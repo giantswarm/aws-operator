@@ -1,11 +1,11 @@
 package memory
 
 import (
-	"github.com/juju/errgo"
+	"github.com/giantswarm/microerror"
 )
 
-var notFoundError = errgo.New("not found")
+var notFoundError = microerror.New("not found")
 
 func IsNotFound(err error) bool {
-	return errgo.Cause(err) == notFoundError
+	return microerror.Cause(err) == notFoundError
 }
