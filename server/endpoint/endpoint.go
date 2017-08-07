@@ -1,11 +1,11 @@
 package endpoint
 
 import (
+	"github.com/giantswarm/microendpoint/endpoint/version"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/server/endpoint/healthz"
-	"github.com/giantswarm/aws-operator/server/endpoint/version"
 	"github.com/giantswarm/aws-operator/server/middleware"
 	"github.com/giantswarm/aws-operator/service"
 )
@@ -49,8 +49,7 @@ func New(config Config) (*Endpoint, error) {
 	{
 		versionConfig := version.DefaultConfig()
 		versionConfig.Logger = config.Logger
-		versionConfig.Middleware = config.Middleware
-		versionConfig.Service = config.Service
+		versionConfig.Service = config.Service.Version
 		versionEndpoint, err = version.New(versionConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
