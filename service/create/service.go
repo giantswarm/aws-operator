@@ -14,8 +14,8 @@ import (
 	"github.com/giantswarm/certificatetpr"
 	"github.com/giantswarm/clustertpr/spec"
 	"github.com/giantswarm/k8scloudconfig"
-	microerror "github.com/giantswarm/microkit/error"
-	micrologger "github.com/giantswarm/microkit/logger"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/tpr"
 	"github.com/juju/errgo"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -80,22 +80,22 @@ func DefaultConfig() Config {
 func New(config Config) (*Service, error) {
 	// Dependencies.
 	if config.CertWatcher == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "config.CertWatcher must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "config.CertWatcher must not be empty")
 	}
 	if config.K8sClient == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "config.K8sClient must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "config.K8sClient must not be empty")
 	}
 	if config.Logger == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "config.Logger must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
 
 	// Settings.
 	var emptyAwsConfig awsutil.Config
 	if config.AwsConfig == emptyAwsConfig {
-		return nil, microerror.MaskAnyf(invalidConfigError, "config.AwsConfig must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "config.AwsConfig must not be empty")
 	}
 	if config.PubKeyFile == "" {
-		return nil, microerror.MaskAnyf(invalidConfigError, "config.PubKeyFile must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "config.PubKeyFile must not be empty")
 	}
 
 	var err error
@@ -113,7 +113,7 @@ func New(config Config) (*Service, error) {
 
 		newTPR, err = tpr.New(tprConfig)
 		if err != nil {
-			return nil, microerror.MaskAny(err)
+			return nil, microerror.Mask(err)
 		}
 	}
 
@@ -238,7 +238,7 @@ func (s *Service) runMachines(input runMachinesInput) (bool, []string, error) {
 
 	// TODO(nhlfr): Create a separate module for validating specs and execute on the earlier stages.
 	if len(machines) != len(awsMachines) {
-		return false, nil, microerror.MaskAny(fmt.Errorf("mismatched number of %s machines in the 'spec' and 'aws' sections: %d != %d",
+		return false, nil, microerror.Mask(fmt.Errorf("mismatched number of %s machines in the 'spec' and 'aws' sections: %d != %d",
 			input.prefix,
 			len(machines),
 			len(awsMachines)))
@@ -267,7 +267,7 @@ func (s *Service) runMachines(input runMachinesInput) (bool, []string, error) {
 			prefix:              input.prefix,
 		})
 		if err != nil {
-			return false, nil, microerror.MaskAny(err)
+			return false, nil, microerror.Mask(err)
 		}
 		if created {
 			anyCreated = true
@@ -304,7 +304,7 @@ func (s *Service) uploadCloudconfigToS3(svc *s3.S3, s3Bucket, path, data string)
 		Key:           aws.String(path),
 		ContentLength: aws.Int64(int64(len(data))),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -336,7 +336,7 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 
 	cloudConfig, err := s.cloudConfig(input.prefix, cloudConfigParams, input.cluster.Spec, input.tlsAssets)
 	if err != nil {
-		return false, "", microerror.MaskAny(err)
+		return false, "", microerror.Mask(err)
 	}
 
 	// We now upload the instance cloudconfig to S3 and create a "small
@@ -357,22 +357,22 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 		AWSEntity: awsresources.AWSEntity{Clients: input.clients},
 	}
 	if err := cloudconfigS3.CreateOrFail(); err != nil {
-		return false, "", microerror.MaskAny(err)
+		return false, "", microerror.Mask(err)
 	}
 
 	smallCloudconfig, err := s.SmallCloudconfig(cloudconfigConfig)
 	if err != nil {
-		return false, "", microerror.MaskAny(err)
+		return false, "", microerror.Mask(err)
 	}
 
 	securityGroupID, err := input.securityGroup.GetID()
 	if err != nil {
-		return false, "", microerror.MaskAny(err)
+		return false, "", microerror.Mask(err)
 	}
 
 	subnetID, err := input.subnet.GetID()
 	if err != nil {
-		return false, "", microerror.MaskAny(err)
+		return false, "", microerror.Mask(err)
 	}
 
 	var instance *awsresources.Instance
@@ -397,7 +397,7 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 		}
 		instanceCreated, err = instance.CreateIfNotExists()
 		if err != nil {
-			return false, "", microerror.MaskAny(err)
+			return false, "", microerror.Mask(err)
 		}
 	}
 
@@ -430,12 +430,12 @@ func (s *Service) deleteMachines(input deleteMachinesInput) error {
 		Pattern: pattern,
 	})
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	for _, instance := range instances {
 		if err := instance.Delete(); err != nil {
-			return microerror.MaskAny(err)
+			return microerror.Mask(err)
 		}
 	}
 
@@ -925,7 +925,7 @@ func (s *Service) addFunc(obj interface{}) {
 
 	// Create Record Sets for the Load Balancers.
 	recordSetInputs := []recordSetInput{
-		recordSetInput{
+		{
 			Cluster:      cluster,
 			Client:       clients.Route53,
 			Resource:     apiLB,
@@ -933,7 +933,7 @@ func (s *Service) addFunc(obj interface{}) {
 			HostedZoneID: cluster.Spec.AWS.HostedZones.API,
 			Type:         route53.RRTypeA,
 		},
-		recordSetInput{
+		{
 			Cluster:      cluster,
 			Client:       clients.Route53,
 			Resource:     etcdLB,
@@ -941,7 +941,7 @@ func (s *Service) addFunc(obj interface{}) {
 			HostedZoneID: cluster.Spec.AWS.HostedZones.Etcd,
 			Type:         route53.RRTypeA,
 		},
-		recordSetInput{
+		{
 			Cluster:      cluster,
 			Client:       clients.Route53,
 			Resource:     ingressLB,
@@ -949,7 +949,7 @@ func (s *Service) addFunc(obj interface{}) {
 			HostedZoneID: cluster.Spec.AWS.HostedZones.Ingress,
 			Type:         route53.RRTypeA,
 		},
-		recordSetInput{
+		{
 			Cluster:      cluster,
 			Client:       clients.Route53,
 			Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.WildcardDomain,
@@ -1066,7 +1066,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 			s.logger.Log("error", errgo.Details(err))
 		} else {
 			recordSetInputs := []recordSetInput{
-				recordSetInput{
+				{
 					Cluster:      cluster,
 					Client:       clients.Route53,
 					Resource:     apiLB,
@@ -1074,7 +1074,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 					HostedZoneID: cluster.Spec.AWS.HostedZones.API,
 					Type:         route53.RRTypeA,
 				},
-				recordSetInput{
+				{
 					Cluster:      cluster,
 					Client:       clients.Route53,
 					Resource:     etcdLB,
@@ -1082,7 +1082,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 					HostedZoneID: cluster.Spec.AWS.HostedZones.Etcd,
 					Type:         route53.RRTypeA,
 				},
-				recordSetInput{
+				{
 					Cluster:      cluster,
 					Client:       clients.Route53,
 					Resource:     ingressLB,
@@ -1090,7 +1090,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 					HostedZoneID: cluster.Spec.AWS.HostedZones.Ingress,
 					Type:         route53.RRTypeA,
 				},
-				recordSetInput{
+				{
 					Cluster:      cluster,
 					Client:       clients.Route53,
 					Value:        cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
@@ -1114,17 +1114,17 @@ func (s *Service) deleteFunc(obj interface{}) {
 
 	// Delete Load Balancers.
 	loadBalancerInputs := []LoadBalancerInput{
-		LoadBalancerInput{
+		{
 			Name:    cluster.Spec.Cluster.Kubernetes.API.Domain,
 			Clients: clients,
 			Cluster: cluster,
 		},
-		LoadBalancerInput{
+		{
 			Name:    cluster.Spec.Cluster.Etcd.Domain,
 			Clients: clients,
 			Cluster: cluster,
 		},
-		LoadBalancerInput{
+		{
 			Name:    cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
 			Clients: clients,
 			Cluster: cluster,

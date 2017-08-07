@@ -1,8 +1,8 @@
 package endpoint
 
 import (
-	microerror "github.com/giantswarm/microkit/error"
-	micrologger "github.com/giantswarm/microkit/logger"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/server/endpoint/healthz"
 	"github.com/giantswarm/aws-operator/server/endpoint/version"
@@ -41,7 +41,7 @@ func New(config Config) (*Endpoint, error) {
 		healthzConfig.Service = config.Service
 		healthzEndpoint, err = healthz.New(healthzConfig)
 		if err != nil {
-			return nil, microerror.MaskAny(err)
+			return nil, microerror.Mask(err)
 		}
 	}
 
@@ -53,7 +53,7 @@ func New(config Config) (*Endpoint, error) {
 		versionConfig.Service = config.Service
 		versionEndpoint, err = version.New(versionConfig)
 		if err != nil {
-			return nil, microerror.MaskAny(err)
+			return nil, microerror.Mask(err)
 		}
 	}
 

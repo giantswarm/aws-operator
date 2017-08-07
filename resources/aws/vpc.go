@@ -5,7 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 type VPC struct {
@@ -18,7 +18,7 @@ type VPC struct {
 func (v VPC) findExisting() (*ec2.Vpc, error) {
 	vpcs, err := v.Clients.EC2.DescribeVpcs(&ec2.DescribeVpcsInput{
 		Filters: []*ec2.Filter{
-			&ec2.Filter{
+			{
 				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
 				Values: []*string{
 					aws.String(v.Name),
@@ -27,13 +27,13 @@ func (v VPC) findExisting() (*ec2.Vpc, error) {
 		},
 	})
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	if len(vpcs.Vpcs) < 1 {
-		return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, VPCType, v.Name)
+		return nil, microerror.Maskf(notFoundError, notFoundErrorFormat, VPCType, v.Name)
 	} else if len(vpcs.Vpcs) > 1 {
-		return nil, microerror.MaskAny(tooManyResultsError)
+		return nil, microerror.Mask(tooManyResultsError)
 	}
 
 	return vpcs.Vpcs[0], nil
@@ -44,7 +44,7 @@ func (v *VPC) checkIfExists() (bool, error) {
 	if IsNotFound(err) {
 		return false, nil
 	} else if err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	return true, nil
@@ -53,7 +53,7 @@ func (v *VPC) checkIfExists() (bool, error) {
 func (v *VPC) CreateIfNotExists() (bool, error) {
 	exists, err := v.checkIfExists()
 	if err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	if exists {
@@ -61,7 +61,7 @@ func (v *VPC) CreateIfNotExists() (bool, error) {
 	}
 
 	if err := v.CreateOrFail(); err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	return true, nil
@@ -72,7 +72,7 @@ func (v *VPC) CreateOrFail() error {
 		CidrBlock: aws.String(v.CidrBlock),
 	})
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 	vpcID := *vpc.Vpc.VpcId
 
@@ -81,7 +81,7 @@ func (v *VPC) CreateOrFail() error {
 			aws.String(vpcID),
 		},
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	if _, err := v.Clients.EC2.CreateTags(&ec2.CreateTagsInput{
@@ -95,7 +95,7 @@ func (v *VPC) CreateOrFail() error {
 			},
 		},
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	// These attributes are required for a VPC with private Hosted Zones.
@@ -105,7 +105,7 @@ func (v *VPC) CreateOrFail() error {
 		},
 		VpcId: aws.String(vpcID),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	if _, err := v.Clients.EC2.ModifyVpcAttribute(&ec2.ModifyVpcAttributeInput{
@@ -114,7 +114,7 @@ func (v *VPC) CreateOrFail() error {
 		},
 		VpcId: aws.String(vpcID),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	v.id = vpcID
@@ -125,13 +125,13 @@ func (v *VPC) CreateOrFail() error {
 func (v *VPC) Delete() error {
 	vpc, err := v.findExisting()
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	if _, err := v.Clients.EC2.DeleteVpc(&ec2.DeleteVpcInput{
 		VpcId: vpc.VpcId,
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -145,7 +145,7 @@ func (v VPC) GetID() (string, error) {
 
 	vpc, err := v.findExisting()
 	if err != nil {
-		return "", microerror.MaskAny(err)
+		return "", microerror.Mask(err)
 	}
 
 	return *vpc.VpcId, nil

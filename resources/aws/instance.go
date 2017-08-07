@@ -6,8 +6,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/cenkalti/backoff"
-	microerror "github.com/giantswarm/microkit/error"
-	micrologger "github.com/giantswarm/microkit/logger"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 )
@@ -85,7 +85,7 @@ func (i Instance) findExisting() (*ec2.Instance, error) {
 		Filters: filters,
 	})
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	var existingInstance *ec2.Instance
@@ -100,9 +100,9 @@ func (i Instance) findExisting() (*ec2.Instance, error) {
 	}
 
 	if instancesFound < 1 {
-		return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, InstanceType, i.Name)
+		return nil, microerror.Maskf(notFoundError, notFoundErrorFormat, InstanceType, i.Name)
 	} else if instancesFound > 1 {
-		return nil, microerror.MaskAny(tooManyResultsError)
+		return nil, microerror.Mask(tooManyResultsError)
 	}
 
 	return existingInstance, nil
@@ -113,7 +113,7 @@ func (i *Instance) checkIfExists() (bool, error) {
 	if IsNotFound(err) {
 		return false, nil
 	} else if err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	i.id = *instance.InstanceId
@@ -124,7 +124,7 @@ func (i *Instance) checkIfExists() (bool, error) {
 func (i *Instance) CreateIfNotExists() (bool, error) {
 	exists, err := i.checkIfExists()
 	if err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	if exists {
@@ -132,7 +132,7 @@ func (i *Instance) CreateIfNotExists() (bool, error) {
 	}
 
 	if err := i.CreateOrFail(); err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	return true, nil
@@ -162,13 +162,13 @@ func (i *Instance) CreateOrFail() error {
 		})
 		if err != nil {
 
-			return microerror.MaskAny(err)
+			return microerror.Mask(err)
 		}
 		return nil
 	}
 	reserveNotify := NewNotify(i.Logger, "creating instance")
 	if err := backoff.RetryNotify(reserveOperation, NewCustomExponentialBackoff(), reserveNotify); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	for _, rawInstance := range reservation.Instances {
@@ -187,7 +187,7 @@ func (i *Instance) CreateOrFail() error {
 				},
 			},
 		}); err != nil {
-			return microerror.MaskAny(err)
+			return microerror.Mask(err)
 		}
 	}
 
@@ -197,7 +197,7 @@ func (i *Instance) CreateOrFail() error {
 func (i *Instance) Delete() error {
 	instance, err := i.findExisting()
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	if _, err := i.Clients.EC2.TerminateInstances(&ec2.TerminateInstancesInput{
@@ -205,7 +205,7 @@ func (i *Instance) Delete() error {
 			instance.InstanceId,
 		},
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	if err := i.Clients.EC2.WaitUntilInstanceTerminated(&ec2.DescribeInstancesInput{
@@ -213,7 +213,7 @@ func (i *Instance) Delete() error {
 			instance.InstanceId,
 		},
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -232,7 +232,7 @@ type FindInstancesInput struct {
 func FindInstances(input FindInstancesInput) ([]*Instance, error) {
 	reservations, err := input.Clients.EC2.DescribeInstances(&ec2.DescribeInstancesInput{
 		Filters: []*ec2.Filter{
-			&ec2.Filter{
+			{
 				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
 				Values: []*string{
 					aws.String(fmt.Sprintf("%s*", input.Pattern)),
@@ -241,7 +241,7 @@ func FindInstances(input FindInstancesInput) ([]*Instance, error) {
 		},
 	})
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	instances := make([]*Instance, 0, len(reservations.Reservations))

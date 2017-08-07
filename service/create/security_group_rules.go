@@ -3,7 +3,7 @@ package create
 import (
 	"fmt"
 
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/resources"
@@ -23,7 +23,7 @@ func (s *Service) deleteSecurityGroupRules(input securityGroupRulesInput) error 
 		AWSEntity:   awsresources.AWSEntity{Clients: input.Clients},
 	}
 	if err := securityGroupRules.Delete(); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	s.logger.Log("info", fmt.Sprintf("deleted rules for security group '%s'", input.GroupName))

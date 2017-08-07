@@ -5,7 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 const (
@@ -106,7 +106,7 @@ func (p *Policy) createRole() error {
 		RoleName:                 aws.String(clusterRoleName),
 		AssumeRolePolicyDocument: aws.String(AssumeRolePolicyDocument),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	clusterPolicyName := fmt.Sprintf("%s-%s", p.ClusterID, PolicyNameTemplate)
@@ -116,7 +116,7 @@ func (p *Policy) createRole() error {
 		RoleName:       aws.String(clusterRoleName),
 		PolicyDocument: aws.String(policyDocument),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -126,20 +126,20 @@ func (p *Policy) createInstanceProfile() error {
 	if _, err := p.Clients.IAM.CreateInstanceProfile(&iam.CreateInstanceProfileInput{
 		InstanceProfileName: aws.String(p.clusterProfileName()),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	} else {
 		if _, err := p.Clients.IAM.AddRoleToInstanceProfile(&iam.AddRoleToInstanceProfileInput{
 			InstanceProfileName: aws.String(p.clusterProfileName()),
 			RoleName:            aws.String(p.clusterRoleName()),
 		}); err != nil {
-			return microerror.MaskAny(err)
+			return microerror.Mask(err)
 		}
 	}
 
 	if err := p.Clients.IAM.WaitUntilInstanceProfileExists(&iam.GetInstanceProfileInput{
 		InstanceProfileName: aws.String(p.clusterProfileName()),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -147,11 +147,11 @@ func (p *Policy) createInstanceProfile() error {
 
 func (p *Policy) CreateOrFail() error {
 	if err := p.createRole(); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	if err := p.createInstanceProfile(); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	p.name = p.clusterProfileName()
@@ -164,7 +164,7 @@ func (p *Policy) removeRoleFromInstanceProfile() error {
 		InstanceProfileName: aws.String(p.clusterProfileName()),
 		RoleName:            aws.String(p.clusterRoleName()),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -174,7 +174,7 @@ func (p *Policy) deleteInstanceProfile() error {
 	if _, err := p.Clients.IAM.DeleteInstanceProfile(&iam.DeleteInstanceProfileInput{
 		InstanceProfileName: aws.String(p.clusterProfileName()),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -185,7 +185,7 @@ func (p *Policy) deletePolicy() error {
 		RoleName:   aws.String(p.clusterRoleName()),
 		PolicyName: aws.String(p.clusterPolicyName()),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -195,7 +195,7 @@ func (p *Policy) deleteRole() error {
 	if _, err := p.Clients.IAM.DeleteRole(&iam.DeleteRoleInput{
 		RoleName: aws.String(p.clusterRoleName()),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -203,19 +203,19 @@ func (p *Policy) deleteRole() error {
 
 func (p *Policy) Delete() error {
 	if err := p.removeRoleFromInstanceProfile(); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	if err := p.deleteInstanceProfile(); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	if err := p.deletePolicy(); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	if err := p.deleteRole(); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil

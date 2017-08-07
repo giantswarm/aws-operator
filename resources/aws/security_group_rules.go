@@ -3,7 +3,7 @@ package aws
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 // SecurityGroupRules allows AWS security group rules to be deleted. Any rules
@@ -18,13 +18,13 @@ type SecurityGroupRules struct {
 func (s SecurityGroupRules) findExisting() (*ec2.SecurityGroup, error) {
 	securityGroups, err := s.Clients.EC2.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
 		Filters: []*ec2.Filter{
-			&ec2.Filter{
+			{
 				Name: aws.String(subnetDescription),
 				Values: []*string{
 					aws.String(s.Description),
 				},
 			},
-			&ec2.Filter{
+			{
 				Name: aws.String(subnetGroupName),
 				Values: []*string{
 					aws.String(s.GroupName),
@@ -33,13 +33,13 @@ func (s SecurityGroupRules) findExisting() (*ec2.SecurityGroup, error) {
 		},
 	})
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	if len(securityGroups.SecurityGroups) < 1 {
-		return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, SecurityGroupType, s.GroupName)
+		return nil, microerror.Maskf(notFoundError, notFoundErrorFormat, SecurityGroupType, s.GroupName)
 	} else if len(securityGroups.SecurityGroups) > 1 {
-		return nil, microerror.MaskAny(tooManyResultsError)
+		return nil, microerror.Mask(tooManyResultsError)
 	}
 
 	return securityGroups.SecurityGroups[0], nil
@@ -51,7 +51,7 @@ func (s SecurityGroupRules) findExisting() (*ec2.SecurityGroup, error) {
 func (s SecurityGroupRules) Delete() error {
 	securityGroup, err := s.findExisting()
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	var params *ec2.RevokeSecurityGroupIngressInput
@@ -60,7 +60,7 @@ func (s SecurityGroupRules) Delete() error {
 		IpPermissions: securityGroup.IpPermissions,
 	}
 	if _, err := s.Clients.EC2.RevokeSecurityGroupIngress(params); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil

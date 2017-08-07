@@ -1,6 +1,6 @@
 package aws
 
-import "github.com/juju/errgo"
+import "github.com/giantswarm/microerror"
 
 const (
 	AlreadyAssociated        = "Resource.AlreadyAssociated"
@@ -11,23 +11,23 @@ const (
 	ELBConfigurationMismatch = "already exists and it is configured with different parameters"
 )
 
-var malformedAmazonAccountIDError = errgo.New("malformed amazon account ID")
+var malformedAmazonAccountIDError = microerror.New("malformed amazon account ID")
 
 // IsMalformedAmazonAccountID asserts malformedAmazonAccountIDError.
 func IsMalformedAmazonAccountID(err error) bool {
-	return errgo.Cause(err) == malformedAmazonAccountIDError
+	return microerror.Cause(err) == malformedAmazonAccountIDError
 }
 
-var wrongAmazonAccountIDLengthError = errgo.New("wrong amazon account ID length")
+var wrongAmazonAccountIDLengthError = microerror.New("wrong amazon account ID length")
 
 // IsWrongAmazonIDLength asserts wrongAmazonAccountIDLengthError.
 func IsWrongAmazonAccountIDLength(err error) bool {
-	return errgo.Cause(err) == wrongAmazonAccountIDLengthError
+	return microerror.Cause(err) == wrongAmazonAccountIDLengthError
 }
 
-var emptyAmazonAccountIDError = errgo.New("empty amazon account ID")
+var emptyAmazonAccountIDError = microerror.New("empty amazon account ID")
 
 // IsEmptyAmazonAccountID asserts emptyAmazonAccountIDError.
 func IsEmptyAmazonAccountID(err error) bool {
-	return errgo.Cause(err) == emptyAmazonAccountIDError
+	return microerror.Cause(err) == emptyAmazonAccountIDError
 }

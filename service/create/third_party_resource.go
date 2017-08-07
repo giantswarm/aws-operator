@@ -2,7 +2,7 @@ package create
 
 import (
 	"github.com/giantswarm/awstpr"
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/pkg/apis/extensions/v1beta1"
@@ -20,7 +20,7 @@ func (s *Service) createTPR() error {
 	}
 	_, err := s.k8sClient.Extensions().ThirdPartyResources().Create(tpr)
 	if err != nil && !apierrors.IsAlreadyExists(err) {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 	return nil
 }

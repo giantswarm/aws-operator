@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go/service/iam"
-	microerror "github.com/giantswarm/microkit/error"
-	micrologger "github.com/giantswarm/microkit/logger"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 )
@@ -40,13 +40,13 @@ func DefaultConfig() Config {
 func New(config Config) (*Service, error) {
 	// Dependencies.
 	if config.Logger == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "logger must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "logger must not be empty")
 	}
 
 	// Settings.
 	var emptyAwsConfig awsutil.Config
 	if config.AwsConfig == emptyAwsConfig {
-		return nil, microerror.MaskAnyf(invalidConfigError, "config.AwsConfig must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "config.AwsConfig must not be empty")
 	}
 
 	newService := &Service{
@@ -80,7 +80,7 @@ func (s *Service) Check(ctx context.Context, request Request) (*Response, error)
 	// Get the current user.
 	_, err := clients.IAM.GetUser(&iam.GetUserInput{})
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	return DefaultResponse(), nil

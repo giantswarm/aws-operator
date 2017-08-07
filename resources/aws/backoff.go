@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff"
-	micrologger "github.com/giantswarm/microkit/logger"
+	"github.com/giantswarm/micrologger"
 	"github.com/juju/errgo"
 )
 

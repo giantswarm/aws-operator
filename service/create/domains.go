@@ -7,7 +7,7 @@ import (
 	"github.com/giantswarm/aws-operator/resources"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
 	"github.com/giantswarm/awstpr"
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 type recordSetInput struct {
@@ -31,7 +31,7 @@ func (s *Service) deleteRecordSet(input recordSetInput) error {
 	}
 
 	if err := rs.Delete(); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -49,7 +49,7 @@ func (s *Service) createRecordSet(input recordSetInput) error {
 	}
 
 	if err := apiRecordSet.CreateOrFail(); err != nil {
-		return microerror.MaskAnyf(err, "error registering DNS record '%s'", apiRecordSet.Domain)
+		return microerror.Maskf(err, "error registering DNS record '%s'", apiRecordSet.Domain)
 	}
 
 	s.logger.Log("debug", fmt.Sprintf("created or reused DNS record '%s'", apiRecordSet.Domain))

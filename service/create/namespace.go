@@ -2,7 +2,7 @@ package create
 
 import (
 	"github.com/giantswarm/clustertpr"
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/pkg/api/v1"
@@ -24,7 +24,7 @@ func (s *Service) createClusterNamespace(cluster clustertpr.Spec) error {
 	}
 
 	if _, err := s.k8sClient.Core().Namespaces().Create(&namespace); err != nil && !apierrors.IsAlreadyExists(err) {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 	return nil
 }

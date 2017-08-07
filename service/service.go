@@ -7,8 +7,9 @@ import (
 	"sync"
 
 	"github.com/giantswarm/certificatetpr"
-	microerror "github.com/giantswarm/microkit/error"
-	micrologger "github.com/giantswarm/microkit/logger"
+	"github.com/giantswarm/microendpoint/service/version"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 	"github.com/spf13/viper"
 	"k8s.io/client-go/kubernetes"
 
@@ -62,7 +63,7 @@ func DefaultConfig() Config {
 func New(config Config) (*Service, error) {
 	// Dependencies.
 	if config.Logger == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "logger must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "logger must not be empty")
 	}
 	config.Logger.Log("debug", fmt.Sprintf("creating aws-operator service with config: %s", config))
 
@@ -86,7 +87,7 @@ func New(config Config) (*Service, error) {
 
 		k8sClient, err = k8sutil.NewClient(k8sConfig)
 		if err != nil {
-			return nil, microerror.MaskAny(err)
+			return nil, microerror.Mask(err)
 		}
 	}
 
@@ -97,7 +98,7 @@ func New(config Config) (*Service, error) {
 		certConfig.Logger = config.Logger
 		certWatcher, err = certificatetpr.New(certConfig)
 		if err != nil {
-			return nil, microerror.MaskAny(err)
+			return nil, microerror.Mask(err)
 		}
 	}
 
@@ -120,7 +121,7 @@ func New(config Config) (*Service, error) {
 
 		createService, err = create.New(createConfig)
 		if err != nil {
-			return nil, microerror.MaskAny(err)
+			return nil, microerror.Mask(err)
 		}
 	}
 
@@ -132,7 +133,7 @@ func New(config Config) (*Service, error) {
 
 		healthzService, err = healthz.New(healthzConfig)
 		if err != nil {
-			return nil, microerror.MaskAny(err)
+			return nil, microerror.Mask(err)
 		}
 	}
 
@@ -147,7 +148,7 @@ func New(config Config) (*Service, error) {
 
 		versionService, err = version.New(versionConfig)
 		if err != nil {
-			return nil, microerror.MaskAny(err)
+			return nil, microerror.Mask(err)
 		}
 	}
 

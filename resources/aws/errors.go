@@ -1,7 +1,7 @@
 package aws
 
 import (
-	"github.com/juju/errgo"
+	"github.com/giantswarm/microerror"
 )
 
 const (
@@ -28,69 +28,69 @@ const (
 
 // NotFound errors.
 
-var notFoundError = errgo.New("not found")
+var notFoundError = microerror.New("not found")
 
 // IsNotFound asserts NotFoundError.
 func IsNotFound(err error) bool {
-	return errgo.Cause(err) == notFoundError
+	return microerror.Cause(err) == notFoundError
 }
 
-var tooManyResultsError = errgo.New("too many results")
+var tooManyResultsError = microerror.New("too many results")
 
 // IsTooManyResults asserts tooManyResultsError.
 func IsTooManyResults(err error) bool {
-	return errgo.Cause(err) == tooManyResultsError
+	return microerror.Cause(err) == tooManyResultsError
 }
 
 // Delete errors.
 
-var resourceDeleteError = errgo.New("couldn't delete resource, it lacks the necessary data (ID)")
+var resourceDeleteError = microerror.New("couldn't delete resource, it lacks the necessary data (ID)")
 
 // IsResourceDelete asserts resourceDeleteError.
 func IsResourceDelete(err error) bool {
-	return errgo.Cause(err) == resourceDeleteError
+	return microerror.Cause(err) == resourceDeleteError
 }
 
 // Other errors.
 
-var clientNotInitializedError = errgo.New("the client has not been initialized")
+var clientNotInitializedError = microerror.New("the client has not been initialized")
 
 // IsClientNotInitialized asserts clientNotInitializedError.
 func IsClientNotInitialized(err error) bool {
-	return errgo.Cause(err) == clientNotInitializedError
+	return microerror.Cause(err) == clientNotInitializedError
 }
 
-var keyPairCannotCreateAndNotFoundError = errgo.New("couldn't create and find the keypair")
+var keyPairCannotCreateAndNotFoundError = microerror.New("couldn't create and find the keypair")
 
 // IsKeyPairCannotCreateAndNotFound asserts keyPairCannotCreateAndNotFoundError.
 func IsKeyPairCannotCreateAndNotFound(err error) bool {
-	return errgo.Cause(err) == keyPairCannotCreateAndNotFoundError
+	return microerror.Cause(err) == keyPairCannotCreateAndNotFoundError
 }
 
-var notImplementedMethodError = errgo.New("not implemented method")
+var notImplementedMethodError = microerror.New("not implemented method")
 
 // IsNotImplementedMethod asserts notImplementedMethodError.
 func IsNotImplementedMethod(err error) bool {
-	return errgo.Cause(err) == notImplementedMethodError
+	return microerror.Cause(err) == notImplementedMethodError
 }
 
-var noBucketInBucketObjectError = errgo.New("object needs to belong to some bucket")
+var noBucketInBucketObjectError = microerror.New("object needs to belong to some bucket")
 
 // IsNoBucketInBucketObject asserts noBucketInBucketObjectError.
 func IsNoBucketInBucketObject(err error) bool {
-	return errgo.Cause(err) == noBucketInBucketObjectError
+	return microerror.Cause(err) == noBucketInBucketObjectError
 }
 
-var kmsKeyAliasEmptyError = errgo.New("the KMS key alias cannot be empty")
+var kmsKeyAliasEmptyError = microerror.New("the KMS key alias cannot be empty")
 
 // IsKMSKeyAliasEmpty asserts kmsKeyAliasEmptyError.
 func IsKMSKeyAliasEmpty(err error) bool {
-	return errgo.Cause(err) == kmsKeyAliasEmptyError
+	return microerror.Cause(err) == kmsKeyAliasEmptyError
 }
 
-var attributeEmptyError = errgo.New("attribute cannot be empty")
+var attributeEmptyError = microerror.New("attribute cannot be empty")
 
 // IsPortsToOpenEmpty asserts portsToOpenEmptyError.
 func IsAttributeEmpty(err error) bool {
-	return errgo.Cause(err) == attributeEmptyError
+	return microerror.Cause(err) == attributeEmptyError
 }
