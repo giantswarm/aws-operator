@@ -1283,17 +1283,32 @@ func (s *Service) deleteFunc(obj interface{}) {
 
 	s.logger.Log("info", "deleted bucket")
 
-	// Delete policy.
-	var policy resources.NamedResource
-	policy = &awsresources.Policy{
-		ClusterID: cluster.Spec.Cluster.Cluster.ID,
-		S3Bucket:  bucketName,
-		AWSEntity: awsresources.AWSEntity{Clients: clients},
+	// Delete master policy.
+	var masterPolicy resources.NamedResource
+	masterPolicy = &awsresources.Policy{
+		ClusterID:  cluster.Spec.Cluster.Cluster.ID,
+		PolicyType: prefixMaster,
+		S3Bucket:   bucketName,
+		AWSEntity:  awsresources.AWSEntity{Clients: clients},
 	}
-	if err := policy.Delete(); err != nil {
+	if err := masterPolicy.Delete(); err != nil {
 		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	} else {
-		s.logger.Log("info", "deleted roles, policies, instance profiles")
+		s.logger.Log("info", fmt.Sprintf("deleted %s roles, policies, instance profiles", prefixMaster))
+	}
+
+	// Delete worker policy.
+	var workerPolicy resources.NamedResource
+	workerPolicy = &awsresources.Policy{
+		ClusterID:  cluster.Spec.Cluster.Cluster.ID,
+		PolicyType: prefixWorker,
+		S3Bucket:   bucketName,
+		AWSEntity:  awsresources.AWSEntity{Clients: clients},
+	}
+	if err := workerPolicy.Delete(); err != nil {
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
+	} else {
+		s.logger.Log("info", fmt.Sprintf("deleted %s roles, policies, instance profiles", prefixWorker))
 	}
 
 	// Delete KMS key.
