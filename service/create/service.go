@@ -540,22 +540,40 @@ func (s *Service) addFunc(obj interface{}) {
 		return
 	}
 
-	// Create policy
 	bucketName := s.bucketName(cluster)
 
-	var policy resources.NamedResource
-	var policyErr error
+	// Create master IAM policy
+	var masterPolicy resources.NamedResource
+	var masterPolicyErr error
 	{
-		policy = &awsresources.Policy{
-			ClusterID: cluster.Spec.Cluster.Cluster.ID,
-			KMSKeyArn: kmsKey.Arn(),
-			S3Bucket:  bucketName,
-			AWSEntity: awsresources.AWSEntity{Clients: clients},
+		masterPolicy = &awsresources.Policy{
+			ClusterID:  cluster.Spec.Cluster.Cluster.ID,
+			KMSKeyArn:  kmsKey.Arn(),
+			PolicyType: prefixMaster,
+			S3Bucket:   bucketName,
+			AWSEntity:  awsresources.AWSEntity{Clients: clients},
 		}
-		policyErr = policy.CreateOrFail()
+		masterPolicyErr = masterPolicy.CreateOrFail()
 	}
-	if policyErr != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create policy: '%#v'", policyErr))
+	if masterPolicyErr != nil {
+		s.logger.Log("error", fmt.Sprintf("could not create %s policy: '%#v'", prefixMaster, masterPolicyErr))
+	}
+
+	// Create worker IAM policy
+	var workerPolicy resources.NamedResource
+	var workerPolicyErr error
+	{
+		workerPolicy = &awsresources.Policy{
+			ClusterID:  cluster.Spec.Cluster.Cluster.ID,
+			KMSKeyArn:  kmsKey.Arn(),
+			PolicyType: prefixWorker,
+			S3Bucket:   bucketName,
+			AWSEntity:  awsresources.AWSEntity{Clients: clients},
+		}
+		workerPolicyErr = workerPolicy.CreateOrFail()
+	}
+	if workerPolicyErr != nil {
+		s.logger.Log("error", fmt.Sprintf("could not create %s policy: '%#v'", prefixWorker, workerPolicyErr))
 	}
 
 	// Create S3 bucket
@@ -759,7 +777,7 @@ func (s *Service) addFunc(obj interface{}) {
 		securityGroup:       mastersSecurityGroup,
 		subnet:              publicSubnet,
 		keyPairName:         cluster.Name,
-		instanceProfileName: policy.GetName(),
+		instanceProfileName: masterPolicy.GetName(),
 		prefix:              prefixMaster,
 	})
 	if err != nil {
@@ -824,7 +842,7 @@ func (s *Service) addFunc(obj interface{}) {
 	// If the policy couldn't be created and some instances didn't exist before, that means that the cluster
 	// is inconsistent and most problably its deployment broke in the middle during the previous run of
 	// aws-operator.
-	if anyMastersCreated && (kmsKeyErr != nil || policyErr != nil) {
+	if anyMastersCreated && (kmsKeyErr != nil || masterPolicyErr != nil || workerPolicyErr != nil) {
 		s.logger.Log("error", fmt.Sprintf("cluster '%s' is inconsistent, KMS keys and policies were not created, but EC2 instances were missing, please consider deleting this cluster", cluster.Name))
 		return
 	}
@@ -871,7 +889,7 @@ func (s *Service) addFunc(obj interface{}) {
 		securityGroup:       workersSecurityGroup,
 		subnet:              publicSubnet,
 		keypairName:         cluster.Name,
-		instanceProfileName: policy.GetName(),
+		instanceProfileName: workerPolicy.GetName(),
 		prefix:              prefixWorker,
 		ebsStorage:          true,
 	}
