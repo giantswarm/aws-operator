@@ -5,7 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 type RouteTable struct {
@@ -18,7 +18,7 @@ type RouteTable struct {
 func (r RouteTable) findExisting() (*ec2.RouteTable, error) {
 	routeTables, err := r.Client.DescribeRouteTables(&ec2.DescribeRouteTablesInput{
 		Filters: []*ec2.Filter{
-			&ec2.Filter{
+			{
 				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
 				Values: []*string{
 					aws.String(r.Name),
@@ -27,13 +27,13 @@ func (r RouteTable) findExisting() (*ec2.RouteTable, error) {
 		},
 	})
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	if len(routeTables.RouteTables) < 1 {
-		return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, RouteTableType, r.Name)
+		return nil, microerror.Maskf(notFoundError, notFoundErrorFormat, RouteTableType, r.Name)
 	} else if len(routeTables.RouteTables) > 1 {
-		return nil, microerror.MaskAny(tooManyResultsError)
+		return nil, microerror.Mask(tooManyResultsError)
 	}
 
 	return routeTables.RouteTables[0], nil
@@ -44,7 +44,7 @@ func (r *RouteTable) checkIfExists() (bool, error) {
 	if IsNotFound(err) {
 		return false, nil
 	} else if err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	r.id = *routeTable.RouteTableId
@@ -55,7 +55,7 @@ func (r *RouteTable) checkIfExists() (bool, error) {
 func (r *RouteTable) CreateIfNotExists() (bool, error) {
 	exists, err := r.checkIfExists()
 	if err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	if exists {
@@ -63,7 +63,7 @@ func (r *RouteTable) CreateIfNotExists() (bool, error) {
 	}
 
 	if err := r.CreateOrFail(); err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	return true, nil
@@ -74,7 +74,7 @@ func (r *RouteTable) CreateOrFail() error {
 		VpcId: aws.String(r.VpcID),
 	})
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	if _, err := r.Client.CreateTags(&ec2.CreateTagsInput{
@@ -86,7 +86,7 @@ func (r *RouteTable) CreateOrFail() error {
 			},
 		},
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	r.id = *routeTable.RouteTable.RouteTableId
@@ -97,21 +97,21 @@ func (r *RouteTable) CreateOrFail() error {
 func (r *RouteTable) Delete() error {
 	routeTable, err := r.findExisting()
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	for _, association := range routeTable.Associations {
 		if _, err := r.Client.DisassociateRouteTable(&ec2.DisassociateRouteTableInput{
 			AssociationId: association.RouteTableAssociationId,
 		}); err != nil {
-			return microerror.MaskAny(err)
+			return microerror.Mask(err)
 		}
 	}
 
 	if _, err := r.Client.DeleteRouteTable(&ec2.DeleteRouteTableInput{
 		RouteTableId: routeTable.RouteTableId,
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -124,7 +124,7 @@ func (r RouteTable) GetID() (string, error) {
 
 	routeTable, err := r.findExisting()
 	if err != nil {
-		return "", microerror.MaskAny(err)
+		return "", microerror.Mask(err)
 	}
 
 	return *routeTable.RouteTableId, nil
@@ -135,7 +135,7 @@ func (r RouteTable) GetID() (string, error) {
 func (r RouteTable) MakePublic() error {
 	gatewayID, err := r.getInternetGateway()
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	if _, err := r.Client.CreateRoute(&ec2.CreateRouteInput{
@@ -143,7 +143,7 @@ func (r RouteTable) MakePublic() error {
 		DestinationCidrBlock: aws.String("0.0.0.0/0"),
 		GatewayId:            aws.String(gatewayID),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -155,7 +155,7 @@ func (r RouteTable) MakePublic() error {
 func (r RouteTable) getInternetGateway() (string, error) {
 	resp, err := r.Client.DescribeInternetGateways(&ec2.DescribeInternetGatewaysInput{
 		Filters: []*ec2.Filter{
-			&ec2.Filter{
+			{
 				// retrieve only the gateway attached to the vpc of the route table.
 				Name: aws.String("attachment.vpc-id"),
 				Values: []*string{
@@ -165,11 +165,11 @@ func (r RouteTable) getInternetGateway() (string, error) {
 		},
 	})
 	if err != nil {
-		return "", microerror.MaskAny(err)
+		return "", microerror.Mask(err)
 	}
 
 	if len(resp.InternetGateways) == 0 {
-		return "", microerror.MaskAnyf(notFoundError, notFoundErrorFormat, RouteTableType, r.Name)
+		return "", microerror.Maskf(notFoundError, notFoundErrorFormat, RouteTableType, r.Name)
 	}
 
 	return *resp.InternetGateways[0].InternetGatewayId, nil

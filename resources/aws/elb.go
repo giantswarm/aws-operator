@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/elb"
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 // ELB is an Elastic Load Balancer
@@ -50,18 +50,18 @@ const (
 
 func (lb *ELB) CreateIfNotExists() (bool, error) {
 	if lb.Client == nil {
-		return false, microerror.MaskAny(clientNotInitializedError)
+		return false, microerror.Mask(clientNotInitializedError)
 	}
 
 	if err := lb.CreateOrFail(); err != nil {
 		if strings.Contains(err.Error(), awsclient.ELBConfigurationMismatch) {
-			return false, microerror.MaskAny(err)
+			return false, microerror.Mask(err)
 		}
 		if strings.Contains(err.Error(), awsclient.ELBAlreadyExists) {
 			return false, nil
 		}
 
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	return true, nil
@@ -69,10 +69,10 @@ func (lb *ELB) CreateIfNotExists() (bool, error) {
 
 func (lb *ELB) CreateOrFail() error {
 	if lb.Client == nil {
-		return microerror.MaskAny(clientNotInitializedError)
+		return microerror.Mask(clientNotInitializedError)
 	}
 	if len(lb.PortsToOpen) == 0 {
-		return microerror.MaskAnyf(attributeEmptyError, attributeEmptyErrorFormat, "portsToOpen")
+		return microerror.Maskf(attributeEmptyError, attributeEmptyErrorFormat, "portsToOpen")
 	}
 
 	var listeners []*elb.Listener
@@ -97,7 +97,7 @@ func (lb *ELB) CreateOrFail() error {
 			aws.String(lb.SubnetID),
 		},
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	if _, err := lb.Client.ConfigureHealthCheck(&elb.ConfigureHealthCheckInput{
@@ -110,13 +110,13 @@ func (lb *ELB) CreateOrFail() error {
 		},
 		LoadBalancerName: aws.String(lb.Name),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	// We have to populate some additional fields.
 	lbDescription, err := lb.findExisting()
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	lb.setDNSFields(*lbDescription)
@@ -126,13 +126,13 @@ func (lb *ELB) CreateOrFail() error {
 
 func (lb ELB) Delete() error {
 	if lb.Client == nil {
-		return microerror.MaskAny(clientNotInitializedError)
+		return microerror.Mask(clientNotInitializedError)
 	}
 
 	if _, err := lb.Client.DeleteLoadBalancer(&elb.DeleteLoadBalancerInput{
 		LoadBalancerName: aws.String(lb.Name),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -152,7 +152,7 @@ func (lb *ELB) RegisterInstances(instanceIDs []string) error {
 		Instances:        instances,
 		LoadBalancerName: aws.String(lb.Name),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -177,7 +177,7 @@ func (lb *ELB) AssignProxyProtocolPolicy() error {
 			},
 		},
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -219,15 +219,15 @@ func (lb ELB) findExisting() (*elb.LoadBalancerDescription, error) {
 	})
 
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	descriptions := resp.LoadBalancerDescriptions
 
 	if len(descriptions) < 1 {
-		return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, ELBType, lb.Name)
+		return nil, microerror.Maskf(notFoundError, notFoundErrorFormat, ELBType, lb.Name)
 	} else if len(descriptions) > 1 {
-		return nil, microerror.MaskAny(tooManyResultsError)
+		return nil, microerror.Mask(tooManyResultsError)
 	}
 
 	return descriptions[0], nil

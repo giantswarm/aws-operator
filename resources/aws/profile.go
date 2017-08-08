@@ -5,7 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 type InstanceProfile struct {
@@ -30,20 +30,20 @@ func (ip *InstanceProfile) CreateOrFail() error {
 	if _, err := ip.Clients.IAM.CreateInstanceProfile(&iam.CreateInstanceProfileInput{
 		InstanceProfileName: aws.String(ip.clusterProfileName()),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	} else {
 		if _, err := ip.Clients.IAM.AddRoleToInstanceProfile(&iam.AddRoleToInstanceProfileInput{
 			InstanceProfileName: aws.String(ip.clusterProfileName()),
 			RoleName:            aws.String(ip.clusterRoleName()),
 		}); err != nil {
-			return microerror.MaskAny(err)
+			return microerror.Mask(err)
 		}
 	}
 
 	if err := ip.Clients.IAM.WaitUntilInstanceProfileExists(&iam.GetInstanceProfileInput{
 		InstanceProfileName: aws.String(ip.clusterProfileName()),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	ip.name = ip.clusterProfileName()
@@ -55,7 +55,7 @@ func (ip *InstanceProfile) Delete() error {
 	if _, err := ip.Clients.IAM.DeleteInstanceProfile(&iam.DeleteInstanceProfileInput{
 		InstanceProfileName: aws.String(ip.clusterProfileName()),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil

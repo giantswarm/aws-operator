@@ -1,4 +1,4 @@
-package version
+package k8s
 
 import (
 	"github.com/juju/errgo"

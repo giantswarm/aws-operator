@@ -12,11 +12,15 @@ import:
   version: master
   subpackages:
   - command
-  - error
-  - logger
   - server
   - transaction
 - package: github.com/giantswarm/operatorkit
+  verson: master
+- package: github.com/giantswarm/microerror
+  verson: master
+- package: github.com/giantswarm/micrologger
+  verson: master
+- package: github.com/giantswarm/microendpoint
   verson: master
 - package: google.golang.org/grpc
   version: v1.2.1

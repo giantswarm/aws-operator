@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 // SecurityGroup is an AWS security group.
@@ -35,20 +35,20 @@ type SecurityGroupRule struct {
 func (s SecurityGroup) findExisting() (*ec2.SecurityGroup, error) {
 	filters, err := s.getGroupFilters()
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	securityGroups, err := s.Clients.EC2.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
 		Filters: filters,
 	})
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	if len(securityGroups.SecurityGroups) < 1 {
-		return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, SecurityGroupType, s.GroupName)
+		return nil, microerror.Maskf(notFoundError, notFoundErrorFormat, SecurityGroupType, s.GroupName)
 	} else if len(securityGroups.SecurityGroups) > 1 {
-		return nil, microerror.MaskAny(tooManyResultsError)
+		return nil, microerror.Mask(tooManyResultsError)
 	}
 
 	return securityGroups.SecurityGroups[0], nil
@@ -59,32 +59,32 @@ func (s SecurityGroup) findExisting() (*ec2.SecurityGroup, error) {
 func (s SecurityGroup) findGroupWithRule(rule SecurityGroupRule) (*ec2.SecurityGroup, error) {
 	filters, err := s.getGroupFilters()
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	var ruleFilters []*ec2.Filter
 
 	if rule.SourceCIDR != "" {
 		ruleFilters = []*ec2.Filter{
-			&ec2.Filter{
+			{
 				Name: aws.String(ipPermissionCIDR),
 				Values: []*string{
 					aws.String(rule.SourceCIDR),
 				},
 			},
-			&ec2.Filter{
+			{
 				Name: aws.String(ipPermissionFromPort),
 				Values: []*string{
 					aws.String(strconv.Itoa(rule.Port)),
 				},
 			},
-			&ec2.Filter{
+			{
 				Name: aws.String(ipPermissionProtocol),
 				Values: []*string{
 					aws.String(rule.Protocol),
 				},
 			},
-			&ec2.Filter{
+			{
 				Name: aws.String(ipPermissionToPort),
 				Values: []*string{
 					aws.String(strconv.Itoa(rule.Port)),
@@ -93,13 +93,13 @@ func (s SecurityGroup) findGroupWithRule(rule SecurityGroupRule) (*ec2.SecurityG
 		}
 	} else {
 		ruleFilters = []*ec2.Filter{
-			&ec2.Filter{
+			{
 				Name: aws.String(ipPermissionGroupID),
 				Values: []*string{
 					aws.String(rule.SecurityGroupID),
 				},
 			},
-			&ec2.Filter{
+			{
 				Name: aws.String(ipPermissionProtocol),
 				Values: []*string{
 					aws.String(rule.Protocol),
@@ -116,13 +116,13 @@ func (s SecurityGroup) findGroupWithRule(rule SecurityGroupRule) (*ec2.SecurityG
 		Filters: filters,
 	})
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	if len(securityGroups.SecurityGroups) < 1 {
 		return nil, nil
 	} else if len(securityGroups.SecurityGroups) > 1 {
-		return nil, microerror.MaskAny(tooManyResultsError)
+		return nil, microerror.Mask(tooManyResultsError)
 	}
 
 	return securityGroups.SecurityGroups[0], nil
@@ -134,14 +134,14 @@ func (s *SecurityGroup) CreateIfNotExists() (bool, error) {
 		if strings.Contains(err.Error(), awsclient.SecurityGroupDuplicate) {
 			securityGroup, err := s.findExisting()
 			if err != nil {
-				return false, microerror.MaskAny(err)
+				return false, microerror.Mask(err)
 			}
 			s.id = *securityGroup.GroupId
 
 			return false, nil
 		}
 
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	return true, nil
@@ -152,12 +152,12 @@ func (s *SecurityGroup) CreateIfNotExists() (bool, error) {
 func (s *SecurityGroup) createRuleIfNotExists(rule SecurityGroupRule) (bool, error) {
 	groupID, err := s.GetID()
 	if err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	existingGroup, err := s.findGroupWithRule(rule)
 	if err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 	if existingGroup != nil {
 		return true, nil
@@ -191,7 +191,7 @@ func (s *SecurityGroup) createRuleIfNotExists(rule SecurityGroupRule) (bool, err
 	}
 
 	if _, err := s.Clients.EC2.AuthorizeSecurityGroupIngress(params); err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	return true, nil
@@ -205,7 +205,7 @@ func (s *SecurityGroup) CreateOrFail() error {
 		VpcId:       aws.String(s.VpcID),
 	})
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	s.id = *securityGroup.GroupId
@@ -219,7 +219,7 @@ func (s *SecurityGroup) CreateOrFail() error {
 func (s SecurityGroup) ApplyRules(rules []SecurityGroupRule) error {
 	for _, rule := range rules {
 		if _, err := s.createRuleIfNotExists(rule); err != nil {
-			return microerror.MaskAny(err)
+			return microerror.Mask(err)
 		}
 	}
 
@@ -232,12 +232,12 @@ func (s SecurityGroup) ApplyRules(rules []SecurityGroupRule) error {
 func (s *SecurityGroup) Delete() error {
 	securityGroup, err := s.findExisting()
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 	if _, err := s.Clients.EC2.DeleteSecurityGroup(&ec2.DeleteSecurityGroupInput{
 		GroupId: securityGroup.GroupId,
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -251,7 +251,7 @@ func (s SecurityGroup) GetID() (string, error) {
 
 	securityGroup, err := s.findExisting()
 	if err != nil {
-		return "", microerror.MaskAny(err)
+		return "", microerror.Mask(err)
 	}
 
 	return *securityGroup.GroupId, nil
@@ -259,20 +259,20 @@ func (s SecurityGroup) GetID() (string, error) {
 
 func (s SecurityGroup) getGroupFilters() ([]*ec2.Filter, error) {
 	if s.Description == "" {
-		return nil, microerror.MaskAnyf(attributeEmptyError, attributeEmptyErrorFormat, "Description")
+		return nil, microerror.Maskf(attributeEmptyError, attributeEmptyErrorFormat, "Description")
 	}
 	if s.GroupName == "" {
-		return nil, microerror.MaskAnyf(attributeEmptyError, attributeEmptyErrorFormat, "GroupName")
+		return nil, microerror.Maskf(attributeEmptyError, attributeEmptyErrorFormat, "GroupName")
 	}
 
 	filters := []*ec2.Filter{
-		&ec2.Filter{
+		{
 			Name: aws.String(subnetDescription),
 			Values: []*string{
 				aws.String(s.Description),
 			},
 		},
-		&ec2.Filter{
+		{
 			Name: aws.String(subnetGroupName),
 			Values: []*string{
 				aws.String(s.GroupName),

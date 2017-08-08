@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/juju/errgo"
+	"github.com/giantswarm/microerror"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -38,6 +38,6 @@ func TestValidAmazonAccountID(t *testing.T) {
 
 	for _, tc := range tests {
 		err := validateAccountID(tc.amazonAccountID)
-		assert.Equal(t, errgo.Cause(tc.err), errgo.Cause(err), fmt.Sprintf("[%s] The return value was not what we expected", tc.name))
+		assert.Equal(t, microerror.Cause(tc.err), microerror.Cause(err), fmt.Sprintf("[%s] The return value was not what we expected", tc.name))
 	}
 }

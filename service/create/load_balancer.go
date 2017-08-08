@@ -9,7 +9,7 @@ import (
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
 	"github.com/giantswarm/awstpr"
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 type LoadBalancerInput struct {
@@ -32,7 +32,7 @@ type LoadBalancerInput struct {
 func (s *Service) createLoadBalancer(input LoadBalancerInput) (*awsresources.ELB, error) {
 	lbName, err := loadBalancerName(input.Name, input.Cluster)
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	lb := &awsresources.ELB{
@@ -45,7 +45,7 @@ func (s *Service) createLoadBalancer(input LoadBalancerInput) (*awsresources.ELB
 
 	lbCreated, err := lb.CreateIfNotExists()
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	if lbCreated {
@@ -56,7 +56,7 @@ func (s *Service) createLoadBalancer(input LoadBalancerInput) (*awsresources.ELB
 
 	if len(input.InstanceIDs) != 0 {
 		if err := s.registerInstances(lb, input); err != nil {
-			return nil, microerror.MaskAny(err)
+			return nil, microerror.Mask(err)
 		}
 	}
 	return lb, nil
@@ -66,7 +66,7 @@ func (s *Service) deleteLoadBalancer(input LoadBalancerInput) error {
 	// Delete ELB.
 	lbName, err := loadBalancerName(input.Name, input.Cluster)
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	lb := awsresources.ELB{
@@ -75,7 +75,7 @@ func (s *Service) deleteLoadBalancer(input LoadBalancerInput) error {
 	}
 
 	if err := lb.Delete(); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 	s.logger.Log("debug", fmt.Sprintf("deleted ELB '%s'", lb.Name))
 
@@ -86,12 +86,12 @@ func (s *Service) deleteLoadBalancer(input LoadBalancerInput) error {
 // It takes the domain name, extracts the first subdomain, and combines it with the cluster name.
 func loadBalancerName(domainName string, cluster awstpr.CustomObject) (string, error) {
 	if cluster.Spec.Cluster.Cluster.ID == "" {
-		return "", microerror.MaskAnyf(missingCloudConfigKeyError, "spec.cluster.cluster.id")
+		return "", microerror.Maskf(missingCloudConfigKeyError, "spec.cluster.cluster.id")
 	}
 
 	componentName, err := componentName(domainName)
 	if err != nil {
-		return "", microerror.MaskAnyf(malformedCloudConfigKeyError, "spec.cluster.cluster.id")
+		return "", microerror.Maskf(malformedCloudConfigKeyError, "spec.cluster.cluster.id")
 	}
 
 	lbName := fmt.Sprintf("%s-%s", cluster.Spec.Cluster.Cluster.ID, componentName)
@@ -105,7 +105,7 @@ func componentName(domainName string) (string, error) {
 	splits := strings.SplitN(domainName, ".", 2)
 
 	if len(splits) != 2 {
-		return "", microerror.MaskAny(malformedCloudConfigKeyError)
+		return "", microerror.Mask(malformedCloudConfigKeyError)
 	}
 
 	return splits[0], nil
@@ -122,11 +122,11 @@ func (s *Service) registerInstances(lb *awsresources.ELB, input LoadBalancerInpu
 	if err := input.Clients.EC2.WaitUntilInstanceRunning(&ec2.DescribeInstancesInput{
 		InstanceIds: awsFlavouredInstanceIDs,
 	}); err != nil {
-		return microerror.MaskAnyf(err, "instances took too long to get running, aborting")
+		return microerror.Maskf(err, "instances took too long to get running, aborting")
 	}
 
 	if err := lb.RegisterInstances(input.InstanceIDs); err != nil {
-		return microerror.MaskAnyf(err, "could not register instances with LB: %s")
+		return microerror.Maskf(err, "could not register instances with LB: %s")
 	}
 
 	s.logger.Log("debug", fmt.Sprintf("instances registered with ELB"))

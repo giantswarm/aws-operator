@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/certificatetpr"
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 type TLSassets struct {
@@ -92,7 +92,7 @@ func (r *rawTLSAssets) encrypt(svc *kms.KMS, kmsKeyARN string) (*encryptedTLSAss
 		EtcdServerCrt:     encrypt(r.EtcdServerCrt),
 	}
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 	return &encryptedAssets, nil
 }
@@ -134,7 +134,7 @@ func (r *encryptedTLSAssets) compact() (*certificatetpr.CompactTLSAssets, error)
 	}
 
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 	return &compactAssets, nil
 }

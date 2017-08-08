@@ -6,7 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/kms"
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 type KMSKey struct {
@@ -17,12 +17,12 @@ type KMSKey struct {
 
 func (kk *KMSKey) CreateIfNotExists() (bool, error) {
 	if kk.Name == "" {
-		return false, microerror.MaskAny(kmsKeyAliasEmptyError)
+		return false, microerror.Mask(kmsKeyAliasEmptyError)
 	}
 
 	existingKey, err := kk.findExisting()
 	if err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	if existingKey != nil {
@@ -32,19 +32,19 @@ func (kk *KMSKey) CreateIfNotExists() (bool, error) {
 	}
 
 	if err := kk.CreateOrFail(); err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	return true, nil
 }
 func (kk *KMSKey) CreateOrFail() error {
 	if kk.Name == "" {
-		return microerror.MaskAny(kmsKeyAliasEmptyError)
+		return microerror.Mask(kmsKeyAliasEmptyError)
 	}
 
 	key, err := kk.Clients.KMS.CreateKey(&kms.CreateKeyInput{})
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	if _, err := kk.Clients.KMS.CreateAlias(&kms.CreateAliasInput{
@@ -52,7 +52,7 @@ func (kk *KMSKey) CreateOrFail() error {
 		AliasName:   aws.String(kk.fullAlias()),
 		TargetKeyId: key.KeyMetadata.Arn,
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	kk.arn = *key.KeyMetadata.Arn
@@ -65,13 +65,13 @@ func (kk *KMSKey) Delete() error {
 		KeyId: aws.String(kk.fullAlias()),
 	})
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	if _, err := kk.Clients.KMS.DeleteAlias(&kms.DeleteAliasInput{
 		AliasName: aws.String(kk.fullAlias()),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	// AWS API doesn't allow to delete the KMS key immediately, but we can schedule its deletion
@@ -79,7 +79,7 @@ func (kk *KMSKey) Delete() error {
 		KeyId:               key.KeyMetadata.KeyId,
 		PendingWindowInDays: aws.Int64(7),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -98,7 +98,7 @@ func (kk KMSKey) findExisting() (*kms.KeyMetadata, error) {
 			return nil, nil
 		}
 
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	return resp.KeyMetadata, nil

@@ -3,7 +3,7 @@ package aws
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 type AutoScalingGroup struct {
@@ -40,19 +40,19 @@ const (
 
 func (asg *AutoScalingGroup) CreateIfNotExists() (bool, error) {
 	if asg.Client == nil {
-		return false, microerror.MaskAny(clientNotInitializedError)
+		return false, microerror.Mask(clientNotInitializedError)
 	}
 
 	exists, err := asg.checkIfExists()
 	if err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 	if exists {
 		return false, nil
 	}
 
 	if err := asg.CreateOrFail(); err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	return true, nil
@@ -60,7 +60,7 @@ func (asg *AutoScalingGroup) CreateIfNotExists() (bool, error) {
 
 func (asg *AutoScalingGroup) CreateOrFail() error {
 	if asg.Client == nil {
-		return microerror.MaskAny(clientNotInitializedError)
+		return microerror.Mask(clientNotInitializedError)
 	}
 
 	params := &autoscaling.CreateAutoScalingGroupInput{
@@ -91,7 +91,7 @@ func (asg *AutoScalingGroup) CreateOrFail() error {
 	}
 
 	if _, err := asg.Client.CreateAutoScalingGroup(params); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -99,7 +99,7 @@ func (asg *AutoScalingGroup) CreateOrFail() error {
 
 func (asg *AutoScalingGroup) Delete() error {
 	if asg.Client == nil {
-		return microerror.MaskAny(clientNotInitializedError)
+		return microerror.Mask(clientNotInitializedError)
 	}
 
 	params := &autoscaling.DeleteAutoScalingGroupInput{
@@ -109,7 +109,7 @@ func (asg *AutoScalingGroup) Delete() error {
 	}
 
 	if _, err := asg.Client.DeleteAutoScalingGroup(params); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -117,7 +117,7 @@ func (asg *AutoScalingGroup) Delete() error {
 
 func (asg *AutoScalingGroup) Update() error {
 	if asg.Client == nil {
-		return microerror.MaskAny(clientNotInitializedError)
+		return microerror.Mask(clientNotInitializedError)
 	}
 
 	params := &autoscaling.UpdateAutoScalingGroupInput{
@@ -127,7 +127,7 @@ func (asg *AutoScalingGroup) Update() error {
 	}
 
 	if _, err := asg.Client.UpdateAutoScalingGroup(params); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 	return nil
 }
@@ -137,7 +137,7 @@ func (asg *AutoScalingGroup) checkIfExists() (bool, error) {
 	if IsNotFound(err) {
 		return false, nil
 	} else if err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	return true, nil
@@ -150,13 +150,13 @@ func (asg *AutoScalingGroup) findExisting() (*autoscaling.Group, error) {
 		},
 	})
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	if len(autoScalingGroups.AutoScalingGroups) < 1 {
-		return nil, microerror.MaskAnyf(notFoundError, notFoundErrorFormat, AutoScalingGroupType, asg.Name)
+		return nil, microerror.Maskf(notFoundError, notFoundErrorFormat, AutoScalingGroupType, asg.Name)
 	} else if len(autoScalingGroups.AutoScalingGroups) > 1 {
-		return nil, microerror.MaskAny(tooManyResultsError)
+		return nil, microerror.Mask(tooManyResultsError)
 	}
 
 	return autoScalingGroups.AutoScalingGroups[0], nil

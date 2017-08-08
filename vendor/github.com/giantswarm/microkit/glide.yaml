@@ -2,18 +2,10 @@ package: github.com/giantswarm/microkit
 import:
 - package: github.com/go-kit/kit
   version: v0.5.0
-  subpackages:
-  - endpoint
-  - log
-  - transport/http
 - package: github.com/gorilla/mux
   version: ~1.1.0
-- package: github.com/juju/errgo
 - package: github.com/prometheus/client_golang
   version: ~0.8.0
-  subpackages:
-  - prometheus
-  - prometheus/promhttp
 - package: github.com/spf13/cobra
   version: master
 - package: github.com/spf13/pflag
@@ -23,13 +15,11 @@ import:
 - package: github.com/tylerb/graceful
   version: ~1.2.13
 - package: golang.org/x/net
-  subpackages:
-  - context
 - package: github.com/go-stack/stack
   version: ~1.5.2
 - package: github.com/coreos/etcd
   version: 3.2.1
-  subpackages:
-  - client
 - package: golang.org/x/text
   version: 4ee4af566555f5fbe026368b75596286a312663a
+- package: github.com/giantswarm/micrologger
+  version: master

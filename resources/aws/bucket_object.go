@@ -5,7 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 type BucketObject struct {
@@ -21,12 +21,12 @@ type BucketObject struct {
 // If we decide to use the S3 bucket for other types of files, we might have to
 // revisit this.
 func (bo *BucketObject) CreateIfNotExists() (bool, error) {
-	return false, microerror.MaskAny(notImplementedMethodError)
+	return false, microerror.Mask(notImplementedMethodError)
 }
 
 func (bo *BucketObject) CreateOrFail() error {
 	if bo.Bucket == nil {
-		return microerror.MaskAny(noBucketInBucketObjectError)
+		return microerror.Mask(noBucketInBucketObjectError)
 	}
 
 	if _, err := bo.Clients.S3.PutObject(&s3.PutObjectInput{
@@ -35,7 +35,7 @@ func (bo *BucketObject) CreateOrFail() error {
 		ContentLength: aws.Int64(int64(len(bo.Data))),
 		Key:           aws.String(bo.Name),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -46,7 +46,7 @@ func (bo *BucketObject) Delete() error {
 		Bucket: aws.String(bo.Bucket.Name),
 		Key:    aws.String(bo.Name),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil

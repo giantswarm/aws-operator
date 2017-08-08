@@ -7,7 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 )
@@ -42,7 +42,7 @@ func (k *KeyPair) CreateIfNotExists() (bool, error) {
 		if strings.Contains(err.Error(), awsclient.KeyPairDuplicate) {
 			return false, nil
 		}
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 	return true, nil
 }
@@ -50,7 +50,7 @@ func (k *KeyPair) CreateIfNotExists() (bool, error) {
 func (k *KeyPair) CreateOrFail() error {
 	pkc, err := k.Provider.pubKeyContent()
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	keyPair, err := k.Clients.EC2.ImportKeyPair(&ec2.ImportKeyPairInput{
@@ -58,7 +58,7 @@ func (k *KeyPair) CreateOrFail() error {
 		PublicKeyMaterial: pkc,
 	})
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	if keyPair == nil || keyPair.KeyName == nil {
@@ -72,7 +72,7 @@ func (k *KeyPair) Delete() error {
 	if _, err := k.Clients.EC2.DeleteKeyPair(&ec2.DeleteKeyPairInput{
 		KeyName: aws.String(k.ClusterName),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil

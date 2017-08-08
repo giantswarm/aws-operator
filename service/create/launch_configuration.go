@@ -7,7 +7,7 @@ import (
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/certificatetpr"
 	cloudconfig "github.com/giantswarm/k8scloudconfig"
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
@@ -49,7 +49,7 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 		instanceType = input.cluster.Spec.AWS.Workers[0].InstanceType
 		publicIP = true
 	default:
-		return false, microerror.MaskAnyf(invalidCloudconfigExtensionNameError, fmt.Sprintf("Invalid extension name '%s'", input.prefix))
+		return false, microerror.Maskf(invalidCloudconfigExtensionNameError, fmt.Sprintf("Invalid extension name '%s'", input.prefix))
 	}
 
 	cloudConfigParams := cloudconfig.Params{
@@ -59,7 +59,7 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 
 	cloudConfig, err := s.cloudConfig(input.prefix, cloudConfigParams, input.cluster.Spec, input.tlsAssets)
 	if err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	// We now upload the instance cloudconfig to S3 and create a "small
@@ -79,22 +79,22 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 		AWSEntity: awsresources.AWSEntity{Clients: input.clients},
 	}
 	if err := cloudconfigS3.CreateOrFail(); err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	smallCloudconfig, err := s.SmallCloudconfig(cloudconfigConfig)
 	if err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	securityGroupID, err := input.securityGroup.GetID()
 	if err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	launchConfigName, err := launchConfigurationName(input.cluster, input.prefix, securityGroupID)
 	if err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	launchConfig := &awsresources.LaunchConfiguration{
@@ -112,7 +112,7 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 
 	launchConfigCreated, err := launchConfig.CreateIfNotExists()
 	if err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	return launchConfigCreated, nil
@@ -128,12 +128,12 @@ func (s *Service) deleteLaunchConfiguration(input launchConfigurationInput) erro
 
 	sgID, err := sg.GetID()
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	workersLCName, err := launchConfigurationName(input.cluster, prefixWorker, sgID)
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	lc := awsresources.LaunchConfiguration{
@@ -142,7 +142,7 @@ func (s *Service) deleteLaunchConfiguration(input launchConfigurationInput) erro
 	}
 
 	if err := lc.Delete(); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 	return nil
 }
@@ -154,15 +154,15 @@ func (s *Service) deleteLaunchConfiguration(input launchConfigurationInput) erro
 // Otherwise, the SG might not exist anymore.
 func launchConfigurationName(cluster awstpr.CustomObject, prefix, securityGroupID string) (string, error) {
 	if cluster.Spec.Cluster.Cluster.ID == "" {
-		return "", microerror.MaskAnyf(missingCloudConfigKeyError, "spec.cluster.cluster.id")
+		return "", microerror.Maskf(missingCloudConfigKeyError, "spec.cluster.cluster.id")
 	}
 
 	if prefix == "" {
-		return "", microerror.MaskAnyf(missingCloudConfigKeyError, "launchConfiguration prefix")
+		return "", microerror.Maskf(missingCloudConfigKeyError, "launchConfiguration prefix")
 	}
 
 	if securityGroupID == "" {
-		return "", microerror.MaskAnyf(missingCloudConfigKeyError, "launchConfiguration securityGroupID")
+		return "", microerror.Maskf(missingCloudConfigKeyError, "launchConfiguration securityGroupID")
 	}
 
 	return fmt.Sprintf("%s-%s-%s", cluster.Spec.Cluster.Cluster.ID, prefix, securityGroupID), nil

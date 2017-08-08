@@ -5,8 +5,7 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff"
-	micrologger "github.com/giantswarm/microkit/logger"
-	"github.com/juju/errgo"
+	"github.com/giantswarm/micrologger"
 )
 
 const maxElapsedTime = 2 * time.Minute
@@ -31,6 +30,6 @@ func NewCustomExponentialBackoff() *backoff.ExponentialBackOff {
 
 func NewNotify(logger micrologger.Logger, operationName string) func(error, time.Duration) {
 	return func(err error, delay time.Duration) {
-		logger.Log("error", fmt.Sprintf("%s failed, retrying with delay %.0fm%.0fs: %v", operationName, delay.Minutes(), delay.Seconds(), errgo.Details(err)))
+		logger.Log("error", fmt.Sprintf("%s failed, retrying with delay %.0fm%.0fs: '%#v'", operationName, delay.Minutes(), delay.Seconds(), err))
 	}
 }

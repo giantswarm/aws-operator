@@ -10,7 +10,7 @@ import (
 
 	"github.com/coreos/etcd/client"
 	"github.com/coreos/etcd/clientv3"
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/microkit/storage/etcd"
 	"github.com/giantswarm/microkit/storage/etcdv2"
 	"github.com/giantswarm/microkit/storage/memory"
@@ -51,10 +51,10 @@ func DefaultConfig() Config {
 func New(config Config) (Service, error) {
 	// Settings.
 	if config.Kind == "" {
-		return nil, microerror.MaskAnyf(invalidConfigError, "kind must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "kind must not be empty")
 	}
 	if config.Kind != KindMemory && config.Kind != KindEtcd && config.Kind != KindEtcdV2 {
-		return nil, microerror.MaskAnyf(invalidConfigError, "kind must be one of: %s, %s, %s", KindMemory, KindEtcd, KindEtcdV2)
+		return nil, microerror.Maskf(invalidConfigError, "kind must be one of: %s, %s, %s", KindMemory, KindEtcd, KindEtcdV2)
 	}
 
 	var err error
@@ -63,7 +63,7 @@ func New(config Config) (Service, error) {
 	{
 		tlsConfig, err = microtls.LoadTLSConfig(config.EtcdTLS)
 		if err != nil {
-			return nil, microerror.MaskAny(err)
+			return nil, microerror.Mask(err)
 		}
 	}
 
@@ -74,11 +74,11 @@ func New(config Config) (Service, error) {
 			storageConfig := memory.DefaultConfig()
 			storageService, err = memory.New(storageConfig)
 			if err != nil {
-				return nil, microerror.MaskAny(err)
+				return nil, microerror.Mask(err)
 			}
 		case KindEtcd:
 			if config.EtcdAddress == "" {
-				return nil, microerror.MaskAnyf(invalidConfigError, "etcd address must not be empty")
+				return nil, microerror.Maskf(invalidConfigError, "etcd address must not be empty")
 			}
 
 			etcdConfig := clientv3.Config{
@@ -88,7 +88,7 @@ func New(config Config) (Service, error) {
 			}
 			etcdClient, err := clientv3.New(etcdConfig)
 			if err != nil {
-				return nil, microerror.MaskAny(err)
+				return nil, microerror.Mask(err)
 			}
 
 			storageConfig := etcd.DefaultConfig()
@@ -96,11 +96,11 @@ func New(config Config) (Service, error) {
 			storageConfig.Prefix = config.EtcdPrefix
 			storageService, err = etcd.New(storageConfig)
 			if err != nil {
-				return nil, microerror.MaskAny(err)
+				return nil, microerror.Mask(err)
 			}
 		case KindEtcdV2:
 			if config.EtcdAddress == "" {
-				return nil, microerror.MaskAnyf(invalidConfigError, "etcd address must not be empty")
+				return nil, microerror.Maskf(invalidConfigError, "etcd address must not be empty")
 			}
 
 			transport := &http.Transport{
@@ -127,7 +127,7 @@ func New(config Config) (Service, error) {
 			storageConfig.Prefix = config.EtcdPrefix
 			storageService, err = etcdv2.New(storageConfig)
 			if err != nil {
-				return nil, microerror.MaskAny(err)
+				return nil, microerror.Mask(err)
 			}
 		}
 	}

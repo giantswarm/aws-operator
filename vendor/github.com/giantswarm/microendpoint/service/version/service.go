@@ -4,7 +4,7 @@ import (
 	"context"
 	"runtime"
 
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 // Config represents the configuration used to create a version service.
@@ -32,16 +32,16 @@ func DefaultConfig() Config {
 func New(config Config) (*Service, error) {
 	// Settings.
 	if config.Description == "" {
-		return nil, microerror.MaskAnyf(invalidConfigError, "description commit must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "description commit must not be empty")
 	}
 	if config.GitCommit == "" {
-		return nil, microerror.MaskAnyf(invalidConfigError, "git commit must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "git commit must not be empty")
 	}
 	if config.Name == "" {
-		return nil, microerror.MaskAnyf(invalidConfigError, "name must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "name must not be empty")
 	}
 	if config.Source == "" {
-		return nil, microerror.MaskAnyf(invalidConfigError, "name must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "source must not be empty")
 	}
 
 	newService := &Service{
@@ -56,6 +56,7 @@ type Service struct {
 	Config
 }
 
+// Get returns the version response.
 func (s *Service) Get(ctx context.Context, request Request) (*Response, error) {
 	response := DefaultResponse()
 

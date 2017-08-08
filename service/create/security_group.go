@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/giantswarm/awstpr"
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/resources"
@@ -50,7 +50,7 @@ func (s *Service) createSecurityGroup(input securityGroupInput) (*awsresources.S
 	}
 	securityGroupCreated, err := securityGroup.CreateIfNotExists()
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 	if securityGroupCreated {
 		s.logger.Log("info", fmt.Sprintf("created security group '%s'", input.GroupName))
@@ -69,7 +69,7 @@ func (s *Service) deleteSecurityGroup(input securityGroupInput) error {
 		AWSEntity:   awsresources.AWSEntity{Clients: input.Clients},
 	}
 	if err := securityGroup.Delete(); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	} else {
 		s.logger.Log("info", fmt.Sprintf("deleted security group '%s'", input.GroupName))
 	}

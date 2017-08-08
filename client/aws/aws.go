@@ -14,8 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
-
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 type Config struct {
@@ -62,14 +61,14 @@ func NewClients(config Config) Clients {
 func (c *Config) SetAccountID(iamClient *iam.IAM) error {
 	resp, err := iamClient.GetUser(&iam.GetUserInput{})
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	userArn := *resp.User.Arn
 	accountID := strings.Split(userArn, ":")[accountIDPosition]
 
 	if err := validateAccountID(accountID); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	c.accountID = accountID
@@ -86,11 +85,11 @@ func validateAccountID(accountID string) error {
 
 	switch {
 	case accountID == "":
-		return microerror.MaskAny(emptyAmazonAccountIDError)
+		return microerror.Mask(emptyAmazonAccountIDError)
 	case len(accountID) != accountIDLength:
-		return microerror.MaskAny(wrongAmazonAccountIDLengthError)
+		return microerror.Mask(wrongAmazonAccountIDLengthError)
 	case !r.MatchString(accountID):
-		return microerror.MaskAny(malformedAmazonAccountIDError)
+		return microerror.Mask(malformedAmazonAccountIDError)
 	}
 
 	return nil

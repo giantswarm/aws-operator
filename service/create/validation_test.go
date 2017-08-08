@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/giantswarm/awstpr/spec/aws"
-	"github.com/juju/errgo"
+	"github.com/giantswarm/microerror"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,11 +17,11 @@ func TestValidateWorkers(t *testing.T) {
 		{
 			name: "Valid workers - image IDs and instance types are the same",
 			workers: []aws.Node{
-				aws.Node{
+				{
 					ImageID:      "example-image-id",
 					InstanceType: "example-instance-type",
 				},
-				aws.Node{
+				{
 					ImageID:      "example-image-id",
 					InstanceType: "example-instance-type",
 				},
@@ -36,11 +36,11 @@ func TestValidateWorkers(t *testing.T) {
 		{
 			name: "Invalid workers - image IDs are different",
 			workers: []aws.Node{
-				aws.Node{
+				{
 					ImageID:      "example-image-id",
 					InstanceType: "example-instance-type",
 				},
-				aws.Node{
+				{
 					ImageID:      "another-image-id",
 					InstanceType: "example-instance-type",
 				},
@@ -50,11 +50,11 @@ func TestValidateWorkers(t *testing.T) {
 		{
 			name: "Invalid workers - instance types are different",
 			workers: []aws.Node{
-				aws.Node{
+				{
 					ImageID:      "example-image-id",
 					InstanceType: "example-instance-type",
 				},
-				aws.Node{
+				{
 					ImageID:      "example-image-id",
 					InstanceType: "another-instance-type",
 				},
@@ -65,6 +65,6 @@ func TestValidateWorkers(t *testing.T) {
 
 	for _, tc := range tests {
 		err := validateWorkers(tc.workers)
-		assert.Equal(t, tc.expectedError, errgo.Cause(err), tc.name)
+		assert.Equal(t, tc.expectedError, microerror.Cause(err), tc.name)
 	}
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/clustertpr"
 	"github.com/giantswarm/clustertpr/spec"
-	"github.com/juju/errgo"
+	"github.com/giantswarm/microerror"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -98,7 +98,7 @@ func TestLoadBalancerName(t *testing.T) {
 		res, err := loadBalancerName(tc.domainName, tc.tpo)
 
 		if err != nil {
-			underlying := errgo.Cause(err)
+			underlying := microerror.Cause(err)
 			assert.Equal(t, tc.err, underlying, fmt.Sprintf("[%s] The input values didn't produce the expected output", tc.desc))
 		}
 

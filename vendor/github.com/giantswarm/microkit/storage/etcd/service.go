@@ -7,7 +7,7 @@ import (
 
 	"github.com/coreos/etcd/clientv3"
 
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 // Config represents the configuration used to create a etcd service.
@@ -43,7 +43,7 @@ func DefaultConfig() Config {
 func New(config Config) (*Service, error) {
 	// Dependencies.
 	if config.EtcdClient == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "etcd client must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "etcd client must not be empty")
 	}
 
 	newService := &Service{
@@ -77,7 +77,7 @@ func (s *Service) Create(ctx context.Context, key, value string) error {
 
 	_, err := s.keyClient.Put(ctx, key, value)
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -88,10 +88,10 @@ func (s *Service) Delete(ctx context.Context, key string) error {
 
 	resp, err := s.keyClient.Delete(ctx, key)
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 	if resp.Deleted == 0 {
-		return microerror.MaskAny(notFoundError)
+		return microerror.Mask(notFoundError)
 	}
 
 	return nil
@@ -102,7 +102,7 @@ func (s *Service) Exists(ctx context.Context, key string) (bool, error) {
 	if IsNotFound(err) {
 		return false, nil
 	} else if err != nil {
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 
 	return true, nil
@@ -117,11 +117,11 @@ func (s *Service) List(ctx context.Context, key string) ([]string, error) {
 	key = s.key(key)
 	res, err := s.keyClient.Get(ctx, key, opts...)
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	if res.Count == 0 {
-		return nil, microerror.MaskAnyf(notFoundError, key)
+		return nil, microerror.Maskf(notFoundError, key)
 	}
 
 	var list []string
@@ -145,7 +145,7 @@ func (s *Service) List(ctx context.Context, key string) ([]string, error) {
 	}
 
 	if len(list) == 0 {
-		return nil, microerror.MaskAnyf(notFoundError, key)
+		return nil, microerror.Maskf(notFoundError, key)
 	}
 
 	return list, nil
@@ -154,15 +154,15 @@ func (s *Service) List(ctx context.Context, key string) ([]string, error) {
 func (s *Service) Search(ctx context.Context, key string) (string, error) {
 	res, err := s.keyClient.Get(ctx, s.key(key))
 	if err != nil {
-		return "", microerror.MaskAny(err)
+		return "", microerror.Mask(err)
 	}
 
 	if res.Count == 0 {
-		return "", microerror.MaskAnyf(notFoundError, key)
+		return "", microerror.Maskf(notFoundError, key)
 	}
 
 	if res.Count > 1 {
-		return "", microerror.MaskAnyf(multipleValuesError, key)
+		return "", microerror.Maskf(multipleValuesError, key)
 	}
 
 	return string(res.Kvs[0].Value), nil

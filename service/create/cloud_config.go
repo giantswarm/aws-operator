@@ -4,7 +4,7 @@ import (
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/certificatetpr"
 	"github.com/giantswarm/k8scloudconfig"
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 var (
@@ -45,7 +45,7 @@ func (c *CloudConfigExtension) renderUnits(unitsMeta []cloudconfig.UnitMetadata)
 	for _, unitMeta := range unitsMeta {
 		content, err := cloudconfig.RenderAssetContent(unitMeta.AssetContent, c.AwsInfo)
 		if err != nil {
-			return nil, microerror.MaskAny(err)
+			return nil, microerror.Mask(err)
 		}
 
 		unitAsset := cloudconfig.UnitAsset{
@@ -74,90 +74,90 @@ func NewMasterCloudConfigExtension(awsSpec awstpr.Spec, tlsAssets *certificatetp
 
 func (m *MasterCloudConfigExtension) Files() ([]cloudconfig.FileAsset, error) {
 	masterFilesMeta := []cloudconfig.FileMetadata{
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: decryptTLSAssetsScriptTemplate,
 			Path:         "/opt/bin/decrypt-tls-assets",
 			Owner:        "root:root",
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: m.TLSAssets.APIServerCrt,
 			Path:         "/etc/kubernetes/ssl/apiserver-crt.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: m.TLSAssets.APIServerCA,
 			Path:         "/etc/kubernetes/ssl/apiserver-ca.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: m.TLSAssets.APIServerKey,
 			Path:         "/etc/kubernetes/ssl/apiserver-key.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: m.TLSAssets.ServiceAccountCrt,
 			Path:         "/etc/kubernetes/ssl/service-account-crt.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: m.TLSAssets.ServiceAccountCA,
 			Path:         "/etc/kubernetes/ssl/service-account-ca.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: m.TLSAssets.ServiceAccountKey,
 			Path:         "/etc/kubernetes/ssl/service-account-key.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: m.TLSAssets.CalicoClientCrt,
 			Path:         "/etc/kubernetes/ssl/calico/client-crt.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: m.TLSAssets.CalicoClientCA,
 			Path:         "/etc/kubernetes/ssl/calico/client-ca.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: m.TLSAssets.CalicoClientKey,
 			Path:         "/etc/kubernetes/ssl/calico/client-key.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: m.TLSAssets.EtcdServerCrt,
 			Path:         "/etc/kubernetes/ssl/etcd/server-crt.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: m.TLSAssets.EtcdServerCA,
 			Path:         "/etc/kubernetes/ssl/etcd/server-ca.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: m.TLSAssets.EtcdServerKey,
 			Path:         "/etc/kubernetes/ssl/etcd/server-key.pem.enc",
 			Owner:        "root:root",
@@ -166,28 +166,28 @@ func (m *MasterCloudConfigExtension) Files() ([]cloudconfig.FileAsset, error) {
 		},
 		// Add second copy of files for etcd client certs. Will be replaced by
 		// a separate client cert.
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: m.TLSAssets.EtcdServerCrt,
 			Path:         "/etc/kubernetes/ssl/etcd/client-crt.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: m.TLSAssets.EtcdServerCA,
 			Path:         "/etc/kubernetes/ssl/etcd/client-ca.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: m.TLSAssets.EtcdServerKey,
 			Path:         "/etc/kubernetes/ssl/etcd/client-key.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: waitDockerConfTemplate,
 			Path:         "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
 			Owner:        "root:root",
@@ -197,7 +197,7 @@ func (m *MasterCloudConfigExtension) Files() ([]cloudconfig.FileAsset, error) {
 
 	files, err := m.renderFiles(masterFilesMeta)
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	return files, nil
@@ -205,19 +205,19 @@ func (m *MasterCloudConfigExtension) Files() ([]cloudconfig.FileAsset, error) {
 
 func (m *MasterCloudConfigExtension) Units() ([]cloudconfig.UnitAsset, error) {
 	unitsMeta := []cloudconfig.UnitMetadata{
-		cloudconfig.UnitMetadata{
+		{
 			AssetContent: decryptTLSAssetsServiceTemplate,
 			Name:         "decrypt-tls-assets.service",
 			Enable:       true,
 			Command:      "start",
 		},
-		cloudconfig.UnitMetadata{
+		{
 			AssetContent: masterFormatVarLibDockerServiceTemplate,
 			Name:         "format-var-lib-docker.service",
 			Enable:       true,
 			Command:      "start",
 		},
-		cloudconfig.UnitMetadata{
+		{
 			AssetContent: ephemeralVarLibDockerMountTemplate,
 			Name:         "var-lib-docker.mount",
 			Enable:       true,
@@ -227,7 +227,7 @@ func (m *MasterCloudConfigExtension) Units() ([]cloudconfig.UnitAsset, error) {
 
 	units, err := m.renderUnits(unitsMeta)
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	return units, nil
@@ -248,76 +248,76 @@ func NewWorkerCloudConfigExtension(awsSpec awstpr.Spec, tlsAssets *certificatetp
 
 func (w *WorkerCloudConfigExtension) Files() ([]cloudconfig.FileAsset, error) {
 	workerFilesMeta := []cloudconfig.FileMetadata{
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: decryptTLSAssetsScriptTemplate,
 			Path:         "/opt/bin/decrypt-tls-assets",
 			Owner:        "root:root",
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: w.TLSAssets.WorkerCrt,
 			Path:         "/etc/kubernetes/ssl/worker-crt.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: w.TLSAssets.WorkerCA,
 			Path:         "/etc/kubernetes/ssl/worker-ca.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: w.TLSAssets.WorkerKey,
 			Path:         "/etc/kubernetes/ssl/worker-key.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: w.TLSAssets.CalicoClientCrt,
 			Path:         "/etc/kubernetes/ssl/calico/client-crt.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: w.TLSAssets.CalicoClientCA,
 			Path:         "/etc/kubernetes/ssl/calico/client-ca.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: w.TLSAssets.CalicoClientKey,
 			Path:         "/etc/kubernetes/ssl/calico/client-key.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: w.TLSAssets.EtcdServerCrt,
 			Path:         "/etc/kubernetes/ssl/etcd/client-crt.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: w.TLSAssets.EtcdServerCA,
 			Path:         "/etc/kubernetes/ssl/etcd/client-ca.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: w.TLSAssets.EtcdServerKey,
 			Path:         "/etc/kubernetes/ssl/etcd/client-key.pem.enc",
 			Owner:        "root:root",
 			Encoding:     cloudconfig.GzipBase64,
 			Permissions:  0700,
 		},
-		cloudconfig.FileMetadata{
+		{
 			AssetContent: waitDockerConfTemplate,
 			Path:         "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
 			Owner:        "root:root",
@@ -327,7 +327,7 @@ func (w *WorkerCloudConfigExtension) Files() ([]cloudconfig.FileAsset, error) {
 
 	files, err := w.renderFiles(workerFilesMeta)
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	return files, nil
@@ -335,19 +335,19 @@ func (w *WorkerCloudConfigExtension) Files() ([]cloudconfig.FileAsset, error) {
 
 func (w *WorkerCloudConfigExtension) Units() ([]cloudconfig.UnitAsset, error) {
 	unitsMeta := []cloudconfig.UnitMetadata{
-		cloudconfig.UnitMetadata{
+		{
 			AssetContent: decryptTLSAssetsServiceTemplate,
 			Name:         "decrypt-tls-assets.service",
 			Enable:       true,
 			Command:      "start",
 		},
-		cloudconfig.UnitMetadata{
+		{
 			AssetContent: workerFormatVarLibDockerServiceTemplate,
 			Name:         "format-var-lib-docker.service",
 			Enable:       true,
 			Command:      "start",
 		},
-		cloudconfig.UnitMetadata{
+		{
 			AssetContent: persistentVarLibDockerMountTemplate,
 			Name:         "var-lib-docker.mount",
 			Enable:       true,
@@ -357,7 +357,7 @@ func (w *WorkerCloudConfigExtension) Units() ([]cloudconfig.UnitAsset, error) {
 
 	units, err := w.renderUnits(unitsMeta)
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	return units, nil
@@ -402,11 +402,11 @@ func (s *Service) cloudConfig(prefix string, params cloudconfig.Params, awsSpec 
 
 	cc, err := cloudconfig.NewCloudConfig(template, params)
 	if err != nil {
-		return "", microerror.MaskAny(err)
+		return "", microerror.Mask(err)
 	}
 
 	if err := cc.ExecuteTemplate(); err != nil {
-		return "", microerror.MaskAny(err)
+		return "", microerror.Mask(err)
 	}
 
 	return cc.Base64(), nil

@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	micrologger "github.com/giantswarm/microkit/logger"
+	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service"
 )

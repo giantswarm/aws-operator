@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"html/template"
 
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 type SmallCloudconfigConfig struct {
@@ -17,13 +17,13 @@ type SmallCloudconfigConfig struct {
 func (s *Service) SmallCloudconfig(config SmallCloudconfigConfig) (string, error) {
 	tmpl, err := template.New("smallCloudconfig").Parse(userDataScriptTemplate)
 	if err != nil {
-		return "", microerror.MaskAny(err)
+		return "", microerror.Mask(err)
 	}
 
 	buf := new(bytes.Buffer)
 	err = tmpl.Execute(buf, config)
 	if err != nil {
-		return "", microerror.MaskAny(err)
+		return "", microerror.Mask(err)
 	}
 
 	return base64.StdEncoding.EncodeToString(buf.Bytes()), nil

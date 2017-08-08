@@ -4,7 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/giantswarm/aws-operator/resources"
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 const (
@@ -27,12 +27,12 @@ type RecordSet struct {
 
 // CreateIfNotExists is not implemented because AWS provides UPSERT functionality for DNS records
 func (record RecordSet) CreateIfNotExists() (bool, error) {
-	return false, microerror.MaskAny(notImplementedMethodError)
+	return false, microerror.Mask(notImplementedMethodError)
 }
 
 func (record RecordSet) CreateOrFail() error {
 	if err := record.perform(route53.ChangeActionUpsert); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -40,7 +40,7 @@ func (record RecordSet) CreateOrFail() error {
 
 func (record RecordSet) Delete() error {
 	if err := record.perform(route53.ChangeActionDelete); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -54,7 +54,7 @@ func (record RecordSet) perform(action string) error {
 	params := record.buildParams(action)
 
 	if _, err := record.Client.ChangeResourceRecordSets(params); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil

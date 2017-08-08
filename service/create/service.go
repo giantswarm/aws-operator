@@ -14,10 +14,9 @@ import (
 	"github.com/giantswarm/certificatetpr"
 	"github.com/giantswarm/clustertpr/spec"
 	"github.com/giantswarm/k8scloudconfig"
-	microerror "github.com/giantswarm/microkit/error"
-	micrologger "github.com/giantswarm/microkit/logger"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/tpr"
-	"github.com/juju/errgo"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
@@ -80,22 +79,22 @@ func DefaultConfig() Config {
 func New(config Config) (*Service, error) {
 	// Dependencies.
 	if config.CertWatcher == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "config.CertWatcher must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "config.CertWatcher must not be empty")
 	}
 	if config.K8sClient == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "config.K8sClient must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "config.K8sClient must not be empty")
 	}
 	if config.Logger == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "config.Logger must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
 
 	// Settings.
 	var emptyAwsConfig awsutil.Config
 	if config.AwsConfig == emptyAwsConfig {
-		return nil, microerror.MaskAnyf(invalidConfigError, "config.AwsConfig must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "config.AwsConfig must not be empty")
 	}
 	if config.PubKeyFile == "" {
-		return nil, microerror.MaskAnyf(invalidConfigError, "config.PubKeyFile must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "config.PubKeyFile must not be empty")
 	}
 
 	var err error
@@ -113,7 +112,7 @@ func New(config Config) (*Service, error) {
 
 		newTPR, err = tpr.New(tprConfig)
 		if err != nil {
-			return nil, microerror.MaskAny(err)
+			return nil, microerror.Mask(err)
 		}
 	}
 
@@ -238,7 +237,7 @@ func (s *Service) runMachines(input runMachinesInput) (bool, []string, error) {
 
 	// TODO(nhlfr): Create a separate module for validating specs and execute on the earlier stages.
 	if len(machines) != len(awsMachines) {
-		return false, nil, microerror.MaskAny(fmt.Errorf("mismatched number of %s machines in the 'spec' and 'aws' sections: %d != %d",
+		return false, nil, microerror.Mask(fmt.Errorf("mismatched number of %s machines in the 'spec' and 'aws' sections: %d != %d",
 			input.prefix,
 			len(machines),
 			len(awsMachines)))
@@ -267,7 +266,7 @@ func (s *Service) runMachines(input runMachinesInput) (bool, []string, error) {
 			prefix:              input.prefix,
 		})
 		if err != nil {
-			return false, nil, microerror.MaskAny(err)
+			return false, nil, microerror.Mask(err)
 		}
 		if created {
 			anyCreated = true
@@ -304,7 +303,7 @@ func (s *Service) uploadCloudconfigToS3(svc *s3.S3, s3Bucket, path, data string)
 		Key:           aws.String(path),
 		ContentLength: aws.Int64(int64(len(data))),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -336,7 +335,7 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 
 	cloudConfig, err := s.cloudConfig(input.prefix, cloudConfigParams, input.cluster.Spec, input.tlsAssets)
 	if err != nil {
-		return false, "", microerror.MaskAny(err)
+		return false, "", microerror.Mask(err)
 	}
 
 	// We now upload the instance cloudconfig to S3 and create a "small
@@ -357,22 +356,22 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 		AWSEntity: awsresources.AWSEntity{Clients: input.clients},
 	}
 	if err := cloudconfigS3.CreateOrFail(); err != nil {
-		return false, "", microerror.MaskAny(err)
+		return false, "", microerror.Mask(err)
 	}
 
 	smallCloudconfig, err := s.SmallCloudconfig(cloudconfigConfig)
 	if err != nil {
-		return false, "", microerror.MaskAny(err)
+		return false, "", microerror.Mask(err)
 	}
 
 	securityGroupID, err := input.securityGroup.GetID()
 	if err != nil {
-		return false, "", microerror.MaskAny(err)
+		return false, "", microerror.Mask(err)
 	}
 
 	subnetID, err := input.subnet.GetID()
 	if err != nil {
-		return false, "", microerror.MaskAny(err)
+		return false, "", microerror.Mask(err)
 	}
 
 	var instance *awsresources.Instance
@@ -397,7 +396,7 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 		}
 		instanceCreated, err = instance.CreateIfNotExists()
 		if err != nil {
-			return false, "", microerror.MaskAny(err)
+			return false, "", microerror.Mask(err)
 		}
 	}
 
@@ -430,12 +429,12 @@ func (s *Service) deleteMachines(input deleteMachinesInput) error {
 		Pattern: pattern,
 	})
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	for _, instance := range instances {
 		if err := instance.Delete(); err != nil {
-			return microerror.MaskAny(err)
+			return microerror.Mask(err)
 		}
 	}
 
@@ -466,12 +465,12 @@ func (s *Service) addFunc(obj interface{}) {
 	s.logger.Log("info", fmt.Sprintf("creating cluster '%s'", cluster.Name))
 
 	if err := validateCluster(cluster); err != nil {
-		s.logger.Log("error", "cluster spec is invalid: %s", errgo.Details(err))
+		s.logger.Log("error", "cluster spec is invalid: '%#v'", err)
 		return
 	}
 
 	if err := s.createClusterNamespace(cluster.Spec.Cluster); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create cluster namespace: %s", errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not create cluster namespace: '%#v'", err))
 		return
 	}
 
@@ -481,7 +480,7 @@ func (s *Service) addFunc(obj interface{}) {
 
 	err := s.awsConfig.SetAccountID(clients.IAM)
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not retrieve amazon account id: %s", errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not retrieve amazon account id: '%#v'", err))
 		return
 	}
 
@@ -497,7 +496,7 @@ func (s *Service) addFunc(obj interface{}) {
 		}
 		keyPairCreated, err = keyPair.CreateIfNotExists()
 		if err != nil {
-			s.logger.Log("error", fmt.Sprintf("could not create keypair: %s", errgo.Details(err)))
+			s.logger.Log("error", fmt.Sprintf("could not create keypair: '%#v'", err))
 			return
 		}
 	}
@@ -512,7 +511,7 @@ func (s *Service) addFunc(obj interface{}) {
 	clusterID := cluster.Spec.Cluster.Cluster.ID
 	certs, err := s.certWatcher.SearchCerts(clusterID)
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not get certificates from secrets: %v", errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not get certificates from secrets: '%#v'", err))
 		return
 	}
 
@@ -524,7 +523,7 @@ func (s *Service) addFunc(obj interface{}) {
 
 	kmsCreated, kmsKeyErr := kmsKey.CreateIfNotExists()
 	if kmsKeyErr != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create KMS key: %v", errgo.Details(kmsKeyErr)))
+		s.logger.Log("error", fmt.Sprintf("could not create KMS key: '%#v'", kmsKeyErr))
 		return
 	}
 
@@ -537,7 +536,7 @@ func (s *Service) addFunc(obj interface{}) {
 	// Encode TLS assets
 	tlsAssets, err := s.encodeTLSAssets(certs, clients.KMS, kmsKey.Arn())
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not encode TLS assets: %s", errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not encode TLS assets: '%#v'", err))
 		return
 	}
 
@@ -556,7 +555,7 @@ func (s *Service) addFunc(obj interface{}) {
 		policyErr = policy.CreateOrFail()
 	}
 	if policyErr != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create policy: %s", errgo.Details(policyErr)))
+		s.logger.Log("error", fmt.Sprintf("could not create policy: '%#v'", policyErr))
 	}
 
 	// Create S3 bucket
@@ -570,7 +569,7 @@ func (s *Service) addFunc(obj interface{}) {
 		}
 		bucketCreated, err = bucket.CreateIfNotExists()
 		if err != nil {
-			s.logger.Log("error", fmt.Sprintf("could not create S3 bucket: %s", errgo.Details(err)))
+			s.logger.Log("error", fmt.Sprintf("could not create S3 bucket: '%#v'", err))
 			return
 		}
 	}
@@ -590,7 +589,7 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 	vpcCreated, err := vpc.CreateIfNotExists()
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create VPC: %s", errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not create VPC: '%#v'", err))
 		return
 	}
 	if vpcCreated {
@@ -600,7 +599,7 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 	vpcID, err := vpc.GetID()
 	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	}
 
 	// Create gateway
@@ -614,7 +613,7 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 	gatewayCreated, err := gateway.CreateIfNotExists()
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create gateway: %s", errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not create gateway: '%#v'", err))
 		return
 	}
 	if gatewayCreated {
@@ -631,12 +630,12 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 	mastersSecurityGroup, err := s.createSecurityGroup(mastersSGInput)
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create security group '%s': %s", mastersSGInput.GroupName, errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not create security group '%s': '%#v'", mastersSGInput.GroupName, err))
 		return
 	}
 	mastersSecurityGroupID, err := mastersSecurityGroup.GetID()
 	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 		return
 	}
 
@@ -648,12 +647,12 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 	workersSecurityGroup, err := s.createSecurityGroup(workersSGInput)
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create security group '%s': %s", workersSGInput.GroupName, errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not create security group '%s': '%#v'", workersSGInput.GroupName, err))
 		return
 	}
 	workersSecurityGroupID, err := workersSecurityGroup.GetID()
 	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 		return
 	}
 
@@ -665,12 +664,12 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 	ingressSecurityGroup, err := s.createSecurityGroup(ingressSGInput)
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create security group '%s': %s", ingressSGInput.GroupName, errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not create security group '%s': '%#v'", ingressSGInput.GroupName, err))
 		return
 	}
 	ingressSecurityGroupID, err := ingressSecurityGroup.GetID()
 	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 		return
 	}
 
@@ -683,17 +682,17 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 
 	if err := mastersSecurityGroup.ApplyRules(rulesInput.masterRules()); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create rules for security group '%s': %s", mastersSecurityGroup.GroupName, errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not create rules for security group '%s': '%#v", mastersSecurityGroup.GroupName, err))
 		return
 	}
 
 	if err := workersSecurityGroup.ApplyRules(rulesInput.workerRules()); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create rules for security group '%s': %s", workersSecurityGroup.GroupName, errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not create rules for security group '%s': '%#v'", workersSecurityGroup.GroupName, err))
 		return
 	}
 
 	if err := ingressSecurityGroup.ApplyRules(rulesInput.ingressRules()); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create rules for security group '%s': %s", ingressSecurityGroup.GroupName, errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not create rules for security group '%s': '%#v'", ingressSecurityGroup.GroupName, err))
 		return
 	}
 
@@ -705,7 +704,7 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 	routeTableCreated, err := routeTable.CreateIfNotExists()
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create route table: %s", errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not create route table: '%#v'", err))
 		return
 	}
 	if routeTableCreated {
@@ -715,7 +714,7 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 
 	if err := routeTable.MakePublic(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not make route table public: %s", errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not make route table public: '%#v'", err))
 		return
 	}
 
@@ -731,7 +730,7 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 	publicSubnetCreated, err := publicSubnet.CreateIfNotExists()
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create public subnet: %s", errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not create public subnet: '%#v'", err))
 		return
 	}
 	if publicSubnetCreated {
@@ -741,12 +740,12 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 	publicSubnetID, err := publicSubnet.GetID()
 	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 		return
 	}
 
 	if err := publicSubnet.MakePublic(routeTable); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not make subnet public, %s", errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not make subnet public, '%#v'", err))
 		return
 	}
 
@@ -764,7 +763,7 @@ func (s *Service) addFunc(obj interface{}) {
 		prefix:              prefixMaster,
 	})
 	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	}
 
 	if !validateIDs(masterIDs) {
@@ -790,13 +789,13 @@ func (s *Service) addFunc(obj interface{}) {
 
 	apiLB, err := s.createLoadBalancer(lbInput)
 	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 		return
 	}
 
 	// Assign the ProxyProtocol policy to the apiserver load balancer.
 	if err := apiLB.AssignProxyProtocolPolicy(); err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 		return
 	}
 
@@ -818,7 +817,7 @@ func (s *Service) addFunc(obj interface{}) {
 
 	etcdLB, err := s.createLoadBalancer(lbInput)
 	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 		return
 	}
 
@@ -851,13 +850,13 @@ func (s *Service) addFunc(obj interface{}) {
 
 	ingressLB, err := s.createLoadBalancer(lbInput)
 	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 		return
 	}
 
 	// Assign the ProxyProtocol policy to the Ingress load balancer.
 	if err := ingressLB.AssignProxyProtocolPolicy(); err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 		return
 	}
 
@@ -879,7 +878,7 @@ func (s *Service) addFunc(obj interface{}) {
 
 	lcCreated, err := s.createLaunchConfiguration(lcInput)
 	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 		return
 	}
 
@@ -891,7 +890,7 @@ func (s *Service) addFunc(obj interface{}) {
 
 	workersLCName, err := launchConfigurationName(cluster, "worker", workersSecurityGroupID)
 	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 		return
 	}
 
@@ -913,7 +912,7 @@ func (s *Service) addFunc(obj interface{}) {
 
 	asgCreated, err := asg.CreateIfNotExists()
 	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 		return
 	}
 
@@ -925,7 +924,7 @@ func (s *Service) addFunc(obj interface{}) {
 
 	// Create Record Sets for the Load Balancers.
 	recordSetInputs := []recordSetInput{
-		recordSetInput{
+		{
 			Cluster:      cluster,
 			Client:       clients.Route53,
 			Resource:     apiLB,
@@ -933,7 +932,7 @@ func (s *Service) addFunc(obj interface{}) {
 			HostedZoneID: cluster.Spec.AWS.HostedZones.API,
 			Type:         route53.RRTypeA,
 		},
-		recordSetInput{
+		{
 			Cluster:      cluster,
 			Client:       clients.Route53,
 			Resource:     etcdLB,
@@ -941,7 +940,7 @@ func (s *Service) addFunc(obj interface{}) {
 			HostedZoneID: cluster.Spec.AWS.HostedZones.Etcd,
 			Type:         route53.RRTypeA,
 		},
-		recordSetInput{
+		{
 			Cluster:      cluster,
 			Client:       clients.Route53,
 			Resource:     ingressLB,
@@ -949,7 +948,7 @@ func (s *Service) addFunc(obj interface{}) {
 			HostedZoneID: cluster.Spec.AWS.HostedZones.Ingress,
 			Type:         route53.RRTypeA,
 		},
-		recordSetInput{
+		{
 			Cluster:      cluster,
 			Client:       clients.Route53,
 			Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.WildcardDomain,
@@ -962,7 +961,7 @@ func (s *Service) addFunc(obj interface{}) {
 	var rsErr error
 	for _, input := range recordSetInputs {
 		if rsErr = s.createRecordSet(input); rsErr != nil {
-			s.logger.Log("error", errgo.Details(rsErr))
+			s.logger.Log("error", fmt.Sprintf("%#v", rsErr))
 			return
 		}
 	}
@@ -1000,7 +999,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	}
 
 	if err := validateCluster(cluster); err != nil {
-		s.logger.Log("error", "cluster spec is invalid: %s", errgo.Details(err))
+		s.logger.Log("error", "cluster spec is invalid: '%#v'", err)
 		return
 	}
 
@@ -1012,7 +1011,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 
 	err := s.awsConfig.SetAccountID(clients.IAM)
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not retrieve amazon account id: %s", errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not retrieve amazon account id: '%#v'", err))
 		return
 	}
 
@@ -1023,7 +1022,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 		clusterName: cluster.Name,
 		prefix:      prefixMaster,
 	}); err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	} else {
 		s.logger.Log("info", "deleted masters")
 	}
@@ -1035,7 +1034,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	}
 
 	if err := asg.Delete(); err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	} else {
 		s.logger.Log("info", "deleted workers auto scaling group")
 	}
@@ -1047,7 +1046,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 		prefix:  "worker",
 	}
 	if err := s.deleteLaunchConfiguration(lcInput); err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	} else {
 		s.logger.Log("info", "deleted worker launch config")
 	}
@@ -1057,16 +1056,16 @@ func (s *Service) deleteFunc(obj interface{}) {
 	etcdLBName, err := loadBalancerName(cluster.Spec.Cluster.Etcd.Domain, cluster)
 	ingressLBName, err := loadBalancerName(cluster.Spec.Cluster.Kubernetes.IngressController.Domain, cluster)
 	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	} else {
 		apiLB, err := awsresources.NewELBFromExisting(apiLBName, clients.ELB)
 		etcdLB, err := awsresources.NewELBFromExisting(etcdLBName, clients.ELB)
 		ingressLB, err := awsresources.NewELBFromExisting(ingressLBName, clients.ELB)
 		if err != nil {
-			s.logger.Log("error", errgo.Details(err))
+			s.logger.Log("error", fmt.Sprintf("%#v", err))
 		} else {
 			recordSetInputs := []recordSetInput{
-				recordSetInput{
+				{
 					Cluster:      cluster,
 					Client:       clients.Route53,
 					Resource:     apiLB,
@@ -1074,7 +1073,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 					HostedZoneID: cluster.Spec.AWS.HostedZones.API,
 					Type:         route53.RRTypeA,
 				},
-				recordSetInput{
+				{
 					Cluster:      cluster,
 					Client:       clients.Route53,
 					Resource:     etcdLB,
@@ -1082,7 +1081,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 					HostedZoneID: cluster.Spec.AWS.HostedZones.Etcd,
 					Type:         route53.RRTypeA,
 				},
-				recordSetInput{
+				{
 					Cluster:      cluster,
 					Client:       clients.Route53,
 					Resource:     ingressLB,
@@ -1090,7 +1089,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 					HostedZoneID: cluster.Spec.AWS.HostedZones.Ingress,
 					Type:         route53.RRTypeA,
 				},
-				recordSetInput{
+				{
 					Cluster:      cluster,
 					Client:       clients.Route53,
 					Value:        cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
@@ -1103,7 +1102,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 			var rsErr error
 			for _, input := range recordSetInputs {
 				if rsErr = s.deleteRecordSet(input); rsErr != nil {
-					s.logger.Log("error", errgo.Details(rsErr))
+					s.logger.Log("error", fmt.Sprintf("%#v", rsErr))
 				}
 			}
 			if rsErr == nil {
@@ -1114,17 +1113,17 @@ func (s *Service) deleteFunc(obj interface{}) {
 
 	// Delete Load Balancers.
 	loadBalancerInputs := []LoadBalancerInput{
-		LoadBalancerInput{
+		{
 			Name:    cluster.Spec.Cluster.Kubernetes.API.Domain,
 			Clients: clients,
 			Cluster: cluster,
 		},
-		LoadBalancerInput{
+		{
 			Name:    cluster.Spec.Cluster.Etcd.Domain,
 			Clients: clients,
 			Cluster: cluster,
 		},
-		LoadBalancerInput{
+		{
 			Name:    cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
 			Clients: clients,
 			Cluster: cluster,
@@ -1134,7 +1133,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	var elbErr error
 	for _, lbInput := range loadBalancerInputs {
 		if elbErr = s.deleteLoadBalancer(lbInput); elbErr != nil {
-			s.logger.Log("error", errgo.Details(elbErr))
+			s.logger.Log("error", fmt.Sprintf("%#v", elbErr))
 		}
 	}
 	if elbErr == nil {
@@ -1148,7 +1147,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 		Client: clients.EC2,
 	}
 	if err := routeTable.Delete(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete route table: %s", errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not delete route table: '%#v'", err))
 	} else {
 		s.logger.Log("info", "deleted route table")
 	}
@@ -1161,7 +1160,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	}
 	vpcID, err := vpc.GetID()
 	if err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	}
 
 	// Delete gateway.
@@ -1174,7 +1173,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
 	}
 	if err := gateway.Delete(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete gateway: %s", errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not delete gateway: '%#v'", err))
 	} else {
 		s.logger.Log("info", "deleted gateway")
 	}
@@ -1187,7 +1186,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
 	}
 	if err := publicSubnet.Delete(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete public subnet: %s", errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not delete public subnet: '%#v'", err))
 	} else {
 		s.logger.Log("info", "deleted public subnet")
 	}
@@ -1199,7 +1198,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 		GroupName: securityGroupName(cluster.Name, prefixMaster),
 	}
 	if err := s.deleteSecurityGroupRules(mastersSGRulesInput); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': %s", mastersSGRulesInput.GroupName, errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
 	}
 
 	workersSGRulesInput := securityGroupRulesInput{
@@ -1207,7 +1206,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 		GroupName: securityGroupName(cluster.Name, prefixWorker),
 	}
 	if err := s.deleteSecurityGroupRules(workersSGRulesInput); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': %s", mastersSGRulesInput.GroupName, errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
 	}
 
 	ingressSGRulesInput := securityGroupRulesInput{
@@ -1215,7 +1214,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 		GroupName: securityGroupName(cluster.Name, prefixIngress),
 	}
 	if err := s.deleteSecurityGroupRules(ingressSGRulesInput); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': %s", mastersSGRulesInput.GroupName, errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
 	}
 
 	// Delete masters security group.
@@ -1224,7 +1223,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 		GroupName: securityGroupName(cluster.Name, prefixMaster),
 	}
 	if err := s.deleteSecurityGroup(mastersSGInput); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': %s", mastersSGInput.GroupName, errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", mastersSGInput.GroupName, err))
 	}
 
 	// Delete workers security group.
@@ -1233,7 +1232,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 		GroupName: securityGroupName(cluster.Name, prefixWorker),
 	}
 	if err := s.deleteSecurityGroup(workersSGInput); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': %s", workersSGInput.GroupName, errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", workersSGInput.GroupName, err))
 	}
 
 	// Delete ingress security group.
@@ -1242,12 +1241,12 @@ func (s *Service) deleteFunc(obj interface{}) {
 		GroupName: securityGroupName(cluster.Name, prefixIngress),
 	}
 	if err := s.deleteSecurityGroup(ingressSGInput); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': %s", ingressSGInput.GroupName, errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", ingressSGInput.GroupName, err))
 	}
 
 	// Delete VPC.
 	if err := vpc.Delete(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete vpc: %s", errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not delete vpc: '%#v'", err))
 	} else {
 		s.logger.Log("info", "deleted vpc")
 	}
@@ -1261,7 +1260,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	}
 
 	if err := bucket.Delete(); err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	}
 
 	s.logger.Log("info", "deleted bucket")
@@ -1274,7 +1273,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
 	}
 	if err := policy.Delete(); err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	} else {
 		s.logger.Log("info", "deleted roles, policies, instance profiles")
 	}
@@ -1286,7 +1285,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
 	}
 	if err := kmsKey.Delete(); err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	} else {
 		s.logger.Log("info", "deleted KMS key")
 	}
@@ -1298,7 +1297,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 		AWSEntity:   awsresources.AWSEntity{Clients: clients},
 	}
 	if err := keyPair.Delete(); err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	} else {
 		s.logger.Log("info", "deleted keypair")
 	}
@@ -1312,7 +1311,7 @@ func (s *Service) updateFunc(oldObj, newObj interface{}) {
 	cluster := *newObj.(*awstpr.CustomObject)
 
 	if err := validateCluster(cluster); err != nil {
-		s.logger.Log("error", "cluster spec is invalid: %s", errgo.Details(err))
+		s.logger.Log("error", "cluster spec is invalid: '%#v'", err)
 		return
 	}
 
@@ -1330,7 +1329,7 @@ func (s *Service) updateFunc(oldObj, newObj interface{}) {
 
 	err := s.awsConfig.SetAccountID(clients.IAM)
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not retrieve amazon account id: %s", errgo.Details(err)))
+		s.logger.Log("error", fmt.Sprintf("could not retrieve amazon account id: '%#v'", err))
 		return
 	}
 
@@ -1342,7 +1341,7 @@ func (s *Service) updateFunc(oldObj, newObj interface{}) {
 	}
 
 	if err := asg.Update(); err != nil {
-		s.logger.Log("error", errgo.Details(err))
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 		return
 	}
 

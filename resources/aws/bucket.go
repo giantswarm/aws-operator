@@ -4,8 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
-	microerror "github.com/giantswarm/microkit/error"
-	"github.com/juju/errgo"
+	"github.com/giantswarm/microerror"
 )
 
 type Bucket struct {
@@ -15,14 +14,14 @@ type Bucket struct {
 
 func (b *Bucket) CreateIfNotExists() (bool, error) {
 	if err := b.CreateOrFail(); err != nil {
-		underlying := errgo.Cause(err)
+		underlying := microerror.Cause(err)
 		if awserr, ok := underlying.(awserr.Error); ok {
 			if awserr.Code() == s3.ErrCodeBucketAlreadyOwnedByYou {
 				return false, nil
 			}
 		}
 
-		return false, microerror.MaskAny(err)
+		return false, microerror.Mask(err)
 	}
 	return true, nil
 }
@@ -31,13 +30,13 @@ func (b *Bucket) CreateOrFail() error {
 	if _, err := b.Clients.S3.CreateBucket(&s3.CreateBucketInput{
 		Bucket: aws.String(b.Name),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	if err := b.Clients.S3.WaitUntilBucketExists(&s3.HeadBucketInput{
 		Bucket: aws.String(b.Name),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -49,7 +48,7 @@ func (b *Bucket) Delete() error {
 		Bucket: aws.String(b.Name),
 	})
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	for _, o := range objects.Contents {
@@ -57,14 +56,14 @@ func (b *Bucket) Delete() error {
 			Bucket: aws.String(b.Name),
 			Key:    aws.String(*o.Key),
 		}); err != nil {
-			return microerror.MaskAny(err)
+			return microerror.Mask(err)
 		}
 	}
 
 	if _, err := b.Clients.S3.DeleteBucket(&s3.DeleteBucketInput{
 		Bucket: aws.String(b.Name),
 	}); err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
