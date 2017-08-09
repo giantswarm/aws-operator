@@ -22,7 +22,7 @@ const (
 			"Action": "sts:AssumeRole"
 		}
 	}`
-	PolicyDocumentTempl = `{
+	MasterPolicyDocumentTempl = `{
 		"Version": "2012-10-17",
 		"Statement": [
 			{
@@ -30,6 +30,52 @@ const (
             	"Effect": "Allow",
                 "Resource": "*"
             },
+			{
+				"Effect": "Allow",
+				"Action": "kms:Decrypt",
+				"Resource": %q
+			},
+			{
+				"Effect": "Allow",
+				"Action": [
+					"s3:GetBucketLocation",
+					"s3:ListAllMyBuckets"
+				],
+				"Resource": "*"
+			},
+			{
+				"Effect": "Allow",
+				"Action": [
+					"s3:ListBucket"
+				],
+				"Resource": "arn:aws:s3:::%s"
+			},
+			{
+				"Effect": "Allow",
+				"Action": "s3:GetObject",
+				"Resource": "arn:aws:s3:::%s/*"
+			}
+		]
+	}`
+	MasterPolicyType          = "master"
+	WorkerPolicyDocumentTempl = `{
+		"Version": "2012-10-17",
+		"Statement": [
+			{
+				"Effect": "Allow",
+				"Action": "ec2:Describe*",
+				"Resource": "*"
+			},
+			{
+				"Effect": "Allow",
+				"Action": "ec2:AttachVolume",
+				"Resource": "*"
+			},
+			{
+				"Effect": "Allow",
+				"Action": "ec2:DetachVolume",
+				"Resource": "*"
+			},
 			{
 				"Effect": "Allow",
 				"Action": "kms:Decrypt",
@@ -70,26 +116,28 @@ const (
 			}
 		]
 	}`
+	WorkerPolicyType = "worker"
 )
 
 type Policy struct {
-	ClusterID string
-	KMSKeyArn string
-	S3Bucket  string
-	name      string
+	ClusterID  string
+	KMSKeyArn  string
+	PolicyType string
+	S3Bucket   string
+	name       string
 	AWSEntity
 }
 
 func (p *Policy) clusterPolicyName() string {
-	return fmt.Sprintf("%s-%s", p.ClusterID, PolicyNameTemplate)
+	return fmt.Sprintf("%s-%s-%s", p.ClusterID, p.PolicyType, PolicyNameTemplate)
 }
 
 func (p *Policy) clusterProfileName() string {
-	return fmt.Sprintf("%s-%s", p.ClusterID, ProfileNameTemplate)
+	return fmt.Sprintf("%s-%s-%s", p.ClusterID, p.PolicyType, ProfileNameTemplate)
 }
 
 func (p *Policy) clusterRoleName() string {
-	return fmt.Sprintf("%s-%s", p.ClusterID, RoleNameTemplate)
+	return fmt.Sprintf("%s-%s-%s", p.ClusterID, p.PolicyType, RoleNameTemplate)
 }
 
 func (p *Policy) CreateIfNotExists() (bool, error) {
@@ -98,10 +146,19 @@ func (p *Policy) CreateIfNotExists() (bool, error) {
 
 func (p *Policy) createRole() error {
 	// TODO switch to using a file and Go templates
-	policyDocument := fmt.Sprintf(PolicyDocumentTempl, p.KMSKeyArn, p.S3Bucket, p.S3Bucket)
+	var policyTemplate string
 
-	clusterRoleName := fmt.Sprintf("%s-%s", p.ClusterID, RoleNameTemplate)
+	switch p.PolicyType {
+	case MasterPolicyType:
+		policyTemplate = MasterPolicyDocumentTempl
+	case WorkerPolicyType:
+		policyTemplate = WorkerPolicyDocumentTempl
+	default:
+		return microerror.Maskf(notFoundError, notFoundErrorFormat, "PolicyType", p.PolicyType)
+	}
 
+	policyDocument := fmt.Sprintf(policyTemplate, p.KMSKeyArn, p.S3Bucket, p.S3Bucket)
+	clusterRoleName := p.clusterRoleName()
 	if _, err := p.Clients.IAM.CreateRole(&iam.CreateRoleInput{
 		RoleName:                 aws.String(clusterRoleName),
 		AssumeRolePolicyDocument: aws.String(AssumeRolePolicyDocument),
@@ -109,10 +166,8 @@ func (p *Policy) createRole() error {
 		return microerror.Mask(err)
 	}
 
-	clusterPolicyName := fmt.Sprintf("%s-%s", p.ClusterID, PolicyNameTemplate)
-
 	if _, err := p.Clients.IAM.PutRolePolicy(&iam.PutRolePolicyInput{
-		PolicyName:     aws.String(clusterPolicyName),
+		PolicyName:     aws.String(p.clusterPolicyName()),
 		RoleName:       aws.String(clusterRoleName),
 		PolicyDocument: aws.String(policyDocument),
 	}); err != nil {

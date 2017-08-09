@@ -474,7 +474,7 @@ func (s *Service) addFunc(obj interface{}) {
 		return
 	}
 
-	// Create AWS client
+	// Create AWS client.
 	s.awsConfig.Region = cluster.Spec.AWS.Region
 	clients := awsutil.NewClients(s.awsConfig)
 
@@ -484,7 +484,7 @@ func (s *Service) addFunc(obj interface{}) {
 		return
 	}
 
-	// Create keypair
+	// Create keypair.
 	var keyPair resources.ReusableResource
 	var keyPairCreated bool
 	{
@@ -515,7 +515,7 @@ func (s *Service) addFunc(obj interface{}) {
 		return
 	}
 
-	// Create KMS key
+	// Create KMS key.
 	kmsKey := &awsresources.KMSKey{
 		Name:      cluster.Name,
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
@@ -533,32 +533,50 @@ func (s *Service) addFunc(obj interface{}) {
 		s.logger.Log("info", fmt.Sprintf("kms key '%s' already exists, reusing", kmsKey.Name))
 	}
 
-	// Encode TLS assets
+	// Encode TLS assets.
 	tlsAssets, err := s.encodeTLSAssets(certs, clients.KMS, kmsKey.Arn())
 	if err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not encode TLS assets: '%#v'", err))
 		return
 	}
 
-	// Create policy
 	bucketName := s.bucketName(cluster)
 
-	var policy resources.NamedResource
-	var policyErr error
+	// Create master IAM policy.
+	var masterPolicy resources.NamedResource
+	var masterPolicyErr error
 	{
-		policy = &awsresources.Policy{
-			ClusterID: cluster.Spec.Cluster.Cluster.ID,
-			KMSKeyArn: kmsKey.Arn(),
-			S3Bucket:  bucketName,
-			AWSEntity: awsresources.AWSEntity{Clients: clients},
+		masterPolicy = &awsresources.Policy{
+			ClusterID:  cluster.Spec.Cluster.Cluster.ID,
+			KMSKeyArn:  kmsKey.Arn(),
+			PolicyType: prefixMaster,
+			S3Bucket:   bucketName,
+			AWSEntity:  awsresources.AWSEntity{Clients: clients},
 		}
-		policyErr = policy.CreateOrFail()
+		masterPolicyErr = masterPolicy.CreateOrFail()
 	}
-	if policyErr != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create policy: '%#v'", policyErr))
+	if masterPolicyErr != nil {
+		s.logger.Log("error", fmt.Sprintf("could not create %s policy: '%#v'", prefixMaster, masterPolicyErr))
 	}
 
-	// Create S3 bucket
+	// Create worker IAM policy.
+	var workerPolicy resources.NamedResource
+	var workerPolicyErr error
+	{
+		workerPolicy = &awsresources.Policy{
+			ClusterID:  cluster.Spec.Cluster.Cluster.ID,
+			KMSKeyArn:  kmsKey.Arn(),
+			PolicyType: prefixWorker,
+			S3Bucket:   bucketName,
+			AWSEntity:  awsresources.AWSEntity{Clients: clients},
+		}
+		workerPolicyErr = workerPolicy.CreateOrFail()
+	}
+	if workerPolicyErr != nil {
+		s.logger.Log("error", fmt.Sprintf("could not create %s policy: '%#v'", prefixWorker, workerPolicyErr))
+	}
+
+	// Create S3 bucket.
 	var bucket resources.ReusableResource
 	var bucketCreated bool
 	{
@@ -580,7 +598,7 @@ func (s *Service) addFunc(obj interface{}) {
 		s.logger.Log("info", fmt.Sprintf("bucket '%s' already exists, reusing", bucketName))
 	}
 
-	// Create VPC
+	// Create VPC.
 	var vpc resources.ResourceWithID
 	vpc = &awsresources.VPC{
 		CidrBlock: cluster.Spec.AWS.VPC.CIDR,
@@ -602,7 +620,7 @@ func (s *Service) addFunc(obj interface{}) {
 		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	}
 
-	// Create gateway
+	// Create gateway.
 	var gateway resources.ResourceWithID
 	gateway = &awsresources.Gateway{
 		Name:  cluster.Name,
@@ -718,7 +736,7 @@ func (s *Service) addFunc(obj interface{}) {
 		return
 	}
 
-	// Create public subnet for the masters
+	// Create public subnet for the masters.
 	publicSubnet := &awsresources.Subnet{
 		AvailabilityZone: cluster.Spec.AWS.AZ,
 		CidrBlock:        cluster.Spec.AWS.VPC.PublicSubnetCIDR,
@@ -749,7 +767,7 @@ func (s *Service) addFunc(obj interface{}) {
 		return
 	}
 
-	// Run masters
+	// Run masters.
 	anyMastersCreated, masterIDs, err := s.runMachines(runMachinesInput{
 		clients:             clients,
 		cluster:             cluster,
@@ -759,7 +777,7 @@ func (s *Service) addFunc(obj interface{}) {
 		securityGroup:       mastersSecurityGroup,
 		subnet:              publicSubnet,
 		keyPairName:         cluster.Name,
-		instanceProfileName: policy.GetName(),
+		instanceProfileName: masterPolicy.GetName(),
 		prefix:              prefixMaster,
 	})
 	if err != nil {
@@ -824,7 +842,7 @@ func (s *Service) addFunc(obj interface{}) {
 	// If the policy couldn't be created and some instances didn't exist before, that means that the cluster
 	// is inconsistent and most problably its deployment broke in the middle during the previous run of
 	// aws-operator.
-	if anyMastersCreated && (kmsKeyErr != nil || policyErr != nil) {
+	if anyMastersCreated && (kmsKeyErr != nil || masterPolicyErr != nil || workerPolicyErr != nil) {
 		s.logger.Log("error", fmt.Sprintf("cluster '%s' is inconsistent, KMS keys and policies were not created, but EC2 instances were missing, please consider deleting this cluster", cluster.Name))
 		return
 	}
@@ -871,7 +889,7 @@ func (s *Service) addFunc(obj interface{}) {
 		securityGroup:       workersSecurityGroup,
 		subnet:              publicSubnet,
 		keypairName:         cluster.Name,
-		instanceProfileName: policy.GetName(),
+		instanceProfileName: workerPolicy.GetName(),
 		prefix:              prefixWorker,
 		ebsStorage:          true,
 	}
@@ -1152,7 +1170,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 		s.logger.Log("info", "deleted route table")
 	}
 
-	// Sync VPC
+	// Sync VPC.
 	var vpc resources.ResourceWithID
 	vpc = &awsresources.VPC{
 		Name:      cluster.Name,
@@ -1265,17 +1283,32 @@ func (s *Service) deleteFunc(obj interface{}) {
 
 	s.logger.Log("info", "deleted bucket")
 
-	// Delete policy.
-	var policy resources.NamedResource
-	policy = &awsresources.Policy{
-		ClusterID: cluster.Spec.Cluster.Cluster.ID,
-		S3Bucket:  bucketName,
-		AWSEntity: awsresources.AWSEntity{Clients: clients},
+	// Delete master policy.
+	var masterPolicy resources.NamedResource
+	masterPolicy = &awsresources.Policy{
+		ClusterID:  cluster.Spec.Cluster.Cluster.ID,
+		PolicyType: prefixMaster,
+		S3Bucket:   bucketName,
+		AWSEntity:  awsresources.AWSEntity{Clients: clients},
 	}
-	if err := policy.Delete(); err != nil {
+	if err := masterPolicy.Delete(); err != nil {
 		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	} else {
-		s.logger.Log("info", "deleted roles, policies, instance profiles")
+		s.logger.Log("info", fmt.Sprintf("deleted %s roles, policies, instance profiles", prefixMaster))
+	}
+
+	// Delete worker policy.
+	var workerPolicy resources.NamedResource
+	workerPolicy = &awsresources.Policy{
+		ClusterID:  cluster.Spec.Cluster.Cluster.ID,
+		PolicyType: prefixWorker,
+		S3Bucket:   bucketName,
+		AWSEntity:  awsresources.AWSEntity{Clients: clients},
+	}
+	if err := workerPolicy.Delete(); err != nil {
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
+	} else {
+		s.logger.Log("info", fmt.Sprintf("deleted %s roles, policies, instance profiles", prefixWorker))
 	}
 
 	// Delete KMS key.
