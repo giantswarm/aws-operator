@@ -474,7 +474,7 @@ func (s *Service) addFunc(obj interface{}) {
 		return
 	}
 
-	// Create AWS client
+	// Create AWS client.
 	s.awsConfig.Region = cluster.Spec.AWS.Region
 	clients := awsutil.NewClients(s.awsConfig)
 
@@ -484,7 +484,7 @@ func (s *Service) addFunc(obj interface{}) {
 		return
 	}
 
-	// Create keypair
+	// Create keypair.
 	var keyPair resources.ReusableResource
 	var keyPairCreated bool
 	{
@@ -515,7 +515,7 @@ func (s *Service) addFunc(obj interface{}) {
 		return
 	}
 
-	// Create KMS key
+	// Create KMS key.
 	kmsKey := &awsresources.KMSKey{
 		Name:      cluster.Name,
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
@@ -533,7 +533,7 @@ func (s *Service) addFunc(obj interface{}) {
 		s.logger.Log("info", fmt.Sprintf("kms key '%s' already exists, reusing", kmsKey.Name))
 	}
 
-	// Encode TLS assets
+	// Encode TLS assets.
 	tlsAssets, err := s.encodeTLSAssets(certs, clients.KMS, kmsKey.Arn())
 	if err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not encode TLS assets: '%#v'", err))
@@ -542,7 +542,7 @@ func (s *Service) addFunc(obj interface{}) {
 
 	bucketName := s.bucketName(cluster)
 
-	// Create master IAM policy
+	// Create master IAM policy.
 	var masterPolicy resources.NamedResource
 	var masterPolicyErr error
 	{
@@ -559,7 +559,7 @@ func (s *Service) addFunc(obj interface{}) {
 		s.logger.Log("error", fmt.Sprintf("could not create %s policy: '%#v'", prefixMaster, masterPolicyErr))
 	}
 
-	// Create worker IAM policy
+	// Create worker IAM policy.
 	var workerPolicy resources.NamedResource
 	var workerPolicyErr error
 	{
@@ -576,7 +576,7 @@ func (s *Service) addFunc(obj interface{}) {
 		s.logger.Log("error", fmt.Sprintf("could not create %s policy: '%#v'", prefixWorker, workerPolicyErr))
 	}
 
-	// Create S3 bucket
+	// Create S3 bucket.
 	var bucket resources.ReusableResource
 	var bucketCreated bool
 	{
@@ -598,7 +598,7 @@ func (s *Service) addFunc(obj interface{}) {
 		s.logger.Log("info", fmt.Sprintf("bucket '%s' already exists, reusing", bucketName))
 	}
 
-	// Create VPC
+	// Create VPC.
 	var vpc resources.ResourceWithID
 	vpc = &awsresources.VPC{
 		CidrBlock: cluster.Spec.AWS.VPC.CIDR,
@@ -620,7 +620,7 @@ func (s *Service) addFunc(obj interface{}) {
 		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	}
 
-	// Create gateway
+	// Create gateway.
 	var gateway resources.ResourceWithID
 	gateway = &awsresources.Gateway{
 		Name:  cluster.Name,
@@ -736,7 +736,7 @@ func (s *Service) addFunc(obj interface{}) {
 		return
 	}
 
-	// Create public subnet for the masters
+	// Create public subnet for the masters.
 	publicSubnet := &awsresources.Subnet{
 		AvailabilityZone: cluster.Spec.AWS.AZ,
 		CidrBlock:        cluster.Spec.AWS.VPC.PublicSubnetCIDR,
@@ -767,7 +767,7 @@ func (s *Service) addFunc(obj interface{}) {
 		return
 	}
 
-	// Run masters
+	// Run masters.
 	anyMastersCreated, masterIDs, err := s.runMachines(runMachinesInput{
 		clients:             clients,
 		cluster:             cluster,
@@ -1170,7 +1170,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 		s.logger.Log("info", "deleted route table")
 	}
 
-	// Sync VPC
+	// Sync VPC.
 	var vpc resources.ResourceWithID
 	vpc = &awsresources.VPC{
 		Name:      cluster.Name,
