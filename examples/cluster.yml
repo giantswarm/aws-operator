@@ -30,6 +30,7 @@ spec:
         ip: "172.31.0.1" 
         securePort: 443
         clusterIPRange: "172.31.0.0/24"
+      cloudProvider: "aws"
       dns:
         ip: "172.31.0.10"
       domain: "cluster.local"
@@ -38,11 +39,14 @@ spec:
           image: "quay.io/giantswarm/hyperkube:v1.6.4_coreos.0"
       ingressController:
         docker:
-          image: "quay.io/giantswarm/nginx-ingress-controller:0.9.0-beta.1"
+          image: "quay.io/giantswarm/nginx-ingress-controller:0.9.0-beta.11"
         insecurePort: 30010
         securePort: 30011
         domain: "ingress.example.aws.gigantic.io"
         wildcardDomain: "*.example.aws.gigantic.io"
+      kubectl:
+        docker:
+          image: "quay.io/giantswarm/docker-kubectl:f51f93c30d27927d2b33122994c0929b3e6f2432"
       kubelet:
         port: 10250
       networkSetup:
