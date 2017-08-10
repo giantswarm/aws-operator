@@ -1,8 +1,8 @@
 hash: 5b100615712487f9c60f65545f793881042f581fe76d54ff0e41ca9e6f2ba143
-updated: 2017-08-07T16:43:51.841002409+02:00
+updated: 2017-08-10T09:49:47.285856674+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 07a12acf062c74aacf99ed8a6a4ee1bc52ab1627
+  version: 0fe261219ed324b1c71cc942f85346d5ced0f7aa
   subpackages:
   - aws
   - aws/awserr
@@ -32,6 +32,7 @@ imports:
   - private/protocol/restxml
   - private/protocol/xml/xmlutil
   - service/autoscaling
+  - service/cloudformation
   - service/ec2
   - service/elb
   - service/iam
@@ -81,14 +82,14 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: 46d936c38eba06537346d340d27c4927826c45fc
+  version: fcebfe8fc8711566eda9a1cfc83c30d09c63a0b8
   subpackages:
   - spec
   - spec/aws
 - name: github.com/giantswarm/certificatetpr
   version: a467108378cd4d0e5b0599f3f2122e70bcf70ba5
 - name: github.com/giantswarm/clustertpr
-  version: e00ef3f59c4d55ce1a2cf70b7739e34a0604d748
+  version: 3b9aeaba188ee91de7e3b9904c3998a0d81211df
   subpackages:
   - spec
   - spec/docker
@@ -98,7 +99,7 @@ imports:
   - spec/kubernetes/kubectl
   - spec/kubernetes/networksetup
 - name: github.com/giantswarm/k8scloudconfig
-  version: 3f295cf51350030d407d247daa2c7f7cf085efe0
+  version: 0faeb9d9d3c885cadb5ee3c4adadf27be82a66f7
 - name: github.com/giantswarm/microendpoint
   version: fb3e124643cfb364625089c39a59393f8cfdf647
   subpackages:
@@ -130,7 +131,7 @@ imports:
 - name: github.com/giantswarm/micrologger
   version: 8a69b2ab80ba2d0bd40d609206518fefacfc8fdf
 - name: github.com/giantswarm/operatorkit
-  version: 2f2c2942ed86d1fd6def7f7367b19031883047db
+  version: 1230c089d563fb0bddc0b336dda0bb336081e76c
   subpackages:
   - client/k8s
   - tpr

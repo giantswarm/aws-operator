@@ -633,37 +633,28 @@ write_files:
         prometheus.io/port: '10254'
         prometheus.io/scrape: 'true'
     spec:
-      replicas: 3
+      replicas: {{len .Cluster.Workers}}
       strategy:
         type: RollingUpdate
         rollingUpdate:
-          maxUnavailable: 2
+          maxUnavailable: 1
       template:
         metadata:
           labels:
             k8s-app: nginx-ingress-controller
-          annotations:
-            scheduler.alpha.kubernetes.io/affinity: >
-              {
-                "podAntiAffinity": {
-                  "preferredDuringSchedulingIgnoredDuringExecution": [
-                    {
-                      "labelSelector": {
-                        "matchExpressions": [
-                          {
-                            "key": "k8s-app",
-                            "operator": "In",
-                            "values": ["nginx-ingress-controller"]
-                          }
-                        ]
-                      },
-                      "topologyKey": "kubernetes.io/hostname",
-                      "weight": 100
-                    }
-                  ]
-                }
-              }
         spec:
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  labelSelector:
+                    matchExpressions:
+                      - key: k8s-app
+                        operator: In
+                        values:
+                        - nginx-ingress-controller
+                  topologyKey: kubernetes.io/hostname
           containers:
           - name: nginx-ingress-controller
             image: {{.Cluster.Kubernetes.IngressController.Docker.Image}}
