@@ -120,7 +120,7 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 }
 
 func (s *Service) deleteLaunchConfiguration(input launchConfigurationInput) error {
-	groupName := securityGroupName(input.cluster.Name, input.prefix)
+	groupName := key.SecurityGroupName(input.cluster, input.prefix)
 	sg := awsresources.SecurityGroup{
 		Description: groupName,
 		GroupName:   groupName,
