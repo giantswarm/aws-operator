@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/giantswarm/aws-operator/resources"
+	"github.com/giantswarm/aws-operator/service/key"
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/certificatetpr"
 	cloudconfig "github.com/giantswarm/k8scloudconfig"
@@ -153,7 +154,7 @@ func (s *Service) deleteLaunchConfiguration(input launchConfigurationInput) erro
 // that we can only reuse an LC if it has been created for the current SG.
 // Otherwise, the SG might not exist anymore.
 func launchConfigurationName(cluster awstpr.CustomObject, prefix, securityGroupID string) (string, error) {
-	if cluster.Spec.Cluster.Cluster.ID == "" {
+	if key.ClusterID(cluster) == "" {
 		return "", microerror.Maskf(missingCloudConfigKeyError, "spec.cluster.cluster.id")
 	}
 
@@ -165,5 +166,5 @@ func launchConfigurationName(cluster awstpr.CustomObject, prefix, securityGroupI
 		return "", microerror.Maskf(missingCloudConfigKeyError, "launchConfiguration securityGroupID")
 	}
 
-	return fmt.Sprintf("%s-%s-%s", cluster.Spec.Cluster.Cluster.ID, prefix, securityGroupID), nil
+	return fmt.Sprintf("%s-%s-%s", key.ClusterID(cluster), prefix, securityGroupID), nil
 }

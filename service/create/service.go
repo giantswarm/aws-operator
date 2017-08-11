@@ -24,6 +24,7 @@ import (
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/resources"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
+	"github.com/giantswarm/aws-operator/service/key"
 )
 
 const (
@@ -462,7 +463,7 @@ func validateIDs(ids []string) bool {
 
 func (s *Service) addFunc(obj interface{}) {
 	cluster := *obj.(*awstpr.CustomObject)
-	s.logger.Log("info", fmt.Sprintf("creating cluster '%s'", cluster.Name))
+	s.logger.Log("info", fmt.Sprintf("creating cluster '%s'", key.ClusterID(cluster)))
 
 	if err := validateCluster(cluster); err != nil {
 		s.logger.Log("error", "cluster spec is invalid: '%#v'", err)
@@ -490,7 +491,7 @@ func (s *Service) addFunc(obj interface{}) {
 	{
 		var err error
 		keyPair = &awsresources.KeyPair{
-			ClusterName: cluster.Name,
+			ClusterName: key.ClusterID(cluster),
 			Provider:    awsresources.NewFSKeyPairProvider(s.pubKeyFile),
 			AWSEntity:   awsresources.AWSEntity{Clients: clients},
 		}
@@ -502,13 +503,13 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 
 	if keyPairCreated {
-		s.logger.Log("info", fmt.Sprintf("created keypair '%s'", cluster.Name))
+		s.logger.Log("info", fmt.Sprintf("created keypair '%s'", key.ClusterID(cluster)))
 	} else {
-		s.logger.Log("info", fmt.Sprintf("keypair '%s' already exists, reusing", cluster.Name))
+		s.logger.Log("info", fmt.Sprintf("keypair '%s' already exists, reusing", key.ClusterID(cluster)))
 	}
 
 	s.logger.Log("info", fmt.Sprintf("waiting for k8s secrets..."))
-	clusterID := cluster.Spec.Cluster.Cluster.ID
+	clusterID := key.ClusterID(cluster)
 	certs, err := s.certWatcher.SearchCerts(clusterID)
 	if err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not get certificates from secrets: '%#v'", err))
@@ -517,7 +518,7 @@ func (s *Service) addFunc(obj interface{}) {
 
 	// Create KMS key.
 	kmsKey := &awsresources.KMSKey{
-		Name:      cluster.Name,
+		Name:      key.ClusterID(cluster),
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
 	}
 
@@ -528,7 +529,7 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 
 	if kmsCreated {
-		s.logger.Log("info", fmt.Sprintf("created KMS key for cluster '%s'", cluster.Name))
+		s.logger.Log("info", fmt.Sprintf("created KMS key for cluster '%s'", key.ClusterID(cluster)))
 	} else {
 		s.logger.Log("info", fmt.Sprintf("kms key '%s' already exists, reusing", kmsKey.Name))
 	}
@@ -547,7 +548,7 @@ func (s *Service) addFunc(obj interface{}) {
 	var masterPolicyErr error
 	{
 		masterPolicy = &awsresources.Policy{
-			ClusterID:  cluster.Spec.Cluster.Cluster.ID,
+			ClusterID:  key.ClusterID(cluster),
 			KMSKeyArn:  kmsKey.Arn(),
 			PolicyType: prefixMaster,
 			S3Bucket:   bucketName,
@@ -564,7 +565,7 @@ func (s *Service) addFunc(obj interface{}) {
 	var workerPolicyErr error
 	{
 		workerPolicy = &awsresources.Policy{
-			ClusterID:  cluster.Spec.Cluster.Cluster.ID,
+			ClusterID:  key.ClusterID(cluster),
 			KMSKeyArn:  kmsKey.Arn(),
 			PolicyType: prefixWorker,
 			S3Bucket:   bucketName,
@@ -602,7 +603,7 @@ func (s *Service) addFunc(obj interface{}) {
 	var vpc resources.ResourceWithID
 	vpc = &awsresources.VPC{
 		CidrBlock: cluster.Spec.AWS.VPC.CIDR,
-		Name:      cluster.Name,
+		Name:      key.ClusterID(cluster),
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
 	}
 	vpcCreated, err := vpc.CreateIfNotExists()
@@ -611,9 +612,9 @@ func (s *Service) addFunc(obj interface{}) {
 		return
 	}
 	if vpcCreated {
-		s.logger.Log("info", fmt.Sprintf("created vpc for cluster '%s'", cluster.Name))
+		s.logger.Log("info", fmt.Sprintf("created vpc for cluster '%s'", key.ClusterID(cluster)))
 	} else {
-		s.logger.Log("info", fmt.Sprintf("vpc for cluster '%s' already exists, reusing", cluster.Name))
+		s.logger.Log("info", fmt.Sprintf("vpc for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
 	}
 	vpcID, err := vpc.GetID()
 	if err != nil {
@@ -623,7 +624,7 @@ func (s *Service) addFunc(obj interface{}) {
 	// Create gateway.
 	var gateway resources.ResourceWithID
 	gateway = &awsresources.Gateway{
-		Name:  cluster.Name,
+		Name:  key.ClusterID(cluster),
 		VpcID: vpcID,
 		// Dependencies.
 		Logger:    s.logger,
@@ -635,15 +636,15 @@ func (s *Service) addFunc(obj interface{}) {
 		return
 	}
 	if gatewayCreated {
-		s.logger.Log("info", fmt.Sprintf("created gateway for cluster '%s'", cluster.Name))
+		s.logger.Log("info", fmt.Sprintf("created gateway for cluster '%s'", key.ClusterID(cluster)))
 	} else {
-		s.logger.Log("info", fmt.Sprintf("gateway for cluster '%s' already exists, reusing", cluster.Name))
+		s.logger.Log("info", fmt.Sprintf("gateway for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
 	}
 
 	// Create masters security group.
 	mastersSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: securityGroupName(cluster.Name, prefixMaster),
+		GroupName: securityGroupName(key.ClusterID(cluster), prefixMaster),
 		VPCID:     vpcID,
 	}
 	mastersSecurityGroup, err := s.createSecurityGroup(mastersSGInput)
@@ -660,7 +661,7 @@ func (s *Service) addFunc(obj interface{}) {
 	// Create workers security group.
 	workersSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: securityGroupName(cluster.Name, prefixWorker),
+		GroupName: securityGroupName(key.ClusterID(cluster), prefixWorker),
 		VPCID:     vpcID,
 	}
 	workersSecurityGroup, err := s.createSecurityGroup(workersSGInput)
@@ -677,7 +678,7 @@ func (s *Service) addFunc(obj interface{}) {
 	// Create ingress ELB security group.
 	ingressSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: securityGroupName(cluster.Name, prefixIngress),
+		GroupName: securityGroupName(key.ClusterID(cluster), prefixIngress),
 		VPCID:     vpcID,
 	}
 	ingressSecurityGroup, err := s.createSecurityGroup(ingressSGInput)
@@ -716,7 +717,7 @@ func (s *Service) addFunc(obj interface{}) {
 
 	// Create route table.
 	routeTable := &awsresources.RouteTable{
-		Name:   cluster.Name,
+		Name:   key.ClusterID(cluster),
 		VpcID:  vpcID,
 		Client: clients.EC2,
 	}
@@ -738,7 +739,7 @@ func (s *Service) addFunc(obj interface{}) {
 
 	// Create public subnet for the masters.
 	publicSubnet := &awsresources.Subnet{
-		AvailabilityZone: cluster.Spec.AWS.AZ,
+		AvailabilityZone: key.AvailabilityZone(cluster),
 		CidrBlock:        cluster.Spec.AWS.VPC.PublicSubnetCIDR,
 		Name:             subnetName(cluster, suffixPublic),
 		VpcID:            vpcID,
@@ -752,9 +753,9 @@ func (s *Service) addFunc(obj interface{}) {
 		return
 	}
 	if publicSubnetCreated {
-		s.logger.Log("info", fmt.Sprintf("created public subnet for cluster '%s'", cluster.Name))
+		s.logger.Log("info", fmt.Sprintf("created public subnet for cluster '%s'", key.ClusterID(cluster)))
 	} else {
-		s.logger.Log("info", fmt.Sprintf("public subnet for cluster '%s' already exists, reusing", cluster.Name))
+		s.logger.Log("info", fmt.Sprintf("public subnet for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
 	}
 	publicSubnetID, err := publicSubnet.GetID()
 	if err != nil {
@@ -772,11 +773,11 @@ func (s *Service) addFunc(obj interface{}) {
 		clients:             clients,
 		cluster:             cluster,
 		tlsAssets:           tlsAssets,
-		clusterName:         cluster.Name,
+		clusterName:         key.ClusterID(cluster),
 		bucket:              bucket,
 		securityGroup:       mastersSecurityGroup,
 		subnet:              publicSubnet,
-		keyPairName:         cluster.Name,
+		keyPairName:         key.ClusterID(cluster),
 		instanceProfileName: masterPolicy.GetName(),
 		prefix:              prefixMaster,
 	})
@@ -843,7 +844,7 @@ func (s *Service) addFunc(obj interface{}) {
 	// is inconsistent and most problably its deployment broke in the middle during the previous run of
 	// aws-operator.
 	if anyMastersCreated && (kmsKeyErr != nil || masterPolicyErr != nil || workerPolicyErr != nil) {
-		s.logger.Log("error", fmt.Sprintf("cluster '%s' is inconsistent, KMS keys and policies were not created, but EC2 instances were missing, please consider deleting this cluster", cluster.Name))
+		s.logger.Log("error", fmt.Sprintf("cluster '%s' is inconsistent, KMS keys and policies were not created, but EC2 instances were missing, please consider deleting this cluster", key.ClusterID(cluster)))
 		return
 	}
 
@@ -888,7 +889,7 @@ func (s *Service) addFunc(obj interface{}) {
 		bucket:              bucket,
 		securityGroup:       workersSecurityGroup,
 		subnet:              publicSubnet,
-		keypairName:         cluster.Name,
+		keypairName:         key.ClusterID(cluster),
 		instanceProfileName: workerPolicy.GetName(),
 		prefix:              prefixWorker,
 		ebsStorage:          true,
@@ -903,7 +904,7 @@ func (s *Service) addFunc(obj interface{}) {
 	if lcCreated {
 		s.logger.Log("info", fmt.Sprintf("created worker launch config"))
 	} else {
-		s.logger.Log("info", fmt.Sprintf("launch config %s already exists, reusing", cluster.Name))
+		s.logger.Log("info", fmt.Sprintf("launch config %s already exists, reusing", key.ClusterID(cluster)))
 	}
 
 	workersLCName, err := launchConfigurationName(cluster, "worker", workersSecurityGroupID)
@@ -912,16 +913,13 @@ func (s *Service) addFunc(obj interface{}) {
 		return
 	}
 
-	// Create an Auto Scaling Group for the workers.
-	asgSize := len(cluster.Spec.AWS.Workers)
-
 	asg := awsresources.AutoScalingGroup{
 		Client:                  clients.AutoScaling,
-		Name:                    fmt.Sprintf("%s-%s", cluster.Name, prefixWorker),
-		ClusterID:               cluster.Name,
-		MinSize:                 asgSize,
-		MaxSize:                 asgSize,
-		AvailabilityZone:        cluster.Spec.AWS.AZ,
+		Name:                    fmt.Sprintf("%s-%s", key.ClusterID(cluster), prefixWorker),
+		ClusterID:               key.ClusterID(cluster),
+		MinSize:                 key.WorkerCount(cluster),
+		MaxSize:                 key.WorkerCount(cluster),
+		AvailabilityZone:        key.AvailabilityZone(cluster),
 		LaunchConfigurationName: workersLCName,
 		LoadBalancerName:        ingressLB.Name,
 		VPCZoneIdentifier:       publicSubnetID,
@@ -935,7 +933,7 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 
 	if asgCreated {
-		s.logger.Log("info", fmt.Sprintf("created auto scaling group '%s' with size %v", asg.Name, asgSize))
+		s.logger.Log("info", fmt.Sprintf("created auto scaling group '%s' with size %v", asg.Name, key.WorkerCount(cluster)))
 	} else {
 		s.logger.Log("info", fmt.Sprintf("auto scaling group '%s' already exists, reusing", asg.Name))
 	}
@@ -987,7 +985,7 @@ func (s *Service) addFunc(obj interface{}) {
 		s.logger.Log("info", fmt.Sprintf("created DNS records for load balancers"))
 	}
 
-	s.logger.Log("info", fmt.Sprintf("cluster '%s' processed", cluster.Name))
+	s.logger.Log("info", fmt.Sprintf("cluster '%s' processed", key.ClusterID(cluster)))
 }
 
 func (s *Service) deleteFunc(obj interface{}) {
@@ -1037,7 +1035,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	s.logger.Log("info", "deleting masters...")
 	if err := s.deleteMachines(deleteMachinesInput{
 		clients:     clients,
-		clusterName: cluster.Name,
+		clusterName: key.ClusterID(cluster),
 		prefix:      prefixMaster,
 	}); err != nil {
 		s.logger.Log("error", fmt.Sprintf("%#v", err))
@@ -1048,7 +1046,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	// Delete workers Auto Scaling Group.
 	asg := awsresources.AutoScalingGroup{
 		Client: clients.AutoScaling,
-		Name:   fmt.Sprintf("%s-%s", cluster.Name, prefixWorker),
+		Name:   fmt.Sprintf("%s-%s", key.ClusterID(cluster), prefixWorker),
 	}
 
 	if err := asg.Delete(); err != nil {
@@ -1161,7 +1159,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	// Delete route table.
 	var routeTable resources.ResourceWithID
 	routeTable = &awsresources.RouteTable{
-		Name:   cluster.Name,
+		Name:   key.ClusterID(cluster),
 		Client: clients.EC2,
 	}
 	if err := routeTable.Delete(); err != nil {
@@ -1173,7 +1171,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	// Sync VPC.
 	var vpc resources.ResourceWithID
 	vpc = &awsresources.VPC{
-		Name:      cluster.Name,
+		Name:      key.ClusterID(cluster),
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
 	}
 	vpcID, err := vpc.GetID()
@@ -1184,7 +1182,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	// Delete gateway.
 	var gateway resources.ResourceWithID
 	gateway = &awsresources.Gateway{
-		Name:  cluster.Name,
+		Name:  key.ClusterID(cluster),
 		VpcID: vpcID,
 		// Dependencies.
 		Logger:    s.logger,
@@ -1213,7 +1211,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	// groups must first be deleted.
 	mastersSGRulesInput := securityGroupRulesInput{
 		Clients:   clients,
-		GroupName: securityGroupName(cluster.Name, prefixMaster),
+		GroupName: securityGroupName(key.ClusterID(cluster), prefixMaster),
 	}
 	if err := s.deleteSecurityGroupRules(mastersSGRulesInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
@@ -1221,7 +1219,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 
 	workersSGRulesInput := securityGroupRulesInput{
 		Clients:   clients,
-		GroupName: securityGroupName(cluster.Name, prefixWorker),
+		GroupName: securityGroupName(key.ClusterID(cluster), prefixWorker),
 	}
 	if err := s.deleteSecurityGroupRules(workersSGRulesInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
@@ -1229,7 +1227,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 
 	ingressSGRulesInput := securityGroupRulesInput{
 		Clients:   clients,
-		GroupName: securityGroupName(cluster.Name, prefixIngress),
+		GroupName: securityGroupName(key.ClusterID(cluster), prefixIngress),
 	}
 	if err := s.deleteSecurityGroupRules(ingressSGRulesInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
@@ -1238,7 +1236,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	// Delete masters security group.
 	mastersSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: securityGroupName(cluster.Name, prefixMaster),
+		GroupName: securityGroupName(key.ClusterID(cluster), prefixMaster),
 	}
 	if err := s.deleteSecurityGroup(mastersSGInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", mastersSGInput.GroupName, err))
@@ -1247,7 +1245,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	// Delete workers security group.
 	workersSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: securityGroupName(cluster.Name, prefixWorker),
+		GroupName: securityGroupName(key.ClusterID(cluster), prefixWorker),
 	}
 	if err := s.deleteSecurityGroup(workersSGInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", workersSGInput.GroupName, err))
@@ -1256,7 +1254,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	// Delete ingress security group.
 	ingressSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: securityGroupName(cluster.Name, prefixIngress),
+		GroupName: securityGroupName(key.ClusterID(cluster), prefixIngress),
 	}
 	if err := s.deleteSecurityGroup(ingressSGInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", ingressSGInput.GroupName, err))
@@ -1286,7 +1284,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	// Delete master policy.
 	var masterPolicy resources.NamedResource
 	masterPolicy = &awsresources.Policy{
-		ClusterID:  cluster.Spec.Cluster.Cluster.ID,
+		ClusterID:  key.ClusterID(cluster),
 		PolicyType: prefixMaster,
 		S3Bucket:   bucketName,
 		AWSEntity:  awsresources.AWSEntity{Clients: clients},
@@ -1300,7 +1298,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	// Delete worker policy.
 	var workerPolicy resources.NamedResource
 	workerPolicy = &awsresources.Policy{
-		ClusterID:  cluster.Spec.Cluster.Cluster.ID,
+		ClusterID:  key.ClusterID(cluster),
 		PolicyType: prefixWorker,
 		S3Bucket:   bucketName,
 		AWSEntity:  awsresources.AWSEntity{Clients: clients},
@@ -1314,7 +1312,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	// Delete KMS key.
 	var kmsKey resources.ArnResource
 	kmsKey = &awsresources.KMSKey{
-		Name:      cluster.Name,
+		Name:      key.ClusterID(cluster),
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
 	}
 	if err := kmsKey.Delete(); err != nil {
@@ -1326,7 +1324,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	// Delete keypair.
 	var keyPair resources.Resource
 	keyPair = &awsresources.KeyPair{
-		ClusterName: cluster.Name,
+		ClusterName: key.ClusterID(cluster),
 		AWSEntity:   awsresources.AWSEntity{Clients: clients},
 	}
 	if err := keyPair.Delete(); err != nil {
@@ -1335,7 +1333,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 		s.logger.Log("info", "deleted keypair")
 	}
 
-	s.logger.Log("info", fmt.Sprintf("cluster '%s' deleted", cluster.Name))
+	s.logger.Log("info", fmt.Sprintf("cluster '%s' deleted", key.ClusterID(cluster)))
 }
 
 // TODO we need to support this in operatorkit.
@@ -1348,8 +1346,8 @@ func (s *Service) updateFunc(oldObj, newObj interface{}) {
 		return
 	}
 
-	oldSize := len(oldCluster.Spec.AWS.Workers)
-	newSize := len(cluster.Spec.AWS.Workers)
+	oldSize := key.WorkerCount(oldCluster)
+	newSize := key.WorkerCount(cluster)
 
 	if oldSize == newSize {
 		// We get update events for all sorts of changes. We are currently only
@@ -1368,7 +1366,7 @@ func (s *Service) updateFunc(oldObj, newObj interface{}) {
 
 	asg := awsresources.AutoScalingGroup{
 		Client:  clients.AutoScaling,
-		Name:    fmt.Sprintf("%s-%s", cluster.Name, prefixWorker),
+		Name:    fmt.Sprintf("%s-%s", key.ClusterID(cluster), prefixWorker),
 		MinSize: newSize,
 		MaxSize: newSize,
 	}
