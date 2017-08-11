@@ -3,12 +3,13 @@ package create
 import (
 	"fmt"
 
+	"github.com/giantswarm/aws-operator/service/key"
 	"github.com/giantswarm/awstpr"
 )
 
 func (s *Service) bucketName(cluster awstpr.CustomObject) string {
 	accountID := s.awsConfig.AccountID()
-	clusterID := cluster.Spec.Cluster.Cluster.ID
+	clusterID := key.ClusterID(cluster)
 
 	name := fmt.Sprintf("%s-g8s-%s", accountID, clusterID)
 

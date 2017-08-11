@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
+	"github.com/giantswarm/aws-operator/service/key"
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/microerror"
 )
@@ -85,7 +86,7 @@ func (s *Service) deleteLoadBalancer(input LoadBalancerInput) error {
 // loadBalancerName produces a unique name for the load balancer.
 // It takes the domain name, extracts the first subdomain, and combines it with the cluster name.
 func loadBalancerName(domainName string, cluster awstpr.CustomObject) (string, error) {
-	if cluster.Spec.Cluster.Cluster.ID == "" {
+	if key.ClusterID(cluster) == "" {
 		return "", microerror.Maskf(missingCloudConfigKeyError, "spec.cluster.cluster.id")
 	}
 
@@ -94,7 +95,7 @@ func loadBalancerName(domainName string, cluster awstpr.CustomObject) (string, e
 		return "", microerror.Maskf(malformedCloudConfigKeyError, "spec.cluster.cluster.id")
 	}
 
-	lbName := fmt.Sprintf("%s-%s", cluster.Spec.Cluster.Cluster.ID, componentName)
+	lbName := fmt.Sprintf("%s-%s", key.ClusterID(cluster), componentName)
 
 	return lbName, nil
 }

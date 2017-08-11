@@ -176,7 +176,3 @@ func (ri rulesInput) ingressRules() []awsresources.SecurityGroupRule {
 		},
 	}
 }
-
-func securityGroupName(clusterName string, groupName string) string {
-	return fmt.Sprintf("%s-%s", clusterName, groupName)
-}
