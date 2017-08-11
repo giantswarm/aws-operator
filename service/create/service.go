@@ -644,7 +644,7 @@ func (s *Service) addFunc(obj interface{}) {
 	// Create masters security group.
 	mastersSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: securityGroupName(key.ClusterID(cluster), prefixMaster),
+		GroupName: key.SecurityGroupName(cluster, prefixMaster),
 		VPCID:     vpcID,
 	}
 	mastersSecurityGroup, err := s.createSecurityGroup(mastersSGInput)
@@ -661,7 +661,7 @@ func (s *Service) addFunc(obj interface{}) {
 	// Create workers security group.
 	workersSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: securityGroupName(key.ClusterID(cluster), prefixWorker),
+		GroupName: key.SecurityGroupName(cluster, prefixWorker),
 		VPCID:     vpcID,
 	}
 	workersSecurityGroup, err := s.createSecurityGroup(workersSGInput)
@@ -678,7 +678,7 @@ func (s *Service) addFunc(obj interface{}) {
 	// Create ingress ELB security group.
 	ingressSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: securityGroupName(key.ClusterID(cluster), prefixIngress),
+		GroupName: key.SecurityGroupName(cluster, prefixIngress),
 		VPCID:     vpcID,
 	}
 	ingressSecurityGroup, err := s.createSecurityGroup(ingressSGInput)
@@ -915,7 +915,7 @@ func (s *Service) addFunc(obj interface{}) {
 
 	asg := awsresources.AutoScalingGroup{
 		Client:                  clients.AutoScaling,
-		Name:                    fmt.Sprintf("%s-%s", key.ClusterID(cluster), prefixWorker),
+		Name:                    key.AutoScalingGroupName(cluster, prefixWorker),
 		ClusterID:               key.ClusterID(cluster),
 		MinSize:                 key.WorkerCount(cluster),
 		MaxSize:                 key.WorkerCount(cluster),
@@ -1046,7 +1046,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	// Delete workers Auto Scaling Group.
 	asg := awsresources.AutoScalingGroup{
 		Client: clients.AutoScaling,
-		Name:   fmt.Sprintf("%s-%s", key.ClusterID(cluster), prefixWorker),
+		Name:   key.AutoScalingGroupName(cluster, prefixWorker),
 	}
 
 	if err := asg.Delete(); err != nil {
@@ -1211,7 +1211,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	// groups must first be deleted.
 	mastersSGRulesInput := securityGroupRulesInput{
 		Clients:   clients,
-		GroupName: securityGroupName(key.ClusterID(cluster), prefixMaster),
+		GroupName: key.SecurityGroupName(cluster, prefixMaster),
 	}
 	if err := s.deleteSecurityGroupRules(mastersSGRulesInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
@@ -1219,7 +1219,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 
 	workersSGRulesInput := securityGroupRulesInput{
 		Clients:   clients,
-		GroupName: securityGroupName(key.ClusterID(cluster), prefixWorker),
+		GroupName: key.SecurityGroupName(cluster, prefixWorker),
 	}
 	if err := s.deleteSecurityGroupRules(workersSGRulesInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
@@ -1227,7 +1227,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 
 	ingressSGRulesInput := securityGroupRulesInput{
 		Clients:   clients,
-		GroupName: securityGroupName(key.ClusterID(cluster), prefixIngress),
+		GroupName: key.SecurityGroupName(cluster, prefixIngress),
 	}
 	if err := s.deleteSecurityGroupRules(ingressSGRulesInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
@@ -1236,7 +1236,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	// Delete masters security group.
 	mastersSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: securityGroupName(key.ClusterID(cluster), prefixMaster),
+		GroupName: key.SecurityGroupName(cluster, prefixMaster),
 	}
 	if err := s.deleteSecurityGroup(mastersSGInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", mastersSGInput.GroupName, err))
@@ -1245,7 +1245,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	// Delete workers security group.
 	workersSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: securityGroupName(key.ClusterID(cluster), prefixWorker),
+		GroupName: key.SecurityGroupName(cluster, prefixWorker),
 	}
 	if err := s.deleteSecurityGroup(workersSGInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", workersSGInput.GroupName, err))
@@ -1254,7 +1254,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	// Delete ingress security group.
 	ingressSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: securityGroupName(key.ClusterID(cluster), prefixIngress),
+		GroupName: key.SecurityGroupName(cluster, prefixIngress),
 	}
 	if err := s.deleteSecurityGroup(ingressSGInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", ingressSGInput.GroupName, err))

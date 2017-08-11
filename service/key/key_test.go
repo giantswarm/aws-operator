@@ -10,6 +10,30 @@ import (
 	"github.com/giantswarm/clustertpr/spec"
 )
 
+func Test_AutoScalingGroupName(t *testing.T) {
+	expectedName := "test-cluster-worker"
+	groupName := "worker"
+
+	cluster := clustertpr.Spec{
+		Cluster: spec.Cluster{
+			ID: "test-cluster",
+		},
+		Customer: spec.Customer{
+			ID: "test-customer",
+		},
+	}
+
+	customObject := awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			Cluster: cluster,
+		},
+	}
+
+	if AutoScalingGroupName(customObject, groupName) != expectedName {
+		t.Fatalf("Expected auto scaling group name %s but was %s", expectedName, AutoScalingGroupName(customObject, groupName))
+	}
+}
+
 func Test_AvailabilityZone(t *testing.T) {
 	expectedAZ := "eu-central-1a"
 
@@ -46,6 +70,30 @@ func Test_ClusterID(t *testing.T) {
 
 	if ClusterID(customObject) != expectedID {
 		t.Fatalf("Expected cluster ID %s but was %s", expectedID, ClusterID(customObject))
+	}
+}
+
+func Test_SecurityGroupName(t *testing.T) {
+	expectedName := "test-cluster-worker"
+	groupName := "worker"
+
+	cluster := clustertpr.Spec{
+		Cluster: spec.Cluster{
+			ID: "test-cluster",
+		},
+		Customer: spec.Customer{
+			ID: "test-customer",
+		},
+	}
+
+	customObject := awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			Cluster: cluster,
+		},
+	}
+
+	if SecurityGroupName(customObject, groupName) != expectedName {
+		t.Fatalf("Expected security group name %s but was %s", expectedName, SecurityGroupName(customObject, groupName))
 	}
 }
 
