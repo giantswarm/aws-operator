@@ -40,14 +40,13 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 	case prefixMaster:
 		extension = NewMasterCloudConfigExtension(input.cluster.Spec, input.tlsAssets)
 
-		// TODO Check only a single master node is provided.
-		imageID = input.cluster.Spec.AWS.Masters[0].ImageID
-		instanceType = input.cluster.Spec.AWS.Masters[0].InstanceType
+		imageID = key.MasterImageID(input.cluster)
+		instanceType = key.MasterInstanceType(input.cluster)
 	case prefixWorker:
 		extension = NewWorkerCloudConfigExtension(input.cluster.Spec, input.tlsAssets)
 
-		imageID = input.cluster.Spec.AWS.Workers[0].ImageID
-		instanceType = input.cluster.Spec.AWS.Workers[0].InstanceType
+		imageID = key.WorkerImageID(input.cluster)
+		instanceType = key.WorkerInstanceType(input.cluster)
 		publicIP = true
 	default:
 		return false, microerror.Maskf(invalidCloudconfigExtensionNameError, fmt.Sprintf("Invalid extension name '%s'", input.prefix))

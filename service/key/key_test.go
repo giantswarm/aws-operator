@@ -73,6 +73,48 @@ func Test_ClusterID(t *testing.T) {
 	}
 }
 
+func Test_MasterImageID(t *testing.T) {
+	expectedImageID := "ami-d60ad6b9"
+
+	customObject := awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			AWS: awsspec.AWS{
+				Masters: []aws.Node{
+					aws.Node{
+						ImageID:      "ami-d60ad6b9",
+						InstanceType: "m3.medium",
+					},
+				},
+			},
+		},
+	}
+
+	if MasterImageID(customObject) != expectedImageID {
+		t.Fatalf("Expected master image ID %s but was %s", expectedImageID, MasterImageID(customObject))
+	}
+}
+
+func Test_MasterInstanceType(t *testing.T) {
+	expectedInstanceType := "m3.medium"
+
+	customObject := awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			AWS: awsspec.AWS{
+				Masters: []aws.Node{
+					aws.Node{
+						ImageID:      "ami-d60ad6b9",
+						InstanceType: "m3.medium",
+					},
+				},
+			},
+		},
+	}
+
+	if MasterInstanceType(customObject) != expectedInstanceType {
+		t.Fatalf("Expected master instance type %s but was %s", expectedInstanceType, MasterInstanceType(customObject))
+	}
+}
+
 func Test_SecurityGroupName(t *testing.T) {
 	expectedName := "test-cluster-worker"
 	groupName := "worker"
@@ -117,5 +159,47 @@ func Test_WorkerCount(t *testing.T) {
 
 	if WorkerCount(customObject) != expectedCount {
 		t.Fatalf("Expected worker count %d but was %d", expectedCount, WorkerCount(customObject))
+	}
+}
+
+func Test_WorkerImageID(t *testing.T) {
+	expectedImageID := "ami-d60ad6b9"
+
+	customObject := awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			AWS: awsspec.AWS{
+				Workers: []aws.Node{
+					aws.Node{
+						ImageID:      "ami-d60ad6b9",
+						InstanceType: "m3.medium",
+					},
+				},
+			},
+		},
+	}
+
+	if WorkerImageID(customObject) != expectedImageID {
+		t.Fatalf("Expected worker image ID %s but was %s", expectedImageID, WorkerImageID(customObject))
+	}
+}
+
+func Test_WorkerInstanceType(t *testing.T) {
+	expectedInstanceType := "m3.medium"
+
+	customObject := awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			AWS: awsspec.AWS{
+				Workers: []aws.Node{
+					aws.Node{
+						ImageID:      "ami-d60ad6b9",
+						InstanceType: "m3.medium",
+					},
+				},
+			},
+		},
+	}
+
+	if WorkerInstanceType(customObject) != expectedInstanceType {
+		t.Fatalf("Expected worker instance type %s but was %s", expectedInstanceType, WorkerInstanceType(customObject))
 	}
 }
