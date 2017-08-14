@@ -10,9 +10,15 @@ import (
 )
 
 const (
+	// asgMaxSizeParam is the Cloud Formation parameter name for the max ASG size.
+	asgMaxSizeParam = "ASGMaxSize"
+	// asgMinSizeParam is the Cloud Formation parameter name for the min ASG size.
+	asgMinSizeParam = "ASGMinSize"
 	// defaultTimeout is the number of minutes after which a Stack creation gets
 	// aborted.
 	defaultTimeout = 5
+	// imageIDParam is the Cloud Formation parameter name for the ASG image ID.
+	imageIDParam = "ImageID"
 )
 
 // ASGStack represents a CloudFormation stack for an Auto Scaling Group.
@@ -50,11 +56,11 @@ func (s *ASGStack) CreateOrFail() error {
 		TimeoutInMinutes: aws.Int64(defaultTimeout),
 		Parameters: []*cloudformation.Parameter{
 			{
-				ParameterKey:   aws.String("ASGMaxSize"),
+				ParameterKey:   aws.String(asgMaxSizeParam),
 				ParameterValue: aws.String(strconv.Itoa(s.ASGMaxSize)),
 			},
 			{
-				ParameterKey:   aws.String("ASGMinSize"),
+				ParameterKey:   aws.String(asgMinSizeParam),
 				ParameterValue: aws.String(strconv.Itoa(s.ASGMinSize)),
 			},
 			{
@@ -74,7 +80,7 @@ func (s *ASGStack) CreateOrFail() error {
 				ParameterValue: aws.String(s.IAMInstanceProfileName),
 			},
 			{
-				ParameterKey:   aws.String("ImageID"),
+				ParameterKey:   aws.String(imageIDParam),
 				ParameterValue: aws.String(s.ImageID),
 			},
 			{
@@ -139,9 +145,9 @@ func (s *ASGStack) Update() error {
 	}
 
 	updateableParams := map[string]string{
-		"ASGMaxSize": strconv.Itoa(s.ASGMaxSize),
-		"ASGMinSize": strconv.Itoa(s.ASGMinSize),
-		"ImageID":    s.ImageID,
+		asgMaxSizeParam: strconv.Itoa(s.ASGMaxSize),
+		asgMinSizeParam: strconv.Itoa(s.ASGMinSize),
+		imageIDParam:    s.ImageID,
 	}
 	params := []*cloudformation.Parameter{}
 
