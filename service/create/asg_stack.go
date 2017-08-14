@@ -54,9 +54,17 @@ type asgTemplateConfig struct {
 }
 
 const (
+	// asgCloudFormationGoTemplate is the Go template that generates the Cloud
+	// Formation template.
+	asgCloudFormationGoTemplate = "resources/templates/cloudformation/auto_scaling_group.yaml"
+	// asgCloudFormationTemplateS3Path is the path to the Cloud Formation
+	// template stored in the S3 bucket.
+	asgCloudFormationTemplateS3Path = "templates/%s.yaml"
+	// defaultEBSVolumeMountPoint is the path for mounting the EBS volume.
 	defaultEBSVolumeMountPoint = "/dev/xvdh"
 	// defaultEBSVolumeSize is expressed in GB.
 	defaultEBSVolumeSize = 50
+	// defaultEBSVolumeType is the EBS volume type.
 	defaultEBSVolumeType = "gp2"
 )
 
@@ -67,7 +75,7 @@ func (s *Service) createASGStack(input asgStackInput) (bool, error) {
 	)
 
 	// Generate the Cloud Formation template using a Go template.
-	cfTemplate, err := ioutil.ReadFile("resources/templates/cloudformation/auto_scaling_group.yaml")
+	cfTemplate, err := ioutil.ReadFile(asgCloudFormationGoTemplate)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
@@ -95,7 +103,7 @@ func (s *Service) createASGStack(input asgStackInput) (bool, error) {
 	}
 
 	// Upload the Cloud Formation template to the S3 bucket.
-	templateRelativePath := fmt.Sprintf("templates/%s.yaml", input.asgType)
+	templateRelativePath := fmt.Sprintf(asgCloudFormationTemplateS3Path, input.asgType)
 	templateURL := s.bucketObjectURL(input.cluster, templateRelativePath)
 
 	templateS3 := &awsresources.BucketObject{
@@ -198,7 +206,7 @@ func (s *Service) updateASGStack(input asgStackInput) error {
 		return microerror.Maskf(invalidCloudconfigExtensionNameError, fmt.Sprintf("Invalid extension name '%s'", input.asgType))
 	}
 
-	templateRelativePath := fmt.Sprintf("templates/%s.yaml", input.asgType)
+	templateRelativePath := fmt.Sprintf(asgCloudFormationTemplateS3Path, input.asgType)
 	templateURL := s.bucketObjectURL(input.cluster, templateRelativePath)
 
 	// Update CloudFormation stack for the ASG.
