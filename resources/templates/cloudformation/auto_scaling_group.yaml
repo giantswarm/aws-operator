@@ -1,0 +1,87 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: {{ .ASGType }} autoscaling group
+Parameters:
+  AssociatePublicIPAddress:
+    AllowedValues: [ true, false ]
+    Type: String
+  ASGMaxSize:
+    Description: Maximum number of EC2 instances
+    Type: Number
+  ASGMinSize:
+    Description: Minimum number of EC2 instances
+    Type: Number
+  AZ:
+    Description: Availability Zone
+    Type: "AWS::EC2::AvailabilityZone::Name"
+  HealthCheckGracePeriod:
+    Description: Length of time in seconds after which health checks start
+    Type: Number
+  IAMInstanceProfileName:
+    Description: IAM profile name for the instances
+    Type: String
+  ImageID:
+    Description: CoreOS AMI for the instances
+    Type: String
+  InstanceType:
+    Description: EC2 instance type
+    Type: String
+  KeyName:
+    Description: The name of the KeyPair containing the SSH key
+    Type: String
+  LoadBalancerName:
+    Description: The name of the load balancer for the instances
+    Type: String
+  SecurityGroupID:
+    Description: The ID of the security group for the instances
+    Type: String
+  SmallCloudConfig:
+    Description: The userdata provided to the instances
+    Type: String
+  SubnetID:
+    Description: The ID of the Subnet in the VPC
+    Type: "AWS::EC2::Subnet::Id"
+  VPCID:
+    Description: The ID of the VPC
+    Type: String
+Resources:
+  {{ .ASGType }}LaunchConfiguration:
+    Type: "AWS::AutoScaling::LaunchConfiguration"
+    Description: {{ .ASGType }} launch configuration
+    Properties:
+      ImageId: !Ref ImageID
+      SecurityGroups:
+      - !Ref SecurityGroupID
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref IAMInstanceProfileName
+      BlockDeviceMappings:
+      {{ range .BlockDeviceMappings }}
+      - DeviceName: "{{ .DeviceName }}"
+        Ebs:
+          DeleteOnTermination: {{ .DeleteOnTermination }}
+          VolumeSize: {{ .VolumeSize }}
+          VolumeType: {{ .VolumeType }}
+      {{ end }}
+      AssociatePublicIpAddress: !Ref AssociatePublicIPAddress
+      UserData: !Ref SmallCloudConfig
+      KeyName: !Ref KeyName
+  {{ .ASGType }}AutoScalingGroup:
+    Type: "AWS::AutoScaling::AutoScalingGroup"
+    Properties:
+      VPCZoneIdentifier:
+        - !Ref SubnetID
+      AvailabilityZones:
+        - !Ref AZ
+      MinSize: !Ref ASGMinSize
+      MaxSize: !Ref ASGMaxSize
+      LaunchConfigurationName: !Ref {{ .ASGType }}LaunchConfiguration
+      LoadBalancerNames:
+        - !Ref LoadBalancerName
+      HealthCheckGracePeriod: !Ref HealthCheckGracePeriod
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        # minimum amount of instances that must always be running during a rolling update
+        MinInstancesInService: 2
+        # only do a rolling update of this amount of instances max
+        MaxBatchSize: 2
+        # after creating a new instance, pause operations on the ASG for this amount of time
+        PauseTime: PT10S
