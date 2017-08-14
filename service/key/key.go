@@ -19,11 +19,23 @@ func ClusterID(customObject awstpr.CustomObject) string {
 }
 
 func MasterImageID(customObject awstpr.CustomObject) string {
-	return customObject.Spec.AWS.Masters[0].ImageID
+	var imageID string
+
+	if len(customObject.Spec.AWS.Masters) > 0 {
+		imageID = customObject.Spec.AWS.Masters[0].ImageID
+	}
+
+	return imageID
 }
 
 func MasterInstanceType(customObject awstpr.CustomObject) string {
-	return customObject.Spec.AWS.Masters[0].InstanceType
+	var instanceType string
+
+	if len(customObject.Spec.AWS.Masters) > 0 {
+		instanceType = customObject.Spec.AWS.Masters[0].InstanceType
+	}
+
+	return instanceType
 }
 
 func SecurityGroupName(customObject awstpr.CustomObject, groupName string) string {
@@ -35,9 +47,22 @@ func WorkerCount(customObject awstpr.CustomObject) int {
 }
 
 func WorkerImageID(customObject awstpr.CustomObject) string {
-	return customObject.Spec.AWS.Workers[0].ImageID
+	var imageID string
+
+	if len(customObject.Spec.AWS.Workers) > 0 {
+		imageID = customObject.Spec.AWS.Workers[0].ImageID
+	}
+
+	return imageID
 }
 
 func WorkerInstanceType(customObject awstpr.CustomObject) string {
-	return customObject.Spec.AWS.Workers[0].InstanceType
+	var instanceType string
+
+	if len(customObject.Spec.AWS.Workers) > 0 {
+		instanceType = customObject.Spec.AWS.Workers[0].InstanceType
+
+	}
+
+	return instanceType
 }
