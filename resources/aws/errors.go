@@ -14,6 +14,7 @@ const (
 type resourceType string
 
 const (
+	CloudFormationStackType resourceType = "cloud formation stack"
 	ELBType                 resourceType = "elb"
 	HostedZoneType          resourceType = "hosted zone"
 	GatewayType             resourceType = "gateway"

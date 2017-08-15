@@ -61,3 +61,17 @@ var differentInstanceTypesError = microerror.New("different instance types")
 func IsDifferentInstanceTypes(err error) bool {
 	return microerror.Cause(err) == differentInstanceTypesError
 }
+
+var invalidMasterNodeCountError = microerror.New("invalid master node count")
+
+// IsInvalidMasterNodeCount asserts invalidMasterNodeCountError.
+func IsInvalidMasterNodeCount(err error) bool {
+	return microerror.Cause(err) == invalidMasterNodeCountError
+}
+
+var invalidWorkerNodeCountError = microerror.New("invalid worker node count")
+
+// IsInvalidWorkerNodeCount asserts invalidWorkerNodeCountError.
+func IsInvalidWorkerNodeCount(err error) bool {
+	return microerror.Cause(err) == invalidWorkerNodeCountError
+}

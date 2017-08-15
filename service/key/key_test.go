@@ -73,6 +73,82 @@ func Test_ClusterID(t *testing.T) {
 	}
 }
 
+func Test_MasterImageID(t *testing.T) {
+	tests := []struct {
+		customObject    awstpr.CustomObject
+		expectedImageID string
+	}{
+		{
+			customObject: awstpr.CustomObject{
+				Spec: awstpr.Spec{
+					AWS: awsspec.AWS{
+						Masters: []aws.Node{
+							aws.Node{
+								ImageID:      "ami-d60ad6b9",
+								InstanceType: "m3.medium",
+							},
+						},
+					},
+				},
+			},
+			expectedImageID: "ami-d60ad6b9",
+		},
+		{
+			customObject: awstpr.CustomObject{
+				Spec: awstpr.Spec{},
+			},
+			expectedImageID: "",
+		},
+	}
+
+	for _, tc := range tests {
+		if MasterImageID(tc.customObject) != tc.expectedImageID {
+			t.Fatalf("Expected master image ID %s but was %s", tc.expectedImageID, MasterImageID(tc.customObject))
+		}
+	}
+}
+
+func Test_MasterInstanceType(t *testing.T) {
+	tests := []struct {
+		customObject         awstpr.CustomObject
+		expectedInstanceType string
+	}{
+		{
+			customObject: awstpr.CustomObject{
+				Spec: awstpr.Spec{
+					AWS: awsspec.AWS{
+						Masters: []aws.Node{
+							aws.Node{
+								ImageID:      "ami-d60ad6b9",
+								InstanceType: "m3.medium",
+							},
+						},
+					},
+				},
+			},
+			expectedInstanceType: "m3.medium",
+		},
+		{
+			customObject: awstpr.CustomObject{
+				Spec: awstpr.Spec{
+					AWS: awsspec.AWS{
+						Masters: []aws.Node{
+							aws.Node{},
+						},
+					},
+				},
+			},
+			expectedInstanceType: "",
+		},
+	}
+
+	for _, tc := range tests {
+		if MasterInstanceType(tc.customObject) != tc.expectedInstanceType {
+			t.Fatalf("Expected master instance type %s but was %s", tc.expectedInstanceType, MasterInstanceType(tc.customObject))
+		}
+	}
+}
+
 func Test_SecurityGroupName(t *testing.T) {
 	expectedName := "test-cluster-worker"
 	groupName := "worker"
@@ -117,5 +193,83 @@ func Test_WorkerCount(t *testing.T) {
 
 	if WorkerCount(customObject) != expectedCount {
 		t.Fatalf("Expected worker count %d but was %d", expectedCount, WorkerCount(customObject))
+	}
+}
+
+func Test_WorkerImageID(t *testing.T) {
+	tests := []struct {
+		customObject    awstpr.CustomObject
+		expectedImageID string
+	}{
+		{
+			customObject: awstpr.CustomObject{
+				Spec: awstpr.Spec{
+					AWS: awsspec.AWS{
+						Workers: []aws.Node{
+							aws.Node{
+								ImageID:      "ami-d60ad6b9",
+								InstanceType: "m3.medium",
+							},
+						},
+					},
+				},
+			},
+			expectedImageID: "ami-d60ad6b9",
+		},
+		{
+			customObject: awstpr.CustomObject{
+				Spec: awstpr.Spec{
+					AWS: awsspec.AWS{
+						Workers: []aws.Node{},
+					},
+				},
+			},
+			expectedImageID: "",
+		},
+	}
+
+	for _, tc := range tests {
+		if WorkerImageID(tc.customObject) != tc.expectedImageID {
+			t.Fatalf("Expected worker image ID %s but was %s", tc.expectedImageID, WorkerImageID(tc.customObject))
+		}
+	}
+}
+
+func Test_WorkerInstanceType(t *testing.T) {
+	tests := []struct {
+		customObject         awstpr.CustomObject
+		expectedInstanceType string
+	}{
+		{
+			customObject: awstpr.CustomObject{
+				Spec: awstpr.Spec{
+					AWS: awsspec.AWS{
+						Workers: []aws.Node{
+							aws.Node{
+								ImageID:      "ami-d60ad6b9",
+								InstanceType: "m3.medium",
+							},
+						},
+					},
+				},
+			},
+			expectedInstanceType: "m3.medium",
+		},
+		{
+			customObject: awstpr.CustomObject{
+				Spec: awstpr.Spec{
+					AWS: awsspec.AWS{
+						Workers: []aws.Node{},
+					},
+				},
+			},
+			expectedInstanceType: "",
+		},
+	}
+
+	for _, tc := range tests {
+		if WorkerInstanceType(tc.customObject) != tc.expectedInstanceType {
+			t.Fatalf("Expected worker instance type %s but was %s", tc.expectedInstanceType, WorkerInstanceType(tc.customObject))
+		}
 	}
 }
