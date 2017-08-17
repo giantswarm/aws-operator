@@ -470,9 +470,18 @@ func (s *Service) addFunc(obj interface{}) {
 		return
 	}
 
+	err := s.processCluster(cluster)
+	if err != nil {
+		s.logger.Log("error", fmt.Sprintf("error processing cluster '%s': '%#v'", key.ClusterID(cluster), err))
+	}
+
+	s.logger.Log("info", fmt.Sprintf("cluster '%s' processed", key.ClusterID(cluster)))
+}
+
+func (s *Service) processCluster(cluster awstpr.CustomObject) error {
+	// Create cluster namespace in k8s.
 	if err := s.createClusterNamespace(cluster.Spec.Cluster); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create cluster namespace: '%#v'", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create cluster namespace: '%#v'", err))
 	}
 
 	// Create AWS client.
@@ -481,8 +490,7 @@ func (s *Service) addFunc(obj interface{}) {
 
 	err := s.awsConfig.SetAccountID(clients.IAM)
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not retrieve amazon account id: '%#v'", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not retrieve amazon account id: '%#v'", err))
 	}
 
 	// Create keypair.
@@ -497,8 +505,7 @@ func (s *Service) addFunc(obj interface{}) {
 		}
 		keyPairCreated, err = keyPair.CreateIfNotExists()
 		if err != nil {
-			s.logger.Log("error", fmt.Sprintf("could not create keypair: '%#v'", err))
-			return
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create keypair: '%#v'", err))
 		}
 	}
 
@@ -512,8 +519,7 @@ func (s *Service) addFunc(obj interface{}) {
 	clusterID := key.ClusterID(cluster)
 	certs, err := s.certWatcher.SearchCerts(clusterID)
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not get certificates from secrets: '%#v'", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get certificates from secrets: '%#v'", err))
 	}
 
 	// Create KMS key.
@@ -524,8 +530,7 @@ func (s *Service) addFunc(obj interface{}) {
 
 	kmsCreated, kmsKeyErr := kmsKey.CreateIfNotExists()
 	if kmsKeyErr != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create KMS key: '%#v'", kmsKeyErr))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create KMS key: '%#v'", kmsKeyErr))
 	}
 
 	if kmsCreated {
@@ -537,8 +542,7 @@ func (s *Service) addFunc(obj interface{}) {
 	// Encode TLS assets.
 	tlsAssets, err := s.encodeTLSAssets(certs, clients.KMS, kmsKey.Arn())
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not encode TLS assets: '%#v'", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not encode TLS assets: '%#v'", err))
 	}
 
 	bucketName := s.bucketName(cluster)
@@ -557,7 +561,8 @@ func (s *Service) addFunc(obj interface{}) {
 		masterPolicyErr = masterPolicy.CreateOrFail()
 	}
 	if masterPolicyErr != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create %s policy: '%#v'", prefixMaster, masterPolicyErr))
+		// TOOO Creating IAM policy should be idempotent.
+		s.logger.Log("error", fmt.Sprintf("could not create '%s' policy: '%#v'", prefixMaster, masterPolicyErr))
 	}
 
 	// Create worker IAM policy.
@@ -574,7 +579,8 @@ func (s *Service) addFunc(obj interface{}) {
 		workerPolicyErr = workerPolicy.CreateOrFail()
 	}
 	if workerPolicyErr != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create %s policy: '%#v'", prefixWorker, workerPolicyErr))
+		// TOOO Creating IAM policy should be idempotent.
+		s.logger.Log("error", fmt.Sprintf("could not create '%s' policy: '%#v'", prefixWorker, workerPolicyErr))
 	}
 
 	// Create S3 bucket.
@@ -588,8 +594,7 @@ func (s *Service) addFunc(obj interface{}) {
 		}
 		bucketCreated, err = bucket.CreateIfNotExists()
 		if err != nil {
-			s.logger.Log("error", fmt.Sprintf("could not create S3 bucket: '%#v'", err))
-			return
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create S3 bucket: '%#v'", err))
 		}
 	}
 
@@ -608,8 +613,7 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 	vpcCreated, err := vpc.CreateIfNotExists()
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create VPC: '%#v'", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create VPC: '%#v'", err))
 	}
 	if vpcCreated {
 		s.logger.Log("info", fmt.Sprintf("created vpc for cluster '%s'", key.ClusterID(cluster)))
@@ -618,7 +622,7 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 	vpcID, err := vpc.GetID()
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get VPC ID: '%#v'", err))
 	}
 
 	// Create gateway.
@@ -632,8 +636,7 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 	gatewayCreated, err := gateway.CreateIfNotExists()
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create gateway: '%#v'", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create gateway: '%#v'", err))
 	}
 	if gatewayCreated {
 		s.logger.Log("info", fmt.Sprintf("created gateway for cluster '%s'", key.ClusterID(cluster)))
@@ -649,13 +652,11 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 	mastersSecurityGroup, err := s.createSecurityGroup(mastersSGInput)
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create security group '%s': '%#v'", mastersSGInput.GroupName, err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create security group '%s': '%#v'", mastersSGInput.GroupName, err))
 	}
 	mastersSecurityGroupID, err := mastersSecurityGroup.GetID()
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get security group '%s' ID: '%#v'", mastersSGInput.GroupName, err))
 	}
 
 	// Create workers security group.
@@ -666,13 +667,11 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 	workersSecurityGroup, err := s.createSecurityGroup(workersSGInput)
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create security group '%s': '%#v'", workersSGInput.GroupName, err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create security group '%s': '%#v'", workersSGInput.GroupName, err))
 	}
 	workersSecurityGroupID, err := workersSecurityGroup.GetID()
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get security group '%s' ID: '%#v'", workersSGInput.GroupName, err))
 	}
 
 	// Create ingress ELB security group.
@@ -683,13 +682,11 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 	ingressSecurityGroup, err := s.createSecurityGroup(ingressSGInput)
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create security group '%s': '%#v'", ingressSGInput.GroupName, err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create security group '%s': '%#v'", ingressSGInput.GroupName, err))
 	}
 	ingressSecurityGroupID, err := ingressSecurityGroup.GetID()
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get security group '%s' ID: '%#v'", ingressSGInput.GroupName, err))
 	}
 
 	// Create rules for the security groups.
@@ -701,18 +698,15 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 
 	if err := mastersSecurityGroup.ApplyRules(rulesInput.masterRules()); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create rules for security group '%s': '%#v", mastersSecurityGroup.GroupName, err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create rules for security group '%s': '%#v", mastersSecurityGroup.GroupName, err))
 	}
 
 	if err := workersSecurityGroup.ApplyRules(rulesInput.workerRules()); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create rules for security group '%s': '%#v'", workersSecurityGroup.GroupName, err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create rules for security group '%s': '%#v'", workersSecurityGroup.GroupName, err))
 	}
 
 	if err := ingressSecurityGroup.ApplyRules(rulesInput.ingressRules()); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create rules for security group '%s': '%#v'", ingressSecurityGroup.GroupName, err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create rules for security group '%s': '%#v'", ingressSecurityGroup.GroupName, err))
 	}
 
 	// Create route table.
@@ -723,8 +717,7 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 	routeTableCreated, err := routeTable.CreateIfNotExists()
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create route table: '%#v'", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create route table: '%#v'", err))
 	}
 	if routeTableCreated {
 		s.logger.Log("info", "created route table")
@@ -733,8 +726,7 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 
 	if err := routeTable.MakePublic(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not make route table public: '%#v'", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not make route table public: '%#v'", err))
 	}
 
 	// Create public subnet for the masters.
@@ -749,8 +741,7 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 	publicSubnetCreated, err := publicSubnet.CreateIfNotExists()
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not create public subnet: '%#v'", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create public subnet: '%#v'", err))
 	}
 	if publicSubnetCreated {
 		s.logger.Log("info", fmt.Sprintf("created public subnet for cluster '%s'", key.ClusterID(cluster)))
@@ -759,13 +750,11 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 	publicSubnetID, err := publicSubnet.GetID()
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get subnet ID: '%#v'", err))
 	}
 
 	if err := publicSubnet.MakePublic(routeTable); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not make subnet public, '%#v'", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not make subnet public, '%#v'", err))
 	}
 
 	// Run masters.
@@ -782,12 +771,11 @@ func (s *Service) addFunc(obj interface{}) {
 		prefix:              prefixMaster,
 	})
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not start masters: '%#v'", err))
 	}
 
 	if !validateIDs(masterIDs) {
-		s.logger.Log("error", fmt.Sprintf("master nodes had invalid instance IDs: %v", masterIDs))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("master nodes had invalid instance IDs: %v", masterIDs))
 	}
 
 	// Create apiserver load balancer.
@@ -808,14 +796,12 @@ func (s *Service) addFunc(obj interface{}) {
 
 	apiLB, err := s.createLoadBalancer(lbInput)
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create apiserver load balancer: '%#v'", err))
 	}
 
 	// Assign the ProxyProtocol policy to the apiserver load balancer.
 	if err := apiLB.AssignProxyProtocolPolicy(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not assign proxy protocol policy: '%#v'", err))
 	}
 
 	// Create etcd load balancer.
@@ -836,16 +822,14 @@ func (s *Service) addFunc(obj interface{}) {
 
 	etcdLB, err := s.createLoadBalancer(lbInput)
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create etcd load balancer: '%#v'", err))
 	}
 
 	// If the policy couldn't be created and some instances didn't exist before, that means that the cluster
 	// is inconsistent and most problably its deployment broke in the middle during the previous run of
 	// aws-operator.
 	if anyMastersCreated && (kmsKeyErr != nil || masterPolicyErr != nil || workerPolicyErr != nil) {
-		s.logger.Log("error", fmt.Sprintf("cluster '%s' is inconsistent, KMS keys and policies were not created, but EC2 instances were missing, please consider deleting this cluster", key.ClusterID(cluster)))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("cluster '%s' is inconsistent, KMS keys and policies were not created, but EC2 instances were missing, please consider deleting this cluster", key.ClusterID(cluster)))
 	}
 
 	// Create Ingress load balancer.
@@ -869,14 +853,12 @@ func (s *Service) addFunc(obj interface{}) {
 
 	ingressLB, err := s.createLoadBalancer(lbInput)
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create ingress load balancer: '%#v'", err))
 	}
 
 	// Assign the ProxyProtocol policy to the Ingress load balancer.
 	if err := ingressLB.AssignProxyProtocolPolicy(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not assign proxy protocol policy: '%#v'", err))
 	}
 
 	s.logger.Log("info", fmt.Sprintf("created ingress load balancer"))
@@ -897,8 +879,7 @@ func (s *Service) addFunc(obj interface{}) {
 
 	lcCreated, err := s.createLaunchConfiguration(lcInput)
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create launch config: '%#v'", err))
 	}
 
 	if lcCreated {
@@ -909,8 +890,7 @@ func (s *Service) addFunc(obj interface{}) {
 
 	workersLCName, err := launchConfigurationName(cluster, "worker", workersSecurityGroupID)
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get launch config name: '%#v'", err))
 	}
 
 	asg := awsresources.AutoScalingGroup{
@@ -928,8 +908,7 @@ func (s *Service) addFunc(obj interface{}) {
 
 	asgCreated, err := asg.CreateIfNotExists()
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create auto scaling group: '%#v'", err))
 	}
 
 	if asgCreated {
@@ -977,15 +956,14 @@ func (s *Service) addFunc(obj interface{}) {
 	var rsErr error
 	for _, input := range recordSetInputs {
 		if rsErr = s.createRecordSet(input); rsErr != nil {
-			s.logger.Log("error", fmt.Sprintf("%#v", rsErr))
-			return
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create record set '%#v'", rsErr))
 		}
 	}
 	if rsErr == nil {
 		s.logger.Log("info", fmt.Sprintf("created DNS records for load balancers"))
 	}
 
-	s.logger.Log("info", fmt.Sprintf("cluster '%s' processed", key.ClusterID(cluster)))
+	return nil
 }
 
 func (s *Service) deleteFunc(obj interface{}) {
