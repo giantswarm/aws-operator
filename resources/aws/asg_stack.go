@@ -19,6 +19,8 @@ const (
 	defaultTimeout = 5
 	// imageIDParam is the Cloud Formation parameter name for the ASG image ID.
 	imageIDParam = "ImageID"
+
+	stackDoesNotExistError = "Stack with id %s does not exist"
 )
 
 // ASGStack represents a CloudFormation stack for an Auto Scaling Group.
@@ -198,11 +200,31 @@ func (s *ASGStack) Delete() error {
 	return nil
 }
 
+// CheckIfExists checks if there is an autoscaling group stack in Cloud Formation
+// with the provided name.
+func (s *ASGStack) CheckIfExists() (bool, error) {
+	_, err := s.findExisting()
+	if IsNotFound(err) {
+		return false, nil
+	} else if err != nil {
+		return false, microerror.Mask(err)
+	}
+
+	return true, nil
+}
+
 func (s *ASGStack) findExisting() (*cloudformation.Stack, error) {
 	stacks, err := s.Client.DescribeStacks(&cloudformation.DescribeStacksInput{
 		StackName: aws.String(s.Name),
 	})
 	if err != nil {
+		underlying := microerror.Cause(err)
+		if awserr, ok := underlying.(awserr.Error); ok {
+			if awserr.Message() == fmt.Sprintf(stackDoesNotExistError, s.Name) {
+				return nil, microerror.Mask(notFoundError)
+			}
+		}
+
 		return nil, microerror.Mask(err)
 	}
 
