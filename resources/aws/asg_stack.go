@@ -137,7 +137,8 @@ func (s *ASGStack) CreateOrFail() error {
 	return nil
 }
 
-// Update updates the autoscaling group stack in Cloud Formation.
+// Update updates the autoscaling group stack in Cloud Formation if one of the
+// updatable parameters has changed.
 func (s *ASGStack) Update() error {
 	currentStack, err := s.findExisting()
 	if err != nil {
@@ -149,29 +150,32 @@ func (s *ASGStack) Update() error {
 		asgMinSizeParam: strconv.Itoa(s.ASGMinSize),
 		imageIDParam:    s.ImageID,
 	}
-	params := []*cloudformation.Parameter{}
 
-	for _, param := range currentStack.Parameters {
-		if value, ok := updateableParams[*param.ParameterKey]; ok {
-			param.ParameterValue = aws.String(value)
+	if hasStackChanged(currentStack.Parameters, updateableParams) {
+		params := []*cloudformation.Parameter{}
+
+		for _, param := range currentStack.Parameters {
+			if value, ok := updateableParams[*param.ParameterKey]; ok {
+				param.ParameterValue = aws.String(value)
+			}
+
+			params = append(params, param)
 		}
 
-		params = append(params, param)
-	}
+		stackInput := &cloudformation.UpdateStackInput{
+			Parameters:  params,
+			StackName:   aws.String(s.Name),
+			TemplateURL: aws.String(s.TemplateURL),
+		}
+		if _, err := s.Client.UpdateStack(stackInput); err != nil {
+			return microerror.Mask(err)
+		}
 
-	stackInput := &cloudformation.UpdateStackInput{
-		Parameters:  params,
-		StackName:   aws.String(s.Name),
-		TemplateURL: aws.String(s.TemplateURL),
-	}
-	if _, err := s.Client.UpdateStack(stackInput); err != nil {
-		return microerror.Mask(err)
-	}
-
-	if err := s.Client.WaitUntilStackUpdateComplete(&cloudformation.DescribeStacksInput{
-		StackName: aws.String(s.Name),
-	}); err != nil {
-		return microerror.Mask(err)
+		if err := s.Client.WaitUntilStackUpdateComplete(&cloudformation.DescribeStacksInput{
+			StackName: aws.String(s.Name),
+		}); err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
 	return nil
@@ -209,4 +213,19 @@ func (s *ASGStack) findExisting() (*cloudformation.Stack, error) {
 	}
 
 	return stacks.Stacks[0], nil
+}
+
+func hasStackChanged(params []*cloudformation.Parameter, paramUpdates map[string]string) bool {
+	for _, param := range params {
+		key := *param.ParameterKey
+		currentValue := *param.ParameterValue
+
+		if updatedValue, ok := paramUpdates[key]; ok {
+			if updatedValue != currentValue {
+				return true
+			}
+		}
+	}
+
+	return false
 }
