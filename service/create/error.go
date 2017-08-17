@@ -75,3 +75,10 @@ var invalidWorkerNodeCountError = microerror.New("invalid worker node count")
 func IsInvalidWorkerNodeCount(err error) bool {
 	return microerror.Cause(err) == invalidWorkerNodeCountError
 }
+
+var executionFailedError = microerror.New("execution failed")
+
+// IsExecutionFailedError asserts isExecutionFailedError.
+func IsExecutionFailedError(err error) bool {
+	return microerror.Cause(err) == executionFailedError
+}
