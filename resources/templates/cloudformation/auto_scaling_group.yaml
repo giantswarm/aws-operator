@@ -25,11 +25,20 @@ Parameters:
   InstanceType:
     Description: EC2 instance type
     Type: String
+  MaxBatchSize:
+    Description: The max number of instances for a rolling update batch
+    Type: Number
+  MinInstancesInService:
+    Description: The min number of instances to keep in service during a rolling update
+    Type: Number
+  LoadBalancerName:
+    Description: The name of the load balancer for the instances
+    Type: String
   KeyName:
     Description: The name of the KeyPair containing the SSH key
     Type: String
-  LoadBalancerName:
-    Description: The name of the load balancer for the instances
+  RollingUpdatePauseTime:
+    Description: The time to pause ASG operations after creating a new instance
     Type: String
   SecurityGroupID:
     Description: The ID of the security group for the instances
@@ -80,8 +89,8 @@ Resources:
     UpdatePolicy:
       AutoScalingRollingUpdate:
         # minimum amount of instances that must always be running during a rolling update
-        MinInstancesInService: 2
+        MinInstancesInService: !Ref MinInstancesInService
         # only do a rolling update of this amount of instances max
-        MaxBatchSize: 2
+        MaxBatchSize: !Ref MaxBatchSize
         # after creating a new instance, pause operations on the ASG for this amount of time
-        PauseTime: PT10S
+        PauseTime: !Ref RollingUpdatePauseTime

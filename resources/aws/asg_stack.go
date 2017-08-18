@@ -20,7 +20,14 @@ const (
 	defaultTimeout = 5
 	// imageIDParam is the Cloud Formation parameter name for the ASG image ID.
 	imageIDParam = "ImageID"
-
+	// maxBatchSizeParam is the Cloud Formation parameter name for the max
+	// batch size during a rolling update.
+	maxBatchSizeParam = "MaxBatchSize"
+	// minInstancesInServiceParam is the Cloud Formation parameter name for the
+	// min instances to keep in service during a rolling update.
+	minInstancesInServiceParam = "MinInstancesInService"
+	// stackDoesNotExistError is for matching if a Cloud Formation validation
+	// error indicates that a stack does not exist.
 	stackDoesNotExistError = "Stack with id %s does not exist"
 )
 
@@ -38,10 +45,13 @@ type ASGStack struct {
 	HealthCheckGracePeriod   int
 	IAMInstanceProfileName   string
 	ImageID                  string
-	LoadBalancerName         string
 	InstanceType             string
 	KeyName                  string
+	MaxBatchSize             int
+	MinInstancesInService    int
+	LoadBalancerName         string
 	Name                     string
+	RollingUpdatePauseTime   string
 	SecurityGroupID          string
 	SmallCloudConfig         string
 	SubnetID                 string
@@ -87,16 +97,28 @@ func (s *ASGStack) CreateOrFail() error {
 				ParameterValue: aws.String(s.ImageID),
 			},
 			{
-				ParameterKey:   aws.String("LoadBalancerName"),
-				ParameterValue: aws.String(s.LoadBalancerName),
-			},
-			{
 				ParameterKey:   aws.String("InstanceType"),
 				ParameterValue: aws.String(s.InstanceType),
 			},
 			{
 				ParameterKey:   aws.String("KeyName"),
 				ParameterValue: aws.String(s.KeyName),
+			},
+			{
+				ParameterKey:   aws.String("LoadBalancerName"),
+				ParameterValue: aws.String(s.LoadBalancerName),
+			},
+			{
+				ParameterKey:   aws.String(maxBatchSizeParam),
+				ParameterValue: aws.String(strconv.Itoa(s.MaxBatchSize)),
+			},
+			{
+				ParameterKey:   aws.String(minInstancesInServiceParam),
+				ParameterValue: aws.String(strconv.Itoa(s.MinInstancesInService)),
+			},
+			{
+				ParameterKey:   aws.String("RollingUpdatePauseTime"),
+				ParameterValue: aws.String(s.RollingUpdatePauseTime),
 			},
 			{
 				ParameterKey:   aws.String("SecurityGroupID"),
@@ -149,9 +171,11 @@ func (s *ASGStack) Update() error {
 	}
 
 	updateableParams := map[string]string{
-		asgMaxSizeParam: strconv.Itoa(s.ASGMaxSize),
-		asgMinSizeParam: strconv.Itoa(s.ASGMinSize),
-		imageIDParam:    s.ImageID,
+		asgMaxSizeParam:            strconv.Itoa(s.ASGMaxSize),
+		asgMinSizeParam:            strconv.Itoa(s.ASGMinSize),
+		imageIDParam:               s.ImageID,
+		maxBatchSizeParam:          strconv.Itoa(s.MaxBatchSize),
+		minInstancesInServiceParam: strconv.Itoa(s.MinInstancesInService),
 	}
 
 	if hasStackChanged(currentStack.Parameters, updateableParams) {

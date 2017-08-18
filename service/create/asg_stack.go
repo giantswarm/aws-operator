@@ -65,6 +65,9 @@ const (
 	defaultEBSVolumeSize = 50
 	// defaultEBSVolumeType is the EBS volume type.
 	defaultEBSVolumeType = "gp2"
+	// rollingUpdatePauseTime is how long to pause ASG operations after creating
+	// new instances. This allows time for new nodes to join the cluster.
+	rollingUpdatePauseTime = "PT4M"
 )
 
 func (s *Service) processASGStack(input asgStackInput) (bool, error) {
@@ -206,15 +209,18 @@ func (s *Service) createASGStack(input asgStackInput) (bool, error) {
 		HealthCheckGracePeriod:   gracePeriodSeconds,
 		IAMInstanceProfileName:   input.iamInstanceProfileName,
 		ImageID:                  input.imageID,
-		LoadBalancerName:         input.loadBalancerName,
 		InstanceType:             input.instanceType,
+		LoadBalancerName:         input.loadBalancerName,
 		KeyName:                  input.keyPairName,
-		Name:                     key.AutoScalingGroupName(input.cluster, input.asgType),
-		SecurityGroupID:          input.workersSecurityGroupID,
-		SmallCloudConfig:         smallCloudconfig,
-		SubnetID:                 input.subnetID,
-		TemplateURL:              templateURL,
-		VPCID:                    input.vpcID,
+		MaxBatchSize:             getMaxBatchSize(input.asgSize),
+		MinInstancesInService:    getMinInstancesInService(input.asgSize),
+		Name: key.AutoScalingGroupName(input.cluster, input.asgType),
+		RollingUpdatePauseTime: rollingUpdatePauseTime,
+		SecurityGroupID:        input.workersSecurityGroupID,
+		SmallCloudConfig:       smallCloudconfig,
+		SubnetID:               input.subnetID,
+		TemplateURL:            templateURL,
+		VPCID:                  input.vpcID,
 	}
 
 	err = stack.CreateOrFail()
@@ -246,9 +252,11 @@ func (s *Service) updateASGStack(input asgStackInput) error {
 		Client: input.clients.CloudFormation,
 
 		// Settings.
-		ASGMaxSize:  input.asgSize,
-		ASGMinSize:  input.asgSize,
-		ImageID:     imageID,
+		ASGMaxSize:            input.asgSize,
+		ASGMinSize:            input.asgSize,
+		ImageID:               imageID,
+		MaxBatchSize:          getMaxBatchSize(input.asgSize),
+		MinInstancesInService: getMinInstancesInService(input.asgSize),
 		Name:        key.AutoScalingGroupName(input.cluster, input.asgType),
 		TemplateURL: templateURL,
 	}
