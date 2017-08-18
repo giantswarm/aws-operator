@@ -462,7 +462,13 @@ func validateIDs(ids []string) bool {
 }
 
 func (s *Service) addFunc(obj interface{}) {
-	cluster := *obj.(*awstpr.CustomObject)
+	customObject, ok := obj.(*awstpr.CustomObject)
+	if !ok {
+		s.logger.Log("error", "could not convert to awstpr.CustomObject")
+		return
+	}
+	cluster := *customObject
+
 	s.logger.Log("info", fmt.Sprintf("creating cluster '%s'", key.ClusterID(cluster)))
 
 	if err := validateCluster(cluster); err != nil {
