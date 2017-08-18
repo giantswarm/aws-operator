@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
 )
@@ -19,6 +20,8 @@ const (
 	defaultTimeout = 5
 	// imageIDParam is the Cloud Formation parameter name for the ASG image ID.
 	imageIDParam = "ImageID"
+
+	stackDoesNotExistError = "Stack with id %s does not exist"
 )
 
 // ASGStack represents a CloudFormation stack for an Auto Scaling Group.
@@ -137,7 +140,8 @@ func (s *ASGStack) CreateOrFail() error {
 	return nil
 }
 
-// Update updates the autoscaling group stack in Cloud Formation.
+// Update updates the autoscaling group stack in Cloud Formation if one of the
+// updatable parameters has changed.
 func (s *ASGStack) Update() error {
 	currentStack, err := s.findExisting()
 	if err != nil {
@@ -149,29 +153,32 @@ func (s *ASGStack) Update() error {
 		asgMinSizeParam: strconv.Itoa(s.ASGMinSize),
 		imageIDParam:    s.ImageID,
 	}
-	params := []*cloudformation.Parameter{}
 
-	for _, param := range currentStack.Parameters {
-		if value, ok := updateableParams[*param.ParameterKey]; ok {
-			param.ParameterValue = aws.String(value)
+	if hasStackChanged(currentStack.Parameters, updateableParams) {
+		params := []*cloudformation.Parameter{}
+
+		for _, param := range currentStack.Parameters {
+			if value, ok := updateableParams[*param.ParameterKey]; ok {
+				param.ParameterValue = aws.String(value)
+			}
+
+			params = append(params, param)
 		}
 
-		params = append(params, param)
-	}
+		stackInput := &cloudformation.UpdateStackInput{
+			Parameters:  params,
+			StackName:   aws.String(s.Name),
+			TemplateURL: aws.String(s.TemplateURL),
+		}
+		if _, err := s.Client.UpdateStack(stackInput); err != nil {
+			return microerror.Mask(err)
+		}
 
-	stackInput := &cloudformation.UpdateStackInput{
-		Parameters:  params,
-		StackName:   aws.String(s.Name),
-		TemplateURL: aws.String(s.TemplateURL),
-	}
-	if _, err := s.Client.UpdateStack(stackInput); err != nil {
-		return microerror.Mask(err)
-	}
-
-	if err := s.Client.WaitUntilStackUpdateComplete(&cloudformation.DescribeStacksInput{
-		StackName: aws.String(s.Name),
-	}); err != nil {
-		return microerror.Mask(err)
+		if err := s.Client.WaitUntilStackUpdateComplete(&cloudformation.DescribeStacksInput{
+			StackName: aws.String(s.Name),
+		}); err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
 	return nil
@@ -194,11 +201,31 @@ func (s *ASGStack) Delete() error {
 	return nil
 }
 
+// CheckIfExists checks if there is an autoscaling group stack in Cloud Formation
+// with the provided name.
+func (s *ASGStack) CheckIfExists() (bool, error) {
+	_, err := s.findExisting()
+	if IsNotFound(err) {
+		return false, nil
+	} else if err != nil {
+		return false, microerror.Mask(err)
+	}
+
+	return true, nil
+}
+
 func (s *ASGStack) findExisting() (*cloudformation.Stack, error) {
 	stacks, err := s.Client.DescribeStacks(&cloudformation.DescribeStacksInput{
 		StackName: aws.String(s.Name),
 	})
 	if err != nil {
+		underlying := microerror.Cause(err)
+		if awserr, ok := underlying.(awserr.Error); ok {
+			if awserr.Message() == fmt.Sprintf(stackDoesNotExistError, s.Name) {
+				return nil, microerror.Mask(notFoundError)
+			}
+		}
+
 		return nil, microerror.Mask(err)
 	}
 
@@ -209,4 +236,19 @@ func (s *ASGStack) findExisting() (*cloudformation.Stack, error) {
 	}
 
 	return stacks.Stacks[0], nil
+}
+
+func hasStackChanged(params []*cloudformation.Parameter, paramUpdates map[string]string) bool {
+	for _, param := range params {
+		key := *param.ParameterKey
+		currentValue := *param.ParameterValue
+
+		if updatedValue, ok := paramUpdates[key]; ok {
+			if updatedValue != currentValue {
+				return true
+			}
+		}
+	}
+
+	return false
 }

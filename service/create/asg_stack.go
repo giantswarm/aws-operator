@@ -18,6 +18,8 @@ import (
 )
 
 type asgStackInput struct {
+	// Dependencies.
+	clients awsutil.Clients
 
 	// Settings.
 	asgSize                int
@@ -36,9 +38,6 @@ type asgStackInput struct {
 	tlsAssets              *certificatetpr.CompactTLSAssets
 	vpcID                  string
 	workersSecurityGroupID string
-
-	// Dependencies.
-	clients awsutil.Clients
 }
 
 type blockDeviceMapping struct {
@@ -67,6 +66,38 @@ const (
 	// defaultEBSVolumeType is the EBS volume type.
 	defaultEBSVolumeType = "gp2"
 )
+
+func (s *Service) processASGStack(input asgStackInput) (bool, error) {
+	stack := awsresources.ASGStack{
+		// Dependencies.
+		Client: input.clients.CloudFormation,
+
+		// Settings.
+		Name: key.AutoScalingGroupName(input.cluster, input.asgType),
+	}
+
+	stackExists, err := stack.CheckIfExists()
+	if err != nil {
+		return false, microerror.Mask(err)
+	}
+
+	var stackCreated bool
+
+	if !stackExists {
+		stackCreated, err = s.createASGStack(input)
+		if err != nil {
+			return stackCreated, microerror.Mask(err)
+		}
+	} else {
+		stackCreated = true
+		err = s.updateASGStack(input)
+		if err != nil {
+			return stackCreated, microerror.Mask(err)
+		}
+	}
+
+	return stackCreated, nil
+}
 
 // createASGStack creates a CloudFormation stack for an Auto Scaling Group.
 func (s *Service) createASGStack(input asgStackInput) (bool, error) {
