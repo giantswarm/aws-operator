@@ -167,10 +167,10 @@ func (s *ASGStack) CreateOrFail() error {
 
 // Update updates the autoscaling group stack in Cloud Formation if one of the
 // updatable parameters has changed.
-func (s *ASGStack) Update() error {
+func (s *ASGStack) Update() (bool, error) {
 	currentStack, err := s.findExisting()
 	if err != nil {
-		return microerror.Mask(err)
+		return false, microerror.Mask(err)
 	}
 
 	updateableParams := map[string]string{
@@ -199,17 +199,21 @@ func (s *ASGStack) Update() error {
 			TemplateURL: aws.String(s.TemplateURL),
 		}
 		if _, err := s.Client.UpdateStack(stackInput); err != nil {
-			return microerror.Mask(err)
+			return false, microerror.Mask(err)
 		}
 
 		if err := s.Client.WaitUntilStackUpdateComplete(&cloudformation.DescribeStacksInput{
 			StackName: aws.String(s.Name),
 		}); err != nil {
-			return microerror.Mask(err)
+			return false, microerror.Mask(err)
 		}
+
+		// Stack was updated successfully.
+		return true, nil
 	}
 
-	return nil
+	// No change was made to the stack.
+	return false, nil
 }
 
 // Delete deletes the autoscaling group stack in Cloud Formation.

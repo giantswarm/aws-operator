@@ -90,22 +90,21 @@ func (s *Service) processASGStack(input asgStackInput) (bool, error) {
 		return false, microerror.Mask(err)
 	}
 
-	var stackCreated bool
+	var stackUpdated bool
 
 	if !stackExists {
-		stackCreated, err = s.createASGStack(input)
+		stackUpdated, err = s.createASGStack(input)
 		if err != nil {
-			return stackCreated, microerror.Mask(err)
+			return stackUpdated, microerror.Mask(err)
 		}
 	} else {
-		stackCreated = true
-		err = s.updateASGStack(input)
+		stackUpdated, err = s.updateASGStack(input)
 		if err != nil {
-			return stackCreated, microerror.Mask(err)
+			return stackUpdated, microerror.Mask(err)
 		}
 	}
 
-	return stackCreated, nil
+	return stackUpdated, nil
 }
 
 // createASGStack creates a CloudFormation stack for an Auto Scaling Group.
@@ -237,7 +236,7 @@ func (s *Service) createASGStack(input asgStackInput) (bool, error) {
 	return true, nil
 }
 
-func (s *Service) updateASGStack(input asgStackInput) error {
+func (s *Service) updateASGStack(input asgStackInput) (bool, error) {
 	var imageID string
 
 	switch input.asgType {
@@ -246,7 +245,7 @@ func (s *Service) updateASGStack(input asgStackInput) error {
 	case prefixWorker:
 		imageID = key.WorkerImageID(input.cluster)
 	default:
-		return microerror.Maskf(invalidCloudconfigExtensionNameError, fmt.Sprintf("Invalid extension name '%s'", input.asgType))
+		return false, microerror.Maskf(invalidCloudconfigExtensionNameError, fmt.Sprintf("Invalid extension name '%s'", input.asgType))
 	}
 
 	templateRelativePath := fmt.Sprintf(asgCloudFormationTemplateS3Path, input.asgType)
