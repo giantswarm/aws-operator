@@ -73,7 +73,7 @@ const (
 	defaultEBSVolumeType = "gp2"
 	// rollingUpdatePauseTime is how long to pause ASG operations after creating
 	// new instances. This allows time for new nodes to join the cluster.
-	rollingUpdatePauseTime = "PT4M"
+	rollingUpdatePauseTime = "PT5M"
 )
 
 func (s *Service) processASGStack(input asgStackInput) (bool, error) {
@@ -263,12 +263,18 @@ func (s *Service) updateASGStack(input asgStackInput) error {
 		ImageID:               imageID,
 		MaxBatchSize:          getMaxBatchSize(input.asgSize),
 		MinInstancesInService: getMinInstancesInService(input.asgSize),
-		Name:        key.AutoScalingGroupName(input.cluster, input.asgType),
-		TemplateURL: templateURL,
+		Name: key.AutoScalingGroupName(input.cluster, input.asgType),
+		RollingUpdatePauseTime: rollingUpdatePauseTime,
+		TemplateURL:            templateURL,
 	}
 
-	if err := stack.Update(); err != nil {
-		return microerror.Mask(err)
+	stackUpdated, err := stack.Update()
+	if err != nil {
+		return stackUpdated, microerror.Mask(err)
+	}
+
+	return stackUpdated, nil
+}
 
 // getMaxBatchSize calculates the max batch size for the rolling update policy.
 func getMaxBatchSize(asgSize int) int {

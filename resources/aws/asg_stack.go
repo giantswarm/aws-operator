@@ -26,6 +26,9 @@ const (
 	// minInstancesInServiceParam is the Cloud Formation parameter name for the
 	// min instances to keep in service during a rolling update.
 	minInstancesInServiceParam = "MinInstancesInService"
+	// rollingUpdatePauseTimeParam is the Cloud Formation parameter name for the
+	// pause time after adding instances during a rolling update.
+	rollingUpdatePauseTimeParam = "RollingUpdatePauseTime"
 	// stackDoesNotExistError is for matching if a Cloud Formation validation
 	// error indicates that a stack does not exist.
 	stackDoesNotExistError = "Stack with id %s does not exist"
@@ -117,7 +120,7 @@ func (s *ASGStack) CreateOrFail() error {
 				ParameterValue: aws.String(strconv.Itoa(s.MinInstancesInService)),
 			},
 			{
-				ParameterKey:   aws.String("RollingUpdatePauseTime"),
+				ParameterKey:   aws.String(rollingUpdatePauseTimeParam),
 				ParameterValue: aws.String(s.RollingUpdatePauseTime),
 			},
 			{
@@ -171,11 +174,12 @@ func (s *ASGStack) Update() error {
 	}
 
 	updateableParams := map[string]string{
-		asgMaxSizeParam:            strconv.Itoa(s.ASGMaxSize),
-		asgMinSizeParam:            strconv.Itoa(s.ASGMinSize),
-		imageIDParam:               s.ImageID,
-		maxBatchSizeParam:          strconv.Itoa(s.MaxBatchSize),
-		minInstancesInServiceParam: strconv.Itoa(s.MinInstancesInService),
+		asgMaxSizeParam:             strconv.Itoa(s.ASGMaxSize),
+		asgMinSizeParam:             strconv.Itoa(s.ASGMinSize),
+		imageIDParam:                s.ImageID,
+		maxBatchSizeParam:           strconv.Itoa(s.MaxBatchSize),
+		minInstancesInServiceParam:  strconv.Itoa(s.MinInstancesInService),
+		rollingUpdatePauseTimeParam: s.RollingUpdatePauseTime,
 	}
 
 	if hasStackChanged(currentStack.Parameters, updateableParams) {
