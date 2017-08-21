@@ -72,6 +72,26 @@ func Test_ClusterID(t *testing.T) {
 		t.Fatalf("Expected cluster ID %s but was %s", expectedID, ClusterID(customObject))
 	}
 }
+func Test_InstanceProfileName(t *testing.T) {
+	expectedName := "test-cluster-worker-EC2-K8S-ROLE"
+	profileType := "worker"
+
+	cluster := clustertpr.Spec{
+		Cluster: spec.Cluster{
+			ID: "test-cluster",
+		},
+	}
+
+	customObject := awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			Cluster: cluster,
+		},
+	}
+
+	if InstanceProfileName(customObject, profileType) != expectedName {
+		t.Fatalf("Expected instance profile name '%s' but was '%s'", expectedName, InstanceProfileName(customObject, profileType))
+	}
+}
 
 func Test_MasterImageID(t *testing.T) {
 	tests := []struct {
