@@ -59,6 +59,12 @@ const (
 	// asgCloudFormationTemplateS3Path is the path to the Cloud Formation
 	// template stored in the S3 bucket.
 	asgCloudFormationTemplateS3Path = "templates/%s.yaml"
+	// asgMaxBatchSizeRatio is the % of instances to be updated during a
+	// rolling update.
+	asgMaxBatchSizeRatio = 0.3
+	// asgMinInstancesRatio is the % of instances to keep in service during a
+	// rolling update.
+	asgMinInstancesRatio = 0.7
 	// defaultEBSVolumeMountPoint is the path for mounting the EBS volume.
 	defaultEBSVolumeMountPoint = "/dev/xvdh"
 	// defaultEBSVolumeSize is expressed in GB.
@@ -263,7 +269,38 @@ func (s *Service) updateASGStack(input asgStackInput) error {
 
 	if err := stack.Update(); err != nil {
 		return microerror.Mask(err)
+
+// getMaxBatchSize calculates the max batch size for the rolling update policy.
+func getMaxBatchSize(asgSize int) int {
+	var batchSize int
+
+	switch {
+	case asgSize <= 2:
+		batchSize = 1
+	case asgSize <= 4:
+		batchSize = 2
+	default:
+		// Calculate batch size and round up to nearest int.
+		result := float64(asgSize) * asgMaxBatchSizeRatio
+		batchSize = int(result + 0.5)
 	}
 
-	return nil
+	return batchSize
+}
+
+// getMinInstancesInService calculates the min number for instances to keep in
+// service for the rolling update policy.
+func getMinInstancesInService(asgSize int) int {
+	var minInstances int
+
+	switch {
+	case asgSize <= 2:
+		minInstances = 1
+	default:
+		// Calculate min instances and round up to nearest int.
+		result := float64(asgSize) * asgMinInstancesRatio
+		minInstances = int(result + 0.5)
+	}
+
+	return minInstances
 }
