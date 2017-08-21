@@ -73,7 +73,7 @@ func Test_ClusterID(t *testing.T) {
 	}
 }
 func Test_InstanceProfileName(t *testing.T) {
-	expectedName := "test-cluster-worker-EC2-K8S-ROLE"
+	expectedName := "test-cluster-worker-EC2-K8S-Role"
 	profileType := "worker"
 
 	cluster := clustertpr.Spec{
