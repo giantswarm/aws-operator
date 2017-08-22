@@ -903,16 +903,12 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		workersSecurityGroupID: workersSecurityGroupID,
 	}
 
-	stackUpdated, err := s.processASGStack(asgStackInput)
+	err = s.processASGStack(asgStackInput)
 	if err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not process '%s' ASG stack: '#%v'", prefixWorker, err))
 	}
 
-	if stackUpdated {
-		s.logger.Log("info", fmt.Sprintf("created autoscaling group stack '%s'", key.AutoScalingGroupName(cluster, prefixWorker)))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("processed autoscaling group stack '%s', no changes were made", key.AutoScalingGroupName(cluster, prefixWorker)))
-	}
+	s.logger.Log("info", fmt.Sprintf("processed autoscaling group stack '%s'", key.AutoScalingGroupName(cluster, prefixWorker)))
 
 	// Create Record Sets for the Load Balancers.
 	recordSetInputs := []recordSetInput{
@@ -1335,15 +1331,11 @@ func (s *Service) updateFunc(oldObj, newObj interface{}) {
 		imageID:   key.WorkerImageID(cluster),
 	}
 
-	stackUpdated, err := s.processASGStack(asgStackInput)
+	err = s.processASGStack(asgStackInput)
 	if err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not process '%s' ASG stack: '#%v'", prefixWorker, err))
 		return
 	}
 
-	if stackUpdated {
-		s.logger.Log("info", fmt.Sprintf("updated autoscaling group stack '%s'", key.AutoScalingGroupName(cluster, prefixWorker)))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("processed autoscaling group stack '%s', no changes were made", key.AutoScalingGroupName(cluster, prefixWorker)))
-	}
+	s.logger.Log("info", fmt.Sprintf("processed autoscaling group stack '%s'", key.AutoScalingGroupName(cluster, prefixWorker)))
 }
