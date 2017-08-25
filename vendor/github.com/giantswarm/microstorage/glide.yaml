@@ -1,0 +1,12 @@
+package: github.com/giantswarm/microstorage
+import:
+- package: github.com/cenkalti/backoff
+  version: master
+- package: github.com/giantswarm/microerror
+  version: master
+- package: github.com/giantswarm/micrologger
+  version: master
+# This is only used in storagetest package so it will not appear in your
+# project dependency, unless you use storagetest.
+- package: github.com/stretchr/testify
+  version: v1.1.4
