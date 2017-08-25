@@ -136,7 +136,7 @@ write_files:
                   value: "ACCEPT"
                 # Configure the IP Pool from which Pod IPs will be chosen.
                 - name: CALICO_IPV4POOL_CIDR
-                  value: "192.168.0.0/16"
+                  value: "{{.Cluster.Calico.Subnet}}/{{.Cluster.Calico.CIDR}}"
                 - name: CALICO_IPV4POOL_IPIP
                   value: "always"
                 # Disable IPv6 on Kubernetes.
