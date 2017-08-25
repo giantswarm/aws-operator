@@ -9,8 +9,8 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/microstorage"
 
-	microstorage "github.com/giantswarm/microkit/storage"
 	transactionid "github.com/giantswarm/microkit/transaction/context/id"
 )
 
@@ -50,51 +50,21 @@ var DefaultTrialEncoder = func(v interface{}) ([]byte, error) {
 type ExecuterConfig struct {
 	// Dependencies.
 	Logger  micrologger.Logger
-	Storage microstorage.Service
+	Storage microstorage.Storage
 }
 
 // DefaultExecuterConfig provides a default configuration to create a new
 // executer by best effort.
 func DefaultExecuterConfig() ExecuterConfig {
-	var err error
-
-	var loggerService micrologger.Logger
-	{
-		loggerConfig := micrologger.DefaultConfig()
-		loggerService, err = micrologger.New(loggerConfig)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	var storageService microstorage.Service
-	{
-		storageConfig := microstorage.DefaultConfig()
-		storageService, err = microstorage.New(storageConfig)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	config := ExecuterConfig{
+	return ExecuterConfig{
 		// Dependencies.
-		Logger:  loggerService,
-		Storage: storageService,
+		Logger:  nil,
+		Storage: nil,
 	}
-
-	return config
 }
 
 // NewExecuter creates a new configured executer.
 func NewExecuter(config ExecuterConfig) (Executer, error) {
-	// Dependencies.
-	if config.Logger == nil {
-		return nil, microerror.Maskf(invalidConfigError, "logger must not be empty")
-	}
-	if config.Storage == nil {
-		return nil, microerror.Maskf(invalidConfigError, "storage must not be empty")
-	}
-
 	newExecuter := &executer{
 		// Dependencies.
 		logger:  config.Logger,
@@ -107,7 +77,7 @@ func NewExecuter(config ExecuterConfig) (Executer, error) {
 type executer struct {
 	// Dependencies.
 	logger  micrologger.Logger
-	storage microstorage.Service
+	storage microstorage.Storage
 }
 
 func (e *executer) Execute(ctx context.Context, config ExecuteConfig) error {

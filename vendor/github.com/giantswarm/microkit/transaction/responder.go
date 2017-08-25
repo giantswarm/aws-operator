@@ -7,47 +7,24 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-
-	microstorage "github.com/giantswarm/microkit/storage"
+	"github.com/giantswarm/microstorage"
 )
 
 // ResponderConfig represents the configuration used to create a responder.
 type ResponderConfig struct {
 	// Dependencies.
 	Logger  micrologger.Logger
-	Storage microstorage.Service
+	Storage microstorage.Storage
 }
 
 // DefaultResponderConfig provides a default configuration to create a new
 // responder by best effort.
 func DefaultResponderConfig() ResponderConfig {
-	var err error
-
-	var loggerService micrologger.Logger
-	{
-		loggerConfig := micrologger.DefaultConfig()
-		loggerService, err = micrologger.New(loggerConfig)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	var storageService microstorage.Service
-	{
-		storageConfig := microstorage.DefaultConfig()
-		storageService, err = microstorage.New(storageConfig)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	config := ResponderConfig{
+	return ResponderConfig{
 		// Dependencies.
-		Logger:  loggerService,
-		Storage: storageService,
+		Logger:  nil,
+		Storage: nil,
 	}
-
-	return config
 }
 
 // NewResponder creates a new configured responder.
@@ -72,7 +49,7 @@ func NewResponder(config ResponderConfig) (Responder, error) {
 type responder struct {
 	// Dependencies.
 	logger  micrologger.Logger
-	storage microstorage.Service
+	storage microstorage.Storage
 }
 
 func (r *responder) Exists(ctx context.Context, transactionID string) (bool, error) {
