@@ -6,7 +6,10 @@ import (
 
 	"github.com/giantswarm/microkit/command"
 	microserver "github.com/giantswarm/microkit/server"
+	"github.com/giantswarm/microkit/transaction"
 	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/microstorage"
+	"github.com/giantswarm/microstorage/memory"
 	"github.com/spf13/viper"
 
 	"github.com/giantswarm/aws-operator/flag"
@@ -60,12 +63,33 @@ func main() {
 			go newService.Boot()
 		}
 
+		var storage microstorage.Storage
+		{
+			storage, err = memory.New(memory.DefaultConfig())
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		var transactionResponder transaction.Responder
+		{
+			c := transaction.DefaultResponderConfig()
+			c.Logger = newLogger
+			c.Storage = storage
+
+			transactionResponder, err = transaction.NewResponder(c)
+			if err != nil {
+				panic(err)
+			}
+		}
+
 		// Create a new custom server which bundles our endpoints.
 		var newServer microserver.Server
 		{
 			serverConfig := server.DefaultConfig()
 
 			serverConfig.MicroServerConfig.Logger = newLogger
+			serverConfig.MicroServerConfig.TransactionResponder = transactionResponder
 			serverConfig.MicroServerConfig.ServiceName = name
 			serverConfig.MicroServerConfig.Viper = v
 			serverConfig.Service = newService
