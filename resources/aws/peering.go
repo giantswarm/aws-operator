@@ -18,7 +18,7 @@ type VPCPeeringConnection struct {
 	AWSEntity
 }
 
-func (v *VPCPeeringConnection) findExisting() (*ec2.VpcPeeringConnection, error) {
+func (v VPCPeeringConnection) findExisting() (*ec2.VpcPeeringConnection, error) {
 	vpcPeeringConnections, err := v.Clients.EC2.DescribeVpcPeeringConnections(
 		&ec2.DescribeVpcPeeringConnectionsInput{
 			Filters: []*ec2.Filter{
