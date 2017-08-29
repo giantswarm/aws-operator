@@ -23,11 +23,11 @@ import:
 - package: github.com/giantswarm/microendpoint
   verson: master
 - package: google.golang.org/grpc
-  version: v1.2.1
+  version: 777daa17ff9b5daef1cfdf915088a2ada3332bf0
 - package: github.com/giantswarm/awstpr
   version: master
 - package: github.com/giantswarm/k8scloudconfig
-  version: master
+  version: f2ced39bb68bc94384ac0090bda8c323f93f09f3
 - package: github.com/stretchr/testify
   version: v1.1.4
   repo: git://github.com/stretchr/testify.git
