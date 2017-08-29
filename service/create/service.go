@@ -1262,6 +1262,17 @@ func (s *Service) deleteFunc(obj interface{}) {
 		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", ingressSGInput.GroupName, err))
 	}
 
+	// Delete VPC peering connection.
+	vpcPeeringConection := &awsresources.VPCPeeringConnection{
+		VPCId:     vpcID,
+		AWSEntity: awsresources.AWSEntity{Clients: clients},
+	}
+	if err := vpcPeeringConection.Delete(); err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not delete vpc peering connection: '%#v'", err))
+	} else {
+		s.logger.Log("info", "deleted vpc peering connection")
+	}
+
 	// Delete VPC.
 	if err := vpc.Delete(); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete vpc: '%#v'", err))
