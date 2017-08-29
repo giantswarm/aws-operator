@@ -3,14 +3,14 @@
 package transaction
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
-	"golang.org/x/net/context"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/microstorage"
 
-	microerror "github.com/giantswarm/microkit/error"
-	micrologger "github.com/giantswarm/microkit/logger"
-	microstorage "github.com/giantswarm/microkit/storage"
 	transactionid "github.com/giantswarm/microkit/transaction/context/id"
 )
 
@@ -40,7 +40,7 @@ var DefaultTrialEncoder = func(v interface{}) ([]byte, error) {
 
 	b, err := json.Marshal(v)
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	return b, nil
@@ -50,51 +50,21 @@ var DefaultTrialEncoder = func(v interface{}) ([]byte, error) {
 type ExecuterConfig struct {
 	// Dependencies.
 	Logger  micrologger.Logger
-	Storage microstorage.Service
+	Storage microstorage.Storage
 }
 
 // DefaultExecuterConfig provides a default configuration to create a new
 // executer by best effort.
 func DefaultExecuterConfig() ExecuterConfig {
-	var err error
-
-	var loggerService micrologger.Logger
-	{
-		loggerConfig := micrologger.DefaultConfig()
-		loggerService, err = micrologger.New(loggerConfig)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	var storageService microstorage.Service
-	{
-		storageConfig := microstorage.DefaultConfig()
-		storageService, err = microstorage.New(storageConfig)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	config := ExecuterConfig{
+	return ExecuterConfig{
 		// Dependencies.
-		Logger:  loggerService,
-		Storage: storageService,
+		Logger:  nil,
+		Storage: nil,
 	}
-
-	return config
 }
 
 // NewExecuter creates a new configured executer.
 func NewExecuter(config ExecuterConfig) (Executer, error) {
-	// Dependencies.
-	if config.Logger == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "logger must not be empty")
-	}
-	if config.Storage == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "storage must not be empty")
-	}
-
 	newExecuter := &executer{
 		// Dependencies.
 		logger:  config.Logger,
@@ -107,14 +77,14 @@ func NewExecuter(config ExecuterConfig) (Executer, error) {
 type executer struct {
 	// Dependencies.
 	logger  micrologger.Logger
-	storage microstorage.Service
+	storage microstorage.Storage
 }
 
 func (e *executer) Execute(ctx context.Context, config ExecuteConfig) error {
 	// Validate the execute config to make sure we can safely work with it.
 	err := validateExecuteConfig(config)
 	if err != nil {
-		return microerror.MaskAny(err)
+		return microerror.Mask(err)
 	}
 
 	// At first we check for the transaction ID that might be obtained by the
@@ -128,7 +98,7 @@ func (e *executer) Execute(ctx context.Context, config ExecuteConfig) error {
 	if !ok {
 		_, err := config.Trial(ctx)
 		if err != nil {
-			return microerror.MaskAny(err)
+			return microerror.Mask(err)
 		}
 		e.logger.Log("debug", fmt.Sprintf("executed transaction trial without transaction ID for trial ID '%s'", config.TrialID))
 
@@ -143,7 +113,7 @@ func (e *executer) Execute(ctx context.Context, config ExecuteConfig) error {
 		key := transactionKey("transaction", transactionID, "trial", config.TrialID)
 		exists, err := e.storage.Exists(ctx, key)
 		if err != nil {
-			return microerror.MaskAny(err)
+			return microerror.Mask(err)
 		}
 
 		if exists {
@@ -160,7 +130,7 @@ func (e *executer) Execute(ctx context.Context, config ExecuteConfig) error {
 			if microstorage.IsNotFound(err) {
 				notFound = true
 			} else if err != nil {
-				return microerror.MaskAny(err)
+				return microerror.Mask(err)
 			}
 
 			// Here it is important to only provide a none nil value to the replay
@@ -171,13 +141,13 @@ func (e *executer) Execute(ctx context.Context, config ExecuteConfig) error {
 			if !notFound {
 				input, err = config.ReplayDecoder([]byte(val))
 				if err != nil {
-					return microerror.MaskAny(err)
+					return microerror.Mask(err)
 				}
 			}
 
 			err = config.Replay(ctx, input)
 			if err != nil {
-				return microerror.MaskAny(err)
+				return microerror.Mask(err)
 			}
 			e.logger.Log("debug", fmt.Sprintf("executed transaction replay for transaction ID '%s' and trial ID '%s'", transactionID, config.TrialID))
 
@@ -193,27 +163,27 @@ func (e *executer) Execute(ctx context.Context, config ExecuteConfig) error {
 	{
 		output, err := config.Trial(ctx)
 		if err != nil {
-			return microerror.MaskAny(err)
+			return microerror.Mask(err)
 		}
 		e.logger.Log("debug", fmt.Sprintf("executed transaction trial for transaction ID '%s' and trial ID '%s'", transactionID, config.TrialID))
 
 		rKey := transactionKey("transaction", transactionID, "trial", config.TrialID, "result")
 		b, err := config.TrialEncoder(output)
 		if err != nil {
-			return microerror.MaskAny(err)
+			return microerror.Mask(err)
 		}
 		if b != nil {
 			rVal := string(b)
 			err = e.storage.Create(ctx, rKey, rVal)
 			if err != nil {
-				return microerror.MaskAny(err)
+				return microerror.Mask(err)
 			}
 		}
 
 		tKey := transactionKey("transaction", transactionID, "trial", config.TrialID)
 		err = e.storage.Create(ctx, tKey, "{}")
 		if err != nil {
-			return microerror.MaskAny(err)
+			return microerror.Mask(err)
 		}
 	}
 
@@ -232,16 +202,16 @@ func (e *executer) ExecuteConfig() ExecuteConfig {
 
 func validateExecuteConfig(config ExecuteConfig) error {
 	if config.Replay != nil && config.ReplayDecoder == nil {
-		return microerror.MaskAnyf(invalidExecutionError, "replay decoder must not be empty when replay is given")
+		return microerror.Maskf(invalidExecutionError, "replay decoder must not be empty when replay is given")
 	}
 	if config.Trial == nil {
-		return microerror.MaskAnyf(invalidExecutionError, "trial must not be empty")
+		return microerror.Maskf(invalidExecutionError, "trial must not be empty")
 	}
 	if config.TrialEncoder == nil {
-		return microerror.MaskAnyf(invalidExecutionError, "trial encoder must not be empty")
+		return microerror.Maskf(invalidExecutionError, "trial encoder must not be empty")
 	}
 	if config.TrialID == "" {
-		return microerror.MaskAnyf(invalidExecutionError, "trial ID must not be empty")
+		return microerror.Maskf(invalidExecutionError, "trial ID must not be empty")
 	}
 
 	return nil

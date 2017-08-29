@@ -3,7 +3,7 @@ package validator
 import (
 	"encoding/json"
 
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 // StructToMap is a helper method to convert an expected request data structure
@@ -11,13 +11,13 @@ import (
 func StructToMap(s interface{}) (map[string]interface{}, error) {
 	b, err := json.Marshal(s)
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	var m map[string]interface{}
 	err = json.Unmarshal(b, &m)
 	if err != nil {
-		return nil, microerror.MaskAny(err)
+		return nil, microerror.Mask(err)
 	}
 
 	return m, nil

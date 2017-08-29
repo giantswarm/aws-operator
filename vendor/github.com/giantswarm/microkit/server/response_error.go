@@ -1,8 +1,7 @@
 package server
 
 import (
-	microerror "github.com/giantswarm/microkit/error"
-	kithttp "github.com/go-kit/kit/transport/http"
+	"github.com/giantswarm/microerror"
 )
 
 // ResponseErrorConfig represents the configuration used to create a new
@@ -25,13 +24,13 @@ func DefaultResponseErrorConfig() ResponseErrorConfig {
 func NewResponseError(config ResponseErrorConfig) (ResponseError, error) {
 	// Settings.
 	if config.Underlying == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "underlying must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "underlying must not be empty")
 	}
 
 	newResponseError := &responseError{
 		// Internals.
 		code:    CodeInternalError,
-		message: errorMessage(config.Underlying),
+		message: config.Underlying.Error(),
 
 		// Settings.
 		underlying: config.Underlying,
@@ -61,22 +60,6 @@ func (e *responseError) Message() string {
 	return e.message
 }
 
-func (e *responseError) IsEndpoint() bool {
-	switch u := e.underlying.(type) {
-	case kithttp.Error:
-		switch u.Domain {
-		case kithttp.DomainEncode:
-			return true
-		case kithttp.DomainDecode:
-			return true
-		case kithttp.DomainDo:
-			return true
-		}
-	}
-
-	return false
-}
-
 func (e *responseError) SetCode(code string) {
 	e.code = code
 }
@@ -86,10 +69,5 @@ func (e *responseError) SetMessage(message string) {
 }
 
 func (e *responseError) Underlying() error {
-	kErr, ok := e.underlying.(kithttp.Error)
-	if ok {
-		return kErr.Err
-	}
-
 	return e.underlying
 }

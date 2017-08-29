@@ -6,13 +6,13 @@ import (
 	"os/signal"
 	"sync"
 
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"github.com/giantswarm/microkit/command/daemon/flag"
-	microerror "github.com/giantswarm/microkit/error"
 	microflag "github.com/giantswarm/microkit/flag"
-	"github.com/giantswarm/microkit/logger"
 	"github.com/giantswarm/microkit/server"
 )
 
@@ -23,7 +23,7 @@ var (
 // Config represents the configuration used to create a new daemon command.
 type Config struct {
 	// Dependencies.
-	Logger        logger.Logger
+	Logger        micrologger.Logger
 	ServerFactory ServerFactory
 
 	// Settings.
@@ -47,13 +47,13 @@ func DefaultConfig() Config {
 func New(config Config) (Command, error) {
 	// Dependencies.
 	if config.Logger == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "logger must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "logger must not be empty")
 	}
 	if config.ServerFactory == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "server factory must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "server factory must not be empty")
 	}
 	if config.Viper == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "viper must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "viper must not be empty")
 	}
 
 	newCommand := &command{
@@ -88,7 +88,7 @@ func New(config Config) (Command, error) {
 
 type command struct {
 	// Dependencies.
-	logger        logger.Logger
+	logger        micrologger.Logger
 	serverFactory ServerFactory
 
 	// Internals.

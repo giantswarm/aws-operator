@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
-	microerror "github.com/giantswarm/microkit/error"
+	"github.com/giantswarm/microerror"
 )
 
 func Init(f interface{}) {
@@ -58,7 +58,7 @@ func Merge(v *viper.Viper, fs *pflag.FlagSet, dirs, files []string) error {
 				// the other ones. If we do not find any configuration using config
 				// files, we go ahead to check the process environment.
 			} else {
-				return microerror.MaskAny(err)
+				return microerror.Mask(err)
 			}
 		}
 

@@ -1,5 +1,5 @@
-hash: e0ce0eab66193c7cfbc24915617692a55411b31520a3592e607d81f0cac83801
-updated: 2017-08-29T13:59:11.590424957+02:00
+hash: 417554aed717dd96358bb780ee169ef6962d92fed25d8fcf17997adb4a9aeebb
+updated: 2017-08-29T15:56:15.59473055+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 3afc215b86987d7d465191700aaa8b9628aff380
@@ -46,18 +46,6 @@ imports:
   - quantile
 - name: github.com/cenkalti/backoff
   version: 61153c768f31ee5f130071d08fc82b85208528de
-- name: github.com/coreos/etcd
-  version: 0520cb9304cb2385f7e72b8bc02d6e4d3257158a
-  subpackages:
-  - auth/authpb
-  - client
-  - clientv3
-  - etcdserver/api/v3rpc/rpctypes
-  - etcdserver/etcdserverpb
-  - mvcc/mvccpb
-  - pkg/pathutil
-  - pkg/tlsutil
-  - pkg/types
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
   subpackages:
@@ -103,7 +91,7 @@ imports:
 - name: github.com/giantswarm/microerror
   version: 5ade94eb4ee35ef72eb9382228470caeddb29989
 - name: github.com/giantswarm/microkit
-  version: 1ac51fb9905e0c7ab5a8d12fec127c6fbfd75aac
+  version: 9c50baa91bd1639e41bc5510b215d9d0801f94ca
   subpackages:
   - command
   - command/daemon
@@ -113,14 +101,8 @@ imports:
   - command/daemon/flag/server/listen
   - command/daemon/flag/server/tls
   - command/version
-  - error
   - flag
-  - logger
   - server
-  - storage
-  - storage/etcd
-  - storage/etcdv2
-  - storage/memory
   - tls
   - transaction
   - transaction/context/id
@@ -128,7 +110,7 @@ imports:
 - name: github.com/giantswarm/micrologger
   version: 8a69b2ab80ba2d0bd40d609206518fefacfc8fdf
 - name: github.com/giantswarm/microstorage
-  version: e990a46ff7c9065f8d83c0a649cb1a6ef5d411d7
+  version: f5c68d40459f0021cf8266501b7d8615ea4ff641
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
@@ -139,7 +121,7 @@ imports:
 - name: github.com/go-ini/ini
   version: c787282c39ac1fc618827141a1f762240def08a3
 - name: github.com/go-kit/kit
-  version: f66b0e13579bfc5a48b9e2a94b1209c107ea1f41
+  version: a9ca6725cbbea455e61c6bc8a1ed28e81eb3493b
   subpackages:
   - endpoint
   - log
@@ -155,7 +137,7 @@ imports:
 - name: github.com/go-openapi/swag
   version: 1d0bd113de87027671077d3c71eb3ac5d7dbba72
 - name: github.com/go-stack/stack
-  version: 54be5f394ed2c3e19dac9134a40a95ba5a017f7b
+  version: 100eb0c0a9c5b306ca2fb4f165df21d80ada4b82
 - name: github.com/gogo/protobuf
   version: e18d7aa8f8c624c915db340349aad4c49b10d173
   subpackages:
@@ -166,7 +148,6 @@ imports:
 - name: github.com/golang/protobuf
   version: 8616e8ee5e20a1704615e6c8d7afcdac06087a67
   subpackages:
-  - jsonpb
   - proto
 - name: github.com/google/gofuzz
   version: 44d81051d367757e1c7c6a5a86423ece9afcf63c
@@ -174,14 +155,6 @@ imports:
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
   version: 0eeaf8392f5b04950925b8a69fe70f110fa7cbfc
-- name: github.com/grpc-ecosystem/go-grpc-prometheus
-  version: 6b7015e65d366bf3f19b2b2a000a831940f0f7e0
-- name: github.com/grpc-ecosystem/grpc-gateway
-  version: 84398b94e188ee336f307779b57b3aa91af7063c
-  subpackages:
-  - runtime
-  - runtime/internal
-  - utilities
 - name: github.com/hashicorp/hcl
   version: 8f6b1344a92ff8877cf24a5de9177bf7d0a2a187
   subpackages:
@@ -220,7 +193,7 @@ imports:
 - name: github.com/pelletier/go-toml
   version: 9c1b4e331f1e3d98e72600677699fbe212cd6d16
 - name: github.com/prometheus/client_golang
-  version: c5b7fccd204277076155f10851dad72b76a49317
+  version: de4d4ffe63b9eff7f27484fdef6e421597e6abb4
   subpackages:
   - prometheus
   - prometheus/promhttp
@@ -249,11 +222,11 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 4c05eb1145f16d0e6bb4a3e1b6d769f4713cb41f
+  version: 31694f19adeeaeb0a0e5fe95441b390d757753d2
 - name: github.com/spf13/jwalterweatherman
   version: 0efa5202c04663c757d84f90f5219c1250baf94f
 - name: github.com/spf13/pflag
-  version: 08b1a584251b5b62f458943640fc8ebd4d50aaa5
+  version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
 - name: github.com/spf13/viper
   version: 25b30aa063fc18e48662b86996252eabdcf2f0c7
 - name: github.com/stretchr/testify
@@ -271,13 +244,10 @@ imports:
   version: e90d6d0afc4c315a0d87a568ae68577cc15149a0
   subpackages:
   - context
-  - context/ctxhttp
   - http2
   - http2/hpack
   - idna
-  - internal/timeseries
   - lex/httplex
-  - trace
 - name: golang.org/x/sys
   version: 8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9
   subpackages:
@@ -296,19 +266,7 @@ imports:
   - unicode/norm
   - width
 - name: google.golang.org/grpc
-  version: 8050b9cbc271307e5a716a9d782803d09b0d6f2d
-  subpackages:
-  - codes
-  - credentials
-  - grpclog
-  - internal
-  - keepalive
-  - metadata
-  - naming
-  - peer
-  - stats
-  - tap
-  - transport
+  version: 777daa17ff9b5daef1cfdf915088a2ada3332bf0
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2

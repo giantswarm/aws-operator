@@ -1,17 +1,19 @@
 package transaction
 
 import (
+	"context"
 	"reflect"
-	"strconv"
 	"testing"
 
-	"golang.org/x/net/context"
-
 	transactionid "github.com/giantswarm/microkit/transaction/context/id"
+	"github.com/giantswarm/micrologger/microloggertest"
+	"github.com/giantswarm/microstorage/microstoragetest"
 )
 
 func Test_Executer_NoTransactionIDGiven(t *testing.T) {
 	config := DefaultExecuterConfig()
+	config.Logger = microloggertest.New()
+	config.Storage = microstoragetest.New()
 	newExecuter, err := NewExecuter(config)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -91,6 +93,8 @@ func Test_Executer_NoTransactionIDGiven(t *testing.T) {
 
 func Test_Executer_TransactionIDGiven(t *testing.T) {
 	config := DefaultExecuterConfig()
+	config.Logger = microloggertest.New()
+	config.Storage = microstoragetest.New()
 	newExecuter, err := NewExecuter(config)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -171,6 +175,8 @@ func Test_Executer_TransactionIDGiven(t *testing.T) {
 
 func Test_Executer_TransactionIDGiven_NoReplay(t *testing.T) {
 	config := DefaultExecuterConfig()
+	config.Logger = microloggertest.New()
+	config.Storage = microstoragetest.New()
 	newExecuter, err := NewExecuter(config)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -234,363 +240,92 @@ func Test_Executer_TransactionIDGiven_NoReplay(t *testing.T) {
 	}
 }
 
-func Test_Executer_TransactionResult_Byte(t *testing.T) {
-	config := DefaultExecuterConfig()
-	newExecuter, err := NewExecuter(config)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
+func Test_Executer_TransactionResult(t *testing.T) {
+	tests := []struct {
+		TrialOutput     interface{}
+		WantReplayInput interface{}
+	}{
+		{ // 0
+			TrialOutput:     []byte("hello world"),
+			WantReplayInput: "hello world",
+		},
+		{ // 1
+			TrialOutput:     float64(4.3),
+			WantReplayInput: "4.3",
+		},
+		{ // 2
+			TrialOutput:     nil,
+			WantReplayInput: nil,
+		},
+		{ // 3
+			TrialOutput:     "hello world",
+			WantReplayInput: "hello world",
+		},
+		{ // 4
+			TrialOutput:     "",
+			WantReplayInput: "",
+		},
+		{ // 5
+			TrialOutput: struct {
+				Foo string `json:"foo"`
+				Bar int    `json:"bar"`
+			}{
+				Foo: "foo-val",
+				Bar: 43,
+			},
+			WantReplayInput: `{"foo":"foo-val","bar":43}`,
+		},
 	}
 
-	var trialOutput []byte
-	var replayInput []byte
-
-	replay := func(context context.Context, v interface{}) error {
-		replayInput = []byte(v.(string))
-		return nil
-	}
-	trial := func(context context.Context) (interface{}, error) {
-		trialOutput = []byte("hello world")
-		return trialOutput, nil
-	}
-
-	var ctx context.Context
-	var executeConfig ExecuteConfig
-	{
-		ctx = context.Background()
-		ctx = transactionid.NewContext(ctx, "test-transaction-id")
-
-		executeConfig = newExecuter.ExecuteConfig()
-		executeConfig.Replay = replay
-		executeConfig.Trial = trial
-		executeConfig.TrialID = "test-trial-ID"
-	}
-
-	{
-		err := newExecuter.Execute(ctx, executeConfig)
+	for i, tc := range tests {
+		config := DefaultExecuterConfig()
+		config.Logger = microloggertest.New()
+		config.Storage = microstoragetest.New()
+		newExecuter, err := NewExecuter(config)
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
 
-		if string(trialOutput) != "hello world" {
-			t.Fatal("expected", "hello world", "got", string(trialOutput))
-		}
-		if string(replayInput) != "" {
-			t.Fatal("expected", "", "got", string(replayInput))
-		}
-	}
+		var replayInput interface{}
 
-	{
-		err := newExecuter.Execute(ctx, executeConfig)
+		replay := func(context context.Context, v interface{}) error {
+			replayInput = v
+			return nil
+		}
+		trial := func(context context.Context) (interface{}, error) {
+			return tc.TrialOutput, nil
+		}
+
+		var ctx context.Context
+		var executeConfig ExecuteConfig
+		{
+			ctx = context.Background()
+			ctx = transactionid.NewContext(ctx, "test-transaction-id")
+
+			executeConfig = newExecuter.ExecuteConfig()
+			executeConfig.Replay = replay
+			executeConfig.Trial = trial
+			executeConfig.TrialID = "test-trial-ID"
+		}
+
+		err = newExecuter.Execute(ctx, executeConfig)
 		if err != nil {
-			t.Fatal("expected", nil, "got", err)
+			t.Errorf("#%d: want nil, got %#v", i, err)
+			continue
 		}
-
-		if string(trialOutput) != "hello world" {
-			t.Fatal("expected", "hello world", "got", string(trialOutput))
-		}
-		if string(replayInput) != "hello world" {
-			t.Fatal("expected", "hello world", "got", string(replayInput))
-		}
-	}
-}
-
-func Test_Executer_TransactionResult_Float64(t *testing.T) {
-	config := DefaultExecuterConfig()
-	newExecuter, err := NewExecuter(config)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	var trialOutput float64
-	var replayInput float64
-
-	replay := func(context context.Context, v interface{}) error {
-		var err error
-		replayInput, err = strconv.ParseFloat(v.(string), 64)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
-		return nil
-	}
-	trial := func(context context.Context) (interface{}, error) {
-		trialOutput = 4.3
-		return trialOutput, nil
-	}
-
-	var ctx context.Context
-	var executeConfig ExecuteConfig
-	{
-		ctx = context.Background()
-		ctx = transactionid.NewContext(ctx, "test-transaction-id")
-
-		executeConfig = newExecuter.ExecuteConfig()
-		executeConfig.Replay = replay
-		executeConfig.Trial = trial
-		executeConfig.TrialID = "test-trial-ID"
-	}
-
-	{
-		err := newExecuter.Execute(ctx, executeConfig)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
-
-		if trialOutput != 4.3 {
-			t.Fatal("expected", 4.3, "got", trialOutput)
-		}
-		if replayInput != 0 {
-			t.Fatal("expected", 0, "got", replayInput)
-		}
-	}
-
-	{
-		err := newExecuter.Execute(ctx, executeConfig)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
-
-		if trialOutput != 4.3 {
-			t.Fatal("expected", 4.3, "got", trialOutput)
-		}
-		if replayInput != 4.3 {
-			t.Fatal("expected", 4.3, "got", replayInput)
-		}
-	}
-}
-
-func Test_Executer_TransactionResult_Nil(t *testing.T) {
-	config := DefaultExecuterConfig()
-	newExecuter, err := NewExecuter(config)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	var replayInput interface{}
-
-	replay := func(context context.Context, v interface{}) error {
-		replayInput = v
-		return nil
-	}
-	trial := func(context context.Context) (interface{}, error) {
-		return nil, nil
-	}
-
-	var ctx context.Context
-	var executeConfig ExecuteConfig
-	{
-		ctx = context.Background()
-		ctx = transactionid.NewContext(ctx, "test-transaction-id")
-
-		executeConfig = newExecuter.ExecuteConfig()
-		executeConfig.Replay = replay
-		executeConfig.Trial = trial
-		executeConfig.TrialID = "test-trial-ID"
-	}
-
-	{
-		err := newExecuter.Execute(ctx, executeConfig)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
-
 		if replayInput != nil {
-			t.Fatal("expected", nil, "got", replayInput)
+			t.Errorf("#%d: want %#v, got %#v", i, nil, replayInput)
+			continue
 		}
-	}
 
-	{
-		err := newExecuter.Execute(ctx, executeConfig)
+		err = newExecuter.Execute(ctx, executeConfig)
 		if err != nil {
-			t.Fatal("expected", nil, "got", err)
+			t.Errorf("#%d: want nil, got %#v", i, err)
+			continue
 		}
-
-		if replayInput != nil {
-			t.Fatal("expected", nil, "got", replayInput)
-		}
-	}
-}
-
-func Test_Executer_TransactionResult_String(t *testing.T) {
-	config := DefaultExecuterConfig()
-	newExecuter, err := NewExecuter(config)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	var trialOutput string
-	var replayInput string
-
-	replay := func(context context.Context, v interface{}) error {
-		replayInput = v.(string)
-		return nil
-	}
-	trial := func(context context.Context) (interface{}, error) {
-		trialOutput = "hello world"
-		return trialOutput, nil
-	}
-
-	var ctx context.Context
-	var executeConfig ExecuteConfig
-	{
-		ctx = context.Background()
-		ctx = transactionid.NewContext(ctx, "test-transaction-id")
-
-		executeConfig = newExecuter.ExecuteConfig()
-		executeConfig.Replay = replay
-		executeConfig.Trial = trial
-		executeConfig.TrialID = "test-trial-ID"
-	}
-
-	{
-		err := newExecuter.Execute(ctx, executeConfig)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
-
-		if trialOutput != "hello world" {
-			t.Fatal("expected", "hello world", "got", trialOutput)
-		}
-		if replayInput != "" {
-			t.Fatal("expected", "", "got", replayInput)
-		}
-	}
-
-	{
-		err := newExecuter.Execute(ctx, executeConfig)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
-
-		if trialOutput != "hello world" {
-			t.Fatal("expected", "hello world", "got", trialOutput)
-		}
-		if replayInput != "hello world" {
-			t.Fatal("expected", "hello world", "got", replayInput)
-		}
-	}
-}
-
-func Test_Executer_TransactionResult_EmptyString(t *testing.T) {
-	config := DefaultExecuterConfig()
-	newExecuter, err := NewExecuter(config)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	var trialOutput string
-	var replayInput string
-
-	replay := func(context context.Context, v interface{}) error {
-		replayInput = v.(string)
-		return nil
-	}
-	trial := func(context context.Context) (interface{}, error) {
-		trialOutput = ""
-		return trialOutput, nil
-	}
-
-	var ctx context.Context
-	var executeConfig ExecuteConfig
-	{
-		ctx = context.Background()
-		ctx = transactionid.NewContext(ctx, "test-transaction-id")
-
-		executeConfig = newExecuter.ExecuteConfig()
-		executeConfig.Replay = replay
-		executeConfig.Trial = trial
-		executeConfig.TrialID = "test-trial-ID"
-	}
-
-	{
-		err := newExecuter.Execute(ctx, executeConfig)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
-
-		if trialOutput != "" {
-			t.Fatal("expected", "", "got", trialOutput)
-		}
-		if replayInput != "" {
-			t.Fatal("expected", "", "got", replayInput)
-		}
-	}
-
-	{
-		err := newExecuter.Execute(ctx, executeConfig)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
-
-		if trialOutput != "" {
-			t.Fatal("expected", "", "got", trialOutput)
-		}
-		if replayInput != "" {
-			t.Fatal("expected", "", "got", replayInput)
-		}
-	}
-}
-
-func Test_Executer_TransactionResult_Struct(t *testing.T) {
-	config := DefaultExecuterConfig()
-	newExecuter, err := NewExecuter(config)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	type testTrialOutput struct {
-		Foo string `json:"foo"`
-		Bar int    `json:"bar"`
-	}
-
-	var trialOutput testTrialOutput
-	var replayInput string
-
-	replay := func(context context.Context, v interface{}) error {
-		replayInput = v.(string)
-		return nil
-	}
-	trial := func(context context.Context) (interface{}, error) {
-		trialOutput = testTrialOutput{Foo: "foo-val", Bar: 43}
-		return trialOutput, nil
-	}
-
-	var ctx context.Context
-	var executeConfig ExecuteConfig
-	{
-		ctx = context.Background()
-		ctx = transactionid.NewContext(ctx, "test-transaction-id")
-
-		executeConfig = newExecuter.ExecuteConfig()
-		executeConfig.Replay = replay
-		executeConfig.Trial = trial
-		executeConfig.TrialID = "test-trial-ID"
-	}
-
-	{
-		err := newExecuter.Execute(ctx, executeConfig)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
-
-		if !reflect.DeepEqual(trialOutput, testTrialOutput{Foo: "foo-val", Bar: 43}) {
-			t.Fatal("expected", testTrialOutput{Foo: "foo-val", Bar: 43}, "got", trialOutput)
-		}
-		if replayInput != "" {
-			t.Fatal("expected", "", "got", replayInput)
-		}
-	}
-
-	{
-		err := newExecuter.Execute(ctx, executeConfig)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
-
-		if !reflect.DeepEqual(trialOutput, testTrialOutput{Foo: "foo-val", Bar: 43}) {
-			t.Fatal("expected", testTrialOutput{Foo: "foo-val", Bar: 43}, "got", trialOutput)
-		}
-		if replayInput != "{\"foo\":\"foo-val\",\"bar\":43}" {
-			t.Fatal("expected", "{\"foo\":\"foo-val\",\"bar\":43}", "got", replayInput)
+		if !reflect.DeepEqual(tc.WantReplayInput, replayInput) {
+			t.Errorf("#%d: want %#v, got %#v", i, tc.TrialOutput, replayInput)
+			continue
 		}
 	}
 }

@@ -1,12 +1,13 @@
 package server
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
-	"golang.org/x/net/context"
+	"github.com/giantswarm/micrologger/microloggertest"
 )
 
 func Test_Transaction_IDFormat(t *testing.T) {
@@ -64,7 +65,9 @@ func Test_Transaction_NoIDGiven(t *testing.T) {
 	e := testNewEndpoint(t)
 
 	config := DefaultConfig()
+	config.Logger = microloggertest.New()
 	config.Endpoints = []Endpoint{e}
+	config.TransactionResponder = testNewTransactionResponder(t)
 	newServer, err := New(config)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -144,7 +147,9 @@ func Test_Transaction_IDGiven(t *testing.T) {
 	e := testNewEndpoint(t)
 
 	config := DefaultConfig()
+	config.Logger = microloggertest.New()
 	config.Endpoints = []Endpoint{e}
+	config.TransactionResponder = testNewTransactionResponder(t)
 	newServer, err := New(config)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -228,7 +233,9 @@ func Test_Transaction_InvalidIDGiven(t *testing.T) {
 	e := testNewEndpoint(t)
 
 	config := DefaultConfig()
+	config.Logger = microloggertest.New()
 	config.Endpoints = []Endpoint{e}
+	config.TransactionResponder = testNewTransactionResponder(t)
 	config.ErrorEncoder = func(ctx context.Context, serverError error, w http.ResponseWriter) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -257,7 +264,7 @@ func Test_Transaction_InvalidIDGiven(t *testing.T) {
 			t.Fatal("expected", http.StatusInternalServerError, "got", w.Code)
 		}
 
-		if !strings.Contains(w.Body.String(), "invalid transaction ID: does not match") {
+		if !strings.Contains(w.Body.String(), "does not match") {
 			t.Fatal("expected", "invalid transaction ID: does not match", "got", w.Body.String())
 		}
 	}
