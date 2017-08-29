@@ -632,6 +632,22 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get VPC ID: '%#v'", err))
 	}
 
+	// Create VPC peering connection.
+	var vpcPeeringConection resources.ResourceWithID
+	vpcPeeringConection = &awsresources.VPCPeeringConnection{
+		VPCId:     vpcID,
+		PeerVPCId: cluster.Spec.AWS.VPC.PeerID,
+	}
+	vpcPeeringConnectionCreated, err := vpcPeeringConection.CreateIfNotExists()
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create vpc peering connection: '%#v'", err))
+	}
+	if vpcPeeringConnectionCreated {
+		s.logger.Log("info", fmt.Sprintf("created vpc peering connection for cluster '%s'", key.ClusterID(cluster)))
+	} else {
+		s.logger.Log("info", fmt.Sprintf("vpc peering connection for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
+	}
+
 	// Create gateway.
 	var gateway resources.ResourceWithID
 	gateway = &awsresources.Gateway{

@@ -14,17 +14,18 @@ const (
 type resourceType string
 
 const (
-	CloudFormationStackType resourceType = "cloud formation stack"
-	ELBType                 resourceType = "elb"
-	HostedZoneType          resourceType = "hosted zone"
-	GatewayType             resourceType = "gateway"
-	InstanceType            resourceType = "instance"
-	LaunchConfigurationType resourceType = "launch configuration"
-	RouteTableType          resourceType = "route table"
-	RouteType               resourceType = "route"
-	SecurityGroupType       resourceType = "security group"
-	SubnetType              resourceType = "subnet"
-	VPCType                 resourceType = "vpc"
+	CloudFormationStackType  resourceType = "cloud formation stack"
+	ELBType                  resourceType = "elb"
+	HostedZoneType           resourceType = "hosted zone"
+	GatewayType              resourceType = "gateway"
+	InstanceType             resourceType = "instance"
+	LaunchConfigurationType  resourceType = "launch configuration"
+	RouteTableType           resourceType = "route table"
+	RouteType                resourceType = "route"
+	SecurityGroupType        resourceType = "security group"
+	SubnetType               resourceType = "subnet"
+	VPCType                  resourceType = "vpc"
+	VPCPeeringConnectionType resourceType = "vpc peering connection"
 )
 
 // NotFound errors.
