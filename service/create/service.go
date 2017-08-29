@@ -637,6 +637,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	vpcPeeringConection = &awsresources.VPCPeeringConnection{
 		VPCId:     vpcID,
 		PeerVPCId: cluster.Spec.AWS.VPC.PeerID,
+		AWSEntity: awsresources.AWSEntity{Clients: clients},
 	}
 	vpcPeeringConnectionCreated, err := vpcPeeringConection.CreateIfNotExists()
 	if err != nil {
