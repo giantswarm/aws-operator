@@ -1,8 +1,6 @@
 package aws
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
@@ -21,13 +19,6 @@ type VPCPeeringConnection struct {
 }
 
 func (v VPCPeeringConnection) findExisting() (*ec2.VpcPeeringConnection, error) {
-	fmt.Printf("v: %v\n", v)
-	fmt.Printf("v.Clients: %v\n", v.Clients)
-	fmt.Printf("v.Clients.EC2: %v\n", v.Clients.EC2)
-	fmt.Printf("v.Clients.EC2.DescribeVPCP etc.: %v\n", v.Clients.EC2.DescribeVpcPeeringConnections)
-	fmt.Printf("v.VPCId: %v\n", v.VPCId)
-	fmt.Printf("v.PeerVPCId: %v\n", v.PeerVPCId)
-
 	vpcPeeringConnections, err := v.Clients.EC2.DescribeVpcPeeringConnections(
 		&ec2.DescribeVpcPeeringConnectionsInput{
 			Filters: []*ec2.Filter{
