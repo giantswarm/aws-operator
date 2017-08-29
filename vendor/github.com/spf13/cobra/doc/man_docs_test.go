@@ -4,14 +4,15 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/spf13/cobra"
 )
+
+var _ = fmt.Println
+var _ = os.Stderr
 
 func translate(in string) string {
 	return strings.Replace(in, "-", "\\-", -1)
@@ -128,45 +129,6 @@ func TestGenManSeeAlso(t *testing.T) {
 	}
 }
 
-func TestManPrintFlagsHidesShortDeperecated(t *testing.T) {
-	cmd := &cobra.Command{}
-	flags := cmd.Flags()
-	flags.StringP("foo", "f", "default", "Foo flag")
-	flags.MarkShorthandDeprecated("foo", "don't use it no more")
-
-	out := new(bytes.Buffer)
-	manPrintFlags(out, flags)
-
-	expected := "**--foo**=\"default\"\n\tFoo flag\n\n"
-	if out.String() != expected {
-		t.Fatalf("Expected %s, but got %s", expected, out.String())
-	}
-}
-
-func TestGenManTree(t *testing.T) {
-	cmd := &cobra.Command{
-		Use: "do [OPTIONS] arg1 arg2",
-	}
-	header := &GenManHeader{Section: "2"}
-	tmpdir, err := ioutil.TempDir("", "test-gen-man-tree")
-	if err != nil {
-		t.Fatalf("Failed to create tmpdir: %s", err.Error())
-	}
-	defer os.RemoveAll(tmpdir)
-
-	if err := GenManTree(cmd, header, tmpdir); err != nil {
-		t.Fatalf("GenManTree failed: %s", err.Error())
-	}
-
-	if _, err := os.Stat(filepath.Join(tmpdir, "do.2")); err != nil {
-		t.Fatalf("Expected file 'do.2' to exist")
-	}
-
-	if header.Title != "" {
-		t.Fatalf("Expected header.Title to be unmodified")
-	}
-}
-
 func AssertLineFound(scanner *bufio.Scanner, expectedLine string) error {
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -196,21 +158,4 @@ func AssertNextLineEquals(scanner *bufio.Scanner, expectedLine string) error {
 	}
 
 	return fmt.Errorf("AssertNextLineEquals: hit EOF before finding %#v", expectedLine)
-}
-
-func BenchmarkGenManToFile(b *testing.B) {
-	c := initializeWithRootCmd()
-	file, err := ioutil.TempFile("", "")
-	if err != nil {
-		b.Fatal(err)
-	}
-	defer os.Remove(file.Name())
-	defer file.Close()
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		if err := GenMan(c, nil, file); err != nil {
-			b.Fatal(err)
-		}
-	}
 }

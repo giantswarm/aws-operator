@@ -3,7 +3,8 @@ package validator
 import (
 	"fmt"
 
-	"github.com/giantswarm/microerror"
+	microerror "github.com/giantswarm/microkit/error"
+	"github.com/juju/errgo"
 )
 
 // UnknownAttributeError indicates there was an error due to unknown attributes
@@ -26,7 +27,7 @@ func (e UnknownAttributeError) Error() string {
 
 // IsUnknownAttribute asserts UnknownAttributeError.
 func IsUnknownAttribute(err error) bool {
-	_, ok := microerror.Cause(err).(UnknownAttributeError)
+	_, ok := errgo.Cause(err).(UnknownAttributeError)
 	return ok
 }
 
@@ -35,7 +36,7 @@ func IsUnknownAttribute(err error) bool {
 // type UnknownAttributeError. Therefore IsUnknownAttribute should always be
 // used to verify the safe execution of ToUnknownAttribute beforehand.
 func ToUnknownAttribute(err error) UnknownAttributeError {
-	return microerror.Cause(err).(UnknownAttributeError)
+	return errgo.Cause(err).(UnknownAttributeError)
 }
 
 // UnknownAttribute takes an arbitrary map and a map obtaining some expected
@@ -64,7 +65,7 @@ func UnknownAttribute(received, expected map[string]interface{}) error {
 			message:   fmt.Sprintf("unknown attribute: %s", r),
 		}
 
-		return microerror.Mask(err)
+		return microerror.MaskAny(err)
 	}
 
 	return nil

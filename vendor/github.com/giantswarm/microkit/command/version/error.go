@@ -1,12 +1,12 @@
 package version
 
 import (
-	"github.com/giantswarm/microerror"
+	"github.com/juju/errgo"
 )
 
-var invalidConfigError = microerror.New("invalid config")
+var invalidConfigError = errgo.New("invalid config")
 
 // IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
-	return microerror.Cause(err) == invalidConfigError
+	return errgo.Cause(err) == invalidConfigError
 }

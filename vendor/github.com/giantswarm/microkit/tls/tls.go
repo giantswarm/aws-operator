@@ -6,7 +6,7 @@ import (
 	"encoding/pem"
 	"io/ioutil"
 
-	"github.com/giantswarm/microerror"
+	microerror "github.com/giantswarm/microkit/error"
 )
 
 type CertFiles struct {
@@ -33,17 +33,17 @@ func LoadTLSConfig(files CertFiles) (*tls.Config, error) {
 	if loadCert {
 		cert, err := ioutil.ReadFile(files.Cert)
 		if err != nil {
-			return nil, microerror.Mask(err)
+			return nil, microerror.MaskAny(err)
 		}
 
 		key, err := ioutil.ReadFile(files.Key)
 		if err != nil {
-			return nil, microerror.Mask(err)
+			return nil, microerror.MaskAny(err)
 		}
 
 		certificate, err = tls.X509KeyPair(cert, key)
 		if err != nil {
-			return nil, microerror.Mask(err)
+			return nil, microerror.MaskAny(err)
 		}
 	}
 
@@ -54,7 +54,7 @@ func LoadTLSConfig(files CertFiles) (*tls.Config, error) {
 		for _, caFile := range files.RootCAs {
 			pemByte, err := ioutil.ReadFile(caFile)
 			if err != nil {
-				return nil, microerror.Mask(err)
+				return nil, microerror.MaskAny(err)
 			}
 
 			for {
@@ -65,7 +65,7 @@ func LoadTLSConfig(files CertFiles) (*tls.Config, error) {
 				}
 				cert, err := x509.ParseCertificate(block.Bytes)
 				if err != nil {
-					return nil, microerror.Mask(err)
+					return nil, microerror.MaskAny(err)
 				}
 				rootCAs.AddCert(cert)
 			}

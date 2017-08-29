@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/giantswarm/microerror"
+	microerror "github.com/giantswarm/microkit/error"
+	"github.com/juju/errgo"
 )
 
 // ImmutableAttributeError indicates a data structure is invalid because it
@@ -27,7 +28,7 @@ func (e ImmutableAttributeError) Error() string {
 
 // IsImmutableAttributeError lets you check if an error is an ImmutableAttributeError.
 func IsImmutableAttributeError(err error) bool {
-	_, ok := microerror.Cause(err).(ImmutableAttributeError)
+	_, ok := errgo.Cause(err).(ImmutableAttributeError)
 	return ok
 }
 
@@ -35,7 +36,7 @@ func IsImmutableAttributeError(err error) bool {
 // returns it. ToImmutableAttributeError will panic in case the underlying error is not of
 // type ToImmutableAttributeError. Use IsImmutableAttributeError before calling ToImmutableAttributeError.
 func ToImmutableAttributeError(err error) ImmutableAttributeError {
-	return microerror.Cause(err).(ImmutableAttributeError)
+	return errgo.Cause(err).(ImmutableAttributeError)
 }
 
 // ValidateImmutableAttribute takes an arbitrary map and a map obtaining some expected
@@ -69,7 +70,7 @@ func ValidateImmutableAttribute(received, blacklist map[string]interface{}) erro
 				message:   fmt.Sprintf("attribute '%s' is immutable, you are not allowed to change it", blacklistedKey),
 			}
 
-			return microerror.Mask(err)
+			return microerror.MaskAny(err)
 		}
 
 	}

@@ -2,8 +2,9 @@ package transaction
 
 import (
 	"bytes"
-	"context"
 	"net/http"
+
+	"golang.org/x/net/context"
 )
 
 // ExecuteConfig is used to configure the Executer.

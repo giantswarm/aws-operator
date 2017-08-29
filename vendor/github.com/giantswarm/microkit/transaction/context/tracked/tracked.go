@@ -3,7 +3,7 @@
 package tracked
 
 import (
-	"context"
+	"golang.org/x/net/context"
 )
 
 // key is an unexported type for keys defined in this package. This prevents

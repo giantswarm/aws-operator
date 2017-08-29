@@ -1,33 +1,33 @@
 package transaction
 
 import (
-	"github.com/giantswarm/microerror"
+	"github.com/juju/errgo"
 )
 
-var alreadyExistsError = microerror.New("already exists")
+var alreadyExistsError = errgo.New("already exists")
 
 // IsAlreadyExists asserts alreadyExistsError.
 func IsAlreadyExists(err error) bool {
-	return microerror.Cause(err) == alreadyExistsError
+	return errgo.Cause(err) == alreadyExistsError
 }
 
-var invalidConfigError = microerror.New("invalid config")
+var invalidConfigError = errgo.New("invalid config")
 
 // IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
-	return microerror.Cause(err) == invalidConfigError
+	return errgo.Cause(err) == invalidConfigError
 }
 
-var invalidExecutionError = microerror.New("invalid execution")
+var invalidExecutionError = errgo.New("invalid execution")
 
 // IsInvalidExecution asserts invalidExecutionError.
 func IsInvalidExecution(err error) bool {
-	return microerror.Cause(err) == invalidExecutionError
+	return errgo.Cause(err) == invalidExecutionError
 }
 
-var notFoundError = microerror.New("not found")
+var notFoundError = errgo.New("not found")
 
 // IsNotFound asserts notFoundError.
 func IsNotFound(err error) bool {
-	return microerror.Cause(err) == notFoundError
+	return errgo.Cause(err) == notFoundError
 }

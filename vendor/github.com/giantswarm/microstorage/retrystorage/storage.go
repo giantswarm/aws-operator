@@ -91,39 +91,23 @@ func New(config Config) (*Storage, error) {
 	return s, nil
 }
 
-func (s *Storage) Create(ctx context.Context, key, value string) error {
+func (s *Storage) Put(ctx context.Context, kv microstorage.KV) error {
 	b := s.newBackOffFunc()
 	op := func() error {
-		err := s.underlying.Create(ctx, key, value)
+		err := s.underlying.Put(ctx, kv)
 		if microstorage.IsInvalidKey(err) || microstorage.IsNotFound(err) {
 			return backoff.Permanent(err)
 		}
 		return err
 	}
 	notify := func(err error, delay time.Duration) {
-		s.logger.Log("warning", "retrying", "op", "create", "key", key, "delay", delay, "err", fmt.Sprintf("%#v", err))
+		s.logger.Log("warning", "retrying", "op", "put", "key", kv.Key, "delay", delay, "err", fmt.Sprintf("%#v", err))
 	}
 	err := backoff.RetryNotify(op, b, notify)
 	return microerror.Mask(err)
 }
 
-func (s *Storage) Put(ctx context.Context, key, value string) error {
-	b := s.newBackOffFunc()
-	op := func() error {
-		err := s.underlying.Put(ctx, key, value)
-		if microstorage.IsInvalidKey(err) || microstorage.IsNotFound(err) {
-			return backoff.Permanent(err)
-		}
-		return err
-	}
-	notify := func(err error, delay time.Duration) {
-		s.logger.Log("warning", "retrying", "op", "put", "key", key, "delay", delay, "err", fmt.Sprintf("%#v", err))
-	}
-	err := backoff.RetryNotify(op, b, notify)
-	return microerror.Mask(err)
-}
-
-func (s *Storage) Delete(ctx context.Context, key string) error {
+func (s *Storage) Delete(ctx context.Context, key microstorage.K) error {
 	b := s.newBackOffFunc()
 	op := func() error {
 		err := s.underlying.Delete(ctx, key)
@@ -139,7 +123,7 @@ func (s *Storage) Delete(ctx context.Context, key string) error {
 	return microerror.Mask(err)
 }
 
-func (s *Storage) Exists(ctx context.Context, key string) (bool, error) {
+func (s *Storage) Exists(ctx context.Context, key microstorage.K) (bool, error) {
 	b := s.newBackOffFunc()
 	var exists bool
 	op := func() error {
@@ -157,9 +141,9 @@ func (s *Storage) Exists(ctx context.Context, key string) (bool, error) {
 	return exists, microerror.Mask(err)
 }
 
-func (s *Storage) List(ctx context.Context, key string) ([]string, error) {
+func (s *Storage) List(ctx context.Context, key microstorage.K) ([]microstorage.KV, error) {
 	b := s.newBackOffFunc()
-	var list []string
+	var list []microstorage.KV
 	op := func() error {
 		var err error
 		list, err = s.underlying.List(ctx, key)
@@ -175,9 +159,9 @@ func (s *Storage) List(ctx context.Context, key string) ([]string, error) {
 	return list, microerror.Mask(err)
 }
 
-func (s *Storage) Search(ctx context.Context, key string) (string, error) {
+func (s *Storage) Search(ctx context.Context, key microstorage.K) (microstorage.KV, error) {
 	b := s.newBackOffFunc()
-	var value string
+	var value microstorage.KV
 	op := func() error {
 		var err error
 		value, err = s.underlying.Search(ctx, key)

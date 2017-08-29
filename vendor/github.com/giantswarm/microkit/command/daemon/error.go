@@ -1,19 +1,19 @@
 package daemon
 
 import (
-	"github.com/giantswarm/microerror"
+	"github.com/juju/errgo"
 )
 
-var invalidConfigError = microerror.New("invalid config")
+var invalidConfigError = errgo.New("invalid config")
 
 // IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
-	return microerror.Cause(err) == invalidConfigError
+	return errgo.Cause(err) == invalidConfigError
 }
 
-var invalidFlagError = microerror.New("invalid flag")
+var invalidFlagError = errgo.New("invalid flag")
 
 // IsInvalidFlag asserts invalidFlagError.
 func IsInvalidFlag(err error) bool {
-	return microerror.Cause(err) == invalidFlagError
+	return errgo.Cause(err) == invalidFlagError
 }

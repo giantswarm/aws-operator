@@ -136,7 +136,7 @@ write_files:
                   value: "ACCEPT"
                 # Configure the IP Pool from which Pod IPs will be chosen.
                 - name: CALICO_IPV4POOL_CIDR
-                  value: "{{.Cluster.Calico.Subnet}}/{{.Cluster.Calico.CIDR}}"
+                  value: "192.168.0.0/16"
                 - name: CALICO_IPV4POOL_IPIP
                   value: "always"
                 # Disable IPv6 on Kubernetes.
@@ -655,6 +655,7 @@ write_files:
                         values:
                         - nginx-ingress-controller
                   topologyKey: kubernetes.io/hostname
+          serviceAccountName: nginx-ingress-controller
           containers:
           - name: nginx-ingress-controller
             image: {{.Cluster.Kubernetes.IngressController.Docker.Image}}
@@ -714,6 +715,378 @@ write_files:
         targetPort: 443
       selector:
         k8s-app: nginx-ingress-controller
+- path: /srv/rbac_bindings.yaml
+  owner: root
+  permissions: 0644
+  content: |
+    ## User
+    kind: ClusterRoleBinding
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    metadata:
+      name: giantswarm-admin
+    subjects:
+    - kind: User
+      name: {{.Cluster.Kubernetes.API.Domain}}
+      apiGroup: rbac.authorization.k8s.io
+    roleRef:
+      kind: ClusterRole
+      name: cluster-admin
+      apiGroup: rbac.authorization.k8s.io
+    ---
+    ## Worker
+    kind: ClusterRoleBinding
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    metadata:
+      name: kubelet
+    subjects:
+    - kind: User
+      name: {{.Cluster.Kubernetes.Kubelet.Domain}}
+      apiGroup: rbac.authorization.k8s.io
+    roleRef:
+      kind: ClusterRole
+      name: system:node
+      apiGroup: rbac.authorization.k8s.io
+    ---
+    kind: ClusterRoleBinding
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    metadata:
+      name: proxy
+    subjects:
+    - kind: User
+      name: {{.Cluster.Kubernetes.Kubelet.Domain}}
+      apiGroup: rbac.authorization.k8s.io
+    roleRef:
+      kind: ClusterRole
+      name: system:node-proxier
+      apiGroup: rbac.authorization.k8s.io
+    ---
+    ## Master
+    kind: ClusterRoleBinding
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    metadata:
+      name: kube-controller-manager
+    subjects:
+    - kind: User
+      name: {{.Cluster.Kubernetes.API.Domain}}
+      apiGroup: rbac.authorization.k8s.io
+    roleRef:
+      kind: ClusterRole
+      name: system:kube-controller-manager
+      apiGroup: rbac.authorization.k8s.io
+    ---
+    kind: ClusterRoleBinding
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    metadata:
+      name: kube-scheduler
+    subjects:
+    - kind: User
+      name: {{.Cluster.Kubernetes.API.Domain}}
+      apiGroup: rbac.authorization.k8s.io
+    roleRef:
+      kind: ClusterRole
+      name: system:kube-scheduler
+      apiGroup: rbac.authorization.k8s.io
+    ---
+    ## Calico
+    kind: ClusterRoleBinding
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    metadata:
+      name: calico-policy-controller
+    subjects:
+    - kind: ServiceAccount
+      name: calico-policy-controller
+      namespace: kube-system
+    roleRef:
+      kind: ClusterRole
+      name: calico-policy-controller
+      apiGroup: rbac.authorization.k8s.io
+    ---
+    kind: ClusterRoleBinding
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    metadata:
+      name: calico-node
+    subjects:
+    - kind: ServiceAccount
+      name: calico-node
+      namespace: kube-system
+    roleRef:
+      kind: ClusterRole
+      name: calico-node
+      apiGroup: rbac.authorization.k8s.io
+    ---
+    ## DNS
+    kind: ClusterRoleBinding
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    metadata:
+      name: kube-dns
+    subjects:
+    - kind: ServiceAccount
+      name: kube-dns
+      namespace: kube-system
+    roleRef:
+      kind: ClusterRole
+      name: system:kube-dns
+      apiGroup: rbac.authorization.k8s.io
+    ---
+    ## IC
+    kind: ClusterRoleBinding
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    metadata:
+      name: nginx-ingress-controller
+    subjects:
+    - kind: ServiceAccount
+      name: nginx-ingress-controller
+      namespace: kube-system
+    roleRef:
+      kind: ClusterRole
+      name: nginx-ingress-controller
+      apiGroup: rbac.authorization.k8s.io
+    ---
+    kind: RoleBinding
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    metadata:
+      name: nginx-ingress-controller
+      namespace: kube-system
+    subjects:
+    - kind: ServiceAccount
+      name: nginx-ingress-controller
+      namespace: kube-system
+    roleRef:
+      kind: Role
+      name: nginx-ingress-role
+      apiGroup: rbac.authorization.k8s.io
+- path: /srv/rbac_roles.yaml
+  owner: root
+  permissions: 0644
+  content: |
+    ## Calico
+    kind: ClusterRole
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    metadata:
+      name: calico-policy-controller
+      namespace: kube-system
+    rules:
+      - apiGroups:
+        - ""
+        - extensions
+        resources:
+          - pods
+          - namespaces
+          - networkpolicies
+        verbs:
+          - watch
+          - list
+    ---
+    kind: ClusterRole
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    metadata:
+      name: calico-node
+      namespace: kube-system
+    rules:
+      - apiGroups: [""]
+        resources:
+          - pods
+          - nodes
+        verbs:
+          - get
+    ---
+    ## IC
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: nginx-ingress-controller
+      namespace: kube-system
+    ---
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    kind: ClusterRole
+    metadata:
+      name: nginx-ingress-controller
+      namespace: kube-system
+    rules:
+      - apiGroups:
+          - ""
+        resources:
+          - configmaps
+          - endpoints
+          - nodes
+          - pods
+          - secrets
+        verbs:
+          - list
+          - watch
+      - apiGroups:
+          - ""
+        resources:
+          - nodes
+        verbs:
+          - get
+      - apiGroups:
+          - ""
+        resources:
+          - services
+        verbs:
+          - get
+          - list
+          - watch
+      - apiGroups:
+          - "extensions"
+        resources:
+          - ingresses
+        verbs:
+          - get
+          - list
+          - watch
+      - apiGroups:
+          - ""
+        resources:
+            - events
+        verbs:
+            - create
+            - patch
+      - apiGroups:
+          - "extensions"
+        resources:
+          - ingresses/status
+        verbs:
+          - update
+    ---
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    kind: Role
+    metadata:
+      name: nginx-ingress-role
+      namespace: kube-system
+    rules:
+      - apiGroups:
+          - ""
+        resources:
+          - configmaps
+          - pods
+          - secrets
+          - namespaces
+        verbs:
+          - get
+      - apiGroups:
+          - ""
+        resources:
+          - configmaps
+        resourceNames:
+          # Defaults to "<election-id>-<ingress-class>"
+          # Here: "<ingress-controller-leader>-<nginx>"
+          # This has to be adapted if you change either parameter
+          # when launching the nginx-ingress-controller.
+          - "ingress-controller-leader-nginx"
+        verbs:
+          - get
+          - update
+      - apiGroups:
+          - ""
+        resources:
+          - configmaps
+        verbs:
+          - create
+      - apiGroups:
+          - ""
+        resources:
+          - endpoints
+        verbs:
+          - get
+          - create
+          - update
+- path: /srv/psp_policies.yaml
+  owner: root
+  permissions: 0644
+  content: |
+    apiVersion: extensions/v1beta1
+    kind: PodSecurityPolicy
+    metadata:
+      name: privileged
+    spec:
+      fsGroup:
+        rule: RunAsAny
+      privileged: true
+      runAsUser:
+        rule: RunAsAny
+      seLinux:
+        rule: RunAsAny
+      supplementalGroups:
+        rule: RunAsAny
+      volumes:
+      - '*'
+    ---
+    apiVersion: extensions/v1beta1
+    kind: PodSecurityPolicy
+    metadata:
+      name: restricted
+    spec:
+      privileged: false
+      fsGroup:
+        rule: RunAsAny
+      runAsUser:
+        rule: MustRunAsNonRoot
+      seLinux:
+        rule: RunAsAny
+      supplementalGroups:
+        rule: RunAsAny
+      volumes:
+      - 'emptyDir'
+      - 'secret'
+      - 'downwardAPI'
+      - 'configMap'
+      - 'persistentVolumeClaim'
+      - 'projected'
+- path: /srv/psp_roles.yaml
+  owner: root
+  permissions: 0644
+  content: |
+    # restrictedPSP grants access to use
+    # the restricted PSP.
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    kind: ClusterRole
+    metadata:
+      name: restricted-psp-user
+    rules: 
+    - apiGroups:
+      - extensions
+      resources:
+      - podsecuritypolicies
+      resourceNames:
+      - restricted
+      verbs:
+      - use
+    ---
+    # privilegedPSP grants access to use the privileged
+    # PSP.
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    kind: ClusterRole
+    metadata:
+      name: privileged-psp-user
+    rules: 
+    - apiGroups:
+      - extensions
+      resources:
+      - podsecuritypolicies
+      resourceNames:
+      - privileged
+      verbs:
+      - use
+- path: /srv/psp_binding.yaml
+  owner: root
+  permissions: 0644
+  content: |
+    # grants the restricted PSP role to
+    # the all authenticated users.
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    kind: ClusterRoleBinding
+    metadata:
+        name: restricted-psp-users
+    subjects:
+    - kind: Group
+      apiGroup: rbac.authorization.k8s.io
+      name: system:authenticated
+    roleRef:
+       apiGroup: rbac.authorization.k8s.io
+       kind: ClusterRole
+       name: restricted-psp-user
 - path: /opt/wait-for-domains
   permissions: 0544
   content: |
@@ -738,6 +1111,20 @@ write_files:
 
       # wait for healthy master
       while [ "$(/usr/bin/docker run --net=host --rm $KUBECTL get cs | grep Healthy | wc -l)" -ne "3" ]; do sleep 1 && echo 'Waiting for healthy k8s'; done
+
+      # apply Security bootstrap (RBAC and PSP)
+      SECURITY_FILES="rbac_bindings.yaml rbac_roles.yaml psp_policies.yaml psp_roles.yaml psp_binding.yaml"
+
+      for manifest in $SECURITY_FILES
+      do
+          while
+              /usr/bin/docker run --net=host --rm -v /srv:/srv $KUBECTL apply -f /srv/$manifest
+              [ "$?" -ne "0" ]
+          do
+              echo "failed to apply /src/$manifest, retrying in 5 sec"
+              sleep 5s
+          done
+      done
 
       # apply calico CNI
       CALICO_FILES="calico-configmap.yaml calico-node-sa.yaml calico-policy-controller-sa.yaml calico-ds.yaml calico-policy-controller.yaml"
@@ -1177,7 +1564,8 @@ coreos:
       --profiling=false \
       --repair-malformed-updates=false \
       --service-account-lookup=true \
-      --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,DefaultStorageClass \
+      --authorization-mode=RBAC \
+      --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,DefaultStorageClass,PodSecurityPolicy \
       --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
       --service-cluster-ip-range={{.Cluster.Kubernetes.API.ClusterIPRange}} \
       --etcd-servers=https://{{ .Cluster.Etcd.Domain }}:443 \
