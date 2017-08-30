@@ -103,10 +103,28 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var awsHostConfig awsclient.Config
+	{
+		accessKeyID := config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID)
+		accessKeySecret := config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret)
+
+		if accessKeyID == "" && accessKeySecret == "" {
+			config.Logger.Log("debug", "no host cluster account credentials supplied, assuming guest and host uses same account")
+			awsHostConfig = awsConfig
+		} else {
+			config.Logger.Log("debug", "host cluster account credentials supplied, using separate accounts for host and guest clusters")
+			awsHostConfig = awsclient.Config{
+				AccessKeyID:     accessKeyID,
+				AccessKeySecret: accessKeySecret,
+			}
+		}
+	}
+
 	var createService *create.Service
 	{
 		createConfig := create.DefaultConfig()
 		createConfig.AwsConfig = awsConfig
+		createConfig.AwsHostConfig = awsHostConfig
 		createConfig.CertWatcher = certWatcher
 		createConfig.K8sClient = k8sClient
 		createConfig.Logger = config.Logger
