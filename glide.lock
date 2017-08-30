@@ -1,8 +1,8 @@
-hash: 5b100615712487f9c60f65545f793881042f581fe76d54ff0e41ca9e6f2ba143
-updated: 2017-08-25T13:54:03.48317345+01:00
+hash: 06ee105b2f18e6bf9601573678abd215951748fde85a19e408394ba01c87a0a3
+updated: 2017-08-29T10:31:41.117503337+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 33ccdd4c5be4efefcb0152e121fce7bb304ac9d4
+  version: 3afc215b86987d7d465191700aaa8b9628aff380
   subpackages:
   - aws
   - aws/awserr
@@ -65,7 +65,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: fcebfe8fc8711566eda9a1cfc83c30d09c63a0b8
+  version: 4871a090bcc4833b133e81fe6c19c550ce7e5f5d
   subpackages:
   - spec
   - spec/aws
@@ -111,8 +111,10 @@ imports:
   version: 8a69b2ab80ba2d0bd40d609206518fefacfc8fdf
 - name: github.com/giantswarm/microstorage
   version: f5c68d40459f0021cf8266501b7d8615ea4ff641
+  subpackages:
+  - memory
 - name: github.com/giantswarm/operatorkit
-  version: 9c07028f0dd7fa029954f09dd1e1b073b7629bc1
+  version: 7f7b7fea307a52987696f78b6c6ec1b86ab756db
   subpackages:
   - client/k8s
   - tpr
@@ -154,7 +156,7 @@ imports:
 - name: github.com/gorilla/mux
   version: 0eeaf8392f5b04950925b8a69fe70f110fa7cbfc
 - name: github.com/hashicorp/hcl
-  version: 392dba7d905ed5d04a5794ba89f558b27e2ba1ca
+  version: 8f6b1344a92ff8877cf24a5de9177bf7d0a2a187
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -191,7 +193,7 @@ imports:
 - name: github.com/pelletier/go-toml
   version: 9c1b4e331f1e3d98e72600677699fbe212cd6d16
 - name: github.com/prometheus/client_golang
-  version: 94ff84a9a6ebb5e6eb9172897c221a64df3443bc
+  version: 140d476395e553172b6a3dac9866c201c701df10
   subpackages:
   - prometheus
   - prometheus/promhttp
@@ -214,7 +216,7 @@ imports:
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/spf13/afero
-  version: 9be650865eab0c12963d8753212f4f9c66cdcf12
+  version: 36f8810e2e3d7eeac4ac05b57f65690fbfba62a2
   subpackages:
   - mem
 - name: github.com/spf13/cast
@@ -242,6 +244,7 @@ imports:
   version: e90d6d0afc4c315a0d87a568ae68577cc15149a0
   subpackages:
   - context
+  - context/ctxhttp
   - http2
   - http2/hpack
   - idna
@@ -268,7 +271,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
+  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/apimachinery
   version: 85ace5365f33b16fc735c866a12e3c765b9700f2
   subpackages:
