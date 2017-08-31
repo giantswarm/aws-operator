@@ -507,7 +507,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	// Create AWS host cluster client.
 	s.awsHostConfig.Region = cluster.Spec.AWS.Region
 	hostClients := awsutil.NewClients(s.awsHostConfig)
-	if err := s.awsHostConfig.SetAccountID(clients.IAM); err != nil {
+	if err := s.awsHostConfig.SetAccountID(hostClients.IAM); err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not retrieve host amazon account id: '%#v'", err))
 	}
 
