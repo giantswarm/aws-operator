@@ -105,7 +105,13 @@ func (v *VPCPeeringConnection) CreateOrFail() error {
 
 	v.id = *vpcPeeringConnection.VpcPeeringConnection.VpcPeeringConnectionId
 
-	// TODO: Accept VPC peering connection from host cluster.
+	if _, err := v.HostClients.EC2.AcceptVpcPeeringConnection(
+		&ec2.AcceptVpcPeeringConnectionInput{
+			VpcPeeringConnectionId: aws.String(v.id),
+		},
+	); err != nil {
+		return microerror.Mask(err)
+	}
 
 	return nil
 }
