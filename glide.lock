@@ -1,5 +1,5 @@
-hash: 9c12b898af45df4b25fe1aaed02ff1d4dcc41d6f0b87d863ebca4ad19ed52425
-updated: 2017-08-31T11:32:17.263126896+02:00
+hash: 1300922999a1e9e08e3f40173ec143ea422fc82ea53ae15c3cfd75d2d6151af5
+updated: 2017-08-31T17:18:29.047126952+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: ef87157887228a0b98102ace872cd999518453fb
@@ -82,7 +82,7 @@ imports:
   - spec/kubernetes/kubectl
   - spec/kubernetes/networksetup
 - name: github.com/giantswarm/k8scloudconfig
-  version: f341ade48ad7eaa538aaaa6cfbab06b531d3d3bc
+  version: 0a541d7750ff88ee78cf9d82766c8a13be45703e
 - name: github.com/giantswarm/microendpoint
   version: 70547070da4072138bb5161e80a164b0bac075cc
   subpackages:
@@ -193,7 +193,7 @@ imports:
 - name: github.com/pelletier/go-toml
   version: 9c1b4e331f1e3d98e72600677699fbe212cd6d16
 - name: github.com/prometheus/client_golang
-  version: 535f493f5a875ebde111871209251257ef834ad1
+  version: 967789050ba94deca04a5e84cce8ad472ce313c1
   subpackages:
   - prometheus
   - prometheus/promhttp

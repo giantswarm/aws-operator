@@ -897,6 +897,12 @@ write_files:
       name: nginx-ingress-controller
       namespace: kube-system
     ---
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: default-backend
+      namespace: kube-system
+    ---
     apiVersion: rbac.authorization.k8s.io/v1beta1
     kind: ClusterRole
     metadata:
@@ -1089,6 +1095,18 @@ write_files:
     subjects:
     - kind: ServiceAccount
       name: calico-node
+      namespace: kube-system
+    - kind: ServiceAccount
+      name: calico-policy-controller
+      namespace: kube-system
+    - kind: ServiceAccount
+      name: kube-dns
+      namespace: kube-system
+    - kind: ServiceAccount
+      name: nginx-ingress-controller
+      namespace: kube-system
+    - kind: ServiceAccount
+      name: default-backend
       namespace: kube-system
     roleRef:
        apiGroup: rbac.authorization.k8s.io
@@ -1458,7 +1476,6 @@ coreos:
       ExecStartPre=/usr/bin/docker pull $IMAGE
       ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
       ExecStartPre=-/usr/bin/docker rm -f $NAME
-      ExecStartPre=/bin/sh -c "while ! curl --output /dev/null --silent --head --fail --cacert /etc/kubernetes/ssl/apiserver-ca.pem --cert /etc/kubernetes/ssl/apiserver-crt.pem --key /etc/kubernetes/ssl/apiserver-key.pem https://{{.Cluster.Kubernetes.API.Domain}}; do sleep 1 && echo 'Waiting for master'; done"
       ExecStart=/bin/sh -c "/usr/bin/docker run --rm --net=host --privileged=true \
       --name $NAME \
       -v /usr/share/ca-certificates:/etc/ssl/certs \
