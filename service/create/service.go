@@ -500,7 +500,6 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 
 	// Create AWS guest cluster client.
 	s.awsConfig.Region = cluster.Spec.AWS.Region
-	fmt.Println(s.awsConfig.AccessKeyID)
 	clients := awsutil.NewClients(s.awsConfig)
 	if err := s.awsConfig.SetAccountID(clients.IAM); err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not retrieve guest amazon account id: '%#v'", err))
@@ -508,7 +507,6 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 
 	// Create AWS host cluster client.
 	s.awsHostConfig.Region = cluster.Spec.AWS.Region
-	fmt.Println(s.awsHostConfig.AccessKeyID)
 	hostClients := awsutil.NewClients(s.awsHostConfig)
 	if err := s.awsHostConfig.SetAccountID(hostClients.IAM); err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not retrieve host amazon account id: '%#v'", err))
