@@ -133,8 +133,9 @@ func New(config Config) (*Service, error) {
 		tpr:      newTPR,
 
 		// Settings.
-		awsConfig:  config.AwsConfig,
-		pubKeyFile: config.PubKeyFile,
+		awsConfig:     config.AwsConfig,
+		awsHostConfig: config.AwsHostConfig,
+		pubKeyFile:    config.PubKeyFile,
 	}
 
 	return newService, nil
