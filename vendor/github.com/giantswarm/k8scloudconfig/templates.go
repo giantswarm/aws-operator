@@ -894,6 +894,17 @@ write_files:
     ClientAliveCountMax 2
     PasswordAuthentication no
 
+- path: /etc/audit/rules.d/10-docker.rules
+  owner: root
+  permissions: 644
+  content: |
+    -w /usr/bin/docker -k docker
+    -w /var/lib/docker -k docker
+    -w /etc/docker -k docker
+    -w docker.service.d/10-giantswarm-extra-args.conf -k docker
+    -w docker.service.d/01-wait-docker.conf -k docker
+                
+
 {{range .Extension.Files}}
 - path: {{.Metadata.Path}}
   owner: {{.Metadata.Owner}}
@@ -1302,6 +1313,9 @@ coreos:
 
       [Install]
       WantedBy=multi-user.target
+    - name: audit-rules.service
+      enable: true
+      command: start
   update:
     reboot-strategy: off
 
@@ -1388,6 +1402,16 @@ write_files:
     ClientAliveCountMax 2
     PasswordAuthentication no
 
+- path: /etc/audit/rules.d/10-docker.rules
+  owner: root
+  permissions: 644
+  content: |
+  -w /usr/bin/docker -k docker
+  -w /var/lib/docker -k docker
+  -w /etc/docker -k docker
+  -w docker.service.d/10-giantswarm-extra-args.conf -k docker
+  -w docker.service.d/01-wait-docker.conf -k docker
+  
 {{range .Extension.Files}}
 - path: {{.Metadata.Path}}
   owner: {{.Metadata.Owner}}
@@ -1536,7 +1560,7 @@ coreos:
       -v /usr/lib/os-release:/etc/os-release \
       -v /usr/share/ca-certificates/:/etc/ssl/certs \
       -v /var/lib/docker/:/var/lib/docker:rw \
-      -v /var/lib/kubelet/:/var/lib/kubelet:rw,shared \
+      -v /var/lib/kubelet/:/var/lib/kubelet:rw,rslave \
       -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
       -v /etc/cni/net.d/:/etc/cni/net.d/ \
@@ -1599,6 +1623,9 @@ coreos:
 
       [Install]
       WantedBy=multi-user.target
+    - name: audit-rules.service
+      enable: true
+      command: start
   update:
     reboot-strategy: off
 

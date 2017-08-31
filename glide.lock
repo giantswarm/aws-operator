@@ -1,5 +1,5 @@
-hash: 5b100615712487f9c60f65545f793881042f581fe76d54ff0e41ca9e6f2ba143
-updated: 2017-08-31T16:19:45.329471118+01:00
+hash: 26b20f76c6ee59a134deee6d0121fdb60c090de4d82f08b230a49b5bf8ecb740
+updated: 2017-08-31T17:33:36.001586379+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: ef87157887228a0b98102ace872cd999518453fb
@@ -82,7 +82,7 @@ imports:
   - spec/kubernetes/kubectl
   - spec/kubernetes/networksetup
 - name: github.com/giantswarm/k8scloudconfig
-  version: a33a8562386695466bd8c76e1e4e9727d6dc7e7a
+  version: 25fc70b62f636c783ada2fa2618077408cc273aa
 - name: github.com/giantswarm/microendpoint
   version: 70547070da4072138bb5161e80a164b0bac075cc
   subpackages:
@@ -202,13 +202,13 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: 49fee292b27bfff7f354ee0f64e1bc4850462edf
+  version: bc8b88226a1210b016e9993b1d75f858c9c8f778
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: a1dba9ce8baed984a2495b658c82687f8157b98f
+  version: e645f4e5aaa8506fc71d6edbc5c4ff02c04c46f2
   subpackages:
   - xfs
 - name: github.com/PuerkitoBio/purell
@@ -244,6 +244,7 @@ imports:
   version: e90d6d0afc4c315a0d87a568ae68577cc15149a0
   subpackages:
   - context
+  - context/ctxhttp
   - http2
   - http2/hpack
   - idna
