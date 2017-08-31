@@ -1536,7 +1536,7 @@ coreos:
       -v /usr/lib/os-release:/etc/os-release \
       -v /usr/share/ca-certificates/:/etc/ssl/certs \
       -v /var/lib/docker/:/var/lib/docker:rw \
-      -v /var/lib/kubelet/:/var/lib/kubelet:rw,rslave \
+      -v /var/lib/kubelet/:/var/lib/kubelet:rw,shared \
       -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
       -v /etc/cni/net.d/:/etc/cni/net.d/ \
