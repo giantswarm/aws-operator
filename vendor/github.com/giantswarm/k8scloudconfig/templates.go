@@ -1012,6 +1012,12 @@ write_files:
         rule: RunAsAny
       volumes:
       - '*'
+      hostPID: true
+      hostIPC: true
+      hostNetwork: true
+      hostPorts:
+      - min: 1
+        max: 65536
     ---
     apiVersion: extensions/v1beta1
     kind: PodSecurityPolicy
@@ -1034,6 +1040,9 @@ write_files:
       - 'configMap'
       - 'persistentVolumeClaim'
       - 'projected'
+      hostPID: false
+      hostIPC: false
+      hostNetwork: false
 - path: /srv/psp_roles.yaml
   owner: root
   permissions: 0644
@@ -1073,6 +1082,19 @@ write_files:
   owner: root
   permissions: 0644
   content: |
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    kind: ClusterRoleBinding
+    metadata:
+        name: privileged-psp-users
+    subjects:
+    - kind: ServiceAccount
+      name: calico-node
+      namespace: kube-system
+    roleRef:
+       apiGroup: rbac.authorization.k8s.io
+       kind: ClusterRole
+       name: privileged-psp-user
+    ---
     # grants the restricted PSP role to
     # the all authenticated users.
     apiVersion: rbac.authorization.k8s.io/v1beta1

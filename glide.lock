@@ -1,8 +1,8 @@
-hash: 417554aed717dd96358bb780ee169ef6962d92fed25d8fcf17997adb4a9aeebb
-updated: 2017-08-29T15:56:15.59473055+02:00
+hash: 9c12b898af45df4b25fe1aaed02ff1d4dcc41d6f0b87d863ebca4ad19ed52425
+updated: 2017-08-31T11:32:17.263126896+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 3afc215b86987d7d465191700aaa8b9628aff380
+  version: ef87157887228a0b98102ace872cd999518453fb
   subpackages:
   - aws
   - aws/awserr
@@ -65,7 +65,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: fcebfe8fc8711566eda9a1cfc83c30d09c63a0b8
+  version: 55c4b7293f81bc6507f52f184b6c350f9c35c397
   subpackages:
   - spec
   - spec/aws
@@ -82,7 +82,7 @@ imports:
   - spec/kubernetes/kubectl
   - spec/kubernetes/networksetup
 - name: github.com/giantswarm/k8scloudconfig
-  version: f2ced39bb68bc94384ac0090bda8c323f93f09f3
+  version: f341ade48ad7eaa538aaaa6cfbab06b531d3d3bc
 - name: github.com/giantswarm/microendpoint
   version: 70547070da4072138bb5161e80a164b0bac075cc
   subpackages:
@@ -114,7 +114,7 @@ imports:
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: 8b0b3f255f8411bb7ea5abc0f906452fe85eb985
+  version: 911fad9e4a4fb20e05d16c6e967f7da50fdc3cfc
   subpackages:
   - client/k8s
   - tpr
@@ -193,7 +193,7 @@ imports:
 - name: github.com/pelletier/go-toml
   version: 9c1b4e331f1e3d98e72600677699fbe212cd6d16
 - name: github.com/prometheus/client_golang
-  version: de4d4ffe63b9eff7f27484fdef6e421597e6abb4
+  version: 535f493f5a875ebde111871209251257ef834ad1
   subpackages:
   - prometheus
   - prometheus/promhttp
@@ -202,7 +202,7 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: 61f87aac8082fa8c3c5655c7608d7478d46ac2ad
+  version: bc8b88226a1210b016e9993b1d75f858c9c8f778
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
@@ -222,7 +222,7 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 31694f19adeeaeb0a0e5fe95441b390d757753d2
+  version: 2df9a531813370438a4d79bfc33e21f58063ed87
 - name: github.com/spf13/jwalterweatherman
   version: 0efa5202c04663c757d84f90f5219c1250baf94f
 - name: github.com/spf13/pflag
