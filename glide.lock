@@ -1,8 +1,8 @@
-hash: 06ee105b2f18e6bf9601573678abd215951748fde85a19e408394ba01c87a0a3
-updated: 2017-08-29T10:31:41.117503337+01:00
+hash: 5b100615712487f9c60f65545f793881042f581fe76d54ff0e41ca9e6f2ba143
+updated: 2017-08-31T16:19:45.329471118+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 3afc215b86987d7d465191700aaa8b9628aff380
+  version: ef87157887228a0b98102ace872cd999518453fb
   subpackages:
   - aws
   - aws/awserr
@@ -65,7 +65,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: 4871a090bcc4833b133e81fe6c19c550ce7e5f5d
+  version: 55c4b7293f81bc6507f52f184b6c350f9c35c397
   subpackages:
   - spec
   - spec/aws
@@ -82,7 +82,7 @@ imports:
   - spec/kubernetes/kubectl
   - spec/kubernetes/networksetup
 - name: github.com/giantswarm/k8scloudconfig
-  version: 5ca35a32ac3b782b582be75282450f8f0981c111
+  version: a33a8562386695466bd8c76e1e4e9727d6dc7e7a
 - name: github.com/giantswarm/microendpoint
   version: 70547070da4072138bb5161e80a164b0bac075cc
   subpackages:
@@ -114,7 +114,7 @@ imports:
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: 7f7b7fea307a52987696f78b6c6ec1b86ab756db
+  version: 911fad9e4a4fb20e05d16c6e967f7da50fdc3cfc
   subpackages:
   - client/k8s
   - tpr
@@ -193,7 +193,7 @@ imports:
 - name: github.com/pelletier/go-toml
   version: 9c1b4e331f1e3d98e72600677699fbe212cd6d16
 - name: github.com/prometheus/client_golang
-  version: 140d476395e553172b6a3dac9866c201c701df10
+  version: 967789050ba94deca04a5e84cce8ad472ce313c1
   subpackages:
   - prometheus
   - prometheus/promhttp
@@ -202,13 +202,13 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: 61f87aac8082fa8c3c5655c7608d7478d46ac2ad
+  version: 49fee292b27bfff7f354ee0f64e1bc4850462edf
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: e645f4e5aaa8506fc71d6edbc5c4ff02c04c46f2
+  version: a1dba9ce8baed984a2495b658c82687f8157b98f
   subpackages:
   - xfs
 - name: github.com/PuerkitoBio/purell
@@ -244,7 +244,6 @@ imports:
   version: e90d6d0afc4c315a0d87a568ae68577cc15149a0
   subpackages:
   - context
-  - context/ctxhttp
   - http2
   - http2/hpack
   - idna
@@ -271,7 +270,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
+  version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
 - name: k8s.io/apimachinery
   version: 85ace5365f33b16fc735c866a12e3c765b9700f2
   subpackages:
