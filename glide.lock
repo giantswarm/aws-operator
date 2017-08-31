@@ -1,5 +1,11 @@
+<<<<<<< HEAD
 hash: a24938420ec06d0110d6229584ac19ddfa492c6f61810eb8a1bcd4e29d8ecf4d
 updated: 2017-09-01T17:51:22.929958989+02:00
+=======
+
+hash: 26b20f76c6ee59a134deee6d0121fdb60c090de4d82f08b230a49b5bf8ecb740
+updated: 2017-08-31T17:33:36.001586379+02:00
+>>>>>>> test aws-operator for giantswarm/k8scloudconfig#182
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 44376742d0a0cb0a97c3e472b00fad8d350af166
@@ -83,7 +89,11 @@ imports:
   - spec/kubernetes/networksetup
   - spec/kubernetes/ssh
 - name: github.com/giantswarm/k8scloudconfig
+<<<<<<< HEAD
   version: 792eebd099d3256e021a91a88b290b2fbf63d559
+=======
+  version: 25fc70b62f636c783ada2fa2618077408cc273aa
+>>>>>>> test aws-operator for giantswarm/k8scloudconfig#182
 - name: github.com/giantswarm/microendpoint
   version: f5682d1d6fe0eb963397fb7e0535c1794644efce
   subpackages:
@@ -245,6 +255,7 @@ imports:
   version: e90d6d0afc4c315a0d87a568ae68577cc15149a0
   subpackages:
   - context
+  - context/ctxhttp
   - http2
   - http2/hpack
   - idna
