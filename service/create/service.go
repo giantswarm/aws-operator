@@ -57,8 +57,9 @@ type Config struct {
 	Logger      micrologger.Logger
 
 	// Settings.
-	AwsConfig  awsutil.Config
-	PubKeyFile string
+	AwsConfig     awsutil.Config
+	AwsHostConfig awsutil.Config
+	PubKeyFile    string
 }
 
 // DefaultConfig provides a default configuration to create a new service by
@@ -71,8 +72,9 @@ func DefaultConfig() Config {
 		Logger:      nil,
 
 		// Settings.
-		AwsConfig:  awsutil.Config{},
-		PubKeyFile: "",
+		AwsConfig:     awsutil.Config{},
+		AwsHostConfig: awsutil.Config{},
+		PubKeyFile:    "",
 	}
 }
 
@@ -93,6 +95,9 @@ func New(config Config) (*Service, error) {
 	var emptyAwsConfig awsutil.Config
 	if config.AwsConfig == emptyAwsConfig {
 		return nil, microerror.Maskf(invalidConfigError, "config.AwsConfig must not be empty")
+	}
+	if config.AwsHostConfig == emptyAwsConfig {
+		return nil, microerror.Maskf(invalidConfigError, "config.AwsHostConfig must not be empty")
 	}
 	if config.PubKeyFile == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.PubKeyFile must not be empty")
@@ -147,8 +152,9 @@ type Service struct {
 	tpr      *tpr.TPR
 
 	// Settings.
-	awsConfig  awsutil.Config
-	pubKeyFile string
+	awsConfig     awsutil.Config
+	awsHostConfig awsutil.Config
+	pubKeyFile    string
 }
 
 type Event struct {
@@ -491,13 +497,18 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create cluster namespace: '%#v'", err))
 	}
 
-	// Create AWS client.
+	// Create AWS guest cluster client.
 	s.awsConfig.Region = cluster.Spec.AWS.Region
 	clients := awsutil.NewClients(s.awsConfig)
+	if err := s.awsConfig.SetAccountID(clients.IAM); err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not retrieve guest amazon account id: '%#v'", err))
+	}
 
-	err := s.awsConfig.SetAccountID(clients.IAM)
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not retrieve amazon account id: '%#v'", err))
+	// Create AWS host cluster client.
+	s.awsHostConfig.Region = cluster.Spec.AWS.Region
+	hostClients := awsutil.NewClients(s.awsHostConfig)
+	if err := s.awsHostConfig.SetAccountID(clients.IAM); err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not retrieve host amazon account id: '%#v'", err))
 	}
 
 	// Create keypair.
@@ -637,7 +648,10 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	vpcPeeringConection = &awsresources.VPCPeeringConnection{
 		VPCId:     vpcID,
 		PeerVPCId: cluster.Spec.AWS.VPC.PeerID,
-		AWSEntity: awsresources.AWSEntity{Clients: clients},
+		AWSEntity: awsresources.AWSEntity{
+			Clients:     clients,
+			HostClients: hostClients,
+		},
 	}
 	vpcPeeringConnectionCreated, err := vpcPeeringConection.CreateIfNotExists()
 	if err != nil {
