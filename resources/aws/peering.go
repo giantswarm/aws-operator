@@ -1,14 +1,19 @@
 package aws
 
 import (
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/giantswarm/microerror"
 )
 
 const (
 	RequesterVpcFilterName = "requester-vpc-info.vpc-id"
 	AccepterVpcFilterName  = "accepter-vpc-info.vpc-id"
+
+	accountIDPosition = 4
 )
 
 type VPCPeeringConnection struct {
@@ -79,10 +84,19 @@ func (v *VPCPeeringConnection) CreateIfNotExists() (bool, error) {
 }
 
 func (v *VPCPeeringConnection) CreateOrFail() error {
+	resp, err := v.HostClients.IAM.GetUser(&iam.GetUserInput{})
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	userArn := *resp.User.Arn
+	peerOwnerId := strings.Split(userArn, ":")[accountIDPosition]
+
 	vpcPeeringConnection, err := v.Clients.EC2.CreateVpcPeeringConnection(
 		&ec2.CreateVpcPeeringConnectionInput{
-			VpcId:     &v.VPCId,
-			PeerVpcId: &v.PeerVPCId,
+			PeerOwnerId: &peerOwnerId,
+			VpcId:       &v.VPCId,
+			PeerVpcId:   &v.PeerVPCId,
 		},
 	)
 	if err != nil {
