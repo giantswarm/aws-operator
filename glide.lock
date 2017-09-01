@@ -1,5 +1,5 @@
-hash: 825f2d2fa65e8862d4ca3a07af6ee1bb5642e88f96adfcaaf0c15c9e78af599a
-updated: 2017-09-01T11:43:35.716072211+02:00
+hash: a24938420ec06d0110d6229584ac19ddfa492c6f61810eb8a1bcd4e29d8ecf4d
+updated: 2017-09-01T17:51:22.929958989+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 44376742d0a0cb0a97c3e472b00fad8d350af166
@@ -82,7 +82,7 @@ imports:
   - spec/kubernetes/kubectl
   - spec/kubernetes/networksetup
 - name: github.com/giantswarm/k8scloudconfig
-  version: f65c2c783514ff8a534a4fc49714538bed81f3fb
+  version: 792eebd099d3256e021a91a88b290b2fbf63d559
 - name: github.com/giantswarm/microendpoint
   version: 70547070da4072138bb5161e80a164b0bac075cc
   subpackages:
@@ -222,11 +222,11 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 2df9a531813370438a4d79bfc33e21f58063ed87
+  version: 3c0b56b677e04926dfa835a1b3f11cd4f62f076e
 - name: github.com/spf13/jwalterweatherman
-  version: 0efa5202c04663c757d84f90f5219c1250baf94f
+  version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
 - name: github.com/spf13/pflag
-  version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
+  version: 7aff26db30c1be810f9de5038ec5ef96ac41fd7c
 - name: github.com/spf13/viper
   version: 25b30aa063fc18e48662b86996252eabdcf2f0c7
 - name: github.com/stretchr/testify
