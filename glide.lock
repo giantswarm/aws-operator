@@ -1,8 +1,8 @@
-hash: 1300922999a1e9e08e3f40173ec143ea422fc82ea53ae15c3cfd75d2d6151af5
-updated: 2017-08-31T17:18:29.047126952+02:00
+hash: a8a4b10f883a70673c13813267e6c56e8dba01d9b3ed58fadcd4d09054c59331
+updated: 2017-09-01T11:12:36.567647511+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: ef87157887228a0b98102ace872cd999518453fb
+  version: 44376742d0a0cb0a97c3e472b00fad8d350af166
   subpackages:
   - aws
   - aws/awserr
@@ -82,7 +82,7 @@ imports:
   - spec/kubernetes/kubectl
   - spec/kubernetes/networksetup
 - name: github.com/giantswarm/k8scloudconfig
-  version: 0a541d7750ff88ee78cf9d82766c8a13be45703e
+  version: 4da662cfd0558c2a0f5dc5dd99d7f8c7ade4543f
 - name: github.com/giantswarm/microendpoint
   version: 70547070da4072138bb5161e80a164b0bac075cc
   subpackages:
@@ -216,7 +216,7 @@ imports:
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/spf13/afero
-  version: 36f8810e2e3d7eeac4ac05b57f65690fbfba62a2
+  version: ee1bd8ee15a1306d1f9201acc41ef39cd9f99a1b
   subpackages:
   - mem
 - name: github.com/spf13/cast
