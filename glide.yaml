@@ -27,7 +27,7 @@ import:
 - package: github.com/giantswarm/awstpr
   version: master
 - package: github.com/giantswarm/k8scloudconfig
-  version: 25fc70b62f636c783ada2fa2618077408cc273aa
+  version: f65c2c783514ff8a534a4fc49714538bed81f3fb
 - package: github.com/stretchr/testify
   version: v1.1.4
   repo: git://github.com/stretchr/testify.git

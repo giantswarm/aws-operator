@@ -1313,9 +1313,11 @@ coreos:
 
       [Install]
       WantedBy=multi-user.target
-    - name: audit-rules.service
-      enable: true
-      command: start
+
+  - name: audit-rules.service
+    enable: true
+    command: start
+    
   update:
     reboot-strategy: off
 
@@ -1623,9 +1625,11 @@ coreos:
 
       [Install]
       WantedBy=multi-user.target
-    - name: audit-rules.service
-      enable: true
-      command: start
+
+  - name: audit-rules.service
+    enable: true
+    command: start
+    
   update:
     reboot-strategy: off
 
