@@ -567,7 +567,6 @@ write_files:
           labels:
             k8s-app: default-http-backend
         spec:
-          serviceAccountName: default-backend
           containers:
           - name: default-http-backend
             image: gcr.io/google_containers/defaultbackend:1.0
@@ -898,12 +897,6 @@ write_files:
       name: nginx-ingress-controller
       namespace: kube-system
     ---
-    apiVersion: v1
-    kind: ServiceAccount
-    metadata:
-      name: default-backend
-      namespace: kube-system
-    ---
     apiVersion: rbac.authorization.k8s.io/v1beta1
     kind: ClusterRole
     metadata:
@@ -1035,7 +1028,7 @@ write_files:
       fsGroup:
         rule: RunAsAny
       runAsUser:
-        rule: MustRunAsNonRoot
+        rule: RunAsAny
       seLinux:
         rule: RunAsAny
       supplementalGroups:
@@ -1105,9 +1098,6 @@ write_files:
       namespace: kube-system
     - kind: ServiceAccount
       name: nginx-ingress-controller
-      namespace: kube-system
-    - kind: ServiceAccount
-      name: default-backend
       namespace: kube-system
     roleRef:
        apiGroup: rbac.authorization.k8s.io
