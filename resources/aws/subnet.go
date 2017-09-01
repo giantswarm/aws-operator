@@ -169,3 +169,25 @@ func (s *Subnet) MakePublic(routeTable *RouteTable) error {
 
 	return nil
 }
+
+func (s *Subnet) AddHostVPCRoute(routeTable *RouteTable, vpcPeeringConnection *VPCPeeringConnection) error {
+	routeTableID, err := routeTable.GetID()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	conn, err := vpcPeeringConnection.findExisting()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	if _, err := s.Clients.EC2.CreateRoute(&ec2.CreateRouteInput{
+		RouteTableId:           &routeTableID,
+		DestinationCidrBlock:   conn.AccepterVpcInfo.CidrBlock,
+		VpcPeeringConnectionId: conn.VpcPeeringConnectionId,
+	}); err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
