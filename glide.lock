@@ -85,12 +85,16 @@ imports:
 - name: github.com/giantswarm/k8scloudconfig
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   version: 792eebd099d3256e021a91a88b290b2fbf63d559
 =======
   version: 25fc70b62f636c783ada2fa2618077408cc273aa
 >>>>>>> test aws-operator for giantswarm/k8scloudconfig#182
 =======
   version: f65c2c783514ff8a534a4fc49714538bed81f3fb
+>>>>>>> test aws-operator for giantswarm/k8scloudconfig#182
+=======
+  version: 792eebd099d3256e021a91a88b290b2fbf63d559
 >>>>>>> test aws-operator for giantswarm/k8scloudconfig#182
 - name: github.com/giantswarm/microendpoint
   version: f5682d1d6fe0eb963397fb7e0535c1794644efce
