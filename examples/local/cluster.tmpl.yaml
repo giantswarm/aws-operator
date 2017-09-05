@@ -70,6 +70,7 @@ spec:
       cidr: "10.0.0.0/16"
       privateSubnetCidr: "10.0.0.0/19"
       publicSubnetCidr: "10.0.128.0/20"
+      peerid: "${AWS_VPC_PEER_ID}"
 
     masters:
     - imageid: "${AWS_AMI}"
