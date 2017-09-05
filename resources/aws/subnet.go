@@ -100,7 +100,7 @@ func (s *Subnet) CreateOrFail() error {
 		}
 		return nil
 	}
-	tagNotify := NewNotify(g.Logger, "tag subnet")
+	tagNotify := NewNotify(s.Logger, "tag subnet")
 	if err := backoff.RetryNotify(tagOperation, NewCustomExponentialBackoff(), tagNotify); err != nil {
 		return microerror.Mask(err)
 	}
