@@ -37,16 +37,16 @@ This is a handy snippet that makes it painless - works in bash and zsh.
 
 ```bash
 export CLUSTER_NAME="example-cluster"
-export COMMON_DOMAIN="internal.company.com"
-export COMMON_DOMAIN_INGRESS="company.com"
+export COMMON_DOMAIN="company.com"
+export COMMON_DOMAIN_INTERNAL="internal.company.com"
 export ID_RSA_PUB="$(cat ~/.ssh/id_rsa.pub)"
 export AWS_ACCESS_KEY_ID="AKIAIXXXXXXXXXXXXXXX"
 export AWS_SECRET_ACCESS_KEY="XXXXXXXXXXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXX"
 export AWS_REGION="eu-central-1"
 export AWS_AZ="eu-central-1a"
 export AWS_AMI="ami-d60ad6b9"
-export AWS_INSTANCE_TYPE_MASTER="t2.medium"
-export AWS_INSTANCE_TYPE_WORKER="t2.medium"
+export AWS_INSTANCE_TYPE_MASTER="m3.medium"
+export AWS_INSTANCE_TYPE_WORKER="m3.medium"
 export AWS_API_HOSTED_ZONE="Z*************"
 export AWS_INGRESS_HOSTED_ZONE="Z*************"
 
@@ -54,7 +54,7 @@ for f in *.tmpl.yaml; do
     sed \
         -e 's|${CLUSTER_NAME}|'"${CLUSTER_NAME}"'|g' \
         -e 's|${COMMON_DOMAIN}|'"${COMMON_DOMAIN}"'|g' \
-        -e 's|${COMMON_DOMAIN_INGRESS}|'"${COMMON_DOMAIN_INGRESS}"'|g' \
+        -e 's|${COMMON_DOMAIN_INTERNAL}|'"${COMMON_DOMAIN_INTERNAL}"'|g' \
         -e 's|${ID_RSA_PUB}|'"${ID_RSA_PUB}"'|g' \
         -e 's|${AWS_ACCESS_KEY_ID}|'"${AWS_ACCESS_KEY_ID}"'|g' \
         -e 's|${AWS_SECRET_ACCESS_KEY}|'"${AWS_SECRET_ACCESS_KEY}"'|g' \
