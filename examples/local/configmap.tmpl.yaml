@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: aws-operator-configmap
 data:
-  config.yml: |
+  config.yaml: |
     service:
       aws:
         accesskey:
