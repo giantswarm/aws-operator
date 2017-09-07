@@ -21,7 +21,6 @@ guide, all placeholders must be replaced with sensible values.
 
 - *CLUSTER_NAME* - Cluster's name.
 - *COMMON_DOMAIN* - Cluster's etcd and API common domain.
-- *COMMON_DOMAIN_INTERNAL* - Ingress common domain.
 - *ID_RSA_PUB* - SSH public key to be installed on nodes.
 - *AWS_ACCESS_KEY_ID* - AWS access key.
 - *AWS_SECRET_ACCESS_KEY* - AWS secret.
@@ -39,7 +38,6 @@ This is a handy snippet that makes it painless - works in bash and zsh.
 ```bash
 export CLUSTER_NAME="example-cluster"
 export COMMON_DOMAIN="company.com"
-export COMMON_DOMAIN_INTERNAL="internal.company.com"
 export ID_RSA_PUB="$(cat ~/.ssh/id_rsa.pub)"
 export AWS_ACCESS_KEY_ID="AKIAIXXXXXXXXXXXXXXX"
 export AWS_SECRET_ACCESS_KEY="XXXXXXXXXXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXX"
@@ -56,7 +54,6 @@ for f in *.tmpl.yaml; do
     sed \
         -e 's|${CLUSTER_NAME}|'"${CLUSTER_NAME}"'|g' \
         -e 's|${COMMON_DOMAIN}|'"${COMMON_DOMAIN}"'|g' \
-        -e 's|${COMMON_DOMAIN_INTERNAL}|'"${COMMON_DOMAIN_INTERNAL}"'|g' \
         -e 's|${ID_RSA_PUB}|'"${ID_RSA_PUB}"'|g' \
         -e 's|${AWS_ACCESS_KEY_ID}|'"${AWS_ACCESS_KEY_ID}"'|g' \
         -e 's|${AWS_SECRET_ACCESS_KEY}|'"${AWS_SECRET_ACCESS_KEY}"'|g' \
