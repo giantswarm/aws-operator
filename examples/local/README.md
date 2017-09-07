@@ -21,7 +21,7 @@ guide, all placeholders must be replaced with sensible values.
 
 - *CLUSTER_NAME* - Cluster's name.
 - *COMMON_DOMAIN* - Cluster's etcd and API common domain.
-- *COMMON_DOMAIN_INGRESS* - Ingress common domain.
+- *COMMON_DOMAIN_INTERNAL* - Ingress common domain.
 - *ID_RSA_PUB* - SSH public key to be installed on nodes.
 - *AWS_ACCESS_KEY_ID* - AWS access key.
 - *AWS_SECRET_ACCESS_KEY* - AWS secret.
@@ -92,7 +92,7 @@ In that case the Docker image needs to be accessible from the K8s cluster
 running the operator. For Minikube run `eval $(minikube docker-env)` before
 `docker build`, see [reusing the Docker daemon] for details.
 
-[reusing the docker daemon]: https://github.com/kubernetes/minikube/blob/master/docs/reusing_the_docker_daemon.md 
+[reusing the docker daemon]: https://github.com/kubernetes/minikube/blob/master/docs/reusing_the_docker_daemon.md
 
 ```bash
 # Optional. Only when using Minikube.
