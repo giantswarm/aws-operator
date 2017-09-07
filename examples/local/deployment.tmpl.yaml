@@ -18,8 +18,8 @@ spec:
         configMap:
           name: aws-operator-configmap
           items:
-          - key: config.yml
-            path: config.yml
+          - key: config.yaml
+            path: config.yaml
       - name: ssh-key
         configMap:
           name: aws-operator-ssh-key-configmap
