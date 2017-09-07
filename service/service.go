@@ -110,7 +110,7 @@ func New(config Config) (*Service, error) {
 		accessKeySecret := config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret)
 		sessionToken := config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session)
 
-		if accessKeyID == "" && accessKeySecret == "" && sessionToken == "" {
+		if accessKeyID == "" && accessKeySecret == "" {
 			config.Logger.Log("debug", "no host cluster account credentials supplied, assuming guest and host uses same account")
 			awsHostConfig = awsConfig
 		} else {
