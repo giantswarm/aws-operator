@@ -14,7 +14,7 @@ spec:
       imageNamespace: "giantswarm"
 
     etcd:
-      domain: "etcd.${CLUSTER_NAME}.${COMMON_DOMAIN_INTERNAL}"
+      domain: "etcd.${CLUSTER_NAME}.${COMMON_DOMAIN}"
       prefix: "${CLUSTER_NAME}"
       port: 2379
 
@@ -25,9 +25,9 @@ spec:
 
     kubernetes:
       api:
-        domain: "api.${CLUSTER_NAME}.${COMMON_DOMAIN_INTERNAL}"
+        domain: "api.${CLUSTER_NAME}.${COMMON_DOMAIN}"
         insecurePort: 8080
-        ip: "172.31.0.1" 
+        ip: "172.31.0.1"
         securePort: 443
         clusterIPRange: "172.31.0.0/24"
       cloudProvider: "aws"
