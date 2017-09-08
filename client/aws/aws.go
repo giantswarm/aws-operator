@@ -21,6 +21,7 @@ import (
 type Config struct {
 	AccessKeyID     string
 	AccessKeySecret string
+	SessionToken    string
 	Region          string
 	accountID       string
 }
@@ -43,7 +44,7 @@ const (
 
 func NewClients(config Config) Clients {
 	awsCfg := &aws.Config{
-		Credentials: credentials.NewStaticCredentials(config.AccessKeyID, config.AccessKeySecret, ""),
+		Credentials: credentials.NewStaticCredentials(config.AccessKeyID, config.AccessKeySecret, config.SessionToken),
 		Region:      aws.String(config.Region),
 	}
 	s := session.New(awsCfg)
