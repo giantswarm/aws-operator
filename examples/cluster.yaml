@@ -36,7 +36,7 @@ spec:
       domain: "cluster.local"
       hyperkube:
         docker:
-          image: "quay.io/giantswarm/hyperkube:v1.6.4_coreos.0"
+          image: "quay.io/giantswarm/hyperkube:v1.7.3_coreos.0"
       ingressController:
         docker:
           image: "quay.io/giantswarm/nginx-ingress-controller:0.9.0-beta.11"
@@ -72,9 +72,9 @@ spec:
       publicSubnetCidr: "10.0.128.0/20"
 
     masters:
-    - imageid: "ami-d60ad6b9"
-      instancetype: "t2.medium"
+    - imageid: "ami-33df775c"
+      instancetype: "m3.medium"
 
     workers:
-    - imageid: "ami-d60ad6b9"
-      instancetype: "t2.medium"
+    - imageid: "ami-33df775c"
+      instancetype: "m3.medium"

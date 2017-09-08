@@ -3,13 +3,15 @@ kind: ConfigMap
 metadata:
   name: aws-operator-configmap
 data:
-  config.yml: |
-    aws:
-      accesskey:
-        id: "${AWS_ACCESS_KEY_ID}"
-        secret: "${AWS_SECRET_ACCESS_KEY}" 
-    kubernetes:
-      incluster: true
+  config.yaml: |
+    service:
+      aws:
+        accesskey:
+          id: "${AWS_ACCESS_KEY_ID}"
+          secret: "${AWS_SECRET_ACCESS_KEY}"
+          session: "${AWS_SESSION_TOKEN}"
+      kubernetes:
+        incluster: true
     server:
       listen:
         address: 'http://0.0.0.0:8000'

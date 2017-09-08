@@ -21,10 +21,10 @@ guide, all placeholders must be replaced with sensible values.
 
 - *CLUSTER_NAME* - Cluster's name.
 - *COMMON_DOMAIN* - Cluster's etcd and API common domain.
-- *COMMON_DOMAIN_INGRESS* - Ingress common domain.
 - *ID_RSA_PUB* - SSH public key to be installed on nodes.
 - *AWS_ACCESS_KEY_ID* - AWS access key.
 - *AWS_SECRET_ACCESS_KEY* - AWS secret.
+- *AWS_SESSION_TOKEN* - AWS session token for MFA accounts; can be left empty.
 - *AWS_REGION* - AWS region.
 - *AWS_AZ* - AWS availability zone.
 - *AWS_AMI* - AWS image to be used on both master and worker machines.
@@ -32,32 +32,34 @@ guide, all placeholders must be replaced with sensible values.
 - *AWS_INSTANCE_TYPE_WORKER* - Worker machines instance type.
 - *AWS_API_HOSTED_ZONE* - Route 53 hosted zone for API and Etcd
 - *AWS_INGRESS_HOSTED_ZONE* - Route 53 hosted zone for Ingress
+- *AWS_VPC_PEER_ID* - VPC ID of the host cluster to peer with.
 
 This is a handy snippet that makes it painless - works in bash and zsh.
 
 ```bash
 export CLUSTER_NAME="example-cluster"
-export COMMON_DOMAIN="internal.company.com"
-export COMMON_DOMAIN_INGRESS="company.com"
+export COMMON_DOMAIN="company.com"
 export ID_RSA_PUB="$(cat ~/.ssh/id_rsa.pub)"
 export AWS_ACCESS_KEY_ID="AKIAIXXXXXXXXXXXXXXX"
 export AWS_SECRET_ACCESS_KEY="XXXXXXXXXXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXX"
+export AWS_SESSION_TOKEN="XXXXXXXXXXXXXXXXXXX"
 export AWS_REGION="eu-central-1"
 export AWS_AZ="eu-central-1a"
 export AWS_AMI="ami-d60ad6b9"
-export AWS_INSTANCE_TYPE_MASTER="t2.medium"
-export AWS_INSTANCE_TYPE_WORKER="t2.medium"
+export AWS_INSTANCE_TYPE_MASTER="m3.medium"
+export AWS_INSTANCE_TYPE_WORKER="m3.medium"
 export AWS_API_HOSTED_ZONE="Z*************"
 export AWS_INGRESS_HOSTED_ZONE="Z*************"
+export AWS_VPC_PEER_ID="vpc-********"
 
 for f in *.tmpl.yaml; do
     sed \
         -e 's|${CLUSTER_NAME}|'"${CLUSTER_NAME}"'|g' \
         -e 's|${COMMON_DOMAIN}|'"${COMMON_DOMAIN}"'|g' \
-        -e 's|${COMMON_DOMAIN_INGRESS}|'"${COMMON_DOMAIN_INGRESS}"'|g' \
         -e 's|${ID_RSA_PUB}|'"${ID_RSA_PUB}"'|g' \
         -e 's|${AWS_ACCESS_KEY_ID}|'"${AWS_ACCESS_KEY_ID}"'|g' \
         -e 's|${AWS_SECRET_ACCESS_KEY}|'"${AWS_SECRET_ACCESS_KEY}"'|g' \
+        -e 's|${AWS_SESSION_TOKEN}|'"${AWS_SESSION_TOKEN}"'|g' \
         -e 's|${AWS_REGION}|'"${AWS_REGION}"'|g' \
         -e 's|${AWS_AZ}|'"${AWS_AZ}"'|g' \
         -e 's|${AWS_AMI}|'"${AWS_AMI}"'|g' \
@@ -65,6 +67,7 @@ for f in *.tmpl.yaml; do
         -e 's|${AWS_INSTANCE_TYPE_WORKER}|'"${AWS_INSTANCE_TYPE_WORKER}"'|g' \
         -e 's|${AWS_API_HOSTED_ZONE}|'"${AWS_API_HOSTED_ZONE}"'|g' \
         -e 's|${AWS_INGRESS_HOSTED_ZONE}|'"${AWS_INGRESS_HOSTED_ZONE}"'|g' \
+        -e 's|${AWS_VPC_PEER_ID}|'"${AWS_VPC_PEER_ID}"'|g' \
         ./$f > ./${f%.tmpl.yaml}.yaml
 done
 ```
@@ -89,7 +92,7 @@ In that case the Docker image needs to be accessible from the K8s cluster
 running the operator. For Minikube run `eval $(minikube docker-env)` before
 `docker build`, see [reusing the Docker daemon] for details.
 
-[reusing the docker daemon]: https://github.com/kubernetes/minikube/blob/master/docs/reusing_the_docker_daemon.md 
+[reusing the docker daemon]: https://github.com/kubernetes/minikube/blob/master/docs/reusing_the_docker_daemon.md
 
 ```bash
 # Optional. Only when using Minikube.
