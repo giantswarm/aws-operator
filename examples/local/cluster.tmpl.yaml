@@ -67,9 +67,9 @@ spec:
       etcd: "${AWS_API_HOSTED_ZONE}"
       ingress: "${AWS_INGRESS_HOSTED_ZONE}"
     vpc:
-      cidr: "10.0.0.0/16"
-      privateSubnetCidr: "10.0.0.0/19"
-      publicSubnetCidr: "10.0.128.0/20"
+      cidr: "10.1.5.0/24"
+      privateSubnetCidr: "10.1.5.0/25"
+      publicSubnetCidr: "10.1.5.128/25"
       peerid: "${AWS_VPC_PEER_ID}"
 
     masters:
