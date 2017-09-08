@@ -24,6 +24,7 @@ guide, all placeholders must be replaced with sensible values.
 - *ID_RSA_PUB* - SSH public key to be installed on nodes.
 - *AWS_ACCESS_KEY_ID* - AWS access key.
 - *AWS_SECRET_ACCESS_KEY* - AWS secret.
+- *AWS_SESSION_TOKEN* - AWS session token for MFA accounts; can be left empty.
 - *AWS_REGION* - AWS region.
 - *AWS_AZ* - AWS availability zone.
 - *AWS_AMI* - AWS image to be used on both master and worker machines.
@@ -41,6 +42,7 @@ export COMMON_DOMAIN="company.com"
 export ID_RSA_PUB="$(cat ~/.ssh/id_rsa.pub)"
 export AWS_ACCESS_KEY_ID="AKIAIXXXXXXXXXXXXXXX"
 export AWS_SECRET_ACCESS_KEY="XXXXXXXXXXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXX"
+export AWS_SESSION_TOKEN="XXXXXXXXXXXXXXXXXXX"
 export AWS_REGION="eu-central-1"
 export AWS_AZ="eu-central-1a"
 export AWS_AMI="ami-d60ad6b9"
@@ -57,6 +59,7 @@ for f in *.tmpl.yaml; do
         -e 's|${ID_RSA_PUB}|'"${ID_RSA_PUB}"'|g' \
         -e 's|${AWS_ACCESS_KEY_ID}|'"${AWS_ACCESS_KEY_ID}"'|g' \
         -e 's|${AWS_SECRET_ACCESS_KEY}|'"${AWS_SECRET_ACCESS_KEY}"'|g' \
+        -e 's|${AWS_SESSION_TOKEN}|'"${AWS_SESSION_TOKEN}"'|g' \
         -e 's|${AWS_REGION}|'"${AWS_REGION}"'|g' \
         -e 's|${AWS_AZ}|'"${AWS_AZ}"'|g' \
         -e 's|${AWS_AMI}|'"${AWS_AMI}"'|g' \

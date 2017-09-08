@@ -100,6 +100,7 @@ func New(config Config) (*Service, error) {
 		awsConfig = awsclient.Config{
 			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
 			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
+			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
 		}
 	}
 
@@ -107,6 +108,7 @@ func New(config Config) (*Service, error) {
 	{
 		accessKeyID := config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID)
 		accessKeySecret := config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret)
+		sessionToken := config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session)
 
 		if accessKeyID == "" && accessKeySecret == "" {
 			config.Logger.Log("debug", "no host cluster account credentials supplied, assuming guest and host uses same account")
@@ -116,6 +118,7 @@ func New(config Config) (*Service, error) {
 			awsHostConfig = awsclient.Config{
 				AccessKeyID:     accessKeyID,
 				AccessKeySecret: accessKeySecret,
+				SessionToken:    sessionToken,
 			}
 		}
 	}
