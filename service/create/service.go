@@ -1280,6 +1280,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	// Delete VPC peering connection.
 	vpcPeeringConection := &awsresources.VPCPeeringConnection{
 		VPCId:     vpcID,
+		PeerVPCId: cluster.Spec.AWS.VPC.PeerID,
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
 	}
 	if err := vpcPeeringConection.Delete(); err != nil {
