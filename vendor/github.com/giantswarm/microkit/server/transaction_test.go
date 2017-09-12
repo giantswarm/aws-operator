@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/giantswarm/micrologger/microloggertest"
 )
 
 func Test_Transaction_IDFormat(t *testing.T) {
@@ -63,7 +65,9 @@ func Test_Transaction_NoIDGiven(t *testing.T) {
 	e := testNewEndpoint(t)
 
 	config := DefaultConfig()
+	config.Logger = microloggertest.New()
 	config.Endpoints = []Endpoint{e}
+	config.TransactionResponder = testNewTransactionResponder(t)
 	newServer, err := New(config)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -143,7 +147,9 @@ func Test_Transaction_IDGiven(t *testing.T) {
 	e := testNewEndpoint(t)
 
 	config := DefaultConfig()
+	config.Logger = microloggertest.New()
 	config.Endpoints = []Endpoint{e}
+	config.TransactionResponder = testNewTransactionResponder(t)
 	newServer, err := New(config)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -227,7 +233,9 @@ func Test_Transaction_InvalidIDGiven(t *testing.T) {
 	e := testNewEndpoint(t)
 
 	config := DefaultConfig()
+	config.Logger = microloggertest.New()
 	config.Endpoints = []Endpoint{e}
+	config.TransactionResponder = testNewTransactionResponder(t)
 	config.ErrorEncoder = func(ctx context.Context, serverError error, w http.ResponseWriter) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}

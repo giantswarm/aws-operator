@@ -1,11 +1,18 @@
 package: github.com/giantswarm/microkit
 import:
+- package: github.com/giantswarm/microerror
+  version: master
+- package: github.com/giantswarm/micrologger
+  version: master
+# TODO: We should track master here.
+- package: github.com/giantswarm/microstorage
+  version: f5c68d40459f0021cf8266501b7d8615ea4ff641
 - package: github.com/go-kit/kit
   version: v0.5.0
 - package: github.com/gorilla/mux
   version: ~1.1.0
 - package: github.com/prometheus/client_golang
-  version: ~0.8.0
+  version: master
 - package: github.com/spf13/cobra
   version: master
 - package: github.com/spf13/pflag
@@ -14,12 +21,3 @@ import:
   version: master
 - package: github.com/tylerb/graceful
   version: ~1.2.13
-- package: golang.org/x/net
-- package: github.com/go-stack/stack
-  version: ~1.5.2
-- package: github.com/coreos/etcd
-  version: 3.2.1
-- package: golang.org/x/text
-  version: 4ee4af566555f5fbe026368b75596286a312663a
-- package: github.com/giantswarm/micrologger
-  version: master

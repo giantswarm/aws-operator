@@ -209,10 +209,18 @@ func (c *EC2) AllocateAddressRequest(input *AllocateAddressInput) (req *request.
 
 // AllocateAddress API operation for Amazon Elastic Compute Cloud.
 //
-// Acquires an Elastic IP address.
+// Allocates an Elastic IP address.
 //
 // An Elastic IP address is for use either in the EC2-Classic platform or in
-// a VPC. For more information, see Elastic IP Addresses (http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html)
+// a VPC. By default, you can allocate 5 Elastic IP addresses for EC2-Classic
+// per region and 5 Elastic IP addresses for EC2-VPC per region.
+//
+// If you release an Elastic IP address for use in a VPC, you might be able
+// to recover it. To recover an Elastic IP address that you released, specify
+// it in the Address parameter. Note that you cannot recover an Elastic IP address
+// that you released after it is allocated to another AWS account.
+//
+// For more information, see Elastic IP Addresses (http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html)
 // in the Amazon Elastic Compute Cloud User Guide.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
@@ -946,8 +954,13 @@ func (c *EC2) AssociateVpcCidrBlockRequest(input *AssociateVpcCidrBlockInput) (r
 
 // AssociateVpcCidrBlock API operation for Amazon Elastic Compute Cloud.
 //
-// Associates a CIDR block with your VPC. You can only associate a single Amazon-provided
-// IPv6 CIDR block with your VPC. The IPv6 CIDR block size is fixed at /56.
+// Associates a CIDR block with your VPC. You can associate a secondary IPv4
+// CIDR block, or you can associate an Amazon-provided IPv6 CIDR block. The
+// IPv6 CIDR block size is fixed at /56.
+//
+// For more information about associating CIDR blocks with your VPC and applicable
+// restrictions, see VPC and Subnet Sizing (http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Subnets.html#VPC_Sizing)
+// in the Amazon Virtual Private Cloud User Guide.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -4404,14 +4417,13 @@ func (c *EC2) CreateSubnetRequest(input *CreateSubnetInput) (req *request.Reques
 //
 // Creates a subnet in an existing VPC.
 //
-// When you create each subnet, you provide the VPC ID and the CIDR block you
-// want for the subnet. After you create a subnet, you can't change its CIDR
-// block. The subnet's IPv4 CIDR block can be the same as the VPC's IPv4 CIDR
-// block (assuming you want only a single subnet in the VPC), or a subset of
-// the VPC's IPv4 CIDR block. If you create more than one subnet in a VPC, the
-// subnets' CIDR blocks must not overlap. The smallest IPv4 subnet (and VPC)
-// you can create uses a /28 netmask (16 IPv4 addresses), and the largest uses
-// a /16 netmask (65,536 IPv4 addresses).
+// When you create each subnet, you provide the VPC ID and the IPv4 CIDR block
+// you want for the subnet. After you create a subnet, you can't change its
+// CIDR block. The size of the subnet's IPv4 CIDR block can be the same as a
+// VPC's IPv4 CIDR block, or a subset of a VPC's IPv4 CIDR block. If you create
+// more than one subnet in a VPC, the subnets' CIDR blocks must not overlap.
+// The smallest IPv4 subnet (and VPC) you can create uses a /28 netmask (16
+// IPv4 addresses), and the largest uses a /16 netmask (65,536 IPv4 addresses).
 //
 // If you've associated an IPv6 CIDR block with your VPC, you can create a subnet
 // with an IPv6 CIDR block that uses a /64 prefix length.
@@ -6590,10 +6602,10 @@ func (c *EC2) DeleteTagsRequest(input *DeleteTagsInput) (req *request.Request, o
 
 // DeleteTags API operation for Amazon Elastic Compute Cloud.
 //
-// Deletes the specified set of tags from the specified set of resources. This
-// call is designed to follow a DescribeTags request.
+// Deletes the specified set of tags from the specified set of resources.
 //
-// For more information about tags, see Tagging Your Resources (http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Using_Tags.html)
+// To list the current tags, use DescribeTags. For more information about tags,
+// see Tagging Your Resources (http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Using_Tags.html)
 // in the Amazon Elastic Compute Cloud User Guide.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
@@ -7229,9 +7241,14 @@ func (c *EC2) DeregisterImageRequest(input *DeregisterImageInput) (req *request.
 // DeregisterImage API operation for Amazon Elastic Compute Cloud.
 //
 // Deregisters the specified AMI. After you deregister an AMI, it can't be used
-// to launch new instances.
+// to launch new instances; however, it doesn't affect any instances that you've
+// already launched from the AMI. You'll continue to incur usage costs for those
+// instances until you terminate them.
 //
-// This command does not delete the AMI.
+// When you deregister an Amazon EBS-backed AMI, it doesn't affect the snapshot
+// that was created for the root volume of the instance during the AMI creation
+// process. When you deregister an instance store-backed AMI, it doesn't affect
+// the files that you uploaded to Amazon S3 when you created the AMI.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -14433,9 +14450,13 @@ func (c *EC2) DisassociateVpcCidrBlockRequest(input *DisassociateVpcCidrBlockInp
 
 // DisassociateVpcCidrBlock API operation for Amazon Elastic Compute Cloud.
 //
-// Disassociates a CIDR block from a VPC. Currently, you can disassociate an
-// IPv6 CIDR block only. You must detach or delete all gateways and resources
-// that are associated with the CIDR block before you can disassociate it.
+// Disassociates a CIDR block from a VPC. To disassociate the CIDR block, you
+// must specify its association ID. You can get the association ID by using
+// DescribeVpcs. You must detach or delete all gateways and resources that are
+// associated with the CIDR block before you can disassociate it.
+//
+// You cannot disassociate the CIDR block with which you originally created
+// the VPC (the primary CIDR block).
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -17662,19 +17683,22 @@ func (c *EC2) ReleaseAddressRequest(input *ReleaseAddressInput) (req *request.Re
 //
 // Releases the specified Elastic IP address.
 //
-// After releasing an Elastic IP address, it is released to the IP address pool
-// and might be unavailable to you. Be sure to update your DNS records and any
-// servers or devices that communicate with the address. If you attempt to release
-// an Elastic IP address that you already released, you'll get an AuthFailure
-// error if the address is already allocated to another AWS account.
-//
 // [EC2-Classic, default VPC] Releasing an Elastic IP address automatically
 // disassociates it from any instance that it's associated with. To disassociate
 // an Elastic IP address without releasing it, use DisassociateAddress.
 //
 // [Nondefault VPC] You must use DisassociateAddress to disassociate the Elastic
-// IP address before you try to release it. Otherwise, Amazon EC2 returns an
-// error (InvalidIPAddress.InUse).
+// IP address before you can release it. Otherwise, Amazon EC2 returns an error
+// (InvalidIPAddress.InUse).
+//
+// After releasing an Elastic IP address, it is released to the IP address pool.
+// Be sure to update your DNS records and any servers or devices that communicate
+// with the address. If you attempt to release an Elastic IP address that you
+// already released, you'll get an AuthFailure error if the address is already
+// allocated to another AWS account.
+//
+// [EC2-VPC] After you release an Elastic IP address for use in a VPC, you might
+// be able to recover it. For more information, see AllocateAddress.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -18971,6 +18995,10 @@ func (c *EC2) RevokeSecurityGroupIngressRequest(input *RevokeSecurityGroupIngres
 // you specify in the revoke request (for example, ports) must match the existing
 // rule's values for the rule to be removed.
 //
+// [EC2-Classic security groups only] If the values you specify do not match
+// the existing rule's values, no error is returned. Use DescribeSecurityGroups
+// to verify that the rule has been removed.
+//
 // Each rule consists of the protocol and the CIDR range or source security
 // group. For the TCP and UDP protocols, you must also specify the destination
 // port or range of ports. For the ICMP protocol, you must also specify the
@@ -20100,6 +20128,9 @@ func (s *Address) SetPublicIp(v string) *Address {
 type AllocateAddressInput struct {
 	_ struct{} `type:"structure"`
 
+	// [EC2-VPC] The Elastic IP address to recover.
+	Address *string `type:"string"`
+
 	// Set to vpc to allocate the address for use with instances in a VPC.
 	//
 	// Default: The address is for use with instances in EC2-Classic.
@@ -20120,6 +20151,12 @@ func (s AllocateAddressInput) String() string {
 // GoString returns the string representation
 func (s AllocateAddressInput) GoString() string {
 	return s.String()
+}
+
+// SetAddress sets the Address field's value.
+func (s *AllocateAddressInput) SetAddress(v string) *AllocateAddressInput {
+	s.Address = &v
+	return s
 }
 
 // SetDomain sets the Domain field's value.
@@ -20946,6 +20983,9 @@ type AssociateVpcCidrBlockInput struct {
 	// CIDR block.
 	AmazonProvidedIpv6CidrBlock *bool `locationName:"amazonProvidedIpv6CidrBlock" type:"boolean"`
 
+	// An IPv4 CIDR block to associate with the VPC.
+	CidrBlock *string `type:"string"`
+
 	// The ID of the VPC.
 	//
 	// VpcId is a required field
@@ -20981,6 +21021,12 @@ func (s *AssociateVpcCidrBlockInput) SetAmazonProvidedIpv6CidrBlock(v bool) *Ass
 	return s
 }
 
+// SetCidrBlock sets the CidrBlock field's value.
+func (s *AssociateVpcCidrBlockInput) SetCidrBlock(v string) *AssociateVpcCidrBlockInput {
+	s.CidrBlock = &v
+	return s
+}
+
 // SetVpcId sets the VpcId field's value.
 func (s *AssociateVpcCidrBlockInput) SetVpcId(v string) *AssociateVpcCidrBlockInput {
 	s.VpcId = &v
@@ -20990,6 +21036,9 @@ func (s *AssociateVpcCidrBlockInput) SetVpcId(v string) *AssociateVpcCidrBlockIn
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/ec2-2016-11-15/AssociateVpcCidrBlockResult
 type AssociateVpcCidrBlockOutput struct {
 	_ struct{} `type:"structure"`
+
+	// Information about the IPv4 CIDR block association.
+	CidrBlockAssociation *VpcCidrBlockAssociation `locationName:"cidrBlockAssociation" type:"structure"`
 
 	// Information about the IPv6 CIDR block association.
 	Ipv6CidrBlockAssociation *VpcIpv6CidrBlockAssociation `locationName:"ipv6CidrBlockAssociation" type:"structure"`
@@ -21006,6 +21055,12 @@ func (s AssociateVpcCidrBlockOutput) String() string {
 // GoString returns the string representation
 func (s AssociateVpcCidrBlockOutput) GoString() string {
 	return s.String()
+}
+
+// SetCidrBlockAssociation sets the CidrBlockAssociation field's value.
+func (s *AssociateVpcCidrBlockOutput) SetCidrBlockAssociation(v *VpcCidrBlockAssociation) *AssociateVpcCidrBlockOutput {
+	s.CidrBlockAssociation = v
+	return s
 }
 
 // SetIpv6CidrBlockAssociation sets the Ipv6CidrBlockAssociation field's value.
@@ -22932,6 +22987,31 @@ func (s *CancelledSpotInstanceRequest) SetSpotInstanceRequestId(v string) *Cance
 // SetState sets the State field's value.
 func (s *CancelledSpotInstanceRequest) SetState(v string) *CancelledSpotInstanceRequest {
 	s.State = &v
+	return s
+}
+
+// Describes an IPv4 CIDR block.
+// Please also see https://docs.aws.amazon.com/goto/WebAPI/ec2-2016-11-15/CidrBlock
+type CidrBlock struct {
+	_ struct{} `type:"structure"`
+
+	// The IPv4 CIDR block.
+	CidrBlock *string `locationName:"cidrBlock" type:"string"`
+}
+
+// String returns the string representation
+func (s CidrBlock) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s CidrBlock) GoString() string {
+	return s.String()
+}
+
+// SetCidrBlock sets the CidrBlock field's value.
+func (s *CidrBlock) SetCidrBlock(v string) *CidrBlock {
+	s.CidrBlock = &v
 	return s
 }
 
@@ -28207,15 +28287,17 @@ type DeleteTagsInput struct {
 	// it is UnauthorizedOperation.
 	DryRun *bool `locationName:"dryRun" type:"boolean"`
 
-	// The ID of the resource. For example, ami-1a2b3c4d. You can specify more than
-	// one resource ID.
+	// The IDs of one or more resources.
 	//
 	// Resources is a required field
 	Resources []*string `locationName:"resourceId" type:"list" required:"true"`
 
-	// One or more tags to delete. If you omit the value parameter, we delete the
-	// tag regardless of its value. If you specify this parameter with an empty
-	// string as the value, we delete the key only if its value is an empty string.
+	// One or more tags to delete. If you omit this parameter, we delete all tags
+	// for the specified resources. Specify a tag key and an optional tag value
+	// to delete specific tags. If you specify a tag key without a tag value, we
+	// delete any tag with this key regardless of its value. If you specify a tag
+	// key with an empty string as the tag value, we delete the tag only if its
+	// value is an empty string.
 	Tags []*Tag `locationName:"tag" locationNameList:"item" type:"list"`
 }
 
@@ -30264,7 +30346,7 @@ type DescribeHostReservationsOutput struct {
 	_ struct{} `type:"structure"`
 
 	// Details about the reservation's configuration.
-	HostReservationSet []*HostReservation `locationName:"hostReservationSet" type:"list"`
+	HostReservationSet []*HostReservation `locationName:"hostReservationSet" locationNameList:"item" type:"list"`
 
 	// The token to use to retrieve the next page of results. This value is null
 	// when there are no more results to return.
@@ -36787,10 +36869,19 @@ type DescribeVpcsInput struct {
 
 	// One or more filters.
 	//
-	//    * cidr - The IPv4 CIDR block of the VPC. The CIDR block you specify must
-	//    exactly match the VPC's CIDR block for information to be returned for
-	//    the VPC. Must contain the slash followed by one or two digits (for example,
-	//    /28).
+	//    * cidr - The primary IPv4 CIDR block of the VPC. The CIDR block you specify
+	//    must exactly match the VPC's CIDR block for information to be returned
+	//    for the VPC. Must contain the slash followed by one or two digits (for
+	//    example, /28).
+	//
+	//    * cidr-block-association.cidr-block - An IPv4 CIDR block associated with
+	//    the VPC.
+	//
+	//    * cidr-block-association.association-id - The association ID for an IPv4
+	//    CIDR block associated with the VPC.
+	//
+	//    * cidr-block-association.state - The state of an IPv4 CIDR block associated
+	//    with the VPC.
 	//
 	//    * dhcp-options-id - The ID of a set of DHCP options.
 	//
@@ -38100,6 +38191,9 @@ func (s *DisassociateVpcCidrBlockInput) SetAssociationId(v string) *Disassociate
 type DisassociateVpcCidrBlockOutput struct {
 	_ struct{} `type:"structure"`
 
+	// Information about the IPv4 CIDR block association.
+	CidrBlockAssociation *VpcCidrBlockAssociation `locationName:"cidrBlockAssociation" type:"structure"`
+
 	// Information about the IPv6 CIDR block association.
 	Ipv6CidrBlockAssociation *VpcIpv6CidrBlockAssociation `locationName:"ipv6CidrBlockAssociation" type:"structure"`
 
@@ -38115,6 +38209,12 @@ func (s DisassociateVpcCidrBlockOutput) String() string {
 // GoString returns the string representation
 func (s DisassociateVpcCidrBlockOutput) GoString() string {
 	return s.String()
+}
+
+// SetCidrBlockAssociation sets the CidrBlockAssociation field's value.
+func (s *DisassociateVpcCidrBlockOutput) SetCidrBlockAssociation(v *VpcCidrBlockAssociation) *DisassociateVpcCidrBlockOutput {
+	s.CidrBlockAssociation = v
+	return s
 }
 
 // SetIpv6CidrBlockAssociation sets the Ipv6CidrBlockAssociation field's value.
@@ -55491,6 +55591,9 @@ type StateReason struct {
 	//    * Client.InstanceInitiatedShutdown: The instance was shut down using the
 	//    shutdown -h command from the instance.
 	//
+	//    * Client.InstanceTerminated: The instance was terminated or rebooted during
+	//    AMI creation.
+	//
 	//    * Client.UserInitiatedShutdown: The instance was shut down using the Amazon
 	//    EC2 API.
 	//
@@ -57362,8 +57465,11 @@ func (s *VolumeStatusItem) SetVolumeStatus(v *VolumeStatusInfo) *VolumeStatusIte
 type Vpc struct {
 	_ struct{} `type:"structure"`
 
-	// The IPv4 CIDR block for the VPC.
+	// The primary IPv4 CIDR block for the VPC.
 	CidrBlock *string `locationName:"cidrBlock" type:"string"`
+
+	// Information about the IPv4 CIDR blocks associated with the VPC.
+	CidrBlockAssociationSet []*VpcCidrBlockAssociation `locationName:"cidrBlockAssociationSet" locationNameList:"item" type:"list"`
 
 	// The ID of the set of DHCP options you've associated with the VPC (or default
 	// if the default options are associated with the VPC).
@@ -57401,6 +57507,12 @@ func (s Vpc) GoString() string {
 // SetCidrBlock sets the CidrBlock field's value.
 func (s *Vpc) SetCidrBlock(v string) *Vpc {
 	s.CidrBlock = &v
+	return s
+}
+
+// SetCidrBlockAssociationSet sets the CidrBlockAssociationSet field's value.
+func (s *Vpc) SetCidrBlockAssociationSet(v []*VpcCidrBlockAssociation) *Vpc {
+	s.CidrBlockAssociationSet = v
 	return s
 }
 
@@ -57477,6 +57589,49 @@ func (s *VpcAttachment) SetState(v string) *VpcAttachment {
 // SetVpcId sets the VpcId field's value.
 func (s *VpcAttachment) SetVpcId(v string) *VpcAttachment {
 	s.VpcId = &v
+	return s
+}
+
+// Describes an IPv4 CIDR block associated with a VPC.
+// Please also see https://docs.aws.amazon.com/goto/WebAPI/ec2-2016-11-15/VpcCidrBlockAssociation
+type VpcCidrBlockAssociation struct {
+	_ struct{} `type:"structure"`
+
+	// The association ID for the IPv4 CIDR block.
+	AssociationId *string `locationName:"associationId" type:"string"`
+
+	// The IPv4 CIDR block.
+	CidrBlock *string `locationName:"cidrBlock" type:"string"`
+
+	// Information about the state of the CIDR block.
+	CidrBlockState *VpcCidrBlockState `locationName:"cidrBlockState" type:"structure"`
+}
+
+// String returns the string representation
+func (s VpcCidrBlockAssociation) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s VpcCidrBlockAssociation) GoString() string {
+	return s.String()
+}
+
+// SetAssociationId sets the AssociationId field's value.
+func (s *VpcCidrBlockAssociation) SetAssociationId(v string) *VpcCidrBlockAssociation {
+	s.AssociationId = &v
+	return s
+}
+
+// SetCidrBlock sets the CidrBlock field's value.
+func (s *VpcCidrBlockAssociation) SetCidrBlock(v string) *VpcCidrBlockAssociation {
+	s.CidrBlock = &v
+	return s
+}
+
+// SetCidrBlockState sets the CidrBlockState field's value.
+func (s *VpcCidrBlockAssociation) SetCidrBlockState(v *VpcCidrBlockState) *VpcCidrBlockAssociation {
+	s.CidrBlockState = v
 	return s
 }
 
@@ -57839,6 +57994,9 @@ type VpcPeeringConnectionVpcInfo struct {
 	// The IPv4 CIDR block for the VPC.
 	CidrBlock *string `locationName:"cidrBlock" type:"string"`
 
+	// Information about the IPv4 CIDR blocks for the VPC.
+	CidrBlockSet []*CidrBlock `locationName:"cidrBlockSet" locationNameList:"item" type:"list"`
+
 	// The IPv6 CIDR block for the VPC.
 	Ipv6CidrBlockSet []*Ipv6CidrBlock `locationName:"ipv6CidrBlockSet" locationNameList:"item" type:"list"`
 
@@ -57866,6 +58024,12 @@ func (s VpcPeeringConnectionVpcInfo) GoString() string {
 // SetCidrBlock sets the CidrBlock field's value.
 func (s *VpcPeeringConnectionVpcInfo) SetCidrBlock(v string) *VpcPeeringConnectionVpcInfo {
 	s.CidrBlock = &v
+	return s
+}
+
+// SetCidrBlockSet sets the CidrBlockSet field's value.
+func (s *VpcPeeringConnectionVpcInfo) SetCidrBlockSet(v []*CidrBlock) *VpcPeeringConnectionVpcInfo {
+	s.CidrBlockSet = v
 	return s
 }
 

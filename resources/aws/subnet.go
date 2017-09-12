@@ -86,15 +86,22 @@ func (s *Subnet) CreateOrFail() error {
 		return microerror.Mask(err)
 	}
 
-	if _, err := s.Clients.EC2.CreateTags(&ec2.CreateTagsInput{
-		Resources: []*string{subnet.Subnet.SubnetId},
-		Tags: []*ec2.Tag{
-			{
-				Key:   aws.String(tagKeyName),
-				Value: aws.String(s.Name),
+	tagOperation := func() error {
+		if _, err := s.Clients.EC2.CreateTags(&ec2.CreateTagsInput{
+			Resources: []*string{subnet.Subnet.SubnetId},
+			Tags: []*ec2.Tag{
+				{
+					Key:   aws.String(tagKeyName),
+					Value: aws.String(s.Name),
+				},
 			},
-		},
-	}); err != nil {
+		}); err != nil {
+			return microerror.Mask(err)
+		}
+		return nil
+	}
+	tagNotify := NewNotify(s.Logger, "tag subnet")
+	if err := backoff.RetryNotify(tagOperation, NewCustomExponentialBackoff(), tagNotify); err != nil {
 		return microerror.Mask(err)
 	}
 

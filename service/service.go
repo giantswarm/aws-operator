@@ -86,10 +86,10 @@ func New(config Config) (*Service, error) {
 
 	var certWatcher *certificatetpr.Service
 	{
-		certConfig := certificatetpr.DefaultConfig()
+		certConfig := certificatetpr.DefaultServiceConfig()
 		certConfig.K8sClient = k8sClient
 		certConfig.Logger = config.Logger
-		certWatcher, err = certificatetpr.New(certConfig)
+		certWatcher, err = certificatetpr.NewService(certConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -100,6 +100,26 @@ func New(config Config) (*Service, error) {
 		awsConfig = awsclient.Config{
 			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
 			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
+			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
+		}
+	}
+
+	var awsHostConfig awsclient.Config
+	{
+		accessKeyID := config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID)
+		accessKeySecret := config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret)
+		sessionToken := config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session)
+
+		if accessKeyID == "" && accessKeySecret == "" {
+			config.Logger.Log("debug", "no host cluster account credentials supplied, assuming guest and host uses same account")
+			awsHostConfig = awsConfig
+		} else {
+			config.Logger.Log("debug", "host cluster account credentials supplied, using separate accounts for host and guest clusters")
+			awsHostConfig = awsclient.Config{
+				AccessKeyID:     accessKeyID,
+				AccessKeySecret: accessKeySecret,
+				SessionToken:    sessionToken,
+			}
 		}
 	}
 
@@ -107,6 +127,7 @@ func New(config Config) (*Service, error) {
 	{
 		createConfig := create.DefaultConfig()
 		createConfig.AwsConfig = awsConfig
+		createConfig.AwsHostConfig = awsHostConfig
 		createConfig.CertWatcher = certWatcher
 		createConfig.K8sClient = k8sClient
 		createConfig.Logger = config.Logger

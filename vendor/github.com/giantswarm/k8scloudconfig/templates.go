@@ -136,7 +136,7 @@ write_files:
                   value: "ACCEPT"
                 # Configure the IP Pool from which Pod IPs will be chosen.
                 - name: CALICO_IPV4POOL_CIDR
-                  value: "192.168.0.0/16"
+                  value: "{{.Cluster.Calico.Subnet}}/{{.Cluster.Calico.CIDR}}"
                 - name: CALICO_IPV4POOL_IPIP
                   value: "always"
                 # Disable IPv6 on Kubernetes.
@@ -949,6 +949,7 @@ coreos:
       content: |
         [Service]
         Environment="DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs {{.Cluster.Docker.Daemon.ExtraArgs}}"
+        Environment="DOCKER_OPT_BIP=--bip={{.Cluster.Docker.Daemon.CIDR}}"
   - name: k8s-setup-network-env.service
     enable: true
     command: start
@@ -1013,6 +1014,7 @@ coreos:
           --trusted-ca-file /etc/etcd/server-ca.pem \
           --cert-file /etc/etcd/server-crt.pem \
           --key-file /etc/etcd/server-key.pem\
+          --client-cert-auth=true \
           --peer-trusted-ca-file /etc/etcd/server-ca.pem \
           --peer-cert-file /etc/etcd/server-crt.pem \
           --peer-key-file /etc/etcd/server-key.pem \
@@ -1092,7 +1094,7 @@ coreos:
       -v /usr/lib/os-release:/etc/os-release \
       -v /usr/share/ca-certificates/:/etc/ssl/certs \
       -v /var/lib/docker/:/var/lib/docker:rw \
-      -v /var/lib/kubelet/:/var/lib/kubelet:rw,rslave \
+      -v /var/lib/kubelet/:/var/lib/kubelet:rw,shared \
       -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
       -v /etc/cni/net.d/:/etc/cni/net.d/ \
@@ -1172,6 +1174,9 @@ coreos:
       --secure_port={{.Cluster.Kubernetes.API.SecurePort}} \
       --bind-address=${DEFAULT_IPV4} \
       --etcd-prefix={{.Cluster.Etcd.Prefix}} \
+      --profiling=false \
+      --repair-malformed-updates=false \
+      --service-account-lookup=true \
       --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,DefaultStorageClass \
       --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
       --service-cluster-ip-range={{.Cluster.Kubernetes.API.ClusterIPRange}} \
@@ -1217,6 +1222,9 @@ coreos:
       --logtostderr=true \
       --v=2 \
       --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
+      --profiling=false \
+      --terminated-pod-gc-threshold=10 \
+      --use-service-account-credentials=true \
       --kubeconfig=/etc/kubernetes/config/controller-manager-kubeconfig.yml \
       --root-ca-file=/etc/kubernetes/ssl/apiserver-ca.pem \
       --service-account-private-key-file=/etc/kubernetes/ssl/service-account-key.pem
@@ -1249,6 +1257,7 @@ coreos:
       --master=https://{{.Cluster.Kubernetes.API.Domain}}:443 \
       --logtostderr=true \
       --v=2 \
+      --profiling=false \
       --kubeconfig=/etc/kubernetes/config/scheduler-kubeconfig.yml
       ExecStop=-/usr/bin/docker stop -t 10 $NAME
       ExecStopPost=-/usr/bin/docker rm -f $NAME
@@ -1437,6 +1446,7 @@ coreos:
       content: |
         [Service]
         Environment="DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs {{.Cluster.Docker.Daemon.ExtraArgs}}"
+        Environment="DOCKER_OPT_BIP=--bip={{.Cluster.Docker.Daemon.CIDR}}"
   - name: k8s-setup-network-env.service
     enable: true
     command: start
@@ -1526,7 +1536,7 @@ coreos:
       -v /usr/lib/os-release:/etc/os-release \
       -v /usr/share/ca-certificates/:/etc/ssl/certs \
       -v /var/lib/docker/:/var/lib/docker:rw \
-      -v /var/lib/kubelet/:/var/lib/kubelet:rw,rslave \
+      -v /var/lib/kubelet/:/var/lib/kubelet:rw,shared \
       -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
       -v /etc/cni/net.d/:/etc/cni/net.d/ \

@@ -78,35 +78,15 @@ type Config struct {
 // DefaultConfig provides a default configuration to create a new server object
 // by best effort.
 func DefaultConfig() Config {
-	var err error
-
-	var loggerService micrologger.Logger
-	{
-		loggerConfig := micrologger.DefaultConfig()
-		loggerService, err = micrologger.New(loggerConfig)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	var responderService microtransaction.Responder
-	{
-		responderConfig := microtransaction.DefaultResponderConfig()
-		responderService, err = microtransaction.NewResponder(responderConfig)
-		if err != nil {
-			panic(err)
-		}
-	}
-
 	return Config{
 		// Dependencies.
-		ErrorEncoder:         func(ctx context.Context, serverError error, w http.ResponseWriter) {},
-		Logger:               loggerService,
+		Logger:               nil,
 		Router:               mux.NewRouter(),
-		TransactionResponder: responderService,
+		TransactionResponder: nil,
 
 		// Settings.
 		Endpoints:      nil,
+		ErrorEncoder:   func(ctx context.Context, serverError error, w http.ResponseWriter) {},
 		HandlerWrapper: func(h http.Handler) http.Handler { return h },
 		ListenAddress:  "http://127.0.0.1:8000",
 		RequestFuncs:   []kithttp.RequestFunc{},
@@ -121,9 +101,6 @@ func DefaultConfig() Config {
 // New creates a new configured server object.
 func New(config Config) (Server, error) {
 	// Dependencies.
-	if config.ErrorEncoder == nil {
-		return nil, microerror.Maskf(invalidConfigError, "error encoder must not be empty")
-	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "logger must not be empty")
 	}
@@ -137,6 +114,9 @@ func New(config Config) (Server, error) {
 	// Settings.
 	if config.Endpoints == nil {
 		return nil, microerror.Maskf(invalidConfigError, "endpoints must not be empty")
+	}
+	if config.ErrorEncoder == nil {
+		return nil, microerror.Maskf(invalidConfigError, "error encoder must not be empty")
 	}
 	if config.HandlerWrapper == nil {
 		return nil, microerror.Maskf(invalidConfigError, "handler wrapper must not be empty")

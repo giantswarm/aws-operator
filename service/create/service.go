@@ -57,8 +57,9 @@ type Config struct {
 	Logger      micrologger.Logger
 
 	// Settings.
-	AwsConfig  awsutil.Config
-	PubKeyFile string
+	AwsConfig     awsutil.Config
+	AwsHostConfig awsutil.Config
+	PubKeyFile    string
 }
 
 // DefaultConfig provides a default configuration to create a new service by
@@ -71,8 +72,9 @@ func DefaultConfig() Config {
 		Logger:      nil,
 
 		// Settings.
-		AwsConfig:  awsutil.Config{},
-		PubKeyFile: "",
+		AwsConfig:     awsutil.Config{},
+		AwsHostConfig: awsutil.Config{},
+		PubKeyFile:    "",
 	}
 }
 
@@ -93,6 +95,9 @@ func New(config Config) (*Service, error) {
 	var emptyAwsConfig awsutil.Config
 	if config.AwsConfig == emptyAwsConfig {
 		return nil, microerror.Maskf(invalidConfigError, "config.AwsConfig must not be empty")
+	}
+	if config.AwsHostConfig == emptyAwsConfig {
+		return nil, microerror.Maskf(invalidConfigError, "config.AwsHostConfig must not be empty")
 	}
 	if config.PubKeyFile == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.PubKeyFile must not be empty")
@@ -128,8 +133,9 @@ func New(config Config) (*Service, error) {
 		tpr:      newTPR,
 
 		// Settings.
-		awsConfig:  config.AwsConfig,
-		pubKeyFile: config.PubKeyFile,
+		awsConfig:     config.AwsConfig,
+		awsHostConfig: config.AwsHostConfig,
+		pubKeyFile:    config.PubKeyFile,
 	}
 
 	return newService, nil
@@ -147,8 +153,9 @@ type Service struct {
 	tpr      *tpr.TPR
 
 	// Settings.
-	awsConfig  awsutil.Config
-	pubKeyFile string
+	awsConfig     awsutil.Config
+	awsHostConfig awsutil.Config
+	pubKeyFile    string
 }
 
 type Event struct {
@@ -491,13 +498,18 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create cluster namespace: '%#v'", err))
 	}
 
-	// Create AWS client.
+	// Create AWS guest cluster client.
 	s.awsConfig.Region = cluster.Spec.AWS.Region
 	clients := awsutil.NewClients(s.awsConfig)
+	if err := s.awsConfig.SetAccountID(clients.IAM); err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not retrieve guest amazon account id: '%#v'", err))
+	}
 
-	err := s.awsConfig.SetAccountID(clients.IAM)
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not retrieve amazon account id: '%#v'", err))
+	// Create AWS host cluster client.
+	s.awsHostConfig.Region = cluster.Spec.AWS.Region
+	hostClients := awsutil.NewClients(s.awsHostConfig)
+	if err := s.awsHostConfig.SetAccountID(hostClients.IAM); err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not retrieve host amazon account id: '%#v'", err))
 	}
 
 	// Create keypair.
@@ -630,6 +642,26 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	vpcID, err := vpc.GetID()
 	if err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get VPC ID: '%#v'", err))
+	}
+
+	// Create VPC peering connection.
+	var vpcPeeringConection resources.ResourceWithID
+	vpcPeeringConection = &awsresources.VPCPeeringConnection{
+		VPCId:     vpcID,
+		PeerVPCId: cluster.Spec.AWS.VPC.PeerID,
+		AWSEntity: awsresources.AWSEntity{
+			Clients:     clients,
+			HostClients: hostClients,
+		},
+	}
+	vpcPeeringConnectionCreated, err := vpcPeeringConection.CreateIfNotExists()
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create vpc peering connection: '%#v'", err))
+	}
+	if vpcPeeringConnectionCreated {
+		s.logger.Log("info", fmt.Sprintf("created vpc peering connection for cluster '%s'", key.ClusterID(cluster)))
+	} else {
+		s.logger.Log("info", fmt.Sprintf("vpc peering connection for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
 	}
 
 	// Create gateway.
@@ -1219,6 +1251,18 @@ func (s *Service) deleteFunc(obj interface{}) {
 	}
 	if err := s.deleteSecurityGroup(ingressSGInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", ingressSGInput.GroupName, err))
+	}
+
+	// Delete VPC peering connection.
+	vpcPeeringConection := &awsresources.VPCPeeringConnection{
+		VPCId:     vpcID,
+		PeerVPCId: cluster.Spec.AWS.VPC.PeerID,
+		AWSEntity: awsresources.AWSEntity{Clients: clients},
+	}
+	if err := vpcPeeringConection.Delete(); err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not delete vpc peering connection: '%#v'", err))
+	} else {
+		s.logger.Log("info", "deleted vpc peering connection")
 	}
 
 	// Delete VPC.

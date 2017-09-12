@@ -5,5 +5,6 @@ import (
 )
 
 type AWSEntity struct {
-	Clients awsutil.Clients
+	Clients     awsutil.Clients
+	HostClients awsutil.Clients
 }

@@ -27,7 +27,7 @@ spec:
       api:
         domain: "api.${CLUSTER_NAME}.${COMMON_DOMAIN}"
         insecurePort: 8080
-        ip: "172.31.0.1" 
+        ip: "172.31.0.1"
         securePort: 443
         clusterIPRange: "172.31.0.0/24"
       cloudProvider: "aws"
@@ -36,14 +36,14 @@ spec:
       domain: "cluster.local"
       hyperkube:
         docker:
-          image: "quay.io/giantswarm/hyperkube:v1.6.4_coreos.0"
+          image: "quay.io/giantswarm/hyperkube:v1.7.3_coreos.0"
       ingressController:
         docker:
           image: "quay.io/giantswarm/nginx-ingress-controller:0.9.0-beta.11"
         insecurePort: 30010
         securePort: 30011
-        domain: "ingress.${CLUSTER_NAME}.${COMMON_DOMAIN_INGRESS}"
-        wildcardDomain: "*.${CLUSTER_NAME}.${COMMON_DOMAIN_INGRESS}"
+        domain: "ingress.${CLUSTER_NAME}.${COMMON_DOMAIN}"
+        wildcardDomain: "*.${CLUSTER_NAME}.${COMMON_DOMAIN}"
       kubectl:
         docker:
           image: "quay.io/giantswarm/docker-kubectl:f51f93c30d27927d2b33122994c0929b3e6f2432"
@@ -58,6 +58,7 @@ spec:
 
     workers:
     - hostname: "worker-1"
+    - hostname: "worker-2"
 
   aws:
     region: "${AWS_REGION}"
@@ -67,14 +68,17 @@ spec:
       etcd: "${AWS_API_HOSTED_ZONE}"
       ingress: "${AWS_INGRESS_HOSTED_ZONE}"
     vpc:
-      cidr: "10.0.0.0/16"
-      privateSubnetCidr: "10.0.0.0/19"
-      publicSubnetCidr: "10.0.128.0/20"
+      cidr: "10.1.5.0/24"
+      privateSubnetCidr: "10.1.5.0/25"
+      publicSubnetCidr: "10.1.5.128/25"
+      peerid: "${AWS_VPC_PEER_ID}"
 
     masters:
     - imageid: "${AWS_AMI}"
       instancetype: "${AWS_INSTANCE_TYPE_MASTER}"
 
     workers:
+    - imageid: "${AWS_AMI}"
+      instancetype: "${AWS_INSTANCE_TYPE_WORKER}"
     - imageid: "${AWS_AMI}"
       instancetype: "${AWS_INSTANCE_TYPE_WORKER}"
