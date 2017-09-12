@@ -74,6 +74,11 @@ aws:
     cidr: 10.0.0.0/16
     privateSubnetCidr: 10.0.0.0/19
     publicSubnetCidr: 10.0.128.0/20
+    privateSubnets:
+    - name: cluster-worker_0
+      routeTableName: cluster_private_0
+    - name: cluster-worker_1
+      routeTableName: cluster_private_1
     peerId: xxxxxxxxx
   masters:
   - imageID: ami-d60ad6b9
