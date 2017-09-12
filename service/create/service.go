@@ -796,6 +796,10 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not make subnet public, '%#v'", err))
 	}
 
+	if err := publicSubnet.AddHostVPCRoute(routeTable, vpcPeeringConection.(*awsresources.VPCPeeringConnection)); err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not add host vpc route: '%#v'", err))
+	}
+
 	// Run masters.
 	anyMastersCreated, masterIDs, err := s.runMachines(runMachinesInput{
 		clients:             clients,
