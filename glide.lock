@@ -1,5 +1,5 @@
 hash: 517afe1145e69929bb0bd0252d991f813122d07202ade06316b2f4dee8167f99
-updated: 2017-09-12T14:51:50.260099484+02:00
+updated: 2017-09-12T18:26:08.058305341+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: c774e20cd3e96c1963f7bdef55aba8b6a2937090
@@ -82,7 +82,7 @@ imports:
   - spec/kubernetes/kubectl
   - spec/kubernetes/networksetup
 - name: github.com/giantswarm/k8scloudconfig
-  version: f458494a956add84ae4db4f6c963420b0b25de35
+  version: 172f467982de9f3b765c9b63c43d9b817ff18b2b
 - name: github.com/giantswarm/microendpoint
   version: 70547070da4072138bb5161e80a164b0bac075cc
   subpackages:
