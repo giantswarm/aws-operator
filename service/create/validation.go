@@ -1,11 +1,43 @@
 package create
 
 import (
+	"regexp"
+	"strings"
+
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/awstpr/spec/aws"
 	"github.com/giantswarm/clustertpr/spec"
 	"github.com/giantswarm/microerror"
 )
+
+const (
+	availabilityZoneFormat = "[\\d][a-z]"
+)
+
+func validateAvailabilityZone(cluster awstpr.CustomObject) error {
+	az := cluster.Spec.AWS.AZ
+	region := cluster.Spec.AWS.Region
+
+	// AZ should begin with the Region name.
+	if !strings.HasPrefix(az, region) {
+		return microerror.Mask(invalidAvailabilityZoneError)
+	}
+	// AZ format uses 2 hyphens as a separator.
+	if len(strings.Split(az, "-")) != 3 {
+		return microerror.Mask(invalidAvailabilityZoneError)
+	}
+
+	// Check format of the AZ suffix.
+	regEx, err := regexp.Compile(availabilityZoneFormat)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	if !regEx.MatchString(strings.Split(az, "-")[2]) {
+		return microerror.Mask(invalidAvailabilityZoneError)
+	}
+
+	return nil
+}
 
 func validateMasters(awsMasters []aws.Node, masters []spec.Node) error {
 	// Currently only a single master is expected.
@@ -40,6 +72,10 @@ func validateWorkers(awsWorkers []aws.Node, workers []spec.Node) error {
 }
 
 func validateCluster(cluster awstpr.CustomObject) error {
+	if err := validateAvailabilityZone(cluster); err != nil {
+		return microerror.Mask(err)
+	}
+
 	if err := validateMasters(cluster.Spec.AWS.Masters, cluster.Spec.Cluster.Masters); err != nil {
 		return microerror.Mask(err)
 	}
