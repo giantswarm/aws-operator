@@ -145,3 +145,7 @@ func (v *VPCPeeringConnection) GetID() (string, error) {
 
 	return *vpcPeeringConnection.VpcPeeringConnectionId, nil
 }
+
+func (v VPCPeeringConnection) FindExisting() (*ec2.VpcPeeringConnection, error) {
+	return v.findExisting()
+}

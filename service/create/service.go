@@ -796,20 +796,28 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not make subnet public, '%#v'", err))
 	}
 
-	if err := publicSubnet.AddHostVPCRoute(routeTable, vpcPeeringConection.(*awsresources.VPCPeeringConnection)); err != nil {
+	conn, err := vpcPeeringConection.(*awsresources.VPCPeeringConnection).FindExisting()
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not find vpc peering connection: '%#v'", err))
+	}
+
+	routeTableID, err := routeTable.GetID()
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get route table ID: '%#v'", err))
+	}
+
+	publicRoute := &awsresources.Route{
+		RouteTableID:         routeTableID,
+		DestinationCidrBlock: *conn.AccepterVpcInfo.CidrBlock,
+		VpcID:                *conn.VpcPeeringConnectionId,
+		AWSEntity:            awsresources.AWSEntity{Clients: clients},
+	}
+
+	if err := publicRoute.CreateOrFail(); err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not add host vpc route: '%#v'", err))
 	}
 
 	for _, privateSubnetSpec := range cluster.Spec.AWS.VPC.PrivateSubnets {
-		privateSubnet := &awsresources.Subnet{
-			AvailabilityZone: key.AvailabilityZone(cluster),
-			CidrBlock:        cluster.Spec.AWS.VPC.PrivateSubnetCIDR,
-			Name:             privateSubnetSpec.Name,
-			VpcID:            cluster.Spec.AWS.VPC.PeerID,
-			// Dependencies.
-			Logger:    s.logger,
-			AWSEntity: awsresources.AWSEntity{Clients: hostClients},
-		}
 
 		privateRouteTable := &awsresources.RouteTable{
 			Name:   privateSubnetSpec.RouteTableName,
@@ -817,7 +825,19 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 			Client: hostClients.EC2,
 		}
 
-		if err := privateSubnet.AddGuestVPCRoute(privateRouteTable, vpcPeeringConection.(*awsresources.VPCPeeringConnection)); err != nil {
+		privateRouteTableID, err := privateRouteTable.GetID()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get private route table ID: '%#v'", err))
+		}
+
+		privateRoute := &awsresources.Route{
+			RouteTableID:         privateRouteTableID,
+			DestinationCidrBlock: *conn.RequesterVpcInfo.CidrBlock,
+			VpcID:                *conn.VpcPeeringConnectionId,
+			AWSEntity:            awsresources.AWSEntity{Clients: hostClients},
+		}
+
+		if err := privateRoute.CreateOrFail(); err != nil {
 			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not add guest vpc route: '%#v'", err))
 		}
 
@@ -1319,26 +1339,32 @@ func (s *Service) deleteFunc(obj interface{}) {
 			HostClients: hostClients,
 		},
 	}
+	conn, err := vpcPeeringConection.(*awsresources.VPCPeeringConnection).FindExisting()
+	if err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not find vpc peering connection: '%#v'", err))
+	}
 
 	// Delete Guest VPC Route.
 	for _, privateSubnetSpec := range cluster.Spec.AWS.VPC.PrivateSubnets {
-		privateSubnet := &awsresources.Subnet{
-			AvailabilityZone: key.AvailabilityZone(cluster),
-			CidrBlock:        cluster.Spec.AWS.VPC.PrivateSubnetCIDR,
-			Name:             privateSubnetSpec.Name,
-			VpcID:            cluster.Spec.AWS.VPC.PeerID,
-			// Dependencies.
-			Logger:    s.logger,
-			AWSEntity: awsresources.AWSEntity{Clients: hostClients},
-		}
-
 		privateRouteTable := &awsresources.RouteTable{
 			Name:   privateSubnetSpec.RouteTableName,
 			VpcID:  cluster.Spec.AWS.VPC.PeerID,
 			Client: hostClients.EC2,
 		}
 
-		if err := privateSubnet.DeleteGuestVPCRoute(privateRouteTable, vpcPeeringConection.(*awsresources.VPCPeeringConnection)); err != nil {
+		privateRouteTableID, err := privateRouteTable.GetID()
+		if err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not get private route table ID: '%#v'", err))
+		}
+
+		privateRoute := &awsresources.Route{
+			RouteTableID:         privateRouteTableID,
+			DestinationCidrBlock: *conn.RequesterVpcInfo.CidrBlock,
+			VpcID:                *conn.VpcPeeringConnectionId,
+			AWSEntity:            awsresources.AWSEntity{Clients: hostClients},
+		}
+
+		if err := privateRoute.Delete(); err != nil {
 			s.logger.Log("error", fmt.Sprintf("could not delete vpc route: '%v'", err))
 		}
 	}
