@@ -198,3 +198,46 @@ func (s *Subnet) AddHostVPCRoute(routeTable *RouteTable, vpcPeeringConnection *V
 
 	return nil
 }
+
+func (s *Subnet) AddGuestVPCRoute(routeTable *RouteTable, vpcPeeringConnection *VPCPeeringConnection) error {
+	routeTableID, err := routeTable.GetID()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	conn, err := vpcPeeringConnection.findExisting()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	if _, err := s.Clients.EC2.CreateRoute(&ec2.CreateRouteInput{
+		RouteTableId:           &routeTableID,
+		DestinationCidrBlock:   conn.RequesterVpcInfo.CidrBlock,
+		VpcPeeringConnectionId: conn.VpcPeeringConnectionId,
+	}); err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
+func (s *Subnet) DeleteGuestVPCRoute(routeTable *RouteTable, vpcPeeringConnection *VPCPeeringConnection) error {
+	routeTableID, err := routeTable.GetID()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	conn, err := vpcPeeringConnection.findExisting()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	if _, err := s.Clients.EC2.DeleteRoute(&ec2.DeleteRouteInput{
+		RouteTableId:         &routeTableID,
+		DestinationCidrBlock: conn.RequesterVpcInfo.CidrBlock,
+	}); err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
