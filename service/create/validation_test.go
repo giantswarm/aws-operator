@@ -3,11 +3,68 @@ package create
 import (
 	"testing"
 
+	"github.com/giantswarm/awstpr"
+
+	awsspec "github.com/giantswarm/awstpr/spec"
 	"github.com/giantswarm/awstpr/spec/aws"
 	"github.com/giantswarm/clustertpr/spec"
 	"github.com/giantswarm/microerror"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestValidateAvailabilityZone(t *testing.T) {
+	tests := []struct {
+		name             string
+		region           string
+		availabilityZone string
+		expectedError    error
+	}{
+		{
+			name:             "Valid AZ",
+			region:           "eu-central-1",
+			availabilityZone: "eu-central-1a",
+			expectedError:    nil,
+		},
+		{
+			name:             "Valid AZ in a different region",
+			region:           "us-east-1",
+			availabilityZone: "us-east-1d",
+			expectedError:    nil,
+		},
+		{
+			name:             "Invalid AZ for region",
+			region:           "eu-central-1",
+			availabilityZone: "eu-west-1a",
+			expectedError:    invalidAvailabilityZoneError,
+		},
+		{
+			name:             "Invalid AZ format",
+			region:           "eu-central-1",
+			availabilityZone: "eu-central1a",
+			expectedError:    invalidAvailabilityZoneError,
+		},
+		{
+			name:             "Invalid numeric AZ",
+			region:           "eu-central-1",
+			availabilityZone: "eu-central-11",
+			expectedError:    invalidAvailabilityZoneError,
+		},
+	}
+
+	for _, tc := range tests {
+		cluster := awstpr.CustomObject{
+			Spec: awstpr.Spec{
+				AWS: awsspec.AWS{
+					Region: tc.region,
+					AZ:     tc.availabilityZone,
+				},
+			},
+		}
+
+		err := validateAvailabilityZone(cluster)
+		assert.Equal(t, tc.expectedError, microerror.Cause(err), tc.name)
+	}
+}
 
 func TestValidateWorkers(t *testing.T) {
 	tests := []struct {

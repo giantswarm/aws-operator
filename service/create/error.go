@@ -41,6 +41,13 @@ func IsSecretsRetrievalFailed(err error) bool {
 
 // Validation errors
 
+var invalidAvailabilityZoneError = microerror.New("invalid availability zone")
+
+// IsInvalidAvailabilityZone asserts invalidAvailabilityZoneError.
+func IsInvalidAvailabilityZone(err error) bool {
+	return microerror.Cause(err) == invalidAvailabilityZoneError
+}
+
 var workersListEmptyError = microerror.New("workers list empty")
 
 // IsWorkersListEmpty asserts workersListEmptyError.
