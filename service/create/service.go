@@ -28,8 +28,6 @@ import (
 )
 
 const (
-	ClusterListAPIEndpoint  string = "/apis/cluster.giantswarm.io/v1/awses"
-	ClusterWatchAPIEndpoint string = "/apis/cluster.giantswarm.io/v1/watch/awses"
 	// The format of instance's name is "[name of cluster]-[prefix ('master' or 'worker')]-[number]".
 	instanceNameFormat string = "%s-%s-%d"
 	// The format of prefix inside a cluster "[name of cluster]-[prefix ('master' or 'worker')]".
