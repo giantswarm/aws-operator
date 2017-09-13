@@ -1,6 +1,8 @@
 package aws
 
 import (
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/giantswarm/microerror"
@@ -160,4 +162,86 @@ func (asg *AutoScalingGroup) findExisting() (*autoscaling.Group, error) {
 	}
 
 	return autoScalingGroups.AutoScalingGroups[0], nil
+}
+
+// FindLegacy returns true if there is an ASG created for the same cluster name
+// but not being part of a CloudFormation stack.
+func (asg *AutoScalingGroup) FindLegacy() (bool, error) {
+	a, err := asg.findExisting()
+	if IsNotFound(err) {
+		return false, nil
+	} else if err != nil {
+		return false, microerror.Mask(err)
+	}
+
+	var keyNameFound, keyClusterFound bool
+	for _, td := range a.Tags {
+		if *td.Key == tagKeyName && *td.Value == asg.Name {
+			keyNameFound = true
+		} else if *td.Key == tagKeyCluster && *td.Value == asg.ClusterID {
+			keyClusterFound = true
+		} else if strings.HasPrefix(*td.Key, "aws:cloudformation:") {
+			return false, nil
+		}
+	}
+
+	return keyNameFound && keyClusterFound, nil
+}
+
+// DetachInstances detaches instances from this ASG and returns their details
+func (asg *AutoScalingGroup) DetachInstances() ([]*autoscaling.Instance, error) {
+	autoScalingGroup, err := asg.findExisting()
+	if err != nil {
+		return []*autoscaling.Instance{}, microerror.Mask(err)
+	}
+
+	for _, i := range autoScalingGroup.Instances {
+		_, err = asg.Client.DetachInstances(&autoscaling.DetachInstancesInput{
+			AutoScalingGroupName:           aws.String(asg.Name),
+			InstanceIds:                    []*string{i.InstanceId},
+			ShouldDecrementDesiredCapacity: aws.Bool(false),
+		})
+		if err != nil {
+			return []*autoscaling.Instance{}, microerror.Mask(err)
+		}
+	}
+
+	return autoScalingGroup.Instances, nil
+}
+
+// AttachInstances returns details of the instances attached to this ASG
+func (asg *AutoScalingGroup) AttachInstances(instances []*autoscaling.Instance) error {
+	// set termination policy to newest first so that the old instances don't get removed
+	terminationPolicy := "NewestInstance"
+	params := &autoscaling.UpdateAutoScalingGroupInput{
+		AutoScalingGroupName: aws.String(asg.Name),
+		TerminationPolicies:  []*string{&terminationPolicy},
+	}
+	if _, err := asg.Client.UpdateAutoScalingGroup(params); err != nil {
+		return microerror.Mask(err)
+	}
+
+	var ids []*string
+	for _, i := range instances {
+		ids = append(ids, i.InstanceId)
+	}
+
+	_, err := asg.Client.AttachInstances(&autoscaling.AttachInstancesInput{
+		AutoScalingGroupName: aws.String(asg.Name),
+		InstanceIds:          ids,
+	})
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	// back to default termination policy
+	terminationPolicy = "Default"
+	params = &autoscaling.UpdateAutoScalingGroupInput{
+		AutoScalingGroupName: aws.String(asg.Name),
+		TerminationPolicies:  []*string{&terminationPolicy},
+	}
+	if _, err := asg.Client.UpdateAutoScalingGroup(params); err != nil {
+		return microerror.Mask(err)
+	}
+	return nil
 }
