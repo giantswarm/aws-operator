@@ -126,15 +126,9 @@ func TestSpecYamlEncoding(t *testing.T) {
 				CIDR:              "10.0.0.0/16",
 				PrivateSubnetCIDR: "10.0.0.0/19",
 				PublicSubnetCIDR:  "10.0.128.0/20",
-				PrivateSubnets: []aws.Subnet{
-					{
-						Name:           "cluster-worker_0",
-						RouteTableName: "cluster_private_0",
-					},
-					{
-						Name:           "cluster-worker_1",
-						RouteTableName: "cluster_private_1",
-					},
+				RouteTableNames: []string{
+					"cluster_private_0",
+					"cluster_private_1",
 				},
 				PeerID: "xxxxxxxxx",
 			},

@@ -71,11 +71,9 @@ spec:
       cidr: "10.1.12.0/24"
       privateSubnetCidr: "10.1.12.0/25"
       publicSubnetCidr: "10.1.12.128/25"
-      privateSubnets:
-      - name: gauss-worker_0
-        routeTableName: gauss_private_0
-      - name: gauss-worker_1
-        routeTableName: gauss_private_1
+      routeTableNames:
+      - ${AWS_ROUTE_TABLE_0}
+      - ${AWS_ROUTE_TABLE_1}
       peerid: "${AWS_VPC_PEER_ID}"
 
     masters:

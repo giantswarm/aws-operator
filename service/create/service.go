@@ -815,10 +815,10 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		s.logger.Log("info", fmt.Sprintf("host vpc route for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
 	}
 
-	for _, privateSubnetSpec := range cluster.Spec.AWS.VPC.PrivateSubnets {
+	for _, privateRouteTableName := range cluster.Spec.AWS.VPC.RouteTableNames {
 
 		privateRouteTable := &awsresources.RouteTable{
-			Name:   privateSubnetSpec.RouteTableName,
+			Name:   privateRouteTableName,
 			VpcID:  cluster.Spec.AWS.VPC.PeerID,
 			Client: hostClients.EC2,
 		}
@@ -1343,9 +1343,9 @@ func (s *Service) deleteFunc(obj interface{}) {
 	}
 
 	// Delete Guest VPC Route.
-	for _, privateSubnetSpec := range cluster.Spec.AWS.VPC.PrivateSubnets {
+	for _, privateRouteTableName := range cluster.Spec.AWS.VPC.RouteTableNames {
 		privateRouteTable := &awsresources.RouteTable{
-			Name:   privateSubnetSpec.RouteTableName,
+			Name:   privateRouteTableName,
 			VpcID:  cluster.Spec.AWS.VPC.PeerID,
 			Client: hostClients.EC2,
 		}

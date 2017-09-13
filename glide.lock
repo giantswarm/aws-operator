@@ -1,8 +1,8 @@
 hash: 517afe1145e69929bb0bd0252d991f813122d07202ade06316b2f4dee8167f99
-updated: 2017-09-12T18:26:08.058305341+02:00
+updated: 2017-09-13T15:56:02.414310623+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: c774e20cd3e96c1963f7bdef55aba8b6a2937090
+  version: bfee4fbee3bcb1cda78299a60ff52fe3aa3a2db9
   subpackages:
   - aws
   - aws/awserr
@@ -65,7 +65,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: 002414d66268c25933b0c38c1c88d2b2f0090bb8
+  version: 99bc35c5464d31c61e1781314cd100d5ee2c6bed
   subpackages:
   - spec
   - spec/aws
@@ -193,7 +193,7 @@ imports:
 - name: github.com/pelletier/go-toml
   version: 1d6b12b7cb290426e27e6b4e38b89fcda3aeef03
 - name: github.com/prometheus/client_golang
-  version: 671c87b04728565380d95c621edc687bfa00664c
+  version: 50b3332fd63be43e38472600ec187ceec39d26d6
   subpackages:
   - prometheus
   - prometheus/promhttp
