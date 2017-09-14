@@ -16,4 +16,7 @@ const (
 	ipPermissionGroupID  string = "ip-permission.group-id"
 	ipPermissionProtocol string = "ip-permission.protocol"
 	ipPermissionToPort   string = "ip-permission.to-port"
+	// newestFirstTerminationPolicy is the ASG termination policy used to prevent
+	// old instances to be terminated during migration
+	newestFirstTerminationPolicy string = "NewestInstance"
 )

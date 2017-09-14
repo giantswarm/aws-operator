@@ -921,7 +921,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	}
 	legacyASG, err := asg.FindLegacy()
 	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("search for legacy worker ASG failed: '%#v'", err))
+		return microerror.Maskf(executionFailedError, "search for legacy worker ASG failed: '%#v'", err)
 	}
 
 	var instances []*autoscaling.Instance
@@ -929,10 +929,10 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		// detach instances and delete legacy ASG to prevent name clash
 		instances, err = asg.DetachInstances()
 		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("detaching legacy worker from ASG failed: '%#v'", err))
+			return microerror.Maskf(executionFailedError, "detaching legacy worker from ASG failed: '%#v'", err)
 		}
 		if err := asg.Delete(); err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("deletingg legacy ASG failed: '%#v'", err))
+			return microerror.Maskf(executionFailedError, "deleting legacy ASG failed: '%#v'", err)
 		}
 	}
 
@@ -969,11 +969,11 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	if legacyASG {
 		cfAsg, err := s.findCFASG(clients.AutoScaling, key.AutoScalingGroupName(cluster, prefixWorker), key.ClusterID(cluster))
 		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could find CF ASG: '#%v'", err))
+			return microerror.Maskf(executionFailedError, "could find CF ASG: '#%v'", err)
 		}
 
 		if err := cfAsg.AttachInstances(instances); err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not process legacy ASG: '#%v'", err))
+			return microerror.Maskf(executionFailedError, "could not process legacy ASG: '#%v'", err)
 		}
 	}
 

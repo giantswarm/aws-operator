@@ -174,18 +174,7 @@ func (asg *AutoScalingGroup) FindLegacy() (bool, error) {
 		return false, microerror.Mask(err)
 	}
 
-	var keyNameFound, keyClusterFound bool
-	for _, td := range a.Tags {
-		if *td.Key == tagKeyName && *td.Value == asg.Name {
-			keyNameFound = true
-		} else if *td.Key == tagKeyCluster && *td.Value == asg.ClusterID {
-			keyClusterFound = true
-		} else if strings.HasPrefix(*td.Key, "aws:cloudformation:") {
-			return false, nil
-		}
-	}
-
-	return keyNameFound && keyClusterFound, nil
+	return isLegacyASG(asg.Name, asg.ClusterID, a.Tags), nil
 }
 
 // DetachInstances detaches instances from this ASG and returns their details
@@ -211,8 +200,15 @@ func (asg *AutoScalingGroup) DetachInstances() ([]*autoscaling.Instance, error) 
 
 // AttachInstances returns details of the instances attached to this ASG
 func (asg *AutoScalingGroup) AttachInstances(instances []*autoscaling.Instance) error {
+	// save current termination policies
+	autoScalingGroup, err := asg.findExisting()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	backTerminationPolicies := autoScalingGroup.TerminationPolicies
+
 	// set termination policy to newest first so that the old instances don't get removed
-	terminationPolicy := "NewestInstance"
+	terminationPolicy := newestFirstTerminationPolicy
 	params := &autoscaling.UpdateAutoScalingGroupInput{
 		AutoScalingGroupName: aws.String(asg.Name),
 		TerminationPolicies:  []*string{&terminationPolicy},
@@ -226,7 +222,7 @@ func (asg *AutoScalingGroup) AttachInstances(instances []*autoscaling.Instance) 
 		ids = append(ids, i.InstanceId)
 	}
 
-	_, err := asg.Client.AttachInstances(&autoscaling.AttachInstancesInput{
+	_, err = asg.Client.AttachInstances(&autoscaling.AttachInstancesInput{
 		AutoScalingGroupName: aws.String(asg.Name),
 		InstanceIds:          ids,
 	})
@@ -234,14 +230,28 @@ func (asg *AutoScalingGroup) AttachInstances(instances []*autoscaling.Instance) 
 		return microerror.Mask(err)
 	}
 
-	// back to default termination policy
-	terminationPolicy = "Default"
+	// back to original termination policies
 	params = &autoscaling.UpdateAutoScalingGroupInput{
 		AutoScalingGroupName: aws.String(asg.Name),
-		TerminationPolicies:  []*string{&terminationPolicy},
+		TerminationPolicies:  backTerminationPolicies,
 	}
 	if _, err := asg.Client.UpdateAutoScalingGroup(params); err != nil {
 		return microerror.Mask(err)
 	}
 	return nil
+}
+
+func isLegacyASG(name, clusterID string, tags []*autoscaling.TagDescription) bool {
+	var keyNameFound, keyClusterFound bool
+	for _, td := range tags {
+		if *td.Key == tagKeyName && *td.Value == name {
+			keyNameFound = true
+		} else if *td.Key == tagKeyCluster && *td.Value == clusterID {
+			keyClusterFound = true
+		} else if strings.HasPrefix(*td.Key, "aws:cloudformation:") {
+			return false
+		}
+	}
+
+	return keyNameFound && keyClusterFound
 }
