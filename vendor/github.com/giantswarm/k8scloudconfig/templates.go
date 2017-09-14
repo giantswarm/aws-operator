@@ -2,9 +2,14 @@ package cloudconfig
 
 const (
 	MasterTemplate = `#cloud-config
-ssh_authorized_keys:
-{{range .Cluster.Kubernetes.SSH.PublicKeys}}
-- '{{.}}'{{end}}
+users:
+{{ range $index, $user := .Cluster.Kubernetes.SSH.UserList }}  - name: {{ $user.Name }}
+    groups:
+      - "sudo"
+      - "docker"
+    ssh-authorized-keys:
+       - "{{ $user.PublicKey }}"
+{{end}}
 write_files:
 - path: /srv/calico-policy-controller-sa.yaml
   owner: root
@@ -1134,9 +1139,15 @@ coreos:
     command: stop
     mask: true
   - name: locksmithd.service
+    enable: false
     command: stop
     mask: true
   - name: fleet.service
+    enable: false
+    mask: true
+    command: stop
+  - name: fleet.socket
+    enable: false
     mask: true
     command: stop
   - name: systemd-networkd-wait-online.service
@@ -1311,9 +1322,14 @@ coreos:
 `
 
 	WorkerTemplate = `#cloud-config
-ssh_authorized_keys:
-{{range .Cluster.Kubernetes.SSH.PublicKeys}}
-- '{{.}}'{{end}}
+users:
+{{ range $index, $user := .Cluster.Kubernetes.SSH.UserList }}  - name: {{ $user.Name }}
+    groups:
+      - "sudo"
+      - "docker"
+    ssh-authorized-keys:
+       - "{{ $user.PublicKey }}"
+{{end}}
 write_files:
 - path: /etc/kubernetes/config/proxy-kubeconfig.yml
   owner: root
