@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
+	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/microerror"
 )
 
@@ -185,11 +186,15 @@ func (asg *AutoScalingGroup) DetachInstances() ([]*autoscaling.Instance, error) 
 	}
 
 	for _, i := range autoScalingGroup.Instances {
-		_, err = asg.Client.DetachInstances(&autoscaling.DetachInstancesInput{
-			AutoScalingGroupName:           aws.String(asg.Name),
-			InstanceIds:                    []*string{i.InstanceId},
-			ShouldDecrementDesiredCapacity: aws.Bool(false),
-		})
+		operation := func() error {
+			_, err = asg.Client.DetachInstances(&autoscaling.DetachInstancesInput{
+				AutoScalingGroupName:           aws.String(asg.Name),
+				InstanceIds:                    []*string{i.InstanceId},
+				ShouldDecrementDesiredCapacity: aws.Bool(false),
+			})
+			return err
+		}
+		err := backoff.Retry(operation, backoff.NewExponentialBackOff())
 		if err != nil {
 			return []*autoscaling.Instance{}, microerror.Mask(err)
 		}
