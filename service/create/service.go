@@ -969,7 +969,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	if legacyASG {
 		cfAsg, err := s.findCFASG(clients.AutoScaling, key.AutoScalingGroupName(cluster, prefixWorker), key.ClusterID(cluster))
 		if err != nil {
-			return microerror.Maskf(executionFailedError, "could find CF ASG: '#%v'", err)
+			return microerror.Maskf(executionFailedError, "could not find CF ASG: '#%v'", err)
 		}
 
 		if err := cfAsg.AttachInstances(instances); err != nil {
