@@ -42,7 +42,7 @@ func TestIsLegacyASG(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		t.Run("name and cluster match, no CF tag", func(t *testing.T) {
+		t.Run(tc.description, func(t *testing.T) {
 			actual := isLegacyASG(tc.name, tc.clusterID, tc.tags)
 
 			if actual != tc.expected {
