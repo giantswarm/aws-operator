@@ -22,23 +22,42 @@ func TestIsLegacyASG(t *testing.T) {
 		tags        []*autoscaling.TagDescription
 		expected    bool
 	}{
-		{"name and cluster match, no CF tag", nameOk, clusterOk, []*autoscaling.TagDescription{
-			{Key: &tagNameOK, Value: &nameOk},
-			{Key: &tagClusterOK, Value: &clusterOk},
-		}, true},
-		{"name and cluster match, CF tag", nameOk, clusterOk, []*autoscaling.TagDescription{
-			{Key: &tagNameOK, Value: &nameOk},
-			{Key: &tagClusterOK, Value: &clusterOk},
-			{Key: &tagCF, Value: &clusterOk},
-		}, false},
-		{"name no match, cluster match, no CF tag", nameBad, clusterOk, []*autoscaling.TagDescription{
-			{Key: &tagNameOK, Value: &nameOk},
-			{Key: &tagClusterOK, Value: &clusterOk},
-		}, false},
-		{"name match, cluster no match, no CF tag", nameOk, clusterBad, []*autoscaling.TagDescription{
-			{Key: &tagNameOK, Value: &nameOk},
-			{Key: &tagClusterOK, Value: &clusterOk},
-		}, false},
+		{
+			description: "name and cluster match, no CF tag",
+			name:        nameOk,
+			clusterID:   clusterOk,
+			tags: []*autoscaling.TagDescription{
+				{Key: &tagNameOK, Value: &nameOk},
+				{Key: &tagClusterOK, Value: &clusterOk},
+			},
+			expected: true},
+		{
+			description: "name and cluster match, CF tag",
+			name:        nameOk,
+			clusterID:   clusterOk,
+			tags: []*autoscaling.TagDescription{
+				{Key: &tagNameOK, Value: &nameOk},
+				{Key: &tagClusterOK, Value: &clusterOk},
+				{Key: &tagCF, Value: &clusterOk},
+			},
+			expected: false},
+		{
+			description: "name no match, cluster match, no CF tag",
+			name:        nameBad,
+			clusterID:   clusterOk,
+			tags: []*autoscaling.TagDescription{
+				{Key: &tagNameOK, Value: &nameOk},
+				{Key: &tagClusterOK, Value: &clusterOk},
+			},
+			expected: false},
+		{
+			description: "name match, cluster no match, no CF tag",
+			name:        nameOk,
+			clusterID:   clusterBad,
+			tags: []*autoscaling.TagDescription{
+				{Key: &tagNameOK, Value: &nameOk},
+				{Key: &tagClusterOK, Value: &clusterOk},
+			}, expected: false},
 	}
 
 	for _, tc := range testCases {
