@@ -12,58 +12,43 @@ func TestIsLegacyASG(t *testing.T) {
 	tagNameOK := tagKeyName
 	tagClusterOK := tagKeyCluster
 	tagCF := "aws:cloudformation:stack-id"
+	nameBad := "my-other-asg"
+	clusterBad := "my-other-cluster"
 
-	t.Run("name and cluster match, no CF tag", func(t *testing.T) {
-		tags := []*autoscaling.TagDescription{
+	testCases := []struct {
+		description string
+		name        string
+		clusterID   string
+		tags        []*autoscaling.TagDescription
+		expected    bool
+	}{
+		{"name and cluster match, no CF tag", nameOk, clusterOk, []*autoscaling.TagDescription{
 			{Key: &tagNameOK, Value: &nameOk},
 			{Key: &tagClusterOK, Value: &clusterOk},
-		}
-
-		if !isLegacyASG(nameOk, clusterOk, tags) {
-			t.Errorf("not legacy for tags %v, name %s and clusterID %s",
-				tags, nameOk, clusterOk)
-		}
-	})
-
-	t.Run("name and cluster match, CF tag", func(t *testing.T) {
-		tags := []*autoscaling.TagDescription{
+		}, true},
+		{"name and cluster match, CF tag", nameOk, clusterOk, []*autoscaling.TagDescription{
 			{Key: &tagNameOK, Value: &nameOk},
 			{Key: &tagClusterOK, Value: &clusterOk},
 			{Key: &tagCF, Value: &clusterOk},
-		}
-
-		if isLegacyASG(nameOk, clusterOk, tags) {
-			t.Errorf("legacy for tags %v, name %s and clusterID %s",
-				tags, nameOk, clusterOk)
-		}
-	})
-
-	t.Run("name no match, cluster match, no CF tag", func(t *testing.T) {
-		tags := []*autoscaling.TagDescription{
+		}, false},
+		{"name no match, cluster match, no CF tag", nameBad, clusterOk, []*autoscaling.TagDescription{
 			{Key: &tagNameOK, Value: &nameOk},
 			{Key: &tagClusterOK, Value: &clusterOk},
-		}
-
-		nameBad := "my-other-asg"
-
-		if isLegacyASG(nameBad, clusterOk, tags) {
-			t.Errorf("legacy for tags %v, name %s and clusterID %s",
-				tags, nameBad, clusterOk)
-		}
-	})
-
-	t.Run("name match, cluster no match, no CF tag", func(t *testing.T) {
-		tags := []*autoscaling.TagDescription{
+		}, false},
+		{"name match, cluster no match, no CF tag", nameOk, clusterBad, []*autoscaling.TagDescription{
 			{Key: &tagNameOK, Value: &nameOk},
 			{Key: &tagClusterOK, Value: &clusterOk},
-		}
+		}, false},
+	}
 
-		clusterBad := "my-other-cluster"
+	for _, tc := range testCases {
+		t.Run("name and cluster match, no CF tag", func(t *testing.T) {
+			actual := isLegacyASG(tc.name, tc.clusterID, tc.tags)
 
-		if isLegacyASG(nameOk, clusterBad, tags) {
-			t.Errorf("legacy for tags %v, name %s and clusterID %s",
-				tags, clusterBad, clusterBad)
-		}
-	})
-
+			if actual != tc.expected {
+				t.Errorf("got %v, expected %v for tags %v, name %s and clusterID %s",
+					actual, tc.expected, tc.tags, tc.name, tc.clusterID)
+			}
+		})
+	}
 }
