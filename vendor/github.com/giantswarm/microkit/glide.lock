@@ -1,5 +1,5 @@
-hash: a820ff2e57789c17b156cd9a56701ee8e78a0aa417c3d37fde0a9396ed099f6e
-updated: 2017-08-24T14:29:05.903499336+01:00
+hash: 2e168d238cf1c55af016d57aee0e470a52421c0ecd035a1368a36a3dc54dec0f
+updated: 2017-09-14T15:49:53.212522287+02:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -14,7 +14,7 @@ imports:
   subpackages:
   - microloggertest
 - name: github.com/giantswarm/microstorage
-  version: f5c68d40459f0021cf8266501b7d8615ea4ff641
+  version: e990a46ff7c9065f8d83c0a649cb1a6ef5d411d7
   subpackages:
   - memory
   - microstoragetest
@@ -37,7 +37,7 @@ imports:
 - name: github.com/gorilla/mux
   version: 0eeaf8392f5b04950925b8a69fe70f110fa7cbfc
 - name: github.com/hashicorp/hcl
-  version: 392dba7d905ed5d04a5794ba89f558b27e2ba1ca
+  version: 8f6b1344a92ff8877cf24a5de9177bf7d0a2a187
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -54,7 +54,7 @@ imports:
 - name: github.com/kr/logfmt
   version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
 - name: github.com/magiconair/properties
-  version: be5ece7dd465ab0765a9682137865547526d1dfb
+  version: 8d7837e64d3c1ee4e54a880c5a920ab4316fc90a
 - name: github.com/matttproud/golang_protobuf_extensions
   version: c12348ce28de40eed0136aa2b644d0ee0650e56c
   subpackages:
@@ -62,9 +62,9 @@ imports:
 - name: github.com/mitchellh/mapstructure
   version: d0303fe809921458f417bcf828397a65db30a7e4
 - name: github.com/pelletier/go-toml
-  version: 4692b8f9babfc93db58cc592ba2689d8736781de
+  version: 1d6b12b7cb290426e27e6b4e38b89fcda3aeef03
 - name: github.com/prometheus/client_golang
-  version: 94ff84a9a6ebb5e6eb9172897c221a64df3443bc
+  version: 50b3332fd63be43e38472600ec187ceec39d26d6
   subpackages:
   - prometheus
   - prometheus/promhttp
@@ -83,17 +83,17 @@ imports:
   subpackages:
   - xfs
 - name: github.com/spf13/afero
-  version: 9be650865eab0c12963d8753212f4f9c66cdcf12
+  version: ee1bd8ee15a1306d1f9201acc41ef39cd9f99a1b
   subpackages:
   - mem
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 2df9a531813370438a4d79bfc33e21f58063ed87
+  version: b78744579491c1ceeaaa3b40205e56b0591b93a3
 - name: github.com/spf13/jwalterweatherman
-  version: 0efa5202c04663c757d84f90f5219c1250baf94f
+  version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
 - name: github.com/spf13/pflag
-  version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
+  version: 7aff26db30c1be810f9de5038ec5ef96ac41fd7c
 - name: github.com/spf13/viper
   version: 25b30aa063fc18e48662b86996252eabdcf2f0c7
 - name: github.com/tylerb/graceful
@@ -108,5 +108,5 @@ imports:
   - transform
   - unicode/norm
 - name: gopkg.in/yaml.v2
-  version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
+  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 testImports: []

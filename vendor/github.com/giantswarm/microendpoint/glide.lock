@@ -1,5 +1,5 @@
 hash: cf39b905afbb50b2bbd503ec81326a6c725aabb9a1af42e2d1b2c1518a9d5a67
-updated: 2017-08-17T08:47:20.213106115+02:00
+updated: 2017-09-14T18:07:35.374476439+02:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -30,7 +30,7 @@ imports:
   subpackages:
   - microloggertest
 - name: github.com/giantswarm/microstorage
-  version: 55dcb4ea118ed35ec49d4d1346e907affa098df5
+  version: e990a46ff7c9065f8d83c0a649cb1a6ef5d411d7
 - name: github.com/go-kit/kit
   version: a9ca6725cbbea455e61c6bc8a1ed28e81eb3493b
   subpackages:
@@ -71,7 +71,7 @@ imports:
 - name: github.com/hashicorp/go-rootcerts
   version: 6bb64b370b90e7ef1fa532be9e591a81c3493e00
 - name: github.com/hashicorp/hcl
-  version: 392dba7d905ed5d04a5794ba89f558b27e2ba1ca
+  version: 68e816d1c783414e79bc65b3994d9ab6b0a722ab
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -108,7 +108,7 @@ imports:
 - name: github.com/mitchellh/mapstructure
   version: d0303fe809921458f417bcf828397a65db30a7e4
 - name: github.com/prometheus/client_golang
-  version: c5b7fccd204277076155f10851dad72b76a49317
+  version: 50b3332fd63be43e38472600ec187ceec39d26d6
   subpackages:
   - prometheus
 - name: github.com/prometheus/client_model
