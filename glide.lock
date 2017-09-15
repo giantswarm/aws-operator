@@ -65,7 +65,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: 55c4b7293f81bc6507f52f184b6c350f9c35c397
+  version: fa0bedb4c273f861dac5aad8983a2ada7308ff90
   subpackages:
   - spec
   - spec/aws
@@ -86,6 +86,7 @@ imports:
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   version: 792eebd099d3256e021a91a88b290b2fbf63d559
 =======
   version: 25fc70b62f636c783ada2fa2618077408cc273aa
@@ -96,6 +97,9 @@ imports:
 =======
   version: 792eebd099d3256e021a91a88b290b2fbf63d559
 >>>>>>> test aws-operator for giantswarm/k8scloudconfig#182
+=======
+  version: 7b652044608bf5ea7e496ca27bb4ddd85ec4176b
+>>>>>>> update Glide vendors
 - name: github.com/giantswarm/microendpoint
   version: f5682d1d6fe0eb963397fb7e0535c1794644efce
   subpackages:
@@ -257,6 +261,7 @@ imports:
   version: e90d6d0afc4c315a0d87a568ae68577cc15149a0
   subpackages:
   - context
+  - context/ctxhttp
   - http2
   - http2/hpack
   - idna

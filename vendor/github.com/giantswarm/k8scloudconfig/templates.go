@@ -1349,6 +1349,24 @@ coreos:
   - name: audit-rules.service
     enable: true
     command: start
+    content: |
+      [Unit]
+      Description=Load Security Auditing Rules
+      DefaultDependencies=no
+      After=local-fs.target systemd-tmpfiles-setup.service
+      Conflicts=shutdown.target
+      Before=sysinit.target shutdown.target
+      ConditionSecurity=audit
+      
+      [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      ExecStartPre=/bin/bash -c "while [ ! -f /etc/audit/rules.d/10-docker.rules ]; do echo 'Waiting for /etc/audit/rules.d/10-docker.rules to be written' && sleep 1; done"      
+      ExecStart=/sbin/augenrules --load
+      ExecStop=-/sbin/auditctl -D
+      
+      [Install]
+      WantedBy=multi-user.target
     
   update:
     reboot-strategy: off
