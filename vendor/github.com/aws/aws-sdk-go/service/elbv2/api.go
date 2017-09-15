@@ -7426,11 +7426,3 @@ const (
 	// TargetTypeEnumIp is a TargetTypeEnum enum value
 	TargetTypeEnumIp = "ip"
 )
-
-const (
-	// TargetTypeEnumInstance is a TargetTypeEnum enum value
-	TargetTypeEnumInstance = "instance"
-
-	// TargetTypeEnumIp is a TargetTypeEnum enum value
-	TargetTypeEnumIp = "ip"
-)

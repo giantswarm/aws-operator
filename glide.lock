@@ -1,8 +1,8 @@
-hash: a24938420ec06d0110d6229584ac19ddfa492c6f61810eb8a1bcd4e29d8ecf4d
-updated: 2017-09-01T17:51:22.929958989+02:00
+hash: 177076be6fb84a1299ce7787388201d6b2fe2a85d2553cfab615fcbf14081fb9
+updated: 2017-09-15T15:45:16.209319407+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 44376742d0a0cb0a97c3e472b00fad8d350af166
+  version: ad2c5a3ad38848175fca3225d0f7a94c426e4894
   subpackages:
   - aws
   - aws/awserr
@@ -83,23 +83,7 @@ imports:
   - spec/kubernetes/networksetup
   - spec/kubernetes/ssh
 - name: github.com/giantswarm/k8scloudconfig
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-  version: 792eebd099d3256e021a91a88b290b2fbf63d559
-=======
-  version: 25fc70b62f636c783ada2fa2618077408cc273aa
->>>>>>> test aws-operator for giantswarm/k8scloudconfig#182
-=======
-  version: f65c2c783514ff8a534a4fc49714538bed81f3fb
->>>>>>> test aws-operator for giantswarm/k8scloudconfig#182
-=======
-  version: 792eebd099d3256e021a91a88b290b2fbf63d559
->>>>>>> test aws-operator for giantswarm/k8scloudconfig#182
-=======
   version: 7b652044608bf5ea7e496ca27bb4ddd85ec4176b
->>>>>>> update Glide vendors
 - name: github.com/giantswarm/microendpoint
   version: f5682d1d6fe0eb963397fb7e0535c1794644efce
   subpackages:
@@ -108,7 +92,7 @@ imports:
 - name: github.com/giantswarm/microerror
   version: 5ade94eb4ee35ef72eb9382228470caeddb29989
 - name: github.com/giantswarm/microkit
-  version: 6b235e750c3dddc4010b9b017642bb91ddd16245
+  version: 4871f763488a16c5b7ea3c411bbd82cd5139e29a
   subpackages:
   - command
   - command/daemon
@@ -116,6 +100,7 @@ imports:
   - command/daemon/flag/config
   - command/daemon/flag/server
   - command/daemon/flag/server/listen
+  - command/daemon/flag/server/log
   - command/daemon/flag/server/tls
   - command/version
   - flag
@@ -131,7 +116,7 @@ imports:
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: ebba313a2a521c384192e0011959d58682220cb3
+  version: 61dee0512ee87e84bb761b50ce8fa1191465fd14
   subpackages:
   - client/k8s
   - tpr
@@ -219,7 +204,7 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: bc8b88226a1210b016e9993b1d75f858c9c8f778
+  version: 2f17f4a9d485bf34b4bfaccc273805040e4f86c8
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
@@ -239,7 +224,7 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 3c0b56b677e04926dfa835a1b3f11cd4f62f076e
+  version: b78744579491c1ceeaaa3b40205e56b0591b93a3
 - name: github.com/spf13/jwalterweatherman
   version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
 - name: github.com/spf13/pflag
@@ -261,7 +246,6 @@ imports:
   version: e90d6d0afc4c315a0d87a568ae68577cc15149a0
   subpackages:
   - context
-  - context/ctxhttp
   - http2
   - http2/hpack
   - idna
@@ -288,7 +272,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
+  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/apimachinery
   version: 85ace5365f33b16fc735c866a12e3c765b9700f2
   subpackages:

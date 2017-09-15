@@ -9561,29 +9561,17 @@ type PutSlotTypeInput struct {
 	// Name is a required field
 	Name *string `location:"uri" locationName:"name" min:"1" type:"string" required:"true"`
 
-<<<<<<< HEAD
-	// Determines the strategy that Amazon Lex uses to return slot type values.
-	// The field can be set to one of the following values:
-	//
-	//    * ORIGINAL_VALUE - Returns the value entered by the user.
-=======
 	// Determines the slot resolution strategy that Amazon Lex uses to return slot
 	// type values. The field can be set to one of the following values:
 	//
 	//    * ORIGINAL_VALUE - Returns the value entered by the user, if the user
 	//    value is similar to the slot value.
->>>>>>> vendor-separate-ssh-accounts (#409)
 	//
 	//    * TOP_RESOLUTION - If there is a resolution list for the slot, return
 	//    the first value in the resolution list as the slot type value. If there
 	//    is no resolution list, null is returned.
 	//
-<<<<<<< HEAD
-	// If you don't specify the valueSelectionStrategy is not provided, the default
-	// is ORIGINAL_VALUE.
-=======
 	// If you don't specify the valueSelectionStrategy, the default is ORIGINAL_VALUE.
->>>>>>> vendor-separate-ssh-accounts (#409)
 	ValueSelectionStrategy *string `locationName:"valueSelectionStrategy" type:"string" enum:"SlotValueSelectionStrategy"`
 }
 
@@ -9680,8 +9668,8 @@ type PutSlotTypeOutput struct {
 	// The name of the slot type.
 	Name *string `locationName:"name" min:"1" type:"string"`
 
-	// The strategy that Amazon Lex uses to determine the value of the slot. For
-	// more information, see PutSlotType.
+	// The slot resolution strategy that Amazon Lex uses to determine the value
+	// of the slot. For more information, see PutSlotType.
 	ValueSelectionStrategy *string `locationName:"valueSelectionStrategy" type:"string" enum:"SlotValueSelectionStrategy"`
 
 	// The version of the slot type. For a new slot type, the version is always
