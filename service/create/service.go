@@ -1,11 +1,13 @@
 package create
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -912,6 +914,28 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	}
 
 	// Create an Auto Scaling Group for the workers.
+	asg := awsresources.AutoScalingGroup{
+		Client:    clients.AutoScaling,
+		Name:      key.AutoScalingGroupName(cluster, prefixWorker),
+		ClusterID: key.ClusterID(cluster),
+	}
+	legacyASG, err := asg.FindLegacy()
+	if err != nil {
+		return microerror.Maskf(executionFailedError, "search for legacy worker ASG failed: '%#v'", err)
+	}
+
+	var instances []*autoscaling.Instance
+	if legacyASG {
+		// detach instances and delete legacy ASG to prevent name clash
+		instances, err = asg.DetachInstances(s.logger)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, "detaching legacy worker from ASG failed: '%#v'", err)
+		}
+		if err := asg.Delete(); err != nil {
+			return microerror.Maskf(executionFailedError, "deleting legacy ASG failed: '%#v'", err)
+		}
+	}
+
 	asgStackInput := asgStackInput{
 		// Dependencies.
 		clients: clients,
@@ -941,6 +965,17 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	}
 
 	s.logger.Log("info", fmt.Sprintf("processed autoscaling group stack '%s'", key.AutoScalingGroupName(cluster, prefixWorker)))
+
+	if legacyASG {
+		cfAsg, err := s.findCFASG(clients.AutoScaling, key.AutoScalingGroupName(cluster, prefixWorker), key.ClusterID(cluster))
+		if err != nil {
+			return microerror.Maskf(executionFailedError, "could not find CF ASG: '#%v'", err)
+		}
+
+		if err := cfAsg.AttachInstances(instances); err != nil {
+			return microerror.Maskf(executionFailedError, "could not process legacy ASG: '#%v'", err)
+		}
+	}
 
 	// Create Record Sets for the Load Balancers.
 	recordSetInputs := []recordSetInput{
@@ -1382,4 +1417,25 @@ func (s *Service) updateFunc(oldObj, newObj interface{}) {
 	}
 
 	s.logger.Log("info", fmt.Sprintf("processed autoscaling group stack '%s'", key.AutoScalingGroupName(cluster, prefixWorker)))
+}
+
+func (s *Service) findCFASG(client *autoscaling.AutoScaling, name string, clusterID string) (awsresources.AutoScalingGroup, error) {
+	autoScalingGroups, err := client.DescribeAutoScalingGroups(&autoscaling.DescribeAutoScalingGroupsInput{})
+	if err != nil {
+		return awsresources.AutoScalingGroup{}, microerror.Mask(err)
+	}
+
+	for _, asg := range autoScalingGroups.AutoScalingGroups {
+		for _, tag := range asg.Tags {
+			if *tag.Key == "aws:cloudformation:stack-name" && *tag.Value == name {
+				return awsresources.AutoScalingGroup{
+					Client:    client,
+					Name:      *asg.AutoScalingGroupName,
+					ClusterID: clusterID,
+				}, nil
+			}
+		}
+	}
+
+	return awsresources.AutoScalingGroup{}, microerror.Mask(errors.New("not found"))
 }

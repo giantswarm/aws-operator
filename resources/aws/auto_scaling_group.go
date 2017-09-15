@@ -1,9 +1,15 @@
 package aws
 
 import (
+	"fmt"
+	"strings"
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
+	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 )
 
 type AutoScalingGroup struct {
@@ -160,4 +166,104 @@ func (asg *AutoScalingGroup) findExisting() (*autoscaling.Group, error) {
 	}
 
 	return autoScalingGroups.AutoScalingGroups[0], nil
+}
+
+// FindLegacy returns true if there is an ASG created for the same cluster name
+// but not being part of a CloudFormation stack.
+func (asg *AutoScalingGroup) FindLegacy() (bool, error) {
+	a, err := asg.findExisting()
+	if IsNotFound(err) {
+		return false, nil
+	} else if err != nil {
+		return false, microerror.Mask(err)
+	}
+
+	return isLegacyASG(asg.Name, asg.ClusterID, a.Tags), nil
+}
+
+// DetachInstances detaches instances from this ASG and returns their details
+func (asg *AutoScalingGroup) DetachInstances(logger micrologger.Logger) ([]*autoscaling.Instance, error) {
+	autoScalingGroup, err := asg.findExisting()
+	if err != nil {
+		return []*autoscaling.Instance{}, microerror.Mask(err)
+	}
+
+	notify := func(err error, dur time.Duration) {
+		logger.Log("warning", fmt.Sprintf("retrying 'DetachInstances' due to error (%s)", err.Error()))
+	}
+
+	for _, i := range autoScalingGroup.Instances {
+		operation := func() error {
+			_, err = asg.Client.DetachInstances(&autoscaling.DetachInstancesInput{
+				AutoScalingGroupName:           aws.String(asg.Name),
+				InstanceIds:                    []*string{i.InstanceId},
+				ShouldDecrementDesiredCapacity: aws.Bool(false),
+			})
+			return err
+		}
+		err := backoff.RetryNotify(operation, backoff.NewExponentialBackOff(), notify)
+		if err != nil {
+			return []*autoscaling.Instance{}, microerror.Mask(err)
+		}
+	}
+
+	return autoScalingGroup.Instances, nil
+}
+
+// AttachInstances returns details of the instances attached to this ASG
+func (asg *AutoScalingGroup) AttachInstances(instances []*autoscaling.Instance) error {
+	// save current termination policies
+	autoScalingGroup, err := asg.findExisting()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	backTerminationPolicies := autoScalingGroup.TerminationPolicies
+
+	// set termination policy to newest first so that the old instances don't get removed
+	terminationPolicy := newestFirstTerminationPolicy
+	params := &autoscaling.UpdateAutoScalingGroupInput{
+		AutoScalingGroupName: aws.String(asg.Name),
+		TerminationPolicies:  []*string{&terminationPolicy},
+	}
+	if _, err := asg.Client.UpdateAutoScalingGroup(params); err != nil {
+		return microerror.Mask(err)
+	}
+
+	var ids []*string
+	for _, i := range instances {
+		ids = append(ids, i.InstanceId)
+	}
+
+	_, err = asg.Client.AttachInstances(&autoscaling.AttachInstancesInput{
+		AutoScalingGroupName: aws.String(asg.Name),
+		InstanceIds:          ids,
+	})
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	// back to original termination policies
+	params = &autoscaling.UpdateAutoScalingGroupInput{
+		AutoScalingGroupName: aws.String(asg.Name),
+		TerminationPolicies:  backTerminationPolicies,
+	}
+	if _, err := asg.Client.UpdateAutoScalingGroup(params); err != nil {
+		return microerror.Mask(err)
+	}
+	return nil
+}
+
+func isLegacyASG(name, clusterID string, tags []*autoscaling.TagDescription) bool {
+	var keyNameFound, keyClusterFound bool
+	for _, td := range tags {
+		if *td.Key == tagKeyName && *td.Value == name {
+			keyNameFound = true
+		} else if *td.Key == tagKeyCluster && *td.Value == clusterID {
+			keyClusterFound = true
+		} else if strings.HasPrefix(*td.Key, "aws:cloudformation:") {
+			return false
+		}
+	}
+
+	return keyNameFound && keyClusterFound
 }
