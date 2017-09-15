@@ -26,9 +26,9 @@ const (
 	Timeout = 10 * time.Second
 )
 
-const (
-	HealthCheckKey   = "microstorage-health-check-key"
-	HealthCheckValue = "microstorage-health-check-value"
+var (
+	HealthCheckK  = microstorage.MustK(microstorage.NewK("microstorage-health-check-key"))
+	HealthCheckKV = microstorage.MustKV(microstorage.NewKV(HealthCheckK.Key(), "microstorage-health-check-value"))
 )
 
 // Config represents the configuration used to create a healthz service.
@@ -130,17 +130,17 @@ func (s *Service) GetHealthz(ctx context.Context) (healthz.Response, error) {
 }
 
 func (s *Service) getHealthzWithError(ctx context.Context) error {
-	err := s.storage.Put(ctx, HealthCheckKey, HealthCheckValue)
+	err := s.storage.Put(ctx, HealthCheckKV)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	v, err := s.storage.Search(ctx, HealthCheckKey)
+	v, err := s.storage.Search(ctx, HealthCheckK)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	if v != HealthCheckValue {
-		return microerror.Maskf(executionFailedError, "expected health check value '%s' got '%s'", HealthCheckValue, v)
+	if v != HealthCheckKV {
+		return microerror.Maskf(executionFailedError, "expected health check value '%#v' got '%#v'", HealthCheckKV, v)
 	}
 
 	return nil

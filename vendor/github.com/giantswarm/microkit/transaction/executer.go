@@ -110,7 +110,10 @@ func (e *executer) Execute(ctx context.Context, config ExecuteConfig) error {
 	// to execute the configured replay, if any. If there was no trial for the
 	// given transaction registered yet, we are executing the trial.
 	{
-		key := transactionKey("transaction", transactionID, "trial", config.TrialID)
+		key, err := microstorage.NewK(transactionKey("transaction", transactionID, "trial", config.TrialID))
+		if err != nil {
+			return microerror.Mask(err)
+		}
 		exists, err := e.storage.Exists(ctx, key)
 		if err != nil {
 			return microerror.Mask(err)
@@ -125,8 +128,11 @@ func (e *executer) Execute(ctx context.Context, config ExecuteConfig) error {
 			}
 
 			var notFound bool
-			key := transactionKey("transaction", transactionID, "trial", config.TrialID, "result")
-			val, err := e.storage.Search(ctx, key)
+			key, err := microstorage.NewK(transactionKey("transaction", transactionID, "trial", config.TrialID, "result"))
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			kv, err := e.storage.Search(ctx, key)
 			if microstorage.IsNotFound(err) {
 				notFound = true
 			} else if err != nil {
@@ -139,7 +145,7 @@ func (e *executer) Execute(ctx context.Context, config ExecuteConfig) error {
 			// as trial output.
 			var input interface{}
 			if !notFound {
-				input, err = config.ReplayDecoder([]byte(val))
+				input, err = config.ReplayDecoder([]byte(kv.Val()))
 				if err != nil {
 					return microerror.Mask(err)
 				}
@@ -174,14 +180,22 @@ func (e *executer) Execute(ctx context.Context, config ExecuteConfig) error {
 		}
 		if b != nil {
 			rVal := string(b)
-			err = e.storage.Create(ctx, rKey, rVal)
+			kv, err := microstorage.NewKV(rKey, rVal)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			err = e.storage.Put(ctx, kv)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 		}
 
 		tKey := transactionKey("transaction", transactionID, "trial", config.TrialID)
-		err = e.storage.Create(ctx, tKey, "{}")
+		kv, err := microstorage.NewKV(tKey, "{}")
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		err = e.storage.Put(ctx, kv)
 		if err != nil {
 			return microerror.Mask(err)
 		}

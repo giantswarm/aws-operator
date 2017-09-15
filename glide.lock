@@ -70,9 +70,9 @@ imports:
   - spec
   - spec/aws
 - name: github.com/giantswarm/certificatetpr
-  version: deb9963e88123d43dcdf5fd071e042734918ddf0
+  version: 682eb790a45b54dd27f78aae511cabb8c42e8575
 - name: github.com/giantswarm/clustertpr
-  version: 1ac2fe67efb012ab2ff0002769c0ae3463f3aa09
+  version: 204c6262c75db8eddf6974c9373a42191db88a56
   subpackages:
   - spec
   - spec/docker
@@ -81,17 +81,18 @@ imports:
   - spec/kubernetes/ingress
   - spec/kubernetes/kubectl
   - spec/kubernetes/networksetup
+  - spec/kubernetes/ssh
 - name: github.com/giantswarm/k8scloudconfig
   version: 792eebd099d3256e021a91a88b290b2fbf63d559
 - name: github.com/giantswarm/microendpoint
-  version: 70547070da4072138bb5161e80a164b0bac075cc
+  version: f5682d1d6fe0eb963397fb7e0535c1794644efce
   subpackages:
   - endpoint/version
   - service/version
 - name: github.com/giantswarm/microerror
   version: 5ade94eb4ee35ef72eb9382228470caeddb29989
 - name: github.com/giantswarm/microkit
-  version: 9c50baa91bd1639e41bc5510b215d9d0801f94ca
+  version: 6b235e750c3dddc4010b9b017642bb91ddd16245
   subpackages:
   - command
   - command/daemon
@@ -110,11 +111,11 @@ imports:
 - name: github.com/giantswarm/micrologger
   version: 8a69b2ab80ba2d0bd40d609206518fefacfc8fdf
 - name: github.com/giantswarm/microstorage
-  version: f5c68d40459f0021cf8266501b7d8615ea4ff641
+  version: e990a46ff7c9065f8d83c0a649cb1a6ef5d411d7
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: 911fad9e4a4fb20e05d16c6e967f7da50fdc3cfc
+  version: ebba313a2a521c384192e0011959d58682220cb3
   subpackages:
   - client/k8s
   - tpr
@@ -156,7 +157,7 @@ imports:
 - name: github.com/gorilla/mux
   version: 0eeaf8392f5b04950925b8a69fe70f110fa7cbfc
 - name: github.com/hashicorp/hcl
-  version: 8f6b1344a92ff8877cf24a5de9177bf7d0a2a187
+  version: 68e816d1c783414e79bc65b3994d9ab6b0a722ab
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -177,7 +178,7 @@ imports:
 - name: github.com/kr/logfmt
   version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
 - name: github.com/magiconair/properties
-  version: be5ece7dd465ab0765a9682137865547526d1dfb
+  version: 8d7837e64d3c1ee4e54a880c5a920ab4316fc90a
 - name: github.com/mailru/easyjson
   version: d5b7844b561a7bc640052f1b935f7b800330d7e0
   subpackages:
@@ -191,9 +192,9 @@ imports:
 - name: github.com/mitchellh/mapstructure
   version: d0303fe809921458f417bcf828397a65db30a7e4
 - name: github.com/pelletier/go-toml
-  version: 9c1b4e331f1e3d98e72600677699fbe212cd6d16
+  version: 1d6b12b7cb290426e27e6b4e38b89fcda3aeef03
 - name: github.com/prometheus/client_golang
-  version: 967789050ba94deca04a5e84cce8ad472ce313c1
+  version: 50b3332fd63be43e38472600ec187ceec39d26d6
   subpackages:
   - prometheus
   - prometheus/promhttp

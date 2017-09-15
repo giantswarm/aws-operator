@@ -53,7 +53,10 @@ type responder struct {
 }
 
 func (r *responder) Exists(ctx context.Context, transactionID string) (bool, error) {
-	key := responseKey("transaction", transactionID)
+	key, err := microstorage.NewK(responseKey("transaction", transactionID))
+	if err != nil {
+		return false, microerror.Mask(err)
+	}
 	exists, err := r.storage.Exists(ctx, key)
 	if err != nil {
 		return false, microerror.Mask(err)
@@ -68,7 +71,10 @@ func (r *responder) Reply(ctx context.Context, transactionID string, rr Response
 	// cannot find the desired transaction response, we return an error.
 	var response Response
 	{
-		key := responseKey("transaction", transactionID)
+		key, err := microstorage.NewK(responseKey("transaction", transactionID))
+		if err != nil {
+			return microerror.Mask(err)
+		}
 		res, err := r.storage.Search(ctx, key)
 		if microstorage.IsNotFound(err) {
 			return microerror.Mask(notFoundError)
@@ -76,7 +82,7 @@ func (r *responder) Reply(ctx context.Context, transactionID string, rr Response
 			return microerror.Mask(err)
 		}
 
-		err = json.Unmarshal([]byte(res), &response)
+		err = json.Unmarshal([]byte(res.Val()), &response)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -140,7 +146,11 @@ func (r *responder) Track(ctx context.Context, transactionID string, rt Response
 	// Now we have all information in place to store the transaction response.
 	{
 		key := responseKey("transaction", transactionID)
-		err := r.storage.Create(ctx, key, val)
+		kv, err := microstorage.NewKV(key, val)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		err = r.storage.Put(ctx, kv)
 		if err != nil {
 			return microerror.Mask(err)
 		}

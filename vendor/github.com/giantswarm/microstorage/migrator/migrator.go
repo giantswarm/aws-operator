@@ -39,8 +39,8 @@ func New(config Config) (*Migrator, error) {
 func (m *Migrator) Migrate(ctx context.Context, dst, src microstorage.Storage) error {
 	var err error
 
-	m.logger.Log("debug", "listing all keys")
-	keys, err := src.List(ctx, "/")
+	m.logger.Log("debug", "listing all KVs")
+	kvs, err := src.List(ctx, microstorage.RootKey)
 	if microstorage.IsNotFound(err) {
 		m.logger.Log("debug", "src sotrage is empty")
 		return nil
@@ -48,30 +48,25 @@ func (m *Migrator) Migrate(ctx context.Context, dst, src microstorage.Storage) e
 		return microerror.Maskf(err, "src storage: listing key=/")
 	}
 
-	m.logger.Log("debug", fmt.Sprintf("transfering %d entries", len(keys)))
+	m.logger.Log("debug", fmt.Sprintf("transfering %d entries", len(kvs)))
 	var migrated int
-	for _, key := range keys {
-		v, err := src.Search(ctx, key)
+	for _, kv := range kvs {
+		exists, err := dst.Exists(ctx, kv.K())
 		if err != nil {
-			return microerror.Maskf(err, "src storage: getting key=%s", key)
-		}
-
-		exists, err := dst.Exists(ctx, key)
-		if err != nil {
-			return microerror.Maskf(err, "dst storage: checking key=%s", key)
+			return microerror.Maskf(err, "dst storage: checking key=%s", kv.Key())
 		}
 
 		if exists {
 			continue
 		}
 
-		err = dst.Put(ctx, key, v)
+		err = dst.Put(ctx, kv)
 		if err != nil {
-			return microerror.Maskf(err, "dst storage: putting key=%s", key)
+			return microerror.Maskf(err, "dst storage: putting key=%s", kv.Key())
 		}
 		migrated++
 	}
 
-	m.logger.Log("info", fmt.Sprintf("migrated %d/%d remaining entries", migrated, len(keys)))
+	m.logger.Log("info", fmt.Sprintf("migrated %d/%d remaining entries", migrated, len(kvs)))
 	return nil
 }

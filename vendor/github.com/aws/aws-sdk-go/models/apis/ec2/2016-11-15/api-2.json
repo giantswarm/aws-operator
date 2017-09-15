@@ -8233,7 +8233,10 @@
     },
     "HostOfferingSet":{
       "type":"list",
-      "member":{"shape":"HostOffering"}
+      "member":{
+        "shape":"HostOffering",
+        "locationName":"item"
+      }
     },
     "HostProperties":{
       "type":"structure",
@@ -9895,6 +9898,7 @@
         "r4.16xlarge",
         "x1.16xlarge",
         "x1.32xlarge",
+        "x1e.32xlarge",
         "i2.xlarge",
         "i2.2xlarge",
         "i2.4xlarge",
@@ -10814,6 +10818,10 @@
         "VpcId":{
           "shape":"String",
           "locationName":"vpcId"
+        },
+        "Tags":{
+          "shape":"TagList",
+          "locationName":"tagSet"
         }
       }
     },
