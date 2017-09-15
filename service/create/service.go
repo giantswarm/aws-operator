@@ -927,7 +927,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	var instances []*autoscaling.Instance
 	if legacyASG {
 		// detach instances and delete legacy ASG to prevent name clash
-		instances, err = asg.DetachInstances()
+		instances, err = asg.DetachInstances(s.logger)
 		if err != nil {
 			return microerror.Maskf(executionFailedError, "detaching legacy worker from ASG failed: '%#v'", err)
 		}

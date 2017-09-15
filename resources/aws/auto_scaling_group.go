@@ -1,12 +1,15 @@
 package aws
 
 import (
+	"fmt"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 )
 
 type AutoScalingGroup struct {
@@ -179,10 +182,14 @@ func (asg *AutoScalingGroup) FindLegacy() (bool, error) {
 }
 
 // DetachInstances detaches instances from this ASG and returns their details
-func (asg *AutoScalingGroup) DetachInstances() ([]*autoscaling.Instance, error) {
+func (asg *AutoScalingGroup) DetachInstances(logger micrologger.Logger) ([]*autoscaling.Instance, error) {
 	autoScalingGroup, err := asg.findExisting()
 	if err != nil {
 		return []*autoscaling.Instance{}, microerror.Mask(err)
+	}
+
+	notify := func(err error, dur time.Duration) {
+		logger.Log("warning", fmt.Sprintf("retrying 'DetachInstances' due to error (%s)", err.Error()))
 	}
 
 	for _, i := range autoScalingGroup.Instances {
@@ -194,7 +201,7 @@ func (asg *AutoScalingGroup) DetachInstances() ([]*autoscaling.Instance, error) 
 			})
 			return err
 		}
-		err := backoff.Retry(operation, backoff.NewExponentialBackOff())
+		err := backoff.RetryNotify(operation, backoff.NewExponentialBackOff(), notify)
 		if err != nil {
 			return []*autoscaling.Instance{}, microerror.Mask(err)
 		}
