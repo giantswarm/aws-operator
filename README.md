@@ -23,14 +23,7 @@ https://quay.io/repository/giantswarm/aws-operator
 
 ### How to build
 
-This project provides a Makefile, so you can build it by typing:
-
-```
-make
-```
-
-If you prefer, you may also build it using the standard `go build` command,
-like:
+Build the standard way.
 
 ```
 go build github.com/giantswarm/aws-operator
