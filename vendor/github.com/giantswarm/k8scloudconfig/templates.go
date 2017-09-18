@@ -1450,7 +1450,7 @@ write_files:
     # Non defaults (#100)
     ClientAliveCountMax 2
     PasswordAuthentication no
-- path /etc/sysctl.d/hardening.conf
+- path: /etc/sysctl.d/hardening.conf
   owner: root
   permissions: 0600
   content: |
