@@ -195,7 +195,7 @@ write_files:
                 httpGet:
                   path: /readiness
                   port: 9099
-            periodSeconds: 10
+                periodSeconds: 10
               volumeMounts:
                 - mountPath: /lib/modules
                   name: lib-modules
