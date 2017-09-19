@@ -79,6 +79,7 @@ func New(config Config) (Command, error) {
 	newCommand.cobraCommand.PersistentFlags().StringSlice(f.Config.Files, []string{"config"}, "List of the config file names. All viper supported extensions can be used.")
 
 	newCommand.cobraCommand.PersistentFlags().String(f.Server.Listen.Address, "http://127.0.0.1:8000", "Address used to make the server listen to.")
+	newCommand.cobraCommand.PersistentFlags().Bool(f.Server.Log.Access, false, "Whether to emit logs for each requested route.")
 	newCommand.cobraCommand.PersistentFlags().String(f.Server.TLS.CaFile, "", "File path of the TLS root CA file, if any.")
 	newCommand.cobraCommand.PersistentFlags().String(f.Server.TLS.CrtFile, "", "File path of the TLS public key file, if any.")
 	newCommand.cobraCommand.PersistentFlags().String(f.Server.TLS.KeyFile, "", "File path of the TLS private key file, if any.")
@@ -119,10 +120,13 @@ func (c *command) Execute(cmd *cobra.Command, args []string) {
 	var newServer server.Server
 	{
 		serverConfig := c.serverFactory(c.viper).Config()
+
+		serverConfig.LogAccess = c.viper.GetBool(f.Server.Log.Access)
 		serverConfig.ListenAddress = c.viper.GetString(f.Server.Listen.Address)
 		serverConfig.TLSCAFile = c.viper.GetString(f.Server.TLS.CaFile)
 		serverConfig.TLSCrtFile = c.viper.GetString(f.Server.TLS.CrtFile)
 		serverConfig.TLSKeyFile = c.viper.GetString(f.Server.TLS.KeyFile)
+
 		newServer, err = server.New(serverConfig)
 		if err != nil {
 			panic(err)

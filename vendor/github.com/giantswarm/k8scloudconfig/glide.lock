@@ -1,8 +1,8 @@
 hash: 7376746e7885ea00032b53692824ac0d34d97e9efdf64bd756768c2298bef31e
-updated: 2017-08-14T12:20:59.266393727+02:00
+updated: 2017-09-14T14:52:50.279889874+02:00
 imports:
 - name: github.com/giantswarm/clustertpr
-  version: 551aed2c01b543c30d60e10d8d16ae2afaa58d0d
+  version: 204c6262c75db8eddf6974c9373a42191db88a56
   subpackages:
   - node
   - spec
@@ -12,9 +12,10 @@ imports:
   - spec/kubernetes/ingress
   - spec/kubernetes/kubectl
   - spec/kubernetes/networksetup
+  - spec/kubernetes/ssh
 testImports:
 - name: github.com/davecgh/go-spew
-  version: adab96458c51a58dc1783b3335dcce5461522e75
+  version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
   subpackages:
   - spew
 - name: github.com/pmezard/go-difflib
@@ -22,6 +23,6 @@ testImports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: 890a5c3458b43e6104ff5da8dfa139d013d77544
+  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
   subpackages:
   - assert

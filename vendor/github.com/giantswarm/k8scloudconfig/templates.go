@@ -2,9 +2,14 @@ package cloudconfig
 
 const (
 	MasterTemplate = `#cloud-config
-ssh_authorized_keys:
-{{range .Cluster.Kubernetes.SSH.PublicKeys}}
-- '{{.}}'{{end}}
+users:
+{{ range $index, $user := .Cluster.Kubernetes.SSH.UserList }}  - name: {{ $user.Name }}
+    groups:
+      - "sudo"
+      - "docker"
+    ssh-authorized-keys:
+       - "{{ $user.PublicKey }}"
+{{end}}
 write_files:
 - path: /srv/calico-policy-controller-sa.yaml
   owner: root
@@ -28,12 +33,12 @@ write_files:
   owner: root
   permissions: 644
   content: |
-    # Calico Version v2.2.1
-    # http://docs.projectcalico.org/v2.2/releases#v2.2.1
+    # Calico Version v2.5.1
+    # https://docs.projectcalico.org/v2.5/releases#v2.5.1
     # This manifest includes the following component versions:
-    #   calico/node:v1.2.1
-    #   calico/cni:v1.8.3
-    #   calico/kube-policy-controller:v0.6.0
+    #   calico/node:v2.5.1
+    #   calico/cni:v1.10.0
+    #   calico/kube-policy-controller:v0.7.0
 
     # This ConfigMap is used to configure a self-hosted Calico installation.
     kind: ConfigMap
@@ -114,7 +119,7 @@ write_files:
             # container programs network policy and routes on each
             # host.
             - name: calico-node
-              image: quay.io/calico/node:v1.2.1
+              image: quay.io/calico/node:v2.5.1
               env:
                 # The location of the Calico etcd cluster.
                 - name: ETCD_ENDPOINTS
@@ -128,6 +133,9 @@ write_files:
                     configMapKeyRef:
                       name: calico-config
                       key: calico_backend
+                # Cluster type to identify the deployment type
+                - name: CLUSTER_TYPE
+                  value: "k8s,bgp"
                 # Disable file logging so kubectl logs works.
                 - name: CALICO_DISABLE_FILE_LOGGING
                   value: "true"
@@ -145,6 +153,9 @@ write_files:
                 # Set Felix logging to "info"
                 - name: FELIX_LOGSEVERITYSCREEN
                   value: "info"
+                # Set MTU for tunnel device used if ipip is enabled
+                - name: FELIX_IPINIPMTU
+                  value: "1440"
                 # Location of the CA certificate for etcd.
                 - name: ETCD_CA_CERT_FILE
                   valueFrom:
@@ -166,11 +177,25 @@ write_files:
                 # Auto-detect the BGP IP address.
                 - name: IP
                   value: ""
+                - name: FELIX_HEALTHENABLED
+                  value: "true"
               securityContext:
                 privileged: true
               resources:
                 requests:
                   cpu: 250m
+              livenessProbe:
+                httpGet:
+                  path: /liveness
+                  port: 9099
+                periodSeconds: 10
+                initialDelaySeconds: 10
+                failureThreshold: 6
+              readinessProbe:
+                httpGet:
+                  path: /readiness
+                  port: 9099
+                periodSeconds: 10
               volumeMounts:
                 - mountPath: /lib/modules
                   name: lib-modules
@@ -183,7 +208,7 @@ write_files:
             # This container installs the Calico CNI binaries
             # and CNI network config file on each node.
             - name: install-cni
-              image: quay.io/calico/cni:v1.8.3
+              image: quay.io/calico/cni:v1.10.0
               command: ["/install-cni.sh"]
               env:
                 # The location of the Calico etcd cluster.
@@ -276,7 +301,7 @@ write_files:
           serviceAccountName: calico-policy-controller
           containers:
             - name: calico-policy-controller
-              image: quay.io/calico/kube-policy-controller:v0.6.0
+              image: quay.io/calico/kube-policy-controller:v0.7.0
               env:
                 # The location of the Calico etcd cluster.
                 - name: ETCD_ENDPOINTS
@@ -1317,9 +1342,14 @@ coreos:
 `
 
 	WorkerTemplate = `#cloud-config
-ssh_authorized_keys:
-{{range .Cluster.Kubernetes.SSH.PublicKeys}}
-- '{{.}}'{{end}}
+users:
+{{ range $index, $user := .Cluster.Kubernetes.SSH.UserList }}  - name: {{ $user.Name }}
+    groups:
+      - "sudo"
+      - "docker"
+    ssh-authorized-keys:
+       - "{{ $user.PublicKey }}"
+{{end}}
 write_files:
 - path: /etc/kubernetes/config/proxy-kubeconfig.yml
   owner: root

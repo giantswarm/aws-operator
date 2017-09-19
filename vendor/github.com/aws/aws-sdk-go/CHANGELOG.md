@@ -1,3 +1,52 @@
+Release v1.10.47 (2017-09-18)
+===
+
+### Service Client Updates
+* `service/ec2`: Updates service API and documentation
+  * Amazon EC2 now lets you opt for Spot instances to be stopped in the event of an interruption instead of being terminated.  Your Spot request can be fulfilled again by restarting instances from a previously stopped state, subject to availability of capacity at or below your preferred price.  When you submit a persistent Spot request, you can choose from "terminate" or "stop" as the instance interruption behavior.  Choosing "stop" will shutdown your Spot instances so you can continue from this stopped state later on.  This feature is only available for instances with Amazon EBS volume as their root device.
+* `service/email`: Updates service API and documentation
+  * Amazon Simple Email Service (Amazon SES) now lets you customize the domains used for tracking open and click events. Previously, open and click tracking links referred to destinations hosted on domains operated by Amazon SES. With this feature, you can use your own branded domains for capturing open and click events.
+* `service/iam`: Updates service API and documentation
+  * A new API, DeleteServiceLinkedRole, submits a service-linked role deletion request and returns a DeletionTaskId, which you can use to check the status of the deletion.
+
+Release v1.10.46 (2017-09-15)
+===
+
+### Service Client Updates
+* `service/apigateway`: Updates service API and documentation
+  * Add a new enum "REQUEST" to '--type <value>' field in the current create-authorizer API, and make "identitySource" optional.
+
+Release v1.10.45 (2017-09-14)
+===
+
+### Service Client Updates
+* `service/codebuild`: Updates service API and documentation
+  * Supporting Parameter Store in environment variables for AWS CodeBuild
+* `service/organizations`: Updates service documentation
+  * Documentation updates for AWS Organizations
+* `service/servicecatalog`: Updates service API, documentation, and paginators
+  * This release of Service Catalog adds API support to copy products.
+
+Release v1.10.44 (2017-09-13)
+===
+
+### Service Client Updates
+* `service/autoscaling`: Updates service API and documentation
+  * Customers can create Life Cycle Hooks at the time of creating Auto Scaling Groups through the CreateAutoScalingGroup API
+* `service/batch`: Updates service documentation and examples
+  * Documentation updates for batch
+* `service/ec2`: Updates service API
+  * You are now able to create and launch EC2 x1e.32xlarge instance, a new EC2 instance in the X1 family, in us-east-1, us-west-2, eu-west-1, and ap-northeast-1. x1e.32xlarge offers 128 vCPUs, 3,904 GiB of DDR4 instance memory, high memory bandwidth, large L3 caches, and leading reliability capabilities to boost the performance and reliability of in-memory applications.
+* `service/events`: Updates service API and documentation
+  * Exposes ConcurrentModificationException as one of the valid exceptions for PutPermission and RemovePermission operation.
+
+### SDK Enhancements
+* `service/autoscaling`: Fix documentation for PutScalingPolicy.AutoScalingGroupName [#1522](https://github.com/aws/aws-sdk-go/pull/1522)
+* `service/s3/s3manager`: Clarify S3 Upload manager Concurrency config [#1521](https://github.com/aws/aws-sdk-go/pull/1521)
+  * Fixes [#1458](https://github.com/aws/aws-sdk-go/issues/1458)
+* `service/dynamodb/dynamodbattribute`: Add support for time alias. [#1520](https://github.com/aws/aws-sdk-go/pull/1520)
+  * Related to [#1505](https://github.com/aws/aws-sdk-go/pull/1505)
+
 Release v1.10.43 (2017-09-12)
 ===
 

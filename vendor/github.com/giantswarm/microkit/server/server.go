@@ -58,6 +58,8 @@ type Config struct {
 	HandlerWrapper func(h http.Handler) http.Handler
 	// ListenAddress is the address the server is listening on.
 	ListenAddress string
+	// LogAccess decides whether to emit logs for each requested route.
+	LogAccess bool
 	// RequestFuncs is the server's configured list of request functions. These
 	// are the custom request functions configured by the client.
 	RequestFuncs []kithttp.RequestFunc
@@ -89,6 +91,7 @@ func DefaultConfig() Config {
 		ErrorEncoder:   func(ctx context.Context, serverError error, w http.ResponseWriter) {},
 		HandlerWrapper: func(h http.Handler) http.Handler { return h },
 		ListenAddress:  "http://127.0.0.1:8000",
+		LogAccess:      false,
 		RequestFuncs:   []kithttp.RequestFunc{},
 		ServiceName:    "microkit",
 		TLSCAFile:      "",
@@ -159,6 +162,7 @@ func New(config Config) (Server, error) {
 		// Settings.
 		endpoints:      config.Endpoints,
 		handlerWrapper: config.HandlerWrapper,
+		logAccess:      config.LogAccess,
 		requestFuncs:   config.RequestFuncs,
 		serviceName:    config.ServiceName,
 		tlsCertFiles: tls.CertFiles{
@@ -189,6 +193,7 @@ type server struct {
 	// Settings.
 	endpoints      []Endpoint
 	handlerWrapper func(h http.Handler) http.Handler
+	logAccess      bool
 	requestFuncs   []kithttp.RequestFunc
 	serviceName    string
 	tlsCertFiles   tls.CertFiles
@@ -230,7 +235,9 @@ func (s *server) Boot() {
 						endpointMethod := strings.ToLower(e.Method())
 						endpointName := strings.Replace(e.Name(), "/", "_", -1)
 
-						s.logger.Log("code", endpointCode, "endpoint", e.Name(), "method", endpointMethod, "path", r.URL.Path)
+						if s.logAccess {
+							s.logger.Log("code", endpointCode, "endpoint", e.Name(), "method", endpointMethod, "path", r.URL.Path)
+						}
 
 						endpointTotal.WithLabelValues(endpointCode, endpointMethod, endpointName).Inc()
 						endpointTime.WithLabelValues(endpointCode, endpointMethod, endpointName).Set(float64(time.Since(t) / time.Millisecond))
@@ -287,18 +294,18 @@ func (s *server) Boot() {
 		}
 
 		go func() {
+			s.logger.Log("debug", fmt.Sprintf("running server at %s", s.listenURL.String()))
+
 			if s.listenURL.Scheme == "https" {
 				tlsConfig, err := tls.LoadTLSConfig(s.tlsCertFiles)
 				if err != nil {
 					panic(err)
 				}
-				s.logger.Log("debug", "running HTTPS server with TLS config")
 				err = s.httpServer.ListenAndServeTLSConfig(tlsConfig)
 				if err != nil {
 					panic(err)
 				}
 			} else {
-				s.logger.Log("debug", "running HTTP server")
 				err := s.httpServer.ListenAndServe()
 				if err != nil {
 					panic(err)

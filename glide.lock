@@ -1,8 +1,8 @@
 hash: 517afe1145e69929bb0bd0252d991f813122d07202ade06316b2f4dee8167f99
-updated: 2017-09-13T15:56:02.414310623+02:00
+updated: 2017-09-19T11:45:55.464085779+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: bfee4fbee3bcb1cda78299a60ff52fe3aa3a2db9
+  version: a90d3cf56fcedc75a4018f11dcde08f180fd4064
   subpackages:
   - aws
   - aws/awserr
@@ -45,7 +45,7 @@ imports:
   subpackages:
   - quantile
 - name: github.com/cenkalti/backoff
-  version: 61153c768f31ee5f130071d08fc82b85208528de
+  version: 80e08cb804a3eb3e576876c777e957e874609a9a
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
   subpackages:
@@ -65,14 +65,14 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: 99bc35c5464d31c61e1781314cd100d5ee2c6bed
+  version: 6212f3ccf1b9b535a7cf1caf3cf0d9bc68a39dae
   subpackages:
   - spec
   - spec/aws
 - name: github.com/giantswarm/certificatetpr
   version: 682eb790a45b54dd27f78aae511cabb8c42e8575
 - name: github.com/giantswarm/clustertpr
-  version: 1ac2fe67efb012ab2ff0002769c0ae3463f3aa09
+  version: 204c6262c75db8eddf6974c9373a42191db88a56
   subpackages:
   - spec
   - spec/docker
@@ -81,17 +81,18 @@ imports:
   - spec/kubernetes/ingress
   - spec/kubernetes/kubectl
   - spec/kubernetes/networksetup
+  - spec/kubernetes/ssh
 - name: github.com/giantswarm/k8scloudconfig
-  version: 172f467982de9f3b765c9b63c43d9b817ff18b2b
+  version: 9a50110b0038bf0c1b7883e3c0ecf76012c71763
 - name: github.com/giantswarm/microendpoint
-  version: 70547070da4072138bb5161e80a164b0bac075cc
+  version: f5682d1d6fe0eb963397fb7e0535c1794644efce
   subpackages:
   - endpoint/version
   - service/version
 - name: github.com/giantswarm/microerror
   version: 5ade94eb4ee35ef72eb9382228470caeddb29989
 - name: github.com/giantswarm/microkit
-  version: 9c50baa91bd1639e41bc5510b215d9d0801f94ca
+  version: 4871f763488a16c5b7ea3c411bbd82cd5139e29a
   subpackages:
   - command
   - command/daemon
@@ -99,6 +100,7 @@ imports:
   - command/daemon/flag/config
   - command/daemon/flag/server
   - command/daemon/flag/server/listen
+  - command/daemon/flag/server/log
   - command/daemon/flag/server/tls
   - command/version
   - flag
@@ -110,11 +112,11 @@ imports:
 - name: github.com/giantswarm/micrologger
   version: 8a69b2ab80ba2d0bd40d609206518fefacfc8fdf
 - name: github.com/giantswarm/microstorage
-  version: f5c68d40459f0021cf8266501b7d8615ea4ff641
+  version: e990a46ff7c9065f8d83c0a649cb1a6ef5d411d7
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: ebba313a2a521c384192e0011959d58682220cb3
+  version: 71a88e7f33f1ea1fb059e7afddfc7a49f2ce53c3
   subpackages:
   - client/k8s
   - tpr
@@ -156,7 +158,7 @@ imports:
 - name: github.com/gorilla/mux
   version: 0eeaf8392f5b04950925b8a69fe70f110fa7cbfc
 - name: github.com/hashicorp/hcl
-  version: 8f6b1344a92ff8877cf24a5de9177bf7d0a2a187
+  version: 68e816d1c783414e79bc65b3994d9ab6b0a722ab
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -270,7 +272,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
+  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/apimachinery
   version: 85ace5365f33b16fc735c866a12e3c765b9700f2
   subpackages:
