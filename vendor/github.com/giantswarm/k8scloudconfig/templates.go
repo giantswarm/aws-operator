@@ -918,6 +918,19 @@ write_files:
     # Non defaults (#100)
     ClientAliveCountMax 2
     PasswordAuthentication no
+- path: /etc/sysctl.d/hardening.conf
+  owner: root
+  permissions: 0600
+  content: |
+    kernel.kptr_restrict = 2
+    kernel.sysrq = 0
+    net.ipv4.conf.all.log_martians = 1
+    net.ipv4.conf.all.send_redirects = 0
+    net.ipv4.conf.default.accept_redirects = 0
+    net.ipv4.conf.default.log_martians = 1
+    net.ipv4.tcp_timestamps = 0
+    net.ipv6.conf.all.accept_redirects = 0
+    net.ipv6.conf.default.accept_redirects = 0
 
 {{range .Extension.Files}}
 - path: {{.Metadata.Path}}
@@ -949,6 +962,21 @@ coreos:
       [Service]
       Type=oneshot
       ExecStart=/opt/wait-for-domains
+
+      [Install]
+      WantedBy=multi-user.target
+  - name: os-hardeing.service
+    enable: true
+    command: start
+    content: |
+      [Unit]
+      Description=Apply os hardening
+
+      [Service]
+      Type=oneshot
+      ExecStartPre=/bin/bash -c "gpasswd -d core rkt; gpasswd -d core docker; gpasswd -d core wheel"
+      ExecStartPre=/bin/bash -c "until [ -f '/etc/sysctl.d/hardening.conf' ]; do echo Waiting for sysctl file; sleep 1s;done;"
+      ExecStart=/usr/sbin/sysctl -p /etc/sysctl.d/hardening.conf
 
       [Install]
       WantedBy=multi-user.target
@@ -1423,6 +1451,19 @@ write_files:
     # Non defaults (#100)
     ClientAliveCountMax 2
     PasswordAuthentication no
+- path: /etc/sysctl.d/hardening.conf
+  owner: root
+  permissions: 0600
+  content: |
+    kernel.kptr_restrict = 2
+    kernel.sysrq = 0
+    net.ipv4.conf.all.log_martians = 1
+    net.ipv4.conf.all.send_redirects = 0
+    net.ipv4.conf.default.accept_redirects = 0
+    net.ipv4.conf.default.log_martians = 1
+    net.ipv4.tcp_timestamps = 0
+    net.ipv6.conf.all.accept_redirects = 0
+    net.ipv6.conf.default.accept_redirects = 0
 
 {{range .Extension.Files}}
 - path: {{.Metadata.Path}}
@@ -1454,6 +1495,21 @@ coreos:
       [Service]
       Type=oneshot
       ExecStart=/opt/wait-for-domains
+
+      [Install]
+      WantedBy=multi-user.target
+  - name: os-hardeing.service
+    enable: true
+    command: start
+    content: |
+      [Unit]
+      Description=Apply os hardening
+
+      [Service]
+      Type=oneshot
+      ExecStartPre=/bin/bash -c "gpasswd -d core rkt; gpasswd -d core docker; gpasswd -d core wheel"
+      ExecStartPre=/bin/bash -c "until [ -f '/etc/sysctl.d/hardening.conf' ]; do echo Waiting for sysctl file; sleep 1s;done;"
+      ExecStart=/usr/sbin/sysctl -p /etc/sysctl.d/hardening.conf
 
       [Install]
       WantedBy=multi-user.target

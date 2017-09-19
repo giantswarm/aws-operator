@@ -1,8 +1,8 @@
 hash: 5b100615712487f9c60f65545f793881042f581fe76d54ff0e41ca9e6f2ba143
-updated: 2017-09-15T09:19:54.136709213+02:00
+updated: 2017-09-18T12:19:44.781114545+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: ad2c5a3ad38848175fca3225d0f7a94c426e4894
+  version: 8d2831dd9188c8f7a1c9719564d23f879bba0179
   subpackages:
   - aws
   - aws/awserr
@@ -45,7 +45,7 @@ imports:
   subpackages:
   - quantile
 - name: github.com/cenkalti/backoff
-  version: 61153c768f31ee5f130071d08fc82b85208528de
+  version: 80e08cb804a3eb3e576876c777e957e874609a9a
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
   subpackages:
@@ -65,7 +65,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: 55c4b7293f81bc6507f52f184b6c350f9c35c397
+  version: fa0bedb4c273f861dac5aad8983a2ada7308ff90
   subpackages:
   - spec
   - spec/aws
@@ -83,7 +83,7 @@ imports:
   - spec/kubernetes/networksetup
   - spec/kubernetes/ssh
 - name: github.com/giantswarm/k8scloudconfig
-  version: 604b7f61d4f5b3bb91d5ec272531ea2baa64c5f9
+  version: 9a50110b0038bf0c1b7883e3c0ecf76012c71763
 - name: github.com/giantswarm/microendpoint
   version: f5682d1d6fe0eb963397fb7e0535c1794644efce
   subpackages:
@@ -92,7 +92,7 @@ imports:
 - name: github.com/giantswarm/microerror
   version: 5ade94eb4ee35ef72eb9382228470caeddb29989
 - name: github.com/giantswarm/microkit
-  version: 6b235e750c3dddc4010b9b017642bb91ddd16245
+  version: 4871f763488a16c5b7ea3c411bbd82cd5139e29a
   subpackages:
   - command
   - command/daemon
@@ -100,6 +100,7 @@ imports:
   - command/daemon/flag/config
   - command/daemon/flag/server
   - command/daemon/flag/server/listen
+  - command/daemon/flag/server/log
   - command/daemon/flag/server/tls
   - command/version
   - flag
@@ -115,7 +116,7 @@ imports:
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: ebba313a2a521c384192e0011959d58682220cb3
+  version: c576223965c9ab394378c2b2c0aec46afc767e5f
   subpackages:
   - client/k8s
   - tpr
