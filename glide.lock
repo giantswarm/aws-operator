@@ -1,8 +1,8 @@
-hash: 517afe1145e69929bb0bd0252d991f813122d07202ade06316b2f4dee8167f99
-updated: 2017-09-19T14:45:29.288526174+01:00
+hash: a1e9c4e7a08d208d688e7a741484a3a9ae280a3ffd3c7e96c9804b83122d46d2
+updated: 2017-09-22T10:58:46.959556801+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: a90d3cf56fcedc75a4018f11dcde08f180fd4064
+  version: 63b62fd164366013a09181fd43879e284c5c5a86
   subpackages:
   - aws
   - aws/awserr
@@ -45,7 +45,7 @@ imports:
   subpackages:
   - quantile
 - name: github.com/cenkalti/backoff
-  version: 80e08cb804a3eb3e576876c777e957e874609a9a
+  version: 61ba96c4d1002f22e06acb8e34a7650611125a63
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
   subpackages:
@@ -65,14 +65,14 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: 6212f3ccf1b9b535a7cf1caf3cf0d9bc68a39dae
+  version: 97c4b7ab683479718d7d120fdd491029d5e2ff22
   subpackages:
   - spec
   - spec/aws
 - name: github.com/giantswarm/certificatetpr
   version: 682eb790a45b54dd27f78aae511cabb8c42e8575
 - name: github.com/giantswarm/clustertpr
-  version: 204c6262c75db8eddf6974c9373a42191db88a56
+  version: 34d49f599b2cc70af0d9c30b941a085aef772e64
   subpackages:
   - spec
   - spec/docker
@@ -83,7 +83,7 @@ imports:
   - spec/kubernetes/networksetup
   - spec/kubernetes/ssh
 - name: github.com/giantswarm/k8scloudconfig
-  version: eddc4cf175f5f4171b2306716fff2c795f761b53
+  version: 05b5ac2a4ed0d145efb1ce8002f26b228ae3cc1b
 - name: github.com/giantswarm/microendpoint
   version: f5682d1d6fe0eb963397fb7e0535c1794644efce
   subpackages:
@@ -112,11 +112,11 @@ imports:
 - name: github.com/giantswarm/micrologger
   version: 8a69b2ab80ba2d0bd40d609206518fefacfc8fdf
 - name: github.com/giantswarm/microstorage
-  version: e990a46ff7c9065f8d83c0a649cb1a6ef5d411d7
+  version: 31cedcac6cdcbcbf57dfdbb885c9a2dd40a9c403
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: 1c622b4fd9e36bb610939af2b3cfb89c52071312
+  version: 49ac418456193963d3c9e13c1a60e6e025eb665a
   subpackages:
   - client/k8s
   - tpr
@@ -195,7 +195,7 @@ imports:
 - name: github.com/pelletier/go-toml
   version: 1d6b12b7cb290426e27e6b4e38b89fcda3aeef03
 - name: github.com/prometheus/client_golang
-  version: 50b3332fd63be43e38472600ec187ceec39d26d6
+  version: 353b8c3f3776541879f9abfd8fa8b1ae162ab394
   subpackages:
   - prometheus
   - prometheus/promhttp
@@ -204,13 +204,13 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: 2f17f4a9d485bf34b4bfaccc273805040e4f86c8
+  version: 49fee292b27bfff7f354ee0f64e1bc4850462edf
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: e645f4e5aaa8506fc71d6edbc5c4ff02c04c46f2
+  version: a1dba9ce8baed984a2495b658c82687f8157b98f
   subpackages:
   - xfs
 - name: github.com/PuerkitoBio/purell
@@ -272,7 +272,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
+  version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
 - name: k8s.io/apimachinery
   version: 85ace5365f33b16fc735c866a12e3c765b9700f2
   subpackages:

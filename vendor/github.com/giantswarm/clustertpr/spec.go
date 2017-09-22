@@ -11,5 +11,6 @@ type Spec struct {
 	Kubernetes spec.Kubernetes `json:"kubernetes" yaml:"kubernetes"`
 	Masters    []spec.Node     `json:"masters" yaml:"masters"`
 	Vault      spec.Vault      `json:"vault" yaml:"vault"`
+	Version    string          `json:"version" yaml:"version"`
 	Workers    []spec.Node     `json:"workers" yaml:"workers"`
 }

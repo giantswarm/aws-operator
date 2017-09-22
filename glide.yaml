@@ -25,9 +25,9 @@ import:
 - package: google.golang.org/grpc
   version: v1.2.1
 - package: github.com/giantswarm/awstpr
-  version: add-private-subnets
-- package: github.com/giantswarm/k8scloudconfig
   version: master
+- package: github.com/giantswarm/k8scloudconfig
+  version: 05b5ac2a4ed0d145efb1ce8002f26b228ae3cc1b # Pinned due to k8scc versioning changes.
 - package: github.com/stretchr/testify
   version: v1.1.4
   repo: git://github.com/stretchr/testify.git
