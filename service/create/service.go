@@ -816,7 +816,6 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	}
 
 	for _, privateRouteTableName := range cluster.Spec.AWS.VPC.RouteTableNames {
-
 		privateRouteTable := &awsresources.RouteTable{
 			Name:   privateRouteTableName,
 			VpcID:  cluster.Spec.AWS.VPC.PeerID,
@@ -1087,12 +1086,12 @@ func (s *Service) deleteFunc(obj interface{}) {
 	}
 
 	clients := awsutil.NewClients(s.awsConfig)
-
 	err := s.awsConfig.SetAccountID(clients.IAM)
 	if err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not retrieve amazon account id: '%#v'", err))
 		return
 	}
+
 	// Retrieve AWS host cluster client.
 	s.awsHostConfig.Region = cluster.Spec.AWS.Region
 	hostClients := awsutil.NewClients(s.awsHostConfig)
@@ -1342,7 +1341,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 		s.logger.Log("error", fmt.Sprintf("could not find vpc peering connection: '%#v'", err))
 	}
 
-	// Delete Guest VPC Route.
+	// Delete Guest VPC Routes.
 	for _, privateRouteTableName := range cluster.Spec.AWS.VPC.RouteTableNames {
 		privateRouteTable := &awsresources.RouteTable{
 			Name:   privateRouteTableName,

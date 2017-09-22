@@ -13,7 +13,6 @@ type Route struct {
 }
 
 func (r Route) findExisting() (*ec2.Route, error) {
-
 	awsRouteTable, err := r.RouteTable.findExisting()
 
 	for _, route := range awsRouteTable.Routes {
