@@ -54,6 +54,12 @@ func (k K) Key() string {
 	return k.key
 }
 
+// KeyNoLeadingSlash returns the actual sanitized key value with leading slash
+// stripped.
+func (k K) KeyNoLeadingSlash() string {
+	return k.key[1:]
+}
+
 // KV is an immutable key-value pair with valid key.
 type KV struct {
 	key string
@@ -104,6 +110,12 @@ func (k KV) K() K {
 // Key returns the sanitized key associated with this key-value pair.
 func (k KV) Key() string {
 	return k.key
+}
+
+// KeyNoLeadingSlashreturns the sanitized key associated with this key-value
+// pair with leading slash stripped.
+func (k KV) KeyNoLeadingSlash() string {
+	return k.key[1:]
 }
 
 // Val returns the value associated with this key-value pair.

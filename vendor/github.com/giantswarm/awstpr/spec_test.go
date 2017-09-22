@@ -126,7 +126,10 @@ func TestSpecYamlEncoding(t *testing.T) {
 				CIDR:              "10.0.0.0/16",
 				PrivateSubnetCIDR: "10.0.0.0/19",
 				PublicSubnetCIDR:  "10.0.128.0/20",
-
+				RouteTableNames: []string{
+					"cluster_private_0",
+					"cluster_private_1",
+				},
 				PeerID: "xxxxxxxxx",
 			},
 			HostedZones: aws.HostedZones{

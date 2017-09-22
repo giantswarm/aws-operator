@@ -32,6 +32,8 @@ guide, all placeholders must be replaced with sensible values.
 - *AWS_INSTANCE_TYPE_WORKER* - Worker machines instance type.
 - *AWS_API_HOSTED_ZONE* - Route 53 hosted zone for API and Etcd
 - *AWS_INGRESS_HOSTED_ZONE* - Route 53 hosted zone for Ingress
+- *AWS_ROUTE_TABLE_0* - Existing route table of the cluster to use for VPC peering.
+- *AWS_ROUTE_TABLE_1* - Existing route table of the cluster to use for VPC peering.
 - *AWS_VPC_PEER_ID* - VPC ID of the host cluster to peer with.
 
 This is a handy snippet that makes it painless - works in bash and zsh.
@@ -50,6 +52,8 @@ export AWS_INSTANCE_TYPE_MASTER="m3.medium"
 export AWS_INSTANCE_TYPE_WORKER="m3.medium"
 export AWS_API_HOSTED_ZONE="Z*************"
 export AWS_INGRESS_HOSTED_ZONE="Z*************"
+export AWS_ROUTE_TABLE_0="example-table"
+export AWS_ROUTE_TABLE_1="example-table-two"
 export AWS_VPC_PEER_ID="vpc-********"
 
 for f in *.tmpl.yaml; do
@@ -67,6 +71,8 @@ for f in *.tmpl.yaml; do
         -e 's|${AWS_INSTANCE_TYPE_WORKER}|'"${AWS_INSTANCE_TYPE_WORKER}"'|g' \
         -e 's|${AWS_API_HOSTED_ZONE}|'"${AWS_API_HOSTED_ZONE}"'|g' \
         -e 's|${AWS_INGRESS_HOSTED_ZONE}|'"${AWS_INGRESS_HOSTED_ZONE}"'|g' \
+        -e 's|${AWS_ROUTE_TABLE_0}|'"${AWS_ROUTE_TABLE_0}"'|g' \
+        -e 's|${AWS_ROUTE_TABLE_1}|'"${AWS_ROUTE_TABLE_1}"'|g' \
         -e 's|${AWS_VPC_PEER_ID}|'"${AWS_VPC_PEER_ID}"'|g' \
         ./$f > ./${f%.tmpl.yaml}.yaml
 done
