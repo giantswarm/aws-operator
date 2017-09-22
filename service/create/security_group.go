@@ -23,6 +23,7 @@ type rulesInput struct {
 	MastersSecurityGroupID string
 	WorkersSecurityGroupID string
 	IngressSecurityGroupID string
+	HostClusterCIDR        string
 }
 
 const (
@@ -157,6 +158,13 @@ func (ri rulesInput) workerRules() []awsresources.SecurityGroupRule {
 			Port:            allPorts,
 			Protocol:        allProtocols,
 			SecurityGroupID: ri.WorkersSecurityGroupID,
+		},
+		// Allow traffic from host cluster to ingress controller secure port,
+		// for guest cluster scraping.
+		{
+			Port:       ri.Cluster.Spec.Cluster.Kubernetes.IngressController.SecurePort,
+			Protocol:   tcpProtocol,
+			SourceCIDR: ri.HostClusterCIDR,
 		},
 	}
 }

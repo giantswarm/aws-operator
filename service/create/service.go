@@ -661,6 +661,11 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		s.logger.Log("info", fmt.Sprintf("vpc peering connection for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
 	}
 
+	conn, err := vpcPeeringConection.FindExisting()
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not find vpc peering connection: '%#v'", err))
+	}
+
 	// Create gateway.
 	var gateway resources.ResourceWithID
 	gateway = &awsresources.Gateway{
@@ -731,6 +736,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		MastersSecurityGroupID: mastersSecurityGroupID,
 		WorkersSecurityGroupID: workersSecurityGroupID,
 		IngressSecurityGroupID: ingressSecurityGroupID,
+		HostClusterCIDR:        *conn.AccepterVpcInfo.CidrBlock,
 	}
 
 	if err := mastersSecurityGroup.ApplyRules(rulesInput.masterRules()); err != nil {
@@ -791,11 +797,6 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 
 	if err := publicSubnet.MakePublic(routeTable); err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not make subnet public, '%#v'", err))
-	}
-
-	conn, err := vpcPeeringConection.FindExisting()
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not find vpc peering connection: '%#v'", err))
 	}
 
 	publicRoute := &awsresources.Route{
