@@ -1,8 +1,8 @@
 hash: a1e9c4e7a08d208d688e7a741484a3a9ae280a3ffd3c7e96c9804b83122d46d2
-updated: 2017-09-22T10:58:46.959556801+01:00
+updated: 2017-09-23T02:50:21.669839055+03:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 63b62fd164366013a09181fd43879e284c5c5a86
+  version: 4c984c1f412ef5c5cdbb1a3f1c6ce5e3155ca9ab
   subpackages:
   - aws
   - aws/awserr
@@ -45,7 +45,7 @@ imports:
   subpackages:
   - quantile
 - name: github.com/cenkalti/backoff
-  version: 61ba96c4d1002f22e06acb8e34a7650611125a63
+  version: 32cd0c5b3aef12c76ed64aaf678f6c79736be7dc
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
   subpackages:
@@ -112,11 +112,11 @@ imports:
 - name: github.com/giantswarm/micrologger
   version: 8a69b2ab80ba2d0bd40d609206518fefacfc8fdf
 - name: github.com/giantswarm/microstorage
-  version: 31cedcac6cdcbcbf57dfdbb885c9a2dd40a9c403
+  version: 15d1f4ae1c9149071d75eca931c541c8edabd24a
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: 49ac418456193963d3c9e13c1a60e6e025eb665a
+  version: a6f6c824a13e17d683ff951edb2439238eaace37
   subpackages:
   - client/k8s
   - tpr
@@ -158,7 +158,7 @@ imports:
 - name: github.com/gorilla/mux
   version: 0eeaf8392f5b04950925b8a69fe70f110fa7cbfc
 - name: github.com/hashicorp/hcl
-  version: 68e816d1c783414e79bc65b3994d9ab6b0a722ab
+  version: 8f6b1344a92ff8877cf24a5de9177bf7d0a2a187
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -204,13 +204,13 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: 49fee292b27bfff7f354ee0f64e1bc4850462edf
+  version: 2f17f4a9d485bf34b4bfaccc273805040e4f86c8
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: a1dba9ce8baed984a2495b658c82687f8157b98f
+  version: e645f4e5aaa8506fc71d6edbc5c4ff02c04c46f2
   subpackages:
   - xfs
 - name: github.com/PuerkitoBio/purell
@@ -246,6 +246,7 @@ imports:
   version: e90d6d0afc4c315a0d87a568ae68577cc15149a0
   subpackages:
   - context
+  - context/ctxhttp
   - http2
   - http2/hpack
   - idna
@@ -272,7 +273,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
+  version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
 - name: k8s.io/apimachinery
   version: 85ace5365f33b16fc735c866a12e3c765b9700f2
   subpackages:
