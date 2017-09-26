@@ -2,5 +2,7 @@ package: github.com/giantswarm/k8scloudconfig
 import:
 - package: github.com/giantswarm/clustertpr
   version: master
-  subpackages:
-  - node
+- package: github.com/giantswarm/microerror
+  version: master
+- package: github.com/stretchr/testify
+  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
