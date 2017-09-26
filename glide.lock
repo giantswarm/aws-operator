@@ -1,5 +1,5 @@
 hash: 5b100615712487f9c60f65545f793881042f581fe76d54ff0e41ca9e6f2ba143
-updated: 2017-09-26T15:38:08.660175028+02:00
+updated: 2017-09-26T15:50:31.865374827+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: f93b927be230712e3587ed606bba8f43e340c4ca
@@ -87,17 +87,6 @@ imports:
   version: d5f6bfdf920ccc93e84e165180cc4abae5a8aa5b
   subpackages:
   - v_0_1_0
-- name: github.com/giantswarm/kvm-operator
-  version: bf49015a93ecd9f793e45ac9297304992521df5e
-  subpackages:
-  - service/cloudconfig
-- name: github.com/giantswarm/kvmtpr
-  version: 8ada36b1a377707e8354ec1da990ec4fbbc372d1
-  subpackages:
-  - spec
-  - spec/kvm
-  - spec/kvm/endpointupdater
-  - spec/kvm/k8skvm
 - name: github.com/giantswarm/microendpoint
   version: 52df81f27120f66c3055812e991df32ee2dda2aa
   subpackages:
@@ -262,7 +251,6 @@ imports:
   version: e90d6d0afc4c315a0d87a568ae68577cc15149a0
   subpackages:
   - context
-  - context/ctxhttp
   - http2
   - http2/hpack
   - idna
