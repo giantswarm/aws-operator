@@ -3,15 +3,14 @@ package create
 import (
 	"fmt"
 
-	"github.com/giantswarm/aws-operator/resources"
-	"github.com/giantswarm/aws-operator/service/key"
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/certificatetpr"
-	cloudconfig "github.com/giantswarm/k8scloudconfig"
 	"github.com/giantswarm/microerror"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/resources"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
+	"github.com/giantswarm/aws-operator/service/key"
 )
 
 type launchConfigurationInput struct {
@@ -29,37 +28,32 @@ type launchConfigurationInput struct {
 }
 
 func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (bool, error) {
-	var (
-		extension    cloudconfig.Extension
-		imageID      string
-		instanceType string
-		publicIP     bool
-	)
+	var err error
+	var imageID string
+	var instanceType string
+	var publicIP bool
+	var template string
 
-	switch input.prefix {
-	case prefixMaster:
-		extension = NewMasterCloudConfigExtension(input.cluster.Spec, input.tlsAssets)
+	{
+		switch input.prefix {
+		case prefixMaster:
+			imageID = key.MasterImageID(input.cluster)
+			instanceType = key.MasterInstanceType(input.cluster)
 
-		imageID = key.MasterImageID(input.cluster)
-		instanceType = key.MasterInstanceType(input.cluster)
-	case prefixWorker:
-		extension = NewWorkerCloudConfigExtension(input.cluster.Spec, input.tlsAssets)
+			template, err = s.cloudConfig.NewMasterTemplate(input.cluster, *input.tlsAssets)
+		case prefixWorker:
+			imageID = key.WorkerImageID(input.cluster)
+			instanceType = key.WorkerInstanceType(input.cluster)
+			publicIP = true
 
-		imageID = key.WorkerImageID(input.cluster)
-		instanceType = key.WorkerInstanceType(input.cluster)
-		publicIP = true
-	default:
-		return false, microerror.Maskf(invalidCloudconfigExtensionNameError, fmt.Sprintf("Invalid extension name '%s'", input.prefix))
-	}
+			template, err = s.cloudConfig.NewWorkerTemplate(input.cluster, *input.tlsAssets)
+		default:
+			return false, microerror.Maskf(invalidCloudconfigExtensionNameError, fmt.Sprintf("Invalid extension name '%s'", input.prefix))
+		}
 
-	cloudConfigParams := cloudconfig.Params{
-		Cluster:   input.cluster.Spec.Cluster,
-		Extension: extension,
-	}
-
-	cloudConfig, err := s.cloudConfig(input.prefix, cloudConfigParams, input.cluster.Spec, input.tlsAssets)
-	if err != nil {
-		return false, microerror.Mask(err)
+		if err != nil {
+			return false, microerror.Mask(err)
+		}
 	}
 
 	// We now upload the instance cloudconfig to S3 and create a "small
@@ -74,7 +68,7 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 
 	cloudconfigS3 := &awsresources.BucketObject{
 		Name:      s.bucketObjectName(input.prefix),
-		Data:      cloudConfig,
+		Data:      template,
 		Bucket:    input.bucket.(*awsresources.Bucket),
 		AWSEntity: awsresources.AWSEntity{Clients: input.clients},
 	}
