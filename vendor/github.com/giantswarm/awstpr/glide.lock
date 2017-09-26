@@ -1,12 +1,12 @@
 hash: 93b97c1eb576443b6ddf21e830d2a67e70149dcd39b761be038ad127eece25b9
-updated: 2017-07-31T17:22:27.462610366+02:00
+updated: 2017-09-26T12:32:00.267578538+02:00
 imports:
 - name: github.com/emicklei/go-restful
-  version: 68c9750c36bb8cb433f1b88c807b4b30df4acc40
+  version: 09691a3b6378b740595c1002f40c34dd5f218a22
   subpackages:
   - log
 - name: github.com/giantswarm/clustertpr
-  version: e00ef3f59c4d55ce1a2cf70b7739e34a0604d748
+  version: 34d49f599b2cc70af0d9c30b941a085aef772e64
   subpackages:
   - spec
   - spec/docker
@@ -15,58 +15,62 @@ imports:
   - spec/kubernetes/ingress
   - spec/kubernetes/kubectl
   - spec/kubernetes/networksetup
+  - spec/kubernetes/ssh
 - name: github.com/giantswarm/operatorkit
-  version: be4331cdb2d518c233732b54a21093ae05231c84
+  version: a6f6c824a13e17d683ff951edb2439238eaace37
 - name: github.com/go-openapi/jsonpointer
-  version: 779f45308c19820f1a69e9a4cd965f496e0da10f
+  version: 46af16f9f7b149af66e5d1bd010e3574dc06de98
 - name: github.com/go-openapi/jsonreference
-  version: 36d33bfe519efae5632669801b180bf1a245da3b
+  version: 13c6e3589ad90f49bd3e3bbe2c2cb3d7a4142272
 - name: github.com/go-openapi/spec
-  version: 51363c5ae11ba8152bd9f35d17da715fbd1a1136
+  version: 6aced65f8501fe1217321abf0749d354824ba2ff
 - name: github.com/go-openapi/swag
-  version: f3f9494671f93fcff853e3c6e9e948b3eb71e590
+  version: 1d0bd113de87027671077d3c71eb3ac5d7dbba72
 - name: github.com/gogo/protobuf
-  version: db30a6cdca2260d5b850dc381bbac7d5de4bfcb4
+  version: e18d7aa8f8c624c915db340349aad4c49b10d173
   subpackages:
   - proto
   - sortkeys
 - name: github.com/golang/glog
-  version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
+  version: 44145f04b68cf362d9c4df2182967c2275eaefed
 - name: github.com/google/gofuzz
-  version: 24818f796faf91cd76ec7bddd72458fbced7a6c1
+  version: 44d81051d367757e1c7c6a5a86423ece9afcf63c
 - name: github.com/mailru/easyjson
-  version: 2f5df55504ebc322e4d52d34df6a1f5b503bf26d
+  version: d5b7844b561a7bc640052f1b935f7b800330d7e0
   subpackages:
   - buffer
   - jlexer
   - jwriter
 - name: github.com/PuerkitoBio/purell
-  version: b938d81255b5473c57635324295cb0fe398c7a58
+  version: 8a290539e2e8629dbc4e6bad948158f790ec31f4
 - name: github.com/PuerkitoBio/urlesc
-  version: bbf7a2afc14f93e1e0a5c06df524fbd75e5031e5
+  version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/spf13/pflag
-  version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
+  version: 9ff6c6923cfffbcd502984b8e0c80539a94968b7
 - name: golang.org/x/net
-  version: f5079bd7f6f74e23c4d65efa0f4ce14cbd6a3c0f
+  version: e90d6d0afc4c315a0d87a568ae68577cc15149a0
   subpackages:
   - http2
   - http2/hpack
   - idna
   - lex/httplex
 - name: golang.org/x/text
-  version: 3bd178b88a8180be2df394a1fbb81313916f0e7b
+  version: 2910a502d2bf9e43193af9d68ca516529614eed3
   subpackages:
+  - cases
+  - internal/tag
+  - language
+  - runes
   - secure/bidirule
+  - secure/precis
   - transform
   - unicode/bidi
   - unicode/norm
   - width
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
-- name: gopkg.in/yaml.v2
-  version: 25c4ec802a7d637f88d584ab26798e94ad14c13b
 - name: k8s.io/apimachinery
-  version: dc1f89aff9a7509782bde3b68824c8043a3e58cc
+  version: 85ace5365f33b16fc735c866a12e3c765b9700f2
   subpackages:
   - pkg/api/resource
   - pkg/apis/meta/v1
@@ -90,11 +94,11 @@ imports:
   - third_party/forked/golang/reflect
 testImports:
 - name: github.com/davecgh/go-spew
-  version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
+  version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
   subpackages:
   - spew
 - name: github.com/kylelemons/godebug
-  version: a616ab194758ae0a11290d87ca46ee8c440117b0
+  version: d65d576e9348f5982d7f6d83682b694e731a45c6
   subpackages:
   - diff
   - pretty
@@ -107,3 +111,5 @@ testImports:
   subpackages:
   - assert
   - require
+- name: gopkg.in/yaml.v2
+  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77

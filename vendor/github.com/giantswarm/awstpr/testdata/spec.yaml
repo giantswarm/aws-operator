@@ -10,10 +10,8 @@ cluster:
     id: BooYa
   docker:
     daemon:
+      cidr: '16'
       extraArgs: --log-opt max-file=1
-    imageNamespace: giantswarm
-    registry:
-      endpoint: http://giantswarm.io
   etcd:
     altNames: ""
     domain: etcd.giantswarm.io
@@ -53,13 +51,15 @@ cluster:
       docker:
         image: quay.io/giantswarm/k8s-setup-network-environment
     ssh:
-      publicKeys:
-      - ssh-rsa AAAAB3NzaC1yc
+      userList:
+      - name: xh3b4sd
+        publicKey: ssh-rsa AAAAB3NzaC1yc
   masters:
   - id: fyz88
   vault:
     address: vault.giantswarm.io
     token: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  version: '0.1.0'
   workers:
   - id: axx99
   - id: cdd88
