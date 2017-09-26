@@ -1,11 +1,11 @@
 package aws
 
 import (
-	"github.com/giantswarm/aws-operator/flag/service/aws/accesskey"
+	"github.com/giantswarm/aws-operator/flag/service/aws/guest"
+	"github.com/giantswarm/aws-operator/flag/service/aws/host"
 )
 
 type AWS struct {
-	AccessKey     accesskey.AccessKey
-	HostAccessKey accesskey.AccessKey
-	PubKeyFile    string
+	Guest guest.Guest
+	Host  host.Host
 }

@@ -5,10 +5,7 @@ import (
 )
 
 type Kubernetes struct {
-	Address     string
-	InCluster   string
-	Password    string
-	TLS         tls.TLS
-	BearerToken string
-	Username    string
+	Address   string
+	InCluster string
+	TLS       tls.TLS
 }

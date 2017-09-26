@@ -1,8 +1,8 @@
 hash: a1e9c4e7a08d208d688e7a741484a3a9ae280a3ffd3c7e96c9804b83122d46d2
-updated: 2017-09-22T10:58:46.959556801+01:00
+updated: 2017-09-26T17:36:02.098380049+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 63b62fd164366013a09181fd43879e284c5c5a86
+  version: f93b927be230712e3587ed606bba8f43e340c4ca
   subpackages:
   - aws
   - aws/awserr
@@ -23,20 +23,13 @@ imports:
   - awserr
   - internal/shareddefaults
   - private/protocol
-  - private/protocol/ec2query
-  - private/protocol/json/jsonutil
-  - private/protocol/jsonrpc
   - private/protocol/query
   - private/protocol/query/queryutil
   - private/protocol/rest
-  - private/protocol/restxml
   - private/protocol/xml/xmlutil
   - service/autoscaling
-  - service/cloudformation
-  - service/ec2
   - service/elb
   - service/iam
-  - service/kms
   - service/route53
   - service/s3
   - service/sts
@@ -44,6 +37,8 @@ imports:
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
   subpackages:
   - quantile
+- name: github.com/cenk/backoff
+  version: 61ba96c4d1002f22e06acb8e34a7650611125a63
 - name: github.com/cenkalti/backoff
   version: 61ba96c4d1002f22e06acb8e34a7650611125a63
 - name: github.com/davecgh/go-spew
@@ -65,7 +60,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: 97c4b7ab683479718d7d120fdd491029d5e2ff22
+  version: f3694486897766836b07e95942d84a02af2f64f5
   subpackages:
   - spec
   - spec/aws
@@ -85,9 +80,12 @@ imports:
 - name: github.com/giantswarm/k8scloudconfig
   version: 05b5ac2a4ed0d145efb1ce8002f26b228ae3cc1b
 - name: github.com/giantswarm/microendpoint
-  version: f5682d1d6fe0eb963397fb7e0535c1794644efce
+  version: 52df81f27120f66c3055812e991df32ee2dda2aa
   subpackages:
+  - endpoint/healthz
   - endpoint/version
+  - service/healthz
+  - service/healthz/k8s
   - service/version
 - name: github.com/giantswarm/microerror
   version: 5ade94eb4ee35ef72eb9382228470caeddb29989
@@ -111,14 +109,21 @@ imports:
   - transaction/context/tracked
 - name: github.com/giantswarm/micrologger
   version: 8a69b2ab80ba2d0bd40d609206518fefacfc8fdf
+  subpackages:
+  - microloggertest
 - name: github.com/giantswarm/microstorage
-  version: 31cedcac6cdcbcbf57dfdbb885c9a2dd40a9c403
+  version: 15d1f4ae1c9149071d75eca931c541c8edabd24a
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: 49ac418456193963d3c9e13c1a60e6e025eb665a
+  version: a6f6c824a13e17d683ff951edb2439238eaace37
   subpackages:
   - client/k8s
+  - framework
+  - framework/canceledcontext
+  - framework/logresource
+  - framework/metricsresource
+  - framework/retryresource
   - tpr
 - name: github.com/go-ini/ini
   version: c787282c39ac1fc618827141a1f762240def08a3
@@ -193,7 +198,7 @@ imports:
 - name: github.com/mitchellh/mapstructure
   version: d0303fe809921458f417bcf828397a65db30a7e4
 - name: github.com/pelletier/go-toml
-  version: 1d6b12b7cb290426e27e6b4e38b89fcda3aeef03
+  version: 16398bac157da96aa88f98a2df640c7f32af1da2
 - name: github.com/prometheus/client_golang
   version: 353b8c3f3776541879f9abfd8fa8b1ae162ab394
   subpackages:
@@ -204,13 +209,13 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: 49fee292b27bfff7f354ee0f64e1bc4850462edf
+  version: 2f17f4a9d485bf34b4bfaccc273805040e4f86c8
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: a1dba9ce8baed984a2495b658c82687f8157b98f
+  version: e645f4e5aaa8506fc71d6edbc5c4ff02c04c46f2
   subpackages:
   - xfs
 - name: github.com/PuerkitoBio/purell
@@ -272,7 +277,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
+  version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
 - name: k8s.io/apimachinery
   version: 85ace5365f33b16fc735c866a12e3c765b9700f2
   subpackages:
@@ -394,8 +399,4 @@ imports:
   - util/clock
   - util/flowcontrol
   - util/integer
-testImports:
-- name: github.com/pmezard/go-difflib
-  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
-  subpackages:
-  - difflib
+testImports: []
