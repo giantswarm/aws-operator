@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"path"
 
 	"github.com/giantswarm/microkit/command"
 	microserver "github.com/giantswarm/microkit/server"
@@ -124,24 +123,20 @@ func main() {
 
 	daemonCommand := newCommand.DaemonCommand().CobraCommand()
 
-	daemonCommand.PersistentFlags().String(f.Service.AWS.AccessKey.ID, "", "ID of the AWS access key for the account to create guest clusters in.")
-	daemonCommand.PersistentFlags().String(f.Service.AWS.AccessKey.Secret, "", "Secret of the AWS access key for the  account to create guest clusters in.")
-	daemonCommand.PersistentFlags().String(f.Service.AWS.AccessKey.Session, "", "Session token of the AWS access key for the  account to create guest clusters in. (Can be empty)")
-	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.ID, "", "ID of the AWS access key for the host cluster account. If empty, guest cluster account is used.")
-	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.Secret, "", "Secret of the AWS access key for the host cluster account. If empty, guest cluster account is used.")
-	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.Session, "", "Session token of the AWS access key for the host cluster account. If empty, guest cluster token is used.")
+	daemonCommand.PersistentFlags().String(f.Service.AWS.Guest.AccessKey.ID, "", "ID of the AWS access key for the account to create guest clusters in.")
+	daemonCommand.PersistentFlags().String(f.Service.AWS.Guest.AccessKey.Secret, "", "Secret of the AWS access key for the  account to create guest clusters in.")
+	daemonCommand.PersistentFlags().String(f.Service.AWS.Guest.AccessKey.Session, "", "Session token of the AWS access key for the  account to create guest clusters in. (Can be empty)")
 
-	// TODO(nhlfr): Deprecate these options when cert-operator will be implemented.
-	daemonCommand.PersistentFlags().String(f.Service.AWS.PubKeyFile, path.Join(os.Getenv("HOME"), ".ssh", "id_rsa.pub"), "Public key to be imported as a keypair in AWS.")
+	daemonCommand.PersistentFlags().String(f.Service.AWS.Host.AccessKey.ID, "", "ID of the AWS access key for the host cluster account. If empty, guest cluster account is used.")
+	daemonCommand.PersistentFlags().String(f.Service.AWS.Host.AccessKey.Secret, "", "Secret of the AWS access key for the host cluster account. If empty, guest cluster account is used.")
+	daemonCommand.PersistentFlags().String(f.Service.AWS.Host.AccessKey.Session, "", "Session token of the AWS access key for the host cluster account. If empty, guest cluster token is used.")
+	daemonCommand.PersistentFlags().String(f.Service.AWS.Host.Region, "", "AWS region of the host cluster account.")
 
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.Address, "http://127.0.0.1:6443", "Address used to connect to Kubernetes. When empty in-cluster config is created.")
-	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.BearerToken, "", "Token (if needed for Kubernetes authentication).")
 	daemonCommand.PersistentFlags().Bool(f.Service.Kubernetes.InCluster, false, "Whether to use the in-cluster config to authenticate with Kubernetes.")
-	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.Password, "", "Password (if Kubernetes cluster is using basic authentication.")
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.CAFile, "", "Certificate authority file path to use to authenticate with Kubernetes.")
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.CrtFile, "", "Certificate file path to use to authenticate with Kubernetes.")
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.KeyFile, "", "Key file path to use to authenticate with Kubernetes.")
-	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.Username, "", "Username (if the Kubernetes cluster is using basic authentication).")
 
 	newCommand.CobraCommand().Execute()
 }

@@ -1,4 +1,4 @@
-package endpoint
+package operator
 
 import "github.com/giantswarm/microerror"
 

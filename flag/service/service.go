@@ -6,6 +6,6 @@ import (
 )
 
 type Service struct {
-	Kubernetes kubernetes.Kubernetes
 	AWS        aws.AWS
+	Kubernetes kubernetes.Kubernetes
 }
