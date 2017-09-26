@@ -1,12 +1,8 @@
-FROM busybox:ubuntu-14.04
+FROM alpine:3.4
 
-RUN mkdir -p /opt
-ADD ./aws-operator /opt/aws-operator
+RUN apk add --update ca-certificates \
+    && rm -rf /var/cache/apk/*
 
-RUN mkdir -p /opt/resources
-ADD resources/templates/ /opt/resources/templates
+ADD ./aws-operator /aws-operator
 
-WORKDIR /opt
-
-EXPOSE 8000
-ENTRYPOINT ["/opt/aws-operator"]
+ENTRYPOINT ["/aws-operator"]
