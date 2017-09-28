@@ -14,7 +14,8 @@ func v_0_1_0MasterTemplate(customObject awstpr.CustomObject, certs certificatetp
 	{
 		params.Cluster = customObject.Spec.Cluster
 		params.Extension = &v_0_1_0MasterExtension{
-			certs: certs,
+			certs:        certs,
+			customObject: customObject,
 		}
 	}
 
@@ -35,7 +36,8 @@ func v_0_1_0MasterTemplate(customObject awstpr.CustomObject, certs certificatetp
 }
 
 type v_0_1_0MasterExtension struct {
-	certs certificatetpr.CompactTLSAssets
+	certs        certificatetpr.CompactTLSAssets
+	customObject awstpr.CustomObject
 }
 
 func (e *v_0_1_0MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
@@ -164,7 +166,7 @@ func (e *v_0_1_0MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	var newFiles []k8scloudconfig.FileAsset
 
 	for _, fm := range filesMeta {
-		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, nil)
+		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, e.customObject.Spec)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -205,7 +207,7 @@ func (e *v_0_1_0MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	var newUnits []k8scloudconfig.UnitAsset
 
 	for _, fm := range unitsMeta {
-		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, nil)
+		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, e.customObject.Spec)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
