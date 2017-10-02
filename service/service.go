@@ -3,7 +3,6 @@
 package service
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/giantswarm/certificatetpr"
@@ -63,7 +62,6 @@ func New(config Config) (*Service, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "logger must not be empty")
 	}
-	config.Logger.Log("debug", fmt.Sprintf("creating aws-operator service with config: %s", config))
 
 	var err error
 
