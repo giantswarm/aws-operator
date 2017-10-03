@@ -1,19 +1,9 @@
 package: github.com/giantswarm/aws-operator
 import:
 - package: github.com/aws/aws-sdk-go
-  version: master
-  subpackages:
-  - service/autoscaling
-  - service/s3
-  - service/elb
-  - service/route53
-  - awserr
+  version: v1.12.3
 - package: github.com/giantswarm/microkit
   version: master
-  subpackages:
-  - command
-  - server
-  - transaction
 - package: github.com/giantswarm/operatorkit
   verson: master
 - package: github.com/giantswarm/microerror

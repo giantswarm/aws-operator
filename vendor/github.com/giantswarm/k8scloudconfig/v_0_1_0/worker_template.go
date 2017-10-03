@@ -197,10 +197,9 @@ coreos:
     - name: 10-giantswarm-extra-args.conf
       content: |
         [Service]
-        Environment="DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs --disable-legacy-registry=true {{.Cluster.Docker.Daemon.ExtraArgs}}"
+        Environment="DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs {{.Cluster.Docker.Daemon.ExtraArgs}}"
         Environment="DOCKER_OPT_BIP=--bip={{.Cluster.Docker.Daemon.CIDR}}"
-        Environment="DOCKER_OPTS=--live-restore"
-
+        Environment="DOCKER_OPTS=--live-restore --icc=false --disable-legacy-registry=true --userland-proxy=false"
   - name: k8s-setup-network-env.service
     enable: true
     command: start
@@ -281,7 +280,7 @@ coreos:
       ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
       ExecStartPre=-/usr/bin/docker rm -f $NAME
       ExecStart=/bin/sh -c "/usr/bin/docker run --rm --pid=host --net=host --privileged=true \
-      -v /:/rootfs:ro \
+      -v /:/rootfs:ro,shared \
       -v /sys:/sys:ro \
       -v /dev:/dev:rw \
       -v /var/log:/var/log:rw \
@@ -290,7 +289,7 @@ coreos:
       -v /run/docker.sock:/run/docker.sock:rw \
       -v /usr/lib/os-release:/etc/os-release \
       -v /usr/share/ca-certificates/:/etc/ssl/certs \
-      -v /var/lib/docker/:/var/lib/docker:rw \
+      -v /var/lib/docker/:/var/lib/docker:rw,shared \
       -v /var/lib/kubelet/:/var/lib/kubelet:rw,shared \
       -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
@@ -304,7 +303,6 @@ coreos:
       /hyperkube kubelet \
       --address=${DEFAULT_IPV4} \
       --port={{.Cluster.Kubernetes.Kubelet.Port}} \
-      --hostname-override=${DEFAULT_IPV4} \
       --node-ip=${DEFAULT_IPV4} \
       --api-servers=https://{{.Cluster.Kubernetes.API.Domain}} \
       --containerized \

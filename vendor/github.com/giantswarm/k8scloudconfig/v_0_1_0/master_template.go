@@ -101,6 +101,10 @@ write_files:
       selector:
         matchLabels:
           k8s-app: calico-node
+      updateStrategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxUnavailable: 1
       template:
         metadata:
           labels:
@@ -1023,9 +1027,9 @@ coreos:
     - name: 10-giantswarm-extra-args.conf
       content: |
         [Service]
-        Environment="DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs --disable-legacy-registry=true {{.Cluster.Docker.Daemon.ExtraArgs}}"
+        Environment="DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs {{.Cluster.Docker.Daemon.ExtraArgs}}"
         Environment="DOCKER_OPT_BIP=--bip={{.Cluster.Docker.Daemon.CIDR}}"
-        Environment="DOCKER_OPTS=--live-restore"
+        Environment="DOCKER_OPTS=--live-restore --icc=false --disable-legacy-registry=true --userland-proxy=false"
   - name: k8s-setup-network-env.service
     enable: true
     command: start
@@ -1107,6 +1111,50 @@ coreos:
 
       [Install]
       WantedBy=multi-user.target
+  - name: etcd3-defragmentation.service
+    enable: true
+    command: start
+    content: |
+      [Unit]
+      Description=etcd defragmentation job
+      After=docker.service etcd3.service
+      Requires=docker.service etcd3.service
+
+      [Service]
+      Type=oneshot
+      EnvironmentFile=/etc/network-environment
+      Environment=IMAGE=quay.io/coreos/etcd:v3.2.7
+      Environment=NAME=%p.service
+      ExecStartPre=-/usr/bin/docker stop  $NAME
+      ExecStartPre=-/usr/bin/docker rm  $NAME
+      ExecStartPre=-/usr/bin/docker pull $IMAGE
+      ExecStart=/usr/bin/docker run \
+        -v /etc/giantswarm/g8s/ssl/etcd/:/etc/etcd \
+        --net=host  \
+        -e ETCDCTL_API=3 \
+        --name $NAME \
+        $IMAGE \
+        etcdctl \
+        --endpoints https://{{ .Cluster.Etcd.Domain }}:443 \
+        --cacert /etc/etcd/etcd-ca.pem \
+        --cert /etc/etcd/etcd.pem \
+        --key /etc/etcd/etcd-key.pem \
+        defrag
+
+      [Install]
+      WantedBy=multi-user.target
+  - name: etcd3-defragmentation.timer
+    enable: true
+    command: start
+    content: |
+      [Unit]
+      Description=Execute etcd3-defragmentation every day at 3.30AM UTC
+
+      [Timer]
+      OnCalendar=*-*-* 03:30:00 UTC
+
+      [Install]
+      WantedBy=multi-user.target
   - name: k8s-proxy.service
     enable: true
     command: start
@@ -1162,7 +1210,7 @@ coreos:
       ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
       ExecStartPre=-/usr/bin/docker rm -f $NAME
       ExecStart=/bin/sh -c "/usr/bin/docker run --rm --pid=host --net=host --privileged=true \
-      -v /:/rootfs:ro \
+      -v /:/rootfs:ro,shared \
       -v /sys:/sys:ro \
       -v /dev:/dev:rw \
       -v /var/log:/var/log:rw \
@@ -1171,7 +1219,7 @@ coreos:
       -v /run/docker.sock:/run/docker.sock:rw \
       -v /usr/lib/os-release:/etc/os-release \
       -v /usr/share/ca-certificates/:/etc/ssl/certs \
-      -v /var/lib/docker/:/var/lib/docker:rw \
+      -v /var/lib/docker/:/var/lib/docker:rw,shared \
       -v /var/lib/kubelet/:/var/lib/kubelet:rw,shared \
       -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
@@ -1185,7 +1233,6 @@ coreos:
       /hyperkube kubelet \
       --address=${DEFAULT_IPV4} \
       --port={{.Cluster.Kubernetes.Kubelet.Port}} \
-      --hostname-override=${DEFAULT_IPV4} \
       --node-ip=${DEFAULT_IPV4} \
       --api-servers=https://{{.Cluster.Kubernetes.API.Domain}} \
       --containerized \
@@ -1278,7 +1325,11 @@ coreos:
       --tls-cert-file=/etc/kubernetes/ssl/apiserver-crt.pem \
       --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem \
       --client-ca-file=/etc/kubernetes/ssl/apiserver-ca.pem \
-      --service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem
+      --service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem \
+      --audit-log-path=/var/log/apiserver/audit.log \
+      --audit-log-maxage=30 \
+      --audit-log-maxbackup=10 \
+      --audit-log-maxsize=100
       ExecStop=-/usr/bin/docker stop -t 10 $NAME
       ExecStopPost=-/usr/bin/docker rm -f $NAME
   - name: k8s-controller-manager.service
