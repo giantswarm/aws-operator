@@ -948,59 +948,45 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 
 	s.logger.Log("info", fmt.Sprintf("created ingress load balancer"))
 
-	// Create a launch configuration for the worker nodes.
-	lcInput := launchConfigurationInput{
-		clients:             clients,
-		cluster:             cluster,
-		tlsAssets:           tlsAssets,
-		bucket:              bucket,
-		securityGroup:       workersSecurityGroup,
-		subnet:              publicSubnet,
-		keypairName:         key.ClusterID(cluster),
-		instanceProfileName: workerPolicy.GetName(),
-		prefix:              prefixWorker,
-		ebsStorage:          true,
-	}
+	// Create an Auto Scaling Group for the workers.
+	s.logger.Log("info", fmt.Sprintf("processing workers auto scaling group..."))
 
-	lcCreated, err := s.createLaunchConfiguration(lcInput)
+	// Get the ingress load balancer name.
+	ingressELBName, err := loadBalancerName(cluster.Spec.Cluster.Kubernetes.IngressController.Domain, cluster)
 	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create launch config: '%#v'", err))
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get ingress load balancer name: '%#v'", err))
 	}
 
-	if lcCreated {
-		s.logger.Log("info", fmt.Sprintf("created worker launch config"))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("launch config %s already exists, reusing", key.ClusterID(cluster)))
+	// Create an Auto Scaling Group for the workers.
+	asgStackInput := asgStackInput{
+		// Dependencies.
+		clients: clients,
+
+		// Settings.
+		asgSize:                key.WorkerCount(cluster),
+		asgType:                prefixWorker,
+		availabilityZone:       key.AvailabilityZone(cluster),
+		bucket:                 bucket,
+		cluster:                cluster,
+		clusterID:              key.ClusterID(cluster),
+		iamInstanceProfileName: key.InstanceProfileName(cluster, prefixWorker),
+		imageID:                key.WorkerImageID(cluster),
+		instanceType:           key.WorkerInstanceType(cluster),
+		keyPairName:            key.ClusterID(cluster),
+		loadBalancerName:       ingressELBName,
+		publicIP:               true,
+		subnetID:               publicSubnetID,
+		tlsAssets:              tlsAssets,
+		vpcID:                  vpcID,
+		workersSecurityGroupID: workersSecurityGroupID,
 	}
 
-	workersLCName, err := launchConfigurationName(cluster, "worker", workersSecurityGroupID)
+	err = s.processASGStack(asgStackInput)
 	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get launch config name: '%#v'", err))
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not process '%s' ASG stack: '#%v'", prefixWorker, err))
 	}
 
-	asg := awsresources.AutoScalingGroup{
-		Client:                  clients.AutoScaling,
-		Name:                    key.AutoScalingGroupName(cluster, prefixWorker),
-		ClusterID:               key.ClusterID(cluster),
-		MinSize:                 key.WorkerCount(cluster),
-		MaxSize:                 key.WorkerCount(cluster),
-		AvailabilityZone:        key.AvailabilityZone(cluster),
-		LaunchConfigurationName: workersLCName,
-		LoadBalancerName:        ingressLB.Name,
-		VPCZoneIdentifier:       publicSubnetID,
-		HealthCheckGracePeriod:  gracePeriodSeconds,
-	}
-
-	asgCreated, err := asg.CreateIfNotExists()
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create auto scaling group: '%#v'", err))
-	}
-
-	if asgCreated {
-		s.logger.Log("info", fmt.Sprintf("created auto scaling group '%s' with size %v", asg.Name, key.WorkerCount(cluster)))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("auto scaling group '%s' already exists, reusing", asg.Name))
-	}
+	s.logger.Log("info", fmt.Sprintf("processed autoscaling group stack '%s'", key.AutoScalingGroupName(cluster, prefixWorker)))
 
 	// Create Record Sets for the Load Balancers.
 	recordSetInputs := []recordSetInput{
@@ -1112,28 +1098,18 @@ func (s *Service) deleteFunc(obj interface{}) {
 		s.logger.Log("info", "deleted masters")
 	}
 
-	// Delete workers Auto Scaling Group.
-	asg := awsresources.AutoScalingGroup{
-		Client: clients.AutoScaling,
+	// Delete workers Auto Scaling Group stack.
+	s.logger.Log("info", "deleting workers auto scaling group...")
+
+	stack := awsresources.ASGStack{
+		Client: clients.CloudFormation,
 		Name:   key.AutoScalingGroupName(cluster, prefixWorker),
 	}
 
-	if err := asg.Delete(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
+	if err := stack.Delete(); err != nil {
+		s.logger.Log("error", fmt.Sprintf("#%v", err))
 	} else {
 		s.logger.Log("info", "deleted workers auto scaling group")
-	}
-
-	// Delete workers launch configuration.
-	lcInput := launchConfigurationInput{
-		clients: clients,
-		cluster: cluster,
-		prefix:  "worker",
-	}
-	if err := s.deleteLaunchConfiguration(lcInput); err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-	} else {
-		s.logger.Log("info", "deleted worker launch config")
 	}
 
 	// Delete Record Sets.
@@ -1447,22 +1423,12 @@ func (s *Service) deleteFunc(obj interface{}) {
 
 // TODO we need to support this in operatorkit.
 func (s *Service) updateFunc(oldObj, newObj interface{}) {
-	oldCluster := *oldObj.(*awstpr.CustomObject)
-	cluster := *newObj.(*awstpr.CustomObject)
-
-	if err := validateCluster(cluster); err != nil {
-		s.logger.Log("error", "cluster spec is invalid: '%#v'", err)
+	customObject, ok := newObj.(*awstpr.CustomObject)
+	if !ok {
+		s.logger.Log("error", "could not convert to awstpr.CustomObject")
 		return
 	}
-
-	oldSize := key.WorkerCount(oldCluster)
-	newSize := key.WorkerCount(cluster)
-
-	if oldSize == newSize {
-		// We get update events for all sorts of changes. We are currently only
-		// interested in changes to one property, so we ignore all the others.
-		return
-	}
+	cluster := *customObject
 
 	s.awsConfig.Region = cluster.Spec.AWS.Region
 	clients := awsutil.NewClients(s.awsConfig)
@@ -1473,17 +1439,27 @@ func (s *Service) updateFunc(oldObj, newObj interface{}) {
 		return
 	}
 
-	asg := awsresources.AutoScalingGroup{
-		Client:  clients.AutoScaling,
-		Name:    fmt.Sprintf("%s-%s", key.ClusterID(cluster), prefixWorker),
-		MinSize: newSize,
-		MaxSize: newSize,
+	// Process the Auto Scaling Group for the workers.
+	s.logger.Log("info", fmt.Sprintf("processing auto scaling group '%s'...", key.AutoScalingGroupName(cluster, prefixWorker)))
+
+	// Create an Auto Scaling Group for the workers.
+	asgStackInput := asgStackInput{
+		// Dependencies.
+		clients: clients,
+
+		// Settings.
+		asgSize:   key.WorkerCount(cluster),
+		asgType:   prefixWorker,
+		cluster:   cluster,
+		clusterID: key.ClusterID(cluster),
+		imageID:   key.WorkerImageID(cluster),
 	}
 
-	if err := asg.Update(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
+	err = s.processASGStack(asgStackInput)
+	if err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not process '%s' ASG stack: '#%v'", prefixWorker, err))
 		return
 	}
 
-	s.logger.Log("info", fmt.Sprintf("scaling workers auto scaling group from %d to %d", oldSize, newSize))
+	s.logger.Log("info", fmt.Sprintf("processed autoscaling group stack '%s'", key.AutoScalingGroupName(cluster, prefixWorker)))
 }

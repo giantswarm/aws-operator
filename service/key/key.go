@@ -6,6 +6,10 @@ import (
 	"github.com/giantswarm/awstpr"
 )
 
+const (
+	ProfileNameTemplate = "EC2-K8S-Role"
+)
+
 func AutoScalingGroupName(customObject awstpr.CustomObject, groupName string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), groupName)
 }
@@ -16,6 +20,10 @@ func AvailabilityZone(customObject awstpr.CustomObject) string {
 
 func ClusterID(customObject awstpr.CustomObject) string {
 	return customObject.Spec.Cluster.Cluster.ID
+}
+
+func InstanceProfileName(customObject awstpr.CustomObject, profileType string) string {
+	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, ProfileNameTemplate)
 }
 
 func MasterImageID(customObject awstpr.CustomObject) string {
