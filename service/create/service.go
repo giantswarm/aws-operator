@@ -13,7 +13,6 @@ import (
 	awsinfo "github.com/giantswarm/awstpr/spec/aws"
 	"github.com/giantswarm/certificatetpr"
 	"github.com/giantswarm/clustertpr/spec"
-	"github.com/giantswarm/k8scloudconfig"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/tpr"
@@ -24,6 +23,7 @@ import (
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/resources"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
+	"github.com/giantswarm/aws-operator/service/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/key"
 )
 
@@ -51,6 +51,7 @@ const (
 type Config struct {
 	// Dependencies.
 	CertWatcher *certificatetpr.Service
+	CloudConfig *cloudconfig.CloudConfig
 	K8sClient   kubernetes.Interface
 	Logger      micrologger.Logger
 
@@ -66,6 +67,7 @@ func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
 		CertWatcher: nil,
+		CloudConfig: nil,
 		K8sClient:   nil,
 		Logger:      nil,
 
@@ -81,6 +83,9 @@ func New(config Config) (*Service, error) {
 	// Dependencies.
 	if config.CertWatcher == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.CertWatcher must not be empty")
+	}
+	if config.CloudConfig == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.CloudConfig must not be empty")
 	}
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.K8sClient must not be empty")
@@ -123,6 +128,7 @@ func New(config Config) (*Service, error) {
 	newService := &Service{
 		// Dependencies.
 		certWatcher: config.CertWatcher,
+		cloudConfig: config.CloudConfig,
 		k8sClient:   config.K8sClient,
 		logger:      config.Logger,
 
@@ -143,6 +149,7 @@ func New(config Config) (*Service, error) {
 type Service struct {
 	// Dependencies.
 	certWatcher *certificatetpr.Service
+	cloudConfig *cloudconfig.CloudConfig
 	k8sClient   kubernetes.Interface
 	logger      micrologger.Logger
 
@@ -226,19 +233,15 @@ func (s *Service) runMachines(input runMachinesInput) (bool, []string, error) {
 		machines    []spec.Node
 		awsMachines []awsinfo.Node
 		instanceIDs []string
-
-		extension cloudconfig.Extension
 	)
 
 	switch input.prefix {
 	case prefixMaster:
 		machines = input.cluster.Spec.Cluster.Masters
 		awsMachines = input.cluster.Spec.AWS.Masters
-		extension = NewMasterCloudConfigExtension(input.cluster.Spec, input.tlsAssets)
 	case prefixWorker:
 		machines = input.cluster.Spec.Cluster.Workers
 		awsMachines = input.cluster.Spec.AWS.Workers
-		extension = NewWorkerCloudConfigExtension(input.cluster.Spec, input.tlsAssets)
 	}
 
 	// TODO(nhlfr): Create a separate module for validating specs and execute on the earlier stages.
@@ -260,7 +263,6 @@ func (s *Service) runMachines(input runMachinesInput) (bool, []string, error) {
 			cluster:             input.cluster,
 			machine:             machines[i],
 			awsNode:             awsMachines[i],
-			extension:           extension,
 			tlsAssets:           input.tlsAssets,
 			bucket:              input.bucket,
 			securityGroup:       input.securityGroup,
@@ -320,7 +322,6 @@ type runMachineInput struct {
 	cluster             awstpr.CustomObject
 	machine             spec.Node
 	awsNode             awsinfo.Node
-	extension           cloudconfig.Extension
 	tlsAssets           *certificatetpr.CompactTLSAssets
 	bucket              resources.Resource
 	securityGroup       resources.ResourceWithID
@@ -333,15 +334,21 @@ type runMachineInput struct {
 }
 
 func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
-	cloudConfigParams := cloudconfig.Params{
-		Cluster:   input.cluster.Spec.Cluster,
-		Node:      input.machine,
-		Extension: input.extension,
-	}
+	var template string
+	var err error
+	{
+		switch input.prefix {
+		case prefixMaster:
+			template, err = s.cloudConfig.NewMasterTemplate(input.cluster, *input.tlsAssets)
+		case prefixWorker:
+			template, err = s.cloudConfig.NewWorkerTemplate(input.cluster, *input.tlsAssets)
+		default:
+			return false, "", microerror.Maskf(invalidCloudconfigExtensionNameError, fmt.Sprintf("Invalid extension name '%s'", input.prefix))
+		}
 
-	cloudConfig, err := s.cloudConfig(input.prefix, cloudConfigParams, input.cluster.Spec, input.tlsAssets)
-	if err != nil {
-		return false, "", microerror.Mask(err)
+		if err != nil {
+			return false, "", microerror.Mask(err)
+		}
 	}
 
 	// We now upload the instance cloudconfig to S3 and create a "small
@@ -357,7 +364,7 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 	var cloudconfigS3 resources.Resource
 	cloudconfigS3 = &awsresources.BucketObject{
 		Name:      s.bucketObjectName(input.prefix),
-		Data:      cloudConfig,
+		Data:      template,
 		Bucket:    input.bucket.(*awsresources.Bucket),
 		AWSEntity: awsresources.AWSEntity{Clients: input.clients},
 	}

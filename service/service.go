@@ -15,6 +15,7 @@ import (
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
+	"github.com/giantswarm/aws-operator/service/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/create"
 	"github.com/giantswarm/aws-operator/service/healthz"
 )
@@ -121,12 +122,25 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var ccService *cloudconfig.CloudConfig
+	{
+		ccServiceConfig := cloudconfig.DefaultConfig()
+
+		ccServiceConfig.Logger = config.Logger
+
+		ccService, err = cloudconfig.New(ccServiceConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var createService *create.Service
 	{
 		createConfig := create.DefaultConfig()
 		createConfig.AwsConfig = awsConfig
 		createConfig.AwsHostConfig = awsHostConfig
 		createConfig.CertWatcher = certWatcher
+		createConfig.CloudConfig = ccService
 		createConfig.K8sClient = k8sClient
 		createConfig.Logger = config.Logger
 		createConfig.PubKeyFile = config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile)

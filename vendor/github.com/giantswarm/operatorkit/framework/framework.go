@@ -4,9 +4,12 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
+	"github.com/cenk/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/giantswarm/operatorkit/framework/canceledcontext"
@@ -15,8 +18,17 @@ import (
 // Config represents the configuration used to create a new operator framework.
 type Config struct {
 	// Dependencies.
-	Logger    micrologger.Logger
-	Resources []Resource
+
+	BackOff backoff.BackOff
+	// InitCtxFunc is to prepare the given context for a single reconciliation
+	// loop. Operators can implement common context packages to enable
+	// communication between resources. These context packages can be set up
+	// within the context initializer function. InitCtxFunc receives the custom
+	// object being reconciled as second argument. Information provided by the
+	// custom object can be used to initialize the context.
+	InitCtxFunc func(ctx context.Context, obj interface{}) (context.Context, error)
+	Logger      micrologger.Logger
+	Resources   []Resource
 }
 
 // DefaultConfig provides a default configuration to create a new operator
@@ -24,15 +36,19 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
-		Logger:    nil,
-		Resources: nil,
+		BackOff:     nil,
+		InitCtxFunc: nil,
+		Logger:      nil,
+		Resources:   nil,
 	}
 }
 
 type Framework struct {
 	// Dependencies.
-	logger    micrologger.Logger
-	resources []Resource
+	backOff     backoff.BackOff
+	initializer func(ctx context.Context, obj interface{}) (context.Context, error)
+	logger      micrologger.Logger
+	resources   []Resource
 
 	// Internals.
 	mutex sync.Mutex
@@ -41,6 +57,9 @@ type Framework struct {
 // New creates a new configured operator framework.
 func New(config Config) (*Framework, error) {
 	// Dependencies.
+	if config.BackOff == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.BackOff must not be empty")
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
@@ -50,8 +69,10 @@ func New(config Config) (*Framework, error) {
 
 	newFramework := &Framework{
 		// Dependencies.
-		logger:    config.Logger,
-		resources: config.Resources,
+		backOff:     config.BackOff,
+		initializer: config.InitCtxFunc,
+		logger:      config.Logger,
+		resources:   config.Resources,
 
 		// Internals.
 		mutex: sync.Mutex{},
@@ -74,6 +95,15 @@ func (f *Framework) AddFunc(obj interface{}) {
 
 	ctx := context.Background()
 	ctx = canceledcontext.NewContext(ctx, make(chan struct{}))
+
+	if f.initializer != nil {
+		var err error
+		ctx, err = f.initializer(ctx, obj)
+		if err != nil {
+			f.logger.Log("error", fmt.Sprintf("%#v", err), "event", "create")
+			return
+		}
+	}
 
 	f.logger.Log("action", "start", "component", "operatorkit", "function", "ProcessCreate")
 
@@ -108,6 +138,15 @@ func (f *Framework) DeleteFunc(obj interface{}) {
 
 	ctx := context.Background()
 	ctx = canceledcontext.NewContext(ctx, make(chan struct{}))
+
+	if f.initializer != nil {
+		var err error
+		ctx, err = f.initializer(ctx, obj)
+		if err != nil {
+			f.logger.Log("error", fmt.Sprintf("%#v", err), "event", "delete")
+			return
+		}
+	}
 
 	f.logger.Log("action", "start", "component", "operatorkit", "function", "ProcessDelete")
 
@@ -253,6 +292,36 @@ func ProcessDelete(ctx context.Context, obj interface{}, resources []Resource) e
 	}
 
 	return nil
+}
+
+// ProcessEvents takes the event channels created by the operatorkit informer
+// and executes the framework's event functions accordingly.
+func (f *Framework) ProcessEvents(ctx context.Context, deleteChan chan watch.Event, updateChan chan watch.Event, errChan chan error) {
+	operation := func() error {
+		for {
+			select {
+			case e := <-deleteChan:
+				f.DeleteFunc(e.Object)
+			case e := <-updateChan:
+				f.UpdateFunc(nil, e.Object)
+			case err := <-errChan:
+				return microerror.Mask(err)
+			case <-ctx.Done():
+				return nil
+			}
+		}
+
+		return nil
+	}
+
+	notifier := func(err error, d time.Duration) {
+		f.logger.Log("error", fmt.Sprintf("%#v", err))
+	}
+
+	err := backoff.RetryNotify(operation, f.backOff, notifier)
+	if err != nil {
+		f.logger.Log("error", fmt.Sprintf("%#v", err))
+	}
 }
 
 // ProcessUpdate is a drop-in for an informer's UpdateFunc. It receives the new

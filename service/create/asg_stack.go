@@ -8,7 +8,6 @@ import (
 
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/certificatetpr"
-	cloudconfig "github.com/giantswarm/k8scloudconfig"
 	"github.com/giantswarm/microerror"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
@@ -101,10 +100,6 @@ func (s *Service) processASGStack(input asgStackInput) (bool, error) {
 
 // createASGStack creates a CloudFormation stack for an Auto Scaling Group.
 func (s *Service) createASGStack(input asgStackInput) (bool, error) {
-	var (
-		extension cloudconfig.Extension
-	)
-
 	// Generate the Cloud Formation template using a Go template.
 	cfTemplate, err := ioutil.ReadFile(asgCloudFormationGoTemplate)
 	if err != nil {
@@ -147,27 +142,22 @@ func (s *Service) createASGStack(input asgStackInput) (bool, error) {
 		return false, microerror.Mask(err)
 	}
 
-	switch input.asgType {
-	case prefixMaster:
-		extension = NewMasterCloudConfigExtension(input.cluster.Spec, input.tlsAssets)
-	case prefixWorker:
-		extension = NewWorkerCloudConfigExtension(input.cluster.Spec, input.tlsAssets)
-	default:
-		return false, microerror.Maskf(invalidCloudconfigExtensionNameError, fmt.Sprintf("Invalid extension name '%s'", input.asgType))
-	}
+	var template string
+	{
+		var err error
 
-	cloudConfigParams := cloudconfig.Params{
-		Cluster:   input.cluster.Spec.Cluster,
-		Extension: extension,
-	}
+		switch input.asgType {
+		case prefixMaster:
+			template, err = s.cloudConfig.NewMasterTemplate(input.cluster, *input.tlsAssets)
+		case prefixWorker:
+			template, err = s.cloudConfig.NewWorkerTemplate(input.cluster, *input.tlsAssets)
+		default:
+			return false, microerror.Maskf(invalidCloudconfigExtensionNameError, fmt.Sprintf("Invalid extension name '%s'", input.asgType))
+		}
 
-	// We now upload the instance cloudconfig to S3 and create a "small
-	// cloudconfig" that just fetches the previously uploaded "final
-	// cloudconfig" and executes coreos-cloudinit with it as argument.
-	// We do this to circumvent the 16KB limit on user-data for EC2 instances.
-	cloudConfig, err := s.cloudConfig(prefixWorker, cloudConfigParams, input.cluster.Spec, input.tlsAssets)
-	if err != nil {
-		return false, microerror.Mask(err)
+		if err != nil {
+			return false, microerror.Mask(err)
+		}
 	}
 
 	cloudconfigConfig := SmallCloudconfigConfig{
@@ -179,7 +169,7 @@ func (s *Service) createASGStack(input asgStackInput) (bool, error) {
 	cloudconfigS3 := &awsresources.BucketObject{
 		AWSEntity: awsresources.AWSEntity{Clients: input.clients},
 		Name:      s.bucketObjectName(input.asgType),
-		Data:      cloudConfig,
+		Data:      template,
 		Bucket:    input.bucket.(*awsresources.Bucket),
 	}
 	if err := cloudconfigS3.CreateOrFail(); err != nil {

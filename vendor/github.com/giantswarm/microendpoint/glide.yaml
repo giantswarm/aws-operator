@@ -11,4 +11,4 @@ import:
 - package: github.com/hashicorp/vault
   version: ~0.7.3
 - package: k8s.io/client-go
-  version: v3.0.0
+  version: v4.0.0
