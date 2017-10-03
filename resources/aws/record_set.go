@@ -1,8 +1,6 @@
 package aws
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/giantswarm/aws-operator/resources"
@@ -67,29 +65,19 @@ func (record RecordSet) buildParams(action string) *route53.ChangeResourceRecord
 	var resourceRecords []*route53.ResourceRecord
 	var ttl *int64
 
-	fmt.Printf("record.Resource.HostedZoneID(): %#v\n", record.Resource.HostedZoneID())
-	fmt.Printf("record.Resource.DNSName(): %#v\n", record.Resource.DNSName())
-	fmt.Printf("aws.String(record.Value): %#v\n", aws.String(record.Value))
-
 	switch record.Type {
 	case route53.RRTypeA:
-		fmt.Printf("1\n")
 		aliasTarget = &route53.AliasTarget{
 			HostedZoneId:         aws.String(record.Resource.HostedZoneID()),
 			DNSName:              aws.String(record.Resource.DNSName()),
 			EvaluateTargetHealth: aws.Bool(false),
 		}
 	case route53.RRTypeCname:
-		fmt.Printf("2\n")
 		resourceRecords = append(resourceRecords, &route53.ResourceRecord{
 			Value: aws.String(record.Value),
 		})
 		ttl = aws.Int64(defaultTTL)
 	}
-
-	fmt.Printf("aliasTarget: %#v\n", aliasTarget)
-	fmt.Printf("resourceRecords: %#v\n", resourceRecords)
-	fmt.Printf("record.HostedZoneID: %#v\n", record.HostedZoneID)
 
 	return &route53.ChangeResourceRecordSetsInput{
 		ChangeBatch: &route53.ChangeBatch{
