@@ -14,15 +14,15 @@ type Route struct {
 
 func (r Route) findExisting() (*ec2.Route, error) {
 	awsRouteTable, err := r.RouteTable.findExisting()
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
 
 	for _, route := range awsRouteTable.Routes {
 		if route.DestinationCidrBlock != nil && route.VpcPeeringConnectionId != nil &&
 			*route.VpcPeeringConnectionId == r.VpcID && *route.DestinationCidrBlock == r.DestinationCidrBlock {
 			return route, nil
 		}
-	}
-	if err != nil {
-		return nil, microerror.Mask(err)
 	}
 	return nil, microerror.Maskf(notFoundError, notFoundErrorFormat, RouteType)
 }
