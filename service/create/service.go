@@ -488,6 +488,8 @@ func (s *Service) addFunc(obj interface{}) {
 		return
 	}
 
+	s.logger.Log("info", fmt.Sprintf("validated cluster '%s'", key.ClusterID(cluster)))
+
 	err := s.processCluster(cluster)
 	if err != nil {
 		s.logger.Log("error", fmt.Sprintf("error processing cluster '%s': '%#v'", key.ClusterID(cluster), err))
