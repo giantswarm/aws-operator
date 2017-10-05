@@ -11,82 +11,15 @@ This guide explains how to get aws-operator running locally - on minikube, for
 example. Also how to create a managed Kubernetes cluster with single master and
 single worker using the operator.
 
-All commands are assumed to be run from `examples/local` directory.
-
-
-## Preparing Templates
-
-All yaml files in this directory are templates. Before continuing with this
-guide, all placeholders must be replaced with sensible values.
-
-- *CLUSTER_NAME* - Cluster's name.
-- *COMMON_DOMAIN* - Cluster's etcd and API common domain.
-- *ID_RSA_PUB* - SSH public key to be installed on nodes.
-- *AWS_ACCESS_KEY_ID* - AWS access key.
-- *AWS_SECRET_ACCESS_KEY* - AWS secret.
-- *AWS_SESSION_TOKEN* - AWS session token for MFA accounts; can be left empty.
-- *AWS_REGION* - AWS region.
-- *AWS_AZ* - AWS availability zone.
-- *AWS_AMI* - AWS image to be used on both master and worker machines.
-- *AWS_INSTANCE_TYPE_MASTER* - Master machines instance type.
-- *AWS_INSTANCE_TYPE_WORKER* - Worker machines instance type.
-- *AWS_API_HOSTED_ZONE* - Route 53 hosted zone for API and Etcd
-- *AWS_INGRESS_HOSTED_ZONE* - Route 53 hosted zone for Ingress
-- *AWS_ROUTE_TABLE_0* - Existing route table of the cluster to use for VPC peering.
-- *AWS_ROUTE_TABLE_1* - Existing route table of the cluster to use for VPC peering.
-- *AWS_VPC_PEER_ID* - VPC ID of the host cluster to peer with.
-
-This is a handy snippet that makes it painless - works in bash and zsh.
-
-```bash
-export CLUSTER_NAME="example-cluster"
-export COMMON_DOMAIN="company.com"
-export ID_RSA_PUB="$(cat ~/.ssh/id_rsa.pub)"
-export AWS_ACCESS_KEY_ID="AKIAIXXXXXXXXXXXXXXX"
-export AWS_SECRET_ACCESS_KEY="XXXXXXXXXXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXX"
-export AWS_SESSION_TOKEN="XXXXXXXXXXXXXXXXXXX"
-export AWS_REGION="eu-central-1"
-export AWS_AZ="eu-central-1a"
-export AWS_AMI="ami-d60ad6b9"
-export AWS_INSTANCE_TYPE_MASTER="m3.medium"
-export AWS_INSTANCE_TYPE_WORKER="m3.medium"
-export AWS_API_HOSTED_ZONE="Z*************"
-export AWS_INGRESS_HOSTED_ZONE="Z*************"
-export AWS_ROUTE_TABLE_0="example-table"
-export AWS_ROUTE_TABLE_1="example-table-two"
-export AWS_VPC_PEER_ID="vpc-********"
-
-for f in *.tmpl.yaml; do
-    sed \
-        -e 's|${CLUSTER_NAME}|'"${CLUSTER_NAME}"'|g' \
-        -e 's|${COMMON_DOMAIN}|'"${COMMON_DOMAIN}"'|g' \
-        -e 's|${ID_RSA_PUB}|'"${ID_RSA_PUB}"'|g' \
-        -e 's|${AWS_ACCESS_KEY_ID}|'"${AWS_ACCESS_KEY_ID}"'|g' \
-        -e 's|${AWS_SECRET_ACCESS_KEY}|'"${AWS_SECRET_ACCESS_KEY}"'|g' \
-        -e 's|${AWS_SESSION_TOKEN}|'"${AWS_SESSION_TOKEN}"'|g' \
-        -e 's|${AWS_REGION}|'"${AWS_REGION}"'|g' \
-        -e 's|${AWS_AZ}|'"${AWS_AZ}"'|g' \
-        -e 's|${AWS_AMI}|'"${AWS_AMI}"'|g' \
-        -e 's|${AWS_INSTANCE_TYPE_MASTER}|'"${AWS_INSTANCE_TYPE_MASTER}"'|g' \
-        -e 's|${AWS_INSTANCE_TYPE_WORKER}|'"${AWS_INSTANCE_TYPE_WORKER}"'|g' \
-        -e 's|${AWS_API_HOSTED_ZONE}|'"${AWS_API_HOSTED_ZONE}"'|g' \
-        -e 's|${AWS_INGRESS_HOSTED_ZONE}|'"${AWS_INGRESS_HOSTED_ZONE}"'|g' \
-        -e 's|${AWS_ROUTE_TABLE_0}|'"${AWS_ROUTE_TABLE_0}"'|g' \
-        -e 's|${AWS_ROUTE_TABLE_1}|'"${AWS_ROUTE_TABLE_1}"'|g' \
-        -e 's|${AWS_VPC_PEER_ID}|'"${AWS_VPC_PEER_ID}"'|g' \
-        ./$f > ./${f%.tmpl.yaml}.yaml
-done
-```
-
-- Note: `|` characters are used in `sed` substitution to avoid escaping.
-
+If not stated otherwise all commands are assumed to be run from `examples/local`
+directory.
 
 ## Cluster Certificates
 
 The easiest way to create certificates is to use the local [cert-operator]
 setup. See [this guide][cert-operator-local-setup] for details.
 
-- Note: `CLUSTER_NAME` and `COMMON_DOMAIN` values must match the values used
+- Note: `clusterName` and `commonDomain` chart values must match the values used
   during this guide.
 
 ## Cluster-Local Docker Image
@@ -104,42 +37,63 @@ running the operator. For Minikube run `eval $(minikube docker-env)` before
 # Optional. Only when using Minikube.
 eval $(minikube docker-env)
 
+# From the root of the project, where the Dockerfile resides
 GOOS=linux go build github.com/giantswarm/aws-operator
-docker build -t quay.io/giantswarm/aws-operator:local-dev .
+docker build -t quay.io/giantswarm/aws-operator:local-lab .
 
 # Optional. Restart running operator after image update.
 # Does nothing when the operator is not deployed.
 #kubectl delete pod -l app=aws-operator-local
 ```
 
+## Deploying the lab charts
 
-## Operator Startup
+The lab consist of two Helm charts, `aws-operator-lab-chart`, which sets up aws-operator,
+and `aws-resource-lab-chart`, which defines the cluster to be created.
 
-The operator requires some configuration:
-
-- AWS credentials
-- SSH public key to be installed
-
-One way is to provide these with ConfigMaps. Please read the introduction of
-this guide if you want to do it more securely.
+With a working Helm installation they can be created from the `examples/local` dir with:
 
 ```bash
-kubectl apply -f ./configmap.yaml
-kubectl apply -f ./configmap-ssh.yaml
-kubectl apply -f ./deployment.yaml
+$ helm install -n aws-operator-lab ./aws-operator-lab-chart/ --wait
+$ helm install -n aws-resource-lab ./aws-resource-lab-chart/ --wait
 ```
 
+`aws-operator-lab-chart` accepts the following configuration parameters:
+* `idRsaPub` - SSH public key to be installed on nodes.
+* `aws.accessKeyId` - AWS access key.
+* `aws.secretAccessKey` - AWS secret.
+* `aws.sessionToken` - AWS session token for MFA accounts; can be left empty.
+* `imgeTag` - Tag of the aws-operator image to be used, by default `local-lab` to use a
+locally created image.
 
-## Creating And Connecting New Cluster
-
-First, let's create an new cluster ThirdPartyObject.
+For instance, to pass your default ssh public key to the install command, along with AWS
+credentials from the environment, you could do:
 
 ```bash
-kubectl create -f ./cluster.yaml
+$ helm install -n aws-operator-lab --set idRsaPub="$(cat ~/.ssh/id_rsa.pub)" \
+                                   --set aws.accessKeyId=${AWS_ACCESS_KEY_ID} \
+                                   --set aws.secretAccessKey=${AWS_SECRET_ACCESS_KEY} \
+                                   --set aws.sessionToken=${AWS_SESSION_TOKEN} \
+                                   ./aws-operator-lab-chart/ --wait
 ```
 
-Creating ThirdPartyObject should eventually result in a working K8s cluster on
-AWS. To test if the cluster is ready check the operator's pod logs with the
+`aws-resource-lab-chart` accepts the following configuration parameters:
+* `clusterName` - Cluster's name.
+* `commonDomain` - Cluster's etcd and API common domain.
+* `aws.region` - AWS region.
+* `aws.az` - AWS availability zone.
+* `aws.ami` - AWS image to be used on both master and worker machines.
+* `aws.instanceTypeMaster` - Master machines instance type.
+* `aws.instanceTypeWroker` - Worker machines instance type.
+* `aws.apiHostedZone` - Route 53 hosted zone for API and Etcd
+* `aws.ingressHostedZone` - Route 53 hosted zone for Ingress
+* `aws.routeTable0` - Existing route table of the cluster to use for VPC peering.
+* `aws.routeTable1` - Existing route table of the cluster to use for VPC peering.
+* `aws.vpcPeerId` - VPC ID of the host cluster to peer with.
+
+## Connecting to the new cluster
+
+To test if the cluster is ready check the operator's pod logs with the
 command below.
 
 ```bash
@@ -149,7 +103,7 @@ kubectl logs -l app=aws-operator-local
 When a similar message appears in the log output, the cluster is ready.
 
 ```
-{"caller":"github.com/giantswarm/aws-operator/service/create/service.go:967","info":"cluster 'pawel' processed","time":"17-05-24 15:24:08.537"}
+{"caller":"github.com/giantswarm/aws-operator/service/create/service.go:967","info":"cluster 'test-cluster' processed","time":"17-05-24 15:24:08.537"}
 ```
 
 Now it's time to connect to the cluster with `kubectl`. This will require
@@ -157,7 +111,7 @@ obtaining the new cluster's certificates adding new `kubectl` configuration.
 Here [jq] comes in handy.
 
 ```bash
-export CLUSTER_NAME="example-cluster"
+export CLUSTER_NAME="test-cluster"
 export COMMON_DOMAIN="internal.company.com"
 export CERT_DIR="./certs"
 
@@ -187,21 +141,22 @@ kubectl cluster-info
 
 ## Cleaning Up
 
-First delete the certificate TPOs.
+First delete the cluster TPO.
 
 ```bash
-export CLUSTER_NAME="example-cluster"
-
-kubectl delete aws -l clusterID=${CLUSTER_NAME}
+$ helm delete aws-resource-lab --purge
 ```
 
-Wait for the operator to delete the cluster, and then remove the operator's
-deployment and configuration.
+Wait for the operator to delete the cluster, you should see a message like this in the operator logs:
+
+```
+{"caller":"github.com/giantswarm/aws-operator/service/create/service.go:967","info":"cluster 'test-cluster' deleted","time":"17-05-24 15:24:08.537"}
+```
+
+Then remove the operator's deployment and configuration.
 
 ```bash
-kubectl delete -f ./deployment.yaml
-kubectl delete -f ./configmap.yaml
-kubectl delete -f ./configmap-ssh.yaml
+$ helm delete aws-operator-lab --purge
 ```
 
 Finally remove `kubectl` cluster configuration.

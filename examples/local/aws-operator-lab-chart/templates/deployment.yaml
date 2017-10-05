@@ -32,7 +32,7 @@ spec:
       # See https://github.com/giantswarm/aws-operator/pull/36#discussion_r105404746
       containers:
       - name: aws-operator
-        image: quay.io/giantswarm/aws-operator:local-dev
+        image: quay.io/giantswarm/aws-operator:{{.Values.imageTag}}
         volumeMounts:
         - name: aws-operator-configmap
           mountPath: /var/run/aws-operator/configmap/
