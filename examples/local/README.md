@@ -100,7 +100,7 @@ $ helm install -n aws-operator-lab --set idRsaPub="$(cat ~/.ssh/id_rsa.pub)" \
 * `aws.az` - AWS availability zone.
 * `aws.ami` - AWS image to be used on both master and worker machines.
 * `aws.instanceTypeMaster` - Master machines instance type.
-* `aws.instanceTypeWroker` - Worker machines instance type.
+* `aws.instanceTypeWorker` - Worker machines instance type.
 * `aws.apiHostedZone` - Route 53 hosted zone for API and Etcd
 * `aws.ingressHostedZone` - Route 53 hosted zone for Ingress
 * `aws.routeTable0` - Existing route table of the cluster to use for VPC peering.
