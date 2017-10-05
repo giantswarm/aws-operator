@@ -1,9 +1,9 @@
-[![CircleCI](https://circleci.com/gh/giantswarm/microendpoint.svg?style=svg)](https://circleci.com/gh/giantswarm/microendpoint)
+[![CircleCI](https://circleci.com/gh/giantswarm/microendpoint.svg?&style=shield&circle-token=ffd1b1181db2c6299afd9f2fdaa79699e447369e)](https://circleci.com/gh/giantswarm/microendpoint)
 
 # microendpoint
 
-microendpoint contains shared endpoints for use in [microkit](https://github.com/giantswarm/microkit)
-services.
+Package microendpoint contains shared endpoints for use in
+[microkit](https://github.com/giantswarm/microkit) services.
 
 ## License
 
