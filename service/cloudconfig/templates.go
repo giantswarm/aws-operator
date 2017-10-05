@@ -131,5 +131,6 @@ write_files:
     provisioner: kubernetes.io/aws-ebs
     parameters:
       type: gp2
+      encrypted: "true" 
 `
 )
