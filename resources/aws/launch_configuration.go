@@ -28,6 +28,7 @@ const (
 	// defaultEBSVolumeSize is expressed in GB.
 	defaultEBSVolumeSize = 50
 	defaultEBSVolumeType = "gp2"
+	defaultEBSEncrypted  = true
 )
 
 // CreateIfNotExists creates the launch config if it doesn't exist.
@@ -66,6 +67,7 @@ func (lc *LaunchConfiguration) CreateOrFail() error {
 				DeleteOnTermination: aws.Bool(true),
 				VolumeSize:          aws.Int64(defaultEBSVolumeSize),
 				VolumeType:          aws.String(defaultEBSVolumeType),
+				Encrypted:           aws.Bool(defaultEBSEncrypted),
 			},
 		}
 	}
