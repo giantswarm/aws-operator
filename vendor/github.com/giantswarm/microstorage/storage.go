@@ -1,4 +1,3 @@
-// microstorage provides an opinionated key-value abstraction for storage.
 package microstorage
 
 import (
@@ -25,7 +24,7 @@ type K struct {
 // slash can be added and trailing slash can be removed. E.g. "/a/b/c",
 // "a/b/c/", "a/b/c", and "/a/b/c/" represent the same key.
 //
-// NewK may fail if the key is not valid. See SanitizeKey to see what a
+// NewK may fail if the key is not valid. See SanitizeKey godoc to learn how
 // valid key looks like.
 func NewK(key string) (K, error) {
 	key, err := SanitizeKey(key)
@@ -55,13 +54,7 @@ func (k K) Key() string {
 	return k.key
 }
 
-// KeyNoLeadingSlash returns the actual sanitized key value with leading slash
-// stripped.
-func (k K) KeyNoLeadingSlash() string {
-	return k.key[1:]
-}
-
-// KV is an immutable key-value pair with a valid key.
+// KV is an immutable key-value pair with valid key.
 type KV struct {
 	key string
 	val string
@@ -76,7 +69,7 @@ type KV struct {
 //
 // The val is an arbitrary value stored under the key.
 //
-// NewKV may fail if the key is not valid. See SanitizeKey to see what a
+// NewKV may fail if the key is not valid. See SanitizeKey godoc to learn how
 // valid key looks like.
 func NewKV(key, val string) (KV, error) {
 	key, err := SanitizeKey(key)
@@ -92,7 +85,7 @@ func NewKV(key, val string) (KV, error) {
 }
 
 // MustKV is a helper that wraps a call to a function returning (KV, error) and
-// panics if the error is non-nil. It is intended for use in Storage
+// panics if the error is non-nil. It is intended for use Storage
 // implementations, where the key is known to be valid because it is retrieved
 // from the storage.
 func MustKV(kv KV, err error) KV {
@@ -102,7 +95,7 @@ func MustKV(kv KV, err error) KV {
 	return kv
 }
 
-// K returns the K instance created from the key value associated with this
+// K returns K instance created from the key value associated with this
 // key-value pair.
 func (k KV) K() K {
 	return MustK(NewK(k.key))
@@ -111,12 +104,6 @@ func (k KV) K() K {
 // Key returns the sanitized key associated with this key-value pair.
 func (k KV) Key() string {
 	return k.key
-}
-
-// KeyNoLeadingSlashreturns the sanitized key associated with this key-value
-// pair with leading slash stripped.
-func (k KV) KeyNoLeadingSlash() string {
-	return k.key[1:]
 }
 
 // Val returns the value associated with this key-value pair.
