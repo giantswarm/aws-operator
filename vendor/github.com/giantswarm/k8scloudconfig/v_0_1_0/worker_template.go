@@ -240,11 +240,7 @@ coreos:
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
       ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
-      ExecStartPre=-/usr/bin/docker rm -f $NAME
-      ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/worker-ca.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/worker-ca.pem to be written' && sleep 1; done"
-      ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/worker-crt.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/worker-crt.pem to be written' && sleep 1; done"
-      ExecStartPre=/bin/bash -c "while [ ! -f /etc/kubernetes/ssl/worker-key.pem ]; do echo 'Waiting for /etc/kubernetes/ssl/worker-key.pem to be written' && sleep 1; done"
-      ExecStartPre=/bin/sh -c "while ! curl --output /dev/null --silent --head --fail --cacert /etc/kubernetes/ssl/worker-ca.pem --cert /etc/kubernetes/ssl/worker-crt.pem --key /etc/kubernetes/ssl/worker-key.pem https://{{.Cluster.Kubernetes.API.Domain}}; do sleep 1 && echo 'Waiting for master'; done"
+      ExecStartPre=-/usr/bin/docker rm -f $NAME      
       ExecStart=/bin/sh -c "/usr/bin/docker run --rm --net=host --privileged=true \
       --name $NAME \
       -v /usr/share/ca-certificates:/etc/ssl/certs \
