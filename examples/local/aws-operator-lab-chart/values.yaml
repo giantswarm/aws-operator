@@ -1,0 +1,6 @@
+idRsaPub: "ssh-rsa XXXXXXXXXXXXXXXXXXXXXXXXX"
+imageTag: "local-lab"
+aws:
+  accessKeyId: "AKIAIXXXXXXXXXXXXXXX"
+  secretAccessKey: "XXXXXXXXXXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXX"
+  sessionToken: ""
