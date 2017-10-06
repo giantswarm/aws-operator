@@ -1,5 +1,5 @@
 hash: 91443910f0c0ad7cd7080feab4dbe2ffccd5371208fddfa6619218bb3c52439e
-updated: 2017-10-03T16:07:49.161027493+02:00
+updated: 2017-10-05T11:53:33.772174+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -40,7 +40,7 @@ imports:
   - service/s3
   - service/sts
 - name: github.com/beorn7/perks
-  version: 3ac7bf7a47d159a033b107610db8a1b6575507a4
+  version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
   subpackages:
   - quantile
 - name: github.com/cenkalti/backoff
@@ -83,11 +83,11 @@ imports:
   - spec/kubernetes/networksetup
   - spec/kubernetes/ssh
 - name: github.com/giantswarm/k8scloudconfig
-  version: 0c80d8ffcb468e8bd658af73bebcfa9e2aa0aeaa
+  version: 302a87e8db4886c8d59af35d0cc1321ea78d4ed1
   subpackages:
   - v_0_1_0
 - name: github.com/giantswarm/microendpoint
-  version: 9f010eaa4a71fcaa4b211d77ce47c1e8e12c4094
+  version: 1ea4d8cd5f0167625f134c855ae42fc747191890
   subpackages:
   - endpoint/version
   - service/version
@@ -120,7 +120,7 @@ imports:
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: d98c4329c3c3bcc498a0ebfbe933889fb3e85594
+  version: da881f7bb58462fa8b96f06edf0e751efd17f5fb
   subpackages:
   - client/k8s
   - tpr
@@ -199,7 +199,7 @@ imports:
   - jlexer
   - jwriter
 - name: github.com/matttproud/golang_protobuf_extensions
-  version: fc2b8d3a73c4867e51861bbdd5ae3c1f0869dd6a
+  version: c12348ce28de40eed0136aa2b644d0ee0650e56c
   subpackages:
   - pbutil
 - name: github.com/mitchellh/mapstructure
@@ -212,17 +212,17 @@ imports:
   - prometheus
   - prometheus/promhttp
 - name: github.com/prometheus/client_model
-  version: fa8ad6fec33561be4280a8f0514318c79d7f6cb6
+  version: 6f3806018612930941127f2a7c6c453ba2c527d2
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: 13ba4ddd0caa9c28ca7b7bffe1dfa9ed8d5ef207
+  version: 2f17f4a9d485bf34b4bfaccc273805040e4f86c8
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: 65c1f6f8f0fc1e2185eb9863a3bc751496404259
+  version: e645f4e5aaa8506fc71d6edbc5c4ff02c04c46f2
   subpackages:
   - xfs
 - name: github.com/PuerkitoBio/purell
@@ -230,13 +230,13 @@ imports:
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/spf13/afero
-  version: ee1bd8ee15a1306d1f9201acc41ef39cd9f99a1b
+  version: 3de492c3cda9570c77bc1f495857bfbf4b760efd
   subpackages:
   - mem
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 0dacccfbaabc71b872087c1719c5380d3e185173
+  version: d5bde60e022436203e377c47806e001418c16af3
 - name: github.com/spf13/jwalterweatherman
   version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
 - name: github.com/spf13/pflag
