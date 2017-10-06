@@ -1,0 +1,15 @@
+clusterName: "test-cluster"
+commonDomain: "aws.gigantic.io"
+
+aws:
+  region: "eu-central-1"
+  az: "eu-central-1a"
+  ami: "ami-d60ad6b9"
+  instanceTypeMaster: "m3.medium"
+  instanceTypeWorker: "m3.medium"
+
+  apiHostedZone: "Z*************"
+  ingressHostedZone: "Z*************"
+  routeTable0: "example-table"
+  routeTable1: "example-table-two"
+  vpcPeerId: "vpc-XXXXXXXXX"

@@ -7,9 +7,9 @@ data:
     service:
       aws:
         accesskey:
-          id: "${AWS_ACCESS_KEY_ID}"
-          secret: "${AWS_SECRET_ACCESS_KEY}"
-          session: "${AWS_SESSION_TOKEN}"
+          id: "{{.Values.aws.accessKeyId}}"
+          secret: "{{.Values.aws.secretAccessKey}}"
+          session: "{{.Values.aws.sessionToken}}"
       kubernetes:
         incluster: true
     server:

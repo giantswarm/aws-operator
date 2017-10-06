@@ -1,0 +1,3 @@
+name: aws-resource-lab-chart
+version: 0.1.0
+description: aws cluster definition to be used in the aws-operator lab

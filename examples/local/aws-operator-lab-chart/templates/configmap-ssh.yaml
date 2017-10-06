@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
   name: aws-operator-ssh-key-configmap
 data:
-  id_rsa.pub: "${ID_RSA_PUB}"
+  id_rsa.pub: "{{.Values.idRsaPub}}"
