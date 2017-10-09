@@ -22,6 +22,7 @@ cluster:
       altNames: kubernetes,kubernetes.default
       clusterIPRange: 172.31.0.0/24
       domain: api.giantswarm.io
+      encryptionKey: AWScv3423DEwcd
       ip: 172.31.0.1
       insecurePort: 8080
       securePort: 443

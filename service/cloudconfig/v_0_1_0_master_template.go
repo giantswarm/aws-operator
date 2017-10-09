@@ -163,7 +163,7 @@ func (e *v_0_1_0MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		},
 		{
 			AssetContent: encryptionConfigTemplate,
-			Path:         "/etc/kubernetes/encryption-config.yaml",
+			Path:         "/etc/kubernetes/config/encryption-config.yaml",
 			Owner:        FileOwner,
 			Permissions:  FilePermission,
 		},
