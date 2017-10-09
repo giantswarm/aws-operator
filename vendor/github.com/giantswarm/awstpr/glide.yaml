@@ -3,7 +3,7 @@ import:
 - package: github.com/giantswarm/operatorkit
   version: master
 - package: github.com/giantswarm/clustertpr
-  version: 6a18b0f69df27358ad84bf8c7e1db1b09fc66d5b
+  version: master
 testImport:
 - package: github.com/stretchr/testify
   version: v1.1.4

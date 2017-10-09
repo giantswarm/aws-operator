@@ -1,5 +1,5 @@
-hash: 0bd2458eca1917cae6b093d4b115fa62f929b9c8dfb2967d199c8f47c2b815c7
-updated: 2017-10-09T16:34:29.619676626+02:00
+hash: 8b37a66f6081ad73fe6cc8973a5c501a03ec2274a0c59d25be95906ee670f0a9
+updated: 2017-10-09T17:10:38.195943971+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -65,14 +65,14 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: 0e0beb2ba920b3eaa4eb48f9dac4f42efaf2d2a1
+  version: f3694486897766836b07e95942d84a02af2f64f5
   subpackages:
   - spec
   - spec/aws
 - name: github.com/giantswarm/certificatetpr
   version: f0bb69b8e5209755129061e59aaaad386afdc738
 - name: github.com/giantswarm/clustertpr
-  version: 6a18b0f69df27358ad84bf8c7e1db1b09fc66d5b
+  version: 6982094b7ea2eed60d461c58c5c969c953f9d1bd
   subpackages:
   - spec
   - spec/docker
@@ -83,7 +83,7 @@ imports:
   - spec/kubernetes/networksetup
   - spec/kubernetes/ssh
 - name: github.com/giantswarm/k8scloudconfig
-  version: bef068c25d96bbf5ce4bbbead1f06531b1fb26ef
+  version: 5dcbea266fd9ed73a323ee2dd11d89b60f3d030e
   subpackages:
   - v_0_1_0
 - name: github.com/giantswarm/microendpoint
