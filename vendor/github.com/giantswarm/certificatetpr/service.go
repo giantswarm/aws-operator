@@ -83,12 +83,6 @@ func (s *Service) SearchCerts(clusterID string) (AssetsBundle, error) {
 	return assetsBundle, nil
 }
 
-// SearchEncryptionKey watches for encruption key secrets of a cluster  and returns it as
-// assets bundle.
-func (s *Service) SearchEncryptionKey(clusterID string) (string, error) {
-	return s.SearchEncryptionKeyForComponent(clusterID, "k8s-encryption")
-}
-
 // SearchCertsForComponent watches for secrets of a single cluster component and
 // returns it as assets bundle.
 func (s *Service) SearchCertsForComponent(clusterID, componentName string) (AssetsBundle, error) {
@@ -146,60 +140,6 @@ func (s *Service) SearchCertsForComponent(clusterID, componentName string) (Asse
 			}
 		case <-time.After(WatchTimeOut):
 			return nil, microerror.Maskf(secretsRetrievalFailedError, "timed out waiting for secrets")
-		}
-	}
-}
-
-// SearchEncryptionKeyForComponent watches for encyrption key secrets of a single cluster component and
-// returns it as assets bundle.
-func (s *Service) SearchEncryptionKeyForComponent(clusterID, componentName string) (string, error) {
-	// TODO we should also do a list. In case the secrets have already been
-	// created we might miss them with only watching.
-	watcher, err := s.k8sClient.Core().Secrets(api.NamespaceDefault).Watch(apismetav1.ListOptions{
-		// Select only secrets that match the given component and the given cluster
-		// clusterID.
-		LabelSelector: fmt.Sprintf(
-			"%s=%s, %s=%s",
-			ComponentLabel,
-			componentName,
-			ClusterIDLabel,
-			clusterID,
-		),
-	})
-	if err != nil {
-		return "nil", microerror.Mask(err)
-	}
-
-	defer watcher.Stop()
-	for {
-		select {
-		case event, ok := <-watcher.ResultChan():
-			if !ok {
-				return "", microerror.Maskf(secretsRetrievalFailedError, "secrets channel was already closed")
-			}
-
-			switch event.Type {
-			case watch.Added:
-				secret := event.Object.(*v1.Secret)
-				// component := ClusterComponent(secret.Labels[ComponentLabel])
-				// if !ValidComponent(component, ClusterComponents) {
-				// 	return nil, microerror.Maskf(secretsRetrievalFailedError, "unknown clusterComponent %s", component)
-				// }
-
-				asset, ok := secret.Data["encryption"]
-				if !ok {
-					return "", microerror.Maskf(secretsRetrievalFailedError, "malformed secret was missing %v asset", "encryption")
-				}
-
-				return string(asset[:]), nil
-			case watch.Deleted:
-				// Noop. Ignore deleted events. These are handled by the certificate
-				// operator.
-			case watch.Error:
-				return "", microerror.Maskf(secretsRetrievalFailedError, "there was an error in the watcher: %v", apierrors.FromObject(event.Object))
-			}
-		case <-time.After(WatchTimeOut):
-			return "", microerror.Maskf(secretsRetrievalFailedError, "timed out waiting for secrets")
 		}
 	}
 }

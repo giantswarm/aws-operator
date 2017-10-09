@@ -15,7 +15,7 @@ import:
 - package: google.golang.org/grpc
   version: v1.2.1
 - package: github.com/giantswarm/awstpr
-  version: master
+  version: master #0e0beb2ba920b3eaa4eb48f9dac4f42efaf2d2a1
 - package: github.com/giantswarm/k8scloudconfig
   version: master
 - package: github.com/stretchr/testify
