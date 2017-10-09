@@ -1,12 +1,12 @@
-hash: 93b97c1eb576443b6ddf21e830d2a67e70149dcd39b761be038ad127eece25b9
-updated: 2017-09-26T12:32:00.267578538+02:00
+hash: 982b18978680ecfd50a4adf98de3256e4b2443d97c05338503b5473c875b2f24
+updated: 2017-10-09T16:00:51.493711109+02:00
 imports:
 - name: github.com/emicklei/go-restful
   version: 09691a3b6378b740595c1002f40c34dd5f218a22
   subpackages:
   - log
 - name: github.com/giantswarm/clustertpr
-  version: 34d49f599b2cc70af0d9c30b941a085aef772e64
+  version: 6a18b0f69df27358ad84bf8c7e1db1b09fc66d5b
   subpackages:
   - spec
   - spec/docker
@@ -17,7 +17,7 @@ imports:
   - spec/kubernetes/networksetup
   - spec/kubernetes/ssh
 - name: github.com/giantswarm/operatorkit
-  version: a6f6c824a13e17d683ff951edb2439238eaace37
+  version: 1317e4c15f237b13a5101a1f3167146d05b2e7a1
 - name: github.com/go-openapi/jsonpointer
   version: 46af16f9f7b149af66e5d1bd010e3574dc06de98
 - name: github.com/go-openapi/jsonreference

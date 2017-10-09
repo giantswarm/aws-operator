@@ -1723,6 +1723,7 @@ coreos:
       --insecure_bind_address=0.0.0.0 \
       --insecure_port={{.Cluster.Kubernetes.API.InsecurePort}} \
       --kubelet_https=true \
+      --kubelet-preferred-address-types=InternalIP \
       --secure_port={{.Cluster.Kubernetes.API.SecurePort}} \
       --bind-address=${DEFAULT_IPV4} \
       --etcd-prefix={{.Cluster.Etcd.Prefix}} \

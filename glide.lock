@@ -1,5 +1,5 @@
-hash: 91443910f0c0ad7cd7080feab4dbe2ffccd5371208fddfa6619218bb3c52439e
-updated: 2017-10-05T11:53:33.772174+02:00
+hash: 0bd2458eca1917cae6b093d4b115fa62f929b9c8dfb2967d199c8f47c2b815c7
+updated: 2017-10-09T16:34:29.619676626+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -65,14 +65,14 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: f3694486897766836b07e95942d84a02af2f64f5
+  version: 0e0beb2ba920b3eaa4eb48f9dac4f42efaf2d2a1
   subpackages:
   - spec
   - spec/aws
 - name: github.com/giantswarm/certificatetpr
-  version: 02983fbbe2165d6acd9e6cb081ace6769311d67a
+  version: f0bb69b8e5209755129061e59aaaad386afdc738
 - name: github.com/giantswarm/clustertpr
-  version: 34d49f599b2cc70af0d9c30b941a085aef772e64
+  version: 6a18b0f69df27358ad84bf8c7e1db1b09fc66d5b
   subpackages:
   - spec
   - spec/docker
@@ -83,7 +83,7 @@ imports:
   - spec/kubernetes/networksetup
   - spec/kubernetes/ssh
 - name: github.com/giantswarm/k8scloudconfig
-  version: 302a87e8db4886c8d59af35d0cc1321ea78d4ed1
+  version: bef068c25d96bbf5ce4bbbead1f06531b1fb26ef
   subpackages:
   - v_0_1_0
 - name: github.com/giantswarm/microendpoint
@@ -116,11 +116,11 @@ imports:
   subpackages:
   - microloggertest
 - name: github.com/giantswarm/microstorage
-  version: 15d1f4ae1c9149071d75eca931c541c8edabd24a
+  version: 99418478ec8f5c68f9b5fc5e6be7e0474948f80d
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: da881f7bb58462fa8b96f06edf0e751efd17f5fb
+  version: 1317e4c15f237b13a5101a1f3167146d05b2e7a1
   subpackages:
   - client/k8s
   - tpr
@@ -207,7 +207,7 @@ imports:
 - name: github.com/pelletier/go-toml
   version: 2009e44b6f182e34d8ce081ac2767622937ea3d4
 - name: github.com/prometheus/client_golang
-  version: 353b8c3f3776541879f9abfd8fa8b1ae162ab394
+  version: 5cec1d0429b02e4323e042eb04dafdb079ddf568
   subpackages:
   - prometheus
   - prometheus/promhttp
@@ -216,7 +216,7 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: 2f17f4a9d485bf34b4bfaccc273805040e4f86c8
+  version: 1bab55dd05dbff384524a6a1c99006d9eb5f139b
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
@@ -230,17 +230,17 @@ imports:
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/spf13/afero
-  version: 3de492c3cda9570c77bc1f495857bfbf4b760efd
+  version: e67d870304c4bca21331b02f414f970df13aa694
   subpackages:
   - mem
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: d5bde60e022436203e377c47806e001418c16af3
+  version: 50204810fdb5010baae72e4f41b303689cbdcc9f
 - name: github.com/spf13/jwalterweatherman
   version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
 - name: github.com/spf13/pflag
-  version: be7121dd7a937a85e1e4b1ddda6a3edce3466110
+  version: a9789e855c7696159b7db0db7f440b449edf2b31
 - name: github.com/spf13/viper
   version: d9cca5ef33035202efb1586825bdbb15ff9ec3ba
 - name: github.com/stretchr/testify
