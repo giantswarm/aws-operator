@@ -145,6 +145,6 @@ resources:
     - aescbc:
         keys:
         - name: key1
-          secret: {{.Cluster.Kubernetes.EncryptionKey}}
+          secret: {{.Cluster.Kubernetes.API.EncryptionKey}}
 `
 )

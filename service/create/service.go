@@ -552,7 +552,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get encryption key from secrets: '%#v'", err))
 	}
 
-	cluster.Spec.Cluster.Kubernetes.EncryptionKey = encryptionKey
+	cluster.Spec.Cluster.Kubernetes.API.EncryptionKey = encryptionKey
 
 	// Create KMS key.
 	kmsKey := &awsresources.KMSKey{
