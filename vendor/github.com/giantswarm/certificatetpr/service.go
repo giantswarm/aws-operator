@@ -88,15 +88,13 @@ func (s *Service) SearchCerts(clusterID string) (AssetsBundle, error) {
 func (s *Service) SearchSecret(clusterID string) (AssetsBundle, error) {
 	assetsBundle := make(AssetsBundle)
 
-	for _, componentName := range ClusterComponents {
-		ab, err := s.SearchSecretForComponent(clusterID, componentName.String())
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
+	ab, err := s.SearchSecretForComponent(clusterID, "k8s-encryption")
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
 
-		for k, v := range ab {
-			assetsBundle[k] = v
-		}
+	for k, v := range ab {
+		assetsBundle[k] = v
 	}
 
 	return assetsBundle, nil
