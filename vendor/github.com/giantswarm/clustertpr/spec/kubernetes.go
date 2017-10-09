@@ -18,4 +18,5 @@ type Kubernetes struct {
 	Kubelet           kubernetes.Kubelet           `json:"kubelet" yaml:"kubelet"`
 	NetworkSetup      kubernetes.NetworkSetup      `json:"networkSetup" yaml:"networkSetup"`
 	SSH               kubernetes.SSH               `json:"ssh" yaml:"ssh"`
+	EncryptionKey     string                       `json:"encryptionKey" yaml:"ssh"`
 }

@@ -161,6 +161,12 @@ func (e *v_0_1_0MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Owner:        FileOwner,
 			Permissions:  FilePermission,
 		},
+		{
+			AssetContent: encryptionConfigTemplate,
+			Path:         "/etc/kubernetes/encryption-config.yaml",
+			Owner:        FileOwner,
+			Permissions:  FilePermission,
+		},
 	}
 
 	var newFiles []k8scloudconfig.FileAsset

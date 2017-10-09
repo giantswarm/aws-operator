@@ -133,4 +133,18 @@ write_files:
       type: gp2
       encrypted: "true" 
 `
+
+	encryptionConfigTemplate = `
+kind: EncryptionConfig
+apiVersion: v1
+resources:
+  - resources:
+    - secrets
+    providers:
+    - identity: {}
+    - aescbc:
+        keys:
+        - name: key1
+          secret: {{.Cluster.Kubernetes.EncryptionKey}}
+`
 )

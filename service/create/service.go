@@ -546,14 +546,13 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get certificates from secrets: '%#v'", err))
 	}
 
-	secrets, err := s.certWatcher.SearchSecret(clusterID)
+	// Create Encryption key
+	encryptionKey, err := s.certWatcher.SearchEncryptionKey(clusterID)
 	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get certificates from secrets: '%#v'", err))
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get encryption key from secrets: '%#v'", err))
 	}
 
-	for k, v := range secrets {
-		s.logger.Log("debug", fmt.Sprintf("## secrets[%v]%v", k, v))
-	}
+	cluster.Spec.Cluster.Kubernetes.EncryptionKey = encryptionKey
 
 	// Create KMS key.
 	kmsKey := &awsresources.KMSKey{

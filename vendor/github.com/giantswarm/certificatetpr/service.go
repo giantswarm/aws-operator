@@ -83,21 +83,10 @@ func (s *Service) SearchCerts(clusterID string) (AssetsBundle, error) {
 	return assetsBundle, nil
 }
 
-// SearchSecret watches for all secrets of a cluster  and returns it as
+// SearchEncryptionKey watches for encruption key secrets of a cluster  and returns it as
 // assets bundle.
-func (s *Service) SearchSecret(clusterID string) (AssetsBundle, error) {
-	assetsBundle := make(AssetsBundle)
-
-	ab, err := s.SearchSecretForComponent(clusterID, "k8s-encryption")
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	for k, v := range ab {
-		assetsBundle[k] = v
-	}
-
-	return assetsBundle, nil
+func (s *Service) SearchEncryptionKey(clusterID string) (string, error) {
+	return s.SearchEncryptionKeyForComponent(clusterID, "k8s-encryption")
 }
 
 // SearchCertsForComponent watches for secrets of a single cluster component and
@@ -161,9 +150,9 @@ func (s *Service) SearchCertsForComponent(clusterID, componentName string) (Asse
 	}
 }
 
-// SearchCertsForComponent watches for secrets of a single cluster component and
+// SearchEncryptionKeyForComponent watches for encyrption key secrets of a single cluster component and
 // returns it as assets bundle.
-func (s *Service) SearchSecretForComponent(clusterID, componentName string) (AssetsBundle, error) {
+func (s *Service) SearchEncryptionKeyForComponent(clusterID, componentName string) (string, error) {
 	// TODO we should also do a list. In case the secrets have already been
 	// created we might miss them with only watching.
 	watcher, err := s.k8sClient.Core().Secrets(api.NamespaceDefault).Watch(apismetav1.ListOptions{
@@ -178,44 +167,39 @@ func (s *Service) SearchSecretForComponent(clusterID, componentName string) (Ass
 		),
 	})
 	if err != nil {
-		return nil, microerror.Mask(err)
+		return "nil", microerror.Mask(err)
 	}
-
-	assetsBundle := make(AssetsBundle)
 
 	defer watcher.Stop()
 	for {
 		select {
 		case event, ok := <-watcher.ResultChan():
 			if !ok {
-				return nil, microerror.Maskf(secretsRetrievalFailedError, "secrets channel was already closed")
+				return "", microerror.Maskf(secretsRetrievalFailedError, "secrets channel was already closed")
 			}
 
 			switch event.Type {
 			case watch.Added:
 				secret := event.Object.(*v1.Secret)
-				component := ClusterComponent(secret.Labels[ComponentLabel])
-
+				// component := ClusterComponent(secret.Labels[ComponentLabel])
 				// if !ValidComponent(component, ClusterComponents) {
 				// 	return nil, microerror.Maskf(secretsRetrievalFailedError, "unknown clusterComponent %s", component)
 				// }
 
 				asset, ok := secret.Data["encryption"]
 				if !ok {
-					return nil, microerror.Maskf(secretsRetrievalFailedError, "malformed secret was missing %v asset", "encryption")
+					return "", microerror.Maskf(secretsRetrievalFailedError, "malformed secret was missing %v asset", "encryption")
 				}
 
-				assetsBundle[AssetsBundleKey{component, "encryption"}] = asset
-
-				return assetsBundle, nil
+				return string(asset[:]), nil
 			case watch.Deleted:
 				// Noop. Ignore deleted events. These are handled by the certificate
 				// operator.
 			case watch.Error:
-				return nil, microerror.Maskf(secretsRetrievalFailedError, "there was an error in the watcher: %v", apierrors.FromObject(event.Object))
+				return "", microerror.Maskf(secretsRetrievalFailedError, "there was an error in the watcher: %v", apierrors.FromObject(event.Object))
 			}
 		case <-time.After(WatchTimeOut):
-			return nil, microerror.Maskf(secretsRetrievalFailedError, "timed out waiting for secrets")
+			return "", microerror.Maskf(secretsRetrievalFailedError, "timed out waiting for secrets")
 		}
 	}
 }
