@@ -200,11 +200,8 @@ func (s *Service) SearchSecretForComponent(clusterID, componentName string) (Ass
 				// 	return nil, microerror.Maskf(secretsRetrievalFailedError, "unknown clusterComponent %s", component)
 				// }
 
-				for k, v := range secret.Data {
-					s.logger.Log("debug", fmt.Sprintf("## %v:%v", k, v))
-				}
 				asset, ok := secret.Data["encryption"]
-				if ok {
+				if !ok {
 					return nil, microerror.Maskf(secretsRetrievalFailedError, "malformed secret was missing %v asset", "encryption")
 				}
 
