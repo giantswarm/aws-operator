@@ -196,9 +196,9 @@ func (s *Service) SearchSecretForComponent(clusterID, componentName string) (Ass
 				secret := event.Object.(*v1.Secret)
 				component := ClusterComponent(secret.Labels[ComponentLabel])
 
-				if !ValidComponent(component, ClusterComponents) {
-					return nil, microerror.Maskf(secretsRetrievalFailedError, "unknown clusterComponent %s", component)
-				}
+				// if !ValidComponent(component, ClusterComponents) {
+				// 	return nil, microerror.Maskf(secretsRetrievalFailedError, "unknown clusterComponent %s", component)
+				// }
 
 				asset, ok := secret.Data["encryption"]
 				if ok {
