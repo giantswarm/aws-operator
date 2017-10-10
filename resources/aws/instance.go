@@ -39,7 +39,7 @@ type Instance struct {
 	SecurityGroupID        string
 	SubnetID               string
 	PrivateDNS             string
-	HostedZoneID           string
+	hostedZoneID           string
 	id                     string
 	// Dependencies.
 	Logger micrologger.Logger
@@ -271,5 +271,5 @@ func (i *Instance) DNSName() string {
 }
 
 func (i *Instance) HostedZoneID() string {
-	return i.HostedZoneID
+	return i.hostedZoneID
 }

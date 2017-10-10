@@ -974,7 +974,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 			SubnetID:        publicSubnetID,
 		}
 
-		etcdLB, err := s.createLoadBalancer(lbInput)
+		etcdLB, err = s.createLoadBalancer(lbInput)
 		if err != nil {
 			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create etcd load balancer: '%#v'", err))
 		}
@@ -1214,7 +1214,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	apiLBName, err := loadBalancerName(cluster.Spec.Cluster.Kubernetes.API.Domain, cluster)
 
 	if !newDeployment(cluster) {
-		etcdLBName, err := loadBalancerName(cluster.Spec.Cluster.Etcd.Domain, cluster)
+		etcdLBName, err = loadBalancerName(cluster.Spec.Cluster.Etcd.Domain, cluster)
 	}
 	ingressLBName, err := loadBalancerName(cluster.Spec.Cluster.Kubernetes.IngressController.Domain, cluster)
 	if err != nil {
@@ -1224,7 +1224,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 		var etcdLB *awsresources.ELB
 
 		if !newDeployment(cluster) {
-			etcdLB, err := awsresources.NewELBFromExisting(etcdLBName, clients.ELB)
+			etcdLB, err = awsresources.NewELBFromExisting(etcdLBName, clients.ELB)
 		}
 		ingressLB, err := awsresources.NewELBFromExisting(ingressLBName, clients.ELB)
 		if err != nil {
@@ -1286,7 +1286,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 			prefix:      prefixMaster,
 		})
 		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not retrieve master instance reference: '%#v'", err))
+			s.logger.Log("error", fmt.Sprintf("could not retrieve master instance reference: '%#v'", err))
 		}
 
 		// Delete etcd dns record
