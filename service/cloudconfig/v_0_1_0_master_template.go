@@ -161,12 +161,6 @@ func (e *v_0_1_0MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Owner:        FileOwner,
 			Permissions:  FilePermission,
 		},
-		{
-			AssetContent: encryptionConfigTemplate,
-			Path:         "/etc/kubernetes/config/encryption-config.yaml",
-			Owner:        FileOwner,
-			Permissions:  FilePermission,
-		},
 	}
 
 	var newFiles []k8scloudconfig.FileAsset
@@ -238,6 +232,10 @@ func (e *v_0_1_0MasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSec
 		{
 			Name:    "storageclass",
 			Content: instanceStorageClassTemplate,
+		},
+		{
+			Name:    "encryptionconfig",
+			Content: encryptionConfigTemplate,
 		},
 	}
 
