@@ -18,6 +18,10 @@ func ClusterID(customObject awstpr.CustomObject) string {
 	return customObject.Spec.Cluster.Cluster.ID
 }
 
+func ClusterVersion(customObject awstpr.CustomObject) string {
+	return customObject.Spec.Cluster.Version
+}
+
 func MasterImageID(customObject awstpr.CustomObject) string {
 	var imageID string
 

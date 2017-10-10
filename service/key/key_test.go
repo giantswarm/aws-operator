@@ -72,6 +72,23 @@ func Test_ClusterID(t *testing.T) {
 		t.Fatalf("Expected cluster ID %s but was %s", expectedID, ClusterID(customObject))
 	}
 }
+func Test_ClusterVersion(t *testing.T) {
+	expectedVersion := "0.1,0"
+
+	cluster := clustertpr.Spec{
+		Version: expectedVersion,
+	}
+
+	customObject := awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			Cluster: cluster,
+		},
+	}
+
+	if ClusterVersion(customObject) != expectedVersion {
+		t.Fatalf("Expected cluster version %s but was %s", expectedVersion, ClusterVersion(customObject))
+	}
+}
 
 func Test_MasterImageID(t *testing.T) {
 	tests := []struct {
