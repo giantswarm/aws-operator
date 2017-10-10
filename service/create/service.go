@@ -896,25 +896,64 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not assign proxy protocol policy: '%#v'", err))
 	}
 
-	// Create etcd load balancer.
-	lbInput = LoadBalancerInput{
-		Name:        cluster.Spec.Cluster.Etcd.Domain,
-		Clients:     clients,
-		Cluster:     cluster,
-		InstanceIDs: masterIDs,
-		PortsToOpen: awsresources.PortPairs{
-			{
-				PortELB:      httpsPort,
-				PortInstance: cluster.Spec.Cluster.Etcd.Port,
-			},
-		},
-		SecurityGroupID: mastersSecurityGroupID,
-		SubnetID:        publicSubnetID,
-	}
+	// Create etcd private hosted zone and CNAME record.
+	var etcdLB *awsresources.ELB
+	// QUESTION: how to determine if it is a new deployment?
+	if newDeployment {
+		etcdHZInput := hostedZoneInput{
+			Cluster: cluster,
+			// QUESTION: which domain to use?
+			Domain:  cluster.Spec.Cluster.Etcd.Domain,
+			Client:  clients.Route53,
+			Private: true,
+			// QUESTION: in the previous code the private hosted zones were not related to any VPC, but afaik it's needed, is this ok?
+			VPCID:     vpcID,
+			VPCRegion: s.awsConfig.Region,
+		}
 
-	etcdLB, err := s.createLoadBalancer(lbInput)
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create etcd load balancer: '%#v'", err))
+		etcdHZ, err := s.createHostedZone(etcdHZInput)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create etcd private hosted zone: '%#v'", err))
+		}
+		etcdHZID := etcdHZ.GetID()
+
+		recordSetInput := recordSetInput{
+			Cluster: cluster,
+			Client:  clients.Route53,
+			// QUESTION: which resource to use here? if the master node, how to get a reference to it?
+			Resource: master,
+			// QUESTION: same about the domain as above
+			Domain:       cluster.Spec.Cluster.Etcd.Domain,
+			HostedZoneID: etcdHZID,
+			Type:         route53.RRTypeCname,
+		}
+
+		if err := s.createRecordSet(recordSetInput); err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create record set '%#v'", err))
+		}
+		s.logger.Log("info", fmt.Sprintf("created DNS records for etcd private hosted zone"))
+
+	} else {
+		// Create etcd load balancer.
+		lbInput = LoadBalancerInput{
+			Name:        cluster.Spec.Cluster.Etcd.Domain,
+			Clients:     clients,
+			Cluster:     cluster,
+			InstanceIDs: masterIDs,
+			PortsToOpen: awsresources.PortPairs{
+				{
+					PortELB:      httpsPort,
+					PortInstance: cluster.Spec.Cluster.Etcd.Port,
+				},
+			},
+			SecurityGroupID: mastersSecurityGroupID,
+			SubnetID:        publicSubnetID,
+		}
+
+		etcdLB, err := s.createLoadBalancer(lbInput)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create etcd load balancer: '%#v'", err))
+		}
 	}
 
 	// If the policy couldn't be created and some instances didn't exist before, that means that the cluster
@@ -1022,14 +1061,6 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		{
 			Cluster:      cluster,
 			Client:       clients.Route53,
-			Resource:     etcdLB,
-			Domain:       cluster.Spec.Cluster.Etcd.Domain,
-			HostedZoneID: cluster.Spec.AWS.HostedZones.Etcd,
-			Type:         route53.RRTypeA,
-		},
-		{
-			Cluster:      cluster,
-			Client:       clients.Route53,
 			Resource:     ingressLB,
 			Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
 			HostedZoneID: cluster.Spec.AWS.HostedZones.Ingress,
@@ -1043,6 +1074,17 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 			Value:        cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
 			Type:         route53.RRTypeCname,
 		},
+	}
+	// QUESTION: same as above about how to determine new deployments
+	if !newDeployment {
+		recordSetInputs = append(recordSetInputs, recordSetInput{
+			Cluster:      cluster,
+			Client:       clients.Route53,
+			Resource:     etcdLB,
+			Domain:       cluster.Spec.Cluster.Etcd.Domain,
+			HostedZoneID: cluster.Spec.AWS.HostedZones.Etcd,
+			Type:         route53.RRTypeA,
+		})
 	}
 
 	var rsErr error
@@ -1144,14 +1186,22 @@ func (s *Service) deleteFunc(obj interface{}) {
 	}
 
 	// Delete Record Sets.
+	var etcdLBName string
 	apiLBName, err := loadBalancerName(cluster.Spec.Cluster.Kubernetes.API.Domain, cluster)
-	etcdLBName, err := loadBalancerName(cluster.Spec.Cluster.Etcd.Domain, cluster)
+	// QUESTION: same as above about how to determine new deployments
+	if !newDeployment {
+		etcdLBName, err := loadBalancerName(cluster.Spec.Cluster.Etcd.Domain, cluster)
+	}
 	ingressLBName, err := loadBalancerName(cluster.Spec.Cluster.Kubernetes.IngressController.Domain, cluster)
 	if err != nil {
 		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	} else {
 		apiLB, err := awsresources.NewELBFromExisting(apiLBName, clients.ELB)
-		etcdLB, err := awsresources.NewELBFromExisting(etcdLBName, clients.ELB)
+		var etcdLB *awsresources.ELB
+		// QUESTION: same as above about how to determine new deployments
+		if !newDeployment {
+			etcdLB, err := awsresources.NewELBFromExisting(etcdLBName, clients.ELB)
+		}
 		ingressLB, err := awsresources.NewELBFromExisting(ingressLBName, clients.ELB)
 		if err != nil {
 			s.logger.Log("error", fmt.Sprintf("%#v", err))
@@ -1163,14 +1213,6 @@ func (s *Service) deleteFunc(obj interface{}) {
 					Resource:     apiLB,
 					Domain:       cluster.Spec.Cluster.Kubernetes.API.Domain,
 					HostedZoneID: cluster.Spec.AWS.HostedZones.API,
-					Type:         route53.RRTypeA,
-				},
-				{
-					Cluster:      cluster,
-					Client:       clients.Route53,
-					Resource:     etcdLB,
-					Domain:       cluster.Spec.Cluster.Etcd.Domain,
-					HostedZoneID: cluster.Spec.AWS.HostedZones.Etcd,
 					Type:         route53.RRTypeA,
 				},
 				{
@@ -1190,7 +1232,17 @@ func (s *Service) deleteFunc(obj interface{}) {
 					Type:         route53.RRTypeCname,
 				},
 			}
-
+			// QUESTION: same as above about how to determine new deployments
+			if !newDeployment {
+				recordSetInputs = append(recordSetInputs, recordSetInput{
+					Cluster:      cluster,
+					Client:       clients.Route53,
+					Resource:     etcdLB,
+					Domain:       cluster.Spec.Cluster.Etcd.Domain,
+					HostedZoneID: cluster.Spec.AWS.HostedZones.Etcd,
+					Type:         route53.RRTypeA,
+				})
+			}
 			var rsErr error
 			for _, input := range recordSetInputs {
 				if rsErr = s.deleteRecordSet(input); rsErr != nil {
@@ -1200,6 +1252,29 @@ func (s *Service) deleteFunc(obj interface{}) {
 			if rsErr == nil {
 				s.logger.Log("info", "deleted record sets")
 			}
+		}
+	}
+	// QUESTION: same as above about how to determine new deployments
+	if newDeployment {
+		// Delete etcd dns record
+		recordSetInput := recordSetInput{
+			Client: clients.Route53,
+			// QUESTION: same as above about the resource
+			Resource: master,
+			// QUESTION: same about the domain as above
+			Domain: cluster.Spec.Cluster.Etcd.Domain,
+		}
+
+		if err := s.deleteRecordSet(recordSetInput); err != nil {
+			s.logger.Log("error", fmt.Sprintf("%#v", err))
+		}
+
+		// Delete etcd private hosted zone
+		etcdHZInput := hostedZoneInput{
+			Domain: cluster.Spec.Cluster.Etcd.Domain,
+		}
+		if err := s.deleteHostedZone(etcdHZInput); err != nil {
+			s.logger.Log("error", fmt.Sprintf("%#v", err))
 		}
 	}
 
