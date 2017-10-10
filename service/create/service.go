@@ -673,23 +673,23 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not find vpc peering connection: '%#v'", err))
 	}
 
-	// Create gateway.
-	var gateway resources.ResourceWithID
-	gateway = &awsresources.Gateway{
+	// Create internet gateway.
+	var internetGateway resources.ResourceWithID
+	internetGateway = &awsresources.InternetGateway{
 		Name:  key.ClusterID(cluster),
 		VpcID: vpcID,
 		// Dependencies.
 		Logger:    s.logger,
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
 	}
-	gatewayCreated, err := gateway.CreateIfNotExists()
+	internetGatewayCreated, err := internetGateway.CreateIfNotExists()
 	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create gateway: '%#v'", err))
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create internet gateway: '%#v'", err))
 	}
-	if gatewayCreated {
-		s.logger.Log("info", fmt.Sprintf("created gateway for cluster '%s'", key.ClusterID(cluster)))
+	if internetGatewayCreated {
+		s.logger.Log("info", fmt.Sprintf("created internet gateway for cluster '%s'", key.ClusterID(cluster)))
 	} else {
-		s.logger.Log("info", fmt.Sprintf("gateway for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
+		s.logger.Log("info", fmt.Sprintf("internet gateway for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
 	}
 
 	// Create masters security group.
@@ -1255,17 +1255,21 @@ func (s *Service) deleteFunc(obj interface{}) {
 		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	}
 
-	// Delete gateway.
-	var gateway resources.ResourceWithID
-	gateway = &awsresources.Gateway{
+	// Delete internet gateway.
+	var internetGateway resources.ResourceWithID
+	internetGateway = &awsresources.InternetGateway{
 		Name:  key.ClusterID(cluster),
 		VpcID: vpcID,
 		// Dependencies.
 		Logger:    s.logger,
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
 	}
-	if err := gateway.Delete(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete gateway: '%#v'", err))
+	if err := internetGateway.Delete(); err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not delete internet gateway: '%#v'", err))
+	} else {
+		s.logger.Log("info", "deleted internet gateway")
+	}
+
 	} else {
 		s.logger.Log("info", "deleted gateway")
 	}

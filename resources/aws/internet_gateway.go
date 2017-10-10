@@ -10,7 +10,7 @@ import (
 	"github.com/giantswarm/micrologger"
 )
 
-type Gateway struct {
+type InternetGateway struct {
 	Name  string
 	VpcID string
 	id    string
@@ -19,7 +19,7 @@ type Gateway struct {
 	AWSEntity
 }
 
-func (g Gateway) findExisting() (*ec2.InternetGateway, error) {
+func (g InternetGateway) findExisting() (*ec2.InternetGateway, error) {
 	gateways, err := g.Clients.EC2.DescribeInternetGateways(&ec2.DescribeInternetGatewaysInput{
 		Filters: []*ec2.Filter{
 			{
@@ -35,7 +35,7 @@ func (g Gateway) findExisting() (*ec2.InternetGateway, error) {
 	}
 
 	if len(gateways.InternetGateways) < 1 {
-		return nil, microerror.Maskf(notFoundError, notFoundErrorFormat, GatewayType, g.Name)
+		return nil, microerror.Maskf(notFoundError, notFoundErrorFormat, InternetGatewayType, g.Name)
 	} else if len(gateways.InternetGateways) > 1 {
 		return nil, microerror.Mask(tooManyResultsError)
 	}
@@ -43,7 +43,7 @@ func (g Gateway) findExisting() (*ec2.InternetGateway, error) {
 	return gateways.InternetGateways[0], nil
 }
 
-func (g *Gateway) checkIfExists() (bool, error) {
+func (g *InternetGateway) checkIfExists() (bool, error) {
 	_, err := g.findExisting()
 	if IsNotFound(err) {
 		return false, nil
@@ -54,7 +54,7 @@ func (g *Gateway) checkIfExists() (bool, error) {
 	return true, nil
 }
 
-func (g *Gateway) CreateIfNotExists() (bool, error) {
+func (g *InternetGateway) CreateIfNotExists() (bool, error) {
 	exists, err := g.checkIfExists()
 	if err != nil {
 		return false, microerror.Mask(err)
@@ -71,7 +71,7 @@ func (g *Gateway) CreateIfNotExists() (bool, error) {
 	return true, nil
 }
 
-func (g *Gateway) CreateOrFail() error {
+func (g *InternetGateway) CreateOrFail() error {
 	gateway, err := g.Clients.EC2.CreateInternetGateway(&ec2.CreateInternetGatewayInput{})
 	if err != nil {
 		return microerror.Mask(err)
@@ -104,7 +104,7 @@ func (g *Gateway) CreateOrFail() error {
 	return nil
 }
 
-func (g *Gateway) Delete() error {
+func (g *InternetGateway) Delete() error {
 	gateway, err := g.findExisting()
 	if err != nil {
 		return microerror.Mask(err)
@@ -119,7 +119,7 @@ func (g *Gateway) Delete() error {
 		}
 		return nil
 	}
-	detachNotify := NewNotify(g.Logger, "detaching gateway")
+	detachNotify := NewNotify(g.Logger, "detaching internet gateway")
 	if err := backoff.RetryNotify(detachOperation, NewCustomExponentialBackoff(), detachNotify); err != nil {
 		return microerror.Mask(err)
 	}
@@ -132,7 +132,7 @@ func (g *Gateway) Delete() error {
 		}
 		return nil
 	}
-	deleteNotify := NewNotify(g.Logger, "deleting gateway")
+	deleteNotify := NewNotify(g.Logger, "deleting internet gateway")
 	if err := backoff.RetryNotify(deleteOperation, NewCustomExponentialBackoff(), deleteNotify); err != nil {
 		return microerror.Mask(err)
 	}
@@ -140,7 +140,7 @@ func (g *Gateway) Delete() error {
 	return nil
 }
 
-func (g Gateway) GetID() (string, error) {
+func (g InternetGateway) GetID() (string, error) {
 	if g.id != "" {
 		return g.id, nil
 	}
