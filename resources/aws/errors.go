@@ -20,6 +20,7 @@ const (
 	InternetGatewayType      resourceType = "internet gateway"
 	InstanceType             resourceType = "instance"
 	LaunchConfigurationType  resourceType = "launch configuration"
+	NatGatewayType           resourceType = "nat gateway"
 	RouteTableType           resourceType = "route table"
 	RouteType                resourceType = "route"
 	SecurityGroupType        resourceType = "security group"

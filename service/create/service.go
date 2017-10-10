@@ -45,6 +45,10 @@ const (
 	// The number of seconds AWS will wait, before issuing a health check on
 	// instances in an Auto Scaling Group.
 	gracePeriodSeconds = 10
+
+	// New clusters with this version will have instances with private IPs.
+	// TODO Implement versioning fully as part of updating clusters.
+	privateNetworkVersion = "0.0.1"
 )
 
 // Config represents the configuration used to create a version service.
@@ -849,6 +853,27 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 
 	}
 
+	if key.ClusterVersion(cluster) == privateNetworkVersion {
+		// Create NAT gateway.
+		var natGateway resources.ResourceWithID
+		natGateway = &awsresources.NatGateway{
+			Name:   key.ClusterID(cluster),
+			Subnet: publicSubnet,
+			// Dependencies.
+			Logger:    s.logger,
+			AWSEntity: awsresources.AWSEntity{Clients: clients},
+		}
+		natGatewayCreated, err := natGateway.CreateIfNotExists()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create nat gateway: '%#v'", err))
+		}
+		if natGatewayCreated {
+			s.logger.Log("info", fmt.Sprintf("created nat gateway for cluster '%s'", key.ClusterID(cluster)))
+		} else {
+			s.logger.Log("info", fmt.Sprintf("nat gateway for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
+		}
+	}
+
 	// Run masters.
 	anyMastersCreated, masterIDs, err := s.runMachines(runMachinesInput{
 		clients:             clients,
@@ -1270,6 +1295,20 @@ func (s *Service) deleteFunc(obj interface{}) {
 		s.logger.Log("info", "deleted internet gateway")
 	}
 
+	if key.ClusterVersion(cluster) == privateNetworkVersion {
+		// Delete NAT gateway.
+		var natGateway resources.ResourceWithID
+		natGateway = &awsresources.NatGateway{
+			Name: key.ClusterID(cluster),
+			// Dependencies.
+			Logger:    s.logger,
+			AWSEntity: awsresources.AWSEntity{Clients: clients},
+		}
+		if err := natGateway.Delete(); err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not delete nat gateway: '%#v'", err))
+		} else {
+			s.logger.Log("info", "deleted nat gateway")
+		}
 	}
 
 	// Delete public subnet.
