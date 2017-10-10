@@ -1270,8 +1270,6 @@ func (s *Service) deleteFunc(obj interface{}) {
 		s.logger.Log("info", "deleted internet gateway")
 	}
 
-	} else {
-		s.logger.Log("info", "deleted gateway")
 	}
 
 	// Delete public subnet.
