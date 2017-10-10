@@ -424,14 +424,31 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 	return instanceCreated, instance.ID(), nil
 }
 
-type deleteMachinesInput struct {
+type findMachinesInput struct {
 	clients     awsutil.Clients
 	spec        awstpr.Spec
 	clusterName string
 	prefix      string
 }
 
-func (s *Service) deleteMachines(input deleteMachinesInput) error {
+func (s *Service) getMasters(input findMachinesInput) ([]*awsresources.Instance, error) {
+	pattern := clusterPrefix(clusterPrefixInput{
+		clusterName: input.clusterName,
+		prefix:      input.prefix,
+	})
+	instances, err := awsresources.FindInstances(awsresources.FindInstancesInput{
+		Clients: input.clients,
+		Logger:  s.logger,
+		Pattern: pattern,
+	})
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	return instances, nil
+}
+
+func (s *Service) deleteMachines(input findMachinesInput) error {
 	pattern := clusterPrefix(clusterPrefixInput{
 		clusterName: input.clusterName,
 		prefix:      input.prefix,
@@ -898,15 +915,14 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 
 	// Create etcd private hosted zone and CNAME record.
 	var etcdLB *awsresources.ELB
-	// QUESTION: how to determine if it is a new deployment?
-	if newDeployment {
+
+	if newDeployment(cluster) {
 		etcdHZInput := hostedZoneInput{
 			Cluster: cluster,
 			// QUESTION: which domain to use?
-			Domain:  cluster.Spec.Cluster.Etcd.Domain,
-			Client:  clients.Route53,
-			Private: true,
-			// QUESTION: in the previous code the private hosted zones were not related to any VPC, but afaik it's needed, is this ok?
+			Domain:    cluster.Spec.Cluster.Etcd.Domain,
+			Client:    clients.Route53,
+			Private:   true,
 			VPCID:     vpcID,
 			VPCRegion: s.awsConfig.Region,
 		}
@@ -917,11 +933,19 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		}
 		etcdHZID := etcdHZ.GetID()
 
+		masters, err := s.getMasters(findMachinesInput{
+			clients:     clients,
+			clusterName: key.ClusterID(cluster),
+			prefix:      prefixMaster,
+		})
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not retrieve master instance reference: '%#v'", err))
+		}
+
 		recordSetInput := recordSetInput{
-			Cluster: cluster,
-			Client:  clients.Route53,
-			// QUESTION: which resource to use here? if the master node, how to get a reference to it?
-			Resource: master,
+			Cluster:  cluster,
+			Client:   clients.Route53,
+			Resource: masters[0],
 			// QUESTION: same about the domain as above
 			Domain:       cluster.Spec.Cluster.Etcd.Domain,
 			HostedZoneID: etcdHZID,
@@ -1075,8 +1099,8 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 			Type:         route53.RRTypeCname,
 		},
 	}
-	// QUESTION: same as above about how to determine new deployments
-	if !newDeployment {
+
+	if !newDeployment(cluster) {
 		recordSetInputs = append(recordSetInputs, recordSetInput{
 			Cluster:      cluster,
 			Client:       clients.Route53,
@@ -1151,7 +1175,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 
 	// Delete masters.
 	s.logger.Log("info", "deleting masters...")
-	if err := s.deleteMachines(deleteMachinesInput{
+	if err := s.deleteMachines(findMachinesInput{
 		clients:     clients,
 		clusterName: key.ClusterID(cluster),
 		prefix:      prefixMaster,
@@ -1188,8 +1212,8 @@ func (s *Service) deleteFunc(obj interface{}) {
 	// Delete Record Sets.
 	var etcdLBName string
 	apiLBName, err := loadBalancerName(cluster.Spec.Cluster.Kubernetes.API.Domain, cluster)
-	// QUESTION: same as above about how to determine new deployments
-	if !newDeployment {
+
+	if !newDeployment(cluster) {
 		etcdLBName, err := loadBalancerName(cluster.Spec.Cluster.Etcd.Domain, cluster)
 	}
 	ingressLBName, err := loadBalancerName(cluster.Spec.Cluster.Kubernetes.IngressController.Domain, cluster)
@@ -1198,8 +1222,8 @@ func (s *Service) deleteFunc(obj interface{}) {
 	} else {
 		apiLB, err := awsresources.NewELBFromExisting(apiLBName, clients.ELB)
 		var etcdLB *awsresources.ELB
-		// QUESTION: same as above about how to determine new deployments
-		if !newDeployment {
+
+		if !newDeployment(cluster) {
 			etcdLB, err := awsresources.NewELBFromExisting(etcdLBName, clients.ELB)
 		}
 		ingressLB, err := awsresources.NewELBFromExisting(ingressLBName, clients.ELB)
@@ -1232,8 +1256,8 @@ func (s *Service) deleteFunc(obj interface{}) {
 					Type:         route53.RRTypeCname,
 				},
 			}
-			// QUESTION: same as above about how to determine new deployments
-			if !newDeployment {
+
+			if !newDeployment(cluster) {
 				recordSetInputs = append(recordSetInputs, recordSetInput{
 					Cluster:      cluster,
 					Client:       clients.Route53,
@@ -1254,13 +1278,21 @@ func (s *Service) deleteFunc(obj interface{}) {
 			}
 		}
 	}
-	// QUESTION: same as above about how to determine new deployments
-	if newDeployment {
+
+	if newDeployment(cluster) {
+		masters, err := s.getMasters(findMachinesInput{
+			clients:     clients,
+			clusterName: key.ClusterID(cluster),
+			prefix:      prefixMaster,
+		})
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not retrieve master instance reference: '%#v'", err))
+		}
+
 		// Delete etcd dns record
 		recordSetInput := recordSetInput{
-			Client: clients.Route53,
-			// QUESTION: same as above about the resource
-			Resource: master,
+			Client:   clients.Route53,
+			Resource: masters[0],
 			// QUESTION: same about the domain as above
 			Domain: cluster.Spec.Cluster.Etcd.Domain,
 		}
@@ -1568,4 +1600,8 @@ func (s *Service) updateFunc(oldObj, newObj interface{}) {
 	}
 
 	s.logger.Log("info", fmt.Sprintf("scaling workers auto scaling group from %d to %d", oldSize, newSize))
+}
+
+func newDeployment(cluster awstpr.CustomObject) bool {
+	return cluster.Spec.Cluster.Version != ""
 }
