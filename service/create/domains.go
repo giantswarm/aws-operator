@@ -74,10 +74,12 @@ func (s *Service) createHostedZone(input hostedZoneInput) (*awsresources.HostedZ
 	}
 
 	hz := &awsresources.HostedZone{
-		Name:    hzName,
-		Comment: hostedZoneComment(input.Cluster),
-		Private: input.Private,
-		Client:  input.Client,
+		Name:      hzName,
+		Comment:   hostedZoneComment(input.Cluster),
+		Private:   input.Private,
+		Client:    input.Client,
+		VPCID:     input.VPCID,
+		VPCRegion: input.VPCRegion,
 	}
 
 	hzCreated, err := hz.CreateIfNotExists()
