@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/giantswarm/awstpr"
+	cloudconfig "github.com/giantswarm/k8scloudconfig"
 )
 
 func AutoScalingGroupName(customObject awstpr.CustomObject, groupName string) string {
@@ -20,6 +21,14 @@ func ClusterID(customObject awstpr.CustomObject) string {
 
 func ClusterVersion(customObject awstpr.CustomObject) string {
 	return customObject.Spec.Cluster.Version
+}
+
+func HasLatestVersion(customObject awstpr.CustomObject) bool {
+	if ClusterVersion(customObject) == string(cloudconfig.V_0_1_0) {
+		return true
+	} else {
+		return false
+	}
 }
 
 func MasterImageID(customObject awstpr.CustomObject) string {

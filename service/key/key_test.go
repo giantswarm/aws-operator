@@ -91,6 +91,56 @@ func Test_ClusterVersion(t *testing.T) {
 	}
 }
 
+func Test_HasLatestVersion(t *testing.T) {
+	tests := []struct {
+		customObject   awstpr.CustomObject
+		expectedResult bool
+	}{
+		{
+			customObject: awstpr.CustomObject{
+				Spec: awstpr.Spec{},
+			},
+			expectedResult: false,
+		},
+		{
+			customObject: awstpr.CustomObject{
+				Spec: awstpr.Spec{
+					Cluster: clustertpr.Spec{
+						Version: "",
+					},
+				},
+			},
+			expectedResult: false,
+		},
+		{
+			customObject: awstpr.CustomObject{
+				Spec: awstpr.Spec{
+					Cluster: clustertpr.Spec{
+						Version: "v_0_1_0",
+					},
+				},
+			},
+			expectedResult: false,
+		},
+		{
+			customObject: awstpr.CustomObject{
+				Spec: awstpr.Spec{
+					Cluster: clustertpr.Spec{
+						Version: "v_0_2_0",
+					},
+				},
+			},
+			expectedResult: true,
+		},
+	}
+
+	for _, tc := range tests {
+		if HasLatestVersion(tc.customObject) != tc.expectedResult {
+			t.Fatalf("Expected has latest version to be %t but was %t", tc.expectedResult, HasLatestVersion(tc.customObject))
+		}
+	}
+}
+
 func Test_MasterImageID(t *testing.T) {
 	tests := []struct {
 		customObject    awstpr.CustomObject
