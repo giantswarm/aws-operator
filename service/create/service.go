@@ -48,7 +48,7 @@ const (
 
 	// New clusters with this version will have instances with private IPs.
 	// TODO Implement versioning fully as part of updating clusters.
-	privateNetworkVersion = "0.0.1"
+	privateNetworkVersion = "0.1.0"
 )
 
 // Config represents the configuration used to create a version service.
