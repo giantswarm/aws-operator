@@ -1,5 +1,12 @@
 package create
 
+import (
+	"bytes"
+	"html/template"
+
+	"github.com/giantswarm/microerror"
+)
+
 const (
 	userDataScriptTemplate = `#!/bin/bash
 
@@ -28,4 +35,37 @@ USERDATA_FILE={{.MachineType}}
     quay.io/coreos/awscli:025a357f05242fdad6a81e8a6b520098aa65a600 -- aws s3 --region {{.Region}} cp s3://{{.S3URI}}/cloudconfig/$USERDATA_FILE /var/run/coreos/temp.txt
 base64 -d /var/run/coreos/temp.txt | gunzip > /var/run/coreos/$USERDATA_FILE
 exec /usr/bin/coreos-cloudinit --from-file /var/run/coreos/$USERDATA_FILE`
+
+	encryptionConfigTemplate = `
+kind: EncryptionConfig
+apiVersion: v1
+resources:
+  - resources:
+    - secrets
+    providers:
+    - aescbc:
+        keys:
+        - name: key1
+          secret: {{.EncryptionKey}}
+    - identity: {}
+`
 )
+
+func (s *Service) EncryptionConfig(encryptionKey string) (string, error) {
+	tmpl, err := template.New("encryptionConfig").Parse(encryptionConfigTemplate)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	buf := new(bytes.Buffer)
+	err = tmpl.Execute(buf, struct {
+		EncryptionKey string
+	}{
+		EncryptionKey: encryptionKey,
+	})
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	return string(buf.Bytes()), nil
+}

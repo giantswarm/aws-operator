@@ -569,7 +569,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, "could not get encryption keys from secrets")
 	}
 
-	encryptionConfig, err := s.keyWatcher.EncryptionConfig(string(encryptionKey))
+	encryptionConfig, err := s.EncryptionConfig(string(encryptionKey))
 	if err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not generate encryption config: '%#v'", err))
 	}
