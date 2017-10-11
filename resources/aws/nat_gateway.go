@@ -118,6 +118,14 @@ func (g *NatGateway) Delete() error {
 		return microerror.Mask(err)
 	}
 
+	allocationIDs := []string{}
+
+	for _, gatewayAddress := range gateway.NatGatewayAddresses {
+		if gatewayAddress.AllocationId != nil {
+			allocationIDs = append(allocationIDs, *gatewayAddress.AllocationId)
+		}
+	}
+
 	deleteOperation := func() error {
 		if _, err := g.Clients.EC2.DeleteNatGateway(&ec2.DeleteNatGatewayInput{
 			NatGatewayId: gateway.NatGatewayId,
@@ -129,6 +137,14 @@ func (g *NatGateway) Delete() error {
 	deleteNotify := NewNotify(g.Logger, "deleting internet gateway")
 	if err := backoff.RetryNotify(deleteOperation, NewCustomExponentialBackoff(), deleteNotify); err != nil {
 		return microerror.Mask(err)
+	}
+
+	for _, allocationID := range allocationIDs {
+		if _, err := g.Clients.EC2.ReleaseAddress(&ec2.ReleaseAddressInput{
+			AllocationId: aws.String(allocationID),
+		}); err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
 	return nil
