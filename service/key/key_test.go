@@ -120,7 +120,7 @@ func Test_HasLatestVersion(t *testing.T) {
 					},
 				},
 			},
-			expectedResult: false,
+			expectedResult: true,
 		},
 		{
 			customObject: awstpr.CustomObject{
@@ -130,7 +130,7 @@ func Test_HasLatestVersion(t *testing.T) {
 					},
 				},
 			},
-			expectedResult: true,
+			expectedResult: false,
 		},
 	}
 
