@@ -133,23 +133,4 @@ write_files:
       type: gp2
       encrypted: "true" 
 `
-
-	encryptionConfigTemplate = `
-write_files:
-- path: /etc/kubernetes/config/k8s-encryption-config.yaml
-  owner: root
-  permissions: 644
-  content: |
-    kind: EncryptionConfig
-    apiVersion: v1
-    resources:
-      - resources:
-        - secrets
-        providers:
-        - identity: {}
-        - aescbc:
-            keys:
-            - name: key1
-              secret: {{.Cluster.Kubernetes.API.EncryptionKey}}
-`
 )

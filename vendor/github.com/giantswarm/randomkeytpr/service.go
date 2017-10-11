@@ -1,4 +1,4 @@
-package certificatetpr
+package randomkeytpr
 
 import (
 	"fmt"
@@ -64,37 +64,36 @@ type Service struct {
 	logger    micrologger.Logger
 }
 
-// SearchCerts watches for all secrets of a cluster  and returns it as
-// assets bundle.
-func (s *Service) SearchCerts(clusterID string) (AssetsBundle, error) {
-	assetsBundle := make(AssetsBundle)
+// SearchKeys watches for keys secrets of a cluster
+func (s *Service) SearchKeys(clusterID string) (map[Key][]byte, error) {
+	keys := make(map[Key][]byte)
 
-	for _, componentName := range ClusterComponents {
-		ab, err := s.SearchCertsForComponent(clusterID, componentName.String())
+	for _, keyType := range RandomKeyTypes {
+		ab, err := s.SearchKeysForKeytype(clusterID, keyType.String())
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 
 		for k, v := range ab {
-			assetsBundle[k] = v
+			keys[k] = v
 		}
 	}
 
-	return assetsBundle, nil
+	return keys, nil
 }
 
-// SearchCertsForComponent watches for secrets of a single cluster component and
+// SearchKeysForKeytype watches for keys secrets of a single cluster keytype and
 // returns it as assets bundle.
-func (s *Service) SearchCertsForComponent(clusterID, componentName string) (AssetsBundle, error) {
+func (s *Service) SearchKeysForKeytype(clusterID, keyType string) (map[Key][]byte, error) {
 	// TODO we should also do a list. In case the secrets have already been
 	// created we might miss them with only watching.
 	watcher, err := s.k8sClient.Core().Secrets(api.NamespaceDefault).Watch(apismetav1.ListOptions{
-		// Select only secrets that match the given component and the given cluster
+		// Select only secrets that match the given Keytype and the given cluster
 		// clusterID.
 		LabelSelector: fmt.Sprintf(
 			"%s=%s, %s=%s",
-			ComponentLabel,
-			componentName,
+			KeyLabel,
+			keyType,
 			ClusterIDLabel,
 			clusterID,
 		),
@@ -103,7 +102,7 @@ func (s *Service) SearchCertsForComponent(clusterID, componentName string) (Asse
 		return nil, microerror.Mask(err)
 	}
 
-	assetsBundle := make(AssetsBundle)
+	keys := make(map[Key][]byte)
 
 	defer watcher.Stop()
 	for {
@@ -116,22 +115,22 @@ func (s *Service) SearchCertsForComponent(clusterID, componentName string) (Asse
 			switch event.Type {
 			case watch.Added:
 				secret := event.Object.(*v1.Secret)
-				component := ClusterComponent(secret.Labels[ComponentLabel])
+				key := Key(secret.Labels[KeyLabel])
 
-				if !ValidComponent(component, ClusterComponents) {
-					return nil, microerror.Maskf(secretsRetrievalFailedError, "unknown clusterComponent %s", component)
+				if !ValidKey(key) {
+					return nil, microerror.Maskf(secretsRetrievalFailedError, "unknown clusterKey %s", key)
 				}
 
-				for _, assetType := range TLSAssetTypes {
-					asset, ok := secret.Data[assetType.String()]
+				for _, k := range RandomKeyTypes {
+					asset, ok := secret.Data[k.String()]
 					if !ok {
-						return nil, microerror.Maskf(secretsRetrievalFailedError, "malformed secret was missing %v asset", assetType)
+						return nil, microerror.Maskf(secretsRetrievalFailedError, "malformed secret was missing %v asset", keyType)
 					}
 
-					assetsBundle[AssetsBundleKey{component, assetType}] = asset
+					keys[k] = asset
 				}
 
-				return assetsBundle, nil
+				return keys, nil
 			case watch.Deleted:
 				// Noop. Ignore deleted events. These are handled by the certificate
 				// operator.

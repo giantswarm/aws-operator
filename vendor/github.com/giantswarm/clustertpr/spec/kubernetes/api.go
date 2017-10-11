@@ -14,8 +14,6 @@ type API struct {
 	// Domain is the API domain of the Kubernetes cluster, e.g.
 	// api.<cluster-id>.g8s.fra-1.giantswarm.io.
 	Domain string `json:"domain" yaml:"domain"`
-	//EncryptionKey is used to encrypt data at rest
-	EncryptionKey string `json:"encryptionKey" yaml:"encryptionKey"`
 	// IP is the Kubernetes API IP, e.g. 172.29.0.1.
 	IP           net.IP `json:"ip" yaml:"ip"`
 	InsecurePort int    `json:"insecurePort" yaml:"insecurePort"`

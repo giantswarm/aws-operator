@@ -6,6 +6,7 @@ import (
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/certificatetpr"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/randomkeytpr"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/resources"
@@ -25,6 +26,7 @@ type launchConfigurationInput struct {
 	ebsStorage          bool
 	subnet              *awsresources.Subnet
 	tlsAssets           *certificatetpr.CompactTLSAssets
+	clusterKeys         *randomkeytpr.CompactRandomKeyAssets
 }
 
 func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (bool, error) {
@@ -40,7 +42,7 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 			imageID = key.MasterImageID(input.cluster)
 			instanceType = key.MasterInstanceType(input.cluster)
 
-			template, err = s.cloudConfig.NewMasterTemplate(input.cluster, *input.tlsAssets)
+			template, err = s.cloudConfig.NewMasterTemplate(input.cluster, *input.tlsAssets, *input.clusterKeys)
 		case prefixWorker:
 			imageID = key.WorkerImageID(input.cluster)
 			instanceType = key.WorkerInstanceType(input.cluster)

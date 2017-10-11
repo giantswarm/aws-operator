@@ -24,4 +24,6 @@ import:
   subpackages:
   - assert
 - package: github.com/giantswarm/certificatetpr
-  version: f0bb69b8e5209755129061e59aaaad386afdc738
+  version: master
+- package: github.com/giantswarm/randomkeytpr
+  version: 46f3c42383707f8f53011beed97e5adf01a82398
