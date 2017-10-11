@@ -14,11 +14,11 @@ resources:
   - resources:
     - secrets
     providers:
-    - identity: {}
     - aescbc:
         keys:
         - name: key1
           secret: {{.EncryptionKey}}
+    - identity: {}
 `
 
 func (s *Service) EncryptionConfig(encryptionKey string) (string, error) {
