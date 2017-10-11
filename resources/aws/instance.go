@@ -38,6 +38,8 @@ type Instance struct {
 	PlacementAZ            string
 	SecurityGroupID        string
 	SubnetID               string
+	PrivateDNS             string
+	hostedZoneID           string
 	id                     string
 	// Dependencies.
 	Logger micrologger.Logger
@@ -257,13 +259,21 @@ func FindInstances(input FindInstancesInput) ([]*Instance, error) {
 				continue
 			}
 			instances = append(instances, &Instance{
-				id: *rawInstance.InstanceId,
+				id:         *rawInstance.InstanceId,
+				PrivateDNS: *rawInstance.PrivateDnsName,
 				// Dependencies.
 				Logger:    input.Logger,
 				AWSEntity: AWSEntity{Clients: input.Clients},
 			})
 		}
 	}
-
 	return instances, nil
+}
+
+func (i *Instance) DNSName() string {
+	return i.PrivateDNS
+}
+
+func (i *Instance) HostedZoneID() string {
+	return i.hostedZoneID
 }

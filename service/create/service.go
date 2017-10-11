@@ -435,14 +435,31 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 	return instanceCreated, instance.ID(), nil
 }
 
-type deleteMachinesInput struct {
+type findMachinesInput struct {
 	clients     awsutil.Clients
 	spec        awstpr.Spec
 	clusterName string
 	prefix      string
 }
 
-func (s *Service) deleteMachines(input deleteMachinesInput) error {
+func (s *Service) getMasters(input findMachinesInput) ([]*awsresources.Instance, error) {
+	pattern := clusterPrefix(clusterPrefixInput{
+		clusterName: input.clusterName,
+		prefix:      input.prefix,
+	})
+	instances, err := awsresources.FindInstances(awsresources.FindInstancesInput{
+		Clients: input.clients,
+		Logger:  s.logger,
+		Pattern: pattern,
+	})
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	return instances, nil
+}
+
+func (s *Service) deleteMachines(input findMachinesInput) error {
 	pattern := clusterPrefix(clusterPrefixInput{
 		clusterName: input.clusterName,
 		prefix:      input.prefix,
@@ -930,27 +947,29 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not assign proxy protocol policy: '%#v'", err))
 	}
 
-	// Create etcd load balancer.
-	lbInput = LoadBalancerInput{
-		Name:        cluster.Spec.Cluster.Etcd.Domain,
-		Clients:     clients,
-		Cluster:     cluster,
-		InstanceIDs: masterIDs,
-		PortsToOpen: awsresources.PortPairs{
-			{
-				PortELB:      httpsPort,
-				PortInstance: cluster.Spec.Cluster.Etcd.Port,
+	var etcdLB *awsresources.ELB
+	if !newDeployment(cluster) {
+		// Create etcd load balancer.
+		lbInput = LoadBalancerInput{
+			Name:        cluster.Spec.Cluster.Etcd.Domain,
+			Clients:     clients,
+			Cluster:     cluster,
+			InstanceIDs: masterIDs,
+			PortsToOpen: awsresources.PortPairs{
+				{
+					PortELB:      httpsPort,
+					PortInstance: cluster.Spec.Cluster.Etcd.Port,
+				},
 			},
-		},
-		SecurityGroupID: mastersSecurityGroupID,
-		SubnetID:        publicSubnetID,
-	}
+			SecurityGroupID: mastersSecurityGroupID,
+			SubnetID:        publicSubnetID,
+		}
 
-	etcdLB, err := s.createLoadBalancer(lbInput)
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create etcd load balancer: '%#v'", err))
+		etcdLB, err = s.createLoadBalancer(lbInput)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create etcd load balancer: '%#v'", err))
+		}
 	}
-
 	// If the policy couldn't be created and some instances didn't exist before, that means that the cluster
 	// is inconsistent and most problably its deployment broke in the middle during the previous run of
 	// aws-operator.
@@ -1061,14 +1080,6 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		{
 			Cluster:      cluster,
 			Client:       clients.Route53,
-			Resource:     etcdLB,
-			Domain:       cluster.Spec.Cluster.Etcd.Domain,
-			HostedZoneID: cluster.Spec.AWS.HostedZones.Etcd,
-			Type:         route53.RRTypeA,
-		},
-		{
-			Cluster:      cluster,
-			Client:       clients.Route53,
 			Resource:     ingressLB,
 			Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
 			HostedZoneID: cluster.Spec.AWS.HostedZones.Ingress,
@@ -1082,6 +1093,33 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 			Value:        cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
 			Type:         route53.RRTypeCname,
 		},
+	}
+	if newDeployment(cluster) {
+		masters, err := s.getMasters(findMachinesInput{
+			clients:     clients,
+			clusterName: key.ClusterID(cluster),
+			prefix:      prefixMaster,
+		})
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not retrieve master instance reference: '%#v'", err))
+		}
+		recordSetInputs = append(recordSetInputs, recordSetInput{
+			Cluster:      cluster,
+			Client:       clients.Route53,
+			Resource:     masters[0],
+			Domain:       cluster.Spec.Cluster.Etcd.Domain,
+			HostedZoneID: cluster.Spec.AWS.HostedZones.Etcd,
+			Type:         route53.RRTypeCname,
+		})
+	} else {
+		recordSetInputs = append(recordSetInputs, recordSetInput{
+			Cluster:      cluster,
+			Client:       clients.Route53,
+			Resource:     etcdLB,
+			Domain:       cluster.Spec.Cluster.Etcd.Domain,
+			HostedZoneID: cluster.Spec.AWS.HostedZones.Etcd,
+			Type:         route53.RRTypeA,
+		})
 	}
 
 	var rsErr error
@@ -1148,7 +1186,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 
 	// Delete masters.
 	s.logger.Log("info", "deleting masters...")
-	if err := s.deleteMachines(deleteMachinesInput{
+	if err := s.deleteMachines(findMachinesInput{
 		clients:     clients,
 		clusterName: key.ClusterID(cluster),
 		prefix:      prefixMaster,
@@ -1184,13 +1222,19 @@ func (s *Service) deleteFunc(obj interface{}) {
 
 	// Delete Record Sets.
 	apiLBName, err := loadBalancerName(cluster.Spec.Cluster.Kubernetes.API.Domain, cluster)
-	etcdLBName, err := loadBalancerName(cluster.Spec.Cluster.Etcd.Domain, cluster)
+	var etcdLBName string
+	if !newDeployment(cluster) {
+		etcdLBName, err = loadBalancerName(cluster.Spec.Cluster.Etcd.Domain, cluster)
+	}
 	ingressLBName, err := loadBalancerName(cluster.Spec.Cluster.Kubernetes.IngressController.Domain, cluster)
 	if err != nil {
 		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	} else {
 		apiLB, err := awsresources.NewELBFromExisting(apiLBName, clients.ELB)
-		etcdLB, err := awsresources.NewELBFromExisting(etcdLBName, clients.ELB)
+		var etcdLB *awsresources.ELB
+		if !newDeployment(cluster) {
+			etcdLB, err = awsresources.NewELBFromExisting(etcdLBName, clients.ELB)
+		}
 		ingressLB, err := awsresources.NewELBFromExisting(ingressLBName, clients.ELB)
 		if err != nil {
 			s.logger.Log("error", fmt.Sprintf("%#v", err))
@@ -1202,14 +1246,6 @@ func (s *Service) deleteFunc(obj interface{}) {
 					Resource:     apiLB,
 					Domain:       cluster.Spec.Cluster.Kubernetes.API.Domain,
 					HostedZoneID: cluster.Spec.AWS.HostedZones.API,
-					Type:         route53.RRTypeA,
-				},
-				{
-					Cluster:      cluster,
-					Client:       clients.Route53,
-					Resource:     etcdLB,
-					Domain:       cluster.Spec.Cluster.Etcd.Domain,
-					HostedZoneID: cluster.Spec.AWS.HostedZones.Etcd,
 					Type:         route53.RRTypeA,
 				},
 				{
@@ -1229,6 +1265,37 @@ func (s *Service) deleteFunc(obj interface{}) {
 					Type:         route53.RRTypeCname,
 				},
 			}
+			var etcdRecordSet recordSetInput
+			if newDeployment(cluster) {
+				etcdRecordSet = recordSetInput{
+					Cluster:      cluster,
+					Client:       clients.Route53,
+					Resource:     etcdLB,
+					Domain:       cluster.Spec.Cluster.Etcd.Domain,
+					HostedZoneID: cluster.Spec.AWS.HostedZones.Etcd,
+					Type:         route53.RRTypeA,
+				}
+
+			} else {
+				masters, err := s.getMasters(findMachinesInput{
+					clients:     clients,
+					clusterName: key.ClusterID(cluster),
+					prefix:      prefixMaster,
+				})
+				if err != nil {
+					s.logger.Log("error", fmt.Sprintf("could not retrieve master instance reference: '%#v'", err))
+				} else {
+					etcdRecordSet = recordSetInput{
+						Cluster:      cluster,
+						Client:       clients.Route53,
+						Resource:     masters[0],
+						Domain:       cluster.Spec.Cluster.Etcd.Domain,
+						HostedZoneID: cluster.Spec.AWS.HostedZones.Etcd,
+						Type:         route53.RRTypeCname,
+					}
+				}
+			}
+			recordSetInputs = append(recordSetInputs, etcdRecordSet)
 
 			var rsErr error
 			for _, input := range recordSetInputs {
@@ -1532,4 +1599,8 @@ func (s *Service) updateFunc(oldObj, newObj interface{}) {
 	}
 
 	s.logger.Log("info", fmt.Sprintf("scaling workers auto scaling group from %d to %d", oldSize, newSize))
+}
+
+func newDeployment(cluster awstpr.CustomObject) bool {
+	return cluster.Spec.Cluster.Version != ""
 }
