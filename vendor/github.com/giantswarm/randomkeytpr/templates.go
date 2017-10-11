@@ -18,7 +18,7 @@ resources:
     - aescbc:
         keys:
         - name: key1
-					secret: {{.EncryptionKey}}
+          secret: {{.EncryptionKey}}
 `
 
 func (s *Service) EncryptionConfig(encryptionKey string) (string, error) {
