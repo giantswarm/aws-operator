@@ -1717,6 +1717,7 @@ coreos:
       ExecStart=/usr/bin/docker run --rm --name $NAME --net=host \
       -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
       -v /etc/kubernetes/secrets/token_sign_key.pem:/etc/kubernetes/secrets/token_sign_key.pem \
+      -v /etc/kubernetes/config/k8s-encryption-config.yaml:/etc/kubernetes/config/k8s-encryption-config.yaml \
       $IMAGE \
       /hyperkube apiserver \
       --allow_privileged=true \
@@ -1748,7 +1749,8 @@ coreos:
       --audit-log-path=/var/log/apiserver/audit.log \
       --audit-log-maxage=30 \
       --audit-log-maxbackup=10 \
-      --audit-log-maxsize=100
+      --audit-log-maxsize=100 \
+      --experimental-encryption-provider-config=/etc/kubernetes/config/k8s-encryption-config.yaml
       ExecStop=-/usr/bin/docker stop -t 10 $NAME
       ExecStopPost=-/usr/bin/docker rm -f $NAME
   - name: k8s-controller-manager.service
