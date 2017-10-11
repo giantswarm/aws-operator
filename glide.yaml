@@ -26,4 +26,4 @@ import:
 - package: github.com/giantswarm/certificatetpr
   version: master
 - package: github.com/giantswarm/randomkeytpr
-  version: 46f3c42383707f8f53011beed97e5adf01a82398
+  version: 4692e0591e0aea99e67251837567d807b4cd6c8d

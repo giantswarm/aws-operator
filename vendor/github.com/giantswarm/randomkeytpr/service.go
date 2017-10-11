@@ -85,10 +85,10 @@ func (s *Service) SearchKeys(clusterID string) (map[Key][]byte, error) {
 // SearchKeysForKeytype watches for keys secrets of a single cluster keytype and
 // returns it as assets bundle.
 func (s *Service) SearchKeysForKeytype(clusterID, keyType string) (map[Key][]byte, error) {
-	s.logger.Log("debug", fmt.Sprintf("searching secret: %s=%s, %s=%s", KeyLabel, keyType, ClusterIDLabel, clusterID))
-
 	// TODO we should also do a list. In case the secrets have already been
 	// created we might miss them with only watching.
+	s.logger.Log("debug", fmt.Sprintf("searching secret: %s=%s, %s=%s", KeyLabel, keyType, ClusterIDLabel, clusterID))
+
 	watcher, err := s.k8sClient.Core().Secrets(api.NamespaceDefault).Watch(apismetav1.ListOptions{
 		// Select only secrets that match the given Keytype and the given cluster
 		// clusterID.

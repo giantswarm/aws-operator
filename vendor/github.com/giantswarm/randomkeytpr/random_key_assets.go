@@ -9,18 +9,6 @@ func (c ClusterComponent) String() string {
 	return string(c)
 }
 
-// These constants are used to match different components of the cluster when
-// parsing a secret received from the API.
-const (
-	// APIComponent is the API server component.
-	APIComponent ClusterComponent = "api"
-)
-
-type Value struct {
-	Bytes []byte
-	Key   Key
-}
-
 // Key represents the type of Random Key asset, e.g. a encryption key.
 // These are used when getting a secret from the k8s API, to
 // identify the specific type of Random Key asset that is contained in the secret.

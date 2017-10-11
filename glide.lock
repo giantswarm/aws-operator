@@ -1,5 +1,5 @@
-hash: 8a844681846ab4db1bc074816d3c8316ea7f9a3bb983da6c4cabad642ff2e2d2
-updated: 2017-10-10T16:29:14.973124681+02:00
+hash: cb49e6b60c728da4a0bf41244d409473eeca932ce17cf0129160a87053773460
+updated: 2017-10-11T15:17:36.792856515+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -120,12 +120,12 @@ imports:
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: 1317e4c15f237b13a5101a1f3167146d05b2e7a1
+  version: 6ed6f05e679d8c9d07e6176e138f89bdea3e24bc
   subpackages:
   - client/k8s
   - tpr
 - name: github.com/giantswarm/randomkeytpr
-  version: 46f3c42383707f8f53011beed97e5adf01a82398
+  version: 4692e0591e0aea99e67251837567d807b4cd6c8d
 - name: github.com/go-ini/ini
   version: c787282c39ac1fc618827141a1f762240def08a3
 - name: github.com/go-kit/kit
@@ -238,7 +238,7 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 4d6af280c76ff7d266434f2dba207c4b75dfc076
+  version: 845c9050106f58df1cb4b4ed2e7e8dae7bbd770d
 - name: github.com/spf13/jwalterweatherman
   version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
 - name: github.com/spf13/pflag
