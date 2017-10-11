@@ -1280,21 +1280,6 @@ func (s *Service) deleteFunc(obj interface{}) {
 		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	}
 
-	// Delete internet gateway.
-	var internetGateway resources.ResourceWithID
-	internetGateway = &awsresources.InternetGateway{
-		Name:  key.ClusterID(cluster),
-		VpcID: vpcID,
-		// Dependencies.
-		Logger:    s.logger,
-		AWSEntity: awsresources.AWSEntity{Clients: clients},
-	}
-	if err := internetGateway.Delete(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete internet gateway: '%#v'", err))
-	} else {
-		s.logger.Log("info", "deleted internet gateway")
-	}
-
 	if key.ClusterVersion(cluster) == privateNetworkVersion {
 		// Delete NAT gateway.
 		var natGateway resources.ResourceWithID
@@ -1309,6 +1294,21 @@ func (s *Service) deleteFunc(obj interface{}) {
 		} else {
 			s.logger.Log("info", "deleted nat gateway")
 		}
+	}
+
+	// Delete internet gateway.
+	var internetGateway resources.ResourceWithID
+	internetGateway = &awsresources.InternetGateway{
+		Name:  key.ClusterID(cluster),
+		VpcID: vpcID,
+		// Dependencies.
+		Logger:    s.logger,
+		AWSEntity: awsresources.AWSEntity{Clients: clients},
+	}
+	if err := internetGateway.Delete(); err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not delete internet gateway: '%#v'", err))
+	} else {
+		s.logger.Log("info", "deleted internet gateway")
 	}
 
 	// Delete public subnet.
