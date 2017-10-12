@@ -564,20 +564,6 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get keys from secrets: '%#v'", err))
 	}
 
-	encryptionKey, ok := keys[randomkeytpr.EncryptionKey]
-	if !ok {
-		return microerror.Maskf(executionFailedError, "could not get encryption keys from secrets")
-	}
-
-	encryptionConfig, err := s.EncryptionConfig(string(encryptionKey))
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not generate encryption config: '%#v'", err))
-	}
-
-	clusterKeys := &randomkeytpr.CompactRandomKeyAssets{
-		APIServerEncryptionKey: encryptionConfig,
-	}
-
 	// Create KMS key.
 	kmsKey := &awsresources.KMSKey{
 		Name:      key.ClusterID(cluster),
@@ -599,6 +585,12 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	tlsAssets, err := s.encodeTLSAssets(certs, clients.KMS, kmsKey.Arn())
 	if err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not encode TLS assets: '%#v'", err))
+	}
+
+	// Encode Key assets.
+	clusterKeys, err := s.encodeKeyAssets(keys, clients.KMS, kmsKey.Arn())
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not encode Keys assets: '%#v'", err))
 	}
 
 	bucketName := s.bucketName(cluster)

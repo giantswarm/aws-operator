@@ -166,8 +166,9 @@ func (e *v_0_1_0MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		},
 		{
 			AssetContent: e.keys.APIServerEncryptionKey,
-			Path:         "/etc/kubernetes/config/k8s-encryption-config.yaml",
+			Path:         "/etc/kubernetes/config/k8s-encryption-config.yaml.enc",
 			Owner:        FileOwner,
+			Encoding:     k8scloudconfig.GzipBase64,
 			Permissions:  0644,
 		},
 	}
