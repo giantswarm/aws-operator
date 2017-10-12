@@ -517,26 +517,29 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not retrieve host amazon account id: '%#v'", err))
 	}
 
-	// Create keypair.
-	var keyPair resources.ReusableResource
-	var keyPairCreated bool
-	{
-		var err error
-		keyPair = &awsresources.KeyPair{
-			ClusterName: key.ClusterID(cluster),
-			Provider:    awsresources.NewFSKeyPairProvider(s.pubKeyFile),
-			AWSEntity:   awsresources.AWSEntity{Clients: clients},
+	// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
+	if !key.HasClusterVersion(cluster) {
+		// Create keypair.
+		var keyPair resources.ReusableResource
+		var keyPairCreated bool
+		{
+			var err error
+			keyPair = &awsresources.KeyPair{
+				ClusterName: key.ClusterID(cluster),
+				Provider:    awsresources.NewFSKeyPairProvider(s.pubKeyFile),
+				AWSEntity:   awsresources.AWSEntity{Clients: clients},
+			}
+			keyPairCreated, err = keyPair.CreateIfNotExists()
+			if err != nil {
+				return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create keypair: '%#v'", err))
+			}
 		}
-		keyPairCreated, err = keyPair.CreateIfNotExists()
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create keypair: '%#v'", err))
-		}
-	}
 
-	if keyPairCreated {
-		s.logger.Log("info", fmt.Sprintf("created keypair '%s'", key.ClusterID(cluster)))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("keypair '%s' already exists, reusing", key.ClusterID(cluster)))
+		if keyPairCreated {
+			s.logger.Log("info", fmt.Sprintf("created keypair '%s'", key.ClusterID(cluster)))
+		} else {
+			s.logger.Log("info", fmt.Sprintf("keypair '%s' already exists, reusing", key.ClusterID(cluster)))
+		}
 	}
 
 	s.logger.Log("info", fmt.Sprintf("waiting for k8s secrets..."))
@@ -849,8 +852,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 
 	}
 
-	// Run masters.
-	anyMastersCreated, masterIDs, err := s.runMachines(runMachinesInput{
+	mastersInput := runMachinesInput{
 		clients:             clients,
 		cluster:             cluster,
 		tlsAssets:           tlsAssets,
@@ -858,10 +860,17 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		bucket:              bucket,
 		securityGroup:       mastersSecurityGroup,
 		subnet:              publicSubnet,
-		keyPairName:         key.ClusterID(cluster),
 		instanceProfileName: masterPolicy.GetName(),
 		prefix:              prefixMaster,
-	})
+	}
+
+	// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
+	if !key.HasClusterVersion(cluster) {
+		mastersInput.keyPairName = key.ClusterID(cluster)
+	}
+
+	// Run masters.
+	anyMastersCreated, masterIDs, err := s.runMachines(mastersInput)
 	if err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not start masters: '%#v'", err))
 	}
@@ -963,10 +972,14 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		bucket:              bucket,
 		securityGroup:       workersSecurityGroup,
 		subnet:              publicSubnet,
-		keypairName:         key.ClusterID(cluster),
 		instanceProfileName: workerPolicy.GetName(),
 		prefix:              prefixWorker,
 		ebsStorage:          true,
+	}
+
+	// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
+	if !key.HasClusterVersion(cluster) {
+		lcInput.keypairName = key.ClusterID(cluster)
 	}
 
 	lcCreated, err := s.createLaunchConfiguration(lcInput)

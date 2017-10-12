@@ -142,10 +142,10 @@ func (i *Instance) CreateOrFail() error {
 	var reservation *ec2.Reservation
 	reserveOperation := func() error {
 		var err error
-		reservation, err = i.Clients.EC2.RunInstances(&ec2.RunInstancesInput{
+
+		instancesInput := &ec2.RunInstancesInput{
 			ImageId:      aws.String(i.ImageID),
 			InstanceType: aws.String(i.InstanceType),
-			KeyName:      aws.String(i.KeyName),
 			MinCount:     aws.Int64(int64(1)),
 			MaxCount:     aws.Int64(int64(1)),
 			UserData:     aws.String(i.SmallCloudconfig),
@@ -159,7 +159,12 @@ func (i *Instance) CreateOrFail() error {
 				aws.String(i.SecurityGroupID),
 			},
 			SubnetId: aws.String(i.SubnetID),
-		})
+		}
+		if i.KeyName != "" {
+			instancesInput.KeyName = aws.String(i.KeyName)
+		}
+
+		reservation, err = i.Clients.EC2.RunInstances(instancesInput)
 		if err != nil {
 
 			return microerror.Mask(err)
