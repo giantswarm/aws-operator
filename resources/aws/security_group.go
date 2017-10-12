@@ -100,6 +100,12 @@ func (s SecurityGroup) findGroupWithRule(rule SecurityGroupRule) (*ec2.SecurityG
 				},
 			},
 			{
+				Name: aws.String(ipPermissionFromPort),
+				Values: []*string{
+					aws.String(strconv.Itoa(rule.Port)),
+				},
+			},
+			{
 				Name: aws.String(ipPermissionProtocol),
 				Values: []*string{
 					aws.String(rule.Protocol),
