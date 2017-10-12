@@ -96,6 +96,8 @@ $ helm install -n aws-operator-lab --set idRsaPub="$(cat ~/.ssh/id_rsa.pub)" \
 `aws-resource-lab-chart` accepts the following configuration parameters:
 * `clusterName` - Cluster's name.
 * `commonDomain` - Cluster's etcd and API common domain.
+* `sshUser` - SSH user created via cloudconfig.
+* `sshPublicKey` - SSH public key added via cloudconfig.
 * `aws.region` - AWS region.
 * `aws.az` - AWS availability zone.
 * `aws.ami` - AWS image to be used on both master and worker machines.
@@ -106,6 +108,14 @@ $ helm install -n aws-operator-lab --set idRsaPub="$(cat ~/.ssh/id_rsa.pub)" \
 * `aws.routeTable0` - Existing route table of the cluster to use for VPC peering.
 * `aws.routeTable1` - Existing route table of the cluster to use for VPC peering.
 * `aws.vpcPeerId` - VPC ID of the host cluster to peer with.
+
+For instance, to create a SSH user with your current user and default public key.
+
+```bash
+$ helm install -n aws-resource-lab --set sshUser="$(whoami)" \
+                                  --set sshPublicKey="$(cat ~/.ssh/id_rsa.pub)" \
+                                   ./aws-resource-lab-chart/ --wait
+```
 
 ## Connecting to the new cluster
 
