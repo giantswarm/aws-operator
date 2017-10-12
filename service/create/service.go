@@ -781,32 +781,46 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not make route table public: '%#v'", err))
 	}
 
-	// Create public subnet for the masters.
-	publicSubnet := &awsresources.Subnet{
-		AvailabilityZone: key.AvailabilityZone(cluster),
-		CidrBlock:        cluster.Spec.AWS.VPC.PublicSubnetCIDR,
-		Name:             subnetName(cluster, suffixPublic),
-		VpcID:            vpcID,
-		// Dependencies.
-		Logger:    s.logger,
-		AWSEntity: awsresources.AWSEntity{Clients: clients},
+	// Create public subnet.
+	subnetInput := SubnetInput{
+		Name:       subnetName(cluster, suffixPublic),
+		CidrBlock:  cluster.Spec.AWS.VPC.PublicSubnetCIDR,
+		Clients:    clients,
+		Cluster:    cluster,
+		MakePublic: true,
+		VpcID:      vpcID,
 	}
-	publicSubnetCreated, err := publicSubnet.CreateIfNotExists()
+	publicSubnet, err := s.createSubnet(subnetInput)
 	if err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create public subnet: '%#v'", err))
 	}
-	if publicSubnetCreated {
-		s.logger.Log("info", fmt.Sprintf("created public subnet for cluster '%s'", key.ClusterID(cluster)))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("public subnet for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
-	}
+
 	publicSubnetID, err := publicSubnet.GetID()
 	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get subnet ID: '%#v'", err))
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get public subnet ID: '%#v'", err))
 	}
 
-	if err := publicSubnet.MakePublic(routeTable); err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not make subnet public, '%#v'", err))
+	var privateSubnet *awsresources.Subnet
+
+	if key.HasClusterVersion(cluster) {
+		// Create private subnet.
+		subnetInput := SubnetInput{
+			Name:       subnetName(cluster, suffixPrivate),
+			CidrBlock:  cluster.Spec.AWS.VPC.PrivateSubnetCIDR,
+			Clients:    clients,
+			Cluster:    cluster,
+			MakePublic: false,
+			VpcID:      vpcID,
+		}
+		privateSubnet, err = s.createSubnet(subnetInput)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create public subnet: '%#v'", err))
+		}
+
+		_, err := privateSubnet.GetID()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get private subnet ID: '%#v'", err))
+		}
 	}
 
 	publicRoute := &awsresources.Route{
