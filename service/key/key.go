@@ -23,10 +23,11 @@ func ClusterVersion(customObject awstpr.CustomObject) string {
 	return customObject.Spec.Cluster.Version
 }
 
-func HasLatestVersion(customObject awstpr.CustomObject) bool {
-	if ClusterVersion(customObject) == string(cloudconfig.V_0_1_0) {
+func HasClusterVersion(customObject awstpr.CustomObject) bool {
+	switch ClusterVersion(customObject) {
+	case string(cloudconfig.V_0_1_0):
 		return true
-	} else {
+	default:
 		return false
 	}
 }

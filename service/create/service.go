@@ -518,7 +518,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	}
 
 	// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
-	if !key.HasLatestVersion(cluster) {
+	if !key.HasClusterVersion(cluster) {
 		// Create keypair.
 		var keyPair resources.ReusableResource
 		var keyPairCreated bool
@@ -865,7 +865,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	}
 
 	// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
-	if !key.HasLatestVersion(cluster) {
+	if !key.HasClusterVersion(cluster) {
 		mastersInput.keyPairName = key.ClusterID(cluster)
 	}
 
@@ -978,7 +978,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	}
 
 	// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
-	if !key.HasLatestVersion(cluster) {
+	if !key.HasClusterVersion(cluster) {
 		lcInput.keypairName = key.ClusterID(cluster)
 	}
 

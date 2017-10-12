@@ -91,7 +91,7 @@ func Test_ClusterVersion(t *testing.T) {
 	}
 }
 
-func Test_HasLatestVersion(t *testing.T) {
+func Test_HasClusterVersion(t *testing.T) {
 	tests := []struct {
 		customObject   awstpr.CustomObject
 		expectedResult bool
@@ -135,8 +135,8 @@ func Test_HasLatestVersion(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		if HasLatestVersion(tc.customObject) != tc.expectedResult {
-			t.Fatalf("Expected has latest version to be %t but was %t", tc.expectedResult, HasLatestVersion(tc.customObject))
+		if HasClusterVersion(tc.customObject) != tc.expectedResult {
+			t.Fatalf("Expected has cluster version to be %t but was %t", tc.expectedResult, HasClusterVersion(tc.customObject))
 		}
 	}
 }
