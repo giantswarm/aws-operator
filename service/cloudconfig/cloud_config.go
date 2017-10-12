@@ -56,7 +56,7 @@ func (c *CloudConfig) NewMasterTemplate(customObject awstpr.CustomObject, certs 
 	var err error
 
 	// TODO remove defaulting as soon as custom objects are configured.
-	if key.ClusterVersion(customObject) == "" {
+	if !key.HasClusterVersion(customObject) {
 		customObject.Spec.Cluster.Version = string(cloudconfig.V_0_1_0)
 	}
 
