@@ -5,7 +5,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 )
@@ -126,16 +125,23 @@ func (g *NatGateway) Delete() error {
 		}
 	}
 
-	deleteOperation := func() error {
-		if _, err := g.Clients.EC2.DeleteNatGateway(&ec2.DeleteNatGatewayInput{
-			NatGatewayId: gateway.NatGatewayId,
-		}); err != nil {
-			return microerror.Mask(err)
-		}
-		return nil
+	if _, err := g.Clients.EC2.DeleteTags(&ec2.DeleteTagsInput{
+		Resources: []*string{
+			gateway.NatGatewayId,
+		},
+		Tags: []*ec2.Tag{
+			{
+				Key:   aws.String(tagKeyName),
+				Value: aws.String(g.Name),
+			},
+		},
+	}); err != nil {
+		return microerror.Mask(err)
 	}
-	deleteNotify := NewNotify(g.Logger, "deleting internet gateway")
-	if err := backoff.RetryNotify(deleteOperation, NewCustomExponentialBackoff(), deleteNotify); err != nil {
+
+	if _, err := g.Clients.EC2.DeleteNatGateway(&ec2.DeleteNatGatewayInput{
+		NatGatewayId: gateway.NatGatewayId,
+	}); err != nil {
 		return microerror.Mask(err)
 	}
 
