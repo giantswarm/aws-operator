@@ -77,13 +77,15 @@ func (lc *LaunchConfiguration) CreateOrFail() error {
 		IamInstanceProfile:      aws.String(lc.IamInstanceProfileName),
 		ImageId:                 aws.String(lc.ImageID),
 		InstanceType:            aws.String(lc.InstanceType),
-		KeyName:                 aws.String(lc.KeyName),
 		SecurityGroups: []*string{
 			aws.String(lc.SecurityGroupID),
 		},
 		UserData:                 aws.String(lc.SmallCloudConfig),
 		AssociatePublicIpAddress: aws.Bool(lc.AssociatePublicIpAddress),
 		BlockDeviceMappings:      []*autoscaling.BlockDeviceMapping{ebsMount},
+	}
+	if lc.KeyName != "" {
+		lcInput.KeyName = aws.String(lc.KeyName)
 	}
 
 	if _, err := lc.Client.CreateLaunchConfiguration(lcInput); err != nil {
