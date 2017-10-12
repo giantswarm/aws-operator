@@ -1,6 +1,7 @@
 package cloudconfig
 
 import (
+	"github.com/giantswarm/aws-operator/service/key"
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/certificatetpr"
 	cloudconfig "github.com/giantswarm/k8scloudconfig"
@@ -55,13 +56,13 @@ func (c *CloudConfig) NewMasterTemplate(customObject awstpr.CustomObject, certs 
 	var err error
 
 	// TODO remove defaulting as soon as custom objects are configured.
-	if customObject.Spec.Cluster.Version == "" {
+	if key.ClusterVersion(customObject) == "" {
 		customObject.Spec.Cluster.Version = string(cloudconfig.V_0_1_0)
 	}
 
 	var template string
 
-	switch customObject.Spec.Cluster.Version {
+	switch key.ClusterVersion(customObject) {
 	case string(cloudconfig.V_0_1_0):
 		template, err = v_0_1_0MasterTemplate(customObject, certs)
 		if err != nil {
