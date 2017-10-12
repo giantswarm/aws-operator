@@ -27,7 +27,8 @@ rkt run \
       | base64 -d > $f
       mv -f $f ${encKey%.enc}
     done;
-    'echo decrypting keys assets
+    
+    echo decrypting keys assets
     shopt -s nullglob
     for encKey in $(find /etc/kubernetes/config -name "*.enc"); do
       echo decrypting $encKey
