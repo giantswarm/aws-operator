@@ -5,6 +5,8 @@ import (
 	"compress/gzip"
 	"encoding/base64"
 
+	"github.com/giantswarm/randomkeytpr"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/certificatetpr"
@@ -56,23 +58,61 @@ func createRawTLSAssets(assets certificatetpr.AssetsBundle) *rawTLSAssets {
 	}
 }
 
+type rawKeyAssets map[randomkeytpr.Key][]byte
+type encryptedKeyAssets map[randomkeytpr.Key][]byte
+
+func (r rawKeyAssets) encrypt(svc *kms.KMS, kmsKeyARN string) (*encryptedKeyAssets, error) {
+
+	encryptedAssets := make(encryptedKeyAssets)
+	for k, v := range r {
+		b, err := encryptor(svc, kmsKeyARN, v)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		encryptedAssets[k] = b
+	}
+
+	return &encryptedAssets, nil
+}
+
+func (r encryptedKeyAssets) compact() (*randomkeytpr.CompactRandomKeyAssets, error) {
+	var err error
+	compact := func(data []byte) (r string) {
+		if err != nil {
+			return ""
+		}
+
+		r, err = compactor(data)
+		if err != nil {
+			return ""
+		}
+
+		return r
+	}
+
+	compactAssets := randomkeytpr.CompactRandomKeyAssets{
+		APIServerEncryptionKey: compact(r[randomkeytpr.EncryptionKey]),
+	}
+
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+	return &compactAssets, nil
+}
+
 func (r *rawTLSAssets) encrypt(svc *kms.KMS, kmsKeyARN string) (*encryptedTLSAssets, error) {
 	var err error
-	encrypt := func(data []byte) []byte {
+	encrypt := func(data []byte) (b []byte) {
 		if err != nil {
 			return []byte{}
 		}
 
-		encryptInput := kms.EncryptInput{
-			KeyId:     aws.String(kmsKeyARN),
-			Plaintext: data,
-		}
+		b, err = encryptor(svc, kmsKeyARN, data)
 
-		var encryptOutput *kms.EncryptOutput
-		if encryptOutput, err = svc.Encrypt(&encryptInput); err != nil {
+		if err != nil {
 			return []byte{}
 		}
-		return encryptOutput.CiphertextBlob
+		return b
 	}
 	encryptedAssets := encryptedTLSAssets{
 		APIServerCA:       encrypt(r.APIServerCA),
@@ -99,20 +139,17 @@ func (r *rawTLSAssets) encrypt(svc *kms.KMS, kmsKeyARN string) (*encryptedTLSAss
 
 func (r *encryptedTLSAssets) compact() (*certificatetpr.CompactTLSAssets, error) {
 	var err error
-	compact := func(data []byte) string {
+	compact := func(data []byte) (r string) {
 		if err != nil {
 			return ""
 		}
 
-		var buf bytes.Buffer
-		gzw := gzip.NewWriter(&buf)
-		if _, err := gzw.Write(data); err != nil {
+		r, err = compactor(data)
+		if err != nil {
 			return ""
 		}
-		if err := gzw.Close(); err != nil {
-			return ""
-		}
-		return base64.StdEncoding.EncodeToString(buf.Bytes())
+
+		return r
 	}
 
 	compactAssets := certificatetpr.CompactTLSAssets{
@@ -137,4 +174,30 @@ func (r *encryptedTLSAssets) compact() (*certificatetpr.CompactTLSAssets, error)
 		return nil, microerror.Mask(err)
 	}
 	return &compactAssets, nil
+}
+
+func compactor(data []byte) (string, error) {
+	var buf bytes.Buffer
+	gzw := gzip.NewWriter(&buf)
+	if _, err := gzw.Write(data); err != nil {
+		return "", err
+	}
+	if err := gzw.Close(); err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(buf.Bytes()), nil
+}
+
+func encryptor(svc *kms.KMS, kmsKeyARN string, data []byte) ([]byte, error) {
+	encryptInput := kms.EncryptInput{
+		KeyId:     aws.String(kmsKeyARN),
+		Plaintext: data,
+	}
+
+	var encryptOutput *kms.EncryptOutput
+	var err error
+	if encryptOutput, err = svc.Encrypt(&encryptInput); err != nil {
+		return []byte{}, err
+	}
+	return encryptOutput.CiphertextBlob, nil
 }

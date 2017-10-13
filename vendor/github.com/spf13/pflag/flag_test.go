@@ -604,7 +604,6 @@ func aliasAndWordSepFlagNames(f *FlagSet, name string) NormalizedName {
 	switch name {
 	case oldName:
 		name = newName
-		break
 	}
 
 	return NormalizedName(name)
@@ -1052,6 +1051,7 @@ const defaultOutput = `      --A                         for bootstrapping, allo
       --custom custom             custom Value implementation
       --customP custom            a VarP with default (default 10)
       --maxT timeout              set timeout for dial
+  -v, --verbose count             verbosity
 `
 
 // Custom value that satisfies the Value interface.
@@ -1092,6 +1092,7 @@ func TestPrintDefaults(t *testing.T) {
 	fs.ShorthandLookup("E").NoOptDefVal = "1234"
 	fs.StringSlice("StringSlice", []string{}, "string slice with zero default")
 	fs.StringArray("StringArray", []string{}, "string array with zero default")
+	fs.CountP("verbose", "v", "verbosity")
 
 	var cv customValue
 	fs.Var(&cv, "custom", "custom Value implementation")

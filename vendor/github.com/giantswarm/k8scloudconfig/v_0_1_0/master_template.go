@@ -1717,12 +1717,14 @@ coreos:
       ExecStart=/usr/bin/docker run --rm --name $NAME --net=host \
       -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
       -v /etc/kubernetes/secrets/token_sign_key.pem:/etc/kubernetes/secrets/token_sign_key.pem \
+      -v /etc/kubernetes/encryption/:/etc/kubernetes/encryption \
       $IMAGE \
       /hyperkube apiserver \
       --allow_privileged=true \
       --insecure_bind_address=0.0.0.0 \
       --insecure_port={{.Cluster.Kubernetes.API.InsecurePort}} \
       --kubelet_https=true \
+      --kubelet-preferred-address-types=InternalIP \
       --secure_port={{.Cluster.Kubernetes.API.SecurePort}} \
       --bind-address=${DEFAULT_IPV4} \
       --etcd-prefix={{.Cluster.Etcd.Prefix}} \
@@ -1747,7 +1749,8 @@ coreos:
       --audit-log-path=/var/log/apiserver/audit.log \
       --audit-log-maxage=30 \
       --audit-log-maxbackup=10 \
-      --audit-log-maxsize=100
+      --audit-log-maxsize=100 \
+      --experimental-encryption-provider-config=/etc/kubernetes/encryption/k8s-encryption-config.yaml
       ExecStop=-/usr/bin/docker stop -t 10 $NAME
       ExecStopPost=-/usr/bin/docker rm -f $NAME
   - name: k8s-controller-manager.service

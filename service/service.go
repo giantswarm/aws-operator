@@ -10,6 +10,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8s"
+	"github.com/giantswarm/randomkeytpr"
 	"github.com/spf13/viper"
 	"k8s.io/client-go/kubernetes"
 
@@ -94,6 +95,17 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var keyWatcher *randomkeytpr.Service
+	{
+		keyConfig := randomkeytpr.DefaultServiceConfig()
+		keyConfig.K8sClient = k8sClient
+		keyConfig.Logger = config.Logger
+		keyWatcher, err = randomkeytpr.NewService(keyConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var awsConfig awsclient.Config
 	{
 		awsConfig = awsclient.Config{
@@ -142,6 +154,7 @@ func New(config Config) (*Service, error) {
 		createConfig.CertWatcher = certWatcher
 		createConfig.CloudConfig = ccService
 		createConfig.K8sClient = k8sClient
+		createConfig.KeyWatcher = keyWatcher
 		createConfig.Logger = config.Logger
 		createConfig.PubKeyFile = config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile)
 
