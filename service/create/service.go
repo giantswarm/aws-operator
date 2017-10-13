@@ -564,7 +564,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get keys from secrets: '%#v'", err))
 	}
 	for k, v := range keys {
-		s.logger.Log("debug", fmt.Sprintf("on receive k:%v -- v:%v", k, string(v))
+		s.logger.Log("debug", fmt.Sprintf("on receive k:%v -- v:%v", k, string(v)))
 
 	}
 	// Create KMS key.
