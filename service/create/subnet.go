@@ -62,7 +62,7 @@ func (s *Service) deleteSubnet(input SubnetInput) error {
 	if err := subnet.Delete(); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete subnet '%s': '%#v'", input.Name, err))
 	} else {
-		s.logger.Log("info", "deleted subnet '%s'")
+		s.logger.Log("info", fmt.Sprintf("deleted subnet '%s'", input.Name))
 	}
 
 	return nil
