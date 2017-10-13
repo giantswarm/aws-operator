@@ -57,7 +57,7 @@ spec:
         altNames: "kubernetes,kubernetes.default,kubernetes.default.svc,kubernetes.default.svc.cluster.local"
       networkSetup:
         docker:
-          image: "giantswarm/k8s-setup-network-environment:1f4ffc52095ac368847ce3428ea99b257003d9b9"
+          image: "quay.io/giantswarm/k8s-setup-network-environment:1f4ffc52095ac368847ce3428ea99b257003d9b9"
       ssh:
         userList:
         - name: "{{.Values.sshUser}}"
