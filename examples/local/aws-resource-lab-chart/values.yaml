@@ -1,7 +1,7 @@
 clusterName: "test-cluster"
 commonDomain: "aws.gigantic.io"
 sshUser: "test-user"
-sshPublicKey: ssh-rsa XXXXXXXXXXXXXXXXXXXXXXXXX"
+sshPublicKey: "ssh-rsa XXXXXXXXXXXXXXXXXXXXXXXXX"
 
 aws:
   region: "eu-central-1"
