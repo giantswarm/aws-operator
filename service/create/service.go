@@ -961,11 +961,11 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create etcd load balancer: '%#v'", err))
 	}
 
-	// If the policy couldn't be created and some instances didn't exist before, that means that the cluster
-	// is inconsistent and most problably its deployment broke in the middle during the previous run of
-	// aws-operator.
-	if anyMastersCreated && (kmsKeyErr != nil || masterPolicyErr != nil || workerPolicyErr != nil) {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("cluster '%s' is inconsistent, KMS keys and policies were not created, but EC2 instances were missing, please consider deleting this cluster", key.ClusterID(cluster)))
+	// Masters were created but the master IAM policy existed from a previous
+	// execution. Its likely that previous execution failed. IAM policies can't
+	// be reused for EC2 instances.
+	if anyMastersCreated && !masterPolicyCreated {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("cluster '%s' cannot be processed. As IAM policy for master nodes cannot be reused. Please delete this cluster.", key.ClusterID(cluster)))
 	}
 
 	// Create Ingress load balancer.
