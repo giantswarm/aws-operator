@@ -165,6 +165,12 @@ func (e *v_0_1_0MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Permissions:  FilePermission,
 		},
 		{
+			AssetContent: decryptKeysAssetsScriptTemplate,
+			Path:         "/opt/bin/decrypt-keys-assets",
+			Owner:        FileOwner,
+			Permissions:  FilePermission,
+		},
+		{
 			AssetContent: e.keys.APIServerEncryptionKey,
 			Path:         "/etc/kubernetes/encryption/k8s-encryption-config.yaml.enc",
 			Owner:        FileOwner,
@@ -209,6 +215,12 @@ func (e *v_0_1_0MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: ephemeralVarLibDockerMountTemplate,
 			Name:         "var-lib-docker.mount",
+			Enable:       true,
+			Command:      "start",
+		},
+		{
+			AssetContent: decryptKeysServiceTemplate,
+			Name:         "decrypt-keys-assets.service",
 			Enable:       true,
 			Command:      "start",
 		},
