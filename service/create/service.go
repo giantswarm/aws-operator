@@ -1335,16 +1335,27 @@ func (s *Service) deleteFunc(obj interface{}) {
 	}
 
 	// Delete public subnet.
-	publicSubnet := &awsresources.Subnet{
-		Name: subnetName(cluster, suffixPublic),
-		// Dependencies.
-		Logger:    s.logger,
-		AWSEntity: awsresources.AWSEntity{Clients: clients},
+	subnetInput := SubnetInput{
+		Name:    subnetName(cluster, suffixPublic),
+		Clients: clients,
 	}
-	if err := publicSubnet.Delete(); err != nil {
+	if err := s.deleteSubnet(subnetInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete public subnet: '%#v'", err))
 	} else {
 		s.logger.Log("info", "deleted public subnet")
+	}
+
+	// Delete private subnet for new clusters. Legacy clusters only have public subnets.
+	if key.HasClusterVersion(cluster) {
+		subnetInput = SubnetInput{
+			Name:    subnetName(cluster, suffixPrivate),
+			Clients: clients,
+		}
+		if err := s.deleteSubnet(subnetInput); err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not delete private subnet: '%#v'", err))
+		} else {
+			s.logger.Log("info", "deleted private subnet")
+		}
 	}
 
 	// Before the security groups can be deleted any rules referencing other
