@@ -1,0 +1,14 @@
+package: github.com/giantswarm/randomkeytpr
+import:
+- package: github.com/giantswarm/operatorkit
+  version: master
+testImport:
+- package: github.com/stretchr/testify
+  version: v1.1.4
+  subpackages:
+  - assert
+  - require
+- package: github.com/kylelemons/godebug
+  version: master
+  subpackages:
+  - pretty

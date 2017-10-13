@@ -5,7 +5,9 @@ const (
 
 rkt run \
   --volume=ssl,kind=host,source=/etc/kubernetes/ssl,readOnly=false \
+  --volume=keys,kind=host,source=/etc/kubernetes/encryption,readOnly=false \
   --mount=volume=ssl,target=/etc/kubernetes/ssl \
+  --mount=volume=keys,target=/etc/kubernetes/encryption \
   --uuid-file-save=/var/run/coreos/decrypt-tls-assets.uuid \
   --volume=dns,kind=host,source=/etc/resolv.conf,readOnly=true --mount volume=dns,target=/etc/resolv.conf \
   --net=host \
@@ -15,6 +17,20 @@ rkt run \
     'echo decrypting tls assets
     shopt -s nullglob
     for encKey in $(find /etc/kubernetes/ssl -name "*.pem.enc"); do
+      echo decrypting $encKey
+      f=$(mktemp $encKey.XXXXXXXX)
+      /usr/bin/aws \
+        --region {{.AWS.Region}} kms decrypt \
+        --ciphertext-blob fileb://$encKey \
+        --output text \
+        --query Plaintext \
+      | base64 -d > $f
+      mv -f $f ${encKey%.enc}
+    done;
+    
+    echo decrypting keys assets
+    shopt -s nullglob
+    for encKey in $(find /etc/kubernetes/encryption -name "*.enc"); do
       echo decrypting $encKey
       f=$(mktemp $encKey.XXXXXXXX)
       /usr/bin/aws \
