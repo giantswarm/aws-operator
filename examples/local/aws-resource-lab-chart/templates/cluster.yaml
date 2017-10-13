@@ -11,17 +11,20 @@ spec:
       id: "example-customer"
 
     docker:
-      imageNamespace: "giantswarm"
+      daemon:
+        cidr: "172.17.0.1/16"
+        extraArgs: "--log-opt max-size=25m --log-opt max-file=2 --log-opt labels=io.kubernetes.container.hash,io.kubernetes.container.name,io.kubernetes.pod.name,io.kubernetes.pod.namespace,io.kubernetes.pod.uid"
 
     etcd:
       domain: "etcd.{{.Values.clusterName}}.{{.Values.commonDomain}}"
-      prefix: "{{.Values.clusterName}}"
+      prefix: "giantswarm.io"
       port: 2379
 
     calico:
       subnet: "192.168.0.0"
-      cidr: 24
+      cidr: 16
       mtu: 1500
+      domain: "calico.{{.Values.clusterName}}.{{.Values.commonDomain}}"
 
     kubernetes:
       api:
@@ -30,13 +33,14 @@ spec:
         ip: "172.31.0.1"
         securePort: 443
         clusterIPRange: "172.31.0.0/24"
+        altNames: "kubernetes,kubernetes.default,kubernetes.default.svc,kubernetes.default.svc.cluster.local"
       cloudProvider: "aws"
       dns:
         ip: "172.31.0.10"
       domain: "cluster.local"
       hyperkube:
         docker:
-          image: "quay.io/giantswarm/hyperkube:v1.7.3_coreos.0"
+          image: "quay.io/giantswarm/hyperkube:v1.7.5_coreos.0"
       ingressController:
         docker:
           image: "quay.io/giantswarm/nginx-ingress-controller:0.9.0-beta.11"
@@ -50,9 +54,10 @@ spec:
       kubelet:
         port: 10250
         domain: "worker.{{.Values.clusterName}}.{{.Values.commonDomain}}"
+        altNames: "kubernetes,kubernetes.default,kubernetes.default.svc,kubernetes.default.svc.cluster.local"
       networkSetup:
         docker:
-          image: "giantswarm/k8s-setup-network-environment:ba2b57155d859a1fc5d378c2a09a77d7c2c755ed"
+          image: "quay.io/giantswarm/k8s-setup-network-environment:1f4ffc52095ac368847ce3428ea99b257003d9b9"
       ssh:
         userList:
         - name: "{{.Values.sshUser}}"
