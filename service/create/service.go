@@ -600,8 +600,9 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 
 	// Create master IAM policy.
 	var masterPolicy resources.NamedResource
-	var masterPolicyErr error
+	var masterPolicyCreated bool
 	{
+		var err error
 		masterPolicy = &awsresources.Policy{
 			ClusterID:  key.ClusterID(cluster),
 			KMSKeyArn:  kmsKey.Arn(),
@@ -609,17 +610,22 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 			S3Bucket:   bucketName,
 			AWSEntity:  awsresources.AWSEntity{Clients: clients},
 		}
-		masterPolicyErr = masterPolicy.CreateOrFail()
+		masterPolicyCreated, err = masterPolicy.CreateIfNotExists()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create master policy: '%#v'", err))
+		}
 	}
-	if masterPolicyErr != nil {
-		// TOOO Creating IAM policy should be idempotent.
-		s.logger.Log("error", fmt.Sprintf("could not create '%s' policy: '%#v'", prefixMaster, masterPolicyErr))
+	if masterPolicyCreated {
+		s.logger.Log("info", fmt.Sprintf("created master policy for cluster '%s'", key.ClusterID(cluster)))
+	} else {
+		s.logger.Log("info", fmt.Sprintf("master policy for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
 	}
 
 	// Create worker IAM policy.
 	var workerPolicy resources.NamedResource
-	var workerPolicyErr error
+	var workerPolicyCreated bool
 	{
+		var err error
 		workerPolicy = &awsresources.Policy{
 			ClusterID:  key.ClusterID(cluster),
 			KMSKeyArn:  kmsKey.Arn(),
@@ -627,11 +633,15 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 			S3Bucket:   bucketName,
 			AWSEntity:  awsresources.AWSEntity{Clients: clients},
 		}
-		workerPolicyErr = workerPolicy.CreateOrFail()
+		workerPolicyCreated, err = workerPolicy.CreateIfNotExists()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create worker policy: '%#v'", err))
+		}
 	}
-	if workerPolicyErr != nil {
-		// TOOO Creating IAM policy should be idempotent.
-		s.logger.Log("error", fmt.Sprintf("could not create '%s' policy: '%#v'", prefixWorker, workerPolicyErr))
+	if workerPolicyCreated {
+		s.logger.Log("info", fmt.Sprintf("created worker policy for cluster '%s'", key.ClusterID(cluster)))
+	} else {
+		s.logger.Log("info", fmt.Sprintf("worker policy for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
 	}
 
 	// Create S3 bucket.

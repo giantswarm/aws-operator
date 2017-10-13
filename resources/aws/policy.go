@@ -2,9 +2,11 @@ package aws
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
+	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/microerror"
 )
 
@@ -141,7 +143,16 @@ func (p *Policy) clusterRoleName() string {
 }
 
 func (p *Policy) CreateIfNotExists() (bool, error) {
-	return false, fmt.Errorf("instance profiles cannot be reused")
+	err := p.CreateOrFail()
+	if err != nil {
+		if strings.Contains(err.Error(), awsclient.RoleDuplicate) {
+			return false, nil
+		}
+
+		return false, microerror.Mask(err)
+	}
+
+	return true, nil
 }
 
 func (p *Policy) createRole() error {

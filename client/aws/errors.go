@@ -5,6 +5,7 @@ import "github.com/giantswarm/microerror"
 const (
 	AlreadyAssociated        = "Resource.AlreadyAssociated"
 	InvalidSubnetConflict    = "InvalidSubnet.Conflict"
+	RoleDuplicate            = "EntityAlreadyExists: Role"
 	KeyPairDuplicate         = "InvalidKeyPair.Duplicate"
 	SecurityGroupDuplicate   = "InvalidGroup.Duplicate"
 	ELBAlreadyExists         = "DuplicateLoadBalancerName"
