@@ -32,6 +32,10 @@ type SecurityGroupRule struct {
 	SecurityGroupID string
 }
 
+const (
+	allPorts = -1
+)
+
 func (s SecurityGroup) findExisting() (*ec2.SecurityGroup, error) {
 	filters, err := s.getGroupFilters()
 	if err != nil {
@@ -105,6 +109,18 @@ func (s SecurityGroup) findGroupWithRule(rule SecurityGroupRule) (*ec2.SecurityG
 					aws.String(rule.Protocol),
 				},
 			},
+		}
+
+		// Needed as filters for all ports rules don't work.
+		if rule.Port != allPorts {
+			portFilter := &ec2.Filter{
+				Name: aws.String(ipPermissionFromPort),
+				Values: []*string{
+					aws.String(strconv.Itoa(rule.Port)),
+				},
+			}
+
+			ruleFilters = append(ruleFilters, portFilter)
 		}
 	}
 

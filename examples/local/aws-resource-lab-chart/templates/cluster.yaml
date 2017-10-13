@@ -49,10 +49,14 @@ spec:
           image: "quay.io/giantswarm/docker-kubectl:f51f93c30d27927d2b33122994c0929b3e6f2432"
       kubelet:
         port: 10250
+        domain: "worker.{{.Values.clusterName}}.{{.Values.commonDomain}}"
       networkSetup:
         docker:
           image: "giantswarm/k8s-setup-network-environment:ba2b57155d859a1fc5d378c2a09a77d7c2c755ed"
-
+      ssh:
+        userList:
+        - name: "{{.Values.sshUser}}"
+          publicKey: "{{.Values.sshPublicKey}}"
     masters:
     - hostname: "master-1"
 

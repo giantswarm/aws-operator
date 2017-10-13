@@ -73,6 +73,74 @@ func Test_ClusterID(t *testing.T) {
 	}
 }
 
+func Test_ClusterVersion(t *testing.T) {
+	expectedVersion := "v_0_1_0"
+
+	cluster := clustertpr.Spec{
+		Version: expectedVersion,
+	}
+
+	customObject := awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			Cluster: cluster,
+		},
+	}
+
+	if ClusterVersion(customObject) != expectedVersion {
+		t.Fatalf("Expected cluster version %s but was %s", expectedVersion, ClusterVersion(customObject))
+	}
+}
+
+func Test_HasClusterVersion(t *testing.T) {
+	tests := []struct {
+		customObject   awstpr.CustomObject
+		expectedResult bool
+	}{
+		{
+			customObject: awstpr.CustomObject{
+				Spec: awstpr.Spec{},
+			},
+			expectedResult: false,
+		},
+		{
+			customObject: awstpr.CustomObject{
+				Spec: awstpr.Spec{
+					Cluster: clustertpr.Spec{
+						Version: "",
+					},
+				},
+			},
+			expectedResult: false,
+		},
+		{
+			customObject: awstpr.CustomObject{
+				Spec: awstpr.Spec{
+					Cluster: clustertpr.Spec{
+						Version: "v_0_1_0",
+					},
+				},
+			},
+			expectedResult: true,
+		},
+		{
+			customObject: awstpr.CustomObject{
+				Spec: awstpr.Spec{
+					Cluster: clustertpr.Spec{
+						Version: "v_0_2_0",
+					},
+				},
+			},
+			expectedResult: false,
+		},
+	}
+
+	for _, tc := range tests {
+		if HasClusterVersion(tc.customObject) != tc.expectedResult {
+			t.Fatalf("Expected has cluster version to be %t but was %t", tc.expectedResult, HasClusterVersion(tc.customObject))
+		}
+	}
+}
+
 func Test_MasterImageID(t *testing.T) {
 	tests := []struct {
 		customObject    awstpr.CustomObject
