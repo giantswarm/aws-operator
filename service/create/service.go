@@ -946,7 +946,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		SubnetID:        publicSubnetID,
 	}
 
-	if newDeployment(cluster) {
+	if key.HasClusterVersion(cluster) {
 		lbInput.Scheme = "internal"
 	}
 
@@ -1536,8 +1536,4 @@ func (s *Service) updateFunc(oldObj, newObj interface{}) {
 	}
 
 	s.logger.Log("info", fmt.Sprintf("scaling workers auto scaling group from %d to %d", oldSize, newSize))
-}
-
-func newDeployment(cluster awstpr.CustomObject) bool {
-	return cluster.Spec.Cluster.Version == ""
 }
