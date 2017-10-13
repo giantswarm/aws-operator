@@ -36,10 +36,15 @@ func (s *Service) encodeKeyAssets(assets map[randomkeytpr.Key][]byte, svc *kms.K
 	if err != nil {
 		return nil, microerror.Maskf(executionFailedError, fmt.Sprintf("could not generate encryption config: '%#v'", err))
 	}
+	s.logger.Log("debug", fmt.Sprintf("encryptionConfig: %v", encryptionConfig))
 
 	rawKeys := make(rawKeyAssets)
 	rawKeys[randomkeytpr.EncryptionKey] = []byte(encryptionConfig)
 
+	for k, v := range rawKeys {
+		s.logger.Log("debug", fmt.Sprintf("rawKeys k:%v -- v:%v", k, string(v)))
+
+	}
 	encKeys, err := rawKeys.encrypt(svc, kmsKeyArn)
 	if err != nil {
 		return nil, microerror.Mask(err)
