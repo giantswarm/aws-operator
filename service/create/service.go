@@ -563,7 +563,10 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	if err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get keys from secrets: '%#v'", err))
 	}
+	for k, v := range keys {
+		s.logger.Log("debug", fmt.Sprintf("k:%v -- v:%v", k, v))
 
+	}
 	// Create KMS key.
 	kmsKey := &awsresources.KMSKey{
 		Name:      key.ClusterID(cluster),
