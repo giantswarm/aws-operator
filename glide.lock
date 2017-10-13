@@ -1,5 +1,5 @@
-hash: 534b6b2d0de88ce27a2b98aa30b732651656330ecee88fa9e14663a8c2860fc6
-updated: 2017-10-12T12:59:41.039025469+02:00
+hash: 4825e5e5dd4daf6c22025b330d50debf71d6e97d94b86452d3922296f39fbfcf
+updated: 2017-10-13T07:56:36.806948837+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -83,7 +83,7 @@ imports:
   - spec/kubernetes/networksetup
   - spec/kubernetes/ssh
 - name: github.com/giantswarm/k8scloudconfig
-  version: 208776af39975d4ddaf9f1a1947984e7e0b0a8dd
+  version: 7d46932eb7e895064a8c2d646123802669a24df9
   subpackages:
   - v_0_1_0
 - name: github.com/giantswarm/microendpoint
@@ -120,7 +120,7 @@ imports:
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: 49db2829de2379b45e399ce52d73d584d3403742
+  version: 53da8cd36ce876d8d3dfe9c0bada1b11d9758926
   subpackages:
   - client/k8s
   - tpr
@@ -238,7 +238,7 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 40f18800b20df8f74ad2b02aa4e56748a3d17239
+  version: 7b2c5ac9fc04fc5efafb60700713d4fa609b777b
 - name: github.com/spf13/jwalterweatherman
   version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
 - name: github.com/spf13/pflag
