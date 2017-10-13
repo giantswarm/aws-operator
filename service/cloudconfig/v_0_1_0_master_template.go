@@ -5,9 +5,10 @@ import (
 	"github.com/giantswarm/certificatetpr"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_0_1_0"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/randomkeytpr"
 )
 
-func v_0_1_0MasterTemplate(customObject awstpr.CustomObject, certs certificatetpr.CompactTLSAssets) (string, error) {
+func v_0_1_0MasterTemplate(customObject awstpr.CustomObject, certs certificatetpr.CompactTLSAssets, keys randomkeytpr.CompactRandomKeyAssets) (string, error) {
 	var err error
 
 	var params k8scloudconfig.Params
@@ -16,6 +17,7 @@ func v_0_1_0MasterTemplate(customObject awstpr.CustomObject, certs certificatetp
 		params.Extension = &v_0_1_0MasterExtension{
 			certs:        certs,
 			customObject: customObject,
+			keys:         keys,
 		}
 	}
 
@@ -38,6 +40,7 @@ func v_0_1_0MasterTemplate(customObject awstpr.CustomObject, certs certificatetp
 type v_0_1_0MasterExtension struct {
 	certs        certificatetpr.CompactTLSAssets
 	customObject awstpr.CustomObject
+	keys         randomkeytpr.CompactRandomKeyAssets
 }
 
 func (e *v_0_1_0MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
@@ -161,6 +164,13 @@ func (e *v_0_1_0MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Owner:        FileOwner,
 			Permissions:  FilePermission,
 		},
+		{
+			AssetContent: e.keys.APIServerEncryptionKey,
+			Path:         "/etc/kubernetes/encryption/k8s-encryption-config.yaml.enc",
+			Owner:        FileOwner,
+			Encoding:     k8scloudconfig.GzipBase64,
+			Permissions:  0644,
+		},
 	}
 
 	var newFiles []k8scloudconfig.FileAsset
@@ -234,6 +244,5 @@ func (e *v_0_1_0MasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSec
 			Content: instanceStorageClassTemplate,
 		},
 	}
-
 	return newSections
 }

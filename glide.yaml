@@ -23,3 +23,7 @@ import:
   repo: git://github.com/stretchr/testify.git
   subpackages:
   - assert
+- package: github.com/giantswarm/certificatetpr
+  version: master
+- package: github.com/giantswarm/randomkeytpr
+  version: master

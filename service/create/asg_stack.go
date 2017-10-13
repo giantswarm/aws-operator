@@ -9,6 +9,7 @@ import (
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/certificatetpr"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/randomkeytpr"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/resources"
@@ -35,6 +36,7 @@ type asgStackInput struct {
 	publicIP               bool
 	subnetID               string
 	tlsAssets              *certificatetpr.CompactTLSAssets
+	clusterKeys            *randomkeytpr.CompactRandomKeyAssets
 	vpcID                  string
 	workersSecurityGroupID string
 }
@@ -148,7 +150,7 @@ func (s *Service) createASGStack(input asgStackInput) (bool, error) {
 
 		switch input.asgType {
 		case prefixMaster:
-			template, err = s.cloudConfig.NewMasterTemplate(input.cluster, *input.tlsAssets)
+			template, err = s.cloudConfig.NewMasterTemplate(input.cluster, *input.tlsAssets, *input.clusterKeys)
 		case prefixWorker:
 			template, err = s.cloudConfig.NewWorkerTemplate(input.cluster, *input.tlsAssets)
 		default:

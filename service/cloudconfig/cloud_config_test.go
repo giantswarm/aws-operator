@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/giantswarm/randomkeytpr"
+
 	"github.com/giantswarm/awstpr"
 	awstprspec "github.com/giantswarm/awstpr/spec"
 	"github.com/giantswarm/certificatetpr"
@@ -20,6 +22,7 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 	testCases := []struct {
 		CustomObject awstpr.CustomObject
 		Certs        certificatetpr.CompactTLSAssets
+		ClusterKeys  randomkeytpr.CompactRandomKeyAssets
 	}{
 		{
 			CustomObject: awstpr.CustomObject{
@@ -45,7 +48,7 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
 
-		template, err := ccService.NewMasterTemplate(tc.CustomObject, tc.Certs)
+		template, err := ccService.NewMasterTemplate(tc.CustomObject, tc.Certs, tc.ClusterKeys)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}

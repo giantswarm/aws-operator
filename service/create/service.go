@@ -16,6 +16,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/tpr"
+	"github.com/giantswarm/randomkeytpr"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
@@ -53,6 +54,7 @@ type Config struct {
 	CertWatcher *certificatetpr.Service
 	CloudConfig *cloudconfig.CloudConfig
 	K8sClient   kubernetes.Interface
+	KeyWatcher  *randomkeytpr.Service
 	Logger      micrologger.Logger
 
 	// Settings.
@@ -69,6 +71,7 @@ func DefaultConfig() Config {
 		CertWatcher: nil,
 		CloudConfig: nil,
 		K8sClient:   nil,
+		KeyWatcher:  nil,
 		Logger:      nil,
 
 		// Settings.
@@ -89,6 +92,9 @@ func New(config Config) (*Service, error) {
 	}
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.K8sClient must not be empty")
+	}
+	if config.KeyWatcher == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.KeyWatcher must not be empty")
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
@@ -130,6 +136,7 @@ func New(config Config) (*Service, error) {
 		certWatcher: config.CertWatcher,
 		cloudConfig: config.CloudConfig,
 		k8sClient:   config.K8sClient,
+		keyWatcher:  config.KeyWatcher,
 		logger:      config.Logger,
 
 		// Internals
@@ -151,6 +158,7 @@ type Service struct {
 	certWatcher *certificatetpr.Service
 	cloudConfig *cloudconfig.CloudConfig
 	k8sClient   kubernetes.Interface
+	keyWatcher  *randomkeytpr.Service
 	logger      micrologger.Logger
 
 	// Internals.
@@ -217,6 +225,7 @@ type runMachinesInput struct {
 	clients             awsutil.Clients
 	cluster             awstpr.CustomObject
 	tlsAssets           *certificatetpr.CompactTLSAssets
+	clusterKeys         *randomkeytpr.CompactRandomKeyAssets
 	bucket              resources.Resource
 	securityGroup       resources.ResourceWithID
 	subnet              *awsresources.Subnet
@@ -264,6 +273,7 @@ func (s *Service) runMachines(input runMachinesInput) (bool, []string, error) {
 			machine:             machines[i],
 			awsNode:             awsMachines[i],
 			tlsAssets:           input.tlsAssets,
+			clusterKeys:         input.clusterKeys,
 			bucket:              input.bucket,
 			securityGroup:       input.securityGroup,
 			subnet:              input.subnet,
@@ -323,6 +333,7 @@ type runMachineInput struct {
 	machine             spec.Node
 	awsNode             awsinfo.Node
 	tlsAssets           *certificatetpr.CompactTLSAssets
+	clusterKeys         *randomkeytpr.CompactRandomKeyAssets
 	bucket              resources.Resource
 	securityGroup       resources.ResourceWithID
 	subnet              *awsresources.Subnet
@@ -339,7 +350,7 @@ func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
 	{
 		switch input.prefix {
 		case prefixMaster:
-			template, err = s.cloudConfig.NewMasterTemplate(input.cluster, *input.tlsAssets)
+			template, err = s.cloudConfig.NewMasterTemplate(input.cluster, *input.tlsAssets, *input.clusterKeys)
 		case prefixWorker:
 			template, err = s.cloudConfig.NewWorkerTemplate(input.cluster, *input.tlsAssets)
 		default:
@@ -549,6 +560,13 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get certificates from secrets: '%#v'", err))
 	}
 
+	// Create Encryption key
+	s.logger.Log("info", fmt.Sprintf("waiting for k8s keys..."))
+	keys, err := s.keyWatcher.SearchKeys(clusterID)
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get keys from secrets: '%#v'", err))
+	}
+
 	// Create KMS key.
 	kmsKey := &awsresources.KMSKey{
 		Name:      key.ClusterID(cluster),
@@ -570,6 +588,12 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	tlsAssets, err := s.encodeTLSAssets(certs, clients.KMS, kmsKey.Arn())
 	if err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not encode TLS assets: '%#v'", err))
+	}
+
+	// Encode Key assets.
+	clusterKeys, err := s.encodeKeyAssets(keys, clients.KMS, kmsKey.Arn())
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not encode Keys assets: '%#v'", err))
 	}
 
 	bucketName := s.bucketName(cluster)
@@ -891,6 +915,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		clients:             clients,
 		cluster:             cluster,
 		tlsAssets:           tlsAssets,
+		clusterKeys:         clusterKeys,
 		clusterName:         key.ClusterID(cluster),
 		bucket:              bucket,
 		securityGroup:       mastersSecurityGroup,
@@ -1003,6 +1028,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	lcInput := launchConfigurationInput{
 		clients:             clients,
 		cluster:             cluster,
+		clusterKeys:         clusterKeys,
 		tlsAssets:           tlsAssets,
 		bucket:              bucket,
 		securityGroup:       workersSecurityGroup,

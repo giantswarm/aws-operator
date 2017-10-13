@@ -7,6 +7,7 @@ import (
 	cloudconfig "github.com/giantswarm/k8scloudconfig"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/randomkeytpr"
 )
 
 const (
@@ -52,7 +53,7 @@ func New(config Config) (*CloudConfig, error) {
 
 // NewMasterTemplate generates a new worker cloud config template and returns it
 // as a base64 encoded string.
-func (c *CloudConfig) NewMasterTemplate(customObject awstpr.CustomObject, certs certificatetpr.CompactTLSAssets) (string, error) {
+func (c *CloudConfig) NewMasterTemplate(customObject awstpr.CustomObject, certs certificatetpr.CompactTLSAssets, keys randomkeytpr.CompactRandomKeyAssets) (string, error) {
 	var err error
 
 	// TODO remove defaulting as soon as custom objects are configured.
@@ -64,7 +65,7 @@ func (c *CloudConfig) NewMasterTemplate(customObject awstpr.CustomObject, certs 
 
 	switch key.ClusterVersion(customObject) {
 	case string(cloudconfig.V_0_1_0):
-		template, err = v_0_1_0MasterTemplate(customObject, certs)
+		template, err = v_0_1_0MasterTemplate(customObject, certs, keys)
 		if err != nil {
 			return "", microerror.Mask(err)
 		}
