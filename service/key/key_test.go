@@ -73,7 +73,7 @@ func Test_ClusterID(t *testing.T) {
 	}
 }
 func Test_ClusterVersion(t *testing.T) {
-	expectedVersion := "0.1,0"
+	expectedVersion := "v_0_1_0"
 
 	cluster := clustertpr.Spec{
 		Version: expectedVersion,
