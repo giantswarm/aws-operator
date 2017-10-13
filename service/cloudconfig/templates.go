@@ -5,9 +5,7 @@ const (
 
 rkt run \
   --volume=ssl,kind=host,source=/etc/kubernetes/ssl,readOnly=false \
-  --volume=keys,kind=host,source=/etc/kubernetes/encryption,readOnly=false \
   --mount=volume=ssl,target=/etc/kubernetes/ssl \
-  --mount=volume=keys,target=/etc/kubernetes/encryption \
   --uuid-file-save=/var/run/coreos/decrypt-tls-assets.uuid \
   --volume=dns,kind=host,source=/etc/resolv.conf,readOnly=true --mount volume=dns,target=/etc/resolv.conf \
   --net=host \
@@ -26,9 +24,36 @@ rkt run \
         --query Plaintext \
       | base64 -d > $f
       mv -f $f ${encKey%.enc}
-    done;
-    
-    echo decrypting keys assets
+    done;'
+
+rkt rm --uuid-file=/var/run/coreos/decrypt-tls-assets.uuid || :
+
+chown -R etcd:etcd /etc/kubernetes/ssl/etcd`
+
+	decryptTLSAssetsServiceTemplate = `
+[Unit]
+Description=Decrypt TLS certificates
+
+[Service]
+Type=oneshot
+ExecStart=/opt/bin/decrypt-tls-assets
+
+[Install]
+WantedBy=multi-user.target
+`
+
+	decryptKeysAssetsScriptTemplate = `#!/bin/bash -e
+
+rkt run \
+  --volume=keys,kind=host,source=/etc/kubernetes/encryption,readOnly=false \
+  --mount=volume=keys,target=/etc/kubernetes/encryption \
+  --uuid-file-save=/var/run/coreos/decrypt-keys-assets.uuid \
+  --volume=dns,kind=host,source=/etc/resolv.conf,readOnly=true --mount volume=dns,target=/etc/resolv.conf \
+  --net=host \
+  --trust-keys-from-https \
+  quay.io/coreos/awscli:025a357f05242fdad6a81e8a6b520098aa65a600 --exec=/bin/bash -- \
+    -ec \
+    'echo decrypting keys assets
     shopt -s nullglob
     for encKey in $(find /etc/kubernetes/encryption -name "*.enc"); do
       echo decrypting $encKey
@@ -43,17 +68,16 @@ rkt run \
     done;
     echo done.'
 
-rkt rm --uuid-file=/var/run/coreos/decrypt-tls-assets.uuid || :
+rkt rm --uuid-file=/var/run/coreos/decrypt-keys-assets.uuid || :
+`
 
-chown -R etcd:etcd /etc/kubernetes/ssl/etcd`
-
-	decryptTLSAssetsServiceTemplate = `
+	decryptKeysServiceTemplate = `
 [Unit]
-Description=Decrypt TLS certificates
+Description=Decrypt Secret Keys
 
 [Service]
 Type=oneshot
-ExecStart=/opt/bin/decrypt-tls-assets
+ExecStart=/opt/bin/decrypt-keys-assets
 
 [Install]
 WantedBy=multi-user.target
