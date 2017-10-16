@@ -18,6 +18,7 @@ type ELB struct {
 	AZ            string
 	SecurityGroup string
 	SubnetID      string
+	Scheme        string
 	Tags          []string
 	PortsToOpen   PortPairs
 	Client        *elb.ELB
@@ -96,6 +97,7 @@ func (lb *ELB) CreateOrFail() error {
 		Subnets: []*string{
 			aws.String(lb.SubnetID),
 		},
+		Scheme: aws.String(lb.Scheme),
 	}); err != nil {
 		return microerror.Mask(err)
 	}

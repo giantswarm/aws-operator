@@ -956,6 +956,10 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		SubnetID:        publicSubnetID,
 	}
 
+	if key.HasClusterVersion(cluster) {
+		lbInput.Scheme = "internal"
+	}
+
 	etcdLB, err := s.createLoadBalancer(lbInput)
 	if err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create etcd load balancer: '%#v'", err))
