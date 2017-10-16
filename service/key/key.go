@@ -56,6 +56,10 @@ func SecurityGroupName(customObject awstpr.CustomObject, groupName string) strin
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), groupName)
 }
 
+func SubnetName(customObject awstpr.CustomObject, suffix string) string {
+	return fmt.Sprintf("%s-%s", ClusterID(customObject), suffix)
+}
+
 func WorkerCount(customObject awstpr.CustomObject) int {
 	return len(customObject.Spec.AWS.Workers)
 }

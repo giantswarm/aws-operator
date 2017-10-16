@@ -817,7 +817,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 
 	// Create public subnet.
 	subnetInput := SubnetInput{
-		Name:       subnetName(cluster, suffixPublic),
+		Name:       key.SubnetName(cluster, suffixPublic),
 		CidrBlock:  cluster.Spec.AWS.VPC.PublicSubnetCIDR,
 		Clients:    clients,
 		Cluster:    cluster,
@@ -839,7 +839,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	if key.HasClusterVersion(cluster) {
 		// Create private subnet.
 		subnetInput := SubnetInput{
-			Name:       subnetName(cluster, suffixPrivate),
+			Name:       key.SubnetName(cluster, suffixPrivate),
 			CidrBlock:  cluster.Spec.AWS.VPC.PrivateSubnetCIDR,
 			Clients:    clients,
 			Cluster:    cluster,
@@ -1374,7 +1374,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 
 	// Delete public subnet.
 	subnetInput := SubnetInput{
-		Name:    subnetName(cluster, suffixPublic),
+		Name:    key.SubnetName(cluster, suffixPublic),
 		Clients: clients,
 	}
 	if err := s.deleteSubnet(subnetInput); err != nil {
@@ -1386,7 +1386,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	// Delete private subnet for new clusters. Legacy clusters only have public subnets.
 	if key.HasClusterVersion(cluster) {
 		subnetInput = SubnetInput{
-			Name:    subnetName(cluster, suffixPrivate),
+			Name:    key.SubnetName(cluster, suffixPrivate),
 			Clients: clients,
 		}
 		if err := s.deleteSubnet(subnetInput); err != nil {

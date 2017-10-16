@@ -240,6 +240,28 @@ func Test_SecurityGroupName(t *testing.T) {
 	}
 }
 
+func Test_SubnetName(t *testing.T) {
+	expectedName := "test-cluster-private"
+	suffix := "private"
+
+	cluster := clustertpr.Spec{
+		Cluster: spec.Cluster{
+			ID: "test-cluster",
+		},
+	}
+
+	customObject := awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			Cluster: cluster,
+		},
+	}
+
+	if SubnetName(customObject, suffix) != expectedName {
+		t.Fatalf("Expected subner name %s but was %s", expectedName, SubnetName(customObject, suffix))
+	}
+
+}
+
 func Test_WorkerCount(t *testing.T) {
 	expectedCount := 2
 
