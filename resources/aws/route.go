@@ -1,14 +1,15 @@
 package aws
 
 import (
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 )
 
 type Route struct {
-	DestinationCidrBlock string
-	VpcID                string
-	RouteTable           RouteTable
+	DestinationCidrBlock   string
+	VpcPeeringConnectionID string
+	RouteTable             RouteTable
 	AWSEntity
 }
 
@@ -20,7 +21,7 @@ func (r Route) findExisting() (*ec2.Route, error) {
 
 	for _, route := range awsRouteTable.Routes {
 		if route.DestinationCidrBlock != nil && route.VpcPeeringConnectionId != nil &&
-			*route.VpcPeeringConnectionId == r.VpcID && *route.DestinationCidrBlock == r.DestinationCidrBlock {
+			*route.VpcPeeringConnectionId == r.VpcPeeringConnectionID && *route.DestinationCidrBlock == r.DestinationCidrBlock {
 			return route, nil
 		}
 	}
@@ -60,10 +61,11 @@ func (r *Route) CreateOrFail() error {
 	if err != nil {
 		return microerror.Mask(err)
 	}
+
 	if _, err := r.Clients.EC2.CreateRoute(&ec2.CreateRouteInput{
-		RouteTableId:           &routeTableID,
-		DestinationCidrBlock:   &r.DestinationCidrBlock,
-		VpcPeeringConnectionId: &r.VpcID,
+		RouteTableId:           aws.String(routeTableID),
+		DestinationCidrBlock:   aws.String(r.DestinationCidrBlock),
+		VpcPeeringConnectionId: aws.String(r.VpcPeeringConnectionID),
 	}); err != nil {
 		return microerror.Mask(err)
 	}

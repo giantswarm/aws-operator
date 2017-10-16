@@ -859,10 +859,10 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	}
 
 	publicRoute := &awsresources.Route{
-		RouteTable:           *routeTable,
-		DestinationCidrBlock: *conn.AccepterVpcInfo.CidrBlock,
-		VpcID:                *conn.VpcPeeringConnectionId,
-		AWSEntity:            awsresources.AWSEntity{Clients: clients},
+		RouteTable:             *publicRouteTable,
+		DestinationCidrBlock:   *conn.AccepterVpcInfo.CidrBlock,
+		VpcPeeringConnectionID: *conn.VpcPeeringConnectionId,
+		AWSEntity:              awsresources.AWSEntity{Clients: clients},
 	}
 
 	publicRouteCreated, err := publicRoute.CreateIfNotExists()
@@ -883,10 +883,10 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		}
 
 		privateRoute := &awsresources.Route{
-			RouteTable:           *privateRouteTable,
-			DestinationCidrBlock: *conn.RequesterVpcInfo.CidrBlock,
-			VpcID:                *conn.VpcPeeringConnectionId,
-			AWSEntity:            awsresources.AWSEntity{Clients: hostClients},
+			RouteTable:             *privateRouteTable,
+			DestinationCidrBlock:   *conn.RequesterVpcInfo.CidrBlock,
+			VpcPeeringConnectionID: *conn.VpcPeeringConnectionId,
+			AWSEntity:              awsresources.AWSEntity{Clients: hostClients},
 		}
 
 		privateRouteCreated, err := privateRoute.CreateIfNotExists()
@@ -1472,10 +1472,10 @@ func (s *Service) deleteFunc(obj interface{}) {
 		}
 
 		privateRoute := &awsresources.Route{
-			RouteTable:           *privateRouteTable,
-			DestinationCidrBlock: *conn.RequesterVpcInfo.CidrBlock,
-			VpcID:                *conn.VpcPeeringConnectionId,
-			AWSEntity:            awsresources.AWSEntity{Clients: hostClients},
+			RouteTable:             *privateRouteTable,
+			DestinationCidrBlock:   *conn.RequesterVpcInfo.CidrBlock,
+			VpcPeeringConnectionID: *conn.VpcPeeringConnectionId,
+			AWSEntity:              awsresources.AWSEntity{Clients: hostClients},
 		}
 
 		if err := privateRoute.Delete(); err != nil {
