@@ -600,8 +600,9 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 
 	// Create master IAM policy.
 	var masterPolicy resources.NamedResource
-	var masterPolicyErr error
+	var masterPolicyCreated bool
 	{
+		var err error
 		masterPolicy = &awsresources.Policy{
 			ClusterID:  key.ClusterID(cluster),
 			KMSKeyArn:  kmsKey.Arn(),
@@ -609,17 +610,22 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 			S3Bucket:   bucketName,
 			AWSEntity:  awsresources.AWSEntity{Clients: clients},
 		}
-		masterPolicyErr = masterPolicy.CreateOrFail()
+		masterPolicyCreated, err = masterPolicy.CreateIfNotExists()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create master policy: '%#v'", err))
+		}
 	}
-	if masterPolicyErr != nil {
-		// TOOO Creating IAM policy should be idempotent.
-		s.logger.Log("error", fmt.Sprintf("could not create '%s' policy: '%#v'", prefixMaster, masterPolicyErr))
+	if masterPolicyCreated {
+		s.logger.Log("info", fmt.Sprintf("created master policy for cluster '%s'", key.ClusterID(cluster)))
+	} else {
+		s.logger.Log("info", fmt.Sprintf("master policy for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
 	}
 
 	// Create worker IAM policy.
 	var workerPolicy resources.NamedResource
-	var workerPolicyErr error
+	var workerPolicyCreated bool
 	{
+		var err error
 		workerPolicy = &awsresources.Policy{
 			ClusterID:  key.ClusterID(cluster),
 			KMSKeyArn:  kmsKey.Arn(),
@@ -627,11 +633,15 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 			S3Bucket:   bucketName,
 			AWSEntity:  awsresources.AWSEntity{Clients: clients},
 		}
-		workerPolicyErr = workerPolicy.CreateOrFail()
+		workerPolicyCreated, err = workerPolicy.CreateIfNotExists()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create worker policy: '%#v'", err))
+		}
 	}
-	if workerPolicyErr != nil {
-		// TOOO Creating IAM policy should be idempotent.
-		s.logger.Log("error", fmt.Sprintf("could not create '%s' policy: '%#v'", prefixWorker, workerPolicyErr))
+	if workerPolicyCreated {
+		s.logger.Log("info", fmt.Sprintf("created worker policy for cluster '%s'", key.ClusterID(cluster)))
+	} else {
+		s.logger.Log("info", fmt.Sprintf("worker policy for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
 	}
 
 	// Create S3 bucket.
@@ -955,11 +965,11 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create etcd load balancer: '%#v'", err))
 	}
 
-	// If the policy couldn't be created and some instances didn't exist before, that means that the cluster
-	// is inconsistent and most problably its deployment broke in the middle during the previous run of
-	// aws-operator.
-	if anyMastersCreated && (kmsKeyErr != nil || masterPolicyErr != nil || workerPolicyErr != nil) {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("cluster '%s' is inconsistent, KMS keys and policies were not created, but EC2 instances were missing, please consider deleting this cluster", key.ClusterID(cluster)))
+	// Masters were created but the master IAM policy existed from a previous
+	// execution. Its likely that previous execution failed. IAM policies can't
+	// be reused for EC2 instances.
+	if anyMastersCreated && !masterPolicyCreated {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("cluster '%s' cannot be processed. As IAM policy for master nodes cannot be reused. Please delete this cluster.", key.ClusterID(cluster)))
 	}
 
 	// Create Ingress load balancer.

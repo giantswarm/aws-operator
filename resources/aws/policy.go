@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
+	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/microerror"
 )
 
@@ -141,7 +142,14 @@ func (p *Policy) clusterRoleName() string {
 }
 
 func (p *Policy) CreateIfNotExists() (bool, error) {
-	return false, fmt.Errorf("instance profiles cannot be reused")
+	err := p.CreateOrFail()
+	if awsutil.IsIAMRoleDuplicateError(err) {
+		return false, nil
+	} else if err != nil {
+		return false, microerror.Mask(err)
+	}
+
+	return true, nil
 }
 
 func (p *Policy) createRole() error {
