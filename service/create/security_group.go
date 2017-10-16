@@ -67,9 +67,8 @@ func (s *Service) deleteSecurityGroup(input securityGroupInput) error {
 	}
 	if err := securityGroup.Delete(); err != nil {
 		return microerror.Mask(err)
-	} else {
-		s.logger.Log("info", fmt.Sprintf("deleted security group '%s'", input.GroupName))
 	}
+	s.logger.Log("info", fmt.Sprintf("deleted security group '%s'", input.GroupName))
 
 	return nil
 }
@@ -79,11 +78,6 @@ func (ri rulesInput) masterRules() []awsresources.SecurityGroupRule {
 	return []awsresources.SecurityGroupRule{
 		{
 			Port:       ri.Cluster.Spec.Cluster.Kubernetes.API.SecurePort,
-			Protocol:   tcpProtocol,
-			SourceCIDR: defaultCIDR,
-		},
-		{
-			Port:       ri.Cluster.Spec.Cluster.Etcd.Port,
 			Protocol:   tcpProtocol,
 			SourceCIDR: defaultCIDR,
 		},
