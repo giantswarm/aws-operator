@@ -143,13 +143,13 @@ func (p *Policy) clusterRoleName() string {
 
 func (p *Policy) CreateIfNotExists() (bool, error) {
 	err := p.CreateOrFail()
+	if err == nil {
+		return true, nil
+	}
 	if awsutil.IsIAMRoleDuplicateError(err) {
 		return false, nil
-	} else if err != nil {
-		return false, microerror.Mask(err)
 	}
-
-	return true, nil
+	return false, microerror.Mask(err)
 }
 
 func (p *Policy) createRole() error {
