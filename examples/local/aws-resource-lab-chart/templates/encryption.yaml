@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    clusterID: {{.Values.clusterName}}
+    clusterKey: encryption
+  name: {{.Values.clusterName}}-encryption
+type: Opaque
+data:
+  encryption: {{.Values.encryptionKey}}
