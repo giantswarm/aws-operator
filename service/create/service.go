@@ -1345,8 +1345,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 
 	if key.HasClusterVersion(cluster) {
 		// Delete NAT gateway.
-		var natGateway resources.ResourceWithID
-		natGateway = &awsresources.NatGateway{
+		natGateway := &awsresources.NatGateway{
 			Name: key.ClusterID(cluster),
 			// Dependencies.
 			Logger:    s.logger,
@@ -1360,8 +1359,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	}
 
 	// Delete internet gateway.
-	var internetGateway resources.ResourceWithID
-	internetGateway = &awsresources.InternetGateway{
+	internetGateway := &awsresources.InternetGateway{
 		Name:  key.ClusterID(cluster),
 		VpcID: vpcID,
 		// Dependencies.
