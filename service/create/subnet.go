@@ -3,11 +3,12 @@ package create
 import (
 	"fmt"
 
+	"github.com/giantswarm/awstpr"
+	"github.com/giantswarm/microerror"
+
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
 	"github.com/giantswarm/aws-operator/service/key"
-	"github.com/giantswarm/awstpr"
-	"github.com/giantswarm/microerror"
 )
 
 type SubnetInput struct {
