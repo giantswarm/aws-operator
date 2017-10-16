@@ -9,6 +9,7 @@ import (
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/resources"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
+	"github.com/giantswarm/aws-operator/service/key"
 )
 
 type securityGroupInput struct {
@@ -67,23 +68,17 @@ func (s *Service) deleteSecurityGroup(input securityGroupInput) error {
 	}
 	if err := securityGroup.Delete(); err != nil {
 		return microerror.Mask(err)
-	} else {
-		s.logger.Log("info", fmt.Sprintf("deleted security group '%s'", input.GroupName))
 	}
+	s.logger.Log("info", fmt.Sprintf("deleted security group '%s'", input.GroupName))
 
 	return nil
 }
 
 // masterRules returns the rules for the masters security group.
 func (ri rulesInput) masterRules() []awsresources.SecurityGroupRule {
-	return []awsresources.SecurityGroupRule{
+	rules := []awsresources.SecurityGroupRule{
 		{
 			Port:       ri.Cluster.Spec.Cluster.Kubernetes.API.SecurePort,
-			Protocol:   tcpProtocol,
-			SourceCIDR: defaultCIDR,
-		},
-		{
-			Port:       ri.Cluster.Spec.Cluster.Etcd.Port,
 			Protocol:   tcpProtocol,
 			SourceCIDR: defaultCIDR,
 		},
@@ -104,6 +99,15 @@ func (ri rulesInput) masterRules() []awsresources.SecurityGroupRule {
 			SecurityGroupID: ri.WorkersSecurityGroupID,
 		},
 	}
+	// we need to add an etcd rule for old clusters
+	if !key.HasClusterVersion(ri.Cluster) {
+		rules = append(rules, awsresources.SecurityGroupRule{
+			Port:       ri.Cluster.Spec.Cluster.Etcd.Port,
+			Protocol:   tcpProtocol,
+			SourceCIDR: defaultCIDR,
+		})
+	}
+	return rules
 }
 
 // workerRules returns the rules for the workers security group.
