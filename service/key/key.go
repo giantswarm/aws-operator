@@ -52,6 +52,10 @@ func MasterInstanceType(customObject awstpr.CustomObject) string {
 	return instanceType
 }
 
+func RouteTableName(customObject awstpr.CustomObject, suffix string) string {
+	return fmt.Sprintf("%s-%s", ClusterID(customObject), suffix)
+}
+
 func SecurityGroupName(customObject awstpr.CustomObject, groupName string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), groupName)
 }
