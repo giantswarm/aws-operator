@@ -710,23 +710,23 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not find vpc peering connection: '%#v'", err))
 	}
 
-	// Create gateway.
-	var gateway resources.ResourceWithID
-	gateway = &awsresources.Gateway{
+	// Create internet gateway.
+	var internetGateway resources.ResourceWithID
+	internetGateway = &awsresources.InternetGateway{
 		Name:  key.ClusterID(cluster),
 		VpcID: vpcID,
 		// Dependencies.
 		Logger:    s.logger,
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
 	}
-	gatewayCreated, err := gateway.CreateIfNotExists()
+	internetGatewayCreated, err := internetGateway.CreateIfNotExists()
 	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create gateway: '%#v'", err))
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create internet gateway: '%#v'", err))
 	}
-	if gatewayCreated {
-		s.logger.Log("info", fmt.Sprintf("created gateway for cluster '%s'", key.ClusterID(cluster)))
+	if internetGatewayCreated {
+		s.logger.Log("info", fmt.Sprintf("created internet gateway for cluster '%s'", key.ClusterID(cluster)))
 	} else {
-		s.logger.Log("info", fmt.Sprintf("gateway for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
+		s.logger.Log("info", fmt.Sprintf("internet gateway for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
 	}
 
 	// Create masters security group.
@@ -815,32 +815,46 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not make route table public: '%#v'", err))
 	}
 
-	// Create public subnet for the masters.
-	publicSubnet := &awsresources.Subnet{
-		AvailabilityZone: key.AvailabilityZone(cluster),
-		CidrBlock:        cluster.Spec.AWS.VPC.PublicSubnetCIDR,
-		Name:             subnetName(cluster, suffixPublic),
-		VpcID:            vpcID,
-		// Dependencies.
-		Logger:    s.logger,
-		AWSEntity: awsresources.AWSEntity{Clients: clients},
+	// Create public subnet.
+	subnetInput := SubnetInput{
+		Name:       subnetName(cluster, suffixPublic),
+		CidrBlock:  cluster.Spec.AWS.VPC.PublicSubnetCIDR,
+		Clients:    clients,
+		Cluster:    cluster,
+		MakePublic: true,
+		VpcID:      vpcID,
 	}
-	publicSubnetCreated, err := publicSubnet.CreateIfNotExists()
+	publicSubnet, err := s.createSubnet(subnetInput)
 	if err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create public subnet: '%#v'", err))
 	}
-	if publicSubnetCreated {
-		s.logger.Log("info", fmt.Sprintf("created public subnet for cluster '%s'", key.ClusterID(cluster)))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("public subnet for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
-	}
+
 	publicSubnetID, err := publicSubnet.GetID()
 	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get subnet ID: '%#v'", err))
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get public subnet ID: '%#v'", err))
 	}
 
-	if err := publicSubnet.MakePublic(routeTable); err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not make subnet public, '%#v'", err))
+	var privateSubnet *awsresources.Subnet
+
+	if key.HasClusterVersion(cluster) {
+		// Create private subnet.
+		subnetInput := SubnetInput{
+			Name:       subnetName(cluster, suffixPrivate),
+			CidrBlock:  cluster.Spec.AWS.VPC.PrivateSubnetCIDR,
+			Clients:    clients,
+			Cluster:    cluster,
+			MakePublic: false,
+			VpcID:      vpcID,
+		}
+		privateSubnet, err = s.createSubnet(subnetInput)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create public subnet: '%#v'", err))
+		}
+
+		_, err := privateSubnet.GetID()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get private subnet ID: '%#v'", err))
+		}
 	}
 
 	publicRoute := &awsresources.Route{
@@ -884,6 +898,27 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 			s.logger.Log("info", fmt.Sprintf("host vpc guest for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
 		}
 
+	}
+
+	if key.HasClusterVersion(cluster) {
+		// Create NAT gateway.
+		var natGateway resources.ResourceWithID
+		natGateway = &awsresources.NatGateway{
+			Name:   key.ClusterID(cluster),
+			Subnet: publicSubnet,
+			// Dependencies.
+			Logger:    s.logger,
+			AWSEntity: awsresources.AWSEntity{Clients: clients},
+		}
+		natGatewayCreated, err := natGateway.CreateIfNotExists()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create nat gateway: '%#v'", err))
+		}
+		if natGatewayCreated {
+			s.logger.Log("info", fmt.Sprintf("created nat gateway for cluster '%s'", key.ClusterID(cluster)))
+		} else {
+			s.logger.Log("info", fmt.Sprintf("nat gateway for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
+		}
 	}
 
 	mastersInput := runMachinesInput{
@@ -1308,32 +1343,57 @@ func (s *Service) deleteFunc(obj interface{}) {
 		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	}
 
-	// Delete gateway.
-	var gateway resources.ResourceWithID
-	gateway = &awsresources.Gateway{
+	if key.HasClusterVersion(cluster) {
+		// Delete NAT gateway.
+		natGateway := &awsresources.NatGateway{
+			Name: key.ClusterID(cluster),
+			// Dependencies.
+			Logger:    s.logger,
+			AWSEntity: awsresources.AWSEntity{Clients: clients},
+		}
+		if err := natGateway.Delete(); err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not delete nat gateway: '%#v'", err))
+		} else {
+			s.logger.Log("info", "deleted nat gateway")
+		}
+	}
+
+	// Delete internet gateway.
+	internetGateway := &awsresources.InternetGateway{
 		Name:  key.ClusterID(cluster),
 		VpcID: vpcID,
 		// Dependencies.
 		Logger:    s.logger,
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
 	}
-	if err := gateway.Delete(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete gateway: '%#v'", err))
+	if err := internetGateway.Delete(); err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not delete internet gateway: '%#v'", err))
 	} else {
-		s.logger.Log("info", "deleted gateway")
+		s.logger.Log("info", "deleted internet gateway")
 	}
 
 	// Delete public subnet.
-	publicSubnet := &awsresources.Subnet{
-		Name: subnetName(cluster, suffixPublic),
-		// Dependencies.
-		Logger:    s.logger,
-		AWSEntity: awsresources.AWSEntity{Clients: clients},
+	subnetInput := SubnetInput{
+		Name:    subnetName(cluster, suffixPublic),
+		Clients: clients,
 	}
-	if err := publicSubnet.Delete(); err != nil {
+	if err := s.deleteSubnet(subnetInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete public subnet: '%#v'", err))
 	} else {
 		s.logger.Log("info", "deleted public subnet")
+	}
+
+	// Delete private subnet for new clusters. Legacy clusters only have public subnets.
+	if key.HasClusterVersion(cluster) {
+		subnetInput = SubnetInput{
+			Name:    subnetName(cluster, suffixPrivate),
+			Clients: clients,
+		}
+		if err := s.deleteSubnet(subnetInput); err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not delete private subnet: '%#v'", err))
+		} else {
+			s.logger.Log("info", "deleted private subnet")
+		}
 	}
 
 	// Before the security groups can be deleted any rules referencing other

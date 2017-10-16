@@ -72,7 +72,6 @@ func Test_ClusterID(t *testing.T) {
 		t.Fatalf("Expected cluster ID %s but was %s", expectedID, ClusterID(customObject))
 	}
 }
-
 func Test_ClusterVersion(t *testing.T) {
 	expectedVersion := "v_0_1_0"
 
