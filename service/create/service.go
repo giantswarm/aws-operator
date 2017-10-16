@@ -795,23 +795,23 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create rules for security group '%s': '%#v'", ingressSecurityGroup.GroupName, err))
 	}
 
-	// Create route table.
-	routeTable := &awsresources.RouteTable{
+	// Create public route table.
+	publicRouteTable := &awsresources.RouteTable{
 		Name:   key.ClusterID(cluster),
 		VpcID:  vpcID,
 		Client: clients.EC2,
 	}
-	routeTableCreated, err := routeTable.CreateIfNotExists()
+	publicRouteTableCreated, err := publicRouteTable.CreateIfNotExists()
 	if err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create route table: '%#v'", err))
 	}
-	if routeTableCreated {
-		s.logger.Log("info", "created route table")
+	if publicRouteTableCreated {
+		s.logger.Log("info", "created public route table")
 	} else {
 		s.logger.Log("info", "route table already exists, reusing")
 	}
 
-	if err := routeTable.MakePublic(); err != nil {
+	if err := publicRouteTable.MakePublic(); err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not make route table public: '%#v'", err))
 	}
 
@@ -822,7 +822,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		Clients:    clients,
 		Cluster:    cluster,
 		MakePublic: true,
-		RouteTable: routeTable,
+		RouteTable: publicRouteTable,
 		VpcID:      vpcID,
 	}
 	publicSubnet, err := s.createSubnet(subnetInput)
@@ -1322,12 +1322,12 @@ func (s *Service) deleteFunc(obj interface{}) {
 	}
 
 	// Delete route table.
-	var routeTable resources.ResourceWithID
-	routeTable = &awsresources.RouteTable{
+	var publicRouteTable resources.ResourceWithID
+	publicRouteTable = &awsresources.RouteTable{
 		Name:   key.ClusterID(cluster),
 		Client: clients.EC2,
 	}
-	if err := routeTable.Delete(); err != nil {
+	if err := publicRouteTable.Delete(); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete route table: '%#v'", err))
 	} else {
 		s.logger.Log("info", "deleted route table")
