@@ -20,6 +20,8 @@ type LoadBalancerInput struct {
 	Clients awsutil.Clients
 	// Cluster is the cluster TPO.
 	Cluster awstpr.CustomObject
+	// IdleTimeoutSeconds is idle time before closing the front-end and back-end connections
+	IdleTimeoutSeconds int
 	// InstanceIDs are the IDs of the instances that should be registered with the ELB.
 	InstanceIDs []string
 	// PortsToOpen are the ports the ELB should listen to and forward on.
@@ -39,12 +41,13 @@ func (s *Service) createLoadBalancer(input LoadBalancerInput) (*awsresources.ELB
 	}
 
 	lb := &awsresources.ELB{
-		Name:          lbName,
-		SecurityGroup: input.SecurityGroupID,
-		SubnetID:      input.SubnetID,
-		PortsToOpen:   input.PortsToOpen,
-		Client:        input.Clients.ELB,
-		Scheme:        input.Scheme,
+		Client:             input.Clients.ELB,
+		IdleTimeoutSeconds: input.IdleTimeoutSeconds,
+		Name:               lbName,
+		PortsToOpen:        input.PortsToOpen,
+		Scheme:             input.Scheme,
+		SecurityGroup:      input.SecurityGroupID,
+		SubnetID:           input.SubnetID,
 	}
 
 	lbCreated, err := lb.CreateIfNotExists()

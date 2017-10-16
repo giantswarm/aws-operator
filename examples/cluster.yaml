@@ -27,7 +27,7 @@ spec:
       api:
         domain: "api.example.aws.giantswarm.io"
         insecurePort: 8080
-        ip: "172.31.0.1" 
+        ip: "172.31.0.1"
         securePort: 443
         clusterIPRange: "172.31.0.0/24"
       cloudProvider: "aws"

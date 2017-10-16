@@ -4,6 +4,18 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
+const (
+	// Format for masked idleTimeoutSecondsOutOfRangeError.
+	idleTimeoutSecondsOutOfRangeErrorFormat string = "ELB idle timeout seconds %s cannot exceed AWS maximum of 3600"
+)
+
+var idleTimeoutSecondsOutOfRangeError = microerror.New("idle timeout seconds out of range")
+
+// IsIdleTimeoutSecondsOutOfRangeError asserts idleTimeoutSecondsOutOfRangeError.
+func IsIdleTimeoutSecondsOutOfRangeError(err error) bool {
+	return microerror.Cause(err) == idleTimeoutSecondsOutOfRangeError
+}
+
 var invalidConfigError = microerror.New("invalid config")
 
 // IsInvalidConfig asserts invalidConfigError.

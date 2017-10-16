@@ -66,6 +66,11 @@ cluster:
 aws:
   region: eu-central-1
   az: eu-central-1a
+  elb:
+    idleTimeoutSeconds:
+      api: 120
+      etcd: 60
+      ingress: 60
   hostedZones:
     api: xxxxxxxxxxxxxx
     etcd: yyyyyyyyyyyyyy
