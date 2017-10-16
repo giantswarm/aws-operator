@@ -822,6 +822,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		Clients:    clients,
 		Cluster:    cluster,
 		MakePublic: true,
+		RouteTable: routeTable,
 		VpcID:      vpcID,
 	}
 	publicSubnet, err := s.createSubnet(subnetInput)
