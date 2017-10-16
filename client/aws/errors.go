@@ -1,6 +1,7 @@
 package aws
 
 import "github.com/giantswarm/microerror"
+import "strings"
 
 const (
 	AlreadyAssociated        = "Resource.AlreadyAssociated"
@@ -31,4 +32,9 @@ var emptyAmazonAccountIDError = microerror.New("empty amazon account ID")
 // IsEmptyAmazonAccountID asserts emptyAmazonAccountIDError.
 func IsEmptyAmazonAccountID(err error) bool {
 	return microerror.Cause(err) == emptyAmazonAccountIDError
+}
+
+// IsIAMRoleDuplicateError checks for duplicate IAM Role errors.
+func IsIAMRoleDuplicateError(err error) bool {
+	return strings.Contains(err.Error(), RoleDuplicate)
 }

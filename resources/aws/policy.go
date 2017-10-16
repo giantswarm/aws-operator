@@ -2,11 +2,10 @@ package aws
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
-	awsclient "github.com/giantswarm/aws-operator/client/aws"
+	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/microerror"
 )
 
@@ -144,11 +143,9 @@ func (p *Policy) clusterRoleName() string {
 
 func (p *Policy) CreateIfNotExists() (bool, error) {
 	err := p.CreateOrFail()
-	if err != nil {
-		if strings.Contains(err.Error(), awsclient.RoleDuplicate) {
-			return false, nil
-		}
-
+	if awsutil.IsIAMRoleDuplicateError(err) {
+		return false, nil
+	} else if err != nil {
 		return false, microerror.Mask(err)
 	}
 
