@@ -28,6 +28,8 @@ type LoadBalancerInput struct {
 	SecurityGroupID string
 	// SubnetID is the ID of the subnet the ELB will be placed in.
 	SubnetID string
+	// Scheme, internal for non internet-facing ELBs
+	Scheme string
 }
 
 func (s *Service) createLoadBalancer(input LoadBalancerInput) (*awsresources.ELB, error) {
@@ -42,6 +44,7 @@ func (s *Service) createLoadBalancer(input LoadBalancerInput) (*awsresources.ELB
 		SubnetID:      input.SubnetID,
 		PortsToOpen:   input.PortsToOpen,
 		Client:        input.Clients.ELB,
+		Scheme:        input.Scheme,
 	}
 
 	lbCreated, err := lb.CreateIfNotExists()
