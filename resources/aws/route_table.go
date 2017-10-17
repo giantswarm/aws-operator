@@ -164,10 +164,12 @@ func (r RouteTable) CreateNatGatewayRoute(natGatewayID string) (bool, error) {
 			DestinationCidrBlock: aws.String("0.0.0.0/0"),
 			NatGatewayId:         aws.String(natGatewayID),
 		})
-		if err == nil || awsutil.IsRouteDuplicateError(err) {
-			return nil
-		}
 		if err != nil {
+			// Fall through if the rule already exists.
+			if awsutil.IsRouteDuplicateError(err) {
+				return nil
+			}
+
 			return microerror.Mask(err)
 		}
 
