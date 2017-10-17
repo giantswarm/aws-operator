@@ -898,14 +898,15 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 			Clients:    clients,
 			Cluster:    cluster,
 			MakePublic: false,
+			RouteTable: privateRouteTable,
 			VpcID:      vpcID,
 		}
 		privateSubnet, err = s.createSubnet(subnetInput)
 		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create public subnet: '%#v'", err))
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create private subnet: '%#v'", err))
 		}
 
-		_, err := privateSubnet.GetID()
+		privateSubnetID, err = privateSubnet.GetID()
 		if err != nil {
 			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get private subnet ID: '%#v'", err))
 		}
