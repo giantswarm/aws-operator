@@ -972,13 +972,18 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		clusterName:         key.ClusterID(cluster),
 		bucket:              bucket,
 		securityGroup:       mastersSecurityGroup,
-		subnet:              publicSubnet,
 		instanceProfileName: masterPolicy.GetName(),
 		prefix:              prefixMaster,
 	}
 
-	// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
-	if !key.HasClusterVersion(cluster) {
+	if key.HasClusterVersion(cluster) {
+		// New clusters have masters in the private subnet.
+		mastersInput.subnet = privateSubnet
+	} else {
+		// Legacy clusters have masters in the public subnet.
+		mastersInput.subnet = publicSubnet
+
+		// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
 		mastersInput.keyPairName = key.ClusterID(cluster)
 	}
 
