@@ -6,6 +6,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
+
+	awsutil "github.com/giantswarm/aws-operator/client/aws"
 )
 
 type RouteTable struct {
@@ -147,6 +149,24 @@ func (r RouteTable) MakePublic() error {
 	}
 
 	return nil
+}
+
+// CreateNatGatewayRoute creates a default route to the NAT gateway for the
+// private subnet.
+func (r RouteTable) CreateNatGatewayRoute(natGatewayID string) (bool, error) {
+	_, err := r.Client.CreateRoute(&ec2.CreateRouteInput{
+		RouteTableId:         aws.String(r.id),
+		DestinationCidrBlock: aws.String("0.0.0.0/0"),
+		NatGatewayId:         aws.String(natGatewayID),
+	})
+	if err == nil {
+		return true, nil
+	}
+	if awsutil.IsRouteDuplicateError(err) {
+		return false, nil
+	}
+
+	return false, microerror.Mask(err)
 }
 
 // getInternetGateway retrieves the Internet Gateway of the Route Table's VPC.
