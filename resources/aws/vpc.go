@@ -5,13 +5,17 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 )
 
 type VPC struct {
 	CidrBlock string
 	Name      string
 	id        string
+	// Dependencies.
+	Logger micrologger.Logger
 	AWSEntity
 }
 
@@ -128,9 +132,16 @@ func (v *VPC) Delete() error {
 		return microerror.Mask(err)
 	}
 
-	if _, err := v.Clients.EC2.DeleteVpc(&ec2.DeleteVpcInput{
-		VpcId: vpc.VpcId,
-	}); err != nil {
+	deleteOperation := func() error {
+		if _, err := v.Clients.EC2.DeleteVpc(&ec2.DeleteVpcInput{
+			VpcId: vpc.VpcId,
+		}); err != nil {
+			return microerror.Mask(err)
+		}
+		return nil
+	}
+	deleteNotify := NewNotify(v.Logger, "deleting vpc")
+	if err := backoff.RetryNotify(deleteOperation, NewCustomExponentialBackoff(), deleteNotify); err != nil {
 		return microerror.Mask(err)
 	}
 

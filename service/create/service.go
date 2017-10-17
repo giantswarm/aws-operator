@@ -1393,6 +1393,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	vpc = &awsresources.VPC{
 		Name:      key.ClusterID(cluster),
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
+		Logger:    s.logger,
 	}
 	vpcID, err := vpc.GetID()
 	if err != nil {
