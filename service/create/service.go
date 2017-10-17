@@ -1085,6 +1085,15 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		ebsStorage:          true,
 	}
 
+	// For new clusters don't assign public IPs and use the private subnet.
+	if key.HasClusterVersion(cluster) {
+		lcInput.associatePublicIP = false
+		lcInput.subnet = privateSubnet
+	} else {
+		lcInput.associatePublicIP = true
+		lcInput.subnet = publicSubnet
+	}
+
 	// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
 	if !key.HasClusterVersion(cluster) {
 		lcInput.keypairName = key.ClusterID(cluster)
@@ -1117,6 +1126,13 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		LoadBalancerName:        ingressLB.Name,
 		VPCZoneIdentifier:       publicSubnetID,
 		HealthCheckGracePeriod:  gracePeriodSeconds,
+	}
+
+	// For new clusters launch the workers in the private subnet.
+	if key.HasClusterVersion(cluster) {
+		asg.VPCZoneIdentifier = privateSubnetID
+	} else {
+		asg.VPCZoneIdentifier = publicSubnetID
 	}
 
 	asgCreated, err := asg.CreateIfNotExists()
