@@ -154,7 +154,13 @@ func (r RouteTable) MakePublic() error {
 // CreateNatGatewayRoute creates a default route to the NAT gateway for the
 // private subnet.
 func (r RouteTable) CreateNatGatewayRoute(natGatewayID string) (bool, error) {
-	_, err := r.Client.CreateRoute(&ec2.CreateRouteInput{
+	// Check that the NAT gateway exists.
+	_, err := r.getNatGateway(natGatewayID)
+	if err != nil {
+		return false, microerror.Mask(err)
+	}
+
+	_, err = r.Client.CreateRoute(&ec2.CreateRouteInput{
 		RouteTableId:         aws.String(r.id),
 		DestinationCidrBlock: aws.String("0.0.0.0/0"),
 		NatGatewayId:         aws.String(natGatewayID),
@@ -193,4 +199,27 @@ func (r RouteTable) getInternetGateway() (string, error) {
 	}
 
 	return *resp.InternetGateways[0].InternetGatewayId, nil
+}
+
+func (r RouteTable) getNatGateway(natGatewayID string) (string, error) {
+	resp, err := r.Client.DescribeNatGateways(&ec2.DescribeNatGatewaysInput{
+		Filter: []*ec2.Filter{
+			{
+				// retrieve only the gateway attached to the vpc of the route table.
+				Name: aws.String("nat-gateway-id"),
+				Values: []*string{
+					aws.String(natGatewayID),
+				},
+			},
+		},
+	})
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	if len(resp.NatGateways) == 0 {
+		return "", microerror.Maskf(notFoundError, notFoundErrorFormat, RouteTableType, r.Name)
+	}
+
+	return *resp.NatGateways[0].NatGatewayId, nil
 }
