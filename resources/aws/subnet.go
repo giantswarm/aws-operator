@@ -145,7 +145,7 @@ func (s Subnet) GetID() (string, error) {
 	return *subnet.SubnetId, nil
 }
 
-func (s *Subnet) MakePublic(routeTable *RouteTable) error {
+func (s *Subnet) AssociateRouteTable(routeTable *RouteTable) error {
 	routeTableID, err := routeTable.GetID()
 	if err != nil {
 		return microerror.Mask(err)
@@ -163,6 +163,15 @@ func (s *Subnet) MakePublic(routeTable *RouteTable) error {
 		if !strings.Contains(err.Error(), awsclient.AlreadyAssociated) {
 			return microerror.Mask(err)
 		}
+	}
+
+	return nil
+}
+
+func (s *Subnet) MakePublic() error {
+	subnetID, err := s.GetID()
+	if err != nil {
+		return microerror.Mask(err)
 	}
 
 	if _, err := s.Clients.EC2.ModifySubnetAttribute(&ec2.ModifySubnetAttributeInput{

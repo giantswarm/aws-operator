@@ -42,8 +42,13 @@ func (s *Service) createSubnet(input SubnetInput) (*awsresources.Subnet, error) 
 		s.logger.Log("info", fmt.Sprintf("subnet '%s' already exists, reusing", input.Name))
 	}
 
-	if input.MakePublic && input.RouteTable != nil {
-		err := subnet.MakePublic(input.RouteTable)
+	err = subnet.AssociateRouteTable(input.RouteTable)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	if input.MakePublic {
+		err := subnet.MakePublic()
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
