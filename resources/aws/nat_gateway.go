@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 )
@@ -145,12 +146,23 @@ func (g *NatGateway) Delete() error {
 		return microerror.Mask(err)
 	}
 
-	for _, allocationID := range allocationIDs {
-		if _, err := g.Clients.EC2.ReleaseAddress(&ec2.ReleaseAddressInput{
-			AllocationId: aws.String(allocationID),
-		}); err != nil {
-			return microerror.Mask(err)
+	// We retry releasing the elastic IP(s) associated with the NAT gateway
+	// because if we try to release them before the gw has been actually deleted
+	// the process can fail
+	releaseOperation := func() error {
+		for _, allocationID := range allocationIDs {
+			if _, err := g.Clients.EC2.ReleaseAddress(&ec2.ReleaseAddressInput{
+				AllocationId: aws.String(allocationID),
+			}); err != nil {
+				return microerror.Mask(err)
+			}
 		}
+		g.Logger.Log("info", "NAT gateway elastic IPs released")
+		return nil
+	}
+	releaseNotify := NewNotify(g.Logger, "releasing NAT gateway eIPs")
+	if err := backoff.RetryNotify(releaseOperation, NewCustomExponentialBackoff(), releaseNotify); err != nil {
+		return microerror.Mask(err)
 	}
 
 	return nil

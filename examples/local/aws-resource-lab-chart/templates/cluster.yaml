@@ -85,7 +85,7 @@ spec:
       routeTableNames:
       - {{.Values.aws.routeTable0}}
       - {{.Values.aws.routeTable1}}
-      peerid: "{{.Values.aws.vpcPeerId}}"
+      peerId: "{{.Values.aws.vpcPeerId}}"
 
     masters:
     - imageid: "{{.Values.aws.ami}}"
