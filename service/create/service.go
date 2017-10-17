@@ -1404,6 +1404,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	}
 
+	// Delete NAT gateway and private subnet for new clusters.
 	if key.HasClusterVersion(cluster) {
 		// Delete NAT gateway.
 		natGateway := &awsresources.NatGateway{
