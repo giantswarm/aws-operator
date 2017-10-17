@@ -774,6 +774,12 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get security group '%s' ID: '%#v'", ingressSGInput.GroupName, err))
 	}
 
+	// In rare cases the host cluster CIDR block is nil. Return error rather
+	// that panic. TODO Fix issue #451 that tracks this.
+	if conn.AccepterVpcInfo.CidrBlock == nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("vpc peering connection cidr block is nil for cluster '%s'", key.ClusterID(cluster)))
+	}
+
 	// Create rules for the security groups.
 	rulesInput := rulesInput{
 		Cluster:                cluster,
@@ -795,34 +801,35 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create rules for security group '%s': '%#v'", ingressSecurityGroup.GroupName, err))
 	}
 
-	// Create route table.
-	routeTable := &awsresources.RouteTable{
+	// Create public route table.
+	publicRouteTable := &awsresources.RouteTable{
 		Name:   key.ClusterID(cluster),
 		VpcID:  vpcID,
 		Client: clients.EC2,
+		Logger: s.logger,
 	}
-	routeTableCreated, err := routeTable.CreateIfNotExists()
+	publicRouteTableCreated, err := publicRouteTable.CreateIfNotExists()
 	if err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create route table: '%#v'", err))
 	}
-	if routeTableCreated {
-		s.logger.Log("info", "created route table")
+	if publicRouteTableCreated {
+		s.logger.Log("info", "created public route table")
 	} else {
 		s.logger.Log("info", "route table already exists, reusing")
 	}
 
-	if err := routeTable.MakePublic(); err != nil {
+	if err := publicRouteTable.MakePublic(); err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not make route table public: '%#v'", err))
 	}
 
 	// Create public subnet.
 	subnetInput := SubnetInput{
-		Name:       subnetName(cluster, suffixPublic),
+		Name:       key.SubnetName(cluster, suffixPublic),
 		CidrBlock:  cluster.Spec.AWS.VPC.PublicSubnetCIDR,
 		Clients:    clients,
 		Cluster:    cluster,
 		MakePublic: true,
-		RouteTable: routeTable,
+		RouteTable: publicRouteTable,
 		VpcID:      vpcID,
 	}
 	publicSubnet, err := s.createSubnet(subnetInput)
@@ -835,34 +842,89 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get public subnet ID: '%#v'", err))
 	}
 
+	var privateRouteTable *awsresources.RouteTable
 	var privateSubnet *awsresources.Subnet
+	var privateSubnetID string
 
+	// For new clusters create a NAT gateway, private route table and private subnet.
 	if key.HasClusterVersion(cluster) {
+		// Create NAT gateway.
+		natGateway := &awsresources.NatGateway{
+			Name:   key.ClusterID(cluster),
+			Subnet: publicSubnet,
+			// Dependencies.
+			Logger:    s.logger,
+			AWSEntity: awsresources.AWSEntity{Clients: clients},
+		}
+		natGatewayCreated, err := natGateway.CreateIfNotExists()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create nat gateway: '%#v'", err))
+		}
+		if natGatewayCreated {
+			s.logger.Log("info", fmt.Sprintf("created nat gateway for cluster '%s'", key.ClusterID(cluster)))
+		} else {
+			s.logger.Log("info", fmt.Sprintf("nat gateway for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
+		}
+
+		natGatewayID, err := natGateway.GetID()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get nat gateway id: '%#v'", err))
+		}
+
+		// Create private route table.
+		privateRouteTable = &awsresources.RouteTable{
+			Name:   key.RouteTableName(cluster, suffixPrivate),
+			VpcID:  vpcID,
+			Client: clients.EC2,
+			Logger: s.logger,
+		}
+		privateRouteTableCreated, err := privateRouteTable.CreateIfNotExists()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create route table: '%#v'", err))
+		}
+		if privateRouteTableCreated {
+			s.logger.Log("info", "created private route table")
+		} else {
+			s.logger.Log("info", "private route table already exists, reusing")
+		}
+
+		// Create default route for the NAT gateway in the private route table.
+		natGatewayRouteCreated, err := privateRouteTable.CreateNatGatewayRoute(natGatewayID)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create route for nat gateway: '%#v'", err))
+		}
+		if natGatewayRouteCreated {
+			s.logger.Log("info", "created nat gateway route")
+		} else {
+			s.logger.Log("info", "nat gateway route already exists, reusing")
+		}
+
 		// Create private subnet.
 		subnetInput := SubnetInput{
-			Name:       subnetName(cluster, suffixPrivate),
+			Name:       key.SubnetName(cluster, suffixPrivate),
 			CidrBlock:  cluster.Spec.AWS.VPC.PrivateSubnetCIDR,
 			Clients:    clients,
 			Cluster:    cluster,
 			MakePublic: false,
+			RouteTable: privateRouteTable,
 			VpcID:      vpcID,
 		}
 		privateSubnet, err = s.createSubnet(subnetInput)
 		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create public subnet: '%#v'", err))
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create private subnet: '%#v'", err))
 		}
 
-		_, err := privateSubnet.GetID()
+		privateSubnetID, err = privateSubnet.GetID()
 		if err != nil {
 			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get private subnet ID: '%#v'", err))
 		}
 	}
 
 	publicRoute := &awsresources.Route{
-		RouteTable:           *routeTable,
-		DestinationCidrBlock: *conn.AccepterVpcInfo.CidrBlock,
-		VpcID:                *conn.VpcPeeringConnectionId,
-		AWSEntity:            awsresources.AWSEntity{Clients: clients},
+		RouteTable:             *publicRouteTable,
+		DestinationCidrBlock:   *conn.AccepterVpcInfo.CidrBlock,
+		VpcPeeringConnectionID: *conn.VpcPeeringConnectionId,
+		AWSEntity:              awsresources.AWSEntity{Clients: clients},
 	}
 
 	publicRouteCreated, err := publicRoute.CreateIfNotExists()
@@ -880,13 +942,14 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 			Name:   privateRouteTableName,
 			VpcID:  cluster.Spec.AWS.VPC.PeerID,
 			Client: hostClients.EC2,
+			Logger: s.logger,
 		}
 
 		privateRoute := &awsresources.Route{
-			RouteTable:           *privateRouteTable,
-			DestinationCidrBlock: *conn.RequesterVpcInfo.CidrBlock,
-			VpcID:                *conn.VpcPeeringConnectionId,
-			AWSEntity:            awsresources.AWSEntity{Clients: hostClients},
+			RouteTable:             *privateRouteTable,
+			DestinationCidrBlock:   *conn.RequesterVpcInfo.CidrBlock,
+			VpcPeeringConnectionID: *conn.VpcPeeringConnectionId,
+			AWSEntity:              awsresources.AWSEntity{Clients: hostClients},
 		}
 
 		privateRouteCreated, err := privateRoute.CreateIfNotExists()
@@ -899,27 +962,6 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 			s.logger.Log("info", fmt.Sprintf("host vpc guest for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
 		}
 
-	}
-
-	if key.HasClusterVersion(cluster) {
-		// Create NAT gateway.
-		var natGateway resources.ResourceWithID
-		natGateway = &awsresources.NatGateway{
-			Name:   key.ClusterID(cluster),
-			Subnet: publicSubnet,
-			// Dependencies.
-			Logger:    s.logger,
-			AWSEntity: awsresources.AWSEntity{Clients: clients},
-		}
-		natGatewayCreated, err := natGateway.CreateIfNotExists()
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create nat gateway: '%#v'", err))
-		}
-		if natGatewayCreated {
-			s.logger.Log("info", fmt.Sprintf("created nat gateway for cluster '%s'", key.ClusterID(cluster)))
-		} else {
-			s.logger.Log("info", fmt.Sprintf("nat gateway for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
-		}
 	}
 
 	mastersInput := runMachinesInput{
@@ -1053,6 +1095,15 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		ebsStorage:          true,
 	}
 
+	// For new clusters don't assign public IPs and use the private subnet.
+	if key.HasClusterVersion(cluster) {
+		lcInput.associatePublicIP = false
+		lcInput.subnet = privateSubnet
+	} else {
+		lcInput.associatePublicIP = true
+		lcInput.subnet = publicSubnet
+	}
+
 	// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
 	if !key.HasClusterVersion(cluster) {
 		lcInput.keypairName = key.ClusterID(cluster)
@@ -1085,6 +1136,13 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		LoadBalancerName:        ingressLB.Name,
 		VPCZoneIdentifier:       publicSubnetID,
 		HealthCheckGracePeriod:  gracePeriodSeconds,
+	}
+
+	// For new clusters launch the workers in the private subnet.
+	if key.HasClusterVersion(cluster) {
+		asg.VPCZoneIdentifier = privateSubnetID
+	} else {
+		asg.VPCZoneIdentifier = publicSubnetID
 	}
 
 	asgCreated, err := asg.CreateIfNotExists()
@@ -1322,12 +1380,13 @@ func (s *Service) deleteFunc(obj interface{}) {
 	}
 
 	// Delete route table.
-	var routeTable resources.ResourceWithID
-	routeTable = &awsresources.RouteTable{
+	var publicRouteTable resources.ResourceWithID
+	publicRouteTable = &awsresources.RouteTable{
 		Name:   key.ClusterID(cluster),
 		Client: clients.EC2,
+		Logger: s.logger,
 	}
-	if err := routeTable.Delete(); err != nil {
+	if err := publicRouteTable.Delete(); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete route table: '%#v'", err))
 	} else {
 		s.logger.Log("info", "deleted route table")
@@ -1338,12 +1397,14 @@ func (s *Service) deleteFunc(obj interface{}) {
 	vpc = &awsresources.VPC{
 		Name:      key.ClusterID(cluster),
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
+		Logger:    s.logger,
 	}
 	vpcID, err := vpc.GetID()
 	if err != nil {
 		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	}
 
+	// Delete NAT gateway and private subnet for new clusters.
 	if key.HasClusterVersion(cluster) {
 		// Delete NAT gateway.
 		natGateway := &awsresources.NatGateway{
@@ -1356,6 +1417,29 @@ func (s *Service) deleteFunc(obj interface{}) {
 			s.logger.Log("error", fmt.Sprintf("could not delete nat gateway: '%#v'", err))
 		} else {
 			s.logger.Log("info", "deleted nat gateway")
+		}
+
+		// Delete private route table.
+		privateRouteTable := &awsresources.RouteTable{
+			Name:   key.RouteTableName(cluster, suffixPrivate),
+			Client: clients.EC2,
+			Logger: s.logger,
+		}
+		if err := privateRouteTable.Delete(); err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not delete private route table: '%#v'", err))
+		} else {
+			s.logger.Log("info", "deleted private route table")
+		}
+
+		// Delete private subnet.
+		subnetInput := SubnetInput{
+			Name:    key.SubnetName(cluster, suffixPrivate),
+			Clients: clients,
+		}
+		if err := s.deleteSubnet(subnetInput); err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not delete private subnet: '%#v'", err))
+		} else {
+			s.logger.Log("info", "deleted private subnet")
 		}
 	}
 
@@ -1375,26 +1459,13 @@ func (s *Service) deleteFunc(obj interface{}) {
 
 	// Delete public subnet.
 	subnetInput := SubnetInput{
-		Name:    subnetName(cluster, suffixPublic),
+		Name:    key.SubnetName(cluster, suffixPublic),
 		Clients: clients,
 	}
 	if err := s.deleteSubnet(subnetInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete public subnet: '%#v'", err))
 	} else {
 		s.logger.Log("info", "deleted public subnet")
-	}
-
-	// Delete private subnet for new clusters. Legacy clusters only have public subnets.
-	if key.HasClusterVersion(cluster) {
-		subnetInput = SubnetInput{
-			Name:    subnetName(cluster, suffixPrivate),
-			Clients: clients,
-		}
-		if err := s.deleteSubnet(subnetInput); err != nil {
-			s.logger.Log("error", fmt.Sprintf("could not delete private subnet: '%#v'", err))
-		} else {
-			s.logger.Log("info", "deleted private subnet")
-		}
 	}
 
 	// Before the security groups can be deleted any rules referencing other
@@ -1469,13 +1540,14 @@ func (s *Service) deleteFunc(obj interface{}) {
 			Name:   privateRouteTableName,
 			VpcID:  cluster.Spec.AWS.VPC.PeerID,
 			Client: hostClients.EC2,
+			Logger: s.logger,
 		}
 
 		privateRoute := &awsresources.Route{
-			RouteTable:           *privateRouteTable,
-			DestinationCidrBlock: *conn.RequesterVpcInfo.CidrBlock,
-			VpcID:                *conn.VpcPeeringConnectionId,
-			AWSEntity:            awsresources.AWSEntity{Clients: hostClients},
+			RouteTable:             *privateRouteTable,
+			DestinationCidrBlock:   *conn.RequesterVpcInfo.CidrBlock,
+			VpcPeeringConnectionID: *conn.VpcPeeringConnectionId,
+			AWSEntity:              awsresources.AWSEntity{Clients: hostClients},
 		}
 
 		if err := privateRoute.Delete(); err != nil {

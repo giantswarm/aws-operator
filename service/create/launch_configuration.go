@@ -15,6 +15,7 @@ import (
 )
 
 type launchConfigurationInput struct {
+	associatePublicIP   bool
 	bucket              resources.Resource
 	clients             awsutil.Clients
 	cluster             awstpr.CustomObject
@@ -33,7 +34,6 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 	var err error
 	var imageID string
 	var instanceType string
-	var publicIP bool
 	var template string
 
 	{
@@ -46,7 +46,6 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 		case prefixWorker:
 			imageID = key.WorkerImageID(input.cluster)
 			instanceType = key.WorkerInstanceType(input.cluster)
-			publicIP = true
 
 			template, err = s.cloudConfig.NewWorkerTemplate(input.cluster, *input.tlsAssets)
 		default:
@@ -102,7 +101,7 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 		KeyName:                  input.keypairName,
 		SecurityGroupID:          securityGroupID,
 		SmallCloudConfig:         smallCloudconfig,
-		AssociatePublicIpAddress: publicIP,
+		AssociatePublicIpAddress: input.associatePublicIP,
 		EBSStorage:               input.ebsStorage,
 	}
 

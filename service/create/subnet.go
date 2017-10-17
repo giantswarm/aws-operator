@@ -3,11 +3,12 @@ package create
 import (
 	"fmt"
 
+	"github.com/giantswarm/awstpr"
+	"github.com/giantswarm/microerror"
+
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
 	"github.com/giantswarm/aws-operator/service/key"
-	"github.com/giantswarm/awstpr"
-	"github.com/giantswarm/microerror"
 )
 
 type SubnetInput struct {
@@ -41,8 +42,13 @@ func (s *Service) createSubnet(input SubnetInput) (*awsresources.Subnet, error) 
 		s.logger.Log("info", fmt.Sprintf("subnet '%s' already exists, reusing", input.Name))
 	}
 
-	if input.MakePublic && input.RouteTable != nil {
-		err := subnet.MakePublic(input.RouteTable)
+	err = subnet.AssociateRouteTable(input.RouteTable)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	if input.MakePublic {
+		err := subnet.MakePublic()
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

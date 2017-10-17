@@ -216,6 +216,27 @@ func Test_MasterInstanceType(t *testing.T) {
 	}
 }
 
+func Test_RouteTableName(t *testing.T) {
+	expectedName := "test-cluster-private"
+	suffix := "private"
+
+	cluster := clustertpr.Spec{
+		Cluster: spec.Cluster{
+			ID: "test-cluster",
+		},
+	}
+
+	customObject := awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			Cluster: cluster,
+		},
+	}
+
+	if RouteTableName(customObject, suffix) != expectedName {
+		t.Fatalf("Expected route table name %s but was %s", expectedName, RouteTableName(customObject, suffix))
+	}
+
+}
 func Test_SecurityGroupName(t *testing.T) {
 	expectedName := "test-cluster-worker"
 	groupName := "worker"
@@ -238,6 +259,28 @@ func Test_SecurityGroupName(t *testing.T) {
 	if SecurityGroupName(customObject, groupName) != expectedName {
 		t.Fatalf("Expected security group name %s but was %s", expectedName, SecurityGroupName(customObject, groupName))
 	}
+}
+
+func Test_SubnetName(t *testing.T) {
+	expectedName := "test-cluster-private"
+	suffix := "private"
+
+	cluster := clustertpr.Spec{
+		Cluster: spec.Cluster{
+			ID: "test-cluster",
+		},
+	}
+
+	customObject := awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			Cluster: cluster,
+		},
+	}
+
+	if SubnetName(customObject, suffix) != expectedName {
+		t.Fatalf("Expected subnet name %s but was %s", expectedName, SubnetName(customObject, suffix))
+	}
+
 }
 
 func Test_WorkerCount(t *testing.T) {
