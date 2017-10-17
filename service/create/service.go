@@ -1389,6 +1389,28 @@ func (s *Service) deleteFunc(obj interface{}) {
 		} else {
 			s.logger.Log("info", "deleted nat gateway")
 		}
+
+		// Delete private route table.
+		privateRouteTable := &awsresources.RouteTable{
+			Name:   key.RouteTableName(cluster, suffixPrivate),
+			Client: clients.EC2,
+		}
+		if err := privateRouteTable.Delete(); err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not delete private route table: '%#v'", err))
+		} else {
+			s.logger.Log("info", "deleted private route table")
+		}
+
+		// Delete private subnet.
+		subnetInput := SubnetInput{
+			Name:    key.SubnetName(cluster, suffixPrivate),
+			Clients: clients,
+		}
+		if err := s.deleteSubnet(subnetInput); err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not delete private subnet: '%#v'", err))
+		} else {
+			s.logger.Log("info", "deleted private subnet")
+		}
 	}
 
 	// Delete internet gateway.
@@ -1414,19 +1436,6 @@ func (s *Service) deleteFunc(obj interface{}) {
 		s.logger.Log("error", fmt.Sprintf("could not delete public subnet: '%#v'", err))
 	} else {
 		s.logger.Log("info", "deleted public subnet")
-	}
-
-	// Delete private subnet for new clusters. Legacy clusters only have public subnets.
-	if key.HasClusterVersion(cluster) {
-		subnetInput = SubnetInput{
-			Name:    key.SubnetName(cluster, suffixPrivate),
-			Clients: clients,
-		}
-		if err := s.deleteSubnet(subnetInput); err != nil {
-			s.logger.Log("error", fmt.Sprintf("could not delete private subnet: '%#v'", err))
-		} else {
-			s.logger.Log("info", "deleted private subnet")
-		}
 	}
 
 	// Before the security groups can be deleted any rules referencing other
