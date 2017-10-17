@@ -806,6 +806,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		Name:   key.ClusterID(cluster),
 		VpcID:  vpcID,
 		Client: clients.EC2,
+		Logger: s.logger,
 	}
 	publicRouteTableCreated, err := publicRouteTable.CreateIfNotExists()
 	if err != nil {
@@ -875,6 +876,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 			Name:   key.RouteTableName(cluster, suffixPrivate),
 			VpcID:  vpcID,
 			Client: clients.EC2,
+			Logger: s.logger,
 		}
 		privateRouteTableCreated, err := privateRouteTable.CreateIfNotExists()
 		if err != nil {
@@ -940,6 +942,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 			Name:   privateRouteTableName,
 			VpcID:  cluster.Spec.AWS.VPC.PeerID,
 			Client: hostClients.EC2,
+			Logger: s.logger,
 		}
 
 		privateRoute := &awsresources.Route{
@@ -1381,6 +1384,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	publicRouteTable = &awsresources.RouteTable{
 		Name:   key.ClusterID(cluster),
 		Client: clients.EC2,
+		Logger: s.logger,
 	}
 	if err := publicRouteTable.Delete(); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete route table: '%#v'", err))
@@ -1418,6 +1422,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 		privateRouteTable := &awsresources.RouteTable{
 			Name:   key.RouteTableName(cluster, suffixPrivate),
 			Client: clients.EC2,
+			Logger: s.logger,
 		}
 		if err := privateRouteTable.Delete(); err != nil {
 			s.logger.Log("error", fmt.Sprintf("could not delete private route table: '%#v'", err))
@@ -1534,6 +1539,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 			Name:   privateRouteTableName,
 			VpcID:  cluster.Spec.AWS.VPC.PeerID,
 			Client: hostClients.EC2,
+			Logger: s.logger,
 		}
 
 		privateRoute := &awsresources.Route{
