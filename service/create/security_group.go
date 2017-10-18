@@ -82,11 +82,6 @@ func (ri rulesInput) masterRules() []awsresources.SecurityGroupRule {
 			Protocol:   tcpProtocol,
 			SourceCIDR: defaultCIDR,
 		},
-		{
-			Port:       sshPort,
-			Protocol:   tcpProtocol,
-			SourceCIDR: defaultCIDR,
-		},
 		// Allow all traffic between the masters and worker nodes for Calico.
 		{
 			Port:            allPorts,
@@ -99,20 +94,36 @@ func (ri rulesInput) masterRules() []awsresources.SecurityGroupRule {
 			SecurityGroupID: ri.WorkersSecurityGroupID,
 		},
 	}
-	// we need to add an etcd rule for old clusters
-	if !key.HasClusterVersion(ri.Cluster) {
+
+	if key.HasClusterVersion(ri.Cluster) {
+		// For new clusters we only allow SSH access from the host cluster.
+		rules = append(rules, awsresources.SecurityGroupRule{
+			Port:       sshPort,
+			Protocol:   tcpProtocol,
+			SourceCIDR: ri.HostClusterCIDR,
+		})
+	} else {
+		// We need to use the default CIDR for SSH on old clusters.
+		rules = append(rules, awsresources.SecurityGroupRule{
+			Port:       sshPort,
+			Protocol:   tcpProtocol,
+			SourceCIDR: defaultCIDR,
+		})
+
+		// We need to add an etcd rule for old clusters.
 		rules = append(rules, awsresources.SecurityGroupRule{
 			Port:       ri.Cluster.Spec.Cluster.Etcd.Port,
 			Protocol:   tcpProtocol,
 			SourceCIDR: defaultCIDR,
 		})
 	}
+
 	return rules
 }
 
 // workerRules returns the rules for the workers security group.
 func (ri rulesInput) workerRules() []awsresources.SecurityGroupRule {
-	return []awsresources.SecurityGroupRule{
+	rules := []awsresources.SecurityGroupRule{
 		{
 			Port:            ri.Cluster.Spec.Cluster.Kubernetes.IngressController.SecurePort,
 			Protocol:        tcpProtocol,
@@ -122,11 +133,6 @@ func (ri rulesInput) workerRules() []awsresources.SecurityGroupRule {
 			Port:            ri.Cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
 			Protocol:        tcpProtocol,
 			SecurityGroupID: ri.IngressSecurityGroupID,
-		},
-		{
-			Port:       sshPort,
-			Protocol:   tcpProtocol,
-			SourceCIDR: defaultCIDR,
 		},
 		// Allow all traffic between the masters and worker nodes for Calico.
 		{
@@ -147,6 +153,24 @@ func (ri rulesInput) workerRules() []awsresources.SecurityGroupRule {
 			SourceCIDR: ri.HostClusterCIDR,
 		},
 	}
+
+	if key.HasClusterVersion(ri.Cluster) {
+		// For new clusters we only allow SSH access from the host cluster.
+		rules = append(rules, awsresources.SecurityGroupRule{
+			Port:       sshPort,
+			Protocol:   tcpProtocol,
+			SourceCIDR: ri.HostClusterCIDR,
+		})
+	} else {
+		// We need to use the default CIDR for SSH on old clusters.
+		rules = append(rules, awsresources.SecurityGroupRule{
+			Port:       sshPort,
+			Protocol:   tcpProtocol,
+			SourceCIDR: defaultCIDR,
+		})
+	}
+
+	return rules
 }
 
 // ingressRules returns the rules for the ingress ELB security group.
