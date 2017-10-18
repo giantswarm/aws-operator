@@ -122,10 +122,18 @@ func (c *command) Execute(cmd *cobra.Command, args []string) {
 		serverConfig := c.serverFactory(c.viper).Config()
 
 		serverConfig.LogAccess = c.viper.GetBool(f.Server.Log.Access)
-		serverConfig.ListenAddress = c.viper.GetString(f.Server.Listen.Address)
-		serverConfig.TLSCAFile = c.viper.GetString(f.Server.TLS.CaFile)
-		serverConfig.TLSCrtFile = c.viper.GetString(f.Server.TLS.CrtFile)
-		serverConfig.TLSKeyFile = c.viper.GetString(f.Server.TLS.KeyFile)
+		if serverConfig.ListenAddress == "" {
+			serverConfig.ListenAddress = c.viper.GetString(f.Server.Listen.Address)
+		}
+		if serverConfig.TLSCAFile == "" {
+			serverConfig.TLSCAFile = c.viper.GetString(f.Server.TLS.CaFile)
+		}
+		if serverConfig.TLSCrtFile == "" {
+			serverConfig.TLSCrtFile = c.viper.GetString(f.Server.TLS.CrtFile)
+		}
+		if serverConfig.TLSKeyFile == "" {
+			serverConfig.TLSKeyFile = c.viper.GetString(f.Server.TLS.KeyFile)
+		}
 
 		newServer, err = server.New(serverConfig)
 		if err != nil {
