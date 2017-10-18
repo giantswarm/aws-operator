@@ -30,6 +30,7 @@ func Test_Server_Endpoints(t *testing.T) {
 
 	config := DefaultConfig()
 	config.Logger = microloggertest.New()
+	config.ListenAddress = "http://127.0.0.1:8000"
 	config.Endpoints = []Endpoint{e1, e2}
 	config.TransactionResponder = testNewTransactionResponder(t)
 	newServer, err := New(config)
@@ -84,6 +85,7 @@ func Test_Server_Default_HandlerWrapper(t *testing.T) {
 
 	config := DefaultConfig()
 	config.Logger = microloggertest.New()
+	config.ListenAddress = "http://127.0.0.1:8000"
 	config.Endpoints = []Endpoint{e}
 	config.TransactionResponder = testNewTransactionResponder(t)
 	newServer, err := New(config)
@@ -123,6 +125,7 @@ func Test_Server_Custom_HandlerWrapper(t *testing.T) {
 
 	config := DefaultConfig()
 	config.Logger = microloggertest.New()
+	config.ListenAddress = "http://127.0.0.1:8000"
 	config.Endpoints = []Endpoint{e}
 	config.TransactionResponder = testNewTransactionResponder(t)
 	config.HandlerWrapper = func(h http.Handler) http.Handler {
