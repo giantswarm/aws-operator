@@ -78,7 +78,8 @@ func New(config Config) (*Service, error) {
 		k8sConfig.TLS.CrtFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CrtFile)
 		k8sConfig.TLS.KeyFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.KeyFile)
 
-		k8sClient, err = k8sclient.NewClient(k8sConfig)
+
+		k8sClient, err = k8sclient.New(k8sConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
