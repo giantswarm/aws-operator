@@ -12,7 +12,7 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/tools/cache"
 
-	"github.com/giantswarm/operatorkit/framework/canceledcontext"
+	"github.com/giantswarm/operatorkit/framework/context/canceledcontext"
 )
 
 // Config represents the configuration used to create a new operator framework.
@@ -310,8 +310,6 @@ func (f *Framework) ProcessEvents(ctx context.Context, deleteChan chan watch.Eve
 				return nil
 			}
 		}
-
-		return nil
 	}
 
 	notifier := func(err error, d time.Duration) {
