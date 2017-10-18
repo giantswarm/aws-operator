@@ -70,7 +70,7 @@ func New(config Config) (*Service, error) {
 	// TODO this should come from operatorkit
 	var k8sClient kubernetes.Interface
 	{
-		k8sConfig := k8s.DefaultConfig()
+		k8sConfig := k8sclient.DefaultConfig()
 		k8sConfig.Address = config.Viper.GetString(config.Flag.Service.Kubernetes.Address)
 		k8sConfig.InCluster = config.Viper.GetBool(config.Flag.Service.Kubernetes.InCluster)
 		k8sConfig.Logger = config.Logger
@@ -78,7 +78,7 @@ func New(config Config) (*Service, error) {
 		k8sConfig.TLS.CrtFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CrtFile)
 		k8sConfig.TLS.KeyFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.KeyFile)
 
-		k8sClient, err = k8s.NewClient(k8sConfig)
+		k8sClient, err = k8sclient.NewClient(k8sConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
