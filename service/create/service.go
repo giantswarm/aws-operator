@@ -774,8 +774,8 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get security group '%s' ID: '%#v'", ingressSGInput.GroupName, err))
 	}
 
-	// In rare cases the host cluster CIDR block is nil. Return error rather
-	// that panic. TODO Fix issue #451 that tracks this.
+	// In rare cases the host cluster CIDR block can be nil. Return error rather
+	// than panic. TODO Fix issue #451 that tracks this.
 	if conn.AccepterVpcInfo.CidrBlock == nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("vpc peering connection cidr block is nil for cluster '%s'", key.ClusterID(cluster)))
 	}
@@ -920,18 +920,26 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		}
 	}
 
-	publicRoute := &awsresources.Route{
+	hostClusterRoute := &awsresources.Route{
 		RouteTable:             *publicRouteTable,
 		DestinationCidrBlock:   *conn.AccepterVpcInfo.CidrBlock,
 		VpcPeeringConnectionID: *conn.VpcPeeringConnectionId,
 		AWSEntity:              awsresources.AWSEntity{Clients: clients},
 	}
 
-	publicRouteCreated, err := publicRoute.CreateIfNotExists()
+	if key.HasClusterVersion(cluster) {
+		// New clusters have private IPs so use the private route table.
+		hostClusterRoute.RouteTable = *privateRouteTable
+	} else {
+		// Legacy clusters have public IPs so use the public route table.
+		hostClusterRoute.RouteTable = *publicRouteTable
+	}
+
+	hostRouteCreated, err := hostClusterRoute.CreateIfNotExists()
 	if err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not add host vpc route: '%#v'", err))
 	}
-	if publicRouteCreated {
+	if hostRouteCreated {
 		s.logger.Log("info", fmt.Sprintf("created host vpc route for cluster '%s'", key.ClusterID(cluster)))
 	} else {
 		s.logger.Log("info", fmt.Sprintf("host vpc route for cluster '%s' already exists, reusing", key.ClusterID(cluster)))
@@ -972,13 +980,18 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		clusterName:         key.ClusterID(cluster),
 		bucket:              bucket,
 		securityGroup:       mastersSecurityGroup,
-		subnet:              publicSubnet,
 		instanceProfileName: masterPolicy.GetName(),
 		prefix:              prefixMaster,
 	}
 
-	// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
-	if !key.HasClusterVersion(cluster) {
+	if key.HasClusterVersion(cluster) {
+		// New clusters have masters in the private subnet.
+		mastersInput.subnet = privateSubnet
+	} else {
+		// Legacy clusters have masters in the public subnet.
+		mastersInput.subnet = publicSubnet
+
+		// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
 		mastersInput.keyPairName = key.ClusterID(cluster)
 	}
 
