@@ -1,5 +1,5 @@
 hash: 4825e5e5dd4daf6c22025b330d50debf71d6e97d94b86452d3922296f39fbfcf
-updated: 2017-10-18T16:36:59.30660999+02:00
+updated: 2017-10-19T16:05:16.370383+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -44,7 +44,7 @@ imports:
   subpackages:
   - quantile
 - name: github.com/cenkalti/backoff
-  version: 61153c768f31ee5f130071d08fc82b85208528de
+  version: 61ba96c4d1002f22e06acb8e34a7650611125a63
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
   subpackages:
@@ -65,7 +65,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/awstpr
-  version: 20e8f3810c8b129e553083127d1a70f808736dbc
+  version: c69e66422c52838995f77f523c214434d1b2f30f
   subpackages:
   - spec
   - spec/aws
