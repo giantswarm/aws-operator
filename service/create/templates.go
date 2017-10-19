@@ -24,16 +24,16 @@ const (
 # gzip+base64 file (the final cloudconfig) from AWS S3 and run coreos-cloudinit
 # with it as an argument.
 
-# Wait for S3 domain to be available.
-s3_domain="s3.{{.Region}}.amazonaws.com"
-
-until nslookup $s3_domain; do
-    echo "waiting for $s3_domain to be available"
-    sleep 5
-done
-
 . /etc/environment
 USERDATA_FILE={{.MachineType}}
+
+# Wait for S3 bucket to be available.
+s3_http_uri="https://s3.{{.Region}}.amazonaws.com/{{.S3URI}}/cloudconfig/$USERDATA_FILE"
+
+until [ $(curl --output /dev/null --silent --head --fail -w "%{http_code}" $s3_http_uri) -eq "403" ]; do
+   echo "waiting for $s3_http_uri to be available"
+   sleep 5
+done
 
 /usr/bin/rkt run \
     --net=host \
