@@ -1,5 +1,5 @@
-hash: 65c18f8dbca16100769f0f432b87d73f0739836a8537eadf280ae376eab088df
-updated: 2017-10-19T14:26:28.708479+02:00
+hash: 756b3a3d5b0695fbc30f8cf1c1d2daed72f15ff442e6ce64c889553166a18691
+updated: 2017-10-19T15:34:30.207879+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -83,7 +83,7 @@ imports:
   - spec/kubernetes/networksetup
   - spec/kubernetes/ssh
 - name: github.com/giantswarm/k8scloudconfig
-  version: 15e9ecce1c3e5f6f42124313d89b00d7467fa331
+  version: f518035e5e3ae3969c561e6974d3bd434c248147
   subpackages:
   - v_0_1_0
 - name: github.com/giantswarm/microendpoint
