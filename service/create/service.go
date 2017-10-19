@@ -529,29 +529,29 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	}
 
 	// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
-	//if !key.HasClusterVersion(cluster) {
-	// Create keypair.
-	var keyPair resources.ReusableResource
-	var keyPairCreated bool
-	{
-		var err error
-		keyPair = &awsresources.KeyPair{
-			ClusterName: key.ClusterID(cluster),
-			Provider:    awsresources.NewFSKeyPairProvider(s.pubKeyFile),
-			AWSEntity:   awsresources.AWSEntity{Clients: clients},
+	if !key.HasClusterVersion(cluster) {
+		// Create keypair.
+		var keyPair resources.ReusableResource
+		var keyPairCreated bool
+		{
+			var err error
+			keyPair = &awsresources.KeyPair{
+				ClusterName: key.ClusterID(cluster),
+				Provider:    awsresources.NewFSKeyPairProvider(s.pubKeyFile),
+				AWSEntity:   awsresources.AWSEntity{Clients: clients},
+			}
+			keyPairCreated, err = keyPair.CreateIfNotExists()
+			if err != nil {
+				return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create keypair: '%#v'", err))
+			}
 		}
-		keyPairCreated, err = keyPair.CreateIfNotExists()
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create keypair: '%#v'", err))
-		}
-	}
 
-	if keyPairCreated {
-		s.logger.Log("info", fmt.Sprintf("created keypair '%s'", key.ClusterID(cluster)))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("keypair '%s' already exists, reusing", key.ClusterID(cluster)))
+		if keyPairCreated {
+			s.logger.Log("info", fmt.Sprintf("created keypair '%s'", key.ClusterID(cluster)))
+		} else {
+			s.logger.Log("info", fmt.Sprintf("keypair '%s' already exists, reusing", key.ClusterID(cluster)))
+		}
 	}
-	//}
 
 	s.logger.Log("info", fmt.Sprintf("waiting for k8s secrets..."))
 	clusterID := key.ClusterID(cluster)
@@ -987,9 +987,6 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	if key.HasClusterVersion(cluster) {
 		// New clusters have masters in the private subnet.
 		mastersInput.subnet = privateSubnet
-
-		// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
-		mastersInput.keyPairName = key.ClusterID(cluster)
 	} else {
 		// Legacy clusters have masters in the public subnet.
 		mastersInput.subnet = publicSubnet
