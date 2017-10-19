@@ -10,14 +10,14 @@ users:
        - "{{ $user.PublicKey }}"
 {{end}}
 write_files:
-- path: /srv/calico-policy-controller-sa.yaml
+- path: /srv/calico-kube-controllers-sa.yaml
   owner: root
   permissions: 644
   content: |
     apiVersion: v1
     kind: ServiceAccount
     metadata:
-      name: calico-policy-controller
+      name: calico-kube-controllers
       namespace: kube-system
 - path: /srv/calico-node-sa.yaml
   owner: root
@@ -32,12 +32,12 @@ write_files:
   owner: root
   permissions: 644
   content: |
-    # Calico Version v2.5.1
-    # https://docs.projectcalico.org/v2.5/releases#v2.5.1
+    # Calico Version v2.6.2
+    # https://docs.projectcalico.org/v2.6/releases#v2.6.2
     # This manifest includes the following component versions:
-    #   calico/node:v2.5.1
-    #   calico/cni:v1.10.0
-    #   calico/kube-policy-controller:v0.7.0
+    #   calico/node:v2.6.2
+    #   calico/cni:v1.11.0
+    #   calico/kube-controllers:v1.0.0
 
     # This ConfigMap is used to configure a self-hosted Calico installation.
     kind: ConfigMap
@@ -126,7 +126,7 @@ write_files:
             # container programs network policy and routes on each
             # host.
             - name: calico-node
-              image: quay.io/calico/node:v2.5.1
+              image: quay.io/calico/node:v2.6.2
               env:
                 # The location of the Calico etcd cluster.
                 - name: ETCD_ENDPOINTS
@@ -215,7 +215,7 @@ write_files:
             # This container installs the Calico CNI binaries
             # and CNI network config file on each node.
             - name: install-cni
-              image: quay.io/calico/cni:v1.10.0
+              image: quay.io/calico/cni:v1.11.0
               command: ["/install-cni.sh"]
               env:
                 # The location of the Calico etcd cluster.
@@ -272,24 +272,21 @@ write_files:
             - name: cni-net-dir
               hostPath:
                path: /etc/cni/net.d
-- path: /srv/calico-policy-controller.yaml
+- path: /srv/calico-kube-controllers.yaml
   owner: root
   permissions: 644
   content: |
-    # This manifest deploys the Calico policy controller on Kubernetes.
-    # See https://github.com/projectcalico/k8s-policy
+    # This manifest deploys the Calico Kubernetes controllers.
+    # See https://github.com/projectcalico/kube-controllers
     apiVersion: extensions/v1beta1
     kind: Deployment
     metadata:
-      name: calico-policy-controller
+      name: calico-kube-controllers
       namespace: kube-system
       labels:
-        k8s-app: calico-policy
+        k8s-app: calico-kube-controllers
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: ''
-        scheduler.alpha.kubernetes.io/tolerations: |
-          [{"key": "dedicated", "value": "master", "effect": "NoSchedule" },
-           {"key":"CriticalAddonsOnly", "operator":"Exists"}]
     spec:
       # The policy controller can only have a single active instance.
       replicas: 1
@@ -297,18 +294,24 @@ write_files:
         type: Recreate
       template:
         metadata:
-          name: calico-policy-controller
+          name: calico-kube-controllers
           namespace: kube-system
           labels:
-            k8s-app: calico-policy
+            k8s-app: calico-kube-controllers
         spec:
-          # The policy controller must run in the host network namespace so that
+          tolerations:
+          - key: node-role.kubernetes.io/master
+            operator: Exists
+            effect: NoSchedule
+          - key: CriticalAddonsOnly
+            operator: Exists
+          # The controllers must run in the host network namespace so that
           # it isn't governed by policy that would prevent it from working.
           hostNetwork: true
-          serviceAccountName: calico-policy-controller
+          serviceAccountName: calico-kube-controllers
           containers:
-            - name: calico-policy-controller
-              image: quay.io/calico/kube-policy-controller:v0.7.0
+            - name: calico-kube-controllers
+              image: quay.io/calico/kube-controllers:v1.0.0
               env:
                 # The location of the Calico etcd cluster.
                 - name: ETCD_ENDPOINTS
@@ -334,7 +337,7 @@ write_files:
                     configMapKeyRef:
                       name: calico-config
                       key: etcd_cert
-                # The location of the Kubernetes API.  Use the default Kubernetes
+                # The location of the Kubernetes API. Use the default Kubernetes
                 # service for API access.
                 - name: K8S_API
                   value: "https://{{.Cluster.Kubernetes.API.Domain}}:443"
@@ -823,14 +826,14 @@ write_files:
     kind: ClusterRoleBinding
     apiVersion: rbac.authorization.k8s.io/v1beta1
     metadata:
-      name: calico-policy-controller
+      name: calico-kube-controllers
     subjects:
     - kind: ServiceAccount
-      name: calico-policy-controller
+      name: calico-kube-controllers
       namespace: kube-system
     roleRef:
       kind: ClusterRole
-      name: calico-policy-controller
+      name: calico-kube-controllers
       apiGroup: rbac.authorization.k8s.io
     ---
     kind: ClusterRoleBinding
@@ -895,7 +898,7 @@ write_files:
     kind: ClusterRole
     apiVersion: rbac.authorization.k8s.io/v1beta1
     metadata:
-      name: calico-policy-controller
+      name: calico-kube-controllers
       namespace: kube-system
     rules:
       - apiGroups:
@@ -1033,6 +1036,7 @@ write_files:
     metadata:
       name: privileged
     spec:
+      allowPrivilegeEscalation: true
       fsGroup:
         rule: RunAsAny
       privileged: true
@@ -1123,7 +1127,7 @@ write_files:
       name: calico-node
       namespace: kube-system
     - kind: ServiceAccount
-      name: calico-policy-controller
+      name: calico-kube-controllers
       namespace: kube-system
     - kind: ServiceAccount
       name: kube-dns
@@ -1168,7 +1172,8 @@ write_files:
   permissions: 0544
   content: |
       #!/bin/bash
-      KUBECTL={{.Cluster.Kubernetes.Kubectl.Docker.Image}}
+      # kubectl 1.8.1
+      KUBECTL=quay.io/giantswarm/docker-kubectl:1dc536ec6dc4597ba46769b3d5d6ce53a7e62038
 
       /usr/bin/docker pull $KUBECTL
 
@@ -1190,7 +1195,7 @@ write_files:
       done
 
       # apply calico CNI
-      CALICO_FILES="calico-configmap.yaml calico-node-sa.yaml calico-policy-controller-sa.yaml calico-ds.yaml calico-policy-controller.yaml"
+      CALICO_FILES="calico-configmap.yaml calico-node-sa.yaml calico-kube-controllers-sa.yaml calico-ds.yaml calico-kube-controllers.yaml"
 
       for manifest in $CALICO_FILES
       do
@@ -1258,6 +1263,7 @@ write_files:
     - name: local
       cluster:
         certificate-authority: /etc/kubernetes/ssl/apiserver-ca.pem
+        server: https://{{.Cluster.Kubernetes.API.Domain}}
     contexts:
     - context:
         cluster: local
@@ -1279,6 +1285,7 @@ write_files:
     - name: local
       cluster:
         certificate-authority: /etc/kubernetes/ssl/apiserver-ca.pem
+        server: https://{{.Cluster.Kubernetes.API.Domain}}
     contexts:
     - context:
         cluster: local
@@ -1300,6 +1307,7 @@ write_files:
     - name: local
       cluster:
         certificate-authority: /etc/kubernetes/ssl/apiserver-ca.pem
+        server: https://{{.Cluster.Kubernetes.API.Domain}}
     contexts:
     - context:
         cluster: local
@@ -1321,6 +1329,7 @@ write_files:
     - name: local
       cluster:
         certificate-authority: /etc/kubernetes/ssl/apiserver-ca.pem
+        server: https://{{.Cluster.Kubernetes.API.Domain}}
     contexts:
     - context:
         cluster: local
@@ -1586,7 +1595,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE={{.Cluster.Kubernetes.Hyperkube.Docker.Image}}"
+      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.8.1_coreos.0"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
@@ -1599,7 +1608,6 @@ coreos:
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
       $IMAGE \
       /hyperkube proxy \
-      --master=https://{{.Cluster.Kubernetes.API.Domain}} \
       --proxy-mode=iptables \
       --logtostderr=true \
       --kubeconfig=/etc/kubernetes/config/proxy-kubeconfig.yml \
@@ -1620,7 +1628,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE={{.Cluster.Kubernetes.Hyperkube.Docker.Image}}"
+      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.8.1_coreos.0"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
@@ -1651,7 +1659,6 @@ coreos:
       --address=${DEFAULT_IPV4} \
       --port={{.Cluster.Kubernetes.Kubelet.Port}} \
       --node-ip=${DEFAULT_IPV4} \
-      --api-servers=https://{{.Cluster.Kubernetes.API.Domain}} \
       --containerized \
       --enable-server \
       --logtostderr=true \
@@ -1707,7 +1714,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE={{.Cluster.Kubernetes.Hyperkube.Docker.Image}}"
+      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.8.1_coreos.0"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/mkdir -p /etc/kubernetes/manifests
@@ -1766,7 +1773,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE={{.Cluster.Kubernetes.Hyperkube.Docker.Image}}"
+      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.8.1_coreos.0"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
@@ -1778,7 +1785,6 @@ coreos:
       -v /etc/kubernetes/secrets/token_sign_key.pem:/etc/kubernetes/secrets/token_sign_key.pem \
       $IMAGE \
       /hyperkube controller-manager \
-      --master=https://{{.Cluster.Kubernetes.API.Domain}}:443 \
       --logtostderr=true \
       --v=2 \
       --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
@@ -1803,7 +1809,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE={{.Cluster.Kubernetes.Hyperkube.Docker.Image}}"
+      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.8.1_coreos.0"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
@@ -1814,7 +1820,6 @@ coreos:
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
       $IMAGE \
       /hyperkube scheduler \
-      --master=https://{{.Cluster.Kubernetes.API.Domain}}:443 \
       --logtostderr=true \
       --v=2 \
       --profiling=false \
