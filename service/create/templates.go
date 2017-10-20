@@ -29,8 +29,15 @@ USERDATA_FILE={{.MachineType}}
 
 # Wait for S3 bucket to be available.
 s3_http_uri="https://s3.{{.Region}}.amazonaws.com/{{.S3URI}}/cloudconfig/$USERDATA_FILE"
+retry=30 
 
 until [ $(curl --output /dev/null --silent --head --fail -w "%{http_code}" $s3_http_uri) -eq "403" ]; do
+   retry=$(( retry - 1))
+   if [ $retry -le 0 ]; then
+     echo "timed out waiting for s3 bucket"
+     exit 1
+   fi
+
    echo "waiting for $s3_http_uri to be available"
    sleep 5
 done
