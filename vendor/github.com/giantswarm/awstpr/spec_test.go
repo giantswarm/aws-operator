@@ -9,6 +9,7 @@ import (
 
 	"github.com/giantswarm/awstpr/spec"
 	"github.com/giantswarm/awstpr/spec/aws"
+	"github.com/giantswarm/awstpr/spec/aws/elb"
 	"github.com/giantswarm/clustertpr"
 	clustertprspec "github.com/giantswarm/clustertpr/spec"
 	clustertprdocker "github.com/giantswarm/clustertpr/spec/docker"
@@ -124,6 +125,13 @@ func TestSpecYamlEncoding(t *testing.T) {
 		AWS: spec.AWS{
 			Region: "eu-central-1",
 			AZ:     "eu-central-1a",
+			ELB: aws.ELB{
+				IdleTimeoutSeconds: elb.IdleTimeoutSeconds{
+					API:     120,
+					Etcd:    60,
+					Ingress: 60,
+				},
+			},
 			VPC: aws.VPC{
 				CIDR:              "10.0.0.0/16",
 				PrivateSubnetCIDR: "10.0.0.0/19",
