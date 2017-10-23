@@ -25,6 +25,7 @@ write_files:
     - name: local
       cluster:
         certificate-authority: /etc/kubernetes/ssl/worker-ca.pem
+        server: https://{{.Cluster.Kubernetes.API.Domain}}
     contexts:
     - context:
         cluster: local
@@ -46,6 +47,7 @@ write_files:
     - name: local
       cluster:
         certificate-authority: /etc/kubernetes/ssl/worker-ca.pem
+        server: https://{{.Cluster.Kubernetes.API.Domain}}
     contexts:
     - context:
         cluster: local
@@ -235,7 +237,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE={{.Cluster.Kubernetes.Hyperkube.Docker.Image}}"
+      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.8.1_coreos.0"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
@@ -248,7 +250,6 @@ coreos:
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
       $IMAGE \
       /hyperkube proxy \
-      --master=https://{{.Cluster.Kubernetes.API.Domain}} \
       --proxy-mode=iptables \
       --logtostderr=true \
       --kubeconfig=/etc/kubernetes/config/proxy-kubeconfig.yml \
@@ -269,7 +270,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE={{.Cluster.Kubernetes.Hyperkube.Docker.Image}}"
+      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.8.1_coreos.0"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
@@ -300,7 +301,6 @@ coreos:
       --address=${DEFAULT_IPV4} \
       --port={{.Cluster.Kubernetes.Kubelet.Port}} \
       --node-ip=${DEFAULT_IPV4} \
-      --api-servers=https://{{.Cluster.Kubernetes.API.Domain}} \
       --containerized \
       --enable-server \
       --logtostderr=true \
