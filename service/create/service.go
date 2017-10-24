@@ -1007,11 +1007,11 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 
 	// Create apiserver load balancer.
 	lbInput := LoadBalancerInput{
-		Name:        cluster.Spec.Cluster.Kubernetes.API.Domain,
-		Clients:     clients,
-		Cluster:     cluster,
+		Name:               cluster.Spec.Cluster.Kubernetes.API.Domain,
+		Clients:            clients,
+		Cluster:            cluster,
 		IdleTimeoutSeconds: cluster.Spec.AWS.ELB.IdleTimeoutSeconds.API,
-		InstanceIDs: masterIDs,
+		InstanceIDs:        masterIDs,
 		PortsToOpen: awsresources.PortPairs{
 			{
 				PortELB:      cluster.Spec.Cluster.Kubernetes.API.SecurePort,
@@ -1034,11 +1034,11 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 
 	// Create etcd load balancer.
 	lbInput = LoadBalancerInput{
-		Name:        cluster.Spec.Cluster.Etcd.Domain,
-		Clients:     clients,
-		Cluster:     cluster,
+		Name:               cluster.Spec.Cluster.Etcd.Domain,
+		Clients:            clients,
+		Cluster:            cluster,
 		IdleTimeoutSeconds: cluster.Spec.AWS.ELB.IdleTimeoutSeconds.Etcd,
-		InstanceIDs: masterIDs,
+		InstanceIDs:        masterIDs,
 		PortsToOpen: awsresources.PortPairs{
 			{
 				PortELB:      httpsPort,
@@ -1067,9 +1067,9 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 
 	// Create Ingress load balancer.
 	lbInput = LoadBalancerInput{
-		Name:    cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-		Clients: clients,
-		Cluster: cluster,
+		Name:               cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+		Clients:            clients,
+		Cluster:            cluster,
 		IdleTimeoutSeconds: cluster.Spec.AWS.ELB.IdleTimeoutSeconds.Ingress,
 		PortsToOpen: awsresources.PortPairs{
 			{
