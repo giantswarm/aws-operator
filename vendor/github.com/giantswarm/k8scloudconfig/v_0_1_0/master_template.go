@@ -10,7 +10,7 @@ users:
        - "{{ $user.PublicKey }}"
 {{end}}
 write_files:
-- path: /srv/calico-kube-controllers-sa.yaml
+- path: /srv/calico-node-controller-sa.yaml
   owner: root
   permissions: 644
   content: |
@@ -849,6 +849,19 @@ write_files:
       name: calico-node
       apiGroup: rbac.authorization.k8s.io
     ---
+    kind: ClusterRoleBinding
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    metadata:
+      name: calico-node-controller
+    subjects:
+    - kind: ServiceAccount
+      name: calico-node-controller
+      namespace: kube-system
+    roleRef:
+      kind: ClusterRole
+      name: calico-node-controller
+      apiGroup: rbac.authorization.k8s.io
+    ---
     ## DNS
     kind: ClusterRoleBinding
     apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -924,6 +937,21 @@ write_files:
           - nodes
         verbs:
           - get
+    ---
+    kind: ClusterRole
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    metadata:
+      name: calico-node-controller
+      namespace: kube-system
+    rules:
+      - apiGroups:
+        - ""
+        - extensions
+        resources:
+          - nodes
+        verbs:
+          - watch
+          - list
     ---
     ## IC
     apiVersion: v1
@@ -1089,7 +1117,7 @@ write_files:
     kind: ClusterRole
     metadata:
       name: restricted-psp-user
-    rules: 
+    rules:
     - apiGroups:
       - extensions
       resources:
@@ -1105,7 +1133,7 @@ write_files:
     kind: ClusterRole
     metadata:
       name: privileged-psp-user
-    rules: 
+    rules:
     - apiGroups:
       - extensions
       resources:
@@ -1128,6 +1156,9 @@ write_files:
       namespace: kube-system
     - kind: ServiceAccount
       name: calico-kube-controllers
+      namespace: kube-system
+    - kind: ServiceAccount
+      name: calico-node-controller
       namespace: kube-system
     - kind: ServiceAccount
       name: kube-dns
@@ -1195,7 +1226,13 @@ write_files:
       done
 
       # apply calico CNI
-      CALICO_FILES="calico-configmap.yaml calico-node-sa.yaml calico-kube-controllers-sa.yaml calico-ds.yaml calico-kube-controllers.yaml"
+      CALICO_FILES="calico-configmap.yaml\
+       calico-node-sa.yaml\
+       calico-kube-controllers-sa.yaml\
+       calico-ds.yaml\
+       calico-kube-controllers.yaml\
+       calico-node-controller-sa.yaml\
+       calico-node-controller.yaml"
 
       for manifest in $CALICO_FILES
       do
@@ -1447,6 +1484,7 @@ coreos:
       TimeoutStartSec=0
       ExecStart=/usr/bin/mkdir -p /etc/kubernetes/data/etcd
       ExecStart=/usr/bin/chown etcd:etcd /etc/kubernetes/data/etcd
+      ExecStart=/usr/bin/chmod -R 700 /etc/kubernetes/data/etcd
   - name: docker.service
     enable: true
     command: start
