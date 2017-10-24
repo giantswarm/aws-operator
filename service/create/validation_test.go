@@ -268,19 +268,18 @@ func TestValidateELBSparseStruct(t *testing.T) {
 // Specific test with a missing IdleTimeoutSeconds struct
 func TestValidateELBMissingStruct(t *testing.T) {
 	tests := []struct {
-		name                   string
-		expectedError          error
+		name          string
+		expectedError error
 	}{
 		{
-			name: "Valid timeout missing value invokes default",
-			expectedError:          nil,
+			name:          "Valid timeout missing value invokes default",
+			expectedError: nil,
 		},
 	}
 
 	for _, tc := range tests {
-		elb := aws.ELB{
-			// Missing nested structs
-		}
+		// Missing nested structs
+		elb := aws.ELB{}
 
 		err := validateELB(elb)
 		assert.Equal(t, tc.expectedError, microerror.Cause(err), tc.name)
