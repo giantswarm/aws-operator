@@ -1557,6 +1557,7 @@ coreos:
       TimeoutStartSec=0
       ExecStart=/usr/bin/mkdir -p /etc/kubernetes/data/etcd
       ExecStart=/usr/bin/chown etcd:etcd /etc/kubernetes/data/etcd
+      ExecStart=/usr/bin/chmod -R 700 /etc/kubernetes/data/etcd
   - name: docker.service
     enable: true
     command: start
