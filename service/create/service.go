@@ -1010,6 +1010,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		Name:        cluster.Spec.Cluster.Kubernetes.API.Domain,
 		Clients:     clients,
 		Cluster:     cluster,
+		IdleTimeoutSeconds: cluster.Spec.AWS.ELB.IdleTimeoutSeconds.API,
 		InstanceIDs: masterIDs,
 		PortsToOpen: awsresources.PortPairs{
 			{
@@ -1036,6 +1037,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		Name:        cluster.Spec.Cluster.Etcd.Domain,
 		Clients:     clients,
 		Cluster:     cluster,
+		IdleTimeoutSeconds: cluster.Spec.AWS.ELB.IdleTimeoutSeconds.Etcd,
 		InstanceIDs: masterIDs,
 		PortsToOpen: awsresources.PortPairs{
 			{
@@ -1068,6 +1070,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		Name:    cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
 		Clients: clients,
 		Cluster: cluster,
+		IdleTimeoutSeconds: cluster.Spec.AWS.ELB.IdleTimeoutSeconds.Ingress,
 		PortsToOpen: awsresources.PortPairs{
 			{
 				PortELB:      httpsPort,

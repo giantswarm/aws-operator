@@ -74,6 +74,11 @@ spec:
   aws:
     region: "{{.Values.aws.region}}"
     az: "{{.Values.aws.az}}"
+    elb:
+      idleTimeoutSeconds:
+        api: 120
+        etcd: 60
+        ingress: 60
     hostedZones:
       api: "{{.Values.aws.apiHostedZone}}"
       etcd: "{{.Values.aws.apiHostedZone}}"

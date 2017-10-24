@@ -12,6 +12,8 @@ import (
 
 const (
 	availabilityZoneFormat = "[\\d][a-z]"
+	// Maximum AWS idle timeout is 60 minutes
+	maxIdleTimeout = 60 * 60
 )
 
 func validateAvailabilityZone(cluster awstpr.CustomObject) error {
@@ -34,6 +36,20 @@ func validateAvailabilityZone(cluster awstpr.CustomObject) error {
 	}
 	if !regEx.MatchString(strings.Split(az, "-")[2]) {
 		return microerror.Mask(invalidAvailabilityZoneError)
+	}
+
+	return nil
+}
+
+func validateELB(elb aws.ELB) error {
+	if elb.IdleTimeoutSeconds.API > maxIdleTimeout {
+		return microerror.Maskf(idleTimeoutSecondsOutOfRangeError, idleTimeoutSecondsOutOfRangeErrorFormat, "api")
+	}
+	if elb.IdleTimeoutSeconds.Etcd > maxIdleTimeout {
+		return microerror.Maskf(idleTimeoutSecondsOutOfRangeError, idleTimeoutSecondsOutOfRangeErrorFormat, "etcd")
+	}
+	if elb.IdleTimeoutSeconds.Ingress > maxIdleTimeout {
+		return microerror.Maskf(idleTimeoutSecondsOutOfRangeError, idleTimeoutSecondsOutOfRangeErrorFormat, "ingress")
 	}
 
 	return nil
@@ -73,6 +89,10 @@ func validateWorkers(awsWorkers []aws.Node, workers []spec.Node) error {
 
 func validateCluster(cluster awstpr.CustomObject) error {
 	if err := validateAvailabilityZone(cluster); err != nil {
+		return microerror.Mask(err)
+	}
+
+	if err := validateELB(cluster.Spec.AWS.ELB); err != nil {
 		return microerror.Mask(err)
 	}
 

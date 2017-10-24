@@ -12,16 +12,17 @@ import (
 
 // ELB is an Elastic Load Balancer
 type ELB struct {
-	Name          string
-	dnsName       string
-	hostedZoneID  string
-	AZ            string
-	SecurityGroup string
-	SubnetID      string
-	Scheme        string
-	Tags          []string
-	PortsToOpen   PortPairs
-	Client        *elb.ELB
+	AZ                 string
+	Client             *elb.ELB
+	dnsName            string
+	hostedZoneID       string
+	IdleTimeoutSeconds int
+	Name               string
+	PortsToOpen        PortPairs
+	Scheme             string
+	SecurityGroup      string
+	SubnetID           string
+	Tags               []string
 }
 
 // PortPair is a pair of ports.
@@ -47,6 +48,8 @@ const (
 	healthCheckInterval           = 5
 	healthCheckTimeout            = 3
 	healthCheckUnhealthyThreshold = 2
+	// Default value for connections, AWS default is 60
+	idleTimeoutSeconds = 60
 )
 
 func (lb *ELB) CreateIfNotExists() (bool, error) {
@@ -74,6 +77,10 @@ func (lb *ELB) CreateOrFail() error {
 	}
 	if len(lb.PortsToOpen) == 0 {
 		return microerror.Maskf(attributeEmptyError, attributeEmptyErrorFormat, "portsToOpen")
+	}
+	if lb.IdleTimeoutSeconds <= 0 {
+		// Set to default if zero (struct initialization) or negative (invalid config)
+		lb.IdleTimeoutSeconds = idleTimeoutSeconds
 	}
 
 	var listeners []*elb.Listener
@@ -109,6 +116,18 @@ func (lb *ELB) CreateOrFail() error {
 			Target:             aws.String(fmt.Sprintf("TCP:%d", lb.PortsToOpen[0].PortInstance)),
 			Timeout:            aws.Int64(int64(healthCheckTimeout)),
 			UnhealthyThreshold: aws.Int64(int64(healthCheckUnhealthyThreshold)),
+		},
+		LoadBalancerName: aws.String(lb.Name),
+	}); err != nil {
+		return microerror.Mask(err)
+	}
+
+	// Configure additional attributes
+	if _, err := lb.Client.ModifyLoadBalancerAttributes(&elb.ModifyLoadBalancerAttributesInput{
+		LoadBalancerAttributes: &elb.LoadBalancerAttributes{
+			ConnectionSettings: &elb.ConnectionSettings{
+				IdleTimeout: aws.Int64(int64(lb.IdleTimeoutSeconds)),
+			},
 		},
 		LoadBalancerName: aws.String(lb.Name),
 	}); err != nil {

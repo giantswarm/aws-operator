@@ -7,6 +7,7 @@ import (
 
 	awsspec "github.com/giantswarm/awstpr/spec"
 	"github.com/giantswarm/awstpr/spec/aws"
+	"github.com/giantswarm/awstpr/spec/aws/elb"
 	"github.com/giantswarm/clustertpr/spec"
 	"github.com/giantswarm/microerror"
 	"github.com/stretchr/testify/assert"
@@ -178,6 +179,110 @@ func TestValidateWorkers(t *testing.T) {
 
 	for _, tc := range tests {
 		err := validateWorkers(tc.awsWorkers, tc.workers)
+		assert.Equal(t, tc.expectedError, microerror.Cause(err), tc.name)
+	}
+}
+
+func TestValidateELB(t *testing.T) {
+	tests := []struct {
+		name                      string
+		idleTimeoutSecondsAPI     int
+		idleTimeoutSecondsEtcd    int
+		idleTimeoutSecondsIngress int
+		expectedError             error
+	}{
+		{
+			name: "Valid timeout",
+			idleTimeoutSecondsAPI:     60,
+			idleTimeoutSecondsEtcd:    60,
+			idleTimeoutSecondsIngress: 60,
+			expectedError:             nil,
+		},
+		{
+			name: "Valid timeout negative timeout invokes default",
+			idleTimeoutSecondsAPI:     -1,
+			idleTimeoutSecondsEtcd:    -1,
+			idleTimeoutSecondsIngress: -1,
+			expectedError:             nil,
+		},
+		{
+			name: "Valid timeout zero invokes default",
+			idleTimeoutSecondsAPI:     0,
+			idleTimeoutSecondsEtcd:    0,
+			idleTimeoutSecondsIngress: 0,
+			expectedError:             nil,
+		},
+		{
+			name: "Invalid timeout exceeds maximum",
+			idleTimeoutSecondsAPI:     3601,
+			idleTimeoutSecondsEtcd:    3601,
+			idleTimeoutSecondsIngress: 3601,
+			expectedError:             idleTimeoutSecondsOutOfRangeError,
+		},
+	}
+
+	for _, tc := range tests {
+		elb := aws.ELB{
+			IdleTimeoutSeconds: elb.IdleTimeoutSeconds{
+				API:     tc.idleTimeoutSecondsAPI,
+				Etcd:    tc.idleTimeoutSecondsEtcd,
+				Ingress: tc.idleTimeoutSecondsIngress,
+			},
+		}
+
+		err := validateELB(elb)
+		assert.Equal(t, tc.expectedError, microerror.Cause(err), tc.name)
+	}
+}
+
+// Specific test with a missing value in the ELB struct
+func TestValidateELBSparseStruct(t *testing.T) {
+	tests := []struct {
+		name                   string
+		idleTimeoutSecondsAPI  int
+		idleTimeoutSecondsEtcd int
+		expectedError          error
+	}{
+		{
+			name: "Valid timeout missing value invokes default",
+			idleTimeoutSecondsAPI:  60,
+			idleTimeoutSecondsEtcd: 60,
+			expectedError:          nil,
+		},
+	}
+
+	for _, tc := range tests {
+		elb := aws.ELB{
+			IdleTimeoutSeconds: elb.IdleTimeoutSeconds{
+				API:  tc.idleTimeoutSecondsAPI,
+				Etcd: tc.idleTimeoutSecondsEtcd,
+				// Ingress:
+			},
+		}
+
+		err := validateELB(elb)
+		assert.Equal(t, tc.expectedError, microerror.Cause(err), tc.name)
+	}
+}
+
+// Specific test with a missing IdleTimeoutSeconds struct
+func TestValidateELBMissingStruct(t *testing.T) {
+	tests := []struct {
+		name                   string
+		expectedError          error
+	}{
+		{
+			name: "Valid timeout missing value invokes default",
+			expectedError:          nil,
+		},
+	}
+
+	for _, tc := range tests {
+		elb := aws.ELB{
+			// Missing nested structs
+		}
+
+		err := validateELB(elb)
 		assert.Equal(t, tc.expectedError, microerror.Cause(err), tc.name)
 	}
 }
