@@ -17,6 +17,79 @@ write_files:
     apiVersion: v1
     kind: ServiceAccount
     metadata:
+      name: calico-node-controller
+      namespace: kube-system
+- path: /srv/calico-node-controller.yaml
+  owner: root
+  permissions: 644
+  content: |
+    apiVersion: extensions/v1beta1
+    kind: Deployment
+    metadata:
+      name: calico-node-controller
+      namespace: kube-system
+      labels:
+        k8s-app: calico-node-controller
+    spec:
+      replicas: 1
+      strategy:
+        type: Recreate
+      template:
+        metadata:
+          name: calico-node-controller
+          namespace: kube-system
+          labels:
+            k8s-app: calico-node-controller
+        spec:
+          serviceAccountName: calico-node-controller
+          containers:
+            - name: calico-node-controller
+              image: quay.io/giantswarm/calico-node-controller
+              env:
+                # The location of the Calico etcd cluster.
+                - name: ETCD_ENDPOINTS
+                  valueFrom:
+                    configMapKeyRef:
+                      name: calico-config
+                      key: etcd_endpoints
+                # Location of the CA certificate for etcd.
+                - name: ETCD_CA_CERT_FILE
+                  valueFrom:
+                    configMapKeyRef:
+                      name: calico-config
+                      key: etcd_ca
+                # Location of the client key for etcd.
+                - name: ETCD_KEY_FILE
+                  valueFrom:
+                    configMapKeyRef:
+                      name: calico-config
+                      key: etcd_key
+                # Location of the client certificate for etcd.
+                - name: ETCD_CERT_FILE
+                  valueFrom:
+                    configMapKeyRef:
+                      name: calico-config
+                      key: etcd_cert
+                # The location of the Kubernetes API.  Use the default Kubernetes
+                # service for API access.
+                - name: K8S_API
+                  value: "https://kubernetes.default:443"
+              volumeMounts:
+                # Mount in the etcd TLS secrets.
+                - mountPath: /etc/kubernetes/ssl/etcd
+                  name: etcd-certs
+          volumes:
+            # Mount in the etcd TLS secrets.
+            - name: etcd-certs
+              hostPath:
+                path: /etc/kubernetes/ssl/etcd
+- path: /srv/calico-kube-controllers-sa.yaml
+  owner: root
+  permissions: 644
+  content: |
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
       name: calico-kube-controllers
       namespace: kube-system
 - path: /srv/calico-node-sa.yaml
@@ -1117,7 +1190,7 @@ write_files:
     kind: ClusterRole
     metadata:
       name: restricted-psp-user
-    rules:
+    rules: 
     - apiGroups:
       - extensions
       resources:
@@ -1133,7 +1206,7 @@ write_files:
     kind: ClusterRole
     metadata:
       name: privileged-psp-user
-    rules:
+    rules: 
     - apiGroups:
       - extensions
       resources:
