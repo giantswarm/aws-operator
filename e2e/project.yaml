@@ -1,0 +1,20 @@
+version: 1
+setup:
+  - run: helm registry install quay.io/giantswarm/cert-operator-lab-chart -- --set imageTag=latest --set clusterName=my-cluster --wait
+    waitFor:
+      run: kubectl get certificate
+      match: No resources found\.
+
+  - run: helm registry install quay.io/giantswarm/cert-resource-lab-chart -- --set clusterName=my-cluster
+    waitFor:
+      run: kubectl get secrets
+      match: my-cluster-api\s*Opaque
+
+outOfClusterTest:
+  - run: helm registry install quay.io/giantswarm/aws-operator-lab-chart -- --set imageTag=${CIRCLE_SHA1}
+    waitFor:
+      run: kubectl get pods
+      match: aws-operator-local-.*\s*1/1\s*Running
+
+inClusterTest:
+  enabled: false
