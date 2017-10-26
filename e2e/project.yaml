@@ -5,6 +5,3 @@ outOfClusterTest:
     waitFor:
       run: kubectl get pods
       match: aws-operator-local-.*\s*1/1\s*Running
-
-inClusterTest:
-  enabled: false
