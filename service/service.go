@@ -16,6 +16,7 @@ import (
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
+	"github.com/giantswarm/aws-operator/service/alerter"
 	"github.com/giantswarm/aws-operator/service/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/create"
 	"github.com/giantswarm/aws-operator/service/healthz"
@@ -134,6 +135,22 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var alerterService *alerter.Service
+	{
+		// Set the region, in the operator this comes from the cluster object.
+		awsConfig.Region = config.Viper.GetString(config.Flag.Service.AWS.Region)
+
+		alerterConfig := alerter.DefaultConfig()
+		alerterConfig.AwsConfig = awsConfig
+		alerterConfig.K8sClient = k8sClient
+		alerterConfig.Logger = config.Logger
+
+		alerterService, err = alerter.New(alerterConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var ccService *cloudconfig.CloudConfig
 	{
 		ccServiceConfig := cloudconfig.DefaultConfig()
@@ -193,6 +210,7 @@ func New(config Config) (*Service, error) {
 
 	newService := &Service{
 		// Dependencies.
+		Alerter: alerterService,
 		Create:  createService,
 		Healthz: healthzService,
 		Version: versionService,
@@ -206,6 +224,7 @@ func New(config Config) (*Service, error) {
 
 type Service struct {
 	// Dependencies.
+	Alerter *alerter.Service
 	Create  *create.Service
 	Healthz *healthz.Service
 	Version *version.Service
@@ -216,6 +235,10 @@ type Service struct {
 
 func (s *Service) Boot() {
 	s.bootOnce.Do(func() {
+		// Start alerts to check for orphan resources.
+		s.Alerter.StartAlerts()
+
+		// Start the operator.
 		s.Create.Boot()
 	})
 }
