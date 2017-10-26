@@ -77,9 +77,11 @@ $ helm install -n aws-resource-lab ./aws-resource-lab-chart/ --wait
 `aws-operator-lab-chart` accepts the following configuration parameters:
 * `idRsaPub` - SSH public key to be installed on nodes.
 * `aws.accessKeyId` - AWS access key.
+* `aws.installationName` - used for tagging resources.
+* `aws.region` - AWS region.
 * `aws.secretAccessKey` - AWS secret.
 * `aws.sessionToken` - AWS session token for MFA accounts; can be left empty.
-* `imgeTag` - Tag of the aws-operator image to be used, by default `local-lab` to use a
+* `imageTag` - Tag of the aws-operator image to be used, by default `local-lab` to use a
 locally created image.
 
 For instance, to pass your default ssh public key to the install command, along with AWS
@@ -88,6 +90,7 @@ credentials from the environment, you could do:
 ```bash
 $ helm install -n aws-operator-lab --set idRsaPub="$(cat ~/.ssh/id_rsa.pub)" \
                                    --set aws.accessKeyId=${AWS_ACCESS_KEY_ID} \
+                                   --set aws.region=${AWS_REGION} \
                                    --set aws.secretAccessKey=${AWS_SECRET_ACCESS_KEY} \
                                    --set aws.sessionToken=${AWS_SESSION_TOKEN} \
                                    ./aws-operator-lab-chart/ --wait
