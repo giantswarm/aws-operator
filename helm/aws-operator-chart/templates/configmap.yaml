@@ -9,5 +9,7 @@ data:
       listen:
         address: 'http://0.0.0.0:8000'
     service:
+      aws:
+        region: '{{ .Values.Installation.V1.Provider.AWS.Region }}'
       kubernetes:
         incluster: true
