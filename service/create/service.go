@@ -669,8 +669,10 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	var vpc resources.ResourceWithID
 	vpc = &awsresources.VPC{
 		CidrBlock: cluster.Spec.AWS.VPC.CIDR,
-		Name:      key.ClusterID(cluster),
-		AWSEntity: awsresources.AWSEntity{Clients: clients},
+		// TODO Make configurable.
+		InstallationName: "gauss",
+		Name:             key.ClusterID(cluster),
+		AWSEntity:        awsresources.AWSEntity{Clients: clients},
 	}
 	vpcCreated, err := vpc.CreateIfNotExists()
 	if err != nil {
