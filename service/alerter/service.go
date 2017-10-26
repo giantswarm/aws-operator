@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/giantswarm/awstpr"
@@ -51,7 +50,6 @@ type Service struct {
 	logger micrologger.Logger
 
 	// Internals.
-	bootOnce   sync.Once
 	awsClients awsutil.Clients
 	k8sClient  kubernetes.Interface
 	tpr        *tpr.TPR
@@ -99,7 +97,6 @@ func New(config Config) (*Service, error) {
 		logger: config.Logger,
 
 		// Internals.
-		bootOnce:   sync.Once{},
 		awsClients: awsClients,
 		k8sClient:  config.K8sClient,
 		tpr:        newTPR,
