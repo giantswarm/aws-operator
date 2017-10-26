@@ -58,9 +58,10 @@ type Config struct {
 	Logger      micrologger.Logger
 
 	// Settings.
-	AwsConfig     awsutil.Config
-	AwsHostConfig awsutil.Config
-	PubKeyFile    string
+	AwsConfig        awsutil.Config
+	AwsHostConfig    awsutil.Config
+	InstallationName string
+	PubKeyFile       string
 }
 
 // DefaultConfig provides a default configuration to create a new service by
@@ -75,9 +76,10 @@ func DefaultConfig() Config {
 		Logger:      nil,
 
 		// Settings.
-		AwsConfig:     awsutil.Config{},
-		AwsHostConfig: awsutil.Config{},
-		PubKeyFile:    "",
+		AwsConfig:        awsutil.Config{},
+		AwsHostConfig:    awsutil.Config{},
+		InstallationName: "",
+		PubKeyFile:       "",
 	}
 }
 
@@ -107,6 +109,9 @@ func New(config Config) (*Service, error) {
 	}
 	if config.AwsHostConfig == emptyAwsConfig {
 		return nil, microerror.Maskf(invalidConfigError, "config.AwsHostConfig must not be empty")
+	}
+	if config.InstallationName == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.InstallationName must not be empty")
 	}
 	if config.PubKeyFile == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.PubKeyFile must not be empty")
@@ -144,9 +149,10 @@ func New(config Config) (*Service, error) {
 		tpr:      newTPR,
 
 		// Settings.
-		awsConfig:     config.AwsConfig,
-		awsHostConfig: config.AwsHostConfig,
-		pubKeyFile:    config.PubKeyFile,
+		awsConfig:        config.AwsConfig,
+		awsHostConfig:    config.AwsHostConfig,
+		installationName: config.InstallationName,
+		pubKeyFile:       config.PubKeyFile,
 	}
 
 	return newService, nil
@@ -166,9 +172,10 @@ type Service struct {
 	tpr      *tpr.TPR
 
 	// Settings.
-	awsConfig     awsutil.Config
-	awsHostConfig awsutil.Config
-	pubKeyFile    string
+	awsConfig        awsutil.Config
+	awsHostConfig    awsutil.Config
+	installationName string
+	pubKeyFile       string
 }
 
 type Event struct {
@@ -668,9 +675,8 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	// Create VPC.
 	var vpc resources.ResourceWithID
 	vpc = &awsresources.VPC{
-		CidrBlock: cluster.Spec.AWS.VPC.CIDR,
-		// TODO Make configurable.
-		InstallationName: "gauss",
+		CidrBlock:        cluster.Spec.AWS.VPC.CIDR,
+		InstallationName: s.installationName,
 		Name:             key.ClusterID(cluster),
 		AWSEntity:        awsresources.AWSEntity{Clients: clients},
 	}

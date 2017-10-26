@@ -28,7 +28,8 @@ type Config struct {
 	Logger    micrologger.Logger
 
 	// Settings.
-	AwsConfig awsutil.Config
+	AwsConfig        awsutil.Config
+	InstallationName string
 }
 
 // DefaultConfig provides a default configuration to create a new service by
@@ -40,7 +41,8 @@ func DefaultConfig() Config {
 		Logger:    nil,
 
 		// Settings.
-		AwsConfig: awsutil.Config{},
+		AwsConfig:        awsutil.Config{},
+		InstallationName: "",
 	}
 }
 
@@ -48,6 +50,9 @@ func DefaultConfig() Config {
 type Service struct {
 	// Dependencies.
 	logger micrologger.Logger
+
+	// Settings.
+	installationName string
 
 	// Internals.
 	awsClients awsutil.Clients
@@ -63,6 +68,11 @@ func New(config Config) (*Service, error) {
 	}
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.K8sClient must not be empty")
+	}
+
+	// Settings.
+	if config.InstallationName == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.installationName must not be empty")
 	}
 
 	// Internals.
@@ -95,6 +105,9 @@ func New(config Config) (*Service, error) {
 	newService := &Service{
 		// Dependencies.
 		logger: config.Logger,
+
+		// Settings.
+		installationName: config.InstallationName,
 
 		// Internals.
 		awsClients: awsClients,

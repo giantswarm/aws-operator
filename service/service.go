@@ -116,6 +116,8 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	installationName := config.Viper.GetString(config.Flag.Service.AWS.InstallationName)
+
 	var awsHostConfig awsclient.Config
 	{
 		accessKeyID := config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID)
@@ -142,6 +144,7 @@ func New(config Config) (*Service, error) {
 
 		alerterConfig := alerter.DefaultConfig()
 		alerterConfig.AwsConfig = awsConfig
+		alerterConfig.InstallationName = installationName
 		alerterConfig.K8sClient = k8sClient
 		alerterConfig.Logger = config.Logger
 
@@ -170,6 +173,7 @@ func New(config Config) (*Service, error) {
 		createConfig.AwsHostConfig = awsHostConfig
 		createConfig.CertWatcher = certWatcher
 		createConfig.CloudConfig = ccService
+		createConfig.InstallationName = installationName
 		createConfig.K8sClient = k8sClient
 		createConfig.KeyWatcher = keyWatcher
 		createConfig.Logger = config.Logger

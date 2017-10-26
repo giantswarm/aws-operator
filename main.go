@@ -130,7 +130,9 @@ func main() {
 	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.ID, "", "ID of the AWS access key for the host cluster account. If empty, guest cluster account is used.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.Secret, "", "Secret of the AWS access key for the host cluster account. If empty, guest cluster account is used.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.Session, "", "Session token of the AWS access key for the host cluster account. If empty, guest cluster token is used.")
-	daemonCommand.PersistentFlags().String(f.Service.AWS.Region, "", "Region for checking for orphan resources.")
+	// TODO Remove hardcoded install name,
+	daemonCommand.PersistentFlags().String(f.Service.AWS.InstallationName, "gauss", "Installation name for tagging AWS resources.")
+	daemonCommand.PersistentFlags().String(f.Service.AWS.Region, "", "Region for checking for orphan AWS resources.")
 
 	// TODO(nhlfr): Deprecate these options when cert-operator will be implemented.
 	daemonCommand.PersistentFlags().String(f.Service.AWS.PubKeyFile, path.Join(os.Getenv("HOME"), ".ssh", "id_rsa.pub"), "Public key to be imported as a keypair in AWS.")

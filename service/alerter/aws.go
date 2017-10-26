@@ -11,8 +11,7 @@ func (s *Service) ListVpcs() ([]string, error) {
 	clusterIDs := []string{}
 
 	vpc := &awsresources.VPC{
-		// TODO Make configurable.
-		InstallationName: "gauss",
+		InstallationName: s.installationName,
 		AWSEntity:        awsresources.AWSEntity{Clients: s.awsClients},
 	}
 
