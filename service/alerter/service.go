@@ -137,7 +137,7 @@ func (s *Service) StartAlerts() {
 	}()
 }
 
-// OrphanResourcesAlerts looks for AWS resources not associated with a cluster.
+// OrphanResourcesAlert looks for AWS resources not associated with a cluster.
 func (s *Service) OrphanResourcesAlert() error {
 	clusterIDs, err := s.ListClusters()
 	if err != nil {
