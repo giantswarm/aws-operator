@@ -1027,11 +1027,6 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create apiserver load balancer: '%#v'", err))
 	}
 
-	// Assign the ProxyProtocol policy to the apiserver load balancer.
-	if err := apiLB.AssignProxyProtocolPolicy(); err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not assign proxy protocol policy: '%#v'", err))
-	}
-
 	// Create etcd load balancer.
 	lbInput = LoadBalancerInput{
 		Name:               cluster.Spec.Cluster.Etcd.Domain,

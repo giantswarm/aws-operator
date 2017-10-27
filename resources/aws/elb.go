@@ -201,6 +201,18 @@ func (lb *ELB) AssignProxyProtocolPolicy() error {
 		return microerror.Mask(err)
 	}
 
+	setPolicyInput := &elb.SetLoadBalancerPoliciesForBackendServerInput{
+		LoadBalancerName: aws.String(lb.Name),
+		PolicyNames:      []*string{aws.String(policyName)},
+	}
+	for _, portPair := range lb.PortsToOpen {
+		setPolicyInput.InstancePort = aws.Int64(int64(portPair.PortInstance))
+
+		if _, err := lb.Client.SetLoadBalancerPoliciesForBackendServer(setPolicyInput); err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
 	return nil
 }
 

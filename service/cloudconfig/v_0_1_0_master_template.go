@@ -177,6 +177,14 @@ func (e *v_0_1_0MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Encoding:     k8scloudconfig.GzipBase64,
 			Permissions:  0644,
 		},
+		// Add use-proxy-protocol to ingress-controller ConfigMap, this doesn't work
+		// on KVM because of dependencies on hardware LB configuration.
+		{
+			AssetContent: ingressControllerConfigMapTemplate,
+			Path:         "/srv/ingress-controller-cm.yml",
+			Owner:        FileOwner,
+			Permissions:  0644,
+		},
 	}
 
 	var newFiles []k8scloudconfig.FileAsset
