@@ -1,7 +1,34 @@
 version: 1
 
-outOfClusterTest:
-  - run: helm registry install quay.io/giantswarm/aws-operator-lab-chart -- --set imageTag=${CIRCLE_SHA1}
+setup:
+  - run: kubectl create namespace giantswarm
     waitFor:
-      run: kubectl get pods
-      match: aws-operator-local-.*\s*1/1\s*Running
+      run: kubectl get namespace
+      match: giantswarm\s*Active
+
+outOfClusterTest:
+  - run: |
+      cat <<EOF > ./values.yaml
+      Installation:
+        V1:
+          Secret:
+            AWSOperator:
+              IDRSAPub: myidrsa
+              SecretYaml: |
+                service:
+                  aws:
+                    accesskey:
+                      id: $AWS_ACCESS_KEY_ID
+                      secret: $AWS_SECRET_ACCESS_KEY
+                    hostaccesskey:
+                      id: ""
+                      secret: ""
+            Registry:
+              PullSecret:
+                DockerConfigJSON: "{\"auths\":{\"quay.io\":{\"auth\":\"$REGISTRY_PULL_SECRET\"}}}"
+      EOF
+      helm registry install quay.io/giantswarm/aws-operator-chart@1.0.0-${CIRCLE_SHA1} -- --values=values.yaml -n aws-operator-chart
+
+    waitFor:
+      run: kubectl get pods -n giantswarm
+      match: aws-operator-.*\s*1/1\s*Running
