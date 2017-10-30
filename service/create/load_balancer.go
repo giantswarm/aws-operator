@@ -57,6 +57,13 @@ func (s *Service) createLoadBalancer(input LoadBalancerInput) (*awsresources.ELB
 
 	if lbCreated {
 		s.logger.Log("debug", fmt.Sprintf("created ELB '%s'", lb.Name))
+
+		// Assign the ProxyProtocol policy for ingress controller
+		if input.Name == input.Cluster.Spec.Cluster.Kubernetes.IngressController.Domain {
+			if err := lb.AssignProxyProtocolPolicy(); err != nil {
+				return nil, microerror.Maskf(executionFailedError, fmt.Sprintf("could not assign proxy protocol policy: '%#v'", err))
+			}
+		}
 	} else {
 		s.logger.Log("debug", fmt.Sprintf("ELB '%s' already exists, reusing", lb.Name))
 	}
@@ -66,6 +73,7 @@ func (s *Service) createLoadBalancer(input LoadBalancerInput) (*awsresources.ELB
 			return nil, microerror.Mask(err)
 		}
 	}
+
 	return lb, nil
 }
 

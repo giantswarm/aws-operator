@@ -23,20 +23,6 @@ jobs:
             ./architect deploy
           fi
 
-  e2eTestBuild:
-    machine: true
-    steps:
-    - checkout
-
-    - attach_workspace:
-        at: .
-
-    - run: |
-        cp -ar vendor e2e
-
-        cd e2e
-        ../architect build --project aws-operator-e2e
-
   e2eSetup:
     machine: true
     steps:
@@ -82,13 +68,9 @@ workflows:
   build_e2e:
     jobs:
       - build
-      - e2eTestBuild:
-          requires:
-          - build
       - e2eSetup:
           requires:
           - build
       - e2eTestExecution:
           requires:
           - e2eSetup
-          - e2eTestBuild

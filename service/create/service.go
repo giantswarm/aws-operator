@@ -1086,13 +1086,6 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create ingress load balancer: '%#v'", err))
 	}
 
-	// Assign the ProxyProtocol policy to the Ingress load balancer.
-	if err := ingressLB.AssignProxyProtocolPolicy(); err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not assign proxy protocol policy: '%#v'", err))
-	}
-
-	s.logger.Log("info", fmt.Sprintf("created ingress load balancer"))
-
 	// Create a launch configuration for the worker nodes.
 	lcInput := launchConfigurationInput{
 		clients:             clients,
