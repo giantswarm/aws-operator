@@ -57,8 +57,13 @@ func (lb *ELB) CreateIfNotExists() (bool, error) {
 	}
 
 	_, err := lb.findExisting()
-	if err != nil && strings.Contains(err.Error(), notFoundError.Error()) {
+	if err == nil {
 		return false, nil
+	}
+
+	if !strings.Contains(err.Error(), notFoundError.Error()) {
+
+		return false, err
 	}
 
 	if err := lb.CreateOrFail(); err != nil {
