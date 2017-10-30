@@ -6,7 +6,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/cenkalti/backoff"
+
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 )
 
 const (
@@ -21,6 +24,8 @@ type VPCPeeringConnection struct {
 	PeerVPCId string // PeerVPCId the ID of the VPC in the host cluster.
 	id        string
 	AWSEntity
+
+	Logger micrologger.Logger
 }
 
 func (v VPCPeeringConnection) findExisting() (*ec2.VpcPeeringConnection, error) {
@@ -105,11 +110,19 @@ func (v *VPCPeeringConnection) CreateOrFail() error {
 
 	v.id = *vpcPeeringConnection.VpcPeeringConnection.VpcPeeringConnectionId
 
-	if _, err := v.HostClients.EC2.AcceptVpcPeeringConnection(
-		&ec2.AcceptVpcPeeringConnectionInput{
-			VpcPeeringConnectionId: aws.String(v.id),
-		},
-	); err != nil {
+	acceptOperation := func() error {
+		if _, err := v.HostClients.EC2.AcceptVpcPeeringConnection(
+			&ec2.AcceptVpcPeeringConnectionInput{
+				VpcPeeringConnectionId: aws.String(v.id),
+			},
+		); err != nil {
+			return microerror.Mask(err)
+		}
+
+		return nil
+	}
+	acceptNotify := NewNotify(v.Logger, "accepting vpc peering connection")
+	if err := backoff.RetryNotify(acceptOperation, NewCustomExponentialBackoff(), acceptNotify); err != nil {
 		return microerror.Mask(err)
 	}
 
