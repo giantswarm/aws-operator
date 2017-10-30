@@ -66,7 +66,22 @@ func (s *Service) createLoadBalancer(input LoadBalancerInput) (*awsresources.ELB
 			return nil, microerror.Mask(err)
 		}
 	}
+
 	return lb, nil
+}
+
+func (s *Service) createIngressLoadBalancer(input LoadBalancerInput) (*awsresources.ELB, error) {
+	elb, err := s.createLoadBalancer(input)
+	if err != nil {
+		return nil, err
+	}
+
+	// Assign the ProxyProtocol policy
+	if err := elb.AssignProxyProtocolPolicy(); err != nil {
+		return nil, microerror.Maskf(executionFailedError, fmt.Sprintf("could not assign proxy protocol policy: '%#v'", err))
+	}
+
+	return elb, nil
 }
 
 func (s *Service) deleteLoadBalancer(input LoadBalancerInput) error {
