@@ -57,15 +57,16 @@ func (lb *ELB) CreateIfNotExists() (bool, error) {
 	}
 
 	lbDescription, err := lb.findExisting()
-	if !strings.Contains(err.Error(), notFoundError.Error()) {
-		// error looking for elb
-		return false, err
-	}
 
 	if err == nil {
 		// elb found, initialize dns and hoested zone id
 		lb.setDNSFields(*lbDescription)
 		return false, nil
+	}
+
+	if !strings.Contains(err.Error(), notFoundError.Error()) {
+		// error looking for elb
+		return false, err
 	}
 
 	// elb not found, create
