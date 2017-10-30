@@ -1081,7 +1081,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		SubnetID:        publicSubnetID,
 	}
 
-	ingressLB, err := s.createIngressLoadBalancer(lbInput)
+	ingressLB, err := s.createLoadBalancer(lbInput)
 	if err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create ingress load balancer: '%#v'", err))
 	}
