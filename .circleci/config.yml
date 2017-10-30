@@ -51,6 +51,11 @@ jobs:
 
     - run: ./e2e-harness setup --name=ci-awsop-${CIRCLE_SHA1:0:7}
 
+    - run:
+        name: Cleanup on failure
+        command: ./e2e-harness teardown
+        when: on_fail
+
     - persist_to_workspace:
         root: .
         paths:
@@ -67,21 +72,10 @@ jobs:
 
     - run: ./e2e-harness test
 
-    - persist_to_workspace:
-        root: .
-        paths:
-        - ./.e2e-harness
-
-
-  e2eTeardown:
-    machine: true
-    steps:
-    - checkout
-
-    - attach_workspace:
-        at: .
-
-    - run: ./e2e-harness teardown
+    - run:
+        name: Finish with cleanup, no matter if the test succeeded or not
+        command: ./e2e-harness teardown
+        when: always
 
 workflows:
   version: 2
@@ -98,6 +92,3 @@ workflows:
           requires:
           - e2eSetup
           - e2eTestBuild
-      - e2eTeardown:
-          requires:
-          - e2eTestExecution
