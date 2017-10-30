@@ -56,15 +56,15 @@ func (lb *ELB) CreateIfNotExists() (bool, error) {
 		return false, microerror.Mask(clientNotInitializedError)
 	}
 
-	lbDescription, err := lb.findExisting()
+	existingElb, err := lb.findExisting()
 
 	if err == nil {
-		// elb found, initialize dns and hoested zone id
-		lb.setDNSFields(*lbDescription)
+		// elb found, initialize dns and hosted zone id
+		lb.setDNSFields(*existingElb)
 		return false, nil
 	}
 
-	if !strings.Contains(err.Error(), notFoundError.Error()) {
+	if !strings.Contains(err.Error(), elb.ErrCodeAccessPointNotFoundException) {
 		// error looking for elb
 		return false, err
 	}
