@@ -56,16 +56,19 @@ func (lb *ELB) CreateIfNotExists() (bool, error) {
 		return false, microerror.Mask(clientNotInitializedError)
 	}
 
-	_, err := lb.findExisting()
-	if err == nil {
-		return false, nil
-	}
-
+	lbDescription, err := lb.findExisting()
 	if !strings.Contains(err.Error(), notFoundError.Error()) {
-
+		// error looking for elb
 		return false, err
 	}
 
+	if err == nil {
+		// elb found, initialize dns and hoested zone id
+		lb.setDNSFields(*lbDescription)
+		return false, nil
+	}
+
+	// elb not found, create
 	if err := lb.CreateOrFail(); err != nil {
 		return false, microerror.Mask(err)
 	}
