@@ -694,6 +694,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 			Clients:     clients,
 			HostClients: hostClients,
 		},
+		Logger: s.logger,
 	}
 	vpcPeeringConnectionCreated, err := vpcPeeringConection.CreateIfNotExists()
 	if err != nil {
@@ -1539,6 +1540,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 			Clients:     clients,
 			HostClients: hostClients,
 		},
+		Logger: s.logger,
 	}
 	conn, err := vpcPeeringConection.FindExisting()
 	if err != nil {
