@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/cenk/backoff"
+	"github.com/giantswarm/aws-operator/service/resource/cloudformation"
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -47,7 +48,8 @@ type Operator struct {
 	// Internals.
 	bootOnce sync.Once
 	mutex    sync.Mutex
-	tpr      *tpr.TPR
+	awsTPR   *tpr.TPR
+	cfTPR    *tpr.TPR
 }
 
 // New creates a new configured service.
@@ -68,7 +70,7 @@ func New(config Config) (*Operator, error) {
 
 	var err error
 
-	var newTPR *tpr.TPR
+	var awsTPR *tpr.TPR
 	{
 		c := tpr.DefaultConfig()
 
@@ -79,9 +81,26 @@ func New(config Config) (*Operator, error) {
 		c.Name = awstpr.Name
 		c.Version = awstpr.VersionV1
 
-		newTPR, err = tpr.New(c)
+		awsTPR, err = tpr.New(c)
 		if err != nil {
 			return nil, microerror.Maskf(err, "creating TPR util for "+awstpr.Name)
+		}
+	}
+
+	var cfTPR *tpr.TPR
+	{
+		c := tpr.DefaultConfig()
+
+		c.K8sClient = config.K8sClient
+		c.Logger = config.Logger
+
+		c.Description = cloudformation.Description
+		c.Name = cloudformation.Name
+		c.Version = cloudformation.VersionV1
+
+		cfTPR, err = tpr.New(c)
+		if err != nil {
+			return nil, microerror.Maskf(err, "creating TPR util for "+cloudformation.Name)
 		}
 	}
 
@@ -94,7 +113,8 @@ func New(config Config) (*Operator, error) {
 		// Internals
 		bootOnce: sync.Once{},
 		mutex:    sync.Mutex{},
-		tpr:      newTPR,
+		awsTPR:   awsTPR,
+		cfTPR:    cfTPR,
 	}
 
 	return newOperator, nil
@@ -124,7 +144,13 @@ func (o *Operator) Boot() {
 }
 
 func (o *Operator) bootWithError() error {
-	err := o.tpr.CreateAndWait()
+	err := o.awsTPR.CreateAndWait()
+	if tpr.IsAlreadyExists(err) {
+		o.logger.Log("debug", "third party resource already exists")
+	} else if err != nil {
+		return microerror.Mask(err)
+	}
+	err = o.cfTPR.CreateAndWait()
 	if tpr.IsAlreadyExists(err) {
 		o.logger.Log("debug", "third party resource already exists")
 	} else if err != nil {
@@ -140,7 +166,8 @@ func (o *Operator) bootWithError() error {
 		NewObjectListFunc: func() runtime.Object { return &awstpr.List{} },
 	}
 
-	o.tpr.NewInformer(newResourceEventHandler, newZeroObjectFactory).Run(nil)
+	o.awsTPR.NewInformer(newResourceEventHandler, newZeroObjectFactory).Run(nil)
+	o.cfTPR.NewInformer(newResourceEventHandler, newZeroObjectFactory).Run(nil)
 
 	return nil
 }

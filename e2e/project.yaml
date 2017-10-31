@@ -1,0 +1,40 @@
+version: 1
+
+setup:
+  - run: kubectl create namespace giantswarm
+    waitFor:
+      run: kubectl get namespace
+      match: giantswarm\s*Active
+
+  - run: helm delete aws-operator-chart --purge || true
+
+  - run: |
+      cat <<EOF > ./values.yaml
+      Installation:
+        V1:
+          Secret:
+            AWSOperator:
+              IDRSAPub: myidrsa
+              SecretYaml: |
+                service:
+                  aws:
+                    guest:
+                      accesskey:
+                        id: $AWS_ACCESS_KEY_ID
+                        secret: $AWS_SECRET_ACCESS_KEY
+                    host:
+                      accesskey:
+                        id: $AWS_ACCESS_KEY_ID
+                        secret: $AWS_SECRET_ACCESS_KEY
+            Registry:
+              PullSecret:
+                DockerConfigJSON: "{\"auths\":{\"quay.io\":{\"auth\":\"$REGISTRY_PULL_SECRET\"}}}"
+      EOF
+      helm registry install quay.io/giantswarm/aws-operator-chart@1.0.0-${CIRCLE_SHA1} -- --values=values.yaml -n aws-operator-chart
+
+    waitFor:
+      run: kubectl get pods -n giantswarm
+      match: aws-operator-.*\s*1/1\s*Running
+
+inClusterTest:
+  enabled: true

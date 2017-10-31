@@ -17,11 +17,11 @@ import (
 	"github.com/giantswarm/microendpoint/service/version"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/client/k8s"
+	"github.com/giantswarm/operatorkit/client/k8sclient"
 	"github.com/giantswarm/operatorkit/framework"
-	"github.com/giantswarm/operatorkit/framework/logresource"
-	"github.com/giantswarm/operatorkit/framework/metricsresource"
-	"github.com/giantswarm/operatorkit/framework/retryresource"
+	"github.com/giantswarm/operatorkit/framework/resource/logresource"
+	"github.com/giantswarm/operatorkit/framework/resource/metricsresource"
+	"github.com/giantswarm/operatorkit/framework/resource/retryresource"
 	"github.com/spf13/viper"
 	"k8s.io/client-go/kubernetes"
 
@@ -105,7 +105,7 @@ func New(config Config) (*Service, error) {
 
 	var k8sClient kubernetes.Interface
 	{
-		k8sConfig := k8s.DefaultConfig()
+		k8sConfig := k8sclient.DefaultConfig()
 		k8sConfig.Address = config.Viper.GetString(config.Flag.Service.Kubernetes.Address)
 		k8sConfig.Logger = config.Logger
 		k8sConfig.InCluster = config.Viper.GetBool(config.Flag.Service.Kubernetes.InCluster)
@@ -113,7 +113,7 @@ func New(config Config) (*Service, error) {
 		k8sConfig.TLS.CrtFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CrtFile)
 		k8sConfig.TLS.KeyFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.KeyFile)
 
-		k8sClient, err = k8s.NewClient(k8sConfig)
+		k8sClient, err = k8sclient.New(k8sConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -130,24 +130,11 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	//var ccService *cloudconfig.CloudConfig
-	//{
-	//	ccServiceConfig := cloudconfig.DefaultConfig()
-	//
-	//	ccServiceConfig.Logger = config.Logger
-	//
-	//	ccService, err = cloudconfig.New(ccServiceConfig)
-	//	if err != nil {
-	//		return nil, microerror.Mask(err)
-	//	}
-	//}
-
 	var cloudformationResource framework.Resource
 	{
 		cloudformationConfig := cloudformationresource.DefaultConfig()
 
 		cloudformationConfig.CertWatcher = certWatcher
-		//cloudformationConfig.CloudConfig = ccService
 		cloudformationConfig.K8sClient = k8sClient
 		cloudformationConfig.Logger = config.Logger
 
@@ -186,7 +173,7 @@ func New(config Config) (*Service, error) {
 		}
 
 		metricsWrapConfig := metricsresource.DefaultWrapConfig()
-		metricsWrapConfig.Namespace = config.Name
+		metricsWrapConfig.Name = config.Name
 		resources, err = metricsresource.Wrap(resources, metricsWrapConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
@@ -199,10 +186,17 @@ func New(config Config) (*Service, error) {
 		return ctx, nil
 	}
 
+	var frameworkBackOff *backoff.ExponentialBackOff
+	{
+		frameworkBackOff = backoff.NewExponentialBackOff()
+		frameworkBackOff.MaxElapsedTime = 5 * time.Minute
+	}
+
 	var operatorFramework *framework.Framework
 	{
 		frameworkConfig := framework.DefaultConfig()
 
+		frameworkConfig.BackOff = frameworkBackOff
 		frameworkConfig.InitCtxFunc = initCtxFunc
 		frameworkConfig.Logger = config.Logger
 		frameworkConfig.Resources = resources

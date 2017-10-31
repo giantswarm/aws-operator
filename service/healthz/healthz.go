@@ -2,8 +2,8 @@ package healthz
 
 import (
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/giantswarm/k8shealthz"
 	"github.com/giantswarm/microendpoint/service/healthz"
-	"github.com/giantswarm/microendpoint/service/healthz/k8s"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"k8s.io/client-go/kubernetes"
@@ -53,10 +53,10 @@ func New(config Config) (*Service, error) {
 
 	var k8sService healthz.Service
 	{
-		k8sConfig := k8s.DefaultConfig()
+		k8sConfig := k8shealthz.DefaultConfig()
 		k8sConfig.K8sClient = config.K8sClient
 		k8sConfig.Logger = config.Logger
-		k8sService, err = k8s.New(k8sConfig)
+		k8sService, err = k8shealthz.New(k8sConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
