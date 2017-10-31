@@ -223,6 +223,41 @@ func (s *Service) addFunc(obj interface{}) {
 	s.logger.Log("info", fmt.Sprintf("cluster '%s' processed", key.ClusterID(cluster)))
 }
 
+func (s *Service) deleteFunc(obj interface{}) {
+	// We can receive an instance of awstpr.CustomObject or cache.DeletedFinalStateUnknown.
+	// We need to assert the type properly and log an error when we cannot do that.
+	// Also, the cache.DeleteFinalStateUnknown object can contain the proper CustomObject,
+	// but doesn't have to.
+	// https://github.com/kubernetes/client-go/blob/7ba6be594966f4bec08a57a60c855d17a9f7000a/tools/cache/delta_fifo.go#L674-L677
+	var cluster awstpr.CustomObject
+	clusterPtr, ok := obj.(*awstpr.CustomObject)
+	if ok {
+		cluster = *clusterPtr
+	} else {
+		deletedObj, ok := obj.(cache.DeletedFinalStateUnknown)
+		if !ok {
+			s.logger.Log("error", "received unknown type of third-party object")
+			return
+		}
+		clusterPtr, ok := deletedObj.Obj.(*awstpr.CustomObject)
+		if !ok {
+			s.logger.Log("error", "received the proper delete request, but the type of third-party object is unknown")
+			return
+		}
+		cluster = *clusterPtr
+	}
+
+	s.logger.Log("info", fmt.Sprintf("deleting cluster '%s'", key.ClusterID(cluster)))
+
+	err := s.processDelete(cluster)
+	if err != nil {
+		s.logger.Log("error", fmt.Sprintf("error deleting cluster '%s': '%#v'", key.ClusterID(cluster), err))
+		return
+	}
+
+	s.logger.Log("info", fmt.Sprintf("cluster '%s' deleted", key.ClusterID(cluster)))
+}
+
 func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	// Create cluster namespace in k8s.
 	if err := s.createClusterNamespace(cluster.Spec.Cluster); err != nil {
@@ -925,35 +960,9 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	return nil
 }
 
-func (s *Service) deleteFunc(obj interface{}) {
-	// TODO(nhlfr): Move this to a separate operator.
-
-	// We can receive an instance of awstpr.CustomObject or cache.DeletedFinalStateUnknown.
-	// We need to assert the type properly and log an error when we cannot do that.
-	// Also, the cache.DeleteFinalStateUnknown object can contain the proper CustomObject,
-	// but doesn't have to.
-	// https://github.com/kubernetes/client-go/blob/7ba6be594966f4bec08a57a60c855d17a9f7000a/tools/cache/delta_fifo.go#L674-L677
-	var cluster awstpr.CustomObject
-	clusterPtr, ok := obj.(*awstpr.CustomObject)
-	if ok {
-		cluster = *clusterPtr
-	} else {
-		deletedObj, ok := obj.(cache.DeletedFinalStateUnknown)
-		if !ok {
-			s.logger.Log("error", "received unknown type of third-party object")
-			return
-		}
-		clusterPtr, ok := deletedObj.Obj.(*awstpr.CustomObject)
-		if !ok {
-			s.logger.Log("error", "received the proper delete request, but the type of third-party object is unknown")
-			return
-		}
-		cluster = *clusterPtr
-	}
-
+func (s *Service) processDelete(cluster awstpr.CustomObject) error {
 	if err := validateCluster(cluster); err != nil {
-		s.logger.Log("error", "cluster spec is invalid: '%#v'", err)
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("cluster spec is invalid: '%#v'", err))
 	}
 
 	if err := s.deleteClusterNamespace(cluster.Spec.Cluster); err != nil {
@@ -963,8 +972,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	clients := awsutil.NewClients(s.awsConfig)
 	err := s.awsConfig.SetAccountID(clients.IAM)
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not retrieve amazon account id: '%#v'", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not retrieve amazon account id: '%#v'", err))
 	}
 
 	// Retrieve AWS host cluster client.
@@ -1356,7 +1364,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 		s.logger.Log("info", "deleted keypair")
 	}
 
-	s.logger.Log("info", fmt.Sprintf("cluster '%s' deleted", key.ClusterID(cluster)))
+	return nil
 }
 
 // TODO we need to support this in operatorkit.
