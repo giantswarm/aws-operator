@@ -197,6 +197,6 @@ kubectl config unset users.${CLUSTER_NAME}
 
 [aws-operator]: https://github.com/giantswarm/aws-operator
 [cert-operator]: https://github.com/giantswarm/cert-operator
-[cert-operator-local-setup]: https://github.com/giantswarm/cert-operator/tree/master/examples/local
+[cert-operator-local-setup]: https://github.com/giantswarm/cert-operator/tree/master/examples
 
 [jq]: https://stedolan.github.io/jq
