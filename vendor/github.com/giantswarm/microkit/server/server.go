@@ -90,7 +90,7 @@ func DefaultConfig() Config {
 		Endpoints:      nil,
 		ErrorEncoder:   func(ctx context.Context, serverError error, w http.ResponseWriter) {},
 		HandlerWrapper: func(h http.Handler) http.Handler { return h },
-		ListenAddress:  "http://127.0.0.1:8000",
+		ListenAddress:  "",
 		LogAccess:      false,
 		RequestFuncs:   []kithttp.RequestFunc{},
 		ServiceName:    "microkit",

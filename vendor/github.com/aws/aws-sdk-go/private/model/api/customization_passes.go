@@ -47,33 +47,26 @@ func (a *API) customizationPasses() {
 	if fn := svcCustomizations[a.PackageName()]; fn != nil {
 		fn(a)
 	}
-
-	// TODO until generated marshalers are all supported
-	a.EnableSelectGeneratedMarshalers()
-}
-
-func (a *API) EnableSelectGeneratedMarshalers() {
-	// Selectivily enable generated marshalers as available
-	a.NoGenMarshalers = true
-	a.NoGenUnmarshalers = true
-
-	// Enable generated marshalers
-	switch a.Metadata.Protocol {
-	case "rest-xml", "rest-json":
-		a.NoGenMarshalers = false
-	}
 }
 
 // s3Customizations customizes the API generation to replace values specific to S3.
 func s3Customizations(a *API) {
 	var strExpires *Shape
 
+	var keepContentMD5Ref = map[string]struct{}{
+		"PutObjectInput":  struct{}{},
+		"UploadPartInput": struct{}{},
+	}
+
 	for name, s := range a.Shapes {
-		// Remove ContentMD5 members
-		if _, ok := s.MemberRefs["ContentMD5"]; ok {
-			delete(s.MemberRefs, "ContentMD5")
+		// Remove ContentMD5 members unless specified otherwise.
+		if _, keep := keepContentMD5Ref[name]; !keep {
+			if _, have := s.MemberRefs["ContentMD5"]; have {
+				delete(s.MemberRefs, "ContentMD5")
+			}
 		}
 
+		// Generate getter methods for API operation fields used by customizations.
 		for _, refName := range []string{"Bucket", "SSECustomerKey", "CopySourceSSECustomerKey"} {
 			if ref, ok := s.MemberRefs[refName]; ok {
 				ref.GenerateGetter = true

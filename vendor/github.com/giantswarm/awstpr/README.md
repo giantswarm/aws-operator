@@ -22,6 +22,14 @@ go build github.com/giantswarm/awstpr
 However, since this project is just a specification used by the other projects, there only goal of building is to check
 whether the build is successful. This is just a library which needs to be vendored by the project aiming to use it.
 
+### Run the tests
+
+Run the tests the standard way (needs Go 1.9).
+
+```
+go test ./...
+```
+
 ## Contact
 
 - Mailing list: [giantswarm](https://groups.google.com/forum/!forum/giantswarm)
