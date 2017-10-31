@@ -34,7 +34,7 @@ go build github.com/giantswarm/aws-operator
 
 See [this guide][examples-local].
 
-[examples-local]: https://github.com/giantswarm/aws-operator/blob/master/examples/local
+[examples-local]: https://github.com/giantswarm/aws-operator/blob/master/examples
 
 
 ## Architecture
