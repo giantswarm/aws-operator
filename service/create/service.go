@@ -199,19 +199,6 @@ func (s *Service) Boot() {
 	})
 }
 
-func (s *Service) uploadCloudconfigToS3(svc *s3.S3, s3Bucket, path, data string) error {
-	if _, err := svc.PutObject(&s3.PutObjectInput{
-		Body:          strings.NewReader(data),
-		Bucket:        aws.String(s3Bucket),
-		Key:           aws.String(path),
-		ContentLength: aws.Int64(int64(len(data))),
-	}); err != nil {
-		return microerror.Mask(err)
-	}
-
-	return nil
-}
-
 func (s *Service) addFunc(obj interface{}) {
 	customObject, ok := obj.(*awstpr.CustomObject)
 	if !ok {
@@ -1413,4 +1400,17 @@ func (s *Service) updateFunc(oldObj, newObj interface{}) {
 	}
 
 	s.logger.Log("info", fmt.Sprintf("scaling workers auto scaling group from %d to %d", oldSize, newSize))
+}
+
+func (s *Service) uploadCloudconfigToS3(svc *s3.S3, s3Bucket, path, data string) error {
+	if _, err := svc.PutObject(&s3.PutObjectInput{
+		Body:          strings.NewReader(data),
+		Bucket:        aws.String(s3Bucket),
+		Key:           aws.String(path),
+		ContentLength: aws.Int64(int64(len(data))),
+	}); err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
 }
