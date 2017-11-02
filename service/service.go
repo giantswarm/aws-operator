@@ -191,9 +191,7 @@ func New(config Config) (*Service, error) {
 	{
 		cloudformationConfig := cloudformationresource.DefaultConfig()
 
-		cloudformationConfig.CertWatcher = certWatcher
-		cloudformationConfig.CloudConfig = ccService
-		cloudformationConfig.K8sClient = k8sClient
+		cloudformationConfig.Clients = awsclient.NewClients(awsConfig)
 		cloudformationConfig.Logger = config.Logger
 
 		cloudformationResource, err = cloudformationresource.New(cloudformationConfig)

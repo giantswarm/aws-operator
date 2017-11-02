@@ -15,10 +15,3 @@ var notFoundError = microerror.New("not found")
 func IsNotFound(err error) bool {
 	return microerror.Cause(err) == notFoundError
 }
-
-var wrongTypeError = microerror.New("wrong type")
-
-// IsWrongTypeError asserts wrongTypeError.
-func IsWrongTypeError(err error) bool {
-	return microerror.Cause(err) == wrongTypeError
-}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/giantswarm/awstpr"
 	cloudconfig "github.com/giantswarm/k8scloudconfig"
+	"github.com/giantswarm/microerror"
 )
 
 func AutoScalingGroupName(customObject awstpr.CustomObject, groupName string) string {
@@ -87,4 +88,24 @@ func WorkerInstanceType(customObject awstpr.CustomObject) string {
 	}
 
 	return instanceType
+}
+
+func ToCustomObject(v interface{}) (awstpr.CustomObject, error) {
+	if v == nil {
+		return awstpr.CustomObject{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &awstpr.CustomObject{}, v)
+	}
+
+	customObjectPointer, ok := v.(*awstpr.CustomObject)
+	if !ok {
+		return awstpr.CustomObject{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &awstpr.CustomObject{}, v)
+	}
+	customObject := *customObjectPointer
+
+	return customObject, nil
+}
+
+func MainStackName(customObject awstpr.CustomObject) string {
+	clusterID := ClusterID(customObject)
+
+	return fmt.Sprintf("%s-main", clusterID)
 }
