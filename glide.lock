@@ -1,5 +1,5 @@
 hash: 0e05add1a117b58ead0a42b6355d62469160970f41467166eb20a9a32c3b3c21
-updated: 2017-11-07T12:27:40.479590438+01:00
+updated: 2017-11-07T17:53:27.065518281+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -32,6 +32,7 @@ imports:
   - private/protocol/xml/xmlutil
   - service/autoscaling
   - service/cloudformation
+  - service/cloudformation/cloudformationiface
   - service/ec2
   - service/elb
   - service/iam
@@ -140,6 +141,7 @@ imports:
   - framework/resource/logresource
   - framework/resource/metricsresource
   - framework/resource/retryresource
+  - informer
   - tpr
 - name: github.com/giantswarm/randomkeytpr
   version: 9e1d78d125841c496889e8a54d49057212a2893e
