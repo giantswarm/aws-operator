@@ -5,13 +5,14 @@ import (
 	"k8s.io/client-go/rest"
 )
 
+// Client returns an incluster k8s clientset.
 func Client() (*kubernetes.Clientset, error) {
-	// creates the in-cluster config
+	// Create the in-cluster config.
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, err
 	}
-	// creates the clientset
+	// Create the clientset.
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		return nil, err

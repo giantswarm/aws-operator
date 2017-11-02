@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -11,15 +10,7 @@ import (
 func main() {
 	// architect requires this
 	if len(os.Args) > 1 {
-		if os.Args[1] == "version" {
-			fmt.Println("0.1.0")
-			return
-		}
-
-		if os.Args[1] == "--help" {
-			fmt.Println("Yet another lookout")
-			return
-		}
+		return
 	}
 
 	if err := tests.Run(); err != nil {
