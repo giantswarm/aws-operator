@@ -23,6 +23,21 @@ jobs:
             ./architect deploy
           fi
 
+  e2eTestBuild:
+    machine: true
+    steps:
+    - checkout
+
+    - attach_workspace:
+        at: .
+
+    - run: |
+        cp -ar vendor e2e
+        mkdir -p e2e/vendor/github.com/giantswarm/aws-operator/e2e
+        cp -ar e2e/tests e2e/vendor/github.com/giantswarm/aws-operator/e2e
+        cd e2e
+        ../architect build --project aws-operator-e2e
+
   e2eSetup:
     machine: true
     steps:
@@ -58,6 +73,9 @@ jobs:
 
     - run: ./e2e-harness test
 
+    - store_artifacts:
+        path: ./.e2e-harness/workdir/plugins/e2e/results.xml
+
     - run:
         name: Finish with cleanup, no matter if the test succeeded or not
         command: ./e2e-harness teardown
@@ -71,6 +89,10 @@ workflows:
       - e2eSetup:
           requires:
           - build
+      - e2eTestBuild:
+          requires:
+          - build
       - e2eTestExecution:
           requires:
           - e2eSetup
+          - e2eTestBuild
