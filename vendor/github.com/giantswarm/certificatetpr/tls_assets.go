@@ -41,6 +41,8 @@ const (
 	CalicoComponent ClusterComponent = "calico"
 	// ServiceAccountComponent is the service-account component.
 	ServiceAccountComponent ClusterComponent = "service-account"
+	// PrometheusComponent is the prometheus component.
+	PrometheusComponent ClusterComponent = "prometheus"
 )
 
 // These constants are used when filtering the secrets, to only retrieve the

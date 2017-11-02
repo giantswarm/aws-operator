@@ -292,6 +292,13 @@ coreos:
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
       -v /etc/cni/net.d/:/etc/cni/net.d/ \
       -v /opt/cni/bin/:/opt/cni/bin/ \
+      -v /usr/sbin/iscsiadm:/usr/sbin/iscsiadm \
+      -v /etc/iscsi/:/etc/iscsi/ \
+      -v /dev/disk/by-path/:/dev/disk/by-path/ \
+      -v /dev/mapper/:/dev/mapper/ \
+      -v /usr/sbin/mkfs.xfs:/usr/sbin/mkfs.xfs \
+      -v /usr/lib64/libxfs.so.0:/usr/lib/libxfs.so.0 \
+      -v /usr/lib64/libxcmd.so.0:/usr/lib/libxcmd.so.0 \
       -e ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/client-ca.pem \
       -e ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/client-crt.pem \
       -e ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/client-key.pem \
