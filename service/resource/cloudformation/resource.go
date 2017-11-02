@@ -12,16 +12,21 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "cloudformation"
+	Name = "cloudformation.giantswarm.io"
+
+	// VersionV1 is the v1 version of this resource.
+	VersionV1 = "v1"
+
+	// Description is the description of this resource.
+	Description = "CloudFormation custom resource for managing clusters on AWS"
 )
 
 // Config represents the configuration used to create a new config map resource.
 type Config struct {
 	// Dependencies.
 	CertWatcher certificatetpr.Searcher
-	//CloudConfig *cloudconfig.CloudConfig
-	K8sClient kubernetes.Interface
-	Logger    micrologger.Logger
+	K8sClient   kubernetes.Interface
+	Logger      micrologger.Logger
 }
 
 // DefaultConfig provides a default configuration to create a new config map
@@ -51,9 +56,6 @@ func New(config Config) (*Resource, error) {
 	if config.CertWatcher == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.CertWatcher must not be empty")
 	}
-	//if config.CloudConfig == nil {
-	//	return nil, microerror.Maskf(invalidConfigError, "config.CloudConfig must not be empty")
-	//}
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.K8sClient must not be empty")
 	}
@@ -82,31 +84,27 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	return nil, nil
 }
 
-func (r *Resource) GetCreateState(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	return nil, nil
-}
-
-func (r *Resource) GetDeleteState(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	return nil, nil
-}
-
-func (r *Resource) GetUpdateState(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, interface{}, interface{}, error) {
-	return nil, nil, nil, nil
-}
-
 func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) ProcessCreateState(ctx context.Context, obj, createState interface{}) error {
+func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
+	return nil, nil
+}
+
+func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
+	return nil, nil
+}
+
+func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
 	return nil
 }
 
-func (r *Resource) ProcessDeleteState(ctx context.Context, obj, deleteState interface{}) error {
+func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
 	return nil
 }
 
-func (r *Resource) ProcessUpdateState(ctx context.Context, obj, updateState interface{}) error {
+func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
 	return nil
 }
 

@@ -66,6 +66,7 @@ func Test_Transaction_NoIDGiven(t *testing.T) {
 
 	config := DefaultConfig()
 	config.Logger = microloggertest.New()
+	config.ListenAddress = "http://127.0.0.1:8000"
 	config.Endpoints = []Endpoint{e}
 	config.TransactionResponder = testNewTransactionResponder(t)
 	newServer, err := New(config)
@@ -148,6 +149,7 @@ func Test_Transaction_IDGiven(t *testing.T) {
 
 	config := DefaultConfig()
 	config.Logger = microloggertest.New()
+	config.ListenAddress = "http://127.0.0.1:8000"
 	config.Endpoints = []Endpoint{e}
 	config.TransactionResponder = testNewTransactionResponder(t)
 	newServer, err := New(config)
@@ -234,6 +236,7 @@ func Test_Transaction_InvalidIDGiven(t *testing.T) {
 
 	config := DefaultConfig()
 	config.Logger = microloggertest.New()
+	config.ListenAddress = "http://127.0.0.1:8000"
 	config.Endpoints = []Endpoint{e}
 	config.TransactionResponder = testNewTransactionResponder(t)
 	config.ErrorEncoder = func(ctx context.Context, serverError error, w http.ResponseWriter) {

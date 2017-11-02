@@ -24,7 +24,6 @@ import (
 	"github.com/aws/aws-sdk-go/private/protocol/restxml"
 	"github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil"
 	"github.com/aws/aws-sdk-go/private/util"
-	"github.com/stretchr/testify/assert"
 )
 
 var _ bytes.Buffer // always import bytes
@@ -321,12 +320,6 @@ type InputService1TestShapeInputService1TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService1TestShapeInputService1TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
-}
-
 type InputService1TestShapeInputService1TestCaseOperation2Input struct {
 	_ struct{} `locationName:"OperationRequest" type:"structure" xmlURI:"https://foo/"`
 
@@ -347,50 +340,16 @@ func (s *InputService1TestShapeInputService1TestCaseOperation2Input) SetName(v s
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService1TestShapeInputService1TestCaseOperation2Input) MarshalFields(e protocol.FieldEncoder) error {
-	if s.Description != nil {
-		v := *s.Description
-
-		e.SetValue(protocol.BodyTarget, "Description", protocol.StringValue(v), protocol.Metadata{})
-	}
-	if s.Name != nil {
-		v := *s.Name
-
-		e.SetValue(protocol.BodyTarget, "Name", protocol.StringValue(v), protocol.Metadata{})
-	}
-
-	return nil
-}
-
 type InputService1TestShapeInputService1TestCaseOperation2Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService1TestShapeInputService1TestCaseOperation2Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 type InputService1TestShapeInputService1TestCaseOperation3Input struct {
 	_ struct{} `type:"structure"`
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService1TestShapeInputService1TestCaseOperation3Input) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
-}
-
 type InputService1TestShapeInputService1TestCaseOperation3Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService1TestShapeInputService1TestCaseOperation3Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 // InputService2ProtocolTest provides the API operation methods for making requests to
@@ -559,40 +518,8 @@ func (s *InputService2TestShapeInputService2TestCaseOperation1Input) SetThird(v 
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService2TestShapeInputService2TestCaseOperation1Input) MarshalFields(e protocol.FieldEncoder) error {
-	if s.First != nil {
-		v := *s.First
-
-		e.SetValue(protocol.BodyTarget, "First", protocol.BoolValue(v), protocol.Metadata{})
-	}
-	if s.Fourth != nil {
-		v := *s.Fourth
-
-		e.SetValue(protocol.BodyTarget, "Fourth", protocol.Int64Value(v), protocol.Metadata{})
-	}
-	if s.Second != nil {
-		v := *s.Second
-
-		e.SetValue(protocol.BodyTarget, "Second", protocol.BoolValue(v), protocol.Metadata{})
-	}
-	if s.Third != nil {
-		v := *s.Third
-
-		e.SetValue(protocol.BodyTarget, "Third", protocol.Float64Value(v), protocol.Metadata{})
-	}
-
-	return nil
-}
-
 type InputService2TestShapeInputService2TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService2TestShapeInputService2TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 // InputService3ProtocolTest provides the API operation methods for making requests to
@@ -800,12 +727,6 @@ type InputService3TestShapeInputService3TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService3TestShapeInputService3TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
-}
-
 type InputService3TestShapeInputService3TestCaseOperation2Input struct {
 	_ struct{} `locationName:"OperationRequest" type:"structure" xmlURI:"https://foo/"`
 
@@ -826,30 +747,8 @@ func (s *InputService3TestShapeInputService3TestCaseOperation2Input) SetSubStruc
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService3TestShapeInputService3TestCaseOperation2Input) MarshalFields(e protocol.FieldEncoder) error {
-	if s.Description != nil {
-		v := *s.Description
-
-		e.SetValue(protocol.BodyTarget, "Description", protocol.StringValue(v), protocol.Metadata{})
-	}
-	if s.SubStructure != nil {
-		v := s.SubStructure
-
-		e.SetFields(protocol.BodyTarget, "SubStructure", v, protocol.Metadata{})
-	}
-
-	return nil
-}
-
 type InputService3TestShapeInputService3TestCaseOperation2Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService3TestShapeInputService3TestCaseOperation2Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 type InputService3TestShapeSubStructure struct {
@@ -870,22 +769,6 @@ func (s *InputService3TestShapeSubStructure) SetBar(v string) *InputService3Test
 func (s *InputService3TestShapeSubStructure) SetFoo(v string) *InputService3TestShapeSubStructure {
 	s.Foo = &v
 	return s
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService3TestShapeSubStructure) MarshalFields(e protocol.FieldEncoder) error {
-	if s.Bar != nil {
-		v := *s.Bar
-
-		e.SetValue(protocol.BodyTarget, "Bar", protocol.StringValue(v), protocol.Metadata{})
-	}
-	if s.Foo != nil {
-		v := *s.Foo
-
-		e.SetValue(protocol.BodyTarget, "Foo", protocol.StringValue(v), protocol.Metadata{})
-	}
-
-	return nil
 }
 
 // InputService4ProtocolTest provides the API operation methods for making requests to
@@ -1038,30 +921,8 @@ func (s *InputService4TestShapeInputService4TestCaseOperation1Input) SetSubStruc
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService4TestShapeInputService4TestCaseOperation1Input) MarshalFields(e protocol.FieldEncoder) error {
-	if s.Description != nil {
-		v := *s.Description
-
-		e.SetValue(protocol.BodyTarget, "Description", protocol.StringValue(v), protocol.Metadata{})
-	}
-	if s.SubStructure != nil {
-		v := s.SubStructure
-
-		e.SetFields(protocol.BodyTarget, "SubStructure", v, protocol.Metadata{})
-	}
-
-	return nil
-}
-
 type InputService4TestShapeInputService4TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService4TestShapeInputService4TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 type InputService4TestShapeSubStructure struct {
@@ -1082,22 +943,6 @@ func (s *InputService4TestShapeSubStructure) SetBar(v string) *InputService4Test
 func (s *InputService4TestShapeSubStructure) SetFoo(v string) *InputService4TestShapeSubStructure {
 	s.Foo = &v
 	return s
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService4TestShapeSubStructure) MarshalFields(e protocol.FieldEncoder) error {
-	if s.Bar != nil {
-		v := *s.Bar
-
-		e.SetValue(protocol.BodyTarget, "Bar", protocol.StringValue(v), protocol.Metadata{})
-	}
-	if s.Foo != nil {
-		v := *s.Foo
-
-		e.SetValue(protocol.BodyTarget, "Foo", protocol.StringValue(v), protocol.Metadata{})
-	}
-
-	return nil
 }
 
 // InputService5ProtocolTest provides the API operation methods for making requests to
@@ -1242,25 +1087,8 @@ func (s *InputService5TestShapeInputService5TestCaseOperation1Input) SetListPara
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService5TestShapeInputService5TestCaseOperation1Input) MarshalFields(e protocol.FieldEncoder) error {
-	if len(s.ListParam) > 0 {
-		v := s.ListParam
-
-		e.SetList(protocol.BodyTarget, "ListParam", protocol.EncodeStringList(v), protocol.Metadata{})
-	}
-
-	return nil
-}
-
 type InputService5TestShapeInputService5TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService5TestShapeInputService5TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 // InputService6ProtocolTest provides the API operation methods for making requests to
@@ -1405,25 +1233,8 @@ func (s *InputService6TestShapeInputService6TestCaseOperation1Input) SetListPara
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService6TestShapeInputService6TestCaseOperation1Input) MarshalFields(e protocol.FieldEncoder) error {
-	if len(s.ListParam) > 0 {
-		v := s.ListParam
-
-		e.SetList(protocol.BodyTarget, "AlternateName", protocol.EncodeStringList(v), protocol.Metadata{ListLocationName: "NotMember"})
-	}
-
-	return nil
-}
-
 type InputService6TestShapeInputService6TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService6TestShapeInputService6TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 // InputService7ProtocolTest provides the API operation methods for making requests to
@@ -1568,25 +1379,8 @@ func (s *InputService7TestShapeInputService7TestCaseOperation1Input) SetListPara
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService7TestShapeInputService7TestCaseOperation1Input) MarshalFields(e protocol.FieldEncoder) error {
-	if len(s.ListParam) > 0 {
-		v := s.ListParam
-
-		e.SetList(protocol.BodyTarget, "ListParam", protocol.EncodeStringList(v), protocol.Metadata{Flatten: true})
-	}
-
-	return nil
-}
-
 type InputService7TestShapeInputService7TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService7TestShapeInputService7TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 // InputService8ProtocolTest provides the API operation methods for making requests to
@@ -1731,25 +1525,8 @@ func (s *InputService8TestShapeInputService8TestCaseOperation1Input) SetListPara
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService8TestShapeInputService8TestCaseOperation1Input) MarshalFields(e protocol.FieldEncoder) error {
-	if len(s.ListParam) > 0 {
-		v := s.ListParam
-
-		e.SetList(protocol.BodyTarget, "item", protocol.EncodeStringList(v), protocol.Metadata{Flatten: true})
-	}
-
-	return nil
-}
-
 type InputService8TestShapeInputService8TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService8TestShapeInputService8TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 // InputService9ProtocolTest provides the API operation methods for making requests to
@@ -1894,25 +1671,8 @@ func (s *InputService9TestShapeInputService9TestCaseOperation1Input) SetListPara
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService9TestShapeInputService9TestCaseOperation1Input) MarshalFields(e protocol.FieldEncoder) error {
-	if len(s.ListParam) > 0 {
-		v := s.ListParam
-
-		e.SetList(protocol.BodyTarget, "item", encodeInputService9TestShapeSingleFieldStructList(v), protocol.Metadata{Flatten: true})
-	}
-
-	return nil
-}
-
 type InputService9TestShapeInputService9TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService9TestShapeInputService9TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 type InputService9TestShapeSingleFieldStruct struct {
@@ -1925,25 +1685,6 @@ type InputService9TestShapeSingleFieldStruct struct {
 func (s *InputService9TestShapeSingleFieldStruct) SetElement(v string) *InputService9TestShapeSingleFieldStruct {
 	s.Element = &v
 	return s
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService9TestShapeSingleFieldStruct) MarshalFields(e protocol.FieldEncoder) error {
-	if s.Element != nil {
-		v := *s.Element
-
-		e.SetValue(protocol.BodyTarget, "value", protocol.StringValue(v), protocol.Metadata{})
-	}
-
-	return nil
-}
-
-func encodeInputService9TestShapeSingleFieldStructList(vs []*InputService9TestShapeSingleFieldStruct) func(protocol.ListEncoder) {
-	return func(le protocol.ListEncoder) {
-		for _, v := range vs {
-			le.ListAddFields(v)
-		}
-	}
 }
 
 // InputService10ProtocolTest provides the API operation methods for making requests to
@@ -2088,25 +1829,8 @@ func (s *InputService10TestShapeInputService10TestCaseOperation1Input) SetStruct
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService10TestShapeInputService10TestCaseOperation1Input) MarshalFields(e protocol.FieldEncoder) error {
-	if s.StructureParam != nil {
-		v := s.StructureParam
-
-		e.SetFields(protocol.BodyTarget, "StructureParam", v, protocol.Metadata{})
-	}
-
-	return nil
-}
-
 type InputService10TestShapeInputService10TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService10TestShapeInputService10TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 type InputService10TestShapeStructureShape struct {
@@ -2128,22 +1852,6 @@ func (s *InputService10TestShapeStructureShape) SetB(v []byte) *InputService10Te
 func (s *InputService10TestShapeStructureShape) SetT(v time.Time) *InputService10TestShapeStructureShape {
 	s.T = &v
 	return s
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService10TestShapeStructureShape) MarshalFields(e protocol.FieldEncoder) error {
-	if s.B != nil {
-		v := s.B
-
-		e.SetValue(protocol.BodyTarget, "b", protocol.BytesValue(v), protocol.Metadata{})
-	}
-	if s.T != nil {
-		v := *s.T
-
-		e.SetValue(protocol.BodyTarget, "t", protocol.TimeValue{V: v, Format: protocol.ISO8601TimeFormat}, protocol.Metadata{})
-	}
-
-	return nil
 }
 
 // InputService11ProtocolTest provides the API operation methods for making requests to
@@ -2288,25 +1996,8 @@ func (s *InputService11TestShapeInputService11TestCaseOperation1Input) SetFoo(v 
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService11TestShapeInputService11TestCaseOperation1Input) MarshalFields(e protocol.FieldEncoder) error {
-	if len(s.Foo) > 0 {
-		v := s.Foo
-
-		e.SetMap(protocol.HeadersTarget, "x-foo-", protocol.EncodeStringMap(v), protocol.Metadata{})
-	}
-
-	return nil
-}
-
 type InputService11TestShapeInputService11TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService11TestShapeInputService11TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 // InputService12ProtocolTest provides the API operation methods for making requests to
@@ -2451,25 +2142,8 @@ func (s *InputService12TestShapeInputService12TestCaseOperation1Input) SetItems(
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService12TestShapeInputService12TestCaseOperation1Input) MarshalFields(e protocol.FieldEncoder) error {
-	if len(s.Items) > 0 {
-		v := s.Items
-
-		e.SetList(protocol.QueryTarget, "item", protocol.EncodeStringList(v), protocol.Metadata{})
-	}
-
-	return nil
-}
-
 type InputService12TestShapeInputService12TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService12TestShapeInputService12TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 // InputService13ProtocolTest provides the API operation methods for making requests to
@@ -2622,30 +2296,8 @@ func (s *InputService13TestShapeInputService13TestCaseOperation1Input) SetQueryD
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService13TestShapeInputService13TestCaseOperation1Input) MarshalFields(e protocol.FieldEncoder) error {
-	if s.PipelineId != nil {
-		v := *s.PipelineId
-
-		e.SetValue(protocol.PathTarget, "PipelineId", protocol.StringValue(v), protocol.Metadata{})
-	}
-	if len(s.QueryDoc) > 0 {
-		v := s.QueryDoc
-
-		e.SetMap(protocol.QueryTarget, "QueryDoc", protocol.EncodeStringMap(v), protocol.Metadata{})
-	}
-
-	return nil
-}
-
 type InputService13TestShapeInputService13TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService13TestShapeInputService13TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 // InputService14ProtocolTest provides the API operation methods for making requests to
@@ -2798,35 +2450,8 @@ func (s *InputService14TestShapeInputService14TestCaseOperation1Input) SetQueryD
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService14TestShapeInputService14TestCaseOperation1Input) MarshalFields(e protocol.FieldEncoder) error {
-	if s.PipelineId != nil {
-		v := *s.PipelineId
-
-		e.SetValue(protocol.PathTarget, "PipelineId", protocol.StringValue(v), protocol.Metadata{})
-	}
-	if len(s.QueryDoc) > 0 {
-		v := s.QueryDoc
-
-		e.SetMap(protocol.QueryTarget, "QueryDoc", func(me protocol.MapEncoder) {
-			for k, item := range v {
-				v := item
-				me.MapSetList(k, protocol.EncodeStringList(v))
-			}
-		}, protocol.Metadata{})
-	}
-
-	return nil
-}
-
 type InputService14TestShapeInputService14TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService14TestShapeInputService14TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 // InputService15ProtocolTest provides the API operation methods for making requests to
@@ -3034,12 +2659,6 @@ type InputService15TestShapeInputService15TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService15TestShapeInputService15TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
-}
-
 type InputService15TestShapeInputService15TestCaseOperation2Input struct {
 	_ struct{} `type:"structure"`
 
@@ -3052,25 +2671,8 @@ func (s *InputService15TestShapeInputService15TestCaseOperation2Input) SetBoolQu
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService15TestShapeInputService15TestCaseOperation2Input) MarshalFields(e protocol.FieldEncoder) error {
-	if s.BoolQuery != nil {
-		v := *s.BoolQuery
-
-		e.SetValue(protocol.QueryTarget, "bool-query", protocol.BoolValue(v), protocol.Metadata{})
-	}
-
-	return nil
-}
-
 type InputService15TestShapeInputService15TestCaseOperation2Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService15TestShapeInputService15TestCaseOperation2Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 // InputService16ProtocolTest provides the API operation methods for making requests to
@@ -3215,25 +2817,8 @@ func (s *InputService16TestShapeInputService16TestCaseOperation1Input) SetFoo(v 
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService16TestShapeInputService16TestCaseOperation1Input) MarshalFields(e protocol.FieldEncoder) error {
-	if s.Foo != nil {
-		v := *s.Foo
-
-		e.SetStream(protocol.PayloadTarget, "foo", protocol.StringStream(v), protocol.Metadata{})
-	}
-
-	return nil
-}
-
 type InputService16TestShapeInputService16TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService16TestShapeInputService16TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 // InputService17ProtocolTest provides the API operation methods for making requests to
@@ -3441,12 +3026,6 @@ type InputService17TestShapeInputService17TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService17TestShapeInputService17TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
-}
-
 type InputService17TestShapeInputService17TestCaseOperation2Input struct {
 	_ struct{} `type:"structure" payload:"Foo"`
 
@@ -3459,25 +3038,8 @@ func (s *InputService17TestShapeInputService17TestCaseOperation2Input) SetFoo(v 
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService17TestShapeInputService17TestCaseOperation2Input) MarshalFields(e protocol.FieldEncoder) error {
-	if s.Foo != nil {
-		v := s.Foo
-
-		e.SetStream(protocol.PayloadTarget, "foo", protocol.BytesStream(v), protocol.Metadata{})
-	}
-
-	return nil
-}
-
 type InputService17TestShapeInputService17TestCaseOperation2Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService17TestShapeInputService17TestCaseOperation2Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 // InputService18ProtocolTest provides the API operation methods for making requests to
@@ -3835,45 +3397,16 @@ func (s *InputService18TestShapeFooShape) SetBaz(v string) *InputService18TestSh
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService18TestShapeFooShape) MarshalFields(e protocol.FieldEncoder) error {
-	if s.Baz != nil {
-		v := *s.Baz
-
-		e.SetValue(protocol.BodyTarget, "baz", protocol.StringValue(v), protocol.Metadata{})
-	}
-
-	return nil
-}
-
 type InputService18TestShapeInputService18TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService18TestShapeInputService18TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 type InputService18TestShapeInputService18TestCaseOperation2Output struct {
 	_ struct{} `type:"structure"`
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService18TestShapeInputService18TestCaseOperation2Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
-}
-
 type InputService18TestShapeInputService18TestCaseOperation3Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService18TestShapeInputService18TestCaseOperation3Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 type InputService18TestShapeInputService18TestCaseOperation4Input struct {
@@ -3888,25 +3421,8 @@ func (s *InputService18TestShapeInputService18TestCaseOperation4Input) SetFoo(v 
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService18TestShapeInputService18TestCaseOperation4Input) MarshalFields(e protocol.FieldEncoder) error {
-	if s.Foo != nil {
-		v := s.Foo
-
-		e.SetFields(protocol.PayloadTarget, "foo", v, protocol.Metadata{})
-	}
-
-	return nil
-}
-
 type InputService18TestShapeInputService18TestCaseOperation4Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService18TestShapeInputService18TestCaseOperation4Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 // InputService19ProtocolTest provides the API operation methods for making requests to
@@ -4051,22 +3567,6 @@ func (s *InputService19TestShapeGrant) SetGrantee(v *InputService19TestShapeGran
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService19TestShapeGrant) MarshalFields(e protocol.FieldEncoder) error {
-	if s.Grantee != nil {
-		v := s.Grantee
-		attrs := make([]protocol.Attribute, 0, 1)
-
-		if s.Grantee.Type != nil {
-			v := *s.Grantee.Type
-			attrs = append(attrs, protocol.Attribute{Name: "xsi:type", Value: protocol.StringValue(v), Meta: protocol.Metadata{}})
-		}
-		e.SetFields(protocol.BodyTarget, "Grantee", v, protocol.Metadata{Attributes: attrs, XMLNamespacePrefix: "xsi", XMLNamespaceURI: "http://www.w3.org/2001/XMLSchema-instance"})
-	}
-
-	return nil
-}
-
 type InputService19TestShapeGrantee struct {
 	_ struct{} `type:"structure" xmlPrefix:"xsi" xmlURI:"http://www.w3.org/2001/XMLSchema-instance"`
 
@@ -4087,18 +3587,6 @@ func (s *InputService19TestShapeGrantee) SetType(v string) *InputService19TestSh
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService19TestShapeGrantee) MarshalFields(e protocol.FieldEncoder) error {
-	if s.EmailAddress != nil {
-		v := *s.EmailAddress
-
-		e.SetValue(protocol.BodyTarget, "EmailAddress", protocol.StringValue(v), protocol.Metadata{})
-	}
-	// Skipping Type XML Attribute.
-
-	return nil
-}
-
 type InputService19TestShapeInputService19TestCaseOperation1Input struct {
 	_ struct{} `type:"structure" payload:"Grant"`
 
@@ -4111,25 +3599,8 @@ func (s *InputService19TestShapeInputService19TestCaseOperation1Input) SetGrant(
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService19TestShapeInputService19TestCaseOperation1Input) MarshalFields(e protocol.FieldEncoder) error {
-	if s.Grant != nil {
-		v := s.Grant
-
-		e.SetFields(protocol.PayloadTarget, "Grant", v, protocol.Metadata{})
-	}
-
-	return nil
-}
-
 type InputService19TestShapeInputService19TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService19TestShapeInputService19TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 // InputService20ProtocolTest provides the API operation methods for making requests to
@@ -4282,30 +3753,8 @@ func (s *InputService20TestShapeInputService20TestCaseOperation1Input) SetKey(v 
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService20TestShapeInputService20TestCaseOperation1Input) MarshalFields(e protocol.FieldEncoder) error {
-	if s.Bucket != nil {
-		v := *s.Bucket
-
-		e.SetValue(protocol.PathTarget, "Bucket", protocol.StringValue(v), protocol.Metadata{})
-	}
-	if s.Key != nil {
-		v := *s.Key
-
-		e.SetValue(protocol.PathTarget, "Key", protocol.StringValue(v), protocol.Metadata{})
-	}
-
-	return nil
-}
-
 type InputService20TestShapeInputService20TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService20TestShapeInputService20TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 // InputService21ProtocolTest provides the API operation methods for making requests to
@@ -4513,12 +3962,6 @@ type InputService21TestShapeInputService21TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService21TestShapeInputService21TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
-}
-
 type InputService21TestShapeInputService21TestCaseOperation2Input struct {
 	_ struct{} `type:"structure"`
 
@@ -4531,25 +3974,8 @@ func (s *InputService21TestShapeInputService21TestCaseOperation2Input) SetFoo(v 
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService21TestShapeInputService21TestCaseOperation2Input) MarshalFields(e protocol.FieldEncoder) error {
-	if s.Foo != nil {
-		v := *s.Foo
-
-		e.SetValue(protocol.QueryTarget, "param-name", protocol.StringValue(v), protocol.Metadata{})
-	}
-
-	return nil
-}
-
 type InputService21TestShapeInputService21TestCaseOperation2Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService21TestShapeInputService21TestCaseOperation2Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 // InputService22ProtocolTest provides the API operation methods for making requests to
@@ -5041,50 +4467,20 @@ type InputService22TestShapeInputService22TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService22TestShapeInputService22TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
-}
-
 type InputService22TestShapeInputService22TestCaseOperation2Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService22TestShapeInputService22TestCaseOperation2Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 type InputService22TestShapeInputService22TestCaseOperation3Output struct {
 	_ struct{} `type:"structure"`
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService22TestShapeInputService22TestCaseOperation3Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
-}
-
 type InputService22TestShapeInputService22TestCaseOperation4Output struct {
 	_ struct{} `type:"structure"`
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService22TestShapeInputService22TestCaseOperation4Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
-}
-
 type InputService22TestShapeInputService22TestCaseOperation5Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService22TestShapeInputService22TestCaseOperation5Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 type InputService22TestShapeInputService22TestCaseOperation6Input struct {
@@ -5099,25 +4495,8 @@ func (s *InputService22TestShapeInputService22TestCaseOperation6Input) SetRecurs
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService22TestShapeInputService22TestCaseOperation6Input) MarshalFields(e protocol.FieldEncoder) error {
-	if s.RecursiveStruct != nil {
-		v := s.RecursiveStruct
-
-		e.SetFields(protocol.BodyTarget, "RecursiveStruct", v, protocol.Metadata{})
-	}
-
-	return nil
-}
-
 type InputService22TestShapeInputService22TestCaseOperation6Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService22TestShapeInputService22TestCaseOperation6Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 type InputService22TestShapeRecursiveStructType struct {
@@ -5154,48 +4533,6 @@ func (s *InputService22TestShapeRecursiveStructType) SetRecursiveMap(v map[strin
 func (s *InputService22TestShapeRecursiveStructType) SetRecursiveStruct(v *InputService22TestShapeRecursiveStructType) *InputService22TestShapeRecursiveStructType {
 	s.RecursiveStruct = v
 	return s
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService22TestShapeRecursiveStructType) MarshalFields(e protocol.FieldEncoder) error {
-	if s.NoRecurse != nil {
-		v := *s.NoRecurse
-
-		e.SetValue(protocol.BodyTarget, "NoRecurse", protocol.StringValue(v), protocol.Metadata{})
-	}
-	if len(s.RecursiveList) > 0 {
-		v := s.RecursiveList
-
-		e.SetList(protocol.BodyTarget, "RecursiveList", encodeInputService22TestShapeRecursiveStructTypeList(v), protocol.Metadata{})
-	}
-	if len(s.RecursiveMap) > 0 {
-		v := s.RecursiveMap
-
-		e.SetMap(protocol.BodyTarget, "RecursiveMap", encodeInputService22TestShapeRecursiveStructTypeMap(v), protocol.Metadata{})
-	}
-	if s.RecursiveStruct != nil {
-		v := s.RecursiveStruct
-
-		e.SetFields(protocol.BodyTarget, "RecursiveStruct", v, protocol.Metadata{})
-	}
-
-	return nil
-}
-
-func encodeInputService22TestShapeRecursiveStructTypeList(vs []*InputService22TestShapeRecursiveStructType) func(protocol.ListEncoder) {
-	return func(le protocol.ListEncoder) {
-		for _, v := range vs {
-			le.ListAddFields(v)
-		}
-	}
-}
-
-func encodeInputService22TestShapeRecursiveStructTypeMap(vs map[string]*InputService22TestShapeRecursiveStructType) func(protocol.MapEncoder) {
-	return func(me protocol.MapEncoder) {
-		for k, v := range vs {
-			me.MapSetFields(k, v)
-		}
-	}
 }
 
 // InputService23ProtocolTest provides the API operation methods for making requests to
@@ -5340,25 +4677,8 @@ func (s *InputService23TestShapeInputService23TestCaseOperation1Input) SetTimeAr
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService23TestShapeInputService23TestCaseOperation1Input) MarshalFields(e protocol.FieldEncoder) error {
-	if s.TimeArgInHeader != nil {
-		v := *s.TimeArgInHeader
-
-		e.SetValue(protocol.HeaderTarget, "x-amz-timearg", protocol.TimeValue{V: v, Format: protocol.RFC822TimeFromat}, protocol.Metadata{})
-	}
-
-	return nil
-}
-
 type InputService23TestShapeInputService23TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService23TestShapeInputService23TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 // InputService24ProtocolTest provides the API operation methods for making requests to
@@ -5566,12 +4886,6 @@ type InputService24TestShapeInputService24TestCaseOperation1Output struct {
 	_ struct{} `type:"structure"`
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService24TestShapeInputService24TestCaseOperation1Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
-}
-
 type InputService24TestShapeInputService24TestCaseOperation2Input struct {
 	_ struct{} `type:"structure"`
 
@@ -5584,31 +4898,8 @@ func (s *InputService24TestShapeInputService24TestCaseOperation2Input) SetToken(
 	return s
 }
 
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService24TestShapeInputService24TestCaseOperation2Input) MarshalFields(e protocol.FieldEncoder) error {
-	var Token string
-	if s.Token != nil {
-		Token = *s.Token
-	} else {
-		Token = protocol.GetIdempotencyToken()
-	}
-	{
-		v := Token
-
-		e.SetValue(protocol.BodyTarget, "Token", protocol.StringValue(v), protocol.Metadata{})
-	}
-
-	return nil
-}
-
 type InputService24TestShapeInputService24TestCaseOperation2Output struct {
 	_ struct{} `type:"structure"`
-}
-
-// MarshalFields encodes the AWS API shape using the passed in protocol encoder.
-func (s *InputService24TestShapeInputService24TestCaseOperation2Output) MarshalFields(e protocol.FieldEncoder) error {
-
-	return nil
 }
 
 //
@@ -5626,10 +4917,14 @@ func TestInputService1ProtocolTestBasicXMLSerializationCase1(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
 	awstesting.AssertXML(t, `<OperationRequest xmlns="https://foo/"><Description xmlns="https://foo/">bar</Description><Name xmlns="https://foo/">foo</Name></OperationRequest>`, util.Trim(string(body)), InputService1TestShapeInputService1TestCaseOperation2Input{})
 
@@ -5651,10 +4946,14 @@ func TestInputService1ProtocolTestBasicXMLSerializationCase2(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
 	awstesting.AssertXML(t, `<OperationRequest xmlns="https://foo/"><Description xmlns="https://foo/">bar</Description><Name xmlns="https://foo/">foo</Name></OperationRequest>`, util.Trim(string(body)), InputService1TestShapeInputService1TestCaseOperation2Input{})
 
@@ -5673,7 +4972,9 @@ func TestInputService1ProtocolTestBasicXMLSerializationCase3(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert URL
 	awstesting.AssertURL(t, "https://test/2014-01-01/hostedzone", r.URL.String())
@@ -5695,10 +4996,14 @@ func TestInputService2ProtocolTestSerializeOtherScalarTypesCase1(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
 	awstesting.AssertXML(t, `<OperationRequest xmlns="https://foo/"><First xmlns="https://foo/">true</First><Fourth xmlns="https://foo/">3</Fourth><Second xmlns="https://foo/">false</Second><Third xmlns="https://foo/">1.2</Third></OperationRequest>`, util.Trim(string(body)), InputService2TestShapeInputService2TestCaseOperation1Input{})
 
@@ -5723,10 +5028,14 @@ func TestInputService3ProtocolTestNestedStructuresCase1(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
 	awstesting.AssertXML(t, `<OperationRequest xmlns="https://foo/"><Description xmlns="https://foo/">baz</Description><SubStructure xmlns="https://foo/"><Bar xmlns="https://foo/">b</Bar><Foo xmlns="https://foo/">a</Foo></SubStructure></OperationRequest>`, util.Trim(string(body)), InputService3TestShapeInputService3TestCaseOperation2Input{})
 
@@ -5750,10 +5059,14 @@ func TestInputService3ProtocolTestNestedStructuresCase2(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
 	awstesting.AssertXML(t, `<OperationRequest xmlns="https://foo/"><Description xmlns="https://foo/">baz</Description><SubStructure xmlns="https://foo/"><Foo xmlns="https://foo/">a</Foo></SubStructure></OperationRequest>`, util.Trim(string(body)), InputService3TestShapeInputService3TestCaseOperation2Input{})
 
@@ -5775,10 +5088,14 @@ func TestInputService4ProtocolTestNestedStructuresCase1(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
 	awstesting.AssertXML(t, `<OperationRequest xmlns="https://foo/"><Description xmlns="https://foo/">baz</Description><SubStructure xmlns="https://foo/"></SubStructure></OperationRequest>`, util.Trim(string(body)), InputService4TestShapeInputService4TestCaseOperation1Input{})
 
@@ -5803,10 +5120,14 @@ func TestInputService5ProtocolTestNonFlattenedListsCase1(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
 	awstesting.AssertXML(t, `<OperationRequest xmlns="https://foo/"><ListParam xmlns="https://foo/"><member xmlns="https://foo/">one</member><member xmlns="https://foo/">two</member><member xmlns="https://foo/">three</member></ListParam></OperationRequest>`, util.Trim(string(body)), InputService5TestShapeInputService5TestCaseOperation1Input{})
 
@@ -5831,10 +5152,14 @@ func TestInputService6ProtocolTestNonFlattenedListsWithLocationNameCase1(t *test
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
 	awstesting.AssertXML(t, `<OperationRequest xmlns="https://foo/"><AlternateName xmlns="https://foo/"><NotMember xmlns="https://foo/">one</NotMember><NotMember xmlns="https://foo/">two</NotMember><NotMember xmlns="https://foo/">three</NotMember></AlternateName></OperationRequest>`, util.Trim(string(body)), InputService6TestShapeInputService6TestCaseOperation1Input{})
 
@@ -5859,10 +5184,14 @@ func TestInputService7ProtocolTestFlattenedListsCase1(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
 	awstesting.AssertXML(t, `<OperationRequest xmlns="https://foo/"><ListParam xmlns="https://foo/">one</ListParam><ListParam xmlns="https://foo/">two</ListParam><ListParam xmlns="https://foo/">three</ListParam></OperationRequest>`, util.Trim(string(body)), InputService7TestShapeInputService7TestCaseOperation1Input{})
 
@@ -5887,10 +5216,14 @@ func TestInputService8ProtocolTestFlattenedListsWithLocationNameCase1(t *testing
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
 	awstesting.AssertXML(t, `<OperationRequest xmlns="https://foo/"><item xmlns="https://foo/">one</item><item xmlns="https://foo/">two</item><item xmlns="https://foo/">three</item></OperationRequest>`, util.Trim(string(body)), InputService8TestShapeInputService8TestCaseOperation1Input{})
 
@@ -5921,10 +5254,14 @@ func TestInputService9ProtocolTestListOfStructuresCase1(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
 	awstesting.AssertXML(t, `<OperationRequest xmlns="https://foo/"><item xmlns="https://foo/"><value xmlns="https://foo/">one</value></item><item xmlns="https://foo/"><value xmlns="https://foo/">two</value></item><item xmlns="https://foo/"><value xmlns="https://foo/">three</value></item></OperationRequest>`, util.Trim(string(body)), InputService9TestShapeInputService9TestCaseOperation1Input{})
 
@@ -5948,10 +5285,14 @@ func TestInputService10ProtocolTestBlobAndTimestampShapesCase1(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
 	awstesting.AssertXML(t, `<OperationRequest xmlns="https://foo/"><StructureParam xmlns="https://foo/"><b xmlns="https://foo/">Zm9v</b><t xmlns="https://foo/">2015-01-25T08:00:00Z</t></StructureParam></OperationRequest>`, util.Trim(string(body)), InputService10TestShapeInputService10TestCaseOperation1Input{})
 
@@ -5975,14 +5316,20 @@ func TestInputService11ProtocolTestHeaderMapsCase1(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert URL
 	awstesting.AssertURL(t, "https://test/", r.URL.String())
 
 	// assert headers
-	assert.Equal(t, "b", r.Header.Get("x-foo-a"))
-	assert.Equal(t, "d", r.Header.Get("x-foo-c"))
+	if e, a := "b", r.Header.Get("x-foo-a"); e != a {
+		t.Errorf("expect %v to be %v", e, a)
+	}
+	if e, a := "d", r.Header.Get("x-foo-c"); e != a {
+		t.Errorf("expect %v to be %v", e, a)
+	}
 
 }
 
@@ -5999,7 +5346,9 @@ func TestInputService12ProtocolTestQuerystringListOfStringsCase1(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert URL
 	awstesting.AssertURL(t, "https://test/path?item=value1&item=value2", r.URL.String())
@@ -6022,7 +5371,9 @@ func TestInputService13ProtocolTestStringToStringMapsInQuerystringCase1(t *testi
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert URL
 	awstesting.AssertURL(t, "https://test/2014-01-01/jobsByPipeline/foo?bar=baz&fizz=buzz", r.URL.String())
@@ -6051,7 +5402,9 @@ func TestInputService14ProtocolTestStringToStringListMapsInQuerystringCase1(t *t
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert URL
 	awstesting.AssertURL(t, "https://test/2014-01-01/jobsByPipeline/id?foo=bar&foo=baz&fizz=buzz&fizz=pop", r.URL.String())
@@ -6070,7 +5423,9 @@ func TestInputService15ProtocolTestBooleanInQuerystringCase1(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert URL
 	awstesting.AssertURL(t, "https://test/path?bool-query=true", r.URL.String())
@@ -6089,7 +5444,9 @@ func TestInputService15ProtocolTestBooleanInQuerystringCase2(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert URL
 	awstesting.AssertURL(t, "https://test/path?bool-query=false", r.URL.String())
@@ -6108,12 +5465,18 @@ func TestInputService16ProtocolTestStringPayloadCase1(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
-	assert.Equal(t, `bar`, util.Trim(string(body)))
+	if e, a := "bar", util.Trim(string(body)); e != a {
+		t.Errorf("expect %v, got %v", e, a)
+	}
 
 	// assert URL
 	awstesting.AssertURL(t, "https://test/", r.URL.String())
@@ -6132,12 +5495,18 @@ func TestInputService17ProtocolTestBlobPayloadCase1(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
-	assert.Equal(t, `bar`, util.Trim(string(body)))
+	if e, a := "bar", util.Trim(string(body)); e != a {
+		t.Errorf("expect %v, got %v", e, a)
+	}
 
 	// assert URL
 	awstesting.AssertURL(t, "https://test/", r.URL.String())
@@ -6154,7 +5523,9 @@ func TestInputService17ProtocolTestBlobPayloadCase2(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert URL
 	awstesting.AssertURL(t, "https://test/", r.URL.String())
@@ -6175,10 +5546,14 @@ func TestInputService18ProtocolTestStructurePayloadCase1(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
 	awstesting.AssertXML(t, `<foo><baz>bar</baz></foo>`, util.Trim(string(body)), InputService18TestShapeInputService18TestCaseOperation4Input{})
 
@@ -6197,7 +5572,9 @@ func TestInputService18ProtocolTestStructurePayloadCase2(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert URL
 	awstesting.AssertURL(t, "https://test/", r.URL.String())
@@ -6216,10 +5593,14 @@ func TestInputService18ProtocolTestStructurePayloadCase3(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
 	awstesting.AssertXML(t, `<foo></foo>`, util.Trim(string(body)), InputService18TestShapeInputService18TestCaseOperation4Input{})
 
@@ -6238,7 +5619,9 @@ func TestInputService18ProtocolTestStructurePayloadCase4(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert URL
 	awstesting.AssertURL(t, "https://test/", r.URL.String())
@@ -6262,10 +5645,14 @@ func TestInputService19ProtocolTestXMLAttributeCase1(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
 	awstesting.AssertXML(t, `<Grant xmlns:_xmlns="xmlns" _xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" XMLSchema-instance:type="CanonicalUser"><Grantee><EmailAddress>foo@example.com</EmailAddress></Grantee></Grant>`, util.Trim(string(body)), InputService19TestShapeInputService19TestCaseOperation1Input{})
 
@@ -6287,7 +5674,9 @@ func TestInputService20ProtocolTestGreedyKeysCase1(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert URL
 	awstesting.AssertURL(t, "https://test/my%2Fbucket/testing%20/123", r.URL.String())
@@ -6304,7 +5693,9 @@ func TestInputService21ProtocolTestOmitsNullQueryParamsButSerializesEmptyStrings
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert URL
 	awstesting.AssertURL(t, "https://test/path", r.URL.String())
@@ -6323,7 +5714,9 @@ func TestInputService21ProtocolTestOmitsNullQueryParamsButSerializesEmptyStrings
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert URL
 	awstesting.AssertURL(t, "https://test/path?abc=mno&param-name=", r.URL.String())
@@ -6344,10 +5737,14 @@ func TestInputService22ProtocolTestRecursiveShapesCase1(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
 	awstesting.AssertXML(t, `<OperationRequest xmlns="https://foo/"><RecursiveStruct xmlns="https://foo/"><NoRecurse xmlns="https://foo/">foo</NoRecurse></RecursiveStruct></OperationRequest>`, util.Trim(string(body)), InputService22TestShapeInputService22TestCaseOperation6Input{})
 
@@ -6372,10 +5769,14 @@ func TestInputService22ProtocolTestRecursiveShapesCase2(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
 	awstesting.AssertXML(t, `<OperationRequest xmlns="https://foo/"><RecursiveStruct xmlns="https://foo/"><RecursiveStruct xmlns="https://foo/"><NoRecurse xmlns="https://foo/">foo</NoRecurse></RecursiveStruct></RecursiveStruct></OperationRequest>`, util.Trim(string(body)), InputService22TestShapeInputService22TestCaseOperation6Input{})
 
@@ -6404,10 +5805,14 @@ func TestInputService22ProtocolTestRecursiveShapesCase3(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
 	awstesting.AssertXML(t, `<OperationRequest xmlns="https://foo/"><RecursiveStruct xmlns="https://foo/"><RecursiveStruct xmlns="https://foo/"><RecursiveStruct xmlns="https://foo/"><RecursiveStruct xmlns="https://foo/"><NoRecurse xmlns="https://foo/">foo</NoRecurse></RecursiveStruct></RecursiveStruct></RecursiveStruct></RecursiveStruct></OperationRequest>`, util.Trim(string(body)), InputService22TestShapeInputService22TestCaseOperation6Input{})
 
@@ -6437,10 +5842,14 @@ func TestInputService22ProtocolTestRecursiveShapesCase4(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
 	awstesting.AssertXML(t, `<OperationRequest xmlns="https://foo/"><RecursiveStruct xmlns="https://foo/"><RecursiveList xmlns="https://foo/"><member xmlns="https://foo/"><NoRecurse xmlns="https://foo/">foo</NoRecurse></member><member xmlns="https://foo/"><NoRecurse xmlns="https://foo/">bar</NoRecurse></member></RecursiveList></RecursiveStruct></OperationRequest>`, util.Trim(string(body)), InputService22TestShapeInputService22TestCaseOperation6Input{})
 
@@ -6472,10 +5881,14 @@ func TestInputService22ProtocolTestRecursiveShapesCase5(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
 	awstesting.AssertXML(t, `<OperationRequest xmlns="https://foo/"><RecursiveStruct xmlns="https://foo/"><RecursiveList xmlns="https://foo/"><member xmlns="https://foo/"><NoRecurse xmlns="https://foo/">foo</NoRecurse></member><member xmlns="https://foo/"><RecursiveStruct xmlns="https://foo/"><NoRecurse xmlns="https://foo/">bar</NoRecurse></RecursiveStruct></member></RecursiveList></RecursiveStruct></OperationRequest>`, util.Trim(string(body)), InputService22TestShapeInputService22TestCaseOperation6Input{})
 
@@ -6505,10 +5918,14 @@ func TestInputService22ProtocolTestRecursiveShapesCase6(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
 	awstesting.AssertXML(t, `<OperationRequest xmlns="https://foo/"><RecursiveStruct xmlns="https://foo/"><RecursiveMap xmlns="https://foo/"><entry xmlns="https://foo/"><key xmlns="https://foo/">foo</key><value xmlns="https://foo/"><NoRecurse xmlns="https://foo/">foo</NoRecurse></value></entry><entry xmlns="https://foo/"><key xmlns="https://foo/">bar</key><value xmlns="https://foo/"><NoRecurse xmlns="https://foo/">bar</NoRecurse></value></entry></RecursiveMap></RecursiveStruct></OperationRequest>`, util.Trim(string(body)), InputService22TestShapeInputService22TestCaseOperation6Input{})
 
@@ -6529,13 +5946,17 @@ func TestInputService23ProtocolTestTimestampInHeaderCase1(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert URL
 	awstesting.AssertURL(t, "https://test/path", r.URL.String())
 
 	// assert headers
-	assert.Equal(t, "Sun, 25 Jan 2015 08:00:00 GMT", r.Header.Get("x-amz-timearg"))
+	if e, a := "Sun, 25 Jan 2015 08:00:00 GMT", r.Header.Get("x-amz-timearg"); e != a {
+		t.Errorf("expect %v to be %v", e, a)
+	}
 
 }
 
@@ -6549,10 +5970,14 @@ func TestInputService24ProtocolTestIdempotencyTokenAutoFillCase1(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
 	awstesting.AssertXML(t, `<InputShape><Token>abc123</Token></InputShape>`, util.Trim(string(body)), InputService24TestShapeInputService24TestCaseOperation2Input{})
 
@@ -6571,10 +5996,14 @@ func TestInputService24ProtocolTestIdempotencyTokenAutoFillCase2(t *testing.T) {
 
 	// build request
 	restxml.Build(req)
-	assert.NoError(t, req.Error)
+	if req.Error != nil {
+		t.Errorf("expect no error, got %v", req.Error)
+	}
 
 	// assert body
-	assert.NotNil(t, r.Body)
+	if r.Body == nil {
+		t.Errorf("expect body not to be nil")
+	}
 	body := util.SortXML(r.Body)
 	awstesting.AssertXML(t, `<InputShape><Token>00000000-0000-4000-8000-000000000000</Token></InputShape>`, util.Trim(string(body)), InputService24TestShapeInputService24TestCaseOperation2Input{})
 

@@ -33,3 +33,7 @@ import:
   repo: git://github.com/stretchr/testify.git
   subpackages:
   - assert
+- package: github.com/giantswarm/e2e-harness
+  version: master
+- package: github.com/spf13/afero
+  version: master
