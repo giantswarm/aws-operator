@@ -1,4 +1,4 @@
-package create
+package legacy
 
 import (
 	"github.com/giantswarm/awstpr"
