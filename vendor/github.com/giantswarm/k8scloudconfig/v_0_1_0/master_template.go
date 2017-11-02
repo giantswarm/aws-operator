@@ -1942,7 +1942,7 @@ coreos:
       --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,DefaultStorageClass,PodSecurityPolicy \
       --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
       --service-cluster-ip-range={{.Cluster.Kubernetes.API.ClusterIPRange}} \
-      --etcd-servers=https://{{ .Cluster.Etcd.Domain }}:443 \
+      --etcd-servers=https://127.0.0.1:2379 \
       --etcd-cafile=/etc/kubernetes/ssl/etcd/server-ca.pem \
       --etcd-certfile=/etc/kubernetes/ssl/etcd/server-crt.pem \
       --etcd-keyfile=/etc/kubernetes/ssl/etcd/server-key.pem \

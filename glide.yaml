@@ -27,3 +27,7 @@ import:
   version: master
 - package: github.com/giantswarm/randomkeytpr
   version: master
+- package: github.com/giantswarm/e2e-harness
+  version: master
+- package: k8s.io/client-go
+  version: v3.0.0

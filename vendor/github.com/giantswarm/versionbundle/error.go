@@ -46,6 +46,13 @@ func IsInvalidComponent(err error) bool {
 	return microerror.Cause(err) == invalidComponentError
 }
 
+var invalidConfigError = microerror.New("invalid config")
+
+// IsInvalidConfig asserts invalidConfigError.
+func IsInvalidConfig(err error) bool {
+	return microerror.Cause(err) == invalidConfigError
+}
+
 var invalidDependencyError = microerror.New("invalid dependency")
 
 // IsInvalidDependency asserts invalidDependencyError.
