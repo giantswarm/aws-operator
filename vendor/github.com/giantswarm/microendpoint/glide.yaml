@@ -4,5 +4,7 @@ import:
   version: master
 - package: github.com/giantswarm/micrologger
   version: master
+- package: github.com/giantswarm/versionbundle
+  version: master
 - package: github.com/go-kit/kit
   version: v0.5.0

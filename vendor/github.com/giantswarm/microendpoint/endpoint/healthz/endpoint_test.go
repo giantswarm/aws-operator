@@ -39,7 +39,7 @@ func Test_Endpoint_ServiceFailed_True(t *testing.T) {
 			}
 			newEndpoint, err := New(endpointConfig)
 			if err != nil {
-				t.Fatalf("test", i+1, "expected", nil, "got", err)
+				t.Fatalf("test %d expected %v got %s", i+1, nil, err)
 			}
 			encoder = newEndpoint.Encoder()
 			endpoint = newEndpoint.Endpoint()
@@ -47,19 +47,19 @@ func Test_Endpoint_ServiceFailed_True(t *testing.T) {
 
 		res, err := endpoint(context.TODO(), nil)
 		if err != nil {
-			t.Fatalf("test", i+1, "expected", nil, "got", err)
+			t.Fatalf("test %d expected %v got %s", i+1, nil, err)
 		}
 
 		w := httptest.NewRecorder()
 
 		err = encoder(context.TODO(), w, res)
 		if err != nil {
-			t.Fatalf("test", i+1, "expected", nil, "got", err)
+			t.Fatalf("test %d expected %v got %s", i+1, nil, err)
 		}
 
 		statusCode := w.Result().StatusCode
 		if statusCode != tc.ExpectedStatusCode {
-			t.Fatalf("test", i+1, "expected", tc.ExpectedStatusCode, "got", statusCode)
+			t.Fatalf("test %d expected %d got %d", i+1, tc.ExpectedStatusCode, statusCode)
 		}
 	}
 }

@@ -10,6 +10,83 @@ users:
        - "{{ $user.PublicKey }}"
 {{end}}
 write_files:
+- path: /srv/calico-ipip-pinger-sa.yaml
+  owner: root
+  permissions: 644
+  content: |
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: calico-ipip-pinger
+      namespace: kube-system
+- path: /srv/calico-ipip-pinger.yaml
+  owner: root
+  permissions: 644
+  content: |
+    apiVersion: extensions/v1beta1
+    kind: DaemonSet
+    metadata:
+      labels:
+        app: calico-ipip-pinger
+      name: calico-ipip-pinger
+      namespace: kube-system
+    spec:
+      updateStrategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxUnavailable: 1
+      template:
+        metadata:
+          labels:
+            app: calico-ipip-pinger
+        spec:
+          serviceAccountName: calico-ipip-pinger
+          containers:
+          - name: calico-ipip-pinger
+            image: quay.io/giantswarm/calico-ipip-pinger:0f197abe866c7c811e42534739148345cb3bded5
+            imagePullPolicy: Always
+            securityContext:
+              privileged: true
+            env:
+              # The location of the Calico etcd cluster.
+              - name: ETCD_ENDPOINTS
+                valueFrom:
+                  configMapKeyRef:
+                    name: calico-config
+                    key: etcd_endpoints
+              # Location of the CA certificate for etcd.
+              - name: ETCD_CA_CERT_FILE
+                valueFrom:
+                  configMapKeyRef:
+                    name: calico-config
+                    key: etcd_ca
+              # Location of the client key for etcd.
+              - name: ETCD_KEY_FILE
+                valueFrom:
+                  configMapKeyRef:
+                    name: calico-config
+                    key: etcd_key
+              # Location of the client certificate for etcd.
+              - name: ETCD_CERT_FILE
+                valueFrom:
+                  configMapKeyRef:
+                    name: calico-config
+                    key: etcd_cert
+            volumeMounts:
+              # Mount in the etcd TLS secrets.
+              - mountPath: /etc/kubernetes/ssl/etcd
+                name: etcd-certs
+          volumes:
+            # Mount in the etcd TLS secrets.
+            - name: etcd-certs
+              hostPath:
+                path: /etc/kubernetes/ssl/etcd
+          tolerations:
+          - effect: NoSchedule
+            key: node-role.kubernetes.io/master
+            operator: Exists
+          hostNetwork: true
+          restartPolicy: Always
 - path: /srv/calico-node-controller-sa.yaml
   owner: root
   permissions: 644
@@ -1190,7 +1267,7 @@ write_files:
     kind: ClusterRole
     metadata:
       name: restricted-psp-user
-    rules: 
+    rules:
     - apiGroups:
       - extensions
       resources:
@@ -1206,7 +1283,7 @@ write_files:
     kind: ClusterRole
     metadata:
       name: privileged-psp-user
-    rules: 
+    rules:
     - apiGroups:
       - extensions
       resources:
@@ -1232,6 +1309,9 @@ write_files:
       namespace: kube-system
     - kind: ServiceAccount
       name: calico-node-controller
+      namespace: kube-system
+    - kind: ServiceAccount
+      name: calico-ipip-pinger
       namespace: kube-system
     - kind: ServiceAccount
       name: kube-dns
@@ -1305,7 +1385,9 @@ write_files:
        calico-ds.yaml\
        calico-kube-controllers.yaml\
        calico-node-controller-sa.yaml\
-       calico-node-controller.yaml"
+       calico-node-controller.yaml\
+       calico-ipip-pinger-sa.yaml\
+       calico-ipip-pinger.yaml"
 
       for manifest in $CALICO_FILES
       do
@@ -1761,6 +1843,13 @@ coreos:
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
       -v /etc/cni/net.d/:/etc/cni/net.d/ \
       -v /opt/cni/bin/:/opt/cni/bin/ \
+      -v /usr/sbin/iscsiadm:/usr/sbin/iscsiadm \
+      -v /etc/iscsi/:/etc/iscsi/ \
+      -v /dev/disk/by-path/:/dev/disk/by-path/ \
+      -v /dev/mapper/:/dev/mapper/ \
+      -v /usr/sbin/mkfs.xfs:/usr/sbin/mkfs.xfs \
+      -v /usr/lib64/libxfs.so.0:/usr/lib/libxfs.so.0 \
+      -v /usr/lib64/libxcmd.so.0:/usr/lib/libxcmd.so.0 \
       -e ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/server-ca.pem \
       -e ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/server-crt.pem \
       -e ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/server-key.pem \
