@@ -23,21 +23,6 @@ func (b Bundles) Contain(item Bundle) bool {
 	return false
 }
 
-func (b Bundles) Copy() Bundles {
-	raw, err := json.Marshal(b)
-	if err != nil {
-		panic(err)
-	}
-
-	var copy Bundles
-	err = json.Unmarshal(raw, &copy)
-	if err != nil {
-		panic(err)
-	}
-
-	return copy
-}
-
 func (b Bundles) Validate() error {
 	if len(b) == 0 {
 		return microerror.Maskf(invalidBundlesError, "version bundles must not be empty")
@@ -47,8 +32,8 @@ func (b Bundles) Validate() error {
 		return microerror.Maskf(invalidBundlesError, "version bundle versions must be unique")
 	}
 
-	b1 := b.Copy()
-	b2 := b.Copy()
+	b1 := CopyBundles(b)
+	b2 := CopyBundles(b)
 	sort.Sort(SortBundlesByTime(b1))
 	sort.Sort(SortBundlesByVersion(b2))
 	if !reflect.DeepEqual(b1, b2) {
@@ -70,6 +55,21 @@ func (b Bundles) Validate() error {
 	}
 
 	return nil
+}
+
+func CopyBundles(bundles []Bundle) []Bundle {
+	raw, err := json.Marshal(bundles)
+	if err != nil {
+		panic(err)
+	}
+
+	var copy []Bundle
+	err = json.Unmarshal(raw, &copy)
+	if err != nil {
+		panic(err)
+	}
+
+	return copy
 }
 
 func (b Bundles) hasDuplicatedVersions() bool {

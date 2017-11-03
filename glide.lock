@@ -1,5 +1,5 @@
-hash: 4825e5e5dd4daf6c22025b330d50debf71d6e97d94b86452d3922296f39fbfcf
-updated: 2017-11-02T13:06:42.153099066+01:00
+hash: c98f890d6b2e4b61ed23bfe63b1248e4409c53e76a56848f9c461149c19665dc
+updated: 2017-11-02T17:32:35.316753398+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -87,8 +87,13 @@ imports:
   - spec/kubernetes/kubectl
   - spec/kubernetes/networksetup
   - spec/kubernetes/ssh
+- name: github.com/giantswarm/e2e-harness
+  version: 6fd13b9585c02e73def00ec7d22c22b4bd340838
+  subpackages:
+  - pkg/results
+  - pkg/runner
 - name: github.com/giantswarm/k8scloudconfig
-  version: 062d12fb69491f892fe3cb43524d16940ae50097
+  version: be9f399432713d5ec7223c3eca6fd9ecfb922456
   subpackages:
   - v_0_1_0
 - name: github.com/giantswarm/microendpoint
@@ -132,7 +137,7 @@ imports:
 - name: github.com/giantswarm/randomkeytpr
   version: 9e1d78d125841c496889e8a54d49057212a2893e
 - name: github.com/giantswarm/versionbundle
-  version: 74ece9fd181fc5ef2a8510cbeb408485f9a0b1a3
+  version: 4d1e771cce94902dc952eed5deef58ebbcbb973f
 - name: github.com/go-ini/ini
   version: f280b3ba517bf5fc98922624f21fb0e7a92adaec
 - name: github.com/go-kit/kit

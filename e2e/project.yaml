@@ -6,7 +6,8 @@ setup:
       run: kubectl get namespace
       match: giantswarm\s*Active
 
-outOfClusterTest:
+  - run: helm delete aws-operator-chart --purge || true
+
   - run: |
       cat <<EOF > ./values.yaml
       Installation:
@@ -32,3 +33,6 @@ outOfClusterTest:
     waitFor:
       run: kubectl get pods -n giantswarm
       match: aws-operator-.*\s*1/1\s*Running
+
+inClusterTest:
+  enabled: true

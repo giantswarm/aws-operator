@@ -381,8 +381,8 @@ func Test_Bundles_Copy(t *testing.T) {
 		},
 	}
 
-	b1 := Bundles(bundles).Copy()
-	b2 := Bundles(bundles).Copy()
+	b1 := CopyBundles(bundles)
+	b2 := CopyBundles(bundles)
 
 	sort.Sort(SortBundlesByTime(b1))
 	sort.Sort(SortBundlesByVersion(b2))
