@@ -1,5 +1,5 @@
-hash: 314f50b1408d660483d3a7bebdae8129e9a178748c71ab11128e0a693ef6e923
-updated: 2017-11-02T15:10:09.279862815+01:00
+hash: 83755b06ab634e3d889a4a38c4e79d860f4923670b385b34bd399c41eb11f304
+updated: 2017-11-03T08:54:07.099466792+01:00
 imports:
 - name: github.com/coreos/go-semver
   version: 8ab6407b697782a06568d4b7f1db25550ec2e4c6
@@ -20,4 +20,8 @@ imports:
   version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
   subpackages:
   - publicsuffix
+- name: golang.org/x/sync
+  version: fd80eb99c8f653c847d294a001bdf2a3a6f768f5
+  subpackages:
+  - errgroup
 testImports: []
