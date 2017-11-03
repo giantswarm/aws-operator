@@ -117,7 +117,18 @@ write_files:
           namespace: kube-system
           labels:
             k8s-app: calico-node-controller
+          annotations:
+            scheduler.alpha.kubernetes.io/critical-pod: ''
         spec:
+          tolerations:
+          - key: node-role.kubernetes.io/master
+            operator: Exists
+            effect: NoSchedule
+          - key: CriticalAddonsOnly
+            operator: Exists
+          nodeSelector:
+            node-role.kubernetes.io/master: ""
+          hostNetwork: true
           serviceAccountName: calico-node-controller
           containers:
             - name: calico-node-controller
@@ -900,6 +911,93 @@ write_files:
         targetPort: 443
       selector:
         k8s-app: nginx-ingress-controller
+- path: /srv/kube-proxy-sa.yaml
+  owner: root
+  permissions: 0644
+  content: |
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: kube-proxy
+      namespace: kube-system
+- path: /srv/kube-proxy-ds.yaml
+  owner: root
+  permissions: 0644
+  content: |
+    kind: DaemonSet
+    apiVersion: extensions/v1beta1
+    metadata:
+      name: kube-proxy
+      namespace: kube-system
+      labels:
+        component: kube-proxy
+        k8s-app: kube-proxy
+        kubernetes.io/cluster-service: "true"
+    spec:
+      selector:
+        matchLabels:
+          k8s-app: kube-proxy
+      updateStrategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxUnavailable: 1
+      template:
+        metadata:
+          labels:
+            component: kube-proxy
+            k8s-app: kube-proxy
+            kubernetes.io/cluster-service: "true"
+          annotations:
+            scheduler.alpha.kubernetes.io/critical-pod: ''
+        spec:
+          tolerations:
+          - key: node-role.kubernetes.io/master
+            operator: Exists
+            effect: NoSchedule
+          - key: CriticalAddonsOnly
+            operator: Exists
+          hostNetwork: true
+          serviceAccountName: kube-proxy
+          containers:
+            - name: kube-proxy
+              image: quay.io/giantswarm/hyperkube:v1.8.1_coreos.0
+              command:
+              - /hyperkube
+              - proxy
+              - --proxy-mode=iptables
+              - --logtostderr=true
+              - --kubeconfig=/etc/kubernetes/config/proxy-kubeconfig.yml
+              - --conntrack-max-per-core=131072
+              - --v=2
+              livenessProbe:
+                httpGet:
+                  path: /healthz
+                  port: 10256
+                initialDelaySeconds: 10
+                periodSeconds: 3
+              securityContext:
+                privileged: true
+              volumeMounts:
+              - mountPath: /etc/ssl/certs
+                name: ssl-certs-host
+                readOnly: true
+              - mountPath: /etc/kubernetes/config/
+                name: config-kubernetes
+                readOnly: true
+              - mountPath: /etc/kubernetes/ssl
+                name: ssl-certs-kubernetes
+                readOnly: true
+          volumes:
+          - hostPath:
+              path: /etc/kubernetes/config/
+            name: config-kubernetes
+          - hostPath:
+              path: /etc/kubernetes/ssl
+            name: ssl-certs-kubernetes
+          - hostPath:
+              path: /usr/share/ca-certificates
+            name: ssl-certs-host
+
 - path: /srv/rbac_bindings.yaml
   owner: root
   permissions: 0644
@@ -1317,6 +1415,9 @@ write_files:
       name: kube-dns
       namespace: kube-system
     - kind: ServiceAccount
+      name: kube-proxy
+      namespace: kube-system
+    - kind: ServiceAccount
       name: nginx-ingress-controller
       namespace: kube-system
     roleRef:
@@ -1427,7 +1528,17 @@ write_files:
       fi
 
       # apply k8s addons
-      MANIFESTS="kubedns-cm.yaml kubedns-sa.yaml kubedns-dep.yaml kubedns-svc.yaml default-backend-dep.yml default-backend-svc.yml ingress-controller-cm.yml ingress-controller-dep.yml ingress-controller-svc.yml"
+      MANIFESTS="kube-proxy-sa.yaml\
+                 kube-proxy-ds.yaml\
+                 kubedns-cm.yaml\
+                 kubedns-sa.yaml\
+                 kubedns-dep.yaml\
+                 kubedns-svc.yaml\
+                 default-backend-dep.yml\
+                 default-backend-svc.yml\
+                 ingress-controller-cm.yml\
+                 ingress-controller-dep.yml\
+                 ingress-controller-svc.yml"
 
       for manifest in $MANIFESTS
       do
@@ -1755,7 +1866,7 @@ coreos:
         --name $NAME \
         $IMAGE \
         etcdctl \
-        --endpoints https://{{ .Cluster.Etcd.Domain }}:443 \
+        --endpoints https://127.0.0.1:2379 \
         --cacert /etc/etcd/server-ca.pem \
         --cert /etc/etcd/server-crt.pem \
         --key /etc/etcd/server-key.pem \
@@ -1775,39 +1886,6 @@ coreos:
 
       [Install]
       WantedBy=multi-user.target
-  - name: k8s-proxy.service
-    enable: true
-    command: start
-    content: |
-      [Unit]
-      Description=k8s-proxy
-      StartLimitIntervalSec=0
-
-      [Service]
-      Restart=always
-      RestartSec=0
-      TimeoutStopSec=10
-      EnvironmentFile=/etc/network-environment
-      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.8.1_coreos.0"
-      Environment="NAME=%p.service"
-      Environment="NETWORK_CONFIG_CONTAINER="
-      ExecStartPre=/usr/bin/docker pull $IMAGE
-      ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
-      ExecStartPre=-/usr/bin/docker rm -f $NAME
-      ExecStart=/bin/sh -c "/usr/bin/docker run --rm --net=host --privileged=true \
-      --name $NAME \
-      -v /usr/share/ca-certificates:/etc/ssl/certs \
-      -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
-      -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
-      $IMAGE \
-      /hyperkube proxy \
-      --proxy-mode=iptables \
-      --logtostderr=true \
-      --kubeconfig=/etc/kubernetes/config/proxy-kubeconfig.yml \
-      --conntrack-max-per-core 131072 \
-      --v=2"
-      ExecStop=-/usr/bin/docker stop -t 10 $NAME
-      ExecStopPost=-/usr/bin/docker rm -f $NAME
   - name: k8s-kubelet.service
     enable: true
     command: start

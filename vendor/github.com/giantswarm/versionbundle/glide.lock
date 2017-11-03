@@ -1,5 +1,5 @@
-hash: b5bccbf03e02fb87ee49db770c792da6d247e4cf5b713e514bc31c314afb0df3
-updated: 2017-10-27T14:57:04.740836597+02:00
+hash: 314f50b1408d660483d3a7bebdae8129e9a178748c71ab11128e0a693ef6e923
+updated: 2017-11-02T15:10:09.279862815+01:00
 imports:
 - name: github.com/coreos/go-semver
   version: 8ab6407b697782a06568d4b7f1db25550ec2e4c6
@@ -7,6 +7,8 @@ imports:
   - semver
 - name: github.com/giantswarm/microerror
   version: 5ade94eb4ee35ef72eb9382228470caeddb29989
+- name: github.com/go-resty/resty
+  version: 9ac9c42358f7c3c69ac9f8610e8790d7c338e85d
 - name: github.com/juju/errgo
   version: 08cceb5d0b5331634b9826762a8fd53b29b86ad8
 - name: github.com/kylelemons/godebug
@@ -14,4 +16,8 @@ imports:
   subpackages:
   - diff
   - pretty
+- name: golang.org/x/net
+  version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
+  subpackages:
+  - publicsuffix
 testImports: []

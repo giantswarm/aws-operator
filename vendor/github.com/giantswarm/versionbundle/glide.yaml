@@ -4,4 +4,6 @@ import:
   version: v0.2.0
 - package: github.com/giantswarm/microerror
   version: master
+- package: github.com/go-resty/resty
+  version: 1.0.0
 - package: github.com/kylelemons/godebug/pretty
