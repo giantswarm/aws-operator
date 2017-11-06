@@ -87,6 +87,11 @@ imports:
   - spec/kubernetes/kubectl
   - spec/kubernetes/networksetup
   - spec/kubernetes/ssh
+- name: github.com/giantswarm/e2e-harness
+  version: 6fd13b9585c02e73def00ec7d22c22b4bd340838
+  subpackages:
+  - pkg/results
+  - pkg/runner
 - name: github.com/giantswarm/k8scloudconfig
   version: 30de6e46e3cd97ad7a6da9005fa00f9dc785b179
   subpackages:
