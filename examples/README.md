@@ -17,17 +17,29 @@ directory.
 ## Cluster Certificates
 
 The easiest way to create certificates is to use the local [cert-operator]
-setup. See [this guide][cert-operator-local-setup] for details.
-
-- Note: `clusterName` and `commonDomain` chart values must match the values used
-  during this guide. Also, you don't need to build cert-operator, just pass `latest`
-  to the `imageTag` value:
+setup. See [this guide][cert-operator-local-setup] for details. The operator and certificates
+to be used during aws-operator setup can be installed with:
 
 ```bash
-helm install -n cert-operator-lab ./cert-operator-lab-chart/ --set imageTag latest --wait
+git clone github.com/giantswarm/cert-operator ./cert-operator
+
+helm \
+  install -n cert-operator-lab ./cert-operator/examples/cert-operator-lab-chart/ \
+  --set clusterName=my-cluster \
+  --set commonDomain=my-common-domain \
+  --set imageTag latest \
+  --wait
+
+# here the certificate TPR is created, wait until `kubectl get certificate` returns
+# `No resources found.` before running the next command
+
+helm install -n cert-resource-lab ./cert-operator/examples/cert-operator-lab-chart/ \
+  --set clusterName=my-cluster \
+  --set commonDomain=my-common-domain
 ```
 
-[helm registry plugin]: https://github.com/app-registry/appr-helm-plugin
+- Note: `clusterName` and `commonDomain` chart values must match the values used
+  during this guide.
 
 ## Cluster-Local Docker Image
 
