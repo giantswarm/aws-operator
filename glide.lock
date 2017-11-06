@@ -1,5 +1,5 @@
 hash: 4825e5e5dd4daf6c22025b330d50debf71d6e97d94b86452d3922296f39fbfcf
-updated: 2017-11-03T15:38:30.362263425+01:00
+updated: 2017-11-06T10:17:21.55034811+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -88,7 +88,7 @@ imports:
   - spec/kubernetes/networksetup
   - spec/kubernetes/ssh
 - name: github.com/giantswarm/k8scloudconfig
-  version: b2bf96468d896956b9fce1072a528385ccfe2058
+  version: 30de6e46e3cd97ad7a6da9005fa00f9dc785b179
   subpackages:
   - v_0_1_0
 - name: github.com/giantswarm/microendpoint
@@ -227,7 +227,7 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: 1bab55dd05dbff384524a6a1c99006d9eb5f139b
+  version: e3fb1a1acd7605367a2b378bc2e2f893c05174b7
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
