@@ -20,7 +20,12 @@ The easiest way to create certificates is to use the local [cert-operator]
 setup. See [this guide][cert-operator-local-setup] for details.
 
 - Note: `clusterName` and `commonDomain` chart values must match the values used
-  during this guide.
+  during this guide. Also, you don't need to build cert-operator, just pass `latest`
+  to the `imageTag` value:
+
+```bash
+helm install -n cert-operator-lab ./cert-operator-lab-chart/ --set imageTag latest --wait
+```
 
 [helm registry plugin]: https://github.com/app-registry/appr-helm-plugin
 
