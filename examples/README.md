@@ -17,21 +17,7 @@ directory.
 ## Cluster Certificates
 
 The easiest way to create certificates is to use the local [cert-operator]
-setup. See [this guide][cert-operator-local-setup] for details. Using the [helm registry plugin]
-the cert-operator charts can be installed easily:
-
-```bash
-helm registry install quay.io/giantswarm/cert-operator-lab-chart -- \
-                   -n cert-operator-lab \
-                   --set imageTag=latest \
-                   --set clusterName=my-cluster \
-                   --set commonDomain=my-common-domain \
-                   --wait
-helm registry install quay.io/giantswarm/cert-resource-lab-chart -- \
-                   -n cert-resource-lab \
-                   --set clusterName=my-cluster \
-                   --set commonDomain=my-common-domain
-```
+setup. See [this guide][cert-operator-local-setup] for details.
 
 - Note: `clusterName` and `commonDomain` chart values must match the values used
   during this guide.
