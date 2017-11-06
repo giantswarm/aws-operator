@@ -1,5 +1,5 @@
-hash: c98f890d6b2e4b61ed23bfe63b1248e4409c53e76a56848f9c461149c19665dc
-updated: 2017-11-02T17:32:35.316753398+01:00
+hash: 4825e5e5dd4daf6c22025b330d50debf71d6e97d94b86452d3922296f39fbfcf
+updated: 2017-11-06T10:17:21.55034811+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -93,7 +93,7 @@ imports:
   - pkg/results
   - pkg/runner
 - name: github.com/giantswarm/k8scloudconfig
-  version: be9f399432713d5ec7223c3eca6fd9ecfb922456
+  version: 30de6e46e3cd97ad7a6da9005fa00f9dc785b179
   subpackages:
   - v_0_1_0
 - name: github.com/giantswarm/microendpoint
@@ -130,14 +130,14 @@ imports:
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: b5bfa412f825f7593baea4149d0fc66a97c5e525
+  version: 7fed726ca23a9ae0f6e26c0b430ce7c2ed249b26
   subpackages:
   - client/k8sclient
   - tpr
 - name: github.com/giantswarm/randomkeytpr
   version: 9e1d78d125841c496889e8a54d49057212a2893e
 - name: github.com/giantswarm/versionbundle
-  version: 4d1e771cce94902dc952eed5deef58ebbcbb973f
+  version: efdbdae719c56ab4880f8fe56643d60a76fc19e5
 - name: github.com/go-ini/ini
   version: f280b3ba517bf5fc98922624f21fb0e7a92adaec
 - name: github.com/go-kit/kit
@@ -160,6 +160,8 @@ imports:
   version: 6aced65f8501fe1217321abf0749d354824ba2ff
 - name: github.com/go-openapi/swag
   version: 1d0bd113de87027671077d3c71eb3ac5d7dbba72
+- name: github.com/go-resty/resty
+  version: 9ac9c42358f7c3c69ac9f8610e8790d7c338e85d
 - name: github.com/go-stack/stack
   version: 100eb0c0a9c5b306ca2fb4f165df21d80ada4b82
 - name: github.com/gogo/protobuf
@@ -230,7 +232,7 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: 1bab55dd05dbff384524a6a1c99006d9eb5f139b
+  version: e3fb1a1acd7605367a2b378bc2e2f893c05174b7
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
@@ -276,6 +278,11 @@ imports:
   - http2/hpack
   - idna
   - lex/httplex
+  - publicsuffix
+- name: golang.org/x/sync
+  version: fd80eb99c8f653c847d294a001bdf2a3a6f768f5
+  subpackages:
+  - errgroup
 - name: golang.org/x/sys
   version: 8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9
   subpackages:
