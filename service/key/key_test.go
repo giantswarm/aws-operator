@@ -383,3 +383,22 @@ func Test_WorkerInstanceType(t *testing.T) {
 		}
 	}
 }
+
+func Test_MainStackName(t *testing.T) {
+	expected := "xyz-main"
+
+	cluster := awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			Cluster: clustertpr.Spec{
+				Cluster: spec.Cluster{
+					ID: "xyz",
+				},
+			},
+		},
+	}
+
+	actual := MainStackName(cluster)
+	if actual != expected {
+		t.Fatalf("Expected main stack name %s but was %s", expected, actual)
+	}
+}
