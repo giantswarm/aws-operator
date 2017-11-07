@@ -68,7 +68,7 @@ const (
 	defaultEBSVolumeType = "gp2"
 )
 
-func (s *Service) processASGStack(input asgStackInput) (bool, error) {
+func (s *Resource) processASGStack(input asgStackInput) (bool, error) {
 	stack := awsresources.ASGStack{
 		// Dependencies.
 		Client: input.clients.CloudFormation,
@@ -101,7 +101,7 @@ func (s *Service) processASGStack(input asgStackInput) (bool, error) {
 }
 
 // createASGStack creates a CloudFormation stack for an Auto Scaling Group.
-func (s *Service) createASGStack(input asgStackInput) (bool, error) {
+func (s *Resource) createASGStack(input asgStackInput) (bool, error) {
 	// Generate the Cloud Formation template using a Go template.
 	cfTemplate, err := ioutil.ReadFile(asgCloudFormationGoTemplate)
 	if err != nil {
@@ -217,7 +217,7 @@ func (s *Service) createASGStack(input asgStackInput) (bool, error) {
 	return true, nil
 }
 
-func (s *Service) updateASGStack(input asgStackInput) error {
+func (s *Resource) updateASGStack(input asgStackInput) error {
 	var imageID string
 
 	switch input.asgType {

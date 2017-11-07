@@ -15,7 +15,7 @@ type securityGroupRulesInput struct {
 	GroupName string
 }
 
-func (s *Service) deleteSecurityGroupRules(input securityGroupRulesInput) error {
+func (s *Resource) deleteSecurityGroupRules(input securityGroupRulesInput) error {
 	var securityGroupRules resources.DeletableResource
 	securityGroupRules = awsresources.SecurityGroupRules{
 		Description: input.GroupName,

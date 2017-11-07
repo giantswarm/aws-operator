@@ -49,7 +49,7 @@ type runMachinesInput struct {
 	prefix              string
 }
 
-func (s *Service) runMachines(input runMachinesInput) (bool, []string, error) {
+func (s *Resource) runMachines(input runMachinesInput) (bool, []string, error) {
 	var (
 		anyCreated bool
 
@@ -145,7 +145,7 @@ type runMachineInput struct {
 	prefix              string
 }
 
-func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
+func (s *Resource) runMachine(input runMachineInput) (bool, string, error) {
 	var template string
 	var err error
 	{
@@ -243,7 +243,7 @@ type deleteMachinesInput struct {
 	prefix      string
 }
 
-func (s *Service) deleteMachines(input deleteMachinesInput) error {
+func (s *Resource) deleteMachines(input deleteMachinesInput) error {
 	pattern := clusterPrefix(clusterPrefixInput{
 		clusterName: input.clusterName,
 		prefix:      input.prefix,

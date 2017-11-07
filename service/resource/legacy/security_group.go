@@ -39,7 +39,7 @@ const (
 	defaultCIDR = "0.0.0.0/0"
 )
 
-func (s *Service) createSecurityGroup(input securityGroupInput) (*awsresources.SecurityGroup, error) {
+func (s *Resource) createSecurityGroup(input securityGroupInput) (*awsresources.SecurityGroup, error) {
 	securityGroup := &awsresources.SecurityGroup{
 		Description: input.GroupName,
 		GroupName:   input.GroupName,
@@ -59,7 +59,7 @@ func (s *Service) createSecurityGroup(input securityGroupInput) (*awsresources.S
 	return securityGroup, nil
 }
 
-func (s *Service) deleteSecurityGroup(input securityGroupInput) error {
+func (s *Resource) deleteSecurityGroup(input securityGroupInput) error {
 	var securityGroup resources.ResourceWithID
 	securityGroup = &awsresources.SecurityGroup{
 		Description: input.GroupName,

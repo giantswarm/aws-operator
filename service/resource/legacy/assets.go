@@ -9,7 +9,7 @@ import (
 	"github.com/giantswarm/randomkeytpr"
 )
 
-func (s *Service) encodeTLSAssets(assets certificatetpr.AssetsBundle, svc *kms.KMS, kmsKeyArn string) (*certificatetpr.CompactTLSAssets, error) {
+func (s *Resource) encodeTLSAssets(assets certificatetpr.AssetsBundle, svc *kms.KMS, kmsKeyArn string) (*certificatetpr.CompactTLSAssets, error) {
 	rawTLS := createRawTLSAssets(assets)
 
 	encTLS, err := rawTLS.encrypt(svc, kmsKeyArn)
@@ -25,7 +25,7 @@ func (s *Service) encodeTLSAssets(assets certificatetpr.AssetsBundle, svc *kms.K
 	return compTLS, nil
 }
 
-func (s *Service) encodeKeyAssets(assets map[randomkeytpr.Key][]byte, svc *kms.KMS, kmsKeyArn string) (*randomkeytpr.CompactRandomKeyAssets, error) {
+func (s *Resource) encodeKeyAssets(assets map[randomkeytpr.Key][]byte, svc *kms.KMS, kmsKeyArn string) (*randomkeytpr.CompactRandomKeyAssets, error) {
 
 	encryptionKey, ok := assets[randomkeytpr.EncryptionKey]
 	if !ok {
@@ -33,6 +33,7 @@ func (s *Service) encodeKeyAssets(assets map[randomkeytpr.Key][]byte, svc *kms.K
 	}
 
 	encryptionConfig, err := s.EncryptionConfig(string(encryptionKey))
+
 	if err != nil {
 		return nil, microerror.Maskf(executionFailedError, fmt.Sprintf("could not generate encryption config: '%#v'", err))
 	}

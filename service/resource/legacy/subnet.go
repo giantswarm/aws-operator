@@ -22,7 +22,7 @@ type SubnetInput struct {
 }
 
 // createSubnet creates a subnet and optionally makes it public.
-func (s *Service) createSubnet(input SubnetInput) (*awsresources.Subnet, error) {
+func (s *Resource) createSubnet(input SubnetInput) (*awsresources.Subnet, error) {
 	subnet := &awsresources.Subnet{
 		AvailabilityZone: key.AvailabilityZone(input.Cluster),
 		CidrBlock:        input.CidrBlock,
@@ -58,7 +58,7 @@ func (s *Service) createSubnet(input SubnetInput) (*awsresources.Subnet, error) 
 }
 
 // deleteSubnet deletes a subnet.
-func (s *Service) deleteSubnet(input SubnetInput) error {
+func (s *Resource) deleteSubnet(input SubnetInput) error {
 	subnet := &awsresources.Subnet{
 		Name: input.Name,
 		// Dependencies.

@@ -8,7 +8,7 @@ import (
 	"k8s.io/client-go/pkg/apis/extensions/v1beta1"
 )
 
-func (s *Service) createTPR() error {
+func (s *Resource) createTPR() error {
 	tpr := &v1beta1.ThirdPartyResource{
 		ObjectMeta: apismetav1.ObjectMeta{
 			Name: awstpr.Name,

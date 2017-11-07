@@ -30,7 +30,7 @@ type launchConfigurationInput struct {
 	clusterKeys         *randomkeytpr.CompactRandomKeyAssets
 }
 
-func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (bool, error) {
+func (s *Resource) createLaunchConfiguration(input launchConfigurationInput) (bool, error) {
 	var err error
 	var imageID string
 	var instanceType string
@@ -113,7 +113,7 @@ func (s *Service) createLaunchConfiguration(input launchConfigurationInput) (boo
 	return launchConfigCreated, nil
 }
 
-func (s *Service) deleteLaunchConfiguration(input launchConfigurationInput) error {
+func (s *Resource) deleteLaunchConfiguration(input launchConfigurationInput) error {
 	groupName := key.SecurityGroupName(input.cluster, input.prefix)
 	sg := awsresources.SecurityGroup{
 		Description: groupName,

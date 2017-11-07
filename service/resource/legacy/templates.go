@@ -66,7 +66,7 @@ resources:
 `
 )
 
-func (s *Service) EncryptionConfig(encryptionKey string) (string, error) {
+func (s *Resource) EncryptionConfig(encryptionKey string) (string, error) {
 	tmpl, err := template.New("encryptionConfig").Parse(encryptionConfigTemplate)
 	if err != nil {
 		return "", microerror.Mask(err)

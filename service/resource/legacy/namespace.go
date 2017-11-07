@@ -8,7 +8,7 @@ import (
 	"k8s.io/client-go/pkg/api/v1"
 )
 
-func (s *Service) createClusterNamespace(cluster clustertpr.Spec) error {
+func (s *Resource) createClusterNamespace(cluster clustertpr.Spec) error {
 	namespace := v1.Namespace{
 		TypeMeta: apismetav1.TypeMeta{
 			Kind:       "Namespace",
@@ -29,6 +29,6 @@ func (s *Service) createClusterNamespace(cluster clustertpr.Spec) error {
 	return nil
 }
 
-func (s *Service) deleteClusterNamespace(cluster clustertpr.Spec) error {
+func (s *Resource) deleteClusterNamespace(cluster clustertpr.Spec) error {
 	return s.k8sClient.Core().Namespaces().Delete(cluster.Cluster.ID, apismetav1.NewDeleteOptions(0))
 }

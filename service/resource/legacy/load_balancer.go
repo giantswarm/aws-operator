@@ -34,7 +34,7 @@ type LoadBalancerInput struct {
 	Scheme string
 }
 
-func (s *Service) createLoadBalancer(input LoadBalancerInput) (*awsresources.ELB, error) {
+func (s *Resource) createLoadBalancer(input LoadBalancerInput) (*awsresources.ELB, error) {
 	lbName, err := loadBalancerName(input.Name, input.Cluster)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -77,7 +77,7 @@ func (s *Service) createLoadBalancer(input LoadBalancerInput) (*awsresources.ELB
 	return lb, nil
 }
 
-func (s *Service) deleteLoadBalancer(input LoadBalancerInput) error {
+func (s *Resource) deleteLoadBalancer(input LoadBalancerInput) error {
 	// Delete ELB.
 	lbName, err := loadBalancerName(input.Name, input.Cluster)
 	if err != nil {
@@ -126,7 +126,7 @@ func componentName(domainName string) (string, error) {
 	return splits[0], nil
 }
 
-func (s *Service) registerInstances(lb *awsresources.ELB, input LoadBalancerInput) error {
+func (s *Resource) registerInstances(lb *awsresources.ELB, input LoadBalancerInput) error {
 	var awsFlavouredInstanceIDs []*string
 	for _, instanceID := range input.InstanceIDs {
 		awsFlavouredInstanceIDs = append(awsFlavouredInstanceIDs, aws.String(instanceID))

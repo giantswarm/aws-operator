@@ -20,7 +20,7 @@ type recordSetInput struct {
 	Type         string
 }
 
-func (s *Service) deleteRecordSet(input recordSetInput) error {
+func (s *Resource) deleteRecordSet(input recordSetInput) error {
 	rs := &awsresources.RecordSet{
 		Client:       input.Client,
 		Resource:     input.Resource,
@@ -37,7 +37,7 @@ func (s *Service) deleteRecordSet(input recordSetInput) error {
 	return nil
 }
 
-func (s *Service) createRecordSet(input recordSetInput) error {
+func (s *Resource) createRecordSet(input recordSetInput) error {
 	// Create DNS records for LB.
 	apiRecordSet := &awsresources.RecordSet{
 		Client:       input.Client,
