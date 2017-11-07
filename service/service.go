@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/cenk/backoff"
+	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/certificatetpr"
 	"github.com/giantswarm/microendpoint/service/version"
 	"github.com/giantswarm/microerror"
@@ -17,8 +18,11 @@ import (
 	"github.com/giantswarm/operatorkit/framework/resource/logresource"
 	"github.com/giantswarm/operatorkit/framework/resource/metricsresource"
 	"github.com/giantswarm/operatorkit/framework/resource/retryresource"
+	"github.com/giantswarm/operatorkit/informer"
+	"github.com/giantswarm/operatorkit/tpr"
 	"github.com/giantswarm/randomkeytpr"
 	"github.com/spf13/viper"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
@@ -260,6 +264,48 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var newTPR *tpr.TPR
+	{
+		c := tpr.DefaultConfig()
+
+		c.K8sClient = k8sClient
+		c.Logger = config.Logger
+
+		c.Description = awstpr.Description
+		c.Name = awstpr.Name
+		c.Version = awstpr.VersionV1
+
+		newTPR, err = tpr.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var newWatcherFactory informer.WatcherFactory
+	{
+		zeroObjectFactory := &informer.ZeroObjectFactoryFuncs{
+			NewObjectFunc:     func() runtime.Object { return &awstpr.CustomObject{} },
+			NewObjectListFunc: func() runtime.Object { return &awstpr.List{} },
+		}
+		newWatcherFactory = informer.NewWatcherFactory(k8sClient.Discovery().RESTClient(), newTPR.WatchEndpoint(""), zeroObjectFactory)
+	}
+
+	var newInformer *informer.Informer
+	{
+		informerConfig := informer.DefaultConfig()
+
+		informerConfig.BackOff = backoff.NewExponentialBackOff()
+		informerConfig.WatcherFactory = newWatcherFactory
+
+		informerConfig.RateWait = time.Second * 10
+		informerConfig.ResyncPeriod = time.Minute * 5
+
+		newInformer, err = informer.New(informerConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var healthzService *healthz.Service
 	{
 		healthzConfig := healthz.DefaultConfig()
@@ -283,9 +329,10 @@ func New(config Config) (*Service, error) {
 		operatorConfig := operator.DefaultConfig()
 
 		operatorConfig.BackOff = operatorBackOff
-		operatorConfig.K8sClient = k8sClient
+		operatorConfig.Framework = operatorFramework
+		operatorConfig.Informer = newInformer
 		operatorConfig.Logger = config.Logger
-		operatorConfig.OperatorFramework = operatorFramework
+		operatorConfig.TPR = newTPR
 
 		operatorService, err = operator.New(operatorConfig)
 		if err != nil {

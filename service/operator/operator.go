@@ -1,28 +1,28 @@
 package operator
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"sync"
 	"time"
 
 	"github.com/cenkalti/backoff"
-	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
+	"github.com/giantswarm/operatorkit/informer"
 	"github.com/giantswarm/operatorkit/tpr"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/kubernetes"
 )
 
 // Config represents the configuration used to create a new service.
 type Config struct {
 	// Dependencies.
-	BackOff           backoff.BackOff
-	K8sClient         kubernetes.Interface
-	Logger            micrologger.Logger
-	OperatorFramework *framework.Framework
+	BackOff   backoff.BackOff
+	Framework *framework.Framework
+	Informer  *informer.Informer
+	Logger    micrologger.Logger
+	TPR       *tpr.TPR
 }
 
 // DefaultConfig provides a default configuration to create a new service by
@@ -30,24 +30,26 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
-		BackOff:           nil,
-		K8sClient:         nil,
-		Logger:            nil,
-		OperatorFramework: nil,
+		BackOff:   nil,
+		Framework: nil,
+		Informer:  nil,
+		Logger:    nil,
+		TPR:       nil,
 	}
 }
 
 // Operator implements the reconciliation of custom objects.
 type Operator struct {
 	// Dependencies.
-	backOff           backoff.BackOff
-	logger            micrologger.Logger
-	operatorFramework *framework.Framework
+	backOff   backoff.BackOff
+	framework *framework.Framework
+	informer  *informer.Informer
+	logger    micrologger.Logger
+	tpr       *tpr.TPR
 
 	// Internals.
 	bootOnce sync.Once
 	mutex    sync.Mutex
-	tpr      *tpr.TPR
 }
 
 // New creates a new configured service.
@@ -56,45 +58,30 @@ func New(config Config) (*Operator, error) {
 	if config.BackOff == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.BackOff must not be empty")
 	}
-	if config.K8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.K8sClient must not be empty")
+	if config.Framework == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.Framework must not be empty")
+	}
+	if config.Informer == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.Informer must not be empty")
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
-	if config.OperatorFramework == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.OperatorFramework must not be empty")
-	}
-
-	var err error
-
-	var newTPR *tpr.TPR
-	{
-		c := tpr.DefaultConfig()
-
-		c.K8sClient = config.K8sClient
-		c.Logger = config.Logger
-
-		c.Description = awstpr.Description
-		c.Name = awstpr.Name
-		c.Version = awstpr.VersionV1
-
-		newTPR, err = tpr.New(c)
-		if err != nil {
-			return nil, microerror.Maskf(err, fmt.Sprintf("creating TPR util for %s", awstpr.Name))
-		}
+	if config.TPR == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.TPR must not be empty")
 	}
 
 	newOperator := &Operator{
 		// Dependencies.
-		backOff:           config.BackOff,
-		logger:            config.Logger,
-		operatorFramework: config.OperatorFramework,
+		backOff:   config.BackOff,
+		framework: config.Framework,
+		informer:  config.Informer,
+		logger:    config.Logger,
+		tpr:       config.TPR,
 
 		// Internals
 		bootOnce: sync.Once{},
 		mutex:    sync.Mutex{},
-		tpr:      newTPR,
 	}
 
 	return newOperator, nil
@@ -133,14 +120,8 @@ func (o *Operator) bootWithError() error {
 
 	o.logger.Log("debug", "starting list/watch")
 
-	newResourceEventHandler := o.operatorFramework.NewCacheResourceEventHandler()
-
-	newZeroObjectFactory := &tpr.ZeroObjectFactoryFuncs{
-		NewObjectFunc:     func() runtime.Object { return &awstpr.CustomObject{} },
-		NewObjectListFunc: func() runtime.Object { return &awstpr.List{} },
-	}
-
-	o.tpr.NewInformer(newResourceEventHandler, newZeroObjectFactory).Run(nil)
+	deleteChan, updateChan, errChan := o.informer.Watch(context.TODO())
+	o.framework.ProcessEvents(context.TODO(), deleteChan, updateChan, errChan)
 
 	return nil
 }
