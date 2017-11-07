@@ -1,5 +1,5 @@
-hash: 1c9e72845aa720c46c78da9a1be7f53cbb2601b90fffbebb8d0c917cb1a358c6
-updated: 2017-10-03T18:20:12.006539836+02:00
+hash: 067832208248275dcaafefb880a9e424b2316c624104d513a90175a0b0c44e60
+updated: 2017-10-27T15:38:02.49111111+02:00
 imports:
 - name: github.com/giantswarm/microerror
   version: 5ade94eb4ee35ef72eb9382228470caeddb29989
@@ -7,6 +7,8 @@ imports:
   version: 8a69b2ab80ba2d0bd40d609206518fefacfc8fdf
   subpackages:
   - microloggertest
+- name: github.com/giantswarm/versionbundle
+  version: 33129aa9036421b72ac122e0a8b643dc6b4454e5
 - name: github.com/go-kit/kit
   version: a9ca6725cbbea455e61c6bc8a1ed28e81eb3493b
   subpackages:
