@@ -1,6 +1,7 @@
 package legacy
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"sync"
@@ -12,9 +13,9 @@ import (
 	"github.com/giantswarm/certificatetpr"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/operatorkit/framework"
 	"github.com/giantswarm/operatorkit/tpr"
 	"github.com/giantswarm/randomkeytpr"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 
@@ -26,6 +27,9 @@ import (
 )
 
 const (
+	// Name is the identifier of the resource.
+	Name = "legacy"
+
 	// The format of instance's name is "[name of cluster]-[prefix ('master' or 'worker')]-[number]".
 	instanceNameFormat string = "%s-%s-%d"
 	// The format of prefix inside a cluster "[name of cluster]-[prefix ('master' or 'worker')]".
@@ -45,7 +49,7 @@ const (
 	gracePeriodSeconds = 10
 )
 
-// Config represents the configuration used to create a version service.
+// Config represents the configuration used to create a legacy service.
 type Config struct {
 	// Dependencies.
 	CertWatcher *certificatetpr.Service
@@ -60,8 +64,8 @@ type Config struct {
 	PubKeyFile    string
 }
 
-// DefaultConfig provides a default configuration to create a new service by
-// best effort.
+// DefaultConfig provides a default configuration to create a new legacy
+// resource by best effort.
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
@@ -78,8 +82,8 @@ func DefaultConfig() Config {
 	}
 }
 
-// New creates a new configured service.
-func New(config Config) (*Service, error) {
+// New creates a new configured resource.
+func New(config Config) (*Resource, error) {
 	// Dependencies.
 	if config.CertWatcher == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.CertWatcher must not be empty")
@@ -128,7 +132,7 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	newService := &Service{
+	newService := &Resource{
 		// Dependencies.
 		certWatcher: config.CertWatcher,
 		cloudConfig: config.CloudConfig,
@@ -149,8 +153,8 @@ func New(config Config) (*Service, error) {
 	return newService, nil
 }
 
-// Service implements the version service interface.
-type Service struct {
+// Resource implements the legacy resource.
+type Resource struct {
 	// Dependencies.
 	certWatcher *certificatetpr.Service
 	cloudConfig *cloudconfig.CloudConfig
@@ -173,57 +177,34 @@ type Event struct {
 	Object *awstpr.CustomObject
 }
 
-func (s *Service) Boot() {
-	s.bootOnce.Do(func() {
-		err := s.tpr.CreateAndWait()
-		if tpr.IsAlreadyExists(err) {
-			s.logger.Log("debug", "third party resource already exists")
-		} else if err != nil {
-			s.logger.Log("error", fmt.Sprintf("%#v", err))
-			return
-		}
-
-		s.logger.Log("debug", "starting list/watch")
-
-		newResourceEventHandler := &cache.ResourceEventHandlerFuncs{
-			AddFunc:    s.addFunc,
-			DeleteFunc: s.deleteFunc,
-			UpdateFunc: s.updateFunc,
-		}
-		newZeroObjectFactory := &tpr.ZeroObjectFactoryFuncs{
-			NewObjectFunc:     func() runtime.Object { return &awstpr.CustomObject{} },
-			NewObjectListFunc: func() runtime.Object { return &awstpr.List{} },
-		}
-
-		s.tpr.NewInformer(newResourceEventHandler, newZeroObjectFactory).Run(nil)
-	})
-}
-
-func (s *Service) addFunc(obj interface{}) {
+// NewUpdatePatch is called upon observed custom object change. It creates the
+// AWS resources for the cluster.
+func (s *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
 	customObject, ok := obj.(*awstpr.CustomObject)
 	if !ok {
-		s.logger.Log("error", "could not convert to awstpr.CustomObject")
-		return
+		return &framework.Patch{}, microerror.Maskf(invalidConfigError, "could not convert to awstpr.CustomObject")
 	}
 	cluster := *customObject
 
 	s.logger.Log("info", fmt.Sprintf("creating cluster '%s'", key.ClusterID(cluster)))
 
 	if err := validateCluster(cluster); err != nil {
-		s.logger.Log("error", "cluster spec is invalid: '%#v'", err)
-		return
+		return &framework.Patch{}, microerror.Mask(err)
 	}
 
 	err := s.processCluster(cluster)
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("error processing cluster '%s': '%#v'", key.ClusterID(cluster), err))
-		return
+		return &framework.Patch{}, microerror.Mask(err)
 	}
 
 	s.logger.Log("info", fmt.Sprintf("cluster '%s' processed", key.ClusterID(cluster)))
+
+	return &framework.Patch{}, nil
 }
 
-func (s *Service) deleteFunc(obj interface{}) {
+// NewDeletePatch is called upon observed custom object deletion. It deletes the
+// AWS resources for the cluster.
+func (s *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
 	// We can receive an instance of awstpr.CustomObject or cache.DeletedFinalStateUnknown.
 	// We need to assert the type properly and log an error when we cannot do that.
 	// Also, the cache.DeleteFinalStateUnknown object can contain the proper CustomObject,
@@ -236,13 +217,11 @@ func (s *Service) deleteFunc(obj interface{}) {
 	} else {
 		deletedObj, ok := obj.(cache.DeletedFinalStateUnknown)
 		if !ok {
-			s.logger.Log("error", "received unknown type of third-party object")
-			return
+			return &framework.Patch{}, microerror.Maskf(invalidConfigError, "received unknown type of third-party object")
 		}
 		clusterPtr, ok := deletedObj.Obj.(*awstpr.CustomObject)
 		if !ok {
-			s.logger.Log("error", "received the proper delete request, but the type of third-party object is unknown")
-			return
+			return &framework.Patch{}, microerror.Maskf(invalidConfigError, "received the proper delete request, but the type of third-party object is unknown")
 		}
 		cluster = *clusterPtr
 	}
@@ -252,56 +231,62 @@ func (s *Service) deleteFunc(obj interface{}) {
 	err := s.processDelete(cluster)
 	if err != nil {
 		s.logger.Log("error", fmt.Sprintf("error deleting cluster '%s': '%#v'", key.ClusterID(cluster), err))
-		return
+		return &framework.Patch{}, microerror.Mask(err)
 	}
 
 	s.logger.Log("info", fmt.Sprintf("cluster '%s' deleted", key.ClusterID(cluster)))
+
+	return &framework.Patch{}, nil
 }
 
-// TODO we need to support this in operatorkit.
-func (s *Service) updateFunc(oldObj, newObj interface{}) {
-	oldCluster := *oldObj.(*awstpr.CustomObject)
-	cluster := *newObj.(*awstpr.CustomObject)
+func (s *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
+	// TODO The legacy resource needs to support scaling workers via NewUpdatePatch.
+	/*
+		oldCluster := *oldObj.(*awstpr.CustomObject)
+		cluster := *newObj.(*awstpr.CustomObject)
 
-	if err := validateCluster(cluster); err != nil {
-		s.logger.Log("error", "cluster spec is invalid: '%#v'", err)
-		return
-	}
+		if err := validateCluster(cluster); err != nil {
+			s.logger.Log("error", "cluster spec is invalid: '%#v'", err)
+			return
+		}
 
-	oldSize := key.WorkerCount(oldCluster)
-	newSize := key.WorkerCount(cluster)
+		oldSize := key.WorkerCount(oldCluster)
+		newSize := key.WorkerCount(cluster)
 
-	if oldSize == newSize {
-		// We get update events for all sorts of changes. We are currently only
-		// interested in changes to one property, so we ignore all the others.
-		return
-	}
+		if oldSize == newSize {
+			// We get update events for all sorts of changes. We are currently only
+			// interested in changes to one property, so we ignore all the others.
+			return
+		}
 
-	s.awsConfig.Region = cluster.Spec.AWS.Region
-	clients := awsutil.NewClients(s.awsConfig)
+		s.awsConfig.Region = cluster.Spec.AWS.Region
+		clients := awsutil.NewClients(s.awsConfig)
 
-	err := s.awsConfig.SetAccountID(clients.IAM)
-	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not retrieve amazon account id: '%#v'", err))
-		return
-	}
+		err := s.awsConfig.SetAccountID(clients.IAM)
+		if err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not retrieve amazon account id: '%#v'", err))
+			return
+		}
 
-	asg := awsresources.AutoScalingGroup{
-		Client:  clients.AutoScaling,
-		Name:    fmt.Sprintf("%s-%s", key.ClusterID(cluster), prefixWorker),
-		MinSize: newSize,
-		MaxSize: newSize,
-	}
+		asg := awsresources.AutoScalingGroup{
+			Client:  clients.AutoScaling,
+			Name:    fmt.Sprintf("%s-%s", key.ClusterID(cluster), prefixWorker),
+			MinSize: newSize,
+			MaxSize: newSize,
+		}
 
-	if err := asg.Update(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-		return
-	}
+		if err := asg.Update(); err != nil {
+			s.logger.Log("error", fmt.Sprintf("%#v", err))
+			return
+		}
 
-	s.logger.Log("info", fmt.Sprintf("scaling workers auto scaling group from %d to %d", oldSize, newSize))
+		s.logger.Log("info", fmt.Sprintf("scaling workers auto scaling group from %d to %d", oldSize, newSize))
+	*/
+
+	return nil
 }
 
-func (s *Service) processCluster(cluster awstpr.CustomObject) error {
+func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 	// Create cluster namespace in k8s.
 	if err := s.createClusterNamespace(cluster.Spec.Cluster); err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create cluster namespace: '%#v'", err))
@@ -1003,7 +988,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	return nil
 }
 
-func (s *Service) processDelete(cluster awstpr.CustomObject) error {
+func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 	if err := validateCluster(cluster); err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("cluster spec is invalid: '%#v'", err))
 	}
@@ -1410,7 +1395,7 @@ func (s *Service) processDelete(cluster awstpr.CustomObject) error {
 	return nil
 }
 
-func (s *Service) uploadCloudconfigToS3(svc *s3.S3, s3Bucket, path, data string) error {
+func (s *Resource) uploadCloudconfigToS3(svc *s3.S3, s3Bucket, path, data string) error {
 	if _, err := svc.PutObject(&s3.PutObjectInput{
 		Body:          strings.NewReader(data),
 		Bucket:        aws.String(s3Bucket),
@@ -1421,4 +1406,28 @@ func (s *Service) uploadCloudconfigToS3(svc *s3.S3, s3Bucket, path, data string)
 	}
 
 	return nil
+}
+
+func (s *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
+	return nil, nil
+}
+
+func (s *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
+	return nil, nil
+}
+
+func (s *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
+	return nil
+}
+
+func (s *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
+	return nil
+}
+
+func (s *Resource) Name() string {
+	return Name
+}
+
+func (r *Resource) Underlying() framework.Resource {
+	return r
 }
