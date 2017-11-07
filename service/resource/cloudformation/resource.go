@@ -1,6 +1,7 @@
 package cloudformation
 
 import (
+	awsCF "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/cloudformation/cloudformationiface"
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/microerror"
@@ -43,6 +44,13 @@ type Resource struct {
 	// Dependencies.
 	awsClient cloudformationiface.CloudFormationAPI
 	logger    micrologger.Logger
+}
+
+// StackState is the state representation pn which the resource methods work
+type StackState struct {
+	Name         string
+	TemplateBody string
+	Parameters   []*awsCF.Parameter
 }
 
 // New creates a new configured cloudformation resource.

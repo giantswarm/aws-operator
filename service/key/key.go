@@ -33,6 +33,12 @@ func HasClusterVersion(customObject awstpr.CustomObject) bool {
 	}
 }
 
+func MainStackName(customObject awstpr.CustomObject) string {
+	clusterID := ClusterID(customObject)
+
+	return fmt.Sprintf("%s-main", clusterID)
+}
+
 func MasterImageID(customObject awstpr.CustomObject) string {
 	var imageID string
 
@@ -65,6 +71,20 @@ func SubnetName(customObject awstpr.CustomObject, suffix string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), suffix)
 }
 
+func ToCustomObject(v interface{}) (awstpr.CustomObject, error) {
+	if v == nil {
+		return awstpr.CustomObject{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &awstpr.CustomObject{}, v)
+	}
+
+	customObjectPointer, ok := v.(*awstpr.CustomObject)
+	if !ok {
+		return awstpr.CustomObject{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &awstpr.CustomObject{}, v)
+	}
+	customObject := *customObjectPointer
+
+	return customObject, nil
+}
+
 func WorkerCount(customObject awstpr.CustomObject) int {
 	return len(customObject.Spec.AWS.Workers)
 }
@@ -88,24 +108,4 @@ func WorkerInstanceType(customObject awstpr.CustomObject) string {
 	}
 
 	return instanceType
-}
-
-func ToCustomObject(v interface{}) (awstpr.CustomObject, error) {
-	if v == nil {
-		return awstpr.CustomObject{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &awstpr.CustomObject{}, v)
-	}
-
-	customObjectPointer, ok := v.(*awstpr.CustomObject)
-	if !ok {
-		return awstpr.CustomObject{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &awstpr.CustomObject{}, v)
-	}
-	customObject := *customObjectPointer
-
-	return customObject, nil
-}
-
-func MainStackName(customObject awstpr.CustomObject) string {
-	clusterID := ClusterID(customObject)
-
-	return fmt.Sprintf("%s-main", clusterID)
 }

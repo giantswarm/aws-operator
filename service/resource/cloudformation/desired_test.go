@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	awsCF "github.com/aws/aws-sdk-go/service/cloudformation"
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/clustertpr"
@@ -53,13 +52,13 @@ func Test_Resource_Cloudformation_GetDesiredState(t *testing.T) {
 				t.Fatalf("expected '%v' got '%#v'", nil, err)
 			}
 
-			desiredStack, ok := result.(*awsCF.CreateStackInput)
+			desiredStack, ok := result.(StackState)
 			if !ok {
 				t.Fatalf("case expected '%T', got '%T'", desiredStack, result)
 			}
 
-			if tc.expectedName != *desiredStack.StackName {
-				t.Fatalf("expected cloudformation name '%s' got '%s'", tc.expectedName, *desiredStack.StackName)
+			if tc.expectedName != desiredStack.Name {
+				t.Fatalf("expected cloudformation name '%s' got '%s'", tc.expectedName, desiredStack.Name)
 			}
 		})
 	}
