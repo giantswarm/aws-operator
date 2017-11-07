@@ -1,5 +1,5 @@
-hash: d3fa19f5d82134fcca08250ec595f3370d39524f2b7d940cbbf947474ff9a907
-updated: 2017-11-07T10:26:39.585782254+01:00
+hash: 0e05add1a117b58ead0a42b6355d62469160970f41467166eb20a9a32c3b3c21
+updated: 2017-11-07T12:27:40.479590438+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -132,7 +132,7 @@ imports:
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: b5bfa412f825f7593baea4149d0fc66a97c5e525
+  version: 7fed726ca23a9ae0f6e26c0b430ce7c2ed249b26
   subpackages:
   - client/k8sclient
   - framework
