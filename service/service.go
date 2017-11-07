@@ -25,7 +25,6 @@ import (
 	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/aws-operator/service/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/healthz"
-	"github.com/giantswarm/aws-operator/service/messagecontext"
 	"github.com/giantswarm/aws-operator/service/operator"
 	cloudformationresource "github.com/giantswarm/aws-operator/service/resource/cloudformation"
 	legacyresource "github.com/giantswarm/aws-operator/service/resource/legacy"
@@ -237,8 +236,6 @@ func New(config Config) (*Service, error) {
 	}
 
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
-		ctx = messagecontext.NewContext(ctx, messagecontext.NewMessage())
-
 		return ctx, nil
 	}
 
