@@ -15,6 +15,7 @@ jobs:
     - persist_to_workspace:
         root: .
         paths:
+        - ./e2e-harness
         - ./architect
 
     - deploy:
@@ -33,10 +34,13 @@ jobs:
 
     - run: |
         cp -ar vendor e2e
-        mkdir -p e2e/vendor/github.com/giantswarm/aws-operator/e2e
-        cp -ar e2e/tests e2e/vendor/github.com/giantswarm/aws-operator/e2e
+
+        # the next commands are only needed for dog-fooding this repo
+        mkdir -p e2e/vendor/github.com/giantswarm/e2e-harness
+        cp -ar pkg e2e/vendor/github.com/giantswarm/e2e-harness
+
         cd e2e
-        ../architect build --project aws-operator-e2e
+        ../architect build --project e2e-harness-e2e
 
   e2eSetup:
     machine: true
@@ -46,21 +50,11 @@ jobs:
     - attach_workspace:
         at: .
 
-    - run: |
-        wget -q $(curl -sS https://api.github.com/repos/giantswarm/e2e-harness/releases/latest | grep browser_download_url | head -n 1 | cut -d '"' -f 4)
-        chmod +x ./e2e-harness
-
-    - run: ./e2e-harness setup --name=ci-awsop-${CIRCLE_SHA1:0:7}
-
-    - run:
-        name: Cleanup on failure
-        command: ./e2e-harness teardown
-        when: on_fail
+    - run: ./e2e-harness setup --name=ci-e2e-harness-${CIRCLE_SHA1:0:7}
 
     - persist_to_workspace:
         root: .
         paths:
-        - ./e2e-harness
         - ./.e2e-harness
 
   e2eTestExecution:
@@ -73,26 +67,36 @@ jobs:
 
     - run: ./e2e-harness test
 
-    - store_artifacts:
-        path: ./.e2e-harness/workdir/plugins/e2e/results.xml
+    - persist_to_workspace:
+        root: .
+        paths:
+        - ./.e2e-harness
 
-    - run:
-        name: Finish with cleanup, no matter if the test succeeded or not
-        command: ./e2e-harness teardown
-        when: always
+  e2eTeardown:
+    machine: true
+    steps:
+    - checkout
+
+    - attach_workspace:
+        at: .
+
+    - run: ./e2e-harness teardown
 
 workflows:
   version: 2
   build_e2e:
     jobs:
       - build
-      - e2eSetup:
+      - e2eTestBuild:
           requires:
           - build
-      - e2eTestBuild:
+      - e2eSetup:
           requires:
           - build
       - e2eTestExecution:
           requires:
           - e2eSetup
           - e2eTestBuild
+      - e2eTeardown:
+          requires:
+          - e2eTestExecution
