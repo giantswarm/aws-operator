@@ -799,6 +799,15 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("master nodes had invalid instance IDs: %v", masterIDs))
 	}
 
+	masterServiceInput := MasterServiceInput{
+		Clients:   clients,
+		Cluster:   cluster,
+		MasterIDs: masterIDs,
+	}
+	if err := s.createMasterService(masterServiceInput); err != nil {
+		return microerror.Mask(err)
+	}
+
 	// Create apiserver load balancer.
 	lbInput := LoadBalancerInput{
 		Name:               cluster.Spec.Cluster.Kubernetes.API.Domain,
