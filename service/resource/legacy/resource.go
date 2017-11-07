@@ -189,12 +189,12 @@ func (s *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 	s.logger.Log("info", fmt.Sprintf("creating cluster '%s'", key.ClusterID(cluster)))
 
 	if err := validateCluster(cluster); err != nil {
-		return &framework.Patch{}, microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 
 	err := s.processCluster(cluster)
 	if err != nil {
-		return &framework.Patch{}, microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 
 	s.logger.Log("info", fmt.Sprintf("cluster '%s' processed", key.ClusterID(cluster)))
@@ -217,11 +217,11 @@ func (s *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desire
 	} else {
 		deletedObj, ok := obj.(cache.DeletedFinalStateUnknown)
 		if !ok {
-			return &framework.Patch{}, microerror.Maskf(invalidConfigError, "received unknown type of third-party object")
+			return nil, microerror.Maskf(invalidConfigError, "received unknown type of third-party object")
 		}
 		clusterPtr, ok := deletedObj.Obj.(*awstpr.CustomObject)
 		if !ok {
-			return &framework.Patch{}, microerror.Maskf(invalidConfigError, "received the proper delete request, but the type of third-party object is unknown")
+			return nil, microerror.Maskf(invalidConfigError, "received the proper delete request, but the type of third-party object is unknown")
 		}
 		cluster = *clusterPtr
 	}
@@ -231,7 +231,7 @@ func (s *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desire
 	err := s.processDelete(cluster)
 	if err != nil {
 		s.logger.Log("error", fmt.Sprintf("error deleting cluster '%s': '%#v'", key.ClusterID(cluster), err))
-		return &framework.Patch{}, microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 
 	s.logger.Log("info", fmt.Sprintf("cluster '%s' deleted", key.ClusterID(cluster)))
