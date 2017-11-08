@@ -936,7 +936,19 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 	if asgCreated {
 		s.logger.Log("info", fmt.Sprintf("created auto scaling group '%s' with size %v", asg.Name, key.WorkerCount(cluster)))
 	} else {
-		s.logger.Log("info", fmt.Sprintf("auto scaling group '%s' already exists, reusing", asg.Name))
+		// If the cluster exists set the worker count so the cluster can be scaled.
+		scaleWorkers := awsresources.AutoScalingGroup{
+			Client:  clients.AutoScaling,
+			Name:    key.AutoScalingGroupName(cluster, prefixWorker),
+			MinSize: key.WorkerCount(cluster),
+			MaxSize: key.WorkerCount(cluster),
+		}
+
+		if err := scaleWorkers.Update(); err != nil {
+			s.logger.Log("error", fmt.Sprintf("%#v", err))
+		}
+
+		s.logger.Log("info", fmt.Sprintf("auto scaling group '%s' already exists, setting to %d workers", scaleWorkers.Name, scaleWorkers.MaxSize))
 	}
 
 	// Create Record Sets for the Load Balancers.
