@@ -1457,6 +1457,8 @@ write_files:
   permissions: 0544
   content: |
       #!/bin/bash
+
+      export KUBECONFIG=/etc/kubernetes/config/addons-kubeconfig.yml
       # kubectl 1.8.1
       KUBECTL=quay.io/giantswarm/docker-kubectl:1dc536ec6dc4597ba46769b3d5d6ce53a7e62038
 
@@ -1551,6 +1553,29 @@ write_files:
           done
       done
       echo "Addons successfully installed"
+  - path: /etc/kubernetes/config/addons-kubeconfig.yml
+    owner: root
+    permissions: 0644
+    content: |
+      apiVersion: v1
+      kind: Config
+      users:
+      - name: proxy
+        user:
+          client-certificate: /etc/kubernetes/ssl/apiserver-crt.pem
+          client-key: /etc/kubernetes/ssl/apiserver-key.pem
+      clusters:
+      - name: local
+        cluster:
+          certificate-authority: /etc/kubernetes/ssl/apiserver-ca.pem
+          server: https://{{.Cluster.Kubernetes.API.Domain}}
+      contexts:
+      - context:
+          cluster: local
+          user: proxy
+        name: service-account-context
+      current-context: service-account-context
+
 - path: /etc/kubernetes/config/proxy-kubeconfig.yml
   owner: root
   permissions: 0644
@@ -1730,7 +1755,7 @@ coreos:
 
       [Service]
       Type=oneshot
-      ExecStartPre=/bin/bash -c "gpasswd -d core rkt; gpasswd -d core docker; gpasswd -d core wheel"
+      ExecStartPre=-/bin/bash -c "gpasswd -d core rkt; gpasswd -d core docker; gpasswd -d core wheel"
       ExecStartPre=/bin/bash -c "until [ -f '/etc/sysctl.d/hardening.conf' ]; do echo Waiting for sysctl file; sleep 1s;done;"
       ExecStart=/usr/sbin/sysctl -p /etc/sysctl.d/hardening.conf
 
@@ -2007,7 +2032,8 @@ coreos:
       /hyperkube apiserver \
       --allow_privileged=true \
       --insecure_bind_address=0.0.0.0 \
-      --insecure_port={{.Cluster.Kubernetes.API.InsecurePort}} \
+      --anonymous-auth=false \
+      --insecure_port=0 \
       --kubelet_https=true \
       --kubelet-preferred-address-types=InternalIP \
       --secure_port={{.Cluster.Kubernetes.API.SecurePort}} \
