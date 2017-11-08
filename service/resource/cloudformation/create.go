@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
-	awsCF "github.com/aws/aws-sdk-go/service/cloudformation"
+	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/aws-operator/service/key"
 	"github.com/giantswarm/microerror"
 )
@@ -26,10 +26,10 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		return microerror.Mask(err)
 	}
 
-	stackInput := &awsCF.CreateStackInput{
+	stackInput := &awscloudformation.CreateStackInput{
 		StackName:        aws.String(createChangeState.Name),
 		TemplateBody:     aws.String(mainTemplate),
-		TimeoutInMinutes: aws.Int64(30),
+		TimeoutInMinutes: aws.Int64(defaultCreationTimeout),
 	}
 
 	_, err = r.awsClient.CreateStack(stackInput)
