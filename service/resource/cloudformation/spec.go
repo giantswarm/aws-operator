@@ -4,7 +4,7 @@ import awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 
 const (
 	// defaultCreationTimeout is the timeout in minutes for the creation of the stack.
-	defaultCreationTimeout = 30
+	defaultCreationTimeout = 10
 )
 
 // StackState is the state representation on which the resource methods work.
