@@ -1553,28 +1553,28 @@ write_files:
           done
       done
       echo "Addons successfully installed"
-  - path: /etc/kubernetes/config/addons-kubeconfig.yml
-    owner: root
-    permissions: 0644
-    content: |
-      apiVersion: v1
-      kind: Config
-      users:
-      - name: proxy
-        user:
-          client-certificate: /etc/kubernetes/ssl/apiserver-crt.pem
-          client-key: /etc/kubernetes/ssl/apiserver-key.pem
-      clusters:
-      - name: local
-        cluster:
-          certificate-authority: /etc/kubernetes/ssl/apiserver-ca.pem
-          server: https://{{.Cluster.Kubernetes.API.Domain}}
-      contexts:
-      - context:
-          cluster: local
-          user: proxy
-        name: service-account-context
-      current-context: service-account-context
+- path: /etc/kubernetes/config/addons-kubeconfig.yml
+  owner: root
+  permissions: 0644
+  content: |
+    apiVersion: v1
+    kind: Config
+    users:
+    - name: proxy
+      user:
+        client-certificate: /etc/kubernetes/ssl/apiserver-crt.pem
+        client-key: /etc/kubernetes/ssl/apiserver-key.pem
+    clusters:
+    - name: local
+      cluster:
+        certificate-authority: /etc/kubernetes/ssl/apiserver-ca.pem
+        server: https://{{.Cluster.Kubernetes.API.Domain}}
+    contexts:
+    - context:
+        cluster: local
+        user: proxy
+      name: service-account-context
+    current-context: service-account-context
 
 - path: /etc/kubernetes/config/proxy-kubeconfig.yml
   owner: root
