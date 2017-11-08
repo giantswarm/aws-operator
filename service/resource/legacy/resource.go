@@ -240,49 +240,6 @@ func (s *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desire
 }
 
 func (s *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
-	// TODO The legacy resource needs to support scaling workers via NewUpdatePatch.
-	/*
-		oldCluster := *oldObj.(*awstpr.CustomObject)
-		cluster := *newObj.(*awstpr.CustomObject)
-
-		if err := validateCluster(cluster); err != nil {
-			s.logger.Log("error", "cluster spec is invalid: '%#v'", err)
-			return
-		}
-
-		oldSize := key.WorkerCount(oldCluster)
-		newSize := key.WorkerCount(cluster)
-
-		if oldSize == newSize {
-			// We get update events for all sorts of changes. We are currently only
-			// interested in changes to one property, so we ignore all the others.
-			return
-		}
-
-		s.awsConfig.Region = cluster.Spec.AWS.Region
-		clients := awsutil.NewClients(s.awsConfig)
-
-		err := s.awsConfig.SetAccountID(clients.IAM)
-		if err != nil {
-			s.logger.Log("error", fmt.Sprintf("could not retrieve amazon account id: '%#v'", err))
-			return
-		}
-
-		asg := awsresources.AutoScalingGroup{
-			Client:  clients.AutoScaling,
-			Name:    fmt.Sprintf("%s-%s", key.ClusterID(cluster), prefixWorker),
-			MinSize: newSize,
-			MaxSize: newSize,
-		}
-
-		if err := asg.Update(); err != nil {
-			s.logger.Log("error", fmt.Sprintf("%#v", err))
-			return
-		}
-
-		s.logger.Log("info", fmt.Sprintf("scaling workers auto scaling group from %d to %d", oldSize, newSize))
-	*/
-
 	return nil
 }
 
@@ -936,7 +893,19 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 	if asgCreated {
 		s.logger.Log("info", fmt.Sprintf("created auto scaling group '%s' with size %v", asg.Name, key.WorkerCount(cluster)))
 	} else {
-		s.logger.Log("info", fmt.Sprintf("auto scaling group '%s' already exists, reusing", asg.Name))
+		// If the cluster exists set the worker count so the cluster can be scaled.
+		scaleWorkers := awsresources.AutoScalingGroup{
+			Client:  clients.AutoScaling,
+			Name:    key.AutoScalingGroupName(cluster, prefixWorker),
+			MinSize: key.WorkerCount(cluster),
+			MaxSize: key.WorkerCount(cluster),
+		}
+
+		if err := scaleWorkers.Update(); err != nil {
+			s.logger.Log("error", fmt.Sprintf("%#v", err))
+		}
+
+		s.logger.Log("info", fmt.Sprintf("auto scaling group '%s' already exists, setting to %d workers", scaleWorkers.Name, scaleWorkers.MaxSize))
 	}
 
 	// Create Record Sets for the Load Balancers.
