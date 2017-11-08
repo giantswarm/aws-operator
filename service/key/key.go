@@ -5,6 +5,7 @@ import (
 
 	"github.com/giantswarm/awstpr"
 	cloudconfig "github.com/giantswarm/k8scloudconfig"
+	"github.com/giantswarm/microerror"
 )
 
 func AutoScalingGroupName(customObject awstpr.CustomObject, groupName string) string {
@@ -30,6 +31,12 @@ func HasClusterVersion(customObject awstpr.CustomObject) bool {
 	default:
 		return false
 	}
+}
+
+func MainStackName(customObject awstpr.CustomObject) string {
+	clusterID := ClusterID(customObject)
+
+	return fmt.Sprintf("%s-main", clusterID)
 }
 
 func MasterImageID(customObject awstpr.CustomObject) string {
@@ -62,6 +69,20 @@ func SecurityGroupName(customObject awstpr.CustomObject, groupName string) strin
 
 func SubnetName(customObject awstpr.CustomObject, suffix string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), suffix)
+}
+
+func ToCustomObject(v interface{}) (awstpr.CustomObject, error) {
+	if v == nil {
+		return awstpr.CustomObject{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &awstpr.CustomObject{}, v)
+	}
+
+	customObjectPointer, ok := v.(*awstpr.CustomObject)
+	if !ok {
+		return awstpr.CustomObject{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &awstpr.CustomObject{}, v)
+	}
+	customObject := *customObjectPointer
+
+	return customObject, nil
 }
 
 func WorkerCount(customObject awstpr.CustomObject) int {
