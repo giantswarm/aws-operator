@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"text/template"
 
+	awsCF "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/aws-operator/service/key"
 	"github.com/giantswarm/awstpr"
 )
@@ -12,8 +13,8 @@ func newMainStack(customObject awstpr.CustomObject) (StackState, error) {
 	stackName := key.MainStackName(customObject)
 
 	mainCF := StackState{
-		Name:         stackName,
-		TemplateBody: MainTemplate,
+		Name:    stackName,
+		Outputs: []*awsCF.Output{},
 	}
 
 	return mainCF, nil
