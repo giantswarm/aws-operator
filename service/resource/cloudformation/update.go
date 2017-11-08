@@ -11,5 +11,5 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 }
 
 func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
-	return nil, nil
+	return &framework.Patch{}, nil
 }
