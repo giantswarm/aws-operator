@@ -21,19 +21,19 @@ setup. See [this guide][cert-operator-local-setup] for details. The operator and
 to be used during aws-operator setup can be installed with:
 
 ```bash
-git clone github.com/giantswarm/cert-operator ./cert-operator
+git clone https://github.com/giantswarm/cert-operator ./cert-operator
 
 helm \
   install -n cert-operator-lab ./cert-operator/examples/cert-operator-lab-chart/ \
   --set clusterName=my-cluster \
   --set commonDomain=my-common-domain \
-  --set imageTag latest \
+  --set imageTag=latest \
   --wait
 
 # here the certificate TPR is created, wait until `kubectl get certificate` returns
 # `No resources found.` before running the next command
 
-helm install -n cert-resource-lab ./cert-operator/examples/cert-operator-lab-chart/ \
+helm install -n cert-resource-lab ./cert-operator/examples/cert-resource-lab-chart/ \
   --set clusterName=my-cluster \
   --set commonDomain=my-common-domain
 ```
