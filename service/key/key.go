@@ -8,6 +8,13 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
+const (
+	// cloudFormationVersion is set during the migration so resources are
+	// managed by the cloudformation resource.
+	// TODO Remove once the migration is complete.
+	cloudFormationVersion = "cloud-formation"
+)
+
 func AutoScalingGroupName(customObject awstpr.CustomObject, groupName string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), groupName)
 }
@@ -83,6 +90,16 @@ func ToCustomObject(v interface{}) (awstpr.CustomObject, error) {
 	customObject := *customObjectPointer
 
 	return customObject, nil
+}
+
+// UseCloudFormation returns true if the cluster version is "cloud-formation".
+// This will be used while we migrate to Cloud Formation and then removed.
+func UseCloudFormation(customObject awstpr.CustomObject) bool {
+	if ClusterVersion(customObject) == cloudFormationVersion {
+		return true
+	}
+
+	return false
 }
 
 func WorkerCount(customObject awstpr.CustomObject) int {
