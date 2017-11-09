@@ -2,8 +2,6 @@ package cloudformation
 
 import (
 	"context"
-	"fmt"
-	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
@@ -14,7 +12,7 @@ import (
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
 	customObject, err := key.ToCustomObject(obj)
 	if err != nil {
-		return nil, microerror.Mask(err)
+		return StackState{}, microerror.Mask(err)
 	}
 
 	r.logger.Log("cluster", key.ClusterID(customObject), "debug", "looking for AWS stack")
@@ -26,23 +24,19 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	}
 	describeOutput, err := r.awsClient.DescribeStacks(describeInput)
 
-	// FIXME: The validation error returned by the CloudFormation API doesn't make things easy to check, other than
-	// looking for the returned string. There's no constant in aws go sdk for defining this string, it comes from
-	// the service.
-	stackNotFoundError := fmt.Sprintf("Stack with id %s does not exist", stackName)
-	if strings.Contains(err.Error(), stackNotFoundError) {
+	if IsStackNotFound(err) {
 
-		r.logger.Log("cluster", key.ClusterID(customObject), "debug", notFoundError)
+		r.logger.Log("cluster", key.ClusterID(customObject), "debug", "did not find a stack in AWS API")
 		return StackState{}, nil
 
 	} else if err != nil {
 
-		return nil, microerror.Mask(err)
+		return StackState{}, microerror.Mask(err)
 
 	}
 
 	if len(describeOutput.Stacks) > 1 {
-		return nil, microerror.Mask(notFoundError)
+		return StackState{}, microerror.Mask(notFoundError)
 	}
 
 	outputStackState := StackState{
