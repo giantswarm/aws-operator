@@ -25,6 +25,9 @@ func TestSpecYamlEncoding(t *testing.T) {
 		IPSANs: []string{
 			"172.31.0.1",
 		},
+		Organizations: []string{
+			"system:masters",
+		},
 		TTL: "4320h",
 	}
 
