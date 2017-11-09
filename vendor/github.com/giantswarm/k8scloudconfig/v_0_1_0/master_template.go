@@ -1465,7 +1465,7 @@ write_files:
       /usr/bin/docker pull $KUBECTL
 
       # wait for healthy master
-      while [ "$(/usr/bin/docker run --net=host --rm $KUBECTL get cs | grep Healthy | wc -l)" -ne "3" ]; do sleep 1 && echo 'Waiting for healthy k8s'; done
+      while [ "$(/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL get cs | grep Healthy | wc -l)" -ne "3" ]; do sleep 1 && echo 'Waiting for healthy k8s'; done
 
       # apply Security bootstrap (RBAC and PSP)
       SECURITY_FILES="rbac_bindings.yaml rbac_roles.yaml psp_policies.yaml psp_roles.yaml psp_binding.yaml"
@@ -1473,7 +1473,7 @@ write_files:
       for manifest in $SECURITY_FILES
       do
           while
-              /usr/bin/docker run --net=host --rm -v /srv:/srv $KUBECTL apply -f /srv/$manifest
+              /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/$manifest
               [ "$?" -ne "0" ]
           do
               echo "failed to apply /src/$manifest, retrying in 5 sec"
@@ -1495,7 +1495,7 @@ write_files:
       for manifest in $CALICO_FILES
       do
           while
-              /usr/bin/docker run --net=host --rm -v /srv:/srv $KUBECTL apply -f /srv/$manifest
+              /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/$manifest
               [ "$?" -ne "0" ]
           do
               echo "failed to apply /src/$manifest, retrying in 5 sec"
@@ -1506,9 +1506,9 @@ write_files:
       # wait for healthy calico - we check for pods - desired vs ready
       while
           # result of this is 'eval [ "$DESIRED_POD_COUNT" -eq "$READY_POD_COUNT" ]'
-          /usr/bin/docker run --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL -n kube-system  get ds calico-node 2>/dev/null >/dev/null
+          /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL -n kube-system  get ds calico-node 2>/dev/null >/dev/null
           RET_CODE_1=$?
-          eval $(/usr/bin/docker run --net=host --rm $KUBECTL -n kube-system get ds calico-node | tail -1 | awk '{print "[ \"" $2"\" -eq \""$4"\" ] "}')
+          eval $(/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL -n kube-system get ds calico-node | tail -1 | awk '{print "[ \"" $2"\" -eq \""$4"\" ] "}')
           RET_CODE_2=$?
           [ "$RET_CODE_1" -ne "0" ] || [ "$RET_CODE_2" -ne "0" ]
       do
@@ -1519,7 +1519,7 @@ write_files:
       # apply default storage class
       if [ -f /srv/default-storage-class.yaml ]; then
           while
-              /usr/bin/docker run --net=host --rm -v /srv:/srv $KUBECTL apply -f /srv/default-storage-class.yaml
+              /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/default-storage-class.yaml
               [ "$?" -ne "0" ]
           do
               echo "failed to apply /srv/default-storage-class.yaml, retrying in 5 sec"
@@ -1531,7 +1531,7 @@ write_files:
 
       # apply k8s addons
       MANIFESTS="kube-proxy-sa.yaml\
-                 kube-proxy-ds.yaml\
+     kube-proxy-ds.yaml\
                  kubedns-cm.yaml\
                  kubedns-sa.yaml\
                  kubedns-dep.yaml\
@@ -1545,7 +1545,7 @@ write_files:
       for manifest in $MANIFESTS
       do
           while
-              /usr/bin/docker run --net=host --rm -v /srv:/srv $KUBECTL apply -f /srv/$manifest
+              /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/$manifest
               [ "$?" -ne "0" ]
           do
               echo "failed to apply /srv/$manifest, retrying in 5 sec"
