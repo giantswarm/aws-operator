@@ -1,5 +1,5 @@
-hash: 139d9fb67e318c23d7e56b7c79d073ccefd72a35e6947300da1a9e045f423aaf
-updated: 2017-11-09T15:31:00.667819838+01:00
+hash: c98f890d6b2e4b61ed23bfe63b1248e4409c53e76a56848f9c461149c19665dc
+updated: 2017-11-09T17:53:25.797533286+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -75,7 +75,7 @@ imports:
   - spec/aws
   - spec/aws/elb
 - name: github.com/giantswarm/certificatetpr
-  version: fee41bfdc17a3b46de1b6ce4129f4c43273c3677
+  version: 7ca1d560db684dd4e2effc49ae0ceeaae2963f5e
 - name: github.com/giantswarm/clustertpr
   version: 6b89a787f157c5531d1c955c32b3c621f0d64c3a
   subpackages:
@@ -88,16 +88,16 @@ imports:
   - spec/kubernetes/networksetup
   - spec/kubernetes/ssh
 - name: github.com/giantswarm/e2e-harness
-  version: 485a9de556676202a635f74a6a898c567df6ff37
+  version: 9aa661bbe2e7c0591a36dce1b3d4c634489b5d5a
   subpackages:
   - pkg/results
   - pkg/runner
 - name: github.com/giantswarm/k8scloudconfig
-  version: afd000859b121d8a2fdcef9735b07256176db61e
+  version: 8a65d3f8a992f728a833dc003b88febe8bc92ab8
   subpackages:
   - v_0_1_0
 - name: github.com/giantswarm/microendpoint
-  version: b93a1e9b89c26ba3bdcd5d19986d550fd090d213
+  version: 7f20461533f43e767628e6404c2211afa7472a54
   subpackages:
   - endpoint/version
   - service/version
@@ -130,7 +130,7 @@ imports:
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: d306448fd014890db29087494a772af93e429d71
+  version: 96f018c3318b6fd2a71e030f336d7f70f321c43d
   subpackages:
   - client/k8sclient
   - tpr
