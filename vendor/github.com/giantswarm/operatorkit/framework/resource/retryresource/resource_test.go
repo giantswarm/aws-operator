@@ -26,10 +26,8 @@ func Test_RetryResource_ProcessCreate_ResourceOrder_RetryOnError(t *testing.T) {
 				"GetCurrentState",
 				"GetCurrentState",
 				"GetDesiredState",
-				"NewUpdatePatch",
-				"ApplyCreatePatch",
-				"ApplyDeletePatch",
-				"ApplyUpdatePatch",
+				"GetCreateState",
+				"ProcessCreateState",
 			},
 		},
 		{
@@ -40,24 +38,20 @@ func Test_RetryResource_ProcessCreate_ResourceOrder_RetryOnError(t *testing.T) {
 				"GetCurrentState",
 				"GetCurrentState",
 				"GetDesiredState",
-				"NewUpdatePatch",
-				"ApplyCreatePatch",
-				"ApplyDeletePatch",
-				"ApplyUpdatePatch",
+				"GetCreateState",
+				"ProcessCreateState",
 			},
 		},
 		{
 			ErrorCount:  2,
-			ErrorMethod: "ApplyCreatePatch",
+			ErrorMethod: "ProcessCreateState",
 			ExpectedMethodOrder: []string{
 				"GetCurrentState",
 				"GetDesiredState",
-				"NewUpdatePatch",
-				"ApplyCreatePatch",
-				"ApplyCreatePatch",
-				"ApplyCreatePatch",
-				"ApplyDeletePatch",
-				"ApplyUpdatePatch",
+				"GetCreateState",
+				"ProcessCreateState",
+				"ProcessCreateState",
+				"ProcessCreateState",
 			},
 		},
 	}
@@ -120,10 +114,8 @@ func Test_RetryResource_ProcessCreate_ResourceOrder(t *testing.T) {
 	e := []string{
 		"GetCurrentState",
 		"GetDesiredState",
-		"NewUpdatePatch",
-		"ApplyCreatePatch",
-		"ApplyDeletePatch",
-		"ApplyUpdatePatch",
+		"GetCreateState",
+		"ProcessCreateState",
 	}
 	if !reflect.DeepEqual(e, tr.Order) {
 		t.Fatal("expected", e, "got", tr.Order)
@@ -146,10 +138,8 @@ func Test_RetryResource_ProcessDelete_ResourceOrder_RetryOnError(t *testing.T) {
 				"GetCurrentState",
 				"GetCurrentState",
 				"GetDesiredState",
-				"NewDeletePatch",
-				"ApplyCreatePatch",
-				"ApplyDeletePatch",
-				"ApplyUpdatePatch",
+				"GetDeleteState",
+				"ProcessDeleteState",
 			},
 		},
 		{
@@ -160,24 +150,20 @@ func Test_RetryResource_ProcessDelete_ResourceOrder_RetryOnError(t *testing.T) {
 				"GetCurrentState",
 				"GetCurrentState",
 				"GetDesiredState",
-				"NewDeletePatch",
-				"ApplyCreatePatch",
-				"ApplyDeletePatch",
-				"ApplyUpdatePatch",
+				"GetDeleteState",
+				"ProcessDeleteState",
 			},
 		},
 		{
 			ErrorCount:  2,
-			ErrorMethod: "ApplyDeletePatch",
+			ErrorMethod: "ProcessDeleteState",
 			ExpectedMethodOrder: []string{
 				"GetCurrentState",
 				"GetDesiredState",
-				"NewDeletePatch",
-				"ApplyCreatePatch",
-				"ApplyDeletePatch",
-				"ApplyDeletePatch",
-				"ApplyDeletePatch",
-				"ApplyUpdatePatch",
+				"GetDeleteState",
+				"ProcessDeleteState",
+				"ProcessDeleteState",
+				"ProcessDeleteState",
 			},
 		},
 	}
@@ -240,10 +226,8 @@ func Test_RetryResource_ProcessDelete_ResourceOrder(t *testing.T) {
 	e := []string{
 		"GetCurrentState",
 		"GetDesiredState",
-		"NewDeletePatch",
-		"ApplyCreatePatch",
-		"ApplyDeletePatch",
-		"ApplyUpdatePatch",
+		"GetDeleteState",
+		"ProcessDeleteState",
 	}
 	if !reflect.DeepEqual(e, tr.Order) {
 		t.Fatal("expected", e, "got", tr.Order)
@@ -266,10 +250,10 @@ func Test_RetryResource_ProcessUpdate_ResourceOrder_RetryOnError(t *testing.T) {
 				"GetCurrentState",
 				"GetCurrentState",
 				"GetDesiredState",
-				"NewUpdatePatch",
-				"ApplyCreatePatch",
-				"ApplyDeletePatch",
-				"ApplyUpdatePatch",
+				"GetUpdateState",
+				"ProcessCreateState",
+				"ProcessDeleteState",
+				"ProcessUpdateState",
 			},
 		},
 		{
@@ -280,24 +264,24 @@ func Test_RetryResource_ProcessUpdate_ResourceOrder_RetryOnError(t *testing.T) {
 				"GetCurrentState",
 				"GetCurrentState",
 				"GetDesiredState",
-				"NewUpdatePatch",
-				"ApplyCreatePatch",
-				"ApplyDeletePatch",
-				"ApplyUpdatePatch",
+				"GetUpdateState",
+				"ProcessCreateState",
+				"ProcessDeleteState",
+				"ProcessUpdateState",
 			},
 		},
 		{
 			ErrorCount:  2,
-			ErrorMethod: "ApplyUpdatePatch",
+			ErrorMethod: "ProcessUpdateState",
 			ExpectedMethodOrder: []string{
 				"GetCurrentState",
 				"GetDesiredState",
-				"NewUpdatePatch",
-				"ApplyCreatePatch",
-				"ApplyDeletePatch",
-				"ApplyUpdatePatch",
-				"ApplyUpdatePatch",
-				"ApplyUpdatePatch",
+				"GetUpdateState",
+				"ProcessCreateState",
+				"ProcessDeleteState",
+				"ProcessUpdateState",
+				"ProcessUpdateState",
+				"ProcessUpdateState",
 			},
 		},
 	}
@@ -360,10 +344,10 @@ func Test_RetryResource_ProcessUpdate_ResourceOrder(t *testing.T) {
 	e := []string{
 		"GetCurrentState",
 		"GetDesiredState",
-		"NewUpdatePatch",
-		"ApplyCreatePatch",
-		"ApplyDeletePatch",
-		"ApplyUpdatePatch",
+		"GetUpdateState",
+		"ProcessCreateState",
+		"ProcessDeleteState",
+		"ProcessUpdateState",
 	}
 	if !reflect.DeepEqual(e, tr.Order) {
 		t.Fatal("expected", e, "got", tr.Order)
@@ -401,34 +385,45 @@ func (r *testResource) GetDesiredState(ctx context.Context, obj interface{}) (in
 	return nil, nil
 }
 
-func (r *testResource) NewUpdatePatch(ctx context.Context, obj, cur, des interface{}) (*framework.Patch, error) {
-	m := "NewUpdatePatch"
+func (r *testResource) GetCreateState(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
+	m := "GetCreateState"
 	r.Order = append(r.Order, m)
 
-	p := framework.NewPatch()
-	p.SetCreateChange("test create data")
-	p.SetUpdateChange("test update data")
-	p.SetDeleteChange("test delete data")
-	return p, nil
+	if r.returnErrorFor(m) {
+		return nil, r.Error
+	}
+
+	return nil, nil
 }
 
-func (r *testResource) NewDeletePatch(ctx context.Context, obj, cur, des interface{}) (*framework.Patch, error) {
-	m := "NewDeletePatch"
+func (r *testResource) GetDeleteState(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
+	m := "GetDeleteState"
 	r.Order = append(r.Order, m)
 
-	p := framework.NewPatch()
-	p.SetCreateChange("test create data")
-	p.SetUpdateChange("test update data")
-	p.SetDeleteChange("test delete data")
-	return p, nil
+	if r.returnErrorFor(m) {
+		return nil, r.Error
+	}
+
+	return nil, nil
+}
+
+func (r *testResource) GetUpdateState(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, interface{}, interface{}, error) {
+	m := "GetUpdateState"
+	r.Order = append(r.Order, m)
+
+	if r.returnErrorFor(m) {
+		return nil, nil, nil, r.Error
+	}
+
+	return nil, nil, nil, nil
 }
 
 func (r *testResource) Name() string {
 	return "testResource"
 }
 
-func (r *testResource) ApplyCreateChange(ctx context.Context, obj, createState interface{}) error {
-	m := "ApplyCreatePatch"
+func (r *testResource) ProcessCreateState(ctx context.Context, obj, createState interface{}) error {
+	m := "ProcessCreateState"
 	r.Order = append(r.Order, m)
 
 	if r.returnErrorFor(m) {
@@ -438,8 +433,8 @@ func (r *testResource) ApplyCreateChange(ctx context.Context, obj, createState i
 	return nil
 }
 
-func (r *testResource) ApplyDeleteChange(ctx context.Context, obj, deleteState interface{}) error {
-	m := "ApplyDeletePatch"
+func (r *testResource) ProcessDeleteState(ctx context.Context, obj, deleteState interface{}) error {
+	m := "ProcessDeleteState"
 	r.Order = append(r.Order, m)
 
 	if r.returnErrorFor(m) {
@@ -449,8 +444,8 @@ func (r *testResource) ApplyDeleteChange(ctx context.Context, obj, deleteState i
 	return nil
 }
 
-func (r *testResource) ApplyUpdateChange(ctx context.Context, obj, updateState interface{}) error {
-	m := "ApplyUpdatePatch"
+func (r *testResource) ProcessUpdateState(ctx context.Context, obj, updateState interface{}) error {
+	m := "ProcessUpdateState"
 	r.Order = append(r.Order, m)
 
 	if r.returnErrorFor(m) {

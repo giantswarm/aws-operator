@@ -1,5 +1,5 @@
-hash: 4825e5e5dd4daf6c22025b330d50debf71d6e97d94b86452d3922296f39fbfcf
-updated: 2017-11-06T10:17:21.55034811+01:00
+hash: 139d9fb67e318c23d7e56b7c79d073ccefd72a35e6947300da1a9e045f423aaf
+updated: 2017-11-09T15:31:00.667819838+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -75,7 +75,7 @@ imports:
   - spec/aws
   - spec/aws/elb
 - name: github.com/giantswarm/certificatetpr
-  version: 97fd57e1955af2e38b3a69a5c0fd70e4a08ec8b9
+  version: fee41bfdc17a3b46de1b6ce4129f4c43273c3677
 - name: github.com/giantswarm/clustertpr
   version: 6b89a787f157c5531d1c955c32b3c621f0d64c3a
   subpackages:
@@ -88,12 +88,12 @@ imports:
   - spec/kubernetes/networksetup
   - spec/kubernetes/ssh
 - name: github.com/giantswarm/e2e-harness
-  version: 6fd13b9585c02e73def00ec7d22c22b4bd340838
+  version: 485a9de556676202a635f74a6a898c567df6ff37
   subpackages:
   - pkg/results
   - pkg/runner
 - name: github.com/giantswarm/k8scloudconfig
-  version: 30de6e46e3cd97ad7a6da9005fa00f9dc785b179
+  version: afd000859b121d8a2fdcef9735b07256176db61e
   subpackages:
   - v_0_1_0
 - name: github.com/giantswarm/microendpoint
@@ -130,14 +130,14 @@ imports:
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: 7fed726ca23a9ae0f6e26c0b430ce7c2ed249b26
+  version: d306448fd014890db29087494a772af93e429d71
   subpackages:
   - client/k8sclient
   - tpr
 - name: github.com/giantswarm/randomkeytpr
   version: 9e1d78d125841c496889e8a54d49057212a2893e
 - name: github.com/giantswarm/versionbundle
-  version: efdbdae719c56ab4880f8fe56643d60a76fc19e5
+  version: 6f255fb054b68827f115fdf6a018b5e66c863250
 - name: github.com/go-ini/ini
   version: f280b3ba517bf5fc98922624f21fb0e7a92adaec
 - name: github.com/go-kit/kit
@@ -252,11 +252,11 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: b3426bbac13d7110c4d8fce456ea0012f79f3b8b
+  version: 2da4a54c5ceefcee7ca5dd0eea1e18a3b6366489
 - name: github.com/spf13/jwalterweatherman
   version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
 - name: github.com/spf13/pflag
-  version: 97afa5e7ca8a08a383cb259e06636b5e2cc7897f
+  version: 4c012f6dcd9546820e378d0bdda4d8fc772cdfea
 - name: github.com/spf13/viper
   version: 8ef37cbca71638bf32f3d5e194117d4cb46da163
 - name: github.com/stretchr/testify
@@ -305,7 +305,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
+  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/apimachinery
   version: 8ab5f3d8a330c2e9baaf84e39042db8d49034ae2
   subpackages:

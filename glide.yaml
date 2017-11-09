@@ -24,7 +24,7 @@ import:
   subpackages:
   - assert
 - package: github.com/giantswarm/certificatetpr
-  version: master
+  version: fee41bfdc17a3b46de1b6ce4129f4c43273c3677
 - package: github.com/giantswarm/randomkeytpr
   version: master
 - package: github.com/giantswarm/e2e-harness

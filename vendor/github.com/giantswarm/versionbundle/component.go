@@ -1,6 +1,7 @@
 package versionbundle
 
 import (
+	"encoding/json"
 	"strings"
 
 	"github.com/giantswarm/microerror"
@@ -43,4 +44,19 @@ func (c Component) Validate() error {
 	}
 
 	return nil
+}
+
+func CopyComponents(components []Component) []Component {
+	raw, err := json.Marshal(components)
+	if err != nil {
+		panic(err)
+	}
+
+	var copy []Component
+	err = json.Unmarshal(raw, &copy)
+	if err != nil {
+		panic(err)
+	}
+
+	return copy
 }

@@ -65,7 +65,6 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	v, err := r.resource.GetCurrentState(ctx, obj)
 	if err != nil {
-		r.logger.Log("action", "error", "component", "operatorkit", "function", "GetCurrentState")
 		return nil, microerror.Mask(err)
 	}
 
@@ -79,7 +78,6 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 
 	v, err := r.resource.GetDesiredState(ctx, obj)
 	if err != nil {
-		r.logger.Log("action", "error", "component", "operatorkit", "function", "GetDesiredState")
 		return nil, microerror.Mask(err)
 	}
 
@@ -88,76 +86,84 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	return v, nil
 }
 
-func (r *Resource) NewUpdatePatch(ctx context.Context, obj, cur, des interface{}) (*framework.Patch, error) {
-	r.logger.Log("action", "start", "component", "operatorkit", "function", "NewUpdatePatch")
+func (r *Resource) GetCreateState(ctx context.Context, obj, cur, des interface{}) (interface{}, error) {
+	r.logger.Log("action", "start", "component", "operatorkit", "function", "GetCreateState")
 
-	v, err := r.resource.NewUpdatePatch(ctx, obj, cur, des)
+	v, err := r.resource.GetCreateState(ctx, obj, cur, des)
 	if err != nil {
-		r.logger.Log("action", "error", "component", "operatorkit", "function", "NewUpdatePatch")
 		return nil, microerror.Mask(err)
 	}
 
-	r.logger.Log("action", "end", "component", "operatorkit", "function", "NewUpdatePatch")
+	r.logger.Log("action", "end", "component", "operatorkit", "function", "GetCreateState")
 
 	return v, nil
 }
 
-func (r *Resource) NewDeletePatch(ctx context.Context, obj, cur, des interface{}) (*framework.Patch, error) {
-	r.logger.Log("action", "start", "component", "operatorkit", "function", "NewDeletePatch")
+func (r *Resource) GetDeleteState(ctx context.Context, obj, cur, des interface{}) (interface{}, error) {
+	r.logger.Log("action", "start", "component", "operatorkit", "function", "GetDeleteState")
 
-	v, err := r.resource.NewDeletePatch(ctx, obj, cur, des)
+	v, err := r.resource.GetDeleteState(ctx, obj, cur, des)
 	if err != nil {
-		r.logger.Log("action", "error", "component", "operatorkit", "function", "NewDeletePatch")
 		return nil, microerror.Mask(err)
 	}
 
-	r.logger.Log("action", "end", "component", "operatorkit", "function", "NewDeletePatch")
+	r.logger.Log("action", "end", "component", "operatorkit", "function", "GetDeleteState")
 
 	return v, nil
+}
+
+func (r *Resource) GetUpdateState(ctx context.Context, obj, cur, des interface{}) (interface{}, interface{}, interface{}, error) {
+	r.logger.Log("action", "start", "component", "operatorkit", "function", "GetUpdateState")
+
+	createState, deleteState, updateState, err := r.resource.GetUpdateState(ctx, obj, cur, des)
+	if err != nil {
+		return nil, nil, nil, microerror.Mask(err)
+	}
+
+	r.logger.Log("action", "end", "component", "operatorkit", "function", "GetUpdateState")
+
+	return createState, deleteState, updateState, nil
 }
 
 func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) ApplyCreateChange(ctx context.Context, obj, cre interface{}) error {
-	r.logger.Log("action", "start", "component", "operatorkit", "function", "ApplyCreatePatch")
+func (r *Resource) ProcessCreateState(ctx context.Context, obj, cre interface{}) error {
+	r.logger.Log("action", "start", "component", "operatorkit", "function", "ProcessCreateState")
 
-	err := r.resource.ApplyCreateChange(ctx, obj, cre)
+	err := r.resource.ProcessCreateState(ctx, obj, cre)
 	if err != nil {
-		r.logger.Log("action", "error", "component", "operatorkit", "function", "ApplyCreatePatch")
 		return microerror.Mask(err)
 	}
 
-	r.logger.Log("action", "end", "component", "operatorkit", "function", "ApplyCreatePatch")
+	r.logger.Log("action", "end", "component", "operatorkit", "function", "ProcessCreateState")
 
 	return nil
 }
 
-func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, del interface{}) error {
-	r.logger.Log("action", "start", "component", "operatorkit", "function", "ApplyDeletePatch")
+func (r *Resource) ProcessDeleteState(ctx context.Context, obj, del interface{}) error {
+	r.logger.Log("action", "start", "component", "operatorkit", "function", "ProcessDeleteState")
 
-	err := r.resource.ApplyDeleteChange(ctx, obj, del)
+	err := r.resource.ProcessDeleteState(ctx, obj, del)
 	if err != nil {
-		r.logger.Log("action", "error", "component", "operatorkit", "function", "ApplyDeletePatch")
 		return microerror.Mask(err)
 	}
 
-	r.logger.Log("action", "end", "component", "operatorkit", "function", "ApplyDeletePatch")
+	r.logger.Log("action", "end", "component", "operatorkit", "function", "ProcessDeleteState")
 
 	return nil
 }
 
-func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, upd interface{}) error {
-	r.logger.Log("action", "start", "component", "operatorkit", "function", "ApplyUpdatePatch")
+func (r *Resource) ProcessUpdateState(ctx context.Context, obj, upd interface{}) error {
+	r.logger.Log("action", "start", "component", "operatorkit", "function", "ProcessUpdateState")
 
-	err := r.resource.ApplyUpdateChange(ctx, obj, upd)
+	err := r.resource.ProcessUpdateState(ctx, obj, upd)
 	if err != nil {
-		r.logger.Log("action", "error", "component", "operatorkit", "function", "ApplyUpdatePatch")
 		return microerror.Mask(err)
 	}
 
-	r.logger.Log("action", "end", "component", "operatorkit", "function", "ApplyUpdatePatch")
+	r.logger.Log("action", "end", "component", "operatorkit", "function", "ProcessUpdateState")
 
 	return nil
 }

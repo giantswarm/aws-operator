@@ -224,6 +224,39 @@ coreos:
       ExecStart=/usr/bin/docker run --rm --net=host -v /etc:/etc --name $NAME $IMAGE
       ExecStop=-/usr/bin/docker stop -t 10 $NAME
       ExecStopPost=-/usr/bin/docker rm -f $NAME
+  - name: k8s-proxy.service
+    enable: true
+    command: start
+    content: |
+      [Unit]
+      Description=k8s-proxy
+      StartLimitIntervalSec=0
+
+      [Service]
+      Restart=always
+      RestartSec=0
+      TimeoutStopSec=10
+      EnvironmentFile=/etc/network-environment
+      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.8.1_coreos.0"
+      Environment="NAME=%p.service"
+      Environment="NETWORK_CONFIG_CONTAINER="
+      ExecStartPre=/usr/bin/docker pull $IMAGE
+      ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
+      ExecStartPre=-/usr/bin/docker rm -f $NAME      
+      ExecStart=/bin/sh -c "/usr/bin/docker run --rm --net=host --privileged=true \
+      --name $NAME \
+      -v /usr/share/ca-certificates:/etc/ssl/certs \
+      -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
+      -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
+      $IMAGE \
+      /hyperkube proxy \
+      --proxy-mode=iptables \
+      --logtostderr=true \
+      --kubeconfig=/etc/kubernetes/config/proxy-kubeconfig.yml \
+      --conntrack-max-per-core 131072 \
+      --v=2"
+      ExecStop=-/usr/bin/docker stop -t 10 $NAME
+      ExecStopPost=-/usr/bin/docker rm -f $NAME
   - name: k8s-kubelet.service
     enable: true
     command: start
@@ -259,13 +292,6 @@ coreos:
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
       -v /etc/cni/net.d/:/etc/cni/net.d/ \
       -v /opt/cni/bin/:/opt/cni/bin/ \
-      -v /usr/sbin/iscsiadm:/usr/sbin/iscsiadm \
-      -v /etc/iscsi/:/etc/iscsi/ \
-      -v /dev/disk/by-path/:/dev/disk/by-path/ \
-      -v /dev/mapper/:/dev/mapper/ \
-      -v /usr/sbin/mkfs.xfs:/usr/sbin/mkfs.xfs \
-      -v /usr/lib64/libxfs.so.0:/usr/lib/libxfs.so.0 \
-      -v /usr/lib64/libxcmd.so.0:/usr/lib/libxcmd.so.0 \
       -e ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/client-ca.pem \
       -e ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/client-crt.pem \
       -e ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/client-key.pem \

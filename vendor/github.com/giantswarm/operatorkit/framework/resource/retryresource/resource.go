@@ -129,12 +129,12 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	return v, nil
 }
 
-func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
+func (r *Resource) GetCreateState(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
 	var err error
 
-	var v *framework.Patch
+	var v interface{}
 	o := func() error {
-		v, err = r.resource.NewUpdatePatch(ctx, obj, currentState, desiredState)
+		v, err = r.resource.GetCreateState(ctx, obj, currentState, desiredState)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -143,7 +143,7 @@ func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 	}
 
 	n := func(err error, dur time.Duration) {
-		r.logger.Log("warning", fmt.Sprintf("retrying 'NewUpdatePatch' due to error (%s)", err.Error()))
+		r.logger.Log("warning", fmt.Sprintf("retrying 'GetCreateState' due to error (%s)", err.Error()))
 	}
 
 	err = backoff.RetryNotify(o, r.backOff, n)
@@ -154,12 +154,12 @@ func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 	return v, nil
 }
 
-func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
+func (r *Resource) GetDeleteState(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
 	var err error
 
-	var v *framework.Patch
+	var v interface{}
 	o := func() error {
-		v, err = r.resource.NewDeletePatch(ctx, obj, currentState, desiredState)
+		v, err = r.resource.GetDeleteState(ctx, obj, currentState, desiredState)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -168,7 +168,7 @@ func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desire
 	}
 
 	n := func(err error, dur time.Duration) {
-		r.logger.Log("warning", fmt.Sprintf("retrying 'NewDeletePatch' due to error (%s)", err.Error()))
+		r.logger.Log("warning", fmt.Sprintf("retrying 'GetDeleteState' due to error (%s)", err.Error()))
 	}
 
 	err = backoff.RetryNotify(o, r.backOff, n)
@@ -177,15 +177,43 @@ func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desire
 	}
 
 	return v, nil
+}
+
+func (r *Resource) GetUpdateState(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, interface{}, interface{}, error) {
+	var err error
+
+	var createState interface{}
+	var deleteState interface{}
+	var updateState interface{}
+
+	o := func() error {
+		createState, deleteState, updateState, err = r.resource.GetUpdateState(ctx, obj, currentState, desiredState)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		return nil
+	}
+
+	n := func(err error, dur time.Duration) {
+		r.logger.Log("warning", fmt.Sprintf("retrying 'GetUpdateState' due to error (%s)", err.Error()))
+	}
+
+	err = backoff.RetryNotify(o, r.backOff, n)
+	if err != nil {
+		return nil, nil, nil, microerror.Mask(err)
+	}
+
+	return createState, deleteState, updateState, nil
 }
 
 func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createState interface{}) error {
+func (r *Resource) ProcessCreateState(ctx context.Context, obj, createState interface{}) error {
 	o := func() error {
-		err := r.resource.ApplyCreateChange(ctx, obj, createState)
+		err := r.resource.ProcessCreateState(ctx, obj, createState)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -194,7 +222,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createState inter
 	}
 
 	n := func(err error, dur time.Duration) {
-		r.logger.Log("warning", fmt.Sprintf("retrying 'ApplyCreatePatch' due to error (%s)", err.Error()))
+		r.logger.Log("warning", fmt.Sprintf("retrying 'ProcessCreateState' due to error (%s)", err.Error()))
 	}
 
 	err := backoff.RetryNotify(o, r.backOff, n)
@@ -205,9 +233,9 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createState inter
 	return nil
 }
 
-func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteState interface{}) error {
+func (r *Resource) ProcessDeleteState(ctx context.Context, obj, deleteState interface{}) error {
 	o := func() error {
-		err := r.resource.ApplyDeleteChange(ctx, obj, deleteState)
+		err := r.resource.ProcessDeleteState(ctx, obj, deleteState)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -216,7 +244,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteState inter
 	}
 
 	n := func(err error, dur time.Duration) {
-		r.logger.Log("warning", fmt.Sprintf("retrying 'ApplyDeletePatch' due to error (%s)", err.Error()))
+		r.logger.Log("warning", fmt.Sprintf("retrying 'ProcessDeleteState' due to error (%s)", err.Error()))
 	}
 
 	err := backoff.RetryNotify(o, r.backOff, n)
@@ -227,9 +255,9 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteState inter
 	return nil
 }
 
-func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateState interface{}) error {
+func (r *Resource) ProcessUpdateState(ctx context.Context, obj, updateState interface{}) error {
 	o := func() error {
-		err := r.resource.ApplyUpdateChange(ctx, obj, updateState)
+		err := r.resource.ProcessUpdateState(ctx, obj, updateState)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -238,7 +266,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateState inter
 	}
 
 	n := func(err error, dur time.Duration) {
-		r.logger.Log("warning", fmt.Sprintf("retrying 'ApplyUpdatePatch' due to error (%s)", err.Error()))
+		r.logger.Log("warning", fmt.Sprintf("retrying 'ProcessUpdateState' due to error (%s)", err.Error()))
 	}
 
 	err := backoff.RetryNotify(o, r.backOff, n)

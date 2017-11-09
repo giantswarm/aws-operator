@@ -98,12 +98,12 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	return v, nil
 }
 
-func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
-	o := "NewUpdatePatch"
+func (r *Resource) GetCreateState(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
+	o := "GetCreateState"
 
 	defer r.updateMetrics(o, time.Now())
 
-	v, err := r.resource.NewUpdatePatch(ctx, obj, currentState, desiredState)
+	v, err := r.resource.GetCreateState(ctx, obj, currentState, desiredState)
 	if err != nil {
 		r.updateErrorMetrics(o)
 		return nil, microerror.Mask(err)
@@ -112,30 +112,44 @@ func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 	return v, nil
 }
 
-func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
-	o := "NewDeletePatch"
+func (r *Resource) GetDeleteState(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
+	o := "GetDeleteState"
 
 	defer r.updateMetrics(o, time.Now())
 
-	v, err := r.resource.NewDeletePatch(ctx, obj, currentState, desiredState)
+	v, err := r.resource.GetDeleteState(ctx, obj, currentState, desiredState)
 	if err != nil {
 		r.updateErrorMetrics(o)
 		return nil, microerror.Mask(err)
 	}
 
 	return v, nil
+}
+
+func (r *Resource) GetUpdateState(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, interface{}, interface{}, error) {
+	o := "GetUpdateState"
+
+	defer r.updateMetrics(o, time.Now())
+
+	createState, deleteState, updateState, err := r.resource.GetUpdateState(ctx, obj, currentState, desiredState)
+	if err != nil {
+		r.updateErrorMetrics(o)
+		return nil, nil, nil, microerror.Mask(err)
+	}
+
+	return createState, deleteState, updateState, nil
 }
 
 func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createState interface{}) error {
-	o := "ApplyCreatePatch"
+func (r *Resource) ProcessCreateState(ctx context.Context, obj, createState interface{}) error {
+	o := "ProcessCreateState"
 
 	defer r.updateMetrics(o, time.Now())
 
-	err := r.resource.ApplyCreateChange(ctx, obj, createState)
+	err := r.resource.ProcessCreateState(ctx, obj, createState)
 	if err != nil {
 		r.updateErrorMetrics(o)
 		return microerror.Mask(err)
@@ -144,12 +158,12 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createState inter
 	return nil
 }
 
-func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteState interface{}) error {
-	o := "ApplyDeletePatch"
+func (r *Resource) ProcessDeleteState(ctx context.Context, obj, deleteState interface{}) error {
+	o := "ProcessDeleteState"
 
 	defer r.updateMetrics(o, time.Now())
 
-	err := r.resource.ApplyDeleteChange(ctx, obj, deleteState)
+	err := r.resource.ProcessDeleteState(ctx, obj, deleteState)
 	if err != nil {
 		r.updateErrorMetrics(o)
 		return microerror.Mask(err)
@@ -158,12 +172,12 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteState inter
 	return nil
 }
 
-func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateState interface{}) error {
-	o := "ApplyUpdatePatch"
+func (r *Resource) ProcessUpdateState(ctx context.Context, obj, updateState interface{}) error {
+	o := "ProcessUpdateState"
 
 	defer r.updateMetrics(o, time.Now())
 
-	err := r.resource.ApplyUpdateChange(ctx, obj, updateState)
+	err := r.resource.ProcessUpdateState(ctx, obj, updateState)
 	if err != nil {
 		r.updateErrorMetrics(o)
 		return microerror.Mask(err)

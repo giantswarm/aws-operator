@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/cenkalti/backoff"
 	"github.com/stretchr/testify/assert"
 
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -123,10 +122,7 @@ func TestCreateTPR(t *testing.T) {
 	resp, err := clientset.ExtensionsV1beta1().ThirdPartyResources().List(apismetav1.ListOptions{})
 	assert.Equal(t, 0, len(resp.Items))
 
-	initBackOff := backoff.NewExponentialBackOff()
-	initBackOff.MaxElapsedTime = 10
-
-	err = tpr.create(initBackOff)
+	err = tpr.create()
 	assert.Nil(t, err)
 
 	resp, err = clientset.ExtensionsV1beta1().ThirdPartyResources().List(apismetav1.ListOptions{})

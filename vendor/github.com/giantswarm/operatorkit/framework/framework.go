@@ -81,13 +81,15 @@ func New(config Config) (*Framework, error) {
 	return newFramework, nil
 }
 
-// AddFunc executes the framework's ProcessCreate function.
+// AddFunc executes the framework's ProcessCreate and ProcessUpdate functions,
+// in this order. This guarantees resource creation is always done before
+// resource updates.
 func (f *Framework) AddFunc(obj interface{}) {
-	// AddFunc/DeleteFunc/UpdateFunc is synchronized to make sure only one
-	// of them is executed at a time. AddFunc/DeleteFunc/UpdateFunc is not
-	// thread safe. This is important because the source of truth for an
-	// operator are the reconciled resources. In case we would run the
-	// operator logic in parallel, we would run into race conditions.
+	// We lock the AddFunc/DeleteFunc to make sure only one AddFunc/DeleteFunc is
+	// executed at a time. AddFunc/DeleteFunc is not thread safe. This is
+	// important because the source of truth for an operator are the reconciled
+	// resources. In case we would run the operator logic in parallel, we would
+	// run into race conditions.
 	f.mutex.Lock()
 	defer f.mutex.Unlock()
 
@@ -112,15 +114,25 @@ func (f *Framework) AddFunc(obj interface{}) {
 	}
 
 	f.logger.Log("action", "end", "component", "operatorkit", "function", "ProcessCreate")
+
+	f.logger.Log("action", "start", "component", "operatorkit", "function", "ProcessUpdate")
+
+	err = ProcessUpdate(ctx, obj, f.resources)
+	if err != nil {
+		f.logger.Log("error", fmt.Sprintf("%#v", err), "event", "update")
+		return
+	}
+
+	f.logger.Log("action", "end", "component", "operatorkit", "function", "ProcessUpdate")
 }
 
 // DeleteFunc executes the framework's ProcessDelete function.
 func (f *Framework) DeleteFunc(obj interface{}) {
-	// AddFunc/DeleteFunc/UpdateFunc is synchronized to make sure only one
-	// of them is executed at a time. AddFunc/DeleteFunc/UpdateFunc is not
-	// thread safe. This is important because the source of truth for an
-	// operator are the reconciled resources. In case we would run the
-	// operator logic in parallel, we would run into race conditions.
+	// We lock the AddFunc/DeleteFunc to make sure only one AddFunc/DeleteFunc is
+	// executed at a time. AddFunc/DeleteFunc is not thread safe. This is
+	// important because the source of truth for an operator are the reconciled
+	// resources. In case we would run the operator logic in parallel, we would
+	// run into race conditions.
 	f.mutex.Lock()
 	defer f.mutex.Unlock()
 
@@ -160,39 +172,10 @@ func (f *Framework) NewCacheResourceEventHandler() *cache.ResourceEventHandlerFu
 	return newHandler
 }
 
-// UpdateFunc executes the framework's ProcessUpdate function.
+// UpdateFunc only redirects to AddFunc and only dispatches the new custom
+// object received.
 func (f *Framework) UpdateFunc(oldObj, newObj interface{}) {
-	obj := newObj
-
-	// AddFunc/DeleteFunc/UpdateFunc is synchronized to make sure only one
-	// of them is executed at a time. AddFunc/DeleteFunc/UpdateFunc is not
-	// thread safe. This is important because the source of truth for an
-	// operator are the reconciled resources. In case we would run the
-	// operator logic in parallel, we would run into race conditions.
-	f.mutex.Lock()
-	defer f.mutex.Unlock()
-
-	ctx := context.Background()
-	ctx = canceledcontext.NewContext(ctx, make(chan struct{}))
-
-	if f.initializer != nil {
-		var err error
-		ctx, err = f.initializer(ctx, obj)
-		if err != nil {
-			f.logger.Log("error", fmt.Sprintf("%#v", err), "event", "create")
-			return
-		}
-	}
-
-	f.logger.Log("action", "start", "component", "operatorkit", "function", "ProcessUpdate")
-
-	err := ProcessUpdate(ctx, obj, f.resources)
-	if err != nil {
-		f.logger.Log("error", fmt.Sprintf("%#v", err), "event", "update")
-		return
-	}
-
-	f.logger.Log("action", "end", "component", "operatorkit", "function", "ProcessUpdate")
+	f.AddFunc(newObj)
 }
 
 // ProcessCreate is a drop-in for an informer's AddFunc. It receives the custom
@@ -212,10 +195,44 @@ func (f *Framework) UpdateFunc(oldObj, newObj interface{}) {
 //     }
 //
 func ProcessCreate(ctx context.Context, obj interface{}, resources []Resource) error {
-	err := ProcessUpdate(ctx, obj, resources)
-	if err != nil {
-		return microerror.Mask(err)
+	if len(resources) == 0 {
+		return microerror.Maskf(executionFailedError, "resources must not be empty")
 	}
+
+	for _, r := range resources {
+		if canceledcontext.IsCanceled(ctx) {
+			return nil
+		}
+		currentState, err := r.GetCurrentState(ctx, obj)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if canceledcontext.IsCanceled(ctx) {
+			return nil
+		}
+		desiredState, err := r.GetDesiredState(ctx, obj)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if canceledcontext.IsCanceled(ctx) {
+			return nil
+		}
+		createState, err := r.GetCreateState(ctx, obj, currentState, desiredState)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if canceledcontext.IsCanceled(ctx) {
+			return nil
+		}
+		err = r.ProcessCreateState(ctx, obj, createState)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
 	return nil
 }
 
@@ -241,8 +258,6 @@ func ProcessDelete(ctx context.Context, obj interface{}, resources []Resource) e
 	}
 
 	for _, r := range resources {
-		// Create the patch.
-
 		if canceledcontext.IsCanceled(ctx) {
 			return nil
 		}
@@ -262,46 +277,18 @@ func ProcessDelete(ctx context.Context, obj interface{}, resources []Resource) e
 		if canceledcontext.IsCanceled(ctx) {
 			return nil
 		}
-		patch, err := r.NewDeletePatch(ctx, obj, currentState, desiredState)
+		deleteState, err := r.GetDeleteState(ctx, obj, currentState, desiredState)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		// Apply the patch.
-
 		if canceledcontext.IsCanceled(ctx) {
 			return nil
 		}
-		createChange, ok := patch.getCreateChange()
-		if ok {
-			err := r.ApplyCreateChange(ctx, obj, createChange)
-			if err != nil {
-				return microerror.Mask(err)
-			}
+		err = r.ProcessDeleteState(ctx, obj, deleteState)
+		if err != nil {
+			return microerror.Mask(err)
 		}
-
-		if canceledcontext.IsCanceled(ctx) {
-			return nil
-		}
-		deleteChange, ok := patch.getDeleteChange()
-		if ok {
-			err := r.ApplyDeleteChange(ctx, obj, deleteChange)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-		}
-
-		if canceledcontext.IsCanceled(ctx) {
-			return nil
-		}
-		updateChange, ok := patch.getUpdateChange()
-		if ok {
-			err := r.ApplyUpdateChange(ctx, obj, updateChange)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-		}
-
 	}
 
 	return nil
@@ -358,8 +345,6 @@ func ProcessUpdate(ctx context.Context, obj interface{}, resources []Resource) e
 	}
 
 	for _, r := range resources {
-		// Create the patch.
-
 		if canceledcontext.IsCanceled(ctx) {
 			return nil
 		}
@@ -379,44 +364,33 @@ func ProcessUpdate(ctx context.Context, obj interface{}, resources []Resource) e
 		if canceledcontext.IsCanceled(ctx) {
 			return nil
 		}
-		patch, err := r.NewUpdatePatch(ctx, obj, currentState, desiredState)
+		createState, deleteState, updateState, err := r.GetUpdateState(ctx, obj, currentState, desiredState)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		// Apply the patch.
-
 		if canceledcontext.IsCanceled(ctx) {
 			return nil
 		}
-		createState, ok := patch.getCreateChange()
-		if ok {
-			err := r.ApplyCreateChange(ctx, obj, createState)
-			if err != nil {
-				return microerror.Mask(err)
-			}
+		err = r.ProcessCreateState(ctx, obj, createState)
+		if err != nil {
+			return microerror.Mask(err)
 		}
 
 		if canceledcontext.IsCanceled(ctx) {
 			return nil
 		}
-		deleteState, ok := patch.getDeleteChange()
-		if ok {
-			err := r.ApplyDeleteChange(ctx, obj, deleteState)
-			if err != nil {
-				return microerror.Mask(err)
-			}
+		err = r.ProcessDeleteState(ctx, obj, deleteState)
+		if err != nil {
+			return microerror.Mask(err)
 		}
 
 		if canceledcontext.IsCanceled(ctx) {
 			return nil
 		}
-		updateState, ok := patch.getUpdateChange()
-		if ok {
-			err := r.ApplyUpdateChange(ctx, obj, updateState)
-			if err != nil {
-				return microerror.Mask(err)
-			}
+		err = r.ProcessUpdateState(ctx, obj, updateState)
+		if err != nil {
+			return microerror.Mask(err)
 		}
 	}
 
