@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/clustertpr"
@@ -13,11 +14,11 @@ import (
 
 func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 	testCases := []struct {
-		obj                  interface{}
-		currentState         interface{}
-		desiredState         interface{}
-		expectedCreateChange StackState
-		description          string
+		obj               interface{}
+		currentState      interface{}
+		desiredState      interface{}
+		expectedStackName string
+		description       string
 	}{
 		{
 			description: "current and desired state empty, expected empty",
@@ -30,9 +31,9 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 					},
 				},
 			},
-			currentState:         StackState{},
-			desiredState:         StackState{},
-			expectedCreateChange: StackState{},
+			currentState:      StackState{},
+			desiredState:      StackState{},
+			expectedStackName: "",
 		},
 		{
 			description: "current state empty, desired state not empty, expected desired state",
@@ -49,9 +50,7 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 			desiredState: StackState{
 				Name: "desired",
 			},
-			expectedCreateChange: StackState{
-				Name: "desired",
-			},
+			expectedStackName: "desired",
 		},
 		{
 			description: "current state not empty, desired state not empty but different, expected desired state",
@@ -70,9 +69,7 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 			desiredState: StackState{
 				Name: "desired",
 			},
-			expectedCreateChange: StackState{
-				Name: "desired",
-			},
+			expectedStackName: "desired",
 		},
 	}
 
@@ -95,14 +92,12 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 			if err != nil {
 				t.Errorf("expected '%v' got '%#v'", nil, err)
 			}
-
-			createChange, ok := result.(StackState)
+			createChange, ok := result.(awscloudformation.CreateStackInput)
 			if !ok {
 				t.Errorf("expected '%T', got '%T'", createChange, result)
 			}
-
-			if createChange.Name != tc.expectedCreateChange.Name {
-				t.Errorf("expected %s, got %s", tc.expectedCreateChange.Name, createChange.Name)
+			if *createChange.StackName != tc.expectedStackName {
+				t.Errorf("expected %s, got %s", tc.expectedStackName, createChange.StackName)
 			}
 		})
 	}

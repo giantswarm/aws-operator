@@ -11,28 +11,12 @@ import (
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
-	customObject, err := key.ToCustomObject(obj)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	createChangeState, ok := createChange.(StackState)
+	stackInput, ok := createChange.(awscloudformation.CreateStackInput)
 	if !ok {
-		return microerror.Mask(fmt.Errorf("unexpected type, expecting %T, got %T", createChangeState, createChange))
+		return microerror.Mask(fmt.Errorf("unexpected type, expecting %T, got %T", stackInput, createChange))
 	}
 
-	mainTemplate, err := getMainTemplateBody(customObject)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	stackInput := &awscloudformation.CreateStackInput{
-		StackName:        aws.String(createChangeState.Name),
-		TemplateBody:     aws.String(mainTemplate),
-		TimeoutInMinutes: aws.Int64(defaultCreationTimeout),
-	}
-
-	_, err = r.awsClient.CreateStack(stackInput)
+	_, err := r.awsClient.CreateStack(&stackInput)
 	if err != nil {
 		return err
 	}
@@ -57,10 +41,22 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 
 	r.logger.Log("cluster", key.ClusterID(customObject), "debug", "finding out if the main stack should be created")
 
-	var createState StackState
+	createState := awscloudformation.CreateStackInput{
+		StackName: aws.String(""),
+	}
 
 	if currentStackState.Name != desiredStackState.Name {
-		createState = desiredStackState
+		var mainTemplate string
+		/*
+			      commented out until we assing proper values to the template
+						mainTemplate, err := getMainTemplateBody(customObject)
+						if err != nil {
+							return nil, microerror.Mask(err)
+						}
+		*/
+		createState.StackName = aws.String(desiredStackState.Name)
+		createState.TemplateBody = aws.String(mainTemplate)
+		createState.TimeoutInMinutes = aws.Int64(defaultCreationTimeout)
 	}
 
 	return createState, nil
