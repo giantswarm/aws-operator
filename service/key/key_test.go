@@ -402,3 +402,37 @@ func Test_MainStackName(t *testing.T) {
 		t.Fatalf("Expected main stack name %s but was %s", expected, actual)
 	}
 }
+
+func Test_UseCloudFormation(t *testing.T) {
+	tests := []struct {
+		clusterVersion string
+		expectedResult bool
+	}{
+		{
+			clusterVersion: "cloud-formation",
+			expectedResult: true,
+		},
+		{
+			clusterVersion: "v_0_1_0",
+			expectedResult: false,
+		},
+		{
+			clusterVersion: "",
+			expectedResult: false,
+		},
+	}
+
+	for _, tc := range tests {
+		cluster := awstpr.CustomObject{
+			Spec: awstpr.Spec{
+				Cluster: clustertpr.Spec{
+					Version: tc.clusterVersion,
+				},
+			},
+		}
+
+		if UseCloudFormation(cluster) != tc.expectedResult {
+			t.Fatalf("Expected use cloud formation to be %t but was %t", tc.expectedResult, UseCloudFormation(cluster))
+		}
+	}
+}
