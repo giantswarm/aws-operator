@@ -800,9 +800,9 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	}
 
 	masterServiceInput := MasterServiceInput{
-		Clients:   clients,
-		Cluster:   cluster,
-		MasterIDs: masterIDs,
+		Clients:  clients,
+		Cluster:  cluster,
+		MasterID: masterIDs[0],
 	}
 	if err := s.createMasterService(masterServiceInput); err != nil {
 		return microerror.Mask(err)

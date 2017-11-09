@@ -38,6 +38,7 @@ type Instance struct {
 	PlacementAZ            string
 	SecurityGroupID        string
 	SubnetID               string
+	PrivateIpAddress       string
 	id                     string
 	// Dependencies.
 	Logger micrologger.Logger
@@ -257,7 +258,8 @@ func FindInstances(input FindInstancesInput) ([]*Instance, error) {
 				continue
 			}
 			instances = append(instances, &Instance{
-				id: *rawInstance.InstanceId,
+				id:               *rawInstance.InstanceId,
+				PrivateIpAddress: *rawInstance.PrivateIpAddress,
 				// Dependencies.
 				Logger:    input.Logger,
 				AWSEntity: AWSEntity{Clients: input.Clients},
