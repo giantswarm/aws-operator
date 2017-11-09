@@ -84,3 +84,14 @@ func BaseDir() (string, error) {
 	}
 	return filepath.Join(dir, ".e2e-harness"), nil
 }
+
+func GetProjectName() string {
+	if os.Getenv("CIRCLE_PROJECT_REPONAME") != "" {
+		return os.Getenv("CIRCLE_PROJECT_REPONAME")
+	}
+	dir, err := os.Getwd()
+	if err != nil {
+		return "e2e-harness"
+	}
+	return filepath.Base(dir)
+}

@@ -10,7 +10,7 @@ import (
 
 // Bundles is a plain validation type for a list of version bundles. A
 // list of version bundles is exposed by authorities. Lists of version bundles
-// of multiple authorities are aggregated and grouped to reflect distributions.
+// of multiple authorities are aggregated and grouped to reflect releases.
 type Bundles []Bundle
 
 func (b Bundles) Contain(item Bundle) bool {
