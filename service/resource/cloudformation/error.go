@@ -29,5 +29,5 @@ func IsStackNotFound(err error) bool {
 	if err == nil {
 		return false
 	}
-	return strings.Contains(err.Error(), "does not exist")
+	return strings.Contains(microerror.Cause(err).Error(), "does not exist")
 }
