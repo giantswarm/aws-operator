@@ -148,7 +148,7 @@ storage:
     - name: ephemeral1
       mount:
         device: /dev/xvdb
-        format: ext3
+        format: xfs
         create:
           force: true
 `
