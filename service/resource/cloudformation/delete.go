@@ -11,5 +11,6 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 }
 
 func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
-	return &framework.Patch{}, nil
+	patch := framework.NewPatch()
+	return patch, nil
 }
