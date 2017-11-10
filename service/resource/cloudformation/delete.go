@@ -5,9 +5,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/giantswarm/aws-operator/service/key"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/framework"
+
+	"github.com/giantswarm/aws-operator/service/key"
 )
 
 func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
@@ -23,14 +24,13 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	stackName := deleteStackInput.StackName
 	if *stackName != "" {
 		_, err := r.awsClient.DeleteStack(&deleteStackInput)
-
 		if err != nil {
-			return microerror.Mask(err)
+			return microerror.Maskf(err, "deleting AWS CloudFormation Stack")
 		}
 
-		r.logger.Log("cluster", key.ClusterID(customObject), "debug", "deleted stacks from the AWS API")
+		r.logger.Log("cluster", key.ClusterID(customObject), "debug", "deleting AWS CloudFormation stack: deleted")
 	} else {
-		r.logger.Log("cluster", key.ClusterID(customObject), "debug", "the stacks do not need to be deleted from the AWS API")
+		r.logger.Log("cluster", key.ClusterID(customObject), "debug", "deleting AWS CloudFormation stack: already deleted")
 	}
 
 	return nil
@@ -66,13 +66,13 @@ func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desir
 
 	r.logger.Log("cluster", key.ClusterID(customObject), "debug", "finding out if the main stack should be deleted")
 
-	createState := awscloudformation.DeleteStackInput{
+	deleteState := awscloudformation.DeleteStackInput{
 		StackName: aws.String(""),
 	}
 
-	if desiredStackState.Name != currentStackState.Name {
-		createState.StackName = aws.String(currentStackState.Name)
+	if currentStackState.Name != "" && desiredStackState.Name != currentStackState.Name {
+		deleteState.StackName = aws.String(currentStackState.Name)
 	}
 
-	return createState, nil
+	return deleteState, nil
 }
