@@ -19,13 +19,15 @@ type MasterServiceInput struct {
 }
 
 func (s *Service) createMasterService(input MasterServiceInput) error {
-	findInstancesInput := aws.FindInstancesInput{
+	instances, err := aws.FindInstances(aws.FindInstancesInput{
 		Clients: input.Clients,
 		Logger:  s.logger,
-		Pattern: input.MasterID,
-	}
-
-	instances, err := aws.FindInstances(findInstancesInput)
+		Pattern: instanceName(instanceNameInput{
+			clusterName: key.ClusterID(input.Cluster),
+			prefix:      prefixMaster,
+			no:          0,
+		}),
+	})
 	if err != nil {
 		return microerror.Mask(err)
 	}
