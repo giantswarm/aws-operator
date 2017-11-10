@@ -120,3 +120,16 @@ func getStackOutputValue(outputs []*awscloudformation.Output, key string) (strin
 
 	return "", microerror.Mask(notFoundError)
 }
+
+func toUpdateStackInput(v interface{}) (awscloudformation.UpdateStackInput, error) {
+	if v == nil {
+		return awscloudformation.UpdateStackInput{}, nil
+	}
+
+	updateStackInput, ok := v.(awscloudformation.UpdateStackInput)
+	if !ok {
+		return awscloudformation.UpdateStackInput{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", updateStackInput, v)
+	}
+
+	return updateStackInput, nil
+}
