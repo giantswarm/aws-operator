@@ -24,6 +24,7 @@ setup:
                     hostaccesskey:
                       id: ""
                       secret: ""
+                    region: "eu-central-1"
             Registry:
               PullSecret:
                 DockerConfigJSON: "{\"auths\":{\"quay.io\":{\"auth\":\"$REGISTRY_PULL_SECRET\"}}}"
