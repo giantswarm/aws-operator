@@ -821,91 +821,94 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create ingress load balancer: '%#v'", err))
 	}
 
-	// Create a launch configuration for the worker nodes.
-	lcInput := launchConfigurationInput{
-		clients:             clients,
-		cluster:             cluster,
-		clusterKeys:         clusterKeys,
-		tlsAssets:           tlsAssets,
-		bucket:              bucket,
-		securityGroup:       workersSecurityGroup,
-		subnet:              publicSubnet,
-		instanceProfileName: workerPolicy.GetName(),
-		prefix:              prefixWorker,
-		ebsStorage:          true,
-	}
-
-	// For new clusters don't assign public IPs and use the private subnet.
-	if key.HasClusterVersion(cluster) {
-		lcInput.associatePublicIP = false
-		lcInput.subnet = privateSubnet
-	} else {
-		lcInput.associatePublicIP = true
-		lcInput.subnet = publicSubnet
-	}
-
-	// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
-	if !key.HasClusterVersion(cluster) {
-		lcInput.keypairName = key.ClusterID(cluster)
-	}
-
-	lcCreated, err := s.createLaunchConfiguration(lcInput)
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create launch config: '%#v'", err))
-	}
-
-	if lcCreated {
-		s.logger.Log("info", fmt.Sprintf("created worker launch config"))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("launch config %s already exists, reusing", key.ClusterID(cluster)))
-	}
-
-	workersLCName, err := launchConfigurationName(cluster, "worker", workersSecurityGroupID)
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get launch config name: '%#v'", err))
-	}
-
-	asg := awsresources.AutoScalingGroup{
-		Client:                  clients.AutoScaling,
-		Name:                    key.AutoScalingGroupName(cluster, prefixWorker),
-		ClusterID:               key.ClusterID(cluster),
-		MinSize:                 key.WorkerCount(cluster),
-		MaxSize:                 key.WorkerCount(cluster),
-		AvailabilityZone:        key.AvailabilityZone(cluster),
-		LaunchConfigurationName: workersLCName,
-		LoadBalancerName:        ingressLB.Name,
-		VPCZoneIdentifier:       publicSubnetID,
-		HealthCheckGracePeriod:  gracePeriodSeconds,
-	}
-
-	// For new clusters launch the workers in the private subnet.
-	if key.HasClusterVersion(cluster) {
-		asg.VPCZoneIdentifier = privateSubnetID
-	} else {
-		asg.VPCZoneIdentifier = publicSubnetID
-	}
-
-	asgCreated, err := asg.CreateIfNotExists()
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create auto scaling group: '%#v'", err))
-	}
-
-	if asgCreated {
-		s.logger.Log("info", fmt.Sprintf("created auto scaling group '%s' with size %v", asg.Name, key.WorkerCount(cluster)))
-	} else {
-		// If the cluster exists set the worker count so the cluster can be scaled.
-		scaleWorkers := awsresources.AutoScalingGroup{
-			Client:  clients.AutoScaling,
-			Name:    key.AutoScalingGroupName(cluster, prefixWorker),
-			MinSize: key.WorkerCount(cluster),
-			MaxSize: key.WorkerCount(cluster),
+	// During Cloud Formation migration this logic is only needed for non CF clusters.
+	if !key.UseCloudFormation(cluster) {
+		// Create a launch configuration for the worker nodes.
+		lcInput := launchConfigurationInput{
+			clients:             clients,
+			cluster:             cluster,
+			clusterKeys:         clusterKeys,
+			tlsAssets:           tlsAssets,
+			bucket:              bucket,
+			securityGroup:       workersSecurityGroup,
+			subnet:              publicSubnet,
+			instanceProfileName: workerPolicy.GetName(),
+			prefix:              prefixWorker,
+			ebsStorage:          true,
 		}
 
-		if err := scaleWorkers.Update(); err != nil {
-			s.logger.Log("error", fmt.Sprintf("%#v", err))
+		// For new clusters don't assign public IPs and use the private subnet.
+		if key.HasClusterVersion(cluster) {
+			lcInput.associatePublicIP = false
+			lcInput.subnet = privateSubnet
+		} else {
+			lcInput.associatePublicIP = true
+			lcInput.subnet = publicSubnet
 		}
 
-		s.logger.Log("info", fmt.Sprintf("auto scaling group '%s' already exists, setting to %d workers", scaleWorkers.Name, scaleWorkers.MaxSize))
+		// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
+		if !key.HasClusterVersion(cluster) {
+			lcInput.keypairName = key.ClusterID(cluster)
+		}
+
+		lcCreated, err := s.createLaunchConfiguration(lcInput)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create launch config: '%#v'", err))
+		}
+
+		if lcCreated {
+			s.logger.Log("info", fmt.Sprintf("created worker launch config"))
+		} else {
+			s.logger.Log("info", fmt.Sprintf("launch config %s already exists, reusing", key.ClusterID(cluster)))
+		}
+
+		workersLCName, err := launchConfigurationName(cluster, "worker", workersSecurityGroupID)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get launch config name: '%#v'", err))
+		}
+
+		asg := awsresources.AutoScalingGroup{
+			Client:                  clients.AutoScaling,
+			Name:                    key.AutoScalingGroupName(cluster, prefixWorker),
+			ClusterID:               key.ClusterID(cluster),
+			MinSize:                 key.WorkerCount(cluster),
+			MaxSize:                 key.WorkerCount(cluster),
+			AvailabilityZone:        key.AvailabilityZone(cluster),
+			LaunchConfigurationName: workersLCName,
+			LoadBalancerName:        ingressLB.Name,
+			VPCZoneIdentifier:       publicSubnetID,
+			HealthCheckGracePeriod:  gracePeriodSeconds,
+		}
+
+		// For new clusters launch the workers in the private subnet.
+		if key.HasClusterVersion(cluster) {
+			asg.VPCZoneIdentifier = privateSubnetID
+		} else {
+			asg.VPCZoneIdentifier = publicSubnetID
+		}
+
+		asgCreated, err := asg.CreateIfNotExists()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create auto scaling group: '%#v'", err))
+		}
+
+		if asgCreated {
+			s.logger.Log("info", fmt.Sprintf("created auto scaling group '%s' with size %v", asg.Name, key.WorkerCount(cluster)))
+		} else {
+			// If the cluster exists set the worker count so the cluster can be scaled.
+			scaleWorkers := awsresources.AutoScalingGroup{
+				Client:  clients.AutoScaling,
+				Name:    key.AutoScalingGroupName(cluster, prefixWorker),
+				MinSize: key.WorkerCount(cluster),
+				MaxSize: key.WorkerCount(cluster),
+			}
+
+			if err := scaleWorkers.Update(); err != nil {
+				s.logger.Log("error", fmt.Sprintf("%#v", err))
+			}
+
+			s.logger.Log("info", fmt.Sprintf("auto scaling group '%s' already exists, setting to %d workers", scaleWorkers.Name, scaleWorkers.MaxSize))
+		}
 	}
 
 	// Create Record Sets for the Load Balancers.
@@ -991,28 +994,31 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 		s.logger.Log("info", "deleted masters")
 	}
 
-	// Delete workers Auto Scaling Group.
-	asg := awsresources.AutoScalingGroup{
-		Client: clients.AutoScaling,
-		Name:   key.AutoScalingGroupName(cluster, prefixWorker),
-	}
+	// During Cloud Formation migration this logic is only needed for non CF clusters.
+	if !key.UseCloudFormation(cluster) {
+		// Delete workers Auto Scaling Group.
+		asg := awsresources.AutoScalingGroup{
+			Client: clients.AutoScaling,
+			Name:   key.AutoScalingGroupName(cluster, prefixWorker),
+		}
 
-	if err := asg.Delete(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-	} else {
-		s.logger.Log("info", "deleted workers auto scaling group")
-	}
+		if err := asg.Delete(); err != nil {
+			s.logger.Log("error", fmt.Sprintf("%#v", err))
+		} else {
+			s.logger.Log("info", "deleted workers auto scaling group")
+		}
 
-	// Delete workers launch configuration.
-	lcInput := launchConfigurationInput{
-		clients: clients,
-		cluster: cluster,
-		prefix:  "worker",
-	}
-	if err := s.deleteLaunchConfiguration(lcInput); err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-	} else {
-		s.logger.Log("info", "deleted worker launch config")
+		// Delete workers launch configuration.
+		lcInput := launchConfigurationInput{
+			clients: clients,
+			cluster: cluster,
+			prefix:  "worker",
+		}
+		if err := s.deleteLaunchConfiguration(lcInput); err != nil {
+			s.logger.Log("error", fmt.Sprintf("%#v", err))
+		} else {
+			s.logger.Log("info", "deleted worker launch config")
+		}
 	}
 
 	// Delete Record Sets.
