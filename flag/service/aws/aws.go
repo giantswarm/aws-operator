@@ -7,7 +7,6 @@ import (
 type AWS struct {
 	AccessKey        accesskey.AccessKey
 	HostAccessKey    accesskey.AccessKey
-	InstallationName string
 	PubKeyFile       string
 	Region           string
 }

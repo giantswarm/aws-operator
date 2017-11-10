@@ -10,7 +10,8 @@ data:
         address: 'http://0.0.0.0:8000'
     service:
       aws:
-        installationName: '{{ .Values.Installation.V1.Provider.AWS.InstallationName }}'
         region: '{{ .Values.Installation.V1.Provider.AWS.Region }}'
+      installation:
+        name: '{{ .Values.Installation.V1.Name }}'
       kubernetes:
         incluster: true

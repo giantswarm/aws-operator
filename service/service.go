@@ -116,7 +116,7 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	installationName := config.Viper.GetString(config.Flag.Service.AWS.InstallationName)
+	installationName := config.Viper.GetString(config.Flag.Service.Installation.Name)
 
 	var awsHostConfig awsclient.Config
 	{
