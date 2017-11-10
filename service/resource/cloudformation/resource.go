@@ -97,3 +97,16 @@ func toCreateStackInput(v interface{}) (awscloudformation.CreateStackInput, erro
 
 	return createStackInput, nil
 }
+
+func toDeleteStackInput(v interface{}) (awscloudformation.DeleteStackInput, error) {
+	if v == nil {
+		return awscloudformation.DeleteStackInput{}, nil
+	}
+
+	deleteStackInput, ok := v.(awscloudformation.DeleteStackInput)
+	if !ok {
+		return awscloudformation.DeleteStackInput{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", deleteStackInput, v)
+	}
+
+	return deleteStackInput, nil
+}
