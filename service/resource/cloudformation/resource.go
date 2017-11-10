@@ -1,6 +1,7 @@
 package cloudformation
 
 import (
+	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/cloudformation/cloudformationiface"
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/microerror"
@@ -69,4 +70,30 @@ func (r *Resource) Name() string {
 
 func (r *Resource) Underlying() framework.Resource {
 	return r
+}
+
+func toStackState(v interface{}) (StackState, error) {
+	if v == nil {
+		return StackState{}, nil
+	}
+
+	stackState, ok := v.(StackState)
+	if !ok {
+		return StackState{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", stackState, v)
+	}
+
+	return stackState, nil
+}
+
+func toCreateStackInput(v interface{}) (awscloudformation.CreateStackInput, error) {
+	if v == nil {
+		return awscloudformation.CreateStackInput{}, nil
+	}
+
+	createStackInput, ok := v.(awscloudformation.CreateStackInput)
+	if !ok {
+		return awscloudformation.CreateStackInput{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", createStackInput, v)
+	}
+
+	return createStackInput, nil
 }
