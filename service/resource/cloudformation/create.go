@@ -27,16 +27,16 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
 	customObject, err := key.ToCustomObject(obj)
 	if err != nil {
-		return nil, microerror.Mask(err)
+		return awscloudformation.CreateStackInput{}, microerror.Mask(err)
 	}
 
 	currentStackState, ok := currentState.(StackState)
 	if !ok {
-		return nil, microerror.Mask(fmt.Errorf("unexpected type, expecting %T, got %T", currentStackState, currentState))
+		return awscloudformation.CreateStackInput{}, microerror.Mask(fmt.Errorf("unexpected type, expecting %T, got %T", currentStackState, currentState))
 	}
 	desiredStackState, ok := desiredState.(StackState)
 	if !ok {
-		return nil, microerror.Mask(fmt.Errorf("unexpected type, expecting %T, got %T", desiredStackState, desiredState))
+		return awscloudformation.CreateStackInput{}, microerror.Mask(fmt.Errorf("unexpected type, expecting %T, got %T", desiredStackState, desiredState))
 	}
 
 	r.logger.Log("cluster", key.ClusterID(customObject), "debug", "finding out if the main stack should be created")
