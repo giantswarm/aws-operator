@@ -6,7 +6,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/elb"
-	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/microerror"
 )
 
@@ -57,14 +56,21 @@ func (lb *ELB) CreateIfNotExists() (bool, error) {
 		return false, microerror.Mask(clientNotInitializedError)
 	}
 
-	if err := lb.CreateOrFail(); err != nil {
-		if strings.Contains(err.Error(), awsclient.ELBConfigurationMismatch) {
-			return false, microerror.Mask(err)
-		}
-		if strings.Contains(err.Error(), awsclient.ELBAlreadyExists) {
-			return false, nil
-		}
+	existingElb, err := lb.findExisting()
 
+	if err == nil {
+		// elb found, initialize dns and hosted zone id
+		lb.setDNSFields(*existingElb)
+		return false, nil
+	}
+
+	if !strings.Contains(err.Error(), elb.ErrCodeAccessPointNotFoundException) {
+		// error looking for elb
+		return false, err
+	}
+
+	// elb not found, create
+	if err := lb.CreateOrFail(); err != nil {
 		return false, microerror.Mask(err)
 	}
 
@@ -179,7 +185,7 @@ func (lb *ELB) RegisterInstances(instanceIDs []string) error {
 	return nil
 }
 
-// AssignProxyPolicy creates a ProxyProtocol policy and assigns it to the Load Balancer.
+// AssignProxyProtocolPolicy creates a ProxyProtocol policy and assigns it to the Load Balancer.
 // This is needed for ELBs that listen/forward over TCP, in order to add
 // a header with the address, port of the source and destination.
 // Without this, `kubectl log/exec` don't work.
@@ -199,6 +205,18 @@ func (lb *ELB) AssignProxyProtocolPolicy() error {
 		},
 	}); err != nil {
 		return microerror.Mask(err)
+	}
+
+	setPolicyInput := &elb.SetLoadBalancerPoliciesForBackendServerInput{
+		LoadBalancerName: aws.String(lb.Name),
+		PolicyNames:      []*string{aws.String(policyName)},
+	}
+	for _, portPair := range lb.PortsToOpen {
+		setPolicyInput.InstancePort = aws.Int64(int64(portPair.PortInstance))
+
+		if _, err := lb.Client.SetLoadBalancerPoliciesForBackendServer(setPolicyInput); err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
 	return nil

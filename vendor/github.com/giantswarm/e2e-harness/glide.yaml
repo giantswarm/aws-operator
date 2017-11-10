@@ -1,0 +1,14 @@
+package: github.com/giantswarm/e2e-harness
+import:
+- package: github.com/giantswarm/micrologger
+  version: master
+- package: github.com/giantswarm/microerror
+  version: master
+- package: github.com/spf13/afero
+  version: master
+- package: gopkg.in/yaml.v2
+  version: master
+- package: github.com/spf13/cobra
+  version: master
+- package: github.com/spf13/pflag
+  version: master

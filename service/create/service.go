@@ -6,13 +6,10 @@ import (
 	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/awstpr"
-	awsinfo "github.com/giantswarm/awstpr/spec/aws"
 	"github.com/giantswarm/certificatetpr"
-	"github.com/giantswarm/clustertpr/spec"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/tpr"
@@ -209,288 +206,6 @@ func (s *Service) Boot() {
 	})
 }
 
-type instanceNameInput struct {
-	clusterName string
-	prefix      string
-	no          int
-}
-
-func instanceName(input instanceNameInput) string {
-	return fmt.Sprintf(instanceNameFormat, input.clusterName, input.prefix, input.no)
-}
-
-type clusterPrefixInput struct {
-	clusterName string
-	prefix      string
-}
-
-func clusterPrefix(input clusterPrefixInput) string {
-	return fmt.Sprintf(instanceClusterPrefixFormat, input.clusterName, input.prefix)
-}
-
-type runMachinesInput struct {
-	clients             awsutil.Clients
-	cluster             awstpr.CustomObject
-	tlsAssets           *certificatetpr.CompactTLSAssets
-	clusterKeys         *randomkeytpr.CompactRandomKeyAssets
-	bucket              resources.Resource
-	securityGroup       resources.ResourceWithID
-	subnet              *awsresources.Subnet
-	clusterName         string
-	keyPairName         string
-	instanceProfileName string
-	prefix              string
-}
-
-func (s *Service) runMachines(input runMachinesInput) (bool, []string, error) {
-	var (
-		anyCreated bool
-
-		machines    []spec.Node
-		awsMachines []awsinfo.Node
-		instanceIDs []string
-	)
-
-	switch input.prefix {
-	case prefixMaster:
-		machines = input.cluster.Spec.Cluster.Masters
-		awsMachines = input.cluster.Spec.AWS.Masters
-	case prefixWorker:
-		machines = input.cluster.Spec.Cluster.Workers
-		awsMachines = input.cluster.Spec.AWS.Workers
-	}
-
-	// TODO(nhlfr): Create a separate module for validating specs and execute on the earlier stages.
-	if len(machines) != len(awsMachines) {
-		return false, nil, microerror.Mask(fmt.Errorf("mismatched number of %s machines in the 'spec' and 'aws' sections: %d != %d",
-			input.prefix,
-			len(machines),
-			len(awsMachines)))
-	}
-
-	for i := 0; i < len(machines); i++ {
-		name := instanceName(instanceNameInput{
-			clusterName: input.clusterName,
-			prefix:      input.prefix,
-			no:          i,
-		})
-		created, instanceID, err := s.runMachine(runMachineInput{
-			clients:             input.clients,
-			cluster:             input.cluster,
-			machine:             machines[i],
-			awsNode:             awsMachines[i],
-			tlsAssets:           input.tlsAssets,
-			clusterKeys:         input.clusterKeys,
-			bucket:              input.bucket,
-			securityGroup:       input.securityGroup,
-			subnet:              input.subnet,
-			clusterName:         input.clusterName,
-			keyPairName:         input.keyPairName,
-			instanceProfileName: input.instanceProfileName,
-			name:                name,
-			prefix:              input.prefix,
-		})
-		if err != nil {
-			return false, nil, microerror.Mask(err)
-		}
-		if created {
-			anyCreated = true
-		}
-
-		instanceIDs = append(instanceIDs, instanceID)
-	}
-	return anyCreated, instanceIDs, nil
-}
-
-// if the instance already exists, return (instanceID, false)
-// otherwise (nil, true)
-func allExistingInstancesMatch(instances *ec2.DescribeInstancesOutput, state awsresources.EC2StateCode) (*string, bool) {
-	// If the instance doesn't exist, then the Reservations field should be nil.
-	// Otherwise, it will contain a slice of instances (which is going to contain our one instance we queried for).
-	// TODO(nhlfr): Check whether the instance has correct parameters. That will be most probably done when we
-	// will introduce the interface for creating, deleting and updating resources.
-	if instances.Reservations != nil {
-		for _, r := range instances.Reservations {
-			for _, i := range r.Instances {
-				if *i.State.Code != int64(state) {
-					return i.InstanceId, false
-				}
-			}
-		}
-	}
-	return nil, true
-}
-
-func (s *Service) uploadCloudconfigToS3(svc *s3.S3, s3Bucket, path, data string) error {
-	if _, err := svc.PutObject(&s3.PutObjectInput{
-		Body:          strings.NewReader(data),
-		Bucket:        aws.String(s3Bucket),
-		Key:           aws.String(path),
-		ContentLength: aws.Int64(int64(len(data))),
-	}); err != nil {
-		return microerror.Mask(err)
-	}
-
-	return nil
-}
-
-type runMachineInput struct {
-	clients             awsutil.Clients
-	cluster             awstpr.CustomObject
-	machine             spec.Node
-	awsNode             awsinfo.Node
-	tlsAssets           *certificatetpr.CompactTLSAssets
-	clusterKeys         *randomkeytpr.CompactRandomKeyAssets
-	bucket              resources.Resource
-	securityGroup       resources.ResourceWithID
-	subnet              *awsresources.Subnet
-	clusterName         string
-	keyPairName         string
-	instanceProfileName string
-	name                string
-	prefix              string
-}
-
-func (s *Service) runMachine(input runMachineInput) (bool, string, error) {
-	var template string
-	var err error
-	{
-		switch input.prefix {
-		case prefixMaster:
-			template, err = s.cloudConfig.NewMasterTemplate(input.cluster, *input.tlsAssets, *input.clusterKeys)
-		case prefixWorker:
-			template, err = s.cloudConfig.NewWorkerTemplate(input.cluster, *input.tlsAssets)
-		default:
-			return false, "", microerror.Maskf(invalidCloudconfigExtensionNameError, fmt.Sprintf("Invalid extension name '%s'", input.prefix))
-		}
-
-		if err != nil {
-			return false, "", microerror.Mask(err)
-		}
-	}
-
-	// We now upload the instance cloudconfig to S3 and create a "small
-	// cloudconfig" that just fetches the previously uploaded "final
-	// cloudconfig" and executes coreos-cloudinit with it as argument.
-	// We do this to circumvent the 16KB limit on user-data for EC2 instances.
-	cloudconfigConfig := SmallCloudconfigConfig{
-		MachineType: input.prefix,
-		Region:      input.cluster.Spec.AWS.Region,
-		S3URI:       s.bucketName(input.cluster),
-	}
-
-	var cloudconfigS3 resources.Resource
-	cloudconfigS3 = &awsresources.BucketObject{
-		Name:      s.bucketObjectName(input.prefix),
-		Data:      template,
-		Bucket:    input.bucket.(*awsresources.Bucket),
-		AWSEntity: awsresources.AWSEntity{Clients: input.clients},
-	}
-	if err := cloudconfigS3.CreateOrFail(); err != nil {
-		return false, "", microerror.Mask(err)
-	}
-
-	smallCloudconfig, err := s.SmallCloudconfig(cloudconfigConfig)
-	if err != nil {
-		return false, "", microerror.Mask(err)
-	}
-
-	securityGroupID, err := input.securityGroup.GetID()
-	if err != nil {
-		return false, "", microerror.Mask(err)
-	}
-
-	subnetID, err := input.subnet.GetID()
-	if err != nil {
-		return false, "", microerror.Mask(err)
-	}
-
-	var instance *awsresources.Instance
-	var instanceCreated bool
-	{
-		var err error
-		instance = &awsresources.Instance{
-			Name:                   input.name,
-			ClusterName:            input.clusterName,
-			ImageID:                input.awsNode.ImageID,
-			InstanceType:           input.awsNode.InstanceType,
-			KeyName:                input.keyPairName,
-			MinCount:               1,
-			MaxCount:               1,
-			SmallCloudconfig:       smallCloudconfig,
-			IamInstanceProfileName: input.instanceProfileName,
-			PlacementAZ:            input.cluster.Spec.AWS.AZ,
-			SecurityGroupID:        securityGroupID,
-			SubnetID:               subnetID,
-			Logger:                 s.logger,
-			AWSEntity:              awsresources.AWSEntity{Clients: input.clients},
-		}
-		instanceCreated, err = instance.CreateIfNotExists()
-		if err != nil {
-			return false, "", microerror.Mask(err)
-		}
-	}
-
-	if instanceCreated {
-		s.logger.Log("info", fmt.Sprintf("instance '%s' reserved", input.name))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("instance '%s' already exists, reusing", input.name))
-	}
-
-	s.logger.Log("info", fmt.Sprintf("instance '%s' tagged", input.name))
-
-	return instanceCreated, instance.ID(), nil
-}
-
-type deleteMachinesInput struct {
-	clients     awsutil.Clients
-	spec        awstpr.Spec
-	clusterName string
-	prefix      string
-}
-
-func (s *Service) deleteMachines(input deleteMachinesInput) error {
-	pattern := clusterPrefix(clusterPrefixInput{
-		clusterName: input.clusterName,
-		prefix:      input.prefix,
-	})
-	instances, err := awsresources.FindInstances(awsresources.FindInstancesInput{
-		Clients: input.clients,
-		Logger:  s.logger,
-		Pattern: pattern,
-	})
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	for _, instance := range instances {
-		if err := instance.Delete(); err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	return nil
-}
-
-type deleteMachineInput struct {
-	name    string
-	clients awsutil.Clients
-	machine spec.Node
-}
-
-func validateIDs(ids []string) bool {
-	if len(ids) == 0 {
-		return false
-	}
-	for _, id := range ids {
-		if id == "" {
-			return false
-		}
-	}
-
-	return true
-}
-
 func (s *Service) addFunc(obj interface{}) {
 	customObject, ok := obj.(*awstpr.CustomObject)
 	if !ok {
@@ -513,6 +228,84 @@ func (s *Service) addFunc(obj interface{}) {
 	}
 
 	s.logger.Log("info", fmt.Sprintf("cluster '%s' processed", key.ClusterID(cluster)))
+}
+
+func (s *Service) deleteFunc(obj interface{}) {
+	// We can receive an instance of awstpr.CustomObject or cache.DeletedFinalStateUnknown.
+	// We need to assert the type properly and log an error when we cannot do that.
+	// Also, the cache.DeleteFinalStateUnknown object can contain the proper CustomObject,
+	// but doesn't have to.
+	// https://github.com/kubernetes/client-go/blob/7ba6be594966f4bec08a57a60c855d17a9f7000a/tools/cache/delta_fifo.go#L674-L677
+	var cluster awstpr.CustomObject
+	clusterPtr, ok := obj.(*awstpr.CustomObject)
+	if ok {
+		cluster = *clusterPtr
+	} else {
+		deletedObj, ok := obj.(cache.DeletedFinalStateUnknown)
+		if !ok {
+			s.logger.Log("error", "received unknown type of third-party object")
+			return
+		}
+		clusterPtr, ok := deletedObj.Obj.(*awstpr.CustomObject)
+		if !ok {
+			s.logger.Log("error", "received the proper delete request, but the type of third-party object is unknown")
+			return
+		}
+		cluster = *clusterPtr
+	}
+
+	s.logger.Log("info", fmt.Sprintf("deleting cluster '%s'", key.ClusterID(cluster)))
+
+	err := s.processDelete(cluster)
+	if err != nil {
+		s.logger.Log("error", fmt.Sprintf("error deleting cluster '%s': '%#v'", key.ClusterID(cluster), err))
+		return
+	}
+
+	s.logger.Log("info", fmt.Sprintf("cluster '%s' deleted", key.ClusterID(cluster)))
+}
+
+// TODO we need to support this in operatorkit.
+func (s *Service) updateFunc(oldObj, newObj interface{}) {
+	oldCluster := *oldObj.(*awstpr.CustomObject)
+	cluster := *newObj.(*awstpr.CustomObject)
+
+	if err := validateCluster(cluster); err != nil {
+		s.logger.Log("error", "cluster spec is invalid: '%#v'", err)
+		return
+	}
+
+	oldSize := key.WorkerCount(oldCluster)
+	newSize := key.WorkerCount(cluster)
+
+	if oldSize == newSize {
+		// We get update events for all sorts of changes. We are currently only
+		// interested in changes to one property, so we ignore all the others.
+		return
+	}
+
+	s.awsConfig.Region = cluster.Spec.AWS.Region
+	clients := awsutil.NewClients(s.awsConfig)
+
+	err := s.awsConfig.SetAccountID(clients.IAM)
+	if err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not retrieve amazon account id: '%#v'", err))
+		return
+	}
+
+	asg := awsresources.AutoScalingGroup{
+		Client:  clients.AutoScaling,
+		Name:    fmt.Sprintf("%s-%s", key.ClusterID(cluster), prefixWorker),
+		MinSize: newSize,
+		MaxSize: newSize,
+	}
+
+	if err := asg.Update(); err != nil {
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
+		return
+	}
+
+	s.logger.Log("info", fmt.Sprintf("scaling workers auto scaling group from %d to %d", oldSize, newSize))
 }
 
 func (s *Service) processCluster(cluster awstpr.CustomObject) error {
@@ -702,6 +495,7 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 			Clients:     clients,
 			HostClients: hostClients,
 		},
+		Logger: s.logger,
 	}
 	vpcPeeringConnectionCreated, err := vpcPeeringConection.CreateIfNotExists()
 	if err != nil {
@@ -1035,11 +829,6 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create apiserver load balancer: '%#v'", err))
 	}
 
-	// Assign the ProxyProtocol policy to the apiserver load balancer.
-	if err := apiLB.AssignProxyProtocolPolicy(); err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not assign proxy protocol policy: '%#v'", err))
-	}
-
 	// Create etcd load balancer.
 	lbInput = LoadBalancerInput{
 		Name:               cluster.Spec.Cluster.Etcd.Domain,
@@ -1097,13 +886,6 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	if err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create ingress load balancer: '%#v'", err))
 	}
-
-	// Assign the ProxyProtocol policy to the Ingress load balancer.
-	if err := ingressLB.AssignProxyProtocolPolicy(); err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not assign proxy protocol policy: '%#v'", err))
-	}
-
-	s.logger.Log("info", fmt.Sprintf("created ingress load balancer"))
 
 	// Create a launch configuration for the worker nodes.
 	lcInput := launchConfigurationInput{
@@ -1229,35 +1011,9 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 	return nil
 }
 
-func (s *Service) deleteFunc(obj interface{}) {
-	// TODO(nhlfr): Move this to a separate operator.
-
-	// We can receive an instance of awstpr.CustomObject or cache.DeletedFinalStateUnknown.
-	// We need to assert the type properly and log an error when we cannot do that.
-	// Also, the cache.DeleteFinalStateUnknown object can contain the proper CustomObject,
-	// but doesn't have to.
-	// https://github.com/kubernetes/client-go/blob/7ba6be594966f4bec08a57a60c855d17a9f7000a/tools/cache/delta_fifo.go#L674-L677
-	var cluster awstpr.CustomObject
-	clusterPtr, ok := obj.(*awstpr.CustomObject)
-	if ok {
-		cluster = *clusterPtr
-	} else {
-		deletedObj, ok := obj.(cache.DeletedFinalStateUnknown)
-		if !ok {
-			s.logger.Log("error", "received unknown type of third-party object")
-			return
-		}
-		clusterPtr, ok := deletedObj.Obj.(*awstpr.CustomObject)
-		if !ok {
-			s.logger.Log("error", "received the proper delete request, but the type of third-party object is unknown")
-			return
-		}
-		cluster = *clusterPtr
-	}
-
+func (s *Service) processDelete(cluster awstpr.CustomObject) error {
 	if err := validateCluster(cluster); err != nil {
-		s.logger.Log("error", "cluster spec is invalid: '%#v'", err)
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("cluster spec is invalid: '%#v'", err))
 	}
 
 	if err := s.deleteClusterNamespace(cluster.Spec.Cluster); err != nil {
@@ -1267,8 +1023,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 	clients := awsutil.NewClients(s.awsConfig)
 	err := s.awsConfig.SetAccountID(clients.IAM)
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not retrieve amazon account id: '%#v'", err))
-		return
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not retrieve amazon account id: '%#v'", err))
 	}
 
 	// Retrieve AWS host cluster client.
@@ -1552,6 +1307,7 @@ func (s *Service) deleteFunc(obj interface{}) {
 			Clients:     clients,
 			HostClients: hostClients,
 		},
+		Logger: s.logger,
 	}
 	conn, err := vpcPeeringConection.FindExisting()
 	if err != nil {
@@ -1659,48 +1415,18 @@ func (s *Service) deleteFunc(obj interface{}) {
 		s.logger.Log("info", "deleted keypair")
 	}
 
-	s.logger.Log("info", fmt.Sprintf("cluster '%s' deleted", key.ClusterID(cluster)))
+	return nil
 }
 
-// TODO we need to support this in operatorkit.
-func (s *Service) updateFunc(oldObj, newObj interface{}) {
-	oldCluster := *oldObj.(*awstpr.CustomObject)
-	cluster := *newObj.(*awstpr.CustomObject)
-
-	if err := validateCluster(cluster); err != nil {
-		s.logger.Log("error", "cluster spec is invalid: '%#v'", err)
-		return
+func (s *Service) uploadCloudconfigToS3(svc *s3.S3, s3Bucket, path, data string) error {
+	if _, err := svc.PutObject(&s3.PutObjectInput{
+		Body:          strings.NewReader(data),
+		Bucket:        aws.String(s3Bucket),
+		Key:           aws.String(path),
+		ContentLength: aws.Int64(int64(len(data))),
+	}); err != nil {
+		return microerror.Mask(err)
 	}
 
-	oldSize := key.WorkerCount(oldCluster)
-	newSize := key.WorkerCount(cluster)
-
-	if oldSize == newSize {
-		// We get update events for all sorts of changes. We are currently only
-		// interested in changes to one property, so we ignore all the others.
-		return
-	}
-
-	s.awsConfig.Region = cluster.Spec.AWS.Region
-	clients := awsutil.NewClients(s.awsConfig)
-
-	err := s.awsConfig.SetAccountID(clients.IAM)
-	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not retrieve amazon account id: '%#v'", err))
-		return
-	}
-
-	asg := awsresources.AutoScalingGroup{
-		Client:  clients.AutoScaling,
-		Name:    fmt.Sprintf("%s-%s", key.ClusterID(cluster), prefixWorker),
-		MinSize: newSize,
-		MaxSize: newSize,
-	}
-
-	if err := asg.Update(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-		return
-	}
-
-	s.logger.Log("info", fmt.Sprintf("scaling workers auto scaling group from %d to %d", oldSize, newSize))
+	return nil
 }

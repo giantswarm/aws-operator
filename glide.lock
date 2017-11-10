@@ -1,5 +1,5 @@
-hash: 4825e5e5dd4daf6c22025b330d50debf71d6e97d94b86452d3922296f39fbfcf
-updated: 2017-10-25T08:36:09.774259784+02:00
+hash: c98f890d6b2e4b61ed23bfe63b1248e4409c53e76a56848f9c461149c19665dc
+updated: 2017-11-09T17:53:25.797533286+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -45,6 +45,10 @@ imports:
   - quantile
 - name: github.com/cenkalti/backoff
   version: 309aa717adbf351e92864cbedf9cca0b769a4b5a
+- name: github.com/coreos/go-semver
+  version: 8ab6407b697782a06568d4b7f1db25550ec2e4c6
+  subpackages:
+  - semver
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
   subpackages:
@@ -71,7 +75,7 @@ imports:
   - spec/aws
   - spec/aws/elb
 - name: github.com/giantswarm/certificatetpr
-  version: 02983fbbe2165d6acd9e6cb081ace6769311d67a
+  version: 7ca1d560db684dd4e2effc49ae0ceeaae2963f5e
 - name: github.com/giantswarm/clustertpr
   version: 6b89a787f157c5531d1c955c32b3c621f0d64c3a
   subpackages:
@@ -83,12 +87,17 @@ imports:
   - spec/kubernetes/kubectl
   - spec/kubernetes/networksetup
   - spec/kubernetes/ssh
+- name: github.com/giantswarm/e2e-harness
+  version: 9aa661bbe2e7c0591a36dce1b3d4c634489b5d5a
+  subpackages:
+  - pkg/results
+  - pkg/runner
 - name: github.com/giantswarm/k8scloudconfig
-  version: afd000859b121d8a2fdcef9735b07256176db61e
+  version: 8a65d3f8a992f728a833dc003b88febe8bc92ab8
   subpackages:
   - v_0_1_0
 - name: github.com/giantswarm/microendpoint
-  version: 1ea4d8cd5f0167625f134c855ae42fc747191890
+  version: 7f20461533f43e767628e6404c2211afa7472a54
   subpackages:
   - endpoint/version
   - service/version
@@ -113,7 +122,7 @@ imports:
   - transaction/context/id
   - transaction/context/tracked
 - name: github.com/giantswarm/micrologger
-  version: 8a69b2ab80ba2d0bd40d609206518fefacfc8fdf
+  version: 954d1261928bbb50dc917c629edf0b71db6a1527
   subpackages:
   - microloggertest
 - name: github.com/giantswarm/microstorage
@@ -121,14 +130,16 @@ imports:
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: d306448fd014890db29087494a772af93e429d71
+  version: 96f018c3318b6fd2a71e030f336d7f70f321c43d
   subpackages:
   - client/k8sclient
   - tpr
 - name: github.com/giantswarm/randomkeytpr
   version: 9e1d78d125841c496889e8a54d49057212a2893e
+- name: github.com/giantswarm/versionbundle
+  version: 6f255fb054b68827f115fdf6a018b5e66c863250
 - name: github.com/go-ini/ini
-  version: f384f410798cbe7cdce40eec40b79ed32bb4f1ad
+  version: f280b3ba517bf5fc98922624f21fb0e7a92adaec
 - name: github.com/go-kit/kit
   version: a9ca6725cbbea455e61c6bc8a1ed28e81eb3493b
   subpackages:
@@ -149,6 +160,8 @@ imports:
   version: 6aced65f8501fe1217321abf0749d354824ba2ff
 - name: github.com/go-openapi/swag
   version: 1d0bd113de87027671077d3c71eb3ac5d7dbba72
+- name: github.com/go-resty/resty
+  version: 9ac9c42358f7c3c69ac9f8610e8790d7c338e85d
 - name: github.com/go-stack/stack
   version: 100eb0c0a9c5b306ca2fb4f165df21d80ada4b82
 - name: github.com/gogo/protobuf
@@ -194,7 +207,7 @@ imports:
 - name: github.com/kr/logfmt
   version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
 - name: github.com/magiconair/properties
-  version: 8d7837e64d3c1ee4e54a880c5a920ab4316fc90a
+  version: 49d762b9817ba1c2e9d0c69183c2b4a8b8f1d934
 - name: github.com/mailru/easyjson
   version: d5b7844b561a7bc640052f1b935f7b800330d7e0
   subpackages:
@@ -219,7 +232,7 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: 1bab55dd05dbff384524a6a1c99006d9eb5f139b
+  version: e3fb1a1acd7605367a2b378bc2e2f893c05174b7
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
@@ -239,11 +252,11 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 7b2c5ac9fc04fc5efafb60700713d4fa609b777b
+  version: 2da4a54c5ceefcee7ca5dd0eea1e18a3b6366489
 - name: github.com/spf13/jwalterweatherman
   version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
 - name: github.com/spf13/pflag
-  version: 97afa5e7ca8a08a383cb259e06636b5e2cc7897f
+  version: 4c012f6dcd9546820e378d0bdda4d8fc772cdfea
 - name: github.com/spf13/viper
   version: 8ef37cbca71638bf32f3d5e194117d4cb46da163
 - name: github.com/stretchr/testify
@@ -265,6 +278,11 @@ imports:
   - http2/hpack
   - idna
   - lex/httplex
+  - publicsuffix
+- name: golang.org/x/sync
+  version: fd80eb99c8f653c847d294a001bdf2a3a6f768f5
+  subpackages:
+  - errgroup
 - name: golang.org/x/sys
   version: 8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9
   subpackages:
@@ -287,7 +305,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
+  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/apimachinery
   version: 8ab5f3d8a330c2e9baaf84e39042db8d49034ae2
   subpackages:
