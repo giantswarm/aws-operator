@@ -1,6 +1,8 @@
 package create
 
 import (
+	"fmt"
+
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/resources/aws"
 	"github.com/giantswarm/aws-operator/service/key"
@@ -98,6 +100,8 @@ func (s *Service) createMasterService(input MasterServiceInput) error {
 	if _, err := s.k8sClient.Core().Endpoints(endpoint.ObjectMeta.Namespace).Create(&endpoint); err != nil {
 		return microerror.Mask(err)
 	}
+
+	s.logger.Log("info", fmt.Sprintf("created master service for scraping"))
 
 	return nil
 }
