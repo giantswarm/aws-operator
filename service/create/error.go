@@ -101,3 +101,17 @@ var executionFailedError = microerror.New("execution failed")
 func IsExecutionFailedError(err error) bool {
 	return microerror.Cause(err) == executionFailedError
 }
+
+var notFoundError = microerror.New("not found")
+
+// IsNotFound asserts NotFoundError.
+func IsNotFound(err error) bool {
+	return microerror.Cause(err) == notFoundError
+}
+
+var tooManyResultsError = microerror.New("too many results")
+
+// IsTooManyResults asserts tooManyResultsError.
+func IsTooManyResults(err error) bool {
+	return microerror.Cause(err) == tooManyResultsError
+}

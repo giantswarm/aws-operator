@@ -1008,6 +1008,15 @@ func (s *Service) processCluster(cluster awstpr.CustomObject) error {
 		s.logger.Log("info", fmt.Sprintf("created DNS records for load balancers"))
 	}
 
+	masterServiceInput := MasterServiceInput{
+		Clients:  clients,
+		Cluster:  cluster,
+		MasterID: masterIDs[0],
+	}
+	if err := s.createMasterService(masterServiceInput); err != nil {
+		return microerror.Mask(err)
+	}
+
 	return nil
 }
 
