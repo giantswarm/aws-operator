@@ -31,3 +31,5 @@ func IsStackNotFound(err error) bool {
 	}
 	return strings.Contains(microerror.Cause(err).Error(), "does not exist")
 }
+
+var wrongTypeError = microerror.New("wrong type")

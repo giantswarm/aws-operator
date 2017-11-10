@@ -2,7 +2,6 @@ package cloudformation
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
@@ -11,12 +10,12 @@ import (
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
-	stackInput, ok := createChange.(awscloudformation.CreateStackInput)
-	if !ok {
-		return microerror.Mask(fmt.Errorf("unexpected type, expecting %T, got %T", stackInput, createChange))
+	stackInput, err := toCreateStackInput(createChange)
+	if err != nil {
+		return microerror.Mask(err)
 	}
 
-	_, err := r.awsClient.CreateStack(&stackInput)
+	_, err = r.awsClient.CreateStack(&stackInput)
 	if err != nil {
 		return err
 	}
@@ -30,13 +29,9 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		return awscloudformation.CreateStackInput{}, microerror.Mask(err)
 	}
 
-	currentStackState, ok := currentState.(StackState)
-	if !ok {
-		return awscloudformation.CreateStackInput{}, microerror.Mask(fmt.Errorf("unexpected type, expecting %T, got %T", currentStackState, currentState))
-	}
-	desiredStackState, ok := desiredState.(StackState)
-	if !ok {
-		return awscloudformation.CreateStackInput{}, microerror.Mask(fmt.Errorf("unexpected type, expecting %T, got %T", desiredStackState, desiredState))
+	desiredStackState, err := toStackState(desiredState)
+	if err != nil {
+		return awscloudformation.CreateStackInput{}, microerror.Mask(err)
 	}
 
 	r.logger.Log("cluster", key.ClusterID(customObject), "debug", "finding out if the main stack should be created")
@@ -45,7 +40,7 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		StackName: aws.String(""),
 	}
 
-	if currentStackState.Name != desiredStackState.Name {
+	if desiredStackState.Name != "" {
 		var mainTemplate string
 		/*
 			      commented out until we assing proper values to the template
