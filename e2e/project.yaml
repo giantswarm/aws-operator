@@ -12,6 +12,10 @@ setup:
       cat <<EOF > ./values.yaml
       Installation:
         V1:
+          Name: gauss
+          Provider:
+            AWS:
+              Region: eu-central-1
           Secret:
             AWSOperator:
               IDRSAPub: myidrsa
