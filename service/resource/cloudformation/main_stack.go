@@ -5,8 +5,9 @@ import (
 	"strconv"
 	"text/template"
 
-	"github.com/giantswarm/aws-operator/service/key"
 	"github.com/giantswarm/awstpr"
+
+	"github.com/giantswarm/aws-operator/service/key"
 )
 
 func newMainStack(customObject awstpr.CustomObject) (StackState, error) {

@@ -5,8 +5,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/giantswarm/aws-operator/service/key"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/service/key"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
