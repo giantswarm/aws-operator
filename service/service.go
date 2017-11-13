@@ -276,7 +276,7 @@ func New(config Config) (*Service, error) {
 		frameworkConfig.BackOff = frameworkBackOff
 		frameworkConfig.InitCtxFunc = initCtxFunc
 		frameworkConfig.Logger = config.Logger
-		frameworkConfig.Resources = resources
+		frameworkConfig.ResourceRouter = framework.NewDefaultResourceRouter(resources)
 
 		operatorFramework, err = framework.New(frameworkConfig)
 		if err != nil {
