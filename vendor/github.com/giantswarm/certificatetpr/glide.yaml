@@ -2,13 +2,10 @@ package: github.com/giantswarm/certificatetpr
 import:
 - package: github.com/giantswarm/operatorkit
   version: master
+- package: github.com/giantswarm/versionbundle
+  version: master
 testImport:
 - package: github.com/stretchr/testify
   version: v1.1.4
-  subpackages:
-  - assert
-  - require
 - package: github.com/kylelemons/godebug
   version: master
-  subpackages:
-  - pretty

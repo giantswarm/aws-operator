@@ -4,6 +4,20 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
+var bundleNotFoundError = microerror.New("bundle not found")
+
+// IsBundleNotFound asserts bundleNotFoundError.
+func IsBundleNotFound(err error) bool {
+	return microerror.Cause(err) == bundleNotFoundError
+}
+
+var executionFailedError = microerror.New("execution failed")
+
+// IsExecutionFailed asserts executionFailedError.
+func IsExecutionFailed(err error) bool {
+	return microerror.Cause(err) == executionFailedError
+}
+
 var invalidAggregatedBundlesError = microerror.New("invalid aggregated bundles")
 
 // IsInvalidAggregatedBundlesError asserts invalidAggregatedBundlesError.

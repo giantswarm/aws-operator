@@ -57,21 +57,6 @@ func (b Bundles) Validate() error {
 	return nil
 }
 
-func CopyBundles(bundles []Bundle) []Bundle {
-	raw, err := json.Marshal(bundles)
-	if err != nil {
-		panic(err)
-	}
-
-	var copy []Bundle
-	err = json.Unmarshal(raw, &copy)
-	if err != nil {
-		panic(err)
-	}
-
-	return copy
-}
-
 func (b Bundles) hasDuplicatedVersions() bool {
 	for _, b1 := range b {
 		var seen int
@@ -88,4 +73,36 @@ func (b Bundles) hasDuplicatedVersions() bool {
 	}
 
 	return false
+}
+
+func CopyBundles(bundles []Bundle) []Bundle {
+	raw, err := json.Marshal(bundles)
+	if err != nil {
+		panic(err)
+	}
+
+	var copy []Bundle
+	err = json.Unmarshal(raw, &copy)
+	if err != nil {
+		panic(err)
+	}
+
+	return copy
+}
+
+func GetBundleByName(bundles []Bundle, name string) (Bundle, error) {
+	if len(bundles) == 0 {
+		return Bundle{}, microerror.Maskf(executionFailedError, "bundles must not be empty")
+	}
+	if name == "" {
+		return Bundle{}, microerror.Maskf(executionFailedError, "name must not be empty")
+	}
+
+	for _, b := range bundles {
+		if b.Name == name {
+			return b, nil
+		}
+	}
+
+	return Bundle{}, microerror.Maskf(bundleNotFoundError, name)
 }

@@ -1,5 +1,5 @@
-hash: c98f890d6b2e4b61ed23bfe63b1248e4409c53e76a56848f9c461149c19665dc
-updated: 2017-11-09T17:53:25.797533286+01:00
+hash: 0e05add1a117b58ead0a42b6355d62469160970f41467166eb20a9a32c3b3c21
+updated: 2017-11-13T19:39:13.028429974+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -78,7 +78,7 @@ imports:
   - spec/aws
   - spec/aws/elb
 - name: github.com/giantswarm/certificatetpr
-  version: 7ca1d560db684dd4e2effc49ae0ceeaae2963f5e
+  version: 72f3cbaf3beacc88d9ef59efeacaf028f2af59d0
 - name: github.com/giantswarm/clustertpr
   version: 6b89a787f157c5531d1c955c32b3c621f0d64c3a
   subpackages:
@@ -96,7 +96,7 @@ imports:
   - pkg/results
   - pkg/runner
 - name: github.com/giantswarm/k8scloudconfig
-  version: 8a65d3f8a992f728a833dc003b88febe8bc92ab8
+  version: 0bcf227a66c31b292e1540272e3af8de41d78aa5
   subpackages:
   - v_0_1_0
 - name: github.com/giantswarm/microendpoint
@@ -133,7 +133,7 @@ imports:
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: 96f018c3318b6fd2a71e030f336d7f70f321c43d
+  version: 93c9638ca2fd14a9482acb7d8c26f599d6d808a5
   subpackages:
   - client/k8sclient
   - framework
@@ -146,7 +146,7 @@ imports:
 - name: github.com/giantswarm/randomkeytpr
   version: 9e1d78d125841c496889e8a54d49057212a2893e
 - name: github.com/giantswarm/versionbundle
-  version: 6f255fb054b68827f115fdf6a018b5e66c863250
+  version: 81ac8381f028dfb2602413c890509c0967db92f3
 - name: github.com/go-ini/ini
   version: f280b3ba517bf5fc98922624f21fb0e7a92adaec
 - name: github.com/go-kit/kit
@@ -255,7 +255,7 @@ imports:
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/spf13/afero
-  version: 5660eeed305fe5f69c8fc6cf899132a459a97064
+  version: 8d919cbe7e2627e417f3e45c3c0e489a5b7e2536
   subpackages:
   - mem
 - name: github.com/spf13/cast
@@ -267,7 +267,7 @@ imports:
 - name: github.com/spf13/pflag
   version: 4c012f6dcd9546820e378d0bdda4d8fc772cdfea
 - name: github.com/spf13/viper
-  version: 8ef37cbca71638bf32f3d5e194117d4cb46da163
+  version: 4dddf7c62e16bce5807744018f5b753bfe21bbd2
 - name: github.com/stretchr/testify
   version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
   repo: git://github.com/stretchr/testify.git
