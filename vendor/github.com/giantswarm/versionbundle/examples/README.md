@@ -8,4 +8,4 @@ which combinations with respect to its expected dependencies. The
 another microservice called `cloud-config-operator`. The
 [aggregation.json](aggregation.json) shows how the version bundles of the two
 mentioned operators are aggregated to reflect the combined version bundles as
-they can be used together. These aggregations are then used as distributions.
+they can be used together. These aggregations are then used as releases.

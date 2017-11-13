@@ -1,5 +1,5 @@
-hash: 0e05add1a117b58ead0a42b6355d62469160970f41467166eb20a9a32c3b3c21
-updated: 2017-11-07T17:53:27.065518281+01:00
+hash: c98f890d6b2e4b61ed23bfe63b1248e4409c53e76a56848f9c461149c19665dc
+updated: 2017-11-09T17:53:25.797533286+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -78,7 +78,7 @@ imports:
   - spec/aws
   - spec/aws/elb
 - name: github.com/giantswarm/certificatetpr
-  version: 97fd57e1955af2e38b3a69a5c0fd70e4a08ec8b9
+  version: 7ca1d560db684dd4e2effc49ae0ceeaae2963f5e
 - name: github.com/giantswarm/clustertpr
   version: 6b89a787f157c5531d1c955c32b3c621f0d64c3a
   subpackages:
@@ -91,16 +91,16 @@ imports:
   - spec/kubernetes/networksetup
   - spec/kubernetes/ssh
 - name: github.com/giantswarm/e2e-harness
-  version: 6fd13b9585c02e73def00ec7d22c22b4bd340838
+  version: 9aa661bbe2e7c0591a36dce1b3d4c634489b5d5a
   subpackages:
   - pkg/results
   - pkg/runner
 - name: github.com/giantswarm/k8scloudconfig
-  version: 30de6e46e3cd97ad7a6da9005fa00f9dc785b179
+  version: 8a65d3f8a992f728a833dc003b88febe8bc92ab8
   subpackages:
   - v_0_1_0
 - name: github.com/giantswarm/microendpoint
-  version: b93a1e9b89c26ba3bdcd5d19986d550fd090d213
+  version: 7f20461533f43e767628e6404c2211afa7472a54
   subpackages:
   - endpoint/version
   - service/version
@@ -133,7 +133,7 @@ imports:
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: 7fed726ca23a9ae0f6e26c0b430ce7c2ed249b26
+  version: 96f018c3318b6fd2a71e030f336d7f70f321c43d
   subpackages:
   - client/k8sclient
   - framework
@@ -146,7 +146,7 @@ imports:
 - name: github.com/giantswarm/randomkeytpr
   version: 9e1d78d125841c496889e8a54d49057212a2893e
 - name: github.com/giantswarm/versionbundle
-  version: efdbdae719c56ab4880f8fe56643d60a76fc19e5
+  version: 6f255fb054b68827f115fdf6a018b5e66c863250
 - name: github.com/go-ini/ini
   version: f280b3ba517bf5fc98922624f21fb0e7a92adaec
 - name: github.com/go-kit/kit
@@ -261,7 +261,7 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: b3426bbac13d7110c4d8fce456ea0012f79f3b8b
+  version: 2da4a54c5ceefcee7ca5dd0eea1e18a3b6366489
 - name: github.com/spf13/jwalterweatherman
   version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
 - name: github.com/spf13/pflag
@@ -314,7 +314,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
+  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/apimachinery
   version: 8ab5f3d8a330c2e9baaf84e39042db8d49034ae2
   subpackages:

@@ -27,6 +27,10 @@ func ClusterID(customObject awstpr.CustomObject) string {
 	return customObject.Spec.Cluster.Cluster.ID
 }
 
+func CustomerID(customObject awstpr.CustomObject) string {
+	return customObject.Spec.Cluster.Customer.ID
+}
+
 func ClusterVersion(customObject awstpr.CustomObject) string {
 	return customObject.Spec.Cluster.Version
 }

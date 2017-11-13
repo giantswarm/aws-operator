@@ -11,9 +11,10 @@ import (
 )
 
 type VPC struct {
-	CidrBlock string
-	Name      string
-	id        string
+	CidrBlock        string
+	InstallationName string
+	Name             string
+	id               string
 	// Dependencies.
 	Logger micrologger.Logger
 	AWSEntity
@@ -97,6 +98,10 @@ func (v *VPC) CreateOrFail() error {
 				Key:   aws.String(tagKeyName),
 				Value: aws.String(v.Name),
 			},
+			{
+				Key:   aws.String(tagKeyInstallation),
+				Value: aws.String(v.InstallationName),
+			},
 		},
 	}); err != nil {
 		return microerror.Mask(err)
@@ -160,4 +165,33 @@ func (v VPC) GetID() (string, error) {
 	}
 
 	return *vpc.VpcId, nil
+}
+
+// List lists the VPCs for this installation.
+func (v VPC) List() ([]VPC, error) {
+	vpcs := []VPC{}
+
+	resp, err := v.Clients.EC2.DescribeVpcs(&ec2.DescribeVpcsInput{
+		Filters: []*ec2.Filter{
+			{
+				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyInstallation)),
+				Values: []*string{
+					aws.String(v.InstallationName),
+				},
+			},
+		},
+	})
+	if err != nil {
+		return []VPC{}, microerror.Mask(err)
+	}
+
+	for _, vpc := range resp.Vpcs {
+		for _, tag := range vpc.Tags {
+			if *tag.Key == "Name" {
+				vpcs = append(vpcs, VPC{Name: *tag.Value})
+			}
+		}
+	}
+
+	return vpcs, nil
 }

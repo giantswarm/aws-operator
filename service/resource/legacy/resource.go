@@ -59,9 +59,10 @@ type Config struct {
 	Logger      micrologger.Logger
 
 	// Settings.
-	AwsConfig     awsutil.Config
-	AwsHostConfig awsutil.Config
-	PubKeyFile    string
+	AwsConfig        awsutil.Config
+	AwsHostConfig    awsutil.Config
+	InstallationName string
+	PubKeyFile       string
 }
 
 // DefaultConfig provides a default configuration to create a new legacy
@@ -76,9 +77,10 @@ func DefaultConfig() Config {
 		Logger:      nil,
 
 		// Settings.
-		AwsConfig:     awsutil.Config{},
-		AwsHostConfig: awsutil.Config{},
-		PubKeyFile:    "",
+		AwsConfig:        awsutil.Config{},
+		AwsHostConfig:    awsutil.Config{},
+		InstallationName: "",
+		PubKeyFile:       "",
 	}
 }
 
@@ -108,6 +110,9 @@ func New(config Config) (*Resource, error) {
 	}
 	if config.AwsHostConfig == emptyAwsConfig {
 		return nil, microerror.Maskf(invalidConfigError, "config.AwsHostConfig must not be empty")
+	}
+	if config.InstallationName == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.InstallationName must not be empty")
 	}
 	if config.PubKeyFile == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.PubKeyFile must not be empty")
@@ -145,9 +150,10 @@ func New(config Config) (*Resource, error) {
 		tpr:      newTPR,
 
 		// Settings.
-		awsConfig:     config.AwsConfig,
-		awsHostConfig: config.AwsHostConfig,
-		pubKeyFile:    config.PubKeyFile,
+		awsConfig:        config.AwsConfig,
+		awsHostConfig:    config.AwsHostConfig,
+		installationName: config.InstallationName,
+		pubKeyFile:       config.PubKeyFile,
 	}
 
 	return newService, nil
@@ -167,9 +173,10 @@ type Resource struct {
 	tpr      *tpr.TPR
 
 	// Settings.
-	awsConfig     awsutil.Config
-	awsHostConfig awsutil.Config
-	pubKeyFile    string
+	awsConfig        awsutil.Config
+	awsHostConfig    awsutil.Config
+	installationName string
+	pubKeyFile       string
 }
 
 type Event struct {
@@ -403,9 +410,10 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 	// Create VPC.
 	var vpc resources.ResourceWithID
 	vpc = &awsresources.VPC{
-		CidrBlock: cluster.Spec.AWS.VPC.CIDR,
-		Name:      key.ClusterID(cluster),
-		AWSEntity: awsresources.AWSEntity{Clients: clients},
+		CidrBlock:        cluster.Spec.AWS.VPC.CIDR,
+		InstallationName: s.installationName,
+		Name:             key.ClusterID(cluster),
+		AWSEntity:        awsresources.AWSEntity{Clients: clients},
 	}
 	vpcCreated, err := vpc.CreateIfNotExists()
 	if err != nil {
@@ -955,6 +963,15 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 	}
 	if rsErr == nil {
 		s.logger.Log("info", fmt.Sprintf("created DNS records for load balancers"))
+	}
+
+	masterServiceInput := MasterServiceInput{
+		Clients:  clients,
+		Cluster:  cluster,
+		MasterID: masterIDs[0],
+	}
+	if err := s.createMasterService(masterServiceInput); err != nil {
+		return microerror.Mask(err)
 	}
 
 	return nil

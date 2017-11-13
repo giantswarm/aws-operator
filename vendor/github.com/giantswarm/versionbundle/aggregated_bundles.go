@@ -7,7 +7,7 @@ import (
 )
 
 // AggregatedBundles is a plain validation type for aggregated lists of version
-// bundles. Lists of version bundles reflect distributions.
+// bundles. Lists of version bundles reflect releases.
 type AggregatedBundles [][]Bundle
 
 func (b AggregatedBundles) Validate() error {

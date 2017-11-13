@@ -11,5 +11,6 @@ type Spec struct {
 	ClusterID        string   `json:"clusterID" yaml:"clusterID"`
 	CommonName       string   `json:"commonName" yaml:"commonName"`
 	IPSANs           []string `json:"ipSans" yaml:"ipSans"`
+	Organizations    []string `json:"organizations" yaml:"organizations"`
 	TTL              string   `json:"ttl" yaml:"ttl"`
 }
