@@ -118,5 +118,5 @@ func getStackOutputValue(outputs []*awscloudformation.Output, key string) (strin
 		}
 	}
 
-	return "", notFoundError
+	return "", microerror.Mask(notFoundError)
 }
