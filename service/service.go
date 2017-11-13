@@ -197,6 +197,7 @@ func New(config Config) (*Service, error) {
 		legacyConfig.AwsHostConfig = awsHostConfig
 		legacyConfig.CertWatcher = certWatcher
 		legacyConfig.CloudConfig = ccService
+		legacyConfig.InstallationName = installationName
 		legacyConfig.K8sClient = k8sClient
 		legacyConfig.KeyWatcher = keyWatcher
 		legacyConfig.Logger = config.Logger
