@@ -90,15 +90,15 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		updateState.TemplateBody = aws.String(mainTemplate)
 		updateState.Parameters = []*awscloudformation.Parameter{
 			{
-				ParameterKey:   aws.String("workers"),
+				ParameterKey:   aws.String(workersParameterKey),
 				ParameterValue: aws.String(desiredStackState.Workers),
 			},
 			{
-				ParameterKey:   aws.String("imageID"),
+				ParameterKey:   aws.String(imageIDParameterKey),
 				ParameterValue: aws.String(desiredStackState.ImageID),
 			},
 			{
-				ParameterKey:   aws.String("clusterVersion"),
+				ParameterKey:   aws.String(clusterVersionParameterKey),
 				ParameterValue: aws.String(desiredStackState.ClusterVersion),
 			},
 		}

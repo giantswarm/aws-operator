@@ -63,15 +63,15 @@ func Test_Resource_Cloudformation_newUpdateChange(t *testing.T) {
 				TemplateBody: aws.String(""),
 				Parameters: []*awscloudformation.Parameter{
 					{
-						ParameterKey:   aws.String("workers"),
+						ParameterKey:   aws.String(workersParameterKey),
 						ParameterValue: aws.String("4"),
 					},
 					{
-						ParameterKey:   aws.String("imageID"),
+						ParameterKey:   aws.String(imageIDParameterKey),
 						ParameterValue: aws.String("ami-1234"),
 					},
 					{
-						ParameterKey:   aws.String("clusterVersion"),
+						ParameterKey:   aws.String(clusterVersionParameterKey),
 						ParameterValue: aws.String("myclusterversion"),
 					},
 				},
@@ -105,15 +105,15 @@ func Test_Resource_Cloudformation_newUpdateChange(t *testing.T) {
 				TemplateBody: aws.String(""),
 				Parameters: []*awscloudformation.Parameter{
 					{
-						ParameterKey:   aws.String("workers"),
+						ParameterKey:   aws.String(workersParameterKey),
 						ParameterValue: aws.String("4"),
 					},
 					{
-						ParameterKey:   aws.String("imageID"),
+						ParameterKey:   aws.String(imageIDParameterKey),
 						ParameterValue: aws.String("ami-1234"),
 					},
 					{
-						ParameterKey:   aws.String("clusterVersion"),
+						ParameterKey:   aws.String(clusterVersionParameterKey),
 						ParameterValue: aws.String("myclusterversion"),
 					},
 				},
