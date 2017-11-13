@@ -1,5 +1,5 @@
 hash: c98f890d6b2e4b61ed23bfe63b1248e4409c53e76a56848f9c461149c19665dc
-updated: 2017-11-09T17:53:25.797533286+01:00
+updated: 2017-11-09T18:35:56.135713223+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -93,7 +93,7 @@ imports:
   - pkg/results
   - pkg/runner
 - name: github.com/giantswarm/k8scloudconfig
-  version: 8a65d3f8a992f728a833dc003b88febe8bc92ab8
+  version: a956870ae706b0bd4a0c9cd521ccdd09f120c36d
   subpackages:
   - v_0_1_0
 - name: github.com/giantswarm/microendpoint
