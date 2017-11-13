@@ -10,6 +10,16 @@ import (
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
+	customObject, err := key.ToCustomObject(obj)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	// no-op if we are not using cloudformation
+	if !key.UseCloudFormation(customObject) {
+		r.logger.Log("cluster", key.ClusterID(customObject), "debug", "not processing cloudformation stack")
+		return nil
+	}
+
 	stackInput, err := toCreateStackInput(createChange)
 	if err != nil {
 		return microerror.Mask(err)

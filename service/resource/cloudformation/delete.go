@@ -16,6 +16,12 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	if err != nil {
 		return microerror.Mask(err)
 	}
+	// no-op if we are not using cloudformation
+	if !key.UseCloudFormation(customObject) {
+		r.logger.Log("cluster", key.ClusterID(customObject), "debug", "not processing cloudformation stack")
+		return nil
+	}
+
 	deleteStackInput, err := toDeleteStackInput(deleteChange)
 	if err != nil {
 		return microerror.Mask(err)
