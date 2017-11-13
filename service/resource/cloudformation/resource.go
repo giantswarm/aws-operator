@@ -110,3 +110,13 @@ func toDeleteStackInput(v interface{}) (awscloudformation.DeleteStackInput, erro
 
 	return deleteStackInput, nil
 }
+
+func getStackOutputValue(outputs []*awscloudformation.Output, key string) (string, error) {
+	for _, o := range outputs {
+		if *o.OutputKey == key {
+			return *o.OutputValue, nil
+		}
+	}
+
+	return "", notFoundError
+}

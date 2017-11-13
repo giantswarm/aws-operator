@@ -39,9 +39,26 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return StackState{}, microerror.Mask(notFoundError)
 	}
 
+	outputs := describeOutput.Stacks[0].Outputs
+
+	workers, err := getStackOutputValue(outputs, workersParameterKey)
+	if err != nil {
+		return StackState{}, microerror.Mask(err)
+	}
+	imageID, err := getStackOutputValue(outputs, imageIDParameterKey)
+	if err != nil {
+		return StackState{}, microerror.Mask(err)
+	}
+	clusterVersion, err := getStackOutputValue(outputs, clusterVersionParameterKey)
+	if err != nil {
+		return StackState{}, microerror.Mask(err)
+	}
+
 	outputStackState := StackState{
-		Name:    stackName,
-		Outputs: describeOutput.Stacks[0].Outputs,
+		Name:           stackName,
+		Workers:        workers,
+		ImageID:        imageID,
+		ClusterVersion: clusterVersion,
 	}
 
 	return outputStackState, nil
