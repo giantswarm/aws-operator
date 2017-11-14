@@ -28,7 +28,7 @@ type Bundle struct {
 	// available to be able to guarantee functionality this authority implements.
 	//
 	// NOTE that once this property is set it must never change again.
-	Dependencies []Dependency `json:"dependency" yaml:"dependency"`
+	Dependencies []Dependency `json:"dependencies" yaml:"dependencies"`
 	// Deprecated defines a version bundle to be deprecated. Deprecated version
 	// bundles are not intended to be mainatined anymore. Further usage of a
 	// deprecated version bundle should be omitted.

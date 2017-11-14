@@ -10,6 +10,9 @@ data:
           id: "{{.Values.aws.accessKeyId}}"
           secret: "{{.Values.aws.secretAccessKey}}"
           session: "{{.Values.aws.sessionToken}}"
+        region: "{{.Values.aws.region}}"
+      installation:
+        name: "{{.Values.installationName}}"
       kubernetes:
         incluster: true
     server:

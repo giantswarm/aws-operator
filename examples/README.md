@@ -17,26 +17,29 @@ directory.
 ## Cluster Certificates
 
 The easiest way to create certificates is to use the local [cert-operator]
-setup. See [this guide][cert-operator-local-setup] for details. Using the [helm registry plugin]
-the cert-operator charts can be installed easily:
+setup. See [this guide][cert-operator-local-setup] for details. The operator and certificates
+to be used during aws-operator setup can be installed with:
 
 ```bash
-helm registry install quay.io/giantswarm/cert-operator-lab-chart -- \
-                   -n cert-operator-lab \
-                   --set imageTag=latest \
-                   --set clusterName=my-cluster \
-                   --set commonDomain=my-common-domain \
-                   --wait
-helm registry install quay.io/giantswarm/cert-resource-lab-chart -- \
-                   -n cert-resource-lab \
-                   --set clusterName=my-cluster \
-                   --set commonDomain=my-common-domain
+git clone https://github.com/giantswarm/cert-operator ./cert-operator
+
+helm \
+  install -n cert-operator-lab ./cert-operator/examples/cert-operator-lab-chart/ \
+  --set clusterName=my-cluster \
+  --set commonDomain=my-common-domain \
+  --set imageTag=latest \
+  --wait
+
+# here the certificate TPR is created, wait until `kubectl get certificate` returns
+# `No resources found.` before running the next command
+
+helm install -n cert-resource-lab ./cert-operator/examples/cert-resource-lab-chart/ \
+  --set clusterName=my-cluster \
+  --set commonDomain=my-common-domain
 ```
 
 - Note: `clusterName` and `commonDomain` chart values must match the values used
   during this guide.
-
-[helm registry plugin]: https://github.com/app-registry/appr-helm-plugin
 
 ## Cluster-Local Docker Image
 
@@ -77,9 +80,11 @@ $ helm install -n aws-resource-lab ./aws-resource-lab-chart/ --wait
 `aws-operator-lab-chart` accepts the following configuration parameters:
 * `idRsaPub` - SSH public key to be installed on nodes.
 * `aws.accessKeyId` - AWS access key.
+* `aws.installationName` - used for tagging resources.
+* `aws.region` - AWS region.
 * `aws.secretAccessKey` - AWS secret.
 * `aws.sessionToken` - AWS session token for MFA accounts; can be left empty.
-* `imgeTag` - Tag of the aws-operator image to be used, by default `local-lab` to use a
+* `imageTag` - Tag of the aws-operator image to be used, by default `local-lab` to use a
 locally created image.
 
 For instance, to pass your default ssh public key to the install command, along with AWS
@@ -88,6 +93,7 @@ credentials from the environment, you could do:
 ```bash
 $ helm install -n aws-operator-lab --set idRsaPub="$(cat ~/.ssh/id_rsa.pub)" \
                                    --set aws.accessKeyId=${AWS_ACCESS_KEY_ID} \
+                                   --set aws.region=${AWS_REGION} \
                                    --set aws.secretAccessKey=${AWS_SECRET_ACCESS_KEY} \
                                    --set aws.sessionToken=${AWS_SESSION_TOKEN} \
                                    ./aws-operator-lab-chart/ --wait

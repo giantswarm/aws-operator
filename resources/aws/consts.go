@@ -4,6 +4,8 @@ const (
 	// EC2 instance tag keys.
 	tagKeyName    string = "Name"
 	tagKeyCluster string = "KubernetesCluster"
+	// Top level resource tag keys.
+	tagKeyInstallation string = "Installation"
 	// Subnet keys
 	subnetAvailabilityZone string = "availabilityZone"
 	subnetCidrBlock        string = "cidrBlock"

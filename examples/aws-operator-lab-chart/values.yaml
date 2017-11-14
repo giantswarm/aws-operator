@@ -1,6 +1,8 @@
 idRsaPub: "ssh-rsa XXXXXXXXXXXXXXXXXXXXXXXXX"
 imageTag: "local-lab"
+installationName: "local-lab"
 aws:
   accessKeyId: "AKIAIXXXXXXXXXXXXXXX"
   secretAccessKey: "XXXXXXXXXXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXX"
   sessionToken: ""
+  region: "eu-central-1"
