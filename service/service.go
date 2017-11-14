@@ -36,7 +36,8 @@ import (
 )
 
 const (
-	ResourceRetries uint64 = 3
+	// ResourceRetries is 0 due to problems with the legacy resource.
+	ResourceRetries uint64 = 0
 	RedactedString         = "[REDACTED]"
 )
 
