@@ -87,7 +87,6 @@ WantedBy=multi-user.target
 [Unit]
 Description=Format /var/lib/docker to XFS
 Before=docker.service var-lib-docker.mount
-ConditionPathExists=!/var/lib/docker
 
 [Service]
 Type=oneshot
