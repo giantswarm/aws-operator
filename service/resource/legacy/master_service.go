@@ -7,6 +7,7 @@ import (
 	"github.com/giantswarm/aws-operator/resources/aws"
 	"github.com/giantswarm/aws-operator/service/key"
 	"github.com/giantswarm/awstpr"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/pkg/api/v1"
@@ -93,11 +94,11 @@ func (s *Resource) createMasterService(input MasterServiceInput) error {
 		},
 	}
 
-	if _, err := s.k8sClient.Core().Services(service.ObjectMeta.Namespace).Create(&service); err != nil {
+	if _, err := s.k8sClient.Core().Services(service.ObjectMeta.Namespace).Create(&service); err != nil && !apierrors.IsAlreadyExists(err) {
 		return microerror.Mask(err)
 	}
 
-	if _, err := s.k8sClient.Core().Endpoints(endpoint.ObjectMeta.Namespace).Create(&endpoint); err != nil {
+	if _, err := s.k8sClient.Core().Endpoints(endpoint.ObjectMeta.Namespace).Create(&endpoint); err != nil && !apierrors.IsAlreadyExists(err) {
 		return microerror.Mask(err)
 	}
 
