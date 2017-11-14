@@ -17,7 +17,6 @@ import (
 	"github.com/giantswarm/operatorkit/framework"
 	"github.com/giantswarm/operatorkit/framework/resource/logresource"
 	"github.com/giantswarm/operatorkit/framework/resource/metricsresource"
-	"github.com/giantswarm/operatorkit/framework/resource/retryresource"
 	"github.com/giantswarm/operatorkit/informer"
 	"github.com/giantswarm/operatorkit/tpr"
 	"github.com/giantswarm/randomkeytpr"
@@ -36,8 +35,7 @@ import (
 )
 
 const (
-	// ResourceRetries is 0 due to problems with the legacy resource.
-	ResourceRetries uint64 = 0
+	ResourceRetries uint64 = 3
 	RedactedString         = "[REDACTED]"
 )
 
@@ -244,13 +242,16 @@ func New(config Config) (*Service, error) {
 			return nil, microerror.Mask(err)
 		}
 
-		retryWrapConfig := retryresource.DefaultWrapConfig()
-		retryWrapConfig.BackOffFactory = func() backoff.BackOff { return backoff.WithMaxTries(backoff.NewExponentialBackOff(), ResourceRetries) }
-		retryWrapConfig.Logger = config.Logger
-		resources, err = retryresource.Wrap(resources, retryWrapConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
+		// Disable retry wrapper due to problems with the legacy resource.
+		/*
+			retryWrapConfig := retryresource.DefaultWrapConfig()
+			retryWrapConfig.BackOffFactory = func() backoff.BackOff { return backoff.WithMaxTries(backoff.NewExponentialBackOff(), ResourceRetries) }
+			retryWrapConfig.Logger = config.Logger
+			resources, err = retryresource.Wrap(resources, retryWrapConfig)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+		*/
 
 		metricsWrapConfig := metricsresource.DefaultWrapConfig()
 		metricsWrapConfig.Name = config.Name
