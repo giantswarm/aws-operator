@@ -15,6 +15,11 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	if err != nil {
 		return StackState{}, microerror.Mask(err)
 	}
+	// no-op if we are not using cloudformation
+	if !key.UseCloudFormation(customObject) {
+		r.logger.Log("cluster", key.ClusterID(customObject), "debug", "not processing cloudformation stack")
+		return StackState{}, nil
+	}
 
 	r.logger.Log("cluster", key.ClusterID(customObject), "debug", "looking for AWS stack")
 

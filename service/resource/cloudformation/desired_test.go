@@ -22,6 +22,7 @@ func Test_Resource_Cloudformation_GetDesiredState(t *testing.T) {
 			obj: &awstpr.CustomObject{
 				Spec: awstpr.Spec{
 					Cluster: clustertpr.Spec{
+						Version: "cloud-formation",
 						Cluster: spec.Cluster{
 							ID: "5xchu",
 						},

@@ -12,6 +12,11 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
+	// no-op if we are not using cloudformation
+	if !key.UseCloudFormation(customObject) {
+		r.logger.Log("cluster", key.ClusterID(customObject), "debug", "not processing cloudformation stack")
+		return nil, nil
+	}
 
 	mainStack, err := newMainStack(customObject)
 	if err != nil {
