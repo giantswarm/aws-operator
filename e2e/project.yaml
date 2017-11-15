@@ -6,6 +6,7 @@ setup:
       run: kubectl get namespace
       match: giantswarm\s*Active
 
+outOfClusterTest:
   - run: helm delete aws-operator-chart --purge || true
 
   - run: |
