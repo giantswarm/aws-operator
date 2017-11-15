@@ -29,7 +29,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/alerter"
 	"github.com/giantswarm/aws-operator/service/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/healthz"
-	"github.com/giantswarm/aws-operator/service/operator"
 	cloudformationresource "github.com/giantswarm/aws-operator/service/resource/cloudformation"
 	legacyresource "github.com/giantswarm/aws-operator/service/resource/legacy"
 )
@@ -74,10 +73,10 @@ func DefaultConfig() Config {
 
 type Service struct {
 	// Dependencies.
-	Alerter  *alerter.Service
-	Healthz  *healthz.Service
-	Operator *operator.Operator
-	Version  *version.Service
+	Alerter   *alerter.Service
+	Framework *framework.Framework
+	Healthz   *healthz.Service
+	Version   *version.Service
 
 	// Internals.
 	bootOnce sync.Once
@@ -265,27 +264,6 @@ func New(config Config) (*Service, error) {
 		return ctx, nil
 	}
 
-	var frameworkBackOff *backoff.ExponentialBackOff
-	{
-		frameworkBackOff = backoff.NewExponentialBackOff()
-		frameworkBackOff.MaxElapsedTime = 5 * time.Minute
-	}
-
-	var operatorFramework *framework.Framework
-	{
-		frameworkConfig := framework.DefaultConfig()
-
-		frameworkConfig.BackOff = frameworkBackOff
-		frameworkConfig.InitCtxFunc = initCtxFunc
-		frameworkConfig.Logger = config.Logger
-		frameworkConfig.ResourceRouter = framework.NewDefaultResourceRouter(resources)
-
-		operatorFramework, err = framework.New(frameworkConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var newTPR *tpr.TPR
 	{
 		c := tpr.DefaultConfig()
@@ -328,6 +306,22 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var operatorFramework *framework.Framework
+	{
+		frameworkConfig := framework.DefaultConfig()
+
+		frameworkConfig.BackOffFactory = framework.DefaultBackOffFactory()
+		frameworkConfig.InitCtxFunc = initCtxFunc
+		frameworkConfig.Logger = config.Logger
+		frameworkConfig.ResourceRouter = framework.DefaultResourceRouter(resources)
+		frameworkConfig.Informer = newInformer
+
+		operatorFramework, err = framework.New(frameworkConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var healthzService *healthz.Service
 	{
 		healthzConfig := healthz.DefaultConfig()
@@ -335,28 +329,6 @@ func New(config Config) (*Service, error) {
 		healthzConfig.Logger = config.Logger
 
 		healthzService, err = healthz.New(healthzConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var operatorBackOff *backoff.ExponentialBackOff
-	{
-		operatorBackOff = backoff.NewExponentialBackOff()
-		operatorBackOff.MaxElapsedTime = 5 * time.Minute
-	}
-
-	var operatorService *operator.Operator
-	{
-		operatorConfig := operator.DefaultConfig()
-
-		operatorConfig.BackOff = operatorBackOff
-		operatorConfig.Framework = operatorFramework
-		operatorConfig.Informer = newInformer
-		operatorConfig.Logger = config.Logger
-		operatorConfig.TPR = newTPR
-
-		operatorService, err = operator.New(operatorConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -379,10 +351,10 @@ func New(config Config) (*Service, error) {
 
 	newService := &Service{
 		// Dependencies.
-		Alerter:  alerterService,
-		Healthz:  healthzService,
-		Operator: operatorService,
-		Version:  versionService,
+		Alerter:   alerterService,
+		Framework: operatorFramework,
+		Healthz:   healthzService,
+		Version:   versionService,
 
 		// Internals
 		bootOnce: sync.Once{},
@@ -396,7 +368,7 @@ func (s *Service) Boot() {
 		// Start alerts to check for orphan resources.
 		s.Alerter.StartAlerts()
 
-		// Start the operator.
-		s.Operator.Boot()
+		// Start the framework.
+		s.Framework.Boot()
 	})
 }

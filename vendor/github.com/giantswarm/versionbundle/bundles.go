@@ -106,3 +106,14 @@ func GetBundleByName(bundles []Bundle, name string) (Bundle, error) {
 
 	return Bundle{}, microerror.Maskf(bundleNotFoundError, name)
 }
+
+func GetNewestBundle(bundles []Bundle) (Bundle, error) {
+	if len(bundles) == 0 {
+		return Bundle{}, microerror.Maskf(executionFailedError, "bundles must not be empty")
+	}
+
+	s := SortBundlesByVersion(bundles)
+	sort.Sort(s)
+
+	return s[len(s)-1], nil
+}

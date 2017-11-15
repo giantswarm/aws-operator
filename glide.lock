@@ -1,5 +1,5 @@
-hash: c98f890d6b2e4b61ed23bfe63b1248e4409c53e76a56848f9c461149c19665dc
-updated: 2017-11-09T17:53:25.797533286+01:00
+hash: 0e05add1a117b58ead0a42b6355d62469160970f41467166eb20a9a32c3b3c21
+updated: 2017-11-15T10:28:20.671208437+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -32,6 +32,7 @@ imports:
   - private/protocol/xml/xmlutil
   - service/autoscaling
   - service/cloudformation
+  - service/cloudformation/cloudformationiface
   - service/ec2
   - service/elb
   - service/iam
@@ -40,9 +41,11 @@ imports:
   - service/s3
   - service/sts
 - name: github.com/beorn7/perks
-  version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
+  version: 3ac7bf7a47d159a033b107610db8a1b6575507a4
   subpackages:
   - quantile
+- name: github.com/cenk/backoff
+  version: 309aa717adbf351e92864cbedf9cca0b769a4b5a
 - name: github.com/cenkalti/backoff
   version: 309aa717adbf351e92864cbedf9cca0b769a4b5a
 - name: github.com/coreos/go-semver
@@ -75,7 +78,7 @@ imports:
   - spec/aws
   - spec/aws/elb
 - name: github.com/giantswarm/certificatetpr
-  version: 7ca1d560db684dd4e2effc49ae0ceeaae2963f5e
+  version: 72f3cbaf3beacc88d9ef59efeacaf028f2af59d0
 - name: github.com/giantswarm/clustertpr
   version: 6b89a787f157c5531d1c955c32b3c621f0d64c3a
   subpackages:
@@ -93,11 +96,11 @@ imports:
   - pkg/results
   - pkg/runner
 - name: github.com/giantswarm/k8scloudconfig
-  version: 8a65d3f8a992f728a833dc003b88febe8bc92ab8
+  version: 9abc128b1429fa3212293c5dd755fa1a89157367
   subpackages:
   - v_0_1_0
 - name: github.com/giantswarm/microendpoint
-  version: 7f20461533f43e767628e6404c2211afa7472a54
+  version: d656a166a5c2a5caa1eea316f884939b7746cea7
   subpackages:
   - endpoint/version
   - service/version
@@ -130,16 +133,21 @@ imports:
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: 96f018c3318b6fd2a71e030f336d7f70f321c43d
+  version: e271341feb02c12eeaf4b527dc39e4eed84c977b
   subpackages:
   - client/k8sclient
+  - framework
+  - framework/context/canceledcontext
+  - framework/resource/logresource
+  - framework/resource/metricsresource
+  - informer
   - tpr
 - name: github.com/giantswarm/randomkeytpr
   version: 9e1d78d125841c496889e8a54d49057212a2893e
 - name: github.com/giantswarm/versionbundle
-  version: 6f255fb054b68827f115fdf6a018b5e66c863250
+  version: 3b7cd23ec96043f5193c1b6c966fade961f0da65
 - name: github.com/go-ini/ini
-  version: f280b3ba517bf5fc98922624f21fb0e7a92adaec
+  version: 7e7da451323b6766da368f8a1e8ec9a88a16b4a0
 - name: github.com/go-kit/kit
   version: a9ca6725cbbea455e61c6bc8a1ed28e81eb3493b
   subpackages:
@@ -215,7 +223,7 @@ imports:
   - jlexer
   - jwriter
 - name: github.com/matttproud/golang_protobuf_extensions
-  version: c12348ce28de40eed0136aa2b644d0ee0650e56c
+  version: fc2b8d3a73c4867e51861bbdd5ae3c1f0869dd6a
   subpackages:
   - pbutil
 - name: github.com/mitchellh/mapstructure
@@ -228,17 +236,17 @@ imports:
   - prometheus
   - prometheus/promhttp
 - name: github.com/prometheus/client_model
-  version: 6f3806018612930941127f2a7c6c453ba2c527d2
+  version: fa8ad6fec33561be4280a8f0514318c79d7f6cb6
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: e3fb1a1acd7605367a2b378bc2e2f893c05174b7
+  version: 13ba4ddd0caa9c28ca7b7bffe1dfa9ed8d5ef207
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: a6e9df898b1336106c743392c48ee0b71f5c4efa
+  version: 65c1f6f8f0fc1e2185eb9863a3bc751496404259
   subpackages:
   - xfs
 - name: github.com/PuerkitoBio/purell
@@ -246,7 +254,7 @@ imports:
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/spf13/afero
-  version: 5660eeed305fe5f69c8fc6cf899132a459a97064
+  version: 8d919cbe7e2627e417f3e45c3c0e489a5b7e2536
   subpackages:
   - mem
 - name: github.com/spf13/cast
@@ -258,7 +266,7 @@ imports:
 - name: github.com/spf13/pflag
   version: 4c012f6dcd9546820e378d0bdda4d8fc772cdfea
 - name: github.com/spf13/viper
-  version: 8ef37cbca71638bf32f3d5e194117d4cb46da163
+  version: 4dddf7c62e16bce5807744018f5b753bfe21bbd2
 - name: github.com/stretchr/testify
   version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
   repo: git://github.com/stretchr/testify.git
@@ -305,7 +313,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
+  version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
 - name: k8s.io/apimachinery
   version: 8ab5f3d8a330c2e9baaf84e39042db8d49034ae2
   subpackages:

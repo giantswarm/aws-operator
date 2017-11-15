@@ -2,6 +2,7 @@ package versionbundle
 
 import (
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/coreos/go-semver/semver"
@@ -171,4 +172,15 @@ func aggregateReleaseVersion(bundles []Bundle) (string, error) {
 	version := fmt.Sprintf("%d.%d.%d", major, minor, patch)
 
 	return version, nil
+}
+
+func GetNewestRelease(releases []Release) (Release, error) {
+	if len(releases) == 0 {
+		return Release{}, microerror.Maskf(executionFailedError, "releases must not be empty")
+	}
+
+	s := SortReleasesByVersion(releases)
+	sort.Sort(s)
+
+	return s[len(s)-1], nil
 }

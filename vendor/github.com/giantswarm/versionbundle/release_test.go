@@ -1617,3 +1617,340 @@ func Test_Release_Version(t *testing.T) {
 		}
 	}
 }
+
+func Test_Releases_GetNewestRelease(t *testing.T) {
+	testCases := []struct {
+		Releases        []Release
+		ExpectedRelease Release
+		ErrorMatcher    func(err error) bool
+	}{
+		// Test 0 ensures that a nil list throws an execution failed error.
+		{
+			Releases:        nil,
+			ExpectedRelease: Release{},
+			ErrorMatcher:    IsExecutionFailed,
+		},
+
+		// Test 1 ensures that the newest release can be found.
+		{
+			Releases: []Release{
+				{
+					bundles:    []Bundle{},
+					changelogs: []Changelog{},
+					components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.5",
+						},
+					},
+					deprecated: false,
+					timestamp:  "1970-01-01T00:00:10.000000Z",
+					version:    "0.1.0",
+				},
+			},
+			ExpectedRelease: Release{
+				bundles:    []Bundle{},
+				changelogs: []Changelog{},
+				components: []Component{
+					{
+						Name:    "calico",
+						Version: "1.1.0",
+					},
+					{
+						Name:    "kubernetes",
+						Version: "1.7.5",
+					},
+				},
+				deprecated: false,
+				timestamp:  "1970-01-01T00:00:10.000000Z",
+				version:    "0.1.0",
+			},
+			ErrorMatcher: nil,
+		},
+
+		// Test 2 is the same as 1 but with different releases.
+		{
+			Releases: []Release{
+				{
+					bundles:    []Bundle{},
+					changelogs: []Changelog{},
+					components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.5",
+						},
+					},
+					deprecated: false,
+					timestamp:  "1970-01-01T00:00:10.000000Z",
+					version:    "0.1.0",
+				},
+				{
+					bundles:    []Bundle{},
+					changelogs: []Changelog{},
+					components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.5",
+						},
+					},
+					deprecated: false,
+					timestamp:  "1970-01-01T00:00:20.000000Z",
+					version:    "0.2.0",
+				},
+			},
+			ExpectedRelease: Release{
+				bundles:    []Bundle{},
+				changelogs: []Changelog{},
+				components: []Component{
+					{
+						Name:    "calico",
+						Version: "1.1.0",
+					},
+					{
+						Name:    "kubernetes",
+						Version: "1.7.5",
+					},
+				},
+				deprecated: false,
+				timestamp:  "1970-01-01T00:00:20.000000Z",
+				version:    "0.2.0",
+			},
+			ErrorMatcher: nil,
+		},
+
+		// Test 3 is the same as 1 but with different releases.
+		{
+			Releases: []Release{
+				{
+					bundles:    []Bundle{},
+					changelogs: []Changelog{},
+					components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.5",
+						},
+					},
+					deprecated: false,
+					timestamp:  "1970-01-01T00:00:20.000000Z",
+					version:    "0.2.0",
+				},
+				{
+					bundles:    []Bundle{},
+					changelogs: []Changelog{},
+					components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.5",
+						},
+					},
+					deprecated: false,
+					timestamp:  "1970-01-01T00:00:10.000000Z",
+					version:    "0.1.0",
+				},
+			},
+			ExpectedRelease: Release{
+				bundles:    []Bundle{},
+				changelogs: []Changelog{},
+				components: []Component{
+					{
+						Name:    "calico",
+						Version: "1.1.0",
+					},
+					{
+						Name:    "kubernetes",
+						Version: "1.7.5",
+					},
+				},
+				deprecated: false,
+				timestamp:  "1970-01-01T00:00:20.000000Z",
+				version:    "0.2.0",
+			},
+			ErrorMatcher: nil,
+		},
+
+		// Test 4 is the same as 1 but with different releases.
+		{
+			Releases: []Release{
+				{
+					bundles:    []Bundle{},
+					changelogs: []Changelog{},
+					components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.5",
+						},
+					},
+					deprecated: false,
+					timestamp:  "1970-01-01T00:00:20.000000Z",
+					version:    "0.2.0",
+				},
+				{
+					bundles:    []Bundle{},
+					changelogs: []Changelog{},
+					components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.5",
+						},
+					},
+					deprecated: false,
+					timestamp:  "1970-01-01T00:00:10.000000Z",
+					version:    "0.1.0",
+				},
+				{
+					bundles:    []Bundle{},
+					changelogs: []Changelog{},
+					components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.5",
+						},
+					},
+					deprecated: false,
+					timestamp:  "1970-01-01T00:00:40.000000Z",
+					version:    "2.3.12",
+				},
+			},
+			ExpectedRelease: Release{
+				bundles:    []Bundle{},
+				changelogs: []Changelog{},
+				components: []Component{
+					{
+						Name:    "calico",
+						Version: "1.1.0",
+					},
+					{
+						Name:    "kubernetes",
+						Version: "1.7.5",
+					},
+				},
+				deprecated: false,
+				timestamp:  "1970-01-01T00:00:40.000000Z",
+				version:    "2.3.12",
+			},
+			ErrorMatcher: nil,
+		},
+
+		// Test 5 is the same as 1 but with different releases.
+		{
+			Releases: []Release{
+				{
+					bundles:    []Bundle{},
+					changelogs: []Changelog{},
+					components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.5",
+						},
+					},
+					deprecated: false,
+					timestamp:  "1970-01-01T00:00:20.000000Z",
+					version:    "0.2.0",
+				},
+				{
+					bundles:    []Bundle{},
+					changelogs: []Changelog{},
+					components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.5",
+						},
+					},
+					deprecated: false,
+					timestamp:  "1970-01-01T00:00:40.000000Z",
+					version:    "2.3.12",
+				},
+				{
+					bundles:    []Bundle{},
+					changelogs: []Changelog{},
+					components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.5",
+						},
+					},
+					deprecated: false,
+					timestamp:  "1970-01-01T00:00:10.000000Z",
+					version:    "0.1.0",
+				},
+			},
+			ExpectedRelease: Release{
+				bundles:    []Bundle{},
+				changelogs: []Changelog{},
+				components: []Component{
+					{
+						Name:    "calico",
+						Version: "1.1.0",
+					},
+					{
+						Name:    "kubernetes",
+						Version: "1.7.5",
+					},
+				},
+				deprecated: false,
+				timestamp:  "1970-01-01T00:00:40.000000Z",
+				version:    "2.3.12",
+			},
+			ErrorMatcher: nil,
+		},
+	}
+
+	for i, tc := range testCases {
+		result, err := GetNewestRelease(tc.Releases)
+		if tc.ErrorMatcher != nil {
+			if !tc.ErrorMatcher(err) {
+				t.Fatalf("test %d expected %#v got %#v", i, true, false)
+			}
+		} else if err != nil {
+			t.Fatalf("test %d expected %#v got %#v", i, nil, err)
+		} else {
+			if !reflect.DeepEqual(result, tc.ExpectedRelease) {
+				t.Fatalf("test %d expected %#v got %#v", i, tc.ExpectedRelease, result)
+			}
+		}
+	}
+}

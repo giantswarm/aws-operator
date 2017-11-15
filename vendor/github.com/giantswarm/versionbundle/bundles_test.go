@@ -670,6 +670,375 @@ func Test_Bundles_GetBundleByName(t *testing.T) {
 	}
 }
 
+func Test_Bundles_GetNewestBundle(t *testing.T) {
+	testCases := []struct {
+		Bundles        []Bundle
+		ExpectedBundle Bundle
+		ErrorMatcher   func(err error) bool
+	}{
+		// Test 0 ensures that a nil list throws an execution failed error.
+		{
+			Bundles:        nil,
+			ExpectedBundle: Bundle{},
+			ErrorMatcher:   IsExecutionFailed,
+		},
+
+		// Test 1 ensures that the newest bundle can be found.
+		{
+			Bundles: []Bundle{
+				{
+					Changelogs: []Changelog{},
+					Components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.5",
+						},
+					},
+					Dependencies: []Dependency{},
+					Deprecated:   false,
+					Name:         "cloud-config-operator",
+					Time:         time.Unix(10, 5),
+					Version:      "0.1.0",
+					WIP:          false,
+				},
+			},
+			ExpectedBundle: Bundle{
+				Changelogs: []Changelog{},
+				Components: []Component{
+					{
+						Name:    "calico",
+						Version: "1.1.0",
+					},
+					{
+						Name:    "kubernetes",
+						Version: "1.7.5",
+					},
+				},
+				Dependencies: []Dependency{},
+				Deprecated:   false,
+				Name:         "cloud-config-operator",
+				Time:         time.Unix(10, 5),
+				Version:      "0.1.0",
+				WIP:          false,
+			},
+			ErrorMatcher: nil,
+		},
+
+		// Test 2 is the same as 1 but with different bundles.
+		{
+			Bundles: []Bundle{
+				{
+					Changelogs: []Changelog{},
+					Components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.5",
+						},
+					},
+					Dependencies: []Dependency{},
+					Deprecated:   false,
+					Name:         "cloud-config-operator",
+					Time:         time.Unix(10, 5),
+					Version:      "0.1.0",
+					WIP:          false,
+				},
+				{
+					Changelogs: []Changelog{},
+					Components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.5",
+						},
+					},
+					Dependencies: []Dependency{},
+					Deprecated:   false,
+					Name:         "cloud-config-operator",
+					Time:         time.Unix(20, 15),
+					Version:      "0.2.0",
+					WIP:          false,
+				},
+			},
+			ExpectedBundle: Bundle{
+				Changelogs: []Changelog{},
+				Components: []Component{
+					{
+						Name:    "calico",
+						Version: "1.1.0",
+					},
+					{
+						Name:    "kubernetes",
+						Version: "1.7.5",
+					},
+				},
+				Dependencies: []Dependency{},
+				Deprecated:   false,
+				Name:         "cloud-config-operator",
+				Time:         time.Unix(20, 15),
+				Version:      "0.2.0",
+				WIP:          false,
+			},
+			ErrorMatcher: nil,
+		},
+
+		// Test 3 is the same as 1 but with different bundles.
+		{
+			Bundles: []Bundle{
+				{
+					Changelogs: []Changelog{},
+					Components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.5",
+						},
+					},
+					Dependencies: []Dependency{},
+					Deprecated:   false,
+					Name:         "cloud-config-operator",
+					Time:         time.Unix(20, 15),
+					Version:      "0.2.0",
+					WIP:          false,
+				},
+				{
+					Changelogs: []Changelog{},
+					Components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.5",
+						},
+					},
+					Dependencies: []Dependency{},
+					Deprecated:   false,
+					Name:         "cloud-config-operator",
+					Time:         time.Unix(10, 5),
+					Version:      "0.1.0",
+					WIP:          false,
+				},
+			},
+			ExpectedBundle: Bundle{
+				Changelogs: []Changelog{},
+				Components: []Component{
+					{
+						Name:    "calico",
+						Version: "1.1.0",
+					},
+					{
+						Name:    "kubernetes",
+						Version: "1.7.5",
+					},
+				},
+				Dependencies: []Dependency{},
+				Deprecated:   false,
+				Name:         "cloud-config-operator",
+				Time:         time.Unix(20, 15),
+				Version:      "0.2.0",
+				WIP:          false,
+			},
+			ErrorMatcher: nil,
+		},
+
+		// Test 4 is the same as 1 but with different bundles.
+		{
+			Bundles: []Bundle{
+				{
+					Changelogs: []Changelog{},
+					Components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.5",
+						},
+					},
+					Dependencies: []Dependency{},
+					Deprecated:   false,
+					Name:         "cloud-config-operator",
+					Time:         time.Unix(20, 15),
+					Version:      "0.2.0",
+					WIP:          false,
+				},
+				{
+					Changelogs: []Changelog{},
+					Components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.5",
+						},
+					},
+					Dependencies: []Dependency{},
+					Deprecated:   false,
+					Name:         "cloud-config-operator",
+					Time:         time.Unix(10, 5),
+					Version:      "0.1.0",
+					WIP:          false,
+				},
+				{
+					Changelogs: []Changelog{},
+					Components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.5",
+						},
+					},
+					Dependencies: []Dependency{},
+					Deprecated:   false,
+					Name:         "cloud-config-operator",
+					Time:         time.Unix(40, 35),
+					Version:      "2.3.12",
+					WIP:          false,
+				},
+			},
+			ExpectedBundle: Bundle{
+				Changelogs: []Changelog{},
+				Components: []Component{
+					{
+						Name:    "calico",
+						Version: "1.1.0",
+					},
+					{
+						Name:    "kubernetes",
+						Version: "1.7.5",
+					},
+				},
+				Dependencies: []Dependency{},
+				Deprecated:   false,
+				Name:         "cloud-config-operator",
+				Time:         time.Unix(40, 35),
+				Version:      "2.3.12",
+				WIP:          false,
+			},
+			ErrorMatcher: nil,
+		},
+
+		// Test 5 is the same as 1 but with different bundles.
+		{
+			Bundles: []Bundle{
+				{
+					Changelogs: []Changelog{},
+					Components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.5",
+						},
+					},
+					Dependencies: []Dependency{},
+					Deprecated:   false,
+					Name:         "cloud-config-operator",
+					Time:         time.Unix(20, 15),
+					Version:      "0.2.0",
+					WIP:          false,
+				},
+				{
+					Changelogs: []Changelog{},
+					Components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.5",
+						},
+					},
+					Dependencies: []Dependency{},
+					Deprecated:   false,
+					Name:         "cloud-config-operator",
+					Time:         time.Unix(40, 35),
+					Version:      "2.3.12",
+					WIP:          false,
+				},
+				{
+					Changelogs: []Changelog{},
+					Components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.5",
+						},
+					},
+					Dependencies: []Dependency{},
+					Deprecated:   false,
+					Name:         "cloud-config-operator",
+					Time:         time.Unix(10, 5),
+					Version:      "0.1.0",
+					WIP:          false,
+				},
+			},
+			ExpectedBundle: Bundle{
+				Changelogs: []Changelog{},
+				Components: []Component{
+					{
+						Name:    "calico",
+						Version: "1.1.0",
+					},
+					{
+						Name:    "kubernetes",
+						Version: "1.7.5",
+					},
+				},
+				Dependencies: []Dependency{},
+				Deprecated:   false,
+				Name:         "cloud-config-operator",
+				Time:         time.Unix(40, 35),
+				Version:      "2.3.12",
+				WIP:          false,
+			},
+			ErrorMatcher: nil,
+		},
+	}
+
+	for i, tc := range testCases {
+		result, err := GetNewestBundle(tc.Bundles)
+		if tc.ErrorMatcher != nil {
+			if !tc.ErrorMatcher(err) {
+				t.Fatalf("test %d expected %#v got %#v", i, true, false)
+			}
+		} else if err != nil {
+			t.Fatalf("test %d expected %#v got %#v", i, nil, err)
+		} else {
+			if !reflect.DeepEqual(result, tc.ExpectedBundle) {
+				t.Fatalf("test %d expected %#v got %#v", i, tc.ExpectedBundle, result)
+			}
+		}
+	}
+}
+
 func Test_Bundles_Validate(t *testing.T) {
 	testCases := []struct {
 		Bundles      []Bundle
