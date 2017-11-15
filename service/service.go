@@ -315,6 +315,7 @@ func New(config Config) (*Service, error) {
 		frameworkConfig.Logger = config.Logger
 		frameworkConfig.ResourceRouter = framework.DefaultResourceRouter(resources)
 		frameworkConfig.Informer = newInformer
+		frameworkConfig.TPR = newTPR
 
 		operatorFramework, err = framework.New(frameworkConfig)
 		if err != nil {
