@@ -28,6 +28,7 @@ func (s *Service) createSubnet(input SubnetInput) (*awsresources.Subnet, error) 
 		CidrBlock:        input.CidrBlock,
 		Name:             input.Name,
 		VpcID:            input.VpcID,
+		ClusterName:      key.ClusterID(input.Cluster),
 		// Dependencies.
 		Logger:    s.logger,
 		AWSEntity: awsresources.AWSEntity{Clients: input.Clients},
