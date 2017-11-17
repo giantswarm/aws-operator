@@ -18,6 +18,7 @@ type Subnet struct {
 	CidrBlock        string
 	Name             string
 	VpcID            string
+	ClusterName      string
 	id               string
 	// Dependencies.
 	Logger micrologger.Logger
@@ -93,6 +94,10 @@ func (s *Subnet) CreateOrFail() error {
 				{
 					Key:   aws.String(tagKeyName),
 					Value: aws.String(s.Name),
+				},
+				{
+					Key:   aws.String(tagKeyCluster),
+					Value: aws.String(s.ClusterName),
 				},
 			},
 		}); err != nil {
