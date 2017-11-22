@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cenk/backoff"
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/certificatetpr"
 	"github.com/giantswarm/microendpoint/service/version"
@@ -294,9 +293,7 @@ func New(config Config) (*Service, error) {
 	{
 		informerConfig := informer.DefaultConfig()
 
-		informerConfig.BackOff = backoff.NewExponentialBackOff()
 		informerConfig.WatcherFactory = newWatcherFactory
-
 		informerConfig.RateWait = time.Second * 10
 		informerConfig.ResyncPeriod = time.Minute * 5
 
