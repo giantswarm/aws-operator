@@ -5,140 +5,79 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/giantswarm/e2e-harness/pkg/harness"
+	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/spf13/afero"
 )
 
 const (
-	DockerFileFmt = `FROM alpine:3.6
-
-ADD ./%s-e2e /e2e
-
-ENTRYPOINT ["/e2e"]
-`
-	MainGoContentFmt = `package main
-
-import (
-	"log"
-	"os"
-
-	"github.com/giantswarm/%s/e2e/tests"
-)
-
-func main() {
-	// architect requires this.
-	if len(os.Args) > 1 {
-		return
-	}
-
-	if err := tests.Run(); err != nil {
-		log.Println("error running tests: ", err.Error())
-		os.Exit(1)
-	}
-}
-`
 	ProjectYamlContent = `version: 1
 
-setup:
-  - run: kubectl create namespace giantswarm
-    waitFor:
-      run: kubectl get namespace
-      match: giantswarm\s*Active
-
-outOfClusterTests:
-  - run: helm registry install quay.io/giantswarm/cert-operator-lab-chart -- -n cert-operator-lab --set imageTag=latest --set clusterName=my-cluster --wait
-    waitFor:
-      run: kubectl get certificate
-      match: No resources found\.
-
-teardown:
-  - run: helm delete cert-operator-lab --purge
-
-inClusterTest:
-  enabled: true
+test:
+  env:
+    - "EXPECTED_KEY=expected_value"
+    - "TEST_USER=${USER}"
 `
-	RunnerGoContent = `package tests
+	ClientGoContent = `// +build e2e
+
+package e2e
 
 import (
-	"github.com/giantswarm/e2e-harness/pkg/results"
-	"github.com/giantswarm/micrologger"
-	"github.com/spf13/afero"
+	"github.com/giantswarm/microerror"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
+
+	"github.com/giantswarm/e2e-harness/pkg/harness"
 )
 
-// Test is a generic type for all the test functions, it returns a
-// description of the tests and the eventually returned error.
-type Test func() (string, error)
-
-type TestSet struct {
-	clientset kubernetes.Interface
-	logger    micrologger.Logger
-}
-
-var (
-	// tests holds the array of functions to be executed.
-	tests = []Test{}
-	// ts is the test suite that will keep the results.
-	ts = &results.TestSuite{}
-)
-
-// Run executes all the tests and saves the results.
-func Run() error {
-	for _, test := range tests {
-		ts.Tests++
-		desc, err := test()
-		tc := results.TestCase{
-			Name: desc,
-		}
-		if err != nil {
-			ts.Failures++
-			tc.Failure = &results.TestFailure{
-				Value: err.Error(),
-			}
-		}
-		ts.TestCases = append(ts.TestCases, tc)
+func getK8sClient() (kubernetes.Interface, error) {
+	config, err := clientcmd.BuildConfigFromFlags("", harness.DefaultKubeConfig)
+	if err != nil {
+		return nil, microerror.Mask(err)
 	}
-	fs := afero.NewOsFs()
-	return results.Write(fs, ts)
-}
+	cs, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
 
-// Add appends the given test to the existing bundle.
-func Add(t Test) {
-	tests = append(tests, t)
+	return cs, nil
 }
 `
-	ExampleGoContent = `package tests
+	ExampleTestGoContent = `// +build e2e
+
+package e2e
 
 import (
-	"fmt"
+	"os"
+	"testing"
 
-	"github.com/giantswarm/operatorkit/client/k8sclient"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func init() {
-	Add(TestExample)
-}
-
-func TestExample() (string, error) {
-  // the description of the test will be shown in the summary.
-	desc := "example in-cluster test"
-
-	cs, err := k8sclient.New(k8sclient.DefaultConfig())
+func TestZeroInitialPods(t *testing.T) {
+	cs, err := getK8sClient()
 	if err != nil {
-		return desc, err
+		t.Errorf("unexpected error %v", err)
 	}
 
-  pods, err := cs.CoreV1().Pods("").List(metav1.ListOptions{})
-  if err != nil {
-    return desc, err
-  }
+	pods, err := cs.CoreV1().Pods("default").List(metav1.ListOptions{})
+	if err != nil {
+		t.Errorf("unexpected error %v", err)
+	}
 
-  if len(pods.Items) != 0 {
-    return desc, fmt.Errorf("Unexpected number of pods, expected 0, got %d", len(pods.Items))
-  }
+	if len(pods.Items) != 0 {
+		t.Errorf("Unexpected number of pods, expected 0, got %d", len(pods.Items))
+	}
+}
 
-	return desc, nil
+func TestEnvVars(t *testing.T) {
+	expected := "expected_value"
+	actual := os.Getenv("EXPECTED_KEY")
+
+	if expected != actual {
+		t.Errorf("unexpected value for EXPECTED_KEY, expected %q, got %q", expected, actual)
+	}
 }
 `
 )
@@ -165,10 +104,10 @@ func New(logger micrologger.Logger, fs afero.Fs, projectName string) *Initialize
 func (i *Initializer) CreateLayout() error {
 	wd, err := os.Getwd()
 	if err != nil {
-		return err
+		return microerror.Mask(err)
 	}
 
-	baseDir := filepath.Join(wd, "e2e")
+	baseDir := filepath.Join(wd, harness.DefaultKubeConfig)
 
 	// return if base dir already exists.
 	if _, err := i.fs.Stat(baseDir); !os.IsNotExist(err) {
@@ -176,49 +115,28 @@ func (i *Initializer) CreateLayout() error {
 	}
 
 	if err := i.fs.MkdirAll(baseDir, os.ModePerm); err != nil {
-		return err
+		return microerror.Mask(err)
 	}
 
 	afs := &afero.Afero{Fs: i.fs}
 
 	files := []fileDef{
 		{
-			name:    "Dockerfile",
-			content: fmt.Sprintf(DockerFileFmt, i.projectName),
-		},
-		{
-			name:    "main.go",
-			content: fmt.Sprintf(MainGoContentFmt, i.projectName),
-		},
-		{
 			name:    "project.yaml",
 			content: ProjectYamlContent,
+		},
+		{
+			name:    "client.go",
+			content: ClientGoContent,
+		},
+		{
+			name:    "example_test.go",
+			content: ExampleTestGoContent,
 		},
 	}
 
 	if err := i.writeFiles(files, baseDir, afs); err != nil {
-		return err
-	}
-
-	testsDir := filepath.Join(baseDir, "tests")
-
-	if err := i.fs.MkdirAll(testsDir, os.ModePerm); err != nil {
-		return err
-	}
-
-	files = []fileDef{
-		{
-			name:    "runner.go",
-			content: RunnerGoContent,
-		},
-		{
-			name:    "example.go",
-			content: ExampleGoContent,
-		},
-	}
-
-	if err := i.writeFiles(files, testsDir, afs); err != nil {
-		return err
+		return microerror.Mask(err)
 	}
 
 	return nil
@@ -229,7 +147,7 @@ func (i *Initializer) writeFiles(files []fileDef, baseDir string, afs *afero.Afe
 		path := filepath.Join(baseDir, f.name)
 
 		if err := afs.WriteFile(path, []byte(f.content), os.ModePerm); err != nil {
-			return err
+			return microerror.Mask(err)
 		}
 	}
 	return nil

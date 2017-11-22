@@ -1,10 +1,6 @@
-hash: 89ebebbdef71c431d149e43b87cc5d064aef9775fff498dee639394b2b3eee38
-updated: 2017-11-10T22:44:14.279618015+01:00
+hash: 526ad183b8534ebfc049eaf9802d51d00d33af08007b1a197ee8160762f8dfff
+updated: 2017-11-21T15:02:36.945981669+01:00
 imports:
-- name: github.com/coreos/go-semver
-  version: 8ab6407b697782a06568d4b7f1db25550ec2e4c6
-  subpackages:
-  - semver
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
   subpackages:
@@ -23,13 +19,11 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/microerror
-  version: 5ade94eb4ee35ef72eb9382228470caeddb29989
+  version: ec5f66bb657662031c0d651504fee6908cdf28d9
 - name: github.com/giantswarm/micrologger
   version: 954d1261928bbb50dc917c629edf0b71db6a1527
 - name: github.com/giantswarm/operatorkit
-  version: 93c9638ca2fd14a9482acb7d8c26f599d6d808a5
-- name: github.com/giantswarm/versionbundle
-  version: 9fa378d39ae958ea6a1e9dd15a0137ca72c18d2e
+  version: 0bd1c4365f66a52c233957c38367ca3a3c2a81e9
 - name: github.com/go-kit/kit
   version: a9ca6725cbbea455e61c6bc8a1ed28e81eb3493b
   subpackages:
@@ -48,8 +42,6 @@ imports:
   version: 6aced65f8501fe1217321abf0749d354824ba2ff
 - name: github.com/go-openapi/swag
   version: 1d0bd113de87027671077d3c71eb3ac5d7dbba72
-- name: github.com/go-resty/resty
-  version: 9ac9c42358f7c3c69ac9f8610e8790d7c338e85d
 - name: github.com/go-stack/stack
   version: 100eb0c0a9c5b306ca2fb4f165df21d80ada4b82
 - name: github.com/gogo/protobuf
@@ -86,16 +78,10 @@ imports:
 - name: golang.org/x/net
   version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
   subpackages:
-  - context
   - http2
   - http2/hpack
   - idna
   - lex/httplex
-  - publicsuffix
-- name: golang.org/x/sync
-  version: fd80eb99c8f653c847d294a001bdf2a3a6f768f5
-  subpackages:
-  - errgroup
 - name: golang.org/x/text
   version: 2910a502d2bf9e43193af9d68ca516529614eed3
   subpackages:

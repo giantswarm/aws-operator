@@ -12,21 +12,5 @@ ipSans:
 organizations:
 - system:masters
 ttl: 4320h
-version_bundle:
-  changelogs:
-  - component: calico
-    description: Calico version updated.
-    kind: changed
-  components:
-  - name: calico
-    version: 1.1.0
-  - name: kube-dns
-    version: 1.0.0
-  dependencies:
-  - name: kubernetes
-    version: <= 1.7.x
-  deprecated: false
-  name: kubernetes-operator
-  time: 1970-01-01T00:00:10.000000005Z
+versionBundle:
   version: 0.1.0
-  wip: false

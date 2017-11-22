@@ -7,7 +7,7 @@ import (
 )
 
 func TestSetupFlags(t *testing.T) {
-	remoteFlag := cmd.SetupCmd.Flags().Lookup("remote-cluster")
+	remoteFlag := cmd.SetupCmd.Flags().Lookup("remote")
 
 	t.Run("flag exists", func(t *testing.T) {
 		if remoteFlag == nil {
