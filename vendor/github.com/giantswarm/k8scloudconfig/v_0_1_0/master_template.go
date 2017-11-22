@@ -507,6 +507,10 @@ write_files:
                 # kubernetes.default to the correct service clusterIP.
                 - name: CONFIGURE_ETC_HOSTS
                   value: "true"
+              resources:
+                requests:
+                  cpu: 30m
+                  memory: 90Mi
               volumeMounts:
                 # Mount in the etcd TLS secrets.
                 - mountPath: /etc/kubernetes/ssl/etcd
@@ -833,11 +837,14 @@ write_files:
       strategy:
         type: RollingUpdate
         rollingUpdate:
+          maxSurge: 1
           maxUnavailable: 1
       template:
         metadata:
           labels:
             k8s-app: nginx-ingress-controller
+          annotations:
+            scheduler.alpha.kubernetes.io/critical-pod: ''
         spec:
           affinity:
             podAntiAffinity:
@@ -854,11 +861,12 @@ write_files:
           serviceAccountName: nginx-ingress-controller
           containers:
           - name: nginx-ingress-controller
-            image: {{.Cluster.Kubernetes.IngressController.Docker.Image}}
+            image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.9.0-beta.17
             args:
             - /nginx-ingress-controller
             - --default-backend-service=$(POD_NAMESPACE)/default-http-backend
             - --configmap=$(POD_NAMESPACE)/ingress-nginx
+            - --enable-ssl-passthrough
             env:
               - name: POD_NAME
                 valueFrom:
@@ -873,6 +881,10 @@ write_files:
                 path: /healthz
                 port: 10254
                 scheme: HTTP
+            resources:
+              requests:
+                memory: "350Mi"
+                cpu: "500m"
             livenessProbe:
               httpGet:
                 path: /healthz
@@ -880,6 +892,12 @@ write_files:
                 scheme: HTTP
               initialDelaySeconds: 10
               timeoutSeconds: 1
+            lifecycle:
+              preStop:
+                exec:
+                  command:
+                  - sleep
+                  - "15"
             ports:
             - containerPort: 80
               hostPort: 80
@@ -975,6 +993,10 @@ write_files:
                   port: 10256
                 initialDelaySeconds: 10
                 periodSeconds: 3
+              resources:
+                requests:
+                  memory: "80Mi"
+                  cpu: "75m"
               securityContext:
                 privileged: true
               volumeMounts:
@@ -1457,13 +1479,15 @@ write_files:
   permissions: 0544
   content: |
       #!/bin/bash
+
+      export KUBECONFIG=/etc/kubernetes/config/addons-kubeconfig.yml
       # kubectl 1.8.1
       KUBECTL=quay.io/giantswarm/docker-kubectl:1dc536ec6dc4597ba46769b3d5d6ce53a7e62038
 
       /usr/bin/docker pull $KUBECTL
 
       # wait for healthy master
-      while [ "$(/usr/bin/docker run --net=host --rm $KUBECTL get cs | grep Healthy | wc -l)" -ne "3" ]; do sleep 1 && echo 'Waiting for healthy k8s'; done
+      while [ "$(/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL get cs | grep Healthy | wc -l)" -ne "3" ]; do sleep 1 && echo 'Waiting for healthy k8s'; done
 
       # apply Security bootstrap (RBAC and PSP)
       SECURITY_FILES="rbac_bindings.yaml rbac_roles.yaml psp_policies.yaml psp_roles.yaml psp_binding.yaml"
@@ -1471,7 +1495,7 @@ write_files:
       for manifest in $SECURITY_FILES
       do
           while
-              /usr/bin/docker run --net=host --rm -v /srv:/srv $KUBECTL apply -f /srv/$manifest
+              /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/$manifest
               [ "$?" -ne "0" ]
           do
               echo "failed to apply /src/$manifest, retrying in 5 sec"
@@ -1493,7 +1517,7 @@ write_files:
       for manifest in $CALICO_FILES
       do
           while
-              /usr/bin/docker run --net=host --rm -v /srv:/srv $KUBECTL apply -f /srv/$manifest
+              /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/$manifest
               [ "$?" -ne "0" ]
           do
               echo "failed to apply /src/$manifest, retrying in 5 sec"
@@ -1504,9 +1528,9 @@ write_files:
       # wait for healthy calico - we check for pods - desired vs ready
       while
           # result of this is 'eval [ "$DESIRED_POD_COUNT" -eq "$READY_POD_COUNT" ]'
-          /usr/bin/docker run --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL -n kube-system  get ds calico-node 2>/dev/null >/dev/null
+          /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL -n kube-system  get ds calico-node 2>/dev/null >/dev/null
           RET_CODE_1=$?
-          eval $(/usr/bin/docker run --net=host --rm $KUBECTL -n kube-system get ds calico-node | tail -1 | awk '{print "[ \"" $2"\" -eq \""$4"\" ] "}')
+          eval $(/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL -n kube-system get ds calico-node | tail -1 | awk '{print "[ \"" $2"\" -eq \""$4"\" ] "}')
           RET_CODE_2=$?
           [ "$RET_CODE_1" -ne "0" ] || [ "$RET_CODE_2" -ne "0" ]
       do
@@ -1517,7 +1541,7 @@ write_files:
       # apply default storage class
       if [ -f /srv/default-storage-class.yaml ]; then
           while
-              /usr/bin/docker run --net=host --rm -v /srv:/srv $KUBECTL apply -f /srv/default-storage-class.yaml
+              /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/default-storage-class.yaml
               [ "$?" -ne "0" ]
           do
               echo "failed to apply /srv/default-storage-class.yaml, retrying in 5 sec"
@@ -1543,7 +1567,7 @@ write_files:
       for manifest in $MANIFESTS
       do
           while
-              /usr/bin/docker run --net=host --rm -v /srv:/srv $KUBECTL apply -f /srv/$manifest
+              /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/$manifest
               [ "$?" -ne "0" ]
           do
               echo "failed to apply /srv/$manifest, retrying in 5 sec"
@@ -1551,6 +1575,29 @@ write_files:
           done
       done
       echo "Addons successfully installed"
+- path: /etc/kubernetes/config/addons-kubeconfig.yml
+  owner: root
+  permissions: 0644
+  content: |
+    apiVersion: v1
+    kind: Config
+    users:
+    - name: proxy
+      user:
+        client-certificate: /etc/kubernetes/ssl/apiserver-crt.pem
+        client-key: /etc/kubernetes/ssl/apiserver-key.pem
+    clusters:
+    - name: local
+      cluster:
+        certificate-authority: /etc/kubernetes/ssl/apiserver-ca.pem
+        server: https://{{.Cluster.Kubernetes.API.Domain}}
+    contexts:
+    - context:
+        cluster: local
+        user: proxy
+      name: service-account-context
+    current-context: service-account-context
+
 - path: /etc/kubernetes/config/proxy-kubeconfig.yml
   owner: root
   permissions: 0644
@@ -1953,6 +2000,8 @@ coreos:
       --allow-privileged=true \
       --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml \
       --node-labels="node-role.kubernetes.io/master,role=master,kubernetes.io/hostname=${HOSTNAME},ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
+      --kube-reserved="cpu=150m,memory=250Mi" \
+      --system-reserved="cpu=150m,memory=250Mi" \
       --v=2"
       ExecStop=-/usr/bin/docker stop -t 10 $NAME
       ExecStopPost=-/usr/bin/docker rm -f $NAME
@@ -2007,7 +2056,8 @@ coreos:
       /hyperkube apiserver \
       --allow_privileged=true \
       --insecure_bind_address=0.0.0.0 \
-      --insecure_port={{.Cluster.Kubernetes.API.InsecurePort}} \
+      --anonymous-auth=false \
+      --insecure_port=0 \
       --kubelet_https=true \
       --kubelet-preferred-address-types=InternalIP \
       --secure_port={{.Cluster.Kubernetes.API.SecurePort}} \
@@ -2116,33 +2166,6 @@ coreos:
       Type=oneshot
       EnvironmentFile=/etc/network-environment
       ExecStart=/opt/k8s-addons
-      [Install]
-      WantedBy=multi-user.target
-  - name: node-exporter.service
-    enable: true
-    command: start
-    content: |
-      [Unit]
-      Description=Prometheus Node Exporter Service
-      Requires=docker.service
-      After=docker.service
-
-      [Service]
-      Restart=always
-      Environment="IMAGE=prom/node-exporter:0.12.0"
-      Environment="NAME=%p.service"
-      ExecStartPre=/usr/bin/docker pull $IMAGE
-      ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
-      ExecStartPre=-/usr/bin/docker rm -f $NAME
-      ExecStart=/usr/bin/docker run --rm \
-        -p 91:91 \
-        --net=host \
-        --name $NAME \
-        $IMAGE \
-        --web.listen-address=:91
-      ExecStop=-/usr/bin/docker stop -t 10 $NAME
-      ExecStopPost=-/usr/bin/docker rm -f $NAME
-
       [Install]
       WantedBy=multi-user.target
 

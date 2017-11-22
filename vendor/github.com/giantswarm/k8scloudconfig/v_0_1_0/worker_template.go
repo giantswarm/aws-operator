@@ -290,38 +290,58 @@ coreos:
       --allow-privileged=true \
       --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml \
       --node-labels="kubernetes.io/hostname=${HOSTNAME},ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
+      --kube-reserved="cpu=150m,memory=250Mi" \
+      --system-reserved="cpu=150m,memory=250Mi" \
       --v=2"
       ExecStop=-/usr/bin/docker stop -t 10 $NAME
       ExecStopPost=-/usr/bin/docker rm -f $NAME
-  - name: node-exporter.service
-    enable: true
-    command: start
+  - name: k8s-proxy.service
+    enable: false
+    command: stop
     content: |
       [Unit]
-      Description=Prometheus Node Exporter Service
-      Requires=docker.service
-      After=docker.service
+      Description=k8s-proxy
+      StartLimitIntervalSec=0
 
       [Service]
       Restart=always
       RestartSec=0
       TimeoutStopSec=10
-      Environment="IMAGE=prom/node-exporter:0.12.0"
+      EnvironmentFile=/etc/network-environment
+      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.8.1_coreos.0"
       Environment="NAME=%p.service"
+      Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
       ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
-      ExecStartPre=-/usr/bin/docker rm -f $NAME
-      ExecStart=/usr/bin/docker run --rm \
-        -p 91:91 \
-        --net=host \
-        --name $NAME \
-        $IMAGE \
-        --web.listen-address=:91
+      ExecStartPre=-/usr/bin/docker rm -f $NAME      
+      ExecStart=/bin/sh -c "/usr/bin/docker run --rm --net=host --privileged=true \
+      --name $NAME \
+      -v /usr/share/ca-certificates:/etc/ssl/certs \
+      -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
+      -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
+      $IMAGE \
+      /hyperkube proxy \
+      --proxy-mode=iptables \
+      --logtostderr=true \
+      --kubeconfig=/etc/kubernetes/config/proxy-kubeconfig.yml \
+      --conntrack-max-per-core 131072 \
+      --v=2"
       ExecStop=-/usr/bin/docker stop -t 10 $NAME
       ExecStopPost=-/usr/bin/docker rm -f $NAME
-
-      [Install]
-      WantedBy=multi-user.target
+  - name: k8s-proxy-watcher.service
+    enable: true
+    command: start
+    content: |
+      [Unit]
+      Description=k8s-proxy-watcher
+      Wants=k8s-kubelet.service
+      After=k8s-kubelet.service
+      
+      [Service]
+      Type=oneshot
+      ExecStartPre=/bin/sh -c "sleep 2m"
+      ExecStart=/bin/sh -c "proxyCount=$(docker ps | grep 'kube-proxy' | wc -l);if [ "$proxyCount" == "0" ]; then sudo systemctl start k8s-proxy; fi;"
+      RemainAfterExit=yes
 
   update:
     reboot-strategy: off

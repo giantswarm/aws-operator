@@ -6,17 +6,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/giantswarm/e2e-harness/pkg/wait"
 	"github.com/giantswarm/micrologger/microloggertest"
+
+	"github.com/giantswarm/e2e-harness/pkg/wait"
 )
 
 type runnerMock struct{}
 
-func (r *runnerMock) Run(out io.Writer, command string) error {
+func (r *runnerMock) Run(out io.Writer, command string, env ...string) error {
 	return nil
 }
 
-func (r *runnerMock) RunPortForward(out io.Writer, command string) error {
+func (r *runnerMock) RunPortForward(out io.Writer, command string, env ...string) error {
 	return nil
 }
 

@@ -5,6 +5,7 @@ import (
 	"io"
 	"regexp"
 
+	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 )
 
@@ -26,18 +27,17 @@ func New(logger micrologger.Logger) *Patterns {
 func (pa *Patterns) Find(input io.Reader, pattern string) (bool, error) {
 	r, err := regexp.Compile(pattern)
 	if err != nil {
-		return false, err
+		return false, microerror.Mask(err)
 	}
 
 	scanner := bufio.NewScanner(input)
 	for scanner.Scan() {
-		pa.logger.Log("debug", "line to match: "+scanner.Text())
 		if r.MatchString(scanner.Text()) {
 			return true, nil
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		return false, err
+		return false, microerror.Mask(err)
 	}
 	return false, nil
 }

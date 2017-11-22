@@ -3,27 +3,38 @@
 package service
 
 import (
+	"context"
 	"sync"
+	"time"
 
+	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/certificatetpr"
 	"github.com/giantswarm/microendpoint/service/version"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8sclient"
+	"github.com/giantswarm/operatorkit/framework"
+	"github.com/giantswarm/operatorkit/framework/resource/logresource"
+	"github.com/giantswarm/operatorkit/framework/resource/metricsresource"
+	"github.com/giantswarm/operatorkit/informer"
+	"github.com/giantswarm/operatorkit/tpr"
 	"github.com/giantswarm/randomkeytpr"
 	"github.com/spf13/viper"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/aws-operator/service/alerter"
 	"github.com/giantswarm/aws-operator/service/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/create"
 	"github.com/giantswarm/aws-operator/service/healthz"
+	cloudformationresource "github.com/giantswarm/aws-operator/service/resource/cloudformation"
+	legacyresource "github.com/giantswarm/aws-operator/service/resource/legacy"
 )
 
 const (
-	RedactedString = "[REDACTED]"
+	ResourceRetries uint64 = 3
+	RedactedString         = "[REDACTED]"
 )
 
 // Config represents the configuration used to create a new service.
@@ -59,6 +70,17 @@ func DefaultConfig() Config {
 	}
 }
 
+type Service struct {
+	// Dependencies.
+	Alerter   *alerter.Service
+	Framework *framework.Framework
+	Healthz   *healthz.Service
+	Version   *version.Service
+
+	// Internals.
+	bootOnce sync.Once
+}
+
 // New creates a new configured service object.
 func New(config Config) (*Service, error) {
 	// Dependencies.
@@ -68,7 +90,6 @@ func New(config Config) (*Service, error) {
 
 	var err error
 
-	// TODO this should come from operatorkit
 	var k8sClient kubernetes.Interface
 	{
 		k8sConfig := k8sclient.DefaultConfig()
@@ -166,20 +187,134 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var createService *create.Service
+	var legacyResource framework.Resource
 	{
-		createConfig := create.DefaultConfig()
-		createConfig.AwsConfig = awsConfig
-		createConfig.AwsHostConfig = awsHostConfig
-		createConfig.CertWatcher = certWatcher
-		createConfig.CloudConfig = ccService
-		createConfig.InstallationName = installationName
-		createConfig.K8sClient = k8sClient
-		createConfig.KeyWatcher = keyWatcher
-		createConfig.Logger = config.Logger
-		createConfig.PubKeyFile = config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile)
+		legacyConfig := legacyresource.DefaultConfig()
+		legacyConfig.AwsConfig = awsConfig
+		legacyConfig.AwsHostConfig = awsHostConfig
+		legacyConfig.CertWatcher = certWatcher
+		legacyConfig.CloudConfig = ccService
+		legacyConfig.InstallationName = installationName
+		legacyConfig.K8sClient = k8sClient
+		legacyConfig.KeyWatcher = keyWatcher
+		legacyConfig.Logger = config.Logger
+		legacyConfig.PubKeyFile = config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile)
 
-		createService, err = create.New(createConfig)
+		legacyResource, err = legacyresource.New(legacyConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var cloudformationResource framework.Resource
+	{
+		cloudformationConfig := cloudformationresource.DefaultConfig()
+
+		cloudformationConfig.Clients = awsclient.NewClients(awsConfig)
+		cloudformationConfig.Logger = config.Logger
+
+		cloudformationResource, err = cloudformationresource.New(cloudformationConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	// We create the list of resources and wrap each resource around some common
+	// resources like metrics and retry resources.
+	//
+	// NOTE that the retry resources wrap the underlying resources first. The
+	// wrapped resources are then wrapped around the metrics resource. That way
+	// the metrics also consider execution times and execution attempts including
+	// retries.
+	var resources []framework.Resource
+	{
+		resources = []framework.Resource{
+			legacyResource,
+			cloudformationResource,
+		}
+
+		logWrapConfig := logresource.DefaultWrapConfig()
+		logWrapConfig.Logger = config.Logger
+		resources, err = logresource.Wrap(resources, logWrapConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		// Disable retry wrapper due to problems with the legacy resource.
+		/*
+			retryWrapConfig := retryresource.DefaultWrapConfig()
+			retryWrapConfig.BackOffFactory = func() backoff.BackOff { return backoff.WithMaxTries(backoff.NewExponentialBackOff(), ResourceRetries) }
+			retryWrapConfig.Logger = config.Logger
+			resources, err = retryresource.Wrap(resources, retryWrapConfig)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+		*/
+
+		metricsWrapConfig := metricsresource.DefaultWrapConfig()
+		metricsWrapConfig.Name = config.Name
+		resources, err = metricsresource.Wrap(resources, metricsWrapConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
+		return ctx, nil
+	}
+
+	var newTPR *tpr.TPR
+	{
+		c := tpr.DefaultConfig()
+
+		c.K8sClient = k8sClient
+		c.Logger = config.Logger
+
+		c.Description = awstpr.Description
+		c.Name = awstpr.Name
+		c.Version = awstpr.VersionV1
+
+		newTPR, err = tpr.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var newWatcherFactory informer.WatcherFactory
+	{
+		zeroObjectFactory := &informer.ZeroObjectFactoryFuncs{
+			NewObjectFunc:     func() runtime.Object { return &awstpr.CustomObject{} },
+			NewObjectListFunc: func() runtime.Object { return &awstpr.List{} },
+		}
+		newWatcherFactory = informer.NewWatcherFactory(k8sClient.Discovery().RESTClient(), newTPR.WatchEndpoint(""), zeroObjectFactory)
+	}
+
+	var newInformer *informer.Informer
+	{
+		informerConfig := informer.DefaultConfig()
+
+		informerConfig.WatcherFactory = newWatcherFactory
+		informerConfig.RateWait = time.Second * 10
+		informerConfig.ResyncPeriod = time.Minute * 5
+
+		newInformer, err = informer.New(informerConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var operatorFramework *framework.Framework
+	{
+		frameworkConfig := framework.DefaultConfig()
+
+		frameworkConfig.BackOffFactory = framework.DefaultBackOffFactory()
+		frameworkConfig.InitCtxFunc = initCtxFunc
+		frameworkConfig.Logger = config.Logger
+		frameworkConfig.ResourceRouter = framework.DefaultResourceRouter(resources)
+		frameworkConfig.Informer = newInformer
+		frameworkConfig.TPR = newTPR
+
+		operatorFramework, err = framework.New(frameworkConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -214,10 +349,10 @@ func New(config Config) (*Service, error) {
 
 	newService := &Service{
 		// Dependencies.
-		Alerter: alerterService,
-		Create:  createService,
-		Healthz: healthzService,
-		Version: versionService,
+		Alerter:   alerterService,
+		Framework: operatorFramework,
+		Healthz:   healthzService,
+		Version:   versionService,
 
 		// Internals
 		bootOnce: sync.Once{},
@@ -226,23 +361,12 @@ func New(config Config) (*Service, error) {
 	return newService, nil
 }
 
-type Service struct {
-	// Dependencies.
-	Alerter *alerter.Service
-	Create  *create.Service
-	Healthz *healthz.Service
-	Version *version.Service
-
-	// Internals.
-	bootOnce sync.Once
-}
-
 func (s *Service) Boot() {
 	s.bootOnce.Do(func() {
 		// Start alerts to check for orphan resources.
 		s.Alerter.StartAlerts()
 
-		// Start the operator.
-		s.Create.Boot()
+		// Start the framework.
+		s.Framework.Boot()
 	})
 }

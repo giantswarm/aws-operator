@@ -1,6 +1,10 @@
 package cmd
 
 import (
+	"github.com/giantswarm/micrologger"
+	"github.com/spf13/afero"
+	"github.com/spf13/cobra"
+
 	"github.com/giantswarm/e2e-harness/pkg/cluster"
 	"github.com/giantswarm/e2e-harness/pkg/docker"
 	"github.com/giantswarm/e2e-harness/pkg/harness"
@@ -8,8 +12,6 @@ import (
 	"github.com/giantswarm/e2e-harness/pkg/project"
 	"github.com/giantswarm/e2e-harness/pkg/tasks"
 	"github.com/giantswarm/e2e-harness/pkg/wait"
-	"github.com/giantswarm/micrologger"
-	"github.com/spf13/cobra"
 )
 
 var (
@@ -29,32 +31,45 @@ func runTeardown(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	h := harness.New(logger, harness.Config{})
+
+	fs := afero.NewOsFs()
+
+	h := harness.New(logger, fs, harness.Config{})
 	cfg, err := h.ReadConfig()
 	if err != nil {
 		return err
 	}
-	imageTag := GetGitCommit()
-	projectName := GetProjectName()
+	projectTag := harness.GetProjectTag()
+	projectName := harness.GetProjectName()
 
-	d := docker.New(logger, imageTag)
+	// use latest tag for consumer projects (not dog-fooding e2e-harness)
+	e2eHarnessTag := projectTag
+	if projectName != "e2e-harness" {
+		e2eHarnessTag = "latest"
+	}
+
+	d := docker.New(logger, e2eHarnessTag, cfg.RemoteCluster)
 	pa := patterns.New(logger)
 	w := wait.New(logger, d, pa)
 	pCfg := &project.Config{
-		Name:      projectName,
-		GitCommit: gitCommit,
+		Name: projectName,
+		Tag:  projectTag,
 	}
 	pDeps := &project.Dependencies{
 		Logger: logger,
 		Runner: d,
 		Wait:   w,
+		Fs:     fs,
 	}
 	p := project.New(pDeps, pCfg)
-	c := cluster.New(logger, d, cfg.RemoteCluster)
+	c := cluster.New(logger, fs, d, cfg.RemoteCluster)
 
-	bundle := []tasks.Task{
-		p.TeardownSteps,
-		c.Delete,
+	bundle := []tasks.Task{}
+
+	if cfg.RemoteCluster {
+		bundle = append(bundle, c.Delete)
+	} else {
+		bundle = append(bundle, p.CommonTearDownSteps)
 	}
 
 	return tasks.Run(bundle)

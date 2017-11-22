@@ -5,13 +5,13 @@ import:
 - package: github.com/giantswarm/microkit
   version: master
 - package: github.com/giantswarm/operatorkit
-  verson: master
+  version: master
 - package: github.com/giantswarm/microerror
-  verson: master
+  version: master
 - package: github.com/giantswarm/micrologger
-  verson: master
+  version: master
 - package: github.com/giantswarm/microendpoint
-  verson: master
+  version: master
 - package: google.golang.org/grpc
   version: v1.2.1
 - package: github.com/giantswarm/awstpr

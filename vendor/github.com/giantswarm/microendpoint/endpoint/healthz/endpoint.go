@@ -80,7 +80,7 @@ func (e *Endpoint) Encoder() kithttp.EncodeResponseFunc {
 		if healthz.Responses(rs).HasFailed() {
 			for _, r := range rs {
 				if r.Failed {
-					e.logger.Log("error", "health check failed", "healthCheckDescritpion", r.Description, "healthCheckMessage", r.Message)
+					e.logger.Log("error", "health check failed", "healthCheckDescription", r.Description, "healthCheckMessage", r.Message)
 				}
 			}
 

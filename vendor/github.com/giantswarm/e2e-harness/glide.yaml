@@ -12,3 +12,7 @@ import:
   version: master
 - package: github.com/spf13/pflag
   version: master
+- package: k8s.io/client-go
+  version: v4.0.0
+- package: k8s.io/apimachinery
+  version: release-1.7

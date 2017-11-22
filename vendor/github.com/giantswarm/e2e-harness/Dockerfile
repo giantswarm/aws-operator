@@ -4,8 +4,7 @@ RUN adduser -D -u 1001 e2e-harness
 ENV HOME=/home/e2e-harness
 ENV WORKDIR=/workdir
 
-RUN mkdir -p ${HOME}/resources ${WORKDIR}
-ADD resources/ ${HOME}/resources
+RUN mkdir -p ${WORKDIR}
 
 RUN chown -R e2e-harness:e2e-harness ${WORKDIR} ${HOME}
 

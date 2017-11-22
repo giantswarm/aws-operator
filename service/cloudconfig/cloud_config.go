@@ -56,8 +56,9 @@ func New(config Config) (*CloudConfig, error) {
 func (c *CloudConfig) NewMasterTemplate(customObject awstpr.CustomObject, certs certificatetpr.CompactTLSAssets, keys randomkeytpr.CompactRandomKeyAssets) (string, error) {
 	var err error
 
-	// TODO remove defaulting as soon as custom objects are configured.
-	if !key.HasClusterVersion(customObject) {
+	// Default the version if it is not configured or we are using Cloud Formation.
+	// TODO Remove once Cloud Formation migration is complete.
+	if !key.HasClusterVersion(customObject) || key.UseCloudFormation(customObject) {
 		customObject.Spec.Cluster.Version = string(cloudconfig.V_0_1_0)
 	}
 
@@ -82,8 +83,9 @@ func (c *CloudConfig) NewMasterTemplate(customObject awstpr.CustomObject, certs 
 func (c *CloudConfig) NewWorkerTemplate(customObject awstpr.CustomObject, certs certificatetpr.CompactTLSAssets) (string, error) {
 	var err error
 
-	// TODO remove defaulting as soon as custom objects are configured.
-	if customObject.Spec.Cluster.Version == "" {
+	// Default the version if it is not configured or we are using Cloud Formation.
+	// TODO Remove once Cloud Formation migration is complete.
+	if !key.HasClusterVersion(customObject) || key.UseCloudFormation(customObject) {
 		customObject.Spec.Cluster.Version = string(cloudconfig.V_0_1_0)
 	}
 

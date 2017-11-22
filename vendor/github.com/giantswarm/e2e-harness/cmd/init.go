@@ -1,12 +1,13 @@
 package cmd
 
 import (
-	"github.com/giantswarm/e2e-harness/pkg/harness"
-	"github.com/giantswarm/e2e-harness/pkg/initializer"
-	"github.com/giantswarm/e2e-harness/pkg/tasks"
 	"github.com/giantswarm/micrologger"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
+
+	"github.com/giantswarm/e2e-harness/pkg/harness"
+	"github.com/giantswarm/e2e-harness/pkg/initializer"
+	"github.com/giantswarm/e2e-harness/pkg/tasks"
 )
 
 var (
