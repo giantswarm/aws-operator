@@ -1,5 +1,5 @@
-hash: 8b167e061d4f6de83b2b505cf12a80c895abeb46d96ba8b63832c251badd2810
-updated: 2017-11-22T18:12:54.03010575+01:00
+hash: 0e05add1a117b58ead0a42b6355d62469160970f41467166eb20a9a32c3b3c21
+updated: 2017-11-23T09:34:56.312208132+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -95,7 +95,7 @@ imports:
 - name: github.com/giantswarm/e2e-harness
   version: 59cf7b74ca2c0149f9e18e337c9ea9ed3f025099
 - name: github.com/giantswarm/k8scloudconfig
-  version: 96e3658464a136d8700c27f9ba9f44942dad3ff1
+  version: 622ecaef754778cf54595392efe79ff6996bab59
   subpackages:
   - v_0_1_0
 - name: github.com/giantswarm/microendpoint
@@ -260,7 +260,7 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 19e54c4a2b8a78c9d54b2bed61b1a6c5e1bfcf6f
+  version: 1be1d2841c773c01bee8289f55f7463b6e2c2539
 - name: github.com/spf13/jwalterweatherman
   version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
 - name: github.com/spf13/pflag
