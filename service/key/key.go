@@ -23,8 +23,16 @@ func AvailabilityZone(customObject awstpr.CustomObject) string {
 	return customObject.Spec.AWS.AZ
 }
 
+func ClusterCustomer(customObject awstpr.CustomObject) string {
+	return customObject.Spec.Cluster.Customer.ID
+}
+
 func ClusterID(customObject awstpr.CustomObject) string {
 	return customObject.Spec.Cluster.Cluster.ID
+}
+
+func ClusterNamespace(customObject awstpr.CustomObject) string {
+	return ClusterID(customObject)
 }
 
 func CustomerID(customObject awstpr.CustomObject) string {
