@@ -32,6 +32,8 @@ func IsStackNotFound(err error) bool {
 	return strings.Contains(microerror.Cause(err).Error(), "does not exist")
 }
 
+var tooManyResultsError = microerror.New("too many results")
+
 var wrongTypeError = microerror.New("wrong type")
 
 // IsWrongType asserts wrongTypeError.

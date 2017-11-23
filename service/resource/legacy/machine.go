@@ -184,7 +184,7 @@ func (s *Resource) runMachine(input runMachineInput) (bool, string, error) {
 		return false, "", microerror.Mask(err)
 	}
 
-	smallCloudconfig, err := s.SmallCloudconfig(cloudconfigConfig)
+	smallCloudconfig, err := SmallCloudconfig(cloudconfigConfig)
 	if err != nil {
 		return false, "", microerror.Mask(err)
 	}

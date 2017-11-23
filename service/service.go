@@ -210,7 +210,10 @@ func New(config Config) (*Service, error) {
 	{
 		cloudformationConfig := cloudformationresource.DefaultConfig()
 
-		cloudformationConfig.Clients = awsclient.NewClients(awsConfig)
+		awsClients := awsclient.NewClients(awsConfig)
+		cloudformationConfig.Clients.EC2 = awsClients.EC2
+		cloudformationConfig.Clients.CloudFormation = awsClients.CloudFormation
+		cloudformationConfig.Clients.IAM = awsClients.IAM
 		cloudformationConfig.Logger = config.Logger
 
 		cloudformationResource, err = cloudformationresource.New(cloudformationConfig)

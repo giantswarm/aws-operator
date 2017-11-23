@@ -77,7 +77,7 @@ func (s *Resource) createLaunchConfiguration(input launchConfigurationInput) (bo
 		return false, microerror.Mask(err)
 	}
 
-	smallCloudconfig, err := s.SmallCloudconfig(cloudconfigConfig)
+	smallCloudconfig, err := SmallCloudconfig(cloudconfigConfig)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}

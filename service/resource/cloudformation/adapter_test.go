@@ -1,13 +1,16 @@
 package cloudformation
 
 import (
+	"encoding/base64"
+	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/giantswarm/awstpr"
 	awsspec "github.com/giantswarm/awstpr/spec"
 	awsspecaws "github.com/giantswarm/awstpr/spec/aws"
-
-	awsutil "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/clustertpr"
+	"github.com/giantswarm/clustertpr/spec"
 )
 
 func TestAdapterMain(t *testing.T) {
@@ -20,14 +23,17 @@ func TestAdapterMain(t *testing.T) {
 			},
 		},
 	}
-	clients := awsutil.Clients{}
+	clients := Clients{
+		EC2: &eC2ClientMock{sgExists: true},
+		IAM: &iAMClientMock{},
+	}
 
 	a, err := newAdapter(customObject, clients)
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
 	}
 
-	expected := "worker"
+	expected := prefixWorker
 	actual := a.ASGType
 
 	if expected != actual {
@@ -44,6 +50,7 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 		expectedInstanceType             string
 		expectedIAMInstanceProfileName   string
 		expectedAssociatePublicIPAddress bool
+		expectedBlockDeviceMappings      []BlockDeviceMapping
 	}{
 		{
 			description:   "empty custom object",
@@ -54,6 +61,11 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 			description: "basic matching, all fields present",
 			customObject: awstpr.CustomObject{
 				Spec: awstpr.Spec{
+					Cluster: clustertpr.Spec{
+						Cluster: spec.Cluster{
+							ID: "test-cluster",
+						},
+					},
 					AWS: awsspec.AWS{
 						Workers: []awsspecaws.Node{
 							awsspecaws.Node{
@@ -64,14 +76,27 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 					},
 				},
 			},
-			expectedImageID:      "myimageid",
-			expectedInstanceType: "myinstancetype",
+			expectedImageID:                  "myimageid",
+			expectedInstanceType:             "myinstancetype",
+			expectedIAMInstanceProfileName:   "test-cluster-worker-EC2-K8S-Role",
+			expectedAssociatePublicIPAddress: true,
+			expectedBlockDeviceMappings: []BlockDeviceMapping{
+				BlockDeviceMapping{
+					DeleteOnTermination: true,
+					DeviceName:          defaultEBSVolumeMountPoint,
+					VolumeSize:          defaultEBSVolumeSize,
+					VolumeType:          defaultEBSVolumeType,
+				},
+			},
 		},
 	}
-
-	clients := awsutil.Clients{}
-	a := adapter{}
 	for _, tc := range testCases {
+		clients := Clients{
+			EC2: &eC2ClientMock{sgExists: true},
+			IAM: &iAMClientMock{},
+		}
+		a := adapter{}
+
 		t.Run(tc.description, func(t *testing.T) {
 			err := a.getLaunchConfiguration(tc.customObject, clients)
 			if tc.expectedError && err == nil {
@@ -83,10 +108,156 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 			}
 
 			if a.ImageID != tc.expectedImageID {
-				t.Errorf("unexpected output, got %q, want %q", a.ImageID, tc.expectedImageID)
+				t.Errorf("unexpected ImageID, got %q, want %q", a.ImageID, tc.expectedImageID)
 			}
 			if a.InstanceType != tc.expectedInstanceType {
-				t.Errorf("unexpected output, got %q, want %q", a.InstanceType, tc.expectedInstanceType)
+				t.Errorf("unexpected InstanceType, got %q, want %q", a.InstanceType, tc.expectedInstanceType)
+			}
+			if a.IAMInstanceProfileName != tc.expectedIAMInstanceProfileName {
+				t.Errorf("unexpected IAMInstanceProfileName, got %q, want %q", a.IAMInstanceProfileName, tc.expectedIAMInstanceProfileName)
+			}
+			if !reflect.DeepEqual(a.BlockDeviceMappings, tc.expectedBlockDeviceMappings) {
+				t.Errorf("unexpected BlockDeviceMappings, got %v, want %v", a.BlockDeviceMappings, tc.expectedBlockDeviceMappings)
+			}
+		})
+	}
+}
+
+func TestAdapterLaunchConfigurationSecurityGroupID(t *testing.T) {
+	testCases := []struct {
+		description             string
+		customObject            awstpr.CustomObject
+		expectedSecurityGroupID string
+		expectedError           bool
+		securityGroupExists     bool
+	}{
+		{
+			description: "existent security group",
+			customObject: awstpr.CustomObject{
+				Spec: awstpr.Spec{
+					Cluster: clustertpr.Spec{
+						Cluster: spec.Cluster{
+							ID: "test-cluster",
+						},
+					},
+					AWS: awsspec.AWS{
+						Workers: []awsspecaws.Node{
+							awsspecaws.Node{
+								ImageID:      "myimageid",
+								InstanceType: "myinstancetype",
+							},
+						},
+					},
+				},
+			},
+			securityGroupExists:     true,
+			expectedSecurityGroupID: "test-cluster-worker",
+		},
+		{
+			description: "unexistent security group",
+			customObject: awstpr.CustomObject{
+				Spec: awstpr.Spec{
+					Cluster: clustertpr.Spec{
+						Cluster: spec.Cluster{
+							ID: "test-cluster",
+						},
+					},
+					AWS: awsspec.AWS{
+						Workers: []awsspecaws.Node{
+							awsspecaws.Node{
+								ImageID:      "myimageid",
+								InstanceType: "myinstancetype",
+							},
+						},
+					},
+				},
+			},
+			securityGroupExists:     false,
+			expectedError:           true,
+			expectedSecurityGroupID: "",
+		},
+	}
+
+	for _, tc := range testCases {
+		a := adapter{}
+		clients := Clients{
+			EC2: &eC2ClientMock{
+				sgExists: tc.securityGroupExists,
+				sgID:     tc.expectedSecurityGroupID,
+			},
+			IAM: &iAMClientMock{},
+		}
+
+		t.Run(tc.description, func(t *testing.T) {
+			err := a.getLaunchConfiguration(tc.customObject, clients)
+			if tc.expectedError && err == nil {
+				t.Error("expected error didn't happen")
+			}
+
+			if !tc.expectedError && err != nil {
+				t.Errorf("unexpected error %v", err)
+			}
+
+			if a.SecurityGroupID != tc.expectedSecurityGroupID {
+				t.Errorf("unexpected SecurityGroupID, got %q, want %q", a.SecurityGroupID, tc.expectedSecurityGroupID)
+			}
+		})
+	}
+}
+
+func TestAdapterLaunchConfigurationSmallCloudConfig(t *testing.T) {
+	testCases := []struct {
+		description  string
+		expectedLine string
+	}{
+		{
+			description:  "userdata file",
+			expectedLine: "USERDATA_FILE=worker",
+		},
+		{
+			description:  "s3 http uri",
+			expectedLine: `s3_http_uri="https://s3.myregion.amazonaws.com/myaccountid-g8s-test-cluster/cloudconfig/$USERDATA_FILE"`,
+		},
+	}
+
+	a := adapter{}
+	clients := Clients{
+		EC2: &eC2ClientMock{sgExists: true},
+		IAM: &iAMClientMock{accountID: "myaccountid"},
+	}
+	customObject := awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			Cluster: clustertpr.Spec{
+				Cluster: spec.Cluster{
+					ID: "test-cluster",
+				},
+			},
+			AWS: awsspec.AWS{
+				Region: "myregion",
+				Workers: []awsspecaws.Node{
+					awsspecaws.Node{
+						ImageID:      "myimageid",
+						InstanceType: "myinstancetype",
+					},
+				},
+			},
+		},
+	}
+
+	err := a.getLaunchConfiguration(customObject, clients)
+	if err != nil {
+		t.Errorf("unexpected error %v", err)
+	}
+
+	data, err := base64.StdEncoding.DecodeString(a.SmallCloudConfig)
+	if err != nil {
+		t.Errorf("unexpected error decoding SmallCloudConfig %v", err)
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			if !strings.Contains(string(data), tc.expectedLine) {
+				t.Errorf("SmallCloudConfig didn't contain expected %q, complete: %q", tc.expectedLine, string(data))
 			}
 		})
 	}
@@ -117,10 +288,9 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 		},
 	}
 
-	clients := awsutil.Clients{}
-
-	a := adapter{}
+	clients := Clients{}
 	for _, tc := range testCases {
+		a := adapter{}
 		t.Run(tc.description, func(t *testing.T) {
 			err := a.getAutoScalingGroup(tc.customObject, clients)
 			if tc.expectedError && err == nil {

@@ -14,7 +14,7 @@ type SmallCloudconfigConfig struct {
 	S3URI       string
 }
 
-func (s *Resource) SmallCloudconfig(config SmallCloudconfigConfig) (string, error) {
+func SmallCloudconfig(config SmallCloudconfigConfig) (string, error) {
 	tmpl, err := template.New("smallCloudconfig").Parse(userDataScriptTemplate)
 	if err != nil {
 		return "", microerror.Mask(err)

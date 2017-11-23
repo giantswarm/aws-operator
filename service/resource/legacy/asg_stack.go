@@ -178,7 +178,7 @@ func (s *Resource) createASGStack(input asgStackInput) (bool, error) {
 		return false, microerror.Mask(err)
 	}
 
-	smallCloudconfig, err := s.SmallCloudconfig(cloudconfigConfig)
+	smallCloudconfig, err := SmallCloudconfig(cloudconfigConfig)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
