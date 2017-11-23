@@ -1,5 +1,5 @@
 hash: 0e05add1a117b58ead0a42b6355d62469160970f41467166eb20a9a32c3b3c21
-updated: 2017-11-22T12:34:49.907568247+01:00
+updated: 2017-11-23T09:34:56.312208132+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -95,7 +95,7 @@ imports:
 - name: github.com/giantswarm/e2e-harness
   version: 59cf7b74ca2c0149f9e18e337c9ea9ed3f025099
 - name: github.com/giantswarm/k8scloudconfig
-  version: af226a776a758ffa33eb715daa7a04a3906dde13
+  version: 622ecaef754778cf54595392efe79ff6996bab59
   subpackages:
   - v_0_1_0
 - name: github.com/giantswarm/microendpoint
@@ -124,15 +124,16 @@ imports:
   - transaction/context/id
   - transaction/context/tracked
 - name: github.com/giantswarm/micrologger
-  version: 954d1261928bbb50dc917c629edf0b71db6a1527
+  version: c2ffba36495025eff48982e6543397dbc4da0ac6
   subpackages:
+  - loggercontext
   - microloggertest
 - name: github.com/giantswarm/microstorage
   version: 99418478ec8f5c68f9b5fc5e6be7e0474948f80d
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: 0bd1c4365f66a52c233957c38367ca3a3c2a81e9
+  version: 443b5fd52645b29e15f23dedf63865fba4a23564
   subpackages:
   - client/k8sclient
   - framework
@@ -259,7 +260,7 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 19e54c4a2b8a78c9d54b2bed61b1a6c5e1bfcf6f
+  version: 1be1d2841c773c01bee8289f55f7463b6e2c2539
 - name: github.com/spf13/jwalterweatherman
   version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
 - name: github.com/spf13/pflag
