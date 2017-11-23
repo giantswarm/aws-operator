@@ -4,11 +4,12 @@ import (
 	"context"
 	"testing"
 
-	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/clustertpr"
 	"github.com/giantswarm/clustertpr/spec"
 	"github.com/giantswarm/micrologger/microloggertest"
+
+	awsutil "github.com/giantswarm/aws-operator/client/aws"
 )
 
 func Test_Resource_Cloudformation_GetDesiredState(t *testing.T) {

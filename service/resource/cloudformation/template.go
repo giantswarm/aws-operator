@@ -1,18 +1,22 @@
 package cloudformation
 
 const (
-	MainTemplate = `AWSTemplateFormatVersion: 2010-09-09
-Description: {{ .ASGType }} autoscaling group
+	MainTemplate = `{{define "main"}}AWSTemplateFormatVersion: 2010-09-09
+Description: Main CloudFormation stack.
 Resources:
-  {{ .ASGType }}LaunchConfiguration:
+  {{template "launch_configuration" .}}
+  {{template "autoscaling_group" .}}
+{{end}}`
+
+	LaunchConfigurationTemplate = `{{define "launch_configuration"}}{{ .ASGType }}LaunchConfiguration:
     Type: "AWS::AutoScaling::LaunchConfiguration"
     Description: {{ .ASGType }} launch configuration
     Properties:
-      ImageId: !Ref ImageID
+      ImageId: {{ .ImageID }}
       SecurityGroups:
-      - !Ref SecurityGroupID
-      InstanceType: !Ref InstanceType
-      IamInstanceProfile: !Ref IAMInstanceProfileName
+      - {{ .SecurityGroupID }}
+      InstanceType: {{ .InstanceType }}
+      IamInstanceProfile: {{ .IAMInstanceProfileName }}
       BlockDeviceMappings:
       {{ range .BlockDeviceMappings }}
       - DeviceName: "{{ .DeviceName }}"
@@ -21,30 +25,29 @@ Resources:
           VolumeSize: {{ .VolumeSize }}
           VolumeType: {{ .VolumeType }}
       {{ end }}
-      AssociatePublicIpAddress: !Ref AssociatePublicIPAddress
-      UserData: !Ref SmallCloudConfig
-      KeyName: !Ref KeyName
-  {{ .ASGType }}AutoScalingGroup:
+      AssociatePublicIpAddress: {{ .AssociatePublicIPAddress }}
+      UserData: {{ .SmallCloudConfig }}
+{{end}}`
+
+	AutoScalingGroupTemplate = `{{define "autoscaling_group"}}  {{ .ASGType }}AutoScalingGroup:
     Type: "AWS::AutoScaling::AutoScalingGroup"
     Properties:
       VPCZoneIdentifier:
-        - !Ref SubnetID
-      AvailabilityZones:
-        - !Ref AZ
-      MinSize: !Ref ASGMinSize
-      MaxSize: !Ref ASGMaxSize
+        - {{ .SubnetID }}
+      AvailabilityZones: [{{ .AZ }}]
+      MinSize: {{ .ASGMinSize }}
+      MaxSize: {{ .ASGMaxSize }}
       LaunchConfigurationName: !Ref {{ .ASGType }}LaunchConfiguration
       LoadBalancerNames:
-        - !Ref LoadBalancerName
-      HealthCheckGracePeriod: !Ref HealthCheckGracePeriod
+        - {{ .LoadBalancerName }}
+      HealthCheckGracePeriod: {{ .HealthCheckGracePeriod }}
     UpdatePolicy:
       AutoScalingRollingUpdate:
         # minimum amount of instances that must always be running during a rolling update
-        MinInstancesInService: 2
+        MinInstancesInService: {{ .MinInstancesInService }}
         # only do a rolling update of this amount of instances max
-        MaxBatchSize: 2
+        MaxBatchSize: {{ .MaxBatchSize }}
         # after creating a new instance, pause operations on the ASG for this amount of time
-        PauseTime: PT10S
-
-`
+        PauseTime: {{ .RollingUpdatePauseTime }}
+{{end}}`
 )

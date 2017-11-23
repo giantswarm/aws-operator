@@ -16,3 +16,7 @@ type StackState struct {
 	Workers        string
 	ClusterVersion string
 }
+
+// AWSClient describes the methods required to be implemented by a AWS client.
+type AWSClient interface {
+}

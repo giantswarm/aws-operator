@@ -5,8 +5,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/giantswarm/aws-operator/service/key"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/service/key"
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
@@ -25,7 +26,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		return microerror.Mask(err)
 	}
 
-	_, err = r.awsClient.CreateStack(&stackInput)
+	_, err = r.awsClients.CloudFormation.CreateStack(&stackInput)
 	if err != nil {
 		return err
 	}

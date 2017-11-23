@@ -3,8 +3,9 @@ package cloudformation
 import (
 	"context"
 
-	"github.com/giantswarm/aws-operator/service/key"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/service/key"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
