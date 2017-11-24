@@ -58,8 +58,8 @@ func (r *Resource) getMainTemplateBody(customObject awstpr.CustomObject) (string
 		return "", microerror.Mask(err)
 	}
 
-	adapter := adapter{}
-	if err := adapter.getMain(customObject, r.awsClients); err != nil {
+	adapter, err := newAdapter(customObject, r.awsClients)
+	if err != nil {
 		return "", microerror.Mask(err)
 	}
 

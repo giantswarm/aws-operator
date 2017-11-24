@@ -44,7 +44,9 @@ type autoScalingGroupAdapter struct {
 	RollingUpdatePauseTime string
 }
 
-func (a *adapter) getMain(customObject awstpr.CustomObject, clients awsutil.Clients) error {
+func newAdapter(customObject awstpr.CustomObject, clients awsutil.Clients) (adapter, error) {
+	a := adapter{}
+
 	a.ASGType = "worker"
 
 	hydraters := []hydrater{
@@ -54,11 +56,11 @@ func (a *adapter) getMain(customObject awstpr.CustomObject, clients awsutil.Clie
 
 	for _, h := range hydraters {
 		if err := h(customObject, clients); err != nil {
-			return microerror.Mask(err)
+			return adapter{}, microerror.Mask(err)
 		}
 	}
 
-	return nil
+	return a, nil
 }
 
 func (a *adapter) getLaunchConfiguration(customObject awstpr.CustomObject, clients awsutil.Clients) error {

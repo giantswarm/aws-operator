@@ -22,8 +22,7 @@ func TestAdapterMain(t *testing.T) {
 	}
 	clients := awsutil.Clients{}
 
-	a := adapter{}
-	err := a.getMain(customObject, clients)
+	a, err := newAdapter(customObject, clients)
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
 	}
