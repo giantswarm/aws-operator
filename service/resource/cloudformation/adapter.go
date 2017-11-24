@@ -17,12 +17,12 @@ type adapter struct {
 }
 
 type lauchConfigAdapter struct {
-	ImageID                  string
-	SecurityGroupID          string
-	InstanceType             string
-	IAMInstanceProfileName   string
-	BlockDeviceMappings      []BlockDeviceMapping
 	AssociatePublicIPAddress bool
+	BlockDeviceMappings      []BlockDeviceMapping
+	IAMInstanceProfileName   string
+	ImageID                  string
+	InstanceType             string
+	SecurityGroupID          string
 	SmallCloudConfig         string
 }
 
@@ -33,15 +33,15 @@ type BlockDeviceMapping struct {
 }
 
 type autoScalingGroupAdapter struct {
-	SubnetID               string
-	AZ                     string
 	ASGMinSize             int
 	ASGMaxSize             int
-	LoadBalancerName       string
+	AZ                     string
 	HealthCheckGracePeriod string
-	MinInstancesInService  int
+	LoadBalancerName       string
 	MaxBatchSize           string
+	MinInstancesInService  int
 	RollingUpdatePauseTime string
+	SubnetID               string
 }
 
 func newAdapter(customObject awstpr.CustomObject, clients awsutil.Clients) (adapter, error) {
@@ -75,7 +75,7 @@ func (a *adapter) getLaunchConfiguration(customObject awstpr.CustomObject, clien
 }
 
 func (a *adapter) getAutoScalingGroup(customObject awstpr.CustomObject, clients awsutil.Clients) error {
-	a.AZ = customObject.Spec.AWS.Region
+	a.AZ = customObject.Spec.AWS.AZ
 
 	return nil
 }

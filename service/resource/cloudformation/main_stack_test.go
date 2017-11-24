@@ -37,7 +37,7 @@ func TestMainTemplateExistingFields(t *testing.T) {
 	customObject := awstpr.CustomObject{
 		Spec: awstpr.Spec{
 			AWS: awsspec.AWS{
-				Region: "myregion",
+				AZ: "myaz",
 				Workers: []awsspecaws.Node{
 					awsspecaws.Node{
 						ImageID: "myimageid",
@@ -79,7 +79,7 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		t.Error("launch configuration element not found")
 	}
 
-	if !strings.Contains(body, "AvailabilityZones: [myregion]") {
+	if !strings.Contains(body, "AvailabilityZones: [myaz]") {
 		fmt.Println(body)
 		t.Error("asg element not found")
 	}

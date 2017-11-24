@@ -109,11 +109,11 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 			customObject: awstpr.CustomObject{
 				Spec: awstpr.Spec{
 					AWS: awsspec.AWS{
-						Region: "myregion",
+						AZ: "myaz",
 					},
 				},
 			},
-			expectedAZ: "myregion",
+			expectedAZ: "myaz",
 		},
 	}
 
