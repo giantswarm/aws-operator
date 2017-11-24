@@ -58,13 +58,13 @@ func (r *Resource) getMainTemplateBody(customObject awstpr.CustomObject) (string
 		return "", microerror.Mask(err)
 	}
 
-	adaptor := adaptor{}
-	if err := adaptor.getMain(customObject, r.awsClients); err != nil {
+	adapter := adapter{}
+	if err := adapter.getMain(customObject, r.awsClients); err != nil {
 		return "", microerror.Mask(err)
 	}
 
 	var tpl bytes.Buffer
-	if err := t.ExecuteTemplate(&tpl, "main", adaptor); err != nil {
+	if err := t.ExecuteTemplate(&tpl, "main", adapter); err != nil {
 		return "", microerror.Mask(err)
 	}
 

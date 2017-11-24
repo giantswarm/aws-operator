@@ -9,14 +9,14 @@ import (
 
 type hydrater func(awstpr.CustomObject, awsutil.Clients) error
 
-type adaptor struct {
+type adapter struct {
 	ASGType string
 
-	lauchConfigAdaptor
-	autoScalingGroupAdaptor
+	lauchConfigAdapter
+	autoScalingGroupAdapter
 }
 
-type lauchConfigAdaptor struct {
+type lauchConfigAdapter struct {
 	ImageID                  string
 	SecurityGroupID          string
 	InstanceType             string
@@ -32,7 +32,7 @@ type BlockDeviceMapping struct {
 	VolumeType string
 }
 
-type autoScalingGroupAdaptor struct {
+type autoScalingGroupAdapter struct {
 	SubnetID               string
 	AZ                     string
 	ASGMinSize             int
@@ -44,7 +44,7 @@ type autoScalingGroupAdaptor struct {
 	RollingUpdatePauseTime string
 }
 
-func (a *adaptor) getMain(customObject awstpr.CustomObject, clients awsutil.Clients) error {
+func (a *adapter) getMain(customObject awstpr.CustomObject, clients awsutil.Clients) error {
 	a.ASGType = "worker"
 
 	hydraters := []hydrater{
@@ -61,7 +61,7 @@ func (a *adaptor) getMain(customObject awstpr.CustomObject, clients awsutil.Clie
 	return nil
 }
 
-func (a *adaptor) getLaunchConfiguration(customObject awstpr.CustomObject, clients awsutil.Clients) error {
+func (a *adapter) getLaunchConfiguration(customObject awstpr.CustomObject, clients awsutil.Clients) error {
 	if len(customObject.Spec.AWS.Workers) == 0 {
 		return microerror.Mask(invalidConfigError)
 	}
@@ -72,7 +72,7 @@ func (a *adaptor) getLaunchConfiguration(customObject awstpr.CustomObject, clien
 	return nil
 }
 
-func (a *adaptor) getAutoScalingGroup(customObject awstpr.CustomObject, clients awsutil.Clients) error {
+func (a *adapter) getAutoScalingGroup(customObject awstpr.CustomObject, clients awsutil.Clients) error {
 	a.AZ = customObject.Spec.AWS.Region
 
 	return nil

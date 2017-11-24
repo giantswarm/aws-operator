@@ -10,7 +10,7 @@ import (
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 )
 
-func TestAdaptorMain(t *testing.T) {
+func TestAdapterMain(t *testing.T) {
 	customObject := awstpr.CustomObject{
 		Spec: awstpr.Spec{
 			AWS: awsspec.AWS{
@@ -22,7 +22,7 @@ func TestAdaptorMain(t *testing.T) {
 	}
 	clients := awsutil.Clients{}
 
-	a := adaptor{}
+	a := adapter{}
 	err := a.getMain(customObject, clients)
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
@@ -36,7 +36,7 @@ func TestAdaptorMain(t *testing.T) {
 	}
 }
 
-func TestAdaptorLaunchConfigurationRegularFields(t *testing.T) {
+func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 	testCases := []struct {
 		description                      string
 		customObject                     awstpr.CustomObject
@@ -71,7 +71,7 @@ func TestAdaptorLaunchConfigurationRegularFields(t *testing.T) {
 	}
 
 	clients := awsutil.Clients{}
-	a := adaptor{}
+	a := adapter{}
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			err := a.getLaunchConfiguration(tc.customObject, clients)
@@ -93,7 +93,7 @@ func TestAdaptorLaunchConfigurationRegularFields(t *testing.T) {
 	}
 }
 
-func TestAdaptorAutoScalingGroupRegularFields(t *testing.T) {
+func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 	testCases := []struct {
 		description   string
 		customObject  awstpr.CustomObject
@@ -120,7 +120,7 @@ func TestAdaptorAutoScalingGroupRegularFields(t *testing.T) {
 
 	clients := awsutil.Clients{}
 
-	a := adaptor{}
+	a := adapter{}
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			err := a.getAutoScalingGroup(tc.customObject, clients)
