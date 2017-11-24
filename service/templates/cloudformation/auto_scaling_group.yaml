@@ -10,6 +10,8 @@
       LoadBalancerNames:
         - {{ .LoadBalancerName }}
       HealthCheckGracePeriod: {{ .HealthCheckGracePeriod }}
+      MetricsCollection:
+        - Granularity: "1Minute"
     UpdatePolicy:
       AutoScalingRollingUpdate:
         # minimum amount of instances that must always be running during a rolling update
