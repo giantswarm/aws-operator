@@ -1,0 +1,6 @@
+{{define "main"}}AWSTemplateFormatVersion: 2010-09-09
+Description: Main CloudFormation stack.
+Resources:
+  {{template "launch_configuration" .}}
+  {{template "autoscaling_group" .}}
+{{end}}

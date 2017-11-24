@@ -1,0 +1,20 @@
+{{define "launch_configuration"}}{{ .ASGType }}LaunchConfiguration:
+    Type: "AWS::AutoScaling::LaunchConfiguration"
+    Description: {{ .ASGType }} launch configuration
+    Properties:
+      ImageId: {{ .ImageID }}
+      SecurityGroups:
+      - {{ .SecurityGroupID }}
+      InstanceType: {{ .InstanceType }}
+      IamInstanceProfile: {{ .IAMInstanceProfileName }}
+      BlockDeviceMappings:
+      {{ range .BlockDeviceMappings }}
+      - DeviceName: "{{ .DeviceName }}"
+        Ebs:
+          DeleteOnTermination: {{ .DeleteOnTermination }}
+          VolumeSize: {{ .VolumeSize }}
+          VolumeType: {{ .VolumeType }}
+      {{ end }}
+      AssociatePublicIpAddress: {{ .AssociatePublicIPAddress }}
+      UserData: {{ .SmallCloudConfig }}
+{{end}}

@@ -7,6 +7,8 @@ const (
 	workersParameterKey        = "workers"
 	imageIDParameterKey        = "imageID"
 	clusterVersionParameterKey = "clusterVersion"
+
+	templatesDirectory = "service/templates/cloudformation"
 )
 
 // StackState is the state representation on which the resource methods work.
@@ -15,4 +17,8 @@ type StackState struct {
 	ImageID        string
 	Workers        string
 	ClusterVersion string
+}
+
+// AWSClient describes the methods required to be implemented by a AWS client.
+type AWSClient interface {
 }

@@ -2,11 +2,11 @@ package cloudformation
 
 import (
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/aws/aws-sdk-go/service/cloudformation/cloudformationiface"
-	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
+
+	awsutil "github.com/giantswarm/aws-operator/client/aws"
 )
 
 const (
@@ -42,8 +42,8 @@ func DefaultConfig() Config {
 // Resource implements the cloudformation resource.
 type Resource struct {
 	// Dependencies.
-	awsClient cloudformationiface.CloudFormationAPI
-	logger    micrologger.Logger
+	awsClients awsutil.Clients
+	logger     micrologger.Logger
 }
 
 // New creates a new configured cloudformation resource.
@@ -55,7 +55,7 @@ func New(config Config) (*Resource, error) {
 
 	newService := &Resource{
 		// Dependencies.
-		awsClient: config.Clients.CloudFormation,
+		awsClients: config.Clients,
 		logger: config.Logger.With(
 			"resource", Name,
 		),

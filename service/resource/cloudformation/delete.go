@@ -29,7 +29,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 
 	stackName := deleteStackInput.StackName
 	if *stackName != "" {
-		_, err := r.awsClient.DeleteStack(&deleteStackInput)
+		_, err := r.awsClients.CloudFormation.DeleteStack(&deleteStackInput)
 		if err != nil {
 			return microerror.Maskf(err, "deleting AWS CloudFormation Stack")
 		}

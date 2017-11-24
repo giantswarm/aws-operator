@@ -30,7 +30,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 
 	stackName := updateStackInput.StackName
 	if *stackName != "" {
-		_, err := r.awsClient.UpdateStack(&updateStackInput)
+		_, err := r.awsClients.CloudFormation.UpdateStack(&updateStackInput)
 		if err != nil {
 			return microerror.Maskf(err, "updating AWS cloudformation stack")
 		}
@@ -87,7 +87,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		var mainTemplate string
 		/*
 			      commented out until we assing proper values to the template
-						mainTemplate, err := getMainTemplateBody(customObject)
+						mainTemplate, err := r.getMainTemplateBody(customObject)
 						if err != nil {
 							return nil, microerror.Mask(err)
 						}

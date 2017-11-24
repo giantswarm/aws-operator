@@ -28,7 +28,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	describeInput := &awscloudformation.DescribeStacksInput{
 		StackName: aws.String(stackName),
 	}
-	describeOutput, err := r.awsClient.DescribeStacks(describeInput)
+	describeOutput, err := r.awsClients.CloudFormation.DescribeStacks(describeInput)
 
 	if IsStackNotFound(err) {
 
