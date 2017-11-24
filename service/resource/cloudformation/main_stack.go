@@ -2,6 +2,8 @@ package cloudformation
 
 import (
 	"bytes"
+	"io/ioutil"
+	"path/filepath"
 	"strconv"
 	"text/template"
 
@@ -9,14 +11,6 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/key"
-)
-
-var (
-	components = []string{
-		MainTemplate,
-		LaunchConfigurationTemplate,
-		AutoScalingGroupTemplate,
-	}
 )
 
 func newMainStack(customObject awstpr.CustomObject) (StackState, error) {
@@ -41,27 +35,36 @@ func newMainStack(customObject awstpr.CustomObject) (StackState, error) {
 }
 
 func (r *Resource) getMainTemplateBody(customObject awstpr.CustomObject) (string, error) {
-	main := template.New("main")
+	main := template.New("")
 
 	var t *template.Template
 	var err error
 
-	for _, component := range components {
-		t, err = main.Parse(component)
-		if err != nil {
-			return "", microerror.Mask(err)
-		}
+	// parse templates
+	baseDir, err := filepath.Abs(filepath.Join("../../../", templatesDirectory))
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	files, err := ioutil.ReadDir(baseDir)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	templates := []string{}
+	for _, file := range files {
+		templates = append(templates, filepath.Join(baseDir, file.Name()))
+	}
+	t, err = main.ParseFiles(templates...)
+	if err != nil {
+		return "", microerror.Mask(err)
 	}
 
-	var tpl bytes.Buffer
-
 	adaptor := adaptor{}
-
 	if err := adaptor.getMain(customObject, r.awsClients); err != nil {
 		return "", microerror.Mask(err)
 	}
 
-	if err := t.Execute(&tpl, adaptor); err != nil {
+	var tpl bytes.Buffer
+	if err := t.ExecuteTemplate(&tpl, "main", adaptor); err != nil {
 		return "", microerror.Mask(err)
 	}
 

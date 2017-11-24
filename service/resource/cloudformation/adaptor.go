@@ -3,7 +3,6 @@ package cloudformation
 import (
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/microerror"
-	"golang.org/x/sync/errgroup"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 )
@@ -13,7 +12,11 @@ type hydrater func(awstpr.CustomObject, awsutil.Clients) error
 type adaptor struct {
 	ASGType string
 
-	// worker launch configuration
+	lauchConfigAdaptor
+	autoScalingGroupAdaptor
+}
+
+type lauchConfigAdaptor struct {
 	ImageID                  string
 	SecurityGroupID          string
 	InstanceType             string
@@ -21,8 +24,15 @@ type adaptor struct {
 	BlockDeviceMappings      []BlockDeviceMapping
 	AssociatePublicIPAddress bool
 	SmallCloudConfig         string
+}
 
-	// worker autoscaling group
+type BlockDeviceMapping struct {
+	DeviceName string
+	VolumeSize string
+	VolumeType string
+}
+
+type autoScalingGroupAdaptor struct {
 	SubnetID               string
 	AZ                     string
 	ASGMinSize             int
@@ -34,34 +44,18 @@ type adaptor struct {
 	RollingUpdatePauseTime string
 }
 
-type BlockDeviceMapping struct {
-	DeviceName string
-	VolumeSize string
-	VolumeType string
-}
-
 func (a *adaptor) getMain(customObject awstpr.CustomObject, clients awsutil.Clients) error {
 	a.ASGType = "worker"
-
-	var g errgroup.Group
 
 	hydraters := []hydrater{
 		a.getAutoScalingGroup,
 		a.getLaunchConfiguration,
 	}
 
-	// each hydrater works on different data and may need to query AWS API, so that
-	// they are run in separate goroutines
 	for _, h := range hydraters {
-		// https://golang.org/doc/faq#closures_and_goroutines
-		h := h
-		g.Go(func() error {
-			return h(customObject, clients)
-		})
-	}
-
-	if err := g.Wait(); err != nil {
-		return microerror.Mask(err)
+		if err := h(customObject, clients); err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
 	return nil
