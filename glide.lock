@@ -1,5 +1,5 @@
 hash: 0e05add1a117b58ead0a42b6355d62469160970f41467166eb20a9a32c3b3c21
-updated: 2017-11-23T09:34:56.312208132+01:00
+updated: 2017-11-27T11:52:20.359560617+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -32,7 +32,6 @@ imports:
   - private/protocol/xml/xmlutil
   - service/autoscaling
   - service/cloudformation
-  - service/cloudformation/cloudformationiface
   - service/ec2
   - service/elb
   - service/iam
@@ -95,7 +94,7 @@ imports:
 - name: github.com/giantswarm/e2e-harness
   version: 59cf7b74ca2c0149f9e18e337c9ea9ed3f025099
 - name: github.com/giantswarm/k8scloudconfig
-  version: 622ecaef754778cf54595392efe79ff6996bab59
+  version: 2bb8e6c55338a2cec47782e547f2710f63cd130a
   subpackages:
   - v_0_1_0
 - name: github.com/giantswarm/microendpoint
@@ -124,21 +123,20 @@ imports:
   - transaction/context/id
   - transaction/context/tracked
 - name: github.com/giantswarm/micrologger
-  version: c2ffba36495025eff48982e6543397dbc4da0ac6
+  version: bab5376fda89f10a5ebc5bd9feedab634400ab75
   subpackages:
-  - loggercontext
+  - loggermeta
   - microloggertest
 - name: github.com/giantswarm/microstorage
   version: 99418478ec8f5c68f9b5fc5e6be7e0474948f80d
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: 443b5fd52645b29e15f23dedf63865fba4a23564
+  version: e83a0ee96faaa3f28582499aef6b74d1956723f9
   subpackages:
   - client/k8sclient
   - framework
   - framework/context/canceledcontext
-  - framework/resource/logresource
   - framework/resource/metricsresource
   - informer
   - tpr

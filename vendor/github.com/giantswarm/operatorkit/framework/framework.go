@@ -10,7 +10,9 @@ import (
 	"github.com/cenk/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/micrologger/loggermeta"
 	"github.com/prometheus/client_golang/prometheus"
+	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/tools/cache"
 
@@ -92,11 +94,38 @@ func New(config Config) (*Framework, error) {
 		return nil, microerror.Maskf(invalidConfigError, "config.ResourceRouter must not be empty")
 	}
 
+	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
+		ctx = canceledcontext.NewContext(ctx, make(chan struct{}))
+
+		if config.InitCtxFunc != nil {
+			var err error
+			ctx, err = config.InitCtxFunc(ctx, obj)
+			if err != nil {
+				return nil, microerror.Maskf(err, "initializing context")
+			}
+		}
+
+		accessor, err := meta.Accessor(obj)
+		if err != nil {
+			config.Logger.Log("warning", fmt.Sprintf("cannot create accessor for object %#v", obj))
+		} else {
+			meta, ok := loggermeta.FromContext(ctx)
+			if !ok {
+				meta = loggermeta.New()
+			}
+			meta.KeyVals["object"] = accessor.GetSelfLink()
+
+			ctx = loggermeta.NewContext(ctx, meta)
+		}
+
+		return ctx, nil
+	}
+
 	f := &Framework{
 		// Dependencies.
 		backOffFactory: config.BackOffFactory,
 		informer:       config.Informer,
-		initCtxFunc:    config.InitCtxFunc,
+		initCtxFunc:    initCtxFunc,
 		logger:         config.Logger,
 		resourceRouter: config.ResourceRouter,
 		tpr:            config.TPR,
@@ -120,32 +149,27 @@ func (f *Framework) AddFunc(obj interface{}) {
 	defer f.mutex.Unlock()
 
 	ctx := context.Background()
-	ctx = canceledcontext.NewContext(ctx, make(chan struct{}))
-
-	if f.initCtxFunc != nil {
-		var err error
-		ctx, err = f.initCtxFunc(ctx, obj)
-		if err != nil {
-			f.logger.LogWithCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "create")
-			return
-		}
+	ctx, err := f.initCtxFunc(ctx, obj)
+	if err != nil {
+		f.logger.LogCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "create")
+		return
 	}
 
 	rs, err := f.resourceRouter(ctx, obj)
 	if err != nil {
-		f.logger.LogWithCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "create")
+		f.logger.LogCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "create")
 		return
 	}
 
-	f.logger.LogWithCtx(ctx, "action", "start", "component", "operatorkit", "function", "ProcessCreate")
+	f.logger.LogCtx(ctx, "action", "start", "component", "operatorkit", "function", "ProcessCreate")
 
 	err = ProcessCreate(ctx, obj, rs)
 	if err != nil {
-		f.logger.LogWithCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "create")
+		f.logger.LogCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "create")
 		return
 	}
 
-	f.logger.LogWithCtx(ctx, "action", "end", "component", "operatorkit", "function", "ProcessCreate")
+	f.logger.LogCtx(ctx, "action", "end", "component", "operatorkit", "function", "ProcessCreate")
 }
 
 func (f *Framework) Boot() {
@@ -162,12 +186,12 @@ func (f *Framework) Boot() {
 		}
 
 		notifier := func(err error, d time.Duration) {
-			f.logger.LogWithCtx(ctx, "warning", fmt.Sprintf("retrying operator boot due to error: %#v", microerror.Mask(err)))
+			f.logger.LogCtx(ctx, "warning", fmt.Sprintf("retrying operator boot due to error: %#v", microerror.Mask(err)))
 		}
 
 		err := backoff.RetryNotify(operation, f.backOffFactory(), notifier)
 		if err != nil {
-			f.logger.LogWithCtx(ctx, "error", fmt.Sprintf("stop operator boot retries due to too many errors: %#v", microerror.Mask(err)))
+			f.logger.LogCtx(ctx, "error", fmt.Sprintf("stop operator boot retries due to too many errors: %#v", microerror.Mask(err)))
 			os.Exit(1)
 		}
 	})
@@ -184,32 +208,27 @@ func (f *Framework) DeleteFunc(obj interface{}) {
 	defer f.mutex.Unlock()
 
 	ctx := context.Background()
-	ctx = canceledcontext.NewContext(ctx, make(chan struct{}))
-
-	if f.initCtxFunc != nil {
-		var err error
-		ctx, err = f.initCtxFunc(ctx, obj)
-		if err != nil {
-			f.logger.LogWithCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "delete")
-			return
-		}
+	ctx, err := f.initCtxFunc(ctx, obj)
+	if err != nil {
+		f.logger.LogCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "delete")
+		return
 	}
 
 	rs, err := f.resourceRouter(ctx, obj)
 	if err != nil {
-		f.logger.LogWithCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "delete")
+		f.logger.LogCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "delete")
 		return
 	}
 
-	f.logger.LogWithCtx(ctx, "action", "start", "component", "operatorkit", "function", "ProcessDelete")
+	f.logger.LogCtx(ctx, "action", "start", "component", "operatorkit", "function", "ProcessDelete")
 
 	err = ProcessDelete(ctx, obj, rs)
 	if err != nil {
-		f.logger.LogWithCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "delete")
+		f.logger.LogCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "delete")
 		return
 	}
 
-	f.logger.LogWithCtx(ctx, "action", "end", "component", "operatorkit", "function", "ProcessDelete")
+	f.logger.LogCtx(ctx, "action", "end", "component", "operatorkit", "function", "ProcessDelete")
 }
 
 // NewCacheResourceEventHandler returns the framework's event handler for the
@@ -238,32 +257,27 @@ func (f *Framework) UpdateFunc(oldObj, newObj interface{}) {
 	defer f.mutex.Unlock()
 
 	ctx := context.Background()
-	ctx = canceledcontext.NewContext(ctx, make(chan struct{}))
-
-	if f.initCtxFunc != nil {
-		var err error
-		ctx, err = f.initCtxFunc(ctx, obj)
-		if err != nil {
-			f.logger.LogWithCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "update")
-			return
-		}
+	ctx, err := f.initCtxFunc(ctx, obj)
+	if err != nil {
+		f.logger.LogCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "update")
+		return
 	}
 
 	rs, err := f.resourceRouter(ctx, obj)
 	if err != nil {
-		f.logger.LogWithCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "update")
+		f.logger.LogCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "update")
 		return
 	}
 
-	f.logger.LogWithCtx(ctx, "action", "start", "component", "operatorkit", "function", "ProcessUpdate")
+	f.logger.LogCtx(ctx, "action", "start", "component", "operatorkit", "function", "ProcessUpdate")
 
 	err = ProcessUpdate(ctx, obj, rs)
 	if err != nil {
-		f.logger.LogWithCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "update")
+		f.logger.LogCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "update")
 		return
 	}
 
-	f.logger.LogWithCtx(ctx, "action", "end", "component", "operatorkit", "function", "ProcessUpdate")
+	f.logger.LogCtx(ctx, "action", "end", "component", "operatorkit", "function", "ProcessUpdate")
 }
 
 // ProcessCreate is a drop-in for an informer's AddFunc. It receives the custom
@@ -312,71 +326,119 @@ func ProcessDelete(ctx context.Context, obj interface{}, resources []Resource) e
 	}
 
 	for _, r := range resources {
-		// Create the patch.
+		var err error
 
-		if canceledcontext.IsCanceled(ctx) {
-			return nil
-		}
-		currentState, err := r.GetCurrentState(ctx, obj)
-		if err != nil {
-			return microerror.Mask(err)
-		}
+		var currentState interface{}
+		{
+			if canceledcontext.IsCanceled(ctx) {
+				return nil
+			}
 
-		if canceledcontext.IsCanceled(ctx) {
-			return nil
-		}
-		desiredState, err := r.GetDesiredState(ctx, obj)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		if canceledcontext.IsCanceled(ctx) {
-			return nil
-		}
-		patch, err := r.NewDeletePatch(ctx, obj, currentState, desiredState)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		if patch == nil {
-			return microerror.Maskf(executionFailedError, "patch must not be nil")
-		}
-
-		// Apply the patch.
-
-		if canceledcontext.IsCanceled(ctx) {
-			return nil
-		}
-		createChange, ok := patch.getCreateChange()
-		if ok {
-			err := r.ApplyCreateChange(ctx, obj, createChange)
+			meta, ok := loggermeta.FromContext(ctx)
+			if ok {
+				meta.KeyVals["function"] = "GetCurrentState"
+				defer delete(meta.KeyVals, "function")
+			}
+			currentState, err = r.GetCurrentState(ctx, obj)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 		}
 
-		if canceledcontext.IsCanceled(ctx) {
-			return nil
-		}
-		deleteChange, ok := patch.getDeleteChange()
-		if ok {
-			err := r.ApplyDeleteChange(ctx, obj, deleteChange)
+		var desiredState interface{}
+		{
+			if canceledcontext.IsCanceled(ctx) {
+				return nil
+			}
+
+			meta, ok := loggermeta.FromContext(ctx)
+			if ok {
+				meta.KeyVals["function"] = "GetDesiredState"
+				defer delete(meta.KeyVals, "function")
+			}
+			desiredState, err = r.GetDesiredState(ctx, obj)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 		}
 
-		if canceledcontext.IsCanceled(ctx) {
-			return nil
-		}
-		updateChange, ok := patch.getUpdateChange()
-		if ok {
-			err := r.ApplyUpdateChange(ctx, obj, updateChange)
+		var patch *Patch
+		{
+			if canceledcontext.IsCanceled(ctx) {
+				return nil
+			}
+
+			meta, ok := loggermeta.FromContext(ctx)
+			if ok {
+				meta.KeyVals["function"] = "NewDeletePatch"
+				defer delete(meta.KeyVals, "function")
+			}
+			patch, err = r.NewDeletePatch(ctx, obj, currentState, desiredState)
 			if err != nil {
 				return microerror.Mask(err)
 			}
+
+			if patch == nil {
+				return microerror.Maskf(executionFailedError, "patch must not be nil")
+			}
 		}
 
+		{
+			if canceledcontext.IsCanceled(ctx) {
+				return nil
+			}
+
+			createChange, ok := patch.getCreateChange()
+			if ok {
+				meta, ok := loggermeta.FromContext(ctx)
+				if ok {
+					meta.KeyVals["function"] = "ApplyCreateChange"
+					defer delete(meta.KeyVals, "function")
+				}
+				err := r.ApplyCreateChange(ctx, obj, createChange)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+			}
+		}
+
+		{
+			if canceledcontext.IsCanceled(ctx) {
+				return nil
+			}
+
+			deleteChange, ok := patch.getDeleteChange()
+			if ok {
+				meta, ok := loggermeta.FromContext(ctx)
+				if ok {
+					meta.KeyVals["function"] = "ApplyDeleteChange"
+					defer delete(meta.KeyVals, "function")
+				}
+				err := r.ApplyDeleteChange(ctx, obj, deleteChange)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+			}
+		}
+
+		{
+			if canceledcontext.IsCanceled(ctx) {
+				return nil
+			}
+
+			updateChange, ok := patch.getUpdateChange()
+			if ok {
+				meta, ok := loggermeta.FromContext(ctx)
+				if ok {
+					meta.KeyVals["function"] = "ApplyUpdateChange"
+					defer delete(meta.KeyVals, "function")
+				}
+				err := r.ApplyUpdateChange(ctx, obj, updateChange)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+			}
+		}
 	}
 
 	return nil
@@ -405,12 +467,12 @@ func (f *Framework) ProcessEvents(ctx context.Context, deleteChan chan watch.Eve
 	}
 
 	notifier := func(err error, d time.Duration) {
-		f.logger.LogWithCtx(ctx, "warning", fmt.Sprintf("retrying operator event processing due to error: %#v", microerror.Mask(err)))
+		f.logger.LogCtx(ctx, "warning", fmt.Sprintf("retrying operator event processing due to error: %#v", microerror.Mask(err)))
 	}
 
 	err := backoff.RetryNotify(operation, f.backOffFactory(), notifier)
 	if err != nil {
-		f.logger.LogWithCtx(ctx, "error", fmt.Sprintf("stop operator event processing retries due to too many errors: %#v", microerror.Mask(err)))
+		f.logger.LogCtx(ctx, "error", fmt.Sprintf("stop operator event processing retries due to too many errors: %#v", microerror.Mask(err)))
 		os.Exit(1)
 	}
 }
@@ -438,67 +500,117 @@ func ProcessUpdate(ctx context.Context, obj interface{}, resources []Resource) e
 	}
 
 	for _, r := range resources {
-		// Create the patch.
+		var err error
 
-		if canceledcontext.IsCanceled(ctx) {
-			return nil
-		}
-		currentState, err := r.GetCurrentState(ctx, obj)
-		if err != nil {
-			return microerror.Mask(err)
-		}
+		var currentState interface{}
+		{
+			if canceledcontext.IsCanceled(ctx) {
+				return nil
+			}
 
-		if canceledcontext.IsCanceled(ctx) {
-			return nil
-		}
-		desiredState, err := r.GetDesiredState(ctx, obj)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		if canceledcontext.IsCanceled(ctx) {
-			return nil
-		}
-		patch, err := r.NewUpdatePatch(ctx, obj, currentState, desiredState)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		if patch == nil {
-			return microerror.Maskf(executionFailedError, "patch must not be nil")
-		}
-
-		// Apply the patch.
-
-		if canceledcontext.IsCanceled(ctx) {
-			return nil
-		}
-		createState, ok := patch.getCreateChange()
-		if ok {
-			err := r.ApplyCreateChange(ctx, obj, createState)
+			meta, ok := loggermeta.FromContext(ctx)
+			if ok {
+				meta.KeyVals["function"] = "GetCurrentState"
+				defer delete(meta.KeyVals, "function")
+			}
+			currentState, err = r.GetCurrentState(ctx, obj)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 		}
 
-		if canceledcontext.IsCanceled(ctx) {
-			return nil
-		}
-		deleteState, ok := patch.getDeleteChange()
-		if ok {
-			err := r.ApplyDeleteChange(ctx, obj, deleteState)
+		var desiredState interface{}
+		{
+			if canceledcontext.IsCanceled(ctx) {
+				return nil
+			}
+
+			meta, ok := loggermeta.FromContext(ctx)
+			if ok {
+				meta.KeyVals["function"] = "GetDesiredState"
+				defer delete(meta.KeyVals, "function")
+			}
+			desiredState, err = r.GetDesiredState(ctx, obj)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 		}
 
-		if canceledcontext.IsCanceled(ctx) {
-			return nil
-		}
-		updateState, ok := patch.getUpdateChange()
-		if ok {
-			err := r.ApplyUpdateChange(ctx, obj, updateState)
+		var patch *Patch
+		{
+			if canceledcontext.IsCanceled(ctx) {
+				return nil
+			}
+
+			meta, ok := loggermeta.FromContext(ctx)
+			if ok {
+				meta.KeyVals["function"] = "NewUpdatePatch"
+				defer delete(meta.KeyVals, "function")
+			}
+			patch, err = r.NewUpdatePatch(ctx, obj, currentState, desiredState)
 			if err != nil {
 				return microerror.Mask(err)
+			}
+
+			if patch == nil {
+				return microerror.Maskf(executionFailedError, "patch must not be nil")
+			}
+		}
+
+		{
+			if canceledcontext.IsCanceled(ctx) {
+				return nil
+			}
+
+			createState, ok := patch.getCreateChange()
+			if ok {
+				meta, ok := loggermeta.FromContext(ctx)
+				if ok {
+					meta.KeyVals["function"] = "ApplyCreateChange"
+					defer delete(meta.KeyVals, "function")
+				}
+				err := r.ApplyCreateChange(ctx, obj, createState)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+			}
+		}
+
+		{
+			if canceledcontext.IsCanceled(ctx) {
+				return nil
+			}
+
+			deleteState, ok := patch.getDeleteChange()
+			if ok {
+				meta, ok := loggermeta.FromContext(ctx)
+				if ok {
+					meta.KeyVals["function"] = "ApplyDeleteChange"
+					defer delete(meta.KeyVals, "function")
+				}
+				err := r.ApplyDeleteChange(ctx, obj, deleteState)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+			}
+		}
+
+		{
+			if canceledcontext.IsCanceled(ctx) {
+				return nil
+			}
+
+			updateState, ok := patch.getUpdateChange()
+			if ok {
+				meta, ok := loggermeta.FromContext(ctx)
+				if ok {
+					meta.KeyVals["function"] = "ApplyUpdateChange"
+					defer delete(meta.KeyVals, "function")
+				}
+				err := r.ApplyUpdateChange(ctx, obj, updateState)
+				if err != nil {
+					return microerror.Mask(err)
+				}
 			}
 		}
 	}
@@ -508,21 +620,21 @@ func ProcessUpdate(ctx context.Context, obj interface{}, resources []Resource) e
 
 func (f *Framework) bootWithError(ctx context.Context) error {
 	if f.tpr != nil {
-		f.logger.LogWithCtx(ctx, "debug", "ensuring third party resource exists")
+		f.logger.LogCtx(ctx, "debug", "ensuring third party resource exists")
 
 		err := f.tpr.CreateAndWait()
 		if tpr.IsAlreadyExists(err) {
-			f.logger.LogWithCtx(ctx, "debug", "third party resource already exists")
+			f.logger.LogCtx(ctx, "debug", "third party resource already exists")
 		} else if err != nil {
 			return microerror.Mask(err)
 		} else {
-			f.logger.LogWithCtx(ctx, "debug", "created third party resource")
+			f.logger.LogCtx(ctx, "debug", "created third party resource")
 		}
 
 		f.tpr.CollectMetrics(context.TODO())
 	}
 
-	f.logger.LogWithCtx(ctx, "debug", "starting list/watch")
+	f.logger.LogCtx(ctx, "debug", "starting list/watch")
 
 	deleteChan, updateChan, errChan := f.informer.Watch(context.TODO())
 	f.ProcessEvents(context.TODO(), deleteChan, updateChan, errChan)
