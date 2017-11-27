@@ -12,9 +12,9 @@ import (
 	"github.com/giantswarm/microendpoint/service/version"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/micrologger/loggermeta"
 	"github.com/giantswarm/operatorkit/client/k8sclient"
 	"github.com/giantswarm/operatorkit/framework"
-	"github.com/giantswarm/operatorkit/framework/resource/logresource"
 	"github.com/giantswarm/operatorkit/framework/resource/metricsresource"
 	"github.com/giantswarm/operatorkit/informer"
 	"github.com/giantswarm/operatorkit/tpr"
@@ -28,6 +28,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/alerter"
 	"github.com/giantswarm/aws-operator/service/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/healthz"
+	"github.com/giantswarm/aws-operator/service/key"
 	cloudformationresource "github.com/giantswarm/aws-operator/service/resource/cloudformation"
 	legacyresource "github.com/giantswarm/aws-operator/service/resource/legacy"
 )
@@ -233,13 +234,6 @@ func New(config Config) (*Service, error) {
 			cloudformationResource,
 		}
 
-		logWrapConfig := logresource.DefaultWrapConfig()
-		logWrapConfig.Logger = config.Logger
-		resources, err = logresource.Wrap(resources, logWrapConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
 		// Disable retry wrapper due to problems with the legacy resource.
 		/*
 			retryWrapConfig := retryresource.DefaultWrapConfig()
@@ -260,6 +254,17 @@ func New(config Config) (*Service, error) {
 	}
 
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
+		meta := loggermeta.New()
+
+		customObject, err := key.ToCustomObject(obj)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		meta.KeyVals["cluster"] = key.ClusterID(customObject)
+
+		ctx = loggermeta.NewContext(ctx, meta)
+
 		return ctx, nil
 	}
 
