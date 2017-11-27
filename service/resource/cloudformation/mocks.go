@@ -48,6 +48,14 @@ type iAMClientMock struct {
 }
 
 func (i *iAMClientMock) GetUser(input *iam.GetUserInput) (*iam.GetUserOutput, error) {
+	if i.accountID == "" {
+		i.accountID = "00"
+	}
+	// pad accountID to required length
+	toPad := accountIDLength - len(i.accountID)
+	for j := 0; j < toPad; j++ {
+		i.accountID += "0"
+	}
 	output := &iam.GetUserOutput{
 		User: &iam.User{
 			Arn: aws.String("::::" + i.accountID),

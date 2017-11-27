@@ -12,6 +12,7 @@ import (
 	"github.com/giantswarm/aws-operator/resources"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
 	"github.com/giantswarm/aws-operator/service/key"
+	"github.com/giantswarm/aws-operator/service/resource/cloudformation"
 )
 
 type launchConfigurationInput struct {
@@ -61,7 +62,7 @@ func (s *Resource) createLaunchConfiguration(input launchConfigurationInput) (bo
 	// cloudconfig" that just fetches the previously uploaded "final
 	// cloudconfig" and executes coreos-cloudinit with it as argument.
 	// We do this to circumvent the 16KB limit on user-data for EC2 instances.
-	cloudconfigConfig := SmallCloudconfigConfig{
+	cloudconfigConfig := cloudformation.SmallCloudconfigConfig{
 		MachineType: input.prefix,
 		Region:      input.cluster.Spec.AWS.Region,
 		S3URI:       s.bucketName(input.cluster),
@@ -77,7 +78,7 @@ func (s *Resource) createLaunchConfiguration(input launchConfigurationInput) (bo
 		return false, microerror.Mask(err)
 	}
 
-	smallCloudconfig, err := SmallCloudconfig(cloudconfigConfig)
+	smallCloudconfig, err := cloudformation.SmallCloudconfig(cloudconfigConfig)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}

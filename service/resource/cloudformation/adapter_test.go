@@ -2,6 +2,7 @@ package cloudformation
 
 import (
 	"encoding/base64"
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -11,6 +12,8 @@ import (
 	awsspecaws "github.com/giantswarm/awstpr/spec/aws"
 	"github.com/giantswarm/clustertpr"
 	"github.com/giantswarm/clustertpr/spec"
+	"github.com/giantswarm/microerror"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAdapterMain(t *testing.T) {
@@ -216,14 +219,14 @@ func TestAdapterLaunchConfigurationSmallCloudConfig(t *testing.T) {
 		},
 		{
 			description:  "s3 http uri",
-			expectedLine: `s3_http_uri="https://s3.myregion.amazonaws.com/myaccountid-g8s-test-cluster/cloudconfig/$USERDATA_FILE"`,
+			expectedLine: `s3_http_uri="https://s3.myregion.amazonaws.com/000000000000-g8s-test-cluster/cloudconfig/$USERDATA_FILE"`,
 		},
 	}
 
 	a := adapter{}
 	clients := Clients{
 		EC2: &eC2ClientMock{sgExists: true},
-		IAM: &iAMClientMock{accountID: "myaccountid"},
+		IAM: &iAMClientMock{accountID: "000000000000"},
 	}
 	customObject := awstpr.CustomObject{
 		Spec: awstpr.Spec{
@@ -305,5 +308,39 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 				t.Errorf("unexpected output, got %q, want %q", a.AZ, tc.expectedAZ)
 			}
 		})
+	}
+}
+
+func TestValidAmazonAccountID(t *testing.T) {
+	tests := []struct {
+		name            string
+		amazonAccountID string
+		err             error
+	}{
+		{
+			name:            "ID has wrong length",
+			amazonAccountID: "foo",
+			err:             wrongAmazonAccountIDLengthError,
+		},
+		{
+			name:            "ID contains letters",
+			amazonAccountID: "123foo123foo",
+			err:             malformedAmazonAccountIDError,
+		},
+		{
+			name:            "ID is empty",
+			amazonAccountID: "",
+			err:             emptyAmazonAccountIDError,
+		},
+		{
+			name:            "ID has correct format",
+			amazonAccountID: "123456789012",
+			err:             nil,
+		},
+	}
+
+	for _, tc := range tests {
+		err := ValidateAccountID(tc.amazonAccountID)
+		assert.Equal(t, microerror.Cause(tc.err), microerror.Cause(err), fmt.Sprintf("[%s] The return value was not what we expected", tc.name))
 	}
 }

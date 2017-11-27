@@ -14,7 +14,9 @@ const (
 	imageIDParameterKey        = "imageID"
 	clusterVersionParameterKey = "clusterVersion"
 
-	templatesDirectory = "service/templates/cloudformation"
+	cloudFormationTemplatesDirectory = "service/templates/cloudformation"
+
+	smallCloudConfigTemplate = "service/templates/cloudconfig/small_cloudconfig.yaml"
 
 	prefixWorker = "worker"
 	// asgMaxBatchSizeRatio is the % of instances to be updated during a
@@ -36,6 +38,11 @@ const (
 	// Subnet keys
 	subnetDescription = "description"
 	subnetGroupName   = "group-name"
+
+	// accountIDIndex represents the index in which we can find the account ID in the user ARN
+	// (splitting by colon)
+	accountIDIndex  = 4
+	accountIDLength = 12
 )
 
 // StackState is the state representation on which the resource methods work.
@@ -62,4 +69,12 @@ type CFClient interface {
 // IAMClient describes the methods required to be implemented by a IAM AWS client.
 type IAMClient interface {
 	GetUser(*iam.GetUserInput) (*iam.GetUserOutput, error)
+}
+
+// SmallCloudconfigConfig represents the data structure required for executing the
+// small cloudconfig template.
+type SmallCloudconfigConfig struct {
+	MachineType string
+	Region      string
+	S3URI       string
 }

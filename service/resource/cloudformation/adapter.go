@@ -1,8 +1,13 @@
 package cloudformation
 
 import (
+	"bytes"
+	"encoding/base64"
 	"fmt"
+	"path/filepath"
+	"regexp"
 	"strings"
+	"text/template"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -11,7 +16,6 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/key"
-	"github.com/giantswarm/aws-operator/service/resource/legacy"
 )
 
 type hydrater func(awstpr.CustomObject, Clients) error
@@ -123,16 +127,20 @@ func (l *lauchConfigAdapter) getLaunchConfiguration(customObject awstpr.CustomOb
 		return microerror.Mask(err)
 	}
 	userArn := *resp.User.Arn
-	accountID := strings.Split(userArn, ":")[4]
+	accountID := strings.Split(userArn, ":")[accountIDIndex]
+	if err := ValidateAccountID(accountID); err != nil {
+		return microerror.Mask(err)
+	}
+
 	clusterID := key.ClusterID(customObject)
 	s3URI := fmt.Sprintf("%s-g8s-%s", accountID, clusterID)
 
-	cloudConfigConfig := legacy.SmallCloudconfigConfig{
+	cloudConfigConfig := SmallCloudconfigConfig{
 		MachineType: prefixWorker,
 		Region:      customObject.Spec.AWS.Region,
 		S3URI:       s3URI,
 	}
-	smallCloudConfig, err := legacy.SmallCloudconfig(cloudConfigConfig)
+	smallCloudConfig, err := SmallCloudconfig(cloudConfigConfig)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -143,6 +151,41 @@ func (l *lauchConfigAdapter) getLaunchConfiguration(customObject awstpr.CustomOb
 
 func (a *autoScalingGroupAdapter) getAutoScalingGroup(customObject awstpr.CustomObject, clients Clients) error {
 	a.AZ = customObject.Spec.AWS.AZ
+
+	return nil
+}
+
+func SmallCloudconfig(config SmallCloudconfigConfig) (string, error) {
+	templateFile, err := filepath.Abs(filepath.Join("../../../", smallCloudConfigTemplate))
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	tmpl, err := template.ParseFiles(templateFile)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	buf := new(bytes.Buffer)
+	err = tmpl.Execute(buf, config)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	return base64.StdEncoding.EncodeToString(buf.Bytes()), nil
+}
+
+func ValidateAccountID(accountID string) error {
+	r, _ := regexp.Compile("^[0-9]*$")
+
+	switch {
+	case accountID == "":
+		return microerror.Mask(emptyAmazonAccountIDError)
+	case len(accountID) != accountIDLength:
+		return microerror.Mask(wrongAmazonAccountIDLengthError)
+	case !r.MatchString(accountID):
+		return microerror.Mask(malformedAmazonAccountIDError)
+	}
 
 	return nil
 }
