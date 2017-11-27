@@ -14,7 +14,6 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8sclient"
 	"github.com/giantswarm/operatorkit/framework"
-	"github.com/giantswarm/operatorkit/framework/resource/logresource"
 	"github.com/giantswarm/operatorkit/framework/resource/metricsresource"
 	"github.com/giantswarm/operatorkit/informer"
 	"github.com/giantswarm/operatorkit/tpr"
@@ -231,13 +230,6 @@ func New(config Config) (*Service, error) {
 		resources = []framework.Resource{
 			legacyResource,
 			cloudformationResource,
-		}
-
-		logWrapConfig := logresource.DefaultWrapConfig()
-		logWrapConfig.Logger = config.Logger
-		resources, err = logresource.Wrap(resources, logWrapConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
 		}
 
 		// Disable retry wrapper due to problems with the legacy resource.

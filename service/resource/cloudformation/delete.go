@@ -18,7 +18,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	}
 	// no-op if we are not using cloudformation
 	if !key.UseCloudFormation(customObject) {
-		r.logger.Log("cluster", key.ClusterID(customObject), "debug", "not processing cloudformation stack")
+		r.logger.LogCtx(ctx, "debug", "not processing cloudformation stack")
 		return nil
 	}
 
@@ -34,9 +34,9 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			return microerror.Maskf(err, "deleting AWS CloudFormation Stack")
 		}
 
-		r.logger.Log("cluster", key.ClusterID(customObject), "debug", "deleting AWS CloudFormation stack: deleted")
+		r.logger.LogCtx(ctx, "debug", "deleting AWS CloudFormation stack: deleted")
 	} else {
-		r.logger.Log("cluster", key.ClusterID(customObject), "debug", "deleting AWS CloudFormation stack: already deleted")
+		r.logger.LogCtx(ctx, "debug", "deleting AWS CloudFormation stack: already deleted")
 	}
 
 	return nil
@@ -55,11 +55,6 @@ func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desire
 }
 
 func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	customObject, err := key.ToCustomObject(obj)
-	if err != nil {
-		return awscloudformation.DeleteStackInput{}, microerror.Mask(err)
-	}
-
 	currentStackState, err := toStackState(currentState)
 	if err != nil {
 		return awscloudformation.DeleteStackInput{}, microerror.Mask(err)
@@ -70,7 +65,7 @@ func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desir
 		return awscloudformation.DeleteStackInput{}, microerror.Mask(err)
 	}
 
-	r.logger.Log("cluster", key.ClusterID(customObject), "debug", "finding out if the main stack should be deleted")
+	r.logger.LogCtx(ctx, "debug", "finding out if the main stack should be deleted")
 
 	deleteState := awscloudformation.DeleteStackInput{
 		StackName: aws.String(""),

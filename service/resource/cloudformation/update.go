@@ -19,7 +19,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	}
 	// no-op if we are not using cloudformation
 	if !key.UseCloudFormation(customObject) {
-		r.logger.Log("cluster", key.ClusterID(customObject), "debug", "not processing cloudformation stack")
+		r.logger.LogCtx(ctx, "debug", "not processing cloudformation stack")
 		return nil
 	}
 
@@ -35,9 +35,9 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 			return microerror.Maskf(err, "updating AWS cloudformation stack")
 		}
 
-		r.logger.Log("cluster", key.ClusterID(customObject), "debug", "updating AWS cloudformation stack: updated")
+		r.logger.LogCtx(ctx, "debug", "updating AWS cloudformation stack: updated")
 	} else {
-		r.logger.Log("cluster", key.ClusterID(customObject), "debug", "updating AWS cloudformation stack: no need to update")
+		r.logger.LogCtx(ctx, "debug", "updating AWS cloudformation stack: no need to update")
 	}
 
 	return nil
@@ -62,11 +62,6 @@ func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 }
 
 func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	customObject, err := key.ToCustomObject(obj)
-	if err != nil {
-		return awscloudformation.CreateStackInput{}, microerror.Mask(err)
-	}
-
 	desiredStackState, err := toStackState(desiredState)
 	if err != nil {
 		return awscloudformation.CreateStackInput{}, microerror.Mask(err)
@@ -77,7 +72,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		return awscloudformation.CreateStackInput{}, microerror.Mask(err)
 	}
 
-	r.logger.Log("cluster", key.ClusterID(customObject), "debug", "finding out if the main stack should be updated")
+	r.logger.LogCtx(ctx, "debug", "finding out if the main stack should be updated")
 
 	updateState := awscloudformation.UpdateStackInput{
 		StackName: aws.String(""),
