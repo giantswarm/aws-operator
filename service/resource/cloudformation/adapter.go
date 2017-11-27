@@ -23,11 +23,11 @@ type hydrater func(awstpr.CustomObject, Clients) error
 type adapter struct {
 	ASGType string
 
-	lauchConfigAdapter
+	launchConfigAdapter
 	autoScalingGroupAdapter
 }
 
-type lauchConfigAdapter struct {
+type launchConfigAdapter struct {
 	AssociatePublicIPAddress bool
 	BlockDeviceMappings      []BlockDeviceMapping
 	IAMInstanceProfileName   string
@@ -75,7 +75,7 @@ func newAdapter(customObject awstpr.CustomObject, clients Clients) (adapter, err
 	return a, nil
 }
 
-func (l *lauchConfigAdapter) getLaunchConfiguration(customObject awstpr.CustomObject, clients Clients) error {
+func (l *launchConfigAdapter) getLaunchConfiguration(customObject awstpr.CustomObject, clients Clients) error {
 	if len(customObject.Spec.AWS.Workers) == 0 {
 		return microerror.Mask(invalidConfigError)
 	}
