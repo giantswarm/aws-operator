@@ -55,6 +55,12 @@ func (kk *KMSKey) CreateOrFail() error {
 		return microerror.Mask(err)
 	}
 
+	if _, err := kk.Clients.KMS.EnableKeyRotation(&kms.EnableKeyRotationInput{
+		KeyId: aws.String(*key.KeyMetadata.KeyId),
+	}); err != nil {
+		return microerror.Mask(err)
+	}
+
 	kk.arn = *key.KeyMetadata.Arn
 
 	return nil
