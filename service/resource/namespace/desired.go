@@ -15,8 +15,6 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-
-	r.logger.LogCtx(ctx, "debug", "computing the desired namespace")
 	// No-op if we are not using cloudformation.
 	if !key.UseCloudFormation(customObject) {
 		r.logger.LogCtx(ctx, "debug", "not processing Kubernetes namespace")
@@ -38,8 +36,6 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			},
 		},
 	}
-
-	r.logger.LogCtx(ctx, "debug", "computed the desired namespace")
 
 	return namespace, nil
 }
