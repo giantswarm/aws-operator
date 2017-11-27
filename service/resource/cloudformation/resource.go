@@ -5,8 +5,6 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
-
-	awsutil "github.com/giantswarm/aws-operator/client/aws"
 )
 
 const (
@@ -22,10 +20,16 @@ type AWSConfig struct {
 	accountID       string
 }
 
+type Clients struct {
+	CloudFormation CFClient
+	EC2            EC2Client
+	IAM            IAMClient
+}
+
 // Config represents the configuration used to create a new cloudformation resource.
 type Config struct {
 	// Dependencies.
-	Clients awsutil.Clients
+	Clients Clients
 	Logger  micrologger.Logger
 }
 
@@ -34,7 +38,7 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
-		Clients: awsutil.Clients{},
+		Clients: Clients{},
 		Logger:  nil,
 	}
 }
@@ -42,7 +46,7 @@ func DefaultConfig() Config {
 // Resource implements the cloudformation resource.
 type Resource struct {
 	// Dependencies.
-	awsClients awsutil.Clients
+	awsClients Clients
 	logger     micrologger.Logger
 }
 

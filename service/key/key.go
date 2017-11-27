@@ -13,6 +13,9 @@ const (
 	// managed by the cloudformation resource.
 	// TODO Remove once the migration is complete.
 	cloudFormationVersion = "cloud-formation"
+
+	// ProfileNameTemplate will be included in the IAM instance profile name.
+	ProfileNameTemplate = "EC2-K8S-Role"
 )
 
 func AutoScalingGroupName(customObject awstpr.CustomObject, groupName string) string {
@@ -42,6 +45,10 @@ func HasClusterVersion(customObject awstpr.CustomObject) bool {
 	default:
 		return false
 	}
+}
+
+func InstanceProfileName(customObject awstpr.CustomObject, profileType string) string {
+	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, ProfileNameTemplate)
 }
 
 func MainStackName(customObject awstpr.CustomObject) string {

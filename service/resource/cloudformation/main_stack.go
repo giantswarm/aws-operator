@@ -41,7 +41,7 @@ func (r *Resource) getMainTemplateBody(customObject awstpr.CustomObject) (string
 	var err error
 
 	// parse templates
-	baseDir, err := filepath.Abs(filepath.Join("../../../", templatesDirectory))
+	baseDir, err := filepath.Abs(filepath.Join("../../../", cloudFormationTemplatesDirectory))
 	if err != nil {
 		return "", microerror.Mask(err)
 	}

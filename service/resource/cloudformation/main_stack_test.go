@@ -9,16 +9,13 @@ import (
 	awsspec "github.com/giantswarm/awstpr/spec"
 	awsspecaws "github.com/giantswarm/awstpr/spec/aws"
 	"github.com/giantswarm/micrologger/microloggertest"
-
-	awsutil "github.com/giantswarm/aws-operator/client/aws"
 )
 
 func TestMainTemplateGetEmptyBody(t *testing.T) {
 	customObject := awstpr.CustomObject{}
 
 	resourceConfig := DefaultConfig()
-	awsCfg := awsutil.Config{}
-	resourceConfig.Clients = awsutil.NewClients(awsCfg)
+	resourceConfig.Clients = Clients{}
 	resourceConfig.Logger = microloggertest.New()
 
 	newResource, err := New(resourceConfig)
@@ -48,8 +45,10 @@ func TestMainTemplateExistingFields(t *testing.T) {
 	}
 
 	resourceConfig := DefaultConfig()
-	awsCfg := awsutil.Config{}
-	resourceConfig.Clients = awsutil.NewClients(awsCfg)
+	resourceConfig.Clients = Clients{
+		EC2: &eC2ClientMock{sgExists: true},
+		IAM: &iAMClientMock{},
+	}
 	resourceConfig.Logger = microloggertest.New()
 
 	newResource, err := New(resourceConfig)
