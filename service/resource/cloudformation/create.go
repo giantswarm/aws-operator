@@ -17,7 +17,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 	}
 	// no-op if we are not using cloudformation
 	if !key.UseCloudFormation(customObject) {
-		r.logger.Log("cluster", key.ClusterID(customObject), "debug", "not processing cloudformation stack")
+		r.logger.LogCtx(ctx, "debug", "not processing cloudformation stack")
 		return nil
 	}
 
@@ -35,17 +35,12 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 }
 
 func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	customObject, err := key.ToCustomObject(obj)
-	if err != nil {
-		return awscloudformation.CreateStackInput{}, microerror.Mask(err)
-	}
-
 	desiredStackState, err := toStackState(desiredState)
 	if err != nil {
 		return awscloudformation.CreateStackInput{}, microerror.Mask(err)
 	}
 
-	r.logger.Log("cluster", key.ClusterID(customObject), "debug", "finding out if the main stack should be created")
+	r.logger.LogCtx(ctx, "debug", "finding out if the main stack should be created")
 
 	createState := awscloudformation.CreateStackInput{
 		StackName: aws.String(""),
