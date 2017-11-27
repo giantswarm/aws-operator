@@ -29,6 +29,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/healthz"
 	cloudformationresource "github.com/giantswarm/aws-operator/service/resource/cloudformation"
 	legacyresource "github.com/giantswarm/aws-operator/service/resource/legacy"
+	namespaceresource "github.com/giantswarm/aws-operator/service/resource/namespace"
 )
 
 const (
@@ -221,6 +222,19 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var namespaceResource framework.Resource
+	{
+		namespaceConfig := namespaceresource.DefaultConfig()
+
+		namespaceConfig.K8sClient = k8sClient
+		namespaceConfig.Logger = config.Logger
+
+		namespaceResource, err = namespaceresource.New(namespaceConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	// We create the list of resources and wrap each resource around some common
 	// resources like metrics and retry resources.
 	//
@@ -233,6 +247,7 @@ func New(config Config) (*Service, error) {
 		resources = []framework.Resource{
 			legacyResource,
 			cloudformationResource,
+			namespaceResource,
 		}
 
 		// Disable retry wrapper due to problems with the legacy resource.
