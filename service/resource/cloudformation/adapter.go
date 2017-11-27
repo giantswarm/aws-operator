@@ -71,17 +71,17 @@ func newAdapter(customObject awstpr.CustomObject, clients Clients) (adapter, err
 	return a, nil
 }
 
-func (a *adapter) getLaunchConfiguration(customObject awstpr.CustomObject, clients Clients) error {
+func (l *lauchConfigAdapter) getLaunchConfiguration(customObject awstpr.CustomObject, clients Clients) error {
 	if len(customObject.Spec.AWS.Workers) == 0 {
 		return microerror.Mask(invalidConfigError)
 	}
 
-	a.ImageID = customObject.Spec.AWS.Workers[0].ImageID
-	a.InstanceType = customObject.Spec.AWS.Workers[0].InstanceType
-	a.IAMInstanceProfileName = key.InstanceProfileName(customObject, prefixWorker)
-	a.AssociatePublicIPAddress = true
+	l.ImageID = customObject.Spec.AWS.Workers[0].ImageID
+	l.InstanceType = customObject.Spec.AWS.Workers[0].InstanceType
+	l.IAMInstanceProfileName = key.InstanceProfileName(customObject, prefixWorker)
+	l.AssociatePublicIPAddress = true
 
-	a.BlockDeviceMappings = []BlockDeviceMapping{
+	l.BlockDeviceMappings = []BlockDeviceMapping{
 		BlockDeviceMapping{
 			DeleteOnTermination: true,
 			DeviceName:          defaultEBSVolumeMountPoint,
@@ -115,7 +115,7 @@ func (a *adapter) getLaunchConfiguration(customObject awstpr.CustomObject, clien
 	if len(output.SecurityGroups) > 1 {
 		return microerror.Mask(tooManyResultsError)
 	}
-	a.SecurityGroupID = *output.SecurityGroups[0].GroupId
+	l.SecurityGroupID = *output.SecurityGroups[0].GroupId
 
 	// cloud config
 	resp, err := clients.IAM.GetUser(&iam.GetUserInput{})
@@ -136,12 +136,12 @@ func (a *adapter) getLaunchConfiguration(customObject awstpr.CustomObject, clien
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	a.SmallCloudConfig = smallCloudConfig
+	l.SmallCloudConfig = smallCloudConfig
 
 	return nil
 }
 
-func (a *adapter) getAutoScalingGroup(customObject awstpr.CustomObject, clients Clients) error {
+func (a *autoScalingGroupAdapter) getAutoScalingGroup(customObject awstpr.CustomObject, clients Clients) error {
 	a.AZ = customObject.Spec.AWS.AZ
 
 	return nil
