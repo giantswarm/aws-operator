@@ -1,5 +1,0 @@
-imageName: gcr.io/heptio-images/kube-conformance
-imageTag: v1.8
-env:
-  - name: E2E_FOCUS
-    value: Conformance

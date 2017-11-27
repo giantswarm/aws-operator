@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/giantswarm/e2e-harness/pkg/tasks"
 	"github.com/spf13/afero"
+
+	"github.com/giantswarm/e2e-harness/pkg/tasks"
 )
 
 var (

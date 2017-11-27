@@ -71,6 +71,8 @@ func New(config Config) (*Service, error) {
 		versionBundles: config.VersionBundles,
 	}
 
+	newService.updateBuildInfoMetric()
+
 	return newService, nil
 }
 

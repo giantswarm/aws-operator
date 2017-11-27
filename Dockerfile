@@ -3,8 +3,8 @@ FROM busybox:ubuntu-14.04
 RUN mkdir -p /opt
 ADD ./aws-operator /opt/aws-operator
 
-RUN mkdir -p /opt/resources
-ADD resources/templates/ /opt/resources/templates
+RUN mkdir -p /service
+ADD service/templates/ /service/templates
 
 WORKDIR /opt
 

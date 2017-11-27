@@ -83,15 +83,22 @@ func (r *RouteTable) CreateOrFail() error {
 		return microerror.Mask(err)
 	}
 
-	if _, err := r.Client.CreateTags(&ec2.CreateTagsInput{
-		Resources: []*string{routeTable.RouteTable.RouteTableId},
-		Tags: []*ec2.Tag{
-			{
-				Key:   aws.String(tagKeyName),
-				Value: aws.String(r.Name),
+	tagOperation := func() error {
+		if _, err := r.Client.CreateTags(&ec2.CreateTagsInput{
+			Resources: []*string{routeTable.RouteTable.RouteTableId},
+			Tags: []*ec2.Tag{
+				{
+					Key:   aws.String(tagKeyName),
+					Value: aws.String(r.Name),
+				},
 			},
-		},
-	}); err != nil {
+		}); err != nil {
+			return microerror.Mask(err)
+		}
+		return nil
+	}
+	tagNotify := NewNotify(r.Logger, "tag route table")
+	if err := backoff.RetryNotify(tagOperation, NewCustomExponentialBackoff(), tagNotify); err != nil {
 		return microerror.Mask(err)
 	}
 

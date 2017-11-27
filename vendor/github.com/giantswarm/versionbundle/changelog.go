@@ -1,6 +1,10 @@
 package versionbundle
 
-import "github.com/giantswarm/microerror"
+import (
+	"encoding/json"
+
+	"github.com/giantswarm/microerror"
+)
 
 type kind string
 
@@ -77,4 +81,19 @@ func (c Changelog) Validate() error {
 	}
 
 	return nil
+}
+
+func CopyChangelogs(changelogs []Changelog) []Changelog {
+	raw, err := json.Marshal(changelogs)
+	if err != nil {
+		panic(err)
+	}
+
+	var copy []Changelog
+	err = json.Unmarshal(raw, &copy)
+	if err != nil {
+		panic(err)
+	}
+
+	return copy
 }

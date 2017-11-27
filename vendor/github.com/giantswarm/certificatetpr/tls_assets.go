@@ -39,6 +39,8 @@ const (
 	EtcdComponent ClusterComponent = "etcd"
 	// CalicoComponent is the calico component.
 	CalicoComponent ClusterComponent = "calico"
+	// KubeStateMetricsComponent is the kube-state-metrics component.
+	KubeStateMetricsComponent ClusterComponent = "kube-state-metrics"
 	// ServiceAccountComponent is the service-account component.
 	ServiceAccountComponent ClusterComponent = "service-account"
 	// PrometheusComponent is the prometheus component.
@@ -74,6 +76,13 @@ var ClusterComponents = []ClusterComponent{
 	EtcdComponent,
 	CalicoComponent,
 	ServiceAccountComponent,
+}
+
+// MonitoringComponents is a slice enumerating all the components that make up
+// monitoring.
+var MonitoringComponents = []ClusterComponent{
+	PrometheusComponent,
+	KubeStateMetricsComponent,
 }
 
 // TLSAssetTypes is a slice enumerating all the TLS assets we need to boot the

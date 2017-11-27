@@ -159,7 +159,7 @@ coreos:
 
       [Service]
       Type=oneshot
-      ExecStartPre=/bin/bash -c "gpasswd -d core rkt; gpasswd -d core docker; gpasswd -d core wheel"
+      ExecStartPre=-/bin/bash -c "gpasswd -d core rkt; gpasswd -d core docker; gpasswd -d core wheel"
       ExecStartPre=/bin/bash -c "until [ -f '/etc/sysctl.d/hardening.conf' ]; do echo Waiting for sysctl file; sleep 1s;done;"
       ExecStart=/usr/sbin/sysctl -p /etc/sysctl.d/hardening.conf
 
@@ -290,38 +290,11 @@ coreos:
       --allow-privileged=true \
       --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml \
       --node-labels="kubernetes.io/hostname=${HOSTNAME},ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
+      --kube-reserved="cpu=150m,memory=250Mi" \
+      --system-reserved="cpu=150m,memory=250Mi" \
       --v=2"
       ExecStop=-/usr/bin/docker stop -t 10 $NAME
       ExecStopPost=-/usr/bin/docker rm -f $NAME
-  - name: node-exporter.service
-    enable: true
-    command: start
-    content: |
-      [Unit]
-      Description=Prometheus Node Exporter Service
-      Requires=docker.service
-      After=docker.service
-
-      [Service]
-      Restart=always
-      RestartSec=0
-      TimeoutStopSec=10
-      Environment="IMAGE=prom/node-exporter:0.12.0"
-      Environment="NAME=%p.service"
-      ExecStartPre=/usr/bin/docker pull $IMAGE
-      ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
-      ExecStartPre=-/usr/bin/docker rm -f $NAME
-      ExecStart=/usr/bin/docker run --rm \
-        -p 91:91 \
-        --net=host \
-        --name $NAME \
-        $IMAGE \
-        --web.listen-address=:91
-      ExecStop=-/usr/bin/docker stop -t 10 $NAME
-      ExecStopPost=-/usr/bin/docker rm -f $NAME
-
-      [Install]
-      WantedBy=multi-user.target
 
   update:
     reboot-strategy: off

@@ -4,8 +4,7 @@ RUN adduser -D -u 1001 e2e-harness
 ENV HOME=/home/e2e-harness
 ENV WORKDIR=/workdir
 
-RUN mkdir -p ${HOME}/resources ${WORKDIR}
-ADD resources/ ${HOME}/resources
+RUN mkdir -p ${WORKDIR}
 
 RUN chown -R e2e-harness:e2e-harness ${WORKDIR} ${HOME}
 
@@ -17,7 +16,7 @@ RUN apk -Uuv add --update --no-cache \
       less=487-r0 \
       libffi-dev=3.2.1-r3 \
       openssh-client=7.5_p1-r1 \
-      openssl=1.0.2k-r0
+      openssl=1.0.2m-r0
 
 ENV KUBECTL_VERSION=v1.8.1
 ENV HELM_VERSION=v2.6.2

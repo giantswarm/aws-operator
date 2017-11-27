@@ -9,8 +9,8 @@ aws:
   region: "eu-central-1"
   az: "eu-central-1a"
   ami: "ami-d60ad6b9"
-  instanceTypeMaster: "m3.medium"
-  instanceTypeWorker: "m3.medium"
+  instanceTypeMaster: "m3.large"
+  instanceTypeWorker: "m3.large"
 
   apiHostedZone: "Z*************"
   ingressHostedZone: "Z*************"

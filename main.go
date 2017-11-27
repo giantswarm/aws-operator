@@ -130,9 +130,12 @@ func main() {
 	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.ID, "", "ID of the AWS access key for the host cluster account. If empty, guest cluster account is used.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.Secret, "", "Secret of the AWS access key for the host cluster account. If empty, guest cluster account is used.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.Session, "", "Session token of the AWS access key for the host cluster account. If empty, guest cluster token is used.")
+	daemonCommand.PersistentFlags().String(f.Service.AWS.Region, "", "Region for checking for orphan AWS resources.")
 
 	// TODO(nhlfr): Deprecate these options when cert-operator will be implemented.
 	daemonCommand.PersistentFlags().String(f.Service.AWS.PubKeyFile, path.Join(os.Getenv("HOME"), ".ssh", "id_rsa.pub"), "Public key to be imported as a keypair in AWS.")
+
+	daemonCommand.PersistentFlags().String(f.Service.Installation.Name, "", "Installation name for tagging AWS resources.")
 
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.Address, "http://127.0.0.1:6443", "Address used to connect to Kubernetes. When empty in-cluster config is created.")
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.BearerToken, "", "Token (if needed for Kubernetes authentication).")

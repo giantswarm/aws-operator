@@ -10,7 +10,7 @@ import (
 
 // Bundles is a plain validation type for a list of version bundles. A
 // list of version bundles is exposed by authorities. Lists of version bundles
-// of multiple authorities are aggregated and grouped to reflect distributions.
+// of multiple authorities are aggregated and grouped to reflect releases.
 type Bundles []Bundle
 
 func (b Bundles) Contain(item Bundle) bool {
@@ -57,21 +57,6 @@ func (b Bundles) Validate() error {
 	return nil
 }
 
-func CopyBundles(bundles []Bundle) []Bundle {
-	raw, err := json.Marshal(bundles)
-	if err != nil {
-		panic(err)
-	}
-
-	var copy []Bundle
-	err = json.Unmarshal(raw, &copy)
-	if err != nil {
-		panic(err)
-	}
-
-	return copy
-}
-
 func (b Bundles) hasDuplicatedVersions() bool {
 	for _, b1 := range b {
 		var seen int
@@ -88,4 +73,47 @@ func (b Bundles) hasDuplicatedVersions() bool {
 	}
 
 	return false
+}
+
+func CopyBundles(bundles []Bundle) []Bundle {
+	raw, err := json.Marshal(bundles)
+	if err != nil {
+		panic(err)
+	}
+
+	var copy []Bundle
+	err = json.Unmarshal(raw, &copy)
+	if err != nil {
+		panic(err)
+	}
+
+	return copy
+}
+
+func GetBundleByName(bundles []Bundle, name string) (Bundle, error) {
+	if len(bundles) == 0 {
+		return Bundle{}, microerror.Maskf(executionFailedError, "bundles must not be empty")
+	}
+	if name == "" {
+		return Bundle{}, microerror.Maskf(executionFailedError, "name must not be empty")
+	}
+
+	for _, b := range bundles {
+		if b.Name == name {
+			return b, nil
+		}
+	}
+
+	return Bundle{}, microerror.Maskf(bundleNotFoundError, name)
+}
+
+func GetNewestBundle(bundles []Bundle) (Bundle, error) {
+	if len(bundles) == 0 {
+		return Bundle{}, microerror.Maskf(executionFailedError, "bundles must not be empty")
+	}
+
+	s := SortBundlesByVersion(bundles)
+	sort.Sort(s)
+
+	return s[len(s)-1], nil
 }

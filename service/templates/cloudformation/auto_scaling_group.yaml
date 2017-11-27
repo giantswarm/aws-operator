@@ -1,0 +1,23 @@
+{{define "autoscaling_group"}}{{ .ASGType }}AutoScalingGroup:
+    Type: "AWS::AutoScaling::AutoScalingGroup"
+    Properties:
+      VPCZoneIdentifier:
+        - {{ .SubnetID }}
+      AvailabilityZones: [{{ .AZ }}]
+      MinSize: {{ .ASGMinSize }}
+      MaxSize: {{ .ASGMaxSize }}
+      LaunchConfigurationName: !Ref {{ .ASGType }}LaunchConfiguration
+      LoadBalancerNames:
+        - {{ .LoadBalancerName }}
+      HealthCheckGracePeriod: {{ .HealthCheckGracePeriod }}
+      MetricsCollection:
+        - Granularity: "1Minute"
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        # minimum amount of instances that must always be running during a rolling update
+        MinInstancesInService: {{ .MinInstancesInService }}
+        # only do a rolling update of this amount of instances max
+        MaxBatchSize: {{ .MaxBatchSize }}
+        # after creating a new instance, pause operations on the ASG for this amount of time
+        PauseTime: {{ .RollingUpdatePauseTime }}
+{{end}}

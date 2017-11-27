@@ -3,23 +3,28 @@ package framework
 import (
 	"context"
 	"fmt"
+	"os"
 	"sync"
 	"time"
 
 	"github.com/cenk/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"github.com/prometheus/client_golang/prometheus"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/giantswarm/operatorkit/framework/context/canceledcontext"
+	"github.com/giantswarm/operatorkit/informer"
+	"github.com/giantswarm/operatorkit/tpr"
 )
 
 // Config represents the configuration used to create a new operator framework.
 type Config struct {
 	// Dependencies.
 
-	BackOff backoff.BackOff
+	BackOffFactory func() backoff.BackOff
+	Informer       informer.Interface
 	// InitCtxFunc is to prepare the given context for a single reconciliation
 	// loop. Operators can implement common context packages to enable
 	// communication between resources. These context packages can be set up
@@ -28,7 +33,19 @@ type Config struct {
 	// custom object can be used to initialize the context.
 	InitCtxFunc func(ctx context.Context, obj interface{}) (context.Context, error)
 	Logger      micrologger.Logger
-	Resources   []Resource
+	// ResourceRouter is to decide which resources to execute. Each custom object
+	// being reconciled is executed against a list of resources. Since custom
+	// objects may differ in version and/or structure the resource router enables
+	// custom inspection before each reconciliation loop. That way whole resources
+	// can be versioned and different resources can be executed depending on the
+	// custom object being reconciled.
+	ResourceRouter func(ctx context.Context, obj interface{}) ([]Resource, error)
+	// TPR can be provided to ensure a third party resource exists. When given the
+	// boot process of the framework ensures the TPR is created before starting
+	// the conciliation.
+	//
+	// NOTE this is deprecated since the CRD concept is the successor of the TPR.
+	TPR tpr.Interface
 }
 
 // DefaultConfig provides a default configuration to create a new operator
@@ -36,49 +53,60 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
-		BackOff:     nil,
-		InitCtxFunc: nil,
-		Logger:      nil,
-		Resources:   nil,
+		BackOffFactory: nil,
+		Informer:       nil,
+		InitCtxFunc:    nil,
+		Logger:         nil,
+		ResourceRouter: nil,
+		TPR:            nil,
 	}
 }
 
 type Framework struct {
 	// Dependencies.
-	backOff     backoff.BackOff
-	initializer func(ctx context.Context, obj interface{}) (context.Context, error)
-	logger      micrologger.Logger
-	resources   []Resource
+	backOffFactory func() backoff.BackOff
+	informer       informer.Interface
+	initCtxFunc    func(ctx context.Context, obj interface{}) (context.Context, error)
+	logger         micrologger.Logger
+	resourceRouter func(ctx context.Context, obj interface{}) ([]Resource, error)
+	tpr            tpr.Interface
 
 	// Internals.
-	mutex sync.Mutex
+	bootOnce sync.Once
+	mutex    sync.Mutex
 }
 
 // New creates a new configured operator framework.
 func New(config Config) (*Framework, error) {
 	// Dependencies.
-	if config.BackOff == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.BackOff must not be empty")
+	if config.BackOffFactory == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.BackOffFactory must not be empty")
+	}
+	if config.Informer == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.Informer must not be empty")
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
-	if len(config.Resources) == 0 {
-		return nil, microerror.Maskf(invalidConfigError, "config.Resources must not be empty")
+	if config.ResourceRouter == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.ResourceRouter must not be empty")
 	}
 
-	newFramework := &Framework{
+	f := &Framework{
 		// Dependencies.
-		backOff:     config.BackOff,
-		initializer: config.InitCtxFunc,
-		logger:      config.Logger,
-		resources:   config.Resources,
+		backOffFactory: config.BackOffFactory,
+		informer:       config.Informer,
+		initCtxFunc:    config.InitCtxFunc,
+		logger:         config.Logger,
+		resourceRouter: config.ResourceRouter,
+		tpr:            config.TPR,
 
 		// Internals.
-		mutex: sync.Mutex{},
+		bootOnce: sync.Once{},
+		mutex:    sync.Mutex{},
 	}
 
-	return newFramework, nil
+	return f, nil
 }
 
 // AddFunc executes the framework's ProcessCreate function.
@@ -94,24 +122,55 @@ func (f *Framework) AddFunc(obj interface{}) {
 	ctx := context.Background()
 	ctx = canceledcontext.NewContext(ctx, make(chan struct{}))
 
-	if f.initializer != nil {
+	if f.initCtxFunc != nil {
 		var err error
-		ctx, err = f.initializer(ctx, obj)
+		ctx, err = f.initCtxFunc(ctx, obj)
 		if err != nil {
-			f.logger.Log("error", fmt.Sprintf("%#v", err), "event", "create")
+			f.logger.LogWithCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "create")
 			return
 		}
 	}
 
-	f.logger.Log("action", "start", "component", "operatorkit", "function", "ProcessCreate")
-
-	err := ProcessCreate(ctx, obj, f.resources)
+	rs, err := f.resourceRouter(ctx, obj)
 	if err != nil {
-		f.logger.Log("error", fmt.Sprintf("%#v", err), "event", "create")
+		f.logger.LogWithCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "create")
 		return
 	}
 
-	f.logger.Log("action", "end", "component", "operatorkit", "function", "ProcessCreate")
+	f.logger.LogWithCtx(ctx, "action", "start", "component", "operatorkit", "function", "ProcessCreate")
+
+	err = ProcessCreate(ctx, obj, rs)
+	if err != nil {
+		f.logger.LogWithCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "create")
+		return
+	}
+
+	f.logger.LogWithCtx(ctx, "action", "end", "component", "operatorkit", "function", "ProcessCreate")
+}
+
+func (f *Framework) Boot() {
+	ctx := context.TODO()
+
+	f.bootOnce.Do(func() {
+		operation := func() error {
+			err := f.bootWithError(ctx)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			return nil
+		}
+
+		notifier := func(err error, d time.Duration) {
+			f.logger.LogWithCtx(ctx, "warning", fmt.Sprintf("retrying operator boot due to error: %#v", microerror.Mask(err)))
+		}
+
+		err := backoff.RetryNotify(operation, f.backOffFactory(), notifier)
+		if err != nil {
+			f.logger.LogWithCtx(ctx, "error", fmt.Sprintf("stop operator boot retries due to too many errors: %#v", microerror.Mask(err)))
+			os.Exit(1)
+		}
+	})
 }
 
 // DeleteFunc executes the framework's ProcessDelete function.
@@ -127,24 +186,30 @@ func (f *Framework) DeleteFunc(obj interface{}) {
 	ctx := context.Background()
 	ctx = canceledcontext.NewContext(ctx, make(chan struct{}))
 
-	if f.initializer != nil {
+	if f.initCtxFunc != nil {
 		var err error
-		ctx, err = f.initializer(ctx, obj)
+		ctx, err = f.initCtxFunc(ctx, obj)
 		if err != nil {
-			f.logger.Log("error", fmt.Sprintf("%#v", err), "event", "delete")
+			f.logger.LogWithCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "delete")
 			return
 		}
 	}
 
-	f.logger.Log("action", "start", "component", "operatorkit", "function", "ProcessDelete")
-
-	err := ProcessDelete(ctx, obj, f.resources)
+	rs, err := f.resourceRouter(ctx, obj)
 	if err != nil {
-		f.logger.Log("error", fmt.Sprintf("%#v", err), "event", "delete")
+		f.logger.LogWithCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "delete")
 		return
 	}
 
-	f.logger.Log("action", "end", "component", "operatorkit", "function", "ProcessDelete")
+	f.logger.LogWithCtx(ctx, "action", "start", "component", "operatorkit", "function", "ProcessDelete")
+
+	err = ProcessDelete(ctx, obj, rs)
+	if err != nil {
+		f.logger.LogWithCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "delete")
+		return
+	}
+
+	f.logger.LogWithCtx(ctx, "action", "end", "component", "operatorkit", "function", "ProcessDelete")
 }
 
 // NewCacheResourceEventHandler returns the framework's event handler for the
@@ -175,24 +240,30 @@ func (f *Framework) UpdateFunc(oldObj, newObj interface{}) {
 	ctx := context.Background()
 	ctx = canceledcontext.NewContext(ctx, make(chan struct{}))
 
-	if f.initializer != nil {
+	if f.initCtxFunc != nil {
 		var err error
-		ctx, err = f.initializer(ctx, obj)
+		ctx, err = f.initCtxFunc(ctx, obj)
 		if err != nil {
-			f.logger.Log("error", fmt.Sprintf("%#v", err), "event", "create")
+			f.logger.LogWithCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "update")
 			return
 		}
 	}
 
-	f.logger.Log("action", "start", "component", "operatorkit", "function", "ProcessUpdate")
-
-	err := ProcessUpdate(ctx, obj, f.resources)
+	rs, err := f.resourceRouter(ctx, obj)
 	if err != nil {
-		f.logger.Log("error", fmt.Sprintf("%#v", err), "event", "update")
+		f.logger.LogWithCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "update")
 		return
 	}
 
-	f.logger.Log("action", "end", "component", "operatorkit", "function", "ProcessUpdate")
+	f.logger.LogWithCtx(ctx, "action", "start", "component", "operatorkit", "function", "ProcessUpdate")
+
+	err = ProcessUpdate(ctx, obj, rs)
+	if err != nil {
+		f.logger.LogWithCtx(ctx, "error", fmt.Sprintf("%#v", err), "event", "update")
+		return
+	}
+
+	f.logger.LogWithCtx(ctx, "action", "end", "component", "operatorkit", "function", "ProcessUpdate")
 }
 
 // ProcessCreate is a drop-in for an informer's AddFunc. It receives the custom
@@ -267,6 +338,10 @@ func ProcessDelete(ctx context.Context, obj interface{}, resources []Resource) e
 			return microerror.Mask(err)
 		}
 
+		if patch == nil {
+			return microerror.Maskf(executionFailedError, "patch must not be nil")
+		}
+
 		// Apply the patch.
 
 		if canceledcontext.IsCanceled(ctx) {
@@ -314,9 +389,13 @@ func (f *Framework) ProcessEvents(ctx context.Context, deleteChan chan watch.Eve
 		for {
 			select {
 			case e := <-deleteChan:
+				t := prometheus.NewTimer(frameworkHistogram.WithLabelValues("delete"))
 				f.DeleteFunc(e.Object)
+				t.ObserveDuration()
 			case e := <-updateChan:
+				t := prometheus.NewTimer(frameworkHistogram.WithLabelValues("update"))
 				f.UpdateFunc(nil, e.Object)
+				t.ObserveDuration()
 			case err := <-errChan:
 				return microerror.Mask(err)
 			case <-ctx.Done():
@@ -326,12 +405,13 @@ func (f *Framework) ProcessEvents(ctx context.Context, deleteChan chan watch.Eve
 	}
 
 	notifier := func(err error, d time.Duration) {
-		f.logger.Log("error", fmt.Sprintf("%#v", err))
+		f.logger.LogWithCtx(ctx, "warning", fmt.Sprintf("retrying operator event processing due to error: %#v", microerror.Mask(err)))
 	}
 
-	err := backoff.RetryNotify(operation, f.backOff, notifier)
+	err := backoff.RetryNotify(operation, f.backOffFactory(), notifier)
 	if err != nil {
-		f.logger.Log("error", fmt.Sprintf("%#v", err))
+		f.logger.LogWithCtx(ctx, "error", fmt.Sprintf("stop operator event processing retries due to too many errors: %#v", microerror.Mask(err)))
+		os.Exit(1)
 	}
 }
 
@@ -383,6 +463,9 @@ func ProcessUpdate(ctx context.Context, obj interface{}, resources []Resource) e
 		if err != nil {
 			return microerror.Mask(err)
 		}
+		if patch == nil {
+			return microerror.Maskf(executionFailedError, "patch must not be nil")
+		}
 
 		// Apply the patch.
 
@@ -419,6 +502,30 @@ func ProcessUpdate(ctx context.Context, obj interface{}, resources []Resource) e
 			}
 		}
 	}
+
+	return nil
+}
+
+func (f *Framework) bootWithError(ctx context.Context) error {
+	if f.tpr != nil {
+		f.logger.LogWithCtx(ctx, "debug", "ensuring third party resource exists")
+
+		err := f.tpr.CreateAndWait()
+		if tpr.IsAlreadyExists(err) {
+			f.logger.LogWithCtx(ctx, "debug", "third party resource already exists")
+		} else if err != nil {
+			return microerror.Mask(err)
+		} else {
+			f.logger.LogWithCtx(ctx, "debug", "created third party resource")
+		}
+
+		f.tpr.CollectMetrics(context.TODO())
+	}
+
+	f.logger.LogWithCtx(ctx, "debug", "starting list/watch")
+
+	deleteChan, updateChan, errChan := f.informer.Watch(context.TODO())
+	f.ProcessEvents(context.TODO(), deleteChan, updateChan, errChan)
 
 	return nil
 }

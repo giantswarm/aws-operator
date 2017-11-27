@@ -7,10 +7,11 @@ import (
 	"github.com/kylelemons/godebug/pretty"
 	"github.com/stretchr/testify/require"
 	yaml "gopkg.in/yaml.v2"
+
+	"github.com/giantswarm/certificatetpr/spec"
 )
 
 func TestSpecYamlEncoding(t *testing.T) {
-
 	spec := Spec{
 		AllowBareDomains: true,
 		AltNames: []string{
@@ -25,7 +26,13 @@ func TestSpecYamlEncoding(t *testing.T) {
 		IPSANs: []string{
 			"172.31.0.1",
 		},
+		Organizations: []string{
+			"system:masters",
+		},
 		TTL: "4320h",
+		VersionBundle: spec.VersionBundle{
+			Version: "0.1.0",
+		},
 	}
 
 	var got map[string]interface{}
