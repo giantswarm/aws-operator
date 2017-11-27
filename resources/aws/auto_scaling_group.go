@@ -6,6 +6,10 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
+const (
+	ASGMetricsGranularity = "1Minute"
+)
+
 type AutoScalingGroup struct {
 	// AvailabilityZone is the AZ the instances will be placed in.
 	AvailabilityZone string
@@ -91,6 +95,13 @@ func (asg *AutoScalingGroup) CreateOrFail() error {
 	}
 
 	if _, err := asg.Client.CreateAutoScalingGroup(params); err != nil {
+		return microerror.Mask(err)
+	}
+
+	if _, err := asg.Client.EnableMetricsCollection(&autoscaling.EnableMetricsCollectionInput{
+		AutoScalingGroupName: aws.String(asg.Name),
+		Granularity:          aws.String(ASGMetricsGranularity),
+	}); err != nil {
 		return microerror.Mask(err)
 	}
 
