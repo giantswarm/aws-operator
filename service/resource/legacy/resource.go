@@ -251,9 +251,13 @@ func (s *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 }
 
 func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
-	// Create cluster namespace in k8s.
-	if err := s.createClusterNamespace(cluster.Spec.Cluster); err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create cluster namespace: '%#v'", err))
+	// For new clusters using Cloud Formation there is an OperatorKit resource
+	// for the k8s namespace.
+	if !key.UseCloudFormation(cluster) {
+		// Create cluster namespace in k8s.
+		if err := s.createClusterNamespace(cluster.Spec.Cluster); err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create cluster namespace: '%#v'", err))
+		}
 	}
 
 	// Create AWS guest cluster client.

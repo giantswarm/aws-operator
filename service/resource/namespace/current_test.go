@@ -25,6 +25,7 @@ func Test_Resource_Namespace_GetCurrentState(t *testing.T) {
 						Cluster: clustertprspec.Cluster{
 							ID: "al9qy",
 						},
+						Version: "cloud-formation",
 					},
 				},
 			},
