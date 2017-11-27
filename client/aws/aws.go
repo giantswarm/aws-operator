@@ -1,7 +1,6 @@
 package aws
 
 import (
-	"regexp"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -16,6 +15,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
+
+	cloudformationresource "github.com/giantswarm/aws-operator/service/resource/cloudformation"
 )
 
 type Config struct {
@@ -71,7 +72,7 @@ func (c *Config) SetAccountID(iamClient *iam.IAM) error {
 	userArn := *resp.User.Arn
 	accountID := strings.Split(userArn, ":")[accountIDPosition]
 
-	if err := validateAccountID(accountID); err != nil {
+	if err := cloudformationresource.ValidateAccountID(accountID); err != nil {
 		return microerror.Mask(err)
 	}
 
@@ -82,19 +83,4 @@ func (c *Config) SetAccountID(iamClient *iam.IAM) error {
 
 func (c *Config) AccountID() string {
 	return c.accountID
-}
-
-func validateAccountID(accountID string) error {
-	r, _ := regexp.Compile("^[0-9]*$")
-
-	switch {
-	case accountID == "":
-		return microerror.Mask(emptyAmazonAccountIDError)
-	case len(accountID) != accountIDLength:
-		return microerror.Mask(wrongAmazonAccountIDLengthError)
-	case !r.MatchString(accountID):
-		return microerror.Mask(malformedAmazonAccountIDError)
-	}
-
-	return nil
 }

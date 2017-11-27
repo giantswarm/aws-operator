@@ -476,3 +476,24 @@ func Test_UseCloudFormation(t *testing.T) {
 		}
 	}
 }
+
+func Test_InstanceProfileName(t *testing.T) {
+	expectedName := "test-cluster-worker-EC2-K8S-Role"
+	profileType := "worker"
+
+	cluster := clustertpr.Spec{
+		Cluster: spec.Cluster{
+			ID: "test-cluster",
+		},
+	}
+
+	customObject := awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			Cluster: cluster,
+		},
+	}
+
+	if InstanceProfileName(customObject, profileType) != expectedName {
+		t.Fatalf("Expected instance profile name '%s' but was '%s'", expectedName, InstanceProfileName(customObject, profileType))
+	}
+}

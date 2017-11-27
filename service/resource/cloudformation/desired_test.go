@@ -8,8 +8,6 @@ import (
 	"github.com/giantswarm/clustertpr"
 	"github.com/giantswarm/clustertpr/spec"
 	"github.com/giantswarm/micrologger/microloggertest"
-
-	awsutil "github.com/giantswarm/aws-operator/client/aws"
 )
 
 func Test_Resource_Cloudformation_GetDesiredState(t *testing.T) {
@@ -38,8 +36,7 @@ func Test_Resource_Cloudformation_GetDesiredState(t *testing.T) {
 	var newResource *Resource
 	{
 		resourceConfig := DefaultConfig()
-		awsCfg := awsutil.Config{}
-		resourceConfig.Clients = awsutil.NewClients(awsCfg)
+		resourceConfig.Clients = Clients{}
 		resourceConfig.Logger = microloggertest.New()
 		newResource, err = New(resourceConfig)
 		if err != nil {

@@ -15,6 +15,7 @@ import (
 	"github.com/giantswarm/aws-operator/resources"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
 	"github.com/giantswarm/aws-operator/service/key"
+	"github.com/giantswarm/aws-operator/service/resource/cloudformation"
 )
 
 type asgStackInput struct {
@@ -162,7 +163,7 @@ func (s *Resource) createASGStack(input asgStackInput) (bool, error) {
 		}
 	}
 
-	cloudconfigConfig := SmallCloudconfigConfig{
+	cloudconfigConfig := cloudformation.SmallCloudconfigConfig{
 		MachineType: input.asgType,
 		Region:      input.cluster.Spec.AWS.Region,
 		S3URI:       s.bucketName(input.cluster),
@@ -178,7 +179,7 @@ func (s *Resource) createASGStack(input asgStackInput) (bool, error) {
 		return false, microerror.Mask(err)
 	}
 
-	smallCloudconfig, err := s.SmallCloudconfig(cloudconfigConfig)
+	smallCloudconfig, err := cloudformation.SmallCloudconfig(cloudconfigConfig)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
