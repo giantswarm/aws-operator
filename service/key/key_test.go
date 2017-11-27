@@ -8,6 +8,7 @@ import (
 	"github.com/giantswarm/awstpr/spec/aws"
 	"github.com/giantswarm/clustertpr"
 	"github.com/giantswarm/clustertpr/spec"
+	"github.com/giantswarm/clustertpr/spec/kubernetes"
 )
 
 func Test_AutoScalingGroupName(t *testing.T) {
@@ -455,5 +456,25 @@ func Test_InstanceProfileName(t *testing.T) {
 
 	if InstanceProfileName(customObject, profileType) != expectedName {
 		t.Fatalf("Expected instance profile name '%s' but was '%s'", expectedName, InstanceProfileName(customObject, profileType))
+	}
+}
+
+func Test_IngressDomain(t *testing.T) {
+	customObject := awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			Cluster: clustertpr.Spec{
+				Kubernetes: spec.Kubernetes{
+					IngressController: kubernetes.IngressController{
+						Domain: "mysubdomain.mydomain.com",
+					},
+				},
+			},
+		},
+	}
+
+	expected := "mysubdomain.mydomain.com"
+	actual := IngressDomain(customObject)
+	if actual != expected {
+		t.Fatalf("Expected ingress name %s but was %s", expected, actual)
 	}
 }

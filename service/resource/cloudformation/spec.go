@@ -43,6 +43,14 @@ const (
 	// (splitting by colon)
 	accountIDIndex  = 4
 	accountIDLength = 12
+
+	// The number of seconds AWS will wait, before issuing a health check on
+	// instances in an Auto Scaling Group.
+	gracePeriodSeconds = 10
+
+	tagKeyName = "Name"
+
+	suffixPublic = "public"
 )
 
 // StackState is the state representation on which the resource methods work.
@@ -56,6 +64,7 @@ type StackState struct {
 // EC2Client describes the methods required to be implemented by a EC2 AWS client.
 type EC2Client interface {
 	DescribeSecurityGroups(*ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error)
+	DescribeSubnets(*ec2.DescribeSubnetsInput) (*ec2.DescribeSubnetsOutput, error)
 }
 
 // CFClient describes the methods required to be implemented by a CloudFormation AWS client.

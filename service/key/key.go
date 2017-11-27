@@ -47,6 +47,10 @@ func HasClusterVersion(customObject awstpr.CustomObject) bool {
 	}
 }
 
+func IngressDomain(customObject awstpr.CustomObject) string {
+	return customObject.Spec.Cluster.Kubernetes.IngressController.Domain
+}
+
 func InstanceProfileName(customObject awstpr.CustomObject, profileType string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, ProfileNameTemplate)
 }

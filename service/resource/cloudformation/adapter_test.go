@@ -2,8 +2,8 @@ package cloudformation
 
 import (
 	"encoding/base64"
-	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -12,13 +12,26 @@ import (
 	awsspecaws "github.com/giantswarm/awstpr/spec/aws"
 	"github.com/giantswarm/clustertpr"
 	"github.com/giantswarm/clustertpr/spec"
-	"github.com/giantswarm/microerror"
-	"github.com/stretchr/testify/assert"
+	"github.com/giantswarm/clustertpr/spec/kubernetes"
+)
+
+var (
+	defaultCluster = clustertpr.Spec{
+		Cluster: spec.Cluster{
+			ID: "test-cluster",
+		},
+		Kubernetes: spec.Kubernetes{
+			IngressController: kubernetes.IngressController{
+				Domain: "mysubdomain.mydomain.com",
+			},
+		},
+	}
 )
 
 func TestAdapterMain(t *testing.T) {
 	customObject := awstpr.CustomObject{
 		Spec: awstpr.Spec{
+			Cluster: defaultCluster,
 			AWS: awsspec.AWS{
 				Workers: []awsspecaws.Node{
 					awsspecaws.Node{},
@@ -27,7 +40,7 @@ func TestAdapterMain(t *testing.T) {
 		},
 	}
 	clients := Clients{
-		EC2: &eC2ClientMock{sgExists: true},
+		EC2: &eC2ClientMock{},
 		IAM: &iAMClientMock{},
 	}
 
@@ -95,7 +108,7 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		clients := Clients{
-			EC2: &eC2ClientMock{sgExists: true},
+			EC2: &eC2ClientMock{},
 			IAM: &iAMClientMock{},
 		}
 		a := adapter{}
@@ -132,7 +145,7 @@ func TestAdapterLaunchConfigurationSecurityGroupID(t *testing.T) {
 		customObject            awstpr.CustomObject
 		expectedSecurityGroupID string
 		expectedError           bool
-		securityGroupExists     bool
+		unexistingSG            bool
 	}{
 		{
 			description: "existent security group",
@@ -153,7 +166,6 @@ func TestAdapterLaunchConfigurationSecurityGroupID(t *testing.T) {
 					},
 				},
 			},
-			securityGroupExists:     true,
 			expectedSecurityGroupID: "test-cluster-worker",
 		},
 		{
@@ -175,7 +187,7 @@ func TestAdapterLaunchConfigurationSecurityGroupID(t *testing.T) {
 					},
 				},
 			},
-			securityGroupExists:     false,
+			unexistingSG:            true,
 			expectedError:           true,
 			expectedSecurityGroupID: "",
 		},
@@ -185,8 +197,8 @@ func TestAdapterLaunchConfigurationSecurityGroupID(t *testing.T) {
 		a := adapter{}
 		clients := Clients{
 			EC2: &eC2ClientMock{
-				sgExists: tc.securityGroupExists,
-				sgID:     tc.expectedSecurityGroupID,
+				unexistingSg: tc.unexistingSG,
+				sgID:         tc.expectedSecurityGroupID,
 			},
 			IAM: &iAMClientMock{},
 		}
@@ -225,7 +237,7 @@ func TestAdapterLaunchConfigurationSmallCloudConfig(t *testing.T) {
 
 	a := adapter{}
 	clients := Clients{
-		EC2: &eC2ClientMock{sgExists: true},
+		EC2: &eC2ClientMock{},
 		IAM: &iAMClientMock{accountID: "000000000000"},
 	}
 	customObject := awstpr.CustomObject{
@@ -268,30 +280,50 @@ func TestAdapterLaunchConfigurationSmallCloudConfig(t *testing.T) {
 
 func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 	testCases := []struct {
-		description   string
-		customObject  awstpr.CustomObject
-		expectedError bool
-		expectedAZ    string
+		description                    string
+		customObject                   awstpr.CustomObject
+		expectedError                  bool
+		expectedAZ                     string
+		expectedASGMaxSize             int
+		expectedASGMinSize             int
+		expectedHealthCheckGracePeriod int
+		expectedMaxBatchSize           string
+		expectedMinInstancesInService  string
+		expectedRollingUpdatePauseTime string
 	}{
 		{
-			description:  "empty custom object",
-			customObject: awstpr.CustomObject{},
-			expectedAZ:   "",
+			description:   "empty custom object",
+			customObject:  awstpr.CustomObject{},
+			expectedError: true,
 		},
 		{
 			description: "basic matching, all fields present",
 			customObject: awstpr.CustomObject{
 				Spec: awstpr.Spec{
+					Cluster: defaultCluster,
 					AWS: awsspec.AWS{
 						AZ: "myaz",
+						Workers: []awsspecaws.Node{
+							awsspecaws.Node{},
+							awsspecaws.Node{},
+							awsspecaws.Node{},
+						},
 					},
 				},
 			},
-			expectedAZ: "myaz",
+			expectedAZ:                     "myaz",
+			expectedASGMaxSize:             3,
+			expectedASGMinSize:             3,
+			expectedHealthCheckGracePeriod: gracePeriodSeconds,
+			expectedMaxBatchSize:           strconv.FormatFloat(asgMaxBatchSizeRatio, 'f', -1, 32),
+			expectedMinInstancesInService:  strconv.FormatFloat(asgMinInstancesRatio, 'f', -1, 32),
+			expectedRollingUpdatePauseTime: rollingUpdatePauseTime,
 		},
 	}
 
-	clients := Clients{}
+	clients := Clients{
+		EC2: &eC2ClientMock{},
+	}
 	for _, tc := range testCases {
 		a := adapter{}
 		t.Run(tc.description, func(t *testing.T) {
@@ -304,43 +336,145 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 				t.Errorf("unexpected error %v", err)
 			}
 
-			if a.AZ != tc.expectedAZ {
-				t.Errorf("unexpected output, got %q, want %q", a.AZ, tc.expectedAZ)
+			if !tc.expectedError {
+				if a.AZ != tc.expectedAZ {
+					t.Errorf("unexpected output, got %q, want %q", a.AZ, tc.expectedAZ)
+				}
+
+				if a.ASGMaxSize != tc.expectedASGMaxSize {
+					t.Errorf("unexpected output, got %d, want %d", a.ASGMaxSize, tc.expectedASGMaxSize)
+				}
+
+				if a.ASGMinSize != tc.expectedASGMinSize {
+					t.Errorf("unexpected output, got %d, want %d", a.ASGMinSize, tc.expectedASGMinSize)
+				}
+
+				if a.HealthCheckGracePeriod != tc.expectedHealthCheckGracePeriod {
+					t.Errorf("unexpected output, got %d, want %d", a.HealthCheckGracePeriod, tc.expectedHealthCheckGracePeriod)
+				}
+
+				if a.MaxBatchSize != tc.expectedMaxBatchSize {
+					t.Errorf("unexpected output, got %q, want %q", a.MaxBatchSize, tc.expectedMaxBatchSize)
+				}
+
+				if a.MinInstancesInService != tc.expectedMinInstancesInService {
+					t.Errorf("unexpected output, got %q, want %q", a.MinInstancesInService, tc.expectedMinInstancesInService)
+				}
+
+				if a.RollingUpdatePauseTime != tc.expectedRollingUpdatePauseTime {
+					t.Errorf("unexpected output, got %q, want %q", a.RollingUpdatePauseTime, tc.expectedRollingUpdatePauseTime)
+				}
 			}
 		})
 	}
 }
 
-func TestValidAmazonAccountID(t *testing.T) {
-	tests := []struct {
-		name            string
-		amazonAccountID string
-		err             error
+func TestAdapterAutoScalingGroupLoadBalancerName(t *testing.T) {
+	testCases := []struct {
+		description              string
+		customObject             awstpr.CustomObject
+		expectedLoadBalancerName string
 	}{
 		{
-			name:            "ID has wrong length",
-			amazonAccountID: "foo",
-			err:             wrongAmazonAccountIDLengthError,
-		},
-		{
-			name:            "ID contains letters",
-			amazonAccountID: "123foo123foo",
-			err:             malformedAmazonAccountIDError,
-		},
-		{
-			name:            "ID is empty",
-			amazonAccountID: "",
-			err:             emptyAmazonAccountIDError,
-		},
-		{
-			name:            "ID has correct format",
-			amazonAccountID: "123456789012",
-			err:             nil,
+			description: "basic matching, all fields present",
+			customObject: awstpr.CustomObject{
+				Spec: awstpr.Spec{
+					Cluster: defaultCluster,
+				},
+			},
+			expectedLoadBalancerName: "test-cluster-mysubdomain",
 		},
 	}
 
-	for _, tc := range tests {
-		err := ValidateAccountID(tc.amazonAccountID)
-		assert.Equal(t, microerror.Cause(tc.err), microerror.Cause(err), fmt.Sprintf("[%s] The return value was not what we expected", tc.name))
+	clients := Clients{
+		EC2: &eC2ClientMock{},
+	}
+	for _, tc := range testCases {
+		a := adapter{}
+		t.Run(tc.description, func(t *testing.T) {
+			err := a.getAutoScalingGroup(tc.customObject, clients)
+			if err != nil {
+				t.Errorf("unexpected error %v", err)
+			}
+
+			if a.LoadBalancerName != tc.expectedLoadBalancerName {
+				t.Errorf("unexpected output, got %q, want %q", a.LoadBalancerName, tc.expectedLoadBalancerName)
+			}
+		})
+	}
+}
+
+func TestAdapterAutoScalingGroupSubnetID(t *testing.T) {
+	testCases := []struct {
+		description                string
+		customObject               awstpr.CustomObject
+		expectedReceivedSubnetName string
+		expectedError              bool
+		unexistentSubnet           bool
+	}{
+		{
+			description: "existent subnet",
+			customObject: awstpr.CustomObject{
+				Spec: awstpr.Spec{
+					Cluster: defaultCluster,
+					AWS: awsspec.AWS{
+						Workers: []awsspecaws.Node{
+							awsspecaws.Node{
+								ImageID:      "myimageid",
+								InstanceType: "myinstancetype",
+							},
+						},
+					},
+				},
+			},
+			expectedReceivedSubnetName: "test-cluster-public",
+		},
+		{
+			description: "unexistent subnet",
+			customObject: awstpr.CustomObject{
+				Spec: awstpr.Spec{
+					Cluster: clustertpr.Spec{
+						Cluster: spec.Cluster{
+							ID: "test-cluster",
+						},
+					},
+					AWS: awsspec.AWS{
+						Workers: []awsspecaws.Node{
+							awsspecaws.Node{
+								ImageID:      "myimageid",
+								InstanceType: "myinstancetype",
+							},
+						},
+					},
+				},
+			},
+			unexistentSubnet:           true,
+			expectedError:              true,
+			expectedReceivedSubnetName: "",
+		},
+	}
+
+	for _, tc := range testCases {
+		a := adapter{}
+		clients := Clients{
+			EC2: &eC2ClientMock{
+				unexistingSubnet: tc.unexistentSubnet,
+				clusterID:        "test-cluster",
+			},
+			IAM: &iAMClientMock{},
+		}
+
+		t.Run(tc.description, func(t *testing.T) {
+			err := a.getAutoScalingGroup(tc.customObject, clients)
+			if tc.expectedError && err == nil {
+				t.Error("expected error didn't happen")
+			}
+
+			// the mock does the check internally, the returned subnet id is not related
+			// to input
+			if !tc.expectedError && err != nil {
+				t.Errorf("unexpected error %v", err)
+			}
+		})
 	}
 }

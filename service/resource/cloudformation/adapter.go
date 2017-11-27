@@ -1,13 +1,9 @@
 package cloudformation
 
 import (
-	"bytes"
-	"encoding/base64"
 	"fmt"
-	"path/filepath"
-	"regexp"
+	"strconv"
 	"strings"
-	"text/template"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -48,10 +44,10 @@ type autoScalingGroupAdapter struct {
 	ASGMaxSize             int
 	ASGMinSize             int
 	AZ                     string
-	HealthCheckGracePeriod string
+	HealthCheckGracePeriod int
 	LoadBalancerName       string
 	MaxBatchSize           string
-	MinInstancesInService  int
+	MinInstancesInService  string
 	RollingUpdatePauseTime string
 	SubnetID               string
 }
@@ -95,6 +91,8 @@ func (l *launchConfigAdapter) getLaunchConfiguration(customObject awstpr.CustomO
 	}
 
 	// security group
+	// TODO: remove this code once the security group is created by cloudformation
+	// and add a reference in the template
 	groupName := key.SecurityGroupName(customObject, prefixWorker)
 	describeSgInput := &ec2.DescribeSecurityGroupsInput{
 		Filters: []*ec2.Filter{
@@ -151,41 +149,46 @@ func (l *launchConfigAdapter) getLaunchConfiguration(customObject awstpr.CustomO
 
 func (a *autoScalingGroupAdapter) getAutoScalingGroup(customObject awstpr.CustomObject, clients Clients) error {
 	a.AZ = customObject.Spec.AWS.AZ
+	workers := key.WorkerCount(customObject)
+	a.ASGMaxSize = workers
+	a.ASGMinSize = workers
+	a.MaxBatchSize = strconv.FormatFloat(asgMaxBatchSizeRatio, 'f', -1, 32)
+	a.MinInstancesInService = strconv.FormatFloat(asgMinInstancesRatio, 'f', -1, 32)
+	a.HealthCheckGracePeriod = gracePeriodSeconds
+	a.RollingUpdatePauseTime = rollingUpdatePauseTime
 
-	return nil
-}
-
-func SmallCloudconfig(config SmallCloudconfigConfig) (string, error) {
-	templateFile, err := filepath.Abs(filepath.Join("../../../", smallCloudConfigTemplate))
+	// load balancer name
+	// TODO: remove this code once the ingress load balancer is created by cloudformation
+	// and add a reference in the template
+	lbName, err := ingressLoadBalancerName(customObject)
 	if err != nil {
-		return "", microerror.Mask(err)
+		return microerror.Mask(err)
 	}
+	a.LoadBalancerName = lbName
 
-	tmpl, err := template.ParseFiles(templateFile)
+	// subnet ID
+	// TODO: remove this code once the subnet is created by cloudformation and add a
+	// reference in the template
+	subnetName := key.SubnetName(customObject, suffixPublic)
+	describeSubnetInput := &ec2.DescribeSubnetsInput{
+		Filters: []*ec2.Filter{
+			{
+				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
+				Values: []*string{
+					aws.String(subnetName),
+				},
+			},
+		},
+	}
+	output, err := clients.EC2.DescribeSubnets(describeSubnetInput)
 	if err != nil {
-		return "", microerror.Mask(err)
+		return microerror.Mask(err)
+	}
+	if len(output.Subnets) > 1 {
+		return microerror.Mask(tooManyResultsError)
 	}
 
-	buf := new(bytes.Buffer)
-	err = tmpl.Execute(buf, config)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	return base64.StdEncoding.EncodeToString(buf.Bytes()), nil
-}
-
-func ValidateAccountID(accountID string) error {
-	r, _ := regexp.Compile("^[0-9]*$")
-
-	switch {
-	case accountID == "":
-		return microerror.Mask(emptyAmazonAccountIDError)
-	case len(accountID) != accountIDLength:
-		return microerror.Mask(wrongAmazonAccountIDLengthError)
-	case !r.MatchString(accountID):
-		return microerror.Mask(malformedAmazonAccountIDError)
-	}
+	a.SubnetID = *output.Subnets[0].SubnetId
 
 	return nil
 }

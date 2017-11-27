@@ -1,4 +1,4 @@
-package legacy
+package cloudformation
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/clustertpr"
 	"github.com/giantswarm/clustertpr/spec"
+	"github.com/giantswarm/clustertpr/spec/kubernetes"
 	"github.com/giantswarm/microerror"
 	"github.com/stretchr/testify/assert"
 )
@@ -95,7 +96,7 @@ func TestLoadBalancerName(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		res, err := loadBalancerName(tc.domainName, tc.tpo)
+		res, err := LoadBalancerName(tc.domainName, tc.tpo)
 
 		if err != nil {
 			underlying := microerror.Cause(err)
@@ -145,5 +146,33 @@ func TestComponentName(t *testing.T) {
 		}
 
 		assert.Equal(t, tc.res, res, fmt.Sprintf("[%s] The input values didn't produce the expected output", tc.desc))
+	}
+}
+
+func Test_IngressLoadBalancerName(t *testing.T) {
+	customObject := awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			Cluster: clustertpr.Spec{
+				Cluster: spec.Cluster{
+					ID: "test-cluster",
+				},
+				Kubernetes: spec.Kubernetes{
+					IngressController: kubernetes.IngressController{
+						Domain: "mysubdomain.mydomain.com",
+					},
+				},
+			},
+		},
+	}
+
+	expected := "test-cluster-mysubdomain"
+	actual, err := ingressLoadBalancerName(customObject)
+
+	if err != nil {
+		t.Errorf("unexpected error %v", err)
+	}
+
+	if actual != expected {
+		t.Errorf("Expected ingress name %s but was %s", expected, actual)
 	}
 }
