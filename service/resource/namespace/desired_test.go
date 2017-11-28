@@ -24,6 +24,7 @@ func Test_Resource_Namespace_GetDesiredState(t *testing.T) {
 						Cluster: clustertprspec.Cluster{
 							ID: "al9qy",
 						},
+						Version: "cloud-formation",
 					},
 				},
 			},
@@ -36,6 +37,7 @@ func Test_Resource_Namespace_GetDesiredState(t *testing.T) {
 						Cluster: clustertprspec.Cluster{
 							ID: "foobar",
 						},
+						Version: "cloud-formation",
 					},
 				},
 			},
