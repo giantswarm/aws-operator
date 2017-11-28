@@ -6,3 +6,5 @@ TODO
 !/examples/local/*.tmpl.yaml
 /examples/local/**/*.crt
 /examples/local/**/*.key
+.e2e-harness
+integration/aws-operator-e2e

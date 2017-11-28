@@ -12,11 +12,6 @@ jobs:
 
     - run: ./architect build
 
-    - persist_to_workspace:
-        root: .
-        paths:
-        - ./architect
-
     - deploy:
         command: |
           if [ "${CIRCLE_BRANCH}" == "master" ]; then
@@ -56,10 +51,16 @@ jobs:
     - attach_workspace:
         at: .
 
-    - run: ./e2e-harness test
+    - run:
+        name: additional setup required for compiling go on circleCI
+        command: |
+          mkdir -p /home/circleci/.go_workspace/src
+          cp -ar vendor/* /home/circleci/.go_workspace/src/
+    - run:
+        name: set CLUSTER_NAME env var
+        command: echo 'export CLUSTER_NAME=ci-awsop-${CIRCLE_SHA1:0:7}' >> $BASH_ENV
 
-    - store_artifacts:
-        path: ./.e2e-harness/workdir/plugins/e2e/results.xml
+    - run: ./e2e-harness test
 
     - run:
         name: Finish with cleanup, no matter if the test succeeded or not
@@ -71,9 +72,8 @@ workflows:
   build_e2e:
     jobs:
       - build
-      - e2eSetup:
-          requires:
-          - build
+      - e2eSetup
       - e2eTestExecution:
           requires:
+          - build
           - e2eSetup
