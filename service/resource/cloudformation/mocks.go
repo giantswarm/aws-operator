@@ -10,12 +10,14 @@ import (
 )
 
 type eC2ClientMock struct {
-	sgExists bool
-	sgID     string
+	unexistingSg     bool
+	sgID             string
+	unexistingSubnet bool
+	clusterID        string
 }
 
 func (e *eC2ClientMock) DescribeSecurityGroups(input *ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error) {
-	if e.sgExists {
+	if !e.unexistingSg {
 		output := &ec2.DescribeSecurityGroupsOutput{
 			SecurityGroups: []*ec2.SecurityGroup{
 				&ec2.SecurityGroup{
@@ -25,7 +27,30 @@ func (e *eC2ClientMock) DescribeSecurityGroups(input *ec2.DescribeSecurityGroups
 		}
 		return output, nil
 	}
-	return nil, fmt.Errorf("not found")
+	return nil, fmt.Errorf("security group not found")
+}
+
+func (e *eC2ClientMock) DescribeSubnets(input *ec2.DescribeSubnetsInput) (*ec2.DescribeSubnetsOutput, error) {
+	if e.clusterID == "" {
+		e.clusterID = "test-cluster"
+	}
+
+	if !e.unexistingSubnet {
+		tagNameValue := *input.Filters[0].Values[0]
+		if tagNameValue != e.clusterID+"-public" {
+			return nil, fmt.Errorf("unexpected tag name value %v", tagNameValue)
+		}
+
+		output := &ec2.DescribeSubnetsOutput{
+			Subnets: []*ec2.Subnet{
+				&ec2.Subnet{
+					SubnetId: aws.String("subnet-1234"),
+				},
+			},
+		}
+		return output, nil
+	}
+	return nil, fmt.Errorf("subnet not found")
 }
 
 type cFClientMock struct{}

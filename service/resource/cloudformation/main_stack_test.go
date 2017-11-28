@@ -8,6 +8,9 @@ import (
 	"github.com/giantswarm/awstpr"
 	awsspec "github.com/giantswarm/awstpr/spec"
 	awsspecaws "github.com/giantswarm/awstpr/spec/aws"
+	"github.com/giantswarm/clustertpr"
+	"github.com/giantswarm/clustertpr/spec"
+	"github.com/giantswarm/clustertpr/spec/kubernetes"
 	"github.com/giantswarm/micrologger/microloggertest"
 )
 
@@ -33,6 +36,16 @@ func TestMainTemplateExistingFields(t *testing.T) {
 	// customObject with example fields for both asg and launch config
 	customObject := awstpr.CustomObject{
 		Spec: awstpr.Spec{
+			Cluster: clustertpr.Spec{
+				Cluster: spec.Cluster{
+					ID: "test-cluster",
+				},
+				Kubernetes: spec.Kubernetes{
+					IngressController: kubernetes.IngressController{
+						Domain: "mysubdomain.mydomain.com",
+					},
+				},
+			},
 			AWS: awsspec.AWS{
 				AZ: "myaz",
 				Workers: []awsspecaws.Node{
@@ -46,7 +59,7 @@ func TestMainTemplateExistingFields(t *testing.T) {
 
 	resourceConfig := DefaultConfig()
 	resourceConfig.Clients = Clients{
-		EC2: &eC2ClientMock{sgExists: true},
+		EC2: &eC2ClientMock{},
 		IAM: &iAMClientMock{},
 	}
 	resourceConfig.Logger = microloggertest.New()

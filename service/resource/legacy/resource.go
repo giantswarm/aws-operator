@@ -1047,9 +1047,9 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 	}
 
 	// Delete Record Sets.
-	apiLBName, err := loadBalancerName(cluster.Spec.Cluster.Kubernetes.API.Domain, cluster)
-	etcdLBName, err := loadBalancerName(cluster.Spec.Cluster.Etcd.Domain, cluster)
-	ingressLBName, err := loadBalancerName(cluster.Spec.Cluster.Kubernetes.IngressController.Domain, cluster)
+	apiLBName, err := key.LoadBalancerName(cluster.Spec.Cluster.Kubernetes.API.Domain, cluster)
+	etcdLBName, err := key.LoadBalancerName(cluster.Spec.Cluster.Etcd.Domain, cluster)
+	ingressLBName, err := key.LoadBalancerName(cluster.Spec.Cluster.Kubernetes.IngressController.Domain, cluster)
 	if err != nil {
 		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	} else {
