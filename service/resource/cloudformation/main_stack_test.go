@@ -12,13 +12,15 @@ import (
 	"github.com/giantswarm/clustertpr/spec"
 	"github.com/giantswarm/clustertpr/spec/kubernetes"
 	"github.com/giantswarm/micrologger/microloggertest"
+
+	"github.com/giantswarm/aws-operator/service/resource/cloudformation/adapter"
 )
 
 func TestMainTemplateGetEmptyBody(t *testing.T) {
 	customObject := awstpr.CustomObject{}
 
 	resourceConfig := DefaultConfig()
-	resourceConfig.Clients = Clients{}
+	resourceConfig.Clients = adapter.Clients{}
 	resourceConfig.Logger = microloggertest.New()
 
 	newResource, err := New(resourceConfig)
@@ -58,9 +60,9 @@ func TestMainTemplateExistingFields(t *testing.T) {
 	}
 
 	resourceConfig := DefaultConfig()
-	resourceConfig.Clients = Clients{
-		EC2: &eC2ClientMock{},
-		IAM: &iAMClientMock{},
+	resourceConfig.Clients = adapter.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
 	}
 	resourceConfig.Logger = microloggertest.New()
 

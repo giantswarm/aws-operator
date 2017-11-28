@@ -1,4 +1,4 @@
-package cloudformation
+package adapter
 
 import (
 	"fmt"
@@ -9,14 +9,14 @@ import (
 	"github.com/aws/aws-sdk-go/service/iam"
 )
 
-type eC2ClientMock struct {
+type EC2ClientMock struct {
 	unexistingSg     bool
 	sgID             string
 	unexistingSubnet bool
 	clusterID        string
 }
 
-func (e *eC2ClientMock) DescribeSecurityGroups(input *ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error) {
+func (e *EC2ClientMock) DescribeSecurityGroups(input *ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error) {
 	if !e.unexistingSg {
 		output := &ec2.DescribeSecurityGroupsOutput{
 			SecurityGroups: []*ec2.SecurityGroup{
@@ -30,7 +30,7 @@ func (e *eC2ClientMock) DescribeSecurityGroups(input *ec2.DescribeSecurityGroups
 	return nil, fmt.Errorf("security group not found")
 }
 
-func (e *eC2ClientMock) DescribeSubnets(input *ec2.DescribeSubnetsInput) (*ec2.DescribeSubnetsOutput, error) {
+func (e *EC2ClientMock) DescribeSubnets(input *ec2.DescribeSubnetsInput) (*ec2.DescribeSubnetsOutput, error) {
 	if e.clusterID == "" {
 		e.clusterID = "test-cluster"
 	}
@@ -53,26 +53,26 @@ func (e *eC2ClientMock) DescribeSubnets(input *ec2.DescribeSubnetsInput) (*ec2.D
 	return nil, fmt.Errorf("subnet not found")
 }
 
-type cFClientMock struct{}
+type CFClientMock struct{}
 
-func (c *cFClientMock) CreateStack(*awscloudformation.CreateStackInput) (*awscloudformation.CreateStackOutput, error) {
+func (c *CFClientMock) CreateStack(*awscloudformation.CreateStackInput) (*awscloudformation.CreateStackOutput, error) {
 	return nil, nil
 }
-func (c *cFClientMock) DeleteStack(*awscloudformation.DeleteStackInput) (*awscloudformation.DeleteStackOutput, error) {
+func (c *CFClientMock) DeleteStack(*awscloudformation.DeleteStackInput) (*awscloudformation.DeleteStackOutput, error) {
 	return nil, nil
 }
-func (c *cFClientMock) DescribeStacks(*awscloudformation.DescribeStacksInput) (*awscloudformation.DescribeStacksOutput, error) {
+func (c *CFClientMock) DescribeStacks(*awscloudformation.DescribeStacksInput) (*awscloudformation.DescribeStacksOutput, error) {
 	return nil, nil
 }
-func (c *cFClientMock) UpdateStack(*awscloudformation.UpdateStackInput) (*awscloudformation.UpdateStackOutput, error) {
+func (c *CFClientMock) UpdateStack(*awscloudformation.UpdateStackInput) (*awscloudformation.UpdateStackOutput, error) {
 	return nil, nil
 }
 
-type iAMClientMock struct {
+type IAMClientMock struct {
 	accountID string
 }
 
-func (i *iAMClientMock) GetUser(input *iam.GetUserInput) (*iam.GetUserOutput, error) {
+func (i *IAMClientMock) GetUser(input *iam.GetUserInput) (*iam.GetUserOutput, error) {
 	if i.accountID == "" {
 		i.accountID = "00"
 	}

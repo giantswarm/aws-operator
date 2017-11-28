@@ -11,6 +11,8 @@ import (
 	"github.com/giantswarm/clustertpr"
 	"github.com/giantswarm/clustertpr/spec"
 	"github.com/giantswarm/micrologger/microloggertest"
+
+	"github.com/giantswarm/aws-operator/service/resource/cloudformation/adapter"
 )
 
 func Test_Resource_Cloudformation_newUpdateChange(t *testing.T) {
@@ -123,7 +125,7 @@ func Test_Resource_Cloudformation_newUpdateChange(t *testing.T) {
 	var newResource *Resource
 	{
 		resourceConfig := DefaultConfig()
-		resourceConfig.Clients = Clients{}
+		resourceConfig.Clients = adapter.Clients{}
 		resourceConfig.Logger = microloggertest.New()
 		newResource, err = New(resourceConfig)
 		if err != nil {
