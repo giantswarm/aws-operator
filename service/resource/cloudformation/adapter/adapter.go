@@ -2,7 +2,7 @@
 // feeding CloudFormation templates.
 //
 // It follows the adapter pattern https://en.wikipedia.org/wiki/Adapter_pattern in the
-// sense that has the knowledge to transform a aws custom object into a data structure
+// sense that it has the knowledge to transform a aws custom object into a data structure
 // easily interpolable into the templates without any additional view logic.
 //
 // There's a base template in `service/templates/cloudformation/main.yaml` which defines
