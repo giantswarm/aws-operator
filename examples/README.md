@@ -178,7 +178,15 @@ kubectl cluster-info
 
 ## Cleaning Up
 
-First delete the cluster TPO.
+First delete the helm charts related to certificates:
+
+```bash
+$ helm delete cert-resource-lab --purge
+$ helm delete cert-operator-lab --purge
+$ helm delete vault --purge
+```
+
+Remove the cluster TPO next.
 
 ```bash
 $ helm delete aws-resource-lab --purge
