@@ -2,6 +2,7 @@ package cloudformation
 
 import (
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/giantswarm/aws-operator/service/resource/cloudformation/adapter"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
@@ -20,16 +21,10 @@ type AWSConfig struct {
 	accountID       string
 }
 
-type Clients struct {
-	CloudFormation CFClient
-	EC2            EC2Client
-	IAM            IAMClient
-}
-
 // Config represents the configuration used to create a new cloudformation resource.
 type Config struct {
 	// Dependencies.
-	Clients Clients
+	Clients adapter.Clients
 	Logger  micrologger.Logger
 }
 
@@ -38,7 +33,7 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
-		Clients: Clients{},
+		Clients: adapter.Clients{},
 		Logger:  nil,
 	}
 }
@@ -46,7 +41,7 @@ func DefaultConfig() Config {
 // Resource implements the cloudformation resource.
 type Resource struct {
 	// Dependencies.
-	awsClients Clients
+	awsClients adapter.Clients
 	logger     micrologger.Logger
 }
 

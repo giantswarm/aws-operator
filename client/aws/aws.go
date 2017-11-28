@@ -16,7 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
 
-	cloudformationresource "github.com/giantswarm/aws-operator/service/resource/cloudformation"
+	"github.com/giantswarm/aws-operator/service/resource/cloudformation/adapter"
 )
 
 type Config struct {
@@ -72,7 +72,7 @@ func (c *Config) SetAccountID(iamClient *iam.IAM) error {
 	userArn := *resp.User.Arn
 	accountID := strings.Split(userArn, ":")[accountIDPosition]
 
-	if err := cloudformationresource.ValidateAccountID(accountID); err != nil {
+	if err := adapter.ValidateAccountID(accountID); err != nil {
 		return microerror.Mask(err)
 	}
 

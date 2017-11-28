@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/giantswarm/aws-operator/service/resource/cloudformation/adapter"
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/clustertpr"
 	"github.com/giantswarm/clustertpr/spec"
@@ -76,7 +77,7 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 	var newResource *Resource
 	{
 		resourceConfig := DefaultConfig()
-		resourceConfig.Clients = Clients{}
+		resourceConfig.Clients = adapter.Clients{}
 		resourceConfig.Logger = microloggertest.New()
 		newResource, err = New(resourceConfig)
 		if err != nil {

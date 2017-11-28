@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io/ioutil"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"text/template"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/key"
+	"github.com/giantswarm/aws-operator/service/resource/cloudformation/adapter"
 )
 
 func newMainStack(customObject awstpr.CustomObject) (StackState, error) {
@@ -41,7 +43,8 @@ func (r *Resource) getMainTemplateBody(customObject awstpr.CustomObject) (string
 	var err error
 
 	// parse templates
-	baseDir, err := filepath.Abs(filepath.Join("../../../", cloudFormationTemplatesDirectory))
+	_, filename, _, _ := runtime.Caller(1)
+	baseDir, err := filepath.Abs(filepath.Join(filepath.Dir(filename), "../../../", cloudFormationTemplatesDirectory))
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -58,7 +61,7 @@ func (r *Resource) getMainTemplateBody(customObject awstpr.CustomObject) (string
 		return "", microerror.Mask(err)
 	}
 
-	adapter, err := newAdapter(customObject, r.awsClients)
+	adapter, err := adapter.New(customObject, r.awsClients)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}

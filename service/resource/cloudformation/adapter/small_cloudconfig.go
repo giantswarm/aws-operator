@@ -1,16 +1,18 @@
-package cloudformation
+package adapter
 
 import (
 	"bytes"
 	"encoding/base64"
 	"html/template"
 	"path/filepath"
+	"runtime"
 
 	"github.com/giantswarm/microerror"
 )
 
 func SmallCloudconfig(config SmallCloudconfigConfig) (string, error) {
-	templateFile, err := filepath.Abs(filepath.Join("../../../", smallCloudConfigTemplate))
+	_, filename, _, _ := runtime.Caller(1)
+	templateFile, err := filepath.Abs(filepath.Join(filepath.Dir(filename), "../../../../", smallCloudConfigTemplate))
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
