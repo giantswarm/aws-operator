@@ -160,7 +160,7 @@ func (a *autoScalingGroupAdapter) getAutoScalingGroup(customObject awstpr.Custom
 	// load balancer name
 	// TODO: remove this code once the ingress load balancer is created by cloudformation
 	// and add a reference in the template
-	lbName, err := ingressLoadBalancerName(customObject)
+	lbName, err := key.LoadBalancerName(customObject.Spec.Cluster.Kubernetes.IngressController.Domain, customObject)
 	if err != nil {
 		return microerror.Mask(err)
 	}

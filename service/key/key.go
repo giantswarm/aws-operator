@@ -2,6 +2,7 @@ package key
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/giantswarm/awstpr"
 	cloudconfig "github.com/giantswarm/k8scloudconfig"
@@ -47,12 +48,25 @@ func HasClusterVersion(customObject awstpr.CustomObject) bool {
 	}
 }
 
-func IngressDomain(customObject awstpr.CustomObject) string {
-	return customObject.Spec.Cluster.Kubernetes.IngressController.Domain
-}
-
 func InstanceProfileName(customObject awstpr.CustomObject, profileType string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, ProfileNameTemplate)
+}
+
+// LoadBalancerName produces a unique name for the load balancer.
+// It takes the domain name, extracts the first subdomain, and combines it with the cluster name.
+func LoadBalancerName(domainName string, cluster awstpr.CustomObject) (string, error) {
+	if ClusterID(cluster) == "" {
+		return "", microerror.Maskf(missingCloudConfigKeyError, "spec.cluster.cluster.id")
+	}
+
+	componentName, err := componentName(domainName)
+	if err != nil {
+		return "", microerror.Maskf(malformedCloudConfigKeyError, "spec.cluster.cluster.id")
+	}
+
+	lbName := fmt.Sprintf("%s-%s", ClusterID(cluster), componentName)
+
+	return lbName, nil
 }
 
 func MainStackName(customObject awstpr.CustomObject) string {
@@ -140,4 +154,16 @@ func WorkerInstanceType(customObject awstpr.CustomObject) string {
 	}
 
 	return instanceType
+}
+
+// componentName returns the first component of a domain name.
+// e.g. apiserver.example.customer.cloud.com -> apiserver
+func componentName(domainName string) (string, error) {
+	splits := strings.SplitN(domainName, ".", 2)
+
+	if len(splits) != 2 {
+		return "", microerror.Mask(malformedCloudConfigKeyError)
+	}
+
+	return splits[0], nil
 }

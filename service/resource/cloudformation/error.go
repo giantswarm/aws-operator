@@ -61,17 +61,3 @@ var emptyAmazonAccountIDError = microerror.New("empty amazon account ID")
 func IsEmptyAmazonAccountID(err error) bool {
 	return microerror.Cause(err) == emptyAmazonAccountIDError
 }
-
-var malformedCloudConfigKeyError = microerror.New("malformed key in the cloudconfig")
-
-// IsMalformedCloudConfigKey asserts malformedCloudConfigKeyError.
-func IsMalformedCloudConfigKey(err error) bool {
-	return microerror.Cause(err) == malformedCloudConfigKeyError
-}
-
-var missingCloudConfigKeyError = microerror.New("missing key in the cloudconfig")
-
-// IsMissingCloudConfigKey asserts missingCloudConfigKeyError.
-func IsMissingCloudConfigKey(err error) bool {
-	return microerror.Cause(err) == missingCloudConfigKeyError
-}
