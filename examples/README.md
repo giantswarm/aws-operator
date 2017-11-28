@@ -11,8 +11,7 @@ This guide explains how to get aws-operator running locally - on minikube, for
 example. Also how to create a managed Kubernetes cluster with single master and
 single worker using the operator.
 
-If not stated otherwise all commands are assumed to be run from `examples/local`
-directory.
+If not stated otherwise all commands are assumed to be run from the project's root.
 
 ## Cluster Certificates
 
@@ -21,11 +20,13 @@ setup. See [this guide][cert-operator-local-setup] for details. The operator and
 to be used during aws-operator setup can be installed with:
 
 ```bash
+helm registry install quay.io/giantswarm/vaultlab-chart:stable -- \
+                        -n vault \
+                        --set vaultToken=myToken
+
 git clone https://github.com/giantswarm/cert-operator ./cert-operator
 
-helm \
-  install -n cert-operator-lab ./cert-operator/examples/cert-operator-lab-chart/ \
-  --set clusterName=my-cluster \
+helm install -n cert-operator-lab ./cert-operator/examples/cert-operator-lab-chart/ \
   --set commonDomain=my-common-domain \
   --set imageTag=latest \
   --wait
@@ -33,7 +34,7 @@ helm \
 # here the certificate TPR is created, wait until `kubectl get certificate` returns
 # `No resources found.` before running the next command
 
-helm install -n cert-resource-lab ./cert-operator/examples/cert-resource-lab-chart/ \
+helm registry install quay.io/giantswarm/cert-resource-lab-chart:stable -- -n cert-resource-lab \
   --set clusterName=my-cluster \
   --set commonDomain=my-common-domain
 ```
@@ -73,8 +74,12 @@ and `aws-resource-lab-chart`, which defines the cluster to be created.
 With a working Helm installation they can be created from the `examples/local` dir with:
 
 ```bash
-$ helm install -n aws-operator-lab ./aws-operator-lab-chart/ --wait
-$ helm install -n aws-resource-lab ./aws-resource-lab-chart/ --wait
+$ helm install -n aws-operator-lab ./examples/aws-operator-lab-chart/ --wait
+
+# here the aws TPR is created, wait until `kubectl get aws` returns
+# `No resources found.` before running the next command
+
+$ helm install -n aws-resource-lab ./examples/aws-resource-lab-chart/ --wait
 ```
 
 `aws-operator-lab-chart` accepts the following configuration parameters:
