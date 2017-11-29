@@ -24,7 +24,7 @@ func NewResourceRouter(rs []framework.Resource) func(ctx context.Context, obj in
 			return enabledResources, microerror.Mask(err)
 		}
 
-		switch customObject.Spec.VersionBundle.Version {
+		switch key.VersionBundleVersion(customObject) {
 		case key.LegacyVersion:
 			// Legacy version so only enable the legacy resource.
 			enabledResources = filterResourcesByName(rs, legacyResourceName)
