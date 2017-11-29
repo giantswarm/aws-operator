@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/cenk/backoff"
+	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/micrologger/loggermeta"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/operatorkit/informer/informertest"
@@ -17,7 +17,6 @@ import (
 func Test_Framework_InitCtxFunc(t *testing.T) {
 	testCases := []struct {
 		Object                   interface{}
-		InitCtxFunc              func(ctx context.Context, obj interface{}) (context.Context, error)
 		ExpectedLoggerMetaSet    bool
 		ExpectedLoggerMetaObject string
 	}{
@@ -48,7 +47,6 @@ func Test_Framework_InitCtxFunc(t *testing.T) {
 
 			c.BackOffFactory = func() backoff.BackOff { return &backoff.StopBackOff{} }
 			c.Informer = informertest.New()
-			c.InitCtxFunc = tc.InitCtxFunc
 			c.Logger = microloggertest.New()
 			c.ResourceRouter = DefaultResourceRouter([]Resource{
 				r,

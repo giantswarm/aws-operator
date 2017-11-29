@@ -317,7 +317,6 @@ func New(config Config) (*Service, error) {
 	{
 		frameworkConfig := framework.DefaultConfig()
 
-		frameworkConfig.BackOffFactory = framework.DefaultBackOffFactory()
 		frameworkConfig.InitCtxFunc = initCtxFunc
 		frameworkConfig.Logger = config.Logger
 		frameworkConfig.ResourceRouter = framework.DefaultResourceRouter(resources)
