@@ -70,47 +70,26 @@ func NewVersionBundles() []versionbundle.Bundle {
 			Dependencies: []versionbundle.Dependency{},
 			Deprecated:   false,
 			Name:         "aws-operator",
-			Time:         time.Date(2017, time.November, 22, 16, 9, 0, 0, time.UTC),
+			Time:         time.Date(2017, time.November, 29, 16, 16, 0, 0, time.UTC),
 			Version:      "0.1.0",
 			WIP:          true,
 		},
 		{
 			Changelogs: []versionbundle.Changelog{
 				{
-					Component:   "calico",
-					Description: "Calico version updated.",
-					Kind:        "changed",
-				},
-				{
-					Component:   "docker",
-					Description: "Docker version updated.",
-					Kind:        "changed",
-				},
-				{
-					Component:   "etcd",
-					Description: "Etcd version updated.",
-					Kind:        "changed",
-				},
-				{
-					Component:   "kubedns",
-					Description: "KubeDNS version updated.",
-					Kind:        "changed",
-				},
-				{
-					Component:   "kubernetes",
-					Description: "Kubernetes version updated.",
-					Kind:        "changed",
-				},
-				{
-					Component:   "nginx-ingress-controller",
-					Description: "Nginx-ingress-controller version updated.",
-					Kind:        "changed",
+					Component:   "cloudformation",
+					Description: "First version of Cloud Formation resources.",
+					Kind:        "added",
 				},
 			},
 			Components: []versionbundle.Component{
 				{
 					Name:    "calico",
 					Version: "2.6.2",
+				},
+				{
+					Name:    "cloudformation",
+					Version: "0.1.0",
 				},
 				{
 					Name:    "docker",
@@ -136,7 +115,7 @@ func NewVersionBundles() []versionbundle.Bundle {
 			Dependencies: []versionbundle.Dependency{},
 			Deprecated:   false,
 			Name:         "aws-operator",
-			Time:         time.Date(2017, time.November, 28, 11, 38, 0, 0, time.UTC),
+			Time:         time.Date(2017, time.November, 29, 16, 16, 0, 0, time.UTC),
 			Version:      "0.2.0",
 			WIP:          true,
 		},
