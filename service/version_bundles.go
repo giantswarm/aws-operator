@@ -75,7 +75,38 @@ func NewVersionBundles() []versionbundle.Bundle {
 			WIP:          true,
 		},
 		{
-			Changelogs: []versionbundle.Changelog{},
+			Changelogs: []versionbundle.Changelog{
+				{
+					Component:   "calico",
+					Description: "Calico version updated.",
+					Kind:        "changed",
+				},
+				{
+					Component:   "docker",
+					Description: "Docker version updated.",
+					Kind:        "changed",
+				},
+				{
+					Component:   "etcd",
+					Description: "Etcd version updated.",
+					Kind:        "changed",
+				},
+				{
+					Component:   "kubedns",
+					Description: "KubeDNS version updated.",
+					Kind:        "changed",
+				},
+				{
+					Component:   "kubernetes",
+					Description: "Kubernetes version updated.",
+					Kind:        "changed",
+				},
+				{
+					Component:   "nginx-ingress-controller",
+					Description: "Nginx-ingress-controller version updated.",
+					Kind:        "changed",
+				},
+			},
 			Components: []versionbundle.Component{
 				{
 					Name:    "calico",
