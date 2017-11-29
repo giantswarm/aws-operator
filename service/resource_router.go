@@ -15,7 +15,7 @@ const (
 
 // NewResourceRouter determines which resources are enabled based upon the
 // version in the version bundle.
-func NewResourceRouter(rs []framework.Resource) func(ctx context.Context, obj interface{}) ([]framework.Resource, error) {
+func NewResourceRouter(resources map[string][]framework.Resource) func(ctx context.Context, obj interface{}) ([]framework.Resource, error) {
 	return func(ctx context.Context, obj interface{}) ([]framework.Resource, error) {
 		var enabledResources []framework.Resource
 
@@ -27,42 +27,16 @@ func NewResourceRouter(rs []framework.Resource) func(ctx context.Context, obj in
 		switch key.VersionBundleVersion(customObject) {
 		case key.LegacyVersion:
 			// Legacy version so only enable the legacy resource.
-			enabledResources = filterResourcesByName(rs, legacyResourceName)
+			enabledResources = resources[key.LegacyVersion]
 		case key.CloudFormationVersion:
 			// Cloud Formation transitional version so enable all resources.
-			enabledResources = rs
+			enabledResources = resources[key.CloudFormationVersion]
 		default:
 			// Default to the legacy resource for custom objects without a version
 			// bundle. TODO Return an error once the legacy resource is deprecated.
-			enabledResources = filterResourcesByName(rs, legacyResourceName)
+			enabledResources = resources[key.LegacyVersion]
 		}
 
 		return enabledResources, nil
 	}
-}
-
-// filterResourcesByName filters a list of resources by one or more resource
-// names. It checks both the resource name and the underlying resource name
-// in case the resources have been wrapped.
-func filterResourcesByName(resources []framework.Resource, resourceNames ...string) []framework.Resource {
-	resourceLookup := make(map[string]bool)
-
-	for _, resourceName := range resourceNames {
-		resourceLookup[resourceName] = true
-	}
-
-	var enabledResources []framework.Resource
-
-	for _, resource := range resources {
-		if _, ok := resourceLookup[resource.Name()]; ok {
-			enabledResources = append(enabledResources, resource)
-			continue
-		}
-
-		if _, ok := resourceLookup[resource.Underlying().Name()]; ok {
-			enabledResources = append(enabledResources, resource)
-		}
-	}
-
-	return enabledResources
 }

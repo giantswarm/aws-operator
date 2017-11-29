@@ -27,6 +27,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/alerter"
 	"github.com/giantswarm/aws-operator/service/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/healthz"
+	"github.com/giantswarm/aws-operator/service/key"
 	cloudformationresource "github.com/giantswarm/aws-operator/service/resource/cloudformation"
 	legacyresource "github.com/giantswarm/aws-operator/service/resource/legacy"
 	namespaceresource "github.com/giantswarm/aws-operator/service/resource/namespace"
@@ -235,13 +236,28 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	// Metrics config for wrapping resources.
+	metricsWrapConfig := metricsresource.DefaultWrapConfig()
+	metricsWrapConfig.Name = config.Name
+
+	// Existing clusters are only processed by the legacy resource. We wrap it
+	// with the metrics resource for monitoring.
+	var legacyResources []framework.Resource
+	{
+		legacyResources = []framework.Resource{
+			legacyResource,
+		}
+
+		legacyResources, err = metricsresource.Wrap(legacyResources, metricsWrapConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	// We create the list of resources and wrap each resource around some common
 	// resources like metrics and retry resources.
-	//
-	// NOTE that the retry resources wrap the underlying resources first. The
-	// wrapped resources are then wrapped around the metrics resource. That way
-	// the metrics also consider execution times and execution attempts including
-	// retries.
+	// TODO Remove the legacy resource once all resources are migrated to
+	// Cloud Formation.
 	var resources []framework.Resource
 	{
 		resources = []framework.Resource{
@@ -251,22 +267,31 @@ func New(config Config) (*Service, error) {
 		}
 
 		// Disable retry wrapper due to problems with the legacy resource.
+		//
+		// NOTE that the retry resources wrap the underlying resources first. The
+		// wrapped resources are then wrapped around the metrics resource. That way
+		// the metrics also consider execution times and execution attempts including
+		// retries.
 		/*
 			retryWrapConfig := retryresource.DefaultWrapConfig()
-			retryWrapConfig.BackOffFactory = func() backoff.BackOff { return backoff.WithMaxTries(backoff.NewExponentialBackOff(), ResourceRetries) }
 			retryWrapConfig.Logger = config.Logger
-			resources, err = retryresource.Wrap(resources, retryWrapConfig)
+			cloudFormationResources, err = retryresource.Wrap(cloudFormationResources, retryWrapConfig)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
 		*/
 
-		metricsWrapConfig := metricsresource.DefaultWrapConfig()
-		metricsWrapConfig.Name = config.Name
 		resources, err = metricsresource.Wrap(resources, metricsWrapConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
+	}
+
+	// We provide a map of resource lists keyed by the version bundle version
+	// to the resource router.
+	versionedResources := map[string][]framework.Resource{
+		key.LegacyVersion:         legacyResources,
+		key.CloudFormationVersion: resources,
 	}
 
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
@@ -319,7 +344,7 @@ func New(config Config) (*Service, error) {
 
 		frameworkConfig.InitCtxFunc = initCtxFunc
 		frameworkConfig.Logger = config.Logger
-		frameworkConfig.ResourceRouter = NewResourceRouter(resources)
+		frameworkConfig.ResourceRouter = NewResourceRouter(versionedResources)
 		frameworkConfig.Informer = newInformer
 		frameworkConfig.TPR = newTPR
 
