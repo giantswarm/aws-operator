@@ -7,15 +7,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cenk/backoff"
+	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/micrologger/loggermeta"
 	"github.com/prometheus/client_golang/prometheus"
+	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/tools/cache"
 
+	"github.com/giantswarm/operatorkit/client/k8scrdclient"
 	"github.com/giantswarm/operatorkit/framework/context/canceledcontext"
 	"github.com/giantswarm/operatorkit/informer"
 	"github.com/giantswarm/operatorkit/tpr"
@@ -25,8 +27,9 @@ import (
 type Config struct {
 	// Dependencies.
 
-	BackOffFactory func() backoff.BackOff
-	Informer       informer.Interface
+	CRD       *apiextensionsv1beta1.CustomResourceDefinition
+	CRDClient *k8scrdclient.CRDClient
+	Informer  informer.Interface
 	// InitCtxFunc is to prepare the given context for a single reconciliation
 	// loop. Operators can implement common context packages to enable
 	// communication between resources. These context packages can be set up
@@ -48,6 +51,9 @@ type Config struct {
 	//
 	// NOTE this is deprecated since the CRD concept is the successor of the TPR.
 	TPR tpr.Interface
+
+	// Settings.
+	BackOffFactory func() backoff.BackOff
 }
 
 // DefaultConfig provides a default configuration to create a new operator
@@ -55,23 +61,37 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
-		BackOffFactory: nil,
+		CRD:            nil,
+		CRDClient:      nil,
 		Informer:       nil,
-		InitCtxFunc:    nil,
 		Logger:         nil,
 		ResourceRouter: nil,
 		TPR:            nil,
+
+		// Settings.
+		BackOffFactory: func() backoff.BackOff {
+			b := backoff.NewExponentialBackOff()
+			b.MaxElapsedTime = 0
+			return backoff.WithMaxTries(b, 7)
+		},
+		InitCtxFunc: func(ctx context.Context, obj interface{}) (context.Context, error) {
+			return ctx, nil
+		},
 	}
 }
 
 type Framework struct {
 	// Dependencies.
-	backOffFactory func() backoff.BackOff
+	crd            *apiextensionsv1beta1.CustomResourceDefinition
+	crdClient      *k8scrdclient.CRDClient
 	informer       informer.Interface
-	initCtxFunc    func(ctx context.Context, obj interface{}) (context.Context, error)
 	logger         micrologger.Logger
 	resourceRouter func(ctx context.Context, obj interface{}) ([]Resource, error)
 	tpr            tpr.Interface
+
+	// Settings.
+	backOffFactory func() backoff.BackOff
+	initCtxFunc    func(ctx context.Context, obj interface{}) (context.Context, error)
 
 	// Internals.
 	bootOnce sync.Once
@@ -81,8 +101,8 @@ type Framework struct {
 // New creates a new configured operator framework.
 func New(config Config) (*Framework, error) {
 	// Dependencies.
-	if config.BackOffFactory == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.BackOffFactory must not be empty")
+	if config.CRD != nil && config.CRDClient == nil || config.CRD == nil && config.CRDClient != nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.CRD and config.CRDClient must not be empty when either given")
 	}
 	if config.Informer == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Informer must not be empty")
@@ -94,15 +114,20 @@ func New(config Config) (*Framework, error) {
 		return nil, microerror.Maskf(invalidConfigError, "config.ResourceRouter must not be empty")
 	}
 
+	// Settings.
+	if config.BackOffFactory == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.BackOffFactory must not be empty")
+	}
+	if config.InitCtxFunc == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.InitCtxFunc must not be empty")
+	}
+
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
 		ctx = canceledcontext.NewContext(ctx, make(chan struct{}))
 
-		if config.InitCtxFunc != nil {
-			var err error
-			ctx, err = config.InitCtxFunc(ctx, obj)
-			if err != nil {
-				return nil, microerror.Maskf(err, "initializing context")
-			}
+		ctx, err := config.InitCtxFunc(ctx, obj)
+		if err != nil {
+			return nil, microerror.Maskf(err, "initializing context")
 		}
 
 		accessor, err := meta.Accessor(obj)
@@ -123,12 +148,16 @@ func New(config Config) (*Framework, error) {
 
 	f := &Framework{
 		// Dependencies.
-		backOffFactory: config.BackOffFactory,
+		crd:            config.CRD,
+		crdClient:      config.CRDClient,
 		informer:       config.Informer,
-		initCtxFunc:    initCtxFunc,
 		logger:         config.Logger,
 		resourceRouter: config.ResourceRouter,
 		tpr:            config.TPR,
+
+		// Settings.
+		backOffFactory: config.BackOffFactory,
+		initCtxFunc:    initCtxFunc,
 
 		// Internals.
 		bootOnce: sync.Once{},
@@ -634,10 +663,23 @@ func (f *Framework) bootWithError(ctx context.Context) error {
 		f.tpr.CollectMetrics(context.TODO())
 	}
 
+	if f.crd != nil {
+		f.logger.LogCtx(ctx, "debug", "ensuring custom resource definition exists")
+
+		err := f.crdClient.Ensure(ctx, f.crd, f.backOffFactory())
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		f.logger.LogCtx(ctx, "debug", "ensured custom resource definition")
+
+		// TODO collect metrics
+	}
+
 	f.logger.LogCtx(ctx, "debug", "starting list/watch")
 
-	deleteChan, updateChan, errChan := f.informer.Watch(context.TODO())
-	f.ProcessEvents(context.TODO(), deleteChan, updateChan, errChan)
+	deleteChan, updateChan, errChan := f.informer.Watch(ctx)
+	f.ProcessEvents(ctx, deleteChan, updateChan, errChan)
 
 	return nil
 }
