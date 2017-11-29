@@ -72,8 +72,10 @@ workflows:
   build_e2e:
     jobs:
       - build
-      - e2eSetup
-      - e2eTestExecution:
+      - e2eSetup:
+          type: approval
           requires:
           - build
+      - e2eTestExecution:
+          requires:
           - e2eSetup
