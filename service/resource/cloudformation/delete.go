@@ -7,21 +7,9 @@ import (
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/framework"
-
-	"github.com/giantswarm/aws-operator/service/key"
 )
 
 func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
-	customObject, err := key.ToCustomObject(obj)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	// no-op if we are not using cloudformation
-	if !key.UseCloudFormation(customObject) {
-		r.logger.LogCtx(ctx, "debug", "not processing cloudformation stack")
-		return nil
-	}
-
 	deleteStackInput, err := toDeleteStackInput(deleteChange)
 	if err != nil {
 		return microerror.Mask(err)

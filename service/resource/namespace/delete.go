@@ -8,21 +8,9 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apiv1 "k8s.io/client-go/pkg/api/v1"
-
-	"github.com/giantswarm/aws-operator/service/key"
 )
 
 func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
-	customObject, err := key.ToCustomObject(obj)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	// No-op if we are not using cloudformation.
-	if !key.UseCloudFormation(customObject) {
-		r.logger.LogCtx(ctx, "debug", "not processing Kubernetes namespace")
-		return nil
-	}
-
 	namespaceToDelete, err := toNamespace(deleteChange)
 	if err != nil {
 		return microerror.Mask(err)

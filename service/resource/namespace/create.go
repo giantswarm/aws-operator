@@ -6,21 +6,9 @@ import (
 	"github.com/giantswarm/microerror"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	apiv1 "k8s.io/client-go/pkg/api/v1"
-
-	"github.com/giantswarm/aws-operator/service/key"
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
-	customObject, err := key.ToCustomObject(obj)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	// No-op if we are not using cloudformation.
-	if !key.UseCloudFormation(customObject) {
-		r.logger.LogCtx(ctx, "debug", "not processing Kubernetes namespace")
-		return nil
-	}
-
 	namespaceToCreate, err := toNamespace(createChange)
 	if err != nil {
 		return microerror.Mask(err)
