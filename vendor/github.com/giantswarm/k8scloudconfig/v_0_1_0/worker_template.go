@@ -229,7 +229,7 @@ coreos:
     command: start
     content: |
       [Unit]
-      Description=k8s-kubelet
+      Description=k8s-kubelet-cloud-config-update
       StartLimitIntervalSec=0
 
       [Service]
