@@ -448,28 +448,28 @@ func Test_MainStackName(t *testing.T) {
 
 func Test_UseCloudFormation(t *testing.T) {
 	tests := []struct {
-		clusterVersion string
-		expectedResult bool
+		versionBundleVersion string
+		expectedResult       bool
 	}{
 		{
-			clusterVersion: "cloud-formation",
-			expectedResult: true,
+			versionBundleVersion: "0.1.0",
+			expectedResult:       false,
 		},
 		{
-			clusterVersion: "v_0_1_0",
-			expectedResult: false,
+			versionBundleVersion: "0.2.0",
+			expectedResult:       true,
 		},
 		{
-			clusterVersion: "",
-			expectedResult: false,
+			versionBundleVersion: "",
+			expectedResult:       false,
 		},
 	}
 
 	for _, tc := range tests {
 		cluster := awstpr.CustomObject{
 			Spec: awstpr.Spec{
-				Cluster: clustertpr.Spec{
-					Version: tc.clusterVersion,
+				VersionBundle: awsspec.VersionBundle{
+					Version: tc.versionBundleVersion,
 				},
 			},
 		}

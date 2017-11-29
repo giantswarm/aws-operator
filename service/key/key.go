@@ -10,10 +10,13 @@ import (
 )
 
 const (
-	// cloudFormationVersion is set during the migration so resources are
-	// managed by the cloudformation resource.
+	// CloudFormationVersion is the version in the version bundle for
+	// transitioning to Cloud Formation.
 	// TODO Remove once the migration is complete.
-	cloudFormationVersion = "cloud-formation"
+	CloudFormationVersion = "0.2.0"
+
+	// LegacyVersion is the version in the version bundle for existing clusters.
+	LegacyVersion = "0.1.0"
 
 	// ProfileNameTemplate will be included in the IAM instance profile name.
 	ProfileNameTemplate = "EC2-K8S-Role"
@@ -129,10 +132,11 @@ func ToCustomObject(v interface{}) (awstpr.CustomObject, error) {
 	return customObject, nil
 }
 
-// UseCloudFormation returns true if the cluster version is "cloud-formation".
-// This will be used while we migrate to Cloud Formation and then removed.
+// UseCloudFormation returns true if the version in the version bundle matches
+// the Cloud Formation version.
+// TODO Remove once we've migrated all AWS resources to Cloud Formation.
 func UseCloudFormation(customObject awstpr.CustomObject) bool {
-	if ClusterVersion(customObject) == cloudFormationVersion {
+	if VersionBundleVersion(customObject) == CloudFormationVersion {
 		return true
 	}
 
