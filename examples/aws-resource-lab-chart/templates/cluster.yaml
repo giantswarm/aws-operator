@@ -4,7 +4,7 @@ metadata:
   name: {{.Values.clusterName}}
 spec:
   cluster:
-    version: "{{.Values.clusterVersion}}"
+    version: "v_0_1_0"
 
     cluster:
       id: "{{.Values.clusterName}}"
