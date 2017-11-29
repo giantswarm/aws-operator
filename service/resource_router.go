@@ -31,10 +31,12 @@ func NewResourceRouter(resources map[string][]framework.Resource) func(ctx conte
 		case key.CloudFormationVersion:
 			// Cloud Formation transitional version so enable all resources.
 			enabledResources = resources[key.CloudFormationVersion]
-		default:
+		case "":
 			// Default to the legacy resource for custom objects without a version
-			// bundle. TODO Return an error once the legacy resource is deprecated.
+			// bundle.
 			enabledResources = resources[key.LegacyVersion]
+		default:
+			return enabledResources, microerror.Maskf(invalidVersionError, "version '%s' in version bundle is invalid", key.VersionBundleVersion(customObject))
 		}
 
 		return enabledResources, nil
