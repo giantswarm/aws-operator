@@ -139,6 +139,11 @@ func UseCloudFormation(customObject awstpr.CustomObject) bool {
 	return false
 }
 
+// VersionBundleVersion returns the version contained in the Version Bundle.
+func VersionBundleVersion(customObject awstpr.CustomObject) string {
+	return customObject.Spec.VersionBundle.Version
+}
+
 func WorkerCount(customObject awstpr.CustomObject) int {
 	return len(customObject.Spec.AWS.Workers)
 }

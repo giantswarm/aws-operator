@@ -637,3 +637,19 @@ func TestComponentName(t *testing.T) {
 		assert.Equal(t, tc.res, res, fmt.Sprintf("[%s] The input values didn't produce the expected output", tc.desc))
 	}
 }
+
+func Test_VersionBundleVersion(t *testing.T) {
+	expectedVersion := "0.1.0"
+
+	customObject := awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			VersionBundle: awsspec.VersionBundle{
+				Version: "0.1.0",
+			},
+		},
+	}
+
+	if VersionBundleVersion(customObject) != expectedVersion {
+		t.Fatalf("Expected version in version bundle to be %s but was %s", expectedVersion, VersionBundleVersion(customObject))
+	}
+}
