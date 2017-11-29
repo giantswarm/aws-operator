@@ -319,7 +319,7 @@ func New(config Config) (*Service, error) {
 
 		frameworkConfig.InitCtxFunc = initCtxFunc
 		frameworkConfig.Logger = config.Logger
-		frameworkConfig.ResourceRouter = framework.DefaultResourceRouter(resources)
+		frameworkConfig.ResourceRouter = NewResourceRouter(resources)
 		frameworkConfig.Informer = newInformer
 		frameworkConfig.TPR = newTPR
 
