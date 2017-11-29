@@ -73,9 +73,15 @@ workflows:
     jobs:
       - build
       - e2eSetup:
+          filters:
+            branches:
+              ignore: /^master$/
           type: approval
           requires:
           - build
       - e2eTestExecution:
+          filters:
+            branches:
+              ignore: /^master$/
           requires:
           - e2eSetup
