@@ -101,3 +101,6 @@ spec:
       instancetype: "{{.Values.aws.instanceTypeWorker}}"
     - imageid: "{{.Values.aws.ami}}"
       instancetype: "{{.Values.aws.instanceTypeWorker}}"
+
+  versionBundle:
+    version: "{{.Values.versionBundleVersion}}"
