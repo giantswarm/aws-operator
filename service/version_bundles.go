@@ -88,10 +88,6 @@ func NewVersionBundles() []versionbundle.Bundle {
 					Version: "2.6.2",
 				},
 				{
-					Name:    "cloudformation",
-					Version: "0.1.0",
-				},
-				{
 					Name:    "docker",
 					Version: "1.12.6",
 				},
