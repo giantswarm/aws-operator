@@ -1,5 +1,5 @@
 e2eTest: &e2eTest
-  machine: true
+    machine: true
     steps:
     - checkout
 
