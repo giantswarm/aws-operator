@@ -16,7 +16,7 @@ func SmallCloudconfig(config SmallCloudconfigConfig) (string, error) {
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-	rootDir, err := key.RootDir(baseDir, "aws-operator")
+	rootDir, err := key.RootDir(baseDir, RootDirElement)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}

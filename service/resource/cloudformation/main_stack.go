@@ -48,7 +48,7 @@ func (r *Resource) getMainTemplateBody(customObject awstpr.CustomObject) (string
 		return "", microerror.Mask(err)
 	}
 
-	rootDir, err := key.RootDir(baseDir, "aws-operator")
+	rootDir, err := key.RootDir(baseDir, adapter.RootDirElement)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
