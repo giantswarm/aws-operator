@@ -4,18 +4,23 @@ import (
 	"bytes"
 	"encoding/base64"
 	"html/template"
+	"os"
 	"path/filepath"
-	"runtime"
 
+	"github.com/giantswarm/aws-operator/service/key"
 	"github.com/giantswarm/microerror"
 )
 
 func SmallCloudconfig(config SmallCloudconfigConfig) (string, error) {
-	_, filename, _, _ := runtime.Caller(1)
-	templateFile, err := filepath.Abs(filepath.Join(filepath.Dir(filename), "../../../../", smallCloudConfigTemplate))
+	baseDir, err := os.Getwd()
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
+	rootDir, err := key.RootDir(baseDir, RootDirElement)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	templateFile := filepath.Join(rootDir, smallCloudConfigTemplate)
 
 	tmpl, err := template.ParseFiles(templateFile)
 	if err != nil {
