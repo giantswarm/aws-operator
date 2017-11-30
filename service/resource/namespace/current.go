@@ -17,12 +17,6 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	// No-op if we are not using cloudformation.
-	if !key.UseCloudFormation(customObject) {
-		r.logger.LogCtx(ctx, "debug", "not processing Kubernetes namespace")
-		return nil, nil
-	}
-
 	r.logger.LogCtx(ctx, "debug", "looking for the namespace in the Kubernetes API")
 
 	// Lookup the current state of the namespace.

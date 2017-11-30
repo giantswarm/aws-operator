@@ -83,9 +83,9 @@ func (c *CloudConfig) NewMasterTemplate(customObject awstpr.CustomObject, certs 
 func (c *CloudConfig) NewWorkerTemplate(customObject awstpr.CustomObject, certs certificatetpr.CompactTLSAssets) (string, error) {
 	var err error
 
-	// Default the version if it is not configured or we are using Cloud Formation.
+	// Default the version if it is not configured.
 	// TODO Remove once Cloud Formation migration is complete.
-	if !key.HasClusterVersion(customObject) || key.UseCloudFormation(customObject) {
+	if !key.HasClusterVersion(customObject) {
 		customObject.Spec.Cluster.Version = string(cloudconfig.V_0_1_0)
 	}
 

@@ -8,21 +8,9 @@ import (
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/framework"
-
-	"github.com/giantswarm/aws-operator/service/key"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
-	customObject, err := key.ToCustomObject(obj)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	// no-op if we are not using cloudformation
-	if !key.UseCloudFormation(customObject) {
-		r.logger.LogCtx(ctx, "debug", "not processing cloudformation stack")
-		return nil
-	}
-
 	updateStackInput, err := toUpdateStackInput(updateChange)
 	if err != nil {
 		return microerror.Mask(err)

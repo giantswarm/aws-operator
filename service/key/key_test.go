@@ -448,28 +448,28 @@ func Test_MainStackName(t *testing.T) {
 
 func Test_UseCloudFormation(t *testing.T) {
 	tests := []struct {
-		clusterVersion string
-		expectedResult bool
+		versionBundleVersion string
+		expectedResult       bool
 	}{
 		{
-			clusterVersion: "cloud-formation",
-			expectedResult: true,
+			versionBundleVersion: "0.1.0",
+			expectedResult:       false,
 		},
 		{
-			clusterVersion: "v_0_1_0",
-			expectedResult: false,
+			versionBundleVersion: "0.2.0",
+			expectedResult:       true,
 		},
 		{
-			clusterVersion: "",
-			expectedResult: false,
+			versionBundleVersion: "",
+			expectedResult:       false,
 		},
 	}
 
 	for _, tc := range tests {
 		cluster := awstpr.CustomObject{
 			Spec: awstpr.Spec{
-				Cluster: clustertpr.Spec{
-					Version: tc.clusterVersion,
+				VersionBundle: awsspec.VersionBundle{
+					Version: tc.versionBundleVersion,
 				},
 			},
 		}
@@ -688,5 +688,21 @@ func TestRootDir(t *testing.T) {
 				t.Errorf("unexpected result, want %q, got %q", tc.expectedDir, actual)
 			}
 		})
+	}
+}
+
+func Test_VersionBundleVersion(t *testing.T) {
+	expectedVersion := "0.1.0"
+
+	customObject := awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			VersionBundle: awsspec.VersionBundle{
+				Version: "0.1.0",
+			},
+		},
+	}
+
+	if VersionBundleVersion(customObject) != expectedVersion {
+		t.Fatalf("Expected version in version bundle to be %s but was %s", expectedVersion, VersionBundleVersion(customObject))
 	}
 }
