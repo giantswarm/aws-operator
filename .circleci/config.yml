@@ -1,3 +1,30 @@
+e2eTest: &e2eTest
+    machine: true
+    steps:
+    - checkout
+
+    - run: |
+        wget -q $(curl -sS https://api.github.com/repos/giantswarm/e2e-harness/releases/latest | grep browser_download_url | head -n 1 | cut -d '"' -f 4)
+        chmod +x ./e2e-harness
+
+    - run: ./e2e-harness setup --name=ci-awsop-${CIRCLE_SHA1:0:7}
+
+    - run:
+        name: additional setup required for compiling go on circleCI
+        command: |
+          mkdir -p /home/circleci/.go_workspace/src
+          cp -ar vendor/* /home/circleci/.go_workspace/src/
+    - run:
+        name: set CLUSTER_NAME env var
+        command: echo 'export CLUSTER_NAME=ci-awsop-${CIRCLE_SHA1:0:7}' >> $BASH_ENV
+
+    - run: ./e2e-harness test
+
+    - run:
+        name: Finish with cleanup, no matter if the test succeeded or not
+        command: ./e2e-harness teardown
+        when: always
+
 version: 2
 jobs:
   build:
@@ -12,68 +39,36 @@ jobs:
 
     - run: ./architect build
 
-    - persist_to_workspace:
-        root: .
-        paths:
-        - ./architect
-
     - deploy:
         command: |
           if [ "${CIRCLE_BRANCH}" == "master" ]; then
             ./architect deploy
           fi
 
-  e2eSetup:
-    machine: true
-    steps:
-    - checkout
+  e2eTestPR:
+    <<: *e2eTest
 
-    - attach_workspace:
-        at: .
-
-    - run: |
-        wget -q $(curl -sS https://api.github.com/repos/giantswarm/e2e-harness/releases/latest | grep browser_download_url | head -n 1 | cut -d '"' -f 4)
-        chmod +x ./e2e-harness
-
-    - run: ./e2e-harness setup --name=ci-awsop-${CIRCLE_SHA1:0:7}
-
-    - run:
-        name: Cleanup on failure
-        command: ./e2e-harness teardown
-        when: on_fail
-
-    - persist_to_workspace:
-        root: .
-        paths:
-        - ./e2e-harness
-        - ./.e2e-harness
-
-  e2eTestExecution:
-    machine: true
-    steps:
-    - checkout
-
-    - attach_workspace:
-        at: .
-
-    - run: ./e2e-harness test
-
-    - store_artifacts:
-        path: ./.e2e-harness/workdir/plugins/e2e/results.xml
-
-    - run:
-        name: Finish with cleanup, no matter if the test succeeded or not
-        command: ./e2e-harness teardown
-        when: always
+  e2eTestMaster:
+    <<: *e2eTest
 
 workflows:
   version: 2
   build_e2e:
     jobs:
       - build
-      - e2eSetup:
+      - hold:
+          type: approval
+          filters:
+            branches:
+              ignore: master
           requires:
           - build
-      - e2eTestExecution:
+      - e2eTestPR:
           requires:
-          - e2eSetup
+          - hold
+      - e2eTestMaster:
+          filters:
+            branches:
+              only: master
+          requires:
+          - build
