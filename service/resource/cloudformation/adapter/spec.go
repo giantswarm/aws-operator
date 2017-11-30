@@ -42,6 +42,10 @@ const (
 	tagKeyName = "Name"
 
 	suffixPublic = "public"
+
+	// RootDirElement marks the directory that should be taken as root when evaluating
+	// template's relative paths.
+	RootDirElement = "aws-operator"
 )
 
 type Clients struct {

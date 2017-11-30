@@ -2,6 +2,7 @@ package key
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/giantswarm/awstpr"
@@ -183,4 +184,22 @@ func componentName(domainName string) (string, error) {
 	}
 
 	return splits[0], nil
+}
+
+// RootDir returns the path in the base directory until the
+// root elemant is found.
+func RootDir(baseDir, rootElement string) (string, error) {
+	items := strings.Split(baseDir, string(filepath.Separator))
+	rootIndex := -1
+	for i := len(items) - 1; i >= 0; i-- {
+		if items[i] == rootElement {
+			rootIndex = i
+			break
+		}
+	}
+	if rootIndex == -1 {
+		return "", microerror.Mask(notFoundError)
+	}
+
+	return "/" + filepath.Join(items[:(rootIndex+1)]...), nil
 }

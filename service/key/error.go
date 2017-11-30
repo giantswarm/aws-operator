@@ -22,3 +22,10 @@ var missingCloudConfigKeyError = microerror.New("missing key in the cloudconfig"
 func IsMissingCloudConfigKey(err error) bool {
 	return microerror.Cause(err) == missingCloudConfigKeyError
 }
+
+var notFoundError = microerror.New("not found")
+
+// IsNotFound asserts notFoundError.
+func IsNotFound(err error) bool {
+	return microerror.Cause(err) == notFoundError
+}

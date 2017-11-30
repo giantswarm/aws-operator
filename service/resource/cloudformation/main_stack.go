@@ -3,8 +3,8 @@ package cloudformation
 import (
 	"bytes"
 	"io/ioutil"
+	"os"
 	"path/filepath"
-	"runtime"
 	"strconv"
 	"text/template"
 
@@ -43,18 +43,24 @@ func (r *Resource) getMainTemplateBody(customObject awstpr.CustomObject) (string
 	var err error
 
 	// parse templates
-	_, filename, _, _ := runtime.Caller(1)
-	baseDir, err := filepath.Abs(filepath.Join(filepath.Dir(filename), "../../../", cloudFormationTemplatesDirectory))
+	baseDir, err := os.Getwd()
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-	files, err := ioutil.ReadDir(baseDir)
+
+	rootDir, err := key.RootDir(baseDir, adapter.RootDirElement)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	templatesDir := filepath.Join(rootDir, cloudFormationTemplatesDirectory)
+
+	files, err := ioutil.ReadDir(templatesDir)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 	templates := []string{}
 	for _, file := range files {
-		templates = append(templates, filepath.Join(baseDir, file.Name()))
+		templates = append(templates, filepath.Join(templatesDir, file.Name()))
 	}
 	t, err = main.ParseFiles(templates...)
 	if err != nil {
