@@ -15,9 +15,9 @@ import (
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/cloudconfig"
-	cloudformationresource "github.com/giantswarm/aws-operator/service/resource/cloudformation"
-	legacyresource "github.com/giantswarm/aws-operator/service/resource/legacy"
-	namespaceresource "github.com/giantswarm/aws-operator/service/resource/namespace"
+	"github.com/giantswarm/aws-operator/service/resource/cloudformationv1"
+	"github.com/giantswarm/aws-operator/service/resource/legacyv1"
+	"github.com/giantswarm/aws-operator/service/resource/namespacev1"
 )
 
 func Test_Service_NewResourceRouter(t *testing.T) {
@@ -68,7 +68,7 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 
 	var legacyResource framework.Resource
 	{
-		legacyConfig := legacyresource.DefaultConfig()
+		legacyConfig := legacyv1.DefaultConfig()
 		legacyConfig.AwsConfig = awsConfig
 		legacyConfig.AwsHostConfig = awsConfig
 		legacyConfig.CertWatcher = certWatcher
@@ -79,7 +79,7 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 		legacyConfig.Logger = microloggertest.New()
 		legacyConfig.PubKeyFile = "test"
 
-		legacyResource, err = legacyresource.New(legacyConfig)
+		legacyResource, err = legacyv1.New(legacyConfig)
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
@@ -87,20 +87,20 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 
 	var cloudformationResource framework.Resource
 	{
-		cloudformationConfig := cloudformationresource.DefaultConfig()
+		cloudformationConfig := cloudformationv1.DefaultConfig()
 		cloudformationConfig.Logger = microloggertest.New()
 
-		cloudformationResource, err = cloudformationresource.New(cloudformationConfig)
+		cloudformationResource, err = cloudformationv1.New(cloudformationConfig)
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
 	}
 
-	namespaceConfig := namespaceresource.DefaultConfig()
+	namespaceConfig := namespacev1.DefaultConfig()
 	namespaceConfig.K8sClient = fake.NewSimpleClientset()
 	namespaceConfig.Logger = microloggertest.New()
 
-	namespaceResource, err := namespaceresource.New(namespaceConfig)
+	namespaceResource, err := namespacev1.New(namespaceConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
