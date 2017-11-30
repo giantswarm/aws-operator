@@ -1,8 +1,8 @@
 hash: 118381fac142db4848bf7929765f69fddc444a071baa5b48013a300a5139cfe8
-updated: 2017-09-21T12:30:15.739691737+02:00
+updated: 2017-11-30T17:42:05.791341+01:00
 imports:
 - name: github.com/giantswarm/clustertpr
-  version: 204c6262c75db8eddf6974c9373a42191db88a56
+  version: 6b89a787f157c5531d1c955c32b3c621f0d64c3a
   subpackages:
   - spec
   - spec/docker
@@ -13,7 +13,7 @@ imports:
   - spec/kubernetes/networksetup
   - spec/kubernetes/ssh
 - name: github.com/giantswarm/microerror
-  version: 5ade94eb4ee35ef72eb9382228470caeddb29989
+  version: ec5f66bb657662031c0d651504fee6908cdf28d9
 - name: github.com/juju/errgo
   version: 08cceb5d0b5331634b9826762a8fd53b29b86ad8
 - name: github.com/stretchr/testify
