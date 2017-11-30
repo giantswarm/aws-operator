@@ -91,5 +91,3 @@ aws:
     instanceType: m3.large
   - imageID: ami-d60ad6b9
     instanceType: m3.large
-versionBundle:
-  version: 0.1.0

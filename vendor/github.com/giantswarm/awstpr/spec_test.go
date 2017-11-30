@@ -164,9 +164,6 @@ func TestSpecYamlEncoding(t *testing.T) {
 				},
 			},
 		},
-		VersionBundle: spec.VersionBundle{
-			Version: "0.1.0",
-		},
 	}
 
 	var got map[string]interface{}

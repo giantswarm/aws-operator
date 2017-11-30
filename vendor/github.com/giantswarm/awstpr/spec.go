@@ -6,7 +6,6 @@ import (
 )
 
 type Spec struct {
-	Cluster       clustertpr.Spec    `json:"cluster" yaml:"cluster"`
-	AWS           spec.AWS           `json:"aws" yaml:"aws"`
-	VersionBundle spec.VersionBundle `json:"versionBundle" yaml:"versionBundle"`
+	Cluster clustertpr.Spec `json:"cluster" yaml:"cluster"`
+	AWS     spec.AWS        `json:"aws" yaml:"aws"`
 }

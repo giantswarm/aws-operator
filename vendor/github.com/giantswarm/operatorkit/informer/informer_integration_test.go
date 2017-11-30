@@ -21,29 +21,26 @@ package informer
 
 import (
 	"context"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"os/exec"
 	"os/user"
 	"path"
-	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/cenkalti/backoff"
-	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+	"github.com/cenk/backoff"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 
 	"github.com/giantswarm/micrologger/microloggertest"
-	"github.com/giantswarm/operatorkit/client/k8scrdclient"
-	"github.com/giantswarm/operatorkit/client/k8sextclient"
+	"github.com/giantswarm/operatorkit/client/crdclient"
+	"github.com/giantswarm/operatorkit/crd"
+	fakecrd "github.com/giantswarm/operatorkit/crd/fake"
 )
 
 var (
@@ -53,28 +50,11 @@ var (
 	crtFile string
 	keyFile string
 
-	newCRD            *apiextensionsv1beta1.CustomResourceDefinition
-	newCRDClient      *k8scrdclient.CRDClient
-	newK8sExtClient   apiextensionsclient.Interface
+	newCRD            *crd.CRD
+	newCRDClient      apiextensionsclient.Interface
 	newInformer       *Informer
 	newWatcherFactory WatcherFactory
 )
-
-type Test struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata"`
-	Spec              TestSpec `json:"spec"`
-}
-
-type TestSpec struct {
-	ID string `json:"id" yaml:"id"`
-}
-
-type TestList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata"`
-	Items           []Test `json:"items"`
-}
 
 func init() {
 	var err error
@@ -105,7 +85,7 @@ func init() {
 	}
 
 	{
-		c := k8sextclient.DefaultConfig()
+		c := crdclient.DefaultConfig()
 
 		c.Logger = microloggertest.New()
 
@@ -115,58 +95,42 @@ func init() {
 		c.TLS.CrtFile = crtFile
 		c.TLS.KeyFile = keyFile
 
-		newK8sExtClient, err = k8sextclient.New(c)
+		newCRDClient, err = crdclient.New(c)
 		if err != nil {
 			panic(fmt.Sprintf("%#v", err))
 		}
 	}
 
 	{
-		c := k8scrdclient.DefaultConfig()
+		c := crd.DefaultConfig()
 
-		c.Logger = microloggertest.New()
-		c.K8sExtClient = newK8sExtClient
+		c.Group = fakecrd.Group
+		c.Kind = fakecrd.Kind
+		c.Name = fakecrd.Name
+		c.Plural = fakecrd.Plural
+		c.Singular = fakecrd.Singular
+		c.Scope = fakecrd.Scope
+		c.Version = fakecrd.VersionV1
 
-		newCRDClient, err = k8scrdclient.New(c)
+		newCRD, err = crd.New(c)
 		if err != nil {
 			panic(fmt.Sprintf("%#v", err))
-		}
-	}
-
-	{
-		newCRD = &apiextensionsv1beta1.CustomResourceDefinition{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: apiextensionsv1beta1.SchemeGroupVersion.String(),
-				Kind:       "CustomResourceDefinition",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "tests.foo.giantswarm.io",
-			},
-			Spec: apiextensionsv1beta1.CustomResourceDefinitionSpec{
-				Group:   "foo.giantswarm.io",
-				Scope:   "Cluster",
-				Version: "v1alpha1",
-				Names: apiextensionsv1beta1.CustomResourceDefinitionNames{
-					Kind:     "Test",
-					Plural:   "tests",
-					Singular: "test",
-				},
-			},
 		}
 	}
 
 	{
 		zeroObjectFactory := &ZeroObjectFactoryFuncs{
-			NewObjectFunc:     func() runtime.Object { return &Test{} },
-			NewObjectListFunc: func() runtime.Object { return &TestList{} },
+			NewObjectFunc:     func() runtime.Object { return &fakecrd.CustomObject{} },
+			NewObjectListFunc: func() runtime.Object { return &fakecrd.List{} },
 		}
-		newWatcherFactory = NewWatcherFactory(newK8sExtClient.Discovery().RESTClient(), filepath.Join("apis", "foo.giantswarm.io", "v1alpha1", "watch", "tests"), zeroObjectFactory)
+		newWatcherFactory = NewWatcherFactory(newCRDClient.Discovery().RESTClient(), newCRD.WatchEndpoint(), zeroObjectFactory)
 	}
 }
 
 func testNewInformer(t *testing.T, rateWait, resyncPeriod time.Duration) *Informer {
 	c := DefaultConfig()
 
+	c.BackOff = backoff.NewExponentialBackOff()
 	c.WatcherFactory = newWatcherFactory
 
 	c.RateWait = rateWait
@@ -197,36 +161,19 @@ func testAssertCROWithID(t *testing.T, e watch.Event, IDs ...string) {
 }
 
 func testCreateCRO(t *testing.T, ID string) {
-	p := filepath.Join("apis", "foo.giantswarm.io", "v1alpha1", "tests")
+	p := newCRD.CreateEndpoint()
+	b := fakecrd.NewCRO(ID)
 
-	o := &Test{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "foo.giantswarm.io/v1alpha1",
-			Kind:       "Test",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: ID,
-		},
-		Spec: TestSpec{
-			ID: ID,
-		},
-	}
-
-	b, err := json.Marshal(o)
-	if err != nil {
-		t.Fatalf("expected %#v got %#v", nil, err)
-	}
-
-	err = newK8sExtClient.Discovery().RESTClient().Post().AbsPath(p).Body(b).Do().Error()
+	err := newCRDClient.Discovery().RESTClient().Post().AbsPath(p).Body(b).Do().Error()
 	if err != nil {
 		t.Fatalf("expected %#v got %#v", nil, err)
 	}
 }
 
 func testDeleteCRO(t *testing.T, ID string) {
-	p := filepath.Join("apis", "foo.giantswarm.io", "v1alpha1", "tests", ID)
+	p := newCRD.ResourceEndpoint(ID)
 
-	err := newK8sExtClient.Discovery().RESTClient().Delete().AbsPath(p).Do().Error()
+	err := newCRDClient.Discovery().RESTClient().Delete().AbsPath(p).Do().Error()
 	if err != nil {
 		t.Fatalf("expected %#v got %#v", nil, err)
 	}
@@ -235,14 +182,14 @@ func testDeleteCRO(t *testing.T, ID string) {
 func testSetup(t *testing.T) {
 	testTeardown(t)
 
-	err := newCRDClient.Ensure(context.TODO(), newCRD, backoff.NewExponentialBackOff())
+	err := crd.Ensure(context.TODO(), newCRD, newCRDClient, backoff.NewExponentialBackOff())
 	if err != nil {
 		t.Fatalf("expected %#v got %#v", nil, err)
 	}
 }
 
 func testTeardown(t *testing.T) {
-	err := newK8sExtClient.ApiextensionsV1beta1().CustomResourceDefinitions().Delete(newCRD.Name, nil)
+	err := newCRDClient.ApiextensionsV1beta1().CustomResourceDefinitions().Delete(newCRD.Name(), nil)
 	if errors.IsNotFound(err) {
 		// fall though
 	} else if err != nil {

@@ -2,9 +2,9 @@ package metricsresource
 
 import (
 	"context"
+	"time"
 
 	"github.com/giantswarm/microerror"
-	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/giantswarm/operatorkit/framework"
 )
@@ -71,18 +71,13 @@ func New(config Config) (*Resource, error) {
 }
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
-	sl := r.name
-	rl := r.resource.Underlying().Name()
-	ol := "GetCurrentState"
+	o := "GetCurrentState"
 
-	operationCounter.WithLabelValues(sl, rl, ol).Inc()
-
-	t := prometheus.NewTimer(operationHistogram.WithLabelValues(sl, rl, ol))
-	defer t.ObserveDuration()
+	defer r.updateMetrics(o, time.Now())
 
 	v, err := r.resource.GetCurrentState(ctx, obj)
 	if err != nil {
-		operationErrorCounter.WithLabelValues(sl, rl, ol).Inc()
+		r.updateErrorMetrics(o)
 		return nil, microerror.Mask(err)
 	}
 
@@ -90,18 +85,13 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 }
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
-	sl := r.name
-	rl := r.resource.Underlying().Name()
-	ol := "GetDesiredState"
+	o := "GetDesiredState"
 
-	operationCounter.WithLabelValues(sl, rl, ol).Inc()
-
-	t := prometheus.NewTimer(operationHistogram.WithLabelValues(sl, rl, ol))
-	defer t.ObserveDuration()
+	defer r.updateMetrics(o, time.Now())
 
 	v, err := r.resource.GetDesiredState(ctx, obj)
 	if err != nil {
-		operationErrorCounter.WithLabelValues(sl, rl, ol).Inc()
+		r.updateErrorMetrics(o)
 		return nil, microerror.Mask(err)
 	}
 
@@ -109,18 +99,13 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 }
 
 func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
-	sl := r.name
-	rl := r.resource.Underlying().Name()
-	ol := "NewUpdatePatch"
+	o := "NewUpdatePatch"
 
-	operationCounter.WithLabelValues(sl, rl, ol).Inc()
-
-	t := prometheus.NewTimer(operationHistogram.WithLabelValues(sl, rl, ol))
-	defer t.ObserveDuration()
+	defer r.updateMetrics(o, time.Now())
 
 	v, err := r.resource.NewUpdatePatch(ctx, obj, currentState, desiredState)
 	if err != nil {
-		operationErrorCounter.WithLabelValues(sl, rl, ol).Inc()
+		r.updateErrorMetrics(o)
 		return nil, microerror.Mask(err)
 	}
 
@@ -128,18 +113,13 @@ func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 }
 
 func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
-	sl := r.name
-	rl := r.resource.Underlying().Name()
-	ol := "NewDeletePatch"
+	o := "NewDeletePatch"
 
-	operationCounter.WithLabelValues(sl, rl, ol).Inc()
-
-	t := prometheus.NewTimer(operationHistogram.WithLabelValues(sl, rl, ol))
-	defer t.ObserveDuration()
+	defer r.updateMetrics(o, time.Now())
 
 	v, err := r.resource.NewDeletePatch(ctx, obj, currentState, desiredState)
 	if err != nil {
-		operationErrorCounter.WithLabelValues(sl, rl, ol).Inc()
+		r.updateErrorMetrics(o)
 		return nil, microerror.Mask(err)
 	}
 
@@ -151,18 +131,13 @@ func (r *Resource) Name() string {
 }
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createState interface{}) error {
-	sl := r.name
-	rl := r.resource.Underlying().Name()
-	ol := "ApplyCreatePatch"
+	o := "ApplyCreatePatch"
 
-	operationCounter.WithLabelValues(sl, rl, ol).Inc()
-
-	t := prometheus.NewTimer(operationHistogram.WithLabelValues(sl, rl, ol))
-	defer t.ObserveDuration()
+	defer r.updateMetrics(o, time.Now())
 
 	err := r.resource.ApplyCreateChange(ctx, obj, createState)
 	if err != nil {
-		operationErrorCounter.WithLabelValues(sl, rl, ol).Inc()
+		r.updateErrorMetrics(o)
 		return microerror.Mask(err)
 	}
 
@@ -170,18 +145,13 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createState inter
 }
 
 func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteState interface{}) error {
-	sl := r.name
-	rl := r.resource.Underlying().Name()
-	ol := "ApplyDeletePatch"
+	o := "ApplyDeletePatch"
 
-	operationCounter.WithLabelValues(sl, rl, ol).Inc()
-
-	t := prometheus.NewTimer(operationHistogram.WithLabelValues(sl, rl, ol))
-	defer t.ObserveDuration()
+	defer r.updateMetrics(o, time.Now())
 
 	err := r.resource.ApplyDeleteChange(ctx, obj, deleteState)
 	if err != nil {
-		operationErrorCounter.WithLabelValues(sl, rl, ol).Inc()
+		r.updateErrorMetrics(o)
 		return microerror.Mask(err)
 	}
 
@@ -189,18 +159,13 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteState inter
 }
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateState interface{}) error {
-	sl := r.name
-	rl := r.resource.Underlying().Name()
-	ol := "ApplyUpdatePatch"
+	o := "ApplyUpdatePatch"
 
-	operationCounter.WithLabelValues(sl, rl, ol).Inc()
-
-	t := prometheus.NewTimer(operationHistogram.WithLabelValues(sl, rl, ol))
-	defer t.ObserveDuration()
+	defer r.updateMetrics(o, time.Now())
 
 	err := r.resource.ApplyUpdateChange(ctx, obj, updateState)
 	if err != nil {
-		operationErrorCounter.WithLabelValues(sl, rl, ol).Inc()
+		r.updateErrorMetrics(o)
 		return microerror.Mask(err)
 	}
 
@@ -209,4 +174,13 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateState inter
 
 func (r *Resource) Underlying() framework.Resource {
 	return r.resource.Underlying()
+}
+
+func (r *Resource) updateErrorMetrics(operation string) {
+	errorTotal.WithLabelValues(r.name, r.resource.Underlying().Name(), operation).Inc()
+}
+
+func (r *Resource) updateMetrics(operation string, startTime time.Time) {
+	operationDuration.WithLabelValues(r.name, r.resource.Underlying().Name(), operation).Set(float64(time.Since(startTime) / time.Millisecond))
+	operationTotal.WithLabelValues(r.name, r.resource.Underlying().Name(), operation).Inc()
 }

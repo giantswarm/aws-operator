@@ -1,7 +1,7 @@
 package retryresource
 
 import (
-	"github.com/cenkalti/backoff"
+	"github.com/cenk/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 

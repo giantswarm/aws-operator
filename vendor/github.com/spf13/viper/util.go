@@ -24,7 +24,6 @@ import (
 	"github.com/hashicorp/hcl"
 	"github.com/magiconair/properties"
 	toml "github.com/pelletier/go-toml"
-	"github.com/spf13/afero"
 	"github.com/spf13/cast"
 	jww "github.com/spf13/jwalterweatherman"
 	"gopkg.in/yaml.v2"
@@ -122,8 +121,8 @@ func absPathify(inPath string) string {
 }
 
 // Check if File / Directory Exists
-func exists(fs afero.Fs, path string) (bool, error) {
-	_, err := fs.Stat(path)
+func exists(path string) (bool, error) {
+	_, err := v.fs.Stat(path)
 	if err == nil {
 		return true, nil
 	}
