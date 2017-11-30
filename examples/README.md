@@ -79,7 +79,7 @@ $ helm install -n aws-operator-lab ./examples/aws-operator-lab-chart/ --wait
 # here the aws TPR is created, wait until `kubectl get aws` returns
 # `No resources found.` before running the next command
 
-$ helm install -n aws-resource-lab ./examples/aws-resource-lab-chart/ --wait
+$ helm registry install quay.io/giantswarm/aws-resource-lab-chart -- -n aws-resource-lab --wait
 ```
 
 `aws-operator-lab-chart` accepts the following configuration parameters:
@@ -123,9 +123,11 @@ $ helm install -n aws-operator-lab --set idRsaPub="$(cat ~/.ssh/id_rsa.pub)" \
 For instance, to create a SSH user with your current user and default public key.
 
 ```bash
-$ helm install -n aws-resource-lab --set sshUser="$(whoami)" \
+$ helm registry install quay.io/giantswarm/aws-resource-lab-chart -- \
+                                  -n aws-resource-lab \
+                                  --set sshUser="$(whoami)" \
                                   --set sshPublicKey="$(cat ~/.ssh/id_rsa.pub)" \
-                                   ./aws-resource-lab-chart/ --wait
+                                  -- wait
 ```
 
 ## Connecting to the new cluster
