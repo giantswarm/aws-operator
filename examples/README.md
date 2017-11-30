@@ -39,6 +39,12 @@ helm registry install quay.io/giantswarm/cert-resource-lab-chart:stable -- -n ce
   --set commonDomain=my-common-domain
 ```
 
+`vaultlab-chart` is built from [this repo][vaultlab-chart-repo] and `cert-resource-lab-chart` from
+[this one][cert-resource-lab-chart-repo].
+
+[vaultlab-chart-repo]: http://github.com/giantswarm/vaultlab
+[cert-resource-lab-chart-repo]: http://github.com/giantswarm/cert-resource-lab
+
 - Note: `clusterName` and `commonDomain` chart values must match the values used
   during this guide.
 
@@ -79,8 +85,12 @@ $ helm install -n aws-operator-lab ./examples/aws-operator-lab-chart/ --wait
 # here the aws TPR is created, wait until `kubectl get aws` returns
 # `No resources found.` before running the next command
 
-$ helm registry install quay.io/giantswarm/aws-resource-lab-chart -- -n aws-resource-lab --wait
+$ helm registry install quay.io/giantswarm/aws-resource-lab-chart:stable -- -n aws-resource-lab --wait
 ```
+
+`aws-resource-lab-chart` is built from [this repo][aws-resource-lab-chart-repo].
+
+[aws-resource-lab-chart-repo]: http://github.com/giantswarm/aws-resource-lab
 
 `aws-operator-lab-chart` accepts the following configuration parameters:
 * `idRsaPub` - SSH public key to be installed on nodes.
@@ -123,7 +133,7 @@ $ helm install -n aws-operator-lab --set idRsaPub="$(cat ~/.ssh/id_rsa.pub)" \
 For instance, to create a SSH user with your current user and default public key.
 
 ```bash
-$ helm registry install quay.io/giantswarm/aws-resource-lab-chart -- \
+$ helm registry install quay.io/giantswarm/aws-resource-lab-chart:stable -- \
                                   -n aws-resource-lab \
                                   --set sshUser="$(whoami)" \
                                   --set sshPublicKey="$(cat ~/.ssh/id_rsa.pub)" \
