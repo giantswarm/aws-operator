@@ -28,9 +28,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/healthz"
 	"github.com/giantswarm/aws-operator/service/key"
-	cloudformationresource "github.com/giantswarm/aws-operator/service/resource/cloudformation"
-	legacyresource "github.com/giantswarm/aws-operator/service/resource/legacy"
-	namespaceresource "github.com/giantswarm/aws-operator/service/resource/namespace"
+	"github.com/giantswarm/aws-operator/service/resource/cloudformationv1"
+	"github.com/giantswarm/aws-operator/service/resource/legacyv1"
+	"github.com/giantswarm/aws-operator/service/resource/namespacev1"
 )
 
 const (
@@ -190,7 +190,7 @@ func New(config Config) (*Service, error) {
 
 	var legacyResource framework.Resource
 	{
-		legacyConfig := legacyresource.DefaultConfig()
+		legacyConfig := legacyv1.DefaultConfig()
 		legacyConfig.AwsConfig = awsConfig
 		legacyConfig.AwsHostConfig = awsHostConfig
 		legacyConfig.CertWatcher = certWatcher
@@ -201,7 +201,7 @@ func New(config Config) (*Service, error) {
 		legacyConfig.Logger = config.Logger
 		legacyConfig.PubKeyFile = config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile)
 
-		legacyResource, err = legacyresource.New(legacyConfig)
+		legacyResource, err = legacyv1.New(legacyConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -209,7 +209,7 @@ func New(config Config) (*Service, error) {
 
 	var cloudformationResource framework.Resource
 	{
-		cloudformationConfig := cloudformationresource.DefaultConfig()
+		cloudformationConfig := cloudformationv1.DefaultConfig()
 
 		awsClients := awsclient.NewClients(awsConfig)
 		cloudformationConfig.Clients.EC2 = awsClients.EC2
@@ -217,7 +217,7 @@ func New(config Config) (*Service, error) {
 		cloudformationConfig.Clients.IAM = awsClients.IAM
 		cloudformationConfig.Logger = config.Logger
 
-		cloudformationResource, err = cloudformationresource.New(cloudformationConfig)
+		cloudformationResource, err = cloudformationv1.New(cloudformationConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -225,12 +225,12 @@ func New(config Config) (*Service, error) {
 
 	var namespaceResource framework.Resource
 	{
-		namespaceConfig := namespaceresource.DefaultConfig()
+		namespaceConfig := namespacev1.DefaultConfig()
 
 		namespaceConfig.K8sClient = k8sClient
 		namespaceConfig.Logger = config.Logger
 
-		namespaceResource, err = namespaceresource.New(namespaceConfig)
+		namespaceResource, err = namespacev1.New(namespaceConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

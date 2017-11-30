@@ -15,9 +15,9 @@ import (
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/cloudconfig"
-	cloudformationresource "github.com/giantswarm/aws-operator/service/resource/cloudformation"
-	legacyresource "github.com/giantswarm/aws-operator/service/resource/legacy"
-	namespaceresource "github.com/giantswarm/aws-operator/service/resource/namespace"
+	"github.com/giantswarm/aws-operator/service/resource/cloudformationv1"
+	"github.com/giantswarm/aws-operator/service/resource/legacyv1"
+	"github.com/giantswarm/aws-operator/service/resource/namespacev1"
 )
 
 func Test_Service_NewResourceRouter(t *testing.T) {
@@ -68,7 +68,7 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 
 	var legacyResource framework.Resource
 	{
-		legacyConfig := legacyresource.DefaultConfig()
+		legacyConfig := legacyv1.DefaultConfig()
 		legacyConfig.AwsConfig = awsConfig
 		legacyConfig.AwsHostConfig = awsConfig
 		legacyConfig.CertWatcher = certWatcher
@@ -79,7 +79,7 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 		legacyConfig.Logger = microloggertest.New()
 		legacyConfig.PubKeyFile = "test"
 
-		legacyResource, err = legacyresource.New(legacyConfig)
+		legacyResource, err = legacyv1.New(legacyConfig)
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
@@ -87,20 +87,20 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 
 	var cloudformationResource framework.Resource
 	{
-		cloudformationConfig := cloudformationresource.DefaultConfig()
+		cloudformationConfig := cloudformationv1.DefaultConfig()
 		cloudformationConfig.Logger = microloggertest.New()
 
-		cloudformationResource, err = cloudformationresource.New(cloudformationConfig)
+		cloudformationResource, err = cloudformationv1.New(cloudformationConfig)
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
 	}
 
-	namespaceConfig := namespaceresource.DefaultConfig()
+	namespaceConfig := namespacev1.DefaultConfig()
 	namespaceConfig.K8sClient = fake.NewSimpleClientset()
 	namespaceConfig.Logger = microloggertest.New()
 
-	namespaceResource, err := namespaceresource.New(namespaceConfig)
+	namespaceResource, err := namespacev1.New(namespaceConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -124,7 +124,7 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 		errorMatcher      func(err error) bool
 		resourceRouter    func(ctx context.Context, obj interface{}) ([]framework.Resource, error)
 	}{
-		// Case 1. No version in version bundle so return legacy resources.
+		// Case 0. No version in version bundle so return legacy resources.
 		{
 			customObject: awstpr.CustomObject{
 				Spec: awstpr.Spec{
@@ -137,7 +137,7 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 			errorMatcher:      nil,
 			resourceRouter:    NewResourceRouter(versionedResources),
 		},
-		// Case 2. Legacy version in version bundle so return legacy resources.
+		// Case 1. Legacy version in version bundle so return legacy resources.
 		{
 			customObject: awstpr.CustomObject{
 				Spec: awstpr.Spec{
@@ -150,7 +150,7 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 			errorMatcher:      nil,
 			resourceRouter:    NewResourceRouter(versionedResources),
 		},
-		// Case 3. Cloud formation version in version bundle so return all resources.
+		// Case 2. Cloud formation version in version bundle so return all resources.
 		{
 			customObject: awstpr.CustomObject{
 				Spec: awstpr.Spec{
@@ -163,7 +163,7 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 			errorMatcher:      nil,
 			resourceRouter:    NewResourceRouter(versionedResources),
 		},
-		// Case 4. Invalid version returns an error.
+		// Case 3. Invalid version returns an error.
 		{
 			customObject: awstpr.CustomObject{
 				Spec: awstpr.Spec{
@@ -182,13 +182,13 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 		resources, err := tc.resourceRouter(context.TODO(), &tc.customObject)
 		if err != nil {
 			if tc.errorMatcher == nil {
-				t.Fatal("test", i+1, "expected", nil, "got", "error matcher")
+				t.Fatal("test", i, "expected", nil, "got", "error matcher")
 			} else if !tc.errorMatcher(err) {
-				t.Fatal("test", i+1, "expected", true, "got", false)
+				t.Fatal("test", i, "expected", true, "got", false)
 			}
 		} else {
 			if !reflect.DeepEqual(tc.expectedResources, resources) {
-				t.Fatal("test", i+1, "expected", tc.expectedResources, "got", resources)
+				t.Fatal("test", i, "expected", tc.expectedResources, "got", resources)
 			}
 		}
 	}
