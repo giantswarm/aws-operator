@@ -111,7 +111,7 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Error("imageID output element not found")
 	}
-	if !strings.Contains(body, clusterVersionOuputKey+":") {
+	if !strings.Contains(body, clusterVersionOutputKey+":") {
 		fmt.Println(body)
 		t.Error("clusterVersion output element not found")
 	}

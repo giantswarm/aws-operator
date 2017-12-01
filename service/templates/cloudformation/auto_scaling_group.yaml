@@ -12,6 +12,10 @@
       HealthCheckGracePeriod: {{ .HealthCheckGracePeriod }}
       MetricsCollection:
         - Granularity: "1Minute"
+      Tags:
+        - Key: Name
+          Value: {{ .ClusterID }}-{{ .ASGType }}
+          PropagateAtLaunch: true
     UpdatePolicy:
       AutoScalingRollingUpdate:
         # minimum amount of instances that must always be running during a rolling update
