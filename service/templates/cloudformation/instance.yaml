@@ -1,0 +1,14 @@
+{{define "instance"}}masterInstance:
+    Type: "AWS::EC2::Instance"
+    Description: Master instance
+    Properties:
+        AvailabilityZone: {{ .AZ }}
+        IamInstanceProfile: {{ .IAMInstanceProfileName }}
+        ImageID: {{ .ImageID }}
+        InstanceType: {{ .InstanceType }}
+        SecurityGroups:
+        - {{ .SecurityGroupID }}
+        SubnetID: {{ .SubnetID }}
+        UserData: {{ .SmallCloudConfig }}
+        Tags:
+{{end}}

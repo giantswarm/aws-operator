@@ -70,8 +70,8 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 			}
 
 			if !tc.expectedError {
-				if a.AZ != tc.expectedAZ {
-					t.Errorf("unexpected output, got %q, want %q", a.AZ, tc.expectedAZ)
+				if a.autoScalingGroupAdapter.AZ != tc.expectedAZ {
+					t.Errorf("unexpected output, got %q, want %q", a.autoScalingGroupAdapter.AZ, tc.expectedAZ)
 				}
 
 				if a.ASGMaxSize != tc.expectedASGMaxSize {
