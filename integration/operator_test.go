@@ -116,7 +116,7 @@ func TestMain(m *testing.M) {
 		v = m.Run()
 	}
 
-	tearDown(cs)
+	// tearDown(cs)
 
 	os.Exit(v)
 }
