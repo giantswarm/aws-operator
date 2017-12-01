@@ -29,6 +29,9 @@ func TestAdapterMain(t *testing.T) {
 		Spec: awstpr.Spec{
 			Cluster: defaultCluster,
 			AWS: awsspec.AWS{
+				Masters: []awsspecaws.Node{
+					awsspecaws.Node{},
+				},
 				Workers: []awsspecaws.Node{
 					awsspecaws.Node{},
 				},

@@ -35,6 +35,7 @@ type hydrater func(awstpr.CustomObject, Clients) error
 type Adapter struct {
 	ASGType string
 
+	instanceAdapter
 	launchConfigAdapter
 	autoScalingGroupAdapter
 	outputsAdapter
@@ -46,8 +47,9 @@ func New(customObject awstpr.CustomObject, clients Clients) (Adapter, error) {
 	a.ASGType = prefixWorker
 
 	hydraters := []hydrater{
-		a.getAutoScalingGroup,
+		a.getInstance,
 		a.getLaunchConfiguration,
+		a.getAutoScalingGroup,
 		a.getOutputs,
 	}
 
