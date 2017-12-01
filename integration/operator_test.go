@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	defaultTimeout         = 240
+	defaultTimeout         = 300
 	awsOperatorValuesFile  = "/tmp/aws-operator-values.yaml"
 	awsOperatorChartValues = `Installation:
   V1:
@@ -116,7 +116,7 @@ func TestMain(m *testing.M) {
 		v = m.Run()
 	}
 
-	// tearDown(cs)
+	tearDown(cs)
 
 	os.Exit(v)
 }
