@@ -26,7 +26,7 @@ type autoScalingGroupAdapter struct {
 }
 
 func (a *autoScalingGroupAdapter) getAutoScalingGroup(customObject awstpr.CustomObject, clients Clients) error {
-	a.AZ = customObject.Spec.AWS.AZ
+	a.AZ = key.AvailabilityZone(customObject)
 	workers := key.WorkerCount(customObject)
 	a.ASGMaxSize = workers
 	a.ASGMinSize = workers

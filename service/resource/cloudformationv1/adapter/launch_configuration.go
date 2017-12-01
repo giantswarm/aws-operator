@@ -36,8 +36,8 @@ func (l *launchConfigAdapter) getLaunchConfiguration(customObject awstpr.CustomO
 		return microerror.Mask(invalidConfigError)
 	}
 
-	l.ImageID = customObject.Spec.AWS.Workers[0].ImageID
-	l.InstanceType = customObject.Spec.AWS.Workers[0].InstanceType
+	l.ImageID = key.WorkerImageID(customObject)
+	l.InstanceType = key.WorkerInstanceType(customObject)
 	l.IAMInstanceProfileName = key.InstanceProfileName(customObject, prefixWorker)
 	l.AssociatePublicIPAddress = true
 
