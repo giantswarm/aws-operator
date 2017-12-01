@@ -12,7 +12,7 @@ type outputsAdapter struct {
 }
 
 func (o *outputsAdapter) getOutputs(customObject awstpr.CustomObject, clients Clients) error {
-	o.ClusterVersion = key.VersionBundleVersion(customObject)
+	o.ClusterVersion = key.ClusterVersion(customObject)
 
 	return nil
 }

@@ -8,6 +8,10 @@ const (
 	imageIDParameterKey        = "ImageIDParam"
 	clusterVersionParameterKey = "ClusterVersionParam"
 
+	workersOutputKey       = "WorkersOutput"
+	imageIDOutputKey       = "ImageIDOutput"
+	clusterVersionOuputKey = "ClusterVersionOutput"
+
 	cloudFormationTemplatesDirectory = "service/templates/cloudformation"
 )
 

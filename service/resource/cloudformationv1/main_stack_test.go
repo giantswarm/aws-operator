@@ -103,15 +103,15 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		t.Error("outputs header not found")
 	}
 
-	if !strings.Contains(body, "  WorkersOutput:") {
+	if !strings.Contains(body, workersOutputKey+":") {
 		fmt.Println(body)
 		t.Error("workers output element not found")
 	}
-	if !strings.Contains(body, "  ImageIDOutput:") {
+	if !strings.Contains(body, imageIDOutputKey+":") {
 		fmt.Println(body)
 		t.Error("imageID output element not found")
 	}
-	if !strings.Contains(body, "  ClusterVersionOutput:") {
+	if !strings.Contains(body, clusterVersionOuputKey+":") {
 		fmt.Println(body)
 		t.Error("clusterVersion output element not found")
 	}

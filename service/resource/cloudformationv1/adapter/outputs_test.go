@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/giantswarm/awstpr"
-	awstprspec "github.com/giantswarm/awstpr/spec"
+	"github.com/giantswarm/clustertpr"
 )
 
 func TestAdapterOutputsRegularFields(t *testing.T) {
@@ -22,7 +22,7 @@ func TestAdapterOutputsRegularFields(t *testing.T) {
 			description: "basic matching",
 			customObject: awstpr.CustomObject{
 				Spec: awstpr.Spec{
-					VersionBundle: awstprspec.VersionBundle{
+					Cluster: clustertpr.Spec{
 						Version: "myversion",
 					},
 				},
