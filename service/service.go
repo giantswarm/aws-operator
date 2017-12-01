@@ -27,9 +27,10 @@ import (
 	"github.com/giantswarm/aws-operator/service/alerter"
 	"github.com/giantswarm/aws-operator/service/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/healthz"
-	cloudformationresource "github.com/giantswarm/aws-operator/service/resource/cloudformation"
-	legacyresource "github.com/giantswarm/aws-operator/service/resource/legacy"
-	namespaceresource "github.com/giantswarm/aws-operator/service/resource/namespace"
+	"github.com/giantswarm/aws-operator/service/key"
+	"github.com/giantswarm/aws-operator/service/resource/cloudformationv1"
+	"github.com/giantswarm/aws-operator/service/resource/legacyv1"
+	"github.com/giantswarm/aws-operator/service/resource/namespacev1"
 )
 
 const (
@@ -189,7 +190,7 @@ func New(config Config) (*Service, error) {
 
 	var legacyResource framework.Resource
 	{
-		legacyConfig := legacyresource.DefaultConfig()
+		legacyConfig := legacyv1.DefaultConfig()
 		legacyConfig.AwsConfig = awsConfig
 		legacyConfig.AwsHostConfig = awsHostConfig
 		legacyConfig.CertWatcher = certWatcher
@@ -200,7 +201,7 @@ func New(config Config) (*Service, error) {
 		legacyConfig.Logger = config.Logger
 		legacyConfig.PubKeyFile = config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile)
 
-		legacyResource, err = legacyresource.New(legacyConfig)
+		legacyResource, err = legacyv1.New(legacyConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -208,7 +209,7 @@ func New(config Config) (*Service, error) {
 
 	var cloudformationResource framework.Resource
 	{
-		cloudformationConfig := cloudformationresource.DefaultConfig()
+		cloudformationConfig := cloudformationv1.DefaultConfig()
 
 		awsClients := awsclient.NewClients(awsConfig)
 		cloudformationConfig.Clients.EC2 = awsClients.EC2
@@ -216,7 +217,7 @@ func New(config Config) (*Service, error) {
 		cloudformationConfig.Clients.IAM = awsClients.IAM
 		cloudformationConfig.Logger = config.Logger
 
-		cloudformationResource, err = cloudformationresource.New(cloudformationConfig)
+		cloudformationResource, err = cloudformationv1.New(cloudformationConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -224,12 +225,30 @@ func New(config Config) (*Service, error) {
 
 	var namespaceResource framework.Resource
 	{
-		namespaceConfig := namespaceresource.DefaultConfig()
+		namespaceConfig := namespacev1.DefaultConfig()
 
 		namespaceConfig.K8sClient = k8sClient
 		namespaceConfig.Logger = config.Logger
 
-		namespaceResource, err = namespaceresource.New(namespaceConfig)
+		namespaceResource, err = namespacev1.New(namespaceConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	// Metrics config for wrapping resources.
+	metricsWrapConfig := metricsresource.DefaultWrapConfig()
+	metricsWrapConfig.Name = config.Name
+
+	// Existing clusters are only processed by the legacy resource. We wrap it
+	// with the metrics resource for monitoring.
+	var legacyResources []framework.Resource
+	{
+		legacyResources = []framework.Resource{
+			legacyResource,
+		}
+
+		legacyResources, err = metricsresource.Wrap(legacyResources, metricsWrapConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -237,11 +256,8 @@ func New(config Config) (*Service, error) {
 
 	// We create the list of resources and wrap each resource around some common
 	// resources like metrics and retry resources.
-	//
-	// NOTE that the retry resources wrap the underlying resources first. The
-	// wrapped resources are then wrapped around the metrics resource. That way
-	// the metrics also consider execution times and execution attempts including
-	// retries.
+	// TODO Remove the legacy resource once all resources are migrated to
+	// Cloud Formation.
 	var resources []framework.Resource
 	{
 		resources = []framework.Resource{
@@ -251,22 +267,31 @@ func New(config Config) (*Service, error) {
 		}
 
 		// Disable retry wrapper due to problems with the legacy resource.
+		//
+		// NOTE that the retry resources wrap the underlying resources first. The
+		// wrapped resources are then wrapped around the metrics resource. That way
+		// the metrics also consider execution times and execution attempts including
+		// retries.
 		/*
 			retryWrapConfig := retryresource.DefaultWrapConfig()
-			retryWrapConfig.BackOffFactory = func() backoff.BackOff { return backoff.WithMaxTries(backoff.NewExponentialBackOff(), ResourceRetries) }
 			retryWrapConfig.Logger = config.Logger
-			resources, err = retryresource.Wrap(resources, retryWrapConfig)
+			cloudFormationResources, err = retryresource.Wrap(cloudFormationResources, retryWrapConfig)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
 		*/
 
-		metricsWrapConfig := metricsresource.DefaultWrapConfig()
-		metricsWrapConfig.Name = config.Name
 		resources, err = metricsresource.Wrap(resources, metricsWrapConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
+	}
+
+	// We provide a map of resource lists keyed by the version bundle version
+	// to the resource router.
+	versionedResources := map[string][]framework.Resource{
+		key.LegacyVersion:         legacyResources,
+		key.CloudFormationVersion: resources,
 	}
 
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
@@ -319,7 +344,7 @@ func New(config Config) (*Service, error) {
 
 		frameworkConfig.InitCtxFunc = initCtxFunc
 		frameworkConfig.Logger = config.Logger
-		frameworkConfig.ResourceRouter = framework.DefaultResourceRouter(resources)
+		frameworkConfig.ResourceRouter = NewResourceRouter(versionedResources)
 		frameworkConfig.Informer = newInformer
 		frameworkConfig.TPR = newTPR
 
@@ -349,6 +374,7 @@ func New(config Config) (*Service, error) {
 		versionConfig.GitCommit = config.GitCommit
 		versionConfig.Name = config.Name
 		versionConfig.Source = config.Source
+		versionConfig.VersionBundles = NewVersionBundles()
 
 		versionService, err = version.New(versionConfig)
 		if err != nil {
