@@ -28,10 +28,11 @@ type rulesInput struct {
 }
 
 const (
-	allPorts  = -1
-	httpPort  = 80
-	httpsPort = 443
-	sshPort   = 22
+	allPorts    = -1
+	httpPort    = 80
+	httpsPort   = 443
+	sshPort     = 22
+	kubeletPort = 10250
 
 	allProtocols = "-1"
 	tcpProtocol  = "tcp"
@@ -93,6 +94,12 @@ func (ri rulesInput) masterRules() []awsresources.SecurityGroupRule {
 			Protocol:        allProtocols,
 			SecurityGroupID: ri.WorkersSecurityGroupID,
 		},
+		// Allow traffic from host cluster CIDR to 10250 for kubelet scraping.
+		{
+			Port:       kubeletPort,
+			Protocol:   tcpProtocol,
+			SourceCIDR: ri.HostClusterCIDR,
+		},
 	}
 
 	if key.HasClusterVersion(ri.Cluster) {
@@ -149,6 +156,12 @@ func (ri rulesInput) workerRules() []awsresources.SecurityGroupRule {
 		// for guest cluster scraping.
 		{
 			Port:       ri.Cluster.Spec.Cluster.Kubernetes.IngressController.SecurePort,
+			Protocol:   tcpProtocol,
+			SourceCIDR: ri.HostClusterCIDR,
+		},
+		// Allow traffic from host cluster CIDR to 10250 for kubelet scraping.
+		{
+			Port:       kubeletPort,
 			Protocol:   tcpProtocol,
 			SourceCIDR: ri.HostClusterCIDR,
 		},
