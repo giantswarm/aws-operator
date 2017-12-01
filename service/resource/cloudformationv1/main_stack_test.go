@@ -97,4 +97,22 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Error("asg element not found")
 	}
+
+	if !strings.Contains(body, "Outputs:") {
+		fmt.Println(body)
+		t.Error("outputs header not found")
+	}
+
+	if !strings.Contains(body, "  WorkersOutput:") {
+		fmt.Println(body)
+		t.Error("workers output element not found")
+	}
+	if !strings.Contains(body, "  ImageIDOutput:") {
+		fmt.Println(body)
+		t.Error("imageID output element not found")
+	}
+	if !strings.Contains(body, "  ClusterVersionOutput:") {
+		fmt.Println(body)
+		t.Error("clusterVersion output element not found")
+	}
 }
