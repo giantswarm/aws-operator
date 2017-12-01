@@ -7,12 +7,38 @@ import (
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/aws-operator/service/resource/cloudformationv1/adapter"
 	"github.com/giantswarm/awstpr"
+	awsspec "github.com/giantswarm/awstpr/spec"
+	awsspecaws "github.com/giantswarm/awstpr/spec/aws"
 	"github.com/giantswarm/clustertpr"
 	"github.com/giantswarm/clustertpr/spec"
+	"github.com/giantswarm/clustertpr/spec/kubernetes"
 	"github.com/giantswarm/micrologger/microloggertest"
 )
 
 func Test_Resource_Cloudformation_newCreate(t *testing.T) {
+	clusterTpo := &awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			Cluster: clustertpr.Spec{
+				Cluster: spec.Cluster{
+					ID: "test-cluster",
+				},
+				Kubernetes: spec.Kubernetes{
+					IngressController: kubernetes.IngressController{
+						Domain: "mysubdomain.mydomain.com",
+					},
+				},
+			},
+			AWS: awsspec.AWS{
+				AZ: "myaz",
+				Workers: []awsspecaws.Node{
+					awsspecaws.Node{
+						ImageID: "myimageid",
+					},
+				},
+			},
+		},
+	}
+
 	testCases := []struct {
 		obj               interface{}
 		currentState      interface{}
@@ -21,31 +47,15 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 		description       string
 	}{
 		{
-			description: "current and desired state empty, expected empty",
-			obj: &awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					Cluster: clustertpr.Spec{
-						Cluster: spec.Cluster{
-							ID: "5xchu",
-						},
-					},
-				},
-			},
+			description:       "current and desired state empty, expected empty",
+			obj:               clusterTpo,
 			currentState:      StackState{},
 			desiredState:      StackState{},
 			expectedStackName: "",
 		},
 		{
-			description: "current state empty, desired state not empty, expected desired state",
-			obj: &awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					Cluster: clustertpr.Spec{
-						Cluster: spec.Cluster{
-							ID: "5xchu",
-						},
-					},
-				},
-			},
+			description:  "current state empty, desired state not empty, expected desired state",
+			obj:          clusterTpo,
 			currentState: StackState{},
 			desiredState: StackState{
 				Name: "desired",
@@ -54,15 +64,7 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 		},
 		{
 			description: "current state not empty, desired state not empty but different, expected desired state",
-			obj: &awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					Cluster: clustertpr.Spec{
-						Cluster: spec.Cluster{
-							ID: "5xchu",
-						},
-					},
-				},
-			},
+			obj:         clusterTpo,
 			currentState: StackState{
 				Name: "current",
 			},
@@ -77,7 +79,10 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 	var newResource *Resource
 	{
 		resourceConfig := DefaultConfig()
-		resourceConfig.Clients = adapter.Clients{}
+		resourceConfig.Clients = adapter.Clients{
+			EC2: &adapter.EC2ClientMock{},
+			IAM: &adapter.IAMClientMock{},
+		}
 		resourceConfig.Logger = microloggertest.New()
 		newResource, err = New(resourceConfig)
 		if err != nil {
@@ -95,7 +100,7 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 			if !ok {
 				t.Errorf("expected '%T', got '%T'", createChange, result)
 			}
-			if *createChange.StackName != tc.expectedStackName {
+			if createChange.StackName != nil && *createChange.StackName != tc.expectedStackName {
 				t.Errorf("expected %s, got %s", tc.expectedStackName, createChange.StackName)
 			}
 		})

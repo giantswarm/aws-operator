@@ -4,13 +4,9 @@ const (
 	// defaultCreationTimeout is the timeout in minutes for the creation of the stack.
 	defaultCreationTimeout = 10
 
-	workersParameterKey        = "WorkersParam"
-	imageIDParameterKey        = "ImageIDParam"
-	clusterVersionParameterKey = "ClusterVersionParam"
-
-	workersOutputKey       = "WorkersOutput"
-	imageIDOutputKey       = "ImageIDOutput"
-	clusterVersionOuputKey = "ClusterVersionOutput"
+	workersOutputKey        = "WorkersOutput"
+	imageIDOutputKey        = "ImageIDOutput"
+	clusterVersionOutputKey = "ClusterVersionOutput"
 
 	cloudFormationTemplatesDirectory = "service/templates/cloudformation"
 )

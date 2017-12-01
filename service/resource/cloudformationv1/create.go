@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/giantswarm/aws-operator/service/key"
 	"github.com/giantswarm/microerror"
 )
 
@@ -19,10 +20,17 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		return err
 	}
 
+	r.logger.LogCtx(ctx, "debug", "creating AWS cloudformation stack: created")
+
 	return nil
 }
 
 func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
+	customObject, err := key.ToCustomObject(obj)
+	if err != nil {
+		return awscloudformation.CreateStackInput{}, microerror.Mask(err)
+	}
+
 	desiredStackState, err := toStackState(desiredState)
 	if err != nil {
 		return awscloudformation.CreateStackInput{}, microerror.Mask(err)
@@ -36,13 +44,10 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 
 	if desiredStackState.Name != "" {
 		var mainTemplate string
-		/*
-			      commented out until we assing proper values to the template
-						mainTemplate, err := getMainTemplateBody(customObject)
-						if err != nil {
-							return nil, microerror.Mask(err)
-						}
-		*/
+		mainTemplate, err := r.getMainTemplateBody(customObject)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 		createState.StackName = aws.String(desiredStackState.Name)
 		createState.TemplateBody = aws.String(mainTemplate)
 		createState.TimeoutInMinutes = aws.Int64(defaultCreationTimeout)

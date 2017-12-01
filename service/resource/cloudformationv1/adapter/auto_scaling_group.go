@@ -23,6 +23,7 @@ type autoScalingGroupAdapter struct {
 	MinInstancesInService  string
 	RollingUpdatePauseTime string
 	SubnetID               string
+	ClusterID              string
 }
 
 func (a *autoScalingGroupAdapter) getAutoScalingGroup(customObject awstpr.CustomObject, clients Clients) error {
@@ -67,6 +68,8 @@ func (a *autoScalingGroupAdapter) getAutoScalingGroup(customObject awstpr.Custom
 	}
 
 	a.SubnetID = *output.Subnets[0].SubnetId
+
+	a.ClusterID = key.ClusterID(customObject)
 
 	return nil
 }
