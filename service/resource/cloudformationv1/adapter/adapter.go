@@ -37,6 +37,7 @@ type Adapter struct {
 
 	launchConfigAdapter
 	autoScalingGroupAdapter
+	outputsAdapter
 }
 
 func New(customObject awstpr.CustomObject, clients Clients) (Adapter, error) {
@@ -47,6 +48,7 @@ func New(customObject awstpr.CustomObject, clients Clients) (Adapter, error) {
 	hydraters := []hydrater{
 		a.getAutoScalingGroup,
 		a.getLaunchConfiguration,
+		a.getOutputs,
 	}
 
 	for _, h := range hydraters {

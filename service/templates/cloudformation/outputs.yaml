@@ -1,0 +1,8 @@
+{{define "outputs"}}Outputs:
+  WorkersOutput:
+    Value: {{ .ASGMinSize }}
+  ImageIDOutput:
+    Value: {{ .ImageID }}
+  ClusterVersionOutput:
+    Value: {{ .ClusterVersion }}
+{{end}}

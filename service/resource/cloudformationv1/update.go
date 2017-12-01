@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/giantswarm/aws-operator/service/key"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/framework"
 )
@@ -50,6 +51,11 @@ func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 }
 
 func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
+	customObject, err := key.ToCustomObject(obj)
+	if err != nil {
+		return awscloudformation.CreateStackInput{}, microerror.Mask(err)
+	}
+
 	desiredStackState, err := toStackState(desiredState)
 	if err != nil {
 		return awscloudformation.CreateStackInput{}, microerror.Mask(err)
@@ -63,18 +69,17 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 	r.logger.LogCtx(ctx, "debug", "finding out if the main stack should be updated")
 
 	updateState := awscloudformation.UpdateStackInput{
-		StackName: aws.String(""),
+		StackName:  aws.String(""),
+		Parameters: []*awscloudformation.Parameter{},
 	}
 
 	if !reflect.DeepEqual(desiredStackState, currentStackState) {
 		var mainTemplate string
-		/*
-			      commented out until we assing proper values to the template
-						mainTemplate, err := r.getMainTemplateBody(customObject)
-						if err != nil {
-							return nil, microerror.Mask(err)
-						}
-		*/
+		mainTemplate, err := r.getMainTemplateBody(customObject)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
 		updateState.StackName = aws.String(desiredStackState.Name)
 		updateState.TemplateBody = aws.String(mainTemplate)
 		updateState.Parameters = []*awscloudformation.Parameter{
