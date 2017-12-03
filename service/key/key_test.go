@@ -53,6 +53,25 @@ func Test_AvailabilityZone(t *testing.T) {
 	}
 }
 
+func Test_BucketName(t *testing.T) {
+	accountID := "1234567890"
+	expectedName := "test-cluster-g8s-1234567890"
+
+	customObject := awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			Cluster: clustertpr.Spec{
+				Cluster: spec.Cluster{
+					ID: "test-cluster",
+				},
+			},
+		},
+	}
+
+	if BucketName(customObject, accountID) != expectedName {
+		t.Fatalf("Expected bucket name %s but was %s", expectedName, BucketName(customObject, accountID))
+	}
+}
+
 func Test_ClusterID(t *testing.T) {
 	expectedID := "test-cluster"
 
