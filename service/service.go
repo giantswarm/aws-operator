@@ -31,6 +31,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/resource/cloudformationv1"
 	"github.com/giantswarm/aws-operator/service/resource/legacyv1"
 	"github.com/giantswarm/aws-operator/service/resource/namespacev1"
+	"github.com/giantswarm/aws-operator/service/resource/s3bucketv1"
 )
 
 const (
@@ -202,6 +203,18 @@ func New(config Config) (*Service, error) {
 		legacyConfig.PubKeyFile = config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile)
 
 		legacyResource, err = legacyv1.New(legacyConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var s3BucketResource framework.Resource
+	{
+		s3BucketConfig := s3bucketv1.DefaultConfig()
+		s3BucketConfig.Logger = config.Logger
+		s3BucketConfig.S3Client = awsclients.S3
+
+		s3BucketResource, err = s3bucketv1.New(s3BucketConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
