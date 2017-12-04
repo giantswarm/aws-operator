@@ -30,7 +30,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 }
 
 func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	desiredObjectState, err := toBucketObject(desiredState)
+	desiredObjectState, err := toBucketObjectState(desiredState)
 	if err != nil {
 		return s3.PutObjectInput{}, microerror.Mask(err)
 	}
@@ -41,11 +41,11 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		Key: aws.String(""),
 	}
 
-	if desiredObjectState.Key != "" {
-		createState.Key = aws.String(desiredObjectState.Key)
-		createState.Body = strings.NewReader(desiredObjectState.Body)
-		createState.Bucket = aws.String(desiredObjectState.Bucket)
-		createState.ContentLength = aws.Int64(int64(len(desiredObjectState.Body)))
+	if desiredObjectState.WorkerCloudConfig.Key != "" {
+		createState.Key = aws.String(desiredObjectState.WorkerCloudConfig.Key)
+		createState.Body = strings.NewReader(desiredObjectState.WorkerCloudConfig.Body)
+		createState.Bucket = aws.String(desiredObjectState.WorkerCloudConfig.Bucket)
+		createState.ContentLength = aws.Int64(int64(len(desiredObjectState.WorkerCloudConfig.Body)))
 	}
 
 	return createState, nil

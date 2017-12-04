@@ -26,8 +26,8 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 
 	testCases := []struct {
 		obj            awstpr.CustomObject
-		currentState   BucketObject
-		desiredState   BucketObject
+		currentState   BucketObjectState
+		desiredState   BucketObjectState
 		expectedBody   string
 		expectedBucket string
 		expectedKey    string
@@ -36,8 +36,8 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 		{
 			description:    "current state empty, desired state empty, empty create change",
 			obj:            clusterTpo,
-			currentState:   BucketObject{},
-			desiredState:   BucketObject{},
+			currentState:   BucketObjectState{},
+			desiredState:   BucketObjectState{},
 			expectedBody:   "",
 			expectedBucket: "",
 			expectedKey:    "",
@@ -45,11 +45,13 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 		{
 			description:  "current state empty, desired state not empty, create change == desired state",
 			obj:          clusterTpo,
-			currentState: BucketObject{},
-			desiredState: BucketObject{
-				Body:   "mybody",
-				Bucket: "mybucket",
-				Key:    "mykey",
+			currentState: BucketObjectState{},
+			desiredState: BucketObjectState{
+				WorkerCloudConfig: BucketObjectInstance{
+					Body:   "mybody",
+					Bucket: "mybucket",
+					Key:    "mykey",
+				},
 			},
 			expectedBody:   "mybody",
 			expectedBucket: "mybucket",
@@ -58,15 +60,19 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 		{
 			description: "current state not empty, desired state not empty, create change == desired state",
 			obj:         clusterTpo,
-			currentState: BucketObject{
-				Body:   "currentbody",
-				Bucket: "currentbucket",
-				Key:    "currentkey",
+			currentState: BucketObjectState{
+				WorkerCloudConfig: BucketObjectInstance{
+					Body:   "currentbody",
+					Bucket: "currentbucket",
+					Key:    "currentkey",
+				},
 			},
-			desiredState: BucketObject{
-				Body:   "mybody",
-				Bucket: "mybucket",
-				Key:    "mykey",
+			desiredState: BucketObjectState{
+				WorkerCloudConfig: BucketObjectInstance{
+					Body:   "mybody",
+					Bucket: "mybucket",
+					Key:    "mykey",
+				},
 			},
 			expectedBody:   "mybody",
 			expectedBucket: "mybucket",
@@ -76,16 +82,16 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 
 	var err error
 	var newResource *Resource
-	{
-		resourceConfig := DefaultConfig()
-		resourceConfig.Clients = Clients{
-			S3: &S3ClientMock{},
-		}
-		resourceConfig.Logger = microloggertest.New()
-		newResource, err = New(resourceConfig)
-		if err != nil {
-			t.Error("expected", nil, "got", err)
-		}
+
+	resourceConfig := DefaultConfig()
+	resourceConfig.Clients = Clients{
+		S3: &S3ClientMock{},
+	}
+	resourceConfig.AwsService = AwsServiceMock{}
+	resourceConfig.Logger = microloggertest.New()
+	newResource, err = New(resourceConfig)
+	if err != nil {
+		t.Error("expected", nil, "got", err)
 	}
 
 	for _, tc := range testCases {
