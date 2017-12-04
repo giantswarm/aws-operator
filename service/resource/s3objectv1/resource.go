@@ -1,6 +1,8 @@
-package s3workercloudconfigv1
+package s3objectv1
 
 import (
+	"context"
+
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -60,6 +62,14 @@ func (r *Resource) Name() string {
 
 func (r *Resource) Underlying() framework.Resource {
 	return r
+}
+
+func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
+	return nil
+}
+
+func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
+	return &framework.Patch{}, nil
 }
 
 func toBucketObject(v interface{}) (BucketObject, error) {

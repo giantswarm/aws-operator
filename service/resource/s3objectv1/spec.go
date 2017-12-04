@@ -1,4 +1,4 @@
-package s3workercloudconfigv1
+package s3objectv1
 
 import "github.com/aws/aws-sdk-go/service/s3"
 

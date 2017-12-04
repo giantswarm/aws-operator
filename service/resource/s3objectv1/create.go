@@ -1,4 +1,4 @@
-package s3workercloudconfigv1
+package s3objectv1
 
 import (
 	"context"
@@ -15,12 +15,16 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		return microerror.Mask(err)
 	}
 
-	_, err = r.awsClients.S3.PutObject(&s3PutInput)
-	if err != nil {
-		return microerror.Mask(err)
-	}
+	if s3PutInput.Key != nil {
+		_, err = r.awsClients.S3.PutObject(&s3PutInput)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 
-	r.logger.LogCtx(ctx, "debug", "creating S3 worker's cloudconfig: created")
+		r.logger.LogCtx(ctx, "debug", "creating S3 worker's cloudconfig: created")
+	} else {
+		r.logger.LogCtx(ctx, "debug", "creating S3 worker's cloudconfig: already created")
+	}
 
 	return nil
 }
