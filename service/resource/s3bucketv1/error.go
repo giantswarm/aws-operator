@@ -54,7 +54,7 @@ func IsBucketAlreadyOwnedByYou(err error) bool {
 	if !ok {
 		return false
 	}
-	if aerr.Code() == s3.ErrCodeBucketAlreadyExists {
+	if aerr.Code() == s3.ErrCodeBucketAlreadyOwnedByYou {
 		return true
 	}
 
