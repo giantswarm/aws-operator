@@ -25,7 +25,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			return nil
 		}
 		if err != nil {
-			return err
+			return microerror.Mask(err)
 		}
 
 		r.logger.LogCtx(ctx, "debug", "creating S3 bucket: created")
