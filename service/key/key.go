@@ -31,6 +31,10 @@ func AvailabilityZone(customObject awstpr.CustomObject) string {
 	return customObject.Spec.AWS.AZ
 }
 
+func BucketName(customObject awstpr.CustomObject, accountID string) string {
+	return fmt.Sprintf("%s-g8s-%s", ClusterID(customObject), accountID)
+}
+
 func ClusterCustomer(customObject awstpr.CustomObject) string {
 	return customObject.Spec.Cluster.Customer.ID
 }

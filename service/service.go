@@ -25,12 +25,14 @@ import (
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/aws-operator/service/alerter"
+	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/aws-operator/service/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/healthz"
 	"github.com/giantswarm/aws-operator/service/key"
 	"github.com/giantswarm/aws-operator/service/resource/cloudformationv1"
 	"github.com/giantswarm/aws-operator/service/resource/legacyv1"
 	"github.com/giantswarm/aws-operator/service/resource/namespacev1"
+	"github.com/giantswarm/aws-operator/service/resource/s3bucketv1"
 )
 
 const (
@@ -176,6 +178,19 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	awsClients := awsclient.NewClients(awsConfig)
+	var awsService *awsservice.Service
+	{
+		awsConfig := awsservice.DefaultConfig()
+		awsConfig.Clients.IAM = awsClients.IAM
+		awsConfig.Logger = config.Logger
+
+		awsService, err = awsservice.New(awsConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var ccService *cloudconfig.CloudConfig
 	{
 		ccServiceConfig := cloudconfig.DefaultConfig()
@@ -207,11 +222,23 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var s3BucketResource framework.Resource
+	{
+		s3BucketConfig := s3bucketv1.DefaultConfig()
+		s3BucketConfig.AwsService = awsService
+		s3BucketConfig.Clients.S3 = awsClients.S3
+		s3BucketConfig.Logger = config.Logger
+
+		s3BucketResource, err = s3bucketv1.New(s3BucketConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var cloudformationResource framework.Resource
 	{
 		cloudformationConfig := cloudformationv1.DefaultConfig()
 
-		awsClients := awsclient.NewClients(awsConfig)
 		cloudformationConfig.Clients.EC2 = awsClients.EC2
 		cloudformationConfig.Clients.CloudFormation = awsClients.CloudFormation
 		cloudformationConfig.Clients.IAM = awsClients.IAM
@@ -262,6 +289,7 @@ func New(config Config) (*Service, error) {
 	{
 		resources = []framework.Resource{
 			legacyResource,
+			s3BucketResource,
 			cloudformationResource,
 			namespaceResource,
 		}
