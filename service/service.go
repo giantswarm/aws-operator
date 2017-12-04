@@ -211,8 +211,9 @@ func New(config Config) (*Service, error) {
 	var s3BucketResource framework.Resource
 	{
 		s3BucketConfig := s3bucketv1.DefaultConfig()
+		s3BucketConfig.AwsConfig = awsConfig
+		s3BucketConfig.Clients = awsclient.NewClients(awsConfig)
 		s3BucketConfig.Logger = config.Logger
-		s3BucketConfig.S3Client = awsclients.S3
 
 		s3BucketResource, err = s3bucketv1.New(s3BucketConfig)
 		if err != nil {

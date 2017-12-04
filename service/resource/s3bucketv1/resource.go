@@ -1,11 +1,15 @@
 package s3bucketv1
 
 import (
+	"strings"
+
+	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/service/resource/cloudformationv1/adapter"
 )
 
 const (
@@ -16,7 +20,7 @@ const (
 // Config represents the configuration used to create a new s3bucket resource.
 type Config struct {
 	// Dependencies.
-	Clients *awsutil.Clients
+	Clients Clients
 	Logger  micrologger.Logger
 
 	// Settings.
@@ -28,7 +32,7 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
-		Clients: nil,
+		Clients: Clients{},
 		Logger:  nil,
 
 		// Settings.
@@ -39,7 +43,7 @@ func DefaultConfig() Config {
 // Resource implements the s3bucket resource.
 type Resource struct {
 	// Dependencies.
-	clients *awsutil.Clients
+	clients Clients
 	logger  micrologger.Logger
 
 	// Settings.
@@ -49,9 +53,6 @@ type Resource struct {
 // New creates a new configured s3bucket resource.
 func New(config Config) (*Resource, error) {
 	// Dependencies.
-	if config.Clients == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.Clients must not be empty")
-	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
@@ -60,11 +61,6 @@ func New(config Config) (*Resource, error) {
 	var emptyAwsConfig awsutil.Config
 	if config.AwsConfig == emptyAwsConfig {
 		return nil, microerror.Maskf(invalidConfigError, "config.AwsConfig must not be empty")
-	}
-
-	err := config.AwsConfig.SetAccountID(config.Clients.IAM)
-	if err != nil {
-		return nil, microerror.Mask(err)
 	}
 
 	newResource := &Resource{
@@ -87,4 +83,18 @@ func (r *Resource) Name() string {
 
 func (r *Resource) Underlying() framework.Resource {
 	return r
+}
+
+func (r *Resource) getAccountID() (string, error) {
+	resp, err := r.clients.IAM.GetUser(&iam.GetUserInput{})
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	userArn := *resp.User.Arn
+	accountID := strings.Split(userArn, ":")[accountIDIndex]
+	if err := adapter.ValidateAccountID(accountID); err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	return accountID, nil
 }

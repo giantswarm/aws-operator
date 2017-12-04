@@ -13,8 +13,13 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
+	accountID, err := r.getAccountID()
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	bucketState := BucketState{
-		Name: key.BucketName(customObject, r.awsConfig.AccountID()),
+		Name: key.BucketName(customObject, accountID),
 	}
 
 	return bucketState, nil
