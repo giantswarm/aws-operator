@@ -1,5 +1,5 @@
-hash: b4d46159ed0b949ad661d745ab7a72329e804e5ebb656d3f33197ef55865890c
-updated: 2017-11-30T17:48:05.381223+01:00
+hash: 0e05add1a117b58ead0a42b6355d62469160970f41467166eb20a9a32c3b3c21
+updated: 2017-12-04T09:20:22.392095+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -94,7 +94,7 @@ imports:
   subpackages:
   - pkg/harness
 - name: github.com/giantswarm/k8scloudconfig
-  version: 8d7d22efc8a1786afb296dc9c2d000fd2ac0c8a3
+  version: 622ecaef754778cf54595392efe79ff6996bab59
   subpackages:
   - v_0_1_0
 - name: github.com/giantswarm/microendpoint
@@ -105,7 +105,7 @@ imports:
 - name: github.com/giantswarm/microerror
   version: ec5f66bb657662031c0d651504fee6908cdf28d9
 - name: github.com/giantswarm/microkit
-  version: e6c3aafd2c6b8298599dc465dc1294fbd025d2f1
+  version: cd17f87c1287d47572c3428a5b34f6fc23ff2a8d
   subpackages:
   - command
   - command/daemon
@@ -234,7 +234,7 @@ imports:
 - name: github.com/pelletier/go-toml
   version: 4e9e0ee19b60b13eb79915933f44d8ed5f268bdd
 - name: github.com/prometheus/client_golang
-  version: 1cdba8fdde81f444626530cce66e138d2f68ae1c
+  version: 661e31bf844dfca9aeba15f27ea8aa0d485ad212
   subpackages:
   - prometheus
   - prometheus/promhttp
@@ -263,7 +263,7 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 1be1d2841c773c01bee8289f55f7463b6e2c2539
+  version: 86783686cade7a5ea7f5306d461d91841c7a6b3d
 - name: github.com/spf13/jwalterweatherman
   version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
 - name: github.com/spf13/pflag
