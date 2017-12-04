@@ -725,3 +725,24 @@ func Test_VersionBundleVersion(t *testing.T) {
 		t.Fatalf("Expected version in version bundle to be %s but was %s", expectedVersion, VersionBundleVersion(customObject))
 	}
 }
+
+func Test_BucketObjectName(t *testing.T) {
+	version := "v_0_1_0"
+	suffix := "mysuffix"
+
+	cluster := clustertpr.Spec{
+		Version: version,
+	}
+
+	customObject := awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			Cluster: cluster,
+		},
+	}
+
+	expectedBucketObjectName := "cloudconfig/v_0_1_0/mysuffix"
+	actualBucketObjectName := BucketObjectName(customObject, suffix)
+	if expectedBucketObjectName != actualBucketObjectName {
+		t.Fatalf("Expected bucket object name %q but was %q", expectedBucketObjectName, actualBucketObjectName)
+	}
+}

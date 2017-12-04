@@ -35,6 +35,10 @@ func BucketName(customObject awstpr.CustomObject, accountID string) string {
 	return fmt.Sprintf("%s-g8s-%s", ClusterID(customObject), accountID)
 }
 
+func BucketObjectName(customObject awstpr.CustomObject, prefix string) string {
+	return fmt.Sprintf("cloudconfig/%s/%s", ClusterVersion(customObject), prefix)
+}
+
 func ClusterCustomer(customObject awstpr.CustomObject) string {
 	return customObject.Spec.Cluster.Customer.ID
 }
