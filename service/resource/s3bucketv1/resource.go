@@ -5,7 +5,6 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
 
-	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
 )
 
@@ -20,9 +19,6 @@ type Config struct {
 	AwsService *awsservice.Service
 	Clients    Clients
 	Logger     micrologger.Logger
-
-	// Settings.
-	AwsConfig awsutil.Config
 }
 
 // DefaultConfig provides a default configuration to create a new s3bucket
@@ -33,9 +29,6 @@ func DefaultConfig() Config {
 		AwsService: nil,
 		Clients:    Clients{},
 		Logger:     nil,
-
-		// Settings.
-		AwsConfig: awsutil.Config{},
 	}
 }
 
@@ -45,9 +38,6 @@ type Resource struct {
 	awsService *awsservice.Service
 	clients    Clients
 	logger     micrologger.Logger
-
-	// Settings.
-	awsConfig awsutil.Config
 }
 
 // New creates a new configured s3bucket resource.
@@ -60,12 +50,6 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
 
-	// Settings.
-	var emptyAwsConfig awsutil.Config
-	if config.AwsConfig == emptyAwsConfig {
-		return nil, microerror.Maskf(invalidConfigError, "config.AwsConfig must not be empty")
-	}
-
 	newResource := &Resource{
 		// Dependencies.
 		awsService: config.AwsService,
@@ -73,9 +57,6 @@ func New(config Config) (*Resource, error) {
 		logger: config.Logger.With(
 			"resource", Name,
 		),
-
-		// Settings.
-		awsConfig: config.AwsConfig,
 	}
 
 	return newResource, nil

@@ -30,8 +30,8 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	if IsBucketNotFound(err) {
 		r.logger.LogCtx(ctx, "debug", "did not find the S3 bucket")
 		return BucketState{}, nil
-
-	} else if err != nil {
+	}
+	if err != nil {
 		return BucketState{}, microerror.Mask(err)
 	}
 

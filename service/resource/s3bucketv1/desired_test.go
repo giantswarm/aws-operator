@@ -9,7 +9,6 @@ import (
 	"github.com/giantswarm/clustertpr/spec"
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
 )
 
@@ -51,10 +50,6 @@ func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
 	var newResource *Resource
 	{
 		resourceConfig := DefaultConfig()
-		resourceConfig.AwsConfig = awsutil.Config{
-			AccessKeyID:     "accessKeyID",
-			AccessKeySecret: "accessKeySecret",
-		}
 		resourceConfig.AwsService = awsService
 		resourceConfig.Logger = microloggertest.New()
 		newResource, err = New(resourceConfig)

@@ -225,7 +225,6 @@ func New(config Config) (*Service, error) {
 	var s3BucketResource framework.Resource
 	{
 		s3BucketConfig := s3bucketv1.DefaultConfig()
-		s3BucketConfig.AwsConfig = awsConfig
 		s3BucketConfig.AwsService = awsService
 		s3BucketConfig.Clients.S3 = awsClients.S3
 		s3BucketConfig.Logger = config.Logger
