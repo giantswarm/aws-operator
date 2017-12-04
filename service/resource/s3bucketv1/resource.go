@@ -69,3 +69,16 @@ func (r *Resource) Name() string {
 func (r *Resource) Underlying() framework.Resource {
 	return r
 }
+
+func toBucketState(v interface{}) (BucketState, error) {
+	if v == nil {
+		return BucketState{}, nil
+	}
+
+	bucketState, ok := v.(BucketState)
+	if !ok {
+		return BucketState{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", BucketState{}, v)
+	}
+
+	return bucketState, nil
+}
