@@ -288,10 +288,10 @@ func New(config Config) (*Service, error) {
 	var resources []framework.Resource
 	{
 		resources = []framework.Resource{
+			namespaceResource,
 			legacyResource,
 			s3BucketResource,
 			cloudformationResource,
-			namespaceResource,
 		}
 
 		// Disable retry wrapper due to problems with the legacy resource.
