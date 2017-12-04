@@ -17,8 +17,9 @@ const (
 // Config represents the configuration used to create a new cloudformation resource.
 type Config struct {
 	// Dependencies.
-	Clients Clients
-	Logger  micrologger.Logger
+	AwsService AwsService
+	Clients    Clients
+	Logger     micrologger.Logger
 }
 
 // DefaultConfig provides a default configuration to create a new cloudformation
@@ -26,14 +27,16 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
-		Clients: Clients{},
-		Logger:  nil,
+		AwsService: nil,
+		Clients:    Clients{},
+		Logger:     nil,
 	}
 }
 
 // Resource implements the cloudformation resource.
 type Resource struct {
 	// Dependencies.
+	awsService AwsService
 	awsClients Clients
 	logger     micrologger.Logger
 }
@@ -41,12 +44,16 @@ type Resource struct {
 // New creates a new configured cloudformation resource.
 func New(config Config) (*Resource, error) {
 	// Dependencies.
+	if config.AwsService == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.AwsService must not be empty")
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
 
 	newService := &Resource{
 		// Dependencies.
+		awsService: config.AwsService,
 		awsClients: config.Clients,
 		logger: config.Logger.With(
 			"resource", Name,
@@ -72,14 +79,14 @@ func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desire
 	return &framework.Patch{}, nil
 }
 
-func toBucketObject(v interface{}) (BucketObject, error) {
+func toBucketObjectState(v interface{}) (BucketObjectState, error) {
 	if v == nil {
-		return BucketObject{}, nil
+		return BucketObjectState{}, nil
 	}
 
-	bucketObject, ok := v.(BucketObject)
+	bucketObject, ok := v.(BucketObjectState)
 	if !ok {
-		return BucketObject{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", bucketObject, v)
+		return BucketObjectState{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", bucketObject, v)
 	}
 
 	return bucketObject, nil
