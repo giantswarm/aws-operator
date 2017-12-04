@@ -25,6 +25,7 @@ import (
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/aws-operator/service/alerter"
+	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/aws-operator/service/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/healthz"
 	"github.com/giantswarm/aws-operator/service/key"
@@ -177,6 +178,19 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	awsClients := awsclient.NewClients(awsConfig)
+	var awsService *awsservice.Service
+	{
+		awsConfig := awsservice.DefaultConfig()
+		awsConfig.Clients.IAM = awsClients.IAM
+		awsConfig.Logger = config.Logger
+
+		awsService, err = awsservice.New(awsConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var ccService *cloudconfig.CloudConfig
 	{
 		ccServiceConfig := cloudconfig.DefaultConfig()
@@ -208,12 +222,11 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	awsClients := awsclient.NewClients(awsConfig)
 	var s3BucketResource framework.Resource
 	{
 		s3BucketConfig := s3bucketv1.DefaultConfig()
 		s3BucketConfig.AwsConfig = awsConfig
-		s3BucketConfig.Clients.IAM = awsClients.IAM
+		s3BucketConfig.AwsService = awsService
 		s3BucketConfig.Clients.S3 = awsClients.S3
 		s3BucketConfig.Logger = config.Logger
 

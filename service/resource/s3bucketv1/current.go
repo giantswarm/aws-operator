@@ -17,7 +17,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	r.logger.LogCtx(ctx, "debug", "looking for the S3 bucket")
 
-	accountID, err := r.getAccountID()
+	accountID, err := r.awsService.GetAccountID()
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}

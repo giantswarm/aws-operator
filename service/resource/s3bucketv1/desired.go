@@ -13,7 +13,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	accountID, err := r.getAccountID()
+	accountID, err := r.awsService.GetAccountID()
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
