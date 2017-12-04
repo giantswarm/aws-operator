@@ -208,11 +208,13 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	awsClients := awsclient.NewClients(awsConfig)
 	var s3BucketResource framework.Resource
 	{
 		s3BucketConfig := s3bucketv1.DefaultConfig()
 		s3BucketConfig.AwsConfig = awsConfig
-		s3BucketConfig.Clients = awsclient.NewClients(awsConfig)
+		s3BucketConfig.Clients.IAM = awsClients.IAM
+		s3BucketConfig.Clients.S3 = awsClients.S3
 		s3BucketConfig.Logger = config.Logger
 
 		s3BucketResource, err = s3bucketv1.New(s3BucketConfig)
@@ -225,7 +227,6 @@ func New(config Config) (*Service, error) {
 	{
 		cloudformationConfig := cloudformationv1.DefaultConfig()
 
-		awsClients := awsclient.NewClients(awsConfig)
 		cloudformationConfig.Clients.EC2 = awsClients.EC2
 		cloudformationConfig.Clients.CloudFormation = awsClients.CloudFormation
 		cloudformationConfig.Clients.IAM = awsClients.IAM
@@ -276,6 +277,7 @@ func New(config Config) (*Service, error) {
 	{
 		resources = []framework.Resource{
 			legacyResource,
+			s3BucketResource,
 			cloudformationResource,
 			namespaceResource,
 		}
