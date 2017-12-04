@@ -17,8 +17,12 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	r.logger.LogCtx(ctx, "debug", "looking for the S3 bucket")
 
-	bucketName := key.BucketName(customObject, r.awsConfig.AccountID())
+	accountID, err := r.getAccountID()
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
 
+	bucketName := key.BucketName(customObject, accountID)
 	headInput := &s3.HeadBucketInput{
 		Bucket: aws.String(bucketName),
 	}
