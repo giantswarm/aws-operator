@@ -16,5 +16,6 @@ type Clients struct {
 // S3Client describes the methods required to be implemented by a S3 AWS client.
 type S3Client interface {
 	CreateBucket(*s3.CreateBucketInput) (*s3.CreateBucketOutput, error)
+	DeleteBucket(*s3.DeleteBucketInput) (*s3.DeleteBucketOutput, error)
 	HeadBucket(*s3.HeadBucketInput) (*s3.HeadBucketOutput, error)
 }
