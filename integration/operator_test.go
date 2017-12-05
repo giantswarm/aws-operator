@@ -52,6 +52,7 @@ const (
 	awsResourceValuesFile  = "/tmp/aws-operator-values.yaml"
 	awsResourceChartValues = `commonDomain: ${COMMON_DOMAIN}
 clusterName: ${CLUSTER_NAME}
+clusterVersion: v_0_1_0
 sshPublicKey: ${IDRSA_PUB}
 versionBundleVersion: ${VERSION_BUNDLE_VERSION}
 aws:

@@ -113,6 +113,7 @@ func newCustomObjectFramework(config Config) (*framework.Framework, error) {
 	{
 		awsConfig := awsservice.DefaultConfig()
 		awsConfig.Clients.IAM = awsClients.IAM
+		awsConfig.Clients.KMS = awsClients.KMS
 		awsConfig.Logger = config.Logger
 
 		awsService, err = awsservice.New(awsConfig)
