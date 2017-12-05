@@ -50,7 +50,7 @@ func (a AwsServiceMock) GetAccountID() (string, error) {
 	return a.AccountID, nil
 }
 
-func (a AwsServiceMock) GetKeyArn(cllustterID string) (string, error) {
+func (a AwsServiceMock) GetKeyArn(clusterID string) (string, error) {
 	if a.IsError {
 		return "", fmt.Errorf("error!!")
 	}
