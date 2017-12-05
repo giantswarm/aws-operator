@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/giantswarm/awstpr"
+	"github.com/giantswarm/certificatetpr/certificatetprtest"
 	"github.com/giantswarm/clustertpr"
 	"github.com/giantswarm/clustertpr/spec"
 	"github.com/giantswarm/micrologger/microloggertest"
@@ -56,7 +57,7 @@ func Test_CurrentState(t *testing.T) {
 	var newResource *Resource
 
 	resourceConfig := DefaultConfig()
-	resourceConfig.CertWatcher = &CertWatcherMock{}
+	resourceConfig.CertWatcher = &certificatetprtest.Service{}
 	resourceConfig.CloudConfig = &CloudConfigMock{}
 	resourceConfig.Logger = microloggertest.New()
 	for _, tc := range testCases {

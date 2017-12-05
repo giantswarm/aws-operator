@@ -8,6 +8,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/awstpr"
+	"github.com/giantswarm/certificatetpr/certificatetprtest"
 	"github.com/giantswarm/clustertpr"
 	"github.com/giantswarm/clustertpr/spec"
 	"github.com/giantswarm/micrologger/microloggertest"
@@ -90,7 +91,7 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 		S3: &S3ClientMock{},
 	}
 	resourceConfig.AwsService = awsservice.AwsServiceMock{}
-	resourceConfig.CertWatcher = &CertWatcherMock{}
+	resourceConfig.CertWatcher = &certificatetprtest.Service{}
 	resourceConfig.CloudConfig = &CloudConfigMock{}
 	resourceConfig.Logger = microloggertest.New()
 	newResource, err = New(resourceConfig)

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/giantswarm/awstpr"
-	"github.com/giantswarm/certificatetpr"
+	"github.com/giantswarm/certificatetpr/certificatetprtest"
 	"github.com/giantswarm/clustertpr"
 	"github.com/giantswarm/clustertpr/spec"
 	"github.com/giantswarm/micrologger/microloggertest"
@@ -52,12 +52,9 @@ func Test_DesiredState(t *testing.T) {
 	resourceConfig.Clients = Clients{
 		KMS: &KMSClientMock{},
 	}
-	defaultAssetsBundle := make(map[certificatetpr.AssetsBundleKey][]byte)
+	resourceConfig.CertWatcher = &certificatetprtest.Service{}
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			resourceConfig.CertWatcher = &CertWatcherMock{
-				certs: defaultAssetsBundle,
-			}
 			resourceConfig.CloudConfig = &CloudConfigMock{
 				template: tc.expectedBody,
 			}

@@ -44,14 +44,6 @@ func (s *S3ClientMock) GetObject(*s3.GetObjectInput) (*s3.GetObjectOutput, error
 	return output, nil
 }
 
-type CertWatcherMock struct {
-	certs certificatetpr.AssetsBundle
-}
-
-func (c *CertWatcherMock) SearchCerts(string) (certificatetpr.AssetsBundle, error) {
-	return c.certs, nil
-}
-
 type CloudConfigMock struct {
 	template string
 }
