@@ -53,6 +53,25 @@ func Test_AvailabilityZone(t *testing.T) {
 	}
 }
 
+func Test_BucketName(t *testing.T) {
+	accountID := "1234567890"
+	expectedName := "1234567890-g8s-test-cluster"
+
+	customObject := awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			Cluster: clustertpr.Spec{
+				Cluster: spec.Cluster{
+					ID: "test-cluster",
+				},
+			},
+		},
+	}
+
+	if BucketName(customObject, accountID) != expectedName {
+		t.Fatalf("Expected bucket name %s but was %s", expectedName, BucketName(customObject, accountID))
+	}
+}
+
 func Test_ClusterID(t *testing.T) {
 	expectedID := "test-cluster"
 
@@ -704,5 +723,26 @@ func Test_VersionBundleVersion(t *testing.T) {
 
 	if VersionBundleVersion(customObject) != expectedVersion {
 		t.Fatalf("Expected version in version bundle to be %s but was %s", expectedVersion, VersionBundleVersion(customObject))
+	}
+}
+
+func Test_BucketObjectName(t *testing.T) {
+	version := "v_0_1_0"
+	suffix := "mysuffix"
+
+	cluster := clustertpr.Spec{
+		Version: version,
+	}
+
+	customObject := awstpr.CustomObject{
+		Spec: awstpr.Spec{
+			Cluster: cluster,
+		},
+	}
+
+	expectedBucketObjectName := "cloudconfig/v_0_1_0/mysuffix"
+	actualBucketObjectName := BucketObjectName(customObject, suffix)
+	if expectedBucketObjectName != actualBucketObjectName {
+		t.Fatalf("Expected bucket object name %q but was %q", expectedBucketObjectName, actualBucketObjectName)
 	}
 }
