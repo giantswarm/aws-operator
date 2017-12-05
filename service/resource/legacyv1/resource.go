@@ -522,12 +522,6 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get security group '%s' ID: '%#v'", ingressSGInput.GroupName, err))
 	}
 
-	// In rare cases the host cluster CIDR block can be nil. Return error rather
-	// than panic. TODO Fix issue #451 that tracks this.
-	if conn.AccepterVpcInfo.CidrBlock == nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("vpc peering connection cidr block is nil for cluster '%s'", key.ClusterID(cluster)))
-	}
-
 	// Create rules for the security groups.
 	rulesInput := rulesInput{
 		Cluster:                cluster,
