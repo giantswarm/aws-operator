@@ -24,6 +24,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/resource/legacyv1"
 	"github.com/giantswarm/aws-operator/service/resource/namespacev1"
 	"github.com/giantswarm/aws-operator/service/resource/s3bucketv1"
+	"github.com/giantswarm/aws-operator/service/resource/s3objectv1"
 )
 
 const (
@@ -165,6 +166,22 @@ func newCustomObjectFramework(config Config) (*framework.Framework, error) {
 		}
 	}
 
+	var s3BucketObjectResource framework.Resource
+	{
+		s3BucketObjectConfig := s3objectv1.DefaultConfig()
+		s3BucketObjectConfig.AwsService = awsService
+		s3BucketObjectConfig.Clients.S3 = awsClients.S3
+		s3BucketObjectConfig.Clients.KMS = awsClients.KMS
+		s3BucketObjectConfig.CloudConfig = ccService
+		s3BucketObjectConfig.CertWatcher = certWatcher
+		s3BucketObjectConfig.Logger = config.Logger
+
+		s3BucketObjectResource, err = s3objectv1.New(s3BucketObjectConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var cloudformationResource framework.Resource
 	{
 		cloudformationConfig := cloudformationv1.DefaultConfig()
@@ -221,6 +238,7 @@ func newCustomObjectFramework(config Config) (*framework.Framework, error) {
 			namespaceResource,
 			legacyResource,
 			s3BucketResource,
+			s3BucketObjectResource,
 			cloudformationResource,
 		}
 
