@@ -85,6 +85,7 @@ func newCustomObjectFramework(config Config) (*framework.Framework, error) {
 			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
 			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
 			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
+			Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
 		}
 	}
 
