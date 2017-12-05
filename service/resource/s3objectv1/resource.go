@@ -17,9 +17,11 @@ const (
 // Config represents the configuration used to create a new cloudformation resource.
 type Config struct {
 	// Dependencies.
-	AwsService AwsService
-	Clients    Clients
-	Logger     micrologger.Logger
+	AwsService  AwsService
+	CertWatcher CertWatcher
+	Clients     Clients
+	CloudConfig CloudConfigService
+	Logger      micrologger.Logger
 }
 
 // DefaultConfig provides a default configuration to create a new cloudformation
@@ -27,18 +29,22 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
-		AwsService: nil,
-		Clients:    Clients{},
-		Logger:     nil,
+		AwsService:  nil,
+		CertWatcher: nil,
+		Clients:     Clients{},
+		CloudConfig: nil,
+		Logger:      nil,
 	}
 }
 
 // Resource implements the cloudformation resource.
 type Resource struct {
 	// Dependencies.
-	awsService AwsService
-	awsClients Clients
-	logger     micrologger.Logger
+	awsService  AwsService
+	awsClients  Clients
+	certWatcher CertWatcher
+	cloudConfig CloudConfigService
+	logger      micrologger.Logger
 }
 
 // New creates a new configured cloudformation resource.
@@ -50,11 +56,19 @@ func New(config Config) (*Resource, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
+	if config.CloudConfig == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.CloudConfig must not be empty")
+	}
+	if config.CertWatcher == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.CertWatcher must not be empty")
+	}
 
 	newService := &Resource{
 		// Dependencies.
-		awsService: config.AwsService,
-		awsClients: config.Clients,
+		awsService:  config.AwsService,
+		awsClients:  config.Clients,
+		certWatcher: config.CertWatcher,
+		cloudConfig: config.CloudConfig,
 		logger: config.Logger.With(
 			"resource", Name,
 		),
