@@ -35,7 +35,7 @@ func Test_CurrentState(t *testing.T) {
 			description:    "basic match",
 			obj:            clusterTpo,
 			expectedKey:    "cloudconfig/myversion/worker",
-			expectedBucket: "test-cluster-g8s-myaccountid",
+			expectedBucket: "myaccountid-g8s-test-cluster",
 			expectedBody:   "mybody",
 		},
 		{

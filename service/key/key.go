@@ -32,7 +32,7 @@ func AvailabilityZone(customObject awstpr.CustomObject) string {
 }
 
 func BucketName(customObject awstpr.CustomObject, accountID string) string {
-	return fmt.Sprintf("%s-g8s-%s", ClusterID(customObject), accountID)
+	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(customObject))
 }
 
 func BucketObjectName(customObject awstpr.CustomObject, prefix string) string {
