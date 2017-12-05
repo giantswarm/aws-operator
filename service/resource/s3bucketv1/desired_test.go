@@ -29,7 +29,7 @@ func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
 					},
 				},
 			},
-			expectedName: "5xchu-g8s-000000000000",
+			expectedName: "000000000000-g8s-5xchu",
 		},
 	}
 
