@@ -41,6 +41,7 @@ type Clients struct {
 const (
 	accountIDPosition = 4
 	accountIDLength   = 12
+	defaultRegion     = "eu-central-1"
 )
 
 func NewClients(config Config) Clients {
@@ -57,7 +58,7 @@ func NewClients(config Config) Clients {
 		IAM:            iam.New(s),
 		KMS:            kms.New(s),
 		Route53:        route53.New(s),
-		S3:             s3.New(s),
+		S3:             s3.New(s, aws.NewConfig().WithRegion(defaultRegion)),
 	}
 
 	return clients
