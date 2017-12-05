@@ -55,7 +55,7 @@ func Test_AvailabilityZone(t *testing.T) {
 
 func Test_BucketName(t *testing.T) {
 	accountID := "1234567890"
-	expectedName := "test-cluster-g8s-1234567890"
+	expectedName := "1234567890-g8s-test-cluster"
 
 	customObject := awstpr.CustomObject{
 		Spec: awstpr.Spec{

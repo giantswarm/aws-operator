@@ -1,10 +1,13 @@
 package aws
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 )
@@ -78,4 +81,21 @@ func ValidateAccountID(accountID string) error {
 	}
 
 	return nil
+}
+
+// GetKeyArn returns the key ARN associated with the given cluster ID.
+func (s *Service) GetKeyArn(clusterID string) (string, error) {
+	keyAlias := fmt.Sprintf("alias/%s", clusterID)
+	input := &kms.DescribeKeyInput{
+		KeyId: aws.String(keyAlias),
+	}
+
+	output, err := s.clients.KMS.DescribeKey(input)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	keyArn := *output.KeyMetadata.Arn
+
+	return keyArn, nil
 }

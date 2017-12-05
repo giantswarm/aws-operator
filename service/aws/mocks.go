@@ -1,6 +1,8 @@
 package aws
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
 )
@@ -32,4 +34,26 @@ func (i *IAMClientMock) GetUser(input *iam.GetUserInput) (*iam.GetUserOutput, er
 	}
 
 	return output, nil
+}
+
+type AwsServiceMock struct {
+	AccountID string
+	KeyArn    string
+	IsError   bool
+}
+
+func (a AwsServiceMock) GetAccountID() (string, error) {
+	if a.IsError {
+		return "", fmt.Errorf("error!!")
+	}
+
+	return a.AccountID, nil
+}
+
+func (a AwsServiceMock) GetKeyArn(clusterID string) (string, error) {
+	if a.IsError {
+		return "", fmt.Errorf("error!!")
+	}
+
+	return a.KeyArn, nil
 }
