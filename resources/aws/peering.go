@@ -16,7 +16,8 @@ const (
 	RequesterVpcFilterName = "requester-vpc-info.vpc-id"
 	AccepterVpcFilterName  = "accepter-vpc-info.vpc-id"
 
-	accountIDPosition = 4
+	accountIDPosition                  = 4
+	peeringConnectionCidrBlockNotFound = "PeeringConnection CIDR block"
 )
 
 type VPCPeeringConnection struct {
@@ -160,5 +161,33 @@ func (v *VPCPeeringConnection) GetID() (string, error) {
 }
 
 func (v VPCPeeringConnection) FindExisting() (*ec2.VpcPeeringConnection, error) {
-	return v.findExisting()
+	var peeringConnection *ec2.VpcPeeringConnection
+
+	findOperation := func() error {
+		conn, err := v.findExisting()
+		if err != nil {
+			return err
+		}
+		// Peering connection is eventually consistent so retry if the CIDR
+		// blocks are not yet set.
+		if conn.AccepterVpcInfo.CidrBlock == nil {
+			return microerror.Maskf(notFoundError, notFoundErrorFormat, peeringConnectionCidrBlockNotFound, v.PeerVPCId)
+		}
+		if conn.RequesterVpcInfo.CidrBlock == nil {
+			return microerror.Maskf(notFoundError, notFoundErrorFormat, peeringConnectionCidrBlockNotFound, v.VPCId)
+		}
+
+		// Set peering connection since data is present.
+		peeringConnection = conn
+
+		return nil
+	}
+
+	findNotify := NewNotify(v.Logger, "finding vpc peering connection")
+	if err := backoff.RetryNotify(findOperation, NewCustomExponentialBackoff(), findNotify); err != nil {
+		return nil, microerror.Mask(err)
+
+	}
+
+	return peeringConnection, nil
 }
