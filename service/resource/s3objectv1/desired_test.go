@@ -36,7 +36,7 @@ func Test_DesiredState(t *testing.T) {
 			description:    "basic match",
 			obj:            clusterTpo,
 			expectedKey:    "cloudconfig/myversion/worker",
-			expectedBucket: "test-cluster-g8s-myaccountid",
+			expectedBucket: "myaccountid-g8s-test-cluster",
 			expectedBody:   "mybody-",
 		},
 	}
@@ -77,15 +77,15 @@ func Test_DesiredState(t *testing.T) {
 			}
 
 			if desiredState.WorkerCloudConfig.Key != tc.expectedKey {
-				t.Errorf("expeccted key %q, got %q", tc.expectedKey, desiredState.WorkerCloudConfig.Key)
+				t.Errorf("expected key %q, got %q", tc.expectedKey, desiredState.WorkerCloudConfig.Key)
 			}
 
 			if desiredState.WorkerCloudConfig.Bucket != tc.expectedBucket {
-				t.Errorf("expeccted key %q, got %q", tc.expectedBucket, desiredState.WorkerCloudConfig.Bucket)
+				t.Errorf("expected key %q, got %q", tc.expectedBucket, desiredState.WorkerCloudConfig.Bucket)
 			}
 
 			if desiredState.WorkerCloudConfig.Body != tc.expectedBody {
-				t.Errorf("expeccted key %q, got %q", tc.expectedBody, desiredState.WorkerCloudConfig.Body)
+				t.Errorf("expected key %q, got %q", tc.expectedBody, desiredState.WorkerCloudConfig.Body)
 			}
 		})
 	}
