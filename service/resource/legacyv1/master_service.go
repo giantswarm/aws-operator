@@ -44,12 +44,6 @@ func (s *Resource) createMasterService(input MasterServiceInput) error {
 
 	masterInstance := instances[0]
 
-	namespace := v1.Namespace{
-		ObjectMeta: apismetav1.ObjectMeta{
-			Name: key.ClusterID(input.Cluster),
-		},
-	}
-
 	service := v1.Service{
 		ObjectMeta: apismetav1.ObjectMeta{
 			Name:      "master",
@@ -98,10 +92,6 @@ func (s *Resource) createMasterService(input MasterServiceInput) error {
 				},
 			},
 		},
-	}
-
-	if _, err := s.k8sClient.Core().Namespaces().Create(&namespace); err != nil && !apierrors.IsAlreadyExists(err) {
-		return microerror.Mask(err)
 	}
 
 	if _, err := s.k8sClient.Core().Services(service.ObjectMeta.Namespace).Create(&service); err != nil && !apierrors.IsAlreadyExists(err) {
