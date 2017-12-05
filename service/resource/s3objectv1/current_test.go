@@ -8,6 +8,8 @@ import (
 	"github.com/giantswarm/clustertpr"
 	"github.com/giantswarm/clustertpr/spec"
 	"github.com/giantswarm/micrologger/microloggertest"
+
+	awsservice "github.com/giantswarm/aws-operator/service/aws"
 )
 
 func Test_CurrentState(t *testing.T) {
@@ -54,12 +56,14 @@ func Test_CurrentState(t *testing.T) {
 	var newResource *Resource
 
 	resourceConfig := DefaultConfig()
+	resourceConfig.CertWatcher = &CertWatcherMock{}
+	resourceConfig.CloudConfig = &CloudConfigMock{}
 	resourceConfig.Logger = microloggertest.New()
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			resourceConfig.AwsService = AwsServiceMock{
-				accountID: "myaccountid",
-				isError:   tc.expectedIAMError,
+			resourceConfig.AwsService = awsservice.AwsServiceMock{
+				AccountID: "myaccountid",
+				IsError:   tc.expectedIAMError,
 			}
 			resourceConfig.Clients = Clients{
 				S3: &S3ClientMock{

@@ -11,6 +11,8 @@ import (
 	"github.com/giantswarm/clustertpr"
 	"github.com/giantswarm/clustertpr/spec"
 	"github.com/giantswarm/micrologger/microloggertest"
+
+	awsservice "github.com/giantswarm/aws-operator/service/aws"
 )
 
 func Test_Resource_S3Object_newCreate(t *testing.T) {
@@ -87,11 +89,13 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 	resourceConfig.Clients = Clients{
 		S3: &S3ClientMock{},
 	}
-	resourceConfig.AwsService = AwsServiceMock{}
+	resourceConfig.AwsService = awsservice.AwsServiceMock{}
+	resourceConfig.CertWatcher = &CertWatcherMock{}
+	resourceConfig.CloudConfig = &CloudConfigMock{}
 	resourceConfig.Logger = microloggertest.New()
 	newResource, err = New(resourceConfig)
 	if err != nil {
-		t.Error("expected", nil, "got", err)
+		t.Fatal("expected", nil, "got", err)
 	}
 
 	for _, tc := range testCases {

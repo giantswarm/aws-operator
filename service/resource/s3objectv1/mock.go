@@ -5,7 +5,10 @@ import (
 	"io"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/giantswarm/awstpr"
+	"github.com/giantswarm/certificatetpr"
 )
 
 // nopCloser is required to implement the ReadCloser interface required by
@@ -41,15 +44,24 @@ func (s *S3ClientMock) GetObject(*s3.GetObjectInput) (*s3.GetObjectOutput, error
 	return output, nil
 }
 
-type AwsServiceMock struct {
-	accountID string
-	isError   bool
+type CertWatcherMock struct {
+	certs certificatetpr.AssetsBundle
 }
 
-func (a AwsServiceMock) GetAccountID() (string, error) {
-	if a.isError {
-		return "", fmt.Errorf("error!!")
-	}
+func (c *CertWatcherMock) SearchCerts(string) (certificatetpr.AssetsBundle, error) {
+	return c.certs, nil
+}
 
-	return a.accountID, nil
+type CloudConfigMock struct {
+	template string
+}
+
+func (c *CloudConfigMock) NewWorkerTemplate(customObject awstpr.CustomObject, certs certificatetpr.CompactTLSAssets) (string, error) {
+	return c.template, nil
+}
+
+type KMSClientMock struct{}
+
+func (k *KMSClientMock) Encrypt(input *kms.EncryptInput) (*kms.EncryptOutput, error) {
+	return &kms.EncryptOutput{}, nil
 }
