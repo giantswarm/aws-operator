@@ -44,7 +44,7 @@ func New(config Config) (Command, error) {
 		return nil, microerror.Maskf(invalidConfigError, "name must not be empty")
 	}
 	if config.Source == "" {
-		return nil, microerror.Maskf(invalidConfigError, "name must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "source must not be empty")
 	}
 
 	newCommand := &command{
