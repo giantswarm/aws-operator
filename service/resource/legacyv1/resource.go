@@ -1374,7 +1374,7 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 		s.logger.Log("info", fmt.Sprintf("deleted %s roles, policies, instance profiles", prefixWorker))
 	}
 
-	// Delete KMS keyv1.
+	// Delete KMS key.
 	var kmsKey resources.ArnResource
 	kmsKey = &awsresources.KMSKey{
 		Name:      keyv1.ClusterID(cluster),
