@@ -1,14 +1,14 @@
 hash: 328307962a26c7765a5476b79cb653ebf5b8a521ab17cbfaaa34ff3cc736bafe
-updated: 2017-12-01T19:11:33.086796+01:00
+updated: 2017-12-06T16:58:39.832336+01:00
 imports:
 - name: github.com/emicklei/go-restful
   version: ff4f55a206334ef123e4f79bbf348980da81ca46
   subpackages:
   - log
 - name: github.com/giantswarm/apiextensions
-  version: ff77d3fd222f34b512255ee7c2c67c55569bcae6
+  version: 11fc47c2373c9ca55b706261e59b0c897d9e3999
   subpackages:
-  - pkg/apis/cluster/v1alpha1
+  - pkg/apis/provider/v1alpha1
 - name: github.com/giantswarm/clustertpr
   version: 6b89a787f157c5531d1c955c32b3c621f0d64c3a
   subpackages:

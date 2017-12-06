@@ -17,38 +17,38 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
+	v1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/scheme"
 	serializer "k8s.io/apimachinery/pkg/runtime/serializer"
 	rest "k8s.io/client-go/rest"
 )
 
-type ClusterV1alpha1Interface interface {
+type ProviderV1alpha1Interface interface {
 	RESTClient() rest.Interface
 	AWSConfigsGetter
 	AzureConfigsGetter
 	KVMConfigsGetter
 }
 
-// ClusterV1alpha1Client is used to interact with features provided by the cluster.giantswarm.io group.
-type ClusterV1alpha1Client struct {
+// ProviderV1alpha1Client is used to interact with features provided by the provider.giantswarm.io group.
+type ProviderV1alpha1Client struct {
 	restClient rest.Interface
 }
 
-func (c *ClusterV1alpha1Client) AWSConfigs(namespace string) AWSConfigInterface {
+func (c *ProviderV1alpha1Client) AWSConfigs(namespace string) AWSConfigInterface {
 	return newAWSConfigs(c, namespace)
 }
 
-func (c *ClusterV1alpha1Client) AzureConfigs(namespace string) AzureConfigInterface {
+func (c *ProviderV1alpha1Client) AzureConfigs(namespace string) AzureConfigInterface {
 	return newAzureConfigs(c, namespace)
 }
 
-func (c *ClusterV1alpha1Client) KVMConfigs(namespace string) KVMConfigInterface {
+func (c *ProviderV1alpha1Client) KVMConfigs(namespace string) KVMConfigInterface {
 	return newKVMConfigs(c, namespace)
 }
 
-// NewForConfig creates a new ClusterV1alpha1Client for the given config.
-func NewForConfig(c *rest.Config) (*ClusterV1alpha1Client, error) {
+// NewForConfig creates a new ProviderV1alpha1Client for the given config.
+func NewForConfig(c *rest.Config) (*ProviderV1alpha1Client, error) {
 	config := *c
 	if err := setConfigDefaults(&config); err != nil {
 		return nil, err
@@ -57,12 +57,12 @@ func NewForConfig(c *rest.Config) (*ClusterV1alpha1Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &ClusterV1alpha1Client{client}, nil
+	return &ProviderV1alpha1Client{client}, nil
 }
 
-// NewForConfigOrDie creates a new ClusterV1alpha1Client for the given config and
+// NewForConfigOrDie creates a new ProviderV1alpha1Client for the given config and
 // panics if there is an error in the config.
-func NewForConfigOrDie(c *rest.Config) *ClusterV1alpha1Client {
+func NewForConfigOrDie(c *rest.Config) *ProviderV1alpha1Client {
 	client, err := NewForConfig(c)
 	if err != nil {
 		panic(err)
@@ -70,9 +70,9 @@ func NewForConfigOrDie(c *rest.Config) *ClusterV1alpha1Client {
 	return client
 }
 
-// New creates a new ClusterV1alpha1Client for the given RESTClient.
-func New(c rest.Interface) *ClusterV1alpha1Client {
-	return &ClusterV1alpha1Client{c}
+// New creates a new ProviderV1alpha1Client for the given RESTClient.
+func New(c rest.Interface) *ProviderV1alpha1Client {
+	return &ProviderV1alpha1Client{c}
 }
 
 func setConfigDefaults(config *rest.Config) error {
@@ -90,7 +90,7 @@ func setConfigDefaults(config *rest.Config) error {
 
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
-func (c *ClusterV1alpha1Client) RESTClient() rest.Interface {
+func (c *ProviderV1alpha1Client) RESTClient() rest.Interface {
 	if c == nil {
 		return nil
 	}

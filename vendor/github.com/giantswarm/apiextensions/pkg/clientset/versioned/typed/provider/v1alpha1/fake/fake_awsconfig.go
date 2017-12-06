@@ -17,7 +17,7 @@ limitations under the License.
 package fake
 
 import (
-	v1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
+	v1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -28,13 +28,13 @@ import (
 
 // FakeAWSConfigs implements AWSConfigInterface
 type FakeAWSConfigs struct {
-	Fake *FakeClusterV1alpha1
+	Fake *FakeProviderV1alpha1
 	ns   string
 }
 
-var awsconfigsResource = schema.GroupVersionResource{Group: "cluster.giantswarm.io", Version: "v1alpha1", Resource: "awsconfigs"}
+var awsconfigsResource = schema.GroupVersionResource{Group: "provider.giantswarm.io", Version: "v1alpha1", Resource: "awsconfigs"}
 
-var awsconfigsKind = schema.GroupVersionKind{Group: "cluster.giantswarm.io", Version: "v1alpha1", Kind: "AWSConfig"}
+var awsconfigsKind = schema.GroupVersionKind{Group: "provider.giantswarm.io", Version: "v1alpha1", Kind: "AWSConfig"}
 
 // Get takes name of the aWSConfig, and returns the corresponding aWSConfig object, and an error if there is any.
 func (c *FakeAWSConfigs) Get(name string, options v1.GetOptions) (result *v1alpha1.AWSConfig, err error) {

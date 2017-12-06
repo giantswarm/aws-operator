@@ -17,7 +17,7 @@ limitations under the License.
 package fake
 
 import (
-	v1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
+	v1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -28,13 +28,13 @@ import (
 
 // FakeAzureConfigs implements AzureConfigInterface
 type FakeAzureConfigs struct {
-	Fake *FakeClusterV1alpha1
+	Fake *FakeProviderV1alpha1
 	ns   string
 }
 
-var azureconfigsResource = schema.GroupVersionResource{Group: "cluster.giantswarm.io", Version: "v1alpha1", Resource: "azureconfigs"}
+var azureconfigsResource = schema.GroupVersionResource{Group: "provider.giantswarm.io", Version: "v1alpha1", Resource: "azureconfigs"}
 
-var azureconfigsKind = schema.GroupVersionKind{Group: "cluster.giantswarm.io", Version: "v1alpha1", Kind: "AzureConfig"}
+var azureconfigsKind = schema.GroupVersionKind{Group: "provider.giantswarm.io", Version: "v1alpha1", Kind: "AzureConfig"}
 
 // Get takes name of the azureConfig, and returns the corresponding azureConfig object, and an error if there is any.
 func (c *FakeAzureConfigs) Get(name string, options v1.GetOptions) (result *v1alpha1.AzureConfig, err error) {
