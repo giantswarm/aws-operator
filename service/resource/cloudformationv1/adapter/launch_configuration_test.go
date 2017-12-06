@@ -51,7 +51,7 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 			expectedImageID:                  "myimageid",
 			expectedInstanceType:             "myinstancetype",
 			expectedIAMInstanceProfileName:   "test-cluster-worker-EC2-K8S-Role",
-			expectedAssociatePublicIPAddress: true,
+			expectedAssociatePublicIPAddress: false,
 			expectedBlockDeviceMappings: []BlockDeviceMapping{
 				BlockDeviceMapping{
 					DeleteOnTermination: true,
