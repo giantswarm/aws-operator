@@ -1013,8 +1013,20 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 		s.logger.Log("info", "deleted masters")
 	}
 
-	// During Cloud Formation migration this logic is only needed for non CF clusters.
-	if !key.UseCloudFormation(cluster) {
+	if key.UseCloudFormation(cluster) {
+		// During Cloud Formation migration we need to delete the main stack
+		// so all resoures including the VPC are deleted.
+		stack := awsresources.ASGStack{
+			Client: clients.CloudFormation,
+			Name:   key.MainStackName(cluster),
+		}
+
+		if err := stack.Delete(); err != nil {
+			s.logger.Log("error", fmt.Sprintf("%#v", err))
+		} else {
+			s.logger.Log("info", fmt.Sprintf("deleted cloud formation stack: '%s'", stack.Name))
+		}
+	} else {
 		// Delete workers Auto Scaling Group.
 		asg := awsresources.AutoScalingGroup{
 			Client: clients.AutoScaling,
