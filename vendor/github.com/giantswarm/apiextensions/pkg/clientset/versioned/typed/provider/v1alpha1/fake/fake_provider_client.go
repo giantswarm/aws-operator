@@ -17,30 +17,30 @@ limitations under the License.
 package fake
 
 import (
-	v1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/cluster/v1alpha1"
+	v1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/provider/v1alpha1"
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
 )
 
-type FakeClusterV1alpha1 struct {
+type FakeProviderV1alpha1 struct {
 	*testing.Fake
 }
 
-func (c *FakeClusterV1alpha1) AWSConfigs(namespace string) v1alpha1.AWSConfigInterface {
+func (c *FakeProviderV1alpha1) AWSConfigs(namespace string) v1alpha1.AWSConfigInterface {
 	return &FakeAWSConfigs{c, namespace}
 }
 
-func (c *FakeClusterV1alpha1) AzureConfigs(namespace string) v1alpha1.AzureConfigInterface {
+func (c *FakeProviderV1alpha1) AzureConfigs(namespace string) v1alpha1.AzureConfigInterface {
 	return &FakeAzureConfigs{c, namespace}
 }
 
-func (c *FakeClusterV1alpha1) KVMConfigs(namespace string) v1alpha1.KVMConfigInterface {
+func (c *FakeProviderV1alpha1) KVMConfigs(namespace string) v1alpha1.KVMConfigInterface {
 	return &FakeKVMConfigs{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
-func (c *FakeClusterV1alpha1) RESTClient() rest.Interface {
+func (c *FakeProviderV1alpha1) RESTClient() rest.Interface {
 	var ret *rest.RESTClient
 	return ret
 }

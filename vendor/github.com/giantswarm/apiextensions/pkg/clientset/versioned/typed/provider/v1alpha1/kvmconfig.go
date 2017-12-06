@@ -17,7 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
+	v1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	scheme "github.com/giantswarm/apiextensions/pkg/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
@@ -51,7 +51,7 @@ type kVMConfigs struct {
 }
 
 // newKVMConfigs returns a KVMConfigs
-func newKVMConfigs(c *ClusterV1alpha1Client, namespace string) *kVMConfigs {
+func newKVMConfigs(c *ProviderV1alpha1Client, namespace string) *kVMConfigs {
 	return &kVMConfigs{
 		client: c.RESTClient(),
 		ns:     namespace,

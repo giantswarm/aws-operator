@@ -18,10 +18,10 @@ package fake
 
 import (
 	clientset "github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	clusterv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/cluster/v1alpha1"
-	fakeclusterv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/cluster/v1alpha1/fake"
 	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/core/v1alpha1"
 	fakecorev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/core/v1alpha1/fake"
+	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/provider/v1alpha1"
+	fakeproviderv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/provider/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
@@ -62,16 +62,6 @@ func (c *Clientset) Discovery() discovery.DiscoveryInterface {
 
 var _ clientset.Interface = &Clientset{}
 
-// ClusterV1alpha1 retrieves the ClusterV1alpha1Client
-func (c *Clientset) ClusterV1alpha1() clusterv1alpha1.ClusterV1alpha1Interface {
-	return &fakeclusterv1alpha1.FakeClusterV1alpha1{Fake: &c.Fake}
-}
-
-// Cluster retrieves the ClusterV1alpha1Client
-func (c *Clientset) Cluster() clusterv1alpha1.ClusterV1alpha1Interface {
-	return &fakeclusterv1alpha1.FakeClusterV1alpha1{Fake: &c.Fake}
-}
-
 // CoreV1alpha1 retrieves the CoreV1alpha1Client
 func (c *Clientset) CoreV1alpha1() corev1alpha1.CoreV1alpha1Interface {
 	return &fakecorev1alpha1.FakeCoreV1alpha1{Fake: &c.Fake}
@@ -80,4 +70,14 @@ func (c *Clientset) CoreV1alpha1() corev1alpha1.CoreV1alpha1Interface {
 // Core retrieves the CoreV1alpha1Client
 func (c *Clientset) Core() corev1alpha1.CoreV1alpha1Interface {
 	return &fakecorev1alpha1.FakeCoreV1alpha1{Fake: &c.Fake}
+}
+
+// ProviderV1alpha1 retrieves the ProviderV1alpha1Client
+func (c *Clientset) ProviderV1alpha1() providerv1alpha1.ProviderV1alpha1Interface {
+	return &fakeproviderv1alpha1.FakeProviderV1alpha1{Fake: &c.Fake}
+}
+
+// Provider retrieves the ProviderV1alpha1Client
+func (c *Clientset) Provider() providerv1alpha1.ProviderV1alpha1Interface {
+	return &fakeproviderv1alpha1.FakeProviderV1alpha1{Fake: &c.Fake}
 }

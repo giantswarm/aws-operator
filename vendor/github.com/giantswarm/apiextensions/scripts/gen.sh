@@ -18,6 +18,6 @@ cd ${dir}/../vendor/k8s.io/code-generator && ./generate-groups.sh \
     client \
     github.com/giantswarm/apiextensions/pkg \
     github.com/giantswarm/apiextensions/pkg/apis \
-    "cluster:v1alpha1 core:v1alpha1"
+    "core:v1alpha1 provider:v1alpha1"
 
 sed -i '' -e 's,"/api","/apis",g' $(find ${dir}/../pkg/* -name "*_client.go")

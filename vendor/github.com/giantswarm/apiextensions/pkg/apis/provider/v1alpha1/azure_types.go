@@ -11,9 +11,9 @@ import (
 //     apiVersion: apiextensions.k8s.io/v1beta1
 //     kind: CustomResourceDefinition
 //     metadata:
-//       name: azureconfigs.cluster.giantswarm.io
+//       name: azureconfigs.provider.giantswarm.io
 //     spec:
-//       group: cluster.giantswarm.io
+//       group: provider.giantswarm.io
 //       scope: Namespaced
 //       version: v1alpha1
 //       names:
@@ -28,10 +28,10 @@ func NewAzureConfigCRD() *apiextensionsv1beta1.CustomResourceDefinition {
 			Kind:       "CustomResourceDefinition",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "azureconfigs.cluster.giantswarm.io",
+			Name: "azureconfigs.provider.giantswarm.io",
 		},
 		Spec: apiextensionsv1beta1.CustomResourceDefinitionSpec{
-			Group:   "cluster.giantswarm.io",
+			Group:   "provider.giantswarm.io",
 			Scope:   "Namespaced",
 			Version: "v1alpha1",
 			Names: apiextensionsv1beta1.CustomResourceDefinitionNames{
