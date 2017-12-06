@@ -1,14 +1,10 @@
-package keyv1
+package keyv2
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/giantswarm/awstpr"
-	awsspec "github.com/giantswarm/awstpr/spec"
-	"github.com/giantswarm/awstpr/spec/aws"
-	"github.com/giantswarm/clustertpr"
-	"github.com/giantswarm/clustertpr/spec"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/stretchr/testify/assert"
 )
@@ -17,18 +13,14 @@ func Test_AutoScalingGroupName(t *testing.T) {
 	expectedName := "test-cluster-worker"
 	groupName := "worker"
 
-	cluster := clustertpr.Spec{
-		Cluster: spec.Cluster{
-			ID: "test-cluster",
-		},
-		Customer: spec.Customer{
-			ID: "test-customer",
-		},
-	}
-
-	customObject := awstpr.CustomObject{
-		Spec: awstpr.Spec{
-			Cluster: cluster,
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "test-cluster",
+				Customer: v1alpha1.ClusterCustomer{
+					ID: "test-customer",
+				},
+			},
 		},
 	}
 
@@ -40,9 +32,9 @@ func Test_AutoScalingGroupName(t *testing.T) {
 func Test_AvailabilityZone(t *testing.T) {
 	expectedAZ := "eu-central-1a"
 
-	customObject := awstpr.CustomObject{
-		Spec: awstpr.Spec{
-			AWS: awsspec.AWS{
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			AWS: v1alpha1.AWSConfigSpecAWS{
 				AZ: "eu-central-1a",
 			},
 		},
@@ -57,12 +49,10 @@ func Test_BucketName(t *testing.T) {
 	accountID := "1234567890"
 	expectedName := "1234567890-g8s-test-cluster"
 
-	customObject := awstpr.CustomObject{
-		Spec: awstpr.Spec{
-			Cluster: clustertpr.Spec{
-				Cluster: spec.Cluster{
-					ID: "test-cluster",
-				},
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "test-cluster",
 			},
 		},
 	}
@@ -75,17 +65,15 @@ func Test_BucketName(t *testing.T) {
 func Test_ClusterID(t *testing.T) {
 	expectedID := "test-cluster"
 
-	cluster := clustertpr.Spec{
-		Cluster: spec.Cluster{
-			ID: expectedID,
-		},
-		Customer: spec.Customer{
+	cluster := v1alpha1.Cluster{
+		ID: expectedID,
+		Customer: v1alpha1.ClusterCustomer{
 			ID: "test-customer",
 		},
 	}
 
-	customObject := awstpr.CustomObject{
-		Spec: awstpr.Spec{
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: cluster,
 		},
 	}
@@ -98,13 +86,11 @@ func Test_ClusterID(t *testing.T) {
 func Test_ClusterCustomer(t *testing.T) {
 	expectedCustomer := "test-customer"
 
-	customObject := awstpr.CustomObject{
-		Spec: awstpr.Spec{
-			Cluster: clustertpr.Spec{
-				Cluster: spec.Cluster{
-					ID: "test-cluster",
-				},
-				Customer: spec.Customer{
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "test-cluster",
+				Customer: v1alpha1.ClusterCustomer{
 					ID: "test-customer",
 				},
 			},
@@ -119,12 +105,10 @@ func Test_ClusterCustomer(t *testing.T) {
 func Test_ClusterNamespace(t *testing.T) {
 	expectedID := "test-cluster"
 
-	customObject := awstpr.CustomObject{
-		Spec: awstpr.Spec{
-			Cluster: clustertpr.Spec{
-				Cluster: spec.Cluster{
-					ID: expectedID,
-				},
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: expectedID,
 			},
 		},
 	}
@@ -204,15 +188,15 @@ func Test_HasClusterVersion(t *testing.T) {
 
 func Test_MasterImageID(t *testing.T) {
 	tests := []struct {
-		customObject    awstpr.CustomObject
+		customObject    v1alpha1.AWSConfig
 		expectedImageID string
 	}{
 		{
-			customObject: awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					AWS: awsspec.AWS{
-						Masters: []aws.Node{
-							aws.Node{
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Masters: []v1alpha1.AWSConfigSpecAWSNode{
+							v1alpha1.AWSConfigSpecAWSNode{
 								ImageID:      "ami-d60ad6b9",
 								InstanceType: "m3.medium",
 							},
@@ -223,8 +207,8 @@ func Test_MasterImageID(t *testing.T) {
 			expectedImageID: "ami-d60ad6b9",
 		},
 		{
-			customObject: awstpr.CustomObject{
-				Spec: awstpr.Spec{},
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{},
 			},
 			expectedImageID: "",
 		},
@@ -239,15 +223,15 @@ func Test_MasterImageID(t *testing.T) {
 
 func Test_MasterInstanceType(t *testing.T) {
 	tests := []struct {
-		customObject         awstpr.CustomObject
+		customObject         v1alpha1.AWSConfig
 		expectedInstanceType string
 	}{
 		{
-			customObject: awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					AWS: awsspec.AWS{
-						Masters: []aws.Node{
-							aws.Node{
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Masters: []v1alpha1.AWSConfigSpecAWSNode{
+							v1alpha1.AWSConfigSpecAWSNode{
 								ImageID:      "ami-d60ad6b9",
 								InstanceType: "m3.medium",
 							},
@@ -258,11 +242,11 @@ func Test_MasterInstanceType(t *testing.T) {
 			expectedInstanceType: "m3.medium",
 		},
 		{
-			customObject: awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					AWS: awsspec.AWS{
-						Masters: []aws.Node{
-							aws.Node{},
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Masters: []v1alpha1.AWSConfigSpecAWSNode{
+							v1alpha1.AWSConfigSpecAWSNode{},
 						},
 					},
 				},
@@ -282,14 +266,12 @@ func Test_RouteTableName(t *testing.T) {
 	expectedName := "test-cluster-private"
 	suffix := "private"
 
-	cluster := clustertpr.Spec{
-		Cluster: spec.Cluster{
-			ID: "test-cluster",
-		},
+	cluster := v1alpha1.Cluster{
+		ID: "test-cluster",
 	}
 
-	customObject := awstpr.CustomObject{
-		Spec: awstpr.Spec{
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: cluster,
 		},
 	}
@@ -303,17 +285,15 @@ func Test_SecurityGroupName(t *testing.T) {
 	expectedName := "test-cluster-worker"
 	groupName := "worker"
 
-	cluster := clustertpr.Spec{
-		Cluster: spec.Cluster{
-			ID: "test-cluster",
-		},
-		Customer: spec.Customer{
+	cluster := v1alpha1.Cluster{
+		ID: "test-cluster",
+		Customer: v1alpha1.ClusterCustomer{
 			ID: "test-customer",
 		},
 	}
 
-	customObject := awstpr.CustomObject{
-		Spec: awstpr.Spec{
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: cluster,
 		},
 	}
@@ -327,14 +307,12 @@ func Test_SubnetName(t *testing.T) {
 	expectedName := "test-cluster-private"
 	suffix := "private"
 
-	cluster := clustertpr.Spec{
-		Cluster: spec.Cluster{
-			ID: "test-cluster",
-		},
+	cluster := v1alpha1.Cluster{
+		ID: "test-cluster",
 	}
 
-	customObject := awstpr.CustomObject{
-		Spec: awstpr.Spec{
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: cluster,
 		},
 	}
@@ -348,14 +326,14 @@ func Test_SubnetName(t *testing.T) {
 func Test_WorkerCount(t *testing.T) {
 	expectedCount := 2
 
-	customObject := awstpr.CustomObject{
-		Spec: awstpr.Spec{
-			AWS: awsspec.AWS{
-				Workers: []aws.Node{
-					aws.Node{
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			AWS: v1alpha1.AWSConfigSpecAWS{
+				Workers: []v1alpha1.AWSConfigSpecAWSNode{
+					v1alpha1.AWSConfigSpecAWSNode{
 						InstanceType: "m3.medium",
 					},
-					aws.Node{
+					v1alpha1.AWSConfigSpecAWSNode{
 						InstanceType: "m3.medium",
 					},
 				},
@@ -370,15 +348,15 @@ func Test_WorkerCount(t *testing.T) {
 
 func Test_WorkerImageID(t *testing.T) {
 	tests := []struct {
-		customObject    awstpr.CustomObject
+		customObject    v1alpha1.AWSConfig
 		expectedImageID string
 	}{
 		{
-			customObject: awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					AWS: awsspec.AWS{
-						Workers: []aws.Node{
-							aws.Node{
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{
+							v1alpha1.AWSConfigSpecAWSNode{
 								ImageID:      "ami-d60ad6b9",
 								InstanceType: "m3.medium",
 							},
@@ -389,10 +367,10 @@ func Test_WorkerImageID(t *testing.T) {
 			expectedImageID: "ami-d60ad6b9",
 		},
 		{
-			customObject: awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					AWS: awsspec.AWS{
-						Workers: []aws.Node{},
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{},
 					},
 				},
 			},
@@ -409,15 +387,15 @@ func Test_WorkerImageID(t *testing.T) {
 
 func Test_WorkerInstanceType(t *testing.T) {
 	tests := []struct {
-		customObject         awstpr.CustomObject
+		customObject         v1alpha1.AWSConfig
 		expectedInstanceType string
 	}{
 		{
-			customObject: awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					AWS: awsspec.AWS{
-						Workers: []aws.Node{
-							aws.Node{
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{
+							v1alpha1.AWSConfigSpecAWSNode{
 								ImageID:      "ami-d60ad6b9",
 								InstanceType: "m3.medium",
 							},
@@ -428,10 +406,10 @@ func Test_WorkerInstanceType(t *testing.T) {
 			expectedInstanceType: "m3.medium",
 		},
 		{
-			customObject: awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					AWS: awsspec.AWS{
-						Workers: []aws.Node{},
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{},
 					},
 				},
 			},
@@ -449,12 +427,10 @@ func Test_WorkerInstanceType(t *testing.T) {
 func Test_MainStackName(t *testing.T) {
 	expected := "xyz-main"
 
-	cluster := awstpr.CustomObject{
-		Spec: awstpr.Spec{
-			Cluster: clustertpr.Spec{
-				Cluster: spec.Cluster{
-					ID: "xyz",
-				},
+	cluster := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "xyz",
 			},
 		},
 	}
@@ -485,9 +461,9 @@ func Test_UseCloudFormation(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		cluster := awstpr.CustomObject{
-			Spec: awstpr.Spec{
-				VersionBundle: awsspec.VersionBundle{
+		cluster := v1alpha1.AWSConfig{
+			Spec: v1alpha1.AWSConfigSpec{
+				VersionBundle: v1alpha1.AWSConfigSpecVersionBundle{
 					Version: tc.versionBundleVersion,
 				},
 			},
@@ -503,14 +479,12 @@ func Test_InstanceProfileName(t *testing.T) {
 	expectedName := "test-cluster-worker-EC2-K8S-Role"
 	profileType := "worker"
 
-	cluster := clustertpr.Spec{
-		Cluster: spec.Cluster{
-			ID: "test-cluster",
-		},
+	cluster := v1alpha1.Cluster{
+		ID: "test-cluster",
 	}
 
-	customObject := awstpr.CustomObject{
-		Spec: awstpr.Spec{
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: cluster,
 		},
 	}
@@ -524,19 +498,17 @@ func TestLoadBalancerName(t *testing.T) {
 	tests := []struct {
 		desc       string
 		domainName string
-		tpo        awstpr.CustomObject
+		tpo        v1alpha1.AWSConfig
 		res        string
 		err        error
 	}{
 		{
 			desc:       "works",
 			domainName: "component.foo.bar.example.com",
-			tpo: awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					Cluster: clustertpr.Spec{
-						Cluster: spec.Cluster{
-							ID: "foo-customer",
-						},
+			tpo: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "foo-customer",
 					},
 				},
 			},
@@ -545,12 +517,10 @@ func TestLoadBalancerName(t *testing.T) {
 		{
 			desc:       "also works",
 			domainName: "component.of.a.well.formed.domain",
-			tpo: awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					Cluster: clustertpr.Spec{
-						Cluster: spec.Cluster{
-							ID: "quux-the-customer",
-						},
+			tpo: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "quux-the-customer",
 					},
 				},
 			},
@@ -559,12 +529,10 @@ func TestLoadBalancerName(t *testing.T) {
 		{
 			desc:       "missing ID key in cloudconfig",
 			domainName: "component.foo.bar.example.com",
-			tpo: awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					Cluster: clustertpr.Spec{
-						Cluster: spec.Cluster{
-							ID: "",
-						},
+			tpo: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "",
 					},
 				},
 			},
@@ -574,12 +542,10 @@ func TestLoadBalancerName(t *testing.T) {
 		{
 			desc:       "malformed domain name",
 			domainName: "not a domain name",
-			tpo: awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					Cluster: clustertpr.Spec{
-						Cluster: spec.Cluster{
-							ID: "foo-customer",
-						},
+			tpo: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "foo-customer",
 					},
 				},
 			},
@@ -589,12 +555,10 @@ func TestLoadBalancerName(t *testing.T) {
 		{
 			desc:       "missing domain name",
 			domainName: "",
-			tpo: awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					Cluster: clustertpr.Spec{
-						Cluster: spec.Cluster{
-							ID: "foo-customer",
-						},
+			tpo: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "foo-customer",
 					},
 				},
 			},
@@ -713,9 +677,9 @@ func TestRootDir(t *testing.T) {
 func Test_VersionBundleVersion(t *testing.T) {
 	expectedVersion := "0.1.0"
 
-	customObject := awstpr.CustomObject{
-		Spec: awstpr.Spec{
-			VersionBundle: awsspec.VersionBundle{
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			VersionBundle: v1alpha1.AWSConfigSpecVersionBundle{
 				Version: "0.1.0",
 			},
 		},
