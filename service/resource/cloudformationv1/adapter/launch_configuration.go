@@ -39,7 +39,7 @@ func (l *launchConfigAdapter) getLaunchConfiguration(customObject awstpr.CustomO
 	l.ImageID = customObject.Spec.AWS.Workers[0].ImageID
 	l.InstanceType = customObject.Spec.AWS.Workers[0].InstanceType
 	l.IAMInstanceProfileName = key.InstanceProfileName(customObject, prefixWorker)
-	l.AssociatePublicIPAddress = true
+	l.AssociatePublicIPAddress = false
 
 	l.BlockDeviceMappings = []BlockDeviceMapping{
 		BlockDeviceMapping{
