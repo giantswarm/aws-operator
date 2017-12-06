@@ -1,4 +1,4 @@
-package s3bucketv1
+package s3bucketv2
 
 import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
