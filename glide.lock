@@ -1,5 +1,5 @@
 hash: 0e05add1a117b58ead0a42b6355d62469160970f41467166eb20a9a32c3b3c21
-updated: 2017-12-04T12:29:39.008405+01:00
+updated: 2017-12-06T17:14:43.505488387+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -69,9 +69,9 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/apiextensions
-  version: ff77d3fd222f34b512255ee7c2c67c55569bcae6
+  version: 11fc47c2373c9ca55b706261e59b0c897d9e3999
   subpackages:
-  - pkg/apis/cluster/v1alpha1
+  - pkg/apis/provider/v1alpha1
 - name: github.com/giantswarm/awstpr
   version: e6767bad175c30792bf7e0e42723f35495f1df50
   subpackages:
@@ -79,8 +79,9 @@ imports:
   - spec/aws
   - spec/aws/elb
 - name: github.com/giantswarm/certificatetpr
-  version: 9a7c674d13714bc7a5258453570bc8163a47b2cc
+  version: 04eb2f7e6433cb9d706eb5fbd2de4f0f986e57f5
   subpackages:
+  - certificatetprtest
   - spec
 - name: github.com/giantswarm/clustertpr
   version: 6b89a787f157c5531d1c955c32b3c621f0d64c3a
@@ -98,7 +99,7 @@ imports:
   subpackages:
   - pkg/harness
 - name: github.com/giantswarm/k8scloudconfig
-  version: ea70bc4ea6fc4c3214c0a71e3c6a95ba3be5fd32
+  version: 4b0542adc876f2e34129d95bc06e5557415c320e
   subpackages:
   - v_0_1_0
   - v_1_0_0
@@ -153,7 +154,7 @@ imports:
 - name: github.com/giantswarm/versionbundle
   version: 3b7cd23ec96043f5193c1b6c966fade961f0da65
 - name: github.com/go-ini/ini
-  version: f280b3ba517bf5fc98922624f21fb0e7a92adaec
+  version: 32e4c1e6bc4e7d0d8451aa6b75200d19e37a536a
 - name: github.com/go-kit/kit
   version: a9ca6725cbbea455e61c6bc8a1ed28e81eb3493b
   subpackages:
@@ -217,7 +218,7 @@ imports:
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/jmespath/go-jmespath
-  version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
+  version: dd801d4f4ce7ac746e7e7b4489d2fa600b3b096b
 - name: github.com/juju/errgo
   version: 08cceb5d0b5331634b9826762a8fd53b29b86ad8
 - name: github.com/juju/ratelimit
@@ -246,7 +247,7 @@ imports:
   - prometheus
   - prometheus/promhttp
 - name: github.com/prometheus/client_model
-  version: 6f3806018612930941127f2a7c6c453ba2c527d2
+  version: 99fa1f4be8e564e8a6b613da7fa6f46c9edafc6c
   subpackages:
   - go
 - name: github.com/prometheus/common
@@ -270,7 +271,7 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 3a5f27b046057b8b1bc8301159a31635aa68d0d5
+  version: de2d9c4eca8f3c1de17d48b096b6504e0296f003
 - name: github.com/spf13/jwalterweatherman
   version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
 - name: github.com/spf13/pflag
@@ -328,7 +329,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
+  version: 287cf08546ab5e7e37d55a84f7ed3fd1db036de5
 - name: k8s.io/apiextensions-apiserver
   version: fcd622fe88a4a6efcb5aea9e94ee87324ac1b036
   subpackages:
