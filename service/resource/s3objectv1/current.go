@@ -34,7 +34,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	}
 	result, err := r.awsClients.S3.GetObject(input)
 
-	if IsNotFound(err) {
+	if IsObjectNotFound(err) || IsBucketNotFound(err) {
 		r.logger.LogCtx(ctx, "debug", "did not find the S3 objects")
 		// fall through
 

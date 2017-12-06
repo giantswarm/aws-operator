@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	defaultTimeout         = 240
+	defaultTimeout         = 300
 	awsOperatorValuesFile  = "/tmp/aws-operator-values.yaml"
 	awsOperatorChartValues = `Installation:
   V1:
@@ -52,7 +52,9 @@ const (
 	awsResourceValuesFile  = "/tmp/aws-operator-values.yaml"
 	awsResourceChartValues = `commonDomain: ${COMMON_DOMAIN}
 clusterName: ${CLUSTER_NAME}
+clusterVersion: v_0_1_0
 sshPublicKey: ${IDRSA_PUB}
+versionBundleVersion: ${VERSION_BUNDLE_VERSION}
 aws:
   networkCIDR: "10.1.173.0/24"
   privateSubnetCIDR: "10.1.173.0/25"
@@ -135,7 +137,12 @@ func TestGuestClusterIsCreated(t *testing.T) {
 		t.Errorf("unexpected error getting operator pod name: %v", err)
 	}
 
-	if err := waitForPodLog(cs, "giantswarm", "cluster '${CLUSTER_NAME}' processed", operatorPodName); err != nil {
+	logEntry := "cluster '${CLUSTER_NAME}' processed"
+	if os.Getenv("VERSION_BUNDLE_VERSION") == "0.2.0" {
+		logEntry = "creating AWS cloudformation stack: created"
+	}
+
+	if err := waitForPodLog(cs, "giantswarm", logEntry, operatorPodName); err != nil {
 		t.Errorf("unexpected error waiting for guest cluster installed: %v", err)
 	}
 }
@@ -259,7 +266,11 @@ func deleteGuestCluster(cs kubernetes.Interface) error {
 		return microerror.Mask(err)
 	}
 
-	return waitForPodLog(cs, "giantswarm", "cluster '${CLUSTER_NAME}' deleted", operatorPodName)
+	logEntry := "cluster '${CLUSTER_NAME}' deleted"
+	if os.Getenv("VERSION_BUNDLE_VERSION") == "0.2.0" {
+		logEntry = "deleting AWS cloudformation stack: deleted"
+	}
+	return waitForPodLog(cs, "giantswarm", logEntry, operatorPodName)
 }
 
 func runCmd(cmdStr string) error {

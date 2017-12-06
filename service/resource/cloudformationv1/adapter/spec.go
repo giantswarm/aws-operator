@@ -76,7 +76,8 @@ type IAMClient interface {
 // SmallCloudconfigConfig represents the data structure required for executing the
 // small cloudconfig template.
 type SmallCloudconfigConfig struct {
-	MachineType string
-	Region      string
-	S3URI       string
+	MachineType    string
+	Region         string
+	S3URI          string
+	ClusterVersion string
 }
