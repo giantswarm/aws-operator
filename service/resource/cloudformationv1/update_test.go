@@ -2,7 +2,6 @@ package cloudformationv1
 
 import (
 	"context"
-	"reflect"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -71,20 +70,6 @@ func Test_Resource_Cloudformation_newUpdateChange(t *testing.T) {
 			},
 			expectedChange: awscloudformation.UpdateStackInput{
 				StackName: aws.String("desired"),
-				Parameters: []*awscloudformation.Parameter{
-					{
-						ParameterKey:   aws.String(workersParameterKey),
-						ParameterValue: aws.String("4"),
-					},
-					{
-						ParameterKey:   aws.String(imageIDParameterKey),
-						ParameterValue: aws.String("ami-1234"),
-					},
-					{
-						ParameterKey:   aws.String(clusterVersionParameterKey),
-						ParameterValue: aws.String("myclusterversion"),
-					},
-				},
 			},
 		},
 		{
@@ -104,20 +89,6 @@ func Test_Resource_Cloudformation_newUpdateChange(t *testing.T) {
 			},
 			expectedChange: awscloudformation.UpdateStackInput{
 				StackName: aws.String("desired"),
-				Parameters: []*awscloudformation.Parameter{
-					{
-						ParameterKey:   aws.String(workersParameterKey),
-						ParameterValue: aws.String("4"),
-					},
-					{
-						ParameterKey:   aws.String(imageIDParameterKey),
-						ParameterValue: aws.String("ami-1234"),
-					},
-					{
-						ParameterKey:   aws.String(clusterVersionParameterKey),
-						ParameterValue: aws.String("myclusterversion"),
-					},
-				},
 			},
 		},
 	}
@@ -149,9 +120,6 @@ func Test_Resource_Cloudformation_newUpdateChange(t *testing.T) {
 			}
 			if updateChange.StackName != nil && *updateChange.StackName != *tc.expectedChange.StackName {
 				t.Errorf("expected %v, got %v", tc.expectedChange.StackName, updateChange.StackName)
-			}
-			if !reflect.DeepEqual(updateChange.Parameters, tc.expectedChange.Parameters) {
-				t.Errorf("expected %v, got %v", tc.expectedChange.Parameters, updateChange.Parameters)
 			}
 		})
 	}

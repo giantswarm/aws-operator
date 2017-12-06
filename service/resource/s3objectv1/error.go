@@ -20,10 +20,18 @@ func IsWrongType(err error) bool {
 	return microerror.Cause(err) == wrongTypeError
 }
 
-// IsNotFound asserts object not found error from upstream's API message.
-func IsNotFound(err error) bool {
+// IsObjectNotFound asserts object not found error from upstream's API message.
+func IsObjectNotFound(err error) bool {
 	if err == nil {
 		return false
 	}
-	return strings.Contains(microerror.Cause(err).Error(), "An error occurred (404) when calling the HeadObject operation: Not Found")
+	return strings.Contains(microerror.Cause(err).Error(), "NoSuchKey: The specified key does not exist")
+}
+
+// IsBucketNotFound asserts object not found error from upstream's API message.
+func IsBucketNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	return strings.Contains(microerror.Cause(err).Error(), "NoSuchBucket: The specified bucket does not exist")
 }

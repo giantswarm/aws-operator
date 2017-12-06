@@ -69,8 +69,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 	r.logger.LogCtx(ctx, "debug", "finding out if the main stack should be updated")
 
 	updateState := awscloudformation.UpdateStackInput{
-		StackName:  aws.String(""),
-		Parameters: []*awscloudformation.Parameter{},
+		StackName: aws.String(""),
 	}
 
 	if !reflect.DeepEqual(desiredStackState, currentStackState) {
@@ -82,20 +81,6 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 
 		updateState.StackName = aws.String(desiredStackState.Name)
 		updateState.TemplateBody = aws.String(mainTemplate)
-		updateState.Parameters = []*awscloudformation.Parameter{
-			{
-				ParameterKey:   aws.String(workersParameterKey),
-				ParameterValue: aws.String(desiredStackState.Workers),
-			},
-			{
-				ParameterKey:   aws.String(imageIDParameterKey),
-				ParameterValue: aws.String(desiredStackState.ImageID),
-			},
-			{
-				ParameterKey:   aws.String(clusterVersionParameterKey),
-				ParameterValue: aws.String(desiredStackState.ClusterVersion),
-			},
-		}
 	}
 
 	return updateState, nil

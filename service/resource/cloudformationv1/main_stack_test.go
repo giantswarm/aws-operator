@@ -39,6 +39,7 @@ func TestMainTemplateExistingFields(t *testing.T) {
 	customObject := awstpr.CustomObject{
 		Spec: awstpr.Spec{
 			Cluster: clustertpr.Spec{
+				Version: "myversion",
 				Cluster: spec.Cluster{
 					ID: "test-cluster",
 				},
@@ -111,8 +112,12 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Error("imageID output element not found")
 	}
-	if !strings.Contains(body, clusterVersionOuputKey+":") {
+	if !strings.Contains(body, clusterVersionOutputKey+":") {
 		fmt.Println(body)
 		t.Error("clusterVersion output element not found")
+	}
+	if !strings.Contains(body, "Value: myversion") {
+		fmt.Println(body)
+		t.Error("output element not found")
 	}
 }

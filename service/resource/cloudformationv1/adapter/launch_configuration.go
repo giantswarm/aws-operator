@@ -94,9 +94,10 @@ func (l *launchConfigAdapter) getLaunchConfiguration(customObject awstpr.CustomO
 	s3URI := fmt.Sprintf("%s-g8s-%s", accountID, clusterID)
 
 	cloudConfigConfig := SmallCloudconfigConfig{
-		MachineType: prefixWorker,
-		Region:      customObject.Spec.AWS.Region,
-		S3URI:       s3URI,
+		MachineType:    prefixWorker,
+		Region:         customObject.Spec.AWS.Region,
+		S3URI:          s3URI,
+		ClusterVersion: key.ClusterVersion(customObject),
 	}
 	smallCloudConfig, err := SmallCloudconfig(cloudConfigConfig)
 	if err != nil {
