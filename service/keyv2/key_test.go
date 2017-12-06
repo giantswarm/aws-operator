@@ -118,15 +118,16 @@ func Test_ClusterNamespace(t *testing.T) {
 	}
 }
 
+// TODO Handle missing version in apiextensions.
 func Test_ClusterVersion(t *testing.T) {
 	expectedVersion := "v_0_1_0"
 
-	cluster := clustertpr.Spec{
-		Version: expectedVersion,
+	cluster := v1alpha1.Cluster{
+	// Version: expectedVersion,
 	}
 
-	customObject := awstpr.CustomObject{
-		Spec: awstpr.Spec{
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: cluster,
 		},
 	}
@@ -136,42 +137,43 @@ func Test_ClusterVersion(t *testing.T) {
 	}
 }
 
+// TODO Handle missing version in apiextensions.
 func Test_HasClusterVersion(t *testing.T) {
 	tests := []struct {
-		customObject   awstpr.CustomObject
+		customObject   v1alpha1.AWSConfig
 		expectedResult bool
 	}{
 		{
-			customObject: awstpr.CustomObject{
-				Spec: awstpr.Spec{},
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{},
 			},
 			expectedResult: false,
 		},
 		{
-			customObject: awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					Cluster: clustertpr.Spec{
-						Version: "",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+					// Version: "",
 					},
 				},
 			},
 			expectedResult: false,
 		},
 		{
-			customObject: awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					Cluster: clustertpr.Spec{
-						Version: "v_0_1_0",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+					// Version: "v_0_1_0",
 					},
 				},
 			},
 			expectedResult: true,
 		},
 		{
-			customObject: awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					Cluster: clustertpr.Spec{
-						Version: "v_0_2_0",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+					// Version: "v_0_2_0",
 					},
 				},
 			},
@@ -690,16 +692,17 @@ func Test_VersionBundleVersion(t *testing.T) {
 	}
 }
 
+// TODO Handle missing version in apiextensions.
 func Test_BucketObjectName(t *testing.T) {
-	version := "v_0_1_0"
+	// version := "v_0_1_0"
 	suffix := "mysuffix"
 
-	cluster := clustertpr.Spec{
-		Version: version,
+	cluster := v1alpha1.Cluster{
+	// Version: version,
 	}
 
-	customObject := awstpr.CustomObject{
-		Spec: awstpr.Spec{
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: cluster,
 		},
 	}

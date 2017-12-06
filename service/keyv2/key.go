@@ -55,11 +55,13 @@ func CustomerID(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Customer.ID
 }
 
-func ClusterVersion(customObject awstpr.CustomObject) string {
-	return customObject.Spec.Cluster.Version
+// TODO Handle missing version in apiextensions.
+func ClusterVersion(customObject v1alpha1.AWSConfig) string {
+	return "FIXME"
 }
 
-func HasClusterVersion(customObject awstpr.CustomObject) bool {
+// TODO Handle missing version in apiextensions.
+func HasClusterVersion(customObject v1alpha1.AWSConfig) bool {
 	switch ClusterVersion(customObject) {
 	case string(cloudconfig.V_0_1_0):
 		return true
@@ -144,7 +146,7 @@ func ToCustomObject(v interface{}) (v1alpha1.AWSConfig, error) {
 // UseCloudFormation returns true if the version in the version bundle matches
 // the Cloud Formation version.
 // TODO Remove once we've migrated all AWS resources to Cloud Formation.
-func UseCloudFormation(customObject awstpr.CustomObject) bool {
+func UseCloudFormation(customObject v1alpha1.AWSConfig) bool {
 	if VersionBundleVersion(customObject) == CloudFormationVersion {
 		return true
 	}
