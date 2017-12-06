@@ -5,9 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/giantswarm/awstpr"
-	"github.com/giantswarm/clustertpr"
-	clustertprspec "github.com/giantswarm/clustertpr/spec"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"k8s.io/client-go/kubernetes/fake"
 	apiv1 "k8s.io/client-go/pkg/api/v1"
@@ -19,13 +17,10 @@ func Test_Resource_Namespace_GetCurrentState(t *testing.T) {
 		ExpectedNamespace *apiv1.Namespace
 	}{
 		{
-			Obj: &awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					Cluster: clustertpr.Spec{
-						Cluster: clustertprspec.Cluster{
-							ID: "al9qy",
-						},
-						Version: "cloud-formation",
+			Obj: &v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "al9qy",
 					},
 				},
 			},
