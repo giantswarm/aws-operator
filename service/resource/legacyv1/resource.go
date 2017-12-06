@@ -28,7 +28,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "legacy"
+	Name = "legacyv1"
 
 	// The format of instance's name is "[name of cluster]-[prefix ('master' or 'worker')]-[number]".
 	instanceNameFormat string = "%s-%s-%d"
