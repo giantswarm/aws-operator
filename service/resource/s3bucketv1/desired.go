@@ -3,12 +3,12 @@ package s3bucketv1
 import (
 	"context"
 
-	"github.com/giantswarm/aws-operator/service/key"
+	"github.com/giantswarm/aws-operator/service/keyv1"
 	"github.com/giantswarm/microerror"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
-	customObject, err := key.ToCustomObject(obj)
+	customObject, err := keyv1.ToCustomObject(obj)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -19,7 +19,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 
 	bucketState := BucketState{
-		Name: key.BucketName(customObject, accountID),
+		Name: keyv1.BucketName(customObject, accountID),
 	}
 
 	return bucketState, nil

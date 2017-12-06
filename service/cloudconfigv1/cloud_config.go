@@ -1,7 +1,7 @@
-package cloudconfig
+package cloudconfigv1
 
 import (
-	"github.com/giantswarm/aws-operator/service/key"
+	"github.com/giantswarm/aws-operator/service/keyv1"
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/certificatetpr"
 	cloudconfig "github.com/giantswarm/k8scloudconfig"
@@ -58,13 +58,13 @@ func (c *CloudConfig) NewMasterTemplate(customObject awstpr.CustomObject, certs 
 
 	// Default the version if it is not configured or we are using Cloud Formation.
 	// TODO Remove once Cloud Formation migration is complete.
-	if !key.HasClusterVersion(customObject) || key.UseCloudFormation(customObject) {
+	if !keyv1.HasClusterVersion(customObject) || keyv1.UseCloudFormation(customObject) {
 		customObject.Spec.Cluster.Version = string(cloudconfig.V_0_1_0)
 	}
 
 	var template string
 
-	switch key.ClusterVersion(customObject) {
+	switch keyv1.ClusterVersion(customObject) {
 	case string(cloudconfig.V_0_1_0):
 		template, err = v_0_1_0MasterTemplate(customObject, certs, keys)
 		if err != nil {
@@ -85,7 +85,7 @@ func (c *CloudConfig) NewWorkerTemplate(customObject awstpr.CustomObject, certs 
 
 	// Default the version if it is not configured.
 	// TODO Remove once Cloud Formation migration is complete.
-	if !key.HasClusterVersion(customObject) {
+	if !keyv1.HasClusterVersion(customObject) {
 		customObject.Spec.Cluster.Version = string(cloudconfig.V_0_1_0)
 	}
 

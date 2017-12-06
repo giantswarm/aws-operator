@@ -7,11 +7,11 @@ import (
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apiv1 "k8s.io/client-go/pkg/api/v1"
 
-	"github.com/giantswarm/aws-operator/service/key"
+	"github.com/giantswarm/aws-operator/service/keyv1"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
-	customObject, err := key.ToCustomObject(obj)
+	customObject, err := keyv1.ToCustomObject(obj)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -24,10 +24,10 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			APIVersion: "v1",
 		},
 		ObjectMeta: apismetav1.ObjectMeta{
-			Name: key.ClusterNamespace(customObject),
+			Name: keyv1.ClusterNamespace(customObject),
 			Labels: map[string]string{
-				"cluster":  key.ClusterID(customObject),
-				"customer": key.ClusterCustomer(customObject),
+				"cluster":  keyv1.ClusterID(customObject),
+				"customer": keyv1.ClusterCustomer(customObject),
 			},
 		},
 	}

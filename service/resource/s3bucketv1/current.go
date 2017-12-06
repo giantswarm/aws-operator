@@ -5,12 +5,12 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/giantswarm/aws-operator/service/key"
+	"github.com/giantswarm/aws-operator/service/keyv1"
 	"github.com/giantswarm/microerror"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
-	customObject, err := key.ToCustomObject(obj)
+	customObject, err := keyv1.ToCustomObject(obj)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -22,7 +22,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	bucketName := key.BucketName(customObject, accountID)
+	bucketName := keyv1.BucketName(customObject, accountID)
 	headInput := &s3.HeadBucketInput{
 		Bucket: aws.String(bucketName),
 	}

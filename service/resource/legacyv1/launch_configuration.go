@@ -11,7 +11,7 @@ import (
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/resources"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
-	"github.com/giantswarm/aws-operator/service/key"
+	"github.com/giantswarm/aws-operator/service/keyv1"
 )
 
 type launchConfigurationInput struct {
@@ -39,13 +39,13 @@ func (s *Resource) createLaunchConfiguration(input launchConfigurationInput) (bo
 	{
 		switch input.prefix {
 		case prefixMaster:
-			imageID = key.MasterImageID(input.cluster)
-			instanceType = key.MasterInstanceType(input.cluster)
+			imageID = keyv1.MasterImageID(input.cluster)
+			instanceType = keyv1.MasterInstanceType(input.cluster)
 
 			template, err = s.cloudConfig.NewMasterTemplate(input.cluster, *input.tlsAssets, *input.clusterKeys)
 		case prefixWorker:
-			imageID = key.WorkerImageID(input.cluster)
-			instanceType = key.WorkerInstanceType(input.cluster)
+			imageID = keyv1.WorkerImageID(input.cluster)
+			instanceType = keyv1.WorkerInstanceType(input.cluster)
 
 			template, err = s.cloudConfig.NewWorkerTemplate(input.cluster, *input.tlsAssets)
 		default:
@@ -114,7 +114,7 @@ func (s *Resource) createLaunchConfiguration(input launchConfigurationInput) (bo
 }
 
 func (s *Resource) deleteLaunchConfiguration(input launchConfigurationInput) error {
-	groupName := key.SecurityGroupName(input.cluster, input.prefix)
+	groupName := keyv1.SecurityGroupName(input.cluster, input.prefix)
 	sg := awsresources.SecurityGroup{
 		Description: groupName,
 		GroupName:   groupName,
@@ -148,7 +148,7 @@ func (s *Resource) deleteLaunchConfiguration(input launchConfigurationInput) err
 // that we can only reuse an LC if it has been created for the current SG.
 // Otherwise, the SG might not exist anymore.
 func launchConfigurationName(cluster awstpr.CustomObject, prefix, securityGroupID string) (string, error) {
-	if key.ClusterID(cluster) == "" {
+	if keyv1.ClusterID(cluster) == "" {
 		return "", microerror.Maskf(missingCloudConfigKeyError, "spec.cluster.cluster.id")
 	}
 
@@ -160,5 +160,5 @@ func launchConfigurationName(cluster awstpr.CustomObject, prefix, securityGroupI
 		return "", microerror.Maskf(missingCloudConfigKeyError, "launchConfiguration securityGroupID")
 	}
 
-	return fmt.Sprintf("%s-%s-%s", key.ClusterID(cluster), prefix, securityGroupID), nil
+	return fmt.Sprintf("%s-%s-%s", keyv1.ClusterID(cluster), prefix, securityGroupID), nil
 }

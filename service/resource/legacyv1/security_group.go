@@ -9,7 +9,7 @@ import (
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/resources"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
-	"github.com/giantswarm/aws-operator/service/key"
+	"github.com/giantswarm/aws-operator/service/keyv1"
 )
 
 type securityGroupInput struct {
@@ -102,7 +102,7 @@ func (ri rulesInput) masterRules() []awsresources.SecurityGroupRule {
 		},
 	}
 
-	if key.HasClusterVersion(ri.Cluster) {
+	if keyv1.HasClusterVersion(ri.Cluster) {
 		// For new clusters we only allow SSH access from the host cluster.
 		rules = append(rules, awsresources.SecurityGroupRule{
 			Port:       sshPort,
@@ -167,7 +167,7 @@ func (ri rulesInput) workerRules() []awsresources.SecurityGroupRule {
 		},
 	}
 
-	if key.HasClusterVersion(ri.Cluster) {
+	if keyv1.HasClusterVersion(ri.Cluster) {
 		// For new clusters we only allow SSH access from the host cluster.
 		rules = append(rules, awsresources.SecurityGroupRule{
 			Port:       sshPort,

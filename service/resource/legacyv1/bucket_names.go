@@ -3,12 +3,12 @@ package legacyv1
 import (
 	"fmt"
 
-	"github.com/giantswarm/aws-operator/service/key"
+	"github.com/giantswarm/aws-operator/service/keyv1"
 	"github.com/giantswarm/awstpr"
 )
 
 func (s *Resource) bucketName(cluster awstpr.CustomObject) string {
-	clusterID := key.ClusterID(cluster)
+	clusterID := keyv1.ClusterID(cluster)
 	accountID := s.awsConfig.AccountID()
 
 	name := fmt.Sprintf("%s-g8s-%s", accountID, clusterID)

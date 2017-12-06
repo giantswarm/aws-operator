@@ -14,7 +14,7 @@ import (
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/resources"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
-	"github.com/giantswarm/aws-operator/service/key"
+	"github.com/giantswarm/aws-operator/service/keyv1"
 )
 
 type asgStackInput struct {
@@ -74,7 +74,7 @@ func (s *Resource) processASGStack(input asgStackInput) (bool, error) {
 		Client: input.clients.CloudFormation,
 
 		// Settings.
-		Name: key.AutoScalingGroupName(input.cluster, input.asgType),
+		Name: keyv1.AutoScalingGroupName(input.cluster, input.asgType),
 	}
 
 	stackExists, err := stack.CheckIfExists()
@@ -201,7 +201,7 @@ func (s *Resource) createASGStack(input asgStackInput) (bool, error) {
 		LoadBalancerName:         input.loadBalancerName,
 		InstanceType:             input.instanceType,
 		KeyName:                  input.keyPairName,
-		Name:                     key.AutoScalingGroupName(input.cluster, input.asgType),
+		Name:                     keyv1.AutoScalingGroupName(input.cluster, input.asgType),
 		SecurityGroupID:          input.workersSecurityGroupID,
 		SmallCloudConfig:         smallCloudconfig,
 		SubnetID:                 input.subnetID,
@@ -222,9 +222,9 @@ func (s *Resource) updateASGStack(input asgStackInput) error {
 
 	switch input.asgType {
 	case prefixMaster:
-		imageID = key.MasterImageID(input.cluster)
+		imageID = keyv1.MasterImageID(input.cluster)
 	case prefixWorker:
-		imageID = key.WorkerImageID(input.cluster)
+		imageID = keyv1.WorkerImageID(input.cluster)
 	default:
 		return microerror.Maskf(invalidCloudconfigExtensionNameError, fmt.Sprintf("Invalid extension name '%s'", input.asgType))
 	}
@@ -241,7 +241,7 @@ func (s *Resource) updateASGStack(input asgStackInput) error {
 		ASGMaxSize:  input.asgSize,
 		ASGMinSize:  input.asgSize,
 		ImageID:     imageID,
-		Name:        key.AutoScalingGroupName(input.cluster, input.asgType),
+		Name:        keyv1.AutoScalingGroupName(input.cluster, input.asgType),
 		TemplateURL: templateURL,
 	}
 

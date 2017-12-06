@@ -5,7 +5,7 @@ import (
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/resources/aws"
-	"github.com/giantswarm/aws-operator/service/key"
+	"github.com/giantswarm/aws-operator/service/keyv1"
 	"github.com/giantswarm/awstpr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -26,7 +26,7 @@ func (s *Resource) createMasterService(input MasterServiceInput) error {
 		Clients: input.Clients,
 		Logger:  s.logger,
 		Pattern: instanceName(instanceNameInput{
-			clusterName: key.ClusterID(input.Cluster),
+			clusterName: keyv1.ClusterID(input.Cluster),
 			prefix:      prefixMaster,
 			no:          0,
 		}),
@@ -46,21 +46,21 @@ func (s *Resource) createMasterService(input MasterServiceInput) error {
 
 	namespace := v1.Namespace{
 		ObjectMeta: apismetav1.ObjectMeta{
-			Name: key.ClusterID(input.Cluster),
+			Name: keyv1.ClusterID(input.Cluster),
 		},
 	}
 
 	service := v1.Service{
 		ObjectMeta: apismetav1.ObjectMeta{
 			Name:      "master",
-			Namespace: key.ClusterID(input.Cluster),
+			Namespace: keyv1.ClusterID(input.Cluster),
 			Labels: map[string]string{
 				"app":      "master",
-				"cluster":  key.ClusterID(input.Cluster),
-				"customer": key.CustomerID(input.Cluster),
+				"cluster":  keyv1.ClusterID(input.Cluster),
+				"customer": keyv1.CustomerID(input.Cluster),
 			},
 			Annotations: map[string]string{
-				"giantswarm.io/prometheus-cluster": key.ClusterID(input.Cluster),
+				"giantswarm.io/prometheus-cluster": keyv1.ClusterID(input.Cluster),
 			},
 		},
 		Spec: v1.ServiceSpec{
@@ -77,11 +77,11 @@ func (s *Resource) createMasterService(input MasterServiceInput) error {
 	endpoint := v1.Endpoints{
 		ObjectMeta: apismetav1.ObjectMeta{
 			Name:      "master",
-			Namespace: key.ClusterID(input.Cluster),
+			Namespace: keyv1.ClusterID(input.Cluster),
 			Labels: map[string]string{
 				"app":      "master",
-				"cluster":  key.ClusterID(input.Cluster),
-				"customer": key.CustomerID(input.Cluster),
+				"cluster":  keyv1.ClusterID(input.Cluster),
+				"customer": keyv1.CustomerID(input.Cluster),
 			},
 		},
 		Subsets: []v1.EndpointSubset{
