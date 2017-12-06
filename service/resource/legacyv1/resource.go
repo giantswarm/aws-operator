@@ -1017,7 +1017,8 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 		// During Cloud Formation migration we need to delete the main stack
 		// so all resoures including the VPC are deleted.
 		stack := awsresources.ASGStack{
-			Name: key.MainStackName(cluster),
+			Client: clients.CloudFormation,
+			Name:   key.MainStackName(cluster),
 		}
 
 		if err := stack.Delete(); err != nil {
