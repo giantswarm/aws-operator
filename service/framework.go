@@ -268,8 +268,9 @@ func newCustomObjectFramework(config Config) (*framework.Framework, error) {
 	// We provide a map of resource lists keyed by the version bundle version
 	// to the resource router.
 	versionedResources := map[string][]framework.Resource{
-		keyv1.LegacyVersion:         legacyResources,
-		keyv1.CloudFormationVersion: resources,
+		key.LegacyVersion:         legacyResources,
+		key.CloudFormationVersion: resources,
+		"1.0.0":                   resources,
 	}
 
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
