@@ -13,7 +13,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/key"
+	"github.com/giantswarm/aws-operator/service/keyv1"
 )
 
 const (
@@ -174,7 +174,7 @@ func (s Service) ListClusters() ([]string, error) {
 	}
 
 	for _, cluster := range clusterList.Items {
-		clusterIDs = append(clusterIDs, key.ClusterID(*cluster))
+		clusterIDs = append(clusterIDs, keyv1.ClusterID(*cluster))
 	}
 
 	return clusterIDs, nil

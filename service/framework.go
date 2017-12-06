@@ -18,8 +18,8 @@ import (
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/key"
+	"github.com/giantswarm/aws-operator/service/cloudconfigv1"
+	"github.com/giantswarm/aws-operator/service/keyv1"
 	"github.com/giantswarm/aws-operator/service/resource/cloudformationv1"
 	"github.com/giantswarm/aws-operator/service/resource/legacyv1"
 	"github.com/giantswarm/aws-operator/service/resource/namespacev1"
@@ -122,13 +122,13 @@ func newCustomObjectFramework(config Config) (*framework.Framework, error) {
 		}
 	}
 
-	var ccService *cloudconfig.CloudConfig
+	var ccService *cloudconfigv1.CloudConfig
 	{
-		ccServiceConfig := cloudconfig.DefaultConfig()
+		ccServiceConfig := cloudconfigv1.DefaultConfig()
 
 		ccServiceConfig.Logger = config.Logger
 
-		ccService, err = cloudconfig.New(ccServiceConfig)
+		ccService, err = cloudconfigv1.New(ccServiceConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -268,8 +268,8 @@ func newCustomObjectFramework(config Config) (*framework.Framework, error) {
 	// We provide a map of resource lists keyed by the version bundle version
 	// to the resource router.
 	versionedResources := map[string][]framework.Resource{
-		key.LegacyVersion:         legacyResources,
-		key.CloudFormationVersion: resources,
+		keyv1.LegacyVersion:         legacyResources,
+		keyv1.CloudFormationVersion: resources,
 	}
 
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {

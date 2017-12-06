@@ -8,7 +8,7 @@ import (
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
-	"github.com/giantswarm/aws-operator/service/key"
+	"github.com/giantswarm/aws-operator/service/keyv1"
 )
 
 type SubnetInput struct {
@@ -24,11 +24,11 @@ type SubnetInput struct {
 // createSubnet creates a subnet and optionally makes it public.
 func (s *Resource) createSubnet(input SubnetInput) (*awsresources.Subnet, error) {
 	subnet := &awsresources.Subnet{
-		AvailabilityZone: key.AvailabilityZone(input.Cluster),
+		AvailabilityZone: keyv1.AvailabilityZone(input.Cluster),
 		CidrBlock:        input.CidrBlock,
 		Name:             input.Name,
 		VpcID:            input.VpcID,
-		ClusterName:      key.ClusterID(input.Cluster),
+		ClusterName:      keyv1.ClusterID(input.Cluster),
 		// Dependencies.
 		Logger:    s.logger,
 		AWSEntity: awsresources.AWSEntity{Clients: input.Clients},

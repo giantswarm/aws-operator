@@ -5,11 +5,11 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/key"
+	"github.com/giantswarm/aws-operator/service/keyv1"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
-	customObject, err := key.ToCustomObject(obj)
+	customObject, err := keyv1.ToCustomObject(obj)
 	output := BucketObjectState{}
 	if err != nil {
 		return output, microerror.Mask(err)
@@ -20,7 +20,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return output, microerror.Mask(err)
 	}
 
-	clusterID := key.ClusterID(customObject)
+	clusterID := keyv1.ClusterID(customObject)
 	certs, err := r.certWatcher.SearchCerts(clusterID)
 	if err != nil {
 		return output, microerror.Mask(err)
@@ -42,9 +42,9 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 
 	output.WorkerCloudConfig = BucketObjectInstance{
-		Bucket: key.BucketName(customObject, accountID),
+		Bucket: keyv1.BucketName(customObject, accountID),
 		Body:   body,
-		Key:    key.BucketObjectName(customObject, prefixWorker),
+		Key:    keyv1.BucketObjectName(customObject, prefixWorker),
 	}
 
 	return output, nil

@@ -1,7 +1,7 @@
 package adapter
 
 import (
-	"github.com/giantswarm/aws-operator/service/key"
+	"github.com/giantswarm/aws-operator/service/keyv1"
 	"github.com/giantswarm/awstpr"
 )
 
@@ -12,7 +12,7 @@ type outputsAdapter struct {
 }
 
 func (o *outputsAdapter) getOutputs(customObject awstpr.CustomObject, clients Clients) error {
-	o.ClusterVersion = key.ClusterVersion(customObject)
+	o.ClusterVersion = keyv1.ClusterVersion(customObject)
 
 	return nil
 }

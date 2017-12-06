@@ -10,7 +10,7 @@ import (
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
-	"github.com/giantswarm/aws-operator/service/key"
+	"github.com/giantswarm/aws-operator/service/keyv1"
 )
 
 type LoadBalancerInput struct {
@@ -35,7 +35,7 @@ type LoadBalancerInput struct {
 }
 
 func (s *Resource) createLoadBalancer(input LoadBalancerInput) (*awsresources.ELB, error) {
-	lbName, err := key.LoadBalancerName(input.Name, input.Cluster)
+	lbName, err := keyv1.LoadBalancerName(input.Name, input.Cluster)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -79,7 +79,7 @@ func (s *Resource) createLoadBalancer(input LoadBalancerInput) (*awsresources.EL
 
 func (s *Resource) deleteLoadBalancer(input LoadBalancerInput) error {
 	// Delete ELB.
-	lbName, err := key.LoadBalancerName(input.Name, input.Cluster)
+	lbName, err := keyv1.LoadBalancerName(input.Name, input.Cluster)
 	if err != nil {
 		return microerror.Mask(err)
 	}

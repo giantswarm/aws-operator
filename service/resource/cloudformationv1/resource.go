@@ -10,7 +10,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "cloudformation"
+	Name = "cloudformationv1"
 )
 
 type AWSConfig struct {

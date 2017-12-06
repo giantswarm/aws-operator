@@ -10,7 +10,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "s3bucket"
+	Name = "s3bucketv1"
 )
 
 // Config represents the configuration used to create a new s3bucket resource.

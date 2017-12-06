@@ -14,7 +14,7 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/cloudconfigv1"
 	"github.com/giantswarm/aws-operator/service/resource/cloudformationv1"
 	"github.com/giantswarm/aws-operator/service/resource/legacyv1"
 	"github.com/giantswarm/aws-operator/service/resource/namespacev1"
@@ -54,13 +54,13 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 		}
 	}
 
-	var ccService *cloudconfig.CloudConfig
+	var ccService *cloudconfigv1.CloudConfig
 	{
-		ccServiceConfig := cloudconfig.DefaultConfig()
+		ccServiceConfig := cloudconfigv1.DefaultConfig()
 		ccServiceConfig.Logger = microloggertest.New()
 		ccServiceConfig.Logger = microloggertest.New()
 
-		ccService, err = cloudconfig.New(ccServiceConfig)
+		ccService, err = cloudconfigv1.New(ccServiceConfig)
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}

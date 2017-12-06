@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/giantswarm/aws-operator/service/key"
+	"github.com/giantswarm/aws-operator/service/keyv1"
 	"github.com/giantswarm/microerror"
 )
 
@@ -16,7 +16,7 @@ func SmallCloudconfig(config SmallCloudconfigConfig) (string, error) {
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-	rootDir, err := key.RootDir(baseDir, RootDirElement)
+	rootDir, err := keyv1.RootDir(baseDir, RootDirElement)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
