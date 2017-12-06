@@ -192,12 +192,6 @@ func (s *ASGStack) Delete() error {
 		return microerror.Mask(err)
 	}
 
-	if err := s.Client.WaitUntilStackDeleteComplete(&cloudformation.DescribeStacksInput{
-		StackName: aws.String(s.Name),
-	}); err != nil {
-		return microerror.Mask(err)
-	}
-
 	return nil
 }
 
