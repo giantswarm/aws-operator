@@ -270,7 +270,7 @@ func newCustomObjectFramework(config Config) (*framework.Framework, error) {
 	versionedResources := map[string][]framework.Resource{
 		key.LegacyVersion:         legacyResources,
 		key.CloudFormationVersion: resources,
-		"1.0.0":                   resources,
+		"1.0.0":                   legacyResources,
 	}
 
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
