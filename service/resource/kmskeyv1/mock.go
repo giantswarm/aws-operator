@@ -9,7 +9,6 @@ import (
 
 type KMSClientMock struct {
 	keyID     string
-	aRN       string
 	isError   bool
 	clusterID string
 }
@@ -53,9 +52,13 @@ func (k *KMSClientMock) DescribeKey(input *kms.DescribeKeyInput) (*kms.DescribeK
 	}
 	output := &kms.DescribeKeyOutput{
 		KeyMetadata: &kms.KeyMetadata{
-			Arn:   aws.String(k.aRN),
+			Arn:   aws.String("myarn"),
 			KeyId: aws.String(k.keyID),
 		},
 	}
 	return output, nil
+}
+
+func (k *KMSClientMock) ScheduleKeyDeletion(input *kms.ScheduleKeyDeletionInput) (*kms.ScheduleKeyDeletionOutput, error) {
+	return nil, nil
 }

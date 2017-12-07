@@ -15,7 +15,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 
 	clusterID := keyv1.ClusterID(customObject)
-	desiredState.KeyID = toAlias(clusterID)
+	desiredState.KeyAlias = toAlias(clusterID)
 
 	return desiredState, nil
 }
