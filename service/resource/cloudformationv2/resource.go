@@ -1,11 +1,12 @@
-package cloudformationv1
+package cloudformationv2
 
 import (
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/giantswarm/aws-operator/service/resource/cloudformationv1/adapter"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
+
+	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2/adapter"
 )
 
 const (

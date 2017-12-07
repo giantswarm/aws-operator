@@ -6,9 +6,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/aws-operator/service/keyv1"
-	"github.com/giantswarm/awstpr"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
 // template related to this adapter: service/templates/cloudformation/auto_scaling_group.go
@@ -26,9 +27,9 @@ type autoScalingGroupAdapter struct {
 	ClusterID              string
 }
 
-func (a *autoScalingGroupAdapter) getAutoScalingGroup(customObject awstpr.CustomObject, clients Clients) error {
+func (a *autoScalingGroupAdapter) getAutoScalingGroup(customObject v1alpha1.AWSConfig, clients Clients) error {
 	a.AZ = customObject.Spec.AWS.AZ
-	workers := keyv1.WorkerCount(customObject)
+	workers := keyv2.WorkerCount(customObject)
 	a.ASGMaxSize = workers
 	a.ASGMinSize = workers
 	a.MaxBatchSize = strconv.FormatFloat(asgMaxBatchSizeRatio, 'f', -1, 32)
@@ -39,7 +40,7 @@ func (a *autoScalingGroupAdapter) getAutoScalingGroup(customObject awstpr.Custom
 	// load balancer name
 	// TODO: remove this code once the ingress load balancer is created by cloudformation
 	// and add a reference in the template
-	lbName, err := keyv1.LoadBalancerName(customObject.Spec.Cluster.Kubernetes.IngressController.Domain, customObject)
+	lbName, err := keyv2.LoadBalancerName(customObject.Spec.Cluster.Kubernetes.IngressController.Domain, customObject)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -48,7 +49,7 @@ func (a *autoScalingGroupAdapter) getAutoScalingGroup(customObject awstpr.Custom
 	// subnet ID
 	// TODO: remove this code once the subnet is created by cloudformation and add a
 	// reference in the template
-	subnetName := keyv1.SubnetName(customObject, suffixPrivate)
+	subnetName := keyv2.SubnetName(customObject, suffixPrivate)
 	describeSubnetInput := &ec2.DescribeSubnetsInput{
 		Filters: []*ec2.Filter{
 			{
@@ -69,7 +70,7 @@ func (a *autoScalingGroupAdapter) getAutoScalingGroup(customObject awstpr.Custom
 
 	a.SubnetID = *output.Subnets[0].SubnetId
 
-	a.ClusterID = keyv1.ClusterID(customObject)
+	a.ClusterID = keyv2.ClusterID(customObject)
 
 	return nil
 }
