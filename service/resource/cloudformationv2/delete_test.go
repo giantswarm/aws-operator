@@ -1,15 +1,14 @@
-package cloudformationv1
+package cloudformationv2
 
 import (
 	"context"
 	"testing"
 
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/giantswarm/aws-operator/service/resource/cloudformationv1/adapter"
-	"github.com/giantswarm/awstpr"
-	"github.com/giantswarm/clustertpr"
-	"github.com/giantswarm/clustertpr/spec"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
+
+	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2/adapter"
 )
 
 func Test_Resource_Cloudformation_newDelete(t *testing.T) {
@@ -22,12 +21,10 @@ func Test_Resource_Cloudformation_newDelete(t *testing.T) {
 	}{
 		{
 			description: "current and desired state empty, expected empty",
-			obj: &awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					Cluster: clustertpr.Spec{
-						Cluster: spec.Cluster{
-							ID: "5xchu",
-						},
+			obj: &v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "5xchu",
 					},
 				},
 			},
@@ -37,12 +34,10 @@ func Test_Resource_Cloudformation_newDelete(t *testing.T) {
 		},
 		{
 			description: "current state empty, desired state not empty, expected empty",
-			obj: &awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					Cluster: clustertpr.Spec{
-						Cluster: spec.Cluster{
-							ID: "5xchu",
-						},
+			obj: &v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "5xchu",
 					},
 				},
 			},
@@ -54,12 +49,10 @@ func Test_Resource_Cloudformation_newDelete(t *testing.T) {
 		},
 		{
 			description: "current state not empty, desired state not empty but different, expected current state",
-			obj: &awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					Cluster: clustertpr.Spec{
-						Cluster: spec.Cluster{
-							ID: "5xchu",
-						},
+			obj: &v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "5xchu",
 					},
 				},
 			},
@@ -73,12 +66,10 @@ func Test_Resource_Cloudformation_newDelete(t *testing.T) {
 		},
 		{
 			description: "current state not empty, desired state not empty but equal, expected desired state",
-			obj: &awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					Cluster: clustertpr.Spec{
-						Cluster: spec.Cluster{
-							ID: "5xchu",
-						},
+			obj: &v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "5xchu",
 					},
 				},
 			},

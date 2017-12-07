@@ -6,17 +6,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/giantswarm/awstpr"
-	awsspec "github.com/giantswarm/awstpr/spec"
-	awsspecaws "github.com/giantswarm/awstpr/spec/aws"
-	"github.com/giantswarm/clustertpr"
-	"github.com/giantswarm/clustertpr/spec"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 )
 
 func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 	testCases := []struct {
 		description                      string
-		customObject                     awstpr.CustomObject
+		customObject                     v1alpha1.AWSConfig
 		expectedError                    bool
 		expectedImageID                  string
 		expectedInstanceType             string
@@ -26,21 +22,19 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 	}{
 		{
 			description:   "empty custom object",
-			customObject:  awstpr.CustomObject{},
+			customObject:  v1alpha1.AWSConfig{},
 			expectedError: true,
 		},
 		{
 			description: "basic matching, all fields present",
-			customObject: awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					Cluster: clustertpr.Spec{
-						Cluster: spec.Cluster{
-							ID: "test-cluster",
-						},
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "test-cluster",
 					},
-					AWS: awsspec.AWS{
-						Workers: []awsspecaws.Node{
-							awsspecaws.Node{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{
+							v1alpha1.AWSConfigSpecAWSNode{
 								ImageID:      "myimageid",
 								InstanceType: "myinstancetype",
 							},
@@ -101,23 +95,21 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 func TestAdapterLaunchConfigurationSecurityGroupID(t *testing.T) {
 	testCases := []struct {
 		description             string
-		customObject            awstpr.CustomObject
+		customObject            v1alpha1.AWSConfig
 		expectedSecurityGroupID string
 		expectedError           bool
 		unexistingSG            bool
 	}{
 		{
 			description: "existent security group",
-			customObject: awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					Cluster: clustertpr.Spec{
-						Cluster: spec.Cluster{
-							ID: "test-cluster",
-						},
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "test-cluster",
 					},
-					AWS: awsspec.AWS{
-						Workers: []awsspecaws.Node{
-							awsspecaws.Node{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{
+							v1alpha1.AWSConfigSpecAWSNode{
 								ImageID:      "myimageid",
 								InstanceType: "myinstancetype",
 							},
@@ -129,16 +121,14 @@ func TestAdapterLaunchConfigurationSecurityGroupID(t *testing.T) {
 		},
 		{
 			description: "unexistent security group",
-			customObject: awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					Cluster: clustertpr.Spec{
-						Cluster: spec.Cluster{
-							ID: "test-cluster",
-						},
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "test-cluster",
 					},
-					AWS: awsspec.AWS{
-						Workers: []awsspecaws.Node{
-							awsspecaws.Node{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{
+							v1alpha1.AWSConfigSpecAWSNode{
 								ImageID:      "myimageid",
 								InstanceType: "myinstancetype",
 							},
@@ -199,18 +189,16 @@ func TestAdapterLaunchConfigurationSmallCloudConfig(t *testing.T) {
 		EC2: &EC2ClientMock{},
 		IAM: &IAMClientMock{accountID: "000000000000"},
 	}
-	customObject := awstpr.CustomObject{
-		Spec: awstpr.Spec{
-			Cluster: clustertpr.Spec{
-				Cluster: spec.Cluster{
-					ID: "test-cluster",
-				},
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID:      "test-cluster",
 				Version: "myversion",
 			},
-			AWS: awsspec.AWS{
+			AWS: v1alpha1.AWSConfigSpecAWS{
 				Region: "myregion",
-				Workers: []awsspecaws.Node{
-					awsspecaws.Node{
+				Workers: []v1alpha1.AWSConfigSpecAWSNode{
+					v1alpha1.AWSConfigSpecAWSNode{
 						ImageID:      "myimageid",
 						InstanceType: "myinstancetype",
 					},

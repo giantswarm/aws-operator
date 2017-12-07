@@ -1,4 +1,4 @@
-package cloudformationv1
+package cloudformationv2
 
 import (
 	"strings"
