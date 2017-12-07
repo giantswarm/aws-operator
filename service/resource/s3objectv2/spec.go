@@ -3,7 +3,7 @@ package s3objectv2
 import (
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/giantswarm/awstpr"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certificatetpr"
 )
 
@@ -56,7 +56,7 @@ type AwsService interface {
 }
 
 type CloudConfigService interface {
-	NewWorkerTemplate(awstpr.CustomObject, certificatetpr.CompactTLSAssets) (string, error)
+	NewWorkerTemplate(v1alpha1.AWSConfig, certificatetpr.CompactTLSAssets) (string, error)
 }
 
 type CertWatcher interface {

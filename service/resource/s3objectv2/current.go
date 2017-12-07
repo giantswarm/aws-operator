@@ -6,27 +6,27 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/giantswarm/aws-operator/service/keyv1"
+	"github.com/giantswarm/aws-operator/service/keyv2"
 	"github.com/giantswarm/microerror"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
 	output := BucketObjectState{}
-	customObject, err := keyv1.ToCustomObject(obj)
+	customObject, err := keyv2.ToCustomObject(obj)
 	if err != nil {
 		return output, microerror.Mask(err)
 	}
 
 	r.logger.LogCtx(ctx, "debug", "looking for S3 objects")
 
-	workersObjectName := keyv1.BucketObjectName(customObject, prefixWorker)
+	workersObjectName := keyv2.BucketObjectName(customObject, prefixWorker)
 
 	accountID, err := r.awsService.GetAccountID()
 	if err != nil {
 		return output, microerror.Mask(err)
 	}
 
-	bucketName := keyv1.BucketName(customObject, accountID)
+	bucketName := keyv2.BucketName(customObject, accountID)
 
 	input := &s3.GetObjectInput{
 		Key:    aws.String(workersObjectName),

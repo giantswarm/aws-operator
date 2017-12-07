@@ -7,27 +7,24 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go/service/s3"
-	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/awstpr"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certificatetpr/certificatetprtest"
-	"github.com/giantswarm/clustertpr"
-	"github.com/giantswarm/clustertpr/spec"
 	"github.com/giantswarm/micrologger/microloggertest"
+
+	awsservice "github.com/giantswarm/aws-operator/service/aws"
 )
 
 func Test_Resource_S3Object_newUpdate(t *testing.T) {
-	clusterTpo := awstpr.CustomObject{
-		Spec: awstpr.Spec{
-			Cluster: clustertpr.Spec{
-				Cluster: spec.Cluster{
-					ID: "test-cluster",
-				},
+	clusterTpo := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "test-cluster",
 			},
 		},
 	}
 
 	testCases := []struct {
-		obj            awstpr.CustomObject
+		obj            v1alpha1.AWSConfig
 		currentState   BucketObjectState
 		desiredState   BucketObjectState
 		expectedBody   string
