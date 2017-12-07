@@ -1,4 +1,4 @@
-package cloudconfigv1
+package cloudconfigv2
 
 import "github.com/giantswarm/microerror"
 

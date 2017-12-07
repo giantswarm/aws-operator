@@ -1,20 +1,22 @@
-package cloudconfigv1
+package cloudconfigv2
 
 import (
-	"github.com/giantswarm/awstpr"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certificatetpr"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_0_1_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_2_0_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeytpr"
 )
 
-func v_0_1_0MasterTemplate(customObject awstpr.CustomObject, certs certificatetpr.CompactTLSAssets, keys randomkeytpr.CompactRandomKeyAssets) (string, error) {
+// NewMasterTemplate generates a new master cloud config template and returns it
+// as a base64 encoded string.
+func (c *CloudConfig) NewMasterTemplate(customObject v1alpha1.AWSConfig, certs certificatetpr.CompactTLSAssets, keys randomkeytpr.CompactRandomKeyAssets) (string, error) {
 	var err error
 
 	var params k8scloudconfig.Params
 	{
 		params.Cluster = customObject.Spec.Cluster
-		params.Extension = &v_0_1_0MasterExtension{
+		params.Extension = &MasterExtension{
 			certs:        certs,
 			customObject: customObject,
 			keys:         keys,
@@ -37,13 +39,13 @@ func v_0_1_0MasterTemplate(customObject awstpr.CustomObject, certs certificatetp
 	return newCloudConfig.Base64(), nil
 }
 
-type v_0_1_0MasterExtension struct {
+type MasterExtension struct {
 	certs        certificatetpr.CompactTLSAssets
-	customObject awstpr.CustomObject
+	customObject v1alpha1.AWSConfig
 	keys         randomkeytpr.CompactRandomKeyAssets
 }
 
-func (e *v_0_1_0MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
+func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	filesMeta := []k8scloudconfig.FileMetadata{
 		{
 			AssetContent: decryptTLSAssetsScriptTemplate,
@@ -206,7 +208,7 @@ func (e *v_0_1_0MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	return newFiles, nil
 }
 
-func (e *v_0_1_0MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
+func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	unitsMeta := []k8scloudconfig.UnitMetadata{
 		{
 			AssetContent: decryptTLSAssetsServiceTemplate,
@@ -253,7 +255,7 @@ func (e *v_0_1_0MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	return newUnits, nil
 }
 
-func (e *v_0_1_0MasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
+func (e *MasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
 	newSections := []k8scloudconfig.VerbatimSection{
 		{
 			Name:    "storage",
