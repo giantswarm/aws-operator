@@ -1,16 +1,15 @@
-package legacyv1
+package legacyv2
 
 import (
 	"bytes"
 	"compress/gzip"
 	"encoding/base64"
 
-	"github.com/giantswarm/randomkeytpr"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/certificatetpr"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/randomkeytpr"
 )
 
 type TLSassets struct {
