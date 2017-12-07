@@ -48,7 +48,7 @@ func (a *autoScalingGroupAdapter) getAutoScalingGroup(customObject awstpr.Custom
 	// subnet ID
 	// TODO: remove this code once the subnet is created by cloudformation and add a
 	// reference in the template
-	subnetName := keyv1.SubnetName(customObject, suffixPublic)
+	subnetName := keyv1.SubnetName(customObject, suffixPrivate)
 	describeSubnetInput := &ec2.DescribeSubnetsInput{
 		Filters: []*ec2.Filter{
 			{
