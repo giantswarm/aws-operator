@@ -8,17 +8,31 @@ import (
 )
 
 type KMSClientMock struct {
-	keyID   string
-	aRN     string
-	isError bool
+	keyID     string
+	aRN       string
+	isError   bool
+	clusterID string
 }
 
 func (k *KMSClientMock) CreateKey(input *kms.CreateKeyInput) (*kms.CreateKeyOutput, error) {
-	return nil, nil
+	return &kms.CreateKeyOutput{
+		KeyMetadata: &kms.KeyMetadata{
+			Arn:   aws.String("myarn"),
+			KeyId: aws.String("mykeyid"),
+		},
+	}, nil
 }
 
 func (k *KMSClientMock) CreateAlias(input *kms.CreateAliasInput) (*kms.CreateAliasOutput, error) {
-	return nil, nil
+	if *input.AliasName != fmt.Sprintf("alias/%s", k.clusterID) {
+		return nil, fmt.Errorf("unexpected alias, %v", input.AliasName)
+	}
+
+	if *input.TargetKeyId != "myarn" {
+		return nil, fmt.Errorf("unexpected targetKeyID, %v", input.TargetKeyId)
+	}
+
+	return &kms.CreateAliasOutput{}, nil
 }
 
 func (k *KMSClientMock) DeleteAlias(input *kms.DeleteAliasInput) (*kms.DeleteAliasOutput, error) {
@@ -26,7 +40,11 @@ func (k *KMSClientMock) DeleteAlias(input *kms.DeleteAliasInput) (*kms.DeleteAli
 }
 
 func (k *KMSClientMock) EnableKeyRotation(input *kms.EnableKeyRotationInput) (*kms.EnableKeyRotationOutput, error) {
-	return nil, nil
+	if *input.KeyId != "mykeyid" {
+		return nil, fmt.Errorf("unexpected keyid, %v", input.KeyId)
+	}
+
+	return &kms.EnableKeyRotationOutput{}, nil
 }
 
 func (k *KMSClientMock) DescribeKey(input *kms.DescribeKeyInput) (*kms.DescribeKeyOutput, error) {
