@@ -1,4 +1,4 @@
-package cloudconfigv1
+package cloudconfigv2
 
 import (
 	"bytes"
@@ -8,29 +8,23 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/giantswarm/randomkeytpr"
-
-	"github.com/giantswarm/awstpr"
-	awstprspec "github.com/giantswarm/awstpr/spec"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certificatetpr"
-	"github.com/giantswarm/clustertpr"
-	clustertprspec "github.com/giantswarm/clustertpr/spec"
 	"github.com/giantswarm/micrologger/microloggertest"
+	"github.com/giantswarm/randomkeytpr"
 )
 
 func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 	testCases := []struct {
-		CustomObject awstpr.CustomObject
+		CustomObject v1alpha1.AWSConfig
 		Certs        certificatetpr.CompactTLSAssets
 		ClusterKeys  randomkeytpr.CompactRandomKeyAssets
 	}{
 		{
-			CustomObject: awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					Cluster: clustertpr.Spec{
-						Cluster: clustertprspec.Cluster{
-							ID: "al9qy",
-						},
+			CustomObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "al9qy",
 					},
 				},
 			},
@@ -86,19 +80,17 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 
 func Test_Service_CloudConfig_NewWorkerTemplate(t *testing.T) {
 	testCases := []struct {
-		CustomObject awstpr.CustomObject
+		CustomObject v1alpha1.AWSConfig
 		Certs        certificatetpr.CompactTLSAssets
 	}{
 		{
-			CustomObject: awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					AWS: awstprspec.AWS{
+			CustomObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
 						Region: "123456789-super-magic-aws-region",
 					},
-					Cluster: clustertpr.Spec{
-						Cluster: clustertprspec.Cluster{
-							ID: "al9qy",
-						},
+					Cluster: v1alpha1.Cluster{
+						ID: "al9qy",
 					},
 				},
 			},

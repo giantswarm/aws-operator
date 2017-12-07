@@ -1,4 +1,4 @@
-package cloudconfigv1
+package cloudconfigv2
 
 const (
 	decryptTLSAssetsScriptTemplate = `#!/bin/bash -e

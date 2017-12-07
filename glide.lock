@@ -1,5 +1,5 @@
-hash: 0e05add1a117b58ead0a42b6355d62469160970f41467166eb20a9a32c3b3c21
-updated: 2017-12-06T17:14:43.505488387+01:00
+hash: 50e2f4d4910b6d4d4492ab412997f6ec88068f58a0cd84b727e7ba060b22ec1c
+updated: 2017-12-07T11:26:05.58548072+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -69,7 +69,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/apiextensions
-  version: 11fc47c2373c9ca55b706261e59b0c897d9e3999
+  version: 7ec3d5ca6238c9d2473d71494a2b36d295513a4e
   subpackages:
   - pkg/apis/provider/v1alpha1
 - name: github.com/giantswarm/awstpr
@@ -205,6 +205,7 @@ imports:
   subpackages:
   - hcl/ast
   - hcl/parser
+  - hcl/printer
   - hcl/scanner
   - hcl/strconv
   - hcl/token
@@ -271,13 +272,13 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: de2d9c4eca8f3c1de17d48b096b6504e0296f003
+  version: ccaecb155a2177302cb56cae929251a256d0f646
 - name: github.com/spf13/jwalterweatherman
   version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
 - name: github.com/spf13/pflag
   version: 4c012f6dcd9546820e378d0bdda4d8fc772cdfea
 - name: github.com/spf13/viper
-  version: 4dddf7c62e16bce5807744018f5b753bfe21bbd2
+  version: 1a0c4a370c3e8286b835467d2dfcdaf636c3538b
 - name: github.com/stretchr/testify
   version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
   repo: git://github.com/stretchr/testify.git

@@ -51,7 +51,7 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 			expectedImageID:                  "myimageid",
 			expectedInstanceType:             "myinstancetype",
 			expectedIAMInstanceProfileName:   "test-cluster-worker-EC2-K8S-Role",
-			expectedAssociatePublicIPAddress: true,
+			expectedAssociatePublicIPAddress: false,
 			expectedBlockDeviceMappings: []BlockDeviceMapping{
 				BlockDeviceMapping{
 					DeleteOnTermination: true,
@@ -86,6 +86,9 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 				t.Errorf("unexpected InstanceType, got %q, want %q", a.InstanceType, tc.expectedInstanceType)
 			}
 			if a.IAMInstanceProfileName != tc.expectedIAMInstanceProfileName {
+				t.Errorf("unexpected IAMInstanceProfileName, got %q, want %q", a.IAMInstanceProfileName, tc.expectedIAMInstanceProfileName)
+			}
+			if a.AssociatePublicIPAddress != tc.expectedAssociatePublicIPAddress {
 				t.Errorf("unexpected IAMInstanceProfileName, got %q, want %q", a.IAMInstanceProfileName, tc.expectedIAMInstanceProfileName)
 			}
 			if !reflect.DeepEqual(a.BlockDeviceMappings, tc.expectedBlockDeviceMappings) {

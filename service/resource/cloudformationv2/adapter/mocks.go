@@ -37,7 +37,7 @@ func (e *EC2ClientMock) DescribeSubnets(input *ec2.DescribeSubnetsInput) (*ec2.D
 
 	if !e.unexistingSubnet {
 		tagNameValue := *input.Filters[0].Values[0]
-		if tagNameValue != e.clusterID+"-public" {
+		if tagNameValue != e.clusterID+"-private" {
 			return nil, fmt.Errorf("unexpected tag name value %v", tagNameValue)
 		}
 

@@ -41,7 +41,8 @@ const (
 
 	tagKeyName = "Name"
 
-	suffixPublic = "public"
+	suffixPublic  = "public"
+	suffixPrivate = "private"
 
 	// RootDirElement marks the directory that should be taken as root when evaluating
 	// template's relative paths.

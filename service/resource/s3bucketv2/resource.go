@@ -1,4 +1,4 @@
-package s3bucketv1
+package s3bucketv2
 
 import (
 	"github.com/giantswarm/microerror"
@@ -10,7 +10,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "s3bucketv1"
+	Name = "s3bucketv2"
 )
 
 // Config represents the configuration used to create a new s3bucket resource.
