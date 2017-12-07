@@ -117,7 +117,7 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 	versionedResources := make(map[string][]framework.Resource)
 	versionedResources["0.1.0"] = legacyResources
 	versionedResources["0.2.0"] = allResources
-	versionedResources["1.0.0"] = allResources
+	versionedResources["1.0.0"] = legacyResources
 
 	testCases := []struct {
 		customObject      awstpr.CustomObject
@@ -173,7 +173,7 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 					},
 				},
 			},
-			expectedResources: allResources,
+			expectedResources: legacyResources,
 			errorMatcher:      nil,
 			resourceRouter:    NewResourceRouter(versionedResources),
 		},
