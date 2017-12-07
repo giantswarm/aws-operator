@@ -1,14 +1,14 @@
-package cloudconfigv1
+package cloudconfigv2
 
 import (
-	"github.com/giantswarm/awstpr"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certificatetpr"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_0_1_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_2_0_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeytpr"
 )
 
-func v_0_1_0MasterTemplate(customObject awstpr.CustomObject, certs certificatetpr.CompactTLSAssets, keys randomkeytpr.CompactRandomKeyAssets) (string, error) {
+func v_0_1_0MasterTemplate(customObject v1alpha1.AWSConfig, certs certificatetpr.CompactTLSAssets, keys randomkeytpr.CompactRandomKeyAssets) (string, error) {
 	var err error
 
 	var params k8scloudconfig.Params
@@ -39,7 +39,7 @@ func v_0_1_0MasterTemplate(customObject awstpr.CustomObject, certs certificatetp
 
 type v_0_1_0MasterExtension struct {
 	certs        certificatetpr.CompactTLSAssets
-	customObject awstpr.CustomObject
+	customObject v1alpha1.AWSConfig
 	keys         randomkeytpr.CompactRandomKeyAssets
 }
 
