@@ -165,7 +165,7 @@ func TestAdapterAutoScalingGroupSubnetID(t *testing.T) {
 					},
 				},
 			},
-			expectedReceivedSubnetName: "test-cluster-public",
+			expectedReceivedSubnetName: "test-cluster-private",
 		},
 		{
 			description: "unexistent subnet",
