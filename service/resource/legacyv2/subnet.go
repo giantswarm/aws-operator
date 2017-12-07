@@ -1,20 +1,20 @@
-package legacyv1
+package legacyv2
 
 import (
 	"fmt"
 
-	"github.com/giantswarm/awstpr"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
-	"github.com/giantswarm/aws-operator/service/keyv1"
+	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
 type SubnetInput struct {
 	CidrBlock  string
 	Clients    awsutil.Clients
-	Cluster    awstpr.CustomObject
+	Cluster    v1alpha1.AWSConfig
 	MakePublic bool
 	Name       string
 	RouteTable *awsresources.RouteTable
@@ -24,11 +24,11 @@ type SubnetInput struct {
 // createSubnet creates a subnet and optionally makes it public.
 func (s *Resource) createSubnet(input SubnetInput) (*awsresources.Subnet, error) {
 	subnet := &awsresources.Subnet{
-		AvailabilityZone: keyv1.AvailabilityZone(input.Cluster),
+		AvailabilityZone: keyv2.AvailabilityZone(input.Cluster),
 		CidrBlock:        input.CidrBlock,
 		Name:             input.Name,
 		VpcID:            input.VpcID,
-		ClusterName:      keyv1.ClusterID(input.Cluster),
+		ClusterName:      keyv2.ClusterID(input.Cluster),
 		// Dependencies.
 		Logger:    s.logger,
 		AWSEntity: awsresources.AWSEntity{Clients: input.Clients},
