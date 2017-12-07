@@ -1,4 +1,4 @@
-package legacyv1
+package legacyv2
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/certificatetpr"
 	"github.com/giantswarm/microerror"
@@ -22,13 +23,13 @@ import (
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/resources"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
-	"github.com/giantswarm/aws-operator/service/cloudconfigv1"
-	"github.com/giantswarm/aws-operator/service/keyv1"
+	"github.com/giantswarm/aws-operator/service/cloudconfigv2"
+	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
 const (
 	// Name is the identifier of the resource.
-	Name = "legacyv1"
+	Name = "legacyv2"
 
 	// The format of instance's name is "[name of cluster]-[prefix ('master' or 'worker')]-[number]".
 	instanceNameFormat string = "%s-%s-%d"
@@ -53,7 +54,7 @@ const (
 type Config struct {
 	// Dependencies.
 	CertWatcher *certificatetpr.Service
-	CloudConfig *cloudconfigv1.CloudConfig
+	CloudConfig *cloudconfigv2.CloudConfig
 	K8sClient   kubernetes.Interface
 	KeyWatcher  *randomkeytpr.Service
 	Logger      micrologger.Logger
@@ -163,7 +164,7 @@ func New(config Config) (*Resource, error) {
 type Resource struct {
 	// Dependencies.
 	certWatcher *certificatetpr.Service
-	cloudConfig *cloudconfigv1.CloudConfig
+	cloudConfig *cloudconfigv2.CloudConfig
 	k8sClient   kubernetes.Interface
 	keyWatcher  *randomkeytpr.Service
 	logger      micrologger.Logger
@@ -181,19 +182,19 @@ type Resource struct {
 
 type Event struct {
 	Type   string
-	Object *awstpr.CustomObject
+	Object *v1alpha1.AWSConfig
 }
 
 // NewUpdatePatch is called upon observed custom object change. It creates the
 // AWS resources for the cluster.
 func (s *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
-	customObject, ok := obj.(*awstpr.CustomObject)
+	customObject, ok := obj.(*v1alpha1.AWSConfig)
 	if !ok {
-		return &framework.Patch{}, microerror.Maskf(invalidConfigError, "could not convert to awstpr.CustomObject")
+		return &framework.Patch{}, microerror.Maskf(invalidConfigError, "could not convert to v1alpha1.AWSConfig")
 	}
 	cluster := *customObject
 
-	s.logger.Log("info", fmt.Sprintf("creating cluster '%s'", keyv1.ClusterID(cluster)))
+	s.logger.Log("info", fmt.Sprintf("creating cluster '%s'", keyv2.ClusterID(cluster)))
 
 	if err := validateCluster(cluster); err != nil {
 		return nil, microerror.Mask(err)
@@ -204,7 +205,7 @@ func (s *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 		return nil, microerror.Mask(err)
 	}
 
-	s.logger.Log("info", fmt.Sprintf("cluster '%s' processed", keyv1.ClusterID(cluster)))
+	s.logger.Log("info", fmt.Sprintf("cluster '%s' processed", keyv2.ClusterID(cluster)))
 
 	return &framework.Patch{}, nil
 }
@@ -212,13 +213,13 @@ func (s *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 // NewDeletePatch is called upon observed custom object deletion. It deletes the
 // AWS resources for the cluster.
 func (s *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
-	// We can receive an instance of awstpr.CustomObject or cache.DeletedFinalStateUnknown.
+	// We can receive an instance of v1alpha1.AWSConfig or cache.DeletedFinalStateUnknown.
 	// We need to assert the type properly and log an error when we cannot do that.
 	// Also, the cache.DeleteFinalStateUnknown object can contain the proper CustomObject,
 	// but doesn't have to.
 	// https://github.com/kubernetes/client-go/blob/7ba6be594966f4bec08a57a60c855d17a9f7000a/tools/cache/delta_fifo.go#L674-L677
-	var cluster awstpr.CustomObject
-	clusterPtr, ok := obj.(*awstpr.CustomObject)
+	var cluster v1alpha1.AWSConfig
+	clusterPtr, ok := obj.(*v1alpha1.AWSConfig)
 	if ok {
 		cluster = *clusterPtr
 	} else {
@@ -226,22 +227,22 @@ func (s *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desire
 		if !ok {
 			return nil, microerror.Maskf(invalidConfigError, "received unknown type of third-party object")
 		}
-		clusterPtr, ok := deletedObj.Obj.(*awstpr.CustomObject)
+		clusterPtr, ok := deletedObj.Obj.(*v1alpha1.AWSConfig)
 		if !ok {
 			return nil, microerror.Maskf(invalidConfigError, "received the proper delete request, but the type of third-party object is unknown")
 		}
 		cluster = *clusterPtr
 	}
 
-	s.logger.Log("info", fmt.Sprintf("deleting cluster '%s'", keyv1.ClusterID(cluster)))
+	s.logger.Log("info", fmt.Sprintf("deleting cluster '%s'", keyv2.ClusterID(cluster)))
 
 	err := s.processDelete(cluster)
 	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("error deleting cluster '%s': '%#v'", keyv1.ClusterID(cluster), err))
+		s.logger.Log("error", fmt.Sprintf("error deleting cluster '%s': '%#v'", keyv2.ClusterID(cluster), err))
 		return nil, microerror.Mask(err)
 	}
 
-	s.logger.Log("info", fmt.Sprintf("cluster '%s' deleted", keyv1.ClusterID(cluster)))
+	s.logger.Log("info", fmt.Sprintf("cluster '%s' deleted", keyv2.ClusterID(cluster)))
 
 	return &framework.Patch{}, nil
 }
@@ -250,10 +251,10 @@ func (s *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	return nil
 }
 
-func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
+func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 	// For new clusters using Cloud Formation there is an OperatorKit resource
 	// for the k8s namespace.
-	if !keyv1.UseCloudFormation(cluster) {
+	if !keyv2.UseCloudFormation(cluster) {
 		// Create cluster namespace in k8s.
 		if err := s.createClusterNamespace(cluster.Spec.Cluster); err != nil {
 			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create cluster namespace: '%#v'", err))
@@ -275,14 +276,14 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 	}
 
 	// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
-	if !keyv1.HasClusterVersion(cluster) {
+	if !keyv2.HasClusterVersion(cluster) {
 		// Create keypair.
 		var keyPair resources.ReusableResource
 		var keyPairCreated bool
 		{
 			var err error
 			keyPair = &awsresources.KeyPair{
-				ClusterName: keyv1.ClusterID(cluster),
+				ClusterName: keyv2.ClusterID(cluster),
 				Provider:    awsresources.NewFSKeyPairProvider(s.pubKeyFile),
 				AWSEntity:   awsresources.AWSEntity{Clients: clients},
 			}
@@ -293,14 +294,14 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 		}
 
 		if keyPairCreated {
-			s.logger.Log("info", fmt.Sprintf("created keypair '%s'", keyv1.ClusterID(cluster)))
+			s.logger.Log("info", fmt.Sprintf("created keypair '%s'", keyv2.ClusterID(cluster)))
 		} else {
-			s.logger.Log("info", fmt.Sprintf("keypair '%s' already exists, reusing", keyv1.ClusterID(cluster)))
+			s.logger.Log("info", fmt.Sprintf("keypair '%s' already exists, reusing", keyv2.ClusterID(cluster)))
 		}
 	}
 
 	s.logger.Log("info", fmt.Sprintf("waiting for k8s secrets..."))
-	clusterID := keyv1.ClusterID(cluster)
+	clusterID := keyv2.ClusterID(cluster)
 	certs, err := s.certWatcher.SearchCerts(clusterID)
 	if err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get certificates from secrets: '%#v'", err))
@@ -315,7 +316,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 
 	// Create KMS key.
 	kmsKey := &awsresources.KMSKey{
-		Name:      keyv1.ClusterID(cluster),
+		Name:      keyv2.ClusterID(cluster),
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
 	}
 
@@ -325,7 +326,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 	}
 
 	if kmsCreated {
-		s.logger.Log("info", fmt.Sprintf("created KMS key for cluster '%s'", keyv1.ClusterID(cluster)))
+		s.logger.Log("info", fmt.Sprintf("created KMS key for cluster '%s'", keyv2.ClusterID(cluster)))
 	} else {
 		s.logger.Log("info", fmt.Sprintf("kms key '%s' already exists, reusing", kmsKey.Name))
 	}
@@ -350,7 +351,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 	{
 		var err error
 		masterPolicy = &awsresources.Policy{
-			ClusterID:  keyv1.ClusterID(cluster),
+			ClusterID:  keyv2.ClusterID(cluster),
 			KMSKeyArn:  kmsKey.Arn(),
 			PolicyType: prefixMaster,
 			S3Bucket:   bucketName,
@@ -362,9 +363,9 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 		}
 	}
 	if masterPolicyCreated {
-		s.logger.Log("info", fmt.Sprintf("created master policy for cluster '%s'", keyv1.ClusterID(cluster)))
+		s.logger.Log("info", fmt.Sprintf("created master policy for cluster '%s'", keyv2.ClusterID(cluster)))
 	} else {
-		s.logger.Log("info", fmt.Sprintf("master policy for cluster '%s' already exists, reusing", keyv1.ClusterID(cluster)))
+		s.logger.Log("info", fmt.Sprintf("master policy for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
 	}
 
 	// Create worker IAM policy.
@@ -373,7 +374,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 	{
 		var err error
 		workerPolicy = &awsresources.Policy{
-			ClusterID:  keyv1.ClusterID(cluster),
+			ClusterID:  keyv2.ClusterID(cluster),
 			KMSKeyArn:  kmsKey.Arn(),
 			PolicyType: prefixWorker,
 			S3Bucket:   bucketName,
@@ -385,9 +386,9 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 		}
 	}
 	if workerPolicyCreated {
-		s.logger.Log("info", fmt.Sprintf("created worker policy for cluster '%s'", keyv1.ClusterID(cluster)))
+		s.logger.Log("info", fmt.Sprintf("created worker policy for cluster '%s'", keyv2.ClusterID(cluster)))
 	} else {
-		s.logger.Log("info", fmt.Sprintf("worker policy for cluster '%s' already exists, reusing", keyv1.ClusterID(cluster)))
+		s.logger.Log("info", fmt.Sprintf("worker policy for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
 	}
 
 	// Create S3 bucket.
@@ -416,7 +417,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 	vpc = &awsresources.VPC{
 		CidrBlock:        cluster.Spec.AWS.VPC.CIDR,
 		InstallationName: s.installationName,
-		Name:             keyv1.ClusterID(cluster),
+		Name:             keyv2.ClusterID(cluster),
 		AWSEntity:        awsresources.AWSEntity{Clients: clients},
 	}
 	vpcCreated, err := vpc.CreateIfNotExists()
@@ -424,9 +425,9 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create VPC: '%#v'", err))
 	}
 	if vpcCreated {
-		s.logger.Log("info", fmt.Sprintf("created vpc for cluster '%s'", keyv1.ClusterID(cluster)))
+		s.logger.Log("info", fmt.Sprintf("created vpc for cluster '%s'", keyv2.ClusterID(cluster)))
 	} else {
-		s.logger.Log("info", fmt.Sprintf("vpc for cluster '%s' already exists, reusing", keyv1.ClusterID(cluster)))
+		s.logger.Log("info", fmt.Sprintf("vpc for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
 	}
 	vpcID, err := vpc.GetID()
 	if err != nil {
@@ -448,9 +449,9 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create vpc peering connection: '%#v'", err))
 	}
 	if vpcPeeringConnectionCreated {
-		s.logger.Log("info", fmt.Sprintf("created vpc peering connection for cluster '%s'", keyv1.ClusterID(cluster)))
+		s.logger.Log("info", fmt.Sprintf("created vpc peering connection for cluster '%s'", keyv2.ClusterID(cluster)))
 	} else {
-		s.logger.Log("info", fmt.Sprintf("vpc peering connection for cluster '%s' already exists, reusing", keyv1.ClusterID(cluster)))
+		s.logger.Log("info", fmt.Sprintf("vpc peering connection for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
 	}
 
 	conn, err := vpcPeeringConection.FindExisting()
@@ -461,7 +462,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 	// Create internet gateway.
 	var internetGateway resources.ResourceWithID
 	internetGateway = &awsresources.InternetGateway{
-		Name:  keyv1.ClusterID(cluster),
+		Name:  keyv2.ClusterID(cluster),
 		VpcID: vpcID,
 		// Dependencies.
 		Logger:    s.logger,
@@ -472,15 +473,15 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create internet gateway: '%#v'", err))
 	}
 	if internetGatewayCreated {
-		s.logger.Log("info", fmt.Sprintf("created internet gateway for cluster '%s'", keyv1.ClusterID(cluster)))
+		s.logger.Log("info", fmt.Sprintf("created internet gateway for cluster '%s'", keyv2.ClusterID(cluster)))
 	} else {
-		s.logger.Log("info", fmt.Sprintf("internet gateway for cluster '%s' already exists, reusing", keyv1.ClusterID(cluster)))
+		s.logger.Log("info", fmt.Sprintf("internet gateway for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
 	}
 
 	// Create masters security group.
 	mastersSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: keyv1.SecurityGroupName(cluster, prefixMaster),
+		GroupName: keyv2.SecurityGroupName(cluster, prefixMaster),
 		VPCID:     vpcID,
 	}
 	mastersSecurityGroup, err := s.createSecurityGroup(mastersSGInput)
@@ -495,7 +496,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 	// Create workers security group.
 	workersSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: keyv1.SecurityGroupName(cluster, prefixWorker),
+		GroupName: keyv2.SecurityGroupName(cluster, prefixWorker),
 		VPCID:     vpcID,
 	}
 	workersSecurityGroup, err := s.createSecurityGroup(workersSGInput)
@@ -510,7 +511,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 	// Create ingress ELB security group.
 	ingressSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: keyv1.SecurityGroupName(cluster, prefixIngress),
+		GroupName: keyv2.SecurityGroupName(cluster, prefixIngress),
 		VPCID:     vpcID,
 	}
 	ingressSecurityGroup, err := s.createSecurityGroup(ingressSGInput)
@@ -545,7 +546,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 
 	// Create public route table.
 	publicRouteTable := &awsresources.RouteTable{
-		Name:   keyv1.ClusterID(cluster),
+		Name:   keyv2.ClusterID(cluster),
 		VpcID:  vpcID,
 		Client: clients.EC2,
 		Logger: s.logger,
@@ -566,7 +567,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 
 	// Create public subnet.
 	subnetInput := SubnetInput{
-		Name:       keyv1.SubnetName(cluster, suffixPublic),
+		Name:       keyv2.SubnetName(cluster, suffixPublic),
 		CidrBlock:  cluster.Spec.AWS.VPC.PublicSubnetCIDR,
 		Clients:    clients,
 		Cluster:    cluster,
@@ -589,10 +590,10 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 	var privateSubnetID string
 
 	// For new clusters create a NAT gateway, private route table and private subnet.
-	if keyv1.HasClusterVersion(cluster) {
+	if keyv2.HasClusterVersion(cluster) {
 		// Create NAT gateway.
 		natGateway := &awsresources.NatGateway{
-			Name:   keyv1.ClusterID(cluster),
+			Name:   keyv2.ClusterID(cluster),
 			Subnet: publicSubnet,
 			// Dependencies.
 			Logger:    s.logger,
@@ -603,9 +604,9 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create nat gateway: '%#v'", err))
 		}
 		if natGatewayCreated {
-			s.logger.Log("info", fmt.Sprintf("created nat gateway for cluster '%s'", keyv1.ClusterID(cluster)))
+			s.logger.Log("info", fmt.Sprintf("created nat gateway for cluster '%s'", keyv2.ClusterID(cluster)))
 		} else {
-			s.logger.Log("info", fmt.Sprintf("nat gateway for cluster '%s' already exists, reusing", keyv1.ClusterID(cluster)))
+			s.logger.Log("info", fmt.Sprintf("nat gateway for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
 		}
 
 		natGatewayID, err := natGateway.GetID()
@@ -615,7 +616,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 
 		// Create private route table.
 		privateRouteTable = &awsresources.RouteTable{
-			Name:   keyv1.RouteTableName(cluster, suffixPrivate),
+			Name:   keyv2.RouteTableName(cluster, suffixPrivate),
 			VpcID:  vpcID,
 			Client: clients.EC2,
 			Logger: s.logger,
@@ -643,7 +644,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 
 		// Create private subnet.
 		subnetInput := SubnetInput{
-			Name:       keyv1.SubnetName(cluster, suffixPrivate),
+			Name:       keyv2.SubnetName(cluster, suffixPrivate),
 			CidrBlock:  cluster.Spec.AWS.VPC.PrivateSubnetCIDR,
 			Clients:    clients,
 			Cluster:    cluster,
@@ -669,7 +670,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 		AWSEntity:              awsresources.AWSEntity{Clients: clients},
 	}
 
-	if keyv1.HasClusterVersion(cluster) {
+	if keyv2.HasClusterVersion(cluster) {
 		// New clusters have private IPs so use the private route table.
 		hostClusterRoute.RouteTable = *privateRouteTable
 	} else {
@@ -682,9 +683,9 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not add host vpc route: '%#v'", err))
 	}
 	if hostRouteCreated {
-		s.logger.Log("info", fmt.Sprintf("created host vpc route for cluster '%s'", keyv1.ClusterID(cluster)))
+		s.logger.Log("info", fmt.Sprintf("created host vpc route for cluster '%s'", keyv2.ClusterID(cluster)))
 	} else {
-		s.logger.Log("info", fmt.Sprintf("host vpc route for cluster '%s' already exists, reusing", keyv1.ClusterID(cluster)))
+		s.logger.Log("info", fmt.Sprintf("host vpc route for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
 	}
 
 	for _, privateRouteTableName := range cluster.Spec.AWS.VPC.RouteTableNames {
@@ -707,9 +708,9 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not add guest vpc route: '%#v'", err))
 		}
 		if privateRouteCreated {
-			s.logger.Log("info", fmt.Sprintf("created guest vpc route for cluster '%s'", keyv1.ClusterID(cluster)))
+			s.logger.Log("info", fmt.Sprintf("created guest vpc route for cluster '%s'", keyv2.ClusterID(cluster)))
 		} else {
-			s.logger.Log("info", fmt.Sprintf("host vpc guest for cluster '%s' already exists, reusing", keyv1.ClusterID(cluster)))
+			s.logger.Log("info", fmt.Sprintf("host vpc guest for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
 		}
 
 	}
@@ -719,14 +720,14 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 		cluster:             cluster,
 		tlsAssets:           tlsAssets,
 		clusterKeys:         clusterKeys,
-		clusterName:         keyv1.ClusterID(cluster),
+		clusterName:         keyv2.ClusterID(cluster),
 		bucket:              bucket,
 		securityGroup:       mastersSecurityGroup,
 		instanceProfileName: masterPolicy.GetName(),
 		prefix:              prefixMaster,
 	}
 
-	if keyv1.HasClusterVersion(cluster) {
+	if keyv2.HasClusterVersion(cluster) {
 		// New clusters have masters in the private subnet.
 		mastersInput.subnet = privateSubnet
 	} else {
@@ -734,7 +735,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 		mastersInput.subnet = publicSubnet
 
 		// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
-		mastersInput.keyPairName = keyv1.ClusterID(cluster)
+		mastersInput.keyPairName = keyv2.ClusterID(cluster)
 	}
 
 	// Run masters.
@@ -752,7 +753,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 		Name:               cluster.Spec.Cluster.Kubernetes.API.Domain,
 		Clients:            clients,
 		Cluster:            cluster,
-		IdleTimeoutSeconds: cluster.Spec.AWS.ELB.IdleTimeoutSeconds.API,
+		IdleTimeoutSeconds: cluster.Spec.AWS.API.ELB.IdleTimeoutSeconds,
 		InstanceIDs:        masterIDs,
 		PortsToOpen: awsresources.PortPairs{
 			{
@@ -774,7 +775,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 		Name:               cluster.Spec.Cluster.Etcd.Domain,
 		Clients:            clients,
 		Cluster:            cluster,
-		IdleTimeoutSeconds: cluster.Spec.AWS.ELB.IdleTimeoutSeconds.Etcd,
+		IdleTimeoutSeconds: cluster.Spec.AWS.Etcd.ELB.IdleTimeoutSeconds,
 		InstanceIDs:        masterIDs,
 		PortsToOpen: awsresources.PortPairs{
 			{
@@ -786,7 +787,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 		SubnetID:        publicSubnetID,
 	}
 
-	if keyv1.HasClusterVersion(cluster) {
+	if keyv2.HasClusterVersion(cluster) {
 		lbInput.Scheme = "internal"
 	}
 
@@ -799,7 +800,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 	// execution. Its likely that previous execution failed. IAM policies can't
 	// be reused for EC2 instances.
 	if anyMastersCreated && !masterPolicyCreated {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("cluster '%s' cannot be processed. As IAM policy for master nodes cannot be reused. Please delete this cluster.", keyv1.ClusterID(cluster)))
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("cluster '%s' cannot be processed. As IAM policy for master nodes cannot be reused. Please delete this cluster.", keyv2.ClusterID(cluster)))
 	}
 
 	// Create Ingress load balancer.
@@ -807,7 +808,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 		Name:               cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
 		Clients:            clients,
 		Cluster:            cluster,
-		IdleTimeoutSeconds: cluster.Spec.AWS.ELB.IdleTimeoutSeconds.Ingress,
+		IdleTimeoutSeconds: cluster.Spec.AWS.Ingress.ELB.IdleTimeoutSeconds,
 		PortsToOpen: awsresources.PortPairs{
 			{
 				PortELB:      httpsPort,
@@ -828,7 +829,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 	}
 
 	// During Cloud Formation migration this logic is only needed for non CF clusters.
-	if !keyv1.UseCloudFormation(cluster) {
+	if !keyv2.UseCloudFormation(cluster) {
 		// Create a launch configuration for the worker nodes.
 		lcInput := launchConfigurationInput{
 			clients:             clients,
@@ -844,7 +845,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 		}
 
 		// For new clusters don't assign public IPs and use the private subnet.
-		if keyv1.HasClusterVersion(cluster) {
+		if keyv2.HasClusterVersion(cluster) {
 			lcInput.associatePublicIP = false
 			lcInput.subnet = privateSubnet
 		} else {
@@ -853,8 +854,8 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 		}
 
 		// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
-		if !keyv1.HasClusterVersion(cluster) {
-			lcInput.keypairName = keyv1.ClusterID(cluster)
+		if !keyv2.HasClusterVersion(cluster) {
+			lcInput.keypairName = keyv2.ClusterID(cluster)
 		}
 
 		lcCreated, err := s.createLaunchConfiguration(lcInput)
@@ -865,7 +866,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 		if lcCreated {
 			s.logger.Log("info", fmt.Sprintf("created worker launch config"))
 		} else {
-			s.logger.Log("info", fmt.Sprintf("launch config %s already exists, reusing", keyv1.ClusterID(cluster)))
+			s.logger.Log("info", fmt.Sprintf("launch config %s already exists, reusing", keyv2.ClusterID(cluster)))
 		}
 
 		workersLCName, err := launchConfigurationName(cluster, "worker", workersSecurityGroupID)
@@ -875,11 +876,11 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 
 		asg := awsresources.AutoScalingGroup{
 			Client:                  clients.AutoScaling,
-			Name:                    keyv1.AutoScalingGroupName(cluster, prefixWorker),
-			ClusterID:               keyv1.ClusterID(cluster),
-			MinSize:                 keyv1.WorkerCount(cluster),
-			MaxSize:                 keyv1.WorkerCount(cluster),
-			AvailabilityZone:        keyv1.AvailabilityZone(cluster),
+			Name:                    keyv2.AutoScalingGroupName(cluster, prefixWorker),
+			ClusterID:               keyv2.ClusterID(cluster),
+			MinSize:                 keyv2.WorkerCount(cluster),
+			MaxSize:                 keyv2.WorkerCount(cluster),
+			AvailabilityZone:        keyv2.AvailabilityZone(cluster),
 			LaunchConfigurationName: workersLCName,
 			LoadBalancerName:        ingressLB.Name,
 			VPCZoneIdentifier:       publicSubnetID,
@@ -887,7 +888,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 		}
 
 		// For new clusters launch the workers in the private subnet.
-		if keyv1.HasClusterVersion(cluster) {
+		if keyv2.HasClusterVersion(cluster) {
 			asg.VPCZoneIdentifier = privateSubnetID
 		} else {
 			asg.VPCZoneIdentifier = publicSubnetID
@@ -899,14 +900,14 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 		}
 
 		if asgCreated {
-			s.logger.Log("info", fmt.Sprintf("created auto scaling group '%s' with size %v", asg.Name, keyv1.WorkerCount(cluster)))
+			s.logger.Log("info", fmt.Sprintf("created auto scaling group '%s' with size %v", asg.Name, keyv2.WorkerCount(cluster)))
 		} else {
 			// If the cluster exists set the worker count so the cluster can be scaled.
 			scaleWorkers := awsresources.AutoScalingGroup{
 				Client:  clients.AutoScaling,
-				Name:    keyv1.AutoScalingGroupName(cluster, prefixWorker),
-				MinSize: keyv1.WorkerCount(cluster),
-				MaxSize: keyv1.WorkerCount(cluster),
+				Name:    keyv2.AutoScalingGroupName(cluster, prefixWorker),
+				MinSize: keyv2.WorkerCount(cluster),
+				MaxSize: keyv2.WorkerCount(cluster),
 			}
 
 			if err := scaleWorkers.Update(); err != nil {
@@ -924,7 +925,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 			Client:       clients.Route53,
 			Resource:     apiLB,
 			Domain:       cluster.Spec.Cluster.Kubernetes.API.Domain,
-			HostedZoneID: cluster.Spec.AWS.HostedZones.API,
+			HostedZoneID: cluster.Spec.AWS.API.HostedZones,
 			Type:         route53.RRTypeA,
 		},
 		{
@@ -932,7 +933,7 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 			Client:       clients.Route53,
 			Resource:     etcdLB,
 			Domain:       cluster.Spec.Cluster.Etcd.Domain,
-			HostedZoneID: cluster.Spec.AWS.HostedZones.Etcd,
+			HostedZoneID: cluster.Spec.AWS.Etcd.HostedZones,
 			Type:         route53.RRTypeA,
 		},
 		{
@@ -940,14 +941,14 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 			Client:       clients.Route53,
 			Resource:     ingressLB,
 			Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-			HostedZoneID: cluster.Spec.AWS.HostedZones.Ingress,
+			HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
 			Type:         route53.RRTypeA,
 		},
 		{
 			Cluster:      cluster,
 			Client:       clients.Route53,
 			Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.WildcardDomain,
-			HostedZoneID: cluster.Spec.AWS.HostedZones.Ingress,
+			HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
 			Value:        cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
 			Type:         route53.RRTypeCname,
 		},
@@ -975,14 +976,14 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 	return nil
 }
 
-func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
+func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 	if err := validateCluster(cluster); err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("cluster spec is invalid: '%#v'", err))
 	}
 
 	// For new clusters using Cloud Formation there is an OperatorKit resource
 	// for the k8s namespace.
-	if !keyv1.UseCloudFormation(cluster) {
+	if !keyv2.UseCloudFormation(cluster) {
 		if err := s.deleteClusterNamespace(cluster.Spec.Cluster); err != nil {
 			s.logger.Log("error", "could not delete cluster namespace:", err)
 		}
@@ -1005,7 +1006,7 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 	s.logger.Log("info", "deleting masters...")
 	if err := s.deleteMachines(deleteMachinesInput{
 		clients:     clients,
-		clusterName: keyv1.ClusterID(cluster),
+		clusterName: keyv2.ClusterID(cluster),
 		prefix:      prefixMaster,
 	}); err != nil {
 		s.logger.Log("error", fmt.Sprintf("%#v", err))
@@ -1013,12 +1014,12 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 		s.logger.Log("info", "deleted masters")
 	}
 
-	if keyv1.UseCloudFormation(cluster) {
+	if keyv2.UseCloudFormation(cluster) {
 		// During Cloud Formation migration we need to delete the main stack
 		// so all resoures including the VPC are deleted.
 		stack := awsresources.ASGStack{
 			Client: clients.CloudFormation,
-			Name:   keyv1.MainStackName(cluster),
+			Name:   keyv2.MainStackName(cluster),
 		}
 
 		if err := stack.Delete(); err != nil {
@@ -1030,7 +1031,7 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 		// Delete workers Auto Scaling Group.
 		asg := awsresources.AutoScalingGroup{
 			Client: clients.AutoScaling,
-			Name:   keyv1.AutoScalingGroupName(cluster, prefixWorker),
+			Name:   keyv2.AutoScalingGroupName(cluster, prefixWorker),
 		}
 
 		if err := asg.Delete(); err != nil {
@@ -1053,9 +1054,9 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 	}
 
 	// Delete Record Sets.
-	apiLBName, err := keyv1.LoadBalancerName(cluster.Spec.Cluster.Kubernetes.API.Domain, cluster)
-	etcdLBName, err := keyv1.LoadBalancerName(cluster.Spec.Cluster.Etcd.Domain, cluster)
-	ingressLBName, err := keyv1.LoadBalancerName(cluster.Spec.Cluster.Kubernetes.IngressController.Domain, cluster)
+	apiLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Kubernetes.API.Domain, cluster)
+	etcdLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Etcd.Domain, cluster)
+	ingressLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Kubernetes.IngressController.Domain, cluster)
 	if err != nil {
 		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	} else {
@@ -1071,7 +1072,7 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 					Client:       clients.Route53,
 					Resource:     apiLB,
 					Domain:       cluster.Spec.Cluster.Kubernetes.API.Domain,
-					HostedZoneID: cluster.Spec.AWS.HostedZones.API,
+					HostedZoneID: cluster.Spec.AWS.API.HostedZones,
 					Type:         route53.RRTypeA,
 				},
 				{
@@ -1079,7 +1080,7 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 					Client:       clients.Route53,
 					Resource:     etcdLB,
 					Domain:       cluster.Spec.Cluster.Etcd.Domain,
-					HostedZoneID: cluster.Spec.AWS.HostedZones.Etcd,
+					HostedZoneID: cluster.Spec.AWS.Etcd.HostedZones,
 					Type:         route53.RRTypeA,
 				},
 				{
@@ -1087,7 +1088,7 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 					Client:       clients.Route53,
 					Resource:     ingressLB,
 					Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-					HostedZoneID: cluster.Spec.AWS.HostedZones.Ingress,
+					HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
 					Type:         route53.RRTypeA,
 				},
 				{
@@ -1095,7 +1096,7 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 					Client:       clients.Route53,
 					Value:        cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
 					Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.WildcardDomain,
-					HostedZoneID: cluster.Spec.AWS.HostedZones.Ingress,
+					HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
 					Type:         route53.RRTypeCname,
 				},
 			}
@@ -1144,7 +1145,7 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 	// Delete route table.
 	var publicRouteTable resources.ResourceWithID
 	publicRouteTable = &awsresources.RouteTable{
-		Name:   keyv1.ClusterID(cluster),
+		Name:   keyv2.ClusterID(cluster),
 		Client: clients.EC2,
 		Logger: s.logger,
 	}
@@ -1157,7 +1158,7 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 	// Sync VPC.
 	var vpc resources.ResourceWithID
 	vpc = &awsresources.VPC{
-		Name:      keyv1.ClusterID(cluster),
+		Name:      keyv2.ClusterID(cluster),
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
 		Logger:    s.logger,
 	}
@@ -1167,10 +1168,10 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 	}
 
 	// Delete NAT gateway and private subnet for new clusters.
-	if keyv1.HasClusterVersion(cluster) {
+	if keyv2.HasClusterVersion(cluster) {
 		// Delete NAT gateway.
 		natGateway := &awsresources.NatGateway{
-			Name: keyv1.ClusterID(cluster),
+			Name: keyv2.ClusterID(cluster),
 			// Dependencies.
 			Logger:    s.logger,
 			AWSEntity: awsresources.AWSEntity{Clients: clients},
@@ -1183,7 +1184,7 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 
 		// Delete private route table.
 		privateRouteTable := &awsresources.RouteTable{
-			Name:   keyv1.RouteTableName(cluster, suffixPrivate),
+			Name:   keyv2.RouteTableName(cluster, suffixPrivate),
 			Client: clients.EC2,
 			Logger: s.logger,
 		}
@@ -1195,7 +1196,7 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 
 		// Delete private subnet.
 		subnetInput := SubnetInput{
-			Name:    keyv1.SubnetName(cluster, suffixPrivate),
+			Name:    keyv2.SubnetName(cluster, suffixPrivate),
 			Clients: clients,
 		}
 		if err := s.deleteSubnet(subnetInput); err != nil {
@@ -1207,7 +1208,7 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 
 	// Delete internet gateway.
 	internetGateway := &awsresources.InternetGateway{
-		Name:  keyv1.ClusterID(cluster),
+		Name:  keyv2.ClusterID(cluster),
 		VpcID: vpcID,
 		// Dependencies.
 		Logger:    s.logger,
@@ -1221,7 +1222,7 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 
 	// Delete public subnet.
 	subnetInput := SubnetInput{
-		Name:    keyv1.SubnetName(cluster, suffixPublic),
+		Name:    keyv2.SubnetName(cluster, suffixPublic),
 		Clients: clients,
 	}
 	if err := s.deleteSubnet(subnetInput); err != nil {
@@ -1234,7 +1235,7 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 	// groups must first be deleted.
 	mastersSGRulesInput := securityGroupRulesInput{
 		Clients:   clients,
-		GroupName: keyv1.SecurityGroupName(cluster, prefixMaster),
+		GroupName: keyv2.SecurityGroupName(cluster, prefixMaster),
 	}
 	if err := s.deleteSecurityGroupRules(mastersSGRulesInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
@@ -1242,7 +1243,7 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 
 	workersSGRulesInput := securityGroupRulesInput{
 		Clients:   clients,
-		GroupName: keyv1.SecurityGroupName(cluster, prefixWorker),
+		GroupName: keyv2.SecurityGroupName(cluster, prefixWorker),
 	}
 	if err := s.deleteSecurityGroupRules(workersSGRulesInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
@@ -1250,7 +1251,7 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 
 	ingressSGRulesInput := securityGroupRulesInput{
 		Clients:   clients,
-		GroupName: keyv1.SecurityGroupName(cluster, prefixIngress),
+		GroupName: keyv2.SecurityGroupName(cluster, prefixIngress),
 	}
 	if err := s.deleteSecurityGroupRules(ingressSGRulesInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
@@ -1259,7 +1260,7 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 	// Delete masters security group.
 	mastersSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: keyv1.SecurityGroupName(cluster, prefixMaster),
+		GroupName: keyv2.SecurityGroupName(cluster, prefixMaster),
 	}
 	if err := s.deleteSecurityGroup(mastersSGInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", mastersSGInput.GroupName, err))
@@ -1268,7 +1269,7 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 	// Delete workers security group.
 	workersSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: keyv1.SecurityGroupName(cluster, prefixWorker),
+		GroupName: keyv2.SecurityGroupName(cluster, prefixWorker),
 	}
 	if err := s.deleteSecurityGroup(workersSGInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", workersSGInput.GroupName, err))
@@ -1277,7 +1278,7 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 	// Delete ingress security group.
 	ingressSGInput := securityGroupInput{
 		Clients:   clients,
-		GroupName: keyv1.SecurityGroupName(cluster, prefixIngress),
+		GroupName: keyv2.SecurityGroupName(cluster, prefixIngress),
 	}
 	if err := s.deleteSecurityGroup(ingressSGInput); err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", ingressSGInput.GroupName, err))
@@ -1349,7 +1350,7 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 	// Delete master policy.
 	var masterPolicy resources.NamedResource
 	masterPolicy = &awsresources.Policy{
-		ClusterID:  keyv1.ClusterID(cluster),
+		ClusterID:  keyv2.ClusterID(cluster),
 		PolicyType: prefixMaster,
 		S3Bucket:   bucketName,
 		AWSEntity:  awsresources.AWSEntity{Clients: clients},
@@ -1363,7 +1364,7 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 	// Delete worker policy.
 	var workerPolicy resources.NamedResource
 	workerPolicy = &awsresources.Policy{
-		ClusterID:  keyv1.ClusterID(cluster),
+		ClusterID:  keyv2.ClusterID(cluster),
 		PolicyType: prefixWorker,
 		S3Bucket:   bucketName,
 		AWSEntity:  awsresources.AWSEntity{Clients: clients},
@@ -1377,7 +1378,7 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 	// Delete KMS key.
 	var kmsKey resources.ArnResource
 	kmsKey = &awsresources.KMSKey{
-		Name:      keyv1.ClusterID(cluster),
+		Name:      keyv2.ClusterID(cluster),
 		AWSEntity: awsresources.AWSEntity{Clients: clients},
 	}
 	if err := kmsKey.Delete(); err != nil {
@@ -1389,7 +1390,7 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 	// Delete keypair.
 	var keyPair resources.Resource
 	keyPair = &awsresources.KeyPair{
-		ClusterName: keyv1.ClusterID(cluster),
+		ClusterName: keyv2.ClusterID(cluster),
 		AWSEntity:   awsresources.AWSEntity{Clients: clients},
 	}
 	if err := keyPair.Delete(); err != nil {

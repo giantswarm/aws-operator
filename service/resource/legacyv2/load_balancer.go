@@ -1,16 +1,16 @@
-package legacyv1
+package legacyv2
 
 import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/awstpr"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
-	"github.com/giantswarm/aws-operator/service/keyv1"
+	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
 type LoadBalancerInput struct {
@@ -19,7 +19,7 @@ type LoadBalancerInput struct {
 	// Clients are the AWS clients.
 	Clients awsutil.Clients
 	// Cluster is the cluster TPO.
-	Cluster awstpr.CustomObject
+	Cluster v1alpha1.AWSConfig
 	// IdleTimeoutSeconds is idle time before closing the front-end and back-end connections
 	IdleTimeoutSeconds int
 	// InstanceIDs are the IDs of the instances that should be registered with the ELB.
@@ -35,7 +35,7 @@ type LoadBalancerInput struct {
 }
 
 func (s *Resource) createLoadBalancer(input LoadBalancerInput) (*awsresources.ELB, error) {
-	lbName, err := keyv1.LoadBalancerName(input.Name, input.Cluster)
+	lbName, err := keyv2.LoadBalancerName(input.Name, input.Cluster)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -79,7 +79,7 @@ func (s *Resource) createLoadBalancer(input LoadBalancerInput) (*awsresources.EL
 
 func (s *Resource) deleteLoadBalancer(input LoadBalancerInput) error {
 	// Delete ELB.
-	lbName, err := keyv1.LoadBalancerName(input.Name, input.Cluster)
+	lbName, err := keyv2.LoadBalancerName(input.Name, input.Cluster)
 	if err != nil {
 		return microerror.Mask(err)
 	}

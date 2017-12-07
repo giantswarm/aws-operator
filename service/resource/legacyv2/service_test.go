@@ -1,4 +1,4 @@
-package legacyv1
+package legacyv2
 
 import (
 	"fmt"
@@ -6,8 +6,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	awsresources "github.com/giantswarm/aws-operator/resources/aws"
 	"github.com/stretchr/testify/assert"
+
+	awsresources "github.com/giantswarm/aws-operator/resources/aws"
 )
 
 func TestAllExistingInstancesMatch(t *testing.T) {

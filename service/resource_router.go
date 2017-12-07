@@ -31,6 +31,9 @@ func NewResourceRouter(resources map[string][]framework.Resource) func(ctx conte
 		case keyv1.CloudFormationVersion:
 			// Cloud Formation transitional version so enable all resources.
 			enabledResources = resources[keyv1.CloudFormationVersion]
+		case "1.0.0":
+			// Kubernetes update to 1.8.4.
+			enabledResources = resources["1.0.0"]
 		case "":
 			// Default to the legacy resource for custom objects without a version
 			// bundle.

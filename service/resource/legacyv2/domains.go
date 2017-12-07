@@ -1,17 +1,18 @@
-package legacyv1
+package legacyv2
 
 import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/route53"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/microerror"
+
 	"github.com/giantswarm/aws-operator/resources"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
-	"github.com/giantswarm/awstpr"
-	"github.com/giantswarm/microerror"
 )
 
 type recordSetInput struct {
-	Cluster      awstpr.CustomObject
+	Cluster      v1alpha1.AWSConfig
 	Client       *route53.Route53
 	Resource     resources.DNSNamedResource
 	Value        string

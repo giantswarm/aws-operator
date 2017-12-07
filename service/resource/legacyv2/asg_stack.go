@@ -1,4 +1,4 @@
-package legacyv1
+package legacyv2
 
 import (
 	"bytes"
@@ -6,7 +6,7 @@ import (
 	"html/template"
 	"io/ioutil"
 
-	"github.com/giantswarm/awstpr"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certificatetpr"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeytpr"
@@ -14,7 +14,7 @@ import (
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/resources"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
-	"github.com/giantswarm/aws-operator/service/keyv1"
+	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
 type asgStackInput struct {
@@ -26,7 +26,7 @@ type asgStackInput struct {
 	asgType                string
 	availabilityZone       string
 	bucket                 resources.ReusableResource
-	cluster                awstpr.CustomObject
+	cluster                v1alpha1.AWSConfig
 	clusterID              string
 	iamInstanceProfileName string
 	imageID                string
@@ -74,7 +74,7 @@ func (s *Resource) processASGStack(input asgStackInput) (bool, error) {
 		Client: input.clients.CloudFormation,
 
 		// Settings.
-		Name: keyv1.AutoScalingGroupName(input.cluster, input.asgType),
+		Name: keyv2.AutoScalingGroupName(input.cluster, input.asgType),
 	}
 
 	stackExists, err := stack.CheckIfExists()
@@ -201,7 +201,7 @@ func (s *Resource) createASGStack(input asgStackInput) (bool, error) {
 		LoadBalancerName:         input.loadBalancerName,
 		InstanceType:             input.instanceType,
 		KeyName:                  input.keyPairName,
-		Name:                     keyv1.AutoScalingGroupName(input.cluster, input.asgType),
+		Name:                     keyv2.AutoScalingGroupName(input.cluster, input.asgType),
 		SecurityGroupID:          input.workersSecurityGroupID,
 		SmallCloudConfig:         smallCloudconfig,
 		SubnetID:                 input.subnetID,
@@ -222,9 +222,9 @@ func (s *Resource) updateASGStack(input asgStackInput) error {
 
 	switch input.asgType {
 	case prefixMaster:
-		imageID = keyv1.MasterImageID(input.cluster)
+		imageID = keyv2.MasterImageID(input.cluster)
 	case prefixWorker:
-		imageID = keyv1.WorkerImageID(input.cluster)
+		imageID = keyv2.WorkerImageID(input.cluster)
 	default:
 		return microerror.Maskf(invalidCloudconfigExtensionNameError, fmt.Sprintf("Invalid extension name '%s'", input.asgType))
 	}
@@ -241,7 +241,7 @@ func (s *Resource) updateASGStack(input asgStackInput) error {
 		ASGMaxSize:  input.asgSize,
 		ASGMinSize:  input.asgSize,
 		ImageID:     imageID,
-		Name:        keyv1.AutoScalingGroupName(input.cluster, input.asgType),
+		Name:        keyv2.AutoScalingGroupName(input.cluster, input.asgType),
 		TemplateURL: templateURL,
 	}
 
