@@ -1,4 +1,4 @@
-package s3objectv1
+package s3objectv2
 
 import (
 	"strings"

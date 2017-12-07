@@ -1,4 +1,4 @@
-package s3objectv1
+package s3objectv2
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/giantswarm/awstpr"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certificatetpr"
 )
 
@@ -48,7 +48,7 @@ type CloudConfigMock struct {
 	template string
 }
 
-func (c *CloudConfigMock) NewWorkerTemplate(customObject awstpr.CustomObject, certs certificatetpr.CompactTLSAssets) (string, error) {
+func (c *CloudConfigMock) NewWorkerTemplate(customObject v1alpha1.AWSConfig, certs certificatetpr.CompactTLSAssets) (string, error) {
 	return c.template, nil
 }
 

@@ -1,15 +1,15 @@
-package s3objectv1
+package s3objectv2
 
 import (
 	"context"
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/keyv1"
+	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
-	customObject, err := keyv1.ToCustomObject(obj)
+	customObject, err := keyv2.ToCustomObject(obj)
 	output := BucketObjectState{}
 	if err != nil {
 		return output, microerror.Mask(err)
@@ -20,7 +20,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return output, microerror.Mask(err)
 	}
 
-	clusterID := keyv1.ClusterID(customObject)
+	clusterID := keyv2.ClusterID(customObject)
 	certs, err := r.certWatcher.SearchCerts(clusterID)
 	if err != nil {
 		return output, microerror.Mask(err)
@@ -42,9 +42,9 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 
 	output.WorkerCloudConfig = BucketObjectInstance{
-		Bucket: keyv1.BucketName(customObject, accountID),
+		Bucket: keyv2.BucketName(customObject, accountID),
 		Body:   body,
-		Key:    keyv1.BucketObjectName(customObject, prefixWorker),
+		Key:    keyv2.BucketObjectName(customObject, prefixWorker),
 	}
 
 	return output, nil

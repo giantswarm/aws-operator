@@ -1,11 +1,11 @@
-package keyv1
+package keyv2
 
 import (
 	"fmt"
 	"path/filepath"
 	"strings"
 
-	"github.com/giantswarm/awstpr"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	cloudconfig "github.com/giantswarm/k8scloudconfig"
 	"github.com/giantswarm/microerror"
 )
@@ -23,43 +23,43 @@ const (
 	ProfileNameTemplate = "EC2-K8S-Role"
 )
 
-func AutoScalingGroupName(customObject awstpr.CustomObject, groupName string) string {
+func AutoScalingGroupName(customObject v1alpha1.AWSConfig, groupName string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), groupName)
 }
 
-func AvailabilityZone(customObject awstpr.CustomObject) string {
+func AvailabilityZone(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.AZ
 }
 
-func BucketName(customObject awstpr.CustomObject, accountID string) string {
+func BucketName(customObject v1alpha1.AWSConfig, accountID string) string {
 	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(customObject))
 }
 
-func BucketObjectName(customObject awstpr.CustomObject, prefix string) string {
+func BucketObjectName(customObject v1alpha1.AWSConfig, prefix string) string {
 	return fmt.Sprintf("cloudconfig/%s/%s", ClusterVersion(customObject), prefix)
 }
 
-func ClusterCustomer(customObject awstpr.CustomObject) string {
+func ClusterCustomer(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Customer.ID
 }
 
-func ClusterID(customObject awstpr.CustomObject) string {
-	return customObject.Spec.Cluster.Cluster.ID
+func ClusterID(customObject v1alpha1.AWSConfig) string {
+	return customObject.Spec.Cluster.ID
 }
 
-func ClusterNamespace(customObject awstpr.CustomObject) string {
+func ClusterNamespace(customObject v1alpha1.AWSConfig) string {
 	return ClusterID(customObject)
 }
 
-func CustomerID(customObject awstpr.CustomObject) string {
+func CustomerID(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Customer.ID
 }
 
-func ClusterVersion(customObject awstpr.CustomObject) string {
+func ClusterVersion(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Version
 }
 
-func HasClusterVersion(customObject awstpr.CustomObject) bool {
+func HasClusterVersion(customObject v1alpha1.AWSConfig) bool {
 	switch ClusterVersion(customObject) {
 	case string(cloudconfig.V_0_1_0):
 		return true
@@ -68,13 +68,13 @@ func HasClusterVersion(customObject awstpr.CustomObject) bool {
 	}
 }
 
-func InstanceProfileName(customObject awstpr.CustomObject, profileType string) string {
+func InstanceProfileName(customObject v1alpha1.AWSConfig, profileType string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, ProfileNameTemplate)
 }
 
 // LoadBalancerName produces a unique name for the load balancer.
 // It takes the domain name, extracts the first subdomain, and combines it with the cluster name.
-func LoadBalancerName(domainName string, cluster awstpr.CustomObject) (string, error) {
+func LoadBalancerName(domainName string, cluster v1alpha1.AWSConfig) (string, error) {
 	if ClusterID(cluster) == "" {
 		return "", microerror.Maskf(missingCloudConfigKeyError, "spec.cluster.cluster.id")
 	}
@@ -89,13 +89,13 @@ func LoadBalancerName(domainName string, cluster awstpr.CustomObject) (string, e
 	return lbName, nil
 }
 
-func MainStackName(customObject awstpr.CustomObject) string {
+func MainStackName(customObject v1alpha1.AWSConfig) string {
 	clusterID := ClusterID(customObject)
 
 	return fmt.Sprintf("%s-main", clusterID)
 }
 
-func MasterImageID(customObject awstpr.CustomObject) string {
+func MasterImageID(customObject v1alpha1.AWSConfig) string {
 	var imageID string
 
 	if len(customObject.Spec.AWS.Masters) > 0 {
@@ -105,7 +105,7 @@ func MasterImageID(customObject awstpr.CustomObject) string {
 	return imageID
 }
 
-func MasterInstanceType(customObject awstpr.CustomObject) string {
+func MasterInstanceType(customObject v1alpha1.AWSConfig) string {
 	var instanceType string
 
 	if len(customObject.Spec.AWS.Masters) > 0 {
@@ -115,26 +115,26 @@ func MasterInstanceType(customObject awstpr.CustomObject) string {
 	return instanceType
 }
 
-func RouteTableName(customObject awstpr.CustomObject, suffix string) string {
+func RouteTableName(customObject v1alpha1.AWSConfig, suffix string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), suffix)
 }
 
-func SecurityGroupName(customObject awstpr.CustomObject, groupName string) string {
+func SecurityGroupName(customObject v1alpha1.AWSConfig, groupName string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), groupName)
 }
 
-func SubnetName(customObject awstpr.CustomObject, suffix string) string {
+func SubnetName(customObject v1alpha1.AWSConfig, suffix string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), suffix)
 }
 
-func ToCustomObject(v interface{}) (awstpr.CustomObject, error) {
+func ToCustomObject(v interface{}) (v1alpha1.AWSConfig, error) {
 	if v == nil {
-		return awstpr.CustomObject{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &awstpr.CustomObject{}, v)
+		return v1alpha1.AWSConfig{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &v1alpha1.AWSConfig{}, v)
 	}
 
-	customObjectPointer, ok := v.(*awstpr.CustomObject)
+	customObjectPointer, ok := v.(*v1alpha1.AWSConfig)
 	if !ok {
-		return awstpr.CustomObject{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &awstpr.CustomObject{}, v)
+		return v1alpha1.AWSConfig{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &v1alpha1.AWSConfig{}, v)
 	}
 	customObject := *customObjectPointer
 
@@ -144,7 +144,7 @@ func ToCustomObject(v interface{}) (awstpr.CustomObject, error) {
 // UseCloudFormation returns true if the version in the version bundle matches
 // the Cloud Formation version.
 // TODO Remove once we've migrated all AWS resources to Cloud Formation.
-func UseCloudFormation(customObject awstpr.CustomObject) bool {
+func UseCloudFormation(customObject v1alpha1.AWSConfig) bool {
 	if VersionBundleVersion(customObject) == CloudFormationVersion {
 		return true
 	}
@@ -153,15 +153,15 @@ func UseCloudFormation(customObject awstpr.CustomObject) bool {
 }
 
 // VersionBundleVersion returns the version contained in the Version Bundle.
-func VersionBundleVersion(customObject awstpr.CustomObject) string {
+func VersionBundleVersion(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.VersionBundle.Version
 }
 
-func WorkerCount(customObject awstpr.CustomObject) int {
+func WorkerCount(customObject v1alpha1.AWSConfig) int {
 	return len(customObject.Spec.AWS.Workers)
 }
 
-func WorkerImageID(customObject awstpr.CustomObject) string {
+func WorkerImageID(customObject v1alpha1.AWSConfig) string {
 	var imageID string
 
 	if len(customObject.Spec.AWS.Workers) > 0 {
@@ -171,7 +171,7 @@ func WorkerImageID(customObject awstpr.CustomObject) string {
 	return imageID
 }
 
-func WorkerInstanceType(customObject awstpr.CustomObject) string {
+func WorkerInstanceType(customObject v1alpha1.AWSConfig) string {
 	var instanceType string
 
 	if len(customObject.Spec.AWS.Workers) > 0 {

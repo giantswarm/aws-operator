@@ -1,4 +1,4 @@
-package keyv1
+package keyv2
 
 import "github.com/giantswarm/microerror"
 

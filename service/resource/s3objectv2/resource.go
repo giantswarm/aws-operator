@@ -1,4 +1,4 @@
-package s3objectv1
+package s3objectv2
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "s3objectv1"
+	Name = "s3objectv2"
 )
 
 // Config represents the configuration used to create a new cloudformation resource.
