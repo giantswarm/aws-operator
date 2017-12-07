@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: master resources
+Resources:
+  MasterEtcdVolume:
+    Type: "AWS::EC2::Volume"
+    Description: Etcd EBS volume
+    Properties:
+      AvailabilityZone: eu-central-1a # awstpr
+      Size: 10 # tbc
+      VolumeType: gp2 #tbc
+      Tags:
+        -
+          Key: Name
+          Value: test-cluster-master # awstpr
+
+  MasterInstance:
+    Type: "AWS::EC2::Instance"
+    Description: Master instance
+    Properties:
+      AvailabilityZone: eu-central-1a # awstpr
+      IamInstanceProfile: test-cluster-master-EC2-K8S-Role # awstpr
+      ImageID: ami-62c97d0d # awstpr
+      InstanceType: m3.medium # awstpr
+      SecurityGroupIds: # Get ID from AWS resource
+      SubnetID: # Get ID from AWS resource
+      Tags:
+        -
+          Key: Name
+          Value: test-cluster-master # awstpr
+        -
+          Key: KubernetesCluster
+          Value: test-cluster # awstpr
+      UserData: # cloud config service
+
+  MasterAttachment:
+    Type: "AWS::EC2::VolumeAttachment"
+    InstanceId: !Ref MasterInstance
+    VolumeId: !Red MasterEtcdVolume

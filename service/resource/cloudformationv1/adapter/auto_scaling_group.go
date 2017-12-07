@@ -6,7 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/aws-operator/service/key"
+	"github.com/giantswarm/aws-operator/service/keyv1"
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/microerror"
 )
@@ -28,7 +28,7 @@ type autoScalingGroupAdapter struct {
 
 func (a *autoScalingGroupAdapter) getAutoScalingGroup(customObject awstpr.CustomObject, clients Clients) error {
 	a.AZ = customObject.Spec.AWS.AZ
-	workers := key.WorkerCount(customObject)
+	workers := keyv1.WorkerCount(customObject)
 	a.ASGMaxSize = workers
 	a.ASGMinSize = workers
 	a.MaxBatchSize = strconv.FormatFloat(asgMaxBatchSizeRatio, 'f', -1, 32)
@@ -39,7 +39,7 @@ func (a *autoScalingGroupAdapter) getAutoScalingGroup(customObject awstpr.Custom
 	// load balancer name
 	// TODO: remove this code once the ingress load balancer is created by cloudformation
 	// and add a reference in the template
-	lbName, err := key.LoadBalancerName(customObject.Spec.Cluster.Kubernetes.IngressController.Domain, customObject)
+	lbName, err := keyv1.LoadBalancerName(customObject.Spec.Cluster.Kubernetes.IngressController.Domain, customObject)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -48,7 +48,7 @@ func (a *autoScalingGroupAdapter) getAutoScalingGroup(customObject awstpr.Custom
 	// subnet ID
 	// TODO: remove this code once the subnet is created by cloudformation and add a
 	// reference in the template
-	subnetName := key.SubnetName(customObject, suffixPrivate)
+	subnetName := keyv1.SubnetName(customObject, suffixPrivate)
 	describeSubnetInput := &ec2.DescribeSubnetsInput{
 		Filters: []*ec2.Filter{
 			{
@@ -69,7 +69,7 @@ func (a *autoScalingGroupAdapter) getAutoScalingGroup(customObject awstpr.Custom
 
 	a.SubnetID = *output.Subnets[0].SubnetId
 
-	a.ClusterID = key.ClusterID(customObject)
+	a.ClusterID = keyv1.ClusterID(customObject)
 
 	return nil
 }

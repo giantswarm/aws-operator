@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
-	"github.com/giantswarm/aws-operator/service/key"
+	"github.com/giantswarm/aws-operator/service/keyv1"
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/microerror"
 )
@@ -38,7 +38,7 @@ func (l *launchConfigAdapter) getLaunchConfiguration(customObject awstpr.CustomO
 
 	l.ImageID = customObject.Spec.AWS.Workers[0].ImageID
 	l.InstanceType = customObject.Spec.AWS.Workers[0].InstanceType
-	l.IAMInstanceProfileName = key.InstanceProfileName(customObject, prefixWorker)
+	l.IAMInstanceProfileName = keyv1.InstanceProfileName(customObject, prefixWorker)
 	l.AssociatePublicIPAddress = false
 
 	l.BlockDeviceMappings = []BlockDeviceMapping{
@@ -53,7 +53,7 @@ func (l *launchConfigAdapter) getLaunchConfiguration(customObject awstpr.CustomO
 	// security group
 	// TODO: remove this code once the security group is created by cloudformation
 	// and add a reference in the template
-	groupName := key.SecurityGroupName(customObject, prefixWorker)
+	groupName := keyv1.SecurityGroupName(customObject, prefixWorker)
 	describeSgInput := &ec2.DescribeSecurityGroupsInput{
 		Filters: []*ec2.Filter{
 			{
@@ -90,14 +90,14 @@ func (l *launchConfigAdapter) getLaunchConfiguration(customObject awstpr.CustomO
 		return microerror.Mask(err)
 	}
 
-	clusterID := key.ClusterID(customObject)
+	clusterID := keyv1.ClusterID(customObject)
 	s3URI := fmt.Sprintf("%s-g8s-%s", accountID, clusterID)
 
 	cloudConfigConfig := SmallCloudconfigConfig{
 		MachineType:    prefixWorker,
 		Region:         customObject.Spec.AWS.Region,
 		S3URI:          s3URI,
-		ClusterVersion: key.ClusterVersion(customObject),
+		ClusterVersion: keyv1.ClusterVersion(customObject),
 	}
 	smallCloudConfig, err := SmallCloudconfig(cloudConfigConfig)
 	if err != nil {
