@@ -13,6 +13,7 @@ type Cluster struct {
 	Kubernetes ClusterKubernetes `json:"kubernetes" yaml:"kubernetes"`
 	Masters    []ClusterNode     `json:"masters" yaml:"masters"`
 	Vault      ClusterVault      `json:"vault" yaml:"vault"`
+	Version    string            `json:"version" yaml:"version"`
 	Workers    []ClusterNode     `json:"workers" yaml:"workers"`
 }
 
