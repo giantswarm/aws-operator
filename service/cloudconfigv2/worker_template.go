@@ -7,13 +7,15 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
-func v_0_1_0WorkerTemplate(customObject v1alpha1.AWSConfig, certs certificatetpr.CompactTLSAssets) (string, error) {
+// NewWorkerTemplate generates a new worker cloud config template and returns it
+// as a base64 encoded string.
+func (c *CloudConfig) NewWorkerTemplate(customObject v1alpha1.AWSConfig, certs certificatetpr.CompactTLSAssets) (string, error) {
 	var err error
 
 	var params k8scloudconfig.Params
 	{
 		params.Cluster = customObject.Spec.Cluster
-		params.Extension = &v_0_1_0WorkerExtension{
+		params.Extension = &WorkerExtension{
 			certs:        certs,
 			customObject: customObject,
 		}
@@ -35,12 +37,12 @@ func v_0_1_0WorkerTemplate(customObject v1alpha1.AWSConfig, certs certificatetpr
 	return newCloudConfig.Base64(), nil
 }
 
-type v_0_1_0WorkerExtension struct {
+type WorkerExtension struct {
 	certs        certificatetpr.CompactTLSAssets
 	customObject v1alpha1.AWSConfig
 }
 
-func (e *v_0_1_0WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
+func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	filesMeta := []k8scloudconfig.FileMetadata{
 		{
 			AssetContent: decryptTLSAssetsScriptTemplate,
@@ -138,7 +140,7 @@ func (e *v_0_1_0WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	return newFiles, nil
 }
 
-func (e *v_0_1_0WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
+func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	unitsMeta := []k8scloudconfig.UnitMetadata{
 		{
 			AssetContent: decryptTLSAssetsServiceTemplate,
@@ -179,7 +181,7 @@ func (e *v_0_1_0WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	return newUnits, nil
 }
 
-func (e *v_0_1_0WorkerExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
+func (e *WorkerExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
 	newSections := []k8scloudconfig.VerbatimSection{
 		{
 			Name:    "storageclass",
