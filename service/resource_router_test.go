@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/awstpr/spec"
 	"github.com/giantswarm/certificatetpr"
@@ -15,12 +16,204 @@ import (
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/cloudconfigv1"
+	"github.com/giantswarm/aws-operator/service/cloudconfigv2"
 	"github.com/giantswarm/aws-operator/service/resource/cloudformationv1"
+	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2"
 	"github.com/giantswarm/aws-operator/service/resource/legacyv1"
+	"github.com/giantswarm/aws-operator/service/resource/legacyv2"
 	"github.com/giantswarm/aws-operator/service/resource/namespacev1"
+	"github.com/giantswarm/aws-operator/service/resource/namespacev2"
 )
 
 func Test_Service_NewResourceRouter(t *testing.T) {
+	var err error
+
+	var awsConfig awsclient.Config
+	{
+		awsConfig = awsclient.Config{
+			AccessKeyID:     "accessKeyID",
+			AccessKeySecret: "accessKeySecret",
+			SessionToken:    "sessionToken",
+		}
+	}
+
+	var certWatcher *certificatetpr.Service
+	{
+		certConfig := certificatetpr.DefaultServiceConfig()
+		certConfig.K8sClient = fake.NewSimpleClientset()
+		certConfig.Logger = microloggertest.New()
+		certWatcher, err = certificatetpr.NewService(certConfig)
+		if err != nil {
+			t.Fatal("expected", nil, "got", err)
+		}
+	}
+
+	var keyWatcher *randomkeytpr.Service
+	{
+		keyConfig := randomkeytpr.DefaultServiceConfig()
+		keyConfig.K8sClient = fake.NewSimpleClientset()
+		keyConfig.Logger = microloggertest.New()
+		keyWatcher, err = randomkeytpr.NewService(keyConfig)
+		if err != nil {
+			t.Fatal("expected", nil, "got", err)
+		}
+	}
+
+	var ccService *cloudconfigv2.CloudConfig
+	{
+		ccServiceConfig := cloudconfigv2.DefaultConfig()
+		ccServiceConfig.Logger = microloggertest.New()
+		ccServiceConfig.Logger = microloggertest.New()
+
+		ccService, err = cloudconfigv2.New(ccServiceConfig)
+		if err != nil {
+			t.Fatal("expected", nil, "got", err)
+		}
+	}
+
+	var legacyResource framework.Resource
+	{
+		legacyConfig := legacyv2.DefaultConfig()
+		legacyConfig.AwsConfig = awsConfig
+		legacyConfig.AwsHostConfig = awsConfig
+		legacyConfig.CertWatcher = certWatcher
+		legacyConfig.CloudConfig = ccService
+		legacyConfig.InstallationName = "test"
+		legacyConfig.K8sClient = fake.NewSimpleClientset()
+		legacyConfig.KeyWatcher = keyWatcher
+		legacyConfig.Logger = microloggertest.New()
+		legacyConfig.PubKeyFile = "test"
+
+		legacyResource, err = legacyv2.New(legacyConfig)
+		if err != nil {
+			t.Fatal("expected", nil, "got", err)
+		}
+	}
+
+	var cloudformationResource framework.Resource
+	{
+		cloudformationConfig := cloudformationv2.DefaultConfig()
+		cloudformationConfig.Logger = microloggertest.New()
+
+		cloudformationResource, err = cloudformationv2.New(cloudformationConfig)
+		if err != nil {
+			t.Fatal("expected", nil, "got", err)
+		}
+	}
+
+	namespaceConfig := namespacev2.DefaultConfig()
+	namespaceConfig.K8sClient = fake.NewSimpleClientset()
+	namespaceConfig.Logger = microloggertest.New()
+
+	namespaceResource, err := namespacev2.New(namespaceConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	allResources := []framework.Resource{
+		legacyResource,
+		cloudformationResource,
+		namespaceResource,
+	}
+	legacyResources := []framework.Resource{
+		legacyResource,
+	}
+
+	versionedResources := make(map[string][]framework.Resource)
+	versionedResources["0.1.0"] = legacyResources
+	versionedResources["0.2.0"] = allResources
+	versionedResources["1.0.0"] = legacyResources
+
+	testCases := []struct {
+		customObject      v1alpha1.AWSConfig
+		expectedResources []framework.Resource
+		errorMatcher      func(err error) bool
+		resourceRouter    func(ctx context.Context, obj interface{}) ([]framework.Resource, error)
+	}{
+		// Case 0. No version in version bundle so return legacy resources.
+		{
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					VersionBundle: v1alpha1.AWSConfigSpecVersionBundle{
+						Version: "",
+					},
+				},
+			},
+			expectedResources: legacyResources,
+			errorMatcher:      nil,
+			resourceRouter:    NewResourceRouter(versionedResources),
+		},
+		// Case 1. Legacy version in version bundle so return legacy resources.
+		{
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					VersionBundle: v1alpha1.AWSConfigSpecVersionBundle{
+						Version: "0.1.0",
+					},
+				},
+			},
+			expectedResources: legacyResources,
+			errorMatcher:      nil,
+			resourceRouter:    NewResourceRouter(versionedResources),
+		},
+		// Case 2. Cloud formation version in version bundle so return all resources.
+		{
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					VersionBundle: v1alpha1.AWSConfigSpecVersionBundle{
+						Version: "0.2.0",
+					},
+				},
+			},
+			expectedResources: allResources,
+			errorMatcher:      nil,
+			resourceRouter:    NewResourceRouter(versionedResources),
+		},
+		// Case 3. Kubernetes update to 1.8.4.
+		{
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					VersionBundle: v1alpha1.AWSConfigSpecVersionBundle{
+						Version: "1.0.0",
+					},
+				},
+			},
+			expectedResources: legacyResources,
+			errorMatcher:      nil,
+			resourceRouter:    NewResourceRouter(versionedResources),
+		},
+		// Case 4. Invalid version returns an error.
+		{
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					VersionBundle: v1alpha1.AWSConfigSpecVersionBundle{
+						Version: "0.3.0",
+					},
+				},
+			},
+			expectedResources: allResources,
+			errorMatcher:      IsInvalidVersion,
+			resourceRouter:    NewResourceRouter(versionedResources),
+		},
+	}
+
+	for i, tc := range testCases {
+		resources, err := tc.resourceRouter(context.TODO(), &tc.customObject)
+		if err != nil {
+			if tc.errorMatcher == nil {
+				t.Fatal("test", i, "expected", nil, "got", "error matcher")
+			} else if !tc.errorMatcher(err) {
+				t.Fatal("test", i, "expected", true, "got", false)
+			}
+		} else {
+			if !reflect.DeepEqual(tc.expectedResources, resources) {
+				t.Fatal("test", i, "expected", tc.expectedResources, "got", resources)
+			}
+		}
+	}
+}
+
+func Test_Service_NewTPRResourceRouter(t *testing.T) {
 	var err error
 
 	var awsConfig awsclient.Config
@@ -136,7 +329,7 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 			},
 			expectedResources: legacyResources,
 			errorMatcher:      nil,
-			resourceRouter:    NewResourceRouter(versionedResources),
+			resourceRouter:    NewTPRResourceRouter(versionedResources),
 		},
 		// Case 1. Legacy version in version bundle so return legacy resources.
 		{
@@ -149,7 +342,7 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 			},
 			expectedResources: legacyResources,
 			errorMatcher:      nil,
-			resourceRouter:    NewResourceRouter(versionedResources),
+			resourceRouter:    NewTPRResourceRouter(versionedResources),
 		},
 		// Case 2. Cloud formation version in version bundle so return all resources.
 		{
@@ -162,7 +355,7 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 			},
 			expectedResources: allResources,
 			errorMatcher:      nil,
-			resourceRouter:    NewResourceRouter(versionedResources),
+			resourceRouter:    NewTPRResourceRouter(versionedResources),
 		},
 		// Case 3. Kubernetes update to 1.8.4.
 		{
@@ -175,7 +368,7 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 			},
 			expectedResources: legacyResources,
 			errorMatcher:      nil,
-			resourceRouter:    NewResourceRouter(versionedResources),
+			resourceRouter:    NewTPRResourceRouter(versionedResources),
 		},
 		// Case 4. Invalid version returns an error.
 		{
@@ -188,7 +381,7 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 			},
 			expectedResources: allResources,
 			errorMatcher:      IsInvalidVersion,
-			resourceRouter:    NewResourceRouter(versionedResources),
+			resourceRouter:    NewTPRResourceRouter(versionedResources),
 		},
 	}
 
