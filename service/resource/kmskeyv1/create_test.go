@@ -13,7 +13,7 @@ import (
 )
 
 func Test_Resource_S3Object_newCreate(t *testing.T) {
-	clusterTpo := awstpr.CustomObject{
+	customObject := awstpr.CustomObject{
 		Spec: awstpr.Spec{
 			Cluster: clustertpr.Spec{
 				Cluster: spec.Cluster{
@@ -24,7 +24,6 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 	}
 
 	testCases := []struct {
-		obj            awstpr.CustomObject
 		currentState   KMSKeyState
 		desiredState   KMSKeyState
 		expectedChange *kms.CreateKeyInput
@@ -32,28 +31,25 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 	}{
 		{
 			description:    "current state empty, desired state empty, empty create change",
-			obj:            clusterTpo,
 			currentState:   KMSKeyState{},
 			desiredState:   KMSKeyState{},
 			expectedChange: nil,
 		},
 		{
 			description:  "current state empty, desired state not empty, create change == desired state",
-			obj:          clusterTpo,
 			currentState: KMSKeyState{},
 			desiredState: KMSKeyState{
-				KeyID: "mykeyid",
+				KeyAlias: "mykeyid",
 			},
 			expectedChange: &kms.CreateKeyInput{},
 		},
 		{
 			description: "current state not empty, desired state not empty, create change == desired state",
-			obj:         clusterTpo,
 			currentState: KMSKeyState{
-				KeyID: "currentkeyid",
+				KeyAlias: "currentkeyid",
 			},
 			desiredState: KMSKeyState{
-				KeyID: "mykeyid",
+				KeyAlias: "mykeyid",
 			},
 			expectedChange: &kms.CreateKeyInput{},
 		},
@@ -73,7 +69,7 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		result, err := newResource.newCreateChange(context.TODO(), tc.obj, tc.currentState, tc.desiredState)
+		result, err := newResource.newCreateChange(context.TODO(), customObject, tc.currentState, tc.desiredState)
 		if err != nil {
 			t.Errorf("expected '%v' got '%#v'", nil, err)
 		}
@@ -92,7 +88,7 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 }
 
 func Test_ApplyCreateChange(t *testing.T) {
-	clusterTpo := awstpr.CustomObject{
+	customObject := awstpr.CustomObject{
 		Spec: awstpr.Spec{
 			Cluster: clustertpr.Spec{
 				Cluster: spec.Cluster{
@@ -103,18 +99,15 @@ func Test_ApplyCreateChange(t *testing.T) {
 	}
 
 	testCases := []struct {
-		obj          awstpr.CustomObject
 		createChange *kms.CreateKeyInput
 		description  string
 	}{
 		{
 			description:  "basic case, create",
-			obj:          clusterTpo,
 			createChange: &kms.CreateKeyInput{},
 		},
 		{
 			description:  "empty create change, not create",
-			obj:          clusterTpo,
 			createChange: nil,
 		},
 	}
@@ -135,7 +128,7 @@ func Test_ApplyCreateChange(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		err := newResource.ApplyCreateChange(context.TODO(), &tc.obj, tc.createChange)
+		err := newResource.ApplyCreateChange(context.TODO(), &customObject, tc.createChange)
 		if err != nil {
 			t.Errorf("unexpected error %v", err)
 		}

@@ -30,7 +30,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	}
 
 	currentState.KeyID = *output.KeyMetadata.KeyId
-	currentState.ARN = *output.KeyMetadata.Arn
+	currentState.KeyAlias = alias
 
 	return currentState, nil
 }
