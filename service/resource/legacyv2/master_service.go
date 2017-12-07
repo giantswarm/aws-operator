@@ -1,23 +1,23 @@
-package legacyv1
+package legacyv2
 
 import (
 	"fmt"
 
-	awsutil "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/resources/aws"
-	"github.com/giantswarm/aws-operator/service/keyv1"
-	"github.com/giantswarm/awstpr"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/microerror"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/pkg/api/v1"
 
-	"github.com/giantswarm/microerror"
+	awsutil "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/resources/aws"
+	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
 type MasterServiceInput struct {
 	Clients  awsutil.Clients
-	Cluster  awstpr.CustomObject
+	Cluster  v1alpha1.AWSConfig
 	MasterID string
 }
 
@@ -26,7 +26,7 @@ func (s *Resource) createMasterService(input MasterServiceInput) error {
 		Clients: input.Clients,
 		Logger:  s.logger,
 		Pattern: instanceName(instanceNameInput{
-			clusterName: keyv1.ClusterID(input.Cluster),
+			clusterName: keyv2.ClusterID(input.Cluster),
 			prefix:      prefixMaster,
 			no:          0,
 		}),
@@ -46,21 +46,21 @@ func (s *Resource) createMasterService(input MasterServiceInput) error {
 
 	namespace := v1.Namespace{
 		ObjectMeta: apismetav1.ObjectMeta{
-			Name: keyv1.ClusterID(input.Cluster),
+			Name: keyv2.ClusterID(input.Cluster),
 		},
 	}
 
 	service := v1.Service{
 		ObjectMeta: apismetav1.ObjectMeta{
 			Name:      "master",
-			Namespace: keyv1.ClusterID(input.Cluster),
+			Namespace: keyv2.ClusterID(input.Cluster),
 			Labels: map[string]string{
 				"app":      "master",
-				"cluster":  keyv1.ClusterID(input.Cluster),
-				"customer": keyv1.CustomerID(input.Cluster),
+				"cluster":  keyv2.ClusterID(input.Cluster),
+				"customer": keyv2.CustomerID(input.Cluster),
 			},
 			Annotations: map[string]string{
-				"giantswarm.io/prometheus-cluster": keyv1.ClusterID(input.Cluster),
+				"giantswarm.io/prometheus-cluster": keyv2.ClusterID(input.Cluster),
 			},
 		},
 		Spec: v1.ServiceSpec{
@@ -77,11 +77,11 @@ func (s *Resource) createMasterService(input MasterServiceInput) error {
 	endpoint := v1.Endpoints{
 		ObjectMeta: apismetav1.ObjectMeta{
 			Name:      "master",
-			Namespace: keyv1.ClusterID(input.Cluster),
+			Namespace: keyv2.ClusterID(input.Cluster),
 			Labels: map[string]string{
 				"app":      "master",
-				"cluster":  keyv1.ClusterID(input.Cluster),
-				"customer": keyv1.CustomerID(input.Cluster),
+				"cluster":  keyv2.ClusterID(input.Cluster),
+				"customer": keyv2.CustomerID(input.Cluster),
 			},
 		},
 		Subsets: []v1.EndpointSubset{

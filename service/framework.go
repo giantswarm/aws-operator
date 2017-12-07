@@ -4,32 +4,400 @@ import (
 	"context"
 	"time"
 
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/awstpr"
 	"github.com/giantswarm/certificatetpr"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/client/k8sclient"
+	"github.com/giantswarm/operatorkit/client/k8scrdclient"
+	"github.com/giantswarm/operatorkit/client/k8sextclient"
 	"github.com/giantswarm/operatorkit/framework"
 	"github.com/giantswarm/operatorkit/framework/resource/metricsresource"
 	"github.com/giantswarm/operatorkit/informer"
 	"github.com/giantswarm/operatorkit/tpr"
 	"github.com/giantswarm/randomkeytpr"
+	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/aws-operator/service/cloudconfigv1"
+	"github.com/giantswarm/aws-operator/service/cloudconfigv2"
 	"github.com/giantswarm/aws-operator/service/keyv1"
+	"github.com/giantswarm/aws-operator/service/keyv2"
 	"github.com/giantswarm/aws-operator/service/resource/cloudformationv1"
+	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2"
 	"github.com/giantswarm/aws-operator/service/resource/legacyv1"
+	"github.com/giantswarm/aws-operator/service/resource/legacyv2"
 	"github.com/giantswarm/aws-operator/service/resource/namespacev1"
+	"github.com/giantswarm/aws-operator/service/resource/namespacev2"
 	"github.com/giantswarm/aws-operator/service/resource/s3bucketv1"
+	"github.com/giantswarm/aws-operator/service/resource/s3bucketv2"
 	"github.com/giantswarm/aws-operator/service/resource/s3objectv1"
+	"github.com/giantswarm/aws-operator/service/resource/s3objectv2"
 )
 
 const (
 	ResourceRetries uint64 = 3
 )
+
+func newCRDFramework(config Config) (*framework.Framework, error) {
+	if config.Flag == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.Flag must not be empty")
+	}
+	if config.Viper == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.Viper must not be empty")
+	}
+
+	var err error
+
+	var k8sExtClient apiextensionsclient.Interface
+	{
+		c := k8sextclient.DefaultConfig()
+
+		c.Logger = config.Logger
+
+		c.Address = config.Viper.GetString(config.Flag.Service.Kubernetes.Address)
+		c.InCluster = config.Viper.GetBool(config.Flag.Service.Kubernetes.InCluster)
+		c.TLS.CAFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CAFile)
+		c.TLS.CrtFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CrtFile)
+		c.TLS.KeyFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.KeyFile)
+
+		k8sExtClient, err = k8sextclient.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var crdClient *k8scrdclient.CRDClient
+	{
+		c := k8scrdclient.DefaultConfig()
+
+		c.K8sExtClient = k8sExtClient
+		c.Logger = config.Logger
+
+		crdClient, err = k8scrdclient.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var k8sClient kubernetes.Interface
+	{
+		c := k8sclient.DefaultConfig()
+
+		c.Logger = config.Logger
+
+		c.Address = config.Viper.GetString(config.Flag.Service.Kubernetes.Address)
+		c.InCluster = config.Viper.GetBool(config.Flag.Service.Kubernetes.InCluster)
+		c.TLS.CAFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CAFile)
+		c.TLS.CrtFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CrtFile)
+		c.TLS.KeyFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.KeyFile)
+
+		k8sClient, err = k8sclient.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var certWatcher *certificatetpr.Service
+	{
+		certConfig := certificatetpr.DefaultServiceConfig()
+		certConfig.K8sClient = k8sClient
+		certConfig.Logger = config.Logger
+		certWatcher, err = certificatetpr.NewService(certConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var keyWatcher *randomkeytpr.Service
+	{
+		keyConfig := randomkeytpr.DefaultServiceConfig()
+		keyConfig.K8sClient = k8sClient
+		keyConfig.Logger = config.Logger
+		keyWatcher, err = randomkeytpr.NewService(keyConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var awsConfig awsclient.Config
+	{
+		awsConfig = awsclient.Config{
+			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
+			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
+			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
+			Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
+		}
+	}
+
+	var awsHostConfig awsclient.Config
+	{
+		accessKeyID := config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID)
+		accessKeySecret := config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret)
+		sessionToken := config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session)
+
+		if accessKeyID == "" && accessKeySecret == "" {
+			config.Logger.Log("debug", "no host cluster account credentials supplied, assuming guest and host uses same account")
+			awsHostConfig = awsConfig
+		} else {
+			config.Logger.Log("debug", "host cluster account credentials supplied, using separate accounts for host and guest clusters")
+			awsHostConfig = awsclient.Config{
+				AccessKeyID:     accessKeyID,
+				AccessKeySecret: accessKeySecret,
+				SessionToken:    sessionToken,
+			}
+		}
+	}
+
+	awsClients := awsclient.NewClients(awsConfig)
+	var awsService *awsservice.Service
+	{
+		awsConfig := awsservice.DefaultConfig()
+		awsConfig.Clients.IAM = awsClients.IAM
+		awsConfig.Clients.KMS = awsClients.KMS
+		awsConfig.Logger = config.Logger
+
+		awsService, err = awsservice.New(awsConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var ccService *cloudconfigv2.CloudConfig
+	{
+		ccServiceConfig := cloudconfigv2.DefaultConfig()
+
+		ccServiceConfig.Logger = config.Logger
+
+		ccService, err = cloudconfigv2.New(ccServiceConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	installationName := config.Viper.GetString(config.Flag.Service.Installation.Name)
+
+	var legacyResource framework.Resource
+	{
+		legacyConfig := legacyv2.DefaultConfig()
+		legacyConfig.AwsConfig = awsConfig
+		legacyConfig.AwsHostConfig = awsHostConfig
+		legacyConfig.CertWatcher = certWatcher
+		legacyConfig.CloudConfig = ccService
+		legacyConfig.InstallationName = installationName
+		legacyConfig.K8sClient = k8sClient
+		legacyConfig.KeyWatcher = keyWatcher
+		legacyConfig.Logger = config.Logger
+		legacyConfig.PubKeyFile = config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile)
+
+		legacyResource, err = legacyv2.New(legacyConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var s3BucketResource framework.Resource
+	{
+		s3BucketConfig := s3bucketv2.DefaultConfig()
+		s3BucketConfig.AwsService = awsService
+		s3BucketConfig.Clients.S3 = awsClients.S3
+		s3BucketConfig.Logger = config.Logger
+
+		s3BucketResource, err = s3bucketv2.New(s3BucketConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var s3BucketObjectResource framework.Resource
+	{
+		s3BucketObjectConfig := s3objectv2.DefaultConfig()
+		s3BucketObjectConfig.AwsService = awsService
+		s3BucketObjectConfig.Clients.S3 = awsClients.S3
+		s3BucketObjectConfig.Clients.KMS = awsClients.KMS
+		s3BucketObjectConfig.CloudConfig = ccService
+		s3BucketObjectConfig.CertWatcher = certWatcher
+		s3BucketObjectConfig.Logger = config.Logger
+
+		s3BucketObjectResource, err = s3objectv2.New(s3BucketObjectConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var cloudformationResource framework.Resource
+	{
+		cloudformationConfig := cloudformationv2.DefaultConfig()
+
+		cloudformationConfig.Clients.EC2 = awsClients.EC2
+		cloudformationConfig.Clients.CloudFormation = awsClients.CloudFormation
+		cloudformationConfig.Clients.IAM = awsClients.IAM
+		cloudformationConfig.Logger = config.Logger
+
+		cloudformationResource, err = cloudformationv2.New(cloudformationConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var namespaceResource framework.Resource
+	{
+		namespaceConfig := namespacev2.DefaultConfig()
+
+		namespaceConfig.K8sClient = k8sClient
+		namespaceConfig.Logger = config.Logger
+
+		namespaceResource, err = namespacev2.New(namespaceConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	// Metrics config for wrapping resources.
+	metricsWrapConfig := metricsresource.DefaultWrapConfig()
+	metricsWrapConfig.Name = config.Name
+
+	// Existing clusters are only processed by the legacy resource. We wrap it
+	// with the metrics resource for monitoring.
+	var legacyResources []framework.Resource
+	{
+		legacyResources = []framework.Resource{
+			legacyResource,
+		}
+
+		legacyResources, err = metricsresource.Wrap(legacyResources, metricsWrapConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	// We create the list of resources and wrap each resource around some common
+	// resources like metrics and retry resources.
+	// TODO Remove the legacy resource once all resources are migrated to
+	// Cloud Formation.
+	var resources []framework.Resource
+	{
+		resources = []framework.Resource{
+			namespaceResource,
+			legacyResource,
+			s3BucketResource,
+			s3BucketObjectResource,
+			cloudformationResource,
+		}
+
+		// Disable retry wrapper due to problems with the legacy resource.
+		//
+		// NOTE that the retry resources wrap the underlying resources first. The
+		// wrapped resources are then wrapped around the metrics resource. That way
+		// the metrics also consider execution times and execution attempts including
+		// retries.
+		/*
+			retryWrapConfig := retryresource.DefaultWrapConfig()
+			retryWrapConfig.Logger = config.Logger
+			cloudFormationResources, err = retryresource.Wrap(cloudFormationResources, retryWrapConfig)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+		*/
+
+		resources, err = metricsresource.Wrap(resources, metricsWrapConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	// We provide a map of resource lists keyed by the version bundle version
+	// to the resource router.
+	versionedResources := map[string][]framework.Resource{
+		keyv2.LegacyVersion:         legacyResources,
+		keyv2.CloudFormationVersion: resources,
+		"1.0.0":                     legacyResources,
+	}
+
+	var clientSet *versioned.Clientset
+	{
+		var c *rest.Config
+
+		if config.Viper.GetBool(config.Flag.Service.Kubernetes.InCluster) {
+			config.Logger.Log("debug", "creating in-cluster config")
+
+			c, err = rest.InClusterConfig()
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+		} else {
+			config.Logger.Log("debug", "creating out-cluster config")
+
+			c = &rest.Config{
+				Host: config.Viper.GetString(config.Flag.Service.Kubernetes.Address),
+				TLSClientConfig: rest.TLSClientConfig{
+					CAFile:   config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CAFile),
+					CertFile: config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CrtFile),
+					KeyFile:  config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.KeyFile),
+				},
+			}
+		}
+
+		clientSet, err = versioned.NewForConfig(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var newWatcherFactory informer.WatcherFactory
+	{
+		newWatcherFactory = func() (watch.Interface, error) {
+			watcher, err := clientSet.ProviderV1alpha1().AWSConfigs("").Watch(apismetav1.ListOptions{})
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+
+			return watcher, nil
+		}
+	}
+
+	var newInformer *informer.Informer
+	{
+		c := informer.DefaultConfig()
+
+		c.WatcherFactory = newWatcherFactory
+
+		newInformer, err = informer.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
+		return ctx, nil
+	}
+
+	var crdFramework *framework.Framework
+	{
+		c := framework.DefaultConfig()
+
+		c.CRD = v1alpha1.NewAWSConfigCRD()
+		c.CRDClient = crdClient
+		c.Informer = newInformer
+		c.InitCtxFunc = initCtxFunc
+		c.Logger = config.Logger
+		c.ResourceRouter = NewResourceRouter(versionedResources)
+
+		crdFramework, err = framework.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	return crdFramework, nil
+}
 
 func newCustomObjectFramework(config Config) (*framework.Framework, error) {
 	if config.Flag == nil {
@@ -270,6 +638,7 @@ func newCustomObjectFramework(config Config) (*framework.Framework, error) {
 	versionedResources := map[string][]framework.Resource{
 		keyv1.LegacyVersion:         legacyResources,
 		keyv1.CloudFormationVersion: resources,
+		"1.0.0":                     legacyResources,
 	}
 
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {

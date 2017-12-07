@@ -1,4 +1,4 @@
-package legacyv1
+package legacyv2
 
 import (
 	"fmt"

@@ -59,6 +59,7 @@ func DefaultConfig() Config {
 type Service struct {
 	// Dependencies.
 	Alerter               *alerter.Service
+	CRDFramework          *framework.Framework
 	CustomObjectFramework *framework.Framework
 	Healthz               *healthz.Service
 	Version               *version.Service
@@ -104,6 +105,14 @@ func New(config Config) (*Service, error) {
 		k8sConfig.TLS.KeyFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.KeyFile)
 
 		k8sClient, err = k8sclient.New(k8sConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var crdFramework *framework.Framework
+	{
+		crdFramework, err = newCRDFramework(config)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -167,6 +176,7 @@ func New(config Config) (*Service, error) {
 	newService := &Service{
 		// Dependencies.
 		Alerter:               alerterService,
+		CRDFramework:          crdFramework,
 		CustomObjectFramework: customObjectFramework,
 		Healthz:               healthzService,
 		Version:               versionService,
@@ -184,6 +194,7 @@ func (s *Service) Boot() {
 		s.Alerter.StartAlerts()
 
 		// Start the framework.
-		s.CustomObjectFramework.Boot()
+		go s.CRDFramework.Boot()
+		go s.CustomObjectFramework.Boot()
 	})
 }

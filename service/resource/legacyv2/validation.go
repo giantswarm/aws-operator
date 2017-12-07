@@ -1,12 +1,10 @@
-package legacyv1
+package legacyv2
 
 import (
 	"regexp"
 	"strings"
 
-	"github.com/giantswarm/awstpr"
-	"github.com/giantswarm/awstpr/spec/aws"
-	"github.com/giantswarm/clustertpr/spec"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 )
 
@@ -16,7 +14,7 @@ const (
 	maxIdleTimeout = 60 * 60
 )
 
-func validateAvailabilityZone(cluster awstpr.CustomObject) error {
+func validateAvailabilityZone(cluster v1alpha1.AWSConfig) error {
 	az := cluster.Spec.AWS.AZ
 	region := cluster.Spec.AWS.Region
 
@@ -41,21 +39,21 @@ func validateAvailabilityZone(cluster awstpr.CustomObject) error {
 	return nil
 }
 
-func validateELB(elb aws.ELB) error {
-	if elb.IdleTimeoutSeconds.API > maxIdleTimeout {
+func validateELB(aws v1alpha1.AWSConfigSpecAWS) error {
+	if aws.API.ELB.IdleTimeoutSeconds > maxIdleTimeout {
 		return microerror.Maskf(idleTimeoutSecondsOutOfRangeError, idleTimeoutSecondsOutOfRangeErrorFormat, "api")
 	}
-	if elb.IdleTimeoutSeconds.Etcd > maxIdleTimeout {
+	if aws.Etcd.ELB.IdleTimeoutSeconds > maxIdleTimeout {
 		return microerror.Maskf(idleTimeoutSecondsOutOfRangeError, idleTimeoutSecondsOutOfRangeErrorFormat, "etcd")
 	}
-	if elb.IdleTimeoutSeconds.Ingress > maxIdleTimeout {
+	if aws.Ingress.ELB.IdleTimeoutSeconds > maxIdleTimeout {
 		return microerror.Maskf(idleTimeoutSecondsOutOfRangeError, idleTimeoutSecondsOutOfRangeErrorFormat, "ingress")
 	}
 
 	return nil
 }
 
-func validateMasters(awsMasters []aws.Node, masters []spec.Node) error {
+func validateMasters(awsMasters []v1alpha1.AWSConfigSpecAWSNode, masters []v1alpha1.ClusterNode) error {
 	// Currently only a single master is expected.
 	if len(awsMasters) != 1 || len(masters) != 1 {
 		return microerror.Mask(invalidMasterNodeCountError)
@@ -64,7 +62,7 @@ func validateMasters(awsMasters []aws.Node, masters []spec.Node) error {
 	return nil
 }
 
-func validateWorkers(awsWorkers []aws.Node, workers []spec.Node) error {
+func validateWorkers(awsWorkers []v1alpha1.AWSConfigSpecAWSNode, workers []v1alpha1.ClusterNode) error {
 	if len(awsWorkers) < 1 || len(workers) < 1 {
 		return microerror.Mask(workersListEmptyError)
 	}
@@ -87,12 +85,12 @@ func validateWorkers(awsWorkers []aws.Node, workers []spec.Node) error {
 	return nil
 }
 
-func validateCluster(cluster awstpr.CustomObject) error {
+func validateCluster(cluster v1alpha1.AWSConfig) error {
 	if err := validateAvailabilityZone(cluster); err != nil {
 		return microerror.Mask(err)
 	}
 
-	if err := validateELB(cluster.Spec.AWS.ELB); err != nil {
+	if err := validateELB(cluster.Spec.AWS); err != nil {
 		return microerror.Mask(err)
 	}
 

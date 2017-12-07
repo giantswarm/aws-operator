@@ -1,23 +1,23 @@
-package legacyv1
+package legacyv2
 
 import (
-	"github.com/giantswarm/clustertpr"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/pkg/api/v1"
 )
 
-func (s *Resource) createClusterNamespace(cluster clustertpr.Spec) error {
+func (s *Resource) createClusterNamespace(cluster v1alpha1.Cluster) error {
 	namespace := v1.Namespace{
 		TypeMeta: apismetav1.TypeMeta{
 			Kind:       "Namespace",
 			APIVersion: "v1",
 		},
 		ObjectMeta: apismetav1.ObjectMeta{
-			Name: cluster.Cluster.ID,
+			Name: cluster.ID,
 			Labels: map[string]string{
-				"cluster":  cluster.Cluster.ID,
+				"cluster":  cluster.ID,
 				"customer": cluster.Customer.ID,
 			},
 		},
@@ -29,6 +29,6 @@ func (s *Resource) createClusterNamespace(cluster clustertpr.Spec) error {
 	return nil
 }
 
-func (s *Resource) deleteClusterNamespace(cluster clustertpr.Spec) error {
-	return s.k8sClient.Core().Namespaces().Delete(cluster.Cluster.ID, apismetav1.NewDeleteOptions(0))
+func (s *Resource) deleteClusterNamespace(cluster v1alpha1.Cluster) error {
+	return s.k8sClient.Core().Namespaces().Delete(cluster.ID, apismetav1.NewDeleteOptions(0))
 }

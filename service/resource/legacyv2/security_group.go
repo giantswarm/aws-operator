@@ -1,15 +1,15 @@
-package legacyv1
+package legacyv2
 
 import (
 	"fmt"
 
-	"github.com/giantswarm/awstpr"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/resources"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
-	"github.com/giantswarm/aws-operator/service/keyv1"
+	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
 type securityGroupInput struct {
@@ -19,7 +19,7 @@ type securityGroupInput struct {
 }
 
 type rulesInput struct {
-	Cluster                awstpr.CustomObject
+	Cluster                v1alpha1.AWSConfig
 	Rules                  []awsresources.SecurityGroupRule
 	MastersSecurityGroupID string
 	WorkersSecurityGroupID string
@@ -102,7 +102,7 @@ func (ri rulesInput) masterRules() []awsresources.SecurityGroupRule {
 		},
 	}
 
-	if keyv1.HasClusterVersion(ri.Cluster) {
+	if keyv2.HasClusterVersion(ri.Cluster) {
 		// For new clusters we only allow SSH access from the host cluster.
 		rules = append(rules, awsresources.SecurityGroupRule{
 			Port:       sshPort,
@@ -167,7 +167,7 @@ func (ri rulesInput) workerRules() []awsresources.SecurityGroupRule {
 		},
 	}
 
-	if keyv1.HasClusterVersion(ri.Cluster) {
+	if keyv2.HasClusterVersion(ri.Cluster) {
 		// For new clusters we only allow SSH access from the host cluster.
 		rules = append(rules, awsresources.SecurityGroupRule{
 			Port:       sshPort,
