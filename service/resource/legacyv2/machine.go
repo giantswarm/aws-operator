@@ -1,13 +1,11 @@
-package legacyv1
+package legacyv2
 
 import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/awstpr"
-	awsinfo "github.com/giantswarm/awstpr/spec/aws"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certificatetpr"
-	"github.com/giantswarm/clustertpr/spec"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeytpr"
 
@@ -37,7 +35,7 @@ func clusterPrefix(input clusterPrefixInput) string {
 
 type runMachinesInput struct {
 	clients             awsutil.Clients
-	cluster             awstpr.CustomObject
+	cluster             v1alpha1.AWSConfig
 	tlsAssets           *certificatetpr.CompactTLSAssets
 	clusterKeys         *randomkeytpr.CompactRandomKeyAssets
 	bucket              resources.Resource
@@ -53,8 +51,8 @@ func (s *Resource) runMachines(input runMachinesInput) (bool, []string, error) {
 	var (
 		anyCreated bool
 
-		machines    []spec.Node
-		awsMachines []awsinfo.Node
+		machines    []v1alpha1.ClusterNode
+		awsMachines []v1alpha1.AWSConfigSpecAWSNode
 		instanceIDs []string
 	)
 
@@ -130,9 +128,9 @@ func allExistingInstancesMatch(instances *ec2.DescribeInstancesOutput, state aws
 
 type runMachineInput struct {
 	clients             awsutil.Clients
-	cluster             awstpr.CustomObject
-	machine             spec.Node
-	awsNode             awsinfo.Node
+	cluster             v1alpha1.AWSConfig
+	machine             v1alpha1.ClusterNode
+	awsNode             v1alpha1.AWSConfigSpecAWSNode
 	tlsAssets           *certificatetpr.CompactTLSAssets
 	clusterKeys         *randomkeytpr.CompactRandomKeyAssets
 	bucket              resources.Resource
@@ -238,7 +236,7 @@ func (s *Resource) runMachine(input runMachineInput) (bool, string, error) {
 
 type deleteMachinesInput struct {
 	clients     awsutil.Clients
-	spec        awstpr.Spec
+	spec        v1alpha1.AWSConfigSpec
 	clusterName string
 	prefix      string
 }
@@ -269,7 +267,7 @@ func (s *Resource) deleteMachines(input deleteMachinesInput) error {
 type deleteMachineInput struct {
 	name    string
 	clients awsutil.Clients
-	machine spec.Node
+	machine v1alpha1.AWSConfigSpecAWSNode
 }
 
 func validateIDs(ids []string) bool {

@@ -117,6 +117,7 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 	versionedResources := make(map[string][]framework.Resource)
 	versionedResources["0.1.0"] = legacyResources
 	versionedResources["0.2.0"] = allResources
+	versionedResources["1.0.0"] = legacyResources
 
 	testCases := []struct {
 		customObject      awstpr.CustomObject
@@ -163,7 +164,20 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 			errorMatcher:      nil,
 			resourceRouter:    NewResourceRouter(versionedResources),
 		},
-		// Case 3. Invalid version returns an error.
+		// Case 3. Kubernetes update to 1.8.4.
+		{
+			customObject: awstpr.CustomObject{
+				Spec: awstpr.Spec{
+					VersionBundle: spec.VersionBundle{
+						Version: "1.0.0",
+					},
+				},
+			},
+			expectedResources: legacyResources,
+			errorMatcher:      nil,
+			resourceRouter:    NewResourceRouter(versionedResources),
+		},
+		// Case 4. Invalid version returns an error.
 		{
 			customObject: awstpr.CustomObject{
 				Spec: awstpr.Spec{

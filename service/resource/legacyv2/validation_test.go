@@ -1,14 +1,9 @@
-package legacyv1
+package legacyv2
 
 import (
 	"testing"
 
-	"github.com/giantswarm/awstpr"
-
-	awsspec "github.com/giantswarm/awstpr/spec"
-	"github.com/giantswarm/awstpr/spec/aws"
-	"github.com/giantswarm/awstpr/spec/aws/elb"
-	"github.com/giantswarm/clustertpr/spec"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/stretchr/testify/assert"
 )
@@ -53,9 +48,9 @@ func TestValidateAvailabilityZone(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		cluster := awstpr.CustomObject{
-			Spec: awstpr.Spec{
-				AWS: awsspec.AWS{
+		cluster := v1alpha1.AWSConfig{
+			Spec: v1alpha1.AWSConfigSpec{
+				AWS: v1alpha1.AWSConfigSpecAWS{
 					Region: tc.region,
 					AZ:     tc.availabilityZone,
 				},
@@ -70,13 +65,13 @@ func TestValidateAvailabilityZone(t *testing.T) {
 func TestValidateWorkers(t *testing.T) {
 	tests := []struct {
 		name          string
-		awsWorkers    []aws.Node
-		workers       []spec.Node
+		awsWorkers    []v1alpha1.AWSConfigSpecAWSNode
+		workers       []v1alpha1.ClusterNode
 		expectedError error
 	}{
 		{
 			name: "Valid workers - image IDs and instance types are the same",
-			awsWorkers: []aws.Node{
+			awsWorkers: []v1alpha1.AWSConfigSpecAWSNode{
 				{
 					ImageID:      "example-image-id",
 					InstanceType: "example-instance-type",
@@ -86,7 +81,7 @@ func TestValidateWorkers(t *testing.T) {
 					InstanceType: "example-instance-type",
 				},
 			},
-			workers: []spec.Node{
+			workers: []v1alpha1.ClusterNode{
 				{
 					ID: "worker-1",
 				},
@@ -98,14 +93,14 @@ func TestValidateWorkers(t *testing.T) {
 		},
 		{
 			name:          "Invalid workers - list is empty",
-			awsWorkers:    []aws.Node{},
-			workers:       []spec.Node{},
+			awsWorkers:    []v1alpha1.AWSConfigSpecAWSNode{},
+			workers:       []v1alpha1.ClusterNode{},
 			expectedError: workersListEmptyError,
 		},
 		{
 			name:       "Invalid workers - aws workers list is empty",
-			awsWorkers: []aws.Node{},
-			workers: []spec.Node{
+			awsWorkers: []v1alpha1.AWSConfigSpecAWSNode{},
+			workers: []v1alpha1.ClusterNode{
 				{
 					ID: "worker-1",
 				},
@@ -114,7 +109,7 @@ func TestValidateWorkers(t *testing.T) {
 		},
 		{
 			name: "Invalid workers - image IDs are different",
-			awsWorkers: []aws.Node{
+			awsWorkers: []v1alpha1.AWSConfigSpecAWSNode{
 				{
 					ImageID:      "example-image-id",
 					InstanceType: "example-instance-type",
@@ -124,7 +119,7 @@ func TestValidateWorkers(t *testing.T) {
 					InstanceType: "example-instance-type",
 				},
 			},
-			workers: []spec.Node{
+			workers: []v1alpha1.ClusterNode{
 				{
 					ID: "worker-1",
 				},
@@ -136,7 +131,7 @@ func TestValidateWorkers(t *testing.T) {
 		},
 		{
 			name: "Invalid workers - instance types are different",
-			awsWorkers: []aws.Node{
+			awsWorkers: []v1alpha1.AWSConfigSpecAWSNode{
 				{
 					ImageID:      "example-image-id",
 					InstanceType: "example-instance-type",
@@ -146,7 +141,7 @@ func TestValidateWorkers(t *testing.T) {
 					InstanceType: "another-instance-type",
 				},
 			},
-			workers: []spec.Node{
+			workers: []v1alpha1.ClusterNode{
 				{
 					ID: "worker-1",
 				},
@@ -158,7 +153,7 @@ func TestValidateWorkers(t *testing.T) {
 		},
 		{
 			name: "Invalid workers - node counts are different",
-			awsWorkers: []aws.Node{
+			awsWorkers: []v1alpha1.AWSConfigSpecAWSNode{
 				{
 					ImageID:      "example-image-id",
 					InstanceType: "example-instance-type",
@@ -168,7 +163,7 @@ func TestValidateWorkers(t *testing.T) {
 					InstanceType: "another-instance-type",
 				},
 			},
-			workers: []spec.Node{
+			workers: []v1alpha1.ClusterNode{
 				{
 					ID: "worker-1",
 				},
@@ -222,15 +217,25 @@ func TestValidateELB(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		elb := aws.ELB{
-			IdleTimeoutSeconds: elb.IdleTimeoutSeconds{
-				API:     tc.idleTimeoutSecondsAPI,
-				Etcd:    tc.idleTimeoutSecondsEtcd,
-				Ingress: tc.idleTimeoutSecondsIngress,
+		aws := v1alpha1.AWSConfigSpecAWS{
+			API: v1alpha1.AWSConfigSpecAWSAPI{
+				ELB: v1alpha1.AWSConfigSpecAWSAPIELB{
+					IdleTimeoutSeconds: tc.idleTimeoutSecondsAPI,
+				},
+			},
+			Etcd: v1alpha1.AWSConfigSpecAWSEtcd{
+				ELB: v1alpha1.AWSConfigSpecAWSEtcdELB{
+					IdleTimeoutSeconds: tc.idleTimeoutSecondsEtcd,
+				},
+			},
+			Ingress: v1alpha1.AWSConfigSpecAWSIngress{
+				ELB: v1alpha1.AWSConfigSpecAWSIngressELB{
+					IdleTimeoutSeconds: tc.idleTimeoutSecondsIngress,
+				},
 			},
 		}
 
-		err := validateELB(elb)
+		err := validateELB(aws)
 		assert.Equal(t, tc.expectedError, microerror.Cause(err), tc.name)
 	}
 }
@@ -252,15 +257,21 @@ func TestValidateELBSparseStruct(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		elb := aws.ELB{
-			IdleTimeoutSeconds: elb.IdleTimeoutSeconds{
-				API:  tc.idleTimeoutSecondsAPI,
-				Etcd: tc.idleTimeoutSecondsEtcd,
-				// Ingress:
+		aws := v1alpha1.AWSConfigSpecAWS{
+			API: v1alpha1.AWSConfigSpecAWSAPI{
+				ELB: v1alpha1.AWSConfigSpecAWSAPIELB{
+					IdleTimeoutSeconds: tc.idleTimeoutSecondsAPI,
+				},
 			},
+			Etcd: v1alpha1.AWSConfigSpecAWSEtcd{
+				ELB: v1alpha1.AWSConfigSpecAWSEtcdELB{
+					IdleTimeoutSeconds: tc.idleTimeoutSecondsEtcd,
+				},
+			},
+			// Ingress:
 		}
 
-		err := validateELB(elb)
+		err := validateELB(aws)
 		assert.Equal(t, tc.expectedError, microerror.Cause(err), tc.name)
 	}
 }
@@ -279,9 +290,9 @@ func TestValidateELBMissingStruct(t *testing.T) {
 
 	for _, tc := range tests {
 		// Missing nested structs
-		elb := aws.ELB{}
+		aws := v1alpha1.AWSConfigSpecAWS{}
 
-		err := validateELB(elb)
+		err := validateELB(aws)
 		assert.Equal(t, tc.expectedError, microerror.Cause(err), tc.name)
 	}
 }
