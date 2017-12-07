@@ -1,37 +1,31 @@
-package cloudformationv1
+package cloudformationv2
 
 import (
 	"context"
 	"testing"
 
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/giantswarm/aws-operator/service/resource/cloudformationv1/adapter"
-	"github.com/giantswarm/awstpr"
-	awsspec "github.com/giantswarm/awstpr/spec"
-	awsspecaws "github.com/giantswarm/awstpr/spec/aws"
-	"github.com/giantswarm/clustertpr"
-	"github.com/giantswarm/clustertpr/spec"
-	"github.com/giantswarm/clustertpr/spec/kubernetes"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
+
+	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2/adapter"
 )
 
 func Test_Resource_Cloudformation_newCreate(t *testing.T) {
-	clusterTpo := &awstpr.CustomObject{
-		Spec: awstpr.Spec{
-			Cluster: clustertpr.Spec{
-				Cluster: spec.Cluster{
-					ID: "test-cluster",
-				},
-				Kubernetes: spec.Kubernetes{
-					IngressController: kubernetes.IngressController{
+	clusterTpo := &v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "test-cluster",
+				Kubernetes: v1alpha1.ClusterKubernetes{
+					IngressController: v1alpha1.ClusterKubernetesIngressController{
 						Domain: "mysubdomain.mydomain.com",
 					},
 				},
 			},
-			AWS: awsspec.AWS{
+			AWS: v1alpha1.AWSConfigSpecAWS{
 				AZ: "myaz",
-				Workers: []awsspecaws.Node{
-					awsspecaws.Node{
+				Workers: []v1alpha1.AWSConfigSpecAWSNode{
+					v1alpha1.AWSConfigSpecAWSNode{
 						ImageID: "myimageid",
 					},
 				},

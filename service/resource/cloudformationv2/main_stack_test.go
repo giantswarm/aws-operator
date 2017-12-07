@@ -1,23 +1,18 @@
-package cloudformationv1
+package cloudformationv2
 
 import (
 	"fmt"
 	"strings"
 	"testing"
 
-	"github.com/giantswarm/awstpr"
-	awsspec "github.com/giantswarm/awstpr/spec"
-	awsspecaws "github.com/giantswarm/awstpr/spec/aws"
-	"github.com/giantswarm/clustertpr"
-	"github.com/giantswarm/clustertpr/spec"
-	"github.com/giantswarm/clustertpr/spec/kubernetes"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	"github.com/giantswarm/aws-operator/service/resource/cloudformationv1/adapter"
+	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2/adapter"
 )
 
 func TestMainTemplateGetEmptyBody(t *testing.T) {
-	customObject := awstpr.CustomObject{}
+	customObject := v1alpha1.AWSConfig{}
 
 	resourceConfig := DefaultConfig()
 	resourceConfig.Clients = adapter.Clients{}
@@ -36,23 +31,21 @@ func TestMainTemplateGetEmptyBody(t *testing.T) {
 
 func TestMainTemplateExistingFields(t *testing.T) {
 	// customObject with example fields for both asg and launch config
-	customObject := awstpr.CustomObject{
-		Spec: awstpr.Spec{
-			Cluster: clustertpr.Spec{
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID:      "test-cluster",
 				Version: "myversion",
-				Cluster: spec.Cluster{
-					ID: "test-cluster",
-				},
-				Kubernetes: spec.Kubernetes{
-					IngressController: kubernetes.IngressController{
+				Kubernetes: v1alpha1.ClusterKubernetes{
+					IngressController: v1alpha1.ClusterKubernetesIngressController{
 						Domain: "mysubdomain.mydomain.com",
 					},
 				},
 			},
-			AWS: awsspec.AWS{
+			AWS: v1alpha1.AWSConfigSpecAWS{
 				AZ: "myaz",
-				Workers: []awsspecaws.Node{
-					awsspecaws.Node{
+				Workers: []v1alpha1.AWSConfigSpecAWSNode{
+					v1alpha1.AWSConfigSpecAWSNode{
 						ImageID: "myimageid",
 					},
 				},

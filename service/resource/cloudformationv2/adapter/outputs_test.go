@@ -3,26 +3,25 @@ package adapter
 import (
 	"testing"
 
-	"github.com/giantswarm/awstpr"
-	"github.com/giantswarm/clustertpr"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 )
 
 func TestAdapterOutputsRegularFields(t *testing.T) {
 	testCases := []struct {
 		description            string
-		customObject           awstpr.CustomObject
+		customObject           v1alpha1.AWSConfig
 		expectedClusterVersion string
 	}{
 		{
 			description:            "empty custom object",
-			customObject:           awstpr.CustomObject{},
+			customObject:           v1alpha1.AWSConfig{},
 			expectedClusterVersion: "",
 		},
 		{
 			description: "basic matching",
-			customObject: awstpr.CustomObject{
-				Spec: awstpr.Spec{
-					Cluster: clustertpr.Spec{
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
 						Version: "myversion",
 					},
 				},

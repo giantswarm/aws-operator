@@ -1,12 +1,13 @@
-package cloudformationv1
+package cloudformationv2
 
 import (
 	"context"
 
 	"github.com/aws/aws-sdk-go/aws"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/giantswarm/aws-operator/service/keyv1"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
@@ -26,7 +27,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 }
 
 func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	customObject, err := keyv1.ToCustomObject(obj)
+	customObject, err := keyv2.ToCustomObject(obj)
 	if err != nil {
 		return awscloudformation.CreateStackInput{}, microerror.Mask(err)
 	}

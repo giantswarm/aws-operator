@@ -26,11 +26,11 @@
 package adapter
 
 import (
-	"github.com/giantswarm/awstpr"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 )
 
-type hydrater func(awstpr.CustomObject, Clients) error
+type hydrater func(v1alpha1.AWSConfig, Clients) error
 
 type Adapter struct {
 	ASGType string
@@ -40,7 +40,7 @@ type Adapter struct {
 	outputsAdapter
 }
 
-func New(customObject awstpr.CustomObject, clients Clients) (Adapter, error) {
+func New(customObject v1alpha1.AWSConfig, clients Clients) (Adapter, error) {
 	a := Adapter{}
 
 	a.ASGType = prefixWorker

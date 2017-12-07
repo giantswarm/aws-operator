@@ -3,21 +3,14 @@ package adapter
 import (
 	"testing"
 
-	"github.com/giantswarm/awstpr"
-	awsspec "github.com/giantswarm/awstpr/spec"
-	awsspecaws "github.com/giantswarm/awstpr/spec/aws"
-	"github.com/giantswarm/clustertpr"
-	"github.com/giantswarm/clustertpr/spec"
-	"github.com/giantswarm/clustertpr/spec/kubernetes"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 )
 
 var (
-	defaultCluster = clustertpr.Spec{
-		Cluster: spec.Cluster{
-			ID: "test-cluster",
-		},
-		Kubernetes: spec.Kubernetes{
-			IngressController: kubernetes.IngressController{
+	defaultCluster = v1alpha1.Cluster{
+		ID: "test-cluster",
+		Kubernetes: v1alpha1.ClusterKubernetes{
+			IngressController: v1alpha1.ClusterKubernetesIngressController{
 				Domain: "mysubdomain.mydomain.com",
 			},
 		},
@@ -25,12 +18,12 @@ var (
 )
 
 func TestAdapterMain(t *testing.T) {
-	customObject := awstpr.CustomObject{
-		Spec: awstpr.Spec{
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: defaultCluster,
-			AWS: awsspec.AWS{
-				Workers: []awsspecaws.Node{
-					awsspecaws.Node{},
+			AWS: v1alpha1.AWSConfigSpecAWS{
+				Workers: []v1alpha1.AWSConfigSpecAWSNode{
+					v1alpha1.AWSConfigSpecAWSNode{},
 				},
 			},
 		},

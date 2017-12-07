@@ -1,4 +1,4 @@
-package cloudformationv1
+package cloudformationv2
 
 import (
 	"bytes"
@@ -8,15 +8,15 @@ import (
 	"strconv"
 	"text/template"
 
-	"github.com/giantswarm/awstpr"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/keyv1"
-	"github.com/giantswarm/aws-operator/service/resource/cloudformationv1/adapter"
+	"github.com/giantswarm/aws-operator/service/keyv2"
+	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2/adapter"
 )
 
-func newMainStack(customObject awstpr.CustomObject) (StackState, error) {
-	stackName := keyv1.MainStackName(customObject)
+func newMainStack(customObject v1alpha1.AWSConfig) (StackState, error) {
+	stackName := keyv2.MainStackName(customObject)
 	workers := len(customObject.Spec.AWS.Workers)
 	var imageID string
 	// FIXME: the imageID should not depend on the number of workers.
@@ -24,7 +24,7 @@ func newMainStack(customObject awstpr.CustomObject) (StackState, error) {
 	if workers > 0 {
 		imageID = customObject.Spec.AWS.Workers[0].ImageID
 	}
-	clusterVersion := keyv1.ClusterVersion(customObject)
+	clusterVersion := keyv2.ClusterVersion(customObject)
 
 	mainCF := StackState{
 		Name:           stackName,
@@ -36,7 +36,7 @@ func newMainStack(customObject awstpr.CustomObject) (StackState, error) {
 	return mainCF, nil
 }
 
-func (r *Resource) getMainTemplateBody(customObject awstpr.CustomObject) (string, error) {
+func (r *Resource) getMainTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
 	main := template.New("")
 
 	var t *template.Template
@@ -48,7 +48,7 @@ func (r *Resource) getMainTemplateBody(customObject awstpr.CustomObject) (string
 		return "", microerror.Mask(err)
 	}
 
-	rootDir, err := keyv1.RootDir(baseDir, adapter.RootDirElement)
+	rootDir, err := keyv2.RootDir(baseDir, adapter.RootDirElement)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
