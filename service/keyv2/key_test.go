@@ -118,12 +118,11 @@ func Test_ClusterNamespace(t *testing.T) {
 	}
 }
 
-// TODO Handle missing version in apiextensions.
 func Test_ClusterVersion(t *testing.T) {
 	expectedVersion := "v_0_1_0"
 
 	cluster := v1alpha1.Cluster{
-	// Version: expectedVersion,
+		Version: expectedVersion,
 	}
 
 	customObject := v1alpha1.AWSConfig{
@@ -137,7 +136,6 @@ func Test_ClusterVersion(t *testing.T) {
 	}
 }
 
-// TODO Handle missing version in apiextensions.
 func Test_HasClusterVersion(t *testing.T) {
 	tests := []struct {
 		customObject   v1alpha1.AWSConfig
@@ -153,7 +151,7 @@ func Test_HasClusterVersion(t *testing.T) {
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
-					// Version: "",
+						Version: "",
 					},
 				},
 			},
@@ -163,7 +161,7 @@ func Test_HasClusterVersion(t *testing.T) {
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
-					// Version: "v_0_1_0",
+						Version: "v_0_1_0",
 					},
 				},
 			},
@@ -173,7 +171,7 @@ func Test_HasClusterVersion(t *testing.T) {
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
-					// Version: "v_0_2_0",
+						Version: "v_0_2_0",
 					},
 				},
 			},
@@ -692,13 +690,12 @@ func Test_VersionBundleVersion(t *testing.T) {
 	}
 }
 
-// TODO Handle missing version in apiextensions.
 func Test_BucketObjectName(t *testing.T) {
-	// version := "v_0_1_0"
+	version := "v_0_1_0"
 	suffix := "mysuffix"
 
 	cluster := v1alpha1.Cluster{
-	// Version: version,
+		Version: version,
 	}
 
 	customObject := v1alpha1.AWSConfig{

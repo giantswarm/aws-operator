@@ -55,12 +55,10 @@ func CustomerID(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Customer.ID
 }
 
-// TODO Handle missing version in apiextensions.
 func ClusterVersion(customObject v1alpha1.AWSConfig) string {
-	return "FIXME"
+	return customObject.Spec.Cluster.Version
 }
 
-// TODO Handle missing version in apiextensions.
 func HasClusterVersion(customObject v1alpha1.AWSConfig) bool {
 	switch ClusterVersion(customObject) {
 	case string(cloudconfig.V_0_1_0):
