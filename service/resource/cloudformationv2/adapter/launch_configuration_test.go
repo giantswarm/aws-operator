@@ -88,6 +88,9 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 			if a.IAMInstanceProfileName != tc.expectedIAMInstanceProfileName {
 				t.Errorf("unexpected IAMInstanceProfileName, got %q, want %q", a.IAMInstanceProfileName, tc.expectedIAMInstanceProfileName)
 			}
+			if a.AssociatePublicIPAddress != tc.expectedAssociatePublicIPAddress {
+				t.Errorf("unexpected IAMInstanceProfileName, got %q, want %q", a.IAMInstanceProfileName, tc.expectedIAMInstanceProfileName)
+			}
 			if !reflect.DeepEqual(a.BlockDeviceMappings, tc.expectedBlockDeviceMappings) {
 				t.Errorf("unexpected BlockDeviceMappings, got %v, want %v", a.BlockDeviceMappings, tc.expectedBlockDeviceMappings)
 			}
