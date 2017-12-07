@@ -22,21 +22,16 @@ func Test_CurrentState(t *testing.T) {
 	}
 
 	testCases := []struct {
-		obj              *awstpr.CustomObject
 		description      string
 		expectedKeyID    string
-		expectedARN      string
 		expectedKMSError bool
 	}{
 		{
 			description:   "basic match",
-			obj:           clusterTpo,
 			expectedKeyID: "mykeyid",
-			expectedARN:   "myarn",
 		},
 		{
 			description:      "KMS error",
-			obj:              clusterTpo,
 			expectedKMSError: true,
 		},
 	}
@@ -50,7 +45,6 @@ func Test_CurrentState(t *testing.T) {
 			resourceConfig.Clients = Clients{
 				KMS: &KMSClientMock{
 					keyID:   tc.expectedKeyID,
-					aRN:     tc.expectedARN,
 					isError: tc.expectedKMSError,
 				},
 			}
@@ -59,7 +53,7 @@ func Test_CurrentState(t *testing.T) {
 				t.Error("expected", nil, "got", err)
 			}
 
-			result, err := newResource.GetCurrentState(context.TODO(), tc.obj)
+			result, err := newResource.GetCurrentState(context.TODO(), clusterTpo)
 			if err != nil && !tc.expectedKMSError {
 				t.Errorf("unexpected error %v", err)
 			}
@@ -73,10 +67,7 @@ func Test_CurrentState(t *testing.T) {
 			}
 
 			if currentState.KeyID != tc.expectedKeyID {
-				t.Errorf("expeccted keyID %q, got %q", tc.expectedKeyID, currentState.KeyID)
-			}
-			if currentState.ARN != tc.expectedARN {
-				t.Errorf("expeccted keyID %q, got %q", tc.expectedARN, currentState.ARN)
+				t.Errorf("expected keyID %q, got %q", tc.expectedKeyID, currentState.KeyID)
 			}
 		})
 	}

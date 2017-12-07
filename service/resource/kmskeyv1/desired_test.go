@@ -22,14 +22,14 @@ func Test_DesiredState(t *testing.T) {
 	}
 
 	testCases := []struct {
-		obj           *awstpr.CustomObject
-		description   string
-		expectedKeyID string
+		obj              *awstpr.CustomObject
+		description      string
+		expectedKeyAlias string
 	}{
 		{
-			description:   "basic match",
-			obj:           clusterTpo,
-			expectedKeyID: "alias/test-cluster",
+			description:      "basic match",
+			obj:              clusterTpo,
+			expectedKeyAlias: "alias/test-cluster",
 		},
 	}
 	var err error
@@ -53,8 +53,8 @@ func Test_DesiredState(t *testing.T) {
 				t.Errorf("expected '%T', got '%T'", currentState, result)
 			}
 
-			if currentState.KeyID != tc.expectedKeyID {
-				t.Errorf("expected keyID %q, got %q", tc.expectedKeyID, currentState.KeyID)
+			if currentState.KeyAlias != tc.expectedKeyAlias {
+				t.Errorf("expected keyID %q, got %q", tc.expectedKeyAlias, currentState.KeyAlias)
 			}
 		})
 	}

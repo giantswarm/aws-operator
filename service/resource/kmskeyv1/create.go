@@ -60,7 +60,7 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		return nil, microerror.Mask(err)
 	}
 
-	if desiredKMSState.KeyID != currentKMSState.KeyID {
+	if desiredKMSState.KeyAlias != currentKMSState.KeyAlias {
 		return &kms.CreateKeyInput{}, nil
 	}
 
