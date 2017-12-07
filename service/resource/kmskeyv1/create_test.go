@@ -13,7 +13,7 @@ import (
 )
 
 func Test_Resource_S3Object_newCreate(t *testing.T) {
-	clusterTpo := awstpr.CustomObject{
+	customObject := awstpr.CustomObject{
 		Spec: awstpr.Spec{
 			Cluster: clustertpr.Spec{
 				Cluster: spec.Cluster{
@@ -69,7 +69,7 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		result, err := newResource.newCreateChange(context.TODO(), clusterTpo, tc.currentState, tc.desiredState)
+		result, err := newResource.newCreateChange(context.TODO(), customObject, tc.currentState, tc.desiredState)
 		if err != nil {
 			t.Errorf("expected '%v' got '%#v'", nil, err)
 		}
@@ -88,7 +88,7 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 }
 
 func Test_ApplyCreateChange(t *testing.T) {
-	clusterTpo := awstpr.CustomObject{
+	customObject := awstpr.CustomObject{
 		Spec: awstpr.Spec{
 			Cluster: clustertpr.Spec{
 				Cluster: spec.Cluster{
@@ -128,7 +128,7 @@ func Test_ApplyCreateChange(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		err := newResource.ApplyCreateChange(context.TODO(), &clusterTpo, tc.createChange)
+		err := newResource.ApplyCreateChange(context.TODO(), &customObject, tc.createChange)
 		if err != nil {
 			t.Errorf("unexpected error %v", err)
 		}

@@ -13,7 +13,7 @@ import (
 )
 
 func Test_newDelete(t *testing.T) {
-	clusterTpo := awstpr.CustomObject{
+	customObject := awstpr.CustomObject{
 		Spec: awstpr.Spec{
 			Cluster: clustertpr.Spec{
 				Cluster: spec.Cluster{
@@ -77,7 +77,7 @@ func Test_newDelete(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			result, err := newResource.newDeleteChange(context.TODO(), clusterTpo, tc.currentState, tc.desiredState)
+			result, err := newResource.newDeleteChange(context.TODO(), customObject, tc.currentState, tc.desiredState)
 			if err != nil {
 				t.Errorf("expected '%v' got '%#v'", nil, err)
 			}
@@ -93,7 +93,7 @@ func Test_newDelete(t *testing.T) {
 }
 
 func Test_ApplyDeleteChange(t *testing.T) {
-	clusterTpo := awstpr.CustomObject{
+	customObject := awstpr.CustomObject{
 		Spec: awstpr.Spec{
 			Cluster: clustertpr.Spec{
 				Cluster: spec.Cluster{
@@ -135,7 +135,7 @@ func Test_ApplyDeleteChange(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		err := newResource.ApplyDeleteChange(context.TODO(), &clusterTpo, tc.deleteChange)
+		err := newResource.ApplyDeleteChange(context.TODO(), &customObject, tc.deleteChange)
 		if err != nil {
 			t.Errorf("unexpected error %v", err)
 		}

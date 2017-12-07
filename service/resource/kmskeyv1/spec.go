@@ -2,6 +2,10 @@ package kmskeyv1
 
 import "github.com/aws/aws-sdk-go/service/kms"
 
+const (
+	pendingDeletionWindow = 7
+)
+
 type KMSKeyState struct {
 	KeyID    string
 	KeyAlias string

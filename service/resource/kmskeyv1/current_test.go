@@ -11,7 +11,7 @@ import (
 )
 
 func Test_CurrentState(t *testing.T) {
-	clusterTpo := &awstpr.CustomObject{
+	customObject := &awstpr.CustomObject{
 		Spec: awstpr.Spec{
 			Cluster: clustertpr.Spec{
 				Cluster: spec.Cluster{
@@ -53,7 +53,7 @@ func Test_CurrentState(t *testing.T) {
 				t.Error("expected", nil, "got", err)
 			}
 
-			result, err := newResource.GetCurrentState(context.TODO(), clusterTpo)
+			result, err := newResource.GetCurrentState(context.TODO(), customObject)
 			if err != nil && !tc.expectedKMSError {
 				t.Errorf("unexpected error %v", err)
 			}

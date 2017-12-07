@@ -11,7 +11,7 @@ import (
 )
 
 func Test_DesiredState(t *testing.T) {
-	clusterTpo := &awstpr.CustomObject{
+	customObject := &awstpr.CustomObject{
 		Spec: awstpr.Spec{
 			Cluster: clustertpr.Spec{
 				Cluster: spec.Cluster{
@@ -28,7 +28,7 @@ func Test_DesiredState(t *testing.T) {
 	}{
 		{
 			description:      "basic match",
-			obj:              clusterTpo,
+			obj:              customObject,
 			expectedKeyAlias: "alias/test-cluster",
 		},
 	}
