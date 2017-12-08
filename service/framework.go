@@ -52,6 +52,10 @@ const (
 	ResourceRetries uint64 = 3
 )
 
+const (
+	AWSConfigCleanupFinalizer = "aws-operator.giantswarm.io/custom-object-cleanup"
+)
+
 func newCRDFramework(config Config) (*framework.Framework, error) {
 	if config.Flag == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Flag must not be empty")
@@ -758,6 +762,10 @@ func migrateTPRsToCRDs(logger micrologger.Logger, clientSet *versioned.Clientset
 		{
 			cro = &v1alpha1.AWSConfig{}
 
+			cro.ObjectMeta.Name = tpo.Name
+			cro.ObjectMeta.Finalizers = []string{
+				AWSConfigCleanupFinalizer,
+			}
 			cro.Spec.AWS.API.ELB.IdleTimeoutSeconds = tpo.Spec.AWS.ELB.IdleTimeoutSeconds.API
 			cro.Spec.AWS.API.HostedZones = tpo.Spec.AWS.HostedZones.API
 			cro.Spec.AWS.AZ = tpo.Spec.AWS.AZ
