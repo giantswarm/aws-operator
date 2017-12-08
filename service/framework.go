@@ -765,9 +765,9 @@ func migrateTPRsToCRDs(logger micrologger.Logger, clientSet *versioned.Clientset
 			cro.TypeMeta.APIVersion = "provider.giantswarm.io"
 			cro.TypeMeta.Kind = "AWSConfig"
 			cro.ObjectMeta.Name = tpo.Name
-			cro.ObjectMeta.Finalizers = []string{
-				AWSConfigCleanupFinalizer,
-			}
+			//cro.ObjectMeta.Finalizers = []string{
+			//	AWSConfigCleanupFinalizer,
+			//}
 			cro.Spec.AWS.API.ELB.IdleTimeoutSeconds = tpo.Spec.AWS.ELB.IdleTimeoutSeconds.API
 			cro.Spec.AWS.API.HostedZones = tpo.Spec.AWS.HostedZones.API
 			cro.Spec.AWS.AZ = tpo.Spec.AWS.AZ
