@@ -26,6 +26,7 @@ type Release struct {
 	deprecated bool
 	timestamp  string
 	version    string
+	wip        bool
 }
 
 func NewRelease(config ReleaseConfig) (Release, error) {
@@ -75,6 +76,14 @@ func NewRelease(config ReleaseConfig) (Release, error) {
 		}
 	}
 
+	var wip bool
+	{
+		wip, err = aggregateReleaseWIP(config.Bundles)
+		if err != nil {
+			return Release{}, microerror.Maskf(invalidConfigError, err.Error())
+		}
+	}
+
 	r := Release{
 		bundles:    config.Bundles,
 		changelogs: changelogs,
@@ -82,6 +91,7 @@ func NewRelease(config ReleaseConfig) (Release, error) {
 		deprecated: deprecated,
 		timestamp:  timestamp,
 		version:    version,
+		wip:        wip,
 	}
 
 	return r, nil
@@ -109,6 +119,10 @@ func (r Release) Timestamp() string {
 
 func (r Release) Version() string {
 	return r.version
+}
+
+func (r Release) WIP() bool {
+	return r.wip
 }
 
 func aggregateReleaseChangelogs(bundles []Bundle) ([]Changelog, error) {
@@ -172,6 +186,16 @@ func aggregateReleaseVersion(bundles []Bundle) (string, error) {
 	version := fmt.Sprintf("%d.%d.%d", major, minor, patch)
 
 	return version, nil
+}
+
+func aggregateReleaseWIP(bundles []Bundle) (bool, error) {
+	for _, b := range bundles {
+		if b.WIP == true {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 func GetNewestRelease(releases []Release) (Release, error) {
