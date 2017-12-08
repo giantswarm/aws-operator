@@ -820,6 +820,7 @@ func migrateTPRsToCRDs(logger micrologger.Logger, clientSet *versioned.Clientset
 			cro.Spec.Cluster.Vault.Token = tpo.Spec.Cluster.Vault.Token
 			cro.Spec.Cluster.Version = tpo.Spec.Cluster.Version
 			cro.Spec.Cluster.Workers = toClusterWorkers(tpo.Spec.Cluster.Workers)
+			cro.Spec.VersionBundle.Version = tpo.Spec.VersionBundle.Version
 
 			fmt.Printf("\n")
 			fmt.Printf("cro start\n")
