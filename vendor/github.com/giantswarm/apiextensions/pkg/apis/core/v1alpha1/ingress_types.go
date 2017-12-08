@@ -54,8 +54,8 @@ type IngressConfig struct {
 }
 
 type IngressConfigSpec struct {
-	GuestCluster  IngressConfigSpecGuestCluster   `json:"guestcluster" yaml:"guestcluster"`
-	HostCluster   IngressConfigSpecHostCluster    `json:"hostcluster" yaml:"hostcluster"`
+	GuestCluster  IngressConfigSpecGuestCluster   `json:"guestCluster" yaml:"guestCluster"`
+	HostCluster   IngressConfigSpecHostCluster    `json:"hostCluster" yaml:"hostCluster"`
 	ProtocolPorts []IngressConfigSpecProtocolPort `json:"protocolPorts" yaml:"protocolPorts"`
 }
 

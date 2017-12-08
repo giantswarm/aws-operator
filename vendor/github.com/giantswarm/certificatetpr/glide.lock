@@ -1,5 +1,5 @@
-hash: 526ad183b8534ebfc049eaf9802d51d00d33af08007b1a197ee8160762f8dfff
-updated: 2017-11-21T15:02:36.945981669+01:00
+hash: a68740b2bf21b8854a8ab46b4226ec7dfeeef3b0d26c2aa98c986108078cee91
+updated: 2017-12-08T15:45:03.678574+01:00
 imports:
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
@@ -21,9 +21,11 @@ imports:
 - name: github.com/giantswarm/microerror
   version: ec5f66bb657662031c0d651504fee6908cdf28d9
 - name: github.com/giantswarm/micrologger
-  version: 954d1261928bbb50dc917c629edf0b71db6a1527
+  version: bab5376fda89f10a5ebc5bd9feedab634400ab75
+  subpackages:
+  - loggermeta
 - name: github.com/giantswarm/operatorkit
-  version: 0bd1c4365f66a52c233957c38367ca3a3c2a81e9
+  version: 8b3446a2ecbe707fb6ba351b035cd60508af5aec
 - name: github.com/go-kit/kit
   version: a9ca6725cbbea455e61c6bc8a1ed28e81eb3493b
   subpackages:
