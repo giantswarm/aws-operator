@@ -794,80 +794,7 @@ func Test_Release_Deprecated(t *testing.T) {
 			ErrorMatcher:       nil,
 		},
 
-		// Test 5 is like 4 but with version bundles being flipped.
-		{
-			Bundles: []Bundle{
-				{
-					Changelogs: []Changelog{
-						{
-							Component:   "etcd",
-							Description: "Etcd version updated.",
-							Kind:        "changed",
-						},
-						{
-							Component:   "kubernetes",
-							Description: "Kubernetes version updated.",
-							Kind:        "changed",
-						},
-					},
-					Components: []Component{
-						{
-							Name:    "etcd",
-							Version: "3.2.0",
-						},
-						{
-							Name:    "kubernetes",
-							Version: "1.7.1",
-						},
-					},
-					Dependencies: []Dependency{},
-					Name:         "cloud-config-operator",
-					Deprecated:   false,
-					Time:         time.Unix(20, 15),
-					Version:      "0.2.0",
-					WIP:          false,
-				},
-				{
-					Changelogs: []Changelog{
-						{
-							Component:   "calico",
-							Description: "Calico version updated.",
-							Kind:        "changed",
-						},
-						{
-							Component:   "kubernetes",
-							Description: "Kubernetes version requirements changed due to calico update.",
-							Kind:        "changed",
-						},
-					},
-					Components: []Component{
-						{
-							Name:    "calico",
-							Version: "1.1.0",
-						},
-						{
-							Name:    "kube-dns",
-							Version: "1.0.0",
-						},
-					},
-					Dependencies: []Dependency{
-						{
-							Name:    "kubernetes",
-							Version: "<= 1.7.x",
-						},
-					},
-					Deprecated: false,
-					Name:       "kubernetes-operator",
-					Time:       time.Unix(10, 5),
-					Version:    "0.1.0",
-					WIP:        false,
-				},
-			},
-			ExpectedDeprecated: false,
-			ErrorMatcher:       nil,
-		},
-
-		// Test 6 is like 4 but with all deprecated flags being true.
+		// Test 5 is like 4 but with all deprecated flags being true.
 		{
 			Bundles: []Bundle{
 				{
@@ -940,7 +867,7 @@ func Test_Release_Deprecated(t *testing.T) {
 			ErrorMatcher:       nil,
 		},
 
-		// Test 7 is like 4 but with only one deprecated flag being true.
+		// Test 6 is like 4 but with only one deprecated flag being true.
 		{
 			Bundles: []Bundle{
 				{
@@ -1013,7 +940,7 @@ func Test_Release_Deprecated(t *testing.T) {
 			ErrorMatcher:       nil,
 		},
 
-		// Test 8 is like 7 but with version bundles being flipped.
+		// Test 7 is like 6 but with version bundles being flipped.
 		{
 			Bundles: []Bundle{
 				{
@@ -1614,6 +1541,407 @@ func Test_Release_Version(t *testing.T) {
 		v := r.Version()
 		if v != tc.ExpectedVersion {
 			t.Fatalf("test %d expected %s got %s", i, tc.ExpectedVersion, v)
+		}
+	}
+}
+
+func Test_Release_WIP(t *testing.T) {
+	testCases := []struct {
+		Bundles      []Bundle
+		ExpectedWIP  bool
+		ErrorMatcher func(err error) bool
+	}{
+		// Test 0 ensures creating a release with a nil slice of bundles throws
+		// an error when creating a new release type.
+		{
+			Bundles:      nil,
+			ExpectedWIP:  false,
+			ErrorMatcher: IsInvalidConfig,
+		},
+
+		// Test 1 is the same as 0 but with an empty list of bundles.
+		{
+			Bundles:      []Bundle{},
+			ExpectedWIP:  false,
+			ErrorMatcher: IsInvalidConfig,
+		},
+
+		// Test 2 ensures computing the release wip flag when having a list
+		// of one bundle given works as expected.
+		{
+			Bundles: []Bundle{
+				{
+					Changelogs: []Changelog{},
+					Components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kube-dns",
+							Version: "1.0.0",
+						},
+					},
+					Dependencies: []Dependency{
+						{
+							Name:    "kubernetes",
+							Version: "<= 1.7.x",
+						},
+					},
+					Deprecated: false,
+					Name:       "kubernetes-operator",
+					Time:       time.Unix(10, 5),
+					Version:    "0.0.1",
+					WIP:        false,
+				},
+			},
+			ExpectedWIP:  false,
+			ErrorMatcher: nil,
+		},
+
+		// Test 3 is the same as 2 but with a different wip flag.
+		{
+			Bundles: []Bundle{
+				{
+					Changelogs: []Changelog{},
+					Components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kube-dns",
+							Version: "1.0.0",
+						},
+					},
+					Dependencies: []Dependency{
+						{
+							Name:    "kubernetes",
+							Version: "<= 1.7.x",
+						},
+					},
+					Deprecated: false,
+					Name:       "kubernetes-operator",
+					Time:       time.Unix(20, 15),
+					Version:    "11.4.1",
+					WIP:        true,
+				},
+			},
+			ExpectedWIP:  true,
+			ErrorMatcher: nil,
+		},
+
+		// Test 4 ensures computing the release wip flag when having a list of
+		// two bundles given works as expected.
+		{
+			Bundles: []Bundle{
+				{
+					Changelogs: []Changelog{
+						{
+							Component:   "calico",
+							Description: "Calico version updated.",
+							Kind:        "changed",
+						},
+						{
+							Component:   "kubernetes",
+							Description: "Kubernetes version requirements changed due to calico update.",
+							Kind:        "changed",
+						},
+					},
+					Components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kube-dns",
+							Version: "1.0.0",
+						},
+					},
+					Dependencies: []Dependency{
+						{
+							Name:    "kubernetes",
+							Version: "<= 1.7.x",
+						},
+					},
+					Deprecated: false,
+					Name:       "kubernetes-operator",
+					Time:       time.Unix(10, 5),
+					Version:    "0.1.0",
+					WIP:        false,
+				},
+				{
+					Changelogs: []Changelog{
+						{
+							Component:   "etcd",
+							Description: "Etcd version updated.",
+							Kind:        "changed",
+						},
+						{
+							Component:   "kubernetes",
+							Description: "Kubernetes version updated.",
+							Kind:        "changed",
+						},
+					},
+					Components: []Component{
+						{
+							Name:    "etcd",
+							Version: "3.2.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.1",
+						},
+					},
+					Dependencies: []Dependency{},
+					Name:         "cloud-config-operator",
+					Deprecated:   false,
+					Time:         time.Unix(20, 15),
+					Version:      "0.2.0",
+					WIP:          false,
+				},
+			},
+			ExpectedWIP:  false,
+			ErrorMatcher: nil,
+		},
+
+		// Test 5 is like 4 but with all wip flags being true.
+		{
+			Bundles: []Bundle{
+				{
+					Changelogs: []Changelog{
+						{
+							Component:   "etcd",
+							Description: "Etcd version updated.",
+							Kind:        "changed",
+						},
+						{
+							Component:   "kubernetes",
+							Description: "Kubernetes version updated.",
+							Kind:        "changed",
+						},
+					},
+					Components: []Component{
+						{
+							Name:    "etcd",
+							Version: "3.2.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.1",
+						},
+					},
+					Dependencies: []Dependency{},
+					Name:         "cloud-config-operator",
+					Deprecated:   false,
+					Time:         time.Unix(20, 15),
+					Version:      "0.2.0",
+					WIP:          true,
+				},
+				{
+					Changelogs: []Changelog{
+						{
+							Component:   "calico",
+							Description: "Calico version updated.",
+							Kind:        "changed",
+						},
+						{
+							Component:   "kubernetes",
+							Description: "Kubernetes version requirements changed due to calico update.",
+							Kind:        "changed",
+						},
+					},
+					Components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kube-dns",
+							Version: "1.0.0",
+						},
+					},
+					Dependencies: []Dependency{
+						{
+							Name:    "kubernetes",
+							Version: "<= 1.7.x",
+						},
+					},
+					Deprecated: false,
+					Name:       "kubernetes-operator",
+					Time:       time.Unix(10, 5),
+					Version:    "0.1.0",
+					WIP:        true,
+				},
+			},
+			ExpectedWIP:  true,
+			ErrorMatcher: nil,
+		},
+
+		// Test 6 is like 4 but with only one wip flag being true.
+		{
+			Bundles: []Bundle{
+				{
+					Changelogs: []Changelog{
+						{
+							Component:   "etcd",
+							Description: "Etcd version updated.",
+							Kind:        "changed",
+						},
+						{
+							Component:   "kubernetes",
+							Description: "Kubernetes version updated.",
+							Kind:        "changed",
+						},
+					},
+					Components: []Component{
+						{
+							Name:    "etcd",
+							Version: "3.2.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.1",
+						},
+					},
+					Dependencies: []Dependency{},
+					Name:         "cloud-config-operator",
+					Deprecated:   false,
+					Time:         time.Unix(20, 15),
+					Version:      "0.2.0",
+					WIP:          false,
+				},
+				{
+					Changelogs: []Changelog{
+						{
+							Component:   "calico",
+							Description: "Calico version updated.",
+							Kind:        "changed",
+						},
+						{
+							Component:   "kubernetes",
+							Description: "Kubernetes version requirements changed due to calico update.",
+							Kind:        "changed",
+						},
+					},
+					Components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kube-dns",
+							Version: "1.0.0",
+						},
+					},
+					Dependencies: []Dependency{
+						{
+							Name:    "kubernetes",
+							Version: "<= 1.7.x",
+						},
+					},
+					Deprecated: false,
+					Name:       "kubernetes-operator",
+					Time:       time.Unix(10, 5),
+					Version:    "0.1.0",
+					WIP:        true,
+				},
+			},
+			ExpectedWIP:  true,
+			ErrorMatcher: nil,
+		},
+
+		// Test 7 is like 6 but with version bundles being flipped.
+		{
+			Bundles: []Bundle{
+				{
+					Changelogs: []Changelog{
+						{
+							Component:   "calico",
+							Description: "Calico version updated.",
+							Kind:        "changed",
+						},
+						{
+							Component:   "kubernetes",
+							Description: "Kubernetes version requirements changed due to calico update.",
+							Kind:        "changed",
+						},
+					},
+					Components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kube-dns",
+							Version: "1.0.0",
+						},
+					},
+					Dependencies: []Dependency{
+						{
+							Name:    "kubernetes",
+							Version: "<= 1.7.x",
+						},
+					},
+					Deprecated: false,
+					Name:       "kubernetes-operator",
+					Time:       time.Unix(10, 5),
+					Version:    "0.1.0",
+					WIP:        true,
+				},
+				{
+					Changelogs: []Changelog{
+						{
+							Component:   "etcd",
+							Description: "Etcd version updated.",
+							Kind:        "changed",
+						},
+						{
+							Component:   "kubernetes",
+							Description: "Kubernetes version updated.",
+							Kind:        "changed",
+						},
+					},
+					Components: []Component{
+						{
+							Name:    "etcd",
+							Version: "3.2.0",
+						},
+						{
+							Name:    "kubernetes",
+							Version: "1.7.1",
+						},
+					},
+					Dependencies: []Dependency{},
+					Name:         "cloud-config-operator",
+					Deprecated:   false,
+					Time:         time.Unix(20, 15),
+					Version:      "0.2.0",
+					WIP:          false,
+				},
+			},
+			ExpectedWIP:  true,
+			ErrorMatcher: nil,
+		},
+	}
+
+	for i, tc := range testCases {
+		config := DefaultReleaseConfig()
+
+		config.Bundles = tc.Bundles
+
+		r, err := NewRelease(config)
+		if tc.ErrorMatcher != nil {
+			if !tc.ErrorMatcher(err) {
+				t.Fatalf("test %d expected %#v got %#v", i, true, false)
+			}
+		} else if err != nil {
+			t.Fatalf("test %d expected %#v got %#v", i, nil, err)
+		}
+
+		d := r.WIP()
+		if d != tc.ExpectedWIP {
+			t.Fatalf("test %d expected %t got %t", i, tc.ExpectedWIP, d)
 		}
 	}
 }

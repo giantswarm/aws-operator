@@ -1,5 +1,5 @@
-hash: 50e2f4d4910b6d4d4492ab412997f6ec88068f58a0cd84b727e7ba060b22ec1c
-updated: 2017-12-07T11:26:05.58548072+01:00
+hash: 8a5511dc9adca67fa2661b25ec7bf4973a578991b8e27b6f4622f558f824f5b3
+updated: 2017-12-08T10:30:27.607588+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -40,7 +40,7 @@ imports:
   - service/s3
   - service/sts
 - name: github.com/beorn7/perks
-  version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
+  version: 3ac7bf7a47d159a033b107610db8a1b6575507a4
   subpackages:
   - quantile
 - name: github.com/cenkalti/backoff
@@ -71,7 +71,12 @@ imports:
 - name: github.com/giantswarm/apiextensions
   version: 7ec3d5ca6238c9d2473d71494a2b36d295513a4e
   subpackages:
+  - pkg/apis/core/v1alpha1
   - pkg/apis/provider/v1alpha1
+  - pkg/clientset/versioned
+  - pkg/clientset/versioned/scheme
+  - pkg/clientset/versioned/typed/core/v1alpha1
+  - pkg/clientset/versioned/typed/provider/v1alpha1
 - name: github.com/giantswarm/awstpr
   version: e6767bad175c30792bf7e0e42723f35495f1df50
   subpackages:
@@ -140,10 +145,11 @@ imports:
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: 2804229e2bf865f72763ec1cf6f1d9dabb096665
+  version: 8b3446a2ecbe707fb6ba351b035cd60508af5aec
   subpackages:
   - client/k8sclient
   - client/k8scrdclient
+  - client/k8sextclient
   - framework
   - framework/context/canceledcontext
   - framework/resource/metricsresource
@@ -152,7 +158,7 @@ imports:
 - name: github.com/giantswarm/randomkeytpr
   version: 9e1d78d125841c496889e8a54d49057212a2893e
 - name: github.com/giantswarm/versionbundle
-  version: 3b7cd23ec96043f5193c1b6c966fade961f0da65
+  version: e22eefeb8e97277bfebe225f77cf0528b69f36b8
 - name: github.com/go-ini/ini
   version: 32e4c1e6bc4e7d0d8451aa6b75200d19e37a536a
 - name: github.com/go-kit/kit
@@ -248,7 +254,7 @@ imports:
   - prometheus
   - prometheus/promhttp
 - name: github.com/prometheus/client_model
-  version: 99fa1f4be8e564e8a6b613da7fa6f46c9edafc6c
+  version: fa8ad6fec33561be4280a8f0514318c79d7f6cb6
   subpackages:
   - go
 - name: github.com/prometheus/common

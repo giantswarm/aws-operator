@@ -1,13 +1,62 @@
-// Package k8sclient is deprecated.
-package k8sclient
+// Package k8srestconfig provides interface to create client-go rest config
+// which can be used to construct various clients.
+//
+// Example useage:
+//
+//	import (
+//		"k8s.io/client-go/kubernetes"
+//		"k8s.io/client-go/rest"
+//		apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+//
+//		"github.com/giantswarm/operatorkit/client/k8srestconfig"
+//		gsclient "github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+//		"github.com/giantswarm/microerror"
+//	)
+//
+//	func f() error {
+//		var err error
+//
+//		var restConfig *rest.Config
+//		{
+//	 		c := k8srestconfig.DefaultConfig()
+//
+//			c.Logger = config.Logger
+//
+//			c.Address = config.Viper.GetString(config.Flag.Service.Kubernetes.Address)
+//			c.InCluster = config.Viper.GetBool(config.Flag.Service.Kubernetes.InCluster)
+//			c.TLS.CAFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CAFile)
+//			c.TLS.CrtFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CrtFile)
+//			c.TLS.KeyFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.KeyFile)
+//
+//			restConfig, err = k8srestconfig.New(c)
+//			if err != nil {
+//				return microerror.Mask(err)
+//			}
+//		}
+//
+//		k8sClient, err := kubernetes.NewForConfig(restConfig)
+//		if err != nil {
+//			return micorerror.Mask(err)
+//		}
+//
+//		k8sExtClient, err := apiextensionsclient.NewForConfig(restConfig)
+//		if err != nil {
+//			return micorerror.Mask(err)
+//		}
+//
+//		gsClient, err := gsclient.NewForConfig(restConfig)
+//		if err != nil {
+//			return microerror.Mask(err)
+//		}
+//	}
+//
+package k8srestconfig
 
 import (
 	"net/url"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
 
@@ -24,14 +73,14 @@ type TLSClientConfig struct {
 	CAFile string
 	// CrtFile is the TLS client certificate.
 	CrtFile string
-	// KeyFile is the private key for the TLS client certificate.
+	// KeyFile is the key for the TLS client certificate.
 	KeyFile string
+	// CAData holds PEM-encoded bytes. CAData takes precedence over CAFile.
+	CAData []byte
 	// CrtData holds PEM-encoded bytes. CrtData takes precedence over CrtFile.
 	CrtData []byte
 	// KeyData holds PEM-encoded bytes. KeyData takes precedence over KeyFile.
 	KeyData []byte
-	// CAData holds PEM-encoded bytes. CAData takes precedence over CAFile.
-	CAData []byte
 }
 
 // Config contains the common attributes to create a Kubernetes Clientset.
@@ -48,20 +97,9 @@ type Config struct {
 // DefaultConfig provides a default configuration to create a new Kubernetes
 // Clientset by best effort.
 func DefaultConfig() Config {
-	var err error
-
-	var newLogger micrologger.Logger
-	{
-		config := micrologger.DefaultConfig()
-		newLogger, err = micrologger.New(config)
-		if err != nil {
-			panic(err)
-		}
-	}
-
 	return Config{
 		// Dependencies.
-		Logger: newLogger,
+		Logger: nil,
 
 		// Settings.
 		Address:   "",
@@ -70,8 +108,8 @@ func DefaultConfig() Config {
 	}
 }
 
-// New returns a Kubernetes Clientset with the provided configuration.
-func New(config Config) (kubernetes.Interface, error) {
+// New returns a Kubernetes REST configuration for clients.
+func New(config Config) (*rest.Config, error) {
 	// Dependencies.
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
@@ -81,7 +119,6 @@ func New(config Config) (kubernetes.Interface, error) {
 	if config.Address == "" && !config.InCluster {
 		return nil, microerror.Maskf(invalidConfigError, "config.Address must not be empty when not creating in-cluster client")
 	}
-
 	if config.Address != "" {
 		_, err := url.Parse(config.Address)
 		if err != nil {
@@ -119,10 +156,5 @@ func New(config Config) (kubernetes.Interface, error) {
 	restConfig.Burst = MaxBurst
 	restConfig.QPS = MaxQPS
 
-	client, err := kubernetes.NewForConfig(restConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	return client, nil
+	return restConfig, nil
 }
