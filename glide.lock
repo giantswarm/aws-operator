@@ -1,5 +1,5 @@
 hash: 8a5511dc9adca67fa2661b25ec7bf4973a578991b8e27b6f4622f558f824f5b3
-updated: 2017-12-08T10:30:27.607588+01:00
+updated: 2017-12-08T17:13:29.091462+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -69,7 +69,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/apiextensions
-  version: 7ec3d5ca6238c9d2473d71494a2b36d295513a4e
+  version: 4d6738e12b97ccac6befe4d41525912cb59c8335
   subpackages:
   - pkg/apis/core/v1alpha1
   - pkg/apis/provider/v1alpha1
@@ -78,13 +78,13 @@ imports:
   - pkg/clientset/versioned/typed/core/v1alpha1
   - pkg/clientset/versioned/typed/provider/v1alpha1
 - name: github.com/giantswarm/awstpr
-  version: e6767bad175c30792bf7e0e42723f35495f1df50
+  version: 1bffa47f8803412b082ad55738467065c14d874d
   subpackages:
   - spec
   - spec/aws
   - spec/aws/elb
 - name: github.com/giantswarm/certificatetpr
-  version: 04eb2f7e6433cb9d706eb5fbd2de4f0f986e57f5
+  version: 6d5c3a764f2c1729aa24960f7fa53c80b5219497
   subpackages:
   - certificatetprtest
   - spec
@@ -336,7 +336,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: 287cf08546ab5e7e37d55a84f7ed3fd1db036de5
+  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/apiextensions-apiserver
   version: fcd622fe88a4a6efcb5aea9e94ee87324ac1b036
   subpackages:

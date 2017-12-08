@@ -1,7 +1,7 @@
 package: github.com/giantswarm/certificatetpr
 import:
 - package: github.com/giantswarm/operatorkit
-  version: master
+  version: kubernetes-1.7
 testImport:
 - package: github.com/stretchr/testify
   version: v1.1.4
