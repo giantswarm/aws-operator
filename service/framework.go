@@ -691,7 +691,7 @@ func newCustomObjectFramework(config Config) (*framework.Framework, error) {
 
 		frameworkConfig.InitCtxFunc = initCtxFunc
 		frameworkConfig.Logger = config.Logger
-		frameworkConfig.ResourceRouter = NewResourceRouter(versionedResources)
+		frameworkConfig.ResourceRouter = NewTPRResourceRouter(versionedResources)
 		frameworkConfig.Informer = newInformer
 		frameworkConfig.TPR = newTPR
 
