@@ -5,6 +5,7 @@ package integration
 import (
 	"bufio"
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"log"
 	"os"
@@ -56,9 +57,9 @@ clusterVersion: v_0_1_0
 sshPublicKey: ${IDRSA_PUB}
 versionBundleVersion: ${VERSION_BUNDLE_VERSION}
 aws:
-  networkCIDR: "10.1.173.0/24"
-  privateSubnetCIDR: "10.1.173.0/25"
-  publicSubnetCIDR: "10.1.173.128/25"
+  networkCIDR: "{{.NetworkCIDR}}"
+  privateSubnetCIDR: "{{.PrivateSubnetCIDR}}"
+  publicSubnetCIDR: "{{.PublicSubnetCIDR}}"
   region: ${AWS_REGION}
   apiHostedZone: ${AWS_API_HOSTED_ZONE}
   ingressHostedZone: ${AWS_INGRESS_HOSTED_ZONE}
@@ -95,7 +96,10 @@ Installation:
 `
 )
 
-var cs kubernetes.Interface
+var (
+	cs        kubernetes.Interface
+	awsClient AWSClient
+)
 
 // TestMain allows us to have common setup and teardown steps that are run
 // once for all the tests https://golang.org/pkg/testing/#hdr-Main.
@@ -107,6 +111,7 @@ func TestMain(m *testing.M) {
 		v = 1
 		log.Printf("unexpected error: %v\n", err)
 	}
+	awsClient = getAWSClient(nil)
 
 	if err := setUp(cs); err != nil {
 		v = 1
@@ -123,8 +128,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestGuestClusterIsCreated(t *testing.T) {
-	awsResourceChartValuesEnv := os.ExpandEnv(awsResourceChartValues)
-	if err := ioutil.WriteFile(awsResourceValuesFile, []byte(awsResourceChartValuesEnv), os.ModePerm); err != nil {
+	if err := writeAWSResourceValues(awsClient); err != nil {
 		t.Errorf("unexpected error writing aws-resource-lab values file: %v", err)
 	}
 
@@ -253,11 +257,11 @@ func installAwsOperator(cs kubernetes.Interface) error {
 		return microerror.Mask(err)
 	}
 
-	return waitFor(tprFunc(cs, "aws"))
+	return waitFor(tprFunc(cs, "awsconfig"))
 }
 
 func deleteGuestCluster(cs kubernetes.Interface) error {
-	if err := runCmd("kubectl delete aws ${CLUSTER_NAME}"); err != nil {
+	if err := runCmd("kubectl delete awsconfig ${CLUSTER_NAME}"); err != nil {
 		return microerror.Mask(err)
 	}
 
@@ -415,4 +419,30 @@ func podName(cs kubernetes.Interface, namespace, labelSelector string) (string, 
 	}
 	pod := pods.Items[0]
 	return pod.Name, nil
+}
+
+func writeAWSResourceValues(awsClient AWSClient) error {
+	awsResourceChartValuesEnv := os.ExpandEnv(awsResourceChartValues)
+	tmpl, err := template.New("awsResource").Parse(awsResourceChartValuesEnv)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	f, err := os.Create(awsResourceValuesFile)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	defer f.Close()
+
+	vpc, err := newAWSVPCBlock(awsClient)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	err = tmpl.Execute(f, vpc)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
 }
