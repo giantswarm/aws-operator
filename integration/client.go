@@ -16,7 +16,7 @@ import (
 	"github.com/giantswarm/e2e-harness/pkg/harness"
 )
 
-func getK8sClient() (kubernetes.Interface, error) {
+func newK8sClient() (kubernetes.Interface, error) {
 	config, err := clientcmd.BuildConfigFromFlags("", harness.DefaultKubeConfig)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -29,11 +29,11 @@ func getK8sClient() (kubernetes.Interface, error) {
 	return cs, nil
 }
 
-type AWSClient struct {
+type aWSClient struct {
 	EC2 *ec2.EC2
 }
 
-func getAWSClient() AWSClient {
+func newAWSClient() aWSClient {
 	awsCfg := &aws.Config{
 		Credentials: credentials.NewStaticCredentials(
 			os.Getenv("AWS_ACCESS_KEY_ID"),

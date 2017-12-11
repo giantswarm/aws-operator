@@ -25,7 +25,7 @@ type awsVPC struct {
 	PublicSubnetCIDR  string
 }
 
-func newAWSVPCBlock(client AWSClient) (awsVPC, error) {
+func newAWSVPCBlock(client aWSClient) (awsVPC, error) {
 	cidrMask := net.CIDRMask(defaultCIDRMask, totalBitsLength)
 	existingSubnets, err := listSubnets(client)
 	if err != nil {
@@ -71,7 +71,7 @@ func newSubnet(mask net.IPMask, existingSubnets []net.IPNet) (net.IPNet, error) 
 	return subnet, nil
 }
 
-func listSubnets(client AWSClient) ([]net.IPNet, error) {
+func listSubnets(client aWSClient) ([]net.IPNet, error) {
 	output := []net.IPNet{}
 
 	input := &ec2.DescribeVpcsInput{
