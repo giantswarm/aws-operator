@@ -29,7 +29,7 @@ const (
 	awsOperatorValuesFile  = "/tmp/aws-operator-values.yaml"
 	awsOperatorChartValues = `Installation:
   V1:
-    Name: gauss
+    Name: ci-awsop
     Provider:
       AWS:
         Region: ${AWS_REGION}
@@ -129,16 +129,16 @@ func TestMain(m *testing.M) {
 
 func TestGuestClusterIsCreated(t *testing.T) {
 	if err := writeAWSResourceValues(awsClient); err != nil {
-		t.Errorf("unexpected error writing aws-resource-lab values file: %v", err)
+		t.Fatalf("unexpected error writing aws-resource-lab values file: %v", err)
 	}
 
 	if err := runCmd("helm registry install quay.io/giantswarm/aws-resource-lab-chart:stable -- -n aws-resource-lab --values " + awsOperatorValuesFile); err != nil {
-		t.Errorf("unexpected error installing aws-resource-lab chart: %v", err)
+		t.Fatalf("unexpected error installing aws-resource-lab chart: %v", err)
 	}
 
 	operatorPodName, err := podName(cs, "giantswarm", "app=aws-operator")
 	if err != nil {
-		t.Errorf("unexpected error getting operator pod name: %v", err)
+		t.Fatalf("unexpected error getting operator pod name: %v", err)
 	}
 
 	logEntry := "cluster '${CLUSTER_NAME}' processed"
@@ -147,7 +147,7 @@ func TestGuestClusterIsCreated(t *testing.T) {
 	}
 
 	if err := waitForPodLog(cs, "giantswarm", logEntry, operatorPodName); err != nil {
-		t.Errorf("unexpected error waiting for guest cluster installed: %v", err)
+		t.Fatalf("unexpected error waiting for guest cluster installed: %v", err)
 	}
 }
 
@@ -423,6 +423,7 @@ func podName(cs kubernetes.Interface, namespace, labelSelector string) (string, 
 
 func writeAWSResourceValues(awsClient aWSClient) error {
 	awsResourceChartValuesEnv := os.ExpandEnv(awsResourceChartValues)
+
 	tmpl, err := template.New("awsResource").Parse(awsResourceChartValuesEnv)
 	if err != nil {
 		return microerror.Mask(err)

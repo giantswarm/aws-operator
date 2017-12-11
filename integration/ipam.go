@@ -16,7 +16,7 @@ const (
 	totalBitsLength   = 32
 	privateSubnetMask = 25
 	publicSubnetMask  = 25
-	networkCIDR       = "10.1.0.0/16"
+	networkCIDR       = "10.12.0.0/16"
 )
 
 type awsVPC struct {
@@ -79,7 +79,7 @@ func listSubnets(client aWSClient) ([]net.IPNet, error) {
 			{
 				Name: aws.String("tag:Installation"),
 				Values: []*string{
-					aws.String("gauss"),
+					aws.String("ci-awsop"),
 				},
 			},
 			{
