@@ -106,12 +106,12 @@ var (
 func TestMain(m *testing.M) {
 	var v int
 	var err error
-	cs, err = getK8sClient()
+	cs, err = newK8sClient()
 	if err != nil {
 		v = 1
 		log.Printf("unexpected error: %v\n", err)
 	}
-	awsClient = getAWSClient()
+	awsClient = newAWSClient()
 
 	if err := setUp(cs); err != nil {
 		v = 1
