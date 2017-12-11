@@ -230,7 +230,7 @@ func installCertOperator(cs kubernetes.Interface) error {
 		return microerror.Mask(err)
 	}
 
-	return waitFor(tprFunc(cs, "certificate"))
+	return waitFor(tprFunc(cs, "certconfig"))
 }
 
 func installCertResource(cs kubernetes.Interface) error {
@@ -253,11 +253,11 @@ func installAwsOperator(cs kubernetes.Interface) error {
 		return microerror.Mask(err)
 	}
 
-	return waitFor(tprFunc(cs, "aws"))
+	return waitFor(tprFunc(cs, "awsconfig"))
 }
 
 func deleteGuestCluster(cs kubernetes.Interface) error {
-	if err := runCmd("kubectl delete aws ${CLUSTER_NAME}"); err != nil {
+	if err := runCmd("kubectl delete awsconfig ${CLUSTER_NAME}"); err != nil {
 		return microerror.Mask(err)
 	}
 
