@@ -234,7 +234,7 @@ func installCertOperator(cs kubernetes.Interface) error {
 		return microerror.Mask(err)
 	}
 
-	return waitFor(tprFunc(cs, "certificate"))
+	return waitFor(tprFunc(cs, "certconfig"))
 }
 
 func installCertResource(cs kubernetes.Interface) error {
