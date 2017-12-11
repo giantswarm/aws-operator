@@ -33,26 +33,13 @@ type AWSClient struct {
 	EC2 *ec2.EC2
 }
 
-type AWSConfig struct {
-	AccessKeyID     string
-	AccessKeySecret string
-	SessionToken    string
-	Region          string
-}
-
-func getAWSClient(config *AWSConfig) AWSClient {
-	if config == nil {
-		config = &AWSConfig{
-			AccessKeyID:     os.Getenv("AWS_ACCESS_KEY_ID"),
-			AccessKeySecret: os.Getenv("AWS_SECRET_ACCESS_KEY"),
-			SessionToken:    os.Getenv("AWS_SESSION_TOKEN"),
-			Region:          os.Getenv("AWS_REGION"),
-		}
-	}
-
+func getAWSClient() AWSClient {
 	awsCfg := &aws.Config{
-		Credentials: credentials.NewStaticCredentials(config.AccessKeyID, config.AccessKeySecret, config.SessionToken),
-		Region:      aws.String(config.Region),
+		Credentials: credentials.NewStaticCredentials(
+			os.Getenv("AWS_ACCESS_KEY_ID"),
+			os.Getenv("AWS_SECRET_ACCESS_KEY"),
+			os.Getenv("AWS_SESSION_TOKEN")),
+		Region: aws.String(os.Getenv("AWS_SESSION_TOKEN")),
 	}
 	s := session.New(awsCfg)
 	clients := AWSClient{

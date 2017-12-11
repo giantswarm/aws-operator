@@ -111,7 +111,7 @@ func TestMain(m *testing.M) {
 		v = 1
 		log.Printf("unexpected error: %v\n", err)
 	}
-	awsClient = getAWSClient(nil)
+	awsClient = getAWSClient()
 
 	if err := setUp(cs); err != nil {
 		v = 1
