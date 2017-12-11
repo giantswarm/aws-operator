@@ -98,7 +98,7 @@ Installation:
 
 var (
 	cs        kubernetes.Interface
-	awsClient AWSClient
+	awsClient aWSClient
 )
 
 // TestMain allows us to have common setup and teardown steps that are run
@@ -421,7 +421,7 @@ func podName(cs kubernetes.Interface, namespace, labelSelector string) (string, 
 	return pod.Name, nil
 }
 
-func writeAWSResourceValues(awsClient AWSClient) error {
+func writeAWSResourceValues(awsClient aWSClient) error {
 	awsResourceChartValuesEnv := os.ExpandEnv(awsResourceChartValues)
 	tmpl, err := template.New("awsResource").Parse(awsResourceChartValuesEnv)
 	if err != nil {

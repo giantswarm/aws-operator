@@ -42,7 +42,7 @@ func newAWSClient() aWSClient {
 		Region: aws.String(os.Getenv("AWS_SESSION_TOKEN")),
 	}
 	s := session.New(awsCfg)
-	clients := AWSClient{
+	clients := aWSClient{
 		EC2: ec2.New(s),
 	}
 
