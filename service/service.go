@@ -195,6 +195,6 @@ func (s *Service) Boot() {
 
 		// Start the framework.
 		go s.CRDFramework.Boot()
-		go s.CustomObjectFramework.Boot()
+		//go s.CustomObjectFramework.Boot()
 	})
 }
