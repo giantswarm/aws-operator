@@ -1,0 +1,8 @@
+package: github.com/giantswarm/ipam
+import:
+- package: github.com/giantswarm/microerror
+  version: master
+- package: github.com/giantswarm/microstorage
+  version: master
+- package: github.com/prometheus/client_golang/prometheus
+  version: master
