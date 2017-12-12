@@ -1,22 +1,18 @@
-package kmskeyv1
+package kmskeyv2
 
 import (
 	"context"
 	"testing"
 
-	"github.com/giantswarm/awstpr"
-	"github.com/giantswarm/clustertpr"
-	"github.com/giantswarm/clustertpr/spec"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 )
 
 func Test_DesiredState(t *testing.T) {
-	customObject := &awstpr.CustomObject{
-		Spec: awstpr.Spec{
-			Cluster: clustertpr.Spec{
-				Cluster: spec.Cluster{
-					ID: "test-cluster",
-				},
+	customObject := &v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "test-cluster",
 			},
 		},
 	}
