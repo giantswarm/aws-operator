@@ -52,6 +52,10 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		createState.StackName = aws.String(desiredStackState.Name)
 		createState.TemplateBody = aws.String(mainTemplate)
 		createState.TimeoutInMinutes = aws.Int64(defaultCreationTimeout)
+		// CAPABILITY_NAMED_IAM is required for creating IAM roles (worker policy)
+		createState.Capabilities = []*string{
+			aws.String("CAPABILITY_NAMED_IAM"),
+		}
 	}
 
 	return createState, nil

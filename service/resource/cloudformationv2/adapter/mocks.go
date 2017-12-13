@@ -7,6 +7,7 @@ import (
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go/service/kms"
 )
 
 type EC2ClientMock struct {
@@ -70,9 +71,13 @@ func (c *CFClientMock) UpdateStack(*awscloudformation.UpdateStackInput) (*awsclo
 
 type IAMClientMock struct {
 	accountID string
+	isError   bool
 }
 
 func (i *IAMClientMock) GetUser(input *iam.GetUserInput) (*iam.GetUserOutput, error) {
+	if i.isError {
+		return nil, fmt.Errorf("error")
+	}
 	if i.accountID == "" {
 		i.accountID = "00"
 	}
@@ -87,5 +92,23 @@ func (i *IAMClientMock) GetUser(input *iam.GetUserInput) (*iam.GetUserOutput, er
 		},
 	}
 
+	return output, nil
+}
+
+type KMSClientMock struct {
+	keyARN  string
+	isError bool
+}
+
+func (k *KMSClientMock) DescribeKey(input *kms.DescribeKeyInput) (*kms.DescribeKeyOutput, error) {
+	if k.isError {
+		return nil, fmt.Errorf("error")
+	}
+
+	output := &kms.DescribeKeyOutput{
+		KeyMetadata: &kms.KeyMetadata{
+			Arn: aws.String(k.keyARN),
+		},
+	}
 	return output, nil
 }

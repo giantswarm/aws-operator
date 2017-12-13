@@ -93,6 +93,7 @@ func Test_Resource_Cloudformation_newUpdateChange(t *testing.T) {
 		resourceConfig.Clients = adapter.Clients{
 			EC2: &adapter.EC2ClientMock{},
 			IAM: &adapter.IAMClientMock{},
+			KMS: &adapter.KMSClientMock{},
 		}
 		resourceConfig.Logger = microloggertest.New()
 		newResource, err = New(resourceConfig)

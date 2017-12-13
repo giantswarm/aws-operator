@@ -250,6 +250,7 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 		cloudformationConfig.Clients.EC2 = awsClients.EC2
 		cloudformationConfig.Clients.CloudFormation = awsClients.CloudFormation
 		cloudformationConfig.Clients.IAM = awsClients.IAM
+		cloudformationConfig.Clients.KMS = awsClients.KMS
 		cloudformationConfig.Logger = config.Logger
 
 		cloudformationResource, err = cloudformationv2.New(cloudformationConfig)

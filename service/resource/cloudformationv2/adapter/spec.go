@@ -4,6 +4,7 @@ import (
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go/service/kms"
 )
 
 const (
@@ -53,6 +54,7 @@ type Clients struct {
 	CloudFormation CFClient
 	EC2            EC2Client
 	IAM            IAMClient
+	KMS            KMSClient
 }
 
 // CFClient describes the methods required to be implemented by a CloudFormation AWS client.
@@ -72,6 +74,11 @@ type EC2Client interface {
 // IAMClient describes the methods required to be implemented by a IAM AWS client.
 type IAMClient interface {
 	GetUser(*iam.GetUserInput) (*iam.GetUserOutput, error)
+}
+
+// KMSClient describes the methods required to be implemented by a KMS AWS client.
+type KMSClient interface {
+	DescribeKey(*kms.DescribeKeyInput) (*kms.DescribeKeyOutput, error)
 }
 
 // SmallCloudconfigConfig represents the data structure required for executing the

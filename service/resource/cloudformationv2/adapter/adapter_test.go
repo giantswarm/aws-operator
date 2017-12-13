@@ -31,6 +31,7 @@ func TestAdapterMain(t *testing.T) {
 	clients := Clients{
 		EC2: &EC2ClientMock{},
 		IAM: &IAMClientMock{},
+		KMS: &KMSClientMock{},
 	}
 
 	a, err := New(customObject, clients)

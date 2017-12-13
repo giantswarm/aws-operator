@@ -7,6 +7,7 @@ const (
 	workersOutputKey        = "WorkersOutput"
 	imageIDOutputKey        = "ImageIDOutput"
 	clusterVersionOutputKey = "ClusterVersionOutput"
+	workerRoleKey           = "workerRole"
 
 	cloudFormationTemplatesDirectory = "service/templates/cloudformation"
 )

@@ -57,6 +57,7 @@ func TestMainTemplateExistingFields(t *testing.T) {
 	resourceConfig.Clients = adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
+		KMS: &adapter.KMSClientMock{},
 	}
 	resourceConfig.Logger = microloggertest.New()
 
@@ -113,4 +114,13 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Error("output element not found")
 	}
+	if !strings.Contains(body, workerRoleKey+":") {
+		fmt.Println(body)
+		t.Error("workerRole output element not found")
+	}
+	if !strings.Contains(body, "PolicyName: test-cluster-worker") {
+		fmt.Println(body)
+		t.Error("PolicyName output element not found")
+	}
+
 }
