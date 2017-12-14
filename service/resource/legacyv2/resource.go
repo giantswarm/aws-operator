@@ -193,6 +193,8 @@ type Resource struct {
 // NewUpdatePatch is called upon observed custom object change. It creates the
 // AWS resources for the cluster.
 func (s *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
+	s.logger.Log("info", "in NewUpdatePatch")
+
 	customObject, ok := obj.(*v1alpha1.AWSConfig)
 	if !ok {
 		return &framework.Patch{}, microerror.Maskf(invalidConfigError, "could not convert to v1alpha1.AWSConfig")
@@ -239,6 +241,7 @@ func (s *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 // NewDeletePatch is called upon observed custom object deletion. It deletes the
 // AWS resources for the cluster.
 func (s *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
+	s.logger.Log("info", "in NewDeletePatch")
 	// We can receive an instance of v1alpha1.AWSConfig or cache.DeletedFinalStateUnknown.
 	// We need to assert the type properly and log an error when we cannot do that.
 	// Also, the cache.DeleteFinalStateUnknown object can contain the proper CustomObject,
@@ -1601,6 +1604,7 @@ func (s *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 }
 
 func (s *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
+	s.logger.Log("info", "in ApplyDeleteChange ")
 	return nil
 }
 
