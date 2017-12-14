@@ -27,6 +27,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -50,7 +51,8 @@ import (
 )
 
 const (
-	ResourceRetries uint64 = 3
+	ResourceRetries  uint64 = 3
+	awsCloudProvider        = "aws"
 )
 
 const (
@@ -833,7 +835,7 @@ func migrateTPRsToCRDs(logger micrologger.Logger, clientSet *versioned.Clientset
 
 		// Create CRO in Kubernetes API.
 		{
-			_, err := clientSet.ProviderV1alpha1().AWSConfigs(tpo.Namespace).Get(cro.Name, apismetav1.GetOptions{})
+			res, err := clientSet.ProviderV1alpha1().AWSConfigs(tpo.Namespace).Get(cro.Name, apismetav1.GetOptions{})
 			if apierrors.IsNotFound(err) {
 				_, err := clientSet.ProviderV1alpha1().AWSConfigs(tpo.Namespace).Create(cro)
 				if err != nil {
@@ -843,6 +845,23 @@ func migrateTPRsToCRDs(logger micrologger.Logger, clientSet *versioned.Clientset
 			} else if err != nil {
 				logger.Log("error", fmt.Sprintf("%#v", err))
 				return
+			} else if res.Spec.Cluster.Kubernetes.CloudProvider == "" {
+				// CRO existed with empty CloudProvider, refresh
+				patch := []v1alpha1.AWSConfig{}
+				patch[0].Spec.Cluster.Kubernetes.CloudProvider = awsCloudProvider
+				patchBytes, err := json.Marshal(patch)
+				if err != nil {
+					logger.Log("error", fmt.Sprintf("%#v", err))
+					return
+				}
+				_, err := clientSet.
+					ProviderV1alpha1().
+					AWSConfigs(tpo.Namespace).
+					Patch("AWSConfig", types.JSONPatchType, patchBytes)
+				if err != nil {
+					logger.Log("error", fmt.Sprintf("%#v", err))
+					return
+				}
 			}
 		}
 	}
