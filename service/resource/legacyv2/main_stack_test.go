@@ -1,4 +1,4 @@
-package cloudformationv2
+package legacyv2
 
 import (
 	"fmt"
@@ -6,19 +6,36 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/certificatetpr"
 	"github.com/giantswarm/micrologger/microloggertest"
+	"github.com/giantswarm/randomkeytpr"
+	"k8s.io/client-go/kubernetes/fake"
 
-	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2/adapter"
+	awsutil "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/service/cloudconfigv2"
+	"github.com/giantswarm/aws-operator/service/resource/legacyv2/adapter"
 )
+
+func testConfig() Config {
+	resourceConfig := DefaultConfig()
+	resourceConfig.Clients = &adapter.Clients{}
+	resourceConfig.Logger = microloggertest.New()
+	resourceConfig.CloudConfig = &cloudconfigv2.CloudConfig{}
+	resourceConfig.CertWatcher = &certificatetpr.Service{}
+	resourceConfig.KeyWatcher = &randomkeytpr.Service{}
+	resourceConfig.K8sClient = fake.NewSimpleClientset()
+	resourceConfig.InstallationName = "myinstallation"
+	resourceConfig.AwsConfig = awsutil.Config{AccessKeyID: "myaccessKey"}
+	resourceConfig.AwsHostConfig = awsutil.Config{AccessKeyID: "myaccessKey"}
+	resourceConfig.PubKeyFile = "mypubkeyfile"
+	return resourceConfig
+}
 
 func TestMainTemplateGetEmptyBody(t *testing.T) {
 	customObject := v1alpha1.AWSConfig{}
+	cfg := testConfig()
 
-	resourceConfig := DefaultConfig()
-	resourceConfig.Clients = adapter.Clients{}
-	resourceConfig.Logger = microloggertest.New()
-
-	newResource, err := New(resourceConfig)
+	newResource, err := New(cfg)
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
 	}
@@ -53,15 +70,13 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		},
 	}
 
-	resourceConfig := DefaultConfig()
-	resourceConfig.Clients = adapter.Clients{
+	cfg := testConfig()
+	cfg.Clients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
 		KMS: &adapter.KMSClientMock{},
 	}
-	resourceConfig.Logger = microloggertest.New()
-
-	newResource, err := New(resourceConfig)
+	newResource, err := New(cfg)
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
 	}
