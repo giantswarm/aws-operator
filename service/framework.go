@@ -802,6 +802,7 @@ func migrateTPRsToCRDs(logger micrologger.Logger, clientSet *versioned.Clientset
 			cro.Spec.Cluster.Kubernetes.API.InsecurePort = tpo.Spec.Cluster.Kubernetes.API.InsecurePort
 			cro.Spec.Cluster.Kubernetes.API.IP = tpo.Spec.Cluster.Kubernetes.API.IP
 			cro.Spec.Cluster.Kubernetes.API.SecurePort = tpo.Spec.Cluster.Kubernetes.API.SecurePort
+			cro.Spec.Cluster.Kubernetes.CloudProvider = tpo.Spec.Cluster.Kubernetes.CloudProvider
 			cro.Spec.Cluster.Kubernetes.DNS.IP = tpo.Spec.Cluster.Kubernetes.DNS.IP
 			cro.Spec.Cluster.Kubernetes.Domain = tpo.Spec.Cluster.Kubernetes.Domain
 			cro.Spec.Cluster.Kubernetes.Hyperkube.Docker.Image = tpo.Spec.Cluster.Kubernetes.Hyperkube.Docker.Image
