@@ -35,3 +35,11 @@ func IsBucketNotFound(err error) bool {
 	}
 	return strings.Contains(microerror.Cause(err).Error(), "NoSuchBucket: The specified bucket does not exist")
 }
+
+// IsKeyNotFound asserts key not found error from upstream's API message.
+func IsKeyNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	return strings.Contains(microerror.Cause(err).Error(), "NotFoundException: Alias arn:aws:kms:")
+}

@@ -1,4 +1,4 @@
-package cloudformationv2
+package legacyv2
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/keyv2"
-	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2/adapter"
+	"github.com/giantswarm/aws-operator/service/resource/legacyv2/adapter"
 )
 
 func newMainStack(customObject v1alpha1.AWSConfig) (StackState, error) {
@@ -67,7 +67,7 @@ func (r *Resource) getMainTemplateBody(customObject v1alpha1.AWSConfig) (string,
 		return "", microerror.Mask(err)
 	}
 
-	adapter, err := adapter.New(customObject, r.awsClients)
+	adapter, err := adapter.New(customObject, *r.awsClients)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}

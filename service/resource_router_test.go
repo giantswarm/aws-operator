@@ -17,10 +17,9 @@ import (
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/cloudconfigv1"
 	"github.com/giantswarm/aws-operator/service/cloudconfigv2"
-	"github.com/giantswarm/aws-operator/service/resource/cloudformationv1"
-	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2"
 	"github.com/giantswarm/aws-operator/service/resource/legacyv1"
 	"github.com/giantswarm/aws-operator/service/resource/legacyv2"
+	"github.com/giantswarm/aws-operator/service/resource/legacyv2/adapter"
 	"github.com/giantswarm/aws-operator/service/resource/namespacev1"
 	"github.com/giantswarm/aws-operator/service/resource/namespacev2"
 )
@@ -83,19 +82,9 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 		legacyConfig.KeyWatcher = keyWatcher
 		legacyConfig.Logger = microloggertest.New()
 		legacyConfig.PubKeyFile = "test"
+		legacyConfig.Clients = &adapter.Clients{}
 
 		legacyResource, err = legacyv2.New(legacyConfig)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
-	}
-
-	var cloudformationResource framework.Resource
-	{
-		cloudformationConfig := cloudformationv2.DefaultConfig()
-		cloudformationConfig.Logger = microloggertest.New()
-
-		cloudformationResource, err = cloudformationv2.New(cloudformationConfig)
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
@@ -112,7 +101,6 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 
 	allResources := []framework.Resource{
 		legacyResource,
-		cloudformationResource,
 		namespaceResource,
 	}
 	legacyResources := []framework.Resource{
@@ -278,17 +266,6 @@ func Test_Service_NewTPRResourceRouter(t *testing.T) {
 		}
 	}
 
-	var cloudformationResource framework.Resource
-	{
-		cloudformationConfig := cloudformationv1.DefaultConfig()
-		cloudformationConfig.Logger = microloggertest.New()
-
-		cloudformationResource, err = cloudformationv1.New(cloudformationConfig)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
-	}
-
 	namespaceConfig := namespacev1.DefaultConfig()
 	namespaceConfig.K8sClient = fake.NewSimpleClientset()
 	namespaceConfig.Logger = microloggertest.New()
@@ -300,7 +277,6 @@ func Test_Service_NewTPRResourceRouter(t *testing.T) {
 
 	allResources := []framework.Resource{
 		legacyResource,
-		cloudformationResource,
 		namespaceResource,
 	}
 	legacyResources := []framework.Resource{
