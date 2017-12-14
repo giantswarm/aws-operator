@@ -854,7 +854,7 @@ func migrateTPRsToCRDs(logger micrologger.Logger, clientSet *versioned.Clientset
 					logger.Log("error", fmt.Sprintf("%#v", err))
 					return
 				}
-				_, err := clientSet.
+				_, err = clientSet.
 					ProviderV1alpha1().
 					AWSConfigs(tpo.Namespace).
 					Patch(cro.Name, types.JSONPatchType, patchBytes)
