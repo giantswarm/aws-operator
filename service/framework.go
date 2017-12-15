@@ -859,24 +859,24 @@ func migrateTPRsToCRDs(logger micrologger.Logger, clientSet *versioned.Clientset
 		return
 	}
 	for _, cro := range cros.Items {
-		if cro.Spec.Cluster.Kubernetes.CloudProvider == "" {
-			// CRO existed with empty CloudProvider, refresh
-			patch := v1alpha1.AWSConfig{}
-			patch.Spec.Cluster.Kubernetes.CloudProvider = awsCloudProvider
-			patchBytes, err := json.Marshal(patch)
-			if err != nil {
-				logger.Log("error", fmt.Sprintf("%#v", err))
-				return
-			}
-			_, err = clientSet.
-				ProviderV1alpha1().
-				AWSConfigs("default").
-				Patch(cro.Name, types.MergePatchType, patchBytes)
-			if err != nil {
-				logger.Log("error", fmt.Sprintf("%#v", err))
-				return
-			}
+		if cro.Spec.Cluster.Kubernetes.CloudProvider != "" {
+			continue
 		}
+		// CRO existed with empty CloudProvider, refresh
+		patch := v1alpha1.AWSConfig{}
+		patch.Spec.Cluster.Kubernetes.CloudProvider = awsCloudProvider
+		patchBytes, err := json.Marshal(patch)
+		if err != nil {
+			logger.Log("error", fmt.Sprintf("%#v", err))
+		}
+		_, err = clientSet.
+			ProviderV1alpha1().
+			AWSConfigs("default").
+			Patch(cro.Name, types.MergePatchType, patchBytes)
+		if err != nil {
+			logger.Log("error", fmt.Sprintf("%#v", err))
+		}
+
 	}
 	logger.Log("debug", "end TPR migration")
 }
