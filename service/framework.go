@@ -835,7 +835,7 @@ func migrateTPRsToCRDs(logger micrologger.Logger, clientSet *versioned.Clientset
 
 		// Create CRO in Kubernetes API.
 		{
-			res, err := clientSet.ProviderV1alpha1().AWSConfigs(tpo.Namespace).Get(cro.Name, apismetav1.GetOptions{})
+			_, err := clientSet.ProviderV1alpha1().AWSConfigs(tpo.Namespace).Get(cro.Name, apismetav1.GetOptions{})
 			if apierrors.IsNotFound(err) {
 				_, err := clientSet.ProviderV1alpha1().AWSConfigs(tpo.Namespace).Create(cro)
 				if err != nil {
@@ -845,27 +845,39 @@ func migrateTPRsToCRDs(logger micrologger.Logger, clientSet *versioned.Clientset
 			} else if err != nil {
 				logger.Log("error", fmt.Sprintf("%#v", err))
 				return
-			} else if res.Spec.Cluster.Kubernetes.CloudProvider == "" {
-				// CRO existed with empty CloudProvider, refresh
-				patch := v1alpha1.AWSConfig{}
-				patch.Spec.Cluster.Kubernetes.CloudProvider = awsCloudProvider
-				patchBytes, err := json.Marshal(patch)
-				if err != nil {
-					logger.Log("error", fmt.Sprintf("%#v", err))
-					return
-				}
-				_, err = clientSet.
-					ProviderV1alpha1().
-					AWSConfigs(tpo.Namespace).
-					Patch(cro.Name, types.MergePatchType, patchBytes)
-				if err != nil {
-					logger.Log("error", fmt.Sprintf("%#v", err))
-					return
-				}
 			}
 		}
 	}
 
+	// update existing CROs with empty cloud provider
+	cros, err := clientSet.
+		ProviderV1alpha1().
+		AWSConfigs("default").
+		List(apismetav1.ListOptions{})
+	if err != nil {
+		logger.Log("error", fmt.Sprintf("%#v", err))
+		return
+	}
+	for _, cro := range cros.Items {
+		if cro.Spec.Cluster.Kubernetes.CloudProvider == "" {
+			// CRO existed with empty CloudProvider, refresh
+			patch := v1alpha1.AWSConfig{}
+			patch.Spec.Cluster.Kubernetes.CloudProvider = awsCloudProvider
+			patchBytes, err := json.Marshal(patch)
+			if err != nil {
+				logger.Log("error", fmt.Sprintf("%#v", err))
+				return
+			}
+			_, err = clientSet.
+				ProviderV1alpha1().
+				AWSConfigs("default").
+				Patch(cro.Name, types.MergePatchType, patchBytes)
+			if err != nil {
+				logger.Log("error", fmt.Sprintf("%#v", err))
+				return
+			}
+		}
+	}
 	logger.Log("debug", "end TPR migration")
 }
 
