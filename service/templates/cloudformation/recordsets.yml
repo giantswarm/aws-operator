@@ -1,0 +1,43 @@
+{{define "recordsets"}}
+  apiRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: {{.APIELBDNS}}
+        HostedZoneID: {{.APIELBHostedZones}}
+        EvaluateTargetHealth: false
+      Name: {{.APIELBDomain}}
+      HostedZoneName: {{.APIELBHostedZones}}
+      TTL: '900'
+      Type: A
+  etcdRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: {{.EtcdELBDNS}}
+        HostedZoneID: {{.EtcdELBHostedZones}}
+        EvaluateTargetHealth: false
+      Name: {{.EtcdELBDomain}}
+      HostedZoneName: {{.EtcdELBHostedZones}}
+      TTL: '900'
+      Type: A
+  ingressRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: {{.IngressELBDNS}}
+        HostedZoneID: {{.IngressELBHostedZones}}
+        EvaluateTargetHealth: false
+      Name: {{.IngressELBDomain}}
+      HostedZoneName: {{.IngressELBHostedZones}}
+      TTL: '900'
+      Type: A
+  ingressWildcardRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: {{.IngressWildcardELBDomain}}
+      HostedZoneName: {{.IngressELBHostedZones}}
+      TTL: '900'
+      Type: CNAME
+      ResourceRecords: {{.IngressELBDomain}}
+{{end}}

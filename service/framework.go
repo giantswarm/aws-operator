@@ -212,6 +212,7 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 		legacyConfig.Clients.CloudFormation = awsClients.CloudFormation
 		legacyConfig.Clients.IAM = awsClients.IAM
 		legacyConfig.Clients.KMS = awsClients.KMS
+		legacyConfig.Clients.ELB = awsClients.ELB
 
 		legacyResource, err = legacyv2.New(legacyConfig)
 		if err != nil {

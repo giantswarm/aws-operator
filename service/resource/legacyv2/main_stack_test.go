@@ -54,9 +54,15 @@ func TestMainTemplateExistingFields(t *testing.T) {
 				ID:      "test-cluster",
 				Version: "myversion",
 				Kubernetes: v1alpha1.ClusterKubernetes{
-					IngressController: v1alpha1.ClusterKubernetesIngressController{
-						Domain: "mysubdomain.mydomain.com",
+					API: v1alpha1.ClusterKubernetesAPI{
+						Domain: "api.domain",
 					},
+					IngressController: v1alpha1.ClusterKubernetesIngressController{
+						Domain: "ingress.domain",
+					},
+				},
+				Etcd: v1alpha1.ClusterEtcd{
+					Domain: "etcd.domain",
 				},
 			},
 			AWS: v1alpha1.AWSConfigSpecAWS{
@@ -75,6 +81,7 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
 		KMS: &adapter.KMSClientMock{},
+		ELB: &adapter.ELBClientMock{},
 	}
 	newResource, err := New(cfg)
 	if err != nil {
@@ -136,6 +143,18 @@ func TestMainTemplateExistingFields(t *testing.T) {
 	if !strings.Contains(body, "PolicyName: test-cluster-worker") {
 		fmt.Println(body)
 		t.Error("PolicyName output element not found")
+	}
+	if !strings.Contains(body, "apiRecordSet:") {
+		fmt.Println(body)
+		t.Error("apiRecordSet element not found")
+	}
+	if !strings.Contains(body, "etcdRecordSet:") {
+		fmt.Println(body)
+		t.Error("etcdRecordSet element not found")
+	}
+	if !strings.Contains(body, "ingressWildcardRecordSet:") {
+		fmt.Println(body)
+		t.Error("ingressWildcardRecordSet element not found")
 	}
 
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/kms"
 )
@@ -108,6 +109,26 @@ func (k *KMSClientMock) DescribeKey(input *kms.DescribeKeyInput) (*kms.DescribeK
 	output := &kms.DescribeKeyOutput{
 		KeyMetadata: &kms.KeyMetadata{
 			Arn: aws.String(k.keyARN),
+		},
+	}
+	return output, nil
+}
+
+type ELBClientMock struct {
+	dns     string
+	name    string
+	isError bool
+}
+
+func (e *ELBClientMock) DescribeLoadBalancers(input *elb.DescribeLoadBalancersInput) (*elb.DescribeLoadBalancersOutput, error) {
+	if e.isError {
+		return nil, fmt.Errorf("error")
+	}
+	output := &elb.DescribeLoadBalancersOutput{
+		LoadBalancerDescriptions: []*elb.LoadBalancerDescription{
+			&elb.LoadBalancerDescription{
+				DNSName: aws.String(e.dns),
+			},
 		},
 	}
 	return output, nil

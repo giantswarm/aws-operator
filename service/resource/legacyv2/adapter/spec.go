@@ -3,6 +3,7 @@ package adapter
 import (
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/kms"
 )
@@ -55,6 +56,7 @@ type Clients struct {
 	EC2            EC2Client
 	IAM            IAMClient
 	KMS            KMSClient
+	ELB            ELBClient
 }
 
 // CFClient describes the methods required to be implemented by a CloudFormation AWS client.
@@ -88,4 +90,9 @@ type SmallCloudconfigConfig struct {
 	Region         string
 	S3URI          string
 	ClusterVersion string
+}
+
+// ELBClient describes the methods required to be implemented by a ELB AWS client.
+type ELBClient interface {
+	DescribeLoadBalancers(*elb.DescribeLoadBalancersInput) (*elb.DescribeLoadBalancersOutput, error)
 }
