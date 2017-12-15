@@ -1,4 +1,5 @@
-{{define "worker_policy"}}workerRole:
+{{define "worker_policy"}}
+  WorkerRole:
     Type: "AWS::IAM::Role"
     Properties:
       RoleName: {{.WorkerRoleName}}
@@ -9,12 +10,12 @@
           Principal:
             Service: "ec2.amazonaws.com"
           Action: "sts:AssumeRole"
-  workerRolePolicy:
+  WorkerRolePolicy:
     Type: "AWS::IAM::Policy"
     Properties:
       PolicyName: {{.WorkerPolicyName}}
       Roles:
-        - Ref: "workerRole"
+        - Ref: "WorkerRole"
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -58,10 +59,10 @@
               - "ecr:ListImages"
               - "ecr:BatchGetImage"
             Resource: "*"
-  workerInstanceProfile:
+  WorkerInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
       InstanceProfileName: {{.WorkerProfileName}}
       Roles:
-        - Ref: "workerRole"
+        - Ref: "WorkerRole"
 {{end}}

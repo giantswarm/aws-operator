@@ -116,7 +116,7 @@ func TestAdapterAutoScalingGroupLoadBalancerName(t *testing.T) {
 					Cluster: defaultCluster,
 				},
 			},
-			expectedLoadBalancerName: "test-cluster-mysubdomain",
+			expectedLoadBalancerName: "test-cluster-ingress",
 		},
 	}
 

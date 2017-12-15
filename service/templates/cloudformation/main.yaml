@@ -4,5 +4,6 @@ Resources:
   {{template "launch_configuration" .}}
   {{template "autoscaling_group" .}}
   {{template "worker_policy" .}}
+  {{template "recordsets" .}}
 {{template "outputs" .}}
 {{end}}
