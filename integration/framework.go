@@ -18,6 +18,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api/v1"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
@@ -52,8 +53,9 @@ Installation:
 )
 
 type framework struct {
-	cs   kubernetes.Interface
-	gsCs *giantclientset.Clientset
+	cs      kubernetes.Interface
+	gsCs    *giantclientset.Clientset
+	guestCS kubernetes.Interface
 }
 
 func newFramework() (*framework, error) {
@@ -293,9 +295,60 @@ func (f *framework) deleteGuestCluster() error {
 		return microerror.Mask(err)
 	}
 
+	// TODO: during the cloudformation migration the legacy resource is always deleted last,
+	// when the migration is done we will need to check here the cloudformation stack deletion
+	// message
 	logEntry := "cluster '${CLUSTER_NAME}' deleted"
-	if os.Getenv("VERSION_BUNDLE_VERSION") == "0.2.0" {
-		logEntry = "deleting AWS cloudformation stack: deleted"
-	}
 	return f.waitForPodLog("giantswarm", logEntry, operatorPodName)
+}
+
+func (f *framework) initGuestClientset() error {
+	// get api secret
+	secretName := os.ExpandEnv("${CLUSTER_NAME}-api")
+
+	secret, err := f.cs.CoreV1().
+		Secrets("default").
+		Get(secretName, metav1.GetOptions{})
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	// create clientset
+	config := &rest.Config{}
+	config.TLSClientConfig = rest.TLSClientConfig{
+		CAData:   secret.Data["ca"],
+		CertData: secret.Data["crt"],
+		KeyData:  secret.Data["key"],
+	}
+	config.Host = os.ExpandEnv("https://api.${CLUSTER_NAME}.${COMMON_DOMAIN}")
+
+	cs, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	f.guestCS = cs
+
+	return nil
+}
+
+func (f *framework) waitForAPIUp() error {
+
+	return waitFor(f.apiUp())
+}
+
+func (f *framework) apiUp() func() error {
+	return func() error {
+		_, err := f.guestCS.
+			CoreV1().
+			Services("default").
+			Get("kubernetes", metav1.GetOptions{})
+
+		if err != nil {
+			log.Printf("waiting for k8s API up: %v\n", err)
+			return microerror.Mask(err)
+		}
+		log.Println("k8s API up")
+		return nil
+	}
 }
