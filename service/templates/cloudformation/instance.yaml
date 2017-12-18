@@ -1,0 +1,18 @@
+{{define "instance"}}masterInstance:
+    Type: "AWS::EC2::Instance"
+    Description: Master instance
+    Properties:
+        AvailabilityZone: {{ .MasterAZ }}
+        IamInstanceProfile: {{ .MasterIAMInstanceProfileName }}
+        ImageID: {{ .MasterImageID }}
+        InstanceType: {{ .MasterInstanceType }}
+        SecurityGroups:
+        - {{ .MasterSecurityGroupID }}
+        SubnetID: {{ .MasterSubnetID }}
+        UserData: {{ .MasterSmallCloudConfig }}
+        Tags:
+        - Key: Name
+          Value: {{ .ClusterID }}-{{ .ASGType }}
+        - Key: KubernetesCluster
+          Value: {{ .ClusterID }}
+{{end}}
