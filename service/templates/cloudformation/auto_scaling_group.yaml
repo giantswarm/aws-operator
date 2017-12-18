@@ -1,4 +1,5 @@
-{{define "autoscaling_group"}}{{ .ASGType }}AutoScalingGroup:
+{{define "autoscaling_group"}}
+  {{ .ASGType }}AutoScalingGroup:
     Type: "AWS::AutoScaling::AutoScalingGroup"
     Properties:
       VPCZoneIdentifier:

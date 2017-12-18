@@ -1,4 +1,5 @@
-{{define "outputs"}}Outputs:
+{{define "outputs"}}
+Outputs:
   WorkersOutput:
     Value: {{ .ASGMinSize }}
   ImageIDOutput:
