@@ -4,15 +4,15 @@
     Properties:
         AvailabilityZone: {{ .MasterAZ }}
         IamInstanceProfile: {{ .MasterIAMInstanceProfileName }}
-        ImageID: {{ .MasterImageID }}
+        ImageId: {{ .MasterImageID }}
         InstanceType: {{ .MasterInstanceType }}
-        SecurityGroups:
+        SecurityGroupIds:
         - {{ .MasterSecurityGroupID }}
-        SubnetID: {{ .MasterSubnetID }}
+        SubnetId: {{ .MasterSubnetID }}
         UserData: {{ .MasterSmallCloudConfig }}
         Tags:
         - Key: Name
-          Value: {{ .ClusterID }}-{{ .ASGType }}
+          Value: {{ .ClusterID }}-master
         - Key: KubernetesCluster
           Value: {{ .ClusterID }}
 {{end}}
