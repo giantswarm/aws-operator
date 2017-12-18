@@ -67,6 +67,11 @@ func TestMainTemplateExistingFields(t *testing.T) {
 			},
 			AWS: v1alpha1.AWSConfigSpecAWS{
 				AZ: "myaz",
+				Masters: []v1alpha1.AWSConfigSpecAWSNode{
+					v1alpha1.AWSConfigSpecAWSNode{
+						ImageID: "myimageid",
+					},
+				},
 				Workers: []v1alpha1.AWSConfigSpecAWSNode{
 					v1alpha1.AWSConfigSpecAWSNode{
 						ImageID: "myimageid",

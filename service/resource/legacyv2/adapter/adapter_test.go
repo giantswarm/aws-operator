@@ -28,6 +28,9 @@ func TestAdapterMain(t *testing.T) {
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: defaultCluster,
 			AWS: v1alpha1.AWSConfigSpecAWS{
+				Masters: []v1alpha1.AWSConfigSpecAWSNode{
+					v1alpha1.AWSConfigSpecAWSNode{},
+				},
 				Workers: []v1alpha1.AWSConfigSpecAWSNode{
 					v1alpha1.AWSConfigSpecAWSNode{},
 				},

@@ -35,6 +35,7 @@ type hydrater func(v1alpha1.AWSConfig, Clients) error
 type Adapter struct {
 	ASGType string
 
+	instanceAdapter
 	launchConfigAdapter
 	autoScalingGroupAdapter
 	outputsAdapter
@@ -48,6 +49,7 @@ func New(customObject v1alpha1.AWSConfig, clients Clients) (Adapter, error) {
 	a.ASGType = prefixWorker
 
 	hydraters := []hydrater{
+		a.getInstance,
 		a.getAutoScalingGroup,
 		a.getLaunchConfiguration,
 		a.getOutputs,
