@@ -115,9 +115,10 @@ func (k *KMSClientMock) DescribeKey(input *kms.DescribeKeyInput) (*kms.DescribeK
 }
 
 type ELBClientMock struct {
-	dns     string
-	name    string
-	isError bool
+	dns        string
+	hostedZone string
+	name       string
+	isError    bool
 }
 
 func (e *ELBClientMock) DescribeLoadBalancers(input *elb.DescribeLoadBalancersInput) (*elb.DescribeLoadBalancersOutput, error) {
@@ -127,7 +128,8 @@ func (e *ELBClientMock) DescribeLoadBalancers(input *elb.DescribeLoadBalancersIn
 	output := &elb.DescribeLoadBalancersOutput{
 		LoadBalancerDescriptions: []*elb.LoadBalancerDescription{
 			&elb.LoadBalancerDescription{
-				DNSName: aws.String(e.dns),
+				DNSName:                   aws.String(e.dns),
+				CanonicalHostedZoneNameID: aws.String(e.hostedZone),
 			},
 		},
 	}

@@ -11,16 +11,19 @@ import (
 // template related to this adapter: service/templates/cloudformation/recordsets.yaml
 
 type recordSetsAdapter struct {
-	APIELBDNS                string
-	APIELBHostedZones        string
-	APIELBDomain             string
-	EtcdELBDNS               string
-	EtcdELBHostedZones       string
-	EtcdELBDomain            string
-	IngressELBDNS            string
-	IngressELBHostedZones    string
-	IngressELBDomain         string
-	IngressWildcardELBDomain string
+	APIELBDNS                 string
+	APIELBHostedZones         string
+	APIELBAliasHostedZone     string
+	APIELBDomain              string
+	EtcdELBDNS                string
+	EtcdELBHostedZones        string
+	EtcdELBAliasHostedZone    string
+	EtcdELBDomain             string
+	IngressELBDNS             string
+	IngressELBHostedZones     string
+	IngressELBAliasHostedZone string
+	IngressELBDomain          string
+	IngressWildcardELBDomain  string
 }
 
 func (r *recordSetsAdapter) getRecordSets(customObject v1alpha1.AWSConfig, clients Clients) error {
@@ -32,31 +35,34 @@ func (r *recordSetsAdapter) getRecordSets(customObject v1alpha1.AWSConfig, clien
 	r.IngressELBDomain = customObject.Spec.Cluster.Kubernetes.IngressController.Domain
 	r.IngressWildcardELBDomain = customObject.Spec.Cluster.Kubernetes.IngressController.WildcardDomain
 
-	apiDNS, err := ELBDNS(clients, r.APIELBDomain, customObject)
+	apiELB, err := ELBDescription(clients, r.APIELBDomain, customObject)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	r.APIELBDNS = apiDNS
+	r.APIELBDNS = *apiELB.DNSName
+	r.APIELBAliasHostedZone = *apiELB.CanonicalHostedZoneNameID
 
-	ingressDNS, err := ELBDNS(clients, r.IngressELBDomain, customObject)
+	ingressELB, err := ELBDescription(clients, r.IngressELBDomain, customObject)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	r.IngressELBDNS = ingressDNS
+	r.IngressELBDNS = *ingressELB.DNSName
+	r.IngressELBAliasHostedZone = *ingressELB.CanonicalHostedZoneNameID
 
-	etcdDNS, err := ELBDNS(clients, r.EtcdELBDomain, customObject)
+	etcdELB, err := ELBDescription(clients, r.EtcdELBDomain, customObject)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	r.EtcdELBDNS = etcdDNS
+	r.EtcdELBDNS = *etcdELB.DNSName
+	r.EtcdELBAliasHostedZone = *etcdELB.CanonicalHostedZoneNameID
 
 	return nil
 }
 
-func ELBDNS(clients Clients, domain string, customObject v1alpha1.AWSConfig) (string, error) {
+func ELBDescription(clients Clients, domain string, customObject v1alpha1.AWSConfig) (*elb.LoadBalancerDescription, error) {
 	elbName, err := keyv2.LoadBalancerName(domain, customObject)
 	if err != nil {
-		return "", microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 
 	input := &elb.DescribeLoadBalancersInput{
@@ -67,11 +73,11 @@ func ELBDNS(clients Clients, domain string, customObject v1alpha1.AWSConfig) (st
 
 	res, err := clients.ELB.DescribeLoadBalancers(input)
 	if err != nil {
-		return "", microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 	if len(res.LoadBalancerDescriptions) != 1 {
-		return "", microerror.Mask(tooManyResultsError)
+		return nil, microerror.Mask(tooManyResultsError)
 	}
 
-	return *res.LoadBalancerDescriptions[0].DNSName, nil
+	return res.LoadBalancerDescriptions[0], nil
 }

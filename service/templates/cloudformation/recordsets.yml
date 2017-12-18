@@ -4,40 +4,38 @@
     Properties:
       AliasTarget:
         DNSName: {{.APIELBDNS}}
-        HostedZoneID: {{.APIELBHostedZones}}
+        HostedZoneId: {{.APIELBAliasHostedZone}}
         EvaluateTargetHealth: false
       Name: {{.APIELBDomain}}
-      HostedZoneName: {{.APIELBHostedZones}}
-      TTL: '900'
+      HostedZoneId: {{.APIELBHostedZones}}
       Type: A
   EtcdRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
       AliasTarget:
         DNSName: {{.EtcdELBDNS}}
-        HostedZoneID: {{.EtcdELBHostedZones}}
+        HostedZoneId: {{.EtcdELBAliasHostedZone}}
         EvaluateTargetHealth: false
       Name: {{.EtcdELBDomain}}
-      HostedZoneName: {{.EtcdELBHostedZones}}
-      TTL: '900'
+      HostedZoneId: {{.EtcdELBHostedZones}}
       Type: A
   IngressRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
       AliasTarget:
         DNSName: {{.IngressELBDNS}}
-        HostedZoneID: {{.IngressELBHostedZones}}
+        HostedZoneId: {{.IngressELBAliasHostedZone}}
         EvaluateTargetHealth: false
       Name: {{.IngressELBDomain}}
-      HostedZoneName: {{.IngressELBHostedZones}}
-      TTL: '900'
+      HostedZoneId: {{.IngressELBHostedZones}}
       Type: A
   IngressWildcardRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
-      Name: {{.IngressWildcardELBDomain}}
-      HostedZoneName: {{.IngressELBHostedZones}}
+      Name: '{{.IngressWildcardELBDomain}}'
+      HostedZoneId: {{.IngressELBHostedZones}}
       TTL: '900'
       Type: CNAME
-      ResourceRecords: {{.IngressELBDomain}}
+      ResourceRecords:
+        - {{.IngressELBDomain}}
 {{end}}
