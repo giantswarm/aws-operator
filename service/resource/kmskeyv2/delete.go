@@ -28,7 +28,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			return microerror.Mask(err)
 		}
 
-		// AWS API doesn't allow to delete the KMS key immediately, but we can schedule its deletion
+		// AWS API doesn't allow to delete the KMS key immediately, but we can schedule its deletion.
 		if _, err := r.awsClients.KMS.ScheduleKeyDeletion(&kms.ScheduleKeyDeletionInput{
 			KeyId:               key.KeyMetadata.KeyId,
 			PendingWindowInDays: aws.Int64(pendingDeletionWindow),
