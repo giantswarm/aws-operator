@@ -193,8 +193,6 @@ type Resource struct {
 // NewUpdatePatch is called upon observed custom object change. It creates the
 // AWS resources for the cluster.
 func (s *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
-	s.logger.Log("info", "in NewUpdatePatch")
-
 	customObject, ok := obj.(*v1alpha1.AWSConfig)
 	if !ok {
 		return &framework.Patch{}, microerror.Maskf(invalidConfigError, "could not convert to v1alpha1.AWSConfig")
@@ -217,7 +215,9 @@ func (s *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 
 	patch := framework.NewPatch()
 
-	// cloudformation logic
+	// cloudformation logic: on creation we need to create the cloudformation resource after legacy so that there are no dependency
+	// problems (see https://github.com/giantswarm/operatorkit/issues/139). Once the transition to cloudformation is done we
+	// will separate the cloudformation and legacy resources.
 	if keyv2.UseCloudFormation(cluster) {
 		create, err := s.newCreateChange(ctx, obj, currentState, desiredState)
 		if err != nil {
@@ -239,7 +239,6 @@ func (s *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 // NewDeletePatch is called upon observed custom object deletion. It deletes the
 // AWS resources for the cluster.
 func (s *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
-	s.logger.Log("info", "in NewDeletePatch")
 	// We can receive an instance of v1alpha1.AWSConfig or cache.DeletedFinalStateUnknown.
 	// We need to assert the type properly and log an error when we cannot do that.
 	// Also, the cache.DeleteFinalStateUnknown object can contain the proper CustomObject,
@@ -263,7 +262,9 @@ func (s *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desire
 
 	s.logger.Log("info", fmt.Sprintf("deleting cluster '%s'", keyv2.ClusterID(cluster)))
 
-	// cloudformation logic
+	// cloudformation logic: on deletion we need to remove first the cloudformation resource so that there are no dependency
+	// problems (see https://github.com/giantswarm/operatorkit/issues/139). Once the transition to cloudformation is done we
+	// will separate the cloudformation and legacy resources.
 	if keyv2.UseCloudFormation(cluster) {
 		deleteStackInput := cloudformation.DeleteStackInput{
 			StackName: aws.String(keyv2.MainStackName(cluster)),
@@ -288,8 +289,6 @@ func (s *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desire
 }
 
 func (s *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
-	s.logger.Log("info", "in ApplyUpdateChange")
-
 	cluster, err := keyv2.ToCustomObject(obj)
 	if err != nil {
 		return microerror.Mask(err)
@@ -1484,7 +1483,6 @@ func (s *Resource) uploadCloudconfigToS3(svc *s3.S3, s3Bucket, path, data string
 }
 
 func (s *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
-	s.logger.Log("info", "in GetCurrentState")
 	// currently only used for cloudformation
 	customObject, err := keyv2.ToCustomObject(obj)
 	if err != nil {
@@ -1560,8 +1558,6 @@ func (s *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 }
 
 func (s *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
-	s.logger.Log("info", "in GetDesiredState")
-
 	// currently only used for cloudformation
 	customObject, err := keyv2.ToCustomObject(obj)
 	if err != nil {
@@ -1579,7 +1575,6 @@ func (s *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 }
 
 func (s *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
-	s.logger.Log("info", "in ApplyCreateChange ")
 	cluster, err := keyv2.ToCustomObject(obj)
 	if err != nil {
 		return microerror.Mask(err)
@@ -1587,7 +1582,8 @@ func (s *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 	s.logger.Log("info", fmt.Sprintf("creating cluster '%s'", keyv2.ClusterID(cluster)))
 
-	// cloudformation logic
+	// cloudformation logic: on creation we only need to handle the cloudformation resource, legacy is handled by the update methods
+	// Once the transition to cloudformation is done we will separate the cloudformation and legacy resources.
 	if keyv2.UseCloudFormation(cluster) {
 		stackInput, err := toCreateStackInput(createChange)
 		if err != nil {
@@ -1605,7 +1601,6 @@ func (s *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 }
 
 func (s *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
-	s.logger.Log("info", "in ApplyDeleteChange ")
 	return nil
 }
 
@@ -1644,7 +1639,6 @@ func toUpdateStackInput(v interface{}) (cloudformation.UpdateStackInput, error) 
 }
 
 func (s *Resource) newUpdateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	s.logger.Log("info", "in newUpdateChange")
 	customObject, err := keyv2.ToCustomObject(obj)
 	if err != nil {
 		return cloudformation.CreateStackInput{}, microerror.Mask(err)
@@ -1682,7 +1676,6 @@ func (s *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 }
 
 func (s *Resource) newCreateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	s.logger.Log("info", "in newCreateChange")
 	customObject, err := keyv2.ToCustomObject(obj)
 	if err != nil {
 		return cloudformation.CreateStackInput{}, microerror.Mask(err)
