@@ -20,7 +20,7 @@ func IsMalformedAmazonAccountID(err error) bool {
 
 var wrongAmazonAccountIDLengthError = microerror.New("wrong amazon account ID length")
 
-// IsWrongAmazonIDLength asserts wrongAmazonAccountIDLengthError.
+// IsWrongAmazonAccountIDLength asserts wrongAmazonAccountIDLengthError.
 func IsWrongAmazonAccountIDLength(err error) bool {
 	return microerror.Cause(err) == wrongAmazonAccountIDLengthError
 }

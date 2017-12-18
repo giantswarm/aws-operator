@@ -984,49 +984,52 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 	}
 
 	// Create Record Sets for the Load Balancers.
-	recordSetInputs := []recordSetInput{
-		{
-			Cluster:      cluster,
-			Client:       clients.Route53,
-			Resource:     apiLB,
-			Domain:       cluster.Spec.Cluster.Kubernetes.API.Domain,
-			HostedZoneID: cluster.Spec.AWS.API.HostedZones,
-			Type:         route53.RRTypeA,
-		},
-		{
-			Cluster:      cluster,
-			Client:       clients.Route53,
-			Resource:     etcdLB,
-			Domain:       cluster.Spec.Cluster.Etcd.Domain,
-			HostedZoneID: cluster.Spec.AWS.Etcd.HostedZones,
-			Type:         route53.RRTypeA,
-		},
-		{
-			Cluster:      cluster,
-			Client:       clients.Route53,
-			Resource:     ingressLB,
-			Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-			HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
-			Type:         route53.RRTypeA,
-		},
-		{
-			Cluster:      cluster,
-			Client:       clients.Route53,
-			Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.WildcardDomain,
-			HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
-			Value:        cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-			Type:         route53.RRTypeCname,
-		},
-	}
-
-	var rsErr error
-	for _, input := range recordSetInputs {
-		if rsErr = s.createRecordSet(input); rsErr != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create record set '%#v'", rsErr))
+	// During Cloud Formation migration this logic is only needed for non CF clusters.
+	if !keyv2.UseCloudFormation(cluster) {
+		recordSetInputs := []recordSetInput{
+			{
+				Cluster:      cluster,
+				Client:       clients.Route53,
+				Resource:     apiLB,
+				Domain:       cluster.Spec.Cluster.Kubernetes.API.Domain,
+				HostedZoneID: cluster.Spec.AWS.API.HostedZones,
+				Type:         route53.RRTypeA,
+			},
+			{
+				Cluster:      cluster,
+				Client:       clients.Route53,
+				Resource:     etcdLB,
+				Domain:       cluster.Spec.Cluster.Etcd.Domain,
+				HostedZoneID: cluster.Spec.AWS.Etcd.HostedZones,
+				Type:         route53.RRTypeA,
+			},
+			{
+				Cluster:      cluster,
+				Client:       clients.Route53,
+				Resource:     ingressLB,
+				Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+				HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
+				Type:         route53.RRTypeA,
+			},
+			{
+				Cluster:      cluster,
+				Client:       clients.Route53,
+				Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.WildcardDomain,
+				HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
+				Value:        cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+				Type:         route53.RRTypeCname,
+			},
 		}
-	}
-	if rsErr == nil {
-		s.logger.Log("info", fmt.Sprintf("created DNS records for load balancers"))
+
+		var rsErr error
+		for _, input := range recordSetInputs {
+			if rsErr = s.createRecordSet(input); rsErr != nil {
+				return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create record set '%#v'", rsErr))
+			}
+		}
+		if rsErr == nil {
+			s.logger.Log("info", fmt.Sprintf("created DNS records for load balancers"))
+		}
 	}
 
 	masterServiceInput := MasterServiceInput{
@@ -1601,6 +1604,7 @@ func (s *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 }
 
 func (s *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
+	s.logger.Log("info", "in ApplyDeleteChange ")
 	return nil
 }
 

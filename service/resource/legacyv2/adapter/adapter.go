@@ -39,6 +39,7 @@ type Adapter struct {
 	autoScalingGroupAdapter
 	outputsAdapter
 	workerPolicyAdapter
+	recordSetsAdapter
 }
 
 func New(customObject v1alpha1.AWSConfig, clients Clients) (Adapter, error) {
@@ -51,6 +52,7 @@ func New(customObject v1alpha1.AWSConfig, clients Clients) (Adapter, error) {
 		a.getLaunchConfiguration,
 		a.getOutputs,
 		a.getWorkerPolicy,
+		a.getRecordSets,
 	}
 
 	for _, h := range hydraters {
