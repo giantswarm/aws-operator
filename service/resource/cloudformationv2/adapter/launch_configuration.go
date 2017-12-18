@@ -49,7 +49,7 @@ func (l *launchConfigAdapter) getLaunchConfiguration(customObject v1alpha1.AWSCo
 		},
 	}
 
-	// security group
+	// security group field.
 	// TODO: remove this code once the security group is created by cloudformation
 	// and add a reference in the template
 	groupName := keyv2.SecurityGroupName(customObject, prefixWorker)
@@ -78,12 +78,11 @@ func (l *launchConfigAdapter) getLaunchConfiguration(customObject v1alpha1.AWSCo
 	}
 	l.SecurityGroupID = *output.SecurityGroups[0].GroupId
 
-	// cloud config
+	// small cloud config field.
 	accountID, err := AccountID(clients)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-
 	clusterID := keyv2.ClusterID(customObject)
 	s3URI := fmt.Sprintf("%s-g8s-%s", accountID, clusterID)
 

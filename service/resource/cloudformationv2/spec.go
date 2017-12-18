@@ -10,6 +10,8 @@ const (
 	workerRoleKey           = "workerRole"
 
 	cloudFormationTemplatesDirectory = "service/templates/cloudformation"
+
+	namedIAMCapability = "CAPABILITY_NAMED_IAM"
 )
 
 // StackState is the state representation on which the resource methods work.

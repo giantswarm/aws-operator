@@ -54,7 +54,7 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		createState.TimeoutInMinutes = aws.Int64(defaultCreationTimeout)
 		// CAPABILITY_NAMED_IAM is required for creating IAM roles (worker policy)
 		createState.Capabilities = []*string{
-			aws.String("CAPABILITY_NAMED_IAM"),
+			aws.String(namedIAMCapability),
 		}
 	}
 
