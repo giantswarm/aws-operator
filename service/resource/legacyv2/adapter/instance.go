@@ -23,7 +23,6 @@ type instanceAdapter struct {
 	MasterSecurityGroupID        string
 	MasterSmallCloudConfig       string
 	MasterSubnetID               string
-	Tags                         map[string]string
 }
 
 func (i *instanceAdapter) getInstance(customObject v1alpha1.AWSConfig, clients Clients) error {
