@@ -229,7 +229,6 @@ func (s *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 			return nil, microerror.Mask(err)
 		}
 
-		patch := framework.NewPatch()
 		patch.SetCreateChange(create)
 		patch.SetUpdateChange(update)
 	}
