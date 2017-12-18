@@ -1,5 +1,5 @@
 {{define "recordsets"}}
-  apiRecordSet:
+  ApiRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
       AliasTarget:
@@ -10,7 +10,7 @@
       HostedZoneName: {{.APIELBHostedZones}}
       TTL: '900'
       Type: A
-  etcdRecordSet:
+  EtcdRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
       AliasTarget:
@@ -21,7 +21,7 @@
       HostedZoneName: {{.EtcdELBHostedZones}}
       TTL: '900'
       Type: A
-  ingressRecordSet:
+  IngressRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
       AliasTarget:
@@ -32,7 +32,7 @@
       HostedZoneName: {{.IngressELBHostedZones}}
       TTL: '900'
       Type: A
-  ingressWildcardRecordSet:
+  IngressWildcardRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
       Name: {{.IngressWildcardELBDomain}}

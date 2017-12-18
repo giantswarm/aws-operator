@@ -144,15 +144,19 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Error("PolicyName output element not found")
 	}
-	if !strings.Contains(body, "apiRecordSet:") {
+	if !strings.Contains(body, "ApiRecordSet:") {
 		fmt.Println(body)
-		t.Error("apiRecordSet element not found")
+		t.Error("ApiRecordSet element not found")
 	}
-	if !strings.Contains(body, "etcdRecordSet:") {
+	if !strings.Contains(body, "EtcdRecordSet:") {
 		fmt.Println(body)
-		t.Error("etcdRecordSet element not found")
+		t.Error("EtcdRecordSet element not found")
 	}
-	if !strings.Contains(body, "ingressWildcardRecordSet:") {
+	if !strings.Contains(body, "IngressRecordSet:") {
+		fmt.Println(body)
+		t.Error("IngressRecordSet element not found")
+	}
+	if !strings.Contains(body, "IngressWildcardRecordSet:") {
 		fmt.Println(body)
 		t.Error("ingressWildcardRecordSet element not found")
 	}
