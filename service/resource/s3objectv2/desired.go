@@ -27,6 +27,10 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 
 	kmsArn, err := r.awsService.GetKeyArn(clusterID)
+	if IsKeyNotFound(err) {
+		// we can get here during deletion, if the key is already deleted we can safely exit.
+		return output, nil
+	}
 	if err != nil {
 		return output, microerror.Mask(err)
 	}

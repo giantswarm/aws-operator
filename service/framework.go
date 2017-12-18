@@ -37,10 +37,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/cloudconfigv2"
 	"github.com/giantswarm/aws-operator/service/keyv1"
 	"github.com/giantswarm/aws-operator/service/keyv2"
-	"github.com/giantswarm/aws-operator/service/resource/cloudformationv1"
-	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2"
 	"github.com/giantswarm/aws-operator/service/resource/legacyv1"
 	"github.com/giantswarm/aws-operator/service/resource/legacyv2"
+	"github.com/giantswarm/aws-operator/service/resource/legacyv2/adapter"
 	"github.com/giantswarm/aws-operator/service/resource/namespacev1"
 	"github.com/giantswarm/aws-operator/service/resource/namespacev2"
 	"github.com/giantswarm/aws-operator/service/resource/s3bucketv1"
@@ -208,6 +207,12 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 		legacyConfig.Logger = config.Logger
 		legacyConfig.PubKeyFile = config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile)
 
+		legacyConfig.Clients = &adapter.Clients{}
+		legacyConfig.Clients.EC2 = awsClients.EC2
+		legacyConfig.Clients.CloudFormation = awsClients.CloudFormation
+		legacyConfig.Clients.IAM = awsClients.IAM
+		legacyConfig.Clients.KMS = awsClients.KMS
+
 		legacyResource, err = legacyv2.New(legacyConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
@@ -238,22 +243,6 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 		s3BucketObjectConfig.Logger = config.Logger
 
 		s3BucketObjectResource, err = s3objectv2.New(s3BucketObjectConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var cloudformationResource framework.Resource
-	{
-		cloudformationConfig := cloudformationv2.DefaultConfig()
-
-		cloudformationConfig.Clients.EC2 = awsClients.EC2
-		cloudformationConfig.Clients.CloudFormation = awsClients.CloudFormation
-		cloudformationConfig.Clients.IAM = awsClients.IAM
-		cloudformationConfig.Clients.KMS = awsClients.KMS
-		cloudformationConfig.Logger = config.Logger
-
-		cloudformationResource, err = cloudformationv2.New(cloudformationConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -301,7 +290,6 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 			legacyResource,
 			s3BucketResource,
 			s3BucketObjectResource,
-			cloudformationResource,
 		}
 
 		// Disable retry wrapper due to problems with the legacy resource.
@@ -567,21 +555,6 @@ func newCustomObjectFramework(config Config) (*framework.Framework, error) {
 		}
 	}
 
-	var cloudformationResource framework.Resource
-	{
-		cloudformationConfig := cloudformationv1.DefaultConfig()
-
-		cloudformationConfig.Clients.EC2 = awsClients.EC2
-		cloudformationConfig.Clients.CloudFormation = awsClients.CloudFormation
-		cloudformationConfig.Clients.IAM = awsClients.IAM
-		cloudformationConfig.Logger = config.Logger
-
-		cloudformationResource, err = cloudformationv1.New(cloudformationConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var namespaceResource framework.Resource
 	{
 		namespaceConfig := namespacev1.DefaultConfig()
@@ -624,7 +597,6 @@ func newCustomObjectFramework(config Config) (*framework.Framework, error) {
 			legacyResource,
 			s3BucketResource,
 			s3BucketObjectResource,
-			cloudformationResource,
 		}
 
 		// Disable retry wrapper due to problems with the legacy resource.
