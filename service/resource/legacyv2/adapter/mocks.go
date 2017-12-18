@@ -14,6 +14,7 @@ import (
 type EC2ClientMock struct {
 	unexistingSg     bool
 	sgID             string
+	subnetID         string
 	unexistingSubnet bool
 	clusterID        string
 }
@@ -29,6 +30,7 @@ func (e *EC2ClientMock) DescribeSecurityGroups(input *ec2.DescribeSecurityGroups
 		}
 		return output, nil
 	}
+
 	return nil, fmt.Errorf("security group not found")
 }
 
@@ -46,7 +48,7 @@ func (e *EC2ClientMock) DescribeSubnets(input *ec2.DescribeSubnetsInput) (*ec2.D
 		output := &ec2.DescribeSubnetsOutput{
 			Subnets: []*ec2.Subnet{
 				&ec2.Subnet{
-					SubnetId: aws.String("subnet-1234"),
+					SubnetId: aws.String(e.subnetID),
 				},
 			},
 		}
