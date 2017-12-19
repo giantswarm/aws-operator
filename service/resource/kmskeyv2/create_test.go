@@ -1,4 +1,4 @@
-package kmskeyv1
+package kmskeyv2
 
 import (
 	"context"
@@ -6,19 +6,15 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go/service/kms"
-	"github.com/giantswarm/awstpr"
-	"github.com/giantswarm/clustertpr"
-	"github.com/giantswarm/clustertpr/spec"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 )
 
 func Test_Resource_KMSKey_newCreate(t *testing.T) {
-	customObject := awstpr.CustomObject{
-		Spec: awstpr.Spec{
-			Cluster: clustertpr.Spec{
-				Cluster: spec.Cluster{
-					ID: "test-cluster",
-				},
+	customObject := &v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "test-cluster",
 			},
 		},
 	}
@@ -88,12 +84,10 @@ func Test_Resource_KMSKey_newCreate(t *testing.T) {
 }
 
 func Test_ApplyCreateChange(t *testing.T) {
-	customObject := awstpr.CustomObject{
-		Spec: awstpr.Spec{
-			Cluster: clustertpr.Spec{
-				Cluster: spec.Cluster{
-					ID: "test-cluster",
-				},
+	customObject := &v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "test-cluster",
 			},
 		},
 	}
@@ -128,7 +122,7 @@ func Test_ApplyCreateChange(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		err := newResource.ApplyCreateChange(context.TODO(), &customObject, tc.createChange)
+		err := newResource.ApplyCreateChange(context.TODO(), customObject, tc.createChange)
 		if err != nil {
 			t.Errorf("unexpected error %v", err)
 		}
