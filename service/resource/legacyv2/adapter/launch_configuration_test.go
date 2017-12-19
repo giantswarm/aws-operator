@@ -73,20 +73,20 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 				t.Errorf("unexpected error %v", err)
 			}
 
-			if a.ImageID != tc.expectedImageID {
-				t.Errorf("unexpected ImageID, got %q, want %q", a.ImageID, tc.expectedImageID)
+			if a.WorkerImageID != tc.expectedImageID {
+				t.Errorf("unexpected ImageID, got %q, want %q", a.WorkerImageID, tc.expectedImageID)
 			}
-			if a.InstanceType != tc.expectedInstanceType {
-				t.Errorf("unexpected InstanceType, got %q, want %q", a.InstanceType, tc.expectedInstanceType)
+			if a.WorkerInstanceType != tc.expectedInstanceType {
+				t.Errorf("unexpected InstanceType, got %q, want %q", a.WorkerInstanceType, tc.expectedInstanceType)
 			}
-			if a.IAMInstanceProfileName != tc.expectedIAMInstanceProfileName {
-				t.Errorf("unexpected IAMInstanceProfileName, got %q, want %q", a.IAMInstanceProfileName, tc.expectedIAMInstanceProfileName)
+			if a.WorkerIAMInstanceProfileName != tc.expectedIAMInstanceProfileName {
+				t.Errorf("unexpected IAMInstanceProfileName, got %q, want %q", a.WorkerIAMInstanceProfileName, tc.expectedIAMInstanceProfileName)
 			}
-			if a.AssociatePublicIPAddress != tc.expectedAssociatePublicIPAddress {
-				t.Errorf("unexpected IAMInstanceProfileName, got %q, want %q", a.IAMInstanceProfileName, tc.expectedIAMInstanceProfileName)
+			if a.WorkerAssociatePublicIPAddress != tc.expectedAssociatePublicIPAddress {
+				t.Errorf("unexpected IAMInstanceProfileName, got %q, want %q", a.WorkerIAMInstanceProfileName, tc.expectedIAMInstanceProfileName)
 			}
-			if !reflect.DeepEqual(a.BlockDeviceMappings, tc.expectedBlockDeviceMappings) {
-				t.Errorf("unexpected BlockDeviceMappings, got %v, want %v", a.BlockDeviceMappings, tc.expectedBlockDeviceMappings)
+			if !reflect.DeepEqual(a.WorkerBlockDeviceMappings, tc.expectedBlockDeviceMappings) {
+				t.Errorf("unexpected BlockDeviceMappings, got %v, want %v", a.WorkerBlockDeviceMappings, tc.expectedBlockDeviceMappings)
 			}
 		})
 	}
@@ -162,8 +162,8 @@ func TestAdapterLaunchConfigurationSecurityGroupID(t *testing.T) {
 				t.Errorf("unexpected error %v", err)
 			}
 
-			if a.SecurityGroupID != tc.expectedSecurityGroupID {
-				t.Errorf("unexpected SecurityGroupID, got %q, want %q", a.SecurityGroupID, tc.expectedSecurityGroupID)
+			if a.WorkerSecurityGroupID != tc.expectedSecurityGroupID {
+				t.Errorf("unexpected SecurityGroupID, got %q, want %q", a.WorkerSecurityGroupID, tc.expectedSecurityGroupID)
 			}
 		})
 	}
@@ -212,7 +212,7 @@ func TestAdapterLaunchConfigurationSmallCloudConfig(t *testing.T) {
 		t.Errorf("unexpected error %v", err)
 	}
 
-	data, err := base64.StdEncoding.DecodeString(a.SmallCloudConfig)
+	data, err := base64.StdEncoding.DecodeString(a.WorkerSmallCloudConfig)
 	if err != nil {
 		t.Errorf("unexpected error decoding SmallCloudConfig %v", err)
 	}

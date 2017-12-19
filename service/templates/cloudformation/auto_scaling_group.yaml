@@ -3,8 +3,8 @@
     Type: "AWS::AutoScaling::AutoScalingGroup"
     Properties:
       VPCZoneIdentifier:
-        - {{ .SubnetID }}
-      AvailabilityZones: [{{ .AZ }}]
+        - {{ .WorkerSubnetID }}
+      AvailabilityZones: [{{ .WorkerAZ }}]
       MinSize: {{ .ASGMinSize }}
       MaxSize: {{ .ASGMaxSize }}
       LaunchConfigurationName: !Ref {{ .ASGType }}LaunchConfiguration
