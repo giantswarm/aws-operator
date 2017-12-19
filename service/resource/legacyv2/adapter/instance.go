@@ -2,11 +2,9 @@ package adapter
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
@@ -87,13 +85,8 @@ func (i *instanceAdapter) getInstance(customObject v1alpha1.AWSConfig, clients C
 	}
 	i.MasterSubnetID = *subnetOutput.Subnets[0].SubnetId
 
-	resp, err := clients.IAM.GetUser(&iam.GetUserInput{})
+	accountID, err := AccountID(clients)
 	if err != nil {
-		return microerror.Mask(err)
-	}
-	userArn := *resp.User.Arn
-	accountID := strings.Split(userArn, ":")[accountIDIndex]
-	if err := ValidateAccountID(accountID); err != nil {
 		return microerror.Mask(err)
 	}
 
