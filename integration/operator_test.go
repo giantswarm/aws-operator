@@ -94,7 +94,7 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	if err := f.setUp(); err != nil {
+	if err := f.SetUp(); err != nil {
 		log.Printf("unexpected error: %v\n", err)
 		v = 1
 	}
@@ -108,9 +108,9 @@ func TestMain(m *testing.M) {
 		v = m.Run()
 	}
 
-	f.deleteGuestCluster()
+	f.DeleteGuestCluster()
 	operatorTearDown()
-	f.tearDown()
+	f.TearDown()
 
 	os.Exit(v)
 }
@@ -119,15 +119,15 @@ func TestPodsResolveNames(t *testing.T) {
 }
 
 func operatorSetup() error {
-	if err := f.installCertOperator(); err != nil {
+	if err := f.InstallCertOperator(); err != nil {
 		return microerror.Mask(err)
 	}
 
-	if err := f.installCertResource(); err != nil {
+	if err := f.InstallCertResource(); err != nil {
 		return microerror.Mask(err)
 	}
 
-	if err := f.installAwsOperator(); err != nil {
+	if err := f.InstallAwsOperator(); err != nil {
 		return microerror.Mask(err)
 	}
 
@@ -144,20 +144,16 @@ func operatorSetup() error {
 		logEntry = "creating AWS cloudformation stack: created"
 	}
 
-	operatorPodName, err := f.podName("giantswarm", "app=aws-operator")
+	operatorPodName, err := f.PodName("giantswarm", "app=aws-operator")
 	if err != nil {
 		return microerror.Maskf(err, "unexpected error getting operator pod name: %v")
 	}
 
-	if err := f.waitForPodLog("giantswarm", logEntry, operatorPodName); err != nil {
+	if err := f.WaitForPodLog("giantswarm", logEntry, operatorPodName); err != nil {
 		return microerror.Maskf(err, "unexpected error waiting for guest cluster installed: %v")
 	}
 
-	if err := f.initGuestClientset(); err != nil {
-		return microerror.Maskf(err, "unexpected error initializing guest clientset")
-	}
-
-	if err := f.waitForAPIUp(); err != nil {
+	if err := f.WaitForAPIUp(); err != nil {
 		return microerror.Maskf(err, "unexpected error waiting for API up")
 	}
 
