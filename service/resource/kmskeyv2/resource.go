@@ -1,4 +1,4 @@
-package kmskeyv1
+package kmskeyv2
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "kmskeyv1"
+	Name = "kmskeyv2"
 )
 
 // Config represents the configuration used to create a new cloudformation resource.

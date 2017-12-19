@@ -21,6 +21,10 @@ const (
 
 	// ProfileNameTemplate will be included in the IAM instance profile name.
 	ProfileNameTemplate = "EC2-K8S-Role"
+	// RoleNameTemplate will be included in the IAM role name.
+	RoleNameTemplate = "EC2-K8S-Role"
+	// PolicyNameTemplate will be included in the IAM policy name.
+	PolicyNameTemplate = "EC2-K8S-Policy"
 )
 
 func AutoScalingGroupName(customObject v1alpha1.AWSConfig, groupName string) string {
@@ -115,6 +119,32 @@ func MasterInstanceType(customObject v1alpha1.AWSConfig) string {
 	return instanceType
 }
 
+func PolicyName(customObject v1alpha1.AWSConfig, profileType string) string {
+	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, PolicyNameTemplate)
+}
+
+func RoleName(customObject v1alpha1.AWSConfig, profileType string) string {
+	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, RoleNameTemplate)
+}
+
+// RootDir returns the path in the base directory until the
+// root elemant is found.
+func RootDir(baseDir, rootElement string) (string, error) {
+	items := strings.Split(baseDir, string(filepath.Separator))
+	rootIndex := -1
+	for i := len(items) - 1; i >= 0; i-- {
+		if items[i] == rootElement {
+			rootIndex = i
+			break
+		}
+	}
+	if rootIndex == -1 {
+		return "", microerror.Mask(notFoundError)
+	}
+
+	return "/" + filepath.Join(items[:(rootIndex+1)]...), nil
+}
+
 func RouteTableName(customObject v1alpha1.AWSConfig, suffix string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), suffix)
 }
@@ -192,22 +222,4 @@ func componentName(domainName string) (string, error) {
 	}
 
 	return splits[0], nil
-}
-
-// RootDir returns the path in the base directory until the
-// root elemant is found.
-func RootDir(baseDir, rootElement string) (string, error) {
-	items := strings.Split(baseDir, string(filepath.Separator))
-	rootIndex := -1
-	for i := len(items) - 1; i >= 0; i-- {
-		if items[i] == rootElement {
-			rootIndex = i
-			break
-		}
-	}
-	if rootIndex == -1 {
-		return "", microerror.Mask(notFoundError)
-	}
-
-	return "/" + filepath.Join(items[:(rootIndex+1)]...), nil
 }
