@@ -710,3 +710,43 @@ func Test_BucketObjectName(t *testing.T) {
 		t.Fatalf("Expected bucket object name %q but was %q", expectedBucketObjectName, actualBucketObjectName)
 	}
 }
+
+func Test_RoleName(t *testing.T) {
+	expectedName := "test-cluster-worker-EC2-K8S-Role"
+	profileType := "worker"
+
+	cluster := v1alpha1.Cluster{
+		ID: "test-cluster",
+	}
+
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: cluster,
+		},
+	}
+
+	actual := RoleName(customObject, profileType)
+	if actual != expectedName {
+		t.Fatalf("Expected  name '%s' but was '%s'", expectedName, actual)
+	}
+}
+
+func Test_PolicyName(t *testing.T) {
+	expectedName := "test-cluster-worker-EC2-K8S-Policy"
+	profileType := "worker"
+
+	cluster := v1alpha1.Cluster{
+		ID: "test-cluster",
+	}
+
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: cluster,
+		},
+	}
+
+	actual := PolicyName(customObject, profileType)
+	if actual != expectedName {
+		t.Fatalf("Expected  name '%s' but was '%s'", expectedName, actual)
+	}
+}

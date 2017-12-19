@@ -1,4 +1,5 @@
-{{define "launch_configuration"}}{{ .ASGType }}LaunchConfiguration:
+{{define "launch_configuration"}}
+  {{ .ASGType }}LaunchConfiguration:
     Type: "AWS::AutoScaling::LaunchConfiguration"
     Description: {{ .ASGType }} launch configuration
     Properties:
