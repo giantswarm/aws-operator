@@ -17,18 +17,18 @@ import (
 type autoScalingGroupAdapter struct {
 	ASGMaxSize             int
 	ASGMinSize             int
-	AZ                     string
+	ClusterID              string
 	HealthCheckGracePeriod int
 	LoadBalancerName       string
 	MaxBatchSize           string
 	MinInstancesInService  string
 	RollingUpdatePauseTime string
-	SubnetID               string
-	ClusterID              string
+	WorkerAZ               string
+	WorkerSubnetID         string
 }
 
 func (a *autoScalingGroupAdapter) getAutoScalingGroup(customObject v1alpha1.AWSConfig, clients Clients) error {
-	a.AZ = customObject.Spec.AWS.AZ
+	a.WorkerAZ = customObject.Spec.AWS.AZ
 	workers := keyv2.WorkerCount(customObject)
 	a.ASGMaxSize = workers
 	a.ASGMinSize = workers
@@ -68,7 +68,7 @@ func (a *autoScalingGroupAdapter) getAutoScalingGroup(customObject v1alpha1.AWSC
 		return microerror.Mask(tooManyResultsError)
 	}
 
-	a.SubnetID = *output.Subnets[0].SubnetId
+	a.WorkerSubnetID = *output.Subnets[0].SubnetId
 
 	a.ClusterID = keyv2.ClusterID(customObject)
 

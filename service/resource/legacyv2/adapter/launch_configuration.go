@@ -14,13 +14,13 @@ import (
 // template related to this adapter: service/templates/cloudformation/launch_configuration.go
 
 type launchConfigAdapter struct {
-	AssociatePublicIPAddress bool
-	BlockDeviceMappings      []BlockDeviceMapping
-	IAMInstanceProfileName   string
-	ImageID                  string
-	InstanceType             string
-	SecurityGroupID          string
-	SmallCloudConfig         string
+	WorkerAssociatePublicIPAddress bool
+	WorkerBlockDeviceMappings      []BlockDeviceMapping
+	WorkerIAMInstanceProfileName   string
+	WorkerImageID                  string
+	WorkerInstanceType             string
+	WorkerSecurityGroupID          string
+	WorkerSmallCloudConfig         string
 }
 
 type BlockDeviceMapping struct {
@@ -35,12 +35,12 @@ func (l *launchConfigAdapter) getLaunchConfiguration(customObject v1alpha1.AWSCo
 		return microerror.Mask(invalidConfigError)
 	}
 
-	l.ImageID = keyv2.WorkerImageID(customObject)
-	l.InstanceType = keyv2.WorkerInstanceType(customObject)
-	l.IAMInstanceProfileName = keyv2.InstanceProfileName(customObject, prefixWorker)
-	l.AssociatePublicIPAddress = false
+	l.WorkerImageID = keyv2.WorkerImageID(customObject)
+	l.WorkerInstanceType = keyv2.WorkerInstanceType(customObject)
+	l.WorkerIAMInstanceProfileName = keyv2.InstanceProfileName(customObject, prefixWorker)
+	l.WorkerAssociatePublicIPAddress = false
 
-	l.BlockDeviceMappings = []BlockDeviceMapping{
+	l.WorkerBlockDeviceMappings = []BlockDeviceMapping{
 		BlockDeviceMapping{
 			DeleteOnTermination: true,
 			DeviceName:          defaultEBSVolumeMountPoint,
@@ -76,7 +76,7 @@ func (l *launchConfigAdapter) getLaunchConfiguration(customObject v1alpha1.AWSCo
 	if len(output.SecurityGroups) > 1 {
 		return microerror.Mask(tooManyResultsError)
 	}
-	l.SecurityGroupID = *output.SecurityGroups[0].GroupId
+	l.WorkerSecurityGroupID = *output.SecurityGroups[0].GroupId
 
 	// small cloud config field.
 	accountID, err := AccountID(clients)
@@ -96,7 +96,7 @@ func (l *launchConfigAdapter) getLaunchConfiguration(customObject v1alpha1.AWSCo
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	l.SmallCloudConfig = smallCloudConfig
+	l.WorkerSmallCloudConfig = smallCloudConfig
 
 	return nil
 }

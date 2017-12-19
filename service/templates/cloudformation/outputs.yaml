@@ -3,7 +3,7 @@ Outputs:
   WorkersOutput:
     Value: {{ .ASGMinSize }}
   ImageIDOutput:
-    Value: {{ .ImageID }}
+    Value: {{ .WorkerImageID }}
   ClusterVersionOutput:
     Value: {{ .ClusterVersion }}
 {{end}}

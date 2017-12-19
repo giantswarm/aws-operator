@@ -27,6 +27,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -49,7 +50,8 @@ import (
 )
 
 const (
-	ResourceRetries uint64 = 3
+	ResourceRetries  uint64 = 3
+	awsCloudProvider        = "aws"
 )
 
 const (
@@ -776,6 +778,7 @@ func migrateTPRsToCRDs(logger micrologger.Logger, clientSet *versioned.Clientset
 			cro.Spec.Cluster.Kubernetes.API.InsecurePort = tpo.Spec.Cluster.Kubernetes.API.InsecurePort
 			cro.Spec.Cluster.Kubernetes.API.IP = tpo.Spec.Cluster.Kubernetes.API.IP
 			cro.Spec.Cluster.Kubernetes.API.SecurePort = tpo.Spec.Cluster.Kubernetes.API.SecurePort
+			cro.Spec.Cluster.Kubernetes.CloudProvider = tpo.Spec.Cluster.Kubernetes.CloudProvider
 			cro.Spec.Cluster.Kubernetes.DNS.IP = tpo.Spec.Cluster.Kubernetes.DNS.IP
 			cro.Spec.Cluster.Kubernetes.Domain = tpo.Spec.Cluster.Kubernetes.Domain
 			cro.Spec.Cluster.Kubernetes.Hyperkube.Docker.Image = tpo.Spec.Cluster.Kubernetes.Hyperkube.Docker.Image
@@ -820,6 +823,41 @@ func migrateTPRsToCRDs(logger micrologger.Logger, clientSet *versioned.Clientset
 		}
 	}
 
+	// update existing CROs with empty cloud provider
+	cros, err := clientSet.
+		ProviderV1alpha1().
+		AWSConfigs("default").
+		List(apismetav1.ListOptions{})
+	if err != nil {
+		logger.Log("error", fmt.Sprintf("%#v", err))
+		return
+	}
+	for _, cro := range cros.Items {
+		if cro.Spec.Cluster.Kubernetes.CloudProvider != "" {
+			continue
+		}
+		// CRO existed with empty CloudProvider, refresh
+		type PatchSpec struct {
+			Op    string `json:"op"`
+			Path  string `json:"path"`
+			Value string `json:"value"`
+		}
+		patch := make([]PatchSpec, 1)
+		patch[0].Op = "replace"
+		patch[0].Path = "/spec/cluster/kubernetes/cloudProvider"
+		patch[0].Value = awsCloudProvider
+		patchBytes, err := json.Marshal(patch)
+		if err != nil {
+			logger.Log("error", fmt.Sprintf("%#v", err))
+		}
+		_, err = clientSet.
+			ProviderV1alpha1().
+			AWSConfigs("default").
+			Patch(cro.Name, types.JSONPatchType, patchBytes)
+		if err != nil {
+			logger.Log("error", fmt.Sprintf("%#v", err))
+		}
+	}
 	logger.Log("debug", "end TPR migration")
 }
 
