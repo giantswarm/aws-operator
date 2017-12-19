@@ -55,7 +55,8 @@ func TestMainTemplateExistingFields(t *testing.T) {
 				Version: "myversion",
 				Kubernetes: v1alpha1.ClusterKubernetes{
 					API: v1alpha1.ClusterKubernetesAPI{
-						Domain: "api.domain",
+						Domain:     "api.domain",
+						SecurePort: 443,
 					},
 					IngressController: v1alpha1.ClusterKubernetesIngressController{
 						Domain: "ingress.domain",
@@ -66,6 +67,11 @@ func TestMainTemplateExistingFields(t *testing.T) {
 				},
 			},
 			AWS: v1alpha1.AWSConfigSpecAWS{
+				API: v1alpha1.AWSConfigSpecAWSAPI{
+					ELB: v1alpha1.AWSConfigSpecAWSAPIELB{
+						IdleTimeoutSeconds: 3600,
+					},
+				},
 				AZ: "myaz",
 				Masters: []v1alpha1.AWSConfigSpecAWSNode{
 					v1alpha1.AWSConfigSpecAWSNode{
@@ -166,4 +172,13 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		t.Error("ingressWildcardRecordSet element not found")
 	}
 
+	if !strings.Contains(body, "MasterInstance:") {
+		fmt.Println(body)
+		t.Error("MasterInstance element not found")
+	}
+
+	if !strings.Contains(body, "ApiLoadBalancer:") {
+		fmt.Println(body)
+		t.Error("ApiLoadBalancer element not found")
+	}
 }

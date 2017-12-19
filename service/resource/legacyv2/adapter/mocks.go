@@ -2,6 +2,7 @@ package adapter
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
@@ -41,7 +42,7 @@ func (e *EC2ClientMock) DescribeSubnets(input *ec2.DescribeSubnetsInput) (*ec2.D
 
 	if !e.unexistingSubnet {
 		tagNameValue := *input.Filters[0].Values[0]
-		if tagNameValue != e.clusterID+"-private" {
+		if !strings.HasPrefix(tagNameValue, e.clusterID) {
 			return nil, fmt.Errorf("unexpected tag name value %v", tagNameValue)
 		}
 
