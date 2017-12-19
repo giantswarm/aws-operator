@@ -1,5 +1,6 @@
 e2eTest: &e2eTest
     machine: true
+    working_directory: /home/circleci/.go_workspace/src/github.com/giantswarm/aws-operator
     steps:
     - checkout
 
@@ -9,11 +10,6 @@ e2eTest: &e2eTest
 
     - run: ./e2e-harness setup --name=ci-awsop-${CIRCLE_SHA1:0:7}
 
-    - run:
-        name: additional setup required for compiling go on circleCI
-        command: |
-          mkdir -p /home/circleci/.go_workspace/src
-          cp -ar vendor/* /home/circleci/.go_workspace/src/
     - run:
         name: set CLUSTER_NAME env var
         command: echo 'export CLUSTER_NAME=ci-awsop-${CIRCLE_SHA1:0:7}' >> $BASH_ENV

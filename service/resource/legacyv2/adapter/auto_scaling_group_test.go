@@ -15,11 +15,11 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 		expectedAZ                     string
 		expectedASGMaxSize             int
 		expectedASGMinSize             int
+		expectedClusterID              string
 		expectedHealthCheckGracePeriod int
 		expectedMaxBatchSize           string
 		expectedMinInstancesInService  string
 		expectedRollingUpdatePauseTime string
-		expectedClusterID              string
 	}{
 		{
 			description:   "empty custom object",
@@ -68,16 +68,16 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 			}
 
 			if !tc.expectedError {
-				if a.AZ != tc.expectedAZ {
-					t.Errorf("unexpected output, got %q, want %q", a.AZ, tc.expectedAZ)
-				}
-
 				if a.ASGMaxSize != tc.expectedASGMaxSize {
 					t.Errorf("unexpected output, got %d, want %d", a.ASGMaxSize, tc.expectedASGMaxSize)
 				}
 
 				if a.ASGMinSize != tc.expectedASGMinSize {
 					t.Errorf("unexpected output, got %d, want %d", a.ASGMinSize, tc.expectedASGMinSize)
+				}
+
+				if a.ClusterID != tc.expectedClusterID {
+					t.Errorf("unexpected ClusterID, got %q, want %q", a.ClusterID, tc.expectedClusterID)
 				}
 
 				if a.HealthCheckGracePeriod != tc.expectedHealthCheckGracePeriod {
@@ -95,9 +95,11 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 				if a.RollingUpdatePauseTime != tc.expectedRollingUpdatePauseTime {
 					t.Errorf("unexpected output, got %q, want %q", a.RollingUpdatePauseTime, tc.expectedRollingUpdatePauseTime)
 				}
-				if a.ClusterID != tc.expectedClusterID {
-					t.Errorf("unexpected ClusterID, got %q, want %q", a.ClusterID, tc.expectedClusterID)
+
+				if a.WorkerAZ != tc.expectedAZ {
+					t.Errorf("unexpected output, got %q, want %q", a.WorkerAZ, tc.expectedAZ)
 				}
+
 			}
 		})
 	}
