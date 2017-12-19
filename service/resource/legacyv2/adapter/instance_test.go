@@ -156,7 +156,7 @@ func TestAdapterInstanceSecurityGroupID(t *testing.T) {
 			}
 
 			if a.MasterSecurityGroupID != tc.expectedSecurityGroupID {
-				t.Errorf("unexpected SecurityGroupID, got %q, want %q", a.SecurityGroupID, tc.expectedSecurityGroupID)
+				t.Errorf("unexpected SecurityGroupID, got %q, want %q", a.MasterSecurityGroupID, tc.expectedSecurityGroupID)
 			}
 		})
 	}
@@ -233,7 +233,7 @@ func TestAdapterInstanceSubnetID(t *testing.T) {
 			}
 
 			if a.MasterSubnetID != tc.expectedSubnetID {
-				t.Errorf("unexpected SubnetID, got %q, want %q", a.SubnetID, tc.expectedSubnetID)
+				t.Errorf("unexpected SubnetID, got %q, want %q", a.MasterSubnetID, tc.expectedSubnetID)
 			}
 		})
 	}
