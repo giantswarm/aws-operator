@@ -78,7 +78,7 @@ func newFramework() (*framework, error) {
 	return f, nil
 }
 
-func (f *framework) runningPodFunc(namespace, labelSelector string) func() error {
+func (f *framework) runningPod(namespace, labelSelector string) func() error {
 	return func() error {
 		pods, err := f.cs.CoreV1().
 			Pods(namespace).
@@ -100,7 +100,7 @@ func (f *framework) runningPodFunc(namespace, labelSelector string) func() error
 	}
 }
 
-func (f *framework) activeNamespaceFunc(name string) func() error {
+func (f *framework) activeNamespace(name string) func() error {
 	return func() error {
 		ns, err := f.cs.CoreV1().
 			Namespaces().
@@ -119,7 +119,7 @@ func (f *framework) activeNamespaceFunc(name string) func() error {
 	}
 }
 
-func (f *framework) secretFunc(namespace, secretName string) func() error {
+func (f *framework) secret(namespace, secretName string) func() error {
 	return func() error {
 		_, err := f.cs.CoreV1().
 			Secrets(namespace).
@@ -128,12 +128,12 @@ func (f *framework) secretFunc(namespace, secretName string) func() error {
 	}
 }
 
-func (f *framework) tprFunc(tprName string) func() error {
+func (f *framework) crd(crdName string) func() error {
 	return func() error {
 		// FIXME: use proper clientset call when apiextensions are in place,
 		// `cs.ExtensionsV1beta1().ThirdPartyResources().Get(tprName, metav1.GetOptions{})` finding
 		// the tpr is not enough for being able to create a tpo.
-		return runCmd("kubectl get " + tprName)
+		return runCmd("kubectl get " + crdName)
 	}
 }
 
@@ -237,7 +237,7 @@ func (f *framework) createGSNamespace() error {
 		return microerror.Mask(err)
 	}
 
-	return waitFor(f.activeNamespaceFunc("giantswarm"))
+	return waitFor(f.activeNamespace("giantswarm"))
 }
 
 func (f *framework) installVault() error {
@@ -245,7 +245,7 @@ func (f *framework) installVault() error {
 		return microerror.Mask(err)
 	}
 
-	return waitFor(f.runningPodFunc("default", "app=vault"))
+	return waitFor(f.runningPod("default", "app=vault"))
 }
 
 func (f *framework) installCertOperator() error {
@@ -257,7 +257,7 @@ func (f *framework) installCertOperator() error {
 		return microerror.Mask(err)
 	}
 
-	return waitFor(f.tprFunc("certconfig"))
+	return waitFor(f.crd("certconfig"))
 }
 
 func (f *framework) installCertResource() error {
@@ -268,7 +268,7 @@ func (f *framework) installCertResource() error {
 
 	secretName := fmt.Sprintf("%s-api", os.Getenv("CLUSTER_NAME"))
 	log.Printf("waiting for secret %v\n", secretName)
-	return waitFor(f.secretFunc("default", secretName))
+	return waitFor(f.secret("default", secretName))
 }
 
 func (f *framework) installAwsOperator() error {
@@ -280,7 +280,7 @@ func (f *framework) installAwsOperator() error {
 		return microerror.Mask(err)
 	}
 
-	return waitFor(f.tprFunc("awsconfig"))
+	return waitFor(f.crd("awsconfig"))
 }
 
 func (f *framework) deleteGuestCluster() error {
