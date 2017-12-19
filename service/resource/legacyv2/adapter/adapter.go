@@ -34,30 +34,35 @@ import (
 type hydrater func(v1alpha1.AWSConfig, Clients) error
 
 type Adapter struct {
-	ASGType   string
-	ClusterID string
+	ASGType          string
+	AvailabilityZone string
+	ClusterID        string
 
+	autoScalingGroupAdapter
 	instanceAdapter
 	launchConfigAdapter
-	autoScalingGroupAdapter
+	loadBalancersAdapter
 	outputsAdapter
-	workerPolicyAdapter
 	recordSetsAdapter
+	workerPolicyAdapter
 }
 
 func New(customObject v1alpha1.AWSConfig, clients Clients) (Adapter, error) {
 	a := Adapter{}
 
 	a.ASGType = prefixWorker
+	a.AvailabilityZone = keyv2.AvailabilityZone(customObject)
 	a.ClusterID = keyv2.ClusterID(customObject)
 
 	hydraters := []hydrater{
-		a.getInstance,
 		a.getAutoScalingGroup,
+		a.getInstance,
 		a.getLaunchConfiguration,
+		a.getLaunchConfiguration,
+		a.getLoadBalancers,
 		a.getOutputs,
-		a.getWorkerPolicy,
 		a.getRecordSets,
+		a.getWorkerPolicy,
 	}
 
 	for _, h := range hydraters {

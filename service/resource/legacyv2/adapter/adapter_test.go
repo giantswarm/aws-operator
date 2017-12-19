@@ -28,6 +28,7 @@ func TestAdapterMain(t *testing.T) {
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: defaultCluster,
 			AWS: v1alpha1.AWSConfigSpecAWS{
+				AZ: "eu-central-1a",
 				Masters: []v1alpha1.AWSConfigSpecAWSNode{
 					v1alpha1.AWSConfigSpecAWSNode{},
 				},
@@ -49,14 +50,18 @@ func TestAdapterMain(t *testing.T) {
 		t.Errorf("unexpected error %v", err)
 	}
 
-	expectedASGType := prefixWorker
-	expectedClusterID := "test-worker"
+	expectedAvailabilityZone := "eu-central-1a"
+	if expectedAvailabilityZone != a.AvailabilityZone {
+		t.Errorf("unexpected value, expecting %q, got %q", expectedAvailabilityZone, a.AvailabilityZone)
+	}
 
+	expectedASGType := prefixWorker
 	if expectedASGType != a.ASGType {
 		t.Errorf("unexpected value, expecting %q, got %q", expectedASGType, a.ASGType)
 	}
 
+	expectedClusterID := "test-cluster"
 	if expectedClusterID != a.ClusterID {
-		t.Errorf("unexpected value, expecting %q, got %q", expectedASGType, a.ASGType)
+		t.Errorf("unexpected value, expecting %q, got %q", expectedClusterID, a.ClusterID)
 	}
 }
