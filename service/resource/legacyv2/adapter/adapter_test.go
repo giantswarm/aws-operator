@@ -49,10 +49,14 @@ func TestAdapterMain(t *testing.T) {
 		t.Errorf("unexpected error %v", err)
 	}
 
-	expected := prefixWorker
-	actual := a.ASGType
+	expectedASGType := prefixWorker
+	expectedClusterID := "test-worker"
 
-	if expected != actual {
-		t.Errorf("unexpected value, expecting %q, got %q", expected, actual)
+	if expectedASGType != a.ASGType {
+		t.Errorf("unexpected value, expecting %q, got %q", expectedASGType, a.ASGType)
+	}
+
+	if expectedClusterID != a.ClusterID {
+		t.Errorf("unexpected value, expecting %q, got %q", expectedASGType, a.ASGType)
 	}
 }

@@ -17,7 +17,6 @@ import (
 type autoScalingGroupAdapter struct {
 	ASGMaxSize             int
 	ASGMinSize             int
-	ClusterID              string
 	HealthCheckGracePeriod int
 	LoadBalancerName       string
 	MaxBatchSize           string
@@ -69,8 +68,6 @@ func (a *autoScalingGroupAdapter) getAutoScalingGroup(customObject v1alpha1.AWSC
 	}
 
 	a.WorkerSubnetID = *output.Subnets[0].SubnetId
-
-	a.ClusterID = keyv2.ClusterID(customObject)
 
 	return nil
 }
