@@ -47,6 +47,9 @@ const (
 	suffixPublic  = "public"
 	suffixPrivate = "private"
 
+	externalELBScheme = "internet-facing"
+	internalELBScheme = "internal"
+
 	// RootDirElement marks the directory that should be taken as root when evaluating
 	// template's relative paths.
 	RootDirElement = "aws-operator"

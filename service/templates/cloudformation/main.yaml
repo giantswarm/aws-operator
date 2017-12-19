@@ -3,6 +3,7 @@ Description: Main CloudFormation stack.
 Resources:
   {{template "worker_policy" .}}
   {{template "instance" .}}
+  {{template "load_balancers" .}}
   {{template "launch_configuration" .}}
   {{template "autoscaling_group" .}}
   {{template "recordsets" .}}
