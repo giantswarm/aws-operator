@@ -837,15 +837,23 @@ func migrateTPRsToCRDs(logger micrologger.Logger, clientSet *versioned.Clientset
 			continue
 		}
 		// CRO existed with empty CloudProvider, refresh
-		cro.Spec.Cluster.Kubernetes.CloudProvider = awsCloudProvider
-		patchBytes, err := json.Marshal(cro)
+		type PatchSpec struct {
+			Op    string `json:"op"`
+			Path  string `json:"path"`
+			Value string `json:"value"`
+		}
+		patch := make([]PatchSpec, 1)
+		patch[0].Op = "replace"
+		patch[0].Path = "/spec/cluster/kubernetes/cloudProvider"
+		patch[0].Value = awsCloudProvider
+		patchBytes, err := json.Marshal(patch)
 		if err != nil {
 			logger.Log("error", fmt.Sprintf("%#v", err))
 		}
 		_, err = clientSet.
 			ProviderV1alpha1().
 			AWSConfigs("default").
-			Patch(cro.Name, types.MergePatchType, patchBytes)
+			Patch(cro.Name, types.JSONPatchType, patchBytes)
 		if err != nil {
 			logger.Log("error", fmt.Sprintf("%#v", err))
 		}
