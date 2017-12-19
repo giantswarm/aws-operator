@@ -50,11 +50,6 @@ func TestAdapterMain(t *testing.T) {
 		t.Errorf("unexpected error %v", err)
 	}
 
-	expectedAvailabilityZone := "eu-central-1a"
-	if expectedAvailabilityZone != a.AvailabilityZone {
-		t.Errorf("unexpected value, expecting %q, got %q", expectedAvailabilityZone, a.AvailabilityZone)
-	}
-
 	expectedASGType := prefixWorker
 	if expectedASGType != a.ASGType {
 		t.Errorf("unexpected value, expecting %q, got %q", expectedASGType, a.ASGType)

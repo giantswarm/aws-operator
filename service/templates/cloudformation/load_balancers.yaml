@@ -1,9 +1,7 @@
 {{define "load_balancers"}}
   ApiLoadBalancer:
-    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
     Properties:
-      AvailabilityZones: 
-      - {{ .AvailabilityZone }}
       ConnectionSettings:
         IdleTimeout: {{ .APIElbIdleTimoutSeconds }}
       HealthCheck:

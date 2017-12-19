@@ -51,7 +51,6 @@ func New(customObject v1alpha1.AWSConfig, clients Clients) (Adapter, error) {
 	a := Adapter{}
 
 	a.ASGType = prefixWorker
-	a.AvailabilityZone = keyv2.AvailabilityZone(customObject)
 	a.ClusterID = keyv2.ClusterID(customObject)
 
 	hydraters := []hydrater{
