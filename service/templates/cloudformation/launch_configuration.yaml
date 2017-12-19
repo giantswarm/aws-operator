@@ -3,19 +3,19 @@
     Type: "AWS::AutoScaling::LaunchConfiguration"
     Description: {{ .ASGType }} launch configuration
     Properties:
-      ImageId: {{ .ImageID }}
+      ImageId: {{ .WorkerImageID }}
       SecurityGroups:
-      - {{ .SecurityGroupID }}
-      InstanceType: {{ .InstanceType }}
-      IamInstanceProfile: {{ .IAMInstanceProfileName }}
+      - {{ .WorkerSecurityGroupID }}
+      InstanceType: {{ .WorkerInstanceType }}
+      IamInstanceProfile: {{ .WorkerIAMInstanceProfileName }}
       BlockDeviceMappings:
-      {{ range .BlockDeviceMappings }}
+      {{ range .WorkerBlockDeviceMappings }}
       - DeviceName: "{{ .DeviceName }}"
         Ebs:
           DeleteOnTermination: {{ .DeleteOnTermination }}
           VolumeSize: {{ .VolumeSize }}
           VolumeType: {{ .VolumeType }}
       {{ end }}
-      AssociatePublicIpAddress: {{ .AssociatePublicIPAddress }}
-      UserData: {{ .SmallCloudConfig }}
+      AssociatePublicIpAddress: {{ .WorkerAssociatePublicIPAddress }}
+      UserData: {{ .WorkerSmallCloudConfig }}
 {{end}}
