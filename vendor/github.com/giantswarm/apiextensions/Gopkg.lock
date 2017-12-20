@@ -170,28 +170,28 @@
   revision = "218912509d74a117d05a718bb926d0948e531c20"
 
 [[projects]]
+  branch = "release-1.8"
   name = "k8s.io/apiextensions-apiserver"
   packages = ["pkg/apis/apiextensions","pkg/apis/apiextensions/v1beta1"]
-  revision = "e509bb64fe1116e12a32273a2032426aa1a5fd26"
-  version = "kubernetes-1.8.2"
+  revision = "996a70a27a0dcf53642ca52601b9107cb2ad810a"
 
 [[projects]]
   branch = "release-1.8"
   name = "k8s.io/apimachinery"
   packages = ["pkg/api/equality","pkg/api/errors","pkg/api/meta","pkg/api/resource","pkg/apis/meta/v1","pkg/apis/meta/v1/unstructured","pkg/apis/meta/v1alpha1","pkg/conversion","pkg/conversion/queryparams","pkg/conversion/unstructured","pkg/fields","pkg/labels","pkg/runtime","pkg/runtime/schema","pkg/runtime/serializer","pkg/runtime/serializer/json","pkg/runtime/serializer/protobuf","pkg/runtime/serializer/recognizer","pkg/runtime/serializer/streaming","pkg/runtime/serializer/versioning","pkg/selection","pkg/types","pkg/util/clock","pkg/util/diff","pkg/util/errors","pkg/util/framer","pkg/util/intstr","pkg/util/json","pkg/util/net","pkg/util/runtime","pkg/util/sets","pkg/util/validation","pkg/util/validation/field","pkg/util/wait","pkg/util/yaml","pkg/version","pkg/watch","third_party/forked/golang/reflect"]
-  revision = "019ae5ada31de202164b118aee88ee2d14075c31"
+  revision = "5134afd2c0c91158afac0d8a28bd2177185a3bcc"
 
 [[projects]]
+  branch = "release-5.0"
   name = "k8s.io/client-go"
   packages = ["discovery","discovery/fake","kubernetes/scheme","pkg/version","rest","rest/watch","testing","tools/clientcmd/api","tools/metrics","transport","util/cert","util/flowcontrol","util/integer"]
-  revision = "35ccd4336052e7d73018b1382413534936f34eee"
-  version = "kubernetes-1.8.2"
+  revision = "1b75876d45719a84085528ee621939b0c68a4b85"
 
 [[projects]]
+  branch = "release-1.8"
   name = "k8s.io/code-generator"
   packages = ["cmd/client-gen","cmd/client-gen/args","cmd/client-gen/generators","cmd/client-gen/generators/fake","cmd/client-gen/generators/scheme","cmd/client-gen/generators/util","cmd/client-gen/path","cmd/client-gen/types"]
-  revision = "1f9d929a2d32f787df8d29f987f31aff1501c0f8"
-  version = "kubernetes-1.8.2"
+  revision = "25fd8c8ddbf75b223882df4479f8b8e615da05ae"
 
 [[projects]]
   branch = "master"
@@ -208,6 +208,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b1e4e080159551c8709f26fd5999a8a782d841c05b7c99271653dedf39f8e3cf"
+  inputs-digest = "ebdc60c83bf430e6a5b95e514719fc12207b2dbb98d2a67042141f13e5e3420e"
   solver-name = "gps-cdcl"
   solver-version = 1

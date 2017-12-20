@@ -30,12 +30,20 @@ func (c *FakeCoreV1alpha1) CertConfigs(namespace string) v1alpha1.CertConfigInte
 	return &FakeCertConfigs{c, namespace}
 }
 
+func (c *FakeCoreV1alpha1) DraughtsmanConfigs(namespace string) v1alpha1.DraughtsmanConfigInterface {
+	return &FakeDraughtsmanConfigs{c, namespace}
+}
+
 func (c *FakeCoreV1alpha1) FlannelConfigs(namespace string) v1alpha1.FlannelConfigInterface {
 	return &FakeFlannelConfigs{c, namespace}
 }
 
 func (c *FakeCoreV1alpha1) IngressConfigs(namespace string) v1alpha1.IngressConfigInterface {
 	return &FakeIngressConfigs{c, namespace}
+}
+
+func (c *FakeCoreV1alpha1) StorageConfigs(namespace string) v1alpha1.StorageConfigInterface {
+	return &FakeStorageConfigs{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

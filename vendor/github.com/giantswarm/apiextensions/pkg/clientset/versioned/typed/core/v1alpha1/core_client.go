@@ -26,8 +26,10 @@ import (
 type CoreV1alpha1Interface interface {
 	RESTClient() rest.Interface
 	CertConfigsGetter
+	DraughtsmanConfigsGetter
 	FlannelConfigsGetter
 	IngressConfigsGetter
+	StorageConfigsGetter
 }
 
 // CoreV1alpha1Client is used to interact with features provided by the core.giantswarm.io group.
@@ -39,12 +41,20 @@ func (c *CoreV1alpha1Client) CertConfigs(namespace string) CertConfigInterface {
 	return newCertConfigs(c, namespace)
 }
 
+func (c *CoreV1alpha1Client) DraughtsmanConfigs(namespace string) DraughtsmanConfigInterface {
+	return newDraughtsmanConfigs(c, namespace)
+}
+
 func (c *CoreV1alpha1Client) FlannelConfigs(namespace string) FlannelConfigInterface {
 	return newFlannelConfigs(c, namespace)
 }
 
 func (c *CoreV1alpha1Client) IngressConfigs(namespace string) IngressConfigInterface {
 	return newIngressConfigs(c, namespace)
+}
+
+func (c *CoreV1alpha1Client) StorageConfigs(namespace string) StorageConfigInterface {
+	return newStorageConfigs(c, namespace)
 }
 
 // NewForConfig creates a new CoreV1alpha1Client for the given config.
