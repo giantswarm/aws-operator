@@ -193,7 +193,6 @@ func TestAdapterAutoScalingGroupSubnetID(t *testing.T) {
 		clients := Clients{
 			EC2: &EC2ClientMock{
 				unexistingSubnet: tc.unexistentSubnet,
-				clusterID:        "test-cluster",
 			},
 			IAM: &IAMClientMock{},
 		}

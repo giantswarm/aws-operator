@@ -4,6 +4,7 @@ Resources:
   {{template "worker_policy" .}}
   {{template "launch_configuration" .}}
   {{template "autoscaling_group" .}}
+  {{template "nat_gateway" .}}
   {{template "recordsets" .}}
 {{template "outputs" .}}
 {{end}}

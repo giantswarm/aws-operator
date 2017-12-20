@@ -37,9 +37,10 @@ type Adapter struct {
 
 	launchConfigAdapter
 	autoScalingGroupAdapter
-	outputsAdapter
+	natGatewayAdapter
 	workerPolicyAdapter
 	recordSetsAdapter
+	outputsAdapter
 }
 
 func New(customObject v1alpha1.AWSConfig, clients Clients) (Adapter, error) {
@@ -50,9 +51,10 @@ func New(customObject v1alpha1.AWSConfig, clients Clients) (Adapter, error) {
 	hydraters := []hydrater{
 		a.getAutoScalingGroup,
 		a.getLaunchConfiguration,
-		a.getOutputs,
+		a.getNatGateway,
 		a.getWorkerPolicy,
 		a.getRecordSets,
+		a.getOutputs,
 	}
 
 	for _, h := range hydraters {

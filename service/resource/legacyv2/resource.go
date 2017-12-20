@@ -655,29 +655,6 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 
 	// For new clusters create a NAT gateway, private route table and private subnet.
 	if keyv2.HasClusterVersion(cluster) {
-		// Create NAT gateway.
-		natGateway := &awsresources.NatGateway{
-			Name:   keyv2.ClusterID(cluster),
-			Subnet: publicSubnet,
-			// Dependencies.
-			Logger:    s.logger,
-			AWSEntity: awsresources.AWSEntity{Clients: clients},
-		}
-		natGatewayCreated, err := natGateway.CreateIfNotExists()
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create nat gateway: '%#v'", err))
-		}
-		if natGatewayCreated {
-			s.logger.Log("info", fmt.Sprintf("created nat gateway for cluster '%s'", keyv2.ClusterID(cluster)))
-		} else {
-			s.logger.Log("info", fmt.Sprintf("nat gateway for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
-		}
-
-		natGatewayID, err := natGateway.GetID()
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get nat gateway id: '%#v'", err))
-		}
-
 		// Create private route table.
 		privateRouteTable = &awsresources.RouteTable{
 			Name:   keyv2.RouteTableName(cluster, suffixPrivate),
@@ -693,17 +670,6 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 			s.logger.Log("info", "created private route table")
 		} else {
 			s.logger.Log("info", "private route table already exists, reusing")
-		}
-
-		// Create default route for the NAT gateway in the private route table.
-		natGatewayRouteCreated, err := privateRouteTable.CreateNatGatewayRoute(natGatewayID)
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create route for nat gateway: '%#v'", err))
-		}
-		if natGatewayRouteCreated {
-			s.logger.Log("info", "created nat gateway route")
-		} else {
-			s.logger.Log("info", "nat gateway route already exists, reusing")
 		}
 
 		// Create private subnet.
@@ -724,6 +690,42 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 		privateSubnetID, err = privateSubnet.GetID()
 		if err != nil {
 			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get private subnet ID: '%#v'", err))
+		}
+
+		if !keyv2.UseCloudFormation(cluster) {
+			// Create NAT gateway.
+			natGateway := &awsresources.NatGateway{
+				Name:   keyv2.ClusterID(cluster),
+				Subnet: publicSubnet,
+				// Dependencies.
+				Logger:    s.logger,
+				AWSEntity: awsresources.AWSEntity{Clients: clients},
+			}
+			natGatewayCreated, err := natGateway.CreateIfNotExists()
+			if err != nil {
+				return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create nat gateway: '%#v'", err))
+			}
+			if natGatewayCreated {
+				s.logger.Log("info", fmt.Sprintf("created nat gateway for cluster '%s'", keyv2.ClusterID(cluster)))
+			} else {
+				s.logger.Log("info", fmt.Sprintf("nat gateway for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
+			}
+
+			natGatewayID, err := natGateway.GetID()
+			if err != nil {
+				return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get nat gateway id: '%#v'", err))
+			}
+
+			// Create default route for the NAT gateway in the private route table.
+			natGatewayRouteCreated, err := privateRouteTable.CreateNatGatewayRoute(natGatewayID)
+			if err != nil {
+				return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create route for nat gateway: '%#v'", err))
+			}
+			if natGatewayRouteCreated {
+				s.logger.Log("info", "created nat gateway route")
+			} else {
+				s.logger.Log("info", "nat gateway route already exists, reusing")
+			}
 		}
 	}
 
