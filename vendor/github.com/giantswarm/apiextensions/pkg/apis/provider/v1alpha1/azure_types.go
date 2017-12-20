@@ -62,10 +62,7 @@ type AzureConfigSpecAzure struct {
 	DNSZones    AzureConfigSpecAzureDNSZones    `json:"dnsZones" yaml:"dnsZones"`
 	HostCluster AzureConfigSpecAzureHostCluster `json:"hostCluster" yaml:"hostCluster"`
 	// Location is the region for the resource group.
-	Location string `json:"location" yaml:"location"`
-	// StorageSKUName is the name of storage capability.
-	// https://docs.microsoft.com/en-us/rest/api/storagerp/StorageAccounts/Create#definitions_skuname
-	StorageSKUName string                             `json:"storageSKUName" yaml:"storageSKUName"`
+	Location       string                             `json:"location" yaml:"location"`
 	VirtualNetwork AzureConfigSpecAzureVirtualNetwork `json:"virtualNetwork" yaml:"virtualNetwork"`
 
 	Masters []AzureConfigSpecAzureNode `json:"masters" yaml:"masters"`
@@ -113,8 +110,6 @@ type AzureConfigSpecAzureNode struct {
 	AdminUsername string `json:"adminUsername" yaml:"adminUsername"`
 	//  AdminSSHKeyData is the vm administrator ssh public key
 	AdminSSHKeyData string `json:"adminSSHKeyData" yaml:"adminSSHKeyData"`
-	// DataDiskSizeGB is the vm data disk size in GB
-	DataDiskSizeGB int `json:"dataDiskSizeGB" yaml:"dataDiskSizeGB"`
 	// OSImage is the vm OS image object
 	OSImage AzureConfigSpecAzureNodeOSImage `json:"osImage" yaml:"osImage"`
 	// VMSize is the master vm size (e.g. Standard_A1)
