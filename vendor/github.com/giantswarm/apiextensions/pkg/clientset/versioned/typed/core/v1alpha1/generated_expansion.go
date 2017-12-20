@@ -21,3 +21,5 @@ type CertConfigExpansion interface{}
 type FlannelConfigExpansion interface{}
 
 type IngressConfigExpansion interface{}
+
+type StorageConfigExpansion interface{}

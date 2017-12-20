@@ -38,6 +38,10 @@ func (c *FakeCoreV1alpha1) IngressConfigs(namespace string) v1alpha1.IngressConf
 	return &FakeIngressConfigs{c, namespace}
 }
 
+func (c *FakeCoreV1alpha1) StorageConfigs(namespace string) v1alpha1.StorageConfigInterface {
+	return &FakeStorageConfigs{c, namespace}
+}
+
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
 func (c *FakeCoreV1alpha1) RESTClient() rest.Interface {
