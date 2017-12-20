@@ -2,8 +2,6 @@ package: github.com/giantswarm/aws-operator
 import:
 - package: github.com/aws/aws-sdk-go
   version: v1.12.3
-- package: github.com/giantswarm/apiextensions
-  version: clientset
 - package: github.com/giantswarm/microkit
   version: master
 - package: github.com/giantswarm/operatorkit
@@ -32,4 +30,8 @@ import:
 - package: github.com/giantswarm/e2e-harness
   version: master
 - package: github.com/giantswarm/apiextensions
-  version: clientset
+  version: master
+- package: github.com/giantswarm/certs
+  version: master
+- package: github.com/giantswarm/randomkeys
+  version: master
