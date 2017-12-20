@@ -303,6 +303,9 @@ func (f *framework) DeleteGuestCluster() error {
 }
 
 func (f *framework) initGuestClientset() error {
+	if f.guestCS != nil {
+		return nil
+	}
 	// get api secret
 	secretName := os.ExpandEnv("${CLUSTER_NAME}-api")
 
@@ -333,10 +336,8 @@ func (f *framework) initGuestClientset() error {
 }
 
 func (f *framework) WaitForAPIUp() error {
-	if f.guestCS == nil {
-		if err := f.initGuestClientset(); err != nil {
-			return microerror.Maskf(err, "unexpected error initializing guest clientset")
-		}
+	if err := f.initGuestClientset(); err != nil {
+		return microerror.Maskf(err, "unexpected error initializing guest clientset")
 	}
 
 	return waitFor(f.apiUp())
