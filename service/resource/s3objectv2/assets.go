@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"html/template"
 
-	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/certificatetpr"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeytpr"
@@ -26,7 +25,7 @@ func (s *Resource) encodeTLSAssets(assets certificatetpr.AssetsBundle, kmsKeyArn
 	return compTLS, nil
 }
 
-func (s *Resource) encodeKeyAssets(assets map[randomkeytpr.Key][]byte, svc *kms.KMS, kmsKeyArn string) (*randomkeytpr.CompactRandomKeyAssets, error) {
+func (s *Resource) encodeKeyAssets(assets map[randomkeytpr.Key][]byte, kmsKeyArn string) (*randomkeytpr.CompactRandomKeyAssets, error) {
 
 	encryptionKey, ok := assets[randomkeytpr.EncryptionKey]
 	if !ok {
@@ -34,7 +33,6 @@ func (s *Resource) encodeKeyAssets(assets map[randomkeytpr.Key][]byte, svc *kms.
 	}
 
 	encryptionConfig, err := s.EncryptionConfig(string(encryptionKey))
-
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -42,7 +40,7 @@ func (s *Resource) encodeKeyAssets(assets map[randomkeytpr.Key][]byte, svc *kms.
 	rawKeys := make(rawKeyAssets)
 	rawKeys[randomkeytpr.EncryptionKey] = []byte(encryptionConfig)
 
-	encKeys, err := rawKeys.encrypt(svc, kmsKeyArn)
+	encKeys, err := rawKeys.encrypt(s.awsClients.KMS, kmsKeyArn)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
