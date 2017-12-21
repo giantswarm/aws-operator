@@ -27,13 +27,15 @@ package adapter
 
 import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/aws-operator/service/keyv2"
 	"github.com/giantswarm/microerror"
 )
 
 type hydrater func(v1alpha1.AWSConfig, Clients) error
 
 type Adapter struct {
-	ASGType string
+	ASGType   string
+	ClusterID string
 
 	launchConfigAdapter
 	autoScalingGroupAdapter
@@ -47,6 +49,7 @@ func New(customObject v1alpha1.AWSConfig, clients Clients) (Adapter, error) {
 	a := Adapter{}
 
 	a.ASGType = prefixWorker
+	a.ClusterID = keyv2.ClusterID(customObject)
 
 	hydraters := []hydrater{
 		a.getAutoScalingGroup,

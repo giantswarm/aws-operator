@@ -7,6 +7,9 @@
         - NATEIP
         - AllocationId
       SubnetId: {{.PublicSubnetID}}
+      Tags:
+        - Key: Name
+          Value: {{ .ClusterID }}
   NATEIP:
     Type: AWS::EC2::EIP
     Properties:
@@ -17,5 +20,5 @@
       RouteTableId: {{.PrivateRouteTableID}}
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId:
-        Ref: NATGateway
+        Ref: "NATGateway"
 {{end}}

@@ -48,7 +48,6 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 			expectedMaxBatchSize:           strconv.FormatFloat(asgMaxBatchSizeRatio, 'f', -1, 32),
 			expectedMinInstancesInService:  strconv.FormatFloat(asgMinInstancesRatio, 'f', -1, 32),
 			expectedRollingUpdatePauseTime: rollingUpdatePauseTime,
-			expectedClusterID:              "test-cluster",
 		},
 	}
 
@@ -74,10 +73,6 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 
 				if a.ASGMinSize != tc.expectedASGMinSize {
 					t.Errorf("unexpected output, got %d, want %d", a.ASGMinSize, tc.expectedASGMinSize)
-				}
-
-				if a.ClusterID != tc.expectedClusterID {
-					t.Errorf("unexpected ClusterID, got %q, want %q", a.ClusterID, tc.expectedClusterID)
 				}
 
 				if a.HealthCheckGracePeriod != tc.expectedHealthCheckGracePeriod {

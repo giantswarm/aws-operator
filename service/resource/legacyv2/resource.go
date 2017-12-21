@@ -1123,6 +1123,7 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 	}
 
 	// Delete Record Sets.
+
 	apiLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Kubernetes.API.Domain, cluster)
 	etcdLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Etcd.Domain, cluster)
 	ingressLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Kubernetes.IngressController.Domain, cluster)
@@ -1238,19 +1239,20 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 
 	// Delete NAT gateway and private subnet for new clusters.
 	if keyv2.HasClusterVersion(cluster) {
-		// Delete NAT gateway.
-		natGateway := &awsresources.NatGateway{
-			Name: keyv2.ClusterID(cluster),
-			// Dependencies.
-			Logger:    s.logger,
-			AWSEntity: awsresources.AWSEntity{Clients: clients},
+		// Delete NAT gateway if not using CloudFormation.
+		if !keyv2.UseCloudFormation(cluster) {
+			natGateway := &awsresources.NatGateway{
+				Name: keyv2.ClusterID(cluster),
+				// Dependencies.
+				Logger:    s.logger,
+				AWSEntity: awsresources.AWSEntity{Clients: clients},
+			}
+			if err := natGateway.Delete(); err != nil {
+				s.logger.Log("error", fmt.Sprintf("could not delete nat gateway: '%#v'", err))
+			} else {
+				s.logger.Log("info", "deleted nat gateway")
+			}
 		}
-		if err := natGateway.Delete(); err != nil {
-			s.logger.Log("error", fmt.Sprintf("could not delete nat gateway: '%#v'", err))
-		} else {
-			s.logger.Log("info", "deleted nat gateway")
-		}
-
 		// Delete private route table.
 		privateRouteTable := &awsresources.RouteTable{
 			Name:   keyv2.RouteTableName(cluster, suffixPrivate),
@@ -1517,10 +1519,13 @@ func (s *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 		// current is called on cluster deletion, if the stack creation failed the
 		// outputs can be unaccessible, this can lead to a stack that cannot be deleted.
+		// it can also be called during creation, while the outputs are still not
+		// accessible.
 		status := describeOutput.Stacks[0].StackStatus
 		errorStatuses := []string{
 			"ROLLBACK_IN_PROGRESS",
 			"ROLLBACK_COMPLETE",
+			"CREATE_IN_PROGRESS",
 		}
 		for _, errorStatus := range errorStatuses {
 			if *status == errorStatus {
