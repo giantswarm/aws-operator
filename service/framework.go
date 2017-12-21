@@ -36,6 +36,7 @@ import (
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/aws-operator/service/cloudconfigv1"
 	"github.com/giantswarm/aws-operator/service/cloudconfigv2"
+	"github.com/giantswarm/aws-operator/service/cloudconfigv3"
 	"github.com/giantswarm/aws-operator/service/keyv1"
 	"github.com/giantswarm/aws-operator/service/keyv2"
 	"github.com/giantswarm/aws-operator/service/resource/legacyv1"
@@ -182,13 +183,27 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 		}
 	}
 
-	var ccService *cloudconfigv2.CloudConfig
+	// ccServicev2 is used by the legacyv2 resource.
+	var ccServiceV2 *cloudconfigv2.CloudConfig
 	{
 		ccServiceConfig := cloudconfigv2.DefaultConfig()
 
 		ccServiceConfig.Logger = config.Logger
 
-		ccService, err = cloudconfigv2.New(ccServiceConfig)
+		ccServiceV2, err = cloudconfigv2.New(ccServiceConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	// ccServicev3 is used by the s3objectv2 resource.
+	var ccServiceV3 *cloudconfigv3.CloudConfig
+	{
+		ccServiceConfig := cloudconfigv3.DefaultConfig()
+
+		ccServiceConfig.Logger = config.Logger
+
+		ccServiceV3, err = cloudconfigv3.New(ccServiceConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -202,7 +217,7 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 		legacyConfig.AwsConfig = awsConfig
 		legacyConfig.AwsHostConfig = awsHostConfig
 		legacyConfig.CertWatcher = certWatcher
-		legacyConfig.CloudConfig = ccService
+		legacyConfig.CloudConfig = ccServiceV2
 		legacyConfig.InstallationName = installationName
 		legacyConfig.K8sClient = k8sClient
 		legacyConfig.KeyWatcher = keyWatcher
@@ -241,7 +256,7 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 		s3BucketObjectConfig.AwsService = awsService
 		s3BucketObjectConfig.Clients.S3 = awsClients.S3
 		s3BucketObjectConfig.Clients.KMS = awsClients.KMS
-		s3BucketObjectConfig.CloudConfig = ccService
+		s3BucketObjectConfig.CloudConfig = ccServiceV3
 		s3BucketObjectConfig.CertWatcher = certWatcher
 		s3BucketObjectConfig.Logger = config.Logger
 
