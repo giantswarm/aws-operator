@@ -259,6 +259,7 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 		s3BucketObjectConfig.CloudConfig = ccServiceV3
 		s3BucketObjectConfig.CertWatcher = certWatcher
 		s3BucketObjectConfig.Logger = config.Logger
+		s3BucketObjectConfig.RandomKeyWatcher = keyWatcher
 
 		s3BucketObjectResource, err = s3objectv2.New(s3BucketObjectConfig)
 		if err != nil {

@@ -7,6 +7,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certificatetpr/certificatetprtest"
 	"github.com/giantswarm/micrologger/microloggertest"
+	"github.com/giantswarm/randomkeytpr/randomkeytprtest"
 
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
 )
@@ -48,7 +49,9 @@ func Test_DesiredState(t *testing.T) {
 	resourceConfig.Clients = Clients{
 		KMS: &KMSClientMock{},
 	}
-	resourceConfig.CertWatcher = &certificatetprtest.Service{}
+	resourceConfig.CertWatcher = certificatetprtest.NewService()
+	resourceConfig.RandomKeyWatcher = randomkeytprtest.NewService()
+
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			resourceConfig.CloudConfig = &CloudConfigMock{

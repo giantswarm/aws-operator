@@ -62,3 +62,7 @@ type CloudConfigService interface {
 type CertWatcher interface {
 	SearchCerts(string) (certificatetpr.AssetsBundle, error)
 }
+
+type RandomKeyWatcher interface {
+	SearchKeys(clusterID string) (map[randomkeytpr.Key][]byte, error)
+}

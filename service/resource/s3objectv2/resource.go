@@ -17,11 +17,12 @@ const (
 // Config represents the configuration used to create a new cloudformation resource.
 type Config struct {
 	// Dependencies.
-	AwsService  AwsService
-	CertWatcher CertWatcher
-	Clients     Clients
-	CloudConfig CloudConfigService
-	Logger      micrologger.Logger
+	AwsService       AwsService
+	CertWatcher      CertWatcher
+	Clients          Clients
+	CloudConfig      CloudConfigService
+	Logger           micrologger.Logger
+	RandomKeyWatcher RandomKeyWatcher
 }
 
 // DefaultConfig provides a default configuration to create a new cloudformation
@@ -29,22 +30,24 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
-		AwsService:  nil,
-		CertWatcher: nil,
-		Clients:     Clients{},
-		CloudConfig: nil,
-		Logger:      nil,
+		AwsService:       nil,
+		CertWatcher:      nil,
+		Clients:          Clients{},
+		CloudConfig:      nil,
+		Logger:           nil,
+		RandomKeyWatcher: nil,
 	}
 }
 
 // Resource implements the cloudformation resource.
 type Resource struct {
 	// Dependencies.
-	awsService  AwsService
-	awsClients  Clients
-	certWatcher CertWatcher
-	cloudConfig CloudConfigService
-	logger      micrologger.Logger
+	awsService       AwsService
+	awsClients       Clients
+	certWatcher      CertWatcher
+	cloudConfig      CloudConfigService
+	logger           micrologger.Logger
+	randomKeyWatcher RandomKeyWatcher
 }
 
 // New creates a new configured cloudformation resource.
@@ -62,6 +65,9 @@ func New(config Config) (*Resource, error) {
 	if config.CertWatcher == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.CertWatcher must not be empty")
 	}
+	if config.RandomKeyWatcher == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.RandomKeyWatcher must not be empty")
+	}
 
 	newService := &Resource{
 		// Dependencies.
@@ -72,6 +78,7 @@ func New(config Config) (*Resource, error) {
 		logger: config.Logger.With(
 			"resource", Name,
 		),
+		randomKeyWatcher: config.RandomKeyWatcher,
 	}
 
 	return newService, nil
