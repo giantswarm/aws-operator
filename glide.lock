@@ -1,5 +1,5 @@
 hash: 8a5511dc9adca67fa2661b25ec7bf4973a578991b8e27b6f4622f558f824f5b3
-updated: 2017-12-10T10:43:25.679054933+01:00
+updated: 2017-12-21T09:59:52.873120521Z
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -69,7 +69,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/apiextensions
-  version: 4d6738e12b97ccac6befe4d41525912cb59c8335
+  version: 1257d8f2fa100675cac6e69a08dcd5dece300963
   subpackages:
   - pkg/apis/core/v1alpha1
   - pkg/apis/provider/v1alpha1
@@ -106,12 +106,13 @@ imports:
 - name: github.com/giantswarm/ipam
   version: 82290fc538b414df4f582577d2120426595dd61b
 - name: github.com/giantswarm/k8scloudconfig
-  version: 4b0542adc876f2e34129d95bc06e5557415c320e
+  version: d75265767b2a885d6cfb004ff00ab700908b8d03
   subpackages:
   - v_0_1_0
   - v_1_0_0
   - v_1_1_0
   - v_2_0_0
+  - v_3_0_0
 - name: github.com/giantswarm/microendpoint
   version: 26dce6e1681c27e7a150bccedb82a45109a0a6be
   subpackages:
@@ -120,7 +121,7 @@ imports:
 - name: github.com/giantswarm/microerror
   version: ec5f66bb657662031c0d651504fee6908cdf28d9
 - name: github.com/giantswarm/microkit
-  version: cd17f87c1287d47572c3428a5b34f6fc23ff2a8d
+  version: e721e5f21f1558102d360139c8b8c6799cb15431
   subpackages:
   - command
   - command/daemon
@@ -138,7 +139,7 @@ imports:
   - transaction/context/id
   - transaction/context/tracked
 - name: github.com/giantswarm/micrologger
-  version: bab5376fda89f10a5ebc5bd9feedab634400ab75
+  version: 0278d149b128aef1b27d492702c0020f4ff7a717
   subpackages:
   - loggermeta
   - microloggertest
@@ -147,7 +148,7 @@ imports:
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
-  version: 8b3446a2ecbe707fb6ba351b035cd60508af5aec
+  version: e0c032f757dec2c4451fdd9049ccbec5264372ee
   subpackages:
   - client/k8sclient
   - client/k8scrdclient
@@ -158,13 +159,13 @@ imports:
   - informer
   - tpr
 - name: github.com/giantswarm/randomkeytpr
-  version: 9e1d78d125841c496889e8a54d49057212a2893e
+  version: 5833410f05365aa5d3fc0bc096e0c8ff7760a733
 - name: github.com/giantswarm/versionbundle
   version: e22eefeb8e97277bfebe225f77cf0528b69f36b8
 - name: github.com/go-ini/ini
   version: 32e4c1e6bc4e7d0d8451aa6b75200d19e37a536a
 - name: github.com/go-kit/kit
-  version: a9ca6725cbbea455e61c6bc8a1ed28e81eb3493b
+  version: 4dc7be5d2d12881735283bcab7352178e190fc71
   subpackages:
   - endpoint
   - log
@@ -193,7 +194,7 @@ imports:
   - proto
   - sortkeys
 - name: github.com/golang/glog
-  version: 44145f04b68cf362d9c4df2182967c2275eaefed
+  version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
 - name: github.com/golang/protobuf
   version: 4bd1920723d7b7c925de087aa32e2187708897f7
   subpackages:
@@ -203,7 +204,7 @@ imports:
 - name: github.com/gorilla/context
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
-  version: 0eeaf8392f5b04950925b8a69fe70f110fa7cbfc
+  version: 7f08801859139f86dfafd1c296e2cba9a80d292e
 - name: github.com/hashicorp/golang-lru
   version: a0d98a5f288019575c6d1f4bb1573fef2d1fcdc4
   subpackages:
@@ -249,7 +250,7 @@ imports:
 - name: github.com/mitchellh/mapstructure
   version: 06020f85339e21b2478f756a78e295255ffa4d6a
 - name: github.com/pelletier/go-toml
-  version: 4e9e0ee19b60b13eb79915933f44d8ed5f268bdd
+  version: b8b5e7696574464b2f9bf303a7b37781bb52889f
 - name: github.com/prometheus/client_golang
   version: 661e31bf844dfca9aeba15f27ea8aa0d485ad212
   subpackages:
@@ -306,7 +307,6 @@ imports:
   version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
   subpackages:
   - context
-  - context/ctxhttp
   - http2
   - http2/hpack
   - idna
