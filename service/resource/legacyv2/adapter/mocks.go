@@ -12,10 +12,12 @@ import (
 )
 
 type EC2ClientMock struct {
-	unexistingSg     bool
-	sgID             string
-	unexistingSubnet bool
-	clusterID        string
+	unexistingSg         bool
+	sgID                 string
+	unexistingSubnet     bool
+	subnetID             string
+	unexistingRouteTable bool
+	routeTableID         string
 }
 
 func (e *EC2ClientMock) DescribeSecurityGroups(input *ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error) {
@@ -33,26 +35,37 @@ func (e *EC2ClientMock) DescribeSecurityGroups(input *ec2.DescribeSecurityGroups
 }
 
 func (e *EC2ClientMock) DescribeSubnets(input *ec2.DescribeSubnetsInput) (*ec2.DescribeSubnetsOutput, error) {
-	if e.clusterID == "" {
-		e.clusterID = "test-cluster"
+	if e.subnetID == "" {
+		e.subnetID = "subnet-1234"
 	}
 
-	if !e.unexistingSubnet {
-		tagNameValue := *input.Filters[0].Values[0]
-		if tagNameValue != e.clusterID+"-private" {
-			return nil, fmt.Errorf("unexpected tag name value %v", tagNameValue)
-		}
+	if e.unexistingSubnet {
+		return nil, fmt.Errorf("subnet not found")
+	}
 
-		output := &ec2.DescribeSubnetsOutput{
-			Subnets: []*ec2.Subnet{
-				&ec2.Subnet{
-					SubnetId: aws.String("subnet-1234"),
-				},
+	output := &ec2.DescribeSubnetsOutput{
+		Subnets: []*ec2.Subnet{
+			&ec2.Subnet{
+				SubnetId: aws.String(e.subnetID),
 			},
-		}
-		return output, nil
+		},
 	}
-	return nil, fmt.Errorf("subnet not found")
+	return output, nil
+}
+
+func (e *EC2ClientMock) DescribeRouteTables(input *ec2.DescribeRouteTablesInput) (*ec2.DescribeRouteTablesOutput, error) {
+	if e.unexistingRouteTable {
+		return nil, fmt.Errorf("route table not found")
+	}
+
+	output := &ec2.DescribeRouteTablesOutput{
+		RouteTables: []*ec2.RouteTable{
+			&ec2.RouteTable{
+				RouteTableId: aws.String(e.routeTableID),
+			},
+		},
+	}
+	return output, nil
 }
 
 type CFClientMock struct{}

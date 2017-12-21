@@ -1,11 +1,8 @@
 package adapter
 
 import (
-	"fmt"
 	"strconv"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
@@ -17,7 +14,6 @@ import (
 type autoScalingGroupAdapter struct {
 	ASGMaxSize             int
 	ASGMinSize             int
-	ClusterID              string
 	HealthCheckGracePeriod int
 	LoadBalancerName       string
 	MaxBatchSize           string
@@ -50,27 +46,11 @@ func (a *autoScalingGroupAdapter) getAutoScalingGroup(customObject v1alpha1.AWSC
 	// TODO: remove this code once the subnet is created by cloudformation and add a
 	// reference in the template
 	subnetName := keyv2.SubnetName(customObject, suffixPrivate)
-	describeSubnetInput := &ec2.DescribeSubnetsInput{
-		Filters: []*ec2.Filter{
-			{
-				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
-				Values: []*string{
-					aws.String(subnetName),
-				},
-			},
-		},
-	}
-	output, err := clients.EC2.DescribeSubnets(describeSubnetInput)
+	subnetID, err := SubnetID(clients, subnetName)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	if len(output.Subnets) > 1 {
-		return microerror.Mask(tooManyResultsError)
-	}
-
-	a.WorkerSubnetID = *output.Subnets[0].SubnetId
-
-	a.ClusterID = keyv2.ClusterID(customObject)
+	a.WorkerSubnetID = subnetID
 
 	return nil
 }

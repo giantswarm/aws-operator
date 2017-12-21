@@ -18,10 +18,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api/v1"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
 const (
+	// minimunNodesReady represents the minimun number of ready nodes in a guest
+	// cluster to be considered healthy.
+	minimunNodesReady = 3
+
 	certOperatorValuesFile = "/tmp/cert-operator-values.yaml"
 	// certOperatorChartValues values required by cert-operator-chart, the environment
 	// variables will be expanded before writing the contents to a file.
@@ -52,8 +57,9 @@ Installation:
 )
 
 type framework struct {
-	cs   kubernetes.Interface
-	gsCs *giantclientset.Clientset
+	cs      kubernetes.Interface
+	gsCs    *giantclientset.Clientset
+	guestCS kubernetes.Interface
 }
 
 func newFramework() (*framework, error) {
@@ -100,25 +106,6 @@ func (f *framework) runningPod(namespace, labelSelector string) func() error {
 	}
 }
 
-func (f *framework) activeNamespace(name string) func() error {
-	return func() error {
-		ns, err := f.cs.CoreV1().
-			Namespaces().
-			Get(name, metav1.GetOptions{})
-
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		phase := ns.Status.Phase
-		if phase != v1.NamespaceActive {
-			return microerror.Maskf(unexpectedStatusPhaseError, "current status: %s", string(phase))
-		}
-
-		return nil
-	}
-}
-
 func (f *framework) secret(namespace, secretName string) func() error {
 	return func() error {
 		_, err := f.cs.CoreV1().
@@ -137,7 +124,7 @@ func (f *framework) crd(crdName string) func() error {
 	}
 }
 
-func (f *framework) waitForPodLog(namespace, needle, podName string) error {
+func (f *framework) WaitForPodLog(namespace, needle, podName string) error {
 	needle = os.ExpandEnv(needle)
 
 	timeout := time.After(defaultTimeout * time.Second)
@@ -178,7 +165,7 @@ func (f *framework) waitForPodLog(namespace, needle, podName string) error {
 	return microerror.Mask(notFoundError)
 }
 
-func (f *framework) podName(namespace, labelSelector string) (string, error) {
+func (f *framework) PodName(namespace, labelSelector string) (string, error) {
 	pods, err := f.cs.CoreV1().
 		Pods(namespace).
 		List(metav1.ListOptions{
@@ -197,7 +184,7 @@ func (f *framework) podName(namespace, labelSelector string) (string, error) {
 	return pod.Name, nil
 }
 
-func (f *framework) setUp() error {
+func (f *framework) SetUp() error {
 	if err := f.createGSNamespace(); err != nil {
 		return microerror.Mask(err)
 	}
@@ -209,7 +196,7 @@ func (f *framework) setUp() error {
 	return nil
 }
 
-func (f *framework) tearDown() {
+func (f *framework) TearDown() {
 	runCmd("helm delete vault --purge")
 	f.cs.CoreV1().
 		Namespaces().
@@ -237,7 +224,24 @@ func (f *framework) createGSNamespace() error {
 		return microerror.Mask(err)
 	}
 
-	return waitFor(f.activeNamespace("giantswarm"))
+	activeNamespace := func() error {
+		ns, err := f.cs.CoreV1().
+			Namespaces().
+			Get("giantswarm", metav1.GetOptions{})
+
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		phase := ns.Status.Phase
+		if phase != v1.NamespaceActive {
+			return microerror.Maskf(unexpectedStatusPhaseError, "current status: %s", string(phase))
+		}
+
+		return nil
+	}
+
+	return waitFor(activeNamespace)
 }
 
 func (f *framework) installVault() error {
@@ -248,7 +252,7 @@ func (f *framework) installVault() error {
 	return waitFor(f.runningPod("default", "app=vault"))
 }
 
-func (f *framework) installCertOperator() error {
+func (f *framework) InstallCertOperator() error {
 	certOperatorChartValuesEnv := os.ExpandEnv(certOperatorChartValues)
 	if err := ioutil.WriteFile(certOperatorValuesFile, []byte(certOperatorChartValuesEnv), os.ModePerm); err != nil {
 		return microerror.Mask(err)
@@ -260,7 +264,7 @@ func (f *framework) installCertOperator() error {
 	return waitFor(f.crd("certconfig"))
 }
 
-func (f *framework) installCertResource() error {
+func (f *framework) InstallCertResource() error {
 	err := runCmd("helm registry install quay.io/giantswarm/cert-resource-lab-chart:stable -- -n cert-resource-lab --set commonDomain=${COMMON_DOMAIN} --set clusterName=${CLUSTER_NAME}")
 	if err != nil {
 		return microerror.Mask(err)
@@ -271,7 +275,7 @@ func (f *framework) installCertResource() error {
 	return waitFor(f.secret("default", secretName))
 }
 
-func (f *framework) installAwsOperator() error {
+func (f *framework) InstallAwsOperator() error {
 	awsOperatorChartValuesEnv := os.ExpandEnv(awsOperatorChartValues)
 	if err := ioutil.WriteFile(awsOperatorValuesFile, []byte(awsOperatorChartValuesEnv), os.ModePerm); err != nil {
 		return microerror.Mask(err)
@@ -283,19 +287,115 @@ func (f *framework) installAwsOperator() error {
 	return waitFor(f.crd("awsconfig"))
 }
 
-func (f *framework) deleteGuestCluster() error {
+func (f *framework) DeleteGuestCluster() error {
 	if err := runCmd("kubectl delete awsconfig ${CLUSTER_NAME}"); err != nil {
 		return microerror.Mask(err)
 	}
 
-	operatorPodName, err := f.podName("giantswarm", "app=aws-operator")
+	operatorPodName, err := f.PodName("giantswarm", "app=aws-operator")
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
+	// TODO: during the cloudformation migration the legacy resource is always deleted last,
+	// when the migration is done we will need to check here the cloudformation stack deletion
+	// message
 	logEntry := "cluster '${CLUSTER_NAME}' deleted"
-	if os.Getenv("VERSION_BUNDLE_VERSION") == "0.2.0" {
-		logEntry = "deleting AWS cloudformation stack: deleted"
+	return f.WaitForPodLog("giantswarm", logEntry, operatorPodName)
+}
+
+func (f *framework) initGuestClientset() error {
+	if f.guestCS != nil {
+		return nil
 	}
-	return f.waitForPodLog("giantswarm", logEntry, operatorPodName)
+	// get api secret
+	secretName := os.ExpandEnv("${CLUSTER_NAME}-api")
+
+	secret, err := f.cs.CoreV1().
+		Secrets("default").
+		Get(secretName, metav1.GetOptions{})
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	// create clientset
+	config := &rest.Config{}
+	config.TLSClientConfig = rest.TLSClientConfig{
+		CAData:   secret.Data["ca"],
+		CertData: secret.Data["crt"],
+		KeyData:  secret.Data["key"],
+	}
+	config.Host = os.ExpandEnv("https://api.${CLUSTER_NAME}.${COMMON_DOMAIN}")
+
+	cs, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	f.guestCS = cs
+
+	return nil
+}
+
+func (f *framework) WaitForGuestReady() error {
+	if err := f.initGuestClientset(); err != nil {
+		return microerror.Maskf(err, "unexpected error initializing guest clientset")
+	}
+
+	if err := f.waitForAPIUp(); err != nil {
+		return microerror.Mask(err)
+	}
+
+	if err := f.waitForNodesUp(); err != nil {
+		return microerror.Mask(err)
+	}
+	return nil
+}
+
+func (f *framework) waitForNodesUp() error {
+	nodesUp := func() error {
+		res, err := f.guestCS.
+			CoreV1().
+			Nodes().
+			List(metav1.ListOptions{})
+
+		if err != nil {
+			log.Printf("waiting for nodes ready: %v\n", err)
+			return microerror.Mask(err)
+		}
+		if len(res.Items) < minimunNodesReady {
+			log.Printf("worker nodes not found")
+			return microerror.Mask(notFoundError)
+		}
+
+		for _, n := range res.Items {
+			for _, c := range n.Status.Conditions {
+				if c.Type == v1.NodeReady && c.Status != v1.ConditionTrue {
+					log.Printf("not all worker nodes ready")
+					return microerror.Mask(notFoundError)
+				}
+			}
+		}
+		return nil
+	}
+
+	return waitFor(nodesUp)
+}
+
+func (f *framework) waitForAPIUp() error {
+	apiUp := func() error {
+		_, err := f.guestCS.
+			CoreV1().
+			Services("default").
+			Get("kubernetes", metav1.GetOptions{})
+
+		if err != nil {
+			log.Printf("waiting for k8s API up: %v\n", err)
+			return microerror.Mask(err)
+		}
+		log.Println("k8s API up")
+		return nil
+	}
+
+	return waitFor(apiUp)
 }

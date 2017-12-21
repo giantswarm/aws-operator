@@ -52,4 +52,9 @@ func TestAdapterMain(t *testing.T) {
 	if expected != actual {
 		t.Errorf("unexpected value, expecting %q, got %q", expected, actual)
 	}
+
+	expectedClusterID := "test-cluster"
+	if a.ClusterID != expectedClusterID {
+		t.Errorf("unexpected ClusterID, got %q, want %q", a.ClusterID, expectedClusterID)
+	}
 }
