@@ -43,6 +43,10 @@ func NewCloudConfig(config CloudConfigConfig) (*CloudConfig, error) {
 	if config.Params.Hyperkube.Apiserver.BindAddress == "" {
 		config.Params.Hyperkube.Apiserver.BindAddress = defaultHyperkubeApiserverBindAddress
 	}
+	// Default to 443 for non AWS providers.
+	if config.Params.EtcdPort == 0 {
+		config.Params.EtcdPort = 443
+	}
 
 	c := &CloudConfig{
 		config:   "",

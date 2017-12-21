@@ -1,5 +1,5 @@
 hash: 8a5511dc9adca67fa2661b25ec7bf4973a578991b8e27b6f4622f558f824f5b3
-updated: 2017-12-21T09:59:52.873120521Z
+updated: 2017-12-21T16:13:38.911329851Z
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -100,13 +100,13 @@ imports:
   - spec/kubernetes/networksetup
   - spec/kubernetes/ssh
 - name: github.com/giantswarm/e2e-harness
-  version: 59cf7b74ca2c0149f9e18e337c9ea9ed3f025099
+  version: b9d663d4e4debe30aa3441ce95bc8f3876ddb037
   subpackages:
   - pkg/harness
 - name: github.com/giantswarm/ipam
   version: 82290fc538b414df4f582577d2120426595dd61b
 - name: github.com/giantswarm/k8scloudconfig
-  version: d75265767b2a885d6cfb004ff00ab700908b8d03
+  version: 905f67bec65a1c6cdb0edfaa54891f77bfd4868e
   subpackages:
   - v_0_1_0
   - v_1_0_0
@@ -159,7 +159,9 @@ imports:
   - informer
   - tpr
 - name: github.com/giantswarm/randomkeytpr
-  version: 5833410f05365aa5d3fc0bc096e0c8ff7760a733
+  version: f1f464e790edc9eaeec963e25c6e9b4ace1e58ea
+  subpackages:
+  - randomkeytprtest
 - name: github.com/giantswarm/versionbundle
   version: e22eefeb8e97277bfebe225f77cf0528b69f36b8
 - name: github.com/go-ini/ini
