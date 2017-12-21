@@ -4,7 +4,7 @@
     Properties:
       AliasTarget:
         DNSName: !GetAtt ApiLoadBalancer.DNSName
-        HostedZoneId: !Get ApiLoadBalancer.CanonicalHostedZoneNameID
+        HostedZoneId: !GetAtt ApiLoadBalancer.CanonicalHostedZoneNameID
         EvaluateTargetHealth: false
       Name: {{.APIELBDomain}}
       HostedZoneId: {{.APIELBHostedZones}}
