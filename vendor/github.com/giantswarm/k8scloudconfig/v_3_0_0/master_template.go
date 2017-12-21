@@ -1,4 +1,4 @@
-package v_2_0_0
+package v_3_0_0
 
 const MasterTemplate = `#cloud-config
 users:
@@ -10,6 +10,7 @@ users:
        - "{{ $user.PublicKey }}"
 {{end}}
 write_files:
+{{ if not .DisableCalico -}}
 - path: /srv/calico-kube-controllers-sa.yaml
   owner: root
   permissions: 644
@@ -47,7 +48,7 @@ write_files:
       namespace: kube-system
     data:
       # Configure this with the location of your etcd cluster.
-      etcd_endpoints: "https://{{ .Cluster.Etcd.Domain }}:443"
+      etcd_endpoints: "https://{{ .Cluster.Etcd.Domain }}:{{ .EtcdPort }}"
 
       # Configure the Calico backend to use.
       calico_backend: "bird"
@@ -346,6 +347,7 @@ write_files:
             - name: etcd-certs
               hostPath:
                 path: /etc/kubernetes/ssl/etcd
+{{ end -}}
 - path: /srv/kubedns-cm.yaml
   owner: root
   permissions: 0644
@@ -804,7 +806,7 @@ write_files:
           serviceAccountName: kube-proxy
           containers:
             - name: kube-proxy
-              image: quay.io/giantswarm/hyperkube:v1.8.4_coreos.0
+              image: quay.io/giantswarm/hyperkube:v1.9.0
               command:
               - /hyperkube
               - proxy
@@ -1282,7 +1284,12 @@ write_files:
       while [ "$(/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL get cs | grep Healthy | wc -l)" -ne "3" ]; do sleep 1 && echo 'Waiting for healthy k8s'; done
 
       # apply Security bootstrap (RBAC and PSP)
-      SECURITY_FILES="rbac_bindings.yaml rbac_roles.yaml psp_policies.yaml psp_roles.yaml psp_binding.yaml"
+      SECURITY_FILES=""
+      SECURITY_FILES="${SECURITY_FILES} rbac_bindings.yaml"
+      SECURITY_FILES="${SECURITY_FILES} rbac_roles.yaml"
+      SECURITY_FILES="${SECURITY_FILES} psp_policies.yaml"
+      SECURITY_FILES="${SECURITY_FILES} psp_roles.yaml"
+      SECURITY_FILES="${SECURITY_FILES} psp_binding.yaml"
 
       for manifest in $SECURITY_FILES
       do
@@ -1295,12 +1302,15 @@ write_files:
           done
       done
 
+      {{ if not .DisableCalico -}}
+
       # apply calico CNI
-      CALICO_FILES="calico-configmap.yaml\
-       calico-node-sa.yaml\
-       calico-kube-controllers-sa.yaml\
-       calico-ds.yaml\
-       calico-kube-controllers.yaml"
+      CALICO_FILES=""
+      CALICO_FILES="${CALICO_FILES} calico-configmap.yaml"
+      CALICO_FILES="${CALICO_FILES} calico-node-sa.yaml"
+      CALICO_FILES="${CALICO_FILES} calico-kube-controllers-sa.yaml"
+      CALICO_FILES="${CALICO_FILES} calico-ds.yaml"
+      CALICO_FILES="${CALICO_FILES} calico-kube-controllers.yaml"
 
       for manifest in $CALICO_FILES
       do
@@ -1326,6 +1336,8 @@ write_files:
           sleep 3s
       done
 
+      {{ end -}}
+
       # apply default storage class
       if [ -f /srv/default-storage-class.yaml ]; then
           while
@@ -1340,17 +1352,21 @@ write_files:
       fi
 
       # apply k8s addons
-      MANIFESTS="kube-proxy-sa.yaml\
-                 kube-proxy-ds.yaml\
-                 kubedns-cm.yaml\
-                 kubedns-sa.yaml\
-                 kubedns-dep.yaml\
-                 kubedns-svc.yaml\
-                 default-backend-dep.yml\
-                 default-backend-svc.yml\
-                 ingress-controller-cm.yml\
-                 ingress-controller-dep.yml\
-                 ingress-controller-svc.yml"
+      MANIFESTS=""
+      {{ range .ExtraManifests -}}
+      MANIFESTS="${MANIFESTS} {{ . }}"
+      {{ end -}}
+      MANIFESTS="${MANIFESTS} kube-proxy-sa.yaml"
+      MANIFESTS="${MANIFESTS} kube-proxy-ds.yaml"
+      MANIFESTS="${MANIFESTS} kubedns-cm.yaml"
+      MANIFESTS="${MANIFESTS} kubedns-sa.yaml"
+      MANIFESTS="${MANIFESTS} kubedns-dep.yaml"
+      MANIFESTS="${MANIFESTS} kubedns-svc.yaml"
+      MANIFESTS="${MANIFESTS} default-backend-dep.yml"
+      MANIFESTS="${MANIFESTS} default-backend-svc.yml"
+      MANIFESTS="${MANIFESTS} ingress-controller-cm.yml"
+      MANIFESTS="${MANIFESTS} ingress-controller-dep.yml"
+      MANIFESTS="${MANIFESTS} ingress-controller-svc.yml"
 
       for manifest in $MANIFESTS
       do
@@ -1378,7 +1394,7 @@ write_files:
     - name: local
       cluster:
         certificate-authority: /etc/kubernetes/ssl/apiserver-ca.pem
-        server: https://{{.Cluster.Kubernetes.API.Domain}}
+        server: https://{{.MasterAPIDomain}}
     contexts:
     - context:
         cluster: local
@@ -1401,7 +1417,7 @@ write_files:
     - name: local
       cluster:
         certificate-authority: /etc/kubernetes/ssl/apiserver-ca.pem
-        server: https://{{.Cluster.Kubernetes.API.Domain}}
+        server: https://{{.MasterAPIDomain}}
     contexts:
     - context:
         cluster: local
@@ -1423,7 +1439,7 @@ write_files:
     - name: local
       cluster:
         certificate-authority: /etc/kubernetes/ssl/apiserver-ca.pem
-        server: https://{{.Cluster.Kubernetes.API.Domain}}
+        server: https://{{.MasterAPIDomain}}
     contexts:
     - context:
         cluster: local
@@ -1445,7 +1461,7 @@ write_files:
     - name: local
       cluster:
         certificate-authority: /etc/kubernetes/ssl/apiserver-ca.pem
-        server: https://{{.Cluster.Kubernetes.API.Domain}}
+        server: https://{{.MasterAPIDomain}}
     contexts:
     - context:
         cluster: local
@@ -1467,7 +1483,7 @@ write_files:
     - name: local
       cluster:
         certificate-authority: /etc/kubernetes/ssl/apiserver-ca.pem
-        server: https://{{.Cluster.Kubernetes.API.Domain}}
+        server: https://{{.MasterAPIDomain}}
     contexts:
     - context:
         cluster: local
@@ -1664,7 +1680,7 @@ coreos:
           --peer-cert-file /etc/etcd/server-crt.pem \
           --peer-key-file /etc/etcd/server-key.pem \
           --peer-client-cert-auth=true \
-          --advertise-client-urls=https://{{ .Cluster.Etcd.Domain }}:443 \
+          --advertise-client-urls=https://{{ .Cluster.Etcd.Domain }}:{{ .EtcdPort }} \
           --initial-advertise-peer-urls=https://127.0.0.1:2380 \
           --listen-client-urls=https://0.0.0.0:2379 \
           --listen-peer-urls=https://${DEFAULT_IPV4}:2380 \
@@ -1733,13 +1749,16 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.8.4_coreos.0"
+      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.9.0"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
       ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
       ExecStartPre=-/usr/bin/docker rm -f $NAME
       ExecStart=/bin/sh -c "/usr/bin/docker run --rm --pid=host --net=host --privileged=true \
+      {{ range .Hyperkube.Kubelet.Docker.RunExtraArgs -}}
+      {{ . }} \
+      {{ end -}}
       -v /:/rootfs:ro,shared \
       -v /sys:/sys:ro \
       -v /dev:/dev:rw \
@@ -1768,6 +1787,9 @@ coreos:
       --name $NAME \
       $IMAGE \
       /hyperkube kubelet \
+      {{ range .Hyperkube.Kubelet.Docker.CommandExtraArgs -}}
+      {{ . }} \
+      {{ end -}}
       --address=${DEFAULT_IPV4} \
       --port={{.Cluster.Kubernetes.Kubelet.Port}} \
       --node-ip=${DEFAULT_IPV4} \
@@ -1777,7 +1799,7 @@ coreos:
       --machine-id-file=/rootfs/etc/machine-id \
       --cadvisor-port=4194 \
       --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
-      --healthz-bind-address=${DEFAULT_IPV4} \
+      --healthz-bind-address={{.Hyperkube.Apiserver.BindAddress}} \
       --healthz-port=10248 \
       --cluster-dns={{.Cluster.Kubernetes.DNS.IP}} \
       --cluster-domain={{.Cluster.Kubernetes.Domain}} \
@@ -1828,7 +1850,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.8.4_coreos.0"
+      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.9.0"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/mkdir -p /etc/kubernetes/manifests
@@ -1836,11 +1858,17 @@ coreos:
       ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
       ExecStartPre=-/usr/bin/docker rm -f $NAME
       ExecStart=/usr/bin/docker run --rm --name $NAME --net=host \
+      {{ range .Hyperkube.Apiserver.Docker.RunExtraArgs -}}
+      {{ . }} \
+      {{ end -}}
       -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
       -v /etc/kubernetes/secrets/token_sign_key.pem:/etc/kubernetes/secrets/token_sign_key.pem \
       -v /etc/kubernetes/encryption/:/etc/kubernetes/encryption \
       $IMAGE \
       /hyperkube apiserver \
+      {{ range .Hyperkube.Apiserver.Docker.CommandExtraArgs -}}
+      {{ . }} \
+      {{ end -}}
       --allow_privileged=true \
       --insecure_bind_address=0.0.0.0 \
       --anonymous-auth=false \
@@ -1848,7 +1876,7 @@ coreos:
       --kubelet_https=true \
       --kubelet-preferred-address-types=InternalIP \
       --secure_port={{.Cluster.Kubernetes.API.SecurePort}} \
-      --bind-address=${DEFAULT_IPV4} \
+      --bind-address={{.Hyperkube.Apiserver.BindAddress}} \
       --etcd-prefix={{.Cluster.Etcd.Prefix}} \
       --profiling=false \
       --repair-malformed-updates=false \
@@ -1888,18 +1916,24 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.8.4_coreos.0"
+      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.9.0"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
       ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
       ExecStartPre=-/usr/bin/docker rm -f $NAME
       ExecStart=/usr/bin/docker run --rm --net=host --name $NAME \
+      {{ range .Hyperkube.ControllerManager.Docker.RunExtraArgs -}}
+      {{ . }} \
+      {{ end -}}
       -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
       -v /etc/kubernetes/secrets/token_sign_key.pem:/etc/kubernetes/secrets/token_sign_key.pem \
       $IMAGE \
       /hyperkube controller-manager \
+      {{ range .Hyperkube.ControllerManager.Docker.CommandExtraArgs -}}
+      {{ . }}  \
+      {{ end -}}
       --logtostderr=true \
       --v=2 \
       --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
@@ -1924,7 +1958,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.8.4_coreos.0"
+      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.9.0"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
