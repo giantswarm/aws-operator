@@ -13,9 +13,7 @@ import (
 type recordSetsAdapter struct {
 	APIELBHostedZones         string
 	APIELBDomain              string
-	EtcdELBDNS                string
 	EtcdELBHostedZones        string
-	EtcdELBAliasHostedZone    string
 	EtcdELBDomain             string
 	IngressELBDNS             string
 	IngressELBHostedZones     string
@@ -39,13 +37,6 @@ func (r *recordSetsAdapter) getRecordSets(customObject v1alpha1.AWSConfig, clien
 	}
 	r.IngressELBDNS = *ingressELB.DNSName
 	r.IngressELBAliasHostedZone = *ingressELB.CanonicalHostedZoneNameID
-
-	etcdELB, err := ELBDescription(clients, r.EtcdELBDomain, customObject)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	r.EtcdELBDNS = *etcdELB.DNSName
-	r.EtcdELBAliasHostedZone = *etcdELB.CanonicalHostedZoneNameID
 
 	return nil
 }
