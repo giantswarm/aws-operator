@@ -7,6 +7,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certificatetpr/certificatetprtest"
 	"github.com/giantswarm/micrologger/microloggertest"
+	"github.com/giantswarm/randomkeytpr/randomkeytprtest"
 
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
 )
@@ -53,9 +54,11 @@ func Test_CurrentState(t *testing.T) {
 	var newResource *Resource
 
 	resourceConfig := DefaultConfig()
-	resourceConfig.CertWatcher = &certificatetprtest.Service{}
+	resourceConfig.CertWatcher = certificatetprtest.NewService()
 	resourceConfig.CloudConfig = &CloudConfigMock{}
 	resourceConfig.Logger = microloggertest.New()
+	resourceConfig.RandomKeyWatcher = randomkeytprtest.NewService()
+
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			resourceConfig.AwsService = awsservice.AwsServiceMock{

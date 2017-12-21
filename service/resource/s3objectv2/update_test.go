@@ -10,6 +10,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certificatetpr/certificatetprtest"
 	"github.com/giantswarm/micrologger/microloggertest"
+	"github.com/giantswarm/randomkeytpr/randomkeytprtest"
 
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
 )
@@ -87,9 +88,11 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 		S3: &S3ClientMock{},
 	}
 	resourceConfig.AwsService = awsservice.AwsServiceMock{}
-	resourceConfig.CertWatcher = &certificatetprtest.Service{}
+	resourceConfig.CertWatcher = certificatetprtest.NewService()
 	resourceConfig.CloudConfig = &CloudConfigMock{}
 	resourceConfig.Logger = microloggertest.New()
+	resourceConfig.RandomKeyWatcher = randomkeytprtest.NewService()
+
 	newResource, err = New(resourceConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)

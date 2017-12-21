@@ -5,6 +5,8 @@ import (
 	"io"
 	"strings"
 
+	"github.com/giantswarm/randomkeytpr"
+
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
@@ -46,6 +48,10 @@ func (s *S3ClientMock) GetObject(*s3.GetObjectInput) (*s3.GetObjectOutput, error
 
 type CloudConfigMock struct {
 	template string
+}
+
+func (c *CloudConfigMock) NewMasterTemplate(customObject v1alpha1.AWSConfig, certs certificatetpr.CompactTLSAssets, randomKeys randomkeytpr.CompactRandomKeyAssets) (string, error) {
+	return c.template, nil
 }
 
 func (c *CloudConfigMock) NewWorkerTemplate(customObject v1alpha1.AWSConfig, certs certificatetpr.CompactTLSAssets) (string, error) {

@@ -67,6 +67,7 @@ func (d *Docker) baseRun(out io.Writer, entrypoint string, args []string, env ..
 		"-e", fmt.Sprintf("AWS_ACCESS_KEY_ID=%s", os.Getenv("AWS_ACCESS_KEY_ID")),
 		"-e", fmt.Sprintf("AWS_SECRET_ACCESS_KEY=%s", os.Getenv("AWS_SECRET_ACCESS_KEY")),
 		"-e", "KUBECONFIG=" + harness.DefaultKubeConfig,
+		"--dns", "8.8.8.8",
 		"--entrypoint", entrypoint,
 	}
 

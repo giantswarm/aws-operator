@@ -5,9 +5,11 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certificatetpr"
+	"github.com/giantswarm/randomkeytpr"
 )
 
 const (
+	prefixMaster = "master"
 	prefixWorker = "worker"
 
 	encryptionConfigTemplate = `
@@ -26,6 +28,7 @@ resources:
 )
 
 type BucketObjectState struct {
+	MasterCloudConfig BucketObjectInstance
 	WorkerCloudConfig BucketObjectInstance
 }
 
@@ -56,9 +59,14 @@ type AwsService interface {
 }
 
 type CloudConfigService interface {
+	NewMasterTemplate(v1alpha1.AWSConfig, certificatetpr.CompactTLSAssets, randomkeytpr.CompactRandomKeyAssets) (string, error)
 	NewWorkerTemplate(v1alpha1.AWSConfig, certificatetpr.CompactTLSAssets) (string, error)
 }
 
 type CertWatcher interface {
 	SearchCerts(string) (certificatetpr.AssetsBundle, error)
+}
+
+type RandomKeyWatcher interface {
+	SearchKeys(clusterID string) (map[randomkeytpr.Key][]byte, error)
 }

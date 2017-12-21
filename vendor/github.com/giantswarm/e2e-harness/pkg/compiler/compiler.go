@@ -70,6 +70,8 @@ func (c *Compiler) compileTests(binaryName, path string) error {
 	cmd := exec.Command("go", "test", "-c", "-o", binaryName, "-tags", "k8srequired", ".")
 	cmd.Env = append(os.Environ(), "CGO_ENABLED=0", "GOOS=linux")
 	cmd.Dir = path
+	cmd.Stderr = os.Stdout
+	cmd.Stdout = os.Stdout
 
 	return cmd.Run()
 }
