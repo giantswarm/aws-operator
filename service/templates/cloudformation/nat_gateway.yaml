@@ -19,6 +19,6 @@
     Properties:
       RouteTableId: {{.PrivateRouteTableID}}
       DestinationCidrBlock: 0.0.0.0/0
-      GatewayId:
+      NatGatewayId:
         Ref: "NATGateway"
 {{end}}
