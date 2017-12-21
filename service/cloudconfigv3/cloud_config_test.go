@@ -25,6 +25,9 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
 						ID: "al9qy",
+						Etcd: v1alpha1.ClusterEtcd{
+							Port: 2379,
+						},
 					},
 				},
 			},
