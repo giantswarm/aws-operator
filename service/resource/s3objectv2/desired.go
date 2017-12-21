@@ -26,6 +26,11 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return output, microerror.Mask(err)
 	}
 
+	randomKeys, err := r.randomKeyWatcher.SearchKeys(clusterID)
+	if err != nil {
+		return output, microerror.Mask(err)
+	}
+
 	kmsArn, err := r.awsService.GetKeyArn(clusterID)
 	if IsKeyNotFound(err) {
 		// we can get here during deletion, if the key is already deleted we can safely exit.
@@ -40,14 +45,30 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return output, microerror.Mask(err)
 	}
 
-	body, err := r.cloudConfig.NewWorkerTemplate(customObject, *tlsAssets)
+	randomKeyAssets, err := r.encodeKeyAssets(randomKeys, kmsArn)
+	if err != nil {
+		return output, microerror.Mask(err)
+	}
+
+	masterBody, err := r.cloudConfig.NewMasterTemplate(customObject, *tlsAssets, *randomKeyAssets)
+	if err != nil {
+		return output, microerror.Mask(err)
+	}
+
+	output.MasterCloudConfig = BucketObjectInstance{
+		Bucket: keyv2.BucketName(customObject, accountID),
+		Body:   masterBody,
+		Key:    keyv2.BucketObjectName(customObject, prefixMaster),
+	}
+
+	workerBody, err := r.cloudConfig.NewWorkerTemplate(customObject, *tlsAssets)
 	if err != nil {
 		return output, microerror.Mask(err)
 	}
 
 	output.WorkerCloudConfig = BucketObjectInstance{
 		Bucket: keyv2.BucketName(customObject, accountID),
-		Body:   body,
+		Body:   workerBody,
 		Key:    keyv2.BucketObjectName(customObject, prefixWorker),
 	}
 
