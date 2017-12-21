@@ -171,14 +171,20 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Error("ingressWildcardRecordSet element not found")
 	}
-
 	if !strings.Contains(body, "MasterInstance:") {
 		fmt.Println(body)
 		t.Error("MasterInstance element not found")
 	}
-
 	if !strings.Contains(body, "ApiLoadBalancer:") {
 		fmt.Println(body)
 		t.Error("ApiLoadBalancer element not found")
+	}
+	if !strings.Contains(body, "NATGateway:") {
+		fmt.Println(body)
+		t.Error("NATGateway element not found")
+	}
+	if !strings.Contains(body, "SubnetId: subnet-1234") {
+		fmt.Println(body)
+		t.Error("NATGateway subnet id property not found")
 	}
 }

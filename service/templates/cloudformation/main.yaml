@@ -6,6 +6,7 @@ Resources:
   {{template "load_balancers" .}}
   {{template "launch_configuration" .}}
   {{template "autoscaling_group" .}}
+  {{template "nat_gateway" .}}
   {{template "recordsets" .}}
 {{template "outputs" .}}
 {{end}}

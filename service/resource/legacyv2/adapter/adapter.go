@@ -42,9 +42,10 @@ type Adapter struct {
 	instanceAdapter
 	launchConfigAdapter
 	loadBalancersAdapter
-	outputsAdapter
+	natGatewayAdapter
 	recordSetsAdapter
 	workerPolicyAdapter
+	outputsAdapter
 }
 
 func New(customObject v1alpha1.AWSConfig, clients Clients) (Adapter, error) {
@@ -57,11 +58,11 @@ func New(customObject v1alpha1.AWSConfig, clients Clients) (Adapter, error) {
 		a.getAutoScalingGroup,
 		a.getInstance,
 		a.getLaunchConfiguration,
-		a.getLaunchConfiguration,
 		a.getLoadBalancers,
-		a.getOutputs,
+		a.getNatGateway,
 		a.getRecordSets,
 		a.getWorkerPolicy,
+		a.getOutputs,
 	}
 
 	for _, h := range hydraters {

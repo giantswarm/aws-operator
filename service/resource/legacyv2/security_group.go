@@ -28,11 +28,12 @@ type rulesInput struct {
 }
 
 const (
-	allPorts    = -1
-	httpPort    = 80
-	httpsPort   = 443
-	sshPort     = 22
-	kubeletPort = 10250
+	allPorts         = -1
+	httpPort         = 80
+	httpsPort        = 443
+	sshPort          = 22
+	kubeletPort      = 10250
+	nodeExporterPort = 10300
 
 	allProtocols = "-1"
 	tcpProtocol  = "tcp"
@@ -100,6 +101,12 @@ func (ri rulesInput) masterRules() []awsresources.SecurityGroupRule {
 			Protocol:   tcpProtocol,
 			SourceCIDR: ri.HostClusterCIDR,
 		},
+		// Allow traffic from host cluster CIDR to 10300 for node-exporter scraping.
+		{
+			Port:       nodeExporterPort,
+			Protocol:   tcpProtocol,
+			SourceCIDR: ri.HostClusterCIDR,
+		},
 	}
 
 	if keyv2.HasClusterVersion(ri.Cluster) {
@@ -162,6 +169,12 @@ func (ri rulesInput) workerRules() []awsresources.SecurityGroupRule {
 		// Allow traffic from host cluster CIDR to 10250 for kubelet scraping.
 		{
 			Port:       kubeletPort,
+			Protocol:   tcpProtocol,
+			SourceCIDR: ri.HostClusterCIDR,
+		},
+		// Allow traffic from host cluster CIDR to 10300 for node-exporter scraping.
+		{
+			Port:       nodeExporterPort,
 			Protocol:   tcpProtocol,
 			SourceCIDR: ri.HostClusterCIDR,
 		},

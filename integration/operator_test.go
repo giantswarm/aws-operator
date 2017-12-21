@@ -90,13 +90,13 @@ func TestMain(m *testing.M) {
 	var err error
 	f, err = newFramework()
 	if err != nil {
-		v = 1
 		log.Printf("unexpected error: %v\n", err)
+		os.Exit(1)
 	}
 
-	if err := f.setUp(); err != nil {
-		v = 1
+	if err := f.SetUp(); err != nil {
 		log.Printf("unexpected error: %v\n", err)
+		v = 1
 	}
 
 	if err := operatorSetup(); err != nil {
@@ -108,23 +108,26 @@ func TestMain(m *testing.M) {
 		v = m.Run()
 	}
 
-	f.deleteGuestCluster()
+	f.DeleteGuestCluster()
 	operatorTearDown()
-	f.tearDown()
+	f.TearDown()
 
 	os.Exit(v)
 }
 
+func TestPodsResolveNames(t *testing.T) {
+}
+
 func operatorSetup() error {
-	if err := f.installCertOperator(); err != nil {
+	if err := f.InstallCertOperator(); err != nil {
 		return microerror.Mask(err)
 	}
 
-	if err := f.installCertResource(); err != nil {
+	if err := f.InstallCertResource(); err != nil {
 		return microerror.Mask(err)
 	}
 
-	if err := f.installAwsOperator(); err != nil {
+	if err := f.InstallAwsOperator(); err != nil {
 		return microerror.Mask(err)
 	}
 
@@ -136,23 +139,25 @@ func operatorSetup() error {
 		return microerror.Maskf(err, "unexpected error installing aws-resource-lab chart: %v")
 	}
 
-	return nil
-}
-
-func TestGuestClusterIsCreated(t *testing.T) {
-	operatorPodName, err := f.podName("giantswarm", "app=aws-operator")
-	if err != nil {
-		t.Fatalf("unexpected error getting operator pod name: %v", err)
-	}
-
 	logEntry := "cluster '${CLUSTER_NAME}' processed"
 	if os.Getenv("VERSION_BUNDLE_VERSION") == "0.2.0" {
 		logEntry = "creating AWS cloudformation stack: created"
 	}
 
-	if err := f.waitForPodLog("giantswarm", logEntry, operatorPodName); err != nil {
-		t.Fatalf("unexpected error waiting for guest cluster installed: %v", err)
+	operatorPodName, err := f.PodName("giantswarm", "app=aws-operator")
+	if err != nil {
+		return microerror.Maskf(err, "unexpected error getting operator pod name: %v")
 	}
+
+	if err := f.WaitForPodLog("giantswarm", logEntry, operatorPodName); err != nil {
+		return microerror.Maskf(err, "unexpected error waiting for guest cluster installed: %v")
+	}
+
+	if err := f.WaitForGuestReady(); err != nil {
+		return microerror.Maskf(err, "unexpected error waiting for guest cluster ready")
+	}
+
+	return nil
 }
 
 func operatorTearDown() {
