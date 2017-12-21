@@ -23,6 +23,10 @@ import (
 )
 
 const (
+	// minimunNodesReady represents the minimun number of ready nodes in a guest
+	// cluster to be considered healthy.
+	minimunNodesReady = 3
+
 	certOperatorValuesFile = "/tmp/cert-operator-values.yaml"
 	// certOperatorChartValues values required by cert-operator-chart, the environment
 	// variables will be expanded before writing the contents to a file.
@@ -98,25 +102,6 @@ func (f *framework) runningPod(namespace, labelSelector string) func() error {
 		if phase != v1.PodRunning {
 			return microerror.Maskf(unexpectedStatusPhaseError, "current status: %s", string(phase))
 		}
-		return nil
-	}
-}
-
-func (f *framework) activeNamespace(name string) func() error {
-	return func() error {
-		ns, err := f.cs.CoreV1().
-			Namespaces().
-			Get(name, metav1.GetOptions{})
-
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		phase := ns.Status.Phase
-		if phase != v1.NamespaceActive {
-			return microerror.Maskf(unexpectedStatusPhaseError, "current status: %s", string(phase))
-		}
-
 		return nil
 	}
 }
@@ -239,7 +224,24 @@ func (f *framework) createGSNamespace() error {
 		return microerror.Mask(err)
 	}
 
-	return waitFor(f.activeNamespace("giantswarm"))
+	activeNamespace := func() error {
+		ns, err := f.cs.CoreV1().
+			Namespaces().
+			Get("giantswarm", metav1.GetOptions{})
+
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		phase := ns.Status.Phase
+		if phase != v1.NamespaceActive {
+			return microerror.Maskf(unexpectedStatusPhaseError, "current status: %s", string(phase))
+		}
+
+		return nil
+	}
+
+	return waitFor(activeNamespace)
 }
 
 func (f *framework) installVault() error {
@@ -335,16 +337,53 @@ func (f *framework) initGuestClientset() error {
 	return nil
 }
 
-func (f *framework) WaitForAPIUp() error {
+func (f *framework) WaitForGuestReady() error {
 	if err := f.initGuestClientset(); err != nil {
 		return microerror.Maskf(err, "unexpected error initializing guest clientset")
 	}
 
-	return waitFor(f.apiUp())
+	if err := f.waitForAPIUp(); err != nil {
+		return microerror.Mask(err)
+	}
+
+	if err := f.waitForNodesUp(); err != nil {
+		return microerror.Mask(err)
+	}
+	return nil
 }
 
-func (f *framework) apiUp() func() error {
-	return func() error {
+func (f *framework) waitForNodesUp() error {
+	nodesUp := func() error {
+		res, err := f.guestCS.
+			CoreV1().
+			Nodes().
+			List(metav1.ListOptions{})
+
+		if err != nil {
+			log.Printf("waiting for nodes ready: %v\n", err)
+			return microerror.Mask(err)
+		}
+		if len(res.Items) < minimunNodesReady {
+			log.Printf("worker nodes not found")
+			return microerror.Mask(notFoundError)
+		}
+
+		for _, n := range res.Items {
+			for _, c := range n.Status.Conditions {
+				if c.Type == v1.NodeReady && c.Status != v1.ConditionTrue {
+					log.Printf("not all worker nodes ready")
+					return microerror.Mask(notFoundError)
+				}
+			}
+		}
+		return nil
+	}
+
+	return waitFor(nodesUp)
+}
+
+func (f *framework) waitForAPIUp() error {
+	apiUp := func() error {
 		_, err := f.guestCS.
 			CoreV1().
 			Services("default").
@@ -357,4 +396,6 @@ func (f *framework) apiUp() func() error {
 		log.Println("k8s API up")
 		return nil
 	}
+
+	return waitFor(apiUp)
 }

@@ -153,8 +153,8 @@ func operatorSetup() error {
 		return microerror.Maskf(err, "unexpected error waiting for guest cluster installed: %v")
 	}
 
-	if err := f.WaitForAPIUp(); err != nil {
-		return microerror.Maskf(err, "unexpected error waiting for API up")
+	if err := f.WaitForGuestReady(); err != nil {
+		return microerror.Maskf(err, "unexpected error waiting for guest cluster ready")
 	}
 
 	return nil
