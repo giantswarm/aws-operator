@@ -11,9 +11,7 @@ import (
 // template related to this adapter: service/templates/cloudformation/recordsets.yaml
 
 type recordSetsAdapter struct {
-	APIELBDNS                 string
 	APIELBHostedZones         string
-	APIELBAliasHostedZone     string
 	APIELBDomain              string
 	EtcdELBDNS                string
 	EtcdELBHostedZones        string
@@ -34,13 +32,6 @@ func (r *recordSetsAdapter) getRecordSets(customObject v1alpha1.AWSConfig, clien
 	r.IngressELBHostedZones = customObject.Spec.AWS.Ingress.HostedZones
 	r.IngressELBDomain = customObject.Spec.Cluster.Kubernetes.IngressController.Domain
 	r.IngressWildcardELBDomain = customObject.Spec.Cluster.Kubernetes.IngressController.WildcardDomain
-
-	apiELB, err := ELBDescription(clients, r.APIELBDomain, customObject)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	r.APIELBDNS = *apiELB.DNSName
-	r.APIELBAliasHostedZone = *apiELB.CanonicalHostedZoneNameID
 
 	ingressELB, err := ELBDescription(clients, r.IngressELBDomain, customObject)
 	if err != nil {

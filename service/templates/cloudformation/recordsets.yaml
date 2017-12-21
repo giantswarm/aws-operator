@@ -3,8 +3,8 @@
     Type: AWS::Route53::RecordSet
     Properties:
       AliasTarget:
-        DNSName: {{.APIELBDNS}}
-        HostedZoneId: {{.APIELBAliasHostedZone}}
+        DNSName: !GetAtt ApiLoadBalancer.DNSName
+        HostedZoneId: !Get ApiLoadBalancer.CanonicalHostedZoneNameID
         EvaluateTargetHealth: false
       Name: {{.APIELBDomain}}
       HostedZoneId: {{.APIELBHostedZones}}
