@@ -97,7 +97,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 }
 
 func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
-	return &framework.Patch{}, nil
+	return framework.NewPatch(), nil
 }
 
 func toBucketObjectState(v interface{}) (BucketObjectState, error) {
@@ -125,17 +125,4 @@ func toPutObjectInput(v interface{}) (s3.PutObjectInput, error) {
 	}
 
 	return putObjectInput, nil
-}
-
-func toDeleteObjectInput(v interface{}) (s3.DeleteObjectInput, error) {
-	if v == nil {
-		return s3.DeleteObjectInput{}, nil
-	}
-
-	deleteObjectInput, ok := v.(s3.DeleteObjectInput)
-	if !ok {
-		return s3.DeleteObjectInput{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", deleteObjectInput, v)
-	}
-
-	return deleteObjectInput, nil
 }
