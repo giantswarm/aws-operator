@@ -132,6 +132,15 @@ func (ri rulesInput) masterRules() []awsresources.SecurityGroupRule {
 		})
 	}
 
+	if keyv2.UseCloudFormation(ri.Cluster) {
+		// Cloud Formation clusters use port 2379 for etcd.
+		rules = append(rules, awsresources.SecurityGroupRule{
+			Port:       ri.Cluster.Spec.Cluster.Etcd.Port,
+			Protocol:   tcpProtocol,
+			SourceCIDR: ri.WorkersSecurityGroupID,
+		})
+	}
+
 	return rules
 }
 
