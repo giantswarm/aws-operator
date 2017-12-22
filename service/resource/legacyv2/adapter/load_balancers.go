@@ -71,7 +71,7 @@ func (lb *loadBalancersAdapter) getLoadBalancers(customObject v1alpha1.AWSConfig
 	// security group field.
 	// TODO: remove this code once the security group is created by cloudformation
 	// and add a reference in the template
-	groupName := keyv2.SecurityGroupName(customObject, prefixWorker)
+	groupName := keyv2.SecurityGroupName(customObject, prefixMaster)
 	describeSgInput := &ec2.DescribeSecurityGroupsInput{
 		Filters: []*ec2.Filter{
 			{
