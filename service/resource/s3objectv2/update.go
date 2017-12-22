@@ -2,31 +2,35 @@ package s3objectv2
 
 import (
 	"context"
-	"reflect"
-	"strings"
+	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/framework"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
-	updateObjectInput, err := toPutObjectInput(updateChange)
+	updateBucketState, err := toBucketObjectState(updateChange)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	objectName := updateObjectInput.Key
-	if *objectName != "" {
-		_, err := r.awsClients.S3.PutObject(&updateObjectInput)
-		if err != nil {
-			return microerror.Maskf(err, "updating S3 object")
-		}
+	for key, bucketObject := range updateBucketState {
+		if bucketObject.Key != "" {
+			s3PutInput, err := toPutObjectInput(bucketObject)
+			if err != nil {
+				return microerror.Mask(err)
+			}
 
-		r.logger.LogCtx(ctx, "debug", "updating S3 object: updated")
-	} else {
-		r.logger.LogCtx(ctx, "debug", "updating S3 object: no need to update")
+			_, err = r.awsClients.S3.PutObject(&s3PutInput)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			r.logger.LogCtx(ctx, "debug", fmt.Sprintf("updating S3 object '%s': updated", key))
+		} else {
+			r.logger.LogCtx(ctx, "debug", fmt.Sprintf("updating S3 object '%s': already updated", key))
+		}
 	}
 
 	return nil
@@ -51,26 +55,32 @@ func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 }
 
 func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	output := s3.PutObjectInput{}
-
-	desiredObjectState, err := toBucketObjectState(desiredState)
+	currentBucketState, err := toBucketObjectState(currentState)
 	if err != nil {
-		return output, microerror.Mask(err)
+		return s3.PutObjectInput{}, microerror.Mask(err)
 	}
 
-	currentObjectState, err := toBucketObjectState(currentState)
+	desiredBucketState, err := toBucketObjectState(desiredState)
 	if err != nil {
-		return output, microerror.Mask(err)
+		return s3.PutObjectInput{}, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "debug", "finding out if S3 object should be updated")
+	r.logger.LogCtx(ctx, "debug", "finding out if the s3 objects should be updated")
 
-	if !reflect.DeepEqual(desiredObjectState, currentObjectState) {
-		output.Key = aws.String(desiredObjectState.WorkerCloudConfig.Key)
-		output.Body = strings.NewReader(desiredObjectState.WorkerCloudConfig.Body)
-		output.Bucket = aws.String(desiredObjectState.WorkerCloudConfig.Bucket)
-		output.ContentLength = aws.Int64(int64(len(desiredObjectState.WorkerCloudConfig.Body)))
+	updateState := map[string]BucketObjectState{}
+
+	for key, bucketObject := range desiredBucketState {
+		if _, ok := currentBucketState[key]; !ok {
+			updateState[key] = BucketObjectState{}
+		}
+
+		currentObject := currentBucketState[key]
+		if currentObject.Body != "" && bucketObject.Body != currentObject.Body {
+			updateState[key] = bucketObject
+		} else {
+			updateState[key] = BucketObjectState{}
+		}
 	}
 
-	return output, nil
+	return updateState, nil
 }
