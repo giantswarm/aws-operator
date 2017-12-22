@@ -61,7 +61,7 @@ func (r *Resource) getBucketObjectBody(bucketName string, keyName string) (strin
 	}
 	result, err := r.awsClients.S3.GetObject(input)
 	if IsObjectNotFound(err) || IsBucketNotFound(err) {
-		r.logger.Log("debug", fmt.Sprintf("did not find S3 object '%s'", keyName))
+		r.logger.Log("info", fmt.Sprintf("did not find S3 object '%s'", keyName))
 
 		// fall through
 		return body, nil
