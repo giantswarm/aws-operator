@@ -36,7 +36,7 @@ func (i *instanceAdapter) getInstance(customObject v1alpha1.AWSConfig, clients C
 	// security group
 	// TODO: remove this code once the security group is created by cloudformation
 	// and add a reference in the template
-	groupName := keyv2.SecurityGroupName(customObject, prefixWorker)
+	groupName := keyv2.SecurityGroupName(customObject, prefixMaster)
 	describeSgInput := &ec2.DescribeSecurityGroupsInput{
 		Filters: []*ec2.Filter{
 			{
@@ -94,7 +94,7 @@ func (i *instanceAdapter) getInstance(customObject v1alpha1.AWSConfig, clients C
 	s3URI := fmt.Sprintf("%s-g8s-%s", accountID, clusterID)
 
 	cloudConfigConfig := SmallCloudconfigConfig{
-		MachineType:    prefixWorker,
+		MachineType:    prefixMaster,
 		Region:         customObject.Spec.AWS.Region,
 		S3URI:          s3URI,
 		ClusterVersion: keyv2.ClusterVersion(customObject),
