@@ -1,12 +1,10 @@
 package s3objectv2
 
 import (
-	"bufio"
 	"context"
-	"strings"
+	"reflect"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certificatetpr/certificatetprtest"
 	"github.com/giantswarm/micrologger/microloggertest"
@@ -25,58 +23,115 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 	}
 
 	testCases := []struct {
-		obj            v1alpha1.AWSConfig
-		currentState   BucketObjectState
-		desiredState   BucketObjectState
-		expectedBody   string
-		expectedBucket string
-		expectedKey    string
-		description    string
+		description   string
+		obj           v1alpha1.AWSConfig
+		currentState  map[string]BucketObjectState
+		desiredState  map[string]BucketObjectState
+		expectedState map[string]BucketObjectState
 	}{
 		{
-			description:    "current state empty, desired state empty, empty create change",
-			obj:            clusterTpo,
-			currentState:   BucketObjectState{},
-			desiredState:   BucketObjectState{},
-			expectedBody:   "",
-			expectedBucket: "",
-			expectedKey:    "",
+			description:   "current state empty, desired state empty, empty update change",
+			obj:           clusterTpo,
+			currentState:  map[string]BucketObjectState{},
+			desiredState:  map[string]BucketObjectState{},
+			expectedState: map[string]BucketObjectState{},
 		},
 		{
-			description:  "current state empty, desired state not empty, create change == desired state",
+			description:  "current state empty, desired state not empty, empty update change",
 			obj:          clusterTpo,
-			currentState: BucketObjectState{},
-			desiredState: BucketObjectState{
-				WorkerCloudConfig: BucketObjectInstance{
-					Body:   "mybody",
+			currentState: map[string]BucketObjectState{},
+			desiredState: map[string]BucketObjectState{
+				"master": BucketObjectState{
+					Body:   "master-body",
 					Bucket: "mybucket",
-					Key:    "mykey",
+					Key:    "master",
 				},
 			},
-			expectedBody:   "mybody",
-			expectedBucket: "mybucket",
-			expectedKey:    "mykey",
+			expectedState: map[string]BucketObjectState{
+				"master": BucketObjectState{},
+			},
 		},
 		{
-			description: "current state not empty, desired state not empty, create change == desired state",
+			description: "current state matches desired state, empty update change",
 			obj:         clusterTpo,
-			currentState: BucketObjectState{
-				WorkerCloudConfig: BucketObjectInstance{
-					Body:   "currentbody",
-					Bucket: "currentbucket",
-					Key:    "currentkey",
-				},
-			},
-			desiredState: BucketObjectState{
-				WorkerCloudConfig: BucketObjectInstance{
-					Body:   "mybody",
+			currentState: map[string]BucketObjectState{
+				"master": BucketObjectState{
+					Body:   "master-body",
 					Bucket: "mybucket",
-					Key:    "mykey",
+					Key:    "master",
 				},
 			},
-			expectedBody:   "mybody",
-			expectedBucket: "mybucket",
-			expectedKey:    "mykey",
+			desiredState: map[string]BucketObjectState{
+				"master": BucketObjectState{
+					Body:   "master-body",
+					Bucket: "mybucket",
+					Key:    "master",
+				},
+			},
+			expectedState: map[string]BucketObjectState{
+				"master": BucketObjectState{},
+			},
+		},
+		{
+			description: "current state does not match desired state, update bucket object",
+			obj:         clusterTpo,
+			currentState: map[string]BucketObjectState{
+				"master": BucketObjectState{
+					Body:   "master-body",
+					Bucket: "mybucket",
+					Key:    "master",
+				},
+			},
+			desiredState: map[string]BucketObjectState{
+				"master": BucketObjectState{
+					Body:   "master-new-body",
+					Bucket: "mybucket",
+					Key:    "master",
+				},
+			},
+			expectedState: map[string]BucketObjectState{
+				"master": BucketObjectState{
+					Body:   "master-new-body",
+					Bucket: "mybucket",
+					Key:    "master",
+				},
+			},
+		},
+		{
+			description: "current state does not match desired state, update bucket object",
+			obj:         clusterTpo,
+			currentState: map[string]BucketObjectState{
+				"master": BucketObjectState{
+					Body:   "master-body",
+					Bucket: "mybucket",
+					Key:    "master",
+				},
+				"worker": BucketObjectState{
+					Body:   "worker-body",
+					Bucket: "mybucket",
+					Key:    "worker",
+				},
+			},
+			desiredState: map[string]BucketObjectState{
+				"master": BucketObjectState{
+					Body:   "master-new-body",
+					Bucket: "mybucket",
+					Key:    "master",
+				},
+				"worker": BucketObjectState{
+					Body:   "worker-body",
+					Bucket: "mybucket",
+					Key:    "worker",
+				},
+			},
+			expectedState: map[string]BucketObjectState{
+				"master": BucketObjectState{
+					Body:   "master-new-body",
+					Bucket: "mybucket",
+					Key:    "master",
+				},
+				"worker": BucketObjectState{},
+			},
 		},
 	}
 
@@ -104,27 +159,13 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 			if err != nil {
 				t.Errorf("expected '%v' got '%#v'", nil, err)
 			}
-			createChange, ok := result.(s3.PutObjectInput)
+			updateChange, ok := result.(map[string]BucketObjectState)
 			if !ok {
-				t.Errorf("expected '%T', got '%T'", createChange, result)
-			}
-			if createChange.Key != nil && *createChange.Key != tc.expectedKey {
-				t.Errorf("expected key %s, got %s", tc.expectedKey, createChange.Key)
-			}
-			if createChange.Bucket != nil && *createChange.Bucket != tc.expectedBucket {
-				t.Errorf("expected bucket %s, got %s", tc.expectedBucket, createChange.Bucket)
+				t.Errorf("expected '%T', got '%T'", updateChange, result)
 			}
 
-			if createChange.Body != nil {
-				var actualBodyItems []string
-				scanner := bufio.NewScanner(createChange.Body)
-				for scanner.Scan() {
-					actualBodyItems = append(actualBodyItems, scanner.Text())
-				}
-				actualBody := strings.Join(actualBodyItems, "\n")
-				if actualBody != tc.expectedBody {
-					t.Errorf("expected body %s, got %s", tc.expectedBody, actualBody)
-				}
+			if !reflect.DeepEqual(tc.expectedState, updateChange) {
+				t.Error("expected", tc.expectedState, "got", updateChange)
 			}
 		})
 	}

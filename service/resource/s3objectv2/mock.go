@@ -7,6 +7,7 @@ import (
 
 	"github.com/giantswarm/randomkeytpr"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
@@ -41,6 +42,22 @@ func (s *S3ClientMock) GetObject(*s3.GetObjectInput) (*s3.GetObjectOutput, error
 
 	output := &s3.GetObjectOutput{
 		Body: nopCloser{strings.NewReader(s.body)},
+	}
+
+	return output, nil
+}
+
+func (s *S3ClientMock) ListObjectsV2(*s3.ListObjectsV2Input) (*s3.ListObjectsV2Output, error) {
+	if s.isError {
+		return nil, fmt.Errorf("error!!")
+	}
+
+	output := &s3.ListObjectsV2Output{
+		Contents: []*s3.Object{
+			&s3.Object{
+				Key: aws.String("cloudconfig/myversion/worker"),
+			},
+		},
 	}
 
 	return output, nil
