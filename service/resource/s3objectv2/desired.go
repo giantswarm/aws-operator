@@ -10,7 +10,7 @@ import (
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
 	customObject, err := keyv2.ToCustomObject(obj)
-	output := BucketObjectState{}
+	output := map[string]BucketObjectState{}
 	if err != nil {
 		return output, microerror.Mask(err)
 	}
@@ -55,22 +55,26 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return output, microerror.Mask(err)
 	}
 
-	output.MasterCloudConfig = BucketObjectInstance{
+	masterObjectName := keyv2.BucketObjectName(customObject, prefixMaster)
+	masterCloudConfig := BucketObjectState{
 		Bucket: keyv2.BucketName(customObject, accountID),
 		Body:   masterBody,
-		Key:    keyv2.BucketObjectName(customObject, prefixMaster),
+		Key:    masterObjectName,
 	}
+	output[masterObjectName] = masterCloudConfig
 
 	workerBody, err := r.cloudConfig.NewWorkerTemplate(customObject, *tlsAssets)
 	if err != nil {
 		return output, microerror.Mask(err)
 	}
 
-	output.WorkerCloudConfig = BucketObjectInstance{
+	workerObjectName := keyv2.BucketObjectName(customObject, prefixWorker)
+	workerCloudConfig := BucketObjectState{
 		Bucket: keyv2.BucketName(customObject, accountID),
 		Body:   workerBody,
-		Key:    keyv2.BucketObjectName(customObject, prefixWorker),
+		Key:    workerObjectName,
 	}
+	output[workerObjectName] = workerCloudConfig
 
 	return output, nil
 }

@@ -41,6 +41,8 @@ func Test_DesiredState(t *testing.T) {
 	}
 	var err error
 	var newResource *Resource
+	var masterCloudConfig BucketObjectState
+	var workerCloudConfig BucketObjectState
 
 	resourceConfig := DefaultConfig()
 	resourceConfig.Logger = microloggertest.New()
@@ -69,33 +71,45 @@ func Test_DesiredState(t *testing.T) {
 				t.Errorf("unexpected error %v", err)
 			}
 
-			desiredState, ok := result.(BucketObjectState)
+			desiredState, ok := result.(map[string]BucketObjectState)
 			if !ok {
 				t.Errorf("expected '%T', got '%T'", desiredState, result)
 			}
 
-			if desiredState.MasterCloudConfig.Bucket != tc.expectedBucket {
-				t.Errorf("expected key %q, got %q", tc.expectedBucket, desiredState.MasterCloudConfig.Bucket)
+			if len(desiredState) != 2 {
+				t.Errorf("expected 2 objects, got %d", len(desiredState))
 			}
 
-			if desiredState.MasterCloudConfig.Key != tc.expectedMasterKey {
-				t.Errorf("expected key %q, got %q", tc.expectedMasterKey, desiredState.MasterCloudConfig.Key)
+			if masterCloudConfig, ok = desiredState[tc.expectedMasterKey]; !ok {
+				t.Errorf("expected key %q, not found", tc.expectedMasterKey)
 			}
 
-			if desiredState.WorkerCloudConfig.Body != tc.expectedBody {
-				t.Errorf("expected key %q, got %q", tc.expectedBody, desiredState.MasterCloudConfig.Body)
+			if masterCloudConfig.Bucket != tc.expectedBucket {
+				t.Errorf("expected bucket %q, got %q", tc.expectedBucket, masterCloudConfig.Bucket)
 			}
 
-			if desiredState.WorkerCloudConfig.Bucket != tc.expectedBucket {
-				t.Errorf("expected key %q, got %q", tc.expectedBucket, desiredState.WorkerCloudConfig.Bucket)
+			if masterCloudConfig.Key != tc.expectedMasterKey {
+				t.Errorf("expected key %q, got %q", tc.expectedMasterKey, masterCloudConfig.Key)
 			}
 
-			if desiredState.WorkerCloudConfig.Key != tc.expectedWorkerKey {
-				t.Errorf("expected key %q, got %q", tc.expectedWorkerKey, desiredState.WorkerCloudConfig.Key)
+			if masterCloudConfig.Body != tc.expectedBody {
+				t.Errorf("expected key %q, got %q", tc.expectedBody, masterCloudConfig.Body)
 			}
 
-			if desiredState.WorkerCloudConfig.Body != tc.expectedBody {
-				t.Errorf("expected key %q, got %q", tc.expectedBody, desiredState.WorkerCloudConfig.Body)
+			if workerCloudConfig, ok = desiredState[tc.expectedWorkerKey]; !ok {
+				t.Errorf("expected key %q, not found", tc.expectedWorkerKey)
+			}
+
+			if workerCloudConfig.Bucket != tc.expectedBucket {
+				t.Errorf("expected bucket %q, got %q", tc.expectedBucket, workerCloudConfig.Bucket)
+			}
+
+			if workerCloudConfig.Key != tc.expectedWorkerKey {
+				t.Errorf("expected key %q, got %q", tc.expectedWorkerKey, workerCloudConfig.Key)
+			}
+
+			if workerCloudConfig.Body != tc.expectedBody {
+				t.Errorf("expected key %q, got %q", tc.expectedBody, workerCloudConfig.Body)
 			}
 		})
 	}
