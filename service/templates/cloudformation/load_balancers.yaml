@@ -21,6 +21,8 @@
       {{ end }}
       LoadBalancerName: {{ .APIElbName }}
       Scheme: {{ .APIElbScheme }}
+      SecurityGroups:
+        - {{ .APIElbSecurityGroupID }}
       Subnets:
         - {{ .APIElbSubnetID }}
 {{end}}
