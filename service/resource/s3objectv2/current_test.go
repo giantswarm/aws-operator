@@ -80,7 +80,7 @@ func Test_CurrentState(t *testing.T) {
 			if err != nil && !tc.expectedIAMError && !tc.expectedS3Error {
 				t.Errorf("unexpected error %v", err)
 			}
-			currentState, ok := result.(BucketObjectState)
+			currentState, ok := result.(map[string]BucketObjectState)
 			if !ok {
 				t.Errorf("expected '%T', got '%T'", currentState, result)
 			}
@@ -93,16 +93,24 @@ func Test_CurrentState(t *testing.T) {
 				t.Error("expected S3 error didn't happen")
 			}
 
-			if currentState.WorkerCloudConfig.Key != tc.expectedKey {
-				t.Errorf("expeccted key %q, got %q", tc.expectedKey, currentState.WorkerCloudConfig.Key)
-			}
+			if !tc.expectedIAMError && !tc.expectedS3Error {
+				var bucketObject BucketObjectState
 
-			if currentState.WorkerCloudConfig.Bucket != tc.expectedBucket {
-				t.Errorf("expeccted key %q, got %q", tc.expectedBucket, currentState.WorkerCloudConfig.Bucket)
-			}
+				if bucketObject, ok = currentState[tc.expectedKey]; !ok {
+					t.Errorf("expected S3 key %q not found", tc.expectedKey)
+				}
 
-			if currentState.WorkerCloudConfig.Body != tc.expectedBody {
-				t.Errorf("expeccted key %q, got %q", tc.expectedBody, currentState.WorkerCloudConfig.Body)
+				if bucketObject.Body != tc.expectedBody {
+					t.Errorf("expected body %q, got %q", tc.expectedBody, bucketObject.Body)
+				}
+
+				if bucketObject.Bucket != tc.expectedBucket {
+					t.Errorf("expected bucket %q, got %q", tc.expectedBucket, bucketObject.Bucket)
+				}
+
+				if bucketObject.Key != tc.expectedKey {
+					t.Errorf("expected key %q, got %q", tc.expectedKey, bucketObject.Key)
+				}
 			}
 		})
 	}
