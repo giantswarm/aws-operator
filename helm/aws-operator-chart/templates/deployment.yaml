@@ -38,6 +38,7 @@ spec:
           items:
           - key: id_rsa.pub
             path: id_rsa.pub
+      serviceAccountName: aws-operator
       containers:
       - name: aws-operator
         image: quay.io/giantswarm/aws-operator:[[ .SHA ]]
