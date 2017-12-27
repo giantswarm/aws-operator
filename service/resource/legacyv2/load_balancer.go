@@ -11,7 +11,6 @@ import (
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
 	"github.com/giantswarm/aws-operator/service/keyv2"
-	"github.com/giantswarm/aws-operator/service/keyv1"
 )
 
 type LoadBalancerInput struct {
