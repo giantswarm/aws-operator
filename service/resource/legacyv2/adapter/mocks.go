@@ -18,6 +18,8 @@ type EC2ClientMock struct {
 	subnetID             string
 	unexistingRouteTable bool
 	routeTableID         string
+	vpcID                string
+	unexistingVPC        bool
 }
 
 func (e *EC2ClientMock) DescribeSecurityGroups(input *ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error) {
@@ -65,6 +67,22 @@ func (e *EC2ClientMock) DescribeRouteTables(input *ec2.DescribeRouteTablesInput)
 			},
 		},
 	}
+	return output, nil
+}
+
+func (e *EC2ClientMock) DescribeVpcs(input *ec2.DescribeVpcsInput) (*ec2.DescribeVpcsOutput, error) {
+	if e.unexistingVPC {
+		return nil, fmt.Errorf("vpc not found")
+	}
+
+	output := &ec2.DescribeVpcsOutput{
+		Vpcs: []*ec2.Vpc{
+			&ec2.Vpc{
+				VpcId: aws.String(e.vpcID),
+			},
+		},
+	}
+
 	return output, nil
 }
 
