@@ -17,6 +17,18 @@ rules:
       - patch
       - delete
   - apiGroups:
+      - "provider.giantswarm.io"
+    resources:
+      - awsconfigs
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
       - ""
     resources:
       - namespaces
