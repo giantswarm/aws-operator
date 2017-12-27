@@ -102,6 +102,10 @@ func (g *NatGateway) CreateOrFail() error {
 				Key:   aws.String(tagKeyName),
 				Value: aws.String(g.Name),
 			},
+			{
+				Key:   aws.String(tagKeyClusterId),
+				Value: aws.String(g.Name),
+			},
 		},
 	}); err != nil {
 		return microerror.Mask(err)

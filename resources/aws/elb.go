@@ -22,6 +22,7 @@ type ELB struct {
 	SecurityGroup      string
 	SubnetID           string
 	Tags               []string
+	ClusterID          string
 }
 
 // PortPair is a pair of ports.
@@ -111,6 +112,20 @@ func (lb *ELB) CreateOrFail() error {
 			aws.String(lb.SubnetID),
 		},
 		Scheme: aws.String(lb.Scheme),
+	}); err != nil {
+		return microerror.Mask(err)
+	}
+
+	if _, err := lb.Client.AddTags(&elb.AddTagsInput{
+		LoadBalancerNames: []*string{
+			aws.String(lb.Name),
+		},
+		Tags: []*elb.Tag{
+			{
+				Key:   aws.String(tagKeyClusterId),
+				Value: aws.String(lb.ClusterID),
+			},
+		},
 	}); err != nil {
 		return microerror.Mask(err)
 	}

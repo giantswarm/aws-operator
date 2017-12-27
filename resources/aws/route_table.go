@@ -13,9 +13,10 @@ import (
 )
 
 type RouteTable struct {
-	Name  string
-	VpcID string
-	id    string
+	Name       string
+	VpcID      string
+	id         string
+	ClusterID  string
 	// Dependencies.
 	Client *ec2.EC2
 	Logger micrologger.Logger
@@ -90,6 +91,10 @@ func (r *RouteTable) CreateOrFail() error {
 				{
 					Key:   aws.String(tagKeyName),
 					Value: aws.String(r.Name),
+				},
+				{
+					Key:   aws.String(tagKeyClusterId),
+					Value: aws.String(r.ClusterID),
 				},
 			},
 		}); err != nil {

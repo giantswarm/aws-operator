@@ -396,8 +396,9 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 	{
 		var err error
 		bucket = &awsresources.Bucket{
-			Name:      bucketName,
-			AWSEntity: awsresources.AWSEntity{Clients: clients},
+			AWSEntity:  awsresources.AWSEntity{Clients: clients},
+			Name:       bucketName,
+			ClusterID:  keyv1.ClusterID(cluster),
 		}
 		bucketCreated, err = bucket.CreateIfNotExists()
 		if err != nil {
@@ -545,10 +546,11 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 
 	// Create public route table.
 	publicRouteTable := &awsresources.RouteTable{
-		Name:   keyv1.ClusterID(cluster),
-		VpcID:  vpcID,
-		Client: clients.EC2,
-		Logger: s.logger,
+		Name:      keyv1.ClusterID(cluster),
+		VpcID:     vpcID,
+		Client:    clients.EC2,
+		Logger:    s.logger,
+		ClusterID: keyv1.ClusterID(cluster),
 	}
 	publicRouteTableCreated, err := publicRouteTable.CreateIfNotExists()
 	if err != nil {
@@ -615,10 +617,11 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 
 		// Create private route table.
 		privateRouteTable = &awsresources.RouteTable{
-			Name:   keyv1.RouteTableName(cluster, suffixPrivate),
-			VpcID:  vpcID,
-			Client: clients.EC2,
-			Logger: s.logger,
+			Name:      keyv1.RouteTableName(cluster, suffixPrivate),
+			VpcID:     vpcID,
+			Client:    clients.EC2,
+			Logger:    s.logger,
+			ClusterID: keyv1.ClusterID(cluster),
 		}
 		privateRouteTableCreated, err := privateRouteTable.CreateIfNotExists()
 		if err != nil {
@@ -689,10 +692,11 @@ func (s *Resource) processCluster(cluster awstpr.CustomObject) error {
 
 	for _, privateRouteTableName := range cluster.Spec.AWS.VPC.RouteTableNames {
 		privateRouteTable := &awsresources.RouteTable{
-			Name:   privateRouteTableName,
-			VpcID:  cluster.Spec.AWS.VPC.PeerID,
-			Client: hostClients.EC2,
-			Logger: s.logger,
+			Name:      privateRouteTableName,
+			VpcID:     cluster.Spec.AWS.VPC.PeerID,
+			Client:    hostClients.EC2,
+			Logger:    s.logger,
+			ClusterID: keyv1.ClusterID(cluster),
 		}
 
 		privateRoute := &awsresources.Route{
@@ -1336,8 +1340,9 @@ func (s *Resource) processDelete(cluster awstpr.CustomObject) error {
 	bucketName := s.bucketName(cluster)
 
 	bucket := &awsresources.Bucket{
-		AWSEntity: awsresources.AWSEntity{Clients: clients},
-		Name:      bucketName,
+		AWSEntity:  awsresources.AWSEntity{Clients: clients},
+		Name:       bucketName,
+		ClusterID:  keyv1.ClusterID(cluster),
 	}
 
 	if err := bucket.Delete(); err != nil {
