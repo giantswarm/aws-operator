@@ -39,6 +39,7 @@ type Adapter struct {
 
 	launchConfigAdapter
 	autoScalingGroupAdapter
+	internetGatewayAdapter
 	natGatewayAdapter
 	workerPolicyAdapter
 	recordSetsAdapter
@@ -54,6 +55,7 @@ func New(customObject v1alpha1.AWSConfig, clients Clients) (Adapter, error) {
 	hydraters := []hydrater{
 		a.getAutoScalingGroup,
 		a.getLaunchConfiguration,
+		a.getInternetGateway,
 		a.getNatGateway,
 		a.getWorkerPolicy,
 		a.getRecordSets,

@@ -160,6 +160,10 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Error("ingressWildcardRecordSet element not found")
 	}
+	if !strings.Contains(body, "InternetGateway:") {
+		fmt.Println(body)
+		t.Error("NATGateway element not found")
+	}
 	if !strings.Contains(body, "NATGateway:") {
 		fmt.Println(body)
 		t.Error("NATGateway element not found")
