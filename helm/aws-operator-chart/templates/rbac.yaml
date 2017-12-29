@@ -57,6 +57,7 @@ rules:
       - get
   - nonResourceURLs:
       - "/"
+      - "/healthz"
     verbs:
       - get
 ---
