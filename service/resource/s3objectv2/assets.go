@@ -2,7 +2,7 @@ package s3objectv2
 
 import (
 	"bytes"
-	"html/template"
+	"text/template"
 
 	"github.com/giantswarm/certificatetpr"
 	"github.com/giantswarm/microerror"
@@ -26,7 +26,6 @@ func (s *Resource) encodeTLSAssets(assets certificatetpr.AssetsBundle, kmsKeyArn
 }
 
 func (s *Resource) encodeKeyAssets(assets map[randomkeytpr.Key][]byte, kmsKeyArn string) (*randomkeytpr.CompactRandomKeyAssets, error) {
-
 	encryptionKey, ok := assets[randomkeytpr.EncryptionKey]
 	if !ok {
 		return nil, microerror.Mask(invalidConfigError)
