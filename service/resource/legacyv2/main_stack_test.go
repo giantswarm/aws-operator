@@ -181,7 +181,7 @@ func TestMainTemplateExistingFields(t *testing.T) {
 	}
 	if !strings.Contains(body, "InternetGateway:") {
 		fmt.Println(body)
-		t.Error("NATGateway element not found")
+		t.Error("InternetGateway element not found")
 	}
 	if !strings.Contains(body, "NATGateway:") {
 		fmt.Println(body)
