@@ -50,10 +50,15 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 		},
 	}
 
-	clients := Clients{
-		EC2: &EC2ClientMock{},
-	}
 	for _, tc := range testCases {
+		clients := Clients{}
+		if tc.expectedError {
+			clients.EC2 = &EC2ClientMock{
+				unexistingSubnet: true,
+			}
+		} else {
+			clients.EC2 = &EC2ClientMock{}
+		}
 		a := Adapter{}
 		t.Run(tc.description, func(t *testing.T) {
 			err := a.getAutoScalingGroup(tc.customObject, clients)
@@ -94,41 +99,6 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 					t.Errorf("unexpected output, got %q, want %q", a.WorkerAZ, tc.expectedAZ)
 				}
 
-			}
-		})
-	}
-}
-
-func TestAdapterAutoScalingGroupLoadBalancerName(t *testing.T) {
-	testCases := []struct {
-		description              string
-		customObject             v1alpha1.AWSConfig
-		expectedLoadBalancerName string
-	}{
-		{
-			description: "basic matching, all fields present",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: defaultCluster,
-				},
-			},
-			expectedLoadBalancerName: "test-cluster-ingress",
-		},
-	}
-
-	clients := Clients{
-		EC2: &EC2ClientMock{},
-	}
-	for _, tc := range testCases {
-		a := Adapter{}
-		t.Run(tc.description, func(t *testing.T) {
-			err := a.getAutoScalingGroup(tc.customObject, clients)
-			if err != nil {
-				t.Errorf("unexpected error %v", err)
-			}
-
-			if a.LoadBalancerName != tc.expectedLoadBalancerName {
-				t.Errorf("unexpected output, got %q, want %q", a.LoadBalancerName, tc.expectedLoadBalancerName)
 			}
 		})
 	}
