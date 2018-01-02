@@ -10,7 +10,7 @@ import (
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
 	customObject, err := keyv2.ToCustomObject(obj)
-	output := BucketObjectState{}
+	output := map[string]BucketObjectState{}
 	if err != nil {
 		return output, microerror.Mask(err)
 	}
@@ -22,6 +22,11 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 
 	clusterID := keyv2.ClusterID(customObject)
 	certs, err := r.certWatcher.SearchCerts(clusterID)
+	if err != nil {
+		return output, microerror.Mask(err)
+	}
+
+	randomKeys, err := r.randomKeyWatcher.SearchKeys(clusterID)
 	if err != nil {
 		return output, microerror.Mask(err)
 	}
@@ -40,16 +45,36 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return output, microerror.Mask(err)
 	}
 
-	body, err := r.cloudConfig.NewWorkerTemplate(customObject, *tlsAssets)
+	randomKeyAssets, err := r.encodeKeyAssets(randomKeys, kmsArn)
 	if err != nil {
 		return output, microerror.Mask(err)
 	}
 
-	output.WorkerCloudConfig = BucketObjectInstance{
-		Bucket: keyv2.BucketName(customObject, accountID),
-		Body:   body,
-		Key:    keyv2.BucketObjectName(customObject, prefixWorker),
+	masterBody, err := r.cloudConfig.NewMasterTemplate(customObject, *tlsAssets, *randomKeyAssets)
+	if err != nil {
+		return output, microerror.Mask(err)
 	}
+
+	masterObjectName := keyv2.BucketObjectName(customObject, prefixMaster)
+	masterCloudConfig := BucketObjectState{
+		Bucket: keyv2.BucketName(customObject, accountID),
+		Body:   masterBody,
+		Key:    masterObjectName,
+	}
+	output[masterObjectName] = masterCloudConfig
+
+	workerBody, err := r.cloudConfig.NewWorkerTemplate(customObject, *tlsAssets)
+	if err != nil {
+		return output, microerror.Mask(err)
+	}
+
+	workerObjectName := keyv2.BucketObjectName(customObject, prefixWorker)
+	workerCloudConfig := BucketObjectState{
+		Bucket: keyv2.BucketName(customObject, accountID),
+		Body:   workerBody,
+		Key:    workerObjectName,
+	}
+	output[workerObjectName] = workerCloudConfig
 
 	return output, nil
 }

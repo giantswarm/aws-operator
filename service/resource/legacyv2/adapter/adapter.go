@@ -34,14 +34,17 @@ import (
 type hydrater func(v1alpha1.AWSConfig, Clients) error
 
 type Adapter struct {
-	ASGType   string
-	ClusterID string
+	ASGType          string
+	AvailabilityZone string
+	ClusterID        string
 
-	launchConfigAdapter
 	autoScalingGroupAdapter
+	instanceAdapter
+	launchConfigAdapter
+	loadBalancersAdapter
 	natGatewayAdapter
-	workerPolicyAdapter
 	recordSetsAdapter
+	workerPolicyAdapter
 	outputsAdapter
 }
 
@@ -53,10 +56,12 @@ func New(customObject v1alpha1.AWSConfig, clients Clients) (Adapter, error) {
 
 	hydraters := []hydrater{
 		a.getAutoScalingGroup,
+		a.getInstance,
 		a.getLaunchConfiguration,
+		a.getLoadBalancers,
 		a.getNatGateway,
-		a.getWorkerPolicy,
 		a.getRecordSets,
+		a.getWorkerPolicy,
 		a.getOutputs,
 	}
 

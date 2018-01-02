@@ -98,59 +98,6 @@ func TestAdapterRecordSetsRegularFields(t *testing.T) {
 	}
 }
 
-func TestAdapterRecordSetsAPIDNS(t *testing.T) {
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: v1alpha1.Cluster{
-				ID: "test-cluster",
-				Kubernetes: v1alpha1.ClusterKubernetes{
-					API: v1alpha1.ClusterKubernetesAPI{
-						Domain: "api.domain",
-					},
-					IngressController: v1alpha1.ClusterKubernetesIngressController{
-						Domain: "ingress.domain",
-					},
-				},
-				Etcd: v1alpha1.ClusterEtcd{
-					Domain: "etcd.domain",
-				},
-			},
-		},
-	}
-	testCases := []struct {
-		description string
-		lbName      string
-		expectedDNS string
-	}{
-		{
-			description: "basic match",
-			lbName:      "test-cluster-api",
-			expectedDNS: "myDNS",
-		},
-	}
-
-	clients := Clients{
-		EC2: &EC2ClientMock{},
-	}
-	for _, tc := range testCases {
-		a := Adapter{}
-		t.Run(tc.description, func(t *testing.T) {
-			clients.ELB = &ELBClientMock{
-				dns:  tc.expectedDNS,
-				name: tc.lbName,
-			}
-			err := a.getRecordSets(customObject, clients)
-			if err != nil {
-				t.Fatalf("unexpected error %v", err)
-			}
-
-			if a.APIELBDNS != tc.expectedDNS {
-				t.Fatalf("unexpected APIELBDNS, got %q, want %q", a.APIELBDNS, tc.expectedDNS)
-			}
-		})
-	}
-}
-
 func TestAdapterRecordSetsIngressDNS(t *testing.T) {
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
@@ -199,59 +146,6 @@ func TestAdapterRecordSetsIngressDNS(t *testing.T) {
 
 			if a.IngressELBDNS != tc.expectedDNS {
 				t.Fatalf("unexpected IngressELBDNS, got %q, want %q", a.IngressELBDNS, tc.expectedDNS)
-			}
-		})
-	}
-}
-
-func TestAdapterRecordSetsEtcdDNS(t *testing.T) {
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: v1alpha1.Cluster{
-				ID: "test-cluster",
-				Kubernetes: v1alpha1.ClusterKubernetes{
-					API: v1alpha1.ClusterKubernetesAPI{
-						Domain: "api.domain",
-					},
-					IngressController: v1alpha1.ClusterKubernetesIngressController{
-						Domain: "ingress.domain",
-					},
-				},
-				Etcd: v1alpha1.ClusterEtcd{
-					Domain: "etcd.domain",
-				},
-			},
-		},
-	}
-	testCases := []struct {
-		description string
-		lbName      string
-		expectedDNS string
-	}{
-		{
-			description: "basic match",
-			lbName:      "test-cluster-etcd",
-			expectedDNS: "myDNS",
-		},
-	}
-
-	clients := Clients{
-		EC2: &EC2ClientMock{},
-	}
-	for _, tc := range testCases {
-		a := Adapter{}
-		t.Run(tc.description, func(t *testing.T) {
-			clients.ELB = &ELBClientMock{
-				dns:  tc.expectedDNS,
-				name: tc.lbName,
-			}
-			err := a.getRecordSets(customObject, clients)
-			if err != nil {
-				t.Fatalf("unexpected error %v", err)
-			}
-
-			if a.EtcdELBDNS != tc.expectedDNS {
-				t.Fatalf("unexpected EtcdELBDNS, got %q, want %q", a.EtcdELBDNS, tc.expectedDNS)
 			}
 		})
 	}

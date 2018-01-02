@@ -61,7 +61,7 @@ func createRawTLSAssets(assets certificatetpr.AssetsBundle) *rawTLSAssets {
 type rawKeyAssets map[randomkeytpr.Key][]byte
 type encryptedKeyAssets map[randomkeytpr.Key][]byte
 
-func (r rawKeyAssets) encrypt(svc *kms.KMS, kmsKeyARN string) (*encryptedKeyAssets, error) {
+func (r rawKeyAssets) encrypt(svc KMSClient, kmsKeyARN string) (*encryptedKeyAssets, error) {
 
 	encryptedAssets := make(encryptedKeyAssets)
 	for k, v := range r {

@@ -28,6 +28,7 @@ type CoreV1alpha1Interface interface {
 	CertConfigsGetter
 	FlannelConfigsGetter
 	IngressConfigsGetter
+	StorageConfigsGetter
 }
 
 // CoreV1alpha1Client is used to interact with features provided by the core.giantswarm.io group.
@@ -45,6 +46,10 @@ func (c *CoreV1alpha1Client) FlannelConfigs(namespace string) FlannelConfigInter
 
 func (c *CoreV1alpha1Client) IngressConfigs(namespace string) IngressConfigInterface {
 	return newIngressConfigs(c, namespace)
+}
+
+func (c *CoreV1alpha1Client) StorageConfigs(namespace string) StorageConfigInterface {
+	return newStorageConfigs(c, namespace)
 }
 
 // NewForConfig creates a new CoreV1alpha1Client for the given config.
