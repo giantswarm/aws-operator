@@ -46,6 +46,16 @@
         Protocol: TCP
       {{ end }}
       LoadBalancerName: {{ .IngressElbName }}
+      Policies:
+      - PolicyName: "EnableProxyProtocol"
+        PolicyType: "ProxyProtocolPolicyType"
+        Attributes:
+        - Name: "ProxyProtocol"
+          Value: "true"
+        InstancePorts:
+        {{ range .IngressElbPortsToOpen}}
+        - {{ .PortInstance }}
+        {{ end }}
       Scheme: {{ .IngressElbScheme }}
       SecurityGroups:
         - {{ .IngressElbSecurityGroupID }}
