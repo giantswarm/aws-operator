@@ -151,6 +151,10 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Error("workerRole output element not found")
 	}
+	if !strings.Contains(body, "PolicyName: test-cluster-master") {
+		fmt.Println(body)
+		t.Error("PolicyName output element not found")
+	}
 	if !strings.Contains(body, "PolicyName: test-cluster-worker") {
 		fmt.Println(body)
 		t.Error("PolicyName output element not found")

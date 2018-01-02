@@ -10,6 +10,9 @@ func TestAdapterIamPoliciesRegularFields(t *testing.T) {
 	testCases := []struct {
 		description               string
 		customObject              v1alpha1.AWSConfig
+		expectedMasterRoleName    string
+		expectedMasterPolicyName  string
+		expectedMasterProfileName string
 		expectedWorkerRoleName    string
 		expectedWorkerPolicyName  string
 		expectedWorkerProfileName string
@@ -21,6 +24,9 @@ func TestAdapterIamPoliciesRegularFields(t *testing.T) {
 					Cluster: defaultCluster,
 				},
 			},
+			expectedMasterRoleName:    "test-cluster-master-EC2-K8S-Role",
+			expectedMasterPolicyName:  "test-cluster-master-EC2-K8S-Policy",
+			expectedMasterProfileName: "test-cluster-master-EC2-K8S-Role",
 			expectedWorkerRoleName:    "test-cluster-worker-EC2-K8S-Role",
 			expectedWorkerPolicyName:  "test-cluster-worker-EC2-K8S-Policy",
 			expectedWorkerProfileName: "test-cluster-worker-EC2-K8S-Role",
@@ -37,6 +43,18 @@ func TestAdapterIamPoliciesRegularFields(t *testing.T) {
 			err := a.getIamPolicies(tc.customObject, clients)
 			if err != nil {
 				t.Errorf("unexpected error %v", err)
+			}
+
+			if a.MasterPolicyName != tc.expectedMasterPolicyName {
+				t.Errorf("unexpected MasterPolicyName, got %q, want %q", a.MasterPolicyName, tc.expectedMasterPolicyName)
+			}
+
+			if a.MasterRoleName != tc.expectedMasterRoleName {
+				t.Errorf("unexpected MasterRoleName, got %q, want %q", a.MasterRoleName, tc.expectedMasterRoleName)
+			}
+
+			if a.MasterProfileName != tc.expectedMasterProfileName {
+				t.Errorf("unexpected MasterProfileName, got %q, want %q", a.MasterProfileName, tc.expectedMasterProfileName)
 			}
 
 			if a.WorkerPolicyName != tc.expectedWorkerPolicyName {

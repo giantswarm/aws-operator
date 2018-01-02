@@ -13,6 +13,9 @@ import (
 // template related to this adapter: service/templates/cloudformation/iam_policies.yaml
 
 type iamPoliciesAdapter struct {
+	MasterRoleName    string
+	MasterPolicyName  string
+	MasterProfileName string
 	WorkerRoleName    string
 	WorkerPolicyName  string
 	WorkerProfileName string
@@ -23,6 +26,9 @@ type iamPoliciesAdapter struct {
 func (i *iamPoliciesAdapter) getIamPolicies(customObject v1alpha1.AWSConfig, clients Clients) error {
 	clusterID := keyv2.ClusterID(customObject)
 
+	i.MasterPolicyName = keyv2.PolicyName(customObject, prefixMaster)
+	i.MasterProfileName = keyv2.InstanceProfileName(customObject, prefixMaster)
+	i.MasterRoleName = keyv2.RoleName(customObject, prefixMaster)
 	i.WorkerPolicyName = keyv2.PolicyName(customObject, prefixWorker)
 	i.WorkerProfileName = keyv2.InstanceProfileName(customObject, prefixWorker)
 	i.WorkerRoleName = keyv2.RoleName(customObject, prefixWorker)
