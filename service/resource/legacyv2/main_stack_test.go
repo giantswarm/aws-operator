@@ -179,6 +179,10 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Error("ApiLoadBalancer element not found")
 	}
+	if !strings.Contains(body, "InternetGateway:") {
+		fmt.Println(body)
+		t.Error("InternetGateway element not found")
+	}
 	if !strings.Contains(body, "NATGateway:") {
 		fmt.Println(body)
 		t.Error("NATGateway element not found")
