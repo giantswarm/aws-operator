@@ -78,7 +78,7 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 				t.Errorf("unexpected InstanceType, got %q, want %q", a.WorkerInstanceType, tc.expectedInstanceType)
 			}
 			if a.WorkerAssociatePublicIPAddress != tc.expectedAssociatePublicIPAddress {
-				t.Errorf("unexpected WorkerAssociatePublicIPAddress, got %q, want %q", a.WorkerAssociatePublicIPAddress, tc.expectedAssociatePublicIPAddress)
+				t.Errorf("unexpected WorkerAssociatePublicIPAddress, got %t, want %t", a.WorkerAssociatePublicIPAddress, tc.expectedAssociatePublicIPAddress)
 			}
 			if !reflect.DeepEqual(a.WorkerBlockDeviceMappings, tc.expectedBlockDeviceMappings) {
 				t.Errorf("unexpected BlockDeviceMappings, got %v, want %v", a.WorkerBlockDeviceMappings, tc.expectedBlockDeviceMappings)
