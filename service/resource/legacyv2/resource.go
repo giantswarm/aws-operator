@@ -781,96 +781,103 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 
 	}
 
-	mastersInput := runMachinesInput{
-		clients:             clients,
-		cluster:             cluster,
-		tlsAssets:           tlsAssets,
-		clusterKeys:         clusterKeys,
-		clusterName:         keyv2.ClusterID(cluster),
-		bucket:              bucket,
-		securityGroup:       mastersSecurityGroup,
-		instanceProfileName: masterPolicy.GetName(),
-		prefix:              prefixMaster,
-	}
+	var apiLB *awsresources.ELB
+	var etcdLB *awsresources.ELB
+	var anyMastersCreated bool
+	var masterIDs []string
 
-	if keyv2.HasClusterVersion(cluster) {
-		// New clusters have masters in the private subnet.
-		mastersInput.subnet = privateSubnet
-	} else {
-		// Legacy clusters have masters in the public subnet.
-		mastersInput.subnet = publicSubnet
+	if !keyv2.UseCloudFormation(cluster) {
+		mastersInput := runMachinesInput{
+			clients:             clients,
+			cluster:             cluster,
+			tlsAssets:           tlsAssets,
+			clusterKeys:         clusterKeys,
+			clusterName:         keyv2.ClusterID(cluster),
+			bucket:              bucket,
+			securityGroup:       mastersSecurityGroup,
+			instanceProfileName: masterPolicy.GetName(),
+			prefix:              prefixMaster,
+		}
 
-		// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
-		mastersInput.keyPairName = keyv2.ClusterID(cluster)
-	}
+		if keyv2.HasClusterVersion(cluster) {
+			// New clusters have masters in the private subnet.
+			mastersInput.subnet = privateSubnet
+		} else {
+			// Legacy clusters have masters in the public subnet.
+			mastersInput.subnet = publicSubnet
 
-	// Run masters.
-	anyMastersCreated, masterIDs, err := s.runMachines(mastersInput)
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not start masters: '%#v'", err))
-	}
+			// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
+			mastersInput.keyPairName = keyv2.ClusterID(cluster)
+		}
 
-	if !validateIDs(masterIDs) {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("master nodes had invalid instance IDs: %v", masterIDs))
-	}
+		// Run masters.
+		anyMastersCreated, masterIDs, err = s.runMachines(mastersInput)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not start masters: '%#v'", err))
+		}
 
-	// Create apiserver load balancer.
-	lbInput := LoadBalancerInput{
-		Name:               cluster.Spec.Cluster.Kubernetes.API.Domain,
-		Clients:            clients,
-		Cluster:            cluster,
-		IdleTimeoutSeconds: cluster.Spec.AWS.API.ELB.IdleTimeoutSeconds,
-		InstanceIDs:        masterIDs,
-		PortsToOpen: awsresources.PortPairs{
-			{
-				PortELB:      cluster.Spec.Cluster.Kubernetes.API.SecurePort,
-				PortInstance: cluster.Spec.Cluster.Kubernetes.API.SecurePort,
+		if !validateIDs(masterIDs) {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("master nodes had invalid instance IDs: %v", masterIDs))
+		}
+
+		// Create apiserver load balancer.
+		lbInput := LoadBalancerInput{
+			Name:               cluster.Spec.Cluster.Kubernetes.API.Domain,
+			Clients:            clients,
+			Cluster:            cluster,
+			IdleTimeoutSeconds: cluster.Spec.AWS.API.ELB.IdleTimeoutSeconds,
+			InstanceIDs:        masterIDs,
+			PortsToOpen: awsresources.PortPairs{
+				{
+					PortELB:      cluster.Spec.Cluster.Kubernetes.API.SecurePort,
+					PortInstance: cluster.Spec.Cluster.Kubernetes.API.SecurePort,
+				},
 			},
-		},
-		SecurityGroupID: mastersSecurityGroupID,
-		SubnetID:        publicSubnetID,
-	}
+			SecurityGroupID: mastersSecurityGroupID,
+			SubnetID:        publicSubnetID,
+		}
 
-	apiLB, err := s.createLoadBalancer(lbInput)
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create apiserver load balancer: '%#v'", err))
-	}
+		apiLB, err = s.createLoadBalancer(lbInput)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create apiserver load balancer: '%#v'", err))
+		}
 
-	// Create etcd load balancer.
-	lbInput = LoadBalancerInput{
-		Name:               cluster.Spec.Cluster.Etcd.Domain,
-		Clients:            clients,
-		Cluster:            cluster,
-		IdleTimeoutSeconds: cluster.Spec.AWS.Etcd.ELB.IdleTimeoutSeconds,
-		InstanceIDs:        masterIDs,
-		PortsToOpen: awsresources.PortPairs{
-			{
-				PortELB:      httpsPort,
-				PortInstance: cluster.Spec.Cluster.Etcd.Port,
+		// Create etcd load balancer.
+		lbInput = LoadBalancerInput{
+			Name:               cluster.Spec.Cluster.Etcd.Domain,
+			Clients:            clients,
+			Cluster:            cluster,
+			IdleTimeoutSeconds: cluster.Spec.AWS.Etcd.ELB.IdleTimeoutSeconds,
+			InstanceIDs:        masterIDs,
+			PortsToOpen: awsresources.PortPairs{
+				{
+					PortELB:      httpsPort,
+					PortInstance: cluster.Spec.Cluster.Etcd.Port,
+				},
 			},
-		},
-		SecurityGroupID: mastersSecurityGroupID,
-		SubnetID:        publicSubnetID,
-	}
+			SecurityGroupID: mastersSecurityGroupID,
+			SubnetID:        publicSubnetID,
+		}
 
-	if keyv2.HasClusterVersion(cluster) {
-		lbInput.Scheme = "internal"
-	}
+		if keyv2.HasClusterVersion(cluster) {
+			lbInput.Scheme = "internal"
+		}
 
-	etcdLB, err := s.createLoadBalancer(lbInput)
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create etcd load balancer: '%#v'", err))
-	}
+		etcdLB, err = s.createLoadBalancer(lbInput)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create etcd load balancer: '%#v'", err))
+		}
 
-	// Masters were created but the master IAM policy existed from a previous
-	// execution. Its likely that previous execution failed. IAM policies can't
-	// be reused for EC2 instances.
-	if anyMastersCreated && !masterPolicyCreated {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("cluster '%s' cannot be processed. As IAM policy for master nodes cannot be reused. Please delete this cluster.", keyv2.ClusterID(cluster)))
+		// Masters were created but the master IAM policy existed from a previous
+		// execution. Its likely that previous execution failed. IAM policies can't
+		// be reused for EC2 instances.
+		if anyMastersCreated && !masterPolicyCreated {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("cluster '%s' cannot be processed. As IAM policy for master nodes cannot be reused. Please delete this cluster.", keyv2.ClusterID(cluster)))
+		}
 	}
 
 	// Create Ingress load balancer.
-	lbInput = LoadBalancerInput{
+	ingressLbInput := LoadBalancerInput{
 		Name:               cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
 		Clients:            clients,
 		Cluster:            cluster,
@@ -889,7 +896,7 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 		SubnetID:        publicSubnetID,
 	}
 
-	ingressLB, err := s.createLoadBalancer(lbInput)
+	ingressLB, err := s.createLoadBalancer(ingressLbInput)
 	if err != nil {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create ingress load balancer: '%#v'", err))
 	}
@@ -1033,13 +1040,15 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 		}
 	}
 
-	masterServiceInput := MasterServiceInput{
-		Clients:  clients,
-		Cluster:  cluster,
-		MasterID: masterIDs[0],
-	}
-	if err := s.createMasterService(masterServiceInput); err != nil {
-		return microerror.Mask(err)
+	if !keyv2.UseCloudFormation(cluster) {
+		masterServiceInput := MasterServiceInput{
+			Clients:  clients,
+			Cluster:  cluster,
+			MasterID: masterIDs[0],
+		}
+		if err := s.createMasterService(masterServiceInput); err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
 	return nil
@@ -1071,16 +1080,18 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 		s.logger.Log("error", fmt.Sprintf("could not retrieve host amazon account id: '%#v'", err))
 	}
 
-	// Delete masters.
-	s.logger.Log("info", "deleting masters...")
-	if err := s.deleteMachines(deleteMachinesInput{
-		clients:     clients,
-		clusterName: keyv2.ClusterID(cluster),
-		prefix:      prefixMaster,
-	}); err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-	} else {
-		s.logger.Log("info", "deleted masters")
+	if !keyv2.UseCloudFormation(cluster) {
+		// Delete masters.
+		s.logger.Log("info", "deleting masters...")
+		if err := s.deleteMachines(deleteMachinesInput{
+			clients:     clients,
+			clusterName: keyv2.ClusterID(cluster),
+			prefix:      prefixMaster,
+		}); err != nil {
+			s.logger.Log("error", fmt.Sprintf("%#v", err))
+		} else {
+			s.logger.Log("info", "deleted masters")
+		}
 	}
 
 	if keyv2.UseCloudFormation(cluster) {
@@ -1122,63 +1133,65 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 		}
 	}
 
-	// Delete Record Sets.
+	if !keyv2.UseCloudFormation(cluster) {
+		// Delete Record Sets.
 
-	apiLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Kubernetes.API.Domain, cluster)
-	etcdLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Etcd.Domain, cluster)
-	ingressLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Kubernetes.IngressController.Domain, cluster)
-	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-	} else {
-		apiLB, err := awsresources.NewELBFromExisting(apiLBName, clients.ELB)
-		etcdLB, err := awsresources.NewELBFromExisting(etcdLBName, clients.ELB)
-		ingressLB, err := awsresources.NewELBFromExisting(ingressLBName, clients.ELB)
+		apiLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Kubernetes.API.Domain, cluster)
+		etcdLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Etcd.Domain, cluster)
+		ingressLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Kubernetes.IngressController.Domain, cluster)
 		if err != nil {
 			s.logger.Log("error", fmt.Sprintf("%#v", err))
 		} else {
-			recordSetInputs := []recordSetInput{
-				{
-					Cluster:      cluster,
-					Client:       clients.Route53,
-					Resource:     apiLB,
-					Domain:       cluster.Spec.Cluster.Kubernetes.API.Domain,
-					HostedZoneID: cluster.Spec.AWS.API.HostedZones,
-					Type:         route53.RRTypeA,
-				},
-				{
-					Cluster:      cluster,
-					Client:       clients.Route53,
-					Resource:     etcdLB,
-					Domain:       cluster.Spec.Cluster.Etcd.Domain,
-					HostedZoneID: cluster.Spec.AWS.Etcd.HostedZones,
-					Type:         route53.RRTypeA,
-				},
-				{
-					Cluster:      cluster,
-					Client:       clients.Route53,
-					Resource:     ingressLB,
-					Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-					HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
-					Type:         route53.RRTypeA,
-				},
-				{
-					Cluster:      cluster,
-					Client:       clients.Route53,
-					Value:        cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-					Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.WildcardDomain,
-					HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
-					Type:         route53.RRTypeCname,
-				},
-			}
-
-			var rsErr error
-			for _, input := range recordSetInputs {
-				if rsErr = s.deleteRecordSet(input); rsErr != nil {
-					s.logger.Log("error", fmt.Sprintf("%#v", rsErr))
+			apiLB, err := awsresources.NewELBFromExisting(apiLBName, clients.ELB)
+			etcdLB, err := awsresources.NewELBFromExisting(etcdLBName, clients.ELB)
+			ingressLB, err := awsresources.NewELBFromExisting(ingressLBName, clients.ELB)
+			if err != nil {
+				s.logger.Log("error", fmt.Sprintf("%#v", err))
+			} else {
+				recordSetInputs := []recordSetInput{
+					{
+						Cluster:      cluster,
+						Client:       clients.Route53,
+						Resource:     apiLB,
+						Domain:       cluster.Spec.Cluster.Kubernetes.API.Domain,
+						HostedZoneID: cluster.Spec.AWS.API.HostedZones,
+						Type:         route53.RRTypeA,
+					},
+					{
+						Cluster:      cluster,
+						Client:       clients.Route53,
+						Resource:     etcdLB,
+						Domain:       cluster.Spec.Cluster.Etcd.Domain,
+						HostedZoneID: cluster.Spec.AWS.Etcd.HostedZones,
+						Type:         route53.RRTypeA,
+					},
+					{
+						Cluster:      cluster,
+						Client:       clients.Route53,
+						Resource:     ingressLB,
+						Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+						HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
+						Type:         route53.RRTypeA,
+					},
+					{
+						Cluster:      cluster,
+						Client:       clients.Route53,
+						Value:        cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+						Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.WildcardDomain,
+						HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
+						Type:         route53.RRTypeCname,
+					},
 				}
-			}
-			if rsErr == nil {
-				s.logger.Log("info", "deleted record sets")
+
+				var rsErr error
+				for _, input := range recordSetInputs {
+					if rsErr = s.deleteRecordSet(input); rsErr != nil {
+						s.logger.Log("error", fmt.Sprintf("%#v", rsErr))
+					}
+				}
+				if rsErr == nil {
+					s.logger.Log("info", "deleted record sets")
+				}
 			}
 		}
 	}
@@ -1186,20 +1199,26 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 	// Delete Load Balancers.
 	loadBalancerInputs := []LoadBalancerInput{
 		{
-			Name:    cluster.Spec.Cluster.Kubernetes.API.Domain,
-			Clients: clients,
-			Cluster: cluster,
-		},
-		{
-			Name:    cluster.Spec.Cluster.Etcd.Domain,
-			Clients: clients,
-			Cluster: cluster,
-		},
-		{
 			Name:    cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
 			Clients: clients,
 			Cluster: cluster,
 		},
+	}
+
+	if !keyv2.UseCloudFormation(cluster) {
+		apiLBInput := LoadBalancerInput{
+			Name:    cluster.Spec.Cluster.Kubernetes.API.Domain,
+			Clients: clients,
+			Cluster: cluster,
+		}
+		etcdLBInput := LoadBalancerInput{
+			Name:    cluster.Spec.Cluster.Etcd.Domain,
+			Clients: clients,
+			Cluster: cluster,
+		}
+
+		loadBalancerInputs = append(loadBalancerInputs, apiLBInput)
+		loadBalancerInputs = append(loadBalancerInputs, etcdLBInput)
 	}
 
 	var elbErr error

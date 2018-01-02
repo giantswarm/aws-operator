@@ -15,7 +15,6 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 		expectedAZ                     string
 		expectedASGMaxSize             int
 		expectedASGMinSize             int
-		expectedClusterID              string
 		expectedHealthCheckGracePeriod int
 		expectedMaxBatchSize           string
 		expectedMinInstancesInService  string

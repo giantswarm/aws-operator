@@ -11,6 +11,7 @@ import (
 const (
 	smallCloudConfigTemplate = "service/templates/cloudconfig/small_cloudconfig.yaml"
 
+	prefixMaster = "master"
 	prefixWorker = "worker"
 	// asgMaxBatchSizeRatio is the % of instances to be updated during a
 	// rolling update.
@@ -45,6 +46,9 @@ const (
 
 	suffixPublic  = "public"
 	suffixPrivate = "private"
+
+	externalELBScheme = "internet-facing"
+	internalELBScheme = "internal"
 
 	// RootDirElement marks the directory that should be taken as root when evaluating
 	// template's relative paths.

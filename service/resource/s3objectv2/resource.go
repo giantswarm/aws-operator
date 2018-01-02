@@ -2,7 +2,9 @@ package s3objectv2
 
 import (
 	"context"
+	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -17,11 +19,12 @@ const (
 // Config represents the configuration used to create a new cloudformation resource.
 type Config struct {
 	// Dependencies.
-	AwsService  AwsService
-	CertWatcher CertWatcher
-	Clients     Clients
-	CloudConfig CloudConfigService
-	Logger      micrologger.Logger
+	AwsService       AwsService
+	CertWatcher      CertWatcher
+	Clients          Clients
+	CloudConfig      CloudConfigService
+	Logger           micrologger.Logger
+	RandomKeyWatcher RandomKeyWatcher
 }
 
 // DefaultConfig provides a default configuration to create a new cloudformation
@@ -29,22 +32,24 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
-		AwsService:  nil,
-		CertWatcher: nil,
-		Clients:     Clients{},
-		CloudConfig: nil,
-		Logger:      nil,
+		AwsService:       nil,
+		CertWatcher:      nil,
+		Clients:          Clients{},
+		CloudConfig:      nil,
+		Logger:           nil,
+		RandomKeyWatcher: nil,
 	}
 }
 
 // Resource implements the cloudformation resource.
 type Resource struct {
 	// Dependencies.
-	awsService  AwsService
-	awsClients  Clients
-	certWatcher CertWatcher
-	cloudConfig CloudConfigService
-	logger      micrologger.Logger
+	awsService       AwsService
+	awsClients       Clients
+	certWatcher      CertWatcher
+	cloudConfig      CloudConfigService
+	logger           micrologger.Logger
+	randomKeyWatcher RandomKeyWatcher
 }
 
 // New creates a new configured cloudformation resource.
@@ -62,6 +67,9 @@ func New(config Config) (*Resource, error) {
 	if config.CertWatcher == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.CertWatcher must not be empty")
 	}
+	if config.RandomKeyWatcher == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.RandomKeyWatcher must not be empty")
+	}
 
 	newService := &Resource{
 		// Dependencies.
@@ -72,6 +80,7 @@ func New(config Config) (*Resource, error) {
 		logger: config.Logger.With(
 			"resource", Name,
 		),
+		randomKeyWatcher: config.RandomKeyWatcher,
 	}
 
 	return newService, nil
@@ -90,21 +99,20 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 }
 
 func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
-	return &framework.Patch{}, nil
+	return framework.NewPatch(), nil
 }
 
-func toBucketObjectState(v interface{}) (BucketObjectState, error) {
+func toBucketObjectState(v interface{}) (map[string]BucketObjectState, error) {
 	if v == nil {
-		return BucketObjectState{}, nil
+		return map[string]BucketObjectState{}, nil
 	}
 
-	bucketObject, ok := v.(BucketObjectState)
+	bucketObjectState, ok := v.(map[string]BucketObjectState)
 	if !ok {
-		return BucketObjectState{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", bucketObject, v)
+		return map[string]BucketObjectState{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", bucketObjectState, v)
 	}
 
-	return bucketObject, nil
-
+	return bucketObjectState, nil
 }
 
 func toPutObjectInput(v interface{}) (s3.PutObjectInput, error) {
@@ -112,23 +120,17 @@ func toPutObjectInput(v interface{}) (s3.PutObjectInput, error) {
 		return s3.PutObjectInput{}, nil
 	}
 
-	putObjectInput, ok := v.(s3.PutObjectInput)
+	bucketObject, ok := v.(BucketObjectState)
 	if !ok {
-		return s3.PutObjectInput{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", putObjectInput, v)
+		return s3.PutObjectInput{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", bucketObject, v)
+	}
+
+	putObjectInput := s3.PutObjectInput{
+		Key:           aws.String(bucketObject.Key),
+		Body:          strings.NewReader(bucketObject.Body),
+		Bucket:        aws.String(bucketObject.Bucket),
+		ContentLength: aws.Int64(int64(len(bucketObject.Body))),
 	}
 
 	return putObjectInput, nil
-}
-
-func toDeleteObjectInput(v interface{}) (s3.DeleteObjectInput, error) {
-	if v == nil {
-		return s3.DeleteObjectInput{}, nil
-	}
-
-	deleteObjectInput, ok := v.(s3.DeleteObjectInput)
-	if !ok {
-		return s3.DeleteObjectInput{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", deleteObjectInput, v)
-	}
-
-	return deleteObjectInput, nil
 }

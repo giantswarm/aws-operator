@@ -11,13 +11,9 @@ import (
 // template related to this adapter: service/templates/cloudformation/recordsets.yaml
 
 type recordSetsAdapter struct {
-	APIELBDNS                 string
 	APIELBHostedZones         string
-	APIELBAliasHostedZone     string
 	APIELBDomain              string
-	EtcdELBDNS                string
 	EtcdELBHostedZones        string
-	EtcdELBAliasHostedZone    string
 	EtcdELBDomain             string
 	IngressELBDNS             string
 	IngressELBHostedZones     string
@@ -35,26 +31,12 @@ func (r *recordSetsAdapter) getRecordSets(customObject v1alpha1.AWSConfig, clien
 	r.IngressELBDomain = customObject.Spec.Cluster.Kubernetes.IngressController.Domain
 	r.IngressWildcardELBDomain = customObject.Spec.Cluster.Kubernetes.IngressController.WildcardDomain
 
-	apiELB, err := ELBDescription(clients, r.APIELBDomain, customObject)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	r.APIELBDNS = *apiELB.DNSName
-	r.APIELBAliasHostedZone = *apiELB.CanonicalHostedZoneNameID
-
 	ingressELB, err := ELBDescription(clients, r.IngressELBDomain, customObject)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 	r.IngressELBDNS = *ingressELB.DNSName
 	r.IngressELBAliasHostedZone = *ingressELB.CanonicalHostedZoneNameID
-
-	etcdELB, err := ELBDescription(clients, r.EtcdELBDomain, customObject)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	r.EtcdELBDNS = *etcdELB.DNSName
-	r.EtcdELBAliasHostedZone = *etcdELB.CanonicalHostedZoneNameID
 
 	return nil
 }

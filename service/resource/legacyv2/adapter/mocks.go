@@ -31,6 +31,7 @@ func (e *EC2ClientMock) DescribeSecurityGroups(input *ec2.DescribeSecurityGroups
 		}
 		return output, nil
 	}
+
 	return nil, fmt.Errorf("security group not found")
 }
 
