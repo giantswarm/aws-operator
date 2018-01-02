@@ -2,12 +2,12 @@
 Description: Main CloudFormation stack.
 Resources:
   {{template "worker_policy" .}}
+  {{template "internet_gateway" .}}
+  {{template "nat_gateway" .}}
   {{template "instance" .}}
   {{template "load_balancers" .}}
   {{template "launch_configuration" .}}
   {{template "autoscaling_group" .}}
-  {{template "internet_gateway" .}}
-  {{template "nat_gateway" .}}
   {{template "recordsets" .}}
 {{template "outputs" .}}
 {{end}}
