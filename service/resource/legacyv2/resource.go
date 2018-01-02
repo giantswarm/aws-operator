@@ -627,8 +627,10 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 		s.logger.Log("info", "route table already exists, reusing")
 	}
 
-	if err := publicRouteTable.MakePublic(); err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not make route table public: '%#v'", err))
+	if !keyv2.UseCloudFormation(cluster) {
+		if err := publicRouteTable.MakePublic(); err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not make route table public: '%#v'", err))
+		}
 	}
 
 	// Create public subnet.

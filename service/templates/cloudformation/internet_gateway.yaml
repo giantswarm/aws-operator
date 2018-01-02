@@ -13,4 +13,10 @@
         Ref: InternetGateway
       VpcId: {{ .VPCID }}
 
+  InternetGatewayRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: {{.PublicRouteTableID}}
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
 {{end}}
