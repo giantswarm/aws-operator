@@ -783,6 +783,7 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 
 	var apiLB *awsresources.ELB
 	var etcdLB *awsresources.ELB
+	var anyMastersCreated bool
 	var masterIDs []string
 
 	if !keyv2.UseCloudFormation(cluster) {
@@ -810,7 +811,7 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 		}
 
 		// Run masters.
-		anyMastersCreated, masterIDs, err := s.runMachines(mastersInput)
+		anyMastersCreated, masterIDs, err = s.runMachines(mastersInput)
 		if err != nil {
 			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not start masters: '%#v'", err))
 		}
