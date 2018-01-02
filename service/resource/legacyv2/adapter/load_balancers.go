@@ -17,6 +17,9 @@ const (
 	healthCheckInterval           = 5
 	healthCheckTimeout            = 3
 	healthCheckUnhealthyThreshold = 2
+
+	httpPort  = 80
+	httpsPort = 443
 )
 
 type loadBalancersAdapter struct {
@@ -31,6 +34,13 @@ type loadBalancersAdapter struct {
 	ELBHealthCheckInterval           int
 	ELBHealthCheckTimeout            int
 	ELBHealthCheckUnhealthyThreshold int
+	IngressElbHealthCheckTarget      string
+	IngressElbIdleTimoutSeconds      int
+	IngressElbName                   string
+	IngressElbPortsToOpen            portPairs
+	IngressElbScheme                 string
+	IngressElbSecurityGroupID        string
+	IngressElbSubnetID               string
 }
 
 // portPair is a pair of ports.
@@ -62,28 +72,49 @@ func (lb *loadBalancersAdapter) getLoadBalancers(customObject v1alpha1.AWSConfig
 	}
 	lb.APIElbScheme = externalELBScheme
 
+	// Ingress load balancer settings.
+	ingressElbName, err := keyv2.LoadBalancerName(customObject.Spec.Cluster.Kubernetes.IngressController.Domain, customObject)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	lb.IngressElbHealthCheckTarget = heathCheckTarget(customObject.Spec.Cluster.Kubernetes.IngressController.SecurePort)
+	lb.IngressElbIdleTimoutSeconds = customObject.Spec.AWS.Ingress.ELB.IdleTimeoutSeconds
+	lb.IngressElbName = ingressElbName
+	lb.IngressElbPortsToOpen = portPairs{
+		{
+			PortELB:      httpsPort,
+			PortInstance: customObject.Spec.Cluster.Kubernetes.IngressController.SecurePort,
+		},
+		{
+			PortELB:      httpPort,
+			PortInstance: customObject.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
+		},
+	}
+	lb.IngressElbScheme = externalELBScheme
+
 	// Load balancer health check settings.
 	lb.ELBHealthCheckHealthyThreshold = healthCheckHealthyThreshold
 	lb.ELBHealthCheckInterval = healthCheckInterval
 	lb.ELBHealthCheckTimeout = healthCheckTimeout
 	lb.ELBHealthCheckUnhealthyThreshold = healthCheckUnhealthyThreshold
 
-	// security group field.
+	// master security group field.
 	// TODO: remove this code once the security group is created by cloudformation
 	// and add a reference in the template
-	groupName := keyv2.SecurityGroupName(customObject, prefixMaster)
+	masterGroupName := keyv2.SecurityGroupName(customObject, prefixMaster)
 	describeSgInput := &ec2.DescribeSecurityGroupsInput{
 		Filters: []*ec2.Filter{
 			{
 				Name: aws.String(subnetDescription),
 				Values: []*string{
-					aws.String(groupName),
+					aws.String(masterGroupName),
 				},
 			},
 			{
 				Name: aws.String(subnetGroupName),
 				Values: []*string{
-					aws.String(groupName),
+					aws.String(masterGroupName),
 				},
 			},
 		},
@@ -96,6 +127,35 @@ func (lb *loadBalancersAdapter) getLoadBalancers(customObject v1alpha1.AWSConfig
 		return microerror.Mask(tooManyResultsError)
 	}
 	lb.APIElbSecurityGroupID = *output.SecurityGroups[0].GroupId
+
+	// ingress security group field.
+	// TODO: remove this code once the security group is created by cloudformation
+	// and add a reference in the template
+	ingressGroupName := keyv2.SecurityGroupName(customObject, prefixIngress)
+	describeSgInput = &ec2.DescribeSecurityGroupsInput{
+		Filters: []*ec2.Filter{
+			{
+				Name: aws.String(subnetDescription),
+				Values: []*string{
+					aws.String(ingressGroupName),
+				},
+			},
+			{
+				Name: aws.String(subnetGroupName),
+				Values: []*string{
+					aws.String(ingressGroupName),
+				},
+			},
+		},
+	}
+	outputIngress, err := clients.EC2.DescribeSecurityGroups(describeSgInput)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	if len(outputIngress.SecurityGroups) > 1 {
+		return microerror.Mask(tooManyResultsError)
+	}
+	lb.IngressElbSecurityGroupID = *outputIngress.SecurityGroups[0].GroupId
 
 	// subnet ID
 	// TODO: remove this code once the subnet is created by cloudformation and add a
@@ -120,6 +180,7 @@ func (lb *loadBalancersAdapter) getLoadBalancers(customObject v1alpha1.AWSConfig
 	}
 
 	lb.APIElbSubnetID = *outputSubnet.Subnets[0].SubnetId
+	lb.IngressElbSubnetID = *outputSubnet.Subnets[0].SubnetId
 
 	return nil
 }

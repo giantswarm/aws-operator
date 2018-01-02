@@ -25,4 +25,29 @@
         - {{ .APIElbSecurityGroupID }}
       Subnets:
         - {{ .APIElbSubnetID }}
+
+  IngressLoadBalancer:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+      ConnectionSettings:
+        IdleTimeout: {{ .IngressElbIdleTimoutSeconds }}
+      HealthCheck:
+        HealthyThreshold: {{ .ELBHealthCheckHealthyThreshold }}
+        Interval: {{ .ELBHealthCheckInterval }}
+        Target: {{ .IngressElbHealthCheckTarget }}
+        Timeout: {{ .ELBHealthCheckTimeout }}
+        UnhealthyThreshold: {{ .ELBHealthCheckUnhealthyThreshold }}
+      Listeners:
+      {{ range .IngressElbPortsToOpen}}
+      - InstancePort: {{ .PortInstance }}
+        InstanceProtocol: TCP
+        LoadBalancerPort: {{ .PortELB }} 
+        Protocol: TCP
+      {{ end }}
+      LoadBalancerName: {{ .IngressElbName }}
+      Scheme: {{ .IngressElbScheme }}
+      SecurityGroups:
+        - {{ .IngressElbSecurityGroupID }}
+      Subnets:
+        - {{ .IngressElbSubnetID }}
 {{end}}
