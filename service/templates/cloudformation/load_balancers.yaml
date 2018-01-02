@@ -28,6 +28,7 @@
 
   IngressLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
+    DependsOn: VPCGatewayAttachment
     Properties:
       ConnectionSettings:
         IdleTimeout: {{ .IngressElbIdleTimoutSeconds }}
