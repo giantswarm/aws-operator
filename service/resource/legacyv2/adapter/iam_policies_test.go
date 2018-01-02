@@ -6,7 +6,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 )
 
-func TestAdapterWorkerPolicyRegularFields(t *testing.T) {
+func TestAdapterIamPoliciesRegularFields(t *testing.T) {
 	testCases := []struct {
 		description               string
 		customObject              v1alpha1.AWSConfig
@@ -34,7 +34,7 @@ func TestAdapterWorkerPolicyRegularFields(t *testing.T) {
 	for _, tc := range testCases {
 		a := Adapter{}
 		t.Run(tc.description, func(t *testing.T) {
-			err := a.getWorkerPolicy(tc.customObject, clients)
+			err := a.getIamPolicies(tc.customObject, clients)
 			if err != nil {
 				t.Errorf("unexpected error %v", err)
 			}
@@ -54,7 +54,7 @@ func TestAdapterWorkerPolicyRegularFields(t *testing.T) {
 	}
 }
 
-func TestAdapterWorkerPolicyKMSKeyARN(t *testing.T) {
+func TestAdapterIamPoliciesKMSKeyARN(t *testing.T) {
 	testCases := []struct {
 		description       string
 		customObject      v1alpha1.AWSConfig
@@ -90,7 +90,7 @@ func TestAdapterWorkerPolicyKMSKeyARN(t *testing.T) {
 					isError: tc.expectedError,
 				},
 			}
-			err := a.getWorkerPolicy(tc.customObject, clients)
+			err := a.getIamPolicies(tc.customObject, clients)
 			if tc.expectedError && err == nil {
 				t.Errorf("expected error didn't happen")
 			}
@@ -108,7 +108,7 @@ func TestAdapterWorkerPolicyKMSKeyARN(t *testing.T) {
 	}
 }
 
-func TestAdapterWorkerPolicyS3Bucket(t *testing.T) {
+func TestAdapterIamPoliciesS3Bucket(t *testing.T) {
 	testCases := []struct {
 		description      string
 		customObject     v1alpha1.AWSConfig
@@ -146,7 +146,7 @@ func TestAdapterWorkerPolicyS3Bucket(t *testing.T) {
 					isError:   tc.expectedError,
 				},
 			}
-			err := a.getWorkerPolicy(tc.customObject, clients)
+			err := a.getIamPolicies(tc.customObject, clients)
 			if tc.expectedError && err == nil {
 				t.Errorf("expected error didn't happen")
 			}

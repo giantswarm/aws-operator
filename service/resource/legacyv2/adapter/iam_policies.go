@@ -10,9 +10,9 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
-// template related to this adapter: service/templates/cloudformation/worker_policy.yaml
+// template related to this adapter: service/templates/cloudformation/iam_policies.yaml
 
-type workerPolicyAdapter struct {
+type iamPoliciesAdapter struct {
 	WorkerRoleName    string
 	WorkerPolicyName  string
 	WorkerProfileName string
@@ -20,12 +20,12 @@ type workerPolicyAdapter struct {
 	S3Bucket          string
 }
 
-func (w *workerPolicyAdapter) getWorkerPolicy(customObject v1alpha1.AWSConfig, clients Clients) error {
+func (i *iamPoliciesAdapter) getIamPolicies(customObject v1alpha1.AWSConfig, clients Clients) error {
 	clusterID := keyv2.ClusterID(customObject)
 
-	w.WorkerPolicyName = keyv2.PolicyName(customObject, prefixWorker)
-	w.WorkerProfileName = keyv2.InstanceProfileName(customObject, prefixWorker)
-	w.WorkerRoleName = keyv2.RoleName(customObject, prefixWorker)
+	i.WorkerPolicyName = keyv2.PolicyName(customObject, prefixWorker)
+	i.WorkerProfileName = keyv2.InstanceProfileName(customObject, prefixWorker)
+	i.WorkerRoleName = keyv2.RoleName(customObject, prefixWorker)
 
 	// KMSKeyARN
 	keyAlias := fmt.Sprintf("alias/%s", clusterID)
@@ -36,14 +36,14 @@ func (w *workerPolicyAdapter) getWorkerPolicy(customObject v1alpha1.AWSConfig, c
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	w.KMSKeyARN = *output.KeyMetadata.Arn
+	i.KMSKeyARN = *output.KeyMetadata.Arn
 
 	// S3Bucket
 	accountID, err := AccountID(clients)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	w.S3Bucket = keyv2.BucketName(customObject, accountID)
+	i.S3Bucket = keyv2.BucketName(customObject, accountID)
 
 	return nil
 }

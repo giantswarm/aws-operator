@@ -1,4 +1,4 @@
-{{define "worker_policy"}}
+{{define "iam_policies"}}
   WorkerRole:
     Type: "AWS::IAM::Role"
     Properties:
