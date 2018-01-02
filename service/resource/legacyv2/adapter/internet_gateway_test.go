@@ -8,9 +8,10 @@ import (
 
 func TestAdapterInternetGatewayVPCID(t *testing.T) {
 	testCases := []struct {
-		description   string
-		customObject  v1alpha1.AWSConfig
-		expectedVPCID string
+		description                string
+		customObject               v1alpha1.AWSConfig
+		expectedPublicRouteTableID string
+		expectedVPCID              string
 	}{
 		{
 			description: "basic matching, all fields present",
@@ -36,6 +37,10 @@ func TestAdapterInternetGatewayVPCID(t *testing.T) {
 			err := a.getInternetGateway(tc.customObject, clients)
 			if err != nil {
 				t.Errorf("unexpected error %v", err)
+			}
+
+			if a.PublicRouteTableID != tc.expectedPublicRouteTableID {
+				t.Errorf("unexpected PublicRouteTableID, got %q, want %q", a.PublicRouteTableID, tc.expectedPublicRouteTableID)
 			}
 
 			if a.VPCID != tc.expectedVPCID {
