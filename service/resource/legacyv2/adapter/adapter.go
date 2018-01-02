@@ -42,6 +42,7 @@ type Adapter struct {
 	instanceAdapter
 	launchConfigAdapter
 	loadBalancersAdapter
+	internetGatewayAdapter
 	natGatewayAdapter
 	recordSetsAdapter
 	workerPolicyAdapter
@@ -59,6 +60,7 @@ func New(customObject v1alpha1.AWSConfig, clients Clients) (Adapter, error) {
 		a.getInstance,
 		a.getLaunchConfiguration,
 		a.getLoadBalancers,
+		a.getInternetGateway,
 		a.getNatGateway,
 		a.getRecordSets,
 		a.getWorkerPolicy,

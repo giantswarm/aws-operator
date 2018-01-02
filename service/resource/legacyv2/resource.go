@@ -523,23 +523,25 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not find vpc peering connection: '%#v'", err))
 	}
 
-	// Create internet gateway.
-	var internetGateway resources.ResourceWithID
-	internetGateway = &awsresources.InternetGateway{
-		Name:  keyv2.ClusterID(cluster),
-		VpcID: vpcID,
-		// Dependencies.
-		Logger:    s.logger,
-		AWSEntity: awsresources.AWSEntity{Clients: clients},
-	}
-	internetGatewayCreated, err := internetGateway.CreateIfNotExists()
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create internet gateway: '%#v'", err))
-	}
-	if internetGatewayCreated {
-		s.logger.Log("info", fmt.Sprintf("created internet gateway for cluster '%s'", keyv2.ClusterID(cluster)))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("internet gateway for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
+	if !keyv2.UseCloudFormation(cluster) {
+		// Create internet gateway.
+		var internetGateway resources.ResourceWithID
+		internetGateway = &awsresources.InternetGateway{
+			Name:  keyv2.ClusterID(cluster),
+			VpcID: vpcID,
+			// Dependencies.
+			Logger:    s.logger,
+			AWSEntity: awsresources.AWSEntity{Clients: clients},
+		}
+		internetGatewayCreated, err := internetGateway.CreateIfNotExists()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create internet gateway: '%#v'", err))
+		}
+		if internetGatewayCreated {
+			s.logger.Log("info", fmt.Sprintf("created internet gateway for cluster '%s'", keyv2.ClusterID(cluster)))
+		} else {
+			s.logger.Log("info", fmt.Sprintf("internet gateway for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
+		}
 	}
 
 	// Create masters security group.
