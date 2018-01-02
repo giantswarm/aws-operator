@@ -18,5 +18,6 @@
     Properties:
       RouteTableId: {{.PublicRouteTableID}}
       DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref InternetGateway
+      GatewayId: 
+        Ref: InternetGateway
 {{end}}
