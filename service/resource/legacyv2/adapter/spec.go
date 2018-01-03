@@ -11,8 +11,10 @@ import (
 const (
 	smallCloudConfigTemplate = "service/templates/cloudconfig/small_cloudconfig.yaml"
 
-	prefixMaster = "master"
-	prefixWorker = "worker"
+	prefixMaster  = "master"
+	prefixWorker  = "worker"
+	prefixIngress = "ingress"
+
 	// asgMaxBatchSizeRatio is the % of instances to be updated during a
 	// rolling update.
 	asgMaxBatchSizeRatio = 0.3
