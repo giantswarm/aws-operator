@@ -788,6 +788,7 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 
 	var apiLB *awsresources.ELB
 	var etcdLB *awsresources.ELB
+	var ingressLB *awsresources.ELB
 	var anyMastersCreated bool
 	var masterIDs []string
 
@@ -879,35 +880,32 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 		if anyMastersCreated && !masterPolicyCreated {
 			return microerror.Maskf(executionFailedError, fmt.Sprintf("cluster '%s' cannot be processed. As IAM policy for master nodes cannot be reused. Please delete this cluster.", keyv2.ClusterID(cluster)))
 		}
-	}
 
-	// Create Ingress load balancer.
-	ingressLbInput := LoadBalancerInput{
-		Name:               cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-		Clients:            clients,
-		Cluster:            cluster,
-		IdleTimeoutSeconds: cluster.Spec.AWS.Ingress.ELB.IdleTimeoutSeconds,
-		PortsToOpen: awsresources.PortPairs{
-			{
-				PortELB:      httpsPort,
-				PortInstance: cluster.Spec.Cluster.Kubernetes.IngressController.SecurePort,
+		// Create Ingress load balancer.
+		ingressLbInput := LoadBalancerInput{
+			Name:               cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+			Clients:            clients,
+			Cluster:            cluster,
+			IdleTimeoutSeconds: cluster.Spec.AWS.Ingress.ELB.IdleTimeoutSeconds,
+			PortsToOpen: awsresources.PortPairs{
+				{
+					PortELB:      httpsPort,
+					PortInstance: cluster.Spec.Cluster.Kubernetes.IngressController.SecurePort,
+				},
+				{
+					PortELB:      httpPort,
+					PortInstance: cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
+				},
 			},
-			{
-				PortELB:      httpPort,
-				PortInstance: cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
-			},
-		},
-		SecurityGroupID: ingressSecurityGroupID,
-		SubnetID:        publicSubnetID,
-	}
+			SecurityGroupID: ingressSecurityGroupID,
+			SubnetID:        publicSubnetID,
+		}
 
-	ingressLB, err := s.createLoadBalancer(ingressLbInput)
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create ingress load balancer: '%#v'", err))
-	}
+		ingressLB, err = s.createLoadBalancer(ingressLbInput)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create ingress load balancer: '%#v'", err))
+		}
 
-	// During Cloud Formation migration this logic is only needed for non CF clusters.
-	if !keyv2.UseCloudFormation(cluster) {
 		// Create a launch configuration for the worker nodes.
 		lcInput := launchConfigurationInput{
 			clients:             clients,
@@ -1201,39 +1199,35 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 		}
 	}
 
-	// Delete Load Balancers.
-	loadBalancerInputs := []LoadBalancerInput{
-		{
-			Name:    cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-			Clients: clients,
-			Cluster: cluster,
-		},
-	}
-
 	if !keyv2.UseCloudFormation(cluster) {
-		apiLBInput := LoadBalancerInput{
-			Name:    cluster.Spec.Cluster.Kubernetes.API.Domain,
-			Clients: clients,
-			Cluster: cluster,
-		}
-		etcdLBInput := LoadBalancerInput{
-			Name:    cluster.Spec.Cluster.Etcd.Domain,
-			Clients: clients,
-			Cluster: cluster,
+		// Delete Load Balancers.
+		loadBalancerInputs := []LoadBalancerInput{
+			{
+				Name:    cluster.Spec.Cluster.Kubernetes.API.Domain,
+				Clients: clients,
+				Cluster: cluster,
+			},
+			{
+				Name:    cluster.Spec.Cluster.Etcd.Domain,
+				Clients: clients,
+				Cluster: cluster,
+			},
+			{
+				Name:    cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+				Clients: clients,
+				Cluster: cluster,
+			},
 		}
 
-		loadBalancerInputs = append(loadBalancerInputs, apiLBInput)
-		loadBalancerInputs = append(loadBalancerInputs, etcdLBInput)
-	}
-
-	var elbErr error
-	for _, lbInput := range loadBalancerInputs {
-		if elbErr = s.deleteLoadBalancer(lbInput); elbErr != nil {
-			s.logger.Log("error", fmt.Sprintf("%#v", elbErr))
+		var elbErr error
+		for _, lbInput := range loadBalancerInputs {
+			if elbErr = s.deleteLoadBalancer(lbInput); elbErr != nil {
+				s.logger.Log("error", fmt.Sprintf("%#v", elbErr))
+			}
 		}
-	}
-	if elbErr == nil {
-		s.logger.Log("info", "deleted ELBs")
+		if elbErr == nil {
+			s.logger.Log("info", "deleted ELBs")
+		}
 	}
 
 	// Delete route table.

@@ -24,6 +24,12 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 		expectedELBHealthCheckInterval           int
 		expectedELBHealthCheckTimeout            int
 		expectedELBHealthCheckUnhealthyThreshold int
+		expectedIngressElbIdleTimoutSeconds      int
+		expectedIngressElbName                   string
+		expectedIngressElbPortsToOpen            portPairs
+		expectedIngressElbScheme                 string
+		expectedIngressElbSecurityGroupID        string
+		expectedIngressElbSubnetID               string
 	}{
 		{
 			description:  "empty custom object",
@@ -41,6 +47,11 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 								Domain:     "api.test-cluster.aws.giantswarm.io",
 								SecurePort: 443,
 							},
+							IngressController: v1alpha1.ClusterKubernetesIngressController{
+								Domain:       "ingress.test-cluster.aws.giantswarm.io",
+								InsecurePort: 30010,
+								SecurePort:   30011,
+							},
 						},
 					},
 					AWS: v1alpha1.AWSConfigSpecAWS{
@@ -50,6 +61,11 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 							},
 						},
 						AZ: "eu-central-1a",
+						Ingress: v1alpha1.AWSConfigSpecAWSIngress{
+							ELB: v1alpha1.AWSConfigSpecAWSIngressELB{
+								IdleTimeoutSeconds: 60,
+							},
+						},
 					},
 				},
 			},
@@ -68,6 +84,19 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 			expectedELBHealthCheckInterval:           5,
 			expectedELBHealthCheckTimeout:            3,
 			expectedELBHealthCheckUnhealthyThreshold: 2,
+			expectedIngressElbIdleTimoutSeconds:      60,
+			expectedIngressElbName:                   "test-cluster-ingress",
+			expectedIngressElbPortsToOpen: portPairs{
+				{
+					PortELB:      443,
+					PortInstance: 30011,
+				},
+				{
+					PortELB:      80,
+					PortInstance: 30010,
+				},
+			},
+			expectedIngressElbScheme: "internet-facing",
 		},
 	}
 
@@ -121,6 +150,21 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 				t.Errorf("expected ELB health check unhealthy threshold, got %q, want %q", a.ELBHealthCheckUnhealthyThreshold, tc.expectedELBHealthCheckUnhealthyThreshold)
 			}
 
+			if tc.expectedIngressElbIdleTimoutSeconds != a.IngressElbIdleTimoutSeconds {
+				t.Errorf("expected Ingress ELB Idle Timeout Seconds, got %q, want %q", a.IngressElbIdleTimoutSeconds, tc.expectedIngressElbIdleTimoutSeconds)
+			}
+
+			if tc.expectedIngressElbName != a.IngressElbName {
+				t.Errorf("expected Ingress ELB Name, got %q, want %q", a.IngressElbName, tc.expectedIngressElbName)
+			}
+
+			if !reflect.DeepEqual(tc.expectedIngressElbPortsToOpen, a.IngressElbPortsToOpen) {
+				t.Errorf("expected Ingress ELB Ports To Open, got %v, want %v", a.IngressElbPortsToOpen, tc.expectedIngressElbPortsToOpen)
+			}
+
+			if tc.expectedIngressElbScheme != a.IngressElbScheme {
+				t.Errorf("expected Ingress ELB Scheme, got %q, want %q", a.IngressElbScheme, tc.expectedIngressElbScheme)
+			}
 		})
 	}
 }

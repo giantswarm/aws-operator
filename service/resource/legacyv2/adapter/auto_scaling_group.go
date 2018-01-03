@@ -15,7 +15,6 @@ type autoScalingGroupAdapter struct {
 	ASGMaxSize             int
 	ASGMinSize             int
 	HealthCheckGracePeriod int
-	LoadBalancerName       string
 	MaxBatchSize           string
 	MinInstancesInService  string
 	RollingUpdatePauseTime string
@@ -32,15 +31,6 @@ func (a *autoScalingGroupAdapter) getAutoScalingGroup(customObject v1alpha1.AWSC
 	a.MinInstancesInService = strconv.FormatFloat(asgMinInstancesRatio, 'f', -1, 32)
 	a.HealthCheckGracePeriod = gracePeriodSeconds
 	a.RollingUpdatePauseTime = rollingUpdatePauseTime
-
-	// load balancer name
-	// TODO: remove this code once the ingress load balancer is created by cloudformation
-	// and add a reference in the template
-	lbName, err := keyv2.LoadBalancerName(customObject.Spec.Cluster.Kubernetes.IngressController.Domain, customObject)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	a.LoadBalancerName = lbName
 
 	// subnet ID
 	// TODO: remove this code once the subnet is created by cloudformation and add a

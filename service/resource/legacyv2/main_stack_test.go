@@ -34,6 +34,9 @@ func testConfig() Config {
 func TestMainTemplateGetEmptyBody(t *testing.T) {
 	customObject := v1alpha1.AWSConfig{}
 	cfg := testConfig()
+	cfg.Clients = &adapter.Clients{
+		EC2: &adapter.EC2ClientMock{},
+	}
 
 	newResource, err := New(cfg)
 	if err != nil {
@@ -59,7 +62,9 @@ func TestMainTemplateExistingFields(t *testing.T) {
 						SecurePort: 443,
 					},
 					IngressController: v1alpha1.ClusterKubernetesIngressController{
-						Domain: "ingress.domain",
+						Domain:       "ingress.domain",
+						InsecurePort: 30010,
+						SecurePort:   30011,
 					},
 				},
 				Etcd: v1alpha1.ClusterEtcd{
@@ -81,6 +86,11 @@ func TestMainTemplateExistingFields(t *testing.T) {
 				Workers: []v1alpha1.AWSConfigSpecAWSNode{
 					v1alpha1.AWSConfigSpecAWSNode{
 						ImageID: "myimageid",
+					},
+				},
+				Ingress: v1alpha1.AWSConfigSpecAWSIngress{
+					ELB: v1alpha1.AWSConfigSpecAWSIngressELB{
+						IdleTimeoutSeconds: 60,
 					},
 				},
 			},
@@ -182,6 +192,10 @@ func TestMainTemplateExistingFields(t *testing.T) {
 	if !strings.Contains(body, "ApiLoadBalancer:") {
 		fmt.Println(body)
 		t.Error("ApiLoadBalancer element not found")
+	}
+	if !strings.Contains(body, "IngressLoadBalancer:") {
+		fmt.Println(body)
+		t.Error("IngressLoadBalancer element not found")
 	}
 	if !strings.Contains(body, "InternetGateway:") {
 		fmt.Println(body)
