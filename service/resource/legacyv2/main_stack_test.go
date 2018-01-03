@@ -36,6 +36,8 @@ func TestMainTemplateGetEmptyBody(t *testing.T) {
 	cfg := testConfig()
 	cfg.Clients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		KMS: &adapter.KMSClientMock{},
 	}
 
 	newResource, err := New(cfg)
