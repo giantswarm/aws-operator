@@ -410,28 +410,29 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 	// Create master IAM policy.
 	var masterPolicy resources.NamedResource
 	var masterPolicyCreated bool
-	{
-		var err error
-		masterPolicy = &awsresources.Policy{
-			ClusterID:  keyv2.ClusterID(cluster),
-			KMSKeyArn:  kmsKey.Arn(),
-			PolicyType: prefixMaster,
-			S3Bucket:   bucketName,
-			AWSEntity:  awsresources.AWSEntity{Clients: clients},
-		}
-		masterPolicyCreated, err = masterPolicy.CreateIfNotExists()
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create master policy: '%#v'", err))
-		}
-	}
-	if masterPolicyCreated {
-		s.logger.Log("info", fmt.Sprintf("created master policy for cluster '%s'", keyv2.ClusterID(cluster)))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("master policy for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
-	}
-
 	var workerPolicy resources.NamedResource
+
 	if !keyv2.UseCloudFormation(cluster) {
+		{
+			var err error
+			masterPolicy = &awsresources.Policy{
+				ClusterID:  keyv2.ClusterID(cluster),
+				KMSKeyArn:  kmsKey.Arn(),
+				PolicyType: prefixMaster,
+				S3Bucket:   bucketName,
+				AWSEntity:  awsresources.AWSEntity{Clients: clients},
+			}
+			masterPolicyCreated, err = masterPolicy.CreateIfNotExists()
+			if err != nil {
+				return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create master policy: '%#v'", err))
+			}
+		}
+		if masterPolicyCreated {
+			s.logger.Log("info", fmt.Sprintf("created master policy for cluster '%s'", keyv2.ClusterID(cluster)))
+		} else {
+			s.logger.Log("info", fmt.Sprintf("master policy for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
+		}
+
 		// Create worker IAM policy.
 		var workerPolicyCreated bool
 		{
@@ -1435,22 +1436,22 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 
 	s.logger.Log("info", "deleted bucket")
 
-	// Delete master policy.
-	var masterPolicy resources.NamedResource
-	masterPolicy = &awsresources.Policy{
-		ClusterID:  keyv2.ClusterID(cluster),
-		PolicyType: prefixMaster,
-		S3Bucket:   bucketName,
-		AWSEntity:  awsresources.AWSEntity{Clients: clients},
-	}
-	if err := masterPolicy.Delete(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("deleted %s roles, policies, instance profiles", prefixMaster))
-	}
-
-	// Delete worker policy.
 	if !keyv2.UseCloudFormation(cluster) {
+		// Delete master policy.
+		var masterPolicy resources.NamedResource
+		masterPolicy = &awsresources.Policy{
+			ClusterID:  keyv2.ClusterID(cluster),
+			PolicyType: prefixMaster,
+			S3Bucket:   bucketName,
+			AWSEntity:  awsresources.AWSEntity{Clients: clients},
+		}
+		if err := masterPolicy.Delete(); err != nil {
+			s.logger.Log("error", fmt.Sprintf("%#v", err))
+		} else {
+			s.logger.Log("info", fmt.Sprintf("deleted %s roles, policies, instance profiles", prefixMaster))
+		}
+
+		// Delete worker policy.
 		var workerPolicy resources.NamedResource
 		workerPolicy = &awsresources.Policy{
 			ClusterID:  keyv2.ClusterID(cluster),

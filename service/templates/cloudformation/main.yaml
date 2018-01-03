@@ -1,7 +1,7 @@
 {{define "main"}}AWSTemplateFormatVersion: 2010-09-09
 Description: Main CloudFormation stack.
 Resources:
-  {{template "worker_policy" .}}
+  {{template "iam_policies" .}}
   {{template "internet_gateway" .}}
   {{template "nat_gateway" .}}
   {{template "instance" .}}

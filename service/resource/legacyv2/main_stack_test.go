@@ -36,6 +36,8 @@ func TestMainTemplateGetEmptyBody(t *testing.T) {
 	cfg := testConfig()
 	cfg.Clients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		KMS: &adapter.KMSClientMock{},
 	}
 
 	newResource, err := New(cfg)
@@ -160,6 +162,10 @@ func TestMainTemplateExistingFields(t *testing.T) {
 	if !strings.Contains(body, workerRoleKey+":") {
 		fmt.Println(body)
 		t.Error("workerRole output element not found")
+	}
+	if !strings.Contains(body, "PolicyName: test-cluster-master") {
+		fmt.Println(body)
+		t.Error("PolicyName output element not found")
 	}
 	if !strings.Contains(body, "PolicyName: test-cluster-worker") {
 		fmt.Println(body)

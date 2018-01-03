@@ -16,7 +16,6 @@ import (
 type launchConfigAdapter struct {
 	WorkerAssociatePublicIPAddress bool
 	WorkerBlockDeviceMappings      []BlockDeviceMapping
-	WorkerIAMInstanceProfileName   string
 	WorkerImageID                  string
 	WorkerInstanceType             string
 	WorkerSecurityGroupID          string
@@ -37,7 +36,6 @@ func (l *launchConfigAdapter) getLaunchConfiguration(customObject v1alpha1.AWSCo
 
 	l.WorkerImageID = keyv2.WorkerImageID(customObject)
 	l.WorkerInstanceType = keyv2.WorkerInstanceType(customObject)
-	l.WorkerIAMInstanceProfileName = keyv2.InstanceProfileName(customObject, prefixWorker)
 	l.WorkerAssociatePublicIPAddress = false
 
 	l.WorkerBlockDeviceMappings = []BlockDeviceMapping{
