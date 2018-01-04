@@ -17,7 +17,7 @@
   NATRoute:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: {{.PrivateRouteTableID}}
+      RouteTableId: !Ref PrivateRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
         Ref: "NATGateway"
