@@ -6,12 +6,11 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 )
 
-func TestAdapterInternetGatewayVPCID(t *testing.T) {
+func TestAdapterInternetGatewayPublicRouteTableID(t *testing.T) {
 	testCases := []struct {
 		description                string
 		customObject               v1alpha1.AWSConfig
 		expectedPublicRouteTableID string
-		expectedVPCID              string
 	}{
 		{
 			description: "basic matching, all fields present",
@@ -20,7 +19,7 @@ func TestAdapterInternetGatewayVPCID(t *testing.T) {
 					Cluster: defaultCluster,
 				},
 			},
-			expectedVPCID: "vpc-12345",
+			expectedPublicRouteTableID: "rtb-1234",
 		},
 	}
 
@@ -32,7 +31,7 @@ func TestAdapterInternetGatewayVPCID(t *testing.T) {
 		a := Adapter{}
 		t.Run(tc.description, func(t *testing.T) {
 			clients.EC2 = &EC2ClientMock{
-				vpcID: tc.expectedVPCID,
+				routeTableID: tc.expectedPublicRouteTableID,
 			}
 			err := a.getInternetGateway(tc.customObject, clients)
 			if err != nil {
@@ -41,10 +40,6 @@ func TestAdapterInternetGatewayVPCID(t *testing.T) {
 
 			if a.PublicRouteTableID != tc.expectedPublicRouteTableID {
 				t.Errorf("unexpected PublicRouteTableID, got %q, want %q", a.PublicRouteTableID, tc.expectedPublicRouteTableID)
-			}
-
-			if a.VPCID != tc.expectedVPCID {
-				t.Errorf("unexpected VPCID, got %q, want %q", a.VPCID, tc.expectedVPCID)
 			}
 		})
 	}

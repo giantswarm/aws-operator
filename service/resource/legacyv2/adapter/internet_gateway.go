@@ -11,7 +11,6 @@ import (
 
 type internetGatewayAdapter struct {
 	PublicRouteTableID string
-	VPCID              string
 }
 
 func (i *internetGatewayAdapter) getInternetGateway(customObject v1alpha1.AWSConfig, clients Clients) error {
@@ -24,14 +23,6 @@ func (i *internetGatewayAdapter) getInternetGateway(customObject v1alpha1.AWSCon
 		return microerror.Mask(err)
 	}
 	i.PublicRouteTableID = routeTableID
-
-	// TODO: remove this code once the VPC is created by cloudformation and add a
-	// reference in the template
-	vpcID, err := VPCID(clients, keyv2.ClusterID(customObject))
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	i.VPCID = vpcID
 
 	return nil
 }
