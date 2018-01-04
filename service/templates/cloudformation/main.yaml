@@ -2,6 +2,7 @@
 Description: Main CloudFormation stack.
 Resources:
   {{template "iam_policies" .}}
+  {{template "route_tables" .}}
   {{template "internet_gateway" .}}
   {{template "nat_gateway" .}}
   {{template "instance" .}}

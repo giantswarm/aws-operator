@@ -47,6 +47,7 @@ type Adapter struct {
 	internetGatewayAdapter
 	natGatewayAdapter
 	recordSetsAdapter
+	routeTablesAdapter
 	outputsAdapter
 }
 
@@ -73,7 +74,7 @@ func New(customObject v1alpha1.AWSConfig, clients Clients) (Adapter, error) {
 		a.getInternetGateway,
 		a.getNatGateway,
 		a.getRecordSets,
-		a.getSecurityGroups,
+		a.getRouteTables,
 		a.getOutputs,
 	}
 

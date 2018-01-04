@@ -211,4 +211,8 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Error("NATGateway subnet id property not found")
 	}
+	if !strings.Contains(body, "PrivateRouteTable:") {
+		fmt.Println(body)
+		t.Error("PrivateRouteTable element not found")
+	}
 }
