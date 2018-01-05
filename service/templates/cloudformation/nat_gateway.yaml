@@ -6,7 +6,7 @@
         Fn::GetAtt:
         - NATEIP
         - AllocationId
-      SubnetId: {{.PublicSubnetID}}
+      SubnetId: !Ref PublicSubnet
       Tags:
         - Key: Name
           Value: {{ .ClusterID }}
