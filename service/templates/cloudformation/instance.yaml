@@ -9,7 +9,7 @@
       InstanceType: {{ .MasterInstanceType }}
       SecurityGroupIds:
       - {{ .MasterSecurityGroupID }}
-      SubnetId: {{ .MasterSubnetID }}
+      SubnetId: !Ref PrivateSubnet
       UserData: {{ .MasterSmallCloudConfig }}
       Tags:
       - Key: Name
