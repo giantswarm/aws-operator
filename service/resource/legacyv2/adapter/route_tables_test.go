@@ -12,7 +12,20 @@ func TestAdapterRouteTablesRegularFields(t *testing.T) {
 		customObject                  v1alpha1.AWSConfig
 		expectedError                 bool
 		expectedPrivateRouteTableName string
-	}{}
+	}{
+		{
+			description: "basic matching, all fields present",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "test-cluster",
+					},
+				},
+			},
+			expectedError:                 false,
+			expectedPrivateRouteTableName: "test-cluster-private",
+		},
+	}
 
 	for _, tc := range testCases {
 		a := Adapter{}
