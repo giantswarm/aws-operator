@@ -48,6 +48,7 @@ type Adapter struct {
 	natGatewayAdapter
 	recordSetsAdapter
 	routeTablesAdapter
+	subnetsAdapter
 	outputsAdapter
 }
 
@@ -75,6 +76,7 @@ func New(customObject v1alpha1.AWSConfig, clients Clients) (Adapter, error) {
 		a.getNatGateway,
 		a.getRecordSets,
 		a.getRouteTables,
+		a.getSubnets,
 		a.getOutputs,
 	}
 

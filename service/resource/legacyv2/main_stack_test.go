@@ -95,6 +95,9 @@ func TestMainTemplateExistingFields(t *testing.T) {
 						IdleTimeoutSeconds: 60,
 					},
 				},
+				VPC: v1alpha1.AWSConfigSpecAWSVPC{
+					PrivateSubnetCIDR: "10.1.2.0/25",
+				},
 			},
 		},
 	}
@@ -214,5 +217,9 @@ func TestMainTemplateExistingFields(t *testing.T) {
 	if !strings.Contains(body, "PrivateRouteTable:") {
 		fmt.Println(body)
 		t.Error("PrivateRouteTable element not found")
+	}
+	if !strings.Contains(body, "PrivateSubnet:") {
+		fmt.Println(body)
+		t.Error("PrivateSubnet element not found")
 	}
 }
