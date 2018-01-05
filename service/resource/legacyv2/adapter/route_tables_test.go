@@ -11,6 +11,7 @@ func TestAdapterRouteTablesRegularFields(t *testing.T) {
 		description                   string
 		customObject                  v1alpha1.AWSConfig
 		expectedError                 bool
+		expectedPublicRouteTableName  string
 		expectedPrivateRouteTableName string
 	}{
 		{
@@ -23,6 +24,7 @@ func TestAdapterRouteTablesRegularFields(t *testing.T) {
 				},
 			},
 			expectedError:                 false,
+			expectedPublicRouteTableName:  "test-cluster-public",
 			expectedPrivateRouteTableName: "test-cluster-private",
 		},
 	}
@@ -39,6 +41,10 @@ func TestAdapterRouteTablesRegularFields(t *testing.T) {
 
 			if !tc.expectedError && err != nil {
 				t.Errorf("unexpected error %v", err)
+			}
+
+			if a.PublicRouteTableName != tc.expectedPublicRouteTableName {
+				t.Errorf("unexpected PublicRouteTableName, got %q, want %q", a.PublicRouteTableName, tc.expectedPrivateRouteTableName)
 			}
 
 			if a.PrivateRouteTableName != tc.expectedPrivateRouteTableName {
