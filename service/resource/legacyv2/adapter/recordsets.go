@@ -1,11 +1,7 @@
 package adapter
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/aws-operator/service/keyv2"
-	"github.com/giantswarm/microerror"
 )
 
 // template related to this adapter: service/templates/cloudformation/recordsets.yaml
@@ -31,35 +27,5 @@ func (r *recordSetsAdapter) getRecordSets(customObject v1alpha1.AWSConfig, clien
 	r.IngressELBDomain = customObject.Spec.Cluster.Kubernetes.IngressController.Domain
 	r.IngressWildcardELBDomain = customObject.Spec.Cluster.Kubernetes.IngressController.WildcardDomain
 
-	ingressELB, err := ELBDescription(clients, r.IngressELBDomain, customObject)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	r.IngressELBDNS = *ingressELB.DNSName
-	r.IngressELBAliasHostedZone = *ingressELB.CanonicalHostedZoneNameID
-
 	return nil
-}
-
-func ELBDescription(clients Clients, domain string, customObject v1alpha1.AWSConfig) (*elb.LoadBalancerDescription, error) {
-	elbName, err := keyv2.LoadBalancerName(domain, customObject)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	input := &elb.DescribeLoadBalancersInput{
-		LoadBalancerNames: []*string{
-			aws.String(elbName),
-		},
-	}
-
-	res, err := clients.ELB.DescribeLoadBalancers(input)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-	if len(res.LoadBalancerDescriptions) != 1 {
-		return nil, microerror.Mask(tooManyResultsError)
-	}
-
-	return res.LoadBalancerDescriptions[0], nil
 }

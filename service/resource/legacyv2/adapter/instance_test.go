@@ -8,15 +8,14 @@ import (
 
 func TestAdapterInstanceRegularFields(t *testing.T) {
 	testCases := []struct {
-		description                    string
-		customObject                   v1alpha1.AWSConfig
-		errorMatcher                   func(error) bool
-		expectedAZ                     string
-		expectedIAMInstanceProfileName string
-		expectedImageID                string
-		expectedInstanceType           string
-		expectedSecurityGroupID        string
-		expectedSubnetID               string
+		description             string
+		customObject            v1alpha1.AWSConfig
+		errorMatcher            func(error) bool
+		expectedAZ              string
+		expectedImageID         string
+		expectedInstanceType    string
+		expectedSecurityGroupID string
+		expectedSubnetID        string
 	}{
 		{
 			description:  "empty custom object",
@@ -41,11 +40,10 @@ func TestAdapterInstanceRegularFields(t *testing.T) {
 					},
 				},
 			},
-			errorMatcher:                   nil,
-			expectedAZ:                     "eu-central-1a",
-			expectedIAMInstanceProfileName: "test-cluster-master-EC2-K8S-Role",
-			expectedImageID:                "ami-test",
-			expectedInstanceType:           "m3.large",
+			errorMatcher:         nil,
+			expectedAZ:           "eu-central-1a",
+			expectedImageID:      "ami-test",
+			expectedInstanceType: "m3.large",
 		},
 	}
 
@@ -68,10 +66,6 @@ func TestAdapterInstanceRegularFields(t *testing.T) {
 
 			if a.MasterAZ != tc.expectedAZ {
 				t.Errorf("unexpected MasterAZ, got %q, want %q", a.instanceAdapter.MasterAZ, tc.expectedAZ)
-			}
-
-			if a.MasterIAMInstanceProfileName != tc.expectedIAMInstanceProfileName {
-				t.Errorf("unexpected MasterIAMInstanceProfileName, got %q, want %q", a.instanceAdapter.MasterAZ, tc.expectedAZ)
 			}
 
 			if a.MasterImageID != tc.expectedImageID {

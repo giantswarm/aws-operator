@@ -39,12 +39,13 @@ type Adapter struct {
 	ClusterID        string
 
 	autoScalingGroupAdapter
+	iamPoliciesAdapter
 	instanceAdapter
 	launchConfigAdapter
 	loadBalancersAdapter
+	internetGatewayAdapter
 	natGatewayAdapter
 	recordSetsAdapter
-	workerPolicyAdapter
 	outputsAdapter
 }
 
@@ -56,12 +57,13 @@ func New(customObject v1alpha1.AWSConfig, clients Clients) (Adapter, error) {
 
 	hydraters := []hydrater{
 		a.getAutoScalingGroup,
+		a.getIamPolicies,
 		a.getInstance,
 		a.getLaunchConfiguration,
 		a.getLoadBalancers,
+		a.getInternetGateway,
 		a.getNatGateway,
 		a.getRecordSets,
-		a.getWorkerPolicy,
 		a.getOutputs,
 	}
 

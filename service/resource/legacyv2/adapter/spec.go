@@ -11,8 +11,10 @@ import (
 const (
 	smallCloudConfigTemplate = "service/templates/cloudconfig/small_cloudconfig.yaml"
 
-	prefixMaster = "master"
-	prefixWorker = "worker"
+	prefixMaster  = "master"
+	prefixWorker  = "worker"
+	prefixIngress = "ingress"
+
 	// asgMaxBatchSizeRatio is the % of instances to be updated during a
 	// rolling update.
 	asgMaxBatchSizeRatio = 0.3
@@ -76,6 +78,7 @@ type EC2Client interface {
 	DescribeSecurityGroups(*ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error)
 	DescribeSubnets(*ec2.DescribeSubnetsInput) (*ec2.DescribeSubnetsOutput, error)
 	DescribeRouteTables(*ec2.DescribeRouteTablesInput) (*ec2.DescribeRouteTablesOutput, error)
+	DescribeVpcs(*ec2.DescribeVpcsInput) (*ec2.DescribeVpcsOutput, error)
 }
 
 // IAMClient describes the methods required to be implemented by a IAM AWS client.

@@ -25,4 +25,40 @@
         - {{ .APIElbSecurityGroupID }}
       Subnets:
         - {{ .APIElbSubnetID }}
+
+  IngressLoadBalancer:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      ConnectionSettings:
+        IdleTimeout: {{ .IngressElbIdleTimoutSeconds }}
+      HealthCheck:
+        HealthyThreshold: {{ .ELBHealthCheckHealthyThreshold }}
+        Interval: {{ .ELBHealthCheckInterval }}
+        Target: {{ .IngressElbHealthCheckTarget }}
+        Timeout: {{ .ELBHealthCheckTimeout }}
+        UnhealthyThreshold: {{ .ELBHealthCheckUnhealthyThreshold }}
+      Listeners:
+      {{ range .IngressElbPortsToOpen}}
+      - InstancePort: {{ .PortInstance }}
+        InstanceProtocol: TCP
+        LoadBalancerPort: {{ .PortELB }} 
+        Protocol: TCP
+      {{ end }}
+      LoadBalancerName: {{ .IngressElbName }}
+      Policies:
+      - PolicyName: "EnableProxyProtocol"
+        PolicyType: "ProxyProtocolPolicyType"
+        Attributes:
+        - Name: "ProxyProtocol"
+          Value: "true"
+        InstancePorts:
+        {{ range .IngressElbPortsToOpen}}
+        - {{ .PortInstance }}
+        {{ end }}
+      Scheme: {{ .IngressElbScheme }}
+      SecurityGroups:
+        - {{ .IngressElbSecurityGroupID }}
+      Subnets:
+        - {{ .IngressElbSubnetID }}
 {{end}}

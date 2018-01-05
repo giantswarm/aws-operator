@@ -14,13 +14,12 @@ import (
 // template related to this adapter: service/templates/cloudformation/instance.yaml
 
 type instanceAdapter struct {
-	MasterAZ                     string
-	MasterIAMInstanceProfileName string
-	MasterImageID                string
-	MasterInstanceType           string
-	MasterSecurityGroupID        string
-	MasterSmallCloudConfig       string
-	MasterSubnetID               string
+	MasterAZ               string
+	MasterImageID          string
+	MasterInstanceType     string
+	MasterSecurityGroupID  string
+	MasterSmallCloudConfig string
+	MasterSubnetID         string
 }
 
 func (i *instanceAdapter) getInstance(customObject v1alpha1.AWSConfig, clients Clients) error {
@@ -31,7 +30,6 @@ func (i *instanceAdapter) getInstance(customObject v1alpha1.AWSConfig, clients C
 	i.MasterAZ = keyv2.AvailabilityZone(customObject)
 	i.MasterImageID = keyv2.MasterImageID(customObject)
 	i.MasterInstanceType = keyv2.MasterInstanceType(customObject)
-	i.MasterIAMInstanceProfileName = keyv2.InstanceProfileName(customObject, prefixMaster)
 
 	// security group
 	// TODO: remove this code once the security group is created by cloudformation
