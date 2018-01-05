@@ -3,11 +3,15 @@ package aws
 import (
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	awsclient "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
+
+	awsclient "github.com/giantswarm/aws-operator/client/aws"
 )
 
 // SecurityGroup is an AWS security group.
@@ -17,6 +21,8 @@ type SecurityGroup struct {
 	VpcID       string
 	Rules       []SecurityGroupRule
 	id          string
+	// Dependencies.
+	Logger micrologger.Logger
 	AWSEntity
 }
 
@@ -250,9 +256,22 @@ func (s *SecurityGroup) Delete() error {
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	if _, err := s.Clients.EC2.DeleteSecurityGroup(&ec2.DeleteSecurityGroupInput{
-		GroupId: securityGroup.GroupId,
-	}); err != nil {
+
+	deleteOperation := func() error {
+		if _, err := s.Clients.EC2.DeleteSecurityGroup(&ec2.DeleteSecurityGroupInput{
+			GroupId: securityGroup.GroupId,
+		}); err != nil {
+			return microerror.Mask(err)
+		}
+		return nil
+	}
+
+	// Increase backoff to allow time for the Cloud Formation stack to delete.
+	deleteBackoff := NewCustomExponentialBackoff()
+	deleteBackoff.MaxElapsedTime = 5 * time.Minute
+
+	deleteNotify := NewNotify(s.Logger, "deleting security group")
+	if err := backoff.RetryNotify(deleteOperation, deleteBackoff, deleteNotify); err != nil {
 		return microerror.Mask(err)
 	}
 
