@@ -11,6 +11,10 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 		description                              string
 		customObject                             v1alpha1.AWSConfig
 		expectedError                            bool
+		expectedPublicSubnetAZ                   string
+		expectedPublicSubnetCIDR                 string
+		expectedPublicSubnetName                 string
+		expectedPublicSubnetMapPublicIPOnLaunch  bool
 		expectedPrivateSubnetAZ                  string
 		expectedPrivateSubnetCIDR                string
 		expectedPrivateSubnetName                string
@@ -23,6 +27,7 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 					AWS: v1alpha1.AWSConfigSpecAWS{
 						AZ: "eu-central-1a",
 						VPC: v1alpha1.AWSConfigSpecAWSVPC{
+							PublicSubnetCIDR:  "10.1.1.0/25",
 							PrivateSubnetCIDR: "10.1.2.0/25",
 						},
 					},
@@ -32,6 +37,10 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 				},
 			},
 			expectedError:                            false,
+			expectedPublicSubnetAZ:                   "eu-central-1a",
+			expectedPublicSubnetCIDR:                 "10.1.1.0/25",
+			expectedPublicSubnetName:                 "test-cluster-public",
+			expectedPublicSubnetMapPublicIPOnLaunch:  false,
 			expectedPrivateSubnetAZ:                  "eu-central-1a",
 			expectedPrivateSubnetCIDR:                "10.1.2.0/25",
 			expectedPrivateSubnetName:                "test-cluster-private",
@@ -51,6 +60,22 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 
 			if !tc.expectedError && err != nil {
 				t.Errorf("unexpected error %v", err)
+			}
+
+			if a.PublicSubnetAZ != tc.expectedPublicSubnetAZ {
+				t.Errorf("unexpected PublicSubnetAZ, got %q, want %q", a.PublicSubnetAZ, tc.expectedPublicSubnetAZ)
+			}
+
+			if a.PublicSubnetCIDR != tc.expectedPublicSubnetCIDR {
+				t.Errorf("unexpected PublicSubnetCIDR, got %q, want %q", a.PublicSubnetCIDR, tc.expectedPublicSubnetCIDR)
+			}
+
+			if a.PublicSubnetName != tc.expectedPublicSubnetName {
+				t.Errorf("unexpected PublicSubnetName, got %q, want %q", a.PublicSubnetName, tc.expectedPublicSubnetName)
+			}
+
+			if a.PublicSubnetMapPublicIPOnLaunch != tc.expectedPublicSubnetMapPublicIPOnLaunch {
+				t.Errorf("unexpected PublicSubnetMapPublicIPOnLaunch, got %t, want %t", a.PublicSubnetMapPublicIPOnLaunch, tc.expectedPublicSubnetMapPublicIPOnLaunch)
 			}
 
 			if a.PrivateSubnetAZ != tc.expectedPrivateSubnetAZ {
