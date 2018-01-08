@@ -1,0 +1,19 @@
+{{define "security_groups" }}
+MasterSecurityGroup:
+  Type: AWS::EC2::SecurityGroup
+  GroupName: {{ .MasterGroupName }}
+  GroupDescription: {{ .MasterGroupName }}
+  VpcId: {{ .VPCID }}
+
+WorkerSecurityGroup:
+  Type: AWS::EC2::SecurityGroup
+  GroupName: {{ .WorkerGroupName }}
+  GroupDescription: {{ .WorkerGroupName }}
+  VpcId: {{ .VPCID }}
+
+IngressSecurityGroup:
+  Type: AWS::EC2::SecurityGroup
+  GroupName: {{ .IngressGroupName }}
+  GroupDescription: {{ .IngressGroupName }}
+  VpcId: {{ .VPCID }}
+{{end}}

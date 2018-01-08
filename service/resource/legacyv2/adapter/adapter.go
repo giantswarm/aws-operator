@@ -46,6 +46,7 @@ type Adapter struct {
 	loadBalancersAdapter
 	recordSetsAdapter
 	routeTablesAdapter
+	securityGroupsAdapter
 	subnetsAdapter
 	outputsAdapter
 }
@@ -72,6 +73,7 @@ func New(customObject v1alpha1.AWSConfig, clients Clients) (Adapter, error) {
 		a.getLoadBalancers,
 		a.getRecordSets,
 		a.getRouteTables,
+		a.getSecurityGroups,
 		a.getSubnets,
 		a.getOutputs,
 	}
