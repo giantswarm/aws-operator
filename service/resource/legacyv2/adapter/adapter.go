@@ -37,15 +37,16 @@ type Adapter struct {
 	ASGType          string
 	AvailabilityZone string
 	ClusterID        string
+	VPCID            string
 
 	autoScalingGroupAdapter
 	iamPoliciesAdapter
 	instanceAdapter
 	launchConfigAdapter
 	loadBalancersAdapter
-	internetGatewayAdapter
-	natGatewayAdapter
 	recordSetsAdapter
+	routeTablesAdapter
+	subnetsAdapter
 	outputsAdapter
 }
 
@@ -55,15 +56,23 @@ func New(customObject v1alpha1.AWSConfig, clients Clients) (Adapter, error) {
 	a.ASGType = prefixWorker
 	a.ClusterID = keyv2.ClusterID(customObject)
 
+	// TODO: remove this code once the VPC is created by cloudformation and add a
+	// reference in the template
+	vpcID, err := VPCID(clients, keyv2.ClusterID(customObject))
+	if err != nil {
+		return Adapter{}, microerror.Mask(err)
+	}
+	a.VPCID = vpcID
+
 	hydraters := []hydrater{
 		a.getAutoScalingGroup,
 		a.getIamPolicies,
 		a.getInstance,
 		a.getLaunchConfiguration,
 		a.getLoadBalancers,
-		a.getInternetGateway,
-		a.getNatGateway,
 		a.getRecordSets,
+		a.getRouteTables,
+		a.getSubnets,
 		a.getOutputs,
 	}
 

@@ -19,7 +19,6 @@ type instanceAdapter struct {
 	MasterInstanceType     string
 	MasterSecurityGroupID  string
 	MasterSmallCloudConfig string
-	MasterSubnetID         string
 }
 
 func (i *instanceAdapter) getInstance(customObject v1alpha1.AWSConfig, clients Clients) error {
@@ -59,29 +58,6 @@ func (i *instanceAdapter) getInstance(customObject v1alpha1.AWSConfig, clients C
 		return microerror.Mask(tooManyResultsError)
 	}
 	i.MasterSecurityGroupID = *output.SecurityGroups[0].GroupId
-
-	// subnet ID
-	// TODO: remove this code once the subnet is created by cloudformation and add a
-	// reference in the template
-	subnetName := keyv2.SubnetName(customObject, suffixPrivate)
-	describeSubnetInput := &ec2.DescribeSubnetsInput{
-		Filters: []*ec2.Filter{
-			{
-				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
-				Values: []*string{
-					aws.String(subnetName),
-				},
-			},
-		},
-	}
-	subnetOutput, err := clients.EC2.DescribeSubnets(describeSubnetInput)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	if len(subnetOutput.Subnets) > 1 {
-		return microerror.Mask(tooManyResultsError)
-	}
-	i.MasterSubnetID = *subnetOutput.Subnets[0].SubnetId
 
 	accountID, err := AccountID(clients)
 	if err != nil {

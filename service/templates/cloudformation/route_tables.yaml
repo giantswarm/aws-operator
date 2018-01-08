@@ -1,0 +1,17 @@
+{{define "route_tables"}}
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: {{ .VPCID }}
+      Tags:
+      - Key: Name
+        Value: {{ .PublicRouteTableName }}
+  
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: {{ .VPCID }}
+      Tags:
+      - Key: Name
+        Value: {{ .PrivateRouteTableName }}
+{{end}}

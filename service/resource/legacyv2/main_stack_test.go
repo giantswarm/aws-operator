@@ -95,6 +95,10 @@ func TestMainTemplateExistingFields(t *testing.T) {
 						IdleTimeoutSeconds: 60,
 					},
 				},
+				VPC: v1alpha1.AWSConfigSpecAWSVPC{
+					PublicSubnetCIDR:  "10.1.1.0/25",
+					PrivateSubnetCIDR: "10.1.2.0/25",
+				},
 			},
 		},
 	}
@@ -207,8 +211,20 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Error("NATGateway element not found")
 	}
-	if !strings.Contains(body, "SubnetId: subnet-1234") {
+	if !strings.Contains(body, "PublicRouteTable:") {
 		fmt.Println(body)
-		t.Error("NATGateway subnet id property not found")
+		t.Error("PublicRouteTable element not found")
+	}
+	if !strings.Contains(body, "PublicSubnet:") {
+		fmt.Println(body)
+		t.Error("PublicSubnet element not found")
+	}
+	if !strings.Contains(body, "PrivateRouteTable:") {
+		fmt.Println(body)
+		t.Error("PrivateRouteTable element not found")
+	}
+	if !strings.Contains(body, "PrivateSubnet:") {
+		fmt.Println(body)
+		t.Error("PrivateSubnet element not found")
 	}
 }

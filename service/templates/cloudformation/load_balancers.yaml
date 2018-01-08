@@ -24,7 +24,7 @@
       SecurityGroups:
         - {{ .APIElbSecurityGroupID }}
       Subnets:
-        - {{ .APIElbSubnetID }}
+        - !Ref PublicSubnet
 
   IngressLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
@@ -60,5 +60,5 @@
       SecurityGroups:
         - {{ .IngressElbSecurityGroupID }}
       Subnets:
-        - {{ .IngressElbSubnetID }}
+        - !Ref PublicSubnet
 {{end}}

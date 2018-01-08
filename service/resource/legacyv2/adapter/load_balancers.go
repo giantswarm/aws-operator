@@ -29,7 +29,6 @@ type loadBalancersAdapter struct {
 	APIElbPortsToOpen                portPairs
 	APIElbScheme                     string
 	APIElbSecurityGroupID            string
-	APIElbSubnetID                   string
 	ELBHealthCheckHealthyThreshold   int
 	ELBHealthCheckInterval           int
 	ELBHealthCheckTimeout            int
@@ -40,7 +39,6 @@ type loadBalancersAdapter struct {
 	IngressElbPortsToOpen            portPairs
 	IngressElbScheme                 string
 	IngressElbSecurityGroupID        string
-	IngressElbSubnetID               string
 }
 
 // portPair is a pair of ports.
@@ -156,31 +154,6 @@ func (lb *loadBalancersAdapter) getLoadBalancers(customObject v1alpha1.AWSConfig
 		return microerror.Mask(tooManyResultsError)
 	}
 	lb.IngressElbSecurityGroupID = *outputIngress.SecurityGroups[0].GroupId
-
-	// subnet ID
-	// TODO: remove this code once the subnet is created by cloudformation and add a
-	// reference in the template
-	subnetName := keyv2.SubnetName(customObject, suffixPublic)
-	describeSubnetInput := &ec2.DescribeSubnetsInput{
-		Filters: []*ec2.Filter{
-			{
-				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
-				Values: []*string{
-					aws.String(subnetName),
-				},
-			},
-		},
-	}
-	outputSubnet, err := clients.EC2.DescribeSubnets(describeSubnetInput)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	if len(outputSubnet.Subnets) > 1 {
-		return microerror.Mask(tooManyResultsError)
-	}
-
-	lb.APIElbSubnetID = *outputSubnet.Subnets[0].SubnetId
-	lb.IngressElbSubnetID = *outputSubnet.Subnets[0].SubnetId
 
 	return nil
 }

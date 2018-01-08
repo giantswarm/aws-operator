@@ -38,8 +38,14 @@ func TestAdapterMain(t *testing.T) {
 			},
 		},
 	}
+	expectedASGType := prefixWorker
+	expectedClusterID := "test-cluster"
+	expectedVPCID := "vpc-1234"
+
 	clients := Clients{
-		EC2: &EC2ClientMock{},
+		EC2: &EC2ClientMock{
+			vpcID: expectedVPCID,
+		},
 		IAM: &IAMClientMock{},
 		KMS: &KMSClientMock{},
 		ELB: &ELBClientMock{},
@@ -50,13 +56,15 @@ func TestAdapterMain(t *testing.T) {
 		t.Errorf("unexpected error %v", err)
 	}
 
-	expectedASGType := prefixWorker
 	if expectedASGType != a.ASGType {
 		t.Errorf("unexpected value, expecting %q, got %q", expectedASGType, a.ASGType)
 	}
 
-	expectedClusterID := "test-cluster"
 	if expectedClusterID != a.ClusterID {
 		t.Errorf("unexpected value, expecting %q, got %q", expectedClusterID, a.ClusterID)
+	}
+
+	if expectedVPCID != a.VPCID {
+		t.Errorf("unexpected value, expecting %q, got %q", expectedVPCID, a.VPCID)
 	}
 }
