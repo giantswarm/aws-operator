@@ -18,7 +18,26 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	if bucketInput.Name != "" {
 		r.logger.LogCtx(ctx, "debug", "deleting S3 bucket")
 
-		_, err := r.clients.S3.DeleteBucket(&s3.DeleteBucketInput{
+		// make sure the bucket is empty.
+		input := &s3.ListObjectsV2Input{
+			Bucket: aws.String(bucketInput.Name),
+		}
+		result, err := r.clients.S3.ListObjectsV2(input)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		for _, object := range result.Contents {
+			_, err := r.clients.S3.DeleteObject(&s3.DeleteObjectInput{
+				Bucket: aws.String(bucketInput.Name),
+				Key:    object.Key,
+			})
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+
+		_, err = r.clients.S3.DeleteBucket(&s3.DeleteBucketInput{
 			Bucket: aws.String(bucketInput.Name),
 		})
 		if IsBucketNotFound(err) {
