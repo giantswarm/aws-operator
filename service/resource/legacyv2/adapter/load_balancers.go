@@ -17,9 +17,6 @@ const (
 	healthCheckInterval           = 5
 	healthCheckTimeout            = 3
 	healthCheckUnhealthyThreshold = 2
-
-	httpPort  = 80
-	httpsPort = 443
 )
 
 type loadBalancersAdapter struct {
