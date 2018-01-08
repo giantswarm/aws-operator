@@ -22,10 +22,7 @@ func IsWrongType(err error) bool {
 
 func IsKeyNotFound(err error) bool {
 	aerr, ok := err.(awserr.Error)
-	if !ok {
-		return false
-	}
-	if aerr.Code() == kms.ErrCodeNotFoundException {
+	if ok && aerr.Code() == kms.ErrCodeNotFoundException {
 		return true
 	}
 
