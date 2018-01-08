@@ -29,6 +29,8 @@ type rulesInput struct {
 
 const (
 	allPorts         = -1
+	httpPort         = 80
+	httpsPort        = 443
 	sshPort          = 22
 	kubeletPort      = 10250
 	nodeExporterPort = 10300
