@@ -362,47 +362,54 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 		}
 	}
 
-	s.logger.Log("info", fmt.Sprintf("waiting for k8s secrets..."))
-	clusterID := keyv2.ClusterID(cluster)
-	certs, err := s.certWatcher.SearchCerts(clusterID)
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get certificates from secrets: '%#v'", err))
-	}
+	// For new clusters using Cloud Formation there is an OperatorKit resource
+	// for the kms keys and related resources.
+	var kmsKey *awsresources.KMSKey
+	var tlsAssets *certificatetpr.CompactTLSAssets
+	var clusterKeys *randomkeytpr.CompactRandomKeyAssets
+	if !keyv2.UseCloudFormation(cluster) {
+		s.logger.Log("info", fmt.Sprintf("waiting for k8s secrets..."))
+		clusterID := keyv2.ClusterID(cluster)
+		certs, err := s.certWatcher.SearchCerts(clusterID)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get certificates from secrets: '%#v'", err))
+		}
 
-	// Create Encryption key
-	s.logger.Log("info", fmt.Sprintf("waiting for k8s keys..."))
-	keys, err := s.keyWatcher.SearchKeys(clusterID)
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get keys from secrets: '%#v'", err))
-	}
+		// Create Encryption key
+		s.logger.Log("info", fmt.Sprintf("waiting for k8s keys..."))
+		keys, err := s.keyWatcher.SearchKeys(clusterID)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get keys from secrets: '%#v'", err))
+		}
 
-	// Create KMS key.
-	kmsKey := &awsresources.KMSKey{
-		Name:      keyv2.ClusterID(cluster),
-		AWSEntity: awsresources.AWSEntity{Clients: clients},
-	}
+		// Create KMS key.
+		kmsKey = &awsresources.KMSKey{
+			Name:      keyv2.ClusterID(cluster),
+			AWSEntity: awsresources.AWSEntity{Clients: clients},
+		}
 
-	kmsCreated, kmsKeyErr := kmsKey.CreateIfNotExists()
-	if kmsKeyErr != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create KMS key: '%#v'", kmsKeyErr))
-	}
+		kmsCreated, kmsKeyErr := kmsKey.CreateIfNotExists()
+		if kmsKeyErr != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create KMS key: '%#v'", kmsKeyErr))
+		}
 
-	if kmsCreated {
-		s.logger.Log("info", fmt.Sprintf("created KMS key for cluster '%s'", keyv2.ClusterID(cluster)))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("kms key '%s' already exists, reusing", kmsKey.Name))
-	}
+		if kmsCreated {
+			s.logger.Log("info", fmt.Sprintf("created KMS key for cluster '%s'", keyv2.ClusterID(cluster)))
+		} else {
+			s.logger.Log("info", fmt.Sprintf("kms key '%s' already exists, reusing", kmsKey.Name))
+		}
 
-	// Encode TLS assets.
-	tlsAssets, err := s.encodeTLSAssets(certs, clients.KMS, kmsKey.Arn())
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not encode TLS assets: '%#v'", err))
-	}
+		// Encode TLS assets.
+		tlsAssets, err = s.encodeTLSAssets(certs, clients.KMS, kmsKey.Arn())
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not encode TLS assets: '%#v'", err))
+		}
 
-	// Encode Key assets.
-	clusterKeys, err := s.encodeKeyAssets(keys, clients.KMS, kmsKey.Arn())
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not encode Keys assets: '%#v'", err))
+		// Encode Key assets.
+		clusterKeys, err = s.encodeKeyAssets(keys, clients.KMS, kmsKey.Arn())
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not encode Keys assets: '%#v'", err))
+		}
 	}
 
 	bucketName := s.bucketName(cluster)
