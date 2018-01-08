@@ -78,11 +78,11 @@ func (lb *loadBalancersAdapter) getLoadBalancers(customObject v1alpha1.AWSConfig
 	lb.IngressElbPortsToOpen = portPairs{
 		{
 			PortELB:      httpsPort,
-			PortInstance: customObject.Spec.Cluster.Kubernetes.IngressController.SecurePort,
+			PortInstance: keyv2.IngressControllerSecurePort(customObject),
 		},
 		{
 			PortELB:      httpPort,
-			PortInstance: customObject.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
+			PortInstance: keyv2.IngressControllerInsecurePort(customObject),
 		},
 	}
 	lb.IngressElbScheme = externalELBScheme
