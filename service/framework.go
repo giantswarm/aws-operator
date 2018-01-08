@@ -39,7 +39,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/cloudconfigv3"
 	"github.com/giantswarm/aws-operator/service/keyv1"
 	"github.com/giantswarm/aws-operator/service/keyv2"
-	"github.com/giantswarm/aws-operator/service/resource/kmskeyv2"
 	"github.com/giantswarm/aws-operator/service/resource/legacyv1"
 	"github.com/giantswarm/aws-operator/service/resource/legacyv2"
 	"github.com/giantswarm/aws-operator/service/resource/legacyv2/adapter"
@@ -238,17 +237,20 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 		}
 	}
 
-	var kmsKeyResource framework.Resource
-	{
-		kmsKeyConfig := kmskeyv2.DefaultConfig()
-		kmsKeyConfig.Clients.KMS = awsClients.KMS
-		kmsKeyConfig.Logger = config.Logger
+	// TODO Enable once the cloud formation resource is added.
+	/*
+		var kmsKeyResource framework.Resource
+		{
+			kmsKeyConfig := kmskeyv2.DefaultConfig()
+			kmsKeyConfig.Clients.KMS = awsClients.KMS
+			kmsKeyConfig.Logger = config.Logger
 
-		kmsKeyResource, err = kmskeyv2.New(kmsKeyConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
+			kmsKeyResource, err = kmskeyv2.New(kmsKeyConfig)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
 		}
-	}
+	*/
 
 	var s3BucketResource framework.Resource
 	{
