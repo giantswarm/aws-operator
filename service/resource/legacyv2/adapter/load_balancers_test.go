@@ -28,8 +28,6 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 		expectedIngressElbName                   string
 		expectedIngressElbPortsToOpen            portPairs
 		expectedIngressElbScheme                 string
-		expectedIngressElbSecurityGroupID        string
-		expectedIngressElbSubnetID               string
 	}{
 		{
 			description:  "empty custom object",

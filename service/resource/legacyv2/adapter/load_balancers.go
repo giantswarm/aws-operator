@@ -38,7 +38,6 @@ type loadBalancersAdapter struct {
 	IngressElbName                   string
 	IngressElbPortsToOpen            portPairs
 	IngressElbScheme                 string
-	IngressElbSecurityGroupID        string
 }
 
 // portPair is a pair of ports.
@@ -125,35 +124,6 @@ func (lb *loadBalancersAdapter) getLoadBalancers(customObject v1alpha1.AWSConfig
 		return microerror.Mask(tooManyResultsError)
 	}
 	lb.APIElbSecurityGroupID = *output.SecurityGroups[0].GroupId
-
-	// ingress security group field.
-	// TODO: remove this code once the security group is created by cloudformation
-	// and add a reference in the template
-	ingressGroupName := keyv2.SecurityGroupName(customObject, prefixIngress)
-	describeSgInput = &ec2.DescribeSecurityGroupsInput{
-		Filters: []*ec2.Filter{
-			{
-				Name: aws.String(subnetDescription),
-				Values: []*string{
-					aws.String(ingressGroupName),
-				},
-			},
-			{
-				Name: aws.String(subnetGroupName),
-				Values: []*string{
-					aws.String(ingressGroupName),
-				},
-			},
-		},
-	}
-	outputIngress, err := clients.EC2.DescribeSecurityGroups(describeSgInput)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	if len(outputIngress.SecurityGroups) > 1 {
-		return microerror.Mask(tooManyResultsError)
-	}
-	lb.IngressElbSecurityGroupID = *outputIngress.SecurityGroups[0].GroupId
 
 	return nil
 }
