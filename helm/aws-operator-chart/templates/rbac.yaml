@@ -4,6 +4,12 @@ metadata:
   name: aws-operator
 rules:
   - apiGroups:
+      - cluster.giantswarm.io
+    resources:
+      - awses
+    verbs:
+      - "*"
+  - apiGroups:
       - apiextensions.k8s.io
     resources:
       - customresourcedefinitions
@@ -41,12 +47,9 @@ rules:
       - ""
     resources:
       - secrets
-    resourceNames:
-      - aws-operator-secret
-      - aws-operator-ssh-key-secret
-      - aws-operator-pull-secret
     verbs:
       - get
+      - watch
   - apiGroups:
       - ""
     resources:
