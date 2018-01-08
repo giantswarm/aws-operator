@@ -7,7 +7,10 @@
           Value: {{ .ClusterID }}
 
   VPCGatewayAttachment:
-    Type: AWS::EC2::VPCGatewayAttachment 
+    Type: AWS::EC2::VPCGatewayAttachment
+    DependsOn:
+      - PublicRouteTable
+      - PrivateRouteTable
     Properties:
       InternetGatewayId:
         Ref: InternetGateway
