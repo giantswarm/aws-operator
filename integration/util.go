@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	defaultTimeout = 400
+	defaultTimeout = 500
 )
 
 func runCmd(cmdStr string) error {
