@@ -1,6 +1,7 @@
 package adapter
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
@@ -8,12 +9,13 @@ import (
 
 func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 	testCases := []struct {
-		description              string
-		customObject             v1alpha1.AWSConfig
-		expectedError            bool
-		expectedMasterGroupName  string
-		expectedWorkerGroupName  string
-		expectedIngressGroupName string
+		description                       string
+		customObject                      v1alpha1.AWSConfig
+		expectedError                     bool
+		expectedMasterGroupName           string
+		expectedWorkerGroupName           string
+		expectedIngressGroupName          string
+		expectedIngressSecurityGroupRules []securityGroupRule
 	}{
 		{
 			description: "basic matching, all fields present",
@@ -28,6 +30,18 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 			expectedMasterGroupName:  "test-cluster-master",
 			expectedWorkerGroupName:  "test-cluster-worker",
 			expectedIngressGroupName: "test-cluster-ingress",
+			expectedIngressSecurityGroupRules: []securityGroupRule{
+				securityGroupRule{
+					Port:       80,
+					Protocol:   "tcp",
+					SourceCIDR: "0.0.0.0/0",
+				},
+				securityGroupRule{
+					Port:       443,
+					Protocol:   "tcp",
+					SourceCIDR: "0.0.0.0/0",
+				},
+			},
 		},
 	}
 	for _, tc := range testCases {
@@ -57,6 +71,10 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 
 			if a.IngressGroupName != tc.expectedIngressGroupName {
 				t.Errorf("unexpected IngressGroupName, got %q, want %q", a.IngressGroupName, tc.expectedIngressGroupName)
+			}
+
+			if !reflect.DeepEqual(a.IngressSecurityGroupRules, tc.expectedIngressSecurityGroupRules) {
+				t.Errorf("unexpected Ingress Security Group Rules, got %v, want %v", a.IngressSecurityGroupRules, tc.expectedIngressSecurityGroupRules)
 			}
 		})
 	}
