@@ -25,6 +25,10 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	}
 
 	output, err := r.awsClients.KMS.DescribeKey(input)
+	if IsKeyNotFound(err) {
+		// Fall through.
+		return nil, nil
+	}
 	if err != nil {
 		return currentState, microerror.Mask(err)
 	}

@@ -237,6 +237,21 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 		}
 	}
 
+	// TODO Enable once the cloud formation resource is added.
+	/*
+		var kmsKeyResource framework.Resource
+		{
+			kmsKeyConfig := kmskeyv2.DefaultConfig()
+			kmsKeyConfig.Clients.KMS = awsClients.KMS
+			kmsKeyConfig.Logger = config.Logger
+
+			kmsKeyResource, err = kmskeyv2.New(kmsKeyConfig)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+		}
+	*/
+
 	var s3BucketResource framework.Resource
 	{
 		s3BucketConfig := s3bucketv2.DefaultConfig()
@@ -307,6 +322,8 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 		resources = []framework.Resource{
 			namespaceResource,
 			legacyResource,
+			// TODO Enable once the cloud formation resource is added.
+			// kmsKeyResource,
 			s3BucketResource,
 			s3BucketObjectResource,
 		}
