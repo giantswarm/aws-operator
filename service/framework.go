@@ -320,7 +320,8 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 		resources = []framework.Resource{
 			namespaceResource,
 			legacyResource,
-			kmsKeyResource,
+			// TODO Enable once the cloud formation resource is added.
+			// kmsKeyResource,
 			s3BucketResource,
 			s3BucketObjectResource,
 		}
