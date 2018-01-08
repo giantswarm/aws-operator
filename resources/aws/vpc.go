@@ -102,6 +102,10 @@ func (v *VPC) CreateOrFail() error {
 				Key:   aws.String(tagKeyInstallation),
 				Value: aws.String(v.InstallationName),
 			},
+			{
+				Key:   aws.String(tagKeyClusterId),
+				Value: aws.String(v.Name),
+			},
 		},
 	}); err != nil {
 		return microerror.Mask(err)

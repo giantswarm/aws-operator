@@ -99,6 +99,10 @@ func (s *Subnet) CreateOrFail() error {
 					Key:   aws.String(tagKeyCluster),
 					Value: aws.String(s.ClusterName),
 				},
+				{
+					Key:   aws.String(tagKeyClusterId),
+					Value: aws.String(s.ClusterName),
+				},
 			},
 		}); err != nil {
 			return microerror.Mask(err)

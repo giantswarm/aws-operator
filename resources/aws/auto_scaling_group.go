@@ -91,6 +91,11 @@ func (asg *AutoScalingGroup) CreateOrFail() error {
 				PropagateAtLaunch: aws.Bool(true),
 				Value:             aws.String(asg.ClusterID),
 			},
+			{
+				Key:               aws.String(tagKeyClusterId),
+				PropagateAtLaunch: aws.Bool(true),
+				Value:             aws.String(asg.ClusterID),
+			},
 		},
 	}
 

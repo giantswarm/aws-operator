@@ -191,6 +191,10 @@ func (i *Instance) CreateOrFail() error {
 					Key:   aws.String(tagKeyCluster),
 					Value: aws.String(i.ClusterName),
 				},
+				{
+					Key:   aws.String(tagKeyClusterId),
+					Value: aws.String(i.ClusterName),
+				},
 			},
 		}); err != nil {
 			return microerror.Mask(err)

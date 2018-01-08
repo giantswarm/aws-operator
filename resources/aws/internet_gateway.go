@@ -11,9 +11,9 @@ import (
 )
 
 type InternetGateway struct {
-	Name  string
-	VpcID string
-	id    string
+	Name      string
+	VpcID     string
+	id        string
 	// Dependencies.
 	Logger micrologger.Logger
 	AWSEntity
@@ -92,6 +92,10 @@ func (g *InternetGateway) CreateOrFail() error {
 		Tags: []*ec2.Tag{
 			{
 				Key:   aws.String(tagKeyName),
+				Value: aws.String(g.Name),
+			},
+			{
+				Key:   aws.String(tagKeyClusterId),
 				Value: aws.String(g.Name),
 			},
 		},

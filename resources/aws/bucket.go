@@ -10,6 +10,7 @@ import (
 type Bucket struct {
 	Name string
 	AWSEntity
+	ClusterID string
 }
 
 func (b *Bucket) CreateIfNotExists() (bool, error) {
@@ -35,6 +36,20 @@ func (b *Bucket) CreateOrFail() error {
 
 	if err := b.Clients.S3.WaitUntilBucketExists(&s3.HeadBucketInput{
 		Bucket: aws.String(b.Name),
+	}); err != nil {
+		return microerror.Mask(err)
+	}
+
+	if _, err := b.Clients.S3.PutBucketTagging(&s3.PutBucketTaggingInput{
+		Bucket: aws.String(b.Name),
+		Tagging: &s3.Tagging{
+			TagSet: []*s3.Tag{
+				{
+					Key:   aws.String(tagKeyClusterId),
+					Value: aws.String(b.ClusterID),
+				},
+			},
+		},
 	}); err != nil {
 		return microerror.Mask(err)
 	}

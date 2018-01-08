@@ -48,6 +48,7 @@ func (s *Resource) createLoadBalancer(input LoadBalancerInput) (*awsresources.EL
 		Scheme:             input.Scheme,
 		SecurityGroup:      input.SecurityGroupID,
 		SubnetID:           input.SubnetID,
+		ClusterID:          keyv1.ClusterID(input.Cluster),
 	}
 
 	lbCreated, err := lb.CreateIfNotExists()
