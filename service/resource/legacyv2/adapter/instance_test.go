@@ -54,7 +54,11 @@ func TestAdapterInstanceRegularFields(t *testing.T) {
 		a := Adapter{}
 
 		t.Run(tc.description, func(t *testing.T) {
-			err := a.getInstance(tc.customObject, clients)
+			cfg := Config{
+				CustomObject: tc.customObject,
+				Clients:      clients,
+			}
+			err := a.getInstance(cfg)
 			if tc.errorMatcher != nil && err == nil {
 				t.Error("expected error didn't happen")
 			}
@@ -139,7 +143,11 @@ func TestAdapterInstanceSecurityGroupID(t *testing.T) {
 		}
 
 		t.Run(tc.description, func(t *testing.T) {
-			err := a.getInstance(tc.customObject, clients)
+			cfg := Config{
+				CustomObject: tc.customObject,
+				Clients:      clients,
+			}
+			err := a.getInstance(cfg)
 			if tc.expectedError && err == nil {
 				t.Error("expected error didn't happen")
 			}

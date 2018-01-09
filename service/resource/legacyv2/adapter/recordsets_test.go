@@ -67,7 +67,11 @@ func TestAdapterRecordSetsRegularFields(t *testing.T) {
 	for _, tc := range testCases {
 		a := Adapter{}
 		t.Run(tc.description, func(t *testing.T) {
-			err := a.getRecordSets(tc.customObject, clients)
+			cfg := Config{
+				CustomObject: tc.customObject,
+				Clients:      clients,
+			}
+			err := a.getRecordSets(cfg)
 			if err != nil {
 				t.Errorf("unexpected error %v", err)
 			}
