@@ -54,4 +54,46 @@
         - Key: Name
           Value: {{ .IngressSecurityGroupName }}
 
+  # Allow all access between masters and workers for calico. This is done after
+  # the other rules to avoid circular dependencies.
+  MasterAllowCalicoIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: MasterSecurityGroup
+    Properties:
+      GroupId: !Ref MasterSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: !Ref MasterSecurityGroup
+
+  MasterAllowWorkerCalicoIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: MasterSecurityGroup
+    Properties:
+      GroupId: !Ref MasterSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: !Ref WorkerSecurityGroup
+
+  WorkerAllowCalicoIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: WorkerSecurityGroup
+    Properties:
+      GroupId: !Ref WorkerSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: !Ref WorkerSecurityGroup
+
+  WorkerAllowMasterCalicoIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: WorkerSecurityGroup
+    Properties:
+      GroupId: !Ref WorkerSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: !Ref MasterSecurityGroup
+
 {{end}}
