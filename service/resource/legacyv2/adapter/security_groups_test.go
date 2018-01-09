@@ -12,31 +12,85 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 		description                       string
 		customObject                      v1alpha1.AWSConfig
 		expectedError                     bool
-		expectedMasterGroupName           string
-		expectedWorkerGroupName           string
-		expectedIngressGroupName          string
+		expectedMasterSecurityGroupName   string
+		expectedWorkerSecurityGroupName   string
+		expectedWorkerSecurityGroupRules  []securityGroupRule
+		expectedIngressSecurityGroupName  string
 		expectedIngressSecurityGroupRules []securityGroupRule
 	}{
 		{
 			description: "basic matching, all fields present",
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						VPC: v1alpha1.AWSConfigSpecAWSVPC{
+							PeerID: "vpc-1234",
+						},
+					},
 					Cluster: v1alpha1.Cluster{
 						ID: "test-cluster",
+						Kubernetes: v1alpha1.ClusterKubernetes{
+							IngressController: v1alpha1.ClusterKubernetesIngressController{
+								SecurePort:   30010,
+								InsecurePort: 30011,
+							},
+						},
 					},
 				},
 			},
-			expectedError:            false,
-			expectedMasterGroupName:  "test-cluster-master",
-			expectedWorkerGroupName:  "test-cluster-worker",
-			expectedIngressGroupName: "test-cluster-ingress",
+			expectedError:                   false,
+			expectedMasterSecurityGroupName: "test-cluster-master",
+			expectedWorkerSecurityGroupName: "test-cluster-worker",
+			expectedWorkerSecurityGroupRules: []securityGroupRule{
+				{
+					Port:              30010,
+					Protocol:          "tcp",
+					SecurityGroupName: "test-cluster-ingress",
+				},
+				{
+					Port:              30011,
+					Protocol:          "tcp",
+					SecurityGroupName: "test-cluster-ingress",
+				},
+				{
+					Port:              -1,
+					Protocol:          "-1",
+					SecurityGroupName: "test-cluster-master",
+				},
+				{
+					Port:              -1,
+					Protocol:          "-1",
+					SecurityGroupName: "test-cluster-worker",
+				},
+				{
+					Port:       30010,
+					Protocol:   "tcp",
+					SourceCIDR: "10.0.0.0/16",
+				},
+				{
+					Port:       10250,
+					Protocol:   "tcp",
+					SourceCIDR: "10.0.0.0/16",
+				},
+				{
+					Port:       10300,
+					Protocol:   "tcp",
+					SourceCIDR: "10.0.0.0/16",
+				},
+				{
+					Port:       22,
+					Protocol:   "tcp",
+					SourceCIDR: "10.0.0.0/16",
+				},
+			},
+			expectedIngressSecurityGroupName: "test-cluster-ingress",
 			expectedIngressSecurityGroupRules: []securityGroupRule{
-				securityGroupRule{
+				{
 					Port:       80,
 					Protocol:   "tcp",
 					SourceCIDR: "0.0.0.0/0",
 				},
-				securityGroupRule{
+				{
 					Port:       443,
 					Protocol:   "tcp",
 					SourceCIDR: "0.0.0.0/0",
@@ -46,7 +100,9 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		clients := Clients{
-			EC2: &EC2ClientMock{},
+			EC2: &EC2ClientMock{
+				vpcCIDR: "10.0.0.0/16",
+			},
 			IAM: &IAMClientMock{},
 		}
 		a := Adapter{}
@@ -61,16 +117,20 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 				t.Errorf("unexpected error %v", err)
 			}
 
-			if a.MasterGroupName != tc.expectedMasterGroupName {
-				t.Errorf("unexpected MasterGroupName, got %q, want %q", a.MasterGroupName, tc.expectedMasterGroupName)
+			if a.MasterSecurityGroupName != tc.expectedMasterSecurityGroupName {
+				t.Errorf("unexpected MasterGroupName, got %q, want %q", a.MasterSecurityGroupName, tc.expectedMasterSecurityGroupName)
 			}
 
-			if a.WorkerGroupName != tc.expectedWorkerGroupName {
-				t.Errorf("unexpected WorkerGroupName, got %q, want %q", a.WorkerGroupName, tc.expectedWorkerGroupName)
+			if a.WorkerSecurityGroupName != tc.expectedWorkerSecurityGroupName {
+				t.Errorf("unexpected WorkerGroupName, got %q, want %q", a.WorkerSecurityGroupName, tc.expectedWorkerSecurityGroupName)
 			}
 
-			if a.IngressGroupName != tc.expectedIngressGroupName {
-				t.Errorf("unexpected IngressGroupName, got %q, want %q", a.IngressGroupName, tc.expectedIngressGroupName)
+			if !reflect.DeepEqual(a.WorkerSecurityGroupRules, tc.expectedWorkerSecurityGroupRules) {
+				t.Errorf("unexpected Worker Security Group Rules, got %v, want %v", a.WorkerSecurityGroupRules, tc.expectedWorkerSecurityGroupRules)
+			}
+
+			if a.IngressSecurityGroupName != tc.expectedIngressSecurityGroupName {
+				t.Errorf("unexpected IngressGroupName, got %q, want %q", a.IngressSecurityGroupName, tc.expectedIngressSecurityGroupName)
 			}
 
 			if !reflect.DeepEqual(a.IngressSecurityGroupRules, tc.expectedIngressSecurityGroupRules) {

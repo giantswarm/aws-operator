@@ -1,27 +1,49 @@
 {{define "security_groups" }}
-MasterSecurityGroup:
-  Type: AWS::EC2::SecurityGroup
-  GroupName: {{ .MasterGroupName }}
-  GroupDescription: {{ .MasterGroupName }}
-  VpcId: {{ .VPCID }}
+  MasterSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription:  {{ .MasterSecurityGroupName }}
+      VpcId: {{ .VPCID }}
+      Tags:
+        - Key: Name
+          Value:  {{ .MasterSecurityGroupName }}
 
-WorkerSecurityGroup:
-  Type: AWS::EC2::SecurityGroup
-  GroupName: {{ .WorkerGroupName }}
-  GroupDescription: {{ .WorkerGroupName }}
-  VpcId: {{ .VPCID }}
+    WorkerSecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: {{ .WorkerSecurityGroupName }}
+        VpcId: {{ .VPCID }}
+        SecurityGroupIngress:
+      {{ range .WorkerSecurityGroupRules }}
+      - 
+        IpProtocol: {{ .Protocol }}
+        FromPort: {{ .Port }}
+        ToPort: {{ .Port }}
+        {{ if .SourceCIDR }}
+        CidrIp: {{ .SourceCIDR }}
+        {{ else }}
+        SourceSecurityGroupName: {{ .SecurityGroupName }}
+        {{ end }}
+      {{ end }}
+      Tags:
+        - Key: Name
+          Value:  {{ .WorkerSecurityGroupName }}
 
-IngressSecurityGroup:
-  Type: AWS::EC2::SecurityGroup
-  GroupName: {{ .IngressGroupName }}
-  GroupDescription: {{ .IngressGroupName }}
-  SecurityGroupIngress:
-  {{ range . IngressSecurityGroupRules }}
-  - IpProtocol: {{ .Protocol }}
-    FromPort: {{ .Port }}
-    ToPort: {{ .Port }}
-    CidrIp: {{ .SourceCIDR }}
-  {{ end }}
-  VpcId: {{ .VPCID }}
+  IngressSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription:  {{ .IngressSecurityGroupName }}
+      VpcId: {{ .VPCID }}
+      SecurityGroupIngress:
+      {{ range .IngressSecurityGroupRules }}
+      - 
+        IpProtocol: {{ .Protocol }}
+        FromPort: {{ .Port }}
+        ToPort: {{ .Port }}
+        CidrIp: {{ .SourceCIDR }}
+      {{ end }}
+      Tags:
+        - Key: Name
+          Value: {{ .IngressSecurityGroupName }}
 
 {{end}}

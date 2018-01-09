@@ -30,46 +30,24 @@ func VPCID(clients Clients, name string) (string, error) {
 	return *output.Vpcs[0].VpcId, nil
 }
 
-func SubnetID(clients Clients, name string) (string, error) {
-	describeSubnetInput := &ec2.DescribeSubnetsInput{
+func VpcCIDR(clients Clients, vpcID string) (string, error) {
+	describeVpcInput := &ec2.DescribeVpcsInput{
 		Filters: []*ec2.Filter{
 			{
-				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
+				Name: aws.String("vpc-id"),
 				Values: []*string{
-					aws.String(name),
+					aws.String(vpcID),
 				},
 			},
 		},
 	}
-	output, err := clients.EC2.DescribeSubnets(describeSubnetInput)
+	output, err := clients.EC2.DescribeVpcs(describeVpcInput)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-	if len(output.Subnets) > 1 {
+	if len(output.Vpcs) > 1 {
 		return "", microerror.Mask(tooManyResultsError)
 	}
 
-	return *output.Subnets[0].SubnetId, nil
-}
-
-func RouteTableID(clients Clients, name string) (string, error) {
-	input := &ec2.DescribeRouteTablesInput{
-		Filters: []*ec2.Filter{
-			{
-				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
-				Values: []*string{
-					aws.String(name),
-				},
-			},
-		},
-	}
-	output, err := clients.EC2.DescribeRouteTables(input)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-	if len(output.RouteTables) > 1 {
-		return "", microerror.Mask(tooManyResultsError)
-	}
-
-	return *output.RouteTables[0].RouteTableId, nil
+	return *output.Vpcs[0].CidrBlock, nil
 }

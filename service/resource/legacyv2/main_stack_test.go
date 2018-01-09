@@ -227,4 +227,16 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Error("PrivateSubnet element not found")
 	}
+	if !strings.Contains(body, "MasterSecurityGroup:") {
+		fmt.Println(body)
+		t.Error("MasterSecurityGroup element not found")
+	}
+	if !strings.Contains(body, "WorkerSecurityGroup:") {
+		fmt.Println(body)
+		t.Error("WorkerSecurityGroup element not found")
+	}
+	if !strings.Contains(body, "IngressSecurityGroup:") {
+		fmt.Println(body)
+		t.Error("IngressSecurityGroup element not found")
+	}
 }
