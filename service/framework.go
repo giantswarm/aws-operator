@@ -320,9 +320,9 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 		resources = []framework.Resource{
 			namespaceResource,
 			kmsKeyResource,
-			legacyResource,
 			s3BucketResource,
 			s3BucketObjectResource,
+			legacyResource,
 		}
 
 		// Disable retry wrapper due to problems with the legacy resource.
