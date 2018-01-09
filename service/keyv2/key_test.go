@@ -224,6 +224,25 @@ func Test_IngressControllerSecurePort(t *testing.T) {
 	}
 }
 
+func Test_KubernetesAPISecurePort(t *testing.T) {
+	expectedPort := 443
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				Kubernetes: v1alpha1.ClusterKubernetes{
+					API: v1alpha1.ClusterKubernetesAPI{
+						SecurePort: expectedPort,
+					},
+				},
+			},
+		},
+	}
+
+	if KubernetesAPISecurePort(customObject) != expectedPort {
+		t.Fatalf("Expected kubernetes api secure port %d but was %d", expectedPort, KubernetesAPISecurePort(customObject))
+	}
+}
+
 func Test_MasterImageID(t *testing.T) {
 	tests := []struct {
 		customObject    v1alpha1.AWSConfig

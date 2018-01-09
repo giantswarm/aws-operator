@@ -84,6 +84,10 @@ func InstanceProfileName(customObject v1alpha1.AWSConfig, profileType string) st
 	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, ProfileNameTemplate)
 }
 
+func KubernetesAPISecurePort(customObject v1alpha1.AWSConfig) int {
+	return customObject.Spec.Cluster.Kubernetes.API.SecurePort
+}
+
 // LoadBalancerName produces a unique name for the load balancer.
 // It takes the domain name, extracts the first subdomain, and combines it with the cluster name.
 func LoadBalancerName(domainName string, cluster v1alpha1.AWSConfig) (string, error) {

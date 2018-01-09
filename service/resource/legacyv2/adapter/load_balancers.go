@@ -53,13 +53,13 @@ func (lb *loadBalancersAdapter) getLoadBalancers(customObject v1alpha1.AWSConfig
 		return microerror.Mask(err)
 	}
 
-	lb.APIElbHealthCheckTarget = heathCheckTarget(customObject.Spec.Cluster.Kubernetes.API.SecurePort)
+	lb.APIElbHealthCheckTarget = heathCheckTarget(keyv2.KubernetesAPISecurePort(customObject))
 	lb.APIElbIdleTimoutSeconds = customObject.Spec.AWS.API.ELB.IdleTimeoutSeconds
 	lb.APIElbName = apiElbName
 	lb.APIElbPortsToOpen = portPairs{
 		{
-			PortELB:      customObject.Spec.Cluster.Kubernetes.API.SecurePort,
-			PortInstance: customObject.Spec.Cluster.Kubernetes.API.SecurePort,
+			PortELB:      keyv2.KubernetesAPISecurePort(customObject),
+			PortInstance: keyv2.KubernetesAPISecurePort(customObject),
 		},
 	}
 	lb.APIElbScheme = externalELBScheme
@@ -70,7 +70,7 @@ func (lb *loadBalancersAdapter) getLoadBalancers(customObject v1alpha1.AWSConfig
 		return microerror.Mask(err)
 	}
 
-	lb.IngressElbHealthCheckTarget = heathCheckTarget(customObject.Spec.Cluster.Kubernetes.IngressController.SecurePort)
+	lb.IngressElbHealthCheckTarget = heathCheckTarget(keyv2.IngressControllerSecurePort(customObject))
 	lb.IngressElbIdleTimoutSeconds = customObject.Spec.AWS.Ingress.ELB.IdleTimeoutSeconds
 	lb.IngressElbName = ingressElbName
 	lb.IngressElbPortsToOpen = portPairs{
