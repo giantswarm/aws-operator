@@ -9,9 +9,14 @@ const (
 	clusterVersionOutputKey = "ClusterVersionOutput"
 	workerRoleKey           = "WorkerRole"
 
+<<<<<<< HEAD
 	cloudFormationGuestTemplatesDirectory    = "service/templates/cloudformation/guest"
 	cloudFormationHostPreTemplatesDirectory  = "service/templates/cloudformation/host-pre"
 	cloudFormationHostPostTemplatesDirectory = "service/templates/cloudformation/host-post"
+=======
+	cloudFormationGuestTemplatesDirectory = "service/templates/cloudformation/guest"
+	cloudFormationHostTemplatesDirectory  = "service/templates/cloudformation/host"
+>>>>>>> migrate vpc and vpc peering to cloudformation
 
 	namedIAMCapability = "CAPABILITY_NAMED_IAM"
 )

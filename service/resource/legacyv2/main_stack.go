@@ -118,6 +118,18 @@ func (r *Resource) getMainTemplateBody(tplDir string, adp adapter.Adapter) (stri
 		return "", microerror.Mask(err)
 	}
 
+	cfg := adapter.Config{
+		CustomObject:     customObject,
+		Clients:          *r.awsClients,
+		HostClients:      *r.awsHostClients,
+		InstallationName: r.installationName,
+		HostAccountID:    r.awsHostConfig.AccountID(),
+	}
+	adapter, err := adapter.New(cfg)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
 	var tpl bytes.Buffer
 	if err := t.ExecuteTemplate(&tpl, "main", adp); err != nil {
 		return "", microerror.Mask(err)
