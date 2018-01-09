@@ -18,7 +18,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	if bucketInput.Name != "" {
 		r.logger.LogCtx(ctx, "debug", "deleting S3 bucket")
 
-		// make sure the bucket is empty.
+		// Make sure the bucket is empty.
 		input := &s3.ListObjectsV2Input{
 			Bucket: aws.String(bucketInput.Name),
 		}
