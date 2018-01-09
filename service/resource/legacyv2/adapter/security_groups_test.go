@@ -13,6 +13,7 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 		customObject                      v1alpha1.AWSConfig
 		expectedError                     bool
 		expectedMasterSecurityGroupName   string
+		expectedMasterSecurityGroupRules  []securityGroupRule
 		expectedWorkerSecurityGroupName   string
 		expectedWorkerSecurityGroupRules  []securityGroupRule
 		expectedIngressSecurityGroupName  string
@@ -40,27 +41,39 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 			},
 			expectedError:                   false,
 			expectedMasterSecurityGroupName: "test-cluster-master",
+			expectedMasterSecurityGroupRules: []securityGroupRule{
+				{
+					Port:       443,
+					Protocol:   "tcp",
+					SourceCIDR: "0.0.0.0/0",
+				},
+				{
+					Port:       10250,
+					Protocol:   "tcp",
+					SourceCIDR: "10.0.0.0/16",
+				},
+				{
+					Port:       10300,
+					Protocol:   "tcp",
+					SourceCIDR: "10.0.0.0/16",
+				},
+				{
+					Port:       22,
+					Protocol:   "tcp",
+					SourceCIDR: "10.0.0.0/16",
+				},
+			},
 			expectedWorkerSecurityGroupName: "test-cluster-worker",
 			expectedWorkerSecurityGroupRules: []securityGroupRule{
 				{
-					Port:                    30010,
-					Protocol:                "tcp",
-					SourceSecurityGroupName: "test-cluster-ingress",
+					Port:                30010,
+					Protocol:            "tcp",
+					SourceSecurityGroup: "IngressSecurityGroup",
 				},
 				{
-					Port:                    30011,
-					Protocol:                "tcp",
-					SourceSecurityGroupName: "test-cluster-ingress",
-				},
-				{
-					Port:                    -1,
-					Protocol:                "-1",
-					SourceSecurityGroupName: "test-cluster-master",
-				},
-				{
-					Port:                    -1,
-					Protocol:                "-1",
-					SourceSecurityGroupName: "test-cluster-worker",
+					Port:                30011,
+					Protocol:            "tcp",
+					SourceSecurityGroup: "IngressSecurityGroup",
 				},
 				{
 					Port:       30010,

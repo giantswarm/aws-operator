@@ -11,6 +11,7 @@ import (
 
 type securityGroupsAdapter struct {
 	MasterSecurityGroupName   string
+	MasterSecurityGroupRules  []securityGroupRule
 	WorkerSecurityGroupName   string
 	WorkerSecurityGroupRules  []securityGroupRule
 	IngressSecurityGroupName  string
@@ -18,10 +19,10 @@ type securityGroupsAdapter struct {
 }
 
 type securityGroupRule struct {
-	Port                    int
-	Protocol                string
-	SourceCIDR              string
-	SourceSecurityGroupName string
+	Port                int
+	Protocol            string
+	SourceCIDR          string
+	SourceSecurityGroup string
 }
 
 const (
@@ -34,6 +35,8 @@ const (
 	tcpProtocol  = "tcp"
 
 	defaultCIDR = "0.0.0.0/0"
+
+	ingressSecurityGroupName = "IngressSecurityGroup"
 )
 
 func (s *securityGroupsAdapter) getSecurityGroups(customObject v1alpha1.AWSConfig, clients Clients) error {
@@ -43,6 +46,8 @@ func (s *securityGroupsAdapter) getSecurityGroups(customObject v1alpha1.AWSConfi
 	}
 
 	s.MasterSecurityGroupName = keyv2.SecurityGroupName(customObject, prefixMaster)
+	s.MasterSecurityGroupRules = s.getMasterRules(customObject, hostClusterCIDR)
+
 	s.WorkerSecurityGroupName = keyv2.SecurityGroupName(customObject, prefixWorker)
 	s.WorkerSecurityGroupRules = s.getWorkerRules(customObject, hostClusterCIDR)
 
@@ -52,28 +57,47 @@ func (s *securityGroupsAdapter) getSecurityGroups(customObject v1alpha1.AWSConfi
 	return nil
 }
 
+func (s *securityGroupsAdapter) getMasterRules(customObject v1alpha1.AWSConfig, hostClusterCIDR string) []securityGroupRule {
+	return []securityGroupRule{
+		// Allow all traffic to the kubernetes api server.
+		{
+			Port:       keyv2.KubernetesAPISecurePort(customObject),
+			Protocol:   tcpProtocol,
+			SourceCIDR: defaultCIDR,
+		},
+		// Allow traffic from host cluster CIDR to 10250 for kubelet scraping.
+		{
+			Port:       kubeletPort,
+			Protocol:   tcpProtocol,
+			SourceCIDR: hostClusterCIDR,
+		},
+		// Allow traffic from host cluster CIDR to 10300 for node-exporter scraping.
+		{
+			Port:       nodeExporterPort,
+			Protocol:   tcpProtocol,
+			SourceCIDR: hostClusterCIDR,
+		},
+		// Only allow ssh traffic from the host cluster.
+		{
+			Port:       sshPort,
+			Protocol:   tcpProtocol,
+			SourceCIDR: hostClusterCIDR,
+		},
+	}
+}
+
 func (s *securityGroupsAdapter) getWorkerRules(customObject v1alpha1.AWSConfig, hostClusterCIDR string) []securityGroupRule {
 	return []securityGroupRule{
+		// Allow traffic from the ingress security group to the ingress controller.
 		{
-			Port:                    customObject.Spec.Cluster.Kubernetes.IngressController.SecurePort,
-			Protocol:                tcpProtocol,
-			SourceSecurityGroupName: keyv2.SecurityGroupName(customObject, prefixIngress),
+			Port:                keyv2.IngressControllerSecurePort(customObject),
+			Protocol:            tcpProtocol,
+			SourceSecurityGroup: ingressSecurityGroupName,
 		},
 		{
-			Port:                    customObject.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
-			Protocol:                tcpProtocol,
-			SourceSecurityGroupName: keyv2.SecurityGroupName(customObject, prefixIngress),
-		},
-		// Allow all traffic between the masters and worker nodes for Calico.
-		{
-			Port:                    allPorts,
-			Protocol:                allProtocols,
-			SourceSecurityGroupName: keyv2.SecurityGroupName(customObject, prefixMaster),
-		},
-		{
-			Port:                    allPorts,
-			Protocol:                allProtocols,
-			SourceSecurityGroupName: keyv2.SecurityGroupName(customObject, prefixWorker),
+			Port:                keyv2.IngressControllerInsecurePort(customObject),
+			Protocol:            tcpProtocol,
+			SourceSecurityGroup: ingressSecurityGroupName,
 		},
 		// Allow traffic from host cluster to ingress controller secure port,
 		// for guest cluster scraping.
@@ -105,6 +129,7 @@ func (s *securityGroupsAdapter) getWorkerRules(customObject v1alpha1.AWSConfig, 
 
 func (s *securityGroupsAdapter) getIngressRules(customObject v1alpha1.AWSConfig) []securityGroupRule {
 	return []securityGroupRule{
+		// Allow all http and https traffic to the ingress load balancer.
 		{
 			Port:       httpPort,
 			Protocol:   tcpProtocol,

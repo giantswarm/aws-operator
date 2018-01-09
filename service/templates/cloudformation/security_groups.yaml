@@ -2,18 +2,26 @@
   MasterSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription:  {{ .MasterSecurityGroupName }}
+      GroupDescription: {{ .MasterSecurityGroupName }}
       VpcId: {{ .VPCID }}
+      SecurityGroupIngress:
+      {{ range .MasterSecurityGroupRules }}
+      - 
+        IpProtocol: {{ .Protocol }}
+        FromPort: {{ .Port }}
+        ToPort: {{ .Port }}
+        CidrIp: {{ .SourceCIDR }}
+      {{ end }}
       Tags:
         - Key: Name
           Value:  {{ .MasterSecurityGroupName }}
 
-    WorkerSecurityGroup:
-      Type: AWS::EC2::SecurityGroup
-      Properties:
-        GroupDescription: {{ .WorkerSecurityGroupName }}
-        VpcId: {{ .VPCID }}
-        SecurityGroupIngress:
+  WorkerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: {{ .WorkerSecurityGroupName }}
+      VpcId: {{ .VPCID }}
+      SecurityGroupIngress:
       {{ range .WorkerSecurityGroupRules }}
       - 
         IpProtocol: {{ .Protocol }}
@@ -22,17 +30,17 @@
         {{ if .SourceCIDR }}
         CidrIp: {{ .SourceCIDR }}
         {{ else }}
-        SourceSecurityGroupName: {{ .SourceSecurityGroupName }}
+        SourceSecurityGroupId: !Ref {{ .SourceSecurityGroup }}
         {{ end }}
       {{ end }}
       Tags:
         - Key: Name
           Value:  {{ .WorkerSecurityGroupName }}
-
+  
   IngressSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription:  {{ .IngressSecurityGroupName }}
+      GroupDescription: {{ .IngressSecurityGroupName }}
       VpcId: {{ .VPCID }}
       SecurityGroupIngress:
       {{ range .IngressSecurityGroupRules }}
