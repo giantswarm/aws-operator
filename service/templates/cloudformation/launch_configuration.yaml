@@ -5,7 +5,7 @@
     Properties:
       ImageId: {{ .WorkerImageID }}
       SecurityGroups:
-      - {{ .WorkerSecurityGroupID }}
+      - !Ref WorkerSecurityGroup
       InstanceType: {{ .WorkerInstanceType }}
       IamInstanceProfile: !Ref WorkerInstanceProfile
       BlockDeviceMappings:
