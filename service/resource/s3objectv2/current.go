@@ -30,6 +30,12 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		Bucket: aws.String(bucketName),
 	}
 	result, err := r.awsClients.S3.ListObjectsV2(input)
+	// the bucket can be already deleted with all the objects in it, it is ok if so.
+	if IsBucketNotFound(err) {
+		r.logger.LogCtx(ctx, "debug", "S3 object's bucket not found, no current objects present")
+		return output, nil
+	}
+	// we don't expect other errors.
 	if err != nil {
 		return output, microerror.Mask(err)
 	}
