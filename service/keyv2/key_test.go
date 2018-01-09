@@ -193,7 +193,7 @@ func Test_IngressControllerInsecurePort(t *testing.T) {
 			Cluster: v1alpha1.Cluster{
 				Kubernetes: v1alpha1.ClusterKubernetes{
 					IngressController: v1alpha1.ClusterKubernetesIngressController{
-						InsecurePort: 30010,
+						InsecurePort: expectedPort,
 					},
 				},
 			},
@@ -212,7 +212,7 @@ func Test_IngressControllerSecurePort(t *testing.T) {
 			Cluster: v1alpha1.Cluster{
 				Kubernetes: v1alpha1.ClusterKubernetes{
 					IngressController: v1alpha1.ClusterKubernetesIngressController{
-						SecurePort: 30011,
+						SecurePort: expectedPort,
 					},
 				},
 			},
