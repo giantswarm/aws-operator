@@ -4,7 +4,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
-// template related to this adapter: service/templates/cloudformation/outputs.yaml
+// template related to this adapter: service/templates/cloudformation/guest/outputs.yaml
 
 type outputsAdapter struct {
 	ClusterVersion string

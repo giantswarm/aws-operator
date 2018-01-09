@@ -87,6 +87,7 @@ type EC2Client interface {
 // IAMClient describes the methods required to be implemented by a IAM AWS client.
 type IAMClient interface {
 	GetUser(*iam.GetUserInput) (*iam.GetUserOutput, error)
+	GetRole(*iam.GetRoleInput) (*iam.GetRoleOutput, error)
 }
 
 // KMSClient describes the methods required to be implemented by a KMS AWS client.

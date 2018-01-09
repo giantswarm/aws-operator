@@ -6,7 +6,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
-// template related to this adapter: service/templates/cloudformation/auto_scaling_group.yaml
+// template related to this adapter: service/templates/cloudformation/guest/auto_scaling_group.yaml
 
 type autoScalingGroupAdapter struct {
 	ASGMaxSize             int

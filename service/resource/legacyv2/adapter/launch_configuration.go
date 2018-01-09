@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
-// template related to this adapter: service/templates/cloudformation/launch_configuration.go
+// template related to this adapter: service/templates/cloudformation/guest/launch_configuration.yaml
 
 type launchConfigAdapter struct {
 	WorkerAssociatePublicIPAddress bool

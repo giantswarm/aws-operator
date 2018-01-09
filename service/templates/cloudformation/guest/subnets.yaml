@@ -8,14 +8,14 @@
       Tags:
       - Key: Name
         Value: {{ .PublicSubnetName }}
-      VpcId: {{ .VPCID }}
+      VpcId: !Ref VPC
 
   PublicSubnetRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicSubnet
- 
+
   PrivateSubnet:
     Type: AWS::EC2::Subnet
     Properties:
@@ -25,7 +25,7 @@
       Tags:
       - Key: Name
         Value: {{ .PrivateSubnetName }}
-      VpcId: {{ .VPCID }}
+      VpcId: !Ref VPC
 
   PrivateSubnetRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation

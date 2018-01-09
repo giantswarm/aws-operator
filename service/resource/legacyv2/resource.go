@@ -9,6 +9,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
@@ -493,51 +494,55 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 		}
 	}
 
-	// Create VPC.
-	var vpc resources.ResourceWithID
-	vpc = &awsresources.VPC{
-		CidrBlock:        cluster.Spec.AWS.VPC.CIDR,
-		InstallationName: s.installationName,
-		Name:             keyv2.ClusterID(cluster),
-		AWSEntity:        awsresources.AWSEntity{Clients: clients},
-	}
-	vpcCreated, err := vpc.CreateIfNotExists()
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create VPC: '%#v'", err))
-	}
-	if vpcCreated {
-		s.logger.Log("info", fmt.Sprintf("created vpc for cluster '%s'", keyv2.ClusterID(cluster)))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("vpc for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
-	}
-	vpcID, err := vpc.GetID()
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get VPC ID: '%#v'", err))
-	}
+	var vpcID string
+	var conn *ec2.VpcPeeringConnection
+	if !keyv2.UseCloudFormation(cluster) {
+		// Create VPC.
+		var vpc resources.ResourceWithID
+		vpc = &awsresources.VPC{
+			CidrBlock:        cluster.Spec.AWS.VPC.CIDR,
+			InstallationName: s.installationName,
+			Name:             keyv2.ClusterID(cluster),
+			AWSEntity:        awsresources.AWSEntity{Clients: clients},
+		}
+		vpcCreated, err := vpc.CreateIfNotExists()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create VPC: '%#v'", err))
+		}
+		if vpcCreated {
+			s.logger.Log("info", fmt.Sprintf("created vpc for cluster '%s'", keyv2.ClusterID(cluster)))
+		} else {
+			s.logger.Log("info", fmt.Sprintf("vpc for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
+		}
+		vpcID, err = vpc.GetID()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get VPC ID: '%#v'", err))
+		}
 
-	// Create VPC peering connection.
-	vpcPeeringConection := &awsresources.VPCPeeringConnection{
-		VPCId:     vpcID,
-		PeerVPCId: cluster.Spec.AWS.VPC.PeerID,
-		AWSEntity: awsresources.AWSEntity{
-			Clients:     clients,
-			HostClients: hostClients,
-		},
-		Logger: s.logger,
-	}
-	vpcPeeringConnectionCreated, err := vpcPeeringConection.CreateIfNotExists()
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create vpc peering connection: '%#v'", err))
-	}
-	if vpcPeeringConnectionCreated {
-		s.logger.Log("info", fmt.Sprintf("created vpc peering connection for cluster '%s'", keyv2.ClusterID(cluster)))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("vpc peering connection for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
-	}
+		// Create VPC peering connection.
+		vpcPeeringConection := &awsresources.VPCPeeringConnection{
+			VPCId:     vpcID,
+			PeerVPCId: cluster.Spec.AWS.VPC.PeerID,
+			AWSEntity: awsresources.AWSEntity{
+				Clients:     clients,
+				HostClients: hostClients,
+			},
+			Logger: s.logger,
+		}
+		vpcPeeringConnectionCreated, err := vpcPeeringConection.CreateIfNotExists()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create vpc peering connection: '%#v'", err))
+		}
+		if vpcPeeringConnectionCreated {
+			s.logger.Log("info", fmt.Sprintf("created vpc peering connection for cluster '%s'", keyv2.ClusterID(cluster)))
+		} else {
+			s.logger.Log("info", fmt.Sprintf("vpc peering connection for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
+		}
 
-	conn, err := vpcPeeringConection.FindExisting()
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not find vpc peering connection: '%#v'", err))
+		conn, err = vpcPeeringConection.FindExisting()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not find vpc peering connection: '%#v'", err))
+		}
 	}
 
 	if !keyv2.UseCloudFormation(cluster) {

@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
-// template related to this adapter: service/templates/cloudformation/instance.yaml
+// template related to this adapter: service/templates/cloudformation/guest/instance.yaml
 
 type instanceAdapter struct {
 	MasterAZ               string

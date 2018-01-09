@@ -807,3 +807,22 @@ func Test_PolicyName(t *testing.T) {
 		t.Fatalf("Expected  name '%s' but was '%s'", expectedName, actual)
 	}
 }
+
+func Test_PeerAccessRoleName(t *testing.T) {
+	expectedName := "test-cluster-peer-access"
+
+	cluster := v1alpha1.Cluster{
+		ID: "test-cluster",
+	}
+
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: cluster,
+		},
+	}
+
+	actual := PeerAccessRoleName(customObject)
+	if actual != expectedName {
+		t.Fatalf("Expected  name '%s' but was '%s'", expectedName, actual)
+	}
+}

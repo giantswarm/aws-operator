@@ -105,8 +105,9 @@ func (c *CFClientMock) UpdateStack(*awscloudformation.UpdateStackInput) (*awsclo
 }
 
 type IAMClientMock struct {
-	accountID string
-	isError   bool
+	accountID   string
+	isError     bool
+	peerRoleArn string
 }
 
 func (i *IAMClientMock) GetUser(input *iam.GetUserInput) (*iam.GetUserOutput, error) {
@@ -124,6 +125,19 @@ func (i *IAMClientMock) GetUser(input *iam.GetUserInput) (*iam.GetUserOutput, er
 	output := &iam.GetUserOutput{
 		User: &iam.User{
 			Arn: aws.String("::::" + i.accountID),
+		},
+	}
+
+	return output, nil
+}
+
+func (i *IAMClientMock) GetRole(input *iam.GetRoleInput) (*iam.GetRoleOutput, error) {
+	if i.isError {
+		return nil, fmt.Errorf("error")
+	}
+	output := &iam.GetRoleOutput{
+		Role: &iam.Role{
+			Arn: aws.String(i.peerRoleArn),
 		},
 	}
 

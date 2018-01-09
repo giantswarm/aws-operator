@@ -1,6 +1,6 @@
 package adapter
 
-// template related to this adapter: service/templates/cloudformation/recordsets.yaml
+// template related to this adapter: service/templates/cloudformation/guest/recordsets.yaml
 
 type recordSetsAdapter struct {
 	APIELBHostedZones         string

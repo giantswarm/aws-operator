@@ -40,23 +40,24 @@ func TestAdapterMain(t *testing.T) {
 	}
 	expectedASGType := prefixWorker
 	expectedClusterID := "test-cluster"
-	expectedVPCID := "vpc-1234"
 
 	clients := Clients{
-		EC2: &EC2ClientMock{
-			vpcID: expectedVPCID,
-		},
+		EC2: &EC2ClientMock{},
 		IAM: &IAMClientMock{},
 		KMS: &KMSClientMock{},
 		ELB: &ELBClientMock{},
 	}
 	hostClients := Clients{
 		EC2: &EC2ClientMock{},
+		IAM: &IAMClientMock{},
 	}
+
 	cfg := Config{
-		CustomObject: customObject,
-		Clients:      clients,
-		HostClients:  hostClients,
+		CustomObject:     customObject,
+		Clients:          clients,
+		InstallationName: "myinstallation",
+		HostAccountID:    "myHostAccountID",
+		HostClients:      hostClients,
 	}
 	a, err := New(cfg)
 	if err != nil {
@@ -69,9 +70,5 @@ func TestAdapterMain(t *testing.T) {
 
 	if expectedClusterID != a.ClusterID {
 		t.Errorf("unexpected value, expecting %q, got %q", expectedClusterID, a.ClusterID)
-	}
-
-	if expectedVPCID != a.VPCID {
-		t.Errorf("unexpected value, expecting %q, got %q", expectedVPCID, a.VPCID)
 	}
 }

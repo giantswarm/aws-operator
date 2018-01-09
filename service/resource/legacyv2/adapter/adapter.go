@@ -5,7 +5,7 @@
 // sense that it has the knowledge to transform a aws custom object into a data structure
 // easily interpolable into the templates without any additional view logic.
 //
-// There's a base template in `service/templates/cloudformation/main.yaml` which defines
+// There's a base template in `service/templates/cloudformation/guest/main.yaml` which defines
 // the basic structure and includes the rest of templates that form the stack as nested
 // templates. Those subtemplates should use a `define` action with the name that will be
 // used to refer to them from the main template, as explained here
@@ -16,7 +16,7 @@
 // to obtain them, this logic is packed into functions called `hydraters`.
 //
 // When extending the stack we will just need to:
-// * Add the template file in `service/template/cloudformation` and modify
+// * Add the template file in `service/template/cloudformation/guest` and modify
 // `service/template/cloudformation/main.yaml` to include the new template.
 // * Add the adapter logic file in `service/resource/cloudformation/adapter` with the type
 // definition and the hydrater function to fill the fields (like asg.go or
@@ -37,7 +37,6 @@ type Adapter struct {
 	ASGType          string
 	AvailabilityZone string
 	ClusterID        string
-	VPCID            string
 
 	autoScalingGroupAdapter
 	iamPoliciesAdapter
@@ -48,13 +47,16 @@ type Adapter struct {
 	routeTablesAdapter
 	securityGroupsAdapter
 	subnetsAdapter
+	vpcAdapter
 	outputsAdapter
 }
 
 type Config struct {
-	CustomObject v1alpha1.AWSConfig
-	Clients      Clients
-	HostClients  Clients
+	CustomObject     v1alpha1.AWSConfig
+	Clients          Clients
+	HostClients      Clients
+	InstallationName string
+	HostAccountID    string
 }
 
 func New(cfg Config) (Adapter, error) {
@@ -62,14 +64,6 @@ func New(cfg Config) (Adapter, error) {
 
 	a.ASGType = prefixWorker
 	a.ClusterID = keyv2.ClusterID(cfg.CustomObject)
-
-	// TODO: remove this code once the VPC is created by cloudformation and add a
-	// reference in the template
-	vpcID, err := VPCID(cfg.Clients, keyv2.ClusterID(cfg.CustomObject))
-	if err != nil {
-		return Adapter{}, microerror.Mask(err)
-	}
-	a.VPCID = vpcID
 
 	hydraters := []hydrater{
 		a.getAutoScalingGroup,
@@ -81,6 +75,7 @@ func New(cfg Config) (Adapter, error) {
 		a.getRouteTables,
 		a.getSecurityGroups,
 		a.getSubnets,
+		a.getVpc,
 		a.getOutputs,
 	}
 

@@ -8,6 +8,8 @@ import (
 	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
+// template related to this adapter: service/templates/cloudformation/guest/load_balancers.yaml
+
 const (
 	// Default values for health checks.
 	healthCheckHealthyThreshold   = 10

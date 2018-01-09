@@ -19,6 +19,7 @@ import (
 func testConfig() Config {
 	resourceConfig := DefaultConfig()
 	resourceConfig.Clients = &adapter.Clients{}
+	resourceConfig.HostClients = &adapter.Clients{}
 	resourceConfig.Logger = microloggertest.New()
 	resourceConfig.CloudConfig = &cloudconfigv2.CloudConfig{}
 	resourceConfig.CertWatcher = &certificatetpr.Service{}
@@ -41,8 +42,8 @@ func TestMainTemplateGetEmptyBody(t *testing.T) {
 	}
 	cfg.HostClients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
 	}
-
 	newResource, err := New(cfg)
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
@@ -99,6 +100,7 @@ func TestMainTemplateExistingFields(t *testing.T) {
 					},
 				},
 				VPC: v1alpha1.AWSConfigSpecAWSVPC{
+					CIDR:              "10.1.1.0/24",
 					PublicSubnetCIDR:  "10.1.1.0/25",
 					PrivateSubnetCIDR: "10.1.2.0/25",
 				},
@@ -115,6 +117,7 @@ func TestMainTemplateExistingFields(t *testing.T) {
 	}
 	cfg.HostClients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
 	}
 	newResource, err := New(cfg)
 	if err != nil {
@@ -244,5 +247,13 @@ func TestMainTemplateExistingFields(t *testing.T) {
 	if !strings.Contains(body, "IngressSecurityGroup:") {
 		fmt.Println(body)
 		t.Error("IngressSecurityGroup element not found")
+	}
+	if !strings.Contains(body, " VPC:") {
+		fmt.Println(body)
+		t.Error("VPC element not found")
+	}
+	if !strings.Contains(body, "CidrBlock: 10.1.1.0/24") {
+		fmt.Println(body)
+		t.Error("CidrBlock element not found")
 	}
 }

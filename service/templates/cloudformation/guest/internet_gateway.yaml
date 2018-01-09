@@ -14,7 +14,7 @@
     Properties:
       InternetGatewayId:
         Ref: InternetGateway
-      VpcId: {{ .VPCID }}
+      VpcId: !Ref VPC
 
   InternetGatewayRoute:
     Type: AWS::EC2::Route

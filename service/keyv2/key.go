@@ -131,6 +131,10 @@ func MasterInstanceType(customObject v1alpha1.AWSConfig) string {
 	return instanceType
 }
 
+func PeerAccessRoleName(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("%s-peer-access", ClusterID(customObject))
+}
+
 func PolicyName(customObject v1alpha1.AWSConfig, profileType string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, PolicyNameTemplate)
 }

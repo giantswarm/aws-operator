@@ -4,7 +4,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
-// template related to this adapter: service/templates/cloudformation/subnets.yaml
+// template related to this adapter: service/templates/cloudformation/guest/subnets.yaml
 
 type subnetsAdapter struct {
 	PublicSubnetAZ                   string

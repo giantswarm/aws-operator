@@ -1,6 +1,7 @@
 {{define "main"}}AWSTemplateFormatVersion: 2010-09-09
 Description: Main CloudFormation stack.
 Resources:
+  {{template "vpc" .}}
   {{template "iam_policies" .}}
   {{template "security_groups" .}}
   {{template "route_tables" .}}

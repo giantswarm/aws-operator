@@ -52,7 +52,7 @@ func (r *Resource) getMainTemplateBody(customObject v1alpha1.AWSConfig) (string,
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-	templatesDir := filepath.Join(rootDir, cloudFormationTemplatesDirectory)
+	templatesDir := filepath.Join(rootDir, cloudFormationGuestTemplatesDirectory)
 
 	files, err := ioutil.ReadDir(templatesDir)
 	if err != nil {
@@ -68,9 +68,11 @@ func (r *Resource) getMainTemplateBody(customObject v1alpha1.AWSConfig) (string,
 	}
 
 	cfg := adapter.Config{
-		CustomObject: customObject,
-		Clients:      *r.awsClients,
-		HostClients:  *r.awsHostClients,
+		CustomObject:     customObject,
+		Clients:          *r.awsClients,
+		HostClients:      *r.awsHostClients,
+		InstallationName: r.installationName,
+		HostAccountID:    r.awsHostConfig.AccountID(),
 	}
 	adapter, err := adapter.New(cfg)
 	if err != nil {
