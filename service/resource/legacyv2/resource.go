@@ -465,23 +465,25 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 
 	// Create S3 bucket.
 	var bucket resources.ReusableResource
-	var bucketCreated bool
-	{
-		var err error
-		bucket = &awsresources.Bucket{
-			Name:      bucketName,
-			AWSEntity: awsresources.AWSEntity{Clients: clients},
+	if !keyv2.UseCloudFormation(cluster) {
+		var bucketCreated bool
+		{
+			var err error
+			bucket = &awsresources.Bucket{
+				Name:      bucketName,
+				AWSEntity: awsresources.AWSEntity{Clients: clients},
+			}
+			bucketCreated, err = bucket.CreateIfNotExists()
+			if err != nil {
+				return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create S3 bucket: '%#v'", err))
+			}
 		}
-		bucketCreated, err = bucket.CreateIfNotExists()
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create S3 bucket: '%#v'", err))
-		}
-	}
 
-	if bucketCreated {
-		s.logger.Log("info", fmt.Sprintf("created bucket '%s'", bucketName))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("bucket '%s' already exists, reusing", bucketName))
+		if bucketCreated {
+			s.logger.Log("info", fmt.Sprintf("created bucket '%s'", bucketName))
+		} else {
+			s.logger.Log("info", fmt.Sprintf("bucket '%s' already exists, reusing", bucketName))
+		}
 	}
 
 	// Create VPC.
