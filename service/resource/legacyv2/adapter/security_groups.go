@@ -18,10 +18,10 @@ type securityGroupsAdapter struct {
 }
 
 type securityGroupRule struct {
-	Port              int
-	Protocol          string
-	SourceCIDR        string
-	SecurityGroupName string
+	Port                    int
+	Protocol                string
+	SourceCIDR              string
+	SourceSecurityGroupName string
 }
 
 const (
@@ -55,25 +55,25 @@ func (s *securityGroupsAdapter) getSecurityGroups(customObject v1alpha1.AWSConfi
 func (s *securityGroupsAdapter) getWorkerRules(customObject v1alpha1.AWSConfig, hostClusterCIDR string) []securityGroupRule {
 	return []securityGroupRule{
 		{
-			Port:              customObject.Spec.Cluster.Kubernetes.IngressController.SecurePort,
-			Protocol:          tcpProtocol,
-			SecurityGroupName: keyv2.SecurityGroupName(customObject, prefixIngress),
+			Port:                    customObject.Spec.Cluster.Kubernetes.IngressController.SecurePort,
+			Protocol:                tcpProtocol,
+			SourceSecurityGroupName: keyv2.SecurityGroupName(customObject, prefixIngress),
 		},
 		{
-			Port:              customObject.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
-			Protocol:          tcpProtocol,
-			SecurityGroupName: keyv2.SecurityGroupName(customObject, prefixIngress),
+			Port:                    customObject.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
+			Protocol:                tcpProtocol,
+			SourceSecurityGroupName: keyv2.SecurityGroupName(customObject, prefixIngress),
 		},
 		// Allow all traffic between the masters and worker nodes for Calico.
 		{
-			Port:              allPorts,
-			Protocol:          allProtocols,
-			SecurityGroupName: keyv2.SecurityGroupName(customObject, prefixMaster),
+			Port:                    allPorts,
+			Protocol:                allProtocols,
+			SourceSecurityGroupName: keyv2.SecurityGroupName(customObject, prefixMaster),
 		},
 		{
-			Port:              allPorts,
-			Protocol:          allProtocols,
-			SecurityGroupName: keyv2.SecurityGroupName(customObject, prefixWorker),
+			Port:                    allPorts,
+			Protocol:                allProtocols,
+			SourceSecurityGroupName: keyv2.SecurityGroupName(customObject, prefixWorker),
 		},
 		// Allow traffic from host cluster to ingress controller secure port,
 		// for guest cluster scraping.

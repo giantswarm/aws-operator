@@ -43,24 +43,24 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 			expectedWorkerSecurityGroupName: "test-cluster-worker",
 			expectedWorkerSecurityGroupRules: []securityGroupRule{
 				{
-					Port:              30010,
-					Protocol:          "tcp",
-					SecurityGroupName: "test-cluster-ingress",
+					Port:                    30010,
+					Protocol:                "tcp",
+					SourceSecurityGroupName: "test-cluster-ingress",
 				},
 				{
-					Port:              30011,
-					Protocol:          "tcp",
-					SecurityGroupName: "test-cluster-ingress",
+					Port:                    30011,
+					Protocol:                "tcp",
+					SourceSecurityGroupName: "test-cluster-ingress",
 				},
 				{
-					Port:              -1,
-					Protocol:          "-1",
-					SecurityGroupName: "test-cluster-master",
+					Port:                    -1,
+					Protocol:                "-1",
+					SourceSecurityGroupName: "test-cluster-master",
 				},
 				{
-					Port:              -1,
-					Protocol:          "-1",
-					SecurityGroupName: "test-cluster-worker",
+					Port:                    -1,
+					Protocol:                "-1",
+					SourceSecurityGroupName: "test-cluster-worker",
 				},
 				{
 					Port:       30010,

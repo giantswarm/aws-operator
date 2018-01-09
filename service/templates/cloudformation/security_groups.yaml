@@ -22,7 +22,7 @@
         {{ if .SourceCIDR }}
         CidrIp: {{ .SourceCIDR }}
         {{ else }}
-        SourceSecurityGroupName: {{ .SecurityGroupName }}
+        SourceSecurityGroupName: {{ .SourceSecurityGroupName }}
         {{ end }}
       {{ end }}
       Tags:
