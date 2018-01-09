@@ -5,7 +5,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/keyv2"
@@ -52,41 +51,41 @@ type portPair struct {
 // portPairs is an array of PortPair.
 type portPairs []portPair
 
-func (lb *loadBalancersAdapter) getLoadBalancers(customObject v1alpha1.AWSConfig, clients Clients) error {
+func (lb *loadBalancersAdapter) getLoadBalancers(cfg Config) error {
 	// API load balancer settings.
-	apiElbName, err := keyv2.LoadBalancerName(customObject.Spec.Cluster.Kubernetes.API.Domain, customObject)
+	apiElbName, err := keyv2.LoadBalancerName(cfg.CustomObject.Spec.Cluster.Kubernetes.API.Domain, cfg.CustomObject)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	lb.APIElbHealthCheckTarget = heathCheckTarget(customObject.Spec.Cluster.Kubernetes.API.SecurePort)
-	lb.APIElbIdleTimoutSeconds = customObject.Spec.AWS.API.ELB.IdleTimeoutSeconds
+	lb.APIElbHealthCheckTarget = heathCheckTarget(cfg.CustomObject.Spec.Cluster.Kubernetes.API.SecurePort)
+	lb.APIElbIdleTimoutSeconds = cfg.CustomObject.Spec.AWS.API.ELB.IdleTimeoutSeconds
 	lb.APIElbName = apiElbName
 	lb.APIElbPortsToOpen = portPairs{
 		{
-			PortELB:      customObject.Spec.Cluster.Kubernetes.API.SecurePort,
-			PortInstance: customObject.Spec.Cluster.Kubernetes.API.SecurePort,
+			PortELB:      cfg.CustomObject.Spec.Cluster.Kubernetes.API.SecurePort,
+			PortInstance: cfg.CustomObject.Spec.Cluster.Kubernetes.API.SecurePort,
 		},
 	}
 	lb.APIElbScheme = externalELBScheme
 
 	// Ingress load balancer settings.
-	ingressElbName, err := keyv2.LoadBalancerName(customObject.Spec.Cluster.Kubernetes.IngressController.Domain, customObject)
+	ingressElbName, err := keyv2.LoadBalancerName(cfg.CustomObject.Spec.Cluster.Kubernetes.IngressController.Domain, cfg.CustomObject)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	lb.IngressElbHealthCheckTarget = heathCheckTarget(customObject.Spec.Cluster.Kubernetes.IngressController.SecurePort)
-	lb.IngressElbIdleTimoutSeconds = customObject.Spec.AWS.Ingress.ELB.IdleTimeoutSeconds
+	lb.IngressElbHealthCheckTarget = heathCheckTarget(cfg.CustomObject.Spec.Cluster.Kubernetes.IngressController.SecurePort)
+	lb.IngressElbIdleTimoutSeconds = cfg.CustomObject.Spec.AWS.Ingress.ELB.IdleTimeoutSeconds
 	lb.IngressElbName = ingressElbName
 	lb.IngressElbPortsToOpen = portPairs{
 		{
 			PortELB:      httpsPort,
-			PortInstance: customObject.Spec.Cluster.Kubernetes.IngressController.SecurePort,
+			PortInstance: cfg.CustomObject.Spec.Cluster.Kubernetes.IngressController.SecurePort,
 		},
 		{
 			PortELB:      httpPort,
-			PortInstance: customObject.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
+			PortInstance: cfg.CustomObject.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
 		},
 	}
 	lb.IngressElbScheme = externalELBScheme
@@ -100,7 +99,7 @@ func (lb *loadBalancersAdapter) getLoadBalancers(customObject v1alpha1.AWSConfig
 	// master security group field.
 	// TODO: remove this code once the security group is created by cloudformation
 	// and add a reference in the template
-	masterGroupName := keyv2.SecurityGroupName(customObject, prefixMaster)
+	masterGroupName := keyv2.SecurityGroupName(cfg.CustomObject, prefixMaster)
 	describeSgInput := &ec2.DescribeSecurityGroupsInput{
 		Filters: []*ec2.Filter{
 			{
@@ -117,7 +116,7 @@ func (lb *loadBalancersAdapter) getLoadBalancers(customObject v1alpha1.AWSConfig
 			},
 		},
 	}
-	output, err := clients.EC2.DescribeSecurityGroups(describeSgInput)
+	output, err := cfg.Clients.EC2.DescribeSecurityGroups(describeSgInput)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -129,7 +128,7 @@ func (lb *loadBalancersAdapter) getLoadBalancers(customObject v1alpha1.AWSConfig
 	// ingress security group field.
 	// TODO: remove this code once the security group is created by cloudformation
 	// and add a reference in the template
-	ingressGroupName := keyv2.SecurityGroupName(customObject, prefixIngress)
+	ingressGroupName := keyv2.SecurityGroupName(cfg.CustomObject, prefixIngress)
 	describeSgInput = &ec2.DescribeSecurityGroupsInput{
 		Filters: []*ec2.Filter{
 			{
@@ -146,7 +145,7 @@ func (lb *loadBalancersAdapter) getLoadBalancers(customObject v1alpha1.AWSConfig
 			},
 		},
 	}
-	outputIngress, err := clients.EC2.DescribeSecurityGroups(describeSgInput)
+	outputIngress, err := cfg.Clients.EC2.DescribeSecurityGroups(describeSgInput)
 	if err != nil {
 		return microerror.Mask(err)
 	}

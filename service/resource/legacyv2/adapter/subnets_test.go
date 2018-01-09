@@ -53,7 +53,11 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 		clients := Clients{}
 
 		t.Run(tc.description, func(t *testing.T) {
-			err := a.getSubnets(tc.customObject, clients)
+			cfg := Config{
+				CustomObject: tc.customObject,
+				Clients:      clients,
+			}
+			err := a.getSubnets(cfg)
 			if tc.expectedError && err == nil {
 				t.Error("expected error didn't happen")
 			}

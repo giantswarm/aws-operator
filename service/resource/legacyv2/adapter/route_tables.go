@@ -1,8 +1,6 @@
 package adapter
 
 import (
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-
 	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
@@ -13,9 +11,9 @@ type routeTablesAdapter struct {
 	PrivateRouteTableName string
 }
 
-func (r *routeTablesAdapter) getRouteTables(customObject v1alpha1.AWSConfig, clients Clients) error {
-	r.PublicRouteTableName = keyv2.RouteTableName(customObject, suffixPublic)
-	r.PrivateRouteTableName = keyv2.RouteTableName(customObject, suffixPrivate)
+func (r *routeTablesAdapter) getRouteTables(cfg Config) error {
+	r.PublicRouteTableName = keyv2.RouteTableName(cfg.CustomObject, suffixPublic)
+	r.PrivateRouteTableName = keyv2.RouteTableName(cfg.CustomObject, suffixPrivate)
 
 	return nil
 }

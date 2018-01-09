@@ -67,7 +67,11 @@ func (r *Resource) getMainTemplateBody(customObject v1alpha1.AWSConfig) (string,
 		return "", microerror.Mask(err)
 	}
 
-	adapter, err := adapter.New(customObject, *r.awsClients)
+	cfg := adapter.Config{
+		CustomObject: customObject,
+		Clients:      *r.awsClients,
+	}
+	adapter, err := adapter.New(cfg)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
