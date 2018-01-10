@@ -23,7 +23,7 @@ var (
 	}
 )
 
-func TestAdapterMain(t *testing.T) {
+func TestAdapterGuestMain(t *testing.T) {
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: defaultCluster,
@@ -59,7 +59,7 @@ func TestAdapterMain(t *testing.T) {
 		HostAccountID:    "myHostAccountID",
 		HostClients:      hostClients,
 	}
-	a, err := New(cfg)
+	a, err := NewGuest(cfg)
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
 	}

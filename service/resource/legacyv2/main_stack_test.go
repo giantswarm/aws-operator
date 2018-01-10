@@ -32,7 +32,7 @@ func testConfig() Config {
 	return resourceConfig
 }
 
-func TestMainTemplateGetEmptyBody(t *testing.T) {
+func TestMainGuestTemplateGetEmptyBody(t *testing.T) {
 	customObject := v1alpha1.AWSConfig{}
 	cfg := testConfig()
 	cfg.Clients = &adapter.Clients{
@@ -49,13 +49,13 @@ func TestMainTemplateGetEmptyBody(t *testing.T) {
 		t.Errorf("unexpected error %v", err)
 	}
 
-	_, err = newResource.getMainTemplateBody(customObject)
+	_, err = newResource.getMainGuestTemplateBody(customObject)
 	if err == nil {
 		t.Error("error didn't happen")
 	}
 }
 
-func TestMainTemplateExistingFields(t *testing.T) {
+func TestMainGuestTemplateExistingFields(t *testing.T) {
 	// customObject with example fields for both asg and launch config
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
@@ -124,7 +124,7 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		t.Errorf("unexpected error %v", err)
 	}
 
-	body, err := newResource.getMainTemplateBody(customObject)
+	body, err := newResource.getMainGuestTemplateBody(customObject)
 
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
@@ -256,4 +256,65 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Error("CidrBlock element not found")
 	}
+}
+
+func TestMainHostTemplateExistingFields(t *testing.T) {
+	// customObject with example fields for both asg and launch config
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "test-cluster",
+			},
+			AWS: v1alpha1.AWSConfigSpecAWS{
+				VPC: v1alpha1.AWSConfigSpecAWSVPC{
+					RouteTableNames: []string{
+						"route_table_1",
+						"route_table_2",
+					},
+					PeerID: "mypeerid",
+				},
+			},
+		},
+	}
+
+	cfg := testConfig()
+	cfg.Clients = &adapter.Clients{
+		EC2: &adapter.EC2ClientMock{},
+	}
+	cfg.HostClients = &adapter.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+	}
+	newResource, err := New(cfg)
+	if err != nil {
+		t.Errorf("unexpected error %v", err)
+	}
+
+	body, err := newResource.getMainHostTemplateBody(customObject)
+
+	if err != nil {
+		t.Errorf("unexpected error %v", err)
+	}
+
+	if !strings.Contains(body, "Description: Main Host CloudFormation stack.") {
+		fmt.Println(body)
+		t.Error("stack header not found")
+	}
+
+	if !strings.Contains(body, "  PeerRole:") {
+		fmt.Println(body)
+		t.Error("peer role header not found")
+	}
+
+	if !strings.Contains(body, "  RoleName: test-cluster-vpc-peer-access") {
+		fmt.Println(body)
+		t.Error("role name not found")
+	}
+
+	/*
+		if !strings.Contains(body, "  PrivateRouteTable-route_table_1:") {
+			fmt.Println(body)
+			t.Error("route_table header not found")
+		}
+	*/
 }

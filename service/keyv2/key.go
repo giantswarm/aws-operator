@@ -111,6 +111,12 @@ func MainGuestStackName(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-guest-main", clusterID)
 }
 
+func MainHostStackName(customObject v1alpha1.AWSConfig) string {
+	clusterID := ClusterID(customObject)
+
+	return fmt.Sprintf("%s-host-main", clusterID)
+}
+
 func MasterImageID(customObject v1alpha1.AWSConfig) string {
 	var imageID string
 

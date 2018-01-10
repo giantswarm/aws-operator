@@ -40,12 +40,14 @@ type Adapter struct {
 
 	autoScalingGroupAdapter
 	iamPoliciesAdapter
+	hostIamRolesAdapter
 	instanceAdapter
 	launchConfigAdapter
 	loadBalancersAdapter
 	recordSetsAdapter
 	routeTablesAdapter
 	securityGroupsAdapter
+	hostRouteTablesAdapter
 	subnetsAdapter
 	vpcAdapter
 	outputsAdapter
@@ -57,9 +59,10 @@ type Config struct {
 	HostClients      Clients
 	InstallationName string
 	HostAccountID    string
+	GuestAccountID   string
 }
 
-func New(cfg Config) (Adapter, error) {
+func NewGuest(cfg Config) (Adapter, error) {
 	a := Adapter{}
 
 	a.ASGType = prefixWorker
@@ -77,6 +80,23 @@ func New(cfg Config) (Adapter, error) {
 		a.getSubnets,
 		a.getVpc,
 		a.getOutputs,
+	}
+
+	for _, h := range hydraters {
+		if err := h(cfg); err != nil {
+			return Adapter{}, microerror.Mask(err)
+		}
+	}
+
+	return a, nil
+}
+
+func NewHost(cfg Config) (Adapter, error) {
+	a := Adapter{}
+
+	hydraters := []hydrater{
+		a.getHostIamRoles,
+		a.getHostRouteTables,
 	}
 
 	for _, h := range hydraters {

@@ -498,6 +498,23 @@ func Test_MainGuestStackName(t *testing.T) {
 	}
 }
 
+func Test_MainHostStackName(t *testing.T) {
+	expected := "xyz-host-main"
+
+	cluster := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "xyz",
+			},
+		},
+	}
+
+	actual := MainHostStackName(cluster)
+	if actual != expected {
+		t.Fatalf("Expected main stack name %s but was %s", expected, actual)
+	}
+}
+
 func Test_UseCloudFormation(t *testing.T) {
 	tests := []struct {
 		versionBundleVersion string

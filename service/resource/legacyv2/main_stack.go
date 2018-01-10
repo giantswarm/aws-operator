@@ -36,7 +36,38 @@ func newMainStack(customObject v1alpha1.AWSConfig) (StackState, error) {
 	return mainCF, nil
 }
 
-func (r *Resource) getMainTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
+func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
+	cfg := adapter.Config{
+		CustomObject:     customObject,
+		Clients:          *r.awsClients,
+		HostClients:      *r.awsHostClients,
+		InstallationName: r.installationName,
+		HostAccountID:    r.awsHostConfig.AccountID(),
+	}
+	adp, err := adapter.NewGuest(cfg)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	return r.getMainTemplateBody(cloudFormationGuestTemplatesDirectory, adp)
+}
+
+func (r *Resource) getMainHostTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
+	cfg := adapter.Config{
+		CustomObject:   customObject,
+		Clients:        *r.awsClients,
+		HostClients:    *r.awsHostClients,
+		GuestAccountID: r.awsConfig.AccountID(),
+	}
+	adp, err := adapter.NewHost(cfg)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	return r.getMainTemplateBody(cloudFormationHostTemplatesDirectory, adp)
+}
+
+func (r *Resource) getMainTemplateBody(tplDir string, adp adapter.Adapter) (string, error) {
 	main := template.New("")
 
 	var t *template.Template
@@ -52,7 +83,7 @@ func (r *Resource) getMainTemplateBody(customObject v1alpha1.AWSConfig) (string,
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-	templatesDir := filepath.Join(rootDir, cloudFormationGuestTemplatesDirectory)
+	templatesDir := filepath.Join(rootDir, tplDir)
 
 	files, err := ioutil.ReadDir(templatesDir)
 	if err != nil {
@@ -67,20 +98,8 @@ func (r *Resource) getMainTemplateBody(customObject v1alpha1.AWSConfig) (string,
 		return "", microerror.Mask(err)
 	}
 
-	cfg := adapter.Config{
-		CustomObject:     customObject,
-		Clients:          *r.awsClients,
-		HostClients:      *r.awsHostClients,
-		InstallationName: r.installationName,
-		HostAccountID:    r.awsHostConfig.AccountID(),
-	}
-	adapter, err := adapter.New(cfg)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
 	var tpl bytes.Buffer
-	if err := t.ExecuteTemplate(&tpl, "main", adapter); err != nil {
+	if err := t.ExecuteTemplate(&tpl, "main", adp); err != nil {
 		return "", microerror.Mask(err)
 	}
 

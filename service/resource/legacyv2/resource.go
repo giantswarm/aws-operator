@@ -1657,7 +1657,13 @@ func (s *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 		_, err = s.awsClients.CloudFormation.CreateStack(&stackInput)
 		if err != nil {
-			return err
+			return microerror.Mask(err)
+		}
+
+		// We need to create the required peering resources in the host account.
+		err = s.createHostStack(cluster)
+		if err != nil {
+			return microerror.Mask(err)
 		}
 
 		s.logger.LogCtx(ctx, "debug", "creating AWS cloudformation stack: created")
@@ -1729,7 +1735,7 @@ func (s *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 	if currentStackState.Name != "" && !reflect.DeepEqual(desiredStackState, currentStackState) {
 		s.logger.LogCtx(ctx, "debug", "main stack should be updated")
 		var mainTemplate string
-		mainTemplate, err := s.getMainTemplateBody(customObject)
+		mainTemplate, err := s.getMainGuestTemplateBody(customObject)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -1761,7 +1767,7 @@ func (s *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 	if desiredStackState.Name != "" {
 		s.logger.LogCtx(ctx, "debug", "main stack should be created")
 		var mainTemplate string
-		mainTemplate, err := s.getMainTemplateBody(customObject)
+		mainTemplate, err := s.getMainGuestTemplateBody(customObject)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -1798,4 +1804,27 @@ func toCreateStackInput(v interface{}) (cloudformation.CreateStackInput, error) 
 	}
 
 	return createStackInput, nil
+}
+
+func (s *Resource) createHostStack(customObject v1alpha1.AWSConfig) error {
+	stackName := keyv2.MainHostStackName(customObject)
+	mainTemplate, err := s.getMainHostTemplateBody(customObject)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	createStack := &cloudformation.CreateStackInput{
+		StackName:    aws.String(stackName),
+		TemplateBody: aws.String(mainTemplate),
+		// CAPABILITY_NAMED_IAM is required for creating IAM roles (worker policy)
+		Capabilities: []*string{
+			aws.String("CAPABILITY_NAMED_IAM"),
+		},
+	}
+
+	_, err = s.awsHostClients.CloudFormation.CreateStack(createStack)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
 }

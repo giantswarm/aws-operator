@@ -17,4 +17,7 @@
       PeerVpcId: {{ .PeerVPCID }}
       PeerOwnerId: {{ .HostAccountID }}
       PeerRoleArn: {{ .PeerRoleArn }}
+      Tags:
+        - Key: Name
+          Value: {{ .ClusterID }}
 {{end}}

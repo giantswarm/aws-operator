@@ -21,6 +21,7 @@ type EC2ClientMock struct {
 	vpcID                string
 	vpcCIDR              string
 	unexistingVPC        bool
+	peeringID            string
 }
 
 func (e *EC2ClientMock) DescribeSecurityGroups(input *ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error) {
@@ -86,6 +87,17 @@ func (e *EC2ClientMock) DescribeVpcs(input *ec2.DescribeVpcsInput) (*ec2.Describ
 		},
 	}
 
+	return output, nil
+}
+
+func (e *EC2ClientMock) DescribeVpcPeeringConnections(*ec2.DescribeVpcPeeringConnectionsInput) (*ec2.DescribeVpcPeeringConnectionsOutput, error) {
+	output := &ec2.DescribeVpcPeeringConnectionsOutput{
+		VpcPeeringConnections: []*ec2.VpcPeeringConnection{
+			&ec2.VpcPeeringConnection{
+				VpcPeeringConnectionId: aws.String(e.peeringID),
+			},
+		},
+	}
 	return output, nil
 }
 
