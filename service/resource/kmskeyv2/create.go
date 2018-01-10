@@ -6,30 +6,22 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/microerror"
-
-	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
-	createKeyInput, err := toCreateKeyInput(createChange)
+	createInput, err := toKMSKeyState(createChange)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	if createKeyInput != nil {
-		customObject, err := keyv2.ToCustomObject(obj)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		key, err := r.awsClients.KMS.CreateKey(createKeyInput)
+	if createInput.KeyAlias != "" {
+		key, err := r.awsClients.KMS.CreateKey(&kms.CreateKeyInput{})
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		clusterID := keyv2.ClusterID(customObject)
-		keyAlias := toAlias(clusterID)
 		if _, err := r.awsClients.KMS.CreateAlias(&kms.CreateAliasInput{
-			AliasName:   aws.String(keyAlias),
+			AliasName:   aws.String(createInput.KeyAlias),
 			TargetKeyId: key.KeyMetadata.Arn,
 		}); err != nil {
 			return microerror.Mask(err)
@@ -50,19 +42,19 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 }
 
 func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	currentKMSState, err := toKMSKeyState(currentState)
+	currentKeyState, err := toKMSKeyState(currentState)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	desiredKMSState, err := toKMSKeyState(desiredState)
+	desiredKeyState, err := toKMSKeyState(desiredState)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	if desiredKMSState.KeyAlias != currentKMSState.KeyAlias {
-		return &kms.CreateKeyInput{}, nil
+	if currentKeyState.KeyAlias == "" || desiredKeyState.KeyAlias != currentKeyState.KeyAlias {
+		return desiredKeyState, nil
 	}
 
-	return nil, nil
+	return KMSKeyState{}, nil
 }
