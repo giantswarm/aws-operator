@@ -10,21 +10,24 @@ import (
 )
 
 func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
-	deleteAliasInput, err := toDeleteAliasInput(deleteChange)
+	deleteInput, err := toKMSKeyState(deleteChange)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	keyAlias := deleteAliasInput.AliasName
-	if keyAlias != nil && *keyAlias != "" {
-		if _, err := r.awsClients.KMS.DeleteAlias(&deleteAliasInput); err != nil {
+	if deleteInput.KeyAlias != "" {
+		// Get the KMS key ID using the key alias.
+		key, err := r.awsClients.KMS.DescribeKey(&kms.DescribeKeyInput{
+			KeyId: aws.String(deleteInput.KeyAlias),
+		})
+		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		key, err := r.awsClients.KMS.DescribeKey(&kms.DescribeKeyInput{
-			KeyId: keyAlias,
-		})
-		if err != nil {
+		// Delete the key alias.
+		if _, err := r.awsClients.KMS.DeleteAlias(&kms.DeleteAliasInput{
+			AliasName: aws.String(deleteInput.KeyAlias),
+		}); err != nil {
 			return microerror.Mask(err)
 		}
 
@@ -57,22 +60,22 @@ func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desire
 }
 
 func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	deleteChange := kms.DeleteAliasInput{}
 	currentKeyState, err := toKMSKeyState(currentState)
 	if err != nil {
-		return deleteChange, microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 
 	desiredKeyState, err := toKMSKeyState(desiredState)
 	if err != nil {
-		return deleteChange, microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 
 	r.logger.LogCtx(ctx, "debug", "finding out if the KMS key should be deleted")
 
-	if currentKeyState.KeyAlias != "" && desiredKeyState.KeyAlias != currentKeyState.KeyAlias {
-		deleteChange.AliasName = aws.String(currentKeyState.KeyAlias)
+	var kmsKeyToDelete KMSKeyState
+	if currentKeyState.KeyAlias != "" {
+		kmsKeyToDelete = desiredKeyState
 	}
 
-	return deleteChange, nil
+	return kmsKeyToDelete, nil
 }
