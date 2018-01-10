@@ -16,7 +16,7 @@ import (
 )
 
 func newMainStack(customObject v1alpha1.AWSConfig) (StackState, error) {
-	stackName := keyv2.MainStackName(customObject)
+	stackName := keyv2.MainGuestStackName(customObject)
 	workers := len(customObject.Spec.AWS.Workers)
 	var imageID string
 	// FIXME: the imageID should not depend on the number of workers.

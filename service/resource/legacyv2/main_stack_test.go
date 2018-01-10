@@ -130,7 +130,7 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		t.Errorf("unexpected error %v", err)
 	}
 
-	if !strings.Contains(body, "Description: Main CloudFormation stack.") {
+	if !strings.Contains(body, "Description: Main Guest CloudFormation stack.") {
 		t.Error("stack header not found")
 	}
 

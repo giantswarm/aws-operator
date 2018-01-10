@@ -274,7 +274,7 @@ func (s *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desire
 	// will separate the cloudformation and legacy resources.
 	if keyv2.UseCloudFormation(cluster) {
 		deleteStackInput := cloudformation.DeleteStackInput{
-			StackName: aws.String(keyv2.MainStackName(cluster)),
+			StackName: aws.String(keyv2.MainGuestStackName(cluster)),
 		}
 		_, err := s.awsClients.CloudFormation.DeleteStack(&deleteStackInput)
 		if err != nil {
@@ -1136,7 +1136,7 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 		// so all resoures including the VPC are deleted.
 		stack := awsresources.ASGStack{
 			Client: clients.CloudFormation,
-			Name:   keyv2.MainStackName(cluster),
+			Name:   keyv2.MainGuestStackName(cluster),
 		}
 
 		if err := stack.Delete(); err != nil {
@@ -1554,7 +1554,7 @@ func (s *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	if keyv2.UseCloudFormation(customObject) {
 		s.logger.LogCtx(ctx, "debug", "looking for AWS stack")
 
-		stackName := keyv2.MainStackName(customObject)
+		stackName := keyv2.MainGuestStackName(customObject)
 
 		describeInput := &cloudformation.DescribeStacksInput{
 			StackName: aws.String(stackName),

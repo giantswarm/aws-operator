@@ -481,8 +481,8 @@ func Test_WorkerInstanceType(t *testing.T) {
 	}
 }
 
-func Test_MainStackName(t *testing.T) {
-	expected := "xyz-main"
+func Test_MainGuestStackName(t *testing.T) {
+	expected := "xyz-guest-main"
 
 	cluster := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
@@ -492,7 +492,7 @@ func Test_MainStackName(t *testing.T) {
 		},
 	}
 
-	actual := MainStackName(cluster)
+	actual := MainGuestStackName(cluster)
 	if actual != expected {
 		t.Fatalf("Expected main stack name %s but was %s", expected, actual)
 	}
@@ -809,7 +809,7 @@ func Test_PolicyName(t *testing.T) {
 }
 
 func Test_PeerAccessRoleName(t *testing.T) {
-	expectedName := "test-cluster-peer-access"
+	expectedName := "test-cluster-vpc-peer-access"
 
 	cluster := v1alpha1.Cluster{
 		ID: "test-cluster",
