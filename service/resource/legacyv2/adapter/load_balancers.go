@@ -3,7 +3,6 @@ package adapter
 import (
 	"fmt"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/keyv2"
@@ -46,41 +45,42 @@ type portPair struct {
 // portPairs is an array of PortPair.
 type portPairs []portPair
 
-func (lb *loadBalancersAdapter) getLoadBalancers(customObject v1alpha1.AWSConfig, clients Clients) error {
+func (lb *loadBalancersAdapter) getLoadBalancers(cfg Config) error {
 	// API load balancer settings.
-	apiElbName, err := keyv2.LoadBalancerName(customObject.Spec.Cluster.Kubernetes.API.Domain, customObject)
+	apiElbName, err := keyv2.LoadBalancerName(cfg.CustomObject.Spec.Cluster.Kubernetes.API.Domain, cfg.CustomObject)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	lb.APIElbHealthCheckTarget = heathCheckTarget(keyv2.KubernetesAPISecurePort(customObject))
-	lb.APIElbIdleTimoutSeconds = customObject.Spec.AWS.API.ELB.IdleTimeoutSeconds
+	lb.APIElbHealthCheckTarget = heathCheckTarget(cfg.CustomObject.Spec.Cluster.Kubernetes.API.SecurePort)
+	lb.APIElbIdleTimoutSeconds = cfg.CustomObject.Spec.AWS.API.ELB.IdleTimeoutSeconds
 	lb.APIElbName = apiElbName
 	lb.APIElbPortsToOpen = portPairs{
 		{
-			PortELB:      keyv2.KubernetesAPISecurePort(customObject),
-			PortInstance: keyv2.KubernetesAPISecurePort(customObject),
+			PortELB:      keyv2.KubernetesAPISecurePort(cfg.CustomObject),
+			PortInstance: keyv2.KubernetesAPISecurePort(cfg.CustomObject),
 		},
 	}
 	lb.APIElbScheme = externalELBScheme
 
 	// Ingress load balancer settings.
-	ingressElbName, err := keyv2.LoadBalancerName(customObject.Spec.Cluster.Kubernetes.IngressController.Domain, customObject)
+	ingressElbName, err := keyv2.LoadBalancerName(cfg.CustomObject.Spec.Cluster.Kubernetes.IngressController.Domain, cfg.CustomObject)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	lb.IngressElbHealthCheckTarget = heathCheckTarget(keyv2.IngressControllerSecurePort(customObject))
-	lb.IngressElbIdleTimoutSeconds = customObject.Spec.AWS.Ingress.ELB.IdleTimeoutSeconds
+	lb.IngressElbHealthCheckTarget = heathCheckTarget(keyv2.IngressControllerSecurePort(cfg.CustomObject))
+	lb.IngressElbIdleTimoutSeconds = cfg.CustomObject.Spec.AWS.Ingress.ELB.IdleTimeoutSeconds
 	lb.IngressElbName = ingressElbName
 	lb.IngressElbPortsToOpen = portPairs{
 		{
-			PortELB:      httpsPort,
-			PortInstance: keyv2.IngressControllerSecurePort(customObject),
+			PortELB: httpsPort,
+
+			PortInstance: keyv2.IngressControllerSecurePort(cfg.CustomObject),
 		},
 		{
 			PortELB:      httpPort,
-			PortInstance: keyv2.IngressControllerInsecurePort(customObject),
+			PortInstance: keyv2.IngressControllerInsecurePort(cfg.CustomObject),
 		},
 	}
 	lb.IngressElbScheme = externalELBScheme

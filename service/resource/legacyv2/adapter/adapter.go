@@ -31,7 +31,7 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
-type hydrater func(v1alpha1.AWSConfig, Clients) error
+type hydrater func(Config) error
 
 type Adapter struct {
 	ASGType          string
@@ -51,15 +51,20 @@ type Adapter struct {
 	outputsAdapter
 }
 
-func New(customObject v1alpha1.AWSConfig, clients Clients) (Adapter, error) {
+type Config struct {
+	CustomObject v1alpha1.AWSConfig
+	Clients      Clients
+}
+
+func New(cfg Config) (Adapter, error) {
 	a := Adapter{}
 
 	a.ASGType = prefixWorker
-	a.ClusterID = keyv2.ClusterID(customObject)
+	a.ClusterID = keyv2.ClusterID(cfg.CustomObject)
 
 	// TODO: remove this code once the VPC is created by cloudformation and add a
 	// reference in the template
-	vpcID, err := VPCID(clients, keyv2.ClusterID(customObject))
+	vpcID, err := VPCID(cfg.Clients, keyv2.ClusterID(cfg.CustomObject))
 	if err != nil {
 		return Adapter{}, microerror.Mask(err)
 	}
@@ -79,7 +84,7 @@ func New(customObject v1alpha1.AWSConfig, clients Clients) (Adapter, error) {
 	}
 
 	for _, h := range hydraters {
-		if err := h(customObject, clients); err != nil {
+		if err := h(cfg); err != nil {
 			return Adapter{}, microerror.Mask(err)
 		}
 	}

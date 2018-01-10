@@ -3,7 +3,6 @@ package adapter
 import (
 	"fmt"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/keyv2"
@@ -27,13 +26,13 @@ type BlockDeviceMapping struct {
 	VolumeType          string
 }
 
-func (l *launchConfigAdapter) getLaunchConfiguration(customObject v1alpha1.AWSConfig, clients Clients) error {
-	if len(customObject.Spec.AWS.Workers) == 0 {
+func (l *launchConfigAdapter) getLaunchConfiguration(cfg Config) error {
+	if len(cfg.CustomObject.Spec.AWS.Workers) == 0 {
 		return microerror.Mask(invalidConfigError)
 	}
 
-	l.WorkerImageID = keyv2.WorkerImageID(customObject)
-	l.WorkerInstanceType = keyv2.WorkerInstanceType(customObject)
+	l.WorkerImageID = keyv2.WorkerImageID(cfg.CustomObject)
+	l.WorkerInstanceType = keyv2.WorkerInstanceType(cfg.CustomObject)
 	l.WorkerAssociatePublicIPAddress = false
 
 	l.WorkerBlockDeviceMappings = []BlockDeviceMapping{
@@ -46,18 +45,18 @@ func (l *launchConfigAdapter) getLaunchConfiguration(customObject v1alpha1.AWSCo
 	}
 
 	// small cloud config field.
-	accountID, err := AccountID(clients)
+	accountID, err := AccountID(cfg.Clients)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	clusterID := keyv2.ClusterID(customObject)
+	clusterID := keyv2.ClusterID(cfg.CustomObject)
 	s3URI := fmt.Sprintf("%s-g8s-%s", accountID, clusterID)
 
 	cloudConfigConfig := SmallCloudconfigConfig{
 		MachineType:    prefixWorker,
-		Region:         customObject.Spec.AWS.Region,
+		Region:         cfg.CustomObject.Spec.AWS.Region,
 		S3URI:          s3URI,
-		ClusterVersion: keyv2.ClusterVersion(customObject),
+		ClusterVersion: keyv2.ClusterVersion(cfg.CustomObject),
 	}
 	smallCloudConfig, err := SmallCloudconfig(cloudConfigConfig)
 	if err != nil {

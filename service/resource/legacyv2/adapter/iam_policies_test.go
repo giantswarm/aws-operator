@@ -40,7 +40,11 @@ func TestAdapterIamPoliciesRegularFields(t *testing.T) {
 	for _, tc := range testCases {
 		a := Adapter{}
 		t.Run(tc.description, func(t *testing.T) {
-			err := a.getIamPolicies(tc.customObject, clients)
+			cfg := Config{
+				CustomObject: tc.customObject,
+				Clients:      clients,
+			}
+			err := a.getIamPolicies(cfg)
 			if err != nil {
 				t.Errorf("unexpected error %v", err)
 			}
@@ -108,7 +112,11 @@ func TestAdapterIamPoliciesKMSKeyARN(t *testing.T) {
 					isError: tc.expectedError,
 				},
 			}
-			err := a.getIamPolicies(tc.customObject, clients)
+			cfg := Config{
+				CustomObject: tc.customObject,
+				Clients:      clients,
+			}
+			err := a.getIamPolicies(cfg)
 			if tc.expectedError && err == nil {
 				t.Errorf("expected error didn't happen")
 			}
@@ -164,7 +172,11 @@ func TestAdapterIamPoliciesS3Bucket(t *testing.T) {
 					isError:   tc.expectedError,
 				},
 			}
-			err := a.getIamPolicies(tc.customObject, clients)
+			cfg := Config{
+				CustomObject: tc.customObject,
+				Clients:      clients,
+			}
+			err := a.getIamPolicies(cfg)
 			if tc.expectedError && err == nil {
 				t.Errorf("expected error didn't happen")
 			}

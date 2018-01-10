@@ -49,7 +49,11 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 		clients := Clients{}
 		a := Adapter{}
 		t.Run(tc.description, func(t *testing.T) {
-			err := a.getAutoScalingGroup(tc.customObject, clients)
+			cfg := Config{
+				CustomObject: tc.customObject,
+				Clients:      clients,
+			}
+			err := a.getAutoScalingGroup(cfg)
 			if tc.expectedError && err == nil {
 				t.Error("expected error didn't happen")
 			}

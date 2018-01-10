@@ -34,7 +34,11 @@ func TestAdapterRouteTablesRegularFields(t *testing.T) {
 		clients := Clients{}
 
 		t.Run(tc.description, func(t *testing.T) {
-			err := a.getRouteTables(tc.customObject, clients)
+			cfg := Config{
+				CustomObject: tc.customObject,
+				Clients:      clients,
+			}
+			err := a.getRouteTables(cfg)
 			if tc.expectedError && err == nil {
 				t.Error("expected error didn't happen")
 			}
