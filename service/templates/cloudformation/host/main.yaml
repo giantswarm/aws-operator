@@ -1,5 +1,5 @@
 {{define "main"}}AWSTemplateFormatVersion: 2010-09-09
-Description: Main CloudFormation stack.
+Description: Main Host CloudFormation stack.
 Resources:
   PeerRole:
     Type: 'AWS::IAM::Role'
