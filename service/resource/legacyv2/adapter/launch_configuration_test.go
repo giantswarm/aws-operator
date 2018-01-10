@@ -62,7 +62,11 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 		a := Adapter{}
 
 		t.Run(tc.description, func(t *testing.T) {
-			err := a.getLaunchConfiguration(tc.customObject, clients)
+			cfg := Config{
+				CustomObject: tc.customObject,
+				Clients:      clients,
+			}
+			err := a.getLaunchConfiguration(cfg)
 			if tc.expectedError && err == nil {
 				t.Error("expected error didn't happen")
 			}
@@ -148,7 +152,11 @@ func TestAdapterLaunchConfigurationSecurityGroupID(t *testing.T) {
 		}
 
 		t.Run(tc.description, func(t *testing.T) {
-			err := a.getLaunchConfiguration(tc.customObject, clients)
+			cfg := Config{
+				CustomObject: tc.customObject,
+				Clients:      clients,
+			}
+			err := a.getLaunchConfiguration(cfg)
 			if tc.expectedError && err == nil {
 				t.Error("expected error didn't happen")
 			}
@@ -201,8 +209,12 @@ func TestAdapterLaunchConfigurationSmallCloudConfig(t *testing.T) {
 			},
 		},
 	}
+	cfg := Config{
+		CustomObject: customObject,
+		Clients:      clients,
+	}
+	err := a.getLaunchConfiguration(cfg)
 
-	err := a.getLaunchConfiguration(customObject, clients)
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
 	}

@@ -50,8 +50,11 @@ func TestAdapterMain(t *testing.T) {
 		KMS: &KMSClientMock{},
 		ELB: &ELBClientMock{},
 	}
-
-	a, err := New(customObject, clients)
+	cfg := Config{
+		CustomObject: customObject,
+		Clients:      clients,
+	}
+	a, err := New(cfg)
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
 	}
