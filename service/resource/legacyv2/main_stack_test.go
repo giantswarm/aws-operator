@@ -39,6 +39,9 @@ func TestMainTemplateGetEmptyBody(t *testing.T) {
 		IAM: &adapter.IAMClientMock{},
 		KMS: &adapter.KMSClientMock{},
 	}
+	cfg.HostClients = &adapter.Clients{
+		EC2: &adapter.EC2ClientMock{},
+	}
 
 	newResource, err := New(cfg)
 	if err != nil {
@@ -109,6 +112,9 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		IAM: &adapter.IAMClientMock{},
 		KMS: &adapter.KMSClientMock{},
 		ELB: &adapter.ELBClientMock{},
+	}
+	cfg.HostClients = &adapter.Clients{
+		EC2: &adapter.EC2ClientMock{},
 	}
 	newResource, err := New(cfg)
 	if err != nil {

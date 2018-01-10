@@ -50,9 +50,13 @@ func TestAdapterMain(t *testing.T) {
 		KMS: &KMSClientMock{},
 		ELB: &ELBClientMock{},
 	}
+	hostClients := Clients{
+		EC2: &EC2ClientMock{},
+	}
 	cfg := Config{
 		CustomObject: customObject,
 		Clients:      clients,
+		HostClients:  hostClients,
 	}
 	a, err := New(cfg)
 	if err != nil {

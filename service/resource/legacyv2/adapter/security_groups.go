@@ -40,7 +40,7 @@ const (
 )
 
 func (s *securityGroupsAdapter) getSecurityGroups(cfg Config) error {
-	hostClusterCIDR, err := VpcCIDR(cfg.Clients, cfg.CustomObject.Spec.AWS.VPC.PeerID)
+	hostClusterCIDR, err := VpcCIDR(cfg.HostClients, cfg.CustomObject.Spec.AWS.VPC.PeerID)
 	if err != nil {
 		return microerror.Mask(err)
 	}

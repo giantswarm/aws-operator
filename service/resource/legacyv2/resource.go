@@ -62,6 +62,7 @@ type Config struct {
 	KeyWatcher  *randomkeytpr.Service
 	Logger      micrologger.Logger
 	Clients     *adapter.Clients
+	HostClients *adapter.Clients
 
 	// Settings.
 	AwsConfig        awsutil.Config
@@ -81,6 +82,7 @@ func DefaultConfig() Config {
 		KeyWatcher:  nil,
 		Logger:      nil,
 		Clients:     nil,
+		HostClients: nil,
 
 		// Settings.
 		AwsConfig:        awsutil.Config{},
@@ -110,6 +112,9 @@ func New(config Config) (*Resource, error) {
 	}
 	if config.Clients == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Clients must not be empty")
+	}
+	if config.HostClients == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.HostClients must not be empty")
 	}
 
 	// Settings.
@@ -148,12 +153,13 @@ func New(config Config) (*Resource, error) {
 
 	newService := &Resource{
 		// Dependencies.
-		certWatcher: config.CertWatcher,
-		cloudConfig: config.CloudConfig,
-		k8sClient:   config.K8sClient,
-		keyWatcher:  config.KeyWatcher,
-		logger:      config.Logger,
-		awsClients:  config.Clients,
+		certWatcher:    config.CertWatcher,
+		cloudConfig:    config.CloudConfig,
+		k8sClient:      config.K8sClient,
+		keyWatcher:     config.KeyWatcher,
+		logger:         config.Logger,
+		awsClients:     config.Clients,
+		awsHostClients: config.HostClients,
 
 		// Internals
 		bootOnce: sync.Once{},
@@ -172,12 +178,13 @@ func New(config Config) (*Resource, error) {
 // Resource implements the legacy resource.
 type Resource struct {
 	// Dependencies.
-	certWatcher *certificatetpr.Service
-	cloudConfig *cloudconfigv2.CloudConfig
-	k8sClient   kubernetes.Interface
-	keyWatcher  *randomkeytpr.Service
-	logger      micrologger.Logger
-	awsClients  *adapter.Clients
+	certWatcher    *certificatetpr.Service
+	cloudConfig    *cloudconfigv2.CloudConfig
+	k8sClient      kubernetes.Interface
+	keyWatcher     *randomkeytpr.Service
+	logger         micrologger.Logger
+	awsClients     *adapter.Clients
+	awsHostClients *adapter.Clients
 
 	// Internals.
 	bootOnce sync.Once

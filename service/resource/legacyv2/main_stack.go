@@ -70,6 +70,7 @@ func (r *Resource) getMainTemplateBody(customObject v1alpha1.AWSConfig) (string,
 	cfg := adapter.Config{
 		CustomObject: customObject,
 		Clients:      *r.awsClients,
+		HostClients:  *r.awsHostClients,
 	}
 	adapter, err := adapter.New(cfg)
 	if err != nil {

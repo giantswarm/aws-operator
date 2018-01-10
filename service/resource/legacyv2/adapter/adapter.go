@@ -54,6 +54,7 @@ type Adapter struct {
 type Config struct {
 	CustomObject v1alpha1.AWSConfig
 	Clients      Clients
+	HostClients  Clients
 }
 
 func New(cfg Config) (Adapter, error) {
