@@ -112,7 +112,7 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
-		clients := Clients{
+		hostClients := Clients{
 			EC2: &EC2ClientMock{
 				vpcCIDR: "10.0.0.0/16",
 			},
@@ -123,7 +123,8 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			cfg := Config{
 				CustomObject: tc.customObject,
-				Clients:      clients,
+				Clients:      Clients{},
+				HostClients:  hostClients,
 			}
 			err := a.getSecurityGroups(cfg)
 			if tc.expectedError && err == nil {
