@@ -1,24 +1,6 @@
 {{define "main"}}AWSTemplateFormatVersion: 2010-09-09
 Description: Main Host CloudFormation stack.
 Resources:
-  PeerRole:
-    Type: 'AWS::IAM::Role'
-    Properties:
-      RoleName: Peer-{{ .ClusterID }}
-      AssumeRolePolicyDocument:
-        Statement:
-          - Principal:
-              AWS: {{ .GuestAccountID }}
-            Action:
-              - 'sts:AssumeRole'
-            Effect: Allow
-      Path: /
-      Policies:
-        - PolicyName: root
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action: 'ec2:AcceptVpcPeeringConnection'
-                Resource: '*'
+  {{template "iam_roles" .}}
+  {{template "route_tables" .}}
 {{end}}
