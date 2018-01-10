@@ -3,7 +3,6 @@ package kmskeyv2
 import (
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
@@ -75,32 +74,6 @@ func toKMSKeyState(v interface{}) (KMSKeyState, error) {
 	}
 
 	return kmsKey, nil
-}
-
-func toCreateKeyInput(v interface{}) (*kms.CreateKeyInput, error) {
-	if v == nil {
-		return nil, nil
-	}
-
-	createKeyInput, ok := v.(*kms.CreateKeyInput)
-	if !ok {
-		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", createKeyInput, v)
-	}
-
-	return createKeyInput, nil
-}
-
-func toDeleteAliasInput(v interface{}) (kms.DeleteAliasInput, error) {
-	if v == nil {
-		return kms.DeleteAliasInput{}, nil
-	}
-
-	deleteAliasInput, ok := v.(kms.DeleteAliasInput)
-	if !ok {
-		return kms.DeleteAliasInput{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", deleteAliasInput, v)
-	}
-
-	return deleteAliasInput, nil
 }
 
 func toAlias(keyID string) string {
