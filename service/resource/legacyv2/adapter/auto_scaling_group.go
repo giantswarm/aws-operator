@@ -3,8 +3,6 @@ package adapter
 import (
 	"strconv"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-
 	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
@@ -20,9 +18,9 @@ type autoScalingGroupAdapter struct {
 	WorkerAZ               string
 }
 
-func (a *autoScalingGroupAdapter) getAutoScalingGroup(customObject v1alpha1.AWSConfig, clients Clients) error {
-	a.WorkerAZ = customObject.Spec.AWS.AZ
-	workers := keyv2.WorkerCount(customObject)
+func (a *autoScalingGroupAdapter) getAutoScalingGroup(cfg Config) error {
+	a.WorkerAZ = cfg.CustomObject.Spec.AWS.AZ
+	workers := keyv2.WorkerCount(cfg.CustomObject)
 	a.ASGMaxSize = workers
 	a.ASGMinSize = workers
 	a.MaxBatchSize = strconv.FormatFloat(asgMaxBatchSizeRatio, 'f', -1, 32)

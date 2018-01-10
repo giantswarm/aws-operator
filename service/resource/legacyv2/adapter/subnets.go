@@ -1,8 +1,6 @@
 package adapter
 
 import (
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-
 	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
@@ -19,14 +17,14 @@ type subnetsAdapter struct {
 	PrivateSubnetMapPublicIPOnLaunch bool
 }
 
-func (s *subnetsAdapter) getSubnets(customObject v1alpha1.AWSConfig, clients Clients) error {
-	s.PublicSubnetAZ = keyv2.AvailabilityZone(customObject)
-	s.PublicSubnetCIDR = customObject.Spec.AWS.VPC.PublicSubnetCIDR
-	s.PublicSubnetName = keyv2.SubnetName(customObject, suffixPublic)
+func (s *subnetsAdapter) getSubnets(cfg Config) error {
+	s.PublicSubnetAZ = keyv2.AvailabilityZone(cfg.CustomObject)
+	s.PublicSubnetCIDR = cfg.CustomObject.Spec.AWS.VPC.PublicSubnetCIDR
+	s.PublicSubnetName = keyv2.SubnetName(cfg.CustomObject, suffixPublic)
 	s.PublicSubnetMapPublicIPOnLaunch = false
-	s.PrivateSubnetAZ = keyv2.AvailabilityZone(customObject)
-	s.PrivateSubnetCIDR = customObject.Spec.AWS.VPC.PrivateSubnetCIDR
-	s.PrivateSubnetName = keyv2.SubnetName(customObject, suffixPrivate)
+	s.PrivateSubnetAZ = keyv2.AvailabilityZone(cfg.CustomObject)
+	s.PrivateSubnetCIDR = cfg.CustomObject.Spec.AWS.VPC.PrivateSubnetCIDR
+	s.PrivateSubnetName = keyv2.SubnetName(cfg.CustomObject, suffixPrivate)
 	s.PrivateSubnetMapPublicIPOnLaunch = false
 
 	return nil
