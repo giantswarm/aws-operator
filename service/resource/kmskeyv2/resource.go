@@ -77,19 +77,6 @@ func toKMSKeyState(v interface{}) (KMSKeyState, error) {
 	return kmsKey, nil
 }
 
-func toCreateKeyInput(v interface{}) (*kms.CreateKeyInput, error) {
-	if v == nil {
-		return nil, nil
-	}
-
-	createKeyInput, ok := v.(*kms.CreateKeyInput)
-	if !ok {
-		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", createKeyInput, v)
-	}
-
-	return createKeyInput, nil
-}
-
 func toDeleteAliasInput(v interface{}) (kms.DeleteAliasInput, error) {
 	if v == nil {
 		return kms.DeleteAliasInput{}, nil
