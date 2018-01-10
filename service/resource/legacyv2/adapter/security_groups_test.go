@@ -121,7 +121,11 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 		a := Adapter{}
 
 		t.Run(tc.description, func(t *testing.T) {
-			err := a.getSecurityGroups(tc.customObject, clients)
+			cfg := Config{
+				CustomObject: tc.customObject,
+				Clients:      clients,
+			}
+			err := a.getSecurityGroups(cfg)
 			if tc.expectedError && err == nil {
 				t.Error("expected error didn't happen")
 			}

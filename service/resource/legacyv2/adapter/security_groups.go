@@ -39,20 +39,20 @@ const (
 	ingressSecurityGroupName = "IngressSecurityGroup"
 )
 
-func (s *securityGroupsAdapter) getSecurityGroups(customObject v1alpha1.AWSConfig, clients Clients) error {
-	hostClusterCIDR, err := VpcCIDR(clients, customObject.Spec.AWS.VPC.PeerID)
+func (s *securityGroupsAdapter) getSecurityGroups(cfg Config) error {
+	hostClusterCIDR, err := VpcCIDR(cfg.Clients, cfg.CustomObject.Spec.AWS.VPC.PeerID)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	s.MasterSecurityGroupName = keyv2.SecurityGroupName(customObject, prefixMaster)
-	s.MasterSecurityGroupRules = s.getMasterRules(customObject, hostClusterCIDR)
+	s.MasterSecurityGroupName = keyv2.SecurityGroupName(cfg.CustomObject, prefixMaster)
+	s.MasterSecurityGroupRules = s.getMasterRules(cfg.CustomObject, hostClusterCIDR)
 
-	s.WorkerSecurityGroupName = keyv2.SecurityGroupName(customObject, prefixWorker)
-	s.WorkerSecurityGroupRules = s.getWorkerRules(customObject, hostClusterCIDR)
+	s.WorkerSecurityGroupName = keyv2.SecurityGroupName(cfg.CustomObject, prefixWorker)
+	s.WorkerSecurityGroupRules = s.getWorkerRules(cfg.CustomObject, hostClusterCIDR)
 
-	s.IngressSecurityGroupName = keyv2.SecurityGroupName(customObject, prefixIngress)
-	s.IngressSecurityGroupRules = s.getIngressRules(customObject)
+	s.IngressSecurityGroupName = keyv2.SecurityGroupName(cfg.CustomObject, prefixIngress)
+	s.IngressSecurityGroupRules = s.getIngressRules(cfg.CustomObject)
 
 	return nil
 }
