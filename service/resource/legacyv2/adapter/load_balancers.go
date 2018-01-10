@@ -10,7 +10,7 @@ import (
 
 const (
 	// Default values for health checks.
-	healthCheckHealthyThreshold   = 10
+	healthCheckHealthyThreshold   = 2
 	healthCheckInterval           = 5
 	healthCheckTimeout            = 3
 	healthCheckUnhealthyThreshold = 2
