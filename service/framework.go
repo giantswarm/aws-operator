@@ -184,6 +184,8 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 		}
 	}
 
+	awsHostClients := awsclient.NewClients(awsHostConfig)
+
 	// ccServicev2 is used by the legacyv2 resource.
 	var ccServiceV2 *cloudconfigv2.CloudConfig
 	{
@@ -231,6 +233,9 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 		legacyConfig.Clients.IAM = awsClients.IAM
 		legacyConfig.Clients.KMS = awsClients.KMS
 		legacyConfig.Clients.ELB = awsClients.ELB
+
+		legacyConfig.HostClients = &adapter.Clients{}
+		legacyConfig.HostClients.EC2 = awsHostClients.EC2
 
 		legacyResource, err = legacyv2.New(legacyConfig)
 		if err != nil {

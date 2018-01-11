@@ -46,12 +46,12 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		clients := Clients{}
 		a := Adapter{}
 		t.Run(tc.description, func(t *testing.T) {
 			cfg := Config{
 				CustomObject: tc.customObject,
-				Clients:      clients,
+				Clients:      Clients{},
+				HostClients:  Clients{},
 			}
 			err := a.getAutoScalingGroup(cfg)
 			if tc.expectedError && err == nil {

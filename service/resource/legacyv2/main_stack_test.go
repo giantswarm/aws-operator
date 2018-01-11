@@ -39,6 +39,9 @@ func TestMainTemplateGetEmptyBody(t *testing.T) {
 		IAM: &adapter.IAMClientMock{},
 		KMS: &adapter.KMSClientMock{},
 	}
+	cfg.HostClients = &adapter.Clients{
+		EC2: &adapter.EC2ClientMock{},
+	}
 
 	newResource, err := New(cfg)
 	if err != nil {
@@ -109,6 +112,9 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		IAM: &adapter.IAMClientMock{},
 		KMS: &adapter.KMSClientMock{},
 		ELB: &adapter.ELBClientMock{},
+	}
+	cfg.HostClients = &adapter.Clients{
+		EC2: &adapter.EC2ClientMock{},
 	}
 	newResource, err := New(cfg)
 	if err != nil {
@@ -226,5 +232,17 @@ func TestMainTemplateExistingFields(t *testing.T) {
 	if !strings.Contains(body, "PrivateSubnet:") {
 		fmt.Println(body)
 		t.Error("PrivateSubnet element not found")
+	}
+	if !strings.Contains(body, "MasterSecurityGroup:") {
+		fmt.Println(body)
+		t.Error("MasterSecurityGroup element not found")
+	}
+	if !strings.Contains(body, "WorkerSecurityGroup:") {
+		fmt.Println(body)
+		t.Error("WorkerSecurityGroup element not found")
+	}
+	if !strings.Contains(body, "IngressSecurityGroup:") {
+		fmt.Println(body)
+		t.Error("IngressSecurityGroup element not found")
 	}
 }

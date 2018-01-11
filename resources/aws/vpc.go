@@ -2,6 +2,7 @@ package aws
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -145,8 +146,13 @@ func (v *VPC) Delete() error {
 		}
 		return nil
 	}
+
+	// Increase backoff to allow time for the Cloud Formation stack to delete.
+	deleteBackoff := NewCustomExponentialBackoff()
+	deleteBackoff.MaxElapsedTime = 8 * time.Minute
+
 	deleteNotify := NewNotify(v.Logger, "deleting vpc")
-	if err := backoff.RetryNotify(deleteOperation, NewCustomExponentialBackoff(), deleteNotify); err != nil {
+	if err := backoff.RetryNotify(deleteOperation, deleteBackoff, deleteNotify); err != nil {
 		return microerror.Mask(err)
 	}
 

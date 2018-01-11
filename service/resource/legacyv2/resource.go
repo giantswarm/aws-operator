@@ -62,6 +62,7 @@ type Config struct {
 	KeyWatcher  *randomkeytpr.Service
 	Logger      micrologger.Logger
 	Clients     *adapter.Clients
+	HostClients *adapter.Clients
 
 	// Settings.
 	AwsConfig        awsutil.Config
@@ -81,6 +82,7 @@ func DefaultConfig() Config {
 		KeyWatcher:  nil,
 		Logger:      nil,
 		Clients:     nil,
+		HostClients: nil,
 
 		// Settings.
 		AwsConfig:        awsutil.Config{},
@@ -110,6 +112,9 @@ func New(config Config) (*Resource, error) {
 	}
 	if config.Clients == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Clients must not be empty")
+	}
+	if config.HostClients == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.HostClients must not be empty")
 	}
 
 	// Settings.
@@ -148,12 +153,13 @@ func New(config Config) (*Resource, error) {
 
 	newService := &Resource{
 		// Dependencies.
-		certWatcher: config.CertWatcher,
-		cloudConfig: config.CloudConfig,
-		k8sClient:   config.K8sClient,
-		keyWatcher:  config.KeyWatcher,
-		logger:      config.Logger,
-		awsClients:  config.Clients,
+		certWatcher:    config.CertWatcher,
+		cloudConfig:    config.CloudConfig,
+		k8sClient:      config.K8sClient,
+		keyWatcher:     config.KeyWatcher,
+		logger:         config.Logger,
+		awsClients:     config.Clients,
+		awsHostClients: config.HostClients,
 
 		// Internals
 		bootOnce: sync.Once{},
@@ -172,12 +178,13 @@ func New(config Config) (*Resource, error) {
 // Resource implements the legacy resource.
 type Resource struct {
 	// Dependencies.
-	certWatcher *certificatetpr.Service
-	cloudConfig *cloudconfigv2.CloudConfig
-	k8sClient   kubernetes.Interface
-	keyWatcher  *randomkeytpr.Service
-	logger      micrologger.Logger
-	awsClients  *adapter.Clients
+	certWatcher    *certificatetpr.Service
+	cloudConfig    *cloudconfigv2.CloudConfig
+	k8sClient      kubernetes.Interface
+	keyWatcher     *randomkeytpr.Service
+	logger         micrologger.Logger
+	awsClients     *adapter.Clients
+	awsHostClients *adapter.Clients
 
 	// Internals.
 	bootOnce sync.Once
@@ -554,70 +561,79 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 		}
 	}
 
-	// Create masters security group.
-	mastersSGInput := securityGroupInput{
-		Clients:   clients,
-		GroupName: keyv2.SecurityGroupName(cluster, prefixMaster),
-		VPCID:     vpcID,
-	}
-	mastersSecurityGroup, err := s.createSecurityGroup(mastersSGInput)
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create security group '%s': '%#v'", mastersSGInput.GroupName, err))
-	}
-	mastersSecurityGroupID, err := mastersSecurityGroup.GetID()
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get security group '%s' ID: '%#v'", mastersSGInput.GroupName, err))
-	}
+	var mastersSecurityGroup *awsresources.SecurityGroup
+	var workersSecurityGroup *awsresources.SecurityGroup
+	var ingressSecurityGroup *awsresources.SecurityGroup
+	var mastersSecurityGroupID string
+	var workersSecurityGroupID string
+	var ingressSecurityGroupID string
 
-	// Create workers security group.
-	workersSGInput := securityGroupInput{
-		Clients:   clients,
-		GroupName: keyv2.SecurityGroupName(cluster, prefixWorker),
-		VPCID:     vpcID,
-	}
-	workersSecurityGroup, err := s.createSecurityGroup(workersSGInput)
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create security group '%s': '%#v'", workersSGInput.GroupName, err))
-	}
-	workersSecurityGroupID, err := workersSecurityGroup.GetID()
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get security group '%s' ID: '%#v'", workersSGInput.GroupName, err))
-	}
+	if !keyv2.UseCloudFormation(cluster) {
+		// Create masters security group.
+		mastersSGInput := securityGroupInput{
+			Clients:   clients,
+			GroupName: keyv2.SecurityGroupName(cluster, prefixMaster),
+			VPCID:     vpcID,
+		}
+		mastersSecurityGroup, err = s.createSecurityGroup(mastersSGInput)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create security group '%s': '%#v'", mastersSGInput.GroupName, err))
+		}
+		mastersSecurityGroupID, err = mastersSecurityGroup.GetID()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get security group '%s' ID: '%#v'", mastersSGInput.GroupName, err))
+		}
 
-	// Create ingress ELB security group.
-	ingressSGInput := securityGroupInput{
-		Clients:   clients,
-		GroupName: keyv2.SecurityGroupName(cluster, prefixIngress),
-		VPCID:     vpcID,
-	}
-	ingressSecurityGroup, err := s.createSecurityGroup(ingressSGInput)
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create security group '%s': '%#v'", ingressSGInput.GroupName, err))
-	}
-	ingressSecurityGroupID, err := ingressSecurityGroup.GetID()
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get security group '%s' ID: '%#v'", ingressSGInput.GroupName, err))
-	}
+		// Create workers security group.
+		workersSGInput := securityGroupInput{
+			Clients:   clients,
+			GroupName: keyv2.SecurityGroupName(cluster, prefixWorker),
+			VPCID:     vpcID,
+		}
+		workersSecurityGroup, err = s.createSecurityGroup(workersSGInput)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create security group '%s': '%#v'", workersSGInput.GroupName, err))
+		}
+		workersSecurityGroupID, err = workersSecurityGroup.GetID()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get security group '%s' ID: '%#v'", workersSGInput.GroupName, err))
+		}
 
-	// Create rules for the security groups.
-	rulesInput := rulesInput{
-		Cluster:                cluster,
-		MastersSecurityGroupID: mastersSecurityGroupID,
-		WorkersSecurityGroupID: workersSecurityGroupID,
-		IngressSecurityGroupID: ingressSecurityGroupID,
-		HostClusterCIDR:        *conn.AccepterVpcInfo.CidrBlock,
-	}
+		// Create ingress ELB security group.
+		ingressSGInput := securityGroupInput{
+			Clients:   clients,
+			GroupName: keyv2.SecurityGroupName(cluster, prefixIngress),
+			VPCID:     vpcID,
+		}
+		ingressSecurityGroup, err = s.createSecurityGroup(ingressSGInput)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create security group '%s': '%#v'", ingressSGInput.GroupName, err))
+		}
+		ingressSecurityGroupID, err = ingressSecurityGroup.GetID()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get security group '%s' ID: '%#v'", ingressSGInput.GroupName, err))
+		}
 
-	if err := mastersSecurityGroup.ApplyRules(rulesInput.masterRules()); err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create rules for security group '%s': '%#v", mastersSecurityGroup.GroupName, err))
-	}
+		// Create rules for the security groups.
+		rulesInput := rulesInput{
+			Cluster:                cluster,
+			MastersSecurityGroupID: mastersSecurityGroupID,
+			WorkersSecurityGroupID: workersSecurityGroupID,
+			IngressSecurityGroupID: ingressSecurityGroupID,
+			HostClusterCIDR:        *conn.AccepterVpcInfo.CidrBlock,
+		}
 
-	if err := workersSecurityGroup.ApplyRules(rulesInput.workerRules()); err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create rules for security group '%s': '%#v'", workersSecurityGroup.GroupName, err))
-	}
+		if err := mastersSecurityGroup.ApplyRules(rulesInput.masterRules()); err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create rules for security group '%s': '%#v", mastersSecurityGroup.GroupName, err))
+		}
 
-	if err := ingressSecurityGroup.ApplyRules(rulesInput.ingressRules()); err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create rules for security group '%s': '%#v'", ingressSecurityGroup.GroupName, err))
+		if err := workersSecurityGroup.ApplyRules(rulesInput.workerRules()); err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create rules for security group '%s': '%#v'", workersSecurityGroup.GroupName, err))
+		}
+
+		if err := ingressSecurityGroup.ApplyRules(rulesInput.ingressRules()); err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create rules for security group '%s': '%#v'", ingressSecurityGroup.GroupName, err))
+		}
 	}
 
 	var publicRouteTable *awsresources.RouteTable
@@ -1333,57 +1349,59 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 		}
 	}
 
-	// Before the security groups can be deleted any rules referencing other
-	// groups must first be deleted.
-	mastersSGRulesInput := securityGroupRulesInput{
-		Clients:   clients,
-		GroupName: keyv2.SecurityGroupName(cluster, prefixMaster),
-	}
-	if err := s.deleteSecurityGroupRules(mastersSGRulesInput); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
-	}
+	if !keyv2.UseCloudFormation(cluster) {
+		// Before the security groups can be deleted any rules referencing other
+		// groups must first be deleted.
+		mastersSGRulesInput := securityGroupRulesInput{
+			Clients:   clients,
+			GroupName: keyv2.SecurityGroupName(cluster, prefixMaster),
+		}
+		if err := s.deleteSecurityGroupRules(mastersSGRulesInput); err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
+		}
 
-	workersSGRulesInput := securityGroupRulesInput{
-		Clients:   clients,
-		GroupName: keyv2.SecurityGroupName(cluster, prefixWorker),
-	}
-	if err := s.deleteSecurityGroupRules(workersSGRulesInput); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
-	}
+		workersSGRulesInput := securityGroupRulesInput{
+			Clients:   clients,
+			GroupName: keyv2.SecurityGroupName(cluster, prefixWorker),
+		}
+		if err := s.deleteSecurityGroupRules(workersSGRulesInput); err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
+		}
 
-	ingressSGRulesInput := securityGroupRulesInput{
-		Clients:   clients,
-		GroupName: keyv2.SecurityGroupName(cluster, prefixIngress),
-	}
-	if err := s.deleteSecurityGroupRules(ingressSGRulesInput); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
-	}
+		ingressSGRulesInput := securityGroupRulesInput{
+			Clients:   clients,
+			GroupName: keyv2.SecurityGroupName(cluster, prefixIngress),
+		}
+		if err := s.deleteSecurityGroupRules(ingressSGRulesInput); err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
+		}
 
-	// Delete masters security group.
-	mastersSGInput := securityGroupInput{
-		Clients:   clients,
-		GroupName: keyv2.SecurityGroupName(cluster, prefixMaster),
-	}
-	if err := s.deleteSecurityGroup(mastersSGInput); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", mastersSGInput.GroupName, err))
-	}
+		// Delete masters security group.
+		mastersSGInput := securityGroupInput{
+			Clients:   clients,
+			GroupName: keyv2.SecurityGroupName(cluster, prefixMaster),
+		}
+		if err := s.deleteSecurityGroup(mastersSGInput); err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", mastersSGInput.GroupName, err))
+		}
 
-	// Delete workers security group.
-	workersSGInput := securityGroupInput{
-		Clients:   clients,
-		GroupName: keyv2.SecurityGroupName(cluster, prefixWorker),
-	}
-	if err := s.deleteSecurityGroup(workersSGInput); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", workersSGInput.GroupName, err))
-	}
+		// Delete workers security group.
+		workersSGInput := securityGroupInput{
+			Clients:   clients,
+			GroupName: keyv2.SecurityGroupName(cluster, prefixWorker),
+		}
+		if err := s.deleteSecurityGroup(workersSGInput); err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", workersSGInput.GroupName, err))
+		}
 
-	// Delete ingress security group.
-	ingressSGInput := securityGroupInput{
-		Clients:   clients,
-		GroupName: keyv2.SecurityGroupName(cluster, prefixIngress),
-	}
-	if err := s.deleteSecurityGroup(ingressSGInput); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", ingressSGInput.GroupName, err))
+		// Delete ingress security group.
+		ingressSGInput := securityGroupInput{
+			Clients:   clients,
+			GroupName: keyv2.SecurityGroupName(cluster, prefixIngress),
+		}
+		if err := s.deleteSecurityGroup(ingressSGInput); err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", ingressSGInput.GroupName, err))
+		}
 	}
 
 	vpcPeeringConection := &awsresources.VPCPeeringConnection{

@@ -72,8 +72,20 @@ func HasClusterVersion(customObject v1alpha1.AWSConfig) bool {
 	}
 }
 
+func IngressControllerInsecurePort(customObject v1alpha1.AWSConfig) int {
+	return customObject.Spec.Cluster.Kubernetes.IngressController.InsecurePort
+}
+
+func IngressControllerSecurePort(customObject v1alpha1.AWSConfig) int {
+	return customObject.Spec.Cluster.Kubernetes.IngressController.SecurePort
+}
+
 func InstanceProfileName(customObject v1alpha1.AWSConfig, profileType string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, ProfileNameTemplate)
+}
+
+func KubernetesAPISecurePort(customObject v1alpha1.AWSConfig) int {
+	return customObject.Spec.Cluster.Kubernetes.API.SecurePort
 }
 
 // LoadBalancerName produces a unique name for the load balancer.

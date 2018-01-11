@@ -52,6 +52,9 @@ const (
 	externalELBScheme = "internet-facing"
 	internalELBScheme = "internal"
 
+	httpPort  = 80
+	httpsPort = 443
+
 	// RootDirElement marks the directory that should be taken as root when evaluating
 	// template's relative paths.
 	RootDirElement = "aws-operator"

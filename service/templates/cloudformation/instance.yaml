@@ -8,7 +8,7 @@
       ImageId: {{ .MasterImageID }}
       InstanceType: {{ .MasterInstanceType }}
       SecurityGroupIds:
-      - {{ .MasterSecurityGroupID }}
+      - !Ref MasterSecurityGroup
       SubnetId: !Ref PrivateSubnet
       UserData: {{ .MasterSmallCloudConfig }}
       Tags:

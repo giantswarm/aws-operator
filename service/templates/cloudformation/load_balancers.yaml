@@ -22,7 +22,7 @@
       LoadBalancerName: {{ .APIElbName }}
       Scheme: {{ .APIElbScheme }}
       SecurityGroups:
-        - {{ .APIElbSecurityGroupID }}
+        - !Ref MasterSecurityGroup
       Subnets:
         - !Ref PublicSubnet
 
@@ -58,7 +58,7 @@
         {{ end }}
       Scheme: {{ .IngressElbScheme }}
       SecurityGroups:
-        - {{ .IngressElbSecurityGroupID }}
+        - !Ref IngressSecurityGroup
       Subnets:
         - !Ref PublicSubnet
 {{end}}

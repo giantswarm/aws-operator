@@ -3,8 +3,6 @@ package adapter
 import (
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/keyv2"
@@ -16,9 +14,6 @@ const (
 	healthCheckInterval           = 5
 	healthCheckTimeout            = 3
 	healthCheckUnhealthyThreshold = 2
-
-	httpPort  = 80
-	httpsPort = 443
 )
 
 type loadBalancersAdapter struct {
@@ -37,7 +32,6 @@ type loadBalancersAdapter struct {
 	IngressElbName                   string
 	IngressElbPortsToOpen            portPairs
 	IngressElbScheme                 string
-	IngressElbSecurityGroupID        string
 }
 
 // portPair is a pair of ports.
@@ -63,8 +57,8 @@ func (lb *loadBalancersAdapter) getLoadBalancers(cfg Config) error {
 	lb.APIElbName = apiElbName
 	lb.APIElbPortsToOpen = portPairs{
 		{
-			PortELB:      cfg.CustomObject.Spec.Cluster.Kubernetes.API.SecurePort,
-			PortInstance: cfg.CustomObject.Spec.Cluster.Kubernetes.API.SecurePort,
+			PortELB:      keyv2.KubernetesAPISecurePort(cfg.CustomObject),
+			PortInstance: keyv2.KubernetesAPISecurePort(cfg.CustomObject),
 		},
 	}
 	lb.APIElbScheme = externalELBScheme
@@ -75,17 +69,18 @@ func (lb *loadBalancersAdapter) getLoadBalancers(cfg Config) error {
 		return microerror.Mask(err)
 	}
 
-	lb.IngressElbHealthCheckTarget = heathCheckTarget(cfg.CustomObject.Spec.Cluster.Kubernetes.IngressController.SecurePort)
+	lb.IngressElbHealthCheckTarget = heathCheckTarget(keyv2.IngressControllerSecurePort(cfg.CustomObject))
 	lb.IngressElbIdleTimoutSeconds = cfg.CustomObject.Spec.AWS.Ingress.ELB.IdleTimeoutSeconds
 	lb.IngressElbName = ingressElbName
 	lb.IngressElbPortsToOpen = portPairs{
 		{
-			PortELB:      httpsPort,
-			PortInstance: cfg.CustomObject.Spec.Cluster.Kubernetes.IngressController.SecurePort,
+			PortELB: httpsPort,
+
+			PortInstance: keyv2.IngressControllerSecurePort(cfg.CustomObject),
 		},
 		{
 			PortELB:      httpPort,
-			PortInstance: cfg.CustomObject.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
+			PortInstance: keyv2.IngressControllerInsecurePort(cfg.CustomObject),
 		},
 	}
 	lb.IngressElbScheme = externalELBScheme
@@ -95,64 +90,6 @@ func (lb *loadBalancersAdapter) getLoadBalancers(cfg Config) error {
 	lb.ELBHealthCheckInterval = healthCheckInterval
 	lb.ELBHealthCheckTimeout = healthCheckTimeout
 	lb.ELBHealthCheckUnhealthyThreshold = healthCheckUnhealthyThreshold
-
-	// master security group field.
-	// TODO: remove this code once the security group is created by cloudformation
-	// and add a reference in the template
-	masterGroupName := keyv2.SecurityGroupName(cfg.CustomObject, prefixMaster)
-	describeSgInput := &ec2.DescribeSecurityGroupsInput{
-		Filters: []*ec2.Filter{
-			{
-				Name: aws.String(subnetDescription),
-				Values: []*string{
-					aws.String(masterGroupName),
-				},
-			},
-			{
-				Name: aws.String(subnetGroupName),
-				Values: []*string{
-					aws.String(masterGroupName),
-				},
-			},
-		},
-	}
-	output, err := cfg.Clients.EC2.DescribeSecurityGroups(describeSgInput)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	if len(output.SecurityGroups) > 1 {
-		return microerror.Mask(tooManyResultsError)
-	}
-	lb.APIElbSecurityGroupID = *output.SecurityGroups[0].GroupId
-
-	// ingress security group field.
-	// TODO: remove this code once the security group is created by cloudformation
-	// and add a reference in the template
-	ingressGroupName := keyv2.SecurityGroupName(cfg.CustomObject, prefixIngress)
-	describeSgInput = &ec2.DescribeSecurityGroupsInput{
-		Filters: []*ec2.Filter{
-			{
-				Name: aws.String(subnetDescription),
-				Values: []*string{
-					aws.String(ingressGroupName),
-				},
-			},
-			{
-				Name: aws.String(subnetGroupName),
-				Values: []*string{
-					aws.String(ingressGroupName),
-				},
-			},
-		},
-	}
-	outputIngress, err := cfg.Clients.EC2.DescribeSecurityGroups(describeSgInput)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	if len(outputIngress.SecurityGroups) > 1 {
-		return microerror.Mask(tooManyResultsError)
-	}
-	lb.IngressElbSecurityGroupID = *outputIngress.SecurityGroups[0].GroupId
 
 	return nil
 }

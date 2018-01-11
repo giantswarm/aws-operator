@@ -19,6 +19,7 @@ type EC2ClientMock struct {
 	unexistingRouteTable bool
 	routeTableID         string
 	vpcID                string
+	vpcCIDR              string
 	unexistingVPC        bool
 }
 
@@ -79,7 +80,8 @@ func (e *EC2ClientMock) DescribeVpcs(input *ec2.DescribeVpcsInput) (*ec2.Describ
 	output := &ec2.DescribeVpcsOutput{
 		Vpcs: []*ec2.Vpc{
 			&ec2.Vpc{
-				VpcId: aws.String(e.vpcID),
+				CidrBlock: aws.String(e.vpcCIDR),
+				VpcId:     aws.String(e.vpcID),
 			},
 		},
 	}

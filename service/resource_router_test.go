@@ -83,6 +83,7 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 		legacyConfig.Logger = microloggertest.New()
 		legacyConfig.PubKeyFile = "test"
 		legacyConfig.Clients = &adapter.Clients{}
+		legacyConfig.HostClients = &adapter.Clients{}
 
 		legacyResource, err = legacyv2.New(legacyConfig)
 		if err != nil {

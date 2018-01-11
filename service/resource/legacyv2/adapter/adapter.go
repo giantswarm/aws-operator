@@ -46,6 +46,7 @@ type Adapter struct {
 	loadBalancersAdapter
 	recordSetsAdapter
 	routeTablesAdapter
+	securityGroupsAdapter
 	subnetsAdapter
 	outputsAdapter
 }
@@ -53,6 +54,7 @@ type Adapter struct {
 type Config struct {
 	CustomObject v1alpha1.AWSConfig
 	Clients      Clients
+	HostClients  Clients
 }
 
 func New(cfg Config) (Adapter, error) {
@@ -77,6 +79,7 @@ func New(cfg Config) (Adapter, error) {
 		a.getLoadBalancers,
 		a.getRecordSets,
 		a.getRouteTables,
+		a.getSecurityGroups,
 		a.getSubnets,
 		a.getOutputs,
 	}
