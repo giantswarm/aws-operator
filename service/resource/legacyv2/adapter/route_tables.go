@@ -4,7 +4,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
-// template related to this adapter: service/templates/cloudformation/route_tables.yaml
+// template related to this adapter: service/templates/cloudformation/guest/route_tables.yaml
 
 type routeTablesAdapter struct {
 	PublicRouteTableName  string

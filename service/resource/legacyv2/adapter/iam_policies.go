@@ -5,11 +5,12 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
-	"github.com/giantswarm/aws-operator/service/keyv2"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
-// template related to this adapter: service/templates/cloudformation/iam_policies.yaml
+// template related to this adapter: service/templates/cloudformation/guest/iam_policies.yaml
 
 type iamPoliciesAdapter struct {
 	MasterRoleName    string

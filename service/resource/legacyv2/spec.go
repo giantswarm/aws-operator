@@ -9,7 +9,9 @@ const (
 	clusterVersionOutputKey = "ClusterVersionOutput"
 	workerRoleKey           = "WorkerRole"
 
-	cloudFormationTemplatesDirectory = "service/templates/cloudformation"
+	cloudFormationGuestTemplatesDirectory    = "service/templates/cloudformation/guest"
+	cloudFormationHostPreTemplatesDirectory  = "service/templates/cloudformation/host-pre"
+	cloudFormationHostPostTemplatesDirectory = "service/templates/cloudformation/host-post"
 
 	namedIAMCapability = "CAPABILITY_NAMED_IAM"
 )

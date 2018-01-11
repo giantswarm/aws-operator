@@ -14,10 +14,13 @@
     Properties:
       InternetGatewayId:
         Ref: InternetGateway
-      VpcId: {{ .VPCID }}
+      VpcId: !Ref VPC
 
   InternetGatewayRoute:
     Type: AWS::EC2::Route
+    DependsOn:
+      - PublicRouteTable
+      - PrivateRouteTable
     Properties:
       RouteTableId: !Ref PublicRouteTable
       DestinationCidrBlock: 0.0.0.0/0

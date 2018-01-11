@@ -236,6 +236,8 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 
 		legacyConfig.HostClients = &adapter.Clients{}
 		legacyConfig.HostClients.EC2 = awsHostClients.EC2
+		legacyConfig.HostClients.IAM = awsHostClients.IAM
+		legacyConfig.HostClients.CloudFormation = awsHostClients.CloudFormation
 
 		legacyResource, err = legacyv2.New(legacyConfig)
 		if err != nil {

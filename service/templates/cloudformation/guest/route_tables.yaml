@@ -2,15 +2,15 @@
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
-      VpcId: {{ .VPCID }}
+      VpcId: !Ref VPC
       Tags:
       - Key: Name
         Value: {{ .PublicRouteTableName }}
-  
+
   PrivateRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
-      VpcId: {{ .VPCID }}
+      VpcId: !Ref VPC
       Tags:
       - Key: Name
         Value: {{ .PrivateRouteTableName }}

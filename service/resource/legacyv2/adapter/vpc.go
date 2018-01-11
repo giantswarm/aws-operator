@@ -1,33 +1,42 @@
 package adapter
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
-func VPCID(clients Clients, name string) (string, error) {
-	describeVpcInput := &ec2.DescribeVpcsInput{
-		Filters: []*ec2.Filter{
-			{
-				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
-				Values: []*string{
-					aws.String(name),
-				},
-			},
-		},
-	}
-	output, err := clients.EC2.DescribeVpcs(describeVpcInput)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-	if len(output.Vpcs) > 1 {
-		return "", microerror.Mask(tooManyResultsError)
-	}
+// template related to this adapter: service/templates/cloudformation/guest/vpc.yaml
 
-	return *output.Vpcs[0].VpcId, nil
+type vpcAdapter struct {
+	CidrBlock        string
+	InstallationName string
+	HostAccountID    string
+	PeerVPCID        string
+	PeerRoleArn      string
+}
+
+func (v *vpcAdapter) getVpc(cfg Config) error {
+	v.CidrBlock = cfg.CustomObject.Spec.AWS.VPC.CIDR
+	v.InstallationName = cfg.InstallationName
+	v.HostAccountID = cfg.HostAccountID
+	v.PeerVPCID = cfg.CustomObject.Spec.AWS.VPC.PeerID
+
+	// PeerRoleArn.
+	roleName := keyv2.PeerAccessRoleName(cfg.CustomObject)
+	input := &iam.GetRoleInput{
+		RoleName: aws.String(roleName),
+	}
+	output, err := cfg.HostClients.IAM.GetRole(input)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	v.PeerRoleArn = *output.Role.Arn
+
+	return nil
 }
 
 func VpcCIDR(clients Clients, vpcID string) (string, error) {
@@ -48,6 +57,5 @@ func VpcCIDR(clients Clients, vpcID string) (string, error) {
 	if len(output.Vpcs) > 1 {
 		return "", microerror.Mask(tooManyResultsError)
 	}
-
 	return *output.Vpcs[0].CidrBlock, nil
 }

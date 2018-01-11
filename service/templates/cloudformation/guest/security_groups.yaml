@@ -3,10 +3,10 @@
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: {{ .MasterSecurityGroupName }}
-      VpcId: {{ .VPCID }}
+      VpcId: !Ref VPC
       SecurityGroupIngress:
       {{ range .MasterSecurityGroupRules }}
-      - 
+      -
         IpProtocol: {{ .Protocol }}
         FromPort: {{ .Port }}
         ToPort: {{ .Port }}
@@ -20,10 +20,10 @@
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: {{ .WorkerSecurityGroupName }}
-      VpcId: {{ .VPCID }}
+      VpcId: !Ref VPC
       SecurityGroupIngress:
       {{ range .WorkerSecurityGroupRules }}
-      - 
+      -
         IpProtocol: {{ .Protocol }}
         FromPort: {{ .Port }}
         ToPort: {{ .Port }}
@@ -36,15 +36,15 @@
       Tags:
         - Key: Name
           Value:  {{ .WorkerSecurityGroupName }}
-  
+
   IngressSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: {{ .IngressSecurityGroupName }}
-      VpcId: {{ .VPCID }}
+      VpcId: !Ref VPC
       SecurityGroupIngress:
       {{ range .IngressSecurityGroupRules }}
-      - 
+      -
         IpProtocol: {{ .Protocol }}
         FromPort: {{ .Port }}
         ToPort: {{ .Port }}

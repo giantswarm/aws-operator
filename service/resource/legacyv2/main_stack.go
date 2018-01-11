@@ -16,7 +16,7 @@ import (
 )
 
 func newMainStack(customObject v1alpha1.AWSConfig) (StackState, error) {
-	stackName := keyv2.MainStackName(customObject)
+	stackName := keyv2.MainGuestStackName(customObject)
 	workers := len(customObject.Spec.AWS.Workers)
 	var imageID string
 	// FIXME: the imageID should not depend on the number of workers.
@@ -36,7 +36,58 @@ func newMainStack(customObject v1alpha1.AWSConfig) (StackState, error) {
 	return mainCF, nil
 }
 
-func (r *Resource) getMainTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
+func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
+	hostAccountID, err := adapter.AccountID(*r.awsHostClients)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	cfg := adapter.Config{
+		CustomObject:     customObject,
+		Clients:          *r.awsClients,
+		HostClients:      *r.awsHostClients,
+		InstallationName: r.installationName,
+		HostAccountID:    hostAccountID,
+	}
+	adp, err := adapter.NewGuest(cfg)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	return r.getMainTemplateBody(cloudFormationGuestTemplatesDirectory, adp)
+}
+
+func (r *Resource) getMainHostPreTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
+	guestAccountID, err := adapter.AccountID(*r.awsClients)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	cfg := adapter.Config{
+		CustomObject:   customObject,
+		GuestAccountID: guestAccountID,
+	}
+	adp, err := adapter.NewHostPre(cfg)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	return r.getMainTemplateBody(cloudFormationHostPreTemplatesDirectory, adp)
+}
+
+func (r *Resource) getMainHostPostTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
+	cfg := adapter.Config{
+		CustomObject: customObject,
+		Clients:      *r.awsClients,
+		HostClients:  *r.awsHostClients,
+	}
+	adp, err := adapter.NewHostPost(cfg)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	return r.getMainTemplateBody(cloudFormationHostPostTemplatesDirectory, adp)
+}
+
+func (r *Resource) getMainTemplateBody(tplDir string, adp adapter.Adapter) (string, error) {
 	main := template.New("")
 
 	var t *template.Template
@@ -52,7 +103,7 @@ func (r *Resource) getMainTemplateBody(customObject v1alpha1.AWSConfig) (string,
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-	templatesDir := filepath.Join(rootDir, cloudFormationTemplatesDirectory)
+	templatesDir := filepath.Join(rootDir, tplDir)
 
 	files, err := ioutil.ReadDir(templatesDir)
 	if err != nil {
@@ -67,18 +118,8 @@ func (r *Resource) getMainTemplateBody(customObject v1alpha1.AWSConfig) (string,
 		return "", microerror.Mask(err)
 	}
 
-	cfg := adapter.Config{
-		CustomObject: customObject,
-		Clients:      *r.awsClients,
-		HostClients:  *r.awsHostClients,
-	}
-	adapter, err := adapter.New(cfg)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
 	var tpl bytes.Buffer
-	if err := t.ExecuteTemplate(&tpl, "main", adapter); err != nil {
+	if err := t.ExecuteTemplate(&tpl, "main", adp); err != nil {
 		return "", microerror.Mask(err)
 	}
 

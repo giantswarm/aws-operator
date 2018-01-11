@@ -4,7 +4,7 @@
     Description: Master instance
     Properties:
       AvailabilityZone: {{ .MasterAZ }}
-      IamInstanceProfile: !Ref MasterInstanceProfile 
+      IamInstanceProfile: !Ref MasterInstanceProfile
       ImageId: {{ .MasterImageID }}
       InstanceType: {{ .MasterInstanceType }}
       SecurityGroupIds:
