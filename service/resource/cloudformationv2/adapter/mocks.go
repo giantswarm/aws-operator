@@ -195,3 +195,21 @@ func (e *ELBClientMock) DescribeLoadBalancers(input *elb.DescribeLoadBalancersIn
 	}
 	return output, nil
 }
+
+type CloudFormationMock struct{}
+
+func (c *CloudFormationMock) CreateStack(*awscloudformation.CreateStackInput) (*awscloudformation.CreateStackOutput, error) {
+	return nil, nil
+}
+func (c *CloudFormationMock) DeleteStack(*awscloudformation.DeleteStackInput) (*awscloudformation.DeleteStackOutput, error) {
+	return nil, nil
+}
+func (c *CloudFormationMock) DescribeStacks(*awscloudformation.DescribeStacksInput) (*awscloudformation.DescribeStacksOutput, error) {
+	return nil, nil
+}
+func (c *CloudFormationMock) UpdateStack(*awscloudformation.UpdateStackInput) (*awscloudformation.UpdateStackOutput, error) {
+	return nil, nil
+}
+func (c *CloudFormationMock) WaitUntilStackCreateComplete(*awscloudformation.DescribeStacksInput) error {
+	return nil
+}

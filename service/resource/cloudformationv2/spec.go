@@ -1,4 +1,4 @@
-package legacyv2
+package cloudformationv2
 
 const (
 	// defaultCreationTimeout is the timeout in minutes for the creation of the stack.

@@ -526,7 +526,7 @@ func Test_MainHostPostStackName(t *testing.T) {
 		},
 	}
 
-	actual := MainHostPreStackName(cluster)
+	actual := MainHostPostStackName(cluster)
 	if actual != expected {
 		t.Fatalf("Expected main stack name %s but was %s", expected, actual)
 	}

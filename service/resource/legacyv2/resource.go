@@ -3,12 +3,10 @@ package legacyv2
 import (
 	"context"
 	"fmt"
-	"reflect"
 	"strings"
 	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -28,7 +26,6 @@ import (
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
 	"github.com/giantswarm/aws-operator/service/cloudconfigv2"
 	"github.com/giantswarm/aws-operator/service/keyv2"
-	"github.com/giantswarm/aws-operator/service/resource/legacyv2/adapter"
 )
 
 const (
@@ -62,8 +59,6 @@ type Config struct {
 	K8sClient   kubernetes.Interface
 	KeyWatcher  *randomkeytpr.Service
 	Logger      micrologger.Logger
-	Clients     *adapter.Clients
-	HostClients *adapter.Clients
 
 	// Settings.
 	AwsConfig        awsutil.Config
@@ -82,8 +77,6 @@ func DefaultConfig() Config {
 		K8sClient:   nil,
 		KeyWatcher:  nil,
 		Logger:      nil,
-		Clients:     nil,
-		HostClients: nil,
 
 		// Settings.
 		AwsConfig:        awsutil.Config{},
@@ -110,12 +103,6 @@ func New(config Config) (*Resource, error) {
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
-	}
-	if config.Clients == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.Clients must not be empty")
-	}
-	if config.HostClients == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.HostClients must not be empty")
 	}
 
 	// Settings.
@@ -154,13 +141,11 @@ func New(config Config) (*Resource, error) {
 
 	newService := &Resource{
 		// Dependencies.
-		certWatcher:    config.CertWatcher,
-		cloudConfig:    config.CloudConfig,
-		k8sClient:      config.K8sClient,
-		keyWatcher:     config.KeyWatcher,
-		logger:         config.Logger,
-		awsClients:     config.Clients,
-		awsHostClients: config.HostClients,
+		certWatcher: config.CertWatcher,
+		cloudConfig: config.CloudConfig,
+		k8sClient:   config.K8sClient,
+		keyWatcher:  config.KeyWatcher,
+		logger:      config.Logger,
 
 		// Internals
 		bootOnce: sync.Once{},
@@ -179,13 +164,11 @@ func New(config Config) (*Resource, error) {
 // Resource implements the legacy resource.
 type Resource struct {
 	// Dependencies.
-	certWatcher    *certificatetpr.Service
-	cloudConfig    *cloudconfigv2.CloudConfig
-	k8sClient      kubernetes.Interface
-	keyWatcher     *randomkeytpr.Service
-	logger         micrologger.Logger
-	awsClients     *adapter.Clients
-	awsHostClients *adapter.Clients
+	certWatcher *certificatetpr.Service
+	cloudConfig *cloudconfigv2.CloudConfig
+	k8sClient   kubernetes.Interface
+	keyWatcher  *randomkeytpr.Service
+	logger      micrologger.Logger
 
 	// Internals.
 	bootOnce sync.Once
@@ -223,23 +206,6 @@ func (s *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 
 	patch := framework.NewPatch()
 
-	// cloudformation logic: on creation we need to create the cloudformation resource after legacy so that there are no dependency
-	// problems (see https://github.com/giantswarm/operatorkit/issues/139). Once the transition to cloudformation is done we
-	// will separate the cloudformation and legacy resources.
-	if keyv2.UseCloudFormation(cluster) {
-		create, err := s.newCreateChange(ctx, obj, currentState, desiredState)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		update, err := s.newUpdateChange(ctx, obj, currentState, desiredState)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		patch.SetCreateChange(create)
-		patch.SetUpdateChange(update)
-	}
 	return patch, nil
 }
 
@@ -269,39 +235,6 @@ func (s *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desire
 
 	s.logger.Log("info", fmt.Sprintf("deleting cluster '%s'", keyv2.ClusterID(cluster)))
 
-	// cloudformation logic: on deletion we need to remove first the cloudformation resource so that there are no dependency
-	// problems (see https://github.com/giantswarm/operatorkit/issues/139). Once the transition to cloudformation is done we
-	// will separate the cloudformation and legacy resources.
-	if keyv2.UseCloudFormation(cluster) {
-		deleteStackInput := cloudformation.DeleteStackInput{
-			StackName: aws.String(keyv2.MainGuestStackName(cluster)),
-		}
-		_, err := s.awsClients.CloudFormation.DeleteStack(&deleteStackInput)
-		if err != nil {
-			return nil, microerror.Maskf(err, "deleting AWS Guest CloudFormation Stack")
-		}
-		s.logger.LogCtx(ctx, "debug", "deleting AWS Guest CloudFormation stack: deleted")
-
-		deleteStackInput = cloudformation.DeleteStackInput{
-			StackName: aws.String(keyv2.MainHostPreStackName(cluster)),
-		}
-		_, err = s.awsHostClients.CloudFormation.DeleteStack(&deleteStackInput)
-		if err != nil {
-			return nil, microerror.Maskf(err, "deleting AWS Host Pre-Guest CloudFormation Stack")
-		}
-		s.logger.LogCtx(ctx, "debug", "deleting AWS Host Pre-Guest CloudFormation stack: deleted")
-
-		deleteStackInput = cloudformation.DeleteStackInput{
-			StackName: aws.String(keyv2.MainHostPostStackName(cluster)),
-		}
-		_, err = s.awsHostClients.CloudFormation.DeleteStack(&deleteStackInput)
-		if err != nil {
-			return nil, microerror.Maskf(err, "deleting AWS Host Post-Guest CloudFormation Stack")
-		}
-		s.logger.LogCtx(ctx, "debug", "deleting AWS Host Post-Guest CloudFormation stack: deleted")
-	}
-
-	// legacy logic
 	err := s.processDelete(cluster)
 	if err != nil {
 		s.logger.Log("error", fmt.Sprintf("error deleting cluster '%s': '%#v'", keyv2.ClusterID(cluster), err))
@@ -314,28 +247,6 @@ func (s *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desire
 }
 
 func (s *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
-	cluster, err := keyv2.ToCustomObject(obj)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	if keyv2.UseCloudFormation(cluster) {
-		updateStackInput, err := toUpdateStackInput(updateChange)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		stackName := updateStackInput.StackName
-		if *stackName != "" {
-			_, err := s.awsClients.CloudFormation.UpdateStack(&updateStackInput)
-			if err != nil {
-				return microerror.Maskf(err, "updating AWS cloudformation stack")
-			}
-
-			s.logger.LogCtx(ctx, "debug", "updating AWS cloudformation stack: updated")
-		} else {
-			s.logger.LogCtx(ctx, "debug", "updating AWS cloudformation stack: no need to update")
-		}
-	}
 	return nil
 }
 
@@ -1561,141 +1472,18 @@ func (s *Resource) uploadCloudconfigToS3(svc *s3.S3, s3Bucket, path, data string
 }
 
 func (s *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
-	// currently only used for cloudformation
-	customObject, err := keyv2.ToCustomObject(obj)
-	if err != nil {
-		return StackState{}, microerror.Mask(err)
-	}
-
-	if keyv2.UseCloudFormation(customObject) {
-		s.logger.LogCtx(ctx, "debug", "looking for AWS stack")
-
-		stackName := keyv2.MainGuestStackName(customObject)
-
-		describeInput := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(stackName),
-		}
-		describeOutput, err := s.awsClients.CloudFormation.DescribeStacks(describeInput)
-
-		if IsStackNotFound(err) {
-			s.logger.LogCtx(ctx, "debug", "did not find a stack in AWS API")
-			return StackState{}, nil
-		}
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-
-		if len(describeOutput.Stacks) > 1 {
-			return StackState{}, microerror.Mask(notFoundError)
-		}
-
-		// current is called on cluster deletion, if the stack creation failed the
-		// outputs can be unaccessible, this can lead to a stack that cannot be deleted.
-		// it can also be called during creation, while the outputs are still not
-		// accessible.
-		status := describeOutput.Stacks[0].StackStatus
-		errorStatuses := []string{
-			"ROLLBACK_IN_PROGRESS",
-			"ROLLBACK_COMPLETE",
-			"CREATE_IN_PROGRESS",
-		}
-		for _, errorStatus := range errorStatuses {
-			if *status == errorStatus {
-				outputStackState := StackState{
-					Name:           stackName,
-					Workers:        "",
-					ImageID:        "",
-					ClusterVersion: "",
-				}
-				return outputStackState, nil
-			}
-		}
-
-		outputs := describeOutput.Stacks[0].Outputs
-
-		workers, err := getStackOutputValue(outputs, workersOutputKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-		imageID, err := getStackOutputValue(outputs, imageIDOutputKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-		clusterVersion, err := getStackOutputValue(outputs, clusterVersionOutputKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-
-		outputStackState := StackState{
-			Name:           stackName,
-			Workers:        workers,
-			ImageID:        imageID,
-			ClusterVersion: clusterVersion,
-		}
-
-		return outputStackState, nil
-	}
 	return nil, nil
 }
 
 func (s *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
-	// currently only used for cloudformation
-	customObject, err := keyv2.ToCustomObject(obj)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-	if keyv2.UseCloudFormation(customObject) {
-		mainStack, err := newMainStack(customObject)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		return mainStack, nil
-	}
 	return nil, nil
 }
 
 func (s *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
-	cluster, err := keyv2.ToCustomObject(obj)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	s.logger.Log("info", fmt.Sprintf("creating cluster '%s'", keyv2.ClusterID(cluster)))
-
-	// cloudformation logic: on creation we only need to handle the cloudformation resource, legacy is handled by the update methods
-	// Once the transition to cloudformation is done we will separate the cloudformation and legacy resources.
-	if keyv2.UseCloudFormation(cluster) {
-		stackInput, err := toCreateStackInput(createChange)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		_, err = s.awsClients.CloudFormation.CreateStack(&stackInput)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		err = s.awsHostClients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
-			StackName: stackInput.StackName,
-		})
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		s.logger.LogCtx(ctx, "debug", "creating AWS cloudformation stack: created")
-
-		// Create host post-main stack. It includes the peering routes, which need resources from the
-		// guest stack to be in place before it can be created.
-		err = s.createHostPostStack(cluster)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
 	return nil
 }
 
 func (s *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
-	s.logger.Log("info", "in ApplyDeleteChange ")
 	return nil
 }
 
@@ -1707,192 +1495,10 @@ func (r *Resource) Underlying() framework.Resource {
 	return r
 }
 
-func toStackState(v interface{}) (StackState, error) {
-	if v == nil {
-		return StackState{}, nil
-	}
-
-	stackState, ok := v.(StackState)
-	if !ok {
-		return StackState{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", stackState, v)
-	}
-
-	return stackState, nil
-}
-
-func toUpdateStackInput(v interface{}) (cloudformation.UpdateStackInput, error) {
-	if v == nil {
-		return cloudformation.UpdateStackInput{}, nil
-	}
-
-	updateStackInput, ok := v.(cloudformation.UpdateStackInput)
-	if !ok {
-		return cloudformation.UpdateStackInput{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", updateStackInput, v)
-	}
-
-	return updateStackInput, nil
-}
-
 func (s *Resource) newUpdateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	customObject, err := keyv2.ToCustomObject(obj)
-	if err != nil {
-		return cloudformation.CreateStackInput{}, microerror.Mask(err)
-	}
-
-	desiredStackState, err := toStackState(desiredState)
-	if err != nil {
-		return cloudformation.CreateStackInput{}, microerror.Mask(err)
-	}
-
-	currentStackState, err := toStackState(currentState)
-	if err != nil {
-		return cloudformation.CreateStackInput{}, microerror.Mask(err)
-	}
-
-	s.logger.LogCtx(ctx, "debug", "finding out if the main stack should be updated")
-
-	updateState := cloudformation.UpdateStackInput{
-		StackName: aws.String(""),
-	}
-
-	if currentStackState.Name != "" && !reflect.DeepEqual(desiredStackState, currentStackState) {
-		s.logger.LogCtx(ctx, "debug", "main stack should be updated")
-		var mainTemplate string
-		mainTemplate, err := s.getMainGuestTemplateBody(customObject)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		updateState.StackName = aws.String(desiredStackState.Name)
-		updateState.TemplateBody = aws.String(mainTemplate)
-	}
-
-	return updateState, nil
+	return nil, nil
 }
 
 func (s *Resource) newCreateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	customObject, err := keyv2.ToCustomObject(obj)
-	if err != nil {
-		return cloudformation.CreateStackInput{}, microerror.Mask(err)
-	}
-
-	desiredStackState, err := toStackState(desiredState)
-	if err != nil {
-		return cloudformation.CreateStackInput{}, microerror.Mask(err)
-	}
-
-	s.logger.LogCtx(ctx, "debug", "finding out if the main stack should be created")
-
-	createState := cloudformation.CreateStackInput{
-		StackName: aws.String(""),
-	}
-
-	if desiredStackState.Name != "" {
-		s.logger.LogCtx(ctx, "debug", "main stack should be created")
-
-		// We need to create the required peering resources in the host account before
-		// getting the guest main stack template body, it requires id values from host
-		// resources.
-		err = s.createHostPreStack(customObject)
-		if err != nil {
-			return cloudformation.CreateStackInput{}, microerror.Mask(err)
-		}
-
-		var mainTemplate string
-		mainTemplate, err := s.getMainGuestTemplateBody(customObject)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-		createState.StackName = aws.String(desiredStackState.Name)
-		createState.TemplateBody = aws.String(mainTemplate)
-		createState.TimeoutInMinutes = aws.Int64(defaultCreationTimeout)
-		// CAPABILITY_NAMED_IAM is required for creating IAM roles (worker policy)
-		createState.Capabilities = []*string{
-			aws.String("CAPABILITY_NAMED_IAM"),
-		}
-	}
-
-	return createState, nil
-}
-
-func getStackOutputValue(outputs []*cloudformation.Output, key string) (string, error) {
-	for _, o := range outputs {
-		if *o.OutputKey == key {
-			return *o.OutputValue, nil
-		}
-	}
-
-	return "", microerror.Mask(notFoundError)
-}
-
-func toCreateStackInput(v interface{}) (cloudformation.CreateStackInput, error) {
-	if v == nil {
-		return cloudformation.CreateStackInput{}, nil
-	}
-
-	createStackInput, ok := v.(cloudformation.CreateStackInput)
-	if !ok {
-		return cloudformation.CreateStackInput{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", createStackInput, v)
-	}
-
-	return createStackInput, nil
-}
-
-func (s *Resource) createHostPreStack(customObject v1alpha1.AWSConfig) error {
-	stackName := keyv2.MainHostPreStackName(customObject)
-	mainTemplate, err := s.getMainHostPreTemplateBody(customObject)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	createStack := &cloudformation.CreateStackInput{
-		StackName:    aws.String(stackName),
-		TemplateBody: aws.String(mainTemplate),
-		// CAPABILITY_NAMED_IAM is required for creating IAM roles (worker policy)
-		Capabilities: []*string{
-			aws.String("CAPABILITY_NAMED_IAM"),
-		},
-	}
-
-	s.logger.Log("debug", "creating AWS Host Pre-Guest cloudformation stack")
-	_, err = s.awsHostClients.CloudFormation.CreateStack(createStack)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	err = s.awsHostClients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
-		StackName: aws.String(stackName),
-	})
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	s.logger.Log("debug", "creating AWS Host Pre-Guest cloudformation stack: created")
-	return nil
-}
-
-func (s *Resource) createHostPostStack(customObject v1alpha1.AWSConfig) error {
-	stackName := keyv2.MainHostPostStackName(customObject)
-	mainTemplate, err := s.getMainHostPostTemplateBody(customObject)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	createStack := &cloudformation.CreateStackInput{
-		StackName:    aws.String(stackName),
-		TemplateBody: aws.String(mainTemplate),
-	}
-
-	s.logger.Log("debug", "creating AWS Host Post-Guest cloudformation stack")
-	_, err = s.awsHostClients.CloudFormation.CreateStack(createStack)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	err = s.awsHostClients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
-		StackName: aws.String(stackName),
-	})
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	s.logger.Log("debug", "creating AWS Host Post-Guest cloudformation stack: created")
-	return nil
+	return nil, nil
 }
