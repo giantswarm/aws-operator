@@ -13,14 +13,14 @@ const (
 	Name = "namespacev2"
 )
 
-// Config represents the configuration used to create a new deployment resource.
+// Config represents the configuration used to create a new namespace resource.
 type Config struct {
 	// Dependencies.
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 }
 
-// DefaultConfig provides a default configuration to create a new deployment
+// DefaultConfig provides a default configuration to create a new namespace
 // resource by best effort.
 func DefaultConfig() Config {
 	return Config{
@@ -30,14 +30,14 @@ func DefaultConfig() Config {
 	}
 }
 
-// Resource implements the deployment resource.
+// Resource implements the namespace resource.
 type Resource struct {
 	// Dependencies.
 	k8sClient kubernetes.Interface
 	logger    micrologger.Logger
 }
 
-// New creates a new configured deployment resource.
+// New creates a new configured namespace resource.
 func New(config Config) (*Resource, error) {
 	// Dependencies.
 	if config.K8sClient == nil {
