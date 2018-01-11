@@ -2,5 +2,4 @@
 Description: Main Host CloudFormation stack.
 Resources:
   {{template "iam_roles" .}}
-  {{template "route_tables" .}}
 {{end}}

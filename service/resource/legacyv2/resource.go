@@ -278,9 +278,18 @@ func (s *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desire
 		}
 		_, err := s.awsClients.CloudFormation.DeleteStack(&deleteStackInput)
 		if err != nil {
-			return nil, microerror.Maskf(err, "deleting AWS CloudFormation Stack")
+			return nil, microerror.Maskf(err, "deleting AWS Guest CloudFormation Stack")
 		}
-		s.logger.LogCtx(ctx, "debug", "deleting AWS CloudFormation stack: deleted")
+		s.logger.LogCtx(ctx, "debug", "deleting AWS Guest CloudFormation stack: deleted")
+
+		deleteStackInput = cloudformation.DeleteStackInput{
+			StackName: aws.String(keyv2.MainHostStackName(cluster)),
+		}
+		_, err = s.awsHostClients.CloudFormation.DeleteStack(&deleteStackInput)
+		if err != nil {
+			return nil, microerror.Maskf(err, "deleting AWS Host CloudFormation Stack")
+		}
+		s.logger.LogCtx(ctx, "debug", "deleting AWS Host CloudFormation stack: deleted")
 	}
 
 	// legacy logic
@@ -1409,21 +1418,21 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 		}
 	}
 
-	vpcPeeringConection := &awsresources.VPCPeeringConnection{
-		VPCId:     vpcID,
-		PeerVPCId: cluster.Spec.AWS.VPC.PeerID,
-		AWSEntity: awsresources.AWSEntity{
-			Clients:     clients,
-			HostClients: hostClients,
-		},
-		Logger: s.logger,
-	}
-	conn, err := vpcPeeringConection.FindExisting()
-	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not find vpc peering connection: '%#v'", err))
-	}
-
 	if !keyv2.UseCloudFormation(cluster) {
+		vpcPeeringConection := &awsresources.VPCPeeringConnection{
+			VPCId:     vpcID,
+			PeerVPCId: cluster.Spec.AWS.VPC.PeerID,
+			AWSEntity: awsresources.AWSEntity{
+				Clients:     clients,
+				HostClients: hostClients,
+			},
+			Logger: s.logger,
+		}
+		conn, err := vpcPeeringConection.FindExisting()
+		if err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not find vpc peering connection: '%#v'", err))
+		}
+
 		// Delete Guest VPC Routes.
 		for _, privateRouteTableName := range cluster.Spec.AWS.VPC.RouteTableNames {
 			privateRouteTable := &awsresources.RouteTable{
@@ -1444,37 +1453,35 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 				s.logger.Log("error", fmt.Sprintf("could not delete vpc route: '%v'", err))
 			}
 		}
-	}
 
-	// Delete VPC peering connection.
-	if err := vpcPeeringConection.Delete(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete vpc peering connection: '%#v'", err))
-	} else {
-		s.logger.Log("info", "deleted vpc peering connection")
-	}
+		// Delete VPC peering connection.
+		if err := vpcPeeringConection.Delete(); err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not delete vpc peering connection: '%#v'", err))
+		} else {
+			s.logger.Log("info", "deleted vpc peering connection")
+		}
 
-	// Delete VPC.
-	if err := vpc.Delete(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete vpc: '%#v'", err))
-	} else {
-		s.logger.Log("info", "deleted vpc")
-	}
+		// Delete VPC.
+		if err := vpc.Delete(); err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not delete vpc: '%#v'", err))
+		} else {
+			s.logger.Log("info", "deleted vpc")
+		}
 
-	// Delete S3 bucket.
-	bucketName := s.bucketName(cluster)
+		// Delete S3 bucket.
+		bucketName := s.bucketName(cluster)
 
-	bucket := &awsresources.Bucket{
-		AWSEntity: awsresources.AWSEntity{Clients: clients},
-		Name:      bucketName,
-	}
+		bucket := &awsresources.Bucket{
+			AWSEntity: awsresources.AWSEntity{Clients: clients},
+			Name:      bucketName,
+		}
 
-	if err := bucket.Delete(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-	}
+		if err := bucket.Delete(); err != nil {
+			s.logger.Log("error", fmt.Sprintf("%#v", err))
+		}
 
-	s.logger.Log("info", "deleted bucket")
+		s.logger.Log("info", "deleted bucket")
 
-	if !keyv2.UseCloudFormation(cluster) {
 		// Delete master policy.
 		var masterPolicy resources.NamedResource
 		masterPolicy = &awsresources.Policy{
@@ -1660,13 +1667,9 @@ func (s *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			return microerror.Mask(err)
 		}
 
-		// We need to create the required peering resources in the host account.
-		err = s.createHostStack(cluster)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
 		s.logger.LogCtx(ctx, "debug", "creating AWS cloudformation stack: created")
+
+		// TODO: create host routes
 	}
 	return nil
 }
@@ -1766,6 +1769,15 @@ func (s *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 
 	if desiredStackState.Name != "" {
 		s.logger.LogCtx(ctx, "debug", "main stack should be created")
+
+		// We need to create the required peering resources in the host account before
+		// getting the guest main stack template body, it requires id values from host
+		// resources.
+		err = s.createHostStack(customObject)
+		if err != nil {
+			return cloudformation.CreateStackInput{}, microerror.Mask(err)
+		}
+
 		var mainTemplate string
 		mainTemplate, err := s.getMainGuestTemplateBody(customObject)
 		if err != nil {
@@ -1822,6 +1834,13 @@ func (s *Resource) createHostStack(customObject v1alpha1.AWSConfig) error {
 	}
 
 	_, err = s.awsHostClients.CloudFormation.CreateStack(createStack)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	err = s.awsHostClients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
+		StackName: aws.String(stackName),
+	})
 	if err != nil {
 		return microerror.Mask(err)
 	}

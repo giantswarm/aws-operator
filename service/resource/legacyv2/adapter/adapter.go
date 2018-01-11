@@ -96,7 +96,6 @@ func NewHost(cfg Config) (Adapter, error) {
 
 	hydraters := []hydrater{
 		a.getHostIamRoles,
-		a.getHostRouteTables,
 	}
 
 	for _, h := range hydraters {

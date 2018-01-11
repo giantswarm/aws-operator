@@ -37,12 +37,16 @@ func newMainStack(customObject v1alpha1.AWSConfig) (StackState, error) {
 }
 
 func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
+	hostAccountID, err := adapter.AccountID(*r.awsHostClients)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
 	cfg := adapter.Config{
 		CustomObject:     customObject,
 		Clients:          *r.awsClients,
 		HostClients:      *r.awsHostClients,
 		InstallationName: r.installationName,
-		HostAccountID:    r.awsHostConfig.AccountID(),
+		HostAccountID:    hostAccountID,
 	}
 	adp, err := adapter.NewGuest(cfg)
 	if err != nil {
@@ -53,11 +57,15 @@ func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig) (st
 }
 
 func (r *Resource) getMainHostTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
+	guestAccountID, err := adapter.AccountID(*r.awsClients)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
 	cfg := adapter.Config{
 		CustomObject:   customObject,
 		Clients:        *r.awsClients,
 		HostClients:    *r.awsHostClients,
-		GuestAccountID: r.awsConfig.AccountID(),
+		GuestAccountID: guestAccountID,
 	}
 	adp, err := adapter.NewHost(cfg)
 	if err != nil {

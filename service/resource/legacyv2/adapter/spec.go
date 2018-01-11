@@ -74,6 +74,7 @@ type CFClient interface {
 	DeleteStack(*awscloudformation.DeleteStackInput) (*awscloudformation.DeleteStackOutput, error)
 	DescribeStacks(*awscloudformation.DescribeStacksInput) (*awscloudformation.DescribeStacksOutput, error)
 	UpdateStack(*awscloudformation.UpdateStackInput) (*awscloudformation.UpdateStackOutput, error)
+	WaitUntilStackCreateComplete(*awscloudformation.DescribeStacksInput) error
 }
 
 // EC2Client describes the methods required to be implemented by a EC2 AWS client.

@@ -15,7 +15,7 @@
     Properties:
       VpcId: !Ref VPC
       PeerVpcId: {{ .PeerVPCID }}
-      PeerOwnerId: {{ .HostAccountID }}
+      PeerOwnerId: '{{ .HostAccountID }}'
       PeerRoleArn: {{ .PeerRoleArn }}
       Tags:
         - Key: Name
