@@ -78,7 +78,7 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 			},
 			expectedAPIElbScheme:                     "internet-facing",
 			expectedELBAZ:                            "eu-central-1a",
-			expectedELBHealthCheckHealthyThreshold:   10,
+			expectedELBHealthCheckHealthyThreshold:   2,
 			expectedELBHealthCheckInterval:           5,
 			expectedELBHealthCheckTimeout:            3,
 			expectedELBHealthCheckUnhealthyThreshold: 2,
