@@ -1690,6 +1690,7 @@ func (s *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		if err != nil {
 			return microerror.Mask(err)
 		}
+		s.logger.LogCtx(ctx, "debug", "creating AWS Host Post-Guest cloudformation stack: created")
 	}
 	return nil
 }
