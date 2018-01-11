@@ -1896,3 +1896,29 @@ func (s *Resource) createHostPostStack(customObject v1alpha1.AWSConfig) error {
 	s.logger.Log("debug", "creating AWS Host Post-Guest cloudformation stack: created")
 	return nil
 }
+
+func (s *Resource) createHostPostStack(customObject v1alpha1.AWSConfig) error {
+	stackName := keyv2.MainHostPostStackName(customObject)
+	mainTemplate, err := s.getMainHostPostTemplateBody(customObject)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	createStack := &cloudformation.CreateStackInput{
+		StackName:    aws.String(stackName),
+		TemplateBody: aws.String(mainTemplate),
+	}
+
+	_, err = s.awsHostClients.CloudFormation.CreateStack(createStack)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	err = s.awsHostClients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
+		StackName: aws.String(stackName),
+	})
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
