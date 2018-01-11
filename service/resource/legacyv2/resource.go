@@ -1320,7 +1320,9 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 		} else {
 			s.logger.Log("info", "deleted private subnet")
 		}
+	}
 
+	if !keyv2.UseCloudFormation(cluster) {
 		// Delete internet gateway.
 		internetGateway := &awsresources.InternetGateway{
 			Name:  keyv2.ClusterID(cluster),
@@ -1336,7 +1338,7 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 		}
 
 		// Delete public subnet.
-		subnetInput = SubnetInput{
+		subnetInput := SubnetInput{
 			Name:    keyv2.SubnetName(cluster, suffixPublic),
 			Clients: clients,
 		}
