@@ -1675,10 +1675,22 @@ func (s *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		if err != nil {
 			return microerror.Mask(err)
 		}
+		err = s.awsHostClients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
+			StackName: stackInput.StackName,
+		})
+		if err != nil {
+			return microerror.Mask(err)
+		}
 
 		s.logger.LogCtx(ctx, "debug", "creating AWS cloudformation stack: created")
 
-		// TODO: create host routes
+		// Create host post-main stack. It includes the peering routes, which need resources from the
+		// guest stack to be in place before it can be created.
+		err = s.createHostPostStack(cluster)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		s.logger.LogCtx(ctx, "debug", "creating AWS Host Post-Guest cloudformation stack: created")
 	}
 	return nil
 }
