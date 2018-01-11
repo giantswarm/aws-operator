@@ -1518,18 +1518,18 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 		} else {
 			s.logger.Log("info", fmt.Sprintf("deleted %s roles, policies, instance profiles", prefixWorker))
 		}
-	}
 
-	// Delete KMS key.
-	var kmsKey resources.ArnResource
-	kmsKey = &awsresources.KMSKey{
-		Name:      keyv2.ClusterID(cluster),
-		AWSEntity: awsresources.AWSEntity{Clients: clients},
-	}
-	if err := kmsKey.Delete(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-	} else {
-		s.logger.Log("info", "deleted KMS key")
+		// Delete KMS key.
+		var kmsKey resources.ArnResource
+		kmsKey = &awsresources.KMSKey{
+			Name:      keyv2.ClusterID(cluster),
+			AWSEntity: awsresources.AWSEntity{Clients: clients},
+		}
+		if err := kmsKey.Delete(); err != nil {
+			s.logger.Log("error", fmt.Sprintf("%#v", err))
+		} else {
+			s.logger.Log("info", "deleted KMS key")
+		}
 	}
 
 	// Delete keypair.
