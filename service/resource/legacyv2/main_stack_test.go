@@ -347,8 +347,8 @@ func TestMainHostPostTemplateExistingFields(t *testing.T) {
 		t.Error("stack header not found")
 	}
 
-	if !strings.Contains(body, "  PrivateRoute-route_table_1:") {
+	if !strings.Contains(body, "  PrivateRoute1:") {
 		fmt.Println(body)
-		t.Error("route_table header not found")
+		t.Error("route header not found")
 	}
 }

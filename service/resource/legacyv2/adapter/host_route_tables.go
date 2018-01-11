@@ -58,6 +58,12 @@ func waitForPeeringConnectionID(cfg Config) (string, error) {
 	input := &ec2.DescribeVpcPeeringConnectionsInput{
 		Filters: []*ec2.Filter{
 			&ec2.Filter{
+				Name: aws.String("status-code"),
+				Values: []*string{
+					aws.String("active"),
+				},
+			},
+			&ec2.Filter{
 				Name: aws.String("tag:Name"),
 				Values: []*string{
 					aws.String(clusterID),

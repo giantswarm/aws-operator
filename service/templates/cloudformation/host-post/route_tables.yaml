@@ -1,10 +1,10 @@
 {{define "route_tables"}}
-  {{ range .RouteTables }}
-  PrivateRoute-{{.Name}}:
+  {{ range $i, $v := .RouteTables }}
+  PrivateRoute{{$i}}:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: {{.RouteTableID}}
-      DestinationCidrBlock: {{.CidrBlock}}
-      VpcPeeringConnectionId: {{.PeerConnectionID}}
+      RouteTableId: {{$v.RouteTableID}}
+      DestinationCidrBlock: {{$v.CidrBlock}}
+      VpcPeeringConnectionId: {{$v.PeerConnectionID}}
   {{end}}
 {{end}}
