@@ -499,7 +499,7 @@ func Test_MainGuestStackName(t *testing.T) {
 }
 
 func Test_MainHostPreStackName(t *testing.T) {
-	expected := "xyz-host-pre-main"
+	expected := "xyz-host-setup"
 
 	cluster := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
@@ -516,7 +516,7 @@ func Test_MainHostPreStackName(t *testing.T) {
 }
 
 func Test_MainHostPostStackName(t *testing.T) {
-	expected := "xyz-host-post-main"
+	expected := "xyz-host-main"
 
 	cluster := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{

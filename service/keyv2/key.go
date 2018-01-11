@@ -114,13 +114,13 @@ func MainGuestStackName(customObject v1alpha1.AWSConfig) string {
 func MainHostPreStackName(customObject v1alpha1.AWSConfig) string {
 	clusterID := ClusterID(customObject)
 
-	return fmt.Sprintf("%s-host-pre-main", clusterID)
+	return fmt.Sprintf("%s-host-setup", clusterID)
 }
 
 func MainHostPostStackName(customObject v1alpha1.AWSConfig) string {
 	clusterID := ClusterID(customObject)
 
-	return fmt.Sprintf("%s-host-post-main", clusterID)
+	return fmt.Sprintf("%s-host-main", clusterID)
 }
 
 func MasterImageID(customObject v1alpha1.AWSConfig) string {
