@@ -13,7 +13,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
-// template related to this adapter: service/templates/cloudformation/host/route_tables.yaml
+// template related to this adapter: service/templates/cloudformation/host-post/route_tables.yaml
 
 type hostRouteTablesAdapter struct {
 	RouteTables []RouteTable
@@ -85,8 +85,12 @@ func waitForPeeringConnectionID(cfg Config) (string, error) {
 		logger.Log("error", fmt.Sprintf("query VPC peering connection ID failed, retrying with delay %.0fm%.0fs: '%#v'", delay.Minutes(), delay.Seconds(), err))
 	}
 	bo := &backoff.ExponentialBackOff{
-		MaxElapsedTime: 2 * time.Minute,
-		Clock:          backoff.SystemClock,
+		InitialInterval:     backoff.DefaultInitialInterval,
+		RandomizationFactor: backoff.DefaultRandomizationFactor,
+		Multiplier:          backoff.DefaultMultiplier,
+		MaxInterval:         backoff.DefaultMaxInterval,
+		MaxElapsedTime:      2 * time.Minute,
+		Clock:               backoff.SystemClock,
 	}
 	if err := backoff.RetryNotify(queryOperation, bo, queryNotify); err != nil {
 		return "", microerror.Mask(err)
