@@ -7,7 +7,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
-// template related to this adapter: service/templates/cloudformation/security_groups.yaml
+// template related to this adapter: service/templates/cloudformation/guest/security_groups.yaml
 
 type securityGroupsAdapter struct {
 	MasterSecurityGroupName   string
