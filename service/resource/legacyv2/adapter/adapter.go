@@ -91,11 +91,27 @@ func NewGuest(cfg Config) (Adapter, error) {
 	return a, nil
 }
 
-func NewHost(cfg Config) (Adapter, error) {
+func NewHostPre(cfg Config) (Adapter, error) {
 	a := Adapter{}
 
 	hydraters := []hydrater{
 		a.getHostIamRoles,
+	}
+
+	for _, h := range hydraters {
+		if err := h(cfg); err != nil {
+			return Adapter{}, microerror.Mask(err)
+		}
+	}
+
+	return a, nil
+}
+
+func NewHostPost(cfg Config) (Adapter, error) {
+	a := Adapter{}
+
+	hydraters := []hydrater{
+		a.getHostRouteTables,
 	}
 
 	for _, h := range hydraters {

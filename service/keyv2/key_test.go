@@ -498,8 +498,8 @@ func Test_MainGuestStackName(t *testing.T) {
 	}
 }
 
-func Test_MainHostStackName(t *testing.T) {
-	expected := "xyz-host-main"
+func Test_MainHostPreStackName(t *testing.T) {
+	expected := "xyz-host-pre-main"
 
 	cluster := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
@@ -509,7 +509,24 @@ func Test_MainHostStackName(t *testing.T) {
 		},
 	}
 
-	actual := MainHostStackName(cluster)
+	actual := MainHostPreStackName(cluster)
+	if actual != expected {
+		t.Fatalf("Expected main stack name %s but was %s", expected, actual)
+	}
+}
+
+func Test_MainHostPostStackName(t *testing.T) {
+	expected := "xyz-host-post-main"
+
+	cluster := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "xyz",
+			},
+		},
+	}
+
+	actual := MainHostPostStackName(cluster)
 	if actual != expected {
 		t.Fatalf("Expected main stack name %s but was %s", expected, actual)
 	}

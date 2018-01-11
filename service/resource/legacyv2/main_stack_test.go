@@ -258,7 +258,53 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 	}
 }
 
-func TestMainHostTemplateExistingFields(t *testing.T) {
+func TestMainHostPreTemplateExistingFields(t *testing.T) {
+	// customObject with example fields for both asg and launch config
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "test-cluster",
+			},
+		},
+	}
+
+	cfg := testConfig()
+	cfg.Clients = &adapter.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+	}
+	cfg.HostClients = &adapter.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+	}
+	newResource, err := New(cfg)
+	if err != nil {
+		t.Errorf("unexpected error %v", err)
+	}
+
+	body, err := newResource.getMainHostPreTemplateBody(customObject)
+
+	if err != nil {
+		t.Errorf("unexpected error %v", err)
+	}
+
+	if !strings.Contains(body, "Description: Main Host Pre-Guest CloudFormation stack.") {
+		fmt.Println(body)
+		t.Error("stack header not found")
+	}
+
+	if !strings.Contains(body, "  PeerRole:") {
+		fmt.Println(body)
+		t.Error("peer role header not found")
+	}
+
+	if !strings.Contains(body, "  RoleName: test-cluster-vpc-peer-access") {
+		fmt.Println(body)
+		t.Error("role name not found")
+	}
+}
+
+func TestMainHostPostTemplateExistingFields(t *testing.T) {
 	// customObject with example fields for both asg and launch config
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
@@ -290,31 +336,19 @@ func TestMainHostTemplateExistingFields(t *testing.T) {
 		t.Errorf("unexpected error %v", err)
 	}
 
-	body, err := newResource.getMainHostTemplateBody(customObject)
+	body, err := newResource.getMainHostPostTemplateBody(customObject)
 
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
 	}
 
-	if !strings.Contains(body, "Description: Main Host CloudFormation stack.") {
+	if !strings.Contains(body, "Description: Main Host Post-Guest CloudFormation stack.") {
 		fmt.Println(body)
 		t.Error("stack header not found")
 	}
 
-	if !strings.Contains(body, "  PeerRole:") {
+	if !strings.Contains(body, "  PrivateRoute-route_table_1:") {
 		fmt.Println(body)
-		t.Error("peer role header not found")
+		t.Error("route_table header not found")
 	}
-
-	if !strings.Contains(body, "  RoleName: test-cluster-vpc-peer-access") {
-		fmt.Println(body)
-		t.Error("role name not found")
-	}
-
-	/*
-		if !strings.Contains(body, "  PrivateRouteTable-route_table_1:") {
-			fmt.Println(body)
-			t.Error("route_table header not found")
-		}
-	*/
 }

@@ -283,13 +283,22 @@ func (s *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desire
 		s.logger.LogCtx(ctx, "debug", "deleting AWS Guest CloudFormation stack: deleted")
 
 		deleteStackInput = cloudformation.DeleteStackInput{
-			StackName: aws.String(keyv2.MainHostStackName(cluster)),
+			StackName: aws.String(keyv2.MainHostPreStackName(cluster)),
 		}
 		_, err = s.awsHostClients.CloudFormation.DeleteStack(&deleteStackInput)
 		if err != nil {
-			return nil, microerror.Maskf(err, "deleting AWS Host CloudFormation Stack")
+			return nil, microerror.Maskf(err, "deleting AWS Host Pre-Guest CloudFormation Stack")
 		}
-		s.logger.LogCtx(ctx, "debug", "deleting AWS Host CloudFormation stack: deleted")
+		s.logger.LogCtx(ctx, "debug", "deleting AWS Host Pre-Guest CloudFormation stack: deleted")
+
+		deleteStackInput = cloudformation.DeleteStackInput{
+			StackName: aws.String(keyv2.MainHostPostStackName(cluster)),
+		}
+		_, err = s.awsHostClients.CloudFormation.DeleteStack(&deleteStackInput)
+		if err != nil {
+			return nil, microerror.Maskf(err, "deleting AWS Host Post-Guest CloudFormation Stack")
+		}
+		s.logger.LogCtx(ctx, "debug", "deleting AWS Host Post-Guest CloudFormation stack: deleted")
 	}
 
 	// legacy logic
@@ -1773,7 +1782,7 @@ func (s *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		// We need to create the required peering resources in the host account before
 		// getting the guest main stack template body, it requires id values from host
 		// resources.
-		err = s.createHostStack(customObject)
+		err = s.createHostPreStack(customObject)
 		if err != nil {
 			return cloudformation.CreateStackInput{}, microerror.Mask(err)
 		}
@@ -1818,9 +1827,9 @@ func toCreateStackInput(v interface{}) (cloudformation.CreateStackInput, error) 
 	return createStackInput, nil
 }
 
-func (s *Resource) createHostStack(customObject v1alpha1.AWSConfig) error {
-	stackName := keyv2.MainHostStackName(customObject)
-	mainTemplate, err := s.getMainHostTemplateBody(customObject)
+func (s *Resource) createHostPreStack(customObject v1alpha1.AWSConfig) error {
+	stackName := keyv2.MainHostPreStackName(customObject)
+	mainTemplate, err := s.getMainHostPreTemplateBody(customObject)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -1831,6 +1840,32 @@ func (s *Resource) createHostStack(customObject v1alpha1.AWSConfig) error {
 		Capabilities: []*string{
 			aws.String("CAPABILITY_NAMED_IAM"),
 		},
+	}
+
+	_, err = s.awsHostClients.CloudFormation.CreateStack(createStack)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	err = s.awsHostClients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
+		StackName: aws.String(stackName),
+	})
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
+func (s *Resource) createHostPostStack(customObject v1alpha1.AWSConfig) error {
+	stackName := keyv2.MainHostPostStackName(customObject)
+	mainTemplate, err := s.getMainHostPostTemplateBody(customObject)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	createStack := &cloudformation.CreateStackInput{
+		StackName:    aws.String(stackName),
+		TemplateBody: aws.String(mainTemplate),
 	}
 
 	_, err = s.awsHostClients.CloudFormation.CreateStack(createStack)

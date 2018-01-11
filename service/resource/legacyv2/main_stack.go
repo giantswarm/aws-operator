@@ -56,23 +56,35 @@ func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig) (st
 	return r.getMainTemplateBody(cloudFormationGuestTemplatesDirectory, adp)
 }
 
-func (r *Resource) getMainHostTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
+func (r *Resource) getMainHostPreTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
 	guestAccountID, err := adapter.AccountID(*r.awsClients)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 	cfg := adapter.Config{
 		CustomObject:   customObject,
-		Clients:        *r.awsClients,
-		HostClients:    *r.awsHostClients,
 		GuestAccountID: guestAccountID,
 	}
-	adp, err := adapter.NewHost(cfg)
+	adp, err := adapter.NewHostPre(cfg)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
-	return r.getMainTemplateBody(cloudFormationHostTemplatesDirectory, adp)
+	return r.getMainTemplateBody(cloudFormationHostPreTemplatesDirectory, adp)
+}
+
+func (r *Resource) getMainHostPostTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
+	cfg := adapter.Config{
+		CustomObject: customObject,
+		Clients:      *r.awsClients,
+		HostClients:  *r.awsHostClients,
+	}
+	adp, err := adapter.NewHostPost(cfg)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	return r.getMainTemplateBody(cloudFormationHostPostTemplatesDirectory, adp)
 }
 
 func (r *Resource) getMainTemplateBody(tplDir string, adp adapter.Adapter) (string, error) {
