@@ -37,23 +37,16 @@ func newMainStack(customObject v1alpha1.AWSConfig) (StackState, error) {
 }
 
 func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
-<<<<<<< HEAD
 	hostAccountID, err := adapter.AccountID(*r.awsHostClients)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-=======
->>>>>>> add host stack
 	cfg := adapter.Config{
 		CustomObject:     customObject,
 		Clients:          *r.awsClients,
 		HostClients:      *r.awsHostClients,
 		InstallationName: r.installationName,
-<<<<<<< HEAD
 		HostAccountID:    hostAccountID,
-=======
-		HostAccountID:    r.awsHostConfig.AccountID(),
->>>>>>> add host stack
 	}
 	adp, err := adapter.NewGuest(cfg)
 	if err != nil {
@@ -63,7 +56,6 @@ func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig) (st
 	return r.getMainTemplateBody(cloudFormationGuestTemplatesDirectory, adp)
 }
 
-<<<<<<< HEAD
 func (r *Resource) getMainHostPreTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
 	guestAccountID, err := adapter.AccountID(*r.awsClients)
 	if err != nil {
@@ -88,25 +80,11 @@ func (r *Resource) getMainHostPostTemplateBody(customObject v1alpha1.AWSConfig) 
 		HostClients:  *r.awsHostClients,
 	}
 	adp, err := adapter.NewHostPost(cfg)
-=======
-func (r *Resource) getMainHostTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
-	cfg := adapter.Config{
-		CustomObject:   customObject,
-		Clients:        *r.awsClients,
-		HostClients:    *r.awsHostClients,
-		GuestAccountID: r.awsConfig.AccountID(),
-	}
-	adp, err := adapter.NewHost(cfg)
->>>>>>> add host stack
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
-<<<<<<< HEAD
 	return r.getMainTemplateBody(cloudFormationHostPostTemplatesDirectory, adp)
-=======
-	return r.getMainTemplateBody(cloudFormationHostTemplatesDirectory, adp)
->>>>>>> add host stack
 }
 
 func (r *Resource) getMainTemplateBody(tplDir string, adp adapter.Adapter) (string, error) {

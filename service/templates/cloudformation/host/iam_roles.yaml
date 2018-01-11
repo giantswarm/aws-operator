@@ -6,7 +6,7 @@
       AssumeRolePolicyDocument:
         Statement:
           - Principal:
-              AWS: {{ .GuestAccountID }}
+              AWS: '{{ .GuestAccountID }}'
             Action:
               - 'sts:AssumeRole'
             Effect: Allow
