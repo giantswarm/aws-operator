@@ -105,10 +105,22 @@ func LoadBalancerName(domainName string, cluster v1alpha1.AWSConfig) (string, er
 	return lbName, nil
 }
 
-func MainStackName(customObject v1alpha1.AWSConfig) string {
+func MainGuestStackName(customObject v1alpha1.AWSConfig) string {
 	clusterID := ClusterID(customObject)
 
-	return fmt.Sprintf("%s-main", clusterID)
+	return fmt.Sprintf("%s-guest-main", clusterID)
+}
+
+func MainHostPreStackName(customObject v1alpha1.AWSConfig) string {
+	clusterID := ClusterID(customObject)
+
+	return fmt.Sprintf("%s-host-setup", clusterID)
+}
+
+func MainHostPostStackName(customObject v1alpha1.AWSConfig) string {
+	clusterID := ClusterID(customObject)
+
+	return fmt.Sprintf("%s-host-main", clusterID)
 }
 
 func MasterImageID(customObject v1alpha1.AWSConfig) string {
@@ -129,6 +141,10 @@ func MasterInstanceType(customObject v1alpha1.AWSConfig) string {
 	}
 
 	return instanceType
+}
+
+func PeerAccessRoleName(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("%s-vpc-peer-access", ClusterID(customObject))
 }
 
 func PolicyName(customObject v1alpha1.AWSConfig, profileType string) string {

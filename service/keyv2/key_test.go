@@ -481,8 +481,8 @@ func Test_WorkerInstanceType(t *testing.T) {
 	}
 }
 
-func Test_MainStackName(t *testing.T) {
-	expected := "xyz-main"
+func Test_MainGuestStackName(t *testing.T) {
+	expected := "xyz-guest-main"
 
 	cluster := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
@@ -492,7 +492,41 @@ func Test_MainStackName(t *testing.T) {
 		},
 	}
 
-	actual := MainStackName(cluster)
+	actual := MainGuestStackName(cluster)
+	if actual != expected {
+		t.Fatalf("Expected main stack name %s but was %s", expected, actual)
+	}
+}
+
+func Test_MainHostPreStackName(t *testing.T) {
+	expected := "xyz-host-setup"
+
+	cluster := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "xyz",
+			},
+		},
+	}
+
+	actual := MainHostPreStackName(cluster)
+	if actual != expected {
+		t.Fatalf("Expected main stack name %s but was %s", expected, actual)
+	}
+}
+
+func Test_MainHostPostStackName(t *testing.T) {
+	expected := "xyz-host-main"
+
+	cluster := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "xyz",
+			},
+		},
+	}
+
+	actual := MainHostPostStackName(cluster)
 	if actual != expected {
 		t.Fatalf("Expected main stack name %s but was %s", expected, actual)
 	}
@@ -803,6 +837,25 @@ func Test_PolicyName(t *testing.T) {
 	}
 
 	actual := PolicyName(customObject, profileType)
+	if actual != expectedName {
+		t.Fatalf("Expected  name '%s' but was '%s'", expectedName, actual)
+	}
+}
+
+func Test_PeerAccessRoleName(t *testing.T) {
+	expectedName := "test-cluster-vpc-peer-access"
+
+	cluster := v1alpha1.Cluster{
+		ID: "test-cluster",
+	}
+
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: cluster,
+		},
+	}
+
+	actual := PeerAccessRoleName(customObject)
 	if actual != expectedName {
 		t.Fatalf("Expected  name '%s' but was '%s'", expectedName, actual)
 	}
