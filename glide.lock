@@ -1,5 +1,5 @@
 hash: 8a5511dc9adca67fa2661b25ec7bf4973a578991b8e27b6f4622f558f824f5b3
-updated: 2017-12-21T16:13:38.911329851Z
+updated: 2018-01-12T11:54:18.291088034+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -44,7 +44,7 @@ imports:
   subpackages:
   - quantile
 - name: github.com/cenkalti/backoff
-  version: 309aa717adbf351e92864cbedf9cca0b769a4b5a
+  version: 2ea60e5f094469f9e65adb9cd103795b73ae743e
 - name: github.com/coreos/go-semver
   version: 8ab6407b697782a06568d4b7f1db25550ec2e4c6
   subpackages:
@@ -65,11 +65,11 @@ imports:
 - name: github.com/emicklei/go-restful-swagger12
   version: dcef7f55730566d41eae5db10e7d6981829720f6
 - name: github.com/fsnotify/fsnotify
-  version: 4da3e2cfbabc9f751898f250b49f2439785783a1
+  version: c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/giantswarm/apiextensions
-  version: 1257d8f2fa100675cac6e69a08dcd5dece300963
+  version: 8d3279511fc01bd9466226d2bf4f6611ee9870d9
   subpackages:
   - pkg/apis/core/v1alpha1
   - pkg/apis/provider/v1alpha1
@@ -106,11 +106,9 @@ imports:
 - name: github.com/giantswarm/ipam
   version: 82290fc538b414df4f582577d2120426595dd61b
 - name: github.com/giantswarm/k8scloudconfig
-  version: 905f67bec65a1c6cdb0edfaa54891f77bfd4868e
+  version: b8d75cd2f0d21701b385cc7eb2379968ba3629b8
   subpackages:
   - v_0_1_0
-  - v_1_0_0
-  - v_1_1_0
   - v_2_0_0
   - v_3_0_0
 - name: github.com/giantswarm/microendpoint
@@ -119,7 +117,7 @@ imports:
   - endpoint/version
   - service/version
 - name: github.com/giantswarm/microerror
-  version: ec5f66bb657662031c0d651504fee6908cdf28d9
+  version: 325932fa68e70dd4464598f11e2f710ac1aaec46
 - name: github.com/giantswarm/microkit
   version: e721e5f21f1558102d360139c8b8c6799cb15431
   subpackages:
@@ -139,12 +137,12 @@ imports:
   - transaction/context/id
   - transaction/context/tracked
 - name: github.com/giantswarm/micrologger
-  version: 0278d149b128aef1b27d492702c0020f4ff7a717
+  version: 216e9191d90f55723bfc0e93801af96e6b80eb12
   subpackages:
   - loggermeta
   - microloggertest
 - name: github.com/giantswarm/microstorage
-  version: 99418478ec8f5c68f9b5fc5e6be7e0474948f80d
+  version: 7f39386c3f39a6b493f1dc38a405d99277c15b83
   subpackages:
   - memory
 - name: github.com/giantswarm/operatorkit
@@ -163,7 +161,7 @@ imports:
   subpackages:
   - randomkeytprtest
 - name: github.com/giantswarm/versionbundle
-  version: e22eefeb8e97277bfebe225f77cf0528b69f36b8
+  version: 5d9ca79fd134acbe53e8b67ef1e649870f02d699
 - name: github.com/go-ini/ini
   version: 32e4c1e6bc4e7d0d8451aa6b75200d19e37a536a
 - name: github.com/go-kit/kit
@@ -250,11 +248,11 @@ imports:
   subpackages:
   - pbutil
 - name: github.com/mitchellh/mapstructure
-  version: 06020f85339e21b2478f756a78e295255ffa4d6a
+  version: b4575eea38cca1123ec2dc90c26529b5c5acfcff
 - name: github.com/pelletier/go-toml
-  version: b8b5e7696574464b2f9bf303a7b37781bb52889f
+  version: 0131db6d737cfbbfb678f8b7d92e55e27ce46224
 - name: github.com/prometheus/client_golang
-  version: 661e31bf844dfca9aeba15f27ea8aa0d485ad212
+  version: f02bfc3484a6b03d1fc00d72d86add103ef9567b
   subpackages:
   - prometheus
   - prometheus/promhttp
@@ -277,19 +275,19 @@ imports:
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/spf13/afero
-  version: 8d919cbe7e2627e417f3e45c3c0e489a5b7e2536
+  version: 57afd63c68602b63ed976de00dd066ccb3c319db
   subpackages:
   - mem
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: ccaecb155a2177302cb56cae929251a256d0f646
+  version: b95ab734e27d33e0d8fbabf71ca990568d4e2020
 - name: github.com/spf13/jwalterweatherman
-  version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
+  version: 7c0cea34c8ece3fbeb2b27ab9b59511d360fb394
 - name: github.com/spf13/pflag
   version: 4c012f6dcd9546820e378d0bdda4d8fc772cdfea
 - name: github.com/spf13/viper
-  version: 1a0c4a370c3e8286b835467d2dfcdaf636c3538b
+  version: aafc9e6bc7b7bb53ddaa75a5ef49a17d6e654be5
 - name: github.com/stretchr/testify
   version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
   repo: git://github.com/stretchr/testify.git
@@ -340,9 +338,9 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: 287cf08546ab5e7e37d55a84f7ed3fd1db036de5
+  version: d670f9405373e636a5a2765eea47fac0c9bc91a4
 - name: k8s.io/apiextensions-apiserver
-  version: fcd622fe88a4a6efcb5aea9e94ee87324ac1b036
+  version: 0965a40c0530e110459750a7fcb9cfa4910fb944
   subpackages:
   - pkg/apis/apiextensions
   - pkg/apis/apiextensions/v1beta1
@@ -350,7 +348,7 @@ imports:
   - pkg/client/clientset/clientset/scheme
   - pkg/client/clientset/clientset/typed/apiextensions/v1beta1
 - name: k8s.io/apimachinery
-  version: 8ab5f3d8a330c2e9baaf84e39042db8d49034ae2
+  version: 8a12651bddd061e6fac22c64db4fb0fe5b1013d2
   subpackages:
   - pkg/api/equality
   - pkg/api/errors

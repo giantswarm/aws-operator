@@ -11,167 +11,6 @@ users:
 {{end}}
 write_files:
 {{ if not .DisableCalico -}}
-- path: /srv/calico-ipip-pinger-sa.yaml
-  owner: root
-  permissions: 644
-  content: |
-    apiVersion: v1
-    kind: ServiceAccount
-    metadata:
-      name: calico-ipip-pinger
-      namespace: kube-system
-- path: /srv/calico-ipip-pinger.yaml
-  owner: root
-  permissions: 644
-  content: |
-    apiVersion: extensions/v1beta1
-    kind: DaemonSet
-    metadata:
-      labels:
-        app: calico-ipip-pinger
-      name: calico-ipip-pinger
-      namespace: kube-system
-    spec:
-      updateStrategy:
-        type: RollingUpdate
-        rollingUpdate:
-          maxUnavailable: 1
-      template:
-        metadata:
-          labels:
-            app: calico-ipip-pinger
-        spec:
-          serviceAccountName: calico-ipip-pinger
-          containers:
-          - name: calico-ipip-pinger
-            image: quay.io/giantswarm/calico-ipip-pinger:0f197abe866c7c811e42534739148345cb3bded5
-            imagePullPolicy: Always
-            securityContext:
-              privileged: true
-            env:
-              # The location of the Calico etcd cluster.
-              - name: ETCD_ENDPOINTS
-                valueFrom:
-                  configMapKeyRef:
-                    name: calico-config
-                    key: etcd_endpoints
-              # Location of the CA certificate for etcd.
-              - name: ETCD_CA_CERT_FILE
-                valueFrom:
-                  configMapKeyRef:
-                    name: calico-config
-                    key: etcd_ca
-              # Location of the client key for etcd.
-              - name: ETCD_KEY_FILE
-                valueFrom:
-                  configMapKeyRef:
-                    name: calico-config
-                    key: etcd_key
-              # Location of the client certificate for etcd.
-              - name: ETCD_CERT_FILE
-                valueFrom:
-                  configMapKeyRef:
-                    name: calico-config
-                    key: etcd_cert
-            volumeMounts:
-              # Mount in the etcd TLS secrets.
-              - mountPath: /etc/kubernetes/ssl/etcd
-                name: etcd-certs
-          volumes:
-            # Mount in the etcd TLS secrets.
-            - name: etcd-certs
-              hostPath:
-                path: /etc/kubernetes/ssl/etcd
-          tolerations:
-          - effect: NoSchedule
-            key: node-role.kubernetes.io/master
-            operator: Exists
-          hostNetwork: true
-          restartPolicy: Always
-- path: /srv/calico-node-controller-sa.yaml
-  owner: root
-  permissions: 644
-  content: |
-    apiVersion: v1
-    kind: ServiceAccount
-    metadata:
-      name: calico-node-controller
-      namespace: kube-system
-- path: /srv/calico-node-controller.yaml
-  owner: root
-  permissions: 644
-  content: |
-    apiVersion: extensions/v1beta1
-    kind: Deployment
-    metadata:
-      name: calico-node-controller
-      namespace: kube-system
-      labels:
-        k8s-app: calico-node-controller
-    spec:
-      replicas: 1
-      strategy:
-        type: Recreate
-      template:
-        metadata:
-          name: calico-node-controller
-          namespace: kube-system
-          labels:
-            k8s-app: calico-node-controller
-          annotations:
-            scheduler.alpha.kubernetes.io/critical-pod: ''
-        spec:
-          tolerations:
-          - key: node-role.kubernetes.io/master
-            operator: Exists
-            effect: NoSchedule
-          - key: CriticalAddonsOnly
-            operator: Exists
-          nodeSelector:
-            node-role.kubernetes.io/master: ""
-          hostNetwork: true
-          serviceAccountName: calico-node-controller
-          containers:
-            - name: calico-node-controller
-              image: quay.io/giantswarm/calico-node-controller
-              env:
-                # The location of the Calico etcd cluster.
-                - name: ETCD_ENDPOINTS
-                  valueFrom:
-                    configMapKeyRef:
-                      name: calico-config
-                      key: etcd_endpoints
-                # Location of the CA certificate for etcd.
-                - name: ETCD_CA_CERT_FILE
-                  valueFrom:
-                    configMapKeyRef:
-                      name: calico-config
-                      key: etcd_ca
-                # Location of the client key for etcd.
-                - name: ETCD_KEY_FILE
-                  valueFrom:
-                    configMapKeyRef:
-                      name: calico-config
-                      key: etcd_key
-                # Location of the client certificate for etcd.
-                - name: ETCD_CERT_FILE
-                  valueFrom:
-                    configMapKeyRef:
-                      name: calico-config
-                      key: etcd_cert
-                # The location of the Kubernetes API.  Use the default Kubernetes
-                # service for API access.
-                - name: K8S_API
-                  value: "https://kubernetes.default:443"
-              volumeMounts:
-                # Mount in the etcd TLS secrets.
-                - mountPath: /etc/kubernetes/ssl/etcd
-                  name: etcd-certs
-          volumes:
-            # Mount in the etcd TLS secrets.
-            - name: etcd-certs
-              hostPath:
-                path: /etc/kubernetes/ssl/etcd
 - path: /srv/calico-kube-controllers-sa.yaml
   owner: root
   permissions: 644
@@ -194,12 +33,12 @@ write_files:
   owner: root
   permissions: 644
   content: |
-    # Calico Version v2.6.2
-    # https://docs.projectcalico.org/v2.6/releases#v2.6.2
+    # Calico Version v3.0.1
+    # https://docs.projectcalico.org/v3.0/releases#v3.0.1
     # This manifest includes the following component versions:
-    #   calico/node:v2.6.2
-    #   calico/cni:v1.11.0
-    #   calico/kube-controllers:v1.0.0
+    #   calico/node:v3.0.1
+    #   calico/cni:v2.0.0
+    #   calico/kube-controllers:v2.0.0
 
     # This ConfigMap is used to configure a self-hosted Calico installation.
     kind: ConfigMap
@@ -215,31 +54,41 @@ write_files:
       calico_backend: "bird"
 
       # The CNI network configuration to install on each node.
-      # TODO: Do we still need to set MTU manually?
       cni_network_config: |-
         {
-            "name": "k8s-pod-network",
-            "cniVersion": "0.1.0",
-            "type": "calico",
-            "etcd_endpoints": "__ETCD_ENDPOINTS__",
-            "etcd_key_file": "__ETCD_KEY_FILE__",
-            "etcd_cert_file": "__ETCD_CERT_FILE__",
-            "etcd_ca_cert_file": "__ETCD_CA_CERT_FILE__",
-            "log_level": "info",
-            "ipam": {
-                "type": "calico-ipam"
+          "name": "k8s-pod-network",
+          "cniVersion": "0.3.0",
+          "plugins": [
+            {
+                "type": "calico",
+                "etcd_endpoints": "__ETCD_ENDPOINTS__",
+                "etcd_key_file": "__ETCD_KEY_FILE__",
+                "etcd_cert_file": "__ETCD_CERT_FILE__",
+                "etcd_ca_cert_file": "__ETCD_CA_CERT_FILE__",
+                "log_level": "info",
+                "mtu": {{.Cluster.Calico.MTU}},
+                "ipam": {
+                    "type": "calico-ipam"
+                },
+                "policy": {
+                    "type": "k8s",
+                    "k8s_api_root": "https://__KUBERNETES_SERVICE_HOST__:__KUBERNETES_SERVICE_PORT__",
+                    "k8s_auth_token": "__SERVICEACCOUNT_TOKEN__"
+                },
+                "kubernetes": {
+                    "kubeconfig": "__KUBECONFIG_FILEPATH__"
+                }
             },
-            "mtu": {{.Cluster.Calico.MTU}},
-            "policy": {
-                "type": "k8s",
-                "k8s_api_root": "https://__KUBERNETES_SERVICE_HOST__:__KUBERNETES_SERVICE_PORT__",
-                "k8s_auth_token": "__SERVICEACCOUNT_TOKEN__"
-            },
-            "kubernetes": {
-                "kubeconfig": "__KUBECONFIG_FILEPATH__"
+            {
+              "type": "portmap",
+              "snat": true,
+              "capabilities": {"portMappings": true}
             }
+          ]
         }
 
+      # If you're using TLS enabled etcd uncomment the following.
+      # You must also populate the Secret below with these files.
       etcd_ca: "/etc/kubernetes/ssl/etcd/client-ca.pem"
       etcd_cert: "/etc/kubernetes/ssl/etcd/client-crt.pem"
       etcd_key: "/etc/kubernetes/ssl/etcd/client-key.pem"
@@ -248,7 +97,6 @@ write_files:
   owner: root
   permissions: 644
   content: |
-
     # This manifest installs the calico/node container, as well
     # as the Calico CNI plugins and network config on
     # each master and worker node in a Kubernetes cluster.
@@ -283,12 +131,15 @@ write_files:
             operator: Exists
           hostNetwork: true
           serviceAccountName: calico-node
+          # Minimize downtime during a rolling upgrade or deletion; tell Kubernetes to do a "force
+          # deletion": https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods.
+          terminationGracePeriodSeconds: 0
           containers:
             # Runs calico/node container on each Kubernetes node.  This
             # container programs network policy and routes on each
             # host.
             - name: calico-node
-              image: quay.io/calico/node:v2.6.2
+              image: quay.io/calico/node:v3.0.1
               env:
                 # The location of the Calico etcd cluster.
                 - name: ETCD_ENDPOINTS
@@ -316,6 +167,11 @@ write_files:
                   value: "{{.Cluster.Calico.Subnet}}/{{.Cluster.Calico.CIDR}}"
                 - name: CALICO_IPV4POOL_IPIP
                   value: "always"
+                # Set noderef for node controller.
+                - name: CALICO_K8S_NODE_REF
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: spec.nodeName
                 # Disable IPv6 on Kubernetes.
                 - name: FELIX_IPV6SUPPORT
                   value: "false"
@@ -377,9 +233,12 @@ write_files:
             # This container installs the Calico CNI binaries
             # and CNI network config file on each node.
             - name: install-cni
-              image: quay.io/calico/cni:v1.11.0
+              image: quay.io/calico/cni:v2.0.0
               command: ["/install-cni.sh"]
               env:
+                # Name of the CNI config file to create.
+                - name: CNI_CONF_NAME
+                  value: "10-calico.conflist"
                 # The location of the Calico etcd cluster.
                 - name: ETCD_ENDPOINTS
                   valueFrom:
@@ -392,24 +251,6 @@ write_files:
                     configMapKeyRef:
                       name: calico-config
                       key: cni_network_config
-                # Location of the CA certificate for etcd.
-                - name: CNI_CONF_ETCD_CA
-                  valueFrom:
-                    configMapKeyRef:
-                      name: calico-config
-                      key: etcd_ca
-                # Location of the client key for etcd.
-                - name: CNI_CONF_ETCD_KEY
-                  valueFrom:
-                    configMapKeyRef:
-                      name: calico-config
-                      key: etcd_key
-                # Location of the client certificate for etcd.
-                - name: CNI_CONF_ETCD_CERT
-                  valueFrom:
-                    configMapKeyRef:
-                      name: calico-config
-                      key: etcd_cert
               volumeMounts:
                 - mountPath: /host/opt/cni/bin
                   name: cni-bin-dir
@@ -419,21 +260,23 @@ write_files:
                   name: etcd-certs
           volumes:
             # Used by calico/node.
-            - name: etcd-certs
-              hostPath:
-                path: /etc/kubernetes/ssl/etcd
             - name: lib-modules
               hostPath:
                 path: /lib/modules
             - name: var-run-calico
               hostPath:
                 path: /var/run/calico
+            # Used to install CNI.
             - name: cni-bin-dir
               hostPath:
                 path: /opt/cni/bin
             - name: cni-net-dir
               hostPath:
-               path: /etc/cni/net.d
+                path: /etc/cni/net.d
+            # Mount in the etcd TLS secrets.
+            - name: etcd-certs
+              hostPath:
+                path: /etc/kubernetes/ssl/etcd
 - path: /srv/calico-kube-controllers.yaml
   owner: root
   permissions: 644
@@ -450,7 +293,7 @@ write_files:
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
-      # The policy controller can only have a single active instance.
+      # The controllers can only have a single active instance.
       replicas: 1
       strategy:
         type: Recreate
@@ -461,6 +304,7 @@ write_files:
           labels:
             k8s-app: calico-kube-controllers
         spec:
+          # Tolerations part was taken from calico manifest for kubeadm as we are using same taint for master.
           tolerations:
           - key: node-role.kubernetes.io/master
             operator: Exists
@@ -473,7 +317,7 @@ write_files:
           serviceAccountName: calico-kube-controllers
           containers:
             - name: calico-kube-controllers
-              image: quay.io/calico/kube-controllers:v1.0.0
+              image: quay.io/calico/kube-controllers:v2.0.0
               env:
                 # The location of the Calico etcd cluster.
                 - name: ETCD_ENDPOINTS
@@ -499,15 +343,9 @@ write_files:
                     configMapKeyRef:
                       name: calico-config
                       key: etcd_cert
-                # The location of the Kubernetes API. Use the default Kubernetes
-                # service for API access.
-                - name: K8S_API
-                  value: "https://{{.Cluster.Kubernetes.API.Domain}}:443"
-                # Since we're running in the host namespace and might not have KubeDNS
-                # access, configure the container's /etc/hosts to resolve
-                # kubernetes.default to the correct service clusterIP.
-                - name: CONFIGURE_ETC_HOSTS
-                  value: "true"
+                # Choose which controllers to run.
+                - name: ENABLED_CONTROLLERS
+                  value: policy,profile,workloadendpoint,node
               resources:
                 requests:
                   cpu: 30m
@@ -522,142 +360,106 @@ write_files:
               hostPath:
                 path: /etc/kubernetes/ssl/etcd
 {{ end -}}
-- path: /srv/kubedns-cm.yaml
-  owner: root
-  permissions: 0644
-  content: |
-    apiVersion: v1
-    kind: ConfigMap
-    metadata:
-      name: kube-dns
-      namespace: kube-system
-      labels:
-        addonmanager.kubernetes.io/mode: EnsureExists
-- path: /srv/kubedns-sa.yaml
+- path: /srv/coredns.yaml
   owner: root
   permissions: 0644
   content: |
     apiVersion: v1
     kind: ServiceAccount
     metadata:
-      name: kube-dns
+      name: coredns
       namespace: kube-system
+    ---
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRole
+    metadata:
       labels:
-        kubernetes.io/cluster-service: "true"
-        addonmanager.kubernetes.io/mode: Reconcile
-- path: /srv/kubedns-dep.yaml
-  owner: root
-  permissions: 0644
-  content: |
-    apiVersion:  extensions/v1beta1
+        kubernetes.io/bootstrapping: rbac-defaults
+      name: system:coredns
+    rules:
+    - apiGroups:
+      - ""
+      resources:
+      - endpoints
+      - services
+      - pods
+      - namespaces
+      verbs:
+      - list
+      - watch
+    ---
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRoleBinding
+    metadata:
+      annotations:
+        rbac.authorization.kubernetes.io/autoupdate: "true"
+      labels:
+        kubernetes.io/bootstrapping: rbac-defaults
+      name: system:coredns
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: ClusterRole
+      name: system:coredns
+    subjects:
+    - kind: ServiceAccount
+      name: coredns
+      namespace: kube-system
+    ---
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: coredns
+      namespace: kube-system
+    data:
+      Corefile: |
+        .:53 {
+            errors
+            health
+            kubernetes {{.Cluster.Kubernetes.Domain}} {{.Cluster.Kubernetes.API.ClusterIPRange}} {{.Cluster.Calico.Subnet}}/{{.Cluster.Calico.CIDR}} {
+              pods insecure
+              upstream /etc/resolv.conf
+            }
+            prometheus :9153
+            proxy . /etc/resolv.conf
+            cache 30
+        }
+    ---
+    apiVersion: extensions/v1beta1
     kind: Deployment
     metadata:
-      name: kube-dns
+      name: coredns
       namespace: kube-system
       labels:
-        k8s-app: kube-dns
-        kubernetes.io/cluster-service: "true"
-        addonmanager.kubernetes.io/mode: Reconcile
+        k8s-app: coredns
+        kubernetes.io/name: "CoreDNS"
     spec:
+      replicas: 2
       strategy:
+        type: RollingUpdate
         rollingUpdate:
-          maxSurge: 10%
-          maxUnavailable: 0
-      replicas: 3
+          maxUnavailable: 1
       selector:
         matchLabels:
-          k8s-app: kube-dns
+          k8s-app: coredns
       template:
         metadata:
           labels:
-            k8s-app: kube-dns
-            kubernetes.io/cluster-service: "true"
-          annotations:
-            scheduler.alpha.kubernetes.io/critical-pod: ''
+            k8s-app: coredns
         spec:
+          serviceAccountName: coredns
           tolerations:
-          - key: "CriticalAddonsOnly"
-            operator: "Exists"
+            - key: node-role.kubernetes.io/master
+              effect: NoSchedule
+            - key: "CriticalAddonsOnly"
+              operator: "Exists"
           containers:
-          - name: kubedns
-            image: gcr.io/google_containers/k8s-dns-kube-dns-amd64:1.14.5
+          - name: coredns
+            image: coredns/coredns:1.0.1
+            imagePullPolicy: IfNotPresent
+            args: [ "-conf", "/etc/coredns/Corefile" ]
             volumeMounts:
-            - name: kube-dns-config
-              mountPath: /kube-dns-config
-            - name: config
-              mountPath: /etc/kubernetes/config/
-              readOnly: false
-            - name: ssl
-              mountPath: /etc/kubernetes/ssl/
-              readOnly: false
-            resources:
-              limits:
-                memory: 170Mi
-              requests:
-                cpu: 100m
-                memory: 70Mi
-            args:
-            # command = "/kube-dns
-            - --dns-port=10053
-            - --domain={{.Cluster.Kubernetes.Domain}}
-            - --config-dir=/kube-dns-config
-            - --v=2
-            - --kubecfg-file=/etc/kubernetes/config/kubelet-kubeconfig.yml
-            - --kube-master-url=https://{{.Cluster.Kubernetes.API.Domain}}
-            env:
-            - name: PROMETHEUS_PORT
-              value: "10055"
-            ports:
-            - containerPort: 10053
-              name: dns-local
-              protocol: UDP
-            - containerPort: 10053
-              name: dns-tcp-local
-              protocol: TCP
-            - containerPort: 10055
-              name: metrics
-              protocol: TCP
-            livenessProbe:
-              httpGet:
-                path: /healthcheck/kubedns
-                port: 10054
-                scheme: HTTP
-              initialDelaySeconds: 60
-              successThreshold: 1
-              failureThreshold: 5
-              timeoutSeconds: 5
-            readinessProbe:
-              httpGet:
-                path: /readiness
-                port: 8081
-                scheme: HTTP
-              initialDelaySeconds: 3
-              timeoutSeconds: 5
-          - name: dnsmasq
-            image: gcr.io/google_containers/k8s-dns-dnsmasq-nanny-amd64:1.14.5
-            livenessProbe:
-              httpGet:
-                path: /healthcheck/dnsmasq
-                port: 10054
-                scheme: HTTP
-              initialDelaySeconds: 60
-              timeoutSeconds: 5
-              successThreshold: 1
-              failureThreshold: 5
-            args:
-            - -v=2
-            - -logtostderr
-            - -configDir=/etc/k8s/dns/dnsmasq-nanny
-            - -restartDnsmasq=true
-            - --
-            - -k
-            - --cache-size=1000
-            - --no-resolv
-            - --log-facility=-
-            - --server=127.0.0.1#10053
-            - --server=/{{.Cluster.Kubernetes.Domain}}/127.0.0.1#10053
-            - --server=/in-addr.arpa/127.0.0.1#10053
-            - --server=/ip6.arpa/127.0.0.1#10053
+            - name: config-volume
+              mountPath: /etc/coredns
             ports:
             - containerPort: 53
               name: dns
@@ -665,67 +467,36 @@ write_files:
             - containerPort: 53
               name: dns-tcp
               protocol: TCP
-            resources:
-              requests:
-                cpu: 150m
-                memory: 10Mi
-            volumeMounts:
-            - name: kube-dns-config
-              mountPath: /etc/k8s/dns/dnsmasq-nanny
-          - name: sidecar
-            image: gcr.io/google_containers/k8s-dns-sidecar-amd64:1.14.5
             livenessProbe:
               httpGet:
-                path: /metrics
-                port: 10054
+                path: /health
+                port: 8080
                 scheme: HTTP
               initialDelaySeconds: 60
               timeoutSeconds: 5
               successThreshold: 1
               failureThreshold: 5
-            args:
-            - --v=2
-            - --logtostderr
-            - --probe=kubedns,127.0.0.1:10053,kubernetes.default.svc.{{.Cluster.Kubernetes.Domain}},5,A
-            - --probe=dnsmasq,127.0.0.1:53,kubernetes.default.svc.{{.Cluster.Kubernetes.Domain}},5,A
-            ports:
-            - containerPort: 10054
-              name: metrics
-              protocol: TCP
-            resources:
-              requests:
-                memory: 20Mi
-                cpu: 10m
-          dnsPolicy: Default  # Don't use cluster DNS.
-          serviceAccountName: kube-dns
+          dnsPolicy: Default
           volumes:
-          - name: kube-dns-config
-            configMap:
-              name: kube-dns
-              optional: true
-          - name: config
-            hostPath:
-              path: /etc/kubernetes/config/
-          - name: ssl
-            hostPath:
-              path: /etc/kubernetes/ssl/
-- path: /srv/kubedns-svc.yaml
-  owner: root
-  permissions: 0644
-  content: |
+            - name: config-volume
+              configMap:
+                name: coredns
+                items:
+                - key: Corefile
+                  path: Corefile
+    ---
     apiVersion: v1
     kind: Service
     metadata:
       name: kube-dns
       namespace: kube-system
       labels:
-        k8s-app: kube-dns
+        k8s-app: coredns
         kubernetes.io/cluster-service: "true"
-        addonmanager.kubernetes.io/mode: Reconcile
-        kubernetes.io/name: "KubeDNS"
+        kubernetes.io/name: "CoreDNS"
     spec:
       selector:
-        k8s-app: kube-dns
+        k8s-app: coredns
       clusterIP: {{.Cluster.Kubernetes.DNS.IP}}
       ports:
       - name: dns
@@ -1121,33 +892,6 @@ write_files:
       name: calico-node
       apiGroup: rbac.authorization.k8s.io
     ---
-    kind: ClusterRoleBinding
-    apiVersion: rbac.authorization.k8s.io/v1beta1
-    metadata:
-      name: calico-node-controller
-    subjects:
-    - kind: ServiceAccount
-      name: calico-node-controller
-      namespace: kube-system
-    roleRef:
-      kind: ClusterRole
-      name: calico-node-controller
-      apiGroup: rbac.authorization.k8s.io
-    ---
-    ## DNS
-    kind: ClusterRoleBinding
-    apiVersion: rbac.authorization.k8s.io/v1beta1
-    metadata:
-      name: kube-dns
-    subjects:
-    - kind: ServiceAccount
-      name: kube-dns
-      namespace: kube-system
-    roleRef:
-      kind: ClusterRole
-      name: system:kube-dns
-      apiGroup: rbac.authorization.k8s.io
-    ---
     ## IC
     kind: ClusterRoleBinding
     apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -1193,6 +937,7 @@ write_files:
           - pods
           - namespaces
           - networkpolicies
+          - nodes
         verbs:
           - watch
           - list
@@ -1209,21 +954,6 @@ write_files:
           - nodes
         verbs:
           - get
-    ---
-    kind: ClusterRole
-    apiVersion: rbac.authorization.k8s.io/v1beta1
-    metadata:
-      name: calico-node-controller
-      namespace: kube-system
-    rules:
-      - apiGroups:
-        - ""
-        - extensions
-        resources:
-          - nodes
-        verbs:
-          - watch
-          - list
     ---
     ## IC
     apiVersion: v1
@@ -1430,15 +1160,6 @@ write_files:
       name: calico-kube-controllers
       namespace: kube-system
     - kind: ServiceAccount
-      name: calico-node-controller
-      namespace: kube-system
-    - kind: ServiceAccount
-      name: calico-ipip-pinger
-      namespace: kube-system
-    - kind: ServiceAccount
-      name: kube-dns
-      namespace: kube-system
-    - kind: ServiceAccount
       name: kube-proxy
       namespace: kube-system
     - kind: ServiceAccount
@@ -1467,7 +1188,7 @@ write_files:
   permissions: 0544
   content: |
       #!/bin/bash
-      domains="{{.Cluster.Etcd.Domain}} {{.Cluster.Kubernetes.API.Domain}}"
+      domains="{{.Cluster.Etcd.Domain}} {{.MasterAPIDomain}}"
 
       for domain in $domains; do
         until nslookup $domain; do
@@ -1519,10 +1240,6 @@ write_files:
       CALICO_FILES="${CALICO_FILES} calico-kube-controllers-sa.yaml"
       CALICO_FILES="${CALICO_FILES} calico-ds.yaml"
       CALICO_FILES="${CALICO_FILES} calico-kube-controllers.yaml"
-      CALICO_FILES="${CALICO_FILES} calico-node-controller-sa.yaml"
-      CALICO_FILES="${CALICO_FILES} calico-node-controller.yaml"
-      CALICO_FILES="${CALICO_FILES} calico-ipip-pinger-sa.yaml"
-      CALICO_FILES="${CALICO_FILES} calico-ipip-pinger.yaml"
 
       for manifest in $CALICO_FILES
       do
@@ -1570,10 +1287,7 @@ write_files:
       {{ end -}}
       MANIFESTS="${MANIFESTS} kube-proxy-sa.yaml"
       MANIFESTS="${MANIFESTS} kube-proxy-ds.yaml"
-      MANIFESTS="${MANIFESTS} kubedns-cm.yaml"
-      MANIFESTS="${MANIFESTS} kubedns-sa.yaml"
-      MANIFESTS="${MANIFESTS} kubedns-dep.yaml"
-      MANIFESTS="${MANIFESTS} kubedns-svc.yaml"
+      MANIFESTS="${MANIFESTS} coredns.yaml"
       MANIFESTS="${MANIFESTS} default-backend-dep.yml"
       MANIFESTS="${MANIFESTS} default-backend-svc.yml"
       MANIFESTS="${MANIFESTS} ingress-controller-cm.yml"
@@ -1702,6 +1416,22 @@ write_files:
         user: scheduler
       name: service-account-context
     current-context: service-account-context
+
+- path: /etc/kubernetes/encryption/k8s-encryption-config.yaml
+  owner: root
+  permissions: 600
+  content: |
+    kind: EncryptionConfig
+    apiVersion: v1
+    resources:
+      - resources:
+        - secrets
+        providers:
+        - aescbc:
+            keys:
+            - name: key1
+              secret: {{ .ApiserverEncryptionKey }}
+        - identity: {}
 
 - path: /etc/ssh/sshd_config
   owner: root

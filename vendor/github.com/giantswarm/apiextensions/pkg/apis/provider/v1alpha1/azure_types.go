@@ -54,18 +54,16 @@ type AzureConfig struct {
 }
 
 type AzureConfigSpec struct {
-	Cluster Cluster              `json:"cluster" yaml:"cluster"`
-	Azure   AzureConfigSpecAzure `json:"azure" yaml:"azure"`
+	Cluster       Cluster                      `json:"cluster" yaml:"cluster"`
+	Azure         AzureConfigSpecAzure         `json:"azure" yaml:"azure"`
+	VersionBundle AzureConfigSpecVersionBundle `json:"versionBundle" yaml:"versionBundle"`
 }
 
 type AzureConfigSpecAzure struct {
 	DNSZones    AzureConfigSpecAzureDNSZones    `json:"dnsZones" yaml:"dnsZones"`
 	HostCluster AzureConfigSpecAzureHostCluster `json:"hostCluster" yaml:"hostCluster"`
 	// Location is the region for the resource group.
-	Location string `json:"location" yaml:"location"`
-	// StorageSKUName is the name of storage capability.
-	// https://docs.microsoft.com/en-us/rest/api/storagerp/StorageAccounts/Create#definitions_skuname
-	StorageSKUName string                             `json:"storageSKUName" yaml:"storageSKUName"`
+	Location       string                             `json:"location" yaml:"location"`
 	VirtualNetwork AzureConfigSpecAzureVirtualNetwork `json:"virtualNetwork" yaml:"virtualNetwork"`
 
 	Masters []AzureConfigSpecAzureNode `json:"masters" yaml:"masters"`
@@ -113,8 +111,6 @@ type AzureConfigSpecAzureNode struct {
 	AdminUsername string `json:"adminUsername" yaml:"adminUsername"`
 	//  AdminSSHKeyData is the vm administrator ssh public key
 	AdminSSHKeyData string `json:"adminSSHKeyData" yaml:"adminSSHKeyData"`
-	// DataDiskSizeGB is the vm data disk size in GB
-	DataDiskSizeGB int `json:"dataDiskSizeGB" yaml:"dataDiskSizeGB"`
 	// OSImage is the vm OS image object
 	OSImage AzureConfigSpecAzureNodeOSImage `json:"osImage" yaml:"osImage"`
 	// VMSize is the master vm size (e.g. Standard_A1)
@@ -129,6 +125,10 @@ type AzureConfigSpecAzureNodeOSImage struct {
 	// SKU is the image SKU (e.g. Alpha)
 	SKU string `json:"sku" yaml:"sku"`
 	// Version is the image version (e.g. 1465.7.0)
+	Version string `json:"version" yaml:"version"`
+}
+
+type AzureConfigSpecVersionBundle struct {
 	Version string `json:"version" yaml:"version"`
 }
 
