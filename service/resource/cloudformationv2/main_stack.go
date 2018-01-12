@@ -1,4 +1,4 @@
-package legacyv2
+package cloudformationv2
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/keyv2"
-	"github.com/giantswarm/aws-operator/service/resource/legacyv2/adapter"
+	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2/adapter"
 )
 
 func newMainStack(customObject v1alpha1.AWSConfig) (StackState, error) {
@@ -37,14 +37,14 @@ func newMainStack(customObject v1alpha1.AWSConfig) (StackState, error) {
 }
 
 func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
-	hostAccountID, err := adapter.AccountID(*r.awsHostClients)
+	hostAccountID, err := adapter.AccountID(*r.HostClients)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 	cfg := adapter.Config{
 		CustomObject:     customObject,
-		Clients:          *r.awsClients,
-		HostClients:      *r.awsHostClients,
+		Clients:          *r.Clients,
+		HostClients:      *r.HostClients,
 		InstallationName: r.installationName,
 		HostAccountID:    hostAccountID,
 	}
@@ -57,7 +57,7 @@ func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig) (st
 }
 
 func (r *Resource) getMainHostPreTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
-	guestAccountID, err := adapter.AccountID(*r.awsClients)
+	guestAccountID, err := adapter.AccountID(*r.Clients)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -76,8 +76,8 @@ func (r *Resource) getMainHostPreTemplateBody(customObject v1alpha1.AWSConfig) (
 func (r *Resource) getMainHostPostTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
 	cfg := adapter.Config{
 		CustomObject: customObject,
-		Clients:      *r.awsClients,
-		HostClients:  *r.awsHostClients,
+		Clients:      *r.Clients,
+		HostClients:  *r.HostClients,
 	}
 	adp, err := adapter.NewHostPost(cfg)
 	if err != nil {

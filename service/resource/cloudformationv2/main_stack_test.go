@@ -1,4 +1,4 @@
-package legacyv2
+package cloudformationv2
 
 import (
 	"fmt"
@@ -6,14 +6,9 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/certificatetpr"
 	"github.com/giantswarm/micrologger/microloggertest"
-	"github.com/giantswarm/randomkeytpr"
-	"k8s.io/client-go/kubernetes/fake"
 
-	awsutil "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/cloudconfigv2"
-	"github.com/giantswarm/aws-operator/service/resource/legacyv2/adapter"
+	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2/adapter"
 )
 
 func testConfig() Config {
@@ -21,14 +16,7 @@ func testConfig() Config {
 	resourceConfig.Clients = &adapter.Clients{}
 	resourceConfig.HostClients = &adapter.Clients{}
 	resourceConfig.Logger = microloggertest.New()
-	resourceConfig.CloudConfig = &cloudconfigv2.CloudConfig{}
-	resourceConfig.CertWatcher = &certificatetpr.Service{}
-	resourceConfig.KeyWatcher = &randomkeytpr.Service{}
-	resourceConfig.K8sClient = fake.NewSimpleClientset()
 	resourceConfig.InstallationName = "myinstallation"
-	resourceConfig.AwsConfig = awsutil.Config{AccessKeyID: "myaccessKey"}
-	resourceConfig.AwsHostConfig = awsutil.Config{AccessKeyID: "myaccessKey"}
-	resourceConfig.PubKeyFile = "mypubkeyfile"
 	return resourceConfig
 }
 
