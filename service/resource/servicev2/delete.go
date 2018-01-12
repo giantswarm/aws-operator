@@ -66,7 +66,7 @@ func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desir
 	r.logger.LogCtx(ctx, "debug", "finding out if the service has to be deleted")
 
 	var serviceToDelete *apiv1.Service
-	if currentService != nil {
+	if currentService != nil && desiredService.Name == currentService.Name {
 		serviceToDelete = desiredService
 	}
 

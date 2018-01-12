@@ -50,7 +50,7 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 	}
 
 	var serviceToCreate *apiv1.Service
-	if currentService == nil {
+	if currentService == nil || desiredService.Name != currentService.Name {
 		serviceToCreate = desiredService
 	}
 

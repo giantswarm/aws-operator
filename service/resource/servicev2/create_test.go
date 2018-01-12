@@ -13,20 +13,22 @@ import (
 
 func Test_Resource_Service_newCreateChange(t *testing.T) {
 	testCases := []struct {
-		Obj             interface{}
-		Cur             interface{}
-		Des             interface{}
-		ExpectedService *apiv1.Service
+		description     string
+		obj             interface{}
+		cur             interface{}
+		des             interface{}
+		expectedService *apiv1.Service
 	}{
 		{
-			Obj: &v1alpha1.AWSConfig{
+			description: "current service matches desired service, no change",
+			obj: &v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
 						ID: "foobar",
 					},
 				},
 			},
-			Cur: &apiv1.Service{
+			cur: &apiv1.Service{
 				TypeMeta: apismetav1.TypeMeta{
 					Kind:       "Service",
 					APIVersion: "v1",
@@ -35,7 +37,7 @@ func Test_Resource_Service_newCreateChange(t *testing.T) {
 					Name: "al9qy",
 				},
 			},
-			Des: &apiv1.Service{
+			des: &apiv1.Service{
 				TypeMeta: apismetav1.TypeMeta{
 					Kind:       "Service",
 					APIVersion: "v1",
@@ -44,19 +46,20 @@ func Test_Resource_Service_newCreateChange(t *testing.T) {
 					Name: "al9qy",
 				},
 			},
-			ExpectedService: nil,
+			expectedService: nil,
 		},
 
 		{
-			Obj: &v1alpha1.AWSConfig{
+			description: "current service is empty, return desired service",
+			obj: &v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
 						ID: "foobar",
 					},
 				},
 			},
-			Cur: nil,
-			Des: &apiv1.Service{
+			cur: nil,
+			des: &apiv1.Service{
 				TypeMeta: apismetav1.TypeMeta{
 					Kind:       "Service",
 					APIVersion: "v1",
@@ -65,7 +68,7 @@ func Test_Resource_Service_newCreateChange(t *testing.T) {
 					Name: "al9qy",
 				},
 			},
-			ExpectedService: &apiv1.Service{
+			expectedService: &apiv1.Service{
 				TypeMeta: apismetav1.TypeMeta{
 					Kind:       "Service",
 					APIVersion: "v1",
@@ -90,19 +93,24 @@ func Test_Resource_Service_newCreateChange(t *testing.T) {
 	}
 
 	for i, tc := range testCases {
-		result, err := newResource.newCreateChange(context.TODO(), tc.Obj, tc.Cur, tc.Des)
-		if err != nil {
-			t.Fatal("case", i+1, "expected", nil, "got", err)
-		}
-		if tc.ExpectedService == nil {
-			if tc.ExpectedService != result {
-				t.Fatal("case", i+1, "expected", tc.ExpectedService, "got", result)
+		t.Run(tc.description, func(t *testing.T) {
+			result, err := newResource.newCreateChange(context.TODO(), tc.obj, tc.cur, tc.des)
+			if err != nil {
+				t.Fatal("case", i+1, "expected", nil, "got", err)
 			}
-		} else {
-			name := result.(*apiv1.Service).Name
-			if tc.ExpectedService.Name != name {
-				t.Fatal("case", i+1, "expected", tc.ExpectedService.Name, "got", name)
+			if tc.expectedService == nil {
+				if tc.expectedService != result {
+					t.Fatal("case", i+1, "expected", tc.expectedService, "got", result)
+				}
+			} else {
+				serviceToCreate, ok := result.(*apiv1.Service)
+				if !ok {
+					t.Fatalf("case expected '%T', got '%T'", serviceToCreate, result)
+				}
+				if tc.expectedService.Name != serviceToCreate.Name {
+					t.Fatal("case", i+1, "expected", tc.expectedService.Name, "got", serviceToCreate.Name)
+				}
 			}
-		}
+		})
 	}
 }
