@@ -16,7 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/resource/legacyv2/adapter"
+	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2/adapter"
 )
 
 type Config struct {

@@ -1,4 +1,4 @@
-package namespacev2
+package servicev2
 
 import (
 	"github.com/giantswarm/microerror"
@@ -11,16 +11,19 @@ import (
 const (
 	// Name is the identifier of the resource.
 	Name = "namespacev2"
+
+	httpsPort         = 443
+	masterServiceName = "master"
 )
 
-// Config represents the configuration used to create a new namespace resource.
+// Config represents the configuration used to create a new service resource.
 type Config struct {
 	// Dependencies.
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 }
 
-// DefaultConfig provides a default configuration to create a new namespace
+// DefaultConfig provides a default configuration to create a new service
 // resource by best effort.
 func DefaultConfig() Config {
 	return Config{
@@ -30,14 +33,14 @@ func DefaultConfig() Config {
 	}
 }
 
-// Resource implements the namespace resource.
+// Resource implements the service resource.
 type Resource struct {
 	// Dependencies.
 	k8sClient kubernetes.Interface
 	logger    micrologger.Logger
 }
 
-// New creates a new configured namespace resource.
+// New creates a new configured service resource.
 func New(config Config) (*Resource, error) {
 	// Dependencies.
 	if config.K8sClient == nil {
@@ -66,15 +69,15 @@ func (r *Resource) Underlying() framework.Resource {
 	return r
 }
 
-func toNamespace(v interface{}) (*apiv1.Namespace, error) {
+func toService(v interface{}) (*apiv1.Service, error) {
 	if v == nil {
 		return nil, nil
 	}
 
-	namespace, ok := v.(*apiv1.Namespace)
+	service, ok := v.(*apiv1.Service)
 	if !ok {
-		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &apiv1.Namespace{}, v)
+		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &apiv1.Service{}, v)
 	}
 
-	return namespace, nil
+	return service, nil
 }
