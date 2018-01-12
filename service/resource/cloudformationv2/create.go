@@ -59,9 +59,7 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 
 	r.logger.LogCtx(ctx, "debug", "finding out if the main stack should be created")
 
-	createState := cloudformation.CreateStackInput{
-		StackName: aws.String(""),
-	}
+	createState := cloudformation.CreateStackInput{}
 
 	if desiredStackState.Name != "" {
 		r.logger.LogCtx(ctx, "debug", "main stack should be created")

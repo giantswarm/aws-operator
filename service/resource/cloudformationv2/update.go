@@ -69,9 +69,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 
 	r.logger.LogCtx(ctx, "debug", "finding out if the main stack should be updated")
 
-	updateState := cloudformation.UpdateStackInput{
-		StackName: aws.String(""),
-	}
+	updateState := cloudformation.UpdateStackInput{}
 
 	if currentStackState.Name != "" && !reflect.DeepEqual(desiredStackState, currentStackState) {
 		r.logger.LogCtx(ctx, "debug", "main stack should be updated")

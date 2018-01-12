@@ -60,7 +60,7 @@ func Test_Resource_Cloudformation_newUpdateChange(t *testing.T) {
 			},
 		},
 		{
-			description:  "current state empty, desired state not empty, expected desired state",
+			description:  "current state empty, desired state not empty, expected empty",
 			obj:          clusterTpo,
 			currentState: StackState{},
 			desiredState: StackState{
@@ -70,7 +70,8 @@ func Test_Resource_Cloudformation_newUpdateChange(t *testing.T) {
 				ClusterVersion: "myclusterversion",
 			},
 			expectedChange: awscloudformation.UpdateStackInput{
-				StackName: aws.String("desired"),
+				StackName:  aws.String(""),
+				Parameters: []*awscloudformation.Parameter{},
 			},
 		},
 		{
@@ -124,11 +125,9 @@ func Test_Resource_Cloudformation_newUpdateChange(t *testing.T) {
 			if !ok {
 				t.Errorf("expected '%T', got '%T'", updateChange, result)
 			}
-			/*
-				if updateChange.StackName != nil && *updateChange.StackName != *tc.expectedChange.StackName {
-					t.Errorf("expected %v, got %v", *tc.expectedChange.StackName, *updateChange.StackName)
-				}
-			*/
+			if updateChange.StackName != nil && *updateChange.StackName != *tc.expectedChange.StackName {
+				t.Errorf("expected %v, got %v", *tc.expectedChange.StackName, *updateChange.StackName)
+			}
 		})
 	}
 }
