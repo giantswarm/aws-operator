@@ -133,6 +133,12 @@ func MasterImageID(customObject v1alpha1.AWSConfig) string {
 	return imageID
 }
 
+func MasterInstanceName(customObject v1alpha1.AWSConfig) string {
+	clusterID := ClusterID(customObject)
+
+	return fmt.Sprintf("%s-master", clusterID)
+}
+
 func MasterInstanceType(customObject v1alpha1.AWSConfig) string {
 	var instanceType string
 

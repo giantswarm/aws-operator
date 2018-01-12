@@ -1,4 +1,4 @@
-package servicev2
+package endpointsv2
 
 import (
 	"context"
@@ -11,13 +11,13 @@ import (
 	apiv1 "k8s.io/client-go/pkg/api/v1"
 )
 
-func Test_Resource_Service_newCreateChange(t *testing.T) {
+func Test_Resource_Endpoints_newCreateChange(t *testing.T) {
 	testCases := []struct {
-		description     string
-		obj             interface{}
-		cur             interface{}
-		des             interface{}
-		expectedService *apiv1.Service
+		description       string
+		obj               interface{}
+		cur               interface{}
+		des               interface{}
+		expectedEndpoints *apiv1.Endpoints
 	}{
 		{
 			description: "current state matches desired state, desired state is empty",
@@ -28,27 +28,26 @@ func Test_Resource_Service_newCreateChange(t *testing.T) {
 					},
 				},
 			},
-			cur: &apiv1.Service{
+			cur: &apiv1.Endpoints{
 				TypeMeta: apismetav1.TypeMeta{
-					Kind:       "Service",
+					Kind:       "Endpoints",
 					APIVersion: "v1",
 				},
 				ObjectMeta: apismetav1.ObjectMeta{
 					Name: "master",
 				},
 			},
-			des: &apiv1.Service{
+			des: &apiv1.Endpoints{
 				TypeMeta: apismetav1.TypeMeta{
-					Kind:       "Service",
+					Kind:       "Endpoints",
 					APIVersion: "v1",
 				},
 				ObjectMeta: apismetav1.ObjectMeta{
 					Name: "master",
 				},
 			},
-			expectedService: nil,
+			expectedEndpoints: nil,
 		},
-
 		{
 			description: "current state is empty, return desired state",
 			obj: &v1alpha1.AWSConfig{
@@ -59,18 +58,18 @@ func Test_Resource_Service_newCreateChange(t *testing.T) {
 				},
 			},
 			cur: nil,
-			des: &apiv1.Service{
+			des: &apiv1.Endpoints{
 				TypeMeta: apismetav1.TypeMeta{
-					Kind:       "Service",
+					Kind:       "Endpoints",
 					APIVersion: "v1",
 				},
 				ObjectMeta: apismetav1.ObjectMeta{
 					Name: "master",
 				},
 			},
-			expectedService: &apiv1.Service{
+			expectedEndpoints: &apiv1.Endpoints{
 				TypeMeta: apismetav1.TypeMeta{
-					Kind:       "Service",
+					Kind:       "Endpoints",
 					APIVersion: "v1",
 				},
 				ObjectMeta: apismetav1.ObjectMeta{
@@ -98,17 +97,17 @@ func Test_Resource_Service_newCreateChange(t *testing.T) {
 			if err != nil {
 				t.Errorf("expected '%v' got '%#v'", nil, err)
 			}
-			if tc.expectedService == nil {
-				if tc.expectedService != result {
-					t.Errorf("expected '%v' got '%v'", tc.expectedService, result)
+			if tc.expectedEndpoints == nil {
+				if tc.expectedEndpoints != result {
+					t.Errorf("expected '%v' got '%v'", tc.expectedEndpoints, result)
 				}
 			} else {
-				serviceToCreate, ok := result.(*apiv1.Service)
+				endpointsToCreate, ok := result.(*apiv1.Endpoints)
 				if !ok {
-					t.Errorf("case expected '%T', got '%T'", serviceToCreate, result)
+					t.Errorf("case expected '%T', got '%T'", endpointsToCreate, result)
 				}
-				if tc.expectedService.Name != serviceToCreate.Name {
-					t.Errorf("expected %s, got %s", tc.expectedService.Name, serviceToCreate.Name)
+				if tc.expectedEndpoints.Name != endpointsToCreate.Name {
+					t.Errorf("expected %s, got %s", tc.expectedEndpoints.Name, endpointsToCreate.Name)
 				}
 			}
 		})

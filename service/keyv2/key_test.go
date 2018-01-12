@@ -278,6 +278,30 @@ func Test_MasterImageID(t *testing.T) {
 	}
 }
 
+func Test_MasterInstanceName(t *testing.T) {
+	tests := []struct {
+		customObject         v1alpha1.AWSConfig
+		expectedInstanceName string
+	}{
+		{
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "test-cluster",
+					},
+				},
+			},
+			expectedInstanceName: "test-cluster-master",
+		},
+	}
+
+	for _, tc := range tests {
+		if MasterInstanceName(tc.customObject) != tc.expectedInstanceName {
+			t.Fatalf("Expected master instance name %s but was %s", tc.expectedInstanceName, MasterInstanceName(tc.customObject))
+		}
+	}
+}
+
 func Test_MasterInstanceType(t *testing.T) {
 	tests := []struct {
 		customObject         v1alpha1.AWSConfig
