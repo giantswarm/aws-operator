@@ -19,7 +19,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	}
 
 	stackName := updateStackInput.StackName
-	if *stackName != "" {
+	if stackName != nil && *stackName != "" {
 		_, err := r.Clients.CloudFormation.UpdateStack(&updateStackInput)
 		if err != nil {
 			return microerror.Maskf(err, "updating AWS cloudformation stack")
