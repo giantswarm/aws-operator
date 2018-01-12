@@ -2,6 +2,7 @@ package cloudformationv2
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -22,25 +23,30 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		return microerror.Mask(err)
 	}
 
-	r.logger.Log("debug", "creating AWS cloudformation stack")
-	_, err = r.Clients.CloudFormation.CreateStack(&stackInput)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	err = r.HostClients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
-		StackName: stackInput.StackName,
-	})
-	if err != nil {
-		return microerror.Mask(err)
-	}
+	r.logger.LogCtx(ctx, "debug", "creating AWS cloudformation stack")
 
-	r.logger.LogCtx(ctx, "debug", "creating AWS cloudformation stack: created")
+	if stackInput.StackName != nil {
+		_, err = r.Clients.CloudFormation.CreateStack(&stackInput)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		err = r.HostClients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
+			StackName: stackInput.StackName,
+		})
+		if err != nil {
+			return microerror.Mask(err)
+		}
 
-	// Create host post-main stack. It includes the peering routes, which need resources from the
-	// guest stack to be in place before it can be created.
-	err = r.createHostPostStack(cluster)
-	if err != nil {
-		return microerror.Mask(err)
+		// Create host post-main stack. It includes the peering routes, which need resources from the
+		// guest stack to be in place before it can be created.
+		err = r.createHostPostStack(cluster)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "debug", "creating AWS cloudformation stack: created")
+	} else {
+		r.logger.LogCtx(ctx, "debug", "creating AWS cloudformation stack: already created")
 	}
 
 	return nil
@@ -48,6 +54,11 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
 	customObject, err := keyv2.ToCustomObject(obj)
+	if err != nil {
+		return cloudformation.CreateStackInput{}, microerror.Mask(err)
+	}
+
+	currentStackState, err := toStackState(currentState)
 	if err != nil {
 		return cloudformation.CreateStackInput{}, microerror.Mask(err)
 	}
@@ -61,7 +72,10 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 
 	createState := cloudformation.CreateStackInput{}
 
-	if desiredStackState.Name != "" {
+	r.logger.Log("info", fmt.Sprintf("CURRENT STATE %#v", currentStackState))
+	r.logger.Log("info", fmt.Sprintf("DESIRED STATE %#v", desiredStackState))
+
+	if currentStackState.Name == "" || desiredStackState.Name != currentStackState.Name {
 		r.logger.LogCtx(ctx, "debug", "main stack should be created")
 
 		// We need to create the required peering resources in the host account before
@@ -85,6 +99,8 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 			aws.String(namedIAMCapability),
 		}
 	}
+
+	r.logger.Log("info", fmt.Sprintf("CREATE STATE %#v", createState))
 
 	return createState, nil
 }
