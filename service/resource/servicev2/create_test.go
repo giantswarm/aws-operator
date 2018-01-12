@@ -20,7 +20,7 @@ func Test_Resource_Service_newCreateChange(t *testing.T) {
 		expectedService *apiv1.Service
 	}{
 		{
-			description: "current service matches desired service, no change",
+			description: "current state matches desired state, desired state is empty",
 			obj: &v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
@@ -50,7 +50,7 @@ func Test_Resource_Service_newCreateChange(t *testing.T) {
 		},
 
 		{
-			description: "current service is empty, return desired service",
+			description: "current state is empty, return desired state",
 			obj: &v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
@@ -92,23 +92,23 @@ func Test_Resource_Service_newCreateChange(t *testing.T) {
 		}
 	}
 
-	for i, tc := range testCases {
+	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			result, err := newResource.newCreateChange(context.TODO(), tc.obj, tc.cur, tc.des)
 			if err != nil {
-				t.Fatal("case", i+1, "expected", nil, "got", err)
+				t.Errorf("expected '%v' got '%#v'", nil, err)
 			}
 			if tc.expectedService == nil {
 				if tc.expectedService != result {
-					t.Fatal("case", i+1, "expected", tc.expectedService, "got", result)
+					t.Errorf("expected '%v' got '%v'", tc.expectedService, result)
 				}
 			} else {
 				serviceToCreate, ok := result.(*apiv1.Service)
 				if !ok {
-					t.Fatalf("case expected '%T', got '%T'", serviceToCreate, result)
+					t.Errorf("case expected '%T', got '%T'", serviceToCreate, result)
 				}
 				if tc.expectedService.Name != serviceToCreate.Name {
-					t.Fatal("case", i+1, "expected", tc.expectedService.Name, "got", serviceToCreate.Name)
+					t.Errorf("expected %s, got %s", tc.expectedService.Name, serviceToCreate.Name)
 				}
 			}
 		})

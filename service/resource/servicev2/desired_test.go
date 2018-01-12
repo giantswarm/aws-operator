@@ -52,27 +52,27 @@ func Test_Resource_Service_GetDesiredState(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			result, err := newResource.GetDesiredState(context.TODO(), tc.obj)
 			if err != nil {
-				t.Fatalf("expected '%v' got '%#v'", nil, err)
+				t.Errorf("expected '%v' got '%#v'", nil, err)
 			}
 			desiredService, ok := result.(*apiv1.Service)
 			if !ok {
-				t.Fatalf("case expected '%T', got '%T'", desiredService, result)
+				t.Errorf("case expected '%T', got '%T'", desiredService, result)
 			}
 
 			if tc.expectedNamespace != desiredService.ObjectMeta.Namespace {
-				t.Fatalf("expected namespace %q got %q", tc.expectedNamespace, desiredService.ObjectMeta.Namespace)
+				t.Errorf("expected namespace %q got %q", tc.expectedNamespace, desiredService.ObjectMeta.Namespace)
 			}
 
 			if tc.expectedName != desiredService.ObjectMeta.Name {
-				t.Fatalf("expected name %q got %q", tc.expectedName, desiredService.ObjectMeta.Name)
+				t.Errorf("expected name %q got %q", tc.expectedName, desiredService.ObjectMeta.Name)
 			}
 
 			if int32(tc.expectedPort) != desiredService.Spec.Ports[0].Port {
-				t.Fatalf("expected port %q got %q", int32(tc.expectedPort), desiredService.Spec.Ports[0].Port)
+				t.Errorf("expected port %q got %q", int32(tc.expectedPort), desiredService.Spec.Ports[0].Port)
 			}
 
 			if intstr.FromInt(tc.expectedPort) != desiredService.Spec.Ports[0].TargetPort {
-				t.Fatalf("expected target port %q got %q", intstr.FromInt(tc.expectedPort), desiredService.Spec.Ports[0].TargetPort)
+				t.Errorf("expected target port %q got %q", intstr.FromInt(tc.expectedPort), desiredService.Spec.Ports[0].TargetPort)
 			}
 		})
 	}

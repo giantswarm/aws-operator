@@ -112,15 +112,15 @@ func Test_Resource_Service_newDeleteChange(t *testing.T) {
 		}
 	}
 
-	for i, tc := range testCases {
+	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			result, err := newResource.newDeleteChange(context.TODO(), tc.obj, tc.cur, tc.des)
 			if err != nil {
-				t.Fatal("case", i+1, "expected", nil, "got", err)
+				t.Errorf("expected '%v' got '%#v'", nil, err)
 			}
 			if tc.expectedService == nil {
 				if tc.expectedService != result {
-					t.Fatal("case", i+1, "expected", tc.expectedService, "got", result)
+					t.Errorf("expected '%v' got '%v'", tc.expectedService, result)
 				}
 			} else {
 				serviceToDelete, ok := result.(*apiv1.Service)
@@ -128,7 +128,7 @@ func Test_Resource_Service_newDeleteChange(t *testing.T) {
 					t.Fatalf("case expected '%T', got '%T'", serviceToDelete, result)
 				}
 				if tc.expectedService.Name != serviceToDelete.Name {
-					t.Fatal("case", i+1, "expected", tc.expectedService.Name, "got", serviceToDelete.Name)
+					t.Errorf("expected %s, got %s", tc.expectedService.Name, serviceToDelete.Name)
 				}
 			}
 		})
