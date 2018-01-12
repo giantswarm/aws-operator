@@ -239,6 +239,13 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Enable:       true,
 			Command:      "start",
 		},
+		// Overwrite set-ownership-etcd-data-dir.service to mount EBS volume.
+		{
+			AssetContent: setUpEtcdVolume,
+			Name:         "set-ownership-etcd-data-dir.service",
+			Enable:       true,
+			Command:      "start",
+		},
 	}
 
 	var newUnits []k8scloudconfig.UnitAsset

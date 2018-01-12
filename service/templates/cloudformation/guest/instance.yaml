@@ -16,4 +16,16 @@
         Value: {{ .ClusterID }}-master
       - Key: KubernetesCluster
         Value: {{ .ClusterID }}
+  EtcdVolume:
+    Type: AWS::EC2::Volume
+    Properties:
+      Size: 100
+      VolumeType: gp2
+      AvailabilityZone: !GetAtt MasterInstance.AvailabilityZone
+  MountPoint:
+    Type: AWS::EC2::VolumeAttachment
+    Properties:
+      InstanceId: !Ref MasterInstance
+      VolumeId: !Ref EtcdVolume
+      Device: /dev/sdh
 {{end}}
