@@ -1,14 +1,11 @@
 package cloudformationv2
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
 
-	"github.com/giantswarm/aws-operator/service/keyv2"
 	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2/adapter"
 )
 
@@ -64,8 +61,9 @@ func New(config Config) (*Resource, error) {
 
 	newService := &Resource{
 		// Dependencies.
-		Clients:     config.Clients,
-		HostClients: config.HostClients,
+		Clients:          config.Clients,
+		HostClients:      config.HostClients,
+		installationName: config.InstallationName,
 		logger: config.Logger.With(
 			"resource", Name,
 		),
@@ -142,64 +140,4 @@ func getStackOutputValue(outputs []*awscloudformation.Output, key string) (strin
 	}
 
 	return "", microerror.Mask(notFoundError)
-}
-
-func (r *Resource) createHostPreStack(customObject v1alpha1.AWSConfig) error {
-	stackName := keyv2.MainHostPreStackName(customObject)
-	mainTemplate, err := r.getMainHostPreTemplateBody(customObject)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	createStack := &awscloudformation.CreateStackInput{
-		StackName:    aws.String(stackName),
-		TemplateBody: aws.String(mainTemplate),
-		// CAPABILITY_NAMED_IAM is required for creating IAM roles (worker policy)
-		Capabilities: []*string{
-			aws.String("CAPABILITY_NAMED_IAM"),
-		},
-	}
-
-	r.logger.Log("debug", "creating AWS Host Pre-Guest cloudformation stack")
-	_, err = r.HostClients.CloudFormation.CreateStack(createStack)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	err = r.HostClients.CloudFormation.WaitUntilStackCreateComplete(&awscloudformation.DescribeStacksInput{
-		StackName: aws.String(stackName),
-	})
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	r.logger.Log("debug", "creating AWS Host Pre-Guest cloudformation stack: created")
-	return nil
-}
-
-func (r *Resource) createHostPostStack(customObject v1alpha1.AWSConfig) error {
-	stackName := keyv2.MainHostPostStackName(customObject)
-	mainTemplate, err := r.getMainHostPostTemplateBody(customObject)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	createStack := &awscloudformation.CreateStackInput{
-		StackName:    aws.String(stackName),
-		TemplateBody: aws.String(mainTemplate),
-	}
-
-	r.logger.Log("debug", "creating AWS Host Post-Guest cloudformation stack")
-	_, err = r.HostClients.CloudFormation.CreateStack(createStack)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	err = r.HostClients.CloudFormation.WaitUntilStackCreateComplete(&awscloudformation.DescribeStacksInput{
-		StackName: aws.String(stackName),
-	})
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	r.logger.Log("debug", "creating AWS Host Post-Guest cloudformation stack: created")
-
-	return nil
 }
