@@ -605,6 +605,19 @@ func newCustomObjectFramework(config Config) (*framework.Framework, error) {
 			return nil, microerror.Mask(err)
 		}
 	}
+	
+	var serviceResource framework.Resource
+	{
+		serviceConfig := servicev1.DefaultConfig()
+
+		serviceConfig.K8sClient = k8sClient
+		serviceConfig.Logger = config.Logger
+
+		serviceResource, err = servicev1.New(serviceConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
 
 	// Metrics config for wrapping resources.
 	metricsWrapConfig := metricsresource.DefaultWrapConfig()
@@ -632,6 +645,7 @@ func newCustomObjectFramework(config Config) (*framework.Framework, error) {
 	{
 		resources = []framework.Resource{
 			namespaceResource,
+			serviceResource,
 			legacyResource,
 			s3BucketResource,
 			s3BucketObjectResource,
