@@ -2,7 +2,6 @@ package cloudformationv2
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -72,9 +71,6 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 
 	createState := cloudformation.CreateStackInput{}
 
-	r.logger.Log("info", fmt.Sprintf("CURRENT STATE %#v", currentStackState))
-	r.logger.Log("info", fmt.Sprintf("DESIRED STATE %#v", desiredStackState))
-
 	if currentStackState.Name == "" || desiredStackState.Name != currentStackState.Name {
 		r.logger.LogCtx(ctx, "debug", "main stack should be created")
 
@@ -99,8 +95,6 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 			aws.String(namedIAMCapability),
 		}
 	}
-
-	r.logger.Log("info", fmt.Sprintf("CREATE STATE %#v", createState))
 
 	return createState, nil
 }
