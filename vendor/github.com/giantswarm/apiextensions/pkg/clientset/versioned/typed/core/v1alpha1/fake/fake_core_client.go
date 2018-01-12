@@ -1,5 +1,5 @@
 /*
-Copyright 2017 The Kubernetes Authors.
+Copyright 2018 The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,6 +28,10 @@ type FakeCoreV1alpha1 struct {
 
 func (c *FakeCoreV1alpha1) CertConfigs(namespace string) v1alpha1.CertConfigInterface {
 	return &FakeCertConfigs{c, namespace}
+}
+
+func (c *FakeCoreV1alpha1) DraughtsmanConfigs(namespace string) v1alpha1.DraughtsmanConfigInterface {
+	return &FakeDraughtsmanConfigs{c, namespace}
 }
 
 func (c *FakeCoreV1alpha1) FlannelConfigs(namespace string) v1alpha1.FlannelConfigInterface {
