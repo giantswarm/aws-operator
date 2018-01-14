@@ -19,8 +19,8 @@ type autoScalingGroupAdapter struct {
 }
 
 func (a *autoScalingGroupAdapter) getAutoScalingGroup(cfg Config) error {
-	a.WorkerAZ = cfg.CustomObject.Spec.AWS.AZ
 	workers := keyv2.WorkerCount(cfg.CustomObject)
+	a.WorkerAZ = keyv2.AvailabilityZone(cfg.CustomObject)
 	a.ASGMaxSize = workers
 	a.ASGMinSize = workers
 	a.MaxBatchSize = strconv.FormatFloat(asgMaxBatchSizeRatio, 'f', -1, 32)
