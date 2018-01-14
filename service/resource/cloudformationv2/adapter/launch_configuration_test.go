@@ -20,11 +20,6 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 		expectedBlockDeviceMappings      []BlockDeviceMapping
 	}{
 		{
-			description:   "empty custom object",
-			customObject:  v1alpha1.AWSConfig{},
-			expectedError: true,
-		},
-		{
 			description: "basic matching, all fields present",
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
