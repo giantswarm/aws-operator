@@ -152,8 +152,64 @@ func newVersionBundles() []versionbundle.Bundle {
 			Dependencies: []versionbundle.Dependency{},
 			Deprecated:   false,
 			Name:         "aws-operator",
-			Time:         time.Date(2017, time.December, 5, 13, 00, 0, 0, time.UTC),
+			Time:         time.Date(2017, time.December, 5, 15, 00, 0, 0, time.UTC),
 			Version:      "1.0.0",
+			WIP:          false,
+		},
+		{
+			Changelogs: []versionbundle.Changelog{
+				{
+					Component:   "cloud formation",
+					Description: "All aws resources use cloud formation except kms and s3.",
+					Kind:        "changed",
+				},
+				{
+					Component:   "kubernetes",
+					Description: "Updated to kubernetes 1.9.0.",
+					Kind:        "changed",
+				},
+				{
+					Component:   "kubernetes",
+					Description: "Switched vanilla (previously coreos) hyperkube image.",
+					Kind:        versionbundle.KindChanged,
+				},
+				{
+					Component:   "calico",
+					Description: "Updated to version 3.0.1.",
+					Kind:        versionbundle.KindChanged,
+				},
+			},
+			Components: []versionbundle.Component{
+				{
+					Name:    "calico",
+					Version: "3.0.1",
+				},
+				{
+					Name:    "docker",
+					Version: "1.12.6",
+				},
+				{
+					Name:    "etcd",
+					Version: "3.2.7",
+				},
+				{
+					Name:    "kubedns",
+					Version: "1.14.5",
+				},
+				{
+					Name:    "kubernetes",
+					Version: "1.9.0",
+				},
+				{
+					Name:    "nginx-ingress-controller",
+					Version: "0.9.0",
+				},
+			},
+			Dependencies: []versionbundle.Dependency{},
+			Deprecated:   false,
+			Name:         "aws-operator",
+			Time:         time.Date(2017, time.December, 5, 15, 00, 0, 0, time.UTC),
+			Version:      "2.0.0",
 			WIP:          false,
 		},
 	}

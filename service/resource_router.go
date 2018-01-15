@@ -25,16 +25,21 @@ func NewResourceRouter(resources map[string][]framework.Resource) func(ctx conte
 			return enabledResources, microerror.Mask(err)
 		}
 
-		switch keyv2.VersionBundleVersion(customObject) {
-		case keyv2.LegacyVersion:
+		version := keyv2.VersionBundleVersion(customObject)
+
+		switch version {
+		case "0.1.0":
 			// Legacy version so only enable the legacy resource.
-			enabledResources = resources[keyv2.LegacyVersion]
-		case keyv2.CloudFormationVersion:
+			enabledResources = resources[version]
+		case "0.2.0":
 			// Cloud Formation transitional version so enable all resources.
-			enabledResources = resources[keyv2.CloudFormationVersion]
+			enabledResources = resources[version]
 		case "1.0.0":
 			// Kubernetes update to 1.8.4.
-			enabledResources = resources["1.0.0"]
+			enabledResources = resources[version]
+		case "2.0.0":
+			// First release of Cloud Formation based operator.
+			enabledResources = resources[version]
 		case "":
 			// Default to the legacy resource for custom objects without a version
 			// bundle.
@@ -58,16 +63,21 @@ func NewTPRResourceRouter(resources map[string][]framework.Resource) func(ctx co
 			return enabledResources, microerror.Mask(err)
 		}
 
-		switch keyv1.VersionBundleVersion(customObject) {
-		case keyv1.LegacyVersion:
+		version := keyv1.VersionBundleVersion(customObject)
+
+		switch version {
+		case "0.1.0":
 			// Legacy version so only enable the legacy resource.
-			enabledResources = resources[keyv1.LegacyVersion]
-		case keyv1.CloudFormationVersion:
+			enabledResources = resources[version]
+		case "0.2.0":
 			// Cloud Formation transitional version so enable all resources.
-			enabledResources = resources[keyv1.CloudFormationVersion]
+			enabledResources = resources[version]
 		case "1.0.0":
 			// Kubernetes update to 1.8.4.
-			enabledResources = resources["1.0.0"]
+			enabledResources = resources[version]
+		case "2.0.0":
+			// First release of Cloud Formation based operator.
+			enabledResources = resources[version]
 		case "":
 			// Default to the legacy resource for custom objects without a version
 			// bundle.
