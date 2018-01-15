@@ -33,7 +33,11 @@ func TestAdapterOutputsRegularFields(t *testing.T) {
 		a := Adapter{}
 		clients := Clients{}
 		t.Run(tc.description, func(t *testing.T) {
-			err := a.getOutputs(tc.customObject, clients)
+			cfg := Config{
+				CustomObject: tc.customObject,
+				Clients:      clients,
+			}
+			err := a.getOutputs(cfg)
 
 			if err != nil {
 				t.Errorf("unexpected error %v", err)

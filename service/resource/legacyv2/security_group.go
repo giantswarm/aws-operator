@@ -67,6 +67,7 @@ func (s *Resource) deleteSecurityGroup(input securityGroupInput) error {
 		Description: input.GroupName,
 		GroupName:   input.GroupName,
 		AWSEntity:   awsresources.AWSEntity{Clients: input.Clients},
+		Logger:      s.logger,
 	}
 	if err := securityGroup.Delete(); err != nil {
 		return microerror.Mask(err)

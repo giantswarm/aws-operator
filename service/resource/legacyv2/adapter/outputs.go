@@ -1,8 +1,6 @@
 package adapter
 
 import (
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-
 	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
@@ -12,8 +10,8 @@ type outputsAdapter struct {
 	ClusterVersion string
 }
 
-func (o *outputsAdapter) getOutputs(customObject v1alpha1.AWSConfig, clients Clients) error {
-	o.ClusterVersion = keyv2.ClusterVersion(customObject)
+func (o *outputsAdapter) getOutputs(cfg Config) error {
+	o.ClusterVersion = keyv2.ClusterVersion(cfg.CustomObject)
 
 	return nil
 }

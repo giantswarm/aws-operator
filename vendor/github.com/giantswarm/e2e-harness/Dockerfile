@@ -16,7 +16,7 @@ RUN apk -Uuv add --update --no-cache \
       less=487-r0 \
       libffi-dev=3.2.1-r3 \
       openssh-client=7.5_p1-r1 \
-      openssl=1.0.2m-r0
+      openssl=1.0.2n-r0
 
 ENV KUBECTL_VERSION=v1.8.1
 ENV HELM_VERSION=v2.6.2

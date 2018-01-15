@@ -3,13 +3,13 @@
     Type: "AWS::AutoScaling::AutoScalingGroup"
     Properties:
       VPCZoneIdentifier:
-        - {{ .WorkerSubnetID }}
+        - !Ref PrivateSubnet
       AvailabilityZones: [{{ .WorkerAZ }}]
       MinSize: {{ .ASGMinSize }}
       MaxSize: {{ .ASGMaxSize }}
       LaunchConfigurationName: !Ref {{ .ASGType }}LaunchConfiguration
       LoadBalancerNames:
-        - {{ .LoadBalancerName }}
+        - !Ref IngressLoadBalancer
       HealthCheckGracePeriod: {{ .HealthCheckGracePeriod }}
       MetricsCollection:
         - Granularity: "1Minute"

@@ -15,17 +15,11 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 		expectedAZ                     string
 		expectedASGMaxSize             int
 		expectedASGMinSize             int
-		expectedClusterID              string
 		expectedHealthCheckGracePeriod int
 		expectedMaxBatchSize           string
 		expectedMinInstancesInService  string
 		expectedRollingUpdatePauseTime string
 	}{
-		{
-			description:   "empty custom object",
-			customObject:  v1alpha1.AWSConfig{},
-			expectedError: true,
-		},
 		{
 			description: "basic matching, all fields present",
 			customObject: v1alpha1.AWSConfig{
@@ -51,13 +45,15 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 		},
 	}
 
-	clients := Clients{
-		EC2: &EC2ClientMock{},
-	}
 	for _, tc := range testCases {
+		clients := Clients{}
 		a := Adapter{}
 		t.Run(tc.description, func(t *testing.T) {
-			err := a.getAutoScalingGroup(tc.customObject, clients)
+			cfg := Config{
+				CustomObject: tc.customObject,
+				Clients:      clients,
+			}
+			err := a.getAutoScalingGroup(cfg)
 			if tc.expectedError && err == nil {
 				t.Error("expected error didn't happen")
 			}
@@ -95,113 +91,6 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 					t.Errorf("unexpected output, got %q, want %q", a.WorkerAZ, tc.expectedAZ)
 				}
 
-			}
-		})
-	}
-}
-
-func TestAdapterAutoScalingGroupLoadBalancerName(t *testing.T) {
-	testCases := []struct {
-		description              string
-		customObject             v1alpha1.AWSConfig
-		expectedLoadBalancerName string
-	}{
-		{
-			description: "basic matching, all fields present",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: defaultCluster,
-				},
-			},
-			expectedLoadBalancerName: "test-cluster-ingress",
-		},
-	}
-
-	clients := Clients{
-		EC2: &EC2ClientMock{},
-	}
-	for _, tc := range testCases {
-		a := Adapter{}
-		t.Run(tc.description, func(t *testing.T) {
-			err := a.getAutoScalingGroup(tc.customObject, clients)
-			if err != nil {
-				t.Errorf("unexpected error %v", err)
-			}
-
-			if a.LoadBalancerName != tc.expectedLoadBalancerName {
-				t.Errorf("unexpected output, got %q, want %q", a.LoadBalancerName, tc.expectedLoadBalancerName)
-			}
-		})
-	}
-}
-
-func TestAdapterAutoScalingGroupSubnetID(t *testing.T) {
-	testCases := []struct {
-		description                string
-		customObject               v1alpha1.AWSConfig
-		expectedReceivedSubnetName string
-		expectedError              bool
-		unexistentSubnet           bool
-	}{
-		{
-			description: "existent subnet",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: defaultCluster,
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Workers: []v1alpha1.AWSConfigSpecAWSNode{
-							v1alpha1.AWSConfigSpecAWSNode{
-								ImageID:      "myimageid",
-								InstanceType: "myinstancetype",
-							},
-						},
-					},
-				},
-			},
-			expectedReceivedSubnetName: "test-cluster-private",
-		},
-		{
-			description: "unexistent subnet",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						ID: "test-cluster",
-					},
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Workers: []v1alpha1.AWSConfigSpecAWSNode{
-							v1alpha1.AWSConfigSpecAWSNode{
-								ImageID:      "myimageid",
-								InstanceType: "myinstancetype",
-							},
-						},
-					},
-				},
-			},
-			unexistentSubnet:           true,
-			expectedError:              true,
-			expectedReceivedSubnetName: "",
-		},
-	}
-
-	for _, tc := range testCases {
-		a := Adapter{}
-		clients := Clients{
-			EC2: &EC2ClientMock{
-				unexistingSubnet: tc.unexistentSubnet,
-			},
-			IAM: &IAMClientMock{},
-		}
-
-		t.Run(tc.description, func(t *testing.T) {
-			err := a.getAutoScalingGroup(tc.customObject, clients)
-			if tc.expectedError && err == nil {
-				t.Error("expected error didn't happen")
-			}
-
-			// the mock does the check internally, the returned subnet id is not related
-			// to input
-			if !tc.expectedError && err != nil {
-				t.Errorf("unexpected error %v", err)
 			}
 		})
 	}

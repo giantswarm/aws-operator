@@ -7,7 +7,7 @@
       SecurityGroups:
       - {{ .WorkerSecurityGroupID }}
       InstanceType: {{ .WorkerInstanceType }}
-      IamInstanceProfile: {{ .WorkerIAMInstanceProfileName }}
+      IamInstanceProfile: !Ref WorkerInstanceProfile
       BlockDeviceMappings:
       {{ range .WorkerBlockDeviceMappings }}
       - DeviceName: "{{ .DeviceName }}"

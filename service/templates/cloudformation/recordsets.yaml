@@ -3,8 +3,8 @@
     Type: AWS::Route53::RecordSet
     Properties:
       AliasTarget:
-        DNSName: {{.APIELBDNS}}
-        HostedZoneId: {{.APIELBAliasHostedZone}}
+        DNSName: !GetAtt ApiLoadBalancer.DNSName
+        HostedZoneId: !GetAtt ApiLoadBalancer.CanonicalHostedZoneNameID
         EvaluateTargetHealth: false
       Name: {{.APIELBDomain}}
       HostedZoneId: {{.APIELBHostedZones}}
@@ -12,19 +12,18 @@
   EtcdRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
-      AliasTarget:
-        DNSName: {{.EtcdELBDNS}}
-        HostedZoneId: {{.EtcdELBAliasHostedZone}}
-        EvaluateTargetHealth: false
       Name: {{.EtcdELBDomain}}
       HostedZoneId: {{.EtcdELBHostedZones}}
-      Type: A
+      TTL: '900'
+      Type: CNAME
+      ResourceRecords:
+        - !GetAtt MasterInstance.PrivateDnsName
   IngressRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
       AliasTarget:
-        DNSName: {{.IngressELBDNS}}
-        HostedZoneId: {{.IngressELBAliasHostedZone}}
+        DNSName: !GetAtt IngressLoadBalancer.DNSName
+        HostedZoneId: !GetAtt IngressLoadBalancer.CanonicalHostedZoneNameID
         EvaluateTargetHealth: false
       Name: {{.IngressELBDomain}}
       HostedZoneId: {{.IngressELBHostedZones}}

@@ -34,6 +34,11 @@ func testConfig() Config {
 func TestMainTemplateGetEmptyBody(t *testing.T) {
 	customObject := v1alpha1.AWSConfig{}
 	cfg := testConfig()
+	cfg.Clients = &adapter.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		KMS: &adapter.KMSClientMock{},
+	}
 
 	newResource, err := New(cfg)
 	if err != nil {
@@ -55,10 +60,13 @@ func TestMainTemplateExistingFields(t *testing.T) {
 				Version: "myversion",
 				Kubernetes: v1alpha1.ClusterKubernetes{
 					API: v1alpha1.ClusterKubernetesAPI{
-						Domain: "api.domain",
+						Domain:     "api.domain",
+						SecurePort: 443,
 					},
 					IngressController: v1alpha1.ClusterKubernetesIngressController{
-						Domain: "ingress.domain",
+						Domain:       "ingress.domain",
+						InsecurePort: 30010,
+						SecurePort:   30011,
 					},
 				},
 				Etcd: v1alpha1.ClusterEtcd{
@@ -66,11 +74,30 @@ func TestMainTemplateExistingFields(t *testing.T) {
 				},
 			},
 			AWS: v1alpha1.AWSConfigSpecAWS{
+				API: v1alpha1.AWSConfigSpecAWSAPI{
+					ELB: v1alpha1.AWSConfigSpecAWSAPIELB{
+						IdleTimeoutSeconds: 3600,
+					},
+				},
 				AZ: "myaz",
+				Masters: []v1alpha1.AWSConfigSpecAWSNode{
+					v1alpha1.AWSConfigSpecAWSNode{
+						ImageID: "myimageid",
+					},
+				},
 				Workers: []v1alpha1.AWSConfigSpecAWSNode{
 					v1alpha1.AWSConfigSpecAWSNode{
 						ImageID: "myimageid",
 					},
+				},
+				Ingress: v1alpha1.AWSConfigSpecAWSIngress{
+					ELB: v1alpha1.AWSConfigSpecAWSIngressELB{
+						IdleTimeoutSeconds: 60,
+					},
+				},
+				VPC: v1alpha1.AWSConfigSpecAWSVPC{
+					PublicSubnetCIDR:  "10.1.1.0/25",
+					PrivateSubnetCIDR: "10.1.2.0/25",
 				},
 			},
 		},
@@ -140,6 +167,10 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Error("workerRole output element not found")
 	}
+	if !strings.Contains(body, "PolicyName: test-cluster-master") {
+		fmt.Println(body)
+		t.Error("PolicyName output element not found")
+	}
 	if !strings.Contains(body, "PolicyName: test-cluster-worker") {
 		fmt.Println(body)
 		t.Error("PolicyName output element not found")
@@ -160,12 +191,40 @@ func TestMainTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Error("ingressWildcardRecordSet element not found")
 	}
+	if !strings.Contains(body, "MasterInstance:") {
+		fmt.Println(body)
+		t.Error("MasterInstance element not found")
+	}
+	if !strings.Contains(body, "ApiLoadBalancer:") {
+		fmt.Println(body)
+		t.Error("ApiLoadBalancer element not found")
+	}
+	if !strings.Contains(body, "IngressLoadBalancer:") {
+		fmt.Println(body)
+		t.Error("IngressLoadBalancer element not found")
+	}
+	if !strings.Contains(body, "InternetGateway:") {
+		fmt.Println(body)
+		t.Error("InternetGateway element not found")
+	}
 	if !strings.Contains(body, "NATGateway:") {
 		fmt.Println(body)
 		t.Error("NATGateway element not found")
 	}
-	if !strings.Contains(body, "SubnetId: subnet-1234") {
+	if !strings.Contains(body, "PublicRouteTable:") {
 		fmt.Println(body)
-		t.Error("NATGateway subnet id property not found")
+		t.Error("PublicRouteTable element not found")
+	}
+	if !strings.Contains(body, "PublicSubnet:") {
+		fmt.Println(body)
+		t.Error("PublicSubnet element not found")
+	}
+	if !strings.Contains(body, "PrivateRouteTable:") {
+		fmt.Println(body)
+		t.Error("PrivateRouteTable element not found")
+	}
+	if !strings.Contains(body, "PrivateSubnet:") {
+		fmt.Println(body)
+		t.Error("PrivateSubnet element not found")
 	}
 }

@@ -1,7 +1,6 @@
 package kmskeyv2
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/kms"
@@ -63,14 +62,6 @@ func (r *Resource) Name() string {
 
 func (r *Resource) Underlying() framework.Resource {
 	return r
-}
-
-func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, deleteChange interface{}) error {
-	return nil
-}
-
-func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
-	return &framework.Patch{}, nil
 }
 
 func toKMSKeyState(v interface{}) (KMSKeyState, error) {

@@ -5,7 +5,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/keyv2"
@@ -16,7 +15,6 @@ import (
 type launchConfigAdapter struct {
 	WorkerAssociatePublicIPAddress bool
 	WorkerBlockDeviceMappings      []BlockDeviceMapping
-	WorkerIAMInstanceProfileName   string
 	WorkerImageID                  string
 	WorkerInstanceType             string
 	WorkerSecurityGroupID          string
@@ -30,14 +28,13 @@ type BlockDeviceMapping struct {
 	VolumeType          string
 }
 
-func (l *launchConfigAdapter) getLaunchConfiguration(customObject v1alpha1.AWSConfig, clients Clients) error {
-	if len(customObject.Spec.AWS.Workers) == 0 {
+func (l *launchConfigAdapter) getLaunchConfiguration(cfg Config) error {
+	if len(cfg.CustomObject.Spec.AWS.Workers) == 0 {
 		return microerror.Mask(invalidConfigError)
 	}
 
-	l.WorkerImageID = keyv2.WorkerImageID(customObject)
-	l.WorkerInstanceType = keyv2.WorkerInstanceType(customObject)
-	l.WorkerIAMInstanceProfileName = keyv2.InstanceProfileName(customObject, prefixWorker)
+	l.WorkerImageID = keyv2.WorkerImageID(cfg.CustomObject)
+	l.WorkerInstanceType = keyv2.WorkerInstanceType(cfg.CustomObject)
 	l.WorkerAssociatePublicIPAddress = false
 
 	l.WorkerBlockDeviceMappings = []BlockDeviceMapping{
@@ -52,7 +49,7 @@ func (l *launchConfigAdapter) getLaunchConfiguration(customObject v1alpha1.AWSCo
 	// security group field.
 	// TODO: remove this code once the security group is created by cloudformation
 	// and add a reference in the template
-	groupName := keyv2.SecurityGroupName(customObject, prefixWorker)
+	groupName := keyv2.SecurityGroupName(cfg.CustomObject, prefixWorker)
 	describeSgInput := &ec2.DescribeSecurityGroupsInput{
 		Filters: []*ec2.Filter{
 			{
@@ -69,7 +66,7 @@ func (l *launchConfigAdapter) getLaunchConfiguration(customObject v1alpha1.AWSCo
 			},
 		},
 	}
-	output, err := clients.EC2.DescribeSecurityGroups(describeSgInput)
+	output, err := cfg.Clients.EC2.DescribeSecurityGroups(describeSgInput)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -79,18 +76,18 @@ func (l *launchConfigAdapter) getLaunchConfiguration(customObject v1alpha1.AWSCo
 	l.WorkerSecurityGroupID = *output.SecurityGroups[0].GroupId
 
 	// small cloud config field.
-	accountID, err := AccountID(clients)
+	accountID, err := AccountID(cfg.Clients)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	clusterID := keyv2.ClusterID(customObject)
+	clusterID := keyv2.ClusterID(cfg.CustomObject)
 	s3URI := fmt.Sprintf("%s-g8s-%s", accountID, clusterID)
 
 	cloudConfigConfig := SmallCloudconfigConfig{
 		MachineType:    prefixWorker,
-		Region:         customObject.Spec.AWS.Region,
+		Region:         cfg.CustomObject.Spec.AWS.Region,
 		S3URI:          s3URI,
-		ClusterVersion: keyv2.ClusterVersion(customObject),
+		ClusterVersion: keyv2.ClusterVersion(cfg.CustomObject),
 	}
 	smallCloudConfig, err := SmallCloudconfig(cloudConfigConfig)
 	if err != nil {

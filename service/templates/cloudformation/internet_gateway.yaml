@@ -1,0 +1,26 @@
+{{define "internet_gateway"}}
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: {{ .ClusterID }}
+
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    DependsOn:
+      - PublicRouteTable
+      - PrivateRouteTable
+    Properties:
+      InternetGatewayId:
+        Ref: InternetGateway
+      VpcId: {{ .VPCID }}
+
+  InternetGatewayRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: InternetGateway
+{{end}}

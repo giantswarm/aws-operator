@@ -28,33 +28,46 @@ func TestAdapterMain(t *testing.T) {
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: defaultCluster,
 			AWS: v1alpha1.AWSConfigSpecAWS{
+				AZ: "eu-central-1a",
+				Masters: []v1alpha1.AWSConfigSpecAWSNode{
+					v1alpha1.AWSConfigSpecAWSNode{},
+				},
 				Workers: []v1alpha1.AWSConfigSpecAWSNode{
 					v1alpha1.AWSConfigSpecAWSNode{},
 				},
 			},
 		},
 	}
+	expectedASGType := prefixWorker
+	expectedClusterID := "test-cluster"
+	expectedVPCID := "vpc-1234"
+
 	clients := Clients{
-		EC2: &EC2ClientMock{},
+		EC2: &EC2ClientMock{
+			vpcID: expectedVPCID,
+		},
 		IAM: &IAMClientMock{},
 		KMS: &KMSClientMock{},
 		ELB: &ELBClientMock{},
 	}
-
-	a, err := New(customObject, clients)
+	cfg := Config{
+		CustomObject: customObject,
+		Clients:      clients,
+	}
+	a, err := New(cfg)
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
 	}
 
-	expected := prefixWorker
-	actual := a.ASGType
-
-	if expected != actual {
-		t.Errorf("unexpected value, expecting %q, got %q", expected, actual)
+	if expectedASGType != a.ASGType {
+		t.Errorf("unexpected value, expecting %q, got %q", expectedASGType, a.ASGType)
 	}
 
-	expectedClusterID := "test-cluster"
-	if a.ClusterID != expectedClusterID {
-		t.Errorf("unexpected ClusterID, got %q, want %q", a.ClusterID, expectedClusterID)
+	if expectedClusterID != a.ClusterID {
+		t.Errorf("unexpected value, expecting %q, got %q", expectedClusterID, a.ClusterID)
+	}
+
+	if expectedVPCID != a.VPCID {
+		t.Errorf("unexpected value, expecting %q, got %q", expectedVPCID, a.VPCID)
 	}
 }

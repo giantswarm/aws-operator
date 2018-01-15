@@ -1,0 +1,85 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: aws-operator
+  namespace: giantswarm
+  labels:
+    app: aws-operator
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: aws-operator
+    spec:
+      volumes:
+      - name: aws-operator-configmap
+        configMap:
+          name: aws-operator-configmap
+          items:
+          - key: config.yaml
+            path: config.yaml
+      - name: aws-operator-secret
+        secret:
+          secretName: aws-operator-secret
+          items:
+          - key: secret.yaml
+            path: secret.yaml
+      - name: certs
+        hostPath:
+          path: /etc/ssl/certs/ca-certificates.crt
+      # See https://github.com/giantswarm/aws-operator/pull/36#discussion_r105404746
+      - name: ssh-key
+        secret:
+          secretName: aws-operator-ssh-key-secret
+          items:
+          - key: id_rsa.pub
+            path: id_rsa.pub
+      serviceAccountName: aws-operator
+      containers:
+      - name: aws-operator
+        image: quay.io/giantswarm/aws-operator:[[ .SHA ]]
+        volumeMounts:
+        - name: aws-operator-configmap
+          mountPath: /var/run/aws-operator/configmap/
+        - name: aws-operator-secret
+          mountPath: /var/run/aws-operator/secret/
+          readOnly: true
+        - name: certs
+          mountPath: /etc/ssl/certs/ca-certificates.crt
+        - name: ssh-key
+          mountPath: /.ssh/
+          readOnly: true
+        ports:
+        - name: http
+          containerPort: 8000
+        args:
+        - daemon
+        - --config.dirs=/var/run/aws-operator/configmap/
+        - --config.dirs=/var/run/aws-operator/secret/
+        - --config.files=config
+        - --config.files=secret
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8000
+          initialDelaySeconds: 15
+          timeoutSeconds: 1
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8000
+          initialDelaySeconds: 15
+          timeoutSeconds: 1
+        resources:
+          requests:
+            cpu: 100m
+            memory: 20Mi
+          limits:
+            cpu: 250m
+            memory: 250Mi
+      imagePullSecrets:
+      - name: aws-operator-pull-secret

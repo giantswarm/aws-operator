@@ -362,47 +362,54 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 		}
 	}
 
-	s.logger.Log("info", fmt.Sprintf("waiting for k8s secrets..."))
-	clusterID := keyv2.ClusterID(cluster)
-	certs, err := s.certWatcher.SearchCerts(clusterID)
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get certificates from secrets: '%#v'", err))
-	}
+	// For new clusters using Cloud Formation there is an OperatorKit resource
+	// for the kms keys and related resources.
+	var kmsKey *awsresources.KMSKey
+	var tlsAssets *certificatetpr.CompactTLSAssets
+	var clusterKeys *randomkeytpr.CompactRandomKeyAssets
+	if !keyv2.UseCloudFormation(cluster) {
+		s.logger.Log("info", fmt.Sprintf("waiting for k8s secrets..."))
+		clusterID := keyv2.ClusterID(cluster)
+		certs, err := s.certWatcher.SearchCerts(clusterID)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get certificates from secrets: '%#v'", err))
+		}
 
-	// Create Encryption key
-	s.logger.Log("info", fmt.Sprintf("waiting for k8s keys..."))
-	keys, err := s.keyWatcher.SearchKeys(clusterID)
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get keys from secrets: '%#v'", err))
-	}
+		// Create Encryption key
+		s.logger.Log("info", fmt.Sprintf("waiting for k8s keys..."))
+		keys, err := s.keyWatcher.SearchKeys(clusterID)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get keys from secrets: '%#v'", err))
+		}
 
-	// Create KMS key.
-	kmsKey := &awsresources.KMSKey{
-		Name:      keyv2.ClusterID(cluster),
-		AWSEntity: awsresources.AWSEntity{Clients: clients},
-	}
+		// Create KMS key.
+		kmsKey = &awsresources.KMSKey{
+			Name:      keyv2.ClusterID(cluster),
+			AWSEntity: awsresources.AWSEntity{Clients: clients},
+		}
 
-	kmsCreated, kmsKeyErr := kmsKey.CreateIfNotExists()
-	if kmsKeyErr != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create KMS key: '%#v'", kmsKeyErr))
-	}
+		kmsCreated, kmsKeyErr := kmsKey.CreateIfNotExists()
+		if kmsKeyErr != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create KMS key: '%#v'", kmsKeyErr))
+		}
 
-	if kmsCreated {
-		s.logger.Log("info", fmt.Sprintf("created KMS key for cluster '%s'", keyv2.ClusterID(cluster)))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("kms key '%s' already exists, reusing", kmsKey.Name))
-	}
+		if kmsCreated {
+			s.logger.Log("info", fmt.Sprintf("created KMS key for cluster '%s'", keyv2.ClusterID(cluster)))
+		} else {
+			s.logger.Log("info", fmt.Sprintf("kms key '%s' already exists, reusing", kmsKey.Name))
+		}
 
-	// Encode TLS assets.
-	tlsAssets, err := s.encodeTLSAssets(certs, clients.KMS, kmsKey.Arn())
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not encode TLS assets: '%#v'", err))
-	}
+		// Encode TLS assets.
+		tlsAssets, err = s.encodeTLSAssets(certs, clients.KMS, kmsKey.Arn())
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not encode TLS assets: '%#v'", err))
+		}
 
-	// Encode Key assets.
-	clusterKeys, err := s.encodeKeyAssets(keys, clients.KMS, kmsKey.Arn())
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not encode Keys assets: '%#v'", err))
+		// Encode Key assets.
+		clusterKeys, err = s.encodeKeyAssets(keys, clients.KMS, kmsKey.Arn())
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not encode Keys assets: '%#v'", err))
+		}
 	}
 
 	bucketName := s.bucketName(cluster)
@@ -410,28 +417,29 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 	// Create master IAM policy.
 	var masterPolicy resources.NamedResource
 	var masterPolicyCreated bool
-	{
-		var err error
-		masterPolicy = &awsresources.Policy{
-			ClusterID:  keyv2.ClusterID(cluster),
-			KMSKeyArn:  kmsKey.Arn(),
-			PolicyType: prefixMaster,
-			S3Bucket:   bucketName,
-			AWSEntity:  awsresources.AWSEntity{Clients: clients},
-		}
-		masterPolicyCreated, err = masterPolicy.CreateIfNotExists()
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create master policy: '%#v'", err))
-		}
-	}
-	if masterPolicyCreated {
-		s.logger.Log("info", fmt.Sprintf("created master policy for cluster '%s'", keyv2.ClusterID(cluster)))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("master policy for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
-	}
-
 	var workerPolicy resources.NamedResource
+
 	if !keyv2.UseCloudFormation(cluster) {
+		{
+			var err error
+			masterPolicy = &awsresources.Policy{
+				ClusterID:  keyv2.ClusterID(cluster),
+				KMSKeyArn:  kmsKey.Arn(),
+				PolicyType: prefixMaster,
+				S3Bucket:   bucketName,
+				AWSEntity:  awsresources.AWSEntity{Clients: clients},
+			}
+			masterPolicyCreated, err = masterPolicy.CreateIfNotExists()
+			if err != nil {
+				return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create master policy: '%#v'", err))
+			}
+		}
+		if masterPolicyCreated {
+			s.logger.Log("info", fmt.Sprintf("created master policy for cluster '%s'", keyv2.ClusterID(cluster)))
+		} else {
+			s.logger.Log("info", fmt.Sprintf("master policy for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
+		}
+
 		// Create worker IAM policy.
 		var workerPolicyCreated bool
 		{
@@ -457,23 +465,25 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 
 	// Create S3 bucket.
 	var bucket resources.ReusableResource
-	var bucketCreated bool
-	{
-		var err error
-		bucket = &awsresources.Bucket{
-			Name:      bucketName,
-			AWSEntity: awsresources.AWSEntity{Clients: clients},
+	if !keyv2.UseCloudFormation(cluster) {
+		var bucketCreated bool
+		{
+			var err error
+			bucket = &awsresources.Bucket{
+				Name:      bucketName,
+				AWSEntity: awsresources.AWSEntity{Clients: clients},
+			}
+			bucketCreated, err = bucket.CreateIfNotExists()
+			if err != nil {
+				return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create S3 bucket: '%#v'", err))
+			}
 		}
-		bucketCreated, err = bucket.CreateIfNotExists()
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create S3 bucket: '%#v'", err))
-		}
-	}
 
-	if bucketCreated {
-		s.logger.Log("info", fmt.Sprintf("created bucket '%s'", bucketName))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("bucket '%s' already exists, reusing", bucketName))
+		if bucketCreated {
+			s.logger.Log("info", fmt.Sprintf("created bucket '%s'", bucketName))
+		} else {
+			s.logger.Log("info", fmt.Sprintf("bucket '%s' already exists, reusing", bucketName))
+		}
 	}
 
 	// Create VPC.
@@ -523,23 +533,25 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not find vpc peering connection: '%#v'", err))
 	}
 
-	// Create internet gateway.
-	var internetGateway resources.ResourceWithID
-	internetGateway = &awsresources.InternetGateway{
-		Name:  keyv2.ClusterID(cluster),
-		VpcID: vpcID,
-		// Dependencies.
-		Logger:    s.logger,
-		AWSEntity: awsresources.AWSEntity{Clients: clients},
-	}
-	internetGatewayCreated, err := internetGateway.CreateIfNotExists()
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create internet gateway: '%#v'", err))
-	}
-	if internetGatewayCreated {
-		s.logger.Log("info", fmt.Sprintf("created internet gateway for cluster '%s'", keyv2.ClusterID(cluster)))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("internet gateway for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
+	if !keyv2.UseCloudFormation(cluster) {
+		// Create internet gateway.
+		var internetGateway resources.ResourceWithID
+		internetGateway = &awsresources.InternetGateway{
+			Name:  keyv2.ClusterID(cluster),
+			VpcID: vpcID,
+			// Dependencies.
+			Logger:    s.logger,
+			AWSEntity: awsresources.AWSEntity{Clients: clients},
+		}
+		internetGatewayCreated, err := internetGateway.CreateIfNotExists()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create internet gateway: '%#v'", err))
+		}
+		if internetGatewayCreated {
+			s.logger.Log("info", fmt.Sprintf("created internet gateway for cluster '%s'", keyv2.ClusterID(cluster)))
+		} else {
+			s.logger.Log("info", fmt.Sprintf("internet gateway for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
+		}
 	}
 
 	// Create masters security group.
@@ -608,45 +620,51 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create rules for security group '%s': '%#v'", ingressSecurityGroup.GroupName, err))
 	}
 
-	// Create public route table.
-	publicRouteTable := &awsresources.RouteTable{
-		Name:   keyv2.ClusterID(cluster),
-		VpcID:  vpcID,
-		Client: clients.EC2,
-		Logger: s.logger,
-	}
-	publicRouteTableCreated, err := publicRouteTable.CreateIfNotExists()
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create route table: '%#v'", err))
-	}
-	if publicRouteTableCreated {
-		s.logger.Log("info", "created public route table")
-	} else {
-		s.logger.Log("info", "route table already exists, reusing")
-	}
+	var publicRouteTable *awsresources.RouteTable
+	var publicSubnet *awsresources.Subnet
+	var publicSubnetID string
 
-	if err := publicRouteTable.MakePublic(); err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not make route table public: '%#v'", err))
-	}
+	if !keyv2.UseCloudFormation(cluster) {
+		// Create public route table.
+		publicRouteTable = &awsresources.RouteTable{
+			Name:   keyv2.ClusterID(cluster),
+			VpcID:  vpcID,
+			Client: clients.EC2,
+			Logger: s.logger,
+		}
+		publicRouteTableCreated, err := publicRouteTable.CreateIfNotExists()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create route table: '%#v'", err))
+		}
+		if publicRouteTableCreated {
+			s.logger.Log("info", "created public route table")
+		} else {
+			s.logger.Log("info", "route table already exists, reusing")
+		}
 
-	// Create public subnet.
-	subnetInput := SubnetInput{
-		Name:       keyv2.SubnetName(cluster, suffixPublic),
-		CidrBlock:  cluster.Spec.AWS.VPC.PublicSubnetCIDR,
-		Clients:    clients,
-		Cluster:    cluster,
-		MakePublic: true,
-		RouteTable: publicRouteTable,
-		VpcID:      vpcID,
-	}
-	publicSubnet, err := s.createSubnet(subnetInput)
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create public subnet: '%#v'", err))
-	}
+		if err := publicRouteTable.MakePublic(); err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not make route table public: '%#v'", err))
+		}
 
-	publicSubnetID, err := publicSubnet.GetID()
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get public subnet ID: '%#v'", err))
+		// Create public subnet.
+		subnetInput := SubnetInput{
+			Name:       keyv2.SubnetName(cluster, suffixPublic),
+			CidrBlock:  cluster.Spec.AWS.VPC.PublicSubnetCIDR,
+			Clients:    clients,
+			Cluster:    cluster,
+			MakePublic: true,
+			RouteTable: publicRouteTable,
+			VpcID:      vpcID,
+		}
+		publicSubnet, err = s.createSubnet(subnetInput)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create public subnet: '%#v'", err))
+		}
+
+		publicSubnetID, err = publicSubnet.GetID()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get public subnet ID: '%#v'", err))
+		}
 	}
 
 	var privateRouteTable *awsresources.RouteTable
@@ -654,7 +672,7 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 	var privateSubnetID string
 
 	// For new clusters create a NAT gateway, private route table and private subnet.
-	if keyv2.HasClusterVersion(cluster) {
+	if keyv2.HasClusterVersion(cluster) && !keyv2.UseCloudFormation(cluster) {
 		// Create private route table.
 		privateRouteTable = &awsresources.RouteTable{
 			Name:   keyv2.RouteTableName(cluster, suffixPrivate),
@@ -692,210 +710,215 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get private subnet ID: '%#v'", err))
 		}
 
-		if !keyv2.UseCloudFormation(cluster) {
-			// Create NAT gateway.
-			natGateway := &awsresources.NatGateway{
-				Name:   keyv2.ClusterID(cluster),
-				Subnet: publicSubnet,
-				// Dependencies.
-				Logger:    s.logger,
-				AWSEntity: awsresources.AWSEntity{Clients: clients},
-			}
-			natGatewayCreated, err := natGateway.CreateIfNotExists()
-			if err != nil {
-				return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create nat gateway: '%#v'", err))
-			}
-			if natGatewayCreated {
-				s.logger.Log("info", fmt.Sprintf("created nat gateway for cluster '%s'", keyv2.ClusterID(cluster)))
-			} else {
-				s.logger.Log("info", fmt.Sprintf("nat gateway for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
-			}
-
-			natGatewayID, err := natGateway.GetID()
-			if err != nil {
-				return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get nat gateway id: '%#v'", err))
-			}
-
-			// Create default route for the NAT gateway in the private route table.
-			natGatewayRouteCreated, err := privateRouteTable.CreateNatGatewayRoute(natGatewayID)
-			if err != nil {
-				return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create route for nat gateway: '%#v'", err))
-			}
-			if natGatewayRouteCreated {
-				s.logger.Log("info", "created nat gateway route")
-			} else {
-				s.logger.Log("info", "nat gateway route already exists, reusing")
-			}
+		// Create NAT gateway.
+		natGateway := &awsresources.NatGateway{
+			Name:   keyv2.ClusterID(cluster),
+			Subnet: publicSubnet,
+			// Dependencies.
+			Logger:    s.logger,
+			AWSEntity: awsresources.AWSEntity{Clients: clients},
 		}
-	}
-
-	hostClusterRoute := &awsresources.Route{
-		RouteTable:             *publicRouteTable,
-		DestinationCidrBlock:   *conn.AccepterVpcInfo.CidrBlock,
-		VpcPeeringConnectionID: *conn.VpcPeeringConnectionId,
-		AWSEntity:              awsresources.AWSEntity{Clients: clients},
-	}
-
-	if keyv2.HasClusterVersion(cluster) {
-		// New clusters have private IPs so use the private route table.
-		hostClusterRoute.RouteTable = *privateRouteTable
-	} else {
-		// Legacy clusters have public IPs so use the public route table.
-		hostClusterRoute.RouteTable = *publicRouteTable
-	}
-
-	hostRouteCreated, err := hostClusterRoute.CreateIfNotExists()
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not add host vpc route: '%#v'", err))
-	}
-	if hostRouteCreated {
-		s.logger.Log("info", fmt.Sprintf("created host vpc route for cluster '%s'", keyv2.ClusterID(cluster)))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("host vpc route for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
-	}
-
-	for _, privateRouteTableName := range cluster.Spec.AWS.VPC.RouteTableNames {
-		privateRouteTable := &awsresources.RouteTable{
-			Name:   privateRouteTableName,
-			VpcID:  cluster.Spec.AWS.VPC.PeerID,
-			Client: hostClients.EC2,
-			Logger: s.logger,
-		}
-
-		privateRoute := &awsresources.Route{
-			RouteTable:             *privateRouteTable,
-			DestinationCidrBlock:   *conn.RequesterVpcInfo.CidrBlock,
-			VpcPeeringConnectionID: *conn.VpcPeeringConnectionId,
-			AWSEntity:              awsresources.AWSEntity{Clients: hostClients},
-		}
-
-		privateRouteCreated, err := privateRoute.CreateIfNotExists()
+		natGatewayCreated, err := natGateway.CreateIfNotExists()
 		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not add guest vpc route: '%#v'", err))
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create nat gateway: '%#v'", err))
 		}
-		if privateRouteCreated {
-			s.logger.Log("info", fmt.Sprintf("created guest vpc route for cluster '%s'", keyv2.ClusterID(cluster)))
+		if natGatewayCreated {
+			s.logger.Log("info", fmt.Sprintf("created nat gateway for cluster '%s'", keyv2.ClusterID(cluster)))
 		} else {
-			s.logger.Log("info", fmt.Sprintf("host vpc guest for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
+			s.logger.Log("info", fmt.Sprintf("nat gateway for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
 		}
 
+		natGatewayID, err := natGateway.GetID()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get nat gateway id: '%#v'", err))
+		}
+
+		// Create default route for the NAT gateway in the private route table.
+		natGatewayRouteCreated, err := privateRouteTable.CreateNatGatewayRoute(natGatewayID)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create route for nat gateway: '%#v'", err))
+		}
+		if natGatewayRouteCreated {
+			s.logger.Log("info", "created nat gateway route")
+		} else {
+			s.logger.Log("info", "nat gateway route already exists, reusing")
+		}
 	}
 
-	mastersInput := runMachinesInput{
-		clients:             clients,
-		cluster:             cluster,
-		tlsAssets:           tlsAssets,
-		clusterKeys:         clusterKeys,
-		clusterName:         keyv2.ClusterID(cluster),
-		bucket:              bucket,
-		securityGroup:       mastersSecurityGroup,
-		instanceProfileName: masterPolicy.GetName(),
-		prefix:              prefixMaster,
-	}
-
-	if keyv2.HasClusterVersion(cluster) {
-		// New clusters have masters in the private subnet.
-		mastersInput.subnet = privateSubnet
-	} else {
-		// Legacy clusters have masters in the public subnet.
-		mastersInput.subnet = publicSubnet
-
-		// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
-		mastersInput.keyPairName = keyv2.ClusterID(cluster)
-	}
-
-	// Run masters.
-	anyMastersCreated, masterIDs, err := s.runMachines(mastersInput)
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not start masters: '%#v'", err))
-	}
-
-	if !validateIDs(masterIDs) {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("master nodes had invalid instance IDs: %v", masterIDs))
-	}
-
-	// Create apiserver load balancer.
-	lbInput := LoadBalancerInput{
-		Name:               cluster.Spec.Cluster.Kubernetes.API.Domain,
-		Clients:            clients,
-		Cluster:            cluster,
-		IdleTimeoutSeconds: cluster.Spec.AWS.API.ELB.IdleTimeoutSeconds,
-		InstanceIDs:        masterIDs,
-		PortsToOpen: awsresources.PortPairs{
-			{
-				PortELB:      cluster.Spec.Cluster.Kubernetes.API.SecurePort,
-				PortInstance: cluster.Spec.Cluster.Kubernetes.API.SecurePort,
-			},
-		},
-		SecurityGroupID: mastersSecurityGroupID,
-		SubnetID:        publicSubnetID,
-	}
-
-	apiLB, err := s.createLoadBalancer(lbInput)
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create apiserver load balancer: '%#v'", err))
-	}
-
-	// Create etcd load balancer.
-	lbInput = LoadBalancerInput{
-		Name:               cluster.Spec.Cluster.Etcd.Domain,
-		Clients:            clients,
-		Cluster:            cluster,
-		IdleTimeoutSeconds: cluster.Spec.AWS.Etcd.ELB.IdleTimeoutSeconds,
-		InstanceIDs:        masterIDs,
-		PortsToOpen: awsresources.PortPairs{
-			{
-				PortELB:      httpsPort,
-				PortInstance: cluster.Spec.Cluster.Etcd.Port,
-			},
-		},
-		SecurityGroupID: mastersSecurityGroupID,
-		SubnetID:        publicSubnetID,
-	}
-
-	if keyv2.HasClusterVersion(cluster) {
-		lbInput.Scheme = "internal"
-	}
-
-	etcdLB, err := s.createLoadBalancer(lbInput)
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create etcd load balancer: '%#v'", err))
-	}
-
-	// Masters were created but the master IAM policy existed from a previous
-	// execution. Its likely that previous execution failed. IAM policies can't
-	// be reused for EC2 instances.
-	if anyMastersCreated && !masterPolicyCreated {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("cluster '%s' cannot be processed. As IAM policy for master nodes cannot be reused. Please delete this cluster.", keyv2.ClusterID(cluster)))
-	}
-
-	// Create Ingress load balancer.
-	lbInput = LoadBalancerInput{
-		Name:               cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-		Clients:            clients,
-		Cluster:            cluster,
-		IdleTimeoutSeconds: cluster.Spec.AWS.Ingress.ELB.IdleTimeoutSeconds,
-		PortsToOpen: awsresources.PortPairs{
-			{
-				PortELB:      httpsPort,
-				PortInstance: cluster.Spec.Cluster.Kubernetes.IngressController.SecurePort,
-			},
-			{
-				PortELB:      httpPort,
-				PortInstance: cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
-			},
-		},
-		SecurityGroupID: ingressSecurityGroupID,
-		SubnetID:        publicSubnetID,
-	}
-
-	ingressLB, err := s.createLoadBalancer(lbInput)
-	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create ingress load balancer: '%#v'", err))
-	}
-
-	// During Cloud Formation migration this logic is only needed for non CF clusters.
 	if !keyv2.UseCloudFormation(cluster) {
+		hostClusterRoute := &awsresources.Route{
+			RouteTable:             *publicRouteTable,
+			DestinationCidrBlock:   *conn.AccepterVpcInfo.CidrBlock,
+			VpcPeeringConnectionID: *conn.VpcPeeringConnectionId,
+			AWSEntity:              awsresources.AWSEntity{Clients: clients},
+		}
+
+		if keyv2.HasClusterVersion(cluster) {
+			// New clusters have private IPs so use the private route table.
+			hostClusterRoute.RouteTable = *privateRouteTable
+		} else {
+			// Legacy clusters have public IPs so use the public route table.
+			hostClusterRoute.RouteTable = *publicRouteTable
+		}
+
+		hostRouteCreated, err := hostClusterRoute.CreateIfNotExists()
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not add host vpc route: '%#v'", err))
+		}
+		if hostRouteCreated {
+			s.logger.Log("info", fmt.Sprintf("created host vpc route for cluster '%s'", keyv2.ClusterID(cluster)))
+		} else {
+			s.logger.Log("info", fmt.Sprintf("host vpc route for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
+		}
+
+		for _, privateRouteTableName := range cluster.Spec.AWS.VPC.RouteTableNames {
+			privateRouteTable := &awsresources.RouteTable{
+				Name:   privateRouteTableName,
+				VpcID:  cluster.Spec.AWS.VPC.PeerID,
+				Client: hostClients.EC2,
+				Logger: s.logger,
+			}
+
+			privateRoute := &awsresources.Route{
+				RouteTable:             *privateRouteTable,
+				DestinationCidrBlock:   *conn.RequesterVpcInfo.CidrBlock,
+				VpcPeeringConnectionID: *conn.VpcPeeringConnectionId,
+				AWSEntity:              awsresources.AWSEntity{Clients: hostClients},
+			}
+
+			privateRouteCreated, err := privateRoute.CreateIfNotExists()
+			if err != nil {
+				return microerror.Maskf(executionFailedError, fmt.Sprintf("could not add guest vpc route: '%#v'", err))
+			}
+			if privateRouteCreated {
+				s.logger.Log("info", fmt.Sprintf("created guest vpc route for cluster '%s'", keyv2.ClusterID(cluster)))
+			} else {
+				s.logger.Log("info", fmt.Sprintf("host vpc guest for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
+			}
+
+		}
+	}
+
+	var apiLB *awsresources.ELB
+	var etcdLB *awsresources.ELB
+	var ingressLB *awsresources.ELB
+	var anyMastersCreated bool
+	var masterIDs []string
+
+	if !keyv2.UseCloudFormation(cluster) {
+		mastersInput := runMachinesInput{
+			clients:             clients,
+			cluster:             cluster,
+			tlsAssets:           tlsAssets,
+			clusterKeys:         clusterKeys,
+			clusterName:         keyv2.ClusterID(cluster),
+			bucket:              bucket,
+			securityGroup:       mastersSecurityGroup,
+			instanceProfileName: masterPolicy.GetName(),
+			prefix:              prefixMaster,
+		}
+
+		if keyv2.HasClusterVersion(cluster) {
+			// New clusters have masters in the private subnet.
+			mastersInput.subnet = privateSubnet
+		} else {
+			// Legacy clusters have masters in the public subnet.
+			mastersInput.subnet = publicSubnet
+
+			// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
+			mastersInput.keyPairName = keyv2.ClusterID(cluster)
+		}
+
+		// Run masters.
+		anyMastersCreated, masterIDs, err = s.runMachines(mastersInput)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not start masters: '%#v'", err))
+		}
+
+		if !validateIDs(masterIDs) {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("master nodes had invalid instance IDs: %v", masterIDs))
+		}
+
+		// Create apiserver load balancer.
+		lbInput := LoadBalancerInput{
+			Name:               cluster.Spec.Cluster.Kubernetes.API.Domain,
+			Clients:            clients,
+			Cluster:            cluster,
+			IdleTimeoutSeconds: cluster.Spec.AWS.API.ELB.IdleTimeoutSeconds,
+			InstanceIDs:        masterIDs,
+			PortsToOpen: awsresources.PortPairs{
+				{
+					PortELB:      cluster.Spec.Cluster.Kubernetes.API.SecurePort,
+					PortInstance: cluster.Spec.Cluster.Kubernetes.API.SecurePort,
+				},
+			},
+			SecurityGroupID: mastersSecurityGroupID,
+			SubnetID:        publicSubnetID,
+		}
+
+		apiLB, err = s.createLoadBalancer(lbInput)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create apiserver load balancer: '%#v'", err))
+		}
+
+		// Create etcd load balancer.
+		lbInput = LoadBalancerInput{
+			Name:               cluster.Spec.Cluster.Etcd.Domain,
+			Clients:            clients,
+			Cluster:            cluster,
+			IdleTimeoutSeconds: cluster.Spec.AWS.Etcd.ELB.IdleTimeoutSeconds,
+			InstanceIDs:        masterIDs,
+			PortsToOpen: awsresources.PortPairs{
+				{
+					PortELB:      httpsPort,
+					PortInstance: cluster.Spec.Cluster.Etcd.Port,
+				},
+			},
+			SecurityGroupID: mastersSecurityGroupID,
+			SubnetID:        publicSubnetID,
+		}
+
+		if keyv2.HasClusterVersion(cluster) {
+			lbInput.Scheme = "internal"
+		}
+
+		etcdLB, err = s.createLoadBalancer(lbInput)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create etcd load balancer: '%#v'", err))
+		}
+
+		// Masters were created but the master IAM policy existed from a previous
+		// execution. Its likely that previous execution failed. IAM policies can't
+		// be reused for EC2 instances.
+		if anyMastersCreated && !masterPolicyCreated {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("cluster '%s' cannot be processed. As IAM policy for master nodes cannot be reused. Please delete this cluster.", keyv2.ClusterID(cluster)))
+		}
+
+		// Create Ingress load balancer.
+		ingressLbInput := LoadBalancerInput{
+			Name:               cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+			Clients:            clients,
+			Cluster:            cluster,
+			IdleTimeoutSeconds: cluster.Spec.AWS.Ingress.ELB.IdleTimeoutSeconds,
+			PortsToOpen: awsresources.PortPairs{
+				{
+					PortELB:      httpsPort,
+					PortInstance: cluster.Spec.Cluster.Kubernetes.IngressController.SecurePort,
+				},
+				{
+					PortELB:      httpPort,
+					PortInstance: cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
+				},
+			},
+			SecurityGroupID: ingressSecurityGroupID,
+			SubnetID:        publicSubnetID,
+		}
+
+		ingressLB, err = s.createLoadBalancer(ingressLbInput)
+		if err != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create ingress load balancer: '%#v'", err))
+		}
+
 		// Create a launch configuration for the worker nodes.
 		lcInput := launchConfigurationInput{
 			clients:             clients,
@@ -1033,13 +1056,15 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 		}
 	}
 
-	masterServiceInput := MasterServiceInput{
-		Clients:  clients,
-		Cluster:  cluster,
-		MasterID: masterIDs[0],
-	}
-	if err := s.createMasterService(masterServiceInput); err != nil {
-		return microerror.Mask(err)
+	if !keyv2.UseCloudFormation(cluster) {
+		masterServiceInput := MasterServiceInput{
+			Clients:  clients,
+			Cluster:  cluster,
+			MasterID: masterIDs[0],
+		}
+		if err := s.createMasterService(masterServiceInput); err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
 	return nil
@@ -1071,16 +1096,18 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 		s.logger.Log("error", fmt.Sprintf("could not retrieve host amazon account id: '%#v'", err))
 	}
 
-	// Delete masters.
-	s.logger.Log("info", "deleting masters...")
-	if err := s.deleteMachines(deleteMachinesInput{
-		clients:     clients,
-		clusterName: keyv2.ClusterID(cluster),
-		prefix:      prefixMaster,
-	}); err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-	} else {
-		s.logger.Log("info", "deleted masters")
+	if !keyv2.UseCloudFormation(cluster) {
+		// Delete masters.
+		s.logger.Log("info", "deleting masters...")
+		if err := s.deleteMachines(deleteMachinesInput{
+			clients:     clients,
+			clusterName: keyv2.ClusterID(cluster),
+			prefix:      prefixMaster,
+		}); err != nil {
+			s.logger.Log("error", fmt.Sprintf("%#v", err))
+		} else {
+			s.logger.Log("info", "deleted masters")
+		}
 	}
 
 	if keyv2.UseCloudFormation(cluster) {
@@ -1122,107 +1149,111 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 		}
 	}
 
-	// Delete Record Sets.
+	if !keyv2.UseCloudFormation(cluster) {
+		// Delete Record Sets.
 
-	apiLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Kubernetes.API.Domain, cluster)
-	etcdLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Etcd.Domain, cluster)
-	ingressLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Kubernetes.IngressController.Domain, cluster)
-	if err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-	} else {
-		apiLB, err := awsresources.NewELBFromExisting(apiLBName, clients.ELB)
-		etcdLB, err := awsresources.NewELBFromExisting(etcdLBName, clients.ELB)
-		ingressLB, err := awsresources.NewELBFromExisting(ingressLBName, clients.ELB)
+		apiLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Kubernetes.API.Domain, cluster)
+		etcdLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Etcd.Domain, cluster)
+		ingressLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Kubernetes.IngressController.Domain, cluster)
 		if err != nil {
 			s.logger.Log("error", fmt.Sprintf("%#v", err))
 		} else {
-			recordSetInputs := []recordSetInput{
-				{
-					Cluster:      cluster,
-					Client:       clients.Route53,
-					Resource:     apiLB,
-					Domain:       cluster.Spec.Cluster.Kubernetes.API.Domain,
-					HostedZoneID: cluster.Spec.AWS.API.HostedZones,
-					Type:         route53.RRTypeA,
-				},
-				{
-					Cluster:      cluster,
-					Client:       clients.Route53,
-					Resource:     etcdLB,
-					Domain:       cluster.Spec.Cluster.Etcd.Domain,
-					HostedZoneID: cluster.Spec.AWS.Etcd.HostedZones,
-					Type:         route53.RRTypeA,
-				},
-				{
-					Cluster:      cluster,
-					Client:       clients.Route53,
-					Resource:     ingressLB,
-					Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-					HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
-					Type:         route53.RRTypeA,
-				},
-				{
-					Cluster:      cluster,
-					Client:       clients.Route53,
-					Value:        cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-					Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.WildcardDomain,
-					HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
-					Type:         route53.RRTypeCname,
-				},
-			}
+			apiLB, err := awsresources.NewELBFromExisting(apiLBName, clients.ELB)
+			etcdLB, err := awsresources.NewELBFromExisting(etcdLBName, clients.ELB)
+			ingressLB, err := awsresources.NewELBFromExisting(ingressLBName, clients.ELB)
+			if err != nil {
+				s.logger.Log("error", fmt.Sprintf("%#v", err))
+			} else {
+				recordSetInputs := []recordSetInput{
+					{
+						Cluster:      cluster,
+						Client:       clients.Route53,
+						Resource:     apiLB,
+						Domain:       cluster.Spec.Cluster.Kubernetes.API.Domain,
+						HostedZoneID: cluster.Spec.AWS.API.HostedZones,
+						Type:         route53.RRTypeA,
+					},
+					{
+						Cluster:      cluster,
+						Client:       clients.Route53,
+						Resource:     etcdLB,
+						Domain:       cluster.Spec.Cluster.Etcd.Domain,
+						HostedZoneID: cluster.Spec.AWS.Etcd.HostedZones,
+						Type:         route53.RRTypeA,
+					},
+					{
+						Cluster:      cluster,
+						Client:       clients.Route53,
+						Resource:     ingressLB,
+						Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+						HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
+						Type:         route53.RRTypeA,
+					},
+					{
+						Cluster:      cluster,
+						Client:       clients.Route53,
+						Value:        cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+						Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.WildcardDomain,
+						HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
+						Type:         route53.RRTypeCname,
+					},
+				}
 
-			var rsErr error
-			for _, input := range recordSetInputs {
-				if rsErr = s.deleteRecordSet(input); rsErr != nil {
-					s.logger.Log("error", fmt.Sprintf("%#v", rsErr))
+				var rsErr error
+				for _, input := range recordSetInputs {
+					if rsErr = s.deleteRecordSet(input); rsErr != nil {
+						s.logger.Log("error", fmt.Sprintf("%#v", rsErr))
+					}
+				}
+				if rsErr == nil {
+					s.logger.Log("info", "deleted record sets")
 				}
 			}
-			if rsErr == nil {
-				s.logger.Log("info", "deleted record sets")
+		}
+	}
+
+	if !keyv2.UseCloudFormation(cluster) {
+		// Delete Load Balancers.
+		loadBalancerInputs := []LoadBalancerInput{
+			{
+				Name:    cluster.Spec.Cluster.Kubernetes.API.Domain,
+				Clients: clients,
+				Cluster: cluster,
+			},
+			{
+				Name:    cluster.Spec.Cluster.Etcd.Domain,
+				Clients: clients,
+				Cluster: cluster,
+			},
+			{
+				Name:    cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+				Clients: clients,
+				Cluster: cluster,
+			},
+		}
+
+		var elbErr error
+		for _, lbInput := range loadBalancerInputs {
+			if elbErr = s.deleteLoadBalancer(lbInput); elbErr != nil {
+				s.logger.Log("error", fmt.Sprintf("%#v", elbErr))
 			}
 		}
-	}
-
-	// Delete Load Balancers.
-	loadBalancerInputs := []LoadBalancerInput{
-		{
-			Name:    cluster.Spec.Cluster.Kubernetes.API.Domain,
-			Clients: clients,
-			Cluster: cluster,
-		},
-		{
-			Name:    cluster.Spec.Cluster.Etcd.Domain,
-			Clients: clients,
-			Cluster: cluster,
-		},
-		{
-			Name:    cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-			Clients: clients,
-			Cluster: cluster,
-		},
-	}
-
-	var elbErr error
-	for _, lbInput := range loadBalancerInputs {
-		if elbErr = s.deleteLoadBalancer(lbInput); elbErr != nil {
-			s.logger.Log("error", fmt.Sprintf("%#v", elbErr))
+		if elbErr == nil {
+			s.logger.Log("info", "deleted ELBs")
 		}
-	}
-	if elbErr == nil {
-		s.logger.Log("info", "deleted ELBs")
-	}
 
-	// Delete route table.
-	var publicRouteTable resources.ResourceWithID
-	publicRouteTable = &awsresources.RouteTable{
-		Name:   keyv2.ClusterID(cluster),
-		Client: clients.EC2,
-		Logger: s.logger,
-	}
-	if err := publicRouteTable.Delete(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete route table: '%#v'", err))
-	} else {
-		s.logger.Log("info", "deleted route table")
+		// Delete route table.
+		var publicRouteTable resources.ResourceWithID
+		publicRouteTable = &awsresources.RouteTable{
+			Name:   keyv2.ClusterID(cluster),
+			Client: clients.EC2,
+			Logger: s.logger,
+		}
+		if err := publicRouteTable.Delete(); err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not delete route table: '%#v'", err))
+		} else {
+			s.logger.Log("info", "deleted route table")
+		}
 	}
 
 	// Sync VPC.
@@ -1237,22 +1268,20 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	}
 
-	// Delete NAT gateway and private subnet for new clusters.
-	if keyv2.HasClusterVersion(cluster) {
-		// Delete NAT gateway if not using CloudFormation.
-		if !keyv2.UseCloudFormation(cluster) {
-			natGateway := &awsresources.NatGateway{
-				Name: keyv2.ClusterID(cluster),
-				// Dependencies.
-				Logger:    s.logger,
-				AWSEntity: awsresources.AWSEntity{Clients: clients},
-			}
-			if err := natGateway.Delete(); err != nil {
-				s.logger.Log("error", fmt.Sprintf("could not delete nat gateway: '%#v'", err))
-			} else {
-				s.logger.Log("info", "deleted nat gateway")
-			}
+	if keyv2.HasClusterVersion(cluster) && !keyv2.UseCloudFormation(cluster) {
+		// Delete NAT gateway and private subnet for new clusters.
+		natGateway := &awsresources.NatGateway{
+			Name: keyv2.ClusterID(cluster),
+			// Dependencies.
+			Logger:    s.logger,
+			AWSEntity: awsresources.AWSEntity{Clients: clients},
 		}
+		if err := natGateway.Delete(); err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not delete nat gateway: '%#v'", err))
+		} else {
+			s.logger.Log("info", "deleted nat gateway")
+		}
+
 		// Delete private route table.
 		privateRouteTable := &awsresources.RouteTable{
 			Name:   keyv2.RouteTableName(cluster, suffixPrivate),
@@ -1275,31 +1304,31 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 		} else {
 			s.logger.Log("info", "deleted private subnet")
 		}
-	}
 
-	// Delete internet gateway.
-	internetGateway := &awsresources.InternetGateway{
-		Name:  keyv2.ClusterID(cluster),
-		VpcID: vpcID,
-		// Dependencies.
-		Logger:    s.logger,
-		AWSEntity: awsresources.AWSEntity{Clients: clients},
-	}
-	if err := internetGateway.Delete(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete internet gateway: '%#v'", err))
-	} else {
-		s.logger.Log("info", "deleted internet gateway")
-	}
+		// Delete internet gateway.
+		internetGateway := &awsresources.InternetGateway{
+			Name:  keyv2.ClusterID(cluster),
+			VpcID: vpcID,
+			// Dependencies.
+			Logger:    s.logger,
+			AWSEntity: awsresources.AWSEntity{Clients: clients},
+		}
+		if err := internetGateway.Delete(); err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not delete internet gateway: '%#v'", err))
+		} else {
+			s.logger.Log("info", "deleted internet gateway")
+		}
 
-	// Delete public subnet.
-	subnetInput := SubnetInput{
-		Name:    keyv2.SubnetName(cluster, suffixPublic),
-		Clients: clients,
-	}
-	if err := s.deleteSubnet(subnetInput); err != nil {
-		s.logger.Log("error", fmt.Sprintf("could not delete public subnet: '%#v'", err))
-	} else {
-		s.logger.Log("info", "deleted public subnet")
+		// Delete public subnet.
+		subnetInput = SubnetInput{
+			Name:    keyv2.SubnetName(cluster, suffixPublic),
+			Clients: clients,
+		}
+		if err := s.deleteSubnet(subnetInput); err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not delete public subnet: '%#v'", err))
+		} else {
+			s.logger.Log("info", "deleted public subnet")
+		}
 	}
 
 	// Before the security groups can be deleted any rules referencing other
@@ -1369,24 +1398,26 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 		s.logger.Log("error", fmt.Sprintf("could not find vpc peering connection: '%#v'", err))
 	}
 
-	// Delete Guest VPC Routes.
-	for _, privateRouteTableName := range cluster.Spec.AWS.VPC.RouteTableNames {
-		privateRouteTable := &awsresources.RouteTable{
-			Name:   privateRouteTableName,
-			VpcID:  cluster.Spec.AWS.VPC.PeerID,
-			Client: hostClients.EC2,
-			Logger: s.logger,
-		}
+	if !keyv2.UseCloudFormation(cluster) {
+		// Delete Guest VPC Routes.
+		for _, privateRouteTableName := range cluster.Spec.AWS.VPC.RouteTableNames {
+			privateRouteTable := &awsresources.RouteTable{
+				Name:   privateRouteTableName,
+				VpcID:  cluster.Spec.AWS.VPC.PeerID,
+				Client: hostClients.EC2,
+				Logger: s.logger,
+			}
 
-		privateRoute := &awsresources.Route{
-			RouteTable:             *privateRouteTable,
-			DestinationCidrBlock:   *conn.RequesterVpcInfo.CidrBlock,
-			VpcPeeringConnectionID: *conn.VpcPeeringConnectionId,
-			AWSEntity:              awsresources.AWSEntity{Clients: hostClients},
-		}
+			privateRoute := &awsresources.Route{
+				RouteTable:             *privateRouteTable,
+				DestinationCidrBlock:   *conn.RequesterVpcInfo.CidrBlock,
+				VpcPeeringConnectionID: *conn.VpcPeeringConnectionId,
+				AWSEntity:              awsresources.AWSEntity{Clients: hostClients},
+			}
 
-		if err := privateRoute.Delete(); err != nil {
-			s.logger.Log("error", fmt.Sprintf("could not delete vpc route: '%v'", err))
+			if err := privateRoute.Delete(); err != nil {
+				s.logger.Log("error", fmt.Sprintf("could not delete vpc route: '%v'", err))
+			}
 		}
 	}
 
@@ -1418,22 +1449,22 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 
 	s.logger.Log("info", "deleted bucket")
 
-	// Delete master policy.
-	var masterPolicy resources.NamedResource
-	masterPolicy = &awsresources.Policy{
-		ClusterID:  keyv2.ClusterID(cluster),
-		PolicyType: prefixMaster,
-		S3Bucket:   bucketName,
-		AWSEntity:  awsresources.AWSEntity{Clients: clients},
-	}
-	if err := masterPolicy.Delete(); err != nil {
-		s.logger.Log("error", fmt.Sprintf("%#v", err))
-	} else {
-		s.logger.Log("info", fmt.Sprintf("deleted %s roles, policies, instance profiles", prefixMaster))
-	}
-
-	// Delete worker policy.
 	if !keyv2.UseCloudFormation(cluster) {
+		// Delete master policy.
+		var masterPolicy resources.NamedResource
+		masterPolicy = &awsresources.Policy{
+			ClusterID:  keyv2.ClusterID(cluster),
+			PolicyType: prefixMaster,
+			S3Bucket:   bucketName,
+			AWSEntity:  awsresources.AWSEntity{Clients: clients},
+		}
+		if err := masterPolicy.Delete(); err != nil {
+			s.logger.Log("error", fmt.Sprintf("%#v", err))
+		} else {
+			s.logger.Log("info", fmt.Sprintf("deleted %s roles, policies, instance profiles", prefixMaster))
+		}
+
+		// Delete worker policy.
 		var workerPolicy resources.NamedResource
 		workerPolicy = &awsresources.Policy{
 			ClusterID:  keyv2.ClusterID(cluster),

@@ -16,7 +16,6 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 		expectedError                    bool
 		expectedImageID                  string
 		expectedInstanceType             string
-		expectedIAMInstanceProfileName   string
 		expectedAssociatePublicIPAddress bool
 		expectedBlockDeviceMappings      []BlockDeviceMapping
 	}{
@@ -44,7 +43,6 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 			},
 			expectedImageID:                  "myimageid",
 			expectedInstanceType:             "myinstancetype",
-			expectedIAMInstanceProfileName:   "test-cluster-worker-EC2-K8S-Role",
 			expectedAssociatePublicIPAddress: false,
 			expectedBlockDeviceMappings: []BlockDeviceMapping{
 				BlockDeviceMapping{
@@ -64,7 +62,11 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 		a := Adapter{}
 
 		t.Run(tc.description, func(t *testing.T) {
-			err := a.getLaunchConfiguration(tc.customObject, clients)
+			cfg := Config{
+				CustomObject: tc.customObject,
+				Clients:      clients,
+			}
+			err := a.getLaunchConfiguration(cfg)
 			if tc.expectedError && err == nil {
 				t.Error("expected error didn't happen")
 			}
@@ -79,11 +81,8 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 			if a.WorkerInstanceType != tc.expectedInstanceType {
 				t.Errorf("unexpected InstanceType, got %q, want %q", a.WorkerInstanceType, tc.expectedInstanceType)
 			}
-			if a.WorkerIAMInstanceProfileName != tc.expectedIAMInstanceProfileName {
-				t.Errorf("unexpected IAMInstanceProfileName, got %q, want %q", a.WorkerIAMInstanceProfileName, tc.expectedIAMInstanceProfileName)
-			}
 			if a.WorkerAssociatePublicIPAddress != tc.expectedAssociatePublicIPAddress {
-				t.Errorf("unexpected IAMInstanceProfileName, got %q, want %q", a.WorkerIAMInstanceProfileName, tc.expectedIAMInstanceProfileName)
+				t.Errorf("unexpected WorkerAssociatePublicIPAddress, got %t, want %t", a.WorkerAssociatePublicIPAddress, tc.expectedAssociatePublicIPAddress)
 			}
 			if !reflect.DeepEqual(a.WorkerBlockDeviceMappings, tc.expectedBlockDeviceMappings) {
 				t.Errorf("unexpected BlockDeviceMappings, got %v, want %v", a.WorkerBlockDeviceMappings, tc.expectedBlockDeviceMappings)
@@ -153,7 +152,11 @@ func TestAdapterLaunchConfigurationSecurityGroupID(t *testing.T) {
 		}
 
 		t.Run(tc.description, func(t *testing.T) {
-			err := a.getLaunchConfiguration(tc.customObject, clients)
+			cfg := Config{
+				CustomObject: tc.customObject,
+				Clients:      clients,
+			}
+			err := a.getLaunchConfiguration(cfg)
 			if tc.expectedError && err == nil {
 				t.Error("expected error didn't happen")
 			}
@@ -206,8 +209,12 @@ func TestAdapterLaunchConfigurationSmallCloudConfig(t *testing.T) {
 			},
 		},
 	}
+	cfg := Config{
+		CustomObject: customObject,
+		Clients:      clients,
+	}
+	err := a.getLaunchConfiguration(cfg)
 
-	err := a.getLaunchConfiguration(customObject, clients)
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
 	}
