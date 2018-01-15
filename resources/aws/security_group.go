@@ -3,7 +3,6 @@ package aws
 import (
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -266,12 +265,8 @@ func (s *SecurityGroup) Delete() error {
 		return nil
 	}
 
-	// Increase backoff to allow time for the Cloud Formation stack to delete.
-	deleteBackoff := NewCustomExponentialBackoff()
-	deleteBackoff.MaxElapsedTime = 5 * time.Minute
-
 	deleteNotify := NewNotify(s.Logger, "deleting security group")
-	if err := backoff.RetryNotify(deleteOperation, deleteBackoff, deleteNotify); err != nil {
+	if err := backoff.RetryNotify(deleteOperation, NewCustomExponentialBackoff(), deleteNotify); err != nil {
 		return microerror.Mask(err)
 	}
 

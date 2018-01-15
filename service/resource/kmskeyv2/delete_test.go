@@ -4,8 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 )
@@ -40,17 +38,7 @@ func Test_newDelete(t *testing.T) {
 			expectedAlias: "",
 		},
 		{
-			description: "current state not empty, desired state not empty but different, expected current state",
-			currentState: KMSKeyState{
-				KeyAlias: "current",
-			},
-			desiredState: KMSKeyState{
-				KeyAlias: "desired",
-			},
-			expectedAlias: "current",
-		},
-		{
-			description: "current state not empty, desired state not empty but equal, expected desired state",
+			description: "current state not empty, desired state not empty but equal, expected current state",
 			currentState: KMSKeyState{
 				KeyAlias: "current",
 			},
@@ -77,12 +65,12 @@ func Test_newDelete(t *testing.T) {
 			if err != nil {
 				t.Errorf("expected '%v' got '%#v'", nil, err)
 			}
-			deleteChange, ok := result.(kms.DeleteAliasInput)
+			deleteChange, ok := result.(KMSKeyState)
 			if !ok {
 				t.Errorf("expected '%T', got '%T'", deleteChange, result)
 			}
-			if deleteChange.AliasName != nil && *deleteChange.AliasName != tc.expectedAlias {
-				t.Errorf("expected %s, got %s", tc.expectedAlias, *deleteChange.AliasName)
+			if deleteChange.KeyAlias != tc.expectedAlias {
+				t.Errorf("expected %s, got %s", tc.expectedAlias, deleteChange.KeyAlias)
 			}
 		})
 	}
@@ -98,18 +86,18 @@ func Test_ApplyDeleteChange(t *testing.T) {
 	}
 
 	testCases := []struct {
-		deleteChange kms.DeleteAliasInput
+		deleteChange KMSKeyState
 		description  string
 	}{
 		{
 			description: "basic case, create",
-			deleteChange: kms.DeleteAliasInput{
-				AliasName: aws.String("alias/test-cluster"),
+			deleteChange: KMSKeyState{
+				KeyAlias: "alias/test-cluster",
 			},
 		},
 		{
 			description:  "empty create change, not create",
-			deleteChange: kms.DeleteAliasInput{},
+			deleteChange: KMSKeyState{},
 		},
 	}
 

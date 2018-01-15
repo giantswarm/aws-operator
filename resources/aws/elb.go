@@ -43,7 +43,7 @@ const (
 	// proxyProtocolAttributeName is the name of the ProxyProtocol attribute we set on the policy.
 	proxyProtocolAttributeName = "ProxyProtocol"
 	// Default values for health checks.
-	healthCheckHealthyThreshold   = 10
+	healthCheckHealthyThreshold   = 2
 	healthCheckInterval           = 5
 	healthCheckTimeout            = 3
 	healthCheckUnhealthyThreshold = 2

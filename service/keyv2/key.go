@@ -72,8 +72,20 @@ func HasClusterVersion(customObject v1alpha1.AWSConfig) bool {
 	}
 }
 
+func IngressControllerInsecurePort(customObject v1alpha1.AWSConfig) int {
+	return customObject.Spec.Cluster.Kubernetes.IngressController.InsecurePort
+}
+
+func IngressControllerSecurePort(customObject v1alpha1.AWSConfig) int {
+	return customObject.Spec.Cluster.Kubernetes.IngressController.SecurePort
+}
+
 func InstanceProfileName(customObject v1alpha1.AWSConfig, profileType string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, ProfileNameTemplate)
+}
+
+func KubernetesAPISecurePort(customObject v1alpha1.AWSConfig) int {
+	return customObject.Spec.Cluster.Kubernetes.API.SecurePort
 }
 
 // LoadBalancerName produces a unique name for the load balancer.
@@ -93,10 +105,22 @@ func LoadBalancerName(domainName string, cluster v1alpha1.AWSConfig) (string, er
 	return lbName, nil
 }
 
-func MainStackName(customObject v1alpha1.AWSConfig) string {
+func MainGuestStackName(customObject v1alpha1.AWSConfig) string {
 	clusterID := ClusterID(customObject)
 
-	return fmt.Sprintf("%s-main", clusterID)
+	return fmt.Sprintf("%s-guest-main", clusterID)
+}
+
+func MainHostPreStackName(customObject v1alpha1.AWSConfig) string {
+	clusterID := ClusterID(customObject)
+
+	return fmt.Sprintf("%s-host-setup", clusterID)
+}
+
+func MainHostPostStackName(customObject v1alpha1.AWSConfig) string {
+	clusterID := ClusterID(customObject)
+
+	return fmt.Sprintf("%s-host-main", clusterID)
 }
 
 func MasterImageID(customObject v1alpha1.AWSConfig) string {
@@ -109,6 +133,12 @@ func MasterImageID(customObject v1alpha1.AWSConfig) string {
 	return imageID
 }
 
+func MasterInstanceName(customObject v1alpha1.AWSConfig) string {
+	clusterID := ClusterID(customObject)
+
+	return fmt.Sprintf("%s-master", clusterID)
+}
+
 func MasterInstanceType(customObject v1alpha1.AWSConfig) string {
 	var instanceType string
 
@@ -117,6 +147,10 @@ func MasterInstanceType(customObject v1alpha1.AWSConfig) string {
 	}
 
 	return instanceType
+}
+
+func PeerAccessRoleName(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("%s-vpc-peer-access", ClusterID(customObject))
 }
 
 func PolicyName(customObject v1alpha1.AWSConfig, profileType string) string {

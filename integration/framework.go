@@ -297,10 +297,10 @@ func (f *framework) DeleteGuestCluster() error {
 		return microerror.Mask(err)
 	}
 
-	// TODO: during the cloudformation migration the legacy resource is always deleted last,
-	// when the migration is done we will need to check here the cloudformation stack deletion
-	// message
 	logEntry := "cluster '${CLUSTER_NAME}' deleted"
+	if os.Getenv("VERSION_BUNDLE_VERSION") == "0.2.0" {
+		logEntry = "deleting AWS Host Post-Guest CloudFormation stack: deleted"
+	}
 	return f.WaitForPodLog("giantswarm", logEntry, operatorPodName)
 }
 

@@ -39,10 +39,11 @@ import (
 	"github.com/giantswarm/aws-operator/service/cloudconfigv3"
 	"github.com/giantswarm/aws-operator/service/keyv1"
 	"github.com/giantswarm/aws-operator/service/keyv2"
+	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2"
+	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2/adapter"
 	"github.com/giantswarm/aws-operator/service/resource/kmskeyv2"
 	"github.com/giantswarm/aws-operator/service/resource/legacyv1"
 	"github.com/giantswarm/aws-operator/service/resource/legacyv2"
-	"github.com/giantswarm/aws-operator/service/resource/legacyv2/adapter"
 	"github.com/giantswarm/aws-operator/service/resource/namespacev1"
 	"github.com/giantswarm/aws-operator/service/resource/namespacev2"
 	"github.com/giantswarm/aws-operator/service/resource/s3bucketv1"
@@ -184,6 +185,8 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 		}
 	}
 
+	awsHostClients := awsclient.NewClients(awsHostConfig)
+
 	// ccServicev2 is used by the legacyv2 resource.
 	var ccServiceV2 *cloudconfigv2.CloudConfig
 	{
@@ -225,14 +228,33 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 		legacyConfig.Logger = config.Logger
 		legacyConfig.PubKeyFile = config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile)
 
-		legacyConfig.Clients = &adapter.Clients{}
-		legacyConfig.Clients.EC2 = awsClients.EC2
-		legacyConfig.Clients.CloudFormation = awsClients.CloudFormation
-		legacyConfig.Clients.IAM = awsClients.IAM
-		legacyConfig.Clients.KMS = awsClients.KMS
-		legacyConfig.Clients.ELB = awsClients.ELB
-
 		legacyResource, err = legacyv2.New(legacyConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var cloudformationResource framework.Resource
+	{
+		cloudformationConfig := cloudformationv2.DefaultConfig()
+
+		cloudformationConfig.Clients = &adapter.Clients{}
+		cloudformationConfig.Clients.EC2 = awsClients.EC2
+		cloudformationConfig.Clients.CloudFormation = awsClients.CloudFormation
+		cloudformationConfig.Clients.IAM = awsClients.IAM
+		cloudformationConfig.Clients.KMS = awsClients.KMS
+		cloudformationConfig.Clients.ELB = awsClients.ELB
+
+		cloudformationConfig.HostClients = &adapter.Clients{}
+		cloudformationConfig.HostClients.EC2 = awsHostClients.EC2
+		cloudformationConfig.HostClients.IAM = awsHostClients.IAM
+		cloudformationConfig.HostClients.CloudFormation = awsHostClients.CloudFormation
+
+		cloudformationConfig.Logger = config.Logger
+
+		cloudformationConfig.InstallationName = installationName
+
+		cloudformationResource, err = cloudformationv2.New(cloudformationConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -323,6 +345,7 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 			s3BucketResource,
 			s3BucketObjectResource,
 			legacyResource,
+			cloudformationResource,
 		}
 
 		// Disable retry wrapper due to problems with the legacy resource.
