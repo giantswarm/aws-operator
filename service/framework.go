@@ -41,6 +41,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/keyv2"
 	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2"
 	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2/adapter"
+	"github.com/giantswarm/aws-operator/service/resource/endpointsv2"
 	"github.com/giantswarm/aws-operator/service/resource/kmskeyv2"
 	"github.com/giantswarm/aws-operator/service/resource/legacyv1"
 	"github.com/giantswarm/aws-operator/service/resource/legacyv2"
@@ -50,6 +51,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/resource/s3bucketv2"
 	"github.com/giantswarm/aws-operator/service/resource/s3objectv1"
 	"github.com/giantswarm/aws-operator/service/resource/s3objectv2"
+	"github.com/giantswarm/aws-operator/service/resource/servicev2"
 )
 
 const (
@@ -315,6 +317,33 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 		}
 	}
 
+	var serviceResource framework.Resource
+	{
+		serviceConfig := servicev2.DefaultConfig()
+
+		serviceConfig.K8sClient = k8sClient
+		serviceConfig.Logger = config.Logger
+
+		serviceResource, err = servicev2.New(serviceConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var endpointsResource framework.Resource
+	{
+		endpointsConfig := endpointsv2.DefaultConfig()
+
+		endpointsConfig.Clients.EC2 = awsClients.EC2
+		endpointsConfig.K8sClient = k8sClient
+		endpointsConfig.Logger = config.Logger
+
+		endpointsResource, err = endpointsv2.New(endpointsConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	// Metrics config for wrapping resources.
 	metricsWrapConfig := metricsresource.DefaultWrapConfig()
 	metricsWrapConfig.Name = config.Name
@@ -335,17 +364,16 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 
 	// We create the list of resources and wrap each resource around some common
 	// resources like metrics and retry resources.
-	// TODO Remove the legacy resource once all resources are migrated to
-	// Cloud Formation.
 	var resources []framework.Resource
 	{
 		resources = []framework.Resource{
-			namespaceResource,
 			kmsKeyResource,
 			s3BucketResource,
 			s3BucketObjectResource,
-			legacyResource,
 			cloudformationResource,
+			namespaceResource,
+			serviceResource,
+			endpointsResource,
 		}
 
 		// Disable retry wrapper due to problems with the legacy resource.
