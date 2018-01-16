@@ -27,10 +27,6 @@ type BlockDeviceMapping struct {
 }
 
 func (l *launchConfigAdapter) getLaunchConfiguration(cfg Config) error {
-	if len(cfg.CustomObject.Spec.AWS.Workers) == 0 {
-		return microerror.Mask(invalidConfigError)
-	}
-
 	l.WorkerImageID = keyv2.WorkerImageID(cfg.CustomObject)
 	l.WorkerInstanceType = keyv2.WorkerInstanceType(cfg.CustomObject)
 	l.WorkerAssociatePublicIPAddress = false
