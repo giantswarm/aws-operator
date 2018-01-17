@@ -1,7 +1,6 @@
 package adapter
 
 import (
-	"strconv"
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
@@ -21,6 +20,19 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 		expectedRollingUpdatePauseTime string
 	}{
 		{
+			description: "no worker nodes, return error",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: defaultCluster,
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						AZ:      "myaz",
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{},
+					},
+				},
+			},
+			expectedError: true,
+		},
+		{
 			description: "basic matching, all fields present",
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
@@ -35,12 +47,41 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 					},
 				},
 			},
+			expectedError:                  false,
 			expectedAZ:                     "myaz",
 			expectedASGMaxSize:             3,
 			expectedASGMinSize:             3,
 			expectedHealthCheckGracePeriod: gracePeriodSeconds,
-			expectedMaxBatchSize:           strconv.FormatFloat(asgMaxBatchSizeRatio, 'f', -1, 32),
-			expectedMinInstancesInService:  strconv.FormatFloat(asgMinInstancesRatio, 'f', -1, 32),
+			expectedMaxBatchSize:           "1",
+			expectedMinInstancesInService:  "2",
+			expectedRollingUpdatePauseTime: rollingUpdatePauseTime,
+		},
+		{
+			description: "7 node cluster, batch size and min instances are correct",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: defaultCluster,
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						AZ: "myaz",
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{
+							v1alpha1.AWSConfigSpecAWSNode{},
+							v1alpha1.AWSConfigSpecAWSNode{},
+							v1alpha1.AWSConfigSpecAWSNode{},
+							v1alpha1.AWSConfigSpecAWSNode{},
+							v1alpha1.AWSConfigSpecAWSNode{},
+							v1alpha1.AWSConfigSpecAWSNode{},
+							v1alpha1.AWSConfigSpecAWSNode{},
+						},
+					},
+				},
+			},
+			expectedError:                  false,
+			expectedAZ:                     "myaz",
+			expectedASGMaxSize:             7,
+			expectedASGMinSize:             7,
+			expectedHealthCheckGracePeriod: gracePeriodSeconds,
+			expectedMaxBatchSize:           "2",
+			expectedMinInstancesInService:  "5",
 			expectedRollingUpdatePauseTime: rollingUpdatePauseTime,
 		},
 	}

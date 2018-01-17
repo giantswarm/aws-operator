@@ -73,12 +73,17 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 
 	if currentStackState.Name != "" && !reflect.DeepEqual(desiredStackState, currentStackState) {
 		r.logger.LogCtx(ctx, "debug", "main stack should be updated")
+
 		mainTemplate, err := r.getMainGuestTemplateBody(customObject)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 		updateState.StackName = aws.String(desiredStackState.Name)
 		updateState.TemplateBody = aws.String(mainTemplate)
+		// CAPABILITY_NAMED_IAM is required for updating IAM roles (worker policy)
+		updateState.Capabilities = []*string{
+			aws.String(namedIAMCapability),
+		}
 	}
 
 	return updateState, nil

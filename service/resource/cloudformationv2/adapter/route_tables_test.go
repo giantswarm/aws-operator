@@ -11,6 +11,7 @@ func TestAdapterRouteTablesRegularFields(t *testing.T) {
 		description                   string
 		customObject                  v1alpha1.AWSConfig
 		expectedError                 bool
+		expectedHostClusterCIDR       string
 		expectedPublicRouteTableName  string
 		expectedPrivateRouteTableName string
 	}{
@@ -24,19 +25,26 @@ func TestAdapterRouteTablesRegularFields(t *testing.T) {
 				},
 			},
 			expectedError:                 false,
+			expectedHostClusterCIDR:       "10.0.0.0/16",
 			expectedPublicRouteTableName:  "test-cluster-public",
 			expectedPrivateRouteTableName: "test-cluster-private",
 		},
 	}
 
 	for _, tc := range testCases {
+		hostClients := Clients{
+			EC2: &EC2ClientMock{
+				vpcCIDR: tc.expectedHostClusterCIDR,
+			},
+		}
+
 		a := Adapter{}
-		clients := Clients{}
 
 		t.Run(tc.description, func(t *testing.T) {
 			cfg := Config{
 				CustomObject: tc.customObject,
-				Clients:      clients,
+				Clients:      Clients{},
+				HostClients:  hostClients,
 			}
 			err := a.getRouteTables(cfg)
 			if tc.expectedError && err == nil {
@@ -45,6 +53,10 @@ func TestAdapterRouteTablesRegularFields(t *testing.T) {
 
 			if !tc.expectedError && err != nil {
 				t.Errorf("unexpected error %v", err)
+			}
+
+			if a.HostClusterCIDR != tc.expectedHostClusterCIDR {
+				t.Errorf("unexpected HostClusterCIDR, got %q, want %q", a.HostClusterCIDR, tc.expectedHostClusterCIDR)
 			}
 
 			if a.PublicRouteTableName != tc.expectedPublicRouteTableName {

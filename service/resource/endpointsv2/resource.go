@@ -1,4 +1,4 @@
-package namespacev2
+package endpointsv2
 
 import (
 	"github.com/giantswarm/microerror"
@@ -10,34 +10,40 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "namespacev2"
+	Name = "endpointsv2"
+
+	httpsPort           = 443
+	masterEndpointsName = "master"
 )
 
-// Config represents the configuration used to create a new namespace resource.
+// Config represents the configuration used to create a new endpoints resource.
 type Config struct {
 	// Dependencies.
+	Clients   Clients
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 }
 
-// DefaultConfig provides a default configuration to create a new namespace
+// DefaultConfig provides a default configuration to create a new endpoints
 // resource by best effort.
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
+		Clients:   Clients{},
 		K8sClient: nil,
 		Logger:    nil,
 	}
 }
 
-// Resource implements the namespace resource.
+// Resource implements the endpoints resource.
 type Resource struct {
 	// Dependencies.
-	k8sClient kubernetes.Interface
-	logger    micrologger.Logger
+	awsClients Clients
+	k8sClient  kubernetes.Interface
+	logger     micrologger.Logger
 }
 
-// New creates a new configured namespace resource.
+// New creates a new configured endpoints resource.
 func New(config Config) (*Resource, error) {
 	// Dependencies.
 	if config.K8sClient == nil {
@@ -49,7 +55,8 @@ func New(config Config) (*Resource, error) {
 
 	newResource := &Resource{
 		// Dependencies.
-		k8sClient: config.K8sClient,
+		awsClients: config.Clients,
+		k8sClient:  config.K8sClient,
 		logger: config.Logger.With(
 			"resource", Name,
 		),
@@ -66,15 +73,15 @@ func (r *Resource) Underlying() framework.Resource {
 	return r
 }
 
-func toNamespace(v interface{}) (*apiv1.Namespace, error) {
+func toEndpoints(v interface{}) (*apiv1.Endpoints, error) {
 	if v == nil {
 		return nil, nil
 	}
 
-	namespace, ok := v.(*apiv1.Namespace)
+	endpoints, ok := v.(*apiv1.Endpoints)
 	if !ok {
-		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &apiv1.Namespace{}, v)
+		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &apiv1.Endpoints{}, v)
 	}
 
-	return namespace, nil
+	return endpoints, nil
 }
