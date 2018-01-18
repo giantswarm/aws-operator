@@ -208,9 +208,9 @@ func newVersionBundles() []versionbundle.Bundle {
 			Dependencies: []versionbundle.Dependency{},
 			Deprecated:   false,
 			Name:         "aws-operator",
-			Time:         time.Date(2017, time.December, 5, 15, 00, 0, 0, time.UTC),
+			Time:         time.Date(2018, time.January, 18, 15, 00, 0, 0, time.UTC),
 			Version:      "2.0.0",
-			WIP:          false,
+			WIP:          true,
 		},
 	}
 }
