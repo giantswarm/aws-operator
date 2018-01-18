@@ -22,25 +22,30 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		return microerror.Mask(err)
 	}
 
-	r.logger.Log("debug", "creating AWS cloudformation stack")
-	_, err = r.Clients.CloudFormation.CreateStack(&stackInput)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	err = r.HostClients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
-		StackName: stackInput.StackName,
-	})
-	if err != nil {
-		return microerror.Mask(err)
-	}
+	r.logger.LogCtx(ctx, "debug", "creating AWS cloudformation stack")
 
-	r.logger.LogCtx(ctx, "debug", "creating AWS cloudformation stack: created")
+	if stackInput.StackName != nil {
+		_, err = r.Clients.CloudFormation.CreateStack(&stackInput)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		err = r.HostClients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
+			StackName: stackInput.StackName,
+		})
+		if err != nil {
+			return microerror.Mask(err)
+		}
 
-	// Create host post-main stack. It includes the peering routes, which need resources from the
-	// guest stack to be in place before it can be created.
-	err = r.createHostPostStack(cluster)
-	if err != nil {
-		return microerror.Mask(err)
+		// Create host post-main stack. It includes the peering routes, which need resources from the
+		// guest stack to be in place before it can be created.
+		err = r.createHostPostStack(ctx, cluster)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "debug", "creating AWS cloudformation stack: created")
+	} else {
+		r.logger.LogCtx(ctx, "debug", "creating AWS cloudformation stack: already created")
 	}
 
 	return nil
@@ -48,6 +53,11 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
 	customObject, err := keyv2.ToCustomObject(obj)
+	if err != nil {
+		return cloudformation.CreateStackInput{}, microerror.Mask(err)
+	}
+
+	currentStackState, err := toStackState(currentState)
 	if err != nil {
 		return cloudformation.CreateStackInput{}, microerror.Mask(err)
 	}
@@ -61,13 +71,13 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 
 	createState := cloudformation.CreateStackInput{}
 
-	if desiredStackState.Name != "" {
+	if currentStackState.Name == "" || desiredStackState.Name != currentStackState.Name {
 		r.logger.LogCtx(ctx, "debug", "main stack should be created")
 
 		// We need to create the required peering resources in the host account before
 		// getting the guest main stack template body, it requires id values from host
 		// resources.
-		err = r.createHostPreStack(customObject)
+		err = r.createHostPreStack(ctx, customObject)
 		if err != nil {
 			return cloudformation.CreateStackInput{}, microerror.Mask(err)
 		}
@@ -89,7 +99,7 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 	return createState, nil
 }
 
-func (r *Resource) createHostPreStack(customObject v1alpha1.AWSConfig) error {
+func (r *Resource) createHostPreStack(ctx context.Context, customObject v1alpha1.AWSConfig) error {
 	stackName := keyv2.MainHostPreStackName(customObject)
 	mainTemplate, err := r.getMainHostPreTemplateBody(customObject)
 	if err != nil {
@@ -104,7 +114,7 @@ func (r *Resource) createHostPreStack(customObject v1alpha1.AWSConfig) error {
 		},
 	}
 
-	r.logger.Log("debug", "creating AWS Host Pre-Guest cloudformation stack")
+	r.logger.LogCtx(ctx, "debug", "creating AWS Host Pre-Guest cloudformation stack")
 	_, err = r.HostClients.CloudFormation.CreateStack(createStack)
 	if err != nil {
 		return microerror.Mask(err)
@@ -116,11 +126,11 @@ func (r *Resource) createHostPreStack(customObject v1alpha1.AWSConfig) error {
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	r.logger.Log("debug", "creating AWS Host Pre-Guest cloudformation stack: created")
+	r.logger.LogCtx(ctx, "debug", "creating AWS Host Pre-Guest cloudformation stack: created")
 	return nil
 }
 
-func (r *Resource) createHostPostStack(customObject v1alpha1.AWSConfig) error {
+func (r *Resource) createHostPostStack(ctx context.Context, customObject v1alpha1.AWSConfig) error {
 	stackName := keyv2.MainHostPostStackName(customObject)
 	mainTemplate, err := r.getMainHostPostTemplateBody(customObject)
 	if err != nil {
@@ -131,7 +141,7 @@ func (r *Resource) createHostPostStack(customObject v1alpha1.AWSConfig) error {
 		TemplateBody: aws.String(mainTemplate),
 	}
 
-	r.logger.Log("debug", "creating AWS Host Post-Guest cloudformation stack")
+	r.logger.LogCtx(ctx, "debug", "creating AWS Host Post-Guest cloudformation stack")
 	_, err = r.HostClients.CloudFormation.CreateStack(createStack)
 	if err != nil {
 		return microerror.Mask(err)
@@ -144,7 +154,7 @@ func (r *Resource) createHostPostStack(customObject v1alpha1.AWSConfig) error {
 		return microerror.Mask(err)
 	}
 
-	r.logger.Log("debug", "creating AWS Host Post-Guest cloudformation stack: created")
+	r.logger.LogCtx(ctx, "debug", "creating AWS Host Post-Guest cloudformation stack: created")
 
 	return nil
 }
