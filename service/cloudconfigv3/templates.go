@@ -185,19 +185,14 @@ data:
   server-name-hash-max-size: "1024"
   use-proxy-protocol: "true"
 `
-	setUpEtcdVolume = `
+	mountEtcdVolume = `
 [Unit]
-Description=Mount data volume and set ownership to etcd3 data dir
-Wants=network-online.target
-[Service]
-Type=oneshot
-RemainAfterExit=yes
-TimeoutStartSec=0
-ExecStartPre=/bin/bash -c "mkfs -t ext4 /dev/xvdh; \
-                           mkdir -p /etc/kubernetes/data/etcd; \
-                           mount /dev/xvdh /etc/kubernetes/data/etcd; \
-                           echo '/dev/xvdh /etc/kubernetes/data/etcd ext4 defaults,nofail 0 2' >> /etc/fstab; \
-                           /usr/bin/chown etcd:etcd /etc/kubernetes/data/etcd"
-ExecStart=/usr/bin/chmod -R 700 /etc/kubernetes/data/etcd
+Description=etcd3 data volume
+
+[Mount]
+What=/dev/xvdh
+Where=/etc/kubernetes/data/etcd
+Type=ext4
+Options=nofail
 `
 )
