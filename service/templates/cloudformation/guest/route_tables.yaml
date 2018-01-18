@@ -14,4 +14,12 @@
       Tags:
       - Key: Name
         Value: {{ .PrivateRouteTableName }}
+
+  VPCPeeringRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: {{ .HostClusterCIDR }}
+      VpcPeeringConnectionId:
+        Ref: "VPCPeeringConnection"
 {{end}}

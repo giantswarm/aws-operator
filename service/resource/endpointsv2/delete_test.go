@@ -92,22 +92,24 @@ func Test_Resource_Endpoints_newDeleteChange(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		result, err := newResource.newDeleteChange(context.TODO(), tc.obj, tc.cur, tc.des)
-		if err != nil {
-			t.Errorf("expected '%v' got '%#v'", nil, err)
-		}
-		if tc.expectedEndpoints == nil {
-			if tc.expectedEndpoints != result {
-				t.Errorf("expected '%v' got '%v'", tc.expectedEndpoints, result)
+		t.Run(tc.description, func(t *testing.T) {
+			result, err := newResource.newDeleteChange(context.TODO(), tc.obj, tc.cur, tc.des)
+			if err != nil {
+				t.Errorf("expected '%v' got '%#v'", nil, err)
 			}
-		} else {
-			endpointsToDelete, ok := result.(*apiv1.Endpoints)
-			if !ok {
-				t.Errorf("case expected '%T', got '%T'", endpointsToDelete, result)
+			if tc.expectedEndpoints == nil {
+				if tc.expectedEndpoints != result {
+					t.Errorf("expected '%v' got '%v'", tc.expectedEndpoints, result)
+				}
+			} else {
+				endpointsToDelete, ok := result.(*apiv1.Endpoints)
+				if !ok {
+					t.Errorf("case expected '%T', got '%T'", endpointsToDelete, result)
+				}
+				if tc.expectedEndpoints.Name != endpointsToDelete.Name {
+					t.Errorf("expected %s, got %s", tc.expectedEndpoints.Name, endpointsToDelete.Name)
+				}
 			}
-			if tc.expectedEndpoints.Name != endpointsToDelete.Name {
-				t.Errorf("expected %s, got %s", tc.expectedEndpoints.Name, endpointsToDelete.Name)
-			}
-		}
+		})
 	}
 }

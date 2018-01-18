@@ -175,22 +175,24 @@ func Test_Resource_Endpoints_newUpdateChange(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		result, err := newResource.newUpdateChange(context.TODO(), tc.obj, tc.cur, tc.des)
-		if err != nil {
-			t.Errorf("expected '%v' got '%#v'", nil, err)
-		}
-		if tc.expectedEndpoints == nil {
-			if tc.expectedEndpoints != result {
-				t.Errorf("expected '%v' got '%v'", tc.expectedEndpoints, result)
+		t.Run(tc.description, func(t *testing.T) {
+			result, err := newResource.newUpdateChange(context.TODO(), tc.obj, tc.cur, tc.des)
+			if err != nil {
+				t.Errorf("expected '%v' got '%#v'", nil, err)
 			}
-		} else {
-			endpointsToUpdate, ok := result.(*apiv1.Endpoints)
-			if !ok {
-				t.Errorf("case expected '%T', got '%T'", endpointsToUpdate, result)
+			if tc.expectedEndpoints == nil {
+				if tc.expectedEndpoints != result {
+					t.Errorf("expected '%v' got '%v'", tc.expectedEndpoints, result)
+				}
+			} else {
+				endpointsToUpdate, ok := result.(*apiv1.Endpoints)
+				if !ok {
+					t.Errorf("case expected '%T', got '%T'", endpointsToUpdate, result)
+				}
+				if tc.expectedEndpoints.Name != endpointsToUpdate.Name {
+					t.Errorf("expected %s, got %s", tc.expectedEndpoints.Name, endpointsToUpdate.Name)
+				}
 			}
-			if tc.expectedEndpoints.Name != endpointsToUpdate.Name {
-				t.Errorf("expected %s, got %s", tc.expectedEndpoints.Name, endpointsToUpdate.Name)
-			}
-		}
+		})
 	}
 }
