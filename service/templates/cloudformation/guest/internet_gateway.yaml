@@ -20,7 +20,7 @@
     Type: AWS::EC2::Route
     DependsOn:
       - PublicRouteTable
-      - PrivateRouteTable
+      - InternetGateway
     Properties:
       RouteTableId: !Ref PublicRouteTable
       DestinationCidrBlock: 0.0.0.0/0
