@@ -22,6 +22,9 @@
       Size: 100
       VolumeType: gp2
       AvailabilityZone: !GetAtt MasterInstance.AvailabilityZone
+      Tags:
+      - Key: Name
+        Value: {{ .ClusterID }}-etcd
   MountPoint:
     Type: AWS::EC2::VolumeAttachment
     Properties:
