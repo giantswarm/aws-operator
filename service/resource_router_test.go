@@ -269,7 +269,20 @@ func Test_Service_NewTPRResourceRouter(t *testing.T) {
 			errorMatcher:      nil,
 			resourceRouter:    NewTPRResourceRouter(versionedResources),
 		},
-		// Case 4. Invalid version returns an error.
+		// Case 4. Version 2.0.0 returns all resources except legacy.
+		{
+			customObject: awstpr.CustomObject{
+				Spec: awstpr.Spec{
+					VersionBundle: spec.VersionBundle{
+						Version: "2.0.0",
+					},
+				},
+			},
+			expectedResources: allResources,
+			errorMatcher:      IsInvalidVersion,
+			resourceRouter:    NewTPRResourceRouter(versionedResources),
+		},
+		// Case 5. Invalid version returns an error.
 		{
 			customObject: awstpr.CustomObject{
 				Spec: awstpr.Spec{
