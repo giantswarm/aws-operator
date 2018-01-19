@@ -1025,12 +1025,8 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 		return microerror.Maskf(executionFailedError, fmt.Sprintf("cluster spec is invalid: '%#v'", err))
 	}
 
-	// For new clusters using Cloud Formation there is an OperatorKit resource
-	// for the k8s namespace.
-	if !keyv2.UseCloudFormation(cluster) {
-		if err := s.deleteClusterNamespace(cluster.Spec.Cluster); err != nil {
-			s.logger.Log("error", "could not delete cluster namespace:", err)
-		}
+	if err := s.deleteClusterNamespace(cluster.Spec.Cluster); err != nil {
+		s.logger.Log("error", "could not delete cluster namespace:", err)
 	}
 
 	clients := awsutil.NewClients(s.awsConfig)
@@ -1046,164 +1042,142 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 		s.logger.Log("error", fmt.Sprintf("could not retrieve host amazon account id: '%#v'", err))
 	}
 
-	if !keyv2.UseCloudFormation(cluster) {
-		// Delete masters.
-		s.logger.Log("info", "deleting masters...")
-		if err := s.deleteMachines(deleteMachinesInput{
-			clients:     clients,
-			clusterName: keyv2.ClusterID(cluster),
-			prefix:      prefixMaster,
-		}); err != nil {
-			s.logger.Log("error", fmt.Sprintf("%#v", err))
-		} else {
-			s.logger.Log("info", "deleted masters")
-		}
-	}
-
-	if keyv2.UseCloudFormation(cluster) {
-		// During Cloud Formation migration we need to delete the main stack
-		// so all resoures including the VPC are deleted.
-		stack := awsresources.ASGStack{
-			Client: clients.CloudFormation,
-			Name:   keyv2.MainGuestStackName(cluster),
-		}
-
-		if err := stack.Delete(); err != nil {
-			s.logger.Log("error", fmt.Sprintf("%#v", err))
-		} else {
-			s.logger.Log("info", fmt.Sprintf("deleted cloud formation stack: '%s'", stack.Name))
-		}
+	// Delete masters.
+	s.logger.Log("info", "deleting masters...")
+	if err := s.deleteMachines(deleteMachinesInput{
+		clients:     clients,
+		clusterName: keyv2.ClusterID(cluster),
+		prefix:      prefixMaster,
+	}); err != nil {
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	} else {
-		// Delete workers Auto Scaling Group.
-		asg := awsresources.AutoScalingGroup{
-			Client: clients.AutoScaling,
-			Name:   keyv2.AutoScalingGroupName(cluster, prefixWorker),
-		}
-
-		if err := asg.Delete(); err != nil {
-			s.logger.Log("error", fmt.Sprintf("%#v", err))
-		} else {
-			s.logger.Log("info", "deleted workers auto scaling group")
-		}
-
-		// Delete workers launch configuration.
-		lcInput := launchConfigurationInput{
-			clients: clients,
-			cluster: cluster,
-			prefix:  "worker",
-		}
-		if err := s.deleteLaunchConfiguration(lcInput); err != nil {
-			s.logger.Log("error", fmt.Sprintf("%#v", err))
-		} else {
-			s.logger.Log("info", "deleted worker launch config")
-		}
+		s.logger.Log("info", "deleted masters")
 	}
 
-	if !keyv2.UseCloudFormation(cluster) {
-		// Delete Record Sets.
+	// Delete workers Auto Scaling Group.
+	asg := awsresources.AutoScalingGroup{
+		Client: clients.AutoScaling,
+		Name:   keyv2.AutoScalingGroupName(cluster, prefixWorker),
+	}
 
-		apiLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Kubernetes.API.Domain, cluster)
-		etcdLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Etcd.Domain, cluster)
-		ingressLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Kubernetes.IngressController.Domain, cluster)
+	if err := asg.Delete(); err != nil {
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
+	} else {
+		s.logger.Log("info", "deleted workers auto scaling group")
+	}
+
+	// Delete workers launch configuration.
+	lcInput := launchConfigurationInput{
+		clients: clients,
+		cluster: cluster,
+		prefix:  "worker",
+	}
+	if err := s.deleteLaunchConfiguration(lcInput); err != nil {
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
+	} else {
+		s.logger.Log("info", "deleted worker launch config")
+	}
+
+	// Delete Record Sets.
+	apiLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Kubernetes.API.Domain, cluster)
+	etcdLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Etcd.Domain, cluster)
+	ingressLBName, err := keyv2.LoadBalancerName(cluster.Spec.Cluster.Kubernetes.IngressController.Domain, cluster)
+	if err != nil {
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
+	} else {
+		apiLB, err := awsresources.NewELBFromExisting(apiLBName, clients.ELB)
+		etcdLB, err := awsresources.NewELBFromExisting(etcdLBName, clients.ELB)
+		ingressLB, err := awsresources.NewELBFromExisting(ingressLBName, clients.ELB)
 		if err != nil {
 			s.logger.Log("error", fmt.Sprintf("%#v", err))
 		} else {
-			apiLB, err := awsresources.NewELBFromExisting(apiLBName, clients.ELB)
-			etcdLB, err := awsresources.NewELBFromExisting(etcdLBName, clients.ELB)
-			ingressLB, err := awsresources.NewELBFromExisting(ingressLBName, clients.ELB)
-			if err != nil {
-				s.logger.Log("error", fmt.Sprintf("%#v", err))
-			} else {
-				recordSetInputs := []recordSetInput{
-					{
-						Cluster:      cluster,
-						Client:       clients.Route53,
-						Resource:     apiLB,
-						Domain:       cluster.Spec.Cluster.Kubernetes.API.Domain,
-						HostedZoneID: cluster.Spec.AWS.API.HostedZones,
-						Type:         route53.RRTypeA,
-					},
-					{
-						Cluster:      cluster,
-						Client:       clients.Route53,
-						Resource:     etcdLB,
-						Domain:       cluster.Spec.Cluster.Etcd.Domain,
-						HostedZoneID: cluster.Spec.AWS.Etcd.HostedZones,
-						Type:         route53.RRTypeA,
-					},
-					{
-						Cluster:      cluster,
-						Client:       clients.Route53,
-						Resource:     ingressLB,
-						Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-						HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
-						Type:         route53.RRTypeA,
-					},
-					{
-						Cluster:      cluster,
-						Client:       clients.Route53,
-						Value:        cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-						Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.WildcardDomain,
-						HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
-						Type:         route53.RRTypeCname,
-					},
-				}
+			recordSetInputs := []recordSetInput{
+				{
+					Cluster:      cluster,
+					Client:       clients.Route53,
+					Resource:     apiLB,
+					Domain:       cluster.Spec.Cluster.Kubernetes.API.Domain,
+					HostedZoneID: cluster.Spec.AWS.API.HostedZones,
+					Type:         route53.RRTypeA,
+				},
+				{
+					Cluster:      cluster,
+					Client:       clients.Route53,
+					Resource:     etcdLB,
+					Domain:       cluster.Spec.Cluster.Etcd.Domain,
+					HostedZoneID: cluster.Spec.AWS.Etcd.HostedZones,
+					Type:         route53.RRTypeA,
+				},
+				{
+					Cluster:      cluster,
+					Client:       clients.Route53,
+					Resource:     ingressLB,
+					Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+					HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
+					Type:         route53.RRTypeA,
+				},
+				{
+					Cluster:      cluster,
+					Client:       clients.Route53,
+					Value:        cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+					Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.WildcardDomain,
+					HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
+					Type:         route53.RRTypeCname,
+				},
+			}
 
-				var rsErr error
-				for _, input := range recordSetInputs {
-					if rsErr = s.deleteRecordSet(input); rsErr != nil {
-						s.logger.Log("error", fmt.Sprintf("%#v", rsErr))
-					}
+			var rsErr error
+			for _, input := range recordSetInputs {
+				if rsErr = s.deleteRecordSet(input); rsErr != nil {
+					s.logger.Log("error", fmt.Sprintf("%#v", rsErr))
 				}
-				if rsErr == nil {
-					s.logger.Log("info", "deleted record sets")
-				}
+			}
+			if rsErr == nil {
+				s.logger.Log("info", "deleted record sets")
 			}
 		}
 	}
 
-	if !keyv2.UseCloudFormation(cluster) {
-		// Delete Load Balancers.
-		loadBalancerInputs := []LoadBalancerInput{
-			{
-				Name:    cluster.Spec.Cluster.Kubernetes.API.Domain,
-				Clients: clients,
-				Cluster: cluster,
-			},
-			{
-				Name:    cluster.Spec.Cluster.Etcd.Domain,
-				Clients: clients,
-				Cluster: cluster,
-			},
-			{
-				Name:    cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-				Clients: clients,
-				Cluster: cluster,
-			},
-		}
+	// Delete Load Balancers.
+	loadBalancerInputs := []LoadBalancerInput{
+		{
+			Name:    cluster.Spec.Cluster.Kubernetes.API.Domain,
+			Clients: clients,
+			Cluster: cluster,
+		},
+		{
+			Name:    cluster.Spec.Cluster.Etcd.Domain,
+			Clients: clients,
+			Cluster: cluster,
+		},
+		{
+			Name:    cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+			Clients: clients,
+			Cluster: cluster,
+		},
+	}
 
-		var elbErr error
-		for _, lbInput := range loadBalancerInputs {
-			if elbErr = s.deleteLoadBalancer(lbInput); elbErr != nil {
-				s.logger.Log("error", fmt.Sprintf("%#v", elbErr))
-			}
+	var elbErr error
+	for _, lbInput := range loadBalancerInputs {
+		if elbErr = s.deleteLoadBalancer(lbInput); elbErr != nil {
+			s.logger.Log("error", fmt.Sprintf("%#v", elbErr))
 		}
-		if elbErr == nil {
-			s.logger.Log("info", "deleted ELBs")
-		}
+	}
+	if elbErr == nil {
+		s.logger.Log("info", "deleted ELBs")
+	}
 
-		// Delete route table.
-		var publicRouteTable resources.ResourceWithID
-		publicRouteTable = &awsresources.RouteTable{
-			Name:   keyv2.ClusterID(cluster),
-			Client: clients.EC2,
-			Logger: s.logger,
-		}
-		if err := publicRouteTable.Delete(); err != nil {
-			s.logger.Log("error", fmt.Sprintf("could not delete route table: '%#v'", err))
-		} else {
-			s.logger.Log("info", "deleted route table")
-		}
+	// Delete route table.
+	var publicRouteTable resources.ResourceWithID
+	publicRouteTable = &awsresources.RouteTable{
+		Name:   keyv2.ClusterID(cluster),
+		Client: clients.EC2,
+		Logger: s.logger,
+	}
+	if err := publicRouteTable.Delete(); err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not delete route table: '%#v'", err))
+	} else {
+		s.logger.Log("info", "deleted route table")
 	}
 
 	// Sync VPC.
