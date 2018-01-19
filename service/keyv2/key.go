@@ -108,19 +108,19 @@ func LoadBalancerName(domainName string, cluster v1alpha1.AWSConfig) (string, er
 func MainGuestStackName(customObject v1alpha1.AWSConfig) string {
 	clusterID := ClusterID(customObject)
 
-	return fmt.Sprintf("%s-guest-main", clusterID)
+	return fmt.Sprintf("cluster-%s-guest-main", clusterID)
 }
 
 func MainHostPreStackName(customObject v1alpha1.AWSConfig) string {
 	clusterID := ClusterID(customObject)
 
-	return fmt.Sprintf("%s-host-setup", clusterID)
+	return fmt.Sprintf("cluster-%s-host-setup", clusterID)
 }
 
 func MainHostPostStackName(customObject v1alpha1.AWSConfig) string {
 	clusterID := ClusterID(customObject)
 
-	return fmt.Sprintf("%s-host-main", clusterID)
+	return fmt.Sprintf("cluster-%s-host-main", clusterID)
 }
 
 func MasterImageID(customObject v1alpha1.AWSConfig) string {
