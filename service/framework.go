@@ -150,7 +150,7 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 		}
 	}
 
-	versionedResources, err := newVersionedResources(config, k8sClient, awsConfig, awsHostConfig)
+	versionedResources, err := NewVersionedResources(config, k8sClient, awsConfig, awsHostConfig)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -236,7 +236,7 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 	return crdFramework, nil
 }
 
-func newVersionedResources(config Config, k8sClient kubernetes.Interface, awsConfig awsclient.Config, awsHostConfig awsclient.Config) (map[string][]framework.Resource, error) {
+func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsConfig awsclient.Config, awsHostConfig awsclient.Config) (map[string][]framework.Resource, error) {
 	var err error
 
 	awsClients := awsclient.NewClients(awsConfig)
@@ -488,6 +488,8 @@ func newVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 	// We provide a map of resource lists keyed by the version bundle version
 	// to the resource router.
 	versionedResources := map[string][]framework.Resource{
+		// Clusters without a version use the legacy resource.
+		"":      legacyResources,
 		"0.1.0": legacyResources,
 		"0.2.0": resources,
 		"1.0.0": legacyResources,

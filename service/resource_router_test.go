@@ -43,7 +43,7 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 		AccessKeySecret: "secret",
 	}
 
-	versionedResources, err := newVersionedResources(config, k8sClient, awsConfig, awsHostConfig)
+	versionedResources, err := NewVersionedResources(config, k8sClient, awsConfig, awsHostConfig)
 	if err != nil {
 		t.Fatalf("unexpected error %#v", err)
 	}
