@@ -86,27 +86,6 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 			resourceRouter: NewResourceRouter(versionedResources),
 		},
 		{
-			description: "Cloud Formation version in version bundle so return cloud formation resources",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					VersionBundle: v1alpha1.AWSConfigSpecVersionBundle{
-						Version: "2.0.0",
-					},
-				},
-			},
-			expectedResources: []string{
-				"kmskeyv2",
-				"s3bucketv2",
-				"s3objectv2",
-				"cloudformationv2",
-				"namespacev2",
-				"servicev2",
-				"endpointsv2",
-			},
-			errorMatcher:   nil,
-			resourceRouter: NewResourceRouter(versionedResources),
-		},
-		{
 			description: "Invalid version in version bundle returns error",
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
