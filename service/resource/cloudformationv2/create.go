@@ -29,7 +29,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		err = r.HostClients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
+		err = r.Clients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
 			StackName: stackInput.StackName,
 		})
 		if err != nil {
