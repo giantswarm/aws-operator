@@ -3,6 +3,7 @@
 package integration
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"os"
@@ -81,6 +82,7 @@ func newAWSClient() aWSClient {
 
 var (
 	f *framework
+	c aWSClient
 )
 
 // TestMain allows us to have common setup and teardown steps that are run
@@ -93,6 +95,8 @@ func TestMain(m *testing.M) {
 		log.Printf("unexpected error: %v\n", err)
 		os.Exit(1)
 	}
+
+	c = newAWSClient()
 
 	if err := f.SetUp(); err != nil {
 		log.Printf("unexpected error: %v\n", err)
@@ -115,7 +119,54 @@ func TestMain(m *testing.M) {
 	os.Exit(v)
 }
 
-func TestPodsResolveNames(t *testing.T) {
+func TestGuestReadyAfterMasterReboot(t *testing.T) {
+	log.Println("getting master ID")
+	describeInput := &ec2.DescribeInstancesInput{
+		Filters: []*ec2.Filter{
+			&ec2.Filter{
+				Name: aws.String("tag:Name"),
+				Values: []*string{
+					aws.String(fmt.Sprintf("%s-master", os.Getenv("CLUSTER_NAME"))),
+				},
+			},
+			&ec2.Filter{
+				Name: aws.String("instance-state-name"),
+				Values: []*string{
+					aws.String("running"),
+				},
+			},
+		},
+	}
+	res, err := c.EC2.DescribeInstances(describeInput)
+	if err != nil {
+		t.Errorf("unexpected error getting master id %v", err)
+	}
+	if len(res.Reservations) != 1 {
+		t.Errorf("unexpected number of reservations %d", len(res.Reservations))
+	}
+	if len(res.Reservations[0].Instances) != 1 {
+		t.Errorf("unexpected number of reservations %d", len(res.Reservations[0].Instances))
+	}
+	masterID := res.Reservations[0].Instances[0].InstanceId
+
+	log.Println("rebooting master")
+	rebootInput := &ec2.RebootInstancesInput{
+		InstanceIds: []*string{
+			masterID,
+		},
+	}
+	_, err = c.EC2.RebootInstances(rebootInput)
+	if err != nil {
+		t.Errorf("unexpected error rebooting  master %v", err)
+	}
+
+	if err := f.WaitForAPIDown(); err != nil {
+		t.Errorf("unexpected error wainting for master shutting down %v", err)
+	}
+
+	if err := f.WaitForGuestReady(); err != nil {
+		t.Errorf("unexpected error waiting for guest cluster ready, %v", err)
+	}
 }
 
 func operatorSetup() error {
@@ -181,8 +232,7 @@ func writeAWSResourceValues() error {
 	}
 	defer f.Close()
 
-	awsClient := newAWSClient()
-	vpc, err := newAWSVPCBlock(awsClient)
+	vpc, err := newAWSVPCBlock(c)
 	if err != nil {
 		return microerror.Mask(err)
 	}

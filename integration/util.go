@@ -29,8 +29,16 @@ func runCmd(cmdStr string) error {
 }
 
 func waitFor(f func() error) error {
+	return baseWait(backoff.NewExponentialBackOff(), f)
+}
+
+func waitConstantFor(f func() error) error {
+	return baseWait(backoff.NewConstantBackOff(1*time.Second), f)
+}
+
+func baseWait(b backoff.BackOff, f func() error) error {
 	timeout := time.After(defaultTimeout * time.Second)
-	ticker := backoff.NewTicker(backoff.NewExponentialBackOff())
+	ticker := backoff.NewTicker(b)
 
 	for {
 		select {

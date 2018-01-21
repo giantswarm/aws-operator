@@ -349,6 +349,7 @@ func (f *framework) WaitForGuestReady() error {
 	if err := f.waitForNodesUp(); err != nil {
 		return microerror.Mask(err)
 	}
+	log.Println("Guest cluster ready")
 	return nil
 }
 
@@ -398,4 +399,22 @@ func (f *framework) waitForAPIUp() error {
 	}
 
 	return waitFor(apiUp)
+}
+
+func (f *framework) WaitForAPIDown() error {
+	apiDown := func() error {
+		_, err := f.guestCS.
+			CoreV1().
+			Services("default").
+			Get("kubernetes", metav1.GetOptions{})
+
+		if err == nil {
+			return microerror.Mask(fmt.Errorf("API up"))
+		}
+		log.Printf("k8s API down: %v\n", err)
+		return nil
+	}
+
+	log.Printf("waiting for k8s API down\n")
+	return waitConstantFor(apiDown)
 }
