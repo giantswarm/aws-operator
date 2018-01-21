@@ -506,7 +506,7 @@ func Test_WorkerInstanceType(t *testing.T) {
 }
 
 func Test_MainGuestStackName(t *testing.T) {
-	expected := "xyz-guest-main"
+	expected := "cluster-xyz-guest-main"
 
 	cluster := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
@@ -523,7 +523,7 @@ func Test_MainGuestStackName(t *testing.T) {
 }
 
 func Test_MainHostPreStackName(t *testing.T) {
-	expected := "xyz-host-setup"
+	expected := "cluster-xyz-host-setup"
 
 	cluster := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
@@ -540,7 +540,7 @@ func Test_MainHostPreStackName(t *testing.T) {
 }
 
 func Test_MainHostPostStackName(t *testing.T) {
-	expected := "xyz-host-main"
+	expected := "cluster-xyz-host-main"
 
 	cluster := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{

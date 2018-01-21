@@ -43,7 +43,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	r.logger.LogCtx(ctx, "debug", "found the S3 objects")
 
 	for _, object := range result.Contents {
-		body, err := r.getBucketObjectBody(bucketName, *object.Key)
+		body, err := r.getBucketObjectBody(ctx, bucketName, *object.Key)
 		if err != nil {
 			return output, microerror.Mask(err)
 		}
@@ -58,7 +58,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	return output, nil
 }
 
-func (r *Resource) getBucketObjectBody(bucketName string, keyName string) (string, error) {
+func (r *Resource) getBucketObjectBody(ctx context.Context, bucketName string, keyName string) (string, error) {
 	var body string
 
 	input := &s3.GetObjectInput{
@@ -67,7 +67,7 @@ func (r *Resource) getBucketObjectBody(bucketName string, keyName string) (strin
 	}
 	result, err := r.awsClients.S3.GetObject(input)
 	if IsObjectNotFound(err) || IsBucketNotFound(err) {
-		r.logger.Log("info", fmt.Sprintf("did not find S3 object '%s'", keyName))
+		r.logger.LogCtx(ctx, "info", fmt.Sprintf("did not find S3 object '%s'", keyName))
 
 		// fall through
 		return body, nil

@@ -26,7 +26,7 @@ func Test_Resource_Cloudformation_GetDesiredState(t *testing.T) {
 					},
 				},
 			},
-			expectedName: "5xchu-guest-main",
+			expectedName: "cluster-5xchu-guest-main",
 		},
 	}
 
