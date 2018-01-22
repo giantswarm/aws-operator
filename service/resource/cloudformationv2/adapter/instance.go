@@ -5,6 +5,7 @@ import (
 
 	"github.com/giantswarm/microerror"
 
+	"github.com/giantswarm/aws-operator/service/cloudconfigv3"
 	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
@@ -36,10 +37,10 @@ func (i *instanceAdapter) getInstance(cfg Config) error {
 	s3URI := fmt.Sprintf("%s-g8s-%s", accountID, clusterID)
 
 	cloudConfigConfig := SmallCloudconfigConfig{
-		MachineType:    prefixMaster,
-		Region:         cfg.CustomObject.Spec.AWS.Region,
-		S3URI:          s3URI,
-		ClusterVersion: keyv2.ClusterVersion(cfg.CustomObject),
+		MachineType:        prefixMaster,
+		Region:             cfg.CustomObject.Spec.AWS.Region,
+		S3URI:              s3URI,
+		CloudConfigVersion: cloudconfigv3.MasterCloudConfigVersion,
 	}
 	smallCloudConfig, err := SmallCloudconfig(cloudConfigConfig)
 	if err != nil {

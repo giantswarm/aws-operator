@@ -11,6 +11,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
+	"github.com/giantswarm/aws-operator/service/cloudconfigv3"
 	"github.com/giantswarm/aws-operator/service/keyv2"
 	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2/adapter"
 )
@@ -24,13 +25,13 @@ func newMainStack(customObject v1alpha1.AWSConfig) (StackState, error) {
 	if workers > 0 {
 		imageID = customObject.Spec.AWS.Workers[0].ImageID
 	}
-	clusterVersion := keyv2.ClusterVersion(customObject)
+	cloudConfigVersion := cloudconfigv3.MasterCloudConfigVersion
 
 	mainCF := StackState{
 		Name:           stackName,
 		Workers:        strconv.Itoa(workers),
 		ImageID:        imageID,
-		ClusterVersion: clusterVersion,
+		ClusterVersion: cloudConfigVersion,
 	}
 
 	return mainCF, nil
