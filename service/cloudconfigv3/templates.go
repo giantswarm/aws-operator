@@ -190,6 +190,7 @@ data:
 Description=Formats EBS /dev/xvdb volume
 After=dev-xvdh.device
 Requires=dev-xvdh.device
+ConditionFirstBoot=true
 
 [Service]
 Type=oneshot

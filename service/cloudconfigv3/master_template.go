@@ -243,7 +243,7 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: formatEtcdVolume,
 			Name:         "format-etcd-ebs.service",
-			Enable:       false,
+			Enable:       true,
 			Command:      "start",
 		},
 		// Mount etcd EBS volume.
