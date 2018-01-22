@@ -187,30 +187,28 @@ data:
 `
 	formatEtcdVolume = `
 [Unit]
-Description=Formats EBS /dev/xvdb volume
-After=dev-xvdh.device
-Requires=dev-xvdh.device
-ConditionFirstBoot=true
+Description=Formats EBS /dev/xvdh volume
+ConditionPathExists=!/var/lib/etcd-volume-formated
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/sbin/wipefs -f /dev/xvdh
 ExecStart=/usr/sbin/mkfs.ext4 /dev/xvdh
+ExecStartPost=/usr/bin/touch /var/lib/etcd-volume-formated
+
+[Install]
+WantedBy=multi-user.target
 `
 	mountEtcdVolume = `
 [Unit]
-Description=Mounts etcd3 data volume
+Description=etcd3 data volume
 After=format-etcd-ebs.service
-Requires=format-etcd-ebs.service
+Before=set-ownership-etcd-data-dir.service etcd3.service
 
 [Mount]
 What=/dev/xvdh
 Where=/etc/kubernetes/data/etcd
 Type=ext4
-Options=nofail
-
-[Install]
-WantedBy=multi-user.target
+LazyUnmount=yes
 `
 )
