@@ -185,14 +185,31 @@ data:
   server-name-hash-max-size: "1024"
   use-proxy-protocol: "true"
 `
+	formatEtcdVolume = `
+[Unit]
+Description=Formats EBS /dev/xvdb volume
+After=dev-xvdh.device
+Requires=dev-xvdh.device
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/wipefs -f /dev/xvdh
+ExecStart=/usr/sbin/mkfs.ext4 /dev/xvdh
+`
 	mountEtcdVolume = `
 [Unit]
-Description=etcd3 data volume
+Description=Mounts etcd3 data volume
+After=format-etcd-ebs.service
+Requires=format-etcd-ebs.service
 
 [Mount]
 What=/dev/xvdh
 Where=/etc/kubernetes/data/etcd
 Type=ext4
 Options=nofail
+
+[Install]
+WantedBy=multi-user.target
 `
 )
