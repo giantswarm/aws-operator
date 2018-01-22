@@ -145,7 +145,7 @@ func TestGuestReadyAfterMasterReboot(t *testing.T) {
 		t.Errorf("unexpected number of reservations %d", len(res.Reservations))
 	}
 	if len(res.Reservations[0].Instances) != 1 {
-		t.Errorf("unexpected number of reservations %d", len(res.Reservations[0].Instances))
+		t.Errorf("unexpected number of instances %d", len(res.Reservations[0].Instances))
 	}
 	masterID := res.Reservations[0].Instances[0].InstanceId
 
@@ -161,7 +161,7 @@ func TestGuestReadyAfterMasterReboot(t *testing.T) {
 	}
 
 	if err := f.WaitForAPIDown(); err != nil {
-		t.Errorf("unexpected error wainting for master shutting down %v", err)
+		t.Errorf("unexpected error waiting for master shutting down %v", err)
 	}
 
 	if err := f.WaitForGuestReady(); err != nil {
