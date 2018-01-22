@@ -25,22 +25,10 @@ func NewResourceRouter(resources map[string][]framework.Resource) func(ctx conte
 			return enabledResources, microerror.Mask(err)
 		}
 
-		switch keyv2.VersionBundleVersion(customObject) {
-		case keyv2.LegacyVersion:
-			// Legacy version so only enable the legacy resource.
-			enabledResources = resources[keyv2.LegacyVersion]
-		case keyv2.CloudFormationVersion:
-			// Cloud Formation transitional version so enable all resources.
-			enabledResources = resources[keyv2.CloudFormationVersion]
-		case "1.0.0":
-			// Kubernetes update to 1.8.4.
-			enabledResources = resources["1.0.0"]
-		case "":
-			// Default to the legacy resource for custom objects without a version
-			// bundle.
-			enabledResources = resources[keyv2.LegacyVersion]
-		default:
-			return enabledResources, microerror.Maskf(invalidVersionError, "version '%s' in version bundle is invalid", keyv2.VersionBundleVersion(customObject))
+		version := keyv2.VersionBundleVersion(customObject)
+		enabledResources, ok := resources[version]
+		if !ok {
+			return enabledResources, microerror.Maskf(invalidVersionError, "version '%s' in version bundle is invalid", version)
 		}
 
 		return enabledResources, nil
