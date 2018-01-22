@@ -38,7 +38,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/cloudconfigv2"
 	"github.com/giantswarm/aws-operator/service/cloudconfigv3"
 	"github.com/giantswarm/aws-operator/service/keyv1"
-	"github.com/giantswarm/aws-operator/service/keyv2"
 	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2"
 	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2/adapter"
 	"github.com/giantswarm/aws-operator/service/resource/endpointsv2"
@@ -122,28 +121,6 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 		}
 	}
 
-	var certWatcher *certificatetpr.Service
-	{
-		certConfig := certificatetpr.DefaultServiceConfig()
-		certConfig.K8sClient = k8sClient
-		certConfig.Logger = config.Logger
-		certWatcher, err = certificatetpr.NewService(certConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var keyWatcher *randomkeytpr.Service
-	{
-		keyConfig := randomkeytpr.DefaultServiceConfig()
-		keyConfig.K8sClient = k8sClient
-		keyConfig.Logger = config.Logger
-		keyWatcher, err = randomkeytpr.NewService(keyConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var awsConfig awsclient.Config
 	{
 		awsConfig = awsclient.Config{
@@ -173,6 +150,95 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 		}
 	}
 
+	versionedResources, err := NewVersionedResources(config, k8sClient, awsConfig, awsHostConfig)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var clientSet *versioned.Clientset
+	{
+		var c *rest.Config
+
+		if config.Viper.GetBool(config.Flag.Service.Kubernetes.InCluster) {
+			config.Logger.Log("debug", "creating in-cluster config")
+
+			c, err = rest.InClusterConfig()
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+		} else {
+			config.Logger.Log("debug", "creating out-cluster config")
+
+			c = &rest.Config{
+				Host: config.Viper.GetString(config.Flag.Service.Kubernetes.Address),
+				TLSClientConfig: rest.TLSClientConfig{
+					CAFile:   config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CAFile),
+					CertFile: config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CrtFile),
+					KeyFile:  config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.KeyFile),
+				},
+			}
+		}
+
+		clientSet, err = versioned.NewForConfig(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	// TODO remove after migration.
+	migrateTPRsToCRDs(config.Logger, clientSet)
+
+	var newWatcherFactory informer.WatcherFactory
+	{
+		newWatcherFactory = func() (watch.Interface, error) {
+			watcher, err := clientSet.ProviderV1alpha1().AWSConfigs("").Watch(apismetav1.ListOptions{})
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+
+			return watcher, nil
+		}
+	}
+
+	var newInformer *informer.Informer
+	{
+		c := informer.DefaultConfig()
+
+		c.WatcherFactory = newWatcherFactory
+
+		newInformer, err = informer.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
+		return ctx, nil
+	}
+
+	var crdFramework *framework.Framework
+	{
+		c := framework.DefaultConfig()
+
+		c.CRD = v1alpha1.NewAWSConfigCRD()
+		c.CRDClient = crdClient
+		c.Informer = newInformer
+		c.InitCtxFunc = initCtxFunc
+		c.Logger = config.Logger
+		c.ResourceRouter = NewResourceRouter(versionedResources)
+
+		crdFramework, err = framework.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	return crdFramework, nil
+}
+
+func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsConfig awsclient.Config, awsHostConfig awsclient.Config) (map[string][]framework.Resource, error) {
+	var err error
+
 	awsClients := awsclient.NewClients(awsConfig)
 	var awsService *awsservice.Service
 	{
@@ -188,6 +254,28 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 	}
 
 	awsHostClients := awsclient.NewClients(awsHostConfig)
+
+	var certWatcher *certificatetpr.Service
+	{
+		certConfig := certificatetpr.DefaultServiceConfig()
+		certConfig.K8sClient = k8sClient
+		certConfig.Logger = config.Logger
+		certWatcher, err = certificatetpr.NewService(certConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var keyWatcher *randomkeytpr.Service
+	{
+		keyConfig := randomkeytpr.DefaultServiceConfig()
+		keyConfig.K8sClient = k8sClient
+		keyConfig.Logger = config.Logger
+		keyWatcher, err = randomkeytpr.NewService(keyConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
 
 	// ccServicev2 is used by the legacyv2 resource.
 	var ccServiceV2 *cloudconfigv2.CloudConfig
@@ -400,90 +488,14 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 	// We provide a map of resource lists keyed by the version bundle version
 	// to the resource router.
 	versionedResources := map[string][]framework.Resource{
-		keyv2.LegacyVersion:         legacyResources,
-		keyv2.CloudFormationVersion: resources,
-		"1.0.0":                     legacyResources,
+		// Clusters without a version use the legacy resource.
+		"":      legacyResources,
+		"0.1.0": legacyResources,
+		"0.2.0": resources,
+		"1.0.0": legacyResources,
 	}
 
-	var clientSet *versioned.Clientset
-	{
-		var c *rest.Config
-
-		if config.Viper.GetBool(config.Flag.Service.Kubernetes.InCluster) {
-			config.Logger.Log("debug", "creating in-cluster config")
-
-			c, err = rest.InClusterConfig()
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-		} else {
-			config.Logger.Log("debug", "creating out-cluster config")
-
-			c = &rest.Config{
-				Host: config.Viper.GetString(config.Flag.Service.Kubernetes.Address),
-				TLSClientConfig: rest.TLSClientConfig{
-					CAFile:   config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CAFile),
-					CertFile: config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CrtFile),
-					KeyFile:  config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.KeyFile),
-				},
-			}
-		}
-
-		clientSet, err = versioned.NewForConfig(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	// TODO remove after migration.
-	migrateTPRsToCRDs(config.Logger, clientSet)
-
-	var newWatcherFactory informer.WatcherFactory
-	{
-		newWatcherFactory = func() (watch.Interface, error) {
-			watcher, err := clientSet.ProviderV1alpha1().AWSConfigs("").Watch(apismetav1.ListOptions{})
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-
-			return watcher, nil
-		}
-	}
-
-	var newInformer *informer.Informer
-	{
-		c := informer.DefaultConfig()
-
-		c.WatcherFactory = newWatcherFactory
-
-		newInformer, err = informer.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
-		return ctx, nil
-	}
-
-	var crdFramework *framework.Framework
-	{
-		c := framework.DefaultConfig()
-
-		c.CRD = v1alpha1.NewAWSConfigCRD()
-		c.CRDClient = crdClient
-		c.Informer = newInformer
-		c.InitCtxFunc = initCtxFunc
-		c.Logger = config.Logger
-		c.ResourceRouter = NewResourceRouter(versionedResources)
-
-		crdFramework, err = framework.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	return crdFramework, nil
+	return versionedResources, nil
 }
 
 func newCustomObjectFramework(config Config) (*framework.Framework, error) {
