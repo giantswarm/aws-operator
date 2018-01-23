@@ -1,19 +1,17 @@
 package alerter
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
-	"github.com/giantswarm/awstpr"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/tpr"
-	"k8s.io/client-go/kubernetes"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/keyv1"
+	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
 const (
@@ -24,7 +22,7 @@ const (
 // Config represents the configuration used to create a new service.
 type Config struct {
 	// Dependencies.
-	K8sClient kubernetes.Interface
+	G8sClient versioned.Interface
 	Logger    micrologger.Logger
 
 	// Settings.
@@ -37,7 +35,7 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
-		K8sClient: nil,
+		G8sClient: nil,
 		Logger:    nil,
 
 		// Settings.
@@ -56,8 +54,7 @@ type Service struct {
 
 	// Internals.
 	awsClients awsutil.Clients
-	k8sClient  kubernetes.Interface
-	tpr        *tpr.TPR
+	g8sClient  versioned.Interface
 }
 
 // New creates a new configured service.
@@ -66,8 +63,8 @@ func New(config Config) (*Service, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
-	if config.K8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.K8sClient must not be empty")
+	if config.G8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.G8sClient must not be empty")
 	}
 
 	// Settings.
@@ -83,25 +80,6 @@ func New(config Config) (*Service, error) {
 
 	awsClients := awsutil.NewClients(config.AwsConfig)
 
-	var err error
-
-	var newTPR *tpr.TPR
-	{
-		tprConfig := tpr.DefaultConfig()
-
-		tprConfig.K8sClient = config.K8sClient
-		tprConfig.Logger = config.Logger
-
-		tprConfig.Description = awstpr.Description
-		tprConfig.Name = awstpr.Name
-		tprConfig.Version = awstpr.VersionV1
-
-		newTPR, err = tpr.New(tprConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	newService := &Service{
 		// Dependencies.
 		logger: config.Logger,
@@ -111,8 +89,7 @@ func New(config Config) (*Service, error) {
 
 		// Internals.
 		awsClients: awsClients,
-		k8sClient:  config.K8sClient,
-		tpr:        newTPR,
+		g8sClient:  config.G8sClient,
 	}
 
 	return newService, nil
@@ -159,22 +136,13 @@ func (s *Service) OrphanResourcesAlert() error {
 func (s Service) ListClusters() ([]string, error) {
 	clusterIDs := []string{}
 
-	endpoint := s.tpr.Endpoint("")
-	restClient := s.k8sClient.Core().RESTClient()
-
-	clientResponse := restClient.Get().AbsPath(endpoint).Do()
-	b, err := clientResponse.Raw()
+	awsConfigs, err := s.g8sClient.ProviderV1alpha1().AWSConfigs("").List(v1.ListOptions{})
 	if err != nil {
 		return []string{}, microerror.Mask(err)
 	}
 
-	clusterList := &awstpr.List{}
-	if err := json.Unmarshal(b, clusterList); err != nil {
-		return []string{}, microerror.Mask(err)
-	}
-
-	for _, cluster := range clusterList.Items {
-		clusterIDs = append(clusterIDs, keyv1.ClusterID(*cluster))
+	for _, awsConfig := range awsConfigs.Items {
+		clusterIDs = append(clusterIDs, keyv2.ClusterID(awsConfig))
 	}
 
 	return clusterIDs, nil

@@ -5,13 +5,14 @@ package service
 import (
 	"sync"
 
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microendpoint/service/version"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/client/k8sclient"
+	"github.com/giantswarm/operatorkit/client/k8srestconfig"
 	"github.com/giantswarm/operatorkit/framework"
 	"github.com/spf13/viper"
-	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
@@ -93,22 +94,6 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var k8sClient kubernetes.Interface
-	{
-		k8sConfig := k8sclient.DefaultConfig()
-		k8sConfig.Address = config.Viper.GetString(config.Flag.Service.Kubernetes.Address)
-		k8sConfig.InCluster = config.Viper.GetBool(config.Flag.Service.Kubernetes.InCluster)
-		k8sConfig.Logger = config.Logger
-		k8sConfig.TLS.CAFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CAFile)
-		k8sConfig.TLS.CrtFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CrtFile)
-		k8sConfig.TLS.KeyFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.KeyFile)
-
-		k8sClient, err = k8sclient.New(k8sConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var crdFramework *framework.Framework
 	{
 		crdFramework, err = newCRDFramework(config)
@@ -119,6 +104,29 @@ func New(config Config) (*Service, error) {
 
 	installationName := config.Viper.GetString(config.Flag.Service.Installation.Name)
 
+	var restConfig *rest.Config
+	{
+		c := k8srestconfig.DefaultConfig()
+
+		c.Logger = config.Logger
+
+		c.Address = config.Viper.GetString(config.Flag.Service.Kubernetes.Address)
+		c.InCluster = config.Viper.GetBool(config.Flag.Service.Kubernetes.InCluster)
+		c.TLS.CAFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CAFile)
+		c.TLS.CrtFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CrtFile)
+		c.TLS.KeyFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.KeyFile)
+
+		restConfig, err = k8srestconfig.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	g8sClient, err := versioned.NewForConfig(restConfig)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	var alerterService *alerter.Service
 	{
 		// Set the region, in the operator this comes from the cluster object.
@@ -127,7 +135,7 @@ func New(config Config) (*Service, error) {
 		alerterConfig := alerter.DefaultConfig()
 		alerterConfig.AwsConfig = awsConfig
 		alerterConfig.InstallationName = installationName
-		alerterConfig.K8sClient = k8sClient
+		alerterConfig.G8sClient = g8sClient
 		alerterConfig.Logger = config.Logger
 
 		alerterService, err = alerter.New(alerterConfig)
