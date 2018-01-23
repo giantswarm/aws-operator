@@ -188,6 +188,8 @@ data:
 	formatEtcdVolume = `
 [Unit]
 Description=Formats EBS /dev/xvdh volume
+Requires=dev-xvdh.device
+After=dev-xvdh.device
 ConditionPathExists=!/var/lib/etcd-volume-formated
 
 [Service]
@@ -202,6 +204,7 @@ WantedBy=multi-user.target
 	mountEtcdVolume = `
 [Unit]
 Description=etcd3 data volume
+Requires=format-etcd-ebs.service
 After=format-etcd-ebs.service
 Before=set-ownership-etcd-data-dir.service etcd3.service
 
@@ -209,6 +212,8 @@ Before=set-ownership-etcd-data-dir.service etcd3.service
 What=/dev/xvdh
 Where=/etc/kubernetes/data/etcd
 Type=ext4
-LazyUnmount=yes
+
+[Install]
+WantedBy=multi-user.target
 `
 )
