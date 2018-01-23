@@ -26,10 +26,11 @@ type securityGroupRule struct {
 }
 
 const (
-	allPorts         = -1
-	kubeletPort      = 10250
-	nodeExporterPort = 10300
-	sshPort          = 22
+	allPorts             = -1
+	kubeletPort          = 10250
+	nodeExporterPort     = 10300
+	kubeStateMetricsPort = 10301
+	sshPort              = 22
 
 	allProtocols = "-1"
 	tcpProtocol  = "tcp"
@@ -77,6 +78,12 @@ func (s *securityGroupsAdapter) getMasterRules(customObject v1alpha1.AWSConfig, 
 			Protocol:   tcpProtocol,
 			SourceCIDR: hostClusterCIDR,
 		},
+		// Allow traffic from host cluster CIDR to 10301 for kube-state-metrics scraping.
+		{
+			Port:       kubeStateMetricsPort,
+			Protocol:   tcpProtocol,
+			SourceCIDR: hostClusterCIDR,
+		},
 		// Only allow ssh traffic from the host cluster.
 		{
 			Port:       sshPort,
@@ -115,6 +122,12 @@ func (s *securityGroupsAdapter) getWorkerRules(customObject v1alpha1.AWSConfig, 
 		// Allow traffic from host cluster CIDR to 10300 for node-exporter scraping.
 		{
 			Port:       nodeExporterPort,
+			Protocol:   tcpProtocol,
+			SourceCIDR: hostClusterCIDR,
+		},
+		// Allow traffic from host cluster CIDR to 10301 for kube-state-metrics scraping.
+		{
+			Port:       kubeStateMetricsPort,
 			Protocol:   tcpProtocol,
 			SourceCIDR: hostClusterCIDR,
 		},
