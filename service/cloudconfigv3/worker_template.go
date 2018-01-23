@@ -7,6 +7,12 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
+const (
+	// WorkerCloudConfigVersion defines the version of k8scloudconfig in use.
+	// It is used in the main stack output and S3 object paths.
+	WorkerCloudConfigVersion = "v_3_0_0"
+)
+
 // NewWorkerTemplate generates a new worker cloud config template and returns it
 // as a base64 encoded string.
 func (c *CloudConfig) NewWorkerTemplate(customObject v1alpha1.AWSConfig, certs certificatetpr.CompactTLSAssets) (string, error) {

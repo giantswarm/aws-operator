@@ -8,6 +8,12 @@ import (
 	"github.com/giantswarm/randomkeytpr"
 )
 
+const (
+	// MasterCloudConfigVersion defines the version of k8scloudconfig in use.
+	// It is used in the main stack output and S3 object paths.
+	MasterCloudConfigVersion = "v_3_0_0"
+)
+
 // NewMasterTemplate generates a new master cloud config template and returns it
 // as a base64 encoded string.
 func (c *CloudConfig) NewMasterTemplate(customObject v1alpha1.AWSConfig, certs certificatetpr.CompactTLSAssets, keys randomkeytpr.CompactRandomKeyAssets) (string, error) {
