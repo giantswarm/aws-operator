@@ -493,6 +493,7 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 		"0.1.0": legacyResources,
 		"0.2.0": resources,
 		"1.0.0": legacyResources,
+		"2.0.0": resources,
 	}
 
 	return versionedResources, nil
