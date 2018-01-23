@@ -1,9 +1,17 @@
 {{define "outputs"}}
 Outputs:
-  WorkersOutput:
+  MasterImageID:
+    Value: {{ .MasterImageID }}
+  MasterInstanceType:
+    Value: {{ .MasterInstanceType }}
+  MasterCloudConfigVersion:
+    Value: {{ .MasterCloudConfigVersion }}
+  WorkerCount:
     Value: {{ .ASGMinSize }}
-  ImageIDOutput:
+  WorkerImageID:
     Value: {{ .WorkerImageID }}
-  ClusterVersionOutput:
-    Value: {{ .ClusterVersion }}
+  WorkerInstanceType:
+    Value: {{ .WorkerInstanceType }}
+  WorkerCloudConfigVersion:
+    Value: {{ .WorkerCloudConfigVersion }}
 {{end}}
