@@ -54,18 +54,16 @@ type AzureConfig struct {
 }
 
 type AzureConfigSpec struct {
-	Cluster Cluster              `json:"cluster" yaml:"cluster"`
-	Azure   AzureConfigSpecAzure `json:"azure" yaml:"azure"`
+	Cluster       Cluster                      `json:"cluster" yaml:"cluster"`
+	Azure         AzureConfigSpecAzure         `json:"azure" yaml:"azure"`
+	VersionBundle AzureConfigSpecVersionBundle `json:"versionBundle" yaml:"versionBundle"`
 }
 
 type AzureConfigSpecAzure struct {
 	DNSZones    AzureConfigSpecAzureDNSZones    `json:"dnsZones" yaml:"dnsZones"`
 	HostCluster AzureConfigSpecAzureHostCluster `json:"hostCluster" yaml:"hostCluster"`
 	// Location is the region for the resource group.
-	Location string `json:"location" yaml:"location"`
-	// StorageSKUName is the name of storage capability.
-	// https://docs.microsoft.com/en-us/rest/api/storagerp/StorageAccounts/Create#definitions_skuname
-	StorageSKUName string                             `json:"storageSKUName" yaml:"storageSKUName"`
+	Location       string                             `json:"location" yaml:"location"`
 	VirtualNetwork AzureConfigSpecAzureVirtualNetwork `json:"virtualNetwork" yaml:"virtualNetwork"`
 
 	Masters []AzureConfigSpecAzureNode `json:"masters" yaml:"masters"`
@@ -102,33 +100,23 @@ type AzureConfigSpecAzureHostCluster struct {
 type AzureConfigSpecAzureVirtualNetwork struct {
 	// CIDR is the CIDR for the Virtual Network.
 	CIDR string `json:"cidr" yaml:"cidr"`
-	// MasterSubnetCIDR is the CIDR for the master subnet,
+
+	// MasterSubnetCIDR is the CIDR for the master subnet.
 	MasterSubnetCIDR string `json:"masterSubnetCIDR" yaml:"masterSubnetCIDR"`
-	// WorkerSubnetCIDR is the CIDR for the worker subnet,
+	// WorkerSubnetCIDR is the CIDR for the worker subnet.
 	WorkerSubnetCIDR string `json:"workerSubnetCIDR" yaml:"workerSubnetCIDR"`
+
+	// CalicoSubnetCIDR is the CIDR for the calico subnet. It has to be
+	// also a worker subnet (Azure limitation).
+	CalicoSubnetCIDR string `json:"calicoSubnetCIDR" yaml:"calicoSubnetCIDR"`
 }
 
 type AzureConfigSpecAzureNode struct {
-	// AdminUsername is the vm administrator username
-	AdminUsername string `json:"adminUsername" yaml:"adminUsername"`
-	//  AdminSSHKeyData is the vm administrator ssh public key
-	AdminSSHKeyData string `json:"adminSSHKeyData" yaml:"adminSSHKeyData"`
-	// DataDiskSizeGB is the vm data disk size in GB
-	DataDiskSizeGB int `json:"dataDiskSizeGB" yaml:"dataDiskSizeGB"`
-	// OSImage is the vm OS image object
-	OSImage AzureConfigSpecAzureNodeOSImage `json:"osImage" yaml:"osImage"`
 	// VMSize is the master vm size (e.g. Standard_A1)
 	VMSize string `json:"vmSize" yaml:"vmSize"`
 }
 
-type AzureConfigSpecAzureNodeOSImage struct {
-	// Publisher is the image publisher (e.g GiantSwarm)
-	Publisher string `json:"publisher" yaml:"publisher"`
-	// Offer is the image offered by the publisher (e.g. CoreOS)
-	Offer string `json:"offer" yaml:"offer"`
-	// SKU is the image SKU (e.g. Alpha)
-	SKU string `json:"sku" yaml:"sku"`
-	// Version is the image version (e.g. 1465.7.0)
+type AzureConfigSpecVersionBundle struct {
 	Version string `json:"version" yaml:"version"`
 }
 
