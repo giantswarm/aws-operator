@@ -36,6 +36,9 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 				CalicoClientCrt: "123456789-super-magic-calico-client-crt",
 				CalicoClientKey: "123456789-super-magic-calico-client-key",
 			},
+			ClusterKeys: randomkeytpr.CompactRandomKeyAssets{
+				APIServerEncryptionKey: "fekhfiwoiqhoifhwqefoiqwefoikqhwef",
+			},
 		},
 	}
 
@@ -76,6 +79,12 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 		t.Run("VerifyTLSAssetsDecryptionUnit", func(t *testing.T) {
 			if !strings.Contains(decoded, "- name: decrypt-tls-assets.service") {
 				t.Fatalf("expected %#v got %#v", "cloud config to contain unit decrypt-tls-assets.service", "none")
+			}
+		})
+
+		t.Run("VerifyAPIServerEncryptionKey", func(t *testing.T) {
+			if !strings.Contains(decoded, "fekhfiwoiqhoifhwqefoiqwefoikqhwef") {
+				t.Fatalf("expected %#v got %#v", "cloud config to contain apiserver encryption key", "none")
 			}
 		})
 	}

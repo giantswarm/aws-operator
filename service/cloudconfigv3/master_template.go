@@ -21,6 +21,7 @@ func (c *CloudConfig) NewMasterTemplate(customObject v1alpha1.AWSConfig, certs c
 
 	var params k8scloudconfig.Params
 	{
+		params.ApiserverEncryptionKey = keys.APIServerEncryptionKey
 		params.Cluster = customObject.Spec.Cluster
 		params.EtcdPort = customObject.Spec.Cluster.Etcd.Port
 		params.Extension = &MasterExtension{
