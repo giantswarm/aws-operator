@@ -14,7 +14,6 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 		description                      string
 		customObject                     v1alpha1.AWSConfig
 		expectedError                    bool
-		expectedImageID                  string
 		expectedInstanceType             string
 		expectedAssociatePublicIPAddress bool
 		expectedBlockDeviceMappings      []BlockDeviceMapping
@@ -29,14 +28,12 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 					AWS: v1alpha1.AWSConfigSpecAWS{
 						Workers: []v1alpha1.AWSConfigSpecAWSNode{
 							v1alpha1.AWSConfigSpecAWSNode{
-								ImageID:      "myimageid",
 								InstanceType: "myinstancetype",
 							},
 						},
 					},
 				},
 			},
-			expectedImageID:                  "myimageid",
 			expectedInstanceType:             "myinstancetype",
 			expectedAssociatePublicIPAddress: false,
 			expectedBlockDeviceMappings: []BlockDeviceMapping{
@@ -70,9 +67,6 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 				t.Errorf("unexpected error %v", err)
 			}
 
-			if a.WorkerImageID != tc.expectedImageID {
-				t.Errorf("unexpected ImageID, got %q, want %q", a.WorkerImageID, tc.expectedImageID)
-			}
 			if a.WorkerInstanceType != tc.expectedInstanceType {
 				t.Errorf("unexpected InstanceType, got %q, want %q", a.WorkerInstanceType, tc.expectedInstanceType)
 			}

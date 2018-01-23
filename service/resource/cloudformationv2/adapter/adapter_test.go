@@ -30,16 +30,22 @@ func TestAdapterGuestMain(t *testing.T) {
 			AWS: v1alpha1.AWSConfigSpecAWS{
 				AZ: "eu-central-1a",
 				Masters: []v1alpha1.AWSConfigSpecAWSNode{
-					v1alpha1.AWSConfigSpecAWSNode{},
+					v1alpha1.AWSConfigSpecAWSNode{
+						ImageID: "ami-test-master",
+					},
 				},
 				Workers: []v1alpha1.AWSConfigSpecAWSNode{
-					v1alpha1.AWSConfigSpecAWSNode{},
+					v1alpha1.AWSConfigSpecAWSNode{
+						ImageID: "ami-test-worker",
+					},
 				},
 			},
 		},
 	}
 	expectedASGType := prefixWorker
 	expectedClusterID := "test-cluster"
+	expectedMasterImageID := "ami-test-master"
+	expectedWorkerImageID := "ami-test-worker"
 
 	clients := Clients{
 		EC2: &EC2ClientMock{},
@@ -70,5 +76,13 @@ func TestAdapterGuestMain(t *testing.T) {
 
 	if expectedClusterID != a.ClusterID {
 		t.Errorf("unexpected value, expecting %q, got %q", expectedClusterID, a.ClusterID)
+	}
+
+	if expectedMasterImageID != a.MasterImageID {
+		t.Errorf("unexpected MasterImageID, got %q, want %q", a.MasterImageID, expectedMasterImageID)
+	}
+
+	if expectedWorkerImageID != a.WorkerImageID {
+		t.Errorf("unexpected WorkerImageID, got %q, want %q", a.WorkerImageID, expectedWorkerImageID)
 	}
 }

@@ -14,7 +14,6 @@ func TestAdapterInstanceRegularFields(t *testing.T) {
 		customObject            v1alpha1.AWSConfig
 		errorMatcher            func(error) bool
 		expectedAZ              string
-		expectedImageID         string
 		expectedInstanceType    string
 		expectedSecurityGroupID string
 	}{
@@ -34,7 +33,6 @@ func TestAdapterInstanceRegularFields(t *testing.T) {
 						AZ: "eu-central-1a",
 						Masters: []v1alpha1.AWSConfigSpecAWSNode{
 							v1alpha1.AWSConfigSpecAWSNode{
-								ImageID:      "ami-test",
 								InstanceType: "m3.large",
 							},
 						},
@@ -43,7 +41,6 @@ func TestAdapterInstanceRegularFields(t *testing.T) {
 			},
 			errorMatcher:         nil,
 			expectedAZ:           "eu-central-1a",
-			expectedImageID:      "ami-test",
 			expectedInstanceType: "m3.large",
 		},
 	}
@@ -71,10 +68,6 @@ func TestAdapterInstanceRegularFields(t *testing.T) {
 
 			if a.MasterAZ != tc.expectedAZ {
 				t.Errorf("unexpected MasterAZ, got %q, want %q", a.instanceAdapter.MasterAZ, tc.expectedAZ)
-			}
-
-			if a.MasterImageID != tc.expectedImageID {
-				t.Errorf("unexpected MasterImageID, got %q, want %q", a.instanceAdapter.MasterImageID, tc.expectedAZ)
 			}
 
 			if a.MasterInstanceType != tc.expectedInstanceType {

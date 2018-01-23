@@ -4,10 +4,13 @@ const (
 	// defaultCreationTimeout is the timeout in minutes for the creation of the stack.
 	defaultCreationTimeout = 10
 
-	workersOutputKey        = "WorkersOutput"
-	imageIDOutputKey        = "ImageIDOutput"
-	clusterVersionOutputKey = "ClusterVersionOutput"
-	workerRoleKey           = "WorkerRole"
+	masterImageIDOutputKey            = "MasterImageID"
+	masterCloudConfigVersionOutputKey = "MasterCloudConfigVersion"
+	workersOutputKey                  = "Workers"
+	workerImageIDOutputKey            = "WorkerImageID"
+	workerCloudConfigVersionOutputKey = "WorkerCloudConfigVersion"
+
+	workerRoleKey = "WorkerRole"
 
 	cloudFormationGuestTemplatesDirectory    = "service/templates/cloudformation/guest"
 	cloudFormationHostPreTemplatesDirectory  = "service/templates/cloudformation/host-pre"
@@ -18,8 +21,10 @@ const (
 
 // StackState is the state representation on which the resource methods work.
 type StackState struct {
-	Name           string
-	ImageID        string
-	Workers        string
-	ClusterVersion string
+	Name                     string
+	MasterImageID            string
+	MasterCloudConfigVersion string
+	Workers                  string
+	WorkerImageID            string
+	WorkerCloudConfigVersion string
 }

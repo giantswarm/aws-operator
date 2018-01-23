@@ -13,7 +13,6 @@ import (
 
 type instanceAdapter struct {
 	MasterAZ               string
-	MasterImageID          string
 	MasterInstanceType     string
 	MasterSecurityGroupID  string
 	MasterSmallCloudConfig string
@@ -25,7 +24,6 @@ func (i *instanceAdapter) getInstance(cfg Config) error {
 	}
 
 	i.MasterAZ = keyv2.AvailabilityZone(cfg.CustomObject)
-	i.MasterImageID = keyv2.MasterImageID(cfg.CustomObject)
 	i.MasterInstanceType = keyv2.MasterInstanceType(cfg.CustomObject)
 
 	accountID, err := AccountID(cfg.Clients)

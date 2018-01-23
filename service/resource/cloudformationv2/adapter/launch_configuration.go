@@ -14,7 +14,6 @@ import (
 type launchConfigAdapter struct {
 	WorkerAssociatePublicIPAddress bool
 	WorkerBlockDeviceMappings      []BlockDeviceMapping
-	WorkerImageID                  string
 	WorkerInstanceType             string
 	WorkerSecurityGroupID          string
 	WorkerSmallCloudConfig         string
@@ -28,7 +27,6 @@ type BlockDeviceMapping struct {
 }
 
 func (l *launchConfigAdapter) getLaunchConfiguration(cfg Config) error {
-	l.WorkerImageID = keyv2.WorkerImageID(cfg.CustomObject)
 	l.WorkerInstanceType = keyv2.WorkerInstanceType(cfg.CustomObject)
 	l.WorkerAssociatePublicIPAddress = false
 
