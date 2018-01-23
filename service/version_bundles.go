@@ -165,7 +165,7 @@ func newVersionBundles() []versionbundle.Bundle {
 				},
 				{
 					Component:   "Kubernetes",
-					Description: "Updated to Kubernetes 1.9.0.",
+					Description: "Updated to Kubernetes 1.9.2.",
 					Kind:        versionbundle.KindChanged,
 				},
 				{
@@ -208,7 +208,7 @@ func newVersionBundles() []versionbundle.Bundle {
 				},
 				{
 					Name:    "kubernetes",
-					Version: "1.9.0",
+					Version: "1.9.2",
 				},
 				{
 					Name:    "nginx-ingress-controller",
