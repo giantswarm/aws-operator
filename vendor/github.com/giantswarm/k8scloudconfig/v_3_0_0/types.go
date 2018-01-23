@@ -1,13 +1,20 @@
 package v_3_0_0
 
-import "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+import (
+	"errors"
+
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+)
 
 const (
 	defaultHyperkubeApiserverBindAddress = "${DEFAULT_IPV4}"
 )
 
 type Params struct {
-	Cluster v1alpha1.Cluster
+	// ApiserverEncryptionKey is AES-CBC with PKCS#7 padding key to encrypt
+	// API etcd data.
+	ApiserverEncryptionKey string
+	Cluster                v1alpha1.Cluster
 	// DisableCalico flag when set removes all calico related Kubernetes
 	// manifests from the cloud config together with their initialization.
 	DisableCalico bool
@@ -37,6 +44,14 @@ type Params struct {
 	// azure-operator sets that to 127.0.0.1. Other operators leave it empty.
 	MasterAPIDomain string
 	Node            v1alpha1.ClusterNode
+}
+
+func (p *Params) Validate() error {
+	if p.ApiserverEncryptionKey == "" {
+		return errors.New("ApiserverEncryptionKey must not be empty")
+	}
+
+	return nil
 }
 
 type Hyperkube struct {

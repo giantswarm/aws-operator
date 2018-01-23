@@ -27,6 +27,7 @@ type Release struct {
 	timestamp  string
 	version    string
 	wip        bool
+	active     bool
 }
 
 func NewRelease(config ReleaseConfig) (Release, error) {
@@ -95,6 +96,10 @@ func NewRelease(config ReleaseConfig) (Release, error) {
 	}
 
 	return r, nil
+}
+
+func (r Release) Active() bool {
+	return !(r.Deprecated() || r.WIP())
 }
 
 func (r Release) Bundles() []Bundle {
