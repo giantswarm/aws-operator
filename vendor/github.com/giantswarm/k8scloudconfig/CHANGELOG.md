@@ -19,6 +19,8 @@ version directory, and then changes are introduced.
 - Allow extract Hyperkube options.
 - Allow setting custom K8s API address for master nodes.
 - Allow setting etcd port.
+- Add node-exporter.
+- Add kube-state-metrics.
 
 ### Changed
 - Unify CloudConfig struct construction.
