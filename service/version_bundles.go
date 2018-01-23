@@ -159,22 +159,27 @@ func newVersionBundles() []versionbundle.Bundle {
 		{
 			Changelogs: []versionbundle.Changelog{
 				{
-					Component:   "cloud formation",
-					Description: "All aws resources use cloud formation except kms and s3.",
+					Component:   "Cloud Formation",
+					Description: "All AWS resources use Cloud Formation except KMS and S3.",
 					Kind:        "changed",
 				},
 				{
-					Component:   "kubernetes",
-					Description: "Updated to kubernetes 1.9.0.",
+					Component:   "Kubernetes",
+					Description: "Updated to Kubernetes 1.9.0.",
 					Kind:        "changed",
 				},
 				{
-					Component:   "kubernetes",
-					Description: "Switched vanilla (previously coreos) hyperkube image.",
+					Component:   "Kubernetes",
+					Description: "Switched to vanilla (previously CoreOS) hyperkube image.",
 					Kind:        versionbundle.KindChanged,
 				},
 				{
-					Component:   "calico",
+					Component:   "Docker",
+					Description: "Updated to 17.09.0-ce.",
+					Kind:        versionbundle.KindChanged,
+				},
+				{
+					Component:   "Calico",
 					Description: "Updated to version 3.0.1.",
 					Kind:        versionbundle.KindChanged,
 				},
@@ -186,7 +191,7 @@ func newVersionBundles() []versionbundle.Bundle {
 				},
 				{
 					Name:    "docker",
-					Version: "1.12.6",
+					Version: "17.09.0-ce",
 				},
 				{
 					Name:    "etcd",
