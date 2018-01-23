@@ -39,8 +39,8 @@ func BucketName(customObject v1alpha1.AWSConfig, accountID string) string {
 	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(customObject))
 }
 
-func BucketObjectName(customObject v1alpha1.AWSConfig, prefix string) string {
-	return fmt.Sprintf("cloudconfig/%s/%s", ClusterVersion(customObject), prefix)
+func BucketObjectName(templateVersion string, prefix string) string {
+	return fmt.Sprintf("cloudconfig/%s/%s", templateVersion, prefix)
 }
 
 func ClusterCustomer(customObject v1alpha1.AWSConfig) string {
