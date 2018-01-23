@@ -6,6 +6,52 @@ import (
 	"time"
 )
 
+func Test_Release_Active(t *testing.T) {
+	testCases := []struct {
+		Release        Release
+		ExpectedActive bool
+	}{
+		// Test 0: A release that is not WIP and not Deprecated should be considered Active
+		{
+			Release: Release{
+				wip:        false,
+				deprecated: false,
+			},
+			ExpectedActive: true,
+		},
+		// Test 1: A release that is WIP but not Deprecated should not be considered Active
+		{
+			Release: Release{
+				wip:        true,
+				deprecated: false,
+			},
+			ExpectedActive: false,
+		},
+		// Test 2: A release that is not WIP but is Deprecated should not be considered Active
+		{
+			Release: Release{
+				wip:        false,
+				deprecated: true,
+			},
+			ExpectedActive: false,
+		},
+		// Test 3: A release that is WIP and Deprecated should not be considered Active
+		{
+			Release: Release{
+				wip:        true,
+				deprecated: true,
+			},
+			ExpectedActive: false,
+		},
+	}
+
+	for i, tc := range testCases {
+		if tc.Release.Active() != tc.ExpectedActive {
+			t.Fatalf("test %d: We expected a release to be 'active: %v' but got 'active: %v'", i, tc.ExpectedActive, tc.Release.Active())
+		}
+	}
+}
+
 func Test_Release_Changelogs(t *testing.T) {
 	testCases := []struct {
 		Bundles            []Bundle
