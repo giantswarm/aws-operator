@@ -792,7 +792,124 @@ write_files:
           - hostPath:
               path: /usr/share/ca-certificates
             name: ssl-certs-host
-
+- path: /srv/node-exporter-svc.yaml
+  owner: root
+  permissions: 0644
+  content: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: node-exporter
+      namespace: kube-system
+      labels:
+        app: node-exporter
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: "http"
+    spec:
+      ports:
+        - port: 10300
+      selector:
+        app: node-exporter
+- path: /srv/node-exporter-sa.yaml
+  owner: root
+  permissions: 0644
+  content: |
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: node-exporter
+      namespace: kube-system
+      labels:
+        app: node-exporter
+- path: /srv/node-exporter-ds.yaml
+  owner: root
+  permissions: 0644
+  content: |
+    apiVersion: extensions/v1beta1
+    kind: DaemonSet
+    metadata:
+      name: node-exporter
+      namespace: kube-system
+      labels:
+        app: node-exporter
+    spec:
+      updateStrategy:
+        type: RollingUpdate
+      template:
+        metadata:
+          name: node-exporter
+          labels:
+            app: node-exporter
+        spec:
+          tolerations:
+          # Tolerate master taint
+          - key: node-role.kubernetes.io/master
+            operator: Exists
+            effect: NoSchedule
+          containers:
+          - image: quay.io/giantswarm/node-exporter:v0.15.1
+            name: node-exporter
+            args:
+              - '--log.level=debug'
+              - '--web.listen-address=:10300'
+              - '--collector.arp'
+              - '--collector.bcache'
+              - '--collector.conntrack'
+              - '--collector.cpu'
+              - '--collector.diskstats'
+              - '--collector.edac'
+              - '--collector.entropy'
+              - '--collector.filefd'
+              - '--collector.filesystem'
+              - '--collector.hwmon'
+              - '--collector.infiniband'
+              - '--collector.ipvs'
+              - '--collector.loadavg'
+              - '--collector.mdadm'
+              - '--collector.meminfo'
+              - '--collector.netdev'
+              - '--collector.netstat'
+              - '--collector.sockstat'
+              - '--collector.stat'
+              - '--collector.systemd'
+              - '--no-collector.textfile'   # we don't use textfile collector.
+              - '--collector.time'
+              - '--collector.timex'
+              - '--collector.uname'
+              - '--collector.vmstat'
+              - '--no-collector.wifi'       # we don't use wifi.
+              - '--collector.xfs'
+              - '--no-collector.zfs'        # we don't use zfs.
+            livenessProbe:
+              httpGet:
+                path: /
+                port: 10300
+              initialDelaySeconds: 5
+              timeoutSeconds: 5
+            readinessProbe:
+              httpGet:
+                path: /
+                port: 10300
+              initialDelaySeconds: 5
+              timeoutSeconds: 5
+            resources:
+              requests:
+                cpu: 55m
+                memory: 75Mi
+              limits:
+                cpu: 55m
+                memory: 75Mi
+            volumeMounts:
+            - mountPath: /var/run/dbus/
+              name: systemd-volume
+          volumes:
+          - name: systemd-volume
+            hostPath:
+              path: /var/run/dbus/
+          serviceAccountName: node-exporter
+          hostNetwork: true
+          hostPID: true
 - path: /srv/rbac_bindings.yaml
   owner: root
   permissions: 0644
@@ -918,6 +1035,22 @@ write_files:
     roleRef:
       kind: Role
       name: nginx-ingress-role
+      apiGroup: rbac.authorization.k8s.io
+    ---
+    kind: RoleBinding
+    apiVersion: rbac.authorization.k8s.io/v1
+    metadata:
+      name: node-exporter
+      namespace: kube-system
+      labels:
+        app: node-exporter
+    subjects:
+    - kind: ServiceAccount
+      name: node-exporter
+      namespace: kube-system
+    roleRef:
+      kind: Role
+      name: node-exporter
       apiGroup: rbac.authorization.k8s.io
 - path: /srv/rbac_roles.yaml
   owner: root
@@ -1057,6 +1190,20 @@ write_files:
           - get
           - create
           - update
+    ---
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: Role
+    metadata:
+      name: node-exporter
+      namespace: kube-system
+      labels:
+        app: node-exporter
+    rules:
+    - apiGroups: ['extensions']
+      resources: ['podsecuritypolicies']
+      verbs:     ['use']
+      resourceNames:
+      - privileged
 - path: /srv/psp_policies.yaml
   owner: root
   permissions: 0644
@@ -1293,6 +1440,9 @@ write_files:
       MANIFESTS="${MANIFESTS} ingress-controller-cm.yml"
       MANIFESTS="${MANIFESTS} ingress-controller-dep.yml"
       MANIFESTS="${MANIFESTS} ingress-controller-svc.yml"
+      MANIFESTS="${MANIFESTS} node-exporter-svc.yml"
+      MANIFESTS="${MANIFESTS} node-exporter-sa.yml"
+      MANIFESTS="${MANIFESTS} node-exporter-ds.yml"
 
       for manifest in $MANIFESTS
       do
