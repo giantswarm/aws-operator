@@ -20,6 +20,7 @@ func Test(t *testing.T, storage microstorage.Storage) {
 	testPutIdempotent(t, storage)
 	testDeleteNotExisting(t, storage)
 	testList(t, storage)
+	testListEmpty(t, storage)
 	testListNested(t, storage)
 	testListInvalid(t, storage)
 }
@@ -163,6 +164,25 @@ func testList(t *testing.T, storage microstorage.Storage) {
 		assert.NoError(t, err, "%s: key=%s", name, kv0.Key())
 		sort.Sort(kvSlice(gotKVs))
 		assert.Equal(t, kvs, gotKVs, "%s: key=%s", name, kv0.Key())
+	}
+}
+
+func testListEmpty(t *testing.T, storage microstorage.Storage) {
+	var (
+		name = "testListEmpty"
+
+		ctx = context.TODO()
+
+		baseKey = name + "-key"
+	)
+
+	for _, key := range validKeyVariations(baseKey) {
+		gotKVs, err := storage.List(ctx, microstorage.MustK(microstorage.NewK(key)))
+		assert.NoError(t, err, "%s: key=%#v", name, microstorage.RootKey.Key())
+
+		// Make sure empty list is returned when listing non-existing
+		// key.
+		assert.Empty(t, gotKVs, "%s: kvs=%#v", name, gotKVs)
 	}
 }
 

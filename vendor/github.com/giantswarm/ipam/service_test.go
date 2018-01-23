@@ -5,16 +5,13 @@ import (
 	"net"
 	"testing"
 
-	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/microstorage/memory"
 )
 
 // TestNew tests the New function.
 func TestNew(t *testing.T) {
-	testLogger, err := micrologger.New(micrologger.DefaultConfig())
-	if err != nil {
-		t.Fatalf("error creating new logger: %v", err)
-	}
+	testLogger := microloggertest.New()
 	testStorage, err := memory.New(memory.DefaultConfig())
 	if err != nil {
 		t.Fatalf("error creating new storage: %v", err)
@@ -253,10 +250,7 @@ func TestNewSubnetAndDeleteSubnet(t *testing.T) {
 		}
 
 		// Create a new IPAM service.
-		logger, err := micrologger.New(micrologger.DefaultConfig())
-		if err != nil {
-			t.Fatalf("%v: error creating new logger: %v", index, err)
-		}
+		logger := microloggertest.New()
 		storage, err := memory.New(memory.DefaultConfig())
 		if err != nil {
 			t.Fatalf("%v: error creating new storage: %v", index, err)
