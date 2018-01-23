@@ -149,6 +149,10 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Error("MasterImageID output element not found")
 	}
+	if !strings.Contains(body, masterInstanceTypeOutputKey+":") {
+		fmt.Println(body)
+		t.Error("MasterInstanceType output element not found")
+	}
 	if !strings.Contains(body, masterCloudConfigVersionOutputKey+":") {
 		fmt.Println(body)
 		t.Error("master CloudConfig version output element not found")
@@ -160,6 +164,10 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 	if !strings.Contains(body, workerImageIDOutputKey+":") {
 		fmt.Println(body)
 		t.Error("WorkerImageID output element not found")
+	}
+	if !strings.Contains(body, workerInstanceTypeOutputKey+":") {
+		fmt.Println(body)
+		t.Error("WorkerInstanceType output element not found")
 	}
 	if !strings.Contains(body, workerCloudConfigVersionOutputKey+":") {
 		fmt.Println(body)

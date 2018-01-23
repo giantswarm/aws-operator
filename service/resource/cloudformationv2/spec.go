@@ -5,9 +5,11 @@ const (
 	defaultCreationTimeout = 10
 
 	masterImageIDOutputKey            = "MasterImageID"
+	masterInstanceTypeOutputKey       = "MasterInstanceType"
 	masterCloudConfigVersionOutputKey = "MasterCloudConfigVersion"
-	workersOutputKey                  = "Workers"
+	workersOutputKey                  = "WorkerCount"
 	workerImageIDOutputKey            = "WorkerImageID"
+	workerInstanceTypeOutputKey       = "WorkerInstanceType"
 	workerCloudConfigVersionOutputKey = "WorkerCloudConfigVersion"
 
 	workerRoleKey = "WorkerRole"
@@ -23,8 +25,10 @@ const (
 type StackState struct {
 	Name                     string
 	MasterImageID            string
+	MasterInstanceType       string
 	MasterCloudConfigVersion string
-	Workers                  string
+	WorkerCount              string
 	WorkerImageID            string
+	WorkerInstanceType       string
 	WorkerCloudConfigVersion string
 }

@@ -50,12 +50,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	for _, errorStatus := range errorStatuses {
 		if *status == errorStatus {
 			outputStackState := StackState{
-				Name:                     stackName,
-				MasterImageID:            "",
-				MasterCloudConfigVersion: "",
-				Workers:                  "",
-				WorkerImageID:            "",
-				WorkerCloudConfigVersion: "",
+				Name: stackName,
 			}
 			return outputStackState, nil
 		}
@@ -64,6 +59,10 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	outputs := describeOutput.Stacks[0].Outputs
 
 	masterImageID, err := getStackOutputValue(outputs, masterImageIDOutputKey)
+	if err != nil {
+		return StackState{}, microerror.Mask(err)
+	}
+	masterInstanceType, err := getStackOutputValue(outputs, masterInstanceTypeOutputKey)
 	if err != nil {
 		return StackState{}, microerror.Mask(err)
 	}
@@ -79,6 +78,10 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	if err != nil {
 		return StackState{}, microerror.Mask(err)
 	}
+	workerInstanceType, err := getStackOutputValue(outputs, workerInstanceTypeOutputKey)
+	if err != nil {
+		return StackState{}, microerror.Mask(err)
+	}
 	workerCloudConfigVersion, err := getStackOutputValue(outputs, workerCloudConfigVersionOutputKey)
 	if err != nil {
 		return StackState{}, microerror.Mask(err)
@@ -87,9 +90,11 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	outputStackState := StackState{
 		Name:                     stackName,
 		MasterImageID:            masterImageID,
+		MasterInstanceType:       masterInstanceType,
 		MasterCloudConfigVersion: masterCloudConfigVersion,
-		Workers:                  workers,
+		WorkerCount:              workers,
 		WorkerImageID:            workerImageID,
+		WorkerInstanceType:       workerInstanceType,
 		WorkerCloudConfigVersion: workerCloudConfigVersion,
 	}
 
