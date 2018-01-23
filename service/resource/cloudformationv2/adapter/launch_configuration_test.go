@@ -97,7 +97,7 @@ func TestAdapterLaunchConfigurationSmallCloudConfig(t *testing.T) {
 		},
 		{
 			description:  "s3 http uri",
-			expectedLine: `s3_http_uri="https://s3.myregion.amazonaws.com/000000000000-g8s-test-cluster/cloudconfig/myversion/$USERDATA_FILE"`,
+			expectedLine: `s3_http_uri="https://s3.myregion.amazonaws.com/000000000000-g8s-test-cluster/cloudconfig/v_3_0_0/$USERDATA_FILE"`,
 		},
 	}
 
@@ -109,8 +109,7 @@ func TestAdapterLaunchConfigurationSmallCloudConfig(t *testing.T) {
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
-				ID:      "test-cluster",
-				Version: "myversion",
+				ID: "test-cluster",
 			},
 			AWS: v1alpha1.AWSConfigSpecAWS{
 				Region: "myregion",

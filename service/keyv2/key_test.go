@@ -809,18 +809,8 @@ func Test_BucketObjectName(t *testing.T) {
 	version := "v_0_1_0"
 	suffix := "mysuffix"
 
-	cluster := v1alpha1.Cluster{
-		Version: version,
-	}
-
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: cluster,
-		},
-	}
-
 	expectedBucketObjectName := "cloudconfig/v_0_1_0/mysuffix"
-	actualBucketObjectName := BucketObjectName(customObject, suffix)
+	actualBucketObjectName := BucketObjectName(version, suffix)
 	if expectedBucketObjectName != actualBucketObjectName {
 		t.Fatalf("Expected bucket object name %q but was %q", expectedBucketObjectName, actualBucketObjectName)
 	}

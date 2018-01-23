@@ -16,8 +16,7 @@ func Test_DesiredState(t *testing.T) {
 	clusterTpo := &v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
-				ID:      "test-cluster",
-				Version: "myversion",
+				ID: "test-cluster",
 			},
 		},
 	}
@@ -35,8 +34,8 @@ func Test_DesiredState(t *testing.T) {
 			obj:               clusterTpo,
 			expectedBody:      "mybody-",
 			expectedBucket:    "myaccountid-g8s-test-cluster",
-			expectedMasterKey: "cloudconfig/myversion/master",
-			expectedWorkerKey: "cloudconfig/myversion/worker",
+			expectedMasterKey: "cloudconfig/v_3_0_0/master",
+			expectedWorkerKey: "cloudconfig/v_3_0_0/worker",
 		},
 	}
 	var err error
