@@ -245,6 +245,20 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Enable:       true,
 			Command:      "start",
 		},
+		// Format etcd EBS volume.
+		{
+			AssetContent: formatEtcdVolume,
+			Name:         "format-etcd-ebs.service",
+			Enable:       true,
+			Command:      "start",
+		},
+		// Mount etcd EBS volume.
+		{
+			AssetContent: mountEtcdVolume,
+			Name:         "etc-kubernetes-data-etcd.mount",
+			Enable:       true,
+			Command:      "start",
+		},
 	}
 
 	var newUnits []k8scloudconfig.UnitAsset
