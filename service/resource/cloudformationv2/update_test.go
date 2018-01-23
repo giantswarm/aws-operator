@@ -43,7 +43,6 @@ func Test_Resource_Cloudformation_newUpdateChange(t *testing.T) {
 	}
 
 	testCases := []struct {
-		obj            interface{}
 		currentState   interface{}
 		desiredState   interface{}
 		expectedChange awscloudformation.UpdateStackInput
@@ -51,7 +50,6 @@ func Test_Resource_Cloudformation_newUpdateChange(t *testing.T) {
 	}{
 		{
 			description:  "current and desired state empty, expected empty",
-			obj:          clusterTpo,
 			currentState: StackState{},
 			desiredState: StackState{},
 			expectedChange: awscloudformation.UpdateStackInput{
@@ -61,13 +59,14 @@ func Test_Resource_Cloudformation_newUpdateChange(t *testing.T) {
 		},
 		{
 			description:  "current state empty, desired state not empty, expected empty",
-			obj:          clusterTpo,
 			currentState: StackState{},
 			desiredState: StackState{
-				Name:           "desired",
-				Workers:        "4",
-				ImageID:        "ami-1234",
-				ClusterVersion: "myclusterversion",
+				Name:                     "desired",
+				MasterImageID:            "ami-678-master",
+				MasterCloudConfigVersion: "myMasterCCVersion",
+				WorkerCount:              "4",
+				WorkerImageID:            "ami-1234-worker",
+				WorkerCloudConfigVersion: "myWorkerCCVersion",
 			},
 			expectedChange: awscloudformation.UpdateStackInput{
 				StackName:  aws.String(""),
@@ -75,19 +74,186 @@ func Test_Resource_Cloudformation_newUpdateChange(t *testing.T) {
 			},
 		},
 		{
-			description: "current state not empty, desired state not empty but different, expected desired state",
-			obj:         clusterTpo,
+			description: "current state not empty, equal desired state, expected empty",
 			currentState: StackState{
-				Name:           "current",
-				Workers:        "3",
-				ImageID:        "ami-6789",
-				ClusterVersion: "oldclusterversion",
+				Name:                     "current",
+				MasterImageID:            "ami-678-master",
+				MasterCloudConfigVersion: "myMasterCCVersion",
+				WorkerCount:              "4",
+				WorkerImageID:            "ami-1234-worker",
+				WorkerCloudConfigVersion: "myWorkerCCVersion",
 			},
 			desiredState: StackState{
-				Name:           "desired",
-				Workers:        "4",
-				ImageID:        "ami-1234",
-				ClusterVersion: "myclusterversion",
+				Name:                     "current",
+				MasterImageID:            "ami-678-master",
+				MasterCloudConfigVersion: "myMasterCCVersion",
+				WorkerCount:              "4",
+				WorkerImageID:            "ami-1234-worker",
+				WorkerCloudConfigVersion: "myWorkerCCVersion",
+			},
+			expectedChange: awscloudformation.UpdateStackInput{
+				StackName:  aws.String(""),
+				Parameters: []*awscloudformation.Parameter{},
+			},
+		},
+
+		{
+			description: "current state not empty, desired state not empty but different master image, expected desired state",
+			currentState: StackState{
+				Name:                     "current",
+				MasterImageID:            "ami-678-master",
+				MasterCloudConfigVersion: "myMasterCCVersion",
+				WorkerCount:              "4",
+				WorkerImageID:            "ami-1234-worker",
+				WorkerCloudConfigVersion: "myWorkerCCVersion",
+			},
+			desiredState: StackState{
+				Name:                     "desired",
+				MasterImageID:            "ami-678-master-new",
+				MasterCloudConfigVersion: "myMasterCCVersion",
+				WorkerCount:              "4",
+				WorkerImageID:            "ami-1234-worker",
+				WorkerCloudConfigVersion: "myWorkerCCVersion",
+			},
+			expectedChange: awscloudformation.UpdateStackInput{
+				StackName: aws.String("desired"),
+			},
+		},
+		{
+			description: "current state not empty, desired state not empty but different master CloudConfig version, expected desired state",
+			currentState: StackState{
+				Name:                     "current",
+				MasterImageID:            "ami-678-master",
+				MasterCloudConfigVersion: "myMasterCCVersion",
+				WorkerCount:              "4",
+				WorkerImageID:            "ami-1234-worker",
+				WorkerCloudConfigVersion: "myWorkerCCVersion",
+			},
+			desiredState: StackState{
+				Name:                     "desired",
+				MasterImageID:            "ami-678-master",
+				MasterCloudConfigVersion: "myMasterCCVersion-new",
+				WorkerCount:              "4",
+				WorkerImageID:            "ami-1234-worker",
+				WorkerCloudConfigVersion: "myWorkerCCVersion",
+			},
+			expectedChange: awscloudformation.UpdateStackInput{
+				StackName: aws.String("desired"),
+			},
+		},
+		{
+			description: "current state not empty, desired state not empty but different number of workers, expected desired state",
+			currentState: StackState{
+				Name:                     "current",
+				MasterImageID:            "ami-678-master",
+				MasterCloudConfigVersion: "myMasterCCVersion",
+				WorkerCount:              "4",
+				WorkerImageID:            "ami-1234-worker",
+				WorkerCloudConfigVersion: "myWorkerCCVersion",
+			},
+			desiredState: StackState{
+				Name:                     "desired",
+				MasterImageID:            "ami-678-master-new",
+				MasterCloudConfigVersion: "myMasterCCVersion",
+				WorkerCount:              "5",
+				WorkerImageID:            "ami-1234-worker",
+				WorkerCloudConfigVersion: "myWorkerCCVersion",
+			},
+			expectedChange: awscloudformation.UpdateStackInput{
+				StackName: aws.String("desired"),
+			},
+		},
+		{
+			description: "current state not empty, desired state not empty but different worker image, expected desired state",
+			currentState: StackState{
+				Name:                     "current",
+				MasterImageID:            "ami-678-master",
+				MasterCloudConfigVersion: "myMasterCCVersion",
+				WorkerCount:              "4",
+				WorkerImageID:            "ami-1234-worker",
+				WorkerCloudConfigVersion: "myWorkerCCVersion",
+			},
+			desiredState: StackState{
+				Name:                     "desired",
+				MasterImageID:            "ami-678-master",
+				MasterCloudConfigVersion: "myMasterCCVersion",
+				WorkerCount:              "4",
+				WorkerImageID:            "ami-1234-worker-new",
+				WorkerCloudConfigVersion: "myWorkerCCVersion",
+			},
+			expectedChange: awscloudformation.UpdateStackInput{
+				StackName: aws.String("desired"),
+			},
+		},
+		{
+			description: "current state not empty, desired state not empty but different worker CloudConfig version, expected desired state",
+			currentState: StackState{
+				Name:                     "current",
+				MasterImageID:            "ami-678-master",
+				MasterCloudConfigVersion: "myMasterCCVersion",
+				WorkerCount:              "4",
+				WorkerImageID:            "ami-1234-worker",
+				WorkerCloudConfigVersion: "myWorkerCCVersion",
+			},
+			desiredState: StackState{
+				Name:                     "desired",
+				MasterImageID:            "ami-678-master",
+				MasterCloudConfigVersion: "myMasterCCVersion",
+				WorkerCount:              "4",
+				WorkerImageID:            "ami-1234-worker",
+				WorkerCloudConfigVersion: "myWorkerCCVersion-new",
+			},
+			expectedChange: awscloudformation.UpdateStackInput{
+				StackName: aws.String("desired"),
+			},
+		},
+		{
+			description: "current state not empty, desired state not empty but different master instance type, expected desired state",
+			currentState: StackState{
+				Name:                     "current",
+				MasterImageID:            "ami-678-master",
+				MasterInstanceType:       "m1-large",
+				MasterCloudConfigVersion: "myMasterCCVersion",
+				WorkerCount:              "4",
+				WorkerImageID:            "ami-1234-worker",
+				WorkerInstanceType:       "m1-large",
+				WorkerCloudConfigVersion: "myWorkerCCVersion",
+			},
+			desiredState: StackState{
+				Name:                     "desired",
+				MasterImageID:            "ami-678-master",
+				MasterInstanceType:       "m1-xlarge",
+				MasterCloudConfigVersion: "myMasterCCVersion",
+				WorkerCount:              "4",
+				WorkerImageID:            "ami-1234-worker",
+				WorkerInstanceType:       "m1-large",
+				WorkerCloudConfigVersion: "myWorkerCCVersion",
+			},
+			expectedChange: awscloudformation.UpdateStackInput{
+				StackName: aws.String("desired"),
+			},
+		},
+		{
+			description: "current state not empty, desired state not empty but different worker instance type, expected desired state",
+			currentState: StackState{
+				Name:                     "current",
+				MasterImageID:            "ami-678-master",
+				MasterCloudConfigVersion: "myMasterCCVersion",
+				MasterInstanceType:       "m1-large",
+				WorkerCount:              "4",
+				WorkerImageID:            "ami-1234-worker",
+				WorkerInstanceType:       "m1-large",
+				WorkerCloudConfigVersion: "myWorkerCCVersion",
+			},
+			desiredState: StackState{
+				Name:                     "desired",
+				MasterImageID:            "ami-678-master",
+				MasterInstanceType:       "m1-large",
+				MasterCloudConfigVersion: "myMasterCCVersion",
+				WorkerCount:              "4",
+				WorkerImageID:            "ami-1234-worker",
+				WorkerInstanceType:       "m1-xlarge",
+				WorkerCloudConfigVersion: "myWorkerCCVersion",
 			},
 			expectedChange: awscloudformation.UpdateStackInput{
 				StackName: aws.String("desired"),
@@ -117,7 +283,7 @@ func Test_Resource_Cloudformation_newUpdateChange(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			result, err := newResource.newUpdateChange(context.TODO(), tc.obj, tc.currentState, tc.desiredState)
+			result, err := newResource.newUpdateChange(context.TODO(), clusterTpo, tc.currentState, tc.desiredState)
 			if err != nil {
 				t.Errorf("expected '%v' got '%#v'", nil, err)
 			}

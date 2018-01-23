@@ -8,6 +8,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 
+	"github.com/giantswarm/aws-operator/service/cloudconfigv3"
 	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2/adapter"
 )
 
@@ -144,22 +145,40 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		t.Error("outputs header not found")
 	}
 
+	if !strings.Contains(body, masterImageIDOutputKey+":") {
+		fmt.Println(body)
+		t.Error("MasterImageID output element not found")
+	}
+	if !strings.Contains(body, masterInstanceTypeOutputKey+":") {
+		fmt.Println(body)
+		t.Error("MasterInstanceType output element not found")
+	}
+	if !strings.Contains(body, masterCloudConfigVersionOutputKey+":") {
+		fmt.Println(body)
+		t.Error("master CloudConfig version output element not found")
+	}
 	if !strings.Contains(body, workersOutputKey+":") {
 		fmt.Println(body)
 		t.Error("workers output element not found")
 	}
-	if !strings.Contains(body, imageIDOutputKey+":") {
+	if !strings.Contains(body, workerImageIDOutputKey+":") {
 		fmt.Println(body)
-		t.Error("imageID output element not found")
+		t.Error("WorkerImageID output element not found")
 	}
-	if !strings.Contains(body, clusterVersionOutputKey+":") {
+	if !strings.Contains(body, workerInstanceTypeOutputKey+":") {
 		fmt.Println(body)
-		t.Error("clusterVersion output element not found")
+		t.Error("WorkerInstanceType output element not found")
 	}
-	if !strings.Contains(body, "Value: myversion") {
+	if !strings.Contains(body, workerCloudConfigVersionOutputKey+":") {
+		fmt.Println(body)
+		t.Error("worker CloudConfig version output element not found")
+	}
+
+	if !strings.Contains(body, "Value: "+cloudconfigv3.MasterCloudConfigVersion) {
 		fmt.Println(body)
 		t.Error("output element not found")
 	}
+
 	if !strings.Contains(body, workerRoleKey+":") {
 		fmt.Println(body)
 		t.Error("workerRole output element not found")

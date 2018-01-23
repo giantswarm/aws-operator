@@ -38,6 +38,8 @@ type Adapter struct {
 	ASGType          string
 	AvailabilityZone string
 	ClusterID        string
+	MasterImageID    string
+	WorkerImageID    string
 
 	autoScalingGroupAdapter
 	iamPoliciesAdapter
@@ -68,6 +70,8 @@ func NewGuest(cfg Config) (Adapter, error) {
 
 	a.ASGType = prefixWorker
 	a.ClusterID = keyv2.ClusterID(cfg.CustomObject)
+	a.MasterImageID = keyv2.MasterImageID(cfg.CustomObject)
+	a.WorkerImageID = keyv2.WorkerImageID(cfg.CustomObject)
 
 	hydraters := []hydrater{
 		a.getAutoScalingGroup,
