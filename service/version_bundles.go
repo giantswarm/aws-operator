@@ -161,12 +161,12 @@ func newVersionBundles() []versionbundle.Bundle {
 				{
 					Component:   "Cloud Formation",
 					Description: "All AWS resources use Cloud Formation except KMS and S3.",
-					Kind:        "changed",
+					Kind:        versionbundle.KindAdded,
 				},
 				{
 					Component:   "Kubernetes",
 					Description: "Updated to Kubernetes 1.9.0.",
-					Kind:        "changed",
+					Kind:        versionbundle.KindChanged,
 				},
 				{
 					Component:   "Kubernetes",
@@ -180,8 +180,13 @@ func newVersionBundles() []versionbundle.Bundle {
 				},
 				{
 					Component:   "Calico",
-					Description: "Updated to version 3.0.1.",
+					Description: "Updated to 3.0.1.",
 					Kind:        versionbundle.KindChanged,
+				},
+				{
+					Component:   "CoreDNS",
+					Description: "CoreDNS 1.0.1 replaces kube-dns.",
+					Kind:        versionbundle.KindAdded,
 				},
 			},
 			Components: []versionbundle.Component{
@@ -198,8 +203,8 @@ func newVersionBundles() []versionbundle.Bundle {
 					Version: "3.2.7",
 				},
 				{
-					Name:    "kubedns",
-					Version: "1.14.5",
+					Name:    "coredns",
+					Version: "1.0.1",
 				},
 				{
 					Name:    "kubernetes",
