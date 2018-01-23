@@ -58,11 +58,10 @@ func DefaultConfig() Config {
 
 type Service struct {
 	// Dependencies.
-	Alerter               *alerter.Service
-	CRDFramework          *framework.Framework
-	CustomObjectFramework *framework.Framework
-	Healthz               *healthz.Service
-	Version               *version.Service
+	Alerter      *alerter.Service
+	CRDFramework *framework.Framework
+	Healthz      *healthz.Service
+	Version      *version.Service
 
 	// Internals.
 	bootOnce sync.Once
@@ -118,14 +117,6 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var customObjectFramework *framework.Framework
-	{
-		customObjectFramework, err = newCustomObjectFramework(config)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	installationName := config.Viper.GetString(config.Flag.Service.Installation.Name)
 
 	var alerterService *alerter.Service
@@ -175,11 +166,10 @@ func New(config Config) (*Service, error) {
 
 	newService := &Service{
 		// Dependencies.
-		Alerter:               alerterService,
-		CRDFramework:          crdFramework,
-		CustomObjectFramework: customObjectFramework,
-		Healthz:               healthzService,
-		Version:               versionService,
+		Alerter:      alerterService,
+		CRDFramework: crdFramework,
+		Healthz:      healthzService,
+		Version:      versionService,
 
 		// Internals
 		bootOnce: sync.Once{},

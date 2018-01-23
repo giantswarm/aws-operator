@@ -2,53 +2,35 @@ package service
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	"github.com/giantswarm/awstpr"
-	"github.com/giantswarm/awstpr/spec/aws"
 	"github.com/giantswarm/certificatetpr"
-	"github.com/giantswarm/clustertpr/spec"
-	"github.com/giantswarm/clustertpr/spec/kubernetes/ssh"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8sclient"
 	"github.com/giantswarm/operatorkit/client/k8scrdclient"
 	"github.com/giantswarm/operatorkit/client/k8sextclient"
 	"github.com/giantswarm/operatorkit/framework"
 	"github.com/giantswarm/operatorkit/framework/resource/metricsresource"
 	"github.com/giantswarm/operatorkit/informer"
-	"github.com/giantswarm/operatorkit/tpr"
 	"github.com/giantswarm/randomkeytpr"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/cloudconfigv1"
 	"github.com/giantswarm/aws-operator/service/cloudconfigv2"
 	"github.com/giantswarm/aws-operator/service/cloudconfigv3"
-	"github.com/giantswarm/aws-operator/service/keyv1"
 	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2"
 	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2/adapter"
 	"github.com/giantswarm/aws-operator/service/resource/endpointsv2"
 	"github.com/giantswarm/aws-operator/service/resource/kmskeyv2"
-	"github.com/giantswarm/aws-operator/service/resource/legacyv1"
 	"github.com/giantswarm/aws-operator/service/resource/legacyv2"
-	"github.com/giantswarm/aws-operator/service/resource/namespacev1"
 	"github.com/giantswarm/aws-operator/service/resource/namespacev2"
-	"github.com/giantswarm/aws-operator/service/resource/s3bucketv1"
 	"github.com/giantswarm/aws-operator/service/resource/s3bucketv2"
-	"github.com/giantswarm/aws-operator/service/resource/s3objectv1"
 	"github.com/giantswarm/aws-operator/service/resource/s3objectv2"
 	"github.com/giantswarm/aws-operator/service/resource/servicev2"
 )
@@ -184,9 +166,6 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 			return nil, microerror.Mask(err)
 		}
 	}
-
-	// TODO remove after migration.
-	migrateTPRsToCRDs(config.Logger, clientSet)
 
 	var newWatcherFactory informer.WatcherFactory
 	{
