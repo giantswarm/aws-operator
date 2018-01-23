@@ -1,5 +1,5 @@
-hash: 7f8cb17f4efb9d0af84510f67f9217923f451bb13ff89ff521a7a1bba223903a
-updated: 2018-01-23T12:05:21.954197Z
+hash: d92d1b77e7d90eeeb8a75a324bd50c543e8aee1b46da1df86a17cef9636cb214
+updated: 2018-01-23T15:11:17.427887Z
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -106,7 +106,7 @@ imports:
 - name: github.com/giantswarm/ipam
   version: 99953f57bd545c9eeca27076784c1f7149a7037a
 - name: github.com/giantswarm/k8scloudconfig
-  version: e63d3dc903ba6983c1f00b8377ae66d047f5b859
+  version: 081bd38ed9448d544f27c10188aa0c804501ec26
   subpackages:
   - v_0_1_0
   - v_2_0_0
