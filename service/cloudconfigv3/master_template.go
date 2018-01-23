@@ -8,6 +8,12 @@ import (
 	"github.com/giantswarm/randomkeytpr"
 )
 
+const (
+	// MasterCloudConfigVersion defines the version of k8scloudconfig in use.
+	// It is used in the main stack output and S3 object paths.
+	MasterCloudConfigVersion = "v_3_0_0"
+)
+
 // NewMasterTemplate generates a new master cloud config template and returns it
 // as a base64 encoded string.
 func (c *CloudConfig) NewMasterTemplate(customObject v1alpha1.AWSConfig, certs certificatetpr.CompactTLSAssets, keys randomkeytpr.CompactRandomKeyAssets) (string, error) {
@@ -237,6 +243,20 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: decryptKeysServiceTemplate,
 			Name:         "decrypt-keys-assets.service",
+			Enable:       true,
+			Command:      "start",
+		},
+		// Format etcd EBS volume.
+		{
+			AssetContent: formatEtcdVolume,
+			Name:         "format-etcd-ebs.service",
+			Enable:       true,
+			Command:      "start",
+		},
+		// Mount etcd EBS volume.
+		{
+			AssetContent: mountEtcdVolume,
+			Name:         "etc-kubernetes-data-etcd.mount",
 			Enable:       true,
 			Command:      "start",
 		},
