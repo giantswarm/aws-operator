@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	cloudconfig "github.com/giantswarm/k8scloudconfig"
 	"github.com/giantswarm/microerror"
 )
 
@@ -65,7 +64,7 @@ func ClusterVersion(customObject v1alpha1.AWSConfig) string {
 
 func HasClusterVersion(customObject v1alpha1.AWSConfig) bool {
 	switch ClusterVersion(customObject) {
-	case string(cloudconfig.V_0_1_0):
+	case string("v_0_1_0"):
 		return true
 	default:
 		return false

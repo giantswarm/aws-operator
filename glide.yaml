@@ -33,3 +33,5 @@ import:
   version: master
 - package: github.com/giantswarm/apiextensions
   version: clientset
+- package: github.com/cenkalti/backoff
+  version: v1.1.0

@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/giantswarm/awstpr"
-	cloudconfig "github.com/giantswarm/k8scloudconfig"
 	"github.com/giantswarm/microerror"
 )
 
@@ -61,7 +60,7 @@ func ClusterVersion(customObject awstpr.CustomObject) string {
 
 func HasClusterVersion(customObject awstpr.CustomObject) bool {
 	switch ClusterVersion(customObject) {
-	case string(cloudconfig.V_0_1_0):
+	case string("v_0_1_0"):
 		return true
 	default:
 		return false
