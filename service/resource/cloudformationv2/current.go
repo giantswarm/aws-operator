@@ -50,10 +50,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	for _, errorStatus := range errorStatuses {
 		if *status == errorStatus {
 			outputStackState := StackState{
-				Name:           stackName,
-				Workers:        "",
-				ImageID:        "",
-				ClusterVersion: "",
+				Name: stackName,
 			}
 			return outputStackState, nil
 		}
@@ -61,24 +58,44 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	outputs := describeOutput.Stacks[0].Outputs
 
+	masterImageID, err := getStackOutputValue(outputs, masterImageIDOutputKey)
+	if err != nil {
+		return StackState{}, microerror.Mask(err)
+	}
+	masterInstanceType, err := getStackOutputValue(outputs, masterInstanceTypeOutputKey)
+	if err != nil {
+		return StackState{}, microerror.Mask(err)
+	}
+	masterCloudConfigVersion, err := getStackOutputValue(outputs, masterCloudConfigVersionOutputKey)
+	if err != nil {
+		return StackState{}, microerror.Mask(err)
+	}
 	workers, err := getStackOutputValue(outputs, workersOutputKey)
 	if err != nil {
 		return StackState{}, microerror.Mask(err)
 	}
-	imageID, err := getStackOutputValue(outputs, imageIDOutputKey)
+	workerImageID, err := getStackOutputValue(outputs, workerImageIDOutputKey)
 	if err != nil {
 		return StackState{}, microerror.Mask(err)
 	}
-	clusterVersion, err := getStackOutputValue(outputs, clusterVersionOutputKey)
+	workerInstanceType, err := getStackOutputValue(outputs, workerInstanceTypeOutputKey)
+	if err != nil {
+		return StackState{}, microerror.Mask(err)
+	}
+	workerCloudConfigVersion, err := getStackOutputValue(outputs, workerCloudConfigVersionOutputKey)
 	if err != nil {
 		return StackState{}, microerror.Mask(err)
 	}
 
 	outputStackState := StackState{
-		Name:           stackName,
-		Workers:        workers,
-		ImageID:        imageID,
-		ClusterVersion: clusterVersion,
+		Name:                     stackName,
+		MasterImageID:            masterImageID,
+		MasterInstanceType:       masterInstanceType,
+		MasterCloudConfigVersion: masterCloudConfigVersion,
+		WorkerCount:              workers,
+		WorkerImageID:            workerImageID,
+		WorkerInstanceType:       workerInstanceType,
+		WorkerCloudConfigVersion: workerCloudConfigVersion,
 	}
 
 	return outputStackState, nil

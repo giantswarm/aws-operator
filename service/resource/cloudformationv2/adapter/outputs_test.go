@@ -3,30 +3,19 @@ package adapter
 import (
 	"testing"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/aws-operator/service/cloudconfigv3"
 )
 
 func TestAdapterOutputsRegularFields(t *testing.T) {
 	testCases := []struct {
-		description            string
-		customObject           v1alpha1.AWSConfig
-		expectedClusterVersion string
+		description                      string
+		expectedMasterCloudConfigVersion string
+		expectedWorkerCloudConfigVersion string
 	}{
 		{
-			description:            "empty custom object",
-			customObject:           v1alpha1.AWSConfig{},
-			expectedClusterVersion: "",
-		},
-		{
-			description: "basic matching",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						Version: "myversion",
-					},
-				},
-			},
-			expectedClusterVersion: "myversion",
+			description:                      "basic check",
+			expectedMasterCloudConfigVersion: cloudconfigv3.MasterCloudConfigVersion,
+			expectedWorkerCloudConfigVersion: cloudconfigv3.WorkerCloudConfigVersion,
 		},
 	}
 	for _, tc := range testCases {
@@ -34,8 +23,7 @@ func TestAdapterOutputsRegularFields(t *testing.T) {
 		clients := Clients{}
 		t.Run(tc.description, func(t *testing.T) {
 			cfg := Config{
-				CustomObject: tc.customObject,
-				Clients:      clients,
+				Clients: clients,
 			}
 			err := a.getOutputs(cfg)
 
@@ -43,8 +31,12 @@ func TestAdapterOutputsRegularFields(t *testing.T) {
 				t.Errorf("unexpected error %v", err)
 			}
 
-			if a.ClusterVersion != tc.expectedClusterVersion {
-				t.Errorf("unexpected ClusterVersion, got %q, want %q", a.ClusterVersion, tc.expectedClusterVersion)
+			if a.MasterCloudConfigVersion != tc.expectedMasterCloudConfigVersion {
+				t.Errorf("unexpected MasterCloudConfigVersion, got %q, want %q", a.MasterCloudConfigVersion, tc.expectedMasterCloudConfigVersion)
+			}
+
+			if a.WorkerCloudConfigVersion != tc.expectedWorkerCloudConfigVersion {
+				t.Errorf("unexpected WorkerCloudConfigVersion, got %q, want %q", a.WorkerCloudConfigVersion, tc.expectedWorkerCloudConfigVersion)
 			}
 		})
 	}
