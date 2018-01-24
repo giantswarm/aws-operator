@@ -13,6 +13,6 @@ import:
 - package: github.com/spf13/pflag
   version: master
 - package: k8s.io/client-go
-  version: v4.0.0
+  version: kubernetes-1.8.5
 - package: k8s.io/apimachinery
-  version: release-1.7
+  version: kubernetes-1.8.5
