@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
-	apiv1 "k8s.io/client-go/pkg/api/v1"
+	apiv1 "k8s.io/api/core/v1"
 )
 
 func Test_Resource_Endpoints_newCreateChange(t *testing.T) {

@@ -1,5 +1,5 @@
 hash: 7f8cb17f4efb9d0af84510f67f9217923f451bb13ff89ff521a7a1bba223903a
-updated: 2018-01-24T12:26:36.559211651+02:00
+updated: 2018-01-24T15:17:17.729781Z
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -106,9 +106,8 @@ imports:
 - name: github.com/giantswarm/ipam
   version: 99953f57bd545c9eeca27076784c1f7149a7037a
 - name: github.com/giantswarm/k8scloudconfig
-  version: 090fa46ca6f628f96924fc22f6b0c8844f452761
+  version: b7c24212eaef4aceb8ebaa05ece84c60f4bd0bdd
   subpackages:
-  - v_0_1_0
   - v_2_0_0
   - v_3_0_0
 - name: github.com/giantswarm/microendpoint
@@ -151,13 +150,14 @@ imports:
   - client/k8sclient
   - client/k8scrdclient
   - client/k8sextclient
+  - client/k8srestconfig
   - framework
   - framework/context/canceledcontext
   - framework/resource/metricsresource
   - informer
   - tpr
 - name: github.com/giantswarm/randomkeytpr
-  version: f1f464e790edc9eaeec963e25c6e9b4ace1e58ea
+  version: 86417ec356c55ea221701ccc646fe7ef5691f5b9
   subpackages:
   - randomkeytprtest
 - name: github.com/giantswarm/versionbundle
@@ -304,7 +304,7 @@ imports:
   subpackages:
   - ssh/terminal
 - name: golang.org/x/net
-  version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
+  version: 1c05540f6879653db88113bc4a2b70aec4bd491f
   subpackages:
   - context
   - http2
@@ -321,9 +321,10 @@ imports:
   subpackages:
   - unix
 - name: golang.org/x/text
-  version: 2910a502d2bf9e43193af9d68ca516529614eed3
+  version: b19bf474d317b857955b12035d2c5acb57ce8b01
   subpackages:
   - cases
+  - internal
   - internal/tag
   - language
   - runes
@@ -339,6 +340,10 @@ imports:
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
   version: d670f9405373e636a5a2765eea47fac0c9bc91a4
+- name: k8s.io/api
+  version: fbe336854453ac8e27bffe14e1964555245cbd05
+  subpackages:
+  - core/v1
 - name: k8s.io/apiextensions-apiserver
   version: 0965a40c0530e110459750a7fcb9cfa4910fb944
   subpackages:

@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes/fake"
-	apiv1 "k8s.io/client-go/pkg/api/v1"
+	apiv1 "k8s.io/api/core/v1"
 )
 
 func Test_Resource_Service_GetDesiredState(t *testing.T) {

@@ -8,7 +8,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"k8s.io/client-go/pkg/api/v1"
+	"k8s.io/api/core/v1"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/resources/aws"

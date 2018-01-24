@@ -5,7 +5,7 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
 	"k8s.io/client-go/kubernetes"
-	apiv1 "k8s.io/client-go/pkg/api/v1"
+	apiv1 "k8s.io/api/core/v1"
 )
 
 const (
