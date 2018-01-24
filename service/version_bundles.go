@@ -185,7 +185,7 @@ func newVersionBundles() []versionbundle.Bundle {
 				},
 				{
 					Component:   "CoreDNS",
-					Description: "CoreDNS 1.0.1 replaces kube-dns.",
+					Description: "Version 1.0.4 replaces kube-dns.",
 					Kind:        versionbundle.KindAdded,
 				},
 			},
