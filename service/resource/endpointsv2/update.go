@@ -7,7 +7,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/keyv2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/framework"
-	apiv1 "k8s.io/client-go/pkg/api/v1"
+	apiv1 "k8s.io/api/core/v1"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {

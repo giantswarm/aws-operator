@@ -5,7 +5,7 @@ import (
 
 	"github.com/giantswarm/microerror"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	apiv1 "k8s.io/client-go/pkg/api/v1"
+	apiv1 "k8s.io/api/core/v1"
 
 	"github.com/giantswarm/aws-operator/service/keyv2"
 )
