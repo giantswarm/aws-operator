@@ -17,9 +17,6 @@
         - Key: Name
           Value: {{ .ClusterID }}-{{ .ASGType }}
           PropagateAtLaunch: true
-        - Key: KubernetesCluster
-          Value: {{ .ClusterID }}
-          PropagateAtLaunch: true
     UpdatePolicy:
       AutoScalingRollingUpdate:
         # minimum amount of instances that must always be running during a rolling update

@@ -94,6 +94,8 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		createState.Capabilities = []*string{
 			aws.String(namedIAMCapability),
 		}
+
+		createState.SetTags(getCloudFormationTags(customObject))
 	}
 
 	return createState, nil
@@ -113,6 +115,7 @@ func (r *Resource) createHostPreStack(ctx context.Context, customObject v1alpha1
 			aws.String(namedIAMCapability),
 		},
 	}
+	createStack.SetTags(getCloudFormationTags(customObject))
 
 	r.logger.LogCtx(ctx, "debug", "creating AWS Host Pre-Guest cloudformation stack")
 	_, err = r.HostClients.CloudFormation.CreateStack(createStack)
@@ -140,6 +143,7 @@ func (r *Resource) createHostPostStack(ctx context.Context, customObject v1alpha
 		StackName:    aws.String(stackName),
 		TemplateBody: aws.String(mainTemplate),
 	}
+	createStack.SetTags(getCloudFormationTags(customObject))
 
 	r.logger.LogCtx(ctx, "debug", "creating AWS Host Post-Guest cloudformation stack")
 	_, err = r.HostClients.CloudFormation.CreateStack(createStack)
