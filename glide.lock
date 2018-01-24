@@ -1,5 +1,5 @@
-hash: 2aca5d7fb960672ef5bcfb43f315c2e019a797fd42b65ff4376456a316368ee1
-updated: 2018-01-23T21:27:54.216390308+02:00
+hash: 7f8cb17f4efb9d0af84510f67f9217923f451bb13ff89ff521a7a1bba223903a
+updated: 2018-01-24T12:26:36.559211651+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -106,7 +106,7 @@ imports:
 - name: github.com/giantswarm/ipam
   version: 99953f57bd545c9eeca27076784c1f7149a7037a
 - name: github.com/giantswarm/k8scloudconfig
-  version: 183ec3f02b37b490d953a066ebf34889ab6d73b2
+  version: 090fa46ca6f628f96924fc22f6b0c8844f452761
   subpackages:
   - v_0_1_0
   - v_2_0_0
@@ -281,7 +281,7 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 0c34d16c3123764e413b9ed982ada58b1c3d53ea
+  version: f91529fc609202eededff4de2dc0ba2f662240a3
 - name: github.com/spf13/jwalterweatherman
   version: 7c0cea34c8ece3fbeb2b27ab9b59511d360fb394
 - name: github.com/spf13/pflag
@@ -348,7 +348,7 @@ imports:
   - pkg/client/clientset/clientset/scheme
   - pkg/client/clientset/clientset/typed/apiextensions/v1beta1
 - name: k8s.io/apimachinery
-  version: 8a12651bddd061e6fac22c64db4fb0fe5b1013d2
+  version: 80184f5f100c67bfcda6b8a848e0243fe4bc2772
   subpackages:
   - pkg/api/equality
   - pkg/api/errors
