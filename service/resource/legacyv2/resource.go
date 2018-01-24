@@ -11,12 +11,10 @@ import (
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/awstpr"
-	"github.com/giantswarm/certificatetpr"
+	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
-	"github.com/giantswarm/operatorkit/tpr"
 	"github.com/giantswarm/randomkeytpr"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
@@ -54,7 +52,7 @@ const (
 // Config represents the configuration used to create a legacy service.
 type Config struct {
 	// Dependencies.
-	CertWatcher *certificatetpr.Service
+	CertWatcher *legacy.Service
 	CloudConfig *cloudconfigv2.CloudConfig
 	K8sClient   kubernetes.Interface
 	KeyWatcher  *randomkeytpr.Service
@@ -122,23 +120,6 @@ func New(config Config) (*Resource, error) {
 
 	var err error
 
-	var newTPR *tpr.TPR
-	{
-		tprConfig := tpr.DefaultConfig()
-
-		tprConfig.K8sClient = config.K8sClient
-		tprConfig.Logger = config.Logger
-
-		tprConfig.Description = awstpr.Description
-		tprConfig.Name = awstpr.Name
-		tprConfig.Version = awstpr.VersionV1
-
-		newTPR, err = tpr.New(tprConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	newService := &Resource{
 		// Dependencies.
 		certWatcher: config.CertWatcher,
@@ -149,7 +130,6 @@ func New(config Config) (*Resource, error) {
 
 		// Internals
 		bootOnce: sync.Once{},
-		tpr:      newTPR,
 
 		// Settings.
 		awsConfig:        config.AwsConfig,
@@ -164,7 +144,7 @@ func New(config Config) (*Resource, error) {
 // Resource implements the legacy resource.
 type Resource struct {
 	// Dependencies.
-	certWatcher *certificatetpr.Service
+	certWatcher *legacy.Service
 	cloudConfig *cloudconfigv2.CloudConfig
 	k8sClient   kubernetes.Interface
 	keyWatcher  *randomkeytpr.Service
@@ -172,7 +152,6 @@ type Resource struct {
 
 	// Internals.
 	bootOnce sync.Once
-	tpr      *tpr.TPR
 
 	// Settings.
 	awsConfig        awsutil.Config
@@ -302,7 +281,7 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 	// For new clusters using Cloud Formation there is an OperatorKit resource
 	// for the kms keys and related resources.
 	var kmsKey *awsresources.KMSKey
-	var tlsAssets *certificatetpr.CompactTLSAssets
+	var tlsAssets *legacy.CompactTLSAssets
 	var clusterKeys *randomkeytpr.CompactRandomKeyAssets
 	if !keyv2.UseCloudFormation(cluster) {
 		s.logger.Log("info", fmt.Sprintf("waiting for k8s secrets..."))
