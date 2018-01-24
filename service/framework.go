@@ -5,7 +5,7 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	"github.com/giantswarm/certificatetpr"
+	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/client/k8sclient"
 	"github.com/giantswarm/operatorkit/client/k8scrdclient"
@@ -234,12 +234,12 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 
 	awsHostClients := awsclient.NewClients(awsHostConfig)
 
-	var certWatcher *certificatetpr.Service
+	var certWatcher *legacy.Service
 	{
-		certConfig := certificatetpr.DefaultServiceConfig()
+		certConfig := legacy.DefaultServiceConfig()
 		certConfig.K8sClient = k8sClient
 		certConfig.Logger = config.Logger
-		certWatcher, err = certificatetpr.NewService(certConfig)
+		certWatcher, err = legacy.NewService(certConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

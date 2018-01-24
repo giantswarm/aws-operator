@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"text/template"
 
-	"github.com/giantswarm/certificatetpr"
+	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeytpr"
 )
 
-func (s *Resource) encodeTLSAssets(assets certificatetpr.AssetsBundle, kmsKeyArn string) (*certificatetpr.CompactTLSAssets, error) {
+func (s *Resource) encodeTLSAssets(assets legacy.AssetsBundle, kmsKeyArn string) (*legacy.CompactTLSAssets, error) {
 	rawTLS := createRawTLSAssets(assets)
 
 	encTLS, err := rawTLS.encrypt(s.awsClients.KMS, kmsKeyArn)

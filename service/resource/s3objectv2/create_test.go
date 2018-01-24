@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/certificatetpr/certificatetprtest"
+	"github.com/giantswarm/certs/legacy/legacytest"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeytpr/randomkeytprtest"
 
@@ -153,7 +153,7 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 		S3: &S3ClientMock{},
 	}
 	resourceConfig.AwsService = awsservice.AwsServiceMock{}
-	resourceConfig.CertWatcher = certificatetprtest.NewService()
+	resourceConfig.CertWatcher = legacytest.NewService()
 	resourceConfig.CloudConfig = &CloudConfigMock{}
 	resourceConfig.Logger = microloggertest.New()
 	resourceConfig.RandomKeyWatcher = randomkeytprtest.NewService()
