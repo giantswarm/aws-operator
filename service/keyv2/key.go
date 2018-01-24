@@ -15,6 +15,13 @@ const (
 	// TODO Remove once the migration is complete.
 	CloudFormationVersion = "0.2.0"
 
+	// CloudProviderTagName is used to add Cloud Provider tags to AWS resources.
+	CloudProviderTagName = "kubernetes.io/cluster/%s"
+
+	// CloudProviderTagOwnedValue is used to indicate an AWS resource is owned
+	// and managed by a cluster.
+	CloudProviderTagOwnedValue = "owned"
+
 	// LegacyVersion is the version in the version bundle for existing clusters.
 	LegacyVersion = "0.1.0"
 
@@ -52,6 +59,15 @@ func ClusterID(customObject v1alpha1.AWSConfig) string {
 
 func ClusterNamespace(customObject v1alpha1.AWSConfig) string {
 	return ClusterID(customObject)
+}
+
+func ClusterTags(customObject v1alpha1.AWSConfig) map[string]string {
+	cloudProviderTag := fmt.Sprintf(CloudProviderTagName, ClusterID(customObject))
+	tags := map[string]string{
+		cloudProviderTag: CloudProviderTagOwnedValue,
+	}
+
+	return tags
 }
 
 func CustomerID(customObject v1alpha1.AWSConfig) string {

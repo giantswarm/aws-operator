@@ -2,6 +2,7 @@ package keyv2
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
@@ -115,6 +116,25 @@ func Test_ClusterNamespace(t *testing.T) {
 
 	if ClusterNamespace(customObject) != expectedID {
 		t.Fatalf("Expected cluster ID %s but was %s", expectedID, ClusterNamespace(customObject))
+	}
+}
+
+func Test_ClusterTags(t *testing.T) {
+	expectedID := "test-cluster"
+	expectedTags := map[string]string{
+		"kubernetes.io/cluster/test-cluster": "owned",
+	}
+
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: expectedID,
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(expectedTags, ClusterTags(customObject)) {
+		t.Fatalf("Expected cluster tags %v but was %v", expectedTags, ClusterTags(customObject))
 	}
 }
 
