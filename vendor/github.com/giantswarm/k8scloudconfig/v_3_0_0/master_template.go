@@ -1127,11 +1127,10 @@ write_files:
       name: node-exporter
       apiGroup: rbac.authorization.k8s.io
     ---
-    kind: RoleBinding
+    kind: ClusterRoleBinding
     apiVersion: rbac.authorization.k8s.io/v1beta1
     metadata:
       name: kube-state-metrics
-      namespace: kube-system
       labels:
         app: kube-state-metrics
     subjects:
@@ -1139,7 +1138,7 @@ write_files:
         name: kube-state-metrics
         namespace: kube-system
     roleRef:
-      kind: Role
+      kind: ClusterRole
       name: kube-state-metrics
       apiGroup: rbac.authorization.k8s.io
 - path: /srv/rbac_roles.yaml
@@ -1296,10 +1295,9 @@ write_files:
       - privileged
     ---
     apiVersion: rbac.authorization.k8s.io/v1
-    kind: Role
+    kind: ClusterRole
     metadata:
       name: kube-state-metrics
-      namespace: kube-system
       labels:
         app: kube-state-metrics
     rules:
@@ -1343,6 +1341,14 @@ write_files:
         verbs:
           - list
           - watch
+      - apiGroups:
+        - extensions
+        resources:
+        - podsecuritypolicies
+        verbs:
+        - use
+        resourceNames:
+        - privileged
 - path: /srv/psp_policies.yaml
   owner: root
   permissions: 0644

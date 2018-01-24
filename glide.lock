@@ -1,5 +1,5 @@
 hash: d19c1c9581057c98e12b801f0fc82e2bc1bc3e482997c99ef3fd3095cbe0c21a
-updated: 2018-01-23T18:29:07.242871Z
+updated: 2018-01-24T14:37:24.812876Z
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -106,7 +106,7 @@ imports:
 - name: github.com/giantswarm/ipam
   version: 99953f57bd545c9eeca27076784c1f7149a7037a
 - name: github.com/giantswarm/k8scloudconfig
-  version: 868ef60acd09a649dc974793f69ac59ef000a408
+  version: 6d4372667a69a8891e281f0bfd78a3cb8abe1c84
   subpackages:
   - v_0_1_0
   - v_2_0_0
@@ -157,7 +157,7 @@ imports:
   - informer
   - tpr
 - name: github.com/giantswarm/randomkeytpr
-  version: f1f464e790edc9eaeec963e25c6e9b4ace1e58ea
+  version: 86417ec356c55ea221701ccc646fe7ef5691f5b9
   subpackages:
   - randomkeytprtest
 - name: github.com/giantswarm/versionbundle
@@ -281,7 +281,7 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 0c34d16c3123764e413b9ed982ada58b1c3d53ea
+  version: f91529fc609202eededff4de2dc0ba2f662240a3
 - name: github.com/spf13/jwalterweatherman
   version: 7c0cea34c8ece3fbeb2b27ab9b59511d360fb394
 - name: github.com/spf13/pflag
@@ -339,6 +339,10 @@ imports:
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
   version: d670f9405373e636a5a2765eea47fac0c9bc91a4
+- name: k8s.io/api
+  version: fbe336854453ac8e27bffe14e1964555245cbd05
+  subpackages:
+  - core/v1
 - name: k8s.io/apiextensions-apiserver
   version: 0965a40c0530e110459750a7fcb9cfa4910fb944
   subpackages:
@@ -348,7 +352,7 @@ imports:
   - pkg/client/clientset/clientset/scheme
   - pkg/client/clientset/clientset/typed/apiextensions/v1beta1
 - name: k8s.io/apimachinery
-  version: 8a12651bddd061e6fac22c64db4fb0fe5b1013d2
+  version: 80184f5f100c67bfcda6b8a848e0243fe4bc2772
   subpackages:
   - pkg/api/equality
   - pkg/api/errors

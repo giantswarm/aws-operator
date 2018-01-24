@@ -6,12 +6,11 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/pkg/api"
-	"k8s.io/client-go/pkg/api/v1"
 )
 
 const (
@@ -89,7 +88,7 @@ func (s *Service) SearchKeysForKeytype(clusterID, keyType string) (map[Key][]byt
 	// created we might miss them with only watching.
 	s.logger.Log("debug", fmt.Sprintf("searching secret: %s=%s, %s=%s", KeyLabel, keyType, ClusterIDLabel, clusterID))
 
-	watcher, err := s.k8sClient.Core().Secrets(api.NamespaceDefault).Watch(apismetav1.ListOptions{
+	watcher, err := s.k8sClient.Core().Secrets(v1.NamespaceDefault).Watch(apismetav1.ListOptions{
 		// Select only secrets that match the given Keytype and the given cluster
 		// clusterID.
 		LabelSelector: fmt.Sprintf(
