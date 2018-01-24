@@ -1,11 +1,14 @@
 package cloudformationv2
 
 import (
+	"github.com/aws/aws-sdk-go/aws"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
 
+	"github.com/giantswarm/aws-operator/service/keyv2"
 	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2/adapter"
 )
 
@@ -140,4 +143,20 @@ func getStackOutputValue(outputs []*awscloudformation.Output, key string) (strin
 	}
 
 	return "", microerror.Mask(notFoundError)
+}
+
+func getCloudFormationTags(customObject v1alpha1.AWSConfig) []*awscloudformation.Tag {
+	clusterTags := keyv2.ClusterTags(customObject)
+	stackTags := []*awscloudformation.Tag{}
+
+	for k, v := range clusterTags {
+		tag := &awscloudformation.Tag{
+			Key:   aws.String(k),
+			Value: aws.String(v),
+		}
+
+		stackTags = append(stackTags, tag)
+	}
+
+	return stackTags
 }

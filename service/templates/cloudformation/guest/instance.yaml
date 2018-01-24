@@ -14,8 +14,6 @@
       Tags:
       - Key: Name
         Value: {{ .ClusterID }}-master
-      - Key: KubernetesCluster
-        Value: {{ .ClusterID }}
   EtcdVolume:
     Type: AWS::EC2::Volume
     Properties:
