@@ -19,7 +19,7 @@ import:
 - package: github.com/giantswarm/microendpoint
   version: master
 - package: github.com/giantswarm/k8scloudconfig
-  version: master
+  version: kube-state-metrics
 - package: github.com/giantswarm/certs
   version: legacy
 - package: github.com/giantswarm/randomkeytpr

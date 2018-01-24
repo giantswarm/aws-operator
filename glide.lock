@@ -1,5 +1,5 @@
-hash: da154a50e003375cf10f0e93b3345508032d985b4a9f157296d7bf7765362d35
-updated: 2018-01-24T20:52:09.103293+01:00
+hash: 30e077c7555253e386491675f4239955b915bb5aa4fa93cda9ca8a452ff24a13
+updated: 2018-01-24T20:24:29.249851Z
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -86,7 +86,7 @@ imports:
 - name: github.com/giantswarm/ipam
   version: 99953f57bd545c9eeca27076784c1f7149a7037a
 - name: github.com/giantswarm/k8scloudconfig
-  version: b7c24212eaef4aceb8ebaa05ece84c60f4bd0bdd
+  version: 6d4372667a69a8891e281f0bfd78a3cb8abe1c84
   subpackages:
   - v_2_0_0
   - v_3_0_0
@@ -170,7 +170,7 @@ imports:
   - proto
   - sortkeys
 - name: github.com/golang/glog
-  version: 44145f04b68cf362d9c4df2182967c2275eaefed
+  version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
 - name: github.com/golang/protobuf
   version: 4bd1920723d7b7c925de087aa32e2187708897f7
   subpackages:
@@ -247,7 +247,7 @@ imports:
 - name: github.com/peterbourgon/diskv
   version: 5f041e8faa004a95c88a202771f4cc3e991971e6
 - name: github.com/prometheus/client_golang
-  version: e7e903064f5e9eb5da98208bae10b475d4db0f8c
+  version: 06bc6e01f4baf4ee783ffcd23abfcb0b0f9dfada
   subpackages:
   - prometheus
   - prometheus/promhttp
