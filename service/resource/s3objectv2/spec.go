@@ -4,7 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/certificatetpr"
+	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/randomkeytpr"
 )
 
@@ -55,12 +55,12 @@ type AwsService interface {
 }
 
 type CloudConfigService interface {
-	NewMasterTemplate(v1alpha1.AWSConfig, certificatetpr.CompactTLSAssets, randomkeytpr.CompactRandomKeyAssets) (string, error)
-	NewWorkerTemplate(v1alpha1.AWSConfig, certificatetpr.CompactTLSAssets) (string, error)
+	NewMasterTemplate(v1alpha1.AWSConfig, legacy.CompactTLSAssets, randomkeytpr.CompactRandomKeyAssets) (string, error)
+	NewWorkerTemplate(v1alpha1.AWSConfig, legacy.CompactTLSAssets) (string, error)
 }
 
 type CertWatcher interface {
-	SearchCerts(string) (certificatetpr.AssetsBundle, error)
+	SearchCerts(string) (legacy.AssetsBundle, error)
 }
 
 type RandomKeyWatcher interface {

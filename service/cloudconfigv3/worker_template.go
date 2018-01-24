@@ -2,7 +2,7 @@ package cloudconfigv3
 
 import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/certificatetpr"
+	"github.com/giantswarm/certs/legacy"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_0_0"
 	"github.com/giantswarm/microerror"
 )
@@ -15,7 +15,7 @@ const (
 
 // NewWorkerTemplate generates a new worker cloud config template and returns it
 // as a base64 encoded string.
-func (c *CloudConfig) NewWorkerTemplate(customObject v1alpha1.AWSConfig, certs certificatetpr.CompactTLSAssets) (string, error) {
+func (c *CloudConfig) NewWorkerTemplate(customObject v1alpha1.AWSConfig, certs legacy.CompactTLSAssets) (string, error) {
 	var err error
 
 	var params k8scloudconfig.Params
@@ -48,7 +48,7 @@ func (c *CloudConfig) NewWorkerTemplate(customObject v1alpha1.AWSConfig, certs c
 }
 
 type WorkerExtension struct {
-	certs        certificatetpr.CompactTLSAssets
+	certs        legacy.CompactTLSAssets
 	customObject v1alpha1.AWSConfig
 }
 

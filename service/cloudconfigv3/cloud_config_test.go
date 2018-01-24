@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/certificatetpr"
+	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeytpr"
 )
@@ -17,7 +17,7 @@ import (
 func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 	testCases := []struct {
 		CustomObject v1alpha1.AWSConfig
-		Certs        certificatetpr.CompactTLSAssets
+		Certs        legacy.CompactTLSAssets
 		ClusterKeys  randomkeytpr.CompactRandomKeyAssets
 	}{
 		{
@@ -31,7 +31,7 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 					},
 				},
 			},
-			Certs: certificatetpr.CompactTLSAssets{
+			Certs: legacy.CompactTLSAssets{
 				CalicoClientCA:  "123456789-super-magic-calico-client-ca",
 				CalicoClientCrt: "123456789-super-magic-calico-client-crt",
 				CalicoClientKey: "123456789-super-magic-calico-client-key",
@@ -93,7 +93,7 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 func Test_Service_CloudConfig_NewWorkerTemplate(t *testing.T) {
 	testCases := []struct {
 		CustomObject v1alpha1.AWSConfig
-		Certs        certificatetpr.CompactTLSAssets
+		Certs        legacy.CompactTLSAssets
 	}{
 		{
 			CustomObject: v1alpha1.AWSConfig{
@@ -106,7 +106,7 @@ func Test_Service_CloudConfig_NewWorkerTemplate(t *testing.T) {
 					},
 				},
 			},
-			Certs: certificatetpr.CompactTLSAssets{
+			Certs: legacy.CompactTLSAssets{
 				CalicoClientCA:  "123456789-super-magic-calico-client-ca",
 				CalicoClientCrt: "123456789-super-magic-calico-client-crt",
 				CalicoClientKey: "123456789-super-magic-calico-client-key",

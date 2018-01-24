@@ -15,7 +15,7 @@ RUN apk -Uuv add --update --no-cache \
       jq=1.5-r3 \
       less=487-r0 \
       libffi-dev=3.2.1-r3 \
-      openssh-client=7.5_p1-r1 \
+      openssh-client=7.5_p1-r2 \
       openssl=1.0.2n-r0
 
 ENV KUBECTL_VERSION=v1.8.1

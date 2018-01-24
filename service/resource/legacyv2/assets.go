@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/kms"
-	"github.com/giantswarm/certificatetpr"
+	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeytpr"
 )
 
-func (s *Resource) encodeTLSAssets(assets certificatetpr.AssetsBundle, svc *kms.KMS, kmsKeyArn string) (*certificatetpr.CompactTLSAssets, error) {
+func (s *Resource) encodeTLSAssets(assets legacy.AssetsBundle, svc *kms.KMS, kmsKeyArn string) (*legacy.CompactTLSAssets, error) {
 	rawTLS := createRawTLSAssets(assets)
 
 	encTLS, err := rawTLS.encrypt(svc, kmsKeyArn)

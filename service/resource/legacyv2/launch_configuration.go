@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/certificatetpr"
+	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeytpr"
 
@@ -26,7 +26,7 @@ type launchConfigurationInput struct {
 	securityGroup       resources.ResourceWithID
 	ebsStorage          bool
 	subnet              *awsresources.Subnet
-	tlsAssets           *certificatetpr.CompactTLSAssets
+	tlsAssets           *legacy.CompactTLSAssets
 	clusterKeys         *randomkeytpr.CompactRandomKeyAssets
 }
 
