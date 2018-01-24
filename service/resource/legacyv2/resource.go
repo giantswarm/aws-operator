@@ -118,8 +118,6 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "config.PubKeyFile must not be empty")
 	}
 
-	var err error
-
 	newService := &Resource{
 		// Dependencies.
 		certWatcher: config.CertWatcher,
