@@ -4,6 +4,7 @@ package integration
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -12,15 +13,25 @@ import (
 	"strings"
 	"time"
 
-	giantclientset "github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	"github.com/giantswarm/e2e-harness/pkg/harness"
-	"github.com/giantswarm/microerror"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	giantclientset "github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/e2e-harness/pkg/harness"
+	"github.com/giantswarm/microerror"
 )
+
+// PatchSpec is a generic patch type to update objects with JSONPatchType operations.
+type PatchSpec struct {
+	Op    string      `json:"op"`
+	Path  string      `json:"path"`
+	Value interface{} `json:"value"`
+}
 
 const (
 	// minimunNodesReady represents the minimun number of ready nodes in a guest
@@ -346,14 +357,14 @@ func (f *framework) WaitForGuestReady() error {
 		return microerror.Mask(err)
 	}
 
-	if err := f.waitForNodesUp(); err != nil {
+	if err := f.waitForNodesUp(minimunNodesReady); err != nil {
 		return microerror.Mask(err)
 	}
 	log.Println("Guest cluster ready")
 	return nil
 }
 
-func (f *framework) waitForNodesUp() error {
+func (f *framework) waitForNodesUp(numberOfNodes int) error {
 	nodesUp := func() error {
 		res, err := f.guestCS.
 			CoreV1().
@@ -364,7 +375,7 @@ func (f *framework) waitForNodesUp() error {
 			log.Printf("waiting for nodes ready: %v\n", err)
 			return microerror.Mask(err)
 		}
-		if len(res.Items) < minimunNodesReady {
+		if len(res.Items) != numberOfNodes {
 			log.Printf("worker nodes not found")
 			return microerror.Mask(notFoundError)
 		}
@@ -417,4 +428,34 @@ func (f *framework) WaitForAPIDown() error {
 
 	log.Printf("waiting for k8s API down\n")
 	return waitConstantFor(apiDown)
+}
+
+func (f *framework) AWSCluster(name string) (*v1alpha1.AWSConfig, error) {
+	cluster, err := f.gsCs.ProviderV1alpha1().
+		AWSConfigs("default").
+		Get(name, metav1.GetOptions{})
+
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	return cluster, nil
+}
+
+func (f *framework) ApplyAWSConfigPatch(patch []PatchSpec, clusterName string) error {
+	patchBytes, err := json.Marshal(patch)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	_, err = f.gsCs.
+		ProviderV1alpha1().
+		AWSConfigs("default").
+		Patch(clusterName, types.JSONPatchType, patchBytes)
+
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
 }

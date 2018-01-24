@@ -169,6 +169,41 @@ func TestGuestReadyAfterMasterReboot(t *testing.T) {
 	}
 }
 
+func TestWorkersScaling(t *testing.T) {
+	currentWorkers, err := numberOfWorkers(os.Getenv("CLUSTER_NAME"))
+	if err != nil {
+		t.Fatalf("unexpected error getting number of workers %v", err)
+	}
+	currentMasters, err := numberOfMasters(os.Getenv("CLUSTER_NAME"))
+	if err != nil {
+		t.Fatalf("unexpected error getting number of masters %v", err)
+	}
+
+	// increase number of workers
+	expectedWorkers := currentWorkers + 1
+	log.Printf("Increasing the number of workers to %d", expectedWorkers)
+	err = addWorker(os.Getenv("CLUSTER_NAME"))
+	if err != nil {
+		t.Fatalf("unexpected error setting number of workers to %d, %v", expectedWorkers, err)
+	}
+
+	if err := f.WaitForNodesUp(currentMasters + expectedWorkers); err != nil {
+		t.Fatalf("unexpected error waiting for %d nodes up, %v", expectedWorkers, err)
+	}
+
+	// decrease number of workers
+	expectedWorkers--
+	log.Printf("Decreasing the number of workers to %d", expectedWorkers)
+	err = removeWorker(os.Getenv("CLUSTER_NAME"))
+	if err != nil {
+		t.Fatalf("unexpected error setting number of workers to %d, %v", expectedWorkers, err)
+	}
+
+	if err := f.WaitForNodesUp(currentMasters + expectedWorkers); err != nil {
+		t.Fatalf("unexpected error waiting for %d nodes up, %v", expectedWorkers, err)
+	}
+}
+
 func operatorSetup() error {
 	if err := f.InstallCertOperator(); err != nil {
 		return microerror.Mask(err)
@@ -243,4 +278,46 @@ func writeAWSResourceValues() error {
 	}
 
 	return nil
+}
+
+func numberOfWorkers(clusterName string) (int, error) {
+	cluster, err := f.AWSCluster(clusterName)
+	if err != nil {
+		return 0, microerror.Mask(err)
+	}
+
+	return len(cluster.Spec.AWS.Workers), nil
+}
+
+func numberOfMasters(clusterName string) (int, error) {
+	cluster, err := f.AWSCluster(clusterName)
+	if err != nil {
+		return 0, microerror.Mask(err)
+	}
+
+	return len(cluster.Spec.AWS.Masters), nil
+}
+
+func addWorker(clusterName string) error {
+	cluster, err := f.AWSCluster(clusterName)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	newWorker := cluster.Spec.AWS.Workers[0]
+
+	patch := make([]PatchSpec, 1)
+	patch[0].Op = "add"
+	patch[0].Path = "/spec/aws/workers/-"
+	patch[0].Value = newWorker
+
+	return f.ApplyAWSConfigPatch(patch, clusterName)
+}
+
+func removeWorker(clusterName string) error {
+	patch := make([]PatchSpec, 1)
+	patch[0].Op = "remove"
+	patch[0].Path = "/spec/aws/workers/1"
+
+	return f.ApplyAWSConfigPatch(patch, clusterName)
 }
