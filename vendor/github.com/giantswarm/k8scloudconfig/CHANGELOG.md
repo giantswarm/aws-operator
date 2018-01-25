@@ -20,13 +20,14 @@ version directory, and then changes are introduced.
 - Allow setting custom K8s API address for master nodes.
 - Allow setting etcd port.
 - Add node-exporter.
+- Add kube-state-metrics.
 
 ### Changed
 - Unify CloudConfig struct construction.
 - Update calico to 3.0.1.
 - Update hyperkube to v1.9.2.
 - Use vanilla (previously coreos) hyperkube image.
-- kube-dns replaced with CoreDNS 1.0.1.
+- kube-dns replaced with CoreDNS 1.0.4.
 - Fix Kubernetes API audit log.
 
 ### Removed
