@@ -452,9 +452,21 @@ write_files:
               effect: NoSchedule
             - key: "CriticalAddonsOnly"
               operator: "Exists"
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  labelSelector:
+                    matchExpressions:
+                      - key: k8s-app
+                        operator: In
+                        values:
+                        - coredns
+                  topologyKey: kubernetes.io/hostname
           containers:
           - name: coredns
-            image: coredns/coredns:1.0.1
+            image: quay.io/giantswarm/coredns:1.0.4
             imagePullPolicy: IfNotPresent
             args: [ "-conf", "/etc/coredns/Corefile" ]
             volumeMounts:
@@ -632,14 +644,25 @@ write_files:
                         - nginx-ingress-controller
                   topologyKey: kubernetes.io/hostname
           serviceAccountName: nginx-ingress-controller
+          initContainers:
+          - command:
+            - sh
+            - -c
+            - sysctl -w net.core.somaxconn=32768; sysctl -w net.ipv4.ip_local_port_range="1024 65535"
+            image: alpine:3.6
+            imagePullPolicy: IfNotPresent
+            name: sysctl
+            securityContext:
+              privileged: true
           containers:
           - name: nginx-ingress-controller
-            image: quay.io/giantswarm/nginx-ingress-controller-0.10.0
+            image: quay.io/giantswarm/nginx-ingress-controller-0.10.1
             args:
             - /nginx-ingress-controller
             - --default-backend-service=$(POD_NAMESPACE)/default-http-backend
             - --configmap=$(POD_NAMESPACE)/ingress-nginx
             - --enable-ssl-passthrough
+            - --annotations-prefix=nginx.ingress.kubernetes.io
             env:
               - name: POD_NAME
                 valueFrom:
@@ -910,6 +933,80 @@ write_files:
           serviceAccountName: node-exporter
           hostNetwork: true
           hostPID: true
+- path: /srv/kube-state-metrics-svc.yaml
+  owner: root
+  permissions: 0644
+  content: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: kube-state-metrics
+      namespace: kube-system
+      labels:
+        app: kube-state-metrics
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/scheme: "http"
+    spec:
+      ports:
+      - port: 10301
+      selector:
+        app: kube-state-metrics
+- path: /srv/kube-state-metrics-sa.yaml
+  owner: root
+  permissions: 0644
+  content: |
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: kube-state-metrics
+      namespace: kube-system
+      labels:
+        app: kube-state-metrics
+- path: /srv/kube-state-metrics-dep.yaml
+  owner: root
+  permissions: 0644
+  content: |
+    apiVersion: extensions/v1beta1
+    kind: Deployment
+    metadata:
+      name: kube-state-metrics
+      namespace: kube-system
+      labels:
+        app: kube-state-metrics
+    spec:
+      replicas: 1
+      template:
+        metadata:
+          labels:
+            app: kube-state-metrics
+        spec:
+          containers:
+          - name: kube-state-metrics
+            image: quay.io/giantswarm/kube-state-metrics:v1.0.1
+            args:
+              - '--port=10301'
+            livenessProbe:
+              httpGet:
+                path: /
+                port: 10301
+              initialDelaySeconds: 5
+              timeoutSeconds: 5
+            readinessProbe:
+              httpGet:
+                path: /
+                port: 10301
+              initialDelaySeconds: 5
+              timeoutSeconds: 5
+            resources:
+              requests:
+                cpu: 50m
+                memory: 75Mi
+              limits:
+                cpu: 50m
+                memory: 75Mi
+          serviceAccountName: kube-state-metrics
+          hostNetwork: true
 - path: /srv/rbac_bindings.yaml
   owner: root
   permissions: 0644
@@ -1051,6 +1148,21 @@ write_files:
     roleRef:
       kind: Role
       name: node-exporter
+      apiGroup: rbac.authorization.k8s.io
+    ---
+    kind: ClusterRoleBinding
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    metadata:
+      name: kube-state-metrics
+      labels:
+        app: kube-state-metrics
+    subjects:
+      - kind: ServiceAccount
+        name: kube-state-metrics
+        namespace: kube-system
+    roleRef:
+      kind: ClusterRole
+      name: kube-state-metrics
       apiGroup: rbac.authorization.k8s.io
 - path: /srv/rbac_roles.yaml
   owner: root
@@ -1204,6 +1316,62 @@ write_files:
       verbs:     ['use']
       resourceNames:
       - privileged
+    ---
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRole
+    metadata:
+      name: kube-state-metrics
+      labels:
+        app: kube-state-metrics
+    rules:
+      - apiGroups:
+          - ""
+        resources:
+          - nodes
+          - pods
+          - services
+          - resourcequotas
+          - replicationcontrollers
+          - limitranges
+          - persistentvolumeclaims
+          - persistentvolumes
+          - namespaces
+          - endpoints
+        verbs:
+          - list
+          - watch
+      - apiGroups:
+          - extensions
+        resources:
+          - daemonsets
+          - deployments
+          - replicasets
+        verbs:
+          - list
+          - watch
+      - apiGroups:
+          - apps
+        resources:
+          - statefulsets
+        verbs:
+          - list
+          - watch
+      - apiGroups:
+          - batch
+        resources:
+          - cronjobs
+          - jobs
+        verbs:
+          - list
+          - watch
+      - apiGroups:
+        - extensions
+        resources:
+        - podsecuritypolicies
+        verbs:
+        - use
+        resourceNames:
+        - privileged
 - path: /srv/psp_policies.yaml
   owner: root
   permissions: 0644
@@ -1443,6 +1611,9 @@ write_files:
       MANIFESTS="${MANIFESTS} node-exporter-svc.yaml"
       MANIFESTS="${MANIFESTS} node-exporter-sa.yaml"
       MANIFESTS="${MANIFESTS} node-exporter-ds.yaml"
+      MANIFESTS="${MANIFESTS} kube-state-metrics-svc.yaml"
+      MANIFESTS="${MANIFESTS} kube-state-metrics-sa.yaml"
+      MANIFESTS="${MANIFESTS} kube-state-metrics-dep.yaml"
 
       for manifest in $MANIFESTS
       do
