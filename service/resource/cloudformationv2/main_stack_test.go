@@ -72,15 +72,16 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 						IdleTimeoutSeconds: 3600,
 					},
 				},
-				AZ: "myaz",
+				Region: "eu-central-1",
+				AZ:     "eu-central-1a",
 				Masters: []v1alpha1.AWSConfigSpecAWSNode{
 					v1alpha1.AWSConfigSpecAWSNode{
-						ImageID: "myimageid",
+						InstanceType: "m3.large",
 					},
 				},
 				Workers: []v1alpha1.AWSConfigSpecAWSNode{
 					v1alpha1.AWSConfigSpecAWSNode{
-						ImageID: "myimageid",
+						InstanceType: "m3.large",
 					},
 				},
 				Ingress: v1alpha1.AWSConfigSpecAWSIngress{
@@ -131,11 +132,11 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		t.Error("asg header not found")
 	}
 
-	if !strings.Contains(body, "ImageId: myimageid") {
+	if !strings.Contains(body, "InstanceType: m3.large") {
 		t.Error("launch configuration element not found")
 	}
 
-	if !strings.Contains(body, "AvailabilityZones: [myaz]") {
+	if !strings.Contains(body, "AvailabilityZones: [eu-central-1a]") {
 		fmt.Println(body)
 		t.Error("asg element not found")
 	}
