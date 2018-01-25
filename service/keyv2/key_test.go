@@ -910,3 +910,26 @@ func Test_PeerAccessRoleName(t *testing.T) {
 		t.Fatalf("Expected  name '%s' but was '%s'", expectedName, actual)
 	}
 }
+
+func Test_MasterCount(t *testing.T) {
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			AWS: v1alpha1.AWSConfigSpecAWS{
+				Masters: []v1alpha1.AWSConfigSpecAWSNode{
+					v1alpha1.AWSConfigSpecAWSNode{
+						InstanceType: "m3.medium",
+					},
+					v1alpha1.AWSConfigSpecAWSNode{
+						InstanceType: "m3.medium",
+					},
+				},
+			},
+		},
+	}
+
+	expected := 2
+	actual := MasterCount(customObject)
+	if actual != expected {
+		t.Fatalf("Expected master count %d but was %d", expected, actual)
+	}
+}
