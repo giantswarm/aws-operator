@@ -13,6 +13,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+
+	"github.com/giantswarm/aws-operator/service/keyv2"
 	"github.com/giantswarm/microerror"
 )
 
@@ -190,6 +192,7 @@ func TestWorkersScaling(t *testing.T) {
 	if err := f.WaitForNodesUp(currentMasters + expectedWorkers); err != nil {
 		t.Fatalf("unexpected error waiting for %d nodes up, %v", expectedWorkers, err)
 	}
+	log.Printf("%d worker nodes ready", expectedWorkers)
 
 	// decrease number of workers
 	expectedWorkers--
@@ -202,6 +205,7 @@ func TestWorkersScaling(t *testing.T) {
 	if err := f.WaitForNodesUp(currentMasters + expectedWorkers); err != nil {
 		t.Fatalf("unexpected error waiting for %d nodes up, %v", expectedWorkers, err)
 	}
+	log.Printf("%d worker nodes ready", expectedWorkers)
 }
 
 func operatorSetup() error {
@@ -286,7 +290,7 @@ func numberOfWorkers(clusterName string) (int, error) {
 		return 0, microerror.Mask(err)
 	}
 
-	return len(cluster.Spec.AWS.Workers), nil
+	return keyv2.WorkerCount(cluster), nil
 }
 
 func numberOfMasters(clusterName string) (int, error) {
@@ -295,7 +299,7 @@ func numberOfMasters(clusterName string) (int, error) {
 		return 0, microerror.Mask(err)
 	}
 
-	return len(cluster.Spec.AWS.Masters), nil
+	return keyv2.MasterCount(cluster), nil
 }
 
 func addWorker(clusterName string) error {

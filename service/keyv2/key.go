@@ -138,6 +138,10 @@ func MainHostPostStackName(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("cluster-%s-host-main", clusterID)
 }
 
+func MasterCount(customObject v1alpha1.AWSConfig) int {
+	return len(customObject.Spec.AWS.Masters)
+}
+
 func MasterImageID(customObject v1alpha1.AWSConfig) string {
 	var imageID string
 

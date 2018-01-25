@@ -34,9 +34,9 @@ type PatchSpec struct {
 }
 
 const (
-	// minimunNodesReady represents the minimun number of ready nodes in a guest
+	// minimumNodesReady represents the minimun number of ready nodes in a guest
 	// cluster to be considered healthy.
-	minimunNodesReady = 3
+	minimumNodesReady = 3
 
 	certOperatorValuesFile = "/tmp/cert-operator-values.yaml"
 	// certOperatorChartValues values required by cert-operator-chart, the environment
@@ -357,7 +357,7 @@ func (f *framework) WaitForGuestReady() error {
 		return microerror.Mask(err)
 	}
 
-	if err := f.WaitForNodesUp(minimunNodesReady); err != nil {
+	if err := f.WaitForNodesUp(minimumNodesReady); err != nil {
 		return microerror.Mask(err)
 	}
 	log.Println("Guest cluster ready")
