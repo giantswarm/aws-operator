@@ -139,8 +139,15 @@ func NewHostPost(cfg Config) (Adapter, error) {
 func getImageID(customObject v1alpha1.AWSConfig) (string, error) {
 	region := keyv2.Region(customObject)
 
-	// Container Linux AMIs for each active region.
-	// NOTE: AMIs should always be for HVM virtualisation and not PV.
+	/*
+		Container Linux AMIs for each active AWS region.
+		From: https://coreos.com/os/docs/latest/booting-on-ec2.html
+
+		NOTE 1: AMIs should always be for HVM virtualisation and not PV.
+		NOTE 2: You also need to update adapter_test.go.
+
+		Current Release: CoreOS Container Linux stable 1576.5.0 (HVM)
+	*/
 	imageIDs := map[string]string{
 		"eu-central-1": "ami-90c152ff",
 		"eu-west-1":    "ami-32d1474b",
