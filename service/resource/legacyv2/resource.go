@@ -228,13 +228,11 @@ func (s *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 }
 
 func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
-	// For new clusters using Cloud Formation there is an OperatorKit resource
-	// for the k8s namespace.
-	if !keyv2.UseCloudFormation(cluster) {
-		// Create cluster namespace in k8s.
-		if err := s.createClusterNamespace(cluster.Spec.Cluster); err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create cluster namespace: '%#v'", err))
-		}
+	var err error
+
+	// Create cluster namespace in k8s.
+	if err := s.createClusterNamespace(cluster.Spec.Cluster); err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create cluster namespace: '%#v'", err))
 	}
 
 	// Create AWS guest cluster client.
@@ -276,128 +274,102 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 		}
 	}
 
-	// For new clusters using Cloud Formation there is an OperatorKit resource
-	// for the kms keys and related resources.
-	var kmsKey *awsresources.KMSKey
-	var tlsAssets *legacy.CompactTLSAssets
-	var clusterKeys *randomkeytpr.CompactRandomKeyAssets
-	if !keyv2.UseCloudFormation(cluster) {
-		s.logger.Log("info", fmt.Sprintf("waiting for k8s secrets..."))
-		clusterID := keyv2.ClusterID(cluster)
-		certs, err := s.certWatcher.SearchCerts(clusterID)
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get certificates from secrets: '%#v'", err))
-		}
+	s.logger.Log("info", fmt.Sprintf("waiting for k8s secrets..."))
+	clusterID := keyv2.ClusterID(cluster)
+	certs, err := s.certWatcher.SearchCerts(clusterID)
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get certificates from secrets: '%#v'", err))
+	}
 
-		// Create Encryption key
-		s.logger.Log("info", fmt.Sprintf("waiting for k8s keys..."))
-		keys, err := s.keyWatcher.SearchKeys(clusterID)
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get keys from secrets: '%#v'", err))
-		}
+	// Create Encryption key
+	s.logger.Log("info", fmt.Sprintf("waiting for k8s keys..."))
+	keys, err := s.keyWatcher.SearchKeys(clusterID)
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get keys from secrets: '%#v'", err))
+	}
 
-		// Create KMS key.
-		kmsKey = &awsresources.KMSKey{
-			Name:      keyv2.ClusterID(cluster),
-			AWSEntity: awsresources.AWSEntity{Clients: clients},
-		}
+	// Create KMS key.
+	kmsKey := &awsresources.KMSKey{
+		Name:      keyv2.ClusterID(cluster),
+		AWSEntity: awsresources.AWSEntity{Clients: clients},
+	}
 
-		kmsCreated, kmsKeyErr := kmsKey.CreateIfNotExists()
-		if kmsKeyErr != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create KMS key: '%#v'", kmsKeyErr))
-		}
+	kmsCreated, kmsKeyErr := kmsKey.CreateIfNotExists()
+	if kmsKeyErr != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create KMS key: '%#v'", kmsKeyErr))
+	}
 
-		if kmsCreated {
-			s.logger.Log("info", fmt.Sprintf("created KMS key for cluster '%s'", keyv2.ClusterID(cluster)))
-		} else {
-			s.logger.Log("info", fmt.Sprintf("kms key '%s' already exists, reusing", kmsKey.Name))
-		}
+	if kmsCreated {
+		s.logger.Log("info", fmt.Sprintf("created KMS key for cluster '%s'", keyv2.ClusterID(cluster)))
+	} else {
+		s.logger.Log("info", fmt.Sprintf("kms key '%s' already exists, reusing", kmsKey.Name))
+	}
 
-		// Encode TLS assets.
-		tlsAssets, err = s.encodeTLSAssets(certs, clients.KMS, kmsKey.Arn())
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not encode TLS assets: '%#v'", err))
-		}
+	// Encode TLS assets.
+	tlsAssets, err := s.encodeTLSAssets(certs, clients.KMS, kmsKey.Arn())
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not encode TLS assets: '%#v'", err))
+	}
 
-		// Encode Key assets.
-		clusterKeys, err = s.encodeKeyAssets(keys, clients.KMS, kmsKey.Arn())
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not encode Keys assets: '%#v'", err))
-		}
+	// Encode Key assets.
+	clusterKeys, err := s.encodeKeyAssets(keys, clients.KMS, kmsKey.Arn())
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not encode Keys assets: '%#v'", err))
 	}
 
 	bucketName := s.bucketName(cluster)
 
 	// Create master IAM policy.
-	var masterPolicy resources.NamedResource
-	var masterPolicyCreated bool
-	var workerPolicy resources.NamedResource
+	masterPolicy := &awsresources.Policy{
+		ClusterID:  keyv2.ClusterID(cluster),
+		KMSKeyArn:  kmsKey.Arn(),
+		PolicyType: prefixMaster,
+		S3Bucket:   bucketName,
+		AWSEntity:  awsresources.AWSEntity{Clients: clients},
+	}
+	masterPolicyCreated, err := masterPolicy.CreateIfNotExists()
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create master policy: '%#v'", err))
+	}
+	if masterPolicyCreated {
+		s.logger.Log("info", fmt.Sprintf("created master policy for cluster '%s'", keyv2.ClusterID(cluster)))
+	} else {
+		s.logger.Log("info", fmt.Sprintf("master policy for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
+	}
 
-	if !keyv2.UseCloudFormation(cluster) {
-		{
-			var err error
-			masterPolicy = &awsresources.Policy{
-				ClusterID:  keyv2.ClusterID(cluster),
-				KMSKeyArn:  kmsKey.Arn(),
-				PolicyType: prefixMaster,
-				S3Bucket:   bucketName,
-				AWSEntity:  awsresources.AWSEntity{Clients: clients},
-			}
-			masterPolicyCreated, err = masterPolicy.CreateIfNotExists()
-			if err != nil {
-				return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create master policy: '%#v'", err))
-			}
-		}
-		if masterPolicyCreated {
-			s.logger.Log("info", fmt.Sprintf("created master policy for cluster '%s'", keyv2.ClusterID(cluster)))
-		} else {
-			s.logger.Log("info", fmt.Sprintf("master policy for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
-		}
+	// Create worker IAM policy.
+	workerPolicy := &awsresources.Policy{
+		ClusterID:  keyv2.ClusterID(cluster),
+		KMSKeyArn:  kmsKey.Arn(),
+		PolicyType: prefixWorker,
+		S3Bucket:   bucketName,
+		AWSEntity:  awsresources.AWSEntity{Clients: clients},
+	}
 
-		// Create worker IAM policy.
-		var workerPolicyCreated bool
-		{
-			var err error
-			workerPolicy = &awsresources.Policy{
-				ClusterID:  keyv2.ClusterID(cluster),
-				KMSKeyArn:  kmsKey.Arn(),
-				PolicyType: prefixWorker,
-				S3Bucket:   bucketName,
-				AWSEntity:  awsresources.AWSEntity{Clients: clients},
-			}
-			workerPolicyCreated, err = workerPolicy.CreateIfNotExists()
-			if err != nil {
-				return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create worker policy: '%#v'", err))
-			}
-		}
-		if workerPolicyCreated {
-			s.logger.Log("info", fmt.Sprintf("created worker policy for cluster '%s'", keyv2.ClusterID(cluster)))
-		} else {
-			s.logger.Log("info", fmt.Sprintf("worker policy for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
-		}
+	workerPolicyCreated, err := workerPolicy.CreateIfNotExists()
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create worker policy: '%#v'", err))
+	}
+	if workerPolicyCreated {
+		s.logger.Log("info", fmt.Sprintf("created worker policy for cluster '%s'", keyv2.ClusterID(cluster)))
+	} else {
+		s.logger.Log("info", fmt.Sprintf("worker policy for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
 	}
 
 	// Create S3 bucket.
-	var bucket resources.ReusableResource
-	if !keyv2.UseCloudFormation(cluster) {
-		var bucketCreated bool
-		{
-			var err error
-			bucket = &awsresources.Bucket{
-				Name:      bucketName,
-				AWSEntity: awsresources.AWSEntity{Clients: clients},
-			}
-			bucketCreated, err = bucket.CreateIfNotExists()
-			if err != nil {
-				return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create S3 bucket: '%#v'", err))
-			}
-		}
+	bucket := &awsresources.Bucket{
+		Name:      bucketName,
+		AWSEntity: awsresources.AWSEntity{Clients: clients},
+	}
+	bucketCreated, err := bucket.CreateIfNotExists()
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create S3 bucket: '%#v'", err))
+	}
 
-		if bucketCreated {
-			s.logger.Log("info", fmt.Sprintf("created bucket '%s'", bucketName))
-		} else {
-			s.logger.Log("info", fmt.Sprintf("bucket '%s' already exists, reusing", bucketName))
-		}
+	if bucketCreated {
+		s.logger.Log("info", fmt.Sprintf("created bucket '%s'", bucketName))
+	} else {
+		s.logger.Log("info", fmt.Sprintf("bucket '%s' already exists, reusing", bucketName))
 	}
 
 	var vpcID string
