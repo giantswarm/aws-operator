@@ -357,14 +357,14 @@ func (f *framework) WaitForGuestReady() error {
 		return microerror.Mask(err)
 	}
 
-	if err := f.waitForNodesUp(minimunNodesReady); err != nil {
+	if err := f.WaitForNodesUp(minimunNodesReady); err != nil {
 		return microerror.Mask(err)
 	}
 	log.Println("Guest cluster ready")
 	return nil
 }
 
-func (f *framework) waitForNodesUp(numberOfNodes int) error {
+func (f *framework) WaitForNodesUp(numberOfNodes int) error {
 	nodesUp := func() error {
 		res, err := f.guestCS.
 			CoreV1().
