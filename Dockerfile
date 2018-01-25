@@ -1,4 +1,6 @@
-FROM busybox:ubuntu-14.04
+FROM alpine:3.7
+
+RUN apk add --no-cache ca-certificates
 
 RUN mkdir -p /opt/aws-operator
 ADD ./aws-operator /opt/aws-operator/aws-operator
