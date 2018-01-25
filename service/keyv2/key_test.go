@@ -363,6 +363,22 @@ func Test_MasterInstanceType(t *testing.T) {
 	}
 }
 
+func Test_Region(t *testing.T) {
+	expectedRegion := "eu-central-1"
+
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			AWS: v1alpha1.AWSConfigSpecAWS{
+				Region: "eu-central-1",
+			},
+		},
+	}
+
+	if Region(customObject) != expectedRegion {
+		t.Fatalf("Expected region %s but was %s", expectedRegion, Region(customObject))
+	}
+}
+
 func Test_RouteTableName(t *testing.T) {
 	expectedName := "test-cluster-private"
 	suffix := "private"
@@ -892,5 +908,28 @@ func Test_PeerAccessRoleName(t *testing.T) {
 	actual := PeerAccessRoleName(customObject)
 	if actual != expectedName {
 		t.Fatalf("Expected  name '%s' but was '%s'", expectedName, actual)
+	}
+}
+
+func Test_MasterCount(t *testing.T) {
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			AWS: v1alpha1.AWSConfigSpecAWS{
+				Masters: []v1alpha1.AWSConfigSpecAWSNode{
+					v1alpha1.AWSConfigSpecAWSNode{
+						InstanceType: "m3.medium",
+					},
+					v1alpha1.AWSConfigSpecAWSNode{
+						InstanceType: "m3.medium",
+					},
+				},
+			},
+		},
+	}
+
+	expected := 2
+	actual := MasterCount(customObject)
+	if actual != expected {
+		t.Fatalf("Expected master count %d but was %d", expected, actual)
 	}
 }
