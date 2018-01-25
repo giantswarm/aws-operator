@@ -212,7 +212,7 @@ func newVersionBundles() []versionbundle.Bundle {
 				},
 				{
 					Name:    "nginx-ingress-controller",
-					Version: "0.9.0",
+					Version: "0.10.1",
 				},
 			},
 			Dependencies: []versionbundle.Dependency{},
