@@ -290,7 +290,7 @@ func numberOfWorkers(clusterName string) (int, error) {
 		return 0, microerror.Mask(err)
 	}
 
-	return keyv2.WorkerCount(cluster), nil
+	return keyv2.WorkerCount(*cluster), nil
 }
 
 func numberOfMasters(clusterName string) (int, error) {
@@ -299,7 +299,7 @@ func numberOfMasters(clusterName string) (int, error) {
 		return 0, microerror.Mask(err)
 	}
 
-	return keyv2.MasterCount(cluster), nil
+	return keyv2.MasterCount(*cluster), nil
 }
 
 func addWorker(clusterName string) error {
