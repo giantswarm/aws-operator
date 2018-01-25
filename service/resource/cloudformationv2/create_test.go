@@ -26,12 +26,13 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 				},
 			},
 			AWS: v1alpha1.AWSConfigSpecAWS{
-				AZ: "myaz",
+				AZ: "eu-central-1a",
 				Masters: []v1alpha1.AWSConfigSpecAWSNode{
 					v1alpha1.AWSConfigSpecAWSNode{
 						ImageID: "myimageid",
 					},
 				},
+				Region: "eu-central-1",
 				Workers: []v1alpha1.AWSConfigSpecAWSNode{
 					v1alpha1.AWSConfigSpecAWSNode{
 						ImageID: "myimageid",

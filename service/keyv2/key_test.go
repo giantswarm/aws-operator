@@ -363,6 +363,22 @@ func Test_MasterInstanceType(t *testing.T) {
 	}
 }
 
+func Test_Region(t *testing.T) {
+	expectedRegion := "eu-central-1"
+
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			AWS: v1alpha1.AWSConfigSpecAWS{
+				Region: "eu-central-1",
+			},
+		},
+	}
+
+	if Region(customObject) != expectedRegion {
+		t.Fatalf("Expected region %s but was %s", expectedRegion, Region(customObject))
+	}
+}
+
 func Test_RouteTableName(t *testing.T) {
 	expectedName := "test-cluster-private"
 	suffix := "private"
