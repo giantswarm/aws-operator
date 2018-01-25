@@ -1,5 +1,5 @@
 hash: da154a50e003375cf10f0e93b3345508032d985b4a9f157296d7bf7765362d35
-updated: 2018-01-25T11:53:24.490026+01:00
+updated: 2018-01-25T18:20:37.652690335+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 8b344ddb7a49daf794928d1db484ad9a81499858
@@ -84,9 +84,9 @@ imports:
   subpackages:
   - pkg/harness
 - name: github.com/giantswarm/ipam
-  version: 99953f57bd545c9eeca27076784c1f7149a7037a
+  version: f12ca156323d142419098bc81c642931b5aa1e0e
 - name: github.com/giantswarm/k8scloudconfig
-  version: a6ffe9532b4c2b4b2b4c4c60e668c703efc77a31
+  version: c946dfe0e7a7da60a8dcd059f94b3c85007a8e05
   subpackages:
   - v_2_0_0
   - v_3_0_0
@@ -247,7 +247,7 @@ imports:
 - name: github.com/peterbourgon/diskv
   version: 5f041e8faa004a95c88a202771f4cc3e991971e6
 - name: github.com/prometheus/client_golang
-  version: e7e903064f5e9eb5da98208bae10b475d4db0f8c
+  version: 06bc6e01f4baf4ee783ffcd23abfcb0b0f9dfada
   subpackages:
   - prometheus
   - prometheus/promhttp
