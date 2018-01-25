@@ -6,9 +6,16 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
+	customObject, err := keyv2.ToCustomObject(obj)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	createInput, err := toKMSKeyState(createChange)
 	if err != nil {
 		return microerror.Mask(err)
@@ -29,6 +36,13 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 		if _, err := r.awsClients.KMS.EnableKeyRotation(&kms.EnableKeyRotationInput{
 			KeyId: key.KeyMetadata.KeyId,
+		}); err != nil {
+			return microerror.Mask(err)
+		}
+
+		if _, err := r.awsClients.KMS.TagResource(&kms.TagResourceInput{
+			KeyId: key.KeyMetadata.KeyId,
+			Tags:  getKMSTags(customObject),
 		}); err != nil {
 			return microerror.Mask(err)
 		}
