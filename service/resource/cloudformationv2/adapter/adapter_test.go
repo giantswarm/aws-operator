@@ -24,28 +24,78 @@ var (
 )
 
 func TestAdapterGuestMain(t *testing.T) {
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: defaultCluster,
-			AWS: v1alpha1.AWSConfigSpecAWS{
-				AZ: "eu-central-1a",
-				Masters: []v1alpha1.AWSConfigSpecAWSNode{
-					v1alpha1.AWSConfigSpecAWSNode{
-						ImageID: "ami-test-master",
-					},
-				},
-				Workers: []v1alpha1.AWSConfigSpecAWSNode{
-					v1alpha1.AWSConfigSpecAWSNode{
-						ImageID: "ami-test-worker",
+	testCases := []struct {
+		description       string
+		customObject      v1alpha1.AWSConfig
+		errorMatcher      func(error) bool
+		expectedASGType   string
+		expectedClusterID string
+		expectedImageID   string
+	}{
+		{
+			description: "basic match",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: defaultCluster,
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						AZ:     "eu-central-1a",
+						Region: "eu-central-1",
+						Masters: []v1alpha1.AWSConfigSpecAWSNode{
+							v1alpha1.AWSConfigSpecAWSNode{},
+						},
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{
+							v1alpha1.AWSConfigSpecAWSNode{},
+						},
 					},
 				},
 			},
+			errorMatcher:      nil,
+			expectedASGType:   "worker",
+			expectedClusterID: "test-cluster",
+			expectedImageID:   "ami-90c152ff",
+		},
+		{
+			description: "different region",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: defaultCluster,
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						AZ:     "eu-west-1a",
+						Region: "eu-west-1",
+						Masters: []v1alpha1.AWSConfigSpecAWSNode{
+							v1alpha1.AWSConfigSpecAWSNode{},
+						},
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{
+							v1alpha1.AWSConfigSpecAWSNode{},
+						},
+					},
+				},
+			},
+			errorMatcher:      nil,
+			expectedASGType:   "worker",
+			expectedClusterID: "test-cluster",
+			expectedImageID:   "ami-32d1474b",
+		},
+		{
+			description: "invalid region",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: defaultCluster,
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						AZ:     "invalid-1a",
+						Region: "invalid-1",
+						Masters: []v1alpha1.AWSConfigSpecAWSNode{
+							v1alpha1.AWSConfigSpecAWSNode{},
+						},
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{
+							v1alpha1.AWSConfigSpecAWSNode{},
+						},
+					},
+				},
+			},
+			errorMatcher: IsInvalidConfig,
 		},
 	}
-	expectedASGType := prefixWorker
-	expectedClusterID := "test-cluster"
-	expectedMasterImageID := "ami-test-master"
-	expectedWorkerImageID := "ami-test-worker"
 
 	clients := Clients{
 		EC2: &EC2ClientMock{},
@@ -58,31 +108,39 @@ func TestAdapterGuestMain(t *testing.T) {
 		IAM: &IAMClientMock{},
 	}
 
-	cfg := Config{
-		CustomObject:     customObject,
-		Clients:          clients,
-		InstallationName: "myinstallation",
-		HostAccountID:    "myHostAccountID",
-		HostClients:      hostClients,
-	}
-	a, err := NewGuest(cfg)
-	if err != nil {
-		t.Errorf("unexpected error %v", err)
-	}
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			cfg := Config{
+				CustomObject:     tc.customObject,
+				Clients:          clients,
+				InstallationName: "myinstallation",
+				HostAccountID:    "myHostAccountID",
+				HostClients:      hostClients,
+			}
+			a, err := NewGuest(cfg)
+			if tc.errorMatcher != nil && err == nil {
+				t.Error("expected error didn't happen")
+			}
 
-	if expectedASGType != a.ASGType {
-		t.Errorf("unexpected value, expecting %q, got %q", expectedASGType, a.ASGType)
-	}
+			if tc.errorMatcher != nil && !tc.errorMatcher(err) {
+				t.Error("expected", true, "got", false)
+			}
 
-	if expectedClusterID != a.ClusterID {
-		t.Errorf("unexpected value, expecting %q, got %q", expectedClusterID, a.ClusterID)
-	}
+			if tc.expectedASGType != a.ASGType {
+				t.Errorf("unexpected value, expecting %q, got %q", tc.expectedASGType, a.ASGType)
+			}
 
-	if expectedMasterImageID != a.MasterImageID {
-		t.Errorf("unexpected MasterImageID, got %q, want %q", a.MasterImageID, expectedMasterImageID)
-	}
+			if tc.expectedClusterID != a.ClusterID {
+				t.Errorf("unexpected value, expecting %q, got %q", tc.expectedClusterID, a.ClusterID)
+			}
 
-	if expectedWorkerImageID != a.WorkerImageID {
-		t.Errorf("unexpected WorkerImageID, got %q, want %q", a.WorkerImageID, expectedWorkerImageID)
+			if tc.expectedImageID != a.MasterImageID {
+				t.Errorf("unexpected MasterImageID, expecting %q, want %q", tc.expectedImageID, a.MasterImageID)
+			}
+
+			if tc.expectedImageID != a.WorkerImageID {
+				t.Errorf("unexpected WorkerImageID, expecting %q, want %q", tc.expectedImageID, a.WorkerImageID)
+			}
+		})
 	}
 }

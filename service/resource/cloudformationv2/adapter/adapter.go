@@ -70,8 +70,15 @@ func NewGuest(cfg Config) (Adapter, error) {
 
 	a.ASGType = prefixWorker
 	a.ClusterID = keyv2.ClusterID(cfg.CustomObject)
-	a.MasterImageID = keyv2.MasterImageID(cfg.CustomObject)
-	a.WorkerImageID = keyv2.WorkerImageID(cfg.CustomObject)
+
+	// Get the EC2 AMI for the configured region.
+	imageID, err := getImageID(cfg.CustomObject)
+	if err != nil {
+		return Adapter{}, microerror.Mask(err)
+	}
+
+	a.MasterImageID = imageID
+	a.WorkerImageID = imageID
 
 	hydraters := []hydrater{
 		a.getAutoScalingGroup,
@@ -126,4 +133,24 @@ func NewHostPost(cfg Config) (Adapter, error) {
 	}
 
 	return a, nil
+}
+
+// getImageID returns the EC2 AMI for the configured region.
+func getImageID(customObject v1alpha1.AWSConfig) (string, error) {
+	region := keyv2.Region(customObject)
+
+	// Container Linux AMIs for each active region.
+	// NOTE: AMIs should always be for HVM virtualisation and not PV.
+	imageIDs := map[string]string{
+		"eu-central-1": "ami-90c152ff",
+		"eu-west-1":    "ami-32d1474b",
+		"us-west-2":    "ami-dc4ce6a4",
+	}
+
+	imageID, ok := imageIDs[region]
+	if !ok {
+		return "", microerror.Maskf(invalidConfigError, "no image id for region '%s'", region)
+	}
+
+	return imageID, nil
 }
