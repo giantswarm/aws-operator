@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/certificatetpr/certificatetprtest"
+	"github.com/giantswarm/certs/legacy/legacytest"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeytpr/randomkeytprtest"
 
@@ -54,7 +54,7 @@ func Test_CurrentState(t *testing.T) {
 	var newResource *Resource
 
 	resourceConfig := DefaultConfig()
-	resourceConfig.CertWatcher = certificatetprtest.NewService()
+	resourceConfig.CertWatcher = legacytest.NewService()
 	resourceConfig.CloudConfig = &CloudConfigMock{}
 	resourceConfig.Logger = microloggertest.New()
 	resourceConfig.RandomKeyWatcher = randomkeytprtest.NewService()

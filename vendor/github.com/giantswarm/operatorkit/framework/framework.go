@@ -18,9 +18,11 @@ import (
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/giantswarm/operatorkit/client/k8scrdclient"
-	"github.com/giantswarm/operatorkit/framework/context/canceledcontext"
+	"github.com/giantswarm/operatorkit/framework/context/reconciliationcanceledcontext"
+	"github.com/giantswarm/operatorkit/framework/context/resourcecanceledcontext"
+	"github.com/giantswarm/operatorkit/framework/context/updateallowedcontext"
+	"github.com/giantswarm/operatorkit/framework/context/updatenecessarycontext"
 	"github.com/giantswarm/operatorkit/informer"
-	"github.com/giantswarm/operatorkit/tpr"
 )
 
 // Config represents the configuration used to create a new operator framework.
@@ -45,12 +47,6 @@ type Config struct {
 	// can be versioned and different resources can be executed depending on the
 	// custom object being reconciled.
 	ResourceRouter func(ctx context.Context, obj interface{}) ([]Resource, error)
-	// TPR can be provided to ensure a third party resource exists. When given the
-	// boot process of the framework ensures the TPR is created before starting
-	// the conciliation.
-	//
-	// NOTE this is deprecated since the CRD concept is the successor of the TPR.
-	TPR tpr.Interface
 
 	// Settings.
 	BackOffFactory func() backoff.BackOff
@@ -66,7 +62,6 @@ func DefaultConfig() Config {
 		Informer:       nil,
 		Logger:         nil,
 		ResourceRouter: nil,
-		TPR:            nil,
 
 		// Settings.
 		BackOffFactory: func() backoff.BackOff {
@@ -87,7 +82,6 @@ type Framework struct {
 	informer       informer.Interface
 	logger         micrologger.Logger
 	resourceRouter func(ctx context.Context, obj interface{}) ([]Resource, error)
-	tpr            tpr.Interface
 
 	// Settings.
 	backOffFactory func() backoff.BackOff
@@ -123,7 +117,10 @@ func New(config Config) (*Framework, error) {
 	}
 
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
-		ctx = canceledcontext.NewContext(ctx, make(chan struct{}))
+		ctx = reconciliationcanceledcontext.NewContext(ctx, make(chan struct{}))
+		ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
+		ctx = updateallowedcontext.NewContext(ctx, make(chan struct{}))
+		ctx = updatenecessarycontext.NewContext(ctx, make(chan struct{}))
 
 		ctx, err := config.InitCtxFunc(ctx, obj)
 		if err != nil {
@@ -153,7 +150,6 @@ func New(config Config) (*Framework, error) {
 		informer:       config.Informer,
 		logger:         config.Logger,
 		resourceRouter: config.ResourceRouter,
-		tpr:            config.TPR,
 
 		// Settings.
 		backOffFactory: config.BackOffFactory,
@@ -310,9 +306,9 @@ func (f *Framework) UpdateFunc(oldObj, newObj interface{}) {
 }
 
 // ProcessCreate is a drop-in for an informer's AddFunc. It receives the custom
-// object observed during TPR watches and anything that implements Resource.
-// ProcessCreate takes care about all necessary reconciliation logic for create
-// events.
+// object observed during custom resource watches and anything that implements
+// Resource. ProcessCreate takes care about all necessary reconciliation logic
+// for create events.
 //
 //     func addFunc(obj interface{}) {
 //         err := f.ProcessCreate(obj, resources)
@@ -334,9 +330,9 @@ func ProcessCreate(ctx context.Context, obj interface{}, resources []Resource) e
 }
 
 // ProcessDelete is a drop-in for an informer's DeleteFunc. It receives the
-// custom object observed during TPR watches and anything that implements
-// Resource. ProcessDelete takes care about all necessary reconciliation logic
-// for delete events.
+// custom object observed during custom resource watches and anything that
+// implements Resource. ProcessDelete takes care about all necessary
+// reconciliation logic for delete events.
 //
 //     func deleteFunc(obj interface{}) {
 //         err := f.ProcessDelete(obj, resources)
@@ -359,8 +355,12 @@ func ProcessDelete(ctx context.Context, obj interface{}, resources []Resource) e
 
 		var currentState interface{}
 		{
-			if canceledcontext.IsCanceled(ctx) {
+			if reconciliationcanceledcontext.IsCanceled(ctx) {
 				return nil
+			}
+			if resourcecanceledcontext.IsCanceled(ctx) {
+				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
+				continue
 			}
 
 			meta, ok := loggermeta.FromContext(ctx)
@@ -376,8 +376,12 @@ func ProcessDelete(ctx context.Context, obj interface{}, resources []Resource) e
 
 		var desiredState interface{}
 		{
-			if canceledcontext.IsCanceled(ctx) {
+			if reconciliationcanceledcontext.IsCanceled(ctx) {
 				return nil
+			}
+			if resourcecanceledcontext.IsCanceled(ctx) {
+				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
+				continue
 			}
 
 			meta, ok := loggermeta.FromContext(ctx)
@@ -393,8 +397,12 @@ func ProcessDelete(ctx context.Context, obj interface{}, resources []Resource) e
 
 		var patch *Patch
 		{
-			if canceledcontext.IsCanceled(ctx) {
+			if reconciliationcanceledcontext.IsCanceled(ctx) {
 				return nil
+			}
+			if resourcecanceledcontext.IsCanceled(ctx) {
+				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
+				continue
 			}
 
 			meta, ok := loggermeta.FromContext(ctx)
@@ -413,8 +421,12 @@ func ProcessDelete(ctx context.Context, obj interface{}, resources []Resource) e
 		}
 
 		{
-			if canceledcontext.IsCanceled(ctx) {
+			if reconciliationcanceledcontext.IsCanceled(ctx) {
 				return nil
+			}
+			if resourcecanceledcontext.IsCanceled(ctx) {
+				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
+				continue
 			}
 
 			createChange, ok := patch.getCreateChange()
@@ -432,8 +444,12 @@ func ProcessDelete(ctx context.Context, obj interface{}, resources []Resource) e
 		}
 
 		{
-			if canceledcontext.IsCanceled(ctx) {
+			if reconciliationcanceledcontext.IsCanceled(ctx) {
 				return nil
+			}
+			if resourcecanceledcontext.IsCanceled(ctx) {
+				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
+				continue
 			}
 
 			deleteChange, ok := patch.getDeleteChange()
@@ -451,8 +467,12 @@ func ProcessDelete(ctx context.Context, obj interface{}, resources []Resource) e
 		}
 
 		{
-			if canceledcontext.IsCanceled(ctx) {
+			if reconciliationcanceledcontext.IsCanceled(ctx) {
 				return nil
+			}
+			if resourcecanceledcontext.IsCanceled(ctx) {
+				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
+				continue
 			}
 
 			updateChange, ok := patch.getUpdateChange()
@@ -507,10 +527,10 @@ func (f *Framework) ProcessEvents(ctx context.Context, deleteChan chan watch.Eve
 }
 
 // ProcessUpdate is a drop-in for an informer's UpdateFunc. It receives the new
-// custom object observed during TPR watches and anything that implements
-// Resource. ProcessUpdate takes care about all necessary reconciliation logic
-// for update events. For complex resources this means state has to be created,
-// deleted and updated eventually, in this order.
+// custom object observed during custom resource watches and anything that
+// implements Resource. ProcessUpdate takes care about all necessary
+// reconciliation logic for update events. For complex resources this means
+// state has to be created, deleted and updated eventually, in this order.
 //
 //     func updateFunc(oldObj, newObj interface{}) {
 //         err := f.ProcessUpdate(newObj, resources)
@@ -533,8 +553,12 @@ func ProcessUpdate(ctx context.Context, obj interface{}, resources []Resource) e
 
 		var currentState interface{}
 		{
-			if canceledcontext.IsCanceled(ctx) {
+			if reconciliationcanceledcontext.IsCanceled(ctx) {
 				return nil
+			}
+			if resourcecanceledcontext.IsCanceled(ctx) {
+				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
+				continue
 			}
 
 			meta, ok := loggermeta.FromContext(ctx)
@@ -550,8 +574,12 @@ func ProcessUpdate(ctx context.Context, obj interface{}, resources []Resource) e
 
 		var desiredState interface{}
 		{
-			if canceledcontext.IsCanceled(ctx) {
+			if reconciliationcanceledcontext.IsCanceled(ctx) {
 				return nil
+			}
+			if resourcecanceledcontext.IsCanceled(ctx) {
+				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
+				continue
 			}
 
 			meta, ok := loggermeta.FromContext(ctx)
@@ -567,8 +595,12 @@ func ProcessUpdate(ctx context.Context, obj interface{}, resources []Resource) e
 
 		var patch *Patch
 		{
-			if canceledcontext.IsCanceled(ctx) {
+			if reconciliationcanceledcontext.IsCanceled(ctx) {
 				return nil
+			}
+			if resourcecanceledcontext.IsCanceled(ctx) {
+				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
+				continue
 			}
 
 			meta, ok := loggermeta.FromContext(ctx)
@@ -587,8 +619,12 @@ func ProcessUpdate(ctx context.Context, obj interface{}, resources []Resource) e
 		}
 
 		{
-			if canceledcontext.IsCanceled(ctx) {
+			if reconciliationcanceledcontext.IsCanceled(ctx) {
 				return nil
+			}
+			if resourcecanceledcontext.IsCanceled(ctx) {
+				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
+				continue
 			}
 
 			createState, ok := patch.getCreateChange()
@@ -606,8 +642,12 @@ func ProcessUpdate(ctx context.Context, obj interface{}, resources []Resource) e
 		}
 
 		{
-			if canceledcontext.IsCanceled(ctx) {
+			if reconciliationcanceledcontext.IsCanceled(ctx) {
 				return nil
+			}
+			if resourcecanceledcontext.IsCanceled(ctx) {
+				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
+				continue
 			}
 
 			deleteState, ok := patch.getDeleteChange()
@@ -625,8 +665,12 @@ func ProcessUpdate(ctx context.Context, obj interface{}, resources []Resource) e
 		}
 
 		{
-			if canceledcontext.IsCanceled(ctx) {
+			if reconciliationcanceledcontext.IsCanceled(ctx) {
 				return nil
+			}
+			if resourcecanceledcontext.IsCanceled(ctx) {
+				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
+				continue
 			}
 
 			updateState, ok := patch.getUpdateChange()
@@ -648,21 +692,6 @@ func ProcessUpdate(ctx context.Context, obj interface{}, resources []Resource) e
 }
 
 func (f *Framework) bootWithError(ctx context.Context) error {
-	if f.tpr != nil {
-		f.logger.LogCtx(ctx, "debug", "ensuring third party resource exists")
-
-		err := f.tpr.CreateAndWait()
-		if tpr.IsAlreadyExists(err) {
-			f.logger.LogCtx(ctx, "debug", "third party resource already exists")
-		} else if err != nil {
-			return microerror.Mask(err)
-		} else {
-			f.logger.LogCtx(ctx, "debug", "created third party resource")
-		}
-
-		f.tpr.CollectMetrics(context.TODO())
-	}
-
 	if f.crd != nil {
 		f.logger.LogCtx(ctx, "debug", "ensuring custom resource definition exists")
 

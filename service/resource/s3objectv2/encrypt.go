@@ -9,7 +9,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
-	"github.com/giantswarm/certificatetpr"
+	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 )
 
@@ -37,24 +37,24 @@ type rawTLSAssets TLSassets
 // Encrypted PEM encoded TLS assets
 type encryptedTLSAssets TLSassets
 
-func createRawTLSAssets(assets certificatetpr.AssetsBundle) *rawTLSAssets {
+func createRawTLSAssets(assets legacy.AssetsBundle) *rawTLSAssets {
 	// TODO refactor this with a for loop iterating over components and asset types
 	return &rawTLSAssets{
-		APIServerCA:       assets[certificatetpr.AssetsBundleKey{certificatetpr.APIComponent, certificatetpr.CA}],
-		APIServerCrt:      assets[certificatetpr.AssetsBundleKey{certificatetpr.APIComponent, certificatetpr.Crt}],
-		APIServerKey:      assets[certificatetpr.AssetsBundleKey{certificatetpr.APIComponent, certificatetpr.Key}],
-		WorkerCA:          assets[certificatetpr.AssetsBundleKey{certificatetpr.WorkerComponent, certificatetpr.CA}],
-		WorkerCrt:         assets[certificatetpr.AssetsBundleKey{certificatetpr.WorkerComponent, certificatetpr.Crt}],
-		WorkerKey:         assets[certificatetpr.AssetsBundleKey{certificatetpr.WorkerComponent, certificatetpr.Key}],
-		ServiceAccountCA:  assets[certificatetpr.AssetsBundleKey{certificatetpr.ServiceAccountComponent, certificatetpr.CA}],
-		ServiceAccountCrt: assets[certificatetpr.AssetsBundleKey{certificatetpr.ServiceAccountComponent, certificatetpr.Crt}],
-		ServiceAccountKey: assets[certificatetpr.AssetsBundleKey{certificatetpr.ServiceAccountComponent, certificatetpr.Key}],
-		EtcdServerCA:      assets[certificatetpr.AssetsBundleKey{certificatetpr.EtcdComponent, certificatetpr.CA}],
-		EtcdServerCrt:     assets[certificatetpr.AssetsBundleKey{certificatetpr.EtcdComponent, certificatetpr.Crt}],
-		EtcdServerKey:     assets[certificatetpr.AssetsBundleKey{certificatetpr.EtcdComponent, certificatetpr.Key}],
-		CalicoClientCA:    assets[certificatetpr.AssetsBundleKey{certificatetpr.CalicoComponent, certificatetpr.CA}],
-		CalicoClientCrt:   assets[certificatetpr.AssetsBundleKey{certificatetpr.CalicoComponent, certificatetpr.Crt}],
-		CalicoClientKey:   assets[certificatetpr.AssetsBundleKey{certificatetpr.CalicoComponent, certificatetpr.Key}],
+		APIServerCA:       assets[legacy.AssetsBundleKey{legacy.APIComponent, legacy.CA}],
+		APIServerCrt:      assets[legacy.AssetsBundleKey{legacy.APIComponent, legacy.Crt}],
+		APIServerKey:      assets[legacy.AssetsBundleKey{legacy.APIComponent, legacy.Key}],
+		WorkerCA:          assets[legacy.AssetsBundleKey{legacy.WorkerComponent, legacy.CA}],
+		WorkerCrt:         assets[legacy.AssetsBundleKey{legacy.WorkerComponent, legacy.Crt}],
+		WorkerKey:         assets[legacy.AssetsBundleKey{legacy.WorkerComponent, legacy.Key}],
+		ServiceAccountCA:  assets[legacy.AssetsBundleKey{legacy.ServiceAccountComponent, legacy.CA}],
+		ServiceAccountCrt: assets[legacy.AssetsBundleKey{legacy.ServiceAccountComponent, legacy.Crt}],
+		ServiceAccountKey: assets[legacy.AssetsBundleKey{legacy.ServiceAccountComponent, legacy.Key}],
+		EtcdServerCA:      assets[legacy.AssetsBundleKey{legacy.EtcdComponent, legacy.CA}],
+		EtcdServerCrt:     assets[legacy.AssetsBundleKey{legacy.EtcdComponent, legacy.Crt}],
+		EtcdServerKey:     assets[legacy.AssetsBundleKey{legacy.EtcdComponent, legacy.Key}],
+		CalicoClientCA:    assets[legacy.AssetsBundleKey{legacy.CalicoComponent, legacy.CA}],
+		CalicoClientCrt:   assets[legacy.AssetsBundleKey{legacy.CalicoComponent, legacy.Crt}],
+		CalicoClientKey:   assets[legacy.AssetsBundleKey{legacy.CalicoComponent, legacy.Key}],
 	}
 }
 
@@ -137,7 +137,7 @@ func (r *rawTLSAssets) encrypt(svc KMSClient, kmsKeyARN string) (*encryptedTLSAs
 	return &encryptedAssets, nil
 }
 
-func (r *encryptedTLSAssets) compact() (*certificatetpr.CompactTLSAssets, error) {
+func (r *encryptedTLSAssets) compact() (*legacy.CompactTLSAssets, error) {
 	var err error
 	compact := func(data []byte) (r string) {
 		if err != nil {
@@ -152,7 +152,7 @@ func (r *encryptedTLSAssets) compact() (*certificatetpr.CompactTLSAssets, error)
 		return r
 	}
 
-	compactAssets := certificatetpr.CompactTLSAssets{
+	compactAssets := legacy.CompactTLSAssets{
 		APIServerCA:       compact(r.APIServerCA),
 		APIServerKey:      compact(r.APIServerKey),
 		APIServerCrt:      compact(r.APIServerCrt),

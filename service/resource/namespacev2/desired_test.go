@@ -6,8 +6,8 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
+	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/fake"
-	apiv1 "k8s.io/client-go/pkg/api/v1"
 )
 
 func Test_Resource_Namespace_GetDesiredState(t *testing.T) {
