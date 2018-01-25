@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/certificatetpr/certificatetprtest"
+	"github.com/giantswarm/certs/legacy/legacytest"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeytpr/randomkeytprtest"
 
@@ -52,7 +52,7 @@ func Test_DesiredState(t *testing.T) {
 	resourceConfig.Clients = Clients{
 		KMS: &KMSClientMock{},
 	}
-	resourceConfig.CertWatcher = certificatetprtest.NewService()
+	resourceConfig.CertWatcher = legacytest.NewService()
 	resourceConfig.RandomKeyWatcher = randomkeytprtest.NewService()
 
 	for _, tc := range testCases {

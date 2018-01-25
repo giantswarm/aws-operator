@@ -2,7 +2,7 @@ package cloudconfigv3
 
 import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/certificatetpr"
+	"github.com/giantswarm/certs/legacy"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_0_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeytpr"
@@ -16,7 +16,7 @@ const (
 
 // NewMasterTemplate generates a new master cloud config template and returns it
 // as a base64 encoded string.
-func (c *CloudConfig) NewMasterTemplate(customObject v1alpha1.AWSConfig, certs certificatetpr.CompactTLSAssets, keys randomkeytpr.CompactRandomKeyAssets) (string, error) {
+func (c *CloudConfig) NewMasterTemplate(customObject v1alpha1.AWSConfig, certs legacy.CompactTLSAssets, keys randomkeytpr.CompactRandomKeyAssets) (string, error) {
 	var err error
 
 	var params k8scloudconfig.Params
@@ -52,7 +52,7 @@ func (c *CloudConfig) NewMasterTemplate(customObject v1alpha1.AWSConfig, certs c
 }
 
 type MasterExtension struct {
-	certs        certificatetpr.CompactTLSAssets
+	certs        legacy.CompactTLSAssets
 	customObject v1alpha1.AWSConfig
 	keys         randomkeytpr.CompactRandomKeyAssets
 }

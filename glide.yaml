@@ -2,36 +2,54 @@ package: github.com/giantswarm/aws-operator
 import:
 - package: github.com/aws/aws-sdk-go
   version: v1.12.3
+- package: google.golang.org/grpc
+  version: v1.2.1
+- package: github.com/stretchr/testify
+  version: v1.1.4
 - package: github.com/giantswarm/apiextensions
-  version: clientset
+  version: master
 - package: github.com/giantswarm/microkit
   version: master
 - package: github.com/giantswarm/operatorkit
-  version: kubernetes-1.7
+  version: master
 - package: github.com/giantswarm/microerror
   version: master
 - package: github.com/giantswarm/micrologger
   version: master
 - package: github.com/giantswarm/microendpoint
   version: master
-- package: google.golang.org/grpc
-  version: v1.2.1
-- package: github.com/giantswarm/awstpr
-  version: master
 - package: github.com/giantswarm/k8scloudconfig
   version: master
-- package: github.com/stretchr/testify
-  version: v1.1.4
-  repo: git://github.com/stretchr/testify.git
-  subpackages:
-  - assert
-- package: github.com/giantswarm/certificatetpr
-  version: master
+- package: github.com/giantswarm/certs
+  version: legacy
 - package: github.com/giantswarm/randomkeytpr
   version: master
 - package: github.com/giantswarm/e2e-harness
   version: master
-- package: github.com/giantswarm/apiextensions
-  version: clientset
+- package: github.com/giantswarm/versionbundle
+  version: master
+
+# Pinned to version using glide and compatible with pinned version of backoff.
 - package: github.com/cenkalti/backoff
   version: v1.1.0
+- package: github.com/giantswarm/crdstorage
+  version: master
+- package: github.com/giantswarm/operatorkit
+  version: master
+- package: github.com/giantswarm/apiextensions
+  version: master
+- package: k8s.io/api
+  version: kubernetes-1.8.5
+- package: k8s.io/apiextensions-apiserver
+  version: kubernetes-1.8.5
+- package: k8s.io/apimachinery
+  version: kubernetes-1.8.5
+- package: k8s.io/client-go
+  version: kubernetes-1.8.5
+
+- package: github.com/spf13/cobra
+  version: 0.0.1
+- package: github.com/spf13/pflag
+  version: 1.0.0
+- package: github.com/spf13/viper
+  version: 1.0.0

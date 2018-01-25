@@ -5,7 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/certificatetpr"
+	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeytpr"
 
@@ -36,7 +36,7 @@ func clusterPrefix(input clusterPrefixInput) string {
 type runMachinesInput struct {
 	clients             awsutil.Clients
 	cluster             v1alpha1.AWSConfig
-	tlsAssets           *certificatetpr.CompactTLSAssets
+	tlsAssets           *legacy.CompactTLSAssets
 	clusterKeys         *randomkeytpr.CompactRandomKeyAssets
 	bucket              resources.Resource
 	securityGroup       resources.ResourceWithID
@@ -131,7 +131,7 @@ type runMachineInput struct {
 	cluster             v1alpha1.AWSConfig
 	machine             v1alpha1.ClusterNode
 	awsNode             v1alpha1.AWSConfigSpecAWSNode
-	tlsAssets           *certificatetpr.CompactTLSAssets
+	tlsAssets           *legacy.CompactTLSAssets
 	clusterKeys         *randomkeytpr.CompactRandomKeyAssets
 	bucket              resources.Resource
 	securityGroup       resources.ResourceWithID

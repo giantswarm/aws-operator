@@ -15,7 +15,7 @@ if [[ ! -f ${GOPATH}/src/k8s.io/kubernetes/hack/boilerplate/boilerplate.go.txt ]
 fi
 
 cd ${dir}/../vendor/k8s.io/code-generator && ./generate-groups.sh \
-    client \
+    all \
     github.com/giantswarm/apiextensions/pkg \
     github.com/giantswarm/apiextensions/pkg/apis \
     "core:v1alpha1 provider:v1alpha1"
