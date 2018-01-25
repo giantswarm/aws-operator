@@ -450,7 +450,7 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 	var mastersSecurityGroupID string
 	var workersSecurityGroupID string
 	var ingressSecurityGroupID string
-	var err error
+
 	if !keyv2.UseCloudFormation(cluster) {
 		// Create masters security group.
 		mastersSGInput := securityGroupInput{
