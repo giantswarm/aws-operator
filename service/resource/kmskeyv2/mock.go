@@ -62,3 +62,11 @@ func (k *KMSClientMock) DescribeKey(input *kms.DescribeKeyInput) (*kms.DescribeK
 func (k *KMSClientMock) ScheduleKeyDeletion(input *kms.ScheduleKeyDeletionInput) (*kms.ScheduleKeyDeletionOutput, error) {
 	return nil, nil
 }
+
+func (k *KMSClientMock) TagResource(input *kms.TagResourceInput) (*kms.TagResourceOutput, error) {
+	if *input.KeyId != "mykeyid" {
+		return nil, fmt.Errorf("unexpected keyid, %v", input.KeyId)
+	}
+
+	return &kms.TagResourceOutput{}, nil
+}
