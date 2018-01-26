@@ -58,6 +58,10 @@ func (e *EC2ClientMock) DescribeSubnets(input *ec2.DescribeSubnetsInput) (*ec2.D
 	return output, nil
 }
 
+func (e *EC2ClientMock) SetUnexistingRouteTable(value bool) {
+	e.unexistingRouteTable = value
+}
+
 func (e *EC2ClientMock) DescribeRouteTables(input *ec2.DescribeRouteTablesInput) (*ec2.DescribeRouteTablesOutput, error) {
 	if e.unexistingRouteTable {
 		return nil, fmt.Errorf("route table not found")

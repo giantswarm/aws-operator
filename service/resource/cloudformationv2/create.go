@@ -57,6 +57,10 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		return cloudformation.CreateStackInput{}, microerror.Mask(err)
 	}
 
+	if err := r.validateCluster(customObject); err != nil {
+		return cloudformation.CreateStackInput{}, microerror.Mask(err)
+	}
+
 	currentStackState, err := toStackState(currentState)
 	if err != nil {
 		return cloudformation.CreateStackInput{}, microerror.Mask(err)

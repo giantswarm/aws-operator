@@ -38,3 +38,10 @@ var wrongTypeError = microerror.New("wrong type")
 func IsWrongType(err error) bool {
 	return microerror.Cause(err) == wrongTypeError
 }
+
+var existingRouteError = microerror.New("existing route")
+
+// IsExistingRoute asserts existingRouteError.
+func IsExistingRoute(err error) bool {
+	return microerror.Cause(err) == existingRouteError
+}

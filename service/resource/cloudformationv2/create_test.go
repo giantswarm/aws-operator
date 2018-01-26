@@ -87,8 +87,10 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 			IAM: &adapter.IAMClientMock{},
 			KMS: &adapter.KMSClientMock{},
 		}
+		ec2Mock := &adapter.EC2ClientMock{}
+		ec2Mock.SetUnexistingRouteTable(true)
 		resourceConfig.HostClients = &adapter.Clients{
-			EC2:            &adapter.EC2ClientMock{},
+			EC2:            ec2Mock,
 			CloudFormation: &adapter.CloudFormationMock{},
 			IAM:            &adapter.IAMClientMock{},
 		}
