@@ -3,9 +3,10 @@ package cloudformationv2
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
 type validator func(v1alpha1.AWSConfig) error
@@ -30,13 +31,13 @@ func (r *Resource) validateHostPeeringRoutes(cluster v1alpha1.AWSConfig) error {
 			&ec2.Filter{
 				Name: aws.String("route.destination-cidr-block"),
 				Values: []*string{
-					aws.String(cluster.Spec.AWS.VPC.PrivateSubnetCIDR),
+					aws.String(keyv2.PrivateSubnetCIDR(cluster)),
 				},
 			},
 			&ec2.Filter{
 				Name: aws.String("vpc-id"),
 				Values: []*string{
-					aws.String(cluster.Spec.AWS.VPC.PeerID),
+					aws.String(keyv2.PeerID(cluster)),
 				},
 			},
 		},
