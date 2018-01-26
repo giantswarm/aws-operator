@@ -466,7 +466,7 @@ write_files:
                   topologyKey: kubernetes.io/hostname
           containers:
           - name: coredns
-            image: quay.io/giantswarm/coredns:1.0.4
+            image: quay.io/giantswarm/coredns:1.0.5
             imagePullPolicy: IfNotPresent
             args: [ "-conf", "/etc/coredns/Corefile" ]
             volumeMounts:
@@ -644,14 +644,25 @@ write_files:
                         - nginx-ingress-controller
                   topologyKey: kubernetes.io/hostname
           serviceAccountName: nginx-ingress-controller
+          initContainers:
+          - command:
+            - sh
+            - -c
+            - sysctl -w net.core.somaxconn=32768; sysctl -w net.ipv4.ip_local_port_range="1024 65535"
+            image: alpine:3.6
+            imagePullPolicy: IfNotPresent
+            name: sysctl
+            securityContext:
+              privileged: true
           containers:
           - name: nginx-ingress-controller
-            image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.9.0-beta.17
+            image: quay.io/giantswarm/nginx-ingress-controller:0.10.2
             args:
             - /nginx-ingress-controller
             - --default-backend-service=$(POD_NAMESPACE)/default-http-backend
             - --configmap=$(POD_NAMESPACE)/ingress-nginx
             - --enable-ssl-passthrough
+            - --annotations-prefix=nginx.ingress.kubernetes.io
             env:
               - name: POD_NAME
                 valueFrom:
