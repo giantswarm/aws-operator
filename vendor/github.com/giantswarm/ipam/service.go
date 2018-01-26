@@ -17,31 +17,31 @@ const (
 
 // Config represents the configuration used to create a new ipam service.
 type Config struct {
-	// Dependencies.
 	Logger  micrologger.Logger
 	Storage microstorage.Storage
 
-	// Settings.
 	// Network is the network in which all returned subnets should exist.
 	Network *net.IPNet
+	// AllocatedSubnets is a list of subnets, contained by `Network`,
+	// that have already been allocated outside of IPAM control.
+	// Any subnets created by the IPAM service will not overlap with these subnets.
+	AllocatedSubnets []net.IPNet
 }
 
 // DefaultConfig provides a default configuration to create a new ipam service
 // by best effort.
 func DefaultConfig() Config {
 	return Config{
-		// Dependencies.
-		Logger:  nil, // Required.
-		Storage: nil, // Required.
+		Logger:  nil,
+		Storage: nil,
 
-		// Settings.
-		Network: nil, // Required.
+		Network:          nil,
+		AllocatedSubnets: nil,
 	}
 }
 
 // New creates a new configured ipam service.
 func New(config Config) (*Service, error) {
-	// Dependencies.
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "logger must not be empty")
 	}
@@ -49,30 +49,38 @@ func New(config Config) (*Service, error) {
 		return nil, microerror.Maskf(invalidConfigError, "storage must not be empty")
 	}
 
-	// Settings.
 	if config.Network == nil {
 		return nil, microerror.Maskf(invalidConfigError, "network must not be empty")
 	}
+	for _, allocatedSubnet := range config.AllocatedSubnets {
+		ipRange := newIPRange(allocatedSubnet)
+		if !(config.Network.Contains(ipRange.start) && config.Network.Contains(ipRange.end)) {
+			return nil, microerror.Maskf(
+				invalidConfigError,
+				"allocated subnet (%v) must be contained by network (%v)",
+				allocatedSubnet.String(),
+				config.Network.String(),
+			)
+		}
+	}
 
 	newService := &Service{
-		// Dependencies.
 		logger:  config.Logger,
 		storage: config.Storage,
 
-		// Settings.
-		network: *config.Network,
+		network:          *config.Network,
+		allocatedSubnets: config.AllocatedSubnets,
 	}
 
 	return newService, nil
 }
 
 type Service struct {
-	// Dependencies.
 	logger  micrologger.Logger
 	storage microstorage.Storage
 
-	// Settings.
-	network net.IPNet
+	network          net.IPNet
+	allocatedSubnets []net.IPNet
 }
 
 // listSubnets retrieves the stored subnets from storage and returns them.
@@ -119,6 +127,8 @@ func (s *Service) NewSubnet(mask net.IPMask) (net.IPNet, error) {
 	if err != nil {
 		return net.IPNet{}, microerror.Mask(err)
 	}
+
+	existingSubnets = append(existingSubnets, s.allocatedSubnets...)
 
 	s.logger.Log("info", "computing next subnet")
 	subnet, err := Free(s.network, mask, existingSubnets)
