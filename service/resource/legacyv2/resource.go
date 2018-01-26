@@ -423,147 +423,130 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 		}
 	}
 
-	if !keyv2.UseCloudFormation(cluster) {
-		// Create internet gateway.
-		var internetGateway resources.ResourceWithID
-		internetGateway = &awsresources.InternetGateway{
-			Name:  keyv2.ClusterID(cluster),
-			VpcID: vpcID,
-			// Dependencies.
-			Logger:    s.logger,
-			AWSEntity: awsresources.AWSEntity{Clients: clients},
-		}
-		internetGatewayCreated, err := internetGateway.CreateIfNotExists()
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create internet gateway: '%#v'", err))
-		}
-		if internetGatewayCreated {
-			s.logger.Log("info", fmt.Sprintf("created internet gateway for cluster '%s'", keyv2.ClusterID(cluster)))
-		} else {
-			s.logger.Log("info", fmt.Sprintf("internet gateway for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
-		}
+	// Create internet gateway.
+	var internetGateway resources.ResourceWithID
+	internetGateway = &awsresources.InternetGateway{
+		Name:  keyv2.ClusterID(cluster),
+		VpcID: vpcID,
+		// Dependencies.
+		Logger:    s.logger,
+		AWSEntity: awsresources.AWSEntity{Clients: clients},
+	}
+	internetGatewayCreated, err := internetGateway.CreateIfNotExists()
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create internet gateway: '%#v'", err))
+	}
+	if internetGatewayCreated {
+		s.logger.Log("info", fmt.Sprintf("created internet gateway for cluster '%s'", keyv2.ClusterID(cluster)))
+	} else {
+		s.logger.Log("info", fmt.Sprintf("internet gateway for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
 	}
 
-	var mastersSecurityGroup *awsresources.SecurityGroup
-	var workersSecurityGroup *awsresources.SecurityGroup
-	var ingressSecurityGroup *awsresources.SecurityGroup
-	var mastersSecurityGroupID string
-	var workersSecurityGroupID string
-	var ingressSecurityGroupID string
-
-	if !keyv2.UseCloudFormation(cluster) {
-		// Create masters security group.
-		mastersSGInput := securityGroupInput{
-			Clients:   clients,
-			GroupName: keyv2.SecurityGroupName(cluster, prefixMaster),
-			VPCID:     vpcID,
-		}
-		mastersSecurityGroup, err = s.createSecurityGroup(mastersSGInput)
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create security group '%s': '%#v'", mastersSGInput.GroupName, err))
-		}
-		mastersSecurityGroupID, err = mastersSecurityGroup.GetID()
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get security group '%s' ID: '%#v'", mastersSGInput.GroupName, err))
-		}
-
-		// Create workers security group.
-		workersSGInput := securityGroupInput{
-			Clients:   clients,
-			GroupName: keyv2.SecurityGroupName(cluster, prefixWorker),
-			VPCID:     vpcID,
-		}
-		workersSecurityGroup, err = s.createSecurityGroup(workersSGInput)
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create security group '%s': '%#v'", workersSGInput.GroupName, err))
-		}
-		workersSecurityGroupID, err = workersSecurityGroup.GetID()
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get security group '%s' ID: '%#v'", workersSGInput.GroupName, err))
-		}
-
-		// Create ingress ELB security group.
-		ingressSGInput := securityGroupInput{
-			Clients:   clients,
-			GroupName: keyv2.SecurityGroupName(cluster, prefixIngress),
-			VPCID:     vpcID,
-		}
-		ingressSecurityGroup, err = s.createSecurityGroup(ingressSGInput)
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create security group '%s': '%#v'", ingressSGInput.GroupName, err))
-		}
-		ingressSecurityGroupID, err = ingressSecurityGroup.GetID()
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get security group '%s' ID: '%#v'", ingressSGInput.GroupName, err))
-		}
-
-		// Create rules for the security groups.
-		rulesInput := rulesInput{
-			Cluster:                cluster,
-			MastersSecurityGroupID: mastersSecurityGroupID,
-			WorkersSecurityGroupID: workersSecurityGroupID,
-			IngressSecurityGroupID: ingressSecurityGroupID,
-			HostClusterCIDR:        *conn.AccepterVpcInfo.CidrBlock,
-		}
-
-		if err := mastersSecurityGroup.ApplyRules(rulesInput.masterRules()); err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create rules for security group '%s': '%#v", mastersSecurityGroup.GroupName, err))
-		}
-
-		if err := workersSecurityGroup.ApplyRules(rulesInput.workerRules()); err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create rules for security group '%s': '%#v'", workersSecurityGroup.GroupName, err))
-		}
-
-		if err := ingressSecurityGroup.ApplyRules(rulesInput.ingressRules()); err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create rules for security group '%s': '%#v'", ingressSecurityGroup.GroupName, err))
-		}
+	// Create masters security group.
+	mastersSGInput := securityGroupInput{
+		Clients:   clients,
+		GroupName: keyv2.SecurityGroupName(cluster, prefixMaster),
+		VPCID:     vpcID,
+	}
+	mastersSecurityGroup, err := s.createSecurityGroup(mastersSGInput)
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create security group '%s': '%#v'", mastersSGInput.GroupName, err))
+	}
+	mastersSecurityGroupID, err := mastersSecurityGroup.GetID()
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get security group '%s' ID: '%#v'", mastersSGInput.GroupName, err))
 	}
 
-	var publicRouteTable *awsresources.RouteTable
-	var publicSubnet *awsresources.Subnet
-	var publicSubnetID string
+	// Create workers security group.
+	workersSGInput := securityGroupInput{
+		Clients:   clients,
+		GroupName: keyv2.SecurityGroupName(cluster, prefixWorker),
+		VPCID:     vpcID,
+	}
+	workersSecurityGroup, err := s.createSecurityGroup(workersSGInput)
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create security group '%s': '%#v'", workersSGInput.GroupName, err))
+	}
+	workersSecurityGroupID, err := workersSecurityGroup.GetID()
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get security group '%s' ID: '%#v'", workersSGInput.GroupName, err))
+	}
 
-	if !keyv2.UseCloudFormation(cluster) {
-		// Create public route table.
-		publicRouteTable = &awsresources.RouteTable{
-			Name:   keyv2.ClusterID(cluster),
-			VpcID:  vpcID,
-			Client: clients.EC2,
-			Logger: s.logger,
-		}
-		publicRouteTableCreated, err := publicRouteTable.CreateIfNotExists()
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create route table: '%#v'", err))
-		}
-		if publicRouteTableCreated {
-			s.logger.Log("info", "created public route table")
-		} else {
-			s.logger.Log("info", "route table already exists, reusing")
-		}
+	// Create ingress ELB security group.
+	ingressSGInput := securityGroupInput{
+		Clients:   clients,
+		GroupName: keyv2.SecurityGroupName(cluster, prefixIngress),
+		VPCID:     vpcID,
+	}
+	ingressSecurityGroup, err := s.createSecurityGroup(ingressSGInput)
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create security group '%s': '%#v'", ingressSGInput.GroupName, err))
+	}
+	ingressSecurityGroupID, err := ingressSecurityGroup.GetID()
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get security group '%s' ID: '%#v'", ingressSGInput.GroupName, err))
+	}
 
-		if err := publicRouteTable.MakePublic(); err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not make route table public: '%#v'", err))
-		}
+	// Create rules for the security groups.
+	rulesInput := rulesInput{
+		Cluster:                cluster,
+		MastersSecurityGroupID: mastersSecurityGroupID,
+		WorkersSecurityGroupID: workersSecurityGroupID,
+		IngressSecurityGroupID: ingressSecurityGroupID,
+		HostClusterCIDR:        *conn.AccepterVpcInfo.CidrBlock,
+	}
 
-		// Create public subnet.
-		subnetInput := SubnetInput{
-			Name:       keyv2.SubnetName(cluster, suffixPublic),
-			CidrBlock:  cluster.Spec.AWS.VPC.PublicSubnetCIDR,
-			Clients:    clients,
-			Cluster:    cluster,
-			MakePublic: true,
-			RouteTable: publicRouteTable,
-			VpcID:      vpcID,
-		}
-		publicSubnet, err = s.createSubnet(subnetInput)
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create public subnet: '%#v'", err))
-		}
+	if err := mastersSecurityGroup.ApplyRules(rulesInput.masterRules()); err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create rules for security group '%s': '%#v", mastersSecurityGroup.GroupName, err))
+	}
 
-		publicSubnetID, err = publicSubnet.GetID()
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get public subnet ID: '%#v'", err))
-		}
+	if err := workersSecurityGroup.ApplyRules(rulesInput.workerRules()); err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create rules for security group '%s': '%#v'", workersSecurityGroup.GroupName, err))
+	}
+
+	if err := ingressSecurityGroup.ApplyRules(rulesInput.ingressRules()); err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create rules for security group '%s': '%#v'", ingressSecurityGroup.GroupName, err))
+	}
+
+	// Create public route table.
+	publicRouteTable := &awsresources.RouteTable{
+		Name:   keyv2.ClusterID(cluster),
+		VpcID:  vpcID,
+		Client: clients.EC2,
+		Logger: s.logger,
+	}
+	publicRouteTableCreated, err := publicRouteTable.CreateIfNotExists()
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create route table: '%#v'", err))
+	}
+	if publicRouteTableCreated {
+		s.logger.Log("info", "created public route table")
+	} else {
+		s.logger.Log("info", "route table already exists, reusing")
+	}
+
+	if err := publicRouteTable.MakePublic(); err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not make route table public: '%#v'", err))
+	}
+
+	// Create public subnet.
+	subnetInput := SubnetInput{
+		Name:       keyv2.SubnetName(cluster, suffixPublic),
+		CidrBlock:  cluster.Spec.AWS.VPC.PublicSubnetCIDR,
+		Clients:    clients,
+		Cluster:    cluster,
+		MakePublic: true,
+		RouteTable: publicRouteTable,
+		VpcID:      vpcID,
+	}
+	publicSubnet, err := s.createSubnet(subnetInput)
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create public subnet: '%#v'", err))
+	}
+
+	publicSubnetID, err := publicSubnet.GetID()
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get public subnet ID: '%#v'", err))
 	}
 
 	var privateRouteTable *awsresources.RouteTable
@@ -571,7 +554,7 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 	var privateSubnetID string
 
 	// For new clusters create a NAT gateway, private route table and private subnet.
-	if keyv2.HasClusterVersion(cluster) && !keyv2.UseCloudFormation(cluster) {
+	if keyv2.HasClusterVersion(cluster) {
 		// Create private route table.
 		privateRouteTable = &awsresources.RouteTable{
 			Name:   keyv2.RouteTableName(cluster, suffixPrivate),
@@ -644,58 +627,56 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 		}
 	}
 
-	if !keyv2.UseCloudFormation(cluster) {
-		hostClusterRoute := &awsresources.Route{
-			RouteTable:             *publicRouteTable,
-			DestinationCidrBlock:   *conn.AccepterVpcInfo.CidrBlock,
+	hostClusterRoute := &awsresources.Route{
+		RouteTable:             *publicRouteTable,
+		DestinationCidrBlock:   *conn.AccepterVpcInfo.CidrBlock,
+		VpcPeeringConnectionID: *conn.VpcPeeringConnectionId,
+		AWSEntity:              awsresources.AWSEntity{Clients: clients},
+	}
+
+	if keyv2.HasClusterVersion(cluster) {
+		// New clusters have private IPs so use the private route table.
+		hostClusterRoute.RouteTable = *privateRouteTable
+	} else {
+		// Legacy clusters have public IPs so use the public route table.
+		hostClusterRoute.RouteTable = *publicRouteTable
+	}
+
+	hostRouteCreated, err := hostClusterRoute.CreateIfNotExists()
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not add host vpc route: '%#v'", err))
+	}
+	if hostRouteCreated {
+		s.logger.Log("info", fmt.Sprintf("created host vpc route for cluster '%s'", keyv2.ClusterID(cluster)))
+	} else {
+		s.logger.Log("info", fmt.Sprintf("host vpc route for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
+	}
+
+	for _, privateRouteTableName := range cluster.Spec.AWS.VPC.RouteTableNames {
+		privateRouteTable := &awsresources.RouteTable{
+			Name:   privateRouteTableName,
+			VpcID:  cluster.Spec.AWS.VPC.PeerID,
+			Client: hostClients.EC2,
+			Logger: s.logger,
+		}
+
+		privateRoute := &awsresources.Route{
+			RouteTable:             *privateRouteTable,
+			DestinationCidrBlock:   *conn.RequesterVpcInfo.CidrBlock,
 			VpcPeeringConnectionID: *conn.VpcPeeringConnectionId,
-			AWSEntity:              awsresources.AWSEntity{Clients: clients},
+			AWSEntity:              awsresources.AWSEntity{Clients: hostClients},
 		}
 
-		if keyv2.HasClusterVersion(cluster) {
-			// New clusters have private IPs so use the private route table.
-			hostClusterRoute.RouteTable = *privateRouteTable
-		} else {
-			// Legacy clusters have public IPs so use the public route table.
-			hostClusterRoute.RouteTable = *publicRouteTable
-		}
-
-		hostRouteCreated, err := hostClusterRoute.CreateIfNotExists()
+		privateRouteCreated, err := privateRoute.CreateIfNotExists()
 		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not add host vpc route: '%#v'", err))
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not add guest vpc route: '%#v'", err))
 		}
-		if hostRouteCreated {
-			s.logger.Log("info", fmt.Sprintf("created host vpc route for cluster '%s'", keyv2.ClusterID(cluster)))
+		if privateRouteCreated {
+			s.logger.Log("info", fmt.Sprintf("created guest vpc route for cluster '%s'", keyv2.ClusterID(cluster)))
 		} else {
-			s.logger.Log("info", fmt.Sprintf("host vpc route for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
+			s.logger.Log("info", fmt.Sprintf("host vpc guest for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
 		}
 
-		for _, privateRouteTableName := range cluster.Spec.AWS.VPC.RouteTableNames {
-			privateRouteTable := &awsresources.RouteTable{
-				Name:   privateRouteTableName,
-				VpcID:  cluster.Spec.AWS.VPC.PeerID,
-				Client: hostClients.EC2,
-				Logger: s.logger,
-			}
-
-			privateRoute := &awsresources.Route{
-				RouteTable:             *privateRouteTable,
-				DestinationCidrBlock:   *conn.RequesterVpcInfo.CidrBlock,
-				VpcPeeringConnectionID: *conn.VpcPeeringConnectionId,
-				AWSEntity:              awsresources.AWSEntity{Clients: hostClients},
-			}
-
-			privateRouteCreated, err := privateRoute.CreateIfNotExists()
-			if err != nil {
-				return microerror.Maskf(executionFailedError, fmt.Sprintf("could not add guest vpc route: '%#v'", err))
-			}
-			if privateRouteCreated {
-				s.logger.Log("info", fmt.Sprintf("created guest vpc route for cluster '%s'", keyv2.ClusterID(cluster)))
-			} else {
-				s.logger.Log("info", fmt.Sprintf("host vpc guest for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
-			}
-
-		}
 	}
 
 	var apiLB *awsresources.ELB
