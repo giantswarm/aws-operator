@@ -95,39 +95,70 @@ func New(config Config) (*Service, error) {
 	return newService, nil
 }
 
-// StartAlerts starts a background ticker that checks for orphan resources.
+// StartAlerts starts a background ticker that runs checks for common problems.
 func (s *Service) StartAlerts() {
 	go func() {
-		s.logger.Log("info", "starting alerter service to check for orphan resources")
+		s.logger.Log("info", "starting alerter service")
 
 		alertChan := time.NewTicker(time.Minute * alertIntervalMins).C
 
 		for {
 			select {
 			case <-alertChan:
-				err := s.OrphanResourcesAlert()
+				err := s.RunAllChecks()
 				if err != nil {
-					s.logger.Log("error", fmt.Sprintf("could not execute orphan resources alert: '%#v'", err))
+					s.logger.Log("error", fmt.Sprintf("could not execute run all checks: '%#v'", err))
 				}
 			}
 		}
 	}()
 }
 
-// OrphanResourcesAlert looks for AWS resources not associated with a cluster.
-func (s *Service) OrphanResourcesAlert() error {
+// RunAllChecks lists all current clusters and looks for common problems.
+func (s *Service) RunAllChecks() error {
 	clusterIDs, err := s.ListClusters()
 	if err != nil {
 		return microerror.Mask(err)
 	}
+
+	if err := s.FindOrphanResources(clusterIDs); err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
+// FindOrphanResources checks for orphan resources not associated with a
+// cluster. It updates the Prometheus metrics and logs the results.
+func (s Service) FindOrphanResources(clusterIDs []string) error {
+	if err := s.FindOrphanVPCs(clusterIDs); err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
+// FindOrphanVPCs finds VPCs not associated with a cluster.
+func (s Service) FindOrphanVPCs(clusterIDs []string) error {
+	clusters := map[string]bool{}
+	orphanVPCs := []string{}
 
 	vpcNames, err := s.ListVpcs()
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	orphanVpcs := FindOrphanResources(clusterIDs, vpcNames)
-	s.UpdateMetrics(vpcResourceType, orphanVpcs)
+	for _, clusterID := range clusterIDs {
+		clusters[clusterID] = true
+	}
+
+	for _, resourceName := range vpcNames {
+		if ok, _ := clusters[resourceName]; !ok {
+			orphanVPCs = append(orphanVPCs, resourceName)
+		}
+	}
+
+	s.UpdateOrphanResourceMetrics(vpcResourceType, orphanVPCs)
 
 	return nil
 }
@@ -148,27 +179,8 @@ func (s Service) ListClusters() ([]string, error) {
 	return clusterIDs, nil
 }
 
-// FindOrphanResources compares a list of cluster IDs and resource names. It
-// returns any resources not associated with a cluster.
-func FindOrphanResources(clusterIDs []string, resourceNames []string) []string {
-	clusters := map[string]bool{}
-	orphanResources := []string{}
-
-	for _, clusterID := range clusterIDs {
-		clusters[clusterID] = true
-	}
-
-	for _, resourceName := range resourceNames {
-		if ok, _ := clusters[resourceName]; !ok {
-			orphanResources = append(orphanResources, resourceName)
-		}
-	}
-
-	return orphanResources
-}
-
-// UpdateMetrics updates the metric and logs the results.
-func (s Service) UpdateMetrics(resourceType string, resourceNames []string) {
+// UpdateOrphanResourceMetrics updates the metric and logs the results.
+func (s Service) UpdateOrphanResourceMetrics(resourceType string, resourceNames []string) {
 	resourceCount := len(resourceNames)
 
 	orphanResourcesTotal.WithLabelValues(resourceType).Set(float64(resourceCount))
