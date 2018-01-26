@@ -1,11 +1,15 @@
 package s3bucketv2
 
 import (
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
 
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
+	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
 const (
@@ -81,4 +85,20 @@ func toBucketState(v interface{}) (BucketState, error) {
 	}
 
 	return bucketState, nil
+}
+
+func getS3BucketTags(customObject v1alpha1.AWSConfig) []*s3.Tag {
+	clusterTags := keyv2.ClusterTags(customObject)
+	s3Tags := []*s3.Tag{}
+
+	for k, v := range clusterTags {
+		tag := &s3.Tag{
+			Key:   aws.String(k),
+			Value: aws.String(v),
+		}
+
+		s3Tags = append(s3Tags, tag)
+	}
+
+	return s3Tags
 }
