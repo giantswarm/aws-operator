@@ -185,7 +185,7 @@ func newVersionBundles() []versionbundle.Bundle {
 				},
 				{
 					Component:   "CoreDNS",
-					Description: "Version 1.0.4 replaces kube-dns.",
+					Description: "Version 1.0.5 replaces kube-dns.",
 					Kind:        versionbundle.KindAdded,
 				},
 			},
@@ -212,7 +212,7 @@ func newVersionBundles() []versionbundle.Bundle {
 				},
 				{
 					Name:    "nginx-ingress-controller",
-					Version: "0.10.1",
+					Version: "0.10.2",
 				},
 			},
 			Dependencies: []versionbundle.Dependency{},
