@@ -26,9 +26,9 @@ version directory, and then changes are introduced.
 - Unify CloudConfig struct construction.
 - Update calico to 3.0.1.
 - Update hyperkube to v1.9.2.
-- Update nginx-ingress-controller to 0.10.1.
+- Update nginx-ingress-controller to 0.10.2.
 - Use vanilla (previously coreos) hyperkube image.
-- kube-dns replaced with CoreDNS 1.0.4.
+- kube-dns replaced with CoreDNS 1.0.5.
 - Fix Kubernetes API audit log.
 
 ### Removed

@@ -466,7 +466,7 @@ write_files:
                   topologyKey: kubernetes.io/hostname
           containers:
           - name: coredns
-            image: quay.io/giantswarm/coredns:1.0.4
+            image: quay.io/giantswarm/coredns:1.0.5
             imagePullPolicy: IfNotPresent
             args: [ "-conf", "/etc/coredns/Corefile" ]
             volumeMounts:
@@ -656,7 +656,7 @@ write_files:
               privileged: true
           containers:
           - name: nginx-ingress-controller
-            image: quay.io/giantswarm/nginx-ingress-controller-0.10.1
+            image: quay.io/giantswarm/nginx-ingress-controller-0.10.2
             args:
             - /nginx-ingress-controller
             - --default-backend-service=$(POD_NAMESPACE)/default-http-backend
