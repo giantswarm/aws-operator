@@ -17,8 +17,9 @@ type Clients struct {
 type S3Client interface {
 	CreateBucket(*s3.CreateBucketInput) (*s3.CreateBucketOutput, error)
 	DeleteBucket(*s3.DeleteBucketInput) (*s3.DeleteBucketOutput, error)
-	HeadBucket(*s3.HeadBucketInput) (*s3.HeadBucketOutput, error)
-	DeleteObjects(*s3.DeleteObjectsInput) (*s3.DeleteObjectsOutput, error)
-	ListObjectsV2(*s3.ListObjectsV2Input) (*s3.ListObjectsV2Output, error)
 	DeleteObject(*s3.DeleteObjectInput) (*s3.DeleteObjectOutput, error)
+	DeleteObjects(*s3.DeleteObjectsInput) (*s3.DeleteObjectsOutput, error)
+	HeadBucket(*s3.HeadBucketInput) (*s3.HeadBucketOutput, error)
+	ListObjectsV2(*s3.ListObjectsV2Input) (*s3.ListObjectsV2Output, error)
+	PutBucketTagging(*s3.PutBucketTaggingInput) (*s3.PutBucketTaggingOutput, error)
 }

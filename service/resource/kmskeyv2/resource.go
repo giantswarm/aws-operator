@@ -3,9 +3,14 @@ package kmskeyv2
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
+
+	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
 const (
@@ -78,4 +83,20 @@ func toKMSKeyState(v interface{}) (KMSKeyState, error) {
 
 func toAlias(keyID string) string {
 	return fmt.Sprintf("alias/%s", keyID)
+}
+
+func getKMSTags(customObject v1alpha1.AWSConfig) []*kms.Tag {
+	clusterTags := keyv2.ClusterTags(customObject)
+	kmsTags := []*kms.Tag{}
+
+	for k, v := range clusterTags {
+		tag := &kms.Tag{
+			TagKey:   aws.String(k),
+			TagValue: aws.String(v),
+		}
+
+		kmsTags = append(kmsTags, tag)
+	}
+
+	return kmsTags
 }

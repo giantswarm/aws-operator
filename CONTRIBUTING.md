@@ -42,8 +42,8 @@ This is a rough outline of what a contributor's workflow looks like:
 - Push your changes to a topic branch in your fork of the repository.
 - Submit a pull request to giantswarm/aws-operator.
 - Adding unit tests will greatly improve the chance for getting a quick review and your PR accepted.
-- Your PR must receive a LGTM from one maintainer found in the MAINTAINERS file.
-- Before merging your PR be sure to squash all commits into one.
+- Your PR must receive a LGTM from project owners.
+- When PR gets approval, all commits are squashed into one and merged by one of the owners.
 
 Thanks for your contributions!
 
