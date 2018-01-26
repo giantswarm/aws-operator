@@ -10,11 +10,6 @@ import (
 )
 
 const (
-	// CloudFormationVersion is the version in the version bundle for
-	// transitioning to Cloud Formation.
-	// TODO Remove once the migration is complete.
-	CloudFormationVersion = "0.2.0"
-
 	// CloudProviderTagName is used to add Cloud Provider tags to AWS resources.
 	CloudProviderTagName = "kubernetes.io/cluster/%s"
 
@@ -226,17 +221,6 @@ func ToCustomObject(v interface{}) (v1alpha1.AWSConfig, error) {
 	customObject := *customObjectPointer
 
 	return customObject, nil
-}
-
-// UseCloudFormation returns true if the version in the version bundle matches
-// the Cloud Formation version.
-// TODO Remove once we've migrated all AWS resources to Cloud Formation.
-func UseCloudFormation(customObject v1alpha1.AWSConfig) bool {
-	if VersionBundleVersion(customObject) == CloudFormationVersion {
-		return true
-	}
-
-	return false
 }
 
 // VersionBundleVersion returns the version contained in the Version Bundle.

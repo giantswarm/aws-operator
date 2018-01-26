@@ -592,40 +592,6 @@ func Test_MainHostPostStackName(t *testing.T) {
 	}
 }
 
-func Test_UseCloudFormation(t *testing.T) {
-	tests := []struct {
-		versionBundleVersion string
-		expectedResult       bool
-	}{
-		{
-			versionBundleVersion: "0.1.0",
-			expectedResult:       false,
-		},
-		{
-			versionBundleVersion: "0.2.0",
-			expectedResult:       true,
-		},
-		{
-			versionBundleVersion: "",
-			expectedResult:       false,
-		},
-	}
-
-	for _, tc := range tests {
-		cluster := v1alpha1.AWSConfig{
-			Spec: v1alpha1.AWSConfigSpec{
-				VersionBundle: v1alpha1.AWSConfigSpecVersionBundle{
-					Version: tc.versionBundleVersion,
-				},
-			},
-		}
-
-		if UseCloudFormation(cluster) != tc.expectedResult {
-			t.Fatalf("Expected use cloud formation to be %t but was %t", tc.expectedResult, UseCloudFormation(cluster))
-		}
-	}
-}
-
 func Test_InstanceProfileName(t *testing.T) {
 	expectedName := "test-cluster-worker-EC2-K8S-Role"
 	profileType := "worker"
