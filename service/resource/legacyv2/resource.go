@@ -1141,7 +1141,7 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 		s.logger.Log("error", fmt.Sprintf("%#v", err))
 	}
 
-	if keyv2.HasClusterVersion(cluster) && !keyv2.UseCloudFormation(cluster) {
+	if keyv2.HasClusterVersion(cluster) {
 		// Delete NAT gateway and private subnet for new clusters.
 		natGateway := &awsresources.NatGateway{
 			Name: keyv2.ClusterID(cluster),
@@ -1179,191 +1179,185 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 		}
 	}
 
-	if !keyv2.UseCloudFormation(cluster) {
-		// Delete internet gateway.
-		internetGateway := &awsresources.InternetGateway{
-			Name:  keyv2.ClusterID(cluster),
-			VpcID: vpcID,
-			// Dependencies.
-			Logger:    s.logger,
-			AWSEntity: awsresources.AWSEntity{Clients: clients},
-		}
-		if err := internetGateway.Delete(); err != nil {
-			s.logger.Log("error", fmt.Sprintf("could not delete internet gateway: '%#v'", err))
-		} else {
-			s.logger.Log("info", "deleted internet gateway")
-		}
-
-		// Delete public subnet.
-		subnetInput := SubnetInput{
-			Name:    keyv2.SubnetName(cluster, suffixPublic),
-			Clients: clients,
-		}
-		if err := s.deleteSubnet(subnetInput); err != nil {
-			s.logger.Log("error", fmt.Sprintf("could not delete public subnet: '%#v'", err))
-		} else {
-			s.logger.Log("info", "deleted public subnet")
-		}
+	// Delete internet gateway.
+	internetGateway := &awsresources.InternetGateway{
+		Name:  keyv2.ClusterID(cluster),
+		VpcID: vpcID,
+		// Dependencies.
+		Logger:    s.logger,
+		AWSEntity: awsresources.AWSEntity{Clients: clients},
+	}
+	if err := internetGateway.Delete(); err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not delete internet gateway: '%#v'", err))
+	} else {
+		s.logger.Log("info", "deleted internet gateway")
 	}
 
-	if !keyv2.UseCloudFormation(cluster) {
-		// Before the security groups can be deleted any rules referencing other
-		// groups must first be deleted.
-		mastersSGRulesInput := securityGroupRulesInput{
-			Clients:   clients,
-			GroupName: keyv2.SecurityGroupName(cluster, prefixMaster),
-		}
-		if err := s.deleteSecurityGroupRules(mastersSGRulesInput); err != nil {
-			s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
-		}
-
-		workersSGRulesInput := securityGroupRulesInput{
-			Clients:   clients,
-			GroupName: keyv2.SecurityGroupName(cluster, prefixWorker),
-		}
-		if err := s.deleteSecurityGroupRules(workersSGRulesInput); err != nil {
-			s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
-		}
-
-		ingressSGRulesInput := securityGroupRulesInput{
-			Clients:   clients,
-			GroupName: keyv2.SecurityGroupName(cluster, prefixIngress),
-		}
-		if err := s.deleteSecurityGroupRules(ingressSGRulesInput); err != nil {
-			s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
-		}
-
-		// Delete masters security group.
-		mastersSGInput := securityGroupInput{
-			Clients:   clients,
-			GroupName: keyv2.SecurityGroupName(cluster, prefixMaster),
-		}
-		if err := s.deleteSecurityGroup(mastersSGInput); err != nil {
-			s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", mastersSGInput.GroupName, err))
-		}
-
-		// Delete workers security group.
-		workersSGInput := securityGroupInput{
-			Clients:   clients,
-			GroupName: keyv2.SecurityGroupName(cluster, prefixWorker),
-		}
-		if err := s.deleteSecurityGroup(workersSGInput); err != nil {
-			s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", workersSGInput.GroupName, err))
-		}
-
-		// Delete ingress security group.
-		ingressSGInput := securityGroupInput{
-			Clients:   clients,
-			GroupName: keyv2.SecurityGroupName(cluster, prefixIngress),
-		}
-		if err := s.deleteSecurityGroup(ingressSGInput); err != nil {
-			s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", ingressSGInput.GroupName, err))
-		}
+	// Delete public subnet.
+	subnetInput := SubnetInput{
+		Name:    keyv2.SubnetName(cluster, suffixPublic),
+		Clients: clients,
+	}
+	if err := s.deleteSubnet(subnetInput); err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not delete public subnet: '%#v'", err))
+	} else {
+		s.logger.Log("info", "deleted public subnet")
 	}
 
-	if !keyv2.UseCloudFormation(cluster) {
-		vpcPeeringConection := &awsresources.VPCPeeringConnection{
-			VPCId:     vpcID,
-			PeerVPCId: cluster.Spec.AWS.VPC.PeerID,
-			AWSEntity: awsresources.AWSEntity{
-				Clients:     clients,
-				HostClients: hostClients,
-			},
+	// Before the security groups can be deleted any rules referencing other
+	// groups must first be deleted.
+	mastersSGRulesInput := securityGroupRulesInput{
+		Clients:   clients,
+		GroupName: keyv2.SecurityGroupName(cluster, prefixMaster),
+	}
+	if err := s.deleteSecurityGroupRules(mastersSGRulesInput); err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
+	}
+
+	workersSGRulesInput := securityGroupRulesInput{
+		Clients:   clients,
+		GroupName: keyv2.SecurityGroupName(cluster, prefixWorker),
+	}
+	if err := s.deleteSecurityGroupRules(workersSGRulesInput); err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
+	}
+
+	ingressSGRulesInput := securityGroupRulesInput{
+		Clients:   clients,
+		GroupName: keyv2.SecurityGroupName(cluster, prefixIngress),
+	}
+	if err := s.deleteSecurityGroupRules(ingressSGRulesInput); err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not delete rules for security group '%s': '%#v'", mastersSGRulesInput.GroupName, err))
+	}
+
+	// Delete masters security group.
+	mastersSGInput := securityGroupInput{
+		Clients:   clients,
+		GroupName: keyv2.SecurityGroupName(cluster, prefixMaster),
+	}
+	if err := s.deleteSecurityGroup(mastersSGInput); err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", mastersSGInput.GroupName, err))
+	}
+
+	// Delete workers security group.
+	workersSGInput := securityGroupInput{
+		Clients:   clients,
+		GroupName: keyv2.SecurityGroupName(cluster, prefixWorker),
+	}
+	if err := s.deleteSecurityGroup(workersSGInput); err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", workersSGInput.GroupName, err))
+	}
+
+	// Delete ingress security group.
+	ingressSGInput := securityGroupInput{
+		Clients:   clients,
+		GroupName: keyv2.SecurityGroupName(cluster, prefixIngress),
+	}
+	if err := s.deleteSecurityGroup(ingressSGInput); err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not delete security group '%s': '%#v'", ingressSGInput.GroupName, err))
+	}
+
+	vpcPeeringConection := &awsresources.VPCPeeringConnection{
+		VPCId:     vpcID,
+		PeerVPCId: cluster.Spec.AWS.VPC.PeerID,
+		AWSEntity: awsresources.AWSEntity{
+			Clients:     clients,
+			HostClients: hostClients,
+		},
+		Logger: s.logger,
+	}
+	conn, err := vpcPeeringConection.FindExisting()
+	if err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not find vpc peering connection: '%#v'", err))
+	}
+
+	// Delete Guest VPC Routes.
+	for _, privateRouteTableName := range cluster.Spec.AWS.VPC.RouteTableNames {
+		privateRouteTable := &awsresources.RouteTable{
+			Name:   privateRouteTableName,
+			VpcID:  cluster.Spec.AWS.VPC.PeerID,
+			Client: hostClients.EC2,
 			Logger: s.logger,
 		}
-		conn, err := vpcPeeringConection.FindExisting()
-		if err != nil {
-			s.logger.Log("error", fmt.Sprintf("could not find vpc peering connection: '%#v'", err))
+
+		privateRoute := &awsresources.Route{
+			RouteTable:             *privateRouteTable,
+			DestinationCidrBlock:   *conn.RequesterVpcInfo.CidrBlock,
+			VpcPeeringConnectionID: *conn.VpcPeeringConnectionId,
+			AWSEntity:              awsresources.AWSEntity{Clients: hostClients},
 		}
 
-		// Delete Guest VPC Routes.
-		for _, privateRouteTableName := range cluster.Spec.AWS.VPC.RouteTableNames {
-			privateRouteTable := &awsresources.RouteTable{
-				Name:   privateRouteTableName,
-				VpcID:  cluster.Spec.AWS.VPC.PeerID,
-				Client: hostClients.EC2,
-				Logger: s.logger,
-			}
-
-			privateRoute := &awsresources.Route{
-				RouteTable:             *privateRouteTable,
-				DestinationCidrBlock:   *conn.RequesterVpcInfo.CidrBlock,
-				VpcPeeringConnectionID: *conn.VpcPeeringConnectionId,
-				AWSEntity:              awsresources.AWSEntity{Clients: hostClients},
-			}
-
-			if err := privateRoute.Delete(); err != nil {
-				s.logger.Log("error", fmt.Sprintf("could not delete vpc route: '%v'", err))
-			}
+		if err := privateRoute.Delete(); err != nil {
+			s.logger.Log("error", fmt.Sprintf("could not delete vpc route: '%v'", err))
 		}
+	}
 
-		// Delete VPC peering connection.
-		if err := vpcPeeringConection.Delete(); err != nil {
-			s.logger.Log("error", fmt.Sprintf("could not delete vpc peering connection: '%#v'", err))
-		} else {
-			s.logger.Log("info", "deleted vpc peering connection")
-		}
+	// Delete VPC peering connection.
+	if err := vpcPeeringConection.Delete(); err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not delete vpc peering connection: '%#v'", err))
+	} else {
+		s.logger.Log("info", "deleted vpc peering connection")
+	}
 
-		// Delete VPC.
-		if err := vpc.Delete(); err != nil {
-			s.logger.Log("error", fmt.Sprintf("could not delete vpc: '%#v'", err))
-		} else {
-			s.logger.Log("info", "deleted vpc")
-		}
+	// Delete VPC.
+	if err := vpc.Delete(); err != nil {
+		s.logger.Log("error", fmt.Sprintf("could not delete vpc: '%#v'", err))
+	} else {
+		s.logger.Log("info", "deleted vpc")
+	}
 
-		// Delete S3 bucket.
-		bucketName := s.bucketName(cluster)
+	// Delete S3 bucket.
+	bucketName := s.bucketName(cluster)
 
-		bucket := &awsresources.Bucket{
-			AWSEntity: awsresources.AWSEntity{Clients: clients},
-			Name:      bucketName,
-		}
+	bucket := &awsresources.Bucket{
+		AWSEntity: awsresources.AWSEntity{Clients: clients},
+		Name:      bucketName,
+	}
 
-		if err := bucket.Delete(); err != nil {
-			s.logger.Log("error", fmt.Sprintf("%#v", err))
-		}
+	if err := bucket.Delete(); err != nil {
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
+	}
 
-		s.logger.Log("info", "deleted bucket")
+	s.logger.Log("info", "deleted bucket")
 
-		// Delete master policy.
-		var masterPolicy resources.NamedResource
-		masterPolicy = &awsresources.Policy{
-			ClusterID:  keyv2.ClusterID(cluster),
-			PolicyType: prefixMaster,
-			S3Bucket:   bucketName,
-			AWSEntity:  awsresources.AWSEntity{Clients: clients},
-		}
-		if err := masterPolicy.Delete(); err != nil {
-			s.logger.Log("error", fmt.Sprintf("%#v", err))
-		} else {
-			s.logger.Log("info", fmt.Sprintf("deleted %s roles, policies, instance profiles", prefixMaster))
-		}
+	// Delete master policy.
+	var masterPolicy resources.NamedResource
+	masterPolicy = &awsresources.Policy{
+		ClusterID:  keyv2.ClusterID(cluster),
+		PolicyType: prefixMaster,
+		S3Bucket:   bucketName,
+		AWSEntity:  awsresources.AWSEntity{Clients: clients},
+	}
+	if err := masterPolicy.Delete(); err != nil {
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
+	} else {
+		s.logger.Log("info", fmt.Sprintf("deleted %s roles, policies, instance profiles", prefixMaster))
+	}
 
-		// Delete worker policy.
-		var workerPolicy resources.NamedResource
-		workerPolicy = &awsresources.Policy{
-			ClusterID:  keyv2.ClusterID(cluster),
-			PolicyType: prefixWorker,
-			S3Bucket:   bucketName,
-			AWSEntity:  awsresources.AWSEntity{Clients: clients},
-		}
-		if err := workerPolicy.Delete(); err != nil {
-			s.logger.Log("error", fmt.Sprintf("%#v", err))
-		} else {
-			s.logger.Log("info", fmt.Sprintf("deleted %s roles, policies, instance profiles", prefixWorker))
-		}
+	// Delete worker policy.
+	var workerPolicy resources.NamedResource
+	workerPolicy = &awsresources.Policy{
+		ClusterID:  keyv2.ClusterID(cluster),
+		PolicyType: prefixWorker,
+		S3Bucket:   bucketName,
+		AWSEntity:  awsresources.AWSEntity{Clients: clients},
+	}
+	if err := workerPolicy.Delete(); err != nil {
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
+	} else {
+		s.logger.Log("info", fmt.Sprintf("deleted %s roles, policies, instance profiles", prefixWorker))
+	}
 
-		// Delete KMS key.
-		var kmsKey resources.ArnResource
-		kmsKey = &awsresources.KMSKey{
-			Name:      keyv2.ClusterID(cluster),
-			AWSEntity: awsresources.AWSEntity{Clients: clients},
-		}
-		if err := kmsKey.Delete(); err != nil {
-			s.logger.Log("error", fmt.Sprintf("%#v", err))
-		} else {
-			s.logger.Log("info", "deleted KMS key")
-		}
+	// Delete KMS key.
+	var kmsKey resources.ArnResource
+	kmsKey = &awsresources.KMSKey{
+		Name:      keyv2.ClusterID(cluster),
+		AWSEntity: awsresources.AWSEntity{Clients: clients},
+	}
+	if err := kmsKey.Delete(); err != nil {
+		s.logger.Log("error", fmt.Sprintf("%#v", err))
+	} else {
+		s.logger.Log("info", "deleted KMS key")
 	}
 
 	// Delete keypair.
