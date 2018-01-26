@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
@@ -372,55 +371,51 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 		s.logger.Log("info", fmt.Sprintf("bucket '%s' already exists, reusing", bucketName))
 	}
 
-	var vpcID string
-	var conn *ec2.VpcPeeringConnection
-	if !keyv2.UseCloudFormation(cluster) {
-		// Create VPC.
-		var vpc resources.ResourceWithID
-		vpc = &awsresources.VPC{
-			CidrBlock:        cluster.Spec.AWS.VPC.CIDR,
-			InstallationName: s.installationName,
-			Name:             keyv2.ClusterID(cluster),
-			AWSEntity:        awsresources.AWSEntity{Clients: clients},
-		}
-		vpcCreated, err := vpc.CreateIfNotExists()
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create VPC: '%#v'", err))
-		}
-		if vpcCreated {
-			s.logger.Log("info", fmt.Sprintf("created vpc for cluster '%s'", keyv2.ClusterID(cluster)))
-		} else {
-			s.logger.Log("info", fmt.Sprintf("vpc for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
-		}
-		vpcID, err = vpc.GetID()
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get VPC ID: '%#v'", err))
-		}
+	// Create VPC.
+	var vpc resources.ResourceWithID
+	vpc = &awsresources.VPC{
+		CidrBlock:        cluster.Spec.AWS.VPC.CIDR,
+		InstallationName: s.installationName,
+		Name:             keyv2.ClusterID(cluster),
+		AWSEntity:        awsresources.AWSEntity{Clients: clients},
+	}
+	vpcCreated, err := vpc.CreateIfNotExists()
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create VPC: '%#v'", err))
+	}
+	if vpcCreated {
+		s.logger.Log("info", fmt.Sprintf("created vpc for cluster '%s'", keyv2.ClusterID(cluster)))
+	} else {
+		s.logger.Log("info", fmt.Sprintf("vpc for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
+	}
+	vpcID, err := vpc.GetID()
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get VPC ID: '%#v'", err))
+	}
 
-		// Create VPC peering connection.
-		vpcPeeringConection := &awsresources.VPCPeeringConnection{
-			VPCId:     vpcID,
-			PeerVPCId: cluster.Spec.AWS.VPC.PeerID,
-			AWSEntity: awsresources.AWSEntity{
-				Clients:     clients,
-				HostClients: hostClients,
-			},
-			Logger: s.logger,
-		}
-		vpcPeeringConnectionCreated, err := vpcPeeringConection.CreateIfNotExists()
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create vpc peering connection: '%#v'", err))
-		}
-		if vpcPeeringConnectionCreated {
-			s.logger.Log("info", fmt.Sprintf("created vpc peering connection for cluster '%s'", keyv2.ClusterID(cluster)))
-		} else {
-			s.logger.Log("info", fmt.Sprintf("vpc peering connection for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
-		}
+	// Create VPC peering connection.
+	vpcPeeringConection := &awsresources.VPCPeeringConnection{
+		VPCId:     vpcID,
+		PeerVPCId: cluster.Spec.AWS.VPC.PeerID,
+		AWSEntity: awsresources.AWSEntity{
+			Clients:     clients,
+			HostClients: hostClients,
+		},
+		Logger: s.logger,
+	}
+	vpcPeeringConnectionCreated, err := vpcPeeringConection.CreateIfNotExists()
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create vpc peering connection: '%#v'", err))
+	}
+	if vpcPeeringConnectionCreated {
+		s.logger.Log("info", fmt.Sprintf("created vpc peering connection for cluster '%s'", keyv2.ClusterID(cluster)))
+	} else {
+		s.logger.Log("info", fmt.Sprintf("vpc peering connection for cluster '%s' already exists, reusing", keyv2.ClusterID(cluster)))
+	}
 
-		conn, err = vpcPeeringConection.FindExisting()
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not find vpc peering connection: '%#v'", err))
-		}
+	conn, err := vpcPeeringConection.FindExisting()
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not find vpc peering connection: '%#v'", err))
 	}
 
 	// Create internet gateway.
@@ -679,272 +674,259 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 
 	}
 
-	var apiLB *awsresources.ELB
-	var etcdLB *awsresources.ELB
-	var ingressLB *awsresources.ELB
-	var anyMastersCreated bool
-	var masterIDs []string
+	mastersInput := runMachinesInput{
+		clients:             clients,
+		cluster:             cluster,
+		tlsAssets:           tlsAssets,
+		clusterKeys:         clusterKeys,
+		clusterName:         keyv2.ClusterID(cluster),
+		bucket:              bucket,
+		securityGroup:       mastersSecurityGroup,
+		instanceProfileName: masterPolicy.GetName(),
+		prefix:              prefixMaster,
+	}
 
-	if !keyv2.UseCloudFormation(cluster) {
-		mastersInput := runMachinesInput{
-			clients:             clients,
-			cluster:             cluster,
-			tlsAssets:           tlsAssets,
-			clusterKeys:         clusterKeys,
-			clusterName:         keyv2.ClusterID(cluster),
-			bucket:              bucket,
-			securityGroup:       mastersSecurityGroup,
-			instanceProfileName: masterPolicy.GetName(),
-			prefix:              prefixMaster,
-		}
-
-		if keyv2.HasClusterVersion(cluster) {
-			// New clusters have masters in the private subnet.
-			mastersInput.subnet = privateSubnet
-		} else {
-			// Legacy clusters have masters in the public subnet.
-			mastersInput.subnet = publicSubnet
-
-			// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
-			mastersInput.keyPairName = keyv2.ClusterID(cluster)
-		}
-
-		// Run masters.
-		anyMastersCreated, masterIDs, err = s.runMachines(mastersInput)
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not start masters: '%#v'", err))
-		}
-
-		if !validateIDs(masterIDs) {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("master nodes had invalid instance IDs: %v", masterIDs))
-		}
-
-		// Create apiserver load balancer.
-		lbInput := LoadBalancerInput{
-			Name:               cluster.Spec.Cluster.Kubernetes.API.Domain,
-			Clients:            clients,
-			Cluster:            cluster,
-			IdleTimeoutSeconds: cluster.Spec.AWS.API.ELB.IdleTimeoutSeconds,
-			InstanceIDs:        masterIDs,
-			PortsToOpen: awsresources.PortPairs{
-				{
-					PortELB:      cluster.Spec.Cluster.Kubernetes.API.SecurePort,
-					PortInstance: cluster.Spec.Cluster.Kubernetes.API.SecurePort,
-				},
-			},
-			SecurityGroupID: mastersSecurityGroupID,
-			SubnetID:        publicSubnetID,
-		}
-
-		apiLB, err = s.createLoadBalancer(lbInput)
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create apiserver load balancer: '%#v'", err))
-		}
-
-		// Create etcd load balancer.
-		lbInput = LoadBalancerInput{
-			Name:               cluster.Spec.Cluster.Etcd.Domain,
-			Clients:            clients,
-			Cluster:            cluster,
-			IdleTimeoutSeconds: cluster.Spec.AWS.Etcd.ELB.IdleTimeoutSeconds,
-			InstanceIDs:        masterIDs,
-			PortsToOpen: awsresources.PortPairs{
-				{
-					PortELB:      httpsPort,
-					PortInstance: cluster.Spec.Cluster.Etcd.Port,
-				},
-			},
-			SecurityGroupID: mastersSecurityGroupID,
-			SubnetID:        publicSubnetID,
-		}
-
-		if keyv2.HasClusterVersion(cluster) {
-			lbInput.Scheme = "internal"
-		}
-
-		etcdLB, err = s.createLoadBalancer(lbInput)
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create etcd load balancer: '%#v'", err))
-		}
-
-		// Masters were created but the master IAM policy existed from a previous
-		// execution. Its likely that previous execution failed. IAM policies can't
-		// be reused for EC2 instances.
-		if anyMastersCreated && !masterPolicyCreated {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("cluster '%s' cannot be processed. As IAM policy for master nodes cannot be reused. Please delete this cluster.", keyv2.ClusterID(cluster)))
-		}
-
-		// Create Ingress load balancer.
-		ingressLbInput := LoadBalancerInput{
-			Name:               cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-			Clients:            clients,
-			Cluster:            cluster,
-			IdleTimeoutSeconds: cluster.Spec.AWS.Ingress.ELB.IdleTimeoutSeconds,
-			PortsToOpen: awsresources.PortPairs{
-				{
-					PortELB:      httpsPort,
-					PortInstance: cluster.Spec.Cluster.Kubernetes.IngressController.SecurePort,
-				},
-				{
-					PortELB:      httpPort,
-					PortInstance: cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
-				},
-			},
-			SecurityGroupID: ingressSecurityGroupID,
-			SubnetID:        publicSubnetID,
-		}
-
-		ingressLB, err = s.createLoadBalancer(ingressLbInput)
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create ingress load balancer: '%#v'", err))
-		}
-
-		// Create a launch configuration for the worker nodes.
-		lcInput := launchConfigurationInput{
-			clients:             clients,
-			cluster:             cluster,
-			clusterKeys:         clusterKeys,
-			tlsAssets:           tlsAssets,
-			bucket:              bucket,
-			securityGroup:       workersSecurityGroup,
-			subnet:              publicSubnet,
-			instanceProfileName: workerPolicy.GetName(),
-			prefix:              prefixWorker,
-			ebsStorage:          true,
-		}
-
-		// For new clusters don't assign public IPs and use the private subnet.
-		if keyv2.HasClusterVersion(cluster) {
-			lcInput.associatePublicIP = false
-			lcInput.subnet = privateSubnet
-		} else {
-			lcInput.associatePublicIP = true
-			lcInput.subnet = publicSubnet
-		}
+	if keyv2.HasClusterVersion(cluster) {
+		// New clusters have masters in the private subnet.
+		mastersInput.subnet = privateSubnet
+	} else {
+		// Legacy clusters have masters in the public subnet.
+		mastersInput.subnet = publicSubnet
 
 		// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
-		if !keyv2.HasClusterVersion(cluster) {
-			lcInput.keypairName = keyv2.ClusterID(cluster)
+		mastersInput.keyPairName = keyv2.ClusterID(cluster)
+	}
+
+	// Run masters.
+	anyMastersCreated, masterIDs, err := s.runMachines(mastersInput)
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not start masters: '%#v'", err))
+	}
+
+	if !validateIDs(masterIDs) {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("master nodes had invalid instance IDs: %v", masterIDs))
+	}
+
+	// Create apiserver load balancer.
+	lbInput := LoadBalancerInput{
+		Name:               cluster.Spec.Cluster.Kubernetes.API.Domain,
+		Clients:            clients,
+		Cluster:            cluster,
+		IdleTimeoutSeconds: cluster.Spec.AWS.API.ELB.IdleTimeoutSeconds,
+		InstanceIDs:        masterIDs,
+		PortsToOpen: awsresources.PortPairs{
+			{
+				PortELB:      cluster.Spec.Cluster.Kubernetes.API.SecurePort,
+				PortInstance: cluster.Spec.Cluster.Kubernetes.API.SecurePort,
+			},
+		},
+		SecurityGroupID: mastersSecurityGroupID,
+		SubnetID:        publicSubnetID,
+	}
+
+	apiLB, err := s.createLoadBalancer(lbInput)
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create apiserver load balancer: '%#v'", err))
+	}
+
+	// Create etcd load balancer.
+	lbInput = LoadBalancerInput{
+		Name:               cluster.Spec.Cluster.Etcd.Domain,
+		Clients:            clients,
+		Cluster:            cluster,
+		IdleTimeoutSeconds: cluster.Spec.AWS.Etcd.ELB.IdleTimeoutSeconds,
+		InstanceIDs:        masterIDs,
+		PortsToOpen: awsresources.PortPairs{
+			{
+				PortELB:      httpsPort,
+				PortInstance: cluster.Spec.Cluster.Etcd.Port,
+			},
+		},
+		SecurityGroupID: mastersSecurityGroupID,
+		SubnetID:        publicSubnetID,
+	}
+
+	if keyv2.HasClusterVersion(cluster) {
+		lbInput.Scheme = "internal"
+	}
+
+	etcdLB, err := s.createLoadBalancer(lbInput)
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create etcd load balancer: '%#v'", err))
+	}
+
+	// Masters were created but the master IAM policy existed from a previous
+	// execution. Its likely that previous execution failed. IAM policies can't
+	// be reused for EC2 instances.
+	if anyMastersCreated && !masterPolicyCreated {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("cluster '%s' cannot be processed. As IAM policy for master nodes cannot be reused. Please delete this cluster.", keyv2.ClusterID(cluster)))
+	}
+
+	// Create Ingress load balancer.
+	ingressLbInput := LoadBalancerInput{
+		Name:               cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+		Clients:            clients,
+		Cluster:            cluster,
+		IdleTimeoutSeconds: cluster.Spec.AWS.Ingress.ELB.IdleTimeoutSeconds,
+		PortsToOpen: awsresources.PortPairs{
+			{
+				PortELB:      httpsPort,
+				PortInstance: cluster.Spec.Cluster.Kubernetes.IngressController.SecurePort,
+			},
+			{
+				PortELB:      httpPort,
+				PortInstance: cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort,
+			},
+		},
+		SecurityGroupID: ingressSecurityGroupID,
+		SubnetID:        publicSubnetID,
+	}
+
+	ingressLB, err := s.createLoadBalancer(ingressLbInput)
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create ingress load balancer: '%#v'", err))
+	}
+
+	// Create a launch configuration for the worker nodes.
+	lcInput := launchConfigurationInput{
+		clients:             clients,
+		cluster:             cluster,
+		clusterKeys:         clusterKeys,
+		tlsAssets:           tlsAssets,
+		bucket:              bucket,
+		securityGroup:       workersSecurityGroup,
+		subnet:              publicSubnet,
+		instanceProfileName: workerPolicy.GetName(),
+		prefix:              prefixWorker,
+		ebsStorage:          true,
+	}
+
+	// For new clusters don't assign public IPs and use the private subnet.
+	if keyv2.HasClusterVersion(cluster) {
+		lcInput.associatePublicIP = false
+		lcInput.subnet = privateSubnet
+	} else {
+		lcInput.associatePublicIP = true
+		lcInput.subnet = publicSubnet
+	}
+
+	// An EC2 Keypair is needed for legacy clusters. New clusters provide SSH keys via cloud config.
+	if !keyv2.HasClusterVersion(cluster) {
+		lcInput.keypairName = keyv2.ClusterID(cluster)
+	}
+
+	lcCreated, err := s.createLaunchConfiguration(lcInput)
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create launch config: '%#v'", err))
+	}
+
+	if lcCreated {
+		s.logger.Log("info", fmt.Sprintf("created worker launch config"))
+	} else {
+		s.logger.Log("info", fmt.Sprintf("launch config %s already exists, reusing", keyv2.ClusterID(cluster)))
+	}
+
+	workersLCName, err := launchConfigurationName(cluster, "worker", workersSecurityGroupID)
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get launch config name: '%#v'", err))
+	}
+
+	asg := awsresources.AutoScalingGroup{
+		Client:                  clients.AutoScaling,
+		Name:                    keyv2.AutoScalingGroupName(cluster, prefixWorker),
+		ClusterID:               keyv2.ClusterID(cluster),
+		MinSize:                 keyv2.WorkerCount(cluster),
+		MaxSize:                 keyv2.WorkerCount(cluster),
+		AvailabilityZone:        keyv2.AvailabilityZone(cluster),
+		LaunchConfigurationName: workersLCName,
+		LoadBalancerName:        ingressLB.Name,
+		VPCZoneIdentifier:       publicSubnetID,
+		HealthCheckGracePeriod:  gracePeriodSeconds,
+	}
+
+	// For new clusters launch the workers in the private subnet.
+	if keyv2.HasClusterVersion(cluster) {
+		asg.VPCZoneIdentifier = privateSubnetID
+	} else {
+		asg.VPCZoneIdentifier = publicSubnetID
+	}
+
+	asgCreated, err := asg.CreateIfNotExists()
+	if err != nil {
+		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create auto scaling group: '%#v'", err))
+	}
+
+	if asgCreated {
+		s.logger.Log("info", fmt.Sprintf("created auto scaling group '%s' with size %v", asg.Name, keyv2.WorkerCount(cluster)))
+	} else {
+		// If the cluster exists set the worker count so the cluster can be scaled.
+		scaleWorkers := awsresources.AutoScalingGroup{
+			Client:  clients.AutoScaling,
+			Name:    keyv2.AutoScalingGroupName(cluster, prefixWorker),
+			MinSize: keyv2.WorkerCount(cluster),
+			MaxSize: keyv2.WorkerCount(cluster),
 		}
 
-		lcCreated, err := s.createLaunchConfiguration(lcInput)
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create launch config: '%#v'", err))
+		if err := scaleWorkers.Update(); err != nil {
+			s.logger.Log("error", fmt.Sprintf("%#v", err))
 		}
 
-		if lcCreated {
-			s.logger.Log("info", fmt.Sprintf("created worker launch config"))
-		} else {
-			s.logger.Log("info", fmt.Sprintf("launch config %s already exists, reusing", keyv2.ClusterID(cluster)))
-		}
-
-		workersLCName, err := launchConfigurationName(cluster, "worker", workersSecurityGroupID)
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get launch config name: '%#v'", err))
-		}
-
-		asg := awsresources.AutoScalingGroup{
-			Client:                  clients.AutoScaling,
-			Name:                    keyv2.AutoScalingGroupName(cluster, prefixWorker),
-			ClusterID:               keyv2.ClusterID(cluster),
-			MinSize:                 keyv2.WorkerCount(cluster),
-			MaxSize:                 keyv2.WorkerCount(cluster),
-			AvailabilityZone:        keyv2.AvailabilityZone(cluster),
-			LaunchConfigurationName: workersLCName,
-			LoadBalancerName:        ingressLB.Name,
-			VPCZoneIdentifier:       publicSubnetID,
-			HealthCheckGracePeriod:  gracePeriodSeconds,
-		}
-
-		// For new clusters launch the workers in the private subnet.
-		if keyv2.HasClusterVersion(cluster) {
-			asg.VPCZoneIdentifier = privateSubnetID
-		} else {
-			asg.VPCZoneIdentifier = publicSubnetID
-		}
-
-		asgCreated, err := asg.CreateIfNotExists()
-		if err != nil {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create auto scaling group: '%#v'", err))
-		}
-
-		if asgCreated {
-			s.logger.Log("info", fmt.Sprintf("created auto scaling group '%s' with size %v", asg.Name, keyv2.WorkerCount(cluster)))
-		} else {
-			// If the cluster exists set the worker count so the cluster can be scaled.
-			scaleWorkers := awsresources.AutoScalingGroup{
-				Client:  clients.AutoScaling,
-				Name:    keyv2.AutoScalingGroupName(cluster, prefixWorker),
-				MinSize: keyv2.WorkerCount(cluster),
-				MaxSize: keyv2.WorkerCount(cluster),
-			}
-
-			if err := scaleWorkers.Update(); err != nil {
-				s.logger.Log("error", fmt.Sprintf("%#v", err))
-			}
-
-			s.logger.Log("info", fmt.Sprintf("auto scaling group '%s' already exists, setting to %d workers", scaleWorkers.Name, scaleWorkers.MaxSize))
-		}
+		s.logger.Log("info", fmt.Sprintf("auto scaling group '%s' already exists, setting to %d workers", scaleWorkers.Name, scaleWorkers.MaxSize))
 	}
 
 	// Create Record Sets for the Load Balancers.
-	// During Cloud Formation migration this logic is only needed for non CF clusters.
-	if !keyv2.UseCloudFormation(cluster) {
-		recordSetInputs := []recordSetInput{
-			{
-				Cluster:      cluster,
-				Client:       clients.Route53,
-				Resource:     apiLB,
-				Domain:       cluster.Spec.Cluster.Kubernetes.API.Domain,
-				HostedZoneID: cluster.Spec.AWS.API.HostedZones,
-				Type:         route53.RRTypeA,
-			},
-			{
-				Cluster:      cluster,
-				Client:       clients.Route53,
-				Resource:     etcdLB,
-				Domain:       cluster.Spec.Cluster.Etcd.Domain,
-				HostedZoneID: cluster.Spec.AWS.Etcd.HostedZones,
-				Type:         route53.RRTypeA,
-			},
-			{
-				Cluster:      cluster,
-				Client:       clients.Route53,
-				Resource:     ingressLB,
-				Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-				HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
-				Type:         route53.RRTypeA,
-			},
-			{
-				Cluster:      cluster,
-				Client:       clients.Route53,
-				Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.WildcardDomain,
-				HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
-				Value:        cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
-				Type:         route53.RRTypeCname,
-			},
-		}
-
-		var rsErr error
-		for _, input := range recordSetInputs {
-			if rsErr = s.createRecordSet(input); rsErr != nil {
-				return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create record set '%#v'", rsErr))
-			}
-		}
-		if rsErr == nil {
-			s.logger.Log("info", fmt.Sprintf("created DNS records for load balancers"))
-		}
+	recordSetInputs := []recordSetInput{
+		{
+			Cluster:      cluster,
+			Client:       clients.Route53,
+			Resource:     apiLB,
+			Domain:       cluster.Spec.Cluster.Kubernetes.API.Domain,
+			HostedZoneID: cluster.Spec.AWS.API.HostedZones,
+			Type:         route53.RRTypeA,
+		},
+		{
+			Cluster:      cluster,
+			Client:       clients.Route53,
+			Resource:     etcdLB,
+			Domain:       cluster.Spec.Cluster.Etcd.Domain,
+			HostedZoneID: cluster.Spec.AWS.Etcd.HostedZones,
+			Type:         route53.RRTypeA,
+		},
+		{
+			Cluster:      cluster,
+			Client:       clients.Route53,
+			Resource:     ingressLB,
+			Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+			HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
+			Type:         route53.RRTypeA,
+		},
+		{
+			Cluster:      cluster,
+			Client:       clients.Route53,
+			Domain:       cluster.Spec.Cluster.Kubernetes.IngressController.WildcardDomain,
+			HostedZoneID: cluster.Spec.AWS.Ingress.HostedZones,
+			Value:        cluster.Spec.Cluster.Kubernetes.IngressController.Domain,
+			Type:         route53.RRTypeCname,
+		},
 	}
 
-	if !keyv2.UseCloudFormation(cluster) {
-		masterServiceInput := MasterServiceInput{
-			Clients:  clients,
-			Cluster:  cluster,
-			MasterID: masterIDs[0],
+	var rsErr error
+	for _, input := range recordSetInputs {
+		if rsErr = s.createRecordSet(input); rsErr != nil {
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("could not create record set '%#v'", rsErr))
 		}
-		if err := s.createMasterService(masterServiceInput); err != nil {
-			return microerror.Mask(err)
-		}
+	}
+	if rsErr == nil {
+		s.logger.Log("info", fmt.Sprintf("created DNS records for load balancers"))
+	}
+
+	masterServiceInput := MasterServiceInput{
+		Clients:  clients,
+		Cluster:  cluster,
+		MasterID: masterIDs[0],
+	}
+	if err := s.createMasterService(masterServiceInput); err != nil {
+		return microerror.Mask(err)
 	}
 
 	return nil
