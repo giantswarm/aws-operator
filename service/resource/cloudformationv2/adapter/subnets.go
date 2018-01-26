@@ -23,7 +23,7 @@ func (s *subnetsAdapter) getSubnets(cfg Config) error {
 	s.PublicSubnetName = keyv2.SubnetName(cfg.CustomObject, suffixPublic)
 	s.PublicSubnetMapPublicIPOnLaunch = false
 	s.PrivateSubnetAZ = keyv2.AvailabilityZone(cfg.CustomObject)
-	s.PrivateSubnetCIDR = cfg.CustomObject.Spec.AWS.VPC.PrivateSubnetCIDR
+	s.PrivateSubnetCIDR = keyv2.PrivateSubnetCIDR(cfg.CustomObject)
 	s.PrivateSubnetName = keyv2.SubnetName(cfg.CustomObject, suffixPrivate)
 	s.PrivateSubnetMapPublicIPOnLaunch = false
 

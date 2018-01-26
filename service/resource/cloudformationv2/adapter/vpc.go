@@ -23,7 +23,7 @@ func (v *vpcAdapter) getVpc(cfg Config) error {
 	v.CidrBlock = cfg.CustomObject.Spec.AWS.VPC.CIDR
 	v.InstallationName = cfg.InstallationName
 	v.HostAccountID = cfg.HostAccountID
-	v.PeerVPCID = cfg.CustomObject.Spec.AWS.VPC.PeerID
+	v.PeerVPCID = keyv2.PeerID(cfg.CustomObject)
 
 	// PeerRoleArn.
 	roleName := keyv2.PeerAccessRoleName(cfg.CustomObject)
