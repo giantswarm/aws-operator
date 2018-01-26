@@ -41,7 +41,7 @@ func (i *hostRouteTablesAdapter) getHostRouteTables(cfg Config) error {
 			Name:         routeTableName,
 			RouteTableID: routeTableID,
 			// Requester CIDR block, we create the peering connection from the guest's private subnet.
-			CidrBlock:        cfg.CustomObject.Spec.AWS.VPC.PrivateSubnetCIDR,
+			CidrBlock:        keyv2.PrivateSubnetCIDR(cfg.CustomObject),
 			PeerConnectionID: peerConnectionID,
 		}
 		i.RouteTables = append(i.RouteTables, rt)
