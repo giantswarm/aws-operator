@@ -935,3 +935,65 @@ func Test_PeerID(t *testing.T) {
 		t.Fatalf("Expected PeerID %s but was %s", expected, actual)
 	}
 }
+
+func Test_ImageID(t *testing.T) {
+	testCases := []struct {
+		description     string
+		customObject    v1alpha1.AWSConfig
+		errorMatcher    func(error) bool
+		expectedImageID string
+	}{
+		{
+			description: "basic match",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "eu-central-1",
+					},
+				},
+			},
+			errorMatcher:    nil,
+			expectedImageID: "ami-90c152ff",
+		},
+		{
+			description: "different region",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "eu-west-1",
+					},
+				},
+			},
+			errorMatcher:    nil,
+			expectedImageID: "ami-32d1474b",
+		},
+		{
+			description: "invalid region",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "invalid-1",
+					},
+				},
+			},
+			errorMatcher: IsInvalidConfig,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			imageID, err := ImageID(tc.customObject)
+			if tc.errorMatcher != nil && err == nil {
+				t.Error("expected error didn't happen")
+			}
+
+			if tc.errorMatcher != nil && !tc.errorMatcher(err) {
+				t.Error("expected", true, "got", false)
+			}
+
+			if tc.expectedImageID != imageID {
+				t.Errorf("unexpected imageID, expecting %q, want %q", tc.expectedImageID, imageID)
+			}
+		})
+	}
+}

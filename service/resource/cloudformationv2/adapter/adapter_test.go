@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+
+	"github.com/giantswarm/aws-operator/service/keyv2"
 )
 
 var (
@@ -93,7 +95,7 @@ func TestAdapterGuestMain(t *testing.T) {
 					},
 				},
 			},
-			errorMatcher: IsInvalidConfig,
+			errorMatcher: keyv2.IsInvalidConfig,
 		},
 	}
 
