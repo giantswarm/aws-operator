@@ -29,3 +29,10 @@ var notFoundError = microerror.New("not found")
 func IsNotFound(err error) bool {
 	return microerror.Cause(err) == notFoundError
 }
+
+var invalidConfigError = microerror.New("invalid config")
+
+// IsInvalidConfig asserts invalidConfigError.
+func IsInvalidConfig(err error) bool {
+	return microerror.Cause(err) == invalidConfigError
+}

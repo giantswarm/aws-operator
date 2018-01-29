@@ -18,19 +18,24 @@ import (
 
 func newMainStack(customObject v1alpha1.AWSConfig) (StackState, error) {
 	stackName := keyv2.MainGuestStackName(customObject)
-	workers := len(customObject.Spec.AWS.Workers)
-	var workerImageID, workerInstanceType string
-	// FIXME: the imageID should not depend on the number of workers.
-	// issue: https://github.com/giantswarm/awstpr/issues/47
-	if workers > 0 {
-		workerImageID = customObject.Spec.AWS.Workers[0].ImageID
-		workerInstanceType = customObject.Spec.AWS.Workers[0].InstanceType
+	workerCount := keyv2.WorkerCount(customObject)
+
+	var workerInstanceType string
+
+	imageID, err := keyv2.ImageID(customObject)
+	if err != nil {
+		return StackState{}, microerror.Mask(err)
 	}
 
-	var masterImageID, masterInstanceType string
+	// FIXME: the instance type should not depend on the number of workers.
+	// issue: https://github.com/giantswarm/awstpr/issues/47
+	if workerCount > 0 {
+		workerInstanceType = keyv2.WorkerInstanceType(customObject)
+	}
+
+	var masterInstanceType string
 	if len(customObject.Spec.AWS.Masters) > 0 {
-		masterImageID = customObject.Spec.AWS.Masters[0].ImageID
-		masterInstanceType = customObject.Spec.AWS.Masters[0].InstanceType
+		masterInstanceType = keyv2.MasterInstanceType(customObject)
 	}
 
 	masterCloudConfigVersion := cloudconfigv3.MasterCloudConfigVersion
@@ -38,11 +43,11 @@ func newMainStack(customObject v1alpha1.AWSConfig) (StackState, error) {
 
 	mainCF := StackState{
 		Name:                     stackName,
-		MasterImageID:            masterImageID,
+		MasterImageID:            imageID,
 		MasterInstanceType:       masterInstanceType,
 		MasterCloudConfigVersion: masterCloudConfigVersion,
-		WorkerCount:              strconv.Itoa(workers),
-		WorkerImageID:            workerImageID,
+		WorkerCount:              strconv.Itoa(workerCount),
+		WorkerImageID:            imageID,
 		WorkerInstanceType:       workerInstanceType,
 		WorkerCloudConfigVersion: workerCloudConfigVersion,
 	}
