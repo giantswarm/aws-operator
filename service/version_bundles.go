@@ -159,8 +159,8 @@ func newVersionBundles() []versionbundle.Bundle {
 		{
 			Changelogs: []versionbundle.Changelog{
 				{
-					Component:   "Cloud Formation",
-					Description: "All AWS resources use Cloud Formation except KMS and S3.",
+					Component:   "CloudFormation",
+					Description: "All AWS resources use CloudFormation except KMS and S3.",
 					Kind:        versionbundle.KindAdded,
 				},
 				{
