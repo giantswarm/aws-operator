@@ -230,7 +230,7 @@ func operatorSetup() error {
 	}
 
 	logEntry := "cluster '${CLUSTER_NAME}' processed"
-	if os.Getenv("VERSION_BUNDLE_VERSION") == "0.2.0" {
+	if os.Getenv("VERSION_BUNDLE_VERSION") == "2.0.0" {
 		logEntry = "creating AWS cloudformation stack: created"
 	}
 
