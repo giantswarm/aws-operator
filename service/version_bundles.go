@@ -190,7 +190,7 @@ func newVersionBundles() []versionbundle.Bundle {
 				},
 				{
 					Component:   "Nginx Ingress Controller",
-					Description: "Updated to 0.10.2",
+					Description: "Updated to 0.10.2.",
 					Kind:        versionbundle.KindChanged,
 				},
 			},
