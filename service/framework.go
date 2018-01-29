@@ -339,16 +339,16 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 
 	var s3BucketObjectResourceV2 framework.Resource
 	{
-		s3BucketObjectConfig := s3objectv2.DefaultConfig()
-		s3BucketObjectConfig.AwsService = awsService
-		s3BucketObjectConfig.Clients.S3 = awsClients.S3
-		s3BucketObjectConfig.Clients.KMS = awsClients.KMS
-		s3BucketObjectConfig.CloudConfig = ccServiceV4
-		s3BucketObjectConfig.CertWatcher = certWatcher
-		s3BucketObjectConfig.Logger = config.Logger
-		s3BucketObjectConfig.RandomKeyWatcher = keyWatcher
+		c := s3objectv2.DefaultConfig()
+		c.AwsService = awsService
+		c.Clients.S3 = awsClients.S3
+		c.Clients.KMS = awsClients.KMS
+		c.CloudConfig = ccServiceV4
+		c.CertWatcher = certWatcher
+		c.Logger = config.Logger
+		c.RandomKeyWatcher = keyWatcher
 
-		s3BucketObjectResourceV2, err = s3objectv2.New(s3BucketObjectConfig)
+		s3BucketObjectResourceV2, err = s3objectv2.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -426,21 +426,6 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 			endpointsResource,
 		}
 
-		// Disable retry wrapper due to problems with the legacy resource.
-		//
-		// NOTE that the retry resources wrap the underlying resources first. The
-		// wrapped resources are then wrapped around the metrics resource. That way
-		// the metrics also consider execution times and execution attempts including
-		// retries.
-		/*
-			retryWrapConfig := retryresource.DefaultWrapConfig()
-			retryWrapConfig.Logger = config.Logger
-			cloudFormationResources, err = retryresource.Wrap(cloudFormationResources, retryWrapConfig)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-		*/
-
 		resourcesV1, err = metricsresource.Wrap(resourcesV1, metricsWrapConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
@@ -460,21 +445,6 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 			serviceResource,
 			endpointsResource,
 		}
-
-		// Disable retry wrapper due to problems with the legacy resource.
-		//
-		// NOTE that the retry resources wrap the underlying resources first. The
-		// wrapped resources are then wrapped around the metrics resource. That way
-		// the metrics also consider execution times and execution attempts including
-		// retries.
-		/*
-			retryWrapConfig := retryresource.DefaultWrapConfig()
-			retryWrapConfig.Logger = config.Logger
-			cloudFormationResources, err = retryresource.Wrap(cloudFormationResources, retryWrapConfig)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-		*/
 
 		resourcesV2, err = metricsresource.Wrap(resourcesV2, metricsWrapConfig)
 		if err != nil {
