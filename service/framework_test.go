@@ -65,6 +65,15 @@ func Test_Service_NewVersionedResources(t *testing.T) {
 					"servicev2",
 					"endpointsv2",
 				},
+				"2.1.0": []string{
+					"kmskeyv2",
+					"s3bucketv2",
+					"s3objectv2",
+					"cloudformationv2",
+					"namespacev2",
+					"servicev2",
+					"endpointsv2",
+				},
 			},
 		},
 	}

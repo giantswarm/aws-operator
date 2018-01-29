@@ -1,4 +1,4 @@
-package cloudconfigv3
+package cloudconfigv4
 
 import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
@@ -225,8 +225,11 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: decryptTLSAssetsServiceTemplate,
 			Name:         "decrypt-tls-assets.service",
-			Enable:       true,
-			Command:      "start",
+			// Do not enable TLS assets decrypt unit so that it won't get autmatically
+			// executed on master reboot. This will prevent eventual races with the
+			// asset files creation.
+			Enable:  false,
+			Command: "start",
 		},
 		{
 			AssetContent: masterFormatVarLibDockerServiceTemplate,
@@ -243,8 +246,11 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: decryptKeysServiceTemplate,
 			Name:         "decrypt-keys-assets.service",
-			Enable:       true,
-			Command:      "start",
+			// Do not enable key decrypt unit so that it won't get autmatically
+			// executed on master reboot. This will prevent eventual races with the
+			// key files creation.
+			Enable:  false,
+			Command: "start",
 		},
 		// Format etcd EBS volume.
 		{
