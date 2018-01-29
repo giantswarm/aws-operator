@@ -20,6 +20,9 @@ func Test_Resource_Cloudformation_GetDesiredState(t *testing.T) {
 			description: "CloudFormation gets name from custom object",
 			obj: &v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "eu-central-1",
+					},
 					Cluster: v1alpha1.Cluster{
 						ID:      "5xchu",
 						Version: "cloud-formation",
