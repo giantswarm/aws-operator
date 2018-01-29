@@ -272,3 +272,33 @@ func componentName(domainName string) (string, error) {
 
 	return splits[0], nil
 }
+
+// ImageID returns the EC2 AMI for the configured region.
+func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
+	region := Region(customObject)
+
+	/*
+		Container Linux AMIs for each active AWS region.
+		From: https://coreos.com/os/docs/latest/booting-on-ec2.html
+
+		NOTE 1: AMIs should always be for HVM virtualisation and not PV.
+		NOTE 2: You also need to update the tests.
+
+		service/keyv2/key_test.go
+		service/resource/cloudformationv2/adapter/adapter_test.go
+
+		Current Release: CoreOS Container Linux stable 1576.5.0 (HVM)
+	*/
+	imageIDs := map[string]string{
+		"eu-central-1": "ami-90c152ff",
+		"eu-west-1":    "ami-32d1474b",
+		"us-west-2":    "ami-dc4ce6a4",
+	}
+
+	imageID, ok := imageIDs[region]
+	if !ok {
+		return "", microerror.Maskf(invalidConfigError, "no image id for region '%s'", region)
+	}
+
+	return imageID, nil
+}
