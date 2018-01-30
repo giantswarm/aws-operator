@@ -159,8 +159,8 @@ func newVersionBundles() []versionbundle.Bundle {
 		{
 			Changelogs: []versionbundle.Changelog{
 				{
-					Component:   "Cloud Formation",
-					Description: "All AWS resources use Cloud Formation except KMS and S3.",
+					Component:   "CloudFormation",
+					Description: "All AWS resources use CloudFormation except KMS and S3.",
 					Kind:        versionbundle.KindAdded,
 				},
 				{
@@ -189,8 +189,8 @@ func newVersionBundles() []versionbundle.Bundle {
 					Kind:        versionbundle.KindAdded,
 				},
 				{
-					Component:   "Nginx ingress controller",
-					Description: "Updated to 0.10.2",
+					Component:   "Nginx Ingress Controller",
+					Description: "Updated to 0.10.2.",
 					Kind:        versionbundle.KindChanged,
 				},
 			},
@@ -225,7 +225,7 @@ func newVersionBundles() []versionbundle.Bundle {
 			Name:         "aws-operator",
 			Time:         time.Date(2018, time.January, 22, 16, 00, 0, 0, time.UTC),
 			Version:      "2.0.0",
-			WIP:          true,
+			WIP:          false,
 		},
 	}
 }
