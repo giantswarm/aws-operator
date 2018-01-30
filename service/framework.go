@@ -21,6 +21,7 @@ import (
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/aws-operator/service/cloudconfigv2"
 	"github.com/giantswarm/aws-operator/service/cloudconfigv3"
+	"github.com/giantswarm/aws-operator/service/cloudconfigv4"
 	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2"
 	"github.com/giantswarm/aws-operator/service/resource/cloudformationv2/adapter"
 	"github.com/giantswarm/aws-operator/service/resource/endpointsv2"
@@ -29,6 +30,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/resource/namespacev2"
 	"github.com/giantswarm/aws-operator/service/resource/s3bucketv2"
 	"github.com/giantswarm/aws-operator/service/resource/s3objectv2"
+	"github.com/giantswarm/aws-operator/service/resource/s3objectv3"
 	"github.com/giantswarm/aws-operator/service/resource/servicev2"
 )
 
@@ -208,7 +210,7 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 		}
 	}
 
-	// ccServicev2 is used by the legacyv2 resource.
+	// ccServiceV2 is used by the legacyv2 resource.
 	var ccServiceV2 *cloudconfigv2.CloudConfig
 	{
 		ccServiceConfig := cloudconfigv2.DefaultConfig()
@@ -221,7 +223,7 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 		}
 	}
 
-	// ccServicev3 is used by the s3objectv2 resource.
+	// ccServiceV3 is used by the s3objectv2.
 	var ccServiceV3 *cloudconfigv3.CloudConfig
 	{
 		ccServiceConfig := cloudconfigv3.DefaultConfig()
@@ -229,6 +231,19 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 		ccServiceConfig.Logger = config.Logger
 
 		ccServiceV3, err = cloudconfigv3.New(ccServiceConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	// ccServiceV4 is used by the s3objectv3.
+	var ccServiceV4 *cloudconfigv4.CloudConfig
+	{
+		ccServiceConfig := cloudconfigv4.DefaultConfig()
+
+		ccServiceConfig.Logger = config.Logger
+
+		ccServiceV4, err = cloudconfigv4.New(ccServiceConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -306,7 +321,7 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 		}
 	}
 
-	var s3BucketObjectResource framework.Resource
+	var s3BucketObjectResourceV2 framework.Resource
 	{
 		s3BucketObjectConfig := s3objectv2.DefaultConfig()
 		s3BucketObjectConfig.AwsService = awsService
@@ -317,7 +332,24 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 		s3BucketObjectConfig.Logger = config.Logger
 		s3BucketObjectConfig.RandomKeyWatcher = keyWatcher
 
-		s3BucketObjectResource, err = s3objectv2.New(s3BucketObjectConfig)
+		s3BucketObjectResourceV2, err = s3objectv2.New(s3BucketObjectConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var s3BucketObjectResourceV3 framework.Resource
+	{
+		c := s3objectv3.DefaultConfig()
+		c.AwsService = awsService
+		c.Clients.S3 = awsClients.S3
+		c.Clients.KMS = awsClients.KMS
+		c.CloudConfig = ccServiceV4
+		c.CertWatcher = certWatcher
+		c.Logger = config.Logger
+		c.RandomKeyWatcher = keyWatcher
+
+		s3BucketObjectResourceV3, err = s3objectv3.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -383,34 +415,39 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 
 	// We create the list of resources and wrap each resource around some common
 	// resources like metrics and retry resources.
-	var resources []framework.Resource
+	var resourcesV2 []framework.Resource
 	{
-		resources = []framework.Resource{
+		resourcesV2 = []framework.Resource{
 			kmsKeyResource,
 			s3BucketResource,
-			s3BucketObjectResource,
+			s3BucketObjectResourceV2,
 			cloudformationResource,
 			namespaceResource,
 			serviceResource,
 			endpointsResource,
 		}
 
-		// Disable retry wrapper due to problems with the legacy resource.
-		//
-		// NOTE that the retry resources wrap the underlying resources first. The
-		// wrapped resources are then wrapped around the metrics resource. That way
-		// the metrics also consider execution times and execution attempts including
-		// retries.
-		/*
-			retryWrapConfig := retryresource.DefaultWrapConfig()
-			retryWrapConfig.Logger = config.Logger
-			cloudFormationResources, err = retryresource.Wrap(cloudFormationResources, retryWrapConfig)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-		*/
+		resourcesV2, err = metricsresource.Wrap(resourcesV2, metricsWrapConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
 
-		resources, err = metricsresource.Wrap(resources, metricsWrapConfig)
+	// We create the list of resources and wrap each resource around some common
+	// resources like metrics and retry resources.
+	var resourcesV2_0_1 []framework.Resource
+	{
+		resourcesV2_0_1 = []framework.Resource{
+			kmsKeyResource,
+			s3BucketResource,
+			s3BucketObjectResourceV3,
+			cloudformationResource,
+			namespaceResource,
+			serviceResource,
+			endpointsResource,
+		}
+
+		resourcesV2_0_1, err = metricsresource.Wrap(resourcesV2_0_1, metricsWrapConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -422,9 +459,10 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 		// Clusters without a version use the legacy resource.
 		"":      legacyResources,
 		"0.1.0": legacyResources,
-		"0.2.0": resources,
+		"0.2.0": resourcesV2,
 		"1.0.0": legacyResources,
-		"2.0.0": resources,
+		"2.0.0": resourcesV2,
+		"2.0.1": resourcesV2_0_1,
 	}
 
 	return versionedResources, nil
