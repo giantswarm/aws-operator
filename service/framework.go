@@ -415,32 +415,12 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 
 	// We create the list of resources and wrap each resource around some common
 	// resources like metrics and retry resources.
-	var resourcesV1 []framework.Resource
-	{
-		resourcesV1 = []framework.Resource{
-			kmsKeyResource,
-			s3BucketResource,
-			s3BucketObjectResourceV2,
-			cloudformationResource,
-			namespaceResource,
-			serviceResource,
-			endpointsResource,
-		}
-
-		resourcesV1, err = metricsresource.Wrap(resourcesV1, metricsWrapConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	// We create the list of resources and wrap each resource around some common
-	// resources like metrics and retry resources.
 	var resourcesV2 []framework.Resource
 	{
 		resourcesV2 = []framework.Resource{
 			kmsKeyResource,
 			s3BucketResource,
-			s3BucketObjectResourceV3,
+			s3BucketObjectResourceV2,
 			cloudformationResource,
 			namespaceResource,
 			serviceResource,
@@ -453,16 +433,36 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 		}
 	}
 
+	// We create the list of resources and wrap each resource around some common
+	// resources like metrics and retry resources.
+	var resourcesV2_0_1 []framework.Resource
+	{
+		resourcesV2_0_1 = []framework.Resource{
+			kmsKeyResource,
+			s3BucketResource,
+			s3BucketObjectResourceV3,
+			cloudformationResource,
+			namespaceResource,
+			serviceResource,
+			endpointsResource,
+		}
+
+		resourcesV2_0_1, err = metricsresource.Wrap(resourcesV2_0_1, metricsWrapConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	// We provide a map of resource lists keyed by the version bundle version
 	// to the resource router.
 	versionedResources := map[string][]framework.Resource{
 		// Clusters without a version use the legacy resource.
 		"":      legacyResources,
 		"0.1.0": legacyResources,
-		"0.2.0": resourcesV1,
+		"0.2.0": resourcesV2,
 		"1.0.0": legacyResources,
-		"2.0.0": resourcesV1,
-		"2.0.1": resourcesV2,
+		"2.0.0": resourcesV2,
+		"2.0.1": resourcesV2_0_1,
 	}
 
 	return versionedResources, nil

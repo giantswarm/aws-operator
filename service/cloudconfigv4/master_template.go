@@ -225,7 +225,7 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: decryptTLSAssetsServiceTemplate,
 			Name:         "decrypt-tls-assets.service",
-			// Do not enable TLS assets decrypt unit so that it won't get autmatically
+			// Do not enable TLS assets decrypt unit so that it won't get automatically
 			// executed on master reboot. This will prevent eventual races with the
 			// asset files creation.
 			Enable:  false,
@@ -246,7 +246,7 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: decryptKeysServiceTemplate,
 			Name:         "decrypt-keys-assets.service",
-			// Do not enable key decrypt unit so that it won't get autmatically
+			// Do not enable key decrypt unit so that it won't get automatically
 			// executed on master reboot. This will prevent eventual races with the
 			// key files creation.
 			Enable:  false,
