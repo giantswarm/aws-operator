@@ -1,4 +1,4 @@
-package s3objectv2
+package s3objectv3
 
 import (
 	"fmt"

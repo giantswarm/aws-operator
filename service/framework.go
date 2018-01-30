@@ -30,6 +30,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/resource/namespacev2"
 	"github.com/giantswarm/aws-operator/service/resource/s3bucketv2"
 	"github.com/giantswarm/aws-operator/service/resource/s3objectv2"
+	"github.com/giantswarm/aws-operator/service/resource/s3objectv3"
 	"github.com/giantswarm/aws-operator/service/resource/servicev2"
 )
 
@@ -222,7 +223,7 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 		}
 	}
 
-	// ccServiceV3 is used by the s3objectv2 resource for s3BucketObjectResourceV1.
+	// ccServiceV3 is used by the s3objectv2.
 	var ccServiceV3 *cloudconfigv3.CloudConfig
 	{
 		ccServiceConfig := cloudconfigv3.DefaultConfig()
@@ -235,7 +236,7 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 		}
 	}
 
-	// ccServiceV4 is used by the s3objectv2 resource for s3BucketObjectResourceV2.
+	// ccServiceV4 is used by the s3objectv3.
 	var ccServiceV4 *cloudconfigv4.CloudConfig
 	{
 		ccServiceConfig := cloudconfigv4.DefaultConfig()
@@ -320,7 +321,7 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 		}
 	}
 
-	var s3BucketObjectResourceV1 framework.Resource
+	var s3BucketObjectResourceV2 framework.Resource
 	{
 		s3BucketObjectConfig := s3objectv2.DefaultConfig()
 		s3BucketObjectConfig.AwsService = awsService
@@ -331,15 +332,15 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 		s3BucketObjectConfig.Logger = config.Logger
 		s3BucketObjectConfig.RandomKeyWatcher = keyWatcher
 
-		s3BucketObjectResourceV1, err = s3objectv2.New(s3BucketObjectConfig)
+		s3BucketObjectResourceV2, err = s3objectv2.New(s3BucketObjectConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	var s3BucketObjectResourceV2 framework.Resource
+	var s3BucketObjectResourceV3 framework.Resource
 	{
-		c := s3objectv2.DefaultConfig()
+		c := s3objectv3.DefaultConfig()
 		c.AwsService = awsService
 		c.Clients.S3 = awsClients.S3
 		c.Clients.KMS = awsClients.KMS
@@ -348,7 +349,7 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 		c.Logger = config.Logger
 		c.RandomKeyWatcher = keyWatcher
 
-		s3BucketObjectResourceV2, err = s3objectv2.New(c)
+		s3BucketObjectResourceV3, err = s3objectv3.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -419,7 +420,7 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 		resourcesV1 = []framework.Resource{
 			kmsKeyResource,
 			s3BucketResource,
-			s3BucketObjectResourceV1,
+			s3BucketObjectResourceV2,
 			cloudformationResource,
 			namespaceResource,
 			serviceResource,
@@ -439,7 +440,7 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 		resourcesV2 = []framework.Resource{
 			kmsKeyResource,
 			s3BucketResource,
-			s3BucketObjectResourceV2,
+			s3BucketObjectResourceV3,
 			cloudformationResource,
 			namespaceResource,
 			serviceResource,
@@ -461,7 +462,7 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 		"0.2.0": resourcesV1,
 		"1.0.0": legacyResources,
 		"2.0.0": resourcesV1,
-		"2.1.0": resourcesV2,
+		"2.0.1": resourcesV2,
 	}
 
 	return versionedResources, nil
