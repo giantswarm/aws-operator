@@ -124,6 +124,7 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 				AccessKeyID:     accessKeyID,
 				AccessKeySecret: accessKeySecret,
 				SessionToken:    sessionToken,
+				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
 			}
 		}
 	}
@@ -171,6 +172,14 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 
 func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsConfig awsclient.Config, awsHostConfig awsclient.Config) (map[string][]framework.Resource, error) {
 	var err error
+
+	if awsConfig.Region == "" {
+		return nil, microerror.Mask(invalidConfigError)
+	}
+
+	if awsHostConfig.Region == "" {
+		return nil, microerror.Mask(invalidConfigError)
+	}
 
 	awsClients := awsclient.NewClients(awsConfig)
 	var awsService *awsservice.Service
@@ -463,6 +472,8 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 		"1.0.0": legacyResources,
 		"2.0.0": resourcesV2,
 		"2.0.1": resourcesV2_0_1,
+		// 2.0.2 fixes missing region in host account credentials, the change only affects service/framework.go
+		"2.0.2": resourcesV2_0_1,
 	}
 
 	return versionedResources, nil
