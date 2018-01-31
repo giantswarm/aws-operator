@@ -308,10 +308,8 @@ func (f *framework) DeleteGuestCluster() error {
 		return microerror.Mask(err)
 	}
 
-	logEntry := "cluster '${CLUSTER_NAME}' deleted"
-	if os.Getenv("VERSION_BUNDLE_VERSION") == "2.0.0" {
-		logEntry = "deleting AWS Host Post-Guest CloudFormation stack: deleted"
-	}
+	logEntry := "deleting AWS Host Post-Guest CloudFormation stack: deleted"
+
 	return f.WaitForPodLog("giantswarm", logEntry, operatorPodName)
 }
 
