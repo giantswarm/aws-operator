@@ -6,39 +6,11 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/operatorkit/framework"
-	"github.com/spf13/viper"
-	"k8s.io/client-go/kubernetes/fake"
-
-	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/flag"
 )
 
 func Test_Service_NewResourceRouter(t *testing.T) {
-	var err error
-
-	config := DefaultConfig()
-	config.Name = "aws-operator"
-	config.Logger = microloggertest.New()
-	config.Flag = flag.New()
-	config.Viper = viper.New()
-	config.Viper.Set(config.Flag.Service.Installation.Name, "test")
-	config.Viper.Set(config.Flag.Service.AWS.PubKeyFile, "~/.ssh/id_rsa.pub")
-
-	k8sClient := fake.NewSimpleClientset()
-	awsConfig := awsclient.Config{
-		AccessKeyID:     "key",
-		AccessKeySecret: "secret",
-		Region:          "myregion",
-	}
-	awsHostConfig := awsclient.Config{
-		AccessKeyID:     "key",
-		AccessKeySecret: "secret",
-		Region:          "myregion",
-	}
-
-	versionedResources, err := NewVersionedResources(config, k8sClient, awsConfig, awsHostConfig)
+	versionedResources, err := newVersionedResources(newTestFrameworkConfig())
 	if err != nil {
 		t.Fatalf("unexpected error %#v", err)
 	}
