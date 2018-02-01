@@ -1768,6 +1768,207 @@ write_files:
         omitStages:
           - "RequestReceived"
 
+- path: /etc/kubernetes/manifests/k8s-api-server.yml
+  owner: root
+  permissions: 0644
+  content: |
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: k8s-api-server
+      namespace: kube-system
+    spec:
+      hostNetwork: true
+      containers:
+      - name: k8s-api-server
+        image: quay.io/giantswarm/hyperkube:v1.9.2
+        command:
+        - /hyperkube
+        - apiserver
+          {{ range .Hyperkube.Apiserver.Docker.CommandExtraArgs -}}
+        - {{ . }} \
+          {{ end -}}
+        - --allow_privileged=true
+        - --insecure_bind_address=0.0.0.0
+        - --anonymous-auth=false
+        - --insecure-port=0
+        - --kubelet_https=true
+        - --kubelet-preferred-address-types=InternalIP
+        - --secure_port={{.Cluster.Kubernetes.API.SecurePort}}
+        - --bind-address={{.Hyperkube.Apiserver.BindAddress}}
+        - --etcd-prefix={{.Cluster.Etcd.Prefix}}
+        - --profiling=false
+        - --repair-malformed-updates=false
+        - --service-account-lookup=true
+        - --authorization-mode=RBAC
+        - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,DefaultStorageClass,PodSecurityPolicy
+        - --cloud-provider={{.Cluster.Kubernetes.CloudProvider}}
+        - --service-cluster-ip-range={{.Cluster.Kubernetes.API.ClusterIPRange}}
+        - --etcd-servers=https://127.0.0.1:2379
+        - --etcd-cafile=/etc/kubernetes/ssl/etcd/server-ca.pem
+        - --etcd-certfile=/etc/kubernetes/ssl/etcd/server-crt.pem
+        - --etcd-keyfile=/etc/kubernetes/ssl/etcd/server-key.pem
+        - --advertise-address={{.Hyperkube.Apiserver.BindAddress}}
+        - --runtime-config=api/all=true
+        - --logtostderr=true
+        - --tls-cert-file=/etc/kubernetes/ssl/apiserver-crt.pem
+        - --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
+        - --client-ca-file=/etc/kubernetes/ssl/apiserver-ca.pem
+        - --service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem
+        - --audit-log-path=/var/log/apiserver/audit.log
+        - --audit-log-maxage=30
+        - --audit-log-maxbackup=30
+        - --audit-log-maxsize=100
+        - --audit-policy-file=/etc/kubernetes/manifests/audit-policy.yml
+        - --experimental-encryption-provider-config=/etc/kubernetes/encryption/k8s-encryption-config.yaml
+        resources:
+          requests:
+            cpu: 300m
+        livenessProbe:
+          httpGet:
+            port: {{.Cluster.Kubernetes.API.SecurePort}}
+            path: /healthz
+          initialDelaySeconds: 15
+          timeoutSeconds: 15
+        ports:
+        - containerPort: {{.Cluster.Kubernetes.API.SecurePort}}
+          hostPort: {{.Cluster.Kubernetes.API.SecurePort}}
+          name: https
+        volumeMounts:
+        - mountPath: /var/log/apiserver/
+          name: apiserver-log
+        - mountPath: /etc/kubernetes/encryption/k8s-encryption-config.yaml
+          subPath: k8s-encryption-config.yaml
+          name: k8s-encryption
+          readOnly: true
+        - mountPath: /etc/kubernetes/manifests
+          name: k8s-manifests
+          readOnly: true
+        - mountPath: /etc/kubernetes/secrets/
+          name: k8s-secrets
+          readOnly: true
+        - mountPath: /etc/kubernetes/ssl/
+          name: ssl-certs-kubernetes
+          readOnly: true
+      volumes:
+      - hostPath:
+          path: /var/log/apiserver/
+        name: apiserver-log
+      - hostPath:
+          path: /etc/kubernetes/encryption/
+        name: k8s-encryption
+      - hostPath:
+          path: /etc/kubernetes/manifests
+        name: k8s-manifests
+      - hostPath:
+          path: /etc/kubernetes/secrets
+        name: k8s-secrets
+        - hostPath:
+          path: /etc/kubernetes/ssl
+        name: ssl-certs-kubernetes
+
+- path: /etc/kubernetes/manifests/k8s-controller-manager.yml
+  owner: root
+  permissions: 0644
+  content: |
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: k8s-controller-manager
+      namespace: kube-system
+    spec:
+      containers:
+      - name: k8s-controller-manager
+        image: quay.io/giantswarm/hyperkube:v1.9.2
+        command:
+        - /hyperkube
+        - controller-manager
+        - --logtostderr=true
+        - --v=2
+        - --cloud-provider={{.Cluster.Kubernetes.CloudProvider}}
+        - --profiling=false
+        - --terminated-pod-gc-threshold=10
+        - --use-service-account-credentials=true
+        - --kubeconfig=/etc/kubernetes/config/controller-manager-kubeconfig.yml
+        - --root-ca-file=/etc/kubernetes/ssl/apiserver-ca.pem
+        - --service-account-private-key-file=/etc/kubernetes/ssl/service-account-key.pem
+        resources:
+          requests:
+            cpu: 200m
+        livenessProbe:
+          httpGet:
+            host: 127.0.0.1
+            path: /healthz
+            port: 10251
+          initialDelaySeconds: 15
+          timeoutSeconds: 15
+        volumeMounts:
+        - mountPath: /etc/kubernetes/config/
+          name: k8s-config
+          readOnly: true
+        - mountPath: /etc/kubernetes/secrets/
+          name: k8s-secrets
+          readOnly: true
+        - mountPath: /etc/kubernetes/ssl/
+          name: ssl-certs-kubernetes
+          readOnly: true
+      volumes:
+      - hostPath:
+          path: /etc/kubernetes/config
+        name: k8s-config
+      - hostPath:
+          path: /etc/kubernetes/secrets
+        name: k8s-secrets
+      - hostPath:
+          path: /etc/kubernetes/ssl
+        name: ssl-certs-kubernetes
+
+- path: /etc/kubernetes/manifests/k8s-scheduler.yml
+  owner: root
+  permissions: 0644
+  content: |
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: k8s-scheduler
+      namespace: kube-system
+    spec:
+      hostNetwork: true
+      containers:
+      - name: k8s-scheduler
+        image: quay.io/giantswarm/hyperkube:v1.9.2
+        command:
+        - /hyperkube
+        - scheduler
+        - --logtostderr=true
+        - --v=2
+        - --profiling=false
+        - --kubeconfig=/etc/kubernetes/config/scheduler-kubeconfig.yml
+        resources:
+          requests:
+            cpu: 100m
+        livenessProbe:
+          httpGet:
+            host: 127.0.0.1
+            path: /healthz
+            port: 10251
+          initialDelaySeconds: 15
+          timeoutSeconds: 15
+        volumeMounts:
+        - mountPath: /etc/kubernetes/config/
+          name: k8s-config
+          readOnly: true
+        - mountPath: /etc/kubernetes/ssl/
+          name: ssl-certs-kubernetes
+          readOnly: true
+      volumes:
+      - hostPath:
+          path: /etc/kubernetes/config
+        name: k8s-config
+      - hostPath:
+          path: /etc/kubernetes/ssl
+        name: ssl-certs-kubernetes
+
 - path: /etc/ssh/sshd_config
   owner: root
   permissions: 0600
@@ -2049,6 +2250,7 @@ coreos:
       -v /var/lib/kubelet/:/var/lib/kubelet:rw,shared \
       -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
+      -v /etc/kubernetes/manifests/:/etc/kubernetes/manifests/ \
       -v /etc/cni/net.d/:/etc/cni/net.d/ \
       -v /opt/cni/bin/:/opt/cni/bin/ \
       -v /usr/sbin/iscsiadm:/usr/sbin/iscsiadm \
@@ -2084,6 +2286,7 @@ coreos:
       --register-node=true \
       --register-with-taints=node-role.kubernetes.io/master=:NoSchedule \
       --allow-privileged=true \
+      --pod-manifest-path=/etc/kubernetes/manifests \
       --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml \
       --node-labels="node-role.kubernetes.io/master,role=master,kubernetes.io/hostname=${HOSTNAME},ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
       --kube-reserved="cpu=150m,memory=250Mi" \
@@ -2114,155 +2317,14 @@ coreos:
   - name: systemd-networkd-wait-online.service
     enable: true
     command: start
-  - name: k8s-api-server.service
-    enable: true
-    command: start
-    content: |
-      [Unit]
-      Description=k8s-api-server
-      StartLimitIntervalSec=0
-
-      [Service]
-      Restart=always
-      RestartSec=0
-      TimeoutStopSec=10
-      EnvironmentFile=/etc/network-environment
-      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.9.2"
-      Environment="NAME=%p.service"
-      Environment="NETWORK_CONFIG_CONTAINER="
-      ExecStartPre=/usr/bin/mkdir -p /etc/kubernetes/manifests
-      ExecStartPre=/usr/bin/docker pull $IMAGE
-      ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
-      ExecStartPre=-/usr/bin/docker rm -f $NAME
-      ExecStart=/usr/bin/docker run --rm --name $NAME --net=host \
-      {{ range .Hyperkube.Apiserver.Docker.RunExtraArgs -}}
-      {{ . }} \
-      {{ end -}}
-      -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
-      -v /etc/kubernetes/secrets/token_sign_key.pem:/etc/kubernetes/secrets/token_sign_key.pem \
-      -v /etc/kubernetes/encryption/:/etc/kubernetes/encryption \
-      -v /etc/kubernetes/manifests:/etc/kubernetes/manifests \
-      -v /var/log:/var/log \
-      $IMAGE \
-      /hyperkube apiserver \
-      {{ range .Hyperkube.Apiserver.Docker.CommandExtraArgs -}}
-      {{ . }} \
-      {{ end -}}
-      --allow_privileged=true \
-      --insecure_bind_address=0.0.0.0 \
-      --anonymous-auth=false \
-      --insecure-port=0 \
-      --kubelet_https=true \
-      --kubelet-preferred-address-types=InternalIP \
-      --secure_port={{.Cluster.Kubernetes.API.SecurePort}} \
-      --bind-address={{.Hyperkube.Apiserver.BindAddress}} \
-      --etcd-prefix={{.Cluster.Etcd.Prefix}} \
-      --profiling=false \
-      --repair-malformed-updates=false \
-      --service-account-lookup=true \
-      --authorization-mode=RBAC \
-      --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,DefaultStorageClass,PodSecurityPolicy \
-      --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
-      --service-cluster-ip-range={{.Cluster.Kubernetes.API.ClusterIPRange}} \
-      --etcd-servers=https://127.0.0.1:2379 \
-      --etcd-cafile=/etc/kubernetes/ssl/etcd/server-ca.pem \
-      --etcd-certfile=/etc/kubernetes/ssl/etcd/server-crt.pem \
-      --etcd-keyfile=/etc/kubernetes/ssl/etcd/server-key.pem \
-      --advertise-address=${DEFAULT_IPV4} \
-      --runtime-config=api/all=true \
-      --logtostderr=true \
-      --tls-cert-file=/etc/kubernetes/ssl/apiserver-crt.pem \
-      --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem \
-      --client-ca-file=/etc/kubernetes/ssl/apiserver-ca.pem \
-      --service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem \
-      --audit-log-path=/var/log/apiserver/audit.log \
-      --audit-log-maxage=30 \
-      --audit-log-maxbackup=30 \
-      --audit-log-maxsize=100 \
-      --audit-policy-file=/etc/kubernetes/manifests/audit-policy.yml \
-      --experimental-encryption-provider-config=/etc/kubernetes/encryption/k8s-encryption-config.yaml
-      ExecStop=-/usr/bin/docker stop -t 10 $NAME
-      ExecStopPost=-/usr/bin/docker rm -f $NAME
-  - name: k8s-controller-manager.service
-    enable: true
-    command: start
-    content: |
-      [Unit]
-      Description=k8s-controller-manager Service
-      StartLimitIntervalSec=0
-
-      [Service]
-      Restart=always
-      RestartSec=0
-      TimeoutStopSec=10
-      EnvironmentFile=/etc/network-environment
-      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.9.2"
-      Environment="NAME=%p.service"
-      Environment="NETWORK_CONFIG_CONTAINER="
-      ExecStartPre=/usr/bin/docker pull $IMAGE
-      ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
-      ExecStartPre=-/usr/bin/docker rm -f $NAME
-      ExecStart=/usr/bin/docker run --rm --net=host --name $NAME \
-      {{ range .Hyperkube.ControllerManager.Docker.RunExtraArgs -}}
-      {{ . }} \
-      {{ end -}}
-      -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
-      -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
-      -v /etc/kubernetes/secrets/token_sign_key.pem:/etc/kubernetes/secrets/token_sign_key.pem \
-      $IMAGE \
-      /hyperkube controller-manager \
-      {{ range .Hyperkube.ControllerManager.Docker.CommandExtraArgs -}}
-      {{ . }}  \
-      {{ end -}}
-      --logtostderr=true \
-      --v=2 \
-      --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
-      --profiling=false \
-      --terminated-pod-gc-threshold=10 \
-      --use-service-account-credentials=true \
-      --kubeconfig=/etc/kubernetes/config/controller-manager-kubeconfig.yml \
-      --root-ca-file=/etc/kubernetes/ssl/apiserver-ca.pem \
-      --service-account-private-key-file=/etc/kubernetes/ssl/service-account-key.pem
-      ExecStop=-/usr/bin/docker stop -t 10 $NAME
-      ExecStopPost=-/usr/bin/docker rm -f $NAME
-  - name: k8s-scheduler.service
-    enable: true
-    command: start
-    content: |
-      [Unit]
-      Description=k8s-scheduler Service
-      StartLimitIntervalSec=0
-
-      [Service]
-      Restart=always
-      RestartSec=0
-      TimeoutStopSec=10
-      EnvironmentFile=/etc/network-environment
-      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.9.2"
-      Environment="NAME=%p.service"
-      Environment="NETWORK_CONFIG_CONTAINER="
-      ExecStartPre=/usr/bin/docker pull $IMAGE
-      ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
-      ExecStartPre=-/usr/bin/docker rm -f $NAME
-      ExecStart=/usr/bin/docker run --rm --net=host --name $NAME \
-      -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
-      -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
-      $IMAGE \
-      /hyperkube scheduler \
-      --logtostderr=true \
-      --v=2 \
-      --profiling=false \
-      --kubeconfig=/etc/kubernetes/config/scheduler-kubeconfig.yml
-      ExecStop=-/usr/bin/docker stop -t 10 $NAME
-      ExecStopPost=-/usr/bin/docker rm -f $NAME
   - name: k8s-addons.service
     enable: true
     command: start
     content: |
       [Unit]
       Description=Kubernetes Addons
-      Wants=k8s-api-server.service
-      After=k8s-api-server.service
+      Wants=k8s-kubelet.service
+      After=k8s-kubelet.service
       [Service]
       Type=oneshot
       EnvironmentFile=/etc/network-environment
