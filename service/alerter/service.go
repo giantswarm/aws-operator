@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	alertIntervalMins      = 1
+	alertIntervalMins      = 5
 	masterNodeResourceType = "master_node"
 	vpcResourceType        = "vpc"
 )
