@@ -105,29 +105,39 @@ func (s *Service) StartAlerts() {
 		for {
 			select {
 			case <-alertChan:
-				err := s.OrphanResourcesAlert()
+				err := s.RunAllChecks()
 				if err != nil {
-					s.logger.Log("error", fmt.Sprintf("could not execute orphan resources alert: '%#v'", err))
+					s.logger.Log("error", fmt.Sprintf("could not execute run all checks: '%#v'", err))
 				}
 			}
 		}
 	}()
 }
 
-// OrphanResourcesAlert looks for AWS resources not associated with a cluster.
-func (s *Service) OrphanResourcesAlert() error {
+// RunAllChecks looks for problems with clusters that we want to alert on.
+func (s *Service) RunAllChecks() error {
 	clusterIDs, err := s.ListClusters()
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
+
+	err = s.OrphanResourcesAlert(clusterIDs)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+// OrphanResourcesAlert looks for AWS resources not associated with a cluster.
+func (s *Service) OrphanResourcesAlert(clusterIDs []string) error {
 	vpcNames, err := s.ListVpcs()
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
 	orphanVpcs := FindOrphanResources(clusterIDs, vpcNames)
-	s.UpdateMetrics(vpcResourceType, orphanVpcs)
+	s.UpdateOrphanResourceMetrics(vpcResourceType, orphanVpcs)
 
 	return nil
 }
@@ -167,8 +177,8 @@ func FindOrphanResources(clusterIDs []string, resourceNames []string) []string {
 	return orphanResources
 }
 
-// UpdateMetrics updates the metric and logs the results.
-func (s Service) UpdateMetrics(resourceType string, resourceNames []string) {
+// UpdateOrphanResourceMetrics updates the metric and logs the results.
+func (s Service) UpdateOrphanResourceMetrics(resourceType string, resourceNames []string) {
 	resourceCount := len(resourceNames)
 
 	orphanResourcesTotal.WithLabelValues(resourceType).Set(float64(resourceCount))
