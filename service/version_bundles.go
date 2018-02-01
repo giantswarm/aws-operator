@@ -113,7 +113,7 @@ func newVersionBundles() []versionbundle.Bundle {
 			Name:         "aws-operator",
 			Time:         time.Date(2017, time.November, 29, 16, 16, 0, 0, time.UTC),
 			Version:      "0.2.0",
-			WIP:          true,
+			WIP:          false,
 		},
 		{
 			Changelogs: []versionbundle.Changelog{
