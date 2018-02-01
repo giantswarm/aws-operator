@@ -11,7 +11,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/keyv2"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v2/key"
 )
 
 const (
@@ -142,7 +142,7 @@ func (s Service) ListClusters() ([]string, error) {
 	}
 
 	for _, awsConfig := range awsConfigs.Items {
-		clusterIDs = append(clusterIDs, keyv2.ClusterID(awsConfig))
+		clusterIDs = append(clusterIDs, key.ClusterID(awsConfig))
 	}
 
 	return clusterIDs, nil

@@ -6,7 +6,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/framework"
 
-	"github.com/giantswarm/aws-operator/service/keyv2"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v2/key"
 )
 
 const (
@@ -19,12 +19,12 @@ func NewResourceRouter(resources map[string][]framework.Resource) func(ctx conte
 	return func(ctx context.Context, obj interface{}) ([]framework.Resource, error) {
 		var enabledResources []framework.Resource
 
-		customObject, err := keyv2.ToCustomObject(obj)
+		customObject, err := key.ToCustomObject(obj)
 		if err != nil {
 			return enabledResources, microerror.Mask(err)
 		}
 
-		version := keyv2.VersionBundleVersion(customObject)
+		version := key.VersionBundleVersion(customObject)
 		enabledResources, ok := resources[version]
 		if !ok {
 			return enabledResources, microerror.Maskf(invalidVersionError, "version '%s' in version bundle is invalid", version)
