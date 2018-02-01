@@ -15,8 +15,9 @@ import (
 )
 
 const (
-	alertIntervalMins = 5
-	vpcResourceType   = "vpc"
+	alertIntervalMins      = 1
+	masterNodeResourceType = "master_node"
+	vpcResourceType        = "vpc"
 )
 
 // Config represents the configuration used to create a new service.
@@ -121,6 +122,10 @@ func (s *Service) RunAllChecks() error {
 		return microerror.Mask(err)
 	}
 
+	err = s.FindDuplicateMasterNodes(clusterIDs)
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
 	err = s.OrphanResourcesAlert(clusterIDs)
 	if err != nil {
@@ -129,6 +134,28 @@ func (s *Service) RunAllChecks() error {
 
 	return nil
 }
+
+// FindDuplicateMasterNodes looks for clusters with duplicate master nodes
+// which is an error state.
+func (s *Service) FindDuplicateMasterNodes(clusterIDs []string) error {
+	affectedClusters := []string{}
+
+	for _, clusterID := range clusterIDs {
+		masterInstances, err := s.ListMasterInstances(clusterID)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if len(masterInstances) > 1 {
+			affectedClusters = append(affectedClusters, clusterID)
+		}
+	}
+
+	s.UpdateDuplicateResourceMetrics(masterNodeResourceType, affectedClusters)
+
+	return nil
+}
+
 // OrphanResourcesAlert looks for AWS resources not associated with a cluster.
 func (s *Service) OrphanResourcesAlert(clusterIDs []string) error {
 	vpcNames, err := s.ListVpcs()
@@ -175,6 +202,18 @@ func FindOrphanResources(clusterIDs []string, resourceNames []string) []string {
 	}
 
 	return orphanResources
+}
+
+// UpdateDuplicateResourceMetrics updates the metric and logs the results.
+func (s Service) UpdateDuplicateResourceMetrics(resourceType string, clusterIDs []string) {
+	resourceCount := len(clusterIDs)
+
+	duplicateResourcesTotal.WithLabelValues(resourceType).Set(float64(resourceCount))
+	s.logger.Log("info", fmt.Sprintf("alerter service found %d clusters with duplicate resources", resourceCount))
+
+	if resourceCount > 0 {
+		s.logger.Log("info", fmt.Sprintf("clusters with duplicate %s %s", resourceType, strings.Join(clusterIDs, ",")))
+	}
 }
 
 // UpdateOrphanResourceMetrics updates the metric and logs the results.

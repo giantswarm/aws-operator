@@ -1,9 +1,31 @@
 package alerter
 
 import (
+	"fmt"
+
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
 	"github.com/giantswarm/microerror"
 )
+
+// ListMasterInstances lists the master instances for this cluster.
+func (s *Service) ListMasterInstances(clusterID string) ([]string, error) {
+	instanceNames := []string{}
+
+	instances, err := awsresources.FindInstances(awsresources.FindInstancesInput{
+		Clients: s.awsClients,
+		Logger:  s.logger,
+		Pattern: fmt.Sprintf("%s-master-0", clusterID),
+	})
+	if err != nil {
+		return instanceNames, microerror.Mask(err)
+	}
+
+	for _, instance := range instances {
+		instanceNames = append(instanceNames, instance.Name)
+	}
+
+	return instanceNames, nil
+}
 
 // ListVpcs lists the VPCs in this installation and returns the clusterIDs
 // associated with them.
