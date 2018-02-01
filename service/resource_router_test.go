@@ -30,10 +30,12 @@ func Test_Service_NewResourceRouter(t *testing.T) {
 	awsConfig := awsclient.Config{
 		AccessKeyID:     "key",
 		AccessKeySecret: "secret",
+		Region:          "myregion",
 	}
 	awsHostConfig := awsclient.Config{
 		AccessKeyID:     "key",
 		AccessKeySecret: "secret",
+		Region:          "myregion",
 	}
 
 	versionedResources, err := NewVersionedResources(config, k8sClient, awsConfig, awsHostConfig)

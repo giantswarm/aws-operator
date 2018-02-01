@@ -229,10 +229,7 @@ func operatorSetup() error {
 		return microerror.Maskf(err, "unexpected error installing aws-resource-lab chart: %v")
 	}
 
-	logEntry := "cluster '${CLUSTER_NAME}' processed"
-	if os.Getenv("VERSION_BUNDLE_VERSION") == "2.0.0" {
-		logEntry = "creating AWS cloudformation stack: created"
-	}
+	logEntry := "creating AWS cloudformation stack: created"
 
 	operatorPodName, err := f.PodName("giantswarm", "app=aws-operator")
 	if err != nil {

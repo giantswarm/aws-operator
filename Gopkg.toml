@@ -1,0 +1,113 @@
+# Gopkg.toml example
+#
+# Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
+# for detailed Gopkg.toml documentation.
+#
+# required = ["github.com/user/thing/cmd/thing"]
+# ignored = ["github.com/user/project/pkgX", "bitbucket.org/user/project/pkgA/pkgY"]
+#
+# [[constraint]]
+#   name = "github.com/user/project"
+#   version = "1.0.0"
+#
+# [[constraint]]
+#   name = "github.com/user/project2"
+#   branch = "dev"
+#   source = "github.com/myfork/project2"
+#
+# [[override]]
+#  name = "github.com/x/y"
+#  version = "2.4.0"
+
+
+[[constraint]]
+  name = "github.com/aws/aws-sdk-go"
+  version = "1.12.3"
+
+[[constraint]]
+  name = "github.com/cenkalti/backoff"
+  version = "1.1.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/apiextensions"
+
+[[constraint]]
+  branch = "legacy"
+  name = "github.com/giantswarm/certs"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/e2e-harness"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/ipam"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/k8scloudconfig"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/microendpoint"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/microerror"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/microkit"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/micrologger"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/microstorage"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/operatorkit"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/randomkeytpr"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/versionbundle"
+
+[[constraint]]
+  name = "github.com/go-kit/kit"
+  version = "0.6.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/prometheus/client_golang"
+
+[[constraint]]
+  name = "github.com/spf13/viper"
+  version = "1.0.0"
+
+[[constraint]]
+  name = "github.com/stretchr/testify"
+  version = "1.1.4"
+
+[[constraint]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.8.5"
+
+[[constraint]]
+  name = "k8s.io/apiextensions-apiserver"
+  version = "kubernetes-1.8.5"
+
+[[constraint]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.8.5"
+
+[[constraint]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.8.5"
