@@ -76,11 +76,13 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 				AZ:     "eu-central-1a",
 				Masters: []v1alpha1.AWSConfigSpecAWSNode{
 					v1alpha1.AWSConfigSpecAWSNode{
+						ImageID:      "ami-1234-master",
 						InstanceType: "m3.large",
 					},
 				},
 				Workers: []v1alpha1.AWSConfigSpecAWSNode{
 					v1alpha1.AWSConfigSpecAWSNode{
+						ImageID:      "ami-1234-worker",
 						InstanceType: "m3.large",
 					},
 				},
@@ -263,6 +265,12 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 	if !strings.Contains(body, "CidrBlock: 10.1.1.0/24") {
 		fmt.Println(body)
 		t.Error("CidrBlock element not found")
+	}
+
+	// image ids should be fixed despite the values in the custom object
+	if !strings.Contains(body, "ImageId: ami-90c152ff") {
+		fmt.Println(body)
+		t.Error("Fixed image ID not found")
 	}
 }
 
