@@ -14,7 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
-	"github.com/giantswarm/aws-operator/service/keyv2"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v2/key"
 	"github.com/giantswarm/microerror"
 )
 
@@ -287,7 +287,7 @@ func numberOfWorkers(clusterName string) (int, error) {
 		return 0, microerror.Mask(err)
 	}
 
-	return keyv2.WorkerCount(*cluster), nil
+	return key.WorkerCount(*cluster), nil
 }
 
 func numberOfMasters(clusterName string) (int, error) {
@@ -296,7 +296,7 @@ func numberOfMasters(clusterName string) (int, error) {
 		return 0, microerror.Mask(err)
 	}
 
-	return keyv2.MasterCount(*cluster), nil
+	return key.MasterCount(*cluster), nil
 }
 
 func addWorker(clusterName string) error {

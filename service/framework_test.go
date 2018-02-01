@@ -47,7 +47,7 @@ func Test_Service_NewVersionedResources(t *testing.T) {
 					"legacyv2",
 				},
 				"0.2.0": []string{
-					"kmskeyv2",
+					"kmskey",
 					"s3bucketv2",
 					"s3objectv2",
 					"cloudformationv2",
@@ -59,7 +59,7 @@ func Test_Service_NewVersionedResources(t *testing.T) {
 					"legacyv2",
 				},
 				"2.0.0": []string{
-					"kmskeyv2",
+					"kmskey",
 					"s3bucketv2",
 					"s3objectv2",
 					"cloudformationv2",
@@ -68,7 +68,7 @@ func Test_Service_NewVersionedResources(t *testing.T) {
 					"endpointsv2",
 				},
 				"2.0.1": []string{
-					"kmskeyv2",
+					"kmskey",
 					"s3bucketv2",
 					"s3objectv3",
 					"cloudformationv2",
@@ -77,7 +77,7 @@ func Test_Service_NewVersionedResources(t *testing.T) {
 					"endpointsv2",
 				},
 				"2.0.2": []string{
-					"kmskeyv2",
+					"kmskey",
 					"s3bucketv2",
 					"s3objectv3",
 					"cloudformationv2",
