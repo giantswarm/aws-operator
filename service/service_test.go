@@ -34,6 +34,7 @@ func Test_Service_New(t *testing.T) {
 
 				config.Viper.Set(config.Flag.Service.AWS.AccessKey.ID, "accessKeyID")
 				config.Viper.Set(config.Flag.Service.AWS.AccessKey.Secret, "accessKeySecret")
+				config.Viper.Set(config.Flag.Service.AWS.AccessKey.Session, "session")
 				config.Viper.Set(config.Flag.Service.AWS.Region, "myregion")
 				config.Viper.Set(config.Flag.Service.AWS.PubKeyFile, "test")
 

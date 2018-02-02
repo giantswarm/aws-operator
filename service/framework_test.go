@@ -4,34 +4,38 @@ import (
 	"reflect"
 	"testing"
 
-	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/flag"
+	versionedfake "github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/micrologger/microloggertest"
-	"github.com/spf13/viper"
-	"k8s.io/client-go/kubernetes/fake"
+	apiextensionsclientfake "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/fake"
+	kubernetesfake "k8s.io/client-go/kubernetes/fake"
 )
 
-func Test_Service_NewVersionedResources(t *testing.T) {
-	config := DefaultConfig()
-	config.Name = "aws-operator"
-	config.Logger = microloggertest.New()
-	config.Flag = flag.New()
-	config.Viper = viper.New()
-	config.Viper.Set(config.Flag.Service.Installation.Name, "test")
-	config.Viper.Set(config.Flag.Service.AWS.PubKeyFile, "~/.ssh/id_rsa.pub")
+func newTestFrameworkConfig() FrameworkConfig {
+	return FrameworkConfig{
+		G8sClient:    versionedfake.NewSimpleClientset(),
+		K8sClient:    kubernetesfake.NewSimpleClientset(),
+		K8sExtClient: apiextensionsclientfake.NewSimpleClientset(),
+		Logger:       microloggertest.New(),
 
-	k8sClient := fake.NewSimpleClientset()
-	awsConfig := awsclient.Config{
-		AccessKeyID:     "key",
-		AccessKeySecret: "secret",
-		Region:          "myregion",
+		GuestAWSConfig: FrameworkConfigAWSConfig{
+			AccessKeyID:     "guest-key",
+			AccessKeySecret: "guest-secret",
+			Region:          "guest-myregion",
+			SessionToken:    "guest-token",
+		},
+		HostAWSConfig: FrameworkConfigAWSConfig{
+			AccessKeyID:     "host-key",
+			AccessKeySecret: "host-secret",
+			Region:          "host-myregion",
+			SessionToken:    "host-token",
+		},
+		InstallationName: "test",
+		Name:             "aws-operator",
+		PubKeyFile:       "~/.ssh/id_rsa.pub",
 	}
-	awsHostConfig := awsclient.Config{
-		AccessKeyID:     "key",
-		AccessKeySecret: "secret",
-		Region:          "myregion",
-	}
+}
 
+func Test_newVersionedResources(t *testing.T) {
 	testCases := []struct {
 		description       string
 		expectedResources map[string][]string
@@ -91,7 +95,9 @@ func Test_Service_NewVersionedResources(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			versionedResources, err := NewVersionedResources(config, k8sClient, awsConfig, awsHostConfig)
+			config := newTestFrameworkConfig()
+
+			versionedResources, err := newVersionedResources(config)
 			if err != nil {
 				t.Fatalf("unexpected error %#v", err)
 			}
@@ -115,74 +121,72 @@ func Test_Service_NewVersionedResources(t *testing.T) {
 	}
 }
 
-func Test_Service_NewVersionedResources_Fails_Without_Regions(t *testing.T) {
-	config := DefaultConfig()
-	config.Name = "aws-operator"
-	config.Logger = microloggertest.New()
-	config.Flag = flag.New()
-	config.Viper = viper.New()
-	config.Viper.Set(config.Flag.Service.Installation.Name, "test")
-	config.Viper.Set(config.Flag.Service.AWS.PubKeyFile, "~/.ssh/id_rsa.pub")
-
-	k8sClient := fake.NewSimpleClientset()
-
+func Test_NewFramework_Fails_Without_Regions(t *testing.T) {
 	testCases := []struct {
 		description      string
-		guestCredentials awsclient.Config
-		hostCredentials  awsclient.Config
+		guestCredentials FrameworkConfigAWSConfig
+		hostCredentials  FrameworkConfigAWSConfig
 		expectedError    bool
 	}{
+		// Test 0.
 		{
 			description: "misisng region in guest",
-			guestCredentials: awsclient.Config{
+			guestCredentials: FrameworkConfigAWSConfig{
 				AccessKeyID:     "key",
 				AccessKeySecret: "secret",
+				SessionToken:    "token",
 			},
-			hostCredentials: awsclient.Config{
+			hostCredentials: FrameworkConfigAWSConfig{
 				AccessKeyID:     "key",
 				AccessKeySecret: "secret",
 				Region:          "myregion",
+				SessionToken:    "token",
 			},
 			expectedError: true,
 		},
+		// Test 1.
 		{
 			description: "missing region in host",
-			guestCredentials: awsclient.Config{
+			guestCredentials: FrameworkConfigAWSConfig{
 				AccessKeyID:     "key",
 				AccessKeySecret: "secret",
 				Region:          "myregion",
+				SessionToken:    "token",
 			},
-			hostCredentials: awsclient.Config{
+			hostCredentials: FrameworkConfigAWSConfig{
 				AccessKeyID:     "key",
 				AccessKeySecret: "secret",
+				SessionToken:    "token",
 			},
 			expectedError: true,
 		},
+		// Test 2.
 		{
 			description: "region exists in guest and host",
-			guestCredentials: awsclient.Config{
+			guestCredentials: FrameworkConfigAWSConfig{
 				AccessKeyID:     "key",
 				AccessKeySecret: "secret",
 				Region:          "myregion",
+				SessionToken:    "token",
 			},
-			hostCredentials: awsclient.Config{
+			hostCredentials: FrameworkConfigAWSConfig{
 				AccessKeyID:     "key",
 				AccessKeySecret: "secret",
 				Region:          "myregion",
+				SessionToken:    "token",
 			},
 			expectedError: false,
 		},
 	}
 
-	for _, tc := range testCases {
-		t.Run(tc.description, func(t *testing.T) {
-			_, err := NewVersionedResources(config, k8sClient, tc.guestCredentials, tc.hostCredentials)
-			if !tc.expectedError && err != nil {
-				t.Fatalf("unexpected error %#v", err)
-			}
-			if tc.expectedError && err == nil {
-				t.Fatalf("expected error didn't happen")
-			}
-		})
+	for i, tc := range testCases {
+		config := newTestFrameworkConfig()
+		config.GuestAWSConfig = tc.guestCredentials
+		config.HostAWSConfig = tc.hostCredentials
+
+		_, err := NewFramework(config)
+		if tc.expectedError != (err != nil) {
+			t.Errorf("case %d: expected error = %v, got = %#v", i, tc.expectedError, err)
+		}
 	}
 }
