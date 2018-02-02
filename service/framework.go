@@ -84,9 +84,7 @@ func NewFramework(config FrameworkConfig) (*framework.Framework, error) {
 	if config.GuestAWSConfig.Region == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSConfig.Region must not be empty")
 	}
-	if config.GuestAWSConfig.SessionToken == "" {
-		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSConfig.SessionToken must not be empty")
-	}
+	// config.GuestAWSConfig.SessionToken is optional.
 	if config.HostAWSConfig.AccessKeyID == "" && config.HostAWSConfig.AccessKeySecret == "" {
 		config.Logger.Log("debug", "no host cluster account credentials supplied, assuming guest and host uses same account")
 		config.HostAWSConfig = config.GuestAWSConfig
@@ -100,9 +98,7 @@ func NewFramework(config FrameworkConfig) (*framework.Framework, error) {
 		if config.HostAWSConfig.Region == "" {
 			return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.Region must not be empty")
 		}
-		if config.HostAWSConfig.SessionToken == "" {
-			return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.SessionToken must not be empty")
-		}
+		// config.HostAWSConfig.SessionToken is optional.
 	}
 
 	var crdClient *k8scrdclient.CRDClient
