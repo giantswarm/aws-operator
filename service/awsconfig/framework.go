@@ -1,8 +1,6 @@
 package awsconfig
 
 import (
-	"context"
-
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs/legacy"
@@ -19,6 +17,7 @@ import (
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	cloudconfigv2 "github.com/giantswarm/aws-operator/service/awsconfig/v2/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v2/key"
 	cloudformationv2 "github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/cloudformation"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/cloudformation/adapter"
 	endpointsv2 "github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/endpoints"
@@ -114,7 +113,7 @@ func NewFramework(config FrameworkConfig) (*framework.Framework, error) {
 		}
 	}
 
-	versionedResources, err := newVersionedResources(config)
+	resourceRouter, err := newResourceRouter(config)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -131,10 +130,6 @@ func NewFramework(config FrameworkConfig) (*framework.Framework, error) {
 		}
 	}
 
-	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
-		return ctx, nil
-	}
-
 	var crdFramework *framework.Framework
 	{
 		c := framework.DefaultConfig()
@@ -142,9 +137,8 @@ func NewFramework(config FrameworkConfig) (*framework.Framework, error) {
 		c.CRD = v1alpha1.NewAWSConfigCRD()
 		c.CRDClient = crdClient
 		c.Informer = newInformer
-		c.InitCtxFunc = initCtxFunc
 		c.Logger = config.Logger
-		c.ResourceRouter = NewResourceRouter(versionedResources)
+		c.ResourceRouter = resourceRouter
 
 		crdFramework, err = framework.New(c)
 		if err != nil {
@@ -155,7 +149,7 @@ func NewFramework(config FrameworkConfig) (*framework.Framework, error) {
 	return crdFramework, nil
 }
 
-func newVersionedResources(config FrameworkConfig) (map[string][]framework.Resource, error) {
+func newResourceRouter(config FrameworkConfig) (*framework.ResourceRouter, error) {
 	var err error
 
 	guestAWSConfig := awsclient.Config{
@@ -451,19 +445,92 @@ func newVersionedResources(config FrameworkConfig) (map[string][]framework.Resou
 		}
 	}
 
-	// We provide a map of resource lists keyed by the version bundle version
-	// to the resource router.
-	versionedResources := map[string][]framework.Resource{
-		// Clusters without a version use the legacy resource.
-		"":      legacyResources,
-		"0.1.0": legacyResources,
-		"0.2.0": resourcesV2,
-		"1.0.0": legacyResources,
-		"2.0.0": resourcesV2,
-		"2.0.1": resourcesV2_0_1,
-		// 2.0.2 fixes missing region in host account credentials, the change only affects service/framework.go
-		"2.0.2": resourcesV2_0_1,
+	handlesFuncFunc := func(handledVersionBundles []string) func(obj interface{}) bool {
+		return func(obj interface{}) bool {
+			kvmConfig, err := key.ToCustomObject(obj)
+			if err != nil {
+				return false
+			}
+			versionBundleVersion := key.VersionBundleVersion(kvmConfig)
+
+			for _, v := range handledVersionBundles {
+				if versionBundleVersion == v {
+					return true
+				}
+			}
+
+			return false
+		}
 	}
 
-	return versionedResources, nil
+	var resourceSetV1 *framework.ResourceSet
+	{
+		c := framework.ResourceSetConfig{
+			Handles: handlesFuncFunc([]string{
+				"",
+				"0.1.0",
+				"1.0.0",
+			}),
+			Logger:    config.Logger,
+			Resources: legacyResources,
+		}
+
+		resourceSetV1, err = framework.NewResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var resourceSetV2 *framework.ResourceSet
+	{
+		c := framework.ResourceSetConfig{
+			Handles: handlesFuncFunc([]string{
+				"0.2.0",
+				"2.0.0",
+			}),
+			Logger:    config.Logger,
+			Resources: resourcesV2,
+		}
+
+		resourceSetV2, err = framework.NewResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var resourceSetV4 *framework.ResourceSet
+	{
+		c := framework.ResourceSetConfig{
+			Handles: handlesFuncFunc([]string{
+				"2.0.1",
+				// 2.0.2 fixes missing region in host account credentials, the change only affects service/framework.go
+				"2.0.2",
+			}),
+			Logger:    config.Logger,
+			Resources: resourcesV2_0_1,
+		}
+
+		resourceSetV4, err = framework.NewResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var resourceRouter *framework.ResourceRouter
+	{
+		c := framework.ResourceRouterConfig{}
+
+		c.ResourceSets = []*framework.ResourceSet{
+			resourceSetV1,
+			resourceSetV2,
+			resourceSetV4,
+		}
+
+		resourceRouter, err = framework.NewResourceRouter(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	return resourceRouter, nil
 }
