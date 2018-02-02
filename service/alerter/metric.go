@@ -24,5 +24,6 @@ var (
 )
 
 func init() {
+	prometheus.MustRegister(duplicateResourcesTotal)
 	prometheus.MustRegister(orphanResourcesTotal)
 }
