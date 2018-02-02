@@ -12,11 +12,14 @@ import (
 	"github.com/giantswarm/operatorkit/client/k8srestconfig"
 	"github.com/giantswarm/operatorkit/framework"
 	"github.com/spf13/viper"
+	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/aws-operator/service/alerter"
+	"github.com/giantswarm/aws-operator/service/awsconfig"
 	"github.com/giantswarm/aws-operator/service/healthz"
 )
 
@@ -59,10 +62,10 @@ func DefaultConfig() Config {
 
 type Service struct {
 	// Dependencies.
-	Alerter      *alerter.Service
-	CRDFramework *framework.Framework
-	Healthz      *healthz.Service
-	Version      *version.Service
+	Alerter            *alerter.Service
+	AWSConfigFramework *framework.Framework
+	Healthz            *healthz.Service
+	Version            *version.Service
 
 	// Internals.
 	bootOnce sync.Once
@@ -84,25 +87,6 @@ func New(config Config) (*Service, error) {
 	}
 
 	var err error
-
-	var awsConfig awsclient.Config
-	{
-		awsConfig = awsclient.Config{
-			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
-			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
-			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
-		}
-	}
-
-	var crdFramework *framework.Framework
-	{
-		crdFramework, err = newCRDFramework(config)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	installationName := config.Viper.GetString(config.Flag.Service.Installation.Name)
 
 	var restConfig *rest.Config
 	{
@@ -127,6 +111,55 @@ func New(config Config) (*Service, error) {
 		return nil, microerror.Mask(err)
 	}
 
+	k8sClient, err := kubernetes.NewForConfig(restConfig)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	k8sExtClient, err := apiextensionsclient.NewForConfig(restConfig)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var awsConfigFramework *framework.Framework
+	{
+		c := awsconfig.FrameworkConfig{
+			G8sClient:    g8sClient,
+			K8sClient:    k8sClient,
+			K8sExtClient: k8sExtClient,
+			Logger:       config.Logger,
+
+			GuestAWSConfig: awsconfig.FrameworkConfigAWSConfig{
+				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
+				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
+				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
+				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
+			},
+			HostAWSConfig: awsconfig.FrameworkConfigAWSConfig{
+				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
+				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
+				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
+				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
+			},
+			InstallationName: config.Viper.GetString(config.Flag.Service.Installation.Name),
+			Name:             config.Name,
+			PubKeyFile:       config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile),
+		}
+		awsConfigFramework, err = awsconfig.NewFramework(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var awsConfig awsclient.Config
+	{
+		awsConfig = awsclient.Config{
+			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
+			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
+			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
+		}
+	}
+
 	var alerterService *alerter.Service
 	{
 		// Set the region, in the operator this comes from the cluster object.
@@ -134,7 +167,7 @@ func New(config Config) (*Service, error) {
 
 		alerterConfig := alerter.DefaultConfig()
 		alerterConfig.AwsConfig = awsConfig
-		alerterConfig.InstallationName = installationName
+		alerterConfig.InstallationName = config.Viper.GetString(config.Flag.Service.Installation.Name)
 		alerterConfig.G8sClient = g8sClient
 		alerterConfig.Logger = config.Logger
 
@@ -174,10 +207,10 @@ func New(config Config) (*Service, error) {
 
 	newService := &Service{
 		// Dependencies.
-		Alerter:      alerterService,
-		CRDFramework: crdFramework,
-		Healthz:      healthzService,
-		Version:      versionService,
+		Alerter:            alerterService,
+		AWSConfigFramework: awsConfigFramework,
+		Healthz:            healthzService,
+		Version:            versionService,
 
 		// Internals
 		bootOnce: sync.Once{},
@@ -192,6 +225,6 @@ func (s *Service) Boot() {
 		s.Alerter.StartAlerts()
 
 		// Start the framework.
-		go s.CRDFramework.Boot()
+		go s.AWSConfigFramework.Boot()
 	})
 }

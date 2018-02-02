@@ -1,4 +1,4 @@
-package service
+package awsconfig
 
 import (
 	"context"
@@ -7,15 +7,14 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8scrdclient"
-	"github.com/giantswarm/operatorkit/client/k8srestconfig"
 	"github.com/giantswarm/operatorkit/framework"
 	"github.com/giantswarm/operatorkit/framework/resource/metricsresource"
 	"github.com/giantswarm/operatorkit/informer"
 	"github.com/giantswarm/randomkeytpr"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
@@ -35,62 +34,78 @@ import (
 )
 
 const (
-	ResourceRetries  uint64 = 3
-	awsCloudProvider        = "aws"
+	ResourceRetries  = 3
+	awsCloudProvider = "aws"
 )
 
 const (
 	AWSConfigCleanupFinalizer = "aws-operator.giantswarm.io/custom-object-cleanup"
 )
 
-func newCRDFramework(config Config) (*framework.Framework, error) {
-	if config.Flag == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.Flag must not be empty")
-	}
-	if config.Viper == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.Viper must not be empty")
-	}
+type FrameworkConfig struct {
+	G8sClient    versioned.Interface
+	K8sClient    kubernetes.Interface
+	K8sExtClient apiextensionsclient.Interface
+	Logger       micrologger.Logger
 
+	GuestAWSConfig   FrameworkConfigAWSConfig
+	HostAWSConfig    FrameworkConfigAWSConfig
+	InstallationName string
+	// Name is the name of the project.
+	Name       string
+	PubKeyFile string
+}
+
+type FrameworkConfigAWSConfig struct {
+	AccessKeyID     string
+	AccessKeySecret string
+	Region          string
+	SessionToken    string
+}
+
+func NewFramework(config FrameworkConfig) (*framework.Framework, error) {
 	var err error
 
-	var restConfig *rest.Config
-	{
-		c := k8srestconfig.DefaultConfig()
-
-		c.Logger = config.Logger
-
-		c.Address = config.Viper.GetString(config.Flag.Service.Kubernetes.Address)
-		c.InCluster = config.Viper.GetBool(config.Flag.Service.Kubernetes.InCluster)
-		c.TLS.CAFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CAFile)
-		c.TLS.CrtFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CrtFile)
-		c.TLS.KeyFile = config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.KeyFile)
-
-		restConfig, err = k8srestconfig.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
+	if config.G8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.G8sClient must not be empty")
+	}
+	if config.K8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.K8sClient must not be empty")
+	}
+	if config.Logger == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
+	}
+	if config.GuestAWSConfig.AccessKeyID == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSConfig.AccessKeyID must not be empty")
+	}
+	if config.GuestAWSConfig.AccessKeySecret == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSConfig.AccessKeySecret must not be empty")
+	}
+	if config.GuestAWSConfig.Region == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSConfig.Region must not be empty")
+	}
+	// config.GuestAWSConfig.SessionToken is optional.
+	if config.HostAWSConfig.AccessKeyID == "" && config.HostAWSConfig.AccessKeySecret == "" {
+		config.Logger.Log("debug", "no host cluster account credentials supplied, assuming guest and host uses same account")
+		config.HostAWSConfig = config.GuestAWSConfig
+	} else {
+		if config.HostAWSConfig.AccessKeyID == "" {
+			return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.AccessKeyID must not be empty")
 		}
-	}
-
-	clientSet, err := versioned.NewForConfig(restConfig)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	k8sClient, err := kubernetes.NewForConfig(restConfig)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	k8sExtClient, err := apiextensionsclient.NewForConfig(restConfig)
-	if err != nil {
-		return nil, microerror.Mask(err)
+		if config.HostAWSConfig.AccessKeySecret == "" {
+			return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.AccessKeySecret must not be empty")
+		}
+		if config.HostAWSConfig.Region == "" {
+			return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.Region must not be empty")
+		}
+		// config.HostAWSConfig.SessionToken is optional.
 	}
 
 	var crdClient *k8scrdclient.CRDClient
 	{
 		c := k8scrdclient.DefaultConfig()
 
-		c.K8sExtClient = k8sExtClient
+		c.K8sExtClient = config.K8sExtClient
 		c.Logger = config.Logger
 
 		crdClient, err = k8scrdclient.New(c)
@@ -99,37 +114,7 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 		}
 	}
 
-	var awsConfig awsclient.Config
-	{
-		awsConfig = awsclient.Config{
-			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
-			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
-			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
-			Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
-		}
-	}
-
-	var awsHostConfig awsclient.Config
-	{
-		accessKeyID := config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID)
-		accessKeySecret := config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret)
-		sessionToken := config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session)
-
-		if accessKeyID == "" && accessKeySecret == "" {
-			config.Logger.Log("debug", "no host cluster account credentials supplied, assuming guest and host uses same account")
-			awsHostConfig = awsConfig
-		} else {
-			config.Logger.Log("debug", "host cluster account credentials supplied, using separate accounts for host and guest clusters")
-			awsHostConfig = awsclient.Config{
-				AccessKeyID:     accessKeyID,
-				AccessKeySecret: accessKeySecret,
-				SessionToken:    sessionToken,
-				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
-			}
-		}
-	}
-
-	versionedResources, err := NewVersionedResources(config, k8sClient, awsConfig, awsHostConfig)
+	versionedResources, err := newVersionedResources(config)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -138,7 +123,7 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 	{
 		c := informer.DefaultConfig()
 
-		c.Watcher = clientSet.ProviderV1alpha1().AWSConfigs("")
+		c.Watcher = config.G8sClient.ProviderV1alpha1().AWSConfigs("")
 
 		newInformer, err = informer.New(c)
 		if err != nil {
@@ -170,18 +155,24 @@ func newCRDFramework(config Config) (*framework.Framework, error) {
 	return crdFramework, nil
 }
 
-func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsConfig awsclient.Config, awsHostConfig awsclient.Config) (map[string][]framework.Resource, error) {
+func newVersionedResources(config FrameworkConfig) (map[string][]framework.Resource, error) {
 	var err error
 
-	if awsConfig.Region == "" {
-		return nil, microerror.Mask(invalidConfigError)
+	guestAWSConfig := awsclient.Config{
+		AccessKeyID:     config.GuestAWSConfig.AccessKeyID,
+		AccessKeySecret: config.GuestAWSConfig.AccessKeySecret,
+		SessionToken:    config.GuestAWSConfig.SessionToken,
+		Region:          config.GuestAWSConfig.Region,
 	}
 
-	if awsHostConfig.Region == "" {
-		return nil, microerror.Mask(invalidConfigError)
+	hostAWSConfig := awsclient.Config{
+		AccessKeyID:     config.HostAWSConfig.AccessKeyID,
+		AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
+		SessionToken:    config.HostAWSConfig.SessionToken,
+		Region:          config.HostAWSConfig.Region,
 	}
 
-	awsClients := awsclient.NewClients(awsConfig)
+	awsClients := awsclient.NewClients(guestAWSConfig)
 	var awsService *awsservice.Service
 	{
 		awsConfig := awsservice.DefaultConfig()
@@ -195,12 +186,12 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 		}
 	}
 
-	awsHostClients := awsclient.NewClients(awsHostConfig)
+	awsHostClients := awsclient.NewClients(hostAWSConfig)
 
 	var certWatcher *legacy.Service
 	{
 		certConfig := legacy.DefaultServiceConfig()
-		certConfig.K8sClient = k8sClient
+		certConfig.K8sClient = config.K8sClient
 		certConfig.Logger = config.Logger
 		certWatcher, err = legacy.NewService(certConfig)
 		if err != nil {
@@ -211,7 +202,7 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 	var keyWatcher *randomkeytpr.Service
 	{
 		keyConfig := randomkeytpr.DefaultServiceConfig()
-		keyConfig.K8sClient = k8sClient
+		keyConfig.K8sClient = config.K8sClient
 		keyConfig.Logger = config.Logger
 		keyWatcher, err = randomkeytpr.NewService(keyConfig)
 		if err != nil {
@@ -258,20 +249,18 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 		}
 	}
 
-	installationName := config.Viper.GetString(config.Flag.Service.Installation.Name)
-
 	var legacyResource framework.Resource
 	{
 		legacyConfig := legacyv2.DefaultConfig()
-		legacyConfig.AwsConfig = awsConfig
-		legacyConfig.AwsHostConfig = awsHostConfig
+		legacyConfig.AwsConfig = guestAWSConfig
+		legacyConfig.AwsHostConfig = hostAWSConfig
 		legacyConfig.CertWatcher = certWatcher
 		legacyConfig.CloudConfig = ccServiceV2
-		legacyConfig.InstallationName = installationName
-		legacyConfig.K8sClient = k8sClient
+		legacyConfig.InstallationName = config.InstallationName
+		legacyConfig.K8sClient = config.K8sClient
 		legacyConfig.KeyWatcher = keyWatcher
 		legacyConfig.Logger = config.Logger
-		legacyConfig.PubKeyFile = config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile)
+		legacyConfig.PubKeyFile = config.PubKeyFile
 
 		legacyResource, err = legacyv2.New(legacyConfig)
 		if err != nil {
@@ -297,7 +286,7 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 
 		cloudformationConfig.Logger = config.Logger
 
-		cloudformationConfig.InstallationName = installationName
+		cloudformationConfig.InstallationName = config.InstallationName
 
 		cloudformationResource, err = cloudformationv2.New(cloudformationConfig)
 		if err != nil {
@@ -368,7 +357,7 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 	{
 		namespaceConfig := namespacev2.DefaultConfig()
 
-		namespaceConfig.K8sClient = k8sClient
+		namespaceConfig.K8sClient = config.K8sClient
 		namespaceConfig.Logger = config.Logger
 
 		namespaceResource, err = namespacev2.New(namespaceConfig)
@@ -381,7 +370,7 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 	{
 		serviceConfig := servicev2.DefaultConfig()
 
-		serviceConfig.K8sClient = k8sClient
+		serviceConfig.K8sClient = config.K8sClient
 		serviceConfig.Logger = config.Logger
 
 		serviceResource, err = servicev2.New(serviceConfig)
@@ -395,7 +384,7 @@ func NewVersionedResources(config Config, k8sClient kubernetes.Interface, awsCon
 		endpointsConfig := endpointsv2.DefaultConfig()
 
 		endpointsConfig.Clients.EC2 = awsClients.EC2
-		endpointsConfig.K8sClient = k8sClient
+		endpointsConfig.K8sClient = config.K8sClient
 		endpointsConfig.Logger = config.Logger
 
 		endpointsResource, err = endpointsv2.New(endpointsConfig)
