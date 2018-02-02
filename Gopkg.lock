@@ -108,9 +108,12 @@
     "pkg/apis/core/v1alpha1",
     "pkg/apis/provider/v1alpha1",
     "pkg/clientset/versioned",
+    "pkg/clientset/versioned/fake",
     "pkg/clientset/versioned/scheme",
     "pkg/clientset/versioned/typed/core/v1alpha1",
-    "pkg/clientset/versioned/typed/provider/v1alpha1"
+    "pkg/clientset/versioned/typed/core/v1alpha1/fake",
+    "pkg/clientset/versioned/typed/provider/v1alpha1",
+    "pkg/clientset/versioned/typed/provider/v1alpha1/fake"
   ]
   revision = "f0b8bcd6122deaf8be38b9705ac528cf4b749e3a"
 
@@ -179,7 +182,7 @@
     "transaction/context/id",
     "transaction/context/tracked"
   ]
-  revision = "489a866095567ab6c764f79831f61e48c035629c"
+  revision = "d48ce8e1f2bd2a7b93de0d5c37ca62a648cbffe8"
 
 [[projects]]
   branch = "master"
@@ -652,8 +655,10 @@
     "pkg/apis/apiextensions",
     "pkg/apis/apiextensions/v1beta1",
     "pkg/client/clientset/clientset",
+    "pkg/client/clientset/clientset/fake",
     "pkg/client/clientset/clientset/scheme",
-    "pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
+    "pkg/client/clientset/clientset/typed/apiextensions/v1beta1",
+    "pkg/client/clientset/clientset/typed/apiextensions/v1beta1/fake"
   ]
   revision = "996a70a27a0dcf53642ca52601b9107cb2ad810a"
   version = "kubernetes-1.8.5"
@@ -791,6 +796,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "44ae42d3662c99b86cd4e368c24e40f953bc71fd6093e0fca2f6ffb5f315c998"
+  inputs-digest = "8d8d8a96be4fa48a978b81403838a667b49bb912e1bc7a4cc55077ddd2e594dd"
   solver-name = "gps-cdcl"
   solver-version = 1

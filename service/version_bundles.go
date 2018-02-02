@@ -6,7 +6,8 @@ import (
 	"github.com/giantswarm/versionbundle"
 )
 
-func newVersionBundles() []versionbundle.Bundle {
+// NewVersionBundles returns the array of version bundles defined for the operator.
+func NewVersionBundles() []versionbundle.Bundle {
 	return []versionbundle.Bundle{
 		{
 			Changelogs: []versionbundle.Changelog{
