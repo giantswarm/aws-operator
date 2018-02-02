@@ -447,11 +447,11 @@ func newResourceRouter(config FrameworkConfig) (*framework.ResourceRouter, error
 
 	handlesFuncFunc := func(handledVersionBundles []string) func(obj interface{}) bool {
 		return func(obj interface{}) bool {
-			kvmConfig, err := key.ToCustomObject(obj)
+			awsConfig, err := key.ToCustomObject(obj)
 			if err != nil {
 				return false
 			}
-			versionBundleVersion := key.VersionBundleVersion(kvmConfig)
+			versionBundleVersion := key.VersionBundleVersion(awsConfig)
 
 			for _, v := range handledVersionBundles {
 				if versionBundleVersion == v {
@@ -498,7 +498,7 @@ func newResourceRouter(config FrameworkConfig) (*framework.ResourceRouter, error
 		}
 	}
 
-	var resourceSetV4 *framework.ResourceSet
+	var resourceSetV3 *framework.ResourceSet
 	{
 		c := framework.ResourceSetConfig{
 			Handles: handlesFuncFunc([]string{
@@ -510,7 +510,7 @@ func newResourceRouter(config FrameworkConfig) (*framework.ResourceRouter, error
 			Resources: resourcesV2_0_1,
 		}
 
-		resourceSetV4, err = framework.NewResourceSet(c)
+		resourceSetV3, err = framework.NewResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -518,12 +518,12 @@ func newResourceRouter(config FrameworkConfig) (*framework.ResourceRouter, error
 
 	var resourceRouter *framework.ResourceRouter
 	{
-		c := framework.ResourceRouterConfig{}
-
-		c.ResourceSets = []*framework.ResourceSet{
-			resourceSetV1,
-			resourceSetV2,
-			resourceSetV4,
+		c := framework.ResourceRouterConfig{
+			ResourceSets: []*framework.ResourceSet{
+				resourceSetV1,
+				resourceSetV2,
+				resourceSetV3,
+			},
 		}
 
 		resourceRouter, err = framework.NewResourceRouter(c)
