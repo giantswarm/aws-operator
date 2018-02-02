@@ -19,6 +19,7 @@ import (
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/aws-operator/service/alerter"
+	"github.com/giantswarm/aws-operator/service/awsconfig"
 	"github.com/giantswarm/aws-operator/service/healthz"
 )
 
@@ -122,19 +123,19 @@ func New(config Config) (*Service, error) {
 
 	var awsConfigFramework *framework.Framework
 	{
-		c := FrameworkConfig{
+		c := awsconfig.FrameworkConfig{
 			G8sClient:    g8sClient,
 			K8sClient:    k8sClient,
 			K8sExtClient: k8sExtClient,
 			Logger:       config.Logger,
 
-			GuestAWSConfig: FrameworkConfigAWSConfig{
+			GuestAWSConfig: awsconfig.FrameworkConfigAWSConfig{
 				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
 				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
 				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
 				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
 			},
-			HostAWSConfig: FrameworkConfigAWSConfig{
+			HostAWSConfig: awsconfig.FrameworkConfigAWSConfig{
 				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
 				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
 				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
@@ -144,7 +145,7 @@ func New(config Config) (*Service, error) {
 			Name:             config.Name,
 			PubKeyFile:       config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile),
 		}
-		awsConfigFramework, err = NewFramework(c)
+		awsConfigFramework, err = awsconfig.NewFramework(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
