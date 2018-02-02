@@ -1,6 +1,8 @@
 e2eTest: &e2eTest
     machine: true
     working_directory: /home/circleci/.go_workspace/src/github.com/giantswarm/aws-operator
+    environment:
+      MINIKUBE_VERSION: v0.25.0
     steps:
     - checkout
 
@@ -8,7 +10,9 @@ e2eTest: &e2eTest
         wget -q $(curl -sS https://api.github.com/repos/giantswarm/e2e-harness/releases/latest | grep browser_download_url | head -n 1 | cut -d '"' -f 4)
         chmod +x ./e2e-harness
 
-    - run: ./e2e-harness setup --name=ci-awsop-${CIRCLE_SHA1:0:7}
+    - run: ./e2e-harness localkube
+
+    - run: ./e2e-harness setup --remote=false
 
     - run:
         name: set CLUSTER_NAME env var
