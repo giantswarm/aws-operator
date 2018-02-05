@@ -14,7 +14,7 @@ func (s *Service) ListMasterInstances(clusterID string) ([]string, error) {
 	instances, err := awsresources.FindInstances(awsresources.FindInstancesInput{
 		Clients: s.awsClients,
 		Logger:  s.logger,
-		Pattern: fmt.Sprintf("%s-master-0", clusterID),
+		Pattern: fmt.Sprintf("%s-master", clusterID),
 	})
 	if err != nil {
 		return instanceNames, microerror.Mask(err)
