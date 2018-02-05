@@ -27,9 +27,8 @@ import (
 	s3bucketv2 "github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/s3bucket"
 	s3objectv2 "github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/s3object"
 	servicev2 "github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/service"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v3"
 	cloudconfigv3 "github.com/giantswarm/aws-operator/service/awsconfig/v3/cloudconfig"
-	s3objectv3 "github.com/giantswarm/aws-operator/service/awsconfig/v3/resource/s3object"
-	cloudconfigv4 "github.com/giantswarm/aws-operator/service/awsconfig/v4/cloudconfig"
 )
 
 const (
@@ -230,19 +229,6 @@ func newResourceRouter(config FrameworkConfig) (*framework.ResourceRouter, error
 		}
 	}
 
-	// ccServiceV4 is used by the s3objectv3.
-	var ccServiceV4 *cloudconfigv4.CloudConfig
-	{
-		ccServiceConfig := cloudconfigv4.DefaultConfig()
-
-		ccServiceConfig.Logger = config.Logger
-
-		ccServiceV4, err = cloudconfigv4.New(ccServiceConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var legacyResource framework.Resource
 	{
 		legacyConfig := legacyv2.DefaultConfig()
@@ -330,23 +316,6 @@ func newResourceRouter(config FrameworkConfig) (*framework.ResourceRouter, error
 		}
 	}
 
-	var s3BucketObjectResourceV3 framework.Resource
-	{
-		c := s3objectv3.DefaultConfig()
-		c.AwsService = awsService
-		c.Clients.S3 = awsClients.S3
-		c.Clients.KMS = awsClients.KMS
-		c.CloudConfig = ccServiceV4
-		c.CertWatcher = certWatcher
-		c.Logger = config.Logger
-		c.RandomKeyWatcher = keyWatcher
-
-		s3BucketObjectResourceV3, err = s3objectv3.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var namespaceResource framework.Resource
 	{
 		namespaceConfig := namespacev2.DefaultConfig()
@@ -425,26 +394,6 @@ func newResourceRouter(config FrameworkConfig) (*framework.ResourceRouter, error
 		}
 	}
 
-	// We create the list of resources and wrap each resource around some common
-	// resources like metrics and retry resources.
-	var resourcesV2_0_1 []framework.Resource
-	{
-		resourcesV2_0_1 = []framework.Resource{
-			kmsKeyResource,
-			s3BucketResource,
-			s3BucketObjectResourceV3,
-			cloudformationResource,
-			namespaceResource,
-			serviceResource,
-			endpointsResource,
-		}
-
-		resourcesV2_0_1, err = metricsresource.Wrap(resourcesV2_0_1, metricsWrapConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	handlesFuncFunc := func(handledVersionBundles []string) func(obj interface{}) bool {
 		return func(obj interface{}) bool {
 			awsConfig, err := key.ToCustomObject(obj)
@@ -500,17 +449,24 @@ func newResourceRouter(config FrameworkConfig) (*framework.ResourceRouter, error
 
 	var resourceSetV3 *framework.ResourceSet
 	{
-		c := framework.ResourceSetConfig{
-			Handles: handlesFuncFunc([]string{
+		c := v3.ResourceSetConfig{
+			CertsSearcher:      certWatcher,
+			GuestAWSClients:    awsClients,
+			HostAWSClients:     awsHostClients,
+			K8sClient:          config.K8sClient,
+			Logger:             config.Logger,
+			RandomkeysSearcher: keyWatcher,
+
+			HandledVersionBundles: []string{
 				"2.0.1",
 				// 2.0.2 fixes missing region in host account credentials, the change only affects service/framework.go
 				"2.0.2",
-			}),
-			Logger:    config.Logger,
-			Resources: resourcesV2_0_1,
+			},
+			InstallationName: config.InstallationName,
+			ProjectName:      config.Name,
 		}
 
-		resourceSetV3, err = framework.NewResourceSet(c)
+		resourceSetV3, err = v3.NewResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
