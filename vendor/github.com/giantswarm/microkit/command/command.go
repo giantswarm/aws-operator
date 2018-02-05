@@ -2,11 +2,12 @@
 package command
 
 import (
+	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/versionbundle"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/microkit/command/daemon"
 	"github.com/giantswarm/microkit/command/version"
 )
@@ -18,11 +19,12 @@ type Config struct {
 	ServerFactory daemon.ServerFactory
 
 	// Settings.
-	Description string
-	GitCommit   string
-	Name        string
-	Source      string
-	Viper       *viper.Viper
+	Description    string
+	GitCommit      string
+	Name           string
+	Source         string
+	VersionBundles []versionbundle.Bundle
+	Viper          *viper.Viper
 }
 
 // DefaultConfig provides a default configuration to create a new root command
@@ -34,11 +36,12 @@ func DefaultConfig() Config {
 		ServerFactory: nil,
 
 		// Settings.
-		Description: "",
-		GitCommit:   "",
-		Name:        "",
-		Source:      "",
-		Viper:       viper.New(),
+		Description:    "",
+		GitCommit:      "",
+		Name:           "",
+		Source:         "",
+		VersionBundles: []versionbundle.Bundle{},
+		Viper:          viper.New(),
 	}
 }
 
@@ -68,6 +71,7 @@ func New(config Config) (Command, error) {
 		versionConfig.GitCommit = config.GitCommit
 		versionConfig.Name = config.Name
 		versionConfig.Source = config.Source
+		versionConfig.VersionBundles = config.VersionBundles
 
 		versionCommand, err = version.New(versionConfig)
 		if err != nil {
