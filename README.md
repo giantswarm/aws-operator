@@ -52,6 +52,9 @@ resources are split between 3 CloudFormation stacks.
 * host-setup manages an IAM role used for VPC peering.
 * host-main manages network routes for the VPC peering connection.
 
+The host cluster may run in a separate AWS account. If so resources are created
+in both the host and guest AWS accounts.
+
 [4]:https://aws.amazon.com/cloudformation
 
 ### Other AWS Resources
