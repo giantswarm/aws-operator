@@ -1,7 +1,6 @@
 package awsconfig
 
 import (
-	"reflect"
 	"testing"
 
 	versionedfake "github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
@@ -32,92 +31,6 @@ func newTestFrameworkConfig() FrameworkConfig {
 		InstallationName: "test",
 		Name:             "aws-operator",
 		PubKeyFile:       "~/.ssh/id_rsa.pub",
-	}
-}
-
-func Test_newVersionedResources(t *testing.T) {
-	testCases := []struct {
-		description       string
-		expectedResources map[string][]string
-		errorMatcher      func(err error) bool
-	}{
-		{
-			description: "",
-			expectedResources: map[string][]string{
-				"": []string{
-					"legacyv2",
-				},
-				"0.1.0": []string{
-					"legacyv2",
-				},
-				"0.2.0": []string{
-					"kmskey",
-					"s3bucketv2",
-					"s3objectv2",
-					"cloudformationv2",
-					"namespacev2",
-					"servicev2",
-					"endpointsv2",
-				},
-				"1.0.0": []string{
-					"legacyv2",
-				},
-				"2.0.0": []string{
-					"kmskey",
-					"s3bucketv2",
-					"s3objectv2",
-					"cloudformationv2",
-					"namespacev2",
-					"servicev2",
-					"endpointsv2",
-				},
-				"2.0.1": []string{
-					"kmskey",
-					"s3bucketv2",
-					"s3objectv3",
-					"cloudformationv2",
-					"namespacev2",
-					"servicev2",
-					"endpointsv2",
-				},
-				"2.0.2": []string{
-					"kmskey",
-					"s3bucketv2",
-					"s3objectv3",
-					"cloudformationv2",
-					"namespacev2",
-					"servicev2",
-					"endpointsv2",
-				},
-			},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.description, func(t *testing.T) {
-			config := newTestFrameworkConfig()
-
-			versionedResources, err := newVersionedResources(config)
-			if err != nil {
-				t.Fatalf("unexpected error %#v", err)
-			}
-
-			versionedResourceNames := make(map[string][]string)
-
-			for versionBundleVersion, resources := range versionedResources {
-				resourceNames := []string{}
-
-				for _, resource := range resources {
-					resourceNames = append(resourceNames, resource.Underlying().Name())
-				}
-
-				versionedResourceNames[versionBundleVersion] = resourceNames
-			}
-
-			if !reflect.DeepEqual(tc.expectedResources, versionedResourceNames) {
-				t.Errorf("expected versioned resources %v got %v", tc.expectedResources, versionedResourceNames)
-			}
-		})
 	}
 }
 
