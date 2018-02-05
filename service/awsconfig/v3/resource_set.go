@@ -276,11 +276,11 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 	}
 
 	handlesFunc := func(obj interface{}) bool {
-		kvmConfig, err := key.ToCustomObject(obj)
+		awsConfig, err := key.ToCustomObject(obj)
 		if err != nil {
 			return false
 		}
-		versionBundleVersion := key.VersionBundleVersion(kvmConfig)
+		versionBundleVersion := key.VersionBundleVersion(awsConfig)
 
 		for _, v := range config.HandledVersionBundles {
 			if versionBundleVersion == v {
