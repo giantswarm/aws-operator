@@ -115,6 +115,7 @@ func main() {
 		commandConfig.GitCommit = gitCommit
 		commandConfig.Name = name
 		commandConfig.Source = source
+		commandConfig.VersionBundles = service.NewVersionBundles()
 
 		newCommand, err = command.New(commandConfig)
 		if err != nil {

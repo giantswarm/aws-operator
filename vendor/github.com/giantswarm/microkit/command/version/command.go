@@ -5,18 +5,20 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/spf13/cobra"
-
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/versionbundle"
+	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 )
 
 // Config represents the configuration used to create a new version command.
 type Config struct {
 	// Settings.
-	Description string
-	GitCommit   string
-	Name        string
-	Source      string
+	Description    string
+	GitCommit      string
+	Name           string
+	Source         string
+	VersionBundles []versionbundle.Bundle
 }
 
 // DefaultConfig provides a default configuration to create a new version
@@ -24,10 +26,11 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		// Settings.
-		Description: "",
-		GitCommit:   "",
-		Name:        "",
-		Source:      "",
+		Description:    "",
+		GitCommit:      "",
+		Name:           "",
+		Source:         "",
+		VersionBundles: []versionbundle.Bundle{},
 	}
 }
 
@@ -52,10 +55,14 @@ func New(config Config) (Command, error) {
 		cobraCommand: nil,
 
 		// Settings.
-		description: config.Description,
-		gitCommit:   config.GitCommit,
-		name:        config.Name,
-		source:      config.Source,
+		Description:    config.Description,
+		GitCommit:      config.GitCommit,
+		Name:           config.Name,
+		Source:         config.Source,
+		GoVersion:      runtime.Version(),
+		OS:             runtime.GOOS,
+		Arch:           runtime.GOARCH,
+		VersionBundles: config.VersionBundles,
 	}
 
 	newCommand.cobraCommand = &cobra.Command{
@@ -73,10 +80,14 @@ type command struct {
 	cobraCommand *cobra.Command
 
 	// Settings.
-	description string
-	gitCommit   string
-	name        string
-	source      string
+	Description    string
+	GitCommit      string
+	Name           string
+	Source         string
+	GoVersion      string
+	OS             string
+	Arch           string
+	VersionBundles []versionbundle.Bundle
 }
 
 func (c *command) CobraCommand() *cobra.Command {
@@ -84,10 +95,10 @@ func (c *command) CobraCommand() *cobra.Command {
 }
 
 func (c *command) Execute(cmd *cobra.Command, args []string) {
-	fmt.Printf("Description:    %s\n", c.description)
-	fmt.Printf("Git Commit:     %s\n", c.gitCommit)
-	fmt.Printf("Go Version:     %s\n", runtime.Version())
-	fmt.Printf("Name:           %s\n", c.name)
-	fmt.Printf("OS / Arch:      %s / %s\n", runtime.GOOS, runtime.GOARCH)
-	fmt.Printf("Source:         %s\n", c.source)
+	d, err := yaml.Marshal(c)
+	if err != nil {
+		fmt.Printf("Could not format version data: #%v", err)
+	}
+
+	fmt.Printf("%s", d)
 }
