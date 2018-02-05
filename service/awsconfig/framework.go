@@ -8,23 +8,15 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8scrdclient"
 	"github.com/giantswarm/operatorkit/framework"
-	"github.com/giantswarm/operatorkit/framework/resource/metricsresource"
 	"github.com/giantswarm/operatorkit/informer"
 	"github.com/giantswarm/randomkeytpr"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v1"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v2"
-	cloudconfigv2 "github.com/giantswarm/aws-operator/service/awsconfig/v2/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v2/key"
-	legacyv2 "github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/legacy"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v3"
-)
-
-const (
-	ResourceRetries  = 3
-	awsCloudProvider = "aws"
 )
 
 const (
@@ -182,87 +174,27 @@ func newResourceRouter(config FrameworkConfig) (*framework.ResourceRouter, error
 		}
 	}
 
-	// ccServiceV2 is used by the legacyv2 resource.
-	var ccServiceV2 *cloudconfigv2.CloudConfig
-	{
-		ccServiceConfig := cloudconfigv2.DefaultConfig()
-
-		ccServiceConfig.Logger = config.Logger
-
-		ccServiceV2, err = cloudconfigv2.New(ccServiceConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var legacyResource framework.Resource
-	{
-		legacyConfig := legacyv2.DefaultConfig()
-		legacyConfig.AwsConfig = guestAWSConfig
-		legacyConfig.AwsHostConfig = hostAWSConfig
-		legacyConfig.CertWatcher = certWatcher
-		legacyConfig.CloudConfig = ccServiceV2
-		legacyConfig.InstallationName = config.InstallationName
-		legacyConfig.K8sClient = config.K8sClient
-		legacyConfig.KeyWatcher = keyWatcher
-		legacyConfig.Logger = config.Logger
-		legacyConfig.PubKeyFile = config.PubKeyFile
-
-		legacyResource, err = legacyv2.New(legacyConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	// Metrics config for wrapping resources.
-	metricsWrapConfig := metricsresource.DefaultWrapConfig()
-	metricsWrapConfig.Name = config.Name
-
-	// Existing clusters are only processed by the legacy resource. We wrap it
-	// with the metrics resource for monitoring.
-	var legacyResources []framework.Resource
-	{
-		legacyResources = []framework.Resource{
-			legacyResource,
-		}
-
-		legacyResources, err = metricsresource.Wrap(legacyResources, metricsWrapConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	handlesFuncFunc := func(handledVersionBundles []string) func(obj interface{}) bool {
-		return func(obj interface{}) bool {
-			awsConfig, err := key.ToCustomObject(obj)
-			if err != nil {
-				return false
-			}
-			versionBundleVersion := key.VersionBundleVersion(awsConfig)
-
-			for _, v := range handledVersionBundles {
-				if versionBundleVersion == v {
-					return true
-				}
-			}
-
-			return false
-		}
-	}
-
 	var resourceSetV1 *framework.ResourceSet
 	{
-		c := framework.ResourceSetConfig{
-			Handles: handlesFuncFunc([]string{
+		c := v1.ResourceSetConfig{
+			CertsSearcher:      certWatcher,
+			GuestAWSConfig:     guestAWSConfig,
+			HostAWSConfig:      hostAWSConfig,
+			K8sClient:          config.K8sClient,
+			Logger:             config.Logger,
+			RandomkeysSearcher: keyWatcher,
+
+			HandledVersionBundles: []string{
 				"",
 				"0.1.0",
 				"1.0.0",
-			}),
-			Logger:    config.Logger,
-			Resources: legacyResources,
+			},
+			InstallationName: config.InstallationName,
+			ProjectName:      config.Name,
+			PubKeyFile:       config.PubKeyFile,
 		}
 
-		resourceSetV1, err = framework.NewResourceSet(c)
+		resourceSetV1, err = v1.NewResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
