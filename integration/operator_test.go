@@ -257,6 +257,8 @@ func operatorTearDown() {
 func writeAWSResourceValues() error {
 	awsResourceChartValuesEnv := os.ExpandEnv(awsResourceChartValues)
 
+	log.Printf("VERSION_BUNDLE_VERSION=%s", os.Getenv("VERSION_BUNDLE_VERSION"))
+
 	tmpl, err := template.New("awsResource").Parse(awsResourceChartValuesEnv)
 	if err != nil {
 		return microerror.Mask(err)
