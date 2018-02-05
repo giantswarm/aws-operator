@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
@@ -20,7 +21,7 @@ const (
 type Config struct {
 	// Dependencies.
 	AwsService       AwsService
-	CertWatcher      CertWatcher
+	CertWatcher      legacy.Searcher
 	Clients          Clients
 	CloudConfig      CloudConfigService
 	Logger           micrologger.Logger
@@ -46,7 +47,7 @@ type Resource struct {
 	// Dependencies.
 	awsService       AwsService
 	awsClients       Clients
-	certWatcher      CertWatcher
+	certWatcher      legacy.Searcher
 	cloudConfig      CloudConfigService
 	logger           micrologger.Logger
 	randomKeyWatcher RandomKeyWatcher

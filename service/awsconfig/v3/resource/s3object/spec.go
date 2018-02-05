@@ -59,10 +59,6 @@ type CloudConfigService interface {
 	NewWorkerTemplate(v1alpha1.AWSConfig, legacy.CompactTLSAssets) (string, error)
 }
 
-type CertWatcher interface {
-	SearchCerts(string) (legacy.AssetsBundle, error)
-}
-
 type RandomKeyWatcher interface {
 	SearchKeys(clusterID string) (map[randomkeytpr.Key][]byte, error)
 }
