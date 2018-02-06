@@ -21,7 +21,7 @@ import (
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/resources"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v2/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v1/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v2/key"
 )
 

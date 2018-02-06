@@ -3,8 +3,14 @@ package cloudconfig
 import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/legacy"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_2_0_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_0_0"
 	"github.com/giantswarm/microerror"
+)
+
+const (
+	// WorkerCloudConfigVersion defines the version of k8scloudconfig in use.
+	// It is used in the main stack output and S3 object paths.
+	WorkerCloudConfigVersion = "v_3_0_0"
 )
 
 // NewWorkerTemplate generates a new worker cloud config template and returns it
@@ -23,7 +29,11 @@ func (c *CloudConfig) NewWorkerTemplate(customObject v1alpha1.AWSConfig, certs l
 
 	var newCloudConfig *k8scloudconfig.CloudConfig
 	{
-		newCloudConfig, err = k8scloudconfig.NewCloudConfig(k8scloudconfig.WorkerTemplate, params)
+		cloudConfigConfig := k8scloudconfig.DefaultCloudConfigConfig()
+		cloudConfigConfig.Params = params
+		cloudConfigConfig.Template = k8scloudconfig.WorkerTemplate
+
+		newCloudConfig, err = k8scloudconfig.NewCloudConfig(cloudConfigConfig)
 		if err != nil {
 			return "", microerror.Mask(err)
 		}
@@ -54,63 +64,63 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			AssetContent: e.certs.WorkerCrt,
 			Path:         "/etc/kubernetes/ssl/worker-crt.pem.enc",
 			Owner:        "root:root",
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  0700,
 		},
 		{
 			AssetContent: e.certs.WorkerCA,
 			Path:         "/etc/kubernetes/ssl/worker-ca.pem.enc",
 			Owner:        "root:root",
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  0700,
 		},
 		{
 			AssetContent: e.certs.WorkerKey,
 			Path:         "/etc/kubernetes/ssl/worker-key.pem.enc",
 			Owner:        "root:root",
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  0700,
 		},
 		{
 			AssetContent: e.certs.CalicoClientCrt,
 			Path:         "/etc/kubernetes/ssl/calico/client-crt.pem.enc",
 			Owner:        "root:root",
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  0700,
 		},
 		{
 			AssetContent: e.certs.CalicoClientCA,
 			Path:         "/etc/kubernetes/ssl/calico/client-ca.pem.enc",
 			Owner:        "root:root",
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  0700,
 		},
 		{
 			AssetContent: e.certs.CalicoClientKey,
 			Path:         "/etc/kubernetes/ssl/calico/client-key.pem.enc",
 			Owner:        "root:root",
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  0700,
 		},
 		{
 			AssetContent: e.certs.EtcdServerCrt,
 			Path:         "/etc/kubernetes/ssl/etcd/client-crt.pem.enc",
 			Owner:        "root:root",
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  0700,
 		},
 		{
 			AssetContent: e.certs.EtcdServerCA,
 			Path:         "/etc/kubernetes/ssl/etcd/client-ca.pem.enc",
 			Owner:        "root:root",
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  0700,
 		},
 		{
 			AssetContent: e.certs.EtcdServerKey,
 			Path:         "/etc/kubernetes/ssl/etcd/client-key.pem.enc",
 			Owner:        "root:root",
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  0700,
 		},
 		{

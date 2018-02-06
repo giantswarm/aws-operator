@@ -3,9 +3,15 @@ package cloudconfig
 import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/legacy"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_2_0_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_0_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeytpr"
+)
+
+const (
+	// MasterCloudConfigVersion defines the version of k8scloudconfig in use.
+	// It is used in the main stack output and S3 object paths.
+	MasterCloudConfigVersion = "v_3_0_0"
 )
 
 // NewMasterTemplate generates a new master cloud config template and returns it
@@ -15,7 +21,9 @@ func (c *CloudConfig) NewMasterTemplate(customObject v1alpha1.AWSConfig, certs l
 
 	var params k8scloudconfig.Params
 	{
+		params.ApiserverEncryptionKey = keys.APIServerEncryptionKey
 		params.Cluster = customObject.Spec.Cluster
+		params.EtcdPort = customObject.Spec.Cluster.Etcd.Port
 		params.Extension = &MasterExtension{
 			certs:        certs,
 			customObject: customObject,
@@ -25,7 +33,11 @@ func (c *CloudConfig) NewMasterTemplate(customObject v1alpha1.AWSConfig, certs l
 
 	var newCloudConfig *k8scloudconfig.CloudConfig
 	{
-		newCloudConfig, err = k8scloudconfig.NewCloudConfig(k8scloudconfig.MasterTemplate, params)
+		cloudConfigConfig := k8scloudconfig.DefaultCloudConfigConfig()
+		cloudConfigConfig.Params = params
+		cloudConfigConfig.Template = k8scloudconfig.MasterTemplate
+
+		newCloudConfig, err = k8scloudconfig.NewCloudConfig(cloudConfigConfig)
 		if err != nil {
 			return "", microerror.Mask(err)
 		}
@@ -57,84 +69,84 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			AssetContent: e.certs.APIServerCrt,
 			Path:         "/etc/kubernetes/ssl/apiserver-crt.pem.enc",
 			Owner:        FileOwner,
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  FilePermission,
 		},
 		{
 			AssetContent: e.certs.APIServerCA,
 			Path:         "/etc/kubernetes/ssl/apiserver-ca.pem.enc",
 			Owner:        FileOwner,
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  FilePermission,
 		},
 		{
 			AssetContent: e.certs.APIServerKey,
 			Path:         "/etc/kubernetes/ssl/apiserver-key.pem.enc",
 			Owner:        FileOwner,
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  FilePermission,
 		},
 		{
 			AssetContent: e.certs.ServiceAccountCrt,
 			Path:         "/etc/kubernetes/ssl/service-account-crt.pem.enc",
 			Owner:        FileOwner,
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  FilePermission,
 		},
 		{
 			AssetContent: e.certs.ServiceAccountCA,
 			Path:         "/etc/kubernetes/ssl/service-account-ca.pem.enc",
 			Owner:        FileOwner,
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  FilePermission,
 		},
 		{
 			AssetContent: e.certs.ServiceAccountKey,
 			Path:         "/etc/kubernetes/ssl/service-account-key.pem.enc",
 			Owner:        FileOwner,
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  FilePermission,
 		},
 		{
 			AssetContent: e.certs.CalicoClientCrt,
 			Path:         "/etc/kubernetes/ssl/calico/client-crt.pem.enc",
 			Owner:        FileOwner,
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  FilePermission,
 		},
 		{
 			AssetContent: e.certs.CalicoClientCA,
 			Path:         "/etc/kubernetes/ssl/calico/client-ca.pem.enc",
 			Owner:        FileOwner,
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  FilePermission,
 		},
 		{
 			AssetContent: e.certs.CalicoClientKey,
 			Path:         "/etc/kubernetes/ssl/calico/client-key.pem.enc",
 			Owner:        FileOwner,
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  FilePermission,
 		},
 		{
 			AssetContent: e.certs.EtcdServerCrt,
 			Path:         "/etc/kubernetes/ssl/etcd/server-crt.pem.enc",
 			Owner:        FileOwner,
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  FilePermission,
 		},
 		{
 			AssetContent: e.certs.EtcdServerCA,
 			Path:         "/etc/kubernetes/ssl/etcd/server-ca.pem.enc",
 			Owner:        FileOwner,
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  FilePermission,
 		},
 		{
 			AssetContent: e.certs.EtcdServerKey,
 			Path:         "/etc/kubernetes/ssl/etcd/server-key.pem.enc",
 			Owner:        FileOwner,
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  FilePermission,
 		},
 		// Add second copy of files for etcd client certs. Will be replaced by
@@ -143,21 +155,21 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			AssetContent: e.certs.EtcdServerCrt,
 			Path:         "/etc/kubernetes/ssl/etcd/client-crt.pem.enc",
 			Owner:        FileOwner,
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  FilePermission,
 		},
 		{
 			AssetContent: e.certs.EtcdServerCA,
 			Path:         "/etc/kubernetes/ssl/etcd/client-ca.pem.enc",
 			Owner:        FileOwner,
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  FilePermission,
 		},
 		{
 			AssetContent: e.certs.EtcdServerKey,
 			Path:         "/etc/kubernetes/ssl/etcd/client-key.pem.enc",
 			Owner:        FileOwner,
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  FilePermission,
 		},
 		{
@@ -176,7 +188,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			AssetContent: e.keys.APIServerEncryptionKey,
 			Path:         "/etc/kubernetes/encryption/k8s-encryption-config.yaml.enc",
 			Owner:        FileOwner,
-			Encoding:     k8scloudconfig.GzipBase64,
+			Encoding:     GzipBase64Encoding,
 			Permissions:  0644,
 		},
 		// Add use-proxy-protocol to ingress-controller ConfigMap, this doesn't work
@@ -231,6 +243,20 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: decryptKeysServiceTemplate,
 			Name:         "decrypt-keys-assets.service",
+			Enable:       true,
+			Command:      "start",
+		},
+		// Format etcd EBS volume.
+		{
+			AssetContent: formatEtcdVolume,
+			Name:         "format-etcd-ebs.service",
+			Enable:       true,
+			Command:      "start",
+		},
+		// Mount etcd EBS volume.
+		{
+			AssetContent: mountEtcdVolume,
+			Name:         "etc-kubernetes-data-etcd.mount",
 			Enable:       true,
 			Command:      "start",
 		},

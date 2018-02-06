@@ -21,9 +21,8 @@ import (
 	"github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/namespace"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/service"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v3/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v3/resource/s3object"
-	// TODO v2 cloudconfig is used in legacy resource, v3 cloudconfig is used in v2 resources and v4 cloudconfig in v3 resources.
-	"github.com/giantswarm/aws-operator/service/awsconfig/v4/cloudconfig"
 )
 
 const (
