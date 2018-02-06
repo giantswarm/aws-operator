@@ -107,6 +107,7 @@ func TestMain(m *testing.M) {
 		}
 		os.Setenv("VERSION_BUNDLE_VERSION", version)
 	}
+	log.Printf("TESTED_VERSION %v", os.Getenv("TESTED_VERSION"))
 	log.Printf("VERSION_BUNDLE_VERSION %v", os.Getenv("VERSION_BUNDLE_VERSION"))
 
 	c = newAWSClient()

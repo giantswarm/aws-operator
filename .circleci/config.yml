@@ -18,7 +18,7 @@ e2eTest: &e2eTest
 
     - run:
         name: set CLUSTER_NAME env var
-        command: echo 'export CLUSTER_NAME=ci-awsop-${CIRCLE_SHA1:0:7}' >> $BASH_ENV
+        command: echo 'export CLUSTER_NAME=ci-awsop-${CIRCLE_SHA1:0:7}-${TESTED_VERSION}' >> $BASH_ENV
 
     - run: ./e2e-harness test
 
@@ -49,22 +49,22 @@ jobs:
 
   e2eTestCurrentVersionPR:
     environment:
-      TESTED_VERSION: current
+      TESTED_VERSION: "current"
     <<: *e2eTest
 
   e2eTestCurrentVersionMaster:
     environment:
-      TESTED_VERSION: current
+      TESTED_VERSION: "current"
     <<: *e2eTest
 
   e2eTestWIPVersionPR:
     environment:
-      TESTED_VERSION: wip
+      TESTED_VERSION: "wip"
     <<: *e2eTest
 
   e2eTestWIPVersionMaster:
     environment:
-      TESTED_VERSION: wip
+      TESTED_VERSION: "wip"
     <<: *e2eTest
 
 workflows:
