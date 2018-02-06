@@ -56,13 +56,7 @@ func statePendingOrRunning(instance *ec2.Instance) bool {
 }
 
 func stateTerminated(instance *ec2.Instance) bool {
-	stateCode := *instance.State.Code
-	switch stateCode {
-	case int64(EC2TerminatedState):
-		return true
-	}
-
-	return false
+	return *instance.State.Code == int64(EC2TerminatedState)
 }
 
 func (i Instance) findExisting() (*ec2.Instance, error) {
