@@ -3,12 +3,7 @@
 
 # aws-operator
 
-The aws-operator handles Kubernetes clusters running on a Kubernetes cluster
-inside of AWS.
-
-
-## Prerequisites
-
+The aws-operator manages Kubernetes clusters running on AWS.
 
 ## Getting Project
 
@@ -29,62 +24,63 @@ Build the standard way.
 go build github.com/giantswarm/aws-operator
 ```
 
-
 ## Running aws-operator
 
 See [this guide][examples-local].
 
 [examples-local]: https://github.com/giantswarm/aws-operator/blob/master/examples
 
-
 ## Architecture
 
+The operator uses our [operatorkit](1) framework. It manages an `awsconfig`
+CRD using a generated client stored in our [apiextensions](2) repo. Releases
+are versioned using [version bundles](3).
 
-### S3 buckets
+The operator provisions guest Kubernetes clusters running on AWS. It runs in a
+host Kubernetes cluster also running on AWS. 
 
-S3 buckets are used for storing cloudconfigs, which are fetched by the EC2
-instances and executed. Then cloud-init, by using those cloudconfigs, takes
-care of running the needed systemd services and containers. The result of
-successful execution of cloud-init on each EC2 instance should be the working
-Kubernetes cluster.
+[1]:https://github.com/giantswarm/operatorkit
+[2]:https://github.com/giantswarm/apiextensions
+[3]:https://github.com/giantswarm/versionbundle
 
-Buckets are created for each customer, then inside the buckets there are
-folders for each cluster.
+### CloudFormation
 
-Each cluster contains the cloudconfig for master and worker instances.
+The guest Kubernetes clusters are provisioned using [AWS CloudFormation](4). The
+resources are split between 3 CloudFormation stacks.
 
-For example, assuming that we have the following customers with clusters:
+* guest-main manages the guest cluster resources.
+* host-setup manages an IAM role used for VPC peering.
+* host-main manages network routes for the VPC peering connection.
 
-- first-customer
-  - first-customers-cluster-1
-  - first-customers-cluster-2
-- second-customer
-  - second-customers-cluster-1
+The host cluster may run in a separate AWS account. If so resources are created
+in both the host and guest AWS accounts.
 
-we will have the following buckets with contents:
+[4]:https://aws.amazon.com/cloudformation
 
-```
-first-customer
-|- first-customers-cluster-1
-|  |- cloudconfig
-|     |- master
-|     |- worker
-|- first-customers-cluster-2
-|  |- cloudconfig
-|     |- master
-|     |- worker
+### Other AWS Resources
 
-second-customer
-|- second-customers-cluster
-|  |- cloudconfig
-|     |- master
-|     |- worker
+As well as the CloudFormation stacks we also provision a KMS key and S3 bucket
+per cluster. This is to upload cloudconfigs for the cluster nodes. The
+cloudconfigs contain TLS certificates which are encrypted using the KMS key.
 
-```
+### Kubernetes Resources
+ 
+The operator also creates a Kubernetes namespace per guest cluster with a
+service and endpoints. These are used by the host cluster to access the guest
+cluster.
+
+### Certificates
+
+Authentication for the cluster components and end-users uses TLS certificates.
+These are provisioned using [Hashicorp Vault](5) and are managed by our
+[cert-operator](6). 
+
+[5]:https://www.vaultproject.io/
+[6]:https://github.com/giantswarm/cert-operator
 
 ## Secret
 
-Here the plain passwords/tokens have to be inserted.
+Here the AWS IAM credentials have to be inserted.
 ```
 service:
   aws:
