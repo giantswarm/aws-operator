@@ -10,7 +10,7 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v2/key"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v4/key"
 )
 
 const (

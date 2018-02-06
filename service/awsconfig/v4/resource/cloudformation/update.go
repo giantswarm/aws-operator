@@ -9,7 +9,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/framework"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v2/key"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v4/key"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
