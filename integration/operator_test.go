@@ -14,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
+	"github.com/giantswarm/aws-operator/service"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v2/key"
 	"github.com/giantswarm/microerror"
 )
@@ -97,6 +98,16 @@ func TestMain(m *testing.M) {
 		log.Printf("unexpected error: %v\n", err)
 		os.Exit(1)
 	}
+
+	if os.Getenv("VERSION_BUNDLE_VERSION") == "" {
+		version := f.GetVersionBundleVersion(service.NewVersionBundles(), os.Getenv("TESTED_VERSION"))
+		if version == "" {
+			log.Printf("No version bundle version for TESTED_VERSION %q", os.Getenv("TESTED_VERSION"))
+			os.Exit(0)
+		}
+		os.Setenv("VERSION_BUNDLE_VERSION", version)
+	}
+	log.Printf("VERSION_BUNDLE_VERSION %v", os.Getenv("VERSION_BUNDLE_VERSION"))
 
 	c = newAWSClient()
 
