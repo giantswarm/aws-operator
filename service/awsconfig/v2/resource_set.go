@@ -13,6 +13,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v2/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v2/key"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/cloudformation"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/cloudformation/adapter"
@@ -22,8 +23,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/service"
-	// TODO v2 cloudconfig is used in legacy resource, v3 cloudconfig is used in v2 resources and v4 cloudconfig in v3 resources.
-	"github.com/giantswarm/aws-operator/service/awsconfig/v3/cloudconfig"
 )
 
 const (

@@ -10,10 +10,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v1/cloudconfig"
 	legacyv2 "github.com/giantswarm/aws-operator/service/awsconfig/v1/resource/legacy"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v2/key"
-	// TODO v2 cloudconfig is used in legacy resource, v3 cloudconfig is used in v2 resources and v4 cloudconfig in v3 resources.
-	"github.com/giantswarm/aws-operator/service/awsconfig/v2/cloudconfig"
 )
 
 const (
