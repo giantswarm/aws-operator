@@ -17,6 +17,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/awsconfig/v1"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v2"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v3"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v4"
 )
 
 const (
