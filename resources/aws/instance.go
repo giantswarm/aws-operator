@@ -55,6 +55,10 @@ func statePendingOrRunning(instance *ec2.Instance) bool {
 	return false
 }
 
+func stateTerminated(instance *ec2.Instance) bool {
+	return *instance.State.Code == int64(EC2TerminatedState)
+}
+
 func (i Instance) findExisting() (*ec2.Instance, error) {
 	filters := []*ec2.Filter{}
 	if i.ClusterName != "" {
@@ -93,7 +97,7 @@ func (i Instance) findExisting() (*ec2.Instance, error) {
 	var instancesFound int
 	for _, reservation := range reservations.Reservations {
 		for _, instance := range reservation.Instances {
-			if statePendingOrRunning(instance) {
+			if !stateTerminated(instance) {
 				existingInstance = instance
 				instancesFound++
 			}
