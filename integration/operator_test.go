@@ -4,7 +4,7 @@ package integration
 
 import (
 	"fmt"
-	"html/template"
+	"io/ioutil"
 	"log"
 	"os"
 	"testing"
@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
 	"github.com/giantswarm/aws-operator/service"
@@ -51,20 +52,21 @@ clusterVersion: v_0_1_0
 sshPublicKey: ${IDRSA_PUB}
 versionBundleVersion: ${VERSION_BUNDLE_VERSION}
 aws:
-  networkCIDR: "{{.NetworkCIDR}}"
-  privateSubnetCIDR: "{{.PrivateSubnetCIDR}}"
-  publicSubnetCIDR: "{{.PublicSubnetCIDR}}"
+  networkCIDR: "10.12.0.0/24"
+  privateSubnetCIDR: "10.12.0.0/25"
+  publicSubnetCIDR: "10.12.0.128/25"
   region: ${AWS_REGION}
   apiHostedZone: ${AWS_API_HOSTED_ZONE}
   ingressHostedZone: ${AWS_INGRESS_HOSTED_ZONE}
-  routeTable0: ${AWS_ROUTE_TABLE_0}
-  routeTable1: ${AWS_ROUTE_TABLE_1}
+  routeTable0: ci_awsop_peer_rt_0
+  routeTable1: ci_awsop_peer_rt_1
   vpcPeerId: ${AWS_VPC_PEER_ID}
 `
 )
 
 type aWSClient struct {
 	EC2 *ec2.EC2
+	CF  *cloudformation.CloudFormation
 }
 
 func newAWSClient() aWSClient {
@@ -78,6 +80,7 @@ func newAWSClient() aWSClient {
 	s := session.New(awsCfg)
 	clients := aWSClient{
 		EC2: ec2.New(s),
+		CF:  cloudformation.New(s),
 	}
 
 	return clients
@@ -112,6 +115,11 @@ func TestMain(m *testing.M) {
 
 	c = newAWSClient()
 
+	if err := createHostPeerVPC(); err != nil {
+		log.Printf("unexpected error: %v\n", err)
+		os.Exit(1)
+	}
+
 	if err := f.SetUp(); err != nil {
 		log.Printf("unexpected error: %v\n", err)
 		v = 1
@@ -129,6 +137,7 @@ func TestMain(m *testing.M) {
 	f.DeleteGuestCluster()
 	operatorTearDown()
 	f.TearDown()
+	deleteHostPeerVPC()
 
 	os.Exit(v)
 }
@@ -268,24 +277,9 @@ func operatorTearDown() {
 
 func writeAWSResourceValues() error {
 	awsResourceChartValuesEnv := os.ExpandEnv(awsResourceChartValues)
+	d := []byte(awsResourceChartValuesEnv)
 
-	tmpl, err := template.New("awsResource").Parse(awsResourceChartValuesEnv)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	f, err := os.Create(awsResourceValuesFile)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	defer f.Close()
-
-	vpc, err := newAWSVPCBlock(c)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	err = tmpl.Execute(f, vpc)
+	err := ioutil.WriteFile(awsResourceValuesFile, d, 0644)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -333,4 +327,82 @@ func removeWorker(clusterName string) error {
 	patch[0].Path = "/spec/aws/workers/1"
 
 	return f.ApplyAWSConfigPatch(patch, clusterName)
+}
+
+func createHostPeerVPC() error {
+	log.Printf("Creating Host Peer VPC stack")
+
+	hostVPCStack := `AWSTemplateFormatVersion: 2010-09-09
+Description: CI Host Stack with Peering VPC and route tables
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.11.0.0/16
+      Tags:
+      - Key: Name
+        Value: ${CLUSTER_NAME}
+  PeerRouteTable0:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: ci_awsop_peer_rt_0
+  PeerRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: ci_awsop_peer_rt_1
+Outputs:
+  VPCID:
+    Description: Accepter VPC ID
+    Value: !Ref VPC
+
+`
+	stackName := "host-peer-" + os.Getenv("CLUSTER_NAME")
+	stackInput := &cloudformation.CreateStackInput{
+		StackName:        aws.String(stackName),
+		TemplateBody:     aws.String(os.ExpandEnv(hostVPCStack)),
+		TimeoutInMinutes: aws.Int64(2),
+	}
+	_, err := c.CF.CreateStack(stackInput)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	err = c.CF.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
+		StackName: aws.String(stackName),
+	})
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	describeOutput, err := c.CF.DescribeStacks(&cloudformation.DescribeStacksInput{
+		StackName: aws.String(stackName),
+	})
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	for _, o := range describeOutput.Stacks[0].Outputs {
+		if *o.OutputKey == "VPCID" {
+			os.Setenv("AWS_VPC_PEER_ID", *o.OutputValue)
+			break
+		}
+	}
+	log.Printf("Host Peer VPC stack created")
+	return nil
+}
+
+func deleteHostPeerVPC() error {
+	log.Printf("Deleting Host Peer VPC stack")
+
+	_, err := c.CF.DeleteStack(&cloudformation.DeleteStackInput{
+		StackName: aws.String("host-peer-" + os.Getenv("CLUSTER_NAME")),
+	})
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
 }
