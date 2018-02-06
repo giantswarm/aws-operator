@@ -1,7 +1,7 @@
 package adapter
 
 // NOTE(PK): This import is disturbing. I'm not bothering. It's first candidate to go away.
-import "github.com/giantswarm/aws-operator/service/awsconfig/v3/cloudconfig"
+import "github.com/giantswarm/aws-operator/service/awsconfig/v2/cloudconfig"
 
 // template related to this adapter: service/templates/cloudformation/guest/outputs.yaml
 

@@ -7,7 +7,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/awsconfig/v2/key"
 	// NOTE(PK): This import is disturbing. I'm not bothering. It's first candidate to go away.
-	"github.com/giantswarm/aws-operator/service/awsconfig/v3/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v2/cloudconfig"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
