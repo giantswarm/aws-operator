@@ -249,6 +249,29 @@ func newResourceRouter(config FrameworkConfig) (*framework.ResourceRouter, error
 		}
 	}
 
+	var resourceSetV4 *framework.ResourceSet
+	{
+		c := v4.ResourceSetConfig{
+			CertsSearcher:      certWatcher,
+			GuestAWSClients:    awsClients,
+			HostAWSClients:     awsHostClients,
+			K8sClient:          config.K8sClient,
+			Logger:             config.Logger,
+			RandomkeysSearcher: keyWatcher,
+
+			HandledVersionBundles: []string{
+				"2.1.0",
+			},
+			InstallationName: config.InstallationName,
+			ProjectName:      config.Name,
+		}
+
+		resourceSetV4, err = v4.NewResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var resourceRouter *framework.ResourceRouter
 	{
 		c := framework.ResourceRouterConfig{
@@ -256,6 +279,7 @@ func newResourceRouter(config FrameworkConfig) (*framework.ResourceRouter, error
 				resourceSetV1,
 				resourceSetV2,
 				resourceSetV3,
+				resourceSetV4,
 			},
 		}
 
