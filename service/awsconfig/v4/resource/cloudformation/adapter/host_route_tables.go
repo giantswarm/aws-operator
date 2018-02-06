@@ -10,7 +10,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v3/key"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v4/key"
 )
 
 // template related to this adapter: service/templates/cloudformation/host-post/route_tables.yaml

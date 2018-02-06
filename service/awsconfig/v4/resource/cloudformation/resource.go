@@ -8,8 +8,8 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v3/key"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v3/resource/cloudformation/adapter"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v4/key"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v4/resource/cloudformation/adapter"
 )
 
 const (
