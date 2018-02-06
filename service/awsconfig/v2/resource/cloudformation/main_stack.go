@@ -11,10 +11,9 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
+	"github.com/giantswarm/aws-operator/service/awsconfig/v2/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v2/key"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/cloudformation/adapter"
-	// NOTE(PK): This import is disturbing. I'm not bothering. It's first candidate to go away.
-	"github.com/giantswarm/aws-operator/service/awsconfig/v2/cloudconfig"
 )
 
 func newMainStack(customObject v1alpha1.AWSConfig) (StackState, error) {
