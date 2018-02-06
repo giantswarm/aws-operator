@@ -39,6 +39,7 @@ type ResourceSetConfig struct {
 
 	HandledVersionBundles []string
 	InstallationName      string
+	K8sAPIExtraArgs       []string
 	ProjectName           string
 }
 
@@ -114,7 +115,8 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 	var cloudConfig *cloudconfig.CloudConfig
 	{
 		c := cloudconfig.Config{
-			Logger: config.Logger,
+			Logger:          config.Logger,
+			K8sAPIExtraArgs: config.K8sAPIExtraArgs,
 		}
 
 		cloudConfig, err = cloudconfig.New(c)

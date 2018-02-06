@@ -33,6 +33,7 @@ type FrameworkConfig struct {
 	GuestAWSConfig   FrameworkConfigAWSConfig
 	HostAWSConfig    FrameworkConfigAWSConfig
 	InstallationName string
+	K8sAPIExtraArgs  []string
 	// Name is the name of the project.
 	Name       string
 	PubKeyFile string
@@ -257,6 +258,7 @@ func newResourceRouter(config FrameworkConfig) (*framework.ResourceRouter, error
 			GuestAWSClients:    awsClients,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
+			K8sAPIExtraArgs:    config.K8sAPIExtraArgs,
 			Logger:             config.Logger,
 			RandomkeysSearcher: keyWatcher,
 
