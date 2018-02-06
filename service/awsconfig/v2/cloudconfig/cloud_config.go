@@ -6,8 +6,9 @@ import (
 )
 
 const (
-	FileOwner      = "root:root"
-	FilePermission = 0700
+	FileOwner          = "root:root"
+	FilePermission     = 0700
+	GzipBase64Encoding = "gzip+base64"
 )
 
 // Config represents the configuration used to create a cloud config service.

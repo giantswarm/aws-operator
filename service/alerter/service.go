@@ -15,8 +15,9 @@ import (
 )
 
 const (
-	alertIntervalMins = 5
-	vpcResourceType   = "vpc"
+	alertIntervalMins      = 5
+	masterNodeResourceType = "master_node"
+	vpcResourceType        = "vpc"
 )
 
 // Config represents the configuration used to create a new service.
@@ -105,29 +106,65 @@ func (s *Service) StartAlerts() {
 		for {
 			select {
 			case <-alertChan:
-				err := s.OrphanResourcesAlert()
+				err := s.RunAllChecks()
 				if err != nil {
-					s.logger.Log("error", fmt.Sprintf("could not execute orphan resources alert: '%#v'", err))
+					s.logger.Log("error", fmt.Sprintf("could not execute run all checks: '%#v'", err))
 				}
 			}
 		}
 	}()
 }
 
-// OrphanResourcesAlert looks for AWS resources not associated with a cluster.
-func (s *Service) OrphanResourcesAlert() error {
+// RunAllChecks looks for problems with clusters that we want to alert on.
+func (s *Service) RunAllChecks() error {
 	clusterIDs, err := s.ListClusters()
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
+	err = s.FindDuplicateMasterNodes(clusterIDs)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	err = s.OrphanResourcesAlert(clusterIDs)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
+// FindDuplicateMasterNodes looks for clusters with duplicate master nodes
+// which is an error state.
+func (s *Service) FindDuplicateMasterNodes(clusterIDs []string) error {
+	affectedClusters := []string{}
+
+	for _, clusterID := range clusterIDs {
+		masterInstances, err := s.ListMasterInstances(clusterID)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if len(masterInstances) > 1 {
+			affectedClusters = append(affectedClusters, clusterID)
+		}
+	}
+
+	s.UpdateDuplicateResourceMetrics(masterNodeResourceType, affectedClusters)
+
+	return nil
+}
+
+// OrphanResourcesAlert looks for AWS resources not associated with a cluster.
+func (s *Service) OrphanResourcesAlert(clusterIDs []string) error {
 	vpcNames, err := s.ListVpcs()
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
 	orphanVpcs := FindOrphanResources(clusterIDs, vpcNames)
-	s.UpdateMetrics(vpcResourceType, orphanVpcs)
+	s.UpdateOrphanResourceMetrics(vpcResourceType, orphanVpcs)
 
 	return nil
 }
@@ -167,8 +204,20 @@ func FindOrphanResources(clusterIDs []string, resourceNames []string) []string {
 	return orphanResources
 }
 
-// UpdateMetrics updates the metric and logs the results.
-func (s Service) UpdateMetrics(resourceType string, resourceNames []string) {
+// UpdateDuplicateResourceMetrics updates the metric and logs the results.
+func (s Service) UpdateDuplicateResourceMetrics(resourceType string, clusterIDs []string) {
+	resourceCount := len(clusterIDs)
+
+	duplicateResourcesTotal.WithLabelValues(resourceType).Set(float64(resourceCount))
+	s.logger.Log("info", fmt.Sprintf("alerter service found %d clusters with duplicate resources", resourceCount))
+
+	if resourceCount > 0 {
+		s.logger.Log("info", fmt.Sprintf("clusters with duplicate %s %s", resourceType, strings.Join(clusterIDs, ",")))
+	}
+}
+
+// UpdateOrphanResourceMetrics updates the metric and logs the results.
+func (s Service) UpdateOrphanResourceMetrics(resourceType string, resourceNames []string) {
 	resourceCount := len(resourceNames)
 
 	orphanResourcesTotal.WithLabelValues(resourceType).Set(float64(resourceCount))
