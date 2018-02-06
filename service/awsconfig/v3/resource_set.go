@@ -13,17 +13,16 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v2/key"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/cloudformation"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/cloudformation/adapter"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/endpoints"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/kmskey"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/namespace"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/s3bucket"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/service"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v3/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v3/key"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v3/resource/cloudformation"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v3/resource/cloudformation/adapter"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v3/resource/endpoints"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v3/resource/kmskey"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v3/resource/namespace"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v3/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v3/resource/s3object"
-	// TODO v2 cloudconfig is used in legacy resource, v3 cloudconfig is used in v2 resources and v4 cloudconfig in v3 resources.
-	"github.com/giantswarm/aws-operator/service/awsconfig/v4/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v3/resource/service"
 )
 
 const (
