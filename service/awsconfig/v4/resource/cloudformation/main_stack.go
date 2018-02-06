@@ -11,9 +11,9 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v3/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v3/key"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v3/resource/cloudformation/adapter"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v4/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v4/key"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v4/resource/cloudformation/adapter"
 )
 
 func newMainStack(customObject v1alpha1.AWSConfig) (StackState, error) {

@@ -9,7 +9,7 @@ import (
 	"github.com/giantswarm/operatorkit/framework"
 
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v3/key"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v4/key"
 )
 
 const (
