@@ -3,6 +3,7 @@ e2eTest: &e2eTest
     working_directory: /home/circleci/.go_workspace/src/github.com/giantswarm/aws-operator
     environment:
       MINIKUBE_VERSION: v0.25.0
+      VERSION_BUNDLE_VERSION: "2.0.0"
     steps:
     - checkout
 
