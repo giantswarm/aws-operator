@@ -4,7 +4,7 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v2/key"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v3/key"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/framework"
 	apiv1 "k8s.io/api/core/v1"
