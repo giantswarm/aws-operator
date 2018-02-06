@@ -463,10 +463,10 @@ func (f *framework) GetVersionBundleVersion(bundle []versionbundle.Bundle, vType
 	var output string
 	for _, v := range bundle {
 		if (vType == "current" || vType == "") && !v.Deprecated && !v.WIP {
-			output = v.Version
+			return v.Version
 		}
 		if vType == "wip" && v.WIP {
-			output = v.Version
+			return v.Version
 		}
 	}
 	return output
