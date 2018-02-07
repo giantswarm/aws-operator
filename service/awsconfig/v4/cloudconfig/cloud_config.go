@@ -49,6 +49,8 @@ func New(config Config) (*CloudConfig, error) {
 		for _, arg := range config.K8sAPIExtraArgs {
 			if !strings.HasSuffix(arg, "=") {
 				k8sAPIExtraArgs = append(k8sAPIExtraArgs, arg)
+			} else {
+				config.Logger.Log("warning", "api-server arguments must not be empty", "argument", arg)
 			}
 		}
 	}
