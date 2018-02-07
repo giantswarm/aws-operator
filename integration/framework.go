@@ -460,13 +460,19 @@ func (f *framework) ApplyAWSConfigPatch(patch []PatchSpec, clusterName string) e
 }
 
 func (f *framework) GetVersionBundleVersion(bundle []versionbundle.Bundle, vType string) string {
+	var output string
+	log.Printf("Tested version %q", vType)
+
 	for _, v := range bundle {
 		if (vType == "current" || vType == "") && !v.Deprecated && !v.WIP {
-			return v.Version
+			output = v.Version
+			break
 		}
 		if vType == "wip" && v.WIP {
-			return v.Version
+			output = v.Version
+			break
 		}
 	}
-	return ""
+	log.Printf("Version Bundle Version %q", output)
+	return output
 }
