@@ -24,6 +24,7 @@ import (
 	giantclientset "github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/e2e-harness/pkg/harness"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/versionbundle"
 )
 
 // PatchSpec is a generic patch type to update objects with JSONPatchType operations.
@@ -456,4 +457,16 @@ func (f *framework) ApplyAWSConfigPatch(patch []PatchSpec, clusterName string) e
 	}
 
 	return nil
+}
+
+func (f *framework) GetVersionBundleVersion(bundle []versionbundle.Bundle, vType string) string {
+	for _, v := range bundle {
+		if (vType == "current" || vType == "") && !v.Deprecated && !v.WIP {
+			return v.Version
+		}
+		if vType == "wip" && v.WIP {
+			return v.Version
+		}
+	}
+	return ""
 }
