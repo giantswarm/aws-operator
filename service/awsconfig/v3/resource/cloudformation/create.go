@@ -29,7 +29,6 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		r.logger.LogCtx(ctx, "debug", "waiting for AWS cloudformation stack to be completed")
 		err = r.Clients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
 			StackName: stackInput.StackName,
 		})
@@ -139,7 +138,6 @@ func (r *Resource) createHostPreStack(ctx context.Context, customObject v1alpha1
 }
 
 func (r *Resource) createHostPostStack(ctx context.Context, customObject v1alpha1.AWSConfig) error {
-	r.logger.LogCtx(ctx, "debug", "starting creation of AWS Host Post-Guest cloudformation stack")
 	stackName := key.MainHostPostStackName(customObject)
 	mainTemplate, err := r.getMainHostPostTemplateBody(customObject)
 	if err != nil {

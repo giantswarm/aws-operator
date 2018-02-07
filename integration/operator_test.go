@@ -58,8 +58,8 @@ aws:
   region: ${AWS_REGION}
   apiHostedZone: ${AWS_API_HOSTED_ZONE}
   ingressHostedZone: ${AWS_INGRESS_HOSTED_ZONE}
-  routeTable0: ci_awsop_peer_rt_0
-  routeTable1: ci_awsop_peer_rt_1
+  routeTable0: ${AWS_ROUTE_TABLE_0}
+  routeTable1: ${AWS_ROUTE_TABLE_1}
   vpcPeerId: ${AWS_VPC_PEER_ID}
 `
 )
@@ -349,20 +349,22 @@ Resources:
       VpcId: !Ref VPC
       Tags:
       - Key: Name
-        Value: ci_awsop_peer_rt_0
+        Value: ${AWS_ROUTE_TABLE_0}
   PeerRouteTable1:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
       - Key: Name
-        Value: ci_awsop_peer_rt_1
+        Value: ${AWS_ROUTE_TABLE_1}
 Outputs:
   VPCID:
     Description: Accepter VPC ID
     Value: !Ref VPC
 
 `
+	os.Setenv("AWS_ROUTE_TABLE_0", os.Getenv("CLUSTER_NAME")+"_0")
+	os.Setenv("AWS_ROUTE_TABLE_1", os.Getenv("CLUSTER_NAME")+"_1")
 	stackName := "host-peer-" + os.Getenv("CLUSTER_NAME")
 	stackInput := &cloudformation.CreateStackInput{
 		StackName:        aws.String(stackName),
