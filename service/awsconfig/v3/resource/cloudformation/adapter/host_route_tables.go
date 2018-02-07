@@ -82,7 +82,6 @@ func waitForPeeringConnectionID(cfg Config) (string, error) {
 			return microerror.Mask(err)
 		}
 		if len(output.VpcPeeringConnections) > 1 {
-			logger.Log("debug", fmt.Sprintf("too many peering connections; clusterID %s, first %s, second %s", clusterID, *output.VpcPeeringConnections[0].VpcPeeringConnectionId, *output.VpcPeeringConnections[1].VpcPeeringConnectionId))
 			return microerror.Mask(tooManyResultsError)
 		}
 		peeringID = *output.VpcPeeringConnections[0].VpcPeeringConnectionId
