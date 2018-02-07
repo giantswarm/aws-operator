@@ -43,7 +43,7 @@ const (
 	certOperatorValuesFile = "/tmp/cert-operator-values.yaml"
 	// certOperatorChartValues values required by cert-operator-chart, the environment
 	// variables will be expanded before writing the contents to a file.
-	certOperatorChartValues = `commonDomain: ${COMMON_DOMAIN}
+	certOperatorChartValues = `commonDomain: ${COMMON_DOMAIN_GUEST}
 clusterName: ${CLUSTER_NAME}
 Installation:
   V1:
@@ -55,7 +55,7 @@ Installation:
     Guest:
       Kubernetes:
         API:
-          EndpointBase: ${COMMON_DOMAIN}
+          EndpointBase: ${COMMON_DOMAIN_GUEST}
     Secret:
       CertOperator:
         SecretYaml: |
@@ -278,7 +278,7 @@ func (f *framework) InstallCertOperator() error {
 }
 
 func (f *framework) InstallCertResource() error {
-	err := runCmd("helm registry install quay.io/giantswarm/cert-resource-lab-chart:stable -- -n cert-resource-lab --set commonDomain=${COMMON_DOMAIN} --set clusterName=${CLUSTER_NAME}")
+	err := runCmd("helm registry install quay.io/giantswarm/cert-resource-lab-chart:stable -- -n cert-resource-lab --set commonDomain=${COMMON_DOMAIN_GUEST} --set clusterName=${CLUSTER_NAME}")
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -336,7 +336,7 @@ func (f *framework) initGuestClientset() error {
 		CertData: secret.Data["crt"],
 		KeyData:  secret.Data["key"],
 	}
-	config.Host = os.ExpandEnv("https://api.${CLUSTER_NAME}.${COMMON_DOMAIN}")
+	config.Host = os.ExpandEnv("https://api.${CLUSTER_NAME}.${COMMON_DOMAIN_GUEST}")
 
 	cs, err := kubernetes.NewForConfig(config)
 	if err != nil {
