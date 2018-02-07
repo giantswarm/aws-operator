@@ -110,6 +110,7 @@ func TestMain(m *testing.M) {
 		}
 		os.Setenv("VERSION_BUNDLE_VERSION", version)
 	}
+	log.Printf("CIRCLE_NODE_INDEX %v", os.Getenv("CIRCLE_NODE_INDEX"))
 	log.Printf("TESTED_VERSION %v", os.Getenv("TESTED_VERSION"))
 	log.Printf("VERSION_BUNDLE_VERSION %v", os.Getenv("VERSION_BUNDLE_VERSION"))
 
