@@ -3,7 +3,6 @@
 package service
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
@@ -143,11 +142,11 @@ func New(config Config) (*Service, error) {
 				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
 			},
 			InstallationName: config.Viper.GetString(config.Flag.Service.Installation.Name),
-			K8sAPIExtraArgs: []string{
-				fmt.Sprintf("--oidc-client-id=%s", config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID)),
-				fmt.Sprintf("--oidc-issuer-url=%s", config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL)),
-				fmt.Sprintf("--oidc-username-claim=%s", config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.UsernameClaim)),
-				fmt.Sprintf("--oidc-groups-claim=%s", config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.GroupsClaim)),
+			OIDC: awsconfig.FrameworkConfigOIDCConfig{
+				ClientID:      config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID),
+				IssuerURL:     config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL),
+				UsernameClaim: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.UsernameClaim),
+				GroupsClaim:   config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.GroupsClaim),
 			},
 			Name:       config.Name,
 			PubKeyFile: config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile),

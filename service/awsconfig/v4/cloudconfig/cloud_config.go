@@ -1,7 +1,7 @@
 package cloudconfig
 
 import (
-	"strings"
+	"fmt"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -16,8 +16,8 @@ const (
 // Config represents the configuration used to create a cloud config service.
 type Config struct {
 	// Dependencies.
-	Logger          micrologger.Logger
-	K8sAPIExtraArgs []string
+	Logger micrologger.Logger
+	OIDC   OIDCConfig
 }
 
 // DefaultConfig provides a default configuration to create a new cloud config
@@ -25,8 +25,7 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
-		Logger:          nil,
-		K8sAPIExtraArgs: []string{},
+		Logger: nil,
 	}
 }
 
@@ -35,6 +34,14 @@ type CloudConfig struct {
 	// Dependencies.
 	logger          micrologger.Logger
 	k8sAPIExtraArgs []string
+}
+
+// OIDCConfig represents the configuration of the OIDC authorization provider
+type OIDCConfig struct {
+	ClientID      string
+	IssuerURL     string
+	UsernameClaim string
+	GroupsClaim   string
 }
 
 // New creates a new configured cloud config service.
@@ -46,12 +53,17 @@ func New(config Config) (*CloudConfig, error) {
 
 	var k8sAPIExtraArgs []string
 	{
-		for _, arg := range config.K8sAPIExtraArgs {
-			if !strings.HasSuffix(arg, "=") {
-				k8sAPIExtraArgs = append(k8sAPIExtraArgs, arg)
-			} else {
-				config.Logger.Log("warning", "api-server arguments must not be empty", "argument", arg)
-			}
+		if config.OIDC.ClientID != "" {
+			k8sAPIExtraArgs = append(k8sAPIExtraArgs, fmt.Sprintf("--oidc-client-id=%s", config.OIDC.ClientID))
+		}
+		if config.OIDC.IssuerURL != "" {
+			k8sAPIExtraArgs = append(k8sAPIExtraArgs, fmt.Sprintf("--oidc-issuer-url=%s", config.OIDC.IssuerURL))
+		}
+		if config.OIDC.UsernameClaim != "" {
+			k8sAPIExtraArgs = append(k8sAPIExtraArgs, fmt.Sprintf("--oidc-username-claim=%s", config.OIDC.UsernameClaim))
+		}
+		if config.OIDC.GroupsClaim != "" {
+			k8sAPIExtraArgs = append(k8sAPIExtraArgs, fmt.Sprintf("--oidc-groups-claim=%s", config.OIDC.GroupsClaim))
 		}
 	}
 
