@@ -317,6 +317,11 @@ func NewVersionBundles() []versionbundle.Bundle {
 					Description: "Add OIDC integration for Kubernetes api-server.",
 					Kind:        versionbundle.KindAdded,
 				},
+				{
+					Component:   "cloudconfig",
+					Description: "Replace systemd units for Kubernetes components with self-hosted pods.",
+					Kind:        versionbundle.KindChanged,
+				},
 			},
 			Components: []versionbundle.Component{
 				{
