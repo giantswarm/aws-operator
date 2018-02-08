@@ -478,14 +478,14 @@ func GetVersionBundleVersion(bundle []versionbundle.Bundle, vType string) (strin
 
 	// sort bundle by time to get the newest vbv.
 	s := versionbundle.SortBundlesByTime(bundle)
-	sort.Sort(s)
-	for i := len(s) - 1; i >= 0; i-- {
-		if (vType == "current" || vType == "") && !s[i].Deprecated && !s[i].WIP {
-			output = s[i].Version
+	sort.Sort(sort.Reverse(s))
+	for _, v := range s {
+		if (vType == "current" || vType == "") && !v.Deprecated && !v.WIP {
+			output = v.Version
 			break
 		}
-		if vType == "wip" && s[i].WIP {
-			output = s[i].Version
+		if vType == "wip" && v.WIP {
+			output = v.Version
 			break
 		}
 	}
