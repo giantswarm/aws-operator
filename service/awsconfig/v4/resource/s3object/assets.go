@@ -28,7 +28,7 @@ func (s *Resource) encodeTLSAssets(assets legacy.AssetsBundle, kmsKeyArn string)
 func (s *Resource) encodeKeyAssets(assets map[randomkeytpr.Key][]byte, kmsKeyArn string) (*randomkeytpr.CompactRandomKeyAssets, error) {
 	encryptionKey, ok := assets[randomkeytpr.EncryptionKey]
 	if !ok {
-		return nil, microerror.Mask(invalidConfigError)
+		return nil, microerror.Maskf(invalidConfigError, "encryption key not found")
 	}
 
 	encryptionConfig, err := s.EncryptionConfig(string(encryptionKey))
