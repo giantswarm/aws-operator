@@ -43,10 +43,10 @@ func (r Resource) findMasterInstance(instanceName string) (*ec2.Instance, error)
 	}
 
 	if instancesFound < 1 {
-		return nil, microerror.Mask(notFoundError)
+		return nil, microerror.Maskf(notFoundError, "could not find instance: %s", instanceName)
 	}
 	if instancesFound > 1 {
-		return nil, microerror.Mask(tooManyResultsError)
+		return nil, microerror.Maskf(tooManyResultsError, "too many instances: %s", instanceName)
 	}
 
 	return masterInstance, nil

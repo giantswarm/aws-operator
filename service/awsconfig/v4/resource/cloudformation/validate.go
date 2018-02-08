@@ -44,7 +44,7 @@ func (r *Resource) validateHostPeeringRoutes(cluster v1alpha1.AWSConfig) error {
 	}
 	output, err := r.HostClients.EC2.DescribeRouteTables(input)
 	if err == nil && len(output.RouteTables) == 1 {
-		return microerror.Mask(existingRouteError)
+		return microerror.Maskf(existingRouteError, "route already exists: %s", key.PrivateSubnetCIDR(cluster))
 	}
 
 	return nil
