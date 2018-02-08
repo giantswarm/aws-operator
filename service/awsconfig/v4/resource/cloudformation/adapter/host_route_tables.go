@@ -82,7 +82,7 @@ func waitForPeeringConnectionID(cfg Config) (string, error) {
 			return microerror.Mask(err)
 		}
 		if len(output.VpcPeeringConnections) > 1 {
-			return microerror.Maskf(tooManyResultsError, "too many peering connections")
+			return microerror.Maskf(tooManyResultsError, "peering connections")
 		}
 		peeringID = *output.VpcPeeringConnections[0].VpcPeeringConnectionId
 		return nil
@@ -120,7 +120,7 @@ func routeTableID(name string, cfg Config) (string, error) {
 		return "", microerror.Mask(err)
 	}
 	if len(output.RouteTables) > 1 {
-		return "", microerror.Maskf(tooManyResultsError, "too many route tables: %s", name)
+		return "", microerror.Maskf(tooManyResultsError, "route tables: %s", name)
 	}
 
 	return *output.RouteTables[0].RouteTableId, nil

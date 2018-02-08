@@ -55,7 +55,7 @@ func VpcCIDR(clients Clients, vpcID string) (string, error) {
 		return "", microerror.Mask(err)
 	}
 	if len(output.Vpcs) > 1 {
-		return "", microerror.Maskf(tooManyResultsError, "too many vpcs: %s", vpcID)
+		return "", microerror.Maskf(tooManyResultsError, "vpcs: %s", vpcID)
 	}
 	return *output.Vpcs[0].CidrBlock, nil
 }
