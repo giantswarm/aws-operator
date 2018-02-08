@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -459,20 +460,35 @@ func (f *framework) ApplyAWSConfigPatch(patch []PatchSpec, clusterName string) e
 	return nil
 }
 
-func (f *framework) GetVersionBundleVersion(bundle []versionbundle.Bundle, vType string) string {
+func GetVersionBundleVersion(bundle []versionbundle.Bundle, vType string) (string, error) {
+	validVTypes := []string{"", "current", "wip"}
+	var isValid bool
+	for _, v := range validVTypes {
+		if v == vType {
+			isValid = true
+			break
+		}
+	}
+	if !isValid {
+		return "", fmt.Errorf("%q is not a valid version bundle version type", vType)
+	}
+
 	var output string
 	log.Printf("Tested version %q", vType)
 
-	for _, v := range bundle {
-		if (vType == "current" || vType == "") && !v.Deprecated && !v.WIP {
-			output = v.Version
+	// sort bundle by time to get the newest vbv.
+	s := versionbundle.SortBundlesByTime(bundle)
+	sort.Sort(s)
+	for i := len(s) - 1; i >= 0; i-- {
+		if (vType == "current" || vType == "") && !s[i].Deprecated && !s[i].WIP {
+			output = s[i].Version
 			break
 		}
-		if vType == "wip" && v.WIP {
-			output = v.Version
+		if vType == "wip" && s[i].WIP {
+			output = s[i].Version
 			break
 		}
 	}
 	log.Printf("Version Bundle Version %q", output)
-	return output
+	return output, nil
 }

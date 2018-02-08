@@ -99,7 +99,11 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	version := f.GetVersionBundleVersion(service.NewVersionBundles(), os.Getenv("TESTED_VERSION"))
+	version, err := GetVersionBundleVersion(service.NewVersionBundles(), os.Getenv("TESTED_VERSION"))
+	if err != nil {
+		log.Printf("Unexpected error getting version bundle version %v", err)
+		os.Exit(1)
+	}
 	if version == "" {
 		log.Printf("No version bundle version for TESTED_VERSION %q", os.Getenv("TESTED_VERSION"))
 		os.Exit(0)
