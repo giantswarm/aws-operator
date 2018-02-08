@@ -315,7 +315,7 @@ func NewVersionBundles() []versionbundle.Bundle {
 				{
 					Component:   "cloudconfig",
 					Description: "Add OIDC integration for Kubernetes api-server.",
-					Kind:        versionbundle.KindFixed,
+					Kind:        versionbundle.KindAdded,
 				},
 			},
 			Components: []versionbundle.Component{
