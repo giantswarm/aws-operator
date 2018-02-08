@@ -18,6 +18,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/awsconfig/v2"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v3"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v4"
+	v4cloudconfig "github.com/giantswarm/aws-operator/service/awsconfig/v4/cloudconfig"
 )
 
 const (
@@ -33,6 +34,7 @@ type FrameworkConfig struct {
 	GuestAWSConfig   FrameworkConfigAWSConfig
 	HostAWSConfig    FrameworkConfigAWSConfig
 	InstallationName string
+	OIDC             FrameworkConfigOIDCConfig
 	// Name is the name of the project.
 	Name       string
 	PubKeyFile string
@@ -43,6 +45,14 @@ type FrameworkConfigAWSConfig struct {
 	AccessKeySecret string
 	Region          string
 	SessionToken    string
+}
+
+// OIDC represents the configuration of the OIDC authorization provider
+type FrameworkConfigOIDCConfig struct {
+	ClientID      string
+	IssuerURL     string
+	UsernameClaim string
+	GroupsClaim   string
 }
 
 func NewFramework(config FrameworkConfig) (*framework.Framework, error) {
@@ -264,7 +274,13 @@ func newResourceRouter(config FrameworkConfig) (*framework.ResourceRouter, error
 				"2.1.0",
 			},
 			InstallationName: config.InstallationName,
-			ProjectName:      config.Name,
+			OIDC: v4cloudconfig.OIDCConfig{
+				ClientID:      config.OIDC.ClientID,
+				IssuerURL:     config.OIDC.IssuerURL,
+				UsernameClaim: config.OIDC.UsernameClaim,
+				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			ProjectName: config.Name,
 		}
 
 		resourceSetV4, err = v4.NewResourceSet(c)

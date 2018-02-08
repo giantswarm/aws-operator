@@ -39,6 +39,7 @@ type ResourceSetConfig struct {
 
 	HandledVersionBundles []string
 	InstallationName      string
+	OIDC                  cloudconfig.OIDCConfig
 	ProjectName           string
 }
 
@@ -115,6 +116,7 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 	{
 		c := cloudconfig.Config{
 			Logger: config.Logger,
+			OIDC:   config.OIDC,
 		}
 
 		cloudConfig, err = cloudconfig.New(c)

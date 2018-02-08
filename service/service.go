@@ -142,8 +142,14 @@ func New(config Config) (*Service, error) {
 				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
 			},
 			InstallationName: config.Viper.GetString(config.Flag.Service.Installation.Name),
-			Name:             config.Name,
-			PubKeyFile:       config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile),
+			OIDC: awsconfig.FrameworkConfigOIDCConfig{
+				ClientID:      config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID),
+				IssuerURL:     config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL),
+				UsernameClaim: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.UsernameClaim),
+				GroupsClaim:   config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.GroupsClaim),
+			},
+			Name:       config.Name,
+			PubKeyFile: config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile),
 		}
 		awsConfigFramework, err = awsconfig.NewFramework(c)
 		if err != nil {

@@ -13,5 +13,17 @@ data:
         region: '{{ .Values.Installation.V1.Provider.AWS.Region }}'
       installation:
         name: '{{ .Values.Installation.V1.Name }}'
+        {{- if .Values.Installation.V1.Guest }}
+        guest:
+          kubernetes:
+            api:
+              auth:
+                provider:
+                  oidc:
+                    clientID: '{{ .Values.Installation.V1.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID }}'
+                    issuerURL: '{{ .Values.Installation.V1.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL }}'
+                    usernameClaim: '{{ .Values.Installation.V1.Guest.Kubernetes.API.Auth.Provider.OIDC.UsernameClaim }}'
+                    groupsClaim: '{{ .Values.Installation.V1.Guest.Kubernetes.API.Auth.Provider.OIDC.GroupsClaim }}'
+        {{- end }}
       kubernetes:
         incluster: true
