@@ -102,16 +102,16 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	if os.Getenv("VERSION_BUNDLE_VERSION") == "" {
-		version := f.GetVersionBundleVersion(service.NewVersionBundles(), os.Getenv("TESTED_VERSION"))
-		if version == "" {
-			log.Printf("No version bundle version for TESTED_VERSION %q", os.Getenv("TESTED_VERSION"))
-			os.Exit(0)
-		}
-		os.Setenv("VERSION_BUNDLE_VERSION", version)
+	version, err := GetVersionBundleVersion(service.NewVersionBundles(), os.Getenv("TESTED_VERSION"))
+	if err != nil {
+		log.Printf("Unexpected error getting version bundle version %v", err)
+		os.Exit(1)
 	}
-	log.Printf("TESTED_VERSION %v", os.Getenv("TESTED_VERSION"))
-	log.Printf("VERSION_BUNDLE_VERSION %v", os.Getenv("VERSION_BUNDLE_VERSION"))
+	if version == "" {
+		log.Printf("No version bundle version for TESTED_VERSION %q", os.Getenv("TESTED_VERSION"))
+		os.Exit(0)
+	}
+	os.Setenv("VERSION_BUNDLE_VERSION", version)
 
 	c = newAWSClient()
 
