@@ -4,6 +4,11 @@ import "github.com/giantswarm/microerror"
 
 var tooManyResultsError = microerror.New("too many results")
 
+// IsTooManyResults asserts tooManyResultsError.
+func IsTooManyResults(err error) bool {
+	return microerror.Cause(err) == tooManyResultsError
+}
+
 var wrongTypeError = microerror.New("wrong type")
 
 // IsWrongType asserts wrongTypeError.
