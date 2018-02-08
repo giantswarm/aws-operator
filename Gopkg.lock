@@ -90,7 +90,7 @@
   branch = "master"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = ["v_2_0_0","v_3_0_0"]
-  revision = "789bebcf0f5b227b53aee3460265e4e2b890f5c9"
+  revision = "caecec1c8753786a90e5ea612a3454bb08025eac"
 
 [[projects]]
   branch = "master"
@@ -108,7 +108,7 @@
   branch = "master"
   name = "github.com/giantswarm/microkit"
   packages = ["command","command/daemon","command/daemon/flag","command/daemon/flag/config","command/daemon/flag/server","command/daemon/flag/server/listen","command/daemon/flag/server/log","command/daemon/flag/server/tls","command/version","flag","server","tls","transaction","transaction/context/id","transaction/context/tracked"]
-  revision = "489a866095567ab6c764f79831f61e48c035629c"
+  revision = "d48ce8e1f2bd2a7b93de0d5c37ca62a648cbffe8"
 
 [[projects]]
   branch = "master"
@@ -125,7 +125,7 @@
 [[projects]]
   branch = "master"
   name = "github.com/giantswarm/operatorkit"
-  packages = ["client/k8scrdclient","client/k8srestconfig","framework","framework/context/reconciliationcanceledcontext","framework/context/resourcecanceledcontext","framework/context/updateallowedcontext","framework/context/updatenecessarycontext","framework/resource/metricsresource","informer"]
+  packages = ["client/k8scrdclient","client/k8srestconfig","framework","framework/context/reconciliationcanceledcontext","framework/context/resourcecanceledcontext","framework/context/updateallowedcontext","framework/context/updatenecessarycontext","framework/resource/metricsresource","framework/resource/retryresource","informer"]
   revision = "9447814d7a6d357450873c7f6a30d2911e4eb17e"
 
 [[projects]]
@@ -479,6 +479,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8d8d8a96be4fa48a978b81403838a667b49bb912e1bc7a4cc55077ddd2e594dd"
+  inputs-digest = "c9f7ffa98e384079e27d2617febab64e775d4bedaa029eb3f70e71b79119f312"
   solver-name = "gps-cdcl"
   solver-version = 1
