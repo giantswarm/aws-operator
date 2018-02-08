@@ -313,8 +313,8 @@ func NewVersionBundles() []versionbundle.Bundle {
 		{
 			Changelogs: []versionbundle.Changelog{
 				{
-					Component:   "cloudformation",
-					Description: "Add missing region to host account credentials.",
+					Component:   "cloudconfig",
+					Description: "Add OIDC integration for Kubernetes api-server.",
 					Kind:        versionbundle.KindFixed,
 				},
 			},

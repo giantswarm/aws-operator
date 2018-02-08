@@ -29,6 +29,7 @@ func (c *CloudConfig) NewMasterTemplate(customObject v1alpha1.AWSConfig, certs l
 			customObject: customObject,
 			keys:         keys,
 		}
+		params.Hyperkube.Apiserver.Docker.CommandExtraArgs = c.k8sAPIExtraArgs
 	}
 
 	var newCloudConfig *k8scloudconfig.CloudConfig
