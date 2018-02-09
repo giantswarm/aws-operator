@@ -9,13 +9,13 @@ The latest version is considered WIP and it is a subject of change. All other
 versions are frozen. To freeze current version all files are copied to a new
 version directory, and then changes are introduced.
 
-## [v3.1.0] WIP
+## [v3.1.0]
 
 ### Changed
 - Systemd units for Kubernetes components (api-server, scheduler and controller-manager)
   replaced with self-hosted pods.
 
-## [v3.0.0] 
+## [v3.0.0]
 
 ### Added
 - Add encryption config template for API etcd data encryption experimental
