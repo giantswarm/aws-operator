@@ -35,18 +35,19 @@ const (
           service:
             aws:
               accesskey:
-                id: ${AWS_ACCESS_KEY_ID}
-                secret: ${AWS_SECRET_ACCESS_KEY}
-                token: ${AWS_SESSION_TOKEN}
+                id: ${GUEST_AWS_ACCESS_KEY_ID}
+                secret: ${GUEST_AWS_SECRET_ACCESS_KEY}
+                token: ${GUEST_AWS_SESSION_TOKEN}
               hostaccesskey:
-                id: ""
-                secret: ""
+                id: ${HOST_AWS_ACCESS_KEY_ID}
+                secret: ${HOST_AWS_SECRET_ACCESS_KEY}
+                token: ${HOST_AWS_SESSION_TOKEN}
       Registry:
         PullSecret:
           DockerConfigJSON: "{\"auths\":{\"quay.io\":{\"auth\":\"${REGISTRY_PULL_SECRET}\"}}}"
 `
 	awsResourceValuesFile  = "/tmp/aws-operator-values.yaml"
-	awsResourceChartValues = `commonDomain: ${COMMON_DOMAIN}
+	awsResourceChartValues = `commonDomain: ${COMMON_DOMAIN_GUEST}
 clusterName: ${CLUSTER_NAME}
 clusterVersion: v_0_1_0
 sshPublicKey: ${IDRSA_PUB}
@@ -56,8 +57,8 @@ aws:
   privateSubnetCIDR: "10.12.0.0/25"
   publicSubnetCIDR: "10.12.0.128/25"
   region: ${AWS_REGION}
-  apiHostedZone: ${AWS_API_HOSTED_ZONE}
-  ingressHostedZone: ${AWS_INGRESS_HOSTED_ZONE}
+  apiHostedZone: ${AWS_API_HOSTED_ZONE_GUEST}
+  ingressHostedZone: ${AWS_INGRESS_HOSTED_ZONE_GUEST}
   routeTable0: ${AWS_ROUTE_TABLE_0}
   routeTable1: ${AWS_ROUTE_TABLE_1}
   vpcPeerId: ${AWS_VPC_PEER_ID}
@@ -70,17 +71,26 @@ type aWSClient struct {
 }
 
 func newAWSClient() aWSClient {
-	awsCfg := &aws.Config{
+	awsCfgGuest := &aws.Config{
 		Credentials: credentials.NewStaticCredentials(
-			os.Getenv("AWS_ACCESS_KEY_ID"),
-			os.Getenv("AWS_SECRET_ACCESS_KEY"),
-			os.Getenv("AWS_SESSION_TOKEN")),
+			os.Getenv("GUEST_AWS_ACCESS_KEY_ID"),
+			os.Getenv("GUEST_AWS_SECRET_ACCESS_KEY"),
+			os.Getenv("GUEST_AWS_SESSION_TOKEN")),
 		Region: aws.String(os.Getenv("AWS_REGION")),
 	}
-	s := session.New(awsCfg)
+	awsCfgHost := &aws.Config{
+		Credentials: credentials.NewStaticCredentials(
+			os.Getenv("HOST_AWS_ACCESS_KEY_ID"),
+			os.Getenv("HOST_AWS_SECRET_ACCESS_KEY"),
+			os.Getenv("HOST_AWS_SESSION_TOKEN")),
+		Region: aws.String(os.Getenv("AWS_REGION")),
+	}
+
+	sGuest := session.New(awsCfgGuest)
+	sHost := session.New(awsCfgHost)
 	clients := aWSClient{
-		EC2: ec2.New(s),
-		CF:  cloudformation.New(s),
+		EC2: ec2.New(sGuest),
+		CF:  cloudformation.New(sHost),
 	}
 
 	return clients
