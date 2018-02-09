@@ -83,6 +83,58 @@ func (r *Resource) Underlying() framework.Resource {
 	return r
 }
 
+func getCloudFormationTags(customObject v1alpha1.AWSConfig) []*awscloudformation.Tag {
+	clusterTags := key.ClusterTags(customObject)
+	stackTags := []*awscloudformation.Tag{}
+
+	for k, v := range clusterTags {
+		tag := &awscloudformation.Tag{
+			Key:   aws.String(k),
+			Value: aws.String(v),
+		}
+
+		stackTags = append(stackTags, tag)
+	}
+
+	return stackTags
+}
+
+func getStackOutputValue(outputs []*awscloudformation.Output, key string) (string, error) {
+	for _, o := range outputs {
+		if *o.OutputKey == key {
+			return *o.OutputValue, nil
+		}
+	}
+
+	return "", microerror.Mask(notFoundError)
+}
+
+func toCreateStackInput(v interface{}) (awscloudformation.CreateStackInput, error) {
+	if v == nil {
+		return awscloudformation.CreateStackInput{}, nil
+	}
+
+	createStackInput, ok := v.(awscloudformation.CreateStackInput)
+	if !ok {
+		return awscloudformation.CreateStackInput{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", createStackInput, v)
+	}
+
+	return createStackInput, nil
+}
+
+func toDeleteStackInput(v interface{}) (awscloudformation.DeleteStackInput, error) {
+	if v == nil {
+		return awscloudformation.DeleteStackInput{}, nil
+	}
+
+	deleteStackInput, ok := v.(awscloudformation.DeleteStackInput)
+	if !ok {
+		return awscloudformation.DeleteStackInput{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", deleteStackInput, v)
+	}
+
+	return deleteStackInput, nil
+}
+
 func toStackState(v interface{}) (StackState, error) {
 	if v == nil {
 		return StackState{}, nil
@@ -107,56 +159,4 @@ func toUpdateStackInput(v interface{}) (awscloudformation.UpdateStackInput, erro
 	}
 
 	return updateStackInput, nil
-}
-
-func toDeleteStackInput(v interface{}) (awscloudformation.DeleteStackInput, error) {
-	if v == nil {
-		return awscloudformation.DeleteStackInput{}, nil
-	}
-
-	deleteStackInput, ok := v.(awscloudformation.DeleteStackInput)
-	if !ok {
-		return awscloudformation.DeleteStackInput{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", deleteStackInput, v)
-	}
-
-	return deleteStackInput, nil
-}
-
-func toCreateStackInput(v interface{}) (awscloudformation.CreateStackInput, error) {
-	if v == nil {
-		return awscloudformation.CreateStackInput{}, nil
-	}
-
-	createStackInput, ok := v.(awscloudformation.CreateStackInput)
-	if !ok {
-		return awscloudformation.CreateStackInput{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", createStackInput, v)
-	}
-
-	return createStackInput, nil
-}
-
-func getStackOutputValue(outputs []*awscloudformation.Output, key string) (string, error) {
-	for _, o := range outputs {
-		if *o.OutputKey == key {
-			return *o.OutputValue, nil
-		}
-	}
-
-	return "", microerror.Mask(notFoundError)
-}
-
-func getCloudFormationTags(customObject v1alpha1.AWSConfig) []*awscloudformation.Tag {
-	clusterTags := key.ClusterTags(customObject)
-	stackTags := []*awscloudformation.Tag{}
-
-	for k, v := range clusterTags {
-		tag := &awscloudformation.Tag{
-			Key:   aws.String(k),
-			Value: aws.String(v),
-		}
-
-		stackTags = append(stackTags, tag)
-	}
-
-	return stackTags
 }
