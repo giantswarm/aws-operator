@@ -321,7 +321,7 @@ func NewVersionBundles() []versionbundle.Bundle {
 
 					Component:   "containerlinux",
 					Description: "Updated Container Linux version to 1576.5.0.",
-					Kind:        "changed",
+					Kind:        versionbundle.KindUpdated,
 				},
 			},
 			Components: []versionbundle.Component{
