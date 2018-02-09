@@ -35,13 +35,13 @@ const (
           service:
             aws:
               accesskey:
-                id: ${AWS_ACCESS_KEY_ID_GUEST}
-                secret: ${AWS_SECRET_ACCESS_KEY_GUEST}
-                token: ${AWS_SESSION_TOKEN_GUEST}
+                id: ${GUEST_AWS_ACCESS_KEY_ID}
+                secret: ${GUEST_AWS_SECRET_ACCESS_KEY}
+                token: ${GUEST_AWS_SESSION_TOKEN}
               hostaccesskey:
-                id: ${AWS_ACCESS_KEY_ID_HOST}
-                secret: ${AWS_SECRET_ACCESS_KEY_HOST}
-                token: ${AWS_SESSION_TOKEN_HOST}
+                id: ${HOST_AWS_ACCESS_KEY_ID}
+                secret: ${HOST_AWS_SECRET_ACCESS_KEY}
+                token: ${HOST_AWS_SESSION_TOKEN}
       Registry:
         PullSecret:
           DockerConfigJSON: "{\"auths\":{\"quay.io\":{\"auth\":\"${REGISTRY_PULL_SECRET}\"}}}"
@@ -73,16 +73,16 @@ type aWSClient struct {
 func newAWSClient() aWSClient {
 	awsCfgGuest := &aws.Config{
 		Credentials: credentials.NewStaticCredentials(
-			os.Getenv("AWS_ACCESS_KEY_ID_GUEST"),
-			os.Getenv("AWS_SECRET_ACCESS_KEY_GUEST"),
-			os.Getenv("AWS_SESSION_TOKEN_GUEST")),
+			os.Getenv("GUEST_AWS_ACCESS_KEY_ID"),
+			os.Getenv("GUEST_AWS_SECRET_ACCESS_KEY"),
+			os.Getenv("GUEST_AWS_SESSION_TOKEN")),
 		Region: aws.String(os.Getenv("AWS_REGION")),
 	}
 	awsCfgHost := &aws.Config{
 		Credentials: credentials.NewStaticCredentials(
-			os.Getenv("AWS_ACCESS_KEY_ID_HOST"),
-			os.Getenv("AWS_SECRET_ACCESS_KEY_HOST"),
-			os.Getenv("AWS_SESSION_TOKEN_HOST")),
+			os.Getenv("HOST_AWS_ACCESS_KEY_ID"),
+			os.Getenv("HOST_AWS_SECRET_ACCESS_KEY"),
+			os.Getenv("HOST_AWS_SESSION_TOKEN")),
 		Region: aws.String(os.Getenv("AWS_REGION")),
 	}
 
