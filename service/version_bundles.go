@@ -317,11 +317,21 @@ func NewVersionBundles() []versionbundle.Bundle {
 					Description: "Add OIDC integration for Kubernetes api-server.",
 					Kind:        versionbundle.KindFixed,
 				},
+				{
+
+					Component:   "containerlinux",
+					Description: "Updated Container Linux version to 1576.5.0.",
+					Kind:        "changed",
+				},
 			},
 			Components: []versionbundle.Component{
 				{
 					Name:    "calico",
 					Version: "3.0.1",
+				},
+				{
+					Name:    "containerlinux",
+					Version: "1576.5.0",
 				},
 				{
 					Name:    "docker",
