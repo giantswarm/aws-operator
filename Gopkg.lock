@@ -82,15 +82,9 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/giantswarm/ipam"
-  packages = ["."]
-  revision = "1aca843768d0b64404f88e99b87729f85e3aea3a"
-
-[[projects]]
-  branch = "master"
   name = "github.com/giantswarm/k8scloudconfig"
-  packages = ["v_2_0_0","v_3_0_0"]
-  revision = "caecec1c8753786a90e5ea612a3454bb08025eac"
+  packages = ["v_2_0_0","v_3_0_0","v_3_1_0"]
+  revision = "70227ffce23947d9a836578718154d3bc5c89617"
 
 [[projects]]
   branch = "master"
@@ -479,6 +473,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c9f7ffa98e384079e27d2617febab64e775d4bedaa029eb3f70e71b79119f312"
+  inputs-digest = "5710370b60ec7ac8a1c6c8dc2c5cc2fb1ed4eb1a8806fc55800bf067c20753c2"
   solver-name = "gps-cdcl"
   solver-version = 1
