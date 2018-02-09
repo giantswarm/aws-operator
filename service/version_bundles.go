@@ -14,32 +14,32 @@ func NewVersionBundles() []versionbundle.Bundle {
 				{
 					Component:   "calico",
 					Description: "Calico version updated.",
-					Kind:        "changed",
+					Kind:        versionbundle.KindChanged,
 				},
 				{
 					Component:   "docker",
 					Description: "Docker version updated.",
-					Kind:        "changed",
+					Kind:        versionbundle.KindChanged,
 				},
 				{
 					Component:   "etcd",
 					Description: "Etcd version updated.",
-					Kind:        "changed",
+					Kind:        versionbundle.KindChanged,
 				},
 				{
 					Component:   "kubedns",
 					Description: "KubeDNS version updated.",
-					Kind:        "changed",
+					Kind:        versionbundle.KindChanged,
 				},
 				{
 					Component:   "kubernetes",
 					Description: "Kubernetes version updated.",
-					Kind:        "changed",
+					Kind:        versionbundle.KindChanged,
 				},
 				{
 					Component:   "nginx-ingress-controller",
 					Description: "Nginx-ingress-controller version updated.",
-					Kind:        "changed",
+					Kind:        versionbundle.KindChanged,
 				},
 			},
 			Components: []versionbundle.Component{
@@ -80,7 +80,7 @@ func NewVersionBundles() []versionbundle.Bundle {
 				{
 					Component:   "cloudformation",
 					Description: "First version of Cloud Formation resources.",
-					Kind:        "added",
+					Kind:        versionbundle.KindAdded,
 				},
 			},
 			Components: []versionbundle.Component{
@@ -121,7 +121,7 @@ func NewVersionBundles() []versionbundle.Bundle {
 				{
 					Component:   "kubernetes",
 					Description: "Updated to kubernetes 1.8.4. Fixes a goroutine leak in the k8s api.",
-					Kind:        "changed",
+					Kind:        versionbundle.KindChanged,
 				},
 			},
 			Components: []versionbundle.Component{
