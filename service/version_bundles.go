@@ -322,11 +322,21 @@ func NewVersionBundles() []versionbundle.Bundle {
 					Description: "Replace systemd units for Kubernetes components with self-hosted pods.",
 					Kind:        versionbundle.KindChanged,
 				},
+				{
+
+					Component:   "containerlinux",
+					Description: "Updated Container Linux version to 1576.5.0.",
+					Kind:        versionbundle.KindChanged,
+				},
 			},
 			Components: []versionbundle.Component{
 				{
 					Name:    "calico",
 					Version: "3.0.1",
+				},
+				{
+					Name:    "containerlinux",
+					Version: "1576.5.0",
 				},
 				{
 					Name:    "docker",
