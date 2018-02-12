@@ -86,10 +86,13 @@ func Test_Resource_Cloudformation_newDelete(t *testing.T) {
 	var err error
 	var newResource *Resource
 	{
-		resourceConfig := DefaultConfig()
-		resourceConfig.Clients = &adapter.Clients{}
-		resourceConfig.Logger = microloggertest.New()
-		newResource, err = New(resourceConfig)
+		c := Config{}
+
+		c.Clients = &adapter.Clients{}
+		c.HostClients = &adapter.Clients{}
+		c.Logger = microloggertest.New()
+
+		newResource, err = New(c)
 		if err != nil {
 			t.Error("expected", nil, "got", err)
 		}

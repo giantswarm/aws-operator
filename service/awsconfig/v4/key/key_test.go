@@ -156,56 +156,6 @@ func Test_ClusterVersion(t *testing.T) {
 	}
 }
 
-func Test_HasClusterVersion(t *testing.T) {
-	tests := []struct {
-		customObject   v1alpha1.AWSConfig
-		expectedResult bool
-	}{
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{},
-			},
-			expectedResult: false,
-		},
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						Version: "",
-					},
-				},
-			},
-			expectedResult: false,
-		},
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						Version: "v_0_1_0",
-					},
-				},
-			},
-			expectedResult: true,
-		},
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						Version: "v_0_2_0",
-					},
-				},
-			},
-			expectedResult: false,
-		},
-	}
-
-	for _, tc := range tests {
-		if HasClusterVersion(tc.customObject) != tc.expectedResult {
-			t.Fatalf("Expected has cluster version to be %t but was %t", tc.expectedResult, HasClusterVersion(tc.customObject))
-		}
-	}
-}
-
 func Test_IngressControllerInsecurePort(t *testing.T) {
 	expectedPort := 30010
 	customObject := v1alpha1.AWSConfig{

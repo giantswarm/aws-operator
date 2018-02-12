@@ -16,7 +16,6 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 	if err != nil {
 		return microerror.Mask(err)
 	}
-
 	stackInput, err := toCreateStackInput(createChange)
 	if err != nil {
 		return microerror.Mask(err)
@@ -25,11 +24,11 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 	r.logger.LogCtx(ctx, "debug", "creating AWS cloudformation stack")
 
 	if stackInput.StackName != nil {
-		_, err = r.Clients.CloudFormation.CreateStack(&stackInput)
+		_, err = r.clients.CloudFormation.CreateStack(&stackInput)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		err = r.Clients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
+		err = r.clients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
 			StackName: stackInput.StackName,
 		})
 		if err != nil {
@@ -56,18 +55,16 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 	if err != nil {
 		return cloudformation.CreateStackInput{}, microerror.Mask(err)
 	}
-
-	if err := r.validateCluster(customObject); err != nil {
-		return cloudformation.CreateStackInput{}, microerror.Mask(err)
-	}
-
 	currentStackState, err := toStackState(currentState)
 	if err != nil {
 		return cloudformation.CreateStackInput{}, microerror.Mask(err)
 	}
-
 	desiredStackState, err := toStackState(desiredState)
 	if err != nil {
+		return cloudformation.CreateStackInput{}, microerror.Mask(err)
+	}
+
+	if err := r.validateCluster(customObject); err != nil {
 		return cloudformation.CreateStackInput{}, microerror.Mask(err)
 	}
 
@@ -122,12 +119,12 @@ func (r *Resource) createHostPreStack(ctx context.Context, customObject v1alpha1
 	createStack.SetTags(getCloudFormationTags(customObject))
 
 	r.logger.LogCtx(ctx, "debug", "creating AWS Host Pre-Guest cloudformation stack")
-	_, err = r.HostClients.CloudFormation.CreateStack(createStack)
+	_, err = r.hostClients.CloudFormation.CreateStack(createStack)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	err = r.HostClients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
+	err = r.hostClients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
 		StackName: aws.String(stackName),
 	})
 	if err != nil {
@@ -150,12 +147,12 @@ func (r *Resource) createHostPostStack(ctx context.Context, customObject v1alpha
 	createStack.SetTags(getCloudFormationTags(customObject))
 
 	r.logger.LogCtx(ctx, "debug", "creating AWS Host Post-Guest cloudformation stack")
-	_, err = r.HostClients.CloudFormation.CreateStack(createStack)
+	_, err = r.hostClients.CloudFormation.CreateStack(createStack)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	err = r.HostClients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
+	err = r.hostClients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
 		StackName: aws.String(stackName),
 	})
 	if err != nil {

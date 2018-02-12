@@ -17,9 +17,6 @@ const (
 	// and managed by a cluster.
 	CloudProviderTagOwnedValue = "owned"
 
-	// LegacyVersion is the version in the version bundle for existing clusters.
-	LegacyVersion = "0.1.0"
-
 	// ProfileNameTemplate will be included in the IAM instance profile name.
 	ProfileNameTemplate = "EC2-K8S-Role"
 	// RoleNameTemplate will be included in the IAM role name.
@@ -73,15 +70,6 @@ func ClusterVersion(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Version
 }
 
-func HasClusterVersion(customObject v1alpha1.AWSConfig) bool {
-	switch ClusterVersion(customObject) {
-	case string("v_0_1_0"):
-		return true
-	default:
-		return false
-	}
-}
-
 func IngressControllerInsecurePort(customObject v1alpha1.AWSConfig) int {
 	return customObject.Spec.Cluster.Kubernetes.IngressController.InsecurePort
 }
@@ -102,12 +90,12 @@ func KubernetesAPISecurePort(customObject v1alpha1.AWSConfig) int {
 // It takes the domain name, extracts the first subdomain, and combines it with the cluster name.
 func LoadBalancerName(domainName string, cluster v1alpha1.AWSConfig) (string, error) {
 	if ClusterID(cluster) == "" {
-		return "", microerror.Maskf(missingCloudConfigKeyError, "spec.cluster.cluster.id")
+		return "", microerror.Maskf(missingCloudConfigKeyError, "spec.cluster.id")
 	}
 
 	componentName, err := componentName(domainName)
 	if err != nil {
-		return "", microerror.Maskf(malformedCloudConfigKeyError, "spec.cluster.cluster.id")
+		return "", microerror.Maskf(malformedCloudConfigKeyError, "spec.cluster.id")
 	}
 
 	lbName := fmt.Sprintf("%s-%s", ClusterID(cluster), componentName)

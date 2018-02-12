@@ -1,7 +1,8 @@
 package cloudformation
 
 const (
-	// defaultCreationTimeout is the timeout in minutes for the creation of the stack.
+	// defaultCreationTimeout is the timeout in minutes for the creation of the
+	// stack.
 	defaultCreationTimeout = 10
 
 	masterImageIDOutputKey            = "MasterImageID"
@@ -23,10 +24,12 @@ const (
 
 // StackState is the state representation on which the resource methods work.
 type StackState struct {
-	Name                     string
+	Name string
+
 	MasterImageID            string
 	MasterInstanceType       string
 	MasterCloudConfigVersion string
+
 	WorkerCount              string
 	WorkerImageID            string
 	WorkerInstanceType       string

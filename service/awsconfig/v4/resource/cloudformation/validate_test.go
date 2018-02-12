@@ -40,22 +40,23 @@ func Test_validateHostPeeringRoutes(t *testing.T) {
 		var err error
 		var newResource *Resource
 		{
-			resourceConfig := DefaultConfig()
-			resourceConfig.Clients = &adapter.Clients{
+			c := Config{}
+
+			c.Clients = &adapter.Clients{
 				EC2: &adapter.EC2ClientMock{},
 				IAM: &adapter.IAMClientMock{},
 				KMS: &adapter.KMSClientMock{},
 			}
 			ec2Mock := &adapter.EC2ClientMock{}
 			ec2Mock.SetUnexistingRouteTable(tc.unexistentRouteTable)
-			resourceConfig.HostClients = &adapter.Clients{
+			c.HostClients = &adapter.Clients{
 				EC2:            ec2Mock,
 				CloudFormation: &adapter.CloudFormationMock{},
 				IAM:            &adapter.IAMClientMock{},
 			}
+			c.Logger = microloggertest.New()
 
-			resourceConfig.Logger = microloggertest.New()
-			newResource, err = New(resourceConfig)
+			newResource, err = New(c)
 			if err != nil {
 				t.Error("expected", nil, "got", err)
 			}
