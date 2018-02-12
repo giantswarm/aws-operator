@@ -23,13 +23,11 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	describeInput := &cloudformation.DescribeStacksInput{
 		StackName: aws.String(stackName),
 	}
-	describeOutput, err := r.Clients.CloudFormation.DescribeStacks(describeInput)
-
+	describeOutput, err := r.clients.CloudFormation.DescribeStacks(describeInput)
 	if IsStackNotFound(err) {
 		r.logger.LogCtx(ctx, "debug", "did not find a stack in AWS API")
 		return StackState{}, nil
-	}
-	if err != nil {
+	} else if err != nil {
 		return StackState{}, microerror.Mask(err)
 	}
 
@@ -37,10 +35,10 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return StackState{}, microerror.Mask(notFoundError)
 	}
 
-	// current is called on cluster deletion, if the stack creation failed the
-	// outputs can be unaccessible, this can lead to a stack that cannot be deleted.
-	// it can also be called during creation, while the outputs are still not
-	// accessible.
+	// GetCurrentState is called on cluster deletion, if the stack creation failed
+	// the outputs can be unaccessible, this can lead to a stack that cannot be
+	// deleted. it can also be called during creation, while the outputs are still
+	// not accessible.
 	status := describeOutput.Stacks[0].StackStatus
 	errorStatuses := []string{
 		"ROLLBACK_IN_PROGRESS",

@@ -14,7 +14,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "cloudformationv2"
+	Name = "cloudformationv4"
 )
 
 type AWSConfig struct {
@@ -25,7 +25,8 @@ type AWSConfig struct {
 	accountID       string
 }
 
-// Config represents the configuration used to create a new cloudformation resource.
+// Config represents the configuration used to create a new cloudformation
+// resource.
 type Config struct {
 	// Dependencies.
 	Clients          *adapter.Clients
@@ -34,23 +35,10 @@ type Config struct {
 	Logger           micrologger.Logger
 }
 
-// DefaultConfig provides a default configuration to create a new cloudformation
-// resource by best effort.
-func DefaultConfig() Config {
-	return Config{
-		// Dependencies.
-		Clients:          &adapter.Clients{},
-		HostClients:      &adapter.Clients{},
-		InstallationName: "",
-		Logger:           nil,
-	}
-}
-
 // Resource implements the cloudformation resource.
 type Resource struct {
-	// Dependencies.
-	Clients          *adapter.Clients
-	HostClients      *adapter.Clients
+	clients          *adapter.Clients
+	hostClients      *adapter.Clients
 	installationName string
 	logger           micrologger.Logger
 }
@@ -64,8 +52,8 @@ func New(config Config) (*Resource, error) {
 
 	newService := &Resource{
 		// Dependencies.
-		Clients:          config.Clients,
-		HostClients:      config.HostClients,
+		clients:          config.Clients,
+		hostClients:      config.HostClients,
 		installationName: config.InstallationName,
 		logger: config.Logger.With(
 			"resource", Name,

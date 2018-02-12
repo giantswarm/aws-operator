@@ -20,7 +20,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 
 	stackName := updateStackInput.StackName
 	if stackName != nil && *stackName != "" {
-		_, err := r.Clients.CloudFormation.UpdateStack(&updateStackInput)
+		_, err := r.clients.CloudFormation.UpdateStack(&updateStackInput)
 		if err != nil {
 			return microerror.Maskf(err, "updating AWS cloudformation stack")
 		}
@@ -38,7 +38,6 @@ func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-
 	update, err := r.newUpdateChange(ctx, obj, currentState, desiredState)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -56,12 +55,10 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 	if err != nil {
 		return cloudformation.CreateStackInput{}, microerror.Mask(err)
 	}
-
 	desiredStackState, err := toStackState(desiredState)
 	if err != nil {
 		return cloudformation.CreateStackInput{}, microerror.Mask(err)
 	}
-
 	currentStackState, err := toStackState(currentState)
 	if err != nil {
 		return cloudformation.CreateStackInput{}, microerror.Mask(err)
@@ -80,7 +77,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		}
 		updateState.StackName = aws.String(desiredStackState.Name)
 		updateState.TemplateBody = aws.String(mainTemplate)
-		// CAPABILITY_NAMED_IAM is required for updating IAM roles (worker policy)
+		// CAPABILITY_NAMED_IAM is required for updating IAM roles (worker policy).
 		updateState.Capabilities = []*string{
 			aws.String(namedIAMCapability),
 		}

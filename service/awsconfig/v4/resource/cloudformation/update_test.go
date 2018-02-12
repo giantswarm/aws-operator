@@ -261,18 +261,20 @@ func Test_Resource_Cloudformation_newUpdateChange(t *testing.T) {
 	var err error
 	var newResource *Resource
 	{
-		resourceConfig := DefaultConfig()
-		resourceConfig.Clients = &adapter.Clients{
+		c := Config{}
+
+		c.Clients = &adapter.Clients{
 			EC2: &adapter.EC2ClientMock{},
 			IAM: &adapter.IAMClientMock{},
 			KMS: &adapter.KMSClientMock{},
 		}
-		resourceConfig.HostClients = &adapter.Clients{
+		c.HostClients = &adapter.Clients{
 			IAM: &adapter.IAMClientMock{},
 			EC2: &adapter.EC2ClientMock{},
 		}
-		resourceConfig.Logger = microloggertest.New()
-		newResource, err = New(resourceConfig)
+		c.Logger = microloggertest.New()
+
+		newResource, err = New(c)
 		if err != nil {
 			t.Error("expected", nil, "got", err)
 		}
