@@ -1,7 +1,6 @@
 package guest
 
-const SecurityGroups = `
-{{define "security_groups" }}
+const SecurityGroups = `{{define "security_groups" }}
   MasterSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -99,5 +98,4 @@ const SecurityGroups = `
       ToPort: -1
       SourceSecurityGroupId: !Ref MasterSecurityGroup
 
-{{end}}
-`
+{{end}}`

@@ -1,7 +1,6 @@
 package guest
 
-const NatGateway = `
-{{define "nat_gateway"}}
+const NatGateway = `{{define "nat_gateway"}}
   NATGateway:
     Type: AWS::EC2::NatGateway
     Properties:
@@ -24,5 +23,4 @@ const NatGateway = `
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
         Ref: "NATGateway"
-{{end}}
-`
+{{end}}`

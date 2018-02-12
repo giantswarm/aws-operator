@@ -1,7 +1,6 @@
 package guest
 
-const AutoScalingGroup = `
-{{define "autoscaling_group"}}
+const AutoScalingGroup = `{{define "autoscaling_group"}}
   {{ .ASGType }}AutoScalingGroup:
     Type: "AWS::AutoScaling::AutoScalingGroup"
     Properties:
@@ -28,5 +27,4 @@ const AutoScalingGroup = `
         MaxBatchSize: {{ .MaxBatchSize }}
         # after creating a new instance, pause operations on the ASG for this amount of time
         PauseTime: {{ .RollingUpdatePauseTime }}
-{{end}}
-`
+{{end}}`

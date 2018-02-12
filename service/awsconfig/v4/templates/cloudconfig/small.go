@@ -1,7 +1,6 @@
 package cloudconfig
 
-const Small = `
-#!/bin/bash
+const Small = `#!/bin/bash
 
 # user-data in EC2 instances has a 16KB limit.
 # To circumvent this limit, we:
@@ -42,5 +41,4 @@ done
     --trust-keys-from-https \
     quay.io/coreos/awscli:025a357f05242fdad6a81e8a6b520098aa65a600 -- aws s3 --region {{.Region}} cp s3://{{.S3URI}}/cloudconfig/{{.CloudConfigVersion}}/$USERDATA_FILE /var/run/coreos/temp.txt
 base64 -d /var/run/coreos/temp.txt | gunzip > /var/run/coreos/$USERDATA_FILE
-exec /usr/bin/coreos-cloudinit --from-file /var/run/coreos/$USERDATA_FILE
-`
+exec /usr/bin/coreos-cloudinit --from-file /var/run/coreos/$USERDATA_FILE`

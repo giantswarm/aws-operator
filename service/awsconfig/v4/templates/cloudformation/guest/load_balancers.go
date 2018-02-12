@@ -1,7 +1,6 @@
 package guest
 
-const LoadBalancers = `
-{{define "load_balancers"}}
+const LoadBalancers = `{{define "load_balancers"}}
   ApiLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     Properties:
@@ -64,5 +63,4 @@ const LoadBalancers = `
         - !Ref IngressSecurityGroup
       Subnets:
         - !Ref PublicSubnet
-{{end}}
-`
+{{end}}`

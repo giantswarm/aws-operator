@@ -1,7 +1,6 @@
 package guest
 
-const VPC = `
-{{define "vpc"}}
+const VPC = `{{define "vpc"}}
   VPC:
     Type: AWS::EC2::VPC
     Properties:
@@ -23,5 +22,4 @@ const VPC = `
       Tags:
         - Key: Name
           Value: {{ .ClusterID }}
-{{end}}
-`
+{{end}}`

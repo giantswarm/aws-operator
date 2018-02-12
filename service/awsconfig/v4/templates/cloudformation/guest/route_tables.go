@@ -1,7 +1,6 @@
 package guest
 
-const RouteTables = `
-{{define "route_tables"}}
+const RouteTables = `{{define "route_tables"}}
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -25,5 +24,4 @@ const RouteTables = `
       DestinationCidrBlock: {{ .HostClusterCIDR }}
       VpcPeeringConnectionId:
         Ref: "VPCPeeringConnection"
-{{end}}
-`
+{{end}}`

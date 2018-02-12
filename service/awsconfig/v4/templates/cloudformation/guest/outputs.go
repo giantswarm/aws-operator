@@ -1,7 +1,6 @@
 package guest
 
-const Outputs = `
-{{define "outputs"}}
+const Outputs = `{{define "outputs"}}
 Outputs:
   MasterImageID:
     Value: {{ .MasterImageID }}
@@ -17,5 +16,4 @@ Outputs:
     Value: {{ .WorkerInstanceType }}
   WorkerCloudConfigVersion:
     Value: {{ .WorkerCloudConfigVersion }}
-{{end}}
-`
+{{end}}`

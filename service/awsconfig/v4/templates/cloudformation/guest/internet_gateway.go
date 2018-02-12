@@ -1,7 +1,6 @@
 package guest
 
-const InternetGateway = `
-{{define "internet_gateway"}}
+const InternetGateway = `{{define "internet_gateway"}}
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
@@ -28,5 +27,4 @@ const InternetGateway = `
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId:
         Ref: InternetGateway
-{{end}}
-`
+{{end}}`

@@ -1,7 +1,6 @@
 package guest
 
-const LaunchConfiguration = `
-{{define "launch_configuration"}}
+const LaunchConfiguration = `{{define "launch_configuration"}}
   {{ .ASGType }}LaunchConfiguration:
     Type: "AWS::AutoScaling::LaunchConfiguration"
     Description: {{ .ASGType }} launch configuration
@@ -21,5 +20,4 @@ const LaunchConfiguration = `
       {{ end }}
       AssociatePublicIpAddress: {{ .WorkerAssociatePublicIPAddress }}
       UserData: {{ .WorkerSmallCloudConfig }}
-{{end}}
-`
+{{end}}`

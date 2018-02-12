@@ -1,7 +1,6 @@
 package guest
 
-const Instance = `
-{{define "instance"}}
+const Instance = `{{define "instance"}}
   MasterInstance:
     Type: "AWS::EC2::Instance"
     Description: Master instance
@@ -32,5 +31,4 @@ const Instance = `
       InstanceId: !Ref MasterInstance
       VolumeId: !Ref EtcdVolume
       Device: /dev/sdh
-{{end}}
-`
+{{end}}`

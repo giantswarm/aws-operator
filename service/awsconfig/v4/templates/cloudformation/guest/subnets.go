@@ -1,7 +1,6 @@
 package guest
 
-const Subnets = `
-{{define "subnets"}}
+const Subnets = `{{define "subnets"}}
   PublicSubnet:
     Type: AWS::EC2::Subnet
     Properties:
@@ -35,5 +34,4 @@ const Subnets = `
     Properties:
       RouteTableId: !Ref PrivateRouteTable
       SubnetId: !Ref PrivateSubnet
-{{end}}
-`
+{{end}}`

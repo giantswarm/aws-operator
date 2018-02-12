@@ -1,7 +1,6 @@
 package hostpost
 
-const RouteTables = `
-{{define "route_tables"}}
+const RouteTables = `{{define "route_tables"}}
   {{ range $i, $v := .RouteTables }}
   PrivateRoute{{$i}}:
     Type: AWS::EC2::Route
@@ -10,5 +9,4 @@ const RouteTables = `
       DestinationCidrBlock: {{$v.CidrBlock}}
       VpcPeeringConnectionId: {{$v.PeerConnectionID}}
   {{end}}
-{{end}}
-`
+{{end}}`

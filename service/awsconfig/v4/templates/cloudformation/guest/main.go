@@ -1,7 +1,6 @@
 package guest
 
-const Main = `
-{{define "main"}}AWSTemplateFormatVersion: 2010-09-09
+const Main = `{{define "main"}}AWSTemplateFormatVersion: 2010-09-09
 Description: Main Guest CloudFormation stack.
 Resources:
   {{template "vpc" .}}
@@ -17,5 +16,4 @@ Resources:
   {{template "autoscaling_group" .}}
   {{template "recordsets" .}}
 {{template "outputs" .}}
-{{end}}
-`
+{{end}}`

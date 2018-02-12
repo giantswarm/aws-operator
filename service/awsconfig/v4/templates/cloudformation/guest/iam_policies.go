@@ -1,7 +1,6 @@
 package guest
 
-const IAMPolicies = `
-{{define "iam_policies"}}
+const IAMPolicies = `{{define "iam_policies"}}
   MasterRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -120,5 +119,4 @@ const IAMPolicies = `
       InstanceProfileName: {{.WorkerProfileName}}
       Roles:
         - Ref: "WorkerRole"
-{{end}}
-`
+{{end}}`
