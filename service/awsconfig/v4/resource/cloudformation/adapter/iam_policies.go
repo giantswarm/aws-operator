@@ -10,7 +10,10 @@ import (
 	"github.com/giantswarm/aws-operator/service/awsconfig/v4/key"
 )
 
-// template related to this adapter: service/templates/cloudformation/guest/iam_policies.yaml
+// The template related to this adapter can be found in the following import.
+//
+//     github.com/giantswarm/aws-operator/service/awsconfig/v4/templates/cloudformation/guest/iam_policies.go
+//
 
 type iamPoliciesAdapter struct {
 	MasterRoleName    string

@@ -688,59 +688,6 @@ func TestComponentName(t *testing.T) {
 	}
 }
 
-func TestRootDir(t *testing.T) {
-	testCases := []struct {
-		desc          string
-		rootElement   string
-		baseDir       string
-		expectedDir   string
-		expectedError bool
-	}{
-		{
-			desc:          "basic case, one level",
-			rootElement:   "aws-operator",
-			baseDir:       "/home/user/aws-operator/dir",
-			expectedDir:   "/home/user/aws-operator",
-			expectedError: false,
-		},
-		{
-			desc:          "basic case, two levels",
-			rootElement:   "aws-operator",
-			baseDir:       "/home/user/aws-operator/dir/subdir",
-			expectedDir:   "/home/user/aws-operator",
-			expectedError: false,
-		},
-		{
-			desc:          "aws-operator as first dir",
-			rootElement:   "aws-operator",
-			baseDir:       "/aws-operator/dir/subdir",
-			expectedDir:   "/aws-operator",
-			expectedError: false,
-		},
-		{
-			desc:          "aws-operator not present",
-			rootElement:   "aws-operator",
-			baseDir:       "/home/user/dir/subdir",
-			expectedDir:   "",
-			expectedError: true,
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.desc, func(t *testing.T) {
-			actual, err := RootDir(tc.baseDir, tc.rootElement)
-
-			if err != nil && !tc.expectedError {
-				t.Errorf("unexpected error: %v", err)
-			}
-
-			if actual != tc.expectedDir {
-				t.Errorf("unexpected result, want %q, got %q", tc.expectedDir, actual)
-			}
-		})
-	}
-}
-
 func Test_VersionBundleVersion(t *testing.T) {
 	expectedVersion := "0.1.0"
 
