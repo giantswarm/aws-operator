@@ -13,12 +13,15 @@ import (
 )
 
 func testConfig() Config {
-	resourceConfig := DefaultConfig()
-	resourceConfig.Clients = &adapter.Clients{}
-	resourceConfig.HostClients = &adapter.Clients{}
-	resourceConfig.Logger = microloggertest.New()
-	resourceConfig.InstallationName = "myinstallation"
-	return resourceConfig
+	c := Config{}
+
+	c.Clients = &adapter.Clients{}
+	c.HostClients = &adapter.Clients{}
+	c.Logger = microloggertest.New()
+
+	c.InstallationName = "myinstallation"
+
+	return c
 }
 
 func TestMainGuestTemplateGetEmptyBody(t *testing.T) {

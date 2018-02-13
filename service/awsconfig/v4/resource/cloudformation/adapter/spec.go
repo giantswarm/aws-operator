@@ -9,8 +9,6 @@ import (
 )
 
 const (
-	smallCloudConfigTemplate = "service/templates/cloudconfig/small_cloudconfig.yaml"
-
 	prefixMaster  = "master"
 	prefixWorker  = "worker"
 	prefixIngress = "ingress"

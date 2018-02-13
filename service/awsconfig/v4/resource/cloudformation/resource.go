@@ -14,7 +14,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "cloudformationv2"
+	Name = "cloudformationv4"
 )
 
 type AWSConfig struct {
@@ -25,7 +25,8 @@ type AWSConfig struct {
 	accountID       string
 }
 
-// Config represents the configuration used to create a new cloudformation resource.
+// Config represents the configuration used to create a new cloudformation
+// resource.
 type Config struct {
 	// Dependencies.
 	Clients          *adapter.Clients
@@ -34,23 +35,10 @@ type Config struct {
 	Logger           micrologger.Logger
 }
 
-// DefaultConfig provides a default configuration to create a new cloudformation
-// resource by best effort.
-func DefaultConfig() Config {
-	return Config{
-		// Dependencies.
-		Clients:          &adapter.Clients{},
-		HostClients:      &adapter.Clients{},
-		InstallationName: "",
-		Logger:           nil,
-	}
-}
-
 // Resource implements the cloudformation resource.
 type Resource struct {
-	// Dependencies.
-	Clients          *adapter.Clients
-	HostClients      *adapter.Clients
+	clients          *adapter.Clients
+	hostClients      *adapter.Clients
 	installationName string
 	logger           micrologger.Logger
 }
@@ -64,8 +52,8 @@ func New(config Config) (*Resource, error) {
 
 	newService := &Resource{
 		// Dependencies.
-		Clients:          config.Clients,
-		HostClients:      config.HostClients,
+		clients:          config.Clients,
+		hostClients:      config.HostClients,
 		installationName: config.InstallationName,
 		logger: config.Logger.With(
 			"resource", Name,
@@ -81,6 +69,58 @@ func (r *Resource) Name() string {
 
 func (r *Resource) Underlying() framework.Resource {
 	return r
+}
+
+func getCloudFormationTags(customObject v1alpha1.AWSConfig) []*awscloudformation.Tag {
+	clusterTags := key.ClusterTags(customObject)
+	stackTags := []*awscloudformation.Tag{}
+
+	for k, v := range clusterTags {
+		tag := &awscloudformation.Tag{
+			Key:   aws.String(k),
+			Value: aws.String(v),
+		}
+
+		stackTags = append(stackTags, tag)
+	}
+
+	return stackTags
+}
+
+func getStackOutputValue(outputs []*awscloudformation.Output, key string) (string, error) {
+	for _, o := range outputs {
+		if *o.OutputKey == key {
+			return *o.OutputValue, nil
+		}
+	}
+
+	return "", microerror.Mask(notFoundError)
+}
+
+func toCreateStackInput(v interface{}) (awscloudformation.CreateStackInput, error) {
+	if v == nil {
+		return awscloudformation.CreateStackInput{}, nil
+	}
+
+	createStackInput, ok := v.(awscloudformation.CreateStackInput)
+	if !ok {
+		return awscloudformation.CreateStackInput{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", createStackInput, v)
+	}
+
+	return createStackInput, nil
+}
+
+func toDeleteStackInput(v interface{}) (awscloudformation.DeleteStackInput, error) {
+	if v == nil {
+		return awscloudformation.DeleteStackInput{}, nil
+	}
+
+	deleteStackInput, ok := v.(awscloudformation.DeleteStackInput)
+	if !ok {
+		return awscloudformation.DeleteStackInput{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", deleteStackInput, v)
+	}
+
+	return deleteStackInput, nil
 }
 
 func toStackState(v interface{}) (StackState, error) {
@@ -107,56 +147,4 @@ func toUpdateStackInput(v interface{}) (awscloudformation.UpdateStackInput, erro
 	}
 
 	return updateStackInput, nil
-}
-
-func toDeleteStackInput(v interface{}) (awscloudformation.DeleteStackInput, error) {
-	if v == nil {
-		return awscloudformation.DeleteStackInput{}, nil
-	}
-
-	deleteStackInput, ok := v.(awscloudformation.DeleteStackInput)
-	if !ok {
-		return awscloudformation.DeleteStackInput{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", deleteStackInput, v)
-	}
-
-	return deleteStackInput, nil
-}
-
-func toCreateStackInput(v interface{}) (awscloudformation.CreateStackInput, error) {
-	if v == nil {
-		return awscloudformation.CreateStackInput{}, nil
-	}
-
-	createStackInput, ok := v.(awscloudformation.CreateStackInput)
-	if !ok {
-		return awscloudformation.CreateStackInput{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", createStackInput, v)
-	}
-
-	return createStackInput, nil
-}
-
-func getStackOutputValue(outputs []*awscloudformation.Output, key string) (string, error) {
-	for _, o := range outputs {
-		if *o.OutputKey == key {
-			return *o.OutputValue, nil
-		}
-	}
-
-	return "", microerror.Mask(notFoundError)
-}
-
-func getCloudFormationTags(customObject v1alpha1.AWSConfig) []*awscloudformation.Tag {
-	clusterTags := key.ClusterTags(customObject)
-	stackTags := []*awscloudformation.Tag{}
-
-	for k, v := range clusterTags {
-		tag := &awscloudformation.Tag{
-			Key:   aws.String(k),
-			Value: aws.String(v),
-		}
-
-		stackTags = append(stackTags, tag)
-	}
-
-	return stackTags
 }

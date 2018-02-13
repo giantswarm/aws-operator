@@ -2,11 +2,15 @@ package key
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/service/awsconfig/v4/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v4/templates/cloudformation/guest"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v4/templates/cloudformation/hostpost"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v4/templates/cloudformation/hostpre"
 )
 
 const (
@@ -16,9 +20,6 @@ const (
 	// CloudProviderTagOwnedValue is used to indicate an AWS resource is owned
 	// and managed by a cluster.
 	CloudProviderTagOwnedValue = "owned"
-
-	// LegacyVersion is the version in the version bundle for existing clusters.
-	LegacyVersion = "0.1.0"
 
 	// ProfileNameTemplate will be included in the IAM instance profile name.
 	ProfileNameTemplate = "EC2-K8S-Role"
@@ -42,6 +43,45 @@ func BucketName(customObject v1alpha1.AWSConfig, accountID string) string {
 
 func BucketObjectName(templateVersion string, prefix string) string {
 	return fmt.Sprintf("cloudconfig/%s/%s", templateVersion, prefix)
+}
+
+func CloudConfigSmallTemplates() []string {
+	return []string{
+		cloudconfig.Small,
+	}
+}
+
+func CloudFormationGuestTemplates() []string {
+	return []string{
+		guest.AutoScalingGroup,
+		guest.IAMPolicies,
+		guest.Instance,
+		guest.InternetGateway,
+		guest.LaunchConfiguration,
+		guest.LoadBalancers,
+		guest.Main,
+		guest.NatGateway,
+		guest.Outputs,
+		guest.RecordSets,
+		guest.RouteTables,
+		guest.SecurityGroups,
+		guest.Subnets,
+		guest.VPC,
+	}
+}
+
+func CloudFormationHostPostTemplates() []string {
+	return []string{
+		hostpost.Main,
+		hostpost.RouteTables,
+	}
+}
+
+func CloudFormationHostPreTemplates() []string {
+	return []string{
+		hostpre.IAMRoles,
+		hostpre.Main,
+	}
 }
 
 func ClusterCustomer(customObject v1alpha1.AWSConfig) string {
@@ -73,15 +113,6 @@ func ClusterVersion(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Version
 }
 
-func HasClusterVersion(customObject v1alpha1.AWSConfig) bool {
-	switch ClusterVersion(customObject) {
-	case string("v_0_1_0"):
-		return true
-	default:
-		return false
-	}
-}
-
 func IngressControllerInsecurePort(customObject v1alpha1.AWSConfig) int {
 	return customObject.Spec.Cluster.Kubernetes.IngressController.InsecurePort
 }
@@ -102,12 +133,12 @@ func KubernetesAPISecurePort(customObject v1alpha1.AWSConfig) int {
 // It takes the domain name, extracts the first subdomain, and combines it with the cluster name.
 func LoadBalancerName(domainName string, cluster v1alpha1.AWSConfig) (string, error) {
 	if ClusterID(cluster) == "" {
-		return "", microerror.Maskf(missingCloudConfigKeyError, "spec.cluster.cluster.id")
+		return "", microerror.Maskf(missingCloudConfigKeyError, "spec.cluster.id")
 	}
 
 	componentName, err := componentName(domainName)
 	if err != nil {
-		return "", microerror.Maskf(malformedCloudConfigKeyError, "spec.cluster.cluster.id")
+		return "", microerror.Maskf(malformedCloudConfigKeyError, "spec.cluster.id")
 	}
 
 	lbName := fmt.Sprintf("%s-%s", ClusterID(cluster), componentName)
@@ -185,24 +216,6 @@ func Region(customObject v1alpha1.AWSConfig) string {
 
 func RoleName(customObject v1alpha1.AWSConfig, profileType string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, RoleNameTemplate)
-}
-
-// RootDir returns the path in the base directory until the
-// root elemant is found.
-func RootDir(baseDir, rootElement string) (string, error) {
-	items := strings.Split(baseDir, string(filepath.Separator))
-	rootIndex := -1
-	for i := len(items) - 1; i >= 0; i-- {
-		if items[i] == rootElement {
-			rootIndex = i
-			break
-		}
-	}
-	if rootIndex == -1 {
-		return "", microerror.Mask(notFoundError)
-	}
-
-	return "/" + filepath.Join(items[:(rootIndex+1)]...), nil
 }
 
 func RouteTableName(customObject v1alpha1.AWSConfig, suffix string) string {
