@@ -21,9 +21,19 @@ var (
 		},
 		[]string{"resource"},
 	)
+	orphanClustersTotal = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: "awsoperator",
+			Subsystem: "resources",
+			Name:      "orphan_clusters_total",
+			Help:      "Number of clusters without AWS resources associated.",
+		},
+		[]string{"resource"},
+	)
 )
 
 func init() {
 	prometheus.MustRegister(duplicateResourcesTotal)
 	prometheus.MustRegister(orphanResourcesTotal)
+	prometheus.MustRegister(orphanClustersTotal)
 }
