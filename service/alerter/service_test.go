@@ -201,6 +201,73 @@ func Test_FindOrphanClusters(t *testing.T) {
 			resourceNames:  []string{"id1", "id2"},
 			orphanClusters: []string{},
 		},
+		{
+			description: "multiple orphan resources and cluster, both recent and old",
+			clusters: []v1alpha1.AWSConfig{
+				v1alpha1.AWSConfig{
+					Spec: v1alpha1.AWSConfigSpec{
+						Cluster: v1alpha1.Cluster{
+							ID: "id1",
+						},
+					},
+					ObjectMeta: metav1.ObjectMeta{
+						CreationTimestamp: twentyMinAgo,
+					},
+				},
+				v1alpha1.AWSConfig{
+					Spec: v1alpha1.AWSConfigSpec{
+						Cluster: v1alpha1.Cluster{
+							ID: "id2",
+						},
+					},
+					ObjectMeta: metav1.ObjectMeta{
+						CreationTimestamp: fiveMinAgo,
+					},
+				},
+				v1alpha1.AWSConfig{
+					Spec: v1alpha1.AWSConfigSpec{
+						Cluster: v1alpha1.Cluster{
+							ID: "id3",
+						},
+					},
+					ObjectMeta: metav1.ObjectMeta{
+						CreationTimestamp: twentyMinAgo,
+					},
+				},
+				v1alpha1.AWSConfig{
+					Spec: v1alpha1.AWSConfigSpec{
+						Cluster: v1alpha1.Cluster{
+							ID: "id4",
+						},
+					},
+					ObjectMeta: metav1.ObjectMeta{
+						CreationTimestamp: twentyMinAgo,
+					},
+				},
+				v1alpha1.AWSConfig{
+					Spec: v1alpha1.AWSConfigSpec{
+						Cluster: v1alpha1.Cluster{
+							ID: "id5",
+						},
+					},
+					ObjectMeta: metav1.ObjectMeta{
+						CreationTimestamp: fiveMinAgo,
+					},
+				},
+				v1alpha1.AWSConfig{
+					Spec: v1alpha1.AWSConfigSpec{
+						Cluster: v1alpha1.Cluster{
+							ID: "id6",
+						},
+					},
+					ObjectMeta: metav1.ObjectMeta{
+						CreationTimestamp: twentyMinAgo,
+					},
+				},
+			},
+			resourceNames:  []string{"id1", "id2", "id5", "id7"},
+			orphanClusters: []string{"id3", "id4", "id6"},
+		},
 	}
 
 	for _, tc := range tests {

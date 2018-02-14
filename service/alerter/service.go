@@ -16,9 +16,10 @@ import (
 )
 
 const (
-	alertIntervalMins      = 5
-	masterNodeResourceType = "master_node"
-	vpcResourceType        = "vpc"
+	alertIntervalMins              = 5
+	maxMinutesSinceClusterCreation = 10
+	masterNodeResourceType         = "master_node"
+	vpcResourceType                = "vpc"
 )
 
 // Config represents the configuration used to create a new service.
@@ -245,7 +246,7 @@ func FindOrphanClusters(awsConfigs []v1alpha1.AWSConfig, resourceNames []string)
 	}
 
 	n := time.Now()
-	l := n.Add(-10 * time.Minute)
+	l := n.Add(-1 * maxMinutesSinceClusterCreation * time.Minute)
 	for _, awsConfig := range awsConfigs {
 		// if the cluster has been recently created maybe the resources are not still there.
 		if awsConfig.CreationTimestamp.After(l) {
@@ -290,7 +291,7 @@ func (s Service) UpdateOrphanClusterMetrics(resourceType string, clusterIDs []st
 
 	orphanClustersTotal.WithLabelValues(resourceType).Set(float64(resourceCount))
 
-	s.logger.Log("info", fmt.Sprintf("alerter service found %d clusters with missing resources", resourceCount))
+	s.logger.Log("info", fmt.Sprintf("alerter service found %d clusters with missing AWS resources", resourceCount))
 
 	if resourceCount > 0 {
 		s.logger.Log("info", fmt.Sprintf("clusters with missing %s %s", resourceType, strings.Join(clusterIDs, ",")))
