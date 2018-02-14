@@ -15,7 +15,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "kmskey"
+	Name = "kmskeyv4"
 )
 
 // Config represents the configuration used to create a new cloudformation resource.
