@@ -1,4 +1,4 @@
-package v4
+package v5
 
 import (
 	"github.com/cenkalti/backoff"
@@ -13,16 +13,16 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v4/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v4/key"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v4/resource/cloudformation"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v4/resource/cloudformation/adapter"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v4/resource/endpoints"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v4/resource/kmskey"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v4/resource/namespace"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v4/resource/s3bucket"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v4/resource/s3object"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v4/resource/service"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v5/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v5/key"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/cloudformation"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/cloudformation/adapter"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/endpoints"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/kmskey"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/namespace"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/s3bucket"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/s3object"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/service"
 )
 
 const (

@@ -5,12 +5,12 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v4/key"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v5/key"
 )
 
 // The template related to this adapter can be found in the following import.
 //
-//     github.com/giantswarm/aws-operator/service/awsconfig/v4/templates/cloudformation/guest/load_balancers.go
+//     github.com/giantswarm/aws-operator/service/awsconfig/v5/templates/cloudformation/guest/load_balancers.go
 //
 
 const (
