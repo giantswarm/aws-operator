@@ -39,9 +39,17 @@ rules:
       - ""
     resources:
       - endpoints
+    verbs:
+      - create
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
       - services
     verbs:
       - create
+      - get
       - list
       - watch
   - apiGroups:
