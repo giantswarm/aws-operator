@@ -1,15 +1,20 @@
 package adapter
 
 import (
+	"encoding/base64"
 	"fmt"
 
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/awsconfig/v4/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v4/key"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v4/templates"
 )
 
-// template related to this adapter: service/templates/cloudformation/guest/launch_configuration.yaml
+// The template related to this adapter can be found in the following import.
+//
+//     github.com/giantswarm/aws-operator/service/awsconfig/v4/templates/cloudformation/guest/launch_configuration.go
+//
 
 type launchConfigAdapter struct {
 	WorkerAssociatePublicIPAddress bool
@@ -47,17 +52,17 @@ func (l *launchConfigAdapter) getLaunchConfiguration(cfg Config) error {
 	clusterID := key.ClusterID(cfg.CustomObject)
 	s3URI := fmt.Sprintf("%s-g8s-%s", accountID, clusterID)
 
-	cloudConfigConfig := SmallCloudconfigConfig{
+	c := SmallCloudconfigConfig{
 		MachineType:        prefixWorker,
 		Region:             cfg.CustomObject.Spec.AWS.Region,
 		S3URI:              s3URI,
 		CloudConfigVersion: cloudconfig.WorkerCloudConfigVersion,
 	}
-	smallCloudConfig, err := SmallCloudconfig(cloudConfigConfig)
+	rendered, err := templates.Render(key.CloudConfigSmallTemplates(), c)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	l.WorkerSmallCloudConfig = smallCloudConfig
+	l.WorkerSmallCloudConfig = base64.StdEncoding.EncodeToString([]byte(rendered))
 
 	return nil
 }

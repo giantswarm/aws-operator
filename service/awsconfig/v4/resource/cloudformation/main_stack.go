@@ -1,12 +1,7 @@
 package cloudformation
 
 import (
-	"bytes"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 	"strconv"
-	"text/template"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
@@ -14,6 +9,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/awsconfig/v4/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v4/key"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v4/resource/cloudformation/adapter"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v4/templates"
 )
 
 func newMainStack(customObject v1alpha1.AWSConfig) (StackState, error) {
@@ -56,14 +52,14 @@ func newMainStack(customObject v1alpha1.AWSConfig) (StackState, error) {
 }
 
 func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
-	hostAccountID, err := adapter.AccountID(*r.HostClients)
+	hostAccountID, err := adapter.AccountID(*r.hostClients)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 	cfg := adapter.Config{
 		CustomObject:     customObject,
-		Clients:          *r.Clients,
-		HostClients:      *r.HostClients,
+		Clients:          *r.clients,
+		HostClients:      *r.hostClients,
 		InstallationName: r.installationName,
 		HostAccountID:    hostAccountID,
 	}
@@ -72,11 +68,16 @@ func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig) (st
 		return "", microerror.Mask(err)
 	}
 
-	return r.getMainTemplateBody(cloudFormationGuestTemplatesDirectory, adp)
+	rendered, err := templates.Render(key.CloudFormationGuestTemplates(), adp)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	return rendered, nil
 }
 
 func (r *Resource) getMainHostPreTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
-	guestAccountID, err := adapter.AccountID(*r.Clients)
+	guestAccountID, err := adapter.AccountID(*r.clients)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -89,58 +90,29 @@ func (r *Resource) getMainHostPreTemplateBody(customObject v1alpha1.AWSConfig) (
 		return "", microerror.Mask(err)
 	}
 
-	return r.getMainTemplateBody(cloudFormationHostPreTemplatesDirectory, adp)
+	rendered, err := templates.Render(key.CloudFormationHostPreTemplates(), adp)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	return rendered, nil
 }
 
 func (r *Resource) getMainHostPostTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
 	cfg := adapter.Config{
 		CustomObject: customObject,
-		Clients:      *r.Clients,
-		HostClients:  *r.HostClients,
+		Clients:      *r.clients,
+		HostClients:  *r.hostClients,
 	}
 	adp, err := adapter.NewHostPost(cfg)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
-	return r.getMainTemplateBody(cloudFormationHostPostTemplatesDirectory, adp)
-}
-
-func (r *Resource) getMainTemplateBody(tplDir string, adp adapter.Adapter) (string, error) {
-	main := template.New("")
-
-	var t *template.Template
-	var err error
-
-	// parse templates
-	baseDir, err := os.Getwd()
+	rendered, err := templates.Render(key.CloudFormationHostPostTemplates(), adp)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
-	rootDir, err := key.RootDir(baseDir, adapter.RootDirElement)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-	templatesDir := filepath.Join(rootDir, tplDir)
-
-	files, err := ioutil.ReadDir(templatesDir)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-	templates := []string{}
-	for _, file := range files {
-		templates = append(templates, filepath.Join(templatesDir, file.Name()))
-	}
-	t, err = main.ParseFiles(templates...)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	var tpl bytes.Buffer
-	if err := t.ExecuteTemplate(&tpl, "main", adp); err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	return tpl.String(), nil
+	return rendered, nil
 }

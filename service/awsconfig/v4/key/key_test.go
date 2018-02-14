@@ -156,56 +156,6 @@ func Test_ClusterVersion(t *testing.T) {
 	}
 }
 
-func Test_HasClusterVersion(t *testing.T) {
-	tests := []struct {
-		customObject   v1alpha1.AWSConfig
-		expectedResult bool
-	}{
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{},
-			},
-			expectedResult: false,
-		},
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						Version: "",
-					},
-				},
-			},
-			expectedResult: false,
-		},
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						Version: "v_0_1_0",
-					},
-				},
-			},
-			expectedResult: true,
-		},
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						Version: "v_0_2_0",
-					},
-				},
-			},
-			expectedResult: false,
-		},
-	}
-
-	for _, tc := range tests {
-		if HasClusterVersion(tc.customObject) != tc.expectedResult {
-			t.Fatalf("Expected has cluster version to be %t but was %t", tc.expectedResult, HasClusterVersion(tc.customObject))
-		}
-	}
-}
-
 func Test_IngressControllerInsecurePort(t *testing.T) {
 	expectedPort := 30010
 	customObject := v1alpha1.AWSConfig{
@@ -735,59 +685,6 @@ func TestComponentName(t *testing.T) {
 		}
 
 		assert.Equal(t, tc.res, res, fmt.Sprintf("[%s] The input values didn't produce the expected output", tc.desc))
-	}
-}
-
-func TestRootDir(t *testing.T) {
-	testCases := []struct {
-		desc          string
-		rootElement   string
-		baseDir       string
-		expectedDir   string
-		expectedError bool
-	}{
-		{
-			desc:          "basic case, one level",
-			rootElement:   "aws-operator",
-			baseDir:       "/home/user/aws-operator/dir",
-			expectedDir:   "/home/user/aws-operator",
-			expectedError: false,
-		},
-		{
-			desc:          "basic case, two levels",
-			rootElement:   "aws-operator",
-			baseDir:       "/home/user/aws-operator/dir/subdir",
-			expectedDir:   "/home/user/aws-operator",
-			expectedError: false,
-		},
-		{
-			desc:          "aws-operator as first dir",
-			rootElement:   "aws-operator",
-			baseDir:       "/aws-operator/dir/subdir",
-			expectedDir:   "/aws-operator",
-			expectedError: false,
-		},
-		{
-			desc:          "aws-operator not present",
-			rootElement:   "aws-operator",
-			baseDir:       "/home/user/dir/subdir",
-			expectedDir:   "",
-			expectedError: true,
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.desc, func(t *testing.T) {
-			actual, err := RootDir(tc.baseDir, tc.rootElement)
-
-			if err != nil && !tc.expectedError {
-				t.Errorf("unexpected error: %v", err)
-			}
-
-			if actual != tc.expectedDir {
-				t.Errorf("unexpected result, want %q, got %q", tc.expectedDir, actual)
-			}
-		})
 	}
 }
 

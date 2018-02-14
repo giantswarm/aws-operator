@@ -14,32 +14,32 @@ func NewVersionBundles() []versionbundle.Bundle {
 				{
 					Component:   "calico",
 					Description: "Calico version updated.",
-					Kind:        "changed",
+					Kind:        versionbundle.KindChanged,
 				},
 				{
 					Component:   "docker",
 					Description: "Docker version updated.",
-					Kind:        "changed",
+					Kind:        versionbundle.KindChanged,
 				},
 				{
 					Component:   "etcd",
 					Description: "Etcd version updated.",
-					Kind:        "changed",
+					Kind:        versionbundle.KindChanged,
 				},
 				{
 					Component:   "kubedns",
 					Description: "KubeDNS version updated.",
-					Kind:        "changed",
+					Kind:        versionbundle.KindChanged,
 				},
 				{
 					Component:   "kubernetes",
 					Description: "Kubernetes version updated.",
-					Kind:        "changed",
+					Kind:        versionbundle.KindChanged,
 				},
 				{
 					Component:   "nginx-ingress-controller",
 					Description: "Nginx-ingress-controller version updated.",
-					Kind:        "changed",
+					Kind:        versionbundle.KindChanged,
 				},
 			},
 			Components: []versionbundle.Component{
@@ -80,7 +80,7 @@ func NewVersionBundles() []versionbundle.Bundle {
 				{
 					Component:   "cloudformation",
 					Description: "First version of Cloud Formation resources.",
-					Kind:        "added",
+					Kind:        versionbundle.KindAdded,
 				},
 			},
 			Components: []versionbundle.Component{
@@ -121,7 +121,7 @@ func NewVersionBundles() []versionbundle.Bundle {
 				{
 					Component:   "kubernetes",
 					Description: "Updated to kubernetes 1.8.4. Fixes a goroutine leak in the k8s api.",
-					Kind:        "changed",
+					Kind:        versionbundle.KindChanged,
 				},
 			},
 			Components: []versionbundle.Component{
@@ -304,7 +304,7 @@ func NewVersionBundles() []versionbundle.Bundle {
 				},
 			},
 			Dependencies: []versionbundle.Dependency{},
-			Deprecated:   false,
+			Deprecated:   true,
 			Name:         "aws-operator",
 			Time:         time.Date(2018, time.January, 31, 10, 43, 0, 0, time.UTC),
 			Version:      "2.0.2",
@@ -364,7 +364,7 @@ func NewVersionBundles() []versionbundle.Bundle {
 			Name:         "aws-operator",
 			Time:         time.Date(2018, time.February, 6, 12, 17, 0, 0, time.UTC),
 			Version:      "2.1.0",
-			WIP:          true,
+			WIP:          false,
 		},
 	}
 }

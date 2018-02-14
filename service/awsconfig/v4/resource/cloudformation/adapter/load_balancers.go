@@ -8,7 +8,10 @@ import (
 	"github.com/giantswarm/aws-operator/service/awsconfig/v4/key"
 )
 
-// template related to this adapter: service/templates/cloudformation/guest/load_balancers.yaml
+// The template related to this adapter can be found in the following import.
+//
+//     github.com/giantswarm/aws-operator/service/awsconfig/v4/templates/cloudformation/guest/load_balancers.go
+//
 
 const (
 	// Default values for health checks.

@@ -1,15 +1,20 @@
 package adapter
 
 import (
+	"encoding/base64"
 	"fmt"
 
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/awsconfig/v4/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v4/key"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v4/templates"
 )
 
-// template related to this adapter: service/templates/cloudformation/guest/instance.yaml
+// The template related to this adapter can be found in the following import.
+//
+//     github.com/giantswarm/aws-operator/service/awsconfig/v4/templates/cloudformation/guest/instance.go
+//
 
 type instanceAdapter struct {
 	MasterAZ               string
@@ -34,17 +39,17 @@ func (i *instanceAdapter) getInstance(cfg Config) error {
 	clusterID := key.ClusterID(cfg.CustomObject)
 	s3URI := fmt.Sprintf("%s-g8s-%s", accountID, clusterID)
 
-	cloudConfigConfig := SmallCloudconfigConfig{
+	c := SmallCloudconfigConfig{
 		MachineType:        prefixMaster,
 		Region:             cfg.CustomObject.Spec.AWS.Region,
 		S3URI:              s3URI,
 		CloudConfigVersion: cloudconfig.MasterCloudConfigVersion,
 	}
-	smallCloudConfig, err := SmallCloudconfig(cloudConfigConfig)
+	rendered, err := templates.Render(key.CloudConfigSmallTemplates(), c)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	i.MasterSmallCloudConfig = smallCloudConfig
+	i.MasterSmallCloudConfig = base64.StdEncoding.EncodeToString([]byte(rendered))
 
 	return nil
 }

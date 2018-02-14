@@ -13,13 +13,13 @@ import (
 func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
 	cluster, err := key.ToCustomObject(obj)
 	if err != nil {
-		microerror.Mask(err)
+		return microerror.Mask(err)
 	}
 
 	deleteStackInput := awscloudformation.DeleteStackInput{
 		StackName: aws.String(key.MainGuestStackName(cluster)),
 	}
-	_, err = r.Clients.CloudFormation.DeleteStack(&deleteStackInput)
+	_, err = r.clients.CloudFormation.DeleteStack(&deleteStackInput)
 	if err != nil {
 		return microerror.Maskf(err, "deleting AWS Guest CloudFormation Stack")
 	}
@@ -28,7 +28,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	deleteStackInput = awscloudformation.DeleteStackInput{
 		StackName: aws.String(key.MainHostPreStackName(cluster)),
 	}
-	_, err = r.HostClients.CloudFormation.DeleteStack(&deleteStackInput)
+	_, err = r.hostClients.CloudFormation.DeleteStack(&deleteStackInput)
 	if err != nil {
 		return microerror.Maskf(err, "deleting AWS Host Pre-Guest CloudFormation Stack")
 	}
@@ -37,7 +37,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	deleteStackInput = awscloudformation.DeleteStackInput{
 		StackName: aws.String(key.MainHostPostStackName(cluster)),
 	}
-	_, err = r.HostClients.CloudFormation.DeleteStack(&deleteStackInput)
+	_, err = r.hostClients.CloudFormation.DeleteStack(&deleteStackInput)
 	if err != nil {
 		return microerror.Maskf(err, "deleting AWS Host Post-Guest CloudFormation Stack")
 	}
@@ -63,7 +63,6 @@ func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desir
 	if err != nil {
 		return awscloudformation.DeleteStackInput{}, microerror.Mask(err)
 	}
-
 	desiredStackState, err := toStackState(desiredState)
 	if err != nil {
 		return awscloudformation.DeleteStackInput{}, microerror.Mask(err)
