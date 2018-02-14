@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -15,9 +16,10 @@ import (
 )
 
 const (
-	alertIntervalMins      = 5
-	masterNodeResourceType = "master_node"
-	vpcResourceType        = "vpc"
+	alertIntervalMins              = 5
+	maxMinutesSinceClusterCreation = 10
+	masterNodeResourceType         = "master_node"
+	vpcResourceType                = "vpc"
 )
 
 // Config represents the configuration used to create a new service.
@@ -117,7 +119,12 @@ func (s *Service) StartAlerts() {
 
 // RunAllChecks looks for problems with clusters that we want to alert on.
 func (s *Service) RunAllChecks() error {
-	clusterIDs, err := s.ListClusters()
+	awsConfigs, err := s.ListClusters()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	clusterIDs, err := s.ListClusterIDs(awsConfigs)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -128,6 +135,11 @@ func (s *Service) RunAllChecks() error {
 	}
 
 	err = s.OrphanResourcesAlert(clusterIDs)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	err = s.OrphanClustersAlert(awsConfigs)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -169,16 +181,34 @@ func (s *Service) OrphanResourcesAlert(clusterIDs []string) error {
 	return nil
 }
 
-// ListClusters lists the cluster custom objects.
-func (s Service) ListClusters() ([]string, error) {
-	clusterIDs := []string{}
-
-	awsConfigs, err := s.g8sClient.ProviderV1alpha1().AWSConfigs("").List(v1.ListOptions{})
+// OrphanClustersAlert looks for clusters without AWS resources associated.
+func (s *Service) OrphanClustersAlert(awsConfigs []v1alpha1.AWSConfig) error {
+	vpcNames, err := s.ListVpcs()
 	if err != nil {
-		return []string{}, microerror.Mask(err)
+		return microerror.Mask(err)
 	}
 
-	for _, awsConfig := range awsConfigs.Items {
+	orphanClusters := FindOrphanClusters(awsConfigs, vpcNames)
+	s.UpdateOrphanClusterMetrics(vpcResourceType, orphanClusters)
+
+	return nil
+}
+
+// ListClusters lists the cluster custom objects.
+func (s Service) ListClusters() ([]v1alpha1.AWSConfig, error) {
+	awsConfigs, err := s.g8sClient.ProviderV1alpha1().AWSConfigs("").List(v1.ListOptions{})
+	if err != nil {
+		return []v1alpha1.AWSConfig{}, microerror.Mask(err)
+	}
+
+	return awsConfigs.Items, nil
+}
+
+// ListClusterIDs lists the cluster custom objects IDs.
+func (s Service) ListClusterIDs(awsConfigs []v1alpha1.AWSConfig) ([]string, error) {
+	clusterIDs := []string{}
+
+	for _, awsConfig := range awsConfigs {
 		clusterIDs = append(clusterIDs, key.ClusterID(awsConfig))
 	}
 
@@ -204,6 +234,33 @@ func FindOrphanResources(clusterIDs []string, resourceNames []string) []string {
 	return orphanResources
 }
 
+// FindOrphanClusters compares a list of cluster IDs and resource names. It
+// returns the IDs of any cluster created a reasonable amount of time ago without
+// resources associated.
+func FindOrphanClusters(awsConfigs []v1alpha1.AWSConfig, resourceNames []string) []string {
+	resources := map[string]bool{}
+	orphanClusters := []string{}
+
+	for _, resourceName := range resourceNames {
+		resources[resourceName] = true
+	}
+
+	n := time.Now()
+	l := n.Add(-1 * maxMinutesSinceClusterCreation * time.Minute)
+	for _, awsConfig := range awsConfigs {
+		// if the cluster has been recently created maybe the resources are not still there.
+		if awsConfig.CreationTimestamp.After(l) {
+			continue
+		}
+		clusterID := key.ClusterID(awsConfig)
+		if ok := resources[clusterID]; !ok {
+			orphanClusters = append(orphanClusters, clusterID)
+		}
+	}
+
+	return orphanClusters
+}
+
 // UpdateDuplicateResourceMetrics updates the metric and logs the results.
 func (s Service) UpdateDuplicateResourceMetrics(resourceType string, clusterIDs []string) {
 	resourceCount := len(clusterIDs)
@@ -225,5 +282,18 @@ func (s Service) UpdateOrphanResourceMetrics(resourceType string, resourceNames 
 
 	if resourceCount > 0 {
 		s.logger.Log("info", fmt.Sprintf("orphan %s names are %s", resourceType, strings.Join(resourceNames, ",")))
+	}
+}
+
+// UpdateOrphanClusterMetrics updates the metric and logs the results.
+func (s Service) UpdateOrphanClusterMetrics(resourceType string, clusterIDs []string) {
+	resourceCount := len(clusterIDs)
+
+	orphanClustersTotal.WithLabelValues(resourceType).Set(float64(resourceCount))
+
+	s.logger.Log("info", fmt.Sprintf("alerter service found %d clusters with missing AWS resources", resourceCount))
+
+	if resourceCount > 0 {
+		s.logger.Log("info", fmt.Sprintf("clusters with missing %s %s", resourceType, strings.Join(clusterIDs, ",")))
 	}
 }
