@@ -1,18 +1,6 @@
 package cloudconfig
 
 const (
-	decryptKeysServiceTemplate = `
-[Unit]
-Description=Decrypt Secret Keys
-
-[Service]
-Type=oneshot
-ExecStart=/opt/bin/decrypt-keys-assets
-
-[Install]
-WantedBy=multi-user.target
-`
-
 	masterFormatVarLibDockerServiceTemplate = `
 [Unit]
 Description=Format /var/lib/docker to XFS
