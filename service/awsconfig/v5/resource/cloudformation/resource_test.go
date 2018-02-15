@@ -1,7 +1,7 @@
 package cloudformation
 
 import (
-	"reflect"
+	"fmt"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -37,12 +37,25 @@ func Test_Resource_Cloudformation_GetCloudFormationTags(t *testing.T) {
 		},
 	}
 
+	noContainsTag := func(tag *awscloudformation.Tag, tags []*awscloudformation.Tag) bool {
+		for _, inTag := range tags {
+			fmt.Printf("%t %t \n", tag, inTag)
+			if tag == inTag {
+				return true
+			}
+		}
+
+		return false
+	}
+
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			tags := getCloudFormationTags(tc.obj)
 
-			if !reflect.DeepEqual(tc.expectedTags, tags) {
-				t.Fatalf("Expected cloud formation tags %v but was %v", tc.expectedTags, tags)
+			for _, tag := range tc.expectedTags {
+				if noContainsTag(tag, tags) {
+					t.Fatalf("Expected cloud formation contains tag %v in the slice %v", tag, tags)
+				}
 			}
 		})
 	}

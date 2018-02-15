@@ -376,7 +376,7 @@ func NewVersionBundles() []versionbundle.Bundle {
 				{
 					Component:   "aws-operator",
 					Description: "Get back Kubernetes Cluster ID tag helping cost analysis in AWS.",
-					Kind:        versionbundle.KindChanged,
+					Kind:        versionbundle.KindAdded,
 				},
 			},
 			Components: []versionbundle.Component{

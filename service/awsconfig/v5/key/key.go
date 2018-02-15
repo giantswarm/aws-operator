@@ -109,12 +109,12 @@ func ClusterTags(customObject v1alpha1.AWSConfig) map[string]string {
 	return tags
 }
 
-func CustomerID(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.Cluster.Customer.ID
-}
-
 func ClusterVersion(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Version
+}
+
+func CustomerID(customObject v1alpha1.AWSConfig) string {
+	return customObject.Spec.Cluster.Customer.ID
 }
 
 func IngressControllerInsecurePort(customObject v1alpha1.AWSConfig) int {
