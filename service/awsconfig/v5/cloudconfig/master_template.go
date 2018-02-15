@@ -197,7 +197,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		// Add use-proxy-protocol to ingress-controller ConfigMap, this doesn't work
 		// on KVM because of dependencies on hardware LB configuration.
 		{
-			AssetContent: ingressControllerConfigMapTemplate,
+			AssetContent: cloudconfig.IngressControllerConfigMapTemplate,
 			Path:         "/srv/ingress-controller-cm.yml",
 			Owner:        FileOwner,
 			Permissions:  0644,
