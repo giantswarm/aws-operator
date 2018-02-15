@@ -2,7 +2,7 @@ package templates
 
 import (
 	"bytes"
-	"html/template"
+	"text/template"
 
 	"github.com/giantswarm/microerror"
 )
