@@ -298,7 +298,7 @@ func (e *MasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
 		},
 		{
 			Name:    "storageclass",
-			Content: cloudconfig.InstanceStorageClassTemplate,
+			Content: cloudconfig.InstanceStorageClass,
 		},
 	}
 	return newSections

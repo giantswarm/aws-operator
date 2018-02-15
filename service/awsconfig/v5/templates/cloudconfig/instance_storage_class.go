@@ -1,6 +1,6 @@
 package cloudconfig
 
-const InstanceStorageClassTemplate = `
+const InstanceStorageClass = `
 write_files:
 - path: /srv/default-storage-class.yaml
   owner: root
