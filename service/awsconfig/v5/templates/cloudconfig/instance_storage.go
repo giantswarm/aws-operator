@@ -1,6 +1,6 @@
 package cloudconfig
 
-const InstanceStorageTemplate = `
+const InstanceStorage = `
 storage:
   filesystems:
     - name: ephemeral1
