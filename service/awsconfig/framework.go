@@ -19,6 +19,8 @@ import (
 	"github.com/giantswarm/aws-operator/service/awsconfig/v3"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v4"
 	v4cloudconfig "github.com/giantswarm/aws-operator/service/awsconfig/v4/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v5"
+	v5cloudconfig "github.com/giantswarm/aws-operator/service/awsconfig/v5/cloudconfig"
 )
 
 const (
@@ -289,6 +291,35 @@ func newResourceRouter(config FrameworkConfig) (*framework.ResourceRouter, error
 		}
 	}
 
+	var resourceSetV5 *framework.ResourceSet
+	{
+		c := v5.ResourceSetConfig{
+			CertsSearcher:      certWatcher,
+			GuestAWSClients:    awsClients,
+			HostAWSClients:     awsHostClients,
+			K8sClient:          config.K8sClient,
+			Logger:             config.Logger,
+			RandomkeysSearcher: keyWatcher,
+
+			HandledVersionBundles: []string{
+				"2.1.1",
+			},
+			InstallationName: config.InstallationName,
+			OIDC: v5cloudconfig.OIDCConfig{
+				ClientID:      config.OIDC.ClientID,
+				IssuerURL:     config.OIDC.IssuerURL,
+				UsernameClaim: config.OIDC.UsernameClaim,
+				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			ProjectName: config.Name,
+		}
+
+		resourceSetV5, err = v5.NewResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var resourceRouter *framework.ResourceRouter
 	{
 		c := framework.ResourceRouterConfig{
@@ -297,6 +328,7 @@ func newResourceRouter(config FrameworkConfig) (*framework.ResourceRouter, error
 				resourceSetV2,
 				resourceSetV3,
 				resourceSetV4,
+				resourceSetV5,
 			},
 		}
 

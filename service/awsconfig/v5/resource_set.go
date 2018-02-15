@@ -19,6 +19,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/cloudformation/adapter"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/kmskey"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/loadbalancer"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/namespace"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/s3object"
@@ -176,6 +177,22 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		}
 	}
 
+	var loadBalancerResource framework.Resource
+	{
+		c := loadbalancer.Config{
+			AwsService: awsService,
+			Clients: loadbalancer.Clients{
+				ELB: config.GuestAWSClients.ELB,
+			},
+			Logger: config.Logger,
+		}
+
+		loadBalancerResource, err = loadbalancer.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var cloudformationResource framework.Resource
 	{
 		c := cloudformation.Config{
@@ -248,6 +265,7 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		kmsKeyResource,
 		s3BucketResource,
 		s3BucketObjectResource,
+		loadBalancerResource,
 		cloudformationResource,
 		namespaceResource,
 		serviceResource,
