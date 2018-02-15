@@ -226,7 +226,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	unitsMeta := []k8scloudconfig.UnitMetadata{
 		{
-			AssetContent: decryptTLSAssetsServiceTemplate,
+			AssetContent: cloudconfig.DecryptTLSAssetsServiceTemplate,
 			Name:         "decrypt-tls-assets.service",
 			// Do not enable TLS assets decrypt unit so that it won't get automatically
 			// executed on master reboot. This will prevent eventual races with the

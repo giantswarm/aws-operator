@@ -1,18 +1,6 @@
 package cloudconfig
 
 const (
-	decryptTLSAssetsServiceTemplate = `
-[Unit]
-Description=Decrypt TLS certificates
-
-[Service]
-Type=oneshot
-ExecStart=/opt/bin/decrypt-tls-assets
-
-[Install]
-WantedBy=multi-user.target
-`
-
 	decryptKeysAssetsScriptTemplate = `#!/bin/bash -e
 
 rkt run \

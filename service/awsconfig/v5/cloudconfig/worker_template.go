@@ -155,7 +155,7 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	unitsMeta := []k8scloudconfig.UnitMetadata{
 		{
-			AssetContent: decryptTLSAssetsServiceTemplate,
+			AssetContent: cloudconfig.DecryptTLSAssetsServiceTemplate,
 			Name:         "decrypt-tls-assets.service",
 			Enable:       true,
 			Command:      "start",
