@@ -6,6 +6,8 @@ import (
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_1_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeytpr"
+
+	"github.com/giantswarm/aws-operator/service/awsconfig/v5/templates/cloudconfig"
 )
 
 const (
@@ -61,7 +63,7 @@ type MasterExtension struct {
 func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	filesMeta := []k8scloudconfig.FileMetadata{
 		{
-			AssetContent: decryptTLSAssetsScriptTemplate,
+			AssetContent: cloudconfig.DecryptTLSAssetsScriptTemplate,
 			Path:         "/opt/bin/decrypt-tls-assets",
 			Owner:        FileOwner,
 			Permissions:  FilePermission,
