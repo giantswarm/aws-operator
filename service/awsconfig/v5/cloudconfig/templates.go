@@ -1,17 +1,6 @@
 package cloudconfig
 
 const (
-	instanceStorageTemplate = `
-storage:
-  filesystems:
-    - name: ephemeral1
-      mount:
-        device: /dev/xvdb
-        format: xfs
-        create:
-          force: true
-`
-
 	instanceStorageClassTemplate = `
 write_files:
 - path: /srv/default-storage-class.yaml
