@@ -366,5 +366,50 @@ func NewVersionBundles() []versionbundle.Bundle {
 			Version:      "2.1.0",
 			WIP:          false,
 		},
+		{
+			Changelogs: []versionbundle.Changelog{
+				{
+					Component:   "aws-operator",
+					Description: "Delete AWS Cloud Provider resources when deleting clusters.",
+					Kind:        versionbundle.KindAdded,
+				},
+			},
+			Components: []versionbundle.Component{
+				{
+					Name:    "calico",
+					Version: "3.0.1",
+				},
+				{
+					Name:    "containerlinux",
+					Version: "1576.5.0",
+				},
+				{
+					Name:    "docker",
+					Version: "17.09.0",
+				},
+				{
+					Name:    "etcd",
+					Version: "3.2.7",
+				},
+				{
+					Name:    "coredns",
+					Version: "1.0.5",
+				},
+				{
+					Name:    "kubernetes",
+					Version: "1.9.2",
+				},
+				{
+					Name:    "nginx-ingress-controller",
+					Version: "0.10.2",
+				},
+			},
+			Dependencies: []versionbundle.Dependency{},
+			Deprecated:   false,
+			Name:         "aws-operator",
+			Time:         time.Date(2018, time.February, 15, 10, 0, 0, 0, time.UTC),
+			Version:      "2.1.1",
+			WIP:          true,
+		},
 	}
 }
