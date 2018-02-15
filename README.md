@@ -1,6 +1,5 @@
 [![CircleCI](https://circleci.com/gh/giantswarm/aws-operator.svg?&style=shield&circle-token=8f0fe6ad08c090afa36c35ba5d926ac6ffe797e8)](https://circleci.com/gh/giantswarm/aws-operator) [![Docker Repository on Quay](https://quay.io/repository/giantswarm/aws-operator/status "Docker Repository on Quay")](https://quay.io/repository/giantswarm/aws-operator)
 
-
 # aws-operator
 
 The aws-operator manages Kubernetes clusters running on AWS.
@@ -37,7 +36,7 @@ CRD using a generated client stored in our [apiextensions](2) repo. Releases
 are versioned using [version bundles](3).
 
 The operator provisions guest Kubernetes clusters running on AWS. It runs in a
-host Kubernetes cluster also running on AWS. 
+host Kubernetes cluster also running on AWS.
 
 [1]:https://github.com/giantswarm/operatorkit
 [2]:https://github.com/giantswarm/apiextensions
@@ -64,7 +63,7 @@ per cluster. This is to upload cloudconfigs for the cluster nodes. The
 cloudconfigs contain TLS certificates which are encrypted using the KMS key.
 
 ### Kubernetes Resources
- 
+
 The operator also creates a Kubernetes namespace per guest cluster with a
 service and endpoints. These are used by the host cluster to access the guest
 cluster.
@@ -73,7 +72,7 @@ cluster.
 
 Authentication for the cluster components and end-users uses TLS certificates.
 These are provisioned using [Hashicorp Vault](5) and are managed by our
-[cert-operator](6). 
+[cert-operator](6).
 
 [5]:https://www.vaultproject.io/
 [6]:https://github.com/giantswarm/cert-operator
