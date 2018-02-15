@@ -373,6 +373,11 @@ func NewVersionBundles() []versionbundle.Bundle {
 					Description: "Delete AWS Cloud Provider resources when deleting clusters.",
 					Kind:        versionbundle.KindAdded,
 				},
+				{
+					Component:   "aws-operator",
+					Description: "Get back Kubernetes Cluster ID tag helping cost analysis in AWS.",
+					Kind:        versionbundle.KindChanged,
+				},
 			},
 			Components: []versionbundle.Component{
 				{
