@@ -63,7 +63,7 @@ type MasterExtension struct {
 func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	filesMeta := []k8scloudconfig.FileMetadata{
 		{
-			AssetContent: cloudconfig.DecryptTLSAssetsScriptTemplate,
+			AssetContent: cloudconfig.DecryptTLSAssetsScript,
 			Path:         "/opt/bin/decrypt-tls-assets",
 			Owner:        FileOwner,
 			Permissions:  FilePermission,

@@ -1,6 +1,6 @@
 package cloudconfig
 
-const DecryptTLSAssetsScriptTemplate = `#!/bin/bash -e
+const DecryptTLSAssetsScript = `#!/bin/bash -e
 
 rkt run \
   --volume=ssl,kind=host,source=/etc/kubernetes/ssl,readOnly=false \

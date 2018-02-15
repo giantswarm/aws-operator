@@ -57,7 +57,7 @@ type WorkerExtension struct {
 func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	filesMeta := []k8scloudconfig.FileMetadata{
 		{
-			AssetContent: cloudconfig.DecryptTLSAssetsScriptTemplate,
+			AssetContent: cloudconfig.DecryptTLSAssetsScript,
 			Path:         "/opt/bin/decrypt-tls-assets",
 			Owner:        "root:root",
 			Permissions:  0700,
