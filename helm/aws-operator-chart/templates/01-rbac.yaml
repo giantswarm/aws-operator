@@ -41,9 +41,7 @@ rules:
       - endpoints
       - services
     verbs:
-      - create
-      - list
-      - watch
+      - "*"
   - apiGroups:
       - ""
     resources:
