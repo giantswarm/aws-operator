@@ -1,6 +1,6 @@
 package cloudconfig
 
-const EphemeralVarLibDockerMountTemplate = `
+const EphemeralVarLibDockerMount = `
 [Unit]
 Description=Mount ephemeral volume on /var/lib/docker
 
