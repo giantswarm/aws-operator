@@ -1,6 +1,6 @@
 package cloudconfig
 
-const DecryptKeysAssetsScriptTemplate = `#!/bin/bash -e
+const DecryptKeysAssetsScript = `#!/bin/bash -e
 
 rkt run \
   --volume=keys,kind=host,source=/etc/kubernetes/encryption,readOnly=false \
