@@ -1,6 +1,6 @@
 package cloudconfig
 
-const PersistentVarLibDockerMountTemplate = `
+const PersistentVarLibDockerMount = `
 [Unit]
 Description=Mount persistent volume on /var/lib/docker
 

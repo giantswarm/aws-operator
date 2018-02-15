@@ -167,7 +167,7 @@ func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Command:      "start",
 		},
 		{
-			AssetContent: cloudconfig.PersistentVarLibDockerMountTemplate,
+			AssetContent: cloudconfig.PersistentVarLibDockerMount,
 			Name:         "var-lib-docker.mount",
 			Enable:       true,
 			Command:      "start",
