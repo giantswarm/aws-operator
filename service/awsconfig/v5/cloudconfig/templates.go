@@ -1,12 +1,6 @@
 package cloudconfig
 
 const (
-	waitDockerConfTemplate = `
-[Unit]
-After=var-lib-docker.mount
-Requires=var-lib-docker.mount
-`
-
 	instanceStorageTemplate = `
 storage:
   filesystems:
