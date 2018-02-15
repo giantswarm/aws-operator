@@ -373,6 +373,11 @@ func NewVersionBundles() []versionbundle.Bundle {
 					Description: "Delete AWS Cloud Provider resources when deleting clusters.",
 					Kind:        versionbundle.KindAdded,
 				},
+				{
+					Component:   "aws-operator",
+					Description: "Change default etcd data dir to /var/lib/etcd.",
+					Kind:        versionbundle.KindAdded,
+				},
 			},
 			Components: []versionbundle.Component{
 				{
