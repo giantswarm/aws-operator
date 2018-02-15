@@ -264,7 +264,7 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		},
 		// Mount etcd EBS volume.
 		{
-			AssetContent: mountEtcdVolume,
+			AssetContent: cloudconfig.MountEtcdVolume,
 			Name:         "etc-kubernetes-data-etcd.mount",
 			Enable:       true,
 			Command:      "start",
