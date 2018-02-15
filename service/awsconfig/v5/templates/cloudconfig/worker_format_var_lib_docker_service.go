@@ -1,6 +1,6 @@
 package cloudconfig
 
-const WorkerFormatVarLibDockerServiceTemplate = `
+const WorkerFormatVarLibDockerService = `
 [Unit]
 Description=Format /var/lib/docker to XFS
 Before=docker.service var-lib-docker.mount
