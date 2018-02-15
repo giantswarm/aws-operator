@@ -126,7 +126,7 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Permissions:  0700,
 		},
 		{
-			AssetContent: cloudconfig.WaitDockerConfTemplate,
+			AssetContent: cloudconfig.WaitDockerConf,
 			Path:         "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
 			Owner:        "root:root",
 			Permissions:  0700,
