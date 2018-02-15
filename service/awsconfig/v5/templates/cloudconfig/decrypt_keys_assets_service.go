@@ -1,6 +1,6 @@
 package cloudconfig
 
-const DecryptKeysAssetsServiceTemplate = `
+const DecryptKeysAssetsService = `
 [Unit]
 Description=Decrypt Secret Keys
 

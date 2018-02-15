@@ -247,7 +247,7 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Command:      "start",
 		},
 		{
-			AssetContent: cloudconfig.DecryptKeysAssetsServiceTemplate,
+			AssetContent: cloudconfig.DecryptKeysAssetsService,
 			Name:         "decrypt-keys-assets.service",
 			// Do not enable key decrypt unit so that it won't get automatically
 			// executed on master reboot. This will prevent eventual races with the
