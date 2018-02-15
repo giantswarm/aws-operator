@@ -235,7 +235,7 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Command: "start",
 		},
 		{
-			AssetContent: cloudconfig.MasterFormatVarLibDockerServiceTemplate,
+			AssetContent: cloudconfig.MasterFormatVarLibDockerService,
 			Name:         "format-var-lib-docker.service",
 			Enable:       true,
 			Command:      "start",
