@@ -1,6 +1,6 @@
 package cloudconfig
 
-const IngressControllerConfigMapTemplate = `kind: ConfigMap
+const IngressControllerConfigMap = `kind: ConfigMap
 apiVersion: v1
 metadata:
   name: ingress-nginx
