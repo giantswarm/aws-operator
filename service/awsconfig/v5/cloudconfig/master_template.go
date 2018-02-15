@@ -241,7 +241,7 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Command:      "start",
 		},
 		{
-			AssetContent: ephemeralVarLibDockerMountTemplate,
+			AssetContent: cloudconfig.EphemeralVarLibDockerMountTemplate,
 			Name:         "var-lib-docker.mount",
 			Enable:       true,
 			Command:      "start",
