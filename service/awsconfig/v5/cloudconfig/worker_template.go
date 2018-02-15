@@ -161,7 +161,7 @@ func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Command:      "start",
 		},
 		{
-			AssetContent: workerFormatVarLibDockerServiceTemplate,
+			AssetContent: cloudconfig.WorkerFormatVarLibDockerServiceTemplate,
 			Name:         "format-var-lib-docker.service",
 			Enable:       true,
 			Command:      "start",
