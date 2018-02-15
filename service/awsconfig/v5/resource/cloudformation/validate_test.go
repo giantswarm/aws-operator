@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v4/resource/cloudformation/adapter"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/cloudformation/adapter"
 	"github.com/giantswarm/micrologger/microloggertest"
 )
 

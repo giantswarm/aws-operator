@@ -9,12 +9,12 @@ import (
 	"github.com/giantswarm/operatorkit/framework"
 
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v4/key"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v5/key"
 )
 
 const (
 	// Name is the identifier of the resource.
-	Name = "s3bucketv4"
+	Name = "s3bucketv5"
 )
 
 // Config represents the configuration used to create a new s3bucket resource.

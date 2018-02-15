@@ -1,10 +1,10 @@
 package adapter
 
-import "github.com/giantswarm/aws-operator/service/awsconfig/v4/cloudconfig"
+import "github.com/giantswarm/aws-operator/service/awsconfig/v5/cloudconfig"
 
 // The template related to this adapter can be found in the following import.
 //
-//     github.com/giantswarm/aws-operator/service/awsconfig/v4/templates/cloudformation/guest/outputs.go
+//     github.com/giantswarm/aws-operator/service/awsconfig/v5/templates/cloudformation/guest/outputs.go
 //
 
 type outputsAdapter struct {
