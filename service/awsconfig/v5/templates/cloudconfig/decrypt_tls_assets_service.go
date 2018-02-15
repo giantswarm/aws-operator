@@ -1,6 +1,6 @@
 package cloudconfig
 
-const DecryptTLSAssetsServiceTemplate = `
+const DecryptTLSAssetsService = `
 [Unit]
 Description=Decrypt TLS certificates
 
