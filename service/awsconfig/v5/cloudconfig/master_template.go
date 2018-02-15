@@ -182,7 +182,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Permissions:  FilePermission,
 		},
 		{
-			AssetContent: decryptKeysAssetsScriptTemplate,
+			AssetContent: cloudconfig.DecryptKeysAssetsScriptTemplate,
 			Path:         "/opt/bin/decrypt-keys-assets",
 			Owner:        FileOwner,
 			Permissions:  FilePermission,
