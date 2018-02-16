@@ -4,7 +4,12 @@ import (
 	"context"
 )
 
-// TODO
+// GetDesiredState returns an empty state as this resource only implements
+// deletion.
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
-	return nil, nil
+	emptyState := LoadBalancerState{
+		LoadBalancerNames: []string{},
+	}
+
+	return emptyState, nil
 }
