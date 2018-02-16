@@ -8,7 +8,6 @@ type Clients struct {
 	ELB ELBClient
 }
 
-// ELBClient describes the methods required to be implemented by an ELB AWS client.
 // ELBClient describes the methods required to be implemented by an ELB AWS
 // client. The ELB API provides support for classic ELBs.
 type ELBClient interface {
