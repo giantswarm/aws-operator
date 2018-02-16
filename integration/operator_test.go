@@ -257,7 +257,7 @@ func operatorSetup() error {
 		return microerror.Maskf(err, "writing aws-resource-lab values file")
 	}
 
-	err := runCmd("helm registry install quay.io/giantswarm/aws-resource-lab-chart:stable -- -n aws-resource-lab --values " + awsOperatorValuesFile)
+	err = runCmd("helm registry install quay.io/giantswarm/aws-resource-lab-chart:stable -- -n aws-resource-lab --values " + awsOperatorValuesFile)
 	if err != nil {
 		return microerror.Maskf(err, "installing aws-resource-lab chart")
 	}
@@ -269,12 +269,12 @@ func operatorSetup() error {
 		return microerror.Maskf(err, "getting operator pod name")
 	}
 
-	err := f.WaitForPodLog("giantswarm", logEntry, operatorPodName)
+	err = f.WaitForPodLog("giantswarm", logEntry, operatorPodName)
 	if err != nil {
 		return microerror.Maskf(err, "waiting for guest cluster installed")
 	}
 
-	err := f.WaitForGuestReady()
+	err = f.WaitForGuestReady()
 	if err != nil {
 		return microerror.Maskf(err, "waiting for guest cluster ready")
 	}
