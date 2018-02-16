@@ -210,7 +210,7 @@ Before=set-ownership-etcd-data-dir.service etcd3.service
 
 [Mount]
 What=/dev/xvdh
-Where=/var/lib/etcd
+Where=/etc/kubernetes/data/etcd
 Type=ext4
 
 [Install]
