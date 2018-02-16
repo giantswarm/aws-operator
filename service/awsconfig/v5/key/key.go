@@ -17,6 +17,9 @@ const (
 	// CloudProviderTagName is used to add Cloud Provider tags to AWS resources.
 	CloudProviderTagName = "kubernetes.io/cluster/%s"
 
+	// Cluster tag name for tagging all resources helping cost analysis in AWS.
+	ClusterTagName = "giantswarm.io/cluster"
+
 	// CloudProviderTagOwnedValue is used to indicate an AWS resource is owned
 	// and managed by a cluster.
 	CloudProviderTagOwnedValue = "owned"
@@ -100,17 +103,18 @@ func ClusterTags(customObject v1alpha1.AWSConfig) map[string]string {
 	cloudProviderTag := fmt.Sprintf(CloudProviderTagName, ClusterID(customObject))
 	tags := map[string]string{
 		cloudProviderTag: CloudProviderTagOwnedValue,
+		ClusterTagName:   ClusterID(customObject),
 	}
 
 	return tags
 }
 
-func CustomerID(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.Cluster.Customer.ID
-}
-
 func ClusterVersion(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Version
+}
+
+func CustomerID(customObject v1alpha1.AWSConfig) string {
+	return customObject.Spec.Cluster.Customer.ID
 }
 
 func IngressControllerInsecurePort(customObject v1alpha1.AWSConfig) int {

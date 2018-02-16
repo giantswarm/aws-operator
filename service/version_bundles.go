@@ -373,6 +373,11 @@ func NewVersionBundles() []versionbundle.Bundle {
 					Description: "Delete AWS Cloud Provider resources when deleting clusters.",
 					Kind:        versionbundle.KindAdded,
 				},
+				{
+					Component:   "aws-operator",
+					Description: "Add AWS resource tag with GiantSwarm Cluster ID for reporting.",
+					Kind:        versionbundle.KindAdded,
+				},
 			},
 			Components: []versionbundle.Component{
 				{
