@@ -381,7 +381,7 @@ func NewVersionBundles() []versionbundle.Bundle {
 				{
 					Component:   "aws-operator",
 					Description: "Change default etcd data dir to /var/lib/etcd.",
-					Kind:        versionbundle.KindAdded,
+					Kind:        versionbundle.KindChanged,
 				},
 			},
 			Components: []versionbundle.Component{
