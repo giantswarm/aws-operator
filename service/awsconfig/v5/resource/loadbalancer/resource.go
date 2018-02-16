@@ -55,3 +55,16 @@ func (r *Resource) Name() string {
 func (r *Resource) Underlying() framework.Resource {
 	return r
 }
+
+func toLoadBalancerState(v interface{}) (LoadBalancerState, error) {
+	if v == nil {
+		return LoadBalancerState{}, nil
+	}
+
+	lbState, ok := v.(LoadBalancerState)
+	if !ok {
+		return LoadBalancerState{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", lbState, v)
+	}
+
+	return lbState, nil
+}
