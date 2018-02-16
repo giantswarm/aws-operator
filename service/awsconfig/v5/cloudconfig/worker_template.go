@@ -5,6 +5,8 @@ import (
 	"github.com/giantswarm/certs/legacy"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_1_0"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/service/awsconfig/v5/templates/cloudconfig"
 )
 
 const (
@@ -55,7 +57,7 @@ type WorkerExtension struct {
 func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	filesMeta := []k8scloudconfig.FileMetadata{
 		{
-			AssetContent: decryptTLSAssetsScriptTemplate,
+			AssetContent: cloudconfig.DecryptTLSAssetsScript,
 			Path:         "/opt/bin/decrypt-tls-assets",
 			Owner:        "root:root",
 			Permissions:  0700,
@@ -124,7 +126,7 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Permissions:  0700,
 		},
 		{
-			AssetContent: waitDockerConfTemplate,
+			AssetContent: cloudconfig.WaitDockerConf,
 			Path:         "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
 			Owner:        "root:root",
 			Permissions:  0700,
@@ -153,19 +155,19 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	unitsMeta := []k8scloudconfig.UnitMetadata{
 		{
-			AssetContent: decryptTLSAssetsServiceTemplate,
+			AssetContent: cloudconfig.DecryptTLSAssetsService,
 			Name:         "decrypt-tls-assets.service",
 			Enable:       true,
 			Command:      "start",
 		},
 		{
-			AssetContent: workerFormatVarLibDockerServiceTemplate,
+			AssetContent: cloudconfig.WorkerFormatVarLibDockerService,
 			Name:         "format-var-lib-docker.service",
 			Enable:       true,
 			Command:      "start",
 		},
 		{
-			AssetContent: persistentVarLibDockerMountTemplate,
+			AssetContent: cloudconfig.PersistentVarLibDockerMount,
 			Name:         "var-lib-docker.mount",
 			Enable:       true,
 			Command:      "start",
@@ -195,7 +197,7 @@ func (e *WorkerExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
 	newSections := []k8scloudconfig.VerbatimSection{
 		{
 			Name:    "storageclass",
-			Content: instanceStorageClassTemplate,
+			Content: cloudconfig.InstanceStorageClass,
 		},
 	}
 
