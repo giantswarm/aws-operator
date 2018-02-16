@@ -9,6 +9,11 @@ The latest version is considered WIP and it is a subject of change. All other
 versions are frozen. To freeze current version all files are copied to a new
 version directory, and then changes are introduced.
 
+## [v3.1.1] WIP
+
+### Changed
+- Change etcd data path to /var/lib/etcd.
+
 ## [v3.1.0]
 
 ### Changed
@@ -70,6 +75,7 @@ version directory, and then changes are introduced.
 
 ## [v0.1.0]
 
+[v3.1.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_1_1
 [v3.1.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_1_0
 [v3.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_0_0
 [v2.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v2

@@ -42,10 +42,6 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/giantswarm/ipam"
-
-[[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/k8scloudconfig"
 
 [[constraint]]
