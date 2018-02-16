@@ -252,27 +252,31 @@ func operatorSetup() error {
 		return microerror.Mask(err)
 	}
 
-	if err := writeAWSResourceValues(); err != nil {
-		return microerror.Maskf(err, "unexpected error writing aws-resource-lab values file")
+	err := writeAWSResourceValues()
+	if err != nil {
+		return microerror.Maskf(err, "writing aws-resource-lab values file")
 	}
 
-	if err := runCmd("helm registry install quay.io/giantswarm/aws-resource-lab-chart:stable -- -n aws-resource-lab --values " + awsOperatorValuesFile); err != nil {
-		return microerror.Maskf(err, "unexpected error installing aws-resource-lab chart: %v")
+	err = runCmd("helm registry install quay.io/giantswarm/aws-resource-lab-chart:stable -- -n aws-resource-lab --values " + awsOperatorValuesFile)
+	if err != nil {
+		return microerror.Maskf(err, "installing aws-resource-lab chart")
 	}
 
 	logEntry := "creating AWS cloudformation stack: created"
 
 	operatorPodName, err := f.PodName("giantswarm", "app=aws-operator")
 	if err != nil {
-		return microerror.Maskf(err, "unexpected error getting operator pod name: %v")
+		return microerror.Maskf(err, "getting operator pod name")
 	}
 
-	if err := f.WaitForPodLog("giantswarm", logEntry, operatorPodName); err != nil {
-		return microerror.Maskf(err, "unexpected error waiting for guest cluster installed: %v")
+	err = f.WaitForPodLog("giantswarm", logEntry, operatorPodName)
+	if err != nil {
+		return microerror.Maskf(err, "waiting for guest cluster installed")
 	}
 
-	if err := f.WaitForGuestReady(); err != nil {
-		return microerror.Maskf(err, "unexpected error waiting for guest cluster ready")
+	err = f.WaitForGuestReady()
+	if err != nil {
+		return microerror.Maskf(err, "waiting for guest cluster ready")
 	}
 
 	return nil
