@@ -3,41 +3,159 @@ package adapter
 import (
 	"testing"
 
-	// NOTE(PK): This import is disturbing. I'm not bothering. It's first candidate to go away.
-	"github.com/giantswarm/aws-operator/service/awsconfig/v5/cloudconfig"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 )
 
-func TestAdapterOutputsRegularFields(t *testing.T) {
+func Test_CloudFormation_Adapter_Outputs_MasterCloudConfigVersion(t *testing.T) {
 	testCases := []struct {
-		description                      string
-		expectedMasterCloudConfigVersion string
-		expectedWorkerCloudConfigVersion string
+		Description                      string
+		Config                           Config
+		ExpectedMasterCloudConfigVersion string
 	}{
 		{
-			description:                      "basic check",
-			expectedMasterCloudConfigVersion: cloudconfig.MasterCloudConfigVersion,
-			expectedWorkerCloudConfigVersion: cloudconfig.WorkerCloudConfigVersion,
+			Description: "master CloudConfig version should match the hardcoded value",
+			Config: Config{
+				Clients: Clients{},
+				CustomObject: v1alpha1.AWSConfig{
+					Spec: v1alpha1.AWSConfigSpec{
+						Cluster: v1alpha1.Cluster{
+							ID: "test-cluster",
+						},
+						AWS: v1alpha1.AWSConfigSpecAWS{
+							Region: "eu-west-1",
+							Workers: []v1alpha1.AWSConfigSpecAWSNode{
+								{},
+							},
+						},
+					},
+				},
+			},
+			ExpectedMasterCloudConfigVersion: "v_3_1_0",
 		},
 	}
+
 	for _, tc := range testCases {
-		a := Adapter{}
-		clients := Clients{}
-		t.Run(tc.description, func(t *testing.T) {
-			cfg := Config{
-				Clients: clients,
-			}
-			err := a.getOutputs(cfg)
+		t.Run(tc.Description, func(t *testing.T) {
+			a := &outputsAdapter{}
 
+			err := a.Adapt(tc.Config)
 			if err != nil {
-				t.Errorf("unexpected error %v", err)
+				t.Fatalf("expected %#v got %#v", nil, err)
 			}
 
-			if a.MasterCloudConfigVersion != tc.expectedMasterCloudConfigVersion {
-				t.Errorf("unexpected MasterCloudConfigVersion, got %q, want %q", a.MasterCloudConfigVersion, tc.expectedMasterCloudConfigVersion)
+			if a.Master.CloudConfig.Version != tc.ExpectedMasterCloudConfigVersion {
+				t.Fatalf("expected %s got %s", tc.ExpectedMasterCloudConfigVersion, a.Master.CloudConfig.Version)
+			}
+		})
+	}
+}
+
+func Test_CloudFormation_Adapter_Outputs_WorkerCloudConfigVersion(t *testing.T) {
+	testCases := []struct {
+		Description                      string
+		Config                           Config
+		ExpectedWorkerCloudConfigVersion string
+	}{
+		{
+			Description: "worker CloudConfig version should match the hardcoded value",
+			Config: Config{
+				Clients: Clients{},
+				CustomObject: v1alpha1.AWSConfig{
+					Spec: v1alpha1.AWSConfigSpec{
+						Cluster: v1alpha1.Cluster{
+							ID: "test-cluster",
+						},
+						AWS: v1alpha1.AWSConfigSpecAWS{
+							Region: "eu-west-1",
+							Workers: []v1alpha1.AWSConfigSpecAWSNode{
+								{},
+							},
+						},
+					},
+				},
+			},
+			ExpectedWorkerCloudConfigVersion: "v_3_1_0",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.Description, func(t *testing.T) {
+			a := &outputsAdapter{}
+
+			err := a.Adapt(tc.Config)
+			if err != nil {
+				t.Fatalf("expected %#v got %#v", nil, err)
 			}
 
-			if a.WorkerCloudConfigVersion != tc.expectedWorkerCloudConfigVersion {
-				t.Errorf("unexpected WorkerCloudConfigVersion, got %q, want %q", a.WorkerCloudConfigVersion, tc.expectedWorkerCloudConfigVersion)
+			if a.Worker.CloudConfig.Version != tc.ExpectedWorkerCloudConfigVersion {
+				t.Fatalf("expected %s got %s", tc.ExpectedWorkerCloudConfigVersion, a.Worker.CloudConfig.Version)
+			}
+		})
+	}
+}
+
+func Test_CloudFormation_Adapter_Outputs_WorkerCount(t *testing.T) {
+	testCases := []struct {
+		Description         string
+		Config              Config
+		ExpectedWorkerCount string
+	}{
+		{
+			Description: "worker count should match the number of workers within the configured custom object when one worker is given",
+			Config: Config{
+				Clients: Clients{},
+				CustomObject: v1alpha1.AWSConfig{
+					Spec: v1alpha1.AWSConfigSpec{
+						Cluster: v1alpha1.Cluster{
+							ID: "test-cluster",
+						},
+						AWS: v1alpha1.AWSConfigSpecAWS{
+							Region: "eu-west-1",
+							Workers: []v1alpha1.AWSConfigSpecAWSNode{
+								{},
+							},
+						},
+					},
+				},
+			},
+			ExpectedWorkerCount: "1",
+		},
+
+		{
+			Description: "worker count should match the number of workers within the configured custom object when three workers are given",
+			Config: Config{
+				Clients: Clients{},
+				CustomObject: v1alpha1.AWSConfig{
+					Spec: v1alpha1.AWSConfigSpec{
+						Cluster: v1alpha1.Cluster{
+							ID: "test-cluster",
+						},
+						AWS: v1alpha1.AWSConfigSpecAWS{
+							Region: "eu-west-1",
+							Workers: []v1alpha1.AWSConfigSpecAWSNode{
+								{},
+								{},
+								{},
+							},
+						},
+					},
+				},
+			},
+			ExpectedWorkerCount: "3",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.Description, func(t *testing.T) {
+			a := &outputsAdapter{}
+
+			err := a.Adapt(tc.Config)
+			if err != nil {
+				t.Fatalf("expected %#v got %#v", nil, err)
+			}
+
+			if a.Worker.Count != tc.ExpectedWorkerCount {
+				t.Fatalf("expected %s got %s", tc.ExpectedWorkerCount, a.Worker.Count)
 			}
 		})
 	}

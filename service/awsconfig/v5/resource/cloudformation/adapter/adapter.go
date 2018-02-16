@@ -41,6 +41,8 @@ type Adapter struct {
 	MasterImageID    string
 	WorkerImageID    string
 
+	Outputs *outputsAdapter
+
 	autoScalingGroupAdapter
 	iamPoliciesAdapter
 	hostIamRolesAdapter
@@ -53,7 +55,6 @@ type Adapter struct {
 	hostRouteTablesAdapter
 	subnetsAdapter
 	vpcAdapter
-	outputsAdapter
 }
 
 type Config struct {
@@ -66,7 +67,14 @@ type Config struct {
 }
 
 func NewGuest(cfg Config) (Adapter, error) {
-	a := Adapter{}
+	a := Adapter{
+		Outputs: &outputsAdapter{},
+	}
+
+	err := a.Outputs.Adapt(cfg)
+	if err != nil {
+		return Adapter{}, microerror.Mask(err)
+	}
 
 	a.ASGType = prefixWorker
 	a.ClusterID = key.ClusterID(cfg.CustomObject)
@@ -91,7 +99,6 @@ func NewGuest(cfg Config) (Adapter, error) {
 		a.getSecurityGroups,
 		a.getSubnets,
 		a.getVpc,
-		a.getOutputs,
 	}
 
 	for _, h := range hydraters {
