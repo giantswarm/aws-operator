@@ -39,7 +39,8 @@ func (e *ELBClientMock) DescribeTags(*elb.DescribeTagsInput) (*elb.DescribeTagsO
 
 	for _, lb := range e.loadBalancers {
 		tagDesc := &elb.TagDescription{
-			Tags: lb.loadBalancerTags,
+			LoadBalancerName: aws.String(lb.loadBalancerName),
+			Tags:             lb.loadBalancerTags,
 		}
 		tagDescs = append(tagDescs, tagDesc)
 	}
