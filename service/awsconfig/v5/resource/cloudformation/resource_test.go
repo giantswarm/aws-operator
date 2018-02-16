@@ -29,6 +29,10 @@ func Test_Resource_Cloudformation_GetCloudFormationTags(t *testing.T) {
 					Key:   aws.String("kubernetes.io/cluster/5xchu"),
 					Value: aws.String("owned"),
 				},
+				&awscloudformation.Tag{
+					Key:   aws.String("giantswarm.io/cluster"),
+					Value: aws.String("5xchu"),
+				},
 			},
 		},
 	}
@@ -37,9 +41,21 @@ func Test_Resource_Cloudformation_GetCloudFormationTags(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			tags := getCloudFormationTags(tc.obj)
 
-			if !reflect.DeepEqual(tc.expectedTags, tags) {
-				t.Fatalf("Expected cloud formation tags %v but was %v", tc.expectedTags, tags)
+			for _, tag := range tc.expectedTags {
+				if !containsTag(tag, tags) {
+					t.Fatalf("Expected cloud formation contains tag %v in the slice %v", tag, tags)
+				}
 			}
 		})
 	}
+}
+
+func containsTag(tag *awscloudformation.Tag, tags []*awscloudformation.Tag) bool {
+	for _, inTag := range tags {
+		if reflect.DeepEqual(tag, inTag) {
+			return true
+		}
+	}
+
+	return false
 }
