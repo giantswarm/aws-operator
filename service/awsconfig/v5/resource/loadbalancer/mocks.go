@@ -1,10 +1,17 @@
 package loadbalancer
 
 import (
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/elb"
 )
 
 type ELBClientMock struct {
+	loadBalancers []LoadBalancerMock
+}
+
+type LoadBalancerMock struct {
+	loadBalancerName string
+	loadBalancerTags []*elb.Tag
 }
 
 func (e *ELBClientMock) DeleteLoadBalancer(*elb.DeleteLoadBalancerInput) (*elb.DeleteLoadBalancerOutput, error) {
@@ -12,9 +19,31 @@ func (e *ELBClientMock) DeleteLoadBalancer(*elb.DeleteLoadBalancerInput) (*elb.D
 }
 
 func (e *ELBClientMock) DescribeLoadBalancers(*elb.DescribeLoadBalancersInput) (*elb.DescribeLoadBalancersOutput, error) {
-	return nil, nil
+	output := &elb.DescribeLoadBalancersOutput{}
+	lbDescs := []*elb.LoadBalancerDescription{}
+
+	for _, lb := range e.loadBalancers {
+		lbDesc := &elb.LoadBalancerDescription{
+			LoadBalancerName: aws.String(lb.loadBalancerName),
+		}
+		lbDescs = append(lbDescs, lbDesc)
+	}
+	output.SetLoadBalancerDescriptions(lbDescs)
+
+	return output, nil
 }
 
 func (e *ELBClientMock) DescribeTags(*elb.DescribeTagsInput) (*elb.DescribeTagsOutput, error) {
-	return nil, nil
+	output := &elb.DescribeTagsOutput{}
+	tagDescs := []*elb.TagDescription{}
+
+	for _, lb := range e.loadBalancers {
+		tagDesc := &elb.TagDescription{
+			Tags: lb.loadBalancerTags,
+		}
+		tagDescs = append(tagDescs, tagDesc)
+	}
+	output.SetTagDescriptions(tagDescs)
+
+	return output, nil
 }
