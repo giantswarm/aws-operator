@@ -6,6 +6,8 @@ import (
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_1_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeytpr"
+
+	"github.com/giantswarm/aws-operator/service/awsconfig/v5/templates/cloudconfig"
 )
 
 const (
@@ -61,7 +63,7 @@ type MasterExtension struct {
 func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	filesMeta := []k8scloudconfig.FileMetadata{
 		{
-			AssetContent: decryptTLSAssetsScriptTemplate,
+			AssetContent: cloudconfig.DecryptTLSAssetsScript,
 			Path:         "/opt/bin/decrypt-tls-assets",
 			Owner:        FileOwner,
 			Permissions:  FilePermission,
@@ -174,13 +176,13 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Permissions:  FilePermission,
 		},
 		{
-			AssetContent: waitDockerConfTemplate,
+			AssetContent: cloudconfig.WaitDockerConf,
 			Path:         "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
 			Owner:        FileOwner,
 			Permissions:  FilePermission,
 		},
 		{
-			AssetContent: decryptKeysAssetsScriptTemplate,
+			AssetContent: cloudconfig.DecryptKeysAssetsScript,
 			Path:         "/opt/bin/decrypt-keys-assets",
 			Owner:        FileOwner,
 			Permissions:  FilePermission,
@@ -195,7 +197,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		// Add use-proxy-protocol to ingress-controller ConfigMap, this doesn't work
 		// on KVM because of dependencies on hardware LB configuration.
 		{
-			AssetContent: ingressControllerConfigMapTemplate,
+			AssetContent: cloudconfig.IngressControllerConfigMap,
 			Path:         "/srv/ingress-controller-cm.yml",
 			Owner:        FileOwner,
 			Permissions:  0644,
@@ -224,7 +226,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	unitsMeta := []k8scloudconfig.UnitMetadata{
 		{
-			AssetContent: decryptTLSAssetsServiceTemplate,
+			AssetContent: cloudconfig.DecryptTLSAssetsService,
 			Name:         "decrypt-tls-assets.service",
 			// Do not enable TLS assets decrypt unit so that it won't get automatically
 			// executed on master reboot. This will prevent eventual races with the
@@ -233,19 +235,19 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Command: "start",
 		},
 		{
-			AssetContent: masterFormatVarLibDockerServiceTemplate,
+			AssetContent: cloudconfig.MasterFormatVarLibDockerService,
 			Name:         "format-var-lib-docker.service",
 			Enable:       true,
 			Command:      "start",
 		},
 		{
-			AssetContent: ephemeralVarLibDockerMountTemplate,
+			AssetContent: cloudconfig.EphemeralVarLibDockerMount,
 			Name:         "var-lib-docker.mount",
 			Enable:       true,
 			Command:      "start",
 		},
 		{
-			AssetContent: decryptKeysServiceTemplate,
+			AssetContent: cloudconfig.DecryptKeysAssetsService,
 			Name:         "decrypt-keys-assets.service",
 			// Do not enable key decrypt unit so that it won't get automatically
 			// executed on master reboot. This will prevent eventual races with the
@@ -255,14 +257,14 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		},
 		// Format etcd EBS volume.
 		{
-			AssetContent: formatEtcdVolume,
+			AssetContent: cloudconfig.FormatEtcdVolume,
 			Name:         "format-etcd-ebs.service",
 			Enable:       true,
 			Command:      "start",
 		},
 		// Mount etcd EBS volume.
 		{
-			AssetContent: mountEtcdVolume,
+			AssetContent: cloudconfig.MountEtcdVolume,
 			Name:         "etc-kubernetes-data-etcd.mount",
 			Enable:       true,
 			Command:      "start",
@@ -292,11 +294,11 @@ func (e *MasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
 	newSections := []k8scloudconfig.VerbatimSection{
 		{
 			Name:    "storage",
-			Content: instanceStorageTemplate,
+			Content: cloudconfig.InstanceStorage,
 		},
 		{
 			Name:    "storageclass",
-			Content: instanceStorageClassTemplate,
+			Content: cloudconfig.InstanceStorageClass,
 		},
 	}
 	return newSections
