@@ -30,7 +30,7 @@ func Test_CloudFormation_Adapter_Outputs_MasterCloudConfigVersion(t *testing.T) 
 					},
 				},
 			},
-			ExpectedMasterCloudConfigVersion: "v_3_1_0",
+			ExpectedMasterCloudConfigVersion: "v_3_1_1",
 		},
 	}
 
@@ -74,7 +74,7 @@ func Test_CloudFormation_Adapter_Outputs_WorkerCloudConfigVersion(t *testing.T) 
 					},
 				},
 			},
-			ExpectedWorkerCloudConfigVersion: "v_3_1_0",
+			ExpectedWorkerCloudConfigVersion: "v_3_1_1",
 		},
 	}
 
