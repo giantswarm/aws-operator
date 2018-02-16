@@ -1,7 +1,7 @@
 package cloudformation
 
 import (
-	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -30,22 +30,11 @@ func Test_Resource_Cloudformation_GetCloudFormationTags(t *testing.T) {
 					Value: aws.String("owned"),
 				},
 				&awscloudformation.Tag{
-					Key:   aws.String("KubernetesCluster"),
+					Key:   aws.String("giantswarm.io/cluster"),
 					Value: aws.String("5xchu"),
 				},
 			},
 		},
-	}
-
-	noContainsTag := func(tag *awscloudformation.Tag, tags []*awscloudformation.Tag) bool {
-		for _, inTag := range tags {
-			fmt.Printf("%t %t \n", tag, inTag)
-			if tag == inTag {
-				return true
-			}
-		}
-
-		return false
 	}
 
 	for _, tc := range testCases {
@@ -53,10 +42,20 @@ func Test_Resource_Cloudformation_GetCloudFormationTags(t *testing.T) {
 			tags := getCloudFormationTags(tc.obj)
 
 			for _, tag := range tc.expectedTags {
-				if noContainsTag(tag, tags) {
+				if !containsTag(tag, tags) {
 					t.Fatalf("Expected cloud formation contains tag %v in the slice %v", tag, tags)
 				}
 			}
 		})
 	}
+}
+
+func containsTag(tag *awscloudformation.Tag, tags []*awscloudformation.Tag) bool {
+	for _, inTag := range tags {
+		if reflect.DeepEqual(tag, inTag) {
+			return true
+		}
+	}
+
+	return false
 }

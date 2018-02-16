@@ -375,7 +375,7 @@ func NewVersionBundles() []versionbundle.Bundle {
 				},
 				{
 					Component:   "aws-operator",
-					Description: "Get back Kubernetes Cluster ID tag helping cost analysis in AWS.",
+					Description: "Add AWS resource tag with GiantSwarm Cluster ID for reporting.",
 					Kind:        versionbundle.KindAdded,
 				},
 			},

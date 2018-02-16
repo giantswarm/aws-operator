@@ -18,7 +18,7 @@ const (
 	CloudProviderTagName = "kubernetes.io/cluster/%s"
 
 	// Cluster tag name for tagging all resources helping cost analysis in AWS.
-	ClusterTagName = "KubernetesCluster"
+	ClusterTagName = "giantswarm.io/cluster"
 
 	// CloudProviderTagOwnedValue is used to indicate an AWS resource is owned
 	// and managed by a cluster.

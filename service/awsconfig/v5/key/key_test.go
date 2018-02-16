@@ -123,7 +123,7 @@ func Test_ClusterTags(t *testing.T) {
 	expectedID := "test-cluster"
 	expectedTags := map[string]string{
 		"kubernetes.io/cluster/test-cluster": "owned",
-		"KubernetesCluster":                  "test-cluster",
+		"giantswarm.io/cluster":              "test-cluster",
 	}
 
 	customObject := v1alpha1.AWSConfig{
