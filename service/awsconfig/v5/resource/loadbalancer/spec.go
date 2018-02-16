@@ -17,6 +17,5 @@ type ELBClient interface {
 }
 
 type LoadBalancerState struct {
-	LoadBalancerArns  []string
 	LoadBalancerNames []string
 }

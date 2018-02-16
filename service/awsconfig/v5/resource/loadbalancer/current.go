@@ -27,8 +27,6 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return currentState, microerror.Mask(err)
 	}
 
-	//r.logger.LogCtx(ctx, "info", fmt.Sprintf("CloudProvider ELBs %#v", currentState))
-
 	return currentState, nil
 }
 
