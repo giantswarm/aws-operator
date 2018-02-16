@@ -375,6 +375,11 @@ func NewVersionBundles() []versionbundle.Bundle {
 				},
 				{
 					Component:   "aws-operator",
+					Description: "Add AWS resource tag with GiantSwarm Cluster ID for reporting.",
+					Kind:        versionbundle.KindAdded,
+				},
+        {
+					Component:   "aws-operator",
 					Description: "Change default etcd data dir to /var/lib/etcd.",
 					Kind:        versionbundle.KindAdded,
 				},
