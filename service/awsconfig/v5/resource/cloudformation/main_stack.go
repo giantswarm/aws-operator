@@ -34,18 +34,19 @@ func newMainStack(customObject v1alpha1.AWSConfig) (StackState, error) {
 		masterInstanceType = key.MasterInstanceType(customObject)
 	}
 
-	masterCloudConfigVersion := cloudconfig.MasterCloudConfigVersion
-	workerCloudConfigVersion := cloudconfig.WorkerCloudConfigVersion
-
 	mainCF := StackState{
-		Name:                     stackName,
+		Name: stackName,
+
 		MasterImageID:            imageID,
 		MasterInstanceType:       masterInstanceType,
-		MasterCloudConfigVersion: masterCloudConfigVersion,
+		MasterCloudConfigVersion: cloudconfig.MasterCloudConfigVersion,
+
 		WorkerCount:              strconv.Itoa(workerCount),
 		WorkerImageID:            imageID,
 		WorkerInstanceType:       workerInstanceType,
-		WorkerCloudConfigVersion: workerCloudConfigVersion,
+		WorkerCloudConfigVersion: cloudconfig.WorkerCloudConfigVersion,
+
+		VersionBundleVersion: key.VersionBundleVersion(customObject),
 	}
 
 	return mainCF, nil
