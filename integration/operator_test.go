@@ -144,10 +144,12 @@ func TestMain(m *testing.M) {
 		v = m.Run()
 	}
 
-	f.DeleteGuestCluster()
-	operatorTearDown()
-	f.TearDown()
-	deleteHostPeerVPC()
+	if os.Getenv("KEEP_RESOURCES") != "true" {
+		f.DeleteGuestCluster()
+		operatorTearDown()
+		f.TearDown()
+		deleteHostPeerVPC()
+	}
 
 	os.Exit(v)
 }
