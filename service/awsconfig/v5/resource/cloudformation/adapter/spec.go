@@ -108,7 +108,3 @@ type SmallCloudconfigConfig struct {
 type ELBClient interface {
 	DescribeLoadBalancers(*elb.DescribeLoadBalancersInput) (*elb.DescribeLoadBalancersOutput, error)
 }
-
-type Interface interface {
-	Adapt(config Config) error
-}
