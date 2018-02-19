@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/framework"
+	"github.com/giantswarm/operatorkit/framework/context/updateallowedcontext"
 
 	"github.com/giantswarm/aws-operator/service/awsconfig/v5/key"
 )
@@ -64,23 +65,27 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		return cloudformation.CreateStackInput{}, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "debug", "finding out if the main stack should be updated")
-
 	updateState := cloudformation.UpdateStackInput{}
 
-	if currentStackState.Name != "" && !reflect.DeepEqual(desiredStackState, currentStackState) {
-		r.logger.LogCtx(ctx, "debug", "main stack should be updated")
+	if updateallowedcontext.IsUpdateAllowed(ctx) {
+		r.logger.LogCtx(ctx, "debug", "finding out if the main stack has to be updated")
 
-		mainTemplate, err := r.getMainGuestTemplateBody(customObject)
-		if err != nil {
-			return nil, microerror.Mask(err)
+		if currentStackState.Name != "" && !reflect.DeepEqual(desiredStackState, currentStackState) {
+			r.logger.LogCtx(ctx, "debug", "main stack has to be updated")
+
+			mainTemplate, err := r.getMainGuestTemplateBody(customObject)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+			updateState.StackName = aws.String(desiredStackState.Name)
+			updateState.TemplateBody = aws.String(mainTemplate)
+			// CAPABILITY_NAMED_IAM is required for updating IAM roles (worker policy).
+			updateState.Capabilities = []*string{
+				aws.String(namedIAMCapability),
+			}
 		}
-		updateState.StackName = aws.String(desiredStackState.Name)
-		updateState.TemplateBody = aws.String(mainTemplate)
-		// CAPABILITY_NAMED_IAM is required for updating IAM roles (worker policy).
-		updateState.Capabilities = []*string{
-			aws.String(namedIAMCapability),
-		}
+	} else {
+		r.logger.LogCtx(ctx, "debug", "not computing update state because main stack are not allowed to be updated")
 	}
 
 	return updateState, nil
