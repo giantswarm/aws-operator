@@ -13,8 +13,6 @@ const (
 	workerInstanceTypeOutputKey       = "WorkerInstanceType"
 	workerCloudConfigVersionOutputKey = "WorkerCloudConfigVersion"
 
-	versionBundleVersionOutputKey = "VersionBundleVersion"
-
 	workerRoleKey = "WorkerRole"
 
 	namedIAMCapability = "CAPABILITY_NAMED_IAM"
@@ -32,6 +30,4 @@ type StackState struct {
 	WorkerImageID            string
 	WorkerInstanceType       string
 	WorkerCloudConfigVersion string
-
-	VersionBundleVersion string
 }
