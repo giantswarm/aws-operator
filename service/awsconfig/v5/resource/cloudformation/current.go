@@ -84,16 +84,24 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	if err != nil {
 		return StackState{}, microerror.Mask(err)
 	}
+	versionBundleVersion, err := getStackOutputValue(outputs, versionBundleVersionOutputKey)
+	if err != nil {
+		return StackState{}, microerror.Mask(err)
+	}
 
 	outputStackState := StackState{
-		Name:                     stackName,
+		Name: stackName,
+
 		MasterImageID:            masterImageID,
 		MasterInstanceType:       masterInstanceType,
 		MasterCloudConfigVersion: masterCloudConfigVersion,
+
 		WorkerCount:              workers,
 		WorkerImageID:            workerImageID,
 		WorkerInstanceType:       workerInstanceType,
 		WorkerCloudConfigVersion: workerCloudConfigVersion,
+
+		VersionBundleVersion: versionBundleVersion,
 	}
 
 	return outputStackState, nil
