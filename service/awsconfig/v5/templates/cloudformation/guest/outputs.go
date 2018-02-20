@@ -3,17 +3,19 @@ package guest
 const Outputs = `{{define "outputs"}}
 Outputs:
   MasterImageID:
-    Value: {{ .MasterImageID }}
+    Value: {{ .Outputs.Master.ImageID }}
   MasterInstanceType:
-    Value: {{ .MasterInstanceType }}
+    Value: {{ .Outputs.Master.InstanceType }}
   MasterCloudConfigVersion:
-    Value: {{ .MasterCloudConfigVersion }}
+    Value: {{ .Outputs.Master.CloudConfig.Version }}
   WorkerCount:
-    Value: {{ .ASGMinSize }}
+    Value: {{ .Outputs.Worker.Count }}
   WorkerImageID:
-    Value: {{ .WorkerImageID }}
+    Value: {{ .Outputs.Worker.ImageID }}
   WorkerInstanceType:
-    Value: {{ .WorkerInstanceType }}
+    Value: {{ .Outputs.Worker.InstanceType }}
   WorkerCloudConfigVersion:
-    Value: {{ .WorkerCloudConfigVersion }}
+    Value: {{ .Outputs.Worker.CloudConfig.Version }}
+  VersionBundleVersion:
+    Value: {{ .Outputs.VersionBundle.Version }}
 {{end}}`
