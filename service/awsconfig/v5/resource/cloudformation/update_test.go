@@ -348,41 +348,7 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 			},
 		},
 		{
-			description: "case 10, current state not empty, desired state not empty, different master version bundle version, expected desired state",
-			currentState: StackState{
-				Name: "current",
-
-				MasterCloudConfigVersion: "1.0.0",
-				MasterImageID:            "ami-123",
-				MasterInstanceType:       "m3.large",
-
-				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
-				WorkerImageID:            "ami-123",
-				WorkerInstanceType:       "m3.large",
-
-				VersionBundleVersion: "CHANGED",
-			},
-			desiredState: StackState{
-				Name: "desired",
-
-				MasterCloudConfigVersion: "1.0.0",
-				MasterImageID:            "ami-123",
-				MasterInstanceType:       "m3.large",
-
-				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
-				WorkerImageID:            "ami-123",
-				WorkerInstanceType:       "m3.large",
-
-				VersionBundleVersion: "1.0.0",
-			},
-			expectedChange: awscloudformation.UpdateStackInput{
-				StackName: aws.String("desired"),
-			},
-		},
-		{
-			description: "case 11, current state not empty, desired state not empty, different worker version bundle version, expected desired state",
+			description: "case 10, current state not empty, desired state not empty, different version bundle version, expected desired state",
 			currentState: StackState{
 				Name: "current",
 
