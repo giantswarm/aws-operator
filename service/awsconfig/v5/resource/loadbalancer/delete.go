@@ -18,9 +18,10 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 
 	if deleteInput != nil && len(deleteInput.LoadBalancerNames) > 0 {
 		for _, lbName := range deleteInput.LoadBalancerNames {
-			if _, err := r.clients.ELB.DeleteLoadBalancer(&elb.DeleteLoadBalancerInput{
+			_, err := r.clients.ELB.DeleteLoadBalancer(&elb.DeleteLoadBalancerInput{
 				LoadBalancerName: aws.String(lbName),
-			}); err != nil {
+			})
+			if err != nil {
 				return microerror.Mask(err)
 			}
 		}
