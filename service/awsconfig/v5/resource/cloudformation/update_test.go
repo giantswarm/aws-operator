@@ -8,11 +8,12 @@ import (
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
+	"github.com/giantswarm/operatorkit/framework/context/updateallowedcontext"
 
 	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/cloudformation/adapter"
 )
 
-func Test_Resource_Cloudformation_newUpdateChange(t *testing.T) {
+func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 	clusterTpo := &v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
@@ -282,7 +283,10 @@ func Test_Resource_Cloudformation_newUpdateChange(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			result, err := newResource.newUpdateChange(context.TODO(), clusterTpo, tc.currentState, tc.desiredState)
+			ctx := updateallowedcontext.NewContext(context.Background(), make(chan struct{}))
+			updateallowedcontext.SetUpdateAllowed(ctx)
+
+			result, err := newResource.newUpdateChange(ctx, clusterTpo, tc.currentState, tc.desiredState)
 			if err != nil {
 				t.Errorf("expected '%v' got '%#v'", nil, err)
 			}
