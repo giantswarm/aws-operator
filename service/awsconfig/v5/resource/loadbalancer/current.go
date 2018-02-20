@@ -35,7 +35,7 @@ func (r *Resource) clusterLoadBalancers(customObject v1alpha1.AWSConfig) (*LoadB
 	// We get all load balancers because the API does not allow tag filters.
 	output, err := r.clients.ELB.DescribeLoadBalancers(&elb.DescribeLoadBalancersInput{})
 	if err != nil {
-		return lbState, microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 
 	allLBNames := []*string{}
@@ -49,7 +49,7 @@ func (r *Resource) clusterLoadBalancers(customObject v1alpha1.AWSConfig) (*LoadB
 	}
 	tagsOutput, err := r.clients.ELB.DescribeTags(tagsInput)
 	if err != nil {
-		return lbState, microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 
 	// We filter based on the AWS cloud provider tags to find load balancers
