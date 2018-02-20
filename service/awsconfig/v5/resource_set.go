@@ -17,6 +17,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/awsconfig/v5/key"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/cloudformation"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/cloudformation/adapter"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/ebsvolume"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/kmskey"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/loadbalancer"
@@ -192,6 +193,21 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		}
 	}
 
+	var ebsVolumeResource framework.Resource
+	{
+		c := ebsvolume.Config{
+			Clients: ebsvolume.Clients{
+				EC2: config.GuestAWSClients.EC2,
+			},
+			Logger: config.Logger,
+		}
+
+		ebsVolumeResource, err = ebsvolume.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var cloudformationResource framework.Resource
 	{
 		c := cloudformation.Config{
@@ -265,6 +281,7 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		s3BucketResource,
 		s3BucketObjectResource,
 		loadBalancerResource,
+		ebsVolumeResource,
 		cloudformationResource,
 		namespaceResource,
 		serviceResource,
