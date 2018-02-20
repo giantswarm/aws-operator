@@ -103,6 +103,23 @@ func Test_ClusterCustomer(t *testing.T) {
 	}
 }
 
+func Test_ClusterCloudProviderTag(t *testing.T) {
+	expectedID := "test-cluster"
+	expectedTag := "kubernetes.io/cluster/test-cluster"
+
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: expectedID,
+			},
+		},
+	}
+
+	if ClusterCloudProviderTag(customObject) != expectedTag {
+		t.Fatalf("Expected cloud provider tag %s but was %s", expectedTag, ClusterCloudProviderTag(customObject))
+	}
+}
+
 func Test_ClusterNamespace(t *testing.T) {
 	expectedID := "test-cluster"
 

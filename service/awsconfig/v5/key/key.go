@@ -87,6 +87,10 @@ func CloudFormationHostPreTemplates() []string {
 	}
 }
 
+func ClusterCloudProviderTag(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf(CloudProviderTagName, ClusterID(customObject))
+}
+
 func ClusterCustomer(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Customer.ID
 }
@@ -100,7 +104,7 @@ func ClusterNamespace(customObject v1alpha1.AWSConfig) string {
 }
 
 func ClusterTags(customObject v1alpha1.AWSConfig) map[string]string {
-	cloudProviderTag := fmt.Sprintf(CloudProviderTagName, ClusterID(customObject))
+	cloudProviderTag := ClusterCloudProviderTag(customObject)
 	tags := map[string]string{
 		cloudProviderTag: CloudProviderTagOwnedValue,
 		ClusterTagName:   ClusterID(customObject),
