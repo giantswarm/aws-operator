@@ -134,7 +134,7 @@ func main() {
 	daemonCommand.PersistentFlags().String(f.Service.AWS.Region, "", "Region for checking for orphan AWS resources.")
 
 	// TODO(nhlfr): Deprecate these options when cert-operator will be implemented.
-	daemonCommand.PersistentFlags().String(f.Service.AWS.PubKeyFile, path.Join(os.Getenv("HOME"), ".ssh", "id_rsa.pub"), "Public key to be imported as a keypair in AWS.")
+	daemonCommand.PersistentFlags().String(f.Service.AWS.PubKeyFile, path.Join(string(os.PathSeparator), ".ssh", "id_rsa.pub"), "Public key to be imported as a keypair in AWS.")
 
 	daemonCommand.PersistentFlags().Bool(f.Service.Guest.Update.Enabled, false, "Whether updates of guest cluster nodes are allowed to be processed upon reconciliation.")
 
