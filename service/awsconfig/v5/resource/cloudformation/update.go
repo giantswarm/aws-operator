@@ -84,22 +84,10 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		return cloudformation.CreateStackInput{}, microerror.Mask(err)
 	}
 
-	if shouldScale(currentStackState, desiredStackState) {
-		r.logger.LogCtx(ctx, "debug", "main stack has to be scaled")
-
-		updateState, err := r.computeUpdateState(customObject, desiredStackState)
-		if err != nil {
-			return cloudformation.CreateStackInput{}, microerror.Mask(err)
-		}
-
-		return updateState, nil
-	} else {
-		r.logger.LogCtx(ctx, "debug", "main stack has not to be scaled")
-	}
-
 	// We enable/disable updates in order to enable them our test installations
 	// but disable them in production installations. That is useful until we have
-	// full confidence in updating guest clusters.
+	// full confidence in updating guest clusters. Note that updates also manage
+	// scaling at the same time to be more efficient.
 	if updateallowedcontext.IsUpdateAllowed(ctx) {
 		r.logger.LogCtx(ctx, "debug", "finding out if the main stack has to be updated")
 
@@ -119,6 +107,24 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		r.logger.LogCtx(ctx, "debug", "not computing update state because main stack are not allowed to be updated")
 	}
 
+	// We manage scaling separately because the impact and implications of scaling
+	// is different compared to updates. We can just process scaling any time. We
+	// cannot just process updates at any time and thus have to separate the
+	// management of both primitives. Note that updates also manage scaling at the
+	// same time for more efficiency.
+	if shouldScale(currentStackState, desiredStackState) {
+		r.logger.LogCtx(ctx, "debug", "main stack has to be scaled")
+
+		updateState, err := r.computeUpdateState(customObject, desiredStackState)
+		if err != nil {
+			return cloudformation.CreateStackInput{}, microerror.Mask(err)
+		}
+
+		return updateState, nil
+	} else {
+		r.logger.LogCtx(ctx, "debug", "main stack has not to be scaled")
+	}
+
 	return cloudformation.UpdateStackInput{}, nil
 }
 
@@ -128,9 +134,6 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 // any other changes should be covered by general updates, which is a separate
 // step.
 func shouldScale(currentState, desiredState StackState) bool {
-	if currentState.Name != desiredState.Name {
-		return false
-	}
 	if currentState.MasterImageID != desiredState.MasterImageID {
 		return false
 	}
@@ -163,23 +166,25 @@ func shouldScale(currentState, desiredState StackState) bool {
 // shouldUpdate determines whether the reconciled guest cluster should be
 // updated. A guest cluster is only allowed to update in the following cases.
 //
-//     The update does not indicate scaling.
-//     The version bundle version changes
-//     The instance type of master nodes changes.
-//     The instance type of worker nodes changes.
+//     The worker count changes (indicates scaling).
+//     The version bundle version changes (indicates updates).
+//     The instance type of master nodes changes (indicates updates).
+//     The instance type of worker nodes changes (indicates updates).
 //
 func shouldUpdate(currentState, desiredState StackState) bool {
+	// Check scaling related properties.
 	if currentState.WorkerCount != desiredState.WorkerCount {
-		return false
-	}
-
-	if currentState.VersionBundleVersion != desiredState.VersionBundleVersion {
 		return true
 	}
+
+	// Check updates related properties.
 	if currentState.MasterInstanceType != desiredState.MasterInstanceType {
 		return true
 	}
 	if currentState.WorkerInstanceType != desiredState.WorkerInstanceType {
+		return true
+	}
+	if currentState.VersionBundleVersion != desiredState.VersionBundleVersion {
 		return true
 	}
 
