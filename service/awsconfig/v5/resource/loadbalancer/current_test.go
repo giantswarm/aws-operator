@@ -57,6 +57,135 @@ func Test_CurrentState(t *testing.T) {
 				},
 			},
 		},
+		{
+			description: "no matching load balancer",
+			obj:         customObject,
+			expectedState: LoadBalancerState{
+				LoadBalancerNames: []string{},
+			},
+			loadBalancers: []LoadBalancerMock{
+				{
+					loadBalancerName: "test-elb",
+					loadBalancerTags: []*elb.Tag{
+						&elb.Tag{
+							Key:   aws.String("kubernetes.io/cluster/other-cluster"),
+							Value: aws.String("owned"),
+						},
+						&elb.Tag{
+							Key:   aws.String("kubernetes.io/service-name"),
+							Value: aws.String("hello-world"),
+						},
+					},
+				},
+			},
+		},
+		{
+			description: "multiple load balancers",
+			obj:         customObject,
+			expectedState: LoadBalancerState{
+				LoadBalancerNames: []string{
+					"test-elb",
+					"test-elb-2",
+				},
+			},
+			loadBalancers: []LoadBalancerMock{
+				{
+					loadBalancerName: "test-elb",
+					loadBalancerTags: []*elb.Tag{
+						&elb.Tag{
+							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
+							Value: aws.String("owned"),
+						},
+						&elb.Tag{
+							Key:   aws.String("kubernetes.io/service-name"),
+							Value: aws.String("hello-world"),
+						},
+					},
+				},
+				{
+					loadBalancerName: "test-elb-2",
+					loadBalancerTags: []*elb.Tag{
+						&elb.Tag{
+							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
+							Value: aws.String("owned"),
+						},
+						&elb.Tag{
+							Key:   aws.String("kubernetes.io/service-name"),
+							Value: aws.String("hello-world-2"),
+						},
+					},
+				},
+			},
+		},
+		{
+			description: "multiple load balancers some not matching",
+			obj:         customObject,
+			expectedState: LoadBalancerState{
+				LoadBalancerNames: []string{
+					"test-elb",
+					"test-elb-2",
+				},
+			},
+			loadBalancers: []LoadBalancerMock{
+				{
+					loadBalancerName: "test-elb",
+					loadBalancerTags: []*elb.Tag{
+						&elb.Tag{
+							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
+							Value: aws.String("owned"),
+						},
+						&elb.Tag{
+							Key:   aws.String("kubernetes.io/service-name"),
+							Value: aws.String("hello-world"),
+						},
+					},
+				},
+				{
+					loadBalancerName: "test-elb-2",
+					loadBalancerTags: []*elb.Tag{
+						&elb.Tag{
+							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
+							Value: aws.String("owned"),
+						},
+						&elb.Tag{
+							Key:   aws.String("kubernetes.io/service-name"),
+							Value: aws.String("hello-world-2"),
+						},
+					},
+				},
+				{
+					loadBalancerName: "test-elb-3",
+					loadBalancerTags: []*elb.Tag{
+						&elb.Tag{
+							Key:   aws.String("kubernetes.io/cluster/another-cluster"),
+							Value: aws.String("owned"),
+						},
+						&elb.Tag{
+							Key:   aws.String("kubernetes.io/service-name"),
+							Value: aws.String("hello-world-2"),
+						},
+					},
+				},
+			},
+		},
+		{
+			description: "missing service tag",
+			obj:         customObject,
+			expectedState: LoadBalancerState{
+				LoadBalancerNames: []string{},
+			},
+			loadBalancers: []LoadBalancerMock{
+				{
+					loadBalancerName: "test-elb",
+					loadBalancerTags: []*elb.Tag{
+						&elb.Tag{
+							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
+							Value: aws.String("owned"),
+						},
+					},
+				},
+			},
+		},
 	}
 	var err error
 	var newResource *Resource
