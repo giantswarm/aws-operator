@@ -24,6 +24,9 @@ const (
 	awsOperatorValuesFile  = "/tmp/aws-operator-values.yaml"
 	awsOperatorChartValues = `Installation:
   V1:
+    GiantSwarm:
+      Update:
+        Enabled: ${GUEST_UPDATE_ENABLED}
     Name: ci-awsop
     Provider:
       AWS:
