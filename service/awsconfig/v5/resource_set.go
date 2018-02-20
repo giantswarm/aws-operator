@@ -180,7 +180,6 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 	var loadBalancerResource framework.Resource
 	{
 		c := loadbalancer.Config{
-			AwsService: awsService,
 			Clients: loadbalancer.Clients{
 				ELB: config.GuestAWSClients.ELB,
 			},
