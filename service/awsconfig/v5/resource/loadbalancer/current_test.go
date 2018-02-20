@@ -23,20 +23,20 @@ func Test_CurrentState(t *testing.T) {
 	testCases := []struct {
 		description   string
 		obj           *v1alpha1.AWSConfig
-		expectedState LoadBalancerState
+		expectedState *LoadBalancerState
 		loadBalancers []LoadBalancerMock
 	}{
 		{
 			description: "basic match with no load balancers",
 			obj:         customObject,
-			expectedState: LoadBalancerState{
+			expectedState: &LoadBalancerState{
 				LoadBalancerNames: []string{},
 			},
 		},
 		{
 			description: "basic match with load balancer",
 			obj:         customObject,
-			expectedState: LoadBalancerState{
+			expectedState: &LoadBalancerState{
 				LoadBalancerNames: []string{
 					"test-elb",
 				},
@@ -60,7 +60,7 @@ func Test_CurrentState(t *testing.T) {
 		{
 			description: "no matching load balancer",
 			obj:         customObject,
-			expectedState: LoadBalancerState{
+			expectedState: &LoadBalancerState{
 				LoadBalancerNames: []string{},
 			},
 			loadBalancers: []LoadBalancerMock{
@@ -82,7 +82,7 @@ func Test_CurrentState(t *testing.T) {
 		{
 			description: "multiple load balancers",
 			obj:         customObject,
-			expectedState: LoadBalancerState{
+			expectedState: &LoadBalancerState{
 				LoadBalancerNames: []string{
 					"test-elb",
 					"test-elb-2",
@@ -120,7 +120,7 @@ func Test_CurrentState(t *testing.T) {
 		{
 			description: "multiple load balancers some not matching",
 			obj:         customObject,
-			expectedState: LoadBalancerState{
+			expectedState: &LoadBalancerState{
 				LoadBalancerNames: []string{
 					"test-elb",
 					"test-elb-2",
@@ -171,7 +171,7 @@ func Test_CurrentState(t *testing.T) {
 		{
 			description: "missing service tag",
 			obj:         customObject,
-			expectedState: LoadBalancerState{
+			expectedState: &LoadBalancerState{
 				LoadBalancerNames: []string{},
 			},
 			loadBalancers: []LoadBalancerMock{
@@ -209,7 +209,7 @@ func Test_CurrentState(t *testing.T) {
 			if err != nil {
 				t.Errorf("unexpected error %v", err)
 			}
-			currentState, ok := result.(LoadBalancerState)
+			currentState, ok := result.(*LoadBalancerState)
 			if !ok {
 				t.Errorf("expected '%T', got '%T'", currentState, result)
 			}
@@ -217,7 +217,6 @@ func Test_CurrentState(t *testing.T) {
 			if !reflect.DeepEqual(currentState, tc.expectedState) {
 				t.Errorf("expected current state '%#v', got '%#v'", tc.expectedState, currentState)
 			}
-
 		})
 	}
 }

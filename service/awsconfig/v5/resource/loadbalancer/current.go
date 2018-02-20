@@ -16,22 +16,21 @@ const (
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
-	currentState := LoadBalancerState{}
 	customObject, err := key.ToCustomObject(obj)
 	if err != nil {
-		return currentState, microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 
-	currentState, err = r.clusterLoadBalancers(customObject)
+	currentState, err := r.clusterLoadBalancers(customObject)
 	if err != nil {
-		return currentState, microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 
 	return currentState, nil
 }
 
-func (r *Resource) clusterLoadBalancers(customObject v1alpha1.AWSConfig) (LoadBalancerState, error) {
-	lbState := LoadBalancerState{}
+func (r *Resource) clusterLoadBalancers(customObject v1alpha1.AWSConfig) (*LoadBalancerState, error) {
+	lbState := &LoadBalancerState{}
 
 	// We get all load balancers because the API does not allow tag filters.
 	output, err := r.clients.ELB.DescribeLoadBalancers(&elb.DescribeLoadBalancersInput{})

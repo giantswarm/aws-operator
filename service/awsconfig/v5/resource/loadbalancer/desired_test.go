@@ -20,11 +20,11 @@ func Test_DesiredState(t *testing.T) {
 
 	testCases := []struct {
 		description   string
-		expectedState LoadBalancerState
+		expectedState *LoadBalancerState
 	}{
 		{
 			description: "basic match returns empty state",
-			expectedState: LoadBalancerState{
+			expectedState: &LoadBalancerState{
 				LoadBalancerNames: []string{},
 			},
 		},
@@ -50,7 +50,7 @@ func Test_DesiredState(t *testing.T) {
 			if err != nil {
 				t.Errorf("unexpected error %v", err)
 			}
-			desiredState, ok := result.(LoadBalancerState)
+			desiredState, ok := result.(*LoadBalancerState)
 			if !ok {
 				t.Errorf("expected '%T', got '%T'", desiredState, result)
 			}

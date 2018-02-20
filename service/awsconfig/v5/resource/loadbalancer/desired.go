@@ -7,7 +7,7 @@ import (
 // GetDesiredState returns an empty state as this resource only implements
 // deletion.
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
-	emptyState := LoadBalancerState{
+	emptyState := &LoadBalancerState{
 		LoadBalancerNames: []string{},
 	}
 
