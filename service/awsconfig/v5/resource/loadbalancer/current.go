@@ -31,6 +31,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 func (r *Resource) clusterLoadBalancers(customObject v1alpha1.AWSConfig) (*LoadBalancerState, error) {
 	lbState := &LoadBalancerState{}
+	clusterLBNames := []string{}
 
 	// We get all load balancers because the API does not allow tag filters.
 	output, err := r.clients.ELB.DescribeLoadBalancers(&elb.DescribeLoadBalancersInput{})
@@ -43,21 +44,22 @@ func (r *Resource) clusterLoadBalancers(customObject v1alpha1.AWSConfig) (*LoadB
 		allLBNames = append(allLBNames, lb.LoadBalancerName)
 	}
 
-	// We get tags for all load balancers which needs a separate API call.
-	tagsInput := &elb.DescribeTagsInput{
-		LoadBalancerNames: allLBNames,
-	}
-	tagsOutput, err := r.clients.ELB.DescribeTags(tagsInput)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
+	if len(allLBNames) > 0 {
+		// We get tags for all load balancers which needs a separate API call.
+		tagsInput := &elb.DescribeTagsInput{
+			LoadBalancerNames: allLBNames,
+		}
+		tagsOutput, err := r.clients.ELB.DescribeTags(tagsInput)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 
-	// We filter based on the AWS cloud provider tags to find load balancers
-	// associated with the cluster being processed.
-	clusterLBNames := []string{}
-	for _, lb := range tagsOutput.TagDescriptions {
-		if containsClusterTag(lb.Tags, customObject) && containsServiceTag(lb.Tags) {
-			clusterLBNames = append(clusterLBNames, *lb.LoadBalancerName)
+		// We filter based on the AWS cloud provider tags to find load balancers
+		// associated with the cluster being processed.
+		for _, lb := range tagsOutput.TagDescriptions {
+			if containsClusterTag(lb.Tags, customObject) && containsServiceTag(lb.Tags) {
+				clusterLBNames = append(clusterLBNames, *lb.LoadBalancerName)
+			}
 		}
 	}
 
