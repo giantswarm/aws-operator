@@ -114,7 +114,7 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 				t.Errorf("expected '%T', got '%T'", createChange, result)
 			}
 			if createChange.StackName != nil && *createChange.StackName != tc.expectedStackName {
-				t.Errorf("expected %s, got %s", tc.expectedStackName, createChange.StackName)
+				t.Errorf("expected %s, got %s", tc.expectedStackName, *createChange.StackName)
 			}
 		})
 	}

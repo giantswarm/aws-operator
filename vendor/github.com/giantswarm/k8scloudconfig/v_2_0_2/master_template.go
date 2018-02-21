@@ -1,4 +1,4 @@
-package v_3_1_1
+package v_2_0_2
 
 const MasterTemplate = `#cloud-config
 users:
@@ -10,7 +10,6 @@ users:
        - "{{ $user.PublicKey }}"
 {{end}}
 write_files:
-{{ if not .DisableCalico -}}
 - path: /srv/calico-kube-controllers-sa.yaml
   owner: root
   permissions: 644
@@ -33,12 +32,12 @@ write_files:
   owner: root
   permissions: 644
   content: |
-    # Calico Version v3.0.2
-    # https://docs.projectcalico.org/v3.0/releases#v3.0.2
+    # Calico Version v2.6.5
+    # https://docs.projectcalico.org/v2.6/releases#v2.6.5
     # This manifest includes the following component versions:
-    #   calico/node:v3.0.2
-    #   calico/cni:v2.0.0
-    #   calico/kube-controllers:v2.0.0
+    #   calico/node:v2.6.5
+    #   calico/cni:v1.11.2
+    #   calico/kube-controllers:v1.0.2
 
     # This ConfigMap is used to configure a self-hosted Calico installation.
     kind: ConfigMap
@@ -48,7 +47,7 @@ write_files:
       namespace: kube-system
     data:
       # Configure this with the location of your etcd cluster.
-      etcd_endpoints: "https://{{ .Cluster.Etcd.Domain }}:{{ .EtcdPort }}"
+      etcd_endpoints: "https://{{ .Cluster.Etcd.Domain }}:443"
 
       # Configure the Calico backend to use.
       calico_backend: "bird"
@@ -56,35 +55,26 @@ write_files:
       # The CNI network configuration to install on each node.
       cni_network_config: |-
         {
-          "name": "k8s-pod-network",
-          "cniVersion": "0.3.0",
-          "plugins": [
-            {
-                "type": "calico",
-                "etcd_endpoints": "__ETCD_ENDPOINTS__",
-                "etcd_key_file": "__ETCD_KEY_FILE__",
-                "etcd_cert_file": "__ETCD_CERT_FILE__",
-                "etcd_ca_cert_file": "__ETCD_CA_CERT_FILE__",
-                "log_level": "info",
-                "mtu": {{.Cluster.Calico.MTU}},
-                "ipam": {
-                    "type": "calico-ipam"
-                },
-                "policy": {
-                    "type": "k8s",
-                    "k8s_api_root": "https://__KUBERNETES_SERVICE_HOST__:__KUBERNETES_SERVICE_PORT__",
-                    "k8s_auth_token": "__SERVICEACCOUNT_TOKEN__"
-                },
-                "kubernetes": {
-                    "kubeconfig": "__KUBECONFIG_FILEPATH__"
-                }
+            "name": "k8s-pod-network",
+            "cniVersion": "0.1.0",
+            "type": "calico",
+            "etcd_endpoints": "__ETCD_ENDPOINTS__",
+            "etcd_key_file": "__ETCD_KEY_FILE__",
+            "etcd_cert_file": "__ETCD_CERT_FILE__",
+            "etcd_ca_cert_file": "__ETCD_CA_CERT_FILE__",
+            "log_level": "info",
+            "mtu": {{.Cluster.Calico.MTU}},
+            "ipam": {
+                "type": "calico-ipam"
             },
-            {
-              "type": "portmap",
-              "snat": true,
-              "capabilities": {"portMappings": true}
+            "policy": {
+                "type": "k8s",
+                "k8s_api_root": "https://__KUBERNETES_SERVICE_HOST__:__KUBERNETES_SERVICE_PORT__",
+                "k8s_auth_token": "__SERVICEACCOUNT_TOKEN__"
+            },
+            "kubernetes": {
+                "kubeconfig": "__KUBECONFIG_FILEPATH__"
             }
-          ]
         }
 
       # If you're using TLS enabled etcd uncomment the following.
@@ -139,7 +129,7 @@ write_files:
             # container programs network policy and routes on each
             # host.
             - name: calico-node
-              image: quay.io/calico/node:v3.0.2
+              image: quay.io/calico/node:v2.6.5
               env:
                 # The location of the Calico etcd cluster.
                 - name: ETCD_ENDPOINTS
@@ -233,12 +223,9 @@ write_files:
             # This container installs the Calico CNI binaries
             # and CNI network config file on each node.
             - name: install-cni
-              image: quay.io/calico/cni:v2.0.0
+              image: quay.io/calico/cni:v1.11.2
               command: ["/install-cni.sh"]
               env:
-                # Name of the CNI config file to create.
-                - name: CNI_CONF_NAME
-                  value: "10-calico.conflist"
                 # The location of the Calico etcd cluster.
                 - name: ETCD_ENDPOINTS
                   valueFrom:
@@ -317,7 +304,7 @@ write_files:
           serviceAccountName: calico-kube-controllers
           containers:
             - name: calico-kube-controllers
-              image: quay.io/calico/kube-controllers:v2.0.0
+              image: quay.io/calico/kube-controllers:v1.0.2
               env:
                 # The location of the Calico etcd cluster.
                 - name: ETCD_ENDPOINTS
@@ -359,119 +346,142 @@ write_files:
             - name: etcd-certs
               hostPath:
                 path: /etc/kubernetes/ssl/etcd
-{{ end -}}
-- path: /srv/coredns.yaml
+- path: /srv/kubedns-cm.yaml
+  owner: root
+  permissions: 0644
+  content: |
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: kube-dns
+      namespace: kube-system
+      labels:
+        addonmanager.kubernetes.io/mode: EnsureExists
+- path: /srv/kubedns-sa.yaml
   owner: root
   permissions: 0644
   content: |
     apiVersion: v1
     kind: ServiceAccount
     metadata:
-      name: coredns
+      name: kube-dns
       namespace: kube-system
-    ---
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: ClusterRole
-    metadata:
       labels:
-        kubernetes.io/bootstrapping: rbac-defaults
-      name: system:coredns
-    rules:
-    - apiGroups:
-      - ""
-      resources:
-      - endpoints
-      - services
-      - pods
-      - namespaces
-      verbs:
-      - list
-      - watch
-    ---
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: ClusterRoleBinding
-    metadata:
-      annotations:
-        rbac.authorization.kubernetes.io/autoupdate: "true"
-      labels:
-        kubernetes.io/bootstrapping: rbac-defaults
-      name: system:coredns
-    roleRef:
-      apiGroup: rbac.authorization.k8s.io
-      kind: ClusterRole
-      name: system:coredns
-    subjects:
-    - kind: ServiceAccount
-      name: coredns
-      namespace: kube-system
-    ---
-    apiVersion: v1
-    kind: ConfigMap
-    metadata:
-      name: coredns
-      namespace: kube-system
-    data:
-      Corefile: |
-        .:53 {
-            errors
-            health
-            kubernetes {{.Cluster.Kubernetes.Domain}} {{.Cluster.Kubernetes.API.ClusterIPRange}} {{.Cluster.Calico.Subnet}}/{{.Cluster.Calico.CIDR}} {
-              pods insecure
-              upstream /etc/resolv.conf
-            }
-            prometheus :9153
-            proxy . /etc/resolv.conf
-            cache 30
-        }
-    ---
-    apiVersion: extensions/v1beta1
+        kubernetes.io/cluster-service: "true"
+        addonmanager.kubernetes.io/mode: Reconcile
+- path: /srv/kubedns-dep.yaml
+  owner: root
+  permissions: 0644
+  content: |
+    apiVersion:  extensions/v1beta1
     kind: Deployment
     metadata:
-      name: coredns
+      name: kube-dns
       namespace: kube-system
       labels:
-        k8s-app: coredns
-        kubernetes.io/name: "CoreDNS"
+        k8s-app: kube-dns
+        kubernetes.io/cluster-service: "true"
+        addonmanager.kubernetes.io/mode: Reconcile
     spec:
-      replicas: 2
       strategy:
-        type: RollingUpdate
         rollingUpdate:
-          maxUnavailable: 1
+          maxSurge: 10%
+          maxUnavailable: 0
+      replicas: 3
       selector:
         matchLabels:
-          k8s-app: coredns
+          k8s-app: kube-dns
       template:
         metadata:
           labels:
-            k8s-app: coredns
+            k8s-app: kube-dns
+            kubernetes.io/cluster-service: "true"
+          annotations:
+            scheduler.alpha.kubernetes.io/critical-pod: ''
         spec:
-          serviceAccountName: coredns
           tolerations:
-            - key: node-role.kubernetes.io/master
-              effect: NoSchedule
-            - key: "CriticalAddonsOnly"
-              operator: "Exists"
-          affinity:
-            podAntiAffinity:
-              preferredDuringSchedulingIgnoredDuringExecution:
-              - weight: 100
-                podAffinityTerm:
-                  labelSelector:
-                    matchExpressions:
-                      - key: k8s-app
-                        operator: In
-                        values:
-                        - coredns
-                  topologyKey: kubernetes.io/hostname
+          - key: "CriticalAddonsOnly"
+            operator: "Exists"
           containers:
-          - name: coredns
-            image: quay.io/giantswarm/coredns:1.0.5
-            imagePullPolicy: IfNotPresent
-            args: [ "-conf", "/etc/coredns/Corefile" ]
+          - name: kubedns
+            image: gcr.io/google_containers/k8s-dns-kube-dns-amd64:1.14.5
             volumeMounts:
-            - name: config-volume
-              mountPath: /etc/coredns
+            - name: kube-dns-config
+              mountPath: /kube-dns-config
+            - name: config
+              mountPath: /etc/kubernetes/config/
+              readOnly: false
+            - name: ssl
+              mountPath: /etc/kubernetes/ssl/
+              readOnly: false
+            resources:
+              limits:
+                memory: 170Mi
+              requests:
+                cpu: 100m
+                memory: 70Mi
+            args:
+            # command = "/kube-dns
+            - --dns-port=10053
+            - --domain={{.Cluster.Kubernetes.Domain}}
+            - --config-dir=/kube-dns-config
+            - --v=2
+            - --kubecfg-file=/etc/kubernetes/config/kubelet-kubeconfig.yml
+            - --kube-master-url=https://{{.Cluster.Kubernetes.API.Domain}}
+            env:
+            - name: PROMETHEUS_PORT
+              value: "10055"
+            ports:
+            - containerPort: 10053
+              name: dns-local
+              protocol: UDP
+            - containerPort: 10053
+              name: dns-tcp-local
+              protocol: TCP
+            - containerPort: 10055
+              name: metrics
+              protocol: TCP
+            livenessProbe:
+              httpGet:
+                path: /healthcheck/kubedns
+                port: 10054
+                scheme: HTTP
+              initialDelaySeconds: 60
+              successThreshold: 1
+              failureThreshold: 5
+              timeoutSeconds: 5
+            readinessProbe:
+              httpGet:
+                path: /readiness
+                port: 8081
+                scheme: HTTP
+              initialDelaySeconds: 3
+              timeoutSeconds: 5
+          - name: dnsmasq
+            image: gcr.io/google_containers/k8s-dns-dnsmasq-nanny-amd64:1.14.5
+            livenessProbe:
+              httpGet:
+                path: /healthcheck/dnsmasq
+                port: 10054
+                scheme: HTTP
+              initialDelaySeconds: 60
+              timeoutSeconds: 5
+              successThreshold: 1
+              failureThreshold: 5
+            args:
+            - -v=2
+            - -logtostderr
+            - -configDir=/etc/k8s/dns/dnsmasq-nanny
+            - -restartDnsmasq=true
+            - --
+            - -k
+            - --cache-size=1000
+            - --no-resolv
+            - --log-facility=-
+            - --server=127.0.0.1#10053
+            - --server=/{{.Cluster.Kubernetes.Domain}}/127.0.0.1#10053
+            - --server=/in-addr.arpa/127.0.0.1#10053
+            - --server=/ip6.arpa/127.0.0.1#10053
             ports:
             - containerPort: 53
               name: dns
@@ -479,36 +489,67 @@ write_files:
             - containerPort: 53
               name: dns-tcp
               protocol: TCP
+            resources:
+              requests:
+                cpu: 150m
+                memory: 10Mi
+            volumeMounts:
+            - name: kube-dns-config
+              mountPath: /etc/k8s/dns/dnsmasq-nanny
+          - name: sidecar
+            image: gcr.io/google_containers/k8s-dns-sidecar-amd64:1.14.5
             livenessProbe:
               httpGet:
-                path: /health
-                port: 8080
+                path: /metrics
+                port: 10054
                 scheme: HTTP
               initialDelaySeconds: 60
               timeoutSeconds: 5
               successThreshold: 1
               failureThreshold: 5
-          dnsPolicy: Default
+            args:
+            - --v=2
+            - --logtostderr
+            - --probe=kubedns,127.0.0.1:10053,kubernetes.default.svc.{{.Cluster.Kubernetes.Domain}},5,A
+            - --probe=dnsmasq,127.0.0.1:53,kubernetes.default.svc.{{.Cluster.Kubernetes.Domain}},5,A
+            ports:
+            - containerPort: 10054
+              name: metrics
+              protocol: TCP
+            resources:
+              requests:
+                memory: 20Mi
+                cpu: 10m
+          dnsPolicy: Default  # Don't use cluster DNS.
+          serviceAccountName: kube-dns
           volumes:
-            - name: config-volume
-              configMap:
-                name: coredns
-                items:
-                - key: Corefile
-                  path: Corefile
-    ---
+          - name: kube-dns-config
+            configMap:
+              name: kube-dns
+              optional: true
+          - name: config
+            hostPath:
+              path: /etc/kubernetes/config/
+          - name: ssl
+            hostPath:
+              path: /etc/kubernetes/ssl/
+- path: /srv/kubedns-svc.yaml
+  owner: root
+  permissions: 0644
+  content: |
     apiVersion: v1
     kind: Service
     metadata:
-      name: coredns
+      name: kube-dns
       namespace: kube-system
       labels:
-        k8s-app: coredns
+        k8s-app: kube-dns
         kubernetes.io/cluster-service: "true"
-        kubernetes.io/name: "CoreDNS"
+        addonmanager.kubernetes.io/mode: Reconcile
+        kubernetes.io/name: "KubeDNS"
     spec:
       selector:
-        k8s-app: coredns
+        k8s-app: kube-dns
       clusterIP: {{.Cluster.Kubernetes.DNS.IP}}
       ports:
       - name: dns
@@ -644,25 +685,14 @@ write_files:
                         - nginx-ingress-controller
                   topologyKey: kubernetes.io/hostname
           serviceAccountName: nginx-ingress-controller
-          initContainers:
-          - command:
-            - sh
-            - -c
-            - sysctl -w net.core.somaxconn=32768; sysctl -w net.ipv4.ip_local_port_range="1024 65535"
-            image: alpine:3.6
-            imagePullPolicy: IfNotPresent
-            name: sysctl
-            securityContext:
-              privileged: true
           containers:
           - name: nginx-ingress-controller
-            image: quay.io/giantswarm/nginx-ingress-controller:0.10.2
+            image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.9.0-beta.17
             args:
             - /nginx-ingress-controller
             - --default-backend-service=$(POD_NAMESPACE)/default-http-backend
             - --configmap=$(POD_NAMESPACE)/ingress-nginx
             - --enable-ssl-passthrough
-            - --annotations-prefix=nginx.ingress.kubernetes.io
             env:
               - name: POD_NAME
                 valueFrom:
@@ -774,7 +804,7 @@ write_files:
           serviceAccountName: kube-proxy
           containers:
             - name: kube-proxy
-              image: quay.io/giantswarm/hyperkube:v1.9.2
+              image: quay.io/giantswarm/hyperkube:v1.8.4_coreos.0
               command:
               - /hyperkube
               - proxy
@@ -805,9 +835,6 @@ write_files:
               - mountPath: /etc/kubernetes/ssl
                 name: ssl-certs-kubernetes
                 readOnly: true
-              - mountPath: /lib/modules
-                name: lib-modules
-                readOnly: true
           volumes:
           - hostPath:
               path: /etc/kubernetes/config/
@@ -818,201 +845,7 @@ write_files:
           - hostPath:
               path: /usr/share/ca-certificates
             name: ssl-certs-host
-          - hostPath:
-              path: /lib/modules
-            name: lib-modules
-- path: /srv/node-exporter-svc.yaml
-  owner: root
-  permissions: 0644
-  content: |
-    apiVersion: v1
-    kind: Service
-    metadata:
-      name: node-exporter
-      namespace: kube-system
-      labels:
-        app: node-exporter
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/scheme: "http"
-    spec:
-      ports:
-        - port: 10300
-      selector:
-        app: node-exporter
-- path: /srv/node-exporter-sa.yaml
-  owner: root
-  permissions: 0644
-  content: |
-    apiVersion: v1
-    kind: ServiceAccount
-    metadata:
-      name: node-exporter
-      namespace: kube-system
-      labels:
-        app: node-exporter
-- path: /srv/node-exporter-ds.yaml
-  owner: root
-  permissions: 0644
-  content: |
-    apiVersion: extensions/v1beta1
-    kind: DaemonSet
-    metadata:
-      name: node-exporter
-      namespace: kube-system
-      labels:
-        app: node-exporter
-    spec:
-      updateStrategy:
-        type: RollingUpdate
-      template:
-        metadata:
-          name: node-exporter
-          labels:
-            app: node-exporter
-        spec:
-          tolerations:
-          # Tolerate master taint
-          - key: node-role.kubernetes.io/master
-            operator: Exists
-            effect: NoSchedule
-          containers:
-          - image: quay.io/giantswarm/node-exporter:v0.15.1
-            name: node-exporter
-            args:
-              - '--log.level=debug'
-              - '--web.listen-address=:10300'
-              - '--collector.arp'
-              - '--collector.bcache'
-              - '--collector.conntrack'
-              - '--collector.cpu'
-              - '--collector.diskstats'
-              - '--collector.edac'
-              - '--collector.entropy'
-              - '--collector.filefd'
-              - '--collector.filesystem'
-              - '--collector.hwmon'
-              - '--collector.infiniband'
-              - '--collector.ipvs'
-              - '--collector.loadavg'
-              - '--collector.mdadm'
-              - '--collector.meminfo'
-              - '--collector.netdev'
-              - '--collector.netstat'
-              - '--collector.sockstat'
-              - '--collector.stat'
-              - '--collector.systemd'
-              - '--no-collector.textfile'   # we don't use textfile collector.
-              - '--collector.time'
-              - '--collector.timex'
-              - '--collector.uname'
-              - '--collector.vmstat'
-              - '--no-collector.wifi'       # we don't use wifi.
-              - '--collector.xfs'
-              - '--no-collector.zfs'        # we don't use zfs.
-            livenessProbe:
-              httpGet:
-                path: /
-                port: 10300
-              initialDelaySeconds: 5
-              timeoutSeconds: 5
-            readinessProbe:
-              httpGet:
-                path: /
-                port: 10300
-              initialDelaySeconds: 5
-              timeoutSeconds: 5
-            resources:
-              requests:
-                cpu: 55m
-                memory: 75Mi
-              limits:
-                cpu: 55m
-                memory: 75Mi
-            volumeMounts:
-            - mountPath: /var/run/dbus/
-              name: systemd-volume
-          volumes:
-          - name: systemd-volume
-            hostPath:
-              path: /var/run/dbus/
-          serviceAccountName: node-exporter
-          hostNetwork: true
-          hostPID: true
-- path: /srv/kube-state-metrics-svc.yaml
-  owner: root
-  permissions: 0644
-  content: |
-    apiVersion: v1
-    kind: Service
-    metadata:
-      name: kube-state-metrics
-      namespace: kube-system
-      labels:
-        app: kube-state-metrics
-      annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/scheme: "http"
-    spec:
-      ports:
-      - port: 10301
-      selector:
-        app: kube-state-metrics
-- path: /srv/kube-state-metrics-sa.yaml
-  owner: root
-  permissions: 0644
-  content: |
-    apiVersion: v1
-    kind: ServiceAccount
-    metadata:
-      name: kube-state-metrics
-      namespace: kube-system
-      labels:
-        app: kube-state-metrics
-- path: /srv/kube-state-metrics-dep.yaml
-  owner: root
-  permissions: 0644
-  content: |
-    apiVersion: extensions/v1beta1
-    kind: Deployment
-    metadata:
-      name: kube-state-metrics
-      namespace: kube-system
-      labels:
-        app: kube-state-metrics
-    spec:
-      replicas: 1
-      template:
-        metadata:
-          labels:
-            app: kube-state-metrics
-        spec:
-          containers:
-          - name: kube-state-metrics
-            image: quay.io/giantswarm/kube-state-metrics:v1.0.1
-            args:
-              - '--port=10301'
-            livenessProbe:
-              httpGet:
-                path: /
-                port: 10301
-              initialDelaySeconds: 5
-              timeoutSeconds: 5
-            readinessProbe:
-              httpGet:
-                path: /
-                port: 10301
-              initialDelaySeconds: 5
-              timeoutSeconds: 5
-            resources:
-              requests:
-                cpu: 50m
-                memory: 75Mi
-              limits:
-                cpu: 50m
-                memory: 75Mi
-          serviceAccountName: kube-state-metrics
-          hostNetwork: true
+
 - path: /srv/rbac_bindings.yaml
   owner: root
   permissions: 0644
@@ -1112,6 +945,20 @@ write_files:
       name: calico-node
       apiGroup: rbac.authorization.k8s.io
     ---
+    ## DNS
+    kind: ClusterRoleBinding
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    metadata:
+      name: kube-dns
+    subjects:
+    - kind: ServiceAccount
+      name: kube-dns
+      namespace: kube-system
+    roleRef:
+      kind: ClusterRole
+      name: system:kube-dns
+      apiGroup: rbac.authorization.k8s.io
+    ---
     ## IC
     kind: ClusterRoleBinding
     apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -1138,37 +985,6 @@ write_files:
     roleRef:
       kind: Role
       name: nginx-ingress-role
-      apiGroup: rbac.authorization.k8s.io
-    ---
-    kind: RoleBinding
-    apiVersion: rbac.authorization.k8s.io/v1
-    metadata:
-      name: node-exporter
-      namespace: kube-system
-      labels:
-        app: node-exporter
-    subjects:
-    - kind: ServiceAccount
-      name: node-exporter
-      namespace: kube-system
-    roleRef:
-      kind: Role
-      name: node-exporter
-      apiGroup: rbac.authorization.k8s.io
-    ---
-    kind: ClusterRoleBinding
-    apiVersion: rbac.authorization.k8s.io/v1beta1
-    metadata:
-      name: kube-state-metrics
-      labels:
-        app: kube-state-metrics
-    subjects:
-      - kind: ServiceAccount
-        name: kube-state-metrics
-        namespace: kube-system
-    roleRef:
-      kind: ClusterRole
-      name: kube-state-metrics
       apiGroup: rbac.authorization.k8s.io
 - path: /srv/rbac_roles.yaml
   owner: root
@@ -1308,76 +1124,6 @@ write_files:
           - get
           - create
           - update
-    ---
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: Role
-    metadata:
-      name: node-exporter
-      namespace: kube-system
-      labels:
-        app: node-exporter
-    rules:
-    - apiGroups: ['extensions']
-      resources: ['podsecuritypolicies']
-      verbs:     ['use']
-      resourceNames:
-      - privileged
-    ---
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: ClusterRole
-    metadata:
-      name: kube-state-metrics
-      labels:
-        app: kube-state-metrics
-    rules:
-      - apiGroups:
-          - ""
-        resources:
-          - nodes
-          - pods
-          - services
-          - resourcequotas
-          - replicationcontrollers
-          - limitranges
-          - persistentvolumeclaims
-          - persistentvolumes
-          - namespaces
-          - endpoints
-        verbs:
-          - list
-          - watch
-      - apiGroups:
-          - extensions
-        resources:
-          - daemonsets
-          - deployments
-          - replicasets
-        verbs:
-          - list
-          - watch
-      - apiGroups:
-          - apps
-        resources:
-          - statefulsets
-        verbs:
-          - list
-          - watch
-      - apiGroups:
-          - batch
-        resources:
-          - cronjobs
-          - jobs
-        verbs:
-          - list
-          - watch
-      - apiGroups:
-        - extensions
-        resources:
-        - podsecuritypolicies
-        verbs:
-        - use
-        resourceNames:
-        - privileged
 - path: /srv/psp_policies.yaml
   owner: root
   permissions: 0644
@@ -1481,6 +1227,12 @@ write_files:
       name: calico-kube-controllers
       namespace: kube-system
     - kind: ServiceAccount
+      name: calico-node-controller
+      namespace: kube-system
+    - kind: ServiceAccount
+      name: kube-dns
+      namespace: kube-system
+    - kind: ServiceAccount
       name: kube-proxy
       namespace: kube-system
     - kind: ServiceAccount
@@ -1534,12 +1286,7 @@ write_files:
       while [ "$(/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL get cs | grep Healthy | wc -l)" -ne "3" ]; do sleep 1 && echo 'Waiting for healthy k8s'; done
 
       # apply Security bootstrap (RBAC and PSP)
-      SECURITY_FILES=""
-      SECURITY_FILES="${SECURITY_FILES} rbac_bindings.yaml"
-      SECURITY_FILES="${SECURITY_FILES} rbac_roles.yaml"
-      SECURITY_FILES="${SECURITY_FILES} psp_policies.yaml"
-      SECURITY_FILES="${SECURITY_FILES} psp_roles.yaml"
-      SECURITY_FILES="${SECURITY_FILES} psp_binding.yaml"
+      SECURITY_FILES="rbac_bindings.yaml rbac_roles.yaml psp_policies.yaml psp_roles.yaml psp_binding.yaml"
 
       for manifest in $SECURITY_FILES
       do
@@ -1552,15 +1299,12 @@ write_files:
           done
       done
 
-      {{ if not .DisableCalico -}}
-
       # apply calico CNI
-      CALICO_FILES=""
-      CALICO_FILES="${CALICO_FILES} calico-configmap.yaml"
-      CALICO_FILES="${CALICO_FILES} calico-node-sa.yaml"
-      CALICO_FILES="${CALICO_FILES} calico-kube-controllers-sa.yaml"
-      CALICO_FILES="${CALICO_FILES} calico-ds.yaml"
-      CALICO_FILES="${CALICO_FILES} calico-kube-controllers.yaml"
+      CALICO_FILES="calico-configmap.yaml\
+       calico-node-sa.yaml\
+       calico-kube-controllers-sa.yaml\
+       calico-ds.yaml\
+       calico-kube-controllers.yaml"
 
       for manifest in $CALICO_FILES
       do
@@ -1586,8 +1330,6 @@ write_files:
           sleep 3s
       done
 
-      {{ end -}}
-
       # apply default storage class
       if [ -f /srv/default-storage-class.yaml ]; then
           while
@@ -1602,24 +1344,17 @@ write_files:
       fi
 
       # apply k8s addons
-      MANIFESTS=""
-      {{ range .ExtraManifests -}}
-      MANIFESTS="${MANIFESTS} {{ . }}"
-      {{ end -}}
-      MANIFESTS="${MANIFESTS} kube-proxy-sa.yaml"
-      MANIFESTS="${MANIFESTS} kube-proxy-ds.yaml"
-      MANIFESTS="${MANIFESTS} coredns.yaml"
-      MANIFESTS="${MANIFESTS} default-backend-dep.yml"
-      MANIFESTS="${MANIFESTS} default-backend-svc.yml"
-      MANIFESTS="${MANIFESTS} ingress-controller-cm.yml"
-      MANIFESTS="${MANIFESTS} ingress-controller-dep.yml"
-      MANIFESTS="${MANIFESTS} ingress-controller-svc.yml"
-      MANIFESTS="${MANIFESTS} node-exporter-svc.yaml"
-      MANIFESTS="${MANIFESTS} node-exporter-sa.yaml"
-      MANIFESTS="${MANIFESTS} node-exporter-ds.yaml"
-      MANIFESTS="${MANIFESTS} kube-state-metrics-svc.yaml"
-      MANIFESTS="${MANIFESTS} kube-state-metrics-sa.yaml"
-      MANIFESTS="${MANIFESTS} kube-state-metrics-dep.yaml"
+      MANIFESTS="kube-proxy-sa.yaml\
+                 kube-proxy-ds.yaml\
+                 kubedns-cm.yaml\
+                 kubedns-sa.yaml\
+                 kubedns-dep.yaml\
+                 kubedns-svc.yaml\
+                 default-backend-dep.yml\
+                 default-backend-svc.yml\
+                 ingress-controller-cm.yml\
+                 ingress-controller-dep.yml\
+                 ingress-controller-svc.yml"
 
       for manifest in $MANIFESTS
       do
@@ -1632,6 +1367,46 @@ write_files:
           done
       done
       echo "Addons successfully installed"
+# Make sure to update this script depending on migration steps needed, if any.
+- path: /opt/migrate-to-new-k8scc-version
+  permissions: 0544
+  content: |
+      #!/bin/bash
+
+      KUBECONFIG=/etc/kubernetes/config/addons-kubeconfig.yml
+      # kubectl 1.8.4
+      KUBECTL_IMAGE=quay.io/giantswarm/docker-kubectl:8cabd75bacbcdad7ac5d85efc3ca90c2fabf023b
+      KUBECTL="/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes ${KUBECTL_IMAGE}"
+
+      /usr/bin/docker pull ${KUBECTL_IMAGE}
+
+      # Wait for healthy master.
+      while [ "$(${KUBECTL} get cs | grep Healthy | wc -l)" -ne "3" ]; do sleep 1 && echo 'Waiting for healthy k8s'; done
+
+      ### Migration steps ###
+
+      # Uncomment following line if no migration steps are needed.
+      # echo "No migration steps needed."
+
+      # Migration to cloudconfig v2.0.0. Calico upgrade to 2.6.5.
+      ${KUBECTL} --ignore-not-found=true -n kube-system delete ds/calico-ipip-pinger -n kube-system
+      ${KUBECTL} --ignore-not-found=true -n kube-system delete sa/calico-ipip-pinger -n kube-system
+
+      # Dirty hack here. Workaround for bug https://github.com/projectcalico/kube-controllers/issues/204
+      # We want old node-contoller to clean up old master, so wait when it will be running.
+      if ${KUBECTL} get deploy/calico-node-controller -n kube-system &>/dev/null; then
+        until ${KUBECTL} get pod -l k8s-app=calico-node-controller -n kube-system | grep -q Running ; do sleep 1 && echo 'Waiting for old calico-node-controller'; done
+
+        # Give a time to clean up old master.
+        sleep 10
+
+        # Finally delete old node-controller
+        ${KUBECTL} --ignore-not-found=true -n kube-system delete deploy/calico-node-controller -n kube-system
+        ${KUBECTL} --ignore-not-found=true -n kube-system delete sa/calico-node-controller -n kube-system
+        ${KUBECTL} --ignore-not-found=true -n kube-system delete ClusterRoleBinding/calico-node-controller
+        ${KUBECTL} --ignore-not-found=true -n kube-system delete ClusterRole/calico-node-controller
+      fi
+
 - path: /etc/kubernetes/config/addons-kubeconfig.yml
   owner: root
   permissions: 0644
@@ -1744,264 +1519,6 @@ write_files:
       name: service-account-context
     current-context: service-account-context
 
-- path: /etc/kubernetes/encryption/k8s-encryption-config.yaml
-  owner: root
-  permissions: 600
-  content: |
-    kind: EncryptionConfig
-    apiVersion: v1
-    resources:
-      - resources:
-        - secrets
-        providers:
-        - aescbc:
-            keys:
-            - name: key1
-              secret: {{ .ApiserverEncryptionKey }}
-        - identity: {}
-- path: /etc/kubernetes/manifests/audit-policy.yml
-  owner: root
-  permissions: 0644
-  content: |
-    apiVersion: audit.k8s.io/v1beta1
-    kind: Policy
-    rules:
-      # TODO: Filter safe system requests.
-      # A catch-all rule to log all requests at the Metadata level.
-      - level: Metadata
-        # Long-running requests like watches that fall under this rule will not
-        # generate an audit event in RequestReceived.
-        omitStages:
-          - "RequestReceived"
-
-- path: /etc/kubernetes/manifests/k8s-api-server.yml
-  owner: root
-  permissions: 0644
-  content: |
-    apiVersion: v1
-    kind: Pod
-    metadata:
-      name: k8s-api-server
-      namespace: kube-system
-    spec:
-      hostNetwork: true
-      containers:
-      - name: k8s-api-server
-        image: quay.io/giantswarm/hyperkube:v1.9.2
-        env:
-        - name: HOST_IP
-          valueFrom:
-            fieldRef:
-              fieldPath: status.podIP
-        command:
-        - /hyperkube
-        - apiserver
-        {{ range .Hyperkube.Apiserver.Pod.CommandExtraArgs -}}
-        - {{ . }}
-        {{ end -}}
-        - --allow_privileged=true
-        - --insecure_bind_address=0.0.0.0
-        - --anonymous-auth=false
-        - --insecure-port=0
-        - --kubelet_https=true
-        - --kubelet-preferred-address-types=InternalIP
-        - --secure_port={{.Cluster.Kubernetes.API.SecurePort}}
-        - --bind-address=$(HOST_IP)
-        - --etcd-prefix={{.Cluster.Etcd.Prefix}}
-        - --profiling=false
-        - --repair-malformed-updates=false
-        - --service-account-lookup=true
-        - --authorization-mode=RBAC
-        - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,DefaultStorageClass,PodSecurityPolicy
-        - --cloud-provider={{.Cluster.Kubernetes.CloudProvider}}
-        - --service-cluster-ip-range={{.Cluster.Kubernetes.API.ClusterIPRange}}
-        - --etcd-servers=https://127.0.0.1:2379
-        - --etcd-cafile=/etc/kubernetes/ssl/etcd/server-ca.pem
-        - --etcd-certfile=/etc/kubernetes/ssl/etcd/server-crt.pem
-        - --etcd-keyfile=/etc/kubernetes/ssl/etcd/server-key.pem
-        - --advertise-address=$(HOST_IP)
-        - --runtime-config=api/all=true
-        - --logtostderr=true
-        - --tls-cert-file=/etc/kubernetes/ssl/apiserver-crt.pem
-        - --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
-        - --client-ca-file=/etc/kubernetes/ssl/apiserver-ca.pem
-        - --service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem
-        - --audit-log-path=/var/log/apiserver/audit.log
-        - --audit-log-maxage=30
-        - --audit-log-maxbackup=30
-        - --audit-log-maxsize=100
-        - --audit-policy-file=/etc/kubernetes/manifests/audit-policy.yml
-        - --experimental-encryption-provider-config=/etc/kubernetes/encryption/k8s-encryption-config.yaml
-        resources:
-          requests:
-            cpu: 300m
-        livenessProbe:
-          tcpSocket:
-            port: {{.Cluster.Kubernetes.API.SecurePort}}
-          initialDelaySeconds: 15
-          timeoutSeconds: 15
-        ports:
-        - containerPort: {{.Cluster.Kubernetes.API.SecurePort}}
-          hostPort: {{.Cluster.Kubernetes.API.SecurePort}}
-          name: https
-        volumeMounts:
-        {{ range .Hyperkube.Apiserver.Pod.HyperkubePodHostExtraMounts -}}
-        - mountPath: {{ .Path }}
-          name: {{ .Name }}
-          readOnly: {{ .ReadOnly }}
-        {{ end -}}
-        - mountPath: /var/log/apiserver/
-          name: apiserver-log
-        - mountPath: /etc/kubernetes/encryption/
-          name: k8s-encryption
-          readOnly: true
-        - mountPath: /etc/kubernetes/manifests
-          name: k8s-manifests
-          readOnly: true
-        - mountPath: /etc/kubernetes/secrets/
-          name: k8s-secrets
-          readOnly: true
-        - mountPath: /etc/kubernetes/ssl/
-          name: ssl-certs-kubernetes
-          readOnly: true
-      volumes:
-      {{ range .Hyperkube.Apiserver.Pod.HyperkubePodHostExtraMounts -}}
-      - hostPath: 
-          path: {{ .Path }}
-        name: {{ .Name }}
-      {{ end -}}
-      - hostPath:
-          path: /var/log/apiserver/
-        name: apiserver-log
-      - hostPath:
-          path: /etc/kubernetes/encryption/
-        name: k8s-encryption
-      - hostPath:
-          path: /etc/kubernetes/manifests
-        name: k8s-manifests
-      - hostPath:
-          path: /etc/kubernetes/secrets
-        name: k8s-secrets
-      - hostPath:
-          path: /etc/kubernetes/ssl
-        name: ssl-certs-kubernetes
-
-- path: /etc/kubernetes/manifests/k8s-controller-manager.yml
-  owner: root
-  permissions: 0644
-  content: |
-    apiVersion: v1
-    kind: Pod
-    metadata:
-      name: k8s-controller-manager
-      namespace: kube-system
-    spec:
-      hostNetwork: true
-      containers:
-      - name: k8s-controller-manager
-        image: quay.io/giantswarm/hyperkube:v1.9.2
-        command:
-        - /hyperkube
-        - controller-manager
-        {{ range .Hyperkube.ControllerManager.Pod.CommandExtraArgs -}}
-        - {{ . }}
-        {{ end -}}
-        - --logtostderr=true
-        - --v=2
-        - --cloud-provider={{.Cluster.Kubernetes.CloudProvider}}
-        - --profiling=false
-        - --terminated-pod-gc-threshold=10
-        - --use-service-account-credentials=true
-        - --kubeconfig=/etc/kubernetes/config/controller-manager-kubeconfig.yml
-        - --root-ca-file=/etc/kubernetes/ssl/apiserver-ca.pem
-        - --service-account-private-key-file=/etc/kubernetes/ssl/service-account-key.pem
-        resources:
-          requests:
-            cpu: 200m
-        livenessProbe:
-          httpGet:
-            host: 127.0.0.1
-            path: /healthz
-            port: 10251
-          initialDelaySeconds: 15
-          timeoutSeconds: 15
-        volumeMounts:
-        {{ range .Hyperkube.ControllerManager.Pod.HyperkubePodHostExtraMounts -}}
-        - mountPath: {{ .Path }}
-          name: {{ .Name }}
-          readOnly: {{ .ReadOnly }}
-        {{ end -}}
-        - mountPath: /etc/kubernetes/config/
-          name: k8s-config
-          readOnly: true
-        - mountPath: /etc/kubernetes/secrets/
-          name: k8s-secrets
-          readOnly: true
-        - mountPath: /etc/kubernetes/ssl/
-          name: ssl-certs-kubernetes
-          readOnly: true
-      volumes:
-      {{ range .Hyperkube.ControllerManager.Pod.HyperkubePodHostExtraMounts -}}
-      - hostPath: 
-          path: {{ .Path }}
-        name: {{ .Name }}
-      {{ end -}}
-      - hostPath:
-          path: /etc/kubernetes/config
-        name: k8s-config
-      - hostPath:
-          path: /etc/kubernetes/secrets
-        name: k8s-secrets
-      - hostPath:
-          path: /etc/kubernetes/ssl
-        name: ssl-certs-kubernetes
-
-- path: /etc/kubernetes/manifests/k8s-scheduler.yml
-  owner: root
-  permissions: 0644
-  content: |
-    apiVersion: v1
-    kind: Pod
-    metadata:
-      name: k8s-scheduler
-      namespace: kube-system
-    spec:
-      hostNetwork: true
-      containers:
-      - name: k8s-scheduler
-        image: quay.io/giantswarm/hyperkube:v1.9.2
-        command:
-        - /hyperkube
-        - scheduler
-        - --logtostderr=true
-        - --v=2
-        - --profiling=false
-        - --kubeconfig=/etc/kubernetes/config/scheduler-kubeconfig.yml
-        resources:
-          requests:
-            cpu: 100m
-        livenessProbe:
-          httpGet:
-            host: 127.0.0.1
-            path: /healthz
-            port: 10251
-          initialDelaySeconds: 15
-          timeoutSeconds: 15
-        volumeMounts:
-        - mountPath: /etc/kubernetes/config/
-          name: k8s-config
-          readOnly: true
-        - mountPath: /etc/kubernetes/ssl/
-          name: ssl-certs-kubernetes
-          readOnly: true
-      volumes:
-      - hostPath:
-          path: /etc/kubernetes/config
-        name: k8s-config
-      - hostPath:
-          path: /etc/kubernetes/ssl
-        name: ssl-certs-kubernetes
-
 - path: /etc/ssh/sshd_config
   owner: root
   permissions: 0600
@@ -2061,16 +1578,6 @@ write_files:
     {{range .Content}}{{.}}
     {{end}}{{end}}
 
-- path: /etc/modules-load.d/ip_vs.conf
-  owner: root
-  permissions: 644
-  content: |
-    ip_vs
-    ip_vs_rr
-    ip_vs_wrr
-    ip_vs_sh
-    nf_conntrack_ipv4
-
 coreos:
   units:
   {{range .Extension.Units}}
@@ -2120,8 +1627,8 @@ coreos:
       Type=oneshot
       RemainAfterExit=yes
       TimeoutStartSec=0
-      ExecStartPre=/bin/bash -c "/usr/bin/mkdir -p /var/lib/etcd; /usr/bin/chown etcd:etcd /var/lib/etcd"
-      ExecStart=/usr/bin/chmod -R 700 /var/lib/etcd
+      ExecStartPre=/bin/bash -c "/usr/bin/mkdir -p /etc/kubernetes/data/etcd; /usr/bin/chown etcd:etcd /etc/kubernetes/data/etcd"
+      ExecStart=/usr/bin/chmod -R 700 /etc/kubernetes/data/etcd
   - name: docker.service
     enable: true
     command: start
@@ -2168,9 +1675,9 @@ coreos:
       Requires=k8s-setup-network-env.service
       After=k8s-setup-network-env.service
       Conflicts=etcd.service etcd2.service
-      StartLimitIntervalSec=0
 
       [Service]
+      StartLimitIntervalSec=0
       Restart=always
       RestartSec=0
       TimeoutStopSec=10
@@ -2187,7 +1694,7 @@ coreos:
       ExecStart=/usr/bin/docker run \
           -v /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt \
           -v /etc/kubernetes/ssl/etcd/:/etc/etcd \
-          -v /var/lib/etcd/:/var/lib/etcd  \
+          -v /etc/kubernetes/data/etcd/:/var/lib/etcd  \
           --net=host  \
           --name $NAME \
           $IMAGE \
@@ -2201,7 +1708,7 @@ coreos:
           --peer-cert-file /etc/etcd/server-crt.pem \
           --peer-key-file /etc/etcd/server-key.pem \
           --peer-client-cert-auth=true \
-          --advertise-client-urls=https://{{ .Cluster.Etcd.Domain }}:{{ .EtcdPort }} \
+          --advertise-client-urls=https://{{ .Cluster.Etcd.Domain }}:443 \
           --initial-advertise-peer-urls=https://127.0.0.1:2380 \
           --listen-client-urls=https://0.0.0.0:2379 \
           --listen-peer-urls=https://${DEFAULT_IPV4}:2380 \
@@ -2270,16 +1777,13 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.9.2"
+      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.8.4_coreos.0"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
       ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
       ExecStartPre=-/usr/bin/docker rm -f $NAME
       ExecStart=/bin/sh -c "/usr/bin/docker run --rm --pid=host --net=host --privileged=true \
-      {{ range .Hyperkube.Kubelet.Docker.RunExtraArgs -}}
-      {{ . }} \
-      {{ end -}}
       -v /:/rootfs:ro,shared \
       -v /sys:/sys:ro \
       -v /dev:/dev:rw \
@@ -2293,7 +1797,6 @@ coreos:
       -v /var/lib/kubelet/:/var/lib/kubelet:rw,shared \
       -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
-      -v /etc/kubernetes/manifests/:/etc/kubernetes/manifests/ \
       -v /etc/cni/net.d/:/etc/cni/net.d/ \
       -v /opt/cni/bin/:/opt/cni/bin/ \
       -v /usr/sbin/iscsiadm:/usr/sbin/iscsiadm \
@@ -2309,9 +1812,6 @@ coreos:
       --name $NAME \
       $IMAGE \
       /hyperkube kubelet \
-      {{ range .Hyperkube.Kubelet.Docker.CommandExtraArgs -}}
-      {{ . }} \
-      {{ end -}}
       --address=${DEFAULT_IPV4} \
       --port={{.Cluster.Kubernetes.Kubelet.Port}} \
       --node-ip=${DEFAULT_IPV4} \
@@ -2329,7 +1829,6 @@ coreos:
       --register-node=true \
       --register-with-taints=node-role.kubernetes.io/master=:NoSchedule \
       --allow-privileged=true \
-      --pod-manifest-path=/etc/kubernetes/manifests \
       --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml \
       --node-labels="node-role.kubernetes.io/master,role=master,kubernetes.io/hostname=${HOSTNAME},ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
       --kube-reserved="cpu=150m,memory=250Mi" \
@@ -2360,18 +1859,160 @@ coreos:
   - name: systemd-networkd-wait-online.service
     enable: true
     command: start
+  - name: k8s-api-server.service
+    enable: true
+    command: start
+    content: |
+      [Unit]
+      Description=k8s-api-server
+      StartLimitIntervalSec=0
+
+      [Service]
+      Restart=always
+      RestartSec=0
+      TimeoutStopSec=10
+      EnvironmentFile=/etc/network-environment
+      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.8.4_coreos.0"
+      Environment="NAME=%p.service"
+      Environment="NETWORK_CONFIG_CONTAINER="
+      ExecStartPre=/usr/bin/mkdir -p /etc/kubernetes/manifests
+      ExecStartPre=/usr/bin/docker pull $IMAGE
+      ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
+      ExecStartPre=-/usr/bin/docker rm -f $NAME
+      ExecStart=/usr/bin/docker run --rm --name $NAME --net=host \
+      -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
+      -v /etc/kubernetes/secrets/token_sign_key.pem:/etc/kubernetes/secrets/token_sign_key.pem \
+      -v /etc/kubernetes/encryption/:/etc/kubernetes/encryption \
+      -v /var/log:/var/log \
+      $IMAGE \
+      /hyperkube apiserver \
+      --allow_privileged=true \
+      --insecure_bind_address=0.0.0.0 \
+      --anonymous-auth=false \
+      --insecure-port=0 \
+      --kubelet_https=true \
+      --kubelet-preferred-address-types=InternalIP \
+      --secure_port={{.Cluster.Kubernetes.API.SecurePort}} \
+      --bind-address=${DEFAULT_IPV4} \
+      --etcd-prefix={{.Cluster.Etcd.Prefix}} \
+      --profiling=false \
+      --repair-malformed-updates=false \
+      --service-account-lookup=true \
+      --authorization-mode=RBAC \
+      --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,DefaultStorageClass,PodSecurityPolicy \
+      --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
+      --service-cluster-ip-range={{.Cluster.Kubernetes.API.ClusterIPRange}} \
+      --etcd-servers=https://127.0.0.1:2379 \
+      --etcd-cafile=/etc/kubernetes/ssl/etcd/server-ca.pem \
+      --etcd-certfile=/etc/kubernetes/ssl/etcd/server-crt.pem \
+      --etcd-keyfile=/etc/kubernetes/ssl/etcd/server-key.pem \
+      --advertise-address=${DEFAULT_IPV4} \
+      --runtime-config=api/all=true \
+      --logtostderr=true \
+      --tls-cert-file=/etc/kubernetes/ssl/apiserver-crt.pem \
+      --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem \
+      --client-ca-file=/etc/kubernetes/ssl/apiserver-ca.pem \
+      --service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem \
+      --audit-log-path=/var/log/apiserver/audit.log \
+      --audit-log-maxage=30 \
+      --audit-log-maxbackup=30 \
+      --audit-log-maxsize=100 \
+      --feature-gates=AdvancedAuditing=false \
+      --experimental-encryption-provider-config=/etc/kubernetes/encryption/k8s-encryption-config.yaml
+      ExecStop=-/usr/bin/docker stop -t 10 $NAME
+      ExecStopPost=-/usr/bin/docker rm -f $NAME
+  - name: k8s-controller-manager.service
+    enable: true
+    command: start
+    content: |
+      [Unit]
+      Description=k8s-controller-manager Service
+      StartLimitIntervalSec=0
+
+      [Service]
+      Restart=always
+      RestartSec=0
+      TimeoutStopSec=10
+      EnvironmentFile=/etc/network-environment
+      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.8.4_coreos.0"
+      Environment="NAME=%p.service"
+      Environment="NETWORK_CONFIG_CONTAINER="
+      ExecStartPre=/usr/bin/docker pull $IMAGE
+      ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
+      ExecStartPre=-/usr/bin/docker rm -f $NAME
+      ExecStart=/usr/bin/docker run --rm --net=host --name $NAME \
+      -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
+      -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
+      -v /etc/kubernetes/secrets/token_sign_key.pem:/etc/kubernetes/secrets/token_sign_key.pem \
+      $IMAGE \
+      /hyperkube controller-manager \
+      --logtostderr=true \
+      --v=2 \
+      --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
+      --profiling=false \
+      --terminated-pod-gc-threshold=10 \
+      --use-service-account-credentials=true \
+      --kubeconfig=/etc/kubernetes/config/controller-manager-kubeconfig.yml \
+      --root-ca-file=/etc/kubernetes/ssl/apiserver-ca.pem \
+      --service-account-private-key-file=/etc/kubernetes/ssl/service-account-key.pem
+      ExecStop=-/usr/bin/docker stop -t 10 $NAME
+      ExecStopPost=-/usr/bin/docker rm -f $NAME
+  - name: k8s-scheduler.service
+    enable: true
+    command: start
+    content: |
+      [Unit]
+      Description=k8s-scheduler Service
+      StartLimitIntervalSec=0
+
+      [Service]
+      Restart=always
+      RestartSec=0
+      TimeoutStopSec=10
+      EnvironmentFile=/etc/network-environment
+      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.8.4_coreos.0"
+      Environment="NAME=%p.service"
+      Environment="NETWORK_CONFIG_CONTAINER="
+      ExecStartPre=/usr/bin/docker pull $IMAGE
+      ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
+      ExecStartPre=-/usr/bin/docker rm -f $NAME
+      ExecStart=/usr/bin/docker run --rm --net=host --name $NAME \
+      -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
+      -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
+      $IMAGE \
+      /hyperkube scheduler \
+      --logtostderr=true \
+      --v=2 \
+      --profiling=false \
+      --kubeconfig=/etc/kubernetes/config/scheduler-kubeconfig.yml
+      ExecStop=-/usr/bin/docker stop -t 10 $NAME
+      ExecStopPost=-/usr/bin/docker rm -f $NAME
   - name: k8s-addons.service
     enable: true
     command: start
     content: |
       [Unit]
       Description=Kubernetes Addons
-      Wants=k8s-kubelet.service
-      After=k8s-kubelet.service
+      Wants=k8s-api-server.service
+      After=k8s-api-server.service
       [Service]
       Type=oneshot
       EnvironmentFile=/etc/network-environment
       ExecStart=/opt/k8s-addons
+      [Install]
+      WantedBy=multi-user.target
+  - name: migrate-to-new-k8scc-version.service
+    enable: true
+    command: start
+    content: |
+      [Unit]
+      Description=Migrate to new k8scloudconfig version
+      Wants=k8s-api-server.service
+      After=k8s-api-server.service
+      [Service]
+      Type=oneshot
+      EnvironmentFile=/etc/network-environment
+      ExecStart=/opt/migrate-to-new-k8scc-version
       [Install]
       WantedBy=multi-user.target
 
