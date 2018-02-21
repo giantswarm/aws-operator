@@ -33,10 +33,10 @@ write_files:
   owner: root
   permissions: 644
   content: |
-    # Calico Version v3.0.1
-    # https://docs.projectcalico.org/v3.0/releases#v3.0.1
+    # Calico Version v3.0.2
+    # https://docs.projectcalico.org/v3.0/releases#v3.0.2
     # This manifest includes the following component versions:
-    #   calico/node:v3.0.1
+    #   calico/node:v3.0.2
     #   calico/cni:v2.0.0
     #   calico/kube-controllers:v2.0.0
 
@@ -139,7 +139,7 @@ write_files:
             # container programs network policy and routes on each
             # host.
             - name: calico-node
-              image: quay.io/calico/node:v3.0.1
+              image: quay.io/calico/node:v3.0.2
               env:
                 # The location of the Calico etcd cluster.
                 - name: ETCD_ENDPOINTS
@@ -1509,7 +1509,7 @@ write_files:
   permissions: 0544
   content: |
       #!/bin/bash
-      domains="{{.Cluster.Etcd.Domain}} {{.MasterAPIDomain}}"
+      domains="{{.Cluster.Etcd.Domain}} {{.Cluster.Kubernetes.API.Domain}}"
 
       for domain in $domains; do
         until nslookup $domain; do
@@ -1647,7 +1647,7 @@ write_files:
     - name: local
       cluster:
         certificate-authority: /etc/kubernetes/ssl/apiserver-ca.pem
-        server: https://{{.MasterAPIDomain}}
+        server: https://{{.Cluster.Kubernetes.API.Domain}}
     contexts:
     - context:
         cluster: local
@@ -1670,7 +1670,7 @@ write_files:
     - name: local
       cluster:
         certificate-authority: /etc/kubernetes/ssl/apiserver-ca.pem
-        server: https://{{.MasterAPIDomain}}
+        server: https://{{.Cluster.Kubernetes.API.Domain}}
     contexts:
     - context:
         cluster: local
@@ -1692,7 +1692,7 @@ write_files:
     - name: local
       cluster:
         certificate-authority: /etc/kubernetes/ssl/apiserver-ca.pem
-        server: https://{{.MasterAPIDomain}}
+        server: https://{{.Cluster.Kubernetes.API.Domain}}
     contexts:
     - context:
         cluster: local
@@ -1714,7 +1714,7 @@ write_files:
     - name: local
       cluster:
         certificate-authority: /etc/kubernetes/ssl/apiserver-ca.pem
-        server: https://{{.MasterAPIDomain}}
+        server: https://{{.Cluster.Kubernetes.API.Domain}}
     contexts:
     - context:
         cluster: local
@@ -1736,7 +1736,7 @@ write_files:
     - name: local
       cluster:
         certificate-authority: /etc/kubernetes/ssl/apiserver-ca.pem
-        server: https://{{.MasterAPIDomain}}
+        server: https://{{.Cluster.Kubernetes.API.Domain}}
     contexts:
     - context:
         cluster: local
@@ -1796,7 +1796,7 @@ write_files:
         command:
         - /hyperkube
         - apiserver
-        {{ range .Hyperkube.Apiserver.Docker.CommandExtraArgs -}}
+        {{ range .Hyperkube.Apiserver.Pod.CommandExtraArgs -}}
         - {{ . }}
         {{ end -}}
         - --allow_privileged=true
@@ -1812,6 +1812,7 @@ write_files:
         - --repair-malformed-updates=false
         - --service-account-lookup=true
         - --authorization-mode=RBAC
+        - --feature-gates=ExpandPersistentVolumes=true
         - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,DefaultStorageClass,PodSecurityPolicy
         - --cloud-provider={{.Cluster.Kubernetes.CloudProvider}}
         - --service-cluster-ip-range={{.Cluster.Kubernetes.API.ClusterIPRange}}
@@ -1845,6 +1846,11 @@ write_files:
           hostPort: {{.Cluster.Kubernetes.API.SecurePort}}
           name: https
         volumeMounts:
+        {{ range .Hyperkube.Apiserver.Pod.HyperkubePodHostExtraMounts -}}
+        - mountPath: {{ .Path }}
+          name: {{ .Name }}
+          readOnly: {{ .ReadOnly }}
+        {{ end -}}
         - mountPath: /var/log/apiserver/
           name: apiserver-log
         - mountPath: /etc/kubernetes/encryption/
@@ -1860,6 +1866,11 @@ write_files:
           name: ssl-certs-kubernetes
           readOnly: true
       volumes:
+      {{ range .Hyperkube.Apiserver.Pod.HyperkubePodHostExtraMounts -}}
+      - hostPath: 
+          path: {{ .Path }}
+        name: {{ .Name }}
+      {{ end -}}
       - hostPath:
           path: /var/log/apiserver/
         name: apiserver-log
@@ -1893,6 +1904,9 @@ write_files:
         command:
         - /hyperkube
         - controller-manager
+        {{ range .Hyperkube.ControllerManager.Pod.CommandExtraArgs -}}
+        - {{ . }}
+        {{ end -}}
         - --logtostderr=true
         - --v=2
         - --cloud-provider={{.Cluster.Kubernetes.CloudProvider}}
@@ -1913,6 +1927,11 @@ write_files:
           initialDelaySeconds: 15
           timeoutSeconds: 15
         volumeMounts:
+        {{ range .Hyperkube.ControllerManager.Pod.HyperkubePodHostExtraMounts -}}
+        - mountPath: {{ .Path }}
+          name: {{ .Name }}
+          readOnly: {{ .ReadOnly }}
+        {{ end -}}
         - mountPath: /etc/kubernetes/config/
           name: k8s-config
           readOnly: true
@@ -1923,6 +1942,11 @@ write_files:
           name: ssl-certs-kubernetes
           readOnly: true
       volumes:
+      {{ range .Hyperkube.ControllerManager.Pod.HyperkubePodHostExtraMounts -}}
+      - hostPath: 
+          path: {{ .Path }}
+        name: {{ .Name }}
+      {{ end -}}
       - hostPath:
           path: /etc/kubernetes/config
         name: k8s-config
@@ -2145,9 +2169,9 @@ coreos:
       Requires=k8s-setup-network-env.service
       After=k8s-setup-network-env.service
       Conflicts=etcd.service etcd2.service
+      StartLimitIntervalSec=0
 
       [Service]
-      StartLimitIntervalSec=0
       Restart=always
       RestartSec=0
       TimeoutStopSec=10
@@ -2298,7 +2322,7 @@ coreos:
       --machine-id-file=/rootfs/etc/machine-id \
       --cadvisor-port=4194 \
       --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
-      --healthz-bind-address={{.Hyperkube.Apiserver.BindAddress}} \
+      --healthz-bind-address=${DEFAULT_IPV4} \
       --healthz-port=10248 \
       --cluster-dns={{.Cluster.Kubernetes.DNS.IP}} \
       --cluster-domain={{.Cluster.Kubernetes.Domain}} \
