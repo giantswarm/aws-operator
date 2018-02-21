@@ -13,3 +13,7 @@ type EC2Client interface {
 	DeleteVolume(*ec2.DeleteVolumeInput) (*ec2.DeleteVolumeOutput, error)
 	DescribeVolumes(*ec2.DescribeVolumesInput) (*ec2.DescribeVolumesOutput, error)
 }
+
+type EBSVolumeState struct {
+	VolumeIDs []string
+}
