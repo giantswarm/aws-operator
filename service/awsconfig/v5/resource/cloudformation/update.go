@@ -19,16 +19,17 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 		return microerror.Mask(err)
 	}
 
-	stackName := updateStackInput.StackName
-	if stackName != nil && *stackName != "" {
+	if updateStackInput.StackName != nil && *updateStackInput.StackName != "" {
+		r.logger.LogCtx(ctx, "debug", "updating main stack")
+
 		_, err := r.clients.CloudFormation.UpdateStack(&updateStackInput)
 		if err != nil {
-			return microerror.Maskf(err, "updating AWS cloudformation stack")
+			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "debug", "updating AWS cloudformation stack: updated")
+		r.logger.LogCtx(ctx, "debug", "updated main stack")
 	} else {
-		r.logger.LogCtx(ctx, "debug", "updating AWS cloudformation stack: no need to update")
+		r.logger.LogCtx(ctx, "debug", "not updating main stack")
 	}
 
 	return nil
