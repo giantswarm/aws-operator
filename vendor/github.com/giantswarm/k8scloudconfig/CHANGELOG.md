@@ -48,6 +48,11 @@ version directory, and then changes are introduced.
 - Remove calico-ipip-pinger.
 - Remove calico-node-controller.
 
+## [v2.0.2]
+
+### Added
+- Add fix for scaled workers to ensure they have a kube-proxy.
+
 ## [v2.0.1]
 
 ### Changed
