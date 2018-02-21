@@ -94,7 +94,7 @@ func getStackOutputValue(outputs []*awscloudformation.Output, key string) (strin
 		}
 	}
 
-	return "", microerror.Mask(notFoundError)
+	return "", microerror.Maskf(notFoundError, "stack outpout value for key '%s'", key)
 }
 
 func toCreateStackInput(v interface{}) (awscloudformation.CreateStackInput, error) {
