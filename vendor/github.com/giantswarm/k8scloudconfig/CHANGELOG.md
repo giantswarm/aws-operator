@@ -13,6 +13,7 @@ version directory, and then changes are introduced.
 
 ### Changed
 - Change etcd data path to /var/lib/etcd.
+- Fix `StartLimitIntervalSec` parameter location in `etcd3` systemd unit.
 
 ## [v3.1.0]
 
@@ -45,6 +46,11 @@ version directory, and then changes are introduced.
 ### Removed
 - Remove calico-ipip-pinger.
 - Remove calico-node-controller.
+
+## [v2.0.2]
+
+### Added
+- Add fix for scaled workers to ensure they have a kube-proxy.
 
 ## [v2.0.1]
 
