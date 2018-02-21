@@ -33,10 +33,11 @@ type FrameworkConfig struct {
 	K8sExtClient apiextensionsclient.Interface
 	Logger       micrologger.Logger
 
-	GuestAWSConfig   FrameworkConfigAWSConfig
-	HostAWSConfig    FrameworkConfigAWSConfig
-	InstallationName string
-	OIDC             FrameworkConfigOIDCConfig
+	GuestAWSConfig     FrameworkConfigAWSConfig
+	GuestUpdateEnabled bool
+	HostAWSConfig      FrameworkConfigAWSConfig
+	InstallationName   string
+	OIDC               FrameworkConfigOIDCConfig
 	// Name is the name of the project.
 	Name       string
 	PubKeyFile string
@@ -304,7 +305,8 @@ func newResourceRouter(config FrameworkConfig) (*framework.ResourceRouter, error
 			HandledVersionBundles: []string{
 				"2.1.1",
 			},
-			InstallationName: config.InstallationName,
+			GuestUpdateEnabled: config.GuestUpdateEnabled,
+			InstallationName:   config.InstallationName,
 			OIDC: v5cloudconfig.OIDCConfig{
 				ClientID:      config.OIDC.ClientID,
 				IssuerURL:     config.OIDC.IssuerURL,

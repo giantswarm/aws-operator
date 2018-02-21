@@ -11,6 +11,9 @@ data:
     service:
       aws:
         region: '{{ .Values.Installation.V1.Provider.AWS.Region }}'
+      guest:
+        update:
+          enabled: {{ .Values.Installation.V1.Guest.Update.Enabled }}
       installation:
         name: '{{ .Values.Installation.V1.Name }}'
         {{- if .Values.Installation.V1.Guest }}

@@ -135,6 +135,7 @@ func New(config Config) (*Service, error) {
 				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
 				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
 			},
+			GuestUpdateEnabled: config.Viper.GetBool(config.Flag.Service.Guest.Update.Enabled),
 			HostAWSConfig: awsconfig.FrameworkConfigAWSConfig{
 				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
 				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
@@ -151,6 +152,7 @@ func New(config Config) (*Service, error) {
 			Name:       config.Name,
 			PubKeyFile: config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile),
 		}
+
 		awsConfigFramework, err = awsconfig.NewFramework(c)
 		if err != nil {
 			return nil, microerror.Mask(err)

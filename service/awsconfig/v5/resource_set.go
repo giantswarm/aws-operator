@@ -1,11 +1,14 @@
 package v5
 
 import (
+	"context"
+
 	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
+	"github.com/giantswarm/operatorkit/framework/context/updateallowedcontext"
 	"github.com/giantswarm/operatorkit/framework/resource/metricsresource"
 	"github.com/giantswarm/operatorkit/framework/resource/retryresource"
 	"github.com/giantswarm/randomkeytpr"
@@ -39,6 +42,7 @@ type ResourceSetConfig struct {
 	Logger             micrologger.Logger
 	RandomkeysSearcher *randomkeytpr.Service
 
+	GuestUpdateEnabled    bool
 	HandledVersionBundles []string
 	InstallationName      string
 	OIDC                  cloudconfig.OIDCConfig
@@ -326,10 +330,19 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		return false
 	}
 
+	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
+		if config.GuestUpdateEnabled {
+			updateallowedcontext.SetUpdateAllowed(ctx)
+		}
+
+		return ctx, nil
+	}
+
 	var resourceSet *framework.ResourceSet
 	{
 		c := framework.ResourceSetConfig{
 			Handles:   handlesFunc,
+			InitCtx:   initCtxFunc,
 			Logger:    config.Logger,
 			Resources: resources,
 		}
