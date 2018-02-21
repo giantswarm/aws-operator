@@ -35,6 +35,7 @@ func (r *Resource) persistentVolumes(customObject v1alpha1.AWSConfig) (*EBSVolum
 	volumeState := &EBSVolumeState{}
 	volumeIDs := []string{}
 
+	// We filter to only select clusters with the cluster cloud provider tag.
 	clusterTag := key.ClusterCloudProviderTag(customObject)
 	filters := []*ec2.Filter{
 		{
@@ -52,6 +53,7 @@ func (r *Resource) persistentVolumes(customObject v1alpha1.AWSConfig) (*EBSVolum
 	}
 
 	for _, vol := range output.Volumes {
+		// Volume is only included if it has a PV name tag.
 		if containsPersistentVolumeTag(vol.Tags) {
 			volumeIDs = append(volumeIDs, *vol.VolumeId)
 		}
