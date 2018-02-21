@@ -17,6 +17,8 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	}
 
 	if deleteInput != nil && len(deleteInput.LoadBalancerNames) > 0 {
+		r.logger.LogCtx(ctx, "debug", fmt.Sprintf("deleting %d load balancers", len(deleteInput.LoadBalancerNames)))
+
 		for _, lbName := range deleteInput.LoadBalancerNames {
 			_, err := r.clients.ELB.DeleteLoadBalancer(&elb.DeleteLoadBalancerInput{
 				LoadBalancerName: aws.String(lbName),
@@ -25,9 +27,11 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 				return microerror.Mask(err)
 			}
 		}
-	}
 
-	r.logger.LogCtx(ctx, "debug", fmt.Sprintf("deleted %d load balancers", len(deleteInput.LoadBalancerNames)))
+		r.logger.LogCtx(ctx, "debug", fmt.Sprintf("deleted %d load balancers", len(deleteInput.LoadBalancerNames)))
+	} else {
+		r.logger.LogCtx(ctx, "debug", "not deleting load balancers because there aren't any")
+	}
 
 	return nil
 }
