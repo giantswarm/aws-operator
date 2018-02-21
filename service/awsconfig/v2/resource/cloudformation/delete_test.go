@@ -106,7 +106,7 @@ func Test_Resource_Cloudformation_newDelete(t *testing.T) {
 				t.Errorf("expected '%T', got '%T'", deleteChange, result)
 			}
 			if *deleteChange.StackName != tc.expectedStackName {
-				t.Errorf("expected %s, got %s", tc.expectedStackName, deleteChange.StackName)
+				t.Errorf("expected %s, got %s", tc.expectedStackName, *deleteChange.StackName)
 			}
 		})
 	}
