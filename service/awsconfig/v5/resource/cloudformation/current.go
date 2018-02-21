@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/framework/context/reconciliationcanceledcontext"
+	"github.com/giantswarm/operatorkit/framework/context/resourcecanceledcontext"
 
 	"github.com/giantswarm/aws-operator/service/awsconfig/v5/key"
 )
@@ -72,8 +72,8 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	// unnecessary friction.
 	if status == cloudformation.ResourceStatusUpdateInProgress {
 		r.logger.LogCtx(ctx, "debug", fmt.Sprintf("main stack is in state '%s'", cloudformation.ResourceStatusUpdateInProgress))
-		reconciliationcanceledcontext.SetCanceled(ctx)
-		r.logger.LogCtx(ctx, "debug", "canceling reconciliation for custom object")
+		resourcecanceledcontext.SetCanceled(ctx)
+		r.logger.LogCtx(ctx, "debug", "canceling resource for custom object")
 
 		return StackState{}, nil
 	}
