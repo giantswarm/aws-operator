@@ -2,6 +2,7 @@ package cloudformation
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -33,6 +34,15 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	if len(describeOutput.Stacks) > 1 {
 		return StackState{}, microerror.Mask(notFoundError)
+	}
+
+	for _, s := range describeOutput.Stacks {
+		fmt.Printf("\n")
+		fmt.Printf("s.StackStatus: %#v\n", s.StackStatus)
+		fmt.Printf("*s.StackStatus: %#v\n", *s.StackStatus)
+		fmt.Printf("s.StackStatusReason: %#v\n", s.StackStatusReason)
+		fmt.Printf("*s.StackStatusReason: %#v\n", *s.StackStatusReason)
+		fmt.Printf("\n")
 	}
 
 	// GetCurrentState is called on cluster deletion, if the stack creation failed
