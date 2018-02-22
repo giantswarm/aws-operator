@@ -1,6 +1,8 @@
 package endpoints
 
 import (
+	"reflect"
+
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
@@ -46,6 +48,9 @@ type Resource struct {
 // New creates a new configured endpoints resource.
 func New(config Config) (*Resource, error) {
 	// Dependencies.
+	if reflect.DeepEqual(config.Clients, Clients{}) {
+		return nil, microerror.Maskf(invalidConfigError, "config.Clients must not be empty")
+	}
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.K8sClient must not be empty")
 	}
