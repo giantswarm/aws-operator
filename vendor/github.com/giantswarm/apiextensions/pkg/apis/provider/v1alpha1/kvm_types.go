@@ -64,8 +64,9 @@ type KVMConfigSpecKVM struct {
 	K8sKVM          KVMConfigSpecKVMK8sKVM          `json:"k8sKVM" yaml:"k8sKVM"`
 	Masters         []KVMConfigSpecKVMNode          `json:"masters" yaml:"masters"`
 	Network         KVMConfigSpecKVMNetwork         `json:"network" yaml:"network"`
-	NodeController  KVMConfigSpecKVMNodeController  `json:"nodeController" yaml:"nodeController"`
-	Workers         []KVMConfigSpecKVMNode          `json:"workers" yaml:"workers"`
+	// NOTE THIS IS DEPRECATED
+	NodeController KVMConfigSpecKVMNodeController `json:"nodeController" yaml:"nodeController"`
+	Workers        []KVMConfigSpecKVMNode         `json:"workers" yaml:"workers"`
 }
 
 type KVMConfigSpecKVMEndpointUpdater struct {
@@ -99,10 +100,12 @@ type KVMConfigSpecKVMNetworkFlannel struct {
 	VNI int `json:"vni" yaml:"vni"`
 }
 
+// NOTE THIS IS DEPRECATED
 type KVMConfigSpecKVMNodeController struct {
 	Docker KVMConfigSpecKVMNodeControllerDocker `json:"docker" yaml:"docker"`
 }
 
+// NOTE THIS IS DEPRECATED
 type KVMConfigSpecKVMNodeControllerDocker struct {
 	Image string `json:"image" yaml:"image"`
 }

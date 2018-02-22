@@ -18,6 +18,8 @@ version directory, and then changes are introduced.
 - Updated calico to 3.0.2.
 - Updated etcd to 3.3.1.
 - Tune kubelet flags for protecting kubernetes resources (kubelet and container runtime) from workload overloads.
+- Updated nginx-ingress-controller to 0.11.0.
+- Updated coredns to 1.0.6.
 
 ## [v3.1.0]
 

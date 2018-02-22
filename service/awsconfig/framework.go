@@ -128,13 +128,13 @@ func NewFramework(config FrameworkConfig) (*framework.Framework, error) {
 
 	var crdFramework *framework.Framework
 	{
-		c := framework.DefaultConfig()
-
-		c.CRD = v1alpha1.NewAWSConfigCRD()
-		c.CRDClient = crdClient
-		c.Informer = newInformer
-		c.Logger = config.Logger
-		c.ResourceRouter = resourceRouter
+		c := framework.Config{
+			CRD:            v1alpha1.NewAWSConfigCRD(),
+			CRDClient:      crdClient,
+			Informer:       newInformer,
+			Logger:         config.Logger,
+			ResourceRouter: resourceRouter,
+		}
 
 		crdFramework, err = framework.New(c)
 		if err != nil {

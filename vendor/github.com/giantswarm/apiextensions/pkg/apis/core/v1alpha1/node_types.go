@@ -61,10 +61,30 @@ type NodeConfigSpec struct {
 }
 
 type NodeConfigSpecGuest struct {
-	Node NodeConfigSpecGuestNode `json:"node" yaml:"node"`
+	Cluster NodeConfigSpecGuestCluster `json:"cluster" yaml:"cluster"`
+	Node    NodeConfigSpecGuestNode    `json:"node" yaml:"node"`
+}
+
+type NodeConfigSpecGuestCluster struct {
+	API NodeConfigSpecGuestClusterAPI `json:"api" yaml:"api"`
+	// ID is the guest cluster ID of which a node should be drained.
+	ID string `json:"id" yaml:"id"`
+}
+
+type NodeConfigSpecGuestClusterAPI struct {
+	// Endpoint is the guest cluster API endpoint.
+	Endpoint string `json:"endpoint" yaml:"endpoint"`
 }
 
 type NodeConfigSpecGuestNode struct {
+	// Name is the identifier of the guest cluster's master and worker nodes. In
+	// Kubernetes/Kubectl they are represented as node names. The names are manage
+	// in an abstracted way because of provider specific differences.
+	//
+	//     AWS: EC2 instance DNS.
+	//     Azure: ???.
+	//     KVM: host cluster pod name.
+	//
 	Name string `json:"name" yaml:"name"`
 }
 
