@@ -387,7 +387,7 @@ func NewVersionBundles() []versionbundle.Bundle {
 			Components: []versionbundle.Component{
 				{
 					Name:    "calico",
-					Version: "3.0.1",
+					Version: "3.0.2",
 				},
 				{
 					Name:    "containerlinux",
@@ -399,7 +399,7 @@ func NewVersionBundles() []versionbundle.Bundle {
 				},
 				{
 					Name:    "etcd",
-					Version: "3.2.7",
+					Version: "3.3.1",
 				},
 				{
 					Name:    "coredns",
