@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2017 Jeevanandam M (jeeva@myjeeva.com), All rights reserved.
+// Copyright (c) 2015-2018 Jeevanandam M (jeeva@myjeeva.com), All rights reserved.
 // resty source code and usage is governed by a MIT style
 // license that can be found in the LICENSE file.
 
@@ -31,14 +31,13 @@ func parseRequestURL(c *Client, r *Request) error {
 		return err
 	}
 
+	// GitHub #103 Path Params
+	reqURL.Path = composeRequestURL(reqURL.Path, c, r)
+
 	// If Request.Url is relative path then added c.HostUrl into
 	// the request URL otherwise Request.Url will be used as-is
 	if !reqURL.IsAbs() {
-		if !strings.HasPrefix(r.URL, "/") {
-			r.URL = "/" + r.URL
-		}
-
-		reqURL, err = url.Parse(c.HostURL + r.URL)
+		reqURL, err = url.Parse(c.HostURL + reqURL.Path)
 		if err != nil {
 			return err
 		}
@@ -227,7 +226,7 @@ func responseLogger(c *Client, res *Response) error {
 		if res.Request.isSaveResponse {
 			c.Log.Printf("BODY   :\n***** RESPONSE WRITTEN INTO FILE *****")
 		} else {
-			c.Log.Printf("BODY   :\n%v", res.fmtBodyString())
+			c.Log.Printf("BODY   :\n%v", res.fmtBodyString(c.debugBodySizeLimit))
 		}
 		c.Log.Println("----------------------------------------------------------")
 		c.enableLogPrefix()

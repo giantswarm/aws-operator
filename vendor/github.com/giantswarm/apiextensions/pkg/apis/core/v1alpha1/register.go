@@ -17,6 +17,12 @@ const (
 var knownTypes = []runtime.Object{
 	&CertConfig{},
 	&CertConfigList{},
+	&AWSClusterConfig{},
+	&AWSClusterConfigList{},
+	&AzureClusterConfig{},
+	&AzureClusterConfigList{},
+	&KVMClusterConfig{},
+	&KVMClusterConfigList{},
 	&DraughtsmanConfig{},
 	&DraughtsmanConfigList{},
 	&FlannelConfig{},
