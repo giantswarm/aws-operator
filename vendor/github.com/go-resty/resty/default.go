@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2017 Jeevanandam M (jeeva@myjeeva.com), All rights reserved.
+// Copyright (c) 2015-2018 Jeevanandam M (jeeva@myjeeva.com), All rights reserved.
 // resty source code and usage is governed by a MIT style
 // license that can be found in the LICENSE file.
 
@@ -8,6 +8,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"io"
+	"math"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -20,55 +21,15 @@ import (
 // DefaultClient of resty
 var DefaultClient *Client
 
-// New method creates a new go-resty client
+// New method creates a new go-resty client.
 func New() *Client {
 	cookieJar, _ := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
+	return createClient(&http.Client{Jar: cookieJar})
+}
 
-	c := &Client{
-		HostURL:          "",
-		QueryParam:       url.Values{},
-		FormData:         url.Values{},
-		Header:           http.Header{},
-		UserInfo:         nil,
-		Token:            "",
-		Cookies:          make([]*http.Cookie, 0),
-		Debug:            false,
-		Log:              getLogger(os.Stderr),
-		RetryCount:       0,
-		RetryWaitTime:    defaultWaitTime,
-		RetryMaxWaitTime: defaultMaxWaitTime,
-		JSONMarshal:      json.Marshal,
-		JSONUnmarshal:    json.Unmarshal,
-		httpClient:       &http.Client{Jar: cookieJar},
-	}
-
-	// Default transport
-	c.SetTransport(&http.Transport{})
-
-	// Default redirect policy
-	c.SetRedirectPolicy(NoRedirectPolicy())
-
-	// default before request middlewares
-	c.beforeRequest = []func(*Client, *Request) error{
-		parseRequestURL,
-		parseRequestHeader,
-		parseRequestBody,
-		createHTTPRequest,
-		addCredentials,
-		requestLogger,
-	}
-
-	// user defined request middlewares
-	c.udBeforeRequest = []func(*Client, *Request) error{}
-
-	// default after response middlewares
-	c.afterResponse = []func(*Client, *Response) error{
-		responseLogger,
-		parseResponseBody,
-		saveResponseIntoFile,
-	}
-
-	return c
+// NewWithClient method create a new go-resty client with given `http.Client`.
+func NewWithClient(hc *http.Client) *Client {
+	return createClient(hc)
 }
 
 // R creates a new resty request object, it is used form a HTTP/RESTful request
@@ -156,6 +117,11 @@ func SetPreRequestHook(h func(*Client, *Request) error) *Client {
 // SetDebug method enables the debug mode. See `Client.SetDebug` for more information.
 func SetDebug(d bool) *Client {
 	return DefaultClient.SetDebug(d)
+}
+
+// SetDebugBodyLimit method sets the response body limit for debug mode. See `Client.SetDebugBodyLimit` for more information.
+func SetDebugBodyLimit(sl int64) *Client {
+	return DefaultClient.SetDebugBodyLimit(sl)
 }
 
 // SetAllowGetMethodPayload method allows the GET method with payload. See `Client.SetAllowGetMethodPayload` for more information.
@@ -285,10 +251,78 @@ func SetDoNotParseResponse(parse bool) *Client {
 	return DefaultClient.SetDoNotParseResponse(parse)
 }
 
+// SetPathParams method sets the Request path parameter key-value pairs. See
+// `Client.SetPathParams` for more information.
+func SetPathParams(params map[string]string) *Client {
+	return DefaultClient.SetPathParams(params)
+}
+
 // IsProxySet method returns the true if proxy is set on client otherwise false.
 // See `Client.IsProxySet` for more information.
 func IsProxySet() bool {
 	return DefaultClient.IsProxySet()
+}
+
+// GetClient method returns the current `http.Client` used by the default resty client.
+func GetClient() *http.Client {
+	return DefaultClient.httpClient
+}
+
+//‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+// Unexported methods
+//___________________________________
+
+func createClient(hc *http.Client) *Client {
+	c := &Client{
+		HostURL:            "",
+		QueryParam:         url.Values{},
+		FormData:           url.Values{},
+		Header:             http.Header{},
+		UserInfo:           nil,
+		Token:              "",
+		Cookies:            make([]*http.Cookie, 0),
+		Debug:              false,
+		Log:                getLogger(os.Stderr),
+		RetryCount:         0,
+		RetryWaitTime:      defaultWaitTime,
+		RetryMaxWaitTime:   defaultMaxWaitTime,
+		JSONMarshal:        json.Marshal,
+		JSONUnmarshal:      json.Unmarshal,
+		httpClient:         hc,
+		debugBodySizeLimit: math.MaxInt32,
+		pathParams:         make(map[string]string),
+	}
+
+	// Log Prefix
+	c.SetLogPrefix("RESTY ")
+
+	// Default transport
+	c.SetTransport(&http.Transport{})
+
+	// Default redirect policy
+	c.SetRedirectPolicy(NoRedirectPolicy())
+
+	// default before request middlewares
+	c.beforeRequest = []func(*Client, *Request) error{
+		parseRequestURL,
+		parseRequestHeader,
+		parseRequestBody,
+		createHTTPRequest,
+		addCredentials,
+		requestLogger,
+	}
+
+	// user defined request middlewares
+	c.udBeforeRequest = []func(*Client, *Request) error{}
+
+	// default after response middlewares
+	c.afterResponse = []func(*Client, *Response) error{
+		responseLogger,
+		parseResponseBody,
+		saveResponseIntoFile,
+	}
+
+	return c
 }
 
 func init() {

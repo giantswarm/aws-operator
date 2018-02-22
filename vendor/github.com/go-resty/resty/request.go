@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2017 Jeevanandam M (jeeva@myjeeva.com), All rights reserved.
+// Copyright (c) 2015-2018 Jeevanandam M (jeeva@myjeeva.com), All rights reserved.
 // resty source code and usage is governed by a MIT style
 // license that can be found in the LICENSE file.
 
@@ -351,6 +351,25 @@ func (r *Request) SetSRV(srv *SRVRecord) *Request {
 // taken over the control of response parsing from `Resty`.
 func (r *Request) SetDoNotParseResponse(parse bool) *Request {
 	r.notParseResponse = parse
+	return r
+}
+
+// SetPathParams method sets multiple URL path key-value pairs at one go in the
+// resty current request instance.
+// 		resty.R().SetPathParams(map[string]string{
+// 		   "userId": "sample@sample.com",
+// 		   "subAccountId": "100002",
+// 		})
+//
+// 		Result:
+// 		   URL - /v1/users/{userId}/{subAccountId}/details
+// 		   Composed URL - /v1/users/sample@sample.com/100002/details
+// It replace the value of the key while composing request URL. Also you can
+// override Path Params value, which was set at client instance level.
+func (r *Request) SetPathParams(params map[string]string) *Request {
+	for p, v := range params {
+		r.pathParams[p] = v
+	}
 	return r
 }
 

@@ -1,10 +1,11 @@
-// Copyright (c) 2015-2017 Jeevanandam M (jeeva@myjeeva.com), All rights reserved.
+// Copyright (c) 2015-2018 Jeevanandam M (jeeva@myjeeva.com), All rights reserved.
 // resty source code and usage is governed by a MIT style
 // license that can be found in the LICENSE file.
 
 package resty
 
 import (
+	"bytes"
 	"crypto/tls"
 	"errors"
 	"io/ioutil"
@@ -340,6 +341,10 @@ func TestClientOptions(t *testing.T) {
 	SetDebug(true)
 	assertEqual(t, DefaultClient.Debug, true)
 
+	var sl int64 = 1000000
+	SetDebugBodyLimit(sl)
+	assertEqual(t, DefaultClient.debugBodySizeLimit, sl)
+
 	SetAllowGetMethodPayload(true)
 	assertEqual(t, DefaultClient.AllowGetMethodPayload, true)
 
@@ -381,7 +386,7 @@ func TestClientAllowsGetMethodPayload(t *testing.T) {
 }
 
 func TestClientRoundTripper(t *testing.T) {
-	c := New()
+	c := NewWithClient(&http.Client{})
 
 	rt := &CustomRoundTripper{}
 	c.SetTransport(rt)
@@ -411,6 +416,42 @@ func TestNewRequest(t *testing.T) {
 	assertNotNil(t, request)
 }
 
+func TestDebugBodySizeLimit(t *testing.T) {
+	ts := createGetServer(t)
+	defer ts.Close()
+
+	var lgr bytes.Buffer
+	c := dc()
+	c.SetDebug(true)
+	c.SetLogger(&lgr)
+	c.SetDebugBodyLimit(30)
+
+	testcases := []struct{ url, want string }{
+		// Text, does not exceed limit.
+		{ts.URL, "TestGet: text response"},
+		// Empty response.
+		{ts.URL + "/no-content", "***** NO CONTENT *****"},
+		// JSON, does not exceed limit.
+		{ts.URL + "/json", "{\n   \"TestGet\": \"JSON response\"\n}"},
+		// Invalid JSON, does not exceed limit.
+		{ts.URL + "/json-invalid", "TestGet: Invalid JSON"},
+		// Text, exceeds limit.
+		{ts.URL + "/long-text", "RESPONSE TOO LARGE"},
+		// JSON, exceeds limit.
+		{ts.URL + "/long-json", "RESPONSE TOO LARGE"},
+	}
+
+	for _, tc := range testcases {
+		_, err := c.R().Get(tc.url)
+		assertError(t, err)
+		debugLog := lgr.String()
+		if !strings.Contains(debugLog, tc.want) {
+			t.Errorf("Expected logs to contain [%v], got [\n%v]", tc.want, debugLog)
+		}
+		lgr.Reset()
+	}
+}
+
 // CustomRoundTripper just for test
 type CustomRoundTripper struct {
 }
@@ -418,4 +459,16 @@ type CustomRoundTripper struct {
 // RoundTrip just for test
 func (rt *CustomRoundTripper) RoundTrip(_ *http.Request) (*http.Response, error) {
 	return &http.Response{}, nil
+}
+
+func TestSetLogPrefix(t *testing.T) {
+	c := New()
+	c.SetLogPrefix("CUSTOM ")
+	assertEqual(t, "CUSTOM ", c.logPrefix)
+	assertEqual(t, "CUSTOM ", c.Log.Prefix())
+
+	c.disableLogPrefix()
+	c.enableLogPrefix()
+	assertEqual(t, "CUSTOM ", c.logPrefix)
+	assertEqual(t, "CUSTOM ", c.Log.Prefix())
 }

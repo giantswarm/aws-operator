@@ -7,127 +7,15 @@ import (
 	"testing"
 
 	"github.com/cenkalti/backoff"
+	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/operatorkit/framework"
+	"github.com/giantswarm/operatorkit/framework/resource/internal"
 )
 
-// Test_RetryResource_ProcessCreate_ResourceOrder_RetryOnError ensures the
-// resource's methods are executed as expected when retrying the creation
-// process.
-func Test_RetryResource_ProcessCreate_ResourceOrder_RetryOnError(t *testing.T) {
-	testCases := []struct {
-		ErrorCount          int
-		ErrorMethod         string
-		ExpectedMethodOrder []string
-	}{
-		{
-			ErrorCount:  1,
-			ErrorMethod: "GetCurrentState",
-			ExpectedMethodOrder: []string{
-				"GetCurrentState",
-				"GetCurrentState",
-				"GetDesiredState",
-				"NewUpdatePatch",
-				"ApplyCreatePatch",
-				"ApplyDeletePatch",
-				"ApplyUpdatePatch",
-			},
-		},
-		{
-			ErrorCount:  2,
-			ErrorMethod: "GetCurrentState",
-			ExpectedMethodOrder: []string{
-				"GetCurrentState",
-				"GetCurrentState",
-				"GetCurrentState",
-				"GetDesiredState",
-				"NewUpdatePatch",
-				"ApplyCreatePatch",
-				"ApplyDeletePatch",
-				"ApplyUpdatePatch",
-			},
-		},
-		{
-			ErrorCount:  2,
-			ErrorMethod: "ApplyCreatePatch",
-			ExpectedMethodOrder: []string{
-				"GetCurrentState",
-				"GetDesiredState",
-				"NewUpdatePatch",
-				"ApplyCreatePatch",
-				"ApplyCreatePatch",
-				"ApplyCreatePatch",
-				"ApplyDeletePatch",
-				"ApplyUpdatePatch",
-			},
-		},
-	}
-
-	for i, tc := range testCases {
-		tr := &testResource{
-			Error:       fmt.Errorf("test error"),
-			ErrorCount:  tc.ErrorCount,
-			ErrorMethod: tc.ErrorMethod,
-		}
-		rs := []framework.Resource{
-			tr,
-		}
-		bf := func() backoff.BackOff {
-			return &backoff.ZeroBackOff{}
-		}
-
-		config := DefaultWrapConfig()
-		config.BackOffFactory = bf
-		wrapped, err := Wrap(rs, config)
-		if err != nil {
-			t.Fatal("test", i+1, "expected", nil, "got", err)
-		}
-
-		err = framework.ProcessCreate(context.TODO(), nil, wrapped)
-		if err != nil {
-			t.Fatal("test", i+1, "expected", nil, "got", err)
-		}
-
-		if !reflect.DeepEqual(tc.ExpectedMethodOrder, tr.Order) {
-			t.Fatal("test", i+1, "expected", tc.ExpectedMethodOrder, "got", tr.Order)
-		}
-	}
-}
-
-// Test_RetryResource_ProcessCreate_ResourceOrder ensures the resource's methods
-// are executed as expected when creating resources using the wrapping retry
-// resource.
-func Test_RetryResource_ProcessCreate_ResourceOrder(t *testing.T) {
-	tr := &testResource{}
-	rs := []framework.Resource{
-		tr,
-	}
-	bf := func() backoff.BackOff {
-		return &backoff.ZeroBackOff{}
-	}
-
-	config := DefaultWrapConfig()
-	config.BackOffFactory = bf
-	wrapped, err := Wrap(rs, config)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	err = framework.ProcessCreate(context.TODO(), nil, wrapped)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	e := []string{
-		"GetCurrentState",
-		"GetDesiredState",
-		"NewUpdatePatch",
-		"ApplyCreatePatch",
-		"ApplyDeletePatch",
-		"ApplyUpdatePatch",
-	}
-	if !reflect.DeepEqual(e, tr.Order) {
-		t.Fatal("expected", e, "got", tr.Order)
-	}
+func Test_Wrapper(t *testing.T) {
+	// This won't compile if the *Resource doesn't implement Wrapper
+	// interface.
+	var _ internal.Wrapper = &Resource{}
 }
 
 // Test_RetryResource_ProcessDelete_ResourceOrder_RetryOnError ensures the
@@ -195,20 +83,22 @@ func Test_RetryResource_ProcessDelete_ResourceOrder_RetryOnError(t *testing.T) {
 			return &backoff.ZeroBackOff{}
 		}
 
-		config := DefaultWrapConfig()
-		config.BackOffFactory = bf
-		wrapped, err := Wrap(rs, config)
+		c := WrapConfig{
+			Logger:         microloggertest.New(),
+			BackOffFactory: bf,
+		}
+		wrapped, err := Wrap(rs, c)
 		if err != nil {
-			t.Fatal("test", i+1, "expected", nil, "got", err)
+			t.Fatal("test", i, "expected", nil, "got", err)
 		}
 
 		err = framework.ProcessDelete(context.TODO(), nil, wrapped)
 		if err != nil {
-			t.Fatal("test", i+1, "expected", nil, "got", err)
+			t.Fatal("test", i, "expected", nil, "got", err)
 		}
 
 		if !reflect.DeepEqual(tc.ExpectedMethodOrder, tr.Order) {
-			t.Fatal("test", i+1, "expected", tc.ExpectedMethodOrder, "got", tr.Order)
+			t.Fatal("test", i, "expected", tc.ExpectedMethodOrder, "got", tr.Order)
 		}
 	}
 }
@@ -225,9 +115,11 @@ func Test_RetryResource_ProcessDelete_ResourceOrder(t *testing.T) {
 		return &backoff.ZeroBackOff{}
 	}
 
-	config := DefaultWrapConfig()
-	config.BackOffFactory = bf
-	wrapped, err := Wrap(rs, config)
+	c := WrapConfig{
+		Logger:         microloggertest.New(),
+		BackOffFactory: bf,
+	}
+	wrapped, err := Wrap(rs, c)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -315,20 +207,22 @@ func Test_RetryResource_ProcessUpdate_ResourceOrder_RetryOnError(t *testing.T) {
 			return &backoff.ZeroBackOff{}
 		}
 
-		config := DefaultWrapConfig()
-		config.BackOffFactory = bf
-		wrapped, err := Wrap(rs, config)
+		c := WrapConfig{
+			Logger:         microloggertest.New(),
+			BackOffFactory: bf,
+		}
+		wrapped, err := Wrap(rs, c)
 		if err != nil {
-			t.Fatal("test", i+1, "expected", nil, "got", err)
+			t.Fatal("test", i, "expected", nil, "got", err)
 		}
 
 		err = framework.ProcessUpdate(context.TODO(), nil, wrapped)
 		if err != nil {
-			t.Fatal("test", i+1, "expected", nil, "got", err)
+			t.Fatal("test", i, "expected", nil, "got", err)
 		}
 
 		if !reflect.DeepEqual(tc.ExpectedMethodOrder, tr.Order) {
-			t.Fatal("test", i+1, "expected", tc.ExpectedMethodOrder, "got", tr.Order)
+			t.Fatal("test", i, "expected", tc.ExpectedMethodOrder, "got", tr.Order)
 		}
 	}
 }
@@ -345,9 +239,11 @@ func Test_RetryResource_ProcessUpdate_ResourceOrder(t *testing.T) {
 		return &backoff.ZeroBackOff{}
 	}
 
-	config := DefaultWrapConfig()
-	config.BackOffFactory = bf
-	wrapped, err := Wrap(rs, config)
+	c := WrapConfig{
+		Logger:         microloggertest.New(),
+		BackOffFactory: bf,
+	}
+	wrapped, err := Wrap(rs, c)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -458,10 +354,6 @@ func (r *testResource) ApplyUpdateChange(ctx context.Context, obj, updateState i
 	}
 
 	return nil
-}
-
-func (r *testResource) Underlying() framework.Resource {
-	return r
 }
 
 func (r *testResource) returnErrorFor(errorMethod string) bool {

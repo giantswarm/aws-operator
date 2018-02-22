@@ -24,40 +24,20 @@ jobs:
             ./architect deploy
           fi
 
-  e2eSetup:
+  e2eLocalTest:
+    working_directory: /home/circleci/.go_workspace/src/github.com/giantswarm/e2e-harness
     machine: true
+    environment:
+      MINIKUBE_VERSION: v0.25.0
     steps:
     - checkout
 
     - attach_workspace:
         at: .
 
-    - run: ./e2e-harness setup --name=ci-e2e-harness-${CIRCLE_SHA1:0:7}
+    - run: ./e2e-harness localkube
 
-    - run:
-        name: Cleanup on failure
-        command: ./e2e-harness teardown
-        when: on_fail
-
-    - persist_to_workspace:
-        root: .
-        paths:
-        - ./.e2e-harness
-
-  e2eTestExecution:
-    machine: true
-    steps:
-    - checkout
-
-    - attach_workspace:
-        at: .
-
-    - run:
-        name: additional setup required for dogfooding e2e-harness
-        command: |
-          mkdir -p /home/circleci/.go_workspace/src/github.com/giantswarm/e2e-harness
-          cp -ar ./pkg/ /home/circleci/.go_workspace/src/github.com/giantswarm/e2e-harness
-          cp -ar vendor/* /home/circleci/.go_workspace/src/
+    - run: ./e2e-harness setup --remote=false
 
     - run: ./e2e-harness test
 
@@ -66,14 +46,50 @@ jobs:
         command: ./e2e-harness teardown
         when: always
 
+  e2eRemoteTest:
+    working_directory: /home/circleci/.go_workspace/src/github.com/giantswarm/e2e-harness
+    machine: true
+    steps:
+    - checkout
+
+    - attach_workspace:
+        at: .
+
+    - run: ./e2e-harness setup
+
+    - run: ./e2e-harness test
+
+    - run:
+        name: Finish with cleanup, no matter if the test succeeded or not
+        command: ./e2e-harness teardown
+        when: always
+
+  github-release:
+    working_directory: /home/circleci/.go_workspace/src/github.com/giantswarm/e2e-harness
+    machine: true
+    steps:
+      - checkout
+
+      - attach_workspace:
+          at: .
+
+      - run: ./github-release.sh $CIRCLE_PROJECT_REPONAME $CIRCLE_SHA1 $PERSONAL_ACCESS_TOKEN
+
 workflows:
   version: 2
   build_e2e:
     jobs:
       - build
-      - e2eSetup:
+      - e2eLocalTest:
           requires:
           - build
-      - e2eTestExecution:
+      - e2eRemoteTest:
           requires:
-          - e2eSetup
+          - build
+      - github-release:
+          requires:
+            - e2eLocalTest
+            - e2eRemoteTest
+          filters:
+            branches:
+              only: master
