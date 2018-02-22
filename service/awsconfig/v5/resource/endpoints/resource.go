@@ -26,17 +26,6 @@ type Config struct {
 	Logger    micrologger.Logger
 }
 
-// DefaultConfig provides a default configuration to create a new endpoints
-// resource by best effort.
-func DefaultConfig() Config {
-	return Config{
-		// Dependencies.
-		Clients:   Clients{},
-		K8sClient: nil,
-		Logger:    nil,
-	}
-}
-
 // Resource implements the endpoints resource.
 type Resource struct {
 	// Dependencies.
