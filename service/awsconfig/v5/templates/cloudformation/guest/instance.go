@@ -18,6 +18,8 @@ const Instance = `{{define "instance"}}
         Value: {{ .ClusterID }}-master
   EtcdVolume:
     Type: AWS::EC2::Volume
+    DependsOn:
+      - MasterInstance
     Properties:
       Size: 100
       VolumeType: gp2
