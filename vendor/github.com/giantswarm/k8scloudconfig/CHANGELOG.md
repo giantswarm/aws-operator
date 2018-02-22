@@ -17,6 +17,8 @@ version directory, and then changes are introduced.
 - Add `feature-gates` flag in api server enabling `ExpandPersistentVolumes` feature.
 - Updated calico to 3.0.2.
 - Updated etcd to 3.3.1.
+- Updated nginx-ingress-controller to 0.11.0.
+- Updated coredns to 1.0.6.
 
 ## [v3.1.0]
 

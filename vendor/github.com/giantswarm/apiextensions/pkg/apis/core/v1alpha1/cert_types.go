@@ -59,14 +59,15 @@ type CertConfigSpec struct {
 }
 
 type CertConfigSpecCert struct {
-	AllowBareDomains bool     `json:"allowBareDomains" yaml:"allowBareDomains"`
-	AltNames         []string `json:"altNames" yaml:"altNames"`
-	ClusterComponent string   `json:"clusterComponent" yaml:"clusterComponent"`
-	ClusterID        string   `json:"clusterID" yaml:"clusterID"`
-	CommonName       string   `json:"commonName" yaml:"commonName"`
-	IPSANs           []string `json:"ipSans" yaml:"ipSans"`
-	Organizations    []string `json:"organizations" yaml:"organizations"`
-	TTL              string   `json:"ttl" yaml:"ttl"`
+	AllowBareDomains    bool     `json:"allowBareDomains" yaml:"allowBareDomains"`
+	AltNames            []string `json:"altNames" yaml:"altNames"`
+	ClusterComponent    string   `json:"clusterComponent" yaml:"clusterComponent"`
+	ClusterID           string   `json:"clusterID" yaml:"clusterID"`
+	CommonName          string   `json:"commonName" yaml:"commonName"`
+	DisableRegeneration bool     `json:"disableRegeneration" yaml:"disableRegeneration"`
+	IPSANs              []string `json:"ipSans" yaml:"ipSans"`
+	Organizations       []string `json:"organizations" yaml:"organizations"`
+	TTL                 string   `json:"ttl" yaml:"ttl"`
 }
 
 type CertConfigSpecVersionBundle struct {

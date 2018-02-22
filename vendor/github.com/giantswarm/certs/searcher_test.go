@@ -13,7 +13,7 @@ func Test_fillTLSFromSecret(t *testing.T) {
 
 	testCases := []struct {
 		ClusterID        string
-		Cert             cert
+		Cert             Cert
 		Secret           *corev1.Secret
 		ExpectedTLS      TLS
 		ExpectedErrMatch func(error) bool
@@ -21,7 +21,7 @@ func Test_fillTLSFromSecret(t *testing.T) {
 		// 0: ok.
 		{
 			ClusterID: "eggs2",
-			Cert:      cert("etcd"),
+			Cert:      Cert("etcd"),
 			Secret: &corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
@@ -45,7 +45,7 @@ func Test_fillTLSFromSecret(t *testing.T) {
 		// 1: cluster ID doesn't match.
 		{
 			ClusterID: "eggs5",
-			Cert:      cert("etcd"),
+			Cert:      Cert("etcd"),
 			Secret: &corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
@@ -65,7 +65,7 @@ func Test_fillTLSFromSecret(t *testing.T) {
 		// 2: cert doesn't match.
 		{
 			ClusterID: "eggs2",
-			Cert:      cert("calico"),
+			Cert:      Cert("calico"),
 			Secret: &corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
@@ -85,7 +85,7 @@ func Test_fillTLSFromSecret(t *testing.T) {
 		// 3: ca field missing.
 		{
 			ClusterID: "eggs2",
-			Cert:      cert("etcd"),
+			Cert:      Cert("etcd"),
 			Secret: &corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
@@ -104,7 +104,7 @@ func Test_fillTLSFromSecret(t *testing.T) {
 		// 4: crt field missing.
 		{
 			ClusterID: "eggs2",
-			Cert:      cert("etcd"),
+			Cert:      Cert("etcd"),
 			Secret: &corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
@@ -123,7 +123,7 @@ func Test_fillTLSFromSecret(t *testing.T) {
 		// 5: key field missing.
 		{
 			ClusterID: "eggs2",
-			Cert:      cert("etcd"),
+			Cert:      Cert("etcd"),
 			Secret: &corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{

@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2017 Jeevanandam M (jeeva@myjeeva.com), All rights reserved.
+// Copyright (c) 2015-2018 Jeevanandam M (jeeva@myjeeva.com), All rights reserved.
 // resty source code and usage is governed by a MIT style
 // license that can be found in the LICENSE file.
 
@@ -85,18 +85,21 @@ type Client struct {
 	JSONMarshal           func(v interface{}) ([]byte, error)
 	JSONUnmarshal         func(data []byte, v interface{}) error
 
-	httpClient       *http.Client
-	setContentLength bool
-	isHTTPMode       bool
-	outputDirectory  string
-	scheme           string
-	proxyURL         *url.URL
-	closeConnection  bool
-	notParseResponse bool
-	beforeRequest    []func(*Client, *Request) error
-	udBeforeRequest  []func(*Client, *Request) error
-	preReqHook       func(*Client, *Request) error
-	afterResponse    []func(*Client, *Response) error
+	httpClient         *http.Client
+	setContentLength   bool
+	isHTTPMode         bool
+	outputDirectory    string
+	scheme             string
+	proxyURL           *url.URL
+	closeConnection    bool
+	notParseResponse   bool
+	debugBodySizeLimit int64
+	logPrefix          string
+	pathParams         map[string]string
+	beforeRequest      []func(*Client, *Request) error
+	udBeforeRequest    []func(*Client, *Request) error
+	preReqHook         func(*Client, *Request) error
+	afterResponse      []func(*Client, *Response) error
 }
 
 // User type is to hold an username and password information
@@ -309,6 +312,7 @@ func (c *Client) R() *Request {
 		client:         c,
 		bodyBuf:        nil,
 		multipartFiles: []*File{},
+		pathParams:     make(map[string]string),
 	}
 
 	return r
@@ -369,6 +373,14 @@ func (c *Client) SetPreRequestHook(h func(*Client, *Request) error) *Client {
 //
 func (c *Client) SetDebug(d bool) *Client {
 	c.Debug = d
+	return c
+}
+
+// SetDebugBodyLimit sets the maximum size for which the response body will be logged in debug mode.
+//		resty.SetDebugBodyLimit(1000000)
+//
+func (c *Client) SetDebugBodyLimit(sl int64) *Client {
+	c.debugBodySizeLimit = sl
 	return c
 }
 
@@ -702,9 +714,40 @@ func (c *Client) SetDoNotParseResponse(parse bool) *Client {
 	return c
 }
 
+// SetLogPrefix method sets the Resty logger prefix value.
+func (c *Client) SetLogPrefix(prefix string) *Client {
+	c.logPrefix = prefix
+	c.Log.SetPrefix(prefix)
+	return c
+}
+
+// SetPathParams method sets multiple URL path key-value pairs at one go in the
+// resty client instance.
+// 		resty.SetPathParams(map[string]string{
+// 		   "userId": "sample@sample.com",
+// 		   "subAccountId": "100002",
+// 		})
+//
+// 		Result:
+// 		   URL - /v1/users/{userId}/{subAccountId}/details
+// 		   Composed URL - /v1/users/sample@sample.com/100002/details
+// It replace the value of the key while composing request URL. Also it can be
+// overridden at request level Path Params options, see `Request.SetPathParams`.
+func (c *Client) SetPathParams(params map[string]string) *Client {
+	for p, v := range params {
+		c.pathParams[p] = v
+	}
+	return c
+}
+
 // IsProxySet method returns the true if proxy is set on client otherwise false.
 func (c *Client) IsProxySet() bool {
 	return c.proxyURL != nil
+}
+
+// GetClient method returns the current http.Client used by the resty client.
+func (c *Client) GetClient() *http.Client {
+	return c.httpClient
 }
 
 //‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
@@ -777,7 +820,7 @@ func (c *Client) execute(req *Request) (*Response, error) {
 // enables a log prefix
 func (c *Client) enableLogPrefix() {
 	c.Log.SetFlags(log.LstdFlags)
-	c.Log.SetPrefix("RESTY ")
+	c.Log.SetPrefix(c.logPrefix)
 }
 
 // disables a log prefix

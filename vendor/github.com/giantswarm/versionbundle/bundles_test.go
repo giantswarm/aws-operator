@@ -1587,6 +1587,101 @@ func Test_Bundles_Validate(t *testing.T) {
 			},
 			ErrorMatcher: IsInvalidBundlesError,
 		},
+
+		// Test 12 ensures validation of a list of version bundles where any version
+		// bundle is deprecated and WIP throws an error.
+		{
+			Bundles: []Bundle{
+				{
+					Changelogs: []Changelog{
+						{
+							Component:   "calico",
+							Description: "Calico version updated.",
+							Kind:        "changed",
+						},
+					},
+					Components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kube-dns",
+							Version: "1.0.0",
+						},
+					},
+					Dependencies: []Dependency{},
+					Deprecated:   true,
+					Name:         "kubernetes-operator",
+					Time:         time.Unix(10, 5),
+					Version:      "0.1.0",
+					WIP:          true,
+				},
+			},
+			ErrorMatcher: IsInvalidBundlesError,
+		},
+
+		// Test 13 is the same as 12 but with multiple version bundles.
+		{
+			Bundles: []Bundle{
+				{
+					Changelogs: []Changelog{
+						{
+							Component:   "calico",
+							Description: "Calico version updated.",
+							Kind:        "changed",
+						},
+					},
+					Components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kube-dns",
+							Version: "1.0.0",
+						},
+					},
+					Dependencies: []Dependency{},
+					Deprecated:   false,
+					Name:         "kubernetes-operator",
+					Time:         time.Unix(10, 5),
+					Version:      "0.1.0",
+					WIP:          false,
+				},
+				{
+					Changelogs: []Changelog{
+						{
+							Component:   "calico",
+							Description: "Calico version updated.",
+							Kind:        "changed",
+						},
+					},
+					Components: []Component{
+						{
+							Name:    "calico",
+							Version: "1.1.0",
+						},
+						{
+							Name:    "kube-dns",
+							Version: "1.0.0",
+						},
+					},
+					Dependencies: []Dependency{
+						{
+							Name:    "kubernetes",
+							Version: "<= 1.7.x",
+						},
+					},
+					Deprecated: true,
+					Name:       "kubernetes-operator",
+					Time:       time.Unix(10, 5),
+					Version:    "0.2.0",
+					WIP:        true,
+				},
+			},
+			ErrorMatcher: IsInvalidBundlesError,
+		},
 	}
 
 	for i, tc := range testCases {

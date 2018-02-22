@@ -41,6 +41,8 @@ const (
 	FlanneldComponent ClusterComponent = "flanneld"
 	// KubeStateMetricsComponent is the kube-state-metrics component.
 	KubeStateMetricsComponent ClusterComponent = "kube-state-metrics"
+	// NodeOperatorComponent is the prometheus component.
+	NodeOperatorComponent ClusterComponent = "node-operator"
 	// PrometheusComponent is the prometheus component.
 	PrometheusComponent ClusterComponent = "prometheus"
 	// ServiceAccountComponent is the service-account component.
@@ -88,6 +90,10 @@ var ClusterComponents = []ClusterComponent{
 var MonitoringComponents = []ClusterComponent{
 	PrometheusComponent,
 	KubeStateMetricsComponent,
+}
+
+var DrainingComponents = []ClusterComponent{
+	NodeOperatorComponent,
 }
 
 // TLSAssetTypes is a slice enumerating all the TLS assets we need to boot the
