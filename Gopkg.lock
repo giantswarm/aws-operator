@@ -53,8 +53,8 @@
     "service/s3",
     "service/sts"
   ]
-  revision = "adeb60566bc8c9202b0f1be7e3a675beedbc11f0"
-  version = "v1.13.2"
+  revision = "146470bc6ef7d6667ef2e9d4ae54f19e98b8ba82"
+  version = "v1.13.3"
 
 [[projects]]
   branch = "master"
@@ -216,12 +216,11 @@
     "framework/context/resourcecanceledcontext",
     "framework/context/updateallowedcontext",
     "framework/context/updatenecessarycontext",
-    "framework/resource/internal",
     "framework/resource/metricsresource",
     "framework/resource/retryresource",
     "informer"
   ]
-  revision = "f4c75a611fb7c27327d9b8580a6758fee7d7bb66"
+  revision = "4e0c85cbae5a9822a53ae0a63a8dcd363ac03a3d"
 
 [[projects]]
   branch = "master"
@@ -590,7 +589,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "432090b8f568c018896cd8a0fb0345872bbac6ce"
+  revision = "49796115aa4b964c318aad4f3084fdb41e9aa067"
 
 [[projects]]
   branch = "master"
