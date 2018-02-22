@@ -1812,6 +1812,7 @@ write_files:
         - --repair-malformed-updates=false
         - --service-account-lookup=true
         - --authorization-mode=RBAC
+        - --feature-gates=ExpandPersistentVolumes=true
         - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,DefaultStorageClass,PodSecurityPolicy
         - --cloud-provider={{.Cluster.Kubernetes.CloudProvider}}
         - --service-cluster-ip-range={{.Cluster.Kubernetes.API.ClusterIPRange}}
@@ -2175,7 +2176,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       LimitNOFILE=40000
-      Environment=IMAGE=quay.io/coreos/etcd:v3.2.7
+      Environment=IMAGE=quay.io/coreos/etcd:v3.3.1
       Environment=NAME=%p.service
       EnvironmentFile=/etc/network-environment
       ExecStartPre=-/usr/bin/docker stop  $NAME
@@ -2225,7 +2226,7 @@ coreos:
       [Service]
       Type=oneshot
       EnvironmentFile=/etc/network-environment
-      Environment=IMAGE=quay.io/coreos/etcd:v3.2.7
+      Environment=IMAGE=quay.io/coreos/etcd:v3.3.1
       Environment=NAME=%p.service
       ExecStartPre=-/usr/bin/docker stop  $NAME
       ExecStartPre=-/usr/bin/docker rm  $NAME
@@ -2332,8 +2333,10 @@ coreos:
       --pod-manifest-path=/etc/kubernetes/manifests \
       --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml \
       --node-labels="node-role.kubernetes.io/master,role=master,kubernetes.io/hostname=${HOSTNAME},ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
-      --kube-reserved="cpu=150m,memory=250Mi" \
+      --kube-reserved="cpu=500m,memory=250Mi" \
       --system-reserved="cpu=150m,memory=250Mi" \
+      --eviction-hard=[memory.available<500Mi] \
+      --enforce-node-allocatable=pods \
       --v=2"
       ExecStop=-/usr/bin/docker stop -t 10 $NAME
       ExecStopPost=-/usr/bin/docker rm -f $NAME
