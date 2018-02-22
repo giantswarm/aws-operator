@@ -17,7 +17,7 @@ version directory, and then changes are introduced.
 - Add `feature-gates` flag in api server enabling `ExpandPersistentVolumes` feature.
 - Updated calico to 3.0.2.
 - Updated etcd to 3.3.1.
-- Tune kubelet flags for protecting kubernetes resources (kubelet) from workload overloads.
+- Tune kubelet flags for protecting kubernetes resources (kubelet and container runtime) from workload overloads.
 
 ## [v3.1.0]
 

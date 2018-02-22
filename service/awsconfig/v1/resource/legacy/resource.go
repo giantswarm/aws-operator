@@ -394,6 +394,10 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 	}
 
 	// Create VPC peering connection.
+	if cluster.Spec.AWS.VPC.PeerID == "" {
+		return microerror.Maskf(invalidConfigError, fmt.Sprintf("could not create VPC peering connection: peer ID is empty for cluster %q", key.ClusterID(cluster)))
+	}
+
 	vpcPeeringConection := &awsresources.VPCPeeringConnection{
 		VPCId:     vpcID,
 		PeerVPCId: cluster.Spec.AWS.VPC.PeerID,
