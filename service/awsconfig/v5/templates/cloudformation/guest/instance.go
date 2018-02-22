@@ -19,7 +19,7 @@ const Instance = `{{define "instance"}}
   EtcdVolume:
     Type: AWS::EC2::Volume
     DependsOn:
-      - MasterInstance
+    - MasterInstance
     Properties:
       Size: 100
       VolumeType: gp2
