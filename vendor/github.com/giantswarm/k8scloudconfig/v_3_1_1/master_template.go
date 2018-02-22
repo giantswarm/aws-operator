@@ -2176,7 +2176,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       LimitNOFILE=40000
-      Environment=IMAGE=quay.io/coreos/etcd:v3.2.7
+      Environment=IMAGE=quay.io/coreos/etcd:v3.3.1
       Environment=NAME=%p.service
       EnvironmentFile=/etc/network-environment
       ExecStartPre=-/usr/bin/docker stop  $NAME
@@ -2226,7 +2226,7 @@ coreos:
       [Service]
       Type=oneshot
       EnvironmentFile=/etc/network-environment
-      Environment=IMAGE=quay.io/coreos/etcd:v3.2.7
+      Environment=IMAGE=quay.io/coreos/etcd:v3.3.1
       Environment=NAME=%p.service
       ExecStartPre=-/usr/bin/docker stop  $NAME
       ExecStartPre=-/usr/bin/docker rm  $NAME
