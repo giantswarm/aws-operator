@@ -38,17 +38,19 @@ func Test_Resource_Endpoints_GetDesiredState(t *testing.T) {
 	var err error
 	var newResource *Resource
 
-	resourceConfig := DefaultConfig()
-	resourceConfig.K8sClient = fake.NewSimpleClientset()
-	resourceConfig.Logger = microloggertest.New()
-
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			resourceConfig.Clients.EC2 = &EC2ClientMock{
-				privateIPAddress: tc.expectedIPAddress,
+			c := Config{
+				Clients: Clients{
+					EC2: &EC2ClientMock{
+						privateIPAddress: tc.expectedIPAddress,
+					},
+				},
+				K8sClient: fake.NewSimpleClientset(),
+				Logger:    microloggertest.New(),
 			}
+			newResource, err = New(c)
 
-			newResource, err = New(resourceConfig)
 			if err != nil {
 				t.Fatal("expected", nil, "got", err)
 			}

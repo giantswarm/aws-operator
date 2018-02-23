@@ -20,16 +20,6 @@ type Config struct {
 	Logger    micrologger.Logger
 }
 
-// DefaultConfig provides a default configuration to create a new namespace
-// resource by best effort.
-func DefaultConfig() Config {
-	return Config{
-		// Dependencies.
-		K8sClient: nil,
-		Logger:    nil,
-	}
-}
-
 // Resource implements the namespace resource.
 type Resource struct {
 	// Dependencies.

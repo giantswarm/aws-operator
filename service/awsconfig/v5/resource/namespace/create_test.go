@@ -96,10 +96,11 @@ func Test_Resource_Namespace_newCreateChange(t *testing.T) {
 	var err error
 	var newResource *Resource
 	{
-		resourceConfig := DefaultConfig()
-		resourceConfig.K8sClient = fake.NewSimpleClientset()
-		resourceConfig.Logger = microloggertest.New()
-		newResource, err = New(resourceConfig)
+		c := Config{
+			K8sClient: fake.NewSimpleClientset(),
+			Logger:    microloggertest.New(),
+		}
+		newResource, err = New(c)
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
