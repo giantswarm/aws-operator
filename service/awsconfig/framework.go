@@ -275,9 +275,6 @@ func newResourceRouter(config FrameworkConfig) (*framework.ResourceRouter, error
 			Logger:             config.Logger,
 			RandomkeysSearcher: keyWatcher,
 
-			HandledVersionBundles: []string{
-				"2.1.0",
-			},
 			InstallationName: config.InstallationName,
 			OIDC: v4cloudconfig.OIDCConfig{
 				ClientID:      config.OIDC.ClientID,
@@ -304,9 +301,6 @@ func newResourceRouter(config FrameworkConfig) (*framework.ResourceRouter, error
 			Logger:             config.Logger,
 			RandomkeysSearcher: keyWatcher,
 
-			HandledVersionBundles: []string{
-				"2.1.1",
-			},
 			GuestUpdateEnabled: config.GuestUpdateEnabled,
 			InstallationName:   config.InstallationName,
 			OIDC: v5cloudconfig.OIDCConfig{
@@ -334,9 +328,6 @@ func newResourceRouter(config FrameworkConfig) (*framework.ResourceRouter, error
 			Logger:             config.Logger,
 			RandomkeysSearcher: keyWatcher,
 
-			HandledVersionBundles: []string{
-				"2.1.2",
-			},
 			GuestUpdateEnabled: config.GuestUpdateEnabled,
 			InstallationName:   config.InstallationName,
 			OIDC: v6cloudconfig.OIDCConfig{
