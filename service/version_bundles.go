@@ -413,6 +413,11 @@ func NewVersionBundles() []versionbundle.Bundle {
 					Description: "Updated to 0.11.0.",
 					Kind:        versionbundle.KindChanged,
 				},
+				{
+					Component:   "cloudconfig",
+					Description: "Tune Kubelet flags for protecting key units (Kubelet and Container Runtime) from workload overloads.",
+					Kind:        versionbundle.KindChanged,
+				},
 			},
 			Components: []versionbundle.Component{
 				{
