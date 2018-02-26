@@ -360,7 +360,7 @@ func NewVersionBundles() []versionbundle.Bundle {
 				},
 			},
 			Dependencies: []versionbundle.Dependency{},
-			Deprecated:   false,
+			Deprecated:   true,
 			Name:         "aws-operator",
 			Time:         time.Date(2018, time.February, 6, 12, 17, 0, 0, time.UTC),
 			Version:      "2.1.0",
@@ -385,8 +385,38 @@ func NewVersionBundles() []versionbundle.Bundle {
 				},
 				{
 					Component:   "aws-operator",
-					Description: "Allow persistent volumes be automatically extended when the claims are changed.",
+					Description: "Allow persistent volumes to be automatically extended when claims are changed.",
 					Kind:        versionbundle.KindAdded,
+				},
+				{
+					Component:   "aws-operator",
+					Description: "Fixed problem with deleting the Etcd EBS volume.",
+					Kind:        versionbundle.KindFixed,
+				},
+				{
+					Component:   "Calico",
+					Description: "Updated to 3.0.2.",
+					Kind:        versionbundle.KindChanged,
+				},
+				{
+					Component:   "Etcd",
+					Description: "Updated to 3.3.1.",
+					Kind:        versionbundle.KindChanged,
+				},
+				{
+					Component:   "CoreDNS",
+					Description: "Updated to 1.0.6.",
+					Kind:        versionbundle.KindChanged,
+				},
+				{
+					Component:   "Nginx Ingress Controller",
+					Description: "Updated to 0.11.0.",
+					Kind:        versionbundle.KindChanged,
+				},
+				{
+					Component:   "cloudconfig",
+					Description: "Tune Kubelet flags for protecting key units (Kubelet and Container Runtime) from workload overloads.",
+					Kind:        versionbundle.KindChanged,
 				},
 			},
 			Components: []versionbundle.Component{
@@ -408,7 +438,7 @@ func NewVersionBundles() []versionbundle.Bundle {
 				},
 				{
 					Name:    "coredns",
-					Version: "1.0.5",
+					Version: "1.0.6",
 				},
 				{
 					Name:    "kubernetes",
@@ -416,7 +446,7 @@ func NewVersionBundles() []versionbundle.Bundle {
 				},
 				{
 					Name:    "nginx-ingress-controller",
-					Version: "0.10.2",
+					Version: "0.11.0",
 				},
 			},
 			Dependencies: []versionbundle.Dependency{},
@@ -424,7 +454,7 @@ func NewVersionBundles() []versionbundle.Bundle {
 			Name:         "aws-operator",
 			Time:         time.Date(2018, time.February, 15, 10, 0, 0, 0, time.UTC),
 			Version:      "2.1.1",
-			WIP:          true,
+			WIP:          false,
 		},
 	}
 }
