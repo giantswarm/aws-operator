@@ -6,12 +6,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v5/key"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v6/key"
 )
 
 // The template related to this adapter can be found in the following import.
 //
-//     github.com/giantswarm/aws-operator/service/awsconfig/v5/templates/cloudformation/guest/vpc.go
+//     github.com/giantswarm/aws-operator/service/awsconfig/v6/templates/cloudformation/guest/vpc.go
 //
 
 type vpcAdapter struct {

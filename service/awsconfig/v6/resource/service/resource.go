@@ -9,7 +9,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "servicev5"
+	Name = "servicev6"
 
 	httpsPort         = 443
 	masterServiceName = "master"

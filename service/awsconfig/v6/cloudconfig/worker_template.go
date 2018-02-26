@@ -6,7 +6,7 @@ import (
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_1_1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v5/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v6/templates/cloudconfig"
 )
 
 const (
