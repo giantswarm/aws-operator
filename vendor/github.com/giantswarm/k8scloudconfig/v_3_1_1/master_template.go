@@ -11,6 +11,74 @@ users:
 {{end}}
 write_files:
 {{ if not .DisableCalico -}}
+- path: /srv/calico-ipip-pinger-ds.yaml
+  owner: root
+  permissions: 644
+  content: |
+    apiVersion: extensions/v1beta1
+    kind: DaemonSet
+    metadata:
+      labels:
+        app: calico-ipip-pinger
+      name: calico-ipip-pinger
+      namespace: kube-system
+    spec:
+      updateStrategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxUnavailable: 1
+      template:
+        metadata:
+          labels:
+            app: calico-ipip-pinger
+        spec:
+          serviceAccountName: calico-node
+          containers:
+          - name: calico-ipip-pinger
+            image: quay.io/giantswarm/calico-ipip-pinger:c2d40fb9bd4dcd78fd28b897f43b2d9a744ab374
+            imagePullPolicy: Always
+            securityContext:
+              privileged: true
+            env:
+              # The location of the Calico etcd cluster.
+              - name: ETCD_ENDPOINTS
+                valueFrom:
+                  configMapKeyRef:
+                    name: calico-config
+                    key: etcd_endpoints
+              # Location of the CA certificate for etcd.
+              - name: ETCD_CA_CERT_FILE
+                valueFrom:
+                  configMapKeyRef:
+                    name: calico-config
+                    key: etcd_ca
+              # Location of the client key for etcd.
+              - name: ETCD_KEY_FILE
+                valueFrom:
+                  configMapKeyRef:
+                    name: calico-config
+                    key: etcd_key
+              # Location of the client certificate for etcd.
+              - name: ETCD_CERT_FILE
+                valueFrom:
+                  configMapKeyRef:
+                    name: calico-config
+                    key: etcd_cert
+            volumeMounts:
+              # Mount in the etcd TLS secrets.
+              - mountPath: /etc/kubernetes/ssl/etcd
+                name: etcd-certs
+          volumes:
+            # Mount in the etcd TLS secrets.
+            - name: etcd-certs
+              hostPath:
+                path: /etc/kubernetes/ssl/etcd
+          tolerations:
+          - effect: NoSchedule
+            key: node-role.kubernetes.io/master
+            operator: Exists
+          hostNetwork: true
+          restartPolicy: Always
 - path: /srv/calico-kube-controllers-sa.yaml
   owner: root
   permissions: 644
@@ -1561,6 +1629,7 @@ write_files:
       CALICO_FILES="${CALICO_FILES} calico-kube-controllers-sa.yaml"
       CALICO_FILES="${CALICO_FILES} calico-ds.yaml"
       CALICO_FILES="${CALICO_FILES} calico-kube-controllers.yaml"
+      CALICO_FILES="${CALICO_FILES} calico-ipip-pinger-ds.yaml"
 
       for manifest in $CALICO_FILES
       do
@@ -2333,9 +2402,8 @@ coreos:
       --pod-manifest-path=/etc/kubernetes/manifests \
       --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml \
       --node-labels="node-role.kubernetes.io/master,role=master,kubernetes.io/hostname=${HOSTNAME},ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
-      --kube-reserved="cpu=500m,memory=250Mi" \
+      --kube-reserved="cpu=200m,memory=250Mi" \
       --system-reserved="cpu=150m,memory=250Mi" \
-      --eviction-hard=[memory.available<500Mi] \
       --enforce-node-allocatable=pods \
       --v=2"
       ExecStop=-/usr/bin/docker stop -t 10 $NAME

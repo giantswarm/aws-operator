@@ -9,7 +9,10 @@ The latest version is considered WIP and it is a subject of change. All other
 versions are frozen. To freeze current version all files are copied to a new
 version directory, and then changes are introduced.
 
-## [v3.1.1] WIP
+## [v3.1.1]
+
+### Added
+- Added calico-ipip-pinger.
 
 ### Changed
 - Change etcd data path to /var/lib/etcd.
@@ -17,7 +20,7 @@ version directory, and then changes are introduced.
 - Add `feature-gates` flag in api server enabling `ExpandPersistentVolumes` feature.
 - Updated calico to 3.0.2.
 - Updated etcd to 3.3.1.
-- Tune kubelet flags for protecting kubernetes resources (kubelet and container runtime) from workload overloads.
+- Tune kubelet flags for protecting key units (kubelet and container runtime) from workload overloads.
 - Updated nginx-ingress-controller to 0.11.0.
 - Updated coredns to 1.0.6.
 
