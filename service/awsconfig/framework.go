@@ -335,7 +335,7 @@ func newResourceRouter(config FrameworkConfig) (*framework.ResourceRouter, error
 			RandomkeysSearcher: keyWatcher,
 
 			HandledVersionBundles: []string{
-				"2.1.1",
+				"2.1.2",
 			},
 			GuestUpdateEnabled: config.GuestUpdateEnabled,
 			InstallationName:   config.InstallationName,
