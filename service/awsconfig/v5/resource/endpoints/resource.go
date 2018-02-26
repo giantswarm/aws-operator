@@ -1,9 +1,10 @@
 package endpoints
 
 import (
+	"reflect"
+
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/framework"
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )
@@ -24,17 +25,6 @@ type Config struct {
 	Logger    micrologger.Logger
 }
 
-// DefaultConfig provides a default configuration to create a new endpoints
-// resource by best effort.
-func DefaultConfig() Config {
-	return Config{
-		// Dependencies.
-		Clients:   Clients{},
-		K8sClient: nil,
-		Logger:    nil,
-	}
-}
-
 // Resource implements the endpoints resource.
 type Resource struct {
 	// Dependencies.
@@ -46,6 +36,9 @@ type Resource struct {
 // New creates a new configured endpoints resource.
 func New(config Config) (*Resource, error) {
 	// Dependencies.
+	if reflect.DeepEqual(config.Clients, Clients{}) {
+		return nil, microerror.Maskf(invalidConfigError, "config.Clients must not be empty")
+	}
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.K8sClient must not be empty")
 	}
@@ -67,10 +60,6 @@ func New(config Config) (*Resource, error) {
 
 func (r *Resource) Name() string {
 	return Name
-}
-
-func (r *Resource) Underlying() framework.Resource {
-	return r
 }
 
 func toEndpoints(v interface{}) (*apiv1.Endpoints, error) {
