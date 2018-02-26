@@ -42,11 +42,10 @@ type ResourceSetConfig struct {
 	Logger             micrologger.Logger
 	RandomkeysSearcher *randomkeytpr.Service
 
-	GuestUpdateEnabled    bool
-	HandledVersionBundles []string
-	InstallationName      string
-	OIDC                  cloudconfig.OIDCConfig
-	ProjectName           string
+	GuestUpdateEnabled bool
+	InstallationName   string
+	OIDC               cloudconfig.OIDCConfig
+	ProjectName        string
 }
 
 func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
@@ -92,9 +91,6 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		return nil, microerror.Maskf(invalidConfigError, "config.RandomkeysSearcher must not be empty")
 	}
 
-	if len(config.HandledVersionBundles) == 0 {
-		return nil, microerror.Maskf(invalidConfigError, "config.HandledVersionBundles must not be empty")
-	}
 	if config.InstallationName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.InstallationName must not be empty")
 	}
@@ -316,16 +312,13 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 	}
 
 	handlesFunc := func(obj interface{}) bool {
-		awsConfig, err := key.ToCustomObject(obj)
+		customObject, err := key.ToCustomObject(obj)
 		if err != nil {
 			return false
 		}
-		versionBundleVersion := key.VersionBundleVersion(awsConfig)
 
-		for _, v := range config.HandledVersionBundles {
-			if versionBundleVersion == v {
-				return true
-			}
+		if key.VersionBundleVersion(customObject) == VersionBundle().Version {
+			return true
 		}
 
 		return false
