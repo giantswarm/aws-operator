@@ -11,7 +11,7 @@ func VersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "aws-operator",
-				Description: "Fix problem getting tags data for ELBs.",
+				Description: "Get ELB tags in batches due to API restriction.",
 				Kind:        versionbundle.KindFixed,
 			},
 		},
