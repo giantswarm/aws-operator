@@ -41,5 +41,9 @@ func workerCountRatio(workers int, ratio float32) string {
 	value := float32(workers) * ratio
 	rounded := int(value + 0.5)
 
+	if workers > 0 && rounded == 0 {
+		rounded = 1
+	}
+
 	return strconv.Itoa(rounded)
 }
