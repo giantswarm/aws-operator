@@ -62,10 +62,10 @@ func DefaultConfig() Config {
 
 type Service struct {
 	// Dependencies.
-	Alerter            *alerter.Service
-	AWSConfigFramework *framework.Framework
-	Healthz            *healthz.Service
-	Version            *version.Service
+	Alerter          *alerter.Service
+	ClusterFramework *framework.Framework
+	Healthz          *healthz.Service
+	Version          *version.Service
 
 	// Internals.
 	bootOnce sync.Once
@@ -121,9 +121,9 @@ func New(config Config) (*Service, error) {
 		return nil, microerror.Mask(err)
 	}
 
-	var awsConfigFramework *framework.Framework
+	var clusterFramework *framework.Framework
 	{
-		c := awsconfig.FrameworkConfig{
+		c := awsconfig.ClusterFrameworkConfig{
 			G8sClient:    g8sClient,
 			K8sClient:    k8sClient,
 			K8sExtClient: k8sExtClient,
@@ -153,7 +153,7 @@ func New(config Config) (*Service, error) {
 			PubKeyFile: config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile),
 		}
 
-		awsConfigFramework, err = awsconfig.NewFramework(c)
+		clusterFramework, err = awsconfig.NewClusterFramework(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -215,10 +215,10 @@ func New(config Config) (*Service, error) {
 
 	newService := &Service{
 		// Dependencies.
-		Alerter:            alerterService,
-		AWSConfigFramework: awsConfigFramework,
-		Healthz:            healthzService,
-		Version:            versionService,
+		Alerter:          alerterService,
+		ClusterFramework: clusterFramework,
+		Healthz:          healthzService,
+		Version:          versionService,
 
 		// Internals
 		bootOnce: sync.Once{},
@@ -233,6 +233,6 @@ func (s *Service) Boot() {
 		s.Alerter.StartAlerts()
 
 		// Start the framework.
-		go s.AWSConfigFramework.Boot()
+		go s.ClusterFramework.Boot()
 	})
 }

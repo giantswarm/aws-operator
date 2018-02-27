@@ -25,11 +25,7 @@ import (
 	v6cloudconfig "github.com/giantswarm/aws-operator/service/awsconfig/v6/cloudconfig"
 )
 
-const (
-	AWSConfigCleanupFinalizer = "aws-operator.giantswarm.io/custom-object-cleanup"
-)
-
-type FrameworkConfig struct {
+type ClusterFrameworkConfig struct {
 	G8sClient    versioned.Interface
 	K8sClient    kubernetes.Interface
 	K8sExtClient apiextensionsclient.Interface
@@ -60,7 +56,7 @@ type FrameworkConfigOIDCConfig struct {
 	GroupsClaim   string
 }
 
-func NewFramework(config FrameworkConfig) (*framework.Framework, error) {
+func NewClusterFramework(config ClusterFrameworkConfig) (*framework.Framework, error) {
 	var err error
 
 	if config.G8sClient == nil {
@@ -111,7 +107,7 @@ func NewFramework(config FrameworkConfig) (*framework.Framework, error) {
 		}
 	}
 
-	resourceRouter, err := newResourceRouter(config)
+	resourceRouter, err := newClusterResourceRouter(config)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -147,7 +143,7 @@ func NewFramework(config FrameworkConfig) (*framework.Framework, error) {
 	return crdFramework, nil
 }
 
-func newResourceRouter(config FrameworkConfig) (*framework.ResourceRouter, error) {
+func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.ResourceRouter, error) {
 	var err error
 
 	guestAWSConfig := awsclient.Config{
