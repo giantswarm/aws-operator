@@ -136,3 +136,36 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 		})
 	}
 }
+
+func TestWorkerCountRatioMaxBatchSize(t *testing.T) {
+	tcs := []struct {
+		description   string
+		workers       int
+		expectedRatio string
+	}{
+		{
+			description:   "scaling down to one worker, one should be up",
+			workers:       1,
+			expectedRatio: "1",
+		},
+		{
+			description:   "scaling down to two worker, one should be up",
+			workers:       2,
+			expectedRatio: "1",
+		},
+		{
+			description:   "scaling down to zero worker, none should be up",
+			workers:       0,
+			expectedRatio: "0",
+		},
+	}
+	for _, tc := range tcs {
+		t.Run(tc.description, func(t *testing.T) {
+			actual := workerCountRatio(tc.workers, asgMaxBatchSizeRatio)
+
+			if tc.expectedRatio != actual {
+				t.Errorf("wrong worker count ratio, expected %q, actual %q", tc.expectedRatio, actual)
+			}
+		})
+	}
+}
