@@ -9,8 +9,8 @@ import (
 	kubernetesfake "k8s.io/client-go/kubernetes/fake"
 )
 
-func newTestFrameworkConfig() FrameworkConfig {
-	return FrameworkConfig{
+func newTestClusterFrameworkConfig() ClusterFrameworkConfig {
+	return ClusterFrameworkConfig{
 		G8sClient:    versionedfake.NewSimpleClientset(),
 		K8sClient:    kubernetesfake.NewSimpleClientset(),
 		K8sExtClient: apiextensionsclientfake.NewSimpleClientset(),
@@ -93,11 +93,11 @@ func Test_NewFramework_Fails_Without_Regions(t *testing.T) {
 	}
 
 	for i, tc := range testCases {
-		config := newTestFrameworkConfig()
+		config := newTestClusterFrameworkConfig()
 		config.GuestAWSConfig = tc.guestCredentials
 		config.HostAWSConfig = tc.hostCredentials
 
-		_, err := NewFramework(config)
+		_, err := NewClusterFramework(config)
 		if tc.expectedError != (err != nil) {
 			t.Errorf("case %d: expected error = %v, got = %#v", i, tc.expectedError, err)
 		}
