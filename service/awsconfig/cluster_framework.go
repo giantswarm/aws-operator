@@ -342,7 +342,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 			return nil, microerror.Mask(err)
 		}
 	}
-	
+
 	var resourceSetV7 *framework.ResourceSet
 	{
 		c := v7.ResourceSetConfig{
