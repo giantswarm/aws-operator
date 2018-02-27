@@ -29,7 +29,7 @@ func newTestClusterFrameworkConfig() ClusterFrameworkConfig {
 			SessionToken:    "host-token",
 		},
 		InstallationName: "test",
-		Name:             "aws-operator",
+		ProjectName:      "aws-operator",
 		PubKeyFile:       "~/.ssh/id_rsa.pub",
 	}
 }
