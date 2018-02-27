@@ -13,6 +13,7 @@ import (
 const (
 	cloudProviderClusterTagValue = "owned"
 	cloudProviderServiceTagKey   = "kubernetes.io/service-name"
+	loadBalancerTagChunkSize     = 20
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
@@ -44,10 +45,17 @@ func (r *Resource) clusterLoadBalancers(customObject v1alpha1.AWSConfig) (*LoadB
 		allLBNames = append(allLBNames, lb.LoadBalancerName)
 	}
 
-	if len(allLBNames) > 0 {
-		// We get tags for all load balancers which needs a separate API call.
+	// Get loadbalancer tags in batches due to API restriction.
+	for i := 0; i < len(allLBNames); i += loadBalancerTagChunkSize {
+		endPos := i + loadBalancerTagChunkSize
+
+		if endPos > len(allLBNames) {
+			endPos = len(allLBNames)
+		}
+
+		lbNames := allLBNames[i:endPos]
 		tagsInput := &elb.DescribeTagsInput{
-			LoadBalancerNames: allLBNames,
+			LoadBalancerNames: lbNames,
 		}
 		tagsOutput, err := r.clients.ELB.DescribeTags(tagsInput)
 		if err != nil {

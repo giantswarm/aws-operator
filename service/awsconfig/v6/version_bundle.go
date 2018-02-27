@@ -11,8 +11,13 @@ func VersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "aws-operator",
-				Description: "There are no changes yet, replace this with something useful.",
-				Kind:        versionbundle.KindChanged,
+				Description: "Fix limitation getting ELB tags that affected cluster creation.",
+				Kind:        versionbundle.KindFixed,
+			},
+			{
+				Component:   "aws-operator",
+				Description: "Fix error scaling down to 1 worker.",
+				Kind:        versionbundle.KindFixed,
 			},
 		},
 		Components: []versionbundle.Component{
@@ -50,6 +55,6 @@ func VersionBundle() versionbundle.Bundle {
 		Name:         "aws-operator",
 		Time:         time.Date(2018, time.February, 26, 12, 15, 0, 0, time.UTC),
 		Version:      "2.1.2",
-		WIP:          true,
+		WIP:          false,
 	}
 }
