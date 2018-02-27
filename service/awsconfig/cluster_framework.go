@@ -38,9 +38,8 @@ type ClusterFrameworkConfig struct {
 	HostAWSConfig      FrameworkConfigAWSConfig
 	InstallationName   string
 	OIDC               FrameworkConfigOIDCConfig
-	// Name is the name of the project.
-	Name       string
-	PubKeyFile string
+	ProjectName        string
+	PubKeyFile         string
 }
 
 type FrameworkConfigAWSConfig struct {
@@ -70,6 +69,7 @@ func NewClusterFramework(config ClusterFrameworkConfig) (*framework.Framework, e
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
+
 	if config.GuestAWSConfig.AccessKeyID == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSConfig.AccessKeyID must not be empty")
 	}
@@ -79,7 +79,6 @@ func NewClusterFramework(config ClusterFrameworkConfig) (*framework.Framework, e
 	if config.GuestAWSConfig.Region == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSConfig.Region must not be empty")
 	}
-	// config.GuestAWSConfig.SessionToken is optional.
 	if config.HostAWSConfig.AccessKeyID == "" && config.HostAWSConfig.AccessKeySecret == "" {
 		config.Logger.Log("debug", "no host cluster account credentials supplied, assuming guest and host uses same account")
 		config.HostAWSConfig = config.GuestAWSConfig
@@ -93,7 +92,9 @@ func NewClusterFramework(config ClusterFrameworkConfig) (*framework.Framework, e
 		if config.HostAWSConfig.Region == "" {
 			return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.Region must not be empty")
 		}
-		// config.HostAWSConfig.SessionToken is optional.
+	}
+	if config.ProjectName == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ProjectName must not be empty", config)
 	}
 
 	var crdClient *k8scrdclient.CRDClient
@@ -204,7 +205,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 				"1.0.0",
 			},
 			InstallationName: config.InstallationName,
-			ProjectName:      config.Name,
+			ProjectName:      config.ProjectName,
 			PubKeyFile:       config.PubKeyFile,
 		}
 
@@ -229,7 +230,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 				"2.0.0",
 			},
 			InstallationName: config.InstallationName,
-			ProjectName:      config.Name,
+			ProjectName:      config.ProjectName,
 		}
 
 		resourceSetV2, err = v2.NewResourceSet(c)
@@ -254,7 +255,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 				"2.0.2",
 			},
 			InstallationName: config.InstallationName,
-			ProjectName:      config.Name,
+			ProjectName:      config.ProjectName,
 		}
 
 		resourceSetV3, err = v3.NewResourceSet(c)
@@ -280,7 +281,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 				UsernameClaim: config.OIDC.UsernameClaim,
 				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
-			ProjectName: config.Name,
+			ProjectName: config.ProjectName,
 		}
 
 		resourceSetV4, err = v4.NewResourceSet(c)
@@ -307,7 +308,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 				UsernameClaim: config.OIDC.UsernameClaim,
 				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
-			ProjectName: config.Name,
+			ProjectName: config.ProjectName,
 		}
 
 		resourceSetV5, err = v5.NewResourceSet(c)
@@ -334,7 +335,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 				UsernameClaim: config.OIDC.UsernameClaim,
 				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
-			ProjectName: config.Name,
+			ProjectName: config.ProjectName,
 		}
 
 		resourceSetV6, err = v6.NewResourceSet(c)
@@ -361,7 +362,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 				UsernameClaim: config.OIDC.UsernameClaim,
 				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
-			ProjectName: config.Name,
+			ProjectName: config.ProjectName,
 		}
 
 		resourceSetV7, err = v7.NewResourceSet(c)
