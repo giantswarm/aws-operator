@@ -1,4 +1,4 @@
-package v6
+package v7
 
 import (
 	"context"
@@ -16,18 +16,18 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v6/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v6/key"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v6/resource/cloudformation"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v6/resource/cloudformation/adapter"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v6/resource/ebsvolume"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v6/resource/endpoints"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v6/resource/kmskey"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v6/resource/loadbalancer"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v6/resource/namespace"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v6/resource/s3bucket"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v6/resource/s3object"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v6/resource/service"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v7/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v7/key"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/cloudformation"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/cloudformation/adapter"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/ebsvolume"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/endpoints"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/kmskey"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/loadbalancer"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/namespace"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/s3bucket"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/s3object"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/service"
 )
 
 const (

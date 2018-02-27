@@ -10,7 +10,7 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/operatorkit/framework/context/updateallowedcontext"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v6/resource/cloudformation/adapter"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/cloudformation/adapter"
 )
 
 func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {

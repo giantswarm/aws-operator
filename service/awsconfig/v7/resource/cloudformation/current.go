@@ -9,7 +9,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/framework/context/resourcecanceledcontext"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v6/key"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v7/key"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
