@@ -1,4 +1,4 @@
-package v6
+package v7
 
 import (
 	"time"
@@ -48,8 +48,8 @@ func VersionBundle() versionbundle.Bundle {
 		Dependencies: []versionbundle.Dependency{},
 		Deprecated:   false,
 		Name:         "aws-operator",
-		Time:         time.Date(2018, time.February, 26, 12, 15, 0, 0, time.UTC),
-		Version:      "2.1.2",
+		Time:         time.Date(2018, time.February, 27, 14, 16, 0, 0, time.UTC),
+		Version:      "2.1.3",
 		WIP:          true,
 	}
 }

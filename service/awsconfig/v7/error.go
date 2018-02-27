@@ -1,4 +1,4 @@
-package v6
+package v7
 
 import "github.com/giantswarm/microerror"
 

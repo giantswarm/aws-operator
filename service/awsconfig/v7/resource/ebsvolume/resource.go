@@ -9,7 +9,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "ebsvolumev6"
+	Name = "ebsvolumev7"
 )
 
 // Config represents the configuration used to create a new ebsvolume resource.
