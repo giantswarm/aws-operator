@@ -14,6 +14,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Fix limitation getting ELB tags that affected cluster creation.",
 				Kind:        versionbundle.KindFixed,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Fix error scaling down to 1 worker.",
+				Kind:        versionbundle.KindFixed,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
