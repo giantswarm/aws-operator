@@ -34,7 +34,7 @@ const (
 	ResourceRetries uint64 = 3
 )
 
-type ResourceSetConfig struct {
+type ClusterResourceSetConfig struct {
 	CertsSearcher      legacy.Searcher
 	GuestAWSClients    aws.Clients
 	HostAWSClients     aws.Clients
@@ -48,7 +48,7 @@ type ResourceSetConfig struct {
 	ProjectName        string
 }
 
-func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
+func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.ResourceSet, error) {
 	var err error
 
 	if config.CertsSearcher == nil {

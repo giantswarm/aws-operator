@@ -67,6 +67,9 @@ func NewClusterFramework(config ClusterFrameworkConfig) (*framework.Framework, e
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.K8sClient must not be empty")
 	}
+	if config.K8sExtClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.K8sExtClient must not be empty")
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
@@ -345,7 +348,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 
 	var resourceSetV7 *framework.ResourceSet
 	{
-		c := v7.ResourceSetConfig{
+		c := v7.ClusterResourceSetConfig{
 			CertsSearcher:      certWatcher,
 			GuestAWSClients:    awsClients,
 			HostAWSClients:     awsHostClients,
@@ -364,7 +367,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 			ProjectName: config.Name,
 		}
 
-		resourceSetV7, err = v7.NewResourceSet(c)
+		resourceSetV7, err = v7.NewClusterResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
