@@ -377,6 +377,8 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 	var resourceRouter *framework.ResourceRouter
 	{
 		c := framework.ResourceRouterConfig{
+			Logger: config.Logger,
+
 			ResourceSets: []*framework.ResourceSet{
 				resourceSetV1,
 				resourceSetV2,
