@@ -2,10 +2,10 @@ package jsoniter
 
 import (
 	"fmt"
+	"github.com/modern-go/reflect2"
 	"io"
 	"strings"
 	"unsafe"
-	"github.com/v2pro/plz/reflect2"
 )
 
 func decoderOfStruct(ctx *ctx, typ reflect2.Type) ValDecoder {
@@ -995,7 +995,7 @@ func (decoder *structFieldDecoder) Decode(ptr unsafe.Pointer, iter *Iterator) {
 	fieldPtr := decoder.field.UnsafeGet(ptr)
 	decoder.fieldDecoder.Decode(fieldPtr, iter)
 	if iter.Error != nil && iter.Error != io.EOF {
-		iter.Error = fmt.Errorf("%s: %s", decoder.field.Name, iter.Error.Error())
+		iter.Error = fmt.Errorf("%s: %s", decoder.field.Name(), iter.Error.Error())
 	}
 }
 
