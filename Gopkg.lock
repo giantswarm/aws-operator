@@ -221,7 +221,7 @@
     "framework/resource/retryresource",
     "informer"
   ]
-  revision = "b0c981ff26e655ec56761f4aa22bb1f759230b47"
+  revision = "0d6b9f658e2f25a9e319626d6d6329fbe4365a0a"
 
 [[projects]]
   branch = "master"
@@ -536,7 +536,7 @@
     "nfs",
     "xfs"
   ]
-  revision = "75f2d6163c7a100bed6e971044ea3de30ee3a678"
+  revision = "d274e363d5759d1c916232217be421f1cc89c5fe"
 
 [[projects]]
   branch = "master"
@@ -593,7 +593,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "8c653846df49742c4c85ec37e5d9f8d3ba657895"
+  revision = "91a49db82a88618983a78a06c1cbd4e00ab749ab"
 
 [[projects]]
   branch = "master"
