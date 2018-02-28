@@ -149,6 +149,8 @@ func newDrainerResourceRouter(config DrainerFrameworkConfig) (*framework.Resourc
 	var resourceRouter *framework.ResourceRouter
 	{
 		c := framework.ResourceRouterConfig{
+			Logger: config.Logger,
+
 			ResourceSets: []*framework.ResourceSet{
 				v7ResourceSet,
 			},
