@@ -13,6 +13,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7/key"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/lifecycle"
 )
 
 type DrainerResourceSetConfig struct {
@@ -40,21 +41,21 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*framework.Resource
 
 	var err error
 
-	//var lifecycleResource framework.Resource
-	//{
-	//	c := lifecycle.ResourceConfig{
-	//		Clients:   config.GuestAWSClients,
-	//		Logger:    config.Logger,
-	//	}
-	//
-	//	lifecycleResource, err = lifecycle.NewResource(c)
-	//	if err != nil {
-	//		return nil, microerror.Mask(err)
-	//	}
-	//}
+	var lifecycleResource framework.Resource
+	{
+		c := lifecycle.ResourceConfig{
+			Clients: config.GuestAWSClients,
+			Logger:  config.Logger,
+		}
+
+		lifecycleResource, err = lifecycle.NewResource(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
 
 	resources := []framework.Resource{
-	//lifecycleResource,
+		lifecycleResource,
 	}
 
 	{

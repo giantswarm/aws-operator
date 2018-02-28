@@ -64,6 +64,7 @@ type Service struct {
 	// Dependencies.
 	Alerter          *alerter.Service
 	ClusterFramework *framework.Framework
+	DrainerFramework *framework.Framework
 	Healthz          *healthz.Service
 	Version          *version.Service
 
@@ -159,6 +160,30 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var drainerFramework *framework.Framework
+	{
+		c := awsconfig.DrainerFrameworkConfig{
+			G8sClient:    g8sClient,
+			K8sClient:    k8sClient,
+			K8sExtClient: k8sExtClient,
+			Logger:       config.Logger,
+
+			AWS: awsconfig.DrainerFrameworkConfigAWS{
+				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
+				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
+				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
+				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
+			},
+			GuestUpdateEnabled: config.Viper.GetBool(config.Flag.Service.Guest.Update.Enabled),
+			ProjectName:        config.Name,
+		}
+
+		drainerFramework, err = awsconfig.NewDrainerFramework(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var awsConfig awsclient.Config
 	{
 		awsConfig = awsclient.Config{
@@ -217,6 +242,7 @@ func New(config Config) (*Service, error) {
 		// Dependencies.
 		Alerter:          alerterService,
 		ClusterFramework: clusterFramework,
+		DrainerFramework: drainerFramework,
 		Healthz:          healthzService,
 		Version:          versionService,
 
@@ -234,5 +260,6 @@ func (s *Service) Boot() {
 
 		// Start the framework.
 		go s.ClusterFramework.Boot()
+		go s.DrainerFramework.Boot()
 	})
 }
