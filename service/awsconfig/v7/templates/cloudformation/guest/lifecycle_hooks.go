@@ -6,7 +6,7 @@ const LifecycleHooks = `{{define "lifecycle_hooks"}}
     Properties:
       AutoScalingGroupName:
         Ref: {{ .LifecycleHooks.NodeDrainer.Name }}
-      DefaultResult: Continue
+      DefaultResult: CONTINUE
       HeartbeatTimeout: 300
       LifecycleHookName: NodeDrainer
       LifecycleTransition: "autoscaling:EC2_INSTANCE_TERMINATING"
