@@ -7,6 +7,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
+
+	"github.com/giantswarm/aws-operator/service/awsconfig/v7/key"
 )
 
 const (
@@ -15,7 +17,7 @@ const (
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
 	i := &autoscaling.DescribeLifecycleHooksInput{
-		AutoScalingGroupName: aws.String(WorkerASGName),
+		AutoScalingGroupName: aws.String(key.WorkerASGName),
 	}
 	o, err := r.clients.AutoScaling.DescribeLifecycleHooks(i)
 	if err != nil {
@@ -24,6 +26,11 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		} else {
 			r.logger.LogCtx(ctx, "level", "error", "message", "describing lifecycle hooks", "stack", fmt.Sprintf("%#v\n", err))
 		}
+	}
+
+	if len(o.LifecycleHooks) == 0 {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "no lifecycle hooks found")
+		return nil, nil
 	}
 
 	fmt.Printf("\n")

@@ -32,6 +32,10 @@ const (
 	PolicyNameTemplate = "EC2-K8S-Policy"
 )
 
+const (
+	WorkerASGName = "WorkerAutoScalingGroup"
+)
+
 func AutoScalingGroupName(customObject v1alpha1.AWSConfig, groupName string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), groupName)
 }
@@ -64,6 +68,7 @@ func CloudFormationGuestTemplates() []string {
 		guest.LoadBalancers,
 		guest.Main,
 		guest.NatGateway,
+		guest.LifecycleHooks,
 		guest.Outputs,
 		guest.RecordSets,
 		guest.RouteTables,
