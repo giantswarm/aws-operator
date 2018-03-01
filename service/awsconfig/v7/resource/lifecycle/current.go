@@ -86,13 +86,16 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		if IsNotFound(err) {
 			// Since we are transitioning between versions we will have situations in
 			// which old clusters are updated to new versions and miss the worker ASG
-			// name in the CF stack outputs. We ignore this problem for now and move
-			// on regardless. The reconciliation will detect the guest cluster needs
-			// to be updated and once this is done, we should be fine again.
+			// name in the CF stack outputs. We cancel the reconciliation until the
+			// current update is done in order to reduce unnecessary friction.
 			//
 			// TODO remove this condition as soon as all guest clusters in existence
 			// obtain a worker ASG name.
-			workerASGName = ""
+			r.logger.LogCtx(ctx, "debug", "no worker ASG name")
+			resourcecanceledcontext.SetCanceled(ctx)
+			r.logger.LogCtx(ctx, "debug", "canceling resource for custom object")
+
+			return nil, nil
 		} else if err != nil {
 			return nil, microerror.Mask(err)
 		}
