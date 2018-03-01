@@ -13,7 +13,7 @@ type lifecycleHooksAdapter struct {
 }
 
 type lifecycleHooksAdapterASG struct {
-	Name string
+	Tag string
 }
 
 type lifecycleHooksAdapterLifecycleHook struct {
@@ -21,7 +21,7 @@ type lifecycleHooksAdapterLifecycleHook struct {
 }
 
 func (a *lifecycleHooksAdapter) Adapt(config Config) error {
-	a.ASG.Name = key.WorkerASGName
+	a.ASG.Tag = key.WorkerASGTag
 	a.LifecycleHook.Name = key.NodeDrainerLifecycleHookName
 
 	return nil
