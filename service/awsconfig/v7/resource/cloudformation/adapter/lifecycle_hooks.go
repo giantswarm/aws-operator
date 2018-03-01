@@ -8,15 +8,21 @@ import "github.com/giantswarm/aws-operator/service/awsconfig/v7/key"
 //
 
 type lifecycleHooksAdapter struct {
-	NodeDrainer lifecycleHooksAdapterNodeDrainer
+	ASG           lifecycleHooksAdapterASG
+	LifecycleHook lifecycleHooksAdapterLifecycleHook
 }
 
-type lifecycleHooksAdapterNodeDrainer struct {
+type lifecycleHooksAdapterASG struct {
+	Name string
+}
+
+type lifecycleHooksAdapterLifecycleHook struct {
 	Name string
 }
 
 func (a *lifecycleHooksAdapter) Adapt(config Config) error {
-	a.NodeDrainer.Name = key.WorkerASGName
+	a.ASG.Name = key.WorkerASGName
+	a.LifecycleHook.Name = key.NodeDrainerLifecycleHookName
 
 	return nil
 }

@@ -33,6 +33,10 @@ const (
 )
 
 const (
+	NodeDrainerLifecycleHookName = "NodeDrainer"
+)
+
+const (
 	WorkerASGName = "workerAutoScalingGroup"
 )
 

@@ -11,10 +11,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7/key"
 )
 
-const (
-	WorkerASGName = "WorkerAutoScalingGroup"
-)
-
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
 	i := &autoscaling.DescribeLifecycleHooksInput{
 		AutoScalingGroupName: aws.String(key.WorkerASGName),
