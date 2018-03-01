@@ -136,17 +136,41 @@ func Test_ClusterNamespace(t *testing.T) {
 	}
 }
 
+func Test_ClusterOrganization(t *testing.T) {
+	expectedOrg := "test-org"
+
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "test-cluster",
+				Customer: v1alpha1.ClusterCustomer{
+					ID: "test-org",
+				},
+			},
+		},
+	}
+
+	if ClusterOrganization(customObject) != expectedOrg {
+		t.Fatalf("Expected organization ID %s but was %s", expectedOrg, ClusterOrganization(customObject))
+	}
+}
+
 func Test_ClusterTags(t *testing.T) {
 	expectedID := "test-cluster"
 	expectedTags := map[string]string{
 		"kubernetes.io/cluster/test-cluster": "owned",
 		"giantswarm.io/cluster":              "test-cluster",
+		"giantswarm.io/organization":         "test-org",
 	}
 
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
 				ID: expectedID,
+				// Organization uses Customer until its renamed in the CRD.
+				Customer: v1alpha1.ClusterCustomer{
+					ID: "test-org",
+				},
 			},
 		},
 	}
