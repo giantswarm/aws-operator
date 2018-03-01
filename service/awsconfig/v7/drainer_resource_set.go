@@ -25,11 +25,8 @@ type DrainerResourceSetConfig struct {
 }
 
 func NewDrainerResourceSet(config DrainerResourceSetConfig) (*framework.ResourceSet, error) {
-	if config.GuestAWSClients.CloudFormation == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.GuestAWSClients.CloudFormation must not be empty", config)
-	}
-	if config.GuestAWSClients.EC2 == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.GuestAWSClients.EC2 must not be empty", config)
+	if config.GuestAWSClients.AutoScaling == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.GuestAWSClients.AutoScaling must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)

@@ -41,7 +41,8 @@ type Adapter struct {
 	MasterImageID    string
 	WorkerImageID    string
 
-	Outputs *outputsAdapter
+	LifecycleHooks *lifecycleHooksAdapter
+	Outputs        *outputsAdapter
 
 	autoScalingGroupAdapter
 	iamPoliciesAdapter
@@ -68,7 +69,8 @@ type Config struct {
 
 func NewGuest(cfg Config) (Adapter, error) {
 	a := Adapter{
-		Outputs: &outputsAdapter{},
+		LifecycleHooks: &lifecycleHooksAdapter{},
+		Outputs:        &outputsAdapter{},
 	}
 
 	a.ASGType = prefixWorker
@@ -94,6 +96,8 @@ func NewGuest(cfg Config) (Adapter, error) {
 		a.getSecurityGroups,
 		a.getSubnets,
 		a.getVpc,
+
+		a.LifecycleHooks.Adapt,
 		a.Outputs.Adapt,
 	}
 

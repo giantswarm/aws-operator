@@ -1,6 +1,7 @@
 package lifecycle
 
 import (
+	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -22,11 +23,8 @@ type Resource struct {
 }
 
 func NewResource(config ResourceConfig) (*Resource, error) {
-	if config.Clients.CloudFormation == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Clients.CloudFormation must not be empty", config)
-	}
-	if config.Clients.EC2 == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Clients.EC2 must not be empty", config)
+	if config.Clients.AutoScaling == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Clients.AutoScaling must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
@@ -44,4 +42,14 @@ func NewResource(config ResourceConfig) (*Resource, error) {
 
 func (r *Resource) Name() string {
 	return Name
+}
+
+func getStackOutputValue(outputs []*cloudformation.Output, key string) (string, error) {
+	for _, o := range outputs {
+		if *o.OutputKey == key {
+			return *o.OutputValue, nil
+		}
+	}
+
+	return "", microerror.Maskf(notFoundError, "stack outpout value for key '%s'", key)
 }
