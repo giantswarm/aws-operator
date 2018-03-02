@@ -1902,6 +1902,13 @@ write_files:
         - --audit-log-maxsize=100
         - --audit-policy-file=/etc/kubernetes/manifests/audit-policy.yml
         - --experimental-encryption-provider-config=/etc/kubernetes/encryption/k8s-encryption-config.yaml
+        - --requestheader-client-ca-file=/etc/kubernetes/ssl/apiserver-ca.pem
+        - --requestheader-allowed-names=aggregator
+        - --requestheader-extra-headers-prefix=X-Remote-Extra-
+        - --requestheader-group-headers=X-Remote-Group
+        - --requestheader-username-headers=X-Remote-User
+        - --proxy-client-cert-file=/etc/kubernetes/ssl/apiserver-crt.pem
+        - --proxy-client-key-file=/etc/kubernetes/ssl/apiserver-key.pem
         resources:
           requests:
             cpu: 300m

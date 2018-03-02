@@ -11,6 +11,9 @@ version directory, and then changes are introduced.
 
 ## [v3.2.1] WIP
 
+### Changed
+- Enable aggregation layer in Kubernetes API server
+
 ## [v3.1.1]
 
 ### Added

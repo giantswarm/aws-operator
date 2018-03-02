@@ -139,7 +139,6 @@
   revision = "bceaa3ffa24781cc879bc87d7cfd12f8d34a7691"
 
 [[projects]]
-  branch = "master"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "v_2_0_2",
@@ -147,7 +146,7 @@
     "v_3_1_0",
     "v_3_1_1"
   ]
-  revision = "44104ba133ba1901e2b2108163d00ba54d77c309"
+  revision = "cc07f011bd232cd96efc4c39f42bc05f7bc35579"
 
 [[projects]]
   branch = "master"
@@ -836,6 +835,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d3a6cbc0a8d705855d3cd6b991e345e618bb487aabfd31f62b0d564f1d143e16"
+  inputs-digest = "02d3455ff36c146c00a685de9d99fa0e1401ac43816d9a468dee9d9182436be8"
   solver-name = "gps-cdcl"
   solver-version = 1
