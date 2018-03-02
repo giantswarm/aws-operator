@@ -103,7 +103,7 @@ func Test_FindOrphanClusters(t *testing.T) {
 		{
 			description: "matching clusters and resources, expected empty",
 			clusters: []v1alpha1.AWSConfig{
-				v1alpha1.AWSConfig{
+				{
 					Spec: v1alpha1.AWSConfigSpec{
 						Cluster: v1alpha1.Cluster{
 							ID: "id1",
@@ -113,7 +113,7 @@ func Test_FindOrphanClusters(t *testing.T) {
 						CreationTimestamp: twentyMinAgo,
 					},
 				},
-				v1alpha1.AWSConfig{
+				{
 					Spec: v1alpha1.AWSConfigSpec{
 						Cluster: v1alpha1.Cluster{
 							ID: "id2",
@@ -130,7 +130,7 @@ func Test_FindOrphanClusters(t *testing.T) {
 		{
 			description: "orphan cluster old enough, expected to be reported",
 			clusters: []v1alpha1.AWSConfig{
-				v1alpha1.AWSConfig{
+				{
 					Spec: v1alpha1.AWSConfigSpec{
 						Cluster: v1alpha1.Cluster{
 							ID: "id1",
@@ -140,7 +140,7 @@ func Test_FindOrphanClusters(t *testing.T) {
 						CreationTimestamp: twentyMinAgo,
 					},
 				},
-				v1alpha1.AWSConfig{
+				{
 					Spec: v1alpha1.AWSConfigSpec{
 						Cluster: v1alpha1.Cluster{
 							ID: "id2",
@@ -150,7 +150,7 @@ func Test_FindOrphanClusters(t *testing.T) {
 						CreationTimestamp: twentyMinAgo,
 					},
 				},
-				v1alpha1.AWSConfig{
+				{
 					Spec: v1alpha1.AWSConfigSpec{
 						Cluster: v1alpha1.Cluster{
 							ID: "id3",
@@ -167,7 +167,7 @@ func Test_FindOrphanClusters(t *testing.T) {
 		{
 			description: "recent orphan cluster, not expected to be reported",
 			clusters: []v1alpha1.AWSConfig{
-				v1alpha1.AWSConfig{
+				{
 					Spec: v1alpha1.AWSConfigSpec{
 						Cluster: v1alpha1.Cluster{
 							ID: "id1",
@@ -177,7 +177,7 @@ func Test_FindOrphanClusters(t *testing.T) {
 						CreationTimestamp: fiveMinAgo,
 					},
 				},
-				v1alpha1.AWSConfig{
+				{
 					Spec: v1alpha1.AWSConfigSpec{
 						Cluster: v1alpha1.Cluster{
 							ID: "id2",
@@ -187,7 +187,7 @@ func Test_FindOrphanClusters(t *testing.T) {
 						CreationTimestamp: fiveMinAgo,
 					},
 				},
-				v1alpha1.AWSConfig{
+				{
 					Spec: v1alpha1.AWSConfigSpec{
 						Cluster: v1alpha1.Cluster{
 							ID: "id3",
@@ -204,7 +204,7 @@ func Test_FindOrphanClusters(t *testing.T) {
 		{
 			description: "multiple orphan resources and cluster, both recent and old",
 			clusters: []v1alpha1.AWSConfig{
-				v1alpha1.AWSConfig{
+				{
 					Spec: v1alpha1.AWSConfigSpec{
 						Cluster: v1alpha1.Cluster{
 							ID: "id1",
@@ -214,7 +214,7 @@ func Test_FindOrphanClusters(t *testing.T) {
 						CreationTimestamp: twentyMinAgo,
 					},
 				},
-				v1alpha1.AWSConfig{
+				{
 					Spec: v1alpha1.AWSConfigSpec{
 						Cluster: v1alpha1.Cluster{
 							ID: "id2",
@@ -224,7 +224,7 @@ func Test_FindOrphanClusters(t *testing.T) {
 						CreationTimestamp: fiveMinAgo,
 					},
 				},
-				v1alpha1.AWSConfig{
+				{
 					Spec: v1alpha1.AWSConfigSpec{
 						Cluster: v1alpha1.Cluster{
 							ID: "id3",
@@ -234,7 +234,7 @@ func Test_FindOrphanClusters(t *testing.T) {
 						CreationTimestamp: twentyMinAgo,
 					},
 				},
-				v1alpha1.AWSConfig{
+				{
 					Spec: v1alpha1.AWSConfigSpec{
 						Cluster: v1alpha1.Cluster{
 							ID: "id4",
@@ -244,7 +244,7 @@ func Test_FindOrphanClusters(t *testing.T) {
 						CreationTimestamp: twentyMinAgo,
 					},
 				},
-				v1alpha1.AWSConfig{
+				{
 					Spec: v1alpha1.AWSConfigSpec{
 						Cluster: v1alpha1.Cluster{
 							ID: "id5",
@@ -254,7 +254,7 @@ func Test_FindOrphanClusters(t *testing.T) {
 						CreationTimestamp: fiveMinAgo,
 					},
 				},
-				v1alpha1.AWSConfig{
+				{
 					Spec: v1alpha1.AWSConfigSpec{
 						Cluster: v1alpha1.Cluster{
 							ID: "id6",

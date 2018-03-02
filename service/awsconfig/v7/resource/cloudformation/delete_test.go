@@ -8,7 +8,8 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/cloudformation/adapter"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v7/adapter"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v7/cloudformation"
 )
 
 func Test_Resource_Cloudformation_newDelete(t *testing.T) {
@@ -91,10 +92,11 @@ func Test_Resource_Cloudformation_newDelete(t *testing.T) {
 		c.Clients = &adapter.Clients{}
 		c.HostClients = &adapter.Clients{}
 		c.Logger = microloggertest.New()
+		c.Service = &cloudformationservice.CloudFormation{}
 
 		newResource, err = New(c)
 		if err != nil {
-			t.Error("expected", nil, "got", err)
+			t.Fatal("expected", nil, "got", err)
 		}
 	}
 
@@ -102,7 +104,7 @@ func Test_Resource_Cloudformation_newDelete(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			result, err := newResource.newDeleteChange(context.TODO(), tc.obj, tc.currentState, tc.desiredState)
 			if err != nil {
-				t.Errorf("expected '%v' got '%#v'", nil, err)
+				t.Fatal("expected", nil, "got", err)
 			}
 			deleteChange, ok := result.(awscloudformation.DeleteStackInput)
 			if !ok {
