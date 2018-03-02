@@ -9,6 +9,7 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7/cloudconfig"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v7/cloudformation"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/cloudformation/adapter"
 )
 
@@ -18,6 +19,7 @@ func testConfig() Config {
 	c.Clients = &adapter.Clients{}
 	c.HostClients = &adapter.Clients{}
 	c.Logger = microloggertest.New()
+	c.Service = &cloudformationservice.CloudFormation{}
 
 	c.InstallationName = "myinstallation"
 
@@ -26,24 +28,26 @@ func testConfig() Config {
 
 func TestMainGuestTemplateGetEmptyBody(t *testing.T) {
 	customObject := v1alpha1.AWSConfig{}
-	cfg := testConfig()
-	cfg.Clients = &adapter.Clients{
+
+	c := testConfig()
+	c.Clients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
 		KMS: &adapter.KMSClientMock{},
 	}
-	cfg.HostClients = &adapter.Clients{
+	c.HostClients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
 	}
-	newResource, err := New(cfg)
+
+	newResource, err := New(c)
 	if err != nil {
-		t.Errorf("unexpected error %v", err)
+		t.Fatal("expected", nil, "got", err)
 	}
 
 	_, err = newResource.getMainGuestTemplateBody(customObject)
 	if err == nil {
-		t.Error("error didn't happen")
+		t.Fatal("expected", nil, "got", err)
 	}
 }
 
@@ -78,13 +82,13 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 				Region: "eu-central-1",
 				AZ:     "eu-central-1a",
 				Masters: []v1alpha1.AWSConfigSpecAWSNode{
-					v1alpha1.AWSConfigSpecAWSNode{
+					{
 						ImageID:      "ami-1234-master",
 						InstanceType: "m3.large",
 					},
 				},
 				Workers: []v1alpha1.AWSConfigSpecAWSNode{
-					v1alpha1.AWSConfigSpecAWSNode{
+					{
 						ImageID:      "ami-1234-worker",
 						InstanceType: "m3.large",
 					},

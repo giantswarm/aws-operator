@@ -8,6 +8,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 
+	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v7/cloudformation"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/cloudformation/adapter"
 )
 
@@ -28,13 +29,13 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 			AWS: v1alpha1.AWSConfigSpecAWS{
 				AZ: "eu-central-1a",
 				Masters: []v1alpha1.AWSConfigSpecAWSNode{
-					v1alpha1.AWSConfigSpecAWSNode{
+					{
 						ImageID: "myimageid",
 					},
 				},
 				Region: "eu-central-1",
 				Workers: []v1alpha1.AWSConfigSpecAWSNode{
-					v1alpha1.AWSConfigSpecAWSNode{
+					{
 						ImageID: "myimageid",
 					},
 				},
@@ -96,10 +97,11 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 			IAM:            &adapter.IAMClientMock{},
 		}
 		c.Logger = microloggertest.New()
+		c.Service = &cloudformationservice.CloudFormation{}
 
 		newResource, err = New(c)
 		if err != nil {
-			t.Error("expected", nil, "got", err)
+			t.Fatal("expected", nil, "got", err)
 		}
 	}
 
@@ -107,14 +109,14 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			result, err := newResource.newCreateChange(context.TODO(), tc.obj, tc.currentState, tc.desiredState)
 			if err != nil {
-				t.Errorf("expected '%v' got '%#v'", nil, err)
+				t.Fatal("expected", nil, "got", err)
 			}
 			createChange, ok := result.(awscloudformation.CreateStackInput)
 			if !ok {
-				t.Errorf("expected '%T', got '%T'", createChange, result)
+				t.Fatalf("expected '%T', got '%T'", createChange, result)
 			}
 			if createChange.StackName != nil && *createChange.StackName != tc.expectedStackName {
-				t.Errorf("expected %s, got %s", tc.expectedStackName, *createChange.StackName)
+				t.Fatalf("expected %s, got %s", tc.expectedStackName, *createChange.StackName)
 			}
 		})
 	}

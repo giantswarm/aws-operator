@@ -5,6 +5,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v7/cloudformation"
 )
 
 const (
@@ -14,22 +15,24 @@ const (
 type ResourceConfig struct {
 	Clients awsclient.Clients
 	Logger  micrologger.Logger
+	Service *cloudformationservice.CloudFormation
 }
 
 type Resource struct {
 	clients awsclient.Clients
 	logger  micrologger.Logger
+	service *cloudformationservice.CloudFormation
 }
 
 func NewResource(config ResourceConfig) (*Resource, error) {
-	if config.Clients.CloudFormation == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Clients.CloudFormation must not be empty", config)
-	}
-	if config.Clients.EC2 == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Clients.EC2 must not be empty", config)
+	if config.Clients.AutoScaling == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Clients.AutoScaling must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
+	}
+	if config.Service == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Service must not be empty", config)
 	}
 
 	newResource := &Resource{
@@ -37,6 +40,7 @@ func NewResource(config ResourceConfig) (*Resource, error) {
 		logger: config.Logger.With(
 			"resource", Name,
 		),
+		service: config.Service,
 	}
 
 	return newResource, nil

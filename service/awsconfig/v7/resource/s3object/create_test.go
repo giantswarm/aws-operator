@@ -41,14 +41,14 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 			obj:          clusterTpo,
 			currentState: map[string]BucketObjectState{},
 			desiredState: map[string]BucketObjectState{
-				"master": BucketObjectState{
+				"master": {
 					Body:   "master-body",
 					Bucket: "mybucket",
 					Key:    "master",
 				},
 			},
 			expectedState: map[string]BucketObjectState{
-				"master": BucketObjectState{
+				"master": {
 					Body:   "master-body",
 					Bucket: "mybucket",
 					Key:    "master",
@@ -59,21 +59,21 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 			description: "current state not empty, desired state not empty, create change == desired state",
 			obj:         clusterTpo,
 			currentState: map[string]BucketObjectState{
-				"mykey": BucketObjectState{
+				"mykey": {
 					Body:   "mykey",
 					Bucket: "mybucket",
 					Key:    "master",
 				},
 			},
 			desiredState: map[string]BucketObjectState{
-				"master": BucketObjectState{
+				"master": {
 					Body:   "master-body",
 					Bucket: "mybucket",
 					Key:    "master",
 				},
 			},
 			expectedState: map[string]BucketObjectState{
-				"master": BucketObjectState{
+				"master": {
 					Body:   "master-body",
 					Bucket: "mybucket",
 					Key:    "master",
@@ -84,27 +84,27 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 			description: "current state has 1 object, desired state has 2 objects, create change == missing object",
 			obj:         clusterTpo,
 			currentState: map[string]BucketObjectState{
-				"master": BucketObjectState{
+				"master": {
 					Body:   "master-body",
 					Bucket: "mybucket",
 					Key:    "master",
 				},
 			},
 			desiredState: map[string]BucketObjectState{
-				"master": BucketObjectState{
+				"master": {
 					Body:   "master-body",
 					Bucket: "mybucket",
 					Key:    "master",
 				},
-				"worker": BucketObjectState{
+				"worker": {
 					Body:   "worker-body",
 					Bucket: "mybucket",
 					Key:    "worker",
 				},
 			},
 			expectedState: map[string]BucketObjectState{
-				"master": BucketObjectState{},
-				"worker": BucketObjectState{
+				"master": {},
+				"worker": {
 					Body:   "worker-body",
 					Bucket: "mybucket",
 					Key:    "worker",
@@ -115,32 +115,32 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 			description: "current state matches desired state, empty create change",
 			obj:         clusterTpo,
 			currentState: map[string]BucketObjectState{
-				"master": BucketObjectState{
+				"master": {
 					Body:   "master-body",
 					Bucket: "mybucket",
 					Key:    "master",
 				},
-				"worker": BucketObjectState{
+				"worker": {
 					Body:   "worker-body",
 					Bucket: "mybucket",
 					Key:    "worker",
 				},
 			},
 			desiredState: map[string]BucketObjectState{
-				"master": BucketObjectState{
+				"master": {
 					Body:   "master-body",
 					Bucket: "mybucket",
 					Key:    "master",
 				},
-				"worker": BucketObjectState{
+				"worker": {
 					Body:   "worker-body",
 					Bucket: "mybucket",
 					Key:    "worker",
 				},
 			},
 			expectedState: map[string]BucketObjectState{
-				"master": BucketObjectState{},
-				"worker": BucketObjectState{},
+				"master": {},
+				"worker": {},
 			},
 		},
 	}

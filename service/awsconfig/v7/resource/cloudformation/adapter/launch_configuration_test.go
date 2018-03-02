@@ -27,7 +27,7 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 					},
 					AWS: v1alpha1.AWSConfigSpecAWS{
 						Workers: []v1alpha1.AWSConfigSpecAWSNode{
-							v1alpha1.AWSConfigSpecAWSNode{
+							{
 								InstanceType: "myinstancetype",
 							},
 						},
@@ -37,7 +37,7 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 			expectedInstanceType:             "myinstancetype",
 			expectedAssociatePublicIPAddress: false,
 			expectedBlockDeviceMappings: []BlockDeviceMapping{
-				BlockDeviceMapping{
+				{
 					DeleteOnTermination: true,
 					DeviceName:          defaultEBSVolumeMountPoint,
 					VolumeSize:          defaultEBSVolumeSize,
@@ -108,7 +108,7 @@ func TestAdapterLaunchConfigurationSmallCloudConfig(t *testing.T) {
 			AWS: v1alpha1.AWSConfigSpecAWS{
 				Region: "myregion",
 				Workers: []v1alpha1.AWSConfigSpecAWSNode{
-					v1alpha1.AWSConfigSpecAWSNode{
+					{
 						ImageID:      "myimageid",
 						InstanceType: "myinstancetype",
 					},

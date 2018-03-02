@@ -170,13 +170,13 @@ func TestGuestReadyAfterMasterReboot(t *testing.T) {
 	log.Println("getting master ID")
 	describeInput := &ec2.DescribeInstancesInput{
 		Filters: []*ec2.Filter{
-			&ec2.Filter{
+			{
 				Name: aws.String("tag:Name"),
 				Values: []*string{
 					aws.String(fmt.Sprintf("%s-master", os.Getenv("CLUSTER_NAME"))),
 				},
 			},
-			&ec2.Filter{
+			{
 				Name: aws.String("instance-state-name"),
 				Values: []*string{
 					aws.String("running"),
