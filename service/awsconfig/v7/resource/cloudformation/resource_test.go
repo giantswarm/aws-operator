@@ -25,11 +25,11 @@ func Test_Resource_Cloudformation_GetCloudFormationTags(t *testing.T) {
 				},
 			},
 			expectedTags: []*awscloudformation.Tag{
-				&awscloudformation.Tag{
+				{
 					Key:   aws.String("kubernetes.io/cluster/5xchu"),
 					Value: aws.String("owned"),
 				},
-				&awscloudformation.Tag{
+				{
 					Key:   aws.String("giantswarm.io/cluster"),
 					Value: aws.String("5xchu"),
 				},

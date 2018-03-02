@@ -45,11 +45,11 @@ func Test_CurrentState(t *testing.T) {
 				{
 					loadBalancerName: "test-elb",
 					loadBalancerTags: []*elb.Tag{
-						&elb.Tag{
+						{
 							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
 							Value: aws.String("owned"),
 						},
-						&elb.Tag{
+						{
 							Key:   aws.String("kubernetes.io/service-name"),
 							Value: aws.String("hello-world"),
 						},
@@ -67,11 +67,11 @@ func Test_CurrentState(t *testing.T) {
 				{
 					loadBalancerName: "test-elb",
 					loadBalancerTags: []*elb.Tag{
-						&elb.Tag{
+						{
 							Key:   aws.String("kubernetes.io/cluster/other-cluster"),
 							Value: aws.String("owned"),
 						},
-						&elb.Tag{
+						{
 							Key:   aws.String("kubernetes.io/service-name"),
 							Value: aws.String("hello-world"),
 						},
@@ -92,11 +92,11 @@ func Test_CurrentState(t *testing.T) {
 				{
 					loadBalancerName: "test-elb",
 					loadBalancerTags: []*elb.Tag{
-						&elb.Tag{
+						{
 							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
 							Value: aws.String("owned"),
 						},
-						&elb.Tag{
+						{
 							Key:   aws.String("kubernetes.io/service-name"),
 							Value: aws.String("hello-world"),
 						},
@@ -105,11 +105,11 @@ func Test_CurrentState(t *testing.T) {
 				{
 					loadBalancerName: "test-elb-2",
 					loadBalancerTags: []*elb.Tag{
-						&elb.Tag{
+						{
 							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
 							Value: aws.String("owned"),
 						},
-						&elb.Tag{
+						{
 							Key:   aws.String("kubernetes.io/service-name"),
 							Value: aws.String("hello-world-2"),
 						},
@@ -130,11 +130,11 @@ func Test_CurrentState(t *testing.T) {
 				{
 					loadBalancerName: "test-elb",
 					loadBalancerTags: []*elb.Tag{
-						&elb.Tag{
+						{
 							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
 							Value: aws.String("owned"),
 						},
-						&elb.Tag{
+						{
 							Key:   aws.String("kubernetes.io/service-name"),
 							Value: aws.String("hello-world"),
 						},
@@ -143,11 +143,11 @@ func Test_CurrentState(t *testing.T) {
 				{
 					loadBalancerName: "test-elb-2",
 					loadBalancerTags: []*elb.Tag{
-						&elb.Tag{
+						{
 							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
 							Value: aws.String("owned"),
 						},
-						&elb.Tag{
+						{
 							Key:   aws.String("kubernetes.io/service-name"),
 							Value: aws.String("hello-world-2"),
 						},
@@ -156,11 +156,11 @@ func Test_CurrentState(t *testing.T) {
 				{
 					loadBalancerName: "test-elb-3",
 					loadBalancerTags: []*elb.Tag{
-						&elb.Tag{
+						{
 							Key:   aws.String("kubernetes.io/cluster/another-cluster"),
 							Value: aws.String("owned"),
 						},
-						&elb.Tag{
+						{
 							Key:   aws.String("kubernetes.io/service-name"),
 							Value: aws.String("hello-world-2"),
 						},
@@ -178,7 +178,7 @@ func Test_CurrentState(t *testing.T) {
 				{
 					loadBalancerName: "test-elb",
 					loadBalancerTags: []*elb.Tag{
-						&elb.Tag{
+						{
 							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
 							Value: aws.String("owned"),
 						},
