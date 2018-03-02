@@ -34,7 +34,7 @@ const (
 
 const (
 	WorkerASGKey = "WorkerASGName"
-	WorkerASGTag = "workerAutoScalingGroup"
+	WorkerASGRef = "workerAutoScalingGroup"
 )
 
 func AutoScalingGroupName(customObject v1alpha1.AWSConfig, groupName string) string {

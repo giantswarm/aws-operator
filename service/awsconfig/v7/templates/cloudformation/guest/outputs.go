@@ -9,7 +9,7 @@ Outputs:
   MasterCloudConfigVersion:
     Value: {{ .Outputs.Master.CloudConfig.Version }}
   {{ .Outputs.Worker.ASG.Key }}:
-    Value: !Ref {{ .Outputs.Worker.ASG.Tag }}
+    Value: !Ref {{ .Outputs.Worker.ASG.Ref }}
   WorkerCount:
     Value: {{ .Outputs.Worker.Count }}
   WorkerImageID:
