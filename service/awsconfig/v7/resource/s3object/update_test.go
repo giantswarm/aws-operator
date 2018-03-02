@@ -41,56 +41,56 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 			obj:          clusterTpo,
 			currentState: map[string]BucketObjectState{},
 			desiredState: map[string]BucketObjectState{
-				"master": BucketObjectState{
+				"master": {
 					Body:   "master-body",
 					Bucket: "mybucket",
 					Key:    "master",
 				},
 			},
 			expectedState: map[string]BucketObjectState{
-				"master": BucketObjectState{},
+				"master": {},
 			},
 		},
 		{
 			description: "current state matches desired state, empty update change",
 			obj:         clusterTpo,
 			currentState: map[string]BucketObjectState{
-				"master": BucketObjectState{
+				"master": {
 					Body:   "master-body",
 					Bucket: "mybucket",
 					Key:    "master",
 				},
 			},
 			desiredState: map[string]BucketObjectState{
-				"master": BucketObjectState{
+				"master": {
 					Body:   "master-body",
 					Bucket: "mybucket",
 					Key:    "master",
 				},
 			},
 			expectedState: map[string]BucketObjectState{
-				"master": BucketObjectState{},
+				"master": {},
 			},
 		},
 		{
 			description: "current state does not match desired state, update bucket object",
 			obj:         clusterTpo,
 			currentState: map[string]BucketObjectState{
-				"master": BucketObjectState{
+				"master": {
 					Body:   "master-body",
 					Bucket: "mybucket",
 					Key:    "master",
 				},
 			},
 			desiredState: map[string]BucketObjectState{
-				"master": BucketObjectState{
+				"master": {
 					Body:   "master-new-body",
 					Bucket: "mybucket",
 					Key:    "master",
 				},
 			},
 			expectedState: map[string]BucketObjectState{
-				"master": BucketObjectState{
+				"master": {
 					Body:   "master-new-body",
 					Bucket: "mybucket",
 					Key:    "master",
@@ -101,36 +101,36 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 			description: "current state does not match desired state, update bucket object",
 			obj:         clusterTpo,
 			currentState: map[string]BucketObjectState{
-				"master": BucketObjectState{
+				"master": {
 					Body:   "master-body",
 					Bucket: "mybucket",
 					Key:    "master",
 				},
-				"worker": BucketObjectState{
+				"worker": {
 					Body:   "worker-body",
 					Bucket: "mybucket",
 					Key:    "worker",
 				},
 			},
 			desiredState: map[string]BucketObjectState{
-				"master": BucketObjectState{
+				"master": {
 					Body:   "master-new-body",
 					Bucket: "mybucket",
 					Key:    "master",
 				},
-				"worker": BucketObjectState{
+				"worker": {
 					Body:   "worker-body",
 					Bucket: "mybucket",
 					Key:    "worker",
 				},
 			},
 			expectedState: map[string]BucketObjectState{
-				"master": BucketObjectState{
+				"master": {
 					Body:   "master-new-body",
 					Bucket: "mybucket",
 					Key:    "master",
 				},
-				"worker": BucketObjectState{},
+				"worker": {},
 			},
 		},
 	}

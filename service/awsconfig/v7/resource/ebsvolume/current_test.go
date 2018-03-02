@@ -45,11 +45,11 @@ func Test_CurrentState(t *testing.T) {
 				{
 					volumeID: "vol-1234",
 					tags: []*ec2.Tag{
-						&ec2.Tag{
+						{
 							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
 							Value: aws.String("owned"),
 						},
-						&ec2.Tag{
+						{
 							Key:   aws.String("kubernetes.io/created-for/pv/name"),
 							Value: aws.String("pvc-1234"),
 						},
@@ -70,11 +70,11 @@ func Test_CurrentState(t *testing.T) {
 				{
 					volumeID: "vol-1234",
 					tags: []*ec2.Tag{
-						&ec2.Tag{
+						{
 							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
 							Value: aws.String("owned"),
 						},
-						&ec2.Tag{
+						{
 							Key:   aws.String("kubernetes.io/created-for/pv/name"),
 							Value: aws.String("pvc-1234"),
 						},
@@ -83,11 +83,11 @@ func Test_CurrentState(t *testing.T) {
 				{
 					volumeID: "vol-5678",
 					tags: []*ec2.Tag{
-						&ec2.Tag{
+						{
 							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
 							Value: aws.String("owned"),
 						},
-						&ec2.Tag{
+						{
 							Key:   aws.String("kubernetes.io/created-for/pv/name"),
 							Value: aws.String("pvc-5678"),
 						},
@@ -105,11 +105,11 @@ func Test_CurrentState(t *testing.T) {
 				{
 					volumeID: "vol-1234",
 					tags: []*ec2.Tag{
-						&ec2.Tag{
+						{
 							Key:   aws.String("kubernetes.io/cluster/other-cluster"),
 							Value: aws.String("owned"),
 						},
-						&ec2.Tag{
+						{
 							Key:   aws.String("kubernetes.io/created-for/pv/name"),
 							Value: aws.String("pvc-1234"),
 						},
@@ -127,7 +127,7 @@ func Test_CurrentState(t *testing.T) {
 				{
 					volumeID: "vol-1234",
 					tags: []*ec2.Tag{
-						&ec2.Tag{
+						{
 							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
 							Value: aws.String("owned"),
 						},

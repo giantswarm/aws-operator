@@ -31,11 +31,11 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 			AWS: v1alpha1.AWSConfigSpecAWS{
 				AZ: "eu-central-1a",
 				Masters: []v1alpha1.AWSConfigSpecAWSNode{
-					v1alpha1.AWSConfigSpecAWSNode{},
+					{},
 				},
 				Region: "eu-central-1",
 				Workers: []v1alpha1.AWSConfigSpecAWSNode{
-					v1alpha1.AWSConfigSpecAWSNode{},
+					{},
 				},
 			},
 		},
@@ -444,11 +444,11 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 			AWS: v1alpha1.AWSConfigSpecAWS{
 				AZ: "eu-central-1a",
 				Masters: []v1alpha1.AWSConfigSpecAWSNode{
-					v1alpha1.AWSConfigSpecAWSNode{},
+					{},
 				},
 				Region: "eu-central-1",
 				Workers: []v1alpha1.AWSConfigSpecAWSNode{
-					v1alpha1.AWSConfigSpecAWSNode{},
+					{},
 				},
 			},
 		},
