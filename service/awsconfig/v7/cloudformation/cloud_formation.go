@@ -37,5 +37,5 @@ func (c *CloudFormation) GetOutputValue(outputs []*cloudformation.Output, key st
 		}
 	}
 
-	return "", microerror.Maskf(outputNotFoundError, "stack outpout value for key '%s'", key)
+	return "", microerror.Maskf(outputNotFoundError, "stack output value for key '%s'", key)
 }
