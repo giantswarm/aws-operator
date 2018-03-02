@@ -10,6 +10,7 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/operatorkit/framework/context/updateallowedcontext"
 
+	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v7/cloudformation"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/cloudformation/adapter"
 )
 
@@ -398,10 +399,11 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 			EC2: &adapter.EC2ClientMock{},
 		}
 		c.Logger = microloggertest.New()
+		c.Service = &cloudformationservice.CloudFormation{}
 
 		newResource, err = New(c)
 		if err != nil {
-			t.Error("expected", nil, "got", err)
+			t.Fatal("expected", nil, "got", err)
 		}
 	}
 
@@ -412,7 +414,7 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 
 			result, err := newResource.newUpdateChange(ctx, clusterTpo, tc.currentState, tc.desiredState)
 			if err != nil {
-				t.Errorf("expected '%v' got '%#v'", nil, err)
+				t.Fatal("expected", nil, "got", err)
 			}
 			updateChange, ok := result.(awscloudformation.UpdateStackInput)
 			if !ok {
@@ -844,10 +846,11 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 			EC2: &adapter.EC2ClientMock{},
 		}
 		c.Logger = microloggertest.New()
+		c.Service = &cloudformationservice.CloudFormation{}
 
 		newResource, err = New(c)
 		if err != nil {
-			t.Error("expected", nil, "got", err)
+			t.Fatal("expected", nil, "got", err)
 		}
 	}
 
@@ -855,7 +858,7 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 		t.Run(tc.description, func(t *testing.T) {
 			result, err := newResource.newUpdateChange(context.TODO(), clusterTpo, tc.currentState, tc.desiredState)
 			if err != nil {
-				t.Errorf("expected '%v' got '%#v'", nil, err)
+				t.Fatal("expected", nil, "got", err)
 			}
 			updateChange, ok := result.(awscloudformation.UpdateStackInput)
 			if !ok {

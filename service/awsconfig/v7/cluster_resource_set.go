@@ -17,8 +17,9 @@ import (
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7/cloudconfig"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v7/cloudformation"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7/key"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/cloudformation"
+	cloudformationresource "github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/cloudformation"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/cloudformation/adapter"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/ebsvolume"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/endpoints"
@@ -127,6 +128,18 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 		}
 	}
 
+	var cloudFormationService *cloudformationservice.CloudFormation
+	{
+		c := cloudformationservice.Config{
+			Client: config.GuestAWSClients.CloudFormation,
+		}
+
+		cloudFormationService, err = cloudformationservice.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var kmsKeyResource framework.Resource
 	{
 		c := kmskey.Config{
@@ -210,7 +223,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 
 	var cloudformationResource framework.Resource
 	{
-		c := cloudformation.Config{
+		c := cloudformationresource.Config{
 			Clients: &adapter.Clients{
 				EC2:            config.GuestAWSClients.EC2,
 				CloudFormation: config.GuestAWSClients.CloudFormation,
@@ -223,12 +236,13 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 				IAM:            config.HostAWSClients.IAM,
 				CloudFormation: config.HostAWSClients.CloudFormation,
 			},
-			Logger: config.Logger,
+			Logger:  config.Logger,
+			Service: cloudFormationService,
 
 			InstallationName: config.InstallationName,
 		}
 
-		cloudformationResource, err = cloudformation.New(c)
+		cloudformationResource, err = cloudformationresource.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

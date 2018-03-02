@@ -12,6 +12,7 @@ import (
 	"github.com/giantswarm/operatorkit/framework/resource/retryresource"
 
 	"github.com/giantswarm/aws-operator/client/aws"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v7/cloudformation"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7/key"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/lifecycle"
 )
@@ -25,27 +26,26 @@ type DrainerResourceSetConfig struct {
 }
 
 func NewDrainerResourceSet(config DrainerResourceSetConfig) (*framework.ResourceSet, error) {
-	if config.GuestAWSClients.CloudFormation == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.GuestAWSClients.CloudFormation must not be empty", config)
-	}
-	if config.GuestAWSClients.EC2 == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.GuestAWSClients.EC2 must not be empty", config)
-	}
-	if config.Logger == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
-	}
-
-	if config.ProjectName == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.ProjectName must not be empty", config)
-	}
-
 	var err error
+
+	var cloudFormationService *cloudformationservice.CloudFormation
+	{
+		c := cloudformationservice.Config{
+			Client: config.GuestAWSClients.CloudFormation,
+		}
+
+		cloudFormationService, err = cloudformationservice.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
 
 	var lifecycleResource framework.Resource
 	{
 		c := lifecycle.ResourceConfig{
 			Clients: config.GuestAWSClients,
 			Logger:  config.Logger,
+			Service: cloudFormationService,
 		}
 
 		lifecycleResource, err = lifecycle.NewResource(c)
