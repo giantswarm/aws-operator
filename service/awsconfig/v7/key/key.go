@@ -32,6 +32,11 @@ const (
 	PolicyNameTemplate = "EC2-K8S-Policy"
 )
 
+const (
+	WorkerASGKey = "WorkerASGName"
+	WorkerASGTag = "workerAutoScalingGroup"
+)
+
 func AutoScalingGroupName(customObject v1alpha1.AWSConfig, groupName string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), groupName)
 }

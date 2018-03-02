@@ -94,6 +94,7 @@ func NewGuest(cfg Config) (Adapter, error) {
 		a.getSecurityGroups,
 		a.getSubnets,
 		a.getVpc,
+
 		a.Outputs.Adapt,
 	}
 
