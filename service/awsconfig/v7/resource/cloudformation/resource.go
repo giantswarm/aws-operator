@@ -7,6 +7,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
+	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v7/cloudformation"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7/key"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/cloudformation/adapter"
 )
@@ -32,6 +33,7 @@ type Config struct {
 	HostClients      *adapter.Clients
 	InstallationName string
 	Logger           micrologger.Logger
+	Service          *cloudformationservice.CloudFormation
 }
 
 // Resource implements the cloudformation resource.
@@ -40,13 +42,16 @@ type Resource struct {
 	hostClients      *adapter.Clients
 	installationName string
 	logger           micrologger.Logger
+	service          *cloudformationservice.CloudFormation
 }
 
 // New creates a new configured cloudformation resource.
 func New(config Config) (*Resource, error) {
-	// Dependencies.
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
+	}
+	if config.Service == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Service must not be empty", config)
 	}
 
 	newService := &Resource{
@@ -57,6 +62,7 @@ func New(config Config) (*Resource, error) {
 		logger: config.Logger.With(
 			"resource", Name,
 		),
+		service: config.Service,
 	}
 
 	return newService, nil
