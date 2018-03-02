@@ -16,11 +16,11 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v7/adapter"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7/cloudconfig"
 	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v7/cloudformation"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7/key"
 	cloudformationresource "github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/cloudformation"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/cloudformation/adapter"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/ebsvolume"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7/resource/kmskey"
