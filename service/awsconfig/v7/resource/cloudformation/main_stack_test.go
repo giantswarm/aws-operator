@@ -82,13 +82,13 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 				Region: "eu-central-1",
 				AZ:     "eu-central-1a",
 				Masters: []v1alpha1.AWSConfigSpecAWSNode{
-					v1alpha1.AWSConfigSpecAWSNode{
+					{
 						ImageID:      "ami-1234-master",
 						InstanceType: "m3.large",
 					},
 				},
 				Workers: []v1alpha1.AWSConfigSpecAWSNode{
-					v1alpha1.AWSConfigSpecAWSNode{
+					{
 						ImageID:      "ami-1234-worker",
 						InstanceType: "m3.large",
 					},
