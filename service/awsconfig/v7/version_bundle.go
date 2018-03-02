@@ -11,7 +11,7 @@ func VersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "aws-operator",
-				Description: "There are no changes yet, replace this with something useful.",
+				Description: "Add AWS resource tag with the Giant Swarm Organization.",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
