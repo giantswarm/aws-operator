@@ -31,10 +31,16 @@ type outputsAdapterMasterCloudConfig struct {
 }
 
 type outputsAdapterWorker struct {
+	ASG          outputsAdapterWorkerASG
 	Count        string
 	ImageID      string
 	InstanceType string
 	CloudConfig  outputsAdapterWorkerCloudConfig
+}
+
+type outputsAdapterWorkerASG struct {
+	Key string
+	Ref string
 }
 
 type outputsAdapterWorkerCloudConfig struct {
@@ -59,6 +65,8 @@ func (a *outputsAdapter) Adapt(config Config) error {
 	a.Master.InstanceType = key.MasterInstanceType(config.CustomObject)
 	a.Master.CloudConfig.Version = cloudconfig.MasterCloudConfigVersion
 
+	a.Worker.ASG.Key = key.WorkerASGKey
+	a.Worker.ASG.Ref = key.WorkerASGRef
 	a.Worker.Count = strconv.Itoa(workerCount)
 	a.Worker.ImageID = imageID
 	a.Worker.InstanceType = key.WorkerInstanceType(config.CustomObject)
