@@ -52,12 +52,10 @@ func (c *CloudFormation) DescribeOutputsAndStatus(stackName string) ([]*cloudfor
 		stackStatus = *o.Stacks[0].StackStatus
 	}
 
-	// TODO check comments
-
-	// GetCurrentState is called on cluster deletion, if the stack creation failed
-	// the outputs can be unaccessible, this can lead to a stack that cannot be
-	// deleted. it can also be called during creation, while the outputs are still
-	// not accessible.
+	// We call DescribeOutputsAndStatus in certain GetCurrentState
+	// implementations. If the stack creation failed, the outputs can be
+	// unaccessible. This can lead to a stack that cannot be deleted. it can also
+	// be called during creation, while the outputs are still not accessible.
 	{
 		errorStatuses := []string{
 			cloudformation.StackStatusRollbackInProgress,

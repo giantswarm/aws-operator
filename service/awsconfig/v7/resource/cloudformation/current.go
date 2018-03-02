@@ -22,10 +22,10 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	stackName := key.MainGuestStackName(customObject)
 
-	// In order to compute the current state of the guest cluster's main stack we
-	// have to describe the CF stacks and lookup the right stack. We dispatch our
-	// custom StackState structure and enrich it with all information necessary to
-	// reconcile the cloudformation resource.
+	// In order to compute the current state of the guest cluster's cloud
+	// formation stack we have to describe the CF stacks and lookup the right
+	// stack. We dispatch our custom StackState structure and enrich it with all
+	// information necessary to reconcile the cloudformation resource.
 	var stackOutputs []*cloudformation.Output
 	var stackStatus string
 	{
