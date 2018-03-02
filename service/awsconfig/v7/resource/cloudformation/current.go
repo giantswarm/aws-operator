@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/framework/context/resourcecanceledcontext"
 
+	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v7/cloudformation"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7/key"
 )
 
@@ -18,100 +18,75 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return StackState{}, microerror.Mask(err)
 	}
 
+	r.logger.LogCtx(ctx, "level", "debug", "message", "looking for the guest cluster cloud formation stack in the AWS API")
+
+	stackName := key.MainGuestStackName(customObject)
+
 	// In order to compute the current state of the guest cluster's main stack we
 	// have to describe the CF stacks and lookup the right stack. We dispatch our
 	// custom StackState structure and enrich it with all information necessary to
 	// reconcile the cloudformation resource.
-	stackName := key.MainGuestStackName(customObject)
-	describeOutput := &cloudformation.DescribeStacksOutput{}
+	var stackOutputs []*cloudformation.Output
+	var stackStatus string
 	{
-		r.logger.LogCtx(ctx, "debug", "looking for main stack")
-
-		describeInput := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(stackName),
-		}
-		describeOutput, err = r.clients.CloudFormation.DescribeStacks(describeInput)
-		if IsStackNotFound(err) {
-			r.logger.LogCtx(ctx, "debug", "did not find main stack")
+		stackOutputs, stackStatus, err = r.service.DescribeOutputsAndStatus(stackName)
+		if cloudformationservice.IsStackNotFound(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster cloud formation stack in the AWS API")
 			return StackState{}, nil
+
+		} else if cloudformationservice.IsOutputsNotAccessible(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster cloud formation stack output values are not accessible due to stack state transition")
+			return StackState{Name: stackName}, nil
+
 		} else if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
-		if len(describeOutput.Stacks) > 1 {
-			return StackState{}, microerror.Mask(notFoundError)
-		}
-
-		r.logger.LogCtx(ctx, "debug", "found main stack")
 	}
 
-	// GetCurrentState is called on cluster deletion, if the stack creation failed
-	// the outputs can be unaccessible, this can lead to a stack that cannot be
-	// deleted. it can also be called during creation, while the outputs are still
-	// not accessible.
-	status := *describeOutput.Stacks[0].StackStatus
-	{
-		errorStatuses := []string{
-			"ROLLBACK_IN_PROGRESS",
-			"ROLLBACK_COMPLETE",
-			"CREATE_IN_PROGRESS",
-		}
-
-		for _, errorStatus := range errorStatuses {
-			if status == errorStatus {
-				outputStackState := StackState{
-					Name: stackName,
-				}
-
-				return outputStackState, nil
-			}
-		}
-	}
+	r.logger.LogCtx(ctx, "level", "debug", "message", "found the guest cluster cloud formation stack in the AWS API")
 
 	// In case the current guest cluster is already being updated, we cancel the
 	// reconciliation until the current update is done in order to reduce
 	// unnecessary friction.
-	if status == cloudformation.ResourceStatusUpdateInProgress {
-		r.logger.LogCtx(ctx, "debug", fmt.Sprintf("main stack is in state '%s'", cloudformation.ResourceStatusUpdateInProgress))
+	if stackStatus == cloudformation.ResourceStatusUpdateInProgress {
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("guest cluster cloud formation stack is in state '%s'", cloudformation.ResourceStatusUpdateInProgress))
 		resourcecanceledcontext.SetCanceled(ctx)
-		r.logger.LogCtx(ctx, "debug", "canceling resource for custom object")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
 
 		return StackState{}, nil
 	}
 
-	// Here we finally construct the current state.
-	currentState := StackState{}
+	var currentState StackState
 	{
-		outputs := describeOutput.Stacks[0].Outputs
-
-		masterImageID, err := getStackOutputValue(outputs, masterImageIDOutputKey)
+		masterImageID, err := r.service.GetOutputValue(stackOutputs, key.MasterImageIDKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
-		masterInstanceType, err := getStackOutputValue(outputs, masterInstanceTypeOutputKey)
+		masterInstanceType, err := r.service.GetOutputValue(stackOutputs, key.MasterInstanceTypeKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
-		masterCloudConfigVersion, err := getStackOutputValue(outputs, masterCloudConfigVersionOutputKey)
+		masterCloudConfigVersion, err := r.service.GetOutputValue(stackOutputs, key.MasterCloudConfigVersionKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
-		workers, err := getStackOutputValue(outputs, workersOutputKey)
+		workerCount, err := r.service.GetOutputValue(stackOutputs, key.WorkerCountKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
-		workerImageID, err := getStackOutputValue(outputs, workerImageIDOutputKey)
+		workerImageID, err := r.service.GetOutputValue(stackOutputs, key.WorkerImageIDKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
-		workerInstanceType, err := getStackOutputValue(outputs, workerInstanceTypeOutputKey)
+		workerInstanceType, err := r.service.GetOutputValue(stackOutputs, key.WorkerInstanceTypeKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
-		workerCloudConfigVersion, err := getStackOutputValue(outputs, workerCloudConfigVersionOutputKey)
+		workerCloudConfigVersion, err := r.service.GetOutputValue(stackOutputs, key.WorkerCloudConfigVersionKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
-		versionBundleVersion, err := getStackOutputValue(outputs, versionBundleVersionOutputKey)
+		versionBundleVersion, err := r.service.GetOutputValue(stackOutputs, key.VersionBundleVersionKey)
 		if IsNotFound(err) {
 			// Since we are transitioning between versions we will have situations in
 			// which old clusters are updated to new versions and miss the version
@@ -133,7 +108,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			MasterInstanceType:       masterInstanceType,
 			MasterCloudConfigVersion: masterCloudConfigVersion,
 
-			WorkerCount:              workers,
+			WorkerCount:              workerCount,
 			WorkerImageID:            workerImageID,
 			WorkerInstanceType:       workerInstanceType,
 			WorkerCloudConfigVersion: workerCloudConfigVersion,

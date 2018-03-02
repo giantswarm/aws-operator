@@ -33,8 +33,16 @@ const (
 )
 
 const (
-	WorkerASGKey = "WorkerASGName"
-	WorkerASGRef = "workerAutoScalingGroup"
+	MasterImageIDKey            = "MasterImageID"
+	MasterInstanceTypeKey       = "MasterInstanceType"
+	MasterCloudConfigVersionKey = "MasterCloudConfigVersion"
+	WorkerASGKey                = "WorkerASGName"
+	WorkerASGRef                = "workerAutoScalingGroup"
+	WorkerCountKey              = "WorkerCount"
+	WorkerImageIDKey            = "WorkerImageID"
+	WorkerInstanceTypeKey       = "WorkerInstanceType"
+	WorkerCloudConfigVersionKey = "WorkerCloudConfigVersion"
+	VersionBundleVersionKey     = "VersionBundleVersion"
 )
 
 func AutoScalingGroupName(customObject v1alpha1.AWSConfig, groupName string) string {

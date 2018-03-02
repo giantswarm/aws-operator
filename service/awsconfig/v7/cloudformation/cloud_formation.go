@@ -1,6 +1,7 @@
 package cloudformation
 
 import (
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
 )
@@ -25,9 +26,53 @@ func New(config Config) (*CloudFormation, error) {
 	return c, nil
 }
 
-// TODO
-func (c *CloudFormation) DescribeOutputs(stackName string) ([]*cloudformation.Output, error) {
-	return nil, nil
+func (c *CloudFormation) DescribeOutputsAndStatus(stackName string) ([]*cloudformation.Output, string, error) {
+	// At first we fetch the CF stack state by describing it via the AWS golang
+	// SDK. We are interested in the stack outputs and the stack status, since
+	// this tells us if we are able to access outputs at all.
+	var stackOutputs []*cloudformation.Output
+	var stackStatus string
+	{
+		i := &cloudformation.DescribeStacksInput{
+			StackName: aws.String(stackName),
+		}
+
+		o, err := c.client.DescribeStacks(i)
+		if IsStackNotFound(err) {
+			return nil, "", microerror.Maskf(stackNotFoundError, "stack name '%s'", stackName)
+		} else if err != nil {
+			return nil, "", microerror.Mask(err)
+		}
+
+		if len(o.Stacks) > 1 {
+			return nil, "", microerror.Maskf(tooManyStacksError, "expected 1 stack, got %d", len(o.Stacks))
+		}
+
+		stackOutputs = o.Stacks[0].Outputs
+		stackStatus = *o.Stacks[0].StackStatus
+	}
+
+	// TODO check comments
+
+	// GetCurrentState is called on cluster deletion, if the stack creation failed
+	// the outputs can be unaccessible, this can lead to a stack that cannot be
+	// deleted. it can also be called during creation, while the outputs are still
+	// not accessible.
+	{
+		errorStatuses := []string{
+			cloudformation.StackStatusRollbackInProgress,
+			cloudformation.StackStatusRollbackComplete,
+			cloudformation.StackStatusCreateInProgress,
+		}
+
+		for _, s := range errorStatuses {
+			if stackStatus == s {
+				return nil, "", microerror.Maskf(outputsNotAccessibleError, "due to stack state '%s'", stackStatus)
+			}
+		}
+	}
+
+	return stackOutputs, stackStatus, nil
 }
 
 func (c *CloudFormation) GetOutputValue(outputs []*cloudformation.Output, key string) (string, error) {

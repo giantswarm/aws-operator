@@ -11,6 +11,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7/adapter"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7/cloudconfig"
 	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v7/cloudformation"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v7/key"
 )
 
 func testConfig() Config {
@@ -155,31 +156,31 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		t.Error("outputs header not found")
 	}
 
-	if !strings.Contains(body, masterImageIDOutputKey+":") {
+	if !strings.Contains(body, key.MasterImageIDKey+":") {
 		fmt.Println(body)
 		t.Error("MasterImageID output element not found")
 	}
-	if !strings.Contains(body, masterInstanceTypeOutputKey+":") {
+	if !strings.Contains(body, key.MasterInstanceTypeKey+":") {
 		fmt.Println(body)
 		t.Error("MasterInstanceType output element not found")
 	}
-	if !strings.Contains(body, masterCloudConfigVersionOutputKey+":") {
+	if !strings.Contains(body, key.MasterCloudConfigVersionKey+":") {
 		fmt.Println(body)
 		t.Error("master CloudConfig version output element not found")
 	}
-	if !strings.Contains(body, workersOutputKey+":") {
+	if !strings.Contains(body, key.WorkerCountKey+":") {
 		fmt.Println(body)
 		t.Error("workers output element not found")
 	}
-	if !strings.Contains(body, workerImageIDOutputKey+":") {
+	if !strings.Contains(body, key.WorkerImageIDKey+":") {
 		fmt.Println(body)
 		t.Error("WorkerImageID output element not found")
 	}
-	if !strings.Contains(body, workerInstanceTypeOutputKey+":") {
+	if !strings.Contains(body, key.WorkerInstanceTypeKey+":") {
 		fmt.Println(body)
 		t.Error("WorkerInstanceType output element not found")
 	}
-	if !strings.Contains(body, workerCloudConfigVersionOutputKey+":") {
+	if !strings.Contains(body, key.WorkerCloudConfigVersionKey+":") {
 		fmt.Println(body)
 		t.Error("worker CloudConfig version output element not found")
 	}
