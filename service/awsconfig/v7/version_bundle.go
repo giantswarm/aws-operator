@@ -14,6 +14,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Enable aggregation layer to be able to extend kubernetes API.",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Add AWS resource tag with the Giant Swarm Organization.",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
