@@ -5,16 +5,6 @@ const (
 	// stack.
 	defaultCreationTimeout = 10
 
-	masterImageIDOutputKey            = "MasterImageID"
-	masterInstanceTypeOutputKey       = "MasterInstanceType"
-	masterCloudConfigVersionOutputKey = "MasterCloudConfigVersion"
-	workersOutputKey                  = "WorkerCount"
-	workerImageIDOutputKey            = "WorkerImageID"
-	workerInstanceTypeOutputKey       = "WorkerInstanceType"
-	workerCloudConfigVersionOutputKey = "WorkerCloudConfigVersion"
-
-	versionBundleVersionOutputKey = "VersionBundleVersion"
-
 	workerRoleKey = "WorkerRole"
 
 	namedIAMCapability = "CAPABILITY_NAMED_IAM"
