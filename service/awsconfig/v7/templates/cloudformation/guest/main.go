@@ -13,6 +13,7 @@ Resources:
   {{template "instance" .}}
   {{template "load_balancers" .}}
   {{template "launch_configuration" .}}
+  {{template "lifecycle_hooks" .}}
   {{template "autoscaling_group" .}}
   {{template "recordsets" .}}
 {{template "outputs" .}}
