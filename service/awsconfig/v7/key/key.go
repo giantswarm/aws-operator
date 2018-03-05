@@ -40,12 +40,16 @@ const (
 	MasterInstanceTypeKey       = "MasterInstanceType"
 	MasterCloudConfigVersionKey = "MasterCloudConfigVersion"
 	WorkerASGKey                = "WorkerASGName"
-	WorkerASGRef                = "workerAutoScalingGroup"
 	WorkerCountKey              = "WorkerCount"
 	WorkerImageIDKey            = "WorkerImageID"
 	WorkerInstanceTypeKey       = "WorkerInstanceType"
 	WorkerCloudConfigVersionKey = "WorkerCloudConfigVersion"
 	VersionBundleVersionKey     = "VersionBundleVersion"
+)
+
+const (
+	NodeDrainerLifecycleHookName = "NodeDrainer"
+	WorkerASGRef                 = "workerAutoScalingGroup"
 )
 
 func AutoScalingGroupName(customObject v1alpha1.AWSConfig, groupName string) string {
@@ -80,6 +84,7 @@ func CloudFormationGuestTemplates() []string {
 		guest.LoadBalancers,
 		guest.Main,
 		guest.NatGateway,
+		guest.LifecycleHooks,
 		guest.Outputs,
 		guest.RecordSets,
 		guest.RouteTables,
