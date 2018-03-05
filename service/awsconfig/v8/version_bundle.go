@@ -10,18 +10,8 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "cloudconfig",
-				Description: "Enable aggregation layer to be able to extend kubernetes API.",
-				Kind:        versionbundle.KindChanged,
-			},
-			{
-				Component:   "aws-operator",
-				Description: "Add AWS resource tag with the Giant Swarm Organization.",
-				Kind:        versionbundle.KindChanged,
-			},
-			{
-				Component:   "aws-operator",
-				Description: "Encrypt etcd EBS volume.",
+				Component:   "TODO",
+				Description: "TODO",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
@@ -59,7 +49,7 @@ func VersionBundle() versionbundle.Bundle {
 		Deprecated:   false,
 		Name:         "aws-operator",
 		Time:         time.Date(2018, time.February, 27, 14, 16, 0, 0, time.UTC),
-		Version:      "3.0.0",
-		WIP:          false,
+		Version:      "3.1.0",
+		WIP:          true,
 	}
 }
