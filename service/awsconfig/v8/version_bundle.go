@@ -48,8 +48,8 @@ func VersionBundle() versionbundle.Bundle {
 		Dependencies: []versionbundle.Dependency{},
 		Deprecated:   false,
 		Name:         "aws-operator",
-		Time:         time.Date(2018, time.February, 27, 14, 16, 0, 0, time.UTC),
-		Version:      "3.1.0",
+		Time:         time.Date(2018, time.March, 3, 17, 28, 0, 0, time.UTC),
+		Version:      "3.0.1",
 		WIP:          true,
 	}
 }
