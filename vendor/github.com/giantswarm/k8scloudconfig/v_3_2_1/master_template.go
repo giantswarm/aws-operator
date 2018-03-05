@@ -33,6 +33,7 @@ write_files:
             app: calico-ipip-pinger
         spec:
           serviceAccountName: calico-node
+          priorityClassName: critical-pods
           containers:
           - name: calico-ipip-pinger
             image: quay.io/giantswarm/calico-ipip-pinger:c2d40fb9bd4dcd78fd28b897f43b2d9a744ab374
@@ -187,17 +188,14 @@ write_files:
         metadata:
           labels:
             k8s-app: calico-node
-          annotations:
-            scheduler.alpha.kubernetes.io/critical-pod: ''
         spec:
           # Tolerations part was taken from calico manifest for kubeadm as we are using same taint for master.
           tolerations:
           - key: node-role.kubernetes.io/master
             operator: Exists
             effect: NoSchedule
-          - key: CriticalAddonsOnly
-            operator: Exists
           hostNetwork: true
+          priorityClassName: critical-pods
           serviceAccountName: calico-node
           # Minimize downtime during a rolling upgrade or deletion; tell Kubernetes to do a "force
           # deletion": https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods.
@@ -277,6 +275,10 @@ write_files:
               resources:
                 requests:
                   cpu: 250m
+                  memory: 100Mi
+                limits:
+                  cpu: 250m
+                  memory: 100Mi
               livenessProbe:
                 httpGet:
                   path: /liveness
@@ -358,8 +360,6 @@ write_files:
       namespace: kube-system
       labels:
         k8s-app: calico-kube-controllers
-      annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
       # The controllers can only have a single active instance.
       replicas: 1
@@ -377,11 +377,10 @@ write_files:
           - key: node-role.kubernetes.io/master
             operator: Exists
             effect: NoSchedule
-          - key: CriticalAddonsOnly
-            operator: Exists
           # The controllers must run in the host network namespace so that
           # it isn't governed by policy that would prevent it from working.
           hostNetwork: true
+          priorityClassName: critical-pods
           serviceAccountName: calico-kube-controllers
           containers:
             - name: calico-kube-controllers
@@ -416,6 +415,9 @@ write_files:
                   value: policy,profile,workloadendpoint,node
               resources:
                 requests:
+                  cpu: 30m
+                  memory: 90Mi
+                limits:
                   cpu: 30m
                   memory: 90Mi
               volumeMounts:
@@ -515,11 +517,10 @@ write_files:
             k8s-app: coredns
         spec:
           serviceAccountName: coredns
+          priorityClassName: important-pods
           tolerations:
             - key: node-role.kubernetes.io/master
               effect: NoSchedule
-            - key: "CriticalAddonsOnly"
-              operator: "Exists"
           affinity:
             podAntiAffinity:
               preferredDuringSchedulingIgnoredDuringExecution:
@@ -696,8 +697,6 @@ write_files:
         metadata:
           labels:
             k8s-app: nginx-ingress-controller
-          annotations:
-            scheduler.alpha.kubernetes.io/critical-pod: ''
         spec:
           affinity:
             podAntiAffinity:
@@ -712,6 +711,7 @@ write_files:
                         - nginx-ingress-controller
                   topologyKey: kubernetes.io/hostname
           serviceAccountName: nginx-ingress-controller
+          priorityClassName: important-pods
           initContainers:
           - command:
             - sh
@@ -829,16 +829,13 @@ write_files:
             component: kube-proxy
             k8s-app: kube-proxy
             kubernetes.io/cluster-service: "true"
-          annotations:
-            scheduler.alpha.kubernetes.io/critical-pod: ''
         spec:
           tolerations:
           - key: node-role.kubernetes.io/master
             operator: Exists
             effect: NoSchedule
-          - key: CriticalAddonsOnly
-            operator: Exists
           hostNetwork: true
+          priorityClassName: critical-pods
           serviceAccountName: kube-proxy
           containers:
             - name: kube-proxy
@@ -859,6 +856,9 @@ write_files:
                 periodSeconds: 3
               resources:
                 requests:
+                  memory: "80Mi"
+                  cpu: "75m"
+                limits:
                   memory: "80Mi"
                   cpu: "75m"
               securityContext:
@@ -1573,6 +1573,41 @@ write_files:
        apiGroup: rbac.authorization.k8s.io
        kind: ClusterRole
        name: restricted-psp-user
+- path: /srv/priority_classes.yaml
+  permissions: 0644
+  content: |
+    apiVersion: scheduling.k8s.io/v1alpha1
+    kind: PriorityClass
+    metadata:
+      name: core-pods
+    value: 1000000
+    globalDefault: false
+    description: "This priority class should be used for k8s components api/scheduler/controller-manager."
+    ---
+    apiVersion: scheduling.k8s.io/v1alpha1
+    kind: PriorityClass
+    metadata:
+      name: critical-pods
+    value: 900000
+    globalDefault: false
+    description: "This priority class should be used for critical pods like calico and kube-proxy."
+    ---
+    apiVersion: scheduling.k8s.io/v1alpha1
+    kind: PriorityClass
+    metadata:
+      name: important-pods
+    value: 800000
+    globalDefault: false
+    description: "This priority class should be used for important pods like coredns/ingress-controller."
+    ---
+    apiVersion: scheduling.k8s.io/v1alpha1
+    kind: PriorityClass
+    metadata:
+      name: default
+    value: 500000
+    globalDefault: true
+    description: "This is a default priority class, used for cluster workloads without priority."
+    ---
 - path: /opt/wait-for-domains
   permissions: 0544
   content: |
@@ -1618,6 +1653,14 @@ write_files:
               echo "failed to apply /src/$manifest, retrying in 5 sec"
               sleep 5s
           done
+      done
+
+      while
+          /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/priority_classes.yaml
+          [ "$?" -ne "0" ]
+      do
+          echo "failed to apply /src/priority_classes.yaml, retrying in 5 sec"
+          sleep 5s
       done
 
       {{ if not .DisableCalico -}}
@@ -1854,6 +1897,7 @@ write_files:
       namespace: kube-system
     spec:
       hostNetwork: true
+      priorityClassName: core-pods
       containers:
       - name: k8s-api-server
         image: quay.io/giantswarm/hyperkube:v1.9.2
@@ -1881,8 +1925,8 @@ write_files:
         - --repair-malformed-updates=false
         - --service-account-lookup=true
         - --authorization-mode=RBAC
-        - --feature-gates=ExpandPersistentVolumes=true
-        - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,DefaultStorageClass,PodSecurityPolicy
+        - --feature-gates=ExpandPersistentVolumes=true,PodPriority=true
+        - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,DefaultStorageClass,PodSecurityPolicy,Priority
         - --cloud-provider={{.Cluster.Kubernetes.CloudProvider}}
         - --service-cluster-ip-range={{.Cluster.Kubernetes.API.ClusterIPRange}}
         - --etcd-servers=https://127.0.0.1:2379
@@ -1890,7 +1934,7 @@ write_files:
         - --etcd-certfile=/etc/kubernetes/ssl/etcd/server-crt.pem
         - --etcd-keyfile=/etc/kubernetes/ssl/etcd/server-key.pem
         - --advertise-address=$(HOST_IP)
-        - --runtime-config=api/all=true
+        - --runtime-config=api/all=true,scheduling.k8s.io/v1alpha1=true
         - --logtostderr=true
         - --tls-cert-file=/etc/kubernetes/ssl/apiserver-crt.pem
         - --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
@@ -1902,16 +1946,13 @@ write_files:
         - --audit-log-maxsize=100
         - --audit-policy-file=/etc/kubernetes/manifests/audit-policy.yml
         - --experimental-encryption-provider-config=/etc/kubernetes/encryption/k8s-encryption-config.yaml
-        - --requestheader-client-ca-file=/etc/kubernetes/ssl/apiserver-ca.pem
-        - --requestheader-allowed-names=aggregator
-        - --requestheader-extra-headers-prefix=X-Remote-Extra-
-        - --requestheader-group-headers=X-Remote-Group
-        - --requestheader-username-headers=X-Remote-User
-        - --proxy-client-cert-file=/etc/kubernetes/ssl/apiserver-crt.pem
-        - --proxy-client-key-file=/etc/kubernetes/ssl/apiserver-key.pem
         resources:
           requests:
             cpu: 300m
+            memory: 300Mi
+          limits:
+            cpu: 300m
+            memory: 300Mi
         livenessProbe:
           tcpSocket:
             port: {{.Cluster.Kubernetes.API.SecurePort}}
@@ -1974,6 +2015,7 @@ write_files:
       namespace: kube-system
     spec:
       hostNetwork: true
+      priorityClassName: core-pods
       containers:
       - name: k8s-controller-manager
         image: quay.io/giantswarm/hyperkube:v1.9.2
@@ -1995,6 +2037,10 @@ write_files:
         resources:
           requests:
             cpu: 200m
+            memory: 200Mi
+          limits:
+            cpu: 200m
+            memory: 200Mi
         livenessProbe:
           httpGet:
             host: 127.0.0.1
@@ -2044,6 +2090,7 @@ write_files:
       namespace: kube-system
     spec:
       hostNetwork: true
+      priorityClassName: core-pods
       containers:
       - name: k8s-scheduler
         image: quay.io/giantswarm/hyperkube:v1.9.2
@@ -2053,10 +2100,15 @@ write_files:
         - --logtostderr=true
         - --v=2
         - --profiling=false
+        - --feature-gates=PodPriority=true
         - --kubeconfig=/etc/kubernetes/config/scheduler-kubeconfig.yml
         resources:
           requests:
             cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 100m
+            memory: 100Mi
         livenessProbe:
           httpGet:
             host: 127.0.0.1
@@ -2406,6 +2458,7 @@ coreos:
       --register-node=true \
       --register-with-taints=node-role.kubernetes.io/master=:NoSchedule \
       --allow-privileged=true \
+      --feature-gates=PodPriority=true \
       --pod-manifest-path=/etc/kubernetes/manifests \
       --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml \
       --node-labels="node-role.kubernetes.io/master,role=master,kubernetes.io/hostname=${HOSTNAME},ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
