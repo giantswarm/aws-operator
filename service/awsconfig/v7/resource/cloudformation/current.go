@@ -87,7 +87,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			return StackState{}, microerror.Mask(err)
 		}
 		versionBundleVersion, err := r.service.GetOutputValue(stackOutputs, key.VersionBundleVersionKey)
-		if IsNotFound(err) {
+		if cloudformationservice.IsOutputNotFound(err) {
 			// Since we are transitioning between versions we will have situations in
 			// which old clusters are updated to new versions and miss the version
 			// bundle version in the CF stack outputs. We ignore this problem for now
