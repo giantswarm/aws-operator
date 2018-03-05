@@ -105,7 +105,20 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	// TODO check if NodeConfig exists
 	// TODO create NodeConfig if it does not exist
 	// TODO check if NodeConfig has final state
-	// TODO complete lifecycle hook if NodeConfig has final state
+
+	for _, instance := range instances {
+		i := &autoscaling.CompleteLifecycleActionInput{
+			AutoScalingGroupName:  aws.String(workerASGName),
+			InstanceId:            instance.InstanceId,
+			LifecycleActionResult: aws.String("CONTINUE"),
+			LifecycleHookName:     aws.String(key.NodeDrainerLifecycleHookName),
+		}
+
+		_, err := r.clients.AutoScaling.CompleteLifecycleAction(i)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
 
 	return nil, nil
 }
