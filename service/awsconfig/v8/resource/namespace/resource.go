@@ -9,7 +9,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "namespacev7"
+	Name = "namespacev8"
 )
 
 // Config represents the configuration used to create a new namespace resource.
