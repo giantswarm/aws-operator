@@ -10,7 +10,7 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "aws-operator",
+				Component:   "cloudconfig",
 				Description: "Enable aggregation layer to be able to extend kubernetes API.",
 				Kind:        versionbundle.KindChanged,
 			},
