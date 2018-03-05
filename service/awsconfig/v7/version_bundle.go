@@ -10,6 +10,11 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
+				Component:   "cloudconfig",
+				Description: "Enable aggregation layer to be able to extend kubernetes API.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
 				Component:   "aws-operator",
 				Description: "Add AWS resource tag with the Giant Swarm Organization.",
 				Kind:        versionbundle.KindChanged,
