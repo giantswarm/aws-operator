@@ -6,8 +6,8 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v7/adapter"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v7/cloudformation"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v8/adapter"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v8/cloudformation"
 )
 
 func Test_validateHostPeeringRoutes(t *testing.T) {
