@@ -107,6 +107,8 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	// TODO check if NodeConfig has final state
 
 	for _, instance := range instances {
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completing lifecycle hook action for guest cluster instance '%s'", *instance.InstanceId))
+
 		i := &autoscaling.CompleteLifecycleActionInput{
 			AutoScalingGroupName:  aws.String(workerASGName),
 			InstanceId:            instance.InstanceId,
@@ -118,6 +120,8 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed lifecycle hook action for guest cluster instance '%s'", *instance.InstanceId))
 	}
 
 	return nil, nil
