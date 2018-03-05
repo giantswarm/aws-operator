@@ -27,10 +27,14 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		stackOutputs, _, err = r.service.DescribeOutputsAndStatus(key.MainGuestStackName(customObject))
 		if cloudformationservice.IsStackNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster cloud formation stack in the AWS API")
+			resourcecanceledcontext.SetCanceled(ctx)
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
 			return nil, nil
 
 		} else if cloudformationservice.IsOutputsNotAccessible(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster cloud formation stack output values are not accessible due to stack state transition")
+			resourcecanceledcontext.SetCanceled(ctx)
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
 			return nil, nil
 
 		} else if err != nil {
