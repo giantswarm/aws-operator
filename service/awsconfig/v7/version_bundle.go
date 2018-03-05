@@ -14,6 +14,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Add AWS resource tag with the Giant Swarm Organization.",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Encrypt etcd EBS volume.",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
