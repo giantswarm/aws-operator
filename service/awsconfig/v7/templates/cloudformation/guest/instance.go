@@ -21,6 +21,7 @@ const Instance = `{{define "instance"}}
     DependsOn:
     - MasterInstance
     Properties:
+      Encrypted: true
       Size: 100
       VolumeType: gp2
       AvailabilityZone: !GetAtt MasterInstance.AvailabilityZone
