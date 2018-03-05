@@ -25,6 +25,8 @@ import (
 	v6cloudconfig "github.com/giantswarm/aws-operator/service/awsconfig/v6/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7"
 	v7cloudconfig "github.com/giantswarm/aws-operator/service/awsconfig/v7/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v8"
+	v8cloudconfig "github.com/giantswarm/aws-operator/service/awsconfig/v8/cloudconfig"
 )
 
 type ClusterFrameworkConfig struct {
@@ -374,6 +376,33 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 		}
 	}
 
+	var resourceSetV8 *framework.ResourceSet
+	{
+		c := v8.ClusterResourceSetConfig{
+			CertsSearcher:      certWatcher,
+			GuestAWSClients:    awsClients,
+			HostAWSClients:     awsHostClients,
+			K8sClient:          config.K8sClient,
+			Logger:             config.Logger,
+			RandomkeysSearcher: keyWatcher,
+
+			GuestUpdateEnabled: config.GuestUpdateEnabled,
+			InstallationName:   config.InstallationName,
+			OIDC: v8cloudconfig.OIDCConfig{
+				ClientID:      config.OIDC.ClientID,
+				IssuerURL:     config.OIDC.IssuerURL,
+				UsernameClaim: config.OIDC.UsernameClaim,
+				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			ProjectName: config.ProjectName,
+		}
+
+		resourceSetV8, err = v8.NewClusterResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var resourceRouter *framework.ResourceRouter
 	{
 		c := framework.ResourceRouterConfig{
@@ -387,6 +416,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 				resourceSetV5,
 				resourceSetV6,
 				resourceSetV7,
+				resourceSetV8,
 			},
 		}
 
