@@ -350,17 +350,19 @@ func (f *framework) initGuestClientset() error {
 
 func (f *framework) WaitForGuestReady() error {
 	if err := f.initGuestClientset(); err != nil {
-		return microerror.Maskf(err, "unexpected error initializing guest clientset")
+		return microerror.Maskf(err, "initializing guest clientset")
 	}
 
 	if err := f.waitForAPIUp(); err != nil {
-		return microerror.Mask(err)
+		return microerror.Maskf(err, "waiting for API being up")
 	}
 
 	if err := f.WaitForNodesUp(minimumNodesReady); err != nil {
-		return microerror.Mask(err)
+		return microerror.Maskf(err, "waiting for nodes being up")
 	}
+
 	log.Println("Guest cluster ready")
+
 	return nil
 }
 

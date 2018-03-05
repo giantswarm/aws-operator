@@ -88,16 +88,6 @@ func getCloudFormationTags(customObject v1alpha1.AWSConfig) []*awscloudformation
 	return stackTags
 }
 
-func getStackOutputValue(outputs []*awscloudformation.Output, key string) (string, error) {
-	for _, o := range outputs {
-		if *o.OutputKey == key {
-			return *o.OutputValue, nil
-		}
-	}
-
-	return "", microerror.Maskf(notFoundError, "stack outpout value for key '%s'", key)
-}
-
 func toCreateStackInput(v interface{}) (awscloudformation.CreateStackInput, error) {
 	if v == nil {
 		return awscloudformation.CreateStackInput{}, nil
