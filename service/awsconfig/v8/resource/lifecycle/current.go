@@ -101,8 +101,6 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 		if len(instances) == 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find the guest cluster instances being in state '%s'", autoscaling.LifecycleStateTerminatingWait))
-			return nil, nil
-
 		} else {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d guest cluster instances being in state '%s'", len(instances), autoscaling.LifecycleStateTerminatingWait))
 		}
@@ -140,6 +138,8 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	}
 
 	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "start inspection of node configs for the guest cluster")
+
 		n := v1.NamespaceDefault
 		o := metav1.ListOptions{
 			LabelSelector: fmt.Sprintf("%s=%s", key.ClusterIDLabel, key.ClusterID(customObject)),
@@ -150,29 +150,36 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			return nil, microerror.Mask(err)
 		}
 
-		for _, nodeConfig := range nodeConfigs.Items {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "inspecting node config for the guest cluster")
+		if len(nodeConfigs.Items) > 0 {
+			for _, nodeConfig := range nodeConfigs.Items {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "inspecting node config for the guest cluster")
 
-			if !hasFinalStatus(nodeConfig.Status.Conditions) {
-				continue
+				if hasFinalStatus(nodeConfig.Status.Conditions) {
+					r.logger.LogCtx(ctx, "level", "debug", "message", "node config of guest cluster has final state")
+				} else {
+					r.logger.LogCtx(ctx, "level", "debug", "message", "node config of guest cluster has no final state")
+					continue
+				}
+
+				instanceID, err := instanceIDFromAnnotations(nodeConfig.GetAnnotations())
+				if err != nil {
+					return nil, microerror.Mask(err)
+				}
+
+				err = r.completeLifecycleHook(ctx, instanceID, workerASGName)
+				if err != nil {
+					return nil, microerror.Mask(err)
+				}
+
+				err = r.deleteNodeConfig(ctx, nodeConfig.GetName())
+				if err != nil {
+					return nil, microerror.Mask(err)
+				}
+
+				r.logger.LogCtx(ctx, "level", "debug", "message", "inspected node config for the guest cluster")
 			}
-
-			r.logger.LogCtx(ctx, "level", "debug", "message", "node config of guest cluster has final state")
-
-			instanceID, err := instanceIDFromAnnotations(nodeConfig.GetAnnotations())
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-
-			err = r.completeLifecycleHook(ctx, instanceID, workerASGName)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-
-			err = r.deleteNodeConfig(ctx, nodeConfig.GetName())
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
+		} else {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "no node configs to inspect for the guest cluster")
 		}
 	}
 
