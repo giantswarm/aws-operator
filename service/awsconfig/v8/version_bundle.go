@@ -10,9 +10,9 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "TODO",
-				Description: "TODO",
-				Kind:        versionbundle.KindChanged,
+				Component:   "aws-operator",
+				Description: "Fix validation check for existing peering routes.",
+				Kind:        versionbundle.KindFixed,
 			},
 		},
 		Components: []versionbundle.Component{

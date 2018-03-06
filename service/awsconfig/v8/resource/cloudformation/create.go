@@ -64,16 +64,16 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		return cloudformation.CreateStackInput{}, microerror.Mask(err)
 	}
 
-	if err := r.validateCluster(customObject); err != nil {
-		return cloudformation.CreateStackInput{}, microerror.Mask(err)
-	}
-
 	r.logger.LogCtx(ctx, "debug", "finding out if the main stack should be created")
 
 	createState := cloudformation.CreateStackInput{}
 
 	if currentStackState.Name == "" || desiredStackState.Name != currentStackState.Name {
 		r.logger.LogCtx(ctx, "debug", "main stack should be created")
+
+		if err := r.validateCluster(customObject); err != nil {
+			return cloudformation.CreateStackInput{}, microerror.Mask(err)
+		}
 
 		// We need to create the required peering resources in the host account before
 		// getting the guest main stack template body, it requires id values from host
