@@ -17,8 +17,11 @@ import (
 
 	"github.com/giantswarm/operatorkit/client/k8scrdclient"
 	"github.com/giantswarm/operatorkit/framework/context/reconciliationcanceledcontext"
-	"github.com/giantswarm/operatorkit/framework/context/resourcecanceledcontext"
 	"github.com/giantswarm/operatorkit/informer"
+)
+
+const (
+	loggerResourceKey = "resource"
 )
 
 // Config represents the configuration used to create a new operator framework.
@@ -127,9 +130,9 @@ func (f *Framework) DeleteFunc(obj interface{}) {
 	defer f.mutex.Unlock()
 
 	resourceSet, err := f.resourceRouter.ResourceSet(obj)
-	if IsNoResourceRouter(err) {
-		// In case there is no resource router available to handle the reconciled
-		// runtime object, we stop here.
+	if IsNoResourceSet(err) {
+		// In case the resource router is not able to find any resource set to
+		// handle the reconciled runtime object, we stop here.
 		return
 	} else if err != nil {
 		f.logger.Log("event", "delete", "function", "DeleteFunc", "level", "error", "message", "stop framework reconciliation due to error", "stack", fmt.Sprintf("%#v", err))
@@ -162,9 +165,9 @@ func (f *Framework) UpdateFunc(oldObj, newObj interface{}) {
 	defer f.mutex.Unlock()
 
 	resourceSet, err := f.resourceRouter.ResourceSet(obj)
-	if IsNoResourceRouter(err) {
-		// In case there is no resource router available to handle the reconciled
-		// runtime object, we stop here.
+	if IsNoResourceSet(err) {
+		// In case the resource router is not able to find any resource set to
+		// handle the reconciled runtime object, we stop here.
 		return
 	} else if err != nil {
 		f.logger.Log("event", "update", "function", "UpdateFunc", "level", "error", "message", "stop framework reconciliation due to error", "stack", fmt.Sprintf("%#v", err))
@@ -205,145 +208,18 @@ func ProcessDelete(ctx context.Context, obj interface{}, resources []Resource) e
 		return microerror.Maskf(executionFailedError, "resources must not be empty")
 	}
 
+	defer unsetLoggerCtxValue(ctx, loggerResourceKey)
+
 	for _, r := range resources {
-		var err error
+		ctx = setLoggerCtxValue(ctx, loggerResourceKey, r.Name())
 
-		var currentState interface{}
-		{
-			if reconciliationcanceledcontext.IsCanceled(ctx) {
-				return nil
-			}
-			if resourcecanceledcontext.IsCanceled(ctx) {
-				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
-				continue
-			}
-
-			meta, ok := loggermeta.FromContext(ctx)
-			if ok {
-				meta.KeyVals["function"] = "GetCurrentState"
-				defer delete(meta.KeyVals, "function")
-			}
-			currentState, err = r.GetCurrentState(ctx, obj)
-			if err != nil {
-				return microerror.Mask(err)
-			}
+		err := r.EnsureDeleted(ctx, obj)
+		if err != nil {
+			return microerror.Mask(err)
 		}
 
-		var desiredState interface{}
-		{
-			if reconciliationcanceledcontext.IsCanceled(ctx) {
-				return nil
-			}
-			if resourcecanceledcontext.IsCanceled(ctx) {
-				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
-				continue
-			}
-
-			meta, ok := loggermeta.FromContext(ctx)
-			if ok {
-				meta.KeyVals["function"] = "GetDesiredState"
-				defer delete(meta.KeyVals, "function")
-			}
-			desiredState, err = r.GetDesiredState(ctx, obj)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-		}
-
-		var patch *Patch
-		{
-			if reconciliationcanceledcontext.IsCanceled(ctx) {
-				return nil
-			}
-			if resourcecanceledcontext.IsCanceled(ctx) {
-				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
-				continue
-			}
-
-			meta, ok := loggermeta.FromContext(ctx)
-			if ok {
-				meta.KeyVals["function"] = "NewDeletePatch"
-				defer delete(meta.KeyVals, "function")
-			}
-			patch, err = r.NewDeletePatch(ctx, obj, currentState, desiredState)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-		}
-
-		{
-			if reconciliationcanceledcontext.IsCanceled(ctx) {
-				return nil
-			}
-			if resourcecanceledcontext.IsCanceled(ctx) {
-				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
-				continue
-			}
-
-			if patch != nil {
-				createChange, ok := patch.getCreateChange()
-				if ok {
-					meta, ok := loggermeta.FromContext(ctx)
-					if ok {
-						meta.KeyVals["function"] = "ApplyCreateChange"
-						defer delete(meta.KeyVals, "function")
-					}
-					err := r.ApplyCreateChange(ctx, obj, createChange)
-					if err != nil {
-						return microerror.Mask(err)
-					}
-				}
-			}
-		}
-
-		{
-			if reconciliationcanceledcontext.IsCanceled(ctx) {
-				return nil
-			}
-			if resourcecanceledcontext.IsCanceled(ctx) {
-				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
-				continue
-			}
-
-			if patch != nil {
-				deleteChange, ok := patch.getDeleteChange()
-				if ok {
-					meta, ok := loggermeta.FromContext(ctx)
-					if ok {
-						meta.KeyVals["function"] = "ApplyDeleteChange"
-						defer delete(meta.KeyVals, "function")
-					}
-					err := r.ApplyDeleteChange(ctx, obj, deleteChange)
-					if err != nil {
-						return microerror.Mask(err)
-					}
-				}
-			}
-		}
-
-		{
-			if reconciliationcanceledcontext.IsCanceled(ctx) {
-				return nil
-			}
-			if resourcecanceledcontext.IsCanceled(ctx) {
-				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
-				continue
-			}
-
-			if patch != nil {
-				updateChange, ok := patch.getUpdateChange()
-				if ok {
-					meta, ok := loggermeta.FromContext(ctx)
-					if ok {
-						meta.KeyVals["function"] = "ApplyUpdateChange"
-						defer delete(meta.KeyVals, "function")
-					}
-					err := r.ApplyUpdateChange(ctx, obj, updateChange)
-					if err != nil {
-						return microerror.Mask(err)
-					}
-				}
-			}
+		if reconciliationcanceledcontext.IsCanceled(ctx) {
+			return nil
 		}
 	}
 
@@ -405,145 +281,18 @@ func ProcessUpdate(ctx context.Context, obj interface{}, resources []Resource) e
 		return microerror.Maskf(executionFailedError, "resources must not be empty")
 	}
 
+	defer unsetLoggerCtxValue(ctx, loggerResourceKey)
+
 	for _, r := range resources {
-		var err error
+		ctx = setLoggerCtxValue(ctx, loggerResourceKey, r.Name())
 
-		var currentState interface{}
-		{
-			if reconciliationcanceledcontext.IsCanceled(ctx) {
-				return nil
-			}
-			if resourcecanceledcontext.IsCanceled(ctx) {
-				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
-				continue
-			}
-
-			meta, ok := loggermeta.FromContext(ctx)
-			if ok {
-				meta.KeyVals["function"] = "GetCurrentState"
-				defer delete(meta.KeyVals, "function")
-			}
-			currentState, err = r.GetCurrentState(ctx, obj)
-			if err != nil {
-				return microerror.Mask(err)
-			}
+		err := r.EnsureCreated(ctx, obj)
+		if err != nil {
+			return microerror.Mask(err)
 		}
 
-		var desiredState interface{}
-		{
-			if reconciliationcanceledcontext.IsCanceled(ctx) {
-				return nil
-			}
-			if resourcecanceledcontext.IsCanceled(ctx) {
-				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
-				continue
-			}
-
-			meta, ok := loggermeta.FromContext(ctx)
-			if ok {
-				meta.KeyVals["function"] = "GetDesiredState"
-				defer delete(meta.KeyVals, "function")
-			}
-			desiredState, err = r.GetDesiredState(ctx, obj)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-		}
-
-		var patch *Patch
-		{
-			if reconciliationcanceledcontext.IsCanceled(ctx) {
-				return nil
-			}
-			if resourcecanceledcontext.IsCanceled(ctx) {
-				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
-				continue
-			}
-
-			meta, ok := loggermeta.FromContext(ctx)
-			if ok {
-				meta.KeyVals["function"] = "NewUpdatePatch"
-				defer delete(meta.KeyVals, "function")
-			}
-			patch, err = r.NewUpdatePatch(ctx, obj, currentState, desiredState)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-		}
-
-		{
-			if reconciliationcanceledcontext.IsCanceled(ctx) {
-				return nil
-			}
-			if resourcecanceledcontext.IsCanceled(ctx) {
-				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
-				continue
-			}
-
-			if patch != nil {
-				createState, ok := patch.getCreateChange()
-				if ok {
-					meta, ok := loggermeta.FromContext(ctx)
-					if ok {
-						meta.KeyVals["function"] = "ApplyCreateChange"
-						defer delete(meta.KeyVals, "function")
-					}
-					err := r.ApplyCreateChange(ctx, obj, createState)
-					if err != nil {
-						return microerror.Mask(err)
-					}
-				}
-			}
-		}
-
-		{
-			if reconciliationcanceledcontext.IsCanceled(ctx) {
-				return nil
-			}
-			if resourcecanceledcontext.IsCanceled(ctx) {
-				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
-				continue
-			}
-
-			if patch != nil {
-				deleteState, ok := patch.getDeleteChange()
-				if ok {
-					meta, ok := loggermeta.FromContext(ctx)
-					if ok {
-						meta.KeyVals["function"] = "ApplyDeleteChange"
-						defer delete(meta.KeyVals, "function")
-					}
-					err := r.ApplyDeleteChange(ctx, obj, deleteState)
-					if err != nil {
-						return microerror.Mask(err)
-					}
-				}
-			}
-		}
-
-		{
-			if reconciliationcanceledcontext.IsCanceled(ctx) {
-				return nil
-			}
-			if resourcecanceledcontext.IsCanceled(ctx) {
-				ctx = resourcecanceledcontext.NewContext(ctx, make(chan struct{}))
-				continue
-			}
-
-			if patch != nil {
-				updateState, ok := patch.getUpdateChange()
-				if ok {
-					meta, ok := loggermeta.FromContext(ctx)
-					if ok {
-						meta.KeyVals["function"] = "ApplyUpdateChange"
-						defer delete(meta.KeyVals, "function")
-					}
-					err := r.ApplyUpdateChange(ctx, obj, updateState)
-					if err != nil {
-						return microerror.Mask(err)
-					}
-				}
-			}
+		if reconciliationcanceledcontext.IsCanceled(ctx) {
+			return nil
 		}
 	}
 
@@ -570,4 +319,24 @@ func (f *Framework) bootWithError(ctx context.Context) error {
 	f.ProcessEvents(ctx, deleteChan, updateChan, errChan)
 
 	return nil
+}
+
+func setLoggerCtxValue(ctx context.Context, key, value string) context.Context {
+	m, ok := loggermeta.FromContext(ctx)
+	if !ok {
+		m = loggermeta.New()
+	}
+	m.KeyVals[key] = value
+
+	return loggermeta.NewContext(ctx, m)
+}
+
+func unsetLoggerCtxValue(ctx context.Context, key string) context.Context {
+	m, ok := loggermeta.FromContext(ctx)
+	if !ok {
+		m = loggermeta.New()
+	}
+	delete(m.KeyVals, key)
+
+	return loggermeta.NewContext(ctx, m)
 }

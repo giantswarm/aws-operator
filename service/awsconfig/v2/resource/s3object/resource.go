@@ -90,10 +90,6 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) Underlying() framework.Resource {
-	return r
-}
-
 func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
 	return nil
 }

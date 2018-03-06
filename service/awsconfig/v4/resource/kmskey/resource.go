@@ -8,7 +8,6 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/framework"
 
 	"github.com/giantswarm/aws-operator/service/awsconfig/v4/key"
 )
@@ -62,10 +61,6 @@ func New(config Config) (*Resource, error) {
 
 func (r *Resource) Name() string {
 	return Name
-}
-
-func (r *Resource) Underlying() framework.Resource {
-	return r
 }
 
 func toKMSKeyState(v interface{}) (KMSKeyState, error) {
