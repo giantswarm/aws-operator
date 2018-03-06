@@ -45,15 +45,9 @@ func (r *Resource) clusterLoadBalancers(customObject v1alpha1.AWSConfig) (*LoadB
 		allLBNames = append(allLBNames, lb.LoadBalancerName)
 	}
 
-	// Get loadbalancer tags in batches due to API restriction.
-	for i := 0; i < len(allLBNames); i += loadBalancerTagChunkSize {
-		endPos := i + loadBalancerTagChunkSize
+	lbChunks := splitLoadBalancers(allLBNames, loadBalancerTagChunkSize)
 
-		if endPos > len(allLBNames) {
-			endPos = len(allLBNames)
-		}
-
-		lbNames := allLBNames[i:endPos]
+	for _, lbNames := range lbChunks {
 		tagsInput := &elb.DescribeTagsInput{
 			LoadBalancerNames: lbNames,
 		}
@@ -74,6 +68,22 @@ func (r *Resource) clusterLoadBalancers(customObject v1alpha1.AWSConfig) (*LoadB
 	lbState.LoadBalancerNames = clusterLBNames
 
 	return lbState, nil
+}
+
+func splitLoadBalancers(loadBalancerNames []*string, chunkSize int) [][]*string {
+	chunks := make([][]*string, 0)
+
+	for i := 0; i < len(loadBalancerNames); i += chunkSize {
+		endPos := i + chunkSize
+
+		if endPos > len(loadBalancerNames) {
+			endPos = len(loadBalancerNames)
+		}
+
+		chunks = append(chunks, loadBalancerNames[i:endPos])
+	}
+
+	return chunks
 }
 
 func containsClusterTag(tags []*elb.Tag, customObject v1alpha1.AWSConfig) bool {
