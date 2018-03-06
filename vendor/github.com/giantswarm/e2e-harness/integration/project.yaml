@@ -1,6 +1,0 @@
-version: 1
-
-test:
-  env:
-    - "EXPECTED_KEY=expected_value"
-    - "TEST_USER=${USER}"
