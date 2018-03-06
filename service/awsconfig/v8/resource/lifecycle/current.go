@@ -218,6 +218,7 @@ func (r *Resource) createNodeConfig(ctx context.Context, customObject providerv1
 			Labels: map[string]string{
 				key.ClusterIDLabel: key.ClusterID(customObject),
 			},
+			Name: privateDNS,
 		},
 		Spec: v1alpha1.NodeConfigSpec{
 			Guest: v1alpha1.NodeConfigSpecGuest{
@@ -236,6 +237,7 @@ func (r *Resource) createNodeConfig(ctx context.Context, customObject providerv1
 			},
 		},
 	}
+
 	_, err := r.g8sClient.CoreV1alpha1().NodeConfigs(n).Create(c)
 	if err != nil {
 		return microerror.Mask(err)
