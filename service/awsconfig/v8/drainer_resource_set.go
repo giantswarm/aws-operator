@@ -18,8 +18,8 @@ import (
 )
 
 type DrainerResourceSetConfig struct {
-	GuestAWSClients aws.Clients
-	Logger          micrologger.Logger
+	AWS    aws.Clients
+	Logger micrologger.Logger
 
 	GuestUpdateEnabled bool
 	ProjectName        string
@@ -31,7 +31,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*framework.Resource
 	var cloudFormationService *cloudformationservice.CloudFormation
 	{
 		c := cloudformationservice.Config{
-			Client: config.GuestAWSClients.CloudFormation,
+			Client: config.AWS.CloudFormation,
 		}
 
 		cloudFormationService, err = cloudformationservice.New(c)
@@ -43,7 +43,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*framework.Resource
 	var lifecycleResource framework.Resource
 	{
 		c := lifecycle.ResourceConfig{
-			Clients: config.GuestAWSClients,
+			AWS:     config.AWS,
 			Logger:  config.Logger,
 			Service: cloudFormationService,
 		}
