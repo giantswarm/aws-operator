@@ -351,8 +351,10 @@ func TestMainHostPostTemplateExistingFields(t *testing.T) {
 	cfg.Clients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
 	}
+	ec2Mock := &adapter.EC2ClientMock{}
+	ec2Mock.SetMatchingRouteTables(1)
 	cfg.HostClients = &adapter.Clients{
-		EC2: &adapter.EC2ClientMock{},
+		EC2: ec2Mock,
 		IAM: &adapter.IAMClientMock{},
 	}
 	newResource, err := New(cfg)
