@@ -7,7 +7,7 @@ const LifecycleHooks = `{{define "lifecycle_hooks"}}
       AutoScalingGroupName:
         Ref: {{ .LifecycleHooks.Worker.ASG.Ref }}
       DefaultResult: CONTINUE
-      HeartbeatTimeout: 300
+      HeartbeatTimeout: 3600
       LifecycleHookName: {{ .LifecycleHooks.Worker.LifecycleHook.Name }}
       LifecycleTransition: "autoscaling:EC2_INSTANCE_TERMINATING"
 {{end}}`
