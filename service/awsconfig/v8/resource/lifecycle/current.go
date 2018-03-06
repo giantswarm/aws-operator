@@ -80,7 +80,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			},
 		}
 
-		o, err := r.clients.AutoScaling.DescribeAutoScalingGroups(i)
+		o, err := r.aws.AutoScaling.DescribeAutoScalingGroups(i)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -116,7 +116,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			LifecycleHookName:     aws.String(key.NodeDrainerLifecycleHookName),
 		}
 
-		_, err := r.clients.AutoScaling.CompleteLifecycleAction(i)
+		_, err := r.aws.AutoScaling.CompleteLifecycleAction(i)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
