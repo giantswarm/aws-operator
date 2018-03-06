@@ -7,8 +7,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/framework/context/resourcecanceledcontext"
+	"k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v8/cloudformation"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v8/key"
@@ -102,27 +107,125 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		}
 	}
 
-	// TODO check if NodeConfig exists
-	// TODO create NodeConfig if it does not exist
-	// TODO check if NodeConfig has final state
+	{
+		for _, instance := range instances {
+			privateDNS, err := r.privateDNSForInstance(*instance.InstanceId)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
 
-	for _, instance := range instances {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completing lifecycle hook action for guest cluster instance '%s'", *instance.InstanceId))
+			n := v1.NamespaceDefault
+			o := metav1.GetOptions{}
 
-		i := &autoscaling.CompleteLifecycleActionInput{
-			AutoScalingGroupName:  aws.String(workerASGName),
-			InstanceId:            instance.InstanceId,
-			LifecycleActionResult: aws.String("CONTINUE"),
-			LifecycleHookName:     aws.String(key.NodeDrainerLifecycleHookName),
+			nodeConfig, err := r.g8sClient.CoreV1alpha1().NodeConfigs(n).Get(privateDNS, o)
+			if errors.IsNotFound(err) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "did not find node config for guest cluster node")
+
+				{
+					r.logger.LogCtx(ctx, "level", "debug", "message", "creating node config for guest cluster node")
+
+					nodeConfig := &v1alpha1.NodeConfig{
+						Spec: v1alpha1.NodeConfigSpec{
+							Guest: v1alpha1.NodeConfigSpecGuest{
+								Cluster: v1alpha1.NodeConfigSpecGuestCluster{
+									API: v1alpha1.NodeConfigSpecGuestClusterAPI{
+										Endpoint: key.ClusterAPIEndpoint(customObject),
+									},
+									ID: key.ClusterID(customObject),
+								},
+								Node: v1alpha1.NodeConfigSpecGuestNode{
+									Name: privateDNS,
+								},
+							},
+							VersionBundle: v1alpha1.NodeConfigSpecVersionBundle{
+								Version: "0.1.0",
+							},
+						},
+					}
+					_, err := r.g8sClient.CoreV1alpha1().NodeConfigs(n).Create(nodeConfig)
+					if err != nil {
+						return nil, microerror.Mask(err)
+					}
+
+					r.logger.LogCtx(ctx, "level", "debug", "message", "created node config for guest cluster node")
+				}
+
+			} else if err != nil {
+				return nil, microerror.Mask(err)
+
+			} else {
+				if hasFinalStatus(nodeConfig.Status.Conditions) {
+					r.logger.LogCtx(ctx, "level", "debug", "message", "node config of guest cluster has final state")
+
+					{
+						r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completing lifecycle hook action for guest cluster instance '%s'", *instance.InstanceId))
+
+						i := &autoscaling.CompleteLifecycleActionInput{
+							AutoScalingGroupName:  aws.String(workerASGName),
+							InstanceId:            instance.InstanceId,
+							LifecycleActionResult: aws.String("CONTINUE"),
+							LifecycleHookName:     aws.String(key.NodeDrainerLifecycleHookName),
+						}
+
+						_, err := r.aws.AutoScaling.CompleteLifecycleAction(i)
+						if err != nil {
+							return nil, microerror.Mask(err)
+						}
+
+						r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed lifecycle hook action for guest cluster instance '%s'", *instance.InstanceId))
+					}
+
+					{
+						r.logger.LogCtx(ctx, "level", "debug", "message", "deleting node config for guest cluster node")
+
+						i := privateDNS
+						o := &metav1.DeleteOptions{}
+
+						err := r.g8sClient.CoreV1alpha1().NodeConfigs(n).Delete(i, o)
+						if err != nil {
+							return nil, microerror.Mask(err)
+						}
+
+						r.logger.LogCtx(ctx, "level", "debug", "message", "deleted node config for guest cluster node")
+					}
+				}
+			}
 		}
-
-		_, err := r.aws.AutoScaling.CompleteLifecycleAction(i)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed lifecycle hook action for guest cluster instance '%s'", *instance.InstanceId))
 	}
 
 	return nil, nil
+}
+
+func (r *Resource) privateDNSForInstance(instanceID string) (string, error) {
+	i := &ec2.DescribeInstancesInput{
+		InstanceIds: []*string{
+			aws.String(instanceID),
+		},
+	}
+
+	o, err := r.aws.EC2.DescribeInstances(i)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	if len(o.Reservations) != 1 {
+		return "", microerror.Maskf(executionFailedError, "expected 1 reservation, got %d", len(o.Reservations))
+	}
+	if len(o.Reservations[0].Instances) != 1 {
+		return "", microerror.Maskf(executionFailedError, "expected 1 instance, got %d", len(o.Reservations[0].Instances))
+	}
+
+	privateDNS := *o.Reservations[0].Instances[0].PrivateDnsName
+
+	return privateDNS, nil
+}
+
+func hasFinalStatus(conditions []v1alpha1.NodeConfigStatusCondition) bool {
+	for _, c := range conditions {
+		if c.Type == "Drained" && c.Status == "True" {
+			return true
+		}
+	}
+
+	return false
 }

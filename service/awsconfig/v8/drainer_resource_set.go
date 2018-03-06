@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/cenkalti/backoff"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/framework"
@@ -18,8 +19,9 @@ import (
 )
 
 type DrainerResourceSetConfig struct {
-	AWS    aws.Clients
-	Logger micrologger.Logger
+	AWS       aws.Clients
+	G8sClient versioned.Interface
+	Logger    micrologger.Logger
 
 	GuestUpdateEnabled bool
 	ProjectName        string
@@ -43,9 +45,10 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*framework.Resource
 	var lifecycleResource framework.Resource
 	{
 		c := lifecycle.ResourceConfig{
-			AWS:     config.AWS,
-			Logger:  config.Logger,
-			Service: cloudFormationService,
+			AWS:       config.AWS,
+			G8sClient: config.G8sClient,
+			Logger:    config.Logger,
+			Service:   cloudFormationService,
 		}
 
 		lifecycleResource, err = lifecycle.NewResource(c)

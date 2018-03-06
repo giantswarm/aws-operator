@@ -150,8 +150,9 @@ func newDrainerResourceRouter(config DrainerFrameworkConfig) (*framework.Resourc
 	var v8ResourceSet *framework.ResourceSet
 	{
 		c := v8.DrainerResourceSetConfig{
-			AWS:    awsClients,
-			Logger: config.Logger,
+			AWS:       awsClients,
+			G8sClient: config.G8sClient,
+			Logger:    config.Logger,
 
 			GuestUpdateEnabled: config.GuestUpdateEnabled,
 			ProjectName:        config.ProjectName,
