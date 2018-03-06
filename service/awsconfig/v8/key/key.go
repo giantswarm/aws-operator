@@ -36,6 +36,10 @@ const (
 )
 
 const (
+	InstanceIDAnnotation = "aws-operator.giantswarm.io/instance"
+)
+
+const (
 	MasterImageIDKey            = "MasterImageID"
 	MasterInstanceTypeKey       = "MasterInstanceType"
 	MasterCloudConfigVersionKey = "MasterCloudConfigVersion"
@@ -45,6 +49,10 @@ const (
 	WorkerInstanceTypeKey       = "WorkerInstanceType"
 	WorkerCloudConfigVersionKey = "WorkerCloudConfigVersion"
 	VersionBundleVersionKey     = "VersionBundleVersion"
+)
+
+const (
+	ClusterIDLabel = "giantswarm.io/cluster"
 )
 
 const (

@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
+	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/framework/context/resourcecanceledcontext"
 	"k8s.io/api/core/v1"
@@ -109,6 +110,8 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	{
 		for _, instance := range instances {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "looking for node config for the guest cluster")
+
 			privateDNS, err := r.privateDNSForInstance(*instance.InstanceId)
 			if err != nil {
 				return nil, microerror.Mask(err)
@@ -117,30 +120,39 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			n := v1.NamespaceDefault
 			o := metav1.GetOptions{}
 
-			nodeConfig, err := r.g8sClient.CoreV1alpha1().NodeConfigs(n).Get(privateDNS, o)
+			_, err = r.g8sClient.CoreV1alpha1().NodeConfigs(n).Get(privateDNS, o)
 			if errors.IsNotFound(err) {
 				r.logger.LogCtx(ctx, "level", "debug", "message", "did not find node config for guest cluster node")
 
-				err := r.createNodeConfig(privateDNS)
+				err := r.createNodeConfig(ctx, customObject, *instance.InstanceId, privateDNS)
 				if err != nil {
 					return nil, microerror.Mask(err)
 				}
+
 			} else if err != nil {
 				return nil, microerror.Mask(err)
+			} else {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "found node config for the guest cluster")
+
+				r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for inspection of node config for the guest cluster")
 			}
 		}
 	}
 
 	{
-		o := &metav1.ListOptions{
+		n := v1.NamespaceDefault
+		o := metav1.ListOptions{
 			LabelSelector: fmt.Sprintf("%s=%s", key.ClusterIDLabel, key.ClusterID(customObject)),
 		}
+
 		nodeConfigs, err := r.g8sClient.CoreV1alpha1().NodeConfigs(n).List(o)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 
 		for _, nodeConfig := range nodeConfigs.Items {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "inspecting node config for the guest cluster")
+
 			if !hasFinalStatus(nodeConfig.Status.Conditions) {
 				continue
 			}
@@ -152,12 +164,12 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 				return nil, microerror.Mask(err)
 			}
 
-			err := r.completeLifecycleHook(instanceID, workerASGName)
+			err = r.completeLifecycleHook(ctx, instanceID, workerASGName)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
 
-			err := r.deleteNodeConfig(privateDNS)
+			err = r.deleteNodeConfig(ctx, nodeConfig.GetName())
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
@@ -167,7 +179,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	return nil, nil
 }
 
-func (r *Resource) completeLifecycleHook(instanceID, workerASGName string) error {
+func (r *Resource) completeLifecycleHook(ctx context.Context, instanceID, workerASGName string) error {
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completing lifecycle hook action for guest cluster instance '%s'", instanceID))
 
 	i := &autoscaling.CompleteLifecycleActionInput{
@@ -187,13 +199,19 @@ func (r *Resource) completeLifecycleHook(instanceID, workerASGName string) error
 	return nil
 }
 
-func (r *Resource) createNodeConfig(privateDNS string) error {
+func (r *Resource) createNodeConfig(ctx context.Context, customObject providerv1alpha1.AWSConfig, instanceID, privateDNS string) error {
 	r.logger.LogCtx(ctx, "level", "debug", "message", "creating node config for guest cluster node")
 
-	// TODO add labels
-	// TODO add annotations
-
-	nodeConfig := &v1alpha1.NodeConfig{
+	n := v1.NamespaceDefault
+	c := &v1alpha1.NodeConfig{
+		ObjectMeta: metav1.ObjectMeta{
+			Annotations: map[string]string{
+				key.InstanceIDAnnotation: instanceID,
+			},
+			Labels: map[string]string{
+				key.ClusterIDLabel: key.ClusterID(customObject),
+			},
+		},
 		Spec: v1alpha1.NodeConfigSpec{
 			Guest: v1alpha1.NodeConfigSpecGuest{
 				Cluster: v1alpha1.NodeConfigSpecGuestCluster{
@@ -211,7 +229,7 @@ func (r *Resource) createNodeConfig(privateDNS string) error {
 			},
 		},
 	}
-	_, err := r.g8sClient.CoreV1alpha1().NodeConfigs(n).Create(nodeConfig)
+	_, err := r.g8sClient.CoreV1alpha1().NodeConfigs(n).Create(c)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -221,9 +239,10 @@ func (r *Resource) createNodeConfig(privateDNS string) error {
 	return nil
 }
 
-func (r *Resource) deleteNodeConfig(privateDNS string) error {
+func (r *Resource) deleteNodeConfig(ctx context.Context, privateDNS string) error {
 	r.logger.LogCtx(ctx, "level", "debug", "message", "deleting node config for guest cluster node")
 
+	n := v1.NamespaceDefault
 	i := privateDNS
 	o := &metav1.DeleteOptions{}
 
@@ -269,4 +288,16 @@ func hasFinalStatus(conditions []v1alpha1.NodeConfigStatusCondition) bool {
 	}
 
 	return false
+}
+
+func instanceIDFromAnnotations(annotations map[string]string) (string, error) {
+	instanceID, ok := annotations[key.InstanceIDAnnotation]
+	if !ok {
+		return "", microerror.Maskf(missingAnnotationError, key.InstanceIDAnnotation)
+	}
+	if instanceID == "" {
+		return "", microerror.Maskf(missingAnnotationError, key.InstanceIDAnnotation)
+	}
+
+	return instanceID, nil
 }
