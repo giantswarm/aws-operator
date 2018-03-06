@@ -4,6 +4,9 @@ e2eTest: &e2eTest
     steps:
     - checkout
 
+    - attach_workspace:
+        at: .
+
     - run: |
         wget -q $(curl -sS https://api.github.com/repos/giantswarm/e2e-harness/releases/latest | grep browser_download_url | head -n 1 | cut -d '"' -f 4)
         chmod +x ./e2e-harness
@@ -40,6 +43,11 @@ jobs:
         ./architect version
 
     - run: ./architect build
+
+    - persist_to_workspace:
+        root: .
+        paths:
+        - ./aws-operator
 
     - deploy:
         command: |
