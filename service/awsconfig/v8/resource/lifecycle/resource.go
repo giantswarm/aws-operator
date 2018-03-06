@@ -13,20 +13,20 @@ const (
 )
 
 type ResourceConfig struct {
-	Clients awsclient.Clients
+	AWS     awsclient.Clients
 	Logger  micrologger.Logger
 	Service *cloudformationservice.CloudFormation
 }
 
 type Resource struct {
-	clients awsclient.Clients
+	aws     awsclient.Clients
 	logger  micrologger.Logger
 	service *cloudformationservice.CloudFormation
 }
 
 func NewResource(config ResourceConfig) (*Resource, error) {
-	if config.Clients.AutoScaling == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Clients.AutoScaling must not be empty", config)
+	if config.AWS.AutoScaling == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.AWS.AutoScaling must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
@@ -36,7 +36,7 @@ func NewResource(config ResourceConfig) (*Resource, error) {
 	}
 
 	newResource := &Resource{
-		clients: config.Clients,
+		aws: config.AWS,
 		logger: config.Logger.With(
 			"resource", Name,
 		),
