@@ -11,7 +11,7 @@ func VersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "aws-operator",
-				Description: "Fix validation check for existing peering routes",
+				Description: "Fix validation check for existing peering routes.",
 				Kind:        versionbundle.KindFixed,
 			},
 		},
