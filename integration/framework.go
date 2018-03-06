@@ -67,6 +67,17 @@ Installation:
         PullSecret:
           DockerConfigJSON: "{\"auths\":{\"quay.io\":{\"auth\":\"$REGISTRY_PULL_SECRET\"}}}"
 `
+
+	nodeOperatorValuesFile = "/tmp/node-operator-values.yaml"
+	// nodeOperatorChartValues values required by node-operator-chart, the environment
+	// variables will be expanded before writing the contents to a file.
+	nodeOperatorChartValues = `Installation:
+  V1:
+    Secret:
+      Registry:
+        PullSecret:
+          DockerConfigJSON: "{\"auths\":{\"quay.io\":{\"auth\":\"$REGISTRY_PULL_SECRET\"}}}"
+`
 )
 
 type framework struct {
@@ -266,15 +277,45 @@ func (f *framework) installVault() error {
 }
 
 func (f *framework) InstallCertOperator() error {
-	certOperatorChartValuesEnv := os.ExpandEnv(certOperatorChartValues)
-	if err := ioutil.WriteFile(certOperatorValuesFile, []byte(certOperatorChartValuesEnv), os.ModePerm); err != nil {
-		return microerror.Mask(err)
-	}
-	if err := runCmd("helm registry install quay.io/giantswarm/cert-operator-chart:stable -- -n cert-operator --values " + certOperatorValuesFile); err != nil {
+	var err error
+
+	err = ioutil.WriteFile(certOperatorValuesFile, []byte(os.ExpandEnv(certOperatorChartValues)), os.ModePerm)
+	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	return waitFor(f.crd("certconfig"))
+	err = runCmd("helm registry install quay.io/giantswarm/cert-operator-chart:stable -- -n cert-operator --values " + certOperatorValuesFile)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	err = waitFor(f.crd("certconfig"))
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
+func (f *framework) InstallNodeOperator() error {
+	var err error
+
+	err = ioutil.WriteFile(nodeOperatorValuesFile, []byte(os.ExpandEnv(nodeOperatorChartValues)), os.ModePerm)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	err = runCmd("helm registry install quay.io/giantswarm/node-operator-chart:stable -- -n node-operator --values " + nodeOperatorValuesFile)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	err = waitFor(f.crd("nodeconfig"))
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
 }
 
 func (f *framework) InstallCertResource() error {

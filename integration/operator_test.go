@@ -257,15 +257,16 @@ func operatorSetup() error {
 	if err := f.InstallCertOperator(); err != nil {
 		return microerror.Mask(err)
 	}
-
-	if err := f.InstallCertResource(); err != nil {
+	if err := f.InstallNodeOperator(); err != nil {
 		return microerror.Mask(err)
 	}
-
 	if err := f.InstallAwsOperator(); err != nil {
 		return microerror.Mask(err)
 	}
 
+	if err := f.InstallCertResource(); err != nil {
+		return microerror.Mask(err)
+	}
 	err := writeAWSResourceValues()
 	if err != nil {
 		return microerror.Maskf(err, "writing aws-resource-lab values file")
