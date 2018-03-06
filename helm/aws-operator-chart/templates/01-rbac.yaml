@@ -28,6 +28,12 @@ rules:
     verbs:
       - "*"
   - apiGroups:
+      - core.giantswarm.io
+    resources:
+      - nodeconfigs
+    verbs:
+      - "*"
+  - apiGroups:
       - ""
     resources:
       - namespaces
