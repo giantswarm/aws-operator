@@ -36,6 +36,10 @@ const (
 )
 
 const (
+	InstanceIDAnnotation = "aws-operator.giantswarm.io/instance"
+)
+
+const (
 	MasterImageIDKey            = "MasterImageID"
 	MasterInstanceTypeKey       = "MasterInstanceType"
 	MasterCloudConfigVersionKey = "MasterCloudConfigVersion"
@@ -48,9 +52,17 @@ const (
 )
 
 const (
+	ClusterIDLabel = "giantswarm.io/cluster"
+)
+
+const (
 	NodeDrainerLifecycleHookName = "NodeDrainer"
 	WorkerASGRef                 = "workerAutoScalingGroup"
 )
+
+func ClusterAPIEndpoint(customObject v1alpha1.AWSConfig) string {
+	return customObject.Spec.Cluster.Kubernetes.API.Domain
+}
 
 func AutoScalingGroupName(customObject v1alpha1.AWSConfig, groupName string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), groupName)

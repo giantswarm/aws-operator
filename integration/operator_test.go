@@ -257,15 +257,16 @@ func operatorSetup() error {
 	if err := f.InstallCertOperator(); err != nil {
 		return microerror.Mask(err)
 	}
-
-	if err := f.InstallCertResource(); err != nil {
+	if err := f.InstallNodeOperator(); err != nil {
 		return microerror.Mask(err)
 	}
-
 	if err := f.InstallAwsOperator(); err != nil {
 		return microerror.Mask(err)
 	}
 
+	if err := f.InstallCertResource(); err != nil {
+		return microerror.Mask(err)
+	}
 	err := writeAWSResourceValues()
 	if err != nil {
 		return microerror.Maskf(err, "writing aws-resource-lab values file")
@@ -297,10 +298,12 @@ func operatorSetup() error {
 }
 
 func operatorTearDown() {
-	runCmd("helm delete cert-resource-lab --purge")
-	runCmd("helm delete cert-operator --purge")
-	runCmd("helm delete aws-resource-lab --purge")
 	runCmd("helm delete aws-operator --purge")
+	runCmd("helm delete cert-operator --purge")
+	runCmd("helm delete node-operator --purge")
+
+	runCmd("helm delete cert-resource-lab --purge")
+	runCmd("helm delete aws-resource-lab --purge")
 }
 
 func writeAWSResourceValues() error {
