@@ -42,7 +42,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "debug", "creating AWS cloudformation stack: created")
+		r.logger.LogCtx(ctx, "debug", "created the guest cluster cloud formation stack")
 	} else {
 		r.logger.LogCtx(ctx, "debug", "creating AWS cloudformation stack: already created")
 	}

@@ -277,7 +277,7 @@ func operatorSetup() error {
 		return microerror.Maskf(err, "installing aws-resource-lab chart")
 	}
 
-	logEntry := "created the guest cluster cloud formation stack"
+	logEntry := "created the guest cluster main stack"
 
 	operatorPodName, err := f.PodName("giantswarm", "app=aws-operator")
 	if err != nil {
