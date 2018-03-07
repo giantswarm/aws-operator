@@ -74,13 +74,11 @@ func New(config Config) (*Resource, error) {
 
 	newService := &Resource{
 		// Dependencies.
-		awsService:  config.AwsService,
-		awsClients:  config.Clients,
-		certWatcher: config.CertWatcher,
-		cloudConfig: config.CloudConfig,
-		logger: config.Logger.With(
-			"resource", Name,
-		),
+		awsService:       config.AwsService,
+		awsClients:       config.Clients,
+		certWatcher:      config.CertWatcher,
+		cloudConfig:      config.CloudConfig,
+		logger:           config.Logger,
 		randomKeyWatcher: config.RandomKeyWatcher,
 	}
 

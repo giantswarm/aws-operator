@@ -36,10 +36,8 @@ func NewResource(config ResourceConfig) (*Resource, error) {
 	}
 
 	newResource := &Resource{
-		aws: config.AWS,
-		logger: config.Logger.With(
-			"resource", Name,
-		),
+		aws:     config.AWS,
+		logger:  config.Logger,
 		service: config.Service,
 	}
 
