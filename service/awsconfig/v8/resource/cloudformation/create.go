@@ -21,9 +21,9 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		return microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "debug", "creating AWS cloudformation stack")
-
 	if stackInput.StackName != nil {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "creating the guest cluster main stack")
+
 		_, err = r.clients.CloudFormation.CreateStack(&stackInput)
 		if err != nil {
 			return microerror.Mask(err)
@@ -42,9 +42,9 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "debug", "creating AWS cloudformation stack: created")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "created the guest cluster main stack")
 	} else {
-		r.logger.LogCtx(ctx, "debug", "creating AWS cloudformation stack: already created")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not creating the guest cluster main stack")
 	}
 
 	return nil
@@ -64,12 +64,12 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		return cloudformation.CreateStackInput{}, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "debug", "finding out if the main stack should be created")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the guest cluster main stack has to be created")
 
 	createState := cloudformation.CreateStackInput{}
 
 	if currentStackState.Name == "" || desiredStackState.Name != currentStackState.Name {
-		r.logger.LogCtx(ctx, "debug", "main stack should be created")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack has to be created")
 
 		if err := r.validateCluster(customObject); err != nil {
 			return cloudformation.CreateStackInput{}, microerror.Mask(err)
@@ -97,6 +97,8 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		}
 
 		createState.SetTags(getCloudFormationTags(customObject))
+	} else {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack does not have to be created")
 	}
 
 	return createState, nil
@@ -118,7 +120,8 @@ func (r *Resource) createHostPreStack(ctx context.Context, customObject v1alpha1
 	}
 	createStack.SetTags(getCloudFormationTags(customObject))
 
-	r.logger.LogCtx(ctx, "debug", "creating AWS Host Pre-Guest cloudformation stack")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "creating the host cluster pre cloud formation stack")
+
 	_, err = r.hostClients.CloudFormation.CreateStack(createStack)
 	if err != nil {
 		return microerror.Mask(err)
@@ -130,7 +133,9 @@ func (r *Resource) createHostPreStack(ctx context.Context, customObject v1alpha1
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	r.logger.LogCtx(ctx, "debug", "creating AWS Host Pre-Guest cloudformation stack: created")
+
+	r.logger.LogCtx(ctx, "level", "debug", "message", "created the host cluster pre cloud formation stack")
+
 	return nil
 }
 
@@ -146,7 +151,8 @@ func (r *Resource) createHostPostStack(ctx context.Context, customObject v1alpha
 	}
 	createStack.SetTags(getCloudFormationTags(customObject))
 
-	r.logger.LogCtx(ctx, "debug", "creating AWS Host Post-Guest cloudformation stack")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "creating the host cluster post cloud formation stack")
+
 	_, err = r.hostClients.CloudFormation.CreateStack(createStack)
 	if err != nil {
 		return microerror.Mask(err)
@@ -159,7 +165,7 @@ func (r *Resource) createHostPostStack(ctx context.Context, customObject v1alpha
 		return microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "debug", "creating AWS Host Post-Guest cloudformation stack: created")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "created the host cluster post cloud formation stack")
 
 	return nil
 }

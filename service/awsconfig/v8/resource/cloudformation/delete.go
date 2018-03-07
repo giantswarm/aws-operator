@@ -23,7 +23,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	if err != nil {
 		return microerror.Maskf(err, "deleting AWS Guest CloudFormation Stack")
 	}
-	r.logger.LogCtx(ctx, "debug", "deleting AWS Guest CloudFormation stack: deleted")
+	r.logger.LogCtx(ctx, "level", "debug", "deleting AWS Guest CloudFormation stack: deleted")
 
 	deleteStackInput = awscloudformation.DeleteStackInput{
 		StackName: aws.String(key.MainHostPreStackName(cluster)),
@@ -32,7 +32,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	if err != nil {
 		return microerror.Maskf(err, "deleting AWS Host Pre-Guest CloudFormation Stack")
 	}
-	r.logger.LogCtx(ctx, "debug", "deleting AWS Host Pre-Guest CloudFormation stack: deleted")
+	r.logger.LogCtx(ctx, "level", "debug", "deleting AWS Host Pre-Guest CloudFormation stack: deleted")
 
 	deleteStackInput = awscloudformation.DeleteStackInput{
 		StackName: aws.String(key.MainHostPostStackName(cluster)),
@@ -41,7 +41,8 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	if err != nil {
 		return microerror.Maskf(err, "deleting AWS Host Post-Guest CloudFormation Stack")
 	}
-	r.logger.LogCtx(ctx, "debug", "deleting AWS Host Post-Guest CloudFormation stack: deleted")
+	// TODO align with integration tests
+	r.logger.LogCtx(ctx, "level", "debug", "deleting AWS Host Post-Guest CloudFormation stack: deleted")
 
 	return nil
 }
@@ -68,7 +69,7 @@ func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desir
 		return awscloudformation.DeleteStackInput{}, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "debug", "finding out if the main stack should be deleted")
+	r.logger.LogCtx(ctx, "level", "debug", "finding out if the main stack should be deleted")
 
 	deleteState := awscloudformation.DeleteStackInput{
 		StackName: aws.String(""),

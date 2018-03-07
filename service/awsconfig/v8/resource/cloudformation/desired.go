@@ -14,9 +14,16 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	mainStack, err := newMainStack(customObject)
-	if err != nil {
-		return nil, microerror.Mask(err)
+	var mainStack StackState
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "computing desired state for the guest cluster main stack")
+
+		mainStack, err = newMainStack(customObject)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "computed desired state for the guest cluster main stack")
 	}
 
 	return mainStack, nil
