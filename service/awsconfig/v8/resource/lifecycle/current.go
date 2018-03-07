@@ -154,12 +154,12 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			for _, nodeConfig := range nodeConfigs.Items {
 				r.logger.LogCtx(ctx, "level", "debug", "message", "inspecting node config for the guest cluster")
 
-				if hasFinalStatus(nodeConfig.Status.Conditions) {
-					r.logger.LogCtx(ctx, "level", "debug", "message", "node config of guest cluster has final state")
-				} else {
+				if !hasFinalStatus(nodeConfig.Status.Conditions) {
 					r.logger.LogCtx(ctx, "level", "debug", "message", "node config of guest cluster has no final state")
 					continue
 				}
+
+				r.logger.LogCtx(ctx, "level", "debug", "message", "node config of guest cluster has final state")
 
 				// This is a special thing for AWS. We use annotations to transport EC2
 				// instance IDs. Otherwise the lookups of all necessary information
