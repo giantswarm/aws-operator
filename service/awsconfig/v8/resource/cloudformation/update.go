@@ -20,16 +20,16 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	}
 
 	if updateStackInput.StackName != nil && *updateStackInput.StackName != "" {
-		r.logger.LogCtx(ctx, "debug", "updating main stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "updating the guest cluster cloud formation stack")
 
 		_, err := r.clients.CloudFormation.UpdateStack(&updateStackInput)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "debug", "updated main stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "updated the guest cluster cloud formation stack")
 	} else {
-		r.logger.LogCtx(ctx, "debug", "not updating main stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not updating the guest cluster cloud formation stack")
 	}
 
 	return nil
@@ -90,10 +90,10 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 	// full confidence in updating guest clusters. Note that updates also manage
 	// scaling at the same time to be more efficient.
 	if updateallowedcontext.IsUpdateAllowed(ctx) {
-		r.logger.LogCtx(ctx, "debug", "finding out if the main stack has to be updated")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the guest cluster cloud formation stack has to be updated")
 
 		if shouldUpdate(currentStackState, desiredStackState) {
-			r.logger.LogCtx(ctx, "debug", "main stack has to be updated")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster cloud formation stack has to be updated")
 
 			updateState, err := r.computeUpdateState(customObject, desiredStackState)
 			if err != nil {
@@ -102,10 +102,10 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 
 			return updateState, nil
 		} else {
-			r.logger.LogCtx(ctx, "debug", "main stack has not to be updated")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster cloud formation stack does not have to be updated")
 		}
 	} else {
-		r.logger.LogCtx(ctx, "debug", "not computing update state because main stack are not allowed to be updated")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not computing update state of the guest cluster cloud formation stack because updates are not allowed")
 	}
 
 	// We manage scaling separately because the impact and implications of scaling
@@ -113,17 +113,21 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 	// cannot just process updates at any time and thus have to separate the
 	// management of both primitives. Note that updates also manage scaling at the
 	// same time for more efficiency.
-	if shouldScale(currentStackState, desiredStackState) {
-		r.logger.LogCtx(ctx, "debug", "main stack has to be scaled")
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the guest cluster cloud formation stack has to be scaled")
 
-		updateState, err := r.computeUpdateState(customObject, desiredStackState)
-		if err != nil {
-			return cloudformation.CreateStackInput{}, microerror.Mask(err)
+		if shouldScale(currentStackState, desiredStackState) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster cloud formation stack has to be scaled")
+
+			updateState, err := r.computeUpdateState(customObject, desiredStackState)
+			if err != nil {
+				return cloudformation.CreateStackInput{}, microerror.Mask(err)
+			}
+
+			return updateState, nil
+		} else {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster cloud formation stack does not have to be scaled")
 		}
-
-		return updateState, nil
-	} else {
-		r.logger.LogCtx(ctx, "debug", "main stack has not to be scaled")
 	}
 
 	return cloudformation.UpdateStackInput{}, nil
