@@ -50,9 +50,7 @@ func New(config Config) (*Resource, error) {
 		// Dependencies.
 		awsClients: config.Clients,
 		k8sClient:  config.K8sClient,
-		logger: config.Logger.With(
-			"resource", Name,
-		),
+		logger:     config.Logger,
 	}
 
 	return newResource, nil
