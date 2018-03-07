@@ -40,7 +40,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*framework.Resource
 		}
 	}
 
-	var lifecycleResource framework.Resource
+	var lifecycleResource framework.CRUDResourceOps
 	{
 		c := lifecycle.ResourceConfig{
 			Clients: config.GuestAWSClients,
@@ -54,8 +54,22 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*framework.Resource
 		}
 	}
 
-	resources := []framework.Resource{
+	var resources []framework.Resource
+	ops := []framework.CRUDResourceOps{
 		lifecycleResource,
+	}
+	for _, o := range ops {
+		c := framework.CRUDResourceConfig{
+			Logger: config.Logger,
+			Ops:    o,
+		}
+
+		r, err := framework.NewCRUDResource(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		resources = append(resources, r)
 	}
 
 	{

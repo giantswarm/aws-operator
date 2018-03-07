@@ -1375,10 +1375,6 @@ func (s *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) Underlying() framework.Resource {
-	return r
-}
-
 func (s *Resource) newUpdateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
 	return nil, nil
 }

@@ -47,10 +47,8 @@ func NewResource(config ResourceConfig) (*Resource, error) {
 	newResource := &Resource{
 		aws:       config.AWS,
 		g8sClient: config.G8sClient,
-		logger: config.Logger.With(
-			"resource", Name,
-		),
-		service: config.Service,
+		logger:    config.Logger,
+		service:   config.Service,
 	}
 
 	return newResource, nil

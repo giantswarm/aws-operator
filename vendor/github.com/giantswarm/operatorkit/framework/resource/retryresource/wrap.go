@@ -30,9 +30,10 @@ func Wrap(resources []framework.Resource, config WrapConfig) ([]framework.Resour
 
 	for _, r := range resources {
 		c := Config{
-			BackOff:  config.BackOffFactory(),
 			Logger:   config.Logger,
 			Resource: r,
+
+			BackOff: config.BackOffFactory(),
 		}
 
 		retryResource, err := New(c)

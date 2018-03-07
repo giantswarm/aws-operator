@@ -72,7 +72,7 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		}
 	}
 
-	var legacyResource framework.Resource
+	var legacyResource framework.CRUDResourceOps
 	{
 		legacyConfig := legacyv2.DefaultConfig()
 		legacyConfig.AwsConfig = config.GuestAWSConfig
@@ -91,8 +91,22 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		}
 	}
 
-	resources := []framework.Resource{
+	var resources []framework.Resource
+	ops := []framework.CRUDResourceOps{
 		legacyResource,
+	}
+	for _, o := range ops {
+		c := framework.CRUDResourceConfig{
+			Logger: config.Logger,
+			Ops:    o,
+		}
+
+		r, err := framework.NewCRUDResource(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		resources = append(resources, r)
 	}
 
 	// Wrap resources with retry and metrics.

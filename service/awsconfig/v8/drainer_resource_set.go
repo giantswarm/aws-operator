@@ -51,7 +51,12 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*framework.Resource
 			Service:   cloudFormationService,
 		}
 
-		lifecycleResource, err = lifecycle.NewResource(c)
+		ops, err := lifecycle.NewResource(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		lifecycleResource, err = toCRUDResource(config.Logger, ops)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

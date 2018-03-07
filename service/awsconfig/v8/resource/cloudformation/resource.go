@@ -59,10 +59,8 @@ func New(config Config) (*Resource, error) {
 		clients:          config.Clients,
 		hostClients:      config.HostClients,
 		installationName: config.InstallationName,
-		logger: config.Logger.With(
-			"resource", Name,
-		),
-		service: config.Service,
+		logger:           config.Logger,
+		service:          config.Service,
 	}
 
 	return newService, nil

@@ -149,7 +149,12 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 			Logger: config.Logger,
 		}
 
-		kmsKeyResource, err = kmskey.New(c)
+		ops, err := kmskey.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		kmsKeyResource, err = toCRUDResource(config.Logger, ops)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -165,7 +170,12 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 			Logger: config.Logger,
 		}
 
-		s3BucketResource, err = s3bucket.New(c)
+		ops, err := s3bucket.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		s3BucketResource, err = toCRUDResource(config.Logger, ops)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -185,7 +195,12 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 			RandomKeyWatcher: config.RandomkeysSearcher,
 		}
 
-		s3BucketObjectResource, err = s3object.New(c)
+		ops, err := s3object.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		s3BucketObjectResource, err = toCRUDResource(config.Logger, ops)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -200,7 +215,12 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 			Logger: config.Logger,
 		}
 
-		loadBalancerResource, err = loadbalancer.New(c)
+		ops, err := loadbalancer.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		loadBalancerResource, err = toCRUDResource(config.Logger, ops)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -215,7 +235,12 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 			Logger: config.Logger,
 		}
 
-		ebsVolumeResource, err = ebsvolume.New(c)
+		ops, err := ebsvolume.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		ebsVolumeResource, err = toCRUDResource(config.Logger, ops)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -242,7 +267,12 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 			InstallationName: config.InstallationName,
 		}
 
-		cloudformationResource, err = cloudformationresource.New(c)
+		ops, err := cloudformationresource.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		cloudformationResource, err = toCRUDResource(config.Logger, ops)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -255,7 +285,12 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 			Logger:    config.Logger,
 		}
 
-		namespaceResource, err = namespace.New(c)
+		ops, err := namespace.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		namespaceResource, err = toCRUDResource(config.Logger, ops)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -268,7 +303,12 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 			Logger:    config.Logger,
 		}
 
-		serviceResource, err = service.New(c)
+		ops, err := service.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		serviceResource, err = toCRUDResource(config.Logger, ops)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -284,7 +324,12 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 			Logger:    config.Logger,
 		}
 
-		endpointsResource, err = endpoints.New(c)
+		ops, err := endpoints.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		endpointsResource, err = toCRUDResource(config.Logger, ops)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -362,4 +407,18 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 	}
 
 	return resourceSet, nil
+}
+
+func toCRUDResource(logger micrologger.Logger, ops framework.CRUDResourceOps) (*framework.CRUDResource, error) {
+	c := framework.CRUDResourceConfig{
+		Logger: logger,
+		Ops:    ops,
+	}
+
+	r, err := framework.NewCRUDResource(c)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	return r, nil
 }

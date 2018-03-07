@@ -57,9 +57,7 @@ func New(config Config) (*Resource, error) {
 		// Dependencies.
 		awsService: config.AwsService,
 		clients:    config.Clients,
-		logger: config.Logger.With(
-			"resource", Name,
-		),
+		logger:     config.Logger,
 	}
 
 	return newResource, nil
