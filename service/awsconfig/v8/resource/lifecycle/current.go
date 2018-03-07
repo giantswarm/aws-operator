@@ -161,6 +161,10 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 					continue
 				}
 
+				// This is a special thing for AWS. We use annotations to transport EC2
+				// instance IDs. Otherwise the lookups of all necessary information
+				// again would be quite a ball ache. Se we take the shortcut leveraging
+				// the k8s API.
 				instanceID, err := instanceIDFromAnnotations(nodeConfig.GetAnnotations())
 				if err != nil {
 					return nil, microerror.Mask(err)
