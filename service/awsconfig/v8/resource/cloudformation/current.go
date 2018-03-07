@@ -18,7 +18,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return StackState{}, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "looking for the guest cluster cloud formation stack in the AWS API")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "looking for the guest cluster main stack in the AWS API")
 
 	stackName := key.MainGuestStackName(customObject)
 
@@ -31,11 +31,11 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	{
 		stackOutputs, stackStatus, err = r.service.DescribeOutputsAndStatus(stackName)
 		if cloudformationservice.IsStackNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster cloud formation stack in the AWS API")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster main stack in the AWS API")
 			return StackState{}, nil
 
 		} else if cloudformationservice.IsOutputsNotAccessible(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster cloud formation stack output values are not accessible due to stack state transition")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack output values are not accessible due to stack state transition")
 			return StackState{Name: stackName}, nil
 
 		} else if err != nil {
@@ -43,13 +43,13 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		}
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "found the guest cluster cloud formation stack in the AWS API")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "found the guest cluster main stack in the AWS API")
 
 	// In case the current guest cluster is already being updated, we cancel the
 	// reconciliation until the current update is done in order to reduce
 	// unnecessary friction.
 	if stackStatus == cloudformation.ResourceStatusUpdateInProgress {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("guest cluster cloud formation stack is in state '%s'", cloudformation.ResourceStatusUpdateInProgress))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("guest cluster main stack is in state '%s'", cloudformation.ResourceStatusUpdateInProgress))
 		resourcecanceledcontext.SetCanceled(ctx)
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
 
