@@ -12,16 +12,16 @@ import (
 )
 
 type EC2ClientMock struct {
-	unexistingSg         bool
-	sgID                 string
-	unexistingSubnet     bool
-	subnetID             string
-	unexistingRouteTable bool
-	routeTableID         string
-	vpcID                string
-	vpcCIDR              string
-	unexistingVPC        bool
-	peeringID            string
+	unexistingSg        bool
+	sgID                string
+	unexistingSubnet    bool
+	subnetID            string
+	matchingRouteTables int
+	routeTableID        string
+	vpcID               string
+	vpcCIDR             string
+	unexistingVPC       bool
+	peeringID           string
 }
 
 func (e *EC2ClientMock) DescribeSecurityGroups(input *ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error) {
@@ -58,21 +58,26 @@ func (e *EC2ClientMock) DescribeSubnets(input *ec2.DescribeSubnetsInput) (*ec2.D
 	return output, nil
 }
 
-func (e *EC2ClientMock) SetUnexistingRouteTable(value bool) {
-	e.unexistingRouteTable = value
+func (e *EC2ClientMock) SetMatchingRouteTables(value int) {
+	e.matchingRouteTables = value
 }
 
 func (e *EC2ClientMock) DescribeRouteTables(input *ec2.DescribeRouteTablesInput) (*ec2.DescribeRouteTablesOutput, error) {
-	if e.unexistingRouteTable {
+	if e.matchingRouteTables == 0 {
 		return nil, fmt.Errorf("route table not found")
 	}
 
+	rts := []*ec2.RouteTable{}
+
+	for i := 0; i < e.matchingRouteTables; i++ {
+		rt := &ec2.RouteTable{
+			RouteTableId: aws.String(fmt.Sprintf("%s_%d", e.routeTableID, i)),
+		}
+		rts = append(rts, rt)
+	}
+
 	output := &ec2.DescribeRouteTablesOutput{
-		RouteTables: []*ec2.RouteTable{
-			{
-				RouteTableId: aws.String(e.routeTableID),
-			},
-		},
+		RouteTables: rts,
 	}
 	return output, nil
 }

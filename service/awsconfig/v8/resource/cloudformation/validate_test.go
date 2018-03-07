@@ -22,19 +22,24 @@ func Test_validateHostPeeringRoutes(t *testing.T) {
 	}
 
 	testCases := []struct {
-		description          string
-		unexistentRouteTable bool
-		expectedError        bool
+		description         string
+		matchingRouteTables int
+		expectedError       bool
 	}{
 		{
-			description:          "route table doesn't exist, do not expect error",
-			unexistentRouteTable: true,
-			expectedError:        false,
+			description:         "route table doesn't exist, do not expect error",
+			matchingRouteTables: 0,
+			expectedError:       false,
 		},
 		{
-			description:          "route table exists, expect error",
-			unexistentRouteTable: false,
-			expectedError:        true,
+			description:         "route table exists, expect error",
+			matchingRouteTables: 1,
+			expectedError:       true,
+		},
+		{
+			description:         "two route table exist, expect error",
+			matchingRouteTables: 2,
+			expectedError:       true,
 		},
 	}
 
@@ -50,7 +55,7 @@ func Test_validateHostPeeringRoutes(t *testing.T) {
 				KMS: &adapter.KMSClientMock{},
 			}
 			ec2Mock := &adapter.EC2ClientMock{}
-			ec2Mock.SetUnexistingRouteTable(tc.unexistentRouteTable)
+			ec2Mock.SetMatchingRouteTables(tc.matchingRouteTables)
 			c.HostClients = &adapter.Clients{
 				EC2:            ec2Mock,
 				CloudFormation: &adapter.CloudFormationMock{},
