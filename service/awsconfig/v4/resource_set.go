@@ -121,7 +121,7 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		}
 	}
 
-	var kmsKeyResource framework.Resource
+	var kmsKeyResource framework.CRUDResourceOps
 	{
 		c := kmskey.Config{
 			Clients: kmskey.Clients{
@@ -136,7 +136,7 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		}
 	}
 
-	var s3BucketResource framework.Resource
+	var s3BucketResource framework.CRUDResourceOps
 	{
 		c := s3bucket.Config{
 			AwsService: awsService,
@@ -152,7 +152,7 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		}
 	}
 
-	var s3BucketObjectResource framework.Resource
+	var s3BucketObjectResource framework.CRUDResourceOps
 	{
 		c := s3object.Config{
 			AwsService: awsService,
@@ -172,7 +172,7 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		}
 	}
 
-	var cloudformationResource framework.Resource
+	var cloudformationResource framework.CRUDResourceOps
 	{
 		c := cloudformation.Config{
 			Clients: &adapter.Clients{
@@ -198,7 +198,7 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		}
 	}
 
-	var namespaceResource framework.Resource
+	var namespaceResource framework.CRUDResourceOps
 	{
 		c := namespace.Config{
 			K8sClient: config.K8sClient,
@@ -211,7 +211,7 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		}
 	}
 
-	var serviceResource framework.Resource
+	var serviceResource framework.CRUDResourceOps
 	{
 		c := service.Config{
 			K8sClient: config.K8sClient,
@@ -224,7 +224,7 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		}
 	}
 
-	var endpointsResource framework.Resource
+	var endpointsResource framework.CRUDResourceOps
 	{
 		c := endpoints.Config{
 			Clients: endpoints.Clients{
@@ -240,7 +240,8 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		}
 	}
 
-	resources := []framework.Resource{
+	var resources []framework.Resource
+	ops := []framework.CRUDResourceOps{
 		kmsKeyResource,
 		s3BucketResource,
 		s3BucketObjectResource,
@@ -248,6 +249,19 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		namespaceResource,
 		serviceResource,
 		endpointsResource,
+	}
+	for _, o := range ops {
+		c := framework.CRUDResourceConfig{
+			Logger: config.Logger,
+			Ops:    o,
+		}
+
+		r, err := framework.NewCRUDResource(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		resources = append(resources, r)
 	}
 
 	{
