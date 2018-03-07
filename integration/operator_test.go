@@ -298,10 +298,12 @@ func operatorSetup() error {
 }
 
 func operatorTearDown() {
-	runCmd("helm delete cert-resource-lab --purge")
-	runCmd("helm delete cert-operator --purge")
-	runCmd("helm delete aws-resource-lab --purge")
 	runCmd("helm delete aws-operator --purge")
+	runCmd("helm delete cert-operator --purge")
+	runCmd("helm delete node-operator --purge")
+
+	runCmd("helm delete cert-resource-lab --purge")
+	runCmd("helm delete aws-resource-lab --purge")
 }
 
 func writeAWSResourceValues() error {
