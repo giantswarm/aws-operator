@@ -38,7 +38,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		_, err := r.clients.S3.PutBucketTagging(&s3.PutBucketTaggingInput{
 			Bucket: aws.String(bucketInput.Name),
 			Tagging: &s3.Tagging{
-				TagSet: getS3BucketTags(customObject),
+				TagSet: r.getS3BucketTags(customObject),
 			},
 		})
 		if err != nil {

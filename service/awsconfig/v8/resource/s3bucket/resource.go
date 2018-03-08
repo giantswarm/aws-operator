@@ -22,6 +22,9 @@ type Config struct {
 	AwsService *awsservice.Service
 	Clients    Clients
 	Logger     micrologger.Logger
+
+	// Settings.
+	InstallationName string
 }
 
 // DefaultConfig provides a default configuration to create a new s3bucket
@@ -41,16 +44,24 @@ type Resource struct {
 	awsService *awsservice.Service
 	clients    Clients
 	logger     micrologger.Logger
+
+	// Settings.
+	installationName string
 }
 
 // New creates a new configured s3bucket resource.
 func New(config Config) (*Resource, error) {
 	// Dependencies.
 	if config.AwsService == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.AwsService must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.AwsService must not be empty", config)
 	}
 	if config.Logger == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
+	}
+
+	// Settings.
+	if config.InstallationName == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
 	}
 
 	newResource := &Resource{
@@ -58,6 +69,9 @@ func New(config Config) (*Resource, error) {
 		awsService: config.AwsService,
 		clients:    config.Clients,
 		logger:     config.Logger,
+
+		// Settings.
+		installationName: config.InstallationName,
 	}
 
 	return newResource, nil
@@ -80,8 +94,8 @@ func toBucketState(v interface{}) (BucketState, error) {
 	return bucketState, nil
 }
 
-func getS3BucketTags(customObject v1alpha1.AWSConfig) []*s3.Tag {
-	clusterTags := key.ClusterTags(customObject)
+func (r *Resource) getS3BucketTags(customObject v1alpha1.AWSConfig) []*s3.Tag {
+	clusterTags := key.ClusterTags(customObject, r.installationName)
 	s3Tags := []*s3.Tag{}
 
 	for k, v := range clusterTags {

@@ -84,6 +84,8 @@ func Test_Resource_S3Bucket_newCreate(t *testing.T) {
 		resourceConfig := DefaultConfig()
 		resourceConfig.AwsService = awsService
 		resourceConfig.Logger = microloggertest.New()
+		resourceConfig.InstallationName = "test-install"
+
 		newResource, err = New(resourceConfig)
 		if err != nil {
 			t.Error("expected", nil, "got", err)
