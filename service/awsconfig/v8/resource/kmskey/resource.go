@@ -22,6 +22,9 @@ type Config struct {
 	// Dependencies.
 	Clients Clients
 	Logger  micrologger.Logger
+
+	// Settings.
+	InstallationName string
 }
 
 // DefaultConfig provides a default configuration to create a new cloudformation
@@ -39,19 +42,31 @@ type Resource struct {
 	// Dependencies.
 	awsClients Clients
 	logger     micrologger.Logger
+
+	// Settings.
+	installationName string
 }
 
 // New creates a new configured cloudformation resource.
 func New(config Config) (*Resource, error) {
 	// Dependencies.
 	if config.Logger == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
+	// Settings.
+	if config.InstallationName == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
+	}
+
+	// Settings.
 	newService := &Resource{
 		// Dependencies.
 		awsClients: config.Clients,
 		logger:     config.Logger,
+
+		// Settings.
+		installationName: config.InstallationName,
 	}
 
 	return newService, nil
@@ -78,8 +93,8 @@ func toAlias(keyID string) string {
 	return fmt.Sprintf("alias/%s", keyID)
 }
 
-func getKMSTags(customObject v1alpha1.AWSConfig) []*kms.Tag {
-	clusterTags := key.ClusterTags(customObject)
+func (r *Resource) getKMSTags(customObject v1alpha1.AWSConfig) []*kms.Tag {
+	clusterTags := key.ClusterTags(customObject, r.installationName)
 	kmsTags := []*kms.Tag{}
 
 	for k, v := range clusterTags {
