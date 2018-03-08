@@ -70,8 +70,8 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func getCloudFormationTags(customObject v1alpha1.AWSConfig) []*awscloudformation.Tag {
-	clusterTags := key.ClusterTags(customObject)
+func (r *Resource) getCloudFormationTags(customObject v1alpha1.AWSConfig) []*awscloudformation.Tag {
+	clusterTags := key.ClusterTags(customObject, r.installationName)
 	stackTags := []*awscloudformation.Tag{}
 
 	for k, v := range clusterTags {
