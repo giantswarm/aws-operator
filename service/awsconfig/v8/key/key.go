@@ -24,6 +24,9 @@ const (
 	// and managed by a cluster.
 	CloudProviderTagOwnedValue = "owned"
 
+	// InstallationTagName is used for AWS resource tagging.
+	InstallationTagName = "giantswarm.io/installation"
+
 	// OrganizationTagName is used for AWS resource tagging.
 	OrganizationTagName = "giantswarm.io/organization"
 
@@ -142,11 +145,12 @@ func ClusterOrganization(customObject v1alpha1.AWSConfig) string {
 	return ClusterCustomer(customObject)
 }
 
-func ClusterTags(customObject v1alpha1.AWSConfig) map[string]string {
+func ClusterTags(customObject v1alpha1.AWSConfig, installationName string) map[string]string {
 	cloudProviderTag := ClusterCloudProviderTag(customObject)
 	tags := map[string]string{
 		cloudProviderTag:    CloudProviderTagOwnedValue,
 		ClusterTagName:      ClusterID(customObject),
+		InstallationTagName: installationName,
 		OrganizationTagName: ClusterOrganization(customObject),
 	}
 

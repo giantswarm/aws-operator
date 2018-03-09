@@ -42,7 +42,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 		if _, err := r.awsClients.KMS.TagResource(&kms.TagResourceInput{
 			KeyId: key.KeyMetadata.KeyId,
-			Tags:  getKMSTags(customObject),
+			Tags:  r.getKMSTags(customObject),
 		}); err != nil {
 			return microerror.Mask(err)
 		}

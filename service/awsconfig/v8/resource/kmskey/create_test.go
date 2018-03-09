@@ -61,6 +61,8 @@ func Test_Resource_KMSKey_newCreate(t *testing.T) {
 		KMS: &KMSClientMock{},
 	}
 	resourceConfig.Logger = microloggertest.New()
+	resourceConfig.InstallationName = "test-install"
+
 	newResource, err = New(resourceConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -118,6 +120,8 @@ func Test_ApplyCreateChange(t *testing.T) {
 		},
 	}
 	resourceConfig.Logger = microloggertest.New()
+	resourceConfig.InstallationName = "test-install"
+
 	newResource, err = New(resourceConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)

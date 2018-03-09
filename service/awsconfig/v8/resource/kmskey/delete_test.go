@@ -54,6 +54,8 @@ func Test_newDelete(t *testing.T) {
 	resourceConfig := DefaultConfig()
 	resourceConfig.Clients = Clients{}
 	resourceConfig.Logger = microloggertest.New()
+	resourceConfig.InstallationName = "test-install"
+
 	newResource, err = New(resourceConfig)
 	if err != nil {
 		t.Error("expected", nil, "got", err)
@@ -111,6 +113,8 @@ func Test_ApplyDeleteChange(t *testing.T) {
 		},
 	}
 	resourceConfig.Logger = microloggertest.New()
+	resourceConfig.InstallationName = "test-install"
+
 	newResource, err = New(resourceConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)

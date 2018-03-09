@@ -156,10 +156,13 @@ func Test_ClusterOrganization(t *testing.T) {
 }
 
 func Test_ClusterTags(t *testing.T) {
+	installName := "test-install"
+
 	expectedID := "test-cluster"
 	expectedTags := map[string]string{
 		"kubernetes.io/cluster/test-cluster": "owned",
 		"giantswarm.io/cluster":              "test-cluster",
+		"giantswarm.io/installation":         "test-install",
 		"giantswarm.io/organization":         "test-org",
 	}
 
@@ -175,8 +178,8 @@ func Test_ClusterTags(t *testing.T) {
 		},
 	}
 
-	if !reflect.DeepEqual(expectedTags, ClusterTags(customObject)) {
-		t.Fatalf("Expected cluster tags %v but was %v", expectedTags, ClusterTags(customObject))
+	if !reflect.DeepEqual(expectedTags, ClusterTags(customObject, installName)) {
+		t.Fatalf("Expected cluster tags %v but was %v", expectedTags, ClusterTags(customObject, installName))
 	}
 }
 

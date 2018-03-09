@@ -14,6 +14,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Fix validation check for existing peering routes.",
 				Kind:        versionbundle.KindFixed,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Add AWS resource tag with the Giant Swarm Installation.",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{

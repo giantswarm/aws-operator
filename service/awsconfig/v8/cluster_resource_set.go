@@ -147,6 +147,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 				KMS: config.GuestAWSClients.KMS,
 			},
 			Logger: config.Logger,
+
+			InstallationName: config.InstallationName,
 		}
 
 		ops, err := kmskey.New(c)
@@ -168,6 +170,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 				S3: config.GuestAWSClients.S3,
 			},
 			Logger: config.Logger,
+
+			InstallationName: config.InstallationName,
 		}
 
 		ops, err := s3bucket.New(c)
