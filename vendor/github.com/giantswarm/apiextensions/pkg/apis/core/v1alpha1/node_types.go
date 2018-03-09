@@ -56,7 +56,6 @@ type NodeConfig struct {
 
 type NodeConfigSpec struct {
 	Guest         NodeConfigSpecGuest         `json:"guest" yaml:"guest"`
-	Host          NodeConfigSpecHost          `json:"host" yaml:"host"`
 	VersionBundle NodeConfigSpecVersionBundle `json:"versionBundle" yaml:"versionBundle"`
 }
 
@@ -82,22 +81,9 @@ type NodeConfigSpecGuestNode struct {
 	// in an abstracted way because of provider specific differences.
 	//
 	//     AWS: EC2 instance DNS.
-	//     Azure: ???.
+	//     Azure: VM name.
 	//     KVM: host cluster pod name.
 	//
-	Name string `json:"name" yaml:"name"`
-}
-
-type NodeConfigSpecHost struct {
-	Deployment NodeConfigSpecHostDeployment `json:"deployment" yaml:"deployment"`
-	Pod        NodeConfigSpecHostPod        `json:"pod" yaml:"pod"`
-}
-
-type NodeConfigSpecHostDeployment struct {
-	Name string `json:"name" yaml:"name"`
-}
-
-type NodeConfigSpecHostPod struct {
 	Name string `json:"name" yaml:"name"`
 }
 
@@ -111,10 +97,10 @@ type NodeConfigStatus struct {
 
 // NodeConfigStatusCondition expresses a condition in which a node may is.
 type NodeConfigStatusCondition struct {
-	// Type may be Pending, Ready, Draining, Terminating.
-	Type string `json:"type" yaml:"type"`
 	// Status may be True, False or Unknown.
 	Status string `json:"status" yaml:"status"`
+	// Type may be Pending, Ready, Draining, Drained.
+	Type string `json:"type" yaml:"type"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

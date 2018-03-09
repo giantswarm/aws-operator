@@ -38,6 +38,10 @@ func (c *FakeCoreV1alpha1) CertConfigs(namespace string) v1alpha1.CertConfigInte
 	return &FakeCertConfigs{c, namespace}
 }
 
+func (c *FakeCoreV1alpha1) ChartConfigs(namespace string) v1alpha1.ChartConfigInterface {
+	return &FakeChartConfigs{c, namespace}
+}
+
 func (c *FakeCoreV1alpha1) DraughtsmanConfigs(namespace string) v1alpha1.DraughtsmanConfigInterface {
 	return &FakeDraughtsmanConfigs{c, namespace}
 }

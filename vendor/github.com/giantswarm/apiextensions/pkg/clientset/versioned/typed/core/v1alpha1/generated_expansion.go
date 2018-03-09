@@ -22,6 +22,8 @@ type AzureClusterConfigExpansion interface{}
 
 type CertConfigExpansion interface{}
 
+type ChartConfigExpansion interface{}
+
 type DraughtsmanConfigExpansion interface{}
 
 type FlannelConfigExpansion interface{}

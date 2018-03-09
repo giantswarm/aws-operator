@@ -2,16 +2,7 @@ package server
 
 import (
 	"github.com/giantswarm/microerror"
-	"github.com/juju/errgo"
 )
-
-func errorTrace(err error) string {
-	switch e := err.(type) {
-	case *errgo.Err:
-		return e.GoString()
-	}
-	return "n/a"
-}
 
 var invalidConfigError = microerror.New("invalid config")
 

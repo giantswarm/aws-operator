@@ -104,10 +104,10 @@ func NewClusterFramework(config ClusterFrameworkConfig) (*framework.Framework, e
 
 	var crdClient *k8scrdclient.CRDClient
 	{
-		c := k8scrdclient.DefaultConfig()
-
-		c.K8sExtClient = config.K8sExtClient
-		c.Logger = config.Logger
+		c := k8scrdclient.Config{
+			K8sExtClient: config.K8sExtClient,
+			Logger:       config.Logger,
+		}
 
 		crdClient, err = k8scrdclient.New(c)
 		if err != nil {
@@ -122,9 +122,12 @@ func NewClusterFramework(config ClusterFrameworkConfig) (*framework.Framework, e
 
 	var newInformer *informer.Informer
 	{
-		c := informer.DefaultConfig()
+		c := informer.Config{
+			Watcher: config.G8sClient.ProviderV1alpha1().AWSConfigs(""),
 
-		c.Watcher = config.G8sClient.ProviderV1alpha1().AWSConfigs("")
+			RateWait:     informer.DefaultRateWait,
+			ResyncPeriod: informer.DefaultResyncPeriod,
+		}
 
 		newInformer, err = informer.New(c)
 		if err != nil {
