@@ -53,8 +53,8 @@
     "service/s3",
     "service/sts"
   ]
-  revision = "ce48e67ca697079662aee65a13202f37a185962b"
-  version = "v1.13.6"
+  revision = "bafcd9ccc717e9bc5406acaea370577299223873"
+  version = "v1.13.11"
 
 [[projects]]
   branch = "master"
@@ -121,7 +121,7 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake"
   ]
-  revision = "3b000f9f8d05f3feabce9971affed05036ec29f7"
+  revision = "819eb0a6b723acd59776a2dee0d6b75b4fa5fde3"
 
 [[projects]]
   branch = "legacy"
@@ -139,7 +139,7 @@
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "fc63d05a76e71bf40e09fdddf49443ae36a40734"
+  revision = "1a56a98ac2c3d1c42aba306787047c52a42f7bc2"
 
 [[projects]]
   branch = "master"
@@ -151,7 +151,7 @@
     "v_3_1_1",
     "v_3_2_1"
   ]
-  revision = "c35b7986f9dc71252c92c7518544107d11965ff2"
+  revision = "137410ef37cba191fb8e2547e403c30e618eb654"
 
 [[projects]]
   branch = "master"
@@ -188,7 +188,7 @@
     "transaction/context/id",
     "transaction/context/tracked"
   ]
-  revision = "d48ce8e1f2bd2a7b93de0d5c37ca62a648cbffe8"
+  revision = "992da614a8f20540ebc9049c62c36bbbf12710de"
 
 [[projects]]
   branch = "master"
@@ -225,7 +225,7 @@
     "framework/resource/retryresource",
     "informer"
   ]
-  revision = "5aefb16e363c2ddba36dec5d3c331e3b5e54a6ae"
+  revision = "b2f83ecc11dc208b8c5aba59a99d48fbf72981d3"
 
 [[projects]]
   branch = "master"
@@ -245,8 +245,8 @@
 [[projects]]
   name = "github.com/go-ini/ini"
   packages = ["."]
-  revision = "32e4c1e6bc4e7d0d8451aa6b75200d19e37a536a"
-  version = "v1.32.0"
+  revision = "6333e38ac20b8949a8dd68baa3650f4dee8f39f0"
+  version = "v1.33.0"
 
 [[projects]]
   name = "github.com/go-kit/kit"
@@ -280,19 +280,19 @@
   branch = "master"
   name = "github.com/go-openapi/spec"
   packages = ["."]
-  revision = "1de3e0542de65ad8d75452a595886fdd0befb363"
+  revision = "d8000b5bfbd1147255710505a27c735b6b2ae2ac"
 
 [[projects]]
   branch = "master"
   name = "github.com/go-openapi/swag"
   packages = ["."]
-  revision = "0d03ad0b6405ada874d59d97c416b5cf4234e154"
+  revision = "ceb469cb0fdf2d792f28d771bc05da6c606f55e5"
 
 [[projects]]
   name = "github.com/go-resty/resty"
   packages = ["."]
-  revision = "00cb083b8cdc8b0fb1e1f5ebe24bbc23e0ff0cf6"
-  version = "v1.2"
+  revision = "65798e030a35b911602b4d1d743d6f50ac93b665"
+  version = "v1.3"
 
 [[projects]]
   name = "github.com/go-stack/stack"
@@ -368,7 +368,7 @@
     ".",
     "diskcache"
   ]
-  revision = "2bcd89a1743fd4b373f7370ce8ddc14dfbd18229"
+  revision = "9cad4c3443a7200dd6400aef47183728de563a38"
 
 [[projects]]
   branch = "master"
@@ -456,7 +456,7 @@
     "jlexer",
     "jwriter"
   ]
-  revision = "32fa128f234d041f196a9f3e0fea5ac9772c08e1"
+  revision = "4a8a4c12c4d1b0c0a7de630426ce6dcb07141b17"
 
 [[projects]]
   name = "github.com/matttproud/golang_protobuf_extensions"
@@ -473,8 +473,8 @@
 [[projects]]
   name = "github.com/modern-go/concurrent"
   packages = ["."]
-  revision = "e0a39a4cb4216ea8db28e22a69f4ec25610d513a"
-  version = "1.0.0"
+  revision = "bacd9c7ef1dd9b15be4a9909b8ac7a4e313eec94"
+  version = "1.0.3"
 
 [[projects]]
   name = "github.com/modern-go/reflect2"
@@ -540,7 +540,7 @@
     "nfs",
     "xfs"
   ]
-  revision = "d274e363d5759d1c916232217be421f1cc89c5fe"
+  revision = "1c7ff3de94ae006f58cba483a4c9c6d7c61e1d98"
 
 [[projects]]
   branch = "master"
@@ -597,7 +597,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "91a49db82a88618983a78a06c1cbd4e00ab749ab"
+  revision = "c7dcf104e3a7a1417abc0230cb0d5240d764159d"
 
 [[projects]]
   branch = "master"
@@ -610,7 +610,7 @@
     "lex/httplex",
     "publicsuffix"
   ]
-  revision = "cbe0f9307d0156177f9dd5dc85da1a31abc5f2fb"
+  revision = "d0aafc73d5cdc42264b0af071c261abac580695e"
 
 [[projects]]
   branch = "master"
@@ -625,7 +625,7 @@
     "unix",
     "windows"
   ]
-  revision = "f6cff0780e542efa0c8e864dc8fa522808f6a598"
+  revision = "7dca6fe1f43775aa6d1334576870ff63f978f539"
 
 [[projects]]
   name = "golang.org/x/text"

@@ -28,7 +28,7 @@ import (
 
 // IsStringEmpty method tells whether given string is empty or not
 func IsStringEmpty(str string) bool {
-	return (len(strings.TrimSpace(str)) == 0)
+	return len(strings.TrimSpace(str)) == 0
 }
 
 // DetectContentType method is used to figure out `Request.Body` content type for request header
@@ -107,6 +107,24 @@ func escapeQuotes(s string) string {
 	return quoteEscaper.Replace(s)
 }
 
+func createMultipartHeader(param, fileName, contentType string) textproto.MIMEHeader {
+	hdr := make(textproto.MIMEHeader)
+	hdr.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"; filename="%s"`,
+		escapeQuotes(param), escapeQuotes(fileName)))
+	hdr.Set("Content-Type", contentType)
+	return hdr
+}
+
+func addMultipartFormField(w *multipart.Writer, mf *multipartField) error {
+	partWriter, err := w.CreatePart(createMultipartHeader(mf.Param, mf.FileName, mf.ContentType))
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(partWriter, mf.Reader)
+	return err
+}
+
 func writeMultipartFormFile(w *multipart.Writer, fieldName, fileName string, r io.Reader) error {
 	// Auto detect actual multipart content type
 	cbuf := make([]byte, 512)
@@ -115,11 +133,7 @@ func writeMultipartFormFile(w *multipart.Writer, fieldName, fileName string, r i
 		return err
 	}
 
-	h := make(textproto.MIMEHeader)
-	h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"; filename="%s"`,
-		escapeQuotes(fieldName), escapeQuotes(fileName)))
-	h.Set("Content-Type", http.DetectContentType(cbuf))
-	partWriter, err := w.CreatePart(h)
+	partWriter, err := w.CreatePart(createMultipartHeader(fieldName, fileName, http.DetectContentType(cbuf)))
 	if err != nil {
 		return err
 	}
@@ -157,7 +171,7 @@ func getPointer(v interface{}) interface{} {
 }
 
 func isPayloadSupported(m string, allowMethodGet bool) bool {
-	return (m == MethodPost || m == MethodPut || m == MethodDelete || m == MethodPatch || (allowMethodGet && m == MethodGet))
+	return !(m == MethodHead || m == MethodOptions || (m == MethodGet && !allowMethodGet))
 }
 
 func typeOf(i interface{}) reflect.Type {

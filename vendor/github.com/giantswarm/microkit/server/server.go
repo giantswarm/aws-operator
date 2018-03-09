@@ -236,7 +236,7 @@ func (s *server) Boot() {
 						endpointName := strings.Replace(e.Name(), "/", "_", -1)
 
 						if s.logAccess {
-							s.logger.Log("code", endpointCode, "endpoint", e.Name(), "method", endpointMethod, "path", r.URL.Path)
+							s.logger.Log("code", endpointCode, "endpoint", e.Name(), "level", "debug", "message", "tracking access log", "method", endpointMethod, "path", r.URL.Path)
 						}
 
 						endpointTotal.WithLabelValues(endpointCode, endpointMethod, endpointName).Inc()
@@ -294,7 +294,7 @@ func (s *server) Boot() {
 		}
 
 		go func() {
-			s.logger.Log("debug", fmt.Sprintf("running server at %s", s.listenURL.String()))
+			s.logger.Log("level", "debug", "message", fmt.Sprintf("running server at %s", s.listenURL.String()))
 
 			if s.listenURL.Scheme == "https" {
 				tlsConfig, err := tls.LoadTLSConfig(s.tlsCertFiles)
@@ -372,8 +372,8 @@ func (s *server) newErrorEncoderWrapper() kithttp.ErrorEncoder {
 		// writing data to the response body can be done.
 		s.errorEncoder(ctx, responseError, rw)
 
-		// Log the error and its errgo trace. This is really useful for debugging.
-		s.logger.Log("error", serverError.Error(), "trace", errorTrace(serverError))
+		// Log the error and its stack. This is really useful for debugging.
+		s.logger.Log("level", "error", "message", "stop endpoint processing due to error", "stack", fmt.Sprintf("%#v", serverError))
 
 		// Emit metrics about the occured errors. That way we can feed our
 		// instrumentation stack to have nice dashboards to get a picture about the
@@ -509,9 +509,10 @@ func (s *server) newEndpointWrapper(e Endpoint) kitendpoint.Endpoint {
 // response.
 func (s *server) newNotFoundHandler() http.Handler {
 	return http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		errMessage := fmt.Sprintf("endpoint not found for %s %s", r.Method, r.URL.Path)
+
 		// Log the error and its message. This is really useful for debugging.
-		errMessage := fmt.Sprintf("not found: %s %s", r.Method, r.URL.Path)
-		s.logger.Log("error", errMessage, "trace", "")
+		s.logger.Log("level", "error", "message", errMessage)
 
 		// This defered callback will be executed at the very end of the request.
 		defer func(t time.Time) {
