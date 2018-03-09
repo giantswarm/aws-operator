@@ -1,6 +1,4 @@
-// +build k8srequired
-
-package integration
+package framework
 
 import (
 	"bufio"
@@ -14,6 +12,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	giantclientset "github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/versionbundle"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -21,11 +23,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	giantclientset "github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/e2e-harness/pkg/harness"
-	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/versionbundle"
 )
 
 // PatchSpec is a generic patch type to update objects with JSONPatchType operations.
@@ -67,26 +65,15 @@ Installation:
         PullSecret:
           DockerConfigJSON: "{\"auths\":{\"quay.io\":{\"auth\":\"$REGISTRY_PULL_SECRET\"}}}"
 `
-
-	nodeOperatorValuesFile = "/tmp/node-operator-values.yaml"
-	// nodeOperatorChartValues values required by node-operator-chart, the environment
-	// variables will be expanded before writing the contents to a file.
-	nodeOperatorChartValues = `Installation:
-  V1:
-    Secret:
-      Registry:
-        PullSecret:
-          DockerConfigJSON: "{\"auths\":{\"quay.io\":{\"auth\":\"$REGISTRY_PULL_SECRET\"}}}"
-`
 )
 
-type framework struct {
+type Framework struct {
 	cs      kubernetes.Interface
 	gsCs    *giantclientset.Clientset
 	guestCS kubernetes.Interface
 }
 
-func newFramework() (*framework, error) {
+func New() (*Framework, error) {
 	config, err := clientcmd.BuildConfigFromFlags("", harness.DefaultKubeConfig)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -101,14 +88,14 @@ func newFramework() (*framework, error) {
 		return nil, microerror.Mask(err)
 	}
 
-	f := &framework{
+	f := &Framework{
 		cs:   cs,
 		gsCs: gsCs,
 	}
 	return f, nil
 }
 
-func (f *framework) runningPod(namespace, labelSelector string) func() error {
+func (f *Framework) runningPod(namespace, labelSelector string) func() error {
 	return func() error {
 		pods, err := f.cs.CoreV1().
 			Pods(namespace).
@@ -130,7 +117,7 @@ func (f *framework) runningPod(namespace, labelSelector string) func() error {
 	}
 }
 
-func (f *framework) secret(namespace, secretName string) func() error {
+func (f *Framework) secret(namespace, secretName string) func() error {
 	return func() error {
 		_, err := f.cs.CoreV1().
 			Secrets(namespace).
@@ -139,7 +126,7 @@ func (f *framework) secret(namespace, secretName string) func() error {
 	}
 }
 
-func (f *framework) crd(crdName string) func() error {
+func (f *Framework) crd(crdName string) func() error {
 	return func() error {
 		// FIXME: use proper clientset call when apiextensions are in place,
 		// `cs.ExtensionsV1beta1().ThirdPartyResources().Get(tprName, metav1.GetOptions{})` finding
@@ -148,7 +135,7 @@ func (f *framework) crd(crdName string) func() error {
 	}
 }
 
-func (f *framework) WaitForPodLog(namespace, needle, podName string) error {
+func (f *Framework) WaitForPodLog(namespace, needle, podName string) error {
 	needle = os.ExpandEnv(needle)
 
 	timeout := time.After(defaultTimeout * time.Second)
@@ -189,7 +176,7 @@ func (f *framework) WaitForPodLog(namespace, needle, podName string) error {
 	return microerror.Mask(notFoundError)
 }
 
-func (f *framework) PodName(namespace, labelSelector string) (string, error) {
+func (f *Framework) PodName(namespace, labelSelector string) (string, error) {
 	pods, err := f.cs.CoreV1().
 		Pods(namespace).
 		List(metav1.ListOptions{
@@ -208,7 +195,7 @@ func (f *framework) PodName(namespace, labelSelector string) (string, error) {
 	return pod.Name, nil
 }
 
-func (f *framework) SetUp() error {
+func (f *Framework) SetUp() error {
 	if err := f.createGSNamespace(); err != nil {
 		return microerror.Mask(err)
 	}
@@ -220,14 +207,14 @@ func (f *framework) SetUp() error {
 	return nil
 }
 
-func (f *framework) TearDown() {
+func (f *Framework) TearDown() {
 	runCmd("helm delete vault --purge")
 	f.cs.CoreV1().
 		Namespaces().
 		Delete("giantswarm", &metav1.DeleteOptions{})
 }
 
-func (f *framework) createGSNamespace() error {
+func (f *Framework) createGSNamespace() error {
 	// check if the namespace already exists
 	_, err := f.cs.CoreV1().
 		Namespaces().
@@ -268,7 +255,7 @@ func (f *framework) createGSNamespace() error {
 	return waitFor(activeNamespace)
 }
 
-func (f *framework) installVault() error {
+func (f *Framework) installVault() error {
 	if err := runCmd("helm registry install quay.io/giantswarm/vaultlab-chart:stable -- --set vaultToken=${VAULT_TOKEN} -n vault"); err != nil {
 		return microerror.Mask(err)
 	}
@@ -276,36 +263,64 @@ func (f *framework) installVault() error {
 	return waitFor(f.runningPod("default", "app=vault"))
 }
 
-func (f *framework) InstallCertOperator() error {
-	var err error
-
-	err = ioutil.WriteFile(certOperatorValuesFile, []byte(os.ExpandEnv(certOperatorChartValues)), os.ModePerm)
-	if err != nil {
+func (f *Framework) InstallCertOperator() error {
+	certOperatorChartValuesEnv := os.ExpandEnv(certOperatorChartValues)
+	if err := ioutil.WriteFile(certOperatorValuesFile, []byte(certOperatorChartValuesEnv), os.ModePerm); err != nil {
+		return microerror.Mask(err)
+	}
+	if err := runCmd("helm registry install quay.io/giantswarm/cert-operator-chart:stable -- -n cert-operator --values " + certOperatorValuesFile); err != nil {
 		return microerror.Mask(err)
 	}
 
-	err = runCmd("helm registry install quay.io/giantswarm/cert-operator-chart:stable -- -n cert-operator --values " + certOperatorValuesFile)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	err = waitFor(f.crd("certconfig"))
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	return nil
+	return waitFor(f.crd("certconfig"))
 }
 
-func (f *framework) InstallNodeOperator() error {
-	var err error
-
-	err = ioutil.WriteFile(nodeOperatorValuesFile, []byte(os.ExpandEnv(nodeOperatorChartValues)), os.ModePerm)
+func (f *Framework) InstallCertResource() error {
+	err := runCmd("helm registry install quay.io/giantswarm/cert-resource-lab-chart:stable -- -n cert-resource-lab --set commonDomain=${COMMON_DOMAIN_GUEST} --set clusterName=${CLUSTER_NAME}")
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	err = runCmd("helm registry install quay.io/giantswarm/node-operator-chart:stable -- -n node-operator --values " + nodeOperatorValuesFile)
+	secretName := fmt.Sprintf("%s-api", os.Getenv("CLUSTER_NAME"))
+	log.Printf("waiting for secret %v\n", secretName)
+	return waitFor(f.secret("default", secretName))
+}
+
+func (f *Framework) InstallAwsOperator(values string) error {
+	awsOperatorChartValuesEnv := os.ExpandEnv(values)
+
+	tmpfile, err := ioutil.TempFile("", "aws-operator-values")
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	defer os.Remove(tmpfile.Name())
+
+	if _, err := tmpfile.Write([]byte(awsOperatorChartValuesEnv)); err != nil {
+		return microerror.Mask(err)
+	}
+	if err := runCmd("helm registry install quay.io/giantswarm/aws-operator-chart@1.0.0-${CIRCLE_SHA1} -- -n aws-operator --values " + tmpfile.Name()); err != nil {
+		return microerror.Mask(err)
+	}
+
+	return waitFor(f.crd("awsconfig"))
+}
+
+func (f *Framework) InstallNodeOperator(values string) error {
+	var err error
+
+	nodeOperatorChartValuesEnv := os.ExpandEnv(values)
+
+	tmpfile, err := ioutil.TempFile("", "node-operator-values")
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	defer os.Remove(tmpfile.Name())
+
+	if _, err := tmpfile.Write([]byte(nodeOperatorChartValuesEnv)); err != nil {
+		return microerror.Mask(err)
+	}
+
+	err = runCmd("helm registry install quay.io/giantswarm/node-operator-chart:stable -- -n node-operator --values " + tmpfile.Name())
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -318,30 +333,7 @@ func (f *framework) InstallNodeOperator() error {
 	return nil
 }
 
-func (f *framework) InstallCertResource() error {
-	err := runCmd("helm registry install quay.io/giantswarm/cert-resource-lab-chart:stable -- -n cert-resource-lab --set commonDomain=${COMMON_DOMAIN_GUEST} --set clusterName=${CLUSTER_NAME}")
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	secretName := fmt.Sprintf("%s-api", os.Getenv("CLUSTER_NAME"))
-	log.Printf("waiting for secret %v\n", secretName)
-	return waitFor(f.secret("default", secretName))
-}
-
-func (f *framework) InstallAwsOperator() error {
-	awsOperatorChartValuesEnv := os.ExpandEnv(awsOperatorChartValues)
-	if err := ioutil.WriteFile(awsOperatorValuesFile, []byte(awsOperatorChartValuesEnv), os.ModePerm); err != nil {
-		return microerror.Mask(err)
-	}
-	if err := runCmd("helm registry install quay.io/giantswarm/aws-operator-chart@1.0.0-${CIRCLE_SHA1} -- -n aws-operator --values " + awsOperatorValuesFile); err != nil {
-		return microerror.Mask(err)
-	}
-
-	return waitFor(f.crd("awsconfig"))
-}
-
-func (f *framework) DeleteGuestCluster() error {
+func (f *Framework) DeleteGuestCluster() error {
 	if err := runCmd("kubectl delete awsconfig ${CLUSTER_NAME}"); err != nil {
 		return microerror.Mask(err)
 	}
@@ -356,7 +348,7 @@ func (f *framework) DeleteGuestCluster() error {
 	return f.WaitForPodLog("giantswarm", logEntry, operatorPodName)
 }
 
-func (f *framework) initGuestClientset() error {
+func (f *Framework) initGuestClientset() error {
 	if f.guestCS != nil {
 		return nil
 	}
@@ -389,25 +381,23 @@ func (f *framework) initGuestClientset() error {
 	return nil
 }
 
-func (f *framework) WaitForGuestReady() error {
+func (f *Framework) WaitForGuestReady() error {
 	if err := f.initGuestClientset(); err != nil {
-		return microerror.Maskf(err, "initializing guest clientset")
+		return microerror.Maskf(err, "unexpected error initializing guest clientset")
 	}
 
 	if err := f.waitForAPIUp(); err != nil {
-		return microerror.Maskf(err, "waiting for API being up")
+		return microerror.Mask(err)
 	}
 
 	if err := f.WaitForNodesUp(minimumNodesReady); err != nil {
-		return microerror.Maskf(err, "waiting for nodes being up")
+		return microerror.Mask(err)
 	}
-
 	log.Println("Guest cluster ready")
-
 	return nil
 }
 
-func (f *framework) WaitForNodesUp(numberOfNodes int) error {
+func (f *Framework) WaitForNodesUp(numberOfNodes int) error {
 	nodesUp := func() error {
 		res, err := f.guestCS.
 			CoreV1().
@@ -437,7 +427,7 @@ func (f *framework) WaitForNodesUp(numberOfNodes int) error {
 	return waitFor(nodesUp)
 }
 
-func (f *framework) waitForAPIUp() error {
+func (f *Framework) waitForAPIUp() error {
 	apiUp := func() error {
 		_, err := f.guestCS.
 			CoreV1().
@@ -455,7 +445,7 @@ func (f *framework) waitForAPIUp() error {
 	return waitFor(apiUp)
 }
 
-func (f *framework) WaitForAPIDown() error {
+func (f *Framework) WaitForAPIDown() error {
 	apiDown := func() error {
 		_, err := f.guestCS.
 			CoreV1().
@@ -473,7 +463,7 @@ func (f *framework) WaitForAPIDown() error {
 	return waitConstantFor(apiDown)
 }
 
-func (f *framework) AWSCluster(name string) (*v1alpha1.AWSConfig, error) {
+func (f *Framework) AWSCluster(name string) (*v1alpha1.AWSConfig, error) {
 	cluster, err := f.gsCs.ProviderV1alpha1().
 		AWSConfigs("default").
 		Get(name, metav1.GetOptions{})
@@ -485,7 +475,7 @@ func (f *framework) AWSCluster(name string) (*v1alpha1.AWSConfig, error) {
 	return cluster, nil
 }
 
-func (f *framework) ApplyAWSConfigPatch(patch []PatchSpec, clusterName string) error {
+func (f *Framework) ApplyAWSConfigPatch(patch []PatchSpec, clusterName string) error {
 	patchBytes, err := json.Marshal(patch)
 	if err != nil {
 		return microerror.Mask(err)
@@ -534,4 +524,9 @@ func GetVersionBundleVersion(bundle []versionbundle.Bundle, vType string) (strin
 	}
 	log.Printf("Version Bundle Version %q", output)
 	return output, nil
+}
+
+// HelmCmd executes a helm command.
+func HelmCmd(cmd string) error {
+	return runCmd("helm " + cmd)
 }

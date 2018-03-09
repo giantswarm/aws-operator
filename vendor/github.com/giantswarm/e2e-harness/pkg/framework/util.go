@@ -1,6 +1,4 @@
-// +build k8srequired
-
-package integration
+package framework
 
 import (
 	"log"
@@ -14,11 +12,11 @@ import (
 )
 
 const (
-	defaultTimeout = 600
+	defaultTimeout = 500
 )
 
 func runCmd(cmdStr string) error {
-	log.Printf("Running command %v\n", cmdStr)
+	log.Printf("Running command %q\n", cmdStr)
 	cmdEnv := os.ExpandEnv(cmdStr)
 	fields := strings.Fields(cmdEnv)
 	cmd := exec.Command(fields[0], fields[1:]...)
