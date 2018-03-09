@@ -37,7 +37,7 @@ const (
                 GroupsClaim: ""
       Update:
         Enabled: ${GUEST_UPDATE_ENABLED}
-    Name: ci-awsop
+    Name: ci-aws-operator
     Provider:
       AWS:
         Region: ${AWS_REGION}
