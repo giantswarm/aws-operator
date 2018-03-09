@@ -54,24 +54,24 @@ func Test_Resource_Cloudformation_GetCloudFormationTags(t *testing.T) {
 		},
 	}
 
+	c := Config{}
+
+	c.Clients = &adapter.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		KMS: &adapter.KMSClientMock{},
+	}
+	c.HostClients = &adapter.Clients{
+		EC2:            &adapter.EC2ClientMock{},
+		CloudFormation: &adapter.CloudFormationMock{},
+		IAM:            &adapter.IAMClientMock{},
+	}
+	c.Logger = microloggertest.New()
+	c.Service = &cloudformationservice.CloudFormation{}
+
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			c := Config{}
-
-			c.Clients = &adapter.Clients{
-				EC2: &adapter.EC2ClientMock{},
-				IAM: &adapter.IAMClientMock{},
-				KMS: &adapter.KMSClientMock{},
-			}
-			c.HostClients = &adapter.Clients{
-				EC2:            &adapter.EC2ClientMock{},
-				CloudFormation: &adapter.CloudFormationMock{},
-				IAM:            &adapter.IAMClientMock{},
-			}
 			c.InstallationName = tc.installation
-			c.Logger = microloggertest.New()
-			c.Service = &cloudformationservice.CloudFormation{}
-
 			r, err := New(c)
 			if err != nil {
 				t.Fatal("expected", nil, "got", err)
