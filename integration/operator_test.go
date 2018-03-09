@@ -14,10 +14,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/giantswarm/e2e-harness/pkg/framework"
+	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v2/key"
-	"github.com/giantswarm/microerror"
 )
 
 const (
@@ -75,6 +76,15 @@ aws:
   routeTable1: ${AWS_ROUTE_TABLE_1}
   vpcPeerId: ${AWS_VPC_PEER_ID}
 `
+	// nodeOperatorChartValues values required by node-operator-chart, the environment
+	// variables will be expanded before writing the contents to a file.
+	nodeOperatorChartValues = `Installation:
+  V1:
+    Secret:
+      Registry:
+        PullSecret:
+          DockerConfigJSON: "{\"auths\":{\"quay.io\":{\"auth\":\"$REGISTRY_PULL_SECRET\"}}}"
+`
 )
 
 type aWSClient struct {
@@ -109,7 +119,7 @@ func newAWSClient() aWSClient {
 }
 
 var (
-	f *framework
+	f *framework.Framework
 	c aWSClient
 )
 
@@ -118,13 +128,13 @@ var (
 func TestMain(m *testing.M) {
 	var v int
 	var err error
-	f, err = newFramework()
+	f, err = framework.New()
 	if err != nil {
 		log.Printf("unexpected error: %v\n", err)
 		os.Exit(1)
 	}
 
-	version, err := GetVersionBundleVersion(service.NewVersionBundles(), os.Getenv("TESTED_VERSION"))
+	version, err := framework.GetVersionBundleVersion(service.NewVersionBundles(), os.Getenv("TESTED_VERSION"))
 	if err != nil {
 		log.Printf("Unexpected error getting version bundle version %v", err)
 		os.Exit(1)
@@ -257,10 +267,10 @@ func operatorSetup() error {
 	if err := f.InstallCertOperator(); err != nil {
 		return microerror.Mask(err)
 	}
-	if err := f.InstallNodeOperator(); err != nil {
+	if err := f.InstallNodeOperator(nodeOperatorChartValues); err != nil {
 		return microerror.Mask(err)
 	}
-	if err := f.InstallAwsOperator(); err != nil {
+	if err := f.InstallAwsOperator(awsOperatorChartValues); err != nil {
 		return microerror.Mask(err)
 	}
 
@@ -272,7 +282,7 @@ func operatorSetup() error {
 		return microerror.Maskf(err, "writing aws-resource-lab values file")
 	}
 
-	err = runCmd("helm registry install quay.io/giantswarm/aws-resource-lab-chart:stable -- -n aws-resource-lab --values " + awsOperatorValuesFile)
+	err = framework.HelmCmd("registry install quay.io/giantswarm/aws-resource-lab-chart:stable -- -n aws-resource-lab --values " + awsOperatorValuesFile)
 	if err != nil {
 		return microerror.Maskf(err, "installing aws-resource-lab chart")
 	}
@@ -298,12 +308,12 @@ func operatorSetup() error {
 }
 
 func operatorTearDown() {
-	runCmd("helm delete aws-operator --purge")
-	runCmd("helm delete cert-operator --purge")
-	runCmd("helm delete node-operator --purge")
+	framework.HelmCmd("delete aws-operator --purge")
+	framework.HelmCmd("delete cert-operator --purge")
+	framework.HelmCmd("delete node-operator --purge")
 
-	runCmd("helm delete cert-resource-lab --purge")
-	runCmd("helm delete aws-resource-lab --purge")
+	framework.HelmCmd("delete cert-resource-lab --purge")
+	framework.HelmCmd("delete aws-resource-lab --purge")
 }
 
 func writeAWSResourceValues() error {
@@ -344,7 +354,7 @@ func addWorker(clusterName string) error {
 
 	newWorker := cluster.Spec.AWS.Workers[0]
 
-	patch := make([]PatchSpec, 1)
+	patch := make([]framework.PatchSpec, 1)
 	patch[0].Op = "add"
 	patch[0].Path = "/spec/aws/workers/-"
 	patch[0].Value = newWorker
@@ -353,7 +363,7 @@ func addWorker(clusterName string) error {
 }
 
 func removeWorker(clusterName string) error {
-	patch := make([]PatchSpec, 1)
+	patch := make([]framework.PatchSpec, 1)
 	patch[0].Op = "remove"
 	patch[0].Path = "/spec/aws/workers/1"
 

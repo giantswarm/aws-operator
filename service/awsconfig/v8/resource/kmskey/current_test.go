@@ -36,6 +36,8 @@ func Test_CurrentState(t *testing.T) {
 
 	resourceConfig := DefaultConfig()
 	resourceConfig.Logger = microloggertest.New()
+	resourceConfig.InstallationName = "test-install"
+
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			resourceConfig.Clients = Clients{

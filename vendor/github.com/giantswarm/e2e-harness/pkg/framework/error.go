@@ -1,14 +1,12 @@
-// +build k8srequired
-
-package integration
+package framework
 
 import "github.com/giantswarm/microerror"
 
-var waitTimeoutError = microerror.New("waitTimeout")
+var notFoundError = microerror.New("not found")
 
-// IsWaitTimeout asserts invalidConfigError.
-func IsWaitTimeout(err error) bool {
-	return microerror.Cause(err) == waitTimeoutError
+// IsNotFound asserts notFoundError.
+func IsNotFound(err error) bool {
+	return microerror.Cause(err) == notFoundError
 }
 
 var tooManyResultsError = microerror.New("too many results")
@@ -25,9 +23,9 @@ func IsUnexpectedStatusPhase(err error) bool {
 	return microerror.Cause(err) == unexpectedStatusPhaseError
 }
 
-var notFoundError = microerror.New("not found")
+var waitTimeoutError = microerror.New("waitTimeout")
 
-// IsNotFound asserts notFoundError.
-func IsNotFound(err error) bool {
-	return microerror.Cause(err) == notFoundError
+// IsWaitTimeout asserts invalidConfigError.
+func IsWaitTimeout(err error) bool {
+	return microerror.Cause(err) == waitTimeoutError
 }

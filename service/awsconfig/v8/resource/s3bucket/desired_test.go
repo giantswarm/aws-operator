@@ -48,6 +48,8 @@ func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
 		resourceConfig := DefaultConfig()
 		resourceConfig.AwsService = awsService
 		resourceConfig.Logger = microloggertest.New()
+		resourceConfig.InstallationName = "test-install"
+
 		newResource, err = New(resourceConfig)
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
