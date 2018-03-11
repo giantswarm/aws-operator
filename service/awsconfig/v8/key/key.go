@@ -356,9 +356,9 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 		Current Release: CoreOS Container Linux stable 1576.5.0 (HVM)
 	*/
 	imageIDs := map[string]string{
-		"eu-central-1": "ami-90c152ff",
-		"eu-west-1":    "ami-32d1474b",
-		"us-west-2":    "ami-dc4ce6a4",
+		"eu-central-1": "ami-862140e9",
+		"eu-west-1":    "ami-a61464df",
+		"us-west-2":    "ami-692faf11",
 	}
 
 	imageID, ok := imageIDs[region]
