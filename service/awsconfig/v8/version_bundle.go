@@ -10,13 +10,8 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "aws-operator",
-				Description: "Fix validation check for existing peering routes.",
-				Kind:        versionbundle.KindFixed,
-			},
-			{
-				Component:   "aws-operator",
-				Description: "Add AWS resource tag with the Giant Swarm Installation.",
+				Component:   "cloudconfig",
+				Description: "Removed set-ownership-etcd-data-dir.service.",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
