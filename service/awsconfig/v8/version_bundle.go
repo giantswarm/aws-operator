@@ -10,14 +10,9 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "aws-operator",
-				Description: "Fix validation check for existing peering routes.",
+				Component:   "containerlinux",
+				Description: "Updated to version 1632.3.0.",
 				Kind:        versionbundle.KindFixed,
-			},
-			{
-				Component:   "aws-operator",
-				Description: "Add AWS resource tag with the Giant Swarm Installation.",
-				Kind:        versionbundle.KindChanged,
 			},
 		},
 		Components: []versionbundle.Component{
@@ -27,7 +22,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "containerlinux",
-				Version: "1576.5.0",
+				Version: "1632.3.0",
 			},
 			{
 				Name:    "docker",
