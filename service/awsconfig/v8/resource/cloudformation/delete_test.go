@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 
@@ -21,7 +20,7 @@ func Test_Resource_Cloudformation_newDelete(t *testing.T) {
 		description       string
 	}{
 		{
-			description: "current and desired state empty, expected empty",
+			description: "case 0: current and desired state empty, expected empty",
 			obj: &v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
@@ -34,7 +33,7 @@ func Test_Resource_Cloudformation_newDelete(t *testing.T) {
 			expectedStackName: "",
 		},
 		{
-			description: "current state empty, desired state not empty, expected empty",
+			description: "case 1: current state empty, desired state not empty, expected desired state",
 			obj: &v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
@@ -46,10 +45,10 @@ func Test_Resource_Cloudformation_newDelete(t *testing.T) {
 			desiredState: StackState{
 				Name: "desired",
 			},
-			expectedStackName: "",
+			expectedStackName: "desired",
 		},
 		{
-			description: "current state not empty, desired state not empty but different, expected current state",
+			description: "case 2: current state not empty, desired state not empty but different, expected desired state",
 			obj: &v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
@@ -63,10 +62,10 @@ func Test_Resource_Cloudformation_newDelete(t *testing.T) {
 			desiredState: StackState{
 				Name: "desired",
 			},
-			expectedStackName: "current",
+			expectedStackName: "desired",
 		},
 		{
-			description: "current state not empty, desired state not empty but equal, expected desired state",
+			description: "case 3: current state not empty, desired state not empty but equal, expected desired state",
 			obj: &v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
@@ -75,12 +74,12 @@ func Test_Resource_Cloudformation_newDelete(t *testing.T) {
 				},
 			},
 			currentState: StackState{
-				Name: "current",
+				Name: "equal",
 			},
 			desiredState: StackState{
-				Name: "current",
+				Name: "equal",
 			},
-			expectedStackName: "",
+			expectedStackName: "equal",
 		},
 	}
 
@@ -106,12 +105,12 @@ func Test_Resource_Cloudformation_newDelete(t *testing.T) {
 			if err != nil {
 				t.Fatal("expected", nil, "got", err)
 			}
-			deleteChange, ok := result.(awscloudformation.DeleteStackInput)
+			deleteChange, ok := result.(StackState)
 			if !ok {
-				t.Errorf("expected '%T', got '%T'", deleteChange, result)
+				t.Fatalf("expected '%T', got '%T'", deleteChange, result)
 			}
-			if *deleteChange.StackName != tc.expectedStackName {
-				t.Errorf("expected %s, got %s", tc.expectedStackName, *deleteChange.StackName)
+			if deleteChange.Name != tc.expectedStackName {
+				t.Fatalf("expected %s, got %s", tc.expectedStackName, deleteChange.Name)
 			}
 		})
 	}
