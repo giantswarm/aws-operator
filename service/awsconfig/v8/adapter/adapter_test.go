@@ -54,7 +54,7 @@ func TestAdapterGuestMain(t *testing.T) {
 			errorMatcher:      nil,
 			expectedASGType:   "worker",
 			expectedClusterID: "test-cluster",
-			expectedImageID:   "ami-90c152ff",
+			expectedImageID:   "ami-862140e9",
 		},
 		{
 			description: "different region",
@@ -76,7 +76,7 @@ func TestAdapterGuestMain(t *testing.T) {
 			errorMatcher:      nil,
 			expectedASGType:   "worker",
 			expectedClusterID: "test-cluster",
-			expectedImageID:   "ami-32d1474b",
+			expectedImageID:   "ami-a61464df",
 		},
 		{
 			description: "invalid region",

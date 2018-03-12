@@ -14,6 +14,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Removed set-ownership-etcd-data-dir.service.",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "containerlinux",
+				Description: "Updated to version 1632.3.0.",
+				Kind:        versionbundle.KindFixed,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
@@ -22,7 +27,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "containerlinux",
-				Version: "1576.5.0",
+				Version: "1632.3.0",
 			},
 			{
 				Name:    "docker",
