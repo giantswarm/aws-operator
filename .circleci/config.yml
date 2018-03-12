@@ -1,3 +1,20 @@
+e2eTest: &e2eTest
+    machine: true
+    working_directory: /home/circleci/.go_workspace/src/github.com/giantswarm/aws-operator
+    steps:
+    - checkout
+    - attach_workspace:
+        at: .
+    - run: |
+        wget -q $(curl -sS https://api.github.com/repos/giantswarm/e2e-harness/releases/latest | grep browser_download_url | head -n 1 | cut -d '"' -f 4)
+        chmod +x ./e2e-harness
+    - run: ./e2e-harness localkube
+    - run: ./e2e-harness setup --remote=false
+    - run: ./e2e-harness test --test-dir=integration
+    - run:
+        command: ./e2e-harness teardown
+        when: always
+
 version: 2
 jobs:
   build:
@@ -29,81 +46,26 @@ jobs:
     environment:
       MINIKUBE_VERSION: v0.25.0
       TESTED_VERSION: "current"
-    machine: true
-    working_directory: /home/circleci/.go_workspace/src/github.com/giantswarm/aws-operator
-    steps:
-    - checkout
-    - run: |
-        wget -q $(curl -sS https://api.github.com/repos/giantswarm/e2e-harness/releases/latest | grep browser_download_url | head -n 1 | cut -d '"' -f 4)
-        chmod +x ./e2e-harness
-    - run: ./e2e-harness localkube
-    - run: ./e2e-harness setup --remote=false
-    - run: ./e2e-harness test --test-dir=integration
-    - run:
-        command: ./e2e-harness teardown
-        when: always
-
-
+    <<: *e2eTest
 
   e2eTestCurrentVersionMaster:
     environment:
       MINIKUBE_VERSION: v0.25.0
       TESTED_VERSION: "current"
-    machine: true
-    working_directory: /home/circleci/.go_workspace/src/github.com/giantswarm/aws-operator
-    steps:
-    - checkout
-    - run: |
-        wget -q $(curl -sS https://api.github.com/repos/giantswarm/e2e-harness/releases/latest | grep browser_download_url | head -n 1 | cut -d '"' -f 4)
-        chmod +x ./e2e-harness
-    - run: ./e2e-harness localkube
-    - run: ./e2e-harness setup --remote=false
-    - run: ./e2e-harness test --test-dir=integration
-    - run:
-        command: ./e2e-harness teardown
-        when: always
-
-
+    <<: *e2eTest
 
   e2eTestWIPVersionPR:
     environment:
       MINIKUBE_VERSION: v0.25.0
       TESTED_VERSION: "wip"
-    machine: true
-    working_directory: /home/circleci/.go_workspace/src/github.com/giantswarm/aws-operator
-    steps:
-    - checkout
-    - run: |
-        wget -q $(curl -sS https://api.github.com/repos/giantswarm/e2e-harness/releases/latest | grep browser_download_url | head -n 1 | cut -d '"' -f 4)
-        chmod +x ./e2e-harness
-    - run: ./e2e-harness localkube
-    - run: ./e2e-harness setup --remote=false
-    - run: ./e2e-harness test --test-dir=integration
-    - run:
-        command: ./e2e-harness teardown
-        when: always
-
+    <<: *e2eTest
 
 
   e2eTestWIPVersionMaster:
     environment:
       MINIKUBE_VERSION: v0.25.0
       TESTED_VERSION: "wip"
-    machine: true
-    working_directory: /home/circleci/.go_workspace/src/github.com/giantswarm/aws-operator
-    steps:
-    - checkout
-    - run: |
-        wget -q $(curl -sS https://api.github.com/repos/giantswarm/e2e-harness/releases/latest | grep browser_download_url | head -n 1 | cut -d '"' -f 4)
-        chmod +x ./e2e-harness
-    - run: ./e2e-harness localkube
-    - run: ./e2e-harness setup --remote=false
-    - run: ./e2e-harness test --test-dir=integration
-    - run:
-        command: ./e2e-harness teardown
-        when: always
-
-
+    <<: *e2eTest
 
 workflows:
   version: 2
