@@ -32,5 +32,5 @@ func init() {
 }
 
 func ClusterID() string {
-	return fmt.Sprintf("ci-awsop-%s", CircleSHA()[0:5])
+	return fmt.Sprintf("ci-awsop-%s-%s", TestedVersion(), CircleSHA()[0:5])
 }
