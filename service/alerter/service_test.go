@@ -80,8 +80,8 @@ func Test_FindOrphanResources(t *testing.T) {
 
 func Test_FindOrphanClusters(t *testing.T) {
 	n := time.Now()
-	twentyMinAgo := metav1.Time{n.Add(-20 * time.Minute)}
-	fiveMinAgo := metav1.Time{n.Add(-5 * time.Minute)}
+	twentyMinAgo := metav1.NewTime(n.Add(-20 * time.Minute))
+	fiveMinAgo := metav1.NewTime(n.Add(-5 * time.Minute))
 	tests := []struct {
 		clusters       []v1alpha1.AWSConfig
 		resourceNames  []string
