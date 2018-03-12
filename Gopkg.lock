@@ -133,13 +133,13 @@
   revision = "65dc7752f8079b0eaf4179345ba311dec1c450d1"
 
 [[projects]]
-  branch = "log-entry"
+  branch = "master"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "8ab91e1945958f5834d46a41c41592c82ecf5db5"
+  revision = "fd37da146cf00a8cf6b7bad830832889bcfc51eb"
 
 [[projects]]
   branch = "master"
@@ -529,7 +529,7 @@
     "internal/bitbucket.org/ww/goautoneg",
     "model"
   ]
-  revision = "6fb6fce6f8b75884b92e1889c150403fc0872c5e"
+  revision = "e4aa40a9169a88835b849a6efb71e05dc04b88f0"
 
 [[projects]]
   branch = "master"
@@ -840,6 +840,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "fa77191fc05cef304855145ff1ef1f28683d8a6720aa7b0f19f90ead7e7ffee1"
+  inputs-digest = "d77daf8a2a7f815ee4bf90781ecb95c2c740dbb0803596fd758005643272ce5b"
   solver-name = "gps-cdcl"
   solver-version = 1
