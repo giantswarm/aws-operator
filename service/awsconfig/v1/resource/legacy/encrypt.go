@@ -39,21 +39,21 @@ type encryptedTLSAssets TLSassets
 func createRawTLSAssets(assets legacy.AssetsBundle) *rawTLSAssets {
 	// TODO refactor this with a for loop iterating over components and asset types
 	return &rawTLSAssets{
-		APIServerCA:       assets[legacy.AssetsBundleKey{legacy.APIComponent, legacy.CA}],
-		APIServerCrt:      assets[legacy.AssetsBundleKey{legacy.APIComponent, legacy.Crt}],
-		APIServerKey:      assets[legacy.AssetsBundleKey{legacy.APIComponent, legacy.Key}],
-		WorkerCA:          assets[legacy.AssetsBundleKey{legacy.WorkerComponent, legacy.CA}],
-		WorkerCrt:         assets[legacy.AssetsBundleKey{legacy.WorkerComponent, legacy.Crt}],
-		WorkerKey:         assets[legacy.AssetsBundleKey{legacy.WorkerComponent, legacy.Key}],
-		ServiceAccountCA:  assets[legacy.AssetsBundleKey{legacy.ServiceAccountComponent, legacy.CA}],
-		ServiceAccountCrt: assets[legacy.AssetsBundleKey{legacy.ServiceAccountComponent, legacy.Crt}],
-		ServiceAccountKey: assets[legacy.AssetsBundleKey{legacy.ServiceAccountComponent, legacy.Key}],
-		EtcdServerCA:      assets[legacy.AssetsBundleKey{legacy.EtcdComponent, legacy.CA}],
-		EtcdServerCrt:     assets[legacy.AssetsBundleKey{legacy.EtcdComponent, legacy.Crt}],
-		EtcdServerKey:     assets[legacy.AssetsBundleKey{legacy.EtcdComponent, legacy.Key}],
-		CalicoClientCA:    assets[legacy.AssetsBundleKey{legacy.CalicoComponent, legacy.CA}],
-		CalicoClientCrt:   assets[legacy.AssetsBundleKey{legacy.CalicoComponent, legacy.Crt}],
-		CalicoClientKey:   assets[legacy.AssetsBundleKey{legacy.CalicoComponent, legacy.Key}],
+		APIServerCA:       assets[assetsBundleKey(legacy.APIComponent, legacy.CA)],
+		APIServerCrt:      assets[assetsBundleKey(legacy.APIComponent, legacy.Crt)],
+		APIServerKey:      assets[assetsBundleKey(legacy.APIComponent, legacy.Key)],
+		WorkerCA:          assets[assetsBundleKey(legacy.WorkerComponent, legacy.CA)],
+		WorkerCrt:         assets[assetsBundleKey(legacy.WorkerComponent, legacy.Crt)],
+		WorkerKey:         assets[assetsBundleKey(legacy.WorkerComponent, legacy.Key)],
+		ServiceAccountCA:  assets[assetsBundleKey(legacy.ServiceAccountComponent, legacy.CA)],
+		ServiceAccountCrt: assets[assetsBundleKey(legacy.ServiceAccountComponent, legacy.Crt)],
+		ServiceAccountKey: assets[assetsBundleKey(legacy.ServiceAccountComponent, legacy.Key)],
+		EtcdServerCA:      assets[assetsBundleKey(legacy.EtcdComponent, legacy.CA)],
+		EtcdServerCrt:     assets[assetsBundleKey(legacy.EtcdComponent, legacy.Crt)],
+		EtcdServerKey:     assets[assetsBundleKey(legacy.EtcdComponent, legacy.Key)],
+		CalicoClientCA:    assets[assetsBundleKey(legacy.CalicoComponent, legacy.CA)],
+		CalicoClientCrt:   assets[assetsBundleKey(legacy.CalicoComponent, legacy.Crt)],
+		CalicoClientKey:   assets[assetsBundleKey(legacy.CalicoComponent, legacy.Key)],
 	}
 }
 
@@ -173,6 +173,13 @@ func (r *encryptedTLSAssets) compact() (*legacy.CompactTLSAssets, error) {
 		return nil, microerror.Mask(err)
 	}
 	return &compactAssets, nil
+}
+
+func assetsBundleKey(c legacy.ClusterComponent, t legacy.TLSAssetType) legacy.AssetsBundleKey {
+	return legacy.AssetsBundleKey{
+		Component: c,
+		Type:      t,
+	}
 }
 
 func compactor(data []byte) (string, error) {
