@@ -11,38 +11,62 @@ import (
 )
 
 func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
-	cluster, err := key.ToCustomObject(obj)
+	customObject, err := key.ToCustomObject(obj)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	stackInputToDelete, err := toStackInput(deleteChange)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	deleteStackInput := awscloudformation.DeleteStackInput{
-		StackName: aws.String(key.MainGuestStackName(cluster)),
-	}
-	_, err = r.clients.CloudFormation.DeleteStack(&deleteStackInput)
-	if err != nil {
-		return microerror.Maskf(err, "deleting AWS Guest CloudFormation Stack")
-	}
-	r.logger.LogCtx(ctx, "level", "debug", "deleting AWS Guest CloudFormation stack: deleted")
+	if stackInputToDelete != nil {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting the guest cluster main stack")
 
-	deleteStackInput = awscloudformation.DeleteStackInput{
-		StackName: aws.String(key.MainHostPreStackName(cluster)),
-	}
-	_, err = r.hostClients.CloudFormation.DeleteStack(&deleteStackInput)
-	if err != nil {
-		return microerror.Maskf(err, "deleting AWS Host Pre-Guest CloudFormation Stack")
-	}
-	r.logger.LogCtx(ctx, "level", "debug", "deleting AWS Host Pre-Guest CloudFormation stack: deleted")
+		i := &awscloudformation.DeleteStackInput{
+			StackName: aws.String(key.MainGuestStackName(customObject)),
+		}
+		_, err = r.clients.CloudFormation.DeleteStack(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 
-	deleteStackInput = awscloudformation.DeleteStackInput{
-		StackName: aws.String(key.MainHostPostStackName(cluster)),
+		r.logger.LogCtx(ctx, "level", "debug", "message", "deleted the guest cluster main stack")
+	} else {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting the guest cluster main stack")
 	}
-	_, err = r.hostClients.CloudFormation.DeleteStack(&deleteStackInput)
-	if err != nil {
-		return microerror.Maskf(err, "deleting AWS Host Post-Guest CloudFormation Stack")
+
+	if stackInputToDelete != nil {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting the host cluster pre stack")
+
+		i := &awscloudformation.DeleteStackInput{
+			StackName: aws.String(key.MainHostPreStackName(customObject)),
+		}
+		_, err = r.hostClients.CloudFormation.DeleteStack(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "deleted the host cluster pre stack")
+	} else {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting the host cluster pre stack")
 	}
-	// TODO align with integration tests
-	r.logger.LogCtx(ctx, "level", "debug", "deleting AWS Host Post-Guest CloudFormation stack: deleted")
+
+	if stackInputToDelete != nil {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting the host cluster post stack")
+
+		i := &awscloudformation.DeleteStackInput{
+			StackName: aws.String(key.MainHostPostStackName(customObject)),
+		}
+		_, err = r.hostClients.CloudFormation.DeleteStack(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "deleted the host cluster post stack")
+	} else {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting the host cluster post stack")
+	}
 
 	return nil
 }
@@ -62,21 +86,25 @@ func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desire
 func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
 	currentStackState, err := toStackState(currentState)
 	if err != nil {
-		return awscloudformation.DeleteStackInput{}, microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 	desiredStackState, err := toStackState(desiredState)
 	if err != nil {
-		return awscloudformation.DeleteStackInput{}, microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "finding out if the main stack should be deleted")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the guest cluster main stack has to be deleted")
 
-	deleteState := awscloudformation.DeleteStackInput{
-		StackName: aws.String(""),
-	}
+	var deleteState *StackState
 
 	if currentStackState.Name != "" && desiredStackState.Name != currentStackState.Name {
-		deleteState.StackName = aws.String(currentStackState.Name)
+		r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack has to be deleted")
+
+		deleteState = &awscloudformation.DeleteStackInput{
+			StackName: aws.String(currentStackState.Name),
+		}
+	} else {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack does not have to be deleted")
 	}
 
 	return deleteState, nil
