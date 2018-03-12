@@ -121,7 +121,7 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake"
   ]
-  revision = "819eb0a6b723acd59776a2dee0d6b75b4fa5fde3"
+  revision = "54312c76ad7bec3d96d1eb57eba5f860410ae075"
 
 [[projects]]
   branch = "legacy"
@@ -133,13 +133,13 @@
   revision = "65dc7752f8079b0eaf4179345ba311dec1c450d1"
 
 [[projects]]
-  branch = "master"
+  branch = "log-entry"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "1a56a98ac2c3d1c42aba306787047c52a42f7bc2"
+  revision = "8ab91e1945958f5834d46a41c41592c82ecf5db5"
 
 [[projects]]
   branch = "master"
@@ -188,7 +188,7 @@
     "transaction/context/id",
     "transaction/context/tracked"
   ]
-  revision = "992da614a8f20540ebc9049c62c36bbbf12710de"
+  revision = "b700edbe027ced8bab334c54e3c07aba17098472"
 
 [[projects]]
   branch = "master"
@@ -225,7 +225,7 @@
     "framework/resource/retryresource",
     "informer"
   ]
-  revision = "b2f83ecc11dc208b8c5aba59a99d48fbf72981d3"
+  revision = "75ba7e3afe272731ffb693bad7920c9bf2baa8d7"
 
 [[projects]]
   branch = "master"
@@ -456,7 +456,7 @@
     "jlexer",
     "jwriter"
   ]
-  revision = "4a8a4c12c4d1b0c0a7de630426ce6dcb07141b17"
+  revision = "f594efddfa171111dc4349cd6e78e8f61dc7936f"
 
 [[projects]]
   name = "github.com/matttproud/golang_protobuf_extensions"
@@ -540,7 +540,7 @@
     "nfs",
     "xfs"
   ]
-  revision = "1c7ff3de94ae006f58cba483a4c9c6d7c61e1d98"
+  revision = "54d17b57dd7d4a3aa092476596b3f8a933bde349"
 
 [[projects]]
   branch = "master"
@@ -610,7 +610,7 @@
     "lex/httplex",
     "publicsuffix"
   ]
-  revision = "d0aafc73d5cdc42264b0af071c261abac580695e"
+  revision = "ae89d30ce0c63142b652837da33d782e2b0a9b25"
 
 [[projects]]
   branch = "master"
@@ -625,7 +625,7 @@
     "unix",
     "windows"
   ]
-  revision = "7dca6fe1f43775aa6d1334576870ff63f978f539"
+  revision = "c28acc882ebcbfbe8ce9f0f14b9ac26ee138dd51"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -840,6 +840,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d77daf8a2a7f815ee4bf90781ecb95c2c740dbb0803596fd758005643272ce5b"
+  inputs-digest = "fa77191fc05cef304855145ff1ef1f28683d8a6720aa7b0f19f90ead7e7ffee1"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -57,6 +57,7 @@ type IngressConfigSpec struct {
 	GuestCluster  IngressConfigSpecGuestCluster   `json:"guestCluster" yaml:"guestCluster"`
 	HostCluster   IngressConfigSpecHostCluster    `json:"hostCluster" yaml:"hostCluster"`
 	ProtocolPorts []IngressConfigSpecProtocolPort `json:"protocolPorts" yaml:"protocolPorts"`
+	VersionBundle IngressConfigSpecVersionBundle  `json:"versionBundle" yaml:"versionBundle"`
 }
 
 type IngressConfigSpecGuestCluster struct {
@@ -79,6 +80,10 @@ type IngressConfigSpecProtocolPort struct {
 	IngressPort int    `json:"ingressPort" yaml:"ingressPort"`
 	LBPort      int    `json:"lbPort" yaml:"lbPort"`
 	Protocol    string `json:"protocol" yaml:"protocol"`
+}
+
+type IngressConfigSpecVersionBundle struct {
+	Version string `json:"version" yaml:"version"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
