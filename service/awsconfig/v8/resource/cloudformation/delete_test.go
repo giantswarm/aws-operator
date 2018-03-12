@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 
@@ -106,12 +105,12 @@ func Test_Resource_Cloudformation_newDelete(t *testing.T) {
 			if err != nil {
 				t.Fatal("expected", nil, "got", err)
 			}
-			deleteChange, ok := result.(awscloudformation.DeleteStackInput)
+			deleteChange, ok := result.(StackState)
 			if !ok {
-				t.Errorf("expected '%T', got '%T'", deleteChange, result)
+				t.Fatalf("expected '%T', got '%T'", deleteChange, result)
 			}
-			if *deleteChange.StackName != tc.expectedStackName {
-				t.Errorf("expected %s, got %s", tc.expectedStackName, *deleteChange.StackName)
+			if deleteChange.Name != tc.expectedStackName {
+				t.Fatalf("expected %s, got %s", tc.expectedStackName, deleteChange.Name)
 			}
 		})
 	}
