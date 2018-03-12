@@ -1,5 +1,6 @@
 [![CircleCI](https://circleci.com/gh/giantswarm/aws-operator.svg?&style=shield&circle-token=8f0fe6ad08c090afa36c35ba5d926ac6ffe797e8)](https://circleci.com/gh/giantswarm/aws-operator) [![Docker Repository on Quay](https://quay.io/repository/giantswarm/aws-operator/status "Docker Repository on Quay")](https://quay.io/repository/giantswarm/aws-operator)
 
+
 # aws-operator
 
 The aws-operator manages Kubernetes clusters running on AWS.
