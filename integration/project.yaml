@@ -4,6 +4,7 @@ test:
   env:
     - "VAULT_TOKEN=mytoken"
     - "CIRCLE_SHA1=${CIRCLE_SHA1}"
+    - "CIRCLECI=${CIRCLECI}"
     - "COMMON_DOMAIN_GUEST=${COMMON_DOMAIN_GUEST}"
     - "CLUSTER_NAME=${CLUSTER_NAME}"
     - "GUEST_UPDATE_ENABLED=true"
