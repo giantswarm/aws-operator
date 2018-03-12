@@ -5,7 +5,7 @@ const MountEtcdVolume = `
 Description=etcd3 data volume
 Requires=format-etcd-ebs.service
 After=format-etcd-ebs.service
-Before=set-ownership-etcd-data-dir.service etcd3.service
+Before=etcd3.service
 
 [Mount]
 What=/dev/xvdh
