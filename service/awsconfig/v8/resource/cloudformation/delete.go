@@ -72,22 +72,18 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 }
 
 func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
-	delete, err := r.newDeleteChange(ctx, obj, currentState, desiredState)
+	deleteChange, err := r.newDeleteChange(ctx, obj, currentState, desiredState)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
 	patch := framework.NewPatch()
-	patch.SetDeleteChange(delete)
+	patch.SetDeleteChange(deleteChange)
 
 	return patch, nil
 }
 
 func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	currentStackState, err := toStackState(currentState)
-	if err != nil {
-		return StackState{}, microerror.Mask(err)
-	}
 	desiredStackState, err := toStackState(desiredState)
 	if err != nil {
 		return StackState{}, microerror.Mask(err)
@@ -97,11 +93,11 @@ func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desir
 
 	var deleteState StackState
 
-	if currentStackState.Name != "" && desiredStackState.Name != currentStackState.Name {
+	if desiredStackState.Name != "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack has to be deleted")
 
 		deleteState = StackState{
-			Name: currentStackState.Name,
+			Name: desiredStackState.Name,
 		}
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack does not have to be deleted")
