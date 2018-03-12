@@ -343,7 +343,7 @@ func (f *Framework) DeleteGuestCluster() error {
 		return microerror.Mask(err)
 	}
 
-	logEntry := "deleting AWS Host Post-Guest CloudFormation stack: deleted"
+	logEntry := "deleted the guest cluster main stack"
 
 	return f.WaitForPodLog("giantswarm", logEntry, operatorPodName)
 }

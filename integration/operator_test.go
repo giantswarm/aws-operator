@@ -168,8 +168,11 @@ func TestMain(m *testing.M) {
 
 	if os.Getenv("KEEP_RESOURCES") != "true" {
 		f.DeleteGuestCluster()
-		operatorTearDown()
-		f.TearDown()
+		// only do full teardown when not on CI
+		if os.Getenv("CIRCLECI") != "true" {
+			operatorTearDown()
+			f.TearDown()
+		}
 		deleteHostPeerVPC()
 	}
 

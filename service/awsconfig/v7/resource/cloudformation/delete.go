@@ -41,7 +41,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	if err != nil {
 		return microerror.Maskf(err, "deleting AWS Host Post-Guest CloudFormation Stack")
 	}
-	r.logger.LogCtx(ctx, "debug", "deleting AWS Host Post-Guest CloudFormation stack: deleted")
+	r.logger.LogCtx(ctx, "debug", "deleted the guest cluster main stack")
 
 	return nil
 }
