@@ -183,7 +183,7 @@ func TestGuestReadyAfterMasterReboot(t *testing.T) {
 			{
 				Name: aws.String("tag:Name"),
 				Values: []*string{
-					aws.String(fmt.Sprintf("%s-master", os.Getenv("CLUSTER_NAME"))),
+					aws.String(fmt.Sprintf("%s-master", ClusterID())),
 				},
 			},
 			{
@@ -227,11 +227,11 @@ func TestGuestReadyAfterMasterReboot(t *testing.T) {
 }
 
 func TestWorkersScaling(t *testing.T) {
-	currentWorkers, err := numberOfWorkers(os.Getenv("CLUSTER_NAME"))
+	currentWorkers, err := numberOfWorkers(ClusterID())
 	if err != nil {
 		t.Fatalf("unexpected error getting number of workers %v", err)
 	}
-	currentMasters, err := numberOfMasters(os.Getenv("CLUSTER_NAME"))
+	currentMasters, err := numberOfMasters(ClusterID())
 	if err != nil {
 		t.Fatalf("unexpected error getting number of masters %v", err)
 	}
@@ -239,7 +239,7 @@ func TestWorkersScaling(t *testing.T) {
 	// increase number of workers
 	expectedWorkers := currentWorkers + 1
 	log.Printf("Increasing the number of workers to %d", expectedWorkers)
-	err = addWorker(os.Getenv("CLUSTER_NAME"))
+	err = addWorker(ClusterID())
 	if err != nil {
 		t.Fatalf("unexpected error setting number of workers to %d, %v", expectedWorkers, err)
 	}
@@ -252,7 +252,7 @@ func TestWorkersScaling(t *testing.T) {
 	// decrease number of workers
 	expectedWorkers--
 	log.Printf("Decreasing the number of workers to %d", expectedWorkers)
-	err = removeWorker(os.Getenv("CLUSTER_NAME"))
+	err = removeWorker(ClusterID())
 	if err != nil {
 		t.Fatalf("unexpected error setting number of workers to %d, %v", expectedWorkers, err)
 	}
@@ -403,9 +403,9 @@ Outputs:
     Value: !Ref VPC
 
 `
-	os.Setenv("AWS_ROUTE_TABLE_0", os.Getenv("CLUSTER_NAME")+"_0")
-	os.Setenv("AWS_ROUTE_TABLE_1", os.Getenv("CLUSTER_NAME")+"_1")
-	stackName := "host-peer-" + os.Getenv("CLUSTER_NAME")
+	os.Setenv("AWS_ROUTE_TABLE_0", ClusterID()+"_0")
+	os.Setenv("AWS_ROUTE_TABLE_1", ClusterID()+"_1")
+	stackName := "host-peer-" + ClusterID()
 	stackInput := &cloudformation.CreateStackInput{
 		StackName:        aws.String(stackName),
 		TemplateBody:     aws.String(os.ExpandEnv(hostVPCStack)),
@@ -441,7 +441,7 @@ func deleteHostPeerVPC() error {
 	log.Printf("Deleting Host Peer VPC stack")
 
 	_, err := c.CF.DeleteStack(&cloudformation.DeleteStackInput{
-		StackName: aws.String("host-peer-" + os.Getenv("CLUSTER_NAME")),
+		StackName: aws.String("host-peer-" + ClusterID()),
 	})
 	if err != nil {
 		return microerror.Mask(err)
