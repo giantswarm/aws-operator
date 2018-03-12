@@ -10,6 +10,11 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
+				Component:   "cloudconfig",
+				Description: "Removed set-ownership-etcd-data-dir.service.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
 				Component:   "containerlinux",
 				Description: "Updated to version 1632.3.0.",
 				Kind:        versionbundle.KindFixed,
