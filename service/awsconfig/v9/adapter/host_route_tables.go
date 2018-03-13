@@ -75,7 +75,14 @@ func waitForPeeringConnectionID(cfg Config) (string, error) {
 		},
 	}
 	var peeringID string
-	logger, err := micrologger.New(micrologger.DefaultConfig())
+	// TODO the logger should be injected and not magically made up in the depths
+	// of the code where nobody knows about it and nobody has control over it.
+	c := micrologger.Config{
+		Caller:             micrologger.DefaultCaller,
+		IOWriter:           micrologger.DefaultIOWriter,
+		TimestampFormatter: micrologger.DefaultTimestampFormatter,
+	}
+	logger, err := micrologger.New(c)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
