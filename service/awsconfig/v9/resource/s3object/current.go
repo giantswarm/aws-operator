@@ -7,7 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v8/key"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v9/key"
 	"github.com/giantswarm/microerror"
 )
 
