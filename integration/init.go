@@ -5,6 +5,9 @@ package integration
 import (
 	"fmt"
 	"os"
+
+	"github.com/giantswarm/aws-operator/service"
+	"github.com/giantswarm/e2e-harness/pkg/framework"
 )
 
 const (
@@ -20,11 +23,15 @@ const (
 	// EnvVarTestedVersion is the process environment variable representing the
 	// TESTED_VERSION env var.
 	EnvVarTestedVersion = "TESTED_VERSION"
+	// EnvVarVersionBundleVersion is the process environment variable representing
+	// the VERSION_BUNDLE_VERSION env var.
+	EnvVarVersionBundleVersion = "VERSION_BUNDLE_VERSION"
 )
 
 var (
-	circleSHA     string
-	testedVersion string
+	circleSHA            string
+	testedVersion        string
+	versionBundleVersion string
 )
 
 func init() {
@@ -44,6 +51,18 @@ func init() {
 	if clusterID == "" {
 		os.Setenv(EnvVarClusterID, ClusterID())
 	}
+
+	var err error
+	versionBundleVersion, err = framework.GetVersionBundleVersion(service.NewVersionBundles(), TestedVersion())
+	if err != nil {
+		panic(err.Error())
+	}
+	// TODO there should be a not found error returned by the framework in such
+	// cases.
+	if VersionBundleVersion() == "" {
+		panic("version bundle version  must not be empty")
+	}
+	os.Setenv(EnvVarVersionBundleVersion, VersionBundleVersion())
 }
 
 func CircleSHA() string {
@@ -56,4 +75,8 @@ func ClusterID() string {
 
 func TestedVersion() string {
 	return testedVersion
+}
+
+func VersionBundleVersion() string {
+	return versionBundleVersion
 }
