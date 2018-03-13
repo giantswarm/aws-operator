@@ -8,8 +8,8 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/framework/context/resourcecanceledcontext"
 
-	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v8/cloudformation"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v8/key"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v9/cloudformation"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v9/key"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {

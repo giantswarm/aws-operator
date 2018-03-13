@@ -32,6 +32,7 @@
     "aws/request",
     "aws/session",
     "aws/signer/v4",
+    "internal/sdkio",
     "internal/sdkrand",
     "internal/shareddefaults",
     "private/protocol",
@@ -53,8 +54,8 @@
     "service/s3",
     "service/sts"
   ]
-  revision = "bafcd9ccc717e9bc5406acaea370577299223873"
-  version = "v1.13.11"
+  revision = "1f8fb9d0919e5a58992207db9512a03f76ab0274"
+  version = "v1.13.12"
 
 [[projects]]
   branch = "master"
@@ -199,7 +200,7 @@
     "loggermeta",
     "microloggertest"
   ]
-  revision = "379c14c9508f2a9e69c7458e7e4d5444103c3abe"
+  revision = "2aaea11da0707ebb7f9fbabb07028a37b00efc16"
 
 [[projects]]
   branch = "master"
@@ -598,7 +599,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "c7dcf104e3a7a1417abc0230cb0d5240d764159d"
+  revision = "182114d582623c1caa54f73de9c7224e23a48487"
 
 [[projects]]
   branch = "master"
@@ -611,7 +612,7 @@
     "lex/httplex",
     "publicsuffix"
   ]
-  revision = "ae89d30ce0c63142b652837da33d782e2b0a9b25"
+  revision = "803fdb99c0f72e493c28ef2099d250a9c989d8ff"
 
 [[projects]]
   branch = "master"
@@ -626,7 +627,7 @@
     "unix",
     "windows"
   ]
-  revision = "c28acc882ebcbfbe8ce9f0f14b9ac26ee138dd51"
+  revision = "8c0ece68c28377f4c326d85b94f8df0dace46f80"
 
 [[projects]]
   name = "golang.org/x/text"

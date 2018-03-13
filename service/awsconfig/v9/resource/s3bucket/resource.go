@@ -8,12 +8,12 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v8/key"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v9/key"
 )
 
 const (
 	// Name is the identifier of the resource.
-	Name = "s3bucketv8"
+	Name = "s3bucketv9"
 )
 
 // Config represents the configuration used to create a new s3bucket resource.
