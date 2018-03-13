@@ -4,62 +4,22 @@ package integration
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/integration/template"
+	"github.com/giantswarm/aws-operator/integration/client"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v2/key"
 )
 
-const (
-	awsOperatorValuesFile = "/tmp/aws-operator-values.yaml"
-	awsResourceValuesFile = "/tmp/aws-operator-values.yaml"
-)
-
-type aWSClient struct {
-	EC2 *ec2.EC2
-	CF  *cloudformation.CloudFormation
-}
-
-func newAWSClient() aWSClient {
-	awsCfgGuest := &aws.Config{
-		Credentials: credentials.NewStaticCredentials(
-			os.Getenv("GUEST_AWS_ACCESS_KEY_ID"),
-			os.Getenv("GUEST_AWS_SECRET_ACCESS_KEY"),
-			os.Getenv("GUEST_AWS_SESSION_TOKEN")),
-		Region: aws.String(os.Getenv("AWS_REGION")),
-	}
-	awsCfgHost := &aws.Config{
-		Credentials: credentials.NewStaticCredentials(
-			os.Getenv("HOST_AWS_ACCESS_KEY_ID"),
-			os.Getenv("HOST_AWS_SECRET_ACCESS_KEY"),
-			os.Getenv("HOST_AWS_SESSION_TOKEN")),
-		Region: aws.String(os.Getenv("AWS_REGION")),
-	}
-
-	sGuest := session.New(awsCfgGuest)
-	sHost := session.New(awsCfgHost)
-	clients := aWSClient{
-		EC2: ec2.New(sGuest),
-		CF:  cloudformation.New(sHost),
-	}
-
-	return clients
-}
-
 var (
 	f *framework.Framework
-	c aWSClient
+	c *client.AWS
 )
 
 // TestMain allows us to have common setup and teardown steps that are run
@@ -67,26 +27,27 @@ var (
 func TestMain(m *testing.M) {
 	var v int
 	var err error
+
 	f, err = framework.New()
 	if err != nil {
-		log.Printf("unexpected error: %v\n", err)
-		os.Exit(1)
+		panic(err.Error())
 	}
 
-	c = newAWSClient()
+	c = client.NewAWS()
 
-	if err := createHostPeerVPC(); err != nil {
-		log.Printf("unexpected error: %v\n", err)
-		os.Exit(1)
+	err = setupHostPeerVPC()
+	if err != nil {
+		panic(err.Error())
 	}
 
 	if err := f.SetUp(); err != nil {
-		log.Printf("unexpected error: %v\n", err)
+		log.Printf("%v\n", err)
 		v = 1
 	}
 
-	if err := operatorSetup(); err != nil {
-		log.Printf("unexpected error: %v\n", err)
+	err = setup()
+	if err != nil {
+		log.Printf("%v\n", err)
 		v = 1
 	}
 
@@ -96,12 +57,23 @@ func TestMain(m *testing.M) {
 
 	if os.Getenv("KEEP_RESOURCES") != "true" {
 		f.DeleteGuestCluster()
+
 		// only do full teardown when not on CI
 		if os.Getenv("CIRCLECI") != "true" {
-			operatorTearDown()
+			err := teardown()
+			if err != nil {
+				log.Printf("%v\n", err)
+				v = 1
+			}
+			// TODO there should be error handling for the framework teardown.
 			f.TearDown()
 		}
-		deleteHostPeerVPC()
+
+		err := teardownHostPeerVPC()
+		if err != nil {
+			log.Printf("%v\n", err)
+			v = 1
+		}
 	}
 
 	os.Exit(v)
@@ -194,71 +166,6 @@ func TestWorkersScaling(t *testing.T) {
 	log.Printf("%d worker nodes ready", expectedWorkers)
 }
 
-func operatorSetup() error {
-	if err := f.InstallCertOperator(); err != nil {
-		return microerror.Mask(err)
-	}
-	if err := f.InstallNodeOperator(template.NodeOperatorChartValues); err != nil {
-		return microerror.Mask(err)
-	}
-	if err := f.InstallAwsOperator(template.AWSOperatorChartValues); err != nil {
-		return microerror.Mask(err)
-	}
-
-	if err := f.InstallCertResource(); err != nil {
-		return microerror.Mask(err)
-	}
-	err := writeAWSResourceValues()
-	if err != nil {
-		return microerror.Maskf(err, "writing aws-resource-lab values file")
-	}
-
-	err = framework.HelmCmd("registry install quay.io/giantswarm/aws-resource-lab-chart:stable -- -n aws-resource-lab --values " + awsOperatorValuesFile)
-	if err != nil {
-		return microerror.Maskf(err, "installing aws-resource-lab chart")
-	}
-
-	logEntry := "created the guest cluster main stack"
-
-	operatorPodName, err := f.PodName("giantswarm", "app=aws-operator")
-	if err != nil {
-		return microerror.Maskf(err, "getting operator pod name")
-	}
-
-	err = f.WaitForPodLog("giantswarm", logEntry, operatorPodName)
-	if err != nil {
-		return microerror.Maskf(err, "waiting for guest cluster installed")
-	}
-
-	err = f.WaitForGuestReady()
-	if err != nil {
-		return microerror.Maskf(err, "waiting for guest cluster ready")
-	}
-
-	return nil
-}
-
-func operatorTearDown() {
-	framework.HelmCmd("delete aws-operator --purge")
-	framework.HelmCmd("delete cert-operator --purge")
-	framework.HelmCmd("delete node-operator --purge")
-
-	framework.HelmCmd("delete cert-resource-lab --purge")
-	framework.HelmCmd("delete aws-resource-lab --purge")
-}
-
-func writeAWSResourceValues() error {
-	awsResourceChartValuesEnv := os.ExpandEnv(template.AWSResourceChartValues)
-	d := []byte(awsResourceChartValuesEnv)
-
-	err := ioutil.WriteFile(awsResourceValuesFile, d, 0644)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	return nil
-}
-
 func numberOfWorkers(clusterName string) (int, error) {
 	cluster, err := f.AWSCluster(clusterName)
 	if err != nil {
@@ -299,54 +206,4 @@ func removeWorker(clusterName string) error {
 	patch[0].Path = "/spec/aws/workers/1"
 
 	return f.ApplyAWSConfigPatch(patch, clusterName)
-}
-
-func createHostPeerVPC() error {
-	log.Printf("Creating Host Peer VPC stack")
-
-	os.Setenv("AWS_ROUTE_TABLE_0", ClusterID()+"_0")
-	os.Setenv("AWS_ROUTE_TABLE_1", ClusterID()+"_1")
-	stackName := "host-peer-" + ClusterID()
-	stackInput := &cloudformation.CreateStackInput{
-		StackName:        aws.String(stackName),
-		TemplateBody:     aws.String(os.ExpandEnv(template.AWSHostVPCStack)),
-		TimeoutInMinutes: aws.Int64(2),
-	}
-	_, err := c.CF.CreateStack(stackInput)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	err = c.CF.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
-		StackName: aws.String(stackName),
-	})
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	describeOutput, err := c.CF.DescribeStacks(&cloudformation.DescribeStacksInput{
-		StackName: aws.String(stackName),
-	})
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	for _, o := range describeOutput.Stacks[0].Outputs {
-		if *o.OutputKey == "VPCID" {
-			os.Setenv("AWS_VPC_PEER_ID", *o.OutputValue)
-			break
-		}
-	}
-	log.Printf("Host Peer VPC stack created")
-	return nil
-}
-
-func deleteHostPeerVPC() error {
-	log.Printf("Deleting Host Peer VPC stack")
-
-	_, err := c.CF.DeleteStack(&cloudformation.DeleteStackInput{
-		StackName: aws.String("host-peer-" + ClusterID()),
-	})
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	return nil
 }
