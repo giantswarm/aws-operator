@@ -10,10 +10,12 @@ e2eTest: &e2eTest
         chmod +x ./e2e-harness
     - run: ./e2e-harness localkube
     - run: ./e2e-harness setup --remote=false
-    - run: ./e2e-harness test --test-dir=integration
+    - run: ./e2e-harness test --test-dir=integration/test/all
     - run:
         command: ./e2e-harness teardown
         when: always
+
+
 
 version: 2
 jobs:
@@ -66,6 +68,8 @@ jobs:
       MINIKUBE_VERSION: v0.25.0
       TESTED_VERSION: "wip"
     <<: *e2eTest
+
+
 
 workflows:
   version: 2
