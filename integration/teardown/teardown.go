@@ -1,6 +1,6 @@
 // +build k8srequired
 
-package integration
+package teardown
 
 import (
 	"log"
@@ -9,13 +9,16 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/integration/client"
+	"github.com/giantswarm/aws-operator/integration/env"
 )
 
-func teardownHostPeerVPC() error {
+func HostPeerVPC(c *client.AWS, f *framework.Framework) error {
 	log.Printf("Deleting Host Peer VPC stack")
 
 	_, err := c.CloudFormation.DeleteStack(&cloudformation.DeleteStackInput{
-		StackName: aws.String("host-peer-" + ClusterID()),
+		StackName: aws.String("host-peer-" + env.ClusterID()),
 	})
 	if err != nil {
 		return microerror.Mask(err)
@@ -24,7 +27,7 @@ func teardownHostPeerVPC() error {
 	return nil
 }
 
-func teardown() error {
+func Teardown(c *client.AWS, f *framework.Framework) error {
 	var err error
 
 	{

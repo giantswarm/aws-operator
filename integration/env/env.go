@@ -1,13 +1,14 @@
 // +build k8srequired
 
-package integration
+package env
 
 import (
 	"fmt"
 	"os"
 
-	"github.com/giantswarm/aws-operator/service"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
+
+	"github.com/giantswarm/aws-operator/service"
 )
 
 const (
