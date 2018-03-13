@@ -10,14 +10,9 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "cloudconfig",
-				Description: "Removed set-ownership-etcd-data-dir.service.",
+				Component:   "component",
+				Description: "Add your description here",
 				Kind:        versionbundle.KindChanged,
-			},
-			{
-				Component:   "containerlinux",
-				Description: "Updated to version 1632.3.0.",
-				Kind:        versionbundle.KindFixed,
 			},
 		},
 		Components: []versionbundle.Component{
@@ -53,8 +48,8 @@ func VersionBundle() versionbundle.Bundle {
 		Dependencies: []versionbundle.Dependency{},
 		Deprecated:   false,
 		Name:         "aws-operator",
-		Time:         time.Date(2018, time.March, 3, 17, 28, 0, 0, time.UTC),
-		Version:      "3.0.1",
-		WIP:          false,
+		Time:         time.Date(2018, time.March, 13, 12, 29, 0, 0, time.UTC),
+		Version:      "3.0.2",
+		WIP:          true,
 	}
 }
