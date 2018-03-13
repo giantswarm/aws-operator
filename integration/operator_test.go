@@ -17,74 +17,13 @@ import (
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service"
+	"github.com/giantswarm/aws-operator/integration/template"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v2/key"
 )
 
 const (
-	awsOperatorValuesFile  = "/tmp/aws-operator-values.yaml"
-	awsOperatorChartValues = `Installation:
-  V1:
-    Guest:
-      Kubernetes:
-        API:
-          Auth:
-            Provider:
-              OIDC:
-                ClientID: ""
-                IssueURL: ""
-                UsernameClaim: ""
-                GroupsClaim: ""
-      Update:
-        Enabled: ${GUEST_UPDATE_ENABLED}
-    Name: ci-aws-operator
-    Provider:
-      AWS:
-        Region: ${AWS_REGION}
-    Secret:
-      AWSOperator:
-        IDRSAPub: ${IDRSA_PUB}
-        SecretYaml: |
-          service:
-            aws:
-              accesskey:
-                id: ${GUEST_AWS_ACCESS_KEY_ID}
-                secret: ${GUEST_AWS_SECRET_ACCESS_KEY}
-                token: ${GUEST_AWS_SESSION_TOKEN}
-              hostaccesskey:
-                id: ${HOST_AWS_ACCESS_KEY_ID}
-                secret: ${HOST_AWS_SECRET_ACCESS_KEY}
-                token: ${HOST_AWS_SESSION_TOKEN}
-      Registry:
-        PullSecret:
-          DockerConfigJSON: "{\"auths\":{\"quay.io\":{\"auth\":\"${REGISTRY_PULL_SECRET}\"}}}"
-`
-	awsResourceValuesFile  = "/tmp/aws-operator-values.yaml"
-	awsResourceChartValues = `commonDomain: ${COMMON_DOMAIN_GUEST}
-clusterName: ${CLUSTER_NAME}
-clusterVersion: v_0_1_0
-sshPublicKey: ${IDRSA_PUB}
-versionBundleVersion: ${VERSION_BUNDLE_VERSION}
-aws:
-  networkCIDR: "10.12.0.0/24"
-  privateSubnetCIDR: "10.12.0.0/25"
-  publicSubnetCIDR: "10.12.0.128/25"
-  region: ${AWS_REGION}
-  apiHostedZone: ${AWS_API_HOSTED_ZONE_GUEST}
-  ingressHostedZone: ${AWS_INGRESS_HOSTED_ZONE_GUEST}
-  routeTable0: ${AWS_ROUTE_TABLE_0}
-  routeTable1: ${AWS_ROUTE_TABLE_1}
-  vpcPeerId: ${AWS_VPC_PEER_ID}
-`
-	// nodeOperatorChartValues values required by node-operator-chart, the environment
-	// variables will be expanded before writing the contents to a file.
-	nodeOperatorChartValues = `Installation:
-  V1:
-    Secret:
-      Registry:
-        PullSecret:
-          DockerConfigJSON: "{\"auths\":{\"quay.io\":{\"auth\":\"$REGISTRY_PULL_SECRET\"}}}"
-`
+	awsOperatorValuesFile = "/tmp/aws-operator-values.yaml"
+	awsResourceValuesFile = "/tmp/aws-operator-values.yaml"
 )
 
 type aWSClient struct {
@@ -133,17 +72,6 @@ func TestMain(m *testing.M) {
 		log.Printf("unexpected error: %v\n", err)
 		os.Exit(1)
 	}
-
-	version, err := framework.GetVersionBundleVersion(service.NewVersionBundles(), os.Getenv("TESTED_VERSION"))
-	if err != nil {
-		log.Printf("Unexpected error getting version bundle version %v", err)
-		os.Exit(1)
-	}
-	if version == "" {
-		log.Printf("No version bundle version for TESTED_VERSION %q", os.Getenv("TESTED_VERSION"))
-		os.Exit(0)
-	}
-	os.Setenv("VERSION_BUNDLE_VERSION", version)
 
 	c = newAWSClient()
 
@@ -270,10 +198,10 @@ func operatorSetup() error {
 	if err := f.InstallCertOperator(); err != nil {
 		return microerror.Mask(err)
 	}
-	if err := f.InstallNodeOperator(nodeOperatorChartValues); err != nil {
+	if err := f.InstallNodeOperator(template.NodeOperatorChartValues); err != nil {
 		return microerror.Mask(err)
 	}
-	if err := f.InstallAwsOperator(awsOperatorChartValues); err != nil {
+	if err := f.InstallAwsOperator(template.AWSOperatorChartValues); err != nil {
 		return microerror.Mask(err)
 	}
 
@@ -320,7 +248,7 @@ func operatorTearDown() {
 }
 
 func writeAWSResourceValues() error {
-	awsResourceChartValuesEnv := os.ExpandEnv(awsResourceChartValues)
+	awsResourceChartValuesEnv := os.ExpandEnv(template.AWSResourceChartValues)
 	d := []byte(awsResourceChartValuesEnv)
 
 	err := ioutil.WriteFile(awsResourceValuesFile, d, 0644)
@@ -376,42 +304,12 @@ func removeWorker(clusterName string) error {
 func createHostPeerVPC() error {
 	log.Printf("Creating Host Peer VPC stack")
 
-	hostVPCStack := `AWSTemplateFormatVersion: 2010-09-09
-Description: CI Host Stack with Peering VPC and route tables
-Resources:
-  VPC:
-    Type: AWS::EC2::VPC
-    Properties:
-      CidrBlock: 10.11.0.0/16
-      Tags:
-      - Key: Name
-        Value: ${CLUSTER_NAME}
-  PeerRouteTable0:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-      - Key: Name
-        Value: ${AWS_ROUTE_TABLE_0}
-  PeerRouteTable1:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-      - Key: Name
-        Value: ${AWS_ROUTE_TABLE_1}
-Outputs:
-  VPCID:
-    Description: Accepter VPC ID
-    Value: !Ref VPC
-
-`
 	os.Setenv("AWS_ROUTE_TABLE_0", ClusterID()+"_0")
 	os.Setenv("AWS_ROUTE_TABLE_1", ClusterID()+"_1")
 	stackName := "host-peer-" + ClusterID()
 	stackInput := &cloudformation.CreateStackInput{
 		StackName:        aws.String(stackName),
-		TemplateBody:     aws.String(os.ExpandEnv(hostVPCStack)),
+		TemplateBody:     aws.String(os.ExpandEnv(template.AWSHostVPCStack)),
 		TimeoutInMinutes: aws.Int64(2),
 	}
 	_, err := c.CF.CreateStack(stackInput)
