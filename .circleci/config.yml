@@ -10,7 +10,7 @@ e2eTest: &e2eTest
         chmod +x ./e2e-harness
     - run: ./e2e-harness localkube
     - run: ./e2e-harness setup --remote=false
-    - run: ./e2e-harness test --test-dir=integration/test/all
+    - run: ./e2e-harness test --test-dir=${TEST_DIR}
     - run:
         command: ./e2e-harness teardown
         when: always
@@ -44,29 +44,55 @@ jobs:
 
 
 
-  e2eTestCurrentVersionPR:
+  e2eTestCurPRReboot:
     environment:
-      MINIKUBE_VERSION: v0.25.0
       TESTED_VERSION: "current"
+      TEST_DIR: "integration/test/reboot"
     <<: *e2eTest
 
-  e2eTestCurrentVersionMaster:
+  e2eTestCurMasterReboot:
     environment:
-      MINIKUBE_VERSION: v0.25.0
       TESTED_VERSION: "current"
+      TEST_DIR: "integration/test/reboot"
     <<: *e2eTest
 
-  e2eTestWIPVersionPR:
+  e2eTestWIPPRReboot:
     environment:
-      MINIKUBE_VERSION: v0.25.0
       TESTED_VERSION: "wip"
+      TEST_DIR: "integration/test/reboot"
     <<: *e2eTest
 
 
-  e2eTestWIPVersionMaster:
+  e2eTestWIPMasterReboot:
     environment:
-      MINIKUBE_VERSION: v0.25.0
       TESTED_VERSION: "wip"
+      TEST_DIR: "integration/test/reboot"
+    <<: *e2eTest
+
+
+
+  e2eTestCurPRScaling:
+    environment:
+      TESTED_VERSION: "current"
+      TEST_DIR: "integration/test/scaling"
+    <<: *e2eTest
+
+  e2eTestCurMasterScaling:
+    environment:
+      TESTED_VERSION: "current"
+      TEST_DIR: "integration/test/scaling"
+    <<: *e2eTest
+
+  e2eTestWIPPRScaling:
+    environment:
+      TESTED_VERSION: "wip"
+      TEST_DIR: "integration/test/scaling"
+    <<: *e2eTest
+
+  e2eTestWIPMasterScaling:
+    environment:
+      TESTED_VERSION: "wip"
+      TEST_DIR: "integration/test/scaling"
     <<: *e2eTest
 
 
@@ -75,7 +101,9 @@ workflows:
   version: 2
   build_e2e:
     jobs:
+
       - build
+
       - hold:
           type: approval
           filters:
@@ -83,20 +111,39 @@ workflows:
               ignore: master
           requires:
           - build
-      - e2eTestCurrentVersionPR:
+
+      - e2eTestCurPRReboot:
           requires:
           - hold
-      - e2eTestWIPVersionPR:
+      - e2eTestWIPPRReboot:
+          requires:
+          - hold
+      - e2eTestCurPRScaling:
+          requires:
+          - hold
+      - e2eTestWIPPRScaling:
           requires:
           - hold
 
-      - e2eTestCurrentVersionMaster:
+      - e2eTestCurMasterReboot:
           filters:
             branches:
               only: master
           requires:
           - build
-      - e2eTestWIPVersionMaster:
+      - e2eTestWIPMasterReboot:
+          filters:
+            branches:
+              only: master
+          requires:
+          - build
+      - e2eTestCurMasterScaling:
+          filters:
+            branches:
+              only: master
+          requires:
+          - build
+      - e2eTestWIPMasterScaling:
           filters:
             branches:
               only: master

@@ -3,8 +3,10 @@
 package env
 
 import (
+	"crypto/sha1"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 
@@ -24,6 +26,9 @@ const (
 	// EnvVarTestedVersion is the process environment variable representing the
 	// TESTED_VERSION env var.
 	EnvVarTestedVersion = "TESTED_VERSION"
+	// EnvVarTestDir is the process environment variable representing the
+	// TEST_DIR env var.
+	EnvVarTestDir = "TEST_DIR"
 	// EnvVarVersionBundleVersion is the process environment variable representing
 	// the VERSION_BUNDLE_VERSION env var.
 	EnvVarVersionBundleVersion = "VERSION_BUNDLE_VERSION"
@@ -32,6 +37,7 @@ const (
 var (
 	circleSHA            string
 	testedVersion        string
+	testDir              string
 	versionBundleVersion string
 )
 
@@ -45,6 +51,8 @@ func init() {
 	if testedVersion == "" {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarTestedVersion))
 	}
+
+	testDir = os.Getenv(EnvVarTestDir)
 
 	// NOTE that implications of changing the order of initialization here means
 	// breaking the initialization behaviour.
@@ -70,12 +78,45 @@ func CircleSHA() string {
 	return circleSHA
 }
 
+// ClusterID returns a cluster ID unique to a run integration test. It might
+// look like ci-wip-3cc75-5e958.
+//
+//     ci is a static identifier stating a CI run of the aws-operator.
+//     wip is a version reference which can also be cur for the current version.
+//     3cc75 is the Git SHA.
+//     5e958 is a hash of the integration test dir, if any.
+//
 func ClusterID() string {
-	return fmt.Sprintf("ci-awsop-%s-%s", TestedVersion(), CircleSHA()[0:5])
+	var parts []string
+
+	parts = append(parts, "ci")
+	parts = append(parts, TestedVersion()[0:3])
+	parts = append(parts, CircleSHA()[0:5])
+	if TestHash() != "" {
+		parts = append(parts, TestHash())
+	}
+
+	return strings.Join(parts, "-")
 }
 
 func TestedVersion() string {
 	return testedVersion
+}
+
+func TestDir() string {
+	return testDir
+}
+
+func TestHash() string {
+	if TestDir() == "" {
+		return ""
+	}
+
+	h := sha1.New()
+	h.Write([]byte(TestDir()))
+	s := fmt.Sprintf("%x", h.Sum(nil))[0:5]
+
+	return s
 }
 
 func VersionBundleVersion() string {
