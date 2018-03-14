@@ -46,21 +46,18 @@ jobs:
 
   e2eTestCurPRReboot:
     environment:
-      MINIKUBE_VERSION: v0.25.0
       TESTED_VERSION: "current"
       TEST_DIR: "integration/test/reboot"
     <<: *e2eTest
 
   e2eTestCurMasterReboot:
     environment:
-      MINIKUBE_VERSION: v0.25.0
       TESTED_VERSION: "current"
       TEST_DIR: "integration/test/reboot"
     <<: *e2eTest
 
   e2eTestWIPPRReboot:
     environment:
-      MINIKUBE_VERSION: v0.25.0
       TESTED_VERSION: "wip"
       TEST_DIR: "integration/test/reboot"
     <<: *e2eTest
@@ -68,7 +65,6 @@ jobs:
 
   e2eTestWIPMasterReboot:
     environment:
-      MINIKUBE_VERSION: v0.25.0
       TESTED_VERSION: "wip"
       TEST_DIR: "integration/test/reboot"
     <<: *e2eTest
@@ -77,28 +73,24 @@ jobs:
 
   e2eTestCurPRScaling:
     environment:
-      MINIKUBE_VERSION: v0.25.0
       TESTED_VERSION: "current"
       TEST_DIR: "integration/test/scaling"
     <<: *e2eTest
 
   e2eTestCurMasterScaling:
     environment:
-      MINIKUBE_VERSION: v0.25.0
       TESTED_VERSION: "current"
       TEST_DIR: "integration/test/scaling"
     <<: *e2eTest
 
   e2eTestWIPPRScaling:
     environment:
-      MINIKUBE_VERSION: v0.25.0
       TESTED_VERSION: "wip"
       TEST_DIR: "integration/test/scaling"
     <<: *e2eTest
 
   e2eTestWIPMasterScaling:
     environment:
-      MINIKUBE_VERSION: v0.25.0
       TESTED_VERSION: "wip"
       TEST_DIR: "integration/test/scaling"
     <<: *e2eTest
