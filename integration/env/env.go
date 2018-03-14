@@ -53,6 +53,9 @@ func init() {
 	}
 
 	testDir = os.Getenv(EnvVarTestDir)
+	fmt.Printf("\n")
+	fmt.Printf("testDir: %#v\n", testDir)
+	fmt.Printf("\n")
 
 	// NOTE that implications of changing the order of initialization here means
 	// breaking the initialization behaviour.
@@ -88,6 +91,10 @@ func ClusterID() string {
 		parts = append(parts, TestHash())
 	}
 
+	fmt.Printf("\n")
+	fmt.Printf("parts: %#v\n", parts)
+	fmt.Printf("\n")
+
 	return strings.Join(parts, "-")
 }
 
@@ -101,12 +108,19 @@ func TestDir() string {
 
 func TestHash() string {
 	if TestDir() == "" {
+		fmt.Printf("\n")
+		fmt.Printf("testDir empty\n")
+		fmt.Printf("\n")
 		return ""
 	}
 
 	h := sha1.New()
 	h.Write([]byte(TestDir()))
 	s := fmt.Sprintf("%x", h.Sum(nil))[0:5]
+
+	fmt.Printf("\n")
+	fmt.Printf("computed test hash: %#v\n", s)
+	fmt.Printf("\n")
 
 	return s
 }
