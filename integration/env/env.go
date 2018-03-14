@@ -6,6 +6,7 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 
@@ -78,7 +79,16 @@ func CircleSHA() string {
 }
 
 func ClusterID() string {
-	return fmt.Sprintf("ci-awsop-%s-%s", TestedVersion(), TestHash())
+	var parts []string
+
+	parts = append(parts, "awsci")
+	parts = append(parts, TestedVersion()[0:3])
+	parts = append(parts, CircleSHA()[0:5])
+	if TestHash() != "" {
+		parts = append(parts, TestHash())
+	}
+
+	return strings.Join(parts, "-")
 }
 
 func TestedVersion() string {
@@ -91,11 +101,10 @@ func TestDir() string {
 
 func TestHash() string {
 	if TestDir() == "" {
-		return CircleSHA()[0:5]
+		return ""
 	}
 
 	h := sha1.New()
-	h.Write([]byte(CircleSHA()))
 	h.Write([]byte(TestDir()))
 	s := fmt.Sprintf("%x", h.Sum(nil))[0:5]
 
