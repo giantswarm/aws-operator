@@ -78,6 +78,14 @@ func CircleSHA() string {
 	return circleSHA
 }
 
+// ClusterID returns a cluster ID unique to a run integration test. It might
+// look like awsci-wip-3cc75-5e958.
+//
+//     awsci is a static identifier stating a CI run of the aws-operator.
+//     wip is a version reference which can also be cur for the current version.
+//     3cc75 is the Git SHA.
+//     5e958 is a hash of the integration test dir, if any.
+//
 func ClusterID() string {
 	var parts []string
 
