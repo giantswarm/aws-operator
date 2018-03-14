@@ -3,6 +3,7 @@
 package env
 
 import (
+	"crypto/sha1"
 	"fmt"
 	"os"
 
@@ -24,6 +25,9 @@ const (
 	// EnvVarTestedVersion is the process environment variable representing the
 	// TESTED_VERSION env var.
 	EnvVarTestedVersion = "TESTED_VERSION"
+	// EnvVarTestDir is the process environment variable representing the
+	// TEST_DIR env var.
+	EnvVarTestDir = "TEST_DIR"
 	// EnvVarVersionBundleVersion is the process environment variable representing
 	// the VERSION_BUNDLE_VERSION env var.
 	EnvVarVersionBundleVersion = "VERSION_BUNDLE_VERSION"
@@ -32,6 +36,7 @@ const (
 var (
 	circleSHA            string
 	testedVersion        string
+	testDir              string
 	versionBundleVersion string
 )
 
@@ -45,6 +50,8 @@ func init() {
 	if testedVersion == "" {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarTestedVersion))
 	}
+
+	testDir = os.Getenv(EnvVarTestDir)
 
 	// NOTE that implications of changing the order of initialization here means
 	// breaking the initialization behaviour.
@@ -71,11 +78,28 @@ func CircleSHA() string {
 }
 
 func ClusterID() string {
-	return fmt.Sprintf("ci-awsop-%s-%s", TestedVersion(), CircleSHA()[0:5])
+	return fmt.Sprintf("ci-awsop-%s-%s", TestedVersion(), TestHash())
 }
 
 func TestedVersion() string {
 	return testedVersion
+}
+
+func TestDir() string {
+	return testDir
+}
+
+func TestHash() string {
+	if TestDir() == "" {
+		return CircleSHA()[0:5]
+	}
+
+	h := sha1.New()
+	h.Write([]byte(CircleSHA()))
+	h.Write([]byte(TestDir()))
+	s := fmt.Sprintf("%x", h.Sum(nil))[0:5]
+
+	return s
 }
 
 func VersionBundleVersion() string {
