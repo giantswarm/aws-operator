@@ -1,6 +1,6 @@
 // +build k8srequired
 
-package all
+package reboot
 
 import (
 	"fmt"
