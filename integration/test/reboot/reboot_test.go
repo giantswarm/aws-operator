@@ -54,11 +54,11 @@ func TestGuestReadyAfterMasterReboot(t *testing.T) {
 		t.Errorf("unexpected error rebooting  master %v", err)
 	}
 
-	if err := f.WaitForAPIDown(); err != nil {
+	if err := g.WaitForAPIDown(); err != nil {
 		t.Errorf("unexpected error waiting for master shutting down %v", err)
 	}
 
-	if err := f.WaitForGuestReady(); err != nil {
+	if err := g.WaitForGuestReady(); err != nil {
 		t.Errorf("unexpected error waiting for guest cluster ready, %v", err)
 	}
 }

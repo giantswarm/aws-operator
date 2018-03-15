@@ -12,7 +12,8 @@ import (
 )
 
 var (
-	f *framework.Framework
+	g *framework.Guest
+	h *framework.Host
 	c *client.AWS
 )
 
@@ -21,12 +22,16 @@ var (
 func TestMain(m *testing.M) {
 	var err error
 
-	f, err = framework.New()
+	g, err = framework.NewGuest()
+	if err != nil {
+		panic(err.Error())
+	}
+	h, err = framework.NewHost()
 	if err != nil {
 		panic(err.Error())
 	}
 
 	c = client.NewAWS()
 
-	setup.WrapTestMain(c, f, m)
+	setup.WrapTestMain(c, g, h, m)
 }
