@@ -102,10 +102,6 @@ func Resources(c *client.AWS, g *framework.Guest, h *framework.Host) error {
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		err = g.WaitForGuestReady()
-		if err != nil {
-			return microerror.Mask(err)
-		}
 	}
 
 	return nil
@@ -120,12 +116,19 @@ func WrapTestMain(c *client.AWS, g *framework.Guest, h *framework.Host, m *testi
 		panic(err.Error())
 	}
 
-	if err := h.SetUp(); err != nil {
+	err = h.Setup()
+	if err != nil {
 		log.Printf("%v\n", err)
 		v = 1
 	}
 
 	err = Resources(c, g, h)
+	if err != nil {
+		log.Printf("%v\n", err)
+		v = 1
+	}
+
+	err = g.Setup()
 	if err != nil {
 		log.Printf("%v\n", err)
 		v = 1
@@ -146,7 +149,7 @@ func WrapTestMain(c *client.AWS, g *framework.Guest, h *framework.Host, m *testi
 				v = 1
 			}
 			// TODO there should be error handling for the framework teardown.
-			h.TearDown()
+			h.Teardown()
 		}
 
 		err := teardown.HostPeerVPC(c, g, h)
