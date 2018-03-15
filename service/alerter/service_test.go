@@ -10,6 +10,7 @@ import (
 )
 
 func Test_FindOrphanResources(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		clusterIDs      []string
 		resourceNames   []string
@@ -79,6 +80,7 @@ func Test_FindOrphanResources(t *testing.T) {
 }
 
 func Test_FindOrphanClusters(t *testing.T) {
+	t.Parallel()
 	n := time.Now()
 	twentyMinAgo := metav1.NewTime(n.Add(-20 * time.Minute))
 	fiveMinAgo := metav1.NewTime(n.Add(-5 * time.Minute))
@@ -272,6 +274,7 @@ func Test_FindOrphanClusters(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			results := FindOrphanClusters(tc.clusters, tc.resourceNames)
 			assert.EqualValues(t, tc.orphanClusters, results)
 		})

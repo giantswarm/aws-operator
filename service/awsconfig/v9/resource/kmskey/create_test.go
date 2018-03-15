@@ -9,6 +9,7 @@ import (
 )
 
 func Test_Resource_KMSKey_newCreate(t *testing.T) {
+	t.Parallel()
 	customObject := &v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
@@ -86,6 +87,7 @@ func Test_Resource_KMSKey_newCreate(t *testing.T) {
 }
 
 func Test_ApplyCreateChange(t *testing.T) {
+	t.Parallel()
 	customObject := &v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{

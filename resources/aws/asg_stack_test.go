@@ -7,6 +7,7 @@ import (
 )
 
 func TestHasStackChanged(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		params         map[string]string
 		updatedParams  map[string]string

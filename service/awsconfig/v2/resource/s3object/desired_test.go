@@ -13,6 +13,7 @@ import (
 )
 
 func Test_DesiredState(t *testing.T) {
+	t.Parallel()
 	clusterTpo := &v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
@@ -57,6 +58,7 @@ func Test_DesiredState(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			resourceConfig.CloudConfig = &CloudConfigMock{
 				template: tc.expectedBody,
 			}

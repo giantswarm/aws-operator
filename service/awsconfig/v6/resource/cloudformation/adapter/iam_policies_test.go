@@ -7,6 +7,7 @@ import (
 )
 
 func TestAdapterIamPoliciesRegularFields(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		description               string
 		customObject              v1alpha1.AWSConfig
@@ -77,6 +78,7 @@ func TestAdapterIamPoliciesRegularFields(t *testing.T) {
 }
 
 func TestAdapterIamPoliciesKMSKeyARN(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		description       string
 		customObject      v1alpha1.AWSConfig
@@ -135,6 +137,7 @@ func TestAdapterIamPoliciesKMSKeyARN(t *testing.T) {
 }
 
 func TestAdapterIamPoliciesS3Bucket(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		description      string
 		customObject     v1alpha1.AWSConfig

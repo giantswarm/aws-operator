@@ -11,6 +11,7 @@ import (
 )
 
 func Test_Resource_Endpoints_GetDesiredState(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		description       string
 		obj               interface{}
@@ -44,6 +45,7 @@ func Test_Resource_Endpoints_GetDesiredState(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			resourceConfig.Clients.EC2 = &EC2ClientMock{
 				privateIPAddress: tc.expectedIPAddress,
 			}

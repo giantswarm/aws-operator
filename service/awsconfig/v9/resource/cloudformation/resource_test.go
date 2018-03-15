@@ -14,6 +14,7 @@ import (
 )
 
 func Test_Resource_Cloudformation_GetCloudFormationTags(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		description  string
 		installation string

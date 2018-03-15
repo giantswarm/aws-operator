@@ -13,6 +13,7 @@ import (
 )
 
 func Test_Resource_Cloudformation_newDelete(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		obj               interface{}
 		currentState      interface{}

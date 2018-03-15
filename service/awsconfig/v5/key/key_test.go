@@ -11,6 +11,7 @@ import (
 )
 
 func Test_AutoScalingGroupName(t *testing.T) {
+	t.Parallel()
 	expectedName := "test-cluster-worker"
 	groupName := "worker"
 
@@ -31,6 +32,7 @@ func Test_AutoScalingGroupName(t *testing.T) {
 }
 
 func Test_AvailabilityZone(t *testing.T) {
+	t.Parallel()
 	expectedAZ := "eu-central-1a"
 
 	customObject := v1alpha1.AWSConfig{
@@ -47,6 +49,7 @@ func Test_AvailabilityZone(t *testing.T) {
 }
 
 func Test_BucketName(t *testing.T) {
+	t.Parallel()
 	accountID := "1234567890"
 	expectedName := "1234567890-g8s-test-cluster"
 
@@ -64,6 +67,7 @@ func Test_BucketName(t *testing.T) {
 }
 
 func Test_ClusterID(t *testing.T) {
+	t.Parallel()
 	expectedID := "test-cluster"
 
 	cluster := v1alpha1.Cluster{
@@ -85,6 +89,7 @@ func Test_ClusterID(t *testing.T) {
 }
 
 func Test_ClusterCustomer(t *testing.T) {
+	t.Parallel()
 	expectedCustomer := "test-customer"
 
 	customObject := v1alpha1.AWSConfig{
@@ -104,6 +109,7 @@ func Test_ClusterCustomer(t *testing.T) {
 }
 
 func Test_ClusterCloudProviderTag(t *testing.T) {
+	t.Parallel()
 	expectedID := "test-cluster"
 	expectedTag := "kubernetes.io/cluster/test-cluster"
 
@@ -121,6 +127,7 @@ func Test_ClusterCloudProviderTag(t *testing.T) {
 }
 
 func Test_ClusterNamespace(t *testing.T) {
+	t.Parallel()
 	expectedID := "test-cluster"
 
 	customObject := v1alpha1.AWSConfig{
@@ -137,6 +144,7 @@ func Test_ClusterNamespace(t *testing.T) {
 }
 
 func Test_ClusterTags(t *testing.T) {
+	t.Parallel()
 	expectedID := "test-cluster"
 	expectedTags := map[string]string{
 		"kubernetes.io/cluster/test-cluster": "owned",
@@ -157,6 +165,7 @@ func Test_ClusterTags(t *testing.T) {
 }
 
 func Test_ClusterVersion(t *testing.T) {
+	t.Parallel()
 	expectedVersion := "v_0_1_0"
 
 	cluster := v1alpha1.Cluster{
@@ -175,6 +184,7 @@ func Test_ClusterVersion(t *testing.T) {
 }
 
 func Test_IngressControllerInsecurePort(t *testing.T) {
+	t.Parallel()
 	expectedPort := 30010
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
@@ -194,6 +204,7 @@ func Test_IngressControllerInsecurePort(t *testing.T) {
 }
 
 func Test_IngressControllerSecurePort(t *testing.T) {
+	t.Parallel()
 	expectedPort := 30011
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
@@ -213,6 +224,7 @@ func Test_IngressControllerSecurePort(t *testing.T) {
 }
 
 func Test_KubernetesAPISecurePort(t *testing.T) {
+	t.Parallel()
 	expectedPort := 443
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
@@ -232,6 +244,7 @@ func Test_KubernetesAPISecurePort(t *testing.T) {
 }
 
 func Test_MasterImageID(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		customObject    v1alpha1.AWSConfig
 		expectedImageID string
@@ -267,6 +280,7 @@ func Test_MasterImageID(t *testing.T) {
 }
 
 func Test_MasterInstanceName(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		customObject         v1alpha1.AWSConfig
 		expectedInstanceName string
@@ -291,6 +305,7 @@ func Test_MasterInstanceName(t *testing.T) {
 }
 
 func Test_MasterInstanceType(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		customObject         v1alpha1.AWSConfig
 		expectedInstanceType string
@@ -332,6 +347,7 @@ func Test_MasterInstanceType(t *testing.T) {
 }
 
 func Test_Region(t *testing.T) {
+	t.Parallel()
 	expectedRegion := "eu-central-1"
 
 	customObject := v1alpha1.AWSConfig{
@@ -348,6 +364,7 @@ func Test_Region(t *testing.T) {
 }
 
 func Test_RouteTableName(t *testing.T) {
+	t.Parallel()
 	expectedName := "test-cluster-private"
 	suffix := "private"
 
@@ -367,6 +384,7 @@ func Test_RouteTableName(t *testing.T) {
 
 }
 func Test_SecurityGroupName(t *testing.T) {
+	t.Parallel()
 	expectedName := "test-cluster-worker"
 	groupName := "worker"
 
@@ -389,6 +407,7 @@ func Test_SecurityGroupName(t *testing.T) {
 }
 
 func Test_SubnetName(t *testing.T) {
+	t.Parallel()
 	expectedName := "test-cluster-private"
 	suffix := "private"
 
@@ -409,6 +428,7 @@ func Test_SubnetName(t *testing.T) {
 }
 
 func Test_WorkerCount(t *testing.T) {
+	t.Parallel()
 	expectedCount := 2
 
 	customObject := v1alpha1.AWSConfig{
@@ -432,6 +452,7 @@ func Test_WorkerCount(t *testing.T) {
 }
 
 func Test_WorkerImageID(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		customObject    v1alpha1.AWSConfig
 		expectedImageID string
@@ -471,6 +492,7 @@ func Test_WorkerImageID(t *testing.T) {
 }
 
 func Test_WorkerInstanceType(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		customObject         v1alpha1.AWSConfig
 		expectedInstanceType string
@@ -510,6 +532,7 @@ func Test_WorkerInstanceType(t *testing.T) {
 }
 
 func Test_MainGuestStackName(t *testing.T) {
+	t.Parallel()
 	expected := "cluster-xyz-guest-main"
 
 	cluster := v1alpha1.AWSConfig{
@@ -527,6 +550,7 @@ func Test_MainGuestStackName(t *testing.T) {
 }
 
 func Test_MainHostPreStackName(t *testing.T) {
+	t.Parallel()
 	expected := "cluster-xyz-host-setup"
 
 	cluster := v1alpha1.AWSConfig{
@@ -544,6 +568,7 @@ func Test_MainHostPreStackName(t *testing.T) {
 }
 
 func Test_MainHostPostStackName(t *testing.T) {
+	t.Parallel()
 	expected := "cluster-xyz-host-main"
 
 	cluster := v1alpha1.AWSConfig{
@@ -561,6 +586,7 @@ func Test_MainHostPostStackName(t *testing.T) {
 }
 
 func Test_InstanceProfileName(t *testing.T) {
+	t.Parallel()
 	expectedName := "test-cluster-worker-EC2-K8S-Role"
 	profileType := "worker"
 
@@ -580,6 +606,7 @@ func Test_InstanceProfileName(t *testing.T) {
 }
 
 func TestLoadBalancerName(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		desc       string
 		domainName string
@@ -665,6 +692,7 @@ func TestLoadBalancerName(t *testing.T) {
 }
 
 func TestComponentName(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		desc       string
 		domainName string
@@ -707,6 +735,7 @@ func TestComponentName(t *testing.T) {
 }
 
 func Test_VersionBundleVersion(t *testing.T) {
+	t.Parallel()
 	expectedVersion := "0.1.0"
 
 	customObject := v1alpha1.AWSConfig{
@@ -723,6 +752,7 @@ func Test_VersionBundleVersion(t *testing.T) {
 }
 
 func Test_BucketObjectName(t *testing.T) {
+	t.Parallel()
 	version := "v_0_1_0"
 	suffix := "mysuffix"
 
@@ -734,6 +764,7 @@ func Test_BucketObjectName(t *testing.T) {
 }
 
 func Test_RoleName(t *testing.T) {
+	t.Parallel()
 	expectedName := "test-cluster-worker-EC2-K8S-Role"
 	profileType := "worker"
 
@@ -754,6 +785,7 @@ func Test_RoleName(t *testing.T) {
 }
 
 func Test_PolicyName(t *testing.T) {
+	t.Parallel()
 	expectedName := "test-cluster-worker-EC2-K8S-Policy"
 	profileType := "worker"
 
@@ -774,6 +806,7 @@ func Test_PolicyName(t *testing.T) {
 }
 
 func Test_PeerAccessRoleName(t *testing.T) {
+	t.Parallel()
 	expectedName := "test-cluster-vpc-peer-access"
 
 	cluster := v1alpha1.Cluster{
@@ -793,6 +826,7 @@ func Test_PeerAccessRoleName(t *testing.T) {
 }
 
 func Test_MasterCount(t *testing.T) {
+	t.Parallel()
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			AWS: v1alpha1.AWSConfigSpecAWS{
@@ -816,6 +850,7 @@ func Test_MasterCount(t *testing.T) {
 }
 
 func Test_PrivateSubnetCIDR(t *testing.T) {
+	t.Parallel()
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			AWS: v1alpha1.AWSConfigSpecAWS{
@@ -834,6 +869,7 @@ func Test_PrivateSubnetCIDR(t *testing.T) {
 }
 
 func Test_PeerID(t *testing.T) {
+	t.Parallel()
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			AWS: v1alpha1.AWSConfigSpecAWS{
@@ -852,6 +888,7 @@ func Test_PeerID(t *testing.T) {
 }
 
 func Test_ImageID(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		description     string
 		customObject    v1alpha1.AWSConfig

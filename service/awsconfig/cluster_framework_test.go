@@ -35,6 +35,7 @@ func newTestClusterFrameworkConfig() ClusterFrameworkConfig {
 }
 
 func Test_NewFramework_Fails_Without_Regions(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		description      string
 		guestCredentials FrameworkConfigAWSConfig

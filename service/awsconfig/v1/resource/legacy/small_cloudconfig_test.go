@@ -7,6 +7,7 @@ import (
 )
 
 func TestAdapterSmallCloudConfig(t *testing.T) {
+	t.Parallel()
 	cloudconfigConfig := adapter.SmallCloudconfigConfig{
 		MachineType: "machine",
 		Region:      "region",

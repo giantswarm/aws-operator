@@ -11,6 +11,7 @@ import (
 )
 
 func Test_Resource_S3Bucket_newCreate(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		obj                interface{}
 		currentState       interface{}

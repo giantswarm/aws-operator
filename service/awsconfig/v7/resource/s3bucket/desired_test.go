@@ -11,6 +11,7 @@ import (
 )
 
 func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		obj          interface{}
 		expectedName string

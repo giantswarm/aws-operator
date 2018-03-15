@@ -7,6 +7,7 @@ import (
 )
 
 func TestAdapterRouteTablesRegularFields(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		description                   string
 		customObject                  v1alpha1.AWSConfig
@@ -41,6 +42,7 @@ func TestAdapterRouteTablesRegularFields(t *testing.T) {
 		a := Adapter{}
 
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			cfg := Config{
 				CustomObject: tc.customObject,
 				Clients:      Clients{},

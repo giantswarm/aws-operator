@@ -11,6 +11,7 @@ import (
 )
 
 func Test_Resource_Endpoints_GetDesiredState(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		description       string
 		obj               interface{}

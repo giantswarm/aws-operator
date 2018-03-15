@@ -7,6 +7,7 @@ import (
 )
 
 func TestAdapterSubnetsRegularFields(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		description                              string
 		customObject                             v1alpha1.AWSConfig
@@ -53,6 +54,7 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 		clients := Clients{}
 
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			cfg := Config{
 				CustomObject: tc.customObject,
 				Clients:      clients,

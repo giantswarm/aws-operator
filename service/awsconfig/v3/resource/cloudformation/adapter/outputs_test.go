@@ -8,6 +8,7 @@ import (
 )
 
 func TestAdapterOutputsRegularFields(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		description                      string
 		expectedMasterCloudConfigVersion string
