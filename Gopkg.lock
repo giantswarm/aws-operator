@@ -54,8 +54,8 @@
     "service/s3",
     "service/sts"
   ]
-  revision = "28d0127967e59b0c41cede1e8d548ed85374bbbc"
-  version = "v1.13.14"
+  revision = "62465d4996f172ae426fdcec7a6a053062cf8995"
+  version = "v1.13.15"
 
 [[projects]]
   branch = "master"
@@ -140,7 +140,7 @@
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "405b1056c4dd1a7f7f44cb803d36346294084ed7"
+  revision = "20ef90e9463c86583ff6b7024067bf426b1d5f25"
 
 [[projects]]
   branch = "master"
@@ -601,7 +601,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "21652f85b0fdddb6c2b6b77a5beca5c5a908174a"
+  revision = "b4956d363a8b14623cc81db401707679605930a3"
 
 [[projects]]
   branch = "master"
