@@ -118,19 +118,19 @@ func WrapTestMain(c *client.AWS, g *framework.Guest, h *framework.Host, m *testi
 
 	err = h.Setup()
 	if err != nil {
-		log.Printf("%v\n", err)
+		log.Printf("%#v\n", err)
 		v = 1
 	}
 
 	err = Resources(c, g, h)
 	if err != nil {
-		log.Printf("%v\n", err)
+		log.Printf("%#v\n", err)
 		v = 1
 	}
 
 	err = g.Setup()
 	if err != nil {
-		log.Printf("%v\n", err)
+		log.Printf("%#v\n", err)
 		v = 1
 	}
 
@@ -145,7 +145,7 @@ func WrapTestMain(c *client.AWS, g *framework.Guest, h *framework.Host, m *testi
 		if os.Getenv("CIRCLECI") != "true" {
 			err := teardown.Teardown(c, g, h)
 			if err != nil {
-				log.Printf("%v\n", err)
+				log.Printf("%#v\n", err)
 				v = 1
 			}
 			// TODO there should be error handling for the framework teardown.
@@ -154,7 +154,7 @@ func WrapTestMain(c *client.AWS, g *framework.Guest, h *framework.Host, m *testi
 
 		err := teardown.HostPeerVPC(c, g, h)
 		if err != nil {
-			log.Printf("%v\n", err)
+			log.Printf("%#v\n", err)
 			v = 1
 		}
 	}
