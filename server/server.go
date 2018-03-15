@@ -13,7 +13,6 @@ import (
 	kithttp "github.com/go-kit/kit/transport/http"
 
 	"github.com/giantswarm/aws-operator/server/endpoint"
-	"github.com/giantswarm/aws-operator/server/middleware"
 	"github.com/giantswarm/aws-operator/service"
 )
 
@@ -42,24 +41,13 @@ func DefaultConfig() Config {
 func New(config Config) (microserver.Server, error) {
 	var err error
 
-	var middlewareCollection *middleware.Middleware
-	{
-		middlewareConfig := middleware.DefaultConfig()
-		middlewareConfig.Logger = config.MicroServerConfig.Logger
-		middlewareConfig.Service = config.Service
-		middlewareCollection, err = middleware.New(middlewareConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var endpointCollection *endpoint.Endpoint
 	{
-		endpointConfig := endpoint.DefaultConfig()
-		endpointConfig.Logger = config.MicroServerConfig.Logger
-		endpointConfig.Middleware = middlewareCollection
-		endpointConfig.Service = config.Service
-		endpointCollection, err = endpoint.New(endpointConfig)
+		c := endpoint.Config{
+			Logger:  config.MicroServerConfig.Logger,
+			Service: config.Service,
+		}
+		endpointCollection, err = endpoint.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

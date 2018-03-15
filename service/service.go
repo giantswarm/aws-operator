@@ -214,11 +214,11 @@ func New(config Config) (*Service, error) {
 
 	var healthzService *healthz.Service
 	{
-		healthzConfig := healthz.DefaultConfig()
-		healthzConfig.AwsConfig = awsConfig
-		healthzConfig.Logger = config.Logger
-
-		healthzService, err = healthz.New(healthzConfig)
+		c := healthz.Config{
+			AwsConfig: awsConfig,
+			Logger: config.Logger,
+		}
+		healthzService, err = healthz.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
