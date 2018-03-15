@@ -113,7 +113,8 @@ func WrapTestMain(c *client.AWS, g *framework.Guest, h *framework.Host, m *testi
 
 	err = HostPeerVPC(c, g, h)
 	if err != nil {
-		panic(err.Error())
+		log.Printf("%#v\n", err)
+		v = 1
 	}
 
 	err = h.Setup()
