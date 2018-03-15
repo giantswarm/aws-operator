@@ -3,7 +3,6 @@
 package setup
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -93,19 +92,6 @@ func Resources(c *client.AWS, g *framework.Guest, h *framework.Host) error {
 		}
 	}
 
-	{
-		logEntry := "created the guest cluster main stack"
-		operatorPodName, err := h.PodName("giantswarm", "app=aws-operator")
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		fmt.Printf("operatorPodName: %#v\n", operatorPodName)
-		err = h.WaitForPodLog("giantswarm", logEntry, operatorPodName)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
 	return nil
 }
 
@@ -125,21 +111,17 @@ func WrapTestMain(c *client.AWS, g *framework.Guest, h *framework.Host, m *testi
 		v = 1
 	}
 
-	fmt.Printf("start resource setup\n")
 	err = Resources(c, g, h)
 	if err != nil {
 		log.Printf("%#v\n", err)
 		v = 1
 	}
-	fmt.Printf("end resource setup\n")
 
-	fmt.Printf("start guest framework setup\n")
 	err = g.Setup()
 	if err != nil {
 		log.Printf("%#v\n", err)
 		v = 1
 	}
-	fmt.Printf("end guest framework setup\n")
 
 	if v == 0 {
 		v = m.Run()

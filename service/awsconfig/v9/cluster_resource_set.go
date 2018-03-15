@@ -375,19 +375,14 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 	}
 
 	handlesFunc := func(obj interface{}) bool {
-		config.Logger.Log("level", "debug", "message", "received CR")
-
 		customObject, err := key.ToCustomObject(obj)
 		if err != nil {
 			return false
 		}
 
 		if key.VersionBundleVersion(customObject) == VersionBundle().Version {
-			config.Logger.Log("level", "debug", "message", "handling CR", "name", customObject.GetName())
 			return true
 		}
-
-		config.Logger.Log("level", "debug", "message", "not handling CR", "name", customObject.GetName())
 
 		return false
 	}
