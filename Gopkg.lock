@@ -54,8 +54,8 @@
     "service/s3",
     "service/sts"
   ]
-  revision = "1f8fb9d0919e5a58992207db9512a03f76ab0274"
-  version = "v1.13.12"
+  revision = "28d0127967e59b0c41cede1e8d548ed85374bbbc"
+  version = "v1.13.14"
 
 [[projects]]
   branch = "master"
@@ -122,7 +122,7 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake"
   ]
-  revision = "54312c76ad7bec3d96d1eb57eba5f860410ae075"
+  revision = "6379f6848b80a4cdf0b5071a6bba51bed1d53c91"
 
 [[projects]]
   branch = "legacy"
@@ -134,13 +134,13 @@
   revision = "65dc7752f8079b0eaf4179345ba311dec1c450d1"
 
 [[projects]]
-  branch = "master"
+  branch = "guest-host"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "fd37da146cf00a8cf6b7bad830832889bcfc51eb"
+  revision = "8e8144e8d48f0c8f37766c3328785e3ec583ae04"
 
 [[projects]]
   branch = "master"
@@ -601,7 +601,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "182114d582623c1caa54f73de9c7224e23a48487"
+  revision = "21652f85b0fdddb6c2b6b77a5beca5c5a908174a"
 
 [[projects]]
   branch = "master"
@@ -614,13 +614,13 @@
     "lex/httplex",
     "publicsuffix"
   ]
-  revision = "803fdb99c0f72e493c28ef2099d250a9c989d8ff"
+  revision = "e0c57d8f86c17f0724497efcb3bc617e82834821"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sync"
   packages = ["errgroup"]
-  revision = "fd80eb99c8f653c847d294a001bdf2a3a6f768f5"
+  revision = "1d60e4601c6fd243af51cc01ddf169918a5407ca"
 
 [[projects]]
   branch = "master"
@@ -629,7 +629,7 @@
     "unix",
     "windows"
   ]
-  revision = "8c0ece68c28377f4c326d85b94f8df0dace46f80"
+  revision = "cc7307a45468e49eaf2997c890f14aa03a26917b"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -844,6 +844,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d336d640bff2bce5359dccf77584e42ccc7cc629538ca3ab51461e1abd043a57"
+  inputs-digest = "aae6dc0bf50173269da79adc2a92aff43471c43aa05345bf8db0473d304c841c"
   solver-name = "gps-cdcl"
   solver-version = 1
