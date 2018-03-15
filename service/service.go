@@ -216,7 +216,7 @@ func New(config Config) (*Service, error) {
 	{
 		c := healthz.Config{
 			AwsConfig: awsConfig,
-			Logger: config.Logger,
+			Logger:    config.Logger,
 		}
 		healthzService, err = healthz.New(c)
 		if err != nil {
