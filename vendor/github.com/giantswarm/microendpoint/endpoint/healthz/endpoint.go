@@ -2,6 +2,7 @@ package healthz
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
 	"github.com/giantswarm/microerror"
@@ -9,13 +10,11 @@ import (
 	kitendpoint "github.com/go-kit/kit/endpoint"
 	kithttp "github.com/go-kit/kit/transport/http"
 
-	"github.com/giantswarm/aws-operator/server/middleware"
-	"github.com/giantswarm/aws-operator/service"
-	"github.com/giantswarm/aws-operator/service/healthz"
+	"github.com/giantswarm/microendpoint/service/healthz"
 )
 
 const (
-	// Method is the HTTP method this endpoint is registered for.
+	// Method is the HTTP method this endpoint is register for.
 	Method = "GET"
 	// Name identifies the endpoint. It is aligned to the package path.
 	Name = "healthz"
@@ -23,12 +22,11 @@ const (
 	Path = "/healthz"
 )
 
-// Config represents the configuration used to create a healthz endpoint.
+// Config represents the configured used to create a healthz endpoint.
 type Config struct {
 	// Dependencies.
-	Logger     micrologger.Logger
-	Middleware *middleware.Middleware
-	Service    *service.Service
+	Logger   micrologger.Logger
+	Services []healthz.Service
 }
 
 // DefaultConfig provides a default configuration to create a new healthz
@@ -36,9 +34,8 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
-		Logger:     nil,
-		Middleware: nil,
-		Service:    nil,
+		Logger:   nil,
+		Services: nil,
 	}
 }
 
@@ -46,24 +43,24 @@ func DefaultConfig() Config {
 func New(config Config) (*Endpoint, error) {
 	// Dependencies.
 	if config.Logger == nil {
-		return nil, microerror.Maskf(invalidConfigError, "logger must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
-	if config.Middleware == nil {
-		return nil, microerror.Maskf(invalidConfigError, "middleware must not be empty")
-	}
-	if config.Service == nil {
-		return nil, microerror.Maskf(invalidConfigError, "service must not be empty")
+	if len(config.Services) == 0 {
+		return nil, microerror.Maskf(invalidConfigError, "config.Services must not be empty")
 	}
 
 	newEndpoint := &Endpoint{
-		Config: config,
+		logger:   config.Logger,
+		services: config.Services,
 	}
 
 	return newEndpoint, nil
 }
 
 type Endpoint struct {
-	Config
+	// Dependencies.
+	logger   micrologger.Logger
+	services []healthz.Service
 }
 
 func (e *Endpoint) Decoder() kithttp.DecodeRequestFunc {
@@ -74,19 +71,40 @@ func (e *Endpoint) Decoder() kithttp.DecodeRequestFunc {
 
 func (e *Endpoint) Encoder() kithttp.EncodeResponseFunc {
 	return func(ctx context.Context, w http.ResponseWriter, response interface{}) error {
-		w.WriteHeader(http.StatusOK)
-		return nil
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+		rs, ok := response.([]healthz.Response)
+		if !ok {
+			return microerror.Maskf(wrongTypeError, "expected '%T' got '%T'", []healthz.Response{}, response)
+		}
+		if healthz.Responses(rs).HasFailed() {
+			for _, r := range rs {
+				if r.Failed {
+					e.logger.Log("error", "health check failed", "healthCheckDescription", r.Description, "healthCheckMessage", r.Message)
+				}
+			}
+
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+
+		return json.NewEncoder(w).Encode(response)
 	}
 }
 
 func (e *Endpoint) Endpoint() kitendpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		_, err := e.Service.Healthz.Check(ctx, healthz.DefaultRequest())
-		if err != nil {
-			return nil, microerror.Mask(err)
+		var healthzResponses []healthz.Response
+
+		for _, s := range e.services {
+			res, err := s.GetHealthz(ctx)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+
+			healthzResponses = append(healthzResponses, res)
 		}
 
-		return nil, nil
+		return healthzResponses, nil
 	}
 }
 

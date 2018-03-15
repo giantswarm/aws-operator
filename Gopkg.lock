@@ -159,7 +159,9 @@
   branch = "master"
   name = "github.com/giantswarm/microendpoint"
   packages = [
+    "endpoint/healthz",
     "endpoint/version",
+    "service/healthz",
     "service/version"
   ]
   revision = "7d8dc82edffbe68d1d7cf5624736d637e2541002"
@@ -842,6 +844,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d74f737b9d07746490bac49e0d638bfb0a64d75171898f7fc14ade4fb74a7d22"
+  inputs-digest = "d336d640bff2bce5359dccf77584e42ccc7cc629538ca3ab51461e1abd043a57"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -1,32 +1,20 @@
 package endpoint
 
 import (
+	"github.com/giantswarm/microendpoint/endpoint/healthz"
 	"github.com/giantswarm/microendpoint/endpoint/version"
+	healthzservice "github.com/giantswarm/microendpoint/service/healthz"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/server/endpoint/healthz"
-	"github.com/giantswarm/aws-operator/server/middleware"
 	"github.com/giantswarm/aws-operator/service"
 )
 
 // Config represents the configuration used to create a endpoint.
 type Config struct {
 	// Dependencies.
-	Logger     micrologger.Logger
-	Middleware *middleware.Middleware
-	Service    *service.Service
-}
-
-// DefaultConfig provides a default configuration to create a new endpoint by
-// best effort.
-func DefaultConfig() Config {
-	return Config{
-		// Dependencies.
-		Logger:     nil,
-		Middleware: nil,
-		Service:    nil,
-	}
+	Logger  micrologger.Logger
+	Service *service.Service
 }
 
 // New creates a new configured endpoint.
@@ -35,11 +23,13 @@ func New(config Config) (*Endpoint, error) {
 
 	var healthzEndpoint *healthz.Endpoint
 	{
-		healthzConfig := healthz.DefaultConfig()
-		healthzConfig.Logger = config.Logger
-		healthzConfig.Middleware = config.Middleware
-		healthzConfig.Service = config.Service
-		healthzEndpoint, err = healthz.New(healthzConfig)
+		c := healthz.Config{
+			Logger: config.Logger,
+			Services: []healthzservice.Service{
+				config.Service.Healthz,
+			},
+		}
+		healthzEndpoint, err = healthz.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
