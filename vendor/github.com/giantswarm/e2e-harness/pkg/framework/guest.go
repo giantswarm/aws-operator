@@ -25,7 +25,7 @@ type Guest struct {
 	k8sClient kubernetes.Interface
 }
 
-func New() (*Guest, error) {
+func NewGuest() (*Guest, error) {
 	var guestK8sClient kubernetes.Interface
 	{
 		c, err := clientcmd.BuildConfigFromFlags("", harness.DefaultKubeConfig)
