@@ -222,7 +222,7 @@ func (h *Host) PodName(namespace, labelSelector string) (string, error) {
 	return pod.Name, nil
 }
 
-func (h *Host) SetUp() error {
+func (h *Host) Setup() error {
 	if err := h.createGSNamespace(); err != nil {
 		return microerror.Mask(err)
 	}
@@ -234,7 +234,7 @@ func (h *Host) SetUp() error {
 	return nil
 }
 
-func (h *Host) TearDown() {
+func (h *Host) Teardown() {
 	runCmd("helm delete vault --purge")
 	h.k8sClient.CoreV1().
 		Namespaces().

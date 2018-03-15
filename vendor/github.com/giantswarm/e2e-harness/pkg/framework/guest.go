@@ -26,27 +26,62 @@ type Guest struct {
 }
 
 func NewGuest() (*Guest, error) {
-	var guestK8sClient kubernetes.Interface
-	{
-		c, err := clientcmd.BuildConfigFromFlags("", harness.DefaultKubeConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-		hostK8sClient, err := kubernetes.NewForConfig(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-		guestK8sClient, err = newGuestK8sClient(hostK8sClient)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	g := &Guest{
-		k8sClient: guestK8sClient,
+		k8sClient: nil,
 	}
 
 	return g, nil
+}
+
+// Setup provides a separate initialization step because of the nature of the
+// host/guest cluster design. We have to setup things in different stages.
+// Constructing the frameworks can be done right away but setting them up can
+// only happen as soon as certain requirements have been met. A requirement for
+// the guest framework is a set up host cluster.
+func (g *Guest) Setup() error {
+	err := g.WaitForGuestReady()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	var hostK8sClient kubernetes.Interface
+	{
+		c, err := clientcmd.BuildConfigFromFlags("", harness.DefaultKubeConfig)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		hostK8sClient, err = kubernetes.NewForConfig(c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	var guestK8sClient kubernetes.Interface
+	{
+		n := os.ExpandEnv("${CLUSTER_NAME}-api")
+		s, err := hostK8sClient.CoreV1().Secrets("default").Get(n, metav1.GetOptions{})
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		c := &rest.Config{
+			Host: os.ExpandEnv("https://api.${CLUSTER_NAME}.${COMMON_DOMAIN_GUEST}"),
+			TLSClientConfig: rest.TLSClientConfig{
+				CAData:   s.Data["ca"],
+				CertData: s.Data["crt"],
+				KeyData:  s.Data["key"],
+			},
+		}
+
+		guestK8sClient, err = kubernetes.NewForConfig(c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	g.k8sClient = guestK8sClient
+
+	return nil
 }
 
 func (g *Guest) WaitForAPIDown() error {
@@ -133,28 +168,4 @@ func (g *Guest) waitForAPIUp() error {
 	}
 
 	return waitFor(apiUp)
-}
-
-func newGuestK8sClient(hostK8sClient kubernetes.Interface) (kubernetes.Interface, error) {
-	n := os.ExpandEnv("${CLUSTER_NAME}-api")
-	s, err := hostK8sClient.CoreV1().Secrets("default").Get(n, metav1.GetOptions{})
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	c := &rest.Config{
-		Host: os.ExpandEnv("https://api.${CLUSTER_NAME}.${COMMON_DOMAIN_GUEST}"),
-		TLSClientConfig: rest.TLSClientConfig{
-			CAData:   s.Data["ca"],
-			CertData: s.Data["crt"],
-			KeyData:  s.Data["key"],
-		},
-	}
-
-	guestK8sClient, err := kubernetes.NewForConfig(c)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	return guestK8sClient, nil
 }
