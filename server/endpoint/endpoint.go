@@ -1,6 +1,7 @@
 package endpoint
 
 import (
+	"github.com/giantswarm/microendpoint/endpoint/healthz"
 	"github.com/giantswarm/microendpoint/endpoint/version"
 	healthzservice "github.com/giantswarm/microendpoint/service/healthz"
 	"github.com/giantswarm/microerror"
