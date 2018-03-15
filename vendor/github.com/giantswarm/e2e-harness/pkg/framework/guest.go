@@ -39,10 +39,7 @@ func NewGuest() (*Guest, error) {
 // only happen as soon as certain requirements have been met. A requirement for
 // the guest framework is a set up host cluster.
 func (g *Guest) Setup() error {
-	err := g.WaitForGuestReady()
-	if err != nil {
-		return microerror.Mask(err)
-	}
+	var err error
 
 	var hostK8sClient kubernetes.Interface
 	{
@@ -80,6 +77,11 @@ func (g *Guest) Setup() error {
 	}
 
 	g.k8sClient = guestK8sClient
+
+	err = g.WaitForGuestReady()
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
 	return nil
 }
