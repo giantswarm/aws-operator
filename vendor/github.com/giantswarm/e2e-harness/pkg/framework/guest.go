@@ -129,28 +129,25 @@ func (g *Guest) WaitForGuestReady() error {
 
 func (g *Guest) WaitForNodesUp(numberOfNodes int) error {
 	nodesUp := func() error {
-		res, err := g.k8sClient.
-			CoreV1().
-			Nodes().
-			List(metav1.ListOptions{})
-
+		nodes, err := g.k8sClient.CoreV1().Nodes().List(metav1.ListOptions{})
 		if err != nil {
-			log.Printf("waiting for nodes ready: %v\n", err)
 			return microerror.Mask(err)
 		}
-		if len(res.Items) != numberOfNodes {
+
+		if len(nodes.Items) != numberOfNodes {
 			log.Printf("worker nodes not found")
 			return microerror.Mask(notFoundError)
 		}
 
-		for _, n := range res.Items {
+		for _, n := range nodes.Items {
 			for _, c := range n.Status.Conditions {
 				if c.Type == v1.NodeReady && c.Status != v1.ConditionTrue {
-					log.Printf("not all worker nodes ready")
+					log.Printf("worker nodes not ready")
 					return microerror.Mask(notFoundError)
 				}
 			}
 		}
+
 		return nil
 	}
 
