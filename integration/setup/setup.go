@@ -23,7 +23,7 @@ const (
 	awsResourceValuesFile = "/tmp/aws-operator-values.yaml"
 )
 
-func HostPeerVPC(c *client.AWS, f *framework.Framework) error {
+func HostPeerVPC(c *client.AWS, g *framework.Guest, h *framework.Host) error {
 	log.Printf("Creating Host Peer VPC stack")
 
 	os.Setenv("AWS_ROUTE_TABLE_0", env.ClusterID()+"_0")
@@ -60,27 +60,27 @@ func HostPeerVPC(c *client.AWS, f *framework.Framework) error {
 	return nil
 }
 
-func Resources(c *client.AWS, f *framework.Framework) error {
+func Resources(c *client.AWS, g *framework.Guest, h *framework.Host) error {
 	var err error
 
 	{
 		// TODO configure chart values like for the other operators below.
-		err = f.InstallCertOperator()
+		err = h.InstallCertOperator()
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		err = f.InstallNodeOperator(template.NodeOperatorChartValues)
+		err = h.InstallNodeOperator(template.NodeOperatorChartValues)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		err = f.InstallAwsOperator(template.AWSOperatorChartValues)
+		err = h.InstallAwsOperator(template.AWSOperatorChartValues)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 	}
 
 	{
-		err = f.InstallCertResource()
+		err = h.InstallCertResource()
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -92,42 +92,34 @@ func Resources(c *client.AWS, f *framework.Framework) error {
 		}
 	}
 
-	{
-		logEntry := "created the guest cluster main stack"
-		operatorPodName, err := f.PodName("giantswarm", "app=aws-operator")
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		err = f.WaitForPodLog("giantswarm", logEntry, operatorPodName)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		err = f.WaitForGuestReady()
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
 	return nil
 }
 
-func WrapTestMain(c *client.AWS, f *framework.Framework, m *testing.M) {
+func WrapTestMain(c *client.AWS, g *framework.Guest, h *framework.Host, m *testing.M) {
 	var v int
 	var err error
 
-	err = HostPeerVPC(c, f)
+	err = HostPeerVPC(c, g, h)
 	if err != nil {
-		panic(err.Error())
-	}
-
-	if err := f.SetUp(); err != nil {
-		log.Printf("%v\n", err)
+		log.Printf("%#v\n", err)
 		v = 1
 	}
 
-	err = Resources(c, f)
+	err = h.Setup()
 	if err != nil {
-		log.Printf("%v\n", err)
+		log.Printf("%#v\n", err)
+		v = 1
+	}
+
+	err = Resources(c, g, h)
+	if err != nil {
+		log.Printf("%#v\n", err)
+		v = 1
+	}
+
+	err = g.Setup()
+	if err != nil {
+		log.Printf("%#v\n", err)
 		v = 1
 	}
 
@@ -136,22 +128,22 @@ func WrapTestMain(c *client.AWS, f *framework.Framework, m *testing.M) {
 	}
 
 	if os.Getenv("KEEP_RESOURCES") != "true" {
-		f.DeleteGuestCluster()
+		h.DeleteGuestCluster()
 
 		// only do full teardown when not on CI
 		if os.Getenv("CIRCLECI") != "true" {
-			err := teardown.Teardown(c, f)
+			err := teardown.Teardown(c, g, h)
 			if err != nil {
-				log.Printf("%v\n", err)
+				log.Printf("%#v\n", err)
 				v = 1
 			}
 			// TODO there should be error handling for the framework teardown.
-			f.TearDown()
+			h.Teardown()
 		}
 
-		err := teardown.HostPeerVPC(c, f)
+		err := teardown.HostPeerVPC(c, g, h)
 		if err != nil {
-			log.Printf("%v\n", err)
+			log.Printf("%#v\n", err)
 			v = 1
 		}
 	}

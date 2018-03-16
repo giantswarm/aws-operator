@@ -14,7 +14,7 @@ import (
 	"github.com/giantswarm/aws-operator/integration/env"
 )
 
-func HostPeerVPC(c *client.AWS, f *framework.Framework) error {
+func HostPeerVPC(c *client.AWS, g *framework.Guest, h *framework.Host) error {
 	log.Printf("Deleting Host Peer VPC stack")
 
 	_, err := c.CloudFormation.DeleteStack(&cloudformation.DeleteStackInput{
@@ -27,7 +27,7 @@ func HostPeerVPC(c *client.AWS, f *framework.Framework) error {
 	return nil
 }
 
-func Teardown(c *client.AWS, f *framework.Framework) error {
+func Teardown(c *client.AWS, g *framework.Guest, h *framework.Host) error {
 	var err error
 
 	{

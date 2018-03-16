@@ -95,6 +95,8 @@ type AzureConfigSpecAzureHostCluster struct {
 	// ResourceGroup is the resource group name of the host cluster. It is
 	// used to determine DNS hosted zone to put NS records in.
 	ResourceGroup string `json:"resourceGroup" yaml:"resourceGroup"`
+	// VirtualNetwork is the name of the host cluster virtual network.
+	VirtualNetwork string `json:"virtualNetwork" yaml:"virtualNetwork"`
 }
 
 type AzureConfigSpecAzureVirtualNetwork struct {

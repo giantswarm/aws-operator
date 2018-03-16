@@ -31,7 +31,7 @@ func TestWorkersScaling(t *testing.T) {
 		t.Fatalf("unexpected error setting number of workers to %d, %v", expectedWorkers, err)
 	}
 
-	if err := f.WaitForNodesUp(currentMasters + expectedWorkers); err != nil {
+	if err := g.WaitForNodesUp(currentMasters + expectedWorkers); err != nil {
 		t.Fatalf("unexpected error waiting for %d nodes up, %v", expectedWorkers, err)
 	}
 	log.Printf("%d worker nodes ready", expectedWorkers)
@@ -44,14 +44,14 @@ func TestWorkersScaling(t *testing.T) {
 		t.Fatalf("unexpected error setting number of workers to %d, %v", expectedWorkers, err)
 	}
 
-	if err := f.WaitForNodesUp(currentMasters + expectedWorkers); err != nil {
+	if err := g.WaitForNodesUp(currentMasters + expectedWorkers); err != nil {
 		t.Fatalf("unexpected error waiting for %d nodes up, %v", expectedWorkers, err)
 	}
 	log.Printf("%d worker nodes ready", expectedWorkers)
 }
 
 func numberOfWorkers(clusterName string) (int, error) {
-	cluster, err := f.AWSCluster(clusterName)
+	cluster, err := h.AWSCluster(clusterName)
 	if err != nil {
 		return 0, microerror.Mask(err)
 	}
@@ -60,7 +60,7 @@ func numberOfWorkers(clusterName string) (int, error) {
 }
 
 func numberOfMasters(clusterName string) (int, error) {
-	cluster, err := f.AWSCluster(clusterName)
+	cluster, err := h.AWSCluster(clusterName)
 	if err != nil {
 		return 0, microerror.Mask(err)
 	}
@@ -69,7 +69,7 @@ func numberOfMasters(clusterName string) (int, error) {
 }
 
 func addWorker(clusterName string) error {
-	cluster, err := f.AWSCluster(clusterName)
+	cluster, err := h.AWSCluster(clusterName)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -81,7 +81,7 @@ func addWorker(clusterName string) error {
 	patch[0].Path = "/spec/aws/workers/-"
 	patch[0].Value = newWorker
 
-	return f.ApplyAWSConfigPatch(patch, clusterName)
+	return h.ApplyAWSConfigPatch(patch, clusterName)
 }
 
 func removeWorker(clusterName string) error {
@@ -89,5 +89,5 @@ func removeWorker(clusterName string) error {
 	patch[0].Op = "remove"
 	patch[0].Path = "/spec/aws/workers/1"
 
-	return f.ApplyAWSConfigPatch(patch, clusterName)
+	return h.ApplyAWSConfigPatch(patch, clusterName)
 }
