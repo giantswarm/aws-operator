@@ -7,6 +7,7 @@ import (
 )
 
 func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		description                    string
 		customObject                   v1alpha1.AWSConfig
@@ -138,6 +139,7 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 }
 
 func TestWorkerCountRatioMaxBatchSize(t *testing.T) {
+	t.Parallel()
 	tcs := []struct {
 		description   string
 		workers       int

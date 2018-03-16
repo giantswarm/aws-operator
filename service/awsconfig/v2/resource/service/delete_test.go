@@ -12,6 +12,7 @@ import (
 )
 
 func Test_Resource_Service_newDeleteChange(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		description     string
 		obj             interface{}
@@ -114,6 +115,7 @@ func Test_Resource_Service_newDeleteChange(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			result, err := newResource.newDeleteChange(context.TODO(), tc.obj, tc.cur, tc.des)
 			if err != nil {
 				t.Errorf("expected '%v' got '%#v'", nil, err)

@@ -15,6 +15,7 @@ import (
 )
 
 func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		CustomObject v1alpha1.AWSConfig
 		Certs        legacy.CompactTLSAssets
@@ -91,6 +92,7 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 }
 
 func Test_Service_CloudConfig_NewWorkerTemplate(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		CustomObject v1alpha1.AWSConfig
 		Certs        legacy.CompactTLSAssets

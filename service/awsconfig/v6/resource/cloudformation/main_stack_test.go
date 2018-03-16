@@ -25,6 +25,7 @@ func testConfig() Config {
 }
 
 func TestMainGuestTemplateGetEmptyBody(t *testing.T) {
+	t.Parallel()
 	customObject := v1alpha1.AWSConfig{}
 	cfg := testConfig()
 	cfg.Clients = &adapter.Clients{
@@ -48,6 +49,7 @@ func TestMainGuestTemplateGetEmptyBody(t *testing.T) {
 }
 
 func TestMainGuestTemplateExistingFields(t *testing.T) {
+	t.Parallel()
 	// customObject with example fields for both asg and launch config
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
@@ -278,6 +280,7 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 }
 
 func TestMainHostPreTemplateExistingFields(t *testing.T) {
+	t.Parallel()
 	// customObject with example fields for both asg and launch config
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
@@ -324,6 +327,7 @@ func TestMainHostPreTemplateExistingFields(t *testing.T) {
 }
 
 func TestMainHostPostTemplateExistingFields(t *testing.T) {
+	t.Parallel()
 	// customObject with example fields for both asg and launch config
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{

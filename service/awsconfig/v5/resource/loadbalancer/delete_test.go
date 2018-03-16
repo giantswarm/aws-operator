@@ -10,6 +10,7 @@ import (
 )
 
 func Test_newDeleteChange(t *testing.T) {
+	t.Parallel()
 	customObject := &v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{

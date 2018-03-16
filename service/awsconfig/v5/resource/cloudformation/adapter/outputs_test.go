@@ -7,6 +7,7 @@ import (
 )
 
 func Test_CloudFormation_Adapter_Outputs_MasterCloudConfigVersion(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		Description                      string
 		Config                           Config
@@ -51,6 +52,7 @@ func Test_CloudFormation_Adapter_Outputs_MasterCloudConfigVersion(t *testing.T) 
 }
 
 func Test_CloudFormation_Adapter_Outputs_WorkerCloudConfigVersion(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		Description                      string
 		Config                           Config
@@ -95,6 +97,7 @@ func Test_CloudFormation_Adapter_Outputs_WorkerCloudConfigVersion(t *testing.T) 
 }
 
 func Test_CloudFormation_Adapter_Outputs_WorkerCount(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		Description         string
 		Config              Config

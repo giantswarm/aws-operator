@@ -9,6 +9,7 @@ import (
 )
 
 func TestValidAmazonAccountID(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name            string
 		amazonAccountID string

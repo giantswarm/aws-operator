@@ -7,6 +7,7 @@ import (
 )
 
 func TestAdapterOutputsRegularFields(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		description                      string
 		expectedMasterCloudConfigVersion string
@@ -22,6 +23,7 @@ func TestAdapterOutputsRegularFields(t *testing.T) {
 		a := Adapter{}
 		clients := Clients{}
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			cfg := Config{
 				Clients: clients,
 			}

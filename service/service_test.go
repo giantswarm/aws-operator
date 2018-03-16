@@ -9,6 +9,7 @@ import (
 )
 
 func Test_Service_New(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		config               func() Config
 		description          string

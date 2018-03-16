@@ -7,6 +7,7 @@ import (
 )
 
 func TestAdapterIamPoliciesRegularFields(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		description               string
 		customObject              v1alpha1.AWSConfig
@@ -40,6 +41,7 @@ func TestAdapterIamPoliciesRegularFields(t *testing.T) {
 	for _, tc := range testCases {
 		a := Adapter{}
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			cfg := Config{
 				CustomObject: tc.customObject,
 				Clients:      clients,
@@ -77,6 +79,7 @@ func TestAdapterIamPoliciesRegularFields(t *testing.T) {
 }
 
 func TestAdapterIamPoliciesKMSKeyARN(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		description       string
 		customObject      v1alpha1.AWSConfig
@@ -105,6 +108,7 @@ func TestAdapterIamPoliciesKMSKeyARN(t *testing.T) {
 	for _, tc := range testCases {
 		a := Adapter{}
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			clients := Clients{
 				IAM: &IAMClientMock{},
 				KMS: &KMSClientMock{
@@ -135,6 +139,7 @@ func TestAdapterIamPoliciesKMSKeyARN(t *testing.T) {
 }
 
 func TestAdapterIamPoliciesS3Bucket(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		description      string
 		customObject     v1alpha1.AWSConfig
@@ -165,6 +170,7 @@ func TestAdapterIamPoliciesS3Bucket(t *testing.T) {
 	for _, tc := range testCases {
 		a := Adapter{}
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			clients := Clients{
 				KMS: &KMSClientMock{},
 				IAM: &IAMClientMock{

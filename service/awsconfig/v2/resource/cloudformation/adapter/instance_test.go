@@ -9,6 +9,7 @@ import (
 )
 
 func TestAdapterInstanceRegularFields(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		description             string
 		customObject            v1alpha1.AWSConfig
@@ -53,6 +54,7 @@ func TestAdapterInstanceRegularFields(t *testing.T) {
 		a := Adapter{}
 
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			cfg := Config{
 				CustomObject: tc.customObject,
 				Clients:      clients,
@@ -78,6 +80,7 @@ func TestAdapterInstanceRegularFields(t *testing.T) {
 }
 
 func TestAdapterInstanceSmallCloudConfig(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		description  string
 		expectedLine string
@@ -130,6 +133,7 @@ func TestAdapterInstanceSmallCloudConfig(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			if !strings.Contains(string(data), tc.expectedLine) {
 				t.Errorf("SmallCloudConfig didn't contain expected %q, complete: %q", tc.expectedLine, string(data))
 			}

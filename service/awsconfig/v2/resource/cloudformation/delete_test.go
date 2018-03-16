@@ -12,6 +12,7 @@ import (
 )
 
 func Test_Resource_Cloudformation_newDelete(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		obj               interface{}
 		currentState      interface{}
@@ -97,6 +98,7 @@ func Test_Resource_Cloudformation_newDelete(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			result, err := newResource.newDeleteChange(context.TODO(), tc.obj, tc.currentState, tc.desiredState)
 			if err != nil {
 				t.Errorf("expected '%v' got '%#v'", nil, err)

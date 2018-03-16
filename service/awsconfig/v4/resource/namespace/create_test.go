@@ -12,6 +12,7 @@ import (
 )
 
 func Test_Resource_Namespace_newCreateChange(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		Obj               interface{}
 		Cur               interface{}

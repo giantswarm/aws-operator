@@ -7,6 +7,7 @@ import (
 )
 
 func TestAdapterHostIAMRolesRegularFields(t *testing.T) {
+	t.Parallel()
 	guestAccountID := "myGuestAccountID"
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
