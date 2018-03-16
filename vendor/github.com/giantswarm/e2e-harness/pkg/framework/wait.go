@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	defaultTimeout = 900
+	defaultTimeout = 1800
 )
 
 func waitFor(f func() error) error {
