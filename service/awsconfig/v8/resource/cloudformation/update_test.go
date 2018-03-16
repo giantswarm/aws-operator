@@ -15,6 +15,7 @@ import (
 )
 
 func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
+	t.Parallel()
 	clusterTpo := &v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
@@ -428,6 +429,7 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 }
 
 func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T) {
+	t.Parallel()
 	clusterTpo := &v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{

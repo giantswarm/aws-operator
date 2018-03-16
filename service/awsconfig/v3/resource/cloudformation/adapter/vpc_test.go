@@ -7,6 +7,7 @@ import (
 )
 
 func TestAdapterVPCRegularFields(t *testing.T) {
+	t.Parallel()
 	cidr := "10.0.0.0/24"
 	peerID := "mypeerID"
 	installationName := "myinstallation"
@@ -79,6 +80,7 @@ func TestAdapterVPCRegularFields(t *testing.T) {
 }
 
 func TestAdapterVPCPeerRoleField(t *testing.T) {
+	t.Parallel()
 	peerRoleArn := "myPeerRoleArn"
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{

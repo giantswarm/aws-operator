@@ -7,6 +7,7 @@ import (
 )
 
 func TestRender(t *testing.T) {
+	t.Parallel()
 	tpl := "some string <{{.Value}}> another string"
 	d := struct {
 		Value string

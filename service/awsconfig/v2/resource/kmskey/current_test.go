@@ -9,6 +9,7 @@ import (
 )
 
 func Test_CurrentState(t *testing.T) {
+	t.Parallel()
 	customObject := &v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
@@ -38,6 +39,7 @@ func Test_CurrentState(t *testing.T) {
 	resourceConfig.Logger = microloggertest.New()
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			resourceConfig.Clients = Clients{
 				KMS: &KMSClientMock{
 					keyID:   tc.expectedKeyID,

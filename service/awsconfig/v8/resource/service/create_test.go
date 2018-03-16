@@ -12,6 +12,7 @@ import (
 )
 
 func Test_Resource_Service_newCreateChange(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		description     string
 		obj             interface{}

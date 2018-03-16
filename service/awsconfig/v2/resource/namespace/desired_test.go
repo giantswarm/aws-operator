@@ -11,6 +11,7 @@ import (
 )
 
 func Test_Resource_Namespace_GetDesiredState(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		Obj          interface{}
 		ExpectedName string

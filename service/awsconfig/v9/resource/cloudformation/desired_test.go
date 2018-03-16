@@ -12,6 +12,7 @@ import (
 )
 
 func Test_Resource_Cloudformation_GetDesiredState(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		obj          interface{}
 		expectedName string

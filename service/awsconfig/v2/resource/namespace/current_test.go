@@ -12,6 +12,7 @@ import (
 )
 
 func Test_Resource_Namespace_GetCurrentState(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		Obj               interface{}
 		ExpectedNamespace *apiv1.Namespace

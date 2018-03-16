@@ -13,6 +13,7 @@ import (
 )
 
 func Test_CurrentState(t *testing.T) {
+	t.Parallel()
 	clusterTpo := &v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{

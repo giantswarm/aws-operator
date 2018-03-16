@@ -9,6 +9,7 @@ import (
 )
 
 func TestAdapterInstanceRegularFields(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		description             string
 		customObject            v1alpha1.AWSConfig
@@ -78,6 +79,7 @@ func TestAdapterInstanceRegularFields(t *testing.T) {
 }
 
 func TestAdapterInstanceSmallCloudConfig(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		description  string
 		expectedLine string

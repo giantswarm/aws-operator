@@ -9,6 +9,7 @@ import (
 )
 
 func TestValidateAvailabilityZone(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name             string
 		region           string
@@ -63,6 +64,7 @@ func TestValidateAvailabilityZone(t *testing.T) {
 }
 
 func TestValidateWorkers(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name          string
 		awsWorkers    []v1alpha1.AWSConfigSpecAWSNode
@@ -179,6 +181,7 @@ func TestValidateWorkers(t *testing.T) {
 }
 
 func TestValidateELB(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name                      string
 		idleTimeoutSecondsAPI     int
@@ -242,6 +245,7 @@ func TestValidateELB(t *testing.T) {
 
 // Specific test with a missing value in the ELB struct
 func TestValidateELBSparseStruct(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name                   string
 		idleTimeoutSecondsAPI  int
@@ -278,6 +282,7 @@ func TestValidateELBSparseStruct(t *testing.T) {
 
 // Specific test with a missing IdleTimeoutSeconds struct
 func TestValidateELBMissingStruct(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name          string
 		expectedError error

@@ -5,4 +5,5 @@ import (
 )
 
 func TestAdapterHostRouteTablesRegularFields(t *testing.T) {
+	t.Parallel()
 }

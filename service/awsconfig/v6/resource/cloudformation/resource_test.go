@@ -10,6 +10,7 @@ import (
 )
 
 func Test_Resource_Cloudformation_GetCloudFormationTags(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		obj          v1alpha1.AWSConfig
 		expectedTags []*awscloudformation.Tag

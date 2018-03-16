@@ -12,6 +12,7 @@ import (
 )
 
 func Test_CurrentState(t *testing.T) {
+	t.Parallel()
 	customObject := &v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
@@ -222,6 +223,7 @@ func Test_CurrentState(t *testing.T) {
 }
 
 func Test_splitLoadBalancers(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		name              string
 		loadBalancerNames []*string

@@ -14,6 +14,7 @@ import (
 )
 
 func Test_Resource_S3Object_newUpdate(t *testing.T) {
+	t.Parallel()
 	clusterTpo := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
@@ -155,6 +156,7 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			result, err := newResource.newUpdateChange(context.TODO(), tc.obj, tc.currentState, tc.desiredState)
 			if err != nil {
 				t.Errorf("expected '%v' got '%#v'", nil, err)

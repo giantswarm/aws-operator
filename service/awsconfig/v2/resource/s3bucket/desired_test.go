@@ -11,6 +11,7 @@ import (
 )
 
 func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		obj          interface{}
 		expectedName string
@@ -56,6 +57,7 @@ func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			result, err := newResource.GetDesiredState(context.TODO(), tc.obj)
 			if err != nil {
 				t.Fatalf("expected '%v' got '%#v'", nil, err)
