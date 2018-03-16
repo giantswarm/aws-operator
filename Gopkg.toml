@@ -37,7 +37,7 @@
   name = "github.com/giantswarm/certs"
 
 [[constraint]]
-  branch = "guest-host"
+  branch = "master"
   name = "github.com/giantswarm/e2e-harness"
 
 [[constraint]]
