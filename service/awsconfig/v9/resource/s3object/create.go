@@ -26,9 +26,9 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 				return microerror.Mask(err)
 			}
 
-			r.logger.LogCtx(ctx, "debug", fmt.Sprintf("creating S3 object '%s': created", key))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating S3 object '%s': created", key))
 		} else {
-			r.logger.LogCtx(ctx, "debug", fmt.Sprintf("creating S3 object '%s': already created", key))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating S3 object '%s': already created", key))
 		}
 	}
 
@@ -46,7 +46,7 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		return s3.PutObjectInput{}, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "debug", "finding out if the s3 objects should be created")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the s3 objects should be created")
 
 	createState := map[string]BucketObjectState{}
 

@@ -16,7 +16,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	}
 
 	if bucketInput.Name != "" {
-		r.logger.LogCtx(ctx, "debug", "deleting S3 bucket")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting S3 bucket")
 
 		// Make sure the bucket is empty.
 		input := &s3.ListObjectsV2Input{
@@ -48,9 +48,9 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "debug", "deleting S3 bucket: deleted")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting S3 bucket: deleted")
 	} else {
-		r.logger.LogCtx(ctx, "debug", "deleting S3 bucket: already deleted")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting S3 bucket: already deleted")
 	}
 
 	return nil

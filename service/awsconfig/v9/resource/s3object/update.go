@@ -27,9 +27,9 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 				return microerror.Mask(err)
 			}
 
-			r.logger.LogCtx(ctx, "debug", fmt.Sprintf("updating S3 object '%s': updated", key))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updating S3 object '%s': updated", key))
 		} else {
-			r.logger.LogCtx(ctx, "debug", fmt.Sprintf("updating S3 object '%s': already updated", key))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updating S3 object '%s': already updated", key))
 		}
 	}
 
@@ -65,7 +65,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		return s3.PutObjectInput{}, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "debug", "finding out if the s3 objects should be updated")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the s3 objects should be updated")
 
 	updateState := map[string]BucketObjectState{}
 

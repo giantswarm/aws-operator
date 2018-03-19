@@ -21,7 +21,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	}
 
 	if endpointsToUpdate != nil {
-		r.logger.LogCtx(ctx, "debug", "updating Kubernetes endpoints")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "updating Kubernetes endpoints")
 
 		namespace := key.ClusterNamespace(customObject)
 		_, err := r.k8sClient.CoreV1().Endpoints(namespace).Update(endpointsToUpdate)
@@ -29,10 +29,10 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "debug", "updated Kubernetes endpoints")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "updated Kubernetes endpoints")
 
 	} else {
-		r.logger.LogCtx(ctx, "debug", "Kubernetes endpoints do not need to be updated")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "Kubernetes endpoints do not need to be updated")
 	}
 
 	return nil
@@ -66,7 +66,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		return nil, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "debug", "finding out if the endpoints has to be updated")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the endpoints has to be updated")
 
 	var endpointsToUpdate *apiv1.Endpoints
 
@@ -78,7 +78,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		}
 	}
 
-	r.logger.LogCtx(ctx, "debug", "found out if the endpoints has to be deleted")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "found out if the endpoints has to be deleted")
 
 	return endpointsToUpdate, nil
 }

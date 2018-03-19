@@ -39,9 +39,9 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "debug", "deleting KMS Key: deleted")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting KMS Key: deleted")
 	} else {
-		r.logger.LogCtx(ctx, "debug", "deleting KMS Key: already deleted")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting KMS Key: already deleted")
 	}
 
 	return nil
@@ -70,7 +70,7 @@ func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desir
 		return nil, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "debug", "finding out if the KMS key should be deleted")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the KMS key should be deleted")
 
 	var kmsKeyToDelete KMSKeyState
 	if currentKeyState.KeyAlias != "" {
