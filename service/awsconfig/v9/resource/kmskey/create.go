@@ -47,9 +47,9 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "debug", "creating KMS key: created")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "creating KMS key: created")
 	} else {
-		r.logger.LogCtx(ctx, "debug", "creating KMS key: already created")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "creating KMS key: already created")
 	}
 
 	return nil

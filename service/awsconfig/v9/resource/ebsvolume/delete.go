@@ -17,7 +17,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	}
 
 	if deleteInput != nil && len(deleteInput.VolumeIDs) > 0 {
-		r.logger.LogCtx(ctx, "debug", fmt.Sprintf("deleting %d ebs volumes", len(deleteInput.VolumeIDs)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting %d ebs volumes", len(deleteInput.VolumeIDs)))
 
 		for _, volID := range deleteInput.VolumeIDs {
 			_, err := r.clients.EC2.DeleteVolume(&ec2.DeleteVolumeInput{
@@ -28,9 +28,9 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			}
 		}
 
-		r.logger.LogCtx(ctx, "debug", fmt.Sprintf("deleted %d ebs volumes", len(deleteInput.VolumeIDs)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted %d ebs volumes", len(deleteInput.VolumeIDs)))
 	} else {
-		r.logger.LogCtx(ctx, "debug", "not deleting load ebs volumes because there aren't any")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting load ebs volumes because there aren't any")
 	}
 
 	return nil
