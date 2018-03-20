@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
 
@@ -31,6 +32,10 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 CREATE BUCKET ERROR: %#v", err))
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ERROR CAUSE: %#v", microerror.Cause(err)))
+
+		aerr, _ := err.(awserr.Error)
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AWS ERROR: %#v", aerr))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AWS ERROR CODE: %#v", aerr.Code()))
 
 		if IsBucketAlreadyExists(err) || IsBucketAlreadyOwnedByYou(err) {
 			// Fall through.
