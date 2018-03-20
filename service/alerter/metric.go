@@ -19,7 +19,7 @@ var (
 			Name:      "orphan_resources_total",
 			Help:      "Number of AWS resources not associated with a cluster to be cleaned up.",
 		},
-		[]string{"resource"},
+		[]string{"resource", "ids"},
 	)
 	orphanClustersTotal = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
@@ -28,7 +28,7 @@ var (
 			Name:      "orphan_clusters_total",
 			Help:      "Number of clusters without AWS resources associated.",
 		},
-		[]string{"resource"},
+		[]string{"resource", "ids"},
 	)
 )
 

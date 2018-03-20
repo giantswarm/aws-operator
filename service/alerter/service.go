@@ -274,26 +274,28 @@ func (s Service) UpdateDuplicateResourceMetrics(resourceType string, clusterIDs 
 }
 
 // UpdateOrphanResourceMetrics updates the metric and logs the results.
-func (s Service) UpdateOrphanResourceMetrics(resourceType string, resourceNames []string) {
-	resourceCount := len(resourceNames)
+func (s Service) UpdateOrphanResourceMetrics(resourceType string, resourceIDs []string) {
+	resourceCount := len(resourceIDs)
+	ids := strings.Join(resourceIDs, ",")
 
-	orphanResourcesTotal.WithLabelValues(resourceType).Set(float64(resourceCount))
+	orphanResourcesTotal.WithLabelValues(resourceType, ids).Set(float64(resourceCount))
 	s.logger.Log("info", fmt.Sprintf("alerter service found %d %s resources not associated with a cluster", resourceCount, resourceType))
 
 	if resourceCount > 0 {
-		s.logger.Log("info", fmt.Sprintf("orphan %s names are %s", resourceType, strings.Join(resourceNames, ",")))
+		s.logger.Log("info", fmt.Sprintf("orphan %s names are %s", resourceType, ids))
 	}
 }
 
 // UpdateOrphanClusterMetrics updates the metric and logs the results.
 func (s Service) UpdateOrphanClusterMetrics(resourceType string, clusterIDs []string) {
 	resourceCount := len(clusterIDs)
+	ids := strings.Join(clusterIDs, ",")
 
-	orphanClustersTotal.WithLabelValues(resourceType).Set(float64(resourceCount))
+	orphanClustersTotal.WithLabelValues(resourceType, ids).Set(float64(resourceCount))
 
 	s.logger.Log("info", fmt.Sprintf("alerter service found %d clusters with missing AWS resources", resourceCount))
 
 	if resourceCount > 0 {
-		s.logger.Log("info", fmt.Sprintf("clusters with missing %s %s", resourceType, strings.Join(clusterIDs, ",")))
+		s.logger.Log("info", fmt.Sprintf("clusters with missing %s %s", resourceType, ids))
 	}
 }
