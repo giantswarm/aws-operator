@@ -26,8 +26,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/awsconfig/v9/resource/kmskey"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v9/resource/loadbalancer"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v9/resource/namespace"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/resource/s3bucket"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v9/resource/service"
 )
 
@@ -162,53 +160,55 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 		}
 	}
 
-	var s3BucketResource framework.Resource
-	{
-		c := s3bucket.Config{
-			AwsService: awsService,
-			Clients: s3bucket.Clients{
-				S3: config.GuestAWSClients.S3,
-			},
-			Logger: config.Logger,
+	/*
+		var s3BucketResource framework.Resource
+		{
+			c := s3bucket.Config{
+				AwsService: awsService,
+				Clients: s3bucket.Clients{
+					S3: config.GuestAWSClients.S3,
+				},
+				Logger: config.Logger,
 
-			InstallationName: config.InstallationName,
+				InstallationName: config.InstallationName,
+			}
+
+			ops, err := s3bucket.New(c)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+
+			s3BucketResource, err = toCRUDResource(config.Logger, ops)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
 		}
 
-		ops, err := s3bucket.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
+		var s3BucketObjectResource framework.Resource
+		{
+			c := s3object.Config{
+				AwsService: awsService,
+				Clients: s3object.Clients{
+					S3:  config.GuestAWSClients.S3,
+					KMS: config.GuestAWSClients.KMS,
+				},
+				CloudConfig:      cloudConfig,
+				CertWatcher:      config.CertsSearcher,
+				Logger:           config.Logger,
+				RandomKeyWatcher: config.RandomkeysSearcher,
+			}
 
-		s3BucketResource, err = toCRUDResource(config.Logger, ops)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
+			ops, err := s3object.New(c)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
 
-	var s3BucketObjectResource framework.Resource
-	{
-		c := s3object.Config{
-			AwsService: awsService,
-			Clients: s3object.Clients{
-				S3:  config.GuestAWSClients.S3,
-				KMS: config.GuestAWSClients.KMS,
-			},
-			CloudConfig:      cloudConfig,
-			CertWatcher:      config.CertsSearcher,
-			Logger:           config.Logger,
-			RandomKeyWatcher: config.RandomkeysSearcher,
+			s3BucketObjectResource, err = toCRUDResource(config.Logger, ops)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
 		}
-
-		ops, err := s3object.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		s3BucketObjectResource, err = toCRUDResource(config.Logger, ops)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
+	*/
 
 	var loadBalancerResource framework.Resource
 	{
