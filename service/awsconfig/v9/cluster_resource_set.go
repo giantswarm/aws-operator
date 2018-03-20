@@ -341,8 +341,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 
 	resources := []framework.Resource{
 		kmsKeyResource,
-		s3BucketResource,
-		s3BucketObjectResource,
+		//s3BucketResource,
+		//s3BucketObjectResource,
 		loadBalancerResource,
 		ebsVolumeResource,
 		cloudformationResource,
