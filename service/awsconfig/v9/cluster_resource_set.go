@@ -15,7 +15,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v9/adapter"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v9/cloudconfig"
 	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v9/cloudformation"
@@ -97,34 +96,36 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 		return nil, microerror.Maskf(invalidConfigError, "config.ProjectName must not be empty")
 	}
 
-	var awsService *awsservice.Service
-	{
-		c := awsservice.Config{
-			Clients: awsservice.Clients{
-				IAM: config.GuestAWSClients.IAM,
-				KMS: config.GuestAWSClients.KMS,
-			},
-			Logger: config.Logger,
+	/*
+		var awsService *awsservice.Service
+		{
+			c := awsservice.Config{
+				Clients: awsservice.Clients{
+					IAM: config.GuestAWSClients.IAM,
+					KMS: config.GuestAWSClients.KMS,
+				},
+				Logger: config.Logger,
+			}
+
+			awsService, err = awsservice.New(c)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
 		}
 
-		awsService, err = awsservice.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
+		var cloudConfig *cloudconfig.CloudConfig
+		{
+			c := cloudconfig.Config{
+				Logger: config.Logger,
+				OIDC:   config.OIDC,
+			}
 
-	var cloudConfig *cloudconfig.CloudConfig
-	{
-		c := cloudconfig.Config{
-			Logger: config.Logger,
-			OIDC:   config.OIDC,
+			cloudConfig, err = cloudconfig.New(c)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
 		}
-
-		cloudConfig, err = cloudconfig.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
+	*/
 
 	var cloudFormationService *cloudformationservice.CloudFormation
 	{
