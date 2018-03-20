@@ -15,7 +15,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v9/adapter"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v9/cloudconfig"
 	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v9/cloudformation"
@@ -26,8 +25,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/awsconfig/v9/resource/kmskey"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v9/resource/loadbalancer"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v9/resource/namespace"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/resource/s3bucket"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v9/resource/service"
 )
 
@@ -99,34 +96,36 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 		return nil, microerror.Maskf(invalidConfigError, "config.ProjectName must not be empty")
 	}
 
-	var awsService *awsservice.Service
-	{
-		c := awsservice.Config{
-			Clients: awsservice.Clients{
-				IAM: config.GuestAWSClients.IAM,
-				KMS: config.GuestAWSClients.KMS,
-			},
-			Logger: config.Logger,
+	/*
+		var awsService *awsservice.Service
+		{
+			c := awsservice.Config{
+				Clients: awsservice.Clients{
+					IAM: config.GuestAWSClients.IAM,
+					KMS: config.GuestAWSClients.KMS,
+				},
+				Logger: config.Logger,
+			}
+
+			awsService, err = awsservice.New(c)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
 		}
 
-		awsService, err = awsservice.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
+		var cloudConfig *cloudconfig.CloudConfig
+		{
+			c := cloudconfig.Config{
+				Logger: config.Logger,
+				OIDC:   config.OIDC,
+			}
 
-	var cloudConfig *cloudconfig.CloudConfig
-	{
-		c := cloudconfig.Config{
-			Logger: config.Logger,
-			OIDC:   config.OIDC,
+			cloudConfig, err = cloudconfig.New(c)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
 		}
-
-		cloudConfig, err = cloudconfig.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
+	*/
 
 	var cloudFormationService *cloudformationservice.CloudFormation
 	{
@@ -162,53 +161,55 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 		}
 	}
 
-	var s3BucketResource framework.Resource
-	{
-		c := s3bucket.Config{
-			AwsService: awsService,
-			Clients: s3bucket.Clients{
-				S3: config.GuestAWSClients.S3,
-			},
-			Logger: config.Logger,
+	/*
+		var s3BucketResource framework.Resource
+		{
+			c := s3bucket.Config{
+				AwsService: awsService,
+				Clients: s3bucket.Clients{
+					S3: config.GuestAWSClients.S3,
+				},
+				Logger: config.Logger,
 
-			InstallationName: config.InstallationName,
+				InstallationName: config.InstallationName,
+			}
+
+			ops, err := s3bucket.New(c)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+
+			s3BucketResource, err = toCRUDResource(config.Logger, ops)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
 		}
 
-		ops, err := s3bucket.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
+		var s3BucketObjectResource framework.Resource
+		{
+			c := s3object.Config{
+				AwsService: awsService,
+				Clients: s3object.Clients{
+					S3:  config.GuestAWSClients.S3,
+					KMS: config.GuestAWSClients.KMS,
+				},
+				CloudConfig:      cloudConfig,
+				CertWatcher:      config.CertsSearcher,
+				Logger:           config.Logger,
+				RandomKeyWatcher: config.RandomkeysSearcher,
+			}
 
-		s3BucketResource, err = toCRUDResource(config.Logger, ops)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
+			ops, err := s3object.New(c)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
 
-	var s3BucketObjectResource framework.Resource
-	{
-		c := s3object.Config{
-			AwsService: awsService,
-			Clients: s3object.Clients{
-				S3:  config.GuestAWSClients.S3,
-				KMS: config.GuestAWSClients.KMS,
-			},
-			CloudConfig:      cloudConfig,
-			CertWatcher:      config.CertsSearcher,
-			Logger:           config.Logger,
-			RandomKeyWatcher: config.RandomkeysSearcher,
+			s3BucketObjectResource, err = toCRUDResource(config.Logger, ops)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
 		}
-
-		ops, err := s3object.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		s3BucketObjectResource, err = toCRUDResource(config.Logger, ops)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
+	*/
 
 	var loadBalancerResource framework.Resource
 	{
@@ -341,8 +342,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 
 	resources := []framework.Resource{
 		kmsKeyResource,
-		s3BucketResource,
-		s3BucketObjectResource,
+		//s3BucketResource,
+		//s3BucketObjectResource,
 		loadBalancerResource,
 		ebsVolumeResource,
 		cloudformationResource,
