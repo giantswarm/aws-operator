@@ -2,6 +2,7 @@ package s3bucket
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -27,6 +28,10 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		_, err = r.clients.S3.CreateBucket(&s3.CreateBucketInput{
 			Bucket: aws.String(bucketInput.Name),
 		})
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 CREATE BUCKET ERROR: %#v", err))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ERROR CAUSE: %#v", microerror.Cause(err)))
+
 		if IsBucketAlreadyExists(err) || IsBucketAlreadyOwnedByYou(err) {
 			// Fall through.
 			return nil
