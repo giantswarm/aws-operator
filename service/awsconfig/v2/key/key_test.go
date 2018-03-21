@@ -807,7 +807,6 @@ func TestRootDir(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			t.Parallel()
 			actual, err := RootDir(tc.baseDir, tc.rootElement)
 
 			if err != nil && !tc.expectedError {
@@ -1021,7 +1020,6 @@ func Test_ImageID(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			t.Parallel()
 			imageID, err := ImageID(tc.customObject)
 			if tc.errorMatcher != nil && err == nil {
 				t.Error("expected error didn't happen")

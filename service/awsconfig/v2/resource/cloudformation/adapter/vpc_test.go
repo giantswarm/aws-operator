@@ -45,7 +45,6 @@ func TestAdapterVPCRegularFields(t *testing.T) {
 	for _, tc := range testCases {
 		a := Adapter{}
 		t.Run(tc.description, func(t *testing.T) {
-			t.Parallel()
 			cfg := Config{
 				CustomObject:     customObject,
 				Clients:          Clients{},
@@ -103,7 +102,6 @@ func TestAdapterVPCPeerRoleField(t *testing.T) {
 	for _, tc := range testCases {
 		a := Adapter{}
 		t.Run(tc.description, func(t *testing.T) {
-			t.Parallel()
 			cfg := Config{
 				CustomObject: customObject,
 				HostClients: Clients{

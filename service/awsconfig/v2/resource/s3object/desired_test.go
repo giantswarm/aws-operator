@@ -58,7 +58,6 @@ func Test_DesiredState(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			t.Parallel()
 			resourceConfig.CloudConfig = &CloudConfigMock{
 				template: tc.expectedBody,
 			}
