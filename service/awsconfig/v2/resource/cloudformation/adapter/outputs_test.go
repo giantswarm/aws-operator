@@ -23,7 +23,6 @@ func TestAdapterOutputsRegularFields(t *testing.T) {
 		a := Adapter{}
 		clients := Clients{}
 		t.Run(tc.description, func(t *testing.T) {
-			t.Parallel()
 			cfg := Config{
 				Clients: clients,
 			}

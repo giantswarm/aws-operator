@@ -62,7 +62,6 @@ func Test_newDelete(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			t.Parallel()
 			result, err := newResource.newDeleteChange(context.TODO(), customObject, tc.currentState, tc.desiredState)
 			if err != nil {
 				t.Errorf("expected '%v' got '%#v'", nil, err)

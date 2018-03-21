@@ -34,7 +34,6 @@ func Test_DesiredState(t *testing.T) {
 	resourceConfig.Logger = microloggertest.New()
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			t.Parallel()
 			newResource, err = New(resourceConfig)
 			if err != nil {
 				t.Error("expected", nil, "got", err)
