@@ -10,74 +10,74 @@ import (
 	"github.com/giantswarm/microerror"
 	microserver "github.com/giantswarm/microkit/server"
 	"github.com/giantswarm/micrologger"
-	kithttp "github.com/go-kit/kit/transport/http"
+	"github.com/spf13/viper"
 
 	"github.com/giantswarm/aws-operator/server/endpoint"
 	"github.com/giantswarm/aws-operator/service"
 )
 
-// Config represents the configuration used to create a new server object.
 type Config struct {
-	// Dependencies.
+	Logger  micrologger.Logger
 	Service *service.Service
+	Viper   *viper.Viper
 
-	// Settings.
-	MicroServerConfig microserver.Config
+	ProjectName string
 }
 
-// DefaultConfig provides a default configuration to create a new server object
-// by best effort.
-func DefaultConfig() Config {
-	return Config{
-		// Dependencies.
-		Service: nil,
-
-		// Settings.
-		MicroServerConfig: microserver.DefaultConfig(),
-	}
-}
-
-// New creates a new configured server object.
 func New(config Config) (microserver.Server, error) {
 	var err error
+
+	if config.Logger == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
+	}
+	if config.Service == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Service must not be empty", config)
+	}
+	if config.Viper == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Viper must not be empty", config)
+	}
+
+	if config.ProjectName == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ProjectName must not be empty", config)
+	}
 
 	var endpointCollection *endpoint.Endpoint
 	{
 		c := endpoint.Config{
-			Logger:  config.MicroServerConfig.Logger,
+			Logger:  config.Logger,
 			Service: config.Service,
 		}
+
 		endpointCollection, err = endpoint.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	newServer := &server{
-		// Dependencies.
-		logger: config.MicroServerConfig.Logger,
+	s := &server{
+		logger: config.Logger,
 
-		// Internals.
-		bootOnce:     sync.Once{},
-		config:       config.MicroServerConfig,
+		bootOnce: sync.Once{},
+		config: microserver.Config{
+			Logger:      config.Logger,
+			ServiceName: config.ProjectName,
+			Viper:       config.Viper,
+
+			Endpoints: []microserver.Endpoint{
+				endpointCollection.Healthz,
+				endpointCollection.Version,
+			},
+			ErrorEncoder: encodeError,
+		},
 		shutdownOnce: sync.Once{},
 	}
 
-	// Apply internals to the micro server config.
-	newServer.config.Endpoints = []microserver.Endpoint{
-		endpointCollection.Healthz,
-		endpointCollection.Version,
-	}
-	newServer.config.ErrorEncoder = newServer.newErrorEncoder()
-
-	return newServer, nil
+	return s, nil
 }
 
 type server struct {
-	// Dependencies.
 	logger micrologger.Logger
 
-	// Internals.
 	bootOnce     sync.Once
 	config       microserver.Config
 	shutdownOnce sync.Once
@@ -85,7 +85,7 @@ type server struct {
 
 func (s *server) Boot() {
 	s.bootOnce.Do(func() {
-		// Here goes your custom boot logic for your server/endpoint/middleware, if
+		// Here goes your custom boot logic for your server/endpoint if
 		// any.
 	})
 }
@@ -96,18 +96,16 @@ func (s *server) Config() microserver.Config {
 
 func (s *server) Shutdown() {
 	s.shutdownOnce.Do(func() {
-		// Here goes your custom shutdown logic for your server/endpoint/middleware,
-		// if any.
+		// Here goes your custom shutdown logic for your
+		// server/endpoint if any.
 	})
 }
 
-func (s *server) newErrorEncoder() kithttp.ErrorEncoder {
-	return func(ctx context.Context, err error, w http.ResponseWriter) {
-		rErr := err.(microserver.ResponseError)
-		uErr := rErr.Underlying()
+func encodeError(ctx context.Context, err error, w http.ResponseWriter) {
+	rErr := err.(microserver.ResponseError)
+	uErr := rErr.Underlying()
 
-		rErr.SetCode(microserver.CodeInternalError)
-		rErr.SetMessage(uErr.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	rErr.SetCode(microserver.CodeInternalError)
+	rErr.SetMessage(uErr.Error())
+	w.WriteHeader(http.StatusInternalServerError)
 }

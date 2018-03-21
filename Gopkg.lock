@@ -54,8 +54,8 @@
     "service/s3",
     "service/sts"
   ]
-  revision = "62465d4996f172ae426fdcec7a6a053062cf8995"
-  version = "v1.13.15"
+  revision = "3698d5a02699973b1c9c8731b1c81f83bfcfd72f"
+  version = "v1.13.17"
 
 [[projects]]
   branch = "master"
@@ -187,12 +187,9 @@
     "command/version",
     "flag",
     "server",
-    "tls",
-    "transaction",
-    "transaction/context/id",
-    "transaction/context/tracked"
+    "tls"
   ]
-  revision = "b700edbe027ced8bab334c54e3c07aba17098472"
+  revision = "72abbaa63827895b5e4964983814e7cdc5353474"
 
 [[projects]]
   branch = "master"
@@ -203,15 +200,6 @@
     "microloggertest"
   ]
   revision = "2aaea11da0707ebb7f9fbabb07028a37b00efc16"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/giantswarm/microstorage"
-  packages = [
-    ".",
-    "memory"
-  ]
-  revision = "4411a6307c6b844b7f9e68aaba37407b41b1c4d7"
 
 [[projects]]
   branch = "master"
@@ -229,7 +217,7 @@
     "framework/resource/retryresource",
     "informer"
   ]
-  revision = "75ba7e3afe272731ffb693bad7920c9bf2baa8d7"
+  revision = "d2b591431f19bc9035bafce284b903eafe85ae80"
 
 [[projects]]
   branch = "master"
@@ -244,7 +232,7 @@
   branch = "master"
   name = "github.com/giantswarm/versionbundle"
   packages = ["."]
-  revision = "9172db5125f7c75ba988e26ed6571151d43c3565"
+  revision = "011ad2d98cb7db5c98e204713aac338d6a90f3b4"
 
 [[projects]]
   name = "github.com/go-ini/ini"
@@ -390,6 +378,7 @@
     ".",
     "hcl/ast",
     "hcl/parser",
+    "hcl/printer",
     "hcl/scanner",
     "hcl/strconv",
     "hcl/token",
@@ -397,7 +386,7 @@
     "json/scanner",
     "json/token"
   ]
-  revision = "23c074d0eceb2b8a5bfdbb271ab780cde70f05a8"
+  revision = "f40e974e75af4e271d97ce0fc917af5898ae7bda"
 
 [[projects]]
   branch = "master"
@@ -425,8 +414,8 @@
 [[projects]]
   name = "github.com/json-iterator/go"
   packages = ["."]
-  revision = "3353055b2a1a5ae1b6a8dfde887a524e7088f3a2"
-  version = "1.1.2"
+  revision = "ca39e5af3ece67bbcda3d0f4f56a8e24d9f2dad4"
+  version = "1.1.3"
 
 [[projects]]
   branch = "master"
@@ -460,7 +449,7 @@
     "jlexer",
     "jwriter"
   ]
-  revision = "f594efddfa171111dc4349cd6e78e8f61dc7936f"
+  revision = "517203d186eb343d3df4068565cc0446b450d2c4"
 
 [[projects]]
   name = "github.com/matttproud/golang_protobuf_extensions"
@@ -517,7 +506,7 @@
     "prometheus",
     "prometheus/promhttp"
   ]
-  revision = "c3324c1198cf3374996e9d3098edd46a6b55afc9"
+  revision = "d49167c4b9f3c4451707560c5c71471ff5291aaa"
 
 [[projects]]
   branch = "master"
@@ -582,8 +571,8 @@
 [[projects]]
   name = "github.com/spf13/viper"
   packages = ["."]
-  revision = "25b30aa063fc18e48662b86996252eabdcf2f0c7"
-  version = "v1.0.0"
+  revision = "b5e8006cbee93ec955a89ab31e0e3ce3204f3736"
+  version = "v1.0.2"
 
 [[projects]]
   name = "github.com/stretchr/testify"
@@ -601,7 +590,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "b4956d363a8b14623cc81db401707679605930a3"
+  revision = "80db560fac1fb3e6ac81dbc7f8ae4c061f5257bd"
 
 [[projects]]
   branch = "master"
@@ -614,7 +603,7 @@
     "lex/httplex",
     "publicsuffix"
   ]
-  revision = "e0c57d8f86c17f0724497efcb3bc617e82834821"
+  revision = "6078986fec03a1dcc236c34816c71b0e05018fda"
 
 [[projects]]
   branch = "master"
@@ -629,7 +618,7 @@
     "unix",
     "windows"
   ]
-  revision = "cc7307a45468e49eaf2997c890f14aa03a26917b"
+  revision = "641605214e7dab930817f68e2fef560efbb033e5"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -844,6 +833,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d336d640bff2bce5359dccf77584e42ccc7cc629538ca3ab51461e1abd043a57"
+  inputs-digest = "16a6b7522162ce0bf29f3be1262955b6effc4c7aec5921cf9ae2ec5d36771698"
   solver-name = "gps-cdcl"
   solver-version = 1

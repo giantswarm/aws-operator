@@ -3,29 +3,25 @@ package versionbundle
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/url"
 	"sync"
 
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 	"github.com/go-resty/resty"
 	"golang.org/x/sync/errgroup"
 )
 
 type CollectorConfig struct {
+	Logger     micrologger.Logger
 	RestClient *resty.Client
 
 	Endpoints []*url.URL
 }
 
-func DefaultCollectorConfig() CollectorConfig {
-	return CollectorConfig{
-		RestClient: nil,
-
-		Endpoints: nil,
-	}
-}
-
 type Collector struct {
+	logger     micrologger.Logger
 	restClient *resty.Client
 
 	bundles []Bundle
@@ -35,15 +31,19 @@ type Collector struct {
 }
 
 func NewCollector(config CollectorConfig) (*Collector, error) {
+	if config.Logger == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
+	}
 	if config.RestClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.RestClient must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.RestClient must not be empty", config)
 	}
 
 	if len(config.Endpoints) == 0 {
-		return nil, microerror.Maskf(invalidConfigError, "config.Endpoints must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.Endpoints must not be empty", config)
 	}
 
 	c := &Collector{
+		logger:     config.Logger,
 		restClient: config.RestClient,
 
 		bundles: nil,
@@ -67,21 +67,28 @@ type CollectorEndpointResponse struct {
 }
 
 func (c *Collector) Collect(ctx context.Context) error {
-	var responses [][]byte
+	c.logger.Log("level", "debug", "message", "collector starts collecting version bundles from endpoints")
+
+	responses := map[string][]byte{}
 	{
 		var g errgroup.Group
-		responses = make([][]byte, len(c.endpoints))
 
-		for i, e := range c.endpoints {
-			i, e := i, e
+		for _, endpoint := range c.endpoints {
+			e := endpoint
 
 			g.Go(func() error {
+				c.logger.Log("endpoint", e.String(), "level", "debug", "message", "collector requesting version bundles from endpoint")
+
 				res, err := c.restClient.NewRequest().Get(e.String())
 				if err != nil {
 					return microerror.Mask(err)
 				}
 
-				responses[i] = res.Body()
+				c.logger.Log("endpoint", e.String(), "level", "debug", "message", "collector received version bundles from endpoint")
+
+				c.mutex.Lock()
+				responses[e.String()] = res.Body()
+				c.mutex.Unlock()
 
 				return nil
 			})
@@ -96,16 +103,15 @@ func (c *Collector) Collect(ctx context.Context) error {
 	var bundles []Bundle
 	{
 
-		for _, b := range responses {
-			var er CollectorEndpointResponse
-			err := json.Unmarshal(b, &er)
+		for e, b := range responses {
+			var r CollectorEndpointResponse
+			err := json.Unmarshal(b, &r)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 
-			for _, bundle := range er.VersionBundles {
-				bundles = append(bundles, bundle)
-			}
+			c.logger.Log("endpoint", e, "level", "debug", "message", fmt.Sprintf("collector found %d version bundles from endpoint", len(r.VersionBundles)))
+			bundles = append(bundles, r.VersionBundles...)
 		}
 	}
 
@@ -114,6 +120,8 @@ func (c *Collector) Collect(ctx context.Context) error {
 		c.bundles = bundles
 		c.mutex.Unlock()
 	}
+
+	c.logger.Log("level", "debug", "message", "collector finishes collecting version bundles from endpoints")
 
 	return nil
 }

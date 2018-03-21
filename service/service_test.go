@@ -17,34 +17,36 @@ func Test_Service_New(t *testing.T) {
 	}{
 		{
 			description:          "default config is invalid",
-			config:               DefaultConfig,
+			config:               func() Config { return Config{} },
 			expectedErrorHandler: IsInvalidConfig,
 		},
 		{
 			description: "production like config is valid",
 			config: func() Config {
-				config := DefaultConfig()
-				config.Logger = microloggertest.New()
-				config.Flag = flag.New()
-				config.Viper = viper.New()
+				f := flag.New()
 
-				config.Description = "test"
-				config.GitCommit = "test"
-				config.Name = "test"
-				config.Source = "test"
+				v := viper.New()
+				v.Set(f.Service.AWS.AccessKey.ID, "accessKeyID")
+				v.Set(f.Service.AWS.AccessKey.Secret, "accessKeySecret")
+				v.Set(f.Service.AWS.AccessKey.Session, "session")
+				v.Set(f.Service.AWS.Region, "myregion")
+				v.Set(f.Service.AWS.PubKeyFile, "test")
 
-				config.Viper.Set(config.Flag.Service.AWS.AccessKey.ID, "accessKeyID")
-				config.Viper.Set(config.Flag.Service.AWS.AccessKey.Secret, "accessKeySecret")
-				config.Viper.Set(config.Flag.Service.AWS.AccessKey.Session, "session")
-				config.Viper.Set(config.Flag.Service.AWS.Region, "myregion")
-				config.Viper.Set(config.Flag.Service.AWS.PubKeyFile, "test")
+				v.Set(f.Service.Installation.Name, "test")
 
-				config.Viper.Set(config.Flag.Service.Installation.Name, "test")
+				v.Set(f.Service.Kubernetes.Address, "http://127.0.0.1:6443")
+				v.Set(f.Service.Kubernetes.InCluster, "false")
 
-				config.Viper.Set(config.Flag.Service.Kubernetes.Address, "http://127.0.0.1:6443")
-				config.Viper.Set(config.Flag.Service.Kubernetes.InCluster, "false")
+				return Config{
+					Logger: microloggertest.New(),
+					Flag:   f,
+					Viper:  v,
 
-				return config
+					Description: "test",
+					GitCommit:   "test",
+					ProjectName: "test",
+					Source:      "test",
+				}
 			},
 			expectedErrorHandler: nil,
 		},
