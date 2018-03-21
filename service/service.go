@@ -3,6 +3,7 @@
 package service
 
 import (
+	"context"
 	"sync"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
@@ -29,46 +30,24 @@ const (
 
 // Config represents the configuration used to create a new service.
 type Config struct {
-	// Dependencies.
 	Logger micrologger.Logger
 
-	// Settings.
 	Flag  *flag.Flag
 	Viper *viper.Viper
 
 	Description string
 	GitCommit   string
-	Name        string
+	ProjectName string
 	Source      string
 }
 
-// DefaultConfig provides a default configuration to create a new service by
-// best effort.
-func DefaultConfig() Config {
-	return Config{
-		// Dependencies.
-		Logger: nil,
-
-		// Settings.
-		Flag:  nil,
-		Viper: nil,
-
-		Description: "",
-		GitCommit:   "",
-		Name:        "",
-		Source:      "",
-	}
-}
-
 type Service struct {
-	// Dependencies.
 	Alerter          *alerter.Service
 	ClusterFramework *framework.Framework
 	DrainerFramework *framework.Framework
 	Healthz          *healthz.Service
 	Version          *version.Service
 
-	// Internals.
 	bootOnce sync.Once
 }
 
@@ -152,7 +131,7 @@ func New(config Config) (*Service, error) {
 				UsernameClaim: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.UsernameClaim),
 				GroupsClaim:   config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.GroupsClaim),
 			},
-			ProjectName: config.Name,
+			ProjectName: config.ProjectName,
 			PubKeyFile:  config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile),
 		}
 
@@ -177,7 +156,7 @@ func New(config Config) (*Service, error) {
 				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
 			},
 			GuestUpdateEnabled: config.Viper.GetBool(config.Flag.Service.Guest.Update.Enabled),
-			ProjectName:        config.Name,
+			ProjectName:        config.ProjectName,
 		}
 
 		drainerFramework, err = awsconfig.NewDrainerFramework(c)
@@ -230,7 +209,7 @@ func New(config Config) (*Service, error) {
 
 		versionConfig.Description = config.Description
 		versionConfig.GitCommit = config.GitCommit
-		versionConfig.Name = config.Name
+		versionConfig.Name = config.ProjectName
 		versionConfig.Source = config.Source
 		versionConfig.VersionBundles = NewVersionBundles()
 
@@ -255,7 +234,7 @@ func New(config Config) (*Service, error) {
 	return newService, nil
 }
 
-func (s *Service) Boot() {
+func (s *Service) Boot(ctx context.Context) {
 	s.bootOnce.Do(func() {
 		// Start alerts to check for orphan resources.
 		s.Alerter.StartAlerts()

@@ -14,11 +14,9 @@ import (
 
 // Config represents the configuration used to create a new root command.
 type Config struct {
-	// Dependencies.
 	Logger        micrologger.Logger
 	ServerFactory daemon.ServerFactory
 
-	// Settings.
 	Description    string
 	GitCommit      string
 	Name           string
@@ -27,37 +25,23 @@ type Config struct {
 	Viper          *viper.Viper
 }
 
-// DefaultConfig provides a default configuration to create a new root command
-// by best effort.
-func DefaultConfig() Config {
-	return Config{
-		// Dependencies.
-		Logger:        nil,
-		ServerFactory: nil,
-
-		// Settings.
-		Description:    "",
-		GitCommit:      "",
-		Name:           "",
-		Source:         "",
-		VersionBundles: []versionbundle.Bundle{},
-		Viper:          viper.New(),
-	}
-}
-
 // New creates a new root command.
 func New(config Config) (Command, error) {
 	var err error
 
+	if config.Viper == nil {
+		config.Viper = viper.New()
+	}
+
 	var daemonCommand daemon.Command
 	{
-		daemonConfig := daemon.DefaultConfig()
+		c := daemon.Config{
+			Logger:        config.Logger,
+			ServerFactory: config.ServerFactory,
+			Viper:         config.Viper,
+		}
 
-		daemonConfig.Logger = config.Logger
-		daemonConfig.ServerFactory = config.ServerFactory
-		daemonConfig.Viper = config.Viper
-
-		daemonCommand, err = daemon.New(daemonConfig)
+		daemonCommand, err = daemon.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -65,13 +49,13 @@ func New(config Config) (Command, error) {
 
 	var versionCommand version.Command
 	{
-		versionConfig := version.DefaultConfig()
-
-		versionConfig.Description = config.Description
-		versionConfig.GitCommit = config.GitCommit
-		versionConfig.Name = config.Name
-		versionConfig.Source = config.Source
-		versionConfig.VersionBundles = config.VersionBundles
+		versionConfig := version.Config{
+			Description:    config.Description,
+			GitCommit:      config.GitCommit,
+			Name:           config.Name,
+			Source:         config.Source,
+			VersionBundles: config.VersionBundles,
+		}
 
 		versionCommand, err = version.New(versionConfig)
 		if err != nil {
