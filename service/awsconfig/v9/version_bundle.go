@@ -10,8 +10,8 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "component",
-				Description: "Add your description here",
+				Component:   "AWS instance support",
+				Description: "Added support for AWS NVMe instance storage.",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
