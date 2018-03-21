@@ -5,7 +5,7 @@ const PersistentVarLibDockerMount = `
 Description=Mount persistent volume on /var/lib/docker
 
 [Mount]
-What=/dev/xvdh
+What=/dev/disk/by-label/docker
 Where=/var/lib/docker
 Type=xfs
 
