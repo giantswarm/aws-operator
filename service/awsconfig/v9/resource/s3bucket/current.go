@@ -2,6 +2,7 @@ package s3bucket
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -14,6 +15,8 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
+
+	r.logger.LogCtx(ctx, fmt.Sprintf("S3BUCKET CLIENTS %#v", r.clients))
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "looking for the S3 bucket")
 

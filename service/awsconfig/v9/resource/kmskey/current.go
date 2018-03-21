@@ -2,6 +2,7 @@ package kmskey
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
@@ -17,6 +18,8 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	if err != nil {
 		return currentState, err
 	}
+
+	r.logger.LogCtx(ctx, fmt.Sprintf("KMSKEY CLIENTS %#v", r.awsClients))
 
 	clusterID := key.ClusterID(customObject)
 	alias := toAlias(clusterID)
