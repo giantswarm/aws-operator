@@ -93,7 +93,6 @@ func Test_Resource_S3Bucket_newCreate(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			t.Parallel()
 			result, err := newResource.newCreateChange(context.TODO(), tc.obj, tc.currentState, tc.desiredState)
 			if err != nil {
 				t.Errorf("expected '%v' got '%#v'", nil, err)

@@ -39,7 +39,6 @@ func Test_CurrentState(t *testing.T) {
 	resourceConfig.Logger = microloggertest.New()
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			t.Parallel()
 			resourceConfig.Clients = Clients{
 				KMS: &KMSClientMock{
 					keyID:   tc.expectedKeyID,
