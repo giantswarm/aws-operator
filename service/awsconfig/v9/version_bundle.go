@@ -16,7 +16,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "cloudconfig",
-				Description: "Nginx-ingress-controller updated to version 0.12.0",
+				Description: "Nginx Ingress Controller updated to version 0.12.0",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
