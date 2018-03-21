@@ -16,21 +16,40 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		return microerror.Mask(err)
 	}
 
-	if deleteInput != nil && len(deleteInput.VolumeIDs) > 0 {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting %d ebs volumes", len(deleteInput.VolumeIDs)))
+	if deleteInput != nil && len(deleteInput.Volumes) > 0 {
+		r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("deleting %d ebs volumes", len(deleteInput.Volumes)))
 
-		for _, volID := range deleteInput.VolumeIDs {
+		for _, vol := range deleteInput.Volumes {
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting ebs volume %s", vol.VolumeID))
+
+			for _, a := range vol.Attachments {
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detaching volume %s from instance %s", vol.VolumeID, a.InstanceID))
+
+				_, err := r.clients.EC2.DetachVolume(&ec2.DetachVolumeInput{
+					Device:     aws.String(a.Device),
+					InstanceId: aws.String(a.InstanceID),
+					VolumeId:   aws.String(vol.VolumeID),
+				})
+				if err != nil {
+					return microerror.Mask(err)
+				}
+
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detached volume %s from instance %s", vol.VolumeID, a.InstanceID))
+			}
+
 			_, err := r.clients.EC2.DeleteVolume(&ec2.DeleteVolumeInput{
-				VolumeId: aws.String(volID),
+				VolumeId: aws.String(vol.VolumeID),
 			})
 			if err != nil {
 				return microerror.Mask(err)
 			}
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted ebs volume %s", vol.VolumeID))
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted %d ebs volumes", len(deleteInput.VolumeIDs)))
+		r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("deleted %d ebs volumes", len(deleteInput.Volumes)))
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting load ebs volumes because there aren't any")
+		r.logger.LogCtx(ctx, "level", "info", "message", "not deleting load ebs volumes because there aren't any")
 	}
 
 	return nil
@@ -59,7 +78,7 @@ func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desir
 	}
 
 	var volStateToDelete *EBSVolumeState
-	if desiredVolState == nil && currentVolState != nil && len(currentVolState.VolumeIDs) > 0 {
+	if desiredVolState == nil && currentVolState != nil && len(currentVolState.Volumes) > 0 {
 		volStateToDelete = currentVolState
 	}
 

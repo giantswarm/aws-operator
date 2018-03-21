@@ -30,16 +30,73 @@ func Test_newDeleteChange(t *testing.T) {
 			description: "basic match",
 			obj:         customObject,
 			currentState: &EBSVolumeState{
-				VolumeIDs: []string{
-					"vol-1234",
-					"vol-5678",
+				Volumes: []Volume{
+					{
+						VolumeID: "vol-1234",
+					},
+					{
+						VolumeID: "vol-5678",
+					},
 				},
 			},
 			desiredState: nil,
 			expectedState: &EBSVolumeState{
-				VolumeIDs: []string{
-					"vol-1234",
-					"vol-5678",
+				Volumes: []Volume{
+					{
+						VolumeID: "vol-1234",
+					},
+					{
+						VolumeID: "vol-5678",
+					},
+				},
+			},
+		},
+		{
+			description: "basic match with attachments",
+			obj:         customObject,
+			currentState: &EBSVolumeState{
+				Volumes: []Volume{
+					{
+						Attachments: []VolumeAttachment{
+							{
+								InstanceID: "i-12345",
+								Device:     "/dev/sdh",
+							},
+						},
+						VolumeID: "vol-1234",
+					},
+					{
+						Attachments: []VolumeAttachment{
+							{
+								InstanceID: "i-56789",
+								Device:     "/dev/sdh",
+							},
+						},
+						VolumeID: "vol-5678",
+					},
+				},
+			},
+			desiredState: nil,
+			expectedState: &EBSVolumeState{
+				Volumes: []Volume{
+					{
+						Attachments: []VolumeAttachment{
+							{
+								InstanceID: "i-12345",
+								Device:     "/dev/sdh",
+							},
+						},
+						VolumeID: "vol-1234",
+					},
+					{
+						Attachments: []VolumeAttachment{
+							{
+								InstanceID: "i-56789",
+								Device:     "/dev/sdh",
+							},
+						},
+						VolumeID: "vol-5678",
+					},
 				},
 			},
 		},
@@ -54,7 +111,7 @@ func Test_newDeleteChange(t *testing.T) {
 			description: "return nil when current volumes are empty",
 			obj:         customObject,
 			currentState: &EBSVolumeState{
-				VolumeIDs: []string{},
+				Volumes: []Volume{},
 			},
 			desiredState:  nil,
 			expectedState: nil,
@@ -63,13 +120,17 @@ func Test_newDeleteChange(t *testing.T) {
 			description: "return nil when desired state is not nil",
 			obj:         customObject,
 			currentState: &EBSVolumeState{
-				VolumeIDs: []string{
-					"vol-1234",
+				Volumes: []Volume{
+					{
+						VolumeID: "vol-1234",
+					},
 				},
 			},
 			desiredState: &EBSVolumeState{
-				VolumeIDs: []string{
-					"vol-1234",
+				Volumes: []Volume{
+					{
+						VolumeID: "vol-1234",
+					},
 				},
 			},
 			expectedState: nil,

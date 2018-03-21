@@ -10,9 +10,9 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "component",
-				Description: "Add your description here",
-				Kind:        versionbundle.KindChanged,
+				Component:   "aws-operator",
+				Description: "Detach EBS volumes before deletion when deleting clusters.",
+				Kind:        versionbundle.KindFixed,
 			},
 		},
 		Components: []versionbundle.Component{
