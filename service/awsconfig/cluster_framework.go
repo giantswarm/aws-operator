@@ -9,6 +9,7 @@ import (
 	"github.com/giantswarm/operatorkit/client/k8scrdclient"
 	"github.com/giantswarm/operatorkit/framework"
 	"github.com/giantswarm/operatorkit/informer"
+	"github.com/giantswarm/randomkeys"
 	"github.com/giantswarm/randomkeytpr"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
@@ -196,6 +197,19 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 		keyConfig.K8sClient = config.K8sClient
 		keyConfig.Logger = config.Logger
 		keyWatcher, err = randomkeytpr.NewService(keyConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var randomKeySearcher randomkeys.Interface
+	{
+		c := randomkeys.Config{
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+		}
+
+		randomKeySearcher, err = randomkeys.NewSearcher(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -445,7 +459,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
-			RandomkeysSearcher: keyWatcher,
+			RandomkeysSearcher: randomKeySearcher,
 
 			GuestUpdateEnabled: config.GuestUpdateEnabled,
 			InstallationName:   config.InstallationName,
