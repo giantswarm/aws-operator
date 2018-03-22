@@ -210,7 +210,7 @@ func newDrainerResourceRouter(config DrainerFrameworkConfig) (*framework.Resourc
 				v7ResourceSet,
 				v8ResourceSet,
 				v9ResourceSet,
-				v10resourceSet,
+				v10ResourceSet,
 			},
 		}
 
