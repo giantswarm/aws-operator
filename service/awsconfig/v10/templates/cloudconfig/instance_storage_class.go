@@ -16,6 +16,7 @@ write_files:
         kubernetes.io/cluster-service: "true"
         addonmanager.kubernetes.io/mode: EnsureExists
     provisioner: kubernetes.io/aws-ebs
+    allowVolumeExpansion: true
     parameters:
       type: gp2
       encrypted: "true"
