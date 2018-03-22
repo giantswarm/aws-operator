@@ -5,7 +5,7 @@ const EphemeralVarLibDockerMount = `
 Description=Mount ephemeral volume on /var/lib/docker
 
 [Mount]
-What=/dev/xvdb
+What=/dev/disk/by-label/docker
 Where=/var/lib/docker
 Type=xfs
 
