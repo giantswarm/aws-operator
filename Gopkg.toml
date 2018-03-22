@@ -20,6 +20,7 @@
 #  version = "2.4.0"
 
 
+
 [[constraint]]
   name = "github.com/aws/aws-sdk-go"
   version = "1.12.3"
@@ -29,15 +30,15 @@
   version = "1.1.0"
 
 [[constraint]]
-  branch = "master"
+  branch = "bump-k8s-libs"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]
-  branch = "legacy"
+  branch = "bump-k8s-libs-legacy"
   name = "github.com/giantswarm/certs"
 
 [[constraint]]
-  branch = "master"
+  branch = "bump-k8s-libs"
   name = "github.com/giantswarm/e2e-harness"
 
 [[constraint]]
@@ -61,11 +62,7 @@
   name = "github.com/giantswarm/micrologger"
 
 [[constraint]]
-  branch = "master"
-  name = "github.com/giantswarm/microstorage"
-
-[[constraint]]
-  branch = "master"
+  branch = "bump-k8s-libs"
   name = "github.com/giantswarm/operatorkit"
 
 [[constraint]]
@@ -75,10 +72,6 @@
 [[constraint]]
   branch = "master"
   name = "github.com/giantswarm/versionbundle"
-
-[[constraint]]
-  name = "github.com/go-kit/kit"
-  version = "0.6.0"
 
 [[constraint]]
   branch = "master"
@@ -94,19 +87,21 @@
 
 [[constraint]]
   name = "k8s.io/api"
-  version = "kubernetes-1.8.5"
+  version = "kubernetes-1.9.3"
 
 [[constraint]]
   name = "k8s.io/apiextensions-apiserver"
-  version = "kubernetes-1.8.5"
+  version = "kubernetes-1.9.3"
 
 [[constraint]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.8.5"
+  version = "kubernetes-1.9.3"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.8.5"
+  version = "kubernetes-1.9.3"
+
+
 
 [prune]
   go-tests = true
