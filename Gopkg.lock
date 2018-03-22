@@ -54,14 +54,14 @@
     "service/s3",
     "service/sts"
   ]
-  revision = "3698d5a02699973b1c9c8731b1c81f83bfcfd72f"
-  version = "v1.13.17"
+  revision = "0a302e6abb548c4a4d22cde8eab1693ee498f202"
+  version = "v1.13.18"
 
 [[projects]]
   branch = "master"
   name = "github.com/beorn7/perks"
   packages = ["quantile"]
-  revision = "4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9"
+  revision = "3a771d992973f24aa725d07868b467d1ddfceafb"
 
 [[projects]]
   name = "github.com/cenkalti/backoff"
@@ -140,10 +140,10 @@
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "b6f3fbcebf6ed04a4b6ef62b1fd4d14920cab704"
+  revision = "8a1f95276ffb0ab135f90f7d8aca4a3274d86bbb"
 
 [[projects]]
-  branch = "master"
+  branch = "xh3b4sd-3-2-4-fix-encryption-key"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "v_2_0_2",
@@ -152,9 +152,10 @@
     "v_3_1_1",
     "v_3_2_1",
     "v_3_2_2",
-    "v_3_2_3"
+    "v_3_2_3",
+    "v_3_2_4"
   ]
-  revision = "367b2c0706ffc1e6f5b7e065e4d7ea597328c5db"
+  revision = "a0f46b96f0c215895365d408a0a127d4397127ab"
 
 [[projects]]
   branch = "master"
@@ -222,6 +223,15 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/giantswarm/randomkeys"
+  packages = [
+    ".",
+    "randomkeystest"
+  ]
+  revision = "c9d471323c5a74329a1863f103dc633ab24c2d19"
+
+[[projects]]
+  branch = "master"
   name = "github.com/giantswarm/randomkeytpr"
   packages = [
     ".",
@@ -233,7 +243,7 @@
   branch = "master"
   name = "github.com/giantswarm/versionbundle"
   packages = ["."]
-  revision = "011ad2d98cb7db5c98e204713aac338d6a90f3b4"
+  revision = "2b7e6cd48a1594f24b36ff78c7d9b9cfb60d57f8"
 
 [[projects]]
   name = "github.com/go-ini/ini"
@@ -534,7 +544,7 @@
     "nfs",
     "xfs"
   ]
-  revision = "54d17b57dd7d4a3aa092476596b3f8a933bde349"
+  revision = "780932d4fbbe0e69b84c34c20f5c8d0981e109ea"
 
 [[projects]]
   branch = "master"
@@ -619,7 +629,7 @@
     "unix",
     "windows"
   ]
-  revision = "641605214e7dab930817f68e2fef560efbb033e5"
+  revision = "91ee8cde435411ca3f1cd365e8f20131aed4d0a1"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -834,6 +844,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9a2d859cad8c220d8950bf69d3e337258954b68ccdb4070b722c749254977526"
+  inputs-digest = "7fbb5e4c0a63f4bf50ec9cf8d96d671bf2fbe96021ad76708a0251e51ac93e6b"
   solver-name = "gps-cdcl"
   solver-version = 1

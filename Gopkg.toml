@@ -41,7 +41,7 @@
   name = "github.com/giantswarm/e2e-harness"
 
 [[constraint]]
-  branch = "master"
+  branch = "xh3b4sd-3-2-4-fix-encryption-key"
   name = "github.com/giantswarm/k8scloudconfig"
 
 [[constraint]]
@@ -62,11 +62,11 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/giantswarm/microstorage"
+  name = "github.com/giantswarm/operatorkit"
 
 [[constraint]]
   branch = "master"
-  name = "github.com/giantswarm/operatorkit"
+  name = "github.com/giantswarm/randomkeys"
 
 [[constraint]]
   branch = "master"
@@ -75,10 +75,6 @@
 [[constraint]]
   branch = "master"
   name = "github.com/giantswarm/versionbundle"
-
-[[constraint]]
-  name = "github.com/go-kit/kit"
-  version = "0.6.0"
 
 [[constraint]]
   branch = "master"
