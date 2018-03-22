@@ -12,6 +12,16 @@ func VersionBundle() versionbundle.Bundle {
 			{
 				Component:   "AWS instance support",
 				Description: "Added support for AWS NVMe instance storage.",
+        Kind:        versionbundle.KindChanged,
+      },
+      {
+				Component:   "cloudconfig",
+				Description: "Kubernetes updated to version 1.9.5.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Nginx Ingress Controller updated to version 0.12.0",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
@@ -38,11 +48,11 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "kubernetes",
-				Version: "1.9.2",
+				Version: "1.9.5",
 			},
 			{
 				Name:    "nginx-ingress-controller",
-				Version: "0.11.0",
+				Version: "0.12.0",
 			},
 		},
 		Dependencies: []versionbundle.Dependency{},
