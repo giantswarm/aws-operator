@@ -14,6 +14,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v7"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v8"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v9"
@@ -183,6 +184,23 @@ func newDrainerResourceRouter(config DrainerFrameworkConfig) (*framework.Resourc
 		}
 	}
 
+	var v10ResourceSet *framework.ResourceSet
+	{
+		c := v10.DrainerResourceSetConfig{
+			AWS:       awsClients,
+			G8sClient: config.G8sClient,
+			Logger:    config.Logger,
+
+			GuestUpdateEnabled: config.GuestUpdateEnabled,
+			ProjectName:        config.ProjectName,
+		}
+
+		v10ResourceSet, err = v10.NewDrainerResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var resourceRouter *framework.ResourceRouter
 	{
 		c := framework.ResourceRouterConfig{
@@ -192,6 +210,7 @@ func newDrainerResourceRouter(config DrainerFrameworkConfig) (*framework.Resourc
 				v7ResourceSet,
 				v8ResourceSet,
 				v9ResourceSet,
+				v10resourceSet,
 			},
 		}
 
