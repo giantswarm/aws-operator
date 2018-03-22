@@ -12,9 +12,9 @@ func VersionBundle() versionbundle.Bundle {
 			{
 				Component:   "AWS instance support",
 				Description: "Added support for AWS NVMe instance storage.",
-        Kind:        versionbundle.KindChanged,
-      },
-      {
+				Kind:        versionbundle.KindChanged,
+			},
+			{
 				Component:   "cloudconfig",
 				Description: "Kubernetes updated to version 1.9.5.",
 				Kind:        versionbundle.KindChanged,
