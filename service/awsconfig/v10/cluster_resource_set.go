@@ -1,4 +1,4 @@
-package v9
+package v10
 
 import (
 	"context"
@@ -16,19 +16,19 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/adapter"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/cloudconfig"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v9/cloudformation"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/key"
-	cloudformationresource "github.com/giantswarm/aws-operator/service/awsconfig/v9/resource/cloudformation"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/resource/ebsvolume"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/resource/endpoints"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/resource/kmskey"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/resource/loadbalancer"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/resource/namespace"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/resource/s3bucket"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/resource/s3object"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/resource/service"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/adapter"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/cloudconfig"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v10/cloudformation"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/key"
+	cloudformationresource "github.com/giantswarm/aws-operator/service/awsconfig/v10/resource/cloudformation"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/resource/ebsvolume"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/resource/endpoints"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/resource/kmskey"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/resource/loadbalancer"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/resource/namespace"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/resource/s3bucket"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/resource/s3object"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/resource/service"
 )
 
 const (

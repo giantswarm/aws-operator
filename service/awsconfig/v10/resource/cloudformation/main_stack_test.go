@@ -8,10 +8,10 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/adapter"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/cloudconfig"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v9/cloudformation"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/key"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/adapter"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/cloudconfig"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v10/cloudformation"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/key"
 )
 
 func testConfig() Config {

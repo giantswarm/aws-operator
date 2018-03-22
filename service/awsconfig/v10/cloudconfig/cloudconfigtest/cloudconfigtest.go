@@ -3,7 +3,7 @@ package cloudconfigtest
 import (
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/cloudconfig"
 )
 
 func New() *cloudconfig.CloudConfig {
