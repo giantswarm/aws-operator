@@ -1,5 +1,5 @@
-hash: be2efcfd20876ffbd36a6c1038add867693971b9fb580c72f1f7797b2ac9d92a
-updated: 2018-01-24T13:35:39.595299+01:00
+hash: 15b68b2a4b8a8e87230dcf5c08489035794c18aa5d5c09a59ea12799314f65aa
+updated: 2018-03-23T15:28:11.230051+01:00
 imports:
 - name: github.com/davecgh/go-spew
   version: 782f4967f2dc4564575ca782fe2d04090b5faca8
@@ -16,13 +16,13 @@ imports:
 - name: github.com/giantswarm/microerror
   version: 325932fa68e70dd4464598f11e2f710ac1aaec46
 - name: github.com/giantswarm/micrologger
-  version: 216e9191d90f55723bfc0e93801af96e6b80eb12
+  version: 2aaea11da0707ebb7f9fbabb07028a37b00efc16
   subpackages:
   - loggermeta
 - name: github.com/giantswarm/operatorkit
-  version: 00eb929ef9604e5037c3ed60a73bf2f4c29f6a31
+  version: ab009f84c1822c7d8271e49883f77d09d22dad00
 - name: github.com/go-kit/kit
-  version: 4dc7be5d2d12881735283bcab7352178e190fc71
+  version: 618005da878c6f91827bd66bd1189403495df76f
   subpackages:
   - log
 - name: github.com/go-logfmt/logfmt
@@ -36,7 +36,7 @@ imports:
 - name: github.com/go-openapi/swag
   version: 1d0bd113de87027671077d3c71eb3ac5d7dbba72
 - name: github.com/go-stack/stack
-  version: 100eb0c0a9c5b306ca2fb4f165df21d80ada4b82
+  version: 259ab82a6cad3992b4e21ff5cac294ccb06474bc
 - name: github.com/gogo/protobuf
   version: c0656edd0d9eab7c66d1eb0c568f9039345796f7
   subpackages:

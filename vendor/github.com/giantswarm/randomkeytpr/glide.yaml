@@ -1,7 +1,7 @@
 package: github.com/giantswarm/randomkeytpr
 import:
 - package: github.com/giantswarm/operatorkit
-  version: master
+  version: bump-k8s-libs
 testImport:
 - package: github.com/stretchr/testify
   version: v1.1.4
