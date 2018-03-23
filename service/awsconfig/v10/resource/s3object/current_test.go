@@ -7,7 +7,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/legacy/legacytest"
 	"github.com/giantswarm/micrologger/microloggertest"
-	"github.com/giantswarm/randomkeytpr/randomkeytprtest"
+	"github.com/giantswarm/randomkeys/randomkeystest"
 
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
 )
@@ -51,30 +51,31 @@ func Test_CurrentState(t *testing.T) {
 			expectedS3Error: true,
 		},
 	}
-	var err error
-	var newResource *Resource
-
-	resourceConfig := DefaultConfig()
-	resourceConfig.CertWatcher = legacytest.NewService()
-	resourceConfig.CloudConfig = &CloudConfigMock{}
-	resourceConfig.Logger = microloggertest.New()
-	resourceConfig.RandomKeyWatcher = randomkeytprtest.NewService()
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			resourceConfig.AwsService = awsservice.AwsServiceMock{
-				AccountID: "myaccountid",
-				IsError:   tc.expectedIAMError,
-			}
-			resourceConfig.Clients = Clients{
-				S3: &S3ClientMock{
-					isError: tc.expectedS3Error,
-					body:    tc.expectedBody,
-				},
-			}
-			newResource, err = New(resourceConfig)
-			if err != nil {
-				t.Error("expected", nil, "got", err)
+			var err error
+			var newResource *Resource
+			{
+				c := Config{}
+				c.CertWatcher = legacytest.NewService()
+				c.CloudConfig = &CloudConfigMock{}
+				c.Logger = microloggertest.New()
+				c.RandomKeySearcher = randomkeystest.NewSearcher()
+				c.AwsService = awsservice.AwsServiceMock{
+					AccountID: "myaccountid",
+					IsError:   tc.expectedIAMError,
+				}
+				c.Clients = Clients{
+					S3: &S3ClientMock{
+						isError: tc.expectedS3Error,
+						body:    tc.expectedBody,
+					},
+				}
+				newResource, err = New(c)
+				if err != nil {
+					t.Error("expected", nil, "got", err)
+				}
 			}
 
 			result, err := newResource.GetCurrentState(context.TODO(), tc.obj)

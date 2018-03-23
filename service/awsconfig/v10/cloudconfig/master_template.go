@@ -5,7 +5,7 @@ import (
 	"github.com/giantswarm/certs/legacy"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_2_4"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/randomkeytpr"
+	"github.com/giantswarm/randomkeys"
 
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/templates/cloudconfig"
 )
@@ -18,18 +18,23 @@ const (
 
 // NewMasterTemplate generates a new master cloud config template and returns it
 // as a base64 encoded string.
-func (c *CloudConfig) NewMasterTemplate(customObject v1alpha1.AWSConfig, certs legacy.CompactTLSAssets, keys randomkeytpr.CompactRandomKeyAssets) (string, error) {
+func (c *CloudConfig) NewMasterTemplate(customObject v1alpha1.AWSConfig, certs legacy.CompactTLSAssets, clusterKeys randomkeys.Cluster, kmsKeyARN string) (string, error) {
 	var err error
+
+	randomKeyTmplSet, err := renderRandomKeyTmplSet(c.kmsClient, clusterKeys, kmsKeyARN)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
 
 	var params k8scloudconfig.Params
 	{
-		params.ApiserverEncryptionKey = keys.APIServerEncryptionKey
 		params.Cluster = customObject.Spec.Cluster
+		params.DisableEncryptionAtREST = true
 		params.EtcdPort = customObject.Spec.Cluster.Etcd.Port
 		params.Extension = &MasterExtension{
-			certs:        certs,
-			customObject: customObject,
-			keys:         keys,
+			certs:            certs,
+			customObject:     customObject,
+			RandomKeyTmplSet: randomKeyTmplSet,
 		}
 		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = c.k8sAPIExtraArgs
 	}
@@ -54,10 +59,16 @@ func (c *CloudConfig) NewMasterTemplate(customObject v1alpha1.AWSConfig, certs l
 	return newCloudConfig.Base64(), nil
 }
 
+// RandomKeyTmplSet holds a collection of rendered templates for random key
+// encryption via KMS.
+type RandomKeyTmplSet struct {
+	APIServerEncryptionKey string
+}
+
 type MasterExtension struct {
-	certs        legacy.CompactTLSAssets
-	customObject v1alpha1.AWSConfig
-	keys         randomkeytpr.CompactRandomKeyAssets
+	certs            legacy.CompactTLSAssets
+	customObject     v1alpha1.AWSConfig
+	RandomKeyTmplSet RandomKeyTmplSet
 }
 
 func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
@@ -176,6 +187,13 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Permissions:  FilePermission,
 		},
 		{
+			AssetContent: e.RandomKeyTmplSet.APIServerEncryptionKey,
+			Path:         "/etc/kubernetes/encryption/k8s-encryption-config.yaml.enc",
+			Owner:        FileOwner,
+			Encoding:     GzipBase64Encoding,
+			Permissions:  0644,
+		},
+		{
 			AssetContent: cloudconfig.WaitDockerConf,
 			Path:         "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
 			Owner:        FileOwner,
@@ -186,13 +204,6 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Path:         "/opt/bin/decrypt-keys-assets",
 			Owner:        FileOwner,
 			Permissions:  FilePermission,
-		},
-		{
-			AssetContent: e.keys.APIServerEncryptionKey,
-			Path:         "/etc/kubernetes/encryption/k8s-encryption-config.yaml.enc",
-			Owner:        FileOwner,
-			Encoding:     GzipBase64Encoding,
-			Permissions:  0644,
 		},
 		// Add use-proxy-protocol to ingress-controller ConfigMap, this doesn't work
 		// on KVM because of dependencies on hardware LB configuration.
