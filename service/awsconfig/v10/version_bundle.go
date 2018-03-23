@@ -10,8 +10,13 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "component",
-				Description: "Add your change here",
+				Component:   "cloudconfig",
+				Description: "Enabled volume resizing feature.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Masked systemd-networkd-wait-online unit.",
 				Kind:        versionbundle.KindChanged,
 			},
 		},

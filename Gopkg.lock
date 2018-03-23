@@ -54,8 +54,8 @@
     "service/s3",
     "service/sts"
   ]
-  revision = "0a302e6abb548c4a4d22cde8eab1693ee498f202"
-  version = "v1.13.18"
+  revision = "c0ea8ae46aeed5902eeebe10d0d5cdf54b258526"
+  version = "v1.13.19"
 
 [[projects]]
   branch = "master"
@@ -122,7 +122,7 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake"
   ]
-  revision = "6379f6848b80a4cdf0b5071a6bba51bed1d53c91"
+  revision = "38869f84ff71c270aba5b43284ea2123c602270b"
 
 [[projects]]
   branch = "legacy"
@@ -155,7 +155,7 @@
     "v_3_2_3",
     "v_3_2_4"
   ]
-  revision = "a0f46b96f0c215895365d408a0a127d4397127ab"
+  revision = "6d0b3b9f26e6b61ae97caa56a1579b45b9c52338"
 
 [[projects]]
   branch = "master"
@@ -243,7 +243,7 @@
   branch = "master"
   name = "github.com/giantswarm/versionbundle"
   packages = ["."]
-  revision = "2b7e6cd48a1594f24b36ff78c7d9b9cfb60d57f8"
+  revision = "9d68178349b5a16f2af8c3d2b4a14dcbcd6fb08b"
 
 [[projects]]
   name = "github.com/go-ini/ini"
@@ -271,19 +271,19 @@
   branch = "master"
   name = "github.com/go-openapi/jsonpointer"
   packages = ["."]
-  revision = "779f45308c19820f1a69e9a4cd965f496e0da10f"
+  revision = "3a0015ad55fa9873f41605d3e8f28cd279c32ab2"
 
 [[projects]]
   branch = "master"
   name = "github.com/go-openapi/jsonreference"
   packages = ["."]
-  revision = "36d33bfe519efae5632669801b180bf1a245da3b"
+  revision = "3fb327e6747da3043567ee86abd02bb6376b6be2"
 
 [[projects]]
   branch = "master"
   name = "github.com/go-openapi/spec"
   packages = ["."]
-  revision = "d8000b5bfbd1147255710505a27c735b6b2ae2ac"
+  revision = "a3092263d8b39f66ff6fe87b0109668eca1e24ff"
 
 [[projects]]
   branch = "master"
@@ -553,7 +553,7 @@
     ".",
     "mem"
   ]
-  revision = "bbf41cb36dffe15dff5bf7e18c447801e7ffe163"
+  revision = "a880a37ed1804d98f64b3b7d58b5e3f8fbf421c4"
 
 [[projects]]
   name = "github.com/spf13/cast"
@@ -601,7 +601,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "80db560fac1fb3e6ac81dbc7f8ae4c061f5257bd"
+  revision = "88942b9c40a4c9d203b82b3731787b672d6e809b"
 
 [[projects]]
   branch = "master"
