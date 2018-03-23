@@ -19,6 +19,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Masked systemd-networkd-wait-online unit.",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "cloudconfig",
+				Description: "Improved encryption key injection.",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
