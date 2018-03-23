@@ -20,7 +20,7 @@ func VersionBundle() versionbundle.Bundle {
 				Kind:        versionbundle.KindChanged,
 			},
 			{
-			Component:   "cloudconfig",
+				Component:   "cloudconfig",
 				Description: "Fixed unencrypted encryption key injection via Cloud Config S3 uploads.",
 				Kind:        versionbundle.KindSecurity,
 			},
@@ -28,7 +28,7 @@ func VersionBundle() versionbundle.Bundle {
 				Component:   "aws-operator",
 				Description: "Detach EBS volumes before deletion when deleting clusters.",
 				Kind:        versionbundle.KindFixed,
-			}.
+			},
 		},
 		Components: []versionbundle.Component{
 			{
