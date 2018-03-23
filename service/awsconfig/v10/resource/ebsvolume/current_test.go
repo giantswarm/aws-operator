@@ -28,18 +28,21 @@ func Test_CurrentState(t *testing.T) {
 		ebsVolumes    []EBSVolumeMock
 	}{
 		{
-			description: "basic match with no ebs volumes",
+			description: "case 0: basic match with no ebs volumes",
 			obj:         customObject,
 			expectedState: &EBSVolumeState{
-				VolumeIDs: []string{},
+				Volumes: []Volume{},
 			},
 		},
 		{
-			description: "basic match with ebs volume",
+			description: "case 1: basic match with ebs volume",
 			obj:         customObject,
 			expectedState: &EBSVolumeState{
-				VolumeIDs: []string{
-					"vol-1234",
+				Volumes: []Volume{
+					{
+						Attachments: []VolumeAttachment{},
+						VolumeID:    "vol-1234",
+					},
 				},
 			},
 			ebsVolumes: []EBSVolumeMock{
@@ -59,12 +62,18 @@ func Test_CurrentState(t *testing.T) {
 			},
 		},
 		{
-			description: "basic match with multiple ebs volumes",
+			description: "case 2: basic match with multiple ebs volumes",
 			obj:         customObject,
 			expectedState: &EBSVolumeState{
-				VolumeIDs: []string{
-					"vol-1234",
-					"vol-5678",
+				Volumes: []Volume{
+					{
+						Attachments: []VolumeAttachment{},
+						VolumeID:    "vol-1234",
+					},
+					{
+						Attachments: []VolumeAttachment{},
+						VolumeID:    "vol-5678",
+					},
 				},
 			},
 			ebsVolumes: []EBSVolumeMock{
@@ -97,10 +106,10 @@ func Test_CurrentState(t *testing.T) {
 			},
 		},
 		{
-			description: "no match due to cluster tag",
+			description: "case 3: no match due to cluster tag",
 			obj:         customObject,
 			expectedState: &EBSVolumeState{
-				VolumeIDs: []string{},
+				Volumes: []Volume{},
 			},
 			ebsVolumes: []EBSVolumeMock{
 				{
@@ -119,10 +128,10 @@ func Test_CurrentState(t *testing.T) {
 			},
 		},
 		{
-			description: "no match due to missing pvc tag",
+			description: "case 4: no match due to missing pvc tag",
 			obj:         customObject,
 			expectedState: &EBSVolumeState{
-				VolumeIDs: []string{},
+				Volumes: []Volume{},
 			},
 			ebsVolumes: []EBSVolumeMock{
 				{
@@ -131,6 +140,72 @@ func Test_CurrentState(t *testing.T) {
 						{
 							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
 							Value: aws.String("owned"),
+						},
+					},
+				},
+			},
+		},
+		{
+			description: "case 5: multiple ebs volumes with attachments",
+			obj:         customObject,
+			expectedState: &EBSVolumeState{
+				Volumes: []Volume{
+					{
+						Attachments: []VolumeAttachment{
+							{
+								InstanceID: "i-12345",
+								Device:     "/dev/sdh",
+							},
+						},
+						VolumeID: "vol-1234",
+					},
+					{
+						Attachments: []VolumeAttachment{
+							{
+								InstanceID: "i-56789",
+								Device:     "/dev/sdh",
+							},
+						},
+						VolumeID: "vol-5678",
+					},
+				},
+			},
+			ebsVolumes: []EBSVolumeMock{
+				{
+					volumeID: "vol-1234",
+					attachments: []*ec2.VolumeAttachment{
+						{
+							Device:     aws.String("/dev/sdh"),
+							InstanceId: aws.String("i-12345"),
+						},
+					},
+					tags: []*ec2.Tag{
+						{
+							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
+							Value: aws.String("owned"),
+						},
+						{
+							Key:   aws.String("kubernetes.io/created-for/pv/name"),
+							Value: aws.String("pvc-1234"),
+						},
+					},
+				},
+				{
+					volumeID: "vol-5678",
+					attachments: []*ec2.VolumeAttachment{
+						{
+							Device:     aws.String("/dev/sdh"),
+							InstanceId: aws.String("i-56789"),
+						},
+					},
+					tags: []*ec2.Tag{
+						{
+							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
+							Value: aws.String("owned"),
+						},
+						{
+							Key:   aws.String("kubernetes.io/created-for/pv/name"),
+							Value: aws.String("pvc-5678"),
 						},
 					},
 				},

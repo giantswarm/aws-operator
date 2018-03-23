@@ -33,7 +33,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 func (r *Resource) persistentVolumes(customObject v1alpha1.AWSConfig) (*EBSVolumeState, error) {
 	volumeState := &EBSVolumeState{}
-	volumeIDs := []string{}
+	volumes := []Volume{}
 
 	// We filter to only select clusters with the cluster cloud provider tag.
 	clusterTag := key.ClusterCloudProviderTag(customObject)
@@ -55,11 +55,27 @@ func (r *Resource) persistentVolumes(customObject v1alpha1.AWSConfig) (*EBSVolum
 	for _, vol := range output.Volumes {
 		// Volume is only included if it has a PV name tag.
 		if containsPersistentVolumeTag(vol.Tags) {
-			volumeIDs = append(volumeIDs, *vol.VolumeId)
+			attachments := []VolumeAttachment{}
+
+			if len(vol.Attachments) > 0 {
+				for _, a := range vol.Attachments {
+					attachments = append(attachments, VolumeAttachment{
+						Device:     *a.Device,
+						InstanceID: *a.InstanceId,
+					})
+				}
+			}
+
+			volume := Volume{
+				VolumeID:    *vol.VolumeId,
+				Attachments: attachments,
+			}
+
+			volumes = append(volumes, volume)
 		}
 	}
 
-	volumeState.VolumeIDs = volumeIDs
+	volumeState.Volumes = volumes
 
 	return volumeState, nil
 }
