@@ -1838,6 +1838,7 @@ write_files:
       name: service-account-context
     current-context: service-account-context
 
+{{ if not .DisableEncryptionAtREST -}}
 - path: /etc/kubernetes/encryption/k8s-encryption-config.yaml
   owner: root
   permissions: 600
@@ -1851,8 +1852,10 @@ write_files:
         - aescbc:
             keys:
             - name: key1
-              secret: {{ .ApiserverEncryptionKey }}
+              secret: {{ .APIServerEncryptionKey }}
         - identity: {}
+{{ end -}}
+
 - path: /etc/kubernetes/manifests/audit-policy.yml
   owner: root
   permissions: 0644
@@ -1970,7 +1973,7 @@ write_files:
           readOnly: true
       volumes:
       {{ range .Hyperkube.Apiserver.Pod.HyperkubePodHostExtraMounts -}}
-      - hostPath: 
+      - hostPath:
           path: {{ .Path }}
         name: {{ .Name }}
       {{ end -}}
@@ -2049,7 +2052,7 @@ write_files:
           readOnly: true
       volumes:
       {{ range .Hyperkube.ControllerManager.Pod.HyperkubePodHostExtraMounts -}}
-      - hostPath: 
+      - hostPath:
           path: {{ .Path }}
         name: {{ .Name }}
       {{ end -}}

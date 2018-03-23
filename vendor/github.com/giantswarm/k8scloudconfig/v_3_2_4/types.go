@@ -5,13 +5,16 @@ import (
 )
 
 type Params struct {
-	// ApiserverEncryptionKey is AES-CBC with PKCS#7 padding key to encrypt
-	// API etcd data.
-	ApiserverEncryptionKey string
+	// APIServerEncryptionKey is AES-CBC with PKCS#7 padding key to encrypt API
+	// etcd data.
+	APIServerEncryptionKey string
 	Cluster                v1alpha1.Cluster
 	// DisableCalico flag when set removes all calico related Kubernetes
 	// manifests from the cloud config together with their initialization.
 	DisableCalico bool
+	// DisableEncryptionAtREST flag when set removes all manifests from the cloud
+	// config related to Kubernetes encryption at REST.
+	DisableEncryptionAtREST bool
 	// Hyperkube allows to pass extra `docker run` and `command` arguments
 	// to hyperkube image commands. This allows to e.g. add cloud provider
 	// extensions.

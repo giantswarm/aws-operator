@@ -11,7 +11,7 @@ import (
 	"github.com/giantswarm/operatorkit/framework/context/updateallowedcontext"
 	"github.com/giantswarm/operatorkit/framework/resource/metricsresource"
 	"github.com/giantswarm/operatorkit/framework/resource/retryresource"
-	"github.com/giantswarm/randomkeytpr"
+	"github.com/giantswarm/randomkeys"
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
@@ -41,7 +41,7 @@ type ClusterResourceSetConfig struct {
 	HostAWSClients     aws.Clients
 	K8sClient          kubernetes.Interface
 	Logger             micrologger.Logger
-	RandomkeysSearcher *randomkeytpr.Service
+	RandomkeysSearcher randomkeys.Interface
 
 	GuestUpdateEnabled bool
 	InstallationName   string
@@ -118,8 +118,10 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 	var cloudConfig *cloudconfig.CloudConfig
 	{
 		c := cloudconfig.Config{
-			Logger: config.Logger,
-			OIDC:   config.OIDC,
+			KMSClient: config.GuestAWSClients.KMS,
+			Logger:    config.Logger,
+
+			OIDC: config.OIDC,
 		}
 
 		cloudConfig, err = cloudconfig.New(c)
@@ -193,10 +195,10 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 				S3:  config.GuestAWSClients.S3,
 				KMS: config.GuestAWSClients.KMS,
 			},
-			CloudConfig:      cloudConfig,
-			CertWatcher:      config.CertsSearcher,
-			Logger:           config.Logger,
-			RandomKeyWatcher: config.RandomkeysSearcher,
+			CloudConfig:       cloudConfig,
+			CertWatcher:       config.CertsSearcher,
+			Logger:            config.Logger,
+			RandomKeySearcher: config.RandomkeysSearcher,
 		}
 
 		ops, err := s3object.New(c)

@@ -5,26 +5,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/legacy"
-	"github.com/giantswarm/randomkeytpr"
+	"github.com/giantswarm/randomkeys"
 )
 
 const (
 	prefixMaster = "master"
 	prefixWorker = "worker"
-
-	encryptionConfigTemplate = `
-kind: EncryptionConfig
-apiVersion: v1
-resources:
-  - resources:
-    - secrets
-    providers:
-    - aescbc:
-        keys:
-        - name: key1
-          secret: {{.EncryptionKey}}
-    - identity: {}
-`
 )
 
 type BucketObjectState struct {
@@ -55,10 +41,6 @@ type AwsService interface {
 }
 
 type CloudConfigService interface {
-	NewMasterTemplate(v1alpha1.AWSConfig, legacy.CompactTLSAssets, randomkeytpr.CompactRandomKeyAssets) (string, error)
+	NewMasterTemplate(v1alpha1.AWSConfig, legacy.CompactTLSAssets, randomkeys.Cluster, string) (string, error)
 	NewWorkerTemplate(v1alpha1.AWSConfig, legacy.CompactTLSAssets) (string, error)
-}
-
-type RandomKeyWatcher interface {
-	SearchKeys(clusterID string) (map[randomkeytpr.Key][]byte, error)
 }

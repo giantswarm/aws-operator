@@ -15,24 +15,17 @@ const (
 
 // Config represents the configuration used to create a cloud config service.
 type Config struct {
-	// Dependencies.
-	Logger micrologger.Logger
-	OIDC   OIDCConfig
-}
+	KMSClient KMSClient
+	Logger    micrologger.Logger
 
-// DefaultConfig provides a default configuration to create a new cloud config
-// service by best effort.
-func DefaultConfig() Config {
-	return Config{
-		// Dependencies.
-		Logger: nil,
-	}
+	OIDC OIDCConfig
 }
 
 // CloudConfig implements the cloud config service interface.
 type CloudConfig struct {
-	// Dependencies.
-	logger          micrologger.Logger
+	kmsClient KMSClient
+	logger    micrologger.Logger
+
 	k8sAPIExtraArgs []string
 }
 
@@ -46,9 +39,11 @@ type OIDCConfig struct {
 
 // New creates a new configured cloud config service.
 func New(config Config) (*CloudConfig, error) {
-	// Dependencies.
+	if config.KMSClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.KMSClient must not be empty", config)
+	}
 	if config.Logger == nil {
-		return nil, microerror.Maskf(invalidConfigError, "logger must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
 	var k8sAPIExtraArgs []string
@@ -68,8 +63,9 @@ func New(config Config) (*CloudConfig, error) {
 	}
 
 	newCloudConfig := &CloudConfig{
-		// Dependencies.
-		logger:          config.Logger,
+		kmsClient: config.KMSClient,
+		logger:    config.Logger,
+
 		k8sAPIExtraArgs: k8sAPIExtraArgs,
 	}
 

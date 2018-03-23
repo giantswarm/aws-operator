@@ -54,14 +54,14 @@
     "service/s3",
     "service/sts"
   ]
-  revision = "3698d5a02699973b1c9c8731b1c81f83bfcfd72f"
-  version = "v1.13.17"
+  revision = "c0ea8ae46aeed5902eeebe10d0d5cdf54b258526"
+  version = "v1.13.19"
 
 [[projects]]
   branch = "master"
   name = "github.com/beorn7/perks"
   packages = ["quantile"]
-  revision = "4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9"
+  revision = "3a771d992973f24aa725d07868b467d1ddfceafb"
 
 [[projects]]
   name = "github.com/cenkalti/backoff"
@@ -122,7 +122,7 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake"
   ]
-  revision = "6379f6848b80a4cdf0b5071a6bba51bed1d53c91"
+  revision = "38869f84ff71c270aba5b43284ea2123c602270b"
 
 [[projects]]
   branch = "legacy"
@@ -140,7 +140,7 @@
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "b6f3fbcebf6ed04a4b6ef62b1fd4d14920cab704"
+  revision = "b83f78d602ed666ea27a7573712efc9038039073"
 
 [[projects]]
   branch = "master"
@@ -155,7 +155,7 @@
     "v_3_2_3",
     "v_3_2_4"
   ]
-  revision = "392865b96d922615f7b4b946962ffd13e18a9983"
+  revision = "a6b64cf872dbacff3dd96d0a743d2920a6aad0c0"
 
 [[projects]]
   branch = "master"
@@ -223,6 +223,15 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/giantswarm/randomkeys"
+  packages = [
+    ".",
+    "randomkeystest"
+  ]
+  revision = "c9d471323c5a74329a1863f103dc633ab24c2d19"
+
+[[projects]]
+  branch = "master"
   name = "github.com/giantswarm/randomkeytpr"
   packages = [
     ".",
@@ -234,7 +243,7 @@
   branch = "master"
   name = "github.com/giantswarm/versionbundle"
   packages = ["."]
-  revision = "011ad2d98cb7db5c98e204713aac338d6a90f3b4"
+  revision = "9d68178349b5a16f2af8c3d2b4a14dcbcd6fb08b"
 
 [[projects]]
   name = "github.com/go-ini/ini"
@@ -262,19 +271,19 @@
   branch = "master"
   name = "github.com/go-openapi/jsonpointer"
   packages = ["."]
-  revision = "779f45308c19820f1a69e9a4cd965f496e0da10f"
+  revision = "3a0015ad55fa9873f41605d3e8f28cd279c32ab2"
 
 [[projects]]
   branch = "master"
   name = "github.com/go-openapi/jsonreference"
   packages = ["."]
-  revision = "36d33bfe519efae5632669801b180bf1a245da3b"
+  revision = "3fb327e6747da3043567ee86abd02bb6376b6be2"
 
 [[projects]]
   branch = "master"
   name = "github.com/go-openapi/spec"
   packages = ["."]
-  revision = "d8000b5bfbd1147255710505a27c735b6b2ae2ac"
+  revision = "a3092263d8b39f66ff6fe87b0109668eca1e24ff"
 
 [[projects]]
   branch = "master"
@@ -451,7 +460,7 @@
     "jlexer",
     "jwriter"
   ]
-  revision = "517203d186eb343d3df4068565cc0446b450d2c4"
+  revision = "61f426003d2f33c6b8a5aac2093fe4ab57b4e942"
 
 [[projects]]
   name = "github.com/matttproud/golang_protobuf_extensions"
@@ -535,7 +544,7 @@
     "nfs",
     "xfs"
   ]
-  revision = "54d17b57dd7d4a3aa092476596b3f8a933bde349"
+  revision = "780932d4fbbe0e69b84c34c20f5c8d0981e109ea"
 
 [[projects]]
   branch = "master"
@@ -544,7 +553,7 @@
     ".",
     "mem"
   ]
-  revision = "bbf41cb36dffe15dff5bf7e18c447801e7ffe163"
+  revision = "a880a37ed1804d98f64b3b7d58b5e3f8fbf421c4"
 
 [[projects]]
   name = "github.com/spf13/cast"
@@ -592,7 +601,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "80db560fac1fb3e6ac81dbc7f8ae4c061f5257bd"
+  revision = "88942b9c40a4c9d203b82b3731787b672d6e809b"
 
 [[projects]]
   branch = "master"
@@ -620,7 +629,7 @@
     "unix",
     "windows"
   ]
-  revision = "641605214e7dab930817f68e2fef560efbb033e5"
+  revision = "91ee8cde435411ca3f1cd365e8f20131aed4d0a1"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -835,6 +844,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a8c280da629d9cce26beaf3082850aabde5d792f489650b9bbdc2c6bdf375b1a"
+  inputs-digest = "e6939e635e48e1aea42894baf93dc1b56021aa1d7207d9c8d5edf3b2eb9d41e4"
   solver-name = "gps-cdcl"
   solver-version = 1
