@@ -103,7 +103,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "bump-k8s-libs"
+  branch = "master"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/core/v1alpha1",
@@ -116,25 +116,25 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake"
   ]
-  revision = "b6f0d0cfc1a5e9134ae0a6479be0bf72eeaabcb9"
+  revision = "1470b7cff67311b0f4d3c7d6349115ae568d59ee"
 
 [[projects]]
-  branch = "bump-k8s-libs-legacy"
+  branch = "legacy"
   name = "github.com/giantswarm/certs"
   packages = [
     "legacy",
     "legacy/legacytest"
   ]
-  revision = "94f79e1e1942cda875b2a8c0c7bacf2b075ed2c3"
+  revision = "3fa48af18f832c9fef81b537849d8dd402a68646"
 
 [[projects]]
-  branch = "bump-k8s-libs"
+  branch = "master"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "4fc5ffb78c4e11ea16e647f74b43f67d1412974e"
+  revision = "169dd954b23fcbdf58f2e8ec7a678ac81bd220fb"
 
 [[projects]]
   branch = "master"
@@ -198,7 +198,7 @@
   revision = "2aaea11da0707ebb7f9fbabb07028a37b00efc16"
 
 [[projects]]
-  branch = "bump-k8s-libs"
+  branch = "master"
   name = "github.com/giantswarm/operatorkit"
   packages = [
     "client/k8scrdclient",
@@ -213,25 +213,25 @@
     "framework/resource/retryresource",
     "informer"
   ]
-  revision = "ab009f84c1822c7d8271e49883f77d09d22dad00"
+  revision = "e785d24fd81b018fa0ebe1fa7874e306a413461a"
 
 [[projects]]
-  branch = "bump-k8s-libs"
+  branch = "master"
   name = "github.com/giantswarm/randomkeys"
   packages = [
     ".",
     "randomkeystest"
   ]
-  revision = "a3213c6205cd96761f652fa7820c496b27e30ab0"
+  revision = "573b66dfb3de656f1f28c1d8b39104bf901a5b9c"
 
 [[projects]]
-  branch = "bump-k8s-libs"
+  branch = "master"
   name = "github.com/giantswarm/randomkeytpr"
   packages = [
     ".",
     "randomkeytprtest"
   ]
-  revision = "7fa8691492a88d1f1f1c87f688334b9bd81cf30c"
+  revision = "b896dccb8a47e3263a48dd310b3a2975812868d0"
 
 [[projects]]
   branch = "master"
@@ -849,6 +849,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "fb7c99e4a8233e827ed0651e149e10e79af3f635f832222b3601913ff893e97e"
+  inputs-digest = "2e234a5ca6a805f43f26865f8166a012d05726787bf0a9c4884125e1d7884c36"
   solver-name = "gps-cdcl"
   solver-version = 1

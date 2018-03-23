@@ -1,5 +1,5 @@
-hash: 15b68b2a4b8a8e87230dcf5c08489035794c18aa5d5c09a59ea12799314f65aa
-updated: 2018-03-23T15:28:11.230051+01:00
+hash: be2efcfd20876ffbd36a6c1038add867693971b9fb580c72f1f7797b2ac9d92a
+updated: 2018-03-23T18:46:10.333712+01:00
 imports:
 - name: github.com/davecgh/go-spew
   version: 782f4967f2dc4564575ca782fe2d04090b5faca8
@@ -20,7 +20,7 @@ imports:
   subpackages:
   - loggermeta
 - name: github.com/giantswarm/operatorkit
-  version: ab009f84c1822c7d8271e49883f77d09d22dad00
+  version: e785d24fd81b018fa0ebe1fa7874e306a413461a
 - name: github.com/go-kit/kit
   version: 618005da878c6f91827bd66bd1189403495df76f
   subpackages:

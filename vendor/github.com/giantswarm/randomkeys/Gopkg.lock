@@ -59,19 +59,19 @@
   branch = "master"
   name = "github.com/go-openapi/jsonpointer"
   packages = ["."]
-  revision = "779f45308c19820f1a69e9a4cd965f496e0da10f"
+  revision = "3a0015ad55fa9873f41605d3e8f28cd279c32ab2"
 
 [[projects]]
   branch = "master"
   name = "github.com/go-openapi/jsonreference"
   packages = ["."]
-  revision = "36d33bfe519efae5632669801b180bf1a245da3b"
+  revision = "3fb327e6747da3043567ee86abd02bb6376b6be2"
 
 [[projects]]
   branch = "master"
   name = "github.com/go-openapi/spec"
   packages = ["."]
-  revision = "d8000b5bfbd1147255710505a27c735b6b2ae2ac"
+  revision = "a3092263d8b39f66ff6fe87b0109668eca1e24ff"
 
 [[projects]]
   branch = "master"
@@ -175,7 +175,7 @@
     "jlexer",
     "jwriter"
   ]
-  revision = "517203d186eb343d3df4068565cc0446b450d2c4"
+  revision = "8b799c424f57fa123fc63a99d6383bc6e4c02578"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -386,6 +386,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1844ad3e67c551f0b6ec5f87ea9cbe6b3e2b60dbcac4d89022603e0f8bcaf777"
+  inputs-digest = "7fbb0d69b4fd6a920d5995a03ef70bb2bee6df767a8edd2375e57faae021ee28"
   solver-name = "gps-cdcl"
   solver-version = 1
