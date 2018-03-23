@@ -25,6 +25,11 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			for _, a := range vol.Attachments {
 				r.detachVolume(ctx, vol.VolumeID, a)
 			}
+
+			err := r.deleteVolume(ctx, vol.VolumeID)
+			if err != nil {
+				return microerror.Mask(err)
+			}
 		}
 
 		r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("deleted %d ebs volumes", len(deleteInput.Volumes)))
