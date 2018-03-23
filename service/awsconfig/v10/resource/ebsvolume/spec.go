@@ -12,8 +12,19 @@ type Clients struct {
 type EC2Client interface {
 	DeleteVolume(*ec2.DeleteVolumeInput) (*ec2.DeleteVolumeOutput, error)
 	DescribeVolumes(*ec2.DescribeVolumesInput) (*ec2.DescribeVolumesOutput, error)
+	DetachVolume(*ec2.DetachVolumeInput) (*ec2.VolumeAttachment, error)
 }
 
 type EBSVolumeState struct {
-	VolumeIDs []string
+	Volumes []Volume
+}
+
+type Volume struct {
+	VolumeID    string
+	Attachments []VolumeAttachment
+}
+
+type VolumeAttachment struct {
+	Device     string
+	InstanceID string
 }
