@@ -140,7 +140,7 @@
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "8a1f95276ffb0ab135f90f7d8aca4a3274d86bbb"
+  revision = "b83f78d602ed666ea27a7573712efc9038039073"
 
 [[projects]]
   branch = "xh3b4sd-3-2-4-fix-encryption-key"
@@ -155,7 +155,7 @@
     "v_3_2_3",
     "v_3_2_4"
   ]
-  revision = "7879395016ed4773330775e5278e2e636539f9b7"
+  revision = "76c6284de17d58b66ee5a131cf4093fbaf354506"
 
 [[projects]]
   branch = "master"

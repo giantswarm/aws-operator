@@ -61,17 +61,17 @@ Installation:
 `
 )
 
+type HostConfig struct {
+	Backoff *backoff.ExponentialBackOff
+}
+
 type Host struct {
 	backoff   *backoff.ExponentialBackOff
 	g8sClient *giantclientset.Clientset
 	k8sClient kubernetes.Interface
 }
 
-type Config struct {
-	Backoff *backoff.ExponentialBackOff
-}
-
-func NewHost(c *Config) (*Host, error) {
+func NewHost(c HostConfig) (*Host, error) {
 	if c.Backoff == nil {
 		c.Backoff = newCustomExponentialBackoff()
 	}
