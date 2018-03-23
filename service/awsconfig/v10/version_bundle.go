@@ -19,6 +19,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Masked systemd-networkd-wait-online unit.",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Detach EBS volumes before deletion when deleting clusters.",
+				Kind:        versionbundle.KindFixed,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
