@@ -2,12 +2,55 @@ package versionbundle
 
 import (
 	"fmt"
-	"reflect"
 	"sort"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 )
+
+/*
+Core design behind Aggregate() implementation:
+
+Aggregate() function takes list of bundles and it builds all possible
+combinations of them. Only restrictions are possibly conflicting Bundle
+dependencies.
+
+Aggregate() implementation works in three phases:
+
+Assume input [simplified] bundles:
+  []Bundle{ (A, 1), (A, 2), (B, 1), (B, 2), (B, 3), (C, 1), (C, 2)}
+
+1. Group all bundles by name and remove duplicate versions.
+
+This produces following map:
+  {
+	  "A": [(A, 1), (A, 2)]
+	  "B": [(B, 1), (B, 2), (B, 3)]
+	  "C": [(C, 1), (C, 2)]
+  }
+
+2. Build a layered tree from Bundles
+
+                                        (root)
+                                          |
+                    +---------------------+---------------------+
+                    |                                           |
+                    |                                           |
+                  (A,1)                                       (A,2)
+                    |                                           |
+      +-------------+-------------+               +-------------+-------------+
+      |             |             |               |             |             |
+    (B,1)         (B,2)         (B,3)           (B,1)         (B,2)         (B,3)
+      |             |             |               |             |             |
+  +---+---+     +---+---+     +---+---+       +---+---+     +---+---+     +---+---+
+  |       |     |       |     |       |       |       |     |       |     |       |
+(C,1)   (C,2) (C,1)   (C,2) (C,1)   (C,2)   (C,1)   (C,2) (C,1)   (C,2) (C,1)   (C,2)
+
+
+3. Walk the tree and create aggregated bundles where are no dependency
+   conflicts.
+
+*/
 
 type AggregatorConfig struct {
 	Logger micrologger.Logger
@@ -17,6 +60,13 @@ type Aggregator struct {
 	logger micrologger.Logger
 }
 
+// node is a data structure for bundle aggregation tree
+type node struct {
+	bundle Bundle
+	leaves []*node
+}
+
+// NewAggregator constructs a new aggregator for given AggregatorConfig.
 func NewAggregator(config AggregatorConfig) (*Aggregator, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
@@ -43,43 +93,47 @@ func (a *Aggregator) Aggregate(bundles []Bundle) ([][]Bundle, error) {
 		return aggregatedBundles, nil
 	}
 
-	for _, b1 := range bundles {
-		newGroup := []Bundle{
-			b1,
-		}
+	bundleMap := make(map[string][]Bundle)
 
-		for _, b2 := range bundles {
-			if reflect.DeepEqual(b1, b2) {
-				continue
+	// First group all bundles by name.
+	for _, v := range bundles {
+		bundleMap[v.Name] = append(bundleMap[v.Name], v)
+	}
+
+	// Gather keys for sorting to guarantee always the same order for [][]Bundles
+	var keys []string
+
+	// Ensure that there are no duplicate bundles.
+	for k, v := range bundleMap {
+		sort.Sort(SortBundlesByVersion(v))
+		for i := 0; i < len(v)-1; i++ {
+			if v[i].Version == v[i+1].Version {
+				v = append(v[:i], v[i+1:]...)
+				i--
 			}
-
-			if a.bundlesConflictWithDependencies(b1, b2) {
-				continue
-			}
-
-			if a.bundlesConflictWithDependencies(b2, b1) {
-				continue
-			}
-
-			if a.containsBundleByName(newGroup, b2) {
-				continue
-			}
-
-			newGroup = append(newGroup, b2)
 		}
+		bundleMap[k] = v
+		keys = append(keys, k)
+	}
 
-		sort.Sort(SortBundlesByVersion(newGroup))
-		sort.Stable(SortBundlesByName(newGroup))
+	// Sort'em
+	sort.Strings(keys)
 
-		if a.containsAggregatedBundle(aggregatedBundles, newGroup) {
-			continue
-		}
+	// Tree root is an empty node.
+	tree := &node{}
 
-		if a.aggregatedBundlesMissVersionBundle(bundles, newGroup) {
-			continue
-		}
+	// Build the tree.
+	for _, k := range keys {
+		a.walkTreeAndAddLeaves(tree, bundleMap[k])
+	}
 
-		aggregatedBundles = append(aggregatedBundles, newGroup)
+	// Walk the tree and aggregate.
+	aggregatedBundles = a.walkTreeAndAggregate(tree, []Bundle{})
+
+	// Instead of returning empty slice, return explicit nil to be backwards
+	// compatible with API.
+	if len(aggregatedBundles) == 0 {
+		aggregatedBundles = nil
 	}
 
 	err := AggregatedBundles(aggregatedBundles).Validate()
@@ -90,32 +144,51 @@ func (a *Aggregator) Aggregate(bundles []Bundle) ([][]Bundle, error) {
 	return aggregatedBundles, nil
 }
 
-func (a *Aggregator) aggregatedBundlesMissVersionBundle(bundles, newGroup []Bundle) bool {
-	// delta is the number of version bundles diverging compared to the aggregated
-	// list of version bundles making up a release. In case delta is greater than
-	// 0, the release misses delta version bundles. In case delta is lower than 0,
-	// the release has delta version bundles too much. The latter should be way
-	// more improbable to happen.
-	var delta int
-	{
-		desireCount := distinctCount(bundles)
-		currentCount := len(newGroup)
-
-		delta = desireCount - currentCount
+func (a *Aggregator) walkTreeAndAddLeaves(n *node, bundles []Bundle) {
+	if len(n.leaves) == 0 {
+		for _, b := range bundles {
+			n.leaves = append(n.leaves, &node{bundle: b})
+		}
+		return
 	}
 
-	if delta != 0 {
-		v, err := aggregateReleaseVersion(newGroup)
-		if err != nil {
-			a.logger.Log("level", "error", "message", "failed aggregating release version", "stack", fmt.Sprintf("%#v", err))
-		} else {
-			a.logger.Log("level", "debug", "message", fmt.Sprintf("release misses %d version bundles", delta), "version", v)
+	for _, leaf := range n.leaves {
+		a.walkTreeAndAddLeaves(leaf, bundles)
+	}
+}
+
+func (a *Aggregator) walkTreeAndAggregate(n *node, bundles []Bundle) [][]Bundle {
+	// If current node is leaf, then return bundle if there are no conflicts.
+	if len(n.leaves) == 0 {
+		// Only aggregate bundle groups that don't have conflicting dependencies.
+		for i, b1 := range bundles {
+			for j, b2 := range bundles {
+				// No need to self-verify.
+				if i == j {
+					continue
+				}
+
+				if a.bundlesConflictWithDependencies(b1, b2) {
+					return [][]Bundle{}
+				}
+			}
 		}
 
-		return true
+		sort.Sort(SortBundlesByVersion(bundles))
+		sort.Stable(SortBundlesByName(bundles))
+		return [][]Bundle{bundles}
 	}
 
-	return false
+	// In the middle of the tree -> continue walking.
+	aggregates := make([][]Bundle, 0)
+	for _, leaf := range n.leaves {
+		bundlesCopy := make([]Bundle, len(bundles), len(bundles)+1)
+		copy(bundlesCopy, bundles)
+		bundlesCopy = append(bundlesCopy, leaf.bundle)
+		aggregates = append(aggregates, a.walkTreeAndAggregate(leaf, bundlesCopy)...)
+	}
+
+	return aggregates
 }
 
 func (a *Aggregator) bundlesConflictWithDependencies(b1, b2 Bundle) bool {
@@ -132,48 +205,18 @@ func (a *Aggregator) bundlesConflictWithDependencies(b1, b2 Bundle) bool {
 		}
 	}
 
-	return false
-}
-
-func (a *Aggregator) containsAggregatedBundle(list [][]Bundle, newGroup []Bundle) bool {
-	if len(newGroup) == 0 {
-		a.logger.Log("level", "warning", "message", "release aggregation observed empty list of version bundles")
-		return false
-	}
-
-	for _, grouped := range list {
-		if reflect.DeepEqual(grouped, newGroup) {
-			v, err := aggregateReleaseVersion(newGroup)
-			if err != nil {
-				a.logger.Log("level", "error", "message", "failed aggregating release version", "stack", fmt.Sprintf("%#v", err))
-			} else {
-				a.logger.Log("level", "debug", "message", "release already exists in release list", "version", v)
+	for _, d := range b2.Dependencies {
+		for _, c := range b1.Components {
+			if d.Name != c.Name {
+				continue
 			}
 
-			return true
+			if !d.Matches(c) {
+				a.logger.Log("component", fmt.Sprintf("%#v", c), "dependency", fmt.Sprintf("%#v", d), "level", "debug", "message", "dependency conflicts with component")
+				return true
+			}
 		}
 	}
 
 	return false
-}
-
-func (a *Aggregator) containsBundleByName(list []Bundle, item Bundle) bool {
-	for _, b := range list {
-		if b.Name == item.Name {
-			a.logger.Log("level", "debug", "message", "version bundle already exists in aggregated list", "name", item.Name)
-			return true
-		}
-	}
-
-	return false
-}
-
-func distinctCount(list []Bundle) int {
-	m := map[string]struct{}{}
-
-	for _, b := range list {
-		m[b.Name] = struct{}{}
-	}
-
-	return len(m)
 }

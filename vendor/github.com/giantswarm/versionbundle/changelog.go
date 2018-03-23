@@ -12,19 +12,19 @@ const (
 	// KindAdded being used in a changelog describes an authority's component got
 	// added.
 	KindAdded kind = "added"
-	// KindAdded being used in a changelog describes an authority's component got
+	// KindChanged being used in a changelog describes an authority's component got
 	// changed.
 	KindChanged kind = "changed"
-	// KindAdded being used in a changelog describes an authority's component got
+	// KindDeprecated being used in a changelog describes an authority's component got
 	// deprecated.
 	KindDeprecated kind = "deprecated"
-	// KindAdded being used in a changelog describes an authority's component got
+	// KindFixed being used in a changelog describes an authority's component got
 	// fixed.
 	KindFixed kind = "fixed"
-	// KindAdded being used in a changelog describes an authority's component got
+	// KindRemoved being used in a changelog describes an authority's component got
 	// removed.
 	KindRemoved kind = "removed"
-	// KindAdded being used in a changelog describes an authority's component got
+	// KindSecurity being used in a changelog describes an authority's component got
 	// adapted for security reasons.
 	KindSecurity kind = "security"
 )

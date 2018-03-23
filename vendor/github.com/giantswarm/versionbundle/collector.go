@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"sort"
 	"sync"
 
 	"github.com/giantswarm/microerror"
@@ -114,6 +115,9 @@ func (c *Collector) Collect(ctx context.Context) error {
 			bundles = append(bundles, r.VersionBundles...)
 		}
 	}
+
+	sort.Sort(SortBundlesByVersion(bundles))
+	sort.Stable(SortBundlesByName(bundles))
 
 	{
 		c.mutex.Lock()

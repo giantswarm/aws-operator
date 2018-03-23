@@ -66,7 +66,11 @@
   name = "github.com/giantswarm/operatorkit"
 
 [[constraint]]
-  branch = "master"
+  branch = "bump-k8s-libs"
+  name = "github.com/giantswarm/randomkeys"
+
+[[constraint]]
+  branch = "bump-k8s-libs"
   name = "github.com/giantswarm/randomkeytpr"
 
 [[constraint]]
@@ -100,6 +104,8 @@
 [[constraint]]
   name = "k8s.io/client-go"
   version = "kubernetes-1.9.3"
+
+
 
 
 

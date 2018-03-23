@@ -60,10 +60,7 @@ type AzureConfigSpec struct {
 }
 
 type AzureConfigSpecAzure struct {
-	DNSZones    AzureConfigSpecAzureDNSZones    `json:"dnsZones" yaml:"dnsZones"`
-	HostCluster AzureConfigSpecAzureHostCluster `json:"hostCluster" yaml:"hostCluster"`
-	// Location is the region for the resource group.
-	Location       string                             `json:"location" yaml:"location"`
+	DNSZones       AzureConfigSpecAzureDNSZones       `json:"dnsZones" yaml:"dnsZones"`
 	VirtualNetwork AzureConfigSpecAzureVirtualNetwork `json:"virtualNetwork" yaml:"virtualNetwork"`
 
 	Masters []AzureConfigSpecAzureNode `json:"masters" yaml:"masters"`
@@ -86,17 +83,6 @@ type AzureConfigSpecAzureDNSZonesDNSZone struct {
 	ResourceGroup string `json:"resourceGroup" yaml:"resourceGroup"`
 	// Name is the name of the zone.
 	Name string `json:"name" yaml:"name"`
-}
-
-type AzureConfigSpecAzureHostCluster struct {
-	// CIDR is the CIDR of the host cluster Virtual Network. This is going
-	// to be used by the Guest Cluster to allow SSH traffic from that CIDR.
-	CIDR string `json:"cidr" yaml:"cidr"`
-	// ResourceGroup is the resource group name of the host cluster. It is
-	// used to determine DNS hosted zone to put NS records in.
-	ResourceGroup string `json:"resourceGroup" yaml:"resourceGroup"`
-	// VirtualNetwork is the name of the host cluster virtual network.
-	VirtualNetwork string `json:"virtualNetwork" yaml:"virtualNetwork"`
 }
 
 type AzureConfigSpecAzureVirtualNetwork struct {
