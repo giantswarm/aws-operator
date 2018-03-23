@@ -21,8 +21,8 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "cloudconfig",
-				Description: "Improved encryption key injection.",
-				Kind:        versionbundle.KindChanged,
+				Description: "Fixed unencrypted encryption key injection via Cloud Config S3 uploads.",
+				Kind:        versionbundle.KindSecurity,
 			},
 		},
 		Components: []versionbundle.Component{
