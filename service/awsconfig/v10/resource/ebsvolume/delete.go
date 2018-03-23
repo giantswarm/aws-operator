@@ -21,11 +21,15 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	if deleteInput != nil && len(deleteInput.Volumes) > 0 {
 		r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("deleting %d ebs volumes", len(deleteInput.Volumes)))
 
+		// First detach any attached volumes.
 		for _, vol := range deleteInput.Volumes {
 			for _, a := range vol.Attachments {
 				r.detachVolume(ctx, vol.VolumeID, a)
 			}
+		}
 
+		// Now delete the volumes.
+		for _, vol := range deleteInput.Volumes {
 			err := r.deleteVolume(ctx, vol.VolumeID)
 			if err != nil {
 				return microerror.Mask(err)
