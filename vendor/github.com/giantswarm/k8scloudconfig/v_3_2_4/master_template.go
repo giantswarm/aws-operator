@@ -1837,6 +1837,25 @@ write_files:
         user: scheduler
       name: service-account-context
     current-context: service-account-context
+
+{{ if not .DisableEncryptionAtREST -}}
+- path: /etc/kubernetes/encryption/k8s-encryption-config.yaml
+  owner: root
+  permissions: 600
+  content: |
+    kind: EncryptionConfig
+    apiVersion: v1
+    resources:
+      - resources:
+        - secrets
+        providers:
+        - aescbc:
+            keys:
+            - name: key1
+              secret: {{ .APIServerEncryptionKey }}
+        - identity: {}
+{{ end -}}
+
 - path: /etc/kubernetes/manifests/audit-policy.yml
   owner: root
   permissions: 0644

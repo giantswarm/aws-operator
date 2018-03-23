@@ -155,7 +155,7 @@
     "v_3_2_3",
     "v_3_2_4"
   ]
-  revision = "6d0b3b9f26e6b61ae97caa56a1579b45b9c52338"
+  revision = "7879395016ed4773330775e5278e2e636539f9b7"
 
 [[projects]]
   branch = "master"
@@ -460,7 +460,7 @@
     "jlexer",
     "jwriter"
   ]
-  revision = "517203d186eb343d3df4068565cc0446b450d2c4"
+  revision = "61f426003d2f33c6b8a5aac2093fe4ab57b4e942"
 
 [[projects]]
   name = "github.com/matttproud/golang_protobuf_extensions"
