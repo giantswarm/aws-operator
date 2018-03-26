@@ -79,7 +79,6 @@ func (r *Resource) detachVolume(ctx context.Context, volumeID string, attachment
 
 	_, err := r.clients.EC2.DetachVolume(&ec2.DetachVolumeInput{
 		Device:     aws.String(attachment.Device),
-		Force:      aws.Bool(true),
 		InstanceId: aws.String(attachment.InstanceID),
 		VolumeId:   aws.String(volumeID),
 	})
