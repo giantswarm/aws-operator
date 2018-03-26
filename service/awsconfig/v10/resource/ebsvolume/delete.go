@@ -106,9 +106,14 @@ func (r *Resource) deleteVolume(ctx context.Context, volumeID string) error {
 		_, err := r.clients.EC2.DeleteVolume(&ec2.DeleteVolumeInput{
 			VolumeId: aws.String(volumeID),
 		})
+		if IsVolumeNotFound(err) {
+			// Fall through.
+			return nil
+		}
 		if err != nil {
 			return microerror.Mask(err)
 		}
+
 		return nil
 	}
 	deleteNotify := func(err error, delay time.Duration) {
