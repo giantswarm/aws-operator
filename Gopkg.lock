@@ -91,12 +91,6 @@
   version = "v2.6.0"
 
 [[projects]]
-  name = "github.com/emicklei/go-restful-swagger12"
-  packages = ["."]
-  revision = "dcef7f55730566d41eae5db10e7d6981829720f6"
-  version = "1.0.1"
-
-[[projects]]
   name = "github.com/fsnotify/fsnotify"
   packages = ["."]
   revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
@@ -122,7 +116,7 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake"
   ]
-  revision = "38869f84ff71c270aba5b43284ea2123c602270b"
+  revision = "1470b7cff67311b0f4d3c7d6349115ae568d59ee"
 
 [[projects]]
   branch = "legacy"
@@ -131,7 +125,7 @@
     "legacy",
     "legacy/legacytest"
   ]
-  revision = "65dc7752f8079b0eaf4179345ba311dec1c450d1"
+  revision = "3fa48af18f832c9fef81b537849d8dd402a68646"
 
 [[projects]]
   branch = "master"
@@ -140,7 +134,7 @@
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "b83f78d602ed666ea27a7573712efc9038039073"
+  revision = "169dd954b23fcbdf58f2e8ec7a678ac81bd220fb"
 
 [[projects]]
   branch = "master"
@@ -155,7 +149,7 @@
     "v_3_2_3",
     "v_3_2_4"
   ]
-  revision = "a6b64cf872dbacff3dd96d0a743d2920a6aad0c0"
+  revision = "8d67317a492c97fbb22a6125693489a76906b53c"
 
 [[projects]]
   branch = "master"
@@ -219,7 +213,7 @@
     "framework/resource/retryresource",
     "informer"
   ]
-  revision = "d2b591431f19bc9035bafce284b903eafe85ae80"
+  revision = "e785d24fd81b018fa0ebe1fa7874e306a413461a"
 
 [[projects]]
   branch = "master"
@@ -228,7 +222,7 @@
     ".",
     "randomkeystest"
   ]
-  revision = "c9d471323c5a74329a1863f103dc633ab24c2d19"
+  revision = "573b66dfb3de656f1f28c1d8b39104bf901a5b9c"
 
 [[projects]]
   branch = "master"
@@ -237,7 +231,7 @@
     ".",
     "randomkeytprtest"
   ]
-  revision = "86417ec356c55ea221701ccc646fe7ef5691f5b9"
+  revision = "b896dccb8a47e3263a48dd310b3a2975812868d0"
 
 [[projects]]
   branch = "master"
@@ -460,7 +454,7 @@
     "jlexer",
     "jwriter"
   ]
-  revision = "61f426003d2f33c6b8a5aac2093fe4ab57b4e942"
+  revision = "8b799c424f57fa123fc63a99d6383bc6e4c02578"
 
 [[projects]]
   name = "github.com/matttproud/golang_protobuf_extensions"
@@ -669,6 +663,8 @@
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1alpha1",
+    "admissionregistration/v1beta1",
+    "apps/v1",
     "apps/v1beta1",
     "apps/v1beta2",
     "authentication/v1",
@@ -682,6 +678,7 @@
     "batch/v2alpha1",
     "certificates/v1beta1",
     "core/v1",
+    "events/v1beta1",
     "extensions/v1beta1",
     "networking/v1",
     "policy/v1beta1",
@@ -691,10 +688,11 @@
     "scheduling/v1alpha1",
     "settings/v1alpha1",
     "storage/v1",
+    "storage/v1alpha1",
     "storage/v1beta1"
   ]
-  revision = "9b9dca205a15b6ce9ef10091f05d60a13fdcf418"
-  version = "kubernetes-1.8.5"
+  revision = "acf347b865f29325eb61f4cd2df11e86e073a5ee"
+  version = "kubernetes-1.9.3"
 
 [[projects]]
   name = "k8s.io/apiextensions-apiserver"
@@ -707,13 +705,12 @@
     "pkg/client/clientset/clientset/typed/apiextensions/v1beta1",
     "pkg/client/clientset/clientset/typed/apiextensions/v1beta1/fake"
   ]
-  revision = "996a70a27a0dcf53642ca52601b9107cb2ad810a"
-  version = "kubernetes-1.8.4"
+  revision = "f1425805c0335c1f5b23e70f0154747b3df5a16a"
+  version = "kubernetes-1.9.3"
 
 [[projects]]
   name = "k8s.io/apimachinery"
   packages = [
-    "pkg/api/equality",
     "pkg/api/errors",
     "pkg/api/meta",
     "pkg/api/resource",
@@ -723,7 +720,6 @@
     "pkg/apis/meta/v1alpha1",
     "pkg/conversion",
     "pkg/conversion/queryparams",
-    "pkg/conversion/unstructured",
     "pkg/fields",
     "pkg/labels",
     "pkg/runtime",
@@ -754,8 +750,8 @@
     "pkg/watch",
     "third_party/forked/golang/reflect"
   ]
-  revision = "5134afd2c0c91158afac0d8a28bd2177185a3bcc"
-  version = "kubernetes-1.8.3"
+  revision = "19e3f5aa3adca672c153d324e6b7d82ff8935f03"
+  version = "kubernetes-1.9.3"
 
 [[projects]]
   name = "k8s.io/client-go"
@@ -767,6 +763,10 @@
     "kubernetes/scheme",
     "kubernetes/typed/admissionregistration/v1alpha1",
     "kubernetes/typed/admissionregistration/v1alpha1/fake",
+    "kubernetes/typed/admissionregistration/v1beta1",
+    "kubernetes/typed/admissionregistration/v1beta1/fake",
+    "kubernetes/typed/apps/v1",
+    "kubernetes/typed/apps/v1/fake",
     "kubernetes/typed/apps/v1beta1",
     "kubernetes/typed/apps/v1beta1/fake",
     "kubernetes/typed/apps/v1beta2",
@@ -793,6 +793,8 @@
     "kubernetes/typed/certificates/v1beta1/fake",
     "kubernetes/typed/core/v1",
     "kubernetes/typed/core/v1/fake",
+    "kubernetes/typed/events/v1beta1",
+    "kubernetes/typed/events/v1beta1/fake",
     "kubernetes/typed/extensions/v1beta1",
     "kubernetes/typed/extensions/v1beta1/fake",
     "kubernetes/typed/networking/v1",
@@ -811,6 +813,8 @@
     "kubernetes/typed/settings/v1alpha1/fake",
     "kubernetes/typed/storage/v1",
     "kubernetes/typed/storage/v1/fake",
+    "kubernetes/typed/storage/v1alpha1",
+    "kubernetes/typed/storage/v1alpha1/fake",
     "kubernetes/typed/storage/v1beta1",
     "kubernetes/typed/storage/v1beta1/fake",
     "pkg/version",
@@ -827,13 +831,14 @@
     "tools/pager",
     "tools/reference",
     "transport",
+    "util/buffer",
     "util/cert",
     "util/flowcontrol",
     "util/homedir",
     "util/integer"
   ]
-  revision = "1b75876d45719a84085528ee621939b0c68a4b85"
-  version = "kubernetes-1.8.5"
+  revision = "9389c055a838d4f208b699b3c7c51b70f2368861"
+  version = "kubernetes-1.9.1"
 
 [[projects]]
   branch = "master"
@@ -844,6 +849,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e6939e635e48e1aea42894baf93dc1b56021aa1d7207d9c8d5edf3b2eb9d41e4"
+  inputs-digest = "2e234a5ca6a805f43f26865f8166a012d05726787bf0a9c4884125e1d7884c36"
   solver-name = "gps-cdcl"
   solver-version = 1

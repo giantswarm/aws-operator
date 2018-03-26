@@ -2,7 +2,7 @@ package cloudconfig
 
 import (
 	"bytes"
-	"html/template"
+	"text/template"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
