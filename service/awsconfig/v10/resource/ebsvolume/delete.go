@@ -21,10 +21,17 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	if deleteInput != nil && len(deleteInput.Volumes) > 0 {
 		r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("deleting %d ebs volumes", len(deleteInput.Volumes)))
 
-		// First detach any attached volumes.
+		// First detach any attached volumes without forcing.
 		for _, vol := range deleteInput.Volumes {
 			for _, a := range vol.Attachments {
-				r.detachVolume(ctx, vol.VolumeID, a)
+				r.detachVolume(ctx, vol.VolumeID, a, false)
+			}
+		}
+
+		// Now force detach so the volumes can be deleted cleanly.
+		for _, vol := range deleteInput.Volumes {
+			for _, a := range vol.Attachments {
+				r.detachVolume(ctx, vol.VolumeID, a, true)
 			}
 		}
 
@@ -74,13 +81,14 @@ func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desir
 	return volStateToDelete, nil
 }
 
-func (r *Resource) detachVolume(ctx context.Context, volumeID string, attachment VolumeAttachment) error {
+func (r *Resource) detachVolume(ctx context.Context, volumeID string, attachment VolumeAttachment, force bool) error {
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detaching volume %s from instance %s", volumeID, attachment.InstanceID))
 
 	_, err := r.clients.EC2.DetachVolume(&ec2.DetachVolumeInput{
 		Device:     aws.String(attachment.Device),
 		InstanceId: aws.String(attachment.InstanceID),
 		VolumeId:   aws.String(volumeID),
+		Force:      aws.Bool(force),
 	})
 	if err != nil {
 		return microerror.Mask(err)
