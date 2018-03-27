@@ -12,6 +12,7 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8srestconfig"
 	"github.com/giantswarm/operatorkit/framework"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/viper"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
@@ -21,6 +22,7 @@ import (
 	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/aws-operator/service/alerter"
 	"github.com/giantswarm/aws-operator/service/awsconfig"
+	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/healthz"
 )
 
@@ -189,6 +191,22 @@ func New(config Config) (*Service, error) {
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
+	}
+
+	{
+		var awsCollector *collector.Collector
+
+		collectorConfig := collector.Config{
+			AwsConfig: awsConfig,
+			Logger:    config.Logger,
+		}
+
+		awsCollector, err = collector.New(collectorConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		prometheus.MustRegister(awsCollector)
 	}
 
 	var healthzService *healthz.Service
