@@ -73,7 +73,7 @@ func (i *instancesAdapter) Adapt(config Config) error {
 		}
 		i.Master.CloudConfig = base64.StdEncoding.EncodeToString([]byte(rendered))
 
-		i.Master.Instance.ID = key.MasterInstanceID(config.CustomObject)
+		i.Master.Instance.ID = config.MasterInstanceID
 
 		i.Master.Instance.Type = key.MasterInstanceType(config.CustomObject)
 	}

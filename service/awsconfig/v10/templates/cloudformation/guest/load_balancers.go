@@ -13,7 +13,7 @@ const LoadBalancers = `{{define "load_balancers"}}
         Timeout: {{ .ELBHealthCheckTimeout }}
         UnhealthyThreshold: {{ .ELBHealthCheckUnhealthyThreshold }}
       Instances:
-      - !Ref MasterInstance
+      - !Ref {{ .MasterInstanceID }}
       Listeners:
       {{ range .APIElbPortsToOpen}}
       - InstancePort: {{ .PortInstance }}
