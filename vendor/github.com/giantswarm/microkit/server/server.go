@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/giantswarm/micrologger"
-	kitendpoint "github.com/go-kit/kit/endpoint"
 	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -23,16 +22,9 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/microkit/tls"
-	"github.com/giantswarm/microkit/transaction"
-	microtransaction "github.com/giantswarm/microkit/transaction"
-	transactionid "github.com/giantswarm/microkit/transaction/context/id"
-	transactiontracked "github.com/giantswarm/microkit/transaction/context/tracked"
 )
 
-// Config represents the configuration used to create a new server object.
 type Config struct {
-	// Dependencies.
-
 	// ErrorEncoder is the server's error encoder. This wraps the error encoder
 	// configured by the client. Clients should not implement error logging in
 	// here them self. This is done by the server itself. Clients must not
@@ -44,11 +36,6 @@ type Config struct {
 	// Router is a HTTP handler for the server. The returned router will have all
 	// endpoints registered that are listed in the endpoint collection.
 	Router *mux.Router
-	// TransactionResponder is the responder used to reply to requests using
-	// persisted transaction results.
-	TransactionResponder microtransaction.Responder
-
-	// Settings.
 
 	// Endpoints is the server's configured list of endpoints. These are the
 	// custom endpoints configured by the client.
@@ -77,67 +64,41 @@ type Config struct {
 	Viper *viper.Viper
 }
 
-// DefaultConfig provides a default configuration to create a new server object
-// by best effort.
-func DefaultConfig() Config {
-	return Config{
-		// Dependencies.
-		Logger:               nil,
-		Router:               mux.NewRouter(),
-		TransactionResponder: nil,
-
-		// Settings.
-		Endpoints:      nil,
-		ErrorEncoder:   func(ctx context.Context, serverError error, w http.ResponseWriter) {},
-		HandlerWrapper: func(h http.Handler) http.Handler { return h },
-		ListenAddress:  "",
-		LogAccess:      false,
-		RequestFuncs:   []kithttp.RequestFunc{},
-		ServiceName:    "microkit",
-		TLSCAFile:      "",
-		TLSCrtFile:     "",
-		TLSKeyFile:     "",
-		Viper:          viper.New(),
-	}
-}
-
 // New creates a new configured server object.
 func New(config Config) (Server, error) {
-	// Dependencies.
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "logger must not be empty")
 	}
 	if config.Router == nil {
-		return nil, microerror.Maskf(invalidConfigError, "router must not be empty")
-	}
-	if config.TransactionResponder == nil {
-		return nil, microerror.Maskf(invalidConfigError, "transaction responder must not be empty")
+		config.Router = mux.NewRouter()
 	}
 
-	// Settings.
 	if config.Endpoints == nil {
 		return nil, microerror.Maskf(invalidConfigError, "endpoints must not be empty")
 	}
 	if config.ErrorEncoder == nil {
-		return nil, microerror.Maskf(invalidConfigError, "error encoder must not be empty")
+		config.ErrorEncoder = func(ctx context.Context, serverError error, w http.ResponseWriter) {}
 	}
 	if config.HandlerWrapper == nil {
-		return nil, microerror.Maskf(invalidConfigError, "handler wrapper must not be empty")
+		config.HandlerWrapper = func(h http.Handler) http.Handler { return h }
 	}
 	if config.ListenAddress == "" {
 		return nil, microerror.Maskf(invalidConfigError, "listen address must not be empty")
 	}
 	if config.RequestFuncs == nil {
-		return nil, microerror.Maskf(invalidConfigError, "request funcs must not be empty")
+		config.RequestFuncs = []kithttp.RequestFunc{}
 	}
 	if config.ServiceName == "" {
-		return nil, microerror.Maskf(invalidConfigError, "service name must not be empty")
+		config.ServiceName = "microkit"
 	}
 	if config.TLSCrtFile == "" && config.TLSKeyFile != "" {
 		return nil, microerror.Maskf(invalidConfigError, "TLS public key must not be empty")
 	}
 	if config.TLSCrtFile != "" && config.TLSKeyFile == "" {
 		return nil, microerror.Maskf(invalidConfigError, "TLS private key must not be empty")
+	}
+	if config.Viper == nil {
+		config.Viper = viper.New()
 	}
 
 	listenURL, err := url.Parse(config.ListenAddress)
@@ -146,20 +107,16 @@ func New(config Config) (Server, error) {
 	}
 
 	newServer := &server{
-		// Dependencies.
-		errorEncoder:         config.ErrorEncoder,
-		logger:               config.Logger,
-		router:               config.Router,
-		transactionResponder: config.TransactionResponder,
+		errorEncoder: config.ErrorEncoder,
+		logger:       config.Logger,
+		router:       config.Router,
 
-		// Internals.
 		bootOnce:     sync.Once{},
 		config:       config,
 		httpServer:   nil,
 		listenURL:    listenURL,
 		shutdownOnce: sync.Once{},
 
-		// Settings.
 		endpoints:      config.Endpoints,
 		handlerWrapper: config.HandlerWrapper,
 		logAccess:      config.LogAccess,
@@ -178,10 +135,9 @@ func New(config Config) (Server, error) {
 // server manages the transport logic and endpoint registration.
 type server struct {
 	// Dependencies.
-	errorEncoder         kithttp.ErrorEncoder
-	logger               micrologger.Logger
-	router               *mux.Router
-	transactionResponder transaction.Responder
+	errorEncoder kithttp.ErrorEncoder
+	logger       micrologger.Logger
+	router       *mux.Router
 
 	// Internals.
 	bootOnce     sync.Once
@@ -243,12 +199,6 @@ func (s *server) Boot() {
 						endpointTime.WithLabelValues(endpointCode, endpointMethod, endpointName).Set(float64(time.Since(t) / time.Millisecond))
 					}(time.Now())
 
-					// Wrapp the custom implementations of the endpoint specific business
-					// logic.
-					wrappedDecoder := s.newDecoderWrapper(e, responseWriter)
-					wrappedEndpoint := s.newEndpointWrapper(e)
-					wrappedEncoder := s.newEncoderWrapper(e, responseWriter)
-
 					// Combine all options this server defines. Since the interface of the
 					// go-kit server changed to not accept a context anymore we have to
 					// work around the context injection by injecting our context via the
@@ -270,9 +220,9 @@ func (s *server) Boot() {
 
 					// Now we execute the actual go-kit endpoint handler.
 					kithttp.NewServer(
-						wrappedEndpoint,
-						wrappedDecoder,
-						wrappedEncoder,
+						e.Endpoint(),
+						e.Decoder(),
+						e.Encoder(),
 						options...,
 					).ServeHTTP(responseWriter, r)
 				})))
@@ -392,118 +342,6 @@ func (s *server) newErrorEncoderWrapper() kithttp.ErrorEncoder {
 	}
 }
 
-// newDecoderWrapper creates a new wrappeed endpoint decoder. E.g. here we wrap
-// the endpoint's decoder. We check if there is a transaction response being
-// tracked. In this case we reply to the current request with the tracked
-// information of the transaction response. After that the endpoint and encoder
-// is not executed. Only response functions, if any, will be executed as usual.
-// If there is no transaction response being tracked, the request is processed
-// normally. This means that the usual execution of the endpoints decoder,
-// endpoint and encoder takes place.
-func (s *server) newDecoderWrapper(e Endpoint, responseWriter ResponseWriter) kithttp.DecodeRequestFunc {
-	return func(ctx context.Context, r *http.Request) (interface{}, error) {
-		tracked, ok := transactiontracked.FromContext(ctx)
-		if !ok {
-			return nil, microerror.Maskf(invalidContextError, "tracked must not be empty")
-		}
-		if tracked {
-			transactionID, ok := transactionid.FromContext(ctx)
-			if !ok {
-				return nil, microerror.Maskf(invalidContextError, "transaction ID must not be empty")
-			}
-			err := s.transactionResponder.Reply(ctx, transactionID, responseWriter)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-
-			return nil, nil
-		}
-
-		request, err := e.Decoder()(ctx, r)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		return request, nil
-	}
-}
-
-// newEncoderWrapper creates a new wrapped endpoint encoder. E.g. here we wrap
-// the endpoint's decoder. In case the response of the current request is known
-// to be tracked, we skip the execution of the actual endpoint. We rely on the
-// wrapped decoder above, which already prepared the reply of the current
-// request. If there is no transaction response being tracked, we execute the
-// actual encoder as usual. Its response is being tracked in case a transaction
-// ID is provided in the given request context. This tracked transaction
-// response is used to reply to upcoming requests that provide the same
-// transaction ID again.
-func (s *server) newEncoderWrapper(e Endpoint, responseWriter ResponseWriter) kithttp.EncodeResponseFunc {
-	return func(ctx context.Context, w http.ResponseWriter, response interface{}) error {
-		tracked, ok := transactiontracked.FromContext(ctx)
-		if !ok {
-			return microerror.Maskf(invalidContextError, "tracked must not be empty")
-		}
-		if tracked {
-			return nil
-		}
-
-		err := e.Encoder()(ctx, w, response)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		transactionID, ok := transactionid.FromContext(ctx)
-		if !ok {
-			// In case the response is not already tracked, but there is no
-			// transaction ID, we cannot track it at all. So we return here.
-			return nil
-		}
-		err = s.transactionResponder.Track(ctx, transactionID, responseWriter)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		return nil
-	}
-}
-
-// newEndpointWrapper creates a new wrapped endpoint function. E.g. here we wrap
-// the actual endpoint, the business logic. In case the response of the current
-// request is known to be tracked, we skip the execution of the actual endpoint.
-// We rely on the wrapped decoder above, which already prepared the reply of the
-// current request. If there is no transaction response being tracked, we
-// execute the actual endpoint as usual.
-func (s *server) newEndpointWrapper(e Endpoint) kitendpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		tracked, ok := transactiontracked.FromContext(ctx)
-		if !ok {
-			return nil, microerror.Maskf(invalidContextError, "tracked must not be empty")
-		}
-		if tracked {
-			return nil, nil
-		}
-
-		// Prepare the actual endpoint depending on the provided middlewares of the
-		// endpoint implementation. There might be cases in which there are none or
-		// only one middleware. The go-kit interface is not that nice so we need to
-		// make it fit here.
-		endpoint := e.Endpoint()
-		middlewares := e.Middlewares()
-		if len(middlewares) == 1 {
-			endpoint = kitendpoint.Chain(middlewares[0])(endpoint)
-		}
-		if len(middlewares) > 1 {
-			endpoint = kitendpoint.Chain(middlewares[0], middlewares[1:]...)(endpoint)
-		}
-		response, err := endpoint(ctx, request)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		return response, nil
-	}
-}
-
 // newNotFoundHandler returns an HTTP handler that represents our custom not
 // found handler. Here we take care about logging, metrics and a proper
 // response.
@@ -546,24 +384,6 @@ func (s *server) newNotFoundHandler() http.Handler {
 // to always have a valid state available within the request context.
 func (s *server) newRequestContext(w http.ResponseWriter, r *http.Request) (context.Context, error) {
 	ctx := context.Background()
-	ctx = transactiontracked.NewContext(ctx, false)
-
-	transactionID := r.Header.Get(TransactionIDHeader)
-	if transactionID == "" {
-		return ctx, nil
-	}
-
-	if !IsValidTransactionID(transactionID) {
-		return nil, microerror.Maskf(invalidTransactionIDError, "does not match %s", TransactionIDRegEx.String())
-	}
-
-	ctx = transactionid.NewContext(ctx, transactionID)
-
-	exists, err := s.transactionResponder.Exists(ctx, transactionID)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-	ctx = transactiontracked.NewContext(ctx, exists)
 
 	return ctx, nil
 }

@@ -22,30 +22,14 @@ var (
 
 // Config represents the configuration used to create a new daemon command.
 type Config struct {
-	// Dependencies.
 	Logger        micrologger.Logger
 	ServerFactory ServerFactory
 
-	// Settings.
 	Viper *viper.Viper
-}
-
-// DefaultConfig provides a default configuration to create a new daemon command
-// by best effort.
-func DefaultConfig() Config {
-	return Config{
-		// Dependencies.
-		Logger:        nil,
-		ServerFactory: nil,
-
-		// Settings.
-		Viper: viper.New(),
-	}
 }
 
 // New creates a new daemon command.
 func New(config Config) (Command, error) {
-	// Dependencies.
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "logger must not be empty")
 	}
@@ -53,18 +37,15 @@ func New(config Config) (Command, error) {
 		return nil, microerror.Maskf(invalidConfigError, "server factory must not be empty")
 	}
 	if config.Viper == nil {
-		return nil, microerror.Maskf(invalidConfigError, "viper must not be empty")
+		config.Viper = viper.New()
 	}
 
 	newCommand := &command{
-		// Dependencies.
 		logger:        config.Logger,
 		serverFactory: config.ServerFactory,
 
-		// Internals.
 		cobraCommand: nil,
 
-		// Settings.
 		viper: config.Viper,
 	}
 

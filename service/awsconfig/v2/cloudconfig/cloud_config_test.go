@@ -133,35 +133,30 @@ func Test_Service_CloudConfig_NewWorkerTemplate(t *testing.T) {
 		}
 
 		t.Run("VerifyAPIServerCA", func(t *testing.T) {
-			t.Parallel()
 			if !strings.Contains(decoded, tc.Certs.CalicoClientCA) {
 				t.Fatalf("expected %#v got %#v", "cloud config to contain Calico client CA", "none")
 			}
 		})
 
 		t.Run("VerifyAPIServerCrt", func(t *testing.T) {
-			t.Parallel()
 			if !strings.Contains(decoded, tc.Certs.CalicoClientCrt) {
 				t.Fatalf("expected %#v got %#v", "cloud config to contain Calico client Crt", "none")
 			}
 		})
 
 		t.Run("VerifyAPIServerKey", func(t *testing.T) {
-			t.Parallel()
 			if !strings.Contains(decoded, tc.Certs.CalicoClientKey) {
 				t.Fatalf("expected %#v got %#v", "cloud config to contain Calico client Key", "none")
 			}
 		})
 
 		t.Run("VerifyTLSAssetsDecryptionUnit", func(t *testing.T) {
-			t.Parallel()
 			if !strings.Contains(decoded, "- name: decrypt-tls-assets.service") {
 				t.Fatalf("expected %#v got %#v", "cloud config to contain unit decrypt-tls-assets.service", "none")
 			}
 		})
 
 		t.Run("VerifyAWSRegion", func(t *testing.T) {
-			t.Parallel()
 			if !strings.Contains(decoded, "--region 123456789-super-magic-aws-region kms decrypt") {
 				t.Fatalf("expected %#v got %#v", "cloud config to contain AWS region", "none")
 			}

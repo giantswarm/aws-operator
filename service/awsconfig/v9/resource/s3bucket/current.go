@@ -15,7 +15,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "debug", "looking for the S3 bucket")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "looking for the S3 bucket")
 
 	accountID, err := r.awsService.GetAccountID()
 	if err != nil {
@@ -28,7 +28,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	}
 	_, err = r.clients.S3.HeadBucket(headInput)
 	if IsBucketNotFound(err) {
-		r.logger.LogCtx(ctx, "debug", "did not find the S3 bucket")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the S3 bucket")
 		return BucketState{}, nil
 	}
 	if err != nil {
@@ -39,7 +39,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		Name: bucketName,
 	}
 
-	r.logger.LogCtx(ctx, "debug", "found the S3 bucket")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "found the S3 bucket")
 
 	return bucketState, nil
 }

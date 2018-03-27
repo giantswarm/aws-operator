@@ -55,7 +55,6 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 		a := Adapter{}
 
 		t.Run(tc.description, func(t *testing.T) {
-			t.Parallel()
 			cfg := Config{
 				CustomObject: tc.customObject,
 				Clients:      clients,
@@ -136,7 +135,6 @@ func TestAdapterLaunchConfigurationSmallCloudConfig(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			t.Parallel()
 			if !strings.Contains(string(data), tc.expectedLine) {
 				t.Errorf("SmallCloudConfig didn't contain expected %q, complete: %q", tc.expectedLine, string(data))
 			}

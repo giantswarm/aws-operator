@@ -18,7 +18,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return output, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "debug", "looking for S3 objects")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "looking for S3 objects")
 
 	accountID, err := r.awsService.GetAccountID()
 	if err != nil {
@@ -32,7 +32,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	result, err := r.awsClients.S3.ListObjectsV2(input)
 	// the bucket can be already deleted with all the objects in it, it is ok if so.
 	if IsBucketNotFound(err) {
-		r.logger.LogCtx(ctx, "debug", "S3 object's bucket not found, no current objects present")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "S3 object's bucket not found, no current objects present")
 		return output, nil
 	}
 	// we don't expect other errors.
@@ -40,7 +40,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return output, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "debug", "found the S3 objects")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "found the S3 objects")
 
 	for _, object := range result.Contents {
 		body, err := r.getBucketObjectBody(ctx, bucketName, *object.Key)
@@ -67,7 +67,7 @@ func (r *Resource) getBucketObjectBody(ctx context.Context, bucketName string, k
 	}
 	result, err := r.awsClients.S3.GetObject(input)
 	if IsObjectNotFound(err) || IsBucketNotFound(err) {
-		r.logger.LogCtx(ctx, "info", fmt.Sprintf("did not find S3 object '%s'", keyName))
+		r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("did not find S3 object '%s'", keyName))
 
 		// fall through
 		return body, nil
