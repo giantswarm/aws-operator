@@ -55,7 +55,7 @@ func Test_Adapter_Instance_RegularFields(t *testing.T) {
 				Clients:      clients,
 			}
 
-			a := &instancesAdapter{}
+			a := &instanceAdapter{}
 			err := a.Adapt(cfg)
 			if err != nil {
 				t.Fatal("expected", nil, "got", err)
@@ -124,7 +124,7 @@ func Test_Adapter_Instance_SmallCloudConfig(t *testing.T) {
 				Clients:      clients,
 			}
 
-			a := &instancesAdapter{}
+			a := &instanceAdapter{}
 			err := a.Adapt(cfg)
 			if err != nil {
 				t.Fatalf("unexpected error %v", err)

@@ -96,7 +96,7 @@ func CloudFormationGuestTemplates() []string {
 	return []string{
 		guest.AutoScalingGroup,
 		guest.IAMPolicies,
-		guest.Instances,
+		guest.Instance,
 		guest.InternetGateway,
 		guest.LaunchConfiguration,
 		guest.LoadBalancers,

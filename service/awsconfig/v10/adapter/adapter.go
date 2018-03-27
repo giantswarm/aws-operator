@@ -42,7 +42,7 @@ type Adapter struct {
 	MasterInstanceID string
 	WorkerImageID    string
 
-	Instances      *instancesAdapter
+	Instance       *instanceAdapter
 	LifecycleHooks *lifecycleHooksAdapter
 	Outputs        *outputsAdapter
 
@@ -72,7 +72,7 @@ type Config struct {
 func NewGuest(cfg Config) (Adapter, error) {
 
 	a := Adapter{
-		Instances:      &instancesAdapter{},
+		Instance:       &instanceAdapter{},
 		LifecycleHooks: &lifecycleHooksAdapter{},
 		Outputs:        &outputsAdapter{},
 	}
@@ -108,7 +108,7 @@ func NewGuest(cfg Config) (Adapter, error) {
 		a.getSubnets,
 		a.getVpc,
 
-		a.Instances.Adapt,
+		a.Instance.Adapt,
 		a.LifecycleHooks.Adapt,
 		a.Outputs.Adapt,
 	}

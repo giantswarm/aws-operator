@@ -13,35 +13,35 @@ import (
 
 // The template related to this adapter can be found in the following import.
 //
-//     github.com/giantswarm/aws-operator/service/awsconfig/v10/templates/cloudformation/guest/instances.go
+//     github.com/giantswarm/aws-operator/service/awsconfig/v10/templates/cloudformation/guest/instance.go
 //
 
-type instancesAdapter struct {
-	Cluster instancesAdapterCluster
-	Image   instancesAdapterImage
-	Master  instancesAdapterMaster
+type instanceAdapter struct {
+	Cluster instanceAdapterCluster
+	Image   instanceAdapterImage
+	Master  instanceAdapterMaster
 }
 
-type instancesAdapterCluster struct {
+type instanceAdapterCluster struct {
 	ID string
 }
 
-type instancesAdapterImage struct {
+type instanceAdapterImage struct {
 	ID string
 }
 
-type instancesAdapterMaster struct {
+type instanceAdapterMaster struct {
 	AZ          string
 	CloudConfig string
-	Instance    instancesAdapterMasterInstance
+	Instance    instanceAdapterMasterInstance
 }
 
-type instancesAdapterMasterInstance struct {
+type instanceAdapterMasterInstance struct {
 	ID   string
 	Type string
 }
 
-func (i *instancesAdapter) Adapt(config Config) error {
+func (i *instanceAdapter) Adapt(config Config) error {
 	{
 		i.Cluster.ID = key.ClusterID(config.CustomObject)
 	}
