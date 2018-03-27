@@ -19,7 +19,7 @@ const RecordSets = `{{define "recordsets"}}
       TTL: '900'
       Type: CNAME
       ResourceRecords:
-        - !GetAtt {{ .MasterInstanceID }}.PrivateDnsName
+        - !GetAtt {{ .MasterInstanceResourceName }}.PrivateDnsName
   IngressRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:

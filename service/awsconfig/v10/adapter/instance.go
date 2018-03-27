@@ -37,8 +37,8 @@ type instanceAdapterMaster struct {
 }
 
 type instanceAdapterMasterInstance struct {
-	ID   string
-	Type string
+	ResourceName string
+	Type         string
 }
 
 func (i *instanceAdapter) Adapt(config Config) error {
@@ -73,7 +73,7 @@ func (i *instanceAdapter) Adapt(config Config) error {
 		}
 		i.Master.CloudConfig = base64.StdEncoding.EncodeToString([]byte(rendered))
 
-		i.Master.Instance.ID = config.MasterInstanceID
+		i.Master.Instance.ResourceName = config.MasterInstanceResourceName
 
 		i.Master.Instance.Type = key.MasterInstanceType(config.CustomObject)
 	}

@@ -35,12 +35,12 @@ import (
 type hydrater func(Config) error
 
 type Adapter struct {
-	ASGType          string
-	AvailabilityZone string
-	ClusterID        string
-	MasterImageID    string
-	MasterInstanceID string
-	WorkerImageID    string
+	ASGType                    string
+	AvailabilityZone           string
+	ClusterID                  string
+	MasterImageID              string
+	MasterInstanceResourceName string
+	WorkerImageID              string
 
 	Instance       *instanceAdapter
 	LifecycleHooks *lifecycleHooksAdapter
@@ -60,13 +60,13 @@ type Adapter struct {
 }
 
 type Config struct {
-	CustomObject     v1alpha1.AWSConfig
-	Clients          Clients
-	GuestAccountID   string
-	HostAccountID    string
-	HostClients      Clients
-	InstallationName string
-	MasterInstanceID string
+	CustomObject               v1alpha1.AWSConfig
+	Clients                    Clients
+	GuestAccountID             string
+	HostAccountID              string
+	HostClients                Clients
+	InstallationName           string
+	MasterInstanceResourceName string
 }
 
 func NewGuest(cfg Config) (Adapter, error) {
@@ -85,9 +85,11 @@ func NewGuest(cfg Config) (Adapter, error) {
 	// adapters and get the configuration more straight. Right now it does not
 	// make that much sense to change a lot fo adapters right away since the focus
 	// is to get actual user stories done.
-	masterInstanceID := key.MasterInstanceID(cfg.CustomObject)
-	a.MasterInstanceID = masterInstanceID
-	cfg.MasterInstanceID = masterInstanceID
+	{
+		n := key.MasterInstanceResourceName(cfg.CustomObject)
+		a.MasterInstanceResourceName = n
+		cfg.MasterInstanceResourceName = n
+	}
 
 	// Get the EC2 AMI for the configured region.
 	imageID, err := key.ImageID(cfg.CustomObject)

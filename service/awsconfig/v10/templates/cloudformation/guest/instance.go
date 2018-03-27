@@ -1,7 +1,7 @@
 package guest
 
 const Instance = `{{define "instance"}}
-  {{ .Instance.Master.Instance.ID }}:
+  {{ .Instance.Master.Instance.ResourceName }}:
     Type: "AWS::EC2::Instance"
     Description: Master instance
     Properties:
@@ -19,19 +19,19 @@ const Instance = `{{define "instance"}}
   EtcdVolume:
     Type: AWS::EC2::Volume
     DependsOn:
-    - {{ .Instance.Master.Instance.ID }}
+    - {{ .Instance.Master.Instance.ResourceName }}
     Properties:
       Encrypted: true
       Size: 100
       VolumeType: gp2
-      AvailabilityZone: !GetAtt {{ .Instance.Master.Instance.ID }}.AvailabilityZone
+      AvailabilityZone: !GetAtt {{ .Instance.Master.Instance.ResourceName }}.AvailabilityZone
       Tags:
       - Key: Name
         Value: {{ .Instance.Cluster.ID }}-etcd
   MountPoint:
     Type: AWS::EC2::VolumeAttachment
     Properties:
-      InstanceId: !Ref {{ .Instance.Master.Instance.ID }}
+      InstanceId: !Ref {{ .Instance.Master.Instance.ResourceName }}
       VolumeId: !Ref EtcdVolume
       Device: /dev/sdh
 {{end}}`
