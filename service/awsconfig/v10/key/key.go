@@ -230,6 +230,10 @@ func MasterImageID(customObject v1alpha1.AWSConfig) string {
 	return imageID
 }
 
+func MasterInstanceResourceName(customObject v1alpha1.AWSConfig) string {
+	return "MasterInstance"
+}
+
 func MasterInstanceName(customObject v1alpha1.AWSConfig) string {
 	clusterID := ClusterID(customObject)
 

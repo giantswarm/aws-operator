@@ -35,19 +35,20 @@ import (
 type hydrater func(Config) error
 
 type Adapter struct {
-	ASGType          string
-	AvailabilityZone string
-	ClusterID        string
-	MasterImageID    string
-	WorkerImageID    string
+	ASGType                    string
+	AvailabilityZone           string
+	ClusterID                  string
+	MasterImageID              string
+	MasterInstanceResourceName string
+	WorkerImageID              string
 
+	Instance       *instanceAdapter
 	LifecycleHooks *lifecycleHooksAdapter
 	Outputs        *outputsAdapter
 
 	autoScalingGroupAdapter
 	iamPoliciesAdapter
 	hostIamRolesAdapter
-	instanceAdapter
 	launchConfigAdapter
 	loadBalancersAdapter
 	recordSetsAdapter
@@ -59,16 +60,19 @@ type Adapter struct {
 }
 
 type Config struct {
-	CustomObject     v1alpha1.AWSConfig
-	Clients          Clients
-	HostClients      Clients
-	InstallationName string
-	HostAccountID    string
-	GuestAccountID   string
+	CustomObject               v1alpha1.AWSConfig
+	Clients                    Clients
+	GuestAccountID             string
+	HostAccountID              string
+	HostClients                Clients
+	InstallationName           string
+	MasterInstanceResourceName string
 }
 
 func NewGuest(cfg Config) (Adapter, error) {
+
 	a := Adapter{
+		Instance:       &instanceAdapter{},
 		LifecycleHooks: &lifecycleHooksAdapter{},
 		Outputs:        &outputsAdapter{},
 	}
@@ -76,19 +80,28 @@ func NewGuest(cfg Config) (Adapter, error) {
 	a.ASGType = prefixWorker
 	a.ClusterID = key.ClusterID(cfg.CustomObject)
 
+	// TODO this is totally odd but is a necessary evil because of the different
+	// approaches adapters are managed right now. Over time we should refactor the
+	// adapters and get the configuration more straight. Right now it does not
+	// make that much sense to change a lot fo adapters right away since the focus
+	// is to get actual user stories done.
+	{
+		n := key.MasterInstanceResourceName(cfg.CustomObject)
+		a.MasterInstanceResourceName = n
+		cfg.MasterInstanceResourceName = n
+	}
+
 	// Get the EC2 AMI for the configured region.
 	imageID, err := key.ImageID(cfg.CustomObject)
 	if err != nil {
 		return Adapter{}, microerror.Mask(err)
 	}
-
 	a.MasterImageID = imageID
 	a.WorkerImageID = imageID
 
 	hydraters := []hydrater{
 		a.getAutoScalingGroup,
 		a.getIamPolicies,
-		a.getInstance,
 		a.getLaunchConfiguration,
 		a.getLoadBalancers,
 		a.getRecordSets,
@@ -97,6 +110,7 @@ func NewGuest(cfg Config) (Adapter, error) {
 		a.getSubnets,
 		a.getVpc,
 
+		a.Instance.Adapt,
 		a.LifecycleHooks.Adapt,
 		a.Outputs.Adapt,
 	}
