@@ -41,13 +41,13 @@ type Adapter struct {
 	MasterImageID    string
 	WorkerImageID    string
 
+	Instances      *instancesAdapter
 	LifecycleHooks *lifecycleHooksAdapter
 	Outputs        *outputsAdapter
 
 	autoScalingGroupAdapter
 	iamPoliciesAdapter
 	hostIamRolesAdapter
-	instanceAdapter
 	launchConfigAdapter
 	loadBalancersAdapter
 	recordSetsAdapter
@@ -69,6 +69,7 @@ type Config struct {
 
 func NewGuest(cfg Config) (Adapter, error) {
 	a := Adapter{
+		Instances:      &instancesAdapter{},
 		LifecycleHooks: &lifecycleHooksAdapter{},
 		Outputs:        &outputsAdapter{},
 	}
@@ -88,7 +89,6 @@ func NewGuest(cfg Config) (Adapter, error) {
 	hydraters := []hydrater{
 		a.getAutoScalingGroup,
 		a.getIamPolicies,
-		a.getInstance,
 		a.getLaunchConfiguration,
 		a.getLoadBalancers,
 		a.getRecordSets,
@@ -97,6 +97,7 @@ func NewGuest(cfg Config) (Adapter, error) {
 		a.getSubnets,
 		a.getVpc,
 
+		a.Instances.Adapt,
 		a.LifecycleHooks.Adapt,
 		a.Outputs.Adapt,
 	}
