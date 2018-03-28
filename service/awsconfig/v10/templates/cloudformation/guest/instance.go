@@ -16,6 +16,9 @@ const Instance = `{{define "instance"}}
       Tags:
       - Key: Name
         Value: {{ .Instance.Cluster.ID }}-master
+      Volumes:
+      - Device: /dev/sdh
+        VolumeId: !Ref EtcdVolume
   EtcdVolume:
     Type: AWS::EC2::Volume
     DependsOn:
@@ -28,10 +31,4 @@ const Instance = `{{define "instance"}}
       Tags:
       - Key: Name
         Value: {{ .Instance.Cluster.ID }}-etcd
-  MountPoint:
-    Type: AWS::EC2::VolumeAttachment
-    Properties:
-      InstanceId: !Ref {{ .Instance.Master.Instance.ResourceName }}
-      VolumeId: !Ref EtcdVolume
-      Device: /dev/sdh
 {{end}}`
