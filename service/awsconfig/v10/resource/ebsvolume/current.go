@@ -20,10 +20,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	}
 
 	// Get both the Etcd volume and any Persistent Volumes.
-	etcdVolume := true
-	persistentVolumes := true
-
-	volumes, err := r.service.ListVolumes(customObject, etcdVolume, persistentVolumes)
+	volumes, err := r.service.ListVolumes(customObject, true, true)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
