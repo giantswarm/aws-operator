@@ -3,11 +3,7 @@ package ebsvolume
 import (
 	"context"
 	"fmt"
-	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/framework"
 )
@@ -21,23 +17,24 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	if deleteInput != nil && len(deleteInput.Volumes) > 0 {
 		r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("deleting %d ebs volumes", len(deleteInput.Volumes)))
 
-		// First detach any attached volumes without forcing.
+		// First detach any attached volumes without forcing but shutdown the
+		// instances.
 		for _, vol := range deleteInput.Volumes {
 			for _, a := range vol.Attachments {
-				r.detachVolume(ctx, vol.VolumeID, a, false)
+				r.service.DetachVolume(ctx, vol.VolumeID, a, false, true)
 			}
 		}
 
 		// Now force detach so the volumes can be deleted cleanly.
 		for _, vol := range deleteInput.Volumes {
 			for _, a := range vol.Attachments {
-				r.detachVolume(ctx, vol.VolumeID, a, true)
+				r.service.DetachVolume(ctx, vol.VolumeID, a, true, false)
 			}
 		}
 
 		// Now delete the volumes.
 		for _, vol := range deleteInput.Volumes {
-			err := r.deleteVolume(ctx, vol.VolumeID)
+			err := r.service.DeleteVolume(ctx, vol.VolumeID)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -79,59 +76,4 @@ func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desir
 	}
 
 	return volStateToDelete, nil
-}
-
-func (r *Resource) detachVolume(ctx context.Context, volumeID string, attachment VolumeAttachment, force bool) error {
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detaching volume %s from instance %s", volumeID, attachment.InstanceID))
-
-	_, err := r.clients.EC2.DetachVolume(&ec2.DetachVolumeInput{
-		Device:     aws.String(attachment.Device),
-		InstanceId: aws.String(attachment.InstanceID),
-		VolumeId:   aws.String(volumeID),
-		Force:      aws.Bool(force),
-	})
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detached volume %s from instance %s", volumeID, attachment.InstanceID))
-
-	return nil
-}
-
-func (r *Resource) deleteVolume(ctx context.Context, volumeID string) error {
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting ebs volume %s", volumeID))
-
-	deleteOperation := func() error {
-		_, err := r.clients.EC2.DeleteVolume(&ec2.DeleteVolumeInput{
-			VolumeId: aws.String(volumeID),
-		})
-		if IsVolumeNotFound(err) {
-			// Fall through.
-			return nil
-		}
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		return nil
-	}
-	deleteNotify := func(err error, delay time.Duration) {
-		r.logger.LogCtx(ctx, "level", "error", fmt.Sprintf("deleting ebs volume failed, retrying with delay %.0fm%.0fs: '%#v'", delay.Minutes(), delay.Seconds(), err))
-	}
-	deleteBackoff := &backoff.ExponentialBackOff{
-		InitialInterval:     backoff.DefaultInitialInterval,
-		RandomizationFactor: backoff.DefaultRandomizationFactor,
-		Multiplier:          backoff.DefaultMultiplier,
-		MaxInterval:         backoff.DefaultMaxInterval,
-		MaxElapsedTime:      3 * time.Minute,
-		Clock:               backoff.SystemClock,
-	}
-	if err := backoff.RetryNotify(deleteOperation, deleteBackoff, deleteNotify); err != nil {
-		return microerror.Mask(err)
-	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted ebs volume %s", volumeID))
-
-	return nil
 }

@@ -2,11 +2,7 @@ package ebsvolume
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/key"
@@ -23,69 +19,18 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	currentState, err := r.persistentVolumes(customObject)
+	// Get both the Etcd volume and any Persistent Volumes.
+	etcdVolume := true
+	persistentVolumes := true
+
+	volumes, err := r.service.ListVolumes(customObject, etcdVolume, persistentVolumes)
 	if err != nil {
 		return nil, microerror.Mask(err)
+	}
+
+	currentState := &EBSVolumeState{
+		Volumes: volumes,
 	}
 
 	return currentState, nil
-}
-
-func (r *Resource) persistentVolumes(customObject v1alpha1.AWSConfig) (*EBSVolumeState, error) {
-	volumeState := &EBSVolumeState{}
-	volumes := []Volume{}
-
-	// We filter to only select clusters with the cluster cloud provider tag.
-	clusterTag := key.ClusterCloudProviderTag(customObject)
-	filters := []*ec2.Filter{
-		{
-			Name: aws.String(fmt.Sprintf("tag:%s", clusterTag)),
-			Values: []*string{
-				aws.String(cloudProviderClusterTagValue),
-			},
-		},
-	}
-	output, err := r.clients.EC2.DescribeVolumes(&ec2.DescribeVolumesInput{
-		Filters: filters,
-	})
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	for _, vol := range output.Volumes {
-		// Volume is only included if it has a PV name tag.
-		if containsPersistentVolumeTag(vol.Tags) {
-			attachments := []VolumeAttachment{}
-
-			if len(vol.Attachments) > 0 {
-				for _, a := range vol.Attachments {
-					attachments = append(attachments, VolumeAttachment{
-						Device:     *a.Device,
-						InstanceID: *a.InstanceId,
-					})
-				}
-			}
-
-			volume := Volume{
-				VolumeID:    *vol.VolumeId,
-				Attachments: attachments,
-			}
-
-			volumes = append(volumes, volume)
-		}
-	}
-
-	volumeState.Volumes = volumes
-
-	return volumeState, nil
-}
-
-func containsPersistentVolumeTag(tags []*ec2.Tag) bool {
-	for _, tag := range tags {
-		if *tag.Key == cloudProviderPersistentVolumeTagKey {
-			return true
-		}
-	}
-
-	return false
 }
