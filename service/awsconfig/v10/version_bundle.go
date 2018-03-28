@@ -24,6 +24,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Fixed unencrypted encryption key injection via Cloud Config S3 uploads.",
 				Kind:        versionbundle.KindSecurity,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Fixed idempotency of format-var-lib-docker service.",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
