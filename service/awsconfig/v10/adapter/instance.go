@@ -17,39 +17,66 @@ import (
 //
 
 type instanceAdapter struct {
-	MasterAZ               string
-	MasterInstanceType     string
-	MasterSecurityGroupID  string
-	MasterSmallCloudConfig string
+	Cluster instanceAdapterCluster
+	Image   instanceAdapterImage
+	Master  instanceAdapterMaster
 }
 
-func (i *instanceAdapter) getInstance(cfg Config) error {
-	if len(cfg.CustomObject.Spec.AWS.Masters) == 0 {
-		return microerror.Mask(invalidConfigError)
+type instanceAdapterCluster struct {
+	ID string
+}
+
+type instanceAdapterImage struct {
+	ID string
+}
+
+type instanceAdapterMaster struct {
+	AZ          string
+	CloudConfig string
+	Instance    instanceAdapterMasterInstance
+}
+
+type instanceAdapterMasterInstance struct {
+	ResourceName string
+	Type         string
+}
+
+func (i *instanceAdapter) Adapt(config Config) error {
+	{
+		i.Cluster.ID = key.ClusterID(config.CustomObject)
 	}
 
-	i.MasterAZ = key.AvailabilityZone(cfg.CustomObject)
-	i.MasterInstanceType = key.MasterInstanceType(cfg.CustomObject)
-
-	accountID, err := AccountID(cfg.Clients)
-	if err != nil {
-		return microerror.Mask(err)
+	{
+		imageID, err := key.ImageID(config.CustomObject)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		i.Image.ID = imageID
 	}
 
-	clusterID := key.ClusterID(cfg.CustomObject)
-	s3URI := fmt.Sprintf("%s-g8s-%s", accountID, clusterID)
+	{
+		i.Master.AZ = key.AvailabilityZone(config.CustomObject)
 
-	c := SmallCloudconfigConfig{
-		MachineType:        prefixMaster,
-		Region:             cfg.CustomObject.Spec.AWS.Region,
-		S3URI:              s3URI,
-		CloudConfigVersion: cloudconfig.MasterCloudConfigVersion,
+		accountID, err := AccountID(config.Clients)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		c := SmallCloudconfigConfig{
+			MachineType:        prefixMaster,
+			Region:             key.Region(config.CustomObject),
+			S3URI:              fmt.Sprintf("%s-g8s-%s", accountID, i.Cluster.ID),
+			CloudConfigVersion: cloudconfig.MasterCloudConfigVersion,
+		}
+		rendered, err := templates.Render(key.CloudConfigSmallTemplates(), c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		i.Master.CloudConfig = base64.StdEncoding.EncodeToString([]byte(rendered))
+
+		i.Master.Instance.ResourceName = config.MasterInstanceResourceName
+
+		i.Master.Instance.Type = key.MasterInstanceType(config.CustomObject)
 	}
-	rendered, err := templates.Render(key.CloudConfigSmallTemplates(), c)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	i.MasterSmallCloudConfig = base64.StdEncoding.EncodeToString([]byte(rendered))
 
 	return nil
 }

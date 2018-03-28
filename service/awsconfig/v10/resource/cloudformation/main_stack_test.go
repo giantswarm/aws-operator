@@ -123,164 +123,163 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 	}
 	newResource, err := New(cfg)
 	if err != nil {
-		t.Errorf("unexpected error %v", err)
+		t.Fatalf("unexpected error %v", err)
 	}
 
 	body, err := newResource.getMainGuestTemplateBody(customObject)
-
 	if err != nil {
-		t.Errorf("unexpected error %v", err)
+		t.Fatalf("unexpected error %v", err)
 	}
 
 	if !strings.Contains(body, "Description: Main Guest CloudFormation stack.") {
-		t.Error("stack header not found")
+		t.Fatal("stack header not found")
 	}
 
 	if !strings.Contains(body, "  workerLaunchConfiguration:") {
-		t.Error("launch configuration header not found")
+		t.Fatal("launch configuration header not found")
 	}
 
 	if !strings.Contains(body, "  workerAutoScalingGroup:") {
-		t.Error("asg header not found")
+		t.Fatal("asg header not found")
 	}
 
 	if !strings.Contains(body, "InstanceType: m3.large") {
-		t.Error("launch configuration element not found")
+		t.Fatal("launch configuration element not found")
 	}
 
 	if !strings.Contains(body, "AvailabilityZones: [eu-central-1a]") {
 		fmt.Println(body)
-		t.Error("asg element not found")
+		t.Fatal("asg element not found")
 	}
 
 	if !strings.Contains(body, "Outputs:") {
 		fmt.Println(body)
-		t.Error("outputs header not found")
+		t.Fatal("outputs header not found")
 	}
 
 	if !strings.Contains(body, key.MasterImageIDKey+":") {
 		fmt.Println(body)
-		t.Error("MasterImageID output element not found")
+		t.Fatal("MasterImageID output element not found")
 	}
 	if !strings.Contains(body, key.MasterInstanceTypeKey+":") {
 		fmt.Println(body)
-		t.Error("MasterInstanceType output element not found")
+		t.Fatal("MasterInstanceType output element not found")
 	}
 	if !strings.Contains(body, key.MasterCloudConfigVersionKey+":") {
 		fmt.Println(body)
-		t.Error("master CloudConfig version output element not found")
+		t.Fatal("master CloudConfig version output element not found")
 	}
 	if !strings.Contains(body, key.WorkerCountKey+":") {
 		fmt.Println(body)
-		t.Error("workers output element not found")
+		t.Fatal("workers output element not found")
 	}
 	if !strings.Contains(body, key.WorkerImageIDKey+":") {
 		fmt.Println(body)
-		t.Error("WorkerImageID output element not found")
+		t.Fatal("WorkerImageID output element not found")
 	}
 	if !strings.Contains(body, key.WorkerInstanceTypeKey+":") {
 		fmt.Println(body)
-		t.Error("WorkerInstanceType output element not found")
+		t.Fatal("WorkerInstanceType output element not found")
 	}
 	if !strings.Contains(body, key.WorkerCloudConfigVersionKey+":") {
 		fmt.Println(body)
-		t.Error("worker CloudConfig version output element not found")
+		t.Fatal("worker CloudConfig version output element not found")
 	}
 
 	if !strings.Contains(body, "Value: "+cloudconfig.MasterCloudConfigVersion) {
 		fmt.Println(body)
-		t.Error("output element not found")
+		t.Fatal("output element not found")
 	}
 
 	if !strings.Contains(body, workerRoleKey+":") {
 		fmt.Println(body)
-		t.Error("workerRole output element not found")
+		t.Fatal("workerRole output element not found")
 	}
 	if !strings.Contains(body, "PolicyName: test-cluster-master") {
 		fmt.Println(body)
-		t.Error("PolicyName output element not found")
+		t.Fatal("PolicyName output element not found")
 	}
 	if !strings.Contains(body, "PolicyName: test-cluster-worker") {
 		fmt.Println(body)
-		t.Error("PolicyName output element not found")
+		t.Fatal("PolicyName output element not found")
 	}
 	if !strings.Contains(body, "ApiRecordSet:") {
 		fmt.Println(body)
-		t.Error("ApiRecordSet element not found")
+		t.Fatal("ApiRecordSet element not found")
 	}
 	if !strings.Contains(body, "EtcdRecordSet:") {
 		fmt.Println(body)
-		t.Error("EtcdRecordSet element not found")
+		t.Fatal("EtcdRecordSet element not found")
 	}
 	if !strings.Contains(body, "IngressRecordSet:") {
 		fmt.Println(body)
-		t.Error("IngressRecordSet element not found")
+		t.Fatal("IngressRecordSet element not found")
 	}
 	if !strings.Contains(body, "IngressWildcardRecordSet:") {
 		fmt.Println(body)
-		t.Error("ingressWildcardRecordSet element not found")
+		t.Fatal("ingressWildcardRecordSet element not found")
 	}
-	if !strings.Contains(body, "MasterInstance:") {
+	if !strings.Contains(body, "MasterInstance") {
 		fmt.Println(body)
-		t.Error("MasterInstance element not found")
+		t.Fatal("MasterInstance element not found")
 	}
 	if !strings.Contains(body, "ApiLoadBalancer:") {
 		fmt.Println(body)
-		t.Error("ApiLoadBalancer element not found")
+		t.Fatal("ApiLoadBalancer element not found")
 	}
 	if !strings.Contains(body, "IngressLoadBalancer:") {
 		fmt.Println(body)
-		t.Error("IngressLoadBalancer element not found")
+		t.Fatal("IngressLoadBalancer element not found")
 	}
 	if !strings.Contains(body, "InternetGateway:") {
 		fmt.Println(body)
-		t.Error("InternetGateway element not found")
+		t.Fatal("InternetGateway element not found")
 	}
 	if !strings.Contains(body, "NATGateway:") {
 		fmt.Println(body)
-		t.Error("NATGateway element not found")
+		t.Fatal("NATGateway element not found")
 	}
 	if !strings.Contains(body, "PublicRouteTable:") {
 		fmt.Println(body)
-		t.Error("PublicRouteTable element not found")
+		t.Fatal("PublicRouteTable element not found")
 	}
 	if !strings.Contains(body, "PublicSubnet:") {
 		fmt.Println(body)
-		t.Error("PublicSubnet element not found")
+		t.Fatal("PublicSubnet element not found")
 	}
 	if !strings.Contains(body, "PrivateRouteTable:") {
 		fmt.Println(body)
-		t.Error("PrivateRouteTable element not found")
+		t.Fatal("PrivateRouteTable element not found")
 	}
 	if !strings.Contains(body, "PrivateSubnet:") {
 		fmt.Println(body)
-		t.Error("PrivateSubnet element not found")
+		t.Fatal("PrivateSubnet element not found")
 	}
 	if !strings.Contains(body, "MasterSecurityGroup:") {
 		fmt.Println(body)
-		t.Error("MasterSecurityGroup element not found")
+		t.Fatal("MasterSecurityGroup element not found")
 	}
 	if !strings.Contains(body, "WorkerSecurityGroup:") {
 		fmt.Println(body)
-		t.Error("WorkerSecurityGroup element not found")
+		t.Fatal("WorkerSecurityGroup element not found")
 	}
 	if !strings.Contains(body, "IngressSecurityGroup:") {
 		fmt.Println(body)
-		t.Error("IngressSecurityGroup element not found")
+		t.Fatal("IngressSecurityGroup element not found")
 	}
 	if !strings.Contains(body, " VPC:") {
 		fmt.Println(body)
-		t.Error("VPC element not found")
+		t.Fatal("VPC element not found")
 	}
 	if !strings.Contains(body, "CidrBlock: 10.1.1.0/24") {
 		fmt.Println(body)
-		t.Error("CidrBlock element not found")
+		t.Fatal("CidrBlock element not found")
 	}
 
 	// image ids should be fixed despite the values in the custom object
 	if !strings.Contains(body, "ImageId: ami-862140e9") {
 		fmt.Println(body)
-		t.Error("Fixed image ID not found")
+		t.Fatal("Fixed image ID not found")
 	}
 }
 
@@ -306,28 +305,28 @@ func TestMainHostPreTemplateExistingFields(t *testing.T) {
 	}
 	newResource, err := New(cfg)
 	if err != nil {
-		t.Errorf("unexpected error %v", err)
+		t.Fatalf("unexpected error %v", err)
 	}
 
 	body, err := newResource.getMainHostPreTemplateBody(customObject)
 
 	if err != nil {
-		t.Errorf("unexpected error %v", err)
+		t.Fatalf("unexpected error %v", err)
 	}
 
 	if !strings.Contains(body, "Description: Main Host Pre-Guest CloudFormation stack.") {
 		fmt.Println(body)
-		t.Error("stack header not found")
+		t.Fatal("stack header not found")
 	}
 
 	if !strings.Contains(body, "  PeerRole:") {
 		fmt.Println(body)
-		t.Error("peer role header not found")
+		t.Fatal("peer role header not found")
 	}
 
 	if !strings.Contains(body, "  RoleName: test-cluster-vpc-peer-access") {
 		fmt.Println(body)
-		t.Error("role name not found")
+		t.Fatal("role name not found")
 	}
 }
 
@@ -363,22 +362,22 @@ func TestMainHostPostTemplateExistingFields(t *testing.T) {
 	}
 	newResource, err := New(cfg)
 	if err != nil {
-		t.Errorf("unexpected error %v", err)
+		t.Fatalf("unexpected error %v", err)
 	}
 
 	body, err := newResource.getMainHostPostTemplateBody(customObject)
 
 	if err != nil {
-		t.Errorf("unexpected error %v", err)
+		t.Fatalf("unexpected error %v", err)
 	}
 
 	if !strings.Contains(body, "Description: Main Host Post-Guest CloudFormation stack.") {
 		fmt.Println(body)
-		t.Error("stack header not found")
+		t.Fatal("stack header not found")
 	}
 
 	if !strings.Contains(body, "  PrivateRoute1:") {
 		fmt.Println(body)
-		t.Error("route header not found")
+		t.Fatal("route header not found")
 	}
 }
