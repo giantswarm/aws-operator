@@ -19,6 +19,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/adapter"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/cloudconfig"
 	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v10/cloudformation"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/ebs"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/key"
 	cloudformationresource "github.com/giantswarm/aws-operator/service/awsconfig/v10/resource/cloudformation"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/resource/ebsvolume"
@@ -29,7 +30,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/resource/service"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v10/ebs"
 )
 
 const (
@@ -143,7 +143,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 		}
 	}
 
-	var ebsService * ebs.EBS
+	var ebsService ebs.Interface
 	{
 		c := ebs.Config{
 			Client: config.GuestAWSClients.EC2,
@@ -248,7 +248,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 	var ebsVolumeResource framework.Resource
 	{
 		c := ebsvolume.Config{
-			Logger: config.Logger,
+			Logger:  config.Logger,
 			Service: ebsService,
 		}
 
