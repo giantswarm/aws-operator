@@ -2,7 +2,6 @@ package cloudformation
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -180,29 +179,17 @@ func shouldScale(currentState, desiredState StackState) bool {
 func shouldUpdate(currentState, desiredState StackState) bool {
 	// Check scaling related properties.
 	if currentState.WorkerCount != desiredState.WorkerCount {
-		fmt.Printf("%#v\n", 1)
-		fmt.Printf("%#v\n", currentState.WorkerCount)
-		fmt.Printf("%#v\n", desiredState.WorkerCount)
 		return true
 	}
 
 	// Check updates related properties.
 	if currentState.MasterInstanceType != desiredState.MasterInstanceType {
-		fmt.Printf("%#v\n", 2)
-		fmt.Printf("%#v\n", currentState.MasterInstanceType)
-		fmt.Printf("%#v\n", desiredState.MasterInstanceType)
 		return true
 	}
 	if currentState.WorkerInstanceType != desiredState.WorkerInstanceType {
-		fmt.Printf("%#v\n", 3)
-		fmt.Printf("%#v\n", currentState.WorkerInstanceType)
-		fmt.Printf("%#v\n", desiredState.WorkerInstanceType)
 		return true
 	}
 	if currentState.VersionBundleVersion != desiredState.VersionBundleVersion {
-		fmt.Printf("%#v\n", 4)
-		fmt.Printf("%#v\n", currentState.VersionBundleVersion)
-		fmt.Printf("%#v\n", desiredState.VersionBundleVersion)
 		return true
 	}
 
