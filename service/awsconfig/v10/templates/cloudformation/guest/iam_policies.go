@@ -46,6 +46,17 @@ const IAMPolicies = `{{define "iam_policies"}}
           - Effect: "Allow"
             Action: "elasticloadbalancing:*"
             Resource: "*"
+
+          - Effect: Allow
+            Action:
+            - sqs:ChangeMessageVisibility
+            - sqs:DeleteMessage
+            - sqs:ReceiveMessage
+            Resource:
+              Fn::GetAtt:
+              - CustomResourcePipeline
+              - Outputs.CustomResourceQueueARN
+
   MasterInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
