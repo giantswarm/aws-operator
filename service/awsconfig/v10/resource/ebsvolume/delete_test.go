@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/ebs"
 	"github.com/giantswarm/micrologger/microloggertest"
 )
 
@@ -30,7 +31,7 @@ func Test_newDeleteChange(t *testing.T) {
 			description: "case 0: basic match",
 			obj:         customObject,
 			currentState: &EBSVolumeState{
-				Volumes: []Volume{
+				Volumes: []ebs.Volume{
 					{
 						VolumeID: "vol-1234",
 					},
@@ -41,7 +42,7 @@ func Test_newDeleteChange(t *testing.T) {
 			},
 			desiredState: nil,
 			expectedState: &EBSVolumeState{
-				Volumes: []Volume{
+				Volumes: []ebs.Volume{
 					{
 						VolumeID: "vol-1234",
 					},
@@ -55,9 +56,9 @@ func Test_newDeleteChange(t *testing.T) {
 			description: "case 1: basic match with attachments",
 			obj:         customObject,
 			currentState: &EBSVolumeState{
-				Volumes: []Volume{
+				Volumes: []ebs.Volume{
 					{
-						Attachments: []VolumeAttachment{
+						Attachments: []ebs.VolumeAttachment{
 							{
 								InstanceID: "i-12345",
 								Device:     "/dev/sdh",
@@ -66,7 +67,7 @@ func Test_newDeleteChange(t *testing.T) {
 						VolumeID: "vol-1234",
 					},
 					{
-						Attachments: []VolumeAttachment{
+						Attachments: []ebs.VolumeAttachment{
 							{
 								InstanceID: "i-56789",
 								Device:     "/dev/sdh",
@@ -78,9 +79,9 @@ func Test_newDeleteChange(t *testing.T) {
 			},
 			desiredState: nil,
 			expectedState: &EBSVolumeState{
-				Volumes: []Volume{
+				Volumes: []ebs.Volume{
 					{
-						Attachments: []VolumeAttachment{
+						Attachments: []ebs.VolumeAttachment{
 							{
 								InstanceID: "i-12345",
 								Device:     "/dev/sdh",
@@ -89,7 +90,7 @@ func Test_newDeleteChange(t *testing.T) {
 						VolumeID: "vol-1234",
 					},
 					{
-						Attachments: []VolumeAttachment{
+						Attachments: []ebs.VolumeAttachment{
 							{
 								InstanceID: "i-56789",
 								Device:     "/dev/sdh",
@@ -111,7 +112,7 @@ func Test_newDeleteChange(t *testing.T) {
 			description: "case 3: return nil when current volumes are empty",
 			obj:         customObject,
 			currentState: &EBSVolumeState{
-				Volumes: []Volume{},
+				Volumes: []ebs.Volume{},
 			},
 			desiredState:  nil,
 			expectedState: nil,
@@ -120,14 +121,14 @@ func Test_newDeleteChange(t *testing.T) {
 			description: "case 4: return nil when desired state is not nil",
 			obj:         customObject,
 			currentState: &EBSVolumeState{
-				Volumes: []Volume{
+				Volumes: []ebs.Volume{
 					{
 						VolumeID: "vol-1234",
 					},
 				},
 			},
 			desiredState: &EBSVolumeState{
-				Volumes: []Volume{
+				Volumes: []ebs.Volume{
 					{
 						VolumeID: "vol-1234",
 					},
@@ -137,18 +138,22 @@ func Test_newDeleteChange(t *testing.T) {
 		},
 	}
 
-	var err error
-	var newResource *Resource
-
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			c := Config{
-				Clients: Clients{
-					EC2: &EC2ClientMock{},
-				},
+			ebsConfig := ebs.Config{
+				Client: &ebs.EC2ClientMock{},
 				Logger: microloggertest.New(),
 			}
-			newResource, err = New(c)
+			ebsService, err := ebs.New(ebsConfig)
+			if err != nil {
+				t.Error("expected", nil, "got", err)
+			}
+
+			c := Config{
+				Logger:  microloggertest.New(),
+				Service: ebsService,
+			}
+			newResource, err := New(c)
 			if err != nil {
 				t.Error("expected", nil, "got", err)
 			}

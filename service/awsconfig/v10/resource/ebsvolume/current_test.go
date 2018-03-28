@@ -9,6 +9,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
+
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/ebs"
 )
 
 func Test_CurrentState(t *testing.T) {
@@ -25,30 +27,30 @@ func Test_CurrentState(t *testing.T) {
 		description   string
 		obj           *v1alpha1.AWSConfig
 		expectedState *EBSVolumeState
-		ebsVolumes    []EBSVolumeMock
+		ebsVolumes    []ebs.EBSVolumeMock
 	}{
 		{
 			description: "case 0: basic match with no ebs volumes",
 			obj:         customObject,
 			expectedState: &EBSVolumeState{
-				Volumes: []Volume{},
+				Volumes: []ebs.Volume{},
 			},
 		},
 		{
 			description: "case 1: basic match with ebs volume",
 			obj:         customObject,
 			expectedState: &EBSVolumeState{
-				Volumes: []Volume{
+				Volumes: []ebs.Volume{
 					{
-						Attachments: []VolumeAttachment{},
+						Attachments: []ebs.VolumeAttachment{},
 						VolumeID:    "vol-1234",
 					},
 				},
 			},
-			ebsVolumes: []EBSVolumeMock{
+			ebsVolumes: []ebs.EBSVolumeMock{
 				{
-					volumeID: "vol-1234",
-					tags: []*ec2.Tag{
+					VolumeID: "vol-1234",
+					Tags: []*ec2.Tag{
 						{
 							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
 							Value: aws.String("owned"),
@@ -65,21 +67,21 @@ func Test_CurrentState(t *testing.T) {
 			description: "case 2: basic match with multiple ebs volumes",
 			obj:         customObject,
 			expectedState: &EBSVolumeState{
-				Volumes: []Volume{
+				Volumes: []ebs.Volume{
 					{
-						Attachments: []VolumeAttachment{},
+						Attachments: []ebs.VolumeAttachment{},
 						VolumeID:    "vol-1234",
 					},
 					{
-						Attachments: []VolumeAttachment{},
+						Attachments: []ebs.VolumeAttachment{},
 						VolumeID:    "vol-5678",
 					},
 				},
 			},
-			ebsVolumes: []EBSVolumeMock{
+			ebsVolumes: []ebs.EBSVolumeMock{
 				{
-					volumeID: "vol-1234",
-					tags: []*ec2.Tag{
+					VolumeID: "vol-1234",
+					Tags: []*ec2.Tag{
 						{
 							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
 							Value: aws.String("owned"),
@@ -91,8 +93,8 @@ func Test_CurrentState(t *testing.T) {
 					},
 				},
 				{
-					volumeID: "vol-5678",
-					tags: []*ec2.Tag{
+					VolumeID: "vol-5678",
+					Tags: []*ec2.Tag{
 						{
 							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
 							Value: aws.String("owned"),
@@ -109,12 +111,12 @@ func Test_CurrentState(t *testing.T) {
 			description: "case 3: no match due to cluster tag",
 			obj:         customObject,
 			expectedState: &EBSVolumeState{
-				Volumes: []Volume{},
+				Volumes: []ebs.Volume{},
 			},
-			ebsVolumes: []EBSVolumeMock{
+			ebsVolumes: []ebs.EBSVolumeMock{
 				{
-					volumeID: "vol-1234",
-					tags: []*ec2.Tag{
+					VolumeID: "vol-1234",
+					Tags: []*ec2.Tag{
 						{
 							Key:   aws.String("kubernetes.io/cluster/other-cluster"),
 							Value: aws.String("owned"),
@@ -131,12 +133,12 @@ func Test_CurrentState(t *testing.T) {
 			description: "case 4: no match due to missing pvc tag",
 			obj:         customObject,
 			expectedState: &EBSVolumeState{
-				Volumes: []Volume{},
+				Volumes: []ebs.Volume{},
 			},
-			ebsVolumes: []EBSVolumeMock{
+			ebsVolumes: []ebs.EBSVolumeMock{
 				{
-					volumeID: "vol-1234",
-					tags: []*ec2.Tag{
+					VolumeID: "vol-1234",
+					Tags: []*ec2.Tag{
 						{
 							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
 							Value: aws.String("owned"),
@@ -149,9 +151,9 @@ func Test_CurrentState(t *testing.T) {
 			description: "case 5: multiple ebs volumes with attachments",
 			obj:         customObject,
 			expectedState: &EBSVolumeState{
-				Volumes: []Volume{
+				Volumes: []ebs.Volume{
 					{
-						Attachments: []VolumeAttachment{
+						Attachments: []ebs.VolumeAttachment{
 							{
 								InstanceID: "i-12345",
 								Device:     "/dev/sdh",
@@ -160,7 +162,7 @@ func Test_CurrentState(t *testing.T) {
 						VolumeID: "vol-1234",
 					},
 					{
-						Attachments: []VolumeAttachment{
+						Attachments: []ebs.VolumeAttachment{
 							{
 								InstanceID: "i-56789",
 								Device:     "/dev/sdh",
@@ -170,16 +172,16 @@ func Test_CurrentState(t *testing.T) {
 					},
 				},
 			},
-			ebsVolumes: []EBSVolumeMock{
+			ebsVolumes: []ebs.EBSVolumeMock{
 				{
-					volumeID: "vol-1234",
-					attachments: []*ec2.VolumeAttachment{
+					VolumeID: "vol-1234",
+					Attachments: []*ec2.VolumeAttachment{
 						{
 							Device:     aws.String("/dev/sdh"),
 							InstanceId: aws.String("i-12345"),
 						},
 					},
-					tags: []*ec2.Tag{
+					Tags: []*ec2.Tag{
 						{
 							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
 							Value: aws.String("owned"),
@@ -191,14 +193,14 @@ func Test_CurrentState(t *testing.T) {
 					},
 				},
 				{
-					volumeID: "vol-5678",
-					attachments: []*ec2.VolumeAttachment{
+					VolumeID: "vol-5678",
+					Attachments: []*ec2.VolumeAttachment{
 						{
 							Device:     aws.String("/dev/sdh"),
 							InstanceId: aws.String("i-56789"),
 						},
 					},
-					tags: []*ec2.Tag{
+					Tags: []*ec2.Tag{
 						{
 							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
 							Value: aws.String("owned"),
@@ -212,21 +214,26 @@ func Test_CurrentState(t *testing.T) {
 			},
 		},
 	}
-	var err error
-	var newResource *Resource
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			c := Config{
-				Clients: Clients{
-					EC2: &EC2ClientMock{
-						customObject: *tc.obj,
-						ebsVolumes:   tc.ebsVolumes,
-					},
+			ebsConfig := ebs.Config{
+				Client: &ebs.EC2ClientMock{
+					CustomObject: *tc.obj,
+					EBSVolumes:   tc.ebsVolumes,
 				},
 				Logger: microloggertest.New(),
 			}
-			newResource, err = New(c)
+			ebsService, err := ebs.New(ebsConfig)
+			if err != nil {
+				t.Error("expected", nil, "got", err)
+			}
+
+			c := Config{
+				Logger:  microloggertest.New(),
+				Service: ebsService,
+			}
+			newResource, err := New(c)
 			if err != nil {
 				t.Error("expected", nil, "got", err)
 			}
