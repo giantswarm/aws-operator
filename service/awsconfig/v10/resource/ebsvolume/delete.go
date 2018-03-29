@@ -35,8 +35,8 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 
 		// Now force detach so the volumes can be deleted cleanly. Instances
 		// are already shutdown.
-		force := true
-		shutdown := false
+		force = true
+		shutdown = false
 
 		for _, vol := range deleteInput.Volumes {
 			for _, a := range vol.Attachments {
