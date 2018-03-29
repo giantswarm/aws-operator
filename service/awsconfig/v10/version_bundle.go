@@ -26,8 +26,13 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "aws-operator",
+				Description: "Fixed idempotency of format-var-lib-docker service.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "aws-operator",
 				Description: "Detach EBS volumes before deletion when deleting clusters.",
-				Kind:        versionbundle.KindFixed,
+				Kind:        versionbundle.KindChanged,
 			},
 		},
 		Components: []versionbundle.Component{
