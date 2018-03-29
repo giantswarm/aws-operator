@@ -27,7 +27,9 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		r.logger.LogCtx(ctx, "level", "debug", "message", "creating the guest cluster main stack")
 
 		_, err = r.clients.CloudFormation.CreateStack(&stackInput)
-		if err != nil {
+		if IsAlreadyExists(err) {
+			// fall through
+		} else if err != nil {
 			return microerror.Mask(err)
 		}
 
