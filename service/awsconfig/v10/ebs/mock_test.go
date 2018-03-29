@@ -9,14 +9,14 @@ import (
 )
 
 type EC2ClientMock struct {
-	CustomObject v1alpha1.AWSConfig
-	EBSVolumes   []EBSVolumeMock
+	customObject v1alpha1.AWSConfig
+	ebsVolumes   []ebsVolumeMock
 }
 
-type EBSVolumeMock struct {
-	VolumeID    string
-	Attachments []*ec2.VolumeAttachment
-	Tags        []*ec2.Tag
+type ebsVolumeMock struct {
+	volumeID    string
+	attachments []*ec2.VolumeAttachment
+	tags        []*ec2.Tag
 }
 
 func (e *EC2ClientMock) DeleteVolume(*ec2.DeleteVolumeInput) (*ec2.DeleteVolumeOutput, error) {
@@ -27,16 +27,16 @@ func (e *EC2ClientMock) DescribeVolumes(input *ec2.DescribeVolumesInput) (*ec2.D
 	output := &ec2.DescribeVolumesOutput{}
 	volumes := []*ec2.Volume{}
 
-	clusterTag := key.ClusterCloudProviderTag(e.CustomObject)
+	clusterTag := key.ClusterCloudProviderTag(e.customObject)
 
-	for _, mock := range e.EBSVolumes {
+	for _, mock := range e.ebsVolumes {
 		vol := &ec2.Volume{
-			VolumeId:    aws.String(mock.VolumeID),
-			Attachments: mock.Attachments,
-			Tags:        mock.Tags,
+			VolumeId:    aws.String(mock.volumeID),
+			Attachments: mock.attachments,
+			Tags:        mock.tags,
 		}
 
-		for _, tag := range mock.Tags {
+		for _, tag := range mock.tags {
 			if *tag.Key == clusterTag && *tag.Value == "owned" {
 				volumes = append(volumes, vol)
 			}
