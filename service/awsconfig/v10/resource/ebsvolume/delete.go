@@ -27,7 +27,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	}
 
 	if len(volumes) > 0 {
-		r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("deleting %d ebs volumes", len(volumes)))
+		r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("deleting %d EBS volumes", len(volumes)))
 
 		// First detach any attached volumes without forcing but shutdown the
 		// instances.
@@ -67,7 +67,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 		r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("deleted %d ebs volumes", len(volumes)))
 	} else {
-		r.logger.LogCtx(ctx, "level", "info", "message", "not deleting load ebs volumes because there aren't any")
+		r.logger.LogCtx(ctx, "level", "info", "message", "not deleting EBS volumes because there aren't any")
 	}
 
 	return nil
