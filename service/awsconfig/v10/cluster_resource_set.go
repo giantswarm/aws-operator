@@ -19,6 +19,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/adapter"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/cloudconfig"
 	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v10/cloudformation"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/ebs"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/key"
 	cloudformationresource "github.com/giantswarm/aws-operator/service/awsconfig/v10/resource/cloudformation"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/resource/ebsvolume"
@@ -142,6 +143,18 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 		}
 	}
 
+	var ebsService ebs.Interface
+	{
+		c := ebs.Config{
+			Client: config.GuestAWSClients.EC2,
+			Logger: config.Logger,
+		}
+		ebsService, err = ebs.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var kmsKeyResource framework.Resource
 	{
 		c := kmskey.Config{
@@ -235,10 +248,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 	var ebsVolumeResource framework.Resource
 	{
 		c := ebsvolume.Config{
-			Clients: ebsvolume.Clients{
-				EC2: config.GuestAWSClients.EC2,
-			},
-			Logger: config.Logger,
+			Logger:  config.Logger,
+			Service: ebsService,
 		}
 
 		ops, err := ebsvolume.New(c)

@@ -211,6 +211,28 @@ func Test_ClusterVersion(t *testing.T) {
 	}
 }
 
+func Test_EtcdVolumeName(t *testing.T) {
+	t.Parallel()
+	expectedName := "test-cluster-etcd"
+
+	cluster := v1alpha1.Cluster{
+		ID: "test-cluster",
+		Customer: v1alpha1.ClusterCustomer{
+			ID: "test-customer",
+		},
+	}
+
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: cluster,
+		},
+	}
+
+	if EtcdVolumeName(customObject) != expectedName {
+		t.Fatalf("Expected Etcd volume name %s but was %s", expectedName, EtcdVolumeName(customObject))
+	}
+}
+
 func Test_IngressControllerInsecurePort(t *testing.T) {
 	t.Parallel()
 	expectedPort := 30010
