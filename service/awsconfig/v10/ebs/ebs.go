@@ -72,7 +72,7 @@ func (e *EBS) DeleteVolume(ctx context.Context, volumeID string) error {
 		RandomizationFactor: backoff.DefaultRandomizationFactor,
 		Multiplier:          backoff.DefaultMultiplier,
 		MaxInterval:         backoff.DefaultMaxInterval,
-		MaxElapsedTime:      3 * time.Minute,
+		MaxElapsedTime:      30 * time.Second,
 		Clock:               backoff.SystemClock,
 	}
 	if err := backoff.RetryNotify(deleteOperation, deleteBackoff, deleteNotify); err != nil {
