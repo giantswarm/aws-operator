@@ -31,7 +31,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			return microerror.Mask(err)
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 		defer cancel()
 
 		err = r.clients.CloudFormation.WaitUntilStackCreateCompleteWithContext(ctx, &cloudformation.DescribeStacksInput{
