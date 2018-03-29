@@ -21,6 +21,9 @@ func IsVolumeNotFound(err error) bool {
 	}
 
 	c := microerror.Cause(err)
+	if c == volumeNotFoundError {
+		return true
+	}
 
 	aerr, ok := err.(awserr.Error)
 	if !ok {
@@ -28,9 +31,6 @@ func IsVolumeNotFound(err error) bool {
 	}
 	// TODO Find constant in the Go SDK for the error code.
 	if aerr.Code() == "NotFound" {
-		return true
-	}
-	if c == volumeNotFoundError {
 		return true
 	}
 
