@@ -8,11 +8,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/key"
 )
 
-const (
-	cloudProviderClusterTagValue        = "owned"
-	cloudProviderPersistentVolumeTagKey = "kubernetes.io/created-for/pv/name"
-)
-
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
 	customObject, err := key.ToCustomObject(obj)
 	if err != nil {
@@ -20,7 +15,10 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	}
 
 	// Get both the Etcd volume and any Persistent Volumes.
-	volumes, err := r.service.ListVolumes(customObject, true, true)
+	etcdVolume := true
+	persistentVolume := true
+
+	volumes, err := r.service.ListVolumes(customObject, etcdVolume, persistentVolume)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}

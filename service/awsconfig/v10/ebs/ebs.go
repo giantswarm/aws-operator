@@ -39,17 +39,17 @@ func New(config Config) (*EBS, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	c := &EBS{
+	e := &EBS{
 		client: config.Client,
 		logger: config.Logger,
 	}
 
-	return c, nil
+	return e, nil
 }
 
 // DeleteVolume deletes an EBS volume with retry logic.
 func (e *EBS) DeleteVolume(ctx context.Context, volumeID string) error {
-	e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting ebs volume %s", volumeID))
+	e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting EBS volume %s", volumeID))
 
 	deleteOperation := func() error {
 		_, err := e.client.DeleteVolume(&ec2.DeleteVolumeInput{
@@ -58,15 +58,14 @@ func (e *EBS) DeleteVolume(ctx context.Context, volumeID string) error {
 		if IsVolumeNotFound(err) {
 			// Fall through.
 			return nil
-		}
-		if err != nil {
+		} else if err != nil {
 			return microerror.Mask(err)
 		}
 
 		return nil
 	}
 	deleteNotify := func(err error, delay time.Duration) {
-		e.logger.LogCtx(ctx, "level", "error", fmt.Sprintf("deleting ebs volume failed, retrying with delay %.0fm%.0fs: '%#v'", delay.Minutes(), delay.Seconds(), err))
+		e.logger.LogCtx(ctx, "level", "error", "message", fmt.Sprintf("deleting EBS volume failed, retrying with delay %.0fm%.0fs:", delay.Minutes(), delay.Seconds()), "stack", fmt.Sprintf("%#v", err))
 	}
 	deleteBackoff := &backoff.ExponentialBackOff{
 		InitialInterval:     backoff.DefaultInitialInterval,
@@ -80,7 +79,7 @@ func (e *EBS) DeleteVolume(ctx context.Context, volumeID string) error {
 		return microerror.Mask(err)
 	}
 
-	e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted ebs volume %s", volumeID))
+	e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted EBS volume %s", volumeID))
 
 	return nil
 }
@@ -88,7 +87,7 @@ func (e *EBS) DeleteVolume(ctx context.Context, volumeID string) error {
 // DetachVolume detaches an EBS volume. If force is specified data loss may occur. If shutdown is
 // specified the instance will be stopped first.
 func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment VolumeAttachment, force bool, shutdown bool) error {
-	e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detaching volume %s from instance %s", volumeID, attachment.InstanceID))
+	e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detaching EBS volume %s from instance %s", volumeID, attachment.InstanceID))
 
 	if shutdown {
 		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("stopping instance %s", attachment.InstanceID))
@@ -115,7 +114,7 @@ func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment Volu
 		return microerror.Mask(err)
 	}
 
-	e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detached volume %s from instance %s", volumeID, attachment.InstanceID))
+	e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detached EBS volume %s from instance %s", volumeID, attachment.InstanceID))
 
 	return nil
 }
