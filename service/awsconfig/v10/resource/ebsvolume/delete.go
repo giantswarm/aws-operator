@@ -5,26 +5,36 @@ import (
 	"fmt"
 
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/framework"
+
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/key"
 )
 
-// ApplyDeleteChange detaches and deletes the EBS volumes. We don't return
-// errors so deletion in following resources is executed.
-func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
-	deleteInput, err := toEBSVolumeState(deleteChange)
+// EnsureDeleted detaches and deletes the EBS volumes. We don't return
+// errors so deletion logic in following resources is executed.
+func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
+	customObject, err := key.ToCustomObject(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	if deleteInput != nil && len(deleteInput.Volumes) > 0 {
-		r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("deleting %d ebs volumes", len(deleteInput.Volumes)))
+	// Get both the Etcd volume and any Persistent Volumes.
+	etcdVolume := true
+	persistentVolume := true
+
+	volumes, err := r.service.ListVolumes(customObject, etcdVolume, persistentVolume)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	if len(volumes) > 0 {
+		r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("deleting %d ebs volumes", len(volumes)))
 
 		// First detach any attached volumes without forcing but shutdown the
 		// instances.
 		force := false
 		shutdown := true
 
-		for _, vol := range deleteInput.Volumes {
+		for _, vol := range volumes {
 			for _, a := range vol.Attachments {
 				err := r.service.DetachVolume(ctx, vol.VolumeID, a, force, shutdown)
 				if err != nil {
@@ -38,7 +48,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		force = true
 		shutdown = false
 
-		for _, vol := range deleteInput.Volumes {
+		for _, vol := range volumes {
 			for _, a := range vol.Attachments {
 				r.service.DetachVolume(ctx, vol.VolumeID, a, force, shutdown)
 				if err != nil {
