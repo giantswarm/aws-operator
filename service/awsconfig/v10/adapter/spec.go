@@ -1,6 +1,8 @@
 package adapter
 
 import (
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/request"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/elb"
@@ -66,13 +68,15 @@ type Clients struct {
 	ELB            ELBClient
 }
 
-// CFClient describes the methods required to be implemented by a CloudFormation AWS client.
+// CFClient describes the methods required to be implemented by a CloudFormation
+// AWS client.
 type CFClient interface {
 	CreateStack(*awscloudformation.CreateStackInput) (*awscloudformation.CreateStackOutput, error)
 	DeleteStack(*awscloudformation.DeleteStackInput) (*awscloudformation.DeleteStackOutput, error)
 	DescribeStacks(*awscloudformation.DescribeStacksInput) (*awscloudformation.DescribeStacksOutput, error)
 	UpdateStack(*awscloudformation.UpdateStackInput) (*awscloudformation.UpdateStackOutput, error)
 	WaitUntilStackCreateComplete(*awscloudformation.DescribeStacksInput) error
+	WaitUntilStackCreateCompleteWithContext(ctx aws.Context, input *awscloudformation.DescribeStacksInput, opts ...request.WaiterOption) error
 }
 
 // EC2Client describes the methods required to be implemented by a EC2 AWS client.
