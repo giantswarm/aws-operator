@@ -48,47 +48,17 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		}
 
 		// Now delete the volumes.
-		for _, vol := range deleteInput.Volumes {
+		for _, vol := range volumes {
 			err := r.service.DeleteVolume(ctx, vol.VolumeID)
 			if err != nil {
 				r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("failed to delete EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
 			}
 		}
 
-		r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("deleted %d ebs volumes", len(deleteInput.Volumes)))
+		r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("deleted %d ebs volumes", len(volumes)))
 	} else {
 		r.logger.LogCtx(ctx, "level", "info", "message", "not deleting load ebs volumes because there aren't any")
 	}
 
 	return nil
-}
-
-func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
-	delete, err := r.newDeleteChange(ctx, obj, currentState, desiredState)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	patch := framework.NewPatch()
-	patch.SetDeleteChange(delete)
-
-	return patch, nil
-}
-
-func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	currentVolState, err := toEBSVolumeState(currentState)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-	desiredVolState, err := toEBSVolumeState(desiredState)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	var volStateToDelete *EBSVolumeState
-	if desiredVolState == nil && currentVolState != nil && len(currentVolState.Volumes) > 0 {
-		volStateToDelete = currentVolState
-	}
-
-	return volStateToDelete, nil
 }
