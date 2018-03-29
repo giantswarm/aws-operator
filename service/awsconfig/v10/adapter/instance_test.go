@@ -15,10 +15,11 @@ func Test_Adapter_Instance_RegularFields(t *testing.T) {
 	t.Parallel()
 
 	testCases := []struct {
-		Description          string
-		CustomObject         v1alpha1.AWSConfig
-		ExpectedAZ           string
-		ExpectedInstanceType string
+		Description            string
+		CustomObject           v1alpha1.AWSConfig
+		ExpectedAZ             string
+		ExpectedEtcdVolumeName string
+		ExpectedInstanceType   string
 	}{
 		{
 			Description: "case 0 basic matching, all fields present",
@@ -38,8 +39,9 @@ func Test_Adapter_Instance_RegularFields(t *testing.T) {
 					},
 				},
 			},
-			ExpectedAZ:           "eu-central-1a",
-			ExpectedInstanceType: "m3.large",
+			ExpectedAZ:             "eu-central-1a",
+			ExpectedEtcdVolumeName: "test-cluster-etcd",
+			ExpectedInstanceType:   "m3.large",
 		},
 	}
 
@@ -63,6 +65,10 @@ func Test_Adapter_Instance_RegularFields(t *testing.T) {
 
 			if a.Master.AZ != tc.ExpectedAZ {
 				t.Fatalf("unexpected a.Master.AZ, got %q, want %q", a.Master.AZ, tc.ExpectedAZ)
+			}
+
+			if a.Master.EtcdVolume.Name != tc.ExpectedEtcdVolumeName {
+				t.Fatalf("unexpected a.Master.EtcdVolume.Name, got %q, want %q", a.Master.EtcdVolume.Name, tc.ExpectedEtcdVolumeName)
 			}
 
 			if a.Master.Instance.Type != tc.ExpectedInstanceType {

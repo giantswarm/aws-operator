@@ -33,7 +33,12 @@ type instanceAdapterImage struct {
 type instanceAdapterMaster struct {
 	AZ          string
 	CloudConfig string
+	EtcdVolume  instanceAdapterMasterEtcdVolume
 	Instance    instanceAdapterMasterInstance
+}
+
+type instanceAdapterMasterEtcdVolume struct {
+	Name string
 }
 
 type instanceAdapterMasterInstance struct {
@@ -72,6 +77,8 @@ func (i *instanceAdapter) Adapt(config Config) error {
 			return microerror.Mask(err)
 		}
 		i.Master.CloudConfig = base64.StdEncoding.EncodeToString([]byte(rendered))
+
+		i.Master.EtcdVolume.Name = key.EtcdVolumeName(config.CustomObject)
 
 		i.Master.Instance.ResourceName = config.MasterInstanceResourceName
 
