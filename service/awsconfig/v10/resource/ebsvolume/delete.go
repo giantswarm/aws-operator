@@ -8,6 +8,8 @@ import (
 	"github.com/giantswarm/operatorkit/framework"
 )
 
+// ApplyDeleteChange detaches and deletes the EBS volumes. We don't return
+// errors so deletion in following resources is executed.
 func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
 	deleteInput, err := toEBSVolumeState(deleteChange)
 	if err != nil {
@@ -21,7 +23,10 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		// instances.
 		for _, vol := range deleteInput.Volumes {
 			for _, a := range vol.Attachments {
-				r.service.DetachVolume(ctx, vol.VolumeID, a, false, true)
+				err := r.service.DetachVolume(ctx, vol.VolumeID, a, false, true)
+				if err != nil {
+					r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("failed to detach EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
+				}
 			}
 		}
 
@@ -29,6 +34,9 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		for _, vol := range deleteInput.Volumes {
 			for _, a := range vol.Attachments {
 				r.service.DetachVolume(ctx, vol.VolumeID, a, true, false)
+				if err != nil {
+					r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("failed to force detach EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
+				}
 			}
 		}
 
@@ -36,7 +44,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		for _, vol := range deleteInput.Volumes {
 			err := r.service.DeleteVolume(ctx, vol.VolumeID)
 			if err != nil {
-				return microerror.Mask(err)
+				r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("failed to delete EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
 			}
 		}
 
