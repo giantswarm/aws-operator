@@ -1,10 +1,10 @@
 package ebsvolume
 
 import (
-	"reflect"
-
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/ebs"
 )
 
 const (
@@ -14,32 +14,29 @@ const (
 
 // Config represents the configuration used to create a new ebsvolume resource.
 type Config struct {
-	// Dependencies.
-	Clients Clients
 	Logger  micrologger.Logger
+	Service ebs.Interface
 }
 
 // Resource implements the ebsvolume resource.
 type Resource struct {
-	// Dependencies.
-	clients Clients
 	logger  micrologger.Logger
+	service ebs.Interface
 }
 
 // New creates a new configured ebsvolume resource.
 func New(config Config) (*Resource, error) {
-	// Dependencies.
-	if reflect.DeepEqual(config.Clients, Clients{}) {
-		return nil, microerror.Maskf(invalidConfigError, "config.Clients must not be empty")
+	if config.Logger == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 	if config.Logger == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.Service must not be empty", config)
 	}
 
 	newResource := &Resource{
 		// Dependencies.
-		clients: config.Clients,
 		logger:  config.Logger,
+		service: config.Service,
 	}
 
 	return newResource, nil

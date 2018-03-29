@@ -18,16 +18,11 @@ func Test_DesiredState(t *testing.T) {
 		},
 	}
 
-	var err error
-	var newResource *Resource
-
 	c := Config{
-		Clients: Clients{
-			EC2: &EC2ClientMock{},
-		},
-		Logger: microloggertest.New(),
+		Logger:  microloggertest.New(),
+		Service: &EBSServiceMock{},
 	}
-	newResource, err = New(c)
+	newResource, err := New(c)
 	if err != nil {
 		t.Error("expected", nil, "got", err)
 	}

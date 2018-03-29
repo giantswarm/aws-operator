@@ -5,10 +5,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
+
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/ebs"
 )
 
 func Test_CurrentState(t *testing.T) {
@@ -24,134 +24,74 @@ func Test_CurrentState(t *testing.T) {
 	testCases := []struct {
 		description   string
 		obj           *v1alpha1.AWSConfig
+		ebsVolumes    []ebs.Volume
 		expectedState *EBSVolumeState
-		ebsVolumes    []EBSVolumeMock
 	}{
 		{
-			description: "basic match with no ebs volumes",
+			description: "case 0: basic match with no ebs volumes",
 			obj:         customObject,
+			ebsVolumes:  []ebs.Volume{},
 			expectedState: &EBSVolumeState{
-				VolumeIDs: []string{},
+				Volumes: []ebs.Volume{},
 			},
 		},
 		{
-			description: "basic match with ebs volume",
+			description: "case 1: basic match with ebs volume",
 			obj:         customObject,
-			expectedState: &EBSVolumeState{
-				VolumeIDs: []string{
-					"vol-1234",
+			ebsVolumes: []ebs.Volume{
+				{
+					Attachments: []ebs.VolumeAttachment{},
+					VolumeID:    "vol-1234",
 				},
 			},
-			ebsVolumes: []EBSVolumeMock{
-				{
-					volumeID: "vol-1234",
-					tags: []*ec2.Tag{
-						{
-							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
-							Value: aws.String("owned"),
-						},
-						{
-							Key:   aws.String("kubernetes.io/created-for/pv/name"),
-							Value: aws.String("pvc-1234"),
-						},
+			expectedState: &EBSVolumeState{
+				Volumes: []ebs.Volume{
+					{
+						Attachments: []ebs.VolumeAttachment{},
+						VolumeID:    "vol-1234",
 					},
 				},
 			},
 		},
 		{
-			description: "basic match with multiple ebs volumes",
+			description: "case 2: basic match with attachment",
 			obj:         customObject,
-			expectedState: &EBSVolumeState{
-				VolumeIDs: []string{
-					"vol-1234",
-					"vol-5678",
-				},
-			},
-			ebsVolumes: []EBSVolumeMock{
+			ebsVolumes: []ebs.Volume{
 				{
-					volumeID: "vol-1234",
-					tags: []*ec2.Tag{
+					Attachments: []ebs.VolumeAttachment{
 						{
-							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
-							Value: aws.String("owned"),
-						},
-						{
-							Key:   aws.String("kubernetes.io/created-for/pv/name"),
-							Value: aws.String("pvc-1234"),
+							InstanceID: "i-12345",
+							Device:     "/dev/sdh",
 						},
 					},
-				},
-				{
-					volumeID: "vol-5678",
-					tags: []*ec2.Tag{
-						{
-							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
-							Value: aws.String("owned"),
-						},
-						{
-							Key:   aws.String("kubernetes.io/created-for/pv/name"),
-							Value: aws.String("pvc-5678"),
-						},
-					},
+					VolumeID: "vol-1234",
 				},
 			},
-		},
-		{
-			description: "no match due to cluster tag",
-			obj:         customObject,
 			expectedState: &EBSVolumeState{
-				VolumeIDs: []string{},
-			},
-			ebsVolumes: []EBSVolumeMock{
-				{
-					volumeID: "vol-1234",
-					tags: []*ec2.Tag{
-						{
-							Key:   aws.String("kubernetes.io/cluster/other-cluster"),
-							Value: aws.String("owned"),
+				Volumes: []ebs.Volume{
+					{
+						Attachments: []ebs.VolumeAttachment{
+							{
+								InstanceID: "i-12345",
+								Device:     "/dev/sdh",
+							},
 						},
-						{
-							Key:   aws.String("kubernetes.io/created-for/pv/name"),
-							Value: aws.String("pvc-1234"),
-						},
-					},
-				},
-			},
-		},
-		{
-			description: "no match due to missing pvc tag",
-			obj:         customObject,
-			expectedState: &EBSVolumeState{
-				VolumeIDs: []string{},
-			},
-			ebsVolumes: []EBSVolumeMock{
-				{
-					volumeID: "vol-1234",
-					tags: []*ec2.Tag{
-						{
-							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
-							Value: aws.String("owned"),
-						},
+						VolumeID: "vol-1234",
 					},
 				},
 			},
 		},
 	}
-	var err error
-	var newResource *Resource
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			c := Config{
-				Clients: Clients{
-					EC2: &EC2ClientMock{
-						customObject: *tc.obj,
-						ebsVolumes:   tc.ebsVolumes,
-					},
-				},
 				Logger: microloggertest.New(),
+				Service: &EBSServiceMock{
+					volumes: tc.ebsVolumes,
+				},
 			}
-			newResource, err = New(c)
+			newResource, err := New(c)
 			if err != nil {
 				t.Error("expected", nil, "got", err)
 			}

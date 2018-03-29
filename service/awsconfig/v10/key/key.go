@@ -165,6 +165,10 @@ func CustomerID(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Customer.ID
 }
 
+func EtcdVolumeName(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("%s-etcd", ClusterID(customObject))
+}
+
 func IngressControllerInsecurePort(customObject v1alpha1.AWSConfig) int {
 	return customObject.Spec.Cluster.Kubernetes.IngressController.InsecurePort
 }

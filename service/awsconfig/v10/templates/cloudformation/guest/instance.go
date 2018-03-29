@@ -27,7 +27,7 @@ const Instance = `{{define "instance"}}
       AvailabilityZone: !GetAtt {{ .Instance.Master.Instance.ResourceName }}.AvailabilityZone
       Tags:
       - Key: Name
-        Value: {{ .Instance.Cluster.ID }}-etcd
+        Value: {{ .Instance.Master.EtcdVolume.Name }}
   MountPoint:
     Type: AWS::EC2::VolumeAttachment
     Properties:
