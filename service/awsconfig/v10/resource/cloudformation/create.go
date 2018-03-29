@@ -2,11 +2,13 @@ package cloudformation
 
 import (
 	"context"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/operatorkit/framework/context/resourcecanceledcontext"
 
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/key"
 )
@@ -23,6 +25,27 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		_, err = r.clients.CloudFormation.CreateStack(&stackInput)
 		if IsAlreadyExists(err) {
 			// fall through
+		} else if err != nil {
+			return microerror.Mask(err)
+		}
+
+		ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+		defer cancel()
+
+		err = r.clients.CloudFormation.WaitUntilStackCreateCompleteWithContext(ctx, &cloudformation.DescribeStacksInput{
+			StackName: stackInput.StackName,
+		})
+		if ctx.Err() == context.DeadlineExceeded {
+			// We waited longer than we wanted to get a reasonable result and be sure
+			// the stack got properly created. We skip here and try again on the next
+			// resync.
+			r.logger.LogCtx(ctx, "level", "debug", "message", "guest cluster main stack creation is not complete")
+			resourcecanceledcontext.SetCanceled(ctx)
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
+
+			return nil
+		} else if ctx.Err() != nil {
+			return microerror.Mask(err)
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
@@ -126,6 +149,13 @@ func (r *Resource) createHostPreStack(ctx context.Context, customObject v1alpha1
 
 		return nil
 	} else if err != nil {
+		return microerror.Mask(err)
+	}
+
+	err = r.hostClients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
+		StackName: aws.String(stackName),
+	})
+	if err != nil {
 		return microerror.Mask(err)
 	}
 
