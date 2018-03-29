@@ -13,7 +13,7 @@ import (
 
 // EnsureDeleted ensures that any ELBs from Kubernetes LoadBalancer services
 // are deleted. This is needed because the use the VPC public subnet.
-func (r *Resource) EnsuredDeleted(ctx context.Context, obj interface{}) error {
+func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	customObject, err := key.ToCustomObject(obj)
 	if err != nil {
 		return microerror.Mask(err)
