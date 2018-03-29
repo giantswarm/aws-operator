@@ -140,18 +140,9 @@ func Test_newDeleteChange(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			ebsConfig := ebs.Config{
-				Client: &ebs.EC2ClientMock{},
-				Logger: microloggertest.New(),
-			}
-			ebsService, err := ebs.New(ebsConfig)
-			if err != nil {
-				t.Error("expected", nil, "got", err)
-			}
-
 			c := Config{
 				Logger:  microloggertest.New(),
-				Service: ebsService,
+				Service: &EBSServiceMock{},
 			}
 			newResource, err := New(c)
 			if err != nil {

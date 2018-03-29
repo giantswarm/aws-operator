@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v10/ebs"
 	"github.com/giantswarm/micrologger/microloggertest"
 )
 
@@ -19,18 +18,9 @@ func Test_DesiredState(t *testing.T) {
 		},
 	}
 
-	ebsConfig := ebs.Config{
-		Client: &ebs.EC2ClientMock{},
-		Logger: microloggertest.New(),
-	}
-	ebsService, err := ebs.New(ebsConfig)
-	if err != nil {
-		t.Error("expected", nil, "got", err)
-	}
-
 	c := Config{
 		Logger:  microloggertest.New(),
-		Service: ebsService,
+		Service: &EBSServiceMock{},
 	}
 	newResource, err := New(c)
 	if err != nil {
