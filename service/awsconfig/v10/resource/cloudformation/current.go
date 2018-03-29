@@ -36,7 +36,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 		} else if cloudformationservice.IsOutputsNotAccessible(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack output values are not accessible due to stack state transition")
-			return StackState{Name: stackName}, nil
+			return StackState{}, nil
 
 		} else if err != nil {
 			return StackState{}, microerror.Mask(err)

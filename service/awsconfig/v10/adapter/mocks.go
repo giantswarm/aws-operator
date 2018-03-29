@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/request"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/elb"
@@ -220,5 +221,8 @@ func (c *CloudFormationMock) UpdateStack(*awscloudformation.UpdateStackInput) (*
 	return nil, nil
 }
 func (c *CloudFormationMock) WaitUntilStackCreateComplete(*awscloudformation.DescribeStacksInput) error {
+	return nil
+}
+func (c *CloudFormationMock) WaitUntilStackCreateCompleteWithContext(ctx aws.Context, input *awscloudformation.DescribeStacksInput, opts ...request.WaiterOption) error {
 	return nil
 }
