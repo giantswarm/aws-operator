@@ -252,12 +252,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 			Service: ebsService,
 		}
 
-		ops, err := ebsvolume.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		ebsVolumeResource, err = toCRUDResource(config.Logger, ops)
+		ebsVolumeResource, err = ebsvolume.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
