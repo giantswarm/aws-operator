@@ -106,8 +106,11 @@ func NewDrainerFramework(config DrainerFrameworkConfig) (*framework.Framework, e
 			CRD:            v1alpha1.NewAWSConfigCRD(),
 			CRDClient:      crdClient,
 			Informer:       newInformer,
+			K8sClient:      config.K8sClient,
 			Logger:         config.Logger,
 			ResourceRouter: resourceRouter,
+
+			Name: config.ProjectName,
 		}
 
 		crdFramework, err = framework.New(c)
