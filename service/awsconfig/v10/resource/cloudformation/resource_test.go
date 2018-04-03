@@ -62,6 +62,7 @@ func Test_Resource_Cloudformation_GetCloudFormationTags(t *testing.T) {
 		IAM: &adapter.IAMClientMock{},
 		KMS: &adapter.KMSClientMock{},
 	}
+	c.EBS = &EBSServiceMock{}
 	c.HostClients = &adapter.Clients{
 		EC2:            &adapter.EC2ClientMock{},
 		CloudFormation: &adapter.CloudFormationMock{},

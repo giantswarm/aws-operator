@@ -17,7 +17,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	}
 
 	if deleteInput != nil && len(deleteInput.Volumes) > 0 {
-		r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("deleting %d ebs volumes", len(deleteInput.Volumes)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting %d ebs volumes", len(deleteInput.Volumes)))
 
 		// First detach any attached volumes without forcing but shutdown the
 		// instances.
@@ -28,7 +28,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			for _, a := range vol.Attachments {
 				err := r.service.DetachVolume(ctx, vol.VolumeID, a, force, shutdown)
 				if err != nil {
-					r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("failed to detach EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
+					r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("failed to detach EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
 				}
 			}
 		}
@@ -40,9 +40,9 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 
 		for _, vol := range deleteInput.Volumes {
 			for _, a := range vol.Attachments {
-				r.service.DetachVolume(ctx, vol.VolumeID, a, force, shutdown)
+				err := r.service.DetachVolume(ctx, vol.VolumeID, a, force, shutdown)
 				if err != nil {
-					r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("failed to force detach EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
+					r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("failed to force detach EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
 				}
 			}
 		}
@@ -51,13 +51,13 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		for _, vol := range deleteInput.Volumes {
 			err := r.service.DeleteVolume(ctx, vol.VolumeID)
 			if err != nil {
-				r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("failed to delete EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
+				r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("failed to delete EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
 			}
 		}
 
-		r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("deleted %d ebs volumes", len(deleteInput.Volumes)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted %d ebs volumes", len(deleteInput.Volumes)))
 	} else {
-		r.logger.LogCtx(ctx, "level", "info", "message", "not deleting load ebs volumes because there aren't any")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting load ebs volumes because there aren't any")
 	}
 
 	return nil

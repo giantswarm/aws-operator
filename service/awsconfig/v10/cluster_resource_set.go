@@ -273,6 +273,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 				KMS:            config.GuestAWSClients.KMS,
 				ELB:            config.GuestAWSClients.ELB,
 			},
+			EBS: ebsService,
 			HostClients: &adapter.Clients{
 				EC2:            config.HostAWSClients.EC2,
 				IAM:            config.HostAWSClients.IAM,

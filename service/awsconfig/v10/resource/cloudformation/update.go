@@ -2,6 +2,7 @@ package cloudformation
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -14,6 +15,10 @@ import (
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
+	customObject, err := key.ToCustomObject(obj)
+	if err != nil {
+		return microerror.Mask(err)
+	}
 	updateStackInput, err := toUpdateStackInput(updateChange)
 	if err != nil {
 		return microerror.Mask(err)
@@ -22,7 +27,53 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	if updateStackInput.StackName != nil && *updateStackInput.StackName != "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "updating the guest cluster main stack")
 
-		_, err := r.clients.CloudFormation.UpdateStack(&updateStackInput)
+		// Fetch the etcd volume information.
+		etcdVolume := true
+		persistentVolume := false
+		volumes, err := r.ebs.ListVolumes(customObject, etcdVolume, persistentVolume)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		if len(volumes) != 1 {
+			return microerror.Maskf(executionFailedError, "there must be 1 volume for etcd, got %d", len(volumes))
+		}
+		vol := volumes[0]
+
+		// First detach any attached volumes without forcing but shutdown the
+		// instances.
+		force := false
+		shutdown := true
+		for _, a := range vol.Attachments {
+			err := r.ebs.DetachVolume(ctx, vol.VolumeID, a, force, shutdown)
+			if err != nil {
+				r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("failed to detach EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
+			}
+		}
+
+		// Now force detach so the volumes can be deleted cleanly. Instances
+		// are already shutdown.
+		force = true
+		shutdown = false
+		for _, a := range vol.Attachments {
+			err := r.ebs.DetachVolume(ctx, vol.VolumeID, a, force, shutdown)
+			if err != nil {
+				r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("failed to force detach EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
+			}
+		}
+
+		// Now delete the volumes.
+		err = r.ebs.DeleteVolume(ctx, vol.VolumeID)
+		if err != nil {
+			r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("failed to delete EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
+		}
+
+		// Once the etcd volume is cleaned up and the master instance is down we can
+		// go ahead to let CloudFormation do its job.
+		//
+		// NOTE the update proceeds even if the volume detachements above fail. We
+		// keep going to update what we are able to even if master nodes are not
+		// updated in error cases.
+		_, err = r.clients.CloudFormation.UpdateStack(&updateStackInput)
 		if err != nil {
 			return microerror.Mask(err)
 		}

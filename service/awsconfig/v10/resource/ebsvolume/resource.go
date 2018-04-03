@@ -29,7 +29,7 @@ func New(config Config) (*Resource, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
-	if config.Logger == nil {
+	if config.Service == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Service must not be empty", config)
 	}
 
