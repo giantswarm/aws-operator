@@ -13,10 +13,6 @@ import (
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
 	customObject, err := key.ToCustomObject(obj)
-	if IsNotFound(err) {
-		// Fall through.
-		return nil, nil
-	}
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -37,7 +33,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		resourcecanceledcontext.SetCanceled(ctx)
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
 
-		return nil, microerror.Mask(err)
+		return nil, nil
 	} else if err != nil {
 		return nil, microerror.Mask(err)
 	}
