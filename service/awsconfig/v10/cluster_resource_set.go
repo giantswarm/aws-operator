@@ -234,12 +234,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 			Logger: config.Logger,
 		}
 
-		ops, err := loadbalancer.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		loadBalancerResource, err = toCRUDResource(config.Logger, ops)
+		loadBalancerResource, err = loadbalancer.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

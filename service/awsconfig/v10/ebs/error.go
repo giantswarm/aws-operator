@@ -25,7 +25,7 @@ func IsVolumeNotFound(err error) bool {
 		return true
 	}
 
-	aerr, ok := err.(awserr.Error)
+	aerr, ok := c.(awserr.Error)
 	if !ok {
 		return false
 	}
