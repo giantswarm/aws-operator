@@ -1,7 +1,6 @@
 package loadbalancer
 
 import (
-	"context"
 	"reflect"
 	"testing"
 
@@ -11,9 +10,9 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 )
 
-func Test_CurrentState(t *testing.T) {
+func Test_clusterLoadBalancers(t *testing.T) {
 	t.Parallel()
-	customObject := &v1alpha1.AWSConfig{
+	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
 				ID: "test-cluster",
@@ -23,7 +22,7 @@ func Test_CurrentState(t *testing.T) {
 
 	testCases := []struct {
 		description   string
-		obj           *v1alpha1.AWSConfig
+		obj           v1alpha1.AWSConfig
 		expectedState *LoadBalancerState
 		loadBalancers []LoadBalancerMock
 	}{
@@ -206,17 +205,13 @@ func Test_CurrentState(t *testing.T) {
 				t.Error("expected", nil, "got", err)
 			}
 
-			result, err := newResource.GetCurrentState(context.TODO(), tc.obj)
+			result, err := newResource.clusterLoadBalancers(tc.obj)
 			if err != nil {
 				t.Errorf("unexpected error %v", err)
 			}
-			currentState, ok := result.(*LoadBalancerState)
-			if !ok {
-				t.Errorf("expected '%T', got '%T'", currentState, result)
-			}
 
-			if !reflect.DeepEqual(currentState, tc.expectedState) {
-				t.Errorf("expected current state '%#v', got '%#v'", tc.expectedState, currentState)
+			if !reflect.DeepEqual(result, tc.expectedState) {
+				t.Errorf("expected current state '%#v', got '%#v'", tc.expectedState, result)
 			}
 		})
 	}
