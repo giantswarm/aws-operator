@@ -35,12 +35,17 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			return microerror.Mask(err)
 		}
 
-		_, err := r.clients.S3.PutBucketTagging(&s3.PutBucketTaggingInput{
+		_, err = r.clients.S3.PutBucketTagging(&s3.PutBucketTaggingInput{
 			Bucket: aws.String(bucketInput.Name),
 			Tagging: &s3.Tagging{
 				TagSet: r.getS3BucketTags(customObject),
 			},
 		})
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		err = r.createAccessLogBucket(ctx, bucketInput)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -67,4 +72,64 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 	}
 
 	return BucketState{}, nil
+}
+
+func (r *Resource) createAccessLogBucket(ctx context.Context, bucketInput BucketState) error {
+	_, err := r.clients.S3.CreateBucket(&s3.CreateBucketInput{
+		Bucket: aws.String(bucketInput.Name + "-logs"),
+	})
+	if IsBucketAlreadyExists(err) || IsBucketAlreadyOwnedByYou(err) {
+		// Fall through.
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+
+	loggingConfiguration := createLoggingConfiguration(ctx, bucketInput)
+	_, err = r.clients.S3.PutBucketLogging(&s3.PutBucketLoggingInput{
+		Bucket:              aws.String(bucketInput.Name),
+		BucketLoggingStatus: loggingConfiguration,
+	})
+	if err != nil {
+		return err
+	}
+
+	loggingConfigurationItSelf := createLoggingConfiguration(ctx, bucketInput)
+	_, err = r.clients.S3.PutBucketLogging(&s3.PutBucketLoggingInput{
+		Bucket:              aws.String(bucketInput.Name + "-logs"),
+		BucketLoggingStatus: loggingConfigurationItSelf,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func createLoggingConfiguration(ctx context.Context, bucketInput BucketState) *s3.BucketLoggingStatus {
+	le := &s3.BucketLoggingStatus{
+		LoggingEnabled: &s3.LoggingEnabled{
+			TargetBucket: aws.String(bucketInput.Name + "-logs"),
+			TargetGrants: []*s3.TargetGrant{
+				{
+					Grantee: &s3.Grantee{
+						Type: aws.String("Group"),
+						URI:  aws.String("http://acs.amazonaws.com/groups/s3/LogDelivery"),
+					},
+					Permission: aws.String("WRITE"),
+				},
+				{
+					Grantee: &s3.Grantee{
+						Type: aws.String("Group"),
+						URI:  aws.String("http://acs.amazonaws.com/groups/s3/LogDelivery"),
+					},
+					Permission: aws.String("READ_ACP"),
+				},
+			},
+			TargetPrefix: aws.String("access-logs/"),
+		},
+	}
+
+	return le
 }
