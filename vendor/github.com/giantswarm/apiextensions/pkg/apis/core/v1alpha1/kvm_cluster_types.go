@@ -54,13 +54,14 @@ type KVMClusterConfig struct {
 }
 
 type KVMClusterConfigSpec struct {
-	Guest KVMClusterConfigSpecGuest `json:"guest" yaml:"guest"`
+	Guest         KVMClusterConfigSpecGuest         `json:"guest" yaml:"guest"`
+	VersionBundle KVMClusterConfigSpecVersionBundle `json:"versionBundle" yaml:"versionBundle"`
 }
 
 type KVMClusterConfigSpecGuest struct {
-	ClusterGuestConfig `json:",inline" yaml:",inline"`
-	Masters            []KVMClusterConfigSpecGuestMaster `json:"masters,omitempty" yaml:"masters,omitempty"`
-	Workers            []KVMClusterConfigSpecGuestWorker `json:"workers,omitempty" yaml:"workers,omitempty"`
+	Config  ClusterGuestConfig                `json:"config" yaml:"config"`
+	Masters []KVMClusterConfigSpecGuestMaster `json:"masters,omitempty" yaml:"masters,omitempty"`
+	Workers []KVMClusterConfigSpecGuestWorker `json:"workers,omitempty" yaml:"workers,omitempty"`
 }
 
 type KVMClusterConfigSpecGuestMaster struct {
@@ -77,6 +78,10 @@ type KVMClusterConfigSpecGuestNode struct {
 	CPUCores      int     `json:"cpuCores,omitempty" yaml:"cpuCores,omitempty"`
 	MemorySizeGB  float64 `json:"memorySizeGB,omitempty" yaml:"memorySizeGB,omitempty"`
 	StorageSizeGB float64 `json:"storageSizeGB,omitempty" yaml:"storageSizeGB,omitempty"`
+}
+
+type KVMClusterConfigSpecVersionBundle struct {
+	Version string `json:"version" yaml:"version"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
