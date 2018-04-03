@@ -1,23 +1,14 @@
 package namespace
 
 import (
-	"context"
-
-	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	apiv1 "k8s.io/api/core/v1"
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/key"
 )
 
-func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
-	customObject, err := key.ToCustomObject(obj)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	// Compute the desired state of the namespace to have a reference of how
-	// the data should be.
+func getNamespace(customObject v1alpha1.AWSConfig) *apiv1.Namespace {
 	namespace := &apiv1.Namespace{
 		TypeMeta: apismetav1.TypeMeta{
 			Kind:       "Namespace",
@@ -32,5 +23,5 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		},
 	}
 
-	return namespace, nil
+	return namespace
 }
