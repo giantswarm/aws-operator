@@ -4,11 +4,8 @@ import (
 	"context"
 )
 
-func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
+// EnsureCreated is a no-op, because the ebsvolume resource is only
+// interested in delete events.
+func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
-}
-
-// newCreateChange is a no-op because ebs volumes are not created.
-func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	return nil, nil
 }

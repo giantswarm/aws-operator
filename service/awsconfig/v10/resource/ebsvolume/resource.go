@@ -45,16 +45,3 @@ func New(config Config) (*Resource, error) {
 func (r *Resource) Name() string {
 	return Name
 }
-
-func toEBSVolumeState(v interface{}) (*EBSVolumeState, error) {
-	if v == nil {
-		return nil, nil
-	}
-
-	volState, ok := v.(*EBSVolumeState)
-	if !ok {
-		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", volState, v)
-	}
-
-	return volState, nil
-}

@@ -54,13 +54,14 @@ type AzureClusterConfig struct {
 }
 
 type AzureClusterConfigSpec struct {
-	Guest AzureClusterConfigSpecGuest `json:"guest" yaml:"guest"`
+	Guest         AzureClusterConfigSpecGuest         `json:"guest" yaml:"guest"`
+	VersionBundle AzureClusterConfigSpecVersionBundle `json:"versionBundle" yaml:"versionBundle"`
 }
 
 type AzureClusterConfigSpecGuest struct {
-	ClusterGuestConfig `json:",inline" yaml:",inline"`
-	Masters            []AzureClusterConfigSpecGuestMaster `json:"masters,omitempty" yaml:"masters,omitempty"`
-	Workers            []AzureClusterConfigSpecGuestWorker `json:"workers,omitempty" yaml:"workers,omitempty"`
+	Config  ClusterGuestConfig                  `json:"config" yaml:"config"`
+	Masters []AzureClusterConfigSpecGuestMaster `json:"masters,omitempty" yaml:"masters,omitempty"`
+	Workers []AzureClusterConfigSpecGuestWorker `json:"workers,omitempty" yaml:"workers,omitempty"`
 }
 
 type AzureClusterConfigSpecGuestMaster struct {
@@ -75,6 +76,10 @@ type AzureClusterConfigSpecGuestWorker struct {
 type AzureClusterConfigSpecGuestNode struct {
 	ID     string `json:"id" yaml:"id"`
 	VMSize string `json:"vmSize,omitempty" yaml:"vmSize,omitempty"`
+}
+
+type AzureClusterConfigSpecVersionBundle struct {
+	Version string `json:"version" yaml:"version"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
