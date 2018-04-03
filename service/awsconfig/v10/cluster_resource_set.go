@@ -292,12 +292,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 			Logger:    config.Logger,
 		}
 
-		ops, err := namespace.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		namespaceResource, err = toCRUDResource(config.Logger, ops)
+		namespaceResource, err = namespace.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
