@@ -3,7 +3,6 @@ package namespace
 import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -30,10 +29,10 @@ type Resource struct {
 func New(config Config) (*Resource, error) {
 	// Dependencies.
 	if config.K8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.K8sClient must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
 	}
 	if config.Logger == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
 	newResource := &Resource{
@@ -47,17 +46,4 @@ func New(config Config) (*Resource, error) {
 
 func (r *Resource) Name() string {
 	return Name
-}
-
-func toNamespace(v interface{}) (*apiv1.Namespace, error) {
-	if v == nil {
-		return nil, nil
-	}
-
-	namespace, ok := v.(*apiv1.Namespace)
-	if !ok {
-		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &apiv1.Namespace{}, v)
-	}
-
-	return namespace, nil
 }
