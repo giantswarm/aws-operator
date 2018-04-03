@@ -65,7 +65,7 @@ func (e *EBS) DeleteVolume(ctx context.Context, volumeID string) error {
 		return nil
 	}
 	deleteNotify := func(err error, delay time.Duration) {
-		e.logger.LogCtx(ctx, "level", "error", "message", fmt.Sprintf("deleting EBS volume failed, retrying with delay %.0fm%.0fs", delay.Minutes(), delay.Seconds()), "stack", fmt.Sprintf("%#v", err))
+		e.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("deleting EBS volume failed, retrying with delay %s", delay.String()))
 	}
 	deleteBackoff := &backoff.ExponentialBackOff{
 		InitialInterval:     backoff.DefaultInitialInterval,

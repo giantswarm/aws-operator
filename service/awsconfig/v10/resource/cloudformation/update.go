@@ -50,8 +50,8 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 			}
 		}
 
-		// Now force detach so the volumes can be deleted cleanly. Instances
-		// are already shutdown.
+		// Now force detaching the volumes so we can update the shutdown master
+		// instance via CloudFormation.
 		force = true
 		shutdown = false
 		for _, a := range vol.Attachments {
@@ -59,12 +59,6 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 			if err != nil {
 				r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("failed to force detach EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
 			}
-		}
-
-		// Now delete the volumes.
-		err = r.ebs.DeleteVolume(ctx, vol.VolumeID)
-		if err != nil {
-			r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("failed to delete EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
 		}
 
 		// Once the etcd volume is cleaned up and the master instance is down we can
