@@ -21,6 +21,7 @@ type S3Client interface {
 	DeleteObjects(*s3.DeleteObjectsInput) (*s3.DeleteObjectsOutput, error)
 	HeadBucket(*s3.HeadBucketInput) (*s3.HeadBucketOutput, error)
 	ListObjectsV2(*s3.ListObjectsV2Input) (*s3.ListObjectsV2Output, error)
-	PutBucketTagging(*s3.PutBucketTaggingInput) (*s3.PutBucketTaggingOutput, error)
+	PutBucketAcl(*s3.PutBucketAclInput) (*s3.PutBucketAclOutput, error)
 	PutBucketLogging(*s3.PutBucketLoggingInput) (*s3.PutBucketLoggingOutput, error)
+	PutBucketTagging(*s3.PutBucketTaggingInput) (*s3.PutBucketTaggingOutput, error)
 }
