@@ -1,8 +1,11 @@
 package key
 
 import (
+	"crypto/sha1"
 	"fmt"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
@@ -235,7 +238,16 @@ func MasterImageID(customObject v1alpha1.AWSConfig) string {
 }
 
 func MasterInstanceResourceName(customObject v1alpha1.AWSConfig) string {
-	return "MasterInstance"
+	s := strconv.FormatInt(time.Now().UnixNano(), 10)
+
+	h := sha1.New()
+	h.Write([]byte(s))
+	timeHash := fmt.Sprintf("%x", h.Sum(nil))[0:5]
+
+	upperTimeHash := strings.ToUpper(timeHash)
+	upperClusterID := strings.ToUpper(ClusterID(customObject))
+
+	return fmt.Sprintf("MasterInstance%s%s", upperClusterID, upperTimeHash)
 }
 
 func MasterInstanceName(customObject v1alpha1.AWSConfig) string {

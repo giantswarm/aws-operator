@@ -28,7 +28,7 @@ const Instance = `{{define "instance"}}
       Tags:
       - Key: Name
         Value: {{ .Instance.Master.EtcdVolume.Name }}
-  MountPoint:
+  {{ .Instance.Master.Instance.ResourceName }}MountPoint:
     Type: AWS::EC2::VolumeAttachment
     Properties:
       InstanceId: !Ref {{ .Instance.Master.Instance.ResourceName }}
