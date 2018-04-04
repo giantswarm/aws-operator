@@ -110,7 +110,9 @@ func NewDrainerFramework(config DrainerFrameworkConfig) (*framework.Framework, e
 			Logger:         config.Logger,
 			ResourceRouter: resourceRouter,
 
-			Name: config.ProjectName,
+			// Name is used to compute finalizer names. This here results in something
+			// like operatorkit.giantswarm.io/aws-operator-drainer.
+			Name: config.ProjectName + "-drainer",
 		}
 
 		crdFramework, err = framework.New(c)
