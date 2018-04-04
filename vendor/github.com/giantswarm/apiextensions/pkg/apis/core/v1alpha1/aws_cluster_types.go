@@ -54,13 +54,14 @@ type AWSClusterConfig struct {
 }
 
 type AWSClusterConfigSpec struct {
-	Guest AWSClusterConfigSpecGuest `json:"guest" yaml:"guest"`
+	Guest         AWSClusterConfigSpecGuest         `json:"guest" yaml:"guest"`
+	VersionBundle AWSClusterConfigSpecVersionBundle `json:"versionBundle" yaml:"versionBundle"`
 }
 
 type AWSClusterConfigSpecGuest struct {
-	ClusterGuestConfig `json:",inline" yaml:",inline"`
-	Masters            []AWSClusterConfigSpecGuestMaster `json:"masters,omitempty" yaml:"masters,omitempty"`
-	Workers            []AWSClusterConfigSpecGuestWorker `json:"workers,omitempty" yaml:"workers,omitempty"`
+	Config  ClusterGuestConfig                `json:"config" yaml:"config"`
+	Masters []AWSClusterConfigSpecGuestMaster `json:"masters,omitempty" yaml:"masters,omitempty"`
+	Workers []AWSClusterConfigSpecGuestWorker `json:"workers,omitempty" yaml:"workers,omitempty"`
 }
 
 type AWSClusterConfigSpecGuestMaster struct {
@@ -74,6 +75,10 @@ type AWSClusterConfigSpecGuestWorker struct {
 type AWSClusterConfigSpecGuestNode struct {
 	ID           string `json:"id" yaml:"id"`
 	InstanceType string `json:"instanceType,omitempty" yaml:"instanceType,omitempty"`
+}
+
+type AWSClusterConfigSpecVersionBundle struct {
+	Version string `json:"version" yaml:"version"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
