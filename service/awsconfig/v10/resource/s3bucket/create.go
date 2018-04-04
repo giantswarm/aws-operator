@@ -45,7 +45,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			return microerror.Mask(err)
 		}
 
-		err = r.createAccessLogBucket(ctx, bucketInput)
+		err = r.createAccessLogBucket(bucketInput)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -60,7 +60,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			},
 		})
 		if err != nil {
-			return err
+			return microerror.Mask(err)
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "creating S3 bucket: created")
@@ -87,7 +87,7 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 	return BucketState{}, nil
 }
 
-func (r *Resource) createAccessLogBucket(ctx context.Context, bucketInput BucketState) error {
+func (r *Resource) createAccessLogBucket(bucketInput BucketState) error {
 	_, err := r.clients.S3.CreateBucket(&s3.CreateBucketInput{
 		Bucket: aws.String(bucketInput.Name + "-logs"),
 	})
@@ -96,7 +96,7 @@ func (r *Resource) createAccessLogBucket(ctx context.Context, bucketInput Bucket
 		return nil
 	}
 	if err != nil {
-		return err
+		return microerror.Mask(err)
 	}
 
 	_, err = r.clients.S3.PutBucketAcl(&s3.PutBucketAclInput{
@@ -105,7 +105,7 @@ func (r *Resource) createAccessLogBucket(ctx context.Context, bucketInput Bucket
 		GrantWrite:   aws.String("uri=http://acs.amazonaws.com/groups/s3/LogDelivery"),
 	})
 	if err != nil {
-		return err
+		return microerror.Mask(err)
 	}
 
 	//Enable logs for the target bucket too
@@ -119,7 +119,7 @@ func (r *Resource) createAccessLogBucket(ctx context.Context, bucketInput Bucket
 		},
 	})
 	if err != nil {
-		return err
+		return microerror.Mask(err)
 	}
 
 	return nil
