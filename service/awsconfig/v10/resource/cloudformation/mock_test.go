@@ -15,7 +15,7 @@ func (e *EBSServiceMock) DeleteVolume(ctx context.Context, volumeID string) erro
 	return nil
 }
 
-func (e *EBSServiceMock) DetachVolume(ctx context.Context, volumeID string, attachment ebs.VolumeAttachment, force bool, shutdown bool) error {
+func (e *EBSServiceMock) DetachVolume(ctx context.Context, volumeID string, attachment ebs.VolumeAttachment, force bool, shutdown bool, wait bool) error {
 	return nil
 }
 

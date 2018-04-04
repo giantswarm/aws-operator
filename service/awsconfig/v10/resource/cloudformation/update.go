@@ -39,25 +39,15 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 		}
 		vol := volumes[0]
 
-		// First detach any attached volumes without forcing but shutdown the
-		// instances.
+		// First shutdown the instances and wait for it to be stopped. Then detach
+		// the etcd volume without forcing.
 		force := false
 		shutdown := true
+		wait := true
 		for _, a := range vol.Attachments {
-			err := r.ebs.DetachVolume(ctx, vol.VolumeID, a, force, shutdown)
+			err := r.ebs.DetachVolume(ctx, vol.VolumeID, a, force, shutdown, wait)
 			if err != nil {
 				r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("failed to detach EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
-			}
-		}
-
-		// Now force detaching the volumes so we can update the shutdown master
-		// instance via CloudFormation.
-		force = true
-		shutdown = false
-		for _, a := range vol.Attachments {
-			err := r.ebs.DetachVolume(ctx, vol.VolumeID, a, force, shutdown)
-			if err != nil {
-				r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("failed to force detach EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
 			}
 		}
 

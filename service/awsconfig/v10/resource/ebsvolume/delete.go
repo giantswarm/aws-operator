@@ -20,7 +20,6 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	// Get both the Etcd volume and any Persistent Volumes.
 	etcdVolume := true
 	persistentVolume := true
-
 	volumes, err := r.service.ListVolumes(customObject, etcdVolume, persistentVolume)
 	if err != nil {
 		return microerror.Mask(err)
@@ -31,12 +30,12 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 		// First detach any attached volumes without forcing but shutdown the
 		// instances.
-		force := false
-		shutdown := true
-
 		for _, vol := range volumes {
 			for _, a := range vol.Attachments {
-				err := r.service.DetachVolume(ctx, vol.VolumeID, a, force, shutdown)
+				force := false
+				shutdown := true
+				wait := false
+				err := r.service.DetachVolume(ctx, vol.VolumeID, a, force, shutdown, wait)
 				if err != nil {
 					r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("failed to detach EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
 				}
@@ -45,12 +44,12 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 		// Now force detach so the volumes can be deleted cleanly. Instances
 		// are already shutdown.
-		force = true
-		shutdown = false
-
 		for _, vol := range volumes {
 			for _, a := range vol.Attachments {
-				err := r.service.DetachVolume(ctx, vol.VolumeID, a, force, shutdown)
+				force := true
+				shutdown := false
+				wait := false
+				err := r.service.DetachVolume(ctx, vol.VolumeID, a, force, shutdown, wait)
 				if err != nil {
 					r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("failed to force detach EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
 				}
