@@ -34,6 +34,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Detach EBS volumes before deletion when deleting clusters.",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Added S3 access logs for cluster buckets.",
+				Kind:        versionbundle.KindAdded,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
