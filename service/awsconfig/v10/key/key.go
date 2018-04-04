@@ -36,6 +36,8 @@ const (
 	RoleNameTemplate = "EC2-K8S-Role"
 	// PolicyNameTemplate will be included in the IAM policy name.
 	PolicyNameTemplate = "EC2-K8S-Policy"
+	// LogDeliveryURI is used for setting the correct ACL in the access log bucket
+	LogDeliveryURI = "uri=http://acs.amazonaws.com/groups/s3/LogDelivery"
 )
 
 const (
@@ -266,6 +268,10 @@ func PolicyName(customObject v1alpha1.AWSConfig, profileType string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, PolicyNameTemplate)
 }
 
+func PrefixLogBucket(id string) string {
+	return fmt.Sprintf("%s-access-logs/", id)
+}
+
 func PrivateSubnetCIDR(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.VPC.PrivateSubnetCIDR
 }
@@ -288,6 +294,10 @@ func SecurityGroupName(customObject v1alpha1.AWSConfig, groupName string) string
 
 func SubnetName(customObject v1alpha1.AWSConfig, suffix string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), suffix)
+}
+
+func TargetLogBucketName(bucketInputName string) string {
+	return fmt.Sprintf("%s-logs", bucketInputName)
 }
 
 func ToCustomObject(v interface{}) (v1alpha1.AWSConfig, error) {

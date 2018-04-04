@@ -54,8 +54,8 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			Bucket: aws.String(bucketInput.Name),
 			BucketLoggingStatus: &s3.BucketLoggingStatus{
 				LoggingEnabled: &s3.LoggingEnabled{
-					TargetBucket: aws.String(bucketInput.Name + "-logs"),
-					TargetPrefix: aws.String(key.ClusterID(customObject) + "-access-logs/"),
+					TargetBucket: aws.String(key.TargetLogBucketName(bucketInput.Name)),
+					TargetPrefix: aws.String(key.PrefixLogBucket(key.ClusterID(customObject))),
 				},
 			},
 		})
@@ -89,7 +89,7 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 
 func (r *Resource) createAccessLogBucket(bucketInput BucketState) error {
 	_, err := r.clients.S3.CreateBucket(&s3.CreateBucketInput{
-		Bucket: aws.String(bucketInput.Name + "-logs"),
+		Bucket: aws.String(key.TargetLogBucketName(bucketInput.Name)),
 	})
 	if IsBucketAlreadyExists(err) || IsBucketAlreadyOwnedByYou(err) {
 		// Fall through.
@@ -100,9 +100,9 @@ func (r *Resource) createAccessLogBucket(bucketInput BucketState) error {
 	}
 
 	_, err = r.clients.S3.PutBucketAcl(&s3.PutBucketAclInput{
-		Bucket:       aws.String(bucketInput.Name + "-logs"),
-		GrantReadACP: aws.String("uri=http://acs.amazonaws.com/groups/s3/LogDelivery"),
-		GrantWrite:   aws.String("uri=http://acs.amazonaws.com/groups/s3/LogDelivery"),
+		Bucket:       aws.String(key.TargetLogBucketName(bucketInput.Name)),
+		GrantReadACP: aws.String(key.LogDeliveryURI),
+		GrantWrite:   aws.String(key.LogDeliveryURI),
 	})
 	if err != nil {
 		return microerror.Mask(err)
@@ -110,11 +110,11 @@ func (r *Resource) createAccessLogBucket(bucketInput BucketState) error {
 
 	//Enable logs for the target bucket too
 	_, err = r.clients.S3.PutBucketLogging(&s3.PutBucketLoggingInput{
-		Bucket: aws.String(bucketInput.Name + "-logs"),
+		Bucket: aws.String(key.TargetLogBucketName(bucketInput.Name)),
 		BucketLoggingStatus: &s3.BucketLoggingStatus{
 			LoggingEnabled: &s3.LoggingEnabled{
-				TargetBucket: aws.String(bucketInput.Name + "-logs"),
-				TargetPrefix: aws.String("self-access-logs/"),
+				TargetBucket: aws.String(key.TargetLogBucketName(bucketInput.Name)),
+				TargetPrefix: aws.String(key.PrefixLogBucket("self")),
 			},
 		},
 	})
