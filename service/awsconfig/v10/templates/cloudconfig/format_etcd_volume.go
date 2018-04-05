@@ -5,13 +5,16 @@ const FormatEtcdVolume = `
 Description=Formats EBS /dev/xvdh volume
 Requires=dev-xvdh.device
 After=dev-xvdh.device
-ConditionPathExists=!/var/lib/etcd/etcd-volume-formated
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/sbin/mkfs.ext4 /dev/xvdh
-ExecStartPost=/usr/bin/touch /var/lib/etcd/etcd-volume-formated
+
+# Do not wipe the disk if it's already being used, so the etcd data is
+# persistent across reboots and updates.
+Environment="LABEL=var-lib-etcd"
+Environment="DEV=/dev/xvdh"
+ExecStart=-/bin/bash -c "if ! findfs LABEL=$LABEL > /tmp/label.$LABEL; then wipefs -a -f $DEV && mkfs.ext4 -T news -F -L $LABEL $DEV && echo formatted file system; else echo file system already formatted fi"
 
 [Install]
 WantedBy=multi-user.target
