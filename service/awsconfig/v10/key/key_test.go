@@ -3,7 +3,9 @@ package key
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
@@ -351,6 +353,51 @@ func Test_MasterInstanceName(t *testing.T) {
 		if MasterInstanceName(tc.customObject) != tc.expectedInstanceName {
 			t.Fatalf("Expected master instance name %s but was %s", tc.expectedInstanceName, MasterInstanceName(tc.customObject))
 		}
+	}
+}
+
+func Test_MasterInstanceResourceName_Format(t *testing.T) {
+	t.Parallel()
+
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "test-cluster",
+			},
+		},
+	}
+
+	n1 := MasterInstanceResourceName(customObject)
+	time.Sleep(1 * time.Millisecond)
+	n2 := MasterInstanceResourceName(customObject)
+
+	prefix := "MasterInstance"
+
+	if !strings.HasPrefix(n1, prefix) {
+		t.Fatalf("expected %s to have prefix %s", n1, prefix)
+	}
+	if !strings.HasPrefix(n2, prefix) {
+		t.Fatalf("expected %s to have prefix %s", n2, prefix)
+	}
+}
+
+func Test_MasterInstanceResourceName_Inequivalence(t *testing.T) {
+	t.Parallel()
+
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "test-cluster",
+			},
+		},
+	}
+
+	n1 := MasterInstanceResourceName(customObject)
+	time.Sleep(1 * time.Millisecond)
+	n2 := MasterInstanceResourceName(customObject)
+
+	if n1 == n2 {
+		t.Fatalf("expected %s to differ from %s", n1, n2)
 	}
 }
 
