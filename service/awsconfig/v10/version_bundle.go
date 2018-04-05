@@ -34,6 +34,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Detach EBS volumes before deletion when deleting clusters.",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Fixed updating master nodes on all kinds of cluster updates.",
+				Kind:        versionbundle.KindFixed,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
