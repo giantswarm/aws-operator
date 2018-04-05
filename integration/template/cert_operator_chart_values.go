@@ -18,7 +18,7 @@ Installation:
     Secret:
       CertOperator:
         SecretYaml: |
-            service:
+          service:
             vault:
               config:
                 token: ${VAULT_TOKEN}
