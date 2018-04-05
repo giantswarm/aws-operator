@@ -11,6 +11,26 @@ func VersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "cloudconfig",
+				Description: "Removed docker flag --disable-legacy-registry",
+				Kind:        versionbundle.KindRemoved,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Removed calico-ipip-pinger.",
+				Kind:        versionbundle.KindRemoved,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Changed kubelet bind mount mode from shared to rshared.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Disabled etcd3-defragmentation service in favor systemd timer.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "cloudconfig",
 				Description: "Enabled volume resizing feature.",
 				Kind:        versionbundle.KindChanged,
 			},
