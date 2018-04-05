@@ -2,6 +2,7 @@ package cloudformation
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -48,7 +49,7 @@ func TestMainGuestTemplateGetEmptyBody(t *testing.T) {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	_, err = newResource.getMainGuestTemplateBody(customObject)
+	_, err = newResource.getMainGuestTemplateBody(customObject, StackState{})
 	if err == nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -111,6 +112,27 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		},
 	}
 
+	imageID, err := key.ImageID(customObject)
+	if err != nil {
+		t.Fatalf("expected %#v got %#v", nil, err)
+	}
+
+	stackState := StackState{
+		Name: key.MainGuestStackName(customObject),
+
+		MasterImageID:              imageID,
+		MasterInstanceResourceName: key.MasterInstanceResourceName(customObject),
+		MasterInstanceType:         key.MasterInstanceType(customObject),
+		MasterCloudConfigVersion:   cloudconfig.MasterCloudConfigVersion,
+
+		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
+		WorkerImageID:            imageID,
+		WorkerInstanceType:       key.WorkerInstanceType(customObject),
+		WorkerCloudConfigVersion: cloudconfig.WorkerCloudConfigVersion,
+
+		VersionBundleVersion: key.VersionBundleVersion(customObject),
+	}
+
 	cfg := testConfig()
 	cfg.Clients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
@@ -127,7 +149,7 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		t.Fatalf("unexpected error %v", err)
 	}
 
-	body, err := newResource.getMainGuestTemplateBody(customObject)
+	body, err := newResource.getMainGuestTemplateBody(customObject, stackState)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}

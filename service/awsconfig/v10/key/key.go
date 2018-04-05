@@ -46,15 +46,16 @@ const (
 )
 
 const (
-	MasterImageIDKey            = "MasterImageID"
-	MasterInstanceTypeKey       = "MasterInstanceType"
-	MasterCloudConfigVersionKey = "MasterCloudConfigVersion"
-	WorkerASGKey                = "WorkerASGName"
-	WorkerCountKey              = "WorkerCount"
-	WorkerImageIDKey            = "WorkerImageID"
-	WorkerInstanceTypeKey       = "WorkerInstanceType"
-	WorkerCloudConfigVersionKey = "WorkerCloudConfigVersion"
-	VersionBundleVersionKey     = "VersionBundleVersion"
+	MasterImageIDKey              = "MasterImageID"
+	MasterInstanceResourceNameKey = "MasterInstanceResourceName"
+	MasterInstanceTypeKey         = "MasterInstanceType"
+	MasterCloudConfigVersionKey   = "MasterCloudConfigVersion"
+	WorkerASGKey                  = "WorkerASGName"
+	WorkerCountKey                = "WorkerCount"
+	WorkerImageIDKey              = "WorkerImageID"
+	WorkerInstanceTypeKey         = "WorkerInstanceType"
+	WorkerCloudConfigVersionKey   = "WorkerCloudConfigVersion"
+	VersionBundleVersionKey       = "VersionBundleVersion"
 )
 
 const (

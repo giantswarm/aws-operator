@@ -14,7 +14,7 @@ RemainAfterExit=yes
 # persistent across reboots and updates.
 Environment="LABEL=var-lib-etcd"
 Environment="DEV=/dev/xvdh"
-ExecStart=-/bin/bash -c "if ! findfs LABEL=$LABEL > /tmp/label.$LABEL; then wipefs -a -f $DEV && mkfs.ext4 -T news -F -L $LABEL $DEV && echo formatted file system; else echo file system already formatted fi"
+ExecStart=-/bin/bash -c "if ! findfs LABEL=$LABEL > /tmp/label.$LABEL; then wipefs -a -f $DEV && mkfs.ext4 -T news -F -L $LABEL $DEV && echo formatted file system; else echo file system already formatted; fi"
 
 [Install]
 WantedBy=multi-user.target

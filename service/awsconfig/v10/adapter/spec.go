@@ -68,6 +68,26 @@ type Clients struct {
 	ELB            ELBClient
 }
 
+// TODO we copy this because of a curcular import issue with the cloudformation
+// resource. The way how the resource works with the adapter and how infromation
+// is passed has to be reworked at some point. Just hacking this now to keep
+// going and to keep the changes as minimal as possible.
+type StackState struct {
+	Name string
+
+	MasterImageID              string
+	MasterInstanceType         string
+	MasterInstanceResourceName string
+	MasterCloudConfigVersion   string
+
+	WorkerCount              string
+	WorkerImageID            string
+	WorkerInstanceType       string
+	WorkerCloudConfigVersion string
+
+	VersionBundleVersion string
+}
+
 // CFClient describes the methods required to be implemented by a CloudFormation
 // AWS client.
 type CFClient interface {

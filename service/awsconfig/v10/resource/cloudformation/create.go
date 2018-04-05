@@ -92,7 +92,7 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		}
 
 		var mainTemplate string
-		mainTemplate, err := r.getMainGuestTemplateBody(customObject)
+		mainTemplate, err := r.getMainGuestTemplateBody(customObject, desiredStackState)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
