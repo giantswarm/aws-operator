@@ -16,111 +16,88 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		return microerror.Mask(err)
 	}
 
-	bucketInput, err := toBucketState(createChange)
+	createBucketsState, err := toBucketState(createChange)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	if bucketInput.Name != "" {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "creating S3 bucket")
+	for _, bucketInput := range createBucketsState {
+		if bucketInput.Name != "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "creating S3 bucket '%s'", bucketInput.Name)
 
-		_, err = r.clients.S3.CreateBucket(&s3.CreateBucketInput{
-			Bucket: aws.String(bucketInput.Name),
-		})
-		if IsBucketAlreadyExists(err) || IsBucketAlreadyOwnedByYou(err) {
-			// Fall through.
-			return nil
-		}
-		if err != nil {
-			return microerror.Mask(err)
-		}
+			_, err = r.clients.S3.CreateBucket(&s3.CreateBucketInput{
+				Bucket: aws.String(bucketInput.Name),
+			})
+			if IsBucketAlreadyExists(err) || IsBucketAlreadyOwnedByYou(err) {
+				// Fall through.
+				return nil
+			}
+			if err != nil {
+				return microerror.Mask(err)
+			}
 
-		_, err = r.clients.S3.PutBucketTagging(&s3.PutBucketTaggingInput{
-			Bucket: aws.String(bucketInput.Name),
-			Tagging: &s3.Tagging{
-				TagSet: r.getS3BucketTags(customObject),
-			},
-		})
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		err = r.createAccessLogBucket(bucketInput)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		_, err = r.clients.S3.PutBucketLogging(&s3.PutBucketLoggingInput{
-			Bucket: aws.String(bucketInput.Name),
-			BucketLoggingStatus: &s3.BucketLoggingStatus{
-				LoggingEnabled: &s3.LoggingEnabled{
-					TargetBucket: aws.String(key.TargetLogBucketName(bucketInput.Name)),
-					TargetPrefix: aws.String(key.PrefixLogBucket(key.ClusterID(customObject))),
+			_, err = r.clients.S3.PutBucketTagging(&s3.PutBucketTaggingInput{
+				Bucket: aws.String(bucketInput.Name),
+				Tagging: &s3.Tagging{
+					TagSet: r.getS3BucketTags(customObject),
 				},
-			},
-		})
-		if err != nil {
-			return microerror.Mask(err)
-		}
+			})
+			if err != nil {
+				return microerror.Mask(err)
+			}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "creating S3 bucket: created")
-	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "creating S3 bucket: already created")
+			if bucketInput.IsDeliveryLog {
+				_, err = r.clients.S3.PutBucketAcl(&s3.PutBucketAclInput{
+					Bucket:       aws.String(key.TargetLogBucketName(customObject)),
+					GrantReadACP: aws.String(key.LogDeliveryURI),
+					GrantWrite:   aws.String(key.LogDeliveryURI),
+				})
+				if err != nil {
+					return microerror.Mask(err)
+				}
+			}
+
+			if bucketInput.LoggingEnabled {
+				_, err = r.clients.S3.PutBucketLogging(&s3.PutBucketLoggingInput{
+					Bucket: aws.String(bucketInput.Name),
+					BucketLoggingStatus: &s3.BucketLoggingStatus{
+						LoggingEnabled: &s3.LoggingEnabled{
+							TargetBucket: aws.String(key.TargetLogBucketName(customObject)),
+							TargetPrefix: aws.String(bucketInput.Name),
+						},
+					},
+				})
+				if err != nil {
+					return microerror.Mask(err)
+				}
+			}
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "creating S3 bucket '%s': created", bucketInput.Name)
+		} else {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "creating S3 bucket '%s': already created", bucketInput.Name)
+		}
 	}
+
 	return nil
 }
 
 func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	currentBucket, err := toBucketState(currentState)
+	currentBuckets, err := toBucketState(currentState)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	desiredBucket, err := toBucketState(desiredState)
+	desiredBuckets, err := toBucketState(desiredState)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	if currentBucket.Name == "" || desiredBucket.Name != currentBucket.Name {
-		return desiredBucket, nil
+	createState := []BucketState{}
+
+	for _, bucket := range desiredBuckets {
+		if !containsBucketState(bucket, currentBuckets) {
+			createState = append(createState, bucket)
+		}
 	}
 
-	return BucketState{}, nil
-}
-
-func (r *Resource) createAccessLogBucket(bucketInput BucketState) error {
-	_, err := r.clients.S3.CreateBucket(&s3.CreateBucketInput{
-		Bucket: aws.String(key.TargetLogBucketName(bucketInput.Name)),
-	})
-	if IsBucketAlreadyExists(err) || IsBucketAlreadyOwnedByYou(err) {
-		// Fall through.
-		return nil
-	}
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	_, err = r.clients.S3.PutBucketAcl(&s3.PutBucketAclInput{
-		Bucket:       aws.String(key.TargetLogBucketName(bucketInput.Name)),
-		GrantReadACP: aws.String(key.LogDeliveryURI),
-		GrantWrite:   aws.String(key.LogDeliveryURI),
-	})
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	//Enable logs for the target bucket too
-	_, err = r.clients.S3.PutBucketLogging(&s3.PutBucketLoggingInput{
-		Bucket: aws.String(key.TargetLogBucketName(bucketInput.Name)),
-		BucketLoggingStatus: &s3.BucketLoggingStatus{
-			LoggingEnabled: &s3.LoggingEnabled{
-				TargetBucket: aws.String(key.TargetLogBucketName(bucketInput.Name)),
-				TargetPrefix: aws.String(key.PrefixLogBucket("self")),
-			},
-		},
-	})
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	return nil
+	return createState, nil
 }

@@ -268,10 +268,6 @@ func PolicyName(customObject v1alpha1.AWSConfig, profileType string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, PolicyNameTemplate)
 }
 
-func PrefixLogBucket(id string) string {
-	return fmt.Sprintf("%s-access-logs/", id)
-}
-
 func PrivateSubnetCIDR(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.VPC.PrivateSubnetCIDR
 }
@@ -296,8 +292,8 @@ func SubnetName(customObject v1alpha1.AWSConfig, suffix string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), suffix)
 }
 
-func TargetLogBucketName(bucketInputName string) string {
-	return fmt.Sprintf("%s-logs", bucketInputName)
+func TargetLogBucketName(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("%s-logs", ClusterID(customObject))
 }
 
 func ToCustomObject(v interface{}) (v1alpha1.AWSConfig, error) {

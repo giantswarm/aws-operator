@@ -10,47 +10,49 @@ import (
 )
 
 func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
-	bucketInput, err := toBucketState(deleteChange)
+	bucketsInput, err := toBucketState(deleteChange)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	if bucketInput.Name != "" {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting S3 bucket")
+	for _, bucketInput := range bucketsInput {
+		if bucketInput.Name != "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "deleting S3 bucket")
 
-		// Make sure the bucket is empty.
-		input := &s3.ListObjectsV2Input{
-			Bucket: aws.String(bucketInput.Name),
-		}
-		result, err := r.clients.S3.ListObjectsV2(input)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		for _, object := range result.Contents {
-			_, err := r.clients.S3.DeleteObject(&s3.DeleteObjectInput{
+			// Make sure the bucket is empty.
+			input := &s3.ListObjectsV2Input{
 				Bucket: aws.String(bucketInput.Name),
-				Key:    object.Key,
-			})
+			}
+			result, err := r.clients.S3.ListObjectsV2(input)
 			if err != nil {
 				return microerror.Mask(err)
 			}
-		}
 
-		_, err = r.clients.S3.DeleteBucket(&s3.DeleteBucketInput{
-			Bucket: aws.String(bucketInput.Name),
-		})
-		if IsBucketNotFound(err) {
-			// Fall through.
-			return nil
-		}
-		if err != nil {
-			return microerror.Mask(err)
-		}
+			for _, object := range result.Contents {
+				_, err := r.clients.S3.DeleteObject(&s3.DeleteObjectInput{
+					Bucket: aws.String(bucketInput.Name),
+					Key:    object.Key,
+				})
+				if err != nil {
+					return microerror.Mask(err)
+				}
+			}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting S3 bucket: deleted")
-	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting S3 bucket: already deleted")
+			_, err = r.clients.S3.DeleteBucket(&s3.DeleteBucketInput{
+				Bucket: aws.String(bucketInput.Name),
+			})
+			if IsBucketNotFound(err) {
+				// Fall through.
+				return nil
+			}
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "deleting S3 bucket: deleted")
+		} else {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "deleting S3 bucket: already deleted")
+		}
 	}
 
 	return nil
@@ -69,19 +71,23 @@ func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desire
 }
 
 func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	currentBucket, err := toBucketState(currentState)
+	currentBuckets, err := toBucketState(currentState)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	desiredBucket, err := toBucketState(desiredState)
+	desiredBuckets, err := toBucketState(desiredState)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	var bucketToDelete BucketState
-	if currentBucket.Name != "" {
-		bucketToDelete = desiredBucket
+	var bucketsToDelete []BucketState
+	for _, bucket := range currentBuckets {
+		// Destination Logs Bucket should no be delete because it has to keep logs
+		// even when cluster is removed (rotation of these logs are managed externally)
+		if !bucket.IsDeliveryLog && containsBucketState(bucket, desiredBuckets) {
+			bucketsToDelete = append(bucketsToDelete, bucket)
+		}
 	}
 
-	return bucketToDelete, nil
+	return bucketsToDelete, nil
 }

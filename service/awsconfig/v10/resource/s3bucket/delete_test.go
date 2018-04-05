@@ -14,8 +14,8 @@ func Test_Resource_S3Bucket_newDelete(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
 		obj                interface{}
-		currentState       interface{}
-		desiredState       interface{}
+		currentState       []BucketState
+		desiredState       []BucketState
 		expectedBucketName string
 		description        string
 	}{
@@ -28,8 +28,8 @@ func Test_Resource_S3Bucket_newDelete(t *testing.T) {
 					},
 				},
 			},
-			currentState:       BucketState{},
-			desiredState:       BucketState{},
+			currentState:       []BucketState{},
+			desiredState:       []BucketState{},
 			expectedBucketName: "",
 		},
 		{
@@ -41,14 +41,16 @@ func Test_Resource_S3Bucket_newDelete(t *testing.T) {
 					},
 				},
 			},
-			currentState: BucketState{},
-			desiredState: BucketState{
-				Name: "desired",
+			currentState: []BucketState{},
+			desiredState: []BucketState{
+				BucketState{
+					Name: "desired",
+				},
 			},
 			expectedBucketName: "",
 		},
 		{
-			description: "current state not empty, desired state not empty but equal, expected desired state",
+			description: "current state not empty, desired state not empty but equal, expected desired state avoiding delivery log bucket",
 			obj: &v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
@@ -56,11 +58,23 @@ func Test_Resource_S3Bucket_newDelete(t *testing.T) {
 					},
 				},
 			},
-			currentState: BucketState{
-				Name: "current",
+			currentState: []BucketState{
+				BucketState{
+					Name: "current",
+				},
+				BucketState{
+					Name:          "log-bucket",
+					IsDeliveryLog: true,
+				},
 			},
-			desiredState: BucketState{
-				Name: "current",
+			desiredState: []BucketState{
+				BucketState{
+					Name: "current",
+				},
+				BucketState{
+					Name:          "log-bucket",
+					IsDeliveryLog: true,
+				},
 			},
 			expectedBucketName: "current",
 		},
@@ -99,12 +113,16 @@ func Test_Resource_S3Bucket_newDelete(t *testing.T) {
 			if err != nil {
 				t.Errorf("expected '%v' got '%#v'", nil, err)
 			}
-			deleteChange, ok := result.(BucketState)
+
+			deleteChanges, ok := result.([]BucketState)
 			if !ok {
-				t.Errorf("expected '%T', got '%T'", deleteChange, result)
+				t.Errorf("expected '%T', got '%T'", deleteChanges, result)
 			}
-			if deleteChange.Name != tc.expectedBucketName {
-				t.Errorf("expected %s, got %s", tc.expectedBucketName, deleteChange.Name)
+
+			for _, deleteChange := range deleteChanges {
+				if deleteChange.Name != tc.expectedBucketName {
+					t.Errorf("expected %s, got %s", tc.expectedBucketName, deleteChange.Name)
+				}
 			}
 		})
 	}

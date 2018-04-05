@@ -13,9 +13,9 @@ import (
 func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
-		obj          interface{}
-		expectedName string
-		description  string
+		obj           interface{}
+		expectedNames []string
+		description   string
 	}{
 		{
 			description: "Get bucket name from custom object.",
@@ -26,7 +26,10 @@ func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
 					},
 				},
 			},
-			expectedName: "000000000000-g8s-5xchu",
+			expectedNames: []string{
+				"5xchu-logs",
+				"000000000000-g8s-5xchu",
+			},
 		},
 	}
 
@@ -64,13 +67,16 @@ func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
 				t.Fatalf("expected '%v' got '%#v'", nil, err)
 			}
 
-			desiredBucket, ok := result.(BucketState)
+			desiredBuckets, ok := result.([]BucketState)
 			if !ok {
-				t.Fatalf("case expected '%T', got '%T'", desiredBucket, result)
+				t.Fatalf("case expected '%T', got '%T'", desiredBuckets, result)
 			}
 
-			if tc.expectedName != desiredBucket.Name {
-				t.Fatalf("expected bucket name '%s' got '%s'", tc.expectedName, desiredBucket.Name)
+			// Order should be respected in the slice returned (always delivery log bucket first)
+			for key, desiredBucket := range desiredBuckets {
+				if tc.expectedNames[key] != desiredBucket.Name {
+					t.Fatalf("expected bucket name '%s' got '%s'", tc.expectedNames[key], desiredBucket.Name)
+				}
 			}
 		})
 	}

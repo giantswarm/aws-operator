@@ -18,8 +18,19 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	bucketState := BucketState{
-		Name: key.BucketName(customObject, accountID),
+	// First bucket must to be the delivery log bucket because otherwise
+	// other buckets can not forward logs to it
+	bucketState := []BucketState{
+		BucketState{
+			Name:           key.TargetLogBucketName(customObject),
+			IsDeliveryLog:  true,
+			LoggingEnabled: true,
+		},
+		BucketState{
+			Name:           key.BucketName(customObject, accountID),
+			IsDeliveryLog:  false,
+			LoggingEnabled: true,
+		},
 	}
 
 	return bucketState, nil
