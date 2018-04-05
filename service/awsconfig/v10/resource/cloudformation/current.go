@@ -72,7 +72,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			//
 			// TODO remove this condition as soon as all guest clusters in existence
 			// obtain a master instance resource.
-			versionBundleVersion = ""
+			masterInstanceResourceName = ""
 		} else if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
