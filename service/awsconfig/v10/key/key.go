@@ -238,14 +238,14 @@ func MasterImageID(customObject v1alpha1.AWSConfig) string {
 }
 
 func MasterInstanceResourceName(customObject v1alpha1.AWSConfig) string {
-	s := strconv.FormatInt(time.Now().UnixNano(), 10)
+	clusterID := strings.Replace(ClusterID(customObject), "-", "", -1)
 
 	h := sha1.New()
-	h.Write([]byte(s))
+	h.Write([]byte(strconv.FormatInt(time.Now().UnixNano(), 10)))
 	timeHash := fmt.Sprintf("%x", h.Sum(nil))[0:5]
 
 	upperTimeHash := strings.ToUpper(timeHash)
-	upperClusterID := strings.ToUpper(ClusterID(customObject))
+	upperClusterID := strings.ToUpper(clusterID)
 
 	return fmt.Sprintf("MasterInstance%s%s", upperClusterID, upperTimeHash)
 }

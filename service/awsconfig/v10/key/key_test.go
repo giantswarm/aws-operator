@@ -376,8 +376,14 @@ func Test_MasterInstanceResourceName_Format(t *testing.T) {
 	if !strings.HasPrefix(n1, prefix) {
 		t.Fatalf("expected %s to have prefix %s", n1, prefix)
 	}
+	if strings.Contains(n1, "-") {
+		t.Fatalf("expected %s to not contain dashes", n1)
+	}
 	if !strings.HasPrefix(n2, prefix) {
 		t.Fatalf("expected %s to have prefix %s", n2, prefix)
+	}
+	if strings.Contains(n2, "-") {
+		t.Fatalf("expected %s to not contain dashes", n2)
 	}
 }
 
