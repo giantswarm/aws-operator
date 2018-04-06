@@ -21,8 +21,8 @@ type StackState struct {
 	MasterInstanceResourceName string
 	MasterCloudConfigVersion   string
 
-	ShouldScaling bool
-	ShouldUpdate  bool
+	ShouldScale  bool
+	ShouldUpdate bool
 
 	Status string
 

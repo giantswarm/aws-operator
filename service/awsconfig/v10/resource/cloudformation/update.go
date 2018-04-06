@@ -2,6 +2,7 @@ package cloudformation
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -26,7 +27,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	if stackStateToUpdate.Name != "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "updating the guest cluster main stack")
 
-		if stackStateToUpdate.ShouldUpdate && !stackStateToUpdate.ShouldScaling {
+		if stackStateToUpdate.ShouldUpdate && !stackStateToUpdate.ShouldScale {
 			// Fetch the etcd volume information.
 			etcdVolume := true
 			persistentVolume := false
@@ -51,6 +52,26 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 				}
 			}
 		}
+
+		fmt.Printf("\n")
+		fmt.Printf("\n")
+		fmt.Printf("\n")
+		fmt.Printf("MasterCloudConfigVersion:   %#v\n", stackStateToUpdate.MasterCloudConfigVersion)
+		fmt.Printf("MasterImageID:              %#v\n", stackStateToUpdate.MasterImageID)
+		fmt.Printf("MasterInstanceResourceName: %#v\n", stackStateToUpdate.MasterInstanceResourceName)
+		fmt.Printf("MasterInstanceType:         %#v\n", stackStateToUpdate.MasterInstanceType)
+		fmt.Printf("Name:                       %#v\n", stackStateToUpdate.Name)
+		fmt.Printf("ShouldScale:                %#v\n", stackStateToUpdate.ShouldScale)
+		fmt.Printf("ShouldUpdate:               %#v\n", stackStateToUpdate.ShouldUpdate)
+		fmt.Printf("Status:                     %#v\n", stackStateToUpdate.Status)
+		fmt.Printf("VersionBundleVersion:       %#v\n", stackStateToUpdate.VersionBundleVersion)
+		fmt.Printf("WorkerCloudConfigVersion:   %#v\n", stackStateToUpdate.WorkerCloudConfigVersion)
+		fmt.Printf("WorkerCount:                %#v\n", stackStateToUpdate.WorkerCount)
+		fmt.Printf("WorkerImageID:              %#v\n", stackStateToUpdate.WorkerImageID)
+		fmt.Printf("WorkerInstanceType:         %#v\n", stackStateToUpdate.WorkerInstanceType)
+		fmt.Printf("\n")
+		fmt.Printf("\n")
+		fmt.Printf("\n")
 
 		// Once the etcd volume is cleaned up and the master instance is down we can
 		// go ahead to let CloudFormation do its job.
@@ -134,7 +155,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 
 			updateState := StackState{
 				Name:             desiredStackState.Name,
-				ShouldScaling:    false,
+				ShouldScale:      false,
 				ShouldUpdate:     true,
 				UpdateStackInput: updateStackInput,
 			}
@@ -170,7 +191,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 
 			updateState := StackState{
 				Name:             desiredStackState.Name,
-				ShouldScaling:    true,
+				ShouldScale:      true,
 				ShouldUpdate:     false,
 				UpdateStackInput: updateStackInput,
 			}
@@ -191,31 +212,40 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 // step.
 func shouldScale(currentState, desiredState StackState) bool {
 	if currentState.MasterImageID != desiredState.MasterImageID {
+		fmt.Printf("1\n")
 		return false
 	}
 	if currentState.MasterInstanceType != desiredState.MasterInstanceType {
+		fmt.Printf("2\n")
 		return false
 	}
 	if currentState.MasterCloudConfigVersion != desiredState.MasterCloudConfigVersion {
+		fmt.Printf("3\n")
 		return false
 	}
 	if currentState.WorkerImageID != desiredState.WorkerImageID {
+		fmt.Printf("4\n")
 		return false
 	}
 	if currentState.WorkerInstanceType != desiredState.WorkerInstanceType {
+		fmt.Printf("5\n")
 		return false
 	}
 	if currentState.WorkerCloudConfigVersion != desiredState.WorkerCloudConfigVersion {
+		fmt.Printf("6\n")
 		return false
 	}
 	if currentState.VersionBundleVersion != desiredState.VersionBundleVersion {
+		fmt.Printf("7\n")
 		return false
 	}
 
 	if currentState.WorkerCount != desiredState.WorkerCount {
+		fmt.Printf("8\n")
 		return true
 	}
 
+	fmt.Printf("9\n")
 	return false
 }
 
@@ -228,14 +258,18 @@ func shouldScale(currentState, desiredState StackState) bool {
 //
 func shouldUpdate(currentState, desiredState StackState) bool {
 	if currentState.MasterInstanceType != desiredState.MasterInstanceType {
+		fmt.Printf("10\n")
 		return true
 	}
 	if currentState.WorkerInstanceType != desiredState.WorkerInstanceType {
+		fmt.Printf("11\n")
 		return true
 	}
 	if currentState.VersionBundleVersion != desiredState.VersionBundleVersion {
+		fmt.Printf("12\n")
 		return true
 	}
 
+	fmt.Printf("13\n")
 	return false
 }
