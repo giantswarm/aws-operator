@@ -2,7 +2,6 @@ package cloudformation
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -47,16 +46,12 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 		for _, a := range vol.Attachments {
 			err := r.ebs.DetachVolume(ctx, vol.VolumeID, a, force, shutdown, wait)
 			if err != nil {
-				r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("failed to detach EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
+				return microerror.Mask(err)
 			}
 		}
 
 		// Once the etcd volume is cleaned up and the master instance is down we can
 		// go ahead to let CloudFormation do its job.
-		//
-		// NOTE the update proceeds even if the volume detachements above fail. We
-		// keep going to update what we are able to even if master nodes are not
-		// updated in error cases.
 		_, err = r.clients.CloudFormation.UpdateStack(&updateStackInput)
 		if err != nil {
 			return microerror.Mask(err)
