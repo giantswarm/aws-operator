@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/operatorkit/framework/context/resourcecanceledcontext"
 	apiv1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -32,6 +33,17 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			r.logger.LogCtx(ctx, "level", "debug", "message", "found the namespace in the Kubernetes API")
 			namespace = manifest
 		}
+	}
+
+	// In case the namespace is already terminating we do not need to do any
+	// further work. Then we cancel the reconciliation to prevent the current and
+	// any further resource from being processed.
+	if namespace != nil && namespace.Status.Phase == "Terminating" {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "namespace is in state 'Terminating'")
+		resourcecanceledcontext.SetCanceled(ctx)
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
+
+		return nil, nil
 	}
 
 	return namespace, nil
