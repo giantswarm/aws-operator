@@ -36,7 +36,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		}
 		_, err = r.clients.S3.HeadBucket(headInput)
 		if IsBucketNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find the S3 bucket '%s'", bucketName))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find the S3 bucket %q", bucketName))
 		}
 		if err != nil {
 			return []BucketState{}, microerror.Mask(err)

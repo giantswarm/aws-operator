@@ -94,9 +94,9 @@ func toBucketState(v interface{}) ([]BucketState, error) {
 	return bucketsState, nil
 }
 
-func containsBucketState(bucketState BucketState, bucketStateList []BucketState) bool {
+func containsBucketState(bucketStateName string, bucketStateList []BucketState) bool {
 	for _, b := range bucketStateList {
-		if b.Name == bucketState.Name {
+		if b.Name == bucketStateName {
 			return true
 		}
 	}

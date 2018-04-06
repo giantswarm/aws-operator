@@ -84,7 +84,7 @@ func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desir
 	for _, bucket := range currentBuckets {
 		// Destination Logs Bucket should no be delete because it has to keep logs
 		// even when cluster is removed (rotation of these logs are managed externally)
-		if !bucket.IsDeliveryLog && containsBucketState(bucket, desiredBuckets) {
+		if !bucket.IsDeliveryLog && containsBucketState(bucket.Name, desiredBuckets) {
 			bucketsToDelete = append(bucketsToDelete, bucket)
 		}
 	}

@@ -75,7 +75,7 @@ func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
 			// Order should be respected in the slice returned (always delivery log bucket first)
 			for key, desiredBucket := range desiredBuckets {
 				if tc.expectedNames[key] != desiredBucket.Name {
-					t.Fatalf("expected bucket name '%s' got '%s'", tc.expectedNames[key], desiredBucket.Name)
+					t.Fatalf("expected bucket name %q got %q", tc.expectedNames[key], desiredBucket.Name)
 				}
 			}
 		})

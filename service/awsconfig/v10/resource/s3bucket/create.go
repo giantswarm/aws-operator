@@ -94,7 +94,7 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 	createState := []BucketState{}
 
 	for _, bucket := range desiredBuckets {
-		if !containsBucketState(bucket, currentBuckets) {
+		if !containsBucketState(bucket.Name, currentBuckets) {
 			createState = append(createState, bucket)
 		}
 	}

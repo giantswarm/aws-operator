@@ -118,7 +118,7 @@ func Test_Resource_S3Bucket_newCreate(t *testing.T) {
 				t.Errorf("expected '%T', got '%T'", createChanges, result)
 			}
 			for _, expectedBucketState := range tc.expectedBucketsState {
-				if !containsBucketState(expectedBucketState, createChanges) {
+				if !containsBucketState(expectedBucketState.Name, createChanges) {
 					t.Errorf("expected %v, got %v", expectedBucketState, createChanges)
 				}
 			}
