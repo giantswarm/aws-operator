@@ -36,7 +36,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "aws-operator",
-				Description: "Opened port 4194 for Cadvisor scraping from host cluster.",
+				Description: "Opened port 4194 for cAdvisor scraping from host cluster.",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
