@@ -27,7 +27,7 @@ func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
 				},
 			},
 			expectedNames: []string{
-				"5xchu-logs",
+				"5xchu-access-logs",
 				"000000000000-g8s-5xchu",
 			},
 		},

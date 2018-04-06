@@ -2,6 +2,7 @@ package s3bucket
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -15,31 +16,40 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "looking for the S3 bucket")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "looking for the S3 buckets")
 
 	accountID, err := r.awsService.GetAccountID()
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	bucketName := key.BucketName(customObject, accountID)
-	headInput := &s3.HeadBucketInput{
-		Bucket: aws.String(bucketName),
-	}
-	_, err = r.clients.S3.HeadBucket(headInput)
-	if IsBucketNotFound(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the S3 bucket")
-		return BucketState{}, nil
-	}
-	if err != nil {
-		return BucketState{}, microerror.Mask(err)
+	bucketNames := []string{
+		key.TargetLogBucketName(customObject),
+		key.BucketName(customObject, accountID),
 	}
 
-	bucketState := BucketState{
-		Name: bucketName,
+	bucketsState := []BucketState{}
+
+	for _, bucketName := range bucketNames {
+		headInput := &s3.HeadBucketInput{
+			Bucket: aws.String(bucketName),
+		}
+		_, err = r.clients.S3.HeadBucket(headInput)
+		if IsBucketNotFound(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find the S3 bucket '%s'", bucketName))
+		}
+		if err != nil {
+			return []BucketState{}, microerror.Mask(err)
+		}
+		if err == nil {
+			bucketState := BucketState{
+				Name: bucketName,
+			}
+			bucketsState = append(bucketsState, bucketState)
+		}
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "found the S3 bucket")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "found the S3 buckets")
 
-	return bucketState, nil
+	return bucketsState, nil
 }
