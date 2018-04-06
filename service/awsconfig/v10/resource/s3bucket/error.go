@@ -1,6 +1,8 @@
 package s3bucket
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
@@ -22,6 +24,7 @@ func IsNotFound(err error) bool {
 
 // IsBucketNotFound asserts bucket not found error from upstream's API code.
 func IsBucketNotFound(err error) bool {
+	fmt.Printf("%+v\n", err)
 	aerr, ok := err.(awserr.Error)
 	if !ok {
 		return false
