@@ -28,6 +28,13 @@ func IsAlreadyExists(err error) bool {
 	return false
 }
 
+var deletionMustBeRetriedError = microerror.New("deletion must be retried")
+
+// IsDeletionMustBeRetried asserts deletionMustBeRetriedError.
+func IsDeletionMustBeRetried(err error) bool {
+	return microerror.Cause(err) == deletionMustBeRetriedError
+}
+
 var invalidConfigError = microerror.New("invalid config")
 
 // IsInvalidConfig asserts invalidConfigError.
