@@ -27,7 +27,7 @@ func IsBucketNotFound(err error) bool {
 		return false
 	}
 	// TODO Find constant in the Go SDK for the error code.
-	if aerr.Code() == "NotFound" {
+	if aerr.Code() == "404" {
 		return true
 	}
 
