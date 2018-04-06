@@ -16,12 +16,12 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	stackInputToDelete, err := toStackState(deleteChange)
+	stackStateToDelete, err := toStackState(deleteChange)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	if stackInputToDelete.Status == cloudformation.ResourceStatusUpdateInProgress {
+	if stackStateToDelete.Status == cloudformation.ResourceStatusUpdateInProgress {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "cannot delete CF stacks due to stack state transitioning")
 
 		// TODO control flow via more proper mechanism via something like the
@@ -29,7 +29,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		return microerror.Maskf(deletionMustBeRetriedError, "stack state is transitioning")
 	}
 
-	if stackInputToDelete.Name != "" {
+	if stackStateToDelete.Name != "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting the guest cluster main stack")
 
 		i := &cloudformation.DeleteStackInput{
@@ -45,7 +45,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting the guest cluster main stack")
 	}
 
-	if stackInputToDelete.Name != "" {
+	if stackStateToDelete.Name != "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting the host cluster pre stack")
 
 		i := &cloudformation.DeleteStackInput{
@@ -61,7 +61,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting the host cluster pre stack")
 	}
 
-	if stackInputToDelete.Name != "" {
+	if stackStateToDelete.Name != "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting the host cluster post stack")
 
 		i := &cloudformation.DeleteStackInput{
