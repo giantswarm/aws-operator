@@ -206,18 +206,11 @@ func shouldScale(currentState, desiredState StackState) bool {
 // shouldUpdate determines whether the reconciled guest cluster should be
 // updated. A guest cluster is only allowed to update in the following cases.
 //
-//     The worker count changes (indicates scaling).
-//     The version bundle version changes (indicates updates).
 //     The instance type of master nodes changes (indicates updates).
 //     The instance type of worker nodes changes (indicates updates).
+//     The version bundle version changes (indicates updates).
 //
 func shouldUpdate(currentState, desiredState StackState) bool {
-	// Check scaling related properties.
-	if currentState.WorkerCount != desiredState.WorkerCount {
-		return true
-	}
-
-	// Check updates related properties.
 	if currentState.MasterInstanceType != desiredState.MasterInstanceType {
 		return true
 	}
