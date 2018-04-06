@@ -62,6 +62,20 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
+		masterInstanceResourceName, err := r.service.GetOutputValue(stackOutputs, key.MasterInstanceResourceNameKey)
+		if cloudformationservice.IsOutputNotFound(err) {
+			// Since we are transitioning between versions we will have situations in
+			// which old clusters are updated to new versions and miss the master
+			// instance resource name in the CF stack outputs. We ignore this problem
+			// for now and move on regardless. On the next resync period the output
+			// value will be there, once the cluster got updated.
+			//
+			// TODO remove this condition as soon as all guest clusters in existence
+			// obtain a master instance resource.
+			masterInstanceResourceName = ""
+		} else if err != nil {
+			return StackState{}, microerror.Mask(err)
+		}
 		masterInstanceType, err := r.service.GetOutputValue(stackOutputs, key.MasterInstanceTypeKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
@@ -70,6 +84,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
+
 		workerCount, err := r.service.GetOutputValue(stackOutputs, key.WorkerCountKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
@@ -86,6 +101,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
+
 		versionBundleVersion, err := r.service.GetOutputValue(stackOutputs, key.VersionBundleVersionKey)
 		if cloudformationservice.IsOutputNotFound(err) {
 			// Since we are transitioning between versions we will have situations in
@@ -104,9 +120,10 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		currentState = StackState{
 			Name: stackName,
 
-			MasterImageID:            masterImageID,
-			MasterInstanceType:       masterInstanceType,
-			MasterCloudConfigVersion: masterCloudConfigVersion,
+			MasterImageID:              masterImageID,
+			MasterInstanceResourceName: masterInstanceResourceName,
+			MasterInstanceType:         masterInstanceType,
+			MasterCloudConfigVersion:   masterCloudConfigVersion,
 
 			Status: stackStatus,
 

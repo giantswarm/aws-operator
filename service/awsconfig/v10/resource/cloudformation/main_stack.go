@@ -1,58 +1,15 @@
 package cloudformation
 
 import (
-	"strconv"
-
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/adapter"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v10/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/key"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/templates"
 )
 
-func newMainStack(customObject v1alpha1.AWSConfig) (StackState, error) {
-	stackName := key.MainGuestStackName(customObject)
-	workerCount := key.WorkerCount(customObject)
-
-	var workerInstanceType string
-
-	imageID, err := key.ImageID(customObject)
-	if err != nil {
-		return StackState{}, microerror.Mask(err)
-	}
-
-	// FIXME: the instance type should not depend on the number of workers.
-	// issue: https://github.com/giantswarm/awstpr/issues/47
-	if workerCount > 0 {
-		workerInstanceType = key.WorkerInstanceType(customObject)
-	}
-
-	var masterInstanceType string
-	if len(customObject.Spec.AWS.Masters) > 0 {
-		masterInstanceType = key.MasterInstanceType(customObject)
-	}
-
-	mainCF := StackState{
-		Name: stackName,
-
-		MasterImageID:            imageID,
-		MasterInstanceType:       masterInstanceType,
-		MasterCloudConfigVersion: cloudconfig.MasterCloudConfigVersion,
-
-		WorkerCount:              strconv.Itoa(workerCount),
-		WorkerImageID:            imageID,
-		WorkerInstanceType:       workerInstanceType,
-		WorkerCloudConfigVersion: cloudconfig.WorkerCloudConfigVersion,
-
-		VersionBundleVersion: key.VersionBundleVersion(customObject),
-	}
-
-	return mainCF, nil
-}
-
-func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
+func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig, stackState StackState) (string, error) {
 	hostAccountID, err := adapter.AccountID(*r.hostClients)
 	if err != nil {
 		return "", microerror.Mask(err)
@@ -63,6 +20,21 @@ func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig) (st
 		HostClients:      *r.hostClients,
 		InstallationName: r.installationName,
 		HostAccountID:    hostAccountID,
+		StackState: adapter.StackState{
+			Name: stackState.Name,
+
+			MasterImageID:              stackState.MasterImageID,
+			MasterInstanceResourceName: stackState.MasterInstanceResourceName,
+			MasterInstanceType:         stackState.MasterInstanceType,
+			MasterCloudConfigVersion:   stackState.MasterCloudConfigVersion,
+
+			WorkerCount:              stackState.WorkerCount,
+			WorkerImageID:            stackState.WorkerImageID,
+			WorkerInstanceType:       stackState.WorkerInstanceType,
+			WorkerCloudConfigVersion: stackState.WorkerCloudConfigVersion,
+
+			VersionBundleVersion: stackState.VersionBundleVersion,
+		},
 	}
 	adp, err := adapter.NewGuest(cfg)
 	if err != nil {

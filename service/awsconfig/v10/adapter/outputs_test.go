@@ -16,22 +16,13 @@ func Test_CloudFormation_Adapter_Outputs_MasterCloudConfigVersion(t *testing.T) 
 		{
 			Description: "master CloudConfig version should match the hardcoded value",
 			Config: Config{
-				Clients: Clients{},
-				CustomObject: v1alpha1.AWSConfig{
-					Spec: v1alpha1.AWSConfigSpec{
-						Cluster: v1alpha1.Cluster{
-							ID: "test-cluster",
-						},
-						AWS: v1alpha1.AWSConfigSpecAWS{
-							Region: "eu-west-1",
-							Workers: []v1alpha1.AWSConfigSpecAWSNode{
-								{},
-							},
-						},
-					},
+				Clients:      Clients{},
+				CustomObject: v1alpha1.AWSConfig{},
+				StackState: StackState{
+					MasterCloudConfigVersion: "foo",
 				},
 			},
-			ExpectedMasterCloudConfigVersion: "v_3_2_4",
+			ExpectedMasterCloudConfigVersion: "foo",
 		},
 	}
 
@@ -61,22 +52,13 @@ func Test_CloudFormation_Adapter_Outputs_WorkerCloudConfigVersion(t *testing.T) 
 		{
 			Description: "worker CloudConfig version should match the hardcoded value",
 			Config: Config{
-				Clients: Clients{},
-				CustomObject: v1alpha1.AWSConfig{
-					Spec: v1alpha1.AWSConfigSpec{
-						Cluster: v1alpha1.Cluster{
-							ID: "test-cluster",
-						},
-						AWS: v1alpha1.AWSConfigSpecAWS{
-							Region: "eu-west-1",
-							Workers: []v1alpha1.AWSConfigSpecAWSNode{
-								{},
-							},
-						},
-					},
+				Clients:      Clients{},
+				CustomObject: v1alpha1.AWSConfig{},
+				StackState: StackState{
+					WorkerCloudConfigVersion: "foo",
 				},
 			},
-			ExpectedWorkerCloudConfigVersion: "v_3_2_4",
+			ExpectedWorkerCloudConfigVersion: "foo",
 		},
 	}
 
@@ -106,19 +88,10 @@ func Test_CloudFormation_Adapter_Outputs_WorkerCount(t *testing.T) {
 		{
 			Description: "worker count should match the number of workers within the configured custom object when one worker is given",
 			Config: Config{
-				Clients: Clients{},
-				CustomObject: v1alpha1.AWSConfig{
-					Spec: v1alpha1.AWSConfigSpec{
-						Cluster: v1alpha1.Cluster{
-							ID: "test-cluster",
-						},
-						AWS: v1alpha1.AWSConfigSpecAWS{
-							Region: "eu-west-1",
-							Workers: []v1alpha1.AWSConfigSpecAWSNode{
-								{},
-							},
-						},
-					},
+				Clients:      Clients{},
+				CustomObject: v1alpha1.AWSConfig{},
+				StackState: StackState{
+					WorkerCount: "1",
 				},
 			},
 			ExpectedWorkerCount: "1",
@@ -127,21 +100,10 @@ func Test_CloudFormation_Adapter_Outputs_WorkerCount(t *testing.T) {
 		{
 			Description: "worker count should match the number of workers within the configured custom object when three workers are given",
 			Config: Config{
-				Clients: Clients{},
-				CustomObject: v1alpha1.AWSConfig{
-					Spec: v1alpha1.AWSConfigSpec{
-						Cluster: v1alpha1.Cluster{
-							ID: "test-cluster",
-						},
-						AWS: v1alpha1.AWSConfigSpecAWS{
-							Region: "eu-west-1",
-							Workers: []v1alpha1.AWSConfigSpecAWSNode{
-								{},
-								{},
-								{},
-							},
-						},
-					},
+				Clients:      Clients{},
+				CustomObject: v1alpha1.AWSConfig{},
+				StackState: StackState{
+					WorkerCount: "3",
 				},
 			},
 			ExpectedWorkerCount: "3",

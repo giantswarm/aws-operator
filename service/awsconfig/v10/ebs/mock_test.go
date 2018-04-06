@@ -55,3 +55,7 @@ func (e *EC2ClientMock) DetachVolume(*ec2.DetachVolumeInput) (*ec2.VolumeAttachm
 func (e *EC2ClientMock) StopInstances(*ec2.StopInstancesInput) (*ec2.StopInstancesOutput, error) {
 	return nil, nil
 }
+
+func (e *EC2ClientMock) WaitUntilInstanceStopped(*ec2.DescribeInstancesInput) error {
+	return nil
+}
