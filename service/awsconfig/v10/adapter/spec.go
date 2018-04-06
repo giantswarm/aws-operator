@@ -68,7 +68,7 @@ type Clients struct {
 	ELB            ELBClient
 }
 
-// TODO we copy this because of a curcular import issue with the cloudformation
+// TODO we copy this because of a circular import issue with the cloudformation
 // resource. The way how the resource works with the adapter and how infromation
 // is passed has to be reworked at some point. Just hacking this now to keep
 // going and to keep the changes as minimal as possible.
