@@ -395,6 +395,7 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 			IAM: &adapter.IAMClientMock{},
 			KMS: &adapter.KMSClientMock{},
 		}
+		c.EBS = &EBSServiceMock{}
 		c.HostClients = &adapter.Clients{
 			IAM: &adapter.IAMClientMock{},
 			EC2: &adapter.EC2ClientMock{},
@@ -843,6 +844,7 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 			IAM: &adapter.IAMClientMock{},
 			KMS: &adapter.KMSClientMock{},
 		}
+		c.EBS = &EBSServiceMock{}
 		c.HostClients = &adapter.Clients{
 			IAM: &adapter.IAMClientMock{},
 			EC2: &adapter.EC2ClientMock{},

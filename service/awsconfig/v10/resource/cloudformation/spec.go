@@ -14,9 +14,10 @@ const (
 type StackState struct {
 	Name string
 
-	MasterImageID            string
-	MasterInstanceType       string
-	MasterCloudConfigVersion string
+	MasterImageID              string
+	MasterInstanceType         string
+	MasterInstanceResourceName string
+	MasterCloudConfigVersion   string
 
 	WorkerCount              string
 	WorkerImageID            string
