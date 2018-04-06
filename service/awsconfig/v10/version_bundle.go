@@ -34,6 +34,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Detach EBS volumes before deletion when deleting clusters.",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Opened port 4194 for cAdvisor scraping from host cluster.",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
