@@ -27,7 +27,7 @@ func IsBucketNotFound(err error) bool {
 		return false
 	}
 	// TODO Find constant in the Go SDK for the error code.
-	if aerr.Code() == "404" {
+	if aerr.Code() == s3.ErrCodeNoSuchBucket {
 		return true
 	}
 
