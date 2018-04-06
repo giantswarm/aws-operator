@@ -13,7 +13,7 @@ type Interface interface {
 	DeleteVolume(ctx context.Context, volumeID string) error
 	// DetachVolume detaches an EBS volume. If force is specified data loss may
 	// occur. If shutdown is specified the instance will be stopped first.
-	DetachVolume(ctx context.Context, volumeID string, attachment VolumeAttachment, force bool, shutdown bool) error
+	DetachVolume(ctx context.Context, volumeID string, attachment VolumeAttachment, force bool, shutdown bool, wait bool) error
 	// ListVolumes lists EBS volumes for a guest cluster. If etcdVolume is true
 	// the Etcd volume for the master instance will be returned. If
 	// persistentVolume is true then any Persistent Volumes associated with the
@@ -27,6 +27,7 @@ type EC2Client interface {
 	DescribeVolumes(*ec2.DescribeVolumesInput) (*ec2.DescribeVolumesOutput, error)
 	DetachVolume(*ec2.DetachVolumeInput) (*ec2.VolumeAttachment, error)
 	StopInstances(*ec2.StopInstancesInput) (*ec2.StopInstancesOutput, error)
+	WaitUntilInstanceStopped(*ec2.DescribeInstancesInput) error
 }
 
 // Volume is an EBS volume and its attachments.

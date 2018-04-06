@@ -28,6 +28,13 @@ func IsAlreadyExists(err error) bool {
 	return false
 }
 
+var executionFailedError = microerror.New("execution failed")
+
+// IsExecutionFailedError asserts isExecutionFailedError.
+func IsExecutionFailedError(err error) bool {
+	return microerror.Cause(err) == executionFailedError
+}
+
 var invalidConfigError = microerror.New("invalid config")
 
 // IsInvalidConfig asserts invalidConfigError.

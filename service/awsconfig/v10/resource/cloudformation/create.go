@@ -45,7 +45,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 			return nil
 		} else if ctx.Err() != nil {
-			return microerror.Mask(err)
+			return microerror.Mask(ctx.Err())
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
@@ -92,7 +92,7 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		}
 
 		var mainTemplate string
-		mainTemplate, err := r.getMainGuestTemplateBody(customObject)
+		mainTemplate, err := r.getMainGuestTemplateBody(customObject, desiredStackState)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
