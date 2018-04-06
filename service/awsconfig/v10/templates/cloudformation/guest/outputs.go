@@ -4,8 +4,10 @@ const Outputs = `{{define "outputs"}}
 Outputs:
   MasterImageID:
     Value: {{ .Outputs.Master.ImageID }}
+  MasterInstanceResourceName:
+    Value: {{ .Outputs.Master.Instance.ResourceName }}
   MasterInstanceType:
-    Value: {{ .Outputs.Master.InstanceType }}
+    Value: {{ .Outputs.Master.Instance.Type }}
   MasterCloudConfigVersion:
     Value: {{ .Outputs.Master.CloudConfig.Version }}
   {{ .Outputs.Worker.ASG.Key }}:

@@ -14,6 +14,10 @@ import (
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
+	customObject, err := key.ToCustomObject(obj)
+	if err != nil {
+		return microerror.Mask(err)
+	}
 	updateStackInput, err := toUpdateStackInput(updateChange)
 	if err != nil {
 		return microerror.Mask(err)
@@ -22,7 +26,33 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	if updateStackInput.StackName != nil && *updateStackInput.StackName != "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "updating the guest cluster main stack")
 
-		_, err := r.clients.CloudFormation.UpdateStack(&updateStackInput)
+		// Fetch the etcd volume information.
+		etcdVolume := true
+		persistentVolume := false
+		volumes, err := r.ebs.ListVolumes(customObject, etcdVolume, persistentVolume)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		if len(volumes) != 1 {
+			return microerror.Maskf(executionFailedError, "there must be 1 volume for etcd, got %d", len(volumes))
+		}
+		vol := volumes[0]
+
+		// First shutdown the instances and wait for it to be stopped. Then detach
+		// the etcd volume without forcing.
+		force := false
+		shutdown := true
+		wait := true
+		for _, a := range vol.Attachments {
+			err := r.ebs.DetachVolume(ctx, vol.VolumeID, a, force, shutdown, wait)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+
+		// Once the etcd volume is cleaned up and the master instance is down we can
+		// go ahead to let CloudFormation do its job.
+		_, err = r.clients.CloudFormation.UpdateStack(&updateStackInput)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -52,8 +82,8 @@ func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 	return patch, nil
 }
 
-func (r *Resource) computeUpdateState(customObject v1alpha1.AWSConfig, desiredState StackState) (cloudformation.UpdateStackInput, error) {
-	mainTemplate, err := r.getMainGuestTemplateBody(customObject)
+func (r *Resource) computeUpdateState(customObject v1alpha1.AWSConfig, stackState StackState) (cloudformation.UpdateStackInput, error) {
+	mainTemplate, err := r.getMainGuestTemplateBody(customObject, stackState)
 	if err != nil {
 		return cloudformation.UpdateStackInput{}, microerror.Mask(err)
 	}
@@ -64,7 +94,7 @@ func (r *Resource) computeUpdateState(customObject v1alpha1.AWSConfig, desiredSt
 			// policy).
 			aws.String(namedIAMCapability),
 		},
-		StackName:    aws.String(desiredState.Name),
+		StackName:    aws.String(stackState.Name),
 		TemplateBody: aws.String(mainTemplate),
 	}
 
@@ -76,11 +106,11 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 	if err != nil {
 		return cloudformation.CreateStackInput{}, microerror.Mask(err)
 	}
-	desiredStackState, err := toStackState(desiredState)
+	currentStackState, err := toStackState(currentState)
 	if err != nil {
 		return cloudformation.CreateStackInput{}, microerror.Mask(err)
 	}
-	currentStackState, err := toStackState(currentState)
+	desiredStackState, err := toStackState(desiredState)
 	if err != nil {
 		return cloudformation.CreateStackInput{}, microerror.Mask(err)
 	}
@@ -112,12 +142,17 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 	// is different compared to updates. We can just process scaling any time. We
 	// cannot just process updates at any time and thus have to separate the
 	// management of both primitives. Note that updates also manage scaling at the
-	// same time for more efficiency.
+	// same time for more efficiency. Note that we have to preserve the master
+	// instance resource name when scaling worker nodes to prevent updating the
+	// master node. This is why we set the desired state of the master instance
+	// resource name to the current state below.
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the guest cluster main stack has to be scaled")
 
 		if shouldScale(currentStackState, desiredStackState) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack has to be scaled")
+
+			desiredStackState.MasterInstanceResourceName = currentStackState.MasterInstanceResourceName
 
 			updateState, err := r.computeUpdateState(customObject, desiredStackState)
 			if err != nil {
