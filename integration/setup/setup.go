@@ -65,15 +65,15 @@ func Resources(c *client.AWS, g *framework.Guest, h *framework.Host) error {
 
 	{
 		// TODO configure chart values like for the other operators below.
-		err = h.InstallCertOperator()
+		err = h.InstallStableOperator("cert-operator", "certconfig", template.CertOperatorChartValues)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		err = h.InstallNodeOperator(template.NodeOperatorChartValues)
+		err = h.InstallStableOperator("node-operator", "nodeconfig", template.NodeOperatorChartValues)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		err = h.InstallAwsOperator(template.AWSOperatorChartValues)
+		err = h.InstallBranchOperator("aws-operator", "awsconfig", template.AWSOperatorChartValues)
 		if err != nil {
 			return microerror.Mask(err)
 		}
