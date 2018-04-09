@@ -54,8 +54,8 @@
     "service/s3",
     "service/sts"
   ]
-  revision = "5a33d0a4f5d9c27e6cd10b4c156e85b46c4501d7"
-  version = "v1.13.26"
+  revision = "61ac2e639a3e5f940b62693f2f1db515e4f0325e"
+  version = "v1.13.30"
 
 [[projects]]
   branch = "master"
@@ -849,6 +849,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "99fd92c4ed40f8ebb88dd4fdcc3e87461be7f6f7aff127a48a743ee797e23ddf"
+  inputs-digest = "9dc341d0a96cd0484b15ee659a90f80748fd10c0d00e0618c7664b6c20a9ddcc"
   solver-name = "gps-cdcl"
   solver-version = 1
