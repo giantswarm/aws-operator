@@ -6,8 +6,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v10/key"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/key"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
@@ -23,33 +24,38 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	bucketNames := []string{
-		key.TargetLogBucketName(customObject),
-		key.BucketName(customObject, accountID),
+	bucketState := []BucketState{
+		BucketState{
+			Name:           key.TargetLogBucketName(customObject),
+			IsDeliveryLog:  true,
+			LoggingEnabled: true,
+		},
+		BucketState{
+			Name:           key.BucketName(customObject, accountID),
+			IsDeliveryLog:  false,
+			LoggingEnabled: true,
+		},
 	}
 
-	bucketsState := []BucketState{}
+	currentBucketState := []BucketState{}
 
-	for _, bucketName := range bucketNames {
+	for _, inputBucket := range bucketState {
 		headInput := &s3.HeadBucketInput{
-			Bucket: aws.String(bucketName),
+			Bucket: aws.String(inputBucket.Name),
 		}
 		_, err = r.clients.S3.HeadBucket(headInput)
 		if IsBucketNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find the S3 bucket %q", bucketName))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find the S3 bucket %q", inputBucket.Name))
 		}
 		if err != nil {
 			return []BucketState{}, nil
 		}
 		if err == nil {
-			bucketState := BucketState{
-				Name: bucketName,
-			}
-			bucketsState = append(bucketsState, bucketState)
+			currentBucketState = append(currentBucketState, inputBucket)
 		}
 	}
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "found the S3 buckets")
 
-	return bucketsState, nil
+	return currentBucketState, nil
 }

@@ -2,6 +2,7 @@ package s3bucket
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -17,7 +18,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 
 	for _, bucketInput := range bucketsInput {
 		if bucketInput.Name != "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "deleting S3 bucket")
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting S3 bucket %q", bucketInput.Name))
 
 			// Make sure the bucket is empty.
 			input := &s3.ListObjectsV2Input{
@@ -49,9 +50,9 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 				return microerror.Mask(err)
 			}
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", "deleting S3 bucket: deleted")
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting S3 bucket %q: deleted", bucketInput.Name))
 		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "deleting S3 bucket: already deleted")
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting S3 bucket %q: already deleted", bucketInput.Name))
 		}
 	}
 
