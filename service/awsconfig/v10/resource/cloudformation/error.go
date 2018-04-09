@@ -28,10 +28,17 @@ func IsAlreadyExists(err error) bool {
 	return false
 }
 
+var deletionMustBeRetriedError = microerror.New("deletion must be retried")
+
+// IsDeletionMustBeRetried asserts deletionMustBeRetriedError.
+func IsDeletionMustBeRetried(err error) bool {
+	return microerror.Cause(err) == deletionMustBeRetriedError
+}
+
 var executionFailedError = microerror.New("execution failed")
 
-// IsExecutionFailedError asserts isExecutionFailedError.
-func IsExecutionFailedError(err error) bool {
+// IsExecutionFailed asserts executionFailedError.
+func IsExecutionFailed(err error) bool {
 	return microerror.Cause(err) == executionFailedError
 }
 

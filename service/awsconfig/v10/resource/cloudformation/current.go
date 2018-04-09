@@ -125,6 +125,8 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			MasterInstanceType:         masterInstanceType,
 			MasterCloudConfigVersion:   masterCloudConfigVersion,
 
+			Status: stackStatus,
+
 			WorkerCount:              workerCount,
 			WorkerImageID:            workerImageID,
 			WorkerInstanceType:       workerInstanceType,
