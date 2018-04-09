@@ -23,7 +23,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 	for _, bucketInput := range createBucketsState {
 		if bucketInput.Name != "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "creating S3 bucket '%s'", bucketInput.Name)
+			r.logger.LogCtx(ctx, "level", "debug", "message", "creating S3 bucket %q", bucketInput.Name)
 
 			_, err = r.clients.S3.CreateBucket(&s3.CreateBucketInput{
 				Bucket: aws.String(bucketInput.Name),
@@ -72,9 +72,9 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 				}
 			}
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", "creating S3 bucket '%s': created", bucketInput.Name)
+			r.logger.LogCtx(ctx, "level", "debug", "message", "creating S3 bucket %q: created", bucketInput.Name)
 		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "creating S3 bucket '%s': already created", bucketInput.Name)
+			r.logger.LogCtx(ctx, "level", "debug", "message", "creating S3 bucket %q: already created", bucketInput.Name)
 		}
 	}
 

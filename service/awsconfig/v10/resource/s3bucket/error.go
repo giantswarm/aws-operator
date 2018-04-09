@@ -1,6 +1,8 @@
 package s3bucket
 
 import (
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
@@ -26,8 +28,12 @@ func IsBucketNotFound(err error) bool {
 	if !ok {
 		return false
 	}
-	// TODO Find constant in the Go SDK for the error code.
 	if aerr.Code() == s3.ErrCodeNoSuchBucket {
+		return true
+	}
+	// AWS returns response Not Found with a wrong format, so
+	// for now a hack to detect bucket does not exist
+	if strings.Contains(aerr.Code(), "Not Found") {
 		return true
 	}
 
