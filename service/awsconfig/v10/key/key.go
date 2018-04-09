@@ -306,7 +306,7 @@ func SubnetName(customObject v1alpha1.AWSConfig, suffix string) string {
 }
 
 func TargetLogBucketName(customObject v1alpha1.AWSConfig) string {
-	return fmt.Sprintf("%s-access-logs", ClusterID(customObject))
+	return fmt.Sprintf("%s-g8s-access-logs", ClusterID(customObject))
 }
 
 func ToCustomObject(v interface{}) (v1alpha1.AWSConfig, error) {

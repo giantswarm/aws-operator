@@ -1055,7 +1055,7 @@ func Test_ImageID(t *testing.T) {
 
 func Test_TargetLogBucketName(t *testing.T) {
 	t.Parallel()
-	expectedName := "test-cluster-access-logs"
+	expectedName := "test-cluster-g8s-access-logs"
 
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
