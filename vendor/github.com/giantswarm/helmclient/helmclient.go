@@ -2,7 +2,10 @@ package helmclient
 
 import (
 	"fmt"
+	"log"
+	"time"
 
+	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -50,12 +53,43 @@ func New(config Config) (*Client, error) {
 
 	helmClient := helmclient.NewClient(helmclient.Host(host), helmclient.ConnectTimeout(connectionTimeoutSecs))
 
+	fmt.Printf("created helm client\n")
+	fmt.Printf("pinging tiller\n")
+	operation := func() error {
+		return helmClient.PingTiller()
+	}
+	err = backoff.RetryNotify(operation, newCustomExponentialBackoff(), newNotify())
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+	fmt.Printf("tiller up\n")
+
 	c := &Client{
 		helmClient: helmClient,
 		logger:     config.Logger,
 	}
 
 	return c, nil
+}
+
+func newCustomExponentialBackoff() *backoff.ExponentialBackOff {
+	b := &backoff.ExponentialBackOff{
+		InitialInterval:     backoff.DefaultInitialInterval,
+		RandomizationFactor: backoff.DefaultRandomizationFactor,
+		Multiplier:          backoff.DefaultMultiplier,
+		MaxInterval:         backoff.DefaultMaxInterval,
+		MaxElapsedTime:      60 * time.Second,
+		Clock:               backoff.SystemClock,
+	}
+
+	b.Reset()
+
+	return b
+}
+func newNotify() func(error, time.Duration) {
+	return func(err error, delay time.Duration) {
+		log.Printf("retrying pinging tiller")
+	}
 }
 
 // DeleteRelease uninstalls a chart given its release name.
