@@ -161,7 +161,7 @@
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "00dce95dd9b359cf782f79128961d45239c915e8"
+  revision = "9533d2eea9a3ec851c0c9ddc0b44fe7c6668f8c7"
 
 [[projects]]
   branch = "master"
@@ -246,7 +246,7 @@
     "framework/resource/retryresource",
     "informer"
   ]
-  revision = "39d3fa3b102b4abd7c17a4178aa658ac7765bda6"
+  revision = "c656522a5b6cf0c811f4d4ba408306b49121c298"
 
 [[projects]]
   branch = "master"
@@ -559,7 +559,7 @@
     "prometheus",
     "prometheus/promhttp"
   ]
-  revision = "2f0e84125ddfaac80c0fc5f9917b668760664359"
+  revision = "e11c6ff8170beca9d5fd8b938e71165eeec53ac6"
 
 [[projects]]
   branch = "master"
