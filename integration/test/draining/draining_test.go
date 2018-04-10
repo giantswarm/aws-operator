@@ -12,6 +12,7 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/spf13/afero"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/helm/cmd/helm/installer"
 )
 
 const (
@@ -24,6 +25,18 @@ const (
 
 func Test_Draining(t *testing.T) {
 	var err error
+
+	// Install tiller in the guest cluster.
+	{
+		o := &installer.Options{
+			Namespace: "kube-system",
+		}
+
+		err := installer.Install(g.K8sClient(), o)
+		if err != nil {
+			t.Fatalf("expected %#v got %#v", nil, err)
+		}
+	}
 
 	var newLogger micrologger.Logger
 	{
