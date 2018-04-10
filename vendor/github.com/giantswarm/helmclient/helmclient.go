@@ -46,23 +46,39 @@ func New(config Config) (*Client, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.RestConfig must not be empty", config)
 	}
 
-	host, err := setupConnection(config.K8sClient, config.RestConfig)
-	if err != nil {
-		return nil, microerror.Mask(err)
+	var err error
+
+	var host string
+	{
+		fmt.Printf("setting up helm connection\n")
+		operation := func() error {
+			host, err = setupConnection(config.K8sClient, config.RestConfig)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			return nil
+		}
+		err = backoff.RetryNotify(operation, newCustomExponentialBackoff(), newNotify())
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		fmt.Printf("helm connection up\n")
 	}
 
 	helmClient := helmclient.NewClient(helmclient.Host(host), helmclient.ConnectTimeout(connectionTimeoutSecs))
 
-	fmt.Printf("created helm client\n")
-	fmt.Printf("pinging tiller\n")
-	operation := func() error {
-		return helmClient.PingTiller()
+	{
+		fmt.Printf("created helm client\n")
+		fmt.Printf("pinging tiller\n")
+		operation := func() error {
+			return helmClient.PingTiller()
+		}
+		err = backoff.RetryNotify(operation, newCustomExponentialBackoff(), newNotify())
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		fmt.Printf("tiller up\n")
 	}
-	err = backoff.RetryNotify(operation, newCustomExponentialBackoff(), newNotify())
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-	fmt.Printf("tiller up\n")
 
 	c := &Client{
 		helmClient: helmClient,
