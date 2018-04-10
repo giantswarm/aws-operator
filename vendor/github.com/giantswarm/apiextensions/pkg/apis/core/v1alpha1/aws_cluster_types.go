@@ -59,9 +59,9 @@ type AWSClusterConfigSpec struct {
 }
 
 type AWSClusterConfigSpecGuest struct {
-	Config  ClusterGuestConfig                `json:"config" yaml:"config"`
-	Masters []AWSClusterConfigSpecGuestMaster `json:"masters,omitempty" yaml:"masters,omitempty"`
-	Workers []AWSClusterConfigSpecGuestWorker `json:"workers,omitempty" yaml:"workers,omitempty"`
+	ClusterGuestConfig `json:",inline" yaml:",inline"`
+	Masters            []AWSClusterConfigSpecGuestMaster `json:"masters,omitempty" yaml:"masters,omitempty"`
+	Workers            []AWSClusterConfigSpecGuestWorker `json:"workers,omitempty" yaml:"workers,omitempty"`
 }
 
 type AWSClusterConfigSpecGuestMaster struct {
