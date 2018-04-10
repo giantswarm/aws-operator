@@ -3,9 +3,9 @@ package helmclient
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/giantswarm/microerror"
@@ -37,7 +37,7 @@ func newTunnel(client rest.Interface, config *rest.Config, namespace, podName st
 		Remote:    remote,
 		stopChan:  make(chan struct{}, 1),
 		readyChan: make(chan struct{}, 1),
-		Out:       ioutil.Discard,
+		Out:       os.Stdout,
 	}
 }
 
@@ -56,6 +56,10 @@ func (t *tunnel) forwardPort() error {
 		Name(t.PodName).
 		SubResource("portforward").URL()
 
+	fmt.Printf("\n")
+	fmt.Printf("u: %#v\n", u)
+	fmt.Printf("\n")
+
 	transport, upgrader, err := spdy.RoundTripperFor(t.config)
 	if err != nil {
 		return microerror.Mask(err)
@@ -64,11 +68,17 @@ func (t *tunnel) forwardPort() error {
 
 	local, err := getAvailablePort()
 	if err != nil {
-		return fmt.Errorf("could not find an available port: %s", err)
+		return microerror.Mask(err)
 	}
 	t.Local = local
+	fmt.Printf("\n")
+	fmt.Printf("local: %#v\n", local)
+	fmt.Printf("\n")
 
 	ports := []string{fmt.Sprintf("%d:%d", t.Local, t.Remote)}
+	fmt.Printf("\n")
+	fmt.Printf("ports: %#v\n", ports)
+	fmt.Printf("\n")
 
 	pf, err := portforward.New(dialer, ports, t.stopChan, t.readyChan, t.Out, t.Out)
 	if err != nil {
@@ -82,7 +92,7 @@ func (t *tunnel) forwardPort() error {
 
 	select {
 	case err = <-errChan:
-		return microerror.Mask(fmt.Errorf("forwarding ports: %v", err))
+		return microerror.Mask(err)
 	case <-pf.Ready:
 		return nil
 	}

@@ -152,8 +152,11 @@ func (c *Client) UpdateReleaseFromTarball(releaseName, path string, options ...h
 func setupConnection(client kubernetes.Interface, config *rest.Config) (string, error) {
 	podName, err := getPodName(client, tillerLabelSelector, tillerDefaultNamespace)
 	if err != nil {
-		return "", err
+		return "", microerror.Mask(err)
 	}
+	fmt.Printf("\n")
+	fmt.Printf("podName: %#v\n", podName)
+	fmt.Printf("\n")
 
 	t := newTunnel(client.CoreV1().RESTClient(), config, tillerDefaultNamespace, podName, tillerPort)
 	err = t.forwardPort()
