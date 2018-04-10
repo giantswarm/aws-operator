@@ -47,25 +47,25 @@ jobs:
   e2eTestCurPRDraining:
     environment:
       TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/reboot"
+      TEST_DIR: "integration/test/draining"
     <<: *e2eTest
 
   e2eTestCurMasterDraining:
     environment:
       TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/reboot"
+      TEST_DIR: "integration/test/draining"
     <<: *e2eTest
 
   e2eTestWIPPRDraining:
     environment:
       TESTED_VERSION: "wip"
-      TEST_DIR: "integration/test/reboot"
+      TEST_DIR: "integration/test/draining"
     <<: *e2eTest
 
   e2eTestWIPMasterDraining:
     environment:
       TESTED_VERSION: "wip"
-      TEST_DIR: "integration/test/reboot"
+      TEST_DIR: "integration/test/draining"
     <<: *e2eTest
 
 
