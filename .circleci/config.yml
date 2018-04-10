@@ -44,6 +44,32 @@ jobs:
 
 
 
+  e2eTestCurPRDraining:
+    environment:
+      TESTED_VERSION: "current"
+      TEST_DIR: "integration/test/reboot"
+    <<: *e2eTest
+
+  e2eTestCurMasterDraining:
+    environment:
+      TESTED_VERSION: "current"
+      TEST_DIR: "integration/test/reboot"
+    <<: *e2eTest
+
+  e2eTestWIPPRDraining:
+    environment:
+      TESTED_VERSION: "wip"
+      TEST_DIR: "integration/test/reboot"
+    <<: *e2eTest
+
+  e2eTestWIPMasterDraining:
+    environment:
+      TESTED_VERSION: "wip"
+      TEST_DIR: "integration/test/reboot"
+    <<: *e2eTest
+
+
+
   e2eTestCurPRReboot:
     environment:
       TESTED_VERSION: "current"
@@ -61,7 +87,6 @@ jobs:
       TESTED_VERSION: "wip"
       TEST_DIR: "integration/test/reboot"
     <<: *e2eTest
-
 
   e2eTestWIPMasterReboot:
     environment:
@@ -101,9 +126,7 @@ workflows:
   version: 2
   build_e2e:
     jobs:
-
       - build
-
       - hold:
           type: approval
           filters:
@@ -112,19 +135,35 @@ workflows:
           requires:
           - build
 
+
+
+      - e2eTestCurPRDraining:
+          requires:
+          - hold
+      - e2eTestWIPPRDraining:
+          requires:
+          - hold
+      - e2eTestCurMasterDraining:
+          filters:
+            branches:
+              only: master
+          requires:
+          - build
+      - e2eTestWIPMasterDraining:
+          filters:
+            branches:
+              only: master
+          requires:
+          - build
+
+
+
       - e2eTestCurPRReboot:
           requires:
           - hold
       - e2eTestWIPPRReboot:
           requires:
           - hold
-      - e2eTestCurPRScaling:
-          requires:
-          - hold
-      - e2eTestWIPPRScaling:
-          requires:
-          - hold
-
       - e2eTestCurMasterReboot:
           filters:
             branches:
@@ -137,6 +176,15 @@ workflows:
               only: master
           requires:
           - build
+
+
+
+      - e2eTestCurPRScaling:
+          requires:
+          - hold
+      - e2eTestWIPPRScaling:
+          requires:
+          - hold
       - e2eTestCurMasterScaling:
           filters:
             branches:

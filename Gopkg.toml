@@ -34,12 +34,20 @@
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/apprclient"
+
+[[constraint]]
   branch = "legacy"
   name = "github.com/giantswarm/certs"
 
 [[constraint]]
   branch = "master"
   name = "github.com/giantswarm/e2e-harness"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/helmclient"
 
 [[constraint]]
   branch = "master"
@@ -104,8 +112,6 @@
 [[constraint]]
   name = "k8s.io/client-go"
   version = "kubernetes-1.9.3"
-
-
 
 
 
