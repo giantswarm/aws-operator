@@ -65,6 +65,10 @@ func New(config Config) (*Client, error) {
 		fmt.Printf("helm connection up\n")
 	}
 
+	fmt.Printf("sleeping 20 minutes for inspection\n")
+	time.Sleep(20 * time.Minute)
+	fmt.Printf("finished sleeping\n")
+
 	helmClient := helmclient.NewClient(helmclient.Host(host), helmclient.ConnectTimeout(connectionTimeoutSecs))
 
 	{
@@ -94,7 +98,7 @@ func newCustomExponentialBackoff() *backoff.ExponentialBackOff {
 		RandomizationFactor: backoff.DefaultRandomizationFactor,
 		Multiplier:          backoff.DefaultMultiplier,
 		MaxInterval:         backoff.DefaultMaxInterval,
-		MaxElapsedTime:      60 * time.Second,
+		MaxElapsedTime:      60 * time.Minute,
 		Clock:               backoff.SystemClock,
 	}
 
