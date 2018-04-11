@@ -13,12 +13,13 @@ import (
 
 	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	giantclientset "github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/giantswarm/e2e-harness/pkg/harness"
@@ -36,9 +37,10 @@ type HostConfig struct {
 }
 
 type Host struct {
-	backoff   *backoff.ExponentialBackOff
-	g8sClient *giantclientset.Clientset
-	k8sClient kubernetes.Interface
+	backoff    *backoff.ExponentialBackOff
+	g8sClient  *versioned.Clientset
+	k8sClient  kubernetes.Interface
+	restConfig *rest.Config
 }
 
 func NewHost(c HostConfig) (*Host, error) {
@@ -46,24 +48,25 @@ func NewHost(c HostConfig) (*Host, error) {
 		c.Backoff = newCustomExponentialBackoff()
 	}
 
-	config, err := clientcmd.BuildConfigFromFlags("", harness.DefaultKubeConfig)
+	restConfig, err := clientcmd.BuildConfigFromFlags("", harness.DefaultKubeConfig)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	g8sClient, err := giantclientset.NewForConfig(config)
+	g8sClient, err := versioned.NewForConfig(restConfig)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	k8sClient, err := kubernetes.NewForConfig(config)
+	k8sClient, err := kubernetes.NewForConfig(restConfig)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
 	h := &Host{
-		backoff:   c.Backoff,
-		g8sClient: g8sClient,
-		k8sClient: k8sClient,
+		backoff:    c.Backoff,
+		g8sClient:  g8sClient,
+		k8sClient:  k8sClient,
+		restConfig: restConfig,
 	}
 
 	return h, nil
@@ -99,23 +102,21 @@ func (h *Host) AWSCluster(name string) (*v1alpha1.AWSConfig, error) {
 	return cluster, nil
 }
 
-func (h *Host) DeleteGuestCluster() error {
-	if err := runCmd("kubectl delete awsconfig ${CLUSTER_NAME}"); err != nil {
+func (h *Host) DeleteGuestCluster(name, cr, logEntry string) error {
+	if err := runCmd(fmt.Sprintf("kubectl delete %s ${CLUSTER_NAME}", cr)); err != nil {
 		return microerror.Mask(err)
 	}
 
-	operatorPodName, err := h.PodName("giantswarm", "app=aws-operator")
+	operatorPodName, err := h.PodName("giantswarm", fmt.Sprintf("app=%s", name))
 	if err != nil {
 		return microerror.Mask(err)
 	}
-
-	logEntry := "deleted the guest cluster main stack"
 
 	return h.WaitForPodLog("giantswarm", logEntry, operatorPodName)
 }
 
 func (h *Host) InstallStableOperator(name, cr, values string) error {
-	err := h.installOperator(name, cr, values, ":stable")
+	err := h.InstallOperator(name, cr, values, ":stable")
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -123,14 +124,14 @@ func (h *Host) InstallStableOperator(name, cr, values string) error {
 }
 
 func (h *Host) InstallBranchOperator(name, cr, values string) error {
-	err := h.installOperator(name, cr, values, "@1.0.0-${CIRCLE_SHA1}")
+	err := h.InstallOperator(name, cr, values, "@1.0.0-${CIRCLE_SHA1}")
 	if err != nil {
 		return microerror.Mask(err)
 	}
 	return nil
 }
 
-func (h *Host) installOperator(name, cr, values, version string) error {
+func (h *Host) InstallOperator(name, cr, values, version string) error {
 	chartValuesEnv := os.ExpandEnv(values)
 
 	tmpfile, err := ioutil.TempFile("", name+"-values")
@@ -176,6 +177,11 @@ func (h *Host) InstallCertResource() error {
 	return waitFor(h.secret("default", secretName))
 }
 
+// K8sClient returns the host cluster framework's Kubernetes client.
+func (h *Host) K8sClient() kubernetes.Interface {
+	return h.k8sClient
+}
+
 func (h *Host) PodName(namespace, labelSelector string) (string, error) {
 	pods, err := h.k8sClient.CoreV1().
 		Pods(namespace).
@@ -193,6 +199,11 @@ func (h *Host) PodName(namespace, labelSelector string) (string, error) {
 	}
 	pod := pods.Items[0]
 	return pod.Name, nil
+}
+
+// RestConfig returns the host cluster framework's rest config.
+func (h *Host) RestConfig() *rest.Config {
+	return h.restConfig
 }
 
 func (h *Host) Setup() error {
