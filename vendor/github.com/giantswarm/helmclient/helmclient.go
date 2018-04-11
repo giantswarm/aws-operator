@@ -68,7 +68,7 @@ func New(config Config) (*Client, error) {
 	fmt.Printf("sleeping 30 minutes for inspection\n")
 	ticker := time.NewTicker(5 * time.Minute)
 	go func() {
-		for t := range ticker.C {
+		for range ticker.C {
 			fmt.Printf("still sleeping\n")
 		}
 	}()
