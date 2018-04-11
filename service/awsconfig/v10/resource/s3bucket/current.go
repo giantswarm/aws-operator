@@ -24,35 +24,41 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	bucketState := []BucketState{
-		BucketState{
-			Name:           key.TargetLogBucketName(customObject),
-			IsDeliveryLog:  true,
-			LoggingEnabled: true,
-		},
-		BucketState{
-			Name:           key.BucketName(customObject, accountID),
-			IsDeliveryLog:  false,
-			LoggingEnabled: true,
-		},
+	bucketStateNames := []string{
+		key.TargetLogBucketName(customObject),
+		key.BucketName(customObject, accountID),
 	}
 
-	currentBucketState := []BucketState{}
+	var currentBucketState []BucketState
+	for _, inputBucketName := range bucketStateNames {
+		inputBucket := BucketState{
+			Name: inputBucketName,
+		}
 
-	for _, inputBucket := range bucketState {
 		headInput := &s3.HeadBucketInput{
-			Bucket: aws.String(inputBucket.Name),
+			Bucket: aws.String(inputBucketName),
 		}
 		_, err = r.clients.S3.HeadBucket(headInput)
 		if IsBucketNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find the S3 bucket %q", inputBucket.Name))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find the S3 bucket %q", inputBucketName))
+		} else if err != nil {
+			return nil, err
 		}
+
+		bucketLoggingInput := &s3.GetBucketLoggingInput{
+			Bucket: aws.String(inputBucketName),
+		}
+		bucketLoggingOutput, err := r.clients.S3.GetBucketLogging(bucketLoggingInput)
 		if err != nil {
-			return []BucketState{}, nil
+			return nil, err
 		}
-		if err == nil {
-			currentBucketState = append(currentBucketState, inputBucket)
+		if bucketLoggingOutput.LoggingEnabled != nil {
+			inputBucket.LoggingEnabled = true
+			if *bucketLoggingOutput.LoggingEnabled.TargetBucket == inputBucketName {
+				inputBucket.IsLoggingBucket = true
+			}
 		}
+		currentBucketState = append(currentBucketState, inputBucket)
 	}
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "found the S3 buckets")

@@ -36,6 +36,9 @@ func IsBucketNotFound(err error) bool {
 	if strings.Contains(aerr.Code(), "Not Found") {
 		return true
 	}
+	if microerror.Cause(err) == notFoundError {
+		return true
+	}
 
 	return false
 }

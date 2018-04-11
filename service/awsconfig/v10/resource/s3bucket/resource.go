@@ -88,7 +88,7 @@ func toBucketState(v interface{}) ([]BucketState, error) {
 
 	bucketsState, ok := v.([]BucketState)
 	if !ok {
-		return []BucketState{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", []BucketState{}, v)
+		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", []BucketState{}, v)
 	}
 
 	return bucketsState, nil
