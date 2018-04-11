@@ -65,8 +65,15 @@ func New(config Config) (*Client, error) {
 		fmt.Printf("helm connection up\n")
 	}
 
-	fmt.Printf("sleeping 20 minutes for inspection\n")
-	time.Sleep(20 * time.Minute)
+	fmt.Printf("sleeping 30 minutes for inspection\n")
+	ticker := time.NewTicker(5 * time.Minute)
+	go func() {
+		for t := range ticker.C {
+			fmt.Printf("still sleeping\n")
+		}
+	}()
+	time.Sleep(30 * time.Minute)
+	ticker.Stop()
 	fmt.Printf("finished sleeping\n")
 
 	helmClient := helmclient.NewClient(helmclient.Host(host), helmclient.ConnectTimeout(connectionTimeoutSecs))
