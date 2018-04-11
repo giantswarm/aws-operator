@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
+	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/framework/context/resourcecanceledcontext"
@@ -121,7 +121,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				return microerror.Mask(err)
 			}
 
-			n := v1.NamespaceDefault
+			n := customObject.GetNamespace()
 			o := metav1.GetOptions{}
 
 			_, err = r.g8sClient.CoreV1alpha1().NodeConfigs(n).Get(privateDNS, o)
@@ -146,7 +146,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "start inspection of node configs for the guest cluster")
 
-		n := v1.NamespaceDefault
+		n := v1.NamespaceAll
 		o := metav1.ListOptions{
 			LabelSelector: fmt.Sprintf("%s=%s", key.ClusterIDLabel, key.ClusterID(customObject)),
 		}
@@ -181,7 +181,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 					return microerror.Mask(err)
 				}
 
-				err = r.deleteNodeConfig(ctx, nodeConfig.GetName())
+				err = r.deleteNodeConfig(ctx, nodeConfig)
 				if err != nil {
 					return microerror.Mask(err)
 				}
@@ -219,8 +219,8 @@ func (r *Resource) completeLifecycleHook(ctx context.Context, instanceID, worker
 func (r *Resource) createNodeConfig(ctx context.Context, customObject providerv1alpha1.AWSConfig, instanceID, privateDNS string) error {
 	r.logger.LogCtx(ctx, "level", "debug", "message", "creating node config for guest cluster node")
 
-	n := v1.NamespaceDefault
-	c := &v1alpha1.NodeConfig{
+	n := customObject.GetNamespace()
+	c := &corev1alpha1.NodeConfig{
 		ObjectMeta: metav1.ObjectMeta{
 			Annotations: map[string]string{
 				key.InstanceIDAnnotation: instanceID,
@@ -230,19 +230,19 @@ func (r *Resource) createNodeConfig(ctx context.Context, customObject providerv1
 			},
 			Name: privateDNS,
 		},
-		Spec: v1alpha1.NodeConfigSpec{
-			Guest: v1alpha1.NodeConfigSpecGuest{
-				Cluster: v1alpha1.NodeConfigSpecGuestCluster{
-					API: v1alpha1.NodeConfigSpecGuestClusterAPI{
+		Spec: corev1alpha1.NodeConfigSpec{
+			Guest: corev1alpha1.NodeConfigSpecGuest{
+				Cluster: corev1alpha1.NodeConfigSpecGuestCluster{
+					API: corev1alpha1.NodeConfigSpecGuestClusterAPI{
 						Endpoint: key.ClusterAPIEndpoint(customObject),
 					},
 					ID: key.ClusterID(customObject),
 				},
-				Node: v1alpha1.NodeConfigSpecGuestNode{
+				Node: corev1alpha1.NodeConfigSpecGuestNode{
 					Name: privateDNS,
 				},
 			},
-			VersionBundle: v1alpha1.NodeConfigSpecVersionBundle{
+			VersionBundle: corev1alpha1.NodeConfigSpecVersionBundle{
 				Version: "0.1.0",
 			},
 		},
@@ -258,11 +258,11 @@ func (r *Resource) createNodeConfig(ctx context.Context, customObject providerv1
 	return nil
 }
 
-func (r *Resource) deleteNodeConfig(ctx context.Context, privateDNS string) error {
+func (r *Resource) deleteNodeConfig(ctx context.Context, nodeConfig corev1alpha1.NodeConfig) error {
 	r.logger.LogCtx(ctx, "level", "debug", "message", "deleting node config for guest cluster node")
 
-	n := v1.NamespaceDefault
-	i := privateDNS
+	n := nodeConfig.GetNamespace()
+	i := nodeConfig.GetName()
 	o := &metav1.DeleteOptions{}
 
 	err := r.g8sClient.CoreV1alpha1().NodeConfigs(n).Delete(i, o)
@@ -299,7 +299,7 @@ func (r *Resource) privateDNSForInstance(instanceID string) (string, error) {
 	return privateDNS, nil
 }
 
-func hasFinalStatus(conditions []v1alpha1.NodeConfigStatusCondition) bool {
+func hasFinalStatus(conditions []corev1alpha1.NodeConfigStatusCondition) bool {
 	for _, c := range conditions {
 		if c.Type == "Drained" && c.Status == "True" {
 			return true
