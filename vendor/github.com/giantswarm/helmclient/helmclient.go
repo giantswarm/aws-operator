@@ -166,7 +166,17 @@ func (c *Client) InstallFromTarball(path, ns string, options ...helmclient.Insta
 
 	_, err = c.newHelmClientFromTunnel(t).InstallRelease(path, ns, options...)
 	if err != nil {
-		return microerror.Mask(err)
+		fmt.Printf("failed installing chart from tarball, retrying\n")
+		time.Sleep(time.Second)
+		_, err = c.newHelmClientFromTunnel(t).InstallRelease(path, ns, options...)
+		if err != nil {
+			fmt.Printf("failed installing chart from tarball, retrying\n")
+			time.Sleep(time.Second)
+			_, err = c.newHelmClientFromTunnel(t).InstallRelease(path, ns, options...)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
 	}
 
 	return nil
