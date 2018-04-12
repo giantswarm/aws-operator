@@ -27,8 +27,8 @@
 [[projects]]
   name = "github.com/Masterminds/semver"
   packages = ["."]
-  revision = "8d82589cda2d7b5b9167396841975c4535c9bec6"
-  version = "v1.4.1"
+  revision = "c7af12943936e8c39859482e61f0574c2fd7fc75"
+  version = "v1.4.2"
 
 [[projects]]
   name = "github.com/PuerkitoBio/purell"
@@ -85,8 +85,8 @@
     "service/s3",
     "service/sts"
   ]
-  revision = "a72204b9bf8d48230ee0fe8995613b394c66f2da"
-  version = "v1.13.31"
+  revision = "9b0098a71f6d4d473a26ec8ad3c2feaac6eb1da6"
+  version = "v1.13.32"
 
 [[projects]]
   branch = "master"
@@ -236,13 +236,13 @@
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "9533d2eea9a3ec851c0c9ddc0b44fe7c6668f8c7"
+  revision = "f07ffbbe515a9961c99f0e50f0c4df7902d7f6b4"
 
 [[projects]]
-  branch = "master"
+  branch = "tiller"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
-  revision = "e6c4e7cd8b93d54d29a56e54259be8b68b84f2d7"
+  revision = "e9c8937cb35f343d0cf21d466b744e0fe262f10c"
 
 [[projects]]
   branch = "master"
@@ -258,6 +258,12 @@
     "v_3_2_4"
   ]
   revision = "192e6f02a54d0213babdb5f36dd8a5fcc3d1e9d8"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/giantswarm/k8sportforward"
+  packages = ["."]
+  revision = "323d6e929c88554cdc8ab8586ff5b89b9227ed8e"
 
 [[projects]]
   branch = "master"
@@ -321,7 +327,7 @@
     "framework/resource/retryresource",
     "informer"
   ]
-  revision = "c656522a5b6cf0c811f4d4ba408306b49121c298"
+  revision = "f0764a8b77dad7af9753bda9300f4161c73093d4"
 
 [[projects]]
   branch = "master"
@@ -345,7 +351,7 @@
   branch = "master"
   name = "github.com/giantswarm/versionbundle"
   packages = ["."]
-  revision = "4fac1282be1ff8d3c097a8a6e9e9795a2c41a847"
+  revision = "f1ba953de318d1c02fd88b21e2e9fa127b7beaba"
 
 [[projects]]
   name = "github.com/go-ini/ini"
@@ -487,7 +493,7 @@
     "openstack/utils",
     "pagination"
   ]
-  revision = "760543a1f14f91a19a9ae133321e4f6857de509c"
+  revision = "3c0e6bd2622193314406205c231ca623528832c9"
 
 [[projects]]
   name = "github.com/gorilla/context"
@@ -750,7 +756,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "f70185d77e8278766928032ee1355e3da47e7181"
+  revision = "d6449816ce06963d9d136eee5a56fca5b0616e7e"
 
 [[projects]]
   branch = "master"
@@ -1027,7 +1033,7 @@
     "pkg/features",
     "pkg/util/feature"
   ]
-  revision = "b66f10671f89152b72794ab044cfe3d0f13e1d4e"
+  revision = "9290515fd4fbef686f9226157fd1e4c0f3aef635"
 
 [[projects]]
   name = "k8s.io/client-go"
@@ -1218,7 +1224,7 @@
     "pkg/common",
     "pkg/util/proto"
   ]
-  revision = "cd0308977f05a0de033c0e8ce1860b317e360dca"
+  revision = "f442ecb314a3679150c272e2b9713d8deed5955d"
 
 [[projects]]
   name = "k8s.io/kubernetes"
@@ -1394,6 +1400,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a9e5908c248a80c2a47d4d2edc3cd211c90b8d8b67d4cc435a0218b9cf44c6a6"
+  inputs-digest = "d0504af42dcf1d6551853e0b0c6b40c6e9ae3b40e51f23b8bdd49f7cfaade478"
   solver-name = "gps-cdcl"
   solver-version = 1

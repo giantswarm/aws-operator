@@ -359,3 +359,23 @@ func (h *Host) runningPod(namespace, labelSelector string) func() error {
 		return nil
 	}
 }
+
+func (h *Host) GetPodName(namespace, labelSelector string) (string, error) {
+	o := metav1.ListOptions{
+		LabelSelector: labelSelector,
+	}
+	pods, err := h.k8sClient.CoreV1().Pods(namespace).List(o)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	if len(pods.Items) > 1 {
+		return "", microerror.Mask(tooManyResultsError)
+	}
+	if len(pods.Items) == 0 {
+		return "", microerror.Mask(notFoundError)
+	}
+	pod := pods.Items[0]
+
+	return pod.Name, nil
+}
