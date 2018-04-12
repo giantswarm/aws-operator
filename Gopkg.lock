@@ -119,12 +119,6 @@
   revision = "2a517245443e2473ea3d49024e325c5ddae329c0"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/giantswarm/apprclient"
-  packages = ["."]
-  revision = "941678e89e3d8836ed99687217676cfdc7c711b1"
-
-[[projects]]
   branch = "legacy"
   name = "github.com/giantswarm/certs"
   packages = [
@@ -143,7 +137,7 @@
   revision = "00dce95dd9b359cf782f79128961d45239c915e8"
 
 [[projects]]
-  branch = "master"
+  branch = "v3.2.5-k8s1.10.0"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "v_2_0_2",
@@ -153,9 +147,9 @@
     "v_3_2_1",
     "v_3_2_2",
     "v_3_2_3",
-    "v_3_2_4"
+    "v_3_2_5"
   ]
-  revision = "192e6f02a54d0213babdb5f36dd8a5fcc3d1e9d8"
+  revision = "0b952595ed33135954b2e16c0896e5c4478c79db"
 
 [[projects]]
   branch = "master"
@@ -855,6 +849,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "32b50eeba37bcb0238e4c27e620086517d2a611ffe192a65b7028fe7f13aacbd"
+  inputs-digest = "e4f79a07a1698778b43bac635eeb672d36e12bf0a7f4632c0aa6c88fdda77945"
   solver-name = "gps-cdcl"
   solver-version = 1

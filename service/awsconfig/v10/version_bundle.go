@@ -44,6 +44,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Fixed updating master nodes on all kinds of cluster updates.",
 				Kind:        versionbundle.KindFixed,
 			},
+			{
+				Component:   "kubernetes",
+				Description: "Updated to 1.10.0.",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
@@ -68,7 +73,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "kubernetes",
-				Version: "1.9.5",
+				Version: "1.10.0",
 			},
 			{
 				Name:    "nginx-ingress-controller",
