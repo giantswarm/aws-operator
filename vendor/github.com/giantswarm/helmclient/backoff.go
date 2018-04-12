@@ -11,7 +11,7 @@ func newExponentialBackoff(maxWait time.Duration) *backoff.ExponentialBackOff {
 		InitialInterval:     backoff.DefaultInitialInterval,
 		RandomizationFactor: backoff.DefaultRandomizationFactor,
 		Multiplier:          backoff.DefaultMultiplier,
-		MaxInterval:         backoff.DefaultMaxInterval,
+		MaxInterval:         5 * time.Second,
 		MaxElapsedTime:      maxWait,
 		Clock:               backoff.SystemClock,
 	}

@@ -239,10 +239,10 @@
   revision = "f07ffbbe515a9961c99f0e50f0c4df7902d7f6b4"
 
 [[projects]]
-  branch = "tiller"
+  branch = "master"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
-  revision = "e9c8937cb35f343d0cf21d466b744e0fe262f10c"
+  revision = "a49fbab1673c0f43cda5d930ee2150dcdaa473b6"
 
 [[projects]]
   branch = "master"
@@ -731,8 +731,8 @@
 [[projects]]
   name = "github.com/spf13/pflag"
   packages = ["."]
-  revision = "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
-  version = "v1.0.0"
+  revision = "583c0c0531f06d5278b7d917446061adc344b5cd"
+  version = "v1.0.1"
 
 [[projects]]
   name = "github.com/spf13/viper"
@@ -1400,6 +1400,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d0504af42dcf1d6551853e0b0c6b40c6e9ae3b40e51f23b8bdd49f7cfaade478"
+  inputs-digest = "01705707948738d978ee7dd9f0d6c04e5b51e0b1279149bd074f416795e093b9"
   solver-name = "gps-cdcl"
   solver-version = 1

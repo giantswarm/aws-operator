@@ -173,19 +173,16 @@ func (c *Client) InstallFromTarball(path, ns string, options ...helmclient.Insta
 }
 
 func (c *Client) InstallTiller() error {
-	var name = "tiller"
-	var namespace = "kube-system"
-
 	// Create the service account for tiller so it can pull images and do its do.
 	{
-		n := namespace
+		n := tillerNamespace
 		i := &corev1.ServiceAccount{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: "v1",
 				Kind:       "ServiceAccount",
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Name: name,
+				Name: tillerPodName,
 			},
 		}
 
@@ -205,13 +202,13 @@ func (c *Client) InstallTiller() error {
 				Kind:       "ClusterRoleBinding",
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Name: name,
+				Name: tillerPodName,
 			},
 			Subjects: []rbacv1.Subject{
 				{
 					Kind:      "ServiceAccount",
-					Name:      name,
-					Namespace: namespace,
+					Name:      tillerPodName,
+					Namespace: tillerNamespace,
 				},
 			},
 			RoleRef: rbacv1.RoleRef{
@@ -232,9 +229,9 @@ func (c *Client) InstallTiller() error {
 	// Install the tiller deployment in the guest cluster.
 	{
 		o := &installer.Options{
-			ImageSpec:      "gcr.io/kubernetes-helm/tiller:v2.8.2",
-			Namespace:      namespace,
-			ServiceAccount: name,
+			ImageSpec:      tillerImageSpec,
+			Namespace:      tillerNamespace,
+			ServiceAccount: tillerPodName,
 		}
 
 		err := installer.Install(c.k8sClient, o)
@@ -245,9 +242,13 @@ func (c *Client) InstallTiller() error {
 		}
 	}
 
-	// Wait for tiller to be up and running.
+	// Wait for tiller to be up and running. When verifying to be able to ping
+	// tiller we make sure 3 consecutive pings succeed before assuming everything
+	// is fine.
 	{
 		c.logger.Log("level", "debug", "message", "attempt pinging tiller")
+
+		var i int
 
 		o := func() error {
 			t, err := c.newTunnel()
@@ -258,12 +259,18 @@ func (c *Client) InstallTiller() error {
 
 			err = c.newHelmClientFromTunnel(t).PingTiller()
 			if err != nil {
+				i = 0
 				return microerror.Mask(err)
+			}
+
+			i++
+			if i < 3 {
+				return microerror.Maskf(executionFailedError, "failed pinging tiller")
 			}
 
 			return nil
 		}
-		b := newExponentialBackoff(60 * time.Second)
+		b := newExponentialBackoff(2 * time.Minute)
 		n := func(err error, delay time.Duration) {
 			c.logger.Log("level", "debug", "message", "failed pinging tiller")
 		}
@@ -328,7 +335,7 @@ func (c *Client) newTunnel() (*k8sportforward.Tunnel, error) {
 		return nil, nil
 	}
 
-	podName, err := getPodName(c.k8sClient, tillerLabelSelector, tillerDefaultNamespace)
+	podName, err := getPodName(c.k8sClient, tillerLabelSelector, tillerNamespace)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -348,7 +355,7 @@ func (c *Client) newTunnel() (*k8sportforward.Tunnel, error) {
 	{
 		c := k8sportforward.TunnelConfig{
 			Remote:    tillerPort,
-			Namespace: tillerDefaultNamespace,
+			Namespace: tillerNamespace,
 			PodName:   podName,
 		}
 
@@ -371,10 +378,10 @@ func getPodName(client kubernetes.Interface, labelSelector, namespace string) (s
 	}
 
 	if len(pods.Items) > 1 {
-		return "", microerror.Mask(tooManyResultsError)
+		return "", microerror.Maskf(tooManyResultsError, "%d", len(pods.Items))
 	}
 	if len(pods.Items) == 0 {
-		return "", microerror.Mask(notFoundError)
+		return "", microerror.Maskf(podNotFoundError, "%s", labelSelector)
 	}
 	pod := pods.Items[0]
 

@@ -3,9 +3,11 @@ package helmclient
 import "k8s.io/helm/pkg/helm"
 
 const (
-	tillerPort             = 44134
-	tillerDefaultNamespace = "kube-system"
-	tillerLabelSelector    = "app=helm,name=tiller"
+	tillerNamespace     = "kube-system"
+	tillerImageSpec     = "gcr.io/kubernetes-helm/tiller:v2.8.2"
+	tillerLabelSelector = "app=helm,name=tiller"
+	tillerPodName       = "tiller"
+	tillerPort          = 44134
 )
 
 // Interface describes the methods provided by the helm client.
