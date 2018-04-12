@@ -1,8 +1,6 @@
 package s3bucket
 
 import (
-	"strings"
-
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
@@ -22,21 +20,15 @@ func IsNotFound(err error) bool {
 	return microerror.Cause(err) == notFoundError
 }
 
+var noSuchBucketError = microerror.New("Not Found")
+
 // IsBucketNotFound asserts bucket not found error from upstream's API code.
 func IsBucketNotFound(err error) bool {
 	aerr, ok := err.(awserr.Error)
 	if !ok {
 		return false
 	}
-	if aerr.Code() == s3.ErrCodeNoSuchBucket {
-		return true
-	}
-	// AWS returns response Not Found with a wrong format, so
-	// for now a hack to detect bucket does not exist
-	if strings.Contains(aerr.Code(), "Not Found") {
-		return true
-	}
-	if microerror.Cause(err) == notFoundError {
+	if microerror.Cause(aerr) == noSuchBucketError {
 		return true
 	}
 

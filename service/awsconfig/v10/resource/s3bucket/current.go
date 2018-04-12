@@ -42,7 +42,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		if IsBucketNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find the S3 bucket %q", inputBucketName))
 		} else if err != nil {
-			return nil, err
+			return nil, microerror.Mask(err)
 		}
 
 		bucketLoggingInput := &s3.GetBucketLoggingInput{
@@ -50,7 +50,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		}
 		bucketLoggingOutput, err := r.clients.S3.GetBucketLogging(bucketLoggingInput)
 		if err != nil {
-			return nil, err
+			return nil, microerror.Mask(err)
 		}
 		if bucketLoggingOutput.LoggingEnabled != nil {
 			inputBucket.LoggingEnabled = true
