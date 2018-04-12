@@ -54,8 +54,8 @@
     "service/s3",
     "service/sts"
   ]
-  revision = "5a33d0a4f5d9c27e6cd10b4c156e85b46c4501d7"
-  version = "v1.13.26"
+  revision = "a72204b9bf8d48230ee0fe8995613b394c66f2da"
+  version = "v1.13.31"
 
 [[projects]]
   branch = "master"
@@ -116,7 +116,13 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake"
   ]
-  revision = "bec18e979214981ec96c3dc71daa0b1e68da9e32"
+  revision = "2a517245443e2473ea3d49024e325c5ddae329c0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/giantswarm/apprclient"
+  packages = ["."]
+  revision = "941678e89e3d8836ed99687217676cfdc7c711b1"
 
 [[projects]]
   branch = "legacy"
@@ -134,7 +140,7 @@
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "90e9c85cb720817927c62d2fe7b6214840f3845a"
+  revision = "00dce95dd9b359cf782f79128961d45239c915e8"
 
 [[projects]]
   branch = "master"
@@ -149,7 +155,7 @@
     "v_3_2_3",
     "v_3_2_4"
   ]
-  revision = "0b265afef45fee89d26cdbe37c0b3df568972f8b"
+  revision = "192e6f02a54d0213babdb5f36dd8a5fcc3d1e9d8"
 
 [[projects]]
   branch = "master"
@@ -213,7 +219,7 @@
     "framework/resource/retryresource",
     "informer"
   ]
-  revision = "1428f611909b304d221954fc09ddfbbe68beb3eb"
+  revision = "39d3fa3b102b4abd7c17a4178aa658ac7765bda6"
 
 [[projects]]
   branch = "master"
@@ -237,7 +243,7 @@
   branch = "master"
   name = "github.com/giantswarm/versionbundle"
   packages = ["."]
-  revision = "9d68178349b5a16f2af8c3d2b4a14dcbcd6fb08b"
+  revision = "4fac1282be1ff8d3c097a8a6e9e9795a2c41a847"
 
 [[projects]]
   name = "github.com/go-ini/ini"
@@ -277,19 +283,19 @@
   branch = "master"
   name = "github.com/go-openapi/spec"
   packages = ["."]
-  revision = "9acd88844bc186c3ec7f318cd3d56f1114b4ab99"
+  revision = "370d9e047557906322be8396e77cb0376be6cb96"
 
 [[projects]]
   branch = "master"
   name = "github.com/go-openapi/swag"
   packages = ["."]
-  revision = "ceb469cb0fdf2d792f28d771bc05da6c606f55e5"
+  revision = "811b1089cde9dad18d4d0c2d09fbdbf28dbd27a5"
 
 [[projects]]
   name = "github.com/go-resty/resty"
   packages = ["."]
-  revision = "65798e030a35b911602b4d1d743d6f50ac93b665"
-  version = "v1.3"
+  revision = "f8815663de1e64d57cdd4ee9e2b2fa96977a030e"
+  version = "v1.4"
 
 [[projects]]
   name = "github.com/go-stack/stack"
@@ -391,7 +397,7 @@
     "json/scanner",
     "json/token"
   ]
-  revision = "f40e974e75af4e271d97ce0fc917af5898ae7bda"
+  revision = "ef8a98b0bbce4a65b5aa4c368430a80ddc533168"
 
 [[projects]]
   branch = "master"
@@ -402,8 +408,8 @@
 [[projects]]
   name = "github.com/imdario/mergo"
   packages = ["."]
-  revision = "33882c6bfe701aca0ff1472aa8b4ebd6135a560d"
-  version = "v0.3.3"
+  revision = "9d5f1277e9a8ed20c3684bda8fde67c05628518c"
+  version = "v0.3.4"
 
 [[projects]]
   name = "github.com/inconshreveable/mousetrap"
@@ -511,7 +517,7 @@
     "prometheus",
     "prometheus/promhttp"
   ]
-  revision = "f504d69affe11ec1ccb2e5948127f86878c9fd57"
+  revision = "2f0e84125ddfaac80c0fc5f9917b668760664359"
 
 [[projects]]
   branch = "master"
@@ -538,7 +544,7 @@
     "nfs",
     "xfs"
   ]
-  revision = "780932d4fbbe0e69b84c34c20f5c8d0981e109ea"
+  revision = "8b1c2da0d56deffdbb9e48d4414b4e674bd8083e"
 
 [[projects]]
   name = "github.com/spf13/afero"
@@ -595,7 +601,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "12892e8c234f4fe6f6803f052061de9057903bb2"
+  revision = "beb2a9779c3b677077c41673505f150149fce895"
 
 [[projects]]
   branch = "master"
@@ -608,7 +614,7 @@
     "lex/httplex",
     "publicsuffix"
   ]
-  revision = "b68f30494add4df6bd8ef5e82803f308e7f7c59c"
+  revision = "61147c48b25b599e5b561d2e9c4f3e1ef489ca41"
 
 [[projects]]
   branch = "master"
@@ -623,7 +629,7 @@
     "unix",
     "windows"
   ]
-  revision = "378d26f46672a356c46195c28f61bdb4c0a781dd"
+  revision = "3b87a42e500a6dc65dae1a55d0b641295971163e"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -844,11 +850,11 @@
   branch = "master"
   name = "k8s.io/kube-openapi"
   packages = ["pkg/common"]
-  revision = "50ae88d24ede7b8bad68e23c805b5d3da5c8abaf"
+  revision = "cd0308977f05a0de033c0e8ce1860b317e360dca"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "99fd92c4ed40f8ebb88dd4fdcc3e87461be7f6f7aff127a48a743ee797e23ddf"
+  inputs-digest = "32b50eeba37bcb0238e4c27e620086517d2a611ffe192a65b7028fe7f13aacbd"
   solver-name = "gps-cdcl"
   solver-version = 1

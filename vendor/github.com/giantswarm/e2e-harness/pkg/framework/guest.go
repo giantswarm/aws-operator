@@ -22,15 +22,31 @@ const (
 )
 
 type Guest struct {
-	k8sClient kubernetes.Interface
+	k8sClient  kubernetes.Interface
+	restConfig *rest.Config
 }
 
 func NewGuest() (*Guest, error) {
 	g := &Guest{
-		k8sClient: nil,
+		k8sClient:  nil,
+		restConfig: nil,
 	}
 
 	return g, nil
+}
+
+// K8sClient returns the guest cluster framework's Kubernetes client. The client
+// being returned is properly configured ones Guest.Setup() got executed
+// successfully.
+func (g *Guest) K8sClient() kubernetes.Interface {
+	return g.k8sClient
+}
+
+// RestConfig returns the guest cluster framework's rest config. The config
+// being returned is properly configured ones Guest.Setup() got executed
+// successfully.
+func (g *Guest) RestConfig() *rest.Config {
+	return g.restConfig
 }
 
 // Setup provides a separate initialization step because of the nature of the
@@ -54,6 +70,7 @@ func (g *Guest) Setup() error {
 	}
 
 	var guestK8sClient kubernetes.Interface
+	var guestRestConfig *rest.Config
 	{
 		n := os.ExpandEnv("${CLUSTER_NAME}-api")
 		s, err := hostK8sClient.CoreV1().Secrets("default").Get(n, metav1.GetOptions{})
@@ -61,7 +78,7 @@ func (g *Guest) Setup() error {
 			return microerror.Mask(err)
 		}
 
-		c := &rest.Config{
+		guestRestConfig := &rest.Config{
 			Host: os.ExpandEnv("https://api.${CLUSTER_NAME}.${COMMON_DOMAIN_GUEST}"),
 			TLSClientConfig: rest.TLSClientConfig{
 				CAData:   s.Data["ca"],
@@ -70,13 +87,14 @@ func (g *Guest) Setup() error {
 			},
 		}
 
-		guestK8sClient, err = kubernetes.NewForConfig(c)
+		guestK8sClient, err = kubernetes.NewForConfig(guestRestConfig)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 	}
 
 	g.k8sClient = guestK8sClient
+	g.restConfig = guestRestConfig
 
 	err = g.WaitForGuestReady()
 	if err != nil {

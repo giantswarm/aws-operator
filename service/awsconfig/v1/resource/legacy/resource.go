@@ -1236,26 +1236,26 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 	conn, err := vpcPeeringConection.FindExisting()
 	if err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not find vpc peering connection: '%#v'", err))
-	}
+	} else {
+		// Delete Guest VPC Routes.
+		for _, privateRouteTableName := range cluster.Spec.AWS.VPC.RouteTableNames {
+			privateRouteTable := &awsresources.RouteTable{
+				Name:   privateRouteTableName,
+				VpcID:  cluster.Spec.AWS.VPC.PeerID,
+				Client: hostClients.EC2,
+				Logger: s.logger,
+			}
 
-	// Delete Guest VPC Routes.
-	for _, privateRouteTableName := range cluster.Spec.AWS.VPC.RouteTableNames {
-		privateRouteTable := &awsresources.RouteTable{
-			Name:   privateRouteTableName,
-			VpcID:  cluster.Spec.AWS.VPC.PeerID,
-			Client: hostClients.EC2,
-			Logger: s.logger,
-		}
+			privateRoute := &awsresources.Route{
+				RouteTable:             *privateRouteTable,
+				DestinationCidrBlock:   *conn.RequesterVpcInfo.CidrBlock,
+				VpcPeeringConnectionID: *conn.VpcPeeringConnectionId,
+				AWSEntity:              awsresources.AWSEntity{Clients: hostClients},
+			}
 
-		privateRoute := &awsresources.Route{
-			RouteTable:             *privateRouteTable,
-			DestinationCidrBlock:   *conn.RequesterVpcInfo.CidrBlock,
-			VpcPeeringConnectionID: *conn.VpcPeeringConnectionId,
-			AWSEntity:              awsresources.AWSEntity{Clients: hostClients},
-		}
-
-		if err := privateRoute.Delete(); err != nil {
-			s.logger.Log("error", fmt.Sprintf("could not delete vpc route: '%v'", err))
+			if err := privateRoute.Delete(); err != nil {
+				s.logger.Log("error", fmt.Sprintf("could not delete vpc route: '%v'", err))
+			}
 		}
 	}
 
