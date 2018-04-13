@@ -217,7 +217,6 @@ func (c *Client) InstallFromTarball(path, ns string, options ...helmclient.Insta
 		defer c.closeTunnel(t)
 
 		_, err = c.newHelmClientFromTunnel(t).InstallRelease(path, ns, options...)
-		fmt.Printf("%#v\n", err)
 		if IsReleaseNotFound(err) {
 			return backoff.Permanent(releaseNotFoundError)
 		} else if IsCannotReuseRelease(err) {
