@@ -20,15 +20,20 @@ func IsNotFound(err error) bool {
 	return microerror.Cause(err) == notFoundError
 }
 
-var noSuchBucketError = microerror.New("Not Found")
+var bucketNotFoundError = microerror.New("bucket not found")
 
 // IsBucketNotFound asserts bucket not found error from upstream's API code.
 func IsBucketNotFound(err error) bool {
-	aerr, ok := err.(awserr.Error)
+	c := microerror.Cause(err)
+	aerr, ok := c.(awserr.Error)
 	if !ok {
 		return false
 	}
-	if microerror.Cause(aerr) == noSuchBucketError {
+	// TODO Find constant in the Go SDK for the error code.
+	if aerr.Code() == "NotFound" {
+		return true
+	}
+	if c == bucketNotFoundError {
 		return true
 	}
 
