@@ -42,7 +42,7 @@
   name = "github.com/giantswarm/e2e-harness"
 
 [[constraint]]
-  branch = "hyperkube-1.10.1"
+  branch = "master"
   name = "github.com/giantswarm/k8scloudconfig"
 
 [[constraint]]
