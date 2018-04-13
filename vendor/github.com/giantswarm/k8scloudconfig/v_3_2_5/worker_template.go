@@ -1,4 +1,4 @@
-package v_3_2_4
+package v_3_2_5
 
 const WorkerTemplate = `#cloud-config
 users:
@@ -210,7 +210,7 @@ coreos:
         [Service]
         Environment="DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs {{.Cluster.Docker.Daemon.ExtraArgs}}"
         Environment="DOCKER_OPT_BIP=--bip={{.Cluster.Docker.Daemon.CIDR}}"
-        Environment="DOCKER_OPTS=--live-restore --icc=false --disable-legacy-registry=true --userland-proxy=false"
+        Environment="DOCKER_OPTS=--live-restore --icc=false --userland-proxy=false"
   - name: k8s-setup-network-env.service
     enable: true
     command: start
@@ -246,7 +246,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.9.5"
+      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.10.1"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
@@ -256,7 +256,7 @@ coreos:
       {{ range .Hyperkube.Kubelet.Docker.RunExtraArgs -}}
       {{ . }} \
       {{ end -}}
-      -v /:/rootfs:ro,shared \
+      -v /:/rootfs:ro,rshared \
       -v /sys:/sys:ro \
       -v /dev:/dev:rw \
       -v /var/log:/var/log:rw \
@@ -265,8 +265,8 @@ coreos:
       -v /run/docker.sock:/run/docker.sock:rw \
       -v /usr/lib/os-release:/etc/os-release \
       -v /usr/share/ca-certificates/:/etc/ssl/certs \
-      -v /var/lib/docker/:/var/lib/docker:rw,shared \
-      -v /var/lib/kubelet/:/var/lib/kubelet:rw,shared \
+      -v /var/lib/docker/:/var/lib/docker:rw,rshared \
+      -v /var/lib/kubelet/:/var/lib/kubelet:rw,rshared \
       -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
       -v /etc/cni/net.d/:/etc/cni/net.d/ \
