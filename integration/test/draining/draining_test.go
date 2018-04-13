@@ -1,17 +1,26 @@
 // +build k8srequired
 
-package scaling
+package draining
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"testing"
 	"time"
 
 	"github.com/giantswarm/apprclient"
+	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/helmclient"
+	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/spf13/afero"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/rest"
+
+	"github.com/giantswarm/aws-operator/integration/env"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/key"
 )
 
 const (
@@ -34,6 +43,8 @@ func Test_Draining(t *testing.T) {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
 	}
+
+	newLogger.Log("level", "debug", "message", "initializing clients")
 
 	var apprClient *apprclient.Client
 	{
@@ -71,6 +82,8 @@ func Test_Draining(t *testing.T) {
 		}
 	}
 
+	newLogger.Log("level", "debug", "message", "installing e2e-app for testing")
+
 	// Install the e2e app chart in the guest cluster.
 	{
 		tarballPath, err := apprClient.PullChartTarball(ChartName, ChartChannel)
@@ -84,23 +97,138 @@ func Test_Draining(t *testing.T) {
 		}
 	}
 
+	newLogger.Log("level", "debug", "message", "waiting for 2 pods of the e2e-app to be up")
+
 	// wait for e2e app to be up
 	for {
-		list, err := g.K8sClient().Core().Pods(ChartNamespace).List(metav1.ListOptions{})
+		o := metav1.ListOptions{
+			LabelSelector: "app=e2e-app",
+		}
+		l, err := g.K8sClient().CoreV1().Pods(ChartNamespace).List(o)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
 
-		fmt.Printf("\n")
-		for _, i := range list.Items {
-			fmt.Printf("%#v\n", i)
+		if len(l.Items) != 2 {
+			newLogger.Log("level", "debug", "message", fmt.Sprintf("found %d pods", len(l.Items)))
+			time.Sleep(3 * time.Second)
+			continue
 		}
-		fmt.Printf("\n")
 
-		time.Sleep(60 * time.Second)
+		break
 	}
 
+	newLogger.Log("level", "debug", "message", "continuously requesting e2e-app")
+
 	// continuously request e2e app
+	var failure int
+	var success int
+	done := make(chan struct{}, 1)
+	go func() {
+		for {
+			select {
+			case <-done:
+				return
+			default:
+				tlsConfig, err := rest.TLSConfigFor(g.RestConfig())
+				if err != nil {
+					t.Fatalf("expected %#v got %#v", nil, err)
+				}
+				client := &http.Client{
+					Transport: &http.Transport{
+						TLSClientConfig: tlsConfig,
+					},
+				}
+
+				restClient := g.K8sClient().Discovery().RESTClient()
+				u := restClient.Get().AbsPath("api", "v1", "proxy", "namespaces", "e2e-app", "services", "e2e-app:8000", "proxy").URL()
+				resp, err := client.Get(u.String())
+				if err != nil {
+					t.Fatalf("expected %#v got %#v", nil, err)
+				}
+				defer resp.Body.Close()
+
+				b, err := ioutil.ReadAll(resp.Body)
+				if err != nil {
+					t.Fatalf("expected %#v got %#v", nil, err)
+				}
+
+				var r E2EAppResponse
+				err = json.Unmarshal(b, &r)
+				if err != nil {
+					t.Fatalf("expected %#v got %#v", nil, err)
+				}
+
+				if r.Name != "e2e-app" {
+					failure++
+				} else if r.Source != "https://github.com/giantswarm/e2e-app" {
+					failure++
+				} else {
+					success++
+				}
+
+				time.Sleep(500 * time.Millisecond)
+			}
+		}
+	}()
+
+	newLogger.Log("level", "debug", "message", "scaling down guest cluster worker")
+
 	// scale down guest cluster
+	masterCount, err := numberOfMasters(env.ClusterID())
+	if err != nil {
+		t.Fatalf("expected %#v got %#v", nil, err)
+	}
+	workerCount, err := numberOfWorkers(env.ClusterID())
+	if err != nil {
+		t.Fatalf("expected %#v got %#v", nil, err)
+	}
+	err = removeWorker(env.ClusterID())
+	if err != nil {
+		t.Fatalf("expected %#v got %#v", nil, err)
+	}
+	err = g.WaitForNodesUp(masterCount + workerCount - 1)
+	if err != nil {
+		t.Fatalf("expected %#v got %#v", nil, err)
+	}
+
+	newLogger.Log("level", "debug", "message", "verifying e2e-app availability 10 more seconds")
+	time.Sleep(10 * time.Second)
+	close(done)
+
+	newLogger.Log("level", "debug", "message", "validating test data")
+
+	newLogger.Log("level", "debug", "message", fmt.Sprintf("failure count is %d", failure))
+	newLogger.Log("level", "debug", "message", fmt.Sprintf("success count is %d", success))
+
 	// verify no requests where failing
+	if failure > 0 {
+		t.Fatalf("expected %#v got %#v", "0 failures", failure)
+	}
+}
+
+func numberOfMasters(clusterID string) (int, error) {
+	cluster, err := h.AWSCluster(clusterID)
+	if err != nil {
+		return 0, microerror.Mask(err)
+	}
+
+	return key.MasterCount(*cluster), nil
+}
+
+func numberOfWorkers(clusterID string) (int, error) {
+	cluster, err := h.AWSCluster(clusterID)
+	if err != nil {
+		return 0, microerror.Mask(err)
+	}
+
+	return key.WorkerCount(*cluster), nil
+}
+
+func removeWorker(clusterID string) error {
+	patch := make([]framework.PatchSpec, 1)
+	patch[0].Op = "remove"
+	patch[0].Path = "/spec/aws/workers/1"
+
+	return h.ApplyAWSConfigPatch(patch, clusterID)
 }

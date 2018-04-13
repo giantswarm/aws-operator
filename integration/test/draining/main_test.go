@@ -1,6 +1,6 @@
 // +build k8srequired
 
-package scaling
+package draining
 
 import (
 	"testing"

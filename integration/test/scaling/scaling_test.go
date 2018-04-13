@@ -10,7 +10,7 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/integration/env"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/key"
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/key"
 )
 
 func TestWorkersScaling(t *testing.T) {
