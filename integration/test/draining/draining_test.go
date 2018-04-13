@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"net/url"
 	"testing"
 	"time"
 
@@ -145,14 +146,21 @@ func Test_Draining(t *testing.T) {
 				u := restClient.Get().AbsPath("api", "v1", "proxy", "namespaces", "e2e-app", "services", "e2e-app:8000", "proxy").URL()
 				resp, err := client.Get(u.String())
 				if err != nil {
-					nErr, ok := err.(*net.OpError)
+					uErr, ok := err.(*url.Error)
 					if ok {
-						fmt.Printf("expected %#v got %#v", nil, nErr.Err)
+						nErr, ok := uErr.Err.(*net.OpError)
+						if ok {
+							fmt.Printf("expected %#v got %#v", nil, nErr)
+							fmt.Printf("expected %#v got %#v", nil, nErr.Err)
+						} else {
+							fmt.Printf("expected %#v got %#v", nil, uErr)
+						}
 					} else {
 						fmt.Printf("expected %#v got %#v", nil, err)
 					}
+				} else {
+					defer resp.Body.Close()
 				}
-				defer resp.Body.Close()
 
 				b, err := ioutil.ReadAll(resp.Body)
 				if err != nil {
