@@ -29,8 +29,11 @@ func IsBucketNotFound(err error) bool {
 	if !ok {
 		return false
 	}
-	// TODO Find constant in the Go SDK for the error code.
+	// hack for HeadBucket request that returns a wrong error code
 	if aerr.Code() == "NotFound" {
+		return true
+	}
+	if aerr.Code() == s3.ErrCodeNoSuchBucket {
 		return true
 	}
 	if c == bucketNotFoundError {

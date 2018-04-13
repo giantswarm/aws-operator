@@ -49,7 +49,9 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			Bucket: aws.String(inputBucketName),
 		}
 		bucketLoggingOutput, err := r.clients.S3.GetBucketLogging(bucketLoggingInput)
-		if err != nil {
+		if IsBucketNotFound(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find the S3 bucket logging for %q", inputBucketName))
+		} else if err != nil {
 			return nil, microerror.Mask(err)
 		}
 		if bucketLoggingOutput.LoggingEnabled != nil {
