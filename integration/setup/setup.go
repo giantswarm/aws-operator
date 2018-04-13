@@ -117,10 +117,12 @@ func WrapTestMain(c *client.AWS, g *framework.Guest, h *framework.Host, m *testi
 		v = 1
 	}
 
-	err = g.Setup()
-	if err != nil {
-		log.Printf("%#v\n", err)
-		v = 1
+	if v == 0 {
+		err = g.Setup()
+		if err != nil {
+			log.Printf("%#v\n", err)
+			v = 1
+		}
 	}
 
 	if v == 0 {
