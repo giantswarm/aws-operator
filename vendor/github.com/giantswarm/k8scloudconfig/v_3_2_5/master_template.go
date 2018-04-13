@@ -1,4 +1,4 @@
-package v_3_2_4
+package v_3_2_5
 
 const MasterTemplate = `#cloud-config
 users:
@@ -11,75 +11,6 @@ users:
 {{end}}
 write_files:
 {{ if not .DisableCalico -}}
-- path: /srv/calico-ipip-pinger-ds.yaml
-  owner: root
-  permissions: 644
-  content: |
-    apiVersion: extensions/v1beta1
-    kind: DaemonSet
-    metadata:
-      labels:
-        app: calico-ipip-pinger
-      name: calico-ipip-pinger
-      namespace: kube-system
-    spec:
-      updateStrategy:
-        type: RollingUpdate
-        rollingUpdate:
-          maxUnavailable: 1
-      template:
-        metadata:
-          labels:
-            app: calico-ipip-pinger
-        spec:
-          serviceAccountName: calico-node
-          priorityClassName: critical-pods
-          containers:
-          - name: calico-ipip-pinger
-            image: quay.io/giantswarm/calico-ipip-pinger:c2d40fb9bd4dcd78fd28b897f43b2d9a744ab374
-            imagePullPolicy: Always
-            securityContext:
-              privileged: true
-            env:
-              # The location of the Calico etcd cluster.
-              - name: ETCD_ENDPOINTS
-                valueFrom:
-                  configMapKeyRef:
-                    name: calico-config
-                    key: etcd_endpoints
-              # Location of the CA certificate for etcd.
-              - name: ETCD_CA_CERT_FILE
-                valueFrom:
-                  configMapKeyRef:
-                    name: calico-config
-                    key: etcd_ca
-              # Location of the client key for etcd.
-              - name: ETCD_KEY_FILE
-                valueFrom:
-                  configMapKeyRef:
-                    name: calico-config
-                    key: etcd_key
-              # Location of the client certificate for etcd.
-              - name: ETCD_CERT_FILE
-                valueFrom:
-                  configMapKeyRef:
-                    name: calico-config
-                    key: etcd_cert
-            volumeMounts:
-              # Mount in the etcd TLS secrets.
-              - mountPath: /etc/kubernetes/ssl/etcd
-                name: etcd-certs
-          volumes:
-            # Mount in the etcd TLS secrets.
-            - name: etcd-certs
-              hostPath:
-                path: /etc/kubernetes/ssl/etcd
-          tolerations:
-          - effect: NoSchedule
-            key: node-role.kubernetes.io/master
-            operator: Exists
-          hostNetwork: true
-          restartPolicy: Always
 - path: /srv/calico-kube-controllers-sa.yaml
   owner: root
   permissions: 644
@@ -830,7 +761,7 @@ write_files:
           serviceAccountName: kube-proxy
           containers:
             - name: kube-proxy
-              image: quay.io/giantswarm/hyperkube:v1.9.5
+              image: quay.io/giantswarm/hyperkube:v1.10.1
               command:
               - /hyperkube
               - proxy
@@ -981,7 +912,7 @@ write_files:
             resources:
               requests:
                 cpu: 55m
-                memory: 75Mi
+                memory: 125Mi
             volumeMounts:
             - mountPath: /var/run/dbus/
               name: systemd-volume
@@ -1042,7 +973,7 @@ write_files:
         spec:
           containers:
           - name: kube-state-metrics
-            image: quay.io/giantswarm/kube-state-metrics:v1.0.1
+            image: quay.io/giantswarm/kube-state-metrics:v1.3.1
             args:
               - '--port=10301'
             livenessProbe:
@@ -1654,7 +1585,6 @@ write_files:
       CALICO_FILES="${CALICO_FILES} calico-kube-controllers-sa.yaml"
       CALICO_FILES="${CALICO_FILES} calico-ds.yaml"
       CALICO_FILES="${CALICO_FILES} calico-kube-controllers.yaml"
-      CALICO_FILES="${CALICO_FILES} calico-ipip-pinger-ds.yaml"
 
       for manifest in $CALICO_FILES
       do
@@ -1885,7 +1815,7 @@ write_files:
       priorityClassName: core-pods
       containers:
       - name: k8s-api-server
-        image: quay.io/giantswarm/hyperkube:v1.9.5
+        image: quay.io/giantswarm/hyperkube:v1.10.1
         env:
         - name: HOST_IP
           valueFrom:
@@ -1897,13 +1827,13 @@ write_files:
         {{ range .Hyperkube.Apiserver.Pod.CommandExtraArgs -}}
         - {{ . }}
         {{ end -}}
-        - --allow_privileged=true
-        - --insecure_bind_address=0.0.0.0
+        - --allow-privileged=true
+        - --insecure-bind-address=0.0.0.0
         - --anonymous-auth=false
         - --insecure-port=0
-        - --kubelet_https=true
+        - --kubelet-https=true
         - --kubelet-preferred-address-types=InternalIP
-        - --secure_port={{.Cluster.Kubernetes.API.SecurePort}}
+        - --secure-port={{.Cluster.Kubernetes.API.SecurePort}}
         - --bind-address=$(HOST_IP)
         - --etcd-prefix={{.Cluster.Etcd.Prefix}}
         - --profiling=false
@@ -2007,7 +1937,7 @@ write_files:
       priorityClassName: core-pods
       containers:
       - name: k8s-controller-manager
-        image: quay.io/giantswarm/hyperkube:v1.9.5
+        image: quay.io/giantswarm/hyperkube:v1.10.1
         command:
         - /hyperkube
         - controller-manager
@@ -2080,7 +2010,7 @@ write_files:
       priorityClassName: core-pods
       containers:
       - name: k8s-scheduler
-        image: quay.io/giantswarm/hyperkube:v1.9.5
+        image: quay.io/giantswarm/hyperkube:v1.10.1
         command:
         - /hyperkube
         - scheduler
@@ -2230,7 +2160,7 @@ coreos:
         [Service]
         Environment="DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs {{.Cluster.Docker.Daemon.ExtraArgs}}"
         Environment="DOCKER_OPT_BIP=--bip={{.Cluster.Docker.Daemon.CIDR}}"
-        Environment="DOCKER_OPTS=--live-restore --icc=false --disable-legacy-registry=true --userland-proxy=false"
+        Environment="DOCKER_OPTS=--live-restore --icc=false --userland-proxy=false"
   - name: k8s-setup-network-env.service
     enable: true
     command: start
@@ -2313,8 +2243,7 @@ coreos:
       [Install]
       WantedBy=multi-user.target
   - name: etcd3-defragmentation.service
-    enable: true
-    command: start
+    enable: false
     content: |
       [Unit]
       Description=etcd defragmentation job
@@ -2369,7 +2298,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.9.5"
+      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.10.1"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
@@ -2379,7 +2308,7 @@ coreos:
       {{ range .Hyperkube.Kubelet.Docker.RunExtraArgs -}}
       {{ . }} \
       {{ end -}}
-      -v /:/rootfs:ro,shared \
+      -v /:/rootfs:ro,rshared \
       -v /sys:/sys:ro \
       -v /dev:/dev:rw \
       -v /var/log:/var/log:rw \
@@ -2388,8 +2317,8 @@ coreos:
       -v /run/docker.sock:/run/docker.sock:rw \
       -v /usr/lib/os-release:/etc/os-release \
       -v /usr/share/ca-certificates/:/etc/ssl/certs \
-      -v /var/lib/docker/:/var/lib/docker:rw,shared \
-      -v /var/lib/kubelet/:/var/lib/kubelet:rw,shared \
+      -v /var/lib/docker/:/var/lib/docker:rw,rshared \
+      -v /var/lib/kubelet/:/var/lib/kubelet:rw,rshared \
       -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
       -v /etc/kubernetes/manifests/:/etc/kubernetes/manifests/ \

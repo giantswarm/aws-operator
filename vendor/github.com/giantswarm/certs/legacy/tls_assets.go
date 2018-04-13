@@ -35,6 +35,8 @@ const (
 	APIComponent ClusterComponent = "api"
 	// CalicoComponent is the calico component.
 	CalicoComponent ClusterComponent = "calico"
+	// ClusterOperatorAPIComponent is the cluster-operator api component.
+	ClusterOperatorAPIComponent ClusterComponent = "cluster-operator-api"
 	// EtcdComponent is the etcd cluster component.
 	EtcdComponent ClusterComponent = "etcd"
 	// FlanneldComponent is the flanneld cluster component.
@@ -83,6 +85,12 @@ var ClusterComponents = []ClusterComponent{
 	EtcdComponent,
 	ServiceAccountComponent,
 	WorkerComponent,
+}
+
+// ClusterOperatorComponents is a slice enumerating all the components that
+// are used by cluster-operator.
+var ClusterOperatorComponents = []ClusterComponent{
+	ClusterOperatorAPIComponent,
 }
 
 // MonitoringComponents is a slice enumerating all the components that make up

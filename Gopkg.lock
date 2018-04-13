@@ -227,7 +227,7 @@
     "legacy",
     "legacy/legacytest"
   ]
-  revision = "3fa48af18f832c9fef81b537849d8dd402a68646"
+  revision = "1c16910f3dfec0d23e36d0892698ec50c6fbd6ba"
 
 [[projects]]
   branch = "master"
@@ -255,9 +255,9 @@
     "v_3_2_1",
     "v_3_2_2",
     "v_3_2_3",
-    "v_3_2_4"
+    "v_3_2_5"
   ]
-  revision = "192e6f02a54d0213babdb5f36dd8a5fcc3d1e9d8"
+  revision = "c37ebb33fc8ed9d50fd9a62008708395dfe413fb"
 
 [[projects]]
   branch = "master"
@@ -327,7 +327,7 @@
     "framework/resource/retryresource",
     "informer"
   ]
-  revision = "f0764a8b77dad7af9753bda9300f4161c73093d4"
+  revision = "ab7825b0d283f56220137f4d5c9c7e9b35ed59ac"
 
 [[projects]]
   branch = "master"
@@ -1400,6 +1400,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "01705707948738d978ee7dd9f0d6c04e5b51e0b1279149bd074f416795e093b9"
+  inputs-digest = "490ffdd1a439f880bce754a40c87a6cc6d86e2baa57bd05aa0af29460909b2e0"
   solver-name = "gps-cdcl"
   solver-version = 1
