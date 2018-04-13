@@ -2,6 +2,9 @@ package apprclient
 
 const (
 	httpClientTimeout = 5
+
+	// status returned on a successful request to a CNR server.
+	okStauts = "ok"
 )
 
 // Interface describes the methods provided by the appr client.

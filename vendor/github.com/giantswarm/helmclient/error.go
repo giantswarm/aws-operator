@@ -7,9 +7,28 @@ import (
 )
 
 const (
-	releaseNotFoundErrorPrefix = "No such release:"
-	releaseNotFoundErrorSuffix = "not found"
+	cannotReuseReleaseErrorPrefix = "cannot re-use"
 )
+
+var cannotReuseReleaseError = microerror.New("cannot reuse release")
+
+// IsCannotReuseRelease asserts cannotReuseReleaseError.
+func IsCannotReuseRelease(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	c := microerror.Cause(err)
+
+	if strings.Contains(c.Error(), cannotReuseReleaseErrorPrefix) {
+		return true
+	}
+	if c == cannotReuseReleaseError {
+		return true
+	}
+
+	return false
+}
 
 var executionFailedError = microerror.New("execution failed")
 
@@ -27,10 +46,15 @@ func IsInvalidConfig(err error) bool {
 
 var podNotFoundError = microerror.New("pod not found")
 
-// IsNotFound asserts podNotFoundError.
-func IsNotFound(err error) bool {
+// IsPodNotFound asserts podNotFoundError.
+func IsPodNotFound(err error) bool {
 	return microerror.Cause(err) == podNotFoundError
 }
+
+const (
+	releaseNotFoundErrorPrefix = "No such release:"
+	releaseNotFoundErrorSuffix = "not found"
+)
 
 var releaseNotFoundError = microerror.New("release not found")
 

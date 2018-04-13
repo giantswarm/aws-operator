@@ -25,6 +25,17 @@
 #   unused-packages = true
 
 
+[[constraint]]
+  version = "^1.1.0"
+  name = "github.com/cenkalti/backoff"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/e2e-harness"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/k8sportforward"
 
 [[constraint]]
   branch = "master"

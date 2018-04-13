@@ -17,6 +17,7 @@ import (
 	"k8s.io/helm/cmd/helm/installer"
 	"k8s.io/helm/pkg/chartutil"
 	helmclient "k8s.io/helm/pkg/helm"
+	hapiservices "k8s.io/helm/pkg/proto/hapi/services"
 )
 
 // Config represents the configuration used to create a helm client.
@@ -67,13 +68,28 @@ func New(config Config) (*Client, error) {
 
 // DeleteRelease uninstalls a chart given its release name.
 func (c *Client) DeleteRelease(releaseName string, options ...helmclient.DeleteOption) error {
-	t, err := c.newTunnel()
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	defer c.closeTunnel(t)
+	o := func() error {
+		t, err := c.newTunnel()
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		defer c.closeTunnel(t)
 
-	_, err = c.newHelmClientFromTunnel(t).DeleteRelease(releaseName, options...)
+		_, err = c.newHelmClientFromTunnel(t).DeleteRelease(releaseName, options...)
+		if IsReleaseNotFound(err) {
+			return backoff.Permanent(microerror.Maskf(releaseNotFoundError, releaseName))
+		} else if err != nil {
+			return microerror.Mask(err)
+		}
+
+		return nil
+	}
+	b := newExponentialBackoff(2*time.Minute, backoff.DefaultMaxInterval)
+	n := func(err error, delay time.Duration) {
+		c.logger.Log("level", "debug", "message", "failed deleting release")
+	}
+
+	err := backoff.RetryNotify(o, b, n)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -85,17 +101,35 @@ func (c *Client) DeleteRelease(releaseName string, options ...helmclient.DeleteO
 // values provided when the chart was installed. The releaseName is the name
 // of the Helm Release that is set when the Helm Chart is installed.
 func (c *Client) GetReleaseContent(releaseName string) (*ReleaseContent, error) {
-	t, err := c.newTunnel()
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-	defer c.closeTunnel(t)
+	var err error
 
-	resp, err := c.newHelmClientFromTunnel(t).ReleaseContent(releaseName)
-	if IsReleaseNotFound(err) {
-		return nil, microerror.Maskf(releaseNotFoundError, releaseName)
-	} else if err != nil {
-		return nil, microerror.Mask(err)
+	var resp *hapiservices.GetReleaseContentResponse
+	{
+		o := func() error {
+			t, err := c.newTunnel()
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			defer c.closeTunnel(t)
+
+			resp, err = c.newHelmClientFromTunnel(t).ReleaseContent(releaseName)
+			if IsReleaseNotFound(err) {
+				return backoff.Permanent(microerror.Maskf(releaseNotFoundError, releaseName))
+			} else if err != nil {
+				return microerror.Mask(err)
+			}
+
+			return nil
+		}
+		b := newExponentialBackoff(2*time.Minute, backoff.DefaultMaxInterval)
+		n := func(err error, delay time.Duration) {
+			c.logger.Log("level", "debug", "message", "failed fetching release content")
+		}
+
+		err := backoff.RetryNotify(o, b, n)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
 	// If parameterizable values were passed at release creation time, raw values
@@ -122,18 +156,35 @@ func (c *Client) GetReleaseContent(releaseName string) (*ReleaseContent, error) 
 // The releaseName is the name of the Helm Release that is set when the Helm
 // Chart is installed.
 func (c *Client) GetReleaseHistory(releaseName string) (*ReleaseHistory, error) {
-	t, err := c.newTunnel()
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-	defer c.closeTunnel(t)
+	var resp *hapiservices.GetHistoryResponse
+	{
+		o := func() error {
+			t, err := c.newTunnel()
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			defer c.closeTunnel(t)
 
-	resp, err := c.newHelmClientFromTunnel(t).ReleaseHistory(releaseName, helmclient.WithMaxHistory(1))
-	if IsReleaseNotFound(err) {
-		return nil, microerror.Maskf(releaseNotFoundError, releaseName)
-	} else if err != nil {
-		return nil, microerror.Mask(err)
+			resp, err = c.newHelmClientFromTunnel(t).ReleaseHistory(releaseName, helmclient.WithMaxHistory(1))
+			if IsReleaseNotFound(err) {
+				return backoff.Permanent(microerror.Maskf(releaseNotFoundError, releaseName))
+			} else if err != nil {
+				return microerror.Mask(err)
+			}
+
+			return nil
+		}
+		b := newExponentialBackoff(2*time.Minute, backoff.DefaultMaxInterval)
+		n := func(err error, delay time.Duration) {
+			c.logger.Log("level", "debug", "message", "failed fetching release content")
+		}
+
+		err := backoff.RetryNotify(o, b, n)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
+
 	if len(resp.Releases) > 1 {
 		return nil, microerror.Maskf(tooManyResultsError, "%d releases found, expected 1", len(resp.Releases))
 	}
@@ -158,25 +209,32 @@ func (c *Client) GetReleaseHistory(releaseName string) (*ReleaseHistory, error) 
 
 // InstallFromTarball installs a chart packaged in the given tarball.
 func (c *Client) InstallFromTarball(path, ns string, options ...helmclient.InstallOption) error {
-	t, err := c.newTunnel()
+	o := func() error {
+		t, err := c.newTunnel()
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		defer c.closeTunnel(t)
+
+		_, err = c.newHelmClientFromTunnel(t).InstallRelease(path, ns, options...)
+		if IsReleaseNotFound(err) {
+			return backoff.Permanent(releaseNotFoundError)
+		} else if IsCannotReuseRelease(err) {
+			return backoff.Permanent(cannotReuseReleaseError)
+		} else if err != nil {
+			return microerror.Mask(err)
+		}
+
+		return nil
+	}
+	b := newExponentialBackoff(2*time.Minute, backoff.DefaultMaxInterval)
+	n := func(err error, delay time.Duration) {
+		c.logger.Log("level", "debug", "message", "failed installing from tarball")
+	}
+
+	err := backoff.RetryNotify(o, b, n)
 	if err != nil {
 		return microerror.Mask(err)
-	}
-	defer c.closeTunnel(t)
-
-	_, err = c.newHelmClientFromTunnel(t).InstallRelease(path, ns, options...)
-	if err != nil {
-		fmt.Printf("failed installing chart from tarball, retrying\n")
-		time.Sleep(time.Second)
-		_, err = c.newHelmClientFromTunnel(t).InstallRelease(path, ns, options...)
-		if err != nil {
-			fmt.Printf("failed installing chart from tarball, retrying\n")
-			time.Sleep(time.Second)
-			_, err = c.newHelmClientFromTunnel(t).InstallRelease(path, ns, options...)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-		}
 	}
 
 	return nil
@@ -280,7 +338,7 @@ func (c *Client) InstallTiller() error {
 
 			return nil
 		}
-		b := newExponentialBackoff(2 * time.Minute)
+		b := newExponentialBackoff(2*time.Minute, 5*time.Second)
 		n := func(err error, delay time.Duration) {
 			c.logger.Log("level", "debug", "message", "failed pinging tiller")
 		}
@@ -299,13 +357,28 @@ func (c *Client) InstallTiller() error {
 // UpdateReleaseFromTarball updates the given release using the chart packaged
 // in the tarball.
 func (c *Client) UpdateReleaseFromTarball(releaseName, path string, options ...helmclient.UpdateOption) error {
-	t, err := c.newTunnel()
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	defer c.closeTunnel(t)
+	o := func() error {
+		t, err := c.newTunnel()
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		defer c.closeTunnel(t)
 
-	_, err = c.newHelmClientFromTunnel(t).UpdateRelease(releaseName, path, options...)
+		_, err = c.newHelmClientFromTunnel(t).UpdateRelease(releaseName, path, options...)
+		if IsReleaseNotFound(err) {
+			return backoff.Permanent(microerror.Maskf(releaseNotFoundError, releaseName))
+		} else if err != nil {
+			return microerror.Mask(err)
+		}
+
+		return nil
+	}
+	b := newExponentialBackoff(2*time.Minute, backoff.DefaultMaxInterval)
+	n := func(err error, delay time.Duration) {
+		c.logger.Log("level", "debug", "message", "failed updating release from tarball")
+	}
+
+	err := backoff.RetryNotify(o, b, n)
 	if err != nil {
 		return microerror.Mask(err)
 	}
