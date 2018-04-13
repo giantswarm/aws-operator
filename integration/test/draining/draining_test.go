@@ -28,7 +28,7 @@ const (
 	CNROrganization = "giantswarm"
 	ChartChannel    = "stable"
 	ChartName       = "e2e-app-chart"
-	ChartNamespace  = "default"
+	ChartNamespace  = "e2e-app"
 )
 
 func Test_Draining(t *testing.T) {
