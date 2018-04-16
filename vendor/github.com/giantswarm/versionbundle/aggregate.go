@@ -80,7 +80,10 @@ func NewAggregator(config AggregatorConfig) (*Aggregator, error) {
 }
 
 // Aggregate merges version bundles based on dependencies each version bundle
-// within the given version bundles define for their own components.
+// within the given version bundles define for their own components. Duplicate
+// versions for same bundle name (e.g. in case of different Provider
+// implementations) are removed. To control bundles selected for aggregation,
+// filter them before aggregation.
 func (a *Aggregator) Aggregate(bundles []Bundle) ([][]Bundle, error) {
 	if len(bundles) == 0 {
 		return nil, nil
