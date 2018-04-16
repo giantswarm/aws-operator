@@ -230,13 +230,13 @@
   revision = "1c16910f3dfec0d23e36d0892698ec50c6fbd6ba"
 
 [[projects]]
-  branch = "backoff"
+  branch = "master"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "048ef35ad7f7a6af6a4de35b3f7be04c833d7160"
+  revision = "3c241f9246b8ace74bb320a6774fd7d1461c0ce7"
 
 [[projects]]
   branch = "master"
@@ -493,7 +493,7 @@
     "openstack/utils",
     "pagination"
   ]
-  revision = "917fbee6f29cdb2fc7bddbbdfc5db2ef5a8f4903"
+  revision = "1ad03b8e6d59290f9287ae5217b415f5280afac7"
 
 [[projects]]
   name = "github.com/gorilla/context"
@@ -764,6 +764,7 @@
   packages = [
     "context",
     "context/ctxhttp",
+    "http/httpguts",
     "http2",
     "http2/hpack",
     "idna",
@@ -772,7 +773,7 @@
     "publicsuffix",
     "trace"
   ]
-  revision = "500e7a4f953ddaf55d316b4d3adc516aa0379622"
+  revision = "a35a21de978d84ffc92f010a153705b170b2f9d1"
 
 [[projects]]
   branch = "master"
@@ -784,7 +785,7 @@
     "jws",
     "jwt"
   ]
-  revision = "921ae394b9430ed4fb549668d7b087601bd60a81"
+  revision = "6881fee410a5daf86371371f9ad451b95e168b71"
 
 [[projects]]
   branch = "master"
@@ -799,7 +800,7 @@
     "unix",
     "windows"
   ]
-  revision = "2f57af4873d00d535c5c9028850aa2152e6a5566"
+  revision = "ecfd8b563e1320e7282dccf28ad48ec2c68aaebf"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -1400,6 +1401,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "021bf1da045e8cf198f9ba10e63945553fed290c6448326719e618aa0308a9f1"
+  inputs-digest = "5b393b35e2b0eea4e11b5421b32bb66efae1117d61909114318b04f1c77adede"
   solver-name = "gps-cdcl"
   solver-version = 1

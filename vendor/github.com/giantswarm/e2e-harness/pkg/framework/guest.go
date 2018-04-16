@@ -1,10 +1,7 @@
 package framework
 
 import (
-	"crypto/x509"
-	"fmt"
 	"log"
-	"net/url"
 	"os"
 	"time"
 
@@ -116,7 +113,6 @@ func (g *Guest) WaitForAPIDown() error {
 	o := func() error {
 		_, err := g.k8sClient.CoreV1().Services("default").Get("kubernetes", metav1.GetOptions{})
 		if err != nil {
-			fmt.Printf("%#v\n", err)
 			return nil
 		}
 
@@ -142,19 +138,7 @@ func (g *Guest) WaitForAPIUp() error {
 
 	o := func() error {
 		_, err := g.k8sClient.CoreV1().Services("default").Get("kubernetes", metav1.GetOptions{})
-		// api.ci-wip-f7fa5-6b509.k8s.gauss.eu-central-1.aws.gigantic.io
-		//  Err:x509.HostnameError{Certificate:(*x509.Certificate)(0xc4206cf900), Host:"api.ci-wip-f7fa5-6b509.k8s.gauss.eu-central-1.aws.gigantic.io"}}
 		if err != nil {
-			fmt.Printf("%#v\n", err.Error())
-			uErr, ok := err.(*url.Error)
-			fmt.Printf("%#v\n", uErr.Error())
-			if ok {
-				xErr, ok := uErr.Err.(x509.HostnameError)
-				if ok {
-					fmt.Printf("%#v\n", xErr.Error())
-					fmt.Printf("%#v\n", xErr.Certificate)
-				}
-			}
 			return microerror.Maskf(waitError, "k8s API is still down")
 		}
 
@@ -197,7 +181,6 @@ func (g *Guest) WaitForNodesUp(numberOfNodes int) error {
 	o := func() error {
 		nodes, err := g.k8sClient.CoreV1().Nodes().List(metav1.ListOptions{})
 		if err != nil {
-			fmt.Printf("%#v\n", err)
 			return microerror.Mask(err)
 		}
 
