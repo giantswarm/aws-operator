@@ -66,7 +66,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 				BucketLoggingStatus: &s3.BucketLoggingStatus{
 					LoggingEnabled: &s3.LoggingEnabled{
 						TargetBucket: aws.String(key.TargetLogBucketName(customObject)),
-						TargetPrefix: aws.String(bucketInput.Name),
+						TargetPrefix: aws.String(bucketInput.Name + "/"),
 					},
 				},
 			})
