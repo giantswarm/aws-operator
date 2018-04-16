@@ -2,11 +2,13 @@ package s3bucket
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v10/key"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/key"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
@@ -15,31 +17,89 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "looking for the S3 bucket")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "looking for the S3 buckets")
 
 	accountID, err := r.awsService.GetAccountID()
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	bucketName := key.BucketName(customObject, accountID)
+	bucketStateNames := []string{
+		key.TargetLogBucketName(customObject),
+		key.BucketName(customObject, accountID),
+	}
+
+	var currentBucketState []BucketState
+	for _, inputBucketName := range bucketStateNames {
+		inputBucket := BucketState{
+			Name: inputBucketName,
+		}
+
+		isCreated, err := r.isBucketCreated(ctx, inputBucketName)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		if !isCreated {
+			continue
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("find the S3 bucket %q", inputBucketName))
+
+		lc, err := r.getLoggingConfiguration(ctx, inputBucketName)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		inputBucket.LoggingEnabled = isLoggingEnabled(lc)
+		inputBucket.IsLoggingBucket = isLoggingBucket(inputBucketName, lc)
+
+		currentBucketState = append(currentBucketState, inputBucket)
+	}
+
+	r.logger.LogCtx(ctx, "level", "debug", "message", "found the S3 buckets")
+
+	return currentBucketState, nil
+}
+
+func (r *Resource) isBucketCreated(ctx context.Context, name string) (bool, error) {
 	headInput := &s3.HeadBucketInput{
-		Bucket: aws.String(bucketName),
+		Bucket: aws.String(name),
 	}
-	_, err = r.clients.S3.HeadBucket(headInput)
+	_, err := r.clients.S3.HeadBucket(headInput)
 	if IsBucketNotFound(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the S3 bucket")
-		return BucketState{}, nil
+		return false, nil
+	} else if err != nil {
+		return false, microerror.Mask(err)
 	}
+
+	return true, nil
+}
+
+func (r *Resource) getLoggingConfiguration(ctx context.Context, name string) (*s3.GetBucketLoggingOutput, error) {
+	bucketLoggingInput := &s3.GetBucketLoggingInput{
+		Bucket: aws.String(name),
+	}
+	bucketLoggingOutput, err := r.clients.S3.GetBucketLogging(bucketLoggingInput)
 	if err != nil {
-		return BucketState{}, microerror.Mask(err)
+		return bucketLoggingOutput, microerror.Mask(err)
 	}
 
-	bucketState := BucketState{
-		Name: bucketName,
+	return bucketLoggingOutput, nil
+}
+
+func isLoggingEnabled(lc *s3.GetBucketLoggingOutput) bool {
+	if lc.LoggingEnabled != nil {
+		return true
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "found the S3 bucket")
+	return false
+}
 
-	return bucketState, nil
+func isLoggingBucket(name string, lc *s3.GetBucketLoggingOutput) bool {
+	if lc.LoggingEnabled != nil {
+		if *lc.LoggingEnabled.TargetBucket == name {
+			return true
+		}
+	}
+
+	return false
 }

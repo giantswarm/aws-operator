@@ -1052,3 +1052,20 @@ func Test_ImageID(t *testing.T) {
 		})
 	}
 }
+
+func Test_TargetLogBucketName(t *testing.T) {
+	t.Parallel()
+	expectedName := "test-cluster-g8s-access-logs"
+
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "test-cluster",
+			},
+		},
+	}
+
+	if TargetLogBucketName(customObject) != expectedName {
+		t.Fatalf("Expected target bucket name %s but was %s", expectedName, TargetLogBucketName(customObject))
+	}
+}
