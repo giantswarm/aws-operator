@@ -92,6 +92,7 @@ func Test_Draining(t *testing.T) {
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
+		fmt.Printf("tarballPath: %#v\n", tarballPath)
 
 		err = helmClient.InstallFromTarball(tarballPath, ChartNamespace)
 		if err != nil {
@@ -177,9 +178,9 @@ func Test_Draining(t *testing.T) {
 				fmt.Printf("\n")
 				fmt.Printf("\n")
 				fmt.Printf("\n")
-				fmt.Printf("%s\n", resp.Header)
+				fmt.Printf("%s\n", u.String())
 				fmt.Printf("\n")
-				fmt.Printf("%s\n", resp.StatusCode)
+				fmt.Printf("%d\n", resp.StatusCode)
 				fmt.Printf("\n")
 				fmt.Printf("%s\n", b)
 				fmt.Printf("\n")
@@ -196,10 +197,14 @@ func Test_Draining(t *testing.T) {
 					success++
 				}
 
-				time.Sleep(500 * time.Millisecond)
+				time.Sleep(5000 * time.Millisecond)
 			}
 		}
 	}()
+
+	newLogger.Log("level", "debug", "message", "verifying e2e-app availability 10 more seconds")
+	time.Sleep(1000000000 * time.Second)
+	close(done)
 
 	newLogger.Log("level", "debug", "message", "scaling down guest cluster worker")
 
