@@ -144,7 +144,7 @@ func Test_Draining(t *testing.T) {
 				}
 
 				restClient := g.K8sClient().Discovery().RESTClient()
-				u := restClient.Get().AbsPath("api", "v1", "proxy", "namespaces", "e2e-app", "services", "e2e-app:8000", "proxy").URL()
+				u := restClient.Get().AbsPath("api", "v1", "namespaces", "e2e-app", "services", "e2e-app:8000", "proxy/").URL()
 				resp, err := client.Get(u.String())
 				if err != nil {
 					uErr, ok := err.(*url.Error)
@@ -203,7 +203,7 @@ func Test_Draining(t *testing.T) {
 	}()
 
 	newLogger.Log("level", "debug", "message", "verifying e2e-app availability 10 more seconds")
-	time.Sleep(1000000000 * time.Second)
+	time.Sleep(10 * time.Second)
 	close(done)
 
 	newLogger.Log("level", "debug", "message", "scaling down guest cluster worker")
