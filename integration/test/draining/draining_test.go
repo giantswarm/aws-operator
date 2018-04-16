@@ -216,7 +216,7 @@ func Test_Draining(t *testing.T) {
 		newLogger.Log("level", "debug", "message", fmt.Sprintf("success count is %f", success))
 		newLogger.Log("level", "debug", "message", fmt.Sprintf("ration is %f of failures", percOfFail))
 
-		if percOfFail < 5 {
+		if percOfFail > 5 {
 			t.Fatalf("expected %#v got %#v", "less than 5 percent of failures", fmt.Sprintf("%f of failures", percOfFail))
 		}
 	}
