@@ -15,6 +15,7 @@ import (
 )
 
 type CollectorConfig struct {
+	FilterFunc func(Bundle) bool
 	Logger     micrologger.Logger
 	RestClient *resty.Client
 
@@ -22,6 +23,7 @@ type CollectorConfig struct {
 }
 
 type Collector struct {
+	filterFunc func(Bundle) bool
 	logger     micrologger.Logger
 	restClient *resty.Client
 
@@ -44,6 +46,7 @@ func NewCollector(config CollectorConfig) (*Collector, error) {
 	}
 
 	c := &Collector{
+		filterFunc: config.FilterFunc, // Not required and therefore not validated above.
 		logger:     config.Logger,
 		restClient: config.RestClient,
 
@@ -111,8 +114,23 @@ func (c *Collector) Collect(ctx context.Context) error {
 				return microerror.Mask(err)
 			}
 
-			c.logger.Log("endpoint", e, "level", "debug", "message", fmt.Sprintf("collector found %d version bundles from endpoint", len(r.VersionBundles)))
-			bundles = append(bundles, r.VersionBundles...)
+			var filteredBundles []Bundle
+
+			if c.filterFunc != nil {
+				for _, b := range r.VersionBundles {
+					if c.filterFunc(b) {
+						filteredBundles = append(filteredBundles, b)
+					} else {
+						c.logger.Log("endpoint", e, "level", "debug", "message", fmt.Sprintf("filterFunc rejected: %#v", b))
+					}
+
+				}
+			} else {
+				filteredBundles = r.VersionBundles
+			}
+
+			c.logger.Log("endpoint", e, "level", "debug", "message", fmt.Sprintf("collector found %d version bundles from endpoint. %d filtered out.", len(r.VersionBundles), (len(r.VersionBundles)-len(filteredBundles))))
+			bundles = append(bundles, filteredBundles...)
 		}
 	}
 

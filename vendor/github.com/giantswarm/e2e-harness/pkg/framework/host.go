@@ -162,6 +162,39 @@ func (h *Host) InstallOperator(name, cr, values, version string) error {
 	return nil
 }
 
+func (h *Host) InstallResource(name, values string, conditions ...func() error) error {
+	chartValuesEnv := os.ExpandEnv(values)
+
+	tmpfile, err := ioutil.TempFile("", name+"-values")
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	defer os.Remove(tmpfile.Name())
+
+	if _, err := tmpfile.Write([]byte(chartValuesEnv)); err != nil {
+		return microerror.Mask(err)
+	}
+
+	cmd := fmt.Sprintf("registry install quay.io/giantswarm/%[1]s -- -n %[1]s --values %[2]s", name, tmpfile.Name())
+	operation := func() error {
+		return HelmCmd(cmd)
+	}
+	notify := newNotify(name + " install")
+	err = backoff.RetryNotify(operation, h.backoff, notify)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	for _, c := range conditions {
+		err = waitFor(c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	return nil
+}
+
 func (h *Host) InstallCertResource() error {
 	operation := func() error {
 		return HelmCmd("registry install quay.io/giantswarm/cert-resource-lab-chart:stable -- -n cert-resource-lab --set commonDomain=${COMMON_DOMAIN_GUEST} --set clusterName=${CLUSTER_NAME}")
@@ -358,4 +391,24 @@ func (h *Host) runningPod(namespace, labelSelector string) func() error {
 		}
 		return nil
 	}
+}
+
+func (h *Host) GetPodName(namespace, labelSelector string) (string, error) {
+	o := metav1.ListOptions{
+		LabelSelector: labelSelector,
+	}
+	pods, err := h.k8sClient.CoreV1().Pods(namespace).List(o)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	if len(pods.Items) > 1 {
+		return "", microerror.Mask(tooManyResultsError)
+	}
+	if len(pods.Items) == 0 {
+		return "", microerror.Mask(notFoundError)
+	}
+	pod := pods.Items[0]
+
+	return pod.Name, nil
 }

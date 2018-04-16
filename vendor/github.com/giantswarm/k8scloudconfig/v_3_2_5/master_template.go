@@ -973,7 +973,7 @@ write_files:
         spec:
           containers:
           - name: kube-state-metrics
-            image: quay.io/giantswarm/kube-state-metrics:v1.0.1
+            image: quay.io/giantswarm/kube-state-metrics:v1.3.1
             args:
               - '--port=10301'
             livenessProbe:

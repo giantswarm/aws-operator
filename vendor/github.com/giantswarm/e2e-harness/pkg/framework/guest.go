@@ -78,7 +78,7 @@ func (g *Guest) Setup() error {
 			return microerror.Mask(err)
 		}
 
-		guestRestConfig := &rest.Config{
+		guestRestConfig = &rest.Config{
 			Host: os.ExpandEnv("https://api.${CLUSTER_NAME}.${COMMON_DOMAIN_GUEST}"),
 			TLSClientConfig: rest.TLSClientConfig{
 				CAData:   s.Data["ca"],
