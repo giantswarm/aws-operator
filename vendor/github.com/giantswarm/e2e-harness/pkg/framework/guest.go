@@ -1,6 +1,7 @@
 package framework
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -113,6 +114,7 @@ func (g *Guest) WaitForAPIDown() error {
 	o := func() error {
 		_, err := g.k8sClient.CoreV1().Services("default").Get("kubernetes", metav1.GetOptions{})
 		if err != nil {
+			fmt.Printf("%#v\n", err)
 			return nil
 		}
 
@@ -139,6 +141,7 @@ func (g *Guest) WaitForAPIUp() error {
 	o := func() error {
 		_, err := g.k8sClient.CoreV1().Services("default").Get("kubernetes", metav1.GetOptions{})
 		if err != nil {
+			fmt.Printf("%#v\n", err)
 			return microerror.Maskf(waitError, "k8s API is still down")
 		}
 
@@ -181,6 +184,7 @@ func (g *Guest) WaitForNodesUp(numberOfNodes int) error {
 	o := func() error {
 		nodes, err := g.k8sClient.CoreV1().Nodes().List(metav1.ListOptions{})
 		if err != nil {
+			fmt.Printf("%#v\n", err)
 			return microerror.Mask(err)
 		}
 
