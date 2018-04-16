@@ -36,6 +36,11 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "aws-operator",
+				Description: "Added S3 access logs for cluster buckets.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "aws-operator",
 				Description: "Opened port 4194 for cAdvisor scraping from host cluster.",
 				Kind:        versionbundle.KindChanged,
 			},
