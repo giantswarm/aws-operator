@@ -150,14 +150,16 @@ func Test_Draining(t *testing.T) {
 					if ok {
 						nErr, ok := uErr.Err.(*net.OpError)
 						if ok {
-							fmt.Printf("expected %#v got %#v", nil, nErr)
-							fmt.Printf("expected %#v got %#v", nil, nErr.Err)
+							fmt.Printf("expected %#v got %#v\n", nil, nErr)
+							fmt.Printf("expected %#v got %#v\n", nil, nErr.Err)
 						} else {
-							fmt.Printf("expected %#v got %#v", nil, uErr)
+							fmt.Printf("expected %#v got %#v\n", nil, uErr)
 						}
 					} else {
-						fmt.Printf("expected %#v got %#v", nil, err)
+						fmt.Printf("expected %#v got %#v\n", nil, err)
 					}
+
+					continue
 				} else {
 					defer resp.Body.Close()
 				}
@@ -172,6 +174,19 @@ func Test_Draining(t *testing.T) {
 				if err != nil {
 					fmt.Printf("expected %#v got %#v", nil, err)
 				}
+				fmt.Printf("\n")
+				fmt.Printf("\n")
+				fmt.Printf("\n")
+				fmt.Printf("%s\n", resp.Header)
+				fmt.Printf("\n")
+				fmt.Printf("%s\n", resp.StatusCode)
+				fmt.Printf("\n")
+				fmt.Printf("%s\n", b)
+				fmt.Printf("\n")
+				fmt.Printf("%#v\n", r)
+				fmt.Printf("\n")
+				fmt.Printf("\n")
+				fmt.Printf("\n")
 
 				if r.Name != "e2e-app" {
 					failure++
