@@ -35,35 +35,71 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			Name: inputBucketName,
 		}
 
-		headInput := &s3.HeadBucketInput{
-			Bucket: aws.String(inputBucketName),
-		}
-		_, err = r.clients.S3.HeadBucket(headInput)
-		if IsBucketNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find the S3 bucket %q", inputBucketName))
-		} else if err != nil {
+		isCreated, err := r.isBucketCreated(ctx, inputBucketName)
+		if err != nil {
 			return nil, microerror.Mask(err)
+		}
+		if !isCreated {
+			continue
 		}
 
-		bucketLoggingInput := &s3.GetBucketLoggingInput{
-			Bucket: aws.String(inputBucketName),
-		}
-		bucketLoggingOutput, err := r.clients.S3.GetBucketLogging(bucketLoggingInput)
-		if IsBucketNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find the S3 bucket logging for %q", inputBucketName))
-		} else if err != nil {
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("find the S3 bucket %q", inputBucketName))
+
+		lc, err := r.getLoggingConfiguration(ctx, inputBucketName)
+		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		if bucketLoggingOutput.LoggingEnabled != nil {
-			inputBucket.LoggingEnabled = true
-			if *bucketLoggingOutput.LoggingEnabled.TargetBucket == inputBucketName {
-				inputBucket.IsLoggingBucket = true
-			}
-		}
+		inputBucket.LoggingEnabled = isLoggingEnabled(lc)
+		inputBucket.IsLoggingBucket = isLoggingBucket(inputBucketName, lc)
+
 		currentBucketState = append(currentBucketState, inputBucket)
 	}
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "found the S3 buckets")
 
 	return currentBucketState, nil
+}
+
+func (r *Resource) isBucketCreated(ctx context.Context, name string) (bool, error) {
+	headInput := &s3.HeadBucketInput{
+		Bucket: aws.String(name),
+	}
+	_, err := r.clients.S3.HeadBucket(headInput)
+	if IsBucketNotFound(err) {
+		return false, nil
+	} else if err != nil {
+		return false, microerror.Mask(err)
+	}
+
+	return true, nil
+}
+
+func (r *Resource) getLoggingConfiguration(ctx context.Context, name string) (*s3.GetBucketLoggingOutput, error) {
+	bucketLoggingInput := &s3.GetBucketLoggingInput{
+		Bucket: aws.String(name),
+	}
+	bucketLoggingOutput, err := r.clients.S3.GetBucketLogging(bucketLoggingInput)
+	if err != nil {
+		return bucketLoggingOutput, microerror.Mask(err)
+	}
+
+	return bucketLoggingOutput, nil
+}
+
+func isLoggingEnabled(lc *s3.GetBucketLoggingOutput) bool {
+	if lc.LoggingEnabled != nil {
+		return true
+	}
+
+	return false
+}
+
+func isLoggingBucket(name string, lc *s3.GetBucketLoggingOutput) bool {
+	if lc.LoggingEnabled != nil {
+		if *lc.LoggingEnabled.TargetBucket == name {
+			return true
+		}
+	}
+
+	return false
 }
