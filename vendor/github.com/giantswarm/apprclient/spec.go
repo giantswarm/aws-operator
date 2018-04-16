@@ -3,8 +3,11 @@ package apprclient
 const (
 	httpClientTimeout = 5
 
-	// status returned on a successful request to a CNR server.
+	// okStauts is the status returned on a successful GET request to a CNR server.
 	okStauts = "ok"
+	// deletedStatus is the status returned on a successful DELETE request to a
+	// CNR server.
+	deletedStatus = "deleted"
 )
 
 // Interface describes the methods provided by the appr client.
