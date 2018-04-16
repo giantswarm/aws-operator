@@ -6,9 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net"
 	"net/http"
-	"net/url"
 	"testing"
 	"time"
 
@@ -46,8 +44,6 @@ func Test_Draining(t *testing.T) {
 		}
 	}
 
-	newLogger.Log("level", "debug", "message", "initializing clients")
-
 	var apprClient *apprclient.Client
 	{
 		c := apprclient.Config{
@@ -84,10 +80,10 @@ func Test_Draining(t *testing.T) {
 		}
 	}
 
-	newLogger.Log("level", "debug", "message", "installing e2e-app for testing")
-
 	// Install the e2e app chart in the guest cluster.
 	{
+		newLogger.Log("level", "debug", "message", "installing e2e-app for testing")
+
 		tarballPath, err := apprClient.PullChartTarball(ChartName, ChartChannel)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
@@ -100,10 +96,10 @@ func Test_Draining(t *testing.T) {
 		}
 	}
 
-	newLogger.Log("level", "debug", "message", "waiting for 2 pods of the e2e-app to be up")
-
 	// wait for e2e app to be up
 	for {
+		newLogger.Log("level", "debug", "message", "waiting for 2 pods of the e2e-app to be up")
+
 		o := metav1.ListOptions{
 			LabelSelector: "app=e2e-app",
 		}
@@ -121,123 +117,106 @@ func Test_Draining(t *testing.T) {
 		break
 	}
 
-	newLogger.Log("level", "debug", "message", "continuously requesting e2e-app")
-
 	// continuously request e2e app
 	var failure int
 	var success int
 	done := make(chan struct{}, 1)
-	go func() {
-		for {
-			select {
-			case <-done:
-				return
-			default:
-				tlsConfig, err := rest.TLSConfigFor(g.RestConfig())
-				if err != nil {
-					fmt.Printf("expected %#v got %#v", nil, err)
-				}
-				client := &http.Client{
-					Transport: &http.Transport{
-						TLSClientConfig: tlsConfig,
-					},
-				}
+	{
+		newLogger.Log("level", "debug", "message", "continuously requesting e2e-app")
 
-				restClient := g.K8sClient().Discovery().RESTClient()
-				u := restClient.Get().AbsPath("api", "v1", "namespaces", "e2e-app", "services", "e2e-app:8000", "proxy/").URL()
-				resp, err := client.Get(u.String())
-				if err != nil {
-					uErr, ok := err.(*url.Error)
-					if ok {
-						nErr, ok := uErr.Err.(*net.OpError)
-						if ok {
-							fmt.Printf("expected %#v got %#v\n", nil, nErr)
-							fmt.Printf("expected %#v got %#v\n", nil, nErr.Err)
-						} else {
-							fmt.Printf("expected %#v got %#v\n", nil, uErr)
-						}
-					} else {
-						fmt.Printf("expected %#v got %#v\n", nil, err)
+		go func() {
+			for {
+				time.Sleep(500 * time.Millisecond)
+
+				select {
+				case <-done:
+					return
+				default:
+					tlsConfig, err := rest.TLSConfigFor(g.RestConfig())
+					if err != nil {
+						fmt.Printf("expected %#v got %#v", nil, err)
+						continue
+					}
+					client := &http.Client{
+						Transport: &http.Transport{
+							TLSClientConfig: tlsConfig,
+						},
 					}
 
-					continue
-				} else {
-					defer resp.Body.Close()
-				}
+					restClient := g.K8sClient().Discovery().RESTClient()
+					u := restClient.Get().AbsPath("api", "v1", "namespaces", "e2e-app", "services", "e2e-app:8000", "proxy/").URL()
+					resp, err := client.Get(u.String())
+					if err != nil {
+						fmt.Printf("expected %#v got %#v\n", nil, err)
+						continue
+					} else {
+						defer resp.Body.Close()
+					}
 
-				b, err := ioutil.ReadAll(resp.Body)
-				if err != nil {
-					fmt.Printf("expected %#v got %#v", nil, err)
-				}
+					b, err := ioutil.ReadAll(resp.Body)
+					if err != nil {
+						fmt.Printf("expected %#v got %#v\n", nil, err)
+						continue
+					}
 
-				var r E2EAppResponse
-				err = json.Unmarshal(b, &r)
-				if err != nil {
-					fmt.Printf("expected %#v got %#v", nil, err)
-				}
-				fmt.Printf("\n")
-				fmt.Printf("\n")
-				fmt.Printf("\n")
-				fmt.Printf("%s\n", u.String())
-				fmt.Printf("\n")
-				fmt.Printf("%d\n", resp.StatusCode)
-				fmt.Printf("\n")
-				fmt.Printf("%s\n", b)
-				fmt.Printf("\n")
-				fmt.Printf("%#v\n", r)
-				fmt.Printf("\n")
-				fmt.Printf("\n")
-				fmt.Printf("\n")
+					var r E2EAppResponse
+					err = json.Unmarshal(b, &r)
+					if err != nil {
+						fmt.Printf("expected %#v got %#v\n", nil, err)
+						continue
+					}
 
-				if r.Name != "e2e-app" {
-					failure++
-				} else if r.Source != "https://github.com/giantswarm/e2e-app" {
-					failure++
-				} else {
-					success++
+					if r.Name != "e2e-app" {
+						failure++
+					} else if r.Source != "https://github.com/giantswarm/e2e-app" {
+						failure++
+					} else {
+						success++
+					}
 				}
-
-				time.Sleep(5000 * time.Millisecond)
 			}
+		}()
+	}
+
+	{
+		newLogger.Log("level", "debug", "message", "verifying e2e-app availability 10 more seconds")
+		time.Sleep(10 * time.Second)
+
+		newLogger.Log("level", "debug", "message", "scaling down guest cluster worker")
+
+		// scale down guest cluster
+		masterCount, err := numberOfMasters(env.ClusterID())
+		if err != nil {
+			t.Fatalf("expected %#v got %#v", nil, err)
 		}
-	}()
+		workerCount, err := numberOfWorkers(env.ClusterID())
+		if err != nil {
+			t.Fatalf("expected %#v got %#v", nil, err)
+		}
+		err = removeWorker(env.ClusterID())
+		if err != nil {
+			t.Fatalf("expected %#v got %#v", nil, err)
+		}
+		err = g.WaitForNodesUp(masterCount + workerCount - 1)
+		if err != nil {
+			t.Fatalf("expected %#v got %#v", nil, err)
+		}
 
-	newLogger.Log("level", "debug", "message", "verifying e2e-app availability 10 more seconds")
-	time.Sleep(10 * time.Second)
-	close(done)
-
-	newLogger.Log("level", "debug", "message", "scaling down guest cluster worker")
-
-	// scale down guest cluster
-	masterCount, err := numberOfMasters(env.ClusterID())
-	if err != nil {
-		t.Fatalf("expected %#v got %#v", nil, err)
-	}
-	workerCount, err := numberOfWorkers(env.ClusterID())
-	if err != nil {
-		t.Fatalf("expected %#v got %#v", nil, err)
-	}
-	err = removeWorker(env.ClusterID())
-	if err != nil {
-		t.Fatalf("expected %#v got %#v", nil, err)
-	}
-	err = g.WaitForNodesUp(masterCount + workerCount - 1)
-	if err != nil {
-		t.Fatalf("expected %#v got %#v", nil, err)
+		newLogger.Log("level", "debug", "message", "verifying e2e-app availability 10 more seconds")
+		time.Sleep(10 * time.Second)
+		close(done)
 	}
 
-	newLogger.Log("level", "debug", "message", "verifying e2e-app availability 10 more seconds")
-	time.Sleep(10 * time.Second)
-	close(done)
+	{
+		newLogger.Log("level", "debug", "message", "validating test data")
 
-	newLogger.Log("level", "debug", "message", "validating test data")
+		newLogger.Log("level", "debug", "message", fmt.Sprintf("failure count is %d", failure))
+		newLogger.Log("level", "debug", "message", fmt.Sprintf("success count is %d", success))
 
-	newLogger.Log("level", "debug", "message", fmt.Sprintf("failure count is %d", failure))
-	newLogger.Log("level", "debug", "message", fmt.Sprintf("success count is %d", success))
-
-	// TODO verify no requests where failing
-	if success == 0 {
-		t.Fatalf("expected %#v got %#v", "more than 0 successes", "0")
+		// TODO verify no requests where failing
+		if success == 0 {
+			t.Fatalf("expected %#v got %#v", "more than 0 successes", "0")
+		}
 	}
 }
 
