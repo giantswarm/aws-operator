@@ -160,7 +160,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			for _, nodeConfig := range nodeConfigs.Items {
 				r.logger.LogCtx(ctx, "level", "debug", "message", "inspecting node config for the guest cluster")
 
-				if !nodeConfig.Status.HasFinalStatus() {
+				if !nodeConfig.Status.HasFinalCondition() {
 					r.logger.LogCtx(ctx, "level", "debug", "message", "node config of guest cluster has no final state")
 					continue
 				}
