@@ -5,7 +5,7 @@ const (
 	NodeConfigStatusTypeDrained = "Drained"
 )
 
-func (s NodeConfigStatus) HasFinalConditiion() bool {
+func (s NodeConfigStatus) HasFinalCondition() bool {
 	for _, c := range s.Conditions {
 		if c.Type == NodeConfigStatusTypeDrained && c.Status == NodeConfigStatusStatusTrue {
 			return true
@@ -15,7 +15,7 @@ func (s NodeConfigStatus) HasFinalConditiion() bool {
 	return false
 }
 
-func (s NodeConfigStatus) NewFinalConditiion() NodeConfigStatusCondition {
+func (s NodeConfigStatus) NewFinalCondition() NodeConfigStatusCondition {
 	return NodeConfigStatusCondition{
 		Status: NodeConfigStatusStatusTrue,
 		Type:   NodeConfigStatusTypeDrained,
