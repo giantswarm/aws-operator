@@ -24,7 +24,8 @@ type Config struct {
 	Logger     micrologger.Logger
 
 	// Settings.
-	InstallationName string
+	InstallationName     string
+	AccessLogsExpiration int
 }
 
 // DefaultConfig provides a default configuration to create a new s3bucket
@@ -46,7 +47,8 @@ type Resource struct {
 	logger     micrologger.Logger
 
 	// Settings.
-	installationName string
+	installationName     string
+	AccessLogsExpiration int
 }
 
 // New creates a new configured s3bucket resource.
@@ -63,6 +65,9 @@ func New(config Config) (*Resource, error) {
 	if config.InstallationName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
 	}
+	if config.AccessLogsExpiration < 0 {
+		return nil, microerror.Maskf(invalidConfigError, "%T.AccessLogsExpiration must not be lower than 0", config)
+	}
 
 	newResource := &Resource{
 		// Dependencies.
@@ -71,7 +76,8 @@ func New(config Config) (*Resource, error) {
 		logger:     config.Logger,
 
 		// Settings.
-		installationName: config.InstallationName,
+		installationName:     config.InstallationName,
+		accessLogsExpiration: config.AccessLogsExpiration,
 	}
 
 	return newResource, nil

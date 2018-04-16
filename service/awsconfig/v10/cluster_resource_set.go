@@ -44,10 +44,11 @@ type ClusterResourceSetConfig struct {
 	Logger             micrologger.Logger
 	RandomkeysSearcher randomkeys.Interface
 
-	GuestUpdateEnabled bool
-	InstallationName   string
-	OIDC               cloudconfig.OIDCConfig
-	ProjectName        string
+	GuestUpdateEnabled   bool
+	InstallationName     string
+	AccessLogsExpiration int
+	OIDC                 cloudconfig.OIDCConfig
+	ProjectName          string
 }
 
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.ResourceSet, error) {
@@ -98,6 +99,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 	}
 	if config.ProjectName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.ProjectName must not be empty")
+	}
+	if config.AccessLogsExpiration == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.AccessLogsExpiration must not be empty")
 	}
 
 	var awsService *awsservice.Service
@@ -186,7 +190,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 			},
 			Logger: config.Logger,
 
-			InstallationName: config.InstallationName,
+			InstallationName:     config.InstallationName,
+			AccessLogsExpiration: config.AccessLogsExpiration,
 		}
 
 		ops, err := s3bucket.New(c)
