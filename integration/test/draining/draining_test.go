@@ -118,15 +118,15 @@ func Test_Draining(t *testing.T) {
 	}
 
 	// continuously request e2e app
-	var failure int
-	var success int
+	var failure float64
+	var success float64
 	done := make(chan struct{}, 1)
 	{
 		newLogger.Log("level", "debug", "message", "continuously requesting e2e-app")
 
 		go func() {
 			for {
-				time.Sleep(500 * time.Millisecond)
+				time.Sleep(200 * time.Millisecond)
 
 				select {
 				case <-done:
@@ -210,12 +210,14 @@ func Test_Draining(t *testing.T) {
 	{
 		newLogger.Log("level", "debug", "message", "validating test data")
 
-		newLogger.Log("level", "debug", "message", fmt.Sprintf("failure count is %d", failure))
-		newLogger.Log("level", "debug", "message", fmt.Sprintf("success count is %d", success))
+		percOfFail := failure * 100 / success
 
-		// TODO verify no requests where failing
-		if success == 0 {
-			t.Fatalf("expected %#v got %#v", "more than 0 successes", "0")
+		newLogger.Log("level", "debug", "message", fmt.Sprintf("failure count is %f", failure))
+		newLogger.Log("level", "debug", "message", fmt.Sprintf("success count is %f", success))
+		newLogger.Log("level", "debug", "message", fmt.Sprintf("ration is %f of failures", percOfFail))
+
+		if percOfFail < 5 {
+			t.Fatalf("expected %#v got %#v", "less than 5 percent of failures", fmt.Sprintf("%f of failures", percOfFail))
 		}
 	}
 }
