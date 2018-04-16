@@ -160,7 +160,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			for _, nodeConfig := range nodeConfigs.Items {
 				r.logger.LogCtx(ctx, "level", "debug", "message", "inspecting node config for the guest cluster")
 
-				if !hasFinalStatus(nodeConfig.Status.Conditions) {
+				if !nodeConfig.Status.HasFinalCondition() {
 					r.logger.LogCtx(ctx, "level", "debug", "message", "node config of guest cluster has no final state")
 					continue
 				}
@@ -297,16 +297,6 @@ func (r *Resource) privateDNSForInstance(instanceID string) (string, error) {
 	privateDNS := *o.Reservations[0].Instances[0].PrivateDnsName
 
 	return privateDNS, nil
-}
-
-func hasFinalStatus(conditions []corev1alpha1.NodeConfigStatusCondition) bool {
-	for _, c := range conditions {
-		if c.Type == "Drained" && c.Status == "True" {
-			return true
-		}
-	}
-
-	return false
 }
 
 func instanceIDFromAnnotations(annotations map[string]string) (string, error) {
