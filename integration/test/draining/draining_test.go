@@ -31,6 +31,14 @@ const (
 	ChartNamespace  = "e2e-app"
 )
 
+// Test_Draining launches the e2e-app in a guest cluster and requests it
+// continuously to verify its availability while scaling down a guest cluster
+// node.
+//
+// TODO bring down the failure tolerance to 0. Right now we accept 10% of failed
+// requests against the e2e-app while a node draining happens. This has to be
+// investigated further in the future.
+//
 func Test_Draining(t *testing.T) {
 	var err error
 
