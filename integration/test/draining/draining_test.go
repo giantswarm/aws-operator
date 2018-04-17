@@ -210,14 +210,15 @@ func Test_Draining(t *testing.T) {
 	{
 		newLogger.Log("level", "debug", "message", "validating test data")
 
+		acceptable = 10
 		percOfFail := failure * 100 / success
 
 		newLogger.Log("level", "debug", "message", fmt.Sprintf("failure count is %f", failure))
 		newLogger.Log("level", "debug", "message", fmt.Sprintf("success count is %f", success))
 		newLogger.Log("level", "debug", "message", fmt.Sprintf("ration is %f of failures", percOfFail))
 
-		if percOfFail > 5 {
-			t.Fatalf("expected %#v got %#v", "less than 5 percent of failures", fmt.Sprintf("%f of failures", percOfFail))
+		if percOfFail > acceptable {
+			t.Fatalf("expected %#v got %#v", fmt.Sprintf("less than %d percent of failures", acceptable), fmt.Sprintf("%f of failures", percOfFail))
 		}
 	}
 }
