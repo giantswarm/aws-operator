@@ -160,6 +160,11 @@ func WrapTestMain(c *client.AWS, g *framework.Guest, h *framework.Host, m *testi
 
 func installAWSResource() error {
 	o := func() error {
+		// NOTE we ignore errors here because we cannot get really useful error
+		// handling done. This here should anyway only be a quick fix until we use
+		// the helm client lib. Then error handling will be better.
+		framework.HelmCmd("delete --purge aws-resource-lab")
+
 		awsResourceChartValuesEnv := os.ExpandEnv(template.AWSResourceChartValues)
 		d := []byte(awsResourceChartValuesEnv)
 
