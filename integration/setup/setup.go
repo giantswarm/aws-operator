@@ -7,9 +7,11 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/microerror"
 
@@ -157,15 +159,28 @@ func WrapTestMain(c *client.AWS, g *framework.Guest, h *framework.Host, m *testi
 }
 
 func installAWSResource() error {
-	awsResourceChartValuesEnv := os.ExpandEnv(template.AWSResourceChartValues)
-	d := []byte(awsResourceChartValuesEnv)
+	o := func() error {
+		awsResourceChartValuesEnv := os.ExpandEnv(template.AWSResourceChartValues)
+		d := []byte(awsResourceChartValuesEnv)
 
-	err := ioutil.WriteFile(awsResourceValuesFile, d, 0644)
-	if err != nil {
-		return microerror.Mask(err)
+		err := ioutil.WriteFile(awsResourceValuesFile, d, 0644)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		err = framework.HelmCmd("registry install quay.io/giantswarm/aws-resource-lab-chart:stable -- -n aws-resource-lab --values " + awsResourceValuesFile)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		return nil
+	}
+	b := framework.NewExponentialBackoff(framework.ShortMaxWait, framework.ShortMaxInterval)
+	n := func(err error, delay time.Duration) {
+		log.Println("level", "debug", "message", err.Error())
 	}
 
-	err = framework.HelmCmd("registry install quay.io/giantswarm/aws-resource-lab-chart:stable -- -n aws-resource-lab --values " + awsResourceValuesFile)
+	err := backoff.RetryNotify(o, b, n)
 	if err != nil {
 		return microerror.Mask(err)
 	}
