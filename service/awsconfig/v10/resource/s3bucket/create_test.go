@@ -43,12 +43,12 @@ func Test_Resource_S3Bucket_newCreate(t *testing.T) {
 			},
 			currentState: []BucketState{},
 			desiredState: []BucketState{
-				BucketState{
+				{
 					Name: "desired",
 				},
 			},
 			expectedBucketsState: []BucketState{
-				BucketState{
+				{
 					Name: "desired",
 				},
 			},
@@ -63,17 +63,17 @@ func Test_Resource_S3Bucket_newCreate(t *testing.T) {
 				},
 			},
 			currentState: []BucketState{
-				BucketState{
+				{
 					Name: "current",
 				},
 			},
 			desiredState: []BucketState{
-				BucketState{
+				{
 					Name: "desired",
 				},
 			},
 			expectedBucketsState: []BucketState{
-				BucketState{
+				{
 					Name: "desired",
 				},
 			},

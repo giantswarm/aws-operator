@@ -6,10 +6,10 @@ import (
 	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/framework"
-	"github.com/giantswarm/operatorkit/framework/context/updateallowedcontext"
-	"github.com/giantswarm/operatorkit/framework/resource/metricsresource"
-	"github.com/giantswarm/operatorkit/framework/resource/retryresource"
+	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
+	"github.com/giantswarm/operatorkit/controller/resource/metricsresource"
+	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v7/cloudformation"
@@ -25,7 +25,7 @@ type DrainerResourceSetConfig struct {
 	ProjectName        string
 }
 
-func NewDrainerResourceSet(config DrainerResourceSetConfig) (*framework.ResourceSet, error) {
+func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
 	var cloudFormationService *cloudformationservice.CloudFormation
@@ -40,7 +40,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*framework.Resource
 		}
 	}
 
-	var lifecycleResource framework.CRUDResourceOps
+	var lifecycleResource controller.CRUDResourceOps
 	{
 		c := lifecycle.ResourceConfig{
 			Clients: config.GuestAWSClients,
@@ -54,17 +54,17 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*framework.Resource
 		}
 	}
 
-	var resources []framework.Resource
-	ops := []framework.CRUDResourceOps{
+	var resources []controller.Resource
+	ops := []controller.CRUDResourceOps{
 		lifecycleResource,
 	}
 	for _, o := range ops {
-		c := framework.CRUDResourceConfig{
+		c := controller.CRUDResourceConfig{
 			Logger: config.Logger,
 			Ops:    o,
 		}
 
-		r, err := framework.NewCRUDResource(c)
+		r, err := controller.NewCRUDResource(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -116,16 +116,16 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*framework.Resource
 		return ctx, nil
 	}
 
-	var resourceSet *framework.ResourceSet
+	var resourceSet *controller.ResourceSet
 	{
-		c := framework.ResourceSetConfig{
+		c := controller.ResourceSetConfig{
 			Handles:   handlesFunc,
 			InitCtx:   initCtxFunc,
 			Logger:    config.Logger,
 			Resources: resources,
 		}
 
-		resourceSet, err = framework.NewResourceSet(c)
+		resourceSet, err = controller.NewResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

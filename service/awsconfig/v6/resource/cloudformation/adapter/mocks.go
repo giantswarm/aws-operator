@@ -28,7 +28,7 @@ func (e *EC2ClientMock) DescribeSecurityGroups(input *ec2.DescribeSecurityGroups
 	if !e.unexistingSg {
 		output := &ec2.DescribeSecurityGroupsOutput{
 			SecurityGroups: []*ec2.SecurityGroup{
-				&ec2.SecurityGroup{
+				{
 					GroupId: aws.String(e.sgID),
 				},
 			},
@@ -50,7 +50,7 @@ func (e *EC2ClientMock) DescribeSubnets(input *ec2.DescribeSubnetsInput) (*ec2.D
 
 	output := &ec2.DescribeSubnetsOutput{
 		Subnets: []*ec2.Subnet{
-			&ec2.Subnet{
+			{
 				SubnetId: aws.String(e.subnetID),
 			},
 		},
@@ -69,7 +69,7 @@ func (e *EC2ClientMock) DescribeRouteTables(input *ec2.DescribeRouteTablesInput)
 
 	output := &ec2.DescribeRouteTablesOutput{
 		RouteTables: []*ec2.RouteTable{
-			&ec2.RouteTable{
+			{
 				RouteTableId: aws.String(e.routeTableID),
 			},
 		},
@@ -84,7 +84,7 @@ func (e *EC2ClientMock) DescribeVpcs(input *ec2.DescribeVpcsInput) (*ec2.Describ
 
 	output := &ec2.DescribeVpcsOutput{
 		Vpcs: []*ec2.Vpc{
-			&ec2.Vpc{
+			{
 				CidrBlock: aws.String(e.vpcCIDR),
 				VpcId:     aws.String(e.vpcID),
 			},
@@ -97,7 +97,7 @@ func (e *EC2ClientMock) DescribeVpcs(input *ec2.DescribeVpcsInput) (*ec2.Describ
 func (e *EC2ClientMock) DescribeVpcPeeringConnections(*ec2.DescribeVpcPeeringConnectionsInput) (*ec2.DescribeVpcPeeringConnectionsOutput, error) {
 	output := &ec2.DescribeVpcPeeringConnectionsOutput{
 		VpcPeeringConnections: []*ec2.VpcPeeringConnection{
-			&ec2.VpcPeeringConnection{
+			{
 				VpcPeeringConnectionId: aws.String(e.peeringID),
 			},
 		},
@@ -191,7 +191,7 @@ func (e *ELBClientMock) DescribeLoadBalancers(input *elb.DescribeLoadBalancersIn
 	}
 	output := &elb.DescribeLoadBalancersOutput{
 		LoadBalancerDescriptions: []*elb.LoadBalancerDescription{
-			&elb.LoadBalancerDescription{
+			{
 				DNSName:                   aws.String(e.dns),
 				CanonicalHostedZoneNameID: aws.String(e.hostedZone),
 			},

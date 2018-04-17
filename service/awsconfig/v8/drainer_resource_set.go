@@ -7,10 +7,10 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/framework"
-	"github.com/giantswarm/operatorkit/framework/context/updateallowedcontext"
-	"github.com/giantswarm/operatorkit/framework/resource/metricsresource"
-	"github.com/giantswarm/operatorkit/framework/resource/retryresource"
+	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
+	"github.com/giantswarm/operatorkit/controller/resource/metricsresource"
+	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v8/cloudformation"
@@ -27,7 +27,7 @@ type DrainerResourceSetConfig struct {
 	ProjectName        string
 }
 
-func NewDrainerResourceSet(config DrainerResourceSetConfig) (*framework.ResourceSet, error) {
+func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
 	var cloudFormationService *cloudformationservice.CloudFormation
@@ -42,7 +42,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*framework.Resource
 		}
 	}
 
-	var lifecycleResource framework.Resource
+	var lifecycleResource controller.Resource
 	{
 		c := lifecycle.ResourceConfig{
 			AWS:       config.AWS,
@@ -62,7 +62,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*framework.Resource
 		}
 	}
 
-	resources := []framework.Resource{
+	resources := []controller.Resource{
 		lifecycleResource,
 	}
 
@@ -110,16 +110,16 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*framework.Resource
 		return ctx, nil
 	}
 
-	var resourceSet *framework.ResourceSet
+	var resourceSet *controller.ResourceSet
 	{
-		c := framework.ResourceSetConfig{
+		c := controller.ResourceSetConfig{
 			Handles:   handlesFunc,
 			InitCtx:   initCtxFunc,
 			Logger:    config.Logger,
 			Resources: resources,
 		}
 
-		resourceSet, err = framework.NewResourceSet(c)
+		resourceSet, err = controller.NewResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

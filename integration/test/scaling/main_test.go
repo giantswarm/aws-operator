@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
+	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/integration/client"
 	"github.com/giantswarm/aws-operator/integration/setup"
@@ -22,13 +23,29 @@ var (
 func TestMain(m *testing.M) {
 	var err error
 
-	g, err = framework.NewGuest()
+	logger, err := micrologger.New(micrologger.Config{})
 	if err != nil {
 		panic(err.Error())
 	}
-	h, err = framework.NewHost(framework.HostConfig{})
-	if err != nil {
-		panic(err.Error())
+
+	{
+		c := framework.GuestConfig{
+			Logger: logger,
+		}
+
+		g, err = framework.NewGuest(c)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
+	{
+		c := framework.HostConfig{}
+
+		h, err = framework.NewHost(c)
+		if err != nil {
+			panic(err.Error())
+		}
 	}
 
 	c = client.NewAWS()

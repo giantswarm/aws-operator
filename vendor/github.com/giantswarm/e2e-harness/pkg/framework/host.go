@@ -197,7 +197,17 @@ func (h *Host) InstallResource(name, values string, conditions ...func() error) 
 
 func (h *Host) InstallCertResource() error {
 	operation := func() error {
-		return HelmCmd("registry install quay.io/giantswarm/cert-resource-lab-chart:stable -- -n cert-resource-lab --set commonDomain=${COMMON_DOMAIN_GUEST} --set clusterName=${CLUSTER_NAME}")
+		// NOTE we ignore errors here because we cannot get really useful error
+		// handling done. This here should anyway only be a quick fix until we use
+		// the helm client lib. Then error handling will be better.
+		HelmCmd("delete --purge cert-resource-lab")
+
+		err := HelmCmd("registry install quay.io/giantswarm/cert-resource-lab-chart:stable -- -n cert-resource-lab --set commonDomain=${COMMON_DOMAIN_GUEST} --set clusterName=${CLUSTER_NAME}")
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		return nil
 	}
 	notify := newNotify("cert-resource-lab-chart install")
 	err := backoff.RetryNotify(operation, h.backoff, notify)
@@ -351,7 +361,17 @@ func (h *Host) CreateNamespace(ns string) error {
 
 func (h *Host) installVault() error {
 	operation := func() error {
-		return HelmCmd("registry install quay.io/giantswarm/vaultlab-chart:stable -- --set vaultToken=${VAULT_TOKEN} -n vault")
+		// NOTE we ignore errors here because we cannot get really useful error
+		// handling done. This here should anyway only be a quick fix until we use
+		// the helm client lib. Then error handling will be better.
+		HelmCmd("delete --purge vault")
+
+		err := HelmCmd("registry install quay.io/giantswarm/vaultlab-chart:stable -- --set vaultToken=${VAULT_TOKEN} -n vault")
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		return nil
 	}
 	notify := newNotify("vaultlab-chart install")
 	err := backoff.RetryNotify(operation, h.backoff, notify)

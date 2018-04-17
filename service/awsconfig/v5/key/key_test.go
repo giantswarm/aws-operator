@@ -254,7 +254,7 @@ func Test_MasterImageID(t *testing.T) {
 				Spec: v1alpha1.AWSConfigSpec{
 					AWS: v1alpha1.AWSConfigSpecAWS{
 						Masters: []v1alpha1.AWSConfigSpecAWSNode{
-							v1alpha1.AWSConfigSpecAWSNode{
+							{
 								ImageID:      "ami-d60ad6b9",
 								InstanceType: "m3.medium",
 							},
@@ -315,7 +315,7 @@ func Test_MasterInstanceType(t *testing.T) {
 				Spec: v1alpha1.AWSConfigSpec{
 					AWS: v1alpha1.AWSConfigSpecAWS{
 						Masters: []v1alpha1.AWSConfigSpecAWSNode{
-							v1alpha1.AWSConfigSpecAWSNode{
+							{
 								ImageID:      "ami-d60ad6b9",
 								InstanceType: "m3.medium",
 							},
@@ -330,7 +330,7 @@ func Test_MasterInstanceType(t *testing.T) {
 				Spec: v1alpha1.AWSConfigSpec{
 					AWS: v1alpha1.AWSConfigSpecAWS{
 						Masters: []v1alpha1.AWSConfigSpecAWSNode{
-							v1alpha1.AWSConfigSpecAWSNode{},
+							{},
 						},
 					},
 				},
@@ -435,10 +435,10 @@ func Test_WorkerCount(t *testing.T) {
 		Spec: v1alpha1.AWSConfigSpec{
 			AWS: v1alpha1.AWSConfigSpecAWS{
 				Workers: []v1alpha1.AWSConfigSpecAWSNode{
-					v1alpha1.AWSConfigSpecAWSNode{
+					{
 						InstanceType: "m3.medium",
 					},
-					v1alpha1.AWSConfigSpecAWSNode{
+					{
 						InstanceType: "m3.medium",
 					},
 				},
@@ -462,7 +462,7 @@ func Test_WorkerImageID(t *testing.T) {
 				Spec: v1alpha1.AWSConfigSpec{
 					AWS: v1alpha1.AWSConfigSpecAWS{
 						Workers: []v1alpha1.AWSConfigSpecAWSNode{
-							v1alpha1.AWSConfigSpecAWSNode{
+							{
 								ImageID:      "ami-d60ad6b9",
 								InstanceType: "m3.medium",
 							},
@@ -502,7 +502,7 @@ func Test_WorkerInstanceType(t *testing.T) {
 				Spec: v1alpha1.AWSConfigSpec{
 					AWS: v1alpha1.AWSConfigSpecAWS{
 						Workers: []v1alpha1.AWSConfigSpecAWSNode{
-							v1alpha1.AWSConfigSpecAWSNode{
+							{
 								ImageID:      "ami-d60ad6b9",
 								InstanceType: "m3.medium",
 							},
@@ -831,10 +831,10 @@ func Test_MasterCount(t *testing.T) {
 		Spec: v1alpha1.AWSConfigSpec{
 			AWS: v1alpha1.AWSConfigSpecAWS{
 				Masters: []v1alpha1.AWSConfigSpecAWSNode{
-					v1alpha1.AWSConfigSpecAWSNode{
+					{
 						InstanceType: "m3.medium",
 					},
-					v1alpha1.AWSConfigSpecAWSNode{
+					{
 						InstanceType: "m3.medium",
 					},
 				},

@@ -41,9 +41,9 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 					AWS: v1alpha1.AWSConfigSpecAWS{
 						AZ: "myaz",
 						Workers: []v1alpha1.AWSConfigSpecAWSNode{
-							v1alpha1.AWSConfigSpecAWSNode{},
-							v1alpha1.AWSConfigSpecAWSNode{},
-							v1alpha1.AWSConfigSpecAWSNode{},
+							{},
+							{},
+							{},
 						},
 					},
 				},
@@ -65,13 +65,13 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 					AWS: v1alpha1.AWSConfigSpecAWS{
 						AZ: "myaz",
 						Workers: []v1alpha1.AWSConfigSpecAWSNode{
-							v1alpha1.AWSConfigSpecAWSNode{},
-							v1alpha1.AWSConfigSpecAWSNode{},
-							v1alpha1.AWSConfigSpecAWSNode{},
-							v1alpha1.AWSConfigSpecAWSNode{},
-							v1alpha1.AWSConfigSpecAWSNode{},
-							v1alpha1.AWSConfigSpecAWSNode{},
-							v1alpha1.AWSConfigSpecAWSNode{},
+							{},
+							{},
+							{},
+							{},
+							{},
+							{},
+							{},
 						},
 					},
 				},

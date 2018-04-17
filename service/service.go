@@ -11,7 +11,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8srestconfig"
-	"github.com/giantswarm/operatorkit/framework"
+	"github.com/giantswarm/operatorkit/controller"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/viper"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -45,8 +45,8 @@ type Config struct {
 
 type Service struct {
 	Alerter          *alerter.Service
-	ClusterFramework *framework.Framework
-	DrainerFramework *framework.Framework
+	ClusterFramework *controller.Controller
+	DrainerFramework *controller.Controller
 	Healthz          *healthz.Service
 	Version          *version.Service
 
@@ -105,7 +105,7 @@ func New(config Config) (*Service, error) {
 		return nil, microerror.Mask(err)
 	}
 
-	var clusterFramework *framework.Framework
+	var clusterFramework *controller.Controller
 	{
 		c := awsconfig.ClusterFrameworkConfig{
 			G8sClient:    g8sClient,
@@ -143,7 +143,7 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var drainerFramework *framework.Framework
+	var drainerFramework *controller.Controller
 	{
 		c := awsconfig.DrainerFrameworkConfig{
 			G8sClient:    g8sClient,
@@ -257,7 +257,7 @@ func (s *Service) Boot(ctx context.Context) {
 		// Start alerts to check for orphan resources.
 		s.Alerter.StartAlerts()
 
-		// Start the framework.
+		// Start the controller.
 		go s.ClusterFramework.Boot()
 		go s.DrainerFramework.Boot()
 	})

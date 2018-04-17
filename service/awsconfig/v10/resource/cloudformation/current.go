@@ -6,7 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/framework/context/resourcecanceledcontext"
+	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
 	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v10/cloudformation"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/key"

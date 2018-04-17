@@ -54,7 +54,7 @@ func (s *S3ClientMock) ListObjectsV2(*s3.ListObjectsV2Input) (*s3.ListObjectsV2O
 
 	output := &s3.ListObjectsV2Output{
 		Contents: []*s3.Object{
-			&s3.Object{
+			{
 				Key: aws.String("cloudconfig/myversion/worker"),
 			},
 		},
