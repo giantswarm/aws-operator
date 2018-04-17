@@ -1,34 +1,31 @@
-package retryresource
+package metricsresource
 
 import (
-	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/operatorkit/framework"
+	"github.com/giantswarm/operatorkit/controller"
 )
 
 type Config struct {
-	Logger   micrologger.Logger
-	Resource framework.Resource
+	Resource controller.Resource
 
-	BackOff backoff.BackOff
+	// Name is name of the service using the controller. This may be the
+	// name of the executing operator or controller. The service name will
+	// be used to label metrics.
+	Name string
 }
 
-func New(config Config) (framework.Resource, error) {
-	if config.Logger == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
-	}
+func New(config Config) (controller.Resource, error) {
 	if config.Resource == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Resource must not be empty")
 	}
 
-	if config.BackOff == nil {
-		config.BackOff = backoff.NewExponentialBackOff()
+	if config.Name == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.Name must not be empty")
 	}
 
 	var err error
-	var r framework.Resource
+	var r controller.Resource
 
 	// CRUD resource special case.
 	r, err = newCRUDResourceWrapper(config)

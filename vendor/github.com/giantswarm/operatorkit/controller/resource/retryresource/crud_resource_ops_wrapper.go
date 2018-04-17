@@ -9,19 +9,19 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/operatorkit/framework"
+	"github.com/giantswarm/operatorkit/controller"
 )
 
 type crudResourceOpsWrapperConfig struct {
 	Logger micrologger.Logger
-	Ops    framework.CRUDResourceOps
+	Ops    controller.CRUDResourceOps
 
 	BackOff backoff.BackOff
 }
 
 type crudResourceWrapperOps struct {
 	logger     micrologger.Logger
-	underlying framework.CRUDResourceOps
+	underlying controller.CRUDResourceOps
 
 	backOff backoff.BackOff
 }
@@ -105,10 +105,10 @@ func (o *crudResourceWrapperOps) GetDesiredState(ctx context.Context, obj interf
 	return v, nil
 }
 
-func (o *crudResourceWrapperOps) NewUpdatePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
+func (o *crudResourceWrapperOps) NewUpdatePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*controller.Patch, error) {
 	var err error
 
-	var v *framework.Patch
+	var v *controller.Patch
 	op := func() error {
 		v, err = o.underlying.NewUpdatePatch(ctx, obj, currentState, desiredState)
 		if err != nil {
@@ -130,10 +130,10 @@ func (o *crudResourceWrapperOps) NewUpdatePatch(ctx context.Context, obj, curren
 	return v, nil
 }
 
-func (o *crudResourceWrapperOps) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
+func (o *crudResourceWrapperOps) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*controller.Patch, error) {
 	var err error
 
-	var v *framework.Patch
+	var v *controller.Patch
 	op := func() error {
 		v, err = o.underlying.NewDeletePatch(ctx, obj, currentState, desiredState)
 		if err != nil {

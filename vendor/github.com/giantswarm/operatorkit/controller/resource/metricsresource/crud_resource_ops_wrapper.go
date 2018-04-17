@@ -6,18 +6,18 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/giantswarm/operatorkit/framework"
+	"github.com/giantswarm/operatorkit/controller"
 )
 
 type crudResourceOpsWrapperConfig struct {
-	Ops framework.CRUDResourceOps
+	Ops controller.CRUDResourceOps
 
 	ServiceName  string
 	ResourceName string
 }
 
 type crudResourceWrapperOps struct {
-	underlying framework.CRUDResourceOps
+	underlying controller.CRUDResourceOps
 
 	serviceName  string
 	resourceName string
@@ -83,7 +83,7 @@ func (o *crudResourceWrapperOps) GetDesiredState(ctx context.Context, obj interf
 	return v, nil
 }
 
-func (o *crudResourceWrapperOps) NewUpdatePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
+func (o *crudResourceWrapperOps) NewUpdatePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*controller.Patch, error) {
 	sl := o.serviceName
 	rl := o.resourceName
 	ol := "NewUpdatePatch"
@@ -102,7 +102,7 @@ func (o *crudResourceWrapperOps) NewUpdatePatch(ctx context.Context, obj, curren
 	return v, nil
 }
 
-func (o *crudResourceWrapperOps) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
+func (o *crudResourceWrapperOps) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*controller.Patch, error) {
 	sl := o.serviceName
 	rl := o.resourceName
 	ol := "NewDeletePatch"

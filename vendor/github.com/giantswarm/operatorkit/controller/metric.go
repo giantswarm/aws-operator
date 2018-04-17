@@ -1,4 +1,4 @@
-package framework
+package controller
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
@@ -6,21 +6,21 @@ import (
 
 const (
 	PrometheusNamespace = "operatorkit"
-	PrometheusSubsystem = "framework"
+	PrometheusSubsystem = "controller"
 )
 
 var (
-	frameworkHistogram = prometheus.NewHistogramVec(
+	controllerHistogram = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Namespace: PrometheusNamespace,
 			Subsystem: PrometheusSubsystem,
 			Name:      "event",
-			Help:      "Histogram for events within the operatorkit framework.",
+			Help:      "Histogram for events within the operatorkit controller.",
 		},
 		[]string{"event"},
 	)
 )
 
 func init() {
-	prometheus.MustRegister(frameworkHistogram)
+	prometheus.MustRegister(controllerHistogram)
 }

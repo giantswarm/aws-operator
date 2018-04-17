@@ -6,11 +6,11 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/giantswarm/operatorkit/framework"
+	"github.com/giantswarm/operatorkit/controller"
 )
 
 type resourceWrapper struct {
-	resource framework.Resource
+	resource controller.Resource
 
 	name string
 }
@@ -76,6 +76,6 @@ func (r *resourceWrapper) Name() string {
 }
 
 // Wrapped implements internal.Wrapper interface.
-func (r *resourceWrapper) Wrapped() framework.Resource {
+func (r *resourceWrapper) Wrapped() controller.Resource {
 	return r.resource
 }

@@ -236,7 +236,7 @@
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "3c241f9246b8ace74bb320a6774fd7d1461c0ce7"
+  revision = "fa653fd1edcd9ad3adc3f517ba72c03af26a949e"
 
 [[projects]]
   branch = "master"
@@ -257,7 +257,7 @@
     "v_3_2_3",
     "v_3_2_5"
   ]
-  revision = "c37ebb33fc8ed9d50fd9a62008708395dfe413fb"
+  revision = "7083ac9b6ddc47db5512c428143c665756577662"
 
 [[projects]]
   branch = "master"
@@ -317,17 +317,17 @@
   packages = [
     "client/k8scrdclient",
     "client/k8srestconfig",
-    "framework",
-    "framework/context/reconciliationcanceledcontext",
-    "framework/context/resourcecanceledcontext",
-    "framework/context/updateallowedcontext",
-    "framework/context/updatenecessarycontext",
-    "framework/resource/internal",
-    "framework/resource/metricsresource",
-    "framework/resource/retryresource",
+    "controller",
+    "controller/context/reconciliationcanceledcontext",
+    "controller/context/resourcecanceledcontext",
+    "controller/context/updateallowedcontext",
+    "controller/context/updatenecessarycontext",
+    "controller/resource/internal",
+    "controller/resource/metricsresource",
+    "controller/resource/retryresource",
     "informer"
   ]
-  revision = "ebc742775a50bb8fbad485cfef9c95e3d4a066a2"
+  revision = "3e96a44c04a17fc0f5c626d10358cc388906833f"
 
 [[projects]]
   branch = "master"
@@ -493,7 +493,7 @@
     "openstack/utils",
     "pagination"
   ]
-  revision = "1ad03b8e6d59290f9287ae5217b415f5280afac7"
+  revision = "9feda0c0a5b094cfe5015bd3c294bb0792b222ec"
 
 [[projects]]
   name = "github.com/gorilla/context"
@@ -672,7 +672,7 @@
     "prometheus",
     "prometheus/promhttp"
   ]
-  revision = "f1323f902ca878b3a87e1a76458be272fe1efe0d"
+  revision = "82f5ff156b29e276022b1a958f7d385870fb9814"
 
 [[projects]]
   branch = "master"
@@ -773,7 +773,7 @@
     "publicsuffix",
     "trace"
   ]
-  revision = "a35a21de978d84ffc92f010a153705b170b2f9d1"
+  revision = "8d16fa6dc9a85c1cd3ed24ad08ff21cf94f10888"
 
 [[projects]]
   branch = "master"
@@ -800,7 +800,7 @@
     "unix",
     "windows"
   ]
-  revision = "ecfd8b563e1320e7282dccf28ad48ec2c68aaebf"
+  revision = "b126b21c05a91c856b027c16779c12e3bf236954"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -1401,6 +1401,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5b393b35e2b0eea4e11b5421b32bb66efae1117d61909114318b04f1c77adede"
+  inputs-digest = "dc25e3232753a4e7324d2d63fdae0af514a9bcc82ab036b68fdc5edff277d322"
   solver-name = "gps-cdcl"
   solver-version = 1

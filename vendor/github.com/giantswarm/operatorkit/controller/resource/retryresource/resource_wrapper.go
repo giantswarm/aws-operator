@@ -9,13 +9,13 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/operatorkit/framework"
-	"github.com/giantswarm/operatorkit/framework/resource/internal"
+	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/controller/resource/internal"
 )
 
 type resourceWrapper struct {
 	logger   micrologger.Logger
-	resource framework.Resource
+	resource controller.Resource
 
 	backOff backoff.BackOff
 
@@ -111,6 +111,6 @@ func (r *resourceWrapper) Name() string {
 }
 
 // Wrapped implements internal.Wrapper interface.
-func (r *resourceWrapper) Wrapped() framework.Resource {
+func (r *resourceWrapper) Wrapped() controller.Resource {
 	return r.resource
 }

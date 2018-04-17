@@ -1,35 +1,27 @@
-package retryresource
+package metricsresource
 
 import (
 	"context"
 
-	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/operatorkit/framework"
-	"github.com/giantswarm/operatorkit/framework/resource/internal"
+	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/controller/resource/internal"
 )
 
 // crudResourceWrapper is a specialized wrapper which wraps
-// *framework.CRUDResource.
+// *controller.CRUDResource.
 type crudResourceWrapper struct {
-	logger   micrologger.Logger
-	resource framework.Resource
-
-	backOff backoff.BackOff
+	resource controller.Resource
 }
 
 func newCRUDResourceWrapper(config Config) (*crudResourceWrapper, error) {
-	if config.Logger == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
-	}
 	if config.Resource == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Resource must not be empty")
 	}
 
-	if config.BackOff == nil {
-		config.BackOff = backoff.NewExponentialBackOff()
+	if config.Name == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.Name must not be empty")
 	}
 
 	// Wrap underlying resource Ops with retry logic. Underlying resource
@@ -40,16 +32,16 @@ func newCRUDResourceWrapper(config Config) (*crudResourceWrapper, error) {
 			return nil, microerror.Mask(err)
 		}
 
-		underlyingCRUD, ok := underlying.(*framework.CRUDResource)
+		underlyingCRUD, ok := underlying.(*controller.CRUDResource)
 		if !ok {
 			return nil, microerror.Maskf(incompatibleUnderlyingResourceError, "expected %T", underlyingCRUD)
 		}
 
 		c := crudResourceOpsWrapperConfig{
-			Logger: config.Logger,
-			Ops:    underlyingCRUD.CRUDResourceOps,
+			Ops: underlyingCRUD.CRUDResourceOps,
 
-			BackOff: config.BackOff,
+			ServiceName:  config.Name,
+			ResourceName: config.Resource.Name(),
 		}
 
 		wrappedOps, err := newCRUDResourceWrapperOps(c)
@@ -61,12 +53,7 @@ func newCRUDResourceWrapper(config Config) (*crudResourceWrapper, error) {
 	}
 
 	r := &crudResourceWrapper{
-		logger: config.Logger.With(
-			"underlyingResource", config.Resource.Name(),
-		),
 		resource: config.Resource,
-
-		backOff: config.BackOff,
 	}
 
 	return r, nil
@@ -99,6 +86,6 @@ func (r *crudResourceWrapper) Name() string {
 }
 
 // Wrapped implements internal.Wrapper interface.
-func (r *crudResourceWrapper) Wrapped() framework.Resource {
+func (r *crudResourceWrapper) Wrapped() controller.Resource {
 	return r.resource
 }

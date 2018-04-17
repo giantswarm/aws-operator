@@ -1,4 +1,4 @@
-package framework
+package controller
 
 import (
 	"context"
@@ -22,7 +22,7 @@ type patchSpec struct {
 	Value interface{} `json:"value"`
 }
 
-func (f *Framework) addFinalizer(obj interface{}) (stopReconciliation bool, err error) {
+func (f *Controller) addFinalizer(obj interface{}) (stopReconciliation bool, err error) {
 	restClient := f.k8sClient.CoreV1().RESTClient()
 	patch, path, result, err := createAddFinalizerPatch(obj, f.name)
 	if err != nil {
@@ -50,14 +50,14 @@ func (f *Framework) addFinalizer(obj interface{}) (stopReconciliation bool, err 
 	return true, nil
 }
 
-func (f *Framework) removeFinalizer(ctx context.Context, obj interface{}) error {
+func (f *Controller) removeFinalizer(ctx context.Context, obj interface{}) error {
 	restClient := f.k8sClient.CoreV1().RESTClient()
 	patch, path, err := createRemoveFinalizerPatch(obj, f.name)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 	if patch == nil {
-		f.logger.LogCtx(ctx, "function", "removeFinalizer", "level", "warning", "message", fmt.Sprintf("object is missing finalizer for framework %s", f.name))
+		f.logger.LogCtx(ctx, "function", "removeFinalizer", "level", "warning", "message", fmt.Sprintf("object is missing finalizer for controller %s", f.name))
 		return nil
 	}
 	p, err := json.Marshal(patch)

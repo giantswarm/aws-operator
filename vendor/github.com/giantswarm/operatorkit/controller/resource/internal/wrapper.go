@@ -3,14 +3,14 @@ package internal
 import (
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/operatorkit/framework"
+	"github.com/giantswarm/operatorkit/controller"
 )
 
 type Wrapper interface {
-	Wrapped() framework.Resource
+	Wrapped() controller.Resource
 }
 
-func Underlying(r framework.Resource) (framework.Resource, error) {
+func Underlying(r controller.Resource) (controller.Resource, error) {
 	i := 0
 
 	for {

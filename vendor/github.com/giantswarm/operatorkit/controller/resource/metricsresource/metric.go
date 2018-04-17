@@ -4,7 +4,7 @@ import "github.com/prometheus/client_golang/prometheus"
 
 const (
 	PrometheusNamespace = "operatorkit"
-	PrometheusSubsystem = "framework"
+	PrometheusSubsystem = "controller"
 )
 
 var (

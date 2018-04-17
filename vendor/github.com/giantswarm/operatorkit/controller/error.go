@@ -1,4 +1,4 @@
-package framework
+package controller
 
 import (
 	"github.com/giantswarm/microerror"

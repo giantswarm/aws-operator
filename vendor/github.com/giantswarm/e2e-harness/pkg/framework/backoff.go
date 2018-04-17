@@ -16,7 +16,7 @@ const (
 	ShortMaxInterval = 5 * time.Second
 )
 
-func newExponentialBackoff(maxWait, maxInterval time.Duration) *backoff.ExponentialBackOff {
+func NewExponentialBackoff(maxWait, maxInterval time.Duration) *backoff.ExponentialBackOff {
 	b := &backoff.ExponentialBackOff{
 		InitialInterval:     backoff.DefaultInitialInterval,
 		RandomizationFactor: backoff.DefaultRandomizationFactor,

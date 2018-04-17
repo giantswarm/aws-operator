@@ -5,7 +5,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/operatorkit/framework"
+	"github.com/giantswarm/operatorkit/controller"
 )
 
 // WrapConfig is the configuration used to wrap resources with retry resources.
@@ -17,7 +17,7 @@ type WrapConfig struct {
 
 // Wrap wraps each given resource with a retry resource and returns the list of
 // wrapped resources.
-func Wrap(resources []framework.Resource, config WrapConfig) ([]framework.Resource, error) {
+func Wrap(resources []controller.Resource, config WrapConfig) ([]controller.Resource, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
@@ -26,7 +26,7 @@ func Wrap(resources []framework.Resource, config WrapConfig) ([]framework.Resour
 		config.BackOffFactory = func() backoff.BackOff { return &backoff.ZeroBackOff{} }
 	}
 
-	var wrapped []framework.Resource
+	var wrapped []controller.Resource
 
 	for _, r := range resources {
 		c := Config{
