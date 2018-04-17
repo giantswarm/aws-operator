@@ -30,6 +30,7 @@ type securityGroupRule struct {
 
 const (
 	allPorts             = -1
+	cadvisorPort         = 4194
 	kubeletPort          = 10250
 	nodeExporterPort     = 10300
 	kubeStateMetricsPort = 10301
@@ -68,6 +69,12 @@ func (s *securityGroupsAdapter) getMasterRules(customObject v1alpha1.AWSConfig, 
 			Port:       key.KubernetesAPISecurePort(customObject),
 			Protocol:   tcpProtocol,
 			SourceCIDR: defaultCIDR,
+		},
+		// Allow traffic from host cluster CIDR to 4194 for cadvisor scraping.
+		{
+			Port:       cadvisorPort,
+			Protocol:   tcpProtocol,
+			SourceCIDR: hostClusterCIDR,
 		},
 		// Allow traffic from host cluster CIDR to 10250 for kubelet scraping.
 		{
@@ -113,6 +120,12 @@ func (s *securityGroupsAdapter) getWorkerRules(customObject v1alpha1.AWSConfig, 
 		// for guest cluster scraping.
 		{
 			Port:       key.IngressControllerSecurePort(customObject),
+			Protocol:   tcpProtocol,
+			SourceCIDR: hostClusterCIDR,
+		},
+		// Allow traffic from host cluster CIDR to 4194 for cadvisor scraping.
+		{
+			Port:       cadvisorPort,
 			Protocol:   tcpProtocol,
 			SourceCIDR: hostClusterCIDR,
 		},

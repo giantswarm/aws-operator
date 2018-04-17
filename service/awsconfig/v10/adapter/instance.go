@@ -6,7 +6,6 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v10/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/key"
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/templates"
 )
@@ -52,11 +51,7 @@ func (i *instanceAdapter) Adapt(config Config) error {
 	}
 
 	{
-		imageID, err := key.ImageID(config.CustomObject)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		i.Image.ID = imageID
+		i.Image.ID = config.StackState.MasterImageID
 	}
 
 	{
@@ -70,7 +65,7 @@ func (i *instanceAdapter) Adapt(config Config) error {
 			MachineType:        prefixMaster,
 			Region:             key.Region(config.CustomObject),
 			S3URI:              fmt.Sprintf("%s-g8s-%s", accountID, i.Cluster.ID),
-			CloudConfigVersion: cloudconfig.MasterCloudConfigVersion,
+			CloudConfigVersion: config.StackState.MasterCloudConfigVersion,
 		}
 		rendered, err := templates.Render(key.CloudConfigSmallTemplates(), c)
 		if err != nil {
@@ -80,9 +75,9 @@ func (i *instanceAdapter) Adapt(config Config) error {
 
 		i.Master.EtcdVolume.Name = key.EtcdVolumeName(config.CustomObject)
 
-		i.Master.Instance.ResourceName = config.MasterInstanceResourceName
+		i.Master.Instance.ResourceName = config.StackState.MasterInstanceResourceName
 
-		i.Master.Instance.Type = key.MasterInstanceType(config.CustomObject)
+		i.Master.Instance.Type = config.StackState.MasterInstanceType
 	}
 
 	return nil

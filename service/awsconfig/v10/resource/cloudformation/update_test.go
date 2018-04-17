@@ -16,7 +16,7 @@ import (
 
 func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 	t.Parallel()
-	clusterTpo := &v1alpha1.AWSConfig{
+	customObject := &v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
 				ID: "test-cluster",
@@ -395,6 +395,7 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 			IAM: &adapter.IAMClientMock{},
 			KMS: &adapter.KMSClientMock{},
 		}
+		c.EBS = &EBSServiceMock{}
 		c.HostClients = &adapter.Clients{
 			IAM: &adapter.IAMClientMock{},
 			EC2: &adapter.EC2ClientMock{},
@@ -413,16 +414,16 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 			ctx := updateallowedcontext.NewContext(context.Background(), make(chan struct{}))
 			updateallowedcontext.SetUpdateAllowed(ctx)
 
-			result, err := newResource.newUpdateChange(ctx, clusterTpo, tc.currentState, tc.desiredState)
+			result, err := newResource.newUpdateChange(ctx, customObject, tc.currentState, tc.desiredState)
 			if err != nil {
 				t.Fatal("expected", nil, "got", err)
 			}
-			updateChange, ok := result.(awscloudformation.UpdateStackInput)
+			updateChange, ok := result.(StackState)
 			if !ok {
-				t.Errorf("expected '%T', got '%T'", updateChange, result)
+				t.Fatalf("expected '%T', got '%T'", updateChange, result)
 			}
-			if updateChange.StackName != nil && *updateChange.StackName != *tc.expectedChange.StackName {
-				t.Errorf("expected %v, got %v", *tc.expectedChange.StackName, *updateChange.StackName)
+			if updateChange.UpdateStackInput.StackName != nil && *updateChange.UpdateStackInput.StackName != *tc.expectedChange.StackName {
+				t.Fatalf("expected %v, got %v", *tc.expectedChange.StackName, *updateChange.UpdateStackInput.StackName)
 			}
 		})
 	}
@@ -430,7 +431,7 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 
 func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T) {
 	t.Parallel()
-	clusterTpo := &v1alpha1.AWSConfig{
+	customObject := &v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
 				ID: "test-cluster",
@@ -843,6 +844,7 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 			IAM: &adapter.IAMClientMock{},
 			KMS: &adapter.KMSClientMock{},
 		}
+		c.EBS = &EBSServiceMock{}
 		c.HostClients = &adapter.Clients{
 			IAM: &adapter.IAMClientMock{},
 			EC2: &adapter.EC2ClientMock{},
@@ -858,16 +860,16 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			result, err := newResource.newUpdateChange(context.TODO(), clusterTpo, tc.currentState, tc.desiredState)
+			result, err := newResource.newUpdateChange(context.TODO(), customObject, tc.currentState, tc.desiredState)
 			if err != nil {
 				t.Fatal("expected", nil, "got", err)
 			}
-			updateChange, ok := result.(awscloudformation.UpdateStackInput)
+			updateChange, ok := result.(StackState)
 			if !ok {
-				t.Errorf("expected '%T', got '%T'", updateChange, result)
+				t.Fatalf("expected '%T', got '%T'", updateChange, result)
 			}
-			if updateChange.StackName != nil && *updateChange.StackName != *tc.expectedChange.StackName {
-				t.Errorf("expected %v, got %v", *tc.expectedChange.StackName, *updateChange.StackName)
+			if updateChange.UpdateStackInput.StackName != nil && *updateChange.UpdateStackInput.StackName != *tc.expectedChange.StackName {
+				t.Fatalf("expected %v, got %v", *tc.expectedChange.StackName, *updateChange.UpdateStackInput.StackName)
 			}
 		})
 	}

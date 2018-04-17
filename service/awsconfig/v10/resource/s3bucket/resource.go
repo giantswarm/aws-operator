@@ -81,17 +81,27 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func toBucketState(v interface{}) (BucketState, error) {
+func toBucketState(v interface{}) ([]BucketState, error) {
 	if v == nil {
-		return BucketState{}, nil
+		return []BucketState{}, nil
 	}
 
-	bucketState, ok := v.(BucketState)
+	bucketsState, ok := v.([]BucketState)
 	if !ok {
-		return BucketState{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", BucketState{}, v)
+		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", []BucketState{}, v)
 	}
 
-	return bucketState, nil
+	return bucketsState, nil
+}
+
+func containsBucketState(bucketStateName string, bucketStateList []BucketState) bool {
+	for _, b := range bucketStateList {
+		if b.Name == bucketStateName {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (r *Resource) getS3BucketTags(customObject v1alpha1.AWSConfig) []*s3.Tag {

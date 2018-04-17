@@ -1,8 +1,11 @@
 package key
 
 import (
+	"crypto/sha1"
 	"fmt"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
@@ -36,6 +39,8 @@ const (
 	RoleNameTemplate = "EC2-K8S-Role"
 	// PolicyNameTemplate will be included in the IAM policy name.
 	PolicyNameTemplate = "EC2-K8S-Policy"
+	// LogDeliveryURI is used for setting the correct ACL in the access log bucket
+	LogDeliveryURI = "uri=http://acs.amazonaws.com/groups/s3/LogDelivery"
 )
 
 const (
@@ -43,15 +48,16 @@ const (
 )
 
 const (
-	MasterImageIDKey            = "MasterImageID"
-	MasterInstanceTypeKey       = "MasterInstanceType"
-	MasterCloudConfigVersionKey = "MasterCloudConfigVersion"
-	WorkerASGKey                = "WorkerASGName"
-	WorkerCountKey              = "WorkerCount"
-	WorkerImageIDKey            = "WorkerImageID"
-	WorkerInstanceTypeKey       = "WorkerInstanceType"
-	WorkerCloudConfigVersionKey = "WorkerCloudConfigVersion"
-	VersionBundleVersionKey     = "VersionBundleVersion"
+	MasterImageIDKey              = "MasterImageID"
+	MasterInstanceResourceNameKey = "MasterInstanceResourceName"
+	MasterInstanceTypeKey         = "MasterInstanceType"
+	MasterCloudConfigVersionKey   = "MasterCloudConfigVersion"
+	WorkerASGKey                  = "WorkerASGName"
+	WorkerCountKey                = "WorkerCount"
+	WorkerImageIDKey              = "WorkerImageID"
+	WorkerInstanceTypeKey         = "WorkerInstanceType"
+	WorkerCloudConfigVersionKey   = "WorkerCloudConfigVersion"
+	VersionBundleVersionKey       = "VersionBundleVersion"
 )
 
 const (
@@ -235,7 +241,16 @@ func MasterImageID(customObject v1alpha1.AWSConfig) string {
 }
 
 func MasterInstanceResourceName(customObject v1alpha1.AWSConfig) string {
-	return "MasterInstance"
+	clusterID := strings.Replace(ClusterID(customObject), "-", "", -1)
+
+	h := sha1.New()
+	h.Write([]byte(strconv.FormatInt(time.Now().UnixNano(), 10)))
+	timeHash := fmt.Sprintf("%x", h.Sum(nil))[0:5]
+
+	upperTimeHash := strings.ToUpper(timeHash)
+	upperClusterID := strings.ToUpper(clusterID)
+
+	return fmt.Sprintf("MasterInstance%s%s", upperClusterID, upperTimeHash)
 }
 
 func MasterInstanceName(customObject v1alpha1.AWSConfig) string {
@@ -288,6 +303,10 @@ func SecurityGroupName(customObject v1alpha1.AWSConfig, groupName string) string
 
 func SubnetName(customObject v1alpha1.AWSConfig, suffix string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), suffix)
+}
+
+func TargetLogBucketName(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("%s-g8s-access-logs", ClusterID(customObject))
 }
 
 func ToCustomObject(v interface{}) (v1alpha1.AWSConfig, error) {

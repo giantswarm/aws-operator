@@ -247,12 +247,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 			Service: ebsService,
 		}
 
-		ops, err := ebsvolume.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		ebsVolumeResource, err = toCRUDResource(config.Logger, ops)
+		ebsVolumeResource, err = ebsvolume.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -268,6 +263,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 				KMS:            config.GuestAWSClients.KMS,
 				ELB:            config.GuestAWSClients.ELB,
 			},
+			EBS: ebsService,
 			HostClients: &adapter.Clients{
 				EC2:            config.HostAWSClients.EC2,
 				IAM:            config.HostAWSClients.IAM,

@@ -13,11 +13,11 @@ import (
 func Test_Resource_S3Bucket_newCreate(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
-		obj                interface{}
-		currentState       interface{}
-		desiredState       interface{}
-		expectedBucketName string
-		description        string
+		obj                  interface{}
+		currentState         interface{}
+		desiredState         interface{}
+		expectedBucketsState []BucketState
+		description          string
 	}{
 		{
 			description: "current and desired state empty, expected empty",
@@ -28,9 +28,9 @@ func Test_Resource_S3Bucket_newCreate(t *testing.T) {
 					},
 				},
 			},
-			currentState:       BucketState{},
-			desiredState:       BucketState{},
-			expectedBucketName: "",
+			currentState:         []BucketState{},
+			desiredState:         []BucketState{},
+			expectedBucketsState: []BucketState{},
 		},
 		{
 			description: "current state empty, desired state not empty, expected desired state",
@@ -41,11 +41,17 @@ func Test_Resource_S3Bucket_newCreate(t *testing.T) {
 					},
 				},
 			},
-			currentState: BucketState{},
-			desiredState: BucketState{
-				Name: "desired",
+			currentState: []BucketState{},
+			desiredState: []BucketState{
+				BucketState{
+					Name: "desired",
+				},
 			},
-			expectedBucketName: "desired",
+			expectedBucketsState: []BucketState{
+				BucketState{
+					Name: "desired",
+				},
+			},
 		},
 		{
 			description: "current state not empty, desired state not empty but different, expected desired state",
@@ -56,13 +62,21 @@ func Test_Resource_S3Bucket_newCreate(t *testing.T) {
 					},
 				},
 			},
-			currentState: BucketState{
-				Name: "current",
+			currentState: []BucketState{
+				BucketState{
+					Name: "current",
+				},
 			},
-			desiredState: BucketState{
-				Name: "desired",
+			desiredState: []BucketState{
+				BucketState{
+					Name: "desired",
+				},
 			},
-			expectedBucketName: "desired",
+			expectedBucketsState: []BucketState{
+				BucketState{
+					Name: "desired",
+				},
+			},
 		},
 	}
 
@@ -99,12 +113,14 @@ func Test_Resource_S3Bucket_newCreate(t *testing.T) {
 			if err != nil {
 				t.Errorf("expected '%v' got '%#v'", nil, err)
 			}
-			createChange, ok := result.(BucketState)
+			createChanges, ok := result.([]BucketState)
 			if !ok {
-				t.Errorf("expected '%T', got '%T'", createChange, result)
+				t.Errorf("expected '%T', got '%T'", createChanges, result)
 			}
-			if createChange.Name != tc.expectedBucketName {
-				t.Errorf("expected %s, got %s", tc.expectedBucketName, createChange.Name)
+			for _, expectedBucketState := range tc.expectedBucketsState {
+				if !containsBucketState(expectedBucketState.Name, createChanges) {
+					t.Errorf("expected %v, got %v", expectedBucketState, createChanges)
+				}
 			}
 		})
 	}

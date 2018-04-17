@@ -1,4 +1,4 @@
-package ebsvolume
+package cloudformation
 
 import (
 	"context"
@@ -9,17 +9,18 @@ import (
 )
 
 type EBSServiceMock struct {
-	volumes []ebs.Volume
 }
 
 func (e *EBSServiceMock) DeleteVolume(ctx context.Context, volumeID string) error {
 	return nil
 }
 
-func (e *EBSServiceMock) DetachVolume(ctx context.Context, volumeID string, attachment ebs.VolumeAttachment, force bool, shutdown bool) error {
+func (e *EBSServiceMock) DetachVolume(ctx context.Context, volumeID string, attachment ebs.VolumeAttachment, force bool, shutdown bool, wait bool) error {
 	return nil
 }
 
+// ListVolumes always returns a list containing one volume because this is what
+// the update process of the cloudformation resource needs.
 func (e *EBSServiceMock) ListVolumes(customObject v1alpha1.AWSConfig, etcdVolume bool, persistentVolume bool) ([]ebs.Volume, error) {
-	return e.volumes, nil
+	return []ebs.Volume{{}}, nil
 }

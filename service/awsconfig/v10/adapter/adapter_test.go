@@ -4,8 +4,6 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-
-	"github.com/giantswarm/aws-operator/service/awsconfig/v10/key"
 )
 
 var (
@@ -28,12 +26,13 @@ var (
 func TestAdapterGuestMain(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
-		description       string
-		customObject      v1alpha1.AWSConfig
-		errorMatcher      func(error) bool
-		expectedASGType   string
-		expectedClusterID string
-		expectedImageID   string
+		description           string
+		customObject          v1alpha1.AWSConfig
+		errorMatcher          func(error) bool
+		expectedASGType       string
+		expectedClusterID     string
+		expectedMasterImageID string
+		expectedWorkerImageID string
 	}{
 		{
 			description: "basic match",
@@ -52,10 +51,11 @@ func TestAdapterGuestMain(t *testing.T) {
 					},
 				},
 			},
-			errorMatcher:      nil,
-			expectedASGType:   "worker",
-			expectedClusterID: "test-cluster",
-			expectedImageID:   "ami-862140e9",
+			errorMatcher:          nil,
+			expectedASGType:       "worker",
+			expectedClusterID:     "test-cluster",
+			expectedMasterImageID: "master-image-id",
+			expectedWorkerImageID: "worker-image-id",
 		},
 		{
 			description: "different region",
@@ -74,75 +74,54 @@ func TestAdapterGuestMain(t *testing.T) {
 					},
 				},
 			},
-			errorMatcher:      nil,
-			expectedASGType:   "worker",
-			expectedClusterID: "test-cluster",
-			expectedImageID:   "ami-a61464df",
+			errorMatcher:          nil,
+			expectedASGType:       "worker",
+			expectedClusterID:     "test-cluster",
+			expectedMasterImageID: "master-image-id",
+			expectedWorkerImageID: "worker-image-id",
 		},
-		{
-			description: "invalid region",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: defaultCluster,
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						AZ:     "invalid-1a",
-						Region: "invalid-1",
-						Masters: []v1alpha1.AWSConfigSpecAWSNode{
-							{},
-						},
-						Workers: []v1alpha1.AWSConfigSpecAWSNode{
-							{},
-						},
-					},
-				},
-			},
-			errorMatcher: key.IsInvalidConfig,
-		},
-	}
-
-	clients := Clients{
-		EC2: &EC2ClientMock{},
-		IAM: &IAMClientMock{},
-		KMS: &KMSClientMock{},
-		ELB: &ELBClientMock{},
-	}
-	hostClients := Clients{
-		EC2: &EC2ClientMock{},
-		IAM: &IAMClientMock{},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			cfg := Config{
-				CustomObject:     tc.customObject,
-				Clients:          clients,
+			config := Config{
+				CustomObject: tc.customObject,
+				Clients: Clients{
+					EC2: &EC2ClientMock{},
+					IAM: &IAMClientMock{},
+					KMS: &KMSClientMock{},
+					ELB: &ELBClientMock{},
+				},
+				HostClients: Clients{
+					EC2: &EC2ClientMock{},
+					IAM: &IAMClientMock{},
+				},
 				InstallationName: "myinstallation",
 				HostAccountID:    "myHostAccountID",
-				HostClients:      hostClients,
+				StackState: StackState{
+					MasterImageID: "master-image-id",
+					WorkerImageID: "worker-image-id",
+				},
 			}
-			a, err := NewGuest(cfg)
+			a, err := NewGuest(config)
 			if tc.errorMatcher != nil && err == nil {
-				t.Error("expected error didn't happen")
+				t.Fatal("expected error didn't happen")
 			}
 
 			if tc.errorMatcher != nil && !tc.errorMatcher(err) {
-				t.Error("expected", true, "got", false)
+				t.Fatal("expected", true, "got", false)
 			}
 
 			if tc.expectedASGType != a.ASGType {
-				t.Errorf("unexpected value, expecting %q, got %q", tc.expectedASGType, a.ASGType)
+				t.Fatalf("unexpected ASG type, expected %q, got %q", tc.expectedASGType, a.ASGType)
 			}
 
 			if tc.expectedClusterID != a.ClusterID {
-				t.Errorf("unexpected value, expecting %q, got %q", tc.expectedClusterID, a.ClusterID)
+				t.Fatalf("unexpected cluster ID, expected %q, got %q", tc.expectedClusterID, a.ClusterID)
 			}
 
-			if tc.expectedImageID != a.MasterImageID {
-				t.Errorf("unexpected MasterImageID, expecting %q, want %q", tc.expectedImageID, a.MasterImageID)
-			}
-
-			if tc.expectedImageID != a.WorkerImageID {
-				t.Errorf("unexpected WorkerImageID, expecting %q, want %q", tc.expectedImageID, a.WorkerImageID)
+			if tc.expectedWorkerImageID != a.WorkerImageID {
+				t.Fatalf("unexpected WorkerImageID, expected %q, got %q", tc.expectedWorkerImageID, a.WorkerImageID)
 			}
 		})
 	}

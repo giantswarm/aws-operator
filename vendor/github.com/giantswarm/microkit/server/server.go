@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/giantswarm/micrologger"
+	kitendpoint "github.com/go-kit/kit/endpoint"
 	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -220,7 +221,7 @@ func (s *server) Boot() {
 
 					// Now we execute the actual go-kit endpoint handler.
 					kithttp.NewServer(
-						e.Endpoint(),
+						s.newEndpointWrapper(e),
 						e.Decoder(),
 						e.Encoder(),
 						options...,
@@ -284,6 +285,31 @@ func (s *server) Shutdown() {
 
 		wg.Wait()
 	})
+}
+
+// newEndpointWrapper creates a new wrapped endpoint function essentially
+// combining the actual endpoint implementation with the defined middlewares.
+func (s *server) newEndpointWrapper(e Endpoint) kitendpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		// Prepare the actual endpoint depending on the provided middlewares of the
+		// endpoint implementation. There might be cases in which there are none or
+		// only one middleware. The go-kit interface is not that nice so we need to
+		// make it fit here.
+		endpoint := e.Endpoint()
+		middlewares := e.Middlewares()
+		if len(middlewares) == 1 {
+			endpoint = kitendpoint.Chain(middlewares[0])(endpoint)
+		}
+		if len(middlewares) > 1 {
+			endpoint = kitendpoint.Chain(middlewares[0], middlewares[1:]...)(endpoint)
+		}
+		response, err := endpoint(ctx, request)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		return response, nil
+	}
 }
 
 func (s *server) newErrorEncoderWrapper() kithttp.ErrorEncoder {
