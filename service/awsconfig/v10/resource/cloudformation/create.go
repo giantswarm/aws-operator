@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/framework/context/resourcecanceledcontext"
+	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/key"
 )
@@ -45,7 +45,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 			return nil
 		} else if ctx.Err() != nil {
-			return microerror.Mask(err)
+			return microerror.Mask(ctx.Err())
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
@@ -92,7 +92,7 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		}
 
 		var mainTemplate string
-		mainTemplate, err := r.getMainGuestTemplateBody(customObject)
+		mainTemplate, err := r.getMainGuestTemplateBody(customObject, desiredStackState)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

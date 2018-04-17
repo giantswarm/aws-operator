@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8scrdclient"
-	"github.com/giantswarm/operatorkit/framework"
+	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/informer"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
@@ -38,7 +38,7 @@ type DrainerFrameworkConfigAWS struct {
 	SessionToken    string
 }
 
-func NewDrainerFramework(config DrainerFrameworkConfig) (*framework.Framework, error) {
+func NewDrainerFramework(config DrainerFrameworkConfig) (*controller.Controller, error) {
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
@@ -100,17 +100,22 @@ func NewDrainerFramework(config DrainerFrameworkConfig) (*framework.Framework, e
 		}
 	}
 
-	var crdFramework *framework.Framework
+	var crdFramework *controller.Controller
 	{
-		c := framework.Config{
+		c := controller.Config{
 			CRD:            v1alpha1.NewAWSConfigCRD(),
 			CRDClient:      crdClient,
 			Informer:       newInformer,
+			K8sClient:      config.K8sClient,
 			Logger:         config.Logger,
 			ResourceRouter: resourceRouter,
+
+			// Name is used to compute finalizer names. This here results in something
+			// like operatorkit.giantswarm.io/aws-operator-drainer.
+			Name: config.ProjectName + "-drainer",
 		}
 
-		crdFramework, err = framework.New(c)
+		crdFramework, err = controller.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -119,7 +124,7 @@ func NewDrainerFramework(config DrainerFrameworkConfig) (*framework.Framework, e
 	return crdFramework, nil
 }
 
-func newDrainerResourceRouter(config DrainerFrameworkConfig) (*framework.ResourceRouter, error) {
+func newDrainerResourceRouter(config DrainerFrameworkConfig) (*controller.ResourceRouter, error) {
 	var err error
 
 	var awsClients awsclient.Clients
@@ -134,7 +139,7 @@ func newDrainerResourceRouter(config DrainerFrameworkConfig) (*framework.Resourc
 		awsClients = awsclient.NewClients(c)
 	}
 
-	var v7ResourceSet *framework.ResourceSet
+	var v7ResourceSet *controller.ResourceSet
 	{
 		c := v7.DrainerResourceSetConfig{
 			GuestAWSClients: awsClients,
@@ -150,7 +155,7 @@ func newDrainerResourceRouter(config DrainerFrameworkConfig) (*framework.Resourc
 		}
 	}
 
-	var v8ResourceSet *framework.ResourceSet
+	var v8ResourceSet *controller.ResourceSet
 	{
 		c := v8.DrainerResourceSetConfig{
 			AWS:       awsClients,
@@ -167,7 +172,7 @@ func newDrainerResourceRouter(config DrainerFrameworkConfig) (*framework.Resourc
 		}
 	}
 
-	var v9ResourceSet *framework.ResourceSet
+	var v9ResourceSet *controller.ResourceSet
 	{
 		c := v9.DrainerResourceSetConfig{
 			AWS:       awsClients,
@@ -184,7 +189,7 @@ func newDrainerResourceRouter(config DrainerFrameworkConfig) (*framework.Resourc
 		}
 	}
 
-	var v10ResourceSet *framework.ResourceSet
+	var v10ResourceSet *controller.ResourceSet
 	{
 		c := v10.DrainerResourceSetConfig{
 			AWS:       awsClients,
@@ -201,12 +206,12 @@ func newDrainerResourceRouter(config DrainerFrameworkConfig) (*framework.Resourc
 		}
 	}
 
-	var resourceRouter *framework.ResourceRouter
+	var resourceRouter *controller.ResourceRouter
 	{
-		c := framework.ResourceRouterConfig{
+		c := controller.ResourceRouterConfig{
 			Logger: config.Logger,
 
-			ResourceSets: []*framework.ResourceSet{
+			ResourceSets: []*controller.ResourceSet{
 				v7ResourceSet,
 				v8ResourceSet,
 				v9ResourceSet,
@@ -214,7 +219,7 @@ func newDrainerResourceRouter(config DrainerFrameworkConfig) (*framework.Resourc
 			},
 		}
 
-		resourceRouter, err = framework.NewResourceRouter(c)
+		resourceRouter, err = controller.NewResourceRouter(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

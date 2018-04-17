@@ -13,12 +13,13 @@ import (
 
 	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	giantclientset "github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/giantswarm/e2e-harness/pkg/harness"
@@ -31,44 +32,15 @@ type PatchSpec struct {
 	Value interface{} `json:"value"`
 }
 
-const (
-	certOperatorValuesFile = "/tmp/cert-operator-values.yaml"
-	// certOperatorChartValues values required by cert-operator-chart, the environment
-	// variables will be expanded before writing the contents to a file.
-	certOperatorChartValues = `commonDomain: ${COMMON_DOMAIN_GUEST}
-clusterName: ${CLUSTER_NAME}
-Installation:
-  V1:
-    Auth:
-      Vault:
-        Address: http://vault.default.svc.cluster.local:8200
-        CA:
-          TTL: 1440h
-    Guest:
-      Kubernetes:
-        API:
-          EndpointBase: ${COMMON_DOMAIN_GUEST}
-    Secret:
-      CertOperator:
-        SecretYaml: |
-          service:
-            vault:
-              config:
-                token: ${VAULT_TOKEN}
-      Registry:
-        PullSecret:
-          DockerConfigJSON: "{\"auths\":{\"quay.io\":{\"auth\":\"$REGISTRY_PULL_SECRET\"}}}"
-`
-)
-
 type HostConfig struct {
 	Backoff *backoff.ExponentialBackOff
 }
 
 type Host struct {
-	backoff   *backoff.ExponentialBackOff
-	g8sClient *giantclientset.Clientset
-	k8sClient kubernetes.Interface
+	backoff    *backoff.ExponentialBackOff
+	g8sClient  *versioned.Clientset
+	k8sClient  kubernetes.Interface
+	restConfig *rest.Config
 }
 
 func NewHost(c HostConfig) (*Host, error) {
@@ -76,24 +48,25 @@ func NewHost(c HostConfig) (*Host, error) {
 		c.Backoff = newCustomExponentialBackoff()
 	}
 
-	config, err := clientcmd.BuildConfigFromFlags("", harness.DefaultKubeConfig)
+	restConfig, err := clientcmd.BuildConfigFromFlags("", harness.DefaultKubeConfig)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	g8sClient, err := giantclientset.NewForConfig(config)
+	g8sClient, err := versioned.NewForConfig(restConfig)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	k8sClient, err := kubernetes.NewForConfig(config)
+	k8sClient, err := kubernetes.NewForConfig(restConfig)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
 	h := &Host{
-		backoff:   c.Backoff,
-		g8sClient: g8sClient,
-		k8sClient: k8sClient,
+		backoff:    c.Backoff,
+		g8sClient:  g8sClient,
+		k8sClient:  k8sClient,
+		restConfig: restConfig,
 	}
 
 	return h, nil
@@ -129,66 +102,112 @@ func (h *Host) AWSCluster(name string) (*v1alpha1.AWSConfig, error) {
 	return cluster, nil
 }
 
-func (h *Host) DeleteGuestCluster() error {
-	if err := runCmd("kubectl delete awsconfig ${CLUSTER_NAME}"); err != nil {
+func (h *Host) DeleteGuestCluster(name, cr, logEntry string) error {
+	if err := runCmd(fmt.Sprintf("kubectl delete %s ${CLUSTER_NAME}", cr)); err != nil {
 		return microerror.Mask(err)
 	}
 
-	operatorPodName, err := h.PodName("giantswarm", "app=aws-operator")
+	operatorPodName, err := h.PodName("giantswarm", fmt.Sprintf("app=%s", name))
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	logEntry := "deleted the guest cluster main stack"
-
 	return h.WaitForPodLog("giantswarm", logEntry, operatorPodName)
 }
 
-func (h *Host) InstallAwsOperator(values string) error {
-	awsOperatorChartValuesEnv := os.ExpandEnv(values)
+func (h *Host) InstallStableOperator(name, cr, values string) error {
+	err := h.InstallOperator(name, cr, values, ":stable")
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	return nil
+}
 
-	tmpfile, err := ioutil.TempFile("", "aws-operator-values")
+func (h *Host) InstallBranchOperator(name, cr, values string) error {
+	err := h.InstallOperator(name, cr, values, "@1.0.0-${CIRCLE_SHA1}")
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	return nil
+}
+
+func (h *Host) InstallOperator(name, cr, values, version string) error {
+	chartValuesEnv := os.ExpandEnv(values)
+
+	tmpfile, err := ioutil.TempFile("", name+"-values")
 	if err != nil {
 		return microerror.Mask(err)
 	}
 	defer os.Remove(tmpfile.Name())
 
-	if _, err := tmpfile.Write([]byte(awsOperatorChartValuesEnv)); err != nil {
+	if _, err := tmpfile.Write([]byte(chartValuesEnv)); err != nil {
 		return microerror.Mask(err)
 	}
 
+	cmd := fmt.Sprintf("registry install quay.io/giantswarm/%[1]s-chart%[2]s -- -n %[1]s --values %[3]s", name, version, tmpfile.Name())
 	operation := func() error {
-		return HelmCmd("registry install quay.io/giantswarm/aws-operator-chart@1.0.0-${CIRCLE_SHA1} -- -n aws-operator --values " + tmpfile.Name())
+		return HelmCmd(cmd)
 	}
-	notify := newNotify("aws-operator-chart install")
+	notify := newNotify(name + "-chart install")
 	err = backoff.RetryNotify(operation, h.backoff, notify)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	return waitFor(h.crd("awsconfig"))
-}
-
-func (h *Host) InstallCertOperator() error {
-	certOperatorChartValuesEnv := os.ExpandEnv(certOperatorChartValues)
-	if err := ioutil.WriteFile(certOperatorValuesFile, []byte(certOperatorChartValuesEnv), os.ModePerm); err != nil {
-		return microerror.Mask(err)
-	}
-	operation := func() error {
-		return HelmCmd("registry install quay.io/giantswarm/cert-operator-chart:stable -- -n cert-operator --values " + certOperatorValuesFile)
-	}
-	notify := newNotify("cert-operator-chart install")
-	err := backoff.RetryNotify(operation, h.backoff, notify)
+	err = waitFor(h.crd(cr))
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	return waitFor(h.crd("certconfig"))
+	return nil
+}
+
+func (h *Host) InstallResource(name, values string, conditions ...func() error) error {
+	chartValuesEnv := os.ExpandEnv(values)
+
+	tmpfile, err := ioutil.TempFile("", name+"-values")
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	defer os.Remove(tmpfile.Name())
+
+	if _, err := tmpfile.Write([]byte(chartValuesEnv)); err != nil {
+		return microerror.Mask(err)
+	}
+
+	cmd := fmt.Sprintf("registry install quay.io/giantswarm/%[1]s -- -n %[1]s --values %[2]s", name, tmpfile.Name())
+	operation := func() error {
+		return HelmCmd(cmd)
+	}
+	notify := newNotify(name + " install")
+	err = backoff.RetryNotify(operation, h.backoff, notify)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	for _, c := range conditions {
+		err = waitFor(c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	return nil
 }
 
 func (h *Host) InstallCertResource() error {
 	operation := func() error {
-		return HelmCmd("registry install quay.io/giantswarm/cert-resource-lab-chart:stable -- -n cert-resource-lab --set commonDomain=${COMMON_DOMAIN_GUEST} --set clusterName=${CLUSTER_NAME}")
+		// NOTE we ignore errors here because we cannot get really useful error
+		// handling done. This here should anyway only be a quick fix until we use
+		// the helm client lib. Then error handling will be better.
+		HelmCmd("delete --purge cert-resource-lab")
+
+		err := HelmCmd("registry install quay.io/giantswarm/cert-resource-lab-chart:stable -- -n cert-resource-lab --set commonDomain=${COMMON_DOMAIN_GUEST} --set clusterName=${CLUSTER_NAME}")
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		return nil
 	}
 	notify := newNotify("cert-resource-lab-chart install")
 	err := backoff.RetryNotify(operation, h.backoff, notify)
@@ -201,36 +220,9 @@ func (h *Host) InstallCertResource() error {
 	return waitFor(h.secret("default", secretName))
 }
 
-func (h *Host) InstallNodeOperator(values string) error {
-	var err error
-
-	nodeOperatorChartValuesEnv := os.ExpandEnv(values)
-
-	tmpfile, err := ioutil.TempFile("", "node-operator-values")
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	defer os.Remove(tmpfile.Name())
-
-	if _, err := tmpfile.Write([]byte(nodeOperatorChartValuesEnv)); err != nil {
-		return microerror.Mask(err)
-	}
-
-	operation := func() error {
-		return HelmCmd("registry install quay.io/giantswarm/node-operator-chart:stable -- -n node-operator --values " + tmpfile.Name())
-	}
-	notify := newNotify("node-operator-chart install")
-	err = backoff.RetryNotify(operation, h.backoff, notify)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	err = waitFor(h.crd("nodeconfig"))
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	return nil
+// K8sClient returns the host cluster framework's Kubernetes client.
+func (h *Host) K8sClient() kubernetes.Interface {
+	return h.k8sClient
 }
 
 func (h *Host) PodName(namespace, labelSelector string) (string, error) {
@@ -252,8 +244,13 @@ func (h *Host) PodName(namespace, labelSelector string) (string, error) {
 	return pod.Name, nil
 }
 
+// RestConfig returns the host cluster framework's rest config.
+func (h *Host) RestConfig() *rest.Config {
+	return h.restConfig
+}
+
 func (h *Host) Setup() error {
-	if err := h.createGSNamespace(); err != nil {
+	if err := h.CreateNamespace("giantswarm"); err != nil {
 		return microerror.Mask(err)
 	}
 
@@ -321,18 +318,18 @@ func (h *Host) crd(crdName string) func() error {
 	}
 }
 
-func (h *Host) createGSNamespace() error {
+func (h *Host) CreateNamespace(ns string) error {
 	// check if the namespace already exists
 	_, err := h.k8sClient.CoreV1().
 		Namespaces().
-		Get("giantswarm", metav1.GetOptions{})
+		Get(ns, metav1.GetOptions{})
 	if err == nil {
 		return nil
 	}
 
 	namespace := &v1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "giantswarm",
+			Name: ns,
 		},
 	}
 	_, err = h.k8sClient.CoreV1().
@@ -345,7 +342,7 @@ func (h *Host) createGSNamespace() error {
 	activeNamespace := func() error {
 		ns, err := h.k8sClient.CoreV1().
 			Namespaces().
-			Get("giantswarm", metav1.GetOptions{})
+			Get(ns, metav1.GetOptions{})
 
 		if err != nil {
 			return microerror.Mask(err)
@@ -364,7 +361,17 @@ func (h *Host) createGSNamespace() error {
 
 func (h *Host) installVault() error {
 	operation := func() error {
-		return HelmCmd("registry install quay.io/giantswarm/vaultlab-chart:stable -- --set vaultToken=${VAULT_TOKEN} -n vault")
+		// NOTE we ignore errors here because we cannot get really useful error
+		// handling done. This here should anyway only be a quick fix until we use
+		// the helm client lib. Then error handling will be better.
+		HelmCmd("delete --purge vault")
+
+		err := HelmCmd("registry install quay.io/giantswarm/vaultlab-chart:stable -- --set vaultToken=${VAULT_TOKEN} -n vault")
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		return nil
 	}
 	notify := newNotify("vaultlab-chart install")
 	err := backoff.RetryNotify(operation, h.backoff, notify)
@@ -404,4 +411,24 @@ func (h *Host) runningPod(namespace, labelSelector string) func() error {
 		}
 		return nil
 	}
+}
+
+func (h *Host) GetPodName(namespace, labelSelector string) (string, error) {
+	o := metav1.ListOptions{
+		LabelSelector: labelSelector,
+	}
+	pods, err := h.k8sClient.CoreV1().Pods(namespace).List(o)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	if len(pods.Items) > 1 {
+		return "", microerror.Mask(tooManyResultsError)
+	}
+	if len(pods.Items) == 0 {
+		return "", microerror.Mask(notFoundError)
+	}
+	pod := pods.Items[0]
+
+	return pod.Name, nil
 }

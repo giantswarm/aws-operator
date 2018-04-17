@@ -34,6 +34,26 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Detach EBS volumes before deletion when deleting clusters.",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Added S3 access logs for cluster buckets.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "aws-operator",
+				Description: "Opened port 4194 for cAdvisor scraping from host cluster.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "aws-operator",
+				Description: "Fixed updating master nodes on all kinds of cluster updates.",
+				Kind:        versionbundle.KindFixed,
+			},
+			{
+				Component:   "kubernetes",
+				Description: "Updated to 1.10.1.",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
@@ -58,7 +78,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "kubernetes",
-				Version: "1.9.5",
+				Version: "1.10.1",
 			},
 			{
 				Name:    "nginx-ingress-controller",
@@ -69,7 +89,7 @@ func VersionBundle() versionbundle.Bundle {
 		Deprecated:   false,
 		Name:         "aws-operator",
 		Time:         time.Date(2018, time.March, 22, 15, 47, 0, 0, time.UTC),
-		Version:      "3.0.3",
+		Version:      "3.1.0",
 		WIP:          true,
 	}
 }

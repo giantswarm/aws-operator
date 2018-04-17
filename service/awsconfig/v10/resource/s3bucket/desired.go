@@ -3,8 +3,9 @@ package s3bucket
 import (
 	"context"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v10/key"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/service/awsconfig/v10/key"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
@@ -18,9 +19,20 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	bucketState := BucketState{
-		Name: key.BucketName(customObject, accountID),
+	// First bucket must be the delivery log bucket because otherwise
+	// other buckets can not forward logs to it
+	bucketsState := []BucketState{
+		{
+			Name:            key.TargetLogBucketName(customObject),
+			IsLoggingBucket: true,
+			LoggingEnabled:  true,
+		},
+		{
+			Name:            key.BucketName(customObject, accountID),
+			IsLoggingBucket: false,
+			LoggingEnabled:  true,
+		},
 	}
 
-	return bucketState, nil
+	return bucketsState, nil
 }

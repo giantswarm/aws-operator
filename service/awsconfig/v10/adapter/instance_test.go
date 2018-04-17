@@ -2,13 +2,10 @@ package adapter
 
 import (
 	"encoding/base64"
-	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-
-	"github.com/giantswarm/aws-operator/service/awsconfig/v10/cloudconfig"
 )
 
 func Test_Adapter_Instance_RegularFields(t *testing.T) {
@@ -16,27 +13,31 @@ func Test_Adapter_Instance_RegularFields(t *testing.T) {
 
 	testCases := []struct {
 		Description            string
-		CustomObject           v1alpha1.AWSConfig
+		Config                 Config
 		ExpectedAZ             string
 		ExpectedEtcdVolumeName string
 		ExpectedInstanceType   string
 	}{
 		{
 			Description: "case 0 basic matching, all fields present",
-			CustomObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						ID: "test-cluster",
-					},
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						AZ: "eu-central-1a",
-						Masters: []v1alpha1.AWSConfigSpecAWSNode{
-							{
-								InstanceType: "m3.large",
-							},
+			Config: Config{
+				Clients: Clients{
+					EC2: &EC2ClientMock{},
+					IAM: &IAMClientMock{},
+				},
+				CustomObject: v1alpha1.AWSConfig{
+					Spec: v1alpha1.AWSConfigSpec{
+						Cluster: v1alpha1.Cluster{
+							ID: "test-cluster",
 						},
-						Region: "eu-west-1",
+						AWS: v1alpha1.AWSConfigSpecAWS{
+							AZ:     "eu-central-1a",
+							Region: "eu-west-1",
+						},
 					},
+				},
+				StackState: StackState{
+					MasterInstanceType: "m3.large",
 				},
 			},
 			ExpectedAZ:             "eu-central-1a",
@@ -47,18 +48,8 @@ func Test_Adapter_Instance_RegularFields(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.Description, func(t *testing.T) {
-			clients := Clients{
-				EC2: &EC2ClientMock{},
-				IAM: &IAMClientMock{},
-			}
-
-			cfg := Config{
-				CustomObject: tc.CustomObject,
-				Clients:      clients,
-			}
-
 			a := &instanceAdapter{}
-			err := a.Adapt(cfg)
+			err := a.Adapt(tc.Config)
 			if err != nil {
 				t.Fatal("expected", nil, "got", err)
 			}
@@ -93,12 +84,12 @@ func Test_Adapter_Instance_SmallCloudConfig(t *testing.T) {
 		},
 		{
 			Description:  "scase 1 http URI",
-			ExpectedLine: fmt.Sprintf("s3_http_uri=\"https://s3.eu-west-1.amazonaws.com/000000000000-g8s-test-cluster/cloudconfig/%s/$USERDATA_FILE\"", cloudconfig.MasterCloudConfigVersion),
+			ExpectedLine: "s3_http_uri=\"https://s3.eu-west-1.amazonaws.com/000000000000-g8s-test-cluster/cloudconfig/foo/$USERDATA_FILE\"",
 			Region:       "eu-west-1",
 		},
 		{
 			Description:  "scase 2 http URI different region",
-			ExpectedLine: fmt.Sprintf("s3_http_uri=\"https://s3.eu-central-1.amazonaws.com/000000000000-g8s-test-cluster/cloudconfig/%s/$USERDATA_FILE\"", cloudconfig.MasterCloudConfigVersion),
+			ExpectedLine: "s3_http_uri=\"https://s3.eu-central-1.amazonaws.com/000000000000-g8s-test-cluster/cloudconfig/foo/$USERDATA_FILE\"",
 			Region:       "eu-central-1",
 		},
 	}
@@ -126,8 +117,11 @@ func Test_Adapter_Instance_SmallCloudConfig(t *testing.T) {
 				},
 			}
 			cfg := Config{
-				CustomObject: customObject,
 				Clients:      clients,
+				CustomObject: customObject,
+				StackState: StackState{
+					MasterCloudConfigVersion: "foo",
+				},
 			}
 
 			a := &instanceAdapter{}

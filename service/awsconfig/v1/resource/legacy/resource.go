@@ -13,7 +13,7 @@ import (
 	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/framework"
+	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/randomkeytpr"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
@@ -159,10 +159,10 @@ type Resource struct {
 
 // NewUpdatePatch is called upon observed custom object change. It creates the
 // AWS resources for the cluster.
-func (s *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
+func (s *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*controller.Patch, error) {
 	customObject, ok := obj.(*v1alpha1.AWSConfig)
 	if !ok {
-		return &framework.Patch{}, microerror.Maskf(invalidConfigError, "could not convert to v1alpha1.AWSConfig")
+		return &controller.Patch{}, microerror.Maskf(invalidConfigError, "could not convert to v1alpha1.AWSConfig")
 	}
 	cluster := *customObject
 
@@ -180,14 +180,14 @@ func (s *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 
 	s.logger.Log("info", fmt.Sprintf("cluster '%s' processed", key.ClusterID(cluster)))
 
-	patch := framework.NewPatch()
+	patch := controller.NewPatch()
 
 	return patch, nil
 }
 
 // NewDeletePatch is called upon observed custom object deletion. It deletes the
 // AWS resources for the cluster.
-func (s *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*framework.Patch, error) {
+func (s *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*controller.Patch, error) {
 	// We can receive an instance of v1alpha1.AWSConfig or cache.DeletedFinalStateUnknown.
 	// We need to assert the type properly and log an error when we cannot do that.
 	// Also, the cache.DeleteFinalStateUnknown object can contain the proper CustomObject,
@@ -219,7 +219,7 @@ func (s *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desire
 
 	s.logger.Log("info", fmt.Sprintf("cluster '%s' deleted", key.ClusterID(cluster)))
 
-	return &framework.Patch{}, nil
+	return &controller.Patch{}, nil
 }
 
 func (s *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
@@ -1236,26 +1236,26 @@ func (s *Resource) processDelete(cluster v1alpha1.AWSConfig) error {
 	conn, err := vpcPeeringConection.FindExisting()
 	if err != nil {
 		s.logger.Log("error", fmt.Sprintf("could not find vpc peering connection: '%#v'", err))
-	}
+	} else {
+		// Delete Guest VPC Routes.
+		for _, privateRouteTableName := range cluster.Spec.AWS.VPC.RouteTableNames {
+			privateRouteTable := &awsresources.RouteTable{
+				Name:   privateRouteTableName,
+				VpcID:  cluster.Spec.AWS.VPC.PeerID,
+				Client: hostClients.EC2,
+				Logger: s.logger,
+			}
 
-	// Delete Guest VPC Routes.
-	for _, privateRouteTableName := range cluster.Spec.AWS.VPC.RouteTableNames {
-		privateRouteTable := &awsresources.RouteTable{
-			Name:   privateRouteTableName,
-			VpcID:  cluster.Spec.AWS.VPC.PeerID,
-			Client: hostClients.EC2,
-			Logger: s.logger,
-		}
+			privateRoute := &awsresources.Route{
+				RouteTable:             *privateRouteTable,
+				DestinationCidrBlock:   *conn.RequesterVpcInfo.CidrBlock,
+				VpcPeeringConnectionID: *conn.VpcPeeringConnectionId,
+				AWSEntity:              awsresources.AWSEntity{Clients: hostClients},
+			}
 
-		privateRoute := &awsresources.Route{
-			RouteTable:             *privateRouteTable,
-			DestinationCidrBlock:   *conn.RequesterVpcInfo.CidrBlock,
-			VpcPeeringConnectionID: *conn.VpcPeeringConnectionId,
-			AWSEntity:              awsresources.AWSEntity{Clients: hostClients},
-		}
-
-		if err := privateRoute.Delete(); err != nil {
-			s.logger.Log("error", fmt.Sprintf("could not delete vpc route: '%v'", err))
+			if err := privateRoute.Delete(); err != nil {
+				s.logger.Log("error", fmt.Sprintf("could not delete vpc route: '%v'", err))
+			}
 		}
 	}
 

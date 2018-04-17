@@ -5,9 +5,9 @@ import (
 	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/framework"
-	"github.com/giantswarm/operatorkit/framework/resource/metricsresource"
-	"github.com/giantswarm/operatorkit/framework/resource/retryresource"
+	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/controller/resource/metricsresource"
+	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
 	"github.com/giantswarm/randomkeytpr"
 	"k8s.io/client-go/kubernetes"
 
@@ -42,7 +42,7 @@ type ResourceSetConfig struct {
 	ProjectName           string
 }
 
-func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
+func NewResourceSet(config ResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
 	if config.CertsSearcher == nil {
@@ -123,7 +123,7 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		}
 	}
 
-	var kmsKeyResource framework.CRUDResourceOps
+	var kmsKeyResource controller.CRUDResourceOps
 	{
 		c := kmskey.Config{
 			Clients: kmskey.Clients{
@@ -138,7 +138,7 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		}
 	}
 
-	var s3BucketResource framework.CRUDResourceOps
+	var s3BucketResource controller.CRUDResourceOps
 	{
 		c := s3bucket.Config{
 			AwsService: awsService,
@@ -154,7 +154,7 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		}
 	}
 
-	var s3BucketObjectResource framework.CRUDResourceOps
+	var s3BucketObjectResource controller.CRUDResourceOps
 	{
 		c := s3object.Config{
 			AwsService: awsService,
@@ -174,7 +174,7 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		}
 	}
 
-	var cloudformationResource framework.CRUDResourceOps
+	var cloudformationResource controller.CRUDResourceOps
 	{
 		c := cloudformation.Config{
 			Clients: &adapter.Clients{
@@ -200,7 +200,7 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		}
 	}
 
-	var namespaceResource framework.CRUDResourceOps
+	var namespaceResource controller.CRUDResourceOps
 	{
 		c := namespace.Config{
 			K8sClient: config.K8sClient,
@@ -213,7 +213,7 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		}
 	}
 
-	var serviceResource framework.CRUDResourceOps
+	var serviceResource controller.CRUDResourceOps
 	{
 		c := service.Config{
 			K8sClient: config.K8sClient,
@@ -226,7 +226,7 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		}
 	}
 
-	var endpointsResource framework.CRUDResourceOps
+	var endpointsResource controller.CRUDResourceOps
 	{
 		c := endpoints.Config{
 			Clients: endpoints.Clients{
@@ -242,8 +242,8 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		}
 	}
 
-	var resources []framework.Resource
-	ops := []framework.CRUDResourceOps{
+	var resources []controller.Resource
+	ops := []controller.CRUDResourceOps{
 		kmsKeyResource,
 		s3BucketResource,
 		s3BucketObjectResource,
@@ -253,12 +253,12 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		endpointsResource,
 	}
 	for _, o := range ops {
-		c := framework.CRUDResourceConfig{
+		c := controller.CRUDResourceConfig{
 			Logger: config.Logger,
 			Ops:    o,
 		}
 
-		r, err := framework.NewCRUDResource(c)
+		r, err := controller.NewCRUDResource(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -305,15 +305,15 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		return false
 	}
 
-	var resourceSet *framework.ResourceSet
+	var resourceSet *controller.ResourceSet
 	{
-		c := framework.ResourceSetConfig{
+		c := controller.ResourceSetConfig{
 			Handles:   handlesFunc,
 			Logger:    config.Logger,
 			Resources: resources,
 		}
 
-		resourceSet, err = framework.NewResourceSet(c)
+		resourceSet, err = controller.NewResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

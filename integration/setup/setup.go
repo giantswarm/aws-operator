@@ -7,9 +7,11 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/microerror"
 
@@ -65,15 +67,15 @@ func Resources(c *client.AWS, g *framework.Guest, h *framework.Host) error {
 
 	{
 		// TODO configure chart values like for the other operators below.
-		err = h.InstallCertOperator()
+		err = h.InstallStableOperator("cert-operator", "certconfig", template.CertOperatorChartValues)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		err = h.InstallNodeOperator(template.NodeOperatorChartValues)
+		err = h.InstallStableOperator("node-operator", "nodeconfig", template.NodeOperatorChartValues)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		err = h.InstallAwsOperator(template.AWSOperatorChartValues)
+		err = h.InstallBranchOperator("aws-operator", "awsconfig", template.AWSOperatorChartValues)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -117,10 +119,12 @@ func WrapTestMain(c *client.AWS, g *framework.Guest, h *framework.Host, m *testi
 		v = 1
 	}
 
-	err = g.Setup()
-	if err != nil {
-		log.Printf("%#v\n", err)
-		v = 1
+	if v == 0 {
+		err = g.Setup()
+		if err != nil {
+			log.Printf("%#v\n", err)
+			v = 1
+		}
 	}
 
 	if v == 0 {
@@ -128,7 +132,10 @@ func WrapTestMain(c *client.AWS, g *framework.Guest, h *framework.Host, m *testi
 	}
 
 	if os.Getenv("KEEP_RESOURCES") != "true" {
-		h.DeleteGuestCluster()
+		name := "aws-operator"
+		customResource := "awsconfig"
+		logEntry := "deleted the guest cluster main stack"
+		h.DeleteGuestCluster(name, customResource, logEntry)
 
 		// only do full teardown when not on CI
 		if os.Getenv("CIRCLECI") != "true" {
@@ -152,15 +159,33 @@ func WrapTestMain(c *client.AWS, g *framework.Guest, h *framework.Host, m *testi
 }
 
 func installAWSResource() error {
-	awsResourceChartValuesEnv := os.ExpandEnv(template.AWSResourceChartValues)
-	d := []byte(awsResourceChartValuesEnv)
+	o := func() error {
+		// NOTE we ignore errors here because we cannot get really useful error
+		// handling done. This here should anyway only be a quick fix until we use
+		// the helm client lib. Then error handling will be better.
+		framework.HelmCmd("delete --purge aws-resource-lab")
 
-	err := ioutil.WriteFile(awsResourceValuesFile, d, 0644)
-	if err != nil {
-		return microerror.Mask(err)
+		awsResourceChartValuesEnv := os.ExpandEnv(template.AWSResourceChartValues)
+		d := []byte(awsResourceChartValuesEnv)
+
+		err := ioutil.WriteFile(awsResourceValuesFile, d, 0644)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		err = framework.HelmCmd("registry install quay.io/giantswarm/aws-resource-lab-chart:stable -- -n aws-resource-lab --values " + awsResourceValuesFile)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		return nil
+	}
+	b := framework.NewExponentialBackoff(framework.ShortMaxWait, framework.ShortMaxInterval)
+	n := func(err error, delay time.Duration) {
+		log.Println("level", "debug", "message", err.Error())
 	}
 
-	err = framework.HelmCmd("registry install quay.io/giantswarm/aws-resource-lab-chart:stable -- -n aws-resource-lab --values " + awsResourceValuesFile)
+	err := backoff.RetryNotify(o, b, n)
 	if err != nil {
 		return microerror.Mask(err)
 	}

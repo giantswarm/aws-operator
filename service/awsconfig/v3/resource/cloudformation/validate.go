@@ -28,13 +28,13 @@ func (r *Resource) validateCluster(cluster v1alpha1.AWSConfig) error {
 func (r *Resource) validateHostPeeringRoutes(cluster v1alpha1.AWSConfig) error {
 	input := &ec2.DescribeRouteTablesInput{
 		Filters: []*ec2.Filter{
-			&ec2.Filter{
+			{
 				Name: aws.String("route.destination-cidr-block"),
 				Values: []*string{
 					aws.String(key.PrivateSubnetCIDR(cluster)),
 				},
 			},
-			&ec2.Filter{
+			{
 				Name: aws.String("vpc-id"),
 				Values: []*string{
 					aws.String(key.PeerID(cluster)),
