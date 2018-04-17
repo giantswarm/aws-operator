@@ -7,10 +7,10 @@ import (
 	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/framework"
-	"github.com/giantswarm/operatorkit/framework/context/updateallowedcontext"
-	"github.com/giantswarm/operatorkit/framework/resource/metricsresource"
-	"github.com/giantswarm/operatorkit/framework/resource/retryresource"
+	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
+	"github.com/giantswarm/operatorkit/controller/resource/metricsresource"
+	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
 	"github.com/giantswarm/randomkeys"
 	"k8s.io/client-go/kubernetes"
 
@@ -50,7 +50,7 @@ type ClusterResourceSetConfig struct {
 	ProjectName        string
 }
 
-func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.ResourceSet, error) {
+func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
 	if config.CertsSearcher == nil {
@@ -155,7 +155,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 		}
 	}
 
-	var kmsKeyResource framework.Resource
+	var kmsKeyResource controller.Resource
 	{
 		c := kmskey.Config{
 			Clients: kmskey.Clients{
@@ -177,7 +177,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 		}
 	}
 
-	var s3BucketResource framework.Resource
+	var s3BucketResource controller.Resource
 	{
 		c := s3bucket.Config{
 			AwsService: awsService,
@@ -200,7 +200,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 		}
 	}
 
-	var s3BucketObjectResource framework.Resource
+	var s3BucketObjectResource controller.Resource
 	{
 		c := s3object.Config{
 			AwsService: awsService,
@@ -225,7 +225,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 		}
 	}
 
-	var loadBalancerResource framework.Resource
+	var loadBalancerResource controller.Resource
 	{
 		c := loadbalancer.Config{
 			Clients: loadbalancer.Clients{
@@ -240,7 +240,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 		}
 	}
 
-	var ebsVolumeResource framework.Resource
+	var ebsVolumeResource controller.Resource
 	{
 		c := ebsvolume.Config{
 			Logger:  config.Logger,
@@ -253,7 +253,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 		}
 	}
 
-	var cloudformationResource framework.Resource
+	var cloudformationResource controller.Resource
 	{
 		c := cloudformationresource.Config{
 			Clients: &adapter.Clients{
@@ -286,7 +286,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 		}
 	}
 
-	var namespaceResource framework.Resource
+	var namespaceResource controller.Resource
 	{
 		c := namespace.Config{
 			K8sClient: config.K8sClient,
@@ -304,7 +304,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 		}
 	}
 
-	var serviceResource framework.Resource
+	var serviceResource controller.Resource
 	{
 		c := service.Config{
 			K8sClient: config.K8sClient,
@@ -322,7 +322,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 		}
 	}
 
-	var endpointsResource framework.Resource
+	var endpointsResource controller.Resource
 	{
 		c := endpoints.Config{
 			Clients: endpoints.Clients{
@@ -343,7 +343,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 		}
 	}
 
-	resources := []framework.Resource{
+	resources := []controller.Resource{
 		kmsKeyResource,
 		s3BucketResource,
 		s3BucketObjectResource,
@@ -399,16 +399,16 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 		return ctx, nil
 	}
 
-	var resourceSet *framework.ResourceSet
+	var resourceSet *controller.ResourceSet
 	{
-		c := framework.ResourceSetConfig{
+		c := controller.ResourceSetConfig{
 			Handles:   handlesFunc,
 			InitCtx:   initCtxFunc,
 			Logger:    config.Logger,
 			Resources: resources,
 		}
 
-		resourceSet, err = framework.NewResourceSet(c)
+		resourceSet, err = controller.NewResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -417,13 +417,13 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*framework.Resource
 	return resourceSet, nil
 }
 
-func toCRUDResource(logger micrologger.Logger, ops framework.CRUDResourceOps) (*framework.CRUDResource, error) {
-	c := framework.CRUDResourceConfig{
+func toCRUDResource(logger micrologger.Logger, ops controller.CRUDResourceOps) (*controller.CRUDResource, error) {
+	c := controller.CRUDResourceConfig{
 		Logger: logger,
 		Ops:    ops,
 	}
 
-	r, err := framework.NewCRUDResource(c)
+	r, err := controller.NewCRUDResource(c)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}

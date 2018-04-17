@@ -44,10 +44,10 @@ func TestAdapterGuestMain(t *testing.T) {
 						AZ:     "eu-central-1a",
 						Region: "eu-central-1",
 						Masters: []v1alpha1.AWSConfigSpecAWSNode{
-							v1alpha1.AWSConfigSpecAWSNode{},
+							{},
 						},
 						Workers: []v1alpha1.AWSConfigSpecAWSNode{
-							v1alpha1.AWSConfigSpecAWSNode{},
+							{},
 						},
 					},
 				},
@@ -66,10 +66,10 @@ func TestAdapterGuestMain(t *testing.T) {
 						AZ:     "eu-west-1a",
 						Region: "eu-west-1",
 						Masters: []v1alpha1.AWSConfigSpecAWSNode{
-							v1alpha1.AWSConfigSpecAWSNode{},
+							{},
 						},
 						Workers: []v1alpha1.AWSConfigSpecAWSNode{
-							v1alpha1.AWSConfigSpecAWSNode{},
+							{},
 						},
 					},
 				},
@@ -88,10 +88,10 @@ func TestAdapterGuestMain(t *testing.T) {
 						AZ:     "invalid-1a",
 						Region: "invalid-1",
 						Masters: []v1alpha1.AWSConfigSpecAWSNode{
-							v1alpha1.AWSConfigSpecAWSNode{},
+							{},
 						},
 						Workers: []v1alpha1.AWSConfigSpecAWSNode{
-							v1alpha1.AWSConfigSpecAWSNode{},
+							{},
 						},
 					},
 				},

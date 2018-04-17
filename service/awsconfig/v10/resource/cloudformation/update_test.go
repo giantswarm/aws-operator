@@ -8,7 +8,7 @@ import (
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
-	"github.com/giantswarm/operatorkit/framework/context/updateallowedcontext"
+	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
 
 	"github.com/giantswarm/aws-operator/service/awsconfig/v10/adapter"
 	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v10/cloudformation"

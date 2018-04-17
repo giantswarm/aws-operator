@@ -43,7 +43,7 @@ func Test_Resource_S3Bucket_newDelete(t *testing.T) {
 			},
 			currentState: []BucketState{},
 			desiredState: []BucketState{
-				BucketState{
+				{
 					Name: "desired",
 				},
 			},
@@ -59,19 +59,19 @@ func Test_Resource_S3Bucket_newDelete(t *testing.T) {
 				},
 			},
 			currentState: []BucketState{
-				BucketState{
+				{
 					Name: "current",
 				},
-				BucketState{
+				{
 					Name:            "log-bucket",
 					IsLoggingBucket: true,
 				},
 			},
 			desiredState: []BucketState{
-				BucketState{
+				{
 					Name: "current",
 				},
-				BucketState{
+				{
 					Name:            "log-bucket",
 					IsLoggingBucket: true,
 				},

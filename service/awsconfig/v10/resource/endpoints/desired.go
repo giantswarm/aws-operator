@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/framework/context/resourcecanceledcontext"
+	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 	"k8s.io/api/core/v1"
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 

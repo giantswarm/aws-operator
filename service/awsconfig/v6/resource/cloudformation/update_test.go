@@ -8,7 +8,7 @@ import (
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
-	"github.com/giantswarm/operatorkit/framework/context/updateallowedcontext"
+	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
 
 	"github.com/giantswarm/aws-operator/service/awsconfig/v6/resource/cloudformation/adapter"
 )
@@ -31,11 +31,11 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 			AWS: v1alpha1.AWSConfigSpecAWS{
 				AZ: "eu-central-1a",
 				Masters: []v1alpha1.AWSConfigSpecAWSNode{
-					v1alpha1.AWSConfigSpecAWSNode{},
+					{},
 				},
 				Region: "eu-central-1",
 				Workers: []v1alpha1.AWSConfigSpecAWSNode{
-					v1alpha1.AWSConfigSpecAWSNode{},
+					{},
 				},
 			},
 		},
@@ -444,11 +444,11 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 			AWS: v1alpha1.AWSConfigSpecAWS{
 				AZ: "eu-central-1a",
 				Masters: []v1alpha1.AWSConfigSpecAWSNode{
-					v1alpha1.AWSConfigSpecAWSNode{},
+					{},
 				},
 				Region: "eu-central-1",
 				Workers: []v1alpha1.AWSConfigSpecAWSNode{
-					v1alpha1.AWSConfigSpecAWSNode{},
+					{},
 				},
 			},
 		},

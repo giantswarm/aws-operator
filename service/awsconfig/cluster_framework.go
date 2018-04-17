@@ -7,7 +7,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8scrdclient"
-	"github.com/giantswarm/operatorkit/framework"
+	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/informer"
 	"github.com/giantswarm/randomkeys"
 	"github.com/giantswarm/randomkeytpr"
@@ -64,7 +64,7 @@ type FrameworkConfigOIDCConfig struct {
 	GroupsClaim   string
 }
 
-func NewClusterFramework(config ClusterFrameworkConfig) (*framework.Framework, error) {
+func NewClusterFramework(config ClusterFrameworkConfig) (*controller.Controller, error) {
 	var err error
 
 	if config.G8sClient == nil {
@@ -140,9 +140,9 @@ func NewClusterFramework(config ClusterFrameworkConfig) (*framework.Framework, e
 		}
 	}
 
-	var crdFramework *framework.Framework
+	var crdFramework *controller.Controller
 	{
-		c := framework.Config{
+		c := controller.Config{
 			CRD:            v1alpha1.NewAWSConfigCRD(),
 			CRDClient:      crdClient,
 			Informer:       newInformer,
@@ -153,7 +153,7 @@ func NewClusterFramework(config ClusterFrameworkConfig) (*framework.Framework, e
 			Name: config.ProjectName,
 		}
 
-		crdFramework, err = framework.New(c)
+		crdFramework, err = controller.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -162,7 +162,7 @@ func NewClusterFramework(config ClusterFrameworkConfig) (*framework.Framework, e
 	return crdFramework, nil
 }
 
-func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.ResourceRouter, error) {
+func newClusterResourceRouter(config ClusterFrameworkConfig) (*controller.ResourceRouter, error) {
 	var err error
 
 	guestAWSConfig := awsclient.Config{
@@ -218,7 +218,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 		}
 	}
 
-	var resourceSetV1 *framework.ResourceSet
+	var resourceSetV1 *controller.ResourceSet
 	{
 		c := v1.ResourceSetConfig{
 			CertsSearcher:      certWatcher,
@@ -244,7 +244,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 		}
 	}
 
-	var resourceSetV2 *framework.ResourceSet
+	var resourceSetV2 *controller.ResourceSet
 	{
 		c := v2.ResourceSetConfig{
 			CertsSearcher:      certWatcher,
@@ -268,7 +268,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 		}
 	}
 
-	var resourceSetV3 *framework.ResourceSet
+	var resourceSetV3 *controller.ResourceSet
 	{
 		c := v3.ResourceSetConfig{
 			CertsSearcher:      certWatcher,
@@ -280,7 +280,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 
 			HandledVersionBundles: []string{
 				"2.0.1",
-				// 2.0.2 fixes missing region in host account credentials, the change only affects service/framework.go
+				// 2.0.2 fixes missing region in host account credentials, the change only affects service/controller.go
 				"2.0.2",
 			},
 			InstallationName: config.InstallationName,
@@ -293,7 +293,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 		}
 	}
 
-	var resourceSetV4 *framework.ResourceSet
+	var resourceSetV4 *controller.ResourceSet
 	{
 		c := v4.ResourceSetConfig{
 			CertsSearcher:      certWatcher,
@@ -319,7 +319,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 		}
 	}
 
-	var resourceSetV5 *framework.ResourceSet
+	var resourceSetV5 *controller.ResourceSet
 	{
 		c := v5.ResourceSetConfig{
 			CertsSearcher:      certWatcher,
@@ -346,7 +346,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 		}
 	}
 
-	var resourceSetV6 *framework.ResourceSet
+	var resourceSetV6 *controller.ResourceSet
 	{
 		c := v6.ResourceSetConfig{
 			CertsSearcher:      certWatcher,
@@ -373,7 +373,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 		}
 	}
 
-	var resourceSetV7 *framework.ResourceSet
+	var resourceSetV7 *controller.ResourceSet
 	{
 		c := v7.ClusterResourceSetConfig{
 			CertsSearcher:      certWatcher,
@@ -400,7 +400,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 		}
 	}
 
-	var resourceSetV8 *framework.ResourceSet
+	var resourceSetV8 *controller.ResourceSet
 	{
 		c := v8.ClusterResourceSetConfig{
 			CertsSearcher:      certWatcher,
@@ -427,7 +427,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 		}
 	}
 
-	var resourceSetV9 *framework.ResourceSet
+	var resourceSetV9 *controller.ResourceSet
 	{
 		c := v9.ClusterResourceSetConfig{
 			CertsSearcher:      certWatcher,
@@ -454,7 +454,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 		}
 	}
 
-	var resourceSetV10 *framework.ResourceSet
+	var resourceSetV10 *controller.ResourceSet
 	{
 		c := v10.ClusterResourceSetConfig{
 			CertsSearcher:      certWatcher,
@@ -480,12 +480,12 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 			return nil, microerror.Mask(err)
 		}
 	}
-	var resourceRouter *framework.ResourceRouter
+	var resourceRouter *controller.ResourceRouter
 	{
-		c := framework.ResourceRouterConfig{
+		c := controller.ResourceRouterConfig{
 			Logger: config.Logger,
 
-			ResourceSets: []*framework.ResourceSet{
+			ResourceSets: []*controller.ResourceSet{
 				resourceSetV1,
 				resourceSetV2,
 				resourceSetV3,
@@ -499,7 +499,7 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*framework.Resourc
 			},
 		}
 
-		resourceRouter, err = framework.NewResourceRouter(c)
+		resourceRouter, err = controller.NewResourceRouter(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

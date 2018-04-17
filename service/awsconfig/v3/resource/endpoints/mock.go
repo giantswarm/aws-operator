@@ -19,9 +19,9 @@ func (e *EC2ClientMock) DescribeInstances(*ec2.DescribeInstancesInput) (*ec2.Des
 
 	output := &ec2.DescribeInstancesOutput{
 		Reservations: []*ec2.Reservation{
-			&ec2.Reservation{
+			{
 				Instances: []*ec2.Instance{
-					&ec2.Instance{
+					{
 						PrivateIpAddress: aws.String(e.privateIPAddress),
 						State: &ec2.InstanceState{
 							Code: aws.Int64(ec2RunningState),

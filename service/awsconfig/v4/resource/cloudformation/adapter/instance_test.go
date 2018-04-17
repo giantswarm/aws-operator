@@ -33,7 +33,7 @@ func TestAdapterInstanceRegularFields(t *testing.T) {
 					AWS: v1alpha1.AWSConfigSpecAWS{
 						AZ: "eu-central-1a",
 						Masters: []v1alpha1.AWSConfigSpecAWSNode{
-							v1alpha1.AWSConfigSpecAWSNode{
+							{
 								InstanceType: "m3.large",
 							},
 						},
@@ -107,7 +107,7 @@ func TestAdapterInstanceSmallCloudConfig(t *testing.T) {
 			AWS: v1alpha1.AWSConfigSpecAWS{
 				Region: "myregion",
 				Masters: []v1alpha1.AWSConfigSpecAWSNode{
-					v1alpha1.AWSConfigSpecAWSNode{
+					{
 						ImageID:      "ami-test",
 						InstanceType: "m3.large",
 					},

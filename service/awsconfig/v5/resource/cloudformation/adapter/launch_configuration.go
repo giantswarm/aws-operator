@@ -36,7 +36,7 @@ func (l *launchConfigAdapter) getLaunchConfiguration(cfg Config) error {
 	l.WorkerAssociatePublicIPAddress = false
 
 	l.WorkerBlockDeviceMappings = []BlockDeviceMapping{
-		BlockDeviceMapping{
+		{
 			DeleteOnTermination: true,
 			DeviceName:          defaultEBSVolumeMountPoint,
 			VolumeSize:          defaultEBSVolumeSize,

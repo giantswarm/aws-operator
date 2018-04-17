@@ -4,8 +4,8 @@ import (
 	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/framework"
-	"github.com/giantswarm/operatorkit/framework/resource/metricsresource"
+	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/controller/resource/metricsresource"
 	"github.com/giantswarm/randomkeytpr"
 	"k8s.io/client-go/kubernetes"
 
@@ -33,7 +33,7 @@ type ResourceSetConfig struct {
 	PubKeyFile            string
 }
 
-func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
+func NewResourceSet(config ResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
 	if config.CertsSearcher == nil {
@@ -48,8 +48,8 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 	if config.RandomkeysSearcher == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.RandomkeysSearcher must not be empty")
 	}
-	// GuestAWSConfig is validated in framework.go and this resource set is legacy.
-	// HostAWSConfig is validated in framework.go and this resource set is legacy.
+	// GuestAWSConfig is validated in controller.go and this resource set is legacy.
+	// HostAWSConfig is validated in controller.go and this resource set is legacy.
 	if len(config.HandledVersionBundles) == 0 {
 		return nil, microerror.Maskf(invalidConfigError, "config.HandledVersionBundles must not be empty")
 	}
@@ -72,7 +72,7 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		}
 	}
 
-	var legacyResource framework.CRUDResourceOps
+	var legacyResource controller.CRUDResourceOps
 	{
 		legacyConfig := legacyv2.DefaultConfig()
 		legacyConfig.AwsConfig = config.GuestAWSConfig
@@ -91,17 +91,17 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		}
 	}
 
-	var resources []framework.Resource
-	ops := []framework.CRUDResourceOps{
+	var resources []controller.Resource
+	ops := []controller.CRUDResourceOps{
 		legacyResource,
 	}
 	for _, o := range ops {
-		c := framework.CRUDResourceConfig{
+		c := controller.CRUDResourceConfig{
 			Logger: config.Logger,
 			Ops:    o,
 		}
 
-		r, err := framework.NewCRUDResource(c)
+		r, err := controller.NewCRUDResource(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -137,15 +137,15 @@ func NewResourceSet(config ResourceSetConfig) (*framework.ResourceSet, error) {
 		return false
 	}
 
-	var resourceSet *framework.ResourceSet
+	var resourceSet *controller.ResourceSet
 	{
-		c := framework.ResourceSetConfig{
+		c := controller.ResourceSetConfig{
 			Handles:   handlesFunc,
 			Logger:    config.Logger,
 			Resources: resources,
 		}
 
-		resourceSet, err = framework.NewResourceSet(c)
+		resourceSet, err = controller.NewResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
