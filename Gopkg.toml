@@ -57,7 +57,7 @@ required = [
   name = "github.com/giantswarm/certs"
 
 [[constraint]]
-  branch = "master"
+  branch = "purge"
   name = "github.com/giantswarm/e2e-harness"
 
 [[constraint]]
