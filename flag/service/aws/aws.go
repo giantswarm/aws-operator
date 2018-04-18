@@ -5,9 +5,9 @@ import (
 )
 
 type AWS struct {
-	AccessKey            accesskey.AccessKey
-	HostAccessKey        accesskey.AccessKey
-	PubKeyFile           string
-	Region               string
-	AccessLogsExpiration string
+	AccessKey              accesskey.AccessKey
+	HostAccessKey          accesskey.AccessKey
+	PubKeyFile             string
+	Region                 string
+	S3AccessLogsExpiration string
 }

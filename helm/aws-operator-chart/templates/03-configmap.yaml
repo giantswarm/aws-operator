@@ -11,7 +11,7 @@ data:
     service:
       aws:
         region: '{{ .Values.Installation.V1.Provider.AWS.Region }}'
-        accessLogsExpiration: '{{ .Values.Installation.V1.Provider.AWS.AccessLogsExpiration }}'
+        accessLogsExpiration: '{{ .Values.Installation.V1.Provider.AWS.S3AccessLogsExpiration }}'
       guest:
         update:
           enabled: {{ .Values.Installation.V1.Guest.Update.Enabled }}
