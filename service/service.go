@@ -11,7 +11,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8srestconfig"
-	"github.com/giantswarm/operatorkit/controller"
+	operatorkitcontroller "github.com/giantswarm/operatorkit/controller"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/viper"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -21,8 +21,8 @@ import (
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/aws-operator/service/alerter"
-	"github.com/giantswarm/aws-operator/service/awsconfig"
 	"github.com/giantswarm/aws-operator/service/collector"
+	"github.com/giantswarm/aws-operator/service/controller"
 	"github.com/giantswarm/aws-operator/service/healthz"
 )
 
@@ -45,8 +45,8 @@ type Config struct {
 
 type Service struct {
 	Alerter          *alerter.Service
-	ClusterFramework *controller.Controller
-	DrainerFramework *controller.Controller
+	ClusterFramework *operatorkitcontroller.Controller
+	DrainerFramework *operatorkitcontroller.Controller
 	Healthz          *healthz.Service
 	Version          *version.Service
 
@@ -105,29 +105,29 @@ func New(config Config) (*Service, error) {
 		return nil, microerror.Mask(err)
 	}
 
-	var clusterFramework *controller.Controller
+	var clusterFramework *operatorkitcontroller.Controller
 	{
-		c := awsconfig.ClusterFrameworkConfig{
+		c := controller.ClusterFrameworkConfig{
 			G8sClient:    g8sClient,
 			K8sClient:    k8sClient,
 			K8sExtClient: k8sExtClient,
 			Logger:       config.Logger,
 
-			GuestAWSConfig: awsconfig.FrameworkConfigAWSConfig{
+			GuestAWSConfig: controller.FrameworkConfigAWSConfig{
 				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
 				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
 				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
 				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
 			},
 			GuestUpdateEnabled: config.Viper.GetBool(config.Flag.Service.Guest.Update.Enabled),
-			HostAWSConfig: awsconfig.FrameworkConfigAWSConfig{
+			HostAWSConfig: controller.FrameworkConfigAWSConfig{
 				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
 				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
 				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
 				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
 			},
 			InstallationName: config.Viper.GetString(config.Flag.Service.Installation.Name),
-			OIDC: awsconfig.FrameworkConfigOIDCConfig{
+			OIDC: controller.FrameworkConfigOIDCConfig{
 				ClientID:      config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID),
 				IssuerURL:     config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL),
 				UsernameClaim: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.UsernameClaim),
@@ -137,21 +137,21 @@ func New(config Config) (*Service, error) {
 			PubKeyFile:  config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile),
 		}
 
-		clusterFramework, err = awsconfig.NewClusterFramework(c)
+		clusterFramework, err = controller.NewClusterFramework(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	var drainerFramework *controller.Controller
+	var drainerFramework *operatorkitcontroller.Controller
 	{
-		c := awsconfig.DrainerFrameworkConfig{
+		c := controller.DrainerFrameworkConfig{
 			G8sClient:    g8sClient,
 			K8sClient:    k8sClient,
 			K8sExtClient: k8sExtClient,
 			Logger:       config.Logger,
 
-			AWS: awsconfig.DrainerFrameworkConfigAWS{
+			AWS: controller.DrainerFrameworkConfigAWS{
 				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
 				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
 				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
@@ -161,7 +161,7 @@ func New(config Config) (*Service, error) {
 			ProjectName:        config.ProjectName,
 		}
 
-		drainerFramework, err = awsconfig.NewDrainerFramework(c)
+		drainerFramework, err = controller.NewDrainerFramework(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
