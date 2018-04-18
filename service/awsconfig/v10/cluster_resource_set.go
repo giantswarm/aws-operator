@@ -44,9 +44,9 @@ type ClusterResourceSetConfig struct {
 	Logger             micrologger.Logger
 	RandomkeysSearcher randomkeys.Interface
 
+	AccessLogsExpiration int64
 	GuestUpdateEnabled   bool
 	InstallationName     string
-	AccessLogsExpiration int
 	OIDC                 cloudconfig.OIDCConfig
 	ProjectName          string
 }
@@ -100,8 +100,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	if config.ProjectName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.ProjectName must not be empty")
 	}
-	if config.AccessLogsExpiration == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.AccessLogsExpiration must not be empty")
+	if config.AccessLogsExpiration <= 0 {
+		return nil, microerror.Maskf(invalidConfigError, "config.AccessLogsExpiration must be bigger than 0")
 	}
 
 	var awsService *awsservice.Service

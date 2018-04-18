@@ -113,6 +113,7 @@ func New(config Config) (*Service, error) {
 			K8sExtClient: k8sExtClient,
 			Logger:       config.Logger,
 
+			AccessLogsExpiration: config.Viper.GetInt64(config.Flag.Service.AWS.AccessLogsExpiration),
 			GuestAWSConfig: awsconfig.FrameworkConfigAWSConfig{
 				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
 				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),

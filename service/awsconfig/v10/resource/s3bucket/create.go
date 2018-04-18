@@ -58,6 +58,25 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			if err != nil {
 				return microerror.Mask(err)
 			}
+
+			_, err = r.clients.S3.PutBucketLifecycleConfiguration(&s3.PutBucketLifecycleConfigurationInput{
+				Bucket: aws.String(key.TargetLogBucketName(customObject)),
+				LifecycleConfiguration: &s3.BucketLifecycleConfiguration{
+					Rules: []*s3.LifecycleRule{
+						{
+							Expiration: &s3.LifecycleExpiration{
+								Days: aws.Int64(r.accessLogsExpiration),
+							},
+							Filter: &s3.LifecycleRuleFilter{},
+							ID:     aws.String(LifecycleLoggingBucketID),
+							Status: aws.String("Enabled"),
+						},
+					},
+				},
+			})
+			if err != nil {
+				return microerror.Mask(err)
+			}
 		}
 
 		if bucketInput.LoggingEnabled {

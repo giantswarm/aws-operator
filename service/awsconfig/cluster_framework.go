@@ -40,13 +40,14 @@ type ClusterFrameworkConfig struct {
 	K8sExtClient apiextensionsclient.Interface
 	Logger       micrologger.Logger
 
-	GuestAWSConfig     FrameworkConfigAWSConfig
-	GuestUpdateEnabled bool
-	HostAWSConfig      FrameworkConfigAWSConfig
-	InstallationName   string
-	OIDC               FrameworkConfigOIDCConfig
-	ProjectName        string
-	PubKeyFile         string
+	AccessLogsExpiration int64
+	GuestAWSConfig       FrameworkConfigAWSConfig
+	GuestUpdateEnabled   bool
+	HostAWSConfig        FrameworkConfigAWSConfig
+	InstallationName     string
+	OIDC                 FrameworkConfigOIDCConfig
+	ProjectName          string
+	PubKeyFile           string
 }
 
 type FrameworkConfigAWSConfig struct {
@@ -105,6 +106,9 @@ func NewClusterFramework(config ClusterFrameworkConfig) (*controller.Controller,
 	}
 	if config.ProjectName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ProjectName must not be empty", config)
+	}
+	if config.AccessLogsExpiration <= 0 {
+		return nil, microerror.Maskf(invalidConfigError, "%T.AccessLogsExpiration must be bigger than 0", config)
 	}
 
 	var crdClient *k8scrdclient.CRDClient
@@ -464,8 +468,9 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*controller.Resour
 			Logger:             config.Logger,
 			RandomkeysSearcher: randomKeySearcher,
 
-			GuestUpdateEnabled: config.GuestUpdateEnabled,
-			InstallationName:   config.InstallationName,
+			AccessLogsExpiration: config.AccessLogsExpiration,
+			GuestUpdateEnabled:   config.GuestUpdateEnabled,
+			InstallationName:     config.InstallationName,
 			OIDC: v10cloudconfig.OIDCConfig{
 				ClientID:      config.OIDC.ClientID,
 				IssuerURL:     config.OIDC.IssuerURL,

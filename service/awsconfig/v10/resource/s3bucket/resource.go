@@ -14,6 +14,8 @@ import (
 const (
 	// Name is the identifier of the resource.
 	Name = "s3bucketv10"
+	// Lifecycle ID for the logging bucket
+	LifecycleLoggingBucketID = "ExpirationLogs"
 )
 
 // Config represents the configuration used to create a new s3bucket resource.
@@ -25,7 +27,7 @@ type Config struct {
 
 	// Settings.
 	InstallationName     string
-	AccessLogsExpiration int
+	AccessLogsExpiration int64
 }
 
 // DefaultConfig provides a default configuration to create a new s3bucket
@@ -48,7 +50,7 @@ type Resource struct {
 
 	// Settings.
 	installationName     string
-	AccessLogsExpiration int
+	accessLogsExpiration int64
 }
 
 // New creates a new configured s3bucket resource.
