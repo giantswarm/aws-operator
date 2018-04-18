@@ -1,4 +1,4 @@
-package awsconfig
+package controller
 
 import (
 	"testing"

@@ -1,4 +1,4 @@
-package awsconfig
+package controller
 
 import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"

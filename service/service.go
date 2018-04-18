@@ -11,7 +11,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8srestconfig"
-	"github.com/giantswarm/operatorkit/controller"
+	operatorkitcontroller "github.com/giantswarm/operatorkit/controller"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/viper"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -22,6 +22,7 @@ import (
 	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/aws-operator/service/alerter"
 	"github.com/giantswarm/aws-operator/service/collector"
+	"github.com/giantswarm/aws-operator/service/controller"
 	"github.com/giantswarm/aws-operator/service/healthz"
 )
 
@@ -44,8 +45,8 @@ type Config struct {
 
 type Service struct {
 	Alerter          *alerter.Service
-	ClusterFramework *controller.Controller
-	DrainerFramework *controller.Controller
+	ClusterFramework *operatorkitcontroller.Controller
+	DrainerFramework *operatorkitcontroller.Controller
 	Healthz          *healthz.Service
 	Version          *version.Service
 
@@ -104,7 +105,7 @@ func New(config Config) (*Service, error) {
 		return nil, microerror.Mask(err)
 	}
 
-	var clusterFramework *controller.Controller
+	var clusterFramework *operatorkitcontroller.Controller
 	{
 		c := controller.ClusterFrameworkConfig{
 			G8sClient:    g8sClient,
@@ -142,7 +143,7 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var drainerFramework *controller.Controller
+	var drainerFramework *operatorkitcontroller.Controller
 	{
 		c := controller.DrainerFrameworkConfig{
 			G8sClient:    g8sClient,
