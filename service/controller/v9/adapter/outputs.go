@@ -5,13 +5,13 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/key"
+	"github.com/giantswarm/aws-operator/service/controller/v9/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v9/key"
 )
 
 // The template related to this adapter can be found in the following import.
 //
-//     github.com/giantswarm/aws-operator/service/awsconfig/v9/templates/cloudformation/guest/outputs.go
+//     github.com/giantswarm/aws-operator/service/controller/v9/templates/cloudformation/guest/outputs.go
 //
 
 type outputsAdapter struct {

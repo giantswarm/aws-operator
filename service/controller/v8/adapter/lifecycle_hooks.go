@@ -1,10 +1,10 @@
 package adapter
 
-import "github.com/giantswarm/aws-operator/service/awsconfig/v8/key"
+import "github.com/giantswarm/aws-operator/service/controller/v8/key"
 
 // The template related to this adapter can be found in the following import.
 //
-//     github.com/giantswarm/aws-operator/service/awsconfig/v8/templates/cloudformation/guest/lifecycle_hooks.go
+//     github.com/giantswarm/aws-operator/service/controller/v8/templates/cloudformation/guest/lifecycle_hooks.go
 //
 
 type lifecycleHooksAdapter struct {

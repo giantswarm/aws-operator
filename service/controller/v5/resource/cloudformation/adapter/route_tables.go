@@ -3,12 +3,12 @@ package adapter
 import (
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v5/key"
+	"github.com/giantswarm/aws-operator/service/controller/v5/key"
 )
 
 // The template related to this adapter can be found in the following import.
 //
-//     github.com/giantswarm/aws-operator/service/awsconfig/v5/templates/cloudformation/guest/route_tables.go
+//     github.com/giantswarm/aws-operator/service/controller/v5/templates/cloudformation/guest/route_tables.go
 //
 
 type routeTablesAdapter struct {

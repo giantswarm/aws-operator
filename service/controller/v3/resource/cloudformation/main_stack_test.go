@@ -8,8 +8,8 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v3/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v3/resource/cloudformation/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v3/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v3/resource/cloudformation/adapter"
 )
 
 func testConfig() Config {

@@ -3,7 +3,7 @@ package s3bucket
 import (
 	"context"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v7/key"
+	"github.com/giantswarm/aws-operator/service/controller/v7/key"
 	"github.com/giantswarm/microerror"
 )
 

@@ -10,9 +10,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v1/cloudconfig"
-	legacyv2 "github.com/giantswarm/aws-operator/service/awsconfig/v1/resource/legacy"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v2/key"
+	"github.com/giantswarm/aws-operator/service/controller/v1/cloudconfig"
+	legacyv2 "github.com/giantswarm/aws-operator/service/controller/v1/resource/legacy"
+	"github.com/giantswarm/aws-operator/service/controller/v2/key"
 )
 
 const (

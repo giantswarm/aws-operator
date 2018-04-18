@@ -7,12 +7,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v7/key"
+	"github.com/giantswarm/aws-operator/service/controller/v7/key"
 )
 
 // The template related to this adapter can be found in the following import.
 //
-//     github.com/giantswarm/aws-operator/service/awsconfig/v7/templates/cloudformation/guest/iam_policies.go
+//     github.com/giantswarm/aws-operator/service/controller/v7/templates/cloudformation/guest/iam_policies.go
 //
 
 type iamPoliciesAdapter struct {

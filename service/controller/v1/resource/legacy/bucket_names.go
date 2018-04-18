@@ -5,7 +5,7 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v2/key"
+	"github.com/giantswarm/aws-operator/service/controller/v2/key"
 )
 
 func (s *Resource) bucketName(cluster v1alpha1.AWSConfig) string {

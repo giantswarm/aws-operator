@@ -7,8 +7,8 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v5/key"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v5/resource/cloudformation/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v5/key"
+	"github.com/giantswarm/aws-operator/service/controller/v5/resource/cloudformation/adapter"
 )
 
 const (

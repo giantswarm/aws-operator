@@ -5,7 +5,7 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v8/key"
+	"github.com/giantswarm/aws-operator/service/controller/v8/key"
 )
 
 var (

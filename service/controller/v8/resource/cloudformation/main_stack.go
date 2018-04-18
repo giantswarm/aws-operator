@@ -6,10 +6,10 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v8/adapter"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v8/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v8/key"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v8/templates"
+	"github.com/giantswarm/aws-operator/service/controller/v8/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v8/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v8/key"
+	"github.com/giantswarm/aws-operator/service/controller/v8/templates"
 )
 
 func newMainStack(customObject v1alpha1.AWSConfig) (StackState, error) {

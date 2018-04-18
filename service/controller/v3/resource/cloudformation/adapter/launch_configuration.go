@@ -5,8 +5,8 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v3/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v3/key"
+	"github.com/giantswarm/aws-operator/service/controller/v3/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v3/key"
 )
 
 // template related to this adapter: service/templates/cloudformation/guest/launch_configuration.yaml

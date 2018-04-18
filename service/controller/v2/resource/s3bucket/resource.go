@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v2/key"
+	"github.com/giantswarm/aws-operator/service/controller/v2/key"
 )
 
 const (

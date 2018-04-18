@@ -1,6 +1,6 @@
 package adapter
 
-import "github.com/giantswarm/aws-operator/service/awsconfig/v3/key"
+import "github.com/giantswarm/aws-operator/service/controller/v3/key"
 
 // template related to this adapter: service/templates/cloudformation/host-pre/iam_roles.yaml
 

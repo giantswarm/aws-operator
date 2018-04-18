@@ -3,7 +3,7 @@ package templates_test
 import (
 	"testing"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v10/templates"
+	"github.com/giantswarm/aws-operator/service/controller/v10/templates"
 )
 
 func TestRender(t *testing.T) {

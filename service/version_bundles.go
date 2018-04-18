@@ -3,16 +3,16 @@ package service
 import (
 	"github.com/giantswarm/versionbundle"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v1"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v10"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v2"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v3"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v4"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v5"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v6"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v7"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v8"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9"
+	"github.com/giantswarm/aws-operator/service/controller/v1"
+	"github.com/giantswarm/aws-operator/service/controller/v10"
+	"github.com/giantswarm/aws-operator/service/controller/v2"
+	"github.com/giantswarm/aws-operator/service/controller/v3"
+	"github.com/giantswarm/aws-operator/service/controller/v4"
+	"github.com/giantswarm/aws-operator/service/controller/v5"
+	"github.com/giantswarm/aws-operator/service/controller/v6"
+	"github.com/giantswarm/aws-operator/service/controller/v7"
+	"github.com/giantswarm/aws-operator/service/controller/v8"
+	"github.com/giantswarm/aws-operator/service/controller/v9"
 )
 
 // NewVersionBundles returns the array of version bundles defined for the

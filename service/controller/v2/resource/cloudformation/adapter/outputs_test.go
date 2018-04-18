@@ -3,7 +3,7 @@ package adapter
 import (
 	"testing"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v2/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v2/cloudconfig"
 )
 
 func TestAdapterOutputsRegularFields(t *testing.T) {

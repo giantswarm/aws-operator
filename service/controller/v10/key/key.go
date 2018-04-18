@@ -10,10 +10,10 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v10/templates/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v10/templates/cloudformation/guest"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v10/templates/cloudformation/hostpost"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v10/templates/cloudformation/hostpre"
+	"github.com/giantswarm/aws-operator/service/controller/v10/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v10/templates/cloudformation/guest"
+	"github.com/giantswarm/aws-operator/service/controller/v10/templates/cloudformation/hostpost"
+	"github.com/giantswarm/aws-operator/service/controller/v10/templates/cloudformation/hostpre"
 )
 
 const (

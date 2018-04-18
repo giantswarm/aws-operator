@@ -10,7 +10,7 @@ import (
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v8/key"
+	"github.com/giantswarm/aws-operator/service/controller/v8/key"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {

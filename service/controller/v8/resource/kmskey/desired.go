@@ -3,7 +3,7 @@ package kmskey
 import (
 	"context"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v8/key"
+	"github.com/giantswarm/aws-operator/service/controller/v8/key"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {

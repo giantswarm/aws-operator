@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v10/key"
+	"github.com/giantswarm/aws-operator/service/controller/v10/key"
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {

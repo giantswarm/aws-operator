@@ -5,7 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v4/key"
+	"github.com/giantswarm/aws-operator/service/controller/v4/key"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
 )

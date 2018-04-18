@@ -5,8 +5,8 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/key"
+	"github.com/giantswarm/aws-operator/service/controller/v9/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v9/key"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {

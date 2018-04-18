@@ -13,9 +13,9 @@ import (
 	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v8/cloudformation"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v8/key"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v8/resource/lifecycle"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v8/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v8/key"
+	"github.com/giantswarm/aws-operator/service/controller/v8/resource/lifecycle"
 )
 
 type DrainerResourceSetConfig struct {

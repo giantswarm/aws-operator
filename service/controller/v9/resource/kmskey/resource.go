@@ -9,7 +9,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v9/key"
+	"github.com/giantswarm/aws-operator/service/controller/v9/key"
 )
 
 const (

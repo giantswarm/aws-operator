@@ -3,7 +3,7 @@ package legacy
 import (
 	"testing"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/cloudformation/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v2/resource/cloudformation/adapter"
 )
 
 func TestAdapterSmallCloudConfig(t *testing.T) {

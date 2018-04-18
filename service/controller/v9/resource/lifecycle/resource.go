@@ -6,7 +6,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/awsconfig/v9/cloudformation"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v9/cloudformation"
 )
 
 const (

@@ -1,6 +1,6 @@
 package adapter
 
-import "github.com/giantswarm/aws-operator/service/awsconfig/v2/cloudconfig"
+import "github.com/giantswarm/aws-operator/service/controller/v2/cloudconfig"
 
 // template related to this adapter: service/templates/cloudformation/guest/outputs.yaml
 

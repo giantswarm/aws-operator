@@ -16,7 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v2/resource/cloudformation/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v2/resource/cloudformation/adapter"
 )
 
 type Config struct {

@@ -8,7 +8,7 @@ import (
 
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	awsresources "github.com/giantswarm/aws-operator/resources/aws"
-	"github.com/giantswarm/aws-operator/service/awsconfig/v2/key"
+	"github.com/giantswarm/aws-operator/service/controller/v2/key"
 )
 
 type SubnetInput struct {

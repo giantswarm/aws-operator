@@ -5,7 +5,7 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/awsconfig/v10/ebs"
+	"github.com/giantswarm/aws-operator/service/controller/v10/ebs"
 )
 
 type EBSServiceMock struct {
