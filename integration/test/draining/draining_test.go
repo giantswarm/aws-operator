@@ -96,7 +96,6 @@ func Test_Draining(t *testing.T) {
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
-		fmt.Printf("tarballPath: %#v\n", tarballPath)
 
 		err = helmClient.InstallFromTarball(tarballPath, ChartNamespace)
 		if err != nil {
