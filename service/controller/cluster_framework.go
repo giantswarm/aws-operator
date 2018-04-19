@@ -40,7 +40,7 @@ type ClusterFrameworkConfig struct {
 	K8sExtClient apiextensionsclient.Interface
 	Logger       micrologger.Logger
 
-	AccessLogsExpiration int64
+	AccessLogsExpiration int
 	GuestAWSConfig       FrameworkConfigAWSConfig
 	GuestUpdateEnabled   bool
 	HostAWSConfig        FrameworkConfigAWSConfig
@@ -106,9 +106,6 @@ func NewClusterFramework(config ClusterFrameworkConfig) (*controller.Controller,
 	}
 	if config.ProjectName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ProjectName must not be empty", config)
-	}
-	if config.AccessLogsExpiration <= 0 {
-		return nil, microerror.Maskf(invalidConfigError, "%T.AccessLogsExpiration must be bigger than 0", config)
 	}
 
 	var crdClient *k8scrdclient.CRDClient

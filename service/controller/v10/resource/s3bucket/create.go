@@ -65,7 +65,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 					Rules: []*s3.LifecycleRule{
 						{
 							Expiration: &s3.LifecycleExpiration{
-								Days: aws.Int64(r.accessLogsExpiration),
+								Days: aws.Int64(int64(r.accessLogsExpiration)),
 							},
 							Filter: &s3.LifecycleRuleFilter{},
 							ID:     aws.String(LifecycleLoggingBucketID),
