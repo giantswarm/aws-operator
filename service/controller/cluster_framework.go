@@ -17,6 +17,7 @@ import (
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v1"
 	"github.com/giantswarm/aws-operator/service/controller/v10"
+	v10adapter "github.com/giantswarm/aws-operator/service/controller/v10/adapter"
 	v10cloudconfig "github.com/giantswarm/aws-operator/service/controller/v10/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v2"
 	"github.com/giantswarm/aws-operator/service/controller/v3"
@@ -45,6 +46,7 @@ type ClusterFrameworkConfig struct {
 	HostAWSConfig      FrameworkConfigAWSConfig
 	InstallationName   string
 	OIDC               FrameworkConfigOIDCConfig
+	APIWhitelist       FrameworkConfigApiWhitelistConfig
 	ProjectName        string
 	PubKeyFile         string
 }
@@ -62,6 +64,12 @@ type FrameworkConfigOIDCConfig struct {
 	IssuerURL     string
 	UsernameClaim string
 	GroupsClaim   string
+}
+
+// Whitelist defines guest cluster k8s API whitelisting.
+type FrameworkConfigApiWhitelistConfig struct {
+	Enabled    bool
+	SubnetList string
 }
 
 func NewClusterFramework(config ClusterFrameworkConfig) (*controller.Controller, error) {
@@ -105,6 +113,10 @@ func NewClusterFramework(config ClusterFrameworkConfig) (*controller.Controller,
 	}
 	if config.ProjectName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ProjectName must not be empty", config)
+	}
+
+	if config.APIWhitelist.Enabled && config.APIWhitelist.SubnetList == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.SubnetList must not be empty when %T.APIWhitelist is enabled", config)
 	}
 
 	var crdClient *k8scrdclient.CRDClient
@@ -471,6 +483,10 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*controller.Resour
 				IssuerURL:     config.OIDC.IssuerURL,
 				UsernameClaim: config.OIDC.UsernameClaim,
 				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			APIWhitelist: v10adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
 			},
 			ProjectName: config.ProjectName,
 		}

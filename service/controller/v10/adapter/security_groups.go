@@ -45,13 +45,14 @@ const (
 )
 
 func (s *securityGroupsAdapter) getSecurityGroups(cfg Config) error {
+
 	hostClusterCIDR, err := VpcCIDR(cfg.HostClients, key.PeerID(cfg.CustomObject))
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
 	s.MasterSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, prefixMaster)
-	s.MasterSecurityGroupRules = s.getMasterRules(cfg.CustomObject, hostClusterCIDR)
+	s.MasterSecurityGroupRules = s.getMasterRules(cfg, hostClusterCIDR)
 
 	s.WorkerSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, prefixWorker)
 	s.WorkerSecurityGroupRules = s.getWorkerRules(cfg.CustomObject, hostClusterCIDR)
@@ -62,14 +63,10 @@ func (s *securityGroupsAdapter) getSecurityGroups(cfg Config) error {
 	return nil
 }
 
-func (s *securityGroupsAdapter) getMasterRules(customObject v1alpha1.AWSConfig, hostClusterCIDR string) []securityGroupRule {
+func (s *securityGroupsAdapter) getMasterRules(cfg Config, hostClusterCIDR string) []securityGroupRule {
 	return []securityGroupRule{
 		// Allow all traffic to the kubernetes api server.
-		{
-			Port:       key.KubernetesAPISecurePort(customObject),
-			Protocol:   tcpProtocol,
-			SourceCIDR: defaultCIDR,
-		},
+		getKubernetesAPIRule(cfg, hostClusterCIDR),
 		// Allow traffic from host cluster CIDR to 4194 for cadvisor scraping.
 		{
 			Port:       cadvisorPort,
@@ -170,4 +167,17 @@ func (s *securityGroupsAdapter) getIngressRules(customObject v1alpha1.AWSConfig)
 			SourceCIDR: defaultCIDR,
 		},
 	}
+}
+
+func getKubernetesAPIRule(cfg Config, hostClusterCIDR string) securityGroupRule {
+	apiRule := securityGroupRule{
+		Port:       key.KubernetesAPISecurePort(cfg.CustomObject),
+		Protocol:   tcpProtocol,
+		SourceCIDR: defaultCIDR,
+	}
+	if cfg.ApiWhitelist.Enabled {
+		apiRule.SourceCIDR = key.ApiSecurityGroupCIDR(hostClusterCIDR, cfg.CustomObject.Spec.AWS.VPC.CIDR, cfg.ApiWhitelist.SubnetList)
+	}
+
+	return apiRule
 }

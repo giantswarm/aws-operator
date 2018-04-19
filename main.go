@@ -127,6 +127,9 @@ func mainError() error {
 	daemonCommand.PersistentFlags().String(f.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.UsernameClaim, "", "OIDC authorization provider UsernameClaim.")
 	daemonCommand.PersistentFlags().String(f.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.GroupsClaim, "", "OIDC authorization provider GroupsClaim.")
 
+	daemonCommand.PersistentFlags().Bool(f.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Enabled, false, "Enable or disable guest cluster k8s API whitelisting.")
+	daemonCommand.PersistentFlags().String(f.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.SubnetList, "", "Subnet list for guest cluster k8s API whitelisting.")
+
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.Address, "http://127.0.0.1:6443", "Address used to connect to Kubernetes. When empty in-cluster config is created.")
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.BearerToken, "", "Token (if needed for Kubernetes authentication).")
 	daemonCommand.PersistentFlags().Bool(f.Service.Kubernetes.InCluster, false, "Whether to use the in-cluster config to authenticate with Kubernetes.")

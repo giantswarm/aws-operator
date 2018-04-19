@@ -27,6 +27,12 @@ data:
                     issuerURL: '{{ .Values.Installation.V1.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL }}'
                     usernameClaim: '{{ .Values.Installation.V1.Guest.Kubernetes.API.Auth.Provider.OIDC.UsernameClaim }}'
                     groupsClaim: '{{ .Values.Installation.V1.Guest.Kubernetes.API.Auth.Provider.OIDC.GroupsClaim }}'
+              security:
+                whitelist:
+                  enabled: {{ .Values.Installation.V1.Security.RestrictAccess.Enabled }}
+                  {{- if .Values.Installation.V1.Security.RestrictAccess.Enabled }}
+                  subnetList: {{ .Values.Installation.V1.Security.RestrictAccess.WhitelistSubnets  }}
+                  {{- end }}
         {{- end }}
       kubernetes:
         incluster: true

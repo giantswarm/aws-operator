@@ -133,6 +133,11 @@ func New(config Config) (*Service, error) {
 				UsernameClaim: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.UsernameClaim),
 				GroupsClaim:   config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.GroupsClaim),
 			},
+			APIWhitelist: controller.FrameworkConfigApiWhitelistConfig{
+				Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Enabled),
+				SubnetList: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.SubnetList),
+			},
+
 			ProjectName: config.ProjectName,
 			PubKeyFile:  config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile),
 		}

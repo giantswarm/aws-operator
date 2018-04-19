@@ -66,6 +66,7 @@ type Config struct {
 	HostClients      Clients
 	InstallationName string
 	StackState       StackState
+	ApiWhitelist     APIWhitelist
 }
 
 func NewGuest(cfg Config) (Adapter, error) {

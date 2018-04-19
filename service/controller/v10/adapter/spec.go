@@ -132,3 +132,9 @@ type SmallCloudconfigConfig struct {
 type ELBClient interface {
 	DescribeLoadBalancers(*elb.DescribeLoadBalancersInput) (*elb.DescribeLoadBalancersOutput, error)
 }
+
+// APIWhitelist defines guest cluster k8s api whitelisting.
+type APIWhitelist struct {
+	Enabled    bool
+	SubnetList string
+}

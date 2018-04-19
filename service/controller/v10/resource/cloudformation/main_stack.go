@@ -20,6 +20,10 @@ func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig, sta
 		HostClients:      *r.hostClients,
 		InstallationName: r.installationName,
 		HostAccountID:    hostAccountID,
+		ApiWhitelist: adapter.APIWhitelist{
+			Enabled:    r.apiWhiteList.Enabled,
+			SubnetList: r.apiWhiteList.SubnetList,
+		},
 		StackState: adapter.StackState{
 			Name: stackState.Name,
 

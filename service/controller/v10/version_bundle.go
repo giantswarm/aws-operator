@@ -54,6 +54,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Updated to 1.10.1.",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Added support for k8s API whitelisting.",
+				Kind:        versionbundle.KindAdded,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
