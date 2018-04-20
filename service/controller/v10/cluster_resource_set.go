@@ -187,8 +187,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			},
 			Logger: config.Logger,
 
-			InstallationName:     config.InstallationName,
 			AccessLogsExpiration: config.AccessLogsExpiration,
+			InstallationName:     config.InstallationName,
 		}
 
 		ops, err := s3bucket.New(c)
