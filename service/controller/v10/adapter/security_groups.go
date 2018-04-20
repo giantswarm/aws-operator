@@ -5,6 +5,7 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v10/key"
+	"fmt"
 )
 
 // The template related to this adapter can be found in the following import.
@@ -174,8 +175,9 @@ func getKubernetesAPIRule(cfg Config, hostClusterCIDR string) securityGroupRule 
 		Protocol:   tcpProtocol,
 		SourceCIDR: defaultCIDR,
 	}
-	if cfg.ApiWhitelist.Enabled {
-		apiRule.SourceCIDR = key.ApiSecurityGroupCIDR(hostClusterCIDR, cfg.CustomObject.Spec.AWS.VPC.CIDR, cfg.ApiWhitelist.SubnetList)
+	fmt.Printf("security_groups.go: whitelist mdoe enabled: %t", cfg.APIWhitelist.Enabled )
+	if cfg.APIWhitelist.Enabled {
+		apiRule.SourceCIDR = key.ApiSecurityGroupCIDR(hostClusterCIDR, cfg.CustomObject.Spec.AWS.VPC.CIDR, cfg.APIWhitelist.SubnetList)
 	}
 
 	return apiRule

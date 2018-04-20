@@ -33,6 +33,7 @@ import (
 	v8cloudconfig "github.com/giantswarm/aws-operator/service/controller/v8/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v9"
 	v9cloudconfig "github.com/giantswarm/aws-operator/service/controller/v9/cloudconfig"
+	"fmt"
 )
 
 type ClusterFrameworkConfig struct {
@@ -114,6 +115,8 @@ func NewClusterFramework(config ClusterFrameworkConfig) (*controller.Controller,
 	if config.ProjectName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ProjectName must not be empty", config)
 	}
+
+	fmt.Printf("cluster_framework.go: whitelist mdoe enabled: %t", config.APIWhitelist.Enabled )
 
 	var crdClient *k8scrdclient.CRDClient
 	{

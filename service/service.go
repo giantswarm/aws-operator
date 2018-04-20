@@ -24,6 +24,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller"
 	"github.com/giantswarm/aws-operator/service/healthz"
+	"fmt"
 )
 
 const (
@@ -141,6 +142,7 @@ func New(config Config) (*Service, error) {
 			ProjectName: config.ProjectName,
 			PubKeyFile:  config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile),
 		}
+		fmt.Printf("service.go: whitelist mdoe enabled: %t", c.APIWhitelist.Enabled )
 
 		clusterFramework, err = controller.NewClusterFramework(c)
 		if err != nil {
