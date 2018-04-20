@@ -88,6 +88,8 @@ func NewGuest(cfg Config) (Adapter, error) {
 	// is to get actual user stories done.
 	a.MasterInstanceResourceName = cfg.StackState.MasterInstanceResourceName
 
+	fmt.Printf("adapter.go: whitelist mode enabled: %t", cfg.APIWhitelist.Enabled)
+
 	hydraters := []hydrater{
 		a.getAutoScalingGroup,
 		a.getIamPolicies,
@@ -109,8 +111,6 @@ func NewGuest(cfg Config) (Adapter, error) {
 			return Adapter{}, microerror.Mask(err)
 		}
 	}
-
-	fmt.Printf("adapter.go: whitelist mode enabled: %t", cfg.APIWhitelist.Enabled)
 
 	return a, nil
 }

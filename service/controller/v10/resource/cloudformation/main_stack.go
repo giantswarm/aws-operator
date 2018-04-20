@@ -4,6 +4,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
+	"fmt"
 	"github.com/giantswarm/aws-operator/service/controller/v10/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v10/key"
 	"github.com/giantswarm/aws-operator/service/controller/v10/templates"
@@ -40,6 +41,8 @@ func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig, sta
 			VersionBundleVersion: stackState.VersionBundleVersion,
 		},
 	}
+
+	fmt.Printf("main_stack.go: whitelist enabled: %t\n", cfg.APIWhitelist.Enabled)
 	adp, err := adapter.NewGuest(cfg)
 	if err != nil {
 		return "", microerror.Mask(err)

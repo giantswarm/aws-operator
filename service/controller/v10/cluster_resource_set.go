@@ -288,7 +288,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		fmt.Printf("cluster_resource_set.go: whitelist mode enabled: %t", c.APIWhitelist.Enabled)
+		fmt.Printf("cluster_resource_set.go: whitelist mode enabled: %t\n", c.APIWhitelist.Enabled)
 
 		cloudformationResource, err = toCRUDResource(config.Logger, ops)
 		if err != nil {
