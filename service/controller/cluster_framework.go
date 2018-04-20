@@ -14,6 +14,7 @@ import (
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
 
+	"fmt"
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v1"
 	"github.com/giantswarm/aws-operator/service/controller/v10"
@@ -33,7 +34,6 @@ import (
 	v8cloudconfig "github.com/giantswarm/aws-operator/service/controller/v8/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v9"
 	v9cloudconfig "github.com/giantswarm/aws-operator/service/controller/v9/cloudconfig"
-	"fmt"
 )
 
 type ClusterFrameworkConfig struct {
@@ -116,7 +116,7 @@ func NewClusterFramework(config ClusterFrameworkConfig) (*controller.Controller,
 		return nil, microerror.Maskf(invalidConfigError, "%T.ProjectName must not be empty", config)
 	}
 
-	fmt.Printf("cluster_framework.go: whitelist mdoe enabled: %t", config.APIWhitelist.Enabled )
+	fmt.Printf("cluster_framework.go: whitelist mdoe enabled: %t", config.APIWhitelist.Enabled)
 
 	var crdClient *k8scrdclient.CRDClient
 	{

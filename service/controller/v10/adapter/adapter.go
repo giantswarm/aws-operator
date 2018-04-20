@@ -29,8 +29,8 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v10/key"
 	"fmt"
+	"github.com/giantswarm/aws-operator/service/controller/v10/key"
 )
 
 type hydrater func(Config) error
@@ -110,7 +110,7 @@ func NewGuest(cfg Config) (Adapter, error) {
 		}
 	}
 
-	fmt.Printf("adapter.go: whitelist mode enabled: %t", cfg.APIWhitelist.Enabled )
+	fmt.Printf("adapter.go: whitelist mode enabled: %t", cfg.APIWhitelist.Enabled)
 
 	return a, nil
 }

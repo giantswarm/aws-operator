@@ -139,7 +139,7 @@ func mainError() error {
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.KeyFile, "", "Key file path to use to authenticate with Kubernetes.")
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.Username, "", "Username (if the Kubernetes cluster is using basic authentication).")
 
-	fmt.Printf("main: whitelist mode %t", daemonCommand.PersistentFlags().GetBool(f.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Enabled) )
+	fmt.Printf("main: whitelist mode %t", daemonCommand.PersistentFlags().GetBool(f.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Enabled))
 
 	newCommand.CobraCommand().Execute()
 

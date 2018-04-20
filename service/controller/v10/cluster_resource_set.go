@@ -14,6 +14,7 @@ import (
 	"github.com/giantswarm/randomkeys"
 	"k8s.io/client-go/kubernetes"
 
+	"fmt"
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v10/adapter"
@@ -30,7 +31,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v10/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/v10/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/v10/resource/service"
-	"fmt"
 )
 
 const (
@@ -288,7 +288,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		fmt.Printf("cluster_resource_set.go: whitelist mode enabled: %t", c.APIWhitelist.Enabled )
+		fmt.Printf("cluster_resource_set.go: whitelist mode enabled: %t", c.APIWhitelist.Enabled)
 
 		cloudformationResource, err = toCRUDResource(config.Logger, ops)
 		if err != nil {
