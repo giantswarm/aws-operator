@@ -140,9 +140,9 @@ workflows:
       - e2eTestCurPRDraining:
           requires:
           - hold
-      # - e2eTestWIPPRDraining:
-      #     requires:
-      #     - hold
+      - e2eTestWIPPRDraining:
+          requires:
+          - hold
       - e2eTestCurMasterDraining:
           filters:
             branches:
