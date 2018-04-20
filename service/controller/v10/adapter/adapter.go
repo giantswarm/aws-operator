@@ -29,7 +29,6 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"fmt"
 	"github.com/giantswarm/aws-operator/service/controller/v10/key"
 )
 
