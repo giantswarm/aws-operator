@@ -116,8 +116,6 @@ func NewClusterFramework(config ClusterFrameworkConfig) (*controller.Controller,
 		return nil, microerror.Maskf(invalidConfigError, "%T.ProjectName must not be empty", config)
 	}
 
-	fmt.Printf("cluster_framework.go: whitelist mdoe enabled: %t\n", config.APIWhitelist.Enabled)
-
 	var crdClient *k8scrdclient.CRDClient
 	{
 		c := k8scrdclient.Config{

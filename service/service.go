@@ -142,7 +142,6 @@ func New(config Config) (*Service, error) {
 			ProjectName: config.ProjectName,
 			PubKeyFile:  config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile),
 		}
-		fmt.Printf("service.go: whitelist mdoe enabled: %t\n", c.APIWhitelist.Enabled)
 
 		clusterFramework, err = controller.NewClusterFramework(c)
 		if err != nil {

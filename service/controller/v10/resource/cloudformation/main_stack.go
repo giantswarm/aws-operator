@@ -42,7 +42,6 @@ func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig, sta
 		},
 	}
 
-	fmt.Printf("main_stack.go: whitelist enabled: %t\n", cfg.APIWhitelist.Enabled)
 	adp, err := adapter.NewGuest(cfg)
 	if err != nil {
 		return "", microerror.Mask(err)
