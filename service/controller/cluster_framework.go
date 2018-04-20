@@ -41,12 +41,12 @@ type ClusterFrameworkConfig struct {
 	K8sExtClient apiextensionsclient.Interface
 	Logger       micrologger.Logger
 
+	APIWhitelist       FrameworkConfigAPIWhitelistConfig
 	GuestAWSConfig     FrameworkConfigAWSConfig
 	GuestUpdateEnabled bool
 	HostAWSConfig      FrameworkConfigAWSConfig
 	InstallationName   string
 	OIDC               FrameworkConfigOIDCConfig
-	APIWhitelist       FrameworkConfigApiWhitelistConfig
 	ProjectName        string
 	PubKeyFile         string
 }
@@ -67,7 +67,7 @@ type FrameworkConfigOIDCConfig struct {
 }
 
 // Whitelist defines guest cluster k8s API whitelisting.
-type FrameworkConfigApiWhitelistConfig struct {
+type FrameworkConfigAPIWhitelistConfig struct {
 	Enabled    bool
 	SubnetList string
 }
@@ -113,10 +113,6 @@ func NewClusterFramework(config ClusterFrameworkConfig) (*controller.Controller,
 	}
 	if config.ProjectName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ProjectName must not be empty", config)
-	}
-
-	if config.APIWhitelist.Enabled && config.APIWhitelist.SubnetList == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.SubnetList must not be empty when %T.APIWhitelist is enabled", config)
 	}
 
 	var crdClient *k8scrdclient.CRDClient
