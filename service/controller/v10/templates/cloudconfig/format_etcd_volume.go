@@ -2,9 +2,8 @@ package cloudconfig
 
 const FormatEtcdVolume = `
 [Unit]
-Description=Formats EBS /dev/xvdh volume
-Requires=dev-xvdh.device
-After=dev-xvdh.device
+Description=Formats EBS volume for etcd
+Before=docker.service var-lib-etcd.mount
 
 [Service]
 Type=oneshot
@@ -12,8 +11,12 @@ RemainAfterExit=yes
 
 # Do not wipe the disk if it's already being used, so the etcd data is
 # persistent across reboots and updates.
-Environment="DEV=/dev/xvdh"
-ExecStart=-/bin/bash -c "if ! blkid $DEV; then wipefs -a -f $DEV && mkfs.ext4 -L etcd $DEV && echo formatted file system; else echo file system already formatted; fi"
+Environment=DEV=/dev/nvme2n1
+
+ExecStart=/bin/bash -c "\
+[ -b /dev/xvdh ] && export DEV=/dev/xvdh ;\
+if ! blkid $DEV; then mkfs.ext4 -L etcd $DEV; fi ;\
+[ -L /dev/disk/by-label/etcd ] || e2label $DEV etcd"
 
 [Install]
 WantedBy=multi-user.target
