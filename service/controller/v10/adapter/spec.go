@@ -60,6 +60,12 @@ const (
 	RootDirElement = "aws-operator"
 )
 
+// APIWhitelist defines guest cluster k8s api whitelisting.
+type APIWhitelist struct {
+	Enabled    bool
+	SubnetList string
+}
+
 type Clients struct {
 	CloudFormation CFClient
 	EC2            EC2Client
@@ -131,10 +137,4 @@ type SmallCloudconfigConfig struct {
 // ELBClient describes the methods required to be implemented by a ELB AWS client.
 type ELBClient interface {
 	DescribeLoadBalancers(*elb.DescribeLoadBalancersInput) (*elb.DescribeLoadBalancersOutput, error)
-}
-
-// APIWhitelist defines guest cluster k8s api whitelisting.
-type APIWhitelist struct {
-	Enabled    bool
-	SubnetList string
 }

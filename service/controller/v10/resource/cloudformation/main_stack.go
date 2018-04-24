@@ -15,15 +15,15 @@ func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig, sta
 		return "", microerror.Mask(err)
 	}
 	cfg := adapter.Config{
+		APIWhitelist: adapter.APIWhitelist{
+			Enabled:    r.apiWhiteList.Enabled,
+			SubnetList: r.apiWhiteList.SubnetList,
+		},
 		CustomObject:     customObject,
 		Clients:          *r.clients,
 		HostClients:      *r.hostClients,
 		InstallationName: r.installationName,
 		HostAccountID:    hostAccountID,
-		APIWhitelist: adapter.APIWhitelist{
-			Enabled:    r.apiWhiteList.Enabled,
-			SubnetList: r.apiWhiteList.SubnetList,
-		},
 		StackState: adapter.StackState{
 			Name: stackState.Name,
 

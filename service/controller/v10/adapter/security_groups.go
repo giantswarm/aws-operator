@@ -1,11 +1,12 @@
 package adapter
 
 import (
+	"strings"
+
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v10/key"
-	"strings"
 )
 
 // The template related to this adapter can be found in the following import.
@@ -14,13 +15,13 @@ import (
 //
 
 type securityGroupsAdapter struct {
+	APIWhitelistEnabled       bool
 	MasterSecurityGroupName   string
 	MasterSecurityGroupRules  []securityGroupRule
 	WorkerSecurityGroupName   string
 	WorkerSecurityGroupRules  []securityGroupRule
 	IngressSecurityGroupName  string
 	IngressSecurityGroupRules []securityGroupRule
-	APIWhitelistEnabled bool
 }
 
 type securityGroupRule struct {

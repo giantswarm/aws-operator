@@ -29,12 +29,12 @@ type AWSConfig struct {
 // Config represents the configuration used to create a new cloudformation
 // resource.
 type Config struct {
+	APIWhitelist adapter.APIWhitelist
 	Clients      *adapter.Clients
 	EBS          ebs.Interface
 	HostClients  *adapter.Clients
 	Logger       micrologger.Logger
 	Service      *cloudformationservice.CloudFormation
-	APIWhitelist adapter.APIWhitelist
 
 	InstallationName string
 }
@@ -70,12 +70,12 @@ func New(config Config) (*Resource, error) {
 	}
 
 	newService := &Resource{
+		apiWhiteList: config.APIWhitelist,
 		clients:      config.Clients,
 		ebs:          config.EBS,
 		hostClients:  config.HostClients,
 		logger:       config.Logger,
 		service:      config.Service,
-		apiWhiteList: config.APIWhitelist,
 
 		installationName: config.InstallationName,
 	}

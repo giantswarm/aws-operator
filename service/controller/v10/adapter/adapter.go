@@ -59,6 +59,7 @@ type Adapter struct {
 }
 
 type Config struct {
+	APIWhitelist     APIWhitelist
 	CustomObject     v1alpha1.AWSConfig
 	Clients          Clients
 	GuestAccountID   string
@@ -66,7 +67,6 @@ type Config struct {
 	HostClients      Clients
 	InstallationName string
 	StackState       StackState
-	APIWhitelist     APIWhitelist
 }
 
 func NewGuest(cfg Config) (Adapter, error) {
