@@ -105,14 +105,14 @@ func (c *Client) EnsureTillerInstalled() error {
 	// Check if Tiller is already present and return early if so.
 	{
 		t, err := c.newTunnel()
-		if err != nil {
-			return microerror.Mask(err)
-		}
 		defer c.closeTunnel(t)
-
-		err = c.newHelmClientFromTunnel(t).PingTiller()
-		if err == nil {
-			return nil
+		if err != nil {
+			// fall through, we may need to create Tiller.
+		} else {
+			err = c.newHelmClientFromTunnel(t).PingTiller()
+			if err == nil {
+				return nil
+			}
 		}
 	}
 
