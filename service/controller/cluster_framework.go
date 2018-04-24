@@ -40,13 +40,14 @@ type ClusterFrameworkConfig struct {
 	K8sExtClient apiextensionsclient.Interface
 	Logger       micrologger.Logger
 
-	GuestAWSConfig     FrameworkConfigAWSConfig
-	GuestUpdateEnabled bool
-	HostAWSConfig      FrameworkConfigAWSConfig
-	InstallationName   string
-	OIDC               FrameworkConfigOIDCConfig
-	ProjectName        string
-	PubKeyFile         string
+	AccessLogsExpiration int
+	GuestAWSConfig       FrameworkConfigAWSConfig
+	GuestUpdateEnabled   bool
+	HostAWSConfig        FrameworkConfigAWSConfig
+	InstallationName     string
+	OIDC                 FrameworkConfigOIDCConfig
+	ProjectName          string
+	PubKeyFile           string
 }
 
 type FrameworkConfigAWSConfig struct {
@@ -464,8 +465,9 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*controller.Resour
 			Logger:             config.Logger,
 			RandomkeysSearcher: randomKeySearcher,
 
-			GuestUpdateEnabled: config.GuestUpdateEnabled,
-			InstallationName:   config.InstallationName,
+			AccessLogsExpiration: config.AccessLogsExpiration,
+			GuestUpdateEnabled:   config.GuestUpdateEnabled,
+			InstallationName:     config.InstallationName,
 			OIDC: v10cloudconfig.OIDCConfig{
 				ClientID:      config.OIDC.ClientID,
 				IssuerURL:     config.OIDC.IssuerURL,
