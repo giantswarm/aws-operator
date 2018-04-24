@@ -20,25 +20,29 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v9"
 )
 
-type DrainerFrameworkConfig struct {
+type DrainerConfig struct {
 	G8sClient    versioned.Interface
 	K8sClient    kubernetes.Interface
 	K8sExtClient apiextensionsclient.Interface
 	Logger       micrologger.Logger
 
-	AWS                DrainerFrameworkConfigAWS
+	AWS                DrainerConfigAWS
 	GuestUpdateEnabled bool
 	ProjectName        string
 }
 
-type DrainerFrameworkConfigAWS struct {
+type DrainerConfigAWS struct {
 	AccessKeyID     string
 	AccessKeySecret string
 	Region          string
 	SessionToken    string
 }
 
-func NewDrainerFramework(config DrainerFrameworkConfig) (*controller.Controller, error) {
+type Drainer struct {
+	*controller.Controller
+}
+
+func NewDrainer(config DrainerConfig) (*Drainer, error) {
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
@@ -100,7 +104,7 @@ func NewDrainerFramework(config DrainerFrameworkConfig) (*controller.Controller,
 		}
 	}
 
-	var crdFramework *controller.Controller
+	var operatorkitController *controller.Controller
 	{
 		c := controller.Config{
 			CRD:            v1alpha1.NewAWSConfigCRD(),
@@ -115,16 +119,20 @@ func NewDrainerFramework(config DrainerFrameworkConfig) (*controller.Controller,
 			Name: config.ProjectName + "-drainer",
 		}
 
-		crdFramework, err = controller.New(c)
+		operatorkitController, err = controller.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	return crdFramework, nil
+	d := &Drainer{
+		Controller: operatorkitController,
+	}
+
+	return d, nil
 }
 
-func newDrainerResourceRouter(config DrainerFrameworkConfig) (*controller.ResourceRouter, error) {
+func newDrainerResourceRouter(config DrainerConfig) (*controller.ResourceRouter, error) {
 	var err error
 
 	var awsClients awsclient.Clients
