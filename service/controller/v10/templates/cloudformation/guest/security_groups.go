@@ -14,6 +14,13 @@ const SecurityGroups = `{{define "security_groups" }}
         ToPort: {{ .Port }}
         CidrIp: {{ .SourceCIDR }}
       {{ end }}
+      {{- if .APIWhitelistEnabled }}
+      -
+        IpProtocol: tcp
+        FromPort: -1
+        ToPort: 443
+        CidrIp: !Ref NATEIP
+      {{- end }}
       Tags:
         - Key: Name
           Value:  {{ .MasterSecurityGroupName }}

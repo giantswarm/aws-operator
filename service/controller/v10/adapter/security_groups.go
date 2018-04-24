@@ -20,6 +20,7 @@ type securityGroupsAdapter struct {
 	WorkerSecurityGroupRules  []securityGroupRule
 	IngressSecurityGroupName  string
 	IngressSecurityGroupRules []securityGroupRule
+	APIWhitelistEnabled bool
 }
 
 type securityGroupRule struct {
