@@ -19,7 +19,7 @@ const SecurityGroups = `{{define "security_groups" }}
         IpProtocol: tcp
         FromPort: -1
         ToPort: 443
-        CidrIp: !Ref NATEIP
+        CidrIp: !Join [ "/", [ !Ref NATEIP, "32" ] ]
       {{- end }}
       Tags:
         - Key: Name
