@@ -41,12 +41,12 @@ type Config struct {
 
 // Resource implements the cloudformation resource.
 type Resource struct {
+	apiWhiteList adapter.APIWhitelist
 	clients      *adapter.Clients
 	ebs          ebs.Interface
 	hostClients  *adapter.Clients
 	logger       micrologger.Logger
 	service      *cloudformationservice.CloudFormation
-	apiWhiteList adapter.APIWhitelist
 
 	installationName string
 }
