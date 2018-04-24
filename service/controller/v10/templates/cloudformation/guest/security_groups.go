@@ -17,7 +17,7 @@ const SecurityGroups = `{{define "security_groups" }}
       {{- if .APIWhitelistEnabled }}
       -
         IpProtocol: tcp
-        FromPort: -1
+        FromPort: 0
         ToPort: 443
         CidrIp: !Join [ "/", [ !Ref NATEIP, "32" ] ]
       {{- end }}
