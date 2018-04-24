@@ -33,7 +33,7 @@ type SecurityGroupRule struct {
 	Protocol string
 	// SourceCIDR is the CIDR of the source.
 	SourceCIDR string
-	// SecurityGroupID is the ID of the source security Group.
+	// SecurityGroupID is the ID of the source security group.
 	SecurityGroupID string
 }
 
