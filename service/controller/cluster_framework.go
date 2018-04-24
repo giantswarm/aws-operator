@@ -41,15 +41,15 @@ type ClusterFrameworkConfig struct {
 	K8sExtClient apiextensionsclient.Interface
 	Logger       micrologger.Logger
 
-  AccessLogsExpiration int
-	APIWhitelist       FrameworkConfigAPIWhitelistConfig
-	GuestAWSConfig     FrameworkConfigAWSConfig
-	GuestUpdateEnabled bool
-	HostAWSConfig      FrameworkConfigAWSConfig
-	InstallationName   string
-	OIDC               FrameworkConfigOIDCConfig
-	ProjectName        string
-	PubKeyFile         string
+	AccessLogsExpiration int
+	APIWhitelist         FrameworkConfigAPIWhitelistConfig
+	GuestAWSConfig       FrameworkConfigAWSConfig
+	GuestUpdateEnabled   bool
+	HostAWSConfig        FrameworkConfigAWSConfig
+	InstallationName     string
+	OIDC                 FrameworkConfigOIDCConfig
+	ProjectName          string
+	PubKeyFile           string
 }
 
 type FrameworkConfigAWSConfig struct {

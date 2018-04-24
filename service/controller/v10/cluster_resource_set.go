@@ -45,12 +45,11 @@ type ClusterResourceSetConfig struct {
 	RandomkeysSearcher randomkeys.Interface
 
 	AccessLogsExpiration int
-  APIWhitelist       adapter.APIWhitelist
+	APIWhitelist         adapter.APIWhitelist
 	GuestUpdateEnabled   bool
 	InstallationName     string
 	OIDC                 cloudconfig.OIDCConfig
 	ProjectName          string
-
 }
 
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
