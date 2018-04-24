@@ -44,10 +44,11 @@ type ClusterResourceSetConfig struct {
 	Logger             micrologger.Logger
 	RandomkeysSearcher randomkeys.Interface
 
-	GuestUpdateEnabled bool
-	InstallationName   string
-	OIDC               cloudconfig.OIDCConfig
-	ProjectName        string
+	AccessLogsExpiration int
+	GuestUpdateEnabled   bool
+	InstallationName     string
+	OIDC                 cloudconfig.OIDCConfig
+	ProjectName          string
 }
 
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
@@ -186,7 +187,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			},
 			Logger: config.Logger,
 
-			InstallationName: config.InstallationName,
+			AccessLogsExpiration: config.AccessLogsExpiration,
+			InstallationName:     config.InstallationName,
 		}
 
 		ops, err := s3bucket.New(c)
