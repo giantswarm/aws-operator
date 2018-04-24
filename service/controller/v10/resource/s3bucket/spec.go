@@ -25,6 +25,7 @@ type S3Client interface {
 	HeadBucket(*s3.HeadBucketInput) (*s3.HeadBucketOutput, error)
 	ListObjectsV2(*s3.ListObjectsV2Input) (*s3.ListObjectsV2Output, error)
 	PutBucketAcl(*s3.PutBucketAclInput) (*s3.PutBucketAclOutput, error)
+	PutBucketLifecycleConfiguration(*s3.PutBucketLifecycleConfigurationInput) (*s3.PutBucketLifecycleConfigurationOutput, error)
 	PutBucketLogging(*s3.PutBucketLoggingInput) (*s3.PutBucketLoggingOutput, error)
 	PutBucketTagging(*s3.PutBucketTaggingInput) (*s3.PutBucketTaggingOutput, error)
 }
