@@ -16,6 +16,7 @@ func newTestClusterFrameworkConfig() ClusterFrameworkConfig {
 		K8sExtClient: apiextensionsclientfake.NewSimpleClientset(),
 		Logger:       microloggertest.New(),
 
+		AccessLogsExpiration: 365,
 		GuestAWSConfig: FrameworkConfigAWSConfig{
 			AccessKeyID:     "guest-key",
 			AccessKeySecret: "guest-secret",

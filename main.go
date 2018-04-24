@@ -138,6 +138,7 @@ func mainError() error {
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.CrtFile, "", "Certificate file path to use to authenticate with Kubernetes.")
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.KeyFile, "", "Key file path to use to authenticate with Kubernetes.")
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.Username, "", "Username (if the Kubernetes cluster is using basic authentication).")
+	daemonCommand.PersistentFlags().Int(f.Service.AWS.S3AccessLogsExpiration, 365, "S3 access logs expiration policy.")
 
 	newCommand.CobraCommand().Execute()
 
