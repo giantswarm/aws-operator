@@ -6,8 +6,10 @@ users:
     groups:
       - "sudo"
       - "docker"
+{{ if ne $user.PublicKey "" }}
     ssh-authorized-keys:
        - "{{ $user.PublicKey }}"
+{{ end }}
 {{end}}
 write_files:
 - path: /etc/kubernetes/config/proxy-kubeconfig.yml
