@@ -97,6 +97,138 @@ func (c *Client) DeleteRelease(releaseName string, options ...helmclient.DeleteO
 	return nil
 }
 
+// EnsureTillerInstalled installs Tiller by creating its deployment and waiting
+// for it to start. A service account and cluster role binding are also created.
+// As a first step, it checks if Tiller is already ready, in which case it
+// returns early.
+func (c *Client) EnsureTillerInstalled() error {
+	// Check if Tiller is already present and return early if so.
+	{
+		t, err := c.newTunnel()
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		defer c.closeTunnel(t)
+
+		err = c.newHelmClientFromTunnel(t).PingTiller()
+		if err == nil {
+			return nil
+		}
+	}
+
+	// Create the service account for tiller so it can pull images and do its do.
+	{
+		n := tillerNamespace
+		i := &corev1.ServiceAccount{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: "v1",
+				Kind:       "ServiceAccount",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name: tillerPodName,
+			},
+		}
+
+		_, err := c.k8sClient.CoreV1().ServiceAccounts(n).Create(i)
+		if errors.IsAlreadyExists(err) {
+			// fall through
+		} else if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	// Create the cluster role binding for tiller so it is allowed to do its job.
+	{
+		i := &rbacv1.ClusterRoleBinding{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: "rbac.authorization.k8s.io/v1",
+				Kind:       "ClusterRoleBinding",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name: tillerPodName,
+			},
+			Subjects: []rbacv1.Subject{
+				{
+					Kind:      "ServiceAccount",
+					Name:      tillerPodName,
+					Namespace: tillerNamespace,
+				},
+			},
+			RoleRef: rbacv1.RoleRef{
+				APIGroup: "rbac.authorization.k8s.io",
+				Kind:     "ClusterRole",
+				Name:     "cluster-admin",
+			},
+		}
+
+		_, err := c.k8sClient.RbacV1().ClusterRoleBindings().Create(i)
+		if errors.IsAlreadyExists(err) {
+			// fall through
+		} else if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	// Install the tiller deployment in the guest cluster.
+	{
+		o := &installer.Options{
+			ImageSpec:      tillerImageSpec,
+			Namespace:      tillerNamespace,
+			ServiceAccount: tillerPodName,
+		}
+
+		err := installer.Install(c.k8sClient, o)
+		if errors.IsAlreadyExists(err) {
+			// fall through
+		} else if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	// Wait for tiller to be up and running. When verifying to be able to ping
+	// tiller we make sure 3 consecutive pings succeed before assuming everything
+	// is fine.
+	{
+		c.logger.Log("level", "debug", "message", "attempt pinging tiller")
+
+		var i int
+
+		o := func() error {
+			t, err := c.newTunnel()
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			defer c.closeTunnel(t)
+
+			err = c.newHelmClientFromTunnel(t).PingTiller()
+			if err != nil {
+				i = 0
+				return microerror.Mask(err)
+			}
+
+			i++
+			if i < 3 {
+				return microerror.Maskf(executionFailedError, "failed pinging tiller")
+			}
+
+			return nil
+		}
+		b := newExponentialBackoff(2*time.Minute, 5*time.Second)
+		n := func(err error, delay time.Duration) {
+			c.logger.Log("level", "debug", "message", "failed pinging tiller")
+		}
+
+		err := backoff.RetryNotify(o, b, n)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		c.logger.Log("level", "debug", "message", "succeeded pinging tiller")
+	}
+
+	return nil
+}
+
 // GetReleaseContent gets the current status of the Helm Release including any
 // values provided when the chart was installed. The releaseName is the name
 // of the Helm Release that is set when the Helm Chart is installed.
@@ -235,120 +367,6 @@ func (c *Client) InstallFromTarball(path, ns string, options ...helmclient.Insta
 	err := backoff.RetryNotify(o, b, n)
 	if err != nil {
 		return microerror.Mask(err)
-	}
-
-	return nil
-}
-
-func (c *Client) InstallTiller() error {
-	// Create the service account for tiller so it can pull images and do its do.
-	{
-		n := tillerNamespace
-		i := &corev1.ServiceAccount{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: "v1",
-				Kind:       "ServiceAccount",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name: tillerPodName,
-			},
-		}
-
-		_, err := c.k8sClient.CoreV1().ServiceAccounts(n).Create(i)
-		if errors.IsAlreadyExists(err) {
-			// fall through
-		} else if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	// Create the cluster role binding for tiller so it is allowed to do its job.
-	{
-		i := &rbacv1.ClusterRoleBinding{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: "rbac.authorization.k8s.io/v1",
-				Kind:       "ClusterRoleBinding",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name: tillerPodName,
-			},
-			Subjects: []rbacv1.Subject{
-				{
-					Kind:      "ServiceAccount",
-					Name:      tillerPodName,
-					Namespace: tillerNamespace,
-				},
-			},
-			RoleRef: rbacv1.RoleRef{
-				APIGroup: "rbac.authorization.k8s.io",
-				Kind:     "ClusterRole",
-				Name:     "cluster-admin",
-			},
-		}
-
-		_, err := c.k8sClient.RbacV1().ClusterRoleBindings().Create(i)
-		if errors.IsAlreadyExists(err) {
-			// fall through
-		} else if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	// Install the tiller deployment in the guest cluster.
-	{
-		o := &installer.Options{
-			ImageSpec:      tillerImageSpec,
-			Namespace:      tillerNamespace,
-			ServiceAccount: tillerPodName,
-		}
-
-		err := installer.Install(c.k8sClient, o)
-		if errors.IsAlreadyExists(err) {
-			// fall through
-		} else if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	// Wait for tiller to be up and running. When verifying to be able to ping
-	// tiller we make sure 3 consecutive pings succeed before assuming everything
-	// is fine.
-	{
-		c.logger.Log("level", "debug", "message", "attempt pinging tiller")
-
-		var i int
-
-		o := func() error {
-			t, err := c.newTunnel()
-			if err != nil {
-				return microerror.Mask(err)
-			}
-			defer c.closeTunnel(t)
-
-			err = c.newHelmClientFromTunnel(t).PingTiller()
-			if err != nil {
-				i = 0
-				return microerror.Mask(err)
-			}
-
-			i++
-			if i < 3 {
-				return microerror.Maskf(executionFailedError, "failed pinging tiller")
-			}
-
-			return nil
-		}
-		b := newExponentialBackoff(2*time.Minute, 5*time.Second)
-		n := func(err error, delay time.Duration) {
-			c.logger.Log("level", "debug", "message", "failed pinging tiller")
-		}
-
-		err := backoff.RetryNotify(o, b, n)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		c.logger.Log("level", "debug", "message", "succeeded pinging tiller")
 	}
 
 	return nil
