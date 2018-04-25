@@ -15,6 +15,10 @@ func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig, sta
 		return "", microerror.Mask(err)
 	}
 	cfg := adapter.Config{
+		APIWhitelist: adapter.APIWhitelist{
+			Enabled:    r.apiWhiteList.Enabled,
+			SubnetList: r.apiWhiteList.SubnetList,
+		},
 		CustomObject:     customObject,
 		Clients:          *r.clients,
 		HostClients:      *r.hostClients,
@@ -36,6 +40,7 @@ func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig, sta
 			VersionBundleVersion: stackState.VersionBundleVersion,
 		},
 	}
+
 	adp, err := adapter.NewGuest(cfg)
 	if err != nil {
 		return "", microerror.Mask(err)

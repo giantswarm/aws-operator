@@ -34,7 +34,11 @@ var AWSOperatorChartValues = `Installation:
                 id: ${HOST_AWS_ACCESS_KEY_ID}
                 secret: ${HOST_AWS_SECRET_ACCESS_KEY}
                 token: ${HOST_AWS_SESSION_TOKEN}
+
       Registry:
         PullSecret:
           DockerConfigJSON: "{\"auths\":{\"quay.io\":{\"auth\":\"${REGISTRY_PULL_SECRET}\"}}}"
+    Security:
+      RestrictAccess:
+        Enabled: false
 `
