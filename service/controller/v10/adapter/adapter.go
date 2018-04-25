@@ -59,6 +59,7 @@ type Adapter struct {
 }
 
 type Config struct {
+	APIWhitelist     APIWhitelist
 	CustomObject     v1alpha1.AWSConfig
 	Clients          Clients
 	GuestAccountID   string
@@ -78,6 +79,8 @@ func NewGuest(cfg Config) (Adapter, error) {
 	a.ASGType = prefixWorker
 	a.ClusterID = key.ClusterID(cfg.CustomObject)
 	a.WorkerImageID = cfg.StackState.WorkerImageID
+	// set api whitelisting
+	a.APIWhitelistEnabled = cfg.APIWhitelist.Enabled
 
 	// TODO this is totally odd but is a necessary evil because of the different
 	// approaches adapters are managed right now. Over time we should refactor the

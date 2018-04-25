@@ -17,6 +17,7 @@ import (
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v1"
 	"github.com/giantswarm/aws-operator/service/controller/v10"
+	v10adapter "github.com/giantswarm/aws-operator/service/controller/v10/adapter"
 	v10cloudconfig "github.com/giantswarm/aws-operator/service/controller/v10/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v2"
 	"github.com/giantswarm/aws-operator/service/controller/v3"
@@ -41,6 +42,7 @@ type ClusterConfig struct {
 	Logger       micrologger.Logger
 
 	AccessLogsExpiration int
+	APIWhitelist         FrameworkConfigAPIWhitelistConfig
 	GuestAWSConfig       ClusterConfigAWSConfig
 	GuestUpdateEnabled   bool
 	HostAWSConfig        ClusterConfigAWSConfig
@@ -64,6 +66,12 @@ type ClusterConfigOIDC struct {
 	IssuerURL     string
 	UsernameClaim string
 	GroupsClaim   string
+}
+
+// Whitelist defines guest cluster k8s API whitelisting.
+type FrameworkConfigAPIWhitelistConfig struct {
+	Enabled    bool
+	SubnetList string
 }
 
 type Cluster struct {
@@ -482,6 +490,10 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 				IssuerURL:     config.OIDC.IssuerURL,
 				UsernameClaim: config.OIDC.UsernameClaim,
 				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			APIWhitelist: v10adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
 			},
 			ProjectName: config.ProjectName,
 		}
