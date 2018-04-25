@@ -14,6 +14,11 @@ const (
 type Interface interface {
 	// DeleteRelease uninstalls a chart given its release name.
 	DeleteRelease(releaseName string, options ...helm.DeleteOption) error
+	// EnsureTillerInstalled installs Tiller by creating its deployment and waiting
+	// for it to start. A service account and cluster role binding are also created.
+	// As a first step, it checks if Tiller is already ready, in which case it
+	// returns early.
+	EnsureTillerInstalled() error
 	// GetReleaseContent gets the current status of the Helm Release. The
 	// releaseName is the name of the Helm Release that is set when the Chart
 	// is installed.

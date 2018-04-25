@@ -17,6 +17,7 @@ import (
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v1"
 	"github.com/giantswarm/aws-operator/service/controller/v10"
+	v10adapter "github.com/giantswarm/aws-operator/service/controller/v10/adapter"
 	v10cloudconfig "github.com/giantswarm/aws-operator/service/controller/v10/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v2"
 	"github.com/giantswarm/aws-operator/service/controller/v3"
@@ -34,37 +35,50 @@ import (
 	v9cloudconfig "github.com/giantswarm/aws-operator/service/controller/v9/cloudconfig"
 )
 
-type ClusterFrameworkConfig struct {
+type ClusterConfig struct {
 	G8sClient    versioned.Interface
 	K8sClient    kubernetes.Interface
 	K8sExtClient apiextensionsclient.Interface
 	Logger       micrologger.Logger
 
-	GuestAWSConfig     FrameworkConfigAWSConfig
-	GuestUpdateEnabled bool
-	HostAWSConfig      FrameworkConfigAWSConfig
-	InstallationName   string
-	OIDC               FrameworkConfigOIDCConfig
-	ProjectName        string
-	PubKeyFile         string
+	AccessLogsExpiration int
+	APIWhitelist         FrameworkConfigAPIWhitelistConfig
+	GuestAWSConfig       ClusterConfigAWSConfig
+	GuestUpdateEnabled   bool
+	HostAWSConfig        ClusterConfigAWSConfig
+	InstallationName     string
+	OIDC                 ClusterConfigOIDC
+	ProjectName          string
+	PubKeyFile           string
 }
 
-type FrameworkConfigAWSConfig struct {
+type ClusterConfigAWSConfig struct {
 	AccessKeyID     string
 	AccessKeySecret string
 	Region          string
 	SessionToken    string
 }
 
-// OIDC represents the configuration of the OIDC authorization provider
-type FrameworkConfigOIDCConfig struct {
+// ClusterConfigOIDC represents the configuration of the OIDC authorization
+// provider.
+type ClusterConfigOIDC struct {
 	ClientID      string
 	IssuerURL     string
 	UsernameClaim string
 	GroupsClaim   string
 }
 
-func NewClusterFramework(config ClusterFrameworkConfig) (*controller.Controller, error) {
+// Whitelist defines guest cluster k8s API whitelisting.
+type FrameworkConfigAPIWhitelistConfig struct {
+	Enabled    bool
+	SubnetList string
+}
+
+type Cluster struct {
+	*controller.Controller
+}
+
+func NewCluster(config ClusterConfig) (*Cluster, error) {
 	var err error
 
 	if config.G8sClient == nil {
@@ -140,7 +154,7 @@ func NewClusterFramework(config ClusterFrameworkConfig) (*controller.Controller,
 		}
 	}
 
-	var crdFramework *controller.Controller
+	var operatorkitController *controller.Controller
 	{
 		c := controller.Config{
 			CRD:            v1alpha1.NewAWSConfigCRD(),
@@ -153,16 +167,20 @@ func NewClusterFramework(config ClusterFrameworkConfig) (*controller.Controller,
 			Name: config.ProjectName,
 		}
 
-		crdFramework, err = controller.New(c)
+		operatorkitController, err = controller.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	return crdFramework, nil
+	c := &Cluster{
+		Controller: operatorkitController,
+	}
+
+	return c, nil
 }
 
-func newClusterResourceRouter(config ClusterFrameworkConfig) (*controller.ResourceRouter, error) {
+func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter, error) {
 	var err error
 
 	guestAWSConfig := awsclient.Config{
@@ -464,13 +482,18 @@ func newClusterResourceRouter(config ClusterFrameworkConfig) (*controller.Resour
 			Logger:             config.Logger,
 			RandomkeysSearcher: randomKeySearcher,
 
-			GuestUpdateEnabled: config.GuestUpdateEnabled,
-			InstallationName:   config.InstallationName,
+			AccessLogsExpiration: config.AccessLogsExpiration,
+			GuestUpdateEnabled:   config.GuestUpdateEnabled,
+			InstallationName:     config.InstallationName,
 			OIDC: v10cloudconfig.OIDCConfig{
 				ClientID:      config.OIDC.ClientID,
 				IssuerURL:     config.OIDC.IssuerURL,
 				UsernameClaim: config.OIDC.UsernameClaim,
 				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			APIWhitelist: v10adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
 			},
 			ProjectName: config.ProjectName,
 		}

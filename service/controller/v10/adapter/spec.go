@@ -60,6 +60,12 @@ const (
 	RootDirElement = "aws-operator"
 )
 
+// APIWhitelist defines guest cluster k8s api whitelisting.
+type APIWhitelist struct {
+	Enabled    bool
+	SubnetList string
+}
+
 type Clients struct {
 	CloudFormation CFClient
 	EC2            EC2Client

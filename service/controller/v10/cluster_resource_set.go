@@ -44,10 +44,12 @@ type ClusterResourceSetConfig struct {
 	Logger             micrologger.Logger
 	RandomkeysSearcher randomkeys.Interface
 
-	GuestUpdateEnabled bool
-	InstallationName   string
-	OIDC               cloudconfig.OIDCConfig
-	ProjectName        string
+	AccessLogsExpiration int
+	APIWhitelist         adapter.APIWhitelist
+	GuestUpdateEnabled   bool
+	InstallationName     string
+	OIDC                 cloudconfig.OIDCConfig
+	ProjectName          string
 }
 
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
@@ -98,6 +100,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	}
 	if config.ProjectName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.ProjectName must not be empty")
+	}
+	if config.APIWhitelist.Enabled && config.APIWhitelist.SubnetList == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.SubnetList must not be empty when %T.APIWhitelist is enabled", config)
 	}
 
 	var awsService *awsservice.Service
@@ -186,7 +191,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			},
 			Logger: config.Logger,
 
-			InstallationName: config.InstallationName,
+			AccessLogsExpiration: config.AccessLogsExpiration,
+			InstallationName:     config.InstallationName,
 		}
 
 		ops, err := s3bucket.New(c)
@@ -271,6 +277,10 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			},
 			Logger:  config.Logger,
 			Service: cloudFormationService,
+			APIWhitelist: adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
+			},
 
 			InstallationName: config.InstallationName,
 		}
