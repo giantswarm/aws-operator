@@ -82,7 +82,7 @@ func Test_Draining(t *testing.T) {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
 
-		err = helmClient.InstallTiller()
+		err = helmClient.EnsureTillerInstalled()
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
