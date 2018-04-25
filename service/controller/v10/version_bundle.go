@@ -71,7 +71,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "docker",
-				Version: "17.09.0",
+				Version: "17.12.1",
 			},
 			{
 				Name:    "etcd",
