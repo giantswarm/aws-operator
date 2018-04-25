@@ -9,21 +9,21 @@ import (
 	kubernetesfake "k8s.io/client-go/kubernetes/fake"
 )
 
-func newTestClusterFrameworkConfig() ClusterFrameworkConfig {
-	return ClusterFrameworkConfig{
+func newTestClusterConfig() ClusterConfig {
+	return ClusterConfig{
 		G8sClient:    versionedfake.NewSimpleClientset(),
 		K8sClient:    kubernetesfake.NewSimpleClientset(),
 		K8sExtClient: apiextensionsclientfake.NewSimpleClientset(),
 		Logger:       microloggertest.New(),
 
 		AccessLogsExpiration: 365,
-		GuestAWSConfig: FrameworkConfigAWSConfig{
+		GuestAWSConfig: ClusterConfigAWSConfig{
 			AccessKeyID:     "guest-key",
 			AccessKeySecret: "guest-secret",
 			Region:          "guest-myregion",
 			SessionToken:    "guest-token",
 		},
-		HostAWSConfig: FrameworkConfigAWSConfig{
+		HostAWSConfig: ClusterConfigAWSConfig{
 			AccessKeyID:     "host-key",
 			AccessKeySecret: "host-secret",
 			Region:          "host-myregion",
@@ -35,23 +35,23 @@ func newTestClusterFrameworkConfig() ClusterFrameworkConfig {
 	}
 }
 
-func Test_NewFramework_Fails_Without_Regions(t *testing.T) {
+func Test_NewCluster_Fails_Without_Regions(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
 		description      string
-		guestCredentials FrameworkConfigAWSConfig
-		hostCredentials  FrameworkConfigAWSConfig
+		guestCredentials ClusterConfigAWSConfig
+		hostCredentials  ClusterConfigAWSConfig
 		expectedError    bool
 	}{
 		// Test 0.
 		{
 			description: "misisng region in guest",
-			guestCredentials: FrameworkConfigAWSConfig{
+			guestCredentials: ClusterConfigAWSConfig{
 				AccessKeyID:     "key",
 				AccessKeySecret: "secret",
 				SessionToken:    "token",
 			},
-			hostCredentials: FrameworkConfigAWSConfig{
+			hostCredentials: ClusterConfigAWSConfig{
 				AccessKeyID:     "key",
 				AccessKeySecret: "secret",
 				Region:          "myregion",
@@ -62,13 +62,13 @@ func Test_NewFramework_Fails_Without_Regions(t *testing.T) {
 		// Test 1.
 		{
 			description: "missing region in host",
-			guestCredentials: FrameworkConfigAWSConfig{
+			guestCredentials: ClusterConfigAWSConfig{
 				AccessKeyID:     "key",
 				AccessKeySecret: "secret",
 				Region:          "myregion",
 				SessionToken:    "token",
 			},
-			hostCredentials: FrameworkConfigAWSConfig{
+			hostCredentials: ClusterConfigAWSConfig{
 				AccessKeyID:     "key",
 				AccessKeySecret: "secret",
 				SessionToken:    "token",
@@ -78,13 +78,13 @@ func Test_NewFramework_Fails_Without_Regions(t *testing.T) {
 		// Test 2.
 		{
 			description: "region exists in guest and host",
-			guestCredentials: FrameworkConfigAWSConfig{
+			guestCredentials: ClusterConfigAWSConfig{
 				AccessKeyID:     "key",
 				AccessKeySecret: "secret",
 				Region:          "myregion",
 				SessionToken:    "token",
 			},
-			hostCredentials: FrameworkConfigAWSConfig{
+			hostCredentials: ClusterConfigAWSConfig{
 				AccessKeyID:     "key",
 				AccessKeySecret: "secret",
 				Region:          "myregion",
@@ -95,11 +95,11 @@ func Test_NewFramework_Fails_Without_Regions(t *testing.T) {
 	}
 
 	for i, tc := range testCases {
-		config := newTestClusterFrameworkConfig()
-		config.GuestAWSConfig = tc.guestCredentials
-		config.HostAWSConfig = tc.hostCredentials
+		c := newTestClusterConfig()
+		c.GuestAWSConfig = tc.guestCredentials
+		c.HostAWSConfig = tc.hostCredentials
 
-		_, err := NewClusterFramework(config)
+		_, err := NewCluster(c)
 		if tc.expectedError != (err != nil) {
 			t.Errorf("case %d: expected error = %v, got = %#v", i, tc.expectedError, err)
 		}
