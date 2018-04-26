@@ -826,7 +826,9 @@ write_files:
         prometheus.io/scheme: "http"
     spec:
       ports:
-        - port: 10300
+        - name: metrics
+          port: 10300
+          targetPort: metrics
       selector:
         app: node-exporter
 - path: /srv/node-exporter-sa.yaml
@@ -868,6 +870,9 @@ write_files:
           containers:
           - image: quay.io/giantswarm/node-exporter:v0.15.1
             name: node-exporter
+            ports:
+            - name: metrics
+              containerPort: 10300
             args:
               - '--log.level=debug'
               - '--path.procfs=/host/proc'
