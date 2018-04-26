@@ -65,7 +65,7 @@ required = [
   name = "github.com/giantswarm/helmclient"
 
 [[constraint]]
-  branch = "master"
+  branch = "add_rules_missing"
   name = "github.com/giantswarm/k8scloudconfig"
 
 [[constraint]]
