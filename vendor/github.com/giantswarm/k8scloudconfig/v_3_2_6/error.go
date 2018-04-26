@@ -1,4 +1,4 @@
-package v_3_2_5
+package v_3_2_6
 
 import "github.com/giantswarm/microerror"
 

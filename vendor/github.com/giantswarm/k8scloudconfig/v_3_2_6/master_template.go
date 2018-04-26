@@ -1,4 +1,4 @@
-package v_3_2_5
+package v_3_2_6
 
 const MasterTemplate = `#cloud-config
 users:
@@ -826,7 +826,9 @@ write_files:
         prometheus.io/scheme: "http"
     spec:
       ports:
-        - port: 10300
+        - name: metrics
+          port: 10300
+          targetPort: metrics
       selector:
         app: node-exporter
 - path: /srv/node-exporter-sa.yaml
@@ -868,6 +870,9 @@ write_files:
           containers:
           - image: quay.io/giantswarm/node-exporter:v0.15.1
             name: node-exporter
+            ports:
+            - name: metrics
+              containerPort: 10300
             args:
               - '--log.level=debug'
               - '--path.procfs=/host/proc'
@@ -1361,6 +1366,8 @@ write_files:
           - persistentvolumes
           - namespaces
           - endpoints
+          - secrets
+          - configmaps
         verbs:
           - list
           - watch
@@ -1389,13 +1396,21 @@ write_files:
           - list
           - watch
       - apiGroups:
-        - extensions
+          - extensions
         resources:
-        - podsecuritypolicies
+          - podsecuritypolicies
         verbs:
-        - use
+          - use
         resourceNames:
-        - privileged
+          - privileged
+      - apiGroups:
+          - autoscaling
+        attributeRestrictions: null
+        resources:
+          - horizontalpodautoscalers
+        verbs:
+          - list
+          - watch
 - path: /srv/psp_policies.yaml
   owner: root
   permissions: 0644
@@ -2398,7 +2413,7 @@ coreos:
       --feature-gates=ExpandPersistentVolumes=true,PodPriority=true \
       --pod-manifest-path=/etc/kubernetes/manifests \
       --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml \
-      --node-labels="node-role.kubernetes.io/master,role=master,kubernetes.io/hostname=${HOSTNAME},ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
+      --node-labels="node-role.kubernetes.io/master,role=master,ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
       --kube-reserved="cpu=200m,memory=250Mi" \
       --system-reserved="cpu=150m,memory=250Mi" \
       --enforce-node-allocatable=pods \
