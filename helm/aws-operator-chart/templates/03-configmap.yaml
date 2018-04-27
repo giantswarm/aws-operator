@@ -17,6 +17,7 @@ data:
           enabled: {{ .Values.Installation.V1.Guest.Update.Enabled }}
       installation:
         name: '{{ .Values.Installation.V1.Name }}'
+        testing: '{{ .Values.Installation.V1.TestingEnvironment }}'
         {{- if .Values.Installation.V1.Guest }}
         guest:
           kubernetes:

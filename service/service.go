@@ -130,7 +130,8 @@ func New(config Config) (*Service, error) {
 				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
 				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
 			},
-			InstallationName: config.Viper.GetString(config.Flag.Service.Installation.Name),
+			InstallationName:   config.Viper.GetString(config.Flag.Service.Installation.Name),
+			TestingEnvironment: config.Viper.GetBool(config.Flag.Service.Installation.Testing),
 			OIDC: controller.ClusterConfigOIDC{
 				ClientID:      config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID),
 				IssuerURL:     config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL),

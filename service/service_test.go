@@ -34,6 +34,7 @@ func Test_Service_New(t *testing.T) {
 				v.Set(f.Service.AWS.PubKeyFile, "test")
 
 				v.Set(f.Service.Installation.Name, "test")
+				v.Set(f.Service.Installation.Testing, true)
 
 				v.Set(f.Service.Kubernetes.Address, "http://127.0.0.1:6443")
 				v.Set(f.Service.Kubernetes.InCluster, "false")

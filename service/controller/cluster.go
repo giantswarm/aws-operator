@@ -47,6 +47,7 @@ type ClusterConfig struct {
 	GuestUpdateEnabled   bool
 	HostAWSConfig        ClusterConfigAWSConfig
 	InstallationName     string
+	TestingEnvironment   bool
 	OIDC                 ClusterConfigOIDC
 	ProjectName          string
 	PubKeyFile           string
@@ -485,6 +486,7 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 			AccessLogsExpiration: config.AccessLogsExpiration,
 			GuestUpdateEnabled:   config.GuestUpdateEnabled,
 			InstallationName:     config.InstallationName,
+			TestingEnvironment:   config.TestingEnvironment,
 			OIDC: v10cloudconfig.OIDCConfig{
 				ClientID:      config.OIDC.ClientID,
 				IssuerURL:     config.OIDC.IssuerURL,
