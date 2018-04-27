@@ -6,16 +6,16 @@ import (
 	"testing"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
+	"github.com/giantswarm/e2eclients/aws"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/integration/client"
 	"github.com/giantswarm/aws-operator/integration/setup"
 )
 
 var (
 	g *framework.Guest
 	h *framework.Host
-	c *client.AWS
+	c *aws.Client
 )
 
 // TestMain allows us to have common setup and teardown steps that are run
@@ -48,7 +48,7 @@ func TestMain(m *testing.M) {
 		}
 	}
 
-	c = client.NewAWS()
+	c = aws.NewClient()
 
 	setup.WrapTestMain(c, g, h, m)
 }

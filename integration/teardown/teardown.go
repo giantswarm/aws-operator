@@ -8,13 +8,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
+	awsclient "github.com/giantswarm/e2eclients/aws"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/integration/client"
 	"github.com/giantswarm/aws-operator/integration/env"
 )
 
-func HostPeerVPC(c *client.AWS, g *framework.Guest, h *framework.Host) error {
+func HostPeerVPC(c *awsclient.Client, g *framework.Guest, h *framework.Host) error {
 	log.Printf("Deleting Host Peer VPC stack")
 
 	_, err := c.CloudFormation.DeleteStack(&cloudformation.DeleteStackInput{
@@ -27,7 +27,7 @@ func HostPeerVPC(c *client.AWS, g *framework.Guest, h *framework.Host) error {
 	return nil
 }
 
-func Teardown(c *client.AWS, g *framework.Guest, h *framework.Host) error {
+func Teardown(c *awsclient.Client, g *framework.Guest, h *framework.Host) error {
 	var err error
 
 	{

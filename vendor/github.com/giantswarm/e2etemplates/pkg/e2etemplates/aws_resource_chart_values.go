@@ -1,6 +1,6 @@
-package template
+package e2etemplates
 
-var AWSResourceChartValues = `commonDomain: ${COMMON_DOMAIN_GUEST}
+const AWSResourceChartValues = `commonDomain: ${COMMON_DOMAIN_GUEST}
 clusterName: ${CLUSTER_NAME}
 clusterVersion: v_0_1_0
 sshPublicKey: ${IDRSA_PUB}
