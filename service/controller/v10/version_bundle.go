@@ -82,7 +82,7 @@ func VersionBundle() versionbundle.Bundle {
 			{
 				Component:   "cloudconfig",
 				Description: "Added /lib/modules mount for kubelet.",
-				Kind:        versionbundle.KindChanged,
+				Kind:        versionbundle.KindAdded,
 			},
 			{
 				Component:   "cloudconfig",
