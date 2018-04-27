@@ -1,8 +1,8 @@
-package template
+package e2etemplates
 
 // NodeOperatorChartValues values required by node-operator-chart, the
 // environment variables will be expanded before writing the contents to a file.
-var NodeOperatorChartValues = `Installation:
+const NodeOperatorChartValues = `Installation:
   V1:
     Secret:
       Registry:

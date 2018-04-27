@@ -1,6 +1,6 @@
-package template
+package e2etemplates
 
-var AWSHostVPCStack = `AWSTemplateFormatVersion: 2010-09-09
+const AWSHostVPCStack = `AWSTemplateFormatVersion: 2010-09-09
 Description: CI Host Stack with Peering VPC and route tables
 Resources:
   VPC:
