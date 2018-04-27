@@ -8,7 +8,7 @@ After=format-etcd-ebs.service
 Before=etcd3.service
 
 [Mount]
-What=/dev/xvdh
+What=/dev/disk/by-label/etcd
 Where=/var/lib/etcd
 Type=ext4
 
