@@ -1,6 +1,4 @@
-// +build k8srequired
-
-package client
+package aws
 
 import (
 	"os"
@@ -12,16 +10,13 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-// TODO it would be best if this would be aligned with the client we use in the
-// aws-operator. The feel would be more native and common and less differences
-// makes it easier to understand certain internals.
-type AWS struct {
+type Client struct {
 	EC2            *ec2.EC2
 	CloudFormation *cloudformation.CloudFormation
 }
 
-func NewAWS() *AWS {
-	a := &AWS{}
+func NewClient() *Client {
+	a := &Client{}
 
 	{
 		c := &aws.Config{
