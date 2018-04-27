@@ -121,7 +121,7 @@ func mainError() error {
 
 	daemonCommand.PersistentFlags().Bool(f.Service.Guest.Update.Enabled, false, "Whether updates of guest cluster nodes are allowed to be processed upon reconciliation.")
 
-	daemonCommand.PersistentFlags().Bool(f.Service.Installation.Testing, false, "Is the installation no used for production.")
+	daemonCommand.PersistentFlags().Bool(f.Service.Installation.Testing, false, "Is the installation not used for production.")
 
 	daemonCommand.PersistentFlags().String(f.Service.Installation.Name, "", "Installation name for tagging AWS resources.")
 	daemonCommand.PersistentFlags().String(f.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID, "", "OIDC authorization provider ClientID.")
