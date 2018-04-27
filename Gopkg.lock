@@ -240,6 +240,18 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/giantswarm/e2eclients"
+  packages = ["aws"]
+  revision = "cb45cf36a000b2212427dac1697740dd316d2f0b"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/giantswarm/e2etemplates"
+  packages = ["pkg/e2etemplates"]
+  revision = "db9359aee247721c31333ccff099c02a5a934794"
+
+[[projects]]
+  branch = "master"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
   revision = "2c5de17867c531388f4b3fb674e7d74a7494b770"
@@ -1402,6 +1414,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "dc25e3232753a4e7324d2d63fdae0af514a9bcc82ab036b68fdc5edff277d322"
+  inputs-digest = "dd178c7e9b9355d4b2a75cc5f6e867b7053c924da962dd975515e068b6a7d92a"
   solver-name = "gps-cdcl"
   solver-version = 1
