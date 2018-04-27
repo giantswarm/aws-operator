@@ -92,6 +92,7 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 	var newInformer *informer.Informer
 	{
 		c := informer.Config{
+			Logger:  config.Logger,
 			Watcher: config.G8sClient.ProviderV1alpha1().AWSConfigs(""),
 
 			RateWait:     informer.DefaultRateWait,
