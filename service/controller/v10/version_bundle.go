@@ -64,11 +64,56 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Updated to 1688.5.3.",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "cloudconfig",
+				Description: "Updated kube-state-metrics to version 1.3.1.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Changed kubelet bind mount mode from shared to rshared.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Disabled etcd3-defragmentation service in favor systemd timer.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Added /lib/modules mount for kubelet.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Updated CoreDNS to 1.1.1.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Updated Calico to 3.0.5.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Updated Etcd to 3.3.3.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Removed docker flag --disable-legacy-registry.",
+				Kind:        versionbundle.KindRemoved,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Removed calico-ipip-pinger.",
+				Kind:        versionbundle.KindRemoved,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
 				Name:    "calico",
-				Version: "3.0.2",
+				Version: "3.0.5",
 			},
 			{
 				Name:    "containerlinux",
@@ -80,11 +125,11 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "etcd",
-				Version: "3.3.1",
+				Version: "3.3.3",
 			},
 			{
 				Name:    "coredns",
-				Version: "1.0.6",
+				Version: "1.1.1",
 			},
 			{
 				Name:    "kubernetes",
