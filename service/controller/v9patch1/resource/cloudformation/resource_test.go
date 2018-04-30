@@ -7,10 +7,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/aws-operator/service/controller/v9/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch1/adapter"
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v9/cloudformation"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v9patch1/cloudformation"
 )
 
 func Test_Resource_Cloudformation_GetCloudFormationTags(t *testing.T) {
