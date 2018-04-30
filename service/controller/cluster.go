@@ -534,7 +534,7 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 			ProjectName: config.ProjectName,
 		}
 
-		resourceSetV10, err = v11.NewClusterResourceSet(c)
+		resourceSetV11, err = v11.NewClusterResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
