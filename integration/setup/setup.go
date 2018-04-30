@@ -13,19 +13,19 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
+	awsclient "github.com/giantswarm/e2eclients/aws"
+	"github.com/giantswarm/e2etemplates/pkg/e2etemplates"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/integration/client"
 	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/aws-operator/integration/teardown"
-	"github.com/giantswarm/aws-operator/integration/template"
 )
 
 const (
 	awsResourceValuesFile = "/tmp/aws-operator-values.yaml"
 )
 
-func HostPeerVPC(c *client.AWS, g *framework.Guest, h *framework.Host) error {
+func HostPeerVPC(c *awsclient.Client, g *framework.Guest, h *framework.Host) error {
 	log.Printf("Creating Host Peer VPC stack")
 
 	os.Setenv("AWS_ROUTE_TABLE_0", env.ClusterID()+"_0")
@@ -33,7 +33,7 @@ func HostPeerVPC(c *client.AWS, g *framework.Guest, h *framework.Host) error {
 	stackName := "host-peer-" + env.ClusterID()
 	stackInput := &cloudformation.CreateStackInput{
 		StackName:        aws.String(stackName),
-		TemplateBody:     aws.String(os.ExpandEnv(template.AWSHostVPCStack)),
+		TemplateBody:     aws.String(os.ExpandEnv(e2etemplates.AWSHostVPCStack)),
 		TimeoutInMinutes: aws.Int64(2),
 	}
 	_, err := c.CloudFormation.CreateStack(stackInput)
@@ -62,20 +62,20 @@ func HostPeerVPC(c *client.AWS, g *framework.Guest, h *framework.Host) error {
 	return nil
 }
 
-func Resources(c *client.AWS, g *framework.Guest, h *framework.Host) error {
+func Resources(c *awsclient.Client, g *framework.Guest, h *framework.Host) error {
 	var err error
 
 	{
 		// TODO configure chart values like for the other operators below.
-		err = h.InstallStableOperator("cert-operator", "certconfig", template.CertOperatorChartValues)
+		err = h.InstallStableOperator("cert-operator", "certconfig", e2etemplates.CertOperatorChartValues)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		err = h.InstallStableOperator("node-operator", "nodeconfig", template.NodeOperatorChartValues)
+		err = h.InstallStableOperator("node-operator", "nodeconfig", e2etemplates.NodeOperatorChartValues)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		err = h.InstallBranchOperator("aws-operator", "awsconfig", template.AWSOperatorChartValues)
+		err = h.InstallBranchOperator("aws-operator", "awsconfig", e2etemplates.AWSOperatorChartValues)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -97,7 +97,7 @@ func Resources(c *client.AWS, g *framework.Guest, h *framework.Host) error {
 	return nil
 }
 
-func WrapTestMain(c *client.AWS, g *framework.Guest, h *framework.Host, m *testing.M) {
+func WrapTestMain(c *awsclient.Client, g *framework.Guest, h *framework.Host, m *testing.M) {
 	var v int
 	var err error
 
@@ -165,7 +165,7 @@ func installAWSResource() error {
 		// the helm client lib. Then error handling will be better.
 		framework.HelmCmd("delete --purge aws-resource-lab")
 
-		awsResourceChartValuesEnv := os.ExpandEnv(template.AWSResourceChartValues)
+		awsResourceChartValuesEnv := os.ExpandEnv(e2etemplates.AWSResourceChartValues)
 		d := []byte(awsResourceChartValuesEnv)
 
 		err := ioutil.WriteFile(awsResourceValuesFile, d, 0644)
