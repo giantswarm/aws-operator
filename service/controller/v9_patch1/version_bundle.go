@@ -24,6 +24,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Nginx Ingress Controller updated to version 0.12.0",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "containerlinux",
+				Description: "Updated to 1688.5.3.",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
@@ -32,11 +37,11 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "containerlinux",
-				Version: "1632.3.0",
+				Version: "1688.5.3",
 			},
 			{
 				Name:    "docker",
-				Version: "17.09.0",
+				Version: "17.12.1",
 			},
 			{
 				Name:    "etcd",
@@ -56,10 +61,10 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Dependencies: []versionbundle.Dependency{},
-		Deprecated:   true,
+		Deprecated:   false,
 		Name:         "aws-operator",
-		Time:         time.Date(2018, time.March, 22, 12, 29, 0, 0, time.UTC),
-		Version:      "3.0.2",
+		Time:         time.Date(2018, time.April, 30, 12, 00, 0, 0, time.UTC),
+		Version:      "3.0.3",
 		WIP:          false,
 	}
 }
