@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch1/key"
 )
 
 var (
@@ -51,11 +52,10 @@ func TestAdapterGuestMain(t *testing.T) {
 					},
 				},
 			},
-			errorMatcher:          nil,
-			expectedASGType:       "worker",
-			expectedClusterID:     "test-cluster",
-			expectedMasterImageID: "master-image-id",
-			expectedWorkerImageID: "worker-image-id",
+			errorMatcher:      nil,
+			expectedASGType:   "worker",
+			expectedClusterID: "test-cluster",
+			expectedImageID:   "ami-604e118b",
 		},
 		{
 			description: "different region",
@@ -74,11 +74,29 @@ func TestAdapterGuestMain(t *testing.T) {
 					},
 				},
 			},
-			errorMatcher:          nil,
-			expectedASGType:       "worker",
-			expectedClusterID:     "test-cluster",
-			expectedMasterImageID: "master-image-id",
-			expectedWorkerImageID: "worker-image-id",
+			errorMatcher:      nil,
+			expectedASGType:   "worker",
+			expectedClusterID: "test-cluster",
+			expectedImageID:   "ami-34237c4d",
+		},
+		{
+			description: "invalid region",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: defaultCluster,
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						AZ:     "invalid-1a",
+						Region: "invalid-1",
+						Masters: []v1alpha1.AWSConfigSpecAWSNode{
+							{},
+						},
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{
+							{},
+						},
+					},
+				},
+			},
+			errorMatcher: key.IsInvalidConfig,
 		},
 	}
 

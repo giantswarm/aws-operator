@@ -50,11 +50,6 @@ func VersionBundle() versionbundle.Bundle {
 				Kind:        versionbundle.KindFixed,
 			},
 			{
-				Component:   "kubernetes",
-				Description: "Updated to 1.10.1.",
-				Kind:        versionbundle.KindChanged,
-			},
-			{
 				Component:   "aws-operator",
 				Description: "Added support for k8s API whitelisting.",
 				Kind:        versionbundle.KindAdded,
@@ -133,7 +128,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "kubernetes",
-				Version: "1.10.1",
+				Version: "1.9.5",
 			},
 			{
 				Name:    "nginx-ingress-controller",
@@ -141,10 +136,10 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Dependencies: []versionbundle.Dependency{},
-		Deprecated:   false,
+		Deprecated:   true,
 		Name:         "aws-operator",
-		Time:         time.Date(2018, time.April, 30, 11, 50, 0, 0, time.UTC),
-		Version:      "3.1.0",
+		Time:         time.Date(2018, time.May, 8, 12, 00, 0, 0, time.UTC),
+		Version:      "3.0.3",
 		WIP:          false,
 	}
 }
