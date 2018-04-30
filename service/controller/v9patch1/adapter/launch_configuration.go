@@ -6,14 +6,14 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v9/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v9/key"
-	"github.com/giantswarm/aws-operator/service/controller/v9/templates"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch1/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch1/key"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch1/templates"
 )
 
 // The template related to this adapter can be found in the following import.
 //
-//     github.com/giantswarm/aws-operator/service/controller/v9/templates/cloudformation/guest/launch_configuration.go
+//     github.com/giantswarm/aws-operator/service/controller/v9patch1/templates/cloudformation/guest/launch_configuration.go
 //
 
 type launchConfigAdapter struct {
