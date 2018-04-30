@@ -9,6 +9,7 @@ import (
 	"github.com/giantswarm/micrologger/loggermeta"
 	"k8s.io/apimachinery/pkg/api/meta"
 
+	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
 	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
 	"github.com/giantswarm/operatorkit/controller/context/updatenecessarycontext"
 )
@@ -67,6 +68,7 @@ func NewResourceSet(c ResourceSetConfig) (*ResourceSet, error) {
 }
 
 func (r *ResourceSet) InitCtx(ctx context.Context, obj interface{}) (context.Context, error) {
+	ctx = finalizerskeptcontext.NewContext(ctx, make(chan struct{}))
 	ctx = updateallowedcontext.NewContext(ctx, make(chan struct{}))
 	ctx = updatenecessarycontext.NewContext(ctx, make(chan struct{}))
 
@@ -77,7 +79,7 @@ func (r *ResourceSet) InitCtx(ctx context.Context, obj interface{}) (context.Con
 
 	accessor, err := meta.Accessor(obj)
 	if err != nil {
-		r.logger.LogCtx(ctx, "function", "InitCtx", "level", "warning", "message", "cannot create accessor for object", "object", fmt.Sprintf("%#v", obj), "stack", fmt.Sprintf("%#v", err))
+		r.logger.LogCtx(ctx, "function", "InitCtx", "level", "warning", "message", "cannot create accessor for object", "stack", fmt.Sprintf("%#v", err))
 	} else {
 		meta, ok := loggermeta.FromContext(ctx)
 		if !ok {

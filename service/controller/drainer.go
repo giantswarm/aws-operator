@@ -92,6 +92,7 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 	var newInformer *informer.Informer
 	{
 		c := informer.Config{
+			Logger:  config.Logger,
 			Watcher: config.G8sClient.ProviderV1alpha1().AWSConfigs(""),
 
 			RateWait:     informer.DefaultRateWait,
@@ -110,9 +111,9 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 			CRD:            v1alpha1.NewAWSConfigCRD(),
 			CRDClient:      crdClient,
 			Informer:       newInformer,
-			K8sClient:      config.K8sClient,
 			Logger:         config.Logger,
 			ResourceRouter: resourceRouter,
+			RESTClient:     config.G8sClient.ProviderV1alpha1().RESTClient(),
 
 			// Name is used to compute finalizer names. This here results in something
 			// like operatorkit.giantswarm.io/aws-operator-drainer.
