@@ -6,7 +6,7 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v10/key"
+	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
 // EnsureDeleted detaches and deletes the EBS volumes. We don't return

@@ -4,9 +4,9 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v10/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/v10/key"
-	"github.com/giantswarm/aws-operator/service/controller/v10/templates"
+	"github.com/giantswarm/aws-operator/service/controller/v11/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v11/key"
+	"github.com/giantswarm/aws-operator/service/controller/v11/templates"
 )
 
 func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig, stackState StackState) (string, error) {

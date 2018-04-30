@@ -7,7 +7,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
-	"github.com/giantswarm/aws-operator/service/controller/v10/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v11/templates/cloudconfig"
 )
 
 const (
