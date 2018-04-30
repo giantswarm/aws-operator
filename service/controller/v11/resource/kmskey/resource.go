@@ -9,12 +9,12 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/v10/key"
+	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
 const (
 	// Name is the identifier of the resource.
-	Name = "kmskeyv10"
+	Name = "kmskeyv11"
 )
 
 // Config represents the configuration used to create a new cloudformation resource.

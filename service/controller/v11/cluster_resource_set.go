@@ -1,4 +1,4 @@
-package v10
+package v11
 
 import (
 	"context"
@@ -16,20 +16,20 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v10/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/v10/cloudconfig"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v10/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v10/ebs"
-	"github.com/giantswarm/aws-operator/service/controller/v10/key"
-	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v10/resource/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v10/resource/ebsvolume"
-	"github.com/giantswarm/aws-operator/service/controller/v10/resource/endpoints"
-	"github.com/giantswarm/aws-operator/service/controller/v10/resource/kmskey"
-	"github.com/giantswarm/aws-operator/service/controller/v10/resource/loadbalancer"
-	"github.com/giantswarm/aws-operator/service/controller/v10/resource/namespace"
-	"github.com/giantswarm/aws-operator/service/controller/v10/resource/s3bucket"
-	"github.com/giantswarm/aws-operator/service/controller/v10/resource/s3object"
-	"github.com/giantswarm/aws-operator/service/controller/v10/resource/service"
+	"github.com/giantswarm/aws-operator/service/controller/v11/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v11/cloudconfig"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v11/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v11/ebs"
+	"github.com/giantswarm/aws-operator/service/controller/v11/key"
+	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v11/resource/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v11/resource/ebsvolume"
+	"github.com/giantswarm/aws-operator/service/controller/v11/resource/endpoints"
+	"github.com/giantswarm/aws-operator/service/controller/v11/resource/kmskey"
+	"github.com/giantswarm/aws-operator/service/controller/v11/resource/loadbalancer"
+	"github.com/giantswarm/aws-operator/service/controller/v11/resource/namespace"
+	"github.com/giantswarm/aws-operator/service/controller/v11/resource/s3bucket"
+	"github.com/giantswarm/aws-operator/service/controller/v11/resource/s3object"
+	"github.com/giantswarm/aws-operator/service/controller/v11/resource/service"
 )
 
 const (
