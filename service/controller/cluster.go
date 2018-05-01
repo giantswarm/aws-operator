@@ -16,9 +16,6 @@ import (
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v1"
-	"github.com/giantswarm/aws-operator/service/controller/v10"
-	v10adapter "github.com/giantswarm/aws-operator/service/controller/v10/adapter"
-	v10cloudconfig "github.com/giantswarm/aws-operator/service/controller/v10/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v2"
 	"github.com/giantswarm/aws-operator/service/controller/v3"
 	"github.com/giantswarm/aws-operator/service/controller/v4"
@@ -33,6 +30,12 @@ import (
 	v8cloudconfig "github.com/giantswarm/aws-operator/service/controller/v8/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v9"
 	v9cloudconfig "github.com/giantswarm/aws-operator/service/controller/v9/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v10"
+	v10adapter "github.com/giantswarm/aws-operator/service/controller/v10/adapter"
+	v10cloudconfig "github.com/giantswarm/aws-operator/service/controller/v10/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v11"
+	v11adapter "github.com/giantswarm/aws-operator/service/controller/v11/adapter"
+	v11cloudconfig "github.com/giantswarm/aws-operator/service/controller/v11/cloudconfig"
 )
 
 type ClusterConfig struct {
@@ -487,7 +490,6 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 			AccessLogsExpiration: config.AccessLogsExpiration,
 			GuestUpdateEnabled:   config.GuestUpdateEnabled,
 			InstallationName:     config.InstallationName,
-			TestingEnvironment:   config.TestingEnvironment,
 			OIDC: v10cloudconfig.OIDCConfig{
 				ClientID:      config.OIDC.ClientID,
 				IssuerURL:     config.OIDC.IssuerURL,
@@ -502,6 +504,39 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 		}
 
 		resourceSetV10, err = v10.NewClusterResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var resourceSetV11 *controller.ResourceSet
+	{
+		c := v11.ClusterResourceSetConfig{
+			CertsSearcher:      certWatcher,
+			GuestAWSClients:    awsClients,
+			HostAWSClients:     awsHostClients,
+			K8sClient:          config.K8sClient,
+			Logger:             config.Logger,
+			RandomkeysSearcher: randomKeySearcher,
+
+			AccessLogsExpiration: config.AccessLogsExpiration,
+			GuestUpdateEnabled:   config.GuestUpdateEnabled,
+			InstallationName:     config.InstallationName,
+			TestingEnvironment:   config.TestingEnvironment,
+			OIDC: v11cloudconfig.OIDCConfig{
+				ClientID:      config.OIDC.ClientID,
+				IssuerURL:     config.OIDC.IssuerURL,
+				UsernameClaim: config.OIDC.UsernameClaim,
+				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			APIWhitelist: v11adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
+			},
+			ProjectName: config.ProjectName,
+		}
+
+		resourceSetV10, err = v11.NewClusterResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -522,6 +557,7 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 				resourceSetV8,
 				resourceSetV9,
 				resourceSetV10,
+				resourceSetV11,
 			},
 		}
 
