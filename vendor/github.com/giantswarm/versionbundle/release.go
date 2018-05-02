@@ -9,6 +9,8 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
+const releaseTimestampFormat = "2006-01-02T15:04:05.000000Z"
+
 type ReleaseConfig struct {
 	Bundles []Bundle
 }
@@ -169,7 +171,7 @@ func aggregateReleaseTimestamp(bundles []Bundle) (string, error) {
 		}
 	}
 
-	return t.Format("2006-01-02T15:04:05.000000Z"), nil
+	return t.Format(releaseTimestampFormat), nil
 }
 
 func aggregateReleaseVersion(bundles []Bundle) (string, error) {

@@ -62,14 +62,8 @@ func (g *Guest) RestConfig() *rest.Config {
 	return g.restConfig
 }
 
-// Setup provides a separate initialization step because of the nature of the
-// host/guest cluster design. We have to setup things in different stages.
-// Constructing the frameworks can be done right away but setting them up can
-// only happen as soon as certain requirements have been met. A requirement for
-// the guest framework is a set up host cluster.
-func (g *Guest) Setup() error {
-	var err error
-
+// Initialize sets up the Guest fields that are not directly injected.
+func (g *Guest) Initialize() error {
 	var hostK8sClient kubernetes.Interface
 	{
 		c, err := clientcmd.BuildConfigFromFlags("", harness.DefaultKubeConfig)
@@ -108,6 +102,20 @@ func (g *Guest) Setup() error {
 
 	g.k8sClient = guestK8sClient
 	g.restConfig = guestRestConfig
+
+	return nil
+}
+
+// Setup provides a separate initialization step because of the nature of the
+// host/guest cluster design. We have to setup things in different stages.
+// Constructing the frameworks can be done right away but setting them up can
+// only happen as soon as certain requirements have been met. A requirement for
+// the guest framework is a set up host cluster.
+func (g *Guest) Setup() error {
+	err := g.Initialize()
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
 	err = g.WaitForGuestReady()
 	if err != nil {

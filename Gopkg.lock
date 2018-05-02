@@ -85,8 +85,8 @@
     "service/s3",
     "service/sts"
   ]
-  revision = "9b0098a71f6d4d473a26ec8ad3c2feaac6eb1da6"
-  version = "v1.13.32"
+  revision = "236a3fce423171d03ae327a8aa2512e6fb24df36"
+  version = "v1.13.39"
 
 [[projects]]
   branch = "master"
@@ -171,8 +171,8 @@
     ".",
     "log"
   ]
-  revision = "26b41036311f2da8242db402557a0dbd09dc83da"
-  version = "v2.6.0"
+  revision = "2810ccc68e0ca445fa81ebfa03fbf70aca5c41ae"
+  version = "v2.7.0"
 
 [[projects]]
   branch = "master"
@@ -203,16 +203,19 @@
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/core/v1alpha1",
+    "pkg/apis/example/v1alpha1",
     "pkg/apis/provider/v1alpha1",
     "pkg/clientset/versioned",
     "pkg/clientset/versioned/fake",
     "pkg/clientset/versioned/scheme",
     "pkg/clientset/versioned/typed/core/v1alpha1",
     "pkg/clientset/versioned/typed/core/v1alpha1/fake",
+    "pkg/clientset/versioned/typed/example/v1alpha1",
+    "pkg/clientset/versioned/typed/example/v1alpha1/fake",
     "pkg/clientset/versioned/typed/provider/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake"
   ]
-  revision = "292a0157b9683e2593f1d65e2e52c5ff2859f124"
+  revision = "b9e071e9e32dd8514b849af8ed7c6d4c0b117fbf"
 
 [[projects]]
   branch = "master"
@@ -236,7 +239,7 @@
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "c30b96d0144c1d7ce411c7f03fefdfa4f3c6af4f"
+  revision = "38d8381fad0902f8e4de1ca28facdecf2f6ddb57"
 
 [[projects]]
   branch = "master"
@@ -254,7 +257,7 @@
   branch = "master"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
-  revision = "2c5de17867c531388f4b3fb674e7d74a7494b770"
+  revision = "a3bc5146b0ecc8b3cbe7b7d94555435d366e715e"
 
 [[projects]]
   branch = "master"
@@ -269,7 +272,7 @@
     "v_3_2_3",
     "v_3_2_5"
   ]
-  revision = "7012556c3984317b3b2ea04183a186f1310950bd"
+  revision = "9fcc811646d2e79388db7e130492216cfd76c760"
 
 [[projects]]
   branch = "master"
@@ -340,7 +343,7 @@
     "controller/resource/retryresource",
     "informer"
   ]
-  revision = "fa5f9b848a8c9cb53e1face5f3af0e42a1e26b87"
+  revision = "8c17ad410e00f66ada8bc2a00cbcd04643a1d4c5"
 
 [[projects]]
   branch = "master"
@@ -364,13 +367,13 @@
   branch = "master"
   name = "github.com/giantswarm/versionbundle"
   packages = ["."]
-  revision = "f1ba953de318d1c02fd88b21e2e9fa127b7beaba"
+  revision = "94e7abbcdd8662cf87bb046f612fa4016277b30a"
 
 [[projects]]
   name = "github.com/go-ini/ini"
   packages = ["."]
-  revision = "ace140f73450505f33e8b8418216792275ae82a7"
-  version = "v1.35.0"
+  revision = "6529cf7c58879c08d927016dde4477f18a0634cb"
+  version = "v1.36.0"
 
 [[projects]]
   name = "github.com/go-kit/kit"
@@ -469,8 +472,8 @@
     "ptypes/duration",
     "ptypes/timestamp"
   ]
-  revision = "925541529c1fa6821df4e44ce2723319eb2be768"
-  version = "v1.0.0"
+  revision = "b4deda0973fb4c70b50d226b1af49f3da59f5265"
+  version = "v1.1.0"
 
 [[projects]]
   branch = "master"
@@ -506,7 +509,7 @@
     "openstack/utils",
     "pagination"
   ]
-  revision = "9feda0c0a5b094cfe5015bd3c294bb0792b222ec"
+  revision = "242a24b4f7bc39e508f1b1c7376874d636705a63"
 
 [[projects]]
   name = "github.com/gorilla/context"
@@ -701,7 +704,7 @@
     "internal/bitbucket.org/ww/goautoneg",
     "model"
   ]
-  revision = "d0f7cd64bda49e08b22ae8a730aa57aa0db125d6"
+  revision = "d811d2e9bf898806ecfb6ef6296774b13ffc314c"
 
 [[projects]]
   branch = "master"
@@ -769,7 +772,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "d6449816ce06963d9d136eee5a56fca5b0616e7e"
+  revision = "2c241ca3045ddc354463c376a9515d9f1f1390a4"
 
 [[projects]]
   branch = "master"
@@ -786,7 +789,7 @@
     "publicsuffix",
     "trace"
   ]
-  revision = "8d16fa6dc9a85c1cd3ed24ad08ff21cf94f10888"
+  revision = "5f9ae10d9af5b1c89ae6904293b14b064d4ada23"
 
 [[projects]]
   branch = "master"
@@ -813,7 +816,7 @@
     "unix",
     "windows"
   ]
-  revision = "b126b21c05a91c856b027c16779c12e3bf236954"
+  revision = "78d5f264b493f125018180c204871ecf58a2dce1"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -864,7 +867,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "7fd901a49ba6a7f87732eb344f6e3c5b19d1b200"
+  revision = "86e600f69ee4704c6efbf6a2a40a5c10700e76c2"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -1047,7 +1050,7 @@
     "pkg/features",
     "pkg/util/feature"
   ]
-  revision = "a3b2d196e0c156ca9436592dc51ab24921f55840"
+  revision = "761b3ff9fe378a442e2bd3dc0d6c4c2de54787a3"
 
 [[projects]]
   name = "k8s.io/client-go"
@@ -1228,8 +1231,8 @@
     "pkg/sympath",
     "pkg/version"
   ]
-  revision = "a80231648a1473929271764b920a8e346f6de844"
-  version = "v2.8.2"
+  revision = "f6025bb9ee7daf9fee0026541c90a6f557a3e0bc"
+  version = "v2.9.0"
 
 [[projects]]
   branch = "master"
@@ -1238,7 +1241,7 @@
     "pkg/common",
     "pkg/util/proto"
   ]
-  revision = "f442ecb314a3679150c272e2b9713d8deed5955d"
+  revision = "f08db293d3ef80052d6513ece19792642a289fea"
 
 [[projects]]
   name = "k8s.io/kubernetes"
@@ -1396,8 +1399,8 @@
     "plugin/pkg/scheduler/util",
     "plugin/pkg/scheduler/volumebinder"
   ]
-  revision = "9f8ebd171479bec0ada837d7ee641dec2f8c6dd1"
-  version = "v1.9.6"
+  revision = "dd5e1a2978fd0b97d9b78e1564398aeea7e7fe92"
+  version = "v1.9.7"
 
 [[projects]]
   branch = "master"

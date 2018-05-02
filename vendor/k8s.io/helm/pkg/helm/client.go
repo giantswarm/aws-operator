@@ -44,6 +44,8 @@ type Client struct {
 // NewClient creates a new client.
 func NewClient(opts ...Option) *Client {
 	var c Client
+	// set some sane defaults
+	c.Option(ConnectTimeout(5))
 	return c.Option(opts...)
 }
 
@@ -299,7 +301,7 @@ func (h *Client) RunReleaseTest(rlsName string, opts ...ReleaseTestOption) (<-ch
 	return h.test(ctx, req)
 }
 
-// PingTiller pings the Tiller pod and ensure's that it is up and runnning
+// PingTiller pings the Tiller pod and ensure's that it is up and running
 func (h *Client) PingTiller() error {
 	ctx := NewContext()
 	return h.ping(ctx)
@@ -344,8 +346,22 @@ func (h *Client) list(ctx context.Context, req *rls.ListReleasesRequest) (*rls.L
 	if err != nil {
 		return nil, err
 	}
-
-	return s.Recv()
+	var resp *rls.ListReleasesResponse
+	for {
+		r, err := s.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		if resp == nil {
+			resp = r
+			continue
+		}
+		resp.Releases = append(resp.Releases, r.GetReleases()[0])
+	}
+	return resp, nil
 }
 
 // Executes tiller.InstallRelease RPC.

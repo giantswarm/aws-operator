@@ -171,9 +171,6 @@ func (b Bundle) Validate() error {
 		}
 	}
 
-	if len(b.Components) == 0 {
-		return microerror.Maskf(invalidBundleError, "components must not be empty")
-	}
 	for _, c := range b.Components {
 		err := c.Validate()
 		if err != nil {
