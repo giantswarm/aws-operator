@@ -92,8 +92,14 @@
 [[projects]]
   name = "github.com/cenkalti/backoff"
   packages = ["."]
-  revision = "2ea60e5f094469f9e65adb9cd103795b73ae743e"
-  version = "v2.0.0"
+  revision = "61153c768f31ee5f130071d08fc82b85208528de"
+  version = "v1.1.0"
+
+[[projects]]
+  name = "github.com/coreos/go-semver"
+  packages = ["semver"]
+  revision = "8ab6407b697782a06568d4b7f1db25550ec2e4c6"
+  version = "v0.2.0"
 
 [[projects]]
   name = "github.com/davecgh/go-spew"
@@ -183,15 +189,25 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/giantswarm/apprclient"
-  packages = ["integration/setup"]
-  revision = "941678e89e3d8836ed99687217676cfdc7c711b1"
+  name = "github.com/giantswarm/apiextensions"
+  packages = [
+    "pkg/apis/core/v1alpha1",
+    "pkg/apis/provider/v1alpha1",
+    "pkg/clientset/versioned",
+    "pkg/clientset/versioned/scheme",
+    "pkg/clientset/versioned/typed/core/v1alpha1",
+    "pkg/clientset/versioned/typed/provider/v1alpha1"
+  ]
+  revision = "292a0157b9683e2593f1d65e2e52c5ff2859f124"
 
 [[projects]]
+  branch = "master"
   name = "github.com/giantswarm/e2e-harness"
-  packages = ["pkg/harness"]
-  revision = "87355014765dfa800271c36c042ab0cf00b0a2cb"
-  version = "8735501"
+  packages = [
+    "pkg/framework",
+    "pkg/harness"
+  ]
+  revision = "24e3de8e44d89468a171ca6338787ea10e4ccd2d"
 
 [[projects]]
   branch = "master"
@@ -214,6 +230,12 @@
     "microloggertest"
   ]
   revision = "ad4de16de22043f947fdf6c587cbc2736456d33d"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/giantswarm/versionbundle"
+  packages = ["."]
+  revision = "94e7abbcdd8662cf87bb046f612fa4016277b30a"
 
 [[projects]]
   name = "github.com/go-ini/ini"
@@ -256,6 +278,12 @@
   name = "github.com/go-openapi/swag"
   packages = ["."]
   revision = "811b1089cde9dad18d4d0c2d09fbdbf28dbd27a5"
+
+[[projects]]
+  name = "github.com/go-resty/resty"
+  packages = ["."]
+  revision = "f8815663de1e64d57cdd4ee9e2b2fa96977a030e"
+  version = "v1.4"
 
 [[projects]]
   name = "github.com/go-stack/stack"
@@ -535,6 +563,7 @@
     "idna",
     "internal/timeseries",
     "lex/httplex",
+    "publicsuffix",
     "trace"
   ]
   revision = "61147c48b25b599e5b561d2e9c4f3e1ef489ca41"
@@ -550,6 +579,12 @@
     "jwt"
   ]
   revision = "921ae394b9430ed4fb549668d7b087601bd60a81"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sync"
+  packages = ["errgroup"]
+  revision = "1d60e4601c6fd243af51cc01ddf169918a5407ca"
 
 [[projects]]
   branch = "master"
@@ -707,10 +742,14 @@
   version = "kubernetes-1.9.3"
 
 [[projects]]
-  branch = "master"
   name = "k8s.io/apiextensions-apiserver"
-  packages = ["pkg/features"]
-  revision = "b111eb9d351569a719b8d4db7c2b368fb59fee93"
+  packages = [
+    "pkg/apis/apiextensions",
+    "pkg/apis/apiextensions/v1beta1",
+    "pkg/features"
+  ]
+  revision = "f1425805c0335c1f5b23e70f0154747b3df5a16a"
+  version = "kubernetes-1.9.3"
 
 [[projects]]
   name = "k8s.io/apimachinery"
@@ -1119,6 +1158,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "202a20b4001f8619b97fef74f088449a231840258a220e457c2ddea3620effd4"
+  inputs-digest = "9e54fc3bd8c7bc82428b42a3eda51ef2b0e91f8564be0a4b17ee100a1743e21d"
   solver-name = "gps-cdcl"
   solver-version = 1
