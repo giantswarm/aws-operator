@@ -2398,7 +2398,7 @@ coreos:
       --feature-gates=ExpandPersistentVolumes=true,PodPriority=true \
       --pod-manifest-path=/etc/kubernetes/manifests \
       --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml \
-      --node-labels="node-role.kubernetes.io/master,role=master,kubernetes.io/hostname=${HOSTNAME},ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
+      --node-labels="node-role.kubernetes.io/master,role=master,ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
       --kube-reserved="cpu=200m,memory=250Mi" \
       --system-reserved="cpu=150m,memory=250Mi" \
       --enforce-node-allocatable=pods \
