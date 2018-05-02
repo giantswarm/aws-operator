@@ -284,7 +284,12 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 	s.logger.Log("info", fmt.Sprintf("waiting for k8s keys..."))
 	keys, err := s.keyWatcher.SearchKeys(clusterID)
 	if err != nil {
-		return microerror.Maskf(executionFailedError, fmt.Sprintf("could not get keys from secrets: '%#v'", err))
+		// NOTE due to the migration of the encryption keys there might be cases and
+		// cluster that do not have certain secrets on purpose. Then we ignore these
+		// cases and just stop the cluster processing here.
+		s.logger.Log("warning", fmt.Sprintf("stop processing of cluster '%s' due to missing encryption key secret", key.ClusterID(cluster)))
+
+		return nil
 	}
 
 	// Create KMS key.
@@ -395,7 +400,12 @@ func (s *Resource) processCluster(cluster v1alpha1.AWSConfig) error {
 
 	// Create VPC peering connection.
 	if cluster.Spec.AWS.VPC.PeerID == "" {
-		return microerror.Maskf(invalidConfigError, fmt.Sprintf("could not create VPC peering connection: peer ID is empty for cluster %q", key.ClusterID(cluster)))
+		// NOTE due to the migration of VPC peering there might be cases and cluster
+		// that do not have certain peerings on purpose. Then we ignore these cases
+		// and just stop the cluster processing here.
+		s.logger.Log("warning", fmt.Sprintf("stop processing of cluster '%s' due to missing VPC peer ID", key.ClusterID(cluster)))
+
+		return nil
 	}
 
 	vpcPeeringConection := &awsresources.VPCPeeringConnection{
