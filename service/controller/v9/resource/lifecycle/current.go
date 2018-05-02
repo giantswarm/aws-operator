@@ -201,11 +201,13 @@ func (r *Resource) completeLifecycleHook(ctx context.Context, instanceID, worker
 	}
 
 	_, err := r.aws.AutoScaling.CompleteLifecycleAction(i)
-	if err != nil {
+	if IsNoActiveLifecycleAction(err) {
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("no lifecycle hook action for guest cluster instance '%s'", instanceID))
+	} else if err != nil {
 		return microerror.Mask(err)
+	} else {
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed lifecycle hook action for guest cluster instance '%s'", instanceID))
 	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed lifecycle hook action for guest cluster instance '%s'", instanceID))
 
 	return nil
 }
