@@ -10,8 +10,8 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "TODO",
-				Description: "TODO",
+				Component:   "component",
+				Description: "Put your description here.",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
@@ -48,7 +48,7 @@ func VersionBundle() versionbundle.Bundle {
 		Dependencies: []versionbundle.Dependency{},
 		Deprecated:   false,
 		Name:         "aws-operator",
-		Time:         time.Date(2018, time.April, 30, 11, 50, 0, 0, time.UTC),
+		Time:         time.Date(2018, time.April, 30, 18, 50, 0, 0, time.UTC),
 		Version:      "3.1.1",
 		WIP:          true,
 	}
