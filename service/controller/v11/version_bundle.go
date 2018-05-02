@@ -49,7 +49,7 @@ func VersionBundle() versionbundle.Bundle {
 		Deprecated:   false,
 		Name:         "aws-operator",
 		Time:         time.Date(2018, time.April, 30, 18, 50, 0, 0, time.UTC),
-		Version:      "3.2.0",
+		Version:      "3.1.1",
 		WIP:          true,
 	}
 }
