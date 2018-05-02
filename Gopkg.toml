@@ -93,7 +93,7 @@ required = [
   name = "github.com/giantswarm/micrologger"
 
 [[constraint]]
-  branch = "finalizer"
+  branch = "master"
   name = "github.com/giantswarm/operatorkit"
 
 [[constraint]]

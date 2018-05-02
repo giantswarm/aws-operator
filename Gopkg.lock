@@ -327,7 +327,7 @@
   revision = "ad4de16de22043f947fdf6c587cbc2736456d33d"
 
 [[projects]]
-  branch = "finalizer"
+  branch = "master"
   name = "github.com/giantswarm/operatorkit"
   packages = [
     "client/k8scrdclient",
@@ -343,7 +343,7 @@
     "controller/resource/retryresource",
     "informer"
   ]
-  revision = "6b454665beb968c69c24615758412bdbc4409d7e"
+  revision = "8c17ad410e00f66ada8bc2a00cbcd04643a1d4c5"
 
 [[projects]]
   branch = "master"
@@ -772,7 +772,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "613d6eafa307c6881a737a3c35c0e312e8d3a8c5"
+  revision = "2c241ca3045ddc354463c376a9515d9f1f1390a4"
 
 [[projects]]
   branch = "master"
@@ -1417,6 +1417,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6322f873429c72e1e6298742cb3a8ba1b6dcdd33f1890d59a9d0fd9121d9de96"
+  inputs-digest = "dd178c7e9b9355d4b2a75cc5f6e867b7053c924da962dd975515e068b6a7d92a"
   solver-name = "gps-cdcl"
   solver-version = 1
