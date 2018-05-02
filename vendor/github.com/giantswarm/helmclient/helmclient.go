@@ -30,7 +30,8 @@ type Config struct {
 	K8sClient  kubernetes.Interface
 	Logger     micrologger.Logger
 
-	RestConfig *rest.Config
+	RestConfig      *rest.Config
+	TillerNamespace string
 }
 
 // Client knows how to talk with a Helm Tiller server.
@@ -39,7 +40,8 @@ type Client struct {
 	k8sClient  kubernetes.Interface
 	logger     micrologger.Logger
 
-	restConfig *rest.Config
+	restConfig      *rest.Config
+	tillerNamespace string
 }
 
 // New creates a new configured Helm client.
@@ -55,12 +57,17 @@ func New(config Config) (*Client, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.RestConfig must not be empty", config)
 	}
 
+	if config.TillerNamespace == "" {
+		config.TillerNamespace = tillerDefaultNamespace
+	}
+
 	c := &Client{
 		helmClient: config.HelmClient,
 		k8sClient:  config.K8sClient,
 		logger:     config.Logger,
 
-		restConfig: config.RestConfig,
+		restConfig:      config.RestConfig,
+		tillerNamespace: config.TillerNamespace,
 	}
 
 	return c, nil
@@ -86,7 +93,7 @@ func (c *Client) DeleteRelease(releaseName string, options ...helmclient.DeleteO
 	}
 	b := newExponentialBackoff(2*time.Minute, backoff.DefaultMaxInterval)
 	n := func(err error, delay time.Duration) {
-		c.logger.Log("level", "debug", "message", "failed deleting release")
+		c.logger.Log("level", "debug", "message", "failed deleting release", "stack", fmt.Sprintf("%#v", err))
 	}
 
 	err := backoff.RetryNotify(o, b, n)
@@ -118,7 +125,7 @@ func (c *Client) EnsureTillerInstalled() error {
 
 	// Create the service account for tiller so it can pull images and do its do.
 	{
-		n := tillerNamespace
+		n := c.tillerNamespace
 		i := &corev1.ServiceAccount{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: "v1",
@@ -151,7 +158,7 @@ func (c *Client) EnsureTillerInstalled() error {
 				{
 					Kind:      "ServiceAccount",
 					Name:      tillerPodName,
-					Namespace: tillerNamespace,
+					Namespace: c.tillerNamespace,
 				},
 			},
 			RoleRef: rbacv1.RoleRef{
@@ -173,7 +180,7 @@ func (c *Client) EnsureTillerInstalled() error {
 	{
 		o := &installer.Options{
 			ImageSpec:      tillerImageSpec,
-			Namespace:      tillerNamespace,
+			Namespace:      c.tillerNamespace,
 			ServiceAccount: tillerPodName,
 		}
 
@@ -215,7 +222,7 @@ func (c *Client) EnsureTillerInstalled() error {
 		}
 		b := newExponentialBackoff(2*time.Minute, 5*time.Second)
 		n := func(err error, delay time.Duration) {
-			c.logger.Log("level", "debug", "message", "failed pinging tiller")
+			c.logger.Log("level", "debug", "message", "failed pinging tiller", "stack", fmt.Sprintf("%#v", err))
 		}
 
 		err := backoff.RetryNotify(o, b, n)
@@ -308,7 +315,7 @@ func (c *Client) GetReleaseHistory(releaseName string) (*ReleaseHistory, error) 
 		}
 		b := newExponentialBackoff(2*time.Minute, backoff.DefaultMaxInterval)
 		n := func(err error, delay time.Duration) {
-			c.logger.Log("level", "debug", "message", "failed fetching release content")
+			c.logger.Log("level", "debug", "message", "failed fetching release content", "stack", fmt.Sprintf("%#v", err))
 		}
 
 		err := backoff.RetryNotify(o, b, n)
@@ -361,7 +368,7 @@ func (c *Client) InstallFromTarball(path, ns string, options ...helmclient.Insta
 	}
 	b := newExponentialBackoff(2*time.Minute, backoff.DefaultMaxInterval)
 	n := func(err error, delay time.Duration) {
-		c.logger.Log("level", "debug", "message", "failed installing from tarball")
+		c.logger.Log("level", "debug", "message", "failed installing from tarball", "stack", fmt.Sprintf("%#v", err))
 	}
 
 	err := backoff.RetryNotify(o, b, n)
@@ -393,7 +400,7 @@ func (c *Client) UpdateReleaseFromTarball(releaseName, path string, options ...h
 	}
 	b := newExponentialBackoff(2*time.Minute, backoff.DefaultMaxInterval)
 	n := func(err error, delay time.Duration) {
-		c.logger.Log("level", "debug", "message", "failed updating release from tarball")
+		c.logger.Log("level", "debug", "message", "failed updating release from tarball", "stack", fmt.Sprintf("%#v", err))
 	}
 
 	err := backoff.RetryNotify(o, b, n)
@@ -436,7 +443,7 @@ func (c *Client) newTunnel() (*k8sportforward.Tunnel, error) {
 		return nil, nil
 	}
 
-	podName, err := getPodName(c.k8sClient, tillerLabelSelector, tillerNamespace)
+	podName, err := getPodName(c.k8sClient, tillerLabelSelector, c.tillerNamespace)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -456,7 +463,7 @@ func (c *Client) newTunnel() (*k8sportforward.Tunnel, error) {
 	{
 		c := k8sportforward.TunnelConfig{
 			Remote:    tillerPort,
-			Namespace: tillerNamespace,
+			Namespace: c.tillerNamespace,
 			PodName:   podName,
 		}
 
