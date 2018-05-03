@@ -17,6 +17,8 @@ const AWSOperatorChartValues = `Installation:
       Update:
         Enabled: ${GUEST_UPDATE_ENABLED}
     Name: ci-aws-operator
+    Infra:
+      TestingEnvironment: false
     Provider:
       AWS:
         Region: ${AWS_REGION}
