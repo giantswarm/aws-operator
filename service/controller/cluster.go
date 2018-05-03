@@ -522,10 +522,7 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 			AccessLogsExpiration: config.AccessLogsExpiration,
 			GuestUpdateEnabled:   config.GuestUpdateEnabled,
 			InstallationName:     config.InstallationName,
-<<<<<<< HEAD
 			TestingEnvironment:   config.TestingEnvironment,
-=======
->>>>>>> master
 			OIDC: v11cloudconfig.OIDCConfig{
 				ClientID:      config.OIDC.ClientID,
 				IssuerURL:     config.OIDC.IssuerURL,
