@@ -522,7 +522,10 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 			AccessLogsExpiration: config.AccessLogsExpiration,
 			GuestUpdateEnabled:   config.GuestUpdateEnabled,
 			InstallationName:     config.InstallationName,
+<<<<<<< HEAD
 			TestingEnvironment:   config.TestingEnvironment,
+=======
+>>>>>>> master
 			OIDC: v11cloudconfig.OIDCConfig{
 				ClientID:      config.OIDC.ClientID,
 				IssuerURL:     config.OIDC.IssuerURL,
@@ -536,7 +539,7 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 			ProjectName: config.ProjectName,
 		}
 
-		resourceSetV10, err = v11.NewClusterResourceSet(c)
+		resourceSetV11, err = v11.NewClusterResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
