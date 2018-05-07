@@ -6,11 +6,11 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v10/cloudformation"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v9patch1/cloudformation"
 )
 
 const (
-	Name = "lifecyclev10"
+	Name = "lifecyclev9patch1"
 )
 
 type ResourceConfig struct {

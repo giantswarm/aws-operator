@@ -1,4 +1,4 @@
-package v10
+package v9patch1
 
 import (
 	"context"
@@ -13,9 +13,9 @@ import (
 	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v10/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v10/key"
-	"github.com/giantswarm/aws-operator/service/controller/v10/resource/lifecycle"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v9patch1/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch1/key"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch1/resource/lifecycle"
 )
 
 type DrainerResourceSetConfig struct {
