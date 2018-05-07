@@ -46,11 +46,11 @@ type ClusterConfig struct {
 
 	AccessLogsExpiration int
 	APIWhitelist         FrameworkConfigAPIWhitelistConfig
+	DeleteLoggingBucket  bool
 	GuestAWSConfig       ClusterConfigAWSConfig
 	GuestUpdateEnabled   bool
 	HostAWSConfig        ClusterConfigAWSConfig
 	InstallationName     string
-	TestingEnvironment   bool
 	OIDC                 ClusterConfigOIDC
 	ProjectName          string
 	PubKeyFile           string
@@ -520,9 +520,9 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 			RandomkeysSearcher: randomKeySearcher,
 
 			AccessLogsExpiration: config.AccessLogsExpiration,
+			DeleteLoggingBucket:  config.DeleteLoggingBucket,
 			GuestUpdateEnabled:   config.GuestUpdateEnabled,
 			InstallationName:     config.InstallationName,
-			TestingEnvironment:   config.TestingEnvironment,
 			OIDC: v11cloudconfig.OIDCConfig{
 				ClientID:      config.OIDC.ClientID,
 				IssuerURL:     config.OIDC.IssuerURL,

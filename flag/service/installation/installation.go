@@ -5,7 +5,6 @@ import (
 )
 
 type Installation struct {
-	Name    string
-	Testing string
-	Guest   guest.Guest
+	Name  string
+	Guest guest.Guest
 }

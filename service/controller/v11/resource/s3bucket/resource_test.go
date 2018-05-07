@@ -38,53 +38,53 @@ func Test_ContainsBucketState(t *testing.T) {
 func Test_BucketCanBeDeleted(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
-		description        string
-		installation       string
-		testingEnvironment bool
-		bucketState        BucketState
-		expectedValue      bool
+		description         string
+		installation        string
+		deleteLoggingBucket bool
+		bucketState         BucketState
+		expectedValue       bool
 	}{
 		{
-			description:        "test env true",
-			installation:       "test-install",
-			testingEnvironment: true,
-			bucketState:        BucketState{},
-			expectedValue:      true,
+			description:         "test env true",
+			installation:        "test-install",
+			deleteLoggingBucket: true,
+			bucketState:         BucketState{},
+			expectedValue:       true,
 		},
 		{
-			description:        "test env false",
-			installation:       "test-install",
-			testingEnvironment: false,
-			bucketState:        BucketState{},
-			expectedValue:      true,
+			description:         "test env false",
+			installation:        "test-install",
+			deleteLoggingBucket: false,
+			bucketState:         BucketState{},
+			expectedValue:       true,
 		},
 		{
-			description:        "test env true no logging bucket",
-			installation:       "test-install",
-			testingEnvironment: true,
-			bucketState:        BucketState{},
-			expectedValue:      true,
+			description:         "test env true no logging bucket",
+			installation:        "test-install",
+			deleteLoggingBucket: true,
+			bucketState:         BucketState{},
+			expectedValue:       true,
 		},
 		{
-			description:        "test env true logging bucket",
-			installation:       "test-install",
-			testingEnvironment: true,
+			description:         "test env true logging bucket",
+			installation:        "test-install",
+			deleteLoggingBucket: true,
 			bucketState: BucketState{
 				IsLoggingBucket: true,
 			},
 			expectedValue: true,
 		},
 		{
-			description:        "test env false no logging bucket",
-			installation:       "test-install",
-			testingEnvironment: true,
-			bucketState:        BucketState{},
-			expectedValue:      true,
+			description:         "test env false no logging bucket",
+			installation:        "test-install",
+			deleteLoggingBucket: true,
+			bucketState:         BucketState{},
+			expectedValue:       true,
 		},
 		{
-			description:        "test env false logging bucket",
-			installation:       "test-install",
-			testingEnvironment: false,
+			description:         "test env false logging bucket",
+			installation:        "test-install",
+			deleteLoggingBucket: false,
 			bucketState: BucketState{
 				IsLoggingBucket: true,
 			},
@@ -113,7 +113,7 @@ func Test_BucketCanBeDeleted(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			c.TestingEnvironment = tc.testingEnvironment
+			c.DeleteLoggingBucket = tc.deleteLoggingBucket
 			c.InstallationName = tc.installation
 			r, err := New(c)
 			if err != nil {
