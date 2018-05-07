@@ -22,7 +22,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 
 	clusterID := key.ClusterID(customObject)
-	kmsArn, err := r.awsService.GetKeyArn(clusterID)
+	kmsKeyARN, err := r.awsService.GetKeyArn(clusterID)
 	if IsKeyNotFound(err) {
 		// we can get here during deletion, if the key is already deleted we can safely exit.
 		return output, nil
@@ -36,22 +36,17 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return output, microerror.Mask(err)
 	}
 
-	randomKeys, err := r.randomKeyWatcher.SearchKeys(clusterID)
+	tlsAssets, err := r.encodeTLSAssets(certs, kmsKeyARN)
 	if err != nil {
 		return output, microerror.Mask(err)
 	}
 
-	tlsAssets, err := r.encodeTLSAssets(certs, kmsArn)
+	clusterKeys, err := r.randomKeySearcher.SearchCluster(clusterID)
 	if err != nil {
 		return output, microerror.Mask(err)
 	}
 
-	randomKeyAssets, err := r.encodeKeyAssets(randomKeys, kmsArn)
-	if err != nil {
-		return output, microerror.Mask(err)
-	}
-
-	masterBody, err := r.cloudConfig.NewMasterTemplate(customObject, *tlsAssets, *randomKeyAssets)
+	masterBody, err := r.cloudConfig.NewMasterTemplate(customObject, *tlsAssets, clusterKeys, kmsKeyARN)
 	if err != nil {
 		return output, microerror.Mask(err)
 	}

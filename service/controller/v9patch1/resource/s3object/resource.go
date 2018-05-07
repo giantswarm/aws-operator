@@ -10,6 +10,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/randomkeys"
 )
 
 const (
@@ -20,37 +21,23 @@ const (
 // Config represents the configuration used to create a new cloudformation resource.
 type Config struct {
 	// Dependencies.
-	AwsService       AwsService
-	CertWatcher      legacy.Searcher
-	Clients          Clients
-	CloudConfig      CloudConfigService
-	Logger           micrologger.Logger
-	RandomKeyWatcher RandomKeyWatcher
-}
-
-// DefaultConfig provides a default configuration to create a new cloudformation
-// resource by best effort.
-func DefaultConfig() Config {
-	return Config{
-		// Dependencies.
-		AwsService:       nil,
-		CertWatcher:      nil,
-		Clients:          Clients{},
-		CloudConfig:      nil,
-		Logger:           nil,
-		RandomKeyWatcher: nil,
-	}
+	AwsService        AwsService
+	CertWatcher       legacy.Searcher
+	Clients           Clients
+	CloudConfig       CloudConfigService
+	Logger            micrologger.Logger
+	RandomKeySearcher randomkeys.Interface
 }
 
 // Resource implements the cloudformation resource.
 type Resource struct {
 	// Dependencies.
-	awsService       AwsService
-	awsClients       Clients
-	certWatcher      legacy.Searcher
-	cloudConfig      CloudConfigService
-	logger           micrologger.Logger
-	randomKeyWatcher RandomKeyWatcher
+	awsService        AwsService
+	awsClients        Clients
+	certWatcher       legacy.Searcher
+	cloudConfig       CloudConfigService
+	logger            micrologger.Logger
+	randomKeySearcher randomkeys.Interface
 }
 
 // New creates a new configured cloudformation resource.
@@ -68,21 +55,21 @@ func New(config Config) (*Resource, error) {
 	if config.CertWatcher == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.CertWatcher must not be empty")
 	}
-	if config.RandomKeyWatcher == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.RandomKeyWatcher must not be empty")
+	if config.RandomKeySearcher == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.RandomKeySearcher must not be empty")
 	}
 
-	newService := &Resource{
+	r := &Resource{
 		// Dependencies.
-		awsService:       config.AwsService,
-		awsClients:       config.Clients,
-		certWatcher:      config.CertWatcher,
-		cloudConfig:      config.CloudConfig,
-		logger:           config.Logger,
-		randomKeyWatcher: config.RandomKeyWatcher,
+		awsService:        config.AwsService,
+		awsClients:        config.Clients,
+		certWatcher:       config.CertWatcher,
+		cloudConfig:       config.CloudConfig,
+		logger:            config.Logger,
+		randomKeySearcher: config.RandomKeySearcher,
 	}
 
-	return newService, nil
+	return r, nil
 }
 
 func (r *Resource) Name() string {

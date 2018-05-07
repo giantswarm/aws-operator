@@ -20,14 +20,23 @@ func IsNotFound(err error) bool {
 	return microerror.Cause(err) == notFoundError
 }
 
+var bucketNotFoundError = microerror.New("bucket not found")
+
 // IsBucketNotFound asserts bucket not found error from upstream's API code.
 func IsBucketNotFound(err error) bool {
-	aerr, ok := err.(awserr.Error)
+	c := microerror.Cause(err)
+	aerr, ok := c.(awserr.Error)
 	if !ok {
 		return false
 	}
-	// TODO Find constant in the Go SDK for the error code.
+	// hack for HeadBucket request that returns a wrong error code
 	if aerr.Code() == "NotFound" {
+		return true
+	}
+	if aerr.Code() == s3.ErrCodeNoSuchBucket {
+		return true
+	}
+	if c == bucketNotFoundError {
 		return true
 	}
 

@@ -90,6 +90,7 @@ func Test_Resource_Cloudformation_newDelete(t *testing.T) {
 		c := Config{}
 
 		c.Clients = &adapter.Clients{}
+		c.EBS = &EBSServiceMock{}
 		c.HostClients = &adapter.Clients{}
 		c.Logger = microloggertest.New()
 		c.Service = &cloudformationservice.CloudFormation{}

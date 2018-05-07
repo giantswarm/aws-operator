@@ -48,16 +48,3 @@ func New(config Config) (*Resource, error) {
 func (r *Resource) Name() string {
 	return Name
 }
-
-func toLoadBalancerState(v interface{}) (*LoadBalancerState, error) {
-	if v == nil {
-		return nil, nil
-	}
-
-	lbState, ok := v.(*LoadBalancerState)
-	if !ok {
-		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", lbState, v)
-	}
-
-	return lbState, nil
-}
