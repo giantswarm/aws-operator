@@ -6,8 +6,8 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/adapter"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v9patch1/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v10/adapter"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v10/cloudformation"
 )
 
 func Test_validateHostPeeringRoutes(t *testing.T) {
@@ -48,6 +48,9 @@ func Test_validateHostPeeringRoutes(t *testing.T) {
 		var err error
 		var newResource *Resource
 		{
+			ec2Mock := &adapter.EC2ClientMock{}
+			ec2Mock.SetMatchingRouteTables(tc.matchingRouteTables)
+
 			c := Config{}
 
 			c.Clients = &adapter.Clients{
@@ -55,8 +58,7 @@ func Test_validateHostPeeringRoutes(t *testing.T) {
 				IAM: &adapter.IAMClientMock{},
 				KMS: &adapter.KMSClientMock{},
 			}
-			ec2Mock := &adapter.EC2ClientMock{}
-			ec2Mock.SetMatchingRouteTables(tc.matchingRouteTables)
+			c.EBS = &EBSServiceMock{}
 			c.HostClients = &adapter.Clients{
 				EC2:            ec2Mock,
 				CloudFormation: &adapter.CloudFormationMock{},
@@ -67,17 +69,17 @@ func Test_validateHostPeeringRoutes(t *testing.T) {
 
 			newResource, err = New(c)
 			if err != nil {
-				t.Error("expected", nil, "got", err)
+				t.Fatal("expected", nil, "got", err)
 			}
 		}
 
 		t.Run(tc.description, func(t *testing.T) {
 			err := newResource.validateHostPeeringRoutes(customObject)
 			if tc.expectedError && err == nil {
-				t.Errorf("expected error didn't happen")
+				t.Fatalf("expected error didn't happen")
 			}
 			if !tc.expectedError && err != nil {
-				t.Errorf("unexpected error %v", err)
+				t.Fatalf("unexpected error %v", err)
 			}
 		})
 	}

@@ -5,13 +5,12 @@ import (
 	"io"
 	"strings"
 
-	"github.com/giantswarm/randomkeytpr"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/legacy"
+	"github.com/giantswarm/randomkeys"
 )
 
 // nopCloser is required to implement the ReadCloser interface required by
@@ -67,7 +66,7 @@ type CloudConfigMock struct {
 	template string
 }
 
-func (c *CloudConfigMock) NewMasterTemplate(customObject v1alpha1.AWSConfig, certs legacy.CompactTLSAssets, randomKeys randomkeytpr.CompactRandomKeyAssets) (string, error) {
+func (c *CloudConfigMock) NewMasterTemplate(customObject v1alpha1.AWSConfig, certs legacy.CompactTLSAssets, randomKeys randomkeys.Cluster, kmsKeyARN string) (string, error) {
 	return c.template, nil
 }
 

@@ -1,4 +1,4 @@
-package v9patch1
+package v10
 
 import (
 	"context"
@@ -11,24 +11,25 @@ import (
 	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
 	"github.com/giantswarm/operatorkit/controller/resource/metricsresource"
 	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
-	"github.com/giantswarm/randomkeytpr"
+	"github.com/giantswarm/randomkeys"
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/cloudconfig"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v9patch1/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/key"
-	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v9patch1/resource/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/resource/ebsvolume"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/resource/endpoints"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/resource/kmskey"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/resource/loadbalancer"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/resource/namespace"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/resource/s3bucket"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/resource/s3object"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/resource/service"
+	"github.com/giantswarm/aws-operator/service/controller/v10/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v10/cloudconfig"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v10/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v10/ebs"
+	"github.com/giantswarm/aws-operator/service/controller/v10/key"
+	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v10/resource/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v10/resource/ebsvolume"
+	"github.com/giantswarm/aws-operator/service/controller/v10/resource/endpoints"
+	"github.com/giantswarm/aws-operator/service/controller/v10/resource/kmskey"
+	"github.com/giantswarm/aws-operator/service/controller/v10/resource/loadbalancer"
+	"github.com/giantswarm/aws-operator/service/controller/v10/resource/namespace"
+	"github.com/giantswarm/aws-operator/service/controller/v10/resource/s3bucket"
+	"github.com/giantswarm/aws-operator/service/controller/v10/resource/s3object"
+	"github.com/giantswarm/aws-operator/service/controller/v10/resource/service"
 )
 
 const (
@@ -41,12 +42,14 @@ type ClusterResourceSetConfig struct {
 	HostAWSClients     aws.Clients
 	K8sClient          kubernetes.Interface
 	Logger             micrologger.Logger
-	RandomkeysSearcher *randomkeytpr.Service
+	RandomkeysSearcher randomkeys.Interface
 
-	GuestUpdateEnabled bool
-	InstallationName   string
-	OIDC               cloudconfig.OIDCConfig
-	ProjectName        string
+	AccessLogsExpiration int
+	APIWhitelist         adapter.APIWhitelist
+	GuestUpdateEnabled   bool
+	InstallationName     string
+	OIDC                 cloudconfig.OIDCConfig
+	ProjectName          string
 }
 
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
@@ -98,6 +101,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	if config.ProjectName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.ProjectName must not be empty")
 	}
+	if config.APIWhitelist.Enabled && config.APIWhitelist.SubnetList == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.SubnetList must not be empty when %T.APIWhitelist is enabled", config)
+	}
 
 	var awsService *awsservice.Service
 	{
@@ -118,8 +124,10 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var cloudConfig *cloudconfig.CloudConfig
 	{
 		c := cloudconfig.Config{
-			Logger: config.Logger,
-			OIDC:   config.OIDC,
+			KMSClient: config.GuestAWSClients.KMS,
+			Logger:    config.Logger,
+
+			OIDC: config.OIDC,
 		}
 
 		cloudConfig, err = cloudconfig.New(c)
@@ -135,6 +143,18 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		cloudFormationService, err = cloudformationservice.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var ebsService ebs.Interface
+	{
+		c := ebs.Config{
+			Client: config.GuestAWSClients.EC2,
+			Logger: config.Logger,
+		}
+		ebsService, err = ebs.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -171,7 +191,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			},
 			Logger: config.Logger,
 
-			InstallationName: config.InstallationName,
+			AccessLogsExpiration: config.AccessLogsExpiration,
+			InstallationName:     config.InstallationName,
 		}
 
 		ops, err := s3bucket.New(c)
@@ -193,10 +214,10 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 				S3:  config.GuestAWSClients.S3,
 				KMS: config.GuestAWSClients.KMS,
 			},
-			CloudConfig:      cloudConfig,
-			CertWatcher:      config.CertsSearcher,
-			Logger:           config.Logger,
-			RandomKeyWatcher: config.RandomkeysSearcher,
+			CloudConfig:       cloudConfig,
+			CertWatcher:       config.CertsSearcher,
+			Logger:            config.Logger,
+			RandomKeySearcher: config.RandomkeysSearcher,
 		}
 
 		ops, err := s3object.New(c)
@@ -219,12 +240,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			Logger: config.Logger,
 		}
 
-		ops, err := loadbalancer.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		loadBalancerResource, err = toCRUDResource(config.Logger, ops)
+		loadBalancerResource, err = loadbalancer.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -233,18 +249,11 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var ebsVolumeResource controller.Resource
 	{
 		c := ebsvolume.Config{
-			Clients: ebsvolume.Clients{
-				EC2: config.GuestAWSClients.EC2,
-			},
-			Logger: config.Logger,
+			Logger:  config.Logger,
+			Service: ebsService,
 		}
 
-		ops, err := ebsvolume.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		ebsVolumeResource, err = toCRUDResource(config.Logger, ops)
+		ebsVolumeResource, err = ebsvolume.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -260,6 +269,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 				KMS:            config.GuestAWSClients.KMS,
 				ELB:            config.GuestAWSClients.ELB,
 			},
+			EBS: ebsService,
 			HostClients: &adapter.Clients{
 				EC2:            config.HostAWSClients.EC2,
 				IAM:            config.HostAWSClients.IAM,
@@ -267,6 +277,10 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			},
 			Logger:  config.Logger,
 			Service: cloudFormationService,
+			APIWhitelist: adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
+			},
 
 			InstallationName: config.InstallationName,
 		}

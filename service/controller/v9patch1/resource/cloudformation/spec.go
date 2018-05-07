@@ -1,5 +1,7 @@
 package cloudformation
 
+import "github.com/aws/aws-sdk-go/service/cloudformation"
+
 const (
 	// defaultCreationTimeout is the timeout in minutes for the creation of the
 	// stack.
@@ -14,14 +16,22 @@ const (
 type StackState struct {
 	Name string
 
-	MasterImageID            string
-	MasterInstanceType       string
-	MasterCloudConfigVersion string
+	MasterImageID              string
+	MasterInstanceType         string
+	MasterInstanceResourceName string
+	MasterCloudConfigVersion   string
+
+	ShouldScale  bool
+	ShouldUpdate bool
+
+	Status string
 
 	WorkerCount              string
 	WorkerImageID            string
 	WorkerInstanceType       string
 	WorkerCloudConfigVersion string
+
+	UpdateStackInput cloudformation.UpdateStackInput
 
 	VersionBundleVersion string
 }

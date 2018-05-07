@@ -9,7 +9,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "loadbalancerv9patch1"
+	Name = "loadbalancerv10"
 )
 
 // Config represents the configuration used to create a new loadbalancer resource.
@@ -47,17 +47,4 @@ func New(config Config) (*Resource, error) {
 
 func (r *Resource) Name() string {
 	return Name
-}
-
-func toLoadBalancerState(v interface{}) (*LoadBalancerState, error) {
-	if v == nil {
-		return nil, nil
-	}
-
-	lbState, ok := v.(*LoadBalancerState)
-	if !ok {
-		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", lbState, v)
-	}
-
-	return lbState, nil
 }

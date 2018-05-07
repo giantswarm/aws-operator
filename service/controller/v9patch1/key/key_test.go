@@ -3,7 +3,9 @@ package key
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
@@ -211,6 +213,28 @@ func Test_ClusterVersion(t *testing.T) {
 	}
 }
 
+func Test_EtcdVolumeName(t *testing.T) {
+	t.Parallel()
+	expectedName := "test-cluster-etcd"
+
+	cluster := v1alpha1.Cluster{
+		ID: "test-cluster",
+		Customer: v1alpha1.ClusterCustomer{
+			ID: "test-customer",
+		},
+	}
+
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: cluster,
+		},
+	}
+
+	if EtcdVolumeName(customObject) != expectedName {
+		t.Fatalf("Expected Etcd volume name %s but was %s", expectedName, EtcdVolumeName(customObject))
+	}
+}
+
 func Test_IngressControllerInsecurePort(t *testing.T) {
 	t.Parallel()
 	expectedPort := 30010
@@ -329,6 +353,57 @@ func Test_MasterInstanceName(t *testing.T) {
 		if MasterInstanceName(tc.customObject) != tc.expectedInstanceName {
 			t.Fatalf("Expected master instance name %s but was %s", tc.expectedInstanceName, MasterInstanceName(tc.customObject))
 		}
+	}
+}
+
+func Test_MasterInstanceResourceName_Format(t *testing.T) {
+	t.Parallel()
+
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "test-cluster",
+			},
+		},
+	}
+
+	n1 := MasterInstanceResourceName(customObject)
+	time.Sleep(1 * time.Millisecond)
+	n2 := MasterInstanceResourceName(customObject)
+
+	prefix := "MasterInstance"
+
+	if !strings.HasPrefix(n1, prefix) {
+		t.Fatalf("expected %s to have prefix %s", n1, prefix)
+	}
+	if strings.Contains(n1, "-") {
+		t.Fatalf("expected %s to not contain dashes", n1)
+	}
+	if !strings.HasPrefix(n2, prefix) {
+		t.Fatalf("expected %s to have prefix %s", n2, prefix)
+	}
+	if strings.Contains(n2, "-") {
+		t.Fatalf("expected %s to not contain dashes", n2)
+	}
+}
+
+func Test_MasterInstanceResourceName_Inequivalence(t *testing.T) {
+	t.Parallel()
+
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "test-cluster",
+			},
+		},
+	}
+
+	n1 := MasterInstanceResourceName(customObject)
+	time.Sleep(1 * time.Millisecond)
+	n2 := MasterInstanceResourceName(customObject)
+
+	if n1 == n2 {
+		t.Fatalf("expected %s to differ from %s", n1, n2)
 	}
 }
 
@@ -933,7 +1008,7 @@ func Test_ImageID(t *testing.T) {
 				},
 			},
 			errorMatcher:    nil,
-			expectedImageID: "ami-862140e9",
+			expectedImageID: "ami-604e118b",
 		},
 		{
 			description: "different region",
@@ -945,7 +1020,7 @@ func Test_ImageID(t *testing.T) {
 				},
 			},
 			errorMatcher:    nil,
-			expectedImageID: "ami-a61464df",
+			expectedImageID: "ami-34237c4d",
 		},
 		{
 			description: "invalid region",
@@ -975,5 +1050,22 @@ func Test_ImageID(t *testing.T) {
 				t.Errorf("unexpected imageID, expecting %q, want %q", tc.expectedImageID, imageID)
 			}
 		})
+	}
+}
+
+func Test_TargetLogBucketName(t *testing.T) {
+	t.Parallel()
+	expectedName := "test-cluster-g8s-access-logs"
+
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "test-cluster",
+			},
+		},
+	}
+
+	if TargetLogBucketName(customObject) != expectedName {
+		t.Fatalf("Expected target bucket name %s but was %s", expectedName, TargetLogBucketName(customObject))
 	}
 }

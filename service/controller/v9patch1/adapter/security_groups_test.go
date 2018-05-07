@@ -49,6 +49,11 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 					SourceCIDR: "0.0.0.0/0",
 				},
 				{
+					Port:       4194,
+					Protocol:   "tcp",
+					SourceCIDR: "10.0.0.0/16",
+				},
+				{
 					Port:       10250,
 					Protocol:   "tcp",
 					SourceCIDR: "10.0.0.0/16",
@@ -83,6 +88,11 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 				},
 				{
 					Port:       30010,
+					Protocol:   "tcp",
+					SourceCIDR: "10.0.0.0/16",
+				},
+				{
+					Port:       4194,
 					Protocol:   "tcp",
 					SourceCIDR: "10.0.0.0/16",
 				},

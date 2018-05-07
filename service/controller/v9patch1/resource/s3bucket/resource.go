@@ -8,12 +8,14 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/key"
+	"github.com/giantswarm/aws-operator/service/controller/v10/key"
 )
 
 const (
 	// Name is the identifier of the resource.
-	Name = "s3bucketv9patch1"
+	Name = "s3bucketv10"
+	// LifecycleLoggingBucketID is the Lifecycle ID for the logging bucket
+	LifecycleLoggingBucketID = "ExpirationLogs"
 )
 
 // Config represents the configuration used to create a new s3bucket resource.
@@ -24,7 +26,8 @@ type Config struct {
 	Logger     micrologger.Logger
 
 	// Settings.
-	InstallationName string
+	AccessLogsExpiration int
+	InstallationName     string
 }
 
 // DefaultConfig provides a default configuration to create a new s3bucket
@@ -46,7 +49,8 @@ type Resource struct {
 	logger     micrologger.Logger
 
 	// Settings.
-	installationName string
+	accessLogsExpiration int
+	installationName     string
 }
 
 // New creates a new configured s3bucket resource.
@@ -60,6 +64,9 @@ func New(config Config) (*Resource, error) {
 	}
 
 	// Settings.
+	if config.AccessLogsExpiration < 0 {
+		return nil, microerror.Maskf(invalidConfigError, "%T.AccessLogsExpiration must not be lower than 0", config)
+	}
 	if config.InstallationName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
 	}
@@ -71,7 +78,8 @@ func New(config Config) (*Resource, error) {
 		logger:     config.Logger,
 
 		// Settings.
-		installationName: config.InstallationName,
+		accessLogsExpiration: config.AccessLogsExpiration,
+		installationName:     config.InstallationName,
 	}
 
 	return newResource, nil
@@ -81,17 +89,27 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func toBucketState(v interface{}) (BucketState, error) {
+func toBucketState(v interface{}) ([]BucketState, error) {
 	if v == nil {
-		return BucketState{}, nil
+		return []BucketState{}, nil
 	}
 
-	bucketState, ok := v.(BucketState)
+	bucketsState, ok := v.([]BucketState)
 	if !ok {
-		return BucketState{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", BucketState{}, v)
+		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", []BucketState{}, v)
 	}
 
-	return bucketState, nil
+	return bucketsState, nil
+}
+
+func containsBucketState(bucketStateName string, bucketStateList []BucketState) bool {
+	for _, b := range bucketStateList {
+		if b.Name == bucketStateName {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (r *Resource) getS3BucketTags(customObject v1alpha1.AWSConfig) []*s3.Tag {

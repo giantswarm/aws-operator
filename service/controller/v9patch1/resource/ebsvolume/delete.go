@@ -4,64 +4,70 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/controller"
+
+	"github.com/giantswarm/aws-operator/service/controller/v10/key"
 )
 
-func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
-	deleteInput, err := toEBSVolumeState(deleteChange)
+// EnsureDeleted detaches and deletes the EBS volumes. We don't return
+// errors so deletion logic in following resources is executed.
+func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
+	customObject, err := key.ToCustomObject(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	if deleteInput != nil && len(deleteInput.VolumeIDs) > 0 {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting %d ebs volumes", len(deleteInput.VolumeIDs)))
+	// Get both the Etcd volume and any Persistent Volumes.
+	etcdVolume := true
+	persistentVolume := true
+	volumes, err := r.service.ListVolumes(customObject, etcdVolume, persistentVolume)
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
-		for _, volID := range deleteInput.VolumeIDs {
-			_, err := r.clients.EC2.DeleteVolume(&ec2.DeleteVolumeInput{
-				VolumeId: aws.String(volID),
-			})
-			if err != nil {
-				return microerror.Mask(err)
+	if len(volumes) > 0 {
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting %d EBS volumes", len(volumes)))
+
+		// First detach any attached volumes without forcing but shutdown the
+		// instances.
+		for _, vol := range volumes {
+			for _, a := range vol.Attachments {
+				force := false
+				shutdown := true
+				wait := false
+				err := r.service.DetachVolume(ctx, vol.VolumeID, a, force, shutdown, wait)
+				if err != nil {
+					r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("failed to detach EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
+				}
 			}
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted %d ebs volumes", len(deleteInput.VolumeIDs)))
+		// Now force detach so the volumes can be deleted cleanly. Instances
+		// are already shutdown.
+		for _, vol := range volumes {
+			for _, a := range vol.Attachments {
+				force := true
+				shutdown := false
+				wait := false
+				err := r.service.DetachVolume(ctx, vol.VolumeID, a, force, shutdown, wait)
+				if err != nil {
+					r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("failed to force detach EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
+				}
+			}
+		}
+
+		// Now delete the volumes.
+		for _, vol := range volumes {
+			err := r.service.DeleteVolume(ctx, vol.VolumeID)
+			if err != nil {
+				r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("failed to delete EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
+			}
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted %d EBS volumes", len(volumes)))
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting load ebs volumes because there aren't any")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting EBS volumes because there aren't any")
 	}
 
 	return nil
-}
-
-func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*controller.Patch, error) {
-	delete, err := r.newDeleteChange(ctx, obj, currentState, desiredState)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	patch := controller.NewPatch()
-	patch.SetDeleteChange(delete)
-
-	return patch, nil
-}
-
-func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	currentVolState, err := toEBSVolumeState(currentState)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-	desiredVolState, err := toEBSVolumeState(desiredState)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	var volStateToDelete *EBSVolumeState
-	if desiredVolState == nil && currentVolState != nil && len(currentVolState.VolumeIDs) > 0 {
-		volStateToDelete = currentVolState
-	}
-
-	return volStateToDelete, nil
 }

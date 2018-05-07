@@ -1,21 +1,22 @@
-package ebsvolume
+package ebs
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/key"
+	"github.com/giantswarm/aws-operator/service/controller/v10/key"
 )
 
 type EC2ClientMock struct {
 	customObject v1alpha1.AWSConfig
-	ebsVolumes   []EBSVolumeMock
+	ebsVolumes   []ebsVolumeMock
 }
 
-type EBSVolumeMock struct {
-	volumeID string
-	tags     []*ec2.Tag
+type ebsVolumeMock struct {
+	volumeID    string
+	attachments []*ec2.VolumeAttachment
+	tags        []*ec2.Tag
 }
 
 func (e *EC2ClientMock) DeleteVolume(*ec2.DeleteVolumeInput) (*ec2.DeleteVolumeOutput, error) {
@@ -30,8 +31,9 @@ func (e *EC2ClientMock) DescribeVolumes(input *ec2.DescribeVolumesInput) (*ec2.D
 
 	for _, mock := range e.ebsVolumes {
 		vol := &ec2.Volume{
-			VolumeId: aws.String(mock.volumeID),
-			Tags:     mock.tags,
+			VolumeId:    aws.String(mock.volumeID),
+			Attachments: mock.attachments,
+			Tags:        mock.tags,
 		}
 
 		for _, tag := range mock.tags {
@@ -44,4 +46,16 @@ func (e *EC2ClientMock) DescribeVolumes(input *ec2.DescribeVolumesInput) (*ec2.D
 	output.SetVolumes(volumes)
 
 	return output, nil
+}
+
+func (e *EC2ClientMock) DetachVolume(*ec2.DetachVolumeInput) (*ec2.VolumeAttachment, error) {
+	return nil, nil
+}
+
+func (e *EC2ClientMock) StopInstances(*ec2.StopInstancesInput) (*ec2.StopInstancesOutput, error) {
+	return nil, nil
+}
+
+func (e *EC2ClientMock) WaitUntilInstanceStopped(*ec2.DescribeInstancesInput) error {
+	return nil
 }

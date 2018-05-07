@@ -7,10 +7,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v10/adapter"
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v9patch1/cloudformation"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v10/cloudformation"
 )
 
 func Test_Resource_Cloudformation_GetCloudFormationTags(t *testing.T) {
@@ -62,6 +62,7 @@ func Test_Resource_Cloudformation_GetCloudFormationTags(t *testing.T) {
 		IAM: &adapter.IAMClientMock{},
 		KMS: &adapter.KMSClientMock{},
 	}
+	c.EBS = &EBSServiceMock{}
 	c.HostClients = &adapter.Clients{
 		EC2:            &adapter.EC2ClientMock{},
 		CloudFormation: &adapter.CloudFormationMock{},
