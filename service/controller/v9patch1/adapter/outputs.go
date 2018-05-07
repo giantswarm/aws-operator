@@ -1,17 +1,12 @@
 package adapter
 
 import (
-	"strconv"
-
-	"github.com/giantswarm/microerror"
-
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/key"
+	"github.com/giantswarm/aws-operator/service/controller/v10/key"
 )
 
 // The template related to this adapter can be found in the following import.
 //
-//     github.com/giantswarm/aws-operator/service/controller/v9patch1/templates/cloudformation/guest/outputs.go
+//     github.com/giantswarm/aws-operator/service/controller/v10/templates/cloudformation/guest/outputs.go
 //
 
 type outputsAdapter struct {
@@ -21,9 +16,14 @@ type outputsAdapter struct {
 }
 
 type outputsAdapterMaster struct {
-	ImageID      string
-	InstanceType string
-	CloudConfig  outputsAdapterMasterCloudConfig
+	ImageID     string
+	Instance    outputsAdapterMasterInstance
+	CloudConfig outputsAdapterMasterCloudConfig
+}
+
+type outputsAdapterMasterInstance struct {
+	ResourceName string
+	Type         string
 }
 
 type outputsAdapterMasterCloudConfig struct {
@@ -52,27 +52,19 @@ type outputsAdapterVersionBundle struct {
 }
 
 func (a *outputsAdapter) Adapt(config Config) error {
-	imageID, err := key.ImageID(config.CustomObject)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	workerCount := key.WorkerCount(config.CustomObject)
-	if workerCount <= 0 {
-		return microerror.Maskf(invalidConfigError, "at least 1 worker required, found %d", workerCount)
-	}
-
-	a.Master.ImageID = imageID
-	a.Master.InstanceType = key.MasterInstanceType(config.CustomObject)
-	a.Master.CloudConfig.Version = cloudconfig.MasterCloudConfigVersion
+	a.Master.ImageID = config.StackState.MasterImageID
+	a.Master.Instance.ResourceName = config.StackState.MasterInstanceResourceName
+	a.Master.Instance.Type = config.StackState.MasterInstanceType
+	a.Master.CloudConfig.Version = config.StackState.MasterCloudConfigVersion
 
 	a.Worker.ASG.Key = key.WorkerASGKey
 	a.Worker.ASG.Ref = key.WorkerASGRef
-	a.Worker.Count = strconv.Itoa(workerCount)
-	a.Worker.ImageID = imageID
-	a.Worker.InstanceType = key.WorkerInstanceType(config.CustomObject)
-	a.Worker.CloudConfig.Version = cloudconfig.WorkerCloudConfigVersion
+	a.Worker.Count = config.StackState.WorkerCount
+	a.Worker.ImageID = config.StackState.WorkerImageID
+	a.Worker.InstanceType = config.StackState.WorkerInstanceType
+	a.Worker.CloudConfig.Version = config.StackState.WorkerCloudConfigVersion
 
-	a.VersionBundle.Version = key.VersionBundleVersion(config.CustomObject)
+	a.VersionBundle.Version = config.StackState.VersionBundleVersion
 
 	return nil
 }

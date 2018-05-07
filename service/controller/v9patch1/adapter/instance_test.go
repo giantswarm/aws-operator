@@ -8,132 +8,135 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 )
 
-func TestAdapterInstanceRegularFields(t *testing.T) {
+func Test_Adapter_Instance_RegularFields(t *testing.T) {
 	t.Parallel()
+
 	testCases := []struct {
-		description             string
-		customObject            v1alpha1.AWSConfig
-		errorMatcher            func(error) bool
-		expectedAZ              string
-		expectedInstanceType    string
-		expectedSecurityGroupID string
+		Description            string
+		Config                 Config
+		ExpectedAZ             string
+		ExpectedEtcdVolumeName string
+		ExpectedInstanceType   string
 	}{
 		{
-			description:  "empty custom object",
-			customObject: v1alpha1.AWSConfig{},
-			errorMatcher: IsInvalidConfig,
-		},
-		{
-			description: "basic matching, all fields present",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						ID: "test-cluster",
-					},
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						AZ: "eu-central-1a",
-						Masters: []v1alpha1.AWSConfigSpecAWSNode{
-							{
-								InstanceType: "m3.large",
-							},
+			Description: "case 0 basic matching, all fields present",
+			Config: Config{
+				Clients: Clients{
+					EC2: &EC2ClientMock{},
+					IAM: &IAMClientMock{},
+				},
+				CustomObject: v1alpha1.AWSConfig{
+					Spec: v1alpha1.AWSConfigSpec{
+						Cluster: v1alpha1.Cluster{
+							ID: "test-cluster",
+						},
+						AWS: v1alpha1.AWSConfigSpecAWS{
+							AZ:     "eu-central-1a",
+							Region: "eu-west-1",
 						},
 					},
 				},
+				StackState: StackState{
+					MasterInstanceType: "m3.large",
+				},
 			},
-			errorMatcher:         nil,
-			expectedAZ:           "eu-central-1a",
-			expectedInstanceType: "m3.large",
+			ExpectedAZ:             "eu-central-1a",
+			ExpectedEtcdVolumeName: "test-cluster-etcd",
+			ExpectedInstanceType:   "m3.large",
 		},
 	}
 
 	for _, tc := range testCases {
-		clients := Clients{
-			EC2: &EC2ClientMock{},
-			IAM: &IAMClientMock{},
-		}
-		a := Adapter{}
-
-		t.Run(tc.description, func(t *testing.T) {
-			cfg := Config{
-				CustomObject: tc.customObject,
-				Clients:      clients,
-			}
-			err := a.getInstance(cfg)
-			if tc.errorMatcher != nil && err == nil {
-				t.Error("expected error didn't happen")
+		t.Run(tc.Description, func(t *testing.T) {
+			a := &instanceAdapter{}
+			err := a.Adapt(tc.Config)
+			if err != nil {
+				t.Fatal("expected", nil, "got", err)
 			}
 
-			if tc.errorMatcher != nil && !tc.errorMatcher(err) {
-				t.Error("expected", true, "got", false)
+			if a.Master.AZ != tc.ExpectedAZ {
+				t.Fatalf("unexpected a.Master.AZ, got %q, want %q", a.Master.AZ, tc.ExpectedAZ)
 			}
 
-			if a.MasterAZ != tc.expectedAZ {
-				t.Errorf("unexpected MasterAZ, got %q, want %q", a.instanceAdapter.MasterAZ, tc.expectedAZ)
+			if a.Master.EtcdVolume.Name != tc.ExpectedEtcdVolumeName {
+				t.Fatalf("unexpected a.Master.EtcdVolume.Name, got %q, want %q", a.Master.EtcdVolume.Name, tc.ExpectedEtcdVolumeName)
 			}
 
-			if a.MasterInstanceType != tc.expectedInstanceType {
-				t.Errorf("unexpected MasterInstanceType, got %q, want %q", a.instanceAdapter.MasterInstanceType, tc.expectedInstanceType)
+			if a.Master.Instance.Type != tc.ExpectedInstanceType {
+				t.Fatalf("unexpected a.Master.Instance.Type, got %q, want %q", a.Master.Instance.Type, tc.ExpectedInstanceType)
 			}
 		})
 	}
 }
 
-func TestAdapterInstanceSmallCloudConfig(t *testing.T) {
+func Test_Adapter_Instance_SmallCloudConfig(t *testing.T) {
 	t.Parallel()
+
 	testCases := []struct {
-		description  string
-		expectedLine string
+		Description  string
+		ExpectedLine string
+		Region       string
 	}{
 		{
-			description:  "userdata file",
-			expectedLine: "USERDATA_FILE=master",
+			Description:  "case 0 userdata file",
+			ExpectedLine: "USERDATA_FILE=master",
+			Region:       "eu-west-1",
 		},
 		{
-			description:  "s3 http uri",
-			expectedLine: `s3_http_uri="https://s3.myregion.amazonaws.com/000000000000-g8s-test-cluster/cloudconfig/v_3_2_3/$USERDATA_FILE"`,
+			Description:  "scase 1 http URI",
+			ExpectedLine: "s3_http_uri=\"https://s3.eu-west-1.amazonaws.com/000000000000-g8s-test-cluster/cloudconfig/foo/$USERDATA_FILE\"",
+			Region:       "eu-west-1",
 		},
-	}
-
-	a := Adapter{}
-	clients := Clients{
-		EC2: &EC2ClientMock{},
-		IAM: &IAMClientMock{accountID: "000000000000"},
-	}
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: v1alpha1.Cluster{
-				ID: "test-cluster",
-			},
-			AWS: v1alpha1.AWSConfigSpecAWS{
-				Region: "myregion",
-				Masters: []v1alpha1.AWSConfigSpecAWSNode{
-					{
-						ImageID:      "ami-test",
-						InstanceType: "m3.large",
-					},
-				},
-			},
+		{
+			Description:  "scase 2 http URI different region",
+			ExpectedLine: "s3_http_uri=\"https://s3.eu-central-1.amazonaws.com/000000000000-g8s-test-cluster/cloudconfig/foo/$USERDATA_FILE\"",
+			Region:       "eu-central-1",
 		},
-	}
-	cfg := Config{
-		CustomObject: customObject,
-		Clients:      clients,
-	}
-	err := a.getInstance(cfg)
-
-	if err != nil {
-		t.Errorf("unexpected error %v", err)
-	}
-
-	data, err := base64.StdEncoding.DecodeString(a.MasterSmallCloudConfig)
-	if err != nil {
-		t.Errorf("unexpected error decoding SmallCloudConfig %v", err)
 	}
 
 	for _, tc := range testCases {
-		t.Run(tc.description, func(t *testing.T) {
-			if !strings.Contains(string(data), tc.expectedLine) {
-				t.Errorf("SmallCloudConfig didn't contain expected %q, complete: %q", tc.expectedLine, string(data))
+		t.Run(tc.Description, func(t *testing.T) {
+			clients := Clients{
+				EC2: &EC2ClientMock{},
+				IAM: &IAMClientMock{accountID: "000000000000"},
+			}
+			customObject := v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "test-cluster",
+					},
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Masters: []v1alpha1.AWSConfigSpecAWSNode{
+							{
+								ImageID:      "ami-test",
+								InstanceType: "m3.large",
+							},
+						},
+						Region: tc.Region,
+					},
+				},
+			}
+			cfg := Config{
+				Clients:      clients,
+				CustomObject: customObject,
+				StackState: StackState{
+					MasterCloudConfigVersion: "foo",
+				},
+			}
+
+			a := &instanceAdapter{}
+			err := a.Adapt(cfg)
+			if err != nil {
+				t.Fatalf("unexpected error %v", err)
+			}
+
+			data, err := base64.StdEncoding.DecodeString(a.Master.CloudConfig)
+			if err != nil {
+				t.Fatalf("unexpected error decoding a.Master.CloudConfig %v", err)
+			}
+
+			if !strings.Contains(string(data), tc.ExpectedLine) {
+				t.Fatalf("SmallCloudConfig didn't contain expected %q, complete: %q", tc.ExpectedLine, string(data))
 			}
 		})
 	}

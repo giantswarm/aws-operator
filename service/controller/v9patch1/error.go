@@ -1,4 +1,4 @@
-package v9patch1
+package v10
 
 import "github.com/giantswarm/microerror"
 

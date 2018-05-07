@@ -1,16 +1,19 @@
 package key
 
 import (
+	"crypto/sha1"
 	"fmt"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/templates/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/templates/cloudformation/guest"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/templates/cloudformation/hostpost"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/templates/cloudformation/hostpre"
+	"github.com/giantswarm/aws-operator/service/controller/v10/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v10/templates/cloudformation/guest"
+	"github.com/giantswarm/aws-operator/service/controller/v10/templates/cloudformation/hostpost"
+	"github.com/giantswarm/aws-operator/service/controller/v10/templates/cloudformation/hostpre"
 )
 
 const (
@@ -36,6 +39,8 @@ const (
 	RoleNameTemplate = "EC2-K8S-Role"
 	// PolicyNameTemplate will be included in the IAM policy name.
 	PolicyNameTemplate = "EC2-K8S-Policy"
+	// LogDeliveryURI is used for setting the correct ACL in the access log bucket
+	LogDeliveryURI = "uri=http://acs.amazonaws.com/groups/s3/LogDelivery"
 )
 
 const (
@@ -43,15 +48,16 @@ const (
 )
 
 const (
-	MasterImageIDKey            = "MasterImageID"
-	MasterInstanceTypeKey       = "MasterInstanceType"
-	MasterCloudConfigVersionKey = "MasterCloudConfigVersion"
-	WorkerASGKey                = "WorkerASGName"
-	WorkerCountKey              = "WorkerCount"
-	WorkerImageIDKey            = "WorkerImageID"
-	WorkerInstanceTypeKey       = "WorkerInstanceType"
-	WorkerCloudConfigVersionKey = "WorkerCloudConfigVersion"
-	VersionBundleVersionKey     = "VersionBundleVersion"
+	MasterImageIDKey              = "MasterImageID"
+	MasterInstanceResourceNameKey = "MasterInstanceResourceName"
+	MasterInstanceTypeKey         = "MasterInstanceType"
+	MasterCloudConfigVersionKey   = "MasterCloudConfigVersion"
+	WorkerASGKey                  = "WorkerASGName"
+	WorkerCountKey                = "WorkerCount"
+	WorkerImageIDKey              = "WorkerImageID"
+	WorkerInstanceTypeKey         = "WorkerInstanceType"
+	WorkerCloudConfigVersionKey   = "WorkerCloudConfigVersion"
+	VersionBundleVersionKey       = "VersionBundleVersion"
 )
 
 const (
@@ -165,6 +171,10 @@ func CustomerID(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Customer.ID
 }
 
+func EtcdVolumeName(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("%s-etcd", ClusterID(customObject))
+}
+
 func IngressControllerInsecurePort(customObject v1alpha1.AWSConfig) int {
 	return customObject.Spec.Cluster.Kubernetes.IngressController.InsecurePort
 }
@@ -230,6 +240,19 @@ func MasterImageID(customObject v1alpha1.AWSConfig) string {
 	return imageID
 }
 
+func MasterInstanceResourceName(customObject v1alpha1.AWSConfig) string {
+	clusterID := strings.Replace(ClusterID(customObject), "-", "", -1)
+
+	h := sha1.New()
+	h.Write([]byte(strconv.FormatInt(time.Now().UnixNano(), 10)))
+	timeHash := fmt.Sprintf("%x", h.Sum(nil))[0:5]
+
+	upperTimeHash := strings.ToUpper(timeHash)
+	upperClusterID := strings.ToUpper(clusterID)
+
+	return fmt.Sprintf("MasterInstance%s%s", upperClusterID, upperTimeHash)
+}
+
 func MasterInstanceName(customObject v1alpha1.AWSConfig) string {
 	clusterID := ClusterID(customObject)
 
@@ -280,6 +303,10 @@ func SecurityGroupName(customObject v1alpha1.AWSConfig, groupName string) string
 
 func SubnetName(customObject v1alpha1.AWSConfig, suffix string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), suffix)
+}
+
+func TargetLogBucketName(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("%s-g8s-access-logs", ClusterID(customObject))
 }
 
 func ToCustomObject(v interface{}) (v1alpha1.AWSConfig, error) {
@@ -349,17 +376,17 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 		NOTE 1: AMIs should always be for HVM virtualisation and not PV.
 		NOTE 2: You also need to update the tests.
 
-		service/awsconfig/v9/key/key_test.go
-		service/awsconfig/v9/resource/cloudformation/adapter/adapter_test.go
+		service/awsconfig/v10/key/key_test.go
+		service/awsconfig/v10/resource/cloudformation/adapter/adapter_test.go
 		service/resource/cloudformationv2/main_stack_test.go
 
 		Current Release: CoreOS Container Linux stable 1576.5.0 (HVM)
 	*/
 	imageIDs := map[string]string{
-		"ap-southeast-1": "ami-d085f3ac",
-		"eu-central-1":   "ami-862140e9",
-		"eu-west-1":      "ami-a61464df",
-		"us-west-2":      "ami-692faf11",
+		"ap-southeast-1": "ami-41461c3d",
+		"eu-central-1":   "ami-604e118b",
+		"eu-west-1":      "ami-34237c4d",
+		"us-west-2":      "ami-b41377cc",
 	}
 
 	imageID, ok := imageIDs[region]

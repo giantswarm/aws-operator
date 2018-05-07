@@ -2,18 +2,10 @@ package lifecycle
 
 import (
 	"context"
-
-	"github.com/giantswarm/operatorkit/controller"
 )
 
-func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
+// EnsureDeleted is a no-op, because the lifecycle resource only has to act on
+// create and update events in order to drain guest cluster nodes.
+func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	return nil
-}
-
-func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*controller.Patch, error) {
-	return nil, nil
-}
-
-func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	return nil, nil
 }

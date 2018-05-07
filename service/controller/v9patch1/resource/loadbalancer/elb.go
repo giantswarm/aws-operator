@@ -1,13 +1,11 @@
 package loadbalancer
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/key"
+	"github.com/giantswarm/aws-operator/service/controller/v10/key"
 )
 
 const (
@@ -15,20 +13,6 @@ const (
 	cloudProviderServiceTagKey   = "kubernetes.io/service-name"
 	loadBalancerTagChunkSize     = 20
 )
-
-func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
-	customObject, err := key.ToCustomObject(obj)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	currentState, err := r.clusterLoadBalancers(customObject)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	return currentState, nil
-}
 
 func (r *Resource) clusterLoadBalancers(customObject v1alpha1.AWSConfig) (*LoadBalancerState, error) {
 	lbState := &LoadBalancerState{}

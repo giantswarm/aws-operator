@@ -8,7 +8,7 @@ import (
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/key"
+	"github.com/giantswarm/aws-operator/service/controller/v10/key"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
@@ -22,9 +22,11 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			Name:      "master",
 			Namespace: key.ClusterID(customObject),
 			Labels: map[string]string{
-				"app":      "master",
-				"cluster":  key.ClusterID(customObject),
-				"customer": key.CustomerID(customObject),
+				"app":                        "master",
+				"cluster":                    key.ClusterID(customObject),
+				"customer":                   key.CustomerID(customObject),
+				"giantswarm.io/cluster":      key.ClusterID(customObject),
+				"giantswarm.io/organization": key.CustomerID(customObject),
 			},
 			Annotations: map[string]string{
 				"giantswarm.io/prometheus-cluster": key.ClusterID(customObject),

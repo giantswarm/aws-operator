@@ -8,10 +8,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/micrologger/microloggertest"
-	"github.com/giantswarm/randomkeytpr"
+	"github.com/giantswarm/randomkeys"
 )
 
 func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
@@ -19,7 +20,7 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 	testCases := []struct {
 		CustomObject v1alpha1.AWSConfig
 		Certs        legacy.CompactTLSAssets
-		ClusterKeys  randomkeytpr.CompactRandomKeyAssets
+		ClusterKeys  randomkeys.Cluster
 	}{
 		{
 			CustomObject: v1alpha1.AWSConfig{
@@ -37,8 +38,8 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 				CalicoClientCrt: "123456789-super-magic-calico-client-crt",
 				CalicoClientKey: "123456789-super-magic-calico-client-key",
 			},
-			ClusterKeys: randomkeytpr.CompactRandomKeyAssets{
-				APIServerEncryptionKey: "fekhfiwoiqhoifhwqefoiqwefoikqhwef",
+			ClusterKeys: randomkeys.Cluster{
+				APIServerEncryptionKey: randomkeys.RandomKey("fekhfiwoiqhoifhwqefoiqwefoikqhwef"),
 			},
 		},
 	}
@@ -49,7 +50,7 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
 
-		template, err := ccService.NewMasterTemplate(tc.CustomObject, tc.Certs, tc.ClusterKeys)
+		template, err := ccService.NewMasterTemplate(tc.CustomObject, tc.Certs, tc.ClusterKeys, "kms-key-arn")
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
@@ -84,8 +85,8 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 		})
 
 		t.Run("VerifyAPIServerEncryptionKey", func(t *testing.T) {
-			if !strings.Contains(decoded, "fekhfiwoiqhoifhwqefoiqwefoikqhwef") {
-				t.Fatalf("expected %#v got %#v", "cloud config to contain apiserver encryption key", "none")
+			if !strings.Contains(decoded, "H4sIAAAAAAAA/1SNMQ7CMAxF957CF+jQNSviCuwldYgVYTd2aBQh7o4CVREeLL33pf8T8eLgzF7bWkj4JBzoNswrXVCNhB1s06Bo8lCP5gaAEf6wC0OvWOxDq8pGC+oRzmj+6r/UL2GzH43A8x1dt9MhYW90EDDFQFUoR6EQa8YglGv/KceKYR+hBblQaQ6er3cAAAD//9QjGEbUAAAA") {
+				t.Fatalf("expected %#v got %#v", "cloud config to contain apiserver encryption config", "wrong config output")
 			}
 		})
 	}
@@ -188,15 +189,22 @@ func testNewCloudConfigService() (*CloudConfig, error) {
 
 	var ccService *CloudConfig
 	{
-		ccConfig := DefaultConfig()
+		c := Config{
+			KMSClient: &KMSClientMock{},
+			Logger:    microloggertest.New(),
+		}
 
-		ccConfig.Logger = microloggertest.New()
-
-		ccService, err = New(ccConfig)
+		ccService, err = New(c)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	return ccService, nil
+}
+
+type KMSClientMock struct{}
+
+func (k *KMSClientMock) Encrypt(input *kms.EncryptInput) (*kms.EncryptOutput, error) {
+	return &kms.EncryptOutput{CiphertextBlob: input.Plaintext}, nil
 }

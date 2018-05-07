@@ -7,14 +7,15 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/adapter"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v9patch1/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/key"
+	"github.com/giantswarm/aws-operator/service/controller/v10/adapter"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v10/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v10/ebs"
+	"github.com/giantswarm/aws-operator/service/controller/v10/key"
 )
 
 const (
 	// Name is the identifier of the resource.
-	Name = "cloudformationv9patch1"
+	Name = "cloudformationv10"
 )
 
 type AWSConfig struct {
@@ -28,25 +29,39 @@ type AWSConfig struct {
 // Config represents the configuration used to create a new cloudformation
 // resource.
 type Config struct {
-	// Dependencies.
-	Clients          *adapter.Clients
-	HostClients      *adapter.Clients
+	APIWhitelist adapter.APIWhitelist
+	Clients      *adapter.Clients
+	EBS          ebs.Interface
+	HostClients  *adapter.Clients
+	Logger       micrologger.Logger
+	Service      *cloudformationservice.CloudFormation
+
 	InstallationName string
-	Logger           micrologger.Logger
-	Service          *cloudformationservice.CloudFormation
 }
 
 // Resource implements the cloudformation resource.
 type Resource struct {
-	clients          *adapter.Clients
-	hostClients      *adapter.Clients
+	apiWhiteList adapter.APIWhitelist
+	clients      *adapter.Clients
+	ebs          ebs.Interface
+	hostClients  *adapter.Clients
+	logger       micrologger.Logger
+	service      *cloudformationservice.CloudFormation
+
 	installationName string
-	logger           micrologger.Logger
-	service          *cloudformationservice.CloudFormation
 }
 
 // New creates a new configured cloudformation resource.
 func New(config Config) (*Resource, error) {
+	if config.Clients == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Clients must not be empty", config)
+	}
+	if config.EBS == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.EBS must not be empty", config)
+	}
+	if config.HostClients == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.HostClients must not be empty", config)
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
@@ -55,12 +70,14 @@ func New(config Config) (*Resource, error) {
 	}
 
 	newService := &Resource{
-		// Dependencies.
-		clients:          config.Clients,
-		hostClients:      config.HostClients,
+		apiWhiteList: config.APIWhitelist,
+		clients:      config.Clients,
+		ebs:          config.EBS,
+		hostClients:  config.HostClients,
+		logger:       config.Logger,
+		service:      config.Service,
+
 		installationName: config.InstallationName,
-		logger:           config.Logger,
-		service:          config.Service,
 	}
 
 	return newService, nil

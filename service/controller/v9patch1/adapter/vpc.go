@@ -6,12 +6,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/key"
+	"github.com/giantswarm/aws-operator/service/controller/v10/key"
 )
 
 // The template related to this adapter can be found in the following import.
 //
-//     github.com/giantswarm/aws-operator/service/controller/v9patch1/templates/cloudformation/guest/vpc.go
+//     github.com/giantswarm/aws-operator/service/controller/v10/templates/cloudformation/guest/vpc.go
 //
 
 type vpcAdapter struct {
@@ -56,9 +56,10 @@ func VpcCIDR(clients Clients, vpcID string) (string, error) {
 	output, err := clients.EC2.DescribeVpcs(describeVpcInput)
 	if err != nil {
 		return "", microerror.Mask(err)
-	}
-	if len(output.Vpcs) > 1 {
-		return "", microerror.Maskf(tooManyResultsError, "vpcs: %s", vpcID)
+	} else if len(output.Vpcs) == 0 {
+		return "", microerror.Maskf(notFoundError, "vpc: %s", vpcID)
+	} else if len(output.Vpcs) > 1 {
+		return "", microerror.Maskf(tooManyResultsError, "vpc: %s found %d vpcs", vpcID, len(output.Vpcs))
 	}
 	return *output.Vpcs[0].CidrBlock, nil
 }
