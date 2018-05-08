@@ -23,22 +23,35 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting S3 bucket %q", bucketInput.Name))
 
-		// Make sure the bucket is empty.
-		input := &s3.ListObjectsV2Input{
-			Bucket: aws.String(bucketInput.Name),
-		}
-		result, err := r.clients.S3.ListObjectsV2(input)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		for _, object := range result.Contents {
-			_, err := r.clients.S3.DeleteObject(&s3.DeleteObjectInput{
-				Bucket: aws.String(bucketInput.Name),
-				Key:    object.Key,
-			})
+		var startAfter *string
+		for {
+			// Make sure the bucket is empty.
+			input := &s3.ListObjectsV2Input{
+				Bucket:     aws.String(bucketInput.Name),
+				StartAfter: startAfter,
+			}
+			result, err := r.clients.S3.ListObjectsV2(input)
 			if err != nil {
 				return microerror.Mask(err)
+			}
+			if result.IsTruncated != nil && *result.IsTruncated {
+				startAfter = result.StartAfter
+			} else {
+				startAfter = nil
+			}
+
+			for _, object := range result.Contents {
+				_, err := r.clients.S3.DeleteObject(&s3.DeleteObjectInput{
+					Bucket: aws.String(bucketInput.Name),
+					Key:    object.Key,
+				})
+				if err != nil {
+					return microerror.Mask(err)
+				}
+			}
+
+			if startAfter == nil {
+				break
 			}
 		}
 
