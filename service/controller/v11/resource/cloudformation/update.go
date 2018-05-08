@@ -38,9 +38,6 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 			if err != nil {
 				return microerror.Mask(err)
 			}
-			if len(volumes) != 2 {
-				return microerror.Maskf(executionFailedError, "there must be 2 volumes for etcd and docker, got %d", len(volumes))
-			}
 
 			// First shutdown the instances and wait for it to be stopped. Then detach
 			// the etcd and docker volume without forcing.
