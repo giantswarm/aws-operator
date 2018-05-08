@@ -37,6 +37,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v9"
 	v9cloudconfig "github.com/giantswarm/aws-operator/service/controller/v9/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v9patch1"
+	v9patch1adapter "github.com/giantswarm/aws-operator/service/controller/v9patch1/adapter"
 	v9patch1cloudconfig "github.com/giantswarm/aws-operator/service/controller/v9patch1/cloudconfig"
 )
 
@@ -486,15 +487,20 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
-			RandomkeysSearcher: keyWatcher,
+			RandomkeysSearcher: randomKeySearcher,
 
-			GuestUpdateEnabled: config.GuestUpdateEnabled,
-			InstallationName:   config.InstallationName,
+			AccessLogsExpiration: config.AccessLogsExpiration,
+			GuestUpdateEnabled:   config.GuestUpdateEnabled,
+			InstallationName:     config.InstallationName,
 			OIDC: v9patch1cloudconfig.OIDCConfig{
 				ClientID:      config.OIDC.ClientID,
 				IssuerURL:     config.OIDC.IssuerURL,
 				UsernameClaim: config.OIDC.UsernameClaim,
 				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			APIWhitelist: v9patch1adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
 			},
 			ProjectName: config.ProjectName,
 		}
