@@ -3,13 +3,13 @@ package legacy
 import (
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go/service/kms/kmsiface"
 	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeytpr"
 )
 
-func (s *Resource) encodeTLSAssets(assets legacy.AssetsBundle, svc *kms.KMS, kmsKeyArn string) (*legacy.CompactTLSAssets, error) {
+func (s *Resource) encodeTLSAssets(assets legacy.AssetsBundle, svc kmsiface.KMSAPI, kmsKeyArn string) (*legacy.CompactTLSAssets, error) {
 	rawTLS := createRawTLSAssets(assets)
 
 	encTLS, err := rawTLS.encrypt(svc, kmsKeyArn)
@@ -25,7 +25,7 @@ func (s *Resource) encodeTLSAssets(assets legacy.AssetsBundle, svc *kms.KMS, kms
 	return compTLS, nil
 }
 
-func (s *Resource) encodeKeyAssets(assets map[randomkeytpr.Key][]byte, svc *kms.KMS, kmsKeyArn string) (*randomkeytpr.CompactRandomKeyAssets, error) {
+func (s *Resource) encodeKeyAssets(assets map[randomkeytpr.Key][]byte, svc kmsiface.KMSAPI, kmsKeyArn string) (*randomkeytpr.CompactRandomKeyAssets, error) {
 
 	encryptionKey, ok := assets[randomkeytpr.EncryptionKey]
 	if !ok {

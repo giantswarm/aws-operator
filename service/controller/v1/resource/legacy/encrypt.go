@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go/service/kms/kmsiface"
 	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeytpr"
@@ -60,7 +61,7 @@ func createRawTLSAssets(assets legacy.AssetsBundle) *rawTLSAssets {
 type rawKeyAssets map[randomkeytpr.Key][]byte
 type encryptedKeyAssets map[randomkeytpr.Key][]byte
 
-func (r rawKeyAssets) encrypt(svc *kms.KMS, kmsKeyARN string) (*encryptedKeyAssets, error) {
+func (r rawKeyAssets) encrypt(svc kmsiface.KMSAPI, kmsKeyARN string) (*encryptedKeyAssets, error) {
 
 	encryptedAssets := make(encryptedKeyAssets)
 	for k, v := range r {
@@ -99,7 +100,7 @@ func (r encryptedKeyAssets) compact() (*randomkeytpr.CompactRandomKeyAssets, err
 	return &compactAssets, nil
 }
 
-func (r *rawTLSAssets) encrypt(svc *kms.KMS, kmsKeyARN string) (*encryptedTLSAssets, error) {
+func (r *rawTLSAssets) encrypt(svc kmsiface.KMSAPI, kmsKeyARN string) (*encryptedTLSAssets, error) {
 	var err error
 	encrypt := func(data []byte) (b []byte) {
 		if err != nil {
@@ -194,7 +195,7 @@ func compactor(data []byte) (string, error) {
 	return base64.StdEncoding.EncodeToString(buf.Bytes()), nil
 }
 
-func encryptor(svc *kms.KMS, kmsKeyARN string, data []byte) ([]byte, error) {
+func encryptor(svc kmsiface.KMSAPI, kmsKeyARN string, data []byte) ([]byte, error) {
 	encryptInput := kms.EncryptInput{
 		KeyId:     aws.String(kmsKeyARN),
 		Plaintext: data,
