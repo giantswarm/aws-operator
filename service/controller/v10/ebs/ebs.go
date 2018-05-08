@@ -16,9 +16,7 @@ import (
 )
 
 const (
-	cloudProviderClusterTagValue        = "owned"
-	cloudProviderPersistentVolumeTagKey = "kubernetes.io/created-for/pv/name"
-	nameTagKey                          = "Name"
+	cloudProviderClusterTagValue = "owned"
 )
 
 type Config struct {
@@ -140,68 +138,48 @@ func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment Volu
 // the Etcd volume for the master instance will be returned. If persistentVolume
 // is set then any Persistent Volumes associated with the cluster will be
 // returned.
-func (e *EBS) ListVolumes(customObject v1alpha1.AWSConfig, etcdVolume bool, persistentVolume bool) ([]Volume, error) {
-	etcdVolumeName := ""
-	volumes := []Volume{}
+func (e *EBS) ListVolumes(customObject v1alpha1.AWSConfig, filterFuncs ...func(t *ec2.Tag) bool) ([]Volume, error) {
+	var volumes []Volume
 
 	// We filter to only select clusters with the cluster cloud provider tag.
-	clusterTag := key.ClusterCloudProviderTag(customObject)
-	filters := []*ec2.Filter{
-		{
-			Name: aws.String(fmt.Sprintf("tag:%s", clusterTag)),
-			Values: []*string{
-				aws.String(cloudProviderClusterTagValue),
+	i := &ec2.DescribeVolumesInput{
+		Filters: []*ec2.Filter{
+			{
+				Name: aws.String(fmt.Sprintf("tag:%s", key.ClusterCloudProviderTag(customObject))),
+				Values: []*string{
+					aws.String(cloudProviderClusterTagValue),
+				},
 			},
 		},
 	}
-	output, err := e.client.DescribeVolumes(&ec2.DescribeVolumesInput{
-		Filters: filters,
-	})
+	o, err := e.client.DescribeVolumes(i)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	// Set the volume name so we select the correct volume.
-	if etcdVolume {
-		etcdVolumeName = key.EtcdVolumeName(customObject)
-	}
-
-	for _, vol := range output.Volumes {
-		// Volume is only returned if it has the correct tags.
-		if containsVolumeTag(vol.Tags, etcdVolumeName, persistentVolume) {
-			attachments := []VolumeAttachment{}
-
-			if len(vol.Attachments) > 0 {
-				for _, a := range vol.Attachments {
-					attachments = append(attachments, VolumeAttachment{
-						Device:     *a.Device,
-						InstanceID: *a.InstanceId,
-					})
-				}
-			}
-
-			volume := Volume{
-				VolumeID:    *vol.VolumeId,
-				Attachments: attachments,
-			}
-
-			volumes = append(volumes, volume)
+	for _, v := range o.Volumes {
+		if !IsFiltered(v, filterFuncs) {
+			continue
 		}
+
+		attachments := []VolumeAttachment{}
+
+		if len(v.Attachments) > 0 {
+			for _, a := range v.Attachments {
+				attachments = append(attachments, VolumeAttachment{
+					Device:     *a.Device,
+					InstanceID: *a.InstanceId,
+				})
+			}
+		}
+
+		volume := Volume{
+			VolumeID:    *v.VolumeId,
+			Attachments: attachments,
+		}
+
+		volumes = append(volumes, volume)
 	}
 
 	return volumes, nil
-}
-
-func containsVolumeTag(tags []*ec2.Tag, etcdVolumeName string, persistentVolume bool) bool {
-	for _, tag := range tags {
-		if etcdVolumeName != "" && *tag.Key == nameTagKey && *tag.Value == etcdVolumeName {
-			return true
-		}
-
-		if persistentVolume && *tag.Key == cloudProviderPersistentVolumeTagKey {
-			return true
-		}
-	}
-
-	return false
 }
