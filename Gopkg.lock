@@ -270,9 +270,10 @@
     "v_3_2_1",
     "v_3_2_2",
     "v_3_2_3",
-    "v_3_2_5"
+    "v_3_2_5",
+    "v_3_2_6"
   ]
-  revision = "9fcc811646d2e79388db7e130492216cfd76c760"
+  revision = "a6e35b2c5689875c32e3d9c64a62cf2063d8ac0d"
 
 [[projects]]
   branch = "master"
@@ -367,7 +368,7 @@
   branch = "master"
   name = "github.com/giantswarm/versionbundle"
   packages = ["."]
-  revision = "94e7abbcdd8662cf87bb046f612fa4016277b30a"
+  revision = "578ed69c80455e82a6d2651c51862b7a582f3530"
 
 [[projects]]
   name = "github.com/go-ini/ini"
@@ -1417,6 +1418,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6c08d543e0cfbdaa0ec5a4c030ccdc95b0b2bed612981413893937ff72e2e4df"
+  inputs-digest = "cbbcb4186ef759e69ad38990f79c2760f4c2a8f732a691788dce478dccc57d4d"
   solver-name = "gps-cdcl"
   solver-version = 1
