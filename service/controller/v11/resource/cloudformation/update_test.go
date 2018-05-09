@@ -404,9 +404,9 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 	}
 
 	awsClients := awsclient.Clients{
-		EC2: adapter.EC2ClientMock{},
-		IAM: adapter.IAMClientMock{},
-		KMS: adapter.KMSClientMock{},
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		KMS: &adapter.KMSClientMock{},
 	}
 
 	for _, tc := range testCases {
@@ -853,9 +853,9 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 	}
 
 	awsClients := awsclient.Clients{
-		EC2: adapter.EC2ClientMock{},
-		IAM: adapter.IAMClientMock{},
-		KMS: adapter.KMSClientMock{},
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		KMS: &adapter.KMSClientMock{},
 	}
 
 	for _, tc := range testCases {
