@@ -5,11 +5,13 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
 
+	"github.com/giantswarm/aws-operator/service/controller/v11/ebs"
 	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
@@ -28,26 +30,26 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 
 		if stackStateToUpdate.ShouldUpdate && !stackStateToUpdate.ShouldScale {
 			// Fetch the etcd volume information.
-			etcdVolume := true
-			persistentVolume := false
-			volumes, err := r.ebs.ListVolumes(customObject, etcdVolume, persistentVolume)
+			filterFuncs := []func(t *ec2.Tag) bool{
+				ebs.NewDockerVolumeFilter(customObject),
+				ebs.NewEtcdVolumeFilter(customObject),
+			}
+			volumes, err := r.ebs.ListVolumes(customObject, filterFuncs...)
 			if err != nil {
 				return microerror.Mask(err)
 			}
-			if len(volumes) != 1 {
-				return microerror.Maskf(executionFailedError, "there must be 1 volume for etcd, got %d", len(volumes))
-			}
-			vol := volumes[0]
 
 			// First shutdown the instances and wait for it to be stopped. Then detach
-			// the etcd volume without forcing.
+			// the etcd and docker volume without forcing.
 			force := false
 			shutdown := true
 			wait := true
-			for _, a := range vol.Attachments {
-				err := r.ebs.DetachVolume(ctx, vol.VolumeID, a, force, shutdown, wait)
-				if err != nil {
-					return microerror.Mask(err)
+			for _, v := range volumes {
+				for _, a := range v.Attachments {
+					err := r.ebs.DetachVolume(ctx, v.VolumeID, a, force, shutdown, wait)
+					if err != nil {
+						return microerror.Mask(err)
+					}
 				}
 			}
 		}
