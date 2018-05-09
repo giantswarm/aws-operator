@@ -1,8 +1,10 @@
-package cloudformation
+package context
 
-import "github.com/giantswarm/microerror"
+import (
+	"github.com/giantswarm/microerror"
+)
 
-var serviceNotFound = microerror.New("cloudformation service not found")
+var serviceNotFound = microerror.New("service not found")
 
 // IsServiceNotFoundError asserts serviceNotFound.
 func IsServiceNotFoundError(err error) bool {
