@@ -1,8 +1,6 @@
 package s3bucket
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
@@ -134,6 +132,5 @@ func (r *Resource) getS3BucketTags(customObject v1alpha1.AWSConfig) []*s3.Tag {
 }
 
 func (r *Resource) canBeDeleted(bucket BucketState) bool {
-	fmt.Printf("can be deleted [loggingBucket: %t] [deleteLogggingBucket: %t] ", bucket.IsLoggingBucket, r.deleteLoggingBucket)
 	return !bucket.IsLoggingBucket || bucket.IsLoggingBucket && r.deleteLoggingBucket
 }

@@ -95,11 +95,9 @@ func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desir
 
 	var bucketsToDelete []BucketState
 	for _, bucket := range currentBuckets {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 bucket in current state %q desired %v", bucket.Name, desiredBuckets))
 		// Destination Logs Bucket should not be deleted because it has to keep logs
 		// even when cluster is removed (rotation of these logs are managed externally).
 		if r.canBeDeleted(bucket) && containsBucketState(bucket.Name, desiredBuckets) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 bucket mark to be deleted %q", bucket.Name))
 			bucketsToDelete = append(bucketsToDelete, bucket)
 		}
 	}
