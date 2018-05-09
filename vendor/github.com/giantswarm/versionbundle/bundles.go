@@ -32,21 +32,6 @@ func (b Bundles) Validate() error {
 		return microerror.Maskf(invalidBundlesError, "version bundle versions must be unique")
 	}
 
-	perProviderVersions := make(map[string][]Bundle, 0)
-	for _, v := range b {
-		perProviderVersions[v.Provider] = append(perProviderVersions[v.Provider], v)
-	}
-
-	for _, v := range perProviderVersions {
-		b1 := CopyBundles(v)
-		b2 := CopyBundles(v)
-		sort.Sort(SortBundlesByTime(b1))
-		sort.Sort(SortBundlesByVersion(b2))
-		if !reflect.DeepEqual(b1, b2) {
-			return microerror.Maskf(invalidBundlesError, "version bundle versions must always increment")
-		}
-	}
-
 	for _, bundle := range b {
 		err := bundle.Validate()
 		if err != nil {
