@@ -43,9 +43,9 @@ func TestMainGuestTemplateGetEmptyBody(t *testing.T) {
 	}
 
 	awsClients := aws.Clients{
-		EC2: adapter.EC2ClientMock{},
-		IAM: adapter.IAMClientMock{},
-		KMS: adapter.KMSClientMock{},
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		KMS: &adapter.KMSClientMock{},
 	}
 
 	ctx := context.TODO()
@@ -146,10 +146,10 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 	}
 
 	awsClients := aws.Clients{
-		EC2: adapter.EC2ClientMock{},
-		IAM: adapter.IAMClientMock{},
-		KMS: adapter.KMSClientMock{},
-		ELB: adapter.ELBClientMock{},
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		KMS: &adapter.KMSClientMock{},
+		ELB: &adapter.ELBClientMock{},
 	}
 
 	ctx := context.TODO()
@@ -334,8 +334,8 @@ func TestMainHostPreTemplateExistingFields(t *testing.T) {
 	}
 
 	awsClients := aws.Clients{
-		EC2: adapter.EC2ClientMock{},
-		IAM: adapter.IAMClientMock{},
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
 	}
 
 	ctx := context.TODO()
@@ -396,7 +396,7 @@ func TestMainHostPostTemplateExistingFields(t *testing.T) {
 	}
 
 	awsClients := aws.Clients{
-		EC2: adapter.EC2ClientMock{},
+		EC2: &adapter.EC2ClientMock{},
 	}
 
 	ctx := context.TODO()

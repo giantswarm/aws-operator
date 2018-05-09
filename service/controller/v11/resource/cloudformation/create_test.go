@@ -100,9 +100,9 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 	}
 
 	awsClients := aws.Clients{
-		EC2: adapter.EC2ClientMock{},
-		IAM: adapter.IAMClientMock{},
-		KMS: adapter.KMSClientMock{},
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		KMS: &adapter.KMSClientMock{},
 	}
 
 	for _, tc := range testCases {

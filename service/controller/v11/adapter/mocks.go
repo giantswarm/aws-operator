@@ -31,7 +31,7 @@ type EC2ClientMock struct {
 	peeringID           string
 }
 
-func (e EC2ClientMock) DescribeSecurityGroups(input *ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error) {
+func (e *EC2ClientMock) DescribeSecurityGroups(input *ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error) {
 	if !e.unexistingSg {
 		output := &ec2.DescribeSecurityGroupsOutput{
 			SecurityGroups: []*ec2.SecurityGroup{
@@ -46,11 +46,9 @@ func (e EC2ClientMock) DescribeSecurityGroups(input *ec2.DescribeSecurityGroupsI
 	return nil, fmt.Errorf("security group not found")
 }
 
-func (e EC2ClientMock) DescribeSubnets(input *ec2.DescribeSubnetsInput) (*ec2.DescribeSubnetsOutput, error) {
-	subnetID := e.subnetID
-
-	if subnetID == "" {
-		subnetID = "subnet-1234"
+func (e *EC2ClientMock) DescribeSubnets(input *ec2.DescribeSubnetsInput) (*ec2.DescribeSubnetsOutput, error) {
+	if e.subnetID == "" {
+		e.subnetID = "subnet-1234"
 	}
 
 	if e.unexistingSubnet {
@@ -60,7 +58,7 @@ func (e EC2ClientMock) DescribeSubnets(input *ec2.DescribeSubnetsInput) (*ec2.De
 	output := &ec2.DescribeSubnetsOutput{
 		Subnets: []*ec2.Subnet{
 			{
-				SubnetId: aws.String(subnetID),
+				SubnetId: aws.String(e.subnetID),
 			},
 		},
 	}
@@ -71,7 +69,7 @@ func (e *EC2ClientMock) SetMatchingRouteTables(value int) {
 	e.matchingRouteTables = value
 }
 
-func (e EC2ClientMock) DescribeRouteTables(input *ec2.DescribeRouteTablesInput) (*ec2.DescribeRouteTablesOutput, error) {
+func (e *EC2ClientMock) DescribeRouteTables(input *ec2.DescribeRouteTablesInput) (*ec2.DescribeRouteTablesOutput, error) {
 	if e.matchingRouteTables == 0 {
 		return nil, fmt.Errorf("route table not found")
 	}
@@ -91,7 +89,7 @@ func (e EC2ClientMock) DescribeRouteTables(input *ec2.DescribeRouteTablesInput) 
 	return output, nil
 }
 
-func (e EC2ClientMock) DescribeVpcs(input *ec2.DescribeVpcsInput) (*ec2.DescribeVpcsOutput, error) {
+func (e *EC2ClientMock) DescribeVpcs(input *ec2.DescribeVpcsInput) (*ec2.DescribeVpcsOutput, error) {
 	if e.unexistingVPC {
 		return nil, fmt.Errorf("vpc not found")
 	}
@@ -108,7 +106,7 @@ func (e EC2ClientMock) DescribeVpcs(input *ec2.DescribeVpcsInput) (*ec2.Describe
 	return output, nil
 }
 
-func (e EC2ClientMock) DescribeVpcPeeringConnections(*ec2.DescribeVpcPeeringConnectionsInput) (*ec2.DescribeVpcPeeringConnectionsOutput, error) {
+func (e *EC2ClientMock) DescribeVpcPeeringConnections(*ec2.DescribeVpcPeeringConnectionsInput) (*ec2.DescribeVpcPeeringConnectionsOutput, error) {
 	output := &ec2.DescribeVpcPeeringConnectionsOutput{
 		VpcPeeringConnections: []*ec2.VpcPeeringConnection{
 			{
@@ -142,30 +140,28 @@ type IAMClientMock struct {
 	peerRoleArn string
 }
 
-func (i IAMClientMock) GetUser(input *iam.GetUserInput) (*iam.GetUserOutput, error) {
-	accountID := i.accountID
-
+func (i *IAMClientMock) GetUser(input *iam.GetUserInput) (*iam.GetUserOutput, error) {
 	if i.isError {
 		return nil, fmt.Errorf("error")
 	}
-	if accountID == "" {
-		accountID = "00"
+	if i.accountID == "" {
+		i.accountID = "00"
 	}
 	// pad accountID to required length
-	toPad := accountIDLength - len(accountID)
+	toPad := accountIDLength - len(i.accountID)
 	for j := 0; j < toPad; j++ {
-		accountID += "0"
+		i.accountID += "0"
 	}
 	output := &iam.GetUserOutput{
 		User: &iam.User{
-			Arn: aws.String("::::" + accountID),
+			Arn: aws.String("::::" + i.accountID),
 		},
 	}
 
 	return output, nil
 }
 
-func (i IAMClientMock) GetRole(input *iam.GetRoleInput) (*iam.GetRoleOutput, error) {
+func (i *IAMClientMock) GetRole(input *iam.GetRoleInput) (*iam.GetRoleOutput, error) {
 	if i.isError {
 		return nil, fmt.Errorf("error")
 	}
@@ -185,7 +181,7 @@ type KMSClientMock struct {
 	isError bool
 }
 
-func (k KMSClientMock) DescribeKey(input *kms.DescribeKeyInput) (*kms.DescribeKeyOutput, error) {
+func (k *KMSClientMock) DescribeKey(input *kms.DescribeKeyInput) (*kms.DescribeKeyOutput, error) {
 	if k.isError {
 		return nil, fmt.Errorf("error")
 	}
@@ -207,7 +203,7 @@ type ELBClientMock struct {
 	isError    bool
 }
 
-func (e ELBClientMock) DescribeLoadBalancers(input *elb.DescribeLoadBalancersInput) (*elb.DescribeLoadBalancersOutput, error) {
+func (e *ELBClientMock) DescribeLoadBalancers(input *elb.DescribeLoadBalancersInput) (*elb.DescribeLoadBalancersOutput, error) {
 	if e.isError {
 		return nil, fmt.Errorf("error")
 	}
