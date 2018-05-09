@@ -7,7 +7,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	awsclientcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsclient"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
@@ -21,13 +21,13 @@ func (r *Resource) clusterLoadBalancers(ctx context.Context, customObject v1alph
 	lbState := &LoadBalancerState{}
 	clusterLBNames := []string{}
 
-	awsClients, err := awsclientcontext.FromContext(ctx)
+	sc, err := servicecontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
 	// We get all load balancers because the API does not allow tag filters.
-	output, err := awsClients.ELB.DescribeLoadBalancers(&elb.DescribeLoadBalancersInput{})
+	output, err := sc.AWSClient.ELB.DescribeLoadBalancers(&elb.DescribeLoadBalancersInput{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -43,7 +43,7 @@ func (r *Resource) clusterLoadBalancers(ctx context.Context, customObject v1alph
 		tagsInput := &elb.DescribeTagsInput{
 			LoadBalancerNames: lbNames,
 		}
-		tagsOutput, err := awsClients.ELB.DescribeTags(tagsInput)
+		tagsOutput, err := sc.AWSClient.ELB.DescribeTags(tagsInput)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

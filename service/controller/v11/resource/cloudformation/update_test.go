@@ -12,7 +12,7 @@ import (
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v11/adapter"
-	awsclientcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsclient"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 )
 
 func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
@@ -412,7 +412,7 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			ctx := updateallowedcontext.NewContext(context.Background(), make(chan struct{}))
-			ctx = awsclientcontext.NewContext(ctx, awsClients)
+			ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
 			updateallowedcontext.SetUpdateAllowed(ctx)
 
 			result, err := newResource.newUpdateChange(ctx, customObject, tc.currentState, tc.desiredState)
@@ -861,7 +861,7 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			ctx := context.TODO()
-			ctx = awsclientcontext.NewContext(ctx, awsClients)
+			ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
 
 			result, err := newResource.newUpdateChange(ctx, customObject, tc.currentState, tc.desiredState)
 			if err != nil {

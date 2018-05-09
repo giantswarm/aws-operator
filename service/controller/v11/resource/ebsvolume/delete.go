@@ -6,7 +6,7 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	ebsservicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context/ebsservice"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
@@ -18,7 +18,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	ebsService, err := ebsservicecontext.FromContext(ctx)
+	sc, err := servicecontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -26,7 +26,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	// Get both the Etcd volume and any Persistent Volumes.
 	etcdVolume := true
 	persistentVolume := true
-	volumes, err := ebsService.ListVolumes(customObject, etcdVolume, persistentVolume)
+	volumes, err := sc.EBSService.ListVolumes(customObject, etcdVolume, persistentVolume)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -41,7 +41,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 				force := false
 				shutdown := true
 				wait := false
-				err := ebsService.DetachVolume(ctx, vol.VolumeID, a, force, shutdown, wait)
+				err := sc.EBSService.DetachVolume(ctx, vol.VolumeID, a, force, shutdown, wait)
 				if err != nil {
 					r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("failed to detach EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
 				}
@@ -55,7 +55,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 				force := true
 				shutdown := false
 				wait := false
-				err := ebsService.DetachVolume(ctx, vol.VolumeID, a, force, shutdown, wait)
+				err := sc.EBSService.DetachVolume(ctx, vol.VolumeID, a, force, shutdown, wait)
 				if err != nil {
 					r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("failed to force detach EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
 				}
@@ -64,7 +64,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 		// Now delete the volumes.
 		for _, vol := range volumes {
-			err := ebsService.DeleteVolume(ctx, vol.VolumeID)
+			err := sc.EBSService.DeleteVolume(ctx, vol.VolumeID)
 			if err != nil {
 				r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("failed to delete EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
 			}

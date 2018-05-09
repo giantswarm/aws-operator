@@ -6,18 +6,18 @@ import (
 	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 
-	awsclientcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsclient"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 )
 
 func (r *Resource) encodeTLSAssets(ctx context.Context, assets legacy.AssetsBundle, kmsKeyArn string) (*legacy.CompactTLSAssets, error) {
 	rawTLS := createRawTLSAssets(assets)
 
-	awsClients, err := awsclientcontext.FromContext(ctx)
+	sc, err := servicecontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	encTLS, err := rawTLS.encrypt(awsClients.KMS, kmsKeyArn)
+	encTLS, err := rawTLS.encrypt(sc.AWSClient.KMS, kmsKeyArn)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}

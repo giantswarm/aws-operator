@@ -10,7 +10,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
-	awsclientcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsclient"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
@@ -23,12 +23,12 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 	if stackInput.StackName != nil {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "creating the guest cluster main stack")
 
-		awsClients, err := awsclientcontext.FromContext(ctx)
+		sc, err := servicecontext.FromContext(ctx)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		_, err = awsClients.CloudFormation.CreateStack(&stackInput)
+		_, err = sc.AWSClient.CloudFormation.CreateStack(&stackInput)
 		if IsAlreadyExists(err) {
 			// fall through
 		} else if err != nil {
@@ -38,7 +38,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 		defer cancel()
 
-		err = awsClients.CloudFormation.WaitUntilStackCreateCompleteWithContext(ctx, &cloudformation.DescribeStacksInput{
+		err = sc.AWSClient.CloudFormation.WaitUntilStackCreateCompleteWithContext(ctx, &cloudformation.DescribeStacksInput{
 			StackName: stackInput.StackName,
 		})
 		if ctx.Err() == context.DeadlineExceeded {

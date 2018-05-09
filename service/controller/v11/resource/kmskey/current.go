@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/microerror"
 
-	awsclientcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsclient"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
@@ -25,12 +25,12 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		KeyId: aws.String(alias),
 	}
 
-	awsClients, err := awsclientcontext.FromContext(ctx)
+	sc, err := servicecontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	output, err := awsClients.KMS.DescribeKey(input)
+	output, err := sc.AWSClient.KMS.DescribeKey(input)
 	if IsKeyNotFound(err) {
 		// Fall through.
 		return nil, nil

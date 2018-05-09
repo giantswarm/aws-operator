@@ -10,7 +10,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v11/adapter"
-	awsclientcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsclient"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 )
 
 func Test_Resource_Cloudformation_newCreate(t *testing.T) {
@@ -108,7 +108,7 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			ctx := context.TODO()
-			ctx = awsclientcontext.NewContext(ctx, awsClients)
+			ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
 
 			result, err := newResource.newCreateChange(ctx, tc.obj, tc.currentState, tc.desiredState)
 			if err != nil {

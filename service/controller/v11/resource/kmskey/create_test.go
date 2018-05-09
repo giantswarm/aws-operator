@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	awsclientcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsclient"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 )
 
 func Test_Resource_KMSKey_newCreate(t *testing.T) {
@@ -74,7 +74,10 @@ func Test_Resource_KMSKey_newCreate(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			result, err := newResource.newCreateChange(awsclientcontext.NewContext(context.TODO(), awsClients), customObject, tc.currentState, tc.desiredState)
+			ctx := context.TODO()
+			ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+
+			result, err := newResource.newCreateChange(ctx, customObject, tc.currentState, tc.desiredState)
 			if err != nil {
 				t.Errorf("expected '%v' got '%#v'", nil, err)
 			}
@@ -133,7 +136,10 @@ func Test_ApplyCreateChange(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		err := newResource.ApplyCreateChange(awsclientcontext.NewContext(context.TODO(), awsClients), customObject, tc.createChange)
+		ctx := context.TODO()
+		ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+
+		err := newResource.ApplyCreateChange(ctx, customObject, tc.createChange)
 		if err != nil {
 			t.Errorf("unexpected error %v", err)
 		}

@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 
-	awsclientcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsclient"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 )
 
 const (
@@ -19,7 +19,7 @@ const (
 
 func (r Resource) findMasterInstance(ctx context.Context, instanceName string) (*ec2.Instance, error) {
 
-	awsClients, err := awsclientcontext.FromContext(ctx)
+	sc, err := servicecontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -33,7 +33,7 @@ func (r Resource) findMasterInstance(ctx context.Context, instanceName string) (
 		},
 	}
 
-	output, err := awsClients.EC2.DescribeInstances(&ec2.DescribeInstancesInput{
+	output, err := sc.AWSClient.EC2.DescribeInstances(&ec2.DescribeInstancesInput{
 		Filters: filters,
 	})
 	if err != nil {

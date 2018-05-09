@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
 
-	awsclientcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsclient"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
@@ -33,7 +33,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	if stackStateToDelete.Name != "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting the guest cluster main stack")
 
-		awsClients, err := awsclientcontext.FromContext(ctx)
+		sc, err := servicecontext.FromContext(ctx)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -41,7 +41,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		i := &cloudformation.DeleteStackInput{
 			StackName: aws.String(key.MainGuestStackName(customObject)),
 		}
-		_, err = awsClients.CloudFormation.DeleteStack(i)
+		_, err = sc.AWSClient.CloudFormation.DeleteStack(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
