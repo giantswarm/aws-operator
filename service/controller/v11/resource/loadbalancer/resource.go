@@ -1,8 +1,6 @@
 package loadbalancer
 
 import (
-	"reflect"
-
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 )
@@ -15,31 +13,25 @@ const (
 // Config represents the configuration used to create a new loadbalancer resource.
 type Config struct {
 	// Dependencies.
-	Clients Clients
-	Logger  micrologger.Logger
+	Logger micrologger.Logger
 }
 
 // Resource implements the loadbalancer resource.
 type Resource struct {
 	// Dependencies.
-	clients Clients
-	logger  micrologger.Logger
+	logger micrologger.Logger
 }
 
 // New creates a new configured loadbalancer resource.
 func New(config Config) (*Resource, error) {
 	// Dependencies.
-	if reflect.DeepEqual(config.Clients, Clients{}) {
-		return nil, microerror.Maskf(invalidConfigError, "config.Clients must not be empty")
-	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
 
 	newResource := &Resource{
 		// Dependencies.
-		clients: config.Clients,
-		logger:  config.Logger,
+		logger: config.Logger,
 	}
 
 	return newResource, nil

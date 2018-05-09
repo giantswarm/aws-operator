@@ -1,6 +1,7 @@
 package loadbalancer
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
@@ -8,6 +9,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
+
+	awsclient "github.com/giantswarm/aws-operator/client/aws"
+	awsclientcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsclient"
 )
 
 func Test_clusterLoadBalancers(t *testing.T) {
@@ -193,11 +197,6 @@ func Test_clusterLoadBalancers(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			c := Config{
-				Clients: Clients{
-					ELB: &ELBClientMock{
-						loadBalancers: tc.loadBalancers,
-					},
-				},
 				Logger: microloggertest.New(),
 			}
 			newResource, err = New(c)
@@ -205,7 +204,15 @@ func Test_clusterLoadBalancers(t *testing.T) {
 				t.Error("expected", nil, "got", err)
 			}
 
-			result, err := newResource.clusterLoadBalancers(tc.obj)
+			awsClients := awsclient.Clients{
+				ELB: &ELBClientMock{
+					loadBalancers: tc.loadBalancers,
+				},
+			}
+			ctx := context.TODO()
+			ctx = awsclientcontext.NewContext(ctx, awsClients)
+
+			result, err := newResource.clusterLoadBalancers(ctx, tc.obj)
 			if err != nil {
 				t.Errorf("unexpected error %v", err)
 			}

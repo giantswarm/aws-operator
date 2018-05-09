@@ -20,8 +20,7 @@ const (
 // Config represents the configuration used to create a new cloudformation resource.
 type Config struct {
 	// Dependencies.
-	Clients Clients
-	Logger  micrologger.Logger
+	Logger micrologger.Logger
 
 	// Settings.
 	InstallationName string
@@ -32,16 +31,14 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
-		Clients: Clients{},
-		Logger:  nil,
+		Logger: nil,
 	}
 }
 
 // Resource implements the cloudformation resource.
 type Resource struct {
 	// Dependencies.
-	awsClients Clients
-	logger     micrologger.Logger
+	logger micrologger.Logger
 
 	// Settings.
 	installationName string
@@ -62,8 +59,7 @@ func New(config Config) (*Resource, error) {
 	// Settings.
 	newService := &Resource{
 		// Dependencies.
-		awsClients: config.Clients,
-		logger:     config.Logger,
+		logger: config.Logger,
 
 		// Settings.
 		installationName: config.InstallationName,

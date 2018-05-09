@@ -5,6 +5,7 @@ import (
 
 	"github.com/giantswarm/microerror"
 
+	awsservicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsservice"
 	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
@@ -14,7 +15,12 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	accountID, err := r.awsService.GetAccountID()
+	awsService, err := awsservicecontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	accountID, err := awsService.GetAccountID()
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}

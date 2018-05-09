@@ -8,8 +8,6 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/v11/adapter"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v11/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v11/ebs"
 	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
@@ -30,11 +28,8 @@ type AWSConfig struct {
 // resource.
 type Config struct {
 	APIWhitelist adapter.APIWhitelist
-	Clients      *adapter.Clients
-	EBS          ebs.Interface
 	HostClients  *adapter.Clients
 	Logger       micrologger.Logger
-	Service      *cloudformationservice.CloudFormation
 
 	InstallationName string
 }
@@ -42,40 +37,25 @@ type Config struct {
 // Resource implements the cloudformation resource.
 type Resource struct {
 	apiWhiteList adapter.APIWhitelist
-	clients      *adapter.Clients
-	ebs          ebs.Interface
 	hostClients  *adapter.Clients
 	logger       micrologger.Logger
-	service      *cloudformationservice.CloudFormation
 
 	installationName string
 }
 
 // New creates a new configured cloudformation resource.
 func New(config Config) (*Resource, error) {
-	if config.Clients == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Clients must not be empty", config)
-	}
-	if config.EBS == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.EBS must not be empty", config)
-	}
 	if config.HostClients == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.HostClients must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
-	if config.Service == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Service must not be empty", config)
-	}
 
 	newService := &Resource{
 		apiWhiteList: config.APIWhitelist,
-		clients:      config.Clients,
-		ebs:          config.EBS,
 		hostClients:  config.HostClients,
 		logger:       config.Logger,
-		service:      config.Service,
 
 		installationName: config.InstallationName,
 	}

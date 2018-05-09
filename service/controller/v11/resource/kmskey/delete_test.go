@@ -6,6 +6,9 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
+
+	"github.com/giantswarm/aws-operator/client/aws"
+	awsclientcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsclient"
 )
 
 func Test_newDelete(t *testing.T) {
@@ -53,7 +56,6 @@ func Test_newDelete(t *testing.T) {
 	var err error
 	var newResource *Resource
 	resourceConfig := DefaultConfig()
-	resourceConfig.Clients = Clients{}
 	resourceConfig.Logger = microloggertest.New()
 	resourceConfig.InstallationName = "test-install"
 
@@ -109,7 +111,7 @@ func Test_ApplyDeleteChange(t *testing.T) {
 	var newResource *Resource
 
 	resourceConfig := DefaultConfig()
-	resourceConfig.Clients = Clients{
+	awsClients := aws.Clients{
 		KMS: &KMSClientMock{
 			clusterID: "test-cluster",
 		},
@@ -123,7 +125,7 @@ func Test_ApplyDeleteChange(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		err := newResource.ApplyDeleteChange(context.TODO(), &customObject, tc.deleteChange)
+		err := newResource.ApplyDeleteChange(awsclientcontext.NewContext(context.TODO(), awsClients), &customObject, tc.deleteChange)
 		if err != nil {
 			t.Errorf("unexpected error %v", err)
 		}

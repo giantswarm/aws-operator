@@ -3,9 +3,12 @@ package loadbalancer
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/elb"
+	"github.com/aws/aws-sdk-go/service/elb/elbiface"
 )
 
 type ELBClientMock struct {
+	elbiface.ELBAPI
+
 	loadBalancers []LoadBalancerMock
 }
 

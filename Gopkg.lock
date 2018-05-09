@@ -76,13 +76,18 @@
     "service/autoscaling",
     "service/cloudformation",
     "service/ec2",
+    "service/ec2/ec2iface",
     "service/ecr",
     "service/elb",
+    "service/elb/elbiface",
     "service/elbv2",
     "service/iam",
+    "service/iam/iamiface",
     "service/kms",
+    "service/kms/kmsiface",
     "service/route53",
     "service/s3",
+    "service/s3/s3iface",
     "service/sts"
   ]
   revision = "236a3fce423171d03ae327a8aa2512e6fb24df36"
@@ -1417,6 +1422,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "cfd65713493006d8f5225a400f18ada20ef8fe569fb971450be4d481c171af55"
+  inputs-digest = "c2a6aa698c4105b8c11f70bec036d471454b00fb8f4955a4350ef97710d8fa5c"
   solver-name = "gps-cdcl"
   solver-version = 1
