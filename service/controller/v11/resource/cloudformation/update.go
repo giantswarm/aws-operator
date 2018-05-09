@@ -11,8 +11,7 @@ import (
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
 
-	awsclientcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsclient"
-	ebsservicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context/ebsservice"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 	"github.com/giantswarm/aws-operator/service/controller/v11/ebs"
 	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
@@ -30,19 +29,18 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	if stackStateToUpdate.Name != "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "updating the guest cluster main stack")
 
+		sc, err := servicecontext.FromContext(ctx)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
 		if stackStateToUpdate.ShouldUpdate && !stackStateToUpdate.ShouldScale {
-
-			ebsService, err := ebsservicecontext.FromContext(ctx)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
 			// Fetch the etcd volume information.
 			filterFuncs := []func(t *ec2.Tag) bool{
 				ebs.NewDockerVolumeFilter(customObject),
 				ebs.NewEtcdVolumeFilter(customObject),
 			}
-			volumes, err := ebsService.ListVolumes(customObject, filterFuncs...)
+			volumes, err := sc.EBSService.ListVolumes(customObject, filterFuncs...)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -54,7 +52,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 			wait := true
 			for _, v := range volumes {
 				for _, a := range v.Attachments {
-					err := ebsService.DetachVolume(ctx, v.VolumeID, a, force, shutdown, wait)
+					err := sc.EBSService.DetachVolume(ctx, v.VolumeID, a, force, shutdown, wait)
 					if err != nil {
 						return microerror.Mask(err)
 					}
@@ -62,14 +60,9 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 			}
 		}
 
-		awsClients, err := awsclientcontext.FromContext(ctx)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
 		// Once the etcd volume is cleaned up and the master instance is down we can
 		// go ahead to let CloudFormation do its job.
-		_, err = awsClients.CloudFormation.UpdateStack(&stackStateToUpdate.UpdateStackInput)
+		_, err = sc.AWSClient.CloudFormation.UpdateStack(&stackStateToUpdate.UpdateStackInput)
 		if err != nil {
 			return microerror.Mask(err)
 		}

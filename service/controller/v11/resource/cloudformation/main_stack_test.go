@@ -13,7 +13,7 @@ import (
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v11/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v11/cloudconfig"
-	awsclientcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsclient"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
@@ -49,7 +49,7 @@ func TestMainGuestTemplateGetEmptyBody(t *testing.T) {
 	}
 
 	ctx := context.TODO()
-	ctx = awsclientcontext.NewContext(ctx, awsClients)
+	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
 
 	_, err = newResource.getMainGuestTemplateBody(ctx, customObject, StackState{})
 	if err == nil {
@@ -157,7 +157,7 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 	}
 
 	ctx := context.TODO()
-	ctx = awsclientcontext.NewContext(ctx, awsClients)
+	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
 
 	body, err := newResource.getMainGuestTemplateBody(ctx, customObject, stackState)
 	if err != nil {
@@ -357,7 +357,7 @@ func TestMainHostPreTemplateExistingFields(t *testing.T) {
 	}
 
 	ctx := context.TODO()
-	ctx = awsclientcontext.NewContext(ctx, awsClients)
+	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
 
 	body, err := newResource.getMainHostPreTemplateBody(ctx, customObject)
 
@@ -418,7 +418,7 @@ func TestMainHostPostTemplateExistingFields(t *testing.T) {
 	}
 
 	ctx := context.TODO()
-	ctx = awsclientcontext.NewContext(ctx, awsClients)
+	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
 
 	body, err := newResource.getMainHostPostTemplateBody(ctx, customObject)
 

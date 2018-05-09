@@ -19,11 +19,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v11/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v11/cloudconfig"
 	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v11/cloudformation"
-	awsclientcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsclient"
-	awsservicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsservice"
-	cloudconfigcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/cloudconfig"
-	cloudformationcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/cloudformation"
-	ebsservicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context/ebsservice"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 	"github.com/giantswarm/aws-operator/service/controller/v11/credential"
 	"github.com/giantswarm/aws-operator/service/controller/v11/ebs"
 	"github.com/giantswarm/aws-operator/service/controller/v11/key"
@@ -328,23 +324,22 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			updateallowedcontext.SetUpdateAllowed(ctx)
 		}
 
-		var clients aws.Clients
+		var awsClient aws.Clients
 		{
 			role, err := credential.GetRole(config.K8sClient, obj)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
 
-			clients = aws.NewClientsWithRole(config.GuestAWSConfig, role.ARN)
-			ctx = awsclientcontext.NewContext(ctx, clients)
+			awsClient = aws.NewClientsWithRole(config.GuestAWSConfig, role.ARN)
 		}
 
 		var awsService *awsservice.Service
 		{
 			c := awsservice.Config{
 				Clients: awsservice.Clients{
-					IAM: clients.IAM,
-					KMS: clients.KMS,
+					IAM: awsClient.IAM,
+					KMS: awsClient.KMS,
 				},
 				Logger: config.Logger,
 			}
@@ -353,13 +348,12 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
-			ctx = awsservicecontext.NewContext(ctx, awsService)
 		}
 
 		var cloudConfig *cloudconfig.CloudConfig
 		{
 			c := cloudconfig.Config{
-				KMSClient: clients.KMS,
+				KMSClient: awsClient.KMS,
 				Logger:    config.Logger,
 
 				OIDC: config.OIDC,
@@ -370,34 +364,40 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
-			ctx = cloudconfigcontext.NewContext(ctx, cloudConfig)
 		}
 
 		var ebsService ebs.Interface
 		{
 			c := ebs.Config{
-				Client: clients.EC2,
+				Client: awsClient.EC2,
 				Logger: config.Logger,
 			}
 			ebsService, err = ebs.New(c)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
-			ctx = ebsservicecontext.NewContext(ctx, ebsService)
 		}
 
 		var cloudFormationService *cloudformationservice.CloudFormation
 		{
 			c := cloudformationservice.Config{
-				Client: clients.CloudFormation,
+				Client: awsClient.CloudFormation,
 			}
 
 			cloudFormationService, err = cloudformationservice.New(c)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
-			ctx = cloudformationcontext.NewContext(ctx, *cloudFormationService)
 		}
+
+		c := servicecontext.Context{
+			AWSClient:      awsClient,
+			AWSService:     awsService,
+			CloudConfig:    cloudConfig,
+			CloudFormation: *cloudFormationService,
+			EBSService:     ebsService,
+		}
+		ctx = servicecontext.NewContext(ctx, c)
 
 		return ctx, nil
 	}

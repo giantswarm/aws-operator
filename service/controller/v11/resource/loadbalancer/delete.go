@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/giantswarm/microerror"
 
-	awsclientcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsclient"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
@@ -28,13 +28,13 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	if lbState != nil && len(lbState.LoadBalancerNames) > 0 {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting %d load balancers", len(lbState.LoadBalancerNames)))
 
-		awsClients, err := awsclientcontext.FromContext(ctx)
+		sc, err := servicecontext.FromContext(ctx)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
 		for _, lbName := range lbState.LoadBalancerNames {
-			_, err := awsClients.ELB.DeleteLoadBalancer(&elb.DeleteLoadBalancerInput{
+			_, err := sc.AWSClient.ELB.DeleteLoadBalancer(&elb.DeleteLoadBalancerInput{
 				LoadBalancerName: aws.String(lbName),
 			})
 			if err != nil {

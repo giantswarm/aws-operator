@@ -8,8 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
 
-	awsclientcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsclient"
-	awsservicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsservice"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
@@ -21,12 +20,12 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "looking for the S3 buckets")
 
-	awsService, err := awsservicecontext.FromContext(ctx)
+	sc, err := servicecontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	accountID, err := awsService.GetAccountID()
+	accountID, err := sc.AWSService.GetAccountID()
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -68,7 +67,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 }
 
 func (r *Resource) isBucketCreated(ctx context.Context, name string) (bool, error) {
-	awsClients, err := awsclientcontext.FromContext(ctx)
+	sc, err := servicecontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
@@ -76,7 +75,7 @@ func (r *Resource) isBucketCreated(ctx context.Context, name string) (bool, erro
 	headInput := &s3.HeadBucketInput{
 		Bucket: aws.String(name),
 	}
-	_, err = awsClients.S3.HeadBucket(headInput)
+	_, err = sc.AWSClient.S3.HeadBucket(headInput)
 	if IsBucketNotFound(err) {
 		return false, nil
 	} else if err != nil {
@@ -87,7 +86,7 @@ func (r *Resource) isBucketCreated(ctx context.Context, name string) (bool, erro
 }
 
 func (r *Resource) getLoggingConfiguration(ctx context.Context, name string) (*s3.GetBucketLoggingOutput, error) {
-	awsClients, err := awsclientcontext.FromContext(ctx)
+	sc, err := servicecontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -95,7 +94,7 @@ func (r *Resource) getLoggingConfiguration(ctx context.Context, name string) (*s
 	bucketLoggingInput := &s3.GetBucketLoggingInput{
 		Bucket: aws.String(name),
 	}
-	bucketLoggingOutput, err := awsClients.S3.GetBucketLogging(bucketLoggingInput)
+	bucketLoggingOutput, err := sc.AWSClient.S3.GetBucketLogging(bucketLoggingInput)
 	if err != nil {
 		return bucketLoggingOutput, microerror.Mask(err)
 	}

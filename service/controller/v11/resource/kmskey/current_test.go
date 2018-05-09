@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	awsclientcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsclient"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 )
 
 func Test_CurrentState(t *testing.T) {
@@ -55,7 +55,10 @@ func Test_CurrentState(t *testing.T) {
 				t.Error("expected", nil, "got", err)
 			}
 
-			result, err := newResource.GetCurrentState(awsclientcontext.NewContext(context.TODO(), awsClients), customObject)
+			ctx := context.TODO()
+			ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+
+			result, err := newResource.GetCurrentState(ctx, customObject)
 			if err != nil && !tc.expectedKMSError {
 				t.Errorf("unexpected error %v", err)
 			}

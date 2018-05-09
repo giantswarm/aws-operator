@@ -12,9 +12,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	awsclientcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsclient"
-	awsservicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsservice"
-	cloudconfigcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/cloudconfig"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 )
 
 func Test_Resource_S3Object_newCreate(t *testing.T) {
@@ -173,10 +171,13 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
+			c := servicecontext.Context{
+				AWSClient:   awsClients,
+				AWSService:  awsService,
+				CloudConfig: cloudconfig,
+			}
 			ctx := context.TODO()
-			ctx = awsclientcontext.NewContext(ctx, awsClients)
-			ctx = awsservicecontext.NewContext(ctx, awsService)
-			ctx = cloudconfigcontext.NewContext(ctx, cloudconfig)
+			ctx = servicecontext.NewContext(ctx, c)
 
 			result, err := newResource.newCreateChange(ctx, tc.obj, tc.currentState, tc.desiredState)
 			if err != nil {

@@ -11,7 +11,7 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	awsclientcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsclient"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 )
 
 func Test_clusterLoadBalancers(t *testing.T) {
@@ -210,7 +210,7 @@ func Test_clusterLoadBalancers(t *testing.T) {
 				},
 			}
 			ctx := context.TODO()
-			ctx = awsclientcontext.NewContext(ctx, awsClients)
+			ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
 
 			result, err := newResource.clusterLoadBalancers(ctx, tc.obj)
 			if err != nil {
