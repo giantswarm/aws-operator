@@ -27,8 +27,7 @@ func (a *autoScalingGroupAdapter) getAutoScalingGroup(cfg Config) error {
 	}
 
 	a.WorkerAZ = key.AvailabilityZone(cfg.CustomObject)
-	a.ASGMaxSize = workers
-	if a.ASGMaxSize == 1 {
+	if workers == 1 {
 		a.ASGMaxSize = workers + 1
 	} else {
 		a.ASGMaxSize = workers
