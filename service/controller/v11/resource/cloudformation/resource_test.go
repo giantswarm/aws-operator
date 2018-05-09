@@ -9,8 +9,6 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/aws-operator/service/controller/v11/adapter"
 	"github.com/giantswarm/micrologger/microloggertest"
-
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v11/cloudformation"
 )
 
 func Test_Resource_Cloudformation_GetCloudFormationTags(t *testing.T) {
@@ -57,19 +55,12 @@ func Test_Resource_Cloudformation_GetCloudFormationTags(t *testing.T) {
 
 	c := Config{}
 
-	c.Clients = &adapter.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-		KMS: &adapter.KMSClientMock{},
-	}
-	c.EBS = &EBSServiceMock{}
 	c.HostClients = &adapter.Clients{
 		EC2:            &adapter.EC2ClientMock{},
 		CloudFormation: &adapter.CloudFormationMock{},
 		IAM:            &adapter.IAMClientMock{},
 	}
 	c.Logger = microloggertest.New()
-	c.Service = &cloudformationservice.CloudFormation{}
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {

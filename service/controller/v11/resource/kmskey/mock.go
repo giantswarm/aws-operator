@@ -5,9 +5,12 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go/service/kms/kmsiface"
 )
 
 type KMSClientMock struct {
+	kmsiface.KMSAPI
+
 	keyID     string
 	isError   bool
 	clusterID string

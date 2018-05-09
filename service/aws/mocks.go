@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go/service/iam/iamiface"
 )
 
 const (
@@ -15,6 +16,8 @@ const (
 )
 
 type IAMClientMock struct {
+	iamiface.IAMAPI
+
 	accountID string
 }
 

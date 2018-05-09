@@ -18,7 +18,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 
 	instanceName := key.MasterInstanceName(customObject)
-	masterInstance, err := r.findMasterInstance(instanceName)
+	masterInstance, err := r.findMasterInstance(ctx, instanceName)
 	if IsNotFound(err) {
 		// During updates the master instance is shut down and thus cannot be found.
 		// In such cases we cancel the reconciliation for the endpoint resource.

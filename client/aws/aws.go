@@ -11,11 +11,16 @@ import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	"github.com/aws/aws-sdk-go/service/elb"
+	"github.com/aws/aws-sdk-go/service/elb/elbiface"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go/service/iam/iamiface"
 	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go/service/kms/kmsiface"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v2/resource/cloudformation/adapter"
@@ -32,12 +37,12 @@ type Config struct {
 type Clients struct {
 	AutoScaling    *autoscaling.AutoScaling
 	CloudFormation *cloudformation.CloudFormation
-	EC2            *ec2.EC2
-	ELB            *elb.ELB
-	IAM            *iam.IAM
-	KMS            *kms.KMS
+	EC2            ec2iface.EC2API
+	ELB            elbiface.ELBAPI
+	IAM            iamiface.IAMAPI
+	KMS            kmsiface.KMSAPI
 	Route53        *route53.Route53
-	S3             *s3.S3
+	S3             s3iface.S3API
 }
 
 const (
@@ -58,7 +63,7 @@ func NewClientsWithRole(config Config, roleARN string) Clients {
 	return newClients(sess, &aws.Config{Credentials: creds})
 }
 
-func (c *Config) SetAccountID(iamClient *iam.IAM) error {
+func (c *Config) SetAccountID(iamClient iamiface.IAMAPI) error {
 	resp, err := iamClient.GetUser(&iam.GetUserInput{})
 	if err != nil {
 		return microerror.Mask(err)

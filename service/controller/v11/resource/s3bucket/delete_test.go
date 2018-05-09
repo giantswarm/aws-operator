@@ -6,8 +6,6 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
-
-	awsservice "github.com/giantswarm/aws-operator/service/aws"
 )
 
 func Test_Resource_S3Bucket_newDelete(t *testing.T) {
@@ -81,23 +79,9 @@ func Test_Resource_S3Bucket_newDelete(t *testing.T) {
 	}
 
 	var err error
-	var awsService *awsservice.Service
-	{
-		awsConfig := awsservice.DefaultConfig()
-		awsConfig.Clients = awsservice.Clients{
-			IAM: &awsservice.IAMClientMock{},
-		}
-		awsConfig.Logger = microloggertest.New()
-		awsService, err = awsservice.New(awsConfig)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
-	}
-
 	var newResource *Resource
 	{
 		resourceConfig := DefaultConfig()
-		resourceConfig.AwsService = awsService
 		resourceConfig.Logger = microloggertest.New()
 		resourceConfig.InstallationName = "test-install"
 

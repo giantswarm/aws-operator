@@ -10,7 +10,11 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys/randomkeystest"
 
+	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
+	awsclientcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsclient"
+	awsservicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsservice"
+	cloudconfigcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/cloudconfig"
 )
 
 func Test_Resource_S3Object_newCreate(t *testing.T) {
@@ -146,16 +150,18 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 		},
 	}
 
+	awsClients := aws.Clients{
+		S3: &S3ClientMock{},
+	}
+
+	awsService := awsservice.AwsServiceMock{}
+	cloudconfig := &CloudConfigMock{}
+
 	var err error
 	var newResource *Resource
 	{
 		c := Config{}
-		c.Clients = Clients{
-			S3: &S3ClientMock{},
-		}
-		c.AwsService = awsservice.AwsServiceMock{}
 		c.CertWatcher = legacytest.NewService()
-		c.CloudConfig = &CloudConfigMock{}
 		c.Logger = microloggertest.New()
 		c.RandomKeySearcher = randomkeystest.NewSearcher()
 
@@ -167,7 +173,12 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			result, err := newResource.newCreateChange(context.TODO(), tc.obj, tc.currentState, tc.desiredState)
+			ctx := context.TODO()
+			ctx = awsclientcontext.NewContext(ctx, awsClients)
+			ctx = awsservicecontext.NewContext(ctx, awsService)
+			ctx = cloudconfigcontext.NewContext(ctx, cloudconfig)
+
+			result, err := newResource.newCreateChange(ctx, tc.obj, tc.currentState, tc.desiredState)
 			if err != nil {
 				t.Errorf("expected '%v' got '%#v'", nil, err)
 			}

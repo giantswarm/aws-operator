@@ -7,7 +7,6 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
@@ -21,9 +20,7 @@ const (
 // Config represents the configuration used to create a new s3bucket resource.
 type Config struct {
 	// Dependencies.
-	AwsService *awsservice.Service
-	Clients    Clients
-	Logger     micrologger.Logger
+	Logger micrologger.Logger
 
 	// Settings.
 	AccessLogsExpiration int
@@ -37,18 +34,14 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
-		AwsService: nil,
-		Clients:    Clients{},
-		Logger:     nil,
+		Logger: nil,
 	}
 }
 
 // Resource implements the s3bucket resource.
 type Resource struct {
 	// Dependencies.
-	awsService *awsservice.Service
-	clients    Clients
-	logger     micrologger.Logger
+	logger micrologger.Logger
 
 	// Settings.
 	accessLogsExpiration int
@@ -60,9 +53,6 @@ type Resource struct {
 // New creates a new configured s3bucket resource.
 func New(config Config) (*Resource, error) {
 	// Dependencies.
-	if config.AwsService == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.AwsService must not be empty", config)
-	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
@@ -77,9 +67,7 @@ func New(config Config) (*Resource, error) {
 
 	newResource := &Resource{
 		// Dependencies.
-		awsService: config.AwsService,
-		clients:    config.Clients,
-		logger:     config.Logger,
+		logger: config.Logger,
 
 		// Settings.
 		accessLogsExpiration: config.AccessLogsExpiration,

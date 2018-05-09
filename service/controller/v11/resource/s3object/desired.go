@@ -6,6 +6,8 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v11/cloudconfig"
+	awsservicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsservice"
+	cloudconfigcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
@@ -16,13 +18,18 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return output, microerror.Mask(err)
 	}
 
-	accountID, err := r.awsService.GetAccountID()
+	awsService, err := awsservicecontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	accountID, err := awsService.GetAccountID()
 	if err != nil {
 		return output, microerror.Mask(err)
 	}
 
 	clusterID := key.ClusterID(customObject)
-	kmsKeyARN, err := r.awsService.GetKeyArn(clusterID)
+	kmsKeyARN, err := awsService.GetKeyArn(clusterID)
 	if IsKeyNotFound(err) {
 		// we can get here during deletion, if the key is already deleted we can safely exit.
 		return output, nil
@@ -36,7 +43,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return output, microerror.Mask(err)
 	}
 
-	tlsAssets, err := r.encodeTLSAssets(certs, kmsKeyARN)
+	tlsAssets, err := r.encodeTLSAssets(ctx, certs, kmsKeyARN)
 	if err != nil {
 		return output, microerror.Mask(err)
 	}
@@ -46,7 +53,12 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return output, microerror.Mask(err)
 	}
 
-	masterBody, err := r.cloudConfig.NewMasterTemplate(customObject, *tlsAssets, clusterKeys, kmsKeyARN)
+	cc, err := cloudconfigcontext.FromContext(ctx)
+	if err != nil {
+		return output, microerror.Mask(err)
+	}
+
+	masterBody, err := cc.NewMasterTemplate(customObject, *tlsAssets, clusterKeys, kmsKeyARN)
 	if err != nil {
 		return output, microerror.Mask(err)
 	}
@@ -59,7 +71,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 	output[masterObjectName] = masterCloudConfig
 
-	workerBody, err := r.cloudConfig.NewWorkerTemplate(customObject, *tlsAssets)
+	workerBody, err := cc.NewWorkerTemplate(customObject, *tlsAssets)
 	if err != nil {
 		return output, microerror.Mask(err)
 	}

@@ -7,12 +7,18 @@ import (
 	"github.com/aws/aws-sdk-go/aws/request"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	"github.com/aws/aws-sdk-go/service/elb"
+	"github.com/aws/aws-sdk-go/service/elb/elbiface"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go/service/iam/iamiface"
 	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go/service/kms/kmsiface"
 )
 
 type EC2ClientMock struct {
+	ec2iface.EC2API
+
 	unexistingSg        bool
 	sgID                string
 	unexistingSubnet    bool
@@ -44,7 +50,7 @@ func (e *EC2ClientMock) DescribeAddresses(input *ec2.DescribeAddressesInput) (*e
 	return output, nil
 }
 
-func (e *EC2ClientMock) DescribeSecurityGroups(input *ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error) {
+func (e EC2ClientMock) DescribeSecurityGroups(input *ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error) {
 	if !e.unexistingSg {
 		output := &ec2.DescribeSecurityGroupsOutput{
 			SecurityGroups: []*ec2.SecurityGroup{
@@ -59,9 +65,11 @@ func (e *EC2ClientMock) DescribeSecurityGroups(input *ec2.DescribeSecurityGroups
 	return nil, fmt.Errorf("security group not found")
 }
 
-func (e *EC2ClientMock) DescribeSubnets(input *ec2.DescribeSubnetsInput) (*ec2.DescribeSubnetsOutput, error) {
-	if e.subnetID == "" {
-		e.subnetID = "subnet-1234"
+func (e EC2ClientMock) DescribeSubnets(input *ec2.DescribeSubnetsInput) (*ec2.DescribeSubnetsOutput, error) {
+	subnetID := e.subnetID
+
+	if subnetID == "" {
+		subnetID = "subnet-1234"
 	}
 
 	if e.unexistingSubnet {
@@ -71,7 +79,7 @@ func (e *EC2ClientMock) DescribeSubnets(input *ec2.DescribeSubnetsInput) (*ec2.D
 	output := &ec2.DescribeSubnetsOutput{
 		Subnets: []*ec2.Subnet{
 			{
-				SubnetId: aws.String(e.subnetID),
+				SubnetId: aws.String(subnetID),
 			},
 		},
 	}
@@ -82,7 +90,7 @@ func (e *EC2ClientMock) SetMatchingRouteTables(value int) {
 	e.matchingRouteTables = value
 }
 
-func (e *EC2ClientMock) DescribeRouteTables(input *ec2.DescribeRouteTablesInput) (*ec2.DescribeRouteTablesOutput, error) {
+func (e EC2ClientMock) DescribeRouteTables(input *ec2.DescribeRouteTablesInput) (*ec2.DescribeRouteTablesOutput, error) {
 	if e.matchingRouteTables == 0 {
 		return nil, fmt.Errorf("route table not found")
 	}
@@ -102,7 +110,7 @@ func (e *EC2ClientMock) DescribeRouteTables(input *ec2.DescribeRouteTablesInput)
 	return output, nil
 }
 
-func (e *EC2ClientMock) DescribeVpcs(input *ec2.DescribeVpcsInput) (*ec2.DescribeVpcsOutput, error) {
+func (e EC2ClientMock) DescribeVpcs(input *ec2.DescribeVpcsInput) (*ec2.DescribeVpcsOutput, error) {
 	if e.unexistingVPC {
 		return nil, fmt.Errorf("vpc not found")
 	}
@@ -119,7 +127,7 @@ func (e *EC2ClientMock) DescribeVpcs(input *ec2.DescribeVpcsInput) (*ec2.Describ
 	return output, nil
 }
 
-func (e *EC2ClientMock) DescribeVpcPeeringConnections(*ec2.DescribeVpcPeeringConnectionsInput) (*ec2.DescribeVpcPeeringConnectionsOutput, error) {
+func (e EC2ClientMock) DescribeVpcPeeringConnections(*ec2.DescribeVpcPeeringConnectionsInput) (*ec2.DescribeVpcPeeringConnectionsOutput, error) {
 	output := &ec2.DescribeVpcPeeringConnectionsOutput{
 		VpcPeeringConnections: []*ec2.VpcPeeringConnection{
 			{
@@ -146,33 +154,37 @@ func (c *CFClientMock) UpdateStack(*awscloudformation.UpdateStackInput) (*awsclo
 }
 
 type IAMClientMock struct {
+	iamiface.IAMAPI
+
 	accountID   string
 	isError     bool
 	peerRoleArn string
 }
 
-func (i *IAMClientMock) GetUser(input *iam.GetUserInput) (*iam.GetUserOutput, error) {
+func (i IAMClientMock) GetUser(input *iam.GetUserInput) (*iam.GetUserOutput, error) {
+	accountID := i.accountID
+
 	if i.isError {
 		return nil, fmt.Errorf("error")
 	}
-	if i.accountID == "" {
-		i.accountID = "00"
+	if accountID == "" {
+		accountID = "00"
 	}
 	// pad accountID to required length
-	toPad := accountIDLength - len(i.accountID)
+	toPad := accountIDLength - len(accountID)
 	for j := 0; j < toPad; j++ {
-		i.accountID += "0"
+		accountID += "0"
 	}
 	output := &iam.GetUserOutput{
 		User: &iam.User{
-			Arn: aws.String("::::" + i.accountID),
+			Arn: aws.String("::::" + accountID),
 		},
 	}
 
 	return output, nil
 }
 
-func (i *IAMClientMock) GetRole(input *iam.GetRoleInput) (*iam.GetRoleOutput, error) {
+func (i IAMClientMock) GetRole(input *iam.GetRoleInput) (*iam.GetRoleOutput, error) {
 	if i.isError {
 		return nil, fmt.Errorf("error")
 	}
@@ -186,11 +198,13 @@ func (i *IAMClientMock) GetRole(input *iam.GetRoleInput) (*iam.GetRoleOutput, er
 }
 
 type KMSClientMock struct {
+	kmsiface.KMSAPI
+
 	keyARN  string
 	isError bool
 }
 
-func (k *KMSClientMock) DescribeKey(input *kms.DescribeKeyInput) (*kms.DescribeKeyOutput, error) {
+func (k KMSClientMock) DescribeKey(input *kms.DescribeKeyInput) (*kms.DescribeKeyOutput, error) {
 	if k.isError {
 		return nil, fmt.Errorf("error")
 	}
@@ -204,13 +218,15 @@ func (k *KMSClientMock) DescribeKey(input *kms.DescribeKeyInput) (*kms.DescribeK
 }
 
 type ELBClientMock struct {
+	elbiface.ELBAPI
+
 	dns        string
 	hostedZone string
 	name       string
 	isError    bool
 }
 
-func (e *ELBClientMock) DescribeLoadBalancers(input *elb.DescribeLoadBalancersInput) (*elb.DescribeLoadBalancersOutput, error) {
+func (e ELBClientMock) DescribeLoadBalancers(input *elb.DescribeLoadBalancersInput) (*elb.DescribeLoadBalancersOutput, error) {
 	if e.isError {
 		return nil, fmt.Errorf("error")
 	}

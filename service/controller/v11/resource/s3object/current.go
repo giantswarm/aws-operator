@@ -7,8 +7,11 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 	"github.com/giantswarm/microerror"
+
+	awsclientcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsclient"
+	awsservicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsservice"
+	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
@@ -20,16 +23,26 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "looking for S3 objects")
 
-	accountID, err := r.awsService.GetAccountID()
+	awsService, err := awsservicecontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	accountID, err := awsService.GetAccountID()
 	if err != nil {
 		return output, microerror.Mask(err)
+	}
+
+	awsClients, err := awsclientcontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
 	}
 
 	bucketName := key.BucketName(customObject, accountID)
 	input := &s3.ListObjectsV2Input{
 		Bucket: aws.String(bucketName),
 	}
-	result, err := r.awsClients.S3.ListObjectsV2(input)
+	result, err := awsClients.S3.ListObjectsV2(input)
 	// the bucket can be already deleted with all the objects in it, it is ok if so.
 	if IsBucketNotFound(err) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "S3 object's bucket not found, no current objects present")
@@ -61,11 +74,15 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 func (r *Resource) getBucketObjectBody(ctx context.Context, bucketName string, keyName string) (string, error) {
 	var body string
 
+	awsClients, err := awsclientcontext.FromContext(ctx)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
 	input := &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(keyName),
 	}
-	result, err := r.awsClients.S3.GetObject(input)
+	result, err := awsClients.S3.GetObject(input)
 	if IsObjectNotFound(err) || IsBucketNotFound(err) {
 		r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("did not find S3 object '%s'", keyName))
 

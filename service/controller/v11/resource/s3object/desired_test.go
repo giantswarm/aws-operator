@@ -9,7 +9,11 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys/randomkeystest"
 
+	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
+	awsclientcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsclient"
+	awsservicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsservice"
+	cloudconfigcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/cloudconfig"
 )
 
 func Test_DesiredState(t *testing.T) {
@@ -42,6 +46,19 @@ func Test_DesiredState(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
+			awsClients := aws.Clients{
+				KMS: &KMSClientMock{},
+			}
+
+			awsService := awsservice.AwsServiceMock{
+				AccountID: "myaccountid",
+				KeyArn:    "mykeyarn",
+			}
+
+			cloudconfig := &CloudConfigMock{
+				template: tc.expectedBody,
+			}
+
 			var err error
 			var newResource *Resource
 			var masterCloudConfig BucketObjectState
@@ -49,25 +66,20 @@ func Test_DesiredState(t *testing.T) {
 			{
 				c := Config{}
 				c.Logger = microloggertest.New()
-				c.AwsService = awsservice.AwsServiceMock{
-					AccountID: "myaccountid",
-					KeyArn:    "mykeyarn",
-				}
-				c.Clients = Clients{
-					KMS: &KMSClientMock{},
-				}
 				c.CertWatcher = legacytest.NewService()
 				c.RandomKeySearcher = randomkeystest.NewSearcher()
-				c.CloudConfig = &CloudConfigMock{
-					template: tc.expectedBody,
-				}
 				newResource, err = New(c)
 				if err != nil {
 					t.Error("expected", nil, "got", err)
 				}
 			}
 
-			result, err := newResource.GetDesiredState(context.TODO(), tc.obj)
+			ctx := context.TODO()
+			ctx = awsclientcontext.NewContext(ctx, awsClients)
+			ctx = awsservicecontext.NewContext(ctx, awsService)
+			ctx = cloudconfigcontext.NewContext(ctx, cloudconfig)
+
+			result, err := newResource.GetDesiredState(ctx, tc.obj)
 			if err != nil {
 				t.Errorf("unexpected error %v", err)
 			}

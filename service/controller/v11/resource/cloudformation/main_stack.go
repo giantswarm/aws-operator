@@ -1,26 +1,42 @@
 package cloudformation
 
 import (
+	"context"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v11/adapter"
+	awsclientcontext "github.com/giantswarm/aws-operator/service/controller/v11/context/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 	"github.com/giantswarm/aws-operator/service/controller/v11/templates"
 )
 
-func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig, stackState StackState) (string, error) {
+func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig, stackState StackState) (string, error) {
 	hostAccountID, err := adapter.AccountID(*r.hostClients)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
+
+	awsClients, err := awsclientcontext.FromContext(ctx)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	adapterClients := adapter.Clients{
+		CloudFormation: awsClients.CloudFormation,
+		EC2:            awsClients.EC2,
+		IAM:            awsClients.IAM,
+		KMS:            awsClients.KMS,
+		ELB:            awsClients.ELB,
+	}
+
 	cfg := adapter.Config{
 		APIWhitelist: adapter.APIWhitelist{
 			Enabled:    r.apiWhiteList.Enabled,
 			SubnetList: r.apiWhiteList.SubnetList,
 		},
 		CustomObject:     customObject,
-		Clients:          *r.clients,
+		Clients:          adapterClients,
 		HostClients:      *r.hostClients,
 		InstallationName: r.installationName,
 		HostAccountID:    hostAccountID,
@@ -57,8 +73,21 @@ func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig, sta
 	return rendered, nil
 }
 
-func (r *Resource) getMainHostPreTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
-	guestAccountID, err := adapter.AccountID(*r.clients)
+func (r *Resource) getMainHostPreTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {
+	awsClients, err := awsclientcontext.FromContext(ctx)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	adapterClients := adapter.Clients{
+		CloudFormation: awsClients.CloudFormation,
+		EC2:            awsClients.EC2,
+		IAM:            awsClients.IAM,
+		KMS:            awsClients.KMS,
+		ELB:            awsClients.ELB,
+	}
+
+	guestAccountID, err := adapter.AccountID(adapterClients)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -79,10 +108,23 @@ func (r *Resource) getMainHostPreTemplateBody(customObject v1alpha1.AWSConfig) (
 	return rendered, nil
 }
 
-func (r *Resource) getMainHostPostTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
+func (r *Resource) getMainHostPostTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {
+	awsClients, err := awsclientcontext.FromContext(ctx)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	adapterClients := adapter.Clients{
+		CloudFormation: awsClients.CloudFormation,
+		EC2:            awsClients.EC2,
+		IAM:            awsClients.IAM,
+		KMS:            awsClients.KMS,
+		ELB:            awsClients.ELB,
+	}
+
 	cfg := adapter.Config{
 		CustomObject: customObject,
-		Clients:      *r.clients,
+		Clients:      adapterClients,
 		HostClients:  *r.hostClients,
 	}
 	adp, err := adapter.NewHostPost(cfg)
