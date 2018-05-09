@@ -17,8 +17,10 @@ import (
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v11/adapter"
+	awsclient "github.com/giantswarm/aws-operator/service/controller/v11/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v11/cloudconfig"
 	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v11/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v11/credential"
 	"github.com/giantswarm/aws-operator/service/controller/v11/ebs"
 	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v11/resource/cloudformation"
@@ -39,6 +41,7 @@ const (
 type ClusterResourceSetConfig struct {
 	CertsSearcher      legacy.Searcher
 	GuestAWSClients    aws.Clients
+	GuestAWSConfig     aws.Config
 	HostAWSClients     aws.Clients
 	K8sClient          kubernetes.Interface
 	Logger             micrologger.Logger
@@ -57,6 +60,15 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 	if config.CertsSearcher == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.CertsSearcher must not be empty")
+	}
+	if config.GuestAWSConfig.AccessKeyID == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSConfig.AccessKeyID must not be empty")
+	}
+	if config.GuestAWSConfig.AccessKeySecret == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSConfig.AccessKeySecret must not be empty")
+	}
+	if config.GuestAWSConfig.Region == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSConfig.Region must not be empty")
 	}
 	if config.GuestAWSClients.CloudFormation == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSClients.CloudFormation must not be empty")
@@ -405,6 +417,14 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		if config.GuestUpdateEnabled {
 			updateallowedcontext.SetUpdateAllowed(ctx)
 		}
+
+		role, err := credential.GetRole(config.K8sClient, obj)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		clients := aws.NewClientsWithRole(config.GuestAWSConfig, role.ARN)
+		ctx = awsclient.NewContext(ctx, clients)
 
 		return ctx, nil
 	}
