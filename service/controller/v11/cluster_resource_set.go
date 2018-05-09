@@ -317,12 +317,12 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 		var awsClient aws.Clients
 		{
-			role, err := credential.GetRole(config.K8sClient, obj)
+			arn, err := credential.GetARN(config.K8sClient, obj)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
 
-			awsClient = aws.NewClientsWithRole(config.GuestAWSConfig, role.ARN)
+			awsClient = aws.NewClientsWithRole(config.GuestAWSConfig, arn)
 		}
 
 		var awsService *awsservice.Service

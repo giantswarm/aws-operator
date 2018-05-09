@@ -2,16 +2,9 @@ package credential
 
 import "github.com/giantswarm/microerror"
 
-var malformedRole = microerror.New("malformed role")
+var arnNotFound = microerror.New("arn not found")
 
-// IsMalformedRoleError asserts malformedRole.
-func IsMalformedRoleError(err error) bool {
-	return microerror.Cause(err) == malformedRole
-}
-
-var roleNotFound = microerror.New("role not found")
-
-// IsRoleNotFoundError asserts roleNotFound.
-func IsRoleNotFoundError(err error) bool {
-	return microerror.Cause(err) == roleNotFound
+// IsArnNotFoundError asserts arnNotFound.
+func IsArnNotFoundError(err error) bool {
+	return microerror.Cause(err) == arnNotFound
 }
