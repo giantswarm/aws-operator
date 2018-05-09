@@ -1,8 +1,6 @@
 package credential
 
 import (
-	"encoding/json"
-
 	"github.com/giantswarm/microerror"
 	"k8s.io/api/core/v1"
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -12,28 +10,31 @@ import (
 )
 
 const (
-	providerKey = "aws"
-	roleKey     = "awsoperator"
+	// awsOperatorArnKey is the key in the Secret under which the ARN for the aws-operator role is held.
+	awsOperatorArnKey = "aws.awsoperator.arn"
 )
 
-type role struct {
-	ARN string `json:"arn"`
-}
-
-type roleMap map[string]role
-
-func GetRole(k8sClient kubernetes.Interface, obj interface{}) (*role, error) {
+func GetARN(k8sClient kubernetes.Interface, obj interface{}) (string, error) {
 	credential, err := readCredential(k8sClient, obj)
 	if err != nil {
-		return nil, microerror.Mask(err)
+		return "", microerror.Mask(err)
 	}
 
-	role, err := getRole(credential)
+	arn, err := getARN(credential)
 	if err != nil {
-		return nil, microerror.Mask(err)
+		return "", microerror.Mask(err)
 	}
 
-	return role, nil
+	return arn, nil
+}
+
+func getARN(credential *v1.Secret) (string, error) {
+	arn, ok := credential.Data[awsOperatorArnKey]
+	if !ok {
+		return "", microerror.Maskf(arnNotFound, awsOperatorArnKey)
+	}
+
+	return string(arn), nil
 }
 
 func readCredential(k8sClient kubernetes.Interface, obj interface{}) (*v1.Secret, error) {
@@ -51,25 +52,4 @@ func readCredential(k8sClient kubernetes.Interface, obj interface{}) (*v1.Secret
 	}
 
 	return credential, nil
-}
-
-func getRole(credential *v1.Secret) (*role, error) {
-	var r roleMap
-
-	data, ok := credential.Data[providerKey]
-	if !ok {
-		return nil, microerror.Maskf(roleNotFound, providerKey)
-	}
-
-	err := json.Unmarshal(data, &r)
-	if err != nil {
-		return nil, microerror.Maskf(malformedRole, "%v", err)
-	}
-
-	v, ok := r[roleKey]
-	if !ok {
-		return nil, microerror.Maskf(roleNotFound, roleKey)
-	}
-
-	return &v, nil
 }
