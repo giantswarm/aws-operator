@@ -20,6 +20,7 @@ type StackState struct {
 	MasterInstanceType         string
 	MasterInstanceResourceName string
 	MasterCloudConfigVersion   string
+	MasterInstanceMonitoring   bool
 
 	ShouldScale  bool
 	ShouldUpdate bool
@@ -30,6 +31,7 @@ type StackState struct {
 	WorkerImageID            string
 	WorkerInstanceType       string
 	WorkerCloudConfigVersion string
+	WorkerMonitoring         bool
 
 	UpdateStackInput cloudformation.UpdateStackInput
 

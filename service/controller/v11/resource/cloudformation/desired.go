@@ -44,11 +44,13 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			MasterInstanceResourceName: key.MasterInstanceResourceName(customObject),
 			MasterInstanceType:         masterInstanceType,
 			MasterCloudConfigVersion:   cloudconfig.MasterCloudConfigVersion,
+			MasterInstanceMonitoring:   r.monitoring,
 
 			WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
 			WorkerImageID:            imageID,
 			WorkerInstanceType:       workerInstanceType,
 			WorkerCloudConfigVersion: cloudconfig.WorkerCloudConfigVersion,
+			WorkerMonitoring:         r.monitoring,
 
 			VersionBundleVersion: key.VersionBundleVersion(customObject),
 		}

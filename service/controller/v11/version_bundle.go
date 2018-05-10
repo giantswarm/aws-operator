@@ -10,9 +10,9 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "component",
-				Description: "Put your description here.",
-				Kind:        versionbundle.KindChanged,
+				Component:   "aws-operator",
+				Description: "Added support for advanced monitoring in EC2.",
+				Kind:        versionbundle.KindAdded,
 			},
 		},
 		Components: []versionbundle.Component{

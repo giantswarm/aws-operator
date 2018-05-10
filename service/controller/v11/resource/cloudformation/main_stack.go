@@ -31,11 +31,13 @@ func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig, sta
 			MasterInstanceResourceName: stackState.MasterInstanceResourceName,
 			MasterInstanceType:         stackState.MasterInstanceType,
 			MasterCloudConfigVersion:   stackState.MasterCloudConfigVersion,
+			MasterInstanceMonitoring:   stackState.MasterInstanceMonitoring,
 
 			WorkerCount:              stackState.WorkerCount,
 			WorkerImageID:            stackState.WorkerImageID,
 			WorkerInstanceType:       stackState.WorkerInstanceType,
 			WorkerCloudConfigVersion: stackState.WorkerCloudConfigVersion,
+			WorkerMonitoring:         stackState.WorkerMonitoring,
 
 			VersionBundleVersion: stackState.VersionBundleVersion,
 		},

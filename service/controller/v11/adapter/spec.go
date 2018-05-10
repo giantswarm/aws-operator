@@ -85,11 +85,13 @@ type StackState struct {
 	MasterInstanceType         string
 	MasterInstanceResourceName string
 	MasterCloudConfigVersion   string
+	MasterInstanceMonitoring   bool
 
 	WorkerCount              string
 	WorkerImageID            string
 	WorkerInstanceType       string
 	WorkerCloudConfigVersion string
+	WorkerMonitoring         bool
 
 	VersionBundleVersion string
 }
