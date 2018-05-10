@@ -156,9 +156,9 @@ func TestWorkerCountRatioMaxBatchSize(t *testing.T) {
 			expectedRatio: "1",
 		},
 		{
-			description:   "scaling down to zero worker, none should be up",
+			description:   "scaling down to zero worker, ratio should be one, because it should never be zero",
 			workers:       0,
-			expectedRatio: "0",
+			expectedRatio: "1",
 		},
 	}
 	for _, tc := range tcs {

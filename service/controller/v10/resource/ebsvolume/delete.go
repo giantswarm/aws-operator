@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 
+	"github.com/giantswarm/aws-operator/service/controller/v10/ebs"
 	"github.com/giantswarm/aws-operator/service/controller/v10/key"
 )
 
@@ -17,10 +19,13 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	// Get both the Etcd volume and any Persistent Volumes.
-	etcdVolume := true
-	persistentVolume := true
-	volumes, err := r.service.ListVolumes(customObject, etcdVolume, persistentVolume)
+	// Get all etcd, docker and persistent volumes.
+	filterFuncs := []func(t *ec2.Tag) bool{
+		ebs.NewDockerVolumeFilter(customObject),
+		ebs.NewEtcdVolumeFilter(customObject),
+		ebs.NewPersistentVolumeFilter(customObject),
+	}
+	volumes, err := r.service.ListVolumes(customObject, filterFuncs...)
 	if err != nil {
 		return microerror.Mask(err)
 	}

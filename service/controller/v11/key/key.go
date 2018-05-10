@@ -173,6 +173,10 @@ func CustomerID(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Customer.ID
 }
 
+func DockerVolumeName(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("%s-docker", ClusterID(customObject))
+}
+
 func EtcdVolumeName(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-etcd", ClusterID(customObject))
 }
