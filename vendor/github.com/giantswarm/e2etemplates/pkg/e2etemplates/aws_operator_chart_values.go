@@ -20,7 +20,6 @@ const AWSOperatorChartValues = `Installation:
     Provider:
       AWS:
         Region: ${AWS_REGION}
-        AdvancedMonitoringEC2: true
     Secret:
       AWSOperator:
         IDRSAPub: ${IDRSA_PUB}
