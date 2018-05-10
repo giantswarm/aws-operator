@@ -3,8 +3,9 @@ package s3bucket
 import (
 	"testing"
 
-	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/micrologger/microloggertest"
+
+	awsservice "github.com/giantswarm/aws-operator/service/aws"
 )
 
 func Test_ContainsBucketState(t *testing.T) {
