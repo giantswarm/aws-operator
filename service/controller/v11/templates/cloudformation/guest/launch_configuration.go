@@ -6,10 +6,10 @@ const LaunchConfiguration = `{{define "launch_configuration"}}
     Description: {{ .ASGType }} launch configuration
     Properties:
       ImageId: {{ .WorkerImageID }}
-      Monitoring: {{ .WorkerMonitoring }}
       SecurityGroups:
       - !Ref WorkerSecurityGroup
       InstanceType: {{ .WorkerInstanceType }}
+      InstanceMonitoring: {{ .WorkerMonitoring }}
       IamInstanceProfile: !Ref WorkerInstanceProfile
       BlockDeviceMappings:
       {{ range .WorkerBlockDeviceMappings }}
