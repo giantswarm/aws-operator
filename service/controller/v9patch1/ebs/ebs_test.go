@@ -12,6 +12,7 @@ import (
 
 func Test_ListVolumes(t *testing.T) {
 	t.Parallel()
+
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
@@ -21,25 +22,28 @@ func Test_ListVolumes(t *testing.T) {
 	}
 
 	testCases := []struct {
-		description      string
-		obj              v1alpha1.AWSConfig
-		etcd             bool
-		persistentVolume bool
-		expectedVolumes  []Volume
-		ebsVolumes       []ebsVolumeMock
+		description     string
+		obj             v1alpha1.AWSConfig
+		filterFuncs     []func(t *ec2.Tag) bool
+		expectedVolumes []Volume
+		ebsVolumes      []ebsVolumeMock
 	}{
 		{
-			description:      "case 0: basic match with no volumes",
-			obj:              customObject,
-			etcd:             true,
-			persistentVolume: true,
-			expectedVolumes:  []Volume{},
+			description: "case 0: basic match with no volumes",
+			obj:         customObject,
+			filterFuncs: []func(t *ec2.Tag) bool{
+				NewEtcdVolumeFilter(customObject),
+				NewPersistentVolumeFilter(customObject),
+			},
+			expectedVolumes: nil,
 		},
 		{
-			description:      "case 1: basic match with pv volume",
-			obj:              customObject,
-			etcd:             true,
-			persistentVolume: true,
+			description: "case 1: basic match with pv volume",
+			obj:         customObject,
+			filterFuncs: []func(t *ec2.Tag) bool{
+				NewEtcdVolumeFilter(customObject),
+				NewPersistentVolumeFilter(customObject),
+			},
 			expectedVolumes: []Volume{
 				{
 					Attachments: []VolumeAttachment{},
@@ -63,10 +67,12 @@ func Test_ListVolumes(t *testing.T) {
 			},
 		},
 		{
-			description:      "case 2: basic match with etcd and multiple pv volumes",
-			obj:              customObject,
-			etcd:             true,
-			persistentVolume: true,
+			description: "case 2: basic match with etcd and multiple pv volumes",
+			obj:         customObject,
+			filterFuncs: []func(t *ec2.Tag) bool{
+				NewEtcdVolumeFilter(customObject),
+				NewPersistentVolumeFilter(customObject),
+			},
 			expectedVolumes: []Volume{
 				{
 					Attachments: []VolumeAttachment{},
@@ -124,11 +130,13 @@ func Test_ListVolumes(t *testing.T) {
 			},
 		},
 		{
-			description:      "case 3: no match due to cluster tag",
-			obj:              customObject,
-			etcd:             true,
-			persistentVolume: true,
-			expectedVolumes:  []Volume{},
+			description: "case 3: no match due to cluster tag",
+			obj:         customObject,
+			filterFuncs: []func(t *ec2.Tag) bool{
+				NewEtcdVolumeFilter(customObject),
+				NewPersistentVolumeFilter(customObject),
+			},
+			expectedVolumes: nil,
 			ebsVolumes: []ebsVolumeMock{
 				{
 					volumeID: "vol-1234",
@@ -146,11 +154,13 @@ func Test_ListVolumes(t *testing.T) {
 			},
 		},
 		{
-			description:      "case 4: no match due to missing pv tag",
-			obj:              customObject,
-			etcd:             true,
-			persistentVolume: true,
-			expectedVolumes:  []Volume{},
+			description: "case 4: no match due to missing pv tag",
+			obj:         customObject,
+			filterFuncs: []func(t *ec2.Tag) bool{
+				NewEtcdVolumeFilter(customObject),
+				NewPersistentVolumeFilter(customObject),
+			},
+			expectedVolumes: nil,
 			ebsVolumes: []ebsVolumeMock{
 				{
 					volumeID: "vol-1234",
@@ -164,10 +174,12 @@ func Test_ListVolumes(t *testing.T) {
 			},
 		},
 		{
-			description:      "case 5: multiple ebs volumes with attachments",
-			obj:              customObject,
-			etcd:             true,
-			persistentVolume: true,
+			description: "case 5: multiple ebs volumes with attachments",
+			obj:         customObject,
+			filterFuncs: []func(t *ec2.Tag) bool{
+				NewEtcdVolumeFilter(customObject),
+				NewPersistentVolumeFilter(customObject),
+			},
 			expectedVolumes: []Volume{
 				{
 					Attachments: []VolumeAttachment{
@@ -230,10 +242,11 @@ func Test_ListVolumes(t *testing.T) {
 			},
 		},
 		{
-			description:      "case 6: only etcd volume",
-			obj:              customObject,
-			etcd:             true,
-			persistentVolume: false,
+			description: "case 6: only etcd volume",
+			obj:         customObject,
+			filterFuncs: []func(t *ec2.Tag) bool{
+				NewEtcdVolumeFilter(customObject),
+			},
 			expectedVolumes: []Volume{
 				{
 					Attachments: []VolumeAttachment{},
@@ -270,10 +283,11 @@ func Test_ListVolumes(t *testing.T) {
 			},
 		},
 		{
-			description:      "case 7: only pv volume",
-			obj:              customObject,
-			etcd:             false,
-			persistentVolume: true,
+			description: "case 7: only pv volume",
+			obj:         customObject,
+			filterFuncs: []func(t *ec2.Tag) bool{
+				NewPersistentVolumeFilter(customObject),
+			},
 			expectedVolumes: []Volume{
 				{
 					Attachments: []VolumeAttachment{},
@@ -322,16 +336,16 @@ func Test_ListVolumes(t *testing.T) {
 			}
 			e, err := New(c)
 			if err != nil {
-				t.Error("expected", nil, "got", err)
+				t.Fatal("expected", nil, "got", err)
 			}
 
-			result, err := e.ListVolumes(tc.obj, tc.etcd, tc.persistentVolume)
+			result, err := e.ListVolumes(tc.obj, tc.filterFuncs...)
 			if err != nil {
-				t.Errorf("unexpected error %v", err)
+				t.Fatal("expected", nil, "got", err)
 			}
 
 			if !reflect.DeepEqual(result, tc.expectedVolumes) {
-				t.Errorf("expected volumes '%#v', got '%#v'", tc.expectedVolumes, result)
+				t.Fatalf("expected volumes '%#v', got '%#v'", tc.expectedVolumes, result)
 			}
 		})
 	}

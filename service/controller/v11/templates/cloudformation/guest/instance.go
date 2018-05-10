@@ -25,6 +25,9 @@ const Instance = `{{define "instance"}}
       Size: 50
       VolumeType: gp2
       AvailabilityZone: !GetAtt {{ .Instance.Master.Instance.ResourceName }}.AvailabilityZone
+      Tags:
+      - Key: Name
+        Value: {{ .Instance.Master.DockerVolume.Name }}
   EtcdVolume:
     Type: AWS::EC2::Volume
     DependsOn:
