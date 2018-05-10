@@ -117,6 +117,7 @@ func New(config Config) (*Service, error) {
 				SubnetList: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.SubnetList),
 			},
 			AccessLogsExpiration: config.Viper.GetInt(config.Flag.Service.AWS.S3AccessLogsExpiration),
+			DeleteLoggingBucket:  config.Viper.GetBool(config.Flag.Service.AWS.LoggingBucket.Delete),
 			GuestAWSConfig: controller.ClusterConfigAWSConfig{
 				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
 				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),

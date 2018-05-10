@@ -49,6 +49,7 @@ type ClusterConfig struct {
 
 	AccessLogsExpiration int
 	APIWhitelist         FrameworkConfigAPIWhitelistConfig
+	DeleteLoggingBucket  bool
 	GuestAWSConfig       ClusterConfigAWSConfig
 	GuestUpdateEnabled   bool
 	HostAWSConfig        ClusterConfigAWSConfig
@@ -554,6 +555,7 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 			RandomkeysSearcher: randomKeySearcher,
 
 			AccessLogsExpiration: config.AccessLogsExpiration,
+			DeleteLoggingBucket:  config.DeleteLoggingBucket,
 			GuestUpdateEnabled:   config.GuestUpdateEnabled,
 			InstallationName:     config.InstallationName,
 			OIDC: v11cloudconfig.OIDCConfig{

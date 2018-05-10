@@ -29,9 +29,10 @@ func newTestClusterConfig() ClusterConfig {
 			Region:          "host-myregion",
 			SessionToken:    "host-token",
 		},
-		InstallationName: "test",
-		ProjectName:      "aws-operator",
-		PubKeyFile:       "~/.ssh/id_rsa.pub",
+		InstallationName:    "test",
+		DeleteLoggingBucket: true,
+		ProjectName:         "aws-operator",
+		PubKeyFile:          "~/.ssh/id_rsa.pub",
 	}
 }
 
