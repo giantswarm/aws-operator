@@ -19,6 +19,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v7"
 	"github.com/giantswarm/aws-operator/service/controller/v8"
 	"github.com/giantswarm/aws-operator/service/controller/v9"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch1"
 )
 
 type DrainerConfig struct {
@@ -199,6 +200,23 @@ func newDrainerResourceRouter(config DrainerConfig) (*controller.ResourceRouter,
 		}
 	}
 
+	var v9patch1ResourceSet *controller.ResourceSet
+	{
+		c := v9patch1.DrainerResourceSetConfig{
+			AWS:       awsClients,
+			G8sClient: config.G8sClient,
+			Logger:    config.Logger,
+
+			GuestUpdateEnabled: config.GuestUpdateEnabled,
+			ProjectName:        config.ProjectName,
+		}
+
+		v9patch1ResourceSet, err = v9patch1.NewDrainerResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var v10ResourceSet *controller.ResourceSet
 	{
 		c := v10.DrainerResourceSetConfig{
@@ -242,6 +260,7 @@ func newDrainerResourceRouter(config DrainerConfig) (*controller.ResourceRouter,
 				v7ResourceSet,
 				v8ResourceSet,
 				v9ResourceSet,
+				v9patch1ResourceSet,
 				v10ResourceSet,
 				v11ResourceSet,
 			},
