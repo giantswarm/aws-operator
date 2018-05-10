@@ -89,9 +89,9 @@ type StackState struct {
 
 	WorkerCount              string
 	WorkerImageID            string
+	WorkerInstanceMonitoring bool
 	WorkerInstanceType       string
 	WorkerCloudConfigVersion string
-	WorkerMonitoring         bool
 
 	VersionBundleVersion string
 }

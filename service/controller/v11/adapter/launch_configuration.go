@@ -19,10 +19,10 @@ import (
 type launchConfigAdapter struct {
 	WorkerAssociatePublicIPAddress bool
 	WorkerBlockDeviceMappings      []BlockDeviceMapping
+	WorkerInstanceMonitoring       bool
 	WorkerInstanceType             string
 	WorkerSecurityGroupID          string
 	WorkerSmallCloudConfig         string
-	WorkerMonitoring               bool
 }
 
 type BlockDeviceMapping struct {
@@ -44,7 +44,7 @@ func (l *launchConfigAdapter) getLaunchConfiguration(cfg Config) error {
 			VolumeType:          defaultEBSVolumeType,
 		},
 	}
-	l.WorkerMonitoring = cfg.StackState.WorkerMonitoring
+	l.WorkerInstanceMonitoring = cfg.StackState.WorkerInstanceMonitoring
 
 	// small cloud config field.
 	accountID, err := AccountID(cfg.Clients)

@@ -128,9 +128,9 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 
 		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
 		WorkerImageID:            imageID,
+		WorkerInstanceMonitoring: true,
 		WorkerInstanceType:       key.WorkerInstanceType(customObject),
 		WorkerCloudConfigVersion: cloudconfig.WorkerCloudConfigVersion,
-		WorkerMonitoring:         true,
 
 		VersionBundleVersion: key.VersionBundleVersion(customObject),
 	}
@@ -215,9 +215,9 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Fatal("worker CloudConfig version output element not found")
 	}
-	if !strings.Contains(body, key.WorkerMonitoring+": true") {
+	if !strings.Contains(body, key.WorkerInstanceMonitoring+": true") {
 		fmt.Println(body)
-		t.Fatal("WorkerMonitoring output element not found")
+		t.Fatal("WorkerInstanceMonitoring output element not found")
 	}
 
 	if !strings.Contains(body, "Value: "+cloudconfig.MasterCloudConfigVersion) {

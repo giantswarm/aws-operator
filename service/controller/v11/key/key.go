@@ -56,9 +56,9 @@ const (
 	WorkerASGKey                  = "WorkerASGName"
 	WorkerCountKey                = "WorkerCount"
 	WorkerImageIDKey              = "WorkerImageID"
+	WorkerInstanceMonitoring      = "Monitoring"
 	WorkerInstanceTypeKey         = "WorkerInstanceType"
 	WorkerCloudConfigVersionKey   = "WorkerCloudConfigVersion"
-	WorkerMonitoring              = "Monitoring"
 	VersionBundleVersionKey       = "VersionBundleVersion"
 )
 
