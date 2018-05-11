@@ -29,6 +29,7 @@ func Test_Service_New(t *testing.T) {
 				v.Set(f.Service.AWS.AccessKey.ID, "accessKeyID")
 				v.Set(f.Service.AWS.AccessKey.Secret, "accessKeySecret")
 				v.Set(f.Service.AWS.AccessKey.Session, "session")
+				v.Set(f.Service.AWS.AdvancedMonitoringEC2, true)
 				v.Set(f.Service.AWS.S3AccessLogsExpiration, 365)
 				v.Set(f.Service.AWS.Region, "myregion")
 				v.Set(f.Service.AWS.PubKeyFile, "test")

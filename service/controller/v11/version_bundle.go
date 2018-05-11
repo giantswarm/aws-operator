@@ -14,6 +14,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Changed logging buckets to be deleted on test environments.",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Added support for advanced monitoring in EC2.",
+				Kind:        versionbundle.KindAdded,
+			},
 		},
 		Components: []versionbundle.Component{
 			{

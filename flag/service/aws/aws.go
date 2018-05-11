@@ -7,6 +7,7 @@ import (
 
 type AWS struct {
 	AccessKey              accesskey.AccessKey
+	AdvancedMonitoringEC2  string
 	LoggingBucket          loggingbucket.LoggingBucket
 	HostAccessKey          accesskey.AccessKey
 	PubKeyFile             string

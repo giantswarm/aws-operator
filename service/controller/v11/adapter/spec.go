@@ -85,9 +85,11 @@ type StackState struct {
 	MasterInstanceType         string
 	MasterInstanceResourceName string
 	MasterCloudConfigVersion   string
+	MasterInstanceMonitoring   bool
 
 	WorkerCount              string
 	WorkerImageID            string
+	WorkerInstanceMonitoring bool
 	WorkerInstanceType       string
 	WorkerCloudConfigVersion string
 

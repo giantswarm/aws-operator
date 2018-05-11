@@ -44,13 +44,14 @@ type ClusterResourceSetConfig struct {
 	Logger             micrologger.Logger
 	RandomkeysSearcher randomkeys.Interface
 
-	AccessLogsExpiration int
-	APIWhitelist         adapter.APIWhitelist
-	GuestUpdateEnabled   bool
-	InstallationName     string
-	DeleteLoggingBucket  bool
-	OIDC                 cloudconfig.OIDCConfig
-	ProjectName          string
+	AccessLogsExpiration  int
+	AdvancedMonitoringEC2 bool
+	APIWhitelist          adapter.APIWhitelist
+	GuestUpdateEnabled    bool
+	InstallationName      string
+	DeleteLoggingBucket   bool
+	OIDC                  cloudconfig.OIDCConfig
+	ProjectName           string
 }
 
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
@@ -284,7 +285,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 				SubnetList: config.APIWhitelist.SubnetList,
 			},
 
-			InstallationName: config.InstallationName,
+			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
+			InstallationName:      config.InstallationName,
 		}
 
 		ops, err := cloudformationresource.New(c)

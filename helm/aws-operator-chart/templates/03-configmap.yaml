@@ -14,6 +14,7 @@ data:
         loggingBucket: 
           delete: '{{ .Values.Installation.V1.Provider.AWS.DeleteLoggingBucket }}'
         accessLogsExpiration: '{{ .Values.Installation.V1.Provider.AWS.S3AccessLogsExpiration }}'
+        advancedMonitoringEC2: '{{ .Values.Installation.V1.Provider.AWS.AdvancedMonitoringEC2 }}'
       guest:
         update:
           enabled: {{ .Values.Installation.V1.Guest.Update.Enabled }}

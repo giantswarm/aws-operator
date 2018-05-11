@@ -124,9 +124,11 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		MasterInstanceResourceName: key.MasterInstanceResourceName(customObject),
 		MasterInstanceType:         key.MasterInstanceType(customObject),
 		MasterCloudConfigVersion:   cloudconfig.MasterCloudConfigVersion,
+		MasterInstanceMonitoring:   false,
 
 		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
 		WorkerImageID:            imageID,
+		WorkerInstanceMonitoring: true,
 		WorkerInstanceType:       key.WorkerInstanceType(customObject),
 		WorkerCloudConfigVersion: cloudconfig.WorkerCloudConfigVersion,
 
@@ -144,6 +146,7 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
 	}
+	cfg.AdvancedMonitoringEC2 = true
 	newResource, err := New(cfg)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
@@ -184,6 +187,10 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Fatal("MasterImageID output element not found")
 	}
+	if !strings.Contains(body, key.MasterInstanceMonitoring+": true") {
+		fmt.Println(body)
+		t.Fatal("MasterInstanceMonitoring output element not found")
+	}
 	if !strings.Contains(body, key.MasterInstanceTypeKey+":") {
 		fmt.Println(body)
 		t.Fatal("MasterInstanceType output element not found")
@@ -207,6 +214,10 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 	if !strings.Contains(body, key.WorkerCloudConfigVersionKey+":") {
 		fmt.Println(body)
 		t.Fatal("worker CloudConfig version output element not found")
+	}
+	if !strings.Contains(body, key.WorkerInstanceMonitoring+": true") {
+		fmt.Println(body)
+		t.Fatal("WorkerInstanceMonitoring output element not found")
 	}
 
 	if !strings.Contains(body, "Value: "+cloudconfig.MasterCloudConfigVersion) {
