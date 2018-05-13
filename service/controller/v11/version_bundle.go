@@ -19,6 +19,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Added support for advanced monitoring in EC2.",
 				Kind:        versionbundle.KindAdded,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Added Kubernetes API server whitelisting for NAT gateway EIPs.",
+				Kind:        versionbundle.KindAdded,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
