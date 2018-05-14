@@ -27,11 +27,7 @@ func (a *autoScalingGroupAdapter) getAutoScalingGroup(cfg Config) error {
 	}
 
 	a.WorkerAZ = key.AvailabilityZone(cfg.CustomObject)
-	if workers == 1 {
-		a.ASGMaxSize = workers + 1
-	} else {
-		a.ASGMaxSize = workers
-	}
+	a.ASGMaxSize = workers + 1
 	a.ASGMinSize = workers
 	a.MaxBatchSize = workerCountRatio(workers, asgMaxBatchSizeRatio)
 	a.MinInstancesInService = workerCountRatio(workers, asgMinInstancesRatio)
