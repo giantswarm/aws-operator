@@ -27,6 +27,7 @@ type Config struct {
 
 	// Settings.
 	AccessLogsExpiration int
+	DeleteLoggingBucket  bool
 	InstallationName     string
 }
 
@@ -50,6 +51,7 @@ type Resource struct {
 
 	// Settings.
 	accessLogsExpiration int
+	deleteLoggingBucket  bool
 	installationName     string
 }
 
@@ -80,6 +82,7 @@ func New(config Config) (*Resource, error) {
 		// Settings.
 		accessLogsExpiration: config.AccessLogsExpiration,
 		installationName:     config.InstallationName,
+		deleteLoggingBucket:  config.DeleteLoggingBucket,
 	}
 
 	return newResource, nil
@@ -126,4 +129,8 @@ func (r *Resource) getS3BucketTags(customObject v1alpha1.AWSConfig) []*s3.Tag {
 	}
 
 	return s3Tags
+}
+
+func (r *Resource) canBeDeleted(bucket BucketState) bool {
+	return !bucket.IsLoggingBucket || bucket.IsLoggingBucket && r.deleteLoggingBucket
 }

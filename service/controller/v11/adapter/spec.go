@@ -85,9 +85,11 @@ type StackState struct {
 	MasterInstanceType         string
 	MasterInstanceResourceName string
 	MasterCloudConfigVersion   string
+	MasterInstanceMonitoring   bool
 
 	WorkerCount              string
 	WorkerImageID            string
+	WorkerInstanceMonitoring bool
 	WorkerInstanceType       string
 	WorkerCloudConfigVersion string
 
@@ -107,6 +109,7 @@ type CFClient interface {
 
 // EC2Client describes the methods required to be implemented by a EC2 AWS client.
 type EC2Client interface {
+	DescribeAddresses(*ec2.DescribeAddressesInput) (*ec2.DescribeAddressesOutput, error)
 	DescribeSecurityGroups(*ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error)
 	DescribeSubnets(*ec2.DescribeSubnetsInput) (*ec2.DescribeSubnetsOutput, error)
 	DescribeRouteTables(*ec2.DescribeRouteTablesInput) (*ec2.DescribeRouteTablesOutput, error)
