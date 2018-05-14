@@ -7,6 +7,7 @@ const AutoScalingGroup = `{{define "autoscaling_group"}}
       VPCZoneIdentifier:
         - !Ref PrivateSubnet
       AvailabilityZones: [{{ .WorkerAZ }}]
+      DesiredCapacity: {{ .ASGMinSize }}
       MinSize: {{ .ASGMinSize }}
       MaxSize: {{ .ASGMaxSize }}
       LaunchConfigurationName: !Ref {{ .ASGType }}LaunchConfiguration

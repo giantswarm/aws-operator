@@ -34,6 +34,28 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 			expectedError: true,
 		},
 		{
+			description: "having one worker leaves 1 worker head room for updates",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: defaultCluster,
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						AZ: "myaz",
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{
+							{},
+						},
+					},
+				},
+			},
+			expectedError:                  false,
+			expectedAZ:                     "myaz",
+			expectedASGMaxSize:             2, // headroom is +1
+			expectedASGMinSize:             1,
+			expectedHealthCheckGracePeriod: gracePeriodSeconds,
+			expectedMaxBatchSize:           "1",
+			expectedMinInstancesInService:  "1",
+			expectedRollingUpdatePauseTime: rollingUpdatePauseTime,
+		},
+		{
 			description: "basic matching, all fields present",
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
@@ -50,7 +72,7 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 			},
 			expectedError:                  false,
 			expectedAZ:                     "myaz",
-			expectedASGMaxSize:             3,
+			expectedASGMaxSize:             4,
 			expectedASGMinSize:             3,
 			expectedHealthCheckGracePeriod: gracePeriodSeconds,
 			expectedMaxBatchSize:           "1",
@@ -78,7 +100,7 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 			},
 			expectedError:                  false,
 			expectedAZ:                     "myaz",
-			expectedASGMaxSize:             7,
+			expectedASGMaxSize:             8,
 			expectedASGMinSize:             7,
 			expectedHealthCheckGracePeriod: gracePeriodSeconds,
 			expectedMaxBatchSize:           "2",
