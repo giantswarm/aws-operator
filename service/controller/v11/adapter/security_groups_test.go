@@ -178,3 +178,315 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 		})
 	}
 }
+
+func TestAdapterSecurityGroupsKubernetesAPIRules(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		description            string
+		customObject           v1alpha1.AWSConfig
+		apiWhitelistingEnabled bool
+		apiWhitelistSubnets    string
+		elasticIPs             []string
+		hostClusterCIDR        string
+		expectedError          bool
+		expectedRules          []securityGroupRule
+	}{
+		{
+			description: "case 0: API whitelisting disabled",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "test-cluster",
+						Kubernetes: v1alpha1.ClusterKubernetes{
+							API: v1alpha1.ClusterKubernetesAPI{
+								SecurePort: 443,
+							},
+						},
+					},
+				},
+			},
+			apiWhitelistingEnabled: false,
+			expectedError:          false,
+			expectedRules: []securityGroupRule{
+				{
+					Port:       443,
+					Protocol:   "tcp",
+					SourceCIDR: "0.0.0.0/0",
+				},
+			},
+		},
+		{
+			description: "case 1: API whitelisting enabled with default rules",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						VPC: v1alpha1.AWSConfigSpecAWSVPC{
+							CIDR: "10.1.1.0/24",
+						},
+					},
+					Cluster: v1alpha1.Cluster{
+						ID: "test-cluster",
+						Kubernetes: v1alpha1.ClusterKubernetes{
+							API: v1alpha1.ClusterKubernetesAPI{
+								SecurePort: 443,
+							},
+						},
+					},
+				},
+			},
+			apiWhitelistingEnabled: true,
+			hostClusterCIDR:        "10.0.0.0/16",
+			expectedError:          false,
+			expectedRules: []securityGroupRule{
+				{
+					Port:       443,
+					Protocol:   "tcp",
+					SourceCIDR: "10.0.0.0/16",
+				},
+				{
+					Port:       443,
+					Protocol:   "tcp",
+					SourceCIDR: "10.1.1.0/24",
+				},
+			},
+		},
+		{
+			description: "case 2: API whitelisting enabled with single configured subnet",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						VPC: v1alpha1.AWSConfigSpecAWSVPC{
+							CIDR: "10.1.1.0/24",
+						},
+					},
+					Cluster: v1alpha1.Cluster{
+						ID: "test-cluster",
+						Kubernetes: v1alpha1.ClusterKubernetes{
+							API: v1alpha1.ClusterKubernetesAPI{
+								SecurePort: 443,
+							},
+						},
+					},
+				},
+			},
+			apiWhitelistingEnabled: true,
+			apiWhitelistSubnets:    "212.145.136.84/32",
+			hostClusterCIDR:        "10.0.0.0/16",
+			expectedError:          false,
+			expectedRules: []securityGroupRule{
+				{
+					Port:       443,
+					Protocol:   "tcp",
+					SourceCIDR: "10.0.0.0/16",
+				},
+				{
+					Port:       443,
+					Protocol:   "tcp",
+					SourceCIDR: "10.1.1.0/24",
+				},
+				{
+					Port:       443,
+					Protocol:   "tcp",
+					SourceCIDR: "212.145.136.84/32",
+				},
+			},
+		},
+		{
+			description: "case 3: API whitelisting enabled with multiple configured subnets",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						VPC: v1alpha1.AWSConfigSpecAWSVPC{
+							CIDR: "10.1.1.0/24",
+						},
+					},
+					Cluster: v1alpha1.Cluster{
+						ID: "test-cluster",
+						Kubernetes: v1alpha1.ClusterKubernetes{
+							API: v1alpha1.ClusterKubernetesAPI{
+								SecurePort: 443,
+							},
+						},
+					},
+				},
+			},
+			apiWhitelistingEnabled: true,
+			apiWhitelistSubnets:    "212.145.136.84/32,192.168.1.0/24,10.2.2.0/24",
+			hostClusterCIDR:        "10.0.0.0/16",
+			expectedError:          false,
+			expectedRules: []securityGroupRule{
+				{
+					Port:       443,
+					Protocol:   "tcp",
+					SourceCIDR: "10.0.0.0/16",
+				},
+				{
+					Port:       443,
+					Protocol:   "tcp",
+					SourceCIDR: "10.1.1.0/24",
+				},
+				{
+					Port:       443,
+					Protocol:   "tcp",
+					SourceCIDR: "212.145.136.84/32",
+				},
+				{
+					Port:       443,
+					Protocol:   "tcp",
+					SourceCIDR: "192.168.1.0/24",
+				},
+				{
+					Port:       443,
+					Protocol:   "tcp",
+					SourceCIDR: "10.2.2.0/24",
+				},
+			},
+		},
+		{
+			description: "case 4: API whitelisting enabled with NAT gateway EIPs",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						VPC: v1alpha1.AWSConfigSpecAWSVPC{
+							CIDR: "10.1.1.0/24",
+						},
+					},
+					Cluster: v1alpha1.Cluster{
+						ID: "test-cluster",
+						Kubernetes: v1alpha1.ClusterKubernetes{
+							API: v1alpha1.ClusterKubernetesAPI{
+								SecurePort: 443,
+							},
+						},
+					},
+				},
+			},
+			apiWhitelistingEnabled: true,
+			elasticIPs: []string{
+				"21.1.136.42",
+				"21.2.136.84",
+			},
+			hostClusterCIDR: "10.0.0.0/16",
+			expectedError:   false,
+			expectedRules: []securityGroupRule{
+				{
+					Port:       443,
+					Protocol:   "tcp",
+					SourceCIDR: "10.0.0.0/16",
+				},
+				{
+					Port:       443,
+					Protocol:   "tcp",
+					SourceCIDR: "10.1.1.0/24",
+				},
+				{
+					Port:       443,
+					Protocol:   "tcp",
+					SourceCIDR: "21.1.136.42/32",
+				},
+				{
+					Port:       443,
+					Protocol:   "tcp",
+					SourceCIDR: "21.2.136.84/32",
+				},
+			},
+		},
+		{
+			description: "case 5: API whitelisting enabled with subnets and NAT gateway EIPs",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						VPC: v1alpha1.AWSConfigSpecAWSVPC{
+							CIDR: "10.1.1.0/24",
+						},
+					},
+					Cluster: v1alpha1.Cluster{
+						ID: "test-cluster",
+						Kubernetes: v1alpha1.ClusterKubernetes{
+							API: v1alpha1.ClusterKubernetesAPI{
+								SecurePort: 443,
+							},
+						},
+					},
+				},
+			},
+			apiWhitelistingEnabled: true,
+			apiWhitelistSubnets:    "212.145.136.84/32,192.168.1.1/24",
+			elasticIPs: []string{
+				"21.1.136.42",
+				"21.2.136.84",
+			},
+			hostClusterCIDR: "10.0.0.0/16",
+			expectedError:   false,
+			expectedRules: []securityGroupRule{
+				{
+					Port:       443,
+					Protocol:   "tcp",
+					SourceCIDR: "10.0.0.0/16",
+				},
+				{
+					Port:       443,
+					Protocol:   "tcp",
+					SourceCIDR: "10.1.1.0/24",
+				},
+				{
+					Port:       443,
+					Protocol:   "tcp",
+					SourceCIDR: "212.145.136.84/32",
+				},
+				{
+					Port:       443,
+					Protocol:   "tcp",
+					SourceCIDR: "192.168.1.1/24",
+				},
+				{
+					Port:       443,
+					Protocol:   "tcp",
+					SourceCIDR: "21.1.136.42/32",
+				},
+				{
+					Port:       443,
+					Protocol:   "tcp",
+					SourceCIDR: "21.2.136.84/32",
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		hostClients := Clients{
+			EC2: &EC2ClientMock{
+				elasticIPs: tc.elasticIPs,
+			},
+		}
+
+		t.Run(tc.description, func(t *testing.T) {
+			cfg := Config{
+				APIWhitelist: APIWhitelist{
+					Enabled:    tc.apiWhitelistingEnabled,
+					SubnetList: tc.apiWhitelistSubnets,
+				},
+				CustomObject: tc.customObject,
+				Clients:      Clients{},
+				HostClients:  hostClients,
+			}
+
+			rules, err := getKubernetesAPIRules(cfg, tc.hostClusterCIDR)
+			if tc.expectedError && err == nil {
+				t.Fatalf("expected error didn't happen")
+			}
+
+			if !tc.expectedError && err != nil {
+				t.Fatalf("unexpected error %v", err)
+			}
+
+			if len(tc.expectedRules) != len(rules) {
+				t.Fatalf("expected %d master rules got %d", len(tc.expectedRules), len(rules))
+			}
+
+			if !reflect.DeepEqual(tc.expectedRules, rules) {
+				t.Fatalf("expected master rules %v got %v", tc.expectedRules, rules)
+			}
+		})
+	}
+}
