@@ -23,6 +23,25 @@ type EC2ClientMock struct {
 	vpcCIDR             string
 	unexistingVPC       bool
 	peeringID           string
+	elasticIPs          []string
+}
+
+func (e *EC2ClientMock) DescribeAddresses(input *ec2.DescribeAddressesInput) (*ec2.DescribeAddressesOutput, error) {
+	addresses := make([]*ec2.Address, 0)
+
+	for _, eip := range e.elasticIPs {
+		address := &ec2.Address{
+			PublicIp: aws.String(eip),
+		}
+
+		addresses = append(addresses, address)
+	}
+
+	output := &ec2.DescribeAddressesOutput{
+		Addresses: addresses,
+	}
+
+	return output, nil
 }
 
 func (e *EC2ClientMock) DescribeSecurityGroups(input *ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error) {
