@@ -27,8 +27,6 @@ const (
 	awsResourceValuesFile = "/tmp/aws-operator-values.yaml"
 	credentialName        = "credential-default"
 	awsOperatorArnKey     = "aws.awsoperator.arn"
-	// TODO: store the arn in a safe place and grab it on runtime. CircleCI env?
-	awsOperatorArnValue = "arn:aws:iam::..."
 )
 
 func HostPeerVPC(c *awsclient.Client, g *framework.Guest, h *framework.Host) error {
@@ -214,7 +212,7 @@ func installCredential(h *framework.Host) error {
 				Name: credentialName,
 			},
 			Data: map[string][]byte{
-				awsOperatorArnKey: []byte(awsOperatorArnValue),
+				awsOperatorArnKey: []byte(env.GuestAWSArn()),
 			},
 		}
 
