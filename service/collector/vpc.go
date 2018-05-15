@@ -3,6 +3,7 @@ package collector
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -45,17 +46,28 @@ var (
 func (c *Collector) collectVPCs(ch chan<- prometheus.Metric) {
 	c.logger.Log("level", "debug", "message", "collecting metrics for vpcs")
 
-	resp, err := c.awsClients.EC2.DescribeVpcs(&ec2.DescribeVpcsInput{})
+	i := &ec2.DescribeVpcsInput{
+		Filters: []*ec2.Filter{
+			{
+				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyInstallation)),
+				Values: []*string{
+					aws.String(c.installationName),
+				},
+			},
+		},
+	}
+	o, err := c.awsClients.EC2.DescribeVpcs(i)
 	if err != nil {
 		c.logger.Log("level", "error", "message", "could not list vpcs", "stack", fmt.Sprintf("%#v", err))
 	}
 
-	for _, vpc := range resp.Vpcs {
+	for _, vpc := range o.Vpcs {
 		cluster := ""
 		installation := ""
 		name := ""
 		organization := ""
 		stackName := ""
+
 		for _, tag := range vpc.Tags {
 			if *tag.Key == ClusterTag {
 				cluster = *tag.Value

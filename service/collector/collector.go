@@ -11,19 +11,22 @@ import (
 const (
 	Namespace = "aws_operator"
 
-	gaugeValue = float64(1)
+	gaugeValue         float64 = 1
+	tagKeyInstallation string  = "giantswarm.io/installation"
 )
 
 type Config struct {
 	Logger micrologger.Logger
 
-	AwsConfig awsutil.Config
+	AwsConfig        awsutil.Config
+	InstallationName string
 }
 
 type Collector struct {
 	logger micrologger.Logger
 
-	awsClients awsutil.Clients
+	awsClients       awsutil.Clients
+	installationName string
 }
 
 func New(config Config) (*Collector, error) {
@@ -35,13 +38,17 @@ func New(config Config) (*Collector, error) {
 	if config.AwsConfig == emptyAwsConfig {
 		return nil, microerror.Maskf(invalidConfigError, "%T.AwsConfig must not be empty", config)
 	}
+	if config.InstallationName == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
+	}
 
 	awsClients := awsutil.NewClients(config.AwsConfig)
 
 	c := &Collector{
 		logger: config.Logger,
 
-		awsClients: awsClients,
+		awsClients:       awsClients,
+		installationName: config.InstallationName,
 	}
 
 	return c, nil

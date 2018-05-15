@@ -47,6 +47,7 @@ type Service struct {
 	Healthz *healthz.Service
 	Version *version.Service
 
+	metricsCollector  *collector.Collector
 	bootOnce          sync.Once
 	clusterController *controller.Cluster
 	drainerController *controller.Drainer
@@ -200,20 +201,19 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var metricsCollector *collector.Collector
 	{
-		var awsCollector *collector.Collector
+		c := collector.Config{
+			Logger: config.Logger,
 
-		collectorConfig := collector.Config{
-			AwsConfig: awsConfig,
-			Logger:    config.Logger,
+			AwsConfig:        awsConfig,
+			InstallationName: config.Viper.GetString(config.Flag.Service.Installation.Name),
 		}
 
-		awsCollector, err = collector.New(collectorConfig)
+		metricsCollector, err = collector.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-
-		prometheus.MustRegister(awsCollector)
 	}
 
 	var healthzService *healthz.Service
@@ -244,22 +244,25 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	newService := &Service{
+	s := &Service{
 		Alerter: alerterService,
 		Healthz: healthzService,
 		Version: versionService,
 
+		metricsCollector:  metricsCollector,
 		bootOnce:          sync.Once{},
 		clusterController: clusterController,
 		drainerController: drainerController,
 	}
 
-	return newService, nil
+	return s, nil
 }
 
 func (s *Service) Boot(ctx context.Context) {
 	s.bootOnce.Do(func() {
 		s.Alerter.StartAlerts()
+
+		prometheus.MustRegister(s.metricsCollector)
 
 		go s.clusterController.Boot()
 		go s.drainerController.Boot()
