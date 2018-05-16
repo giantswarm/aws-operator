@@ -67,18 +67,13 @@ func (c *Collector) collectVPCs(ch chan<- prometheus.Metric) {
 			fmt.Printf("\n")
 			for _, filter := range filters {
 				fmt.Printf("%#v\n", filter.String())
-				fmt.Printf("%#v\n", *filter.Name)
-				fmt.Printf("%#v\n", *filter.Name)
-				for _, v := range filter.Values {
-					fmt.Printf("%#v\n", *v)
-				}
 			}
+			fmt.Printf("gaugeValue: %#v\n", gaugeValue)
+			fmt.Printf("old gaugeValue: %#v\n", float64(1))
 			fmt.Printf("c.installationName: %#v\n", c.installationName)
 			fmt.Printf("vpc.ID: %#v\n", *vpc.VpcId)
 			for _, tag := range vpc.Tags {
 				fmt.Printf("tag: %#v\n", tag)
-				fmt.Printf("tag.key: %#v\n", *tag.Key)
-				fmt.Printf("tag.val: %#v\n", *tag.Value)
 				if *tag.Key == ClusterTag {
 					cluster = *tag.Value
 				}
