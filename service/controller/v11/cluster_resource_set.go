@@ -52,6 +52,7 @@ type ClusterResourceSetConfig struct {
 	DeleteLoggingBucket   bool
 	OIDC                  cloudconfig.OIDCConfig
 	ProjectName           string
+	Route53Enabled        bool
 }
 
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
@@ -287,6 +288,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
 			InstallationName:      config.InstallationName,
+			Route53Enabled:        config.Route53Enabled,
 		}
 
 		ops, err := cloudformationresource.New(c)

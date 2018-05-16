@@ -15,6 +15,7 @@ type recordSetsAdapter struct {
 	IngressELBAliasHostedZone string
 	IngressELBDomain          string
 	IngressWildcardELBDomain  string
+	Route53Enabled            bool
 }
 
 func (r *recordSetsAdapter) getRecordSets(cfg Config) error {
@@ -25,6 +26,7 @@ func (r *recordSetsAdapter) getRecordSets(cfg Config) error {
 	r.IngressELBHostedZones = cfg.CustomObject.Spec.AWS.Ingress.HostedZones
 	r.IngressELBDomain = cfg.CustomObject.Spec.Cluster.Kubernetes.IngressController.Domain
 	r.IngressWildcardELBDomain = cfg.CustomObject.Spec.Cluster.Kubernetes.IngressController.WildcardDomain
+	r.Route53Enabled = cfg.Route53Enabled
 
 	return nil
 }

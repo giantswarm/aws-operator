@@ -36,8 +36,9 @@ type Config struct {
 	Logger       micrologger.Logger
 	Service      *cloudformationservice.CloudFormation
 
-	InstallationName      string
 	AdvancedMonitoringEC2 bool
+	InstallationName      string
+	Route53Enabled        bool
 }
 
 // Resource implements the cloudformation resource.
@@ -51,6 +52,7 @@ type Resource struct {
 
 	installationName string
 	monitoring       bool
+	route53Enabled   bool
 }
 
 // New creates a new configured cloudformation resource.
@@ -81,6 +83,7 @@ func New(config Config) (*Resource, error) {
 
 		installationName: config.InstallationName,
 		monitoring:       config.AdvancedMonitoringEC2,
+		route53Enabled:   config.Route53Enabled,
 	}
 
 	return newService, nil

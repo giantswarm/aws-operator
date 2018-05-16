@@ -24,6 +24,7 @@ func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig, sta
 		HostClients:      *r.hostClients,
 		InstallationName: r.installationName,
 		HostAccountID:    hostAccountID,
+		Route53Enabled:   r.route53Enabled,
 		StackState: adapter.StackState{
 			Name: stackState.Name,
 

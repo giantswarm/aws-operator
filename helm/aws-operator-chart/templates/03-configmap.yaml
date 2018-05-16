@@ -10,11 +10,13 @@ data:
         address: 'http://0.0.0.0:8000'
     service:
       aws:
-        region: '{{ .Values.Installation.V1.Provider.AWS.Region }}'
-        loggingBucket: 
-          delete: '{{ .Values.Installation.V1.Provider.AWS.DeleteLoggingBucket }}'
         accessLogsExpiration: '{{ .Values.Installation.V1.Provider.AWS.S3AccessLogsExpiration }}'
         advancedMonitoringEC2: '{{ .Values.Installation.V1.Provider.AWS.AdvancedMonitoringEC2 }}'
+        loggingBucket:
+          delete: '{{ .Values.Installation.V1.Provider.AWS.DeleteLoggingBucket }}'
+        region: '{{ .Values.Installation.V1.Provider.AWS.Region }}'
+        route53:
+          enabled: '{{ .Values.Installation.V1.Provider.AWS.Route53.Enabled }}'
       guest:
         update:
           enabled: {{ .Values.Installation.V1.Guest.Update.Enabled }}

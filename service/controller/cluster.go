@@ -58,6 +58,7 @@ type ClusterConfig struct {
 	OIDC                  ClusterConfigOIDC
 	ProjectName           string
 	PubKeyFile            string
+	Route53Enabled        bool
 }
 
 type ClusterConfigAWSConfig struct {
@@ -559,6 +560,7 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
 			DeleteLoggingBucket:   config.DeleteLoggingBucket,
 			GuestUpdateEnabled:    config.GuestUpdateEnabled,
+			Route53Enabled:        config.Route53Enabled,
 			InstallationName:      config.InstallationName,
 			OIDC: v11cloudconfig.OIDCConfig{
 				ClientID:      config.OIDC.ClientID,
