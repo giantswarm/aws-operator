@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
@@ -215,6 +216,7 @@ func New(config Config) (*Service, error) {
 			return nil, microerror.Mask(err)
 		}
 	}
+	fmt.Printf("%#v\n", metricsCollector)
 
 	var healthzService *healthz.Service
 	{
@@ -262,6 +264,7 @@ func (s *Service) Boot(ctx context.Context) {
 	s.bootOnce.Do(func() {
 		s.Alerter.StartAlerts()
 
+		fmt.Printf("%#v\n", s.metricsCollector)
 		prometheus.MustRegister(s.metricsCollector)
 
 		go s.clusterController.Boot()

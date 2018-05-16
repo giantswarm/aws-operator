@@ -62,18 +62,7 @@ func (c *Collector) collectVPCs(ch chan<- prometheus.Metric) {
 			organization := ""
 			stackName := ""
 
-			fmt.Printf("\n")
-			fmt.Printf("\n")
-			fmt.Printf("\n")
-			for _, filter := range filters {
-				fmt.Printf("%#v\n", filter.String())
-			}
-			fmt.Printf("gaugeValue: %#v\n", gaugeValue)
-			fmt.Printf("old gaugeValue: %#v\n", float64(1))
-			fmt.Printf("c.installationName: %#v\n", c.installationName)
-			fmt.Printf("vpc.ID: %#v\n", *vpc.VpcId)
 			for _, tag := range vpc.Tags {
-				fmt.Printf("tag: %#v\n", tag)
 				if *tag.Key == ClusterTag {
 					cluster = *tag.Value
 				}
@@ -91,6 +80,11 @@ func (c *Collector) collectVPCs(ch chan<- prometheus.Metric) {
 				}
 			}
 
+			fmt.Printf("\n")
+			fmt.Printf("\n")
+			fmt.Printf("\n")
+			fmt.Printf("vpc.ID: %#v\n", *vpc.VpcId)
+
 			ch <- prometheus.MustNewConstMetric(
 				vpcs,
 				prometheus.GaugeValue,
@@ -104,6 +98,8 @@ func (c *Collector) collectVPCs(ch chan<- prometheus.Metric) {
 				stackName,
 				*vpc.State,
 			)
+
+			fmt.Printf("metric written to collector channel\n")
 		}
 	}
 
