@@ -56,12 +56,14 @@ func (c *Collector) collectVPCs(ch chan<- prometheus.Metric) {
 	}
 
 	for _, vpc := range o.Vpcs {
-		c.logger.Log("level", "debug", "message", fmt.Sprintf("checking if VPC '%s' belongs to current installation", *vpc.VpcId))
-		if !containsInstallationTag(vpc.Tags, c.installationName) {
-			c.logger.Log("level", "debug", "message", fmt.Sprintf("VPC '%s' does not belong to current installation", *vpc.VpcId))
+		installationName := installationFromTags(vpc.Tags)
+
+		c.logger.Log("level", "debug", "message", fmt.Sprintf("VPC '%s' belongs to installation '%s'", *vpc.VpcId, installationName))
+		if installationName != c.installationName {
+			c.logger.Log("level", "debug", "message", fmt.Sprintf("VPC '%s' is being skipped for metrics collection", *vpc.VpcId))
 			continue
 		}
-		c.logger.Log("level", "debug", "message", fmt.Sprintf("VPC '%s' belongs to current installation", *vpc.VpcId))
+		c.logger.Log("level", "debug", "message", fmt.Sprintf("VPC '%s' is being used for metrics collection", *vpc.VpcId))
 
 		cluster := ""
 		installation := ""
@@ -87,8 +89,6 @@ func (c *Collector) collectVPCs(ch chan<- prometheus.Metric) {
 			}
 		}
 
-		fmt.Printf("emitting metric for %#v\n", vpc)
-
 		ch <- prometheus.MustNewConstMetric(
 			vpcsDesc,
 			prometheus.GaugeValue,
@@ -107,19 +107,18 @@ func (c *Collector) collectVPCs(ch chan<- prometheus.Metric) {
 	c.logger.Log("level", "debug", "message", "finished collecting metrics for vpcs")
 }
 
-func containsInstallationTag(tags []*ec2.Tag, n string) bool {
+func installationFromTags(tags []*ec2.Tag) string {
 	for _, t := range tags {
-		if *t.Key != InstallationTag {
-			continue
+		if *t.Key == InstallationTag {
+			return *t.Value
 		}
-		// TODO this is the old tag which should be removed at some point.
-		if *t.Key != "Installation" {
-			continue
-		}
-		if *t.Value == n {
-			return true
+
+		// TODO the old hard coded tag "Installation" should be removed at some
+		// point. Then we can get rid of this extra check.
+		if *t.Key == "Installation" {
+			return *t.Value
 		}
 	}
 
-	return false
+	return ""
 }
