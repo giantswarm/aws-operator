@@ -8,13 +8,6 @@ import (
 	"github.com/giantswarm/micrologger"
 )
 
-const (
-	Namespace = "aws_operator"
-
-	gaugeValue         float64 = 1
-	tagKeyInstallation string  = "giantswarm.io/installation"
-)
-
 type Config struct {
 	Logger micrologger.Logger
 
@@ -55,7 +48,7 @@ func New(config Config) (*Collector, error) {
 }
 
 func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
-	ch <- vpcs
+	ch <- vpcsDesc
 }
 
 func (c *Collector) Collect(ch chan<- prometheus.Metric) {
