@@ -56,9 +56,12 @@ func (c *Collector) collectVPCs(ch chan<- prometheus.Metric) {
 	}
 
 	for _, vpc := range o.Vpcs {
+		c.logger.Log("level", "debug", "message", fmt.Sprintf("checking if VPC '%s' belongs to current installation", *vpc.VpcId))
 		if !containsInstallationTag(vpc.Tags, c.installationName) {
+			c.logger.Log("level", "debug", "message", fmt.Sprintf("VPC '%s' does not belong to current installation", *vpc.VpcId))
 			continue
 		}
+		c.logger.Log("level", "debug", "message", fmt.Sprintf("VPC '%s' belongs to current installation", *vpc.VpcId))
 
 		cluster := ""
 		installation := ""
@@ -83,6 +86,8 @@ func (c *Collector) collectVPCs(ch chan<- prometheus.Metric) {
 				stackName = *tag.Value
 			}
 		}
+
+		fmt.Printf("emitting metric for %#v\n", vpc)
 
 		ch <- prometheus.MustNewConstMetric(
 			vpcsDesc,
