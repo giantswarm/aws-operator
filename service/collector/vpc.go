@@ -54,6 +54,14 @@ func (c *Collector) collectVPCs(ch chan<- prometheus.Metric) {
 					aws.String(c.installationName),
 				},
 			},
+			// TODO this is the deprecated tag we are only still using for old
+			// clusters. This filter condition should be removed at some point.
+			{
+				Name: aws.String("tag:Installation"),
+				Values: []*string{
+					aws.String(c.installationName),
+				},
+			},
 		},
 	}
 	o, err := c.awsClients.EC2.DescribeVpcs(i)
