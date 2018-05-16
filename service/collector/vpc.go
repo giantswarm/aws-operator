@@ -3,17 +3,20 @@ package collector
 import (
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
 const (
+	Namespace = "aws_operator"
+
 	ClusterTag      = "giantswarm.io/cluster"
 	InstallationTag = "giantswarm.io/installation"
 	NameTag         = "Name"
 	OrganizationTag = "giantswarm.io/organization"
 	StackNameTag    = "aws:cloudformation:stack-name"
+
+	GaugeValue float64 = 1
 
 	CidrLabel         = "cidr"
 	ClusterLabel      = "cluster_id"
@@ -26,7 +29,7 @@ const (
 )
 
 var (
-	vpcs *prometheus.Desc = prometheus.NewDesc(
+	vpcsDesc *prometheus.Desc = prometheus.NewDesc(
 		prometheus.BuildFQName(Namespace, "", "vpc_info"),
 		"VPC information.",
 		[]string{
@@ -46,22 +49,22 @@ var (
 func (c *Collector) collectVPCs(ch chan<- prometheus.Metric) {
 	c.logger.Log("level", "debug", "message", "collecting metrics for vpcs")
 
-	i := &ec2.DescribeVpcsInput{
-		Filters: []*ec2.Filter{
-			{
-				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyInstallation)),
-				Values: []*string{
-					aws.String(c.installationName),
-				},
-			},
-		},
-	}
+	i := &ec2.DescribeVpcsInput{}
 	o, err := c.awsClients.EC2.DescribeVpcs(i)
 	if err != nil {
 		c.logger.Log("level", "error", "message", "could not list vpcs", "stack", fmt.Sprintf("%#v", err))
 	}
 
 	for _, vpc := range o.Vpcs {
+		installationName := installationFromTags(vpc.Tags)
+
+		c.logger.Log("level", "debug", "message", fmt.Sprintf("VPC '%s' belongs to installation '%s'", *vpc.VpcId, installationName))
+		if installationName != c.installationName {
+			c.logger.Log("level", "debug", "message", fmt.Sprintf("VPC '%s' is being skipped for metrics collection", *vpc.VpcId))
+			continue
+		}
+		c.logger.Log("level", "debug", "message", fmt.Sprintf("VPC '%s' is being used for metrics collection", *vpc.VpcId))
+
 		cluster := ""
 		installation := ""
 		name := ""
@@ -87,9 +90,9 @@ func (c *Collector) collectVPCs(ch chan<- prometheus.Metric) {
 		}
 
 		ch <- prometheus.MustNewConstMetric(
-			vpcs,
+			vpcsDesc,
 			prometheus.GaugeValue,
-			gaugeValue,
+			GaugeValue,
 			*vpc.CidrBlock,
 			cluster,
 			*vpc.VpcId,
@@ -102,4 +105,20 @@ func (c *Collector) collectVPCs(ch chan<- prometheus.Metric) {
 	}
 
 	c.logger.Log("level", "debug", "message", "finished collecting metrics for vpcs")
+}
+
+func installationFromTags(tags []*ec2.Tag) string {
+	for _, t := range tags {
+		if *t.Key == InstallationTag {
+			return *t.Value
+		}
+
+		// TODO the old hard coded tag "Installation" should be removed at some
+		// point. Then we can get rid of this extra check.
+		if *t.Key == "Installation" {
+			return *t.Value
+		}
+	}
+
+	return ""
 }
