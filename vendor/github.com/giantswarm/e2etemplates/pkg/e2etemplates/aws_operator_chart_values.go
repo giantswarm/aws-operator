@@ -21,6 +21,8 @@ const AWSOperatorChartValues = `Installation:
       AWS:
         Region: ${AWS_REGION}
         DeleteLoggingBucket: true
+        Route53:
+          Enabled: true
     Secret:
       AWSOperator:
         IDRSAPub: ${IDRSA_PUB}
