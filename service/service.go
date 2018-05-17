@@ -141,8 +141,9 @@ func New(config Config) (*Service, error) {
 				GroupsClaim:   config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.GroupsClaim),
 			},
 
-			ProjectName: config.ProjectName,
-			PubKeyFile:  config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile),
+			ProjectName:    config.ProjectName,
+			PubKeyFile:     config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile),
+			Route53Enabled: config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 		}
 
 		clusterController, err = controller.NewCluster(c)

@@ -66,6 +66,7 @@ type Config struct {
 	HostAccountID    string
 	HostClients      Clients
 	InstallationName string
+	Route53Enabled   bool
 	StackState       StackState
 }
 
