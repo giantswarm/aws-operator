@@ -390,6 +390,7 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 	*/
 	imageIDs := map[string]string{
 		"ap-southeast-1": "ami-41461c3d",
+		"cn-north-1":     "ami-39ee3154",
 		"eu-central-1":   "ami-604e118b",
 		"eu-west-1":      "ami-34237c4d",
 		"us-west-2":      "ami-b41377cc",
