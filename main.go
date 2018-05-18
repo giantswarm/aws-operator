@@ -125,6 +125,8 @@ func mainError() error {
 
 	daemonCommand.PersistentFlags().Bool(f.Service.AWS.Route53.Enabled, true, "Should Route53 be enabled.")
 
+	daemonCommand.PersistentFlags().String(f.Service.AWS.PodInfraContainerImage, "", "Image to be used for the pause container. If empty, default image from gcr.io/google_containers/pause-amd64 is used.")
+
 	daemonCommand.PersistentFlags().String(f.Service.Installation.Name, "", "Installation name for tagging AWS resources.")
 	daemonCommand.PersistentFlags().String(f.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID, "", "OIDC authorization provider ClientID.")
 	daemonCommand.PersistentFlags().String(f.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL, "", "OIDC authorization provider IssuerURL.")

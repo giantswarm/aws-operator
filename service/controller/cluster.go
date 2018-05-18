@@ -47,18 +47,19 @@ type ClusterConfig struct {
 	K8sExtClient apiextensionsclient.Interface
 	Logger       micrologger.Logger
 
-	AccessLogsExpiration  int
-	AdvancedMonitoringEC2 bool
-	APIWhitelist          FrameworkConfigAPIWhitelistConfig
-	DeleteLoggingBucket   bool
-	GuestAWSConfig        ClusterConfigAWSConfig
-	GuestUpdateEnabled    bool
-	HostAWSConfig         ClusterConfigAWSConfig
-	InstallationName      string
-	OIDC                  ClusterConfigOIDC
-	ProjectName           string
-	PubKeyFile            string
-	Route53Enabled        bool
+	AccessLogsExpiration   int
+	AdvancedMonitoringEC2  bool
+	APIWhitelist           FrameworkConfigAPIWhitelistConfig
+	DeleteLoggingBucket    bool
+	GuestAWSConfig         ClusterConfigAWSConfig
+	GuestUpdateEnabled     bool
+	HostAWSConfig          ClusterConfigAWSConfig
+	InstallationName       string
+	OIDC                   ClusterConfigOIDC
+	PodInfraContainerImage string
+	ProjectName            string
+	PubKeyFile             string
+	Route53Enabled         bool
 }
 
 type ClusterConfigAWSConfig struct {
@@ -556,12 +557,13 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 			Logger:             config.Logger,
 			RandomkeysSearcher: randomKeySearcher,
 
-			AccessLogsExpiration:  config.AccessLogsExpiration,
-			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
-			DeleteLoggingBucket:   config.DeleteLoggingBucket,
-			GuestUpdateEnabled:    config.GuestUpdateEnabled,
-			Route53Enabled:        config.Route53Enabled,
-			InstallationName:      config.InstallationName,
+			AccessLogsExpiration:   config.AccessLogsExpiration,
+			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
+			DeleteLoggingBucket:    config.DeleteLoggingBucket,
+			GuestUpdateEnabled:     config.GuestUpdateEnabled,
+			PodInfraContainerImage: config.PodInfraContainerImage,
+			Route53Enabled:         config.Route53Enabled,
+			InstallationName:       config.InstallationName,
 			OIDC: v11cloudconfig.OIDCConfig{
 				ClientID:      config.OIDC.ClientID,
 				IssuerURL:     config.OIDC.IssuerURL,

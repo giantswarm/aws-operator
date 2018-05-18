@@ -29,6 +29,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Added support for disabling Route53.",
 				Kind:        versionbundle.KindAdded,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Added support for making pause container configurable.",
+				Kind:        versionbundle.KindAdded,
+			},
 		},
 		Components: []versionbundle.Component{
 			{

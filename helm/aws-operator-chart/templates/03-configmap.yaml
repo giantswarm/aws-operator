@@ -14,6 +14,7 @@ data:
         advancedMonitoringEC2: '{{ .Values.Installation.V1.Provider.AWS.AdvancedMonitoringEC2 }}'
         loggingBucket:
           delete: '{{ .Values.Installation.V1.Provider.AWS.DeleteLoggingBucket }}'
+        podInfraContainerImage: '{{ .Values.Installation.V1.Provider.AWS.PodInfraContainerImage }}'
         region: '{{ .Values.Installation.V1.Provider.AWS.Region }}'
         route53:
           enabled: '{{ .Values.Installation.V1.Provider.AWS.Route53.Enabled }}'
