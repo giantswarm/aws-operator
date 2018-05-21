@@ -295,6 +295,16 @@ func Region(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.Region
 }
 
+func RegionARN(customObject v1alpha1.AWSConfig) string {
+	regionARN := "aws"
+
+	if customObject.Spec.AWS.Region == "cn-north-1" {
+		regionARN += "-cn"
+	}
+
+	return regionARN
+}
+
 func RoleName(customObject v1alpha1.AWSConfig, profileType string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, RoleNameTemplate)
 }
