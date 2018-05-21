@@ -12,6 +12,7 @@ data:
       aws:
         accessLogsExpiration: '{{ .Values.Installation.V1.Provider.AWS.S3AccessLogsExpiration }}'
         advancedMonitoringEC2: '{{ .Values.Installation.V1.Provider.AWS.AdvancedMonitoringEC2 }}'
+        includeTags: '{{ .Values.Installation.V1.Provider.AWS.IncludeTags }}'
         loggingBucket:
           delete: '{{ .Values.Installation.V1.Provider.AWS.DeleteLoggingBucket }}'
         podInfraContainerImage: '{{ .Values.Installation.V1.Provider.AWS.PodInfraContainerImage }}'
