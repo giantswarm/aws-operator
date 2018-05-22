@@ -24,9 +24,10 @@ import (
 )
 
 const (
+	awsOperatorArnKey     = "aws.awsoperator.arn"
 	awsResourceValuesFile = "/tmp/aws-operator-values.yaml"
 	credentialName        = "credential-default"
-	awsOperatorArnKey     = "aws.awsoperator.arn"
+	credentialNamespace   = "giantswarm"
 )
 
 func HostPeerVPC(c *awsclient.Client, g *framework.Guest, h *framework.Host) error {
@@ -205,7 +206,7 @@ func installCredential(h *framework.Host) error {
 	o := func() error {
 		k8sClient := h.K8sClient()
 
-		k8sClient.CoreV1().Secrets("giantswarm").Delete(credentialName, &metav1.DeleteOptions{})
+		k8sClient.CoreV1().Secrets(credentialNamespace).Delete(credentialName, &metav1.DeleteOptions{})
 
 		secret := &v1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
@@ -216,7 +217,7 @@ func installCredential(h *framework.Host) error {
 			},
 		}
 
-		_, err := k8sClient.CoreV1().Secrets("giantswarm").Create(secret)
+		_, err := k8sClient.CoreV1().Secrets(credentialNamespace).Create(secret)
 		if err != nil {
 			return microerror.Mask(err)
 		}
