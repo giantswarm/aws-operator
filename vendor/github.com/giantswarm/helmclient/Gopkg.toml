@@ -28,7 +28,8 @@
 
 required = [
   "github.com/Azure/go-autorest/autorest",
-	"github.com/docker/distribution/reference"
+	"github.com/docker/distribution/reference",
+  "k8s.io/apiserver/pkg/endpoints/request", 
 ]
 
 
@@ -63,6 +64,10 @@ required = [
 
 [[constraint]]
   name = "k8s.io/apimachinery"
+  version = "kubernetes-1.9.3"
+
+[[constraint]]
+  name = "k8s.io/apiserver"
   version = "kubernetes-1.9.3"
 
 [[constraint]]
