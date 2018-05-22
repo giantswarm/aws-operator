@@ -298,7 +298,7 @@ func Region(customObject v1alpha1.AWSConfig) string {
 func RegionARN(customObject v1alpha1.AWSConfig) string {
 	regionARN := "aws"
 
-	if customObject.Spec.AWS.Region == "cn-north-1" {
+	if Region(customObject) == "cn-north-1" {
 		regionARN += "-cn"
 	}
 
