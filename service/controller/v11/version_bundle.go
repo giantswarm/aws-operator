@@ -41,7 +41,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "aws-operator",
-				Description: "Allow port 2379 from Host cluster to add support for etcd backup.",
+				Description: "Allow port 2379 from host cluster to add support for etcd backup.",
 				Kind:        versionbundle.KindAdded,
 			},
 		},
