@@ -21,6 +21,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
+	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/aws/aws-sdk-go/service/sts/stsiface"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v2/resource/cloudformation/adapter"
@@ -42,6 +44,7 @@ type Clients struct {
 	IAM            iamiface.IAMAPI
 	KMS            kmsiface.KMSAPI
 	Route53        *route53.Route53
+	STS            stsiface.STSAPI
 	S3             s3iface.S3API
 }
 
@@ -94,6 +97,7 @@ func newClients(p client.ConfigProvider, cfgs ...*aws.Config) Clients {
 		IAM:            iam.New(p, cfgs...),
 		KMS:            kms.New(p, cfgs...),
 		Route53:        route53.New(p, cfgs...),
+		STS:            sts.New(p, cfgs...),
 		S3:             s3.New(p, cfgs...),
 	}
 }
