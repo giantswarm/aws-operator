@@ -1069,3 +1069,49 @@ func Test_TargetLogBucketName(t *testing.T) {
 		t.Fatalf("Expected target bucket name %s but was %s", expectedName, TargetLogBucketName(customObject))
 	}
 }
+
+func Test_RegionARN(t *testing.T) {
+	t.Parallel()
+
+	testCases := []struct {
+		region            string
+		expectedRegionARN string
+		description       string
+	}{
+		{
+			description:       "eu region",
+			region:            "eu-central-1",
+			expectedRegionARN: "aws",
+		},
+		{
+			description:       "china region",
+			region:            "cn-north-1",
+			expectedRegionARN: "aws-cn",
+		},
+		{
+			description:       "unknown region",
+			region:            "unknown-region-1",
+			expectedRegionARN: "aws",
+		},
+	}
+
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			AWS: v1alpha1.AWSConfigSpecAWS{
+				Region: "",
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			customObject.Spec.AWS.Region = tc.region
+
+			actual := RegionARN(customObject)
+
+			if actual != tc.expectedRegionARN {
+				t.Fatalf("Expected region ARN %q but was %q", tc.expectedRegionARN, actual)
+			}
+		})
+	}
+}

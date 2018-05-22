@@ -16,14 +16,15 @@ import (
 //
 
 type iamPoliciesAdapter struct {
+	KMSKeyARN         string
 	MasterRoleName    string
 	MasterPolicyName  string
 	MasterProfileName string
+	RegionARN         string
+	S3Bucket          string
 	WorkerRoleName    string
 	WorkerPolicyName  string
 	WorkerProfileName string
-	KMSKeyARN         string
-	S3Bucket          string
 }
 
 func (i *iamPoliciesAdapter) getIamPolicies(cfg Config) error {
@@ -35,6 +36,7 @@ func (i *iamPoliciesAdapter) getIamPolicies(cfg Config) error {
 	i.WorkerPolicyName = key.PolicyName(cfg.CustomObject, prefixWorker)
 	i.WorkerProfileName = key.InstanceProfileName(cfg.CustomObject, prefixWorker)
 	i.WorkerRoleName = key.RoleName(cfg.CustomObject, prefixWorker)
+	i.RegionARN = key.RegionARN(cfg.CustomObject)
 
 	// KMSKeyARN
 	keyAlias := fmt.Sprintf("alias/%s", clusterID)

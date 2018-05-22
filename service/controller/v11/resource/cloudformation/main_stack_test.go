@@ -311,6 +311,12 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		t.Fatal("CidrBlock element not found")
 	}
 
+	// arn depends on region
+	if !strings.Contains(body, `Resource: "arn:aws:s3:::`) {
+		fmt.Println(body)
+		t.Fatal("ARN region dependent element not found")
+	}
+
 	// image ids should be fixed despite the values in the custom object
 	if !strings.Contains(body, "ImageId: ami-604e118b") {
 		fmt.Println(body)
@@ -535,5 +541,115 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 	if strings.Contains(body, "IngressWildcardRecordSet:") {
 		fmt.Println(body)
 		t.Fatal("ingressWildcardRecordSet element found")
+	}
+}
+
+func TestMainGuestTemplateChinaRegion(t *testing.T) {
+	t.Parallel()
+	// customObject with example fields for both asg and launch config
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID:      "test-cluster",
+				Version: "myversion",
+				Kubernetes: v1alpha1.ClusterKubernetes{
+					API: v1alpha1.ClusterKubernetesAPI{
+						Domain:     "api.domain",
+						SecurePort: 443,
+					},
+					IngressController: v1alpha1.ClusterKubernetesIngressController{
+						Domain:       "ingress.domain",
+						InsecurePort: 30010,
+						SecurePort:   30011,
+					},
+				},
+				Etcd: v1alpha1.ClusterEtcd{
+					Domain: "etcd.domain",
+				},
+			},
+			AWS: v1alpha1.AWSConfigSpecAWS{
+				API: v1alpha1.AWSConfigSpecAWSAPI{
+					ELB: v1alpha1.AWSConfigSpecAWSAPIELB{
+						IdleTimeoutSeconds: 3600,
+					},
+				},
+				Region: "cn-north-1",
+				AZ:     "cn-north-1a",
+				Masters: []v1alpha1.AWSConfigSpecAWSNode{
+					{
+						ImageID:      "ami-1234-master",
+						InstanceType: "m3.large",
+					},
+				},
+				Workers: []v1alpha1.AWSConfigSpecAWSNode{
+					{
+						ImageID:      "ami-1234-worker",
+						InstanceType: "m3.large",
+					},
+				},
+				Ingress: v1alpha1.AWSConfigSpecAWSIngress{
+					ELB: v1alpha1.AWSConfigSpecAWSIngressELB{
+						IdleTimeoutSeconds: 60,
+					},
+				},
+				VPC: v1alpha1.AWSConfigSpecAWSVPC{
+					CIDR:              "10.1.1.0/24",
+					PublicSubnetCIDR:  "10.1.1.0/25",
+					PrivateSubnetCIDR: "10.1.2.0/25",
+				},
+			},
+		},
+	}
+
+	imageID, err := key.ImageID(customObject)
+	if err != nil {
+		t.Fatalf("expected %#v got %#v", nil, err)
+	}
+
+	stackState := StackState{
+		Name: key.MainGuestStackName(customObject),
+
+		MasterImageID:              imageID,
+		MasterInstanceResourceName: key.MasterInstanceResourceName(customObject),
+		MasterInstanceType:         key.MasterInstanceType(customObject),
+		MasterCloudConfigVersion:   cloudconfig.MasterCloudConfigVersion,
+		MasterInstanceMonitoring:   false,
+
+		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
+		WorkerImageID:            imageID,
+		WorkerInstanceMonitoring: true,
+		WorkerInstanceType:       key.WorkerInstanceType(customObject),
+		WorkerCloudConfigVersion: cloudconfig.WorkerCloudConfigVersion,
+
+		VersionBundleVersion: key.VersionBundleVersion(customObject),
+	}
+
+	cfg := testConfig()
+	cfg.Clients = &adapter.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		KMS: &adapter.KMSClientMock{},
+		ELB: &adapter.ELBClientMock{},
+	}
+	cfg.HostClients = &adapter.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+	}
+	cfg.Route53Enabled = false
+
+	newResource, err := New(cfg)
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+
+	body, err := newResource.getMainGuestTemplateBody(customObject, stackState)
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+
+	// arn depends on region
+	if !strings.Contains(body, `Resource: "arn:aws-cn:s3:::`) {
+		fmt.Println(body)
+		t.Fatal("ARN region dependent element not found")
 	}
 }
