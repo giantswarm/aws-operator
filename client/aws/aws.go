@@ -58,7 +58,7 @@ func NewClients(config Config) Clients {
 	return newClients(s)
 }
 
-func NewClientsWithRole(config Config, roleARN string) Clients {
+func NewClientsRole(config Config, roleARN string) Clients {
 	sess := newSession(config)
 
 	creds := stscreds.NewCredentials(sess, roleARN)
