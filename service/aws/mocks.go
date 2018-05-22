@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/iam"
-	"github.com/aws/aws-sdk-go/service/iam/iamiface"
+	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/aws/aws-sdk-go/service/sts/stsiface"
 )
 
 const (
@@ -15,13 +15,13 @@ const (
 	accountIDLength = 12
 )
 
-type IAMClientMock struct {
-	iamiface.IAMAPI
+type STSClientMock struct {
+	stsiface.STSAPI
 
 	accountID string
 }
 
-func (i *IAMClientMock) GetUser(input *iam.GetUserInput) (*iam.GetUserOutput, error) {
+func (i *STSClientMock) GetCallerIdentity(input *sts.GetCallerIdentityInput) (*sts.GetCallerIdentityOutput, error) {
 	if i.accountID == "" {
 		i.accountID = "00"
 	}
@@ -30,10 +30,8 @@ func (i *IAMClientMock) GetUser(input *iam.GetUserInput) (*iam.GetUserOutput, er
 	for j := 0; j < toPad; j++ {
 		i.accountID += "0"
 	}
-	output := &iam.GetUserOutput{
-		User: &iam.User{
-			Arn: aws.String("::::" + i.accountID),
-		},
+	output := &sts.GetCallerIdentityOutput{
+		Arn: aws.String("::::" + i.accountID),
 	}
 
 	return output, nil

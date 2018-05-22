@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 )
@@ -54,11 +54,11 @@ func New(config Config) (*Service, error) {
 
 // GetAccountID gets the AWS Account ID.
 func (s *Service) GetAccountID() (string, error) {
-	resp, err := s.clients.IAM.GetUser(&iam.GetUserInput{})
+	resp, err := s.clients.STS.GetCallerIdentity(&sts.GetCallerIdentityInput{})
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-	userArn := *resp.User.Arn
+	userArn := *resp.Arn
 	accountID := strings.Split(userArn, ":")[accountIDIndex]
 	if err := ValidateAccountID(accountID); err != nil {
 		return "", microerror.Mask(err)

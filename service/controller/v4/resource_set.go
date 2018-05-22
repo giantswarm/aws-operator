@@ -96,8 +96,8 @@ func NewResourceSet(config ResourceSetConfig) (*controller.ResourceSet, error) {
 	{
 		c := awsservice.Config{
 			Clients: awsservice.Clients{
-				IAM: config.GuestAWSClients.IAM,
 				KMS: config.GuestAWSClients.KMS,
+				STS: config.GuestAWSClients.STS,
 			},
 			Logger: config.Logger,
 		}

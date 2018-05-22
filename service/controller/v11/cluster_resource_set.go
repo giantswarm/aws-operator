@@ -338,8 +338,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		{
 			c := awsservice.Config{
 				Clients: awsservice.Clients{
-					IAM: awsClient.IAM,
 					KMS: awsClient.KMS,
+					STS: awsClient.STS,
 				},
 				Logger: config.Logger,
 			}
