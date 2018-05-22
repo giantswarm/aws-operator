@@ -1,4 +1,4 @@
-package v_3_3_0
+package v_3_3_1
 
 const MasterTemplate = `#cloud-config
 users:
@@ -138,7 +138,7 @@ write_files:
             # container programs network policy and routes on each
             # host.
             - name: calico-node
-              image: quay.io/calico/node:v3.0.5
+              image: quay.io/giantswarm/node:v3.0.5
               env:
                 # The location of the Calico etcd cluster.
                 - name: ETCD_ENDPOINTS
@@ -233,7 +233,7 @@ write_files:
             # This container installs the Calico CNI binaries
             # and CNI network config file on each node.
             - name: install-cni
-              image: quay.io/calico/cni:v2.0.4
+              image: quay.io/giantswarm/cni:v2.0.4
               command: ["/install-cni.sh"]
               env:
                 # Name of the CNI config file to create.
@@ -314,7 +314,7 @@ write_files:
           serviceAccountName: calico-kube-controllers
           containers:
             - name: calico-kube-controllers
-              image: quay.io/calico/kube-controllers:v2.0.3
+              image: quay.io/giantswarm/kube-controllers:v2.0.3
               env:
                 # The location of the Calico etcd cluster.
                 - name: ETCD_ENDPOINTS
@@ -551,7 +551,7 @@ write_files:
         spec:
           containers:
           - name: default-http-backend
-            image: gcr.io/google_containers/defaultbackend:1.0
+            image: quay.io/giantswarm/defaultbackend:1.0
             livenessProbe:
               httpGet:
                 path: /healthz
@@ -642,7 +642,7 @@ write_files:
             - sh
             - -c
             - sysctl -w net.core.somaxconn=32768; sysctl -w net.ipv4.ip_local_port_range="1024 65535"
-            image: alpine:3.6
+            image: quay.io/giantswarm/alpine:3.7
             imagePullPolicy: IfNotPresent
             name: sysctl
             securityContext:
@@ -763,7 +763,7 @@ write_files:
           serviceAccountName: kube-proxy
           containers:
             - name: kube-proxy
-              image: quay.io/giantswarm/hyperkube:v1.10.2
+              image: quay.io/giantswarm/hyperkube:v1.10.3
               command:
               - /hyperkube
               - proxy
@@ -1716,7 +1716,7 @@ write_files:
       priorityClassName: core-pods
       containers:
       - name: k8s-api-server
-        image: quay.io/giantswarm/hyperkube:v1.10.2
+        image: quay.io/giantswarm/hyperkube:v1.10.3
         env:
         - name: HOST_IP
           valueFrom:
@@ -1838,7 +1838,7 @@ write_files:
       priorityClassName: core-pods
       containers:
       - name: k8s-controller-manager
-        image: quay.io/giantswarm/hyperkube:v1.10.2
+        image: quay.io/giantswarm/hyperkube:v1.10.3
         command:
         - /hyperkube
         - controller-manager
@@ -1911,7 +1911,7 @@ write_files:
       priorityClassName: core-pods
       containers:
       - name: k8s-scheduler
-        image: quay.io/giantswarm/hyperkube:v1.10.2
+        image: quay.io/giantswarm/hyperkube:v1.10.3
         command:
         - /hyperkube
         - scheduler
@@ -2199,7 +2199,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.10.2"
+      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.10.3"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
@@ -2233,6 +2233,7 @@ coreos:
       -v /usr/sbin/mkfs.xfs:/usr/sbin/mkfs.xfs \
       -v /usr/lib64/libxfs.so.0:/usr/lib/libxfs.so.0 \
       -v /usr/lib64/libxcmd.so.0:/usr/lib/libxcmd.so.0 \
+      -v /usr/lib64/libreadline.so.6:/usr/lib/libreadline.so.6 \
       -e ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/server-ca.pem \
       -e ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/server-crt.pem \
       -e ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/server-key.pem \

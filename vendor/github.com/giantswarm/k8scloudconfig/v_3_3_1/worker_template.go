@@ -1,4 +1,4 @@
-package v_3_3_0
+package v_3_3_1
 
 const WorkerTemplate = `#cloud-config
 users:
@@ -248,7 +248,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.10.2"
+      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.10.3"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
@@ -281,6 +281,7 @@ coreos:
       -v /usr/sbin/mkfs.xfs:/usr/sbin/mkfs.xfs \
       -v /usr/lib64/libxfs.so.0:/usr/lib/libxfs.so.0 \
       -v /usr/lib64/libxcmd.so.0:/usr/lib/libxcmd.so.0 \
+      -v /usr/lib64/libreadline.so.6:/usr/lib/libreadline.so.6 \
       -e ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/client-ca.pem \
       -e ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/client-crt.pem \
       -e ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/client-key.pem \
