@@ -88,7 +88,8 @@
     "service/route53",
     "service/s3",
     "service/s3/s3iface",
-    "service/sts"
+    "service/sts",
+    "service/sts/stsiface"
   ]
   revision = "cf00d544fc3c02f31e05e8d02444a1325d3a840b"
   version = "v1.13.53"
@@ -1423,6 +1424,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "994e902bf64015391628474e3bce6f993d7a39a02df2b5881283c58acd09d977"
+  inputs-digest = "90f33687c6d3add6b3fe92c24effd9d6b17fd62821164cbcd6f075aa29f00ded"
   solver-name = "gps-cdcl"
   solver-version = 1
