@@ -48,6 +48,7 @@ type ClusterResourceSetConfig struct {
 	AdvancedMonitoringEC2  bool
 	APIWhitelist           adapter.APIWhitelist
 	GuestUpdateEnabled     bool
+	IncludeTags            bool
 	InstallationName       string
 	DeleteLoggingBucket    bool
 	OIDC                   cloudconfig.OIDCConfig
@@ -197,8 +198,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			Logger: config.Logger,
 
 			AccessLogsExpiration: config.AccessLogsExpiration,
-			InstallationName:     config.InstallationName,
 			DeleteLoggingBucket:  config.DeleteLoggingBucket,
+			IncludeTags:          config.IncludeTags,
+			InstallationName:     config.InstallationName,
 		}
 
 		ops, err := s3bucket.New(c)

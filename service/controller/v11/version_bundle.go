@@ -34,6 +34,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Added support for making pause container configurable.",
 				Kind:        versionbundle.KindAdded,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Added support for not including S3 bucket tags.",
+				Kind:        versionbundle.KindAdded,
+			},
 		},
 		Components: []versionbundle.Component{
 			{

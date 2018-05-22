@@ -11,6 +11,7 @@ type AWS struct {
 	AdvancedMonitoringEC2  string
 	LoggingBucket          loggingbucket.LoggingBucket
 	HostAccessKey          accesskey.AccessKey
+	IncludeTags            string
 	PodInfraContainerImage string
 	PubKeyFile             string
 	Region                 string
