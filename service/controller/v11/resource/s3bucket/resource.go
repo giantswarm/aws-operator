@@ -28,6 +28,7 @@ type Config struct {
 	// Settings.
 	AccessLogsExpiration int
 	DeleteLoggingBucket  bool
+	IncludeTags          bool
 	InstallationName     string
 }
 
@@ -52,6 +53,7 @@ type Resource struct {
 	// Settings.
 	accessLogsExpiration int
 	deleteLoggingBucket  bool
+	includeTags          bool
 	installationName     string
 }
 
@@ -81,8 +83,9 @@ func New(config Config) (*Resource, error) {
 
 		// Settings.
 		accessLogsExpiration: config.AccessLogsExpiration,
-		installationName:     config.InstallationName,
 		deleteLoggingBucket:  config.DeleteLoggingBucket,
+		includeTags:          config.IncludeTags,
+		installationName:     config.InstallationName,
 	}
 
 	return newResource, nil
@@ -119,13 +122,15 @@ func (r *Resource) getS3BucketTags(customObject v1alpha1.AWSConfig) []*s3.Tag {
 	clusterTags := key.ClusterTags(customObject, r.installationName)
 	s3Tags := []*s3.Tag{}
 
-	for k, v := range clusterTags {
-		tag := &s3.Tag{
-			Key:   aws.String(k),
-			Value: aws.String(v),
-		}
+	if r.includeTags {
+		for k, v := range clusterTags {
+			tag := &s3.Tag{
+				Key:   aws.String(k),
+				Value: aws.String(v),
+			}
 
-		s3Tags = append(s3Tags, tag)
+			s3Tags = append(s3Tags, tag)
+		}
 	}
 
 	return s3Tags

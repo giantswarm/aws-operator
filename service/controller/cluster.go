@@ -54,6 +54,7 @@ type ClusterConfig struct {
 	GuestAWSConfig         ClusterConfigAWSConfig
 	GuestUpdateEnabled     bool
 	HostAWSConfig          ClusterConfigAWSConfig
+	IncludeTags            bool
 	InstallationName       string
 	OIDC                   ClusterConfigOIDC
 	PodInfraContainerImage string
@@ -563,6 +564,7 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 			GuestUpdateEnabled:     config.GuestUpdateEnabled,
 			PodInfraContainerImage: config.PodInfraContainerImage,
 			Route53Enabled:         config.Route53Enabled,
+			IncludeTags:            config.IncludeTags,
 			InstallationName:       config.InstallationName,
 			OIDC: v11cloudconfig.OIDCConfig{
 				ClientID:      config.OIDC.ClientID,
