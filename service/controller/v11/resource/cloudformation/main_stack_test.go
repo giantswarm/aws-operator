@@ -518,24 +518,27 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 	}
 
 	cfg := testConfig()
-	cfg.Clients = &adapter.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-		KMS: &adapter.KMSClientMock{},
-		ELB: &adapter.ELBClientMock{},
-	}
 	cfg.HostClients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
 	}
 	cfg.Route53Enabled = false
-
 	newResource, err := New(cfg)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
 
-	body, err := newResource.getMainGuestTemplateBody(customObject, stackState)
+	awsClients := aws.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		KMS: &adapter.KMSClientMock{},
+		ELB: &adapter.ELBClientMock{},
+	}
+
+	ctx := context.TODO()
+	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+
+	body, err := newResource.getMainGuestTemplateBody(ctx, customObject, stackState)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
@@ -639,24 +642,27 @@ func TestMainGuestTemplateChinaRegion(t *testing.T) {
 	}
 
 	cfg := testConfig()
-	cfg.Clients = &adapter.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-		KMS: &adapter.KMSClientMock{},
-		ELB: &adapter.ELBClientMock{},
-	}
 	cfg.HostClients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
 	}
 	cfg.Route53Enabled = false
-
 	newResource, err := New(cfg)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
 
-	body, err := newResource.getMainGuestTemplateBody(customObject, stackState)
+	awsClients := aws.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		KMS: &adapter.KMSClientMock{},
+		ELB: &adapter.ELBClientMock{},
+	}
+
+	ctx := context.TODO()
+	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+
+	body, err := newResource.getMainGuestTemplateBody(ctx, customObject, stackState)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
