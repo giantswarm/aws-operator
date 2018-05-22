@@ -6,6 +6,7 @@ package resty
 
 import (
 	"bytes"
+	"compress/gzip"
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
@@ -46,11 +47,12 @@ const (
 )
 
 var (
-	hdrUserAgentKey     = http.CanonicalHeaderKey("User-Agent")
-	hdrAcceptKey        = http.CanonicalHeaderKey("Accept")
-	hdrContentTypeKey   = http.CanonicalHeaderKey("Content-Type")
-	hdrContentLengthKey = http.CanonicalHeaderKey("Content-Length")
-	hdrAuthorizationKey = http.CanonicalHeaderKey("Authorization")
+	hdrUserAgentKey       = http.CanonicalHeaderKey("User-Agent")
+	hdrAcceptKey          = http.CanonicalHeaderKey("Accept")
+	hdrContentTypeKey     = http.CanonicalHeaderKey("Content-Type")
+	hdrContentLengthKey   = http.CanonicalHeaderKey("Content-Length")
+	hdrContentEncodingKey = http.CanonicalHeaderKey("Content-Encoding")
+	hdrAuthorizationKey   = http.CanonicalHeaderKey("Authorization")
 
 	plainTextType   = "text/plain; charset=utf-8"
 	jsonContentType = "application/json; charset=utf-8"
@@ -504,21 +506,21 @@ func (c *Client) AddRetryCondition(condition RetryConditionFunc) *Client {
 	return c
 }
 
-// SetHTTPMode method sets go-resty mode into HTTP
+// SetHTTPMode method sets go-resty mode to 'http'
 func (c *Client) SetHTTPMode() *Client {
 	return c.SetMode("http")
 }
 
-// SetRESTMode method sets go-resty mode into RESTful
+// SetRESTMode method sets go-resty mode to 'rest'
 func (c *Client) SetRESTMode() *Client {
 	return c.SetMode("rest")
 }
 
 // SetMode method sets go-resty client mode to given value such as 'http' & 'rest'.
-// 	RESTful:
+//	'rest':
 //		- No Redirect
 //		- Automatic response unmarshal if it is JSON or XML
-//	HTML:
+//	'http':
 //		- Up to 10 Redirects
 //		- No automatic unmarshall. Response will be treated as `response.String()`
 //
@@ -797,11 +799,23 @@ func (c *Client) execute(req *Request) (*Response, error) {
 	}
 
 	if !req.isSaveResponse {
+		body := resp.Body
+
+		// GitHub #142
+		if strings.EqualFold(resp.Header.Get(hdrContentEncodingKey), "gzip") {
+			if _, ok := body.(*gzip.Reader); !ok {
+				body, err = gzip.NewReader(body)
+				if err != nil {
+					return response, err
+				}
+			}
+		}
+
 		defer func() {
-			_ = resp.Body.Close()
+			_ = body.Close()
 		}()
 
-		if response.body, err = ioutil.ReadAll(resp.Body); err != nil {
+		if response.body, err = ioutil.ReadAll(body); err != nil {
 			return response, err
 		}
 
@@ -845,6 +859,10 @@ func (c *Client) getTLSConfig() (*tls.Config, error) {
 // returns `*http.Transport` currently in use or error
 // in case currently used `transport` is not an `*http.Transport`
 func (c *Client) getTransport() (*http.Transport, error) {
+	if c.httpClient.Transport == nil {
+		c.SetTransport(new(http.Transport))
+	}
+
 	if transport, ok := c.httpClient.Transport.(*http.Transport); ok {
 		return transport, nil
 	}

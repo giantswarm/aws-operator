@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/cenkalti/backoff"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -26,6 +27,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v11/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/v11/resource/kmskey"
 	"github.com/giantswarm/aws-operator/service/controller/v11/resource/loadbalancer"
+	"github.com/giantswarm/aws-operator/service/controller/v11/resource/migration"
 	"github.com/giantswarm/aws-operator/service/controller/v11/resource/namespace"
 	"github.com/giantswarm/aws-operator/service/controller/v11/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/v11/resource/s3object"
@@ -38,6 +40,7 @@ const (
 
 type ClusterResourceSetConfig struct {
 	CertsSearcher      legacy.Searcher
+	G8sClient          versioned.Interface
 	GuestAWSClients    aws.Clients
 	HostAWSClients     aws.Clients
 	K8sClient          kubernetes.Interface
@@ -62,6 +65,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 	if config.CertsSearcher == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.CertsSearcher must not be empty")
+	}
+	if config.G8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.G8sClient must not be empty")
 	}
 	if config.GuestAWSClients.CloudFormation == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSClients.CloudFormation must not be empty")
@@ -183,6 +189,19 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		kmsKeyResource, err = toCRUDResource(config.Logger, ops)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var migrationResource controller.Resource
+	{
+		c := migration.Config{
+			G8sClient: config.G8sClient,
+			Logger:    config.Logger,
+		}
+
+		migrationResource, err = migration.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -364,6 +383,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	}
 
 	resources := []controller.Resource{
+		migrationResource,
 		kmsKeyResource,
 		s3BucketResource,
 		s3BucketObjectResource,

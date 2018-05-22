@@ -4,9 +4,9 @@ import "k8s.io/helm/pkg/helm"
 
 const (
 	tillerDefaultNamespace = "kube-system"
-	tillerImageSpec        = "gcr.io/kubernetes-helm/tiller:v2.8.2"
+	tillerImageSpec        = "quay.io/giantswarm/tiller:v2.8.2"
 	tillerLabelSelector    = "app=helm,name=tiller"
-	tillerPodName          = "tiller"
+	tillerPodName          = "tiller-giantswarm"
 	tillerPort             = 44134
 )
 
