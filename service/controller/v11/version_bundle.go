@@ -39,6 +39,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Added support for not including S3 bucket tags.",
 				Kind:        versionbundle.KindAdded,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Allow port 2379 from Host cluster to add support for etcd backup.",
+				Kind:        versionbundle.KindAdded,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
