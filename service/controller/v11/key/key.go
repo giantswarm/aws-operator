@@ -92,11 +92,11 @@ func BucketObjectName(templateVersion string, prefix string) string {
 }
 
 func CredentialName(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.AWS.Credential.Name
+	return customObject.Spec.AWS.CredentialSecret.Name
 }
 
 func CredentialNamespace(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.AWS.Credential.Namespace
+	return customObject.Spec.AWS.CredentialSecret.Namespace
 }
 
 func CloudConfigSmallTemplates() []string {
