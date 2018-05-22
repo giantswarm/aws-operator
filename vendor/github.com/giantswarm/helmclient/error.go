@@ -1,6 +1,7 @@
 package helmclient
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/giantswarm/microerror"
@@ -37,11 +38,67 @@ func IsExecutionFailed(err error) bool {
 	return microerror.Cause(err) == executionFailedError
 }
 
+var guestAPINotAvailableError = microerror.New("Guest API not available")
+var guestNamespaceCreationErrorSuffix = "namespaces/kube-system/serviceaccounts: EOF"
+
+// match example https://play.golang.org/p/ipBkwqlc4Td
+var guestDNSNotReadyPattern = "dial tcp: lookup .* on .*:53: no such host"
+
+// IsGuestAPINotAvailable asserts guestAPINotAvailableError.
+func IsGuestAPINotAvailable(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	c := microerror.Cause(err)
+
+	if strings.HasSuffix(c.Error(), guestNamespaceCreationErrorSuffix) {
+		return true
+	}
+	matched, matchErr := regexp.MatchString(guestDNSNotReadyPattern, c.Error())
+	if matchErr != nil {
+		return false
+	}
+	if matched {
+		return true
+	}
+
+	if c == guestAPINotAvailableError {
+		return true
+	}
+
+	return false
+}
+
 var invalidConfigError = microerror.New("invalid config")
 
 // IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
+}
+
+const (
+	invalidGZipHeaderErrorPrefix = "gzip: invalid header"
+)
+
+var invalidGZipHeaderError = microerror.New("invalid gzip header")
+
+// IsInvalidGZipHeader asserts invalidGZipHeaderError.
+func IsInvalidGZipHeader(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	c := microerror.Cause(err)
+
+	if strings.HasPrefix(c.Error(), invalidGZipHeaderErrorPrefix) {
+		return true
+	}
+	if c == invalidGZipHeaderError {
+		return true
+	}
+
+	return false
 }
 
 var podNotFoundError = microerror.New("pod not found")
@@ -77,6 +134,13 @@ func IsReleaseNotFound(err error) bool {
 	}
 
 	return false
+}
+
+var tillerInstallationFailedError = microerror.New("Tiller installation failed")
+
+// IsTillerInstallationFailed asserts tillerInstallationFailedError.
+func IsTillerInstallationFailed(err error) bool {
+	return microerror.Cause(err) == tillerInstallationFailedError
 }
 
 var tooManyResultsError = microerror.New("too many results")
