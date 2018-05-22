@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"k8s.io/api/core/v1"
@@ -29,6 +30,7 @@ type GuestConfig struct {
 type Guest struct {
 	logger micrologger.Logger
 
+	g8sClient  versioned.Interface
 	k8sClient  kubernetes.Interface
 	restConfig *rest.Config
 }
@@ -41,6 +43,7 @@ func NewGuest(config GuestConfig) (*Guest, error) {
 	g := &Guest{
 		logger: config.Logger,
 
+		g8sClient:  nil,
 		k8sClient:  nil,
 		restConfig: nil,
 	}
@@ -48,15 +51,22 @@ func NewGuest(config GuestConfig) (*Guest, error) {
 	return g, nil
 }
 
+// G8sClient returns the guest cluster framework's apiextensions clientset. The
+// client being returned is properly configured once Guest.Setup() is executed
+// successfully.
+func (g *Guest) G8sClient() versioned.Interface {
+	return g.g8sClient
+}
+
 // K8sClient returns the guest cluster framework's Kubernetes client. The client
-// being returned is properly configured ones Guest.Setup() got executed
+// being returned is properly configured once Guest.Setup() is executed
 // successfully.
 func (g *Guest) K8sClient() kubernetes.Interface {
 	return g.k8sClient
 }
 
 // RestConfig returns the guest cluster framework's rest config. The config
-// being returned is properly configured ones Guest.Setup() got executed
+// being returned is properly configured once Guest.Setup() is executed
 // successfully.
 func (g *Guest) RestConfig() *rest.Config {
 	return g.restConfig
@@ -76,6 +86,7 @@ func (g *Guest) Initialize() error {
 		}
 	}
 
+	var guestG8sClient versioned.Interface
 	var guestK8sClient kubernetes.Interface
 	var guestRestConfig *rest.Config
 	{
@@ -94,12 +105,18 @@ func (g *Guest) Initialize() error {
 			},
 		}
 
+		guestG8sClient, err = versioned.NewForConfig(guestRestConfig)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
 		guestK8sClient, err = kubernetes.NewForConfig(guestRestConfig)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 	}
 
+	g.g8sClient = guestG8sClient
 	g.k8sClient = guestK8sClient
 	g.restConfig = guestRestConfig
 
