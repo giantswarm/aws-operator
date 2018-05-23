@@ -257,7 +257,7 @@
   branch = "master"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
-  revision = "5ff4c1ff0eb8ebf7c65224cef7f94af77114bca8"
+  revision = "0f1af4c3bd3b0d6f445494bed71cf2cfd8de2edd"
 
 [[projects]]
   branch = "master"
@@ -273,7 +273,7 @@
     "v_3_2_5",
     "v_3_2_6"
   ]
-  revision = "3bb30a7ce6831bdaeb65b6ae7bff2a839c100450"
+  revision = "a490795bbf0b7d2dc079185031115d4a3b698f81"
 
 [[projects]]
   branch = "master"
@@ -315,7 +315,7 @@
     "server",
     "tls"
   ]
-  revision = "a9dfb8b471d59689316c616503b53a558811dada"
+  revision = "37ebe65c1bdd91ee02a36b684251d419b8449827"
 
 [[projects]]
   branch = "master"
@@ -368,7 +368,7 @@
   branch = "master"
   name = "github.com/giantswarm/versionbundle"
   packages = ["."]
-  revision = "d3bebdd7a9efb503d3ce05d6feaf9f403ccbf927"
+  revision = "36ba466124d6494c1772e6380756594ba996d081"
 
 [[projects]]
   name = "github.com/go-ini/ini"
@@ -764,6 +764,12 @@
   version = "v1.2.1"
 
 [[projects]]
+  name = "github.com/tylerb/graceful"
+  packages = ["."]
+  revision = "4654dfbb6ad53cb5e27f37d99b02e16c1872fbbb"
+  version = "v1.2.15"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
@@ -810,7 +816,7 @@
     "unix",
     "windows"
   ]
-  revision = "7f59abf37be6a6007f075af1bc7f16f137bc176b"
+  revision = "7c87d13f8e835d2fb3a70a2912c811ed0c1d241b"
 
 [[projects]]
   name = "golang.org/x/text"

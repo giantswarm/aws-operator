@@ -37,6 +37,7 @@ type securityGroupRule struct {
 const (
 	allPorts             = -1
 	cadvisorPort         = 4194
+	etcdPort             = 2379
 	kubeletPort          = 10250
 	nodeExporterPort     = 10300
 	kubeStateMetricsPort = 10301
@@ -86,6 +87,12 @@ func (s *securityGroupsAdapter) getMasterRules(cfg Config, hostClusterCIDR strin
 		// Allow traffic from host cluster CIDR to 4194 for cadvisor scraping.
 		{
 			Port:       cadvisorPort,
+			Protocol:   tcpProtocol,
+			SourceCIDR: hostClusterCIDR,
+		},
+		// Allow traffic from host cluster CIDR to 2379 for etcd backup.
+		{
+			Port:       etcdPort,
 			Protocol:   tcpProtocol,
 			SourceCIDR: hostClusterCIDR,
 		},
