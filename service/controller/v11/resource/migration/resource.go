@@ -62,7 +62,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return nil
 	}
 
-	r.logger.Log("level", "debug", "message", "CR is missing credential, setting the default")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "CR is missing credential, setting the default")
 
 	customObject.Spec.AWS.CredentialSecret.Namespace = CredentialSecretDefaultNamespace
 	customObject.Spec.AWS.CredentialSecret.Name = CredentialSecretDefaultName
@@ -72,7 +72,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	r.logger.Log("level", "debug", "message", "CR updated with default credential, canceling reconciliation")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "CR updated with default credential, canceling reconciliation")
 	reconciliationcanceledcontext.SetCanceled(ctx)
 
 	return nil
