@@ -40,6 +40,11 @@ func VersionBundle() versionbundle.Bundle {
 				Kind:        versionbundle.KindAdded,
 			},
 			{
+				Component:   "aws-operator",
+				Description: "Allow port 2379 from host cluster to add support for etcd backup.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
 				Component:   "kubernetes",
 				Description: "Updated to 1.10.2.",
 				Kind:        versionbundle.KindChanged,
