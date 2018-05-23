@@ -9,7 +9,27 @@ import (
 
 const (
 	cannotReuseReleaseErrorPrefix = "cannot re-use"
+	// guestDNSNotReadyPattern is a regular expression representing DNS errors for
+	// the guest API domain.
+	// match example https://play.golang.org/p/ipBkwqlc4Td
+	guestDNSNotReadyPattern = "dial tcp: lookup .* on .*:53: no such host"
+
+	// guestTransientInvalidCertificatePattern regular expression defines the kind
+	// of transient errors related to certificates returned while the guest API is
+	// not fully up.
+	// match example https://play.golang.org/p/iiYvBhPOg4f
+	guestTransientInvalidCertificatePattern = `[Get|Post] https://api\..*: x509: certificate is valid for ingress.local, not api\..*`
 )
+
+var (
+	guestDNSNotReadyRegexp                 *regexp.Regexp
+	guestTransientInvalidCertificateRegexp *regexp.Regexp
+)
+
+func init() {
+	guestDNSNotReadyRegexp = regexp.MustCompile(guestDNSNotReadyPattern)
+	guestTransientInvalidCertificateRegexp = regexp.MustCompile(guestTransientInvalidCertificatePattern)
+}
 
 var cannotReuseReleaseError = microerror.New("cannot reuse release")
 
@@ -41,9 +61,6 @@ func IsExecutionFailed(err error) bool {
 var guestAPINotAvailableError = microerror.New("Guest API not available")
 var guestNamespaceCreationErrorSuffix = "namespaces/kube-system/serviceaccounts: EOF"
 
-// match example https://play.golang.org/p/ipBkwqlc4Td
-var guestDNSNotReadyPattern = "dial tcp: lookup .* on .*:53: no such host"
-
 // IsGuestAPINotAvailable asserts guestAPINotAvailableError.
 func IsGuestAPINotAvailable(err error) bool {
 	if err == nil {
@@ -55,12 +72,17 @@ func IsGuestAPINotAvailable(err error) bool {
 	if strings.HasSuffix(c.Error(), guestNamespaceCreationErrorSuffix) {
 		return true
 	}
-	matched, matchErr := regexp.MatchString(guestDNSNotReadyPattern, c.Error())
-	if matchErr != nil {
-		return false
+
+	regexps := []*regexp.Regexp{
+		guestDNSNotReadyRegexp,
+		guestTransientInvalidCertificateRegexp,
 	}
-	if matched {
-		return true
+	for _, re := range regexps {
+		matched := re.MatchString(c.Error())
+
+		if matched {
+			return true
+		}
 	}
 
 	if c == guestAPINotAvailableError {

@@ -257,7 +257,7 @@
   branch = "master"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
-  revision = "fa0cb6e79704cafaa67cec66b11adec7d639b418"
+  revision = "0f1af4c3bd3b0d6f445494bed71cf2cfd8de2edd"
 
 [[projects]]
   branch = "hyperkube-1.10.3"
