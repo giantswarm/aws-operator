@@ -331,8 +331,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
+			config.GuestAWSConfig.RoleARN = arn
 
-			awsClient = aws.NewClientsRole(config.GuestAWSConfig, arn)
+			awsClient = aws.NewClients(config.GuestAWSConfig)
 		}
 
 		var awsService *awsservice.Service

@@ -33,6 +33,7 @@ type Config struct {
 	AccessKeySecret string
 	SessionToken    string
 	Region          string
+	RoleARN         string
 	accountID       string
 }
 
@@ -55,15 +56,13 @@ const (
 
 func NewClients(config Config) Clients {
 	s := newSession(config)
-	return newClients(s)
-}
 
-func NewClientsRole(config Config, roleARN string) Clients {
-	sess := newSession(config)
-
-	creds := stscreds.NewCredentials(sess, roleARN)
-
-	return newClients(sess, &aws.Config{Credentials: creds})
+	if config.RoleARN != "" {
+		creds := stscreds.NewCredentials(s, config.RoleARN)
+		return newClients(s, &aws.Config{Credentials: creds})
+	} else {
+		return newClients(s)
+	}
 }
 
 func (c *Config) SetAccountID(iamClient iamiface.IAMAPI) error {
