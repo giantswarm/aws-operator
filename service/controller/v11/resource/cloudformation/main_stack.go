@@ -28,6 +28,7 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 		IAM:            sc.AWSClient.IAM,
 		KMS:            sc.AWSClient.KMS,
 		ELB:            sc.AWSClient.ELB,
+		STS:            sc.AWSClient.STS,
 	}
 
 	cfg := adapter.Config{
@@ -85,6 +86,7 @@ func (r *Resource) getMainHostPreTemplateBody(ctx context.Context, customObject 
 		IAM:            sc.AWSClient.IAM,
 		KMS:            sc.AWSClient.KMS,
 		ELB:            sc.AWSClient.ELB,
+		STS:            sc.AWSClient.STS,
 	}
 
 	guestAccountID, err := adapter.AccountID(adapterClients)
@@ -120,6 +122,7 @@ func (r *Resource) getMainHostPostTemplateBody(ctx context.Context, customObject
 		IAM:            sc.AWSClient.IAM,
 		KMS:            sc.AWSClient.KMS,
 		ELB:            sc.AWSClient.ELB,
+		STS:            sc.AWSClient.STS,
 	}
 
 	cfg := adapter.Config{

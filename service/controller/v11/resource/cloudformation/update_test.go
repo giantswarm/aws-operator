@@ -394,6 +394,7 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 		c.HostClients = &adapter.Clients{
 			IAM: &adapter.IAMClientMock{},
 			EC2: &adapter.EC2ClientMock{},
+			STS: &adapter.STSClientMock{},
 		}
 		c.Logger = microloggertest.New()
 
@@ -407,6 +408,7 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
 		KMS: &adapter.KMSClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
 
 	for _, tc := range testCases {
@@ -843,6 +845,7 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 		c.HostClients = &adapter.Clients{
 			IAM: &adapter.IAMClientMock{},
 			EC2: &adapter.EC2ClientMock{},
+			STS: &adapter.STSClientMock{},
 		}
 		c.Logger = microloggertest.New()
 
@@ -856,6 +859,7 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
 		KMS: &adapter.KMSClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
 
 	for _, tc := range testCases {

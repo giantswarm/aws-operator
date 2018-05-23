@@ -36,6 +36,7 @@ func TestMainGuestTemplateGetEmptyBody(t *testing.T) {
 	c.HostClients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
 	newResource, err := New(c)
 	if err != nil {
@@ -46,6 +47,7 @@ func TestMainGuestTemplateGetEmptyBody(t *testing.T) {
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
 		KMS: &adapter.KMSClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
 
 	ctx := context.TODO()
@@ -141,6 +143,7 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 	cfg.HostClients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
 	cfg.AdvancedMonitoringEC2 = true
 	cfg.Route53Enabled = true
@@ -154,6 +157,7 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		IAM: &adapter.IAMClientMock{},
 		KMS: &adapter.KMSClientMock{},
 		ELB: &adapter.ELBClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
 
 	ctx := context.TODO()
@@ -345,6 +349,7 @@ func TestMainHostPreTemplateExistingFields(t *testing.T) {
 	cfg.HostClients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
 	newResource, err := New(cfg)
 	if err != nil {
@@ -354,6 +359,7 @@ func TestMainHostPreTemplateExistingFields(t *testing.T) {
 	awsClients := aws.Clients{
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
 
 	ctx := context.TODO()
@@ -407,6 +413,7 @@ func TestMainHostPostTemplateExistingFields(t *testing.T) {
 	cfg.HostClients = &adapter.Clients{
 		EC2: ec2Mock,
 		IAM: &adapter.IAMClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
 	newResource, err := New(cfg)
 	if err != nil {
@@ -415,6 +422,7 @@ func TestMainHostPostTemplateExistingFields(t *testing.T) {
 
 	awsClients := aws.Clients{
 		EC2: &adapter.EC2ClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
 
 	ctx := context.TODO()
@@ -521,6 +529,7 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 	cfg.HostClients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
 	cfg.Route53Enabled = false
 	newResource, err := New(cfg)
@@ -533,6 +542,7 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 		IAM: &adapter.IAMClientMock{},
 		KMS: &adapter.KMSClientMock{},
 		ELB: &adapter.ELBClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
 
 	ctx := context.TODO()
@@ -645,6 +655,7 @@ func TestMainGuestTemplateChinaRegion(t *testing.T) {
 	cfg.HostClients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
 	cfg.Route53Enabled = false
 	newResource, err := New(cfg)
@@ -657,6 +668,7 @@ func TestMainGuestTemplateChinaRegion(t *testing.T) {
 		IAM: &adapter.IAMClientMock{},
 		KMS: &adapter.KMSClientMock{},
 		ELB: &adapter.ELBClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
 
 	ctx := context.TODO()

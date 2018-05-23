@@ -68,6 +68,7 @@ func TestAdapterRecordSetsRegularFields(t *testing.T) {
 	clients := Clients{
 		EC2: &EC2ClientMock{},
 		ELB: &ELBClientMock{},
+		STS: &STSClientMock{},
 	}
 	for _, tc := range testCases {
 		a := Adapter{}

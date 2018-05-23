@@ -56,6 +56,7 @@ func Test_validateHostPeeringRoutes(t *testing.T) {
 				EC2:            ec2Mock,
 				CloudFormation: &adapter.CloudFormationMock{},
 				IAM:            &adapter.IAMClientMock{},
+				STS:            &adapter.STSClientMock{},
 			}
 			c.Logger = microloggertest.New()
 

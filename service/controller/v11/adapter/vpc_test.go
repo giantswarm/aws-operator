@@ -52,6 +52,7 @@ func TestAdapterVPCRegularFields(t *testing.T) {
 				HostAccountID:    hostAccountID,
 				HostClients: Clients{
 					IAM: &IAMClientMock{},
+					STS: &STSClientMock{},
 				},
 			}
 			err := a.getVpc(cfg)
@@ -106,6 +107,7 @@ func TestAdapterVPCPeerRoleField(t *testing.T) {
 				CustomObject: customObject,
 				HostClients: Clients{
 					IAM: &IAMClientMock{peerRoleArn: peerRoleArn},
+					STS: &STSClientMock{},
 				},
 			}
 			err := a.getVpc(cfg)

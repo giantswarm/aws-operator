@@ -193,6 +193,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			HostClients: &adapter.Clients{
 				EC2:            config.HostAWSClients.EC2,
 				IAM:            config.HostAWSClients.IAM,
+				STS:            config.HostAWSClients.STS,
 				CloudFormation: config.HostAWSClients.CloudFormation,
 			},
 			Logger: config.Logger,

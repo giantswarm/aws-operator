@@ -59,6 +59,7 @@ func Test_Resource_Cloudformation_GetCloudFormationTags(t *testing.T) {
 		EC2:            &adapter.EC2ClientMock{},
 		CloudFormation: &adapter.CloudFormationMock{},
 		IAM:            &adapter.IAMClientMock{},
+		STS:            &adapter.STSClientMock{},
 	}
 	c.Logger = microloggertest.New()
 
