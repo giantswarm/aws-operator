@@ -73,10 +73,3 @@ var invalidDependencyError = microerror.New("invalid dependency")
 func IsInvalidDependency(err error) bool {
 	return microerror.Cause(err) == invalidDependencyError
 }
-
-var invalidReleaseError = microerror.New("invalid release")
-
-// IsInvalidRelease asserts invalidReleaseError.
-func IsInvalidRelease(err error) bool {
-	return microerror.Cause(err) == invalidReleaseError
-}
