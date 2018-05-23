@@ -67,7 +67,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	customObject.Spec.AWS.CredentialSecret.Namespace = CredentialSecretDefaultNamespace
 	customObject.Spec.AWS.CredentialSecret.Name = CredentialSecretDefaultName
 
-	_, err := r.g8sClient.ProviderV1alpha1().AWSConfigs(AWSConfigNamespace).Update(&customObject)
+	_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(AWSConfigNamespace).Update(&customObject)
 	if err != nil {
 		return microerror.Mask(err)
 	}
