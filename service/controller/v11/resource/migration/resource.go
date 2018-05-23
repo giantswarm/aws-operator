@@ -10,6 +10,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 )
 
 const (
@@ -56,20 +57,23 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	// If the default credential secret is not referenced,
-	// update the CR, and then cancel reconciliation.
-	credentialSecret := customObject.Spec.AWS.CredentialSecret
-	if credentialSecret.Namespace == "" || credentialSecret.Name == "" {
-		r.logger.Log("level", "debug", "message", "config is missing default credential, migrating")
-
-		customObject.Spec.AWS.CredentialSecret.Namespace = CredentialSecretDefaultNamespace
-		customObject.Spec.AWS.CredentialSecret.Name = CredentialSecretDefaultName
-
-		_, err := r.g8sClient.ProviderV1alpha1().AWSConfigs(AWSConfigNamespace).Update(&customObject)
-		if err != nil {
-			return microerror.Mask(err)
-		}
+	// If credential secret is set we have nothing to migrate.
+	if customObject.Spec.AWS.CredentialSecret.Name != "" {
+		return nil
 	}
+
+	r.logger.Log("level", "debug", "message", "CR is missing credential, setting the default")
+
+	customObject.Spec.AWS.CredentialSecret.Namespace = CredentialSecretDefaultNamespace
+	customObject.Spec.AWS.CredentialSecret.Name = CredentialSecretDefaultName
+
+	_, err := r.g8sClient.ProviderV1alpha1().AWSConfigs(AWSConfigNamespace).Update(&customObject)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	r.logger.Log("level", "debug", "message", "CR updated with default credential, canceling reconciliation")
+	reconciliationcanceledcontext.SetCanceled(ctx)
 
 	return nil
 }
