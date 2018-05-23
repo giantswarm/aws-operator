@@ -5,6 +5,7 @@ package env
 import (
 	"crypto/sha1"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -69,6 +70,10 @@ func init() {
 	// TODO there should be a not found error returned by the framework in such
 	// cases.
 	if VersionBundleVersion() == "" {
+		if strings.ToLower(TestedVersion()) == "wip" {
+			log.Println("WIP version bundle version not present, exiting.")
+			os.Exit(0)
+		}
 		panic("version bundle version  must not be empty")
 	}
 	os.Setenv(EnvVarVersionBundleVersion, VersionBundleVersion())
