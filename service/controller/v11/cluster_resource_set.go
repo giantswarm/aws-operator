@@ -2,6 +2,7 @@ package v11
 
 import (
 	"context"
+	"log"
 
 	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/certs/legacy"
@@ -331,9 +332,11 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
-			config.HostAWSConfig.RoleARN = arn
+			c := config.HostAWSConfig
+			c.RoleARN = arn
 
-			awsClient = aws.NewClients(config.HostAWSConfig)
+			log.Printf("config: %#v", c)
+			awsClient = aws.NewClients(c)
 		}
 
 		var awsService *awsservice.Service
