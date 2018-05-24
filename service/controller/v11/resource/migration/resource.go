@@ -7,18 +7,19 @@ import (
 	"context"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
+
+	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
 const (
-	Name = "migrationv11"
+	name = "migrationv11"
 
-	AWSConfigNamespace               = "default"
-	CredentialSecretDefaultNamespace = "giantswarm"
-	CredentialSecretDefaultName      = "credential-default"
+	awsConfigNamespace               = "default"
+	credentialSecretDefaultNamespace = "giantswarm"
+	credentialSecretDefaultName      = "credential-default"
 )
 
 type Config struct {
@@ -48,7 +49,7 @@ func New(config Config) (*Resource, error) {
 }
 
 func (r *Resource) Name() string {
-	return Name
+	return name
 }
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -64,10 +65,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "CR is missing credential, setting the default")
 
-	customObject.Spec.AWS.CredentialSecret.Namespace = CredentialSecretDefaultNamespace
-	customObject.Spec.AWS.CredentialSecret.Name = CredentialSecretDefaultName
+	customObject.Spec.AWS.CredentialSecret.Namespace = credentialSecretDefaultNamespace
+	customObject.Spec.AWS.CredentialSecret.Name = credentialSecretDefaultName
 
-	_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(AWSConfigNamespace).Update(&customObject)
+	_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(awsConfigNamespace).Update(&customObject)
 	if err != nil {
 		return microerror.Mask(err)
 	}
