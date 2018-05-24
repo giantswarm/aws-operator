@@ -74,7 +74,7 @@ required = [
   name = "github.com/giantswarm/helmclient"
 
 [[constraint]]
-  branch = "master"
+  branch = "hyperkube-1.10.3"
   name = "github.com/giantswarm/k8scloudconfig"
 
 [[constraint]]

@@ -35,8 +35,8 @@ func Test_DesiredState(t *testing.T) {
 			obj:               clusterTpo,
 			expectedBody:      "mybody-",
 			expectedBucket:    "myaccountid-g8s-test-cluster",
-			expectedMasterKey: "cloudconfig/v_3_2_5/master",
-			expectedWorkerKey: "cloudconfig/v_3_2_5/worker",
+			expectedMasterKey: "cloudconfig/v_3_3_1/master",
+			expectedWorkerKey: "cloudconfig/v_3_3_1/worker",
 		},
 	}
 

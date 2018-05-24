@@ -44,6 +44,16 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Allow port 2379 from host cluster to add support for etcd backup.",
 				Kind:        versionbundle.KindAdded,
 			},
+			{
+				Component:   "kubernetes",
+				Description: "Updated to 1.10.2.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Removed kube-state-metrics so it can be managed by chart-operator.",
+				Kind:        versionbundle.KindRemoved,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
@@ -68,7 +78,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "kubernetes",
-				Version: "1.10.1",
+				Version: "1.10.2",
 			},
 			{
 				Name:    "nginx-ingress-controller",
@@ -79,7 +89,7 @@ func VersionBundle() versionbundle.Bundle {
 		Deprecated:   false,
 		Name:         "aws-operator",
 		Time:         time.Date(2018, time.May, 1, 11, 50, 0, 0, time.UTC),
-		Version:      "3.1.1",
+		Version:      "3.2.0",
 		WIP:          true,
 	}
 }
