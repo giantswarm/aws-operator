@@ -54,6 +54,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Removed kube-state-metrics so it can be managed by chart-operator.",
 				Kind:        versionbundle.KindRemoved,
 			},
+			{
+				Component:   "containerlinux",
+				Description: "Updated to 1745.3.1.",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
@@ -62,11 +67,11 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "containerlinux",
-				Version: "1688.5.3",
+				Version: "1745.3.1",
 			},
 			{
 				Name:    "docker",
-				Version: "17.12.1",
+				Version: "18.03.1",
 			},
 			{
 				Name:    "etcd",
