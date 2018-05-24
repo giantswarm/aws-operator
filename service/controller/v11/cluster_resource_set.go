@@ -40,7 +40,7 @@ const (
 
 type ClusterResourceSetConfig struct {
 	CertsSearcher      legacy.Searcher
-	GuestAWSConfig     aws.Config
+	HostAWSConfig      aws.Config
 	HostAWSClients     aws.Clients
 	K8sClient          kubernetes.Interface
 	Logger             micrologger.Logger
@@ -65,14 +65,14 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	if config.CertsSearcher == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.CertsSearcher must not be empty")
 	}
-	if config.GuestAWSConfig.AccessKeyID == "" {
-		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSConfig.AccessKeyID must not be empty")
+	if config.HostAWSConfig.AccessKeyID == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.AccessKeyID must not be empty")
 	}
-	if config.GuestAWSConfig.AccessKeySecret == "" {
-		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSConfig.AccessKeySecret must not be empty")
+	if config.HostAWSConfig.AccessKeySecret == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.AccessKeySecret must not be empty")
 	}
-	if config.GuestAWSConfig.Region == "" {
-		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSConfig.Region must not be empty")
+	if config.HostAWSConfig.Region == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.Region must not be empty")
 	}
 	if config.HostAWSClients.CloudFormation == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.HostAWSClients.CloudFormation must not be empty")
@@ -331,9 +331,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
-			config.GuestAWSConfig.RoleARN = arn
+			config.HostAWSConfig.RoleARN = arn
 
-			awsClient = aws.NewClients(config.GuestAWSConfig)
+			awsClient = aws.NewClients(config.HostAWSConfig)
 		}
 
 		var awsService *awsservice.Service

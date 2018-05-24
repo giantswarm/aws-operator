@@ -552,7 +552,7 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 	{
 		c := v11.ClusterResourceSetConfig{
 			CertsSearcher:      certWatcher,
-			GuestAWSConfig:     guestAWSConfig,
+			HostAWSConfig:      hostAWSConfig,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
