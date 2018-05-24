@@ -75,7 +75,9 @@ func (s *Service) GetHealthz(ctx context.Context) (healthzservice.Response, erro
 
 		go func() {
 			// Set the region for the API client.
-			s.awsConfig.Region = AWSRegion
+			if s.awsConfig.Region == "" {
+				s.awsConfig.Region = AWSRegion
+			}
 			clients := awsutil.NewClients(s.awsConfig)
 
 			// Get the current user.
