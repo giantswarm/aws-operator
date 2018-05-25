@@ -24,6 +24,9 @@ const (
 	// TODO rename to CLUSTER_ID. Note this also had to be changed in the
 	// framework package of e2e-harness.
 	EnvVarClusterID = "CLUSTER_NAME"
+	// EnvVarGuestAWSArn is the process environment variable representing
+	// the GUEST_AWS_ARN env var.
+	EnvVarGuestAWSArn = "GUEST_AWS_ARN"
 	// EnvVarTestedVersion is the process environment variable representing the
 	// TESTED_VERSION env var.
 	EnvVarTestedVersion = "TESTED_VERSION"
@@ -37,6 +40,7 @@ const (
 
 var (
 	circleSHA            string
+	guestAWSArn          string
 	testedVersion        string
 	testDir              string
 	versionBundleVersion string
@@ -46,6 +50,11 @@ func init() {
 	circleSHA = os.Getenv(EnvVarCircleSHA)
 	if circleSHA == "" {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarCircleSHA))
+	}
+
+	guestAWSArn = os.Getenv(EnvVarGuestAWSArn)
+	if guestAWSArn == "" {
+		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarGuestAWSArn))
 	}
 
 	testedVersion = os.Getenv(EnvVarTestedVersion)
@@ -102,6 +111,10 @@ func ClusterID() string {
 	}
 
 	return strings.Join(parts, "-")
+}
+
+func GuestAWSArn() string {
+	return guestAWSArn
 }
 
 func TestedVersion() string {

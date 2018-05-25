@@ -7,12 +7,20 @@ import (
 	"github.com/aws/aws-sdk-go/aws/request"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	"github.com/aws/aws-sdk-go/service/elb"
+	"github.com/aws/aws-sdk-go/service/elb/elbiface"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go/service/iam/iamiface"
 	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go/service/kms/kmsiface"
+	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/aws/aws-sdk-go/service/sts/stsiface"
 )
 
 type EC2ClientMock struct {
+	ec2iface.EC2API
+
 	unexistingSg        bool
 	sgID                string
 	unexistingSubnet    bool
@@ -146,30 +154,10 @@ func (c *CFClientMock) UpdateStack(*awscloudformation.UpdateStackInput) (*awsclo
 }
 
 type IAMClientMock struct {
-	accountID   string
+	iamiface.IAMAPI
+
 	isError     bool
 	peerRoleArn string
-}
-
-func (i *IAMClientMock) GetUser(input *iam.GetUserInput) (*iam.GetUserOutput, error) {
-	if i.isError {
-		return nil, fmt.Errorf("error")
-	}
-	if i.accountID == "" {
-		i.accountID = "00"
-	}
-	// pad accountID to required length
-	toPad := accountIDLength - len(i.accountID)
-	for j := 0; j < toPad; j++ {
-		i.accountID += "0"
-	}
-	output := &iam.GetUserOutput{
-		User: &iam.User{
-			Arn: aws.String("::::" + i.accountID),
-		},
-	}
-
-	return output, nil
 }
 
 func (i *IAMClientMock) GetRole(input *iam.GetRoleInput) (*iam.GetRoleOutput, error) {
@@ -186,6 +174,8 @@ func (i *IAMClientMock) GetRole(input *iam.GetRoleInput) (*iam.GetRoleOutput, er
 }
 
 type KMSClientMock struct {
+	kmsiface.KMSAPI
+
 	keyARN  string
 	isError bool
 }
@@ -204,6 +194,8 @@ func (k *KMSClientMock) DescribeKey(input *kms.DescribeKeyInput) (*kms.DescribeK
 }
 
 type ELBClientMock struct {
+	elbiface.ELBAPI
+
 	dns        string
 	hostedZone string
 	name       string
@@ -244,4 +236,30 @@ func (c *CloudFormationMock) WaitUntilStackCreateComplete(*awscloudformation.Des
 }
 func (c *CloudFormationMock) WaitUntilStackCreateCompleteWithContext(ctx aws.Context, input *awscloudformation.DescribeStacksInput, opts ...request.WaiterOption) error {
 	return nil
+}
+
+type STSClientMock struct {
+	stsiface.STSAPI
+
+	accountID string
+	isError   bool
+}
+
+func (i *STSClientMock) GetCallerIdentity(input *sts.GetCallerIdentityInput) (*sts.GetCallerIdentityOutput, error) {
+	if i.isError {
+		return nil, fmt.Errorf("error")
+	}
+	if i.accountID == "" {
+		i.accountID = "00"
+	}
+	// pad accountID to required length
+	toPad := accountIDLength - len(i.accountID)
+	for j := 0; j < toPad; j++ {
+		i.accountID += "0"
+	}
+	output := &sts.GetCallerIdentityOutput{
+		Arn: aws.String("::::" + i.accountID),
+	}
+
+	return output, nil
 }

@@ -103,6 +103,7 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 		clients := Clients{
 			EC2: &EC2ClientMock{},
 			IAM: &IAMClientMock{},
+			STS: &STSClientMock{},
 		}
 		a := Adapter{}
 

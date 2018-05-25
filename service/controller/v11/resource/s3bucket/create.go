@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
 
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
@@ -22,6 +23,11 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		return microerror.Mask(err)
 	}
 
+	sc, err := servicecontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	for _, bucketInput := range createBucketsState {
 		if bucketInput.Name == "" {
 			continue
@@ -29,7 +35,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating S3 bucket %q", bucketInput.Name))
 
-		_, err = r.clients.S3.CreateBucket(&s3.CreateBucketInput{
+		_, err = sc.AWSClient.S3.CreateBucket(&s3.CreateBucketInput{
 			Bucket: aws.String(bucketInput.Name),
 		})
 		if IsBucketAlreadyExists(err) || IsBucketAlreadyOwnedByYou(err) {
@@ -39,7 +45,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			return microerror.Mask(err)
 		}
 
-		_, err = r.clients.S3.PutBucketTagging(&s3.PutBucketTaggingInput{
+		_, err = sc.AWSClient.S3.PutBucketTagging(&s3.PutBucketTaggingInput{
 			Bucket: aws.String(bucketInput.Name),
 			Tagging: &s3.Tagging{
 				TagSet: r.getS3BucketTags(customObject),
@@ -50,7 +56,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		}
 
 		if bucketInput.IsLoggingBucket {
-			_, err = r.clients.S3.PutBucketAcl(&s3.PutBucketAclInput{
+			_, err = sc.AWSClient.S3.PutBucketAcl(&s3.PutBucketAclInput{
 				Bucket:       aws.String(key.TargetLogBucketName(customObject)),
 				GrantReadACP: aws.String(key.LogDeliveryURI),
 				GrantWrite:   aws.String(key.LogDeliveryURI),
@@ -59,7 +65,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 				return microerror.Mask(err)
 			}
 
-			_, err = r.clients.S3.PutBucketLifecycleConfiguration(&s3.PutBucketLifecycleConfigurationInput{
+			_, err = sc.AWSClient.S3.PutBucketLifecycleConfiguration(&s3.PutBucketLifecycleConfigurationInput{
 				Bucket: aws.String(key.TargetLogBucketName(customObject)),
 				LifecycleConfiguration: &s3.BucketLifecycleConfiguration{
 					Rules: []*s3.LifecycleRule{
@@ -80,7 +86,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		}
 
 		if bucketInput.LoggingEnabled {
-			_, err = r.clients.S3.PutBucketLogging(&s3.PutBucketLoggingInput{
+			_, err = sc.AWSClient.S3.PutBucketLogging(&s3.PutBucketLoggingInput{
 				Bucket: aws.String(bucketInput.Name),
 				BucketLoggingStatus: &s3.BucketLoggingStatus{
 					LoggingEnabled: &s3.LoggingEnabled{

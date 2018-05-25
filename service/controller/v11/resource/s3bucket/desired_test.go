@@ -8,6 +8,7 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 )
 
 func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
@@ -38,7 +39,7 @@ func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
 	{
 		awsConfig := awsservice.DefaultConfig()
 		awsConfig.Clients = awsservice.Clients{
-			IAM: &awsservice.IAMClientMock{},
+			STS: &awsservice.STSClientMock{},
 		}
 		awsConfig.Logger = microloggertest.New()
 		awsService, err = awsservice.New(awsConfig)
@@ -50,7 +51,6 @@ func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
 	var newResource *Resource
 	{
 		resourceConfig := DefaultConfig()
-		resourceConfig.AwsService = awsService
 		resourceConfig.Logger = microloggertest.New()
 		resourceConfig.InstallationName = "test-install"
 
@@ -62,7 +62,10 @@ func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			result, err := newResource.GetDesiredState(context.TODO(), tc.obj)
+			ctx := context.TODO()
+			ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSService: awsService})
+
+			result, err := newResource.GetDesiredState(ctx, tc.obj)
 			if err != nil {
 				t.Fatalf("expected '%v' got '%#v'", nil, err)
 			}

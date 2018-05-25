@@ -1,6 +1,7 @@
 package cloudformation
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -9,20 +10,18 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 
+	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v11/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v11/cloudconfig"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v11/cloudformation"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
 func testConfig() Config {
 	c := Config{}
 
-	c.Clients = &adapter.Clients{}
-	c.EBS = &EBSServiceMock{}
 	c.HostClients = &adapter.Clients{}
 	c.Logger = microloggertest.New()
-	c.Service = &cloudformationservice.CloudFormation{}
 
 	c.InstallationName = "myinstallation"
 
@@ -34,22 +33,27 @@ func TestMainGuestTemplateGetEmptyBody(t *testing.T) {
 	customObject := v1alpha1.AWSConfig{}
 
 	c := testConfig()
-	c.Clients = &adapter.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-		KMS: &adapter.KMSClientMock{},
-	}
 	c.HostClients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
-
 	newResource, err := New(c)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	_, err = newResource.getMainGuestTemplateBody(customObject, StackState{})
+	awsClients := aws.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		KMS: &adapter.KMSClientMock{},
+		STS: &adapter.STSClientMock{},
+	}
+
+	ctx := context.TODO()
+	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+
+	_, err = newResource.getMainGuestTemplateBody(ctx, customObject, StackState{})
 	if err == nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -136,15 +140,10 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 	}
 
 	cfg := testConfig()
-	cfg.Clients = &adapter.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-		KMS: &adapter.KMSClientMock{},
-		ELB: &adapter.ELBClientMock{},
-	}
 	cfg.HostClients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
 	cfg.AdvancedMonitoringEC2 = true
 	cfg.Route53Enabled = true
@@ -153,7 +152,18 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		t.Fatalf("unexpected error %v", err)
 	}
 
-	body, err := newResource.getMainGuestTemplateBody(customObject, stackState)
+	awsClients := aws.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		KMS: &adapter.KMSClientMock{},
+		ELB: &adapter.ELBClientMock{},
+		STS: &adapter.STSClientMock{},
+	}
+
+	ctx := context.TODO()
+	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+
+	body, err := newResource.getMainGuestTemplateBody(ctx, customObject, stackState)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
@@ -336,20 +346,26 @@ func TestMainHostPreTemplateExistingFields(t *testing.T) {
 	}
 
 	cfg := testConfig()
-	cfg.Clients = &adapter.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-	}
 	cfg.HostClients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
 	newResource, err := New(cfg)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
 
-	body, err := newResource.getMainHostPreTemplateBody(customObject)
+	awsClients := aws.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		STS: &adapter.STSClientMock{},
+	}
+
+	ctx := context.TODO()
+	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+
+	body, err := newResource.getMainHostPreTemplateBody(ctx, customObject)
 
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
@@ -392,21 +408,27 @@ func TestMainHostPostTemplateExistingFields(t *testing.T) {
 	}
 
 	cfg := testConfig()
-	cfg.Clients = &adapter.Clients{
-		EC2: &adapter.EC2ClientMock{},
-	}
 	ec2Mock := &adapter.EC2ClientMock{}
 	ec2Mock.SetMatchingRouteTables(1)
 	cfg.HostClients = &adapter.Clients{
 		EC2: ec2Mock,
 		IAM: &adapter.IAMClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
 	newResource, err := New(cfg)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
 
-	body, err := newResource.getMainHostPostTemplateBody(customObject)
+	awsClients := aws.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		STS: &adapter.STSClientMock{},
+	}
+
+	ctx := context.TODO()
+	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+
+	body, err := newResource.getMainHostPostTemplateBody(ctx, customObject)
 
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
@@ -504,24 +526,29 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 	}
 
 	cfg := testConfig()
-	cfg.Clients = &adapter.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-		KMS: &adapter.KMSClientMock{},
-		ELB: &adapter.ELBClientMock{},
-	}
 	cfg.HostClients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
 	cfg.Route53Enabled = false
-
 	newResource, err := New(cfg)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
 
-	body, err := newResource.getMainGuestTemplateBody(customObject, stackState)
+	awsClients := aws.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		KMS: &adapter.KMSClientMock{},
+		ELB: &adapter.ELBClientMock{},
+		STS: &adapter.STSClientMock{},
+	}
+
+	ctx := context.TODO()
+	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+
+	body, err := newResource.getMainGuestTemplateBody(ctx, customObject, stackState)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
@@ -625,24 +652,29 @@ func TestMainGuestTemplateChinaRegion(t *testing.T) {
 	}
 
 	cfg := testConfig()
-	cfg.Clients = &adapter.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-		KMS: &adapter.KMSClientMock{},
-		ELB: &adapter.ELBClientMock{},
-	}
 	cfg.HostClients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
 	cfg.Route53Enabled = false
-
 	newResource, err := New(cfg)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
 
-	body, err := newResource.getMainGuestTemplateBody(customObject, stackState)
+	awsClients := aws.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		KMS: &adapter.KMSClientMock{},
+		ELB: &adapter.ELBClientMock{},
+		STS: &adapter.STSClientMock{},
+	}
+
+	ctx := context.TODO()
+	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+
+	body, err := newResource.getMainGuestTemplateBody(ctx, customObject, stackState)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}

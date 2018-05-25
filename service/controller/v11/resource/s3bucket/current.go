@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
 
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
@@ -19,7 +20,12 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "looking for the S3 buckets")
 
-	accountID, err := r.awsService.GetAccountID()
+	sc, err := servicecontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	accountID, err := sc.AWSService.GetAccountID()
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -61,10 +67,15 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 }
 
 func (r *Resource) isBucketCreated(ctx context.Context, name string) (bool, error) {
+	sc, err := servicecontext.FromContext(ctx)
+	if err != nil {
+		return false, microerror.Mask(err)
+	}
+
 	headInput := &s3.HeadBucketInput{
 		Bucket: aws.String(name),
 	}
-	_, err := r.clients.S3.HeadBucket(headInput)
+	_, err = sc.AWSClient.S3.HeadBucket(headInput)
 	if IsBucketNotFound(err) {
 		return false, nil
 	} else if err != nil {
@@ -75,10 +86,15 @@ func (r *Resource) isBucketCreated(ctx context.Context, name string) (bool, erro
 }
 
 func (r *Resource) getLoggingConfiguration(ctx context.Context, name string) (*s3.GetBucketLoggingOutput, error) {
+	sc, err := servicecontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	bucketLoggingInput := &s3.GetBucketLoggingInput{
 		Bucket: aws.String(name),
 	}
-	bucketLoggingOutput, err := r.clients.S3.GetBucketLogging(bucketLoggingInput)
+	bucketLoggingOutput, err := sc.AWSClient.S3.GetBucketLogging(bucketLoggingInput)
 	if err != nil {
 		return bucketLoggingOutput, microerror.Mask(err)
 	}

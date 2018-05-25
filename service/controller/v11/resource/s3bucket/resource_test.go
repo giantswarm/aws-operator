@@ -7,8 +7,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
-
-	awsservice "github.com/giantswarm/aws-operator/service/aws"
 )
 
 func Test_ContainsBucketState(t *testing.T) {
@@ -96,23 +94,9 @@ func Test_BucketCanBeDeleted(t *testing.T) {
 		},
 	}
 
-	var awsService *awsservice.Service
-	{
-		var err error
-		awsConfig := awsservice.DefaultConfig()
-		awsConfig.Clients = awsservice.Clients{}
-		awsConfig.Logger = microloggertest.New()
-		awsService, err = awsservice.New(awsConfig)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
-	}
-
 	c := Config{}
 
-	c.AwsService = awsService
 	c.Logger = microloggertest.New()
-
 	c.AccessLogsExpiration = 0
 
 	for _, tc := range testCases {
@@ -146,21 +130,9 @@ func Test_getS3BucketTags(t *testing.T) {
 			expectedTags: []*s3.Tag{},
 		},
 	}
-	var awsService *awsservice.Service
-	{
-		var err error
-		awsConfig := awsservice.DefaultConfig()
-		awsConfig.Clients = awsservice.Clients{}
-		awsConfig.Logger = microloggertest.New()
-		awsService, err = awsservice.New(awsConfig)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
-	}
 
 	c := Config{}
 
-	c.AwsService = awsService
 	c.Logger = microloggertest.New()
 	c.InstallationName = "installation-name"
 

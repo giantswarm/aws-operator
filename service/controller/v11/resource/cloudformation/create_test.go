@@ -8,8 +8,9 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 
+	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v11/adapter"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v11/cloudformation"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 )
 
 func Test_Resource_Cloudformation_newCreate(t *testing.T) {
@@ -85,19 +86,13 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 	{
 		c := Config{}
 
-		c.Clients = &adapter.Clients{
-			EC2: &adapter.EC2ClientMock{},
-			IAM: &adapter.IAMClientMock{},
-			KMS: &adapter.KMSClientMock{},
-		}
-		c.EBS = &EBSServiceMock{}
 		c.HostClients = &adapter.Clients{
 			EC2:            &adapter.EC2ClientMock{},
 			CloudFormation: &adapter.CloudFormationMock{},
 			IAM:            &adapter.IAMClientMock{},
+			STS:            &adapter.STSClientMock{},
 		}
 		c.Logger = microloggertest.New()
-		c.Service = &cloudformationservice.CloudFormation{}
 
 		newResource, err = New(c)
 		if err != nil {
@@ -105,9 +100,19 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 		}
 	}
 
+	awsClients := aws.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		KMS: &adapter.KMSClientMock{},
+		STS: &adapter.STSClientMock{},
+	}
+
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			result, err := newResource.newCreateChange(context.TODO(), tc.obj, tc.currentState, tc.desiredState)
+			ctx := context.TODO()
+			ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+
+			result, err := newResource.newCreateChange(ctx, tc.obj, tc.currentState, tc.desiredState)
 			if err != nil {
 				t.Fatal("expected", nil, "got", err)
 			}

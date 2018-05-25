@@ -1,10 +1,13 @@
 package loadbalancer
 
 import (
+	"context"
+
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
@@ -14,12 +17,17 @@ const (
 	loadBalancerTagChunkSize     = 20
 )
 
-func (r *Resource) clusterLoadBalancers(customObject v1alpha1.AWSConfig) (*LoadBalancerState, error) {
+func (r *Resource) clusterLoadBalancers(ctx context.Context, customObject v1alpha1.AWSConfig) (*LoadBalancerState, error) {
 	lbState := &LoadBalancerState{}
 	clusterLBNames := []string{}
 
+	sc, err := servicecontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	// We get all load balancers because the API does not allow tag filters.
-	output, err := r.clients.ELB.DescribeLoadBalancers(&elb.DescribeLoadBalancersInput{})
+	output, err := sc.AWSClient.ELB.DescribeLoadBalancers(&elb.DescribeLoadBalancersInput{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -35,7 +43,7 @@ func (r *Resource) clusterLoadBalancers(customObject v1alpha1.AWSConfig) (*LoadB
 		tagsInput := &elb.DescribeTagsInput{
 			LoadBalancerNames: lbNames,
 		}
-		tagsOutput, err := r.clients.ELB.DescribeTags(tagsInput)
+		tagsOutput, err := sc.AWSClient.ELB.DescribeTags(tagsInput)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

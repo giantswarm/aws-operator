@@ -6,13 +6,14 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/elb"
+	"github.com/aws/aws-sdk-go/service/elb/elbiface"
 	"github.com/giantswarm/microerror"
 )
 
 // ELB is an Elastic Load Balancer
 type ELB struct {
 	AZ                 string
-	Client             *elb.ELB
+	Client             elbiface.ELBAPI
 	dnsName            string
 	hostedZoneID       string
 	IdleTimeoutSeconds int
@@ -233,7 +234,7 @@ func (lb ELB) HostedZoneID() string {
 // NewELBFromExisting initializes an ELB struct with some fields retrieved from the API,
 // such as its FQDN and its Hosted Zone ID. We need these fields when deleting a Record Set.
 // This method doesn't create a new ELB on AWS.
-func NewELBFromExisting(name string, client *elb.ELB) (*ELB, error) {
+func NewELBFromExisting(name string, client elbiface.ELBAPI) (*ELB, error) {
 	lb := ELB{
 		Name:   name,
 		Client: client,

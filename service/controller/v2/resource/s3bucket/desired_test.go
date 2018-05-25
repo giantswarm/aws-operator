@@ -35,7 +35,7 @@ func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
 	{
 		awsConfig := awsservice.DefaultConfig()
 		awsConfig.Clients = awsservice.Clients{
-			IAM: &awsservice.IAMClientMock{},
+			STS: &awsservice.STSClientMock{},
 		}
 		awsConfig.Logger = microloggertest.New()
 		awsService, err = awsservice.New(awsConfig)

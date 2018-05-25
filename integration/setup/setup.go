@@ -16,13 +16,18 @@ import (
 	awsclient "github.com/giantswarm/e2eclients/aws"
 	"github.com/giantswarm/e2etemplates/pkg/e2etemplates"
 	"github.com/giantswarm/microerror"
+	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/aws-operator/integration/teardown"
 )
 
 const (
+	awsOperatorArnKey     = "aws.awsoperator.arn"
 	awsResourceValuesFile = "/tmp/aws-operator-values.yaml"
+	credentialName        = "credential-default"
+	credentialNamespace   = "giantswarm"
 )
 
 func HostPeerVPC(c *awsclient.Client, g *framework.Guest, h *framework.Host) error {
@@ -83,6 +88,10 @@ func Resources(c *awsclient.Client, g *framework.Guest, h *framework.Host) error
 
 	{
 		err = h.InstallCertResource()
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		err = installCredential(h)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -174,6 +183,41 @@ func installAWSResource() error {
 		}
 
 		err = framework.HelmCmd("registry install quay.io/giantswarm/aws-resource-lab-chart:stable -- -n aws-resource-lab --values " + awsResourceValuesFile)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		return nil
+	}
+	b := framework.NewExponentialBackoff(framework.ShortMaxWait, framework.ShortMaxInterval)
+	n := func(err error, delay time.Duration) {
+		log.Println("level", "debug", "message", err.Error())
+	}
+
+	err := backoff.RetryNotify(o, b, n)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
+func installCredential(h *framework.Host) error {
+	o := func() error {
+		k8sClient := h.K8sClient()
+
+		k8sClient.CoreV1().Secrets(credentialNamespace).Delete(credentialName, &metav1.DeleteOptions{})
+
+		secret := &v1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: credentialName,
+			},
+			Data: map[string][]byte{
+				awsOperatorArnKey: []byte(env.GuestAWSArn()),
+			},
+		}
+
+		_, err := k8sClient.CoreV1().Secrets(credentialNamespace).Create(secret)
 		if err != nil {
 			return microerror.Mask(err)
 		}

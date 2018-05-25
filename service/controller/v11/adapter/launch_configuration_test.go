@@ -51,6 +51,7 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 		clients := Clients{
 			EC2: &EC2ClientMock{},
 			IAM: &IAMClientMock{},
+			STS: &STSClientMock{},
 		}
 		a := Adapter{}
 
@@ -100,7 +101,8 @@ func TestAdapterLaunchConfigurationSmallCloudConfig(t *testing.T) {
 	a := Adapter{}
 	clients := Clients{
 		EC2: &EC2ClientMock{},
-		IAM: &IAMClientMock{accountID: "000000000000"},
+		IAM: &IAMClientMock{},
+		STS: &STSClientMock{accountID: "000000000000"},
 	}
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{

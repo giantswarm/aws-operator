@@ -91,6 +91,14 @@ func BucketObjectName(templateVersion string, prefix string) string {
 	return fmt.Sprintf("cloudconfig/%s/%s", templateVersion, prefix)
 }
 
+func CredentialName(customObject v1alpha1.AWSConfig) string {
+	return customObject.Spec.AWS.CredentialSecret.Name
+}
+
+func CredentialNamespace(customObject v1alpha1.AWSConfig) string {
+	return customObject.Spec.AWS.CredentialSecret.Namespace
+}
+
 func CloudConfigSmallTemplates() []string {
 	return []string{
 		cloudconfig.Small,

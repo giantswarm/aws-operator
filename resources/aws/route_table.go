@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -17,7 +18,7 @@ type RouteTable struct {
 	VpcID string
 	id    string
 	// Dependencies.
-	Client *ec2.EC2
+	Client ec2iface.EC2API
 	Logger micrologger.Logger
 }
 

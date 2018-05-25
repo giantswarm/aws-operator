@@ -8,10 +8,17 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
+
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 )
 
 func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
 	bucketsInput, err := toBucketState(deleteChange)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	sc, err := servicecontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -30,7 +37,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 				Bucket:     aws.String(bucketInput.Name),
 				StartAfter: startAfter,
 			}
-			result, err := r.clients.S3.ListObjectsV2(input)
+			result, err := sc.AWSClient.S3.ListObjectsV2(input)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -41,7 +48,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			}
 
 			for _, object := range result.Contents {
-				_, err := r.clients.S3.DeleteObject(&s3.DeleteObjectInput{
+				_, err := sc.AWSClient.S3.DeleteObject(&s3.DeleteObjectInput{
 					Bucket: aws.String(bucketInput.Name),
 					Key:    object.Key,
 				})
@@ -55,7 +62,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			}
 		}
 
-		_, err = r.clients.S3.DeleteBucket(&s3.DeleteBucketInput{
+		_, err = sc.AWSClient.S3.DeleteBucket(&s3.DeleteBucketInput{
 			Bucket: aws.String(bucketInput.Name),
 		})
 		if IsBucketNotFound(err) {

@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go/service/sts"
 )
 
 const (
@@ -72,6 +73,7 @@ type Clients struct {
 	IAM            IAMClient
 	KMS            KMSClient
 	ELB            ELBClient
+	STS            STSClient
 }
 
 // TODO we copy this because of a circular import issue with the cloudformation
@@ -140,4 +142,9 @@ type SmallCloudconfigConfig struct {
 // ELBClient describes the methods required to be implemented by a ELB AWS client.
 type ELBClient interface {
 	DescribeLoadBalancers(*elb.DescribeLoadBalancersInput) (*elb.DescribeLoadBalancersOutput, error)
+}
+
+// STSClient describes the methods required to be implemented by a STS AWS client.
+type STSClient interface {
+	GetCallerIdentity(*sts.GetCallerIdentityInput) (*sts.GetCallerIdentityOutput, error)
 }

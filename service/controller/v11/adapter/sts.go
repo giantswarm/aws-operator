@@ -4,16 +4,16 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/giantswarm/microerror"
 )
 
 func AccountID(clients Clients) (string, error) {
-	resp, err := clients.IAM.GetUser(&iam.GetUserInput{})
+	resp, err := clients.STS.GetCallerIdentity(&sts.GetCallerIdentityInput{})
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-	userArn := *resp.User.Arn
+	userArn := *resp.Arn
 	accountID := strings.Split(userArn, ":")[accountIDIndex]
 	if err := ValidateAccountID(accountID); err != nil {
 		return "", microerror.Mask(err)

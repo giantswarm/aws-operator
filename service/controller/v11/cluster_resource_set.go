@@ -20,6 +20,8 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v11/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v11/cloudconfig"
 	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v11/cloudformation"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
+	"github.com/giantswarm/aws-operator/service/controller/v11/credential"
 	"github.com/giantswarm/aws-operator/service/controller/v11/ebs"
 	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v11/resource/cloudformation"
@@ -41,7 +43,7 @@ const (
 type ClusterResourceSetConfig struct {
 	CertsSearcher      legacy.Searcher
 	G8sClient          versioned.Interface
-	GuestAWSClients    aws.Clients
+	HostAWSConfig      aws.Config
 	HostAWSClients     aws.Clients
 	K8sClient          kubernetes.Interface
 	Logger             micrologger.Logger
@@ -69,23 +71,14 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.G8sClient must not be empty")
 	}
-	if config.GuestAWSClients.CloudFormation == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSClients.CloudFormation must not be empty")
+	if config.HostAWSConfig.AccessKeyID == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.AccessKeyID must not be empty")
 	}
-	if config.GuestAWSClients.EC2 == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSClients.EC2 must not be empty")
+	if config.HostAWSConfig.AccessKeySecret == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.AccessKeySecret must not be empty")
 	}
-	if config.GuestAWSClients.ELB == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSClients.ELB must not be empty")
-	}
-	if config.GuestAWSClients.IAM == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSClients.IAM must not be empty")
-	}
-	if config.GuestAWSClients.KMS == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSClients.KMS must not be empty")
-	}
-	if config.GuestAWSClients.S3 == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSClients.S3 must not be empty")
+	if config.HostAWSConfig.Region == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.Region must not be empty")
 	}
 	if config.HostAWSClients.CloudFormation == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.HostAWSClients.CloudFormation must not be empty")
@@ -116,68 +109,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.SubnetList must not be empty when %T.APIWhitelist is enabled", config)
 	}
 
-	var awsService *awsservice.Service
-	{
-		c := awsservice.Config{
-			Clients: awsservice.Clients{
-				IAM: config.GuestAWSClients.IAM,
-				KMS: config.GuestAWSClients.KMS,
-			},
-			Logger: config.Logger,
-		}
-
-		awsService, err = awsservice.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var cloudConfig *cloudconfig.CloudConfig
-	{
-		c := cloudconfig.Config{
-			KMSClient: config.GuestAWSClients.KMS,
-			Logger:    config.Logger,
-
-			OIDC: config.OIDC,
-			PodInfraContainerImage: config.PodInfraContainerImage,
-		}
-
-		cloudConfig, err = cloudconfig.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var cloudFormationService *cloudformationservice.CloudFormation
-	{
-		c := cloudformationservice.Config{
-			Client: config.GuestAWSClients.CloudFormation,
-		}
-
-		cloudFormationService, err = cloudformationservice.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var ebsService ebs.Interface
-	{
-		c := ebs.Config{
-			Client: config.GuestAWSClients.EC2,
-			Logger: config.Logger,
-		}
-		ebsService, err = ebs.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var kmsKeyResource controller.Resource
 	{
 		c := kmskey.Config{
-			Clients: kmskey.Clients{
-				KMS: config.GuestAWSClients.KMS,
-			},
 			Logger: config.Logger,
 
 			InstallationName: config.InstallationName,
@@ -210,10 +144,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var s3BucketResource controller.Resource
 	{
 		c := s3bucket.Config{
-			AwsService: awsService,
-			Clients: s3bucket.Clients{
-				S3: config.GuestAWSClients.S3,
-			},
 			Logger: config.Logger,
 
 			AccessLogsExpiration: config.AccessLogsExpiration,
@@ -236,12 +166,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var s3BucketObjectResource controller.Resource
 	{
 		c := s3object.Config{
-			AwsService: awsService,
-			Clients: s3object.Clients{
-				S3:  config.GuestAWSClients.S3,
-				KMS: config.GuestAWSClients.KMS,
-			},
-			CloudConfig:       cloudConfig,
 			CertWatcher:       config.CertsSearcher,
 			Logger:            config.Logger,
 			RandomKeySearcher: config.RandomkeysSearcher,
@@ -261,9 +185,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var loadBalancerResource controller.Resource
 	{
 		c := loadbalancer.Config{
-			Clients: loadbalancer.Clients{
-				ELB: config.GuestAWSClients.ELB,
-			},
 			Logger: config.Logger,
 		}
 
@@ -276,8 +197,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var ebsVolumeResource controller.Resource
 	{
 		c := ebsvolume.Config{
-			Logger:  config.Logger,
-			Service: ebsService,
+			Logger: config.Logger,
 		}
 
 		ebsVolumeResource, err = ebsvolume.New(c)
@@ -289,21 +209,13 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var cloudformationResource controller.Resource
 	{
 		c := cloudformationresource.Config{
-			Clients: &adapter.Clients{
-				EC2:            config.GuestAWSClients.EC2,
-				CloudFormation: config.GuestAWSClients.CloudFormation,
-				IAM:            config.GuestAWSClients.IAM,
-				KMS:            config.GuestAWSClients.KMS,
-				ELB:            config.GuestAWSClients.ELB,
-			},
-			EBS: ebsService,
 			HostClients: &adapter.Clients{
 				EC2:            config.HostAWSClients.EC2,
 				IAM:            config.HostAWSClients.IAM,
+				STS:            config.HostAWSClients.STS,
 				CloudFormation: config.HostAWSClients.CloudFormation,
 			},
-			Logger:  config.Logger,
-			Service: cloudFormationService,
+			Logger: config.Logger,
 			APIWhitelist: adapter.APIWhitelist{
 				Enabled:    config.APIWhitelist.Enabled,
 				SubnetList: config.APIWhitelist.SubnetList,
@@ -364,9 +276,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var endpointsResource controller.Resource
 	{
 		c := endpoints.Config{
-			Clients: endpoints.Clients{
-				EC2: config.GuestAWSClients.EC2,
-			},
 			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 		}
@@ -435,6 +344,83 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		if config.GuestUpdateEnabled {
 			updateallowedcontext.SetUpdateAllowed(ctx)
 		}
+
+		var awsClient aws.Clients
+		{
+			arn, err := credential.GetARN(config.K8sClient, obj)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+			c := config.HostAWSConfig
+			c.RoleARN = arn
+
+			awsClient = aws.NewClients(c)
+		}
+
+		var awsService *awsservice.Service
+		{
+			c := awsservice.Config{
+				Clients: awsservice.Clients{
+					KMS: awsClient.KMS,
+					STS: awsClient.STS,
+				},
+				Logger: config.Logger,
+			}
+
+			awsService, err = awsservice.New(c)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+		}
+
+		var cloudConfig *cloudconfig.CloudConfig
+		{
+			c := cloudconfig.Config{
+				KMSClient: awsClient.KMS,
+				Logger:    config.Logger,
+
+				OIDC: config.OIDC,
+				PodInfraContainerImage: config.PodInfraContainerImage,
+			}
+
+			cloudConfig, err = cloudconfig.New(c)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+		}
+
+		var ebsService ebs.Interface
+		{
+			c := ebs.Config{
+				Client: awsClient.EC2,
+				Logger: config.Logger,
+			}
+			ebsService, err = ebs.New(c)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+		}
+
+		var cloudFormationService *cloudformationservice.CloudFormation
+		{
+			c := cloudformationservice.Config{
+				Client: awsClient.CloudFormation,
+			}
+
+			cloudFormationService, err = cloudformationservice.New(c)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+		}
+
+		c := servicecontext.Context{
+			AWSClient:      awsClient,
+			AWSService:     awsService,
+			CloudConfig:    cloudConfig,
+			CloudFormation: *cloudFormationService,
+			EBSService:     ebsService,
+		}
+		ctx = servicecontext.NewContext(ctx, c)
 
 		return ctx, nil
 	}
