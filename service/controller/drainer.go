@@ -68,14 +68,20 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 	if config.GuestAWSConfig.Region == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.GuestAWSConfig.Region must not be empty", config)
 	}
-	if config.HostAWSConfig.AccessKeyID == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSConfig.AccessKeyID must not be empty", config)
-	}
-	if config.HostAWSConfig.AccessKeySecret == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSConfig.AccessKeySecret must not be empty", config)
-	}
-	if config.HostAWSConfig.Region == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSConfig.Region must not be empty", config)
+	// TODO: remove this when all version prior to v11 are removed
+	if config.HostAWSConfig.AccessKeyID == "" && config.HostAWSConfig.AccessKeySecret == "" {
+		config.Logger.Log("debug", "no host cluster account credentials supplied, assuming guest and host uses same account")
+		config.HostAWSConfig = config.GuestAWSConfig
+	} else {
+		if config.HostAWSConfig.AccessKeyID == "" {
+			return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.AccessKeyID must not be empty")
+		}
+		if config.HostAWSConfig.AccessKeySecret == "" {
+			return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.AccessKeySecret must not be empty")
+		}
+		if config.HostAWSConfig.Region == "" {
+			return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.Region must not be empty")
+		}
 	}
 	if config.ProjectName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ProjectName must not be empty", config)
