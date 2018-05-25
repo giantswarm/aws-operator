@@ -162,10 +162,16 @@ func New(config Config) (*Service, error) {
 			K8sExtClient: k8sExtClient,
 			Logger:       config.Logger,
 
-			AWS: controller.DrainerConfigAWS{
+			GuestAWSConfig: controller.DrainerConfigAWS{
 				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
 				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
 				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
+				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
+			},
+			HostAWSConfig: controller.DrainerConfigAWS{
+				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
+				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
+				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
 				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
 			},
 			GuestUpdateEnabled: config.Viper.GetBool(config.Flag.Service.Guest.Update.Enabled),
