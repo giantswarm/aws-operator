@@ -190,14 +190,12 @@ func New(config Config) (*Service, error) {
 			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
 			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
 			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
+			Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
 		}
 	}
 
 	var alerterService *alerter.Service
 	{
-		// Set the region, in the operator this comes from the cluster object.
-		awsConfig.Region = config.Viper.GetString(config.Flag.Service.AWS.Region)
-
 		alerterConfig := alerter.DefaultConfig()
 		alerterConfig.AwsConfig = awsConfig
 		alerterConfig.InstallationName = config.Viper.GetString(config.Flag.Service.Installation.Name)
