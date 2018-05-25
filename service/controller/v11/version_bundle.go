@@ -56,7 +56,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "containerlinux",
-				Description: "Updated to 1745.3.1.",
+				Description: "Updated to 1745.4.0.",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
@@ -67,7 +67,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "containerlinux",
-				Version: "1745.3.1",
+				Version: "1745.4.0",
 			},
 			{
 				Name:    "docker",
