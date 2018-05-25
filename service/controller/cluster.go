@@ -114,7 +114,7 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 	if config.GuestAWSConfig.Region == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSConfig.Region must not be empty")
 	}
-	// TODO: remove this when all version prior to v11 are removed.
+	// TODO: remove this when all version prior to v11 are removed
 	if config.HostAWSConfig.AccessKeyID == "" && config.HostAWSConfig.AccessKeySecret == "" {
 		config.Logger.Log("debug", "no host cluster account credentials supplied, assuming guest and host uses same account")
 		config.HostAWSConfig = config.GuestAWSConfig
