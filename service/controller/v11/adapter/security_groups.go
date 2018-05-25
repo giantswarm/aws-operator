@@ -2,6 +2,7 @@ package adapter
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -196,6 +197,8 @@ func (s *securityGroupsAdapter) getIngressRules(customObject v1alpha1.AWSConfig)
 func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupRule, error) {
 	// When API whitelisting is enabled, add separate security group rule per each subnet.
 	if cfg.APIWhitelist.Enabled {
+		fmt.Fprintf(os.Stdout, "API white listing enabled")
+
 		rules := []securityGroupRule{
 			// Allow traffic from host cluster CIDR.
 			{
@@ -224,15 +227,21 @@ func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupR
 			}
 		}
 
+		fmt.Fprintf(os.Stdout, "Getting NAT gateway rules")
+
 		// Whitelist public EIPs of the host cluster NAT gateways.
 		hostClusterNATGatewayRules, err := getHostClusterNATGatewayRules(cfg)
 		if err != nil {
 			return []securityGroupRule{}, microerror.Mask(err)
 		}
 
+		fmt.Fprintf(os.Stdout, "Got NAT gateway rules %#v", hostClusterNATGatewayRules)
+
 		for _, gatewayRule := range hostClusterNATGatewayRules {
 			rules = append(rules, gatewayRule)
 		}
+
+		fmt.Fprintf(os.Stdout, "All master rules %#v", rules)
 
 		return rules, nil
 	} else {
@@ -250,6 +259,8 @@ func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupR
 }
 
 func getHostClusterNATGatewayRules(cfg Config) ([]securityGroupRule, error) {
+	fmt.Fprintf(os.Stdout, "Getting NAT gateway EIPs")
+
 	gatewayRules := []securityGroupRule{}
 
 	// Get all EIPs tagged with the host cluster installation tag.
@@ -269,6 +280,8 @@ func getHostClusterNATGatewayRules(cfg Config) ([]securityGroupRule, error) {
 		return gatewayRules, microerror.Mask(err)
 	}
 
+	fmt.Fprintf(os.Stdout, "EC2 Describe Addresses %#v", output)
+
 	for _, address := range output.Addresses {
 		gatewayRule := securityGroupRule{
 			Port:       key.KubernetesAPISecurePort(cfg.CustomObject),
@@ -278,6 +291,8 @@ func getHostClusterNATGatewayRules(cfg Config) ([]securityGroupRule, error) {
 
 		gatewayRules = append(gatewayRules, gatewayRule)
 	}
+
+	fmt.Fprintf(os.Stdout, "Sec group rules %#v", gatewayRules)
 
 	return gatewayRules, nil
 }
