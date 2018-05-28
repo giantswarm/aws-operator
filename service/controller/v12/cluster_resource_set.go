@@ -1,4 +1,4 @@
-package v11
+package v12
 
 import (
 	"context"
@@ -17,23 +17,23 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v11/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/v11/cloudconfig"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v11/cloudformation"
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
-	"github.com/giantswarm/aws-operator/service/controller/v11/credential"
-	"github.com/giantswarm/aws-operator/service/controller/v11/ebs"
-	"github.com/giantswarm/aws-operator/service/controller/v11/key"
-	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v11/resource/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v11/resource/ebsvolume"
-	"github.com/giantswarm/aws-operator/service/controller/v11/resource/endpoints"
-	"github.com/giantswarm/aws-operator/service/controller/v11/resource/kmskey"
-	"github.com/giantswarm/aws-operator/service/controller/v11/resource/loadbalancer"
-	"github.com/giantswarm/aws-operator/service/controller/v11/resource/migration"
-	"github.com/giantswarm/aws-operator/service/controller/v11/resource/namespace"
-	"github.com/giantswarm/aws-operator/service/controller/v11/resource/s3bucket"
-	"github.com/giantswarm/aws-operator/service/controller/v11/resource/s3object"
-	"github.com/giantswarm/aws-operator/service/controller/v11/resource/service"
+	"github.com/giantswarm/aws-operator/service/controller/v12/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v12/cloudconfig"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v12/cloudformation"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
+	"github.com/giantswarm/aws-operator/service/controller/v12/credential"
+	"github.com/giantswarm/aws-operator/service/controller/v12/ebs"
+	"github.com/giantswarm/aws-operator/service/controller/v12/key"
+	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v12/resource/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v12/resource/ebsvolume"
+	"github.com/giantswarm/aws-operator/service/controller/v12/resource/endpoints"
+	"github.com/giantswarm/aws-operator/service/controller/v12/resource/kmskey"
+	"github.com/giantswarm/aws-operator/service/controller/v12/resource/loadbalancer"
+	"github.com/giantswarm/aws-operator/service/controller/v12/resource/migration"
+	"github.com/giantswarm/aws-operator/service/controller/v12/resource/namespace"
+	"github.com/giantswarm/aws-operator/service/controller/v12/resource/s3bucket"
+	"github.com/giantswarm/aws-operator/service/controller/v12/resource/s3object"
+	"github.com/giantswarm/aws-operator/service/controller/v12/resource/service"
 )
 
 const (

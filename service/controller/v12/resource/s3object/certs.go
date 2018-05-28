@@ -6,7 +6,7 @@ import (
 	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
 )
 
 func (r *Resource) encodeTLSAssets(ctx context.Context, assets legacy.AssetsBundle, kmsKeyArn string) (*legacy.CompactTLSAssets, error) {

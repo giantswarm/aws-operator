@@ -15,7 +15,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "s3objectv11"
+	Name = "s3objectv12"
 )
 
 // Config represents the configuration used to create a new cloudformation resource.
