@@ -400,9 +400,9 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 		NOTE 1: AMIs should always be for HVM virtualisation and not PV.
 		NOTE 2: You also need to update the tests.
 
-		service/awsconfig/v11/key/key_test.go
-		service/awsconfig/v11/resource/cloudformation/adapter/adapter_test.go
-		service/resource/cloudformationv11/main_stack_test.go
+		service/controller/v12/key/key_test.go
+		service/controller/v12/adapter/adapter_test.go
+		service/controller/v12/resource/cloudformation/main_stack_test.go
 
 		Current Release: CoreOS Container Linux stable 1745.4.0 (HVM)
 	*/
