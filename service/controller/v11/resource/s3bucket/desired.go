@@ -5,7 +5,8 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v10/key"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
+	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
@@ -14,7 +15,12 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	accountID, err := r.awsService.GetAccountID()
+	sc, err := servicecontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	accountID, err := sc.AWSService.GetAccountID()
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}

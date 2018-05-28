@@ -8,6 +8,9 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/fake"
+
+	"github.com/giantswarm/aws-operator/client/aws"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 )
 
 func Test_Resource_Endpoints_GetDesiredState(t *testing.T) {
@@ -42,21 +45,24 @@ func Test_Resource_Endpoints_GetDesiredState(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			c := Config{
-				Clients: Clients{
-					EC2: &EC2ClientMock{
-						privateIPAddress: tc.expectedIPAddress,
-					},
-				},
 				K8sClient: fake.NewSimpleClientset(),
 				Logger:    microloggertest.New(),
 			}
 			newResource, err = New(c)
-
 			if err != nil {
 				t.Fatal("expected", nil, "got", err)
 			}
 
-			result, err := newResource.GetDesiredState(context.TODO(), tc.obj)
+			awsClients := aws.Clients{
+				EC2: EC2ClientMock{
+					privateIPAddress: tc.expectedIPAddress,
+				},
+			}
+
+			ctx := context.TODO()
+			ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+
+			result, err := newResource.GetDesiredState(ctx, tc.obj)
 			if err != nil {
 				t.Fatalf("expected '%v' got '%#v'", nil, err)
 			}

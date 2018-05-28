@@ -3,17 +3,17 @@ package cloudconfig
 import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/legacy"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_2_5"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_3_1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
-	"github.com/giantswarm/aws-operator/service/controller/v10/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v11/templates/cloudconfig"
 )
 
 const (
 	// MasterCloudConfigVersion defines the version of k8scloudconfig in use.
 	// It is used in the main stack output and S3 object paths.
-	MasterCloudConfigVersion = "v_3_2_5"
+	MasterCloudConfigVersion = "v_3_3_1"
 )
 
 // NewMasterTemplate generates a new master cloud config template and returns it
@@ -37,6 +37,7 @@ func (c *CloudConfig) NewMasterTemplate(customObject v1alpha1.AWSConfig, certs l
 			RandomKeyTmplSet: randomKeyTmplSet,
 		}
 		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = c.k8sAPIExtraArgs
+		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
 	}
 
 	var newCloudConfig *k8scloudconfig.CloudConfig

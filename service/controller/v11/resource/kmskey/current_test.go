@@ -6,6 +6,9 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
+
+	"github.com/giantswarm/aws-operator/client/aws"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 )
 
 func Test_CurrentState(t *testing.T) {
@@ -41,7 +44,7 @@ func Test_CurrentState(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			resourceConfig.Clients = Clients{
+			awsClients := aws.Clients{
 				KMS: &KMSClientMock{
 					keyID:   tc.expectedKeyID,
 					isError: tc.expectedKMSError,
@@ -52,7 +55,10 @@ func Test_CurrentState(t *testing.T) {
 				t.Error("expected", nil, "got", err)
 			}
 
-			result, err := newResource.GetCurrentState(context.TODO(), customObject)
+			ctx := context.TODO()
+			ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+
+			result, err := newResource.GetCurrentState(ctx, customObject)
 			if err != nil && !tc.expectedKMSError {
 				t.Errorf("unexpected error %v", err)
 			}

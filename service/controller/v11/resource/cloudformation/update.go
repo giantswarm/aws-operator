@@ -11,8 +11,9 @@ import (
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
 
-	"github.com/giantswarm/aws-operator/service/controller/v10/ebs"
-	"github.com/giantswarm/aws-operator/service/controller/v10/key"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
+	"github.com/giantswarm/aws-operator/service/controller/v11/ebs"
+	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
@@ -28,13 +29,18 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	if stackStateToUpdate.Name != "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "updating the guest cluster main stack")
 
+		sc, err := servicecontext.FromContext(ctx)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
 		if stackStateToUpdate.ShouldUpdate && !stackStateToUpdate.ShouldScale {
 			// Fetch the etcd volume information.
 			filterFuncs := []func(t *ec2.Tag) bool{
 				ebs.NewDockerVolumeFilter(customObject),
 				ebs.NewEtcdVolumeFilter(customObject),
 			}
-			volumes, err := r.ebs.ListVolumes(customObject, filterFuncs...)
+			volumes, err := sc.EBSService.ListVolumes(customObject, filterFuncs...)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -46,7 +52,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 			wait := true
 			for _, v := range volumes {
 				for _, a := range v.Attachments {
-					err := r.ebs.DetachVolume(ctx, v.VolumeID, a, force, shutdown, wait)
+					err := sc.EBSService.DetachVolume(ctx, v.VolumeID, a, force, shutdown, wait)
 					if err != nil {
 						return microerror.Mask(err)
 					}
@@ -56,7 +62,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 
 		// Once the etcd volume is cleaned up and the master instance is down we can
 		// go ahead to let CloudFormation do its job.
-		_, err = r.clients.CloudFormation.UpdateStack(&stackStateToUpdate.UpdateStackInput)
+		_, err = sc.AWSClient.CloudFormation.UpdateStack(&stackStateToUpdate.UpdateStackInput)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -86,8 +92,8 @@ func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 	return patch, nil
 }
 
-func (r *Resource) computeUpdateState(customObject v1alpha1.AWSConfig, stackState StackState) (cloudformation.UpdateStackInput, error) {
-	mainTemplate, err := r.getMainGuestTemplateBody(customObject, stackState)
+func (r *Resource) computeUpdateState(ctx context.Context, customObject v1alpha1.AWSConfig, stackState StackState) (cloudformation.UpdateStackInput, error) {
+	mainTemplate, err := r.getMainGuestTemplateBody(ctx, customObject, stackState)
 	if err != nil {
 		return cloudformation.UpdateStackInput{}, microerror.Mask(err)
 	}
@@ -129,7 +135,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		if shouldUpdate(currentStackState, desiredStackState) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack has to be updated")
 
-			updateStackInput, err := r.computeUpdateState(customObject, desiredStackState)
+			updateStackInput, err := r.computeUpdateState(ctx, customObject, desiredStackState)
 			if err != nil {
 				return StackState{}, microerror.Mask(err)
 			}
@@ -165,7 +171,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 
 			desiredStackState.MasterInstanceResourceName = currentStackState.MasterInstanceResourceName
 
-			updateStackInput, err := r.computeUpdateState(customObject, desiredStackState)
+			updateStackInput, err := r.computeUpdateState(ctx, customObject, desiredStackState)
 			if err != nil {
 				return StackState{}, microerror.Mask(err)
 			}

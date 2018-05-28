@@ -84,9 +84,6 @@ func Test_Resource_Endpoints_newDeleteChange(t *testing.T) {
 	var newResource *Resource
 	{
 		c := Config{
-			Clients: Clients{
-				EC2: &EC2ClientMock{},
-			},
 			K8sClient: fake.NewSimpleClientset(),
 			Logger:    microloggertest.New(),
 		}

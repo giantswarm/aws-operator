@@ -9,6 +9,7 @@ const Instance = `{{define "instance"}}
       IamInstanceProfile: !Ref MasterInstanceProfile
       ImageId: {{ .Instance.Image.ID }}
       InstanceType: {{ .Instance.Master.Instance.Type }}
+      Monitoring: {{ .Instance.Master.Instance.Monitoring }}
       SecurityGroupIds:
       - !Ref MasterSecurityGroup
       SubnetId: !Ref PrivateSubnet

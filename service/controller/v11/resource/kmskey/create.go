@@ -7,7 +7,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v10/key"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
+	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
@@ -22,25 +23,30 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 	}
 
 	if createInput.KeyAlias != "" {
-		key, err := r.awsClients.KMS.CreateKey(&kms.CreateKeyInput{})
+		sc, err := servicecontext.FromContext(ctx)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		if _, err := r.awsClients.KMS.CreateAlias(&kms.CreateAliasInput{
+		key, err := sc.AWSClient.KMS.CreateKey(&kms.CreateKeyInput{})
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if _, err := sc.AWSClient.KMS.CreateAlias(&kms.CreateAliasInput{
 			AliasName:   aws.String(createInput.KeyAlias),
 			TargetKeyId: key.KeyMetadata.Arn,
 		}); err != nil {
 			return microerror.Mask(err)
 		}
 
-		if _, err := r.awsClients.KMS.EnableKeyRotation(&kms.EnableKeyRotationInput{
+		if _, err := sc.AWSClient.KMS.EnableKeyRotation(&kms.EnableKeyRotationInput{
 			KeyId: key.KeyMetadata.KeyId,
 		}); err != nil {
 			return microerror.Mask(err)
 		}
 
-		if _, err := r.awsClients.KMS.TagResource(&kms.TagResourceInput{
+		if _, err := sc.AWSClient.KMS.TagResource(&kms.TagResourceInput{
 			KeyId: key.KeyMetadata.KeyId,
 			Tags:  r.getKMSTags(customObject),
 		}); err != nil {

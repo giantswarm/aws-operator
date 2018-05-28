@@ -8,7 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v10/key"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
+	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
 // EnsureDeleted ensures that any ELBs from Kubernetes LoadBalancer services
@@ -19,7 +20,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	lbState, err := r.clusterLoadBalancers(customObject)
+	lbState, err := r.clusterLoadBalancers(ctx, customObject)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -27,8 +28,13 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	if lbState != nil && len(lbState.LoadBalancerNames) > 0 {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting %d load balancers", len(lbState.LoadBalancerNames)))
 
+		sc, err := servicecontext.FromContext(ctx)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
 		for _, lbName := range lbState.LoadBalancerNames {
-			_, err := r.clients.ELB.DeleteLoadBalancer(&elb.DeleteLoadBalancerInput{
+			_, err := sc.AWSClient.ELB.DeleteLoadBalancer(&elb.DeleteLoadBalancerInput{
 				LoadBalancerName: aws.String(lbName),
 			})
 			if err != nil {

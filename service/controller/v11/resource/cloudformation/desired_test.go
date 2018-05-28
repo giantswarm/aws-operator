@@ -7,8 +7,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	"github.com/giantswarm/aws-operator/service/controller/v10/adapter"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v10/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v11/adapter"
 )
 
 func Test_Resource_Cloudformation_GetDesiredState(t *testing.T) {
@@ -40,11 +39,8 @@ func Test_Resource_Cloudformation_GetDesiredState(t *testing.T) {
 	{
 		c := Config{}
 
-		c.Clients = &adapter.Clients{}
-		c.EBS = &EBSServiceMock{}
 		c.HostClients = &adapter.Clients{}
 		c.Logger = microloggertest.New()
-		c.Service = &cloudformationservice.CloudFormation{}
 
 		newResource, err = New(c)
 		if err != nil {
@@ -54,7 +50,9 @@ func Test_Resource_Cloudformation_GetDesiredState(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			result, err := newResource.GetDesiredState(context.TODO(), tc.obj)
+			ctx := context.TODO()
+
+			result, err := newResource.GetDesiredState(ctx, tc.obj)
 			if err != nil {
 				t.Fatal("expected", nil, "got", err)
 			}

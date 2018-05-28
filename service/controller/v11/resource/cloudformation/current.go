@@ -8,8 +8,9 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v10/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v10/key"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v11/cloudformation"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
+	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
@@ -22,6 +23,11 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	stackName := key.MainGuestStackName(customObject)
 
+	sc, err := servicecontext.FromContext(ctx)
+	if err != nil {
+		return StackState{}, microerror.Mask(err)
+	}
+
 	// In order to compute the current state of the guest cluster's cloud
 	// formation stack we have to describe the CF stacks and lookup the right
 	// stack. We dispatch our custom StackState structure and enrich it with all
@@ -29,7 +35,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	var stackOutputs []*cloudformation.Output
 	var stackStatus string
 	{
-		stackOutputs, stackStatus, err = r.service.DescribeOutputsAndStatus(stackName)
+		stackOutputs, stackStatus, err = sc.CloudFormation.DescribeOutputsAndStatus(stackName)
 		if cloudformationservice.IsStackNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster main stack in the AWS API")
 			return StackState{}, nil
@@ -58,11 +64,11 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	var currentState StackState
 	{
-		masterImageID, err := r.service.GetOutputValue(stackOutputs, key.MasterImageIDKey)
+		masterImageID, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.MasterImageIDKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
-		masterInstanceResourceName, err := r.service.GetOutputValue(stackOutputs, key.MasterInstanceResourceNameKey)
+		masterInstanceResourceName, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.MasterInstanceResourceNameKey)
 		if cloudformationservice.IsOutputNotFound(err) {
 			// Since we are transitioning between versions we will have situations in
 			// which old clusters are updated to new versions and miss the master
@@ -76,33 +82,33 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		} else if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
-		masterInstanceType, err := r.service.GetOutputValue(stackOutputs, key.MasterInstanceTypeKey)
+		masterInstanceType, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.MasterInstanceTypeKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
-		masterCloudConfigVersion, err := r.service.GetOutputValue(stackOutputs, key.MasterCloudConfigVersionKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-
-		workerCount, err := r.service.GetOutputValue(stackOutputs, key.WorkerCountKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-		workerImageID, err := r.service.GetOutputValue(stackOutputs, key.WorkerImageIDKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-		workerInstanceType, err := r.service.GetOutputValue(stackOutputs, key.WorkerInstanceTypeKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-		workerCloudConfigVersion, err := r.service.GetOutputValue(stackOutputs, key.WorkerCloudConfigVersionKey)
+		masterCloudConfigVersion, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.MasterCloudConfigVersionKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
 
-		versionBundleVersion, err := r.service.GetOutputValue(stackOutputs, key.VersionBundleVersionKey)
+		workerCount, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.WorkerCountKey)
+		if err != nil {
+			return StackState{}, microerror.Mask(err)
+		}
+		workerImageID, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.WorkerImageIDKey)
+		if err != nil {
+			return StackState{}, microerror.Mask(err)
+		}
+		workerInstanceType, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.WorkerInstanceTypeKey)
+		if err != nil {
+			return StackState{}, microerror.Mask(err)
+		}
+		workerCloudConfigVersion, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.WorkerCloudConfigVersionKey)
+		if err != nil {
+			return StackState{}, microerror.Mask(err)
+		}
+
+		versionBundleVersion, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.VersionBundleVersionKey)
 		if cloudformationservice.IsOutputNotFound(err) {
 			// Since we are transitioning between versions we will have situations in
 			// which old clusters are updated to new versions and miss the version

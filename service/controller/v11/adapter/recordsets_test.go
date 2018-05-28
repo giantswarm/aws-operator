@@ -11,6 +11,7 @@ func TestAdapterRecordSetsRegularFields(t *testing.T) {
 	testCases := []struct {
 		description                   string
 		customObject                  v1alpha1.AWSConfig
+		route53Enabled                bool
 		expectedAPIHostedZone         string
 		expectedAPIDomain             string
 		expectedEtcdHostedZone        string
@@ -18,6 +19,7 @@ func TestAdapterRecordSetsRegularFields(t *testing.T) {
 		expectedIngressHostedZone     string
 		expectedIngressDomain         string
 		expectedIngressWildcardDomain string
+		expectedRoute53Enabled        bool
 	}{
 		{
 			description: "basic matching, all fields present",
@@ -51,6 +53,7 @@ func TestAdapterRecordSetsRegularFields(t *testing.T) {
 					},
 				},
 			},
+			route53Enabled:                true,
 			expectedAPIHostedZone:         "apiHostedZones",
 			expectedAPIDomain:             "api.domain",
 			expectedEtcdHostedZone:        "etcdHostedZone",
@@ -58,19 +61,22 @@ func TestAdapterRecordSetsRegularFields(t *testing.T) {
 			expectedIngressHostedZone:     "ingressHostedZone",
 			expectedIngressDomain:         "ingress.domain",
 			expectedIngressWildcardDomain: "ingressWildcardDomain",
+			expectedRoute53Enabled:        true,
 		},
 	}
 
 	clients := Clients{
 		EC2: &EC2ClientMock{},
 		ELB: &ELBClientMock{},
+		STS: &STSClientMock{},
 	}
 	for _, tc := range testCases {
 		a := Adapter{}
 		t.Run(tc.description, func(t *testing.T) {
 			cfg := Config{
-				CustomObject: tc.customObject,
-				Clients:      clients,
+				CustomObject:   tc.customObject,
+				Clients:        clients,
+				Route53Enabled: tc.route53Enabled,
 			}
 			err := a.getRecordSets(cfg)
 			if err != nil {
@@ -98,7 +104,9 @@ func TestAdapterRecordSetsRegularFields(t *testing.T) {
 			if a.IngressWildcardELBDomain != tc.expectedIngressWildcardDomain {
 				t.Errorf("unexpected IngressWildcardELBDomain, got %q, want %q", a.IngressWildcardELBDomain, tc.expectedIngressWildcardDomain)
 			}
-
+			if a.Route53Enabled != tc.expectedRoute53Enabled {
+				t.Errorf("unexpected Route53Enabled, got %t, want %t", a.Route53Enabled, tc.expectedRoute53Enabled)
+			}
 		})
 	}
 }

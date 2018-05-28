@@ -10,7 +10,8 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
-	"github.com/giantswarm/aws-operator/service/controller/v10/key"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
+	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
@@ -22,7 +23,12 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 	if stackInput.StackName != nil {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "creating the guest cluster main stack")
 
-		_, err = r.clients.CloudFormation.CreateStack(&stackInput)
+		sc, err := servicecontext.FromContext(ctx)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		_, err = sc.AWSClient.CloudFormation.CreateStack(&stackInput)
 		if IsAlreadyExists(err) {
 			// fall through
 		} else if err != nil {
@@ -32,7 +38,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 		defer cancel()
 
-		err = r.clients.CloudFormation.WaitUntilStackCreateCompleteWithContext(ctx, &cloudformation.DescribeStacksInput{
+		err = sc.AWSClient.CloudFormation.WaitUntilStackCreateCompleteWithContext(ctx, &cloudformation.DescribeStacksInput{
 			StackName: stackInput.StackName,
 		})
 		if ctx.Err() == context.DeadlineExceeded {
@@ -92,7 +98,7 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		}
 
 		var mainTemplate string
-		mainTemplate, err := r.getMainGuestTemplateBody(customObject, desiredStackState)
+		mainTemplate, err := r.getMainGuestTemplateBody(ctx, customObject, desiredStackState)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -123,7 +129,7 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 
 func (r *Resource) createHostPreStack(ctx context.Context, customObject v1alpha1.AWSConfig) error {
 	stackName := key.MainHostPreStackName(customObject)
-	mainTemplate, err := r.getMainHostPreTemplateBody(customObject)
+	mainTemplate, err := r.getMainHostPreTemplateBody(ctx, customObject)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -166,7 +172,7 @@ func (r *Resource) createHostPreStack(ctx context.Context, customObject v1alpha1
 
 func (r *Resource) createHostPostStack(ctx context.Context, customObject v1alpha1.AWSConfig) error {
 	stackName := key.MainHostPostStackName(customObject)
-	mainTemplate, err := r.getMainHostPostTemplateBody(customObject)
+	mainTemplate, err := r.getMainHostPostTemplateBody(ctx, customObject)
 	if err != nil {
 		return microerror.Mask(err)
 	}

@@ -9,7 +9,9 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys/randomkeystest"
 
+	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 )
 
 func Test_CurrentState(t *testing.T) {
@@ -54,31 +56,42 @@ func Test_CurrentState(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
+			awsClients := aws.Clients{
+				S3: &S3ClientMock{
+					isError: tc.expectedS3Error,
+					body:    tc.expectedBody,
+				},
+			}
+
+			awsService := awsservice.AwsServiceMock{
+				AccountID: "myaccountid",
+				IsError:   tc.expectedIAMError,
+			}
+
+			cloudconfig := &CloudConfigMock{}
+
 			var err error
 			var newResource *Resource
 			{
 				c := Config{}
 				c.CertWatcher = legacytest.NewService()
-				c.CloudConfig = &CloudConfigMock{}
 				c.Logger = microloggertest.New()
 				c.RandomKeySearcher = randomkeystest.NewSearcher()
-				c.AwsService = awsservice.AwsServiceMock{
-					AccountID: "myaccountid",
-					IsError:   tc.expectedIAMError,
-				}
-				c.Clients = Clients{
-					S3: &S3ClientMock{
-						isError: tc.expectedS3Error,
-						body:    tc.expectedBody,
-					},
-				}
 				newResource, err = New(c)
 				if err != nil {
 					t.Error("expected", nil, "got", err)
 				}
 			}
 
-			result, err := newResource.GetCurrentState(context.TODO(), tc.obj)
+			c := servicecontext.Context{
+				AWSClient:   awsClients,
+				AWSService:  awsService,
+				CloudConfig: cloudconfig,
+			}
+			ctx := context.TODO()
+			ctx = servicecontext.NewContext(ctx, c)
+
+			result, err := newResource.GetCurrentState(ctx, tc.obj)
 			if err != nil && !tc.expectedIAMError && !tc.expectedS3Error {
 				t.Errorf("unexpected error %v", err)
 			}

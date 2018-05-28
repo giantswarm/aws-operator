@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go/service/sts"
 )
 
 const (
@@ -72,6 +73,7 @@ type Clients struct {
 	IAM            IAMClient
 	KMS            KMSClient
 	ELB            ELBClient
+	STS            STSClient
 }
 
 // TODO we copy this because of a circular import issue with the cloudformation
@@ -85,9 +87,11 @@ type StackState struct {
 	MasterInstanceType         string
 	MasterInstanceResourceName string
 	MasterCloudConfigVersion   string
+	MasterInstanceMonitoring   bool
 
 	WorkerCount              string
 	WorkerImageID            string
+	WorkerInstanceMonitoring bool
 	WorkerInstanceType       string
 	WorkerCloudConfigVersion string
 
@@ -107,6 +111,7 @@ type CFClient interface {
 
 // EC2Client describes the methods required to be implemented by a EC2 AWS client.
 type EC2Client interface {
+	DescribeAddresses(*ec2.DescribeAddressesInput) (*ec2.DescribeAddressesOutput, error)
 	DescribeSecurityGroups(*ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error)
 	DescribeSubnets(*ec2.DescribeSubnetsInput) (*ec2.DescribeSubnetsOutput, error)
 	DescribeRouteTables(*ec2.DescribeRouteTablesInput) (*ec2.DescribeRouteTablesOutput, error)
@@ -137,4 +142,9 @@ type SmallCloudconfigConfig struct {
 // ELBClient describes the methods required to be implemented by a ELB AWS client.
 type ELBClient interface {
 	DescribeLoadBalancers(*elb.DescribeLoadBalancersInput) (*elb.DescribeLoadBalancersOutput, error)
+}
+
+// STSClient describes the methods required to be implemented by a STS AWS client.
+type STSClient interface {
+	GetCallerIdentity(*sts.GetCallerIdentityInput) (*sts.GetCallerIdentityOutput, error)
 }

@@ -9,7 +9,9 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys/randomkeystest"
 
+	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 )
 
 func Test_DesiredState(t *testing.T) {
@@ -35,13 +37,26 @@ func Test_DesiredState(t *testing.T) {
 			obj:               clusterTpo,
 			expectedBody:      "mybody-",
 			expectedBucket:    "myaccountid-g8s-test-cluster",
-			expectedMasterKey: "cloudconfig/v_3_2_5/master",
-			expectedWorkerKey: "cloudconfig/v_3_2_5/worker",
+			expectedMasterKey: "cloudconfig/v_3_3_1/master",
+			expectedWorkerKey: "cloudconfig/v_3_3_1/worker",
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
+			awsClients := aws.Clients{
+				KMS: &KMSClientMock{},
+			}
+
+			awsService := awsservice.AwsServiceMock{
+				AccountID: "myaccountid",
+				KeyArn:    "mykeyarn",
+			}
+
+			cloudconfig := &CloudConfigMock{
+				template: tc.expectedBody,
+			}
+
 			var err error
 			var newResource *Resource
 			var masterCloudConfig BucketObjectState
@@ -49,25 +64,23 @@ func Test_DesiredState(t *testing.T) {
 			{
 				c := Config{}
 				c.Logger = microloggertest.New()
-				c.AwsService = awsservice.AwsServiceMock{
-					AccountID: "myaccountid",
-					KeyArn:    "mykeyarn",
-				}
-				c.Clients = Clients{
-					KMS: &KMSClientMock{},
-				}
 				c.CertWatcher = legacytest.NewService()
 				c.RandomKeySearcher = randomkeystest.NewSearcher()
-				c.CloudConfig = &CloudConfigMock{
-					template: tc.expectedBody,
-				}
 				newResource, err = New(c)
 				if err != nil {
 					t.Error("expected", nil, "got", err)
 				}
 			}
 
-			result, err := newResource.GetDesiredState(context.TODO(), tc.obj)
+			c := servicecontext.Context{
+				AWSClient:   awsClients,
+				AWSService:  awsService,
+				CloudConfig: cloudconfig,
+			}
+			ctx := context.TODO()
+			ctx = servicecontext.NewContext(ctx, c)
+
+			result, err := newResource.GetDesiredState(ctx, tc.obj)
 			if err != nil {
 				t.Errorf("unexpected error %v", err)
 			}

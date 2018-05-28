@@ -16,8 +16,9 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v10/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v10/key"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v11/cloudformation"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
+	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
 // EnsureCreated tries to drain guest cluster nodes when necessary. Once it
@@ -34,9 +35,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "looking for the guest cluster main stack in the AWS API")
 
+	sc, err := servicecontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	var stackOutputs []*cloudformation.Output
 	{
-		stackOutputs, _, err = r.service.DescribeOutputsAndStatus(key.MainGuestStackName(customObject))
+		stackOutputs, _, err = sc.CloudFormation.DescribeOutputsAndStatus(key.MainGuestStackName(customObject))
 		if cloudformationservice.IsStackNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster main stack in the AWS API")
 			resourcecanceledcontext.SetCanceled(ctx)
@@ -60,7 +66,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	var workerASGName string
 	{
-		workerASGName, err = r.service.GetOutputValue(stackOutputs, key.WorkerASGKey)
+		workerASGName, err = sc.CloudFormation.GetOutputValue(stackOutputs, key.WorkerASGKey)
 		if cloudformationservice.IsOutputNotFound(err) {
 			// Since we are transitioning between versions we will have situations in
 			// which old clusters are updated to new versions and miss the ASG name in
@@ -92,7 +98,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			},
 		}
 
-		o, err := r.aws.AutoScaling.DescribeAutoScalingGroups(i)
+		o, err := sc.AWSClient.AutoScaling.DescribeAutoScalingGroups(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -116,7 +122,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		for _, instance := range instances {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "looking for node config for the guest cluster")
 
-			privateDNS, err := r.privateDNSForInstance(*instance.InstanceId)
+			privateDNS, err := r.privateDNSForInstance(ctx, *instance.InstanceId)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -206,7 +212,12 @@ func (r *Resource) completeLifecycleHook(ctx context.Context, instanceID, worker
 		LifecycleHookName:     aws.String(key.NodeDrainerLifecycleHookName),
 	}
 
-	_, err := r.aws.AutoScaling.CompleteLifecycleAction(i)
+	sc, err := servicecontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	_, err = sc.AWSClient.AutoScaling.CompleteLifecycleAction(i)
 	if IsNoActiveLifecycleAction(err) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("no lifecycle hook action for guest cluster instance '%s'", instanceID))
 	} else if err != nil {
@@ -277,14 +288,19 @@ func (r *Resource) deleteNodeConfig(ctx context.Context, nodeConfig corev1alpha1
 	return nil
 }
 
-func (r *Resource) privateDNSForInstance(instanceID string) (string, error) {
+func (r *Resource) privateDNSForInstance(ctx context.Context, instanceID string) (string, error) {
 	i := &ec2.DescribeInstancesInput{
 		InstanceIds: []*string{
 			aws.String(instanceID),
 		},
 	}
 
-	o, err := r.aws.EC2.DescribeInstances(i)
+	sc, err := servicecontext.FromContext(ctx)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	o, err := sc.AWSClient.EC2.DescribeInstances(i)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}

@@ -1,6 +1,7 @@
 package cloudformation
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -9,20 +10,18 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	"github.com/giantswarm/aws-operator/service/controller/v10/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/v10/cloudconfig"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v10/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v10/key"
+	"github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/service/controller/v11/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v11/cloudconfig"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
+	"github.com/giantswarm/aws-operator/service/controller/v11/key"
 )
 
 func testConfig() Config {
 	c := Config{}
 
-	c.Clients = &adapter.Clients{}
-	c.EBS = &EBSServiceMock{}
 	c.HostClients = &adapter.Clients{}
 	c.Logger = microloggertest.New()
-	c.Service = &cloudformationservice.CloudFormation{}
 
 	c.InstallationName = "myinstallation"
 
@@ -34,22 +33,27 @@ func TestMainGuestTemplateGetEmptyBody(t *testing.T) {
 	customObject := v1alpha1.AWSConfig{}
 
 	c := testConfig()
-	c.Clients = &adapter.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-		KMS: &adapter.KMSClientMock{},
-	}
 	c.HostClients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
-
 	newResource, err := New(c)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	_, err = newResource.getMainGuestTemplateBody(customObject, StackState{})
+	awsClients := aws.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		KMS: &adapter.KMSClientMock{},
+		STS: &adapter.STSClientMock{},
+	}
+
+	ctx := context.TODO()
+	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+
+	_, err = newResource.getMainGuestTemplateBody(ctx, customObject, StackState{})
 	if err == nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -124,9 +128,11 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		MasterInstanceResourceName: key.MasterInstanceResourceName(customObject),
 		MasterInstanceType:         key.MasterInstanceType(customObject),
 		MasterCloudConfigVersion:   cloudconfig.MasterCloudConfigVersion,
+		MasterInstanceMonitoring:   false,
 
 		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
 		WorkerImageID:            imageID,
+		WorkerInstanceMonitoring: true,
 		WorkerInstanceType:       key.WorkerInstanceType(customObject),
 		WorkerCloudConfigVersion: cloudconfig.WorkerCloudConfigVersion,
 
@@ -134,22 +140,30 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 	}
 
 	cfg := testConfig()
-	cfg.Clients = &adapter.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-		KMS: &adapter.KMSClientMock{},
-		ELB: &adapter.ELBClientMock{},
-	}
 	cfg.HostClients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
+	cfg.AdvancedMonitoringEC2 = true
+	cfg.Route53Enabled = true
 	newResource, err := New(cfg)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
 
-	body, err := newResource.getMainGuestTemplateBody(customObject, stackState)
+	awsClients := aws.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		KMS: &adapter.KMSClientMock{},
+		ELB: &adapter.ELBClientMock{},
+		STS: &adapter.STSClientMock{},
+	}
+
+	ctx := context.TODO()
+	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+
+	body, err := newResource.getMainGuestTemplateBody(ctx, customObject, stackState)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
@@ -184,6 +198,10 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Fatal("MasterImageID output element not found")
 	}
+	if !strings.Contains(body, key.MasterInstanceMonitoring+": true") {
+		fmt.Println(body)
+		t.Fatal("MasterInstanceMonitoring output element not found")
+	}
 	if !strings.Contains(body, key.MasterInstanceTypeKey+":") {
 		fmt.Println(body)
 		t.Fatal("MasterInstanceType output element not found")
@@ -207,6 +225,10 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 	if !strings.Contains(body, key.WorkerCloudConfigVersionKey+":") {
 		fmt.Println(body)
 		t.Fatal("worker CloudConfig version output element not found")
+	}
+	if !strings.Contains(body, key.WorkerInstanceMonitoring+": true") {
+		fmt.Println(body)
+		t.Fatal("WorkerInstanceMonitoring output element not found")
 	}
 
 	if !strings.Contains(body, "Value: "+cloudconfig.MasterCloudConfigVersion) {
@@ -299,8 +321,14 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		t.Fatal("CidrBlock element not found")
 	}
 
+	// arn depends on region
+	if !strings.Contains(body, `Resource: "arn:aws:s3:::`) {
+		fmt.Println(body)
+		t.Fatal("ARN region dependent element not found")
+	}
+
 	// image ids should be fixed despite the values in the custom object
-	if !strings.Contains(body, "ImageId: ami-604e118b") {
+	if !strings.Contains(body, "ImageId: ami-32042fd9") {
 		fmt.Println(body)
 		t.Fatal("Fixed image ID not found")
 	}
@@ -318,20 +346,26 @@ func TestMainHostPreTemplateExistingFields(t *testing.T) {
 	}
 
 	cfg := testConfig()
-	cfg.Clients = &adapter.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-	}
 	cfg.HostClients = &adapter.Clients{
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
 	newResource, err := New(cfg)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
 
-	body, err := newResource.getMainHostPreTemplateBody(customObject)
+	awsClients := aws.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		STS: &adapter.STSClientMock{},
+	}
+
+	ctx := context.TODO()
+	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+
+	body, err := newResource.getMainHostPreTemplateBody(ctx, customObject)
 
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
@@ -374,21 +408,27 @@ func TestMainHostPostTemplateExistingFields(t *testing.T) {
 	}
 
 	cfg := testConfig()
-	cfg.Clients = &adapter.Clients{
-		EC2: &adapter.EC2ClientMock{},
-	}
 	ec2Mock := &adapter.EC2ClientMock{}
 	ec2Mock.SetMatchingRouteTables(1)
 	cfg.HostClients = &adapter.Clients{
 		EC2: ec2Mock,
 		IAM: &adapter.IAMClientMock{},
+		STS: &adapter.STSClientMock{},
 	}
 	newResource, err := New(cfg)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
 
-	body, err := newResource.getMainHostPostTemplateBody(customObject)
+	awsClients := aws.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		STS: &adapter.STSClientMock{},
+	}
+
+	ctx := context.TODO()
+	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+
+	body, err := newResource.getMainHostPostTemplateBody(ctx, customObject)
 
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
@@ -402,5 +442,246 @@ func TestMainHostPostTemplateExistingFields(t *testing.T) {
 	if !strings.Contains(body, "  PrivateRoute1:") {
 		fmt.Println(body)
 		t.Fatal("route header not found")
+	}
+}
+
+func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
+	t.Parallel()
+	// customObject with example fields for both asg and launch config
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID:      "test-cluster",
+				Version: "myversion",
+				Kubernetes: v1alpha1.ClusterKubernetes{
+					API: v1alpha1.ClusterKubernetesAPI{
+						Domain:     "api.domain",
+						SecurePort: 443,
+					},
+					IngressController: v1alpha1.ClusterKubernetesIngressController{
+						Domain:       "ingress.domain",
+						InsecurePort: 30010,
+						SecurePort:   30011,
+					},
+				},
+				Etcd: v1alpha1.ClusterEtcd{
+					Domain: "etcd.domain",
+				},
+			},
+			AWS: v1alpha1.AWSConfigSpecAWS{
+				API: v1alpha1.AWSConfigSpecAWSAPI{
+					ELB: v1alpha1.AWSConfigSpecAWSAPIELB{
+						IdleTimeoutSeconds: 3600,
+					},
+				},
+				Region: "eu-central-1",
+				AZ:     "eu-central-1a",
+				Masters: []v1alpha1.AWSConfigSpecAWSNode{
+					{
+						ImageID:      "ami-1234-master",
+						InstanceType: "m3.large",
+					},
+				},
+				Workers: []v1alpha1.AWSConfigSpecAWSNode{
+					{
+						ImageID:      "ami-1234-worker",
+						InstanceType: "m3.large",
+					},
+				},
+				Ingress: v1alpha1.AWSConfigSpecAWSIngress{
+					ELB: v1alpha1.AWSConfigSpecAWSIngressELB{
+						IdleTimeoutSeconds: 60,
+					},
+				},
+				VPC: v1alpha1.AWSConfigSpecAWSVPC{
+					CIDR:              "10.1.1.0/24",
+					PublicSubnetCIDR:  "10.1.1.0/25",
+					PrivateSubnetCIDR: "10.1.2.0/25",
+				},
+			},
+		},
+	}
+
+	imageID, err := key.ImageID(customObject)
+	if err != nil {
+		t.Fatalf("expected %#v got %#v", nil, err)
+	}
+
+	stackState := StackState{
+		Name: key.MainGuestStackName(customObject),
+
+		MasterImageID:              imageID,
+		MasterInstanceResourceName: key.MasterInstanceResourceName(customObject),
+		MasterInstanceType:         key.MasterInstanceType(customObject),
+		MasterCloudConfigVersion:   cloudconfig.MasterCloudConfigVersion,
+		MasterInstanceMonitoring:   false,
+
+		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
+		WorkerImageID:            imageID,
+		WorkerInstanceMonitoring: true,
+		WorkerInstanceType:       key.WorkerInstanceType(customObject),
+		WorkerCloudConfigVersion: cloudconfig.WorkerCloudConfigVersion,
+
+		VersionBundleVersion: key.VersionBundleVersion(customObject),
+	}
+
+	cfg := testConfig()
+	cfg.HostClients = &adapter.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		STS: &adapter.STSClientMock{},
+	}
+	cfg.Route53Enabled = false
+	newResource, err := New(cfg)
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+
+	awsClients := aws.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		KMS: &adapter.KMSClientMock{},
+		ELB: &adapter.ELBClientMock{},
+		STS: &adapter.STSClientMock{},
+	}
+
+	ctx := context.TODO()
+	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+
+	body, err := newResource.getMainGuestTemplateBody(ctx, customObject, stackState)
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+
+	if strings.Contains(body, "ApiRecordSet:") {
+		fmt.Println(body)
+		t.Fatal("ApiRecordSet element found")
+	}
+	if strings.Contains(body, "EtcdRecordSet:") {
+		fmt.Println(body)
+		t.Fatal("EtcdRecordSet element found")
+	}
+	if strings.Contains(body, "IngressRecordSet:") {
+		fmt.Println(body)
+		t.Fatal("IngressRecordSet element found")
+	}
+	if strings.Contains(body, "IngressWildcardRecordSet:") {
+		fmt.Println(body)
+		t.Fatal("ingressWildcardRecordSet element found")
+	}
+}
+
+func TestMainGuestTemplateChinaRegion(t *testing.T) {
+	t.Parallel()
+	// customObject with example fields for both asg and launch config
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID:      "test-cluster",
+				Version: "myversion",
+				Kubernetes: v1alpha1.ClusterKubernetes{
+					API: v1alpha1.ClusterKubernetesAPI{
+						Domain:     "api.domain",
+						SecurePort: 443,
+					},
+					IngressController: v1alpha1.ClusterKubernetesIngressController{
+						Domain:       "ingress.domain",
+						InsecurePort: 30010,
+						SecurePort:   30011,
+					},
+				},
+				Etcd: v1alpha1.ClusterEtcd{
+					Domain: "etcd.domain",
+				},
+			},
+			AWS: v1alpha1.AWSConfigSpecAWS{
+				API: v1alpha1.AWSConfigSpecAWSAPI{
+					ELB: v1alpha1.AWSConfigSpecAWSAPIELB{
+						IdleTimeoutSeconds: 3600,
+					},
+				},
+				Region: "cn-north-1",
+				AZ:     "cn-north-1a",
+				Masters: []v1alpha1.AWSConfigSpecAWSNode{
+					{
+						ImageID:      "ami-1234-master",
+						InstanceType: "m3.large",
+					},
+				},
+				Workers: []v1alpha1.AWSConfigSpecAWSNode{
+					{
+						ImageID:      "ami-1234-worker",
+						InstanceType: "m3.large",
+					},
+				},
+				Ingress: v1alpha1.AWSConfigSpecAWSIngress{
+					ELB: v1alpha1.AWSConfigSpecAWSIngressELB{
+						IdleTimeoutSeconds: 60,
+					},
+				},
+				VPC: v1alpha1.AWSConfigSpecAWSVPC{
+					CIDR:              "10.1.1.0/24",
+					PublicSubnetCIDR:  "10.1.1.0/25",
+					PrivateSubnetCIDR: "10.1.2.0/25",
+				},
+			},
+		},
+	}
+
+	imageID, err := key.ImageID(customObject)
+	if err != nil {
+		t.Fatalf("expected %#v got %#v", nil, err)
+	}
+
+	stackState := StackState{
+		Name: key.MainGuestStackName(customObject),
+
+		MasterImageID:              imageID,
+		MasterInstanceResourceName: key.MasterInstanceResourceName(customObject),
+		MasterInstanceType:         key.MasterInstanceType(customObject),
+		MasterCloudConfigVersion:   cloudconfig.MasterCloudConfigVersion,
+		MasterInstanceMonitoring:   false,
+
+		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
+		WorkerImageID:            imageID,
+		WorkerInstanceMonitoring: true,
+		WorkerInstanceType:       key.WorkerInstanceType(customObject),
+		WorkerCloudConfigVersion: cloudconfig.WorkerCloudConfigVersion,
+
+		VersionBundleVersion: key.VersionBundleVersion(customObject),
+	}
+
+	cfg := testConfig()
+	cfg.HostClients = &adapter.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		STS: &adapter.STSClientMock{},
+	}
+	cfg.Route53Enabled = false
+	newResource, err := New(cfg)
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+
+	awsClients := aws.Clients{
+		EC2: &adapter.EC2ClientMock{},
+		IAM: &adapter.IAMClientMock{},
+		KMS: &adapter.KMSClientMock{},
+		ELB: &adapter.ELBClientMock{},
+		STS: &adapter.STSClientMock{},
+	}
+
+	ctx := context.TODO()
+	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+
+	body, err := newResource.getMainGuestTemplateBody(ctx, customObject, stackState)
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+
+	// arn depends on region
+	if !strings.Contains(body, `Resource: "arn:aws-cn:s3:::`) {
+		fmt.Println(body)
+		t.Fatal("ARN region dependent element not found")
 	}
 }
