@@ -11,7 +11,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
 )
 
 func Test_DesiredState(t *testing.T) {

@@ -7,13 +7,13 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/v11/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/v11/key"
+	"github.com/giantswarm/aws-operator/service/controller/v12/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v12/key"
 )
 
 const (
 	// Name is the identifier of the resource.
-	Name = "cloudformationv11"
+	Name = "cloudformationv12"
 )
 
 type AWSConfig struct {

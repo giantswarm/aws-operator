@@ -7,9 +7,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
-	"github.com/giantswarm/aws-operator/service/controller/v11/ebs"
-	"github.com/giantswarm/aws-operator/service/controller/v11/key"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
+	"github.com/giantswarm/aws-operator/service/controller/v12/ebs"
+	"github.com/giantswarm/aws-operator/service/controller/v12/key"
 )
 
 // EnsureDeleted detaches and deletes the EBS volumes. We don't return

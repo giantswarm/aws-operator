@@ -1,4 +1,4 @@
-package v11
+package v12
 
 import (
 	"context"
@@ -14,11 +14,11 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v11/cloudformation"
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
-	"github.com/giantswarm/aws-operator/service/controller/v11/credential"
-	"github.com/giantswarm/aws-operator/service/controller/v11/key"
-	"github.com/giantswarm/aws-operator/service/controller/v11/resource/lifecycle"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v12/cloudformation"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
+	"github.com/giantswarm/aws-operator/service/controller/v12/credential"
+	"github.com/giantswarm/aws-operator/service/controller/v12/key"
+	"github.com/giantswarm/aws-operator/service/controller/v12/resource/lifecycle"
 )
 
 type DrainerResourceSetConfig struct {

@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
 
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
+	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
