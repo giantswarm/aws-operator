@@ -18,8 +18,7 @@ type Config struct {
 	KMSClient KMSClient
 	Logger    micrologger.Logger
 
-	OIDC                   OIDCConfig
-	PodInfraContainerImage string
+	OIDC OIDCConfig
 }
 
 // CloudConfig implements the cloud config service interface.
@@ -27,8 +26,7 @@ type CloudConfig struct {
 	kmsClient KMSClient
 	logger    micrologger.Logger
 
-	k8sAPIExtraArgs     []string
-	k8sKubeletExtraArgs []string
+	k8sAPIExtraArgs []string
 }
 
 // OIDCConfig represents the configuration of the OIDC authorization provider
@@ -64,19 +62,11 @@ func New(config Config) (*CloudConfig, error) {
 		}
 	}
 
-	var k8sKubeletExtraArgs []string
-	{
-		if config.PodInfraContainerImage != "" {
-			k8sKubeletExtraArgs = append(k8sKubeletExtraArgs, fmt.Sprintf("--pod-infra-container-image=%s", config.PodInfraContainerImage))
-		}
-	}
-
 	newCloudConfig := &CloudConfig{
 		kmsClient: config.KMSClient,
 		logger:    config.Logger,
 
-		k8sAPIExtraArgs:     k8sAPIExtraArgs,
-		k8sKubeletExtraArgs: k8sKubeletExtraArgs,
+		k8sAPIExtraArgs: k8sAPIExtraArgs,
 	}
 
 	return newCloudConfig, nil

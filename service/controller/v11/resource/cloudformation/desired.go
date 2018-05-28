@@ -6,8 +6,8 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v11/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v11/key"
+	"github.com/giantswarm/aws-operator/service/controller/v10/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v10/key"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
@@ -44,11 +44,9 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			MasterInstanceResourceName: key.MasterInstanceResourceName(customObject),
 			MasterInstanceType:         masterInstanceType,
 			MasterCloudConfigVersion:   cloudconfig.MasterCloudConfigVersion,
-			MasterInstanceMonitoring:   r.monitoring,
 
 			WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
 			WorkerImageID:            imageID,
-			WorkerInstanceMonitoring: r.monitoring,
 			WorkerInstanceType:       workerInstanceType,
 			WorkerCloudConfigVersion: cloudconfig.WorkerCloudConfigVersion,
 

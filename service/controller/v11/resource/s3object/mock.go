@@ -7,9 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
-	"github.com/aws/aws-sdk-go/service/kms/kmsiface"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/randomkeys"
@@ -24,8 +22,6 @@ type nopCloser struct {
 func (nopCloser) Close() error { return nil }
 
 type S3ClientMock struct {
-	s3iface.S3API
-
 	isError bool
 	body    string
 }
@@ -78,9 +74,7 @@ func (c *CloudConfigMock) NewWorkerTemplate(customObject v1alpha1.AWSConfig, cer
 	return c.template, nil
 }
 
-type KMSClientMock struct {
-	kmsiface.KMSAPI
-}
+type KMSClientMock struct{}
 
 func (k *KMSClientMock) Encrypt(input *kms.EncryptInput) (*kms.EncryptOutput, error) {
 	return &kms.EncryptOutput{}, nil

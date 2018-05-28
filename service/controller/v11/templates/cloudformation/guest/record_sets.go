@@ -1,7 +1,6 @@
 package guest
 
 const RecordSets = `{{define "recordsets"}}
-{{ if .Route53Enabled }}
   ApiRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
@@ -40,5 +39,4 @@ const RecordSets = `{{define "recordsets"}}
       Type: CNAME
       ResourceRecords:
         - {{.IngressELBDomain}}
-{{end}}
 {{end}}`

@@ -37,7 +37,6 @@ func TestAdapterIamPoliciesRegularFields(t *testing.T) {
 	clients := Clients{
 		KMS: &KMSClientMock{},
 		IAM: &IAMClientMock{},
-		STS: &STSClientMock{},
 	}
 	for _, tc := range testCases {
 		a := Adapter{}
@@ -114,7 +113,6 @@ func TestAdapterIamPoliciesKMSKeyARN(t *testing.T) {
 					keyARN:  tc.expectedKMSKeyARN,
 					isError: tc.expectedError,
 				},
-				STS: &STSClientMock{},
 			}
 			cfg := Config{
 				CustomObject: tc.customObject,
@@ -172,8 +170,7 @@ func TestAdapterIamPoliciesS3Bucket(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			clients := Clients{
 				KMS: &KMSClientMock{},
-				IAM: &IAMClientMock{},
-				STS: &STSClientMock{
+				IAM: &IAMClientMock{
 					accountID: tc.accountID,
 					isError:   tc.expectedError,
 				},

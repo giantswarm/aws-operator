@@ -8,7 +8,7 @@ import (
 	"k8s.io/api/core/v1"
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/service/controller/v11/key"
+	"github.com/giantswarm/aws-operator/service/controller/v10/key"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
@@ -18,7 +18,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 
 	instanceName := key.MasterInstanceName(customObject)
-	masterInstance, err := r.findMasterInstance(ctx, instanceName)
+	masterInstance, err := r.findMasterInstance(instanceName)
 	if IsNotFound(err) {
 		// During updates the master instance is shut down and thus cannot be found.
 		// In such cases we cancel the reconciliation for the endpoint resource.

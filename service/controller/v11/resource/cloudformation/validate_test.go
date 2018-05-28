@@ -6,7 +6,8 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	"github.com/giantswarm/aws-operator/service/controller/v11/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v10/adapter"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v10/cloudformation"
 )
 
 func Test_validateHostPeeringRoutes(t *testing.T) {
@@ -52,13 +53,19 @@ func Test_validateHostPeeringRoutes(t *testing.T) {
 
 			c := Config{}
 
+			c.Clients = &adapter.Clients{
+				EC2: &adapter.EC2ClientMock{},
+				IAM: &adapter.IAMClientMock{},
+				KMS: &adapter.KMSClientMock{},
+			}
+			c.EBS = &EBSServiceMock{}
 			c.HostClients = &adapter.Clients{
 				EC2:            ec2Mock,
 				CloudFormation: &adapter.CloudFormationMock{},
 				IAM:            &adapter.IAMClientMock{},
-				STS:            &adapter.STSClientMock{},
 			}
 			c.Logger = microloggertest.New()
+			c.Service = &cloudformationservice.CloudFormation{}
 
 			newResource, err = New(c)
 			if err != nil {

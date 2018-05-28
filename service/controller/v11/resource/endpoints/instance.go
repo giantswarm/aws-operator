@@ -1,14 +1,11 @@
 package endpoints
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
-
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 )
 
 const (
@@ -17,13 +14,7 @@ const (
 	tagKeyName      = "Name"
 )
 
-func (r Resource) findMasterInstance(ctx context.Context, instanceName string) (*ec2.Instance, error) {
-
-	sc, err := servicecontext.FromContext(ctx)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
+func (r Resource) findMasterInstance(instanceName string) (*ec2.Instance, error) {
 	filters := []*ec2.Filter{
 		{
 			Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
@@ -33,7 +24,7 @@ func (r Resource) findMasterInstance(ctx context.Context, instanceName string) (
 		},
 	}
 
-	output, err := sc.AWSClient.EC2.DescribeInstances(&ec2.DescribeInstancesInput{
+	output, err := r.awsClients.EC2.DescribeInstances(&ec2.DescribeInstancesInput{
 		Filters: filters,
 	})
 	if err != nil {

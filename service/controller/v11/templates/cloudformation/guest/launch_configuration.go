@@ -9,7 +9,6 @@ const LaunchConfiguration = `{{define "launch_configuration"}}
       SecurityGroups:
       - !Ref WorkerSecurityGroup
       InstanceType: {{ .WorkerInstanceType }}
-      InstanceMonitoring: {{ .WorkerInstanceMonitoring }}
       IamInstanceProfile: !Ref WorkerInstanceProfile
       BlockDeviceMappings:
       {{ range .WorkerBlockDeviceMappings }}

@@ -9,18 +9,19 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/v11/key"
+	"github.com/giantswarm/aws-operator/service/controller/v10/key"
 )
 
 const (
 	// Name is the identifier of the resource.
-	Name = "kmskeyv11"
+	Name = "kmskeyv10"
 )
 
 // Config represents the configuration used to create a new cloudformation resource.
 type Config struct {
 	// Dependencies.
-	Logger micrologger.Logger
+	Clients Clients
+	Logger  micrologger.Logger
 
 	// Settings.
 	InstallationName string
@@ -31,14 +32,16 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		// Dependencies.
-		Logger: nil,
+		Clients: Clients{},
+		Logger:  nil,
 	}
 }
 
 // Resource implements the cloudformation resource.
 type Resource struct {
 	// Dependencies.
-	logger micrologger.Logger
+	awsClients Clients
+	logger     micrologger.Logger
 
 	// Settings.
 	installationName string
@@ -59,7 +62,8 @@ func New(config Config) (*Resource, error) {
 	// Settings.
 	newService := &Resource{
 		// Dependencies.
-		logger: config.Logger,
+		awsClients: config.Clients,
+		logger:     config.Logger,
 
 		// Settings.
 		installationName: config.InstallationName,

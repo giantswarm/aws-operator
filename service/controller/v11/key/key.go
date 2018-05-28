@@ -10,10 +10,10 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v11/templates/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v11/templates/cloudformation/guest"
-	"github.com/giantswarm/aws-operator/service/controller/v11/templates/cloudformation/hostpost"
-	"github.com/giantswarm/aws-operator/service/controller/v11/templates/cloudformation/hostpre"
+	"github.com/giantswarm/aws-operator/service/controller/v10/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v10/templates/cloudformation/guest"
+	"github.com/giantswarm/aws-operator/service/controller/v10/templates/cloudformation/hostpost"
+	"github.com/giantswarm/aws-operator/service/controller/v10/templates/cloudformation/hostpre"
 )
 
 const (
@@ -51,12 +51,10 @@ const (
 	MasterImageIDKey              = "MasterImageID"
 	MasterInstanceResourceNameKey = "MasterInstanceResourceName"
 	MasterInstanceTypeKey         = "MasterInstanceType"
-	MasterInstanceMonitoring      = "Monitoring"
 	MasterCloudConfigVersionKey   = "MasterCloudConfigVersion"
 	WorkerASGKey                  = "WorkerASGName"
 	WorkerCountKey                = "WorkerCount"
 	WorkerImageIDKey              = "WorkerImageID"
-	WorkerInstanceMonitoring      = "Monitoring"
 	WorkerInstanceTypeKey         = "WorkerInstanceType"
 	WorkerCloudConfigVersionKey   = "WorkerCloudConfigVersion"
 	VersionBundleVersionKey       = "VersionBundleVersion"
@@ -89,14 +87,6 @@ func BucketName(customObject v1alpha1.AWSConfig, accountID string) string {
 
 func BucketObjectName(templateVersion string, prefix string) string {
 	return fmt.Sprintf("cloudconfig/%s/%s", templateVersion, prefix)
-}
-
-func CredentialName(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.AWS.CredentialSecret.Name
-}
-
-func CredentialNamespace(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.AWS.CredentialSecret.Namespace
 }
 
 func CloudConfigSmallTemplates() []string {
@@ -303,16 +293,6 @@ func Region(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.Region
 }
 
-func RegionARN(customObject v1alpha1.AWSConfig) string {
-	regionARN := "aws"
-
-	if Region(customObject) == "cn-north-1" {
-		regionARN += "-cn"
-	}
-
-	return regionARN
-}
-
 func RoleName(customObject v1alpha1.AWSConfig, profileType string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, RoleNameTemplate)
 }
@@ -400,18 +380,17 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 		NOTE 1: AMIs should always be for HVM virtualisation and not PV.
 		NOTE 2: You also need to update the tests.
 
-		service/awsconfig/v11/key/key_test.go
-		service/awsconfig/v11/resource/cloudformation/adapter/adapter_test.go
-		service/resource/cloudformationv11/main_stack_test.go
+		service/awsconfig/v10/key/key_test.go
+		service/awsconfig/v10/resource/cloudformation/adapter/adapter_test.go
+		service/resource/cloudformationv2/main_stack_test.go
 
-		Current Release: CoreOS Container Linux stable 1745.4.0 (HVM)
+		Current Release: CoreOS Container Linux stable 1576.5.0 (HVM)
 	*/
 	imageIDs := map[string]string{
-		"ap-southeast-1": "ami-73b28f0f",
-		"cn-north-1":     "ami-8f05dbe2",
-		"eu-central-1":   "ami-32042fd9",
-		"eu-west-1":      "ami-82645dfb",
-		"us-west-2":      "ami-574f362f",
+		"ap-southeast-1": "ami-41461c3d",
+		"eu-central-1":   "ami-604e118b",
+		"eu-west-1":      "ami-34237c4d",
+		"us-west-2":      "ami-b41377cc",
 	}
 
 	imageID, ok := imageIDs[region]

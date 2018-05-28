@@ -10,12 +10,12 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/v11/key"
+	"github.com/giantswarm/aws-operator/service/controller/v10/key"
 )
 
 // The template related to this adapter can be found in the following import.
 //
-//     github.com/giantswarm/aws-operator/service/controller/v11/templates/cloudformation/hostpost/route_tables.go
+//     github.com/giantswarm/aws-operator/service/controller/v10/templates/cloudformation/hostpost/route_tables.go
 //
 
 type hostRouteTablesAdapter struct {

@@ -10,9 +10,8 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
 
-	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v11/adapter"
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
+	"github.com/giantswarm/aws-operator/service/controller/v10/adapter"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v10/cloudformation"
 )
 
 func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
@@ -391,12 +390,18 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 	{
 		c := Config{}
 
+		c.Clients = &adapter.Clients{
+			EC2: &adapter.EC2ClientMock{},
+			IAM: &adapter.IAMClientMock{},
+			KMS: &adapter.KMSClientMock{},
+		}
+		c.EBS = &EBSServiceMock{}
 		c.HostClients = &adapter.Clients{
 			IAM: &adapter.IAMClientMock{},
 			EC2: &adapter.EC2ClientMock{},
-			STS: &adapter.STSClientMock{},
 		}
 		c.Logger = microloggertest.New()
+		c.Service = &cloudformationservice.CloudFormation{}
 
 		newResource, err = New(c)
 		if err != nil {
@@ -404,17 +409,9 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 		}
 	}
 
-	awsClients := awsclient.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-		KMS: &adapter.KMSClientMock{},
-		STS: &adapter.STSClientMock{},
-	}
-
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			ctx := updateallowedcontext.NewContext(context.Background(), make(chan struct{}))
-			ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
 			updateallowedcontext.SetUpdateAllowed(ctx)
 
 			result, err := newResource.newUpdateChange(ctx, customObject, tc.currentState, tc.desiredState)
@@ -842,12 +839,18 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 	{
 		c := Config{}
 
+		c.Clients = &adapter.Clients{
+			EC2: &adapter.EC2ClientMock{},
+			IAM: &adapter.IAMClientMock{},
+			KMS: &adapter.KMSClientMock{},
+		}
+		c.EBS = &EBSServiceMock{}
 		c.HostClients = &adapter.Clients{
 			IAM: &adapter.IAMClientMock{},
 			EC2: &adapter.EC2ClientMock{},
-			STS: &adapter.STSClientMock{},
 		}
 		c.Logger = microloggertest.New()
+		c.Service = &cloudformationservice.CloudFormation{}
 
 		newResource, err = New(c)
 		if err != nil {
@@ -855,19 +858,9 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 		}
 	}
 
-	awsClients := awsclient.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-		KMS: &adapter.KMSClientMock{},
-		STS: &adapter.STSClientMock{},
-	}
-
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			ctx := context.TODO()
-			ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
-
-			result, err := newResource.newUpdateChange(ctx, customObject, tc.currentState, tc.desiredState)
+			result, err := newResource.newUpdateChange(context.TODO(), customObject, tc.currentState, tc.desiredState)
 			if err != nil {
 				t.Fatal("expected", nil, "got", err)
 			}

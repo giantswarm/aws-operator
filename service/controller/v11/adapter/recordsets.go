@@ -2,7 +2,7 @@ package adapter
 
 // The template related to this adapter can be found in the following import.
 //
-//     github.com/giantswarm/aws-operator/service/controller/v11/templates/cloudformation/guest/recordsets.go
+//     github.com/giantswarm/aws-operator/service/controller/v10/templates/cloudformation/guest/recordsets.go
 //
 
 type recordSetsAdapter struct {
@@ -15,7 +15,6 @@ type recordSetsAdapter struct {
 	IngressELBAliasHostedZone string
 	IngressELBDomain          string
 	IngressWildcardELBDomain  string
-	Route53Enabled            bool
 }
 
 func (r *recordSetsAdapter) getRecordSets(cfg Config) error {
@@ -26,7 +25,6 @@ func (r *recordSetsAdapter) getRecordSets(cfg Config) error {
 	r.IngressELBHostedZones = cfg.CustomObject.Spec.AWS.Ingress.HostedZones
 	r.IngressELBDomain = cfg.CustomObject.Spec.Cluster.Kubernetes.IngressController.Domain
 	r.IngressWildcardELBDomain = cfg.CustomObject.Spec.Cluster.Kubernetes.IngressController.WildcardDomain
-	r.Route53Enabled = cfg.Route53Enabled
 
 	return nil
 }
