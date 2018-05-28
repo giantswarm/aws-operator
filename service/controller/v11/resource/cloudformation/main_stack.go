@@ -1,47 +1,29 @@
 package cloudformation
 
 import (
-	"context"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v11/adapter"
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
-	"github.com/giantswarm/aws-operator/service/controller/v11/key"
-	"github.com/giantswarm/aws-operator/service/controller/v11/templates"
+	"github.com/giantswarm/aws-operator/service/controller/v10/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v10/key"
+	"github.com/giantswarm/aws-operator/service/controller/v10/templates"
 )
 
-func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig, stackState StackState) (string, error) {
+func (r *Resource) getMainGuestTemplateBody(customObject v1alpha1.AWSConfig, stackState StackState) (string, error) {
 	hostAccountID, err := adapter.AccountID(*r.hostClients)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-
-	sc, err := servicecontext.FromContext(ctx)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	adapterClients := adapter.Clients{
-		CloudFormation: sc.AWSClient.CloudFormation,
-		EC2:            sc.AWSClient.EC2,
-		IAM:            sc.AWSClient.IAM,
-		KMS:            sc.AWSClient.KMS,
-		ELB:            sc.AWSClient.ELB,
-		STS:            sc.AWSClient.STS,
-	}
-
 	cfg := adapter.Config{
 		APIWhitelist: adapter.APIWhitelist{
 			Enabled:    r.apiWhiteList.Enabled,
 			SubnetList: r.apiWhiteList.SubnetList,
 		},
 		CustomObject:     customObject,
-		Clients:          adapterClients,
+		Clients:          *r.clients,
 		HostClients:      *r.hostClients,
 		InstallationName: r.installationName,
 		HostAccountID:    hostAccountID,
-		Route53Enabled:   r.route53Enabled,
 		StackState: adapter.StackState{
 			Name: stackState.Name,
 
@@ -49,11 +31,9 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 			MasterInstanceResourceName: stackState.MasterInstanceResourceName,
 			MasterInstanceType:         stackState.MasterInstanceType,
 			MasterCloudConfigVersion:   stackState.MasterCloudConfigVersion,
-			MasterInstanceMonitoring:   stackState.MasterInstanceMonitoring,
 
 			WorkerCount:              stackState.WorkerCount,
 			WorkerImageID:            stackState.WorkerImageID,
-			WorkerInstanceMonitoring: stackState.WorkerInstanceMonitoring,
 			WorkerInstanceType:       stackState.WorkerInstanceType,
 			WorkerCloudConfigVersion: stackState.WorkerCloudConfigVersion,
 
@@ -74,22 +54,8 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 	return rendered, nil
 }
 
-func (r *Resource) getMainHostPreTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {
-	sc, err := servicecontext.FromContext(ctx)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	adapterClients := adapter.Clients{
-		CloudFormation: sc.AWSClient.CloudFormation,
-		EC2:            sc.AWSClient.EC2,
-		IAM:            sc.AWSClient.IAM,
-		KMS:            sc.AWSClient.KMS,
-		ELB:            sc.AWSClient.ELB,
-		STS:            sc.AWSClient.STS,
-	}
-
-	guestAccountID, err := adapter.AccountID(adapterClients)
+func (r *Resource) getMainHostPreTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
+	guestAccountID, err := adapter.AccountID(*r.clients)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -110,24 +76,10 @@ func (r *Resource) getMainHostPreTemplateBody(ctx context.Context, customObject 
 	return rendered, nil
 }
 
-func (r *Resource) getMainHostPostTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {
-	sc, err := servicecontext.FromContext(ctx)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	adapterClients := adapter.Clients{
-		CloudFormation: sc.AWSClient.CloudFormation,
-		EC2:            sc.AWSClient.EC2,
-		IAM:            sc.AWSClient.IAM,
-		KMS:            sc.AWSClient.KMS,
-		ELB:            sc.AWSClient.ELB,
-		STS:            sc.AWSClient.STS,
-	}
-
+func (r *Resource) getMainHostPostTemplateBody(customObject v1alpha1.AWSConfig) (string, error) {
 	cfg := adapter.Config{
 		CustomObject: customObject,
-		Clients:      adapterClients,
+		Clients:      *r.clients,
 		HostClients:  *r.hostClients,
 	}
 	adp, err := adapter.NewHostPost(cfg)

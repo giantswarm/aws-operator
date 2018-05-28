@@ -6,13 +6,13 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v11/key"
-	"github.com/giantswarm/aws-operator/service/controller/v11/templates"
+	"github.com/giantswarm/aws-operator/service/controller/v10/key"
+	"github.com/giantswarm/aws-operator/service/controller/v10/templates"
 )
 
 // The template related to this adapter can be found in the following import.
 //
-//     github.com/giantswarm/aws-operator/service/controller/v11/templates/cloudformation/guest/instance.go
+//     github.com/giantswarm/aws-operator/service/controller/v10/templates/cloudformation/guest/instance.go
 //
 
 type instanceAdapter struct {
@@ -48,7 +48,6 @@ type instanceAdapterMasterEtcdVolume struct {
 type instanceAdapterMasterInstance struct {
 	ResourceName string
 	Type         string
-	Monitoring   bool
 }
 
 func (i *instanceAdapter) Adapt(config Config) error {
@@ -86,8 +85,6 @@ func (i *instanceAdapter) Adapt(config Config) error {
 		i.Master.Instance.ResourceName = config.StackState.MasterInstanceResourceName
 
 		i.Master.Instance.Type = config.StackState.MasterInstanceType
-
-		i.Master.Instance.Monitoring = config.StackState.MasterInstanceMonitoring
 	}
 
 	return nil

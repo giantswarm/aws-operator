@@ -7,8 +7,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
-
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 )
 
 func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
@@ -18,13 +16,8 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	}
 
 	if deleteInput.KeyAlias != "" {
-		sc, err := servicecontext.FromContext(ctx)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
 		// Get the KMS key ID using the key alias.
-		key, err := sc.AWSClient.KMS.DescribeKey(&kms.DescribeKeyInput{
+		key, err := r.awsClients.KMS.DescribeKey(&kms.DescribeKeyInput{
 			KeyId: aws.String(deleteInput.KeyAlias),
 		})
 		if err != nil {
@@ -32,14 +25,14 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		}
 
 		// Delete the key alias.
-		if _, err := sc.AWSClient.KMS.DeleteAlias(&kms.DeleteAliasInput{
+		if _, err := r.awsClients.KMS.DeleteAlias(&kms.DeleteAliasInput{
 			AliasName: aws.String(deleteInput.KeyAlias),
 		}); err != nil {
 			return microerror.Mask(err)
 		}
 
 		// AWS API doesn't allow to delete the KMS key immediately, but we can schedule its deletion.
-		if _, err := sc.AWSClient.KMS.ScheduleKeyDeletion(&kms.ScheduleKeyDeletionInput{
+		if _, err := r.awsClients.KMS.ScheduleKeyDeletion(&kms.ScheduleKeyDeletionInput{
 			KeyId:               key.KeyMetadata.KeyId,
 			PendingWindowInDays: aws.Int64(pendingDeletionWindow),
 		}); err != nil {

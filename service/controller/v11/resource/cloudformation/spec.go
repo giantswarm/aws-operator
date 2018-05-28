@@ -20,7 +20,6 @@ type StackState struct {
 	MasterInstanceType         string
 	MasterInstanceResourceName string
 	MasterCloudConfigVersion   string
-	MasterInstanceMonitoring   bool
 
 	ShouldScale  bool
 	ShouldUpdate bool
@@ -29,7 +28,6 @@ type StackState struct {
 
 	WorkerCount              string
 	WorkerImageID            string
-	WorkerInstanceMonitoring bool
 	WorkerInstanceType       string
 	WorkerCloudConfigVersion string
 

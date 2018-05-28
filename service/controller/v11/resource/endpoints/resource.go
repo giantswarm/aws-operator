@@ -1,6 +1,8 @@
 package endpoints
 
 import (
+	"reflect"
+
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	apiv1 "k8s.io/api/core/v1"
@@ -9,7 +11,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "endpointsv11"
+	Name = "endpointsv10"
 
 	httpsPort           = 443
 	masterEndpointsName = "master"
@@ -18,6 +20,7 @@ const (
 // Config represents the configuration used to create a new endpoints resource.
 type Config struct {
 	// Dependencies.
+	Clients   Clients
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 }
@@ -25,13 +28,17 @@ type Config struct {
 // Resource implements the endpoints resource.
 type Resource struct {
 	// Dependencies.
-	k8sClient kubernetes.Interface
-	logger    micrologger.Logger
+	awsClients Clients
+	k8sClient  kubernetes.Interface
+	logger     micrologger.Logger
 }
 
 // New creates a new configured endpoints resource.
 func New(config Config) (*Resource, error) {
 	// Dependencies.
+	if reflect.DeepEqual(config.Clients, Clients{}) {
+		return nil, microerror.Maskf(invalidConfigError, "config.Clients must not be empty")
+	}
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.K8sClient must not be empty")
 	}
@@ -41,8 +48,9 @@ func New(config Config) (*Resource, error) {
 
 	newResource := &Resource{
 		// Dependencies.
-		k8sClient: config.K8sClient,
-		logger:    config.Logger,
+		awsClients: config.Clients,
+		k8sClient:  config.K8sClient,
+		logger:     config.Logger,
 	}
 
 	return newResource, nil

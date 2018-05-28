@@ -1,4 +1,4 @@
-package v11
+package v10
 
 import (
 	"context"
@@ -11,21 +11,17 @@ import (
 	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
 	"github.com/giantswarm/operatorkit/controller/resource/metricsresource"
 	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
-	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v11/cloudformation"
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
-	"github.com/giantswarm/aws-operator/service/controller/v11/credential"
-	"github.com/giantswarm/aws-operator/service/controller/v11/key"
-	"github.com/giantswarm/aws-operator/service/controller/v11/resource/lifecycle"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v10/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v10/key"
+	"github.com/giantswarm/aws-operator/service/controller/v10/resource/lifecycle"
 )
 
 type DrainerResourceSetConfig struct {
-	G8sClient     versioned.Interface
-	HostAWSConfig aws.Config
-	K8sClient     kubernetes.Interface
-	Logger        micrologger.Logger
+	AWS       aws.Clients
+	G8sClient versioned.Interface
+	Logger    micrologger.Logger
 
 	GuestUpdateEnabled bool
 	ProjectName        string
@@ -34,11 +30,25 @@ type DrainerResourceSetConfig struct {
 func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
+	var cloudFormationService *cloudformationservice.CloudFormation
+	{
+		c := cloudformationservice.Config{
+			Client: config.AWS.CloudFormation,
+		}
+
+		cloudFormationService, err = cloudformationservice.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var lifecycleResource controller.Resource
 	{
 		c := lifecycle.ResourceConfig{
+			AWS:       config.AWS,
 			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
+			Service:   cloudFormationService,
 		}
 
 		lifecycleResource, err = lifecycle.NewResource(c)
@@ -91,36 +101,6 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 		if config.GuestUpdateEnabled {
 			updateallowedcontext.SetUpdateAllowed(ctx)
 		}
-
-		var awsClient aws.Clients
-		{
-			arn, err := credential.GetARN(config.K8sClient, obj)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-			c := config.HostAWSConfig
-			c.RoleARN = arn
-
-			awsClient = aws.NewClients(c)
-		}
-
-		var cloudFormationService *cloudformationservice.CloudFormation
-		{
-			c := cloudformationservice.Config{
-				Client: awsClient.CloudFormation,
-			}
-
-			cloudFormationService, err = cloudformationservice.New(c)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-		}
-
-		c := servicecontext.Context{
-			AWSClient:      awsClient,
-			CloudFormation: *cloudFormationService,
-		}
-		ctx = servicecontext.NewContext(ctx, c)
 
 		return ctx, nil
 	}

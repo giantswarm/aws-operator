@@ -37,11 +37,11 @@ const IAMPolicies = `{{define "iam_policies"}}
 
           - Effect: "Allow"
             Action: "s3:ListBucket"
-            Resource: "arn:{{.RegionARN}}:s3:::{{.S3Bucket}}"
+            Resource: "arn:aws:s3:::{{.S3Bucket}}"
 
           - Effect: "Allow"
             Action: "s3:GetObject"
-            Resource: "arn:{{.RegionARN}}:s3:::{{.S3Bucket}}/*"
+            Resource: "arn:aws:s3:::{{.S3Bucket}}/*"
 
           - Effect: "Allow"
             Action: "elasticloadbalancing:*"
@@ -97,11 +97,11 @@ const IAMPolicies = `{{define "iam_policies"}}
 
           - Effect: "Allow"
             Action: "s3:ListBucket"
-            Resource: "arn:{{.RegionARN}}:s3:::{{.S3Bucket}}"
+            Resource: "arn:aws:s3:::{{.S3Bucket}}"
 
           - Effect: "Allow"
             Action: "s3:GetObject"
-            Resource: "arn:{{.RegionARN}}:s3:::{{.S3Bucket}}/*"
+            Resource: "arn:aws:s3:::{{.S3Bucket}}/*"
 
           - Effect: "Allow"
             Action:

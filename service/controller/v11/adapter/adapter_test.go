@@ -91,12 +91,10 @@ func TestAdapterGuestMain(t *testing.T) {
 					IAM: &IAMClientMock{},
 					KMS: &KMSClientMock{},
 					ELB: &ELBClientMock{},
-					STS: &STSClientMock{},
 				},
 				HostClients: Clients{
 					EC2: &EC2ClientMock{},
 					IAM: &IAMClientMock{},
-					STS: &STSClientMock{},
 				},
 				InstallationName: "myinstallation",
 				HostAccountID:    "myHostAccountID",

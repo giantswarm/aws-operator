@@ -7,24 +7,23 @@ import (
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v11/key"
+	"github.com/giantswarm/aws-operator/service/controller/v10/key"
 )
 
 // The template related to this adapter can be found in the following import.
 //
-//     github.com/giantswarm/aws-operator/service/controller/v11/templates/cloudformation/guest/iam_policies.go
+//     github.com/giantswarm/aws-operator/service/controller/v10/templates/cloudformation/guest/iam_policies.go
 //
 
 type iamPoliciesAdapter struct {
-	KMSKeyARN         string
 	MasterRoleName    string
 	MasterPolicyName  string
 	MasterProfileName string
-	RegionARN         string
-	S3Bucket          string
 	WorkerRoleName    string
 	WorkerPolicyName  string
 	WorkerProfileName string
+	KMSKeyARN         string
+	S3Bucket          string
 }
 
 func (i *iamPoliciesAdapter) getIamPolicies(cfg Config) error {
@@ -36,7 +35,6 @@ func (i *iamPoliciesAdapter) getIamPolicies(cfg Config) error {
 	i.WorkerPolicyName = key.PolicyName(cfg.CustomObject, prefixWorker)
 	i.WorkerProfileName = key.InstanceProfileName(cfg.CustomObject, prefixWorker)
 	i.WorkerRoleName = key.RoleName(cfg.CustomObject, prefixWorker)
-	i.RegionARN = key.RegionARN(cfg.CustomObject)
 
 	// KMSKeyARN
 	keyAlias := fmt.Sprintf("alias/%s", clusterID)

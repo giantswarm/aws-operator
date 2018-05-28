@@ -15,13 +15,16 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "s3objectv11"
+	Name = "s3objectv10"
 )
 
 // Config represents the configuration used to create a new cloudformation resource.
 type Config struct {
 	// Dependencies.
+	AwsService        AwsService
 	CertWatcher       legacy.Searcher
+	Clients           Clients
+	CloudConfig       CloudConfigService
 	Logger            micrologger.Logger
 	RandomKeySearcher randomkeys.Interface
 }
@@ -29,7 +32,10 @@ type Config struct {
 // Resource implements the cloudformation resource.
 type Resource struct {
 	// Dependencies.
+	awsService        AwsService
+	awsClients        Clients
 	certWatcher       legacy.Searcher
+	cloudConfig       CloudConfigService
 	logger            micrologger.Logger
 	randomKeySearcher randomkeys.Interface
 }
@@ -37,8 +43,14 @@ type Resource struct {
 // New creates a new configured cloudformation resource.
 func New(config Config) (*Resource, error) {
 	// Dependencies.
+	if config.AwsService == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.AwsService must not be empty")
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
+	}
+	if config.CloudConfig == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.CloudConfig must not be empty")
 	}
 	if config.CertWatcher == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.CertWatcher must not be empty")
@@ -49,7 +61,10 @@ func New(config Config) (*Resource, error) {
 
 	r := &Resource{
 		// Dependencies.
+		awsService:        config.AwsService,
+		awsClients:        config.Clients,
 		certWatcher:       config.CertWatcher,
+		cloudConfig:       config.CloudConfig,
 		logger:            config.Logger,
 		randomKeySearcher: config.RandomKeySearcher,
 	}

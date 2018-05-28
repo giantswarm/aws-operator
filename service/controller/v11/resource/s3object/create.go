@@ -6,17 +6,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
-
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
 	createBucketState, err := toBucketObjectState(createChange)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	sc, err := servicecontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -28,7 +21,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 				return microerror.Mask(err)
 			}
 
-			_, err = sc.AWSClient.S3.PutObject(&s3PutInput)
+			_, err = r.awsClients.S3.PutObject(&s3PutInput)
 			if err != nil {
 				return microerror.Mask(err)
 			}

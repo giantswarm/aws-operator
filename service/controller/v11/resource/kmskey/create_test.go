@@ -6,9 +6,6 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
-
-	"github.com/giantswarm/aws-operator/client/aws"
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v11/context"
 )
 
 func Test_Resource_KMSKey_newCreate(t *testing.T) {
@@ -61,7 +58,7 @@ func Test_Resource_KMSKey_newCreate(t *testing.T) {
 	var newResource *Resource
 
 	resourceConfig := DefaultConfig()
-	awsClients := aws.Clients{
+	resourceConfig.Clients = Clients{
 		KMS: &KMSClientMock{},
 	}
 	resourceConfig.Logger = microloggertest.New()
@@ -74,10 +71,7 @@ func Test_Resource_KMSKey_newCreate(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			ctx := context.TODO()
-			ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
-
-			result, err := newResource.newCreateChange(ctx, customObject, tc.currentState, tc.desiredState)
+			result, err := newResource.newCreateChange(context.TODO(), customObject, tc.currentState, tc.desiredState)
 			if err != nil {
 				t.Errorf("expected '%v' got '%#v'", nil, err)
 			}
@@ -122,7 +116,7 @@ func Test_ApplyCreateChange(t *testing.T) {
 	var newResource *Resource
 
 	resourceConfig := DefaultConfig()
-	awsClients := aws.Clients{
+	resourceConfig.Clients = Clients{
 		KMS: &KMSClientMock{
 			clusterID: "test-cluster",
 		},
@@ -136,10 +130,7 @@ func Test_ApplyCreateChange(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		ctx := context.TODO()
-		ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
-
-		err := newResource.ApplyCreateChange(ctx, customObject, tc.createChange)
+		err := newResource.ApplyCreateChange(context.TODO(), customObject, tc.createChange)
 		if err != nil {
 			t.Errorf("unexpected error %v", err)
 		}
