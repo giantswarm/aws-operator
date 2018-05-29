@@ -10,9 +10,9 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "aws-operator",
-				Description: "Add your changes here.",
-				Kind:        versionbundle.KindChanged,
+				Component:   "cloudconfig",
+				Description: "Removed node-exporter so it can be managed by chart-operator.",
+				Kind:        versionbundle.KindRemoved,
 			},
 		},
 		Components: []versionbundle.Component{
