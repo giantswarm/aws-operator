@@ -7,15 +7,15 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/adapter"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v9patch1/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/ebs"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/key"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch2/adapter"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v9patch2/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch2/ebs"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch2/key"
 )
 
 const (
 	// Name is the identifier of the resource.
-	Name = "cloudformationv9patch1"
+	Name = "cloudformationv9patch2"
 )
 
 type AWSConfig struct {

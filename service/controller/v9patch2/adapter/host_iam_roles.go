@@ -1,10 +1,10 @@
 package adapter
 
-import "github.com/giantswarm/aws-operator/service/controller/v9patch1/key"
+import "github.com/giantswarm/aws-operator/service/controller/v9patch2/key"
 
 // The template related to this adapter can be found in the following import.
 //
-//     github.com/giantswarm/aws-operator/service/controller/v9patch1/templates/cloudformation/hostpre/iam_roles.go
+//     github.com/giantswarm/aws-operator/service/controller/v9patch2/templates/cloudformation/hostpre/iam_roles.go
 //
 
 type hostIamRolesAdapter struct {

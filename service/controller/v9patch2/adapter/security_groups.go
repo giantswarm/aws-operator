@@ -6,12 +6,12 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/key"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch2/key"
 )
 
 // The template related to this adapter can be found in the following import.
 //
-//     github.com/giantswarm/aws-operator/service/controller/v9patch1/templates/cloudformation/guest/security_groups.go
+//     github.com/giantswarm/aws-operator/service/controller/v9patch2/templates/cloudformation/guest/security_groups.go
 //
 
 type securityGroupsAdapter struct {

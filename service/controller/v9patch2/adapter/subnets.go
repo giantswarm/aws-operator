@@ -1,12 +1,12 @@
 package adapter
 
 import (
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/key"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch2/key"
 )
 
 // The template related to this adapter can be found in the following import.
 //
-//     github.com/giantswarm/aws-operator/service/controller/v9patch1/templates/cloudformation/guest/subnets.go
+//     github.com/giantswarm/aws-operator/service/controller/v9patch2/templates/cloudformation/guest/subnets.go
 //
 
 type subnetsAdapter struct {

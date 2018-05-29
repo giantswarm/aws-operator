@@ -1,4 +1,4 @@
-package v9patch1
+package v9patch2
 
 import (
 	"context"
@@ -16,20 +16,20 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/cloudconfig"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v9patch1/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/ebs"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/key"
-	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v9patch1/resource/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/resource/ebsvolume"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/resource/endpoints"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/resource/kmskey"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/resource/loadbalancer"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/resource/namespace"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/resource/s3bucket"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/resource/s3object"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/resource/service"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch2/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch2/cloudconfig"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v9patch2/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch2/ebs"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch2/key"
+	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v9patch2/resource/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch2/resource/ebsvolume"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch2/resource/endpoints"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch2/resource/kmskey"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch2/resource/loadbalancer"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch2/resource/namespace"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch2/resource/s3bucket"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch2/resource/s3object"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch2/resource/service"
 )
 
 const (
