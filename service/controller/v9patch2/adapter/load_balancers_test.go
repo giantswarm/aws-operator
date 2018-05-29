@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/aws-operator/service/controller/v9patch1/key"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch2/key"
 )
 
 func TestAdapterLoadBalancersRegularFields(t *testing.T) {
