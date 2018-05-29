@@ -25,7 +25,7 @@ const (
 	// defaultEBSVolumeMountPoint is the path for mounting the EBS volume.
 	defaultEBSVolumeMountPoint = "/dev/xvdh"
 	// defaultEBSVolumeSize is expressed in GB.
-	defaultEBSVolumeSize = 50
+	defaultEBSVolumeSize = 100
 	// defaultEBSVolumeType is the EBS volume type.
 	defaultEBSVolumeType = "gp2"
 	// rollingUpdatePauseTime is how long to pause ASG operations after creating
