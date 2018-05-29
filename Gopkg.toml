@@ -74,8 +74,8 @@ required = [
   name = "github.com/giantswarm/helmclient"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/k8scloudconfig"
+  revision = "d6d7cd76fb8ec9bad2a0a4146630f1766f32d29b"
 
 [[constraint]]
   branch = "master"
