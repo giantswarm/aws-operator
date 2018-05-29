@@ -16,6 +16,7 @@ import (
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v10"
 	"github.com/giantswarm/aws-operator/service/controller/v11"
+	"github.com/giantswarm/aws-operator/service/controller/v12"
 	"github.com/giantswarm/aws-operator/service/controller/v7"
 	"github.com/giantswarm/aws-operator/service/controller/v8"
 	"github.com/giantswarm/aws-operator/service/controller/v9"
@@ -272,6 +273,24 @@ func newDrainerResourceRouter(config DrainerConfig) (*controller.ResourceRouter,
 		}
 	}
 
+	var v12ResourceSet *controller.ResourceSet
+	{
+		c := v12.DrainerResourceSetConfig{
+			G8sClient:     config.G8sClient,
+			HostAWSConfig: hostAWSConfig,
+			K8sClient:     config.K8sClient,
+			Logger:        config.Logger,
+
+			GuestUpdateEnabled: config.GuestUpdateEnabled,
+			ProjectName:        config.ProjectName,
+		}
+
+		v12ResourceSet, err = v12.NewDrainerResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var resourceRouter *controller.ResourceRouter
 	{
 		c := controller.ResourceRouterConfig{
@@ -284,6 +303,7 @@ func newDrainerResourceRouter(config DrainerConfig) (*controller.ResourceRouter,
 				v9patch1ResourceSet,
 				v10ResourceSet,
 				v11ResourceSet,
+				v12ResourceSet,
 			},
 		}
 
