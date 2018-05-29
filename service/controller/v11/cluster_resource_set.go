@@ -345,6 +345,16 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			updateallowedcontext.SetUpdateAllowed(ctx)
 		}
 
+		// Fix for v11 upgrade path.
+		// Allow migration resource to run and fix CredentialSecret when its Name is not set.
+		if customObject, err := key.ToCustomObject(obj); err != nil {
+			return nil, microerror.Mask(err)
+		} else {
+			if key.CredentialName(customObject) == "" {
+				return ctx, nil
+			}
+		}
+
 		var awsClient aws.Clients
 		{
 			arn, err := credential.GetARN(config.K8sClient, obj)
