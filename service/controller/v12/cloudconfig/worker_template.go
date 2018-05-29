@@ -3,7 +3,7 @@ package cloudconfig
 import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/legacy"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_3_1"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_3_2"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v12/templates/cloudconfig"
@@ -12,7 +12,7 @@ import (
 const (
 	// WorkerCloudConfigVersion defines the version of k8scloudconfig in use.
 	// It is used in the main stack output and S3 object paths.
-	WorkerCloudConfigVersion = "v_3_3_1"
+	WorkerCloudConfigVersion = "v_3_3_2"
 )
 
 // NewWorkerTemplate generates a new worker cloud config template and returns it
