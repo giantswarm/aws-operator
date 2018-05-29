@@ -23,7 +23,7 @@ const Instance = `{{define "instance"}}
     - {{ .Instance.Master.Instance.ResourceName }}
     Properties:
       Encrypted: true
-      Size: 50
+      Size: 100
       VolumeType: gp2
       AvailabilityZone: !GetAtt {{ .Instance.Master.Instance.ResourceName }}.AvailabilityZone
       Tags:
