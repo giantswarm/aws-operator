@@ -10,8 +10,8 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "aws-operator",
-				Description: "Add your changes here.",
+				Component:   "cloudconfig",
+				Description: "Disable Server Token in nginx-ingress-controller",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
@@ -49,7 +49,7 @@ func VersionBundle() versionbundle.Bundle {
 		Deprecated:   false,
 		Name:         "aws-operator",
 		Time:         time.Date(2018, time.May, 28, 8, 24, 0, 0, time.UTC),
-		Version:      "3.1.2",
+		Version:      "3.3.2",
 		WIP:          true,
 	}
 }

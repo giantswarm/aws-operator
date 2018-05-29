@@ -75,7 +75,7 @@ required = [
 
 [[constraint]]
   name = "github.com/giantswarm/k8scloudconfig"
-  revision = "5e532ccf5b784c78f090af51e1695efba56a8ce2"
+  revision = "d6d7cd76fb8ec9bad2a0a4146630f1766f32d29b"
 
 [[constraint]]
   branch = "master"
