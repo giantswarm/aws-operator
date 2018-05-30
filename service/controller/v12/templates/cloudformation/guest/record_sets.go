@@ -1,12 +1,7 @@
 package guest
 
-// TODO rename to DNS
 const RecordSets = `{{define "recordsets"}}
 {{ if .Route53Enabled }}
-  HostedZone: 
-    Type: "AWS::Route53::HostedZone"
-    Properties: 
-      Name: {{.HostedZoneDomain}}
   ApiRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
@@ -14,14 +9,14 @@ const RecordSets = `{{define "recordsets"}}
         DNSName: !GetAtt ApiLoadBalancer.DNSName
         HostedZoneId: !GetAtt ApiLoadBalancer.CanonicalHostedZoneNameID
         EvaluateTargetHealth: false
-      Name: api.{{.HostedZoneDomain}}
-      HostedZoneId: !Ref HostedZone
+      Name: {{.APIELBDomain}}
+      HostedZoneId: {{.APIELBHostedZones}}
       Type: A
   EtcdRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
-      Name: etcd.{{.HostedZoneDomain}}
-      HostedZoneId: !Ref HostedZone
+      Name: {{.EtcdELBDomain}}
+      HostedZoneId: {{.EtcdELBHostedZones}}
       TTL: '900'
       Type: CNAME
       ResourceRecords:
@@ -33,14 +28,14 @@ const RecordSets = `{{define "recordsets"}}
         DNSName: !GetAtt IngressLoadBalancer.DNSName
         HostedZoneId: !GetAtt IngressLoadBalancer.CanonicalHostedZoneNameID
         EvaluateTargetHealth: false
-      Name: ingress.{{.HostedZoneDomain}}
-      HostedZoneId: !Ref HostedZone
+      Name: {{.IngressELBDomain}}
+      HostedZoneId: {{.IngressELBHostedZones}}
       Type: A
   IngressWildcardRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
-      Name: *.{{.HostedZoneDomain}}
-      HostedZoneId: !Ref HostedZone
+      Name: '{{.IngressWildcardELBDomain}}'
+      HostedZoneId: {{.IngressELBHostedZones}}
       TTL: '900'
       Type: CNAME
       ResourceRecords:
