@@ -384,13 +384,13 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 		service/controller/v9patch2/resource/cloudformation/adapter/adapter_test.go
 		service/controller/v9patch2/resource/cloudformation/main_stack_test.go
 
-		Current Release: CoreOS Container Linux stable 1576.5.0 (HVM)
+		Current Release: CoreOS Container Linux stable 1745.4.0 (HVM)
 	*/
 	imageIDs := map[string]string{
-		"ap-southeast-1": "ami-41461c3d",
-		"eu-central-1":   "ami-604e118b",
-		"eu-west-1":      "ami-34237c4d",
-		"us-west-2":      "ami-b41377cc",
+		"ap-southeast-1": "ami-73b28f0f",
+		"eu-central-1":   "ami-32042fd9",
+		"eu-west-1":      "ami-82645dfb",
+		"us-west-2":      "ami-574f362f",
 	}
 
 	imageID, ok := imageIDs[region]
