@@ -50,8 +50,7 @@ func NewAWSConfigCRD() *apiextensionsv1beta1.CustomResourceDefinition {
 type AWSConfig struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`
-	Spec              AWSConfigSpec   `json:"spec"`
-	Status            AWSConfigStatus `json:"status"`
+	Spec              AWSConfigSpec `json:"spec"`
 }
 
 type AWSConfigSpec struct {
@@ -147,24 +146,6 @@ type AWSConfigSpecAWSVPC struct {
 
 type AWSConfigSpecVersionBundle struct {
 	Version string `json:"version" yaml:"version"`
-}
-
-type AWSConfigStatus struct {
-	AWS AWSConfigStatusAWS `json:"aws" yaml:"aws"`
-}
-
-type AWSConfigStatusAWS struct {
-	HostedZones AWSConfigStatusAWSHostedZones `json:"hostedZones" yaml:"hostedZones"`
-}
-
-type AWSConfigStatusAWSHostedZones struct {
-	API     AWSConfigStatusAWSHostedZonesZone `json:"api" yaml:"api"`
-	Etcd    AWSConfigStatusAWSHostedZonesZone `json:"etcd" yaml:"etcd"`
-	Ingress AWSConfigStatusAWSHostedZonesZone `json:"ingress" yaml:"ingress"`
-}
-
-type AWSConfigStatusAWSHostedZonesZone struct {
-	ID string `json:"id" yaml:"id"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

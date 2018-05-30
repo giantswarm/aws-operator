@@ -205,7 +205,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "aws-dns"
+  branch = "master"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/core/v1alpha1",
@@ -221,7 +221,7 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake"
   ]
-  revision = "a15dbf2e2bf821259b30ecfb3d73346c4d587a7c"
+  revision = "461375f2ed17f7efd1c97917daa135c1f135ac1f"
 
 [[projects]]
   branch = "master"
@@ -1425,6 +1425,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "dd6ca4a58813d20e0f682c935968137ca0aa17540b5999458e0130193090b7f8"
+  inputs-digest = "3cda665ff02742c564069382e44904be4e9e2cbb024762b6dd5a43c4bf0281b1"
   solver-name = "gps-cdcl"
   solver-version = 1

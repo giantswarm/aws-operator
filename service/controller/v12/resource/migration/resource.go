@@ -63,7 +63,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 	customObject = *customObject.DeepCopy()
 
-	oldSpec := customObject.Spec.DeepCopy()
+	oldSpec := *customObject.Spec.DeepCopy()
 
 	if reflect.DeepEqual(providerv1alpha1.AWSConfigSpecAWSHostedZones{}, customObject.Spec.AWS.HostedZones) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "CR is missing hosted zone names")
