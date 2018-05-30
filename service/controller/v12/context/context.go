@@ -23,9 +23,9 @@ type Context struct {
 	CloudFormation cloudformationservice.CloudFormation
 	EBSService     ebs.Interface
 
-	// Status is holds the data used to communicate between controller's
+	// Status holds the data used to communicate between controller's
 	// resources. It can be edited in place as Context is stored as
-	// a pointer withing context.Context.
+	// a pointer within context.Context.
 	Status Status
 }
 

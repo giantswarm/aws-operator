@@ -185,6 +185,10 @@ func DockerVolumeName(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-docker", ClusterID(customObject))
 }
 
+func EtcdVolumeName(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("%s-etcd", ClusterID(customObject))
+}
+
 func HostedZoneNameAPI(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.HostedZones.API.Name
 }
@@ -195,10 +199,6 @@ func HostedZoneNameEtcd(customObject v1alpha1.AWSConfig) string {
 
 func HostedZoneNameIngress(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.HostedZones.Ingress.Name
-}
-
-func EtcdVolumeName(customObject v1alpha1.AWSConfig) string {
-	return fmt.Sprintf("%s-etcd", ClusterID(customObject))
 }
 
 func IngressControllerInsecurePort(customObject v1alpha1.AWSConfig) int {
