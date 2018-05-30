@@ -221,7 +221,7 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake"
   ]
-  revision = "496c70f095ab9a89b8413f099b3424cd3a6d9810"
+  revision = "461375f2ed17f7efd1c97917daa135c1f135ac1f"
 
 [[projects]]
   branch = "master"
@@ -351,7 +351,7 @@
     "controller/resource/retryresource",
     "informer"
   ]
-  revision = "178f1023df2fc4b7652ed03d77832c2370f45721"
+  revision = "4df9ae8a194ea96785e9ed8fdd284d79904726be"
 
 [[projects]]
   branch = "master"
@@ -790,7 +790,7 @@
     "publicsuffix",
     "trace"
   ]
-  revision = "89e543239a64caf31d3a6865872ea120b41446df"
+  revision = "4ef37e81ae7d4d477bda45ba9506a70004e1317b"
 
 [[projects]]
   branch = "master"
