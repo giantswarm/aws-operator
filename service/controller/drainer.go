@@ -256,7 +256,6 @@ func newDrainerResourceRouter(config DrainerConfig) (*controller.ResourceRouter,
 		}
 	}
 
-
 	var v10ResourceSet *controller.ResourceSet
 	{
 		c := v10.DrainerResourceSetConfig{
