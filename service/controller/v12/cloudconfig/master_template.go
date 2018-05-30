@@ -10,12 +10,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v12/templates/cloudconfig"
 )
 
-const (
-	// MasterCloudConfigVersion defines the version of k8scloudconfig in use.
-	// It is used in the main stack output and S3 object paths.
-	MasterCloudConfigVersion = "v_3_3_2"
-)
-
 // NewMasterTemplate generates a new master cloud config template and returns it
 // as a base64 encoded string.
 func (c *CloudConfig) NewMasterTemplate(customObject v1alpha1.AWSConfig, certs legacy.CompactTLSAssets, clusterKeys randomkeys.Cluster, kmsKeyARN string) (string, error) {
