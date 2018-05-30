@@ -1,8 +1,6 @@
 package v3
 
 import (
-	"time"
-
 	"github.com/giantswarm/versionbundle"
 )
 
@@ -42,12 +40,8 @@ func VersionBundles() []versionbundle.Bundle {
 					Version: "0.10.2",
 				},
 			},
-			Dependencies: []versionbundle.Dependency{},
-			Deprecated:   true,
-			Name:         "aws-operator",
-			Time:         time.Date(2018, time.January, 30, 11, 55, 0, 0, time.UTC),
-			Version:      "2.0.1",
-			WIP:          false,
+			Name:    "aws-operator",
+			Version: "2.0.1",
 		},
 		{
 			Changelogs: []versionbundle.Changelog{
@@ -83,12 +77,8 @@ func VersionBundles() []versionbundle.Bundle {
 					Version: "0.10.2",
 				},
 			},
-			Dependencies: []versionbundle.Dependency{},
-			Deprecated:   true,
-			Name:         "aws-operator",
-			Time:         time.Date(2018, time.January, 31, 10, 43, 0, 0, time.UTC),
-			Version:      "2.0.2",
-			WIP:          false,
+			Name:    "aws-operator",
+			Version: "2.0.2",
 		},
 	}
 }

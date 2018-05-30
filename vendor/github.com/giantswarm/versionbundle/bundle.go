@@ -2,7 +2,6 @@ package versionbundle
 
 import (
 	"strings"
-	"time"
 
 	"github.com/coreos/go-semver/semver"
 	"github.com/giantswarm/microerror"
@@ -24,15 +23,6 @@ type Bundle struct {
 	//
 	// NOTE that once this property is set it must never change again.
 	Components []Component `json:"components" yaml:"components"`
-	// Dependencies describe which components other authorities expose have to be
-	// available to be able to guarantee functionality this authority implements.
-	//
-	// NOTE that once this property is set it must never change again.
-	Dependencies []Dependency `json:"dependencies" yaml:"dependencies"`
-	// Deprecated defines a version bundle to be deprecated. Deprecated version
-	// bundles are not intended to be mainatined anymore. Further usage of a
-	// deprecated version bundle should be omitted.
-	Deprecated bool `json:"deprecated" yaml:"deprecated"`
 	// Name is the name of the authority exposing the version bundle.
 	//
 	// NOTE that once this property is set it must never change again.
@@ -40,19 +30,19 @@ type Bundle struct {
 	// Provider describes infrastructure provider that is specific for this
 	// Bundle.
 	Provider string `json:"provider,omitempty" yaml:"provider,omitempty"`
-	// Time describes the time this version bundle got introduced.
-	//
-	// NOTE that once this property is set it must never change again.
-	Time time.Time `json:"time" yaml:"time"`
 	// Version describes the version of the version bundle. Versions of version
 	// bundles must be semver versions. Versions must not be duplicated. Versions
 	// should be incremented gradually.
 	//
 	// NOTE that once this property is set it must never change again.
 	Version string `json:"version" yaml:"version"`
-	// WIP describes if a version bundle is being developed. Usage of a version
-	// bundle still being developed should be omitted.
-	WIP bool `json:"wip" yaml:"wip"`
+}
+
+func (b Bundle) ID() string {
+	n := strings.TrimSpace(b.Name)
+	p := strings.TrimSpace(b.Provider)
+	v := strings.TrimSpace(b.Version)
+	return n + ":" + p + ":" + v
 }
 
 func (b Bundle) IsMajorUpgrade(other Bundle) (bool, error) {
@@ -176,18 +166,6 @@ func (b Bundle) Validate() error {
 		if err != nil {
 			return microerror.Maskf(invalidBundleError, err.Error())
 		}
-	}
-
-	for _, d := range b.Dependencies {
-		err := d.Validate()
-		if err != nil {
-			return microerror.Maskf(invalidBundleError, err.Error())
-		}
-	}
-
-	var emptyTime time.Time
-	if b.Time == emptyTime {
-		return microerror.Maskf(invalidBundleError, "time must not be empty")
 	}
 
 	if b.Name == "" {
