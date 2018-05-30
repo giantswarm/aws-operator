@@ -3,6 +3,7 @@ package hostedzone
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/giantswarm/microerror"
@@ -84,9 +85,9 @@ func (r *Resource) setStatus(ctx context.Context, obj interface{}) error {
 		etcdFound    = false
 		ingressFound = false
 
-		apiDomain     = key.HostedZoneNameAPI(customObject)
-		etcdDomain    = key.HostedZoneNameEtcd(customObject)
-		ingressDomain = key.HostedZoneNameIngress(customObject)
+		apiDomain     = strings.TrimSuffix(key.HostedZoneNameAPI(customObject), ".")
+		etcdDomain    = strings.TrimSuffix(key.HostedZoneNameEtcd(customObject), ".")
+		ingressDomain = strings.TrimSuffix(key.HostedZoneNameIngress(customObject), ".")
 	)
 
 	var marker *string
@@ -106,6 +107,7 @@ func (r *Resource) setStatus(ctx context.Context, obj interface{}) error {
 			}
 
 			hzName := *hz.Name
+			hzName = strings.TrimSuffix(hzName, ".")
 			hzID := *hz.Id
 
 			switch hzName {
