@@ -1,8 +1,6 @@
 package v9
 
 import (
-	"time"
-
 	"github.com/giantswarm/versionbundle"
 )
 
@@ -55,11 +53,7 @@ func VersionBundle() versionbundle.Bundle {
 				Version: "0.12.0",
 			},
 		},
-		Dependencies: []versionbundle.Dependency{},
-		Deprecated:   true,
-		Name:         "aws-operator",
-		Time:         time.Date(2018, time.March, 22, 12, 29, 0, 0, time.UTC),
-		Version:      "3.0.2",
-		WIP:          false,
+		Name:    "aws-operator",
+		Version: "3.0.2",
 	}
 }
