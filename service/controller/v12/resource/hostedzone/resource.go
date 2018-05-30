@@ -85,9 +85,9 @@ func (r *Resource) setStatus(ctx context.Context, obj interface{}) error {
 		etcdFound    = false
 		ingressFound = false
 
-		apiDomain     = strings.TrimSuffix(key.HostedZoneNameAPI(customObject), ".")
-		etcdDomain    = strings.TrimSuffix(key.HostedZoneNameEtcd(customObject), ".")
-		ingressDomain = strings.TrimSuffix(key.HostedZoneNameIngress(customObject), ".")
+		apiZone     = strings.TrimSuffix(key.HostedZoneNameAPI(customObject), ".")
+		etcdZone    = strings.TrimSuffix(key.HostedZoneNameEtcd(customObject), ".")
+		ingressZone = strings.TrimSuffix(key.HostedZoneNameIngress(customObject), ".")
 	)
 
 	var marker *string
@@ -110,22 +110,20 @@ func (r *Resource) setStatus(ctx context.Context, obj interface{}) error {
 			hzName = strings.TrimSuffix(hzName, ".")
 			hzID := *hz.Id
 
-			switch hzName {
-			case apiDomain:
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found hosted zone ID %q for domain %q", hzName, hzID))
+			if hzName == apiZone {
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found hosted zone ID %q for domain %q", hzID, hzName))
 				controllerCtx.Status.HostedZones.API.ID = hzID
 				apiFound = true
-			case etcdDomain:
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found hosted zone ID %q for domain %q", hzName, hzID))
+			}
+			if hzName == etcdZone {
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found hosted zone ID %q for domain %q", hzID, hzName))
 				controllerCtx.Status.HostedZones.Etcd.ID = hzID
 				etcdFound = true
-			case ingressDomain:
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found hosted zone ID %q for domain %q", hzName, hzID))
+			}
+			if hzName == ingressZone {
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found hosted zone ID %q for domain %q", hzID, hzName))
 				controllerCtx.Status.HostedZones.Ingress.ID = hzID
 				ingressFound = true
-			default:
-				// Hosted Zone doesn't match any of desired
-				// domains. Continue.
 			}
 		}
 
@@ -143,13 +141,13 @@ func (r *Resource) setStatus(ctx context.Context, obj interface{}) error {
 	}
 
 	if !apiFound {
-		return microerror.Maskf(hostedZoneNotFoundError, "domain = %q", apiDomain)
+		return microerror.Maskf(hostedZoneNotFoundError, "zone = %q", apiZone)
 	}
 	if !etcdFound {
-		return microerror.Maskf(hostedZoneNotFoundError, "domain = %q", etcdDomain)
+		return microerror.Maskf(hostedZoneNotFoundError, "zone = %q", etcdZone)
 	}
 	if !ingressFound {
-		return microerror.Maskf(hostedZoneNotFoundError, "domain = %q", ingressDomain)
+		return microerror.Maskf(hostedZoneNotFoundError, "zone = %q", ingressZone)
 	}
 
 	return nil
