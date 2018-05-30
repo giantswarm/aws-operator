@@ -92,10 +92,6 @@ func TestAdapterLaunchConfigurationSmallCloudConfig(t *testing.T) {
 			description:  "userdata file",
 			expectedLine: "USERDATA_FILE=worker",
 		},
-		{
-			description:  "s3 http uri",
-			expectedLine: `s3_http_uri="https://s3.myregion.amazonaws.com/000000000000-g8s-test-cluster/cloudconfig/v_3_3_2/$USERDATA_FILE"`,
-		},
 	}
 
 	a := Adapter{}
