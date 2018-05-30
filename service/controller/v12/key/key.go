@@ -356,6 +356,8 @@ func ToCustomObject(v interface{}) (v1alpha1.AWSConfig, error) {
 	}
 	customObject := *customObjectPointer
 
+	customObject = *customObject.DeepCopy()
+
 	return customObject, nil
 }
 
