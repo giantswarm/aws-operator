@@ -2,6 +2,8 @@ package guest
 
 const Outputs = `{{define "outputs"}}
 Outputs:
+  HostedZoneID:
+    Value: !GetAtt HostedZone.NameServers
   MasterImageID:
     Value: {{ .Outputs.Master.ImageID }}
   MasterInstanceResourceName:

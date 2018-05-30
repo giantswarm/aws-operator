@@ -4,9 +4,9 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
-var serviceNotFound = microerror.New("service not found")
+var notFoundError = microerror.New("not found")
 
-// IsServiceNotFoundError asserts serviceNotFound.
-func IsServiceNotFoundError(err error) bool {
-	return microerror.Cause(err) == serviceNotFound
+// IsNotFound asserts notFoundError.
+func IsNotFound(err error) bool {
+	return microerror.Cause(err) == notFoundError
 }

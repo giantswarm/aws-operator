@@ -46,7 +46,7 @@ required = [
   name = "github.com/docker/distribution"
 
 [[constraint]]
-  branch = "master"
+  branch = "aws-dns"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]

@@ -50,7 +50,8 @@ func NewAWSConfigCRD() *apiextensionsv1beta1.CustomResourceDefinition {
 type AWSConfig struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`
-	Spec              AWSConfigSpec `json:"spec"`
+	Spec              AWSConfigSpec   `json:"spec"`
+	Status            AWSConfigStatus `json:"status"`
 }
 
 type AWSConfigSpec struct {
@@ -64,18 +65,32 @@ type AWSConfigSpecAWS struct {
 	AZ               string                    `json:"az" yaml:"az"`
 	CredentialSecret AWSConfigCredentialSecret `json:"credentialSecret" yaml:"credentialSecret"`
 	Etcd             AWSConfigSpecAWSEtcd      `json:"etcd" yaml:"etcd"`
-	Ingress          AWSConfigSpecAWSIngress   `json:"ingress" yaml:"ingress"`
-	Masters          []AWSConfigSpecAWSNode    `json:"masters" yaml:"masters"`
-	Region           string                    `json:"region" yaml:"region"`
-	VPC              AWSConfigSpecAWSVPC       `json:"vpc" yaml:"vpc"`
-	Workers          []AWSConfigSpecAWSNode    `json:"workers" yaml:"workers"`
+
+	// HostedZones is AWS hosted zones names in the host cluster account.
+	// For each zone there will be "CLUSTER_ID.k8s" NS record created in
+	// the host cluster account. Then for each created NS record there will
+	// be a zone created in the guest account. After that component
+	// specific records under those zones:
+	//	- api.CLUSTER_ID.k8s.{{ .Spec.AWS.HostedZones.API.Name }}
+	//	- etcd.CLUSTER_ID.k8s.{{ .Spec.AWS.HostedZones.Etcd.Name }}
+	//	- ingress.CLUSTER_ID.k8s.{{ .Spec.AWS.HostedZones.Ingress.Name }}
+	//	- *.CLUSTER_ID.k8s.{{ .Spec.AWS.HostedZones.Ingress.Name }}
+	HostedZones AWSConfigSpecAWSHostedZones `json:"hostedZones" yaml:"hostedZones"`
+
+	Ingress AWSConfigSpecAWSIngress `json:"ingress" yaml:"ingress"`
+	Masters []AWSConfigSpecAWSNode  `json:"masters" yaml:"masters"`
+	Region  string                  `json:"region" yaml:"region"`
+	VPC     AWSConfigSpecAWSVPC     `json:"vpc" yaml:"vpc"`
+	Workers []AWSConfigSpecAWSNode  `json:"workers" yaml:"workers"`
 }
 
+// AWSConfigSpecAWSAPI deprecated since aws-operator v12 resources.
 type AWSConfigSpecAWSAPI struct {
 	HostedZones string                 `json:"hostedZones" yaml:"hostedZones"`
 	ELB         AWSConfigSpecAWSAPIELB `json:"elb" yaml:"elb"`
 }
 
+// AWSConfigSpecAWSAPIELB deprecated since aws-operator v12 resources.
 type AWSConfigSpecAWSAPIELB struct {
 	IdleTimeoutSeconds int `json:"idleTimeoutSeconds" yaml:"idleTimeoutSeconds"`
 }
@@ -85,20 +100,34 @@ type AWSConfigCredentialSecret struct {
 	Namespace string `json:"namespace" yaml:"namespace"`
 }
 
+// AWSConfigSpecAWSEtcd deprecated since aws-operator v12 resources.
 type AWSConfigSpecAWSEtcd struct {
 	HostedZones string                  `json:"hostedZones" yaml:"hostedZones"`
 	ELB         AWSConfigSpecAWSEtcdELB `json:"elb" yaml:"elb"`
 }
 
+// AWSConfigSpecAWSEtcdELB deprecated since aws-operator v12 resources.
 type AWSConfigSpecAWSEtcdELB struct {
 	IdleTimeoutSeconds int `json:"idleTimeoutSeconds" yaml:"idleTimeoutSeconds"`
 }
 
+type AWSConfigSpecAWSHostedZones struct {
+	API     AWSConfigSpecAWSHostedZonesZone `json:"api" yaml:"api"`
+	Etcd    AWSConfigSpecAWSHostedZonesZone `json:"etcd" yaml:"etcd"`
+	Ingress AWSConfigSpecAWSHostedZonesZone `json:"ingress" yaml:"ingress"`
+}
+
+type AWSConfigSpecAWSHostedZonesZone struct {
+	Name string `json:"name" yaml:"name"`
+}
+
+// AWSConfigSpecAWSIngress deprecated since aws-operator v12 resources.
 type AWSConfigSpecAWSIngress struct {
 	HostedZones string                     `json:"hostedZones" yaml:"hostedZones"`
 	ELB         AWSConfigSpecAWSIngressELB `json:"elb" yaml:"elb"`
 }
 
+// AWSConfigSpecAWSIngressELB deprecated since aws-operator v12 resources.
 type AWSConfigSpecAWSIngressELB struct {
 	IdleTimeoutSeconds int `json:"idleTimeoutSeconds" yaml:"idleTimeoutSeconds"`
 }
@@ -118,6 +147,24 @@ type AWSConfigSpecAWSVPC struct {
 
 type AWSConfigSpecVersionBundle struct {
 	Version string `json:"version" yaml:"version"`
+}
+
+type AWSConfigStatus struct {
+	AWS AWSConfigStatusAWS `json:"aws" yaml:"aws"`
+}
+
+type AWSConfigStatusAWS struct {
+	HostedZones AWSConfigStatusAWSHostedZones `json:"hostedZones" yaml:"hostedZones"`
+}
+
+type AWSConfigStatusAWSHostedZones struct {
+	API     AWSConfigStatusAWSHostedZonesZone `json:"api" yaml:"api"`
+	Etcd    AWSConfigStatusAWSHostedZonesZone `json:"etcd" yaml:"etcd"`
+	Ingress AWSConfigStatusAWSHostedZonesZone `json:"ingress" yaml:"ingress"`
+}
+
+type AWSConfigStatusAWSHostedZonesZone struct {
+	ID string `json:"id" yaml:"id"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
