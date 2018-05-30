@@ -42,6 +42,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v9patch1"
 	v9patch1adapter "github.com/giantswarm/aws-operator/service/controller/v9patch1/adapter"
 	v9patch1cloudconfig "github.com/giantswarm/aws-operator/service/controller/v9patch1/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v9patch2"
+	v9patch2adapter "github.com/giantswarm/aws-operator/service/controller/v9patch2/adapter"
+	v9patch2cloudconfig "github.com/giantswarm/aws-operator/service/controller/v9patch2/cloudconfig"
 )
 
 type ClusterConfig struct {
@@ -519,6 +522,38 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 			return nil, microerror.Mask(err)
 		}
 	}
+	
+	var resourceSetV9Patch2 *controller.ResourceSet
+	{
+		c := v9patch2.ClusterResourceSetConfig{
+			CertsSearcher:      certWatcher,
+			GuestAWSClients:    awsClients,
+			HostAWSClients:     awsHostClients,
+			K8sClient:          config.K8sClient,
+			Logger:             config.Logger,
+			RandomkeysSearcher: randomKeySearcher,
+
+			AccessLogsExpiration: config.AccessLogsExpiration,
+			GuestUpdateEnabled:   config.GuestUpdateEnabled,
+			InstallationName:     config.InstallationName,
+			OIDC: v9patch2cloudconfig.OIDCConfig{
+				ClientID:      config.OIDC.ClientID,
+				IssuerURL:     config.OIDC.IssuerURL,
+				UsernameClaim: config.OIDC.UsernameClaim,
+				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			APIWhitelist: v9patch2adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
+			},
+			ProjectName: config.ProjectName,
+		}
+
+		resourceSetV9Patch2, err = v9patch2.NewClusterResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
 
 	var resourceSetV10 *controller.ResourceSet
 	{
@@ -644,6 +679,7 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 				resourceSetV8,
 				resourceSetV9,
 				resourceSetV9Patch1,
+				resourceSetV9Patch2,
 				resourceSetV10,
 				resourceSetV11,
 				resourceSetV12,
