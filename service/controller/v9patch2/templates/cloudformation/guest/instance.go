@@ -9,7 +9,6 @@ const Instance = `{{define "instance"}}
       IamInstanceProfile: !Ref MasterInstanceProfile
       ImageId: {{ .Instance.Image.ID }}
       InstanceType: {{ .Instance.Master.Instance.Type }}
-      Monitoring: {{ .Instance.Master.Instance.Monitoring }}
       SecurityGroupIds:
       - !Ref MasterSecurityGroup
       SubnetId: !Ref PrivateSubnet
@@ -23,7 +22,7 @@ const Instance = `{{define "instance"}}
     - {{ .Instance.Master.Instance.ResourceName }}
     Properties:
       Encrypted: true
-      Size: 100
+      Size: 50
       VolumeType: gp2
       AvailabilityZone: !GetAtt {{ .Instance.Master.Instance.ResourceName }}.AvailabilityZone
       Tags:

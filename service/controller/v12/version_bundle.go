@@ -10,6 +10,11 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
+				Component:   "aws-operator",
+				Description: "Increased Docker EBS volume size from 50 to 100 GB.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
 				Component:   "cloudconfig",
 				Description: "Removed node-exporter so it can be managed by chart-operator.",
 				Kind:        versionbundle.KindRemoved,
