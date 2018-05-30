@@ -19,7 +19,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/viper"
-	"github.com/tylerb/graceful"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/microkit/tls"
@@ -143,7 +142,7 @@ type server struct {
 	// Internals.
 	bootOnce     sync.Once
 	config       Config
-	httpServer   *graceful.Server
+	httpServer   *http.Server
 	listenURL    *url.URL
 	shutdownOnce sync.Once
 
@@ -235,13 +234,9 @@ func (s *server) Boot() {
 
 		// Register the router which has all of the configured custom endpoints
 		// registered.
-		s.httpServer = &graceful.Server{
-			NoSignalHandling: true,
-			Server: &http.Server{
-				Addr:    s.listenURL.Host,
-				Handler: s.router,
-			},
-			Timeout: 3 * time.Second,
+		s.httpServer = &http.Server{
+			Addr:    s.listenURL.Host,
+			Handler: s.router,
 		}
 
 		go func() {
@@ -252,15 +247,15 @@ func (s *server) Boot() {
 				if err != nil {
 					panic(err)
 				}
-				err = s.httpServer.ListenAndServeTLSConfig(tlsConfig)
-				if err != nil {
-					panic(err)
-				}
-			} else {
-				err := s.httpServer.ListenAndServe()
-				if err != nil {
-					panic(err)
-				}
+				s.httpServer.TLSConfig = tlsConfig
+			}
+
+			err := s.httpServer.ListenAndServe()
+			if IsServerClosed(err) {
+				// We get a closed error in case the server is shutting down. We expect
+				// this at times so we just fall through here.
+			} else if err != nil {
+				panic(err)
 			}
 		}()
 	})
@@ -272,18 +267,19 @@ func (s *server) Config() Config {
 
 func (s *server) Shutdown() {
 	s.shutdownOnce.Do(func() {
-		var wg sync.WaitGroup
-
-		wg.Add(1)
+		// Stop the HTTP server gracefully and wait some time for open connections
+		// to be closed. Then force it to be stopped.
 		go func() {
-			// Stop the HTTP server gracefully and wait some time for open connections
-			// to be closed. Then force it to be stopped.
-			s.httpServer.Stop(s.httpServer.Timeout)
-			<-s.httpServer.StopChan()
-			wg.Done()
+			err := s.httpServer.Shutdown(context.Background())
+			if err != nil {
+				s.logger.Log("level", "error", "message", "shutting down server failed", "stack", fmt.Sprintf("%#v", err))
+			}
 		}()
-
-		wg.Wait()
+		<-time.After(3 * time.Second)
+		err := s.httpServer.Close()
+		if err != nil {
+			s.logger.Log("level", "error", "message", "closing server failed", "stack", fmt.Sprintf("%#v", err))
+		}
 	})
 }
 

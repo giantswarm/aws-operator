@@ -46,12 +46,6 @@ func (b Bundles) Validate() error {
 		}
 	}
 
-	for _, bundle := range b {
-		if bundle.Deprecated && bundle.WIP {
-			return microerror.Maskf(invalidBundlesError, "version bundles must not be deprecated and WIP")
-		}
-	}
-
 	return nil
 }
 

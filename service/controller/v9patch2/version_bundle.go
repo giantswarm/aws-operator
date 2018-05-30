@@ -1,8 +1,6 @@
 package v9patch2
 
 import (
-	"time"
-
 	"github.com/giantswarm/versionbundle"
 )
 
@@ -11,7 +9,12 @@ func VersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "aws-operator",
-				Description: "Add your changes here.",
+				Description: "Increased Docker EBS volume size from 50 to 100 GB.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "containerlinux",
+				Description: "Updated to 1745.4.0.",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
@@ -22,11 +25,11 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "containerlinux",
-				Version: "1688.5.3",
+				Version: "1745.4.0",
 			},
 			{
 				Name:    "docker",
-				Version: "17.12.1",
+				Version: "18.03.1",
 			},
 			{
 				Name:    "etcd",
@@ -45,11 +48,7 @@ func VersionBundle() versionbundle.Bundle {
 				Version: "0.12.0",
 			},
 		},
-		Dependencies: []versionbundle.Dependency{},
-		Deprecated:   false,
-		Name:         "aws-operator",
-		Time:         time.Date(2018, time.May, 8, 12, 00, 0, 0, time.UTC),
-		Version:      "3.0.4",
-		WIP:          true,
+		Name:    "aws-operator",
+		Version: "3.0.4",
 	}
 }

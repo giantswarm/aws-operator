@@ -57,6 +57,10 @@ type Changelog struct {
 	Kind kind `json:"kind" yaml:"kind"`
 }
 
+func (c Changelog) String() string {
+	return string(c.Kind) + ":" + c.Component + ":" + c.Description
+}
+
 func (c Changelog) Validate() error {
 	if c.Component == "" {
 		return microerror.Maskf(invalidChangelogError, "component must not be empty")
