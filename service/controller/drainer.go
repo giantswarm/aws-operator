@@ -238,7 +238,7 @@ func newDrainerResourceRouter(config DrainerConfig) (*controller.ResourceRouter,
 			return nil, microerror.Mask(err)
 		}
 	}
-	
+
 	var v9patch2ResourceSet *controller.ResourceSet
 	{
 		c := v9patch2.DrainerResourceSetConfig{
