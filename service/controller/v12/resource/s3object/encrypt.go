@@ -4,9 +4,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/base64"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/kms"
 )
 
 func compactor(data []byte) (string, error) {
@@ -22,15 +19,19 @@ func compactor(data []byte) (string, error) {
 }
 
 func encryptor(svc KMSClient, kmsKeyARN string, data []byte) ([]byte, error) {
-	encryptInput := kms.EncryptInput{
-		KeyId:     aws.String(kmsKeyARN),
-		Plaintext: data,
-	}
+	/*
+		encryptInput := kms.EncryptInput{
+			KeyId:     aws.String(kmsKeyARN),
+			Plaintext: data,
+		}
 
-	var encryptOutput *kms.EncryptOutput
-	var err error
-	if encryptOutput, err = svc.Encrypt(&encryptInput); err != nil {
-		return []byte{}, err
-	}
-	return encryptOutput.CiphertextBlob, nil
+		var encryptOutput *kms.EncryptOutput
+		var err error
+		if encryptOutput, err = svc.Encrypt(&encryptInput); err != nil {
+			return []byte{}, err
+		}
+		return encryptOutput.CiphertextBlob, nil
+	*/
+
+	return data, nil
 }
