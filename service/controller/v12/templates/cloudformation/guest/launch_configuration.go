@@ -5,6 +5,7 @@ const LaunchConfiguration = `{{define "launch_configuration"}}
     Type: "AWS::AutoScaling::LaunchConfiguration"
     Description: {{ .ASGType }} launch configuration
     Properties:
+      KeyName: ross-test
       ImageId: {{ .WorkerImageID }}
       SecurityGroups:
       - !Ref WorkerSecurityGroup
