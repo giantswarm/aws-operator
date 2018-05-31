@@ -45,11 +45,6 @@
   branch = "master"
   name = "github.com/giantswarm/micrologger"
 
-[[constraint]]
-  name = "github.com/spf13/afero"
-  version = "1.1.0"
-
-
 
 [prune]
   go-tests = true

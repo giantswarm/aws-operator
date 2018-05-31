@@ -10,8 +10,6 @@ import (
 	"strings"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
-
-	"github.com/giantswarm/aws-operator/service"
 )
 
 const (
@@ -24,6 +22,9 @@ const (
 	// TODO rename to CLUSTER_ID. Note this also had to be changed in the
 	// framework package of e2e-harness.
 	EnvVarClusterID = "CLUSTER_NAME"
+	// EnvVarGithubBotToken is the process environment variable representing
+	// the GITHUB_BOT_TOKEN env var.
+	EnvVarGithubBotToken = "GITHUB_BOT_TOKEN"
 	// EnvVarGuestAWSArn is the process environment variable representing
 	// the GUEST_AWS_ARN env var.
 	EnvVarGuestAWSArn = "GUEST_AWS_ARN"
@@ -72,7 +73,14 @@ func init() {
 	}
 
 	var err error
-	versionBundleVersion, err = framework.GetVersionBundleVersion(service.NewVersionBundles(), TestedVersion())
+	token := os.Getenv(EnvVarGithubBotToken)
+	params := &framework.VBVParams{
+		Component: "aws-operator",
+		Provider:  "aws",
+		Token:     token,
+		VType:     TestedVersion(),
+	}
+	versionBundleVersion, err = framework.GetVersionBundleVersion(params)
 	if err != nil {
 		panic(err.Error())
 	}
