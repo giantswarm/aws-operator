@@ -111,17 +111,17 @@ func (r *Resource) setStatus(ctx context.Context, obj interface{}) error {
 			hzID := *hz.Id
 
 			if hzName == apiZone {
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found hosted zone ID %q for domain %q", hzID, hzName))
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found api hosted zone ID %q for domain %q", hzID, hzName))
 				controllerCtx.Status.HostedZones.API.ID = hzID
 				apiFound = true
 			}
 			if hzName == etcdZone {
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found hosted zone ID %q for domain %q", hzID, hzName))
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found etcd hosted zone ID %q for domain %q", hzID, hzName))
 				controllerCtx.Status.HostedZones.Etcd.ID = hzID
 				etcdFound = true
 			}
 			if hzName == ingressZone {
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found hosted zone ID %q for domain %q", hzID, hzName))
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found ingress hosted zone ID %q for domain %q", hzID, hzName))
 				controllerCtx.Status.HostedZones.Ingress.ID = hzID
 				ingressFound = true
 			}
@@ -150,5 +150,6 @@ func (r *Resource) setStatus(ctx context.Context, obj interface{}) error {
 		return microerror.Maskf(hostedZoneNotFoundError, "zone = %q", ingressZone)
 	}
 
+	r.logger.LogCtx(ctx, "level", "debug", "message", "found all host cluster hosted zone IDs")
 	return nil
 }
