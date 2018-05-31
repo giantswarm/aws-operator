@@ -20,11 +20,15 @@ const (
 type Config struct {
 	HostRoute53 *route53.Route53
 	Logger      micrologger.Logger
+
+	Route53Enabled bool
 }
 
 type Resource struct {
 	hostRoute53 *route53.Route53
 	logger      micrologger.Logger
+
+	route53Enabled bool
 }
 
 func New(config Config) (*Resource, error) {
@@ -38,6 +42,8 @@ func New(config Config) (*Resource, error) {
 	r := &Resource{
 		hostRoute53: config.HostRoute53,
 		logger:      config.Logger,
+
+		route53Enabled: config.Route53Enabled,
 	}
 
 	return r, nil
@@ -68,6 +74,11 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 // setStatus searches for HostedZone in AWS API by name for their IDs. Those
 // IDs are set in controller context status for further use.
 func (r *Resource) setStatus(ctx context.Context, obj interface{}) error {
+	if !r.route53Enabled {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "route53 disabled, skipping execution")
+		return nil
+	}
+
 	customObject, err := key.ToCustomObject(obj)
 	if err != nil {
 		return microerror.Mask(err)
