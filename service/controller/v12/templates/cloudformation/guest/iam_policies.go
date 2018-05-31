@@ -26,10 +26,6 @@ const IAMPolicies = `{{define "iam_policies"}}
             Resource: "*"
 
           - Effect: "Allow"
-            Action: "kms:Decrypt"
-            Resource: "{{.KMSKeyARN}}"
-
-          - Effect: "Allow"
             Action:
               - "s3:GetBucketLocation"
               - "s3:ListAllMyBuckets"
@@ -84,10 +80,6 @@ const IAMPolicies = `{{define "iam_policies"}}
           - Effect: "Allow"
             Action: "ec2:DetachVolume"
             Resource: "*"
-
-          - Effect: "Allow"
-            Action: "kms:Decrypt"
-            Resource: "{{.KMSKeyARN}}"
 
           - Effect: "Allow"
             Action:
