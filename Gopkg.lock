@@ -239,13 +239,13 @@
   revision = "1c16910f3dfec0d23e36d0892698ec50c6fbd6ba"
 
 [[projects]]
+  branch = "master"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "5352466ad607e1c7c3a29e51116192d5410372f2"
-  version = "5352466"
+  revision = "758b2eeaf3f661cdd8cbed18dd5562bf03e24dd0"
 
 [[projects]]
   branch = "master"
@@ -266,7 +266,7 @@
   revision = "0f1af4c3bd3b0d6f445494bed71cf2cfd8de2edd"
 
 [[projects]]
-  branch = "master"
+  branch = "ic-param"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "v_2_0_2",
@@ -281,7 +281,7 @@
     "v_3_3_1",
     "v_3_3_2"
   ]
-  revision = "119402e11843b12ffcc2c5f88997f1ec3849e14b"
+  revision = "dbb132afe3d1a2edc26a1589693dcb4d9ef133fb"
 
 [[projects]]
   branch = "master"
@@ -489,6 +489,18 @@
   name = "github.com/google/btree"
   packages = ["."]
   revision = "e89373fe6b4a7413d7acd6da1725b83ef713e6e4"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/google/go-github"
+  packages = ["github"]
+  revision = "2ae5df7848328c214a48cec94c7d410cf8526527"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/google/go-querystring"
+  packages = ["query"]
+  revision = "53e6ce116135b80d037921a7fdd5138cf32d7a8a"
 
 [[projects]]
   branch = "master"
@@ -1420,6 +1432,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "bd0047f0ee014a4933ef92762a849e0bb77f19774b94b2cff2378e0d79b00ef7"
+  inputs-digest = "aa57deab10ce5de4dc1900d4cab4c35a0950dc47ca5552ae4d7d1cec73b4d89c"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -531,6 +531,8 @@ write_files:
         }
       ]
     }
+
+{{ if not .DisableIngressController -}}
 - path: /srv/default-backend-dep.yml
   owner: root
   permissions: 0644
@@ -717,6 +719,7 @@ write_files:
         targetPort: 443
       selector:
         k8s-app: nginx-ingress-controller
+{{ end -}}
 - path: /srv/kube-proxy-sa.yaml
   owner: root
   permissions: 0644
@@ -1354,9 +1357,11 @@ write_files:
       MANIFESTS="${MANIFESTS} coredns.yaml"
       MANIFESTS="${MANIFESTS} default-backend-dep.yml"
       MANIFESTS="${MANIFESTS} default-backend-svc.yml"
+      {{ if not .DisableIngressController -}}
       MANIFESTS="${MANIFESTS} ingress-controller-cm.yml"
       MANIFESTS="${MANIFESTS} ingress-controller-dep.yml"
       MANIFESTS="${MANIFESTS} ingress-controller-svc.yml"
+      {{ end -}}
 
       for manifest in $MANIFESTS
       do
