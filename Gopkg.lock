@@ -227,7 +227,7 @@
   branch = "master"
   name = "github.com/giantswarm/apprclient"
   packages = ["."]
-  revision = "3b84395624cf804b3f43bb2f5bcf43ca36de9fee"
+  revision = "32a7099fbb5b6af28013d7cce3918a6aa3fb2e8d"
 
 [[projects]]
   branch = "legacy"
@@ -239,13 +239,13 @@
   revision = "1c16910f3dfec0d23e36d0892698ec50c6fbd6ba"
 
 [[projects]]
+  branch = "master"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "5352466ad607e1c7c3a29e51116192d5410372f2"
-  version = "5352466"
+  revision = "e48967bc28cef0ecc56bf4c7387400987d1de694"
 
 [[projects]]
   branch = "master"
@@ -491,6 +491,18 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/google/go-github"
+  packages = ["github"]
+  revision = "2ae5df7848328c214a48cec94c7d410cf8526527"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/google/go-querystring"
+  packages = ["query"]
+  revision = "53e6ce116135b80d037921a7fdd5138cf32d7a8a"
+
+[[projects]]
+  branch = "master"
   name = "github.com/google/gofuzz"
   packages = ["."]
   revision = "24818f796faf91cd76ec7bddd72458fbced7a6c1"
@@ -726,13 +738,13 @@
   revision = "fe93d378a6b03758a2c1b65e86cf630bf78681c0"
 
 [[projects]]
+  branch = "master"
   name = "github.com/spf13/afero"
   packages = [
     ".",
     "mem"
   ]
-  revision = "63644898a8da0bc22138abf860edaf5277b6102e"
-  version = "v1.1.0"
+  revision = "787d034dfe70e44075ccc060d346146ef53270ad"
 
 [[projects]]
   name = "github.com/spf13/cast"
