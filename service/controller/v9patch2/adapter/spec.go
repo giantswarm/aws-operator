@@ -29,7 +29,7 @@ const (
 	defaultEBSVolumeType = "gp2"
 	// rollingUpdatePauseTime is how long to pause ASG operations after creating
 	// new instances. This allows time for new nodes to join the cluster.
-	rollingUpdatePauseTime = "PT5M"
+	rollingUpdatePauseTime = "PT15M"
 
 	// Subnet keys
 	subnetDescription = "description"

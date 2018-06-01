@@ -17,6 +17,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Updated to 1745.4.0.",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Increased ASG rolling update pause time to 15 minutes.",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
