@@ -3,7 +3,6 @@ package v9patch2
 import (
 	"context"
 
-	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -30,10 +29,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v9patch2/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/v9patch2/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/v9patch2/resource/service"
-)
-
-const (
-	ResourceRetries uint64 = 3
 )
 
 type ClusterResourceSetConfig struct {
@@ -367,8 +362,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 	{
 		c := retryresource.WrapConfig{
-			BackOffFactory: func() backoff.BackOff { return backoff.WithMaxTries(backoff.NewExponentialBackOff(), ResourceRetries) },
-			Logger:         config.Logger,
+			Logger: config.Logger,
 		}
 
 		resources, err = retryresource.Wrap(resources, c)
