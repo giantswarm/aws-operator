@@ -70,35 +70,35 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSConfig.AccessKeyID must not be empty", config)
 	}
 	if config.HostAWSConfig.AccessKeySecret == "" {
-		return nil, microerror.Maskf(invalidConfigError, "T%.HostAWSConfig.AccessKeySecret must not be empty", config)
+		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSConfig.AccessKeySecret must not be empty", config)
 	}
 	if config.HostAWSConfig.Region == "" {
-		return nil, microerror.Maskf(invalidConfigError, "T%.HostAWSConfig.Region must not be empty", config)
+		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSConfig.Region must not be empty", config)
 	}
 	if config.HostAWSClients.CloudFormation == nil {
-		return nil, microerror.Maskf(invalidConfigError, "T%.HostAWSClients.CloudFormation must not be empty", config)
+		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSClients.CloudFormation must not be empty", config)
 	}
 	if config.HostAWSClients.EC2 == nil {
-		return nil, microerror.Maskf(invalidConfigError, "T%.HostAWSClients.EC2 must not be empty", config)
+		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSClients.EC2 must not be empty", config)
 	}
 	if config.HostAWSClients.IAM == nil {
-		return nil, microerror.Maskf(invalidConfigError, "T%.HostAWSClients.IAM must not be empty", config)
+		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSClients.IAM must not be empty", config)
 	}
 	if config.K8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "T%.K8sClient must not be empty", config)
+		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
 	}
 	if config.Logger == nil {
-		return nil, microerror.Maskf(invalidConfigError, "T%.Logger must not be empty", config)
+		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 	if config.RandomkeysSearcher == nil {
-		return nil, microerror.Maskf(invalidConfigError, "T%.RandomkeysSearcher must not be empty", config)
+		return nil, microerror.Maskf(invalidConfigError, "%T.RandomkeysSearcher must not be empty", config)
 	}
 
 	if config.InstallationName == "" {
-		return nil, microerror.Maskf(invalidConfigError, "T%.InstallationName must not be empty", config)
+		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
 	}
 	if config.ProjectName == "" {
-		return nil, microerror.Maskf(invalidConfigError, "T%.ProjectName must not be empty", config)
+		return nil, microerror.Maskf(invalidConfigError, "%T.ProjectName must not be empty", config)
 	}
 	if config.APIWhitelist.Enabled && config.APIWhitelist.SubnetList == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.SubnetList must not be empty when %T.APIWhitelist is enabled", config)
