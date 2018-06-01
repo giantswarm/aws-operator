@@ -33,8 +33,7 @@ func (c *Collector) collectClusterInfo(ch chan<- prometheus.Metric) {
 		clusterID := cluster.Name
 		status := "Running"
 
-		_, ok := cluster.Annotations["deletionTimestamp"]
-		if ok {
+		if cluster.DeletionTimestamp != nil {
 			status = "Terminating"
 		}
 
