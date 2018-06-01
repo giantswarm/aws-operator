@@ -245,7 +245,6 @@
     "pkg/framework",
     "pkg/harness"
   ]
-
   revision = "758b2eeaf3f661cdd8cbed18dd5562bf03e24dd0"
 
 [[projects]]
@@ -267,7 +266,7 @@
   revision = "0f1af4c3bd3b0d6f445494bed71cf2cfd8de2edd"
 
 [[projects]]
-  branch = "ic-param"
+  branch = "master"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "v_2_0_2",
@@ -282,7 +281,7 @@
     "v_3_3_1",
     "v_3_3_2"
   ]
-  revision = "dbb132afe3d1a2edc26a1589693dcb4d9ef133fb"
+  revision = "119402e11843b12ffcc2c5f88997f1ec3849e14b"
 
 [[projects]]
   branch = "master"
@@ -1433,6 +1432,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "aa57deab10ce5de4dc1900d4cab4c35a0950dc47ca5552ae4d7d1cec73b4d89c"
+  inputs-digest = "bd0047f0ee014a4933ef92762a849e0bb77f19774b94b2cff2378e0d79b00ef7"
   solver-name = "gps-cdcl"
   solver-version = 1
