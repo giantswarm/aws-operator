@@ -211,7 +211,8 @@ func New(config Config) (*Service, error) {
 	var metricsCollector *collector.Collector
 	{
 		c := collector.Config{
-			Logger: config.Logger,
+			Logger:    config.Logger,
+			G8sClient: g8sClient,
 
 			AwsConfig:        awsConfig,
 			InstallationName: config.Viper.GetString(config.Flag.Service.Installation.Name),

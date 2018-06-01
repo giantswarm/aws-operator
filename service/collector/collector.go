@@ -6,17 +6,21 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 )
 
 type Config struct {
-	Logger micrologger.Logger
+	Logger    micrologger.Logger
+	G8sClient versioned.Interface
 
 	AwsConfig        awsutil.Config
 	InstallationName string
 }
 
 type Collector struct {
-	logger micrologger.Logger
+	logger    micrologger.Logger
+	g8sClient versioned.Interface
 
 	awsClients       awsutil.Clients
 	installationName string
@@ -34,11 +38,15 @@ func New(config Config) (*Collector, error) {
 	if config.InstallationName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
 	}
+	if config.G8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
+	}
 
 	awsClients := awsutil.NewClients(config.AwsConfig)
 
 	c := &Collector{
-		logger: config.Logger,
+		logger:    config.Logger,
+		g8sClient: config.G8sClient,
 
 		awsClients:       awsClients,
 		installationName: config.InstallationName,
@@ -49,12 +57,15 @@ func New(config Config) (*Collector, error) {
 
 func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- vpcsDesc
+	ch <- clustersDesc
 }
 
 func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	c.logger.Log("level", "debug", "message", "collecting metrics")
 
 	c.collectVPCs(ch)
+
+	c.collectClusterInfo(ch)
 
 	c.logger.Log("level", "debug", "message", "finished collecting metrics")
 }
