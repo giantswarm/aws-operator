@@ -23,7 +23,6 @@ const Instance = `{{define "instance"}}
     DependsOn:
     - {{ .Instance.Master.Instance.ResourceName }}
     Properties:
-      Encrypted: true
       Size: 100
       VolumeType: gp2
       AvailabilityZone: !GetAtt {{ .Instance.Master.Instance.ResourceName }}.AvailabilityZone
@@ -35,7 +34,6 @@ const Instance = `{{define "instance"}}
     DependsOn:
     - {{ .Instance.Master.Instance.ResourceName }}
     Properties:
-      Encrypted: true
       Size: 100
       VolumeType: gp2
       AvailabilityZone: !GetAtt {{ .Instance.Master.Instance.ResourceName }}.AvailabilityZone
