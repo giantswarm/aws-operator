@@ -187,9 +187,9 @@ func (h *Host) InstallCertResource() error {
 			// NOTE we ignore errors here because we cannot get really useful error
 			// handling done. This here should anyway only be a quick fix until we use
 			// the helm client lib. Then error handling will be better.
-			HelmCmd("delete --purge cert-resource-lab")
+			HelmCmd("delete --purge cert-config-e2e")
 
-			err := HelmCmd("registry install quay.io/giantswarm/cert-resource-lab-chart:stable -- -n cert-resource-lab --set commonDomain=${COMMON_DOMAIN_GUEST} --set clusterName=${CLUSTER_NAME}")
+			err := HelmCmd("registry install quay.io/giantswarm/apiextensions-cert-config-e2e-chart:stable -- -n cert-config-e2e --set commonDomain=${COMMON_DOMAIN} --set clusterName=${CLUSTER_NAME}")
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -197,7 +197,7 @@ func (h *Host) InstallCertResource() error {
 			return nil
 		}
 		b := NewExponentialBackoff(ShortMaxWait, ShortMaxInterval)
-		n := newNotify("cert-resource-lab-chart install")
+		n := newNotify("cert-config-e2e-chart install")
 		err := backoff.RetryNotify(o, b, n)
 		if err != nil {
 			return microerror.Mask(err)
