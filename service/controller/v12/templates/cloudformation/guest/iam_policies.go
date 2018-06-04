@@ -10,7 +10,7 @@ const IAMPolicies = `{{define "iam_policies"}}
         Statement:
           Effect: "Allow"
           Principal:
-            Service: "ec2.cn-north-1.amazonaws.com.cn"
+            Service: "ec2.amazonaws.com.cn"
           Action: "sts:AssumeRole"
   MasterRolePolicy:
     Type: "AWS::IAM::Policy"
@@ -58,7 +58,7 @@ const IAMPolicies = `{{define "iam_policies"}}
         Statement:
           Effect: "Allow"
           Principal:
-            Service: "ec2.cn-north-1.amazonaws.com.cn"
+            Service: "ec2.amazonaws.com.cn"
           Action: "sts:AssumeRole"
   WorkerRolePolicy:
     Type: "AWS::IAM::Policy"
