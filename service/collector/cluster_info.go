@@ -11,16 +11,14 @@ const (
 	listClusterConfigLimit = 20
 )
 
-var (
-	clustersDesc *prometheus.Desc = prometheus.NewDesc(
-		prometheus.BuildFQName(Namespace, "", "cluster_info"),
-		"Cluster information.",
-		[]string{
-			clusterLabel,
-			statusLabel,
-		},
-		nil,
-	)
+var clustersDesc *prometheus.Desc = prometheus.NewDesc(
+	prometheus.BuildFQName(Namespace, "", "cluster_info"),
+	"Cluster information.",
+	[]string{
+		clusterLabel,
+		statusLabel,
+	},
+	nil,
 )
 
 func (c *Collector) collectClusterInfo(ch chan<- prometheus.Metric) {
