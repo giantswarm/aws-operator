@@ -94,17 +94,6 @@ const IAMPolicies = `{{define "iam_policies"}}
           - Effect: "Allow"
             Action: "s3:GetObject"
             Resource: "arn:{{.RegionARN}}:s3:::{{.S3Bucket}}/*"
-
-          - Effect: "Allow"
-            Action:
-              - "ecr:GetAuthorizationToken"
-              - "ecr:BatchCheckLayerAvailability"
-              - "ecr:GetDownloadUrlForLayer"
-              - "ecr:GetRepositoryPolicy"
-              - "ecr:DescribeRepositories"
-              - "ecr:ListImages"
-              - "ecr:BatchGetImage"
-            Resource: "*"
   WorkerInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
