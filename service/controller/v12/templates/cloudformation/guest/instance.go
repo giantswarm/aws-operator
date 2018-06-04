@@ -5,7 +5,6 @@ const Instance = `{{define "instance"}}
     Type: "AWS::EC2::Instance"
     Description: Master instance
     Properties:
-      KeyName: ross-test
       AvailabilityZone: {{ .Instance.Master.AZ }}
       IamInstanceProfile: !Ref MasterInstanceProfile
       ImageId: {{ .Instance.Image.ID }}
