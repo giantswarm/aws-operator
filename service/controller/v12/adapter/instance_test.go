@@ -85,12 +85,12 @@ func Test_Adapter_Instance_SmallCloudConfig(t *testing.T) {
 		},
 		{
 			Description:  "scase 1 http URI",
-			ExpectedLine: "s3_http_uri=\"https://s3.eu-west-1.amazonaws.com/000000000000-g8s-test-cluster/cloudconfig/foo/$USERDATA_FILE\"",
+			ExpectedLine: "s3_http_uri=\"https://s3.eu-west-1.amazonaws.com.cn/000000000000-g8s-test-cluster/cloudconfig/foo/$USERDATA_FILE\"",
 			Region:       "eu-west-1",
 		},
 		{
 			Description:  "scase 2 http URI different region",
-			ExpectedLine: "s3_http_uri=\"https://s3.eu-central-1.amazonaws.com/000000000000-g8s-test-cluster/cloudconfig/foo/$USERDATA_FILE\"",
+			ExpectedLine: "s3_http_uri=\"https://s3.eu-central-1.amazonaws.com.cn/000000000000-g8s-test-cluster/cloudconfig/foo/$USERDATA_FILE\"",
 			Region:       "eu-central-1",
 		},
 	}
