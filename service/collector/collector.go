@@ -11,22 +11,25 @@ import (
 )
 
 type Config struct {
-	Logger    micrologger.Logger
 	G8sClient versioned.Interface
+	Logger    micrologger.Logger
 
 	AwsConfig        awsutil.Config
 	InstallationName string
 }
 
 type Collector struct {
-	logger    micrologger.Logger
 	g8sClient versioned.Interface
+	logger    micrologger.Logger
 
 	awsClients       awsutil.Clients
 	installationName string
 }
 
 func New(config Config) (*Collector, error) {
+	if config.G8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
@@ -38,15 +41,12 @@ func New(config Config) (*Collector, error) {
 	if config.InstallationName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
 	}
-	if config.G8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
-	}
 
 	awsClients := awsutil.NewClients(config.AwsConfig)
 
 	c := &Collector{
-		logger:    config.Logger,
 		g8sClient: config.G8sClient,
+		logger:    config.Logger,
 
 		awsClients:       awsClients,
 		installationName: config.InstallationName,
