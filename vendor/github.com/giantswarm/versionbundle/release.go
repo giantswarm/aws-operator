@@ -114,8 +114,15 @@ func aggregateReleaseComponents(bundles []Bundle) ([]Component, error) {
 	var components []Component
 
 	for _, b := range bundles {
+		bundleAsComponent := Component{
+			Name:    b.Name,
+			Version: b.Version,
+		}
+		components = append(components, bundleAsComponent)
 		components = append(components, b.Components...)
 	}
+
+	sort.Sort(SortComponentsByName(components))
 
 	return components, nil
 }
