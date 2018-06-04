@@ -6,8 +6,9 @@ import (
 )
 
 const (
-	clusterLabel = "cluster_id"
-	statusLabel  = "status"
+	clusterLabel           = "cluster_id"
+	statusLabel            = "status"
+	listClusterConfigLimit = 20
 )
 
 var (
@@ -25,25 +26,42 @@ var (
 func (c *Collector) collectClusterInfo(ch chan<- prometheus.Metric) {
 	c.logger.Log("level", "debug", "message", "collecting metrics for clusters")
 
-	opts := v1.ListOptions{}
-	clusters, _ := c.g8sClient.ProviderV1alpha1().AWSConfigs("").List(opts)
+	opts := v1.ListOptions{
+		Limit: listClusterConfigLimit,
+	}
 
-	for _, cluster := range clusters.Items {
+	continueToken := ""
 
-		clusterID := cluster.Name
-		status := "Running"
+	for {
+		opts.Continue = continueToken
 
-		if cluster.DeletionTimestamp != nil {
-			status = "Terminating"
+		clustersConfigList, err := c.g8sClient.ProviderV1alpha1().AWSConfigs("").List(opts)
+		if err != nil {
+			c.logger.Log(err)
 		}
 
-		ch <- prometheus.MustNewConstMetric(
-			clustersDesc,
-			prometheus.GaugeValue,
-			GaugeValue,
-			clusterID,
-			status,
-		)
+		for _, clusterConfig := range clustersConfigList.Items {
+
+			clusterID := clusterConfig.Name
+			status := "Running"
+
+			if clusterConfig.DeletionTimestamp != nil {
+				status = "Terminating"
+			}
+
+			ch <- prometheus.MustNewConstMetric(
+				clustersDesc,
+				prometheus.GaugeValue,
+				GaugeValue,
+				clusterID,
+				status,
+			)
+		}
+
+		continueToken = clustersConfigList.Continue
+		if continueToken == "" {
+			break
+		}
 	}
 
 	c.logger.Log("level", "debug", "message", "finished collecting metrics for clusters")
