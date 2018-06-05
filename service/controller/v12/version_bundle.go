@@ -12,6 +12,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Increased Docker EBS volume size from 50 to 100 GB.",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Increased ASG rolling update pause time to 15 minutes.",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
