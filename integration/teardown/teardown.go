@@ -46,11 +46,11 @@ func Teardown(c *awsclient.Client, g *framework.Guest, h *framework.Host) error 
 	}
 
 	{
-		err = framework.HelmCmd("delete cert-resource-lab --purge")
+		err = framework.HelmCmd("delete cert-config-e2e --purge")
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		err = framework.HelmCmd("delete aws-resource-lab --purge")
+		err = framework.HelmCmd("delete aws-config-e2e --purge")
 		if err != nil {
 			return microerror.Mask(err)
 		}

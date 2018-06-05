@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: aws-operator-ssh-key-configmap
-data:
-  id_rsa.pub: "{{.Values.idRsaPub}}"
