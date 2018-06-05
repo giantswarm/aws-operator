@@ -127,14 +127,14 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		MasterImageID:              imageID,
 		MasterInstanceResourceName: key.MasterInstanceResourceName(customObject),
 		MasterInstanceType:         key.MasterInstanceType(customObject),
-		MasterCloudConfigVersion:   cloudconfig.MasterCloudConfigVersion,
+		MasterCloudConfigVersion:   cloudconfig.CloudConfigVersion,
 		MasterInstanceMonitoring:   false,
 
 		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
 		WorkerImageID:            imageID,
 		WorkerInstanceMonitoring: true,
 		WorkerInstanceType:       key.WorkerInstanceType(customObject),
-		WorkerCloudConfigVersion: cloudconfig.WorkerCloudConfigVersion,
+		WorkerCloudConfigVersion: cloudconfig.CloudConfigVersion,
 
 		VersionBundleVersion: key.VersionBundleVersion(customObject),
 	}
@@ -231,7 +231,7 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		t.Fatal("WorkerInstanceMonitoring output element not found")
 	}
 
-	if !strings.Contains(body, "Value: "+cloudconfig.MasterCloudConfigVersion) {
+	if !strings.Contains(body, "Value: "+cloudconfig.CloudConfigVersion) {
 		fmt.Println(body)
 		t.Fatal("output element not found")
 	}
@@ -513,14 +513,14 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 		MasterImageID:              imageID,
 		MasterInstanceResourceName: key.MasterInstanceResourceName(customObject),
 		MasterInstanceType:         key.MasterInstanceType(customObject),
-		MasterCloudConfigVersion:   cloudconfig.MasterCloudConfigVersion,
+		MasterCloudConfigVersion:   cloudconfig.CloudConfigVersion,
 		MasterInstanceMonitoring:   false,
 
 		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
 		WorkerImageID:            imageID,
 		WorkerInstanceMonitoring: true,
 		WorkerInstanceType:       key.WorkerInstanceType(customObject),
-		WorkerCloudConfigVersion: cloudconfig.WorkerCloudConfigVersion,
+		WorkerCloudConfigVersion: cloudconfig.CloudConfigVersion,
 
 		VersionBundleVersion: key.VersionBundleVersion(customObject),
 	}
@@ -639,14 +639,14 @@ func TestMainGuestTemplateChinaRegion(t *testing.T) {
 		MasterImageID:              imageID,
 		MasterInstanceResourceName: key.MasterInstanceResourceName(customObject),
 		MasterInstanceType:         key.MasterInstanceType(customObject),
-		MasterCloudConfigVersion:   cloudconfig.MasterCloudConfigVersion,
+		MasterCloudConfigVersion:   cloudconfig.CloudConfigVersion,
 		MasterInstanceMonitoring:   false,
 
 		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
 		WorkerImageID:            imageID,
 		WorkerInstanceMonitoring: true,
 		WorkerInstanceType:       key.WorkerInstanceType(customObject),
-		WorkerCloudConfigVersion: cloudconfig.WorkerCloudConfigVersion,
+		WorkerCloudConfigVersion: cloudconfig.CloudConfigVersion,
 
 		VersionBundleVersion: key.VersionBundleVersion(customObject),
 	}

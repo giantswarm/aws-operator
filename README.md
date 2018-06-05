@@ -24,12 +24,6 @@ Build the standard way.
 go build github.com/giantswarm/aws-operator
 ```
 
-## Running aws-operator
-
-See [this guide][examples-local].
-
-[examples-local]: https://github.com/giantswarm/aws-operator/blob/master/examples
-
 ## Architecture
 
 The operator uses our [operatorkit](1) framework. It manages an `awsconfig`

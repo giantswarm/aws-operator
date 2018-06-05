@@ -172,9 +172,9 @@ func installAWSResource() error {
 		// NOTE we ignore errors here because we cannot get really useful error
 		// handling done. This here should anyway only be a quick fix until we use
 		// the helm client lib. Then error handling will be better.
-		framework.HelmCmd("delete --purge aws-resource-lab")
+		framework.HelmCmd("delete --purge aws-config-e2e")
 
-		awsResourceChartValuesEnv := os.ExpandEnv(e2etemplates.AWSResourceChartValues)
+		awsResourceChartValuesEnv := os.ExpandEnv(e2etemplates.ApiextensionsAWSConfigE2EChartValues)
 		d := []byte(awsResourceChartValuesEnv)
 
 		err := ioutil.WriteFile(awsResourceValuesFile, d, 0644)
@@ -182,7 +182,7 @@ func installAWSResource() error {
 			return microerror.Mask(err)
 		}
 
-		err = framework.HelmCmd("registry install quay.io/giantswarm/aws-resource-lab-chart:stable -- -n aws-resource-lab --values " + awsResourceValuesFile)
+		err = framework.HelmCmd("registry install quay.io/giantswarm/apiextensions-aws-config-e2e-chart:stable -- -n aws-config-e2e --values " + awsResourceValuesFile)
 		if err != nil {
 			return microerror.Mask(err)
 		}
