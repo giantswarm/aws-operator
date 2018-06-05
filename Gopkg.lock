@@ -375,7 +375,7 @@
   branch = "master"
   name = "github.com/giantswarm/versionbundle"
   packages = ["."]
-  revision = "da2469c864842ff01892ad70b1f99b247b0a2aef"
+  revision = "5a861dc7cd1cc6c24816af3aadadb85ea1b372ff"
 
 [[projects]]
   name = "github.com/go-ini/ini"
