@@ -22,6 +22,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Removed node-exporter so it can be managed by chart-operator.",
 				Kind:        versionbundle.KindRemoved,
 			},
+			{
+				Component:   "kubernetes",
+				Description: "Updated to 1.10.2 due to regression in 1.10.3 with configmaps.",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
@@ -46,7 +51,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "kubernetes",
-				Version: "1.10.3",
+				Version: "1.10.2",
 			},
 			{
 				Name:    "nginx-ingress-controller",
