@@ -763,7 +763,7 @@ write_files:
           serviceAccountName: kube-proxy
           containers:
             - name: kube-proxy
-              image: quay.io/giantswarm/hyperkube:v1.10.3
+              image: quay.io/giantswarm/hyperkube:v1.10.2
               command:
               - /hyperkube
               - proxy
@@ -1528,7 +1528,7 @@ write_files:
       priorityClassName: core-pods
       containers:
       - name: k8s-api-server
-        image: quay.io/giantswarm/hyperkube:v1.10.3
+        image: quay.io/giantswarm/hyperkube:v1.10.2
         env:
         - name: HOST_IP
           valueFrom:
@@ -1650,7 +1650,7 @@ write_files:
       priorityClassName: core-pods
       containers:
       - name: k8s-controller-manager
-        image: quay.io/giantswarm/hyperkube:v1.10.3
+        image: quay.io/giantswarm/hyperkube:v1.10.2
         command:
         - /hyperkube
         - controller-manager
@@ -1723,7 +1723,7 @@ write_files:
       priorityClassName: core-pods
       containers:
       - name: k8s-scheduler
-        image: quay.io/giantswarm/hyperkube:v1.10.3
+        image: quay.io/giantswarm/hyperkube:v1.10.2
         command:
         - /hyperkube
         - scheduler
@@ -2011,7 +2011,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.10.3"
+      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.10.2"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
