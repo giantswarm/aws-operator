@@ -57,7 +57,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return output, microerror.Mask(err)
 	}
 
-	masterObjectName := key.BucketObjectName(cloudconfig.MasterCloudConfigVersion, prefixMaster)
+	masterObjectName := key.BucketObjectName(cloudconfig.CloudConfigVersion, prefixMaster)
 	masterCloudConfig := BucketObjectState{
 		Bucket: key.BucketName(customObject, accountID),
 		Body:   masterBody,
@@ -70,7 +70,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return output, microerror.Mask(err)
 	}
 
-	workerObjectName := key.BucketObjectName(cloudconfig.WorkerCloudConfigVersion, prefixWorker)
+	workerObjectName := key.BucketObjectName(cloudconfig.CloudConfigVersion, prefixWorker)
 	workerCloudConfig := BucketObjectState{
 		Bucket: key.BucketName(customObject, accountID),
 		Body:   workerBody,
