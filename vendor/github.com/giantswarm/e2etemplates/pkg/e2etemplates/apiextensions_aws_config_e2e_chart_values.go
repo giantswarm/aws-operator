@@ -1,6 +1,6 @@
 package e2etemplates
 
-const AWSResourceChartValues = `commonDomain: ${COMMON_DOMAIN_GUEST}
+const ApiextensionsAWSConfigE2EChartValues = `commonDomain: ${COMMON_DOMAIN}
 clusterName: ${CLUSTER_NAME}
 clusterVersion: v_0_1_0
 sshPublicKey: ${IDRSA_PUB}
