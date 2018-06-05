@@ -27,6 +27,7 @@ func (c *CloudConfig) NewWorkerTemplate(customObject v1alpha1.AWSConfig, certs l
 			certs:        certs,
 			customObject: customObject,
 		}
+		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
 	}
 
 	var newCloudConfig *k8scloudconfig.CloudConfig
