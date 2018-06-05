@@ -18,12 +18,6 @@ const (
 	defaultRepo  = "installations"
 )
 
-type SortReleasesByTime []versionbundle.IndexRelease
-
-func (b SortReleasesByTime) Len() int           { return len(b) }
-func (b SortReleasesByTime) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
-func (b SortReleasesByTime) Less(i, j int) bool { return b[i].Date.UnixNano() < b[j].Date.UnixNano() }
-
 type VBVParams struct {
 	Component string
 	Provider  string
@@ -102,7 +96,7 @@ func extractReleaseVersion(content, vType, component string) (string, error) {
 		return "", microerror.Mask(err)
 	}
 
-	sortedReleases := SortReleasesByTime(indexReleases)
+	sortedReleases := versionbundle.SortIndexReleasesByVersion(indexReleases)
 	sort.Sort(sort.Reverse(sortedReleases))
 	for _, ir := range sortedReleases {
 		if vType == "wip" && !ir.Active || vType == "current" && ir.Active {

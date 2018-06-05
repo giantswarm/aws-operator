@@ -13,6 +13,11 @@ func VersionBundle() versionbundle.Bundle {
 				Kind:        versionbundle.KindChanged,
 			},
 			{
+				Component:   "aws-operator",
+				Description: "Increased ASG rolling update pause time to 15 minutes.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
 				Component:   "cloudconfig",
 				Description: "Removed node-exporter so it can be managed by chart-operator.",
 				Kind:        versionbundle.KindRemoved,

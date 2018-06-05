@@ -245,6 +245,7 @@
     "pkg/framework",
     "pkg/harness"
   ]
+
   revision = "758b2eeaf3f661cdd8cbed18dd5562bf03e24dd0"
 
 [[projects]]
@@ -257,7 +258,7 @@
   branch = "master"
   name = "github.com/giantswarm/e2etemplates"
   packages = ["pkg/e2etemplates"]
-  revision = "cac5ee40b8feb5760b7c67273631037ebbc1f0cb"
+  revision = "f01e99e2eb0f1609514125aa5214f645d9347882"
 
 [[projects]]
   branch = "master"
@@ -376,7 +377,7 @@
   branch = "master"
   name = "github.com/giantswarm/versionbundle"
   packages = ["."]
-  revision = "da2469c864842ff01892ad70b1f99b247b0a2aef"
+  revision = "5a861dc7cd1cc6c24816af3aadadb85ea1b372ff"
 
 [[projects]]
   name = "github.com/go-ini/ini"
