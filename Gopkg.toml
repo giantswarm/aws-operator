@@ -50,7 +50,7 @@ required = [
   name = "github.com/giantswarm/certs"
 
 [[constraint]]
-  branch = "apiextensions-charts"
+  branch = "master"
   name = "github.com/giantswarm/e2e-harness"
 
 [[constraint]]
@@ -58,7 +58,7 @@ required = [
   name = "github.com/giantswarm/e2eclients"
 
 [[constraint]]
-  branch = "apiextensions-charts"
+  branch = "master"
   name = "github.com/giantswarm/e2etemplates"
 
 [[constraint]]

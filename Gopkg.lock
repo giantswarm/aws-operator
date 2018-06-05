@@ -239,13 +239,13 @@
   revision = "1c16910f3dfec0d23e36d0892698ec50c6fbd6ba"
 
 [[projects]]
-  branch = "apiextensions-charts"
+  branch = "master"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "0f612bb59e744e1c551b13e167d64648cd730d7a"
+  revision = "54be9f9ff435305dcbe09ee26fc94361ac57a330"
 
 [[projects]]
   branch = "master"
@@ -254,10 +254,10 @@
   revision = "cb45cf36a000b2212427dac1697740dd316d2f0b"
 
 [[projects]]
-  branch = "apiextensions-charts"
+  branch = "master"
   name = "github.com/giantswarm/e2etemplates"
   packages = ["pkg/e2etemplates"]
-  revision = "7dc9ed5efb10da856bb5e7f7686c303c7f1fa103"
+  revision = "f01e99e2eb0f1609514125aa5214f645d9347882"
 
 [[projects]]
   branch = "master"
@@ -1431,6 +1431,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3fdc141c576a379e5310865e2169d519884eee8966d73713ef7a9c2357c51dbc"
+  inputs-digest = "d37c8bb4c5e350904c9fff3b1ab4485bdb877279fd37315e23bf4f852b91c20f"
   solver-name = "gps-cdcl"
   solver-version = 1
