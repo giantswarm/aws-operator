@@ -58,7 +58,7 @@ func (l *launchConfigAdapter) getLaunchConfiguration(cfg Config) error {
 		MachineType:        prefixWorker,
 		Region:             cfg.CustomObject.Spec.AWS.Region,
 		S3URI:              s3URI,
-		CloudConfigVersion: cloudconfig.WorkerCloudConfigVersion,
+		CloudConfigVersion: cloudconfig.CloudConfigVersion,
 	}
 	rendered, err := templates.Render(key.CloudConfigSmallTemplates(), c)
 	if err != nil {
