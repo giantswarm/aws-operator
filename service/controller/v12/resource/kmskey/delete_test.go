@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
+	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
 )
 
 func Test_newDelete(t *testing.T) {
@@ -126,7 +126,7 @@ func Test_ApplyDeleteChange(t *testing.T) {
 
 	for _, tc := range testCases {
 		ctx := context.TODO()
-		ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+		ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
 
 		err := newResource.ApplyDeleteChange(ctx, &customObject, tc.deleteChange)
 		if err != nil {

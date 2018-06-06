@@ -10,7 +10,7 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
+	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
 )
 
 func Test_Resource_Endpoints_GetDesiredState(t *testing.T) {
@@ -60,7 +60,7 @@ func Test_Resource_Endpoints_GetDesiredState(t *testing.T) {
 			}
 
 			ctx := context.TODO()
-			ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+			ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
 
 			result, err := newResource.GetDesiredState(ctx, tc.obj)
 			if err != nil {

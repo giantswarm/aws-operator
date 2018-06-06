@@ -1,4 +1,4 @@
-package context
+package controllercontext
 
 type Status struct {
 	// HostedZones information is filled by the hostedzone resouce. This

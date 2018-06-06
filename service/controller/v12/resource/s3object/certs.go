@@ -3,16 +3,15 @@ package s3object
 import (
 	"context"
 
+	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
 	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
-
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
 )
 
 func (r *Resource) encodeTLSAssets(ctx context.Context, assets legacy.AssetsBundle, kmsKeyArn string) (*legacy.CompactTLSAssets, error) {
 	rawTLS := createRawTLSAssets(assets)
 
-	sc, err := servicecontext.FromContext(ctx)
+	sc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
