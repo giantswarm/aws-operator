@@ -9,27 +9,7 @@ func VersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "aws-operator",
-				Description: "Increased Docker EBS volume size from 50 to 100 GB.",
-				Kind:        versionbundle.KindChanged,
-			},
-			{
-				Component:   "aws-operator",
-				Description: "Use global ELB idle timeout settings, instead of CR configured ones.",
-				Kind:        versionbundle.KindChanged,
-			},
-			{
-				Component:   "aws-operator",
-				Description: "Increased ASG rolling update pause time to 15 minutes.",
-				Kind:        versionbundle.KindChanged,
-			},
-			{
-				Component:   "cloudconfig",
-				Description: "Removed node-exporter so it can be managed by chart-operator.",
-				Kind:        versionbundle.KindRemoved,
-			},
-			{
-				Component:   "kubernetes",
-				Description: "Updated to 1.10.2 due to regression in 1.10.3 with configmaps.",
+				Description: "Add your changes here.",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
@@ -64,6 +44,6 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    "aws-operator",
-		Version: "3.1.2",
+		Version: "3.1.3",
 	}
 }
