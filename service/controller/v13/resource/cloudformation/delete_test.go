@@ -7,7 +7,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	"github.com/giantswarm/aws-operator/service/controller/v12/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v13/adapter"
 )
 
 func Test_Resource_Cloudformation_newDelete(t *testing.T) {
