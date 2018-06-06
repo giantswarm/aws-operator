@@ -9,7 +9,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	controllercontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
+	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v12/key"
 )
 

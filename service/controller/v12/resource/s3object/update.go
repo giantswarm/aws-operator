@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
 
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
+	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
@@ -17,7 +17,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 		return microerror.Mask(err)
 	}
 
-	sc, err := servicecontext.FromContext(ctx)
+	sc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}

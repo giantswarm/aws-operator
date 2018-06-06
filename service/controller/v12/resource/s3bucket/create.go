@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
 
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
+	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v12/key"
 )
 
@@ -23,7 +23,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		return microerror.Mask(err)
 	}
 
-	sc, err := servicecontext.FromContext(ctx)
+	sc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}

@@ -19,7 +19,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v12/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v12/cloudconfig"
 	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v12/cloudformation"
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
+	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v12/credential"
 	"github.com/giantswarm/aws-operator/service/controller/v12/ebs"
 	"github.com/giantswarm/aws-operator/service/controller/v12/key"
@@ -428,14 +428,14 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			}
 		}
 
-		c := servicecontext.Context{
+		c := controllercontext.Context{
 			AWSClient:      awsClient,
 			AWSService:     awsService,
 			CloudConfig:    cloudConfig,
 			CloudFormation: *cloudFormationService,
 			EBSService:     ebsService,
 		}
-		ctx = servicecontext.NewContext(ctx, c)
+		ctx = controllercontext.NewContext(ctx, c)
 
 		return ctx, nil
 	}

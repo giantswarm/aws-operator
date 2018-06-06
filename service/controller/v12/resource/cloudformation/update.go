@@ -11,7 +11,7 @@ import (
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
 
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
+	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v12/ebs"
 	"github.com/giantswarm/aws-operator/service/controller/v12/key"
 )
@@ -29,7 +29,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	if stackStateToUpdate.Name != "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "updating the guest cluster main stack")
 
-		sc, err := servicecontext.FromContext(ctx)
+		sc, err := controllercontext.FromContext(ctx)
 		if err != nil {
 			return microerror.Mask(err)
 		}
