@@ -7,9 +7,9 @@ import (
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v12/cloudconfig"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v12/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v12/ebs"
+	"github.com/giantswarm/aws-operator/service/controller/v13/cloudconfig"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v13/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v13/ebs"
 )
 
 type contextKey string

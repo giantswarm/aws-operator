@@ -1,12 +1,12 @@
 package adapter
 
 import (
-	"github.com/giantswarm/aws-operator/service/controller/v12/key"
+	"github.com/giantswarm/aws-operator/service/controller/v13/key"
 )
 
 // The template related to this adapter can be found in the following import.
 //
-//     github.com/giantswarm/aws-operator/service/controller/v12/templates/cloudformation/guest/outputs.go
+//     github.com/giantswarm/aws-operator/service/controller/v13/templates/cloudformation/guest/outputs.go
 //
 
 type outputsAdapter struct {
