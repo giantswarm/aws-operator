@@ -3,7 +3,7 @@ package s3object
 import (
 	"context"
 
-	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v13/controllercontext"
 	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 )

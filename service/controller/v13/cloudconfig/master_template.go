@@ -7,7 +7,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
-	"github.com/giantswarm/aws-operator/service/controller/v12/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v13/templates/cloudconfig"
 )
 
 // NewMasterTemplate generates a new master cloud config template and returns it

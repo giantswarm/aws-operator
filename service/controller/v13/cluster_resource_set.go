@@ -1,4 +1,4 @@
-package v12
+package v13
 
 import (
 	"context"
@@ -16,24 +16,24 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v12/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/v12/cloudconfig"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v12/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v12/credential"
-	"github.com/giantswarm/aws-operator/service/controller/v12/ebs"
-	"github.com/giantswarm/aws-operator/service/controller/v12/key"
-	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v12/resource/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v12/resource/ebsvolume"
-	"github.com/giantswarm/aws-operator/service/controller/v12/resource/endpoints"
-	"github.com/giantswarm/aws-operator/service/controller/v12/resource/hostedzone"
-	"github.com/giantswarm/aws-operator/service/controller/v12/resource/kmskey"
-	"github.com/giantswarm/aws-operator/service/controller/v12/resource/loadbalancer"
-	"github.com/giantswarm/aws-operator/service/controller/v12/resource/migration"
-	"github.com/giantswarm/aws-operator/service/controller/v12/resource/namespace"
-	"github.com/giantswarm/aws-operator/service/controller/v12/resource/s3bucket"
-	"github.com/giantswarm/aws-operator/service/controller/v12/resource/s3object"
-	"github.com/giantswarm/aws-operator/service/controller/v12/resource/service"
+	"github.com/giantswarm/aws-operator/service/controller/v13/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v13/cloudconfig"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v13/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v13/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v13/credential"
+	"github.com/giantswarm/aws-operator/service/controller/v13/ebs"
+	"github.com/giantswarm/aws-operator/service/controller/v13/key"
+	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v13/resource/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v13/resource/ebsvolume"
+	"github.com/giantswarm/aws-operator/service/controller/v13/resource/endpoints"
+	"github.com/giantswarm/aws-operator/service/controller/v13/resource/hostedzone"
+	"github.com/giantswarm/aws-operator/service/controller/v13/resource/kmskey"
+	"github.com/giantswarm/aws-operator/service/controller/v13/resource/loadbalancer"
+	"github.com/giantswarm/aws-operator/service/controller/v13/resource/migration"
+	"github.com/giantswarm/aws-operator/service/controller/v13/resource/namespace"
+	"github.com/giantswarm/aws-operator/service/controller/v13/resource/s3bucket"
+	"github.com/giantswarm/aws-operator/service/controller/v13/resource/s3object"
+	"github.com/giantswarm/aws-operator/service/controller/v13/resource/service"
 )
 
 type ClusterResourceSetConfig struct {
