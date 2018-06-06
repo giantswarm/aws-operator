@@ -309,7 +309,7 @@ func newDrainerResourceRouter(config DrainerConfig) (*controller.ResourceRouter,
 			return nil, microerror.Mask(err)
 		}
 	}
-	
+
 	var v13ResourceSet *controller.ResourceSet
 	{
 		c := v13.DrainerResourceSetConfig{
