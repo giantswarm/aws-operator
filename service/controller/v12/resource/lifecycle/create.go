@@ -17,7 +17,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v12/cloudformation"
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
+	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v12/key"
 )
 
@@ -35,7 +35,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "looking for the guest cluster main stack in the AWS API")
 
-	sc, err := servicecontext.FromContext(ctx)
+	sc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -212,7 +212,7 @@ func (r *Resource) completeLifecycleHook(ctx context.Context, instanceID, worker
 		LifecycleHookName:     aws.String(key.NodeDrainerLifecycleHookName),
 	}
 
-	sc, err := servicecontext.FromContext(ctx)
+	sc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -295,7 +295,7 @@ func (r *Resource) privateDNSForInstance(ctx context.Context, instanceID string)
 		},
 	}
 
-	sc, err := servicecontext.FromContext(ctx)
+	sc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}

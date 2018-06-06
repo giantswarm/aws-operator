@@ -6,7 +6,7 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v12/cloudconfig"
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
+	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v12/key"
 )
 
@@ -17,7 +17,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return output, microerror.Mask(err)
 	}
 
-	sc, err := servicecontext.FromContext(ctx)
+	sc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}

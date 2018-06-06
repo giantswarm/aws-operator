@@ -12,7 +12,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
+	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
 )
 
 func Test_Resource_S3Object_newUpdate(t *testing.T) {
@@ -162,13 +162,13 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 				}
 			}
 
-			c := servicecontext.Context{
+			c := controllercontext.Context{
 				AWSClient:   awsClients,
 				AWSService:  awsService,
 				CloudConfig: cloudconfig,
 			}
 			ctx := context.TODO()
-			ctx = servicecontext.NewContext(ctx, c)
+			ctx = controllercontext.NewContext(ctx, c)
 
 			result, err := newResource.newUpdateChange(ctx, tc.obj, tc.currentState, tc.desiredState)
 			if err != nil {

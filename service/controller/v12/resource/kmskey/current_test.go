@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
+	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
 )
 
 func Test_CurrentState(t *testing.T) {
@@ -56,7 +56,7 @@ func Test_CurrentState(t *testing.T) {
 			}
 
 			ctx := context.TODO()
-			ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+			ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
 
 			result, err := newResource.GetCurrentState(ctx, customObject)
 			if err != nil && !tc.expectedKMSError {
