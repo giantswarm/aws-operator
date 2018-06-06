@@ -23,7 +23,6 @@ const (
 
 type loadBalancersAdapter struct {
 	APIElbHealthCheckTarget          string
-	APIElbIdleTimoutSeconds          int
 	APIElbName                       string
 	APIElbPortsToOpen                portPairs
 	APIElbScheme                     string
@@ -33,7 +32,6 @@ type loadBalancersAdapter struct {
 	ELBHealthCheckTimeout            int
 	ELBHealthCheckUnhealthyThreshold int
 	IngressElbHealthCheckTarget      string
-	IngressElbIdleTimoutSeconds      int
 	IngressElbName                   string
 	IngressElbPortsToOpen            portPairs
 	IngressElbScheme                 string
@@ -58,7 +56,6 @@ func (lb *loadBalancersAdapter) getLoadBalancers(cfg Config) error {
 	}
 
 	lb.APIElbHealthCheckTarget = heathCheckTarget(cfg.CustomObject.Spec.Cluster.Kubernetes.API.SecurePort)
-	lb.APIElbIdleTimoutSeconds = cfg.CustomObject.Spec.AWS.API.ELB.IdleTimeoutSeconds
 	lb.APIElbName = apiElbName
 	lb.APIElbPortsToOpen = portPairs{
 		{
@@ -75,7 +72,6 @@ func (lb *loadBalancersAdapter) getLoadBalancers(cfg Config) error {
 	}
 
 	lb.IngressElbHealthCheckTarget = heathCheckTarget(key.IngressControllerSecurePort(cfg.CustomObject))
-	lb.IngressElbIdleTimoutSeconds = cfg.CustomObject.Spec.AWS.Ingress.ELB.IdleTimeoutSeconds
 	lb.IngressElbName = ingressElbName
 	lb.IngressElbPortsToOpen = portPairs{
 		{

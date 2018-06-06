@@ -14,7 +14,6 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 		description                              string
 		customObject                             v1alpha1.AWSConfig
 		errorMatcher                             func(error) bool
-		expectedAPIElbIdleTimoutSeconds          int
 		expectedAPIElbName                       string
 		expectedAPIElbPortsToOpen                portPairs
 		expectedAPIElbScheme                     string
@@ -25,7 +24,6 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 		expectedELBHealthCheckInterval           int
 		expectedELBHealthCheckTimeout            int
 		expectedELBHealthCheckUnhealthyThreshold int
-		expectedIngressElbIdleTimoutSeconds      int
 		expectedIngressElbName                   string
 		expectedIngressElbPortsToOpen            portPairs
 		expectedIngressElbScheme                 string
@@ -54,23 +52,12 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 						},
 					},
 					AWS: v1alpha1.AWSConfigSpecAWS{
-						API: v1alpha1.AWSConfigSpecAWSAPI{
-							ELB: v1alpha1.AWSConfigSpecAWSAPIELB{
-								IdleTimeoutSeconds: 3600,
-							},
-						},
 						AZ: "eu-central-1a",
-						Ingress: v1alpha1.AWSConfigSpecAWSIngress{
-							ELB: v1alpha1.AWSConfigSpecAWSIngressELB{
-								IdleTimeoutSeconds: 60,
-							},
-						},
 					},
 				},
 			},
-			errorMatcher:                    nil,
-			expectedAPIElbIdleTimoutSeconds: 3600,
-			expectedAPIElbName:              "test-cluster-api",
+			errorMatcher:       nil,
+			expectedAPIElbName: "test-cluster-api",
 			expectedAPIElbPortsToOpen: portPairs{
 				{
 					PortELB:      443,
@@ -83,7 +70,6 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 			expectedELBHealthCheckInterval:           5,
 			expectedELBHealthCheckTimeout:            3,
 			expectedELBHealthCheckUnhealthyThreshold: 2,
-			expectedIngressElbIdleTimoutSeconds:      60,
 			expectedIngressElbName:                   "test-cluster-ingress",
 			expectedIngressElbPortsToOpen: portPairs{
 				{
@@ -122,10 +108,6 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 				t.Error("expected", true, "got", false)
 			}
 
-			if tc.expectedAPIElbIdleTimoutSeconds != a.APIElbIdleTimoutSeconds {
-				t.Errorf("expected API ELB Idle Timeout Seconds, got %q, want %q", a.APIElbIdleTimoutSeconds, tc.expectedAPIElbIdleTimoutSeconds)
-			}
-
 			if tc.expectedAPIElbName != a.APIElbName {
 				t.Errorf("expected API ELB Name, got %q, want %q", a.APIElbName, tc.expectedAPIElbName)
 			}
@@ -152,10 +134,6 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 
 			if tc.expectedELBHealthCheckUnhealthyThreshold != a.ELBHealthCheckUnhealthyThreshold {
 				t.Errorf("expected ELB health check unhealthy threshold, got %q, want %q", a.ELBHealthCheckUnhealthyThreshold, tc.expectedELBHealthCheckUnhealthyThreshold)
-			}
-
-			if tc.expectedIngressElbIdleTimoutSeconds != a.IngressElbIdleTimoutSeconds {
-				t.Errorf("expected Ingress ELB Idle Timeout Seconds, got %q, want %q", a.IngressElbIdleTimoutSeconds, tc.expectedIngressElbIdleTimoutSeconds)
 			}
 
 			if tc.expectedIngressElbName != a.IngressElbName {
