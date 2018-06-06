@@ -14,6 +14,11 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "aws-operator",
+				Description: "Use global ELB idle timeout settings, instead of CR configured ones.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "aws-operator",
 				Description: "Increased ASG rolling update pause time to 15 minutes.",
 				Kind:        versionbundle.KindChanged,
 			},

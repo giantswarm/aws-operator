@@ -5,7 +5,7 @@ const LoadBalancers = `{{define "load_balancers"}}
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     Properties:
       ConnectionSettings:
-        IdleTimeout: {{ .APIElbIdleTimoutSeconds }}
+        IdleTimeout: 1200
       HealthCheck:
         HealthyThreshold: {{ .ELBHealthCheckHealthyThreshold }}
         Interval: {{ .ELBHealthCheckInterval }}
@@ -33,7 +33,7 @@ const LoadBalancers = `{{define "load_balancers"}}
     DependsOn: VPCGatewayAttachment
     Properties:
       ConnectionSettings:
-        IdleTimeout: {{ .IngressElbIdleTimoutSeconds }}
+        IdleTimeout: 60
       HealthCheck:
         HealthyThreshold: {{ .ELBHealthCheckHealthyThreshold }}
         Interval: {{ .ELBHealthCheckInterval }}
