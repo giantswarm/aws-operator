@@ -1907,8 +1907,8 @@ coreos:
     content: |
       [Unit]
       Description=etcd3
-      Requires=k8s-setup-network-env.service
-      After=k8s-setup-network-env.service
+      Requires=var-lib-etcd.mount
+      After=var-lib-etcd.mount
       Conflicts=etcd.service etcd2.service
       StartLimitIntervalSec=0
 
