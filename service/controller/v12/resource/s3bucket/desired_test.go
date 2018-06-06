@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
+	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
 )
 
 func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
@@ -63,7 +63,7 @@ func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			ctx := context.TODO()
-			ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSService: awsService})
+			ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSService: awsService})
 
 			result, err := newResource.GetDesiredState(ctx, tc.obj)
 			if err != nil {

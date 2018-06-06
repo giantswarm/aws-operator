@@ -14,7 +14,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v12/cloudformation"
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
+	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v12/credential"
 	"github.com/giantswarm/aws-operator/service/controller/v12/key"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/lifecycle"
@@ -114,11 +114,11 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 			}
 		}
 
-		c := servicecontext.Context{
+		c := controllercontext.Context{
 			AWSClient:      awsClient,
 			CloudFormation: *cloudFormationService,
 		}
-		ctx = servicecontext.NewContext(ctx, c)
+		ctx = controllercontext.NewContext(ctx, c)
 
 		return ctx, nil
 	}

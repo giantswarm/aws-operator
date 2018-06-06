@@ -19,13 +19,14 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v12/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v12/cloudconfig"
 	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v12/cloudformation"
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
+	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v12/credential"
 	"github.com/giantswarm/aws-operator/service/controller/v12/ebs"
 	"github.com/giantswarm/aws-operator/service/controller/v12/key"
 	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v12/resource/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/ebsvolume"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/endpoints"
+	"github.com/giantswarm/aws-operator/service/controller/v12/resource/hostedzone"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/kmskey"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/loadbalancer"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/migration"
@@ -84,6 +85,10 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	if config.HostAWSClients.IAM == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSClients.IAM must not be empty", config)
 	}
+	if config.HostAWSClients.Route53 == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSClients.Route53 must not be empty", config)
+	}
+
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
 	}
@@ -131,6 +136,21 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		migrationResource, err = migration.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var hostedZoneResource controller.Resource
+	{
+		c := hostedzone.Config{
+			HostRoute53: config.HostAWSClients.Route53,
+			Logger:      config.Logger,
+
+			Route53Enabled: config.Route53Enabled,
+		}
+
+		hostedZoneResource, err = hostedzone.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -288,6 +308,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 	resources := []controller.Resource{
 		migrationResource,
+		hostedZoneResource,
 		kmsKeyResource,
 		s3BucketResource,
 		s3BucketObjectResource,
@@ -407,14 +428,14 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			}
 		}
 
-		c := servicecontext.Context{
+		c := controllercontext.Context{
 			AWSClient:      awsClient,
 			AWSService:     awsService,
 			CloudConfig:    cloudConfig,
 			CloudFormation: *cloudFormationService,
 			EBSService:     ebsService,
 		}
-		ctx = servicecontext.NewContext(ctx, c)
+		ctx = controllercontext.NewContext(ctx, c)
 
 		return ctx, nil
 	}

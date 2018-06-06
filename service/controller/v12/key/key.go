@@ -189,6 +189,18 @@ func EtcdVolumeName(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-etcd", ClusterID(customObject))
 }
 
+func HostedZoneNameAPI(customObject v1alpha1.AWSConfig) string {
+	return customObject.Spec.AWS.HostedZones.API.Name
+}
+
+func HostedZoneNameEtcd(customObject v1alpha1.AWSConfig) string {
+	return customObject.Spec.AWS.HostedZones.Etcd.Name
+}
+
+func HostedZoneNameIngress(customObject v1alpha1.AWSConfig) string {
+	return customObject.Spec.AWS.HostedZones.Ingress.Name
+}
+
 func IngressControllerInsecurePort(customObject v1alpha1.AWSConfig) int {
 	return customObject.Spec.Cluster.Kubernetes.IngressController.InsecurePort
 }
@@ -343,6 +355,8 @@ func ToCustomObject(v interface{}) (v1alpha1.AWSConfig, error) {
 		return v1alpha1.AWSConfig{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &v1alpha1.AWSConfig{}, v)
 	}
 	customObject := *customObjectPointer
+
+	customObject = *customObject.DeepCopy()
 
 	return customObject, nil
 }
