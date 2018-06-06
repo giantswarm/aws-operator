@@ -14,7 +14,7 @@ import (
 
 type contextKey string
 
-const serviceKey contextKey = "service"
+const controllerKey contextKey = "controller"
 
 type Context struct {
 	AWSClient      awsclient.Clients
@@ -22,16 +22,21 @@ type Context struct {
 	CloudConfig    cloudconfig.Interface
 	CloudFormation cloudformationservice.CloudFormation
 	EBSService     ebs.Interface
+
+	// Status holds the data used to communicate between controller's
+	// resources. It can be edited in place as Context is stored as
+	// a pointer within context.Context.
+	Status Status
 }
 
 func NewContext(ctx context.Context, c Context) context.Context {
-	return context.WithValue(ctx, serviceKey, &c)
+	return context.WithValue(ctx, controllerKey, &c)
 }
 
 func FromContext(ctx context.Context) (*Context, error) {
-	c, ok := ctx.Value(serviceKey).(*Context)
+	c, ok := ctx.Value(controllerKey).(*Context)
 	if !ok {
-		return nil, microerror.Mask(serviceNotFound)
+		return nil, microerror.Maskf(notFoundError, "context key %q of type %T", controllerKey, controllerKey)
 	}
 
 	return c, nil
