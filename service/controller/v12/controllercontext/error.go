@@ -1,4 +1,4 @@
-package context
+package controllercontext
 
 import (
 	"github.com/giantswarm/microerror"

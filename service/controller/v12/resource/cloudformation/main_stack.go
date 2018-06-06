@@ -2,11 +2,12 @@ package cloudformation
 
 import (
 	"context"
+
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v12/adapter"
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
+	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v12/key"
 	"github.com/giantswarm/aws-operator/service/controller/v12/templates"
 )
@@ -17,7 +18,7 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 		return "", microerror.Mask(err)
 	}
 
-	sc, err := servicecontext.FromContext(ctx)
+	sc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -75,7 +76,7 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 }
 
 func (r *Resource) getMainHostPreTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {
-	sc, err := servicecontext.FromContext(ctx)
+	sc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -111,7 +112,7 @@ func (r *Resource) getMainHostPreTemplateBody(ctx context.Context, customObject 
 }
 
 func (r *Resource) getMainHostPostTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {
-	sc, err := servicecontext.FromContext(ctx)
+	sc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
