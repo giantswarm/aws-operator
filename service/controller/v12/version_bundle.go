@@ -14,7 +14,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "aws-operator",
-				Description: "Use global LB idle timeout settings, instead of CR configured ones.",
+				Description: "Use global ELB idle timeout settings, instead of CR configured ones.",
 				Kind:        versionbundle.KindChanged,
 			},
 			{
