@@ -9,7 +9,7 @@ func VersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "aws-operator",
-				Description: "Add your changes here.",
+				Description: "Updated EC2 and S3 endpoints for supporting AWS China regions.",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
