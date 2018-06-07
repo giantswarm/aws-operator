@@ -135,6 +135,7 @@ type KMSClient interface {
 type SmallCloudconfigConfig struct {
 	MachineType        string
 	Region             string
+	S3Domain           string
 	S3URI              string
 	CloudConfigVersion string
 }

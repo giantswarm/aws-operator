@@ -70,6 +70,7 @@ func (i *instanceAdapter) Adapt(config Config) error {
 		c := SmallCloudconfigConfig{
 			MachineType:        prefixMaster,
 			Region:             key.Region(config.CustomObject),
+			S3Domain:           key.S3ServiceDomain(config.CustomObject),
 			S3URI:              fmt.Sprintf("%s-g8s-%s", accountID, i.Cluster.ID),
 			CloudConfigVersion: config.StackState.MasterCloudConfigVersion,
 		}

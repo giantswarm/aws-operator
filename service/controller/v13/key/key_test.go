@@ -601,6 +601,60 @@ func Test_RouteTableName(t *testing.T) {
 	}
 
 }
+
+func Test_S3ServiceDomain(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		description      string
+		customObject     v1alpha1.AWSConfig
+		expectedS3Domain string
+	}{
+		{
+			description: "basic match",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "eu-central-1",
+					},
+				},
+			},
+			expectedS3Domain: "s3.eu-central-1.amazonaws.com",
+		},
+		{
+			description: "different region",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "us-west-2",
+					},
+				},
+			},
+			expectedS3Domain: "s3.us-west-2.amazonaws.com",
+		},
+		{
+			description: "china region",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "cn-north-1",
+					},
+				},
+			},
+			expectedS3Domain: "s3.cn-north-1.amazonaws.com.cn",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			s3Domain := S3ServiceDomain(tc.customObject)
+
+			if tc.expectedS3Domain != s3Domain {
+				t.Errorf("unexpected S3 service domain, expecting %q, want %q", tc.expectedS3Domain, s3Domain)
+			}
+		})
+	}
+}
+
 func Test_SecurityGroupName(t *testing.T) {
 	t.Parallel()
 	expectedName := "test-cluster-worker"
