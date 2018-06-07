@@ -2,7 +2,7 @@ package e2etemplates
 
 // CertOperatorChartValues values required by cert-operator-chart, the environment
 // variables will be expanded before writing the contents to a file.
-const CertOperatorChartValues = `commonDomain: ${COMMON_DOMAIN_GUEST}
+const CertOperatorChartValues = `commonDomain: k8s.${COMMON_DOMAIN}
 clusterName: ${CLUSTER_NAME}
 Installation:
   V1:
