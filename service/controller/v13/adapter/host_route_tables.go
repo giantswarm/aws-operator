@@ -29,7 +29,7 @@ type RouteTable struct {
 	PeerConnectionID string
 }
 
-func (i *hostRouteTablesAdapter) getHostRouteTables(cfg Config) error {
+func (i *hostRouteTablesAdapter) getHostPostRouteTables(cfg Config) error {
 	peerConnectionID, err := waitForPeeringConnectionID(cfg)
 	if err != nil {
 		return microerror.Mask(err)

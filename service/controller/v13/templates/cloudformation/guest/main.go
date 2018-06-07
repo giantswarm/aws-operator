@@ -15,6 +15,6 @@ Resources:
   {{template "launch_configuration" .}}
   {{template "lifecycle_hooks" .}}
   {{template "autoscaling_group" .}}
-  {{template "recordsets" .}}
+  {{template "record_sets" .}}
 {{template "outputs" .}}
 {{end}}`

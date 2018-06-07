@@ -135,7 +135,8 @@ func NewHostPost(cfg Config) (Adapter, error) {
 	a := Adapter{}
 
 	hydraters := []hydrater{
-		a.getHostRouteTables,
+		a.getHostPostRouteTables,
+		a.getHostPostRecordSets,
 	}
 
 	for _, h := range hydraters {

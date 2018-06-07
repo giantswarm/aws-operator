@@ -7,11 +7,11 @@ import (
 )
 
 type Config struct {
-	Client *cloudformation.CloudFormation
+	Client CloudFormationInterface
 }
 
 type CloudFormation struct {
-	client *cloudformation.CloudFormation
+	client CloudFormationInterface
 }
 
 func New(config Config) (*CloudFormation, error) {
