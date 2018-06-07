@@ -414,18 +414,18 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 		NOTE 1: AMIs should always be for HVM virtualisation and not PV.
 		NOTE 2: You also need to update the tests.
 
-		service/controller/v12/key/key_test.go
-		service/controller/v12/adapter/adapter_test.go
-		service/controller/v12/resource/cloudformation/main_stack_test.go
+		service/awsconfig/v10/key/key_test.go
+		service/awsconfig/v10/resource/cloudformation/adapter/adapter_test.go
+		service/resource/cloudformationv2/main_stack_test.go
 
-		Current Release: CoreOS Container Linux stable 1745.4.0 (HVM)
+		Current Release: CoreOS Container Linux stable 1576.5.0 (HVM)
 	*/
 	imageIDs := map[string]string{
-		"ap-southeast-1": "ami-73b28f0f",
-		"cn-north-1":     "ami-8f05dbe2",
-		"eu-central-1":   "ami-32042fd9",
-		"eu-west-1":      "ami-82645dfb",
-		"us-west-2":      "ami-574f362f",
+		"ap-southeast-1": "ami-41461c3d",
+		"cn-north-1":     "ami-39ee3154",
+		"eu-central-1":   "ami-604e118b",
+		"eu-west-1":      "ami-34237c4d",
+		"us-west-2":      "ami-b41377cc",
 	}
 
 	imageID, ok := imageIDs[region]
