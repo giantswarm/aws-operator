@@ -26,13 +26,14 @@ var (
 func TestAdapterGuestMain(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
-		description           string
-		customObject          v1alpha1.AWSConfig
-		errorMatcher          func(error) bool
-		expectedASGType       string
-		expectedClusterID     string
-		expectedMasterImageID string
-		expectedWorkerImageID string
+		description              string
+		customObject             v1alpha1.AWSConfig
+		errorMatcher             func(error) bool
+		expectedASGType          string
+		expectedEC2ServiceDomain string
+		expectedClusterID        string
+		expectedMasterImageID    string
+		expectedWorkerImageID    string
 	}{
 		{
 			description: "basic match",
@@ -51,20 +52,21 @@ func TestAdapterGuestMain(t *testing.T) {
 					},
 				},
 			},
-			errorMatcher:          nil,
-			expectedASGType:       "worker",
-			expectedClusterID:     "test-cluster",
-			expectedMasterImageID: "master-image-id",
-			expectedWorkerImageID: "worker-image-id",
+			errorMatcher:             nil,
+			expectedASGType:          "worker",
+			expectedEC2ServiceDomain: "ec2.amazonaws.com",
+			expectedClusterID:        "test-cluster",
+			expectedMasterImageID:    "master-image-id",
+			expectedWorkerImageID:    "worker-image-id",
 		},
 		{
-			description: "different region",
+			description: "china region",
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: defaultCluster,
 					AWS: v1alpha1.AWSConfigSpecAWS{
-						AZ:     "eu-west-1a",
-						Region: "eu-west-1",
+						AZ:     "cn-north-1a",
+						Region: "cn-north-1",
 						Masters: []v1alpha1.AWSConfigSpecAWSNode{
 							{},
 						},
@@ -74,11 +76,12 @@ func TestAdapterGuestMain(t *testing.T) {
 					},
 				},
 			},
-			errorMatcher:          nil,
-			expectedASGType:       "worker",
-			expectedClusterID:     "test-cluster",
-			expectedMasterImageID: "master-image-id",
-			expectedWorkerImageID: "worker-image-id",
+			errorMatcher:             nil,
+			expectedASGType:          "worker",
+			expectedEC2ServiceDomain: "ec2.amazonaws.com.cn",
+			expectedClusterID:        "test-cluster",
+			expectedMasterImageID:    "master-image-id",
+			expectedWorkerImageID:    "worker-image-id",
 		},
 	}
 
@@ -116,6 +119,10 @@ func TestAdapterGuestMain(t *testing.T) {
 
 			if tc.expectedASGType != a.ASGType {
 				t.Fatalf("unexpected ASG type, expected %q, got %q", tc.expectedASGType, a.ASGType)
+			}
+
+			if tc.expectedEC2ServiceDomain != a.EC2ServiceDomain {
+				t.Fatalf("unexpected EC2 service domain, expected %q, got %q", tc.expectedEC2ServiceDomain, a.EC2ServiceDomain)
 			}
 
 			if tc.expectedClusterID != a.ClusterID {

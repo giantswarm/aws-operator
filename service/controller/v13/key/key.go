@@ -357,6 +357,16 @@ func RouteTableName(customObject v1alpha1.AWSConfig, suffix string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), suffix)
 }
 
+func S3ServiceDomain(customObject v1alpha1.AWSConfig) string {
+	s3Domain := fmt.Sprintf("s3.%s.amazonaws.com", Region(customObject))
+
+	if IsChinaRegion(customObject) {
+		s3Domain += ".cn"
+	}
+
+	return s3Domain
+}
+
 func SecurityGroupName(customObject v1alpha1.AWSConfig, groupName string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), groupName)
 }
