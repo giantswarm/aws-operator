@@ -4,6 +4,9 @@ const Instance = `{{define "instance"}}
   {{ .Instance.Master.Instance.ResourceName }}:
     Type: "AWS::EC2::Instance"
     Description: Master instance
+    DependsOn:
+    - DockerVolume
+    - EtcdVolume
     Properties:
       AvailabilityZone: {{ .Instance.Master.AZ }}
       IamInstanceProfile: !Ref MasterInstanceProfile
@@ -19,25 +22,21 @@ const Instance = `{{define "instance"}}
         Value: {{ .Instance.Cluster.ID }}-master
   DockerVolume:
     Type: AWS::EC2::Volume
-    DependsOn:
-    - {{ .Instance.Master.Instance.ResourceName }}
     Properties:
       Encrypted: true
-      Size: 100
+      Size: 50
       VolumeType: gp2
-      AvailabilityZone: !GetAtt {{ .Instance.Master.Instance.ResourceName }}.AvailabilityZone
+      AvailabilityZone: {{ .Instance.Master.AZ }}
       Tags:
       - Key: Name
         Value: {{ .Instance.Master.DockerVolume.Name }}
   EtcdVolume:
     Type: AWS::EC2::Volume
-    DependsOn:
-    - {{ .Instance.Master.Instance.ResourceName }}
     Properties:
       Encrypted: true
       Size: 100
       VolumeType: gp2
-      AvailabilityZone: !GetAtt {{ .Instance.Master.Instance.ResourceName }}.AvailabilityZone
+      AvailabilityZone: {{ .Instance.Master.AZ }}
       Tags:
       - Key: Name
         Value: {{ .Instance.Master.EtcdVolume.Name }}
