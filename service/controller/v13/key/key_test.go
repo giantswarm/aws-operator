@@ -213,6 +213,59 @@ func Test_ClusterVersion(t *testing.T) {
 	}
 }
 
+func Test_EC2ServiceDomain(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		description              string
+		customObject             v1alpha1.AWSConfig
+		expectedEC2ServiceDomain string
+	}{
+		{
+			description: "basic match",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "eu-central-1",
+					},
+				},
+			},
+			expectedEC2ServiceDomain: "ec2.amazonaws.com",
+		},
+		{
+			description: "different region",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "us-west-2",
+					},
+				},
+			},
+			expectedEC2ServiceDomain: "ec2.amazonaws.com",
+		},
+		{
+			description: "china region",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "cn-north-1",
+					},
+				},
+			},
+			expectedEC2ServiceDomain: "ec2.amazonaws.com.cn",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			ec2ServiceDomain := EC2ServiceDomain(tc.customObject)
+
+			if tc.expectedEC2ServiceDomain != ec2ServiceDomain {
+				t.Errorf("unexpected EC2 service domain, expecting %q, want %q", tc.expectedEC2ServiceDomain, ec2ServiceDomain)
+			}
+		})
+	}
+}
+
 func Test_EtcdVolumeName(t *testing.T) {
 	t.Parallel()
 	expectedName := "test-cluster-etcd"
@@ -272,6 +325,68 @@ func Test_IngressControllerSecurePort(t *testing.T) {
 
 	if IngressControllerSecurePort(customObject) != expectedPort {
 		t.Fatalf("Expected ingress controller secure port %d but was %d", expectedPort, IngressControllerSecurePort(customObject))
+	}
+}
+
+func Test_IsChinaRegion(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		description    string
+		customObject   v1alpha1.AWSConfig
+		expectedResult bool
+	}{
+		{
+			description: "non china region",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "eu-central-1",
+					},
+				},
+			},
+			expectedResult: false,
+		},
+		{
+			description: "different non china region",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "us-west-2",
+					},
+				},
+			},
+			expectedResult: false,
+		},
+		{
+			description: "china region",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "cn-north-1",
+					},
+				},
+			},
+			expectedResult: true,
+		},
+		{
+			description: "different china region",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "cn-northwest-1",
+					},
+				},
+			},
+			expectedResult: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			if tc.expectedResult != IsChinaRegion(tc.customObject) {
+				t.Errorf("unexpected result, expecting %t, want %t", tc.expectedResult, IsChinaRegion(tc.customObject))
+			}
+		})
 	}
 }
 
@@ -486,6 +601,60 @@ func Test_RouteTableName(t *testing.T) {
 	}
 
 }
+
+func Test_S3ServiceDomain(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		description      string
+		customObject     v1alpha1.AWSConfig
+		expectedS3Domain string
+	}{
+		{
+			description: "basic match",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "eu-central-1",
+					},
+				},
+			},
+			expectedS3Domain: "s3.eu-central-1.amazonaws.com",
+		},
+		{
+			description: "different region",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "us-west-2",
+					},
+				},
+			},
+			expectedS3Domain: "s3.us-west-2.amazonaws.com",
+		},
+		{
+			description: "china region",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "cn-north-1",
+					},
+				},
+			},
+			expectedS3Domain: "s3.cn-north-1.amazonaws.com.cn",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			s3Domain := S3ServiceDomain(tc.customObject)
+
+			if tc.expectedS3Domain != s3Domain {
+				t.Errorf("unexpected S3 service domain, expecting %q, want %q", tc.expectedS3Domain, s3Domain)
+			}
+		})
+	}
+}
+
 func Test_SecurityGroupName(t *testing.T) {
 	t.Parallel()
 	expectedName := "test-cluster-worker"

@@ -56,7 +56,8 @@ func (l *launchConfigAdapter) getLaunchConfiguration(cfg Config) error {
 
 	c := SmallCloudconfigConfig{
 		MachineType:        prefixWorker,
-		Region:             cfg.CustomObject.Spec.AWS.Region,
+		Region:             key.Region(cfg.CustomObject),
+		S3Domain:           key.S3ServiceDomain(cfg.CustomObject),
 		S3URI:              s3URI,
 		CloudConfigVersion: cloudconfig.CloudConfigVersion,
 	}
