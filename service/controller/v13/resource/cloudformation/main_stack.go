@@ -97,6 +97,7 @@ func (r *Resource) getMainHostPreTemplateBody(ctx context.Context, customObject 
 	cfg := adapter.Config{
 		CustomObject:   customObject,
 		GuestAccountID: guestAccountID,
+		Route53Enabled: r.route53Enabled,
 	}
 	adp, err := adapter.NewHostPre(cfg)
 	if err != nil {
@@ -127,9 +128,10 @@ func (r *Resource) getMainHostPostTemplateBody(ctx context.Context, customObject
 	}
 
 	cfg := adapter.Config{
-		CustomObject: customObject,
-		Clients:      adapterClients,
-		HostClients:  *r.hostClients,
+		CustomObject:   customObject,
+		Clients:        adapterClients,
+		HostClients:    *r.hostClients,
+		Route53Enabled: r.route53Enabled,
 	}
 	adp, err := adapter.NewHostPost(cfg)
 	if err != nil {
