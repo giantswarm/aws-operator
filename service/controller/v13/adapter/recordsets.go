@@ -31,7 +31,7 @@ func (r *recordSetsAdapter) getHostPostRecordSets(cfg Config) error {
 		return microerror.Mask(err)
 	}
 
-	r.GuestHostedZoneNameServers = cfg.StackState.GuestHostedZoneNameServers
+	r.GuestHostedZoneNameServers = cfg.StackState.HostedZoneNameServers
 
 	return nil
 }

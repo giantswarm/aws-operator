@@ -48,7 +48,7 @@ const (
 )
 
 const (
-	GuestHostedZoneNameServers    = "GuestHostedZoneNameServers"
+	HostedZoneNameServers         = "HostedZoneNameServers"
 	MasterImageIDKey              = "MasterImageID"
 	MasterInstanceResourceNameKey = "MasterInstanceResourceName"
 	MasterInstanceTypeKey         = "MasterInstanceType"

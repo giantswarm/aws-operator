@@ -134,7 +134,7 @@ func (r *Resource) getMainHostPostTemplateBody(ctx context.Context, customObject
 		HostClients:    *r.hostClients,
 		Route53Enabled: r.route53Enabled,
 		StackState: adapter.StackState{
-			GuestHostedZoneNameServers: guestMainStackState.GuestHostedZoneNameServers,
+			HostedZoneNameServers: guestMainStackState.HostedZoneNameServers,
 		},
 	}
 	adp, err := adapter.NewHostPost(cfg)
