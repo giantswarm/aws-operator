@@ -1,7 +1,6 @@
 package adapter
 
 import (
-	"github.com/giantswarm/aws-operator/service/controller/v13/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/v13/key"
 	"github.com/giantswarm/microerror"
 )
@@ -32,38 +31,7 @@ func (r *recordSetsAdapter) getHostPostRecordSets(cfg Config) error {
 		return microerror.Mask(err)
 	}
 
-	// When Route53 isn't enabled, HostedZone isn't created and there are
-	// no outputs.
-	if !r.Route53Enabled {
-		return nil
-	}
-
-	var cf *cloudformation.CloudFormation
-	{
-		c := cloudformation.Config{
-			Client: cfg.Clients.CloudFormation,
-		}
-
-		cf, err = cloudformation.New(c)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	// GuestHostedZoneNameServers
-	{
-		outputs, _, err := cf.DescribeOutputsAndStatus(key.MainGuestStackName(cfg.CustomObject))
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		ns, err := cf.GetOutputValue(outputs, key.GuestHostedZoneNameServers)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		r.GuestHostedZoneNameServers = ns
-	}
+	r.GuestHostedZoneNameServers = cfg.StackState.GuestHostedZoneNameServers
 
 	return nil
 }

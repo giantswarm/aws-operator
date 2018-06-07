@@ -64,6 +64,13 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	var currentState StackState
 	{
+		var guestHostedZoneNameServers string
+		if r.route53Enabled {
+			guestHostedZoneNameServers, err = sc.CloudFormation.GetOutputValue(stackOutputs, key.GuestHostedZoneNameServers)
+			if err != nil {
+				return StackState{}, microerror.Mask(err)
+			}
+		}
 		masterImageID, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.MasterImageIDKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
@@ -125,6 +132,8 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 		currentState = StackState{
 			Name: stackName,
+
+			GuestHostedZoneNameServers: guestHostedZoneNameServers,
 
 			MasterImageID:              masterImageID,
 			MasterInstanceResourceName: masterInstanceResourceName,

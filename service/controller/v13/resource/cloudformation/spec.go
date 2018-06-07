@@ -16,6 +16,8 @@ const (
 type StackState struct {
 	Name string
 
+	GuestHostedZoneNameServers string
+
 	MasterImageID              string
 	MasterInstanceType         string
 	MasterInstanceResourceName string

@@ -2,6 +2,7 @@ package cloudformation
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
@@ -112,7 +113,7 @@ func (r *Resource) getMainHostPreTemplateBody(ctx context.Context, customObject 
 	return rendered, nil
 }
 
-func (r *Resource) getMainHostPostTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {
+func (r *Resource) getMainHostPostTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig, guestMainStackState StackState) (string, error) {
 	sc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)
@@ -132,16 +133,48 @@ func (r *Resource) getMainHostPostTemplateBody(ctx context.Context, customObject
 		Clients:        adapterClients,
 		HostClients:    *r.hostClients,
 		Route53Enabled: r.route53Enabled,
+		StackState: adapter.StackState{
+			GuestHostedZoneNameServers: guestMainStackState.GuestHostedZoneNameServers,
+		},
 	}
 	adp, err := adapter.NewHostPost(cfg)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
+	fmt.Println("================================================================================")
+	fmt.Println("================================================================================")
+	fmt.Println("================================================================================")
+	fmt.Println("================================================================================")
+	fmt.Println("================================================================================")
+	fmt.Println("adp.Route53Enabled", adp.Route53Enabled)
+	fmt.Println("adp.GuestHostedZoneNameServers", adp.GuestHostedZoneNameServers)
+	fmt.Println("cfg.StackState.GuestHostedZoneNameServers", cfg.StackState.GuestHostedZoneNameServers)
+	fmt.Println("================================================================================")
+	fmt.Println("================================================================================")
+	fmt.Println("================================================================================")
+	fmt.Println("================================================================================")
+	fmt.Println("================================================================================")
+	fmt.Println("================================================================================")
+
 	rendered, err := templates.Render(key.CloudFormationHostPostTemplates(), adp)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
+
+	fmt.Println("================================================================================")
+	fmt.Println("================================================================================")
+	fmt.Println("================================================================================")
+	fmt.Println("================================================================================")
+	fmt.Println("================================================================================")
+	fmt.Println("host post stack:")
+	fmt.Println(rendered)
+	fmt.Println("================================================================================")
+	fmt.Println("================================================================================")
+	fmt.Println("================================================================================")
+	fmt.Println("================================================================================")
+	fmt.Println("================================================================================")
+	fmt.Println("================================================================================")
 
 	return rendered, nil
 }
