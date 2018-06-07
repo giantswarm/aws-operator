@@ -2,8 +2,10 @@ package guest
 
 const Outputs = `{{define "outputs"}}
 Outputs:
+  {{ if .Route53Enabled }}
   HostedZoneNameServers:
     Value: !Join [ ',', !GetAtt 'HostedZone.NameServers' ]
+  {{ end }}
   MasterImageID:
     Value: {{ .Outputs.Master.ImageID }}
   MasterInstanceResourceName:
