@@ -1,7 +1,6 @@
 package hostpost
 
 const RecordSets = `{{define "record_sets"}}
-{{ if .Route53Enabled }}
   GuestNSRecordSet:
     Type: 'AWS::Route53::RecordSet'
     Properties:
@@ -10,5 +9,7 @@ const RecordSets = `{{define "record_sets"}}
       Type: 'NS'
       TTL: '900'
       ResourceRecords: !Split [ ',', '{{ .GuestHostedZoneNameServers }}' ]
+# TODO: wrap again
+{{ if .Route53Enabled }}
 {{end}}
 {{end}}`
