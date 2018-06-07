@@ -8,7 +8,7 @@
         Statement:
           Effect: "Allow"
           Principal:
-            Service: "ec2.amazonaws.com"
+            Service: {{.EC2ServiceDomain}}
           Action: "sts:AssumeRole"
   MasterRolePolicy:
     Type: "AWS::IAM::Policy"
@@ -60,7 +60,7 @@
         Statement:
           Effect: "Allow"
           Principal:
-            Service: "ec2.amazonaws.com"
+            Service: {{.EC2ServiceDomain}}
           Action: "sts:AssumeRole"
   WorkerRolePolicy:
     Type: "AWS::IAM::Policy"
