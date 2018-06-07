@@ -427,7 +427,7 @@ func TestMainHostPostTemplateExistingFields(t *testing.T) {
 	}
 
 	stackState := StackState{
-		GuestHostedZoneNameServers: "a.com.,b.com.",
+		HostedZoneNameServers: "a.com.,b.com.",
 	}
 
 	ctx := context.TODO()

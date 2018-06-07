@@ -149,7 +149,7 @@ func (r *Resource) getMainHostPostTemplateBody(ctx context.Context, customObject
 	fmt.Println("================================================================================")
 	fmt.Println("adp.Route53Enabled", adp.Route53Enabled)
 	fmt.Println("adp.GuestHostedZoneNameServers", adp.GuestHostedZoneNameServers)
-	fmt.Println("cfg.StackState.GuestHostedZoneNameServers", cfg.StackState.GuestHostedZoneNameServers)
+	fmt.Println("cfg.StackState.HostedZoneNameServers", cfg.StackState.HostedZoneNameServers)
 	fmt.Println("================================================================================")
 	fmt.Println("================================================================================")
 	fmt.Println("================================================================================")
