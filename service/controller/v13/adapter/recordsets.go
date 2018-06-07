@@ -32,8 +32,8 @@ func (r *recordSetsAdapter) getHostPostRecordSets(cfg Config) error {
 		return microerror.Mask(err)
 	}
 
-	// When Route53 isn't enabled HostedZone isn't created and there are no
-	// outputs.
+	// When Route53 isn't enabled, HostedZone isn't created and there are
+	// no outputs.
 	if !r.Route53Enabled {
 		return nil
 	}
