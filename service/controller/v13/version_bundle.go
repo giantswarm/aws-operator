@@ -36,7 +36,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "kubernetes",
-				Version: "1.10.2",
+				Version: "1.10.4",
 			},
 			{
 				Name:    "nginx-ingress-controller",

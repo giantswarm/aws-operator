@@ -8,7 +8,7 @@ ConditionPathExists=!/var/lib/docker
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash -c "([ -b "/dev/xvdc" ] && /usr/sbin/mkfs.xfs -f /dev/xvdc -L docker) || ([ -b "/dev/nvme1n1" ] && /usr/sbin/mkfs.xfs -f /dev/nvme1n1 -L docker)"
+ExecStart=/bin/bash -c "[ -e "/dev/xvdc" ] && /usr/sbin/mkfs.xfs -f /dev/xvdc -L docker"
 
 [Install]
 WantedBy=multi-user.target
