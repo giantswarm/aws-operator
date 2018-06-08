@@ -1,4 +1,4 @@
-package v_3_3_2
+package v_3_3_3
 
 const WorkerTemplate = `#cloud-config
 users:
@@ -248,7 +248,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.10.2"
+      Environment="IMAGE=quay.io/giantswarm/hyperkube:v1.10.4"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
