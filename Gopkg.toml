@@ -38,6 +38,10 @@ required = [
   version = "1.1.0"
 
 [[constraint]]
+  branch = "master"
+  name = "github.com/docker/distribution"
+
+[[constraint]]
   branch = "k8s-1.10.4"
   name = "github.com/giantswarm/apiextensions"
 

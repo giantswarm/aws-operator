@@ -73,8 +73,8 @@
     "service/sts",
     "service/sts/stsiface"
   ]
-  revision = "47309c012812d9e9c488a54313e5cdfa7479df93"
-  version = "v1.14.1"
+  revision = "152e9ff2c63af90874bf3eff1286acee291d0065"
+  version = "v1.14.2"
 
 [[projects]]
   branch = "master"
@@ -107,13 +107,13 @@
   version = "v3.2.0"
 
 [[projects]]
+  branch = "master"
   name = "github.com/docker/distribution"
   packages = [
-    "digest",
+    "digestset",
     "reference"
   ]
-  revision = "48294d928ced5dd9b378f7fd7c6f5da3ff3f2c89"
-  version = "v2.6.2"
+  revision = "f0cc927784781fa395c06317c58dea2841ece3a9"
 
 [[projects]]
   name = "github.com/docker/docker"
@@ -254,7 +254,7 @@
     "v_3_3_1",
     "v_3_3_2"
   ]
-  revision = "570aa461fd8c9fc1d56f45cfc5b8afffc4af7109"
+  revision = "e95830a9949c10a21b2975ac509fbe664e2332c3"
 
 [[projects]]
   branch = "k8s-1.10.4"
@@ -571,6 +571,12 @@
   version = "1.0.0"
 
 [[projects]]
+  name = "github.com/opencontainers/go-digest"
+  packages = ["."]
+  revision = "279bed98673dd5bef374d3b6e4b09e2af76183bf"
+  version = "v1.0.0-rc1"
+
+[[projects]]
   name = "github.com/pborman/uuid"
   packages = ["."]
   revision = "e790cca94e6cc75c7064b1332e63811d4aae1a53"
@@ -677,7 +683,7 @@
     "ed25519/internal/edwards25519",
     "ssh/terminal"
   ]
-  revision = "b47b1587369238182299fe4dad77d05b8b461e06"
+  revision = "8ac0e0d97ce45cd83d1d7243c060cb8461dda5e9"
 
 [[projects]]
   branch = "master"
@@ -801,8 +807,8 @@
     "tap",
     "transport"
   ]
-  revision = "22a49e732a507a11ac524e4ea5fd1a3e384b6fb8"
-  version = "v1.12.1"
+  revision = "7a6a684ca69eb4cae85ad0a484f2e531598c047b"
+  version = "v1.12.2"
 
 [[projects]]
   name = "gopkg.in/inf.v0"
@@ -1319,6 +1325,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9da910a332c49cc784448fa0da73987271ee733235fdf76f87d4f898b2a65a54"
+  inputs-digest = "81c80042cb031a533d7b840619e7d2a3b54ed9ad5d6bead9ceef3bffa19dbeab"
   solver-name = "gps-cdcl"
   solver-version = 1
