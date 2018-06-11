@@ -25,9 +25,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v13/key"
 	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v13/resource/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/v13/resource/ebsvolume"
+	"github.com/giantswarm/aws-operator/service/controller/v13/resource/encryptionkey"
 	"github.com/giantswarm/aws-operator/service/controller/v13/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/v13/resource/hostedzone"
-	"github.com/giantswarm/aws-operator/service/controller/v13/resource/kmskey"
 	"github.com/giantswarm/aws-operator/service/controller/v13/resource/loadbalancer"
 	"github.com/giantswarm/aws-operator/service/controller/v13/resource/migration"
 	"github.com/giantswarm/aws-operator/service/controller/v13/resource/namespace"
@@ -109,20 +109,20 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.SubnetList must not be empty when %T.APIWhitelist is enabled", config)
 	}
 
-	var kmsKeyResource controller.Resource
+	var encryptionKeyResource controller.Resource
 	{
-		c := kmskey.Config{
+		c := encryptionkey.Config{
 			Logger: config.Logger,
 
 			InstallationName: config.InstallationName,
 		}
 
-		ops, err := kmskey.New(c)
+		ops, err := encryptionkey.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 
-		kmsKeyResource, err = toCRUDResource(config.Logger, ops)
+		encryptionKeyResource, err = toCRUDResource(config.Logger, ops)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -309,7 +309,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	resources := []controller.Resource{
 		migrationResource,
 		hostedZoneResource,
-		kmsKeyResource,
+		encryptionKeyResource,
 		s3BucketResource,
 		s3BucketObjectResource,
 		loadBalancerResource,
