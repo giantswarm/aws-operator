@@ -39,6 +39,10 @@ required = [
 
 [[constraint]]
   branch = "master"
+  name = "github.com/docker/distribution"
+
+[[constraint]]
+  branch = "master"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]
@@ -115,23 +119,23 @@ required = [
 
 [[constraint]]
   name = "k8s.io/api"
-  version = "kubernetes-1.9.3"
+  version = "kubernetes-1.10.4"
 
 [[constraint]]
   name = "k8s.io/apiextensions-apiserver"
-  version = "kubernetes-1.9.3"
+  version = "kubernetes-1.10.4"
 
 [[constraint]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.9.3"
+  version = "kubernetes-1.10.4"
 
 [[constraint]]
   name = "k8s.io/apiserver"
-  version = "kubernetes-1.9.3"
+  version = "kubernetes-1.10.4"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.9.3"
+  version = "kubernetes-1.10.4"
 
 
 

@@ -1,5 +1,6 @@
 package listen
 
 type Listen struct {
-	Address string
+	Address        string
+	MetricsAddress string
 }
