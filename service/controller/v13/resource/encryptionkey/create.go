@@ -1,4 +1,4 @@
-package kmskey
+package encryptionkey
 
 import (
 	"context"
