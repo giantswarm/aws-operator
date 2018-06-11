@@ -29,7 +29,17 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "kubernetes",
-				Description: "Updated to 1.10.2 due to regression in 1.10.3 with configmaps.",
+				Description: "Updated to 1.10.4 due to regression in 1.10.3 with configmaps.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Added udev rule for NVMe disks.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Remove Nginx version from Server header in Ingress Controller",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
@@ -56,7 +66,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "kubernetes",
-				Version: "1.10.2",
+				Version: "1.10.4",
 			},
 			{
 				Name:    "nginx-ingress-controller",
