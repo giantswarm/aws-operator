@@ -119,7 +119,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "k8s-1.10.4"
+  branch = "master"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/core/v1alpha1",
@@ -131,22 +131,28 @@
     "pkg/clientset/versioned/typed/example/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1"
   ]
-  revision = "6432d5e9d211094d511f17b560819dd757c97bb6"
+  revision = "18c1aa070409bfa5ebdf91660837370dfb4071b1"
 
 [[projects]]
-  branch = "k8s-1.10.4"
+  branch = "master"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "9cf26f144d2cd33ef454818f8c90b39d04b44b5e"
+  revision = "c5b82c0351c122d5c4f96de2381c58fd97f1e354"
 
 [[projects]]
-  branch = "k8s-1.10.4"
+  branch = "master"
+  name = "github.com/giantswarm/errors"
+  packages = ["api"]
+  revision = "b106b0f6cb8112b3e343310d2e9d448033d8d383"
+
+[[projects]]
+  branch = "master"
   name = "github.com/giantswarm/k8sportforward"
   packages = ["."]
-  revision = "a1bc0461044fc84346a8316cbcf61a379b3d3fb8"
+  revision = "00489ad5cc81835cf9bf13e9dfa538fa6f3f729e"
 
 [[projects]]
   branch = "master"
@@ -288,8 +294,8 @@
 [[projects]]
   name = "github.com/imdario/mergo"
   packages = ["."]
-  revision = "9d5f1277e9a8ed20c3684bda8fde67c05628518c"
-  version = "v0.3.4"
+  revision = "9316a62528ac99aaecb4e47eadd6dc8aa6533d58"
+  version = "v0.3.5"
 
 [[projects]]
   name = "github.com/inconshreveable/mousetrap"
@@ -384,8 +390,8 @@
     ".",
     "mem"
   ]
-  revision = "63644898a8da0bc22138abf860edaf5277b6102e"
-  version = "v1.1.0"
+  revision = "787d034dfe70e44075ccc060d346146ef53270ad"
+  version = "v1.1.1"
 
 [[projects]]
   name = "github.com/spf13/cobra"
@@ -407,7 +413,7 @@
     "ed25519/internal/edwards25519",
     "ssh/terminal"
   ]
-  revision = "b47b1587369238182299fe4dad77d05b8b461e06"
+  revision = "8ac0e0d97ce45cd83d1d7243c060cb8461dda5e9"
 
 [[projects]]
   branch = "master"
@@ -447,7 +453,7 @@
     "unix",
     "windows"
   ]
-  revision = "9527bec2660bd847c050fda93a0f0c6dee0800bb"
+  revision = "bff228c7b664c5fce602223a05fb708fd8654986"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -500,7 +506,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "81158efcc9f219c511e4d3c0d61a0e6e49c01a24"
+  revision = "32ee49c4dd805befd833990acba36cb75042378c"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -531,8 +537,8 @@
     "tap",
     "transport"
   ]
-  revision = "22a49e732a507a11ac524e4ea5fd1a3e384b6fb8"
-  version = "v1.12.1"
+  revision = "7a6a684ca69eb4cae85ad0a484f2e531598c047b"
+  version = "v1.12.2"
 
 [[projects]]
   name = "gopkg.in/inf.v0"
@@ -1013,6 +1019,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8a4b438aaa88c7b471f36e8732966a15f44be2520b31a5f7cb364e5a60e7f04a"
+  inputs-digest = "4176cd91c209efa7bd91a37262c11f8e906771813da2d79636837d4ba1ddce14"
   solver-name = "gps-cdcl"
   solver-version = 1

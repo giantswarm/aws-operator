@@ -73,8 +73,8 @@
     "service/sts",
     "service/sts/stsiface"
   ]
-  revision = "152e9ff2c63af90874bf3eff1286acee291d0065"
-  version = "v1.14.2"
+  revision = "c9af76f2478f81c6566d0f7f4d522254ec7c0b52"
+  version = "v1.14.3"
 
 [[projects]]
   branch = "master"
@@ -178,7 +178,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "k8s-1.10.4"
+  branch = "master"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/core/v1alpha1",
@@ -194,7 +194,7 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake"
   ]
-  revision = "6432d5e9d211094d511f17b560819dd757c97bb6"
+  revision = "18c1aa070409bfa5ebdf91660837370dfb4071b1"
 
 [[projects]]
   branch = "master"
@@ -203,22 +203,22 @@
   revision = "32a7099fbb5b6af28013d7cce3918a6aa3fb2e8d"
 
 [[projects]]
-  branch = "k8s-1.10.4-legacy"
+  branch = "legacy"
   name = "github.com/giantswarm/certs"
   packages = [
     "legacy",
     "legacy/legacytest"
   ]
-  revision = "47ed2f50ec0e7070a01088a80282c4fee800824e"
+  revision = "f21f0275d3dee520420206890cc6c2444c092b9b"
 
 [[projects]]
-  branch = "k8s-1.10.4"
+  branch = "master"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "9cf26f144d2cd33ef454818f8c90b39d04b44b5e"
+  revision = "c5b82c0351c122d5c4f96de2381c58fd97f1e354"
 
 [[projects]]
   branch = "master"
@@ -233,10 +233,16 @@
   revision = "641ca85450f736082b846d20c8be8bb2f1504e30"
 
 [[projects]]
-  branch = "k8s-1.10.4"
+  branch = "master"
+  name = "github.com/giantswarm/errors"
+  packages = ["api"]
+  revision = "282cac0812c7870825c66648f1e61471d4a33bf2"
+
+[[projects]]
+  branch = "master"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
-  revision = "c5e33c8eb4108e36acf397829d85f3256f116e3e"
+  revision = "ef96695ed455e1f051c945c7db6d21d1681a7bb5"
 
 [[projects]]
   branch = "master"
@@ -252,15 +258,15 @@
     "v_3_2_5",
     "v_3_2_6",
     "v_3_3_1",
-    "v_3_3_2"
+    "v_3_3_3"
   ]
   revision = "e95830a9949c10a21b2975ac509fbe664e2332c3"
 
 [[projects]]
-  branch = "k8s-1.10.4"
+  branch = "master"
   name = "github.com/giantswarm/k8sportforward"
   packages = ["."]
-  revision = "a1bc0461044fc84346a8316cbcf61a379b3d3fb8"
+  revision = "00489ad5cc81835cf9bf13e9dfa538fa6f3f729e"
 
 [[projects]]
   branch = "master"
@@ -309,7 +315,7 @@
   revision = "39f8cfb7c2583edb28552d9e4b12193e5bddaf60"
 
 [[projects]]
-  branch = "k8s-1.10.4"
+  branch = "master"
   name = "github.com/giantswarm/operatorkit"
   packages = [
     "client/k8scrdclient",
@@ -325,25 +331,25 @@
     "controller/resource/retryresource",
     "informer"
   ]
-  revision = "f744e97ecf7ce924044c3b387bcd2bf841af1d35"
+  revision = "d80fdea79511051e5f7fbd585a98b5919671ea45"
 
 [[projects]]
-  branch = "k8s-1.10.4"
+  branch = "master"
   name = "github.com/giantswarm/randomkeys"
   packages = [
     ".",
     "randomkeystest"
   ]
-  revision = "6235d97583aaf71ad18502dcbbf49f168b56b1fa"
+  revision = "b2516ed0f070900eddc2b2654ce4f3d356ddf24a"
 
 [[projects]]
-  branch = "k8s-1.10.4"
+  branch = "master"
   name = "github.com/giantswarm/randomkeytpr"
   packages = [
     ".",
     "randomkeytprtest"
   ]
-  revision = "b1830966a6d3607018f8b2d5500d4cce387da86b"
+  revision = "d30333b6c23134aade3841156fa441a2045a957f"
 
 [[projects]]
   branch = "master"
@@ -508,8 +514,8 @@
 [[projects]]
   name = "github.com/imdario/mergo"
   packages = ["."]
-  revision = "9d5f1277e9a8ed20c3684bda8fde67c05628518c"
-  version = "v0.3.4"
+  revision = "9316a62528ac99aaecb4e47eadd6dc8aa6533d58"
+  version = "v0.3.5"
 
 [[projects]]
   name = "github.com/inconshreveable/mousetrap"
@@ -636,8 +642,8 @@
     ".",
     "mem"
   ]
-  revision = "63644898a8da0bc22138abf860edaf5277b6102e"
-  version = "v1.1.0"
+  revision = "787d034dfe70e44075ccc060d346146ef53270ad"
+  version = "v1.1.1"
 
 [[projects]]
   name = "github.com/spf13/cast"
@@ -672,8 +678,8 @@
 [[projects]]
   name = "github.com/stretchr/testify"
   packages = ["assert"]
-  revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
-  version = "v1.2.1"
+  revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
+  version = "v1.2.2"
 
 [[projects]]
   branch = "master"
@@ -723,7 +729,7 @@
     "unix",
     "windows"
   ]
-  revision = "9527bec2660bd847c050fda93a0f0c6dee0800bb"
+  revision = "bff228c7b664c5fce602223a05fb708fd8654986"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -776,7 +782,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "81158efcc9f219c511e4d3c0d61a0e6e49c01a24"
+  revision = "32ee49c4dd805befd833990acba36cb75042378c"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -1325,6 +1331,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "81c80042cb031a533d7b840619e7d2a3b54ed9ad5d6bead9ceef3bffa19dbeab"
+  inputs-digest = "bcfce58f9b0773b6aedcb9d125c06a1d21375d9d97f3304c20c12655b41a58b6"
   solver-name = "gps-cdcl"
   solver-version = 1
