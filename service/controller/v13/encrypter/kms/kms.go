@@ -55,23 +55,26 @@ func (k *Encrypter) CreateKey(ctx context.Context, customObject v1alpha1.AWSConf
 		return microerror.Mask(err)
 	}
 
-	if _, err := sc.AWSClient.KMS.CreateAlias(&kms.CreateAliasInput{
+	_, err = sc.AWSClient.KMS.CreateAlias(&kms.CreateAliasInput{
 		AliasName:   aws.String(keyAlias),
 		TargetKeyId: key.KeyMetadata.Arn,
-	}); err != nil {
+	})
+	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	if _, err := sc.AWSClient.KMS.EnableKeyRotation(&kms.EnableKeyRotationInput{
+	_, err = sc.AWSClient.KMS.EnableKeyRotation(&kms.EnableKeyRotationInput{
 		KeyId: key.KeyMetadata.KeyId,
-	}); err != nil {
+	})
+	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	if _, err := sc.AWSClient.KMS.TagResource(&kms.TagResourceInput{
+	_, err = sc.AWSClient.KMS.TagResource(&kms.TagResourceInput{
 		KeyId: key.KeyMetadata.KeyId,
 		Tags:  k.getKMSTags(customObject),
-	}); err != nil {
+	})
+	if err != nil {
 		return microerror.Mask(err)
 	}
 
@@ -93,17 +96,19 @@ func (k *Encrypter) DeleteKey(ctx context.Context, keyAlias string) error {
 	}
 
 	// Delete the key alias.
-	if _, err := sc.AWSClient.KMS.DeleteAlias(&kms.DeleteAliasInput{
+	_, err = sc.AWSClient.KMS.DeleteAlias(&kms.DeleteAliasInput{
 		AliasName: aws.String(keyAlias),
-	}); err != nil {
+	})
+	if err != nil {
 		return microerror.Mask(err)
 	}
 
 	// AWS API doesn't allow to delete the KMS key immediately, but we can schedule its deletion.
-	if _, err := sc.AWSClient.KMS.ScheduleKeyDeletion(&kms.ScheduleKeyDeletionInput{
+	_, err = sc.AWSClient.KMS.ScheduleKeyDeletion(&kms.ScheduleKeyDeletionInput{
 		KeyId:               key.KeyMetadata.KeyId,
 		PendingWindowInDays: aws.Int64(pendingDeletionWindow),
-	}); err != nil {
+	})
+	if err != nil {
 		return microerror.Mask(err)
 	}
 
