@@ -22,6 +22,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v13/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v13/credential"
 	"github.com/giantswarm/aws-operator/service/controller/v13/ebs"
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/controller/v13/key"
 	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v13/resource/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/v13/resource/ebsvolume"
@@ -109,10 +110,25 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.SubnetList must not be empty when %T.APIWhitelist is enabled", config)
 	}
 
+	var encrypter *kms.Encrypter
+	{
+		c := &kms.EncrypterConfig{
+			Logger: config.Logger,
+
+			InstallationName: config.InstallationName,
+		}
+
+		encrypter, err = kms.NewEncrypter(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var encryptionKeyResource controller.Resource
 	{
 		c := encryptionkey.Config{
-			Logger: config.Logger,
+			Encrypter: encrypter,
+			Logger:    config.Logger,
 
 			InstallationName: config.InstallationName,
 		}

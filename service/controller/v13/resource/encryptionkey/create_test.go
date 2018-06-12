@@ -7,11 +7,10 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v13/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter"
 )
 
-func Test_Resource_KMSKey_newCreate(t *testing.T) {
+func Test_Resource_EncryptionKey_newCreate(t *testing.T) {
 	t.Parallel()
 	customObject := &v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
@@ -22,37 +21,37 @@ func Test_Resource_KMSKey_newCreate(t *testing.T) {
 	}
 
 	testCases := []struct {
-		currentState   KMSKeyState
-		desiredState   KMSKeyState
-		expectedChange KMSKeyState
+		currentState   encrypter.EncryptionKeyState
+		desiredState   encrypter.EncryptionKeyState
+		expectedChange encrypter.EncryptionKeyState
 		description    string
 	}{
 		{
 			description:    "current state empty, desired state empty, empty create change",
-			currentState:   KMSKeyState{},
-			desiredState:   KMSKeyState{},
-			expectedChange: KMSKeyState{},
+			currentState:   encrypter.EncryptionKeyState{},
+			desiredState:   encrypter.EncryptionKeyState{},
+			expectedChange: encrypter.EncryptionKeyState{},
 		},
 		{
 			description:  "current state empty, desired state not empty, create change == desired state",
-			currentState: KMSKeyState{},
-			desiredState: KMSKeyState{
-				KeyAlias: "mykeyid",
+			currentState: encrypter.EncryptionKeyState{},
+			desiredState: encrypter.EncryptionKeyState{
+				KeyName: "mykeyid",
 			},
-			expectedChange: KMSKeyState{
-				KeyAlias: "mykeyid",
+			expectedChange: encrypter.EncryptionKeyState{
+				KeyName: "mykeyid",
 			},
 		},
 		{
 			description: "current state not empty, desired state not empty, create change == desired state",
-			currentState: KMSKeyState{
-				KeyAlias: "currentkeyid",
+			currentState: encrypter.EncryptionKeyState{
+				KeyName: "currentkeyid",
 			},
-			desiredState: KMSKeyState{
-				KeyAlias: "mykeyid",
+			desiredState: encrypter.EncryptionKeyState{
+				KeyName: "mykeyid",
 			},
-			expectedChange: KMSKeyState{
-				KeyAlias: "mykeyid",
+			expectedChange: encrypter.EncryptionKeyState{
+				KeyName: "mykeyid",
 			},
 		},
 	}
@@ -61,10 +60,8 @@ func Test_Resource_KMSKey_newCreate(t *testing.T) {
 	var newResource *Resource
 
 	resourceConfig := DefaultConfig()
-	awsClients := aws.Clients{
-		KMS: &KMSClientMock{},
-	}
 	resourceConfig.Logger = microloggertest.New()
+	resourceConfig.Encrypter = &EncrypterMock{}
 	resourceConfig.InstallationName = "test-install"
 
 	newResource, err = New(resourceConfig)
@@ -75,18 +72,16 @@ func Test_Resource_KMSKey_newCreate(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			ctx := context.TODO()
-			ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
-
 			result, err := newResource.newCreateChange(ctx, customObject, tc.currentState, tc.desiredState)
 			if err != nil {
 				t.Errorf("expected '%v' got '%#v'", nil, err)
 			}
-			createChange, ok := result.(KMSKeyState)
+			createChange, ok := result.(encrypter.EncryptionKeyState)
 			if !ok {
 				t.Errorf("expected '%T', got '%T'", createChange, result)
 			}
-			if createChange.KeyAlias != tc.expectedChange.KeyAlias {
-				t.Errorf("expected %s, got %s", tc.expectedChange.KeyAlias, createChange.KeyAlias)
+			if createChange.KeyName != tc.expectedChange.KeyName {
+				t.Errorf("expected %s, got %s", tc.expectedChange.KeyName, createChange.KeyName)
 			}
 		})
 	}
@@ -103,18 +98,18 @@ func Test_ApplyCreateChange(t *testing.T) {
 	}
 
 	testCases := []struct {
-		createChange KMSKeyState
+		createChange encrypter.EncryptionKeyState
 		description  string
 	}{
 		{
 			description: "basic case, create",
-			createChange: KMSKeyState{
-				KeyAlias: "alias/test-cluster",
+			createChange: encrypter.EncryptionKeyState{
+				KeyName: "alias/test-cluster",
 			},
 		},
 		{
 			description:  "empty create change, not create",
-			createChange: KMSKeyState{},
+			createChange: encrypter.EncryptionKeyState{},
 		},
 	}
 
@@ -122,12 +117,8 @@ func Test_ApplyCreateChange(t *testing.T) {
 	var newResource *Resource
 
 	resourceConfig := DefaultConfig()
-	awsClients := aws.Clients{
-		KMS: &KMSClientMock{
-			clusterID: "test-cluster",
-		},
-	}
 	resourceConfig.Logger = microloggertest.New()
+	resourceConfig.Encrypter = &EncrypterMock{}
 	resourceConfig.InstallationName = "test-install"
 
 	newResource, err = New(resourceConfig)
@@ -137,8 +128,6 @@ func Test_ApplyCreateChange(t *testing.T) {
 
 	for _, tc := range testCases {
 		ctx := context.TODO()
-		ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
-
 		err := newResource.ApplyCreateChange(ctx, customObject, tc.createChange)
 		if err != nil {
 			t.Errorf("unexpected error %v", err)

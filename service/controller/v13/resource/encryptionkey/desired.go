@@ -3,19 +3,21 @@ package encryptionkey
 import (
 	"context"
 
+	"github.com/giantswarm/microerror"
+
 	"github.com/giantswarm/aws-operator/service/controller/v13/key"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
-	desiredState := KMSKeyState{}
-
 	customObject, err := key.ToCustomObject(obj)
 	if err != nil {
-		return desiredState, err
+		return nil, microerror.Mask(err)
 	}
 
-	clusterID := key.ClusterID(customObject)
-	desiredState.KeyAlias = toAlias(clusterID)
+	desiredState, err := r.encrypter.DesiredState(ctx, customObject)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
 
 	return desiredState, nil
 }

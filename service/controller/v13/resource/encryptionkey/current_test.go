@@ -7,8 +7,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v13/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter"
 )
 
 func Test_CurrentState(t *testing.T) {
@@ -22,17 +21,17 @@ func Test_CurrentState(t *testing.T) {
 	}
 
 	testCases := []struct {
-		description      string
-		expectedKeyID    string
-		expectedKMSError bool
+		description             string
+		expectedKeyID           string
+		expectedEncryptionError bool
 	}{
 		{
 			description:   "basic match",
 			expectedKeyID: "mykeyid",
 		},
 		{
-			description:      "KMS error",
-			expectedKMSError: true,
+			description:             "Encryption error",
+			expectedEncryptionError: true,
 		},
 	}
 	var err error
@@ -44,11 +43,9 @@ func Test_CurrentState(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			awsClients := aws.Clients{
-				KMS: &KMSClientMock{
-					keyID:   tc.expectedKeyID,
-					isError: tc.expectedKMSError,
-				},
+			resourceConfig.Encrypter = &EncrypterMock{
+				isError: tc.expectedEncryptionError,
+				keyID:   tc.expectedKeyID,
 			}
 			newResource, err = New(resourceConfig)
 			if err != nil {
@@ -56,19 +53,17 @@ func Test_CurrentState(t *testing.T) {
 			}
 
 			ctx := context.TODO()
-			ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
-
 			result, err := newResource.GetCurrentState(ctx, customObject)
-			if err != nil && !tc.expectedKMSError {
+			if err != nil && !tc.expectedEncryptionError {
 				t.Errorf("unexpected error %v", err)
 			}
-			currentState, ok := result.(KMSKeyState)
+			currentState, ok := result.(encrypter.EncryptionKeyState)
 			if !ok {
 				t.Errorf("expected '%T', got '%T'", currentState, result)
 			}
 
-			if err == nil && tc.expectedKMSError {
-				t.Error("expected KMS error didn't happen")
+			if err == nil && tc.expectedEncryptionError {
+				t.Error("expected encryption error didn't happen")
 			}
 
 			if currentState.KeyID != tc.expectedKeyID {
