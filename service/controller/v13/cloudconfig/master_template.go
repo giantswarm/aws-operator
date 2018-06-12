@@ -3,7 +3,7 @@ package cloudconfig
 import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/legacy"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_3_3"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_3_4"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
@@ -24,6 +24,7 @@ func (c *CloudConfig) NewMasterTemplate(customObject v1alpha1.AWSConfig, certs l
 	{
 		params.Cluster = customObject.Spec.Cluster
 		params.DisableEncryptionAtREST = true
+		params.DisableIngressController = true
 		params.EtcdPort = customObject.Spec.Cluster.Etcd.Port
 		params.Extension = &MasterExtension{
 			certs:            certs,
