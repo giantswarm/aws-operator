@@ -911,7 +911,7 @@ write_files:
       kind: ClusterRole
       name: calico-node
       apiGroup: rbac.authorization.k8s.io
-    {{ if not .DisableIngressController -}}
+{{ if not .DisableIngressController -}}
     ---
     ## IC
     kind: ClusterRoleBinding
@@ -940,7 +940,7 @@ write_files:
       kind: Role
       name: nginx-ingress-role
       apiGroup: rbac.authorization.k8s.io
-    {{ end -}}
+{{ end -}}
 - path: /srv/rbac_roles.yaml
   owner: root
   permissions: 0644
@@ -976,7 +976,7 @@ write_files:
           - nodes
         verbs:
           - get
-    {{ if not .DisableIngressController -}}
+{{ if not .DisableIngressController -}}
     ---
     ## IC
     apiVersion: v1
@@ -1080,7 +1080,7 @@ write_files:
           - get
           - create
           - update
-    {{ end -}}
+{{ end -}}
 - path: /srv/psp_policies.yaml
   owner: root
   permissions: 0644
@@ -1289,7 +1289,7 @@ write_files:
               /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/$manifest
               [ "$?" -ne "0" ]
           do
-              echo "failed to apply /src/$manifest, retrying in 5 sec"
+              echo "failed to apply /srv/$manifest, retrying in 5 sec"
               sleep 5s
           done
       done
@@ -1298,7 +1298,7 @@ write_files:
           /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/priority_classes.yaml
           [ "$?" -ne "0" ]
       do
-          echo "failed to apply /src/priority_classes.yaml, retrying in 5 sec"
+          echo "failed to apply /srv/priority_classes.yaml, retrying in 5 sec"
           sleep 5s
       done
 
@@ -1318,7 +1318,7 @@ write_files:
               /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/$manifest
               [ "$?" -ne "0" ]
           do
-              echo "failed to apply /src/$manifest, retrying in 5 sec"
+              echo "failed to apply /srv/$manifest, retrying in 5 sec"
               sleep 5s
           done
       done
