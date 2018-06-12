@@ -3,13 +3,14 @@ package cloudconfig
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"encoding/base64"
 	"io"
 	"strings"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter"
 	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys"
@@ -49,8 +50,7 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
-
-		template, err := ccService.NewMasterTemplate(tc.CustomObject, tc.Certs, tc.ClusterKeys, "kms-key-arn")
+		template, err := ccService.NewMasterTemplate(context.TODO(), tc.CustomObject, tc.Certs, tc.ClusterKeys)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
@@ -190,7 +190,7 @@ func testNewCloudConfigService() (*CloudConfig, error) {
 	var ccService *CloudConfig
 	{
 		c := Config{
-			KMSClient: &KMSClientMock{},
+			Encrypter: &encrypter.EncrypterMock{},
 			Logger:    microloggertest.New(),
 		}
 
@@ -201,10 +201,4 @@ func testNewCloudConfigService() (*CloudConfig, error) {
 	}
 
 	return ccService, nil
-}
-
-type KMSClientMock struct{}
-
-func (k *KMSClientMock) Encrypt(input *kms.EncryptInput) (*kms.EncryptOutput, error) {
-	return &kms.EncryptOutput{CiphertextBlob: input.Plaintext}, nil
 }

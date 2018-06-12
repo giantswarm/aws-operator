@@ -16,6 +16,7 @@ type Interface interface {
 	KeyManager
 	StateManager
 	TLSManager
+	Encrypter
 }
 
 type KeyManager interface {
@@ -29,5 +30,10 @@ type StateManager interface {
 }
 
 type TLSManager interface {
-	EncryptTLSAssets(ctx context.Context, assets legacy.AssetsBundle, key string) (*legacy.CompactTLSAssets, error)
+	EncryptTLSAssets(ctx context.Context, customObject v1alpha1.AWSConfig, assets legacy.AssetsBundle) (*legacy.CompactTLSAssets, error)
+}
+
+type Encrypter interface {
+	EncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error)
+	Encrypt(ctx context.Context, key, plaintext string) (string, error)
 }

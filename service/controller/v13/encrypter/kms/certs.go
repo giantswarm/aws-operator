@@ -8,13 +8,15 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v13/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v13/key"
 )
 
-func (k *Encrypter) EncryptTLSAssets(ctx context.Context, assets legacy.AssetsBundle, kmsKeyArn string) (*legacy.CompactTLSAssets, error) {
+func (k *Encrypter) EncryptTLSAssets(ctx context.Context, customObject v1alpha1.AWSConfig, assets legacy.AssetsBundle) (*legacy.CompactTLSAssets, error) {
 	rawTLS := createRawTLSAssets(assets)
 
 	sc, err := controllercontext.FromContext(ctx)
@@ -22,7 +24,10 @@ func (k *Encrypter) EncryptTLSAssets(ctx context.Context, assets legacy.AssetsBu
 		return nil, microerror.Mask(err)
 	}
 
-	encTLS, err := rawTLS.encrypt(sc.AWSClient.KMS, kmsKeyArn)
+	clusterID := key.ClusterID(customObject)
+	kmsKeyARN, err := sc.AWSService.GetKeyArn(clusterID)
+
+	encTLS, err := rawTLS.encrypt(sc.AWSClient.KMS, kmsKeyARN)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}

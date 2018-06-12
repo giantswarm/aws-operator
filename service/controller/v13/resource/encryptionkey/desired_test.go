@@ -5,9 +5,8 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/micrologger/microloggertest"
-
 	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter"
+	"github.com/giantswarm/micrologger/microloggertest"
 )
 
 func Test_DesiredState(t *testing.T) {
@@ -38,8 +37,8 @@ func Test_DesiredState(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			resourceConfig.Encrypter = &EncrypterMock{
-				keyName: tc.expectedKeyName,
+			resourceConfig.Encrypter = &encrypter.EncrypterMock{
+				KeyName: tc.expectedKeyName,
 			}
 
 			newResource, err = New(resourceConfig)

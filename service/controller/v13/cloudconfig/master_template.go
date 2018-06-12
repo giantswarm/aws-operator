@@ -1,6 +1,8 @@
 package cloudconfig
 
 import (
+	"context"
+
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/legacy"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_3_3"
@@ -12,10 +14,14 @@ import (
 
 // NewMasterTemplate generates a new master cloud config template and returns it
 // as a base64 encoded string.
-func (c *CloudConfig) NewMasterTemplate(customObject v1alpha1.AWSConfig, certs legacy.CompactTLSAssets, clusterKeys randomkeys.Cluster, kmsKeyARN string) (string, error) {
+func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, certs legacy.CompactTLSAssets, clusterKeys randomkeys.Cluster) (string, error) {
 	var err error
 
-	randomKeyTmplSet, err := renderRandomKeyTmplSet(c.kmsClient, clusterKeys, kmsKeyARN)
+	encryptionKey, err := c.encrypter.EncryptionKey(ctx, customObject)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, c.encrypter, encryptionKey, clusterKeys)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
