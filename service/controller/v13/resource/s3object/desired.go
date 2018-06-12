@@ -42,7 +42,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return output, microerror.Mask(err)
 	}
 
-	tlsAssets, err := r.encodeTLSAssets(ctx, certs, kmsKeyARN)
+	tlsAssets, err := r.encrypter.EncryptTLSAssets(ctx, certs, kmsKeyARN)
 	if err != nil {
 		return output, microerror.Mask(err)
 	}

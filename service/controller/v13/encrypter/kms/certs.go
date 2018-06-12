@@ -1,14 +1,20 @@
-package s3object
+package kms
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
+	"encoding/base64"
 
-	"github.com/giantswarm/aws-operator/service/controller/v13/controllercontext"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/service/controller/v13/controllercontext"
 )
 
-func (r *Resource) encodeTLSAssets(ctx context.Context, assets legacy.AssetsBundle, kmsKeyArn string) (*legacy.CompactTLSAssets, error) {
+func (k *Encrypter) EncryptTLSAssets(ctx context.Context, assets legacy.AssetsBundle, kmsKeyArn string) (*legacy.CompactTLSAssets, error) {
 	rawTLS := createRawTLSAssets(assets)
 
 	sc, err := controllercontext.FromContext(ctx)
@@ -155,4 +161,30 @@ func assetsBundleKey(c legacy.ClusterComponent, t legacy.TLSAssetType) legacy.As
 		Component: c,
 		Type:      t,
 	}
+}
+
+func compactor(data []byte) (string, error) {
+	var buf bytes.Buffer
+	gzw := gzip.NewWriter(&buf)
+	if _, err := gzw.Write(data); err != nil {
+		return "", err
+	}
+	if err := gzw.Close(); err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(buf.Bytes()), nil
+}
+
+func encryptor(svc KMSClient, kmsKeyARN string, data []byte) ([]byte, error) {
+	encryptInput := kms.EncryptInput{
+		KeyId:     aws.String(kmsKeyARN),
+		Plaintext: data,
+	}
+
+	var encryptOutput *kms.EncryptOutput
+	var err error
+	if encryptOutput, err = svc.Encrypt(&encryptInput); err != nil {
+		return []byte{}, err
+	}
+	return encryptOutput.CiphertextBlob, nil
 }
