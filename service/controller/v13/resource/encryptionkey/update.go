@@ -29,7 +29,7 @@ func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 	return patch, nil
 }
 
-// newUpdateChange is a no-op because KMS keys are not updated.
+// newUpdateChange is a no-op because encryption keys are not updated.
 func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
 	return nil, nil
 }

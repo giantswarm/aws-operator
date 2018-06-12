@@ -6,6 +6,8 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
+
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter"
 )
 
 func Test_DesiredState(t *testing.T) {
@@ -19,12 +21,12 @@ func Test_DesiredState(t *testing.T) {
 	}
 
 	testCases := []struct {
-		description      string
-		expectedKeyAlias string
+		description     string
+		expectedKeyName string
 	}{
 		{
-			description:      "basic match",
-			expectedKeyAlias: "alias/test-cluster",
+			description:     "basic match",
+			expectedKeyName: "alias/test-cluster",
 		},
 	}
 	var err error
@@ -36,6 +38,10 @@ func Test_DesiredState(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
+			resourceConfig.Encrypter = &EncrypterMock{
+				keyName: tc.expectedKeyName,
+			}
+
 			newResource, err = New(resourceConfig)
 			if err != nil {
 				t.Error("expected", nil, "got", err)
@@ -45,13 +51,13 @@ func Test_DesiredState(t *testing.T) {
 			if err != nil {
 				t.Errorf("unexpected error %v", err)
 			}
-			currentState, ok := result.(KMSKeyState)
+			currentState, ok := result.(encrypter.EncryptionKeyState)
 			if !ok {
 				t.Errorf("expected '%T', got '%T'", currentState, result)
 			}
 
-			if currentState.KeyAlias != tc.expectedKeyAlias {
-				t.Errorf("expected keyID %q, got %q", tc.expectedKeyAlias, currentState.KeyAlias)
+			if currentState.KeyName != tc.expectedKeyName {
+				t.Errorf("expected keyName %q, got %q", tc.expectedKeyName, currentState.KeyName)
 			}
 		})
 	}
