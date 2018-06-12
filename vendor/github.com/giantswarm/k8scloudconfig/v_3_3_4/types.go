@@ -9,12 +9,16 @@ type Params struct {
 	// etcd data.
 	APIServerEncryptionKey string
 	Cluster                v1alpha1.Cluster
-	// DisableCalico flag when set removes all calico related Kubernetes
+	// DisableCalico flag. When set removes all calico related Kubernetes
 	// manifests from the cloud config together with their initialization.
 	DisableCalico bool
-	// DisableEncryptionAtREST flag when set removes all manifests from the cloud
+	// DisableEncryptionAtREST flag. When set removes all manifests from the cloud
 	// config related to Kubernetes encryption at REST.
 	DisableEncryptionAtREST bool
+	// DisableIngressController flag. When set removes all manifests from the
+	// cloud config related to Ingress Controller. This allows us to migrate
+	// providers to chart-operator independently.
+	DisableIngressController bool
 	// Hyperkube allows to pass extra `docker run` and `command` arguments
 	// to hyperkube image commands. This allows to e.g. add cloud provider
 	// extensions.

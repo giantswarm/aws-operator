@@ -531,6 +531,7 @@ write_files:
         }
       ]
     }
+{{ if not .DisableIngressController -}}    
 - path: /srv/default-backend-dep.yml
   owner: root
   permissions: 0644
@@ -718,6 +719,7 @@ write_files:
         targetPort: 443
       selector:
         k8s-app: nginx-ingress-controller
+{{ end -}}
 - path: /srv/kube-proxy-sa.yaml
   owner: root
   permissions: 0644
@@ -909,6 +911,7 @@ write_files:
       kind: ClusterRole
       name: calico-node
       apiGroup: rbac.authorization.k8s.io
+    {{ if not .DisableIngressController -}}
     ---
     ## IC
     kind: ClusterRoleBinding
@@ -937,6 +940,7 @@ write_files:
       kind: Role
       name: nginx-ingress-role
       apiGroup: rbac.authorization.k8s.io
+    {{ end -}}
 - path: /srv/rbac_roles.yaml
   owner: root
   permissions: 0644
@@ -972,6 +976,7 @@ write_files:
           - nodes
         verbs:
           - get
+    {{ if not .DisableIngressController -}}
     ---
     ## IC
     apiVersion: v1
@@ -1075,6 +1080,7 @@ write_files:
           - get
           - create
           - update
+    {{ end -}}
 - path: /srv/psp_policies.yaml
   owner: root
   permissions: 0644
@@ -1353,11 +1359,13 @@ write_files:
       MANIFESTS="${MANIFESTS} kube-proxy-sa.yaml"
       MANIFESTS="${MANIFESTS} kube-proxy-ds.yaml"
       MANIFESTS="${MANIFESTS} coredns.yaml"
+      {{ if not .DisableIngressController -}}
       MANIFESTS="${MANIFESTS} default-backend-dep.yml"
       MANIFESTS="${MANIFESTS} default-backend-svc.yml"
       MANIFESTS="${MANIFESTS} ingress-controller-cm.yml"
       MANIFESTS="${MANIFESTS} ingress-controller-dep.yml"
       MANIFESTS="${MANIFESTS} ingress-controller-svc.yml"
+      {{ end -}}
 
       for manifest in $MANIFESTS
       do
