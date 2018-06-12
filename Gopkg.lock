@@ -8,8 +8,8 @@
     "autorest/adal",
     "autorest/date"
   ]
-  revision = "d21db7ee8958d471f5b185d700762c903549ee08"
-  version = "v10.10.0"
+  revision = "76796dcb80ab6491bf22e344402023c081a7a282"
+  version = "v10.11.1"
 
 [[projects]]
   name = "github.com/BurntSushi/toml"
@@ -73,8 +73,8 @@
     "service/sts",
     "service/sts/stsiface"
   ]
-  revision = "c9af76f2478f81c6566d0f7f4d522254ec7c0b52"
-  version = "v1.14.3"
+  revision = "d2d4fca90395039f60821c231da759cab8f318c7"
+  version = "v1.14.4"
 
 [[projects]]
   branch = "master"
@@ -113,7 +113,7 @@
     "digestset",
     "reference"
   ]
-  revision = "f0cc927784781fa395c06317c58dea2841ece3a9"
+  revision = "749f6afb4572201e3c37325d0ffedb6f32be8950"
 
 [[projects]]
   name = "github.com/docker/docker"
@@ -194,7 +194,7 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake"
   ]
-  revision = "18c1aa070409bfa5ebdf91660837370dfb4071b1"
+  revision = "7bd5a0ce29400731deed05bccaf559cedc6f2221"
 
 [[projects]]
   branch = "master"
@@ -233,16 +233,25 @@
   revision = "641ca85450f736082b846d20c8be8bb2f1504e30"
 
 [[projects]]
+  branch = "scaling"
+  name = "github.com/giantswarm/e2etests"
+  packages = [
+    "scaling",
+    "scaling/provider"
+  ]
+  revision = "47be51c31c6908a2372277ab1395df8dfa127052"
+
+[[projects]]
   branch = "master"
   name = "github.com/giantswarm/errors"
-  packages = ["api"]
-  revision = "282cac0812c7870825c66648f1e61471d4a33bf2"
+  packages = ["guest"]
+  revision = "e829655ed78351b795407d7ec2b9b27d9a40dcf7"
 
 [[projects]]
   branch = "master"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
-  revision = "ef96695ed455e1f051c945c7db6d21d1681a7bb5"
+  revision = "b48ae48e60b4891baf6f3ab23eff9ed469532ad0"
 
 [[projects]]
   branch = "master"
@@ -260,7 +269,7 @@
     "v_3_3_1",
     "v_3_3_3"
   ]
-  revision = "e95830a9949c10a21b2975ac509fbe664e2332c3"
+  revision = "1970c8fe31efb7b3b147277c1084c9b1dfd1b4f7"
 
 [[projects]]
   branch = "master"
@@ -302,7 +311,7 @@
     "server",
     "tls"
   ]
-  revision = "6578efbcb390bb4be316637e0de492241bea52a3"
+  revision = "19f5fe4a59000232718a4e563090d8346bd06ad9"
 
 [[projects]]
   branch = "master"
@@ -705,7 +714,7 @@
     "publicsuffix",
     "trace"
   ]
-  revision = "1e491301e022f8f977054da4c2d852decd59571f"
+  revision = "db08ff08e8622530d9ed3a0e8ac279f6d4c02196"
 
 [[projects]]
   branch = "master"
@@ -729,7 +738,7 @@
     "unix",
     "windows"
   ]
-  revision = "bff228c7b664c5fce602223a05fb708fd8654986"
+  revision = "a9e25c09b96b8870693763211309e213c6ef299d"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -1155,7 +1164,7 @@
   branch = "master"
   name = "k8s.io/kube-openapi"
   packages = ["pkg/util/proto"]
-  revision = "8a9b82f00b3a86eac24681da3f9fe6c34c01cea2"
+  revision = "bf40560368791a7dddfeea9b3cfcf89b34139f44"
 
 [[projects]]
   name = "k8s.io/kubernetes"
@@ -1331,6 +1340,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "bcfce58f9b0773b6aedcb9d125c06a1d21375d9d97f3304c20c12655b41a58b6"
+  inputs-digest = "9c1a7a650be299cf58ec5be5a2320178702db18716e80c2f485570227bb966c2"
   solver-name = "gps-cdcl"
   solver-version = 1

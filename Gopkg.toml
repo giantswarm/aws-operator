@@ -66,6 +66,10 @@ required = [
   name = "github.com/giantswarm/e2etemplates"
 
 [[constraint]]
+  branch = "scaling"
+  name = "github.com/giantswarm/e2etests"
+
+[[constraint]]
   branch = "master"
   name = "github.com/giantswarm/helmclient"
 
