@@ -18,30 +18,24 @@ const (
 )
 
 type Config struct {
-	HostRoute53 *route53.Route53
-	Logger      micrologger.Logger
+	Logger micrologger.Logger
 
 	Route53Enabled bool
 }
 
 type Resource struct {
-	hostRoute53 *route53.Route53
-	logger      micrologger.Logger
+	logger micrologger.Logger
 
 	route53Enabled bool
 }
 
 func New(config Config) (*Resource, error) {
-	if config.HostRoute53 == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostRoute53 must not be empty", config)
-	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
 	r := &Resource{
-		hostRoute53: config.HostRoute53,
-		logger:      config.Logger,
+		logger: config.Logger,
 
 		route53Enabled: config.Route53Enabled,
 	}
@@ -107,7 +101,7 @@ func (r *Resource) setStatus(ctx context.Context, obj interface{}) error {
 			Marker: marker,
 		}
 
-		out, err := r.hostRoute53.ListHostedZones(in)
+		out, err := controllerCtx.AWSClient.Route53.ListHostedZones(in)
 		if err != nil {
 			return microerror.Mask(err)
 		}

@@ -144,8 +144,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var hostedZoneResource controller.Resource
 	{
 		c := hostedzone.Config{
-			HostRoute53: config.HostAWSClients.Route53,
-			Logger:      config.Logger,
+			Logger: config.Logger,
 
 			Route53Enabled: config.Route53Enabled,
 		}
