@@ -28,7 +28,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/kmskey"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/loadbalancer"
-	"github.com/giantswarm/aws-operator/service/controller/v12/resource/migration"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/namespace"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/s3object"
@@ -122,19 +121,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		kmsKeyResource, err = toCRUDResource(config.Logger, ops)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var migrationResource controller.Resource
-	{
-		c := migration.Config{
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
-		}
-
-		migrationResource, err = migration.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -291,7 +277,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	}
 
 	resources := []controller.Resource{
-		migrationResource,
 		kmsKeyResource,
 		s3BucketResource,
 		s3BucketObjectResource,
