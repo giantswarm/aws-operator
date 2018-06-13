@@ -56,7 +56,7 @@ func Test_newDelete(t *testing.T) {
 	var newResource *Resource
 	resourceConfig := DefaultConfig()
 	resourceConfig.Logger = microloggertest.New()
-	resourceConfig.Encrypter = &EncrypterMock{}
+	resourceConfig.Encrypter = &encrypter.EncrypterMock{}
 	resourceConfig.InstallationName = "test-install"
 
 	newResource, err = New(resourceConfig)
@@ -112,7 +112,7 @@ func Test_ApplyDeleteChange(t *testing.T) {
 
 	resourceConfig := DefaultConfig()
 	resourceConfig.Logger = microloggertest.New()
-	resourceConfig.Encrypter = &EncrypterMock{}
+	resourceConfig.Encrypter = &encrypter.EncrypterMock{}
 	resourceConfig.InstallationName = "test-install"
 
 	newResource, err = New(resourceConfig)

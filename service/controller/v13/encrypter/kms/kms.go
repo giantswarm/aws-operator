@@ -118,18 +118,10 @@ func (k *Encrypter) DeleteKey(ctx context.Context, keyAlias string) error {
 func (k *Encrypter) CurrentState(ctx context.Context, customObject v1alpha1.AWSConfig) (encrypter.EncryptionKeyState, error) {
 	var currentState encrypter.EncryptionKeyState
 
-	sc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return currentState, microerror.Mask(err)
-	}
-
 	clusterID := key.ClusterID(customObject)
 	alias := toAlias(clusterID)
-	input := &kms.DescribeKeyInput{
-		KeyId: aws.String(alias),
-	}
 
-	output, err := sc.AWSClient.KMS.DescribeKey(input)
+	output, err := k.describeKey(ctx, customObject)
 	if IsKeyNotFound(err) {
 		// Fall through.
 		return currentState, nil
@@ -153,6 +145,34 @@ func (k *Encrypter) DesiredState(ctx context.Context, customObject v1alpha1.AWSC
 	return desiredState, nil
 }
 
+func (k *Encrypter) EncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {
+	output, err := k.describeKey(ctx, customObject)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	return *output.KeyMetadata.Arn, nil
+}
+
+func (k *Encrypter) Encrypt(ctx context.Context, key, plaintext string) (string, error) {
+	sc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	encryptInput := &kms.EncryptInput{
+		KeyId:     aws.String(key),
+		Plaintext: []byte(plaintext),
+	}
+
+	encryptOutput, err := sc.AWSClient.KMS.Encrypt(encryptInput)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	return string(encryptOutput.CiphertextBlob), nil
+}
+
 func (k *Encrypter) getKMSTags(customObject v1alpha1.AWSConfig) []*kms.Tag {
 	clusterTags := key.ClusterTags(customObject, k.installationName)
 	kmsTags := []*kms.Tag{}
@@ -167,6 +187,26 @@ func (k *Encrypter) getKMSTags(customObject v1alpha1.AWSConfig) []*kms.Tag {
 	}
 
 	return kmsTags
+}
+
+func (k *Encrypter) describeKey(ctx context.Context, customObject v1alpha1.AWSConfig) (*kms.DescribeKeyOutput, error) {
+	sc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	clusterID := key.ClusterID(customObject)
+	alias := toAlias(clusterID)
+	input := &kms.DescribeKeyInput{
+		KeyId: aws.String(alias),
+	}
+
+	output, err := sc.AWSClient.KMS.DescribeKey(input)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	return output, nil
 }
 
 func toAlias(keyID string) string {

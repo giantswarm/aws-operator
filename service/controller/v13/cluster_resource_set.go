@@ -198,6 +198,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	{
 		c := s3object.Config{
 			CertWatcher:       config.CertsSearcher,
+			Encrypter:         encrypter,
 			Logger:            config.Logger,
 			RandomKeySearcher: config.RandomkeysSearcher,
 		}
@@ -407,7 +408,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		var cloudConfig *cloudconfig.CloudConfig
 		{
 			c := cloudconfig.Config{
-				KMSClient: awsClient.KMS,
+				Encrypter: encrypter,
 				Logger:    config.Logger,
 
 				OIDC: config.OIDC,
