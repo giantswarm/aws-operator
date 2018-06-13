@@ -77,7 +77,7 @@ func (s *Scaling) Test(ctx context.Context) error {
 	{
 		s.logger.LogCtx(ctx, "level", "debug", "message", "waiting for scaling up to be complete")
 
-		err = s.provider.WaitForNodesUp(numMasters + numWorkers + 1)
+		err = s.provider.WaitForNodes(numMasters + numWorkers + 1)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -99,7 +99,7 @@ func (s *Scaling) Test(ctx context.Context) error {
 	{
 		s.logger.LogCtx(ctx, "level", "debug", "message", "waiting for scaling down to be complete")
 
-		err = s.provider.WaitForNodesUp(numMasters + numWorkers)
+		err = s.provider.WaitForNodes(numMasters + numWorkers)
 		if err != nil {
 			return microerror.Mask(err)
 		}

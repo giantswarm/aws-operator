@@ -10,7 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-type AWSConfig struct {
+type KVMConfig struct {
 	GuestFramework *framework.Guest
 	HostFramework  *framework.Host
 	Logger         micrologger.Logger
@@ -18,7 +18,7 @@ type AWSConfig struct {
 	ClusterID string
 }
 
-type AWS struct {
+type KVM struct {
 	guestFramework *framework.Guest
 	hostFramework  *framework.Host
 	logger         micrologger.Logger
@@ -26,7 +26,7 @@ type AWS struct {
 	clusterID string
 }
 
-func NewAWS(config AWSConfig) (*AWS, error) {
+func NewKVM(config KVMConfig) (*KVM, error) {
 	if config.GuestFramework == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.GuestFramework must not be empty", config)
 	}
@@ -41,7 +41,7 @@ func NewAWS(config AWSConfig) (*AWS, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ClusterID must not be empty", config)
 	}
 
-	a := &AWS{
+	a := &KVM{
 		guestFramework: config.GuestFramework,
 		hostFramework:  config.HostFramework,
 		logger:         config.Logger,
@@ -52,8 +52,8 @@ func NewAWS(config AWSConfig) (*AWS, error) {
 	return a, nil
 }
 
-func (a *AWS) AddWorker() error {
-	customObject, err := a.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(a.clusterID, metav1.GetOptions{})
+func (a *KVM) AddWorker() error {
+	customObject, err := a.hostFramework.G8sClient().ProviderV1alpha1().KVMConfigs("default").Get(a.clusterID, metav1.GetOptions{})
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -61,8 +61,8 @@ func (a *AWS) AddWorker() error {
 	patches := []Patch{
 		{
 			Op:    "add",
-			Path:  "/spec/aws/workers/-",
-			Value: customObject.Spec.AWS.Workers[0],
+			Path:  "/spec/kvm/workers/-",
+			Value: customObject.Spec.KVM.Workers[0],
 		},
 	}
 
@@ -71,7 +71,7 @@ func (a *AWS) AddWorker() error {
 		return microerror.Mask(err)
 	}
 
-	_, err = a.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Patch(a.clusterID, types.JSONPatchType, b)
+	_, err = a.hostFramework.G8sClient().ProviderV1alpha1().KVMConfigs("default").Patch(a.clusterID, types.JSONPatchType, b)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -79,33 +79,33 @@ func (a *AWS) AddWorker() error {
 	return nil
 }
 
-func (a *AWS) NumMasters() (int, error) {
-	customObject, err := a.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(a.clusterID, metav1.GetOptions{})
+func (a *KVM) NumMasters() (int, error) {
+	customObject, err := a.hostFramework.G8sClient().ProviderV1alpha1().KVMConfigs("default").Get(a.clusterID, metav1.GetOptions{})
 	if err != nil {
 		return 0, microerror.Mask(err)
 	}
 
-	num := len(customObject.Spec.AWS.Masters)
+	num := len(customObject.Spec.KVM.Masters)
 
 	return num, nil
 }
 
-func (a *AWS) NumWorkers() (int, error) {
-	customObject, err := a.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(a.clusterID, metav1.GetOptions{})
+func (a *KVM) NumWorkers() (int, error) {
+	customObject, err := a.hostFramework.G8sClient().ProviderV1alpha1().KVMConfigs("default").Get(a.clusterID, metav1.GetOptions{})
 	if err != nil {
 		return 0, microerror.Mask(err)
 	}
 
-	num := len(customObject.Spec.AWS.Workers)
+	num := len(customObject.Spec.KVM.Workers)
 
 	return num, nil
 }
 
-func (a *AWS) RemoveWorker() error {
+func (a *KVM) RemoveWorker() error {
 	patches := []Patch{
 		{
 			Op:   "remove",
-			Path: "/spec/aws/workers/1",
+			Path: "/spec/kvm/workers/1",
 		},
 	}
 
@@ -114,7 +114,7 @@ func (a *AWS) RemoveWorker() error {
 		return microerror.Mask(err)
 	}
 
-	_, err = a.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Patch(a.clusterID, types.JSONPatchType, b)
+	_, err = a.hostFramework.G8sClient().ProviderV1alpha1().KVMConfigs("default").Patch(a.clusterID, types.JSONPatchType, b)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -122,7 +122,7 @@ func (a *AWS) RemoveWorker() error {
 	return nil
 }
 
-func (a *AWS) WaitForNodes(num int) error {
+func (a *KVM) WaitForNodes(num int) error {
 	err := a.guestFramework.WaitForNodesUp(num)
 	if err != nil {
 		return microerror.Mask(err)

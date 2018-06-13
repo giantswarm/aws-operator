@@ -73,8 +73,8 @@
     "service/sts",
     "service/sts/stsiface"
   ]
-  revision = "d2d4fca90395039f60821c231da759cab8f318c7"
-  version = "v1.14.4"
+  revision = "4bdf3e6f6926903b8ca6b0d2b93bbdddcf6af219"
+  version = "v1.14.5"
 
 [[projects]]
   branch = "master"
@@ -218,7 +218,7 @@
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "c5b82c0351c122d5c4f96de2381c58fd97f1e354"
+  revision = "fae6052878d9c2e8e187f04f4132ac581984d77c"
 
 [[projects]]
   branch = "master"
@@ -239,7 +239,7 @@
     "scaling",
     "scaling/provider"
   ]
-  revision = "47be51c31c6908a2372277ab1395df8dfa127052"
+  revision = "4a23b1d2cb646a59aaba09ddd88f7854dd411d48"
 
 [[projects]]
   branch = "master"
@@ -269,7 +269,7 @@
     "v_3_3_1",
     "v_3_3_3"
   ]
-  revision = "1970c8fe31efb7b3b147277c1084c9b1dfd1b4f7"
+  revision = "fee7619110fa14f03a8c19b7da1afb64c36e81cf"
 
 [[projects]]
   branch = "master"
@@ -452,7 +452,7 @@
   branch = "master"
   name = "github.com/google/go-github"
   packages = ["github"]
-  revision = "2ae5df7848328c214a48cec94c7d410cf8526527"
+  revision = "a83ae98ad5d09188c49d6056edb60ec9bdf202bd"
 
 [[projects]]
   branch = "master"
@@ -643,7 +643,7 @@
     "nfs",
     "xfs"
   ]
-  revision = "94663424ae5ae9856b40a9f170762b4197024661"
+  revision = "7d6f385de8bea29190f15ba9931442a0eaef9af7"
 
 [[projects]]
   name = "github.com/spf13/afero"
