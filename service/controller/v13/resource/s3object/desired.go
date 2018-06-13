@@ -65,7 +65,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 	output[masterObjectName] = masterCloudConfig
 
-	workerBody, err := sc.CloudConfig.NewWorkerTemplate(customObject, *tlsAssets)
+	workerBody, err := sc.CloudConfig.NewWorkerTemplate(ctx, customObject, *tlsAssets)
 	if err != nil {
 		return output, microerror.Mask(err)
 	}

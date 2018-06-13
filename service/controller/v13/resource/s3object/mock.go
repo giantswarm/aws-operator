@@ -75,7 +75,7 @@ func (c *CloudConfigMock) NewMasterTemplate(ctx context.Context, customObject v1
 	return c.template, nil
 }
 
-func (c *CloudConfigMock) NewWorkerTemplate(customObject v1alpha1.AWSConfig, certs legacy.CompactTLSAssets) (string, error) {
+func (c *CloudConfigMock) NewWorkerTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, certs legacy.CompactTLSAssets) (string, error) {
 	return c.template, nil
 }
 

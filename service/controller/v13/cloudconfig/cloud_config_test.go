@@ -124,7 +124,7 @@ func Test_Service_CloudConfig_NewWorkerTemplate(t *testing.T) {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
 
-		template, err := ccService.NewWorkerTemplate(tc.CustomObject, tc.Certs)
+		template, err := ccService.NewWorkerTemplate(context.TODO(), tc.CustomObject, tc.Certs)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
