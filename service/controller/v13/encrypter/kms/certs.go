@@ -1,14 +1,22 @@
-package s3object
+package kms
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
+	"encoding/base64"
 
-	"github.com/giantswarm/aws-operator/service/controller/v13/controllercontext"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/service/controller/v13/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v13/key"
 )
 
-func (r *Resource) encodeTLSAssets(ctx context.Context, assets legacy.AssetsBundle, kmsKeyArn string) (*legacy.CompactTLSAssets, error) {
+func (k *Encrypter) EncryptTLSAssets(ctx context.Context, customObject v1alpha1.AWSConfig, assets legacy.AssetsBundle) (*legacy.CompactTLSAssets, error) {
 	rawTLS := createRawTLSAssets(assets)
 
 	sc, err := controllercontext.FromContext(ctx)
@@ -16,7 +24,10 @@ func (r *Resource) encodeTLSAssets(ctx context.Context, assets legacy.AssetsBund
 		return nil, microerror.Mask(err)
 	}
 
-	encTLS, err := rawTLS.encrypt(sc.AWSClient.KMS, kmsKeyArn)
+	clusterID := key.ClusterID(customObject)
+	kmsKeyARN, err := sc.AWSService.GetKeyArn(clusterID)
+
+	encTLS, err := rawTLS.encrypt(sc.AWSClient.KMS, kmsKeyARN)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -155,4 +166,30 @@ func assetsBundleKey(c legacy.ClusterComponent, t legacy.TLSAssetType) legacy.As
 		Component: c,
 		Type:      t,
 	}
+}
+
+func compactor(data []byte) (string, error) {
+	var buf bytes.Buffer
+	gzw := gzip.NewWriter(&buf)
+	if _, err := gzw.Write(data); err != nil {
+		return "", err
+	}
+	if err := gzw.Close(); err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(buf.Bytes()), nil
+}
+
+func encryptor(svc KMSClient, kmsKeyARN string, data []byte) ([]byte, error) {
+	encryptInput := kms.EncryptInput{
+		KeyId:     aws.String(kmsKeyARN),
+		Plaintext: data,
+	}
+
+	var encryptOutput *kms.EncryptOutput
+	var err error
+	if encryptOutput, err = svc.Encrypt(&encryptInput); err != nil {
+		return nil, err
+	}
+	return encryptOutput.CiphertextBlob, nil
 }

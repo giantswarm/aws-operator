@@ -43,9 +43,9 @@ func Test_CurrentState(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			resourceConfig.Encrypter = &EncrypterMock{
-				isError: tc.expectedEncryptionError,
-				keyID:   tc.expectedKeyID,
+			resourceConfig.Encrypter = &encrypter.EncrypterMock{
+				IsError: tc.expectedEncryptionError,
+				KeyID:   tc.expectedKeyID,
 			}
 			newResource, err = New(resourceConfig)
 			if err != nil {

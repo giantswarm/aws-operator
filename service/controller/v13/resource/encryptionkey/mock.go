@@ -44,3 +44,7 @@ func (e *EncrypterMock) DesiredState(ctx context.Context, customObject v1alpha1.
 		KeyName: e.keyName,
 	}, nil
 }
+
+func (e *EncrypterMock) EncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {
+	return "", nil
+}
