@@ -203,7 +203,7 @@ func (k *Encrypter) describeKey(ctx context.Context, customObject v1alpha1.AWSCo
 
 	output, err := sc.AWSClient.KMS.DescribeKey(input)
 	if IsKeyNotFound(err) {
-		return nil, microerror.Mask(keyNotFoundError)
+		return nil, microerror.Maskf(keyNotFoundError, "could not find key with alias %q: %#v", err)
 	}
 	if err != nil {
 		return nil, microerror.Mask(err)

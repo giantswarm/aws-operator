@@ -21,12 +21,13 @@ func IsKeyNotFound(err error) bool {
 		return false
 	}
 
-	aerr, ok := err.(awserr.Error)
+	c := microerror.Cause(err)
+
+	aerr, ok := c.(awserr.Error)
 	if ok && aerr.Code() == kms.ErrCodeNotFoundException {
 		return true
 	}
 
-	c := microerror.Cause(err)
 	if c == keyNotFoundError {
 		return true
 	}
