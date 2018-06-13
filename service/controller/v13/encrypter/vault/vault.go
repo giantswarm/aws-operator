@@ -15,11 +15,11 @@ import (
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/v13/key"
-	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v13/key"
 )
 
 type Encrypter struct {
@@ -174,10 +174,6 @@ func (e *Encrypter) DesiredState(ctx context.Context, customObject v1alpha1.AWSC
 	state.KeyName = keyName
 
 	return state, nil
-}
-
-func (e *Encrypter) EncryptTLSAssets(ctx context.Context, customObject v1alpha1.AWSConfig, assets legacy.AssetsBundle) (*legacy.CompactTLSAssets, error) {
-	return nil, nil
 }
 
 func (e *Encrypter) EncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {
