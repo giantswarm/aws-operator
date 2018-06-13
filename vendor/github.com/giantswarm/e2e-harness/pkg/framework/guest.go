@@ -97,7 +97,7 @@ func (g *Guest) Initialize() error {
 		}
 
 		guestRestConfig = &rest.Config{
-			Host: os.ExpandEnv("https://api.${CLUSTER_NAME}.${COMMON_DOMAIN_GUEST}"),
+			Host: os.ExpandEnv("https://api.${CLUSTER_NAME}.k8s.${COMMON_DOMAIN}"),
 			TLSClientConfig: rest.TLSClientConfig{
 				CAData:   s.Data["ca"],
 				CertData: s.Data["crt"],

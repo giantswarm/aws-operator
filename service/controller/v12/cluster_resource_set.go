@@ -19,7 +19,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v12/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v12/cloudconfig"
 	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v12/cloudformation"
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
+	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v12/credential"
 	"github.com/giantswarm/aws-operator/service/controller/v12/ebs"
 	"github.com/giantswarm/aws-operator/service/controller/v12/key"
@@ -27,7 +27,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/ebsvolume"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/loadbalancer"
-	"github.com/giantswarm/aws-operator/service/controller/v12/resource/migration"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/namespace"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/s3object"
@@ -60,44 +59,48 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var err error
 
 	if config.CertsSearcher == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.CertsSearcher must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.CertsSearcher must not be empty", config)
 	}
 	if config.G8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.G8sClient must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
 	if config.HostAWSConfig.AccessKeyID == "" {
-		return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.AccessKeyID must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSConfig.AccessKeyID must not be empty", config)
 	}
 	if config.HostAWSConfig.AccessKeySecret == "" {
-		return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.AccessKeySecret must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSConfig.AccessKeySecret must not be empty", config)
 	}
 	if config.HostAWSConfig.Region == "" {
-		return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.Region must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSConfig.Region must not be empty", config)
 	}
 	if config.HostAWSClients.CloudFormation == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.HostAWSClients.CloudFormation must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSClients.CloudFormation must not be empty", config)
 	}
 	if config.HostAWSClients.EC2 == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.HostAWSClients.EC2 must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSClients.EC2 must not be empty", config)
 	}
 	if config.HostAWSClients.IAM == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.HostAWSClients.IAM must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSClients.IAM must not be empty", config)
 	}
+	if config.HostAWSClients.Route53 == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSClients.Route53 must not be empty", config)
+	}
+
 	if config.K8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.K8sClient must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
 	}
 	if config.Logger == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 	if config.RandomkeysSearcher == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.RandomkeysSearcher must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.RandomkeysSearcher must not be empty", config)
 	}
 
 	if config.InstallationName == "" {
-		return nil, microerror.Maskf(invalidConfigError, "config.InstallationName must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
 	}
 	if config.ProjectName == "" {
-		return nil, microerror.Maskf(invalidConfigError, "config.ProjectName must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.ProjectName must not be empty", config)
 	}
 	if config.APIWhitelist.Enabled && config.APIWhitelist.SubnetList == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.SubnetList must not be empty when %T.APIWhitelist is enabled", config)
@@ -123,19 +126,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			}
 		}
 	*/
-
-	var migrationResource controller.Resource
-	{
-		c := migration.Config{
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
-		}
-
-		migrationResource, err = migration.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
 
 	var s3BucketResource controller.Resource
 	{
@@ -288,8 +278,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	}
 
 	resources := []controller.Resource{
-		migrationResource,
-		// kmsKeyResource,
 		s3BucketResource,
 		s3BucketObjectResource,
 		loadBalancerResource,
@@ -408,14 +396,14 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			}
 		}
 
-		c := servicecontext.Context{
+		c := controllercontext.Context{
 			AWSClient:      awsClient,
 			AWSService:     awsService,
 			CloudConfig:    cloudConfig,
 			CloudFormation: *cloudFormationService,
 			EBSService:     ebsService,
 		}
-		ctx = servicecontext.NewContext(ctx, c)
+		ctx = controllercontext.NewContext(ctx, c)
 
 		return ctx, nil
 	}

@@ -12,6 +12,36 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Increased Docker EBS volume size from 50 to 100 GB.",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Use global ELB idle timeout settings, instead of CR configured ones.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "aws-operator",
+				Description: "Increased ASG rolling update pause time to 15 minutes.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Removed node-exporter so it can be managed by chart-operator.",
+				Kind:        versionbundle.KindRemoved,
+			},
+			{
+				Component:   "kubernetes",
+				Description: "Updated to 1.10.4 due to regression in 1.10.3 with configmaps.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Added udev rule for NVMe disks.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Remove Nginx version from Server header in Ingress Controller",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
@@ -36,7 +66,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "kubernetes",
-				Version: "1.10.3",
+				Version: "1.10.4",
 			},
 			{
 				Name:    "nginx-ingress-controller",

@@ -13,7 +13,7 @@ import (
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v12/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v12/cloudconfig"
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
+	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v12/key"
 )
 
@@ -51,7 +51,7 @@ func TestMainGuestTemplateGetEmptyBody(t *testing.T) {
 	}
 
 	ctx := context.TODO()
-	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+	ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
 
 	_, err = newResource.getMainGuestTemplateBody(ctx, customObject, StackState{})
 	if err == nil {
@@ -127,14 +127,14 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		MasterImageID:              imageID,
 		MasterInstanceResourceName: key.MasterInstanceResourceName(customObject),
 		MasterInstanceType:         key.MasterInstanceType(customObject),
-		MasterCloudConfigVersion:   cloudconfig.MasterCloudConfigVersion,
+		MasterCloudConfigVersion:   cloudconfig.CloudConfigVersion,
 		MasterInstanceMonitoring:   false,
 
 		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
 		WorkerImageID:            imageID,
 		WorkerInstanceMonitoring: true,
 		WorkerInstanceType:       key.WorkerInstanceType(customObject),
-		WorkerCloudConfigVersion: cloudconfig.WorkerCloudConfigVersion,
+		WorkerCloudConfigVersion: cloudconfig.CloudConfigVersion,
 
 		VersionBundleVersion: key.VersionBundleVersion(customObject),
 	}
@@ -161,7 +161,7 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 	}
 
 	ctx := context.TODO()
-	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+	ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
 
 	body, err := newResource.getMainGuestTemplateBody(ctx, customObject, stackState)
 	if err != nil {
@@ -231,7 +231,7 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		t.Fatal("WorkerInstanceMonitoring output element not found")
 	}
 
-	if !strings.Contains(body, "Value: "+cloudconfig.MasterCloudConfigVersion) {
+	if !strings.Contains(body, "Value: "+cloudconfig.CloudConfigVersion) {
 		fmt.Println(body)
 		t.Fatal("output element not found")
 	}
@@ -363,7 +363,7 @@ func TestMainHostPreTemplateExistingFields(t *testing.T) {
 	}
 
 	ctx := context.TODO()
-	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+	ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
 
 	body, err := newResource.getMainHostPreTemplateBody(ctx, customObject)
 
@@ -426,7 +426,7 @@ func TestMainHostPostTemplateExistingFields(t *testing.T) {
 	}
 
 	ctx := context.TODO()
-	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+	ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
 
 	body, err := newResource.getMainHostPostTemplateBody(ctx, customObject)
 
@@ -513,14 +513,14 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 		MasterImageID:              imageID,
 		MasterInstanceResourceName: key.MasterInstanceResourceName(customObject),
 		MasterInstanceType:         key.MasterInstanceType(customObject),
-		MasterCloudConfigVersion:   cloudconfig.MasterCloudConfigVersion,
+		MasterCloudConfigVersion:   cloudconfig.CloudConfigVersion,
 		MasterInstanceMonitoring:   false,
 
 		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
 		WorkerImageID:            imageID,
 		WorkerInstanceMonitoring: true,
 		WorkerInstanceType:       key.WorkerInstanceType(customObject),
-		WorkerCloudConfigVersion: cloudconfig.WorkerCloudConfigVersion,
+		WorkerCloudConfigVersion: cloudconfig.CloudConfigVersion,
 
 		VersionBundleVersion: key.VersionBundleVersion(customObject),
 	}
@@ -546,7 +546,7 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 	}
 
 	ctx := context.TODO()
-	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+	ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
 
 	body, err := newResource.getMainGuestTemplateBody(ctx, customObject, stackState)
 	if err != nil {
@@ -639,14 +639,14 @@ func TestMainGuestTemplateChinaRegion(t *testing.T) {
 		MasterImageID:              imageID,
 		MasterInstanceResourceName: key.MasterInstanceResourceName(customObject),
 		MasterInstanceType:         key.MasterInstanceType(customObject),
-		MasterCloudConfigVersion:   cloudconfig.MasterCloudConfigVersion,
+		MasterCloudConfigVersion:   cloudconfig.CloudConfigVersion,
 		MasterInstanceMonitoring:   false,
 
 		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
 		WorkerImageID:            imageID,
 		WorkerInstanceMonitoring: true,
 		WorkerInstanceType:       key.WorkerInstanceType(customObject),
-		WorkerCloudConfigVersion: cloudconfig.WorkerCloudConfigVersion,
+		WorkerCloudConfigVersion: cloudconfig.CloudConfigVersion,
 
 		VersionBundleVersion: key.VersionBundleVersion(customObject),
 	}
@@ -672,7 +672,7 @@ func TestMainGuestTemplateChinaRegion(t *testing.T) {
 	}
 
 	ctx := context.TODO()
-	ctx = servicecontext.NewContext(ctx, servicecontext.Context{AWSClient: awsClients})
+	ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
 
 	body, err := newResource.getMainGuestTemplateBody(ctx, customObject, stackState)
 	if err != nil {

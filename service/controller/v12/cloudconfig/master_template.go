@@ -3,17 +3,11 @@ package cloudconfig
 import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/legacy"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_3_1"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_3_3"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
 	"github.com/giantswarm/aws-operator/service/controller/v12/templates/cloudconfig"
-)
-
-const (
-	// MasterCloudConfigVersion defines the version of k8scloudconfig in use.
-	// It is used in the main stack output and S3 object paths.
-	MasterCloudConfigVersion = "v_3_3_1"
 )
 
 // NewMasterTemplate generates a new master cloud config template and returns it
@@ -216,6 +210,20 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Owner:        FileOwner,
 			Permissions:  0644,
 		},
+		// NVME disks udev rules and script.
+		// Workaround for https://github.com/coreos/bugs/issues/2399
+		{
+			AssetContent: cloudconfig.NVMEUdevRule,
+			Path:         "/etc/udev/rules.d/10-ebs-nvme-mapping.rules",
+			Owner:        FileOwner,
+			Permissions:  0644,
+		},
+		{
+			AssetContent: cloudconfig.NVMEUdevScript,
+			Path:         "/opt/ebs-nvme-mapping",
+			Owner:        FileOwner,
+			Permissions:  0766,
+		},
 	}
 
 	var newFiles []k8scloudconfig.FileAsset
@@ -239,6 +247,14 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	unitsMeta := []k8scloudconfig.UnitMetadata{
+		// Create symlinks for nvme disks.
+		// This service should be started only on first boot.
+		{
+			AssetContent: cloudconfig.NVMEUdevTriggerUnit,
+			Name:         "ebs-nvme-udev-trigger.service",
+			Enable:       false,
+			Command:      "start",
+		},
 		{
 			AssetContent: cloudconfig.DecryptTLSAssetsService,
 			Name:         "decrypt-tls-assets.service",

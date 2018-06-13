@@ -6,7 +6,7 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v12/cloudconfig"
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
+	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v12/key"
 )
 
@@ -17,7 +17,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return output, microerror.Mask(err)
 	}
 
-	sc, err := servicecontext.FromContext(ctx)
+	sc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -61,7 +61,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return output, microerror.Mask(err)
 	}
 
-	masterObjectName := key.BucketObjectName(cloudconfig.MasterCloudConfigVersion, prefixMaster)
+	masterObjectName := key.BucketObjectName(cloudconfig.CloudConfigVersion, prefixMaster)
 	masterCloudConfig := BucketObjectState{
 		Bucket: key.BucketName(customObject, accountID),
 		Body:   masterBody,
@@ -74,7 +74,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return output, microerror.Mask(err)
 	}
 
-	workerObjectName := key.BucketObjectName(cloudconfig.WorkerCloudConfigVersion, prefixWorker)
+	workerObjectName := key.BucketObjectName(cloudconfig.CloudConfigVersion, prefixWorker)
 	workerCloudConfig := BucketObjectState{
 		Bucket: key.BucketName(customObject, accountID),
 		Body:   workerBody,

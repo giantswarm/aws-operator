@@ -9,7 +9,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
 
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
+	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
 )
 
 func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
@@ -18,7 +18,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		return microerror.Mask(err)
 	}
 
-	sc, err := servicecontext.FromContext(ctx)
+	sc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -30,34 +30,34 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting S3 bucket %q", bucketInput.Name))
 
-		var startAfter *string
+		var repeat bool
 		for {
-			// Make sure the bucket is empty.
-			input := &s3.ListObjectsV2Input{
-				Bucket:     aws.String(bucketInput.Name),
-				StartAfter: startAfter,
+			i := &s3.ListObjectsV2Input{
+				Bucket: aws.String(bucketInput.Name),
 			}
-			result, err := sc.AWSClient.S3.ListObjectsV2(input)
+			o, err := sc.AWSClient.S3.ListObjectsV2(i)
 			if err != nil {
 				return microerror.Mask(err)
 			}
-			if result.IsTruncated != nil && *result.IsTruncated {
-				startAfter = result.StartAfter
-			} else {
-				startAfter = nil
+			if o.IsTruncated != nil && *o.IsTruncated {
+				repeat = true
+			}
+			if len(o.Contents) == 0 {
+				break
 			}
 
-			for _, object := range result.Contents {
-				_, err := sc.AWSClient.S3.DeleteObject(&s3.DeleteObjectInput{
+			for _, o := range o.Contents {
+				i := &s3.DeleteObjectInput{
 					Bucket: aws.String(bucketInput.Name),
-					Key:    object.Key,
-				})
+					Key:    o.Key,
+				}
+				_, err := sc.AWSClient.S3.DeleteObject(i)
 				if err != nil {
 					return microerror.Mask(err)
 				}
 			}
 
-			if startAfter == nil {
+			if !repeat {
 				break
 			}
 		}

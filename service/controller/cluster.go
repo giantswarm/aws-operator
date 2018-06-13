@@ -25,6 +25,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v12"
 	v12adapter "github.com/giantswarm/aws-operator/service/controller/v12/adapter"
 	v12cloudconfig "github.com/giantswarm/aws-operator/service/controller/v12/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v13"
+	v13adapter "github.com/giantswarm/aws-operator/service/controller/v13/adapter"
+	v13cloudconfig "github.com/giantswarm/aws-operator/service/controller/v13/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v2"
 	"github.com/giantswarm/aws-operator/service/controller/v3"
 	"github.com/giantswarm/aws-operator/service/controller/v4"
@@ -663,6 +666,44 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 		}
 	}
 
+	var resourceSetV13 *controller.ResourceSet
+	{
+		c := v13.ClusterResourceSetConfig{
+			CertsSearcher:      certWatcher,
+			G8sClient:          config.G8sClient,
+			HostAWSConfig:      hostAWSConfig,
+			HostAWSClients:     awsHostClients,
+			K8sClient:          config.K8sClient,
+			Logger:             config.Logger,
+			RandomkeysSearcher: randomKeySearcher,
+
+			AccessLogsExpiration:   config.AccessLogsExpiration,
+			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
+			DeleteLoggingBucket:    config.DeleteLoggingBucket,
+			GuestUpdateEnabled:     config.GuestUpdateEnabled,
+			PodInfraContainerImage: config.PodInfraContainerImage,
+			Route53Enabled:         config.Route53Enabled,
+			IncludeTags:            config.IncludeTags,
+			InstallationName:       config.InstallationName,
+			OIDC: v13cloudconfig.OIDCConfig{
+				ClientID:      config.OIDC.ClientID,
+				IssuerURL:     config.OIDC.IssuerURL,
+				UsernameClaim: config.OIDC.UsernameClaim,
+				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			APIWhitelist: v13adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
+			},
+			ProjectName: config.ProjectName,
+		}
+
+		resourceSetV13, err = v13.NewClusterResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var resourceRouter *controller.ResourceRouter
 	{
 		c := controller.ResourceRouterConfig{
@@ -683,6 +724,7 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 				resourceSetV10,
 				resourceSetV11,
 				resourceSetV12,
+				resourceSetV13,
 			},
 		}
 

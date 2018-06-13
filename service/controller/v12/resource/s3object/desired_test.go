@@ -2,6 +2,8 @@ package s3object
 
 import (
 	"context"
+	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
@@ -11,7 +13,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	servicecontext "github.com/giantswarm/aws-operator/service/controller/v12/context"
+	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
 )
 
 func Test_DesiredState(t *testing.T) {
@@ -24,21 +26,23 @@ func Test_DesiredState(t *testing.T) {
 		},
 	}
 
+	masterKeyPattern := "cloudconfig/v[\\d_]+/master"
+	workerKeyPattern := "cloudconfig/v[\\d_]+/worker"
+
+	masterKeyRegexp := regexp.MustCompile(masterKeyPattern)
+	workerKeyRegexp := regexp.MustCompile(workerKeyPattern)
+
 	testCases := []struct {
-		obj               *v1alpha1.AWSConfig
-		description       string
-		expectedBucket    string
-		expectedBody      string
-		expectedMasterKey string
-		expectedWorkerKey string
+		obj            *v1alpha1.AWSConfig
+		description    string
+		expectedBucket string
+		expectedBody   string
 	}{
 		{
-			description:       "basic match",
-			obj:               clusterTpo,
-			expectedBody:      "mybody-",
-			expectedBucket:    "myaccountid-g8s-test-cluster",
-			expectedMasterKey: "cloudconfig/v_3_3_1/master",
-			expectedWorkerKey: "cloudconfig/v_3_3_1/worker",
+			description:    "basic match",
+			obj:            clusterTpo,
+			expectedBody:   "mybody-",
+			expectedBucket: "myaccountid-g8s-test-cluster",
 		},
 	}
 
@@ -59,8 +63,6 @@ func Test_DesiredState(t *testing.T) {
 
 			var err error
 			var newResource *Resource
-			var masterCloudConfig BucketObjectState
-			var workerCloudConfig BucketObjectState
 			{
 				c := Config{}
 				c.Logger = microloggertest.New()
@@ -68,62 +70,52 @@ func Test_DesiredState(t *testing.T) {
 				c.RandomKeySearcher = randomkeystest.NewSearcher()
 				newResource, err = New(c)
 				if err != nil {
-					t.Error("expected", nil, "got", err)
+					t.Fatal("expected", nil, "got", err)
 				}
 			}
 
-			c := servicecontext.Context{
+			c := controllercontext.Context{
 				AWSClient:   awsClients,
 				AWSService:  awsService,
 				CloudConfig: cloudconfig,
 			}
 			ctx := context.TODO()
-			ctx = servicecontext.NewContext(ctx, c)
+			ctx = controllercontext.NewContext(ctx, c)
 
 			result, err := newResource.GetDesiredState(ctx, tc.obj)
 			if err != nil {
-				t.Errorf("unexpected error %v", err)
+				t.Fatalf("unexpected error %v", err)
 			}
 
 			desiredState, ok := result.(map[string]BucketObjectState)
 			if !ok {
-				t.Errorf("expected '%T', got '%T'", desiredState, result)
+				t.Fatalf("expected '%T', got '%T'", desiredState, result)
 			}
 
 			if len(desiredState) != 2 {
-				t.Errorf("expected 2 objects, got %d", len(desiredState))
+				t.Fatalf("expected 2 objects, got %d", len(desiredState))
 			}
 
-			if masterCloudConfig, ok = desiredState[tc.expectedMasterKey]; !ok {
-				t.Errorf("expected key %q, not found", tc.expectedMasterKey)
-			}
+			for key, bucketObjectState := range desiredState {
+				if bucketObjectState.Bucket != tc.expectedBucket {
+					t.Fatalf("expected bucket %q, got %q", tc.expectedBucket, bucketObjectState.Bucket)
+				}
 
-			if masterCloudConfig.Bucket != tc.expectedBucket {
-				t.Errorf("expected bucket %q, got %q", tc.expectedBucket, masterCloudConfig.Bucket)
-			}
+				if bucketObjectState.Body != tc.expectedBody {
+					t.Fatalf("expected body %q, got %q", tc.expectedBody, bucketObjectState.Body)
+				}
 
-			if masterCloudConfig.Key != tc.expectedMasterKey {
-				t.Errorf("expected key %q, got %q", tc.expectedMasterKey, masterCloudConfig.Key)
-			}
-
-			if masterCloudConfig.Body != tc.expectedBody {
-				t.Errorf("expected key %q, got %q", tc.expectedBody, masterCloudConfig.Body)
-			}
-
-			if workerCloudConfig, ok = desiredState[tc.expectedWorkerKey]; !ok {
-				t.Errorf("expected key %q, not found", tc.expectedWorkerKey)
-			}
-
-			if workerCloudConfig.Bucket != tc.expectedBucket {
-				t.Errorf("expected bucket %q, got %q", tc.expectedBucket, workerCloudConfig.Bucket)
-			}
-
-			if workerCloudConfig.Key != tc.expectedWorkerKey {
-				t.Errorf("expected key %q, got %q", tc.expectedWorkerKey, workerCloudConfig.Key)
-			}
-
-			if workerCloudConfig.Body != tc.expectedBody {
-				t.Errorf("expected key %q, got %q", tc.expectedBody, workerCloudConfig.Body)
+				if strings.HasSuffix(key, "master") {
+					if !masterKeyRegexp.MatchString(key) {
+						t.Fatalf("expected key %q, to match pattern %q", key, masterKeyPattern)
+					}
+				} else if strings.HasSuffix(key, "worker") {
+					if !workerKeyRegexp.MatchString(key) {
+						t.Fatalf("expected key %q, to match pattern %q", key, workerKeyPattern)
+					}
+				} else {
+					t.Fatalf("unexpected key %q", key)
+				}
 			}
 		})
 	}
