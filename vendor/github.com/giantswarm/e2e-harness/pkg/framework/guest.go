@@ -1,7 +1,6 @@
 package framework
 
 import (
-	"fmt"
 	"os"
 	"time"
 
@@ -222,17 +221,12 @@ func (g *Guest) WaitForNodesUp(numberOfNodes int) error {
 			return microerror.Mask(err)
 		}
 
-		fmt.Printf("current num nodes: %#v\n", len(nodes.Items))
-		fmt.Printf("desired num nodes: %#v\n", numberOfNodes)
-
 		if len(nodes.Items) != numberOfNodes {
 			return microerror.Maskf(waitError, "worker nodes are still not found")
 		}
 
 		for _, n := range nodes.Items {
-			fmt.Printf("node name: %#v\n", n.GetName())
 			for _, c := range n.Status.Conditions {
-				fmt.Printf("condition: %#v\n", c)
 				if c.Type == v1.NodeReady && c.Status != v1.ConditionTrue {
 					return microerror.Maskf(waitError, "worker nodes are still not ready")
 				}

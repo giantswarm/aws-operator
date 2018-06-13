@@ -55,7 +55,7 @@ func (s *Scaling) Test(ctx context.Context) error {
 	{
 		s.logger.LogCtx(ctx, "level", "debug", "message", "looking for the number of workers")
 
-		numWorkers, err := s.provider.NumWorkers()
+		numWorkers, err = s.provider.NumWorkers()
 		if err != nil {
 			return microerror.Mask(err)
 		}
