@@ -20,7 +20,7 @@ const Small = `#!/bin/bash
 USERDATA_FILE={{.MachineType}}
 
 # Wait for S3 bucket to be available.
-s3_http_uri="https://s3.{{.Region}}.amazonaws.com/{{.S3URI}}/cloudconfig/{{.CloudConfigVersion}}/$USERDATA_FILE"
+s3_http_uri="https://s3.{{.Region}}.amazonaws.com.cn/{{.S3URI}}/cloudconfig/{{.CloudConfigVersion}}/$USERDATA_FILE"
 retry=30
 
 until [ $(curl --output /dev/null --silent --head --fail -w "%{http_code}" $s3_http_uri) -eq "403" ]; do

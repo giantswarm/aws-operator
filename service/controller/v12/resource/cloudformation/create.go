@@ -2,7 +2,10 @@ package cloudformation
 
 import (
 	"context"
+	"fmt"
 	"time"
+
+	"github.com/aws/aws-sdk-go/aws/awserr"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -35,7 +38,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			return microerror.Mask(err)
 		}
 
-		ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+		ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 		defer cancel()
 
 		err = sc.AWSClient.CloudFormation.WaitUntilStackCreateCompleteWithContext(ctx, &cloudformation.DescribeStacksInput{
@@ -53,6 +56,11 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		} else if ctx.Err() != nil {
 			return microerror.Mask(ctx.Err())
 		} else if err != nil {
+			aerr, ok := err.(awserr.Error)
+			if ok {
+				r.logger.LogCtx(ctx, "level", "debug", fmt.Sprintf("cloudformation error: %#v", aerr))
+			}
+
 			return microerror.Mask(err)
 		}
 

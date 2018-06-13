@@ -8,6 +8,7 @@ const Instance = `{{define "instance"}}
     - DockerVolume
     - EtcdVolume
     Properties:
+      KeyName: "ross-test"
       AvailabilityZone: {{ .Instance.Master.AZ }}
       IamInstanceProfile: !Ref MasterInstanceProfile
       ImageId: {{ .Instance.Image.ID }}
@@ -23,7 +24,6 @@ const Instance = `{{define "instance"}}
   DockerVolume:
     Type: AWS::EC2::Volume
     Properties:
-      Encrypted: true
       Size: 50
       VolumeType: gp2
       AvailabilityZone: {{ .Instance.Master.AZ }}
@@ -33,7 +33,6 @@ const Instance = `{{define "instance"}}
   EtcdVolume:
     Type: AWS::EC2::Volume
     Properties:
-      Encrypted: true
       Size: 100
       VolumeType: gp2
       AvailabilityZone: {{ .Instance.Master.AZ }}

@@ -28,11 +28,15 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 
 	clusterID := key.ClusterID(customObject)
-	kmsKeyARN, err := sc.AWSService.GetKeyArn(clusterID)
-	if IsKeyNotFound(err) {
-		// we can get here during deletion, if the key is already deleted we can safely exit.
-		return output, nil
-	}
+	/*
+		kmsKeyARN, err := sc.AWSService.GetKeyArn(clusterID)
+		if IsKeyNotFound(err) {
+			// we can get here during deletion, if the key is already deleted we can safely exit.
+			return output, nil
+		}
+	*/
+	kmsKeyARN := "disabled"
+
 	if err != nil {
 		return output, microerror.Mask(err)
 	}

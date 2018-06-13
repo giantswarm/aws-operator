@@ -19,5 +19,5 @@ write_files:
     allowVolumeExpansion: true
     parameters:
       type: gp2
-      encrypted: "true"
+      encrypted: "false"
 `

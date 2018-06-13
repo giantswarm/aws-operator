@@ -21,6 +21,7 @@ func (c *CloudConfig) NewWorkerTemplate(customObject v1alpha1.AWSConfig, certs l
 			certs:        certs,
 			customObject: customObject,
 		}
+		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
 	}
 
 	var newCloudConfig *k8scloudconfig.CloudConfig
@@ -58,63 +59,63 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		},
 		{
 			AssetContent: e.certs.WorkerCrt,
-			Path:         "/etc/kubernetes/ssl/worker-crt.pem.enc",
+			Path:         "/etc/kubernetes/ssl/worker-crt.pem",
 			Owner:        "root:root",
 			Encoding:     GzipBase64Encoding,
 			Permissions:  0700,
 		},
 		{
 			AssetContent: e.certs.WorkerCA,
-			Path:         "/etc/kubernetes/ssl/worker-ca.pem.enc",
+			Path:         "/etc/kubernetes/ssl/worker-ca.pem",
 			Owner:        "root:root",
 			Encoding:     GzipBase64Encoding,
 			Permissions:  0700,
 		},
 		{
 			AssetContent: e.certs.WorkerKey,
-			Path:         "/etc/kubernetes/ssl/worker-key.pem.enc",
+			Path:         "/etc/kubernetes/ssl/worker-key.pem",
 			Owner:        "root:root",
 			Encoding:     GzipBase64Encoding,
 			Permissions:  0700,
 		},
 		{
 			AssetContent: e.certs.CalicoClientCrt,
-			Path:         "/etc/kubernetes/ssl/calico/client-crt.pem.enc",
+			Path:         "/etc/kubernetes/ssl/calico/client-crt.pem",
 			Owner:        "root:root",
 			Encoding:     GzipBase64Encoding,
 			Permissions:  0700,
 		},
 		{
 			AssetContent: e.certs.CalicoClientCA,
-			Path:         "/etc/kubernetes/ssl/calico/client-ca.pem.enc",
+			Path:         "/etc/kubernetes/ssl/calico/client-ca.pem",
 			Owner:        "root:root",
 			Encoding:     GzipBase64Encoding,
 			Permissions:  0700,
 		},
 		{
 			AssetContent: e.certs.CalicoClientKey,
-			Path:         "/etc/kubernetes/ssl/calico/client-key.pem.enc",
+			Path:         "/etc/kubernetes/ssl/calico/client-key.pem",
 			Owner:        "root:root",
 			Encoding:     GzipBase64Encoding,
 			Permissions:  0700,
 		},
 		{
 			AssetContent: e.certs.EtcdServerCrt,
-			Path:         "/etc/kubernetes/ssl/etcd/client-crt.pem.enc",
+			Path:         "/etc/kubernetes/ssl/etcd/client-crt.pem",
 			Owner:        "root:root",
 			Encoding:     GzipBase64Encoding,
 			Permissions:  0700,
 		},
 		{
 			AssetContent: e.certs.EtcdServerCA,
-			Path:         "/etc/kubernetes/ssl/etcd/client-ca.pem.enc",
+			Path:         "/etc/kubernetes/ssl/etcd/client-ca.pem",
 			Owner:        "root:root",
 			Encoding:     GzipBase64Encoding,
 			Permissions:  0700,
 		},
 		{
 			AssetContent: e.certs.EtcdServerKey,
-			Path:         "/etc/kubernetes/ssl/etcd/client-key.pem.enc",
+			Path:         "/etc/kubernetes/ssl/etcd/client-key.pem",
 			Owner:        "root:root",
 			Encoding:     GzipBase64Encoding,
 			Permissions:  0700,

@@ -1,10 +1,6 @@
 package adapter
 
 import (
-	"fmt"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v12/key"
@@ -28,7 +24,7 @@ type iamPoliciesAdapter struct {
 }
 
 func (i *iamPoliciesAdapter) getIamPolicies(cfg Config) error {
-	clusterID := key.ClusterID(cfg.CustomObject)
+	// clusterID := key.ClusterID(cfg.CustomObject)
 
 	i.MasterPolicyName = key.PolicyName(cfg.CustomObject, prefixMaster)
 	i.MasterProfileName = key.InstanceProfileName(cfg.CustomObject, prefixMaster)
@@ -39,15 +35,17 @@ func (i *iamPoliciesAdapter) getIamPolicies(cfg Config) error {
 	i.RegionARN = key.RegionARN(cfg.CustomObject)
 
 	// KMSKeyARN
-	keyAlias := fmt.Sprintf("alias/%s", clusterID)
-	input := &kms.DescribeKeyInput{
-		KeyId: aws.String(keyAlias),
-	}
-	output, err := cfg.Clients.KMS.DescribeKey(input)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	i.KMSKeyARN = *output.KeyMetadata.Arn
+	/*
+		keyAlias := fmt.Sprintf("alias/%s", clusterID)
+		input := &kms.DescribeKeyInput{
+			KeyId: aws.String(keyAlias),
+		}
+		output, err := cfg.Clients.KMS.DescribeKey(input)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		i.KMSKeyARN = *output.KeyMetadata.Arn
+	*/
 
 	// S3Bucket
 	accountID, err := AccountID(cfg.Clients)

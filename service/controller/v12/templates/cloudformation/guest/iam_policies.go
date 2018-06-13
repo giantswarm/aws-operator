@@ -10,7 +10,7 @@ const IAMPolicies = `{{define "iam_policies"}}
         Statement:
           Effect: "Allow"
           Principal:
-            Service: "ec2.amazonaws.com"
+            Service: "ec2.amazonaws.com.cn"
           Action: "sts:AssumeRole"
   MasterRolePolicy:
     Type: "AWS::IAM::Policy"
@@ -24,10 +24,6 @@ const IAMPolicies = `{{define "iam_policies"}}
           - Effect: "Allow"
             Action: "ec2:*"
             Resource: "*"
-
-          - Effect: "Allow"
-            Action: "kms:Decrypt"
-            Resource: "{{.KMSKeyARN}}"
 
           - Effect: "Allow"
             Action:
@@ -62,7 +58,7 @@ const IAMPolicies = `{{define "iam_policies"}}
         Statement:
           Effect: "Allow"
           Principal:
-            Service: "ec2.amazonaws.com"
+            Service: "ec2.amazonaws.com.cn"
           Action: "sts:AssumeRole"
   WorkerRolePolicy:
     Type: "AWS::IAM::Policy"
@@ -86,10 +82,6 @@ const IAMPolicies = `{{define "iam_policies"}}
             Resource: "*"
 
           - Effect: "Allow"
-            Action: "kms:Decrypt"
-            Resource: "{{.KMSKeyARN}}"
-
-          - Effect: "Allow"
             Action:
               - "s3:GetBucketLocation"
               - "s3:ListAllMyBuckets"
@@ -103,16 +95,6 @@ const IAMPolicies = `{{define "iam_policies"}}
             Action: "s3:GetObject"
             Resource: "arn:{{.RegionARN}}:s3:::{{.S3Bucket}}/*"
 
-          - Effect: "Allow"
-            Action:
-              - "ecr:GetAuthorizationToken"
-              - "ecr:BatchCheckLayerAvailability"
-              - "ecr:GetDownloadUrlForLayer"
-              - "ecr:GetRepositoryPolicy"
-              - "ecr:DescribeRepositories"
-              - "ecr:ListImages"
-              - "ecr:BatchGetImage"
-            Resource: "*"
   WorkerInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
