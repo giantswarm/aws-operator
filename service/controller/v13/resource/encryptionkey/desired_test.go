@@ -38,8 +38,8 @@ func Test_DesiredState(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			resourceConfig.Encrypter = &EncrypterMock{
-				keyName: tc.expectedKeyName,
+			resourceConfig.Encrypter = &encrypter.EncrypterMock{
+				KeyName: tc.expectedKeyName,
 			}
 
 			newResource, err = New(resourceConfig)

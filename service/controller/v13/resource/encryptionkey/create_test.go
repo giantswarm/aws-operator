@@ -61,7 +61,7 @@ func Test_Resource_EncryptionKey_newCreate(t *testing.T) {
 
 	resourceConfig := DefaultConfig()
 	resourceConfig.Logger = microloggertest.New()
-	resourceConfig.Encrypter = &EncrypterMock{}
+	resourceConfig.Encrypter = &encrypter.EncrypterMock{}
 	resourceConfig.InstallationName = "test-install"
 
 	newResource, err = New(resourceConfig)
@@ -118,7 +118,7 @@ func Test_ApplyCreateChange(t *testing.T) {
 
 	resourceConfig := DefaultConfig()
 	resourceConfig.Logger = microloggertest.New()
-	resourceConfig.Encrypter = &EncrypterMock{}
+	resourceConfig.Encrypter = &encrypter.EncrypterMock{}
 	resourceConfig.InstallationName = "test-install"
 
 	newResource, err = New(resourceConfig)
