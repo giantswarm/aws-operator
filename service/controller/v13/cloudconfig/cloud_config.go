@@ -3,9 +3,10 @@ package cloudconfig
 import (
 	"fmt"
 
-	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter"
 )
 
 const (

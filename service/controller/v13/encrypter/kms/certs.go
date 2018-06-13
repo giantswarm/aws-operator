@@ -189,7 +189,7 @@ func encryptor(svc KMSClient, kmsKeyARN string, data []byte) ([]byte, error) {
 	var encryptOutput *kms.EncryptOutput
 	var err error
 	if encryptOutput, err = svc.Encrypt(&encryptInput); err != nil {
-		return []byte{}, err
+		return nil, err
 	}
 	return encryptOutput.CiphertextBlob, nil
 }
