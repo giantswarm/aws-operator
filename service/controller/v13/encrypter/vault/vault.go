@@ -26,26 +26,24 @@ type Encrypter struct {
 	httpClient *http.Client
 	logger     micrologger.Logger
 
-	base             *url.URL
-	installationName string
-	nonce            string
-	token            string
+	address string
+	base    *url.URL
+	nonce   string
+	token   string
 }
 
 type EncrypterConfig struct {
 	Logger micrologger.Logger
 
-	Address          string
-	InstallationName string
+	Address string
 }
 
 func NewEncrypter(c *EncrypterConfig) (*Encrypter, error) {
 	if c.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", c)
 	}
-
-	if c.InstallationName == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", c)
+	if c.Address == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Address must not be empty", c)
 	}
 
 	base, err := url.Parse(c.Address + "/v1/")
@@ -62,8 +60,8 @@ func NewEncrypter(c *EncrypterConfig) (*Encrypter, error) {
 		httpClient: httpClient,
 		logger:     c.Logger,
 
-		base:             base,
-		installationName: c.InstallationName,
+		address: c.Address,
+		base:    base,
 	}
 
 	return e, nil
@@ -322,6 +320,10 @@ func (e *Encrypter) RemoveAWSIAMRoleFromAuth(vaultRoleName, iamRoleARN string) e
 	}
 
 	return nil
+}
+
+func (e *Encrypter) Address() string {
+	return e.address
 }
 
 func (e *Encrypter) ensureToken() error {

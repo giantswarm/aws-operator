@@ -12,6 +12,7 @@ data:
       aws:
         accessLogsExpiration: '{{ .Values.Installation.V1.Provider.AWS.S3AccessLogsExpiration }}'
         advancedMonitoringEC2: '{{ .Values.Installation.V1.Provider.AWS.AdvancedMonitoringEC2 }}'
+        encrypter: '{{ .Values.Installation.V1.Provider.AWS.Encrypter }}'
         includeTags: '{{ .Values.Installation.V1.Provider.AWS.IncludeTags }}'
         loggingBucket:
           delete: '{{ .Values.Installation.V1.Provider.AWS.DeleteLoggingBucket }}'
@@ -19,6 +20,7 @@ data:
         region: '{{ .Values.Installation.V1.Provider.AWS.Region }}'
         route53:
           enabled: '{{ .Values.Installation.V1.Provider.AWS.Route53.Enabled }}'
+        vaultAddress: '{{ .Values.Installation.V1.Auth.Vault.Address }}'
       guest:
         update:
           enabled: {{ .Values.Installation.V1.Guest.Update.Enabled }}

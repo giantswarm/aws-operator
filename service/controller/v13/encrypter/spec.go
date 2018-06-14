@@ -7,6 +7,11 @@ import (
 	"github.com/giantswarm/certs/legacy"
 )
 
+const (
+	KMSBackend   = "kms"
+	VaultBackend = "vault"
+)
+
 type EncryptionKeyState struct {
 	KeyID   string
 	KeyName string

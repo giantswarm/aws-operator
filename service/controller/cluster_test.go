@@ -33,6 +33,7 @@ func newTestClusterConfig() ClusterConfig {
 		DeleteLoggingBucket: true,
 		ProjectName:         "aws-operator",
 		PubKeyFile:          "~/.ssh/id_rsa.pub",
+		Encrypter:           "kms",
 	}
 }
 

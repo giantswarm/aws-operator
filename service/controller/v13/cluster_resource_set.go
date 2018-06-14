@@ -22,7 +22,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v13/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v13/credential"
 	"github.com/giantswarm/aws-operator/service/controller/v13/ebs"
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter/kms"
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter/vault"
 	"github.com/giantswarm/aws-operator/service/controller/v13/key"
 	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v13/resource/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/v13/resource/ebsvolume"
@@ -49,6 +51,7 @@ type ClusterResourceSetConfig struct {
 	AccessLogsExpiration   int
 	AdvancedMonitoringEC2  bool
 	APIWhitelist           adapter.APIWhitelist
+	Encrypter              string
 	GuestUpdateEnabled     bool
 	IncludeTags            bool
 	InstallationName       string
@@ -57,6 +60,7 @@ type ClusterResourceSetConfig struct {
 	ProjectName            string
 	Route53Enabled         bool
 	PodInfraContainerImage string
+	VaultAddress           string
 }
 
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
@@ -110,24 +114,38 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.SubnetList must not be empty when %T.APIWhitelist is enabled", config)
 	}
 
-	var encrypter *kms.Encrypter
-	{
+	var encrypterBackend encrypter.Interface
+	switch config.Encrypter {
+	case encrypter.VaultBackend:
+		c := &vault.EncrypterConfig{
+			Logger: config.Logger,
+
+			Address: config.VaultAddress,
+		}
+
+		encrypterBackend, err = vault.NewEncrypter(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	case encrypter.KMSBackend:
 		c := &kms.EncrypterConfig{
 			Logger: config.Logger,
 
 			InstallationName: config.InstallationName,
 		}
 
-		encrypter, err = kms.NewEncrypter(c)
+		encrypterBackend, err = kms.NewEncrypter(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
+	default:
+		return nil, microerror.Maskf(invalidConfigError, "unknown encrypter backend %q", config.Encrypter)
 	}
 
 	var encryptionKeyResource controller.Resource
 	{
 		c := encryptionkey.Config{
-			Encrypter: encrypter,
+			Encrypter: encrypterBackend,
 			Logger:    config.Logger,
 
 			InstallationName: config.InstallationName,
@@ -198,7 +216,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	{
 		c := s3object.Config{
 			CertWatcher:       config.CertsSearcher,
-			Encrypter:         encrypter,
+			Encrypter:         encrypterBackend,
 			Logger:            config.Logger,
 			RandomKeySearcher: config.RandomkeysSearcher,
 		}
@@ -408,7 +426,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		var cloudConfig *cloudconfig.CloudConfig
 		{
 			c := cloudconfig.Config{
-				Encrypter: encrypter,
+				Encrypter: encrypterBackend,
 				Logger:    config.Logger,
 
 				OIDC: config.OIDC,
