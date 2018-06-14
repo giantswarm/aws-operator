@@ -60,8 +60,9 @@ type AzureConfigSpec struct {
 }
 
 type AzureConfigSpecAzure struct {
-	DNSZones       AzureConfigSpecAzureDNSZones       `json:"dnsZones" yaml:"dnsZones"`
-	VirtualNetwork AzureConfigSpecAzureVirtualNetwork `json:"virtualNetwork" yaml:"virtualNetwork"`
+	CredentialSecret CredentialSecret                   `json:"credentialSecret" yaml:"credentialSecret"`
+	DNSZones         AzureConfigSpecAzureDNSZones       `json:"dnsZones" yaml:"dnsZones"`
+	VirtualNetwork   AzureConfigSpecAzureVirtualNetwork `json:"virtualNetwork" yaml:"virtualNetwork"`
 
 	Masters []AzureConfigSpecAzureNode `json:"masters" yaml:"masters"`
 	Workers []AzureConfigSpecAzureNode `json:"workers" yaml:"workers"`

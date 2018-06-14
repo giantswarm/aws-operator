@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff"
-	"github.com/giantswarm/errors/api"
+	"github.com/giantswarm/errors/guest"
 	"github.com/giantswarm/k8sportforward"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -142,8 +142,8 @@ func (c *Client) EnsureTillerInstalled() error {
 		if errors.IsAlreadyExists(err) {
 			c.logger.Log("level", "debug", "message", fmt.Sprintf("serviceaccount %s creation failed", tillerPodName), "stack", fmt.Sprintf("%#v", err))
 			// fall through
-		} else if api.IsGuestAPINotAvailable(err) {
-			return microerror.Maskf(api.GuestAPINotAvailableError, err.Error())
+		} else if guest.IsAPINotAvailable(err) {
+			return microerror.Maskf(guest.APINotAvailableError, err.Error())
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
