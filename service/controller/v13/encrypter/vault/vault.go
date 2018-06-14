@@ -208,7 +208,8 @@ func (e *Encrypter) Encrypt(ctx context.Context, key, plaintext string) (string,
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", microerror.Mask(invalidHTTPStatusCodeError)
+		body, _ := ioutil.ReadAll(resp.Body)
+		return "", microerror.Maskf(invalidHTTPStatusCodeError, "want 200, got %q, response body: %q", resp.StatusCode, body)
 	}
 
 	encryptResp := &EncryptResponse{}
@@ -247,7 +248,8 @@ func (e *Encrypter) Decrypt(key, ciphertext string) (string, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", microerror.Mask(invalidHTTPStatusCodeError)
+		body, _ := ioutil.ReadAll(resp.Body)
+		return "", microerror.Maskf(invalidHTTPStatusCodeError, "want 200, got %q, response body: %q", resp.StatusCode, body)
 	}
 
 	decryptResp := &DecryptResponse{}
@@ -357,7 +359,12 @@ func (e *Encrypter) isTokenValid() bool {
 
 	defer resp.Body.Close()
 
-	return resp.StatusCode == http.StatusOK
+	if resp.StatusCode != http.StatusOK {
+		body, _ := ioutil.ReadAll(resp.Body)
+		e.logger.Log("level", "error", "message", fmt.Sprintf("invalid HTTP status code, want 200, got %q, response body: %q", resp.StatusCode, body))
+		return false
+	}
+	return true
 }
 
 func (e *Encrypter) login() error {
@@ -387,7 +394,8 @@ func (e *Encrypter) login() error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return microerror.Mask(invalidHTTPStatusCodeError)
+		body, _ := ioutil.ReadAll(resp.Body)
+		return microerror.Maskf(invalidHTTPStatusCodeError, "want 200, got %q, response body: %q", resp.StatusCode, body)
 	}
 
 	loginResp := &LoginResponse{}
@@ -473,7 +481,8 @@ func (e *Encrypter) getAWSAuthRole(path string) (*AWSAuthRole, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, microerror.Mask(invalidHTTPStatusCodeError)
+		body, _ := ioutil.ReadAll(resp.Body)
+		return nil, microerror.Maskf(invalidHTTPStatusCodeError, "want 200, got %q, response body: %q", resp.StatusCode, body)
 	}
 
 	role := &AWSAuthRole{}
@@ -499,7 +508,8 @@ func (e *Encrypter) postAWSAuthRole(path string, role *AWSAuthRole) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return microerror.Mask(invalidHTTPStatusCodeError)
+		body, _ := ioutil.ReadAll(resp.Body)
+		return microerror.Maskf(invalidHTTPStatusCodeError, "want 200, got %q, response body: %q", resp.StatusCode, body)
 	}
 
 	return nil
