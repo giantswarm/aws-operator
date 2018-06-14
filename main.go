@@ -129,6 +129,9 @@ func mainError() error {
 
 	daemonCommand.PersistentFlags().Bool(f.Service.AWS.IncludeTags, true, "Should resource tags be included (especially for restricted regions, like S3 buckets in China regions).")
 
+	daemonCommand.PersistentFlags().String(f.Service.AWS.Encrypter, "kvm", "Encryption backend to use.")
+	daemonCommand.PersistentFlags().String(f.Service.AWS.VaultAddress, "", "Server address for Vault encryption.")
+
 	daemonCommand.PersistentFlags().String(f.Service.Installation.Name, "", "Installation name for tagging AWS resources.")
 	daemonCommand.PersistentFlags().String(f.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID, "", "OIDC authorization provider ClientID.")
 	daemonCommand.PersistentFlags().String(f.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL, "", "OIDC authorization provider IssuerURL.")

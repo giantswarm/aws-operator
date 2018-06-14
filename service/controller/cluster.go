@@ -60,6 +60,7 @@ type ClusterConfig struct {
 	AdvancedMonitoringEC2  bool
 	APIWhitelist           FrameworkConfigAPIWhitelistConfig
 	DeleteLoggingBucket    bool
+	Encrypter              string
 	GuestAWSConfig         ClusterConfigAWSConfig
 	GuestUpdateEnabled     bool
 	HostAWSConfig          ClusterConfigAWSConfig
@@ -70,6 +71,7 @@ type ClusterConfig struct {
 	ProjectName            string
 	PubKeyFile             string
 	Route53Enabled         bool
+	VaultAddress           string
 }
 
 type ClusterConfigAWSConfig struct {
@@ -680,6 +682,7 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 			AccessLogsExpiration:   config.AccessLogsExpiration,
 			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
 			DeleteLoggingBucket:    config.DeleteLoggingBucket,
+			Encrypter:              config.Encrypter,
 			GuestUpdateEnabled:     config.GuestUpdateEnabled,
 			PodInfraContainerImage: config.PodInfraContainerImage,
 			Route53Enabled:         config.Route53Enabled,
@@ -695,7 +698,8 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 				Enabled:    config.APIWhitelist.Enabled,
 				SubnetList: config.APIWhitelist.SubnetList,
 			},
-			ProjectName: config.ProjectName,
+			ProjectName:  config.ProjectName,
+			VaultAddress: config.VaultAddress,
 		}
 
 		resourceSetV13, err = v13.NewClusterResourceSet(c)
