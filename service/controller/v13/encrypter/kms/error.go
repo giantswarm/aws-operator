@@ -13,9 +13,22 @@ func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
 
+var keyNotFoundError = microerror.New("key not found")
+
+// IsKeyNotFound asserts keyNotFoundError.
 func IsKeyNotFound(err error) bool {
-	aerr, ok := err.(awserr.Error)
+	if err == nil {
+		return false
+	}
+
+	c := microerror.Cause(err)
+
+	aerr, ok := c.(awserr.Error)
 	if ok && aerr.Code() == kms.ErrCodeNotFoundException {
+		return true
+	}
+
+	if c == keyNotFoundError {
 		return true
 	}
 
