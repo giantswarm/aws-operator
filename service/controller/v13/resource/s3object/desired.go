@@ -7,6 +7,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/v13/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v13/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/controller/v13/key"
 )
 
@@ -29,7 +30,8 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 
 	clusterID := key.ClusterID(customObject)
 
-	if IsKeyNotFound(err) {
+	_, err = r.encrypter.EncryptionKey(ctx, customObject)
+	if kms.IsKeyNotFound(err) {
 		// we can get here during deletion, if the key is already deleted we can safely exit.
 		return output, nil
 	}
