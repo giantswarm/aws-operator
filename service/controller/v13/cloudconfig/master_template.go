@@ -9,6 +9,8 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter/vault"
 	"github.com/giantswarm/aws-operator/service/controller/v13/templates/cloudconfig"
 )
 
@@ -34,6 +36,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 		params.Extension = &MasterExtension{
 			certs:            certs,
 			customObject:     customObject,
+			encrypter:        c.encrypter,
 			RandomKeyTmplSet: randomKeyTmplSet,
 		}
 		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = c.k8sAPIExtraArgs
@@ -69,6 +72,7 @@ type RandomKeyTmplSet struct {
 type MasterExtension struct {
 	certs            legacy.CompactTLSAssets
 	customObject     v1alpha1.AWSConfig
+	encrypter        encrypter.Interface
 	RandomKeyTmplSet RandomKeyTmplSet
 }
 
@@ -233,7 +237,8 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	var newFiles []k8scloudconfig.FileAsset
 
 	for _, fm := range filesMeta {
-		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, e.customObject.Spec)
+		data := e.templateData()
+		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, data)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -336,4 +341,26 @@ func (e *MasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
 		},
 	}
 	return newSections
+}
+
+func (e *MasterExtension) templateData() TemplateData {
+	var encrypterType string
+	var vaultAddress string
+	var encryptionKey string
+	v, ok := e.encrypter.(*vault.Encrypter)
+	if ok {
+		encrypterType = "vault"
+		encryptionKey, _ = v.EncryptionKey(context.TODO(), e.customObject)
+		vaultAddress = v.Address()
+	} else {
+		encrypterType = "kms"
+	}
+	data := TemplateData{
+		AWSConfigSpec: e.customObject.Spec,
+		EncrypterType: encrypterType,
+		VaultAddress:  vaultAddress,
+		EncryptionKey: encryptionKey,
+	}
+
+	return data
 }

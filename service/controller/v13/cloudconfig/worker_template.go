@@ -8,6 +8,8 @@ import (
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_3_3"
 	"github.com/giantswarm/microerror"
 
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter/vault"
 	"github.com/giantswarm/aws-operator/service/controller/v13/templates/cloudconfig"
 )
 
@@ -22,6 +24,7 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 		params.Extension = &WorkerExtension{
 			certs:        certs,
 			customObject: customObject,
+			encrypter:    c.encrypter,
 		}
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
 	}
@@ -49,6 +52,7 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 type WorkerExtension struct {
 	certs        legacy.CompactTLSAssets
 	customObject v1alpha1.AWSConfig
+	encrypter    encrypter.Interface
 }
 
 func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
@@ -133,7 +137,8 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	var newFiles []k8scloudconfig.FileAsset
 
 	for _, m := range filesMeta {
-		c, err := k8scloudconfig.RenderAssetContent(m.AssetContent, e.customObject.Spec)
+		data := e.templateData()
+		c, err := k8scloudconfig.RenderAssetContent(m.AssetContent, data)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -199,4 +204,26 @@ func (e *WorkerExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
 	}
 
 	return newSections
+}
+
+func (e *WorkerExtension) templateData() TemplateData {
+	var encrypterType string
+	var vaultAddress string
+	var encryptionKey string
+	v, ok := e.encrypter.(*vault.Encrypter)
+	if ok {
+		encrypterType = "vault"
+		encryptionKey, _ = v.EncryptionKey(context.TODO(), e.customObject)
+		vaultAddress = v.Address()
+	} else {
+		encrypterType = "kms"
+	}
+	data := TemplateData{
+		AWSConfigSpec: e.customObject.Spec,
+		EncrypterType: encrypterType,
+		VaultAddress:  vaultAddress,
+		EncryptionKey: encryptionKey,
+	}
+
+	return data
 }
