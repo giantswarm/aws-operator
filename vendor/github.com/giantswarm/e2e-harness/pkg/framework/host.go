@@ -115,6 +115,11 @@ func (h *Host) DeleteGuestCluster(name, cr, logEntry string) error {
 	return h.WaitForPodLog("giantswarm", logEntry, operatorPodName)
 }
 
+// G8sClient returns the host cluster framework's Giant Swarm client.
+func (h *Host) G8sClient() versioned.Interface {
+	return h.g8sClient
+}
+
 func (h *Host) InstallStableOperator(name, cr, values string) error {
 	err := h.InstallOperator(name, cr, values, ":stable")
 	if err != nil {
