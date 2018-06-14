@@ -1,8 +1,6 @@
-package kms
+package vault
 
 import (
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/microerror"
 )
 
@@ -17,20 +15,12 @@ var keyNotFoundError = microerror.New("key not found")
 
 // IsKeyNotFound asserts keyNotFoundError.
 func IsKeyNotFound(err error) bool {
-	if err == nil {
-		return false
-	}
+	return microerror.Cause(err) == invalidConfigError
+}
 
-	c := microerror.Cause(err)
+var invalidHTTPStatusCodeError = microerror.New("invalid HTTP status code")
 
-	aerr, ok := c.(awserr.Error)
-	if ok && aerr.Code() == kms.ErrCodeNotFoundException {
-		return true
-	}
-
-	if c == keyNotFoundError {
-		return true
-	}
-
-	return false
+// IsInvalidHTTPStatus asserts invalidHTTPStatusCodeError.
+func IsInvalidHTTPStatus(err error) bool {
+	return microerror.Cause(err) == invalidHTTPStatusCodeError
 }
