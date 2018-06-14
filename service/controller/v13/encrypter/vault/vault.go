@@ -153,7 +153,8 @@ func (e *Encrypter) CurrentState(ctx context.Context, customObject v1alpha1.AWSC
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return state, microerror.Mask(invalidHTTPStatusCodeError)
+		body, _ := ioutil.ReadAll(resp.Body)
+		return state, microerror.Maskf(invalidHTTPStatusCodeError, "want 200, got %q, response body: %q", resp.StatusCode, body)
 	}
 
 	state.KeyName = keyName
