@@ -383,7 +383,7 @@ func (e *Encrypter) login() error {
 	if e.nonce != "" {
 		payload.Nonce = e.nonce
 	}
-
+	e.logger.Log("level", "debug", "message", fmt.Sprintf("payload %q", payload))
 	p := path.Join("auth", "aws", "login")
 
 	req, err := e.newPayloadRequest(p, payload)
@@ -426,7 +426,7 @@ func (e *Encrypter) newRequest(method, path string) (*http.Request, error) {
 		return nil, microerror.Mask(err)
 	}
 
-	req.Header.Set("Accept", "application/json")
+	//req.Header.Set("Accept", "application/json")
 	if e.token != "" {
 		req.Header.Set("X-Vault-Token", e.token)
 	}
@@ -442,6 +442,7 @@ func (e *Encrypter) newPayloadRequest(path string, payload interface{}) (*http.R
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
+	e.logger.Log("level", "debug", "message", fmt.Sprintf("marshalled payload %q, dest: %q", b, dest.String()))
 	buf := bytes.NewReader(b)
 
 	req, err := http.NewRequest("POST", dest.String(), buf)
@@ -449,8 +450,8 @@ func (e *Encrypter) newPayloadRequest(path string, payload interface{}) (*http.R
 		return nil, microerror.Mask(err)
 	}
 
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Content-Type", "application/json")
+	//req.Header.Set("Accept", "application/json")
+	//req.Header.Set("Content-Type", "application/json")
 	if e.token != "" {
 		req.Header.Set("X-Vault-Token", e.token)
 	}
