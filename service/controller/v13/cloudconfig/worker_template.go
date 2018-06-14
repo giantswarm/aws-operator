@@ -23,6 +23,7 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 		params.Cluster = customObject.Spec.Cluster
 		params.Extension = &WorkerExtension{
 			certs:        certs,
+			ctx:          ctx,
 			customObject: customObject,
 			encrypter:    c.encrypter,
 		}
@@ -51,6 +52,7 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 
 type WorkerExtension struct {
 	certs        legacy.CompactTLSAssets
+	ctx          context.Context
 	customObject v1alpha1.AWSConfig
 	encrypter    encrypter.Interface
 }
@@ -213,7 +215,7 @@ func (e *WorkerExtension) templateData() TemplateData {
 	v, ok := e.encrypter.(*vault.Encrypter)
 	if ok {
 		encrypterType = "vault"
-		encryptionKey, _ = v.EncryptionKey(context.TODO(), e.customObject)
+		encryptionKey, _ = v.EncryptionKey(e.ctx, e.customObject)
 		vaultAddress = v.Address()
 	} else {
 		encrypterType = "kms"

@@ -35,6 +35,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 		params.EtcdPort = customObject.Spec.Cluster.Etcd.Port
 		params.Extension = &MasterExtension{
 			certs:            certs,
+			ctx:              ctx,
 			customObject:     customObject,
 			encrypter:        c.encrypter,
 			RandomKeyTmplSet: randomKeyTmplSet,
@@ -71,6 +72,7 @@ type RandomKeyTmplSet struct {
 
 type MasterExtension struct {
 	certs            legacy.CompactTLSAssets
+	ctx              context.Context
 	customObject     v1alpha1.AWSConfig
 	encrypter        encrypter.Interface
 	RandomKeyTmplSet RandomKeyTmplSet
@@ -350,7 +352,7 @@ func (e *MasterExtension) templateData() TemplateData {
 	v, ok := e.encrypter.(*vault.Encrypter)
 	if ok {
 		encrypterType = "vault"
-		encryptionKey, _ = v.EncryptionKey(context.TODO(), e.customObject)
+		encryptionKey, _ = v.EncryptionKey(e.ctx, e.customObject)
 		vaultAddress = v.Address()
 	} else {
 		encrypterType = "kms"

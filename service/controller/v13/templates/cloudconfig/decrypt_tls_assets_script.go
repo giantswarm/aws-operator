@@ -58,6 +58,7 @@ main () {
 }
 
 aws_login () {
+    # query EC2 metadata endpoint (common for all AWS infrastructure).
     pkcs7=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/pkcs7 | tr -d '\n')
     if [ -z "$1" ]; then
         # do not load nonce if initial login
