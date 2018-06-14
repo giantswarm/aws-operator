@@ -12,6 +12,7 @@ func commonViperSettings(f *flag.Flag, v *viper.Viper) {
 	v.Set(f.Service.AWS.AccessKey.ID, "accessKeyID")
 	v.Set(f.Service.AWS.AccessKey.Secret, "accessKeySecret")
 	v.Set(f.Service.AWS.AccessKey.Session, "session")
+	v.Set(f.Service.AWS.Encrypter, "kms")
 	v.Set(f.Service.AWS.HostAccessKey.ID, "accessKeyID")
 	v.Set(f.Service.AWS.HostAccessKey.Secret, "accessKeySecret")
 	v.Set(f.Service.AWS.HostAccessKey.Session, "session")
