@@ -379,9 +379,7 @@ func (e *Encrypter) login() error {
 	payload := &LoginPayload{
 		Role:  defaultRole,
 		PKCS7: pkcs7,
-	}
-	if e.nonce != "" {
-		payload.Nonce = e.nonce
+		Nonce: e.nonce,
 	}
 	e.logger.Log("level", "debug", "message", fmt.Sprintf("payload %q", payload))
 	p := path.Join("auth", "aws", "login")
@@ -426,7 +424,6 @@ func (e *Encrypter) newRequest(method, path string) (*http.Request, error) {
 		return nil, microerror.Mask(err)
 	}
 
-	//req.Header.Set("Accept", "application/json")
 	if e.token != "" {
 		req.Header.Set("X-Vault-Token", e.token)
 	}
@@ -450,8 +447,6 @@ func (e *Encrypter) newPayloadRequest(path string, payload interface{}) (*http.R
 		return nil, microerror.Mask(err)
 	}
 
-	//req.Header.Set("Accept", "application/json")
-	//req.Header.Set("Content-Type", "application/json")
 	if e.token != "" {
 		req.Header.Set("X-Vault-Token", e.token)
 	}
@@ -471,7 +466,7 @@ func (e *Encrypter) getPKCS7() (string, error) {
 		return "", microerror.Mask(err)
 	}
 
-	return strings.TrimSpace(string(responseData)), nil
+	return strings.Replace(string(responseData), "\n", "", -1), nil
 }
 
 func (e *Encrypter) getAWSAuthRole(path string) (*AWSAuthRole, error) {
