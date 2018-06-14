@@ -129,7 +129,7 @@ func mainError() error {
 
 	daemonCommand.PersistentFlags().Bool(f.Service.AWS.IncludeTags, true, "Should resource tags be included (especially for restricted regions, like S3 buckets in China regions).")
 
-	daemonCommand.PersistentFlags().String(f.Service.AWS.Encrypter, "kvm", "Encryption backend to use.")
+	daemonCommand.PersistentFlags().String(f.Service.AWS.Encrypter, "kms", "Encryption backend to use.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.VaultAddress, "", "Server address for Vault encryption.")
 
 	daemonCommand.PersistentFlags().String(f.Service.Installation.Name, "", "Installation name for tagging AWS resources.")

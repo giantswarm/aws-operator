@@ -115,7 +115,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	}
 
 	var encrypterBackend encrypter.Interface
-	if config.Encrypter == "vault" {
+	switch config.Encrypter {
+	case encrypter.VaultBackend:
 		c := &vault.EncrypterConfig{
 			Logger: config.Logger,
 
@@ -126,7 +127,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-	} else {
+	case encrypter.KMSBackend:
 		c := &kms.EncrypterConfig{
 			Logger: config.Logger,
 
@@ -137,6 +138,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
+	default:
+		return nil, microerror.Maskf(invalidConfigError, "unknown encrypter backend %q", config.Encrypter)
 	}
 
 	var encryptionKeyResource controller.Resource
