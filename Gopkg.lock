@@ -73,8 +73,8 @@
     "service/sts",
     "service/sts/stsiface"
   ]
-  revision = "4bdf3e6f6926903b8ca6b0d2b93bbdddcf6af219"
-  version = "v1.14.5"
+  revision = "92c96c4f5ad419f2a72401c2f606d51e010cc110"
+  version = "v1.14.6"
 
 [[projects]]
   branch = "master"
@@ -233,13 +233,13 @@
   revision = "641ca85450f736082b846d20c8be8bb2f1504e30"
 
 [[projects]]
-  branch = "scaling"
+  branch = "master"
   name = "github.com/giantswarm/e2etests"
   packages = [
     "scaling",
     "scaling/provider"
   ]
-  revision = "d4487dbbf209fb7b518a8892d61206ebe0fa83ae"
+  revision = "fa5400777e4dfb94fd0e6417f1d2c025f81fa921"
 
 [[projects]]
   branch = "master"
@@ -269,7 +269,7 @@
     "v_3_3_1",
     "v_3_3_3"
   ]
-  revision = "fee7619110fa14f03a8c19b7da1afb64c36e81cf"
+  revision = "cf4b32b3be41093a962a86e9ec757d924a0ff614"
 
 [[projects]]
   branch = "master"
@@ -698,7 +698,7 @@
     "ed25519/internal/edwards25519",
     "ssh/terminal"
   ]
-  revision = "8ac0e0d97ce45cd83d1d7243c060cb8461dda5e9"
+  revision = "37a17fe027db43f76fd88b056ddf588563fc8722"
 
 [[projects]]
   branch = "master"
@@ -738,7 +738,7 @@
     "unix",
     "windows"
   ]
-  revision = "a9e25c09b96b8870693763211309e213c6ef299d"
+  revision = "56ede360ec1c541828fb88741b3f1049406d28f5"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -959,7 +959,6 @@
   revision = "17529ec7eadb8de8e7dc835201455f53571f655a"
 
 [[projects]]
-  branch = "release-1.10"
   name = "k8s.io/apiserver"
   packages = [
     "pkg/apis/audit",
@@ -971,6 +970,7 @@
     "pkg/util/feature"
   ]
   revision = "8378ef881d4fa7d3ca5c5e7e5309592ec69b11e4"
+  version = "kubernetes-1.10.4"
 
 [[projects]]
   branch = "release-7.0"
@@ -1340,6 +1340,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9c1a7a650be299cf58ec5be5a2320178702db18716e80c2f485570227bb966c2"
+  inputs-digest = "aab62397e9daac23cbc61e9953adcea2498f78333417571efaac023922945c43"
   solver-name = "gps-cdcl"
   solver-version = 1
