@@ -28,6 +28,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/kmskey"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/loadbalancer"
+	"github.com/giantswarm/aws-operator/service/controller/v12/resource/migration"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/namespace"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/s3object"
@@ -105,6 +106,19 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	}
 	if config.APIWhitelist.Enabled && config.APIWhitelist.SubnetList == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.SubnetList must not be empty when %T.APIWhitelist is enabled", config)
+	}
+
+	var migrationResource controller.Resource
+	{
+		c := migration.Config{
+			G8sClient: config.G8sClient,
+			Logger:    config.Logger,
+		}
+
+		migrationResource, err = migration.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
 	var kmsKeyResource controller.Resource
@@ -277,6 +291,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	}
 
 	resources := []controller.Resource{
+		migrationResource,
 		kmsKeyResource,
 		s3BucketResource,
 		s3BucketObjectResource,

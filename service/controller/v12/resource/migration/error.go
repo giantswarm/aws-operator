@@ -10,10 +10,3 @@ var invalidConfigError = microerror.New("invalid config")
 func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
-
-var malformedDomainError = microerror.New("malformed domain")
-
-// IsMalformedDomain asserts malformedDomainError.
-func IsMalformedDomain(err error) bool {
-	return microerror.Cause(err) == malformedDomainError
-}
