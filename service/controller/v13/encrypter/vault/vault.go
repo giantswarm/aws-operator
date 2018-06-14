@@ -379,7 +379,9 @@ func (e *Encrypter) login() error {
 	payload := &LoginPayload{
 		Role:  defaultRole,
 		PKCS7: pkcs7,
-		Nonce: e.nonce,
+	}
+	if e.nonce != "" {
+		payload.Nonce = e.nonce
 	}
 
 	p := path.Join("auth", "aws", "login")
