@@ -351,11 +351,11 @@ func (e *MasterExtension) templateData() TemplateData {
 	var encryptionKey string
 	v, ok := e.encrypter.(*vault.Encrypter)
 	if ok {
-		encrypterType = "vault"
+		encrypterType = encrypter.VaultBackend
 		encryptionKey, _ = v.EncryptionKey(e.ctx, e.customObject)
 		vaultAddress = v.Address()
 	} else {
-		encrypterType = "kms"
+		encrypterType = encrypter.KMSBackend
 	}
 	data := TemplateData{
 		AWSConfigSpec: e.customObject.Spec,
