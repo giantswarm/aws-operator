@@ -29,6 +29,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 
 	clusterID := key.ClusterID(customObject)
 
+	_, err = r.encrypter.EncryptionKey(ctx, customObject)
 	if IsKeyNotFound(err) {
 		// we can get here during deletion, if the key is already deleted we can safely exit.
 		return output, nil
