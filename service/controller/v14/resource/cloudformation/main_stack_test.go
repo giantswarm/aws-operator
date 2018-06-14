@@ -11,10 +11,10 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v13/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/v13/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v13/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v13/key"
+	"github.com/giantswarm/aws-operator/service/controller/v14/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v14/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v14/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v14/key"
 )
 
 func testConfig() Config {
