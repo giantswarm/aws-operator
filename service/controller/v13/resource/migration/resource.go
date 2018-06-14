@@ -65,6 +65,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	oldSpec := *customObject.Spec.DeepCopy()
 
+	if customObject.Spec.AWS.CredentialSecret.Name != "" {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "CR is missing credential, setting the default")
+
+		customObject.Spec.AWS.CredentialSecret.Namespace = credentialSecretDefaultNamespace
+		customObject.Spec.AWS.CredentialSecret.Name = credentialSecretDefaultName
+	}
+
 	if reflect.DeepEqual(providerv1alpha1.AWSConfigSpecAWSHostedZones{}, customObject.Spec.AWS.HostedZones) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "CR is missing hosted zone names")
 
