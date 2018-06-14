@@ -60,10 +60,10 @@ type AWSConfigSpec struct {
 }
 
 type AWSConfigSpecAWS struct {
-	API              AWSConfigSpecAWSAPI       `json:"api" yaml:"api"`
-	AZ               string                    `json:"az" yaml:"az"`
-	CredentialSecret AWSConfigCredentialSecret `json:"credentialSecret" yaml:"credentialSecret"`
-	Etcd             AWSConfigSpecAWSEtcd      `json:"etcd" yaml:"etcd"`
+	API              AWSConfigSpecAWSAPI  `json:"api" yaml:"api"`
+	AZ               string               `json:"az" yaml:"az"`
+	CredentialSecret CredentialSecret     `json:"credentialSecret" yaml:"credentialSecret"`
+	Etcd             AWSConfigSpecAWSEtcd `json:"etcd" yaml:"etcd"`
 
 	// HostedZones is AWS hosted zones names in the host cluster account.
 	// For each zone there will be "CLUSTER_ID.k8s" NS record created in
@@ -92,11 +92,6 @@ type AWSConfigSpecAWSAPI struct {
 // AWSConfigSpecAWSAPIELB deprecated since aws-operator v12 resources.
 type AWSConfigSpecAWSAPIELB struct {
 	IdleTimeoutSeconds int `json:"idleTimeoutSeconds" yaml:"idleTimeoutSeconds"`
-}
-
-type AWSConfigCredentialSecret struct {
-	Name      string `json:"name" yaml:"name"`
-	Namespace string `json:"namespace" yaml:"namespace"`
 }
 
 // AWSConfigSpecAWSEtcd deprecated since aws-operator v12 resources.
