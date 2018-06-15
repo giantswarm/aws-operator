@@ -15,9 +15,10 @@ const (
 // AWSConfigSpec.
 type TemplateData struct {
 	v1alpha1.AWSConfigSpec
-	EncrypterType string
-	VaultAddress  string
-	EncryptionKey string
+	EncrypterType      string
+	VaultAddress       string
+	EncryptionKey      string
+	VaultDecryptScript string
 }
 
 type KMSClient interface {
