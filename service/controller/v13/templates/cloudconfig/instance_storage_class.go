@@ -19,5 +19,7 @@ write_files:
     allowVolumeExpansion: true
     parameters:
       type: gp2
+{{ if eq .EncrypterType "kms" }}
       encrypted: "true"
+{{ end }}
 `
