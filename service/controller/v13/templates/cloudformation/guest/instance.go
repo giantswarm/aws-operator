@@ -8,6 +8,7 @@ const Instance = `{{define "instance"}}
     - DockerVolume
     - EtcdVolume
     Properties:
+      KeyName: vault-poc
       AvailabilityZone: {{ .Instance.Master.AZ }}
       IamInstanceProfile: !Ref MasterInstanceProfile
       ImageId: {{ .Instance.Image.ID }}

@@ -5,6 +5,7 @@ const LaunchConfiguration = `{{define "launch_configuration"}}
     Type: "AWS::AutoScaling::LaunchConfiguration"
     Description: {{ .ASGType }} launch configuration
     Properties:
+      KeyName: vault-poc
       ImageId: {{ .WorkerImageID }}
       SecurityGroups:
       - !Ref WorkerSecurityGroup
