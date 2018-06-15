@@ -332,6 +332,14 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 }
 
 func (e *MasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
+	var storageClasss string
+	_, ok := e.encrypter.(*vault.Encrypter)
+	if ok {
+		storageClasss = cloudconfig.InstanceStorageClass
+	} else {
+		storageClasss = cloudconfig.InstanceStorageClassEncrypted
+	}
+
 	newSections := []k8scloudconfig.VerbatimSection{
 		{
 			Name:    "storage",
@@ -339,7 +347,7 @@ func (e *MasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
 		},
 		{
 			Name:    "storageclass",
-			Content: cloudconfig.InstanceStorageClass,
+			Content: storageClasss,
 		},
 	}
 	return newSections
