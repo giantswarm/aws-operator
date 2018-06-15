@@ -60,7 +60,7 @@ type ClusterConfig struct {
 	AdvancedMonitoringEC2  bool
 	APIWhitelist           FrameworkConfigAPIWhitelistConfig
 	DeleteLoggingBucket    bool
-	Encrypter              string
+	EncrypterBackend       string
 	GuestAWSConfig         ClusterConfigAWSConfig
 	GuestUpdateEnabled     bool
 	HostAWSConfig          ClusterConfigAWSConfig
@@ -682,7 +682,7 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 			AccessLogsExpiration:   config.AccessLogsExpiration,
 			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
 			DeleteLoggingBucket:    config.DeleteLoggingBucket,
-			Encrypter:              config.Encrypter,
+			EncrypterBackend:       config.EncrypterBackend,
 			GuestUpdateEnabled:     config.GuestUpdateEnabled,
 			PodInfraContainerImage: config.PodInfraContainerImage,
 			Route53Enabled:         config.Route53Enabled,

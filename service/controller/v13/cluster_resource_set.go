@@ -51,7 +51,7 @@ type ClusterResourceSetConfig struct {
 	AccessLogsExpiration   int
 	AdvancedMonitoringEC2  bool
 	APIWhitelist           adapter.APIWhitelist
-	Encrypter              string
+	EncrypterBackend       string
 	GuestUpdateEnabled     bool
 	IncludeTags            bool
 	InstallationName       string
@@ -114,8 +114,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.SubnetList must not be empty when %T.APIWhitelist is enabled", config)
 	}
 
-	var encrypterBackend encrypter.Interface
-	switch config.Encrypter {
+	var encrypterObject encrypter.Interface
+	switch config.EncrypterBackend {
 	case encrypter.VaultBackend:
 		c := &vault.EncrypterConfig{
 			Logger: config.Logger,
@@ -123,7 +123,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			Address: config.VaultAddress,
 		}
 
-		encrypterBackend, err = vault.NewEncrypter(c)
+		encrypterObject, err = vault.NewEncrypter(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -134,18 +134,18 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			InstallationName: config.InstallationName,
 		}
 
-		encrypterBackend, err = kms.NewEncrypter(c)
+		encrypterObject, err = kms.NewEncrypter(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	default:
-		return nil, microerror.Maskf(invalidConfigError, "unknown encrypter backend %q", config.Encrypter)
+		return nil, microerror.Maskf(invalidConfigError, "unknown encrypter backend %q", config.EncrypterBackend)
 	}
 
 	var encryptionKeyResource controller.Resource
 	{
 		c := encryptionkey.Config{
-			Encrypter: encrypterBackend,
+			Encrypter: encrypterObject,
 			Logger:    config.Logger,
 
 			InstallationName: config.InstallationName,
@@ -216,7 +216,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	{
 		c := s3object.Config{
 			CertWatcher:       config.CertsSearcher,
-			Encrypter:         encrypterBackend,
+			Encrypter:         encrypterObject,
 			Logger:            config.Logger,
 			RandomKeySearcher: config.RandomkeysSearcher,
 		}
@@ -272,6 +272,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			},
 
 			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
+			EncrypterBackend:      config.EncrypterBackend,
 			InstallationName:      config.InstallationName,
 			Route53Enabled:        config.Route53Enabled,
 		}
@@ -426,7 +427,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		var cloudConfig *cloudconfig.CloudConfig
 		{
 			c := cloudconfig.Config{
-				Encrypter: encrypterBackend,
+				Encrypter: encrypterObject,
 				Logger:    config.Logger,
 
 				OIDC: config.OIDC,

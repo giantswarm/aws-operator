@@ -85,6 +85,7 @@ func TestAdapterIamPoliciesKMSKeyARN(t *testing.T) {
 		customObject      v1alpha1.AWSConfig
 		expectedKMSKeyARN string
 		expectedError     bool
+		encrypterBackend  string
 	}{
 		{
 			description: "basic matching, all fields present",
@@ -94,15 +95,27 @@ func TestAdapterIamPoliciesKMSKeyARN(t *testing.T) {
 				},
 			},
 			expectedKMSKeyARN: "alias/test-cluster",
+			encrypterBackend:  "kms",
 		},
 		{
-			description: "basic matching, all fields present",
+			description: "error check",
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: defaultCluster,
 				},
 			},
-			expectedError: true,
+			expectedError:    true,
+			encrypterBackend: "kms",
+		},
+		{
+			description: "vault backend",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: defaultCluster,
+				},
+			},
+			expectedKMSKeyARN: "",
+			encrypterBackend:  "vault",
 		},
 	}
 	for _, tc := range testCases {
@@ -117,8 +130,9 @@ func TestAdapterIamPoliciesKMSKeyARN(t *testing.T) {
 				STS: &STSClientMock{},
 			}
 			cfg := Config{
-				CustomObject: tc.customObject,
-				Clients:      clients,
+				EncrypterBackend: tc.encrypterBackend,
+				CustomObject:     tc.customObject,
+				Clients:          clients,
 			}
 			err := a.getIamPolicies(cfg)
 			if tc.expectedError && err == nil {
