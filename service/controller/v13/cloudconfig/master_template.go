@@ -357,7 +357,6 @@ func (e *MasterExtension) templateData() TemplateData {
 	var encrypterType string
 	var vaultAddress string
 	var encryptionKey string
-	var vaultDecryptScript string
 	v, ok := e.encrypter.(*vault.Encrypter)
 	if ok {
 		encrypterType = encrypter.VaultBackend
@@ -365,16 +364,14 @@ func (e *MasterExtension) templateData() TemplateData {
 		// Debug, fixed vault IP
 		// vaultAddress = v.Address()
 		vaultAddress = "https://172.19.4.88:8200"
-		vaultDecryptScript = cloudconfig.VaultDecryptScript
 	} else {
 		encrypterType = encrypter.KMSBackend
 	}
 	data := TemplateData{
-		AWSConfigSpec:      e.customObject.Spec,
-		EncrypterType:      encrypterType,
-		VaultAddress:       vaultAddress,
-		EncryptionKey:      encryptionKey,
-		VaultDecryptScript: vaultDecryptScript,
+		AWSConfigSpec: e.customObject.Spec,
+		EncrypterType: encrypterType,
+		VaultAddress:  vaultAddress,
+		EncryptionKey: encryptionKey,
 	}
 
 	return data
