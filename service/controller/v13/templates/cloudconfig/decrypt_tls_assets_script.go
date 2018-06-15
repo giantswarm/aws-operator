@@ -43,7 +43,7 @@ main () {
 
     echo decrypting keys assets
     shopt -s nullglob
-    for encKey in $(find /etc/kubernetes/encryption -name "*.enc"); do
+    for encKey in $(find /etc/kubernetes/ssl -name "*.pem.enc"); do
       echo decrypting $encKey
       f=$(mktemp $encKey.XXXXXXXX)
       cat <<EOF > data.json
