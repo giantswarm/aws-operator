@@ -1,4 +1,4 @@
-package masternode
+package clusterstate
 
 import "github.com/giantswarm/microerror"
 

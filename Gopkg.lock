@@ -236,12 +236,12 @@
   branch = "master-node"
   name = "github.com/giantswarm/e2etests"
   packages = [
-    "masternode",
-    "masternode/provider",
+    "clusterstate",
+    "clusterstate/provider",
     "scaling",
     "scaling/provider"
   ]
-  revision = "ab93e59026abbcb9bd2d0ce3965bc5b3e447a811"
+  revision = "c5a9d9d9731313ddc34cbbe5058e3c5285094d89"
 
 [[projects]]
   branch = "master"
@@ -1342,6 +1342,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ecfff6c1ff9d7673cf1d3c5e338a7d29b69322784e4556f5d173bde504c935bc"
+  inputs-digest = "a5c7c08b379aae7258efed267d8a1f7f44de22b84c2685d41bc7c38fe0ad1812"
   solver-name = "gps-cdcl"
   solver-version = 1

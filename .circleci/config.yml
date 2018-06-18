@@ -73,25 +73,25 @@ jobs:
   e2eTestCurPRReboot:
     environment:
       TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/reboot"
+      TEST_DIR: "integration/test/clusterstate"
     <<: *e2eTest
 
   e2eTestCurMasterReboot:
     environment:
       TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/reboot"
+      TEST_DIR: "integration/test/clusterstate"
     <<: *e2eTest
 
   e2eTestWIPPRReboot:
     environment:
       TESTED_VERSION: "wip"
-      TEST_DIR: "integration/test/reboot"
+      TEST_DIR: "integration/test/clusterstate"
     <<: *e2eTest
 
   e2eTestWIPMasterReboot:
     environment:
       TESTED_VERSION: "wip"
-      TEST_DIR: "integration/test/reboot"
+      TEST_DIR: "integration/test/clusterstate"
     <<: *e2eTest
 
 

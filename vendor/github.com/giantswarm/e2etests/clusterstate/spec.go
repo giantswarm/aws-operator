@@ -1,4 +1,4 @@
-package masternode
+package clusterstate
 
 import (
 	"context"

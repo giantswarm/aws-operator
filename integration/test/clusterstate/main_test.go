@@ -7,8 +7,8 @@ import (
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/e2eclients/aws"
-	"github.com/giantswarm/e2etests/masternode"
-	"github.com/giantswarm/e2etests/masternode/provider"
+	"github.com/giantswarm/e2etests/clusterstate"
+	"github.com/giantswarm/e2etests/clusterstate/provider"
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/integration/env"
@@ -19,7 +19,7 @@ var (
 	c *aws.Client
 	g *framework.Guest
 	h *framework.Host
-	m *masternode.MasterNode
+	cs *clusterstate.ClusterState
 )
 
 func init() {
@@ -72,22 +72,22 @@ func init() {
 	}
 
 	{
-		c := masternode.Config{
+		c := clusterstate.Config{
 			Logger:   l,
 			Provider: p,
 		}
 
-		s, err = masternode.New(c)
+		cs, err = cluserstate.New(c)
 		if err != nil {
 			panic(err.Error())
 		}
 	}
 
-	c = aws.NewClient()
+	cs = aws.NewClient()
 }
 
 // TestMain allows us to have common setup and teardown steps that are run
 // once for all the tests https://golang.org/pkg/testing/#hdr-Main.
 func TestMain(m *testing.M) {
-	setup.WrapTestMain(c, g, h, m)
+	setup.WrapTestMain(c, g, h, cs)
 }
