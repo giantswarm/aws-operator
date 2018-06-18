@@ -70,28 +70,28 @@ jobs:
 
 
 
-  e2eTestCurPRReboot:
+  e2eTestCurPRMasterNode:
     environment:
       TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/reboot"
+      TEST_DIR: "integration/test/masternode"
     <<: *e2eTest
 
-  e2eTestCurMasterReboot:
+  e2eTestCurMasterMasterNode:
     environment:
       TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/reboot"
+      TEST_DIR: "integration/test/masternode"
     <<: *e2eTest
 
-  e2eTestWIPPRReboot:
+  e2eTestWIPPRMasterNode:
     environment:
       TESTED_VERSION: "wip"
-      TEST_DIR: "integration/test/reboot"
+      TEST_DIR: "integration/test/masternode"
     <<: *e2eTest
 
-  e2eTestWIPMasterReboot:
+  e2eTestWIPMasterMasterNode:
     environment:
       TESTED_VERSION: "wip"
-      TEST_DIR: "integration/test/reboot"
+      TEST_DIR: "integration/test/masternode"
     <<: *e2eTest
 
 
