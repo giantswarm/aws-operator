@@ -16,9 +16,9 @@ import (
 )
 
 var (
-	c *aws.Client
-	g *framework.Guest
-	h *framework.Host
+	c  *aws.Client
+	g  *framework.Guest
+	h  *framework.Host
 	cs *clusterstate.ClusterState
 )
 
