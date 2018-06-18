@@ -62,6 +62,8 @@ func NewEncrypter(c *EncrypterConfig) (*Encrypter, error) {
 
 		address: c.Address,
 		base:    base,
+		// fixed nonce, so that we can reauthenticate from the same host.
+		nonce: defaultNonce,
 	}
 
 	return e, nil
