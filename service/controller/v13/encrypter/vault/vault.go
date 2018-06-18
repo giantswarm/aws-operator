@@ -383,7 +383,6 @@ func (e *Encrypter) login() error {
 		PKCS7: pkcs7,
 		Nonce: e.nonce,
 	}
-	e.logger.Log("level", "debug", "message", fmt.Sprintf("payload %q", payload))
 	p := path.Join("auth", "aws", "login")
 
 	req, err := e.newPayloadRequest(p, payload)
@@ -441,7 +440,6 @@ func (e *Encrypter) newPayloadRequest(path string, payload interface{}) (*http.R
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	e.logger.Log("level", "debug", "message", fmt.Sprintf("marshalled payload %q, dest: %q", b, dest.String()))
 	buf := bytes.NewReader(b)
 
 	req, err := http.NewRequest("POST", dest.String(), buf)
