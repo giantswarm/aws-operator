@@ -73,8 +73,8 @@
     "service/sts",
     "service/sts/stsiface"
   ]
-  revision = "92c96c4f5ad419f2a72401c2f606d51e010cc110"
-  version = "v1.14.6"
+  revision = "bfc1a07cf158c30c41a3eefba8aae043d0bb5bff"
+  version = "v1.14.8"
 
 [[projects]]
   branch = "master"
@@ -233,13 +233,15 @@
   revision = "e9c2163f85a43bd48eadf8c08531130f3642de02"
 
 [[projects]]
-  branch = "master"
+  branch = "master-node"
   name = "github.com/giantswarm/e2etests"
   packages = [
+    "masternode",
+    "masternode/provider",
     "scaling",
     "scaling/provider"
   ]
-  revision = "fa5400777e4dfb94fd0e6417f1d2c025f81fa921"
+  revision = "ab93e59026abbcb9bd2d0ce3965bc5b3e447a811"
 
 [[projects]]
   branch = "master"
@@ -1340,6 +1342,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "aab62397e9daac23cbc61e9953adcea2498f78333417571efaac023922945c43"
+  inputs-digest = "ecfff6c1ff9d7673cf1d3c5e338a7d29b69322784e4556f5d173bde504c935bc"
   solver-name = "gps-cdcl"
   solver-version = 1
