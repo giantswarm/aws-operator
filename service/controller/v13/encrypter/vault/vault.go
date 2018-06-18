@@ -62,8 +62,6 @@ func NewEncrypter(c *EncrypterConfig) (*Encrypter, error) {
 
 		address: c.Address,
 		base:    base,
-		nonce:   "3c4caa13-dc08-f51f-51f8-02c4abb8d89f",
-		token:   "98b8b1aa-fa75-adba-7dd8-0499ba591bbd",
 	}
 
 	return e, nil
