@@ -9,7 +9,6 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
-	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter/vault"
 	"github.com/giantswarm/aws-operator/service/controller/v13/templates/cloudconfig"
 )
@@ -30,14 +29,18 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 
 	var params k8scloudconfig.Params
 	{
+		be := baseExtension{
+			ctx:          ctx,
+			customObject: customObject,
+			encrypter:    c.encrypter,
+		}
+
 		params.Cluster = customObject.Spec.Cluster
 		params.DisableEncryptionAtREST = true
 		params.EtcdPort = customObject.Spec.Cluster.Etcd.Port
 		params.Extension = &MasterExtension{
 			certs:            certs,
-			ctx:              ctx,
-			customObject:     customObject,
-			encrypter:        c.encrypter,
+			baseExtension:    be,
 			RandomKeyTmplSet: randomKeyTmplSet,
 		}
 		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = c.k8sAPIExtraArgs
@@ -71,10 +74,9 @@ type RandomKeyTmplSet struct {
 }
 
 type MasterExtension struct {
+	baseExtension
+
 	certs            legacy.CompactTLSAssets
-	ctx              context.Context
-	customObject     v1alpha1.AWSConfig
-	encrypter        encrypter.Interface
 	RandomKeyTmplSet RandomKeyTmplSet
 }
 
@@ -351,28 +353,4 @@ func (e *MasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
 		},
 	}
 	return newSections
-}
-
-func (e *MasterExtension) templateData() TemplateData {
-	var encrypterType string
-	var vaultAddress string
-	var encryptionKey string
-	v, ok := e.encrypter.(*vault.Encrypter)
-	if ok {
-		encrypterType = encrypter.VaultBackend
-		encryptionKey, _ = v.EncryptionKey(e.ctx, e.customObject)
-		// Debug, fixed vault IP
-		// vaultAddress = v.Address()
-		vaultAddress = "https://172.19.4.88:8200"
-	} else {
-		encrypterType = encrypter.KMSBackend
-	}
-	data := TemplateData{
-		AWSConfigSpec: e.customObject.Spec,
-		EncrypterType: encrypterType,
-		VaultAddress:  vaultAddress,
-		EncryptionKey: encryptionKey,
-	}
-
-	return data
 }
