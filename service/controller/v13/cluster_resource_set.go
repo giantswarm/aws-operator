@@ -115,6 +115,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	}
 
 	var encrypterObject encrypter.Interface
+	var encrypterRoleManager encrypter.RoleManager
 	switch config.EncrypterBackend {
 	case encrypter.VaultBackend:
 		c := &vault.EncrypterConfig{
@@ -127,6 +128,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
+		encrypterRoleManager = encrypterObject.(encrypter.RoleManager)
 	case encrypter.KMSBackend:
 		c := &kms.EncrypterConfig{
 			Logger: config.Logger,
@@ -273,6 +275,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
 			EncrypterBackend:      config.EncrypterBackend,
+			EncrypterRoleManager:  encrypterRoleManager,
 			InstallationName:      config.InstallationName,
 			Route53Enabled:        config.Route53Enabled,
 		}

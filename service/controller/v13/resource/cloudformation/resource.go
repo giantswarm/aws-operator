@@ -1,6 +1,8 @@
 package cloudformation
 
 import (
+	"context"
+
 	"github.com/aws/aws-sdk-go/aws"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
@@ -8,6 +10,8 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/v13/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v13/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v13/key"
 )
 
@@ -27,9 +31,10 @@ type AWSConfig struct {
 // Config represents the configuration used to create a new cloudformation
 // resource.
 type Config struct {
-	APIWhitelist adapter.APIWhitelist
-	HostClients  *adapter.Clients
-	Logger       micrologger.Logger
+	APIWhitelist         adapter.APIWhitelist
+	HostClients          *adapter.Clients
+	Logger               micrologger.Logger
+	EncrypterRoleManager encrypter.RoleManager
 
 	AdvancedMonitoringEC2 bool
 	EncrypterBackend      string
@@ -39,9 +44,10 @@ type Config struct {
 
 // Resource implements the cloudformation resource.
 type Resource struct {
-	apiWhiteList adapter.APIWhitelist
-	hostClients  *adapter.Clients
-	logger       micrologger.Logger
+	apiWhiteList         adapter.APIWhitelist
+	encrypterRoleManager encrypter.RoleManager
+	hostClients          *adapter.Clients
+	logger               micrologger.Logger
 
 	encrypterBackend string
 	installationName string
@@ -62,9 +68,10 @@ func New(config Config) (*Resource, error) {
 	}
 
 	newService := &Resource{
-		apiWhiteList: config.APIWhitelist,
-		hostClients:  config.HostClients,
-		logger:       config.Logger,
+		apiWhiteList:         config.APIWhitelist,
+		hostClients:          config.HostClients,
+		logger:               config.Logger,
+		encrypterRoleManager: config.EncrypterRoleManager,
 
 		encrypterBackend: config.EncrypterBackend,
 		installationName: config.InstallationName,
@@ -93,6 +100,58 @@ func (r *Resource) getCloudFormationTags(customObject v1alpha1.AWSConfig) []*aws
 	}
 
 	return stackTags
+}
+
+func (r *Resource) getStackOutputs(ctx context.Context, stackName string) ([]*awscloudformation.Output, error) {
+	input := &awscloudformation.DescribeStacksInput{
+		StackName: aws.String(stackName),
+	}
+	sc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	output, err := sc.AWSClient.CloudFormation.DescribeStacks(input)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	if len(output.Stacks) == 0 {
+		return nil, microerror.Mask(notFoundError)
+	}
+
+	return output.Stacks[0].Outputs, nil
+}
+
+func (r *Resource) addRoleAccess(outputs []*awscloudformation.Output) error {
+	masterRoleARN := r.extractOutputValue(outputs, masterRoleARNOutputKey)
+	workerRoleARN := r.extractOutputValue(outputs, workerRoleARNOutputKey)
+
+	err := r.encrypterRoleManager.AddAWSIAMRoleToAuth(encrypter.DecrypterVaultRole, masterRoleARN, workerRoleARN)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	return nil
+}
+
+func (r *Resource) removeRoleAccess(outputs []*awscloudformation.Output) error {
+	masterRoleARN := r.extractOutputValue(outputs, masterRoleARNOutputKey)
+	workerRoleARN := r.extractOutputValue(outputs, workerRoleARNOutputKey)
+
+	err := r.encrypterRoleManager.RemoveAWSIAMRoleFromAuth(encrypter.DecrypterVaultRole, masterRoleARN, workerRoleARN)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	return nil
+}
+
+func (r *Resource) extractOutputValue(outputs []*awscloudformation.Output, key string) string {
+	for _, output := range outputs {
+		if *output.OutputKey == key {
+			return *output.OutputValue
+		}
+	}
+	return ""
 }
 
 func toCreateStackInput(v interface{}) (awscloudformation.CreateStackInput, error) {

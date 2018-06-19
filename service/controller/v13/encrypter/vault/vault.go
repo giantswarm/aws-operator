@@ -277,7 +277,7 @@ func (e *Encrypter) Decrypt(key, ciphertext string) (string, error) {
 	return string(plaintext), nil
 }
 
-func (e *Encrypter) AddAWSIAMRoleToAuth(vaultRoleName, iamRoleARN string) error {
+func (e *Encrypter) AddAWSIAMRoleToAuth(vaultRoleName string, iamRoleARNs ...string) error {
 	err := e.ensureToken()
 	if err != nil {
 		return microerror.Mask(err)
@@ -291,9 +291,13 @@ func (e *Encrypter) AddAWSIAMRoleToAuth(vaultRoleName, iamRoleARN string) error 
 	}
 
 	if role.BoundIAMRoleARN == "" {
-		role.BoundIAMRoleARN = iamRoleARN
-	} else if !strings.Contains(role.BoundIAMRoleARN, iamRoleARN) {
-		role.BoundIAMRoleARN = fmt.Sprintf("%s,%s", role.BoundIAMRoleARN, iamRoleARN)
+		role.BoundIAMRoleARN = strings.Join(iamRoleARNs, ",")
+	} else {
+		for _, iamRoleARN := range iamRoleARNs {
+			if !strings.Contains(role.BoundIAMRoleARN, iamRoleARN) {
+				role.BoundIAMRoleARN = fmt.Sprintf("%s,%s", role.BoundIAMRoleARN, iamRoleARN)
+			}
+		}
 	}
 
 	err = e.postAWSAuthRole(p, role)
@@ -304,7 +308,7 @@ func (e *Encrypter) AddAWSIAMRoleToAuth(vaultRoleName, iamRoleARN string) error 
 	return nil
 }
 
-func (e *Encrypter) RemoveAWSIAMRoleFromAuth(vaultRoleName, iamRoleARN string) error {
+func (e *Encrypter) RemoveAWSIAMRoleFromAuth(vaultRoleName string, iamRoleARNs ...string) error {
 	err := e.ensureToken()
 	if err != nil {
 		return microerror.Mask(err)
@@ -319,8 +323,9 @@ func (e *Encrypter) RemoveAWSIAMRoleFromAuth(vaultRoleName, iamRoleARN string) e
 
 	iamRoles := strings.Split(role.BoundIAMRoleARN, ",")
 	wantedIamRoles := []string{}
+	joinedIamRoleARNs := strings.Join(iamRoleARNs, ",")
 	for _, iamRole := range iamRoles {
-		if iamRole != iamRoleARN {
+		if !strings.Contains(joinedIamRoleARNs, iamRole) {
 			wantedIamRoles = append(wantedIamRoles, iamRole)
 		}
 	}

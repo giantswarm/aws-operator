@@ -22,4 +22,8 @@ Outputs:
     Value: {{ .Outputs.Worker.CloudConfig.Version }}
   VersionBundleVersion:
     Value: {{ .Outputs.VersionBundle.Version }}
+  MasterRoleARN:
+    Value: !GetAtt MasterRole .Arn
+  WorkerRoleARN:
+    Value: !GetAtt WorkerRole .Arn
 {{end}}`

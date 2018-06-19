@@ -11,6 +11,7 @@ import (
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
 	"github.com/giantswarm/aws-operator/service/controller/v13/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v13/key"
 )
 
@@ -54,6 +55,18 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			return microerror.Mask(ctx.Err())
 		} else if err != nil {
 			return microerror.Mask(err)
+		}
+
+		if r.encrypterBackend == encrypter.VaultBackend {
+			outputs, err := r.getStackOutputs(ctx, *stackInput.StackName)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			err = r.addRoleAccess(outputs)
+			if err != nil {
+				return microerror.Mask(err)
+			}
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "created the guest cluster main stack")

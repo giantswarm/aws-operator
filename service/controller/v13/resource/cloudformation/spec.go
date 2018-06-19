@@ -10,6 +10,13 @@ const (
 	workerRoleKey = "WorkerRole"
 
 	namedIAMCapability = "CAPABILITY_NAMED_IAM"
+
+	// masterRoleARNOutputKey is the key of the master role ARN output in the main
+	// guest stack.
+	masterRoleARNOutputKey = "MasterRoleARN"
+	// workerRoleARNOutputKey is the key of the worker role ARN output in the main
+	// guest stack.
+	workerRoleARNOutputKey = "WorkerRoleARN"
 )
 
 // StackState is the state representation on which the resource methods work.
