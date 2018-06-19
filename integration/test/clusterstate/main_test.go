@@ -77,17 +77,17 @@ func init() {
 			Provider: p,
 		}
 
-		cs, err = cluserstate.New(c)
+		cs, err = clusterstate.New(c)
 		if err != nil {
 			panic(err.Error())
 		}
 	}
 
-	cs = aws.NewClient()
+	c = aws.NewClient()
 }
 
 // TestMain allows us to have common setup and teardown steps that are run
 // once for all the tests https://golang.org/pkg/testing/#hdr-Main.
 func TestMain(m *testing.M) {
-	setup.WrapTestMain(c, g, h, cs)
+	setup.WrapTestMain(c, g, h, m)
 }
