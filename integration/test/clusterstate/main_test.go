@@ -55,9 +55,12 @@ func init() {
 		}
 	}
 
+	c = aws.NewClient()
+
 	var p *provider.AWS
 	{
 		c := provider.AWSConfig{
+			AWSClient:      c,
 			GuestFramework: g,
 			HostFramework:  h,
 			Logger:         l,
@@ -82,8 +85,6 @@ func init() {
 			panic(err.Error())
 		}
 	}
-
-	c = aws.NewClient()
 }
 
 // TestMain allows us to have common setup and teardown steps that are run
