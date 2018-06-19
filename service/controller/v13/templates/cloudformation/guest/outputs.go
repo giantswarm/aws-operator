@@ -23,7 +23,7 @@ Outputs:
   VersionBundleVersion:
     Value: {{ .Outputs.VersionBundle.Version }}
   MasterRoleARN:
-    Value: !GetAtt MasterRole .Arn
+    Value: !GetAtt MasterRole.Arn
   WorkerRoleARN:
-    Value: !GetAtt WorkerRole .Arn
+    Value: !GetAtt WorkerRole.Arn
 {{end}}`
