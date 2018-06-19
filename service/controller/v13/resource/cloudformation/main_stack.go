@@ -39,6 +39,7 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 		},
 		CustomObject:     customObject,
 		Clients:          adapterClients,
+		EncrypterBackend: r.encrypterBackend,
 		HostClients:      *r.hostClients,
 		InstallationName: r.installationName,
 		HostAccountID:    hostAccountID,

@@ -16,12 +16,23 @@ import (
 func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, certs legacy.CompactTLSAssets) (string, error) {
 	var err error
 
+	encryptionKey, err := c.encrypter.EncryptionKey(ctx, customObject)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
 	var params k8scloudconfig.Params
 	{
+		be := baseExtension{
+			customObject:  customObject,
+			encrypter:     c.encrypter,
+			encryptionKey: encryptionKey,
+		}
+
 		params.Cluster = customObject.Spec.Cluster
 		params.Extension = &WorkerExtension{
-			certs:        certs,
-			customObject: customObject,
+			baseExtension: be,
+			certs:         certs,
 		}
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
 	}
@@ -47,8 +58,8 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 }
 
 type WorkerExtension struct {
-	certs        legacy.CompactTLSAssets
-	customObject v1alpha1.AWSConfig
+	baseExtension
+	certs legacy.CompactTLSAssets
 }
 
 func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
@@ -133,7 +144,8 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	var newFiles []k8scloudconfig.FileAsset
 
 	for _, m := range filesMeta {
-		c, err := k8scloudconfig.RenderAssetContent(m.AssetContent, e.customObject.Spec)
+		data := e.templateData()
+		c, err := k8scloudconfig.RenderAssetContent(m.AssetContent, data)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

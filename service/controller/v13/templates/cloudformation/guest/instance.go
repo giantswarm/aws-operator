@@ -23,7 +23,9 @@ const Instance = `{{define "instance"}}
   DockerVolume:
     Type: AWS::EC2::Volume
     Properties:
+{{ if eq .Instance.Master.EncrypterBackend "kms" }}
       Encrypted: true
+{{ end }}
       Size: 50
       VolumeType: gp2
       AvailabilityZone: {{ .Instance.Master.AZ }}
@@ -33,7 +35,9 @@ const Instance = `{{define "instance"}}
   EtcdVolume:
     Type: AWS::EC2::Volume
     Properties:
+{{ if eq .Instance.Master.EncrypterBackend "kms" }}
       Encrypted: true
+{{ end }}
       Size: 100
       VolumeType: gp2
       AvailabilityZone: {{ .Instance.Master.AZ }}
