@@ -8,6 +8,8 @@ const (
 	instanceIdentityPKCS7Endpoint = "http://169.254.169.254/latest/dynamic/instance-identity/pkcs7"
 
 	defaultRole = "encrypter"
+	// fixed nonce, see https://www.vaultproject.io/api/auth/aws/index.html#nonce.
+	defaultNonce = "aws-operator"
 )
 
 type LoginPayload struct {

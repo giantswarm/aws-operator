@@ -9,6 +9,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter/vault"
 	"github.com/giantswarm/aws-operator/service/controller/v13/templates/cloudconfig"
 )
 
@@ -28,12 +29,18 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 
 	var params k8scloudconfig.Params
 	{
+		be := baseExtension{
+			customObject:  customObject,
+			encrypter:     c.encrypter,
+			encryptionKey: encryptionKey,
+		}
+
 		params.Cluster = customObject.Spec.Cluster
 		params.DisableEncryptionAtREST = true
 		params.EtcdPort = customObject.Spec.Cluster.Etcd.Port
 		params.Extension = &MasterExtension{
 			certs:            certs,
-			customObject:     customObject,
+			baseExtension:    be,
 			RandomKeyTmplSet: randomKeyTmplSet,
 		}
 		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = c.k8sAPIExtraArgs
@@ -67,8 +74,9 @@ type RandomKeyTmplSet struct {
 }
 
 type MasterExtension struct {
+	baseExtension
+
 	certs            legacy.CompactTLSAssets
-	customObject     v1alpha1.AWSConfig
 	RandomKeyTmplSet RandomKeyTmplSet
 }
 
@@ -233,7 +241,8 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	var newFiles []k8scloudconfig.FileAsset
 
 	for _, fm := range filesMeta {
-		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, e.customObject.Spec)
+		data := e.templateData()
+		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, data)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -325,6 +334,14 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 }
 
 func (e *MasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
+	var storageClasss string
+	_, ok := e.encrypter.(*vault.Encrypter)
+	if ok {
+		storageClasss = cloudconfig.InstanceStorageClass
+	} else {
+		storageClasss = cloudconfig.InstanceStorageClassEncrypted
+	}
+
 	newSections := []k8scloudconfig.VerbatimSection{
 		{
 			Name:    "storage",
@@ -332,7 +349,7 @@ func (e *MasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
 		},
 		{
 			Name:    "storageclass",
-			Content: cloudconfig.InstanceStorageClass,
+			Content: storageClasss,
 		},
 	}
 	return newSections

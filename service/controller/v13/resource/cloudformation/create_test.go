@@ -93,6 +93,7 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 			STS:            &adapter.STSClientMock{},
 		}
 		c.Logger = microloggertest.New()
+		c.EncrypterBackend = "kms"
 
 		newResource, err = New(c)
 		if err != nil {

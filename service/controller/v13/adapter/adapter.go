@@ -62,6 +62,7 @@ type Config struct {
 	APIWhitelist     APIWhitelist
 	CustomObject     v1alpha1.AWSConfig
 	Clients          Clients
+	EncrypterBackend string
 	GuestAccountID   string
 	HostAccountID    string
 	HostClients      Clients

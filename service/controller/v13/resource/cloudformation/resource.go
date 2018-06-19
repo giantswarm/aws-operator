@@ -32,6 +32,7 @@ type Config struct {
 	Logger       micrologger.Logger
 
 	AdvancedMonitoringEC2 bool
+	EncrypterBackend      string
 	InstallationName      string
 	Route53Enabled        bool
 }
@@ -42,6 +43,7 @@ type Resource struct {
 	hostClients  *adapter.Clients
 	logger       micrologger.Logger
 
+	encrypterBackend string
 	installationName string
 	monitoring       bool
 	route53Enabled   bool
@@ -55,12 +57,16 @@ func New(config Config) (*Resource, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
+	if config.EncrypterBackend == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.EncrypterBackend must not be empty")
+	}
 
 	newService := &Resource{
 		apiWhiteList: config.APIWhitelist,
 		hostClients:  config.HostClients,
 		logger:       config.Logger,
 
+		encrypterBackend: config.EncrypterBackend,
 		installationName: config.InstallationName,
 		monitoring:       config.AdvancedMonitoringEC2,
 		route53Enabled:   config.Route53Enabled,
