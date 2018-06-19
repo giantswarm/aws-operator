@@ -30,9 +30,9 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 	var params k8scloudconfig.Params
 	{
 		be := baseExtension{
-			ctx:          ctx,
-			customObject: customObject,
-			encrypter:    c.encrypter,
+			customObject:  customObject,
+			encrypter:     c.encrypter,
+			encryptionKey: encryptionKey,
 		}
 
 		params.Cluster = customObject.Spec.Cluster

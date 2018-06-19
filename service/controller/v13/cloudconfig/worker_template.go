@@ -16,12 +16,17 @@ import (
 func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, certs legacy.CompactTLSAssets) (string, error) {
 	var err error
 
+	encryptionKey, err := c.encrypter.EncryptionKey(ctx, customObject)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
 	var params k8scloudconfig.Params
 	{
 		be := baseExtension{
-			ctx:          ctx,
-			customObject: customObject,
-			encrypter:    c.encrypter,
+			customObject:  customObject,
+			encrypter:     c.encrypter,
+			encryptionKey: encryptionKey,
 		}
 
 		params.Cluster = customObject.Spec.Cluster
