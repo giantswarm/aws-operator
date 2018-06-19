@@ -121,8 +121,12 @@ func (e *Encrypter) DeleteKey(ctx context.Context, keyName string) error {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode == http.StatusBadRequest {
+		// key not found, fallthrough
+		return nil
+	}
 	if resp.StatusCode != http.StatusNoContent {
-		return microerror.Mask(invalidHTTPStatusCodeError)
+		return microerror.Maskf(invalidHTTPStatusCodeError, "want 204, got %d", resp.StatusCode)
 	}
 
 	return nil
