@@ -53,12 +53,14 @@ const (
 	MasterInstanceTypeKey         = "MasterInstanceType"
 	MasterInstanceMonitoring      = "Monitoring"
 	MasterCloudConfigVersionKey   = "MasterCloudConfigVersion"
+	MasterRoleARNKey              = "MasterRoleARN"
 	WorkerASGKey                  = "WorkerASGName"
 	WorkerCountKey                = "WorkerCount"
 	WorkerImageIDKey              = "WorkerImageID"
 	WorkerInstanceMonitoring      = "Monitoring"
 	WorkerInstanceTypeKey         = "WorkerInstanceType"
 	WorkerCloudConfigVersionKey   = "WorkerCloudConfigVersion"
+	WorkerRoleARNKey              = "WorkerRoleARN"
 	VersionBundleVersionKey       = "VersionBundleVersion"
 )
 

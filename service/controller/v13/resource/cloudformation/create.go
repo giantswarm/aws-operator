@@ -63,7 +63,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 				return microerror.Mask(err)
 			}
 
-			err = r.addRoleAccess(outputs)
+			err = r.addRoleAccess(sc, outputs)
 			if err != nil {
 				return microerror.Mask(err)
 			}

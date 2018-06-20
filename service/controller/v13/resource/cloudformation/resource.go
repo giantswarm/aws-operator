@@ -10,6 +10,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/v13/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v13/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v13/key"
 )
@@ -101,35 +102,41 @@ func (r *Resource) getCloudFormationTags(customObject v1alpha1.AWSConfig) []*aws
 	return stackTags
 }
 
-func (r *Resource) addRoleAccess(outputs []*awscloudformation.Output) error {
-	masterRoleARN := r.extractOutputValue(outputs, masterRoleARNOutputKey)
-	workerRoleARN := r.extractOutputValue(outputs, workerRoleARNOutputKey)
+func (r *Resource) addRoleAccess(sc *controllercontext.Context, outputs []*awscloudformation.Output) error {
+	masterRoleARN, err := sc.CloudFormation.GetOutputValue(outputs, key.MasterRoleARNKey)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	workerRoleARN, err := sc.CloudFormation.GetOutputValue(outputs, key.WorkerRoleARNKey)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	r.logger.Log(fmt.Sprintf("masterRoleARN: %q, workerRoleARN: %q", masterRoleARN, workerRoleARN))
-	err := r.encrypterRoleManager.AddIAMRoleToAuth(encrypter.DecrypterVaultRole, masterRoleARN, workerRoleARN)
+	err = r.encrypterRoleManager.AddIAMRoleToAuth(encrypter.DecrypterVaultRole, masterRoleARN, workerRoleARN)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 	return nil
 }
 
-func (r *Resource) removeRoleAccess(outputs []*awscloudformation.Output) error {
-	masterRoleARN := r.extractOutputValue(outputs, masterRoleARNOutputKey)
-	workerRoleARN := r.extractOutputValue(outputs, workerRoleARNOutputKey)
+func (r *Resource) removeRoleAccess(sc *controllercontext.Context, outputs []*awscloudformation.Output) error {
+	masterRoleARN, err := sc.CloudFormation.GetOutputValue(outputs, key.MasterRoleARNKey)
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
-	err := r.encrypterRoleManager.RemoveIAMRoleFromAuth(encrypter.DecrypterVaultRole, masterRoleARN, workerRoleARN)
+	workerRoleARN, err := sc.CloudFormation.GetOutputValue(outputs, key.WorkerRoleARNKey)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	err = r.encrypterRoleManager.RemoveIAMRoleFromAuth(encrypter.DecrypterVaultRole, masterRoleARN, workerRoleARN)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 	return nil
-}
-
-func (r *Resource) extractOutputValue(outputs []*awscloudformation.Output, key string) string {
-	for _, output := range outputs {
-		if *output.OutputKey == key {
-			return *output.OutputValue
-		}
-	}
-	return ""
 }
 
 func toCreateStackInput(v interface{}) (awscloudformation.CreateStackInput, error) {
