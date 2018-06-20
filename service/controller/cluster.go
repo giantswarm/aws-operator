@@ -700,6 +700,7 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 				SubnetList: config.APIWhitelist.SubnetList,
 			},
 			ProjectName:  config.ProjectName,
+			SSOPublicKey: config.SSOPublicKey,
 			VaultAddress: config.VaultAddress,
 		}
 
