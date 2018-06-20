@@ -218,6 +218,8 @@ func (a *AWS) WaitForGuestReady() error {
 			continue
 		}
 
+		a.logger.Log("level", "debug", "message", "found 2 pods of the e2e-app")
+
 		break
 	}
 
