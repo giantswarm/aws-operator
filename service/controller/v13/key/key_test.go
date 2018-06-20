@@ -1140,22 +1140,22 @@ func Test_PrivateSubnetCIDR(t *testing.T) {
 	}
 }
 
-func Test_PublicSubnetCIDR(t *testing.T) {
+func Test_CIDR(t *testing.T) {
 	t.Parallel()
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			AWS: v1alpha1.AWSConfigSpecAWS{
 				VPC: v1alpha1.AWSConfigSpecAWSVPC{
-					PublicSubnetCIDR: "172.31.0.0/16",
+					CIDR: "172.31.0.0/16",
 				},
 			},
 		},
 	}
 	expected := "172.31.0.0/16"
-	actual := PublicSubnetCIDR(customObject)
+	actual := CIDR(customObject)
 
 	if actual != expected {
-		t.Fatalf("Expected PublicSubnetCIDR %s but was %s", expected, actual)
+		t.Fatalf("Expected CIDR %s but was %s", expected, actual)
 	}
 }
 
