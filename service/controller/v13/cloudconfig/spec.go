@@ -31,12 +31,10 @@ type baseExtension struct {
 func (e *baseExtension) templateData() TemplateData {
 	var encrypterType string
 	var vaultAddress string
-	_, ok := e.encrypter.(*vault.Encrypter)
+	v, ok := e.encrypter.(*vault.Encrypter)
 	if ok {
 		encrypterType = encrypter.VaultBackend
-		// Debug, fixed vault IP
-		// vaultAddress = v.Address()
-		vaultAddress = "https://172.19.4.88:8200"
+		vaultAddress = v.Address()
 	} else {
 		encrypterType = encrypter.KMSBackend
 	}
