@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
-	"github.com/giantswarm/e2eclients/aws"
+	e2eclient "github.com/giantswarm/e2eclients/aws"
 	"github.com/giantswarm/e2etests/clusterstate"
 	"github.com/giantswarm/e2etests/clusterstate/provider"
 	"github.com/giantswarm/micrologger"
@@ -55,12 +55,15 @@ func init() {
 		}
 	}
 
-	c = aws.NewClient()
-
 	var p *provider.AWS
 	{
+		ac, err := e2eclient.NewClient()
+		if err != nil {
+			panic(err.Error())
+		}
+
 		c := provider.AWSConfig{
-			AWSClient:      c,
+			AWSClient:      ac,
 			GuestFramework: g,
 			HostFramework:  h,
 			Logger:         l,
