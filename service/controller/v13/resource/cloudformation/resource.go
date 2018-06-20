@@ -2,6 +2,7 @@ package cloudformation
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
@@ -126,7 +127,7 @@ func (r *Resource) getStackOutputs(ctx context.Context, stackName string) ([]*aw
 func (r *Resource) addRoleAccess(outputs []*awscloudformation.Output) error {
 	masterRoleARN := r.extractOutputValue(outputs, masterRoleARNOutputKey)
 	workerRoleARN := r.extractOutputValue(outputs, workerRoleARNOutputKey)
-
+	r.logger.Log(fmt.Sprintf("masterRoleARN: %q, workerRoleARN: %q", masterRoleARN, workerRoleARN))
 	err := r.encrypterRoleManager.AddAWSIAMRoleToAuth(encrypter.DecrypterVaultRole, masterRoleARN, workerRoleARN)
 	if err != nil {
 		return microerror.Mask(err)
