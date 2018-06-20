@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	c  *aws.Client
+	c  *e2eclient.Client
 	g  *framework.Guest
 	h  *framework.Host
 	cs *clusterstate.ClusterState
@@ -55,15 +55,16 @@ func init() {
 		}
 	}
 
+	c, err := e2eclient.NewClient()
+	if err != nil {
+		panic(err.Error())
+	}
+
 	var p *provider.AWS
 	{
-		ac, err := e2eclient.NewClient()
-		if err != nil {
-			panic(err.Error())
-		}
 
-		c := provider.AWSConfig{
-			AWSClient:      ac,
+		ac := provider.AWSConfig{
+			AWSClient:      c,
 			GuestFramework: g,
 			HostFramework:  h,
 			Logger:         l,
@@ -71,7 +72,7 @@ func init() {
 			ClusterID: env.ClusterID(),
 		}
 
-		p, err = provider.NewAWS(c)
+		p, err = provider.NewAWS(ac)
 		if err != nil {
 			panic(err.Error())
 		}
