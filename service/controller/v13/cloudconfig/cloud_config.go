@@ -22,6 +22,7 @@ type Config struct {
 
 	OIDC                   OIDCConfig
 	PodInfraContainerImage string
+	SSOPublicKey           string
 }
 
 // CloudConfig implements the cloud config service interface.
@@ -31,6 +32,7 @@ type CloudConfig struct {
 
 	k8sAPIExtraArgs     []string
 	k8sKubeletExtraArgs []string
+	SSOPublicKey        string
 }
 
 // OIDCConfig represents the configuration of the OIDC authorization provider
@@ -79,6 +81,7 @@ func New(config Config) (*CloudConfig, error) {
 
 		k8sAPIExtraArgs:     k8sAPIExtraArgs,
 		k8sKubeletExtraArgs: k8sKubeletExtraArgs,
+		SSOPublicKey:        config.SSOPublicKey,
 	}
 
 	return newCloudConfig, nil

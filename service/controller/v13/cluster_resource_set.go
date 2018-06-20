@@ -60,6 +60,7 @@ type ClusterResourceSetConfig struct {
 	ProjectName            string
 	Route53Enabled         bool
 	PodInfraContainerImage string
+	SSOPublicKey           string
 	VaultAddress           string
 }
 
@@ -112,6 +113,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	}
 	if config.APIWhitelist.Enabled && config.APIWhitelist.SubnetList == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.SubnetList must not be empty when %T.APIWhitelist is enabled", config)
+	}
+	if config.SSOPublicKey == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.SSOPublicKey must not be empty", config)
 	}
 
 	var encrypterObject encrypter.Interface

@@ -71,6 +71,7 @@ type ClusterConfig struct {
 	ProjectName            string
 	PubKeyFile             string
 	Route53Enabled         bool
+	SSOPublicKey           string
 	VaultAddress           string
 }
 
