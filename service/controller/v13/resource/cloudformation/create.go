@@ -58,7 +58,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		}
 
 		if r.encrypterBackend == encrypter.VaultBackend {
-			outputs, err := r.getStackOutputs(ctx, *stackInput.StackName)
+			outputs, _, err := sc.CloudFormation.DescribeOutputsAndStatus(*stackInput.StackName)
 			if err != nil {
 				return microerror.Mask(err)
 			}

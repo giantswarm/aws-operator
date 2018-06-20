@@ -45,6 +45,6 @@ type Encrypter interface {
 }
 
 type RoleManager interface {
-	AddAWSIAMRoleToAuth(vaultRoleName string, iamRoleARNs ...string) error
-	RemoveAWSIAMRoleFromAuth(vaultRoleName string, iamRoleARNs ...string) error
+	AddIAMRoleToAuth(vaultRoleName string, iamRoleARNs ...string) error
+	RemoveIAMRoleFromAuth(vaultRoleName string, iamRoleARNs ...string) error
 }

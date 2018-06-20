@@ -277,7 +277,7 @@ func (e *Encrypter) Decrypt(key, ciphertext string) (string, error) {
 	return string(plaintext), nil
 }
 
-func (e *Encrypter) AddAWSIAMRoleToAuth(vaultRoleName string, iamRoleARNs ...string) error {
+func (e *Encrypter) AddIAMRoleToAuth(vaultRoleName string, iamRoleARNs ...string) error {
 	err := e.ensureToken()
 	if err != nil {
 		return microerror.Mask(err)
@@ -311,7 +311,7 @@ func (e *Encrypter) AddAWSIAMRoleToAuth(vaultRoleName string, iamRoleARNs ...str
 	return nil
 }
 
-func (e *Encrypter) RemoveAWSIAMRoleFromAuth(vaultRoleName string, iamRoleARNs ...string) error {
+func (e *Encrypter) RemoveIAMRoleFromAuth(vaultRoleName string, iamRoleARNs ...string) error {
 	err := e.ensureToken()
 	if err != nil {
 		return microerror.Mask(err)

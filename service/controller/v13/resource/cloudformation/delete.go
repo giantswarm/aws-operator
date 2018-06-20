@@ -34,20 +34,18 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	if stackStateToDelete.Name != "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting the guest cluster main stack")
 
-		var outputs []*cloudformation.Output
-
-		stackName := key.MainGuestStackName(customObject)
-
-		if r.encrypterBackend == encrypter.VaultBackend {
-			outputs, err = r.getStackOutputs(ctx, stackName)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-		}
-
 		sc, err := controllercontext.FromContext(ctx)
 		if err != nil {
 			return microerror.Mask(err)
+		}
+
+		var outputs []*cloudformation.Output
+		stackName := key.MainGuestStackName(customObject)
+		if r.encrypterBackend == encrypter.VaultBackend {
+			outputs, _, err = sc.CloudFormation.DescribeOutputsAndStatus(stackName)
+			if err != nil {
+				return microerror.Mask(err)
+			}
 		}
 
 		i := &cloudformation.DeleteStackInput{
