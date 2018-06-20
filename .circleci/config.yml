@@ -41,6 +41,32 @@ jobs:
           if [ "${CIRCLE_BRANCH}" == "master" ]; then
             ./architect deploy
           fi
+  
+  
+  
+  e2eTestCurPRClusterState:
+    environment:
+      TESTED_VERSION: "current"
+      TEST_DIR: "integration/test/clusterstate"
+    <<: *e2eTest
+
+  e2eTestCurMasterClusterState:
+    environment:
+      TESTED_VERSION: "current"
+      TEST_DIR: "integration/test/clusterstate"
+    <<: *e2eTest
+
+  e2eTestWIPPRClusterState:
+    environment:
+      TESTED_VERSION: "wip"
+      TEST_DIR: "integration/test/clusterstate"
+    <<: *e2eTest
+
+  e2eTestWIPMasterClusterState:
+    environment:
+      TESTED_VERSION: "wip"
+      TEST_DIR: "integration/test/clusterstate"
+    <<: *e2eTest
 
 
 
@@ -66,32 +92,6 @@ jobs:
     environment:
       TESTED_VERSION: "wip"
       TEST_DIR: "integration/test/draining"
-    <<: *e2eTest
-
-
-
-  e2eTestCurPRClusterState:
-    environment:
-      TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/clusterstate"
-    <<: *e2eTest
-
-  e2eTestCurMasterClusterState:
-    environment:
-      TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/clusterstate"
-    <<: *e2eTest
-
-  e2eTestWIPPRClusterState:
-    environment:
-      TESTED_VERSION: "wip"
-      TEST_DIR: "integration/test/clusterstate"
-    <<: *e2eTest
-
-  e2eTestWIPMasterClusterState:
-    environment:
-      TESTED_VERSION: "wip"
-      TEST_DIR: "integration/test/clusterstate"
     <<: *e2eTest
 
 
@@ -137,27 +137,6 @@ workflows:
 
 
 
-      - e2eTestCurPRDraining:
-          requires:
-          - hold
-      - e2eTestWIPPRDraining:
-          requires:
-          - hold
-      - e2eTestCurMasterDraining:
-          filters:
-            branches:
-              only: master
-          requires:
-          - build
-      - e2eTestWIPMasterDraining:
-          filters:
-            branches:
-              only: master
-          requires:
-          - build
-
-
-
       - e2eTestCurPRClusterState:
           requires:
           - hold
@@ -171,6 +150,29 @@ workflows:
           requires:
           - build
       - e2eTestWIPMasterClusterState:
+          filters:
+            branches:
+              only: master
+          requires:
+          - build
+
+
+
+
+
+      - e2eTestCurPRDraining:
+          requires:
+          - hold
+      - e2eTestWIPPRDraining:
+          requires:
+          - hold
+      - e2eTestCurMasterDraining:
+          filters:
+            branches:
+              only: master
+          requires:
+          - build
+      - e2eTestWIPMasterDraining:
           filters:
             branches:
               only: master
