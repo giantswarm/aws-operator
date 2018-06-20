@@ -185,6 +185,15 @@ func (a *AWS) ReplaceMaster() error {
 	return nil
 }
 
+func (a *AWS) WaitForAPIDown() error {
+	err := a.guestFramework.WaitForAPIDown()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
 func (a *AWS) WaitForGuestReady() error {
 	err := a.guestFramework.WaitForGuestReady()
 	if err != nil {

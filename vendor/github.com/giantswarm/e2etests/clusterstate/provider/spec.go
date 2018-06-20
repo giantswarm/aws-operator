@@ -12,6 +12,7 @@ type Interface interface {
 	InstallTestApp() error
 	RebootMaster() error
 	ReplaceMaster() error
+	WaitForAPIDown() error
 	WaitForGuestReady() error
 }
 

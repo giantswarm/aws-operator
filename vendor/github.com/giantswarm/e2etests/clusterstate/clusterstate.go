@@ -72,6 +72,17 @@ func (c *ClusterState) Test(ctx context.Context) error {
 	}
 
 	{
+		c.logger.LogCtx(ctx, "level", "debug", "message", "waiting api to go down")
+
+		err = c.provider.WaitForAPIDown()
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		c.logger.LogCtx(ctx, "level", "debug", "message", "api is down")
+	}
+
+	{
 		c.logger.LogCtx(ctx, "level", "debug", "message", "waiting for guest cluster")
 
 		err = c.provider.WaitForGuestReady()
@@ -91,6 +102,17 @@ func (c *ClusterState) Test(ctx context.Context) error {
 		}
 
 		c.logger.LogCtx(ctx, "level", "debug", "message", "master node replaced")
+	}
+
+	{
+		c.logger.LogCtx(ctx, "level", "debug", "message", "waiting api to go down")
+
+		err = c.provider.WaitForAPIDown()
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		c.logger.LogCtx(ctx, "level", "debug", "message", "api is down")
 	}
 
 	{

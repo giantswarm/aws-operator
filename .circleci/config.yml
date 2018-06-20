@@ -70,25 +70,25 @@ jobs:
 
 
 
-  e2eTestCurPRReboot:
+  e2eTestCurPRClusterState:
     environment:
       TESTED_VERSION: "current"
       TEST_DIR: "integration/test/clusterstate"
     <<: *e2eTest
 
-  e2eTestCurMasterReboot:
+  e2eTestCurMasterClusterState:
     environment:
       TESTED_VERSION: "current"
       TEST_DIR: "integration/test/clusterstate"
     <<: *e2eTest
 
-  e2eTestWIPPRReboot:
+  e2eTestWIPPRClusterState:
     environment:
       TESTED_VERSION: "wip"
       TEST_DIR: "integration/test/clusterstate"
     <<: *e2eTest
 
-  e2eTestWIPMasterReboot:
+  e2eTestWIPMasterClusterState:
     environment:
       TESTED_VERSION: "wip"
       TEST_DIR: "integration/test/clusterstate"
@@ -158,19 +158,19 @@ workflows:
 
 
 
-      - e2eTestCurPRReboot:
+      - e2eTestCurPRClusterState:
           requires:
           - hold
-      - e2eTestWIPPRReboot:
+      - e2eTestWIPPRClusterState:
           requires:
           - hold
-      - e2eTestCurMasterReboot:
+      - e2eTestCurMasterClusterState:
           filters:
             branches:
               only: master
           requires:
           - build
-      - e2eTestWIPMasterReboot:
+      - e2eTestWIPMasterClusterState:
           filters:
             branches:
               only: master
