@@ -436,6 +436,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 				OIDC: config.OIDC,
 				PodInfraContainerImage: config.PodInfraContainerImage,
+				SSOPublicKey:           config.SSOPublicKey,
 			}
 
 			cloudConfig, err = cloudconfig.New(c)
