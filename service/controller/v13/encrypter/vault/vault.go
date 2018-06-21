@@ -291,16 +291,13 @@ func (e *Encrypter) AddIAMRoleToAuth(vaultRoleName string, iamRoleARNs ...string
 	}
 
 	if role.BoundIAMRoleARN == "" {
-		e.logger.Log(fmt.Sprintf("empty bound_iam_role, setting %q", strings.Join(iamRoleARNs, ",")))
 		role.BoundIAMRoleARN = strings.Join(iamRoleARNs, ",")
 	} else {
-		e.logger.Log(fmt.Sprintf("not empty bound_iam_role, value %q", role.BoundIAMRoleARN))
 		for _, iamRoleARN := range iamRoleARNs {
 			if !strings.Contains(role.BoundIAMRoleARN, iamRoleARN) {
 				role.BoundIAMRoleARN = fmt.Sprintf("%s,%s", role.BoundIAMRoleARN, iamRoleARN)
 			}
 		}
-		e.logger.Log(fmt.Sprintf("bound_iam_role value %q", role.BoundIAMRoleARN))
 	}
 
 	err = e.postAWSAuthRole(p, role)
@@ -508,7 +505,6 @@ func (e *Encrypter) getAWSAuthRole(path string) (*AWSAuthRole, error) {
 }
 
 func (e *Encrypter) postAWSAuthRole(path string, role *AWSAuthRole) error {
-	e.logger.Log(fmt.Sprintf("posting role %#v", role))
 	req, err := e.newPayloadRequest(path, role)
 	if err != nil {
 		return microerror.Mask(err)
@@ -521,7 +517,7 @@ func (e *Encrypter) postAWSAuthRole(path string, role *AWSAuthRole) error {
 
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusNoContent {
 		body, _ := ioutil.ReadAll(resp.Body)
 		return microerror.Maskf(invalidHTTPStatusCodeError, "want 200, got %d, response body: %q", resp.StatusCode, body)
 	}
