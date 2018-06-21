@@ -17,6 +17,8 @@ const AWSOperatorChartValues = `Installation:
                 IssueURL: ""
                 UsernameClaim: ""
                 GroupsClaim: ""
+      SSH:
+        SSOPublicKey: 'test'
       Update:
         Enabled: ${GUEST_UPDATE_ENABLED}
     Name: ci-aws-operator
