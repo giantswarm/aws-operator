@@ -64,11 +64,11 @@ type AWSAuthRoleResponse struct {
 }
 
 type AWSAuthRole struct {
-	AuthType                 string `json:"auth_type"`
-	BoundRegion              string `json:"bound_region"`
-	BoundIAMRoleARN          string `json:"bound_iam_role_arn"`
-	Policies                 string `json:"policies"`
-	MaxTTL                   string `json:"max_ttl"`
-	DisallowReauthentication string `json:"disallow_reauthentication"`
-	AllowInstanceMigration   string `json:"allow_instance_migration"`
+	AuthType                 string   `json:"auth_type"`
+	BoundRegion              string   `json:"bound_region"`
+	BoundIAMRoleARN          []string `json:"bound_iam_role_arn"`
+	Policies                 []string `json:"policies"`
+	MaxTTL                   int      `json:"max_ttl"`
+	DisallowReauthentication bool     `json:"disallow_reauthentication"`
+	AllowInstanceMigration   bool     `json:"allow_instance_migration"`
 }
