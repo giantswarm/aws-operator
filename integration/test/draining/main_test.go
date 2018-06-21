@@ -48,7 +48,10 @@ func TestMain(m *testing.M) {
 		}
 	}
 
-	c = aws.NewClient()
+	c, err = aws.NewClient()
+	if err != nil {
+		panic(err.Error())
+	}
 
 	setup.WrapTestMain(c, g, h, m)
 }
