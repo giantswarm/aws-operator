@@ -290,16 +290,14 @@ func (e *Encrypter) AddIAMRoleToAuth(vaultRoleName string, iamRoleARNs ...string
 		return microerror.Mask(err)
 	}
 
-	if role.BoundIAMRoleARN == nil {
+	if role.BoundIAMRoleARN == "" {
 		e.logger.Log(fmt.Sprintf("empty bound_iam_role, setting %q", strings.Join(iamRoleARNs, ",")))
-		role.BoundIAMRoleARN = iamRoleARNs
+		role.BoundIAMRoleARN = strings.Join(iamRoleARNs, ",")
 	} else {
-
 		e.logger.Log(fmt.Sprintf("not empty bound_iam_role, value %q", role.BoundIAMRoleARN))
-		boundIAMRoleARN := strings.Join(role.BoundIAMRoleARN, ",")
 		for _, iamRoleARN := range iamRoleARNs {
-			if !strings.Contains(boundIAMRoleARN, iamRoleARN) {
-				role.BoundIAMRoleARN = append(role.BoundIAMRoleARN, iamRoleARN)
+			if !strings.Contains(role.BoundIAMRoleARN, iamRoleARN) {
+				role.BoundIAMRoleARN = fmt.Sprintf("%s,%s", role.BoundIAMRoleARN, iamRoleARN)
 			}
 		}
 		e.logger.Log(fmt.Sprintf("bound_iam_role value %q", role.BoundIAMRoleARN))
@@ -326,14 +324,15 @@ func (e *Encrypter) RemoveIAMRoleFromAuth(vaultRoleName string, iamRoleARNs ...s
 		return microerror.Mask(err)
 	}
 
+	iamRoles := strings.Split(role.BoundIAMRoleARN, ",")
 	wantedIamRoles := []string{}
 	joinedIamRoleARNs := strings.Join(iamRoleARNs, ",")
-	for _, iamRole := range role.BoundIAMRoleARN {
+	for _, iamRole := range iamRoles {
 		if !strings.Contains(joinedIamRoleARNs, iamRole) {
 			wantedIamRoles = append(wantedIamRoles, iamRole)
 		}
 	}
-	role.BoundIAMRoleARN = wantedIamRoles
+	role.BoundIAMRoleARN = strings.Join(wantedIamRoles, ",")
 
 	err = e.postAWSAuthRole(p, role)
 	if err != nil {

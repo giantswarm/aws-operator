@@ -1,8 +1,6 @@
 package cloudformation
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
@@ -111,7 +109,6 @@ func (r *Resource) addRoleAccess(sc *controllercontext.Context, customObject v1a
 	masterRoleARN := key.MasterRoleARN(customObject, accountID)
 	workerRoleARN := key.WorkerRoleARN(customObject, accountID)
 
-	r.logger.Log(fmt.Sprintf("masterRoleARN: %q, workerRoleARN: %q", masterRoleARN, workerRoleARN))
 	err = r.encrypterRoleManager.AddIAMRoleToAuth(encrypter.DecrypterVaultRole, masterRoleARN, workerRoleARN)
 	if err != nil {
 		return microerror.Mask(err)
