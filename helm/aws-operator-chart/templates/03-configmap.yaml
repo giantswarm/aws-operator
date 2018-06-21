@@ -23,6 +23,8 @@ data:
         publicRouteTables: '{{ .Values.Installation.V1.Provider.AWS.PublicRouteTableNames }}'
         vaultAddress: '{{ .Values.Installation.V1.Auth.Vault.Address }}'
       guest:
+        ssh:
+          ssoPublicKey: '{{ .Values.Installation.V1.Guest.SSH.SSOPublicKey }}'
         update:
           enabled: {{ .Values.Installation.V1.Guest.Update.Enabled }}
       installation:

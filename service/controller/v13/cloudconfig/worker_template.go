@@ -5,7 +5,7 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/legacy"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_3_3"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_4_0"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v13/templates/cloudconfig"
@@ -35,6 +35,7 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 			certs:         certs,
 		}
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
+		params.SSOPublicKey = c.SSOPublicKey
 	}
 
 	var newCloudConfig *k8scloudconfig.CloudConfig

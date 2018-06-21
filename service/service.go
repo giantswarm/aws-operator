@@ -148,6 +148,7 @@ func New(config Config) (*Service, error) {
 			PubKeyFile:             config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile),
 			PublicRouteTables:      config.Viper.GetString(config.Flag.Service.AWS.PublicRouteTables),
 			Route53Enabled:         config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
+			SSOPublicKey:           config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
 			VaultAddress:           config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
 		}
 

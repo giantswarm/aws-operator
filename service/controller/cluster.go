@@ -72,6 +72,7 @@ type ClusterConfig struct {
 	PubKeyFile             string
 	PublicRouteTables      string
 	Route53Enabled         bool
+	SSOPublicKey           string
 	VaultAddress           string
 }
 
@@ -701,6 +702,7 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 			},
 			ProjectName:       config.ProjectName,
 			PublicRouteTables: config.PublicRouteTables,
+			SSOPublicKey:      config.SSOPublicKey,
 			VaultAddress:      config.VaultAddress,
 		}
 
