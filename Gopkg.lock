@@ -245,7 +245,7 @@
   branch = "master"
   name = "github.com/giantswarm/e2etemplates"
   packages = ["pkg/e2etemplates"]
-  revision = "e9c2163f85a43bd48eadf8c08531130f3642de02"
+  revision = "f60b47d58ebbcc919ce94918af33ac2cb155a4c8"
 
 [[projects]]
   branch = "master-node"
@@ -284,9 +284,10 @@
     "v_3_2_5",
     "v_3_2_6",
     "v_3_3_1",
-    "v_3_3_3"
+    "v_3_3_3",
+    "v_3_4_0"
   ]
-  revision = "cf4b32b3be41093a962a86e9ec757d924a0ff614"
+  revision = "db8017556986e8783e398d8a460aed39fde7aff5"
 
 [[projects]]
   branch = "master"
