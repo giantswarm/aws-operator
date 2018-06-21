@@ -40,8 +40,9 @@ func New(config Config) (*ClusterState, error) {
 	}
 
 	s := &ClusterState{
-		logger:   config.Logger,
-		provider: config.Provider,
+		guestFramework: config.GuestFramework,
+		logger:         config.Logger,
+		provider:       config.Provider,
 	}
 
 	return s, nil

@@ -59,7 +59,7 @@ func NewAzure(config AzureConfig) (*Azure, error) {
 
 func (a *Azure) RebootMaster() error {
 	resourceGroupName := a.clusterID
-	masterVMName := fmt.Sprintf("%s-Master-1", a.clusterID)
+	masterVMName := fmt.Sprintf("%s-master_0", a.clusterID)
 	_, err := a.azureClient.VirtualMachineClient.Restart(context.TODO(), resourceGroupName, masterVMName)
 	if err != nil {
 		return microerror.Mask(err)
