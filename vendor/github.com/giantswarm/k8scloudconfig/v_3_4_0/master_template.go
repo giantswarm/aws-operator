@@ -890,6 +890,20 @@ write_files:
       name: system:kube-scheduler
       apiGroup: rbac.authorization.k8s.io
     ---
+    ## node-operator
+    kind: ClusterRoleBinding
+    apiVersion: rbac.authorization.k8s.io/v1
+    metadata:
+      name: node-operator
+    subjects:
+    - kind: User
+      name: node-operator.{{.Cluster.Kubernetes.Domain}}
+      apiGroup: rbac.authorization.k8s.io
+    roleRef:
+      kind: ClusterRole
+      name: node-operator
+      apiGroup: rbac.authorization.k8s.io
+    ---
     ## Calico
     kind: ClusterRoleBinding
     apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -950,6 +964,19 @@ write_files:
   owner: root
   permissions: 0644
   content: |
+    ## node-operator
+    kind: ClusterRole
+    apiVersion: rbac.authorization.k8s.io/v1
+    metadata:
+      name: node-operator
+    rules:
+    - apiGroups: [""]
+      resources: ["nodes"]
+      verbs: ["patch"]
+    - apiGroups: [""]
+      resources: ["pods"]
+      verbs: ["list", "delete"]
+    ---
     ## Calico
     kind: ClusterRole
     apiVersion: rbac.authorization.k8s.io/v1beta1
