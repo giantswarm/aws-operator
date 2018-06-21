@@ -1284,3 +1284,103 @@ func Test_RegionARN(t *testing.T) {
 		})
 	}
 }
+
+func Test_MasterRoleARN(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		description     string
+		customObject    v1alpha1.AWSConfig
+		accountID       string
+		expectedRoleARN string
+	}{
+		{
+			description: "common partition",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "myclusterid",
+					},
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "eu-central-1",
+					},
+				},
+			},
+			accountID:       "myaccountid",
+			expectedRoleARN: "arn:aws:iam::myaccountid:role/myclusterid-master-EC2-K8S-Role",
+		},
+		{
+			description: "china partition",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "myclusterid",
+					},
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "cn-north-1",
+					},
+				},
+			},
+			accountID:       "myaccountid",
+			expectedRoleARN: "arn:aws-cn:iam::myaccountid:role/myclusterid-master-EC2-K8S-Role",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			roleARN := MasterRoleARN(tc.customObject, tc.accountID)
+			if tc.expectedRoleARN != roleARN {
+				t.Errorf("unexpected Master role ARN, expecting %q, want %q", tc.expectedRoleARN, roleARN)
+			}
+		})
+	}
+}
+
+func Test_WorkerRoleARN(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		description     string
+		customObject    v1alpha1.AWSConfig
+		accountID       string
+		expectedRoleARN string
+	}{
+		{
+			description: "common partition",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "myclusterid",
+					},
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "eu-central-1",
+					},
+				},
+			},
+			accountID:       "myaccountid",
+			expectedRoleARN: "arn:aws:iam::myaccountid:role/myclusterid-worker-EC2-K8S-Role",
+		},
+		{
+			description: "china partition",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "myclusterid",
+					},
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "cn-north-1",
+					},
+				},
+			},
+			accountID:       "myaccountid",
+			expectedRoleARN: "arn:aws-cn:iam::myaccountid:role/myclusterid-worker-EC2-K8S-Role",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			roleARN := WorkerRoleARN(tc.customObject, tc.accountID)
+			if tc.expectedRoleARN != roleARN {
+				t.Errorf("unexpected Worker role ARN, expecting %q, want %q", tc.expectedRoleARN, roleARN)
+			}
+		})
+	}
+}
