@@ -102,16 +102,14 @@ func (r *Resource) getCloudFormationTags(customObject v1alpha1.AWSConfig) []*aws
 	return stackTags
 }
 
-func (r *Resource) addRoleAccess(sc *controllercontext.Context, outputs []*awscloudformation.Output) error {
-	masterRoleARN, err := sc.CloudFormation.GetOutputValue(outputs, key.MasterRoleARNKey)
+func (r *Resource) addRoleAccess(sc *controllercontext.Context, customObject v1alpha1.AWSConfig) error {
+	accountID, err := sc.AWSService.GetAccountID()
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	workerRoleARN, err := sc.CloudFormation.GetOutputValue(outputs, key.WorkerRoleARNKey)
-	if err != nil {
-		return microerror.Mask(err)
-	}
+	masterRoleARN := key.MasterRoleARN(customObject, accountID)
+	workerRoleARN := key.WorkerRoleARN(customObject, accountID)
 
 	r.logger.Log(fmt.Sprintf("masterRoleARN: %q, workerRoleARN: %q", masterRoleARN, workerRoleARN))
 	err = r.encrypterRoleManager.AddIAMRoleToAuth(encrypter.DecrypterVaultRole, masterRoleARN, workerRoleARN)
@@ -121,16 +119,14 @@ func (r *Resource) addRoleAccess(sc *controllercontext.Context, outputs []*awscl
 	return nil
 }
 
-func (r *Resource) removeRoleAccess(sc *controllercontext.Context, outputs []*awscloudformation.Output) error {
-	masterRoleARN, err := sc.CloudFormation.GetOutputValue(outputs, key.MasterRoleARNKey)
+func (r *Resource) removeRoleAccess(sc *controllercontext.Context, customObject v1alpha1.AWSConfig) error {
+	accountID, err := sc.AWSService.GetAccountID()
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	workerRoleARN, err := sc.CloudFormation.GetOutputValue(outputs, key.WorkerRoleARNKey)
-	if err != nil {
-		return microerror.Mask(err)
-	}
+	masterRoleARN := key.MasterRoleARN(customObject, accountID)
+	workerRoleARN := key.WorkerRoleARN(customObject, accountID)
 
 	err = r.encrypterRoleManager.RemoveIAMRoleFromAuth(encrypter.DecrypterVaultRole, masterRoleARN, workerRoleARN)
 	if err != nil {

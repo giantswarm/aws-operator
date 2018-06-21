@@ -53,14 +53,12 @@ const (
 	MasterInstanceTypeKey         = "MasterInstanceType"
 	MasterInstanceMonitoring      = "Monitoring"
 	MasterCloudConfigVersionKey   = "MasterCloudConfigVersion"
-	MasterRoleARNKey              = "MasterRoleARN"
 	WorkerASGKey                  = "WorkerASGName"
 	WorkerCountKey                = "WorkerCount"
 	WorkerImageIDKey              = "WorkerImageID"
 	WorkerInstanceMonitoring      = "Monitoring"
 	WorkerInstanceTypeKey         = "WorkerInstanceType"
 	WorkerCloudConfigVersionKey   = "WorkerCloudConfigVersion"
-	WorkerRoleARNKey              = "WorkerRoleARN"
 	VersionBundleVersionKey       = "VersionBundleVersion"
 )
 
@@ -311,6 +309,10 @@ func MasterInstanceType(customObject v1alpha1.AWSConfig) string {
 	return instanceType
 }
 
+func MasterRoleARN(customObject v1alpha1.AWSConfig, accountID string) string {
+	return baseRoleARN(customObject, accountID, "master")
+}
+
 func PeerAccessRoleName(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-vpc-peer-access", ClusterID(customObject))
 }
@@ -415,6 +417,17 @@ func WorkerInstanceType(customObject v1alpha1.AWSConfig) string {
 	}
 
 	return instanceType
+}
+
+func WorkerRoleARN(customObject v1alpha1.AWSConfig, accountID string) string {
+	return baseRoleARN(customObject, accountID, "worker")
+}
+
+func baseRoleARN(customObject v1alpha1.AWSConfig, accountID string, kind string) string {
+	clusterID := ClusterID(customObject)
+	partition := RegionARN(customObject)
+
+	return fmt.Sprintf("arn:%s:iam::%s:role/%s-%s-%s", partition, accountID, clusterID, kind, RoleNameTemplate)
 }
 
 // componentName returns the first component of a domain name.

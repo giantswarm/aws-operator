@@ -29,6 +29,18 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			return microerror.Mask(err)
 		}
 
+		if r.encrypterBackend == encrypter.VaultBackend {
+			customObject, err := key.ToCustomObject(obj)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			err = r.addRoleAccess(sc, customObject)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+
 		_, err = sc.AWSClient.CloudFormation.CreateStack(&stackInput)
 		if IsAlreadyExists(err) {
 			// fall through
@@ -55,18 +67,6 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			return microerror.Mask(ctx.Err())
 		} else if err != nil {
 			return microerror.Mask(err)
-		}
-
-		if r.encrypterBackend == encrypter.VaultBackend {
-			outputs, _, err := sc.CloudFormation.DescribeOutputsAndStatus(*stackInput.StackName)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			err = r.addRoleAccess(sc, outputs)
-			if err != nil {
-				return microerror.Mask(err)
-			}
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "created the guest cluster main stack")

@@ -39,15 +39,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			return microerror.Mask(err)
 		}
 
-		var outputs []*cloudformation.Output
 		stackName := key.MainGuestStackName(customObject)
-		if r.encrypterBackend == encrypter.VaultBackend {
-			outputs, _, err = sc.CloudFormation.DescribeOutputsAndStatus(stackName)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-		}
-
 		i := &cloudformation.DeleteStackInput{
 			StackName: aws.String(stackName),
 		}
@@ -57,7 +49,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		}
 
 		if r.encrypterBackend == encrypter.VaultBackend {
-			err = r.removeRoleAccess(sc, outputs)
+			err = r.removeRoleAccess(sc, customObject)
 			if err != nil {
 				return microerror.Mask(err)
 			}
