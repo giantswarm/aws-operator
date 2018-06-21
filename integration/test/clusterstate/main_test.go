@@ -55,9 +55,11 @@ func init() {
 		}
 	}
 
-	c, err := e2eclient.NewClient()
-	if err != nil {
-		panic(err.Error())
+	{
+		c, err := e2eclient.NewClient()
+		if err != nil {
+			panic(err.Error())
+		}
 	}
 
 	var p *provider.AWS
@@ -79,12 +81,12 @@ func init() {
 	}
 
 	{
-		c := clusterstate.Config{
+		cc := clusterstate.Config{
 			Logger:   l,
 			Provider: p,
 		}
 
-		cs, err = clusterstate.New(c)
+		cs, err = clusterstate.New(cc)
 		if err != nil {
 			panic(err.Error())
 		}

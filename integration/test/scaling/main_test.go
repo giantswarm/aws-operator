@@ -83,7 +83,12 @@ func init() {
 		}
 	}
 
-	c = aws.NewClient()
+	{
+		c, err = aws.NewClient()
+		if err != nil {
+			panic(err.Error())
+		}
+	}
 }
 
 // TestMain allows us to have common setup and teardown steps that are run
