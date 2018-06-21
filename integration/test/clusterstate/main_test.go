@@ -66,10 +66,9 @@ func init() {
 	{
 
 		ac := provider.AWSConfig{
-			AWSClient:      c,
-			GuestFramework: g,
-			HostFramework:  h,
-			Logger:         l,
+			AWSClient:     c,
+			HostFramework: h,
+			Logger:        l,
 
 			ClusterID: env.ClusterID(),
 		}
@@ -82,8 +81,9 @@ func init() {
 
 	{
 		cc := clusterstate.Config{
-			Logger:   l,
-			Provider: p,
+			GuestFramework: g,
+			Logger:         l,
+			Provider:       p,
 		}
 
 		cs, err = clusterstate.New(cc)
