@@ -39,9 +39,8 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			return microerror.Mask(err)
 		}
 
-		stackName := key.MainGuestStackName(customObject)
 		i := &cloudformation.DeleteStackInput{
-			StackName: aws.String(stackName),
+			StackName: aws.String(key.MainGuestStackName(customObject)),
 		}
 		_, err = sc.AWSClient.CloudFormation.DeleteStack(i)
 		if err != nil {
