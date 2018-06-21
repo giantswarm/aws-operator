@@ -498,13 +498,13 @@ func (e *Encrypter) getAWSAuthRole(path string) (*AWSAuthRole, error) {
 		return nil, microerror.Maskf(invalidHTTPStatusCodeError, "want 200, got %d, response body: %q", resp.StatusCode, body)
 	}
 
-	role := &AWSAuthRole{}
-	err = json.NewDecoder(resp.Body).Decode(role)
+	roleResponse := &AWSAuthRoleResponse{}
+	err = json.NewDecoder(resp.Body).Decode(roleResponse)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	return role, nil
+	return &roleResponse.Data, nil
 }
 
 func (e *Encrypter) postAWSAuthRole(path string, role *AWSAuthRole) error {

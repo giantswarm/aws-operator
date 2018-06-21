@@ -59,6 +59,10 @@ type DecryptResponseData struct {
 	Plaintext string `json:"plaintext"`
 }
 
+type AWSAuthRoleResponse struct {
+	Data AWSAuthRole `json:"data"`
+}
+
 type AWSAuthRole struct {
 	AuthType                 string `json:"auth_type"`
 	BoundRegion              string `json:"bound_region"`
