@@ -1,7 +1,6 @@
 package azure
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
@@ -35,22 +34,22 @@ func NewClient() (*Client, error) {
 	{
 		azureClientID = os.Getenv(envVarAzureClientID)
 		if azureClientID == "" {
-			return nil, microerror.Maskf(invalidConfigError, fmt.Sprintf("%s must be set", envVarAzureClientID))
+			return nil, microerror.Maskf(invalidConfigError, "%s must be set", envVarAzureClientID)
 		}
 
 		azureClientSecret = os.Getenv(envVarAzureClientSecret)
 		if azureClientSecret == "" {
-			return nil, microerror.Maskf(invalidConfigError, fmt.Sprintf("%s must be set", envVarAzureClientSecret))
+			return nil, microerror.Maskf(invalidConfigError, "%s must be set", envVarAzureClientSecret)
 		}
 
 		azureSubscriptionID = os.Getenv(envVarAzureSubscriptionID)
 		if azureSubscriptionID == "" {
-			return nil, microerror.Maskf(invalidConfigError, fmt.Sprintf("%s must be set", envVarAzureSubscriptionID))
+			return nil, microerror.Maskf(invalidConfigError, "%s must be set", envVarAzureSubscriptionID)
 		}
 
 		azureTenantID = os.Getenv(envVarAzureTenantID)
 		if azureTenantID == "" {
-			return nil, microerror.Maskf(invalidConfigError, fmt.Sprintf("%s must be set", envVarAzureTenantID))
+			return nil, microerror.Maskf(invalidConfigError, "%s must be set", envVarAzureTenantID)
 		}
 
 		env, err := azure.EnvironmentFromName(azure.PublicCloud.Name)

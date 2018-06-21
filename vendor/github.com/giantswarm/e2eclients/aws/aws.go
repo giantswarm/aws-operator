@@ -1,7 +1,6 @@
 package aws
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -40,20 +39,22 @@ type Client struct {
 func NewClient() (*Client, error) {
 	a := &Client{}
 
-	region = os.Getenv(envVarRegion)
-	if region == "" {
-		return nil, microerror.Maskf(invalidConfigError, "AWS_REGION must be set")
+	{
+		region = os.Getenv(envVarRegion)
+		if region == "" {
+			return nil, microerror.Maskf(invalidConfigError, "%s must be set", envVarRegion)
+		}
 	}
 
 	{
 		guestAccessKeyID = os.Getenv(envVarGuestAccessKeyID)
 		if guestAccessKeyID == "" {
-			return nil, microerror.Maskf(invalidConfigError, fmt.Sprintf("%s must be set", envVarGuestAccessKeyID))
+			return nil, microerror.Maskf(invalidConfigError, "%s must be set", envVarGuestAccessKeyID)
 		}
 
 		guestSecretAccessKey = os.Getenv(envVarGuestSecretAccessKey)
 		if guestSecretAccessKey == "" {
-			return nil, microerror.Maskf(invalidConfigError, fmt.Sprintf("%s must be set", envVarGuestSecretAccessKey))
+			return nil, microerror.Maskf(invalidConfigError, "%s must be set", envVarGuestSecretAccessKey)
 		}
 
 		guestSessionToken = os.Getenv(envVarGuestSessionToken)
@@ -70,12 +71,12 @@ func NewClient() (*Client, error) {
 	{
 		hostAccessKeyID = os.Getenv(envVarHostAccessKeyID)
 		if hostAccessKeyID == "" {
-			return nil, microerror.Maskf(invalidConfigError, fmt.Sprintf("%s must be set", envVarHostAccessKeyID))
+			return nil, microerror.Maskf(invalidConfigError, "%s must be set", envVarHostAccessKeyID)
 		}
 
 		hostSecretAccessKey = os.Getenv(envVarHostSecretAccessKey)
 		if hostSecretAccessKey == "" {
-			return nil, microerror.Maskf(invalidConfigError, fmt.Sprintf("%s must be set", envVarHostSecretAccessKey))
+			return nil, microerror.Maskf(invalidConfigError, "%s must be set", envVarHostSecretAccessKey)
 		}
 
 		hostSessionToken = os.Getenv(envVarHostSessionToken)
@@ -86,7 +87,6 @@ func NewClient() (*Client, error) {
 				hostSessionToken),
 			Region: aws.String(region),
 		}
-		a.EC2 = ec2.New(session.New(c))
 		a.CloudFormation = cloudformation.New(session.New(c))
 	}
 

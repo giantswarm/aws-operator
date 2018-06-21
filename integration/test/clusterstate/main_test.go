@@ -17,9 +17,9 @@ import (
 
 var (
 	c  *e2eclient.Client
+	cs *clusterstate.ClusterState
 	g  *framework.Guest
 	h  *framework.Host
-	cs *clusterstate.ClusterState
 )
 
 func init() {
