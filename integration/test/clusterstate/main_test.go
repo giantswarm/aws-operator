@@ -56,7 +56,7 @@ func init() {
 	}
 
 	{
-		c, err := e2eclient.NewClient()
+		c, err = e2eclient.NewClient()
 		if err != nil {
 			panic(err.Error())
 		}
