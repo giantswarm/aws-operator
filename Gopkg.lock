@@ -224,7 +224,7 @@
   branch = "master"
   name = "github.com/giantswarm/e2eclients"
   packages = ["aws"]
-  revision = "cb45cf36a000b2212427dac1697740dd316d2f0b"
+  revision = "d3e0cea898a742752b5dc9564f566777d1891d61"
 
 [[projects]]
   branch = "master"
