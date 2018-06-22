@@ -129,9 +129,11 @@ func (r *Resource) getMainHostPostTemplateBody(ctx context.Context, customObject
 	}
 
 	cfg := adapter.Config{
-		CustomObject: customObject,
-		Clients:      adapterClients,
-		HostClients:  *r.hostClients,
+		CustomObject:      customObject,
+		Clients:           adapterClients,
+		HostClients:       *r.hostClients,
+		EncrypterBackend:  r.encrypterBackend,
+		PublicRouteTables: r.publicRouteTables,
 	}
 	adp, err := adapter.NewHostPost(cfg)
 	if err != nil {
