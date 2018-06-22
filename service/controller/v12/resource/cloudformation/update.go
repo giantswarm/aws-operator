@@ -2,12 +2,14 @@ package cloudformation
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
 
@@ -166,7 +168,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the guest cluster main stack has to be scaled")
 
-		if shouldScale(currentStackState, desiredStackState) {
+		if shouldScale(currentStackState, desiredStackState, r.logger, ctx) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack has to be scaled")
 
 			desiredStackState.MasterInstanceResourceName = currentStackState.MasterInstanceResourceName
@@ -197,31 +199,43 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 // changes. In case anything else changes as well, scaling is not allowed, since
 // any other changes should be covered by general updates, which is a separate
 // step.
-func shouldScale(currentState, desiredState StackState) bool {
+func shouldScale(currentState, desiredState StackState, logger micrologger.Logger, ctx context.Context) bool {
+	logger.LogCtx(ctx, "level", "debug", fmt.Sprintf("CURRENT WORKER COUNT %s", currentState.WorkerCount))
+	logger.LogCtx(ctx, "level", "debug", fmt.Sprintf("DESIRED WORKER COUNT %s", desiredState.WorkerCount))
+
 	if currentState.MasterImageID != desiredState.MasterImageID {
+		logger.LogCtx(ctx, "level", "debug", "NOT SCALING DUE TO MASTER IMAGE")
 		return false
 	}
 	if currentState.MasterInstanceType != desiredState.MasterInstanceType {
+		logger.LogCtx(ctx, "level", "debug", "NOT SCALING DUE TO MASTER INSTANCE TYPE")
 		return false
 	}
 	if currentState.MasterCloudConfigVersion != desiredState.MasterCloudConfigVersion {
+		logger.LogCtx(ctx, "level", "debug", "NOT SCALING DUE TO MASTER CLOUD CONFIG")
 		return false
 	}
 	if currentState.WorkerImageID != desiredState.WorkerImageID {
+		logger.LogCtx(ctx, "level", "debug", "NOT SCALING DUE TO WORKER IMAGE")
 		return false
 	}
 	if currentState.WorkerInstanceType != desiredState.WorkerInstanceType {
+		logger.LogCtx(ctx, "level", "debug", "NOT SCALING DUE TO WORKER INSTANCE TYPE")
 		return false
 	}
 	if currentState.WorkerCloudConfigVersion != desiredState.WorkerCloudConfigVersion {
+		logger.LogCtx(ctx, "level", "debug", "NOT SCALING DUE TO WORKER CLOUD CONFIG")
 		return false
 	}
 	if currentState.VersionBundleVersion != desiredState.VersionBundleVersion {
+		logger.LogCtx(ctx, "level", "debug", "NOT SCALING DUE TO VERSION BUNDLE VERSION")
 		return false
 	}
 
 	if currentState.WorkerCount != desiredState.WorkerCount {
 		return true
+	} else {
+		logger.LogCtx(ctx, "level", "debug", "WORKER COUNT FALSE")
 	}
 
 	return false
