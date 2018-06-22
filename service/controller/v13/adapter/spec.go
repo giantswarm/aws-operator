@@ -133,11 +133,12 @@ type KMSClient interface {
 // SmallCloudconfigConfig represents the data structure required for executing the
 // small cloudconfig template.
 type SmallCloudconfigConfig struct {
-	MachineType        string
-	Region             string
-	S3Domain           string
-	S3URI              string
-	CloudConfigVersion string
+	MachineType             string
+	Region                  string
+	S3Domain                string
+	S3URI                   string
+	CloudConfigVersion      string
+	AWSCliContainerRegistry string
 }
 
 // ELBClient describes the methods required to be implemented by a ELB AWS client.
