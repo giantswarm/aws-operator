@@ -194,7 +194,7 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake"
   ]
-  revision = "7bd5a0ce29400731deed05bccaf559cedc6f2221"
+  revision = "34f6e0f2a88fcaac12671537f7233c4af6473c4b"
 
 [[projects]]
   branch = "master"
@@ -270,7 +270,7 @@
     "v_3_3_3",
     "v_3_4_0"
   ]
-  revision = "db8017556986e8783e398d8a460aed39fde7aff5"
+  revision = "efb643053c663bfae668e495dee33eb6aef44607"
 
 [[projects]]
   branch = "master"
