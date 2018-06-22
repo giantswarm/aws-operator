@@ -5,6 +5,20 @@ const DecryptKeysAssetsScript = `#!/bin/bash -e
 token_path=/var/token
 nonce_path=/var/nonce
 
+wait_for_vault_elb(){
+    local service_name="$1"
+    local state="${2:-active}"
+    for i in $(seq 12); do
+        if curl -s -o /dev/null -w "%{http_code}" --max-time 3 {{ .VaultAddress }}/v1/sys/health | grep -q "200"; then
+            return 0
+        fi
+        sleep 5;
+    done
+
+    echo "{{ .VaultAddress }} not accessible"
+    return 1
+}
+
 token_exists () {
   if [ -f $token_path ]; then
     return 0
@@ -33,6 +47,9 @@ token_is_valid() {
 }
 
 main () {
+    if ! wait_for_vault_elb; then
+        exit 1;
+    fi
     if ! token_exists; then
         aws_login ""
     elif token_exists && ! token_is_valid; then

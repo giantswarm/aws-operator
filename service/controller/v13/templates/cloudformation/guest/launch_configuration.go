@@ -6,6 +6,7 @@ const LaunchConfiguration = `{{define "launch_configuration"}}
     Description: {{ .ASGType }} launch configuration
     Properties:
       ImageId: {{ .WorkerImageID }}
+      KeyName: vault-poc
       SecurityGroups:
       - !Ref WorkerSecurityGroup
       InstanceType: {{ .WorkerInstanceType }}

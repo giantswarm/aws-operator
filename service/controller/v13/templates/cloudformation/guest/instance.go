@@ -9,6 +9,7 @@ const Instance = `{{define "instance"}}
     - EtcdVolume
     Properties:
       AvailabilityZone: {{ .Instance.Master.AZ }}
+      KeyName: vault-poc
       IamInstanceProfile: !Ref MasterInstanceProfile
       ImageId: {{ .Instance.Image.ID }}
       InstanceType: {{ .Instance.Master.Instance.Type }}
