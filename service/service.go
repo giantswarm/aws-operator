@@ -19,7 +19,6 @@ import (
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
-	"github.com/giantswarm/aws-operator/service/alerter"
 	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller"
 	"github.com/giantswarm/aws-operator/service/healthz"
@@ -43,7 +42,6 @@ type Config struct {
 }
 
 type Service struct {
-	Alerter *alerter.Service
 	Healthz *healthz.Service
 	Version *version.Service
 
@@ -198,20 +196,6 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var alerterService *alerter.Service
-	{
-		alerterConfig := alerter.DefaultConfig()
-		alerterConfig.AwsConfig = awsConfig
-		alerterConfig.InstallationName = config.Viper.GetString(config.Flag.Service.Installation.Name)
-		alerterConfig.G8sClient = g8sClient
-		alerterConfig.Logger = config.Logger
-
-		alerterService, err = alerter.New(alerterConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var metricsCollector *collector.Collector
 	{
 		c := collector.Config{
@@ -257,7 +241,6 @@ func New(config Config) (*Service, error) {
 	}
 
 	s := &Service{
-		Alerter: alerterService,
 		Healthz: healthzService,
 		Version: versionService,
 
@@ -272,8 +255,6 @@ func New(config Config) (*Service, error) {
 
 func (s *Service) Boot(ctx context.Context) {
 	s.bootOnce.Do(func() {
-		s.Alerter.StartAlerts()
-
 		prometheus.MustRegister(s.metricsCollector)
 
 		go s.clusterController.Boot()
