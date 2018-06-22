@@ -12,6 +12,7 @@ wait_for_vault_elb(){
         if curl -s -o /dev/null -w "%{http_code}" --max-time 3 {{ .VaultAddress }}/v1/sys/health | grep -q "200"; then
             return 0
         fi
+        echo "{{ .VaultAddress }} not accessible yet, waiting..."
         sleep 5;
     done
 
