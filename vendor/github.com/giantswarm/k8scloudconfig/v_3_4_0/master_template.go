@@ -536,7 +536,7 @@ write_files:
         }
       ]
     }
-{{ if not .DisableIngressController -}}    
+{{- if not .DisableIngressController }}
 - path: /srv/default-backend-dep.yml
   owner: root
   permissions: 0644
@@ -724,7 +724,7 @@ write_files:
         targetPort: 443
       selector:
         k8s-app: nginx-ingress-controller
-{{ end -}}
+{{- end }}
 - path: /srv/kube-proxy-sa.yaml
   owner: root
   permissions: 0644
@@ -945,7 +945,7 @@ write_files:
       kind: Role
       name: nginx-ingress-role
       apiGroup: rbac.authorization.k8s.io
-{{ end -}}
+{{- end }}
 - path: /srv/rbac_roles.yaml
   owner: root
   permissions: 0644
@@ -1085,7 +1085,7 @@ write_files:
           - get
           - create
           - update
-{{ end -}}
+{{- end }}
 - path: /srv/psp_policies.yaml
   owner: root
   permissions: 0644
@@ -1886,7 +1886,7 @@ coreos:
     - name: 10-giantswarm-extra-args.conf
       content: |
         [Service]
-        Environment="DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs {{.Cluster.Docker.Daemon.ExtraArgs}}"
+        Environment="DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs --log-opt max-size=25m --log-opt max-file=2 --log-opt labels=io.kubernetes.container.hash,io.kubernetes.container.name,io.kubernetes.pod.name,io.kubernetes.pod.namespace,io.kubernetes.pod.uid"
         Environment="DOCKER_OPT_BIP=--bip={{.Cluster.Docker.Daemon.CIDR}}"
         Environment="DOCKER_OPTS=--live-restore --icc=false --userland-proxy=false"
   - name: k8s-setup-network-env.service
