@@ -55,11 +55,12 @@ func (l *launchConfigAdapter) getLaunchConfiguration(cfg Config) error {
 	s3URI := fmt.Sprintf("%s-g8s-%s", accountID, clusterID)
 
 	c := SmallCloudconfigConfig{
-		MachineType:        prefixWorker,
-		Region:             key.Region(cfg.CustomObject),
-		S3Domain:           key.S3ServiceDomain(cfg.CustomObject),
-		S3URI:              s3URI,
-		CloudConfigVersion: cloudconfig.CloudConfigVersion,
+		MachineType:             prefixWorker,
+		Region:                  key.Region(cfg.CustomObject),
+		S3Domain:                key.S3ServiceDomain(cfg.CustomObject),
+		S3URI:                   s3URI,
+		CloudConfigVersion:      cloudconfig.CloudConfigVersion,
+		AWSCliContainerRegistry: key.AWSCliContainerRegistry(cfg.CustomObject),
 	}
 	rendered, err := templates.Render(key.CloudConfigSmallTemplates(), c)
 	if err != nil {

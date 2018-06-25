@@ -58,6 +58,7 @@ type ClusterResourceSetConfig struct {
 	DeleteLoggingBucket    bool
 	OIDC                   cloudconfig.OIDCConfig
 	ProjectName            string
+	PublicRouteTables      string
 	Route53Enabled         bool
 	PodInfraContainerImage string
 	SSOPublicKey           string
@@ -281,6 +282,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			EncrypterBackend:      config.EncrypterBackend,
 			EncrypterRoleManager:  encrypterRoleManager,
 			InstallationName:      config.InstallationName,
+			PublicRouteTables:     config.PublicRouteTables,
 			Route53Enabled:        config.Route53Enabled,
 		}
 
