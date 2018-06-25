@@ -70,6 +70,7 @@ type ClusterConfig struct {
 	PodInfraContainerImage string
 	ProjectName            string
 	PubKeyFile             string
+	PublicRouteTables      string
 	Route53Enabled         bool
 	SSOPublicKey           string
 	VaultAddress           string
@@ -699,9 +700,10 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 				Enabled:    config.APIWhitelist.Enabled,
 				SubnetList: config.APIWhitelist.SubnetList,
 			},
-			ProjectName:  config.ProjectName,
-			SSOPublicKey: config.SSOPublicKey,
-			VaultAddress: config.VaultAddress,
+			ProjectName:       config.ProjectName,
+			PublicRouteTables: config.PublicRouteTables,
+			SSOPublicKey:      config.SSOPublicKey,
+			VaultAddress:      config.VaultAddress,
 		}
 
 		resourceSetV13, err = v13.NewClusterResourceSet(c)

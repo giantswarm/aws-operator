@@ -37,6 +37,7 @@ type Config struct {
 	AdvancedMonitoringEC2 bool
 	EncrypterBackend      string
 	InstallationName      string
+	PublicRouteTables     string
 	Route53Enabled        bool
 }
 
@@ -47,10 +48,11 @@ type Resource struct {
 	hostClients          *adapter.Clients
 	logger               micrologger.Logger
 
-	encrypterBackend string
-	installationName string
-	monitoring       bool
-	route53Enabled   bool
+	encrypterBackend  string
+	installationName  string
+	monitoring        bool
+	publicRouteTables string
+	route53Enabled    bool
 }
 
 // New creates a new configured cloudformation resource.
@@ -71,10 +73,11 @@ func New(config Config) (*Resource, error) {
 		logger:               config.Logger,
 		encrypterRoleManager: config.EncrypterRoleManager,
 
-		encrypterBackend: config.EncrypterBackend,
-		installationName: config.InstallationName,
-		monitoring:       config.AdvancedMonitoringEC2,
-		route53Enabled:   config.Route53Enabled,
+		encrypterBackend:  config.EncrypterBackend,
+		installationName:  config.InstallationName,
+		monitoring:        config.AdvancedMonitoringEC2,
+		publicRouteTables: config.PublicRouteTables,
+		route53Enabled:    config.Route53Enabled,
 	}
 
 	return newService, nil
