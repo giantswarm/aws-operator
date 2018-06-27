@@ -24,8 +24,6 @@ import (
 	v13cloudconfig "github.com/giantswarm/aws-operator/service/controller/v13/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v2"
 	"github.com/giantswarm/aws-operator/service/controller/v3"
-	"github.com/giantswarm/aws-operator/service/controller/v5"
-	v5cloudconfig "github.com/giantswarm/aws-operator/service/controller/v5/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v6"
 	v6cloudconfig "github.com/giantswarm/aws-operator/service/controller/v6/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v8"
@@ -325,33 +323,6 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 		}
 	}
 
-	var resourceSetV5 *controller.ResourceSet
-	{
-		c := v5.ResourceSetConfig{
-			CertsSearcher:      certWatcher,
-			GuestAWSClients:    awsClients,
-			HostAWSClients:     awsHostClients,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			RandomkeysSearcher: keyWatcher,
-
-			GuestUpdateEnabled: config.GuestUpdateEnabled,
-			InstallationName:   config.InstallationName,
-			OIDC: v5cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			ProjectName: config.ProjectName,
-		}
-
-		resourceSetV5, err = v5.NewResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var resourceSetV6 *controller.ResourceSet
 	{
 		c := v6.ResourceSetConfig{
@@ -559,7 +530,6 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 				resourceSetV1,
 				resourceSetV2,
 				resourceSetV3,
-				resourceSetV5,
 				resourceSetV6,
 				resourceSetV8,
 				resourceSetV9Patch1,

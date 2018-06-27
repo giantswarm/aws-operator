@@ -169,22 +169,6 @@ func newDrainerResourceRouter(config DrainerConfig) (*controller.ResourceRouter,
 
 	awsClients := awsclient.NewClients(guestAWSConfig)
 
-	var v7ResourceSet *controller.ResourceSet
-	{
-		c := v7.DrainerResourceSetConfig{
-			GuestAWSClients: awsClients,
-			Logger:          config.Logger,
-
-			GuestUpdateEnabled: config.GuestUpdateEnabled,
-			ProjectName:        config.ProjectName,
-		}
-
-		v7ResourceSet, err = v7.NewDrainerResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var v8ResourceSet *controller.ResourceSet
 	{
 		c := v8.DrainerResourceSetConfig{
@@ -278,7 +262,6 @@ func newDrainerResourceRouter(config DrainerConfig) (*controller.ResourceRouter,
 			Logger: config.Logger,
 
 			ResourceSets: []*controller.ResourceSet{
-				v7ResourceSet,
 				v8ResourceSet,
 				v9patch1ResourceSet,
 				v9patch2ResourceSet,
