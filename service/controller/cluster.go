@@ -16,12 +16,6 @@ import (
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v1"
-	"github.com/giantswarm/aws-operator/service/controller/v10"
-	v10adapter "github.com/giantswarm/aws-operator/service/controller/v10/adapter"
-	v10cloudconfig "github.com/giantswarm/aws-operator/service/controller/v10/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v11"
-	v11adapter "github.com/giantswarm/aws-operator/service/controller/v11/adapter"
-	v11cloudconfig "github.com/giantswarm/aws-operator/service/controller/v11/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v12"
 	v12adapter "github.com/giantswarm/aws-operator/service/controller/v12/adapter"
 	v12cloudconfig "github.com/giantswarm/aws-operator/service/controller/v12/cloudconfig"

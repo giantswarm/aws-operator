@@ -16,7 +16,6 @@ import (
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v12"
 	"github.com/giantswarm/aws-operator/service/controller/v13"
-	"github.com/giantswarm/aws-operator/service/controller/v7"
 	"github.com/giantswarm/aws-operator/service/controller/v8"
 	"github.com/giantswarm/aws-operator/service/controller/v9patch1"
 	"github.com/giantswarm/aws-operator/service/controller/v9patch2"
