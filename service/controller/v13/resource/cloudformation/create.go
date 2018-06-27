@@ -41,6 +41,18 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			}
 		}
 
+		customObject, err := key.ToCustomObject(obj)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		stackInput.Parameters = []*cloudformation.Parameter{
+			&cloudformation.Parameter{
+				ParameterKey:   aws.String("VersionBundleVersionParameter"),
+				ParameterValue: aws.String(key.VersionBundleVersion(customObject)),
+			},
+		}
+
 		_, err = sc.AWSClient.CloudFormation.CreateStack(&stackInput)
 		if IsAlreadyExists(err) {
 			// fall through

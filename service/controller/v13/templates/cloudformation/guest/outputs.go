@@ -21,5 +21,6 @@ Outputs:
   WorkerCloudConfigVersion:
     Value: {{ .Outputs.Worker.CloudConfig.Version }}
   VersionBundleVersion:
-    Value: {{ .Outputs.VersionBundle.Version }}
+    Value:
+      Ref: VersionBundleVersionParameter
 {{end}}`
