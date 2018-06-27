@@ -75,7 +75,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 
 		// Once the etcd volume is cleaned up and the master instance is down we can
 		// go ahead to let CloudFormation do its job.
-		_, err = sc.AWSClient.CloudFormation.UpdateStack(&stackStateToUpdate.UpdateStackInput)
+		_, err = sc.AWSClient.CloudFormation.UpdateStack(&updateStackInput)
 		if err != nil {
 			return microerror.Mask(err)
 		}
