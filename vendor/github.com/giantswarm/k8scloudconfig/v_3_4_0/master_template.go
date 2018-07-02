@@ -601,6 +601,7 @@ write_files:
       labels:
         k8s-addon: ingress-nginx.addons.k8s.io
     data:
+      enable-vts-status: "true"
       server-name-hash-bucket-size: "1024"
       server-name-hash-max-size: "1024"
       server-tokens: "false"
@@ -705,6 +706,9 @@ write_files:
     apiVersion: v1
     kind: Service
     metadata:
+      annotations:
+        prometheus.io/port: "10254"
+        prometheus.io/scrape: "true"
       name: nginx-ingress-controller
       namespace: kube-system
       labels:
@@ -890,6 +894,20 @@ write_files:
       name: system:kube-scheduler
       apiGroup: rbac.authorization.k8s.io
     ---
+    ## node-operator
+    kind: ClusterRoleBinding
+    apiVersion: rbac.authorization.k8s.io/v1
+    metadata:
+      name: node-operator
+    subjects:
+    - kind: User
+      name: node-operator.{{.BaseDomain}}
+      apiGroup: rbac.authorization.k8s.io
+    roleRef:
+      kind: ClusterRole
+      name: node-operator
+      apiGroup: rbac.authorization.k8s.io
+    ---
     ## Calico
     kind: ClusterRoleBinding
     apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -950,6 +968,19 @@ write_files:
   owner: root
   permissions: 0644
   content: |
+    ## node-operator
+    kind: ClusterRole
+    apiVersion: rbac.authorization.k8s.io/v1
+    metadata:
+      name: node-operator
+    rules:
+    - apiGroups: [""]
+      resources: ["nodes"]
+      verbs: ["patch"]
+    - apiGroups: [""]
+      resources: ["pods"]
+      verbs: ["list", "delete"]
+    ---
     ## Calico
     kind: ClusterRole
     apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -2096,6 +2127,10 @@ coreos:
       --node-labels="node-role.kubernetes.io/master,role=master,ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
       --kube-reserved="cpu=200m,memory=250Mi" \
       --system-reserved="cpu=150m,memory=250Mi" \
+      --eviction-soft='memory.available<500Mi' \
+      --eviction-hard='memory.available<350Mi' \
+      --eviction-soft-grace-period='memory.available=5s' \
+      --eviction-max-pod-grace-period=60 \
       --enforce-node-allocatable=pods \
       --v=2"
       ExecStop=-/usr/bin/docker stop -t 10 $NAME

@@ -7,6 +7,7 @@ import (
 	"text/template"
 
 	"github.com/giantswarm/microerror"
+	"strings"
 )
 
 type CloudConfigConfig struct {
@@ -39,6 +40,8 @@ func NewCloudConfig(config CloudConfigConfig) (*CloudConfig, error) {
 	if config.Params.EtcdPort == 0 {
 		config.Params.EtcdPort = 443
 	}
+	// extract cluster base domain
+	config.Params.BaseDomain = strings.TrimPrefix(config.Params.Cluster.Kubernetes.API.Domain, "api.")
 
 	c := &CloudConfig{
 		config:   "",

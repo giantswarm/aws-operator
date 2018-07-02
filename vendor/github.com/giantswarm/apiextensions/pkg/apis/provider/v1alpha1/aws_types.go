@@ -20,6 +20,8 @@ import (
 //         kind: AWSConfig
 //         plural: awsconfigs
 //         singular: awsconfig
+//       subresources:
+//         status: {}
 //
 func NewAWSConfigCRD() *apiextensionsv1beta1.CustomResourceDefinition {
 	return &apiextensionsv1beta1.CustomResourceDefinition{
@@ -39,18 +41,21 @@ func NewAWSConfigCRD() *apiextensionsv1beta1.CustomResourceDefinition {
 				Plural:   "awsconfigs",
 				Singular: "awsconfig",
 			},
+			Subresources: &apiextensionsv1beta1.CustomResourceSubresources{
+				Status: &apiextensionsv1beta1.CustomResourceSubresourceStatus{},
+			},
 		},
 	}
 }
 
 // +genclient
-// +genclient:noStatus
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 type AWSConfig struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`
-	Spec              AWSConfigSpec `json:"spec"`
+	Spec              AWSConfigSpec   `json:"spec"`
+	Status            AWSConfigStatus `json:"status" yaml:"status"`
 }
 
 type AWSConfigSpec struct {
@@ -141,6 +146,10 @@ type AWSConfigSpecAWSVPC struct {
 
 type AWSConfigSpecVersionBundle struct {
 	Version string `json:"version" yaml:"version"`
+}
+
+type AWSConfigStatus struct {
+	Cluster StatusCluster `json:"cluster" yaml:"cluster"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
