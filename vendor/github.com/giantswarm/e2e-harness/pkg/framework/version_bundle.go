@@ -36,7 +36,6 @@ func GetVersionBundleVersion(params *VBVParams) (string, error) {
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-	logger.Log("level", "debug", "message", fmt.Sprintf("Tested version %q", params.VType))
 
 	content, err := getContent(params.Provider, params.Token)
 	if err != nil {
@@ -48,7 +47,9 @@ func GetVersionBundleVersion(params *VBVParams) (string, error) {
 		return "", microerror.Mask(err)
 	}
 
-	logger.Log("level", "debug", fmt.Sprintf("Version Bundle Version %q", output))
+	logger.Log("level", "debug", "message", fmt.Sprintf("tested version '%s'", params.VType))
+	logger.Log("level", "debug", "message", fmt.Sprintf("version bundle version '%s'", output))
+
 	return output, nil
 }
 
@@ -57,7 +58,7 @@ func GetAuthorities(params *VBVParams) ([]versionbundle.Authority, error) {
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	logger.Log("level", "debug", "message", fmt.Sprintf("Tested version %q", params.VType))
+	logger.Log("level", "debug", "message", fmt.Sprintf("tested version '%s'", params.VType))
 
 	content, err := getContent(params.Provider, params.Token)
 	if err != nil {
@@ -68,6 +69,7 @@ func GetAuthorities(params *VBVParams) ([]versionbundle.Authority, error) {
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
+
 	return authorities, nil
 }
 
@@ -107,7 +109,7 @@ func checkType(vType string) error {
 		}
 	}
 	if !isValid {
-		return fmt.Errorf("%q is not a valid version bundle version type", vType)
+		return fmt.Errorf("'%s' is not a valid version bundle version type", vType)
 	}
 
 	return nil
