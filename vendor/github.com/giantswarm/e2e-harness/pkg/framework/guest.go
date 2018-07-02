@@ -155,7 +155,7 @@ func (g *Guest) WaitForAPIDown() error {
 
 		return microerror.Maskf(waitError, "k8s API is still up")
 	}
-	b := NewExponentialBackoff(ShortMaxWait, ShortMaxInterval)
+	b := NewConstantBackoff(ShortMaxWait, ShortMaxInterval)
 	n := func(err error, delay time.Duration) {
 		g.logger.Log("level", "debug", "message", err.Error())
 	}
@@ -181,7 +181,7 @@ func (g *Guest) WaitForAPIUp() error {
 
 		return nil
 	}
-	b := NewExponentialBackoff(LongMaxWait, LongMaxInterval)
+	b := NewConstantBackoff(LongMaxWait, LongMaxInterval)
 	n := func(err error, delay time.Duration) {
 		g.logger.Log("level", "debug", "message", err.Error())
 	}
@@ -235,7 +235,7 @@ func (g *Guest) WaitForNodesUp(numberOfNodes int) error {
 
 		return nil
 	}
-	b := NewExponentialBackoff(LongMaxWait, LongMaxInterval)
+	b := NewConstantBackoff(LongMaxWait, LongMaxInterval)
 	n := func(err error, delay time.Duration) {
 		g.logger.Log("level", "debug", "message", err.Error())
 	}
