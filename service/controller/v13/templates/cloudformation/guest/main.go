@@ -2,10 +2,7 @@ package guest
 
 const Main = `{{define "main"}}AWSTemplateFormatVersion: 2010-09-09
 Description: Main Guest CloudFormation stack.
-Parameters:
-  VersionBundleVersionParameter:
-    Type: String
-    Description: Sets the VersionBundleVersion used to generate the template. 
+{{template "parameters" .}}
 Resources:
   {{template "vpc" .}}
   {{template "iam_policies" .}}
