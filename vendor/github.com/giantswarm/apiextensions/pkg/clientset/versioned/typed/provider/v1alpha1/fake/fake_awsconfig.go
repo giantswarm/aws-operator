@@ -100,6 +100,18 @@ func (c *FakeAWSConfigs) Update(aWSConfig *v1alpha1.AWSConfig) (result *v1alpha1
 	return obj.(*v1alpha1.AWSConfig), err
 }
 
+// UpdateStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+func (c *FakeAWSConfigs) UpdateStatus(aWSConfig *v1alpha1.AWSConfig) (*v1alpha1.AWSConfig, error) {
+	obj, err := c.Fake.
+		Invokes(testing.NewUpdateSubresourceAction(awsconfigsResource, "status", c.ns, aWSConfig), &v1alpha1.AWSConfig{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1alpha1.AWSConfig), err
+}
+
 // Delete takes name of the aWSConfig and deletes it. Returns an error if one occurs.
 func (c *FakeAWSConfigs) Delete(name string, options *v1.DeleteOptions) error {
 	_, err := c.Fake.

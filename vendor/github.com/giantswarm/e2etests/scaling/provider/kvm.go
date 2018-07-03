@@ -41,7 +41,7 @@ func NewKVM(config KVMConfig) (*KVM, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ClusterID must not be empty", config)
 	}
 
-	a := &KVM{
+	k := &KVM{
 		guestFramework: config.GuestFramework,
 		hostFramework:  config.HostFramework,
 		logger:         config.Logger,
@@ -49,11 +49,11 @@ func NewKVM(config KVMConfig) (*KVM, error) {
 		clusterID: config.ClusterID,
 	}
 
-	return a, nil
+	return k, nil
 }
 
-func (a *KVM) AddWorker() error {
-	customObject, err := a.hostFramework.G8sClient().ProviderV1alpha1().KVMConfigs("default").Get(a.clusterID, metav1.GetOptions{})
+func (k *KVM) AddWorker() error {
+	customObject, err := k.hostFramework.G8sClient().ProviderV1alpha1().KVMConfigs("default").Get(k.clusterID, metav1.GetOptions{})
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -71,7 +71,7 @@ func (a *KVM) AddWorker() error {
 		return microerror.Mask(err)
 	}
 
-	_, err = a.hostFramework.G8sClient().ProviderV1alpha1().KVMConfigs("default").Patch(a.clusterID, types.JSONPatchType, b)
+	_, err = k.hostFramework.G8sClient().ProviderV1alpha1().KVMConfigs("default").Patch(k.clusterID, types.JSONPatchType, b)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -79,8 +79,8 @@ func (a *KVM) AddWorker() error {
 	return nil
 }
 
-func (a *KVM) NumMasters() (int, error) {
-	customObject, err := a.hostFramework.G8sClient().ProviderV1alpha1().KVMConfigs("default").Get(a.clusterID, metav1.GetOptions{})
+func (k *KVM) NumMasters() (int, error) {
+	customObject, err := k.hostFramework.G8sClient().ProviderV1alpha1().KVMConfigs("default").Get(k.clusterID, metav1.GetOptions{})
 	if err != nil {
 		return 0, microerror.Mask(err)
 	}
@@ -90,8 +90,8 @@ func (a *KVM) NumMasters() (int, error) {
 	return num, nil
 }
 
-func (a *KVM) NumWorkers() (int, error) {
-	customObject, err := a.hostFramework.G8sClient().ProviderV1alpha1().KVMConfigs("default").Get(a.clusterID, metav1.GetOptions{})
+func (k *KVM) NumWorkers() (int, error) {
+	customObject, err := k.hostFramework.G8sClient().ProviderV1alpha1().KVMConfigs("default").Get(k.clusterID, metav1.GetOptions{})
 	if err != nil {
 		return 0, microerror.Mask(err)
 	}
@@ -101,7 +101,7 @@ func (a *KVM) NumWorkers() (int, error) {
 	return num, nil
 }
 
-func (a *KVM) RemoveWorker() error {
+func (k *KVM) RemoveWorker() error {
 	patches := []Patch{
 		{
 			Op:   "remove",
@@ -114,7 +114,7 @@ func (a *KVM) RemoveWorker() error {
 		return microerror.Mask(err)
 	}
 
-	_, err = a.hostFramework.G8sClient().ProviderV1alpha1().KVMConfigs("default").Patch(a.clusterID, types.JSONPatchType, b)
+	_, err = k.hostFramework.G8sClient().ProviderV1alpha1().KVMConfigs("default").Patch(k.clusterID, types.JSONPatchType, b)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -122,8 +122,8 @@ func (a *KVM) RemoveWorker() error {
 	return nil
 }
 
-func (a *KVM) WaitForNodes(num int) error {
-	err := a.guestFramework.WaitForNodesUp(num)
+func (k *KVM) WaitForNodes(num int) error {
+	err := k.guestFramework.WaitForNodesUp(num)
 	if err != nil {
 		return microerror.Mask(err)
 	}

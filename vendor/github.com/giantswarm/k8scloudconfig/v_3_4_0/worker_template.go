@@ -321,6 +321,10 @@ coreos:
       --node-labels="ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
       --kube-reserved="cpu=200m,memory=250Mi" \
       --system-reserved="cpu=150m,memory=250Mi" \
+      --eviction-soft='memory.available<500Mi' \
+      --eviction-hard='memory.available<350Mi' \
+      --eviction-soft-grace-period='memory.available=5s' \
+      --eviction-max-pod-grace-period=60 \
       --enforce-node-allocatable=pods \
       --v=2"
       ExecStop=-/usr/bin/docker stop -t 10 $NAME

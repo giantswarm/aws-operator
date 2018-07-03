@@ -179,7 +179,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the guest cluster main stack has to be scaled")
 
-		if shouldScale(currentStackState, desiredStackState) {
+		if r.shouldScale(ctx, currentStackState, desiredStackState) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack has to be scaled")
 
 			desiredStackState.MasterInstanceResourceName = currentStackState.MasterInstanceResourceName
@@ -210,26 +210,33 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 // changes. In case anything else changes as well, scaling is not allowed, since
 // any other changes should be covered by general updates, which is a separate
 // step.
-func shouldScale(currentState, desiredState StackState) bool {
+func (r *Resource) shouldScale(ctx context.Context, currentState, desiredState StackState) bool {
 	if currentState.MasterImageID != desiredState.MasterImageID {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to master image id")
 		return false
 	}
 	if currentState.MasterInstanceType != desiredState.MasterInstanceType {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to master instance type")
 		return false
 	}
 	if currentState.MasterCloudConfigVersion != desiredState.MasterCloudConfigVersion {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to master cloudconfig version")
 		return false
 	}
 	if currentState.WorkerImageID != desiredState.WorkerImageID {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to worker image id")
 		return false
 	}
 	if currentState.WorkerInstanceType != desiredState.WorkerInstanceType {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to worker instance type")
 		return false
 	}
 	if currentState.WorkerCloudConfigVersion != desiredState.WorkerCloudConfigVersion {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to worker cloudconfig version")
 		return false
 	}
 	if currentState.VersionBundleVersion != desiredState.VersionBundleVersion {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to version bundle version")
 		return false
 	}
 
