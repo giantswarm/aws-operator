@@ -1963,7 +1963,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       LimitNOFILE=40000
-      Environment=IMAGE={{ .RegistryDomain }}/coreos/etcd:v3.3.3
+      Environment=IMAGE={{ .RegistryDomain }}/giantswarm/etcd:v3.3.3
       Environment=NAME=%p.service
       EnvironmentFile=/etc/network-environment
       ExecStartPre=-/usr/bin/docker stop  $NAME
@@ -2012,7 +2012,7 @@ coreos:
       [Service]
       Type=oneshot
       EnvironmentFile=/etc/network-environment
-      Environment=IMAGE={{ .RegistryDomain }}/coreos/etcd:v3.3.3
+      Environment=IMAGE={{ .RegistryDomain }}/giantswarm/etcd:v3.3.3
       Environment=NAME=%p.service
       ExecStartPre=-/usr/bin/docker stop  $NAME
       ExecStartPre=-/usr/bin/docker rm  $NAME
