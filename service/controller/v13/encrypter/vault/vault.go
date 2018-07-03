@@ -277,7 +277,7 @@ func (e *Encrypter) Decrypt(key, ciphertext string) (string, error) {
 	return string(plaintext), nil
 }
 
-func (e *Encrypter) AddAWSIAMRoleToAuth(vaultRoleName, iamRoleARN string) error {
+func (e *Encrypter) AddIAMRoleToAuth(vaultRoleName string, iamRoleARNs ...string) error {
 	err := e.ensureToken()
 	if err != nil {
 		return microerror.Mask(err)
@@ -290,10 +290,15 @@ func (e *Encrypter) AddAWSIAMRoleToAuth(vaultRoleName, iamRoleARN string) error 
 		return microerror.Mask(err)
 	}
 
-	if role.BoundIAMRoleARN == "" {
-		role.BoundIAMRoleARN = iamRoleARN
-	} else if !strings.Contains(role.BoundIAMRoleARN, iamRoleARN) {
-		role.BoundIAMRoleARN = fmt.Sprintf("%s,%s", role.BoundIAMRoleARN, iamRoleARN)
+	if len(role.BoundIAMRoleARN) == 0 {
+		role.BoundIAMRoleARN = iamRoleARNs
+	} else {
+		joinedBoundIAMRoleARN := strings.Join(role.BoundIAMRoleARN, ",")
+		for _, iamRoleARN := range iamRoleARNs {
+			if !strings.Contains(joinedBoundIAMRoleARN, iamRoleARN) {
+				role.BoundIAMRoleARN = append(role.BoundIAMRoleARN, iamRoleARN)
+			}
+		}
 	}
 
 	err = e.postAWSAuthRole(p, role)
@@ -304,7 +309,7 @@ func (e *Encrypter) AddAWSIAMRoleToAuth(vaultRoleName, iamRoleARN string) error 
 	return nil
 }
 
-func (e *Encrypter) RemoveAWSIAMRoleFromAuth(vaultRoleName, iamRoleARN string) error {
+func (e *Encrypter) RemoveIAMRoleFromAuth(vaultRoleName string, iamRoleARNs ...string) error {
 	err := e.ensureToken()
 	if err != nil {
 		return microerror.Mask(err)
@@ -317,14 +322,14 @@ func (e *Encrypter) RemoveAWSIAMRoleFromAuth(vaultRoleName, iamRoleARN string) e
 		return microerror.Mask(err)
 	}
 
-	iamRoles := strings.Split(role.BoundIAMRoleARN, ",")
 	wantedIamRoles := []string{}
-	for _, iamRole := range iamRoles {
-		if iamRole != iamRoleARN {
+	toRemoveIamRoleARNs := strings.Join(iamRoleARNs, ",")
+	for _, iamRole := range role.BoundIAMRoleARN {
+		if !strings.Contains(toRemoveIamRoleARNs, iamRole) {
 			wantedIamRoles = append(wantedIamRoles, iamRole)
 		}
 	}
-	role.BoundIAMRoleARN = strings.Join(wantedIamRoles, ",")
+	role.BoundIAMRoleARN = wantedIamRoles
 
 	err = e.postAWSAuthRole(p, role)
 	if err != nil {
@@ -490,13 +495,13 @@ func (e *Encrypter) getAWSAuthRole(path string) (*AWSAuthRole, error) {
 		return nil, microerror.Maskf(invalidHTTPStatusCodeError, "want 200, got %d, response body: %q", resp.StatusCode, body)
 	}
 
-	role := &AWSAuthRole{}
-	err = json.NewDecoder(resp.Body).Decode(role)
+	roleResponse := &AWSAuthRoleResponse{}
+	err = json.NewDecoder(resp.Body).Decode(roleResponse)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	return role, nil
+	return &roleResponse.Data, nil
 }
 
 func (e *Encrypter) postAWSAuthRole(path string, role *AWSAuthRole) error {
@@ -512,7 +517,7 @@ func (e *Encrypter) postAWSAuthRole(path string, role *AWSAuthRole) error {
 
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusNoContent {
 		body, _ := ioutil.ReadAll(resp.Body)
 		return microerror.Maskf(invalidHTTPStatusCodeError, "want 200, got %d, response body: %q", resp.StatusCode, body)
 	}

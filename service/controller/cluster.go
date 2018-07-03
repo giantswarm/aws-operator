@@ -16,12 +16,6 @@ import (
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v1"
-	"github.com/giantswarm/aws-operator/service/controller/v10"
-	v10adapter "github.com/giantswarm/aws-operator/service/controller/v10/adapter"
-	v10cloudconfig "github.com/giantswarm/aws-operator/service/controller/v10/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v11"
-	v11adapter "github.com/giantswarm/aws-operator/service/controller/v11/adapter"
-	v11cloudconfig "github.com/giantswarm/aws-operator/service/controller/v11/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v12"
 	v12adapter "github.com/giantswarm/aws-operator/service/controller/v12/adapter"
 	v12cloudconfig "github.com/giantswarm/aws-operator/service/controller/v12/cloudconfig"
@@ -30,18 +24,10 @@ import (
 	v13cloudconfig "github.com/giantswarm/aws-operator/service/controller/v13/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v2"
 	"github.com/giantswarm/aws-operator/service/controller/v3"
-	"github.com/giantswarm/aws-operator/service/controller/v4"
-	v4cloudconfig "github.com/giantswarm/aws-operator/service/controller/v4/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v5"
-	v5cloudconfig "github.com/giantswarm/aws-operator/service/controller/v5/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v6"
 	v6cloudconfig "github.com/giantswarm/aws-operator/service/controller/v6/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v7"
-	v7cloudconfig "github.com/giantswarm/aws-operator/service/controller/v7/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v8"
 	v8cloudconfig "github.com/giantswarm/aws-operator/service/controller/v8/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v9"
-	v9cloudconfig "github.com/giantswarm/aws-operator/service/controller/v9/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v9patch1"
 	v9patch1adapter "github.com/giantswarm/aws-operator/service/controller/v9patch1/adapter"
 	v9patch1cloudconfig "github.com/giantswarm/aws-operator/service/controller/v9patch1/cloudconfig"
@@ -70,6 +56,7 @@ type ClusterConfig struct {
 	PodInfraContainerImage string
 	ProjectName            string
 	PubKeyFile             string
+	PublicRouteTables      string
 	Route53Enabled         bool
 	SSOPublicKey           string
 	VaultAddress           string
@@ -336,59 +323,6 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 		}
 	}
 
-	var resourceSetV4 *controller.ResourceSet
-	{
-		c := v4.ResourceSetConfig{
-			CertsSearcher:      certWatcher,
-			GuestAWSClients:    awsClients,
-			HostAWSClients:     awsHostClients,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			RandomkeysSearcher: keyWatcher,
-
-			InstallationName: config.InstallationName,
-			OIDC: v4cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			ProjectName: config.ProjectName,
-		}
-
-		resourceSetV4, err = v4.NewResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var resourceSetV5 *controller.ResourceSet
-	{
-		c := v5.ResourceSetConfig{
-			CertsSearcher:      certWatcher,
-			GuestAWSClients:    awsClients,
-			HostAWSClients:     awsHostClients,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			RandomkeysSearcher: keyWatcher,
-
-			GuestUpdateEnabled: config.GuestUpdateEnabled,
-			InstallationName:   config.InstallationName,
-			OIDC: v5cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			ProjectName: config.ProjectName,
-		}
-
-		resourceSetV5, err = v5.NewResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var resourceSetV6 *controller.ResourceSet
 	{
 		c := v6.ResourceSetConfig{
@@ -416,33 +350,6 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 		}
 	}
 
-	var resourceSetV7 *controller.ResourceSet
-	{
-		c := v7.ClusterResourceSetConfig{
-			CertsSearcher:      certWatcher,
-			GuestAWSClients:    awsClients,
-			HostAWSClients:     awsHostClients,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			RandomkeysSearcher: keyWatcher,
-
-			GuestUpdateEnabled: config.GuestUpdateEnabled,
-			InstallationName:   config.InstallationName,
-			OIDC: v7cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			ProjectName: config.ProjectName,
-		}
-
-		resourceSetV7, err = v7.NewClusterResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var resourceSetV8 *controller.ResourceSet
 	{
 		c := v8.ClusterResourceSetConfig{
@@ -465,33 +372,6 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 		}
 
 		resourceSetV8, err = v8.NewClusterResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var resourceSetV9 *controller.ResourceSet
-	{
-		c := v9.ClusterResourceSetConfig{
-			CertsSearcher:      certWatcher,
-			GuestAWSClients:    awsClients,
-			HostAWSClients:     awsHostClients,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			RandomkeysSearcher: keyWatcher,
-
-			GuestUpdateEnabled: config.GuestUpdateEnabled,
-			InstallationName:   config.InstallationName,
-			OIDC: v9cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			ProjectName: config.ProjectName,
-		}
-
-		resourceSetV9, err = v9.NewClusterResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -556,76 +436,6 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 		}
 
 		resourceSetV9Patch2, err = v9patch2.NewClusterResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var resourceSetV10 *controller.ResourceSet
-	{
-		c := v10.ClusterResourceSetConfig{
-			CertsSearcher:      certWatcher,
-			GuestAWSClients:    awsClients,
-			HostAWSClients:     awsHostClients,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeySearcher,
-
-			AccessLogsExpiration: config.AccessLogsExpiration,
-			GuestUpdateEnabled:   config.GuestUpdateEnabled,
-			InstallationName:     config.InstallationName,
-			OIDC: v10cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			APIWhitelist: v10adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
-			},
-			ProjectName: config.ProjectName,
-		}
-
-		resourceSetV10, err = v10.NewClusterResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var resourceSetV11 *controller.ResourceSet
-	{
-		c := v11.ClusterResourceSetConfig{
-			CertsSearcher:      certWatcher,
-			G8sClient:          config.G8sClient,
-			HostAWSConfig:      hostAWSConfig,
-			HostAWSClients:     awsHostClients,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeySearcher,
-
-			AccessLogsExpiration:   config.AccessLogsExpiration,
-			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
-			DeleteLoggingBucket:    config.DeleteLoggingBucket,
-			GuestUpdateEnabled:     config.GuestUpdateEnabled,
-			PodInfraContainerImage: config.PodInfraContainerImage,
-			Route53Enabled:         config.Route53Enabled,
-			IncludeTags:            config.IncludeTags,
-			InstallationName:       config.InstallationName,
-			OIDC: v11cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			APIWhitelist: v11adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
-			},
-			ProjectName: config.ProjectName,
-		}
-
-		resourceSetV11, err = v11.NewClusterResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -699,9 +509,10 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 				Enabled:    config.APIWhitelist.Enabled,
 				SubnetList: config.APIWhitelist.SubnetList,
 			},
-			ProjectName:  config.ProjectName,
-			SSOPublicKey: config.SSOPublicKey,
-			VaultAddress: config.VaultAddress,
+			ProjectName:       config.ProjectName,
+			PublicRouteTables: config.PublicRouteTables,
+			SSOPublicKey:      config.SSOPublicKey,
+			VaultAddress:      config.VaultAddress,
 		}
 
 		resourceSetV13, err = v13.NewClusterResourceSet(c)
@@ -719,16 +530,10 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 				resourceSetV1,
 				resourceSetV2,
 				resourceSetV3,
-				resourceSetV4,
-				resourceSetV5,
 				resourceSetV6,
-				resourceSetV7,
 				resourceSetV8,
-				resourceSetV9,
 				resourceSetV9Patch1,
 				resourceSetV9Patch2,
-				resourceSetV10,
-				resourceSetV11,
 				resourceSetV12,
 				resourceSetV13,
 			},

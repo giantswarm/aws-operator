@@ -8,6 +8,8 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/v13/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v13/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v13/key"
 )
 
@@ -27,26 +29,30 @@ type AWSConfig struct {
 // Config represents the configuration used to create a new cloudformation
 // resource.
 type Config struct {
-	APIWhitelist adapter.APIWhitelist
-	HostClients  *adapter.Clients
-	Logger       micrologger.Logger
+	APIWhitelist         adapter.APIWhitelist
+	HostClients          *adapter.Clients
+	Logger               micrologger.Logger
+	EncrypterRoleManager encrypter.RoleManager
 
 	AdvancedMonitoringEC2 bool
 	EncrypterBackend      string
 	InstallationName      string
+	PublicRouteTables     string
 	Route53Enabled        bool
 }
 
 // Resource implements the cloudformation resource.
 type Resource struct {
-	apiWhiteList adapter.APIWhitelist
-	hostClients  *adapter.Clients
-	logger       micrologger.Logger
+	apiWhiteList         adapter.APIWhitelist
+	encrypterRoleManager encrypter.RoleManager
+	hostClients          *adapter.Clients
+	logger               micrologger.Logger
 
-	encrypterBackend string
-	installationName string
-	monitoring       bool
-	route53Enabled   bool
+	encrypterBackend  string
+	installationName  string
+	monitoring        bool
+	publicRouteTables string
+	route53Enabled    bool
 }
 
 // New creates a new configured cloudformation resource.
@@ -62,14 +68,16 @@ func New(config Config) (*Resource, error) {
 	}
 
 	newService := &Resource{
-		apiWhiteList: config.APIWhitelist,
-		hostClients:  config.HostClients,
-		logger:       config.Logger,
+		apiWhiteList:         config.APIWhitelist,
+		hostClients:          config.HostClients,
+		logger:               config.Logger,
+		encrypterRoleManager: config.EncrypterRoleManager,
 
-		encrypterBackend: config.EncrypterBackend,
-		installationName: config.InstallationName,
-		monitoring:       config.AdvancedMonitoringEC2,
-		route53Enabled:   config.Route53Enabled,
+		encrypterBackend:  config.EncrypterBackend,
+		installationName:  config.InstallationName,
+		monitoring:        config.AdvancedMonitoringEC2,
+		publicRouteTables: config.PublicRouteTables,
+		route53Enabled:    config.Route53Enabled,
 	}
 
 	return newService, nil
@@ -93,6 +101,38 @@ func (r *Resource) getCloudFormationTags(customObject v1alpha1.AWSConfig) []*aws
 	}
 
 	return stackTags
+}
+
+func (r *Resource) addRoleAccess(sc *controllercontext.Context, customObject v1alpha1.AWSConfig) error {
+	accountID, err := sc.AWSService.GetAccountID()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	masterRoleARN := key.MasterRoleARN(customObject, accountID)
+	workerRoleARN := key.WorkerRoleARN(customObject, accountID)
+
+	err = r.encrypterRoleManager.AddIAMRoleToAuth(encrypter.DecrypterVaultRole, masterRoleARN, workerRoleARN)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	return nil
+}
+
+func (r *Resource) removeRoleAccess(sc *controllercontext.Context, customObject v1alpha1.AWSConfig) error {
+	accountID, err := sc.AWSService.GetAccountID()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	masterRoleARN := key.MasterRoleARN(customObject, accountID)
+	workerRoleARN := key.WorkerRoleARN(customObject, accountID)
+
+	err = r.encrypterRoleManager.RemoveIAMRoleFromAuth(encrypter.DecrypterVaultRole, masterRoleARN, workerRoleARN)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	return nil
 }
 
 func toCreateStackInput(v interface{}) (awscloudformation.CreateStackInput, error) {

@@ -536,7 +536,7 @@ write_files:
         }
       ]
     }
-{{ if not .DisableIngressController -}}    
+{{- if not .DisableIngressController }}
 - path: /srv/default-backend-dep.yml
   owner: root
   permissions: 0644
@@ -601,6 +601,7 @@ write_files:
       labels:
         k8s-addon: ingress-nginx.addons.k8s.io
     data:
+      enable-vts-status: "true"
       server-name-hash-bucket-size: "1024"
       server-name-hash-max-size: "1024"
       server-tokens: "false"
@@ -705,6 +706,9 @@ write_files:
     apiVersion: v1
     kind: Service
     metadata:
+      annotations:
+        prometheus.io/port: "10254"
+        prometheus.io/scrape: "true"
       name: nginx-ingress-controller
       namespace: kube-system
       labels:
@@ -724,7 +728,7 @@ write_files:
         targetPort: 443
       selector:
         k8s-app: nginx-ingress-controller
-{{ end -}}
+{{- end }}
 - path: /srv/kube-proxy-sa.yaml
   owner: root
   permissions: 0644
@@ -890,6 +894,20 @@ write_files:
       name: system:kube-scheduler
       apiGroup: rbac.authorization.k8s.io
     ---
+    ## node-operator
+    kind: ClusterRoleBinding
+    apiVersion: rbac.authorization.k8s.io/v1
+    metadata:
+      name: node-operator
+    subjects:
+    - kind: User
+      name: node-operator.{{.BaseDomain}}
+      apiGroup: rbac.authorization.k8s.io
+    roleRef:
+      kind: ClusterRole
+      name: node-operator
+      apiGroup: rbac.authorization.k8s.io
+    ---
     ## Calico
     kind: ClusterRoleBinding
     apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -945,11 +963,24 @@ write_files:
       kind: Role
       name: nginx-ingress-role
       apiGroup: rbac.authorization.k8s.io
-{{ end -}}
+{{- end }}
 - path: /srv/rbac_roles.yaml
   owner: root
   permissions: 0644
   content: |
+    ## node-operator
+    kind: ClusterRole
+    apiVersion: rbac.authorization.k8s.io/v1
+    metadata:
+      name: node-operator
+    rules:
+    - apiGroups: [""]
+      resources: ["nodes"]
+      verbs: ["patch"]
+    - apiGroups: [""]
+      resources: ["pods"]
+      verbs: ["list", "delete"]
+    ---
     ## Calico
     kind: ClusterRole
     apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -1085,7 +1116,7 @@ write_files:
           - get
           - create
           - update
-{{ end -}}
+{{- end }}
 - path: /srv/psp_policies.yaml
   owner: root
   permissions: 0644
@@ -1886,7 +1917,7 @@ coreos:
     - name: 10-giantswarm-extra-args.conf
       content: |
         [Service]
-        Environment="DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs {{.Cluster.Docker.Daemon.ExtraArgs}}"
+        Environment="DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs --log-opt max-size=25m --log-opt max-file=2 --log-opt labels=io.kubernetes.container.hash,io.kubernetes.container.name,io.kubernetes.pod.name,io.kubernetes.pod.namespace,io.kubernetes.pod.uid"
         Environment="DOCKER_OPT_BIP=--bip={{.Cluster.Docker.Daemon.CIDR}}"
         Environment="DOCKER_OPTS=--live-restore --icc=false --userland-proxy=false"
   - name: k8s-setup-network-env.service
@@ -2096,6 +2127,10 @@ coreos:
       --node-labels="node-role.kubernetes.io/master,role=master,ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
       --kube-reserved="cpu=200m,memory=250Mi" \
       --system-reserved="cpu=150m,memory=250Mi" \
+      --eviction-soft='memory.available<500Mi' \
+      --eviction-hard='memory.available<350Mi' \
+      --eviction-soft-grace-period='memory.available=5s' \
+      --eviction-max-pod-grace-period=60 \
       --enforce-node-allocatable=pods \
       --v=2"
       ExecStop=-/usr/bin/docker stop -t 10 $NAME

@@ -2,6 +2,7 @@ package adapter
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -10,6 +11,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v13/key"
 )
 
@@ -19,7 +21,8 @@ import (
 //
 
 type hostRouteTablesAdapter struct {
-	RouteTables []RouteTable
+	PrivateRouteTables []RouteTable
+	PublicRouteTables  []RouteTable
 }
 
 type RouteTable struct {
@@ -35,6 +38,7 @@ func (i *hostRouteTablesAdapter) getHostRouteTables(cfg Config) error {
 		return microerror.Mask(err)
 	}
 
+	// private routes.
 	for _, routeTableName := range cfg.CustomObject.Spec.AWS.VPC.RouteTableNames {
 		routeTableID, err := routeTableID(routeTableName, cfg)
 		if err != nil {
@@ -47,9 +51,28 @@ func (i *hostRouteTablesAdapter) getHostRouteTables(cfg Config) error {
 			CidrBlock:        key.PrivateSubnetCIDR(cfg.CustomObject),
 			PeerConnectionID: peerConnectionID,
 		}
-		i.RouteTables = append(i.RouteTables, rt)
+		i.PrivateRouteTables = append(i.PrivateRouteTables, rt)
 	}
 
+	// public routes for vault.
+	if cfg.EncrypterBackend == encrypter.VaultBackend {
+		publicRouteTables := strings.Split(cfg.PublicRouteTables, ",")
+		for _, routeTableName := range publicRouteTables {
+			routeTableID, err := routeTableID(routeTableName, cfg)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			rt := RouteTable{
+				Name:         routeTableName,
+				RouteTableID: routeTableID,
+				// Requester CIDR block, we create the peering connection from the
+				// guest's CIDR for being able to access Vault's ELB.
+				CidrBlock:        key.CIDR(cfg.CustomObject),
+				PeerConnectionID: peerConnectionID,
+			}
+			i.PublicRouteTables = append(i.PublicRouteTables, rt)
+		}
+	}
 	return nil
 }
 

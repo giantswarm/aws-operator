@@ -14,13 +14,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v10"
-	"github.com/giantswarm/aws-operator/service/controller/v11"
 	"github.com/giantswarm/aws-operator/service/controller/v12"
 	"github.com/giantswarm/aws-operator/service/controller/v13"
-	"github.com/giantswarm/aws-operator/service/controller/v7"
 	"github.com/giantswarm/aws-operator/service/controller/v8"
-	"github.com/giantswarm/aws-operator/service/controller/v9"
 	"github.com/giantswarm/aws-operator/service/controller/v9patch1"
 	"github.com/giantswarm/aws-operator/service/controller/v9patch2"
 )
@@ -173,22 +169,6 @@ func newDrainerResourceRouter(config DrainerConfig) (*controller.ResourceRouter,
 
 	awsClients := awsclient.NewClients(guestAWSConfig)
 
-	var v7ResourceSet *controller.ResourceSet
-	{
-		c := v7.DrainerResourceSetConfig{
-			GuestAWSClients: awsClients,
-			Logger:          config.Logger,
-
-			GuestUpdateEnabled: config.GuestUpdateEnabled,
-			ProjectName:        config.ProjectName,
-		}
-
-		v7ResourceSet, err = v7.NewDrainerResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var v8ResourceSet *controller.ResourceSet
 	{
 		c := v8.DrainerResourceSetConfig{
@@ -201,23 +181,6 @@ func newDrainerResourceRouter(config DrainerConfig) (*controller.ResourceRouter,
 		}
 
 		v8ResourceSet, err = v8.NewDrainerResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var v9ResourceSet *controller.ResourceSet
-	{
-		c := v9.DrainerResourceSetConfig{
-			AWS:       awsClients,
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
-
-			GuestUpdateEnabled: config.GuestUpdateEnabled,
-			ProjectName:        config.ProjectName,
-		}
-
-		v9ResourceSet, err = v9.NewDrainerResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -252,41 +215,6 @@ func newDrainerResourceRouter(config DrainerConfig) (*controller.ResourceRouter,
 		}
 
 		v9patch2ResourceSet, err = v9patch2.NewDrainerResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var v10ResourceSet *controller.ResourceSet
-	{
-		c := v10.DrainerResourceSetConfig{
-			AWS:       awsClients,
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
-
-			GuestUpdateEnabled: config.GuestUpdateEnabled,
-			ProjectName:        config.ProjectName,
-		}
-
-		v10ResourceSet, err = v10.NewDrainerResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var v11ResourceSet *controller.ResourceSet
-	{
-		c := v11.DrainerResourceSetConfig{
-			G8sClient:     config.G8sClient,
-			HostAWSConfig: hostAWSConfig,
-			K8sClient:     config.K8sClient,
-			Logger:        config.Logger,
-
-			GuestUpdateEnabled: config.GuestUpdateEnabled,
-			ProjectName:        config.ProjectName,
-		}
-
-		v11ResourceSet, err = v11.NewDrainerResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -334,13 +262,9 @@ func newDrainerResourceRouter(config DrainerConfig) (*controller.ResourceRouter,
 			Logger: config.Logger,
 
 			ResourceSets: []*controller.ResourceSet{
-				v7ResourceSet,
 				v8ResourceSet,
-				v9ResourceSet,
 				v9patch1ResourceSet,
 				v9patch2ResourceSet,
-				v10ResourceSet,
-				v11ResourceSet,
 				v12ResourceSet,
 				v13ResourceSet,
 			},
