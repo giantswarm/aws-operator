@@ -25,7 +25,7 @@ var (
 )
 
 type Client struct {
-	VirtualMachineClient *compute.VirtualMachinesClient
+	VirtualMachineScaleSetsClient *compute.VirtualMachineScaleSetsClient
 }
 
 func NewClient() (*Client, error) {
@@ -67,10 +67,10 @@ func NewClient() (*Client, error) {
 			return nil, microerror.Mask(err)
 		}
 
-		virtualMachineClient := compute.NewVirtualMachinesClient(azureSubscriptionID)
-		virtualMachineClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
+		virtualMachineScaleSetsClient := compute.NewVirtualMachineScaleSetsClient(azureSubscriptionID)
+		virtualMachineScaleSetsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 
-		a.VirtualMachineClient = &virtualMachineClient
+		a.VirtualMachineScaleSetsClient = &virtualMachineScaleSetsClient
 	}
 
 	return a, nil

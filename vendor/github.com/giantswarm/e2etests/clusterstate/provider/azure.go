@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
+	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	azureclient "github.com/giantswarm/e2eclients/azure"
 	"github.com/giantswarm/microerror"
@@ -12,7 +14,7 @@ import (
 )
 
 const (
-	VirtualMachineSize = "Standard_A2"
+	VirtualMachineSize = "Standard_D4s_v3"
 )
 
 type AzureConfig struct {
@@ -59,8 +61,14 @@ func NewAzure(config AzureConfig) (*Azure, error) {
 
 func (a *Azure) RebootMaster() error {
 	resourceGroupName := a.clusterID
-	masterVMName := fmt.Sprintf("%s-master_0", a.clusterID)
-	_, err := a.azureClient.VirtualMachineClient.Restart(context.TODO(), resourceGroupName, masterVMName)
+	scaleSetName := fmt.Sprintf("%s-master", a.clusterID)
+	instanceIDs := &compute.VirtualMachineScaleSetVMInstanceIDs{
+		InstanceIds: to.StringSlicePtr([]string{
+			"0",
+		}),
+	}
+
+	_, err := a.azureClient.VirtualMachineScaleSetsClient.Restart(context.TODO(), resourceGroupName, scaleSetName, instanceIDs)
 	if err != nil {
 		return microerror.Mask(err)
 	}
