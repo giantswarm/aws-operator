@@ -68,7 +68,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 		updateStackInput := stackStateToUpdate.UpdateStackInput
 		updateStackInput.Parameters = []*cloudformation.Parameter{
 			&cloudformation.Parameter{
-				ParameterKey:   aws.String("VersionBundleVersionParameter"),
+				ParameterKey:   aws.String(versionBundleVersionParameterKey),
 				ParameterValue: aws.String(key.VersionBundleVersion(customObject)),
 			},
 		}

@@ -10,6 +10,10 @@ const (
 	workerRoleKey = "WorkerRole"
 
 	namedIAMCapability = "CAPABILITY_NAMED_IAM"
+
+	// versionBundleVersionParameterKey is the key name of the Cloud Formation
+	// parameter that sets the version bundle verion.
+	versionBundleVersionParameterKey = "VersionBundleVersionParameter"
 )
 
 // StackState is the state representation on which the resource methods work.
