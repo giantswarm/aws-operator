@@ -61,6 +61,7 @@ type ClusterResourceSetConfig struct {
 	PublicRouteTables      string
 	Route53Enabled         bool
 	PodInfraContainerImage string
+	RegistryDomain         string
 	SSOPublicKey           string
 	VaultAddress           string
 }
@@ -441,6 +442,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 				OIDC: config.OIDC,
 				PodInfraContainerImage: config.PodInfraContainerImage,
+				RegistryDomain:         config.RegistryDomain,
 				SSOPublicKey:           config.SSOPublicKey,
 			}
 
