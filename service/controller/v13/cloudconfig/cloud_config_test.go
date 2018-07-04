@@ -191,8 +191,9 @@ func testNewCloudConfigService() (*CloudConfig, error) {
 	var ccService *CloudConfig
 	{
 		c := Config{
-			Encrypter: &encrypter.EncrypterMock{},
-			Logger:    microloggertest.New(),
+			Encrypter:      &encrypter.EncrypterMock{},
+			Logger:         microloggertest.New(),
+			RegistryDomain: "quay.io",
 		}
 
 		ccService, err = New(c)

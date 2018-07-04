@@ -30,6 +30,8 @@ const AWSOperatorChartValues = `Installation:
         Route53:
           Enabled: true
         Encrypter: 'kms'
+    Registry:
+      Domain: quay.io
     Secret:
       AWSOperator:
         IDRSAPub: ${IDRSA_PUB}
