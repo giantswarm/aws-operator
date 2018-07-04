@@ -8,7 +8,7 @@ nonce_path=/var/nonce
 wait_for_vault_elb(){
     local service_name="$1"
     local state="${2:-active}"
-    for i in $(seq 20); do
+    for i in $(seq 80); do
         if curl -k -s -o /dev/null -w "%{http_code}" --max-time 3 {{ .VaultAddress }}/v1/sys/health | grep -q "200"; then
             return 0
         fi
