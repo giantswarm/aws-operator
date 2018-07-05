@@ -8,8 +8,9 @@ import (
 )
 
 type Service struct {
-	AWS          aws.AWS
-	Guest        guest.Guest
-	Installation installation.Installation
-	Kubernetes   kubernetes.Kubernetes
+	AWS            aws.AWS
+	Guest          guest.Guest
+	Installation   installation.Installation
+	Kubernetes     kubernetes.Kubernetes
+	RegistryDomain string
 }
