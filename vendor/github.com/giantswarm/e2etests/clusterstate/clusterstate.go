@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/apprclient"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/helmclient"
@@ -222,38 +223,36 @@ func (c *ClusterState) InstallTestApp() error {
 }
 
 func (c *ClusterState) CheckTestAppIsInstalled() error {
-	waitCount := 0
+	var podCount = 2
 
-	// Wait for e2e app to be up.
-	for {
-		c.logger.Log("level", "debug", "message", "waiting for 2 pods of the e2e-app to be up")
+	c.logger.Log("level", "debug", "message", fmt.Sprintf("waiting for %d pods of the e2e-app to be up", podCount))
 
-		o := metav1.ListOptions{
+	o := func() error {
+		lo := metav1.ListOptions{
 			LabelSelector: "app=e2e-app",
 		}
-		l, err := c.guestFramework.K8sClient().CoreV1().Pods(ChartNamespace).List(o)
+		l, err := c.guestFramework.K8sClient().CoreV1().Pods(ChartNamespace).List(lo)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-
-		if len(l.Items) != 2 {
-			c.logger.Log("level", "debug", "message", fmt.Sprintf("found %d pods", len(l.Items)))
-
-			time.Sleep(3 * time.Second)
-			waitCount++
-
-			continue
+		if len(l.Items) != podCount {
+			return microerror.Maskf(waitError, "want %d pods found %d", podCount, len(l.Items))
 		}
 
-		// Stop after 90 seconds if pods not found.
-		if waitCount == 30 {
-			return microerror.Maskf(notFoundError, "e2e-app pods not found")
-		}
-
-		c.logger.Log("level", "debug", "message", "found 2 pods of the e2e-app")
-
-		break
+		return nil
 	}
+
+	b := framework.NewConstantBackoff(framework.ShortMaxWait, framework.ShortMaxInterval)
+	n := func(err error, delay time.Duration) {
+		c.logger.Log("level", "debug", "message", err.Error())
+	}
+
+	err := backoff.RetryNotify(o, b, n)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	c.logger.Log("level", "debug", "message", fmt.Sprintf("found %d pods of the e2e-app", podCount))
 
 	return nil
 }

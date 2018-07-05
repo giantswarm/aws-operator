@@ -15,3 +15,10 @@ var notFoundError = microerror.New("not found")
 func IsNotFound(err error) bool {
 	return microerror.Cause(err) == notFoundError
 }
+
+var waitError = microerror.New("wait")
+
+// IsWait asserts waitError.
+func IsWait(err error) bool {
+	return microerror.Cause(err) == waitError
+}

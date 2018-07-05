@@ -62,13 +62,26 @@ func NewAzure(config AzureConfig) (*Azure, error) {
 func (a *Azure) RebootMaster() error {
 	resourceGroupName := a.clusterID
 	scaleSetName := fmt.Sprintf("%s-master", a.clusterID)
-	instanceIDs := &compute.VirtualMachineScaleSetVMInstanceIDs{
-		InstanceIds: to.StringSlicePtr([]string{
-			"0",
-		}),
+
+	scaleSetVMs, err := a.azureClient.VirtualMachineScaleSetVMsClient.List(context.TODO(), resourceGroupName, scaleSetName, "", "", "")
+	if err != nil {
+		return microerror.Mask(err)
 	}
 
-	_, err := a.azureClient.VirtualMachineScaleSetsClient.Restart(context.TODO(), resourceGroupName, scaleSetName, instanceIDs)
+	vmList := scaleSetVMs.Values()
+	if len(vmList) == 0 {
+		return microerror.Maskf(notFoundError, "scale set '%s' has no vms", scaleSetName)
+	} else if len(vmList) > 1 {
+		return microerror.Maskf(tooManyResultsError, "scale set '%s' has %d vms", scaleSetName, len(vmList))
+	}
+
+	instanceID := vmList[0].InstanceID
+	instanceIDs := &compute.VirtualMachineScaleSetVMInstanceIDs{
+		InstanceIds: to.StringSlicePtr([]string{
+			*instanceID,
+		}),
+	}
+	_, err = a.azureClient.VirtualMachineScaleSetsClient.Restart(context.TODO(), resourceGroupName, scaleSetName, instanceIDs)
 	if err != nil {
 		return microerror.Mask(err)
 	}
