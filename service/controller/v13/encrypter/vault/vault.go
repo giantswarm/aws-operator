@@ -75,7 +75,7 @@ func (e *Encrypter) CreateKey(ctx context.Context, customObject v1alpha1.AWSConf
 		return microerror.Mask(err)
 	}
 
-	keyName := e.keyName(ctx, customObject)
+	keyName := e.keyName(customObject)
 
 	payload := &struct{}{}
 
@@ -87,6 +87,28 @@ func (e *Encrypter) CreateKey(ctx context.Context, customObject v1alpha1.AWSConf
 	}
 
 	resp, err := e.httpClient.Do(req)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusNoContent {
+		return microerror.Mask(invalidHTTPStatusCodeError)
+	}
+
+	// we need to make the key erasable.
+	keyConfigPayload := &KeyConfigPayload{
+		DeletionAllowed: true,
+	}
+
+	p = path.Join("transit", "keys", keyName, "config")
+
+	req, err = e.newPayloadRequest(p, keyConfigPayload)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	resp, err = e.httpClient.Do(req)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -137,7 +159,7 @@ func (e *Encrypter) CurrentState(ctx context.Context, customObject v1alpha1.AWSC
 		return state, microerror.Mask(err)
 	}
 
-	keyName := e.keyName(ctx, customObject)
+	keyName := e.keyName(customObject)
 
 	p := path.Join("transit", "keys", keyName)
 
@@ -168,10 +190,7 @@ func (e *Encrypter) CurrentState(ctx context.Context, customObject v1alpha1.AWSC
 func (e *Encrypter) DesiredState(ctx context.Context, customObject v1alpha1.AWSConfig) (encrypter.EncryptionKeyState, error) {
 	state := encrypter.EncryptionKeyState{}
 
-	keyName, err := e.EncryptionKey(ctx, customObject)
-	if err != nil {
-		return state, microerror.Mask(err)
-	}
+	keyName := e.keyName(customObject)
 
 	state.KeyName = keyName
 
@@ -184,7 +203,7 @@ func (e *Encrypter) EncryptionKey(ctx context.Context, customObject v1alpha1.AWS
 		return "", microerror.Mask(err)
 	}
 
-	keyName := e.keyName(ctx, customObject)
+	keyName := e.keyName(customObject)
 
 	p := path.Join("transit", "keys", keyName)
 
@@ -548,8 +567,6 @@ func (e *Encrypter) postAWSAuthRole(path string, role *AWSAuthRole) error {
 	return nil
 }
 
-func (e *Encrypter) keyName(ctx context.Context, customObject v1alpha1.AWSConfig) string {
-	clusterID := key.ClusterID(customObject)
-
-	return clusterID
+func (e *Encrypter) keyName(customObject v1alpha1.AWSConfig) string {
+	return key.ClusterID(customObject)
 }
