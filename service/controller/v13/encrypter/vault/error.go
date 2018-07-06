@@ -15,7 +15,7 @@ var keyNotFoundError = microerror.New("key not found")
 
 // IsKeyNotFound asserts keyNotFoundError.
 func IsKeyNotFound(err error) bool {
-	return microerror.Cause(err) == invalidConfigError
+	return microerror.Cause(err) == keyNotFoundError
 }
 
 var invalidHTTPStatusCodeError = microerror.New("invalid HTTP status code")
