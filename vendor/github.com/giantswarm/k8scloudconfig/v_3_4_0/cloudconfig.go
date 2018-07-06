@@ -6,8 +6,13 @@ import (
 	"encoding/base64"
 	"text/template"
 
-	"github.com/giantswarm/microerror"
 	"strings"
+
+	"github.com/giantswarm/microerror"
+)
+
+const (
+	defaultRegistryDomain = "quay.io"
 )
 
 type CloudConfigConfig struct {
@@ -39,6 +44,10 @@ func NewCloudConfig(config CloudConfigConfig) (*CloudConfig, error) {
 	// Default to 443 for non AWS providers.
 	if config.Params.EtcdPort == 0 {
 		config.Params.EtcdPort = 443
+	}
+	// Set default registry to quay.io
+	if config.Params.RegistryDomain == "" {
+		config.Params.RegistryDomain = defaultRegistryDomain
 	}
 	// extract cluster base domain
 	config.Params.BaseDomain = strings.TrimPrefix(config.Params.Cluster.Kubernetes.API.Domain, "api.")

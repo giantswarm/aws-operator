@@ -22,6 +22,7 @@ type Config struct {
 
 	OIDC                   OIDCConfig
 	PodInfraContainerImage string
+	RegistryDomain         string
 	SSOPublicKey           string
 }
 
@@ -32,6 +33,7 @@ type CloudConfig struct {
 
 	k8sAPIExtraArgs     []string
 	k8sKubeletExtraArgs []string
+	registryDomain      string
 	SSOPublicKey        string
 }
 
@@ -50,6 +52,9 @@ func New(config Config) (*CloudConfig, error) {
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
+	}
+	if config.RegistryDomain == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.RegistryDomain must not be empty", config)
 	}
 
 	var k8sAPIExtraArgs []string
@@ -81,6 +86,7 @@ func New(config Config) (*CloudConfig, error) {
 
 		k8sAPIExtraArgs:     k8sAPIExtraArgs,
 		k8sKubeletExtraArgs: k8sKubeletExtraArgs,
+		registryDomain:      config.RegistryDomain,
 		SSOPublicKey:        config.SSOPublicKey,
 	}
 
