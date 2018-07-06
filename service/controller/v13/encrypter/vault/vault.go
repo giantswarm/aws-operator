@@ -96,7 +96,7 @@ func (e *Encrypter) CreateKey(ctx context.Context, customObject v1alpha1.AWSConf
 		return microerror.Mask(invalidHTTPStatusCodeError)
 	}
 
-	// we need to make the key erasable.
+	// We need to make the key deletable.
 	keyConfigPayload := &KeyConfigPayload{
 		DeletionAllowed: true,
 	}
@@ -222,7 +222,7 @@ func (e *Encrypter) EncryptionKey(ctx context.Context, customObject v1alpha1.AWS
 		return "", microerror.Mask(keyNotFoundError)
 	} else if resp.StatusCode != http.StatusOK {
 		body, _ := ioutil.ReadAll(resp.Body)
-		return "", microerror.Maskf(invalidHTTPStatusCodeError, "want 200, got %d, response body: %q", resp.StatusCode, body)
+		return "", microerror.Maskf(invalidHTTPStatusCodeError, "want %d, got %d, response body: %q", http.StatusOK, resp.StatusCode, body)
 	}
 
 	return keyName, nil
