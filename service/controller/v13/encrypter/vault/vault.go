@@ -75,10 +75,7 @@ func (e *Encrypter) CreateKey(ctx context.Context, customObject v1alpha1.AWSConf
 		return microerror.Mask(err)
 	}
 
-	keyName, err := e.EncryptionKey(ctx, customObject)
-	if err != nil {
-		return microerror.Mask(err)
-	}
+	keyName := e.keyName(ctx, customObject)
 
 	payload := &struct{}{}
 
@@ -140,10 +137,7 @@ func (e *Encrypter) CurrentState(ctx context.Context, customObject v1alpha1.AWSC
 		return state, microerror.Mask(err)
 	}
 
-	keyName, err := e.EncryptionKey(ctx, customObject)
-	if err != nil {
-		return state, microerror.Mask(err)
-	}
+	keyName := e.keyName(ctx, customObject)
 
 	p := path.Join("transit", "keys", keyName)
 
@@ -185,9 +179,34 @@ func (e *Encrypter) DesiredState(ctx context.Context, customObject v1alpha1.AWSC
 }
 
 func (e *Encrypter) EncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {
-	clusterID := key.ClusterID(customObject)
+	err := e.ensureToken()
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
 
-	return clusterID, nil
+	keyName := e.keyName(ctx, customObject)
+
+	p := path.Join("transit", "keys", keyName)
+
+	req, err := e.newRequest("GET", p)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	resp, err := e.httpClient.Do(req)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return "", microerror.Mask(keyNotFoundError)
+	} else if resp.StatusCode != http.StatusOK {
+		body, _ := ioutil.ReadAll(resp.Body)
+		return "", microerror.Maskf(invalidHTTPStatusCodeError, "want 200, got %d, response body: %q", resp.StatusCode, body)
+	}
+
+	return keyName, nil
 }
 
 func (e *Encrypter) Encrypt(ctx context.Context, key, plaintext string) (string, error) {
@@ -527,4 +546,10 @@ func (e *Encrypter) postAWSAuthRole(path string, role *AWSAuthRole) error {
 	}
 
 	return nil
+}
+
+func (e *Encrypter) keyName(ctx context.Context, customObject v1alpha1.AWSConfig) string {
+	clusterID := key.ClusterID(customObject)
+
+	return clusterID
 }
