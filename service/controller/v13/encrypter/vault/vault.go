@@ -232,6 +232,10 @@ func (e *Encrypter) Encrypt(ctx context.Context, key, plaintext string) (string,
 	return ciphertext, nil
 }
 
+func (e *Encrypter) IsKeyNotFound(err error) bool {
+	return IsKeyNotFound(err)
+}
+
 func (e *Encrypter) Decrypt(key, ciphertext string) (string, error) {
 	err := e.ensureToken()
 	if err != nil {
