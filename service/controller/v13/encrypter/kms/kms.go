@@ -173,6 +173,10 @@ func (k *Encrypter) Encrypt(ctx context.Context, key, plaintext string) (string,
 	return string(encryptOutput.CiphertextBlob), nil
 }
 
+func (e *Encrypter) IsKeyNotFound(err error) bool {
+	return IsKeyNotFound(err)
+}
+
 func (k *Encrypter) getKMSTags(customObject v1alpha1.AWSConfig) []*kms.Tag {
 	clusterTags := key.ClusterTags(customObject, k.installationName)
 	kmsTags := []*kms.Tag{}

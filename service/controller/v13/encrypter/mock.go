@@ -55,3 +55,7 @@ func (e *EncrypterMock) Encrypt(ctx context.Context, key, plaintext string) (str
 func (e *EncrypterMock) EncryptTLSAssets(ctx context.Context, customObject v1alpha1.AWSConfig, assets legacy.AssetsBundle) (*legacy.CompactTLSAssets, error) {
 	return &legacy.CompactTLSAssets{}, nil
 }
+
+func (e *EncrypterMock) IsKeyNotFound(err error) bool {
+	return false
+}
