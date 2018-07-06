@@ -1,14 +1,14 @@
 // +build k8srequired
 
-package scaling
+package clusterstate
 
 import (
 	"testing"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
-	"github.com/giantswarm/e2eclients/aws"
-	"github.com/giantswarm/e2etests/scaling"
-	"github.com/giantswarm/e2etests/scaling/provider"
+	e2eclient "github.com/giantswarm/e2eclients/aws"
+	"github.com/giantswarm/e2etests/clusterstate"
+	"github.com/giantswarm/e2etests/clusterstate/provider"
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/integration/env"
@@ -16,10 +16,10 @@ import (
 )
 
 var (
-	c *aws.Client
-	g *framework.Guest
-	h *framework.Host
-	s *scaling.Scaling
+	c  *e2eclient.Client
+	cs *clusterstate.ClusterState
+	g  *framework.Guest
+	h  *framework.Host
 )
 
 func init() {
@@ -55,36 +55,38 @@ func init() {
 		}
 	}
 
+	{
+		c, err = e2eclient.NewClient()
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
 	var p *provider.AWS
 	{
-		c := provider.AWSConfig{
-			GuestFramework: g,
-			HostFramework:  h,
-			Logger:         l,
+
+		ac := provider.AWSConfig{
+			AWSClient:     c,
+			HostFramework: h,
+			Logger:        l,
 
 			ClusterID: env.ClusterID(),
 		}
 
-		p, err = provider.NewAWS(c)
+		p, err = provider.NewAWS(ac)
 		if err != nil {
 			panic(err.Error())
 		}
 	}
 
 	{
-		c := scaling.Config{
-			Logger:   l,
-			Provider: p,
+		cc := clusterstate.Config{
+			GuestFramework: g,
+			Logger:         l,
+			Provider:       p,
 		}
 
-		s, err = scaling.New(c)
-		if err != nil {
-			panic(err.Error())
-		}
-	}
-
-	{
-		c, err = aws.NewClient()
+		cs, err = clusterstate.New(cc)
 		if err != nil {
 			panic(err.Error())
 		}

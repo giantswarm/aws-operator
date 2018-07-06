@@ -2,11 +2,23 @@
 
 
 [[projects]]
+  name = "github.com/Azure/azure-sdk-for-go"
+  packages = [
+    "services/compute/mgmt/2018-04-01/compute",
+    "version"
+  ]
+  revision = "fad8443a79b0e755c18c3bec29a8d2bedab0b421"
+  version = "v15.3.0"
+
+[[projects]]
   name = "github.com/Azure/go-autorest"
   packages = [
     "autorest",
     "autorest/adal",
-    "autorest/date"
+    "autorest/azure",
+    "autorest/date",
+    "autorest/to",
+    "autorest/validation"
   ]
   revision = "1f7cd6cfe0adea687ad44a512dfe76140f804318"
   version = "v10.12.0"
@@ -223,8 +235,11 @@
 [[projects]]
   branch = "master"
   name = "github.com/giantswarm/e2eclients"
-  packages = ["aws"]
-  revision = "d3e0cea898a742752b5dc9564f566777d1891d61"
+  packages = [
+    "aws",
+    "azure"
+  ]
+  revision = "a5cd49efce41a33fe79729984116f2026ad67cb0"
 
 [[projects]]
   branch = "master"
@@ -236,10 +251,12 @@
   branch = "master"
   name = "github.com/giantswarm/e2etests"
   packages = [
+    "clusterstate",
+    "clusterstate/provider",
     "scaling",
     "scaling/provider"
   ]
-  revision = "21ad4ac1314339330574f49031bed164946596f3"
+  revision = "e087f8cfb8a483310a909546a72cf8dc5bbd28d7"
 
 [[projects]]
   branch = "master"
@@ -1337,6 +1354,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7f170bf8dcd61807cca39630d53415babcd96af8e9ad7a7f1098f27b286eddc8"
+  inputs-digest = "92c050b56eacfeabf5888774a733b15487c480c9ac87109109f79d92376f5b7c"
   solver-name = "gps-cdcl"
   solver-version = 1
