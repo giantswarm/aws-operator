@@ -295,8 +295,13 @@ func (r *Resource) getNameServers(ctx context.Context, client *route53.Route53, 
 		return nil, microerror.Maskf(executionError, "expected single NS recrod %q for HostedZone %q, found %#v", name, zoneID, out.ResourceRecordSets)
 	}
 
-	var servers []string
 	rs := *out.ResourceRecordSets[0]
+
+	if *rs.Name != name {
+		return nil, microerror.Maskf(executionError, "expected NS recrod with name %q , found %q", name, *rs.Name)
+	}
+
+	var servers []string
 	for _, r := range rs.ResourceRecords {
 		servers = append(servers, *r.Value)
 	}
