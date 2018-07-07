@@ -29,6 +29,46 @@ type Config struct {
 	Route53Enabled bool
 }
 
+// Resource is bridgezone resource making sure we have fallback delegation in
+// old DNS structure. This is only for the migration period. When we delete the
+// "intermediate" this resource becomes noop and we do not need it anymore.
+//
+// Old structure looks like:
+//
+//	installation.eu-central-1.aws.gigantic.io
+//	└── NS installation.k8s.eu-central-1.aws.gigantic.io
+//	    ├── A api.old_cluster.k8s.installation.eu-central-1.aws.gigantic.io
+//	    └── A ingress.old_cluster.k8s.installation.eu-central-1.aws.gigantic.io
+//
+// New structure looks like:
+//
+//	installation.eu-central-1.aws.gigantic.io
+//	└── NS new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
+//	    ├── A api.new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
+//	    └── A ingress.new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
+//
+// For the migration period for new clusters we need also to add delegation to
+// k8s.eu-central-1.aws.gigantic.io because of the AWS DNS caching issues.
+//
+//	installation.eu-central-1.aws.gigantic.io
+//	├── NS k8s.installation.eu-central-1.aws.gigantic.io
+//	│   ├── NS new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
+//	│   ├── A api.old_cluster.k8s.installation.eu-central-1.aws.gigantic.io
+//	│   └── A ingress.old_cluster.k8s.installation.eu-central-1.aws.gigantic.io
+//	└── NS new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
+//	    ├── A api.new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
+//	    └── A ingress.new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
+//
+// NOTE: In the code below k8s.eu-central-1.aws.gigantic.io zone is called
+// "intermediate" and new_cluster.k8s.eu-central-1.aws.gigantic.io is called
+// "final".
+//
+// After we have guest clusters managed by this resource set (v13) and newer it
+// means we can delete delegation to
+// k8s.installation.eu-central-1.aws.gigantic.io from
+// installation.eu-central-1.aws.gigantic.io zone. Then after a couple of days
+// when delegation propagates and DNS caches are refreshed we can delete
+// k8s.installation.eu-central-1.aws.gigantic.io zone.
 type Resource struct {
 	hostAWSConfig aws.Config
 	hostRoute53   *route53.Route53
