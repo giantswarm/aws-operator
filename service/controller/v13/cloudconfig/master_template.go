@@ -1,37 +1,52 @@
 package cloudconfig
 
 import (
+	"context"
+
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/legacy"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_3_2"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_4_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter/vault"
 	"github.com/giantswarm/aws-operator/service/controller/v13/templates/cloudconfig"
 )
 
 // NewMasterTemplate generates a new master cloud config template and returns it
 // as a base64 encoded string.
-func (c *CloudConfig) NewMasterTemplate(customObject v1alpha1.AWSConfig, certs legacy.CompactTLSAssets, clusterKeys randomkeys.Cluster, kmsKeyARN string) (string, error) {
+func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, certs legacy.CompactTLSAssets, clusterKeys randomkeys.Cluster) (string, error) {
 	var err error
 
-	randomKeyTmplSet, err := renderRandomKeyTmplSet(c.kmsClient, clusterKeys, kmsKeyARN)
+	encryptionKey, err := c.encrypter.EncryptionKey(ctx, customObject)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, c.encrypter, encryptionKey, clusterKeys)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
 	var params k8scloudconfig.Params
 	{
+		be := baseExtension{
+			customObject:  customObject,
+			encrypter:     c.encrypter,
+			encryptionKey: encryptionKey,
+		}
+
 		params.Cluster = customObject.Spec.Cluster
 		params.DisableEncryptionAtREST = true
 		params.EtcdPort = customObject.Spec.Cluster.Etcd.Port
 		params.Extension = &MasterExtension{
 			certs:            certs,
-			customObject:     customObject,
+			baseExtension:    be,
 			RandomKeyTmplSet: randomKeyTmplSet,
 		}
 		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = c.k8sAPIExtraArgs
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
+		params.RegistryDomain = c.registryDomain
+		params.SSOPublicKey = c.SSOPublicKey
 	}
 
 	var newCloudConfig *k8scloudconfig.CloudConfig
@@ -61,8 +76,9 @@ type RandomKeyTmplSet struct {
 }
 
 type MasterExtension struct {
+	baseExtension
+
 	certs            legacy.CompactTLSAssets
-	customObject     v1alpha1.AWSConfig
 	RandomKeyTmplSet RandomKeyTmplSet
 }
 
@@ -208,12 +224,27 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Owner:        FileOwner,
 			Permissions:  0644,
 		},
+		// NVME disks udev rules and script.
+		// Workaround for https://github.com/coreos/bugs/issues/2399
+		{
+			AssetContent: cloudconfig.NVMEUdevRule,
+			Path:         "/etc/udev/rules.d/10-ebs-nvme-mapping.rules",
+			Owner:        FileOwner,
+			Permissions:  0644,
+		},
+		{
+			AssetContent: cloudconfig.NVMEUdevScript,
+			Path:         "/opt/ebs-nvme-mapping",
+			Owner:        FileOwner,
+			Permissions:  0766,
+		},
 	}
 
 	var newFiles []k8scloudconfig.FileAsset
 
 	for _, fm := range filesMeta {
-		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, e.customObject.Spec)
+		data := e.templateData()
+		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, data)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -231,6 +262,14 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	unitsMeta := []k8scloudconfig.UnitMetadata{
+		// Create symlinks for nvme disks.
+		// This service should be started only on first boot.
+		{
+			AssetContent: cloudconfig.NVMEUdevTriggerUnit,
+			Name:         "ebs-nvme-udev-trigger.service",
+			Enable:       false,
+			Command:      "start",
+		},
 		{
 			AssetContent: cloudconfig.DecryptTLSAssetsService,
 			Name:         "decrypt-tls-assets.service",
@@ -297,6 +336,14 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 }
 
 func (e *MasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
+	var storageClasss string
+	_, ok := e.encrypter.(*vault.Encrypter)
+	if ok {
+		storageClasss = cloudconfig.InstanceStorageClass
+	} else {
+		storageClasss = cloudconfig.InstanceStorageClassEncrypted
+	}
+
 	newSections := []k8scloudconfig.VerbatimSection{
 		{
 			Name:    "storage",
@@ -304,7 +351,7 @@ func (e *MasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
 		},
 		{
 			Name:    "storageclass",
-			Content: cloudconfig.InstanceStorageClass,
+			Content: storageClasss,
 		},
 	}
 	return newSections

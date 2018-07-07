@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/microerror"
 
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v13/key"
 )
 
@@ -41,15 +42,17 @@ func (i *iamPoliciesAdapter) getIamPolicies(cfg Config) error {
 	i.RegionARN = key.RegionARN(cfg.CustomObject)
 
 	// KMSKeyARN
-	keyAlias := fmt.Sprintf("alias/%s", clusterID)
-	input := &kms.DescribeKeyInput{
-		KeyId: aws.String(keyAlias),
+	if cfg.EncrypterBackend == encrypter.KMSBackend {
+		keyAlias := fmt.Sprintf("alias/%s", clusterID)
+		input := &kms.DescribeKeyInput{
+			KeyId: aws.String(keyAlias),
+		}
+		output, err := cfg.Clients.KMS.DescribeKey(input)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		i.KMSKeyARN = *output.KeyMetadata.Arn
 	}
-	output, err := cfg.Clients.KMS.DescribeKey(input)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	i.KMSKeyARN = *output.KeyMetadata.Arn
 
 	// S3Bucket
 	accountID, err := AccountID(cfg.Clients)

@@ -59,15 +59,17 @@ type Adapter struct {
 }
 
 type Config struct {
-	APIWhitelist     APIWhitelist
-	CustomObject     v1alpha1.AWSConfig
-	Clients          Clients
-	GuestAccountID   string
-	HostAccountID    string
-	HostClients      Clients
-	InstallationName string
-	Route53Enabled   bool
-	StackState       StackState
+	APIWhitelist      APIWhitelist
+	CustomObject      v1alpha1.AWSConfig
+	Clients           Clients
+	EncrypterBackend  string
+	GuestAccountID    string
+	HostAccountID     string
+	HostClients       Clients
+	InstallationName  string
+	PublicRouteTables string
+	Route53Enabled    bool
+	StackState        StackState
 }
 
 func NewGuest(cfg Config) (Adapter, error) {

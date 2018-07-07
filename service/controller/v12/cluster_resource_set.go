@@ -26,7 +26,6 @@ import (
 	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v12/resource/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/ebsvolume"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/endpoints"
-	"github.com/giantswarm/aws-operator/service/controller/v12/resource/hostedzone"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/kmskey"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/loadbalancer"
 	"github.com/giantswarm/aws-operator/service/controller/v12/resource/migration"
@@ -109,6 +108,19 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.SubnetList must not be empty when %T.APIWhitelist is enabled", config)
 	}
 
+	var migrationResource controller.Resource
+	{
+		c := migration.Config{
+			G8sClient: config.G8sClient,
+			Logger:    config.Logger,
+		}
+
+		migrationResource, err = migration.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var kmsKeyResource controller.Resource
 	{
 		c := kmskey.Config{
@@ -123,34 +135,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		kmsKeyResource, err = toCRUDResource(config.Logger, ops)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var migrationResource controller.Resource
-	{
-		c := migration.Config{
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
-		}
-
-		migrationResource, err = migration.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var hostedZoneResource controller.Resource
-	{
-		c := hostedzone.Config{
-			HostRoute53: config.HostAWSClients.Route53,
-			Logger:      config.Logger,
-
-			Route53Enabled: config.Route53Enabled,
-		}
-
-		hostedZoneResource, err = hostedzone.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -308,7 +292,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 	resources := []controller.Resource{
 		migrationResource,
-		hostedZoneResource,
 		kmsKeyResource,
 		s3BucketResource,
 		s3BucketObjectResource,

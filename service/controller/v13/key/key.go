@@ -41,10 +41,11 @@ const (
 	PolicyNameTemplate = "EC2-K8S-Policy"
 	// LogDeliveryURI is used for setting the correct ACL in the access log bucket
 	LogDeliveryURI = "uri=http://acs.amazonaws.com/groups/s3/LogDelivery"
-)
 
-const (
 	InstanceIDAnnotation = "aws-operator.giantswarm.io/instance"
+
+	defaultAWSCliContainerRegistry = "quay.io/coreos/awscli:025a357f05242fdad6a81e8a6b520098aa65a600"
+	chinaAWSCliContainerRegistry   = "docker://registry-intl.cn-shanghai.aliyuncs.com/giantswarm/awscli:latest"
 )
 
 const (
@@ -82,6 +83,13 @@ func AutoScalingGroupName(customObject v1alpha1.AWSConfig, groupName string) str
 
 func AvailabilityZone(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.AZ
+}
+
+func AWSCliContainerRegistry(customObject v1alpha1.AWSConfig) string {
+	if IsChinaRegion(customObject) {
+		return chinaAWSCliContainerRegistry
+	}
+	return defaultAWSCliContainerRegistry
 }
 
 func BucketName(customObject v1alpha1.AWSConfig, accountID string) string {
@@ -319,6 +327,10 @@ func MasterInstanceType(customObject v1alpha1.AWSConfig) string {
 	return instanceType
 }
 
+func MasterRoleARN(customObject v1alpha1.AWSConfig, accountID string) string {
+	return baseRoleARN(customObject, accountID, "master")
+}
+
 func PeerAccessRoleName(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-vpc-peer-access", ClusterID(customObject))
 }
@@ -333,6 +345,10 @@ func PolicyName(customObject v1alpha1.AWSConfig, profileType string) string {
 
 func PrivateSubnetCIDR(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.VPC.PrivateSubnetCIDR
+}
+
+func CIDR(customObject v1alpha1.AWSConfig) string {
+	return customObject.Spec.AWS.VPC.CIDR
 }
 
 func Region(customObject v1alpha1.AWSConfig) string {
@@ -425,6 +441,17 @@ func WorkerInstanceType(customObject v1alpha1.AWSConfig) string {
 	return instanceType
 }
 
+func WorkerRoleARN(customObject v1alpha1.AWSConfig, accountID string) string {
+	return baseRoleARN(customObject, accountID, "worker")
+}
+
+func baseRoleARN(customObject v1alpha1.AWSConfig, accountID string, kind string) string {
+	clusterID := ClusterID(customObject)
+	partition := RegionARN(customObject)
+
+	return fmt.Sprintf("arn:%s:iam::%s:role/%s-%s-%s", partition, accountID, clusterID, kind, RoleNameTemplate)
+}
+
 // componentName returns the first component of a domain name.
 // e.g. apiserver.example.customer.cloud.com -> apiserver
 func componentName(domainName string) (string, error) {
@@ -456,7 +483,7 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 	*/
 	imageIDs := map[string]string{
 		"ap-southeast-1": "ami-73b28f0f",
-		"cn-north-1":     "ami-8f05dbe2",
+		"cn-north-1":     "ami-2a875e47",
 		"eu-central-1":   "ami-32042fd9",
 		"eu-west-1":      "ami-82645dfb",
 		"us-west-2":      "ami-574f362f",

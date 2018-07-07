@@ -22,7 +22,7 @@ func testConfig() Config {
 
 	c.HostClients = &adapter.Clients{}
 	c.Logger = microloggertest.New()
-
+	c.EncrypterBackend = "kms"
 	c.InstallationName = "myinstallation"
 
 	return c

@@ -12,11 +12,12 @@ func Test_Adapter_Instance_RegularFields(t *testing.T) {
 	t.Parallel()
 
 	testCases := []struct {
-		Description            string
-		Config                 Config
-		ExpectedAZ             string
-		ExpectedEtcdVolumeName string
-		ExpectedInstanceType   string
+		Description              string
+		Config                   Config
+		ExpectedAZ               string
+		ExpectedEtcdVolumeName   string
+		ExpectedInstanceType     string
+		ExpectedEncrypterBackend string
 	}{
 		{
 			Description: "case 0 basic matching, all fields present",
@@ -40,10 +41,12 @@ func Test_Adapter_Instance_RegularFields(t *testing.T) {
 				StackState: StackState{
 					MasterInstanceType: "m3.large",
 				},
+				EncrypterBackend: "my-encrypter-backend",
 			},
-			ExpectedAZ:             "eu-central-1a",
-			ExpectedEtcdVolumeName: "test-cluster-etcd",
-			ExpectedInstanceType:   "m3.large",
+			ExpectedAZ:               "eu-central-1a",
+			ExpectedEtcdVolumeName:   "test-cluster-etcd",
+			ExpectedInstanceType:     "m3.large",
+			ExpectedEncrypterBackend: "my-encrypter-backend",
 		},
 	}
 
@@ -65,6 +68,10 @@ func Test_Adapter_Instance_RegularFields(t *testing.T) {
 
 			if a.Master.Instance.Type != tc.ExpectedInstanceType {
 				t.Fatalf("unexpected a.Master.Instance.Type, got %q, want %q", a.Master.Instance.Type, tc.ExpectedInstanceType)
+			}
+
+			if a.Master.EncrypterBackend != tc.ExpectedEncrypterBackend {
+				t.Fatalf("unexpected a.Master.Instance.Type, got %q, want %q", a.Master.EncrypterBackend, tc.ExpectedEncrypterBackend)
 			}
 		})
 	}

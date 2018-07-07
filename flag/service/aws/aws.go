@@ -9,12 +9,15 @@ import (
 type AWS struct {
 	AccessKey              accesskey.AccessKey
 	AdvancedMonitoringEC2  string
-	LoggingBucket          loggingbucket.LoggingBucket
+	Encrypter              string
 	HostAccessKey          accesskey.AccessKey
 	IncludeTags            string
+	LoggingBucket          loggingbucket.LoggingBucket
 	PodInfraContainerImage string
 	PubKeyFile             string
+	PublicRouteTables      string
 	Region                 string
 	Route53                route53.Route53
 	S3AccessLogsExpiration string
+	VaultAddress           string
 }

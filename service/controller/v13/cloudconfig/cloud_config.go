@@ -5,6 +5,8 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter"
 )
 
 const (
@@ -15,20 +17,24 @@ const (
 
 // Config represents the configuration used to create a cloud config service.
 type Config struct {
-	KMSClient KMSClient
+	Encrypter encrypter.Interface
 	Logger    micrologger.Logger
 
 	OIDC                   OIDCConfig
 	PodInfraContainerImage string
+	RegistryDomain         string
+	SSOPublicKey           string
 }
 
 // CloudConfig implements the cloud config service interface.
 type CloudConfig struct {
-	kmsClient KMSClient
+	encrypter encrypter.Interface
 	logger    micrologger.Logger
 
 	k8sAPIExtraArgs     []string
 	k8sKubeletExtraArgs []string
+	registryDomain      string
+	SSOPublicKey        string
 }
 
 // OIDCConfig represents the configuration of the OIDC authorization provider
@@ -41,11 +47,14 @@ type OIDCConfig struct {
 
 // New creates a new configured cloud config service.
 func New(config Config) (*CloudConfig, error) {
-	if config.KMSClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.KMSClient must not be empty", config)
+	if config.Encrypter == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Encrypter must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
+	}
+	if config.RegistryDomain == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.RegistryDomain must not be empty", config)
 	}
 
 	var k8sAPIExtraArgs []string
@@ -72,11 +81,13 @@ func New(config Config) (*CloudConfig, error) {
 	}
 
 	newCloudConfig := &CloudConfig{
-		kmsClient: config.KMSClient,
+		encrypter: config.Encrypter,
 		logger:    config.Logger,
 
 		k8sAPIExtraArgs:     k8sAPIExtraArgs,
 		k8sKubeletExtraArgs: k8sKubeletExtraArgs,
+		registryDomain:      config.RegistryDomain,
+		SSOPublicKey:        config.SSOPublicKey,
 	}
 
 	return newCloudConfig, nil

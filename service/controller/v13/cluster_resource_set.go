@@ -22,12 +22,15 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v13/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v13/credential"
 	"github.com/giantswarm/aws-operator/service/controller/v13/ebs"
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter/kms"
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter/vault"
 	"github.com/giantswarm/aws-operator/service/controller/v13/key"
 	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v13/resource/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/v13/resource/ebsvolume"
+	"github.com/giantswarm/aws-operator/service/controller/v13/resource/encryptionkey"
 	"github.com/giantswarm/aws-operator/service/controller/v13/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/v13/resource/hostedzone"
-	"github.com/giantswarm/aws-operator/service/controller/v13/resource/kmskey"
 	"github.com/giantswarm/aws-operator/service/controller/v13/resource/loadbalancer"
 	"github.com/giantswarm/aws-operator/service/controller/v13/resource/migration"
 	"github.com/giantswarm/aws-operator/service/controller/v13/resource/namespace"
@@ -48,14 +51,19 @@ type ClusterResourceSetConfig struct {
 	AccessLogsExpiration   int
 	AdvancedMonitoringEC2  bool
 	APIWhitelist           adapter.APIWhitelist
+	EncrypterBackend       string
 	GuestUpdateEnabled     bool
 	IncludeTags            bool
 	InstallationName       string
 	DeleteLoggingBucket    bool
 	OIDC                   cloudconfig.OIDCConfig
 	ProjectName            string
+	PublicRouteTables      string
 	Route53Enabled         bool
 	PodInfraContainerImage string
+	RegistryDomain         string
+	SSOPublicKey           string
+	VaultAddress           string
 }
 
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
@@ -108,21 +116,55 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	if config.APIWhitelist.Enabled && config.APIWhitelist.SubnetList == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.SubnetList must not be empty when %T.APIWhitelist is enabled", config)
 	}
+	if config.SSOPublicKey == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.SSOPublicKey must not be empty", config)
+	}
 
-	var kmsKeyResource controller.Resource
-	{
-		c := kmskey.Config{
+	var encrypterObject encrypter.Interface
+	var encrypterRoleManager encrypter.RoleManager
+	switch config.EncrypterBackend {
+	case encrypter.VaultBackend:
+		c := &vault.EncrypterConfig{
+			Logger: config.Logger,
+
+			Address: config.VaultAddress,
+		}
+
+		encrypterObject, err = vault.NewEncrypter(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		encrypterRoleManager = encrypterObject.(encrypter.RoleManager)
+	case encrypter.KMSBackend:
+		c := &kms.EncrypterConfig{
 			Logger: config.Logger,
 
 			InstallationName: config.InstallationName,
 		}
 
-		ops, err := kmskey.New(c)
+		encrypterObject, err = kms.NewEncrypter(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	default:
+		return nil, microerror.Maskf(invalidConfigError, "unknown encrypter backend %q", config.EncrypterBackend)
+	}
+
+	var encryptionKeyResource controller.Resource
+	{
+		c := encryptionkey.Config{
+			Encrypter: encrypterObject,
+			Logger:    config.Logger,
+
+			InstallationName: config.InstallationName,
+		}
+
+		ops, err := encryptionkey.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 
-		kmsKeyResource, err = toCRUDResource(config.Logger, ops)
+		encryptionKeyResource, err = toCRUDResource(config.Logger, ops)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -182,6 +224,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	{
 		c := s3object.Config{
 			CertWatcher:       config.CertsSearcher,
+			Encrypter:         encrypterObject,
 			Logger:            config.Logger,
 			RandomKeySearcher: config.RandomkeysSearcher,
 		}
@@ -237,7 +280,10 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			},
 
 			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
+			EncrypterBackend:      config.EncrypterBackend,
+			EncrypterRoleManager:  encrypterRoleManager,
 			InstallationName:      config.InstallationName,
+			PublicRouteTables:     config.PublicRouteTables,
 			Route53Enabled:        config.Route53Enabled,
 		}
 
@@ -309,7 +355,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	resources := []controller.Resource{
 		migrationResource,
 		hostedZoneResource,
-		kmsKeyResource,
+		encryptionKeyResource,
 		s3BucketResource,
 		s3BucketObjectResource,
 		loadBalancerResource,
@@ -391,11 +437,13 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		var cloudConfig *cloudconfig.CloudConfig
 		{
 			c := cloudconfig.Config{
-				KMSClient: awsClient.KMS,
+				Encrypter: encrypterObject,
 				Logger:    config.Logger,
 
 				OIDC: config.OIDC,
 				PodInfraContainerImage: config.PodInfraContainerImage,
+				RegistryDomain:         config.RegistryDomain,
+				SSOPublicKey:           config.SSOPublicKey,
 			}
 
 			cloudConfig, err = cloudconfig.New(c)

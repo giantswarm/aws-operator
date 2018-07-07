@@ -13,7 +13,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/03-configmap.yaml") . | sha256sum }}
+        releasetime: {{ $.Release.Time }}
       labels:
         app: aws-operator
     spec:
