@@ -1,9 +1,11 @@
 package cloudconfig
 
 import (
+	"context"
+
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/legacy"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_3_2"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_4_0"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v13/templates/cloudconfig"
@@ -11,17 +13,30 @@ import (
 
 // NewWorkerTemplate generates a new worker cloud config template and returns it
 // as a base64 encoded string.
-func (c *CloudConfig) NewWorkerTemplate(customObject v1alpha1.AWSConfig, certs legacy.CompactTLSAssets) (string, error) {
+func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, certs legacy.CompactTLSAssets) (string, error) {
 	var err error
+
+	encryptionKey, err := c.encrypter.EncryptionKey(ctx, customObject)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
 
 	var params k8scloudconfig.Params
 	{
+		be := baseExtension{
+			customObject:  customObject,
+			encrypter:     c.encrypter,
+			encryptionKey: encryptionKey,
+		}
+
 		params.Cluster = customObject.Spec.Cluster
 		params.Extension = &WorkerExtension{
-			certs:        certs,
-			customObject: customObject,
+			baseExtension: be,
+			certs:         certs,
 		}
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
+		params.RegistryDomain = c.registryDomain
+		params.SSOPublicKey = c.SSOPublicKey
 	}
 
 	var newCloudConfig *k8scloudconfig.CloudConfig
@@ -45,8 +60,8 @@ func (c *CloudConfig) NewWorkerTemplate(customObject v1alpha1.AWSConfig, certs l
 }
 
 type WorkerExtension struct {
-	certs        legacy.CompactTLSAssets
-	customObject v1alpha1.AWSConfig
+	baseExtension
+	certs legacy.CompactTLSAssets
 }
 
 func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
@@ -131,7 +146,8 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	var newFiles []k8scloudconfig.FileAsset
 
 	for _, m := range filesMeta {
-		c, err := k8scloudconfig.RenderAssetContent(m.AssetContent, e.customObject.Spec)
+		data := e.templateData()
+		c, err := k8scloudconfig.RenderAssetContent(m.AssetContent, data)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

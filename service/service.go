@@ -19,7 +19,6 @@ import (
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
-	"github.com/giantswarm/aws-operator/service/alerter"
 	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller"
 	"github.com/giantswarm/aws-operator/service/healthz"
@@ -43,7 +42,6 @@ type Config struct {
 }
 
 type Service struct {
-	Alerter *alerter.Service
 	Healthz *healthz.Service
 	Version *version.Service
 
@@ -120,6 +118,7 @@ func New(config Config) (*Service, error) {
 			AccessLogsExpiration:  config.Viper.GetInt(config.Flag.Service.AWS.S3AccessLogsExpiration),
 			AdvancedMonitoringEC2: config.Viper.GetBool(config.Flag.Service.AWS.AdvancedMonitoringEC2),
 			DeleteLoggingBucket:   config.Viper.GetBool(config.Flag.Service.AWS.LoggingBucket.Delete),
+			EncrypterBackend:      config.Viper.GetString(config.Flag.Service.AWS.Encrypter),
 			GuestAWSConfig: controller.ClusterConfigAWSConfig{
 				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
 				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
@@ -145,7 +144,11 @@ func New(config Config) (*Service, error) {
 			PodInfraContainerImage: config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
 			ProjectName:            config.ProjectName,
 			PubKeyFile:             config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile),
+			PublicRouteTables:      config.Viper.GetString(config.Flag.Service.AWS.PublicRouteTables),
 			Route53Enabled:         config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
+			RegistryDomain:         config.Viper.GetString(config.Flag.Service.RegistryDomain),
+			SSOPublicKey:           config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
+			VaultAddress:           config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
 		}
 
 		clusterController, err = controller.NewCluster(c)
@@ -194,20 +197,6 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var alerterService *alerter.Service
-	{
-		alerterConfig := alerter.DefaultConfig()
-		alerterConfig.AwsConfig = awsConfig
-		alerterConfig.InstallationName = config.Viper.GetString(config.Flag.Service.Installation.Name)
-		alerterConfig.G8sClient = g8sClient
-		alerterConfig.Logger = config.Logger
-
-		alerterService, err = alerter.New(alerterConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var metricsCollector *collector.Collector
 	{
 		c := collector.Config{
@@ -253,7 +242,6 @@ func New(config Config) (*Service, error) {
 	}
 
 	s := &Service{
-		Alerter: alerterService,
 		Healthz: healthzService,
 		Version: versionService,
 
@@ -268,8 +256,6 @@ func New(config Config) (*Service, error) {
 
 func (s *Service) Boot(ctx context.Context) {
 	s.bootOnce.Do(func() {
-		s.Alerter.StartAlerts()
-
 		prometheus.MustRegister(s.metricsCollector)
 
 		go s.clusterController.Boot()

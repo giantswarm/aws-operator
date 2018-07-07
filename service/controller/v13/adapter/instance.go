@@ -30,11 +30,12 @@ type instanceAdapterImage struct {
 }
 
 type instanceAdapterMaster struct {
-	AZ           string
-	CloudConfig  string
-	DockerVolume instanceAdapterMasterDockerVolume
-	EtcdVolume   instanceAdapterMasterEtcdVolume
-	Instance     instanceAdapterMasterInstance
+	AZ               string
+	CloudConfig      string
+	EncrypterBackend string
+	DockerVolume     instanceAdapterMasterDockerVolume
+	EtcdVolume       instanceAdapterMasterEtcdVolume
+	Instance         instanceAdapterMasterInstance
 }
 
 type instanceAdapterMasterDockerVolume struct {
@@ -67,18 +68,22 @@ func (i *instanceAdapter) Adapt(config Config) error {
 		if err != nil {
 			return microerror.Mask(err)
 		}
+
 		c := SmallCloudconfigConfig{
-			MachineType:        prefixMaster,
-			Region:             key.Region(config.CustomObject),
-			S3Domain:           key.S3ServiceDomain(config.CustomObject),
-			S3URI:              fmt.Sprintf("%s-g8s-%s", accountID, i.Cluster.ID),
-			CloudConfigVersion: config.StackState.MasterCloudConfigVersion,
+			MachineType:             prefixMaster,
+			Region:                  key.Region(config.CustomObject),
+			S3Domain:                key.S3ServiceDomain(config.CustomObject),
+			S3URI:                   fmt.Sprintf("%s-g8s-%s", accountID, i.Cluster.ID),
+			CloudConfigVersion:      config.StackState.MasterCloudConfigVersion,
+			AWSCliContainerRegistry: key.AWSCliContainerRegistry(config.CustomObject),
 		}
 		rendered, err := templates.Render(key.CloudConfigSmallTemplates(), c)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 		i.Master.CloudConfig = base64.StdEncoding.EncodeToString([]byte(rendered))
+
+		i.Master.EncrypterBackend = config.EncrypterBackend
 
 		i.Master.DockerVolume.Name = key.DockerVolumeName(config.CustomObject)
 

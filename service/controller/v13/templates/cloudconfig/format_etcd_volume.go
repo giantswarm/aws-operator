@@ -11,13 +11,11 @@ RemainAfterExit=yes
 
 # Do not wipe the disk if it's already being used, so the etcd data is
 # persistent across reboots and updates.
-Environment=DEV=/dev/nvme2n1
+Environment=DEV=/dev/xvdh
 
-# line 1: For compatibility with m3.large that has xvdX disks.
-# line 2: Create filesystem if does not exist.
-# line 3: For compatibility with older clusters. Label existing filesystem with etcd label.
+# line 1: Create filesystem if does not exist.
+# line 2: For compatibility with older clusters. Label existing filesystem with etcd label.
 ExecStart=/bin/bash -c "\
-[ -b /dev/xvdh ] && export DEV=/dev/xvdh ;\
 if ! blkid $DEV; then mkfs.ext4 -L etcd $DEV; fi ;\
 [ -L /dev/disk/by-label/etcd ] || e2label $DEV etcd"
 

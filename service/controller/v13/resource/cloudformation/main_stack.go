@@ -37,12 +37,14 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 			Enabled:    r.apiWhiteList.Enabled,
 			SubnetList: r.apiWhiteList.SubnetList,
 		},
-		CustomObject:     customObject,
-		Clients:          adapterClients,
-		HostClients:      *r.hostClients,
-		InstallationName: r.installationName,
-		HostAccountID:    hostAccountID,
-		Route53Enabled:   r.route53Enabled,
+		CustomObject:      customObject,
+		Clients:           adapterClients,
+		EncrypterBackend:  r.encrypterBackend,
+		HostClients:       *r.hostClients,
+		InstallationName:  r.installationName,
+		HostAccountID:     hostAccountID,
+		PublicRouteTables: r.publicRouteTables,
+		Route53Enabled:    r.route53Enabled,
 		StackState: adapter.StackState{
 			Name: stackState.Name,
 
@@ -128,10 +130,12 @@ func (r *Resource) getMainHostPostTemplateBody(ctx context.Context, customObject
 	}
 
 	cfg := adapter.Config{
-		CustomObject:   customObject,
-		Clients:        adapterClients,
-		HostClients:    *r.hostClients,
-		Route53Enabled: r.route53Enabled,
+		CustomObject:      customObject,
+		Clients:           adapterClients,
+		HostClients:       *r.hostClients,
+		EncrypterBackend:  r.encrypterBackend,
+		PublicRouteTables: r.publicRouteTables,
+		Route53Enabled:    r.route53Enabled,
 		StackState: adapter.StackState{
 			HostedZoneNameServers: guestMainStackState.HostedZoneNameServers,
 		},

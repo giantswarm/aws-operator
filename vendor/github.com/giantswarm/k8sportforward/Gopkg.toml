@@ -25,13 +25,16 @@
 #   unused-packages = true
 
 
+
 [[constraint]]
   branch = "master"
   name = "github.com/giantswarm/microerror"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.9.3"
+  version = "kubernetes-1.10.4"
+
+
 
 [prune]
   go-tests = true

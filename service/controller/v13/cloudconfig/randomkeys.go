@@ -2,15 +2,17 @@ package cloudconfig
 
 import (
 	"bytes"
+	"context"
 	"text/template"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v13/templates/cloudconfig"
 )
 
-func renderRandomKeyTmplSet(kmsClient KMSClient, clusterKeys randomkeys.Cluster, kmsKeyARN string) (RandomKeyTmplSet, error) {
+func renderRandomKeyTmplSet(ctx context.Context, encrypter encrypter.Interface, key string, clusterKeys randomkeys.Cluster) (RandomKeyTmplSet, error) {
 	var randomKeyTmplSet RandomKeyTmplSet
 	{
 		tmpl, err := template.New("encryption-config").Parse(cloudconfig.EncryptionConfig)
@@ -27,12 +29,12 @@ func renderRandomKeyTmplSet(kmsClient KMSClient, clusterKeys randomkeys.Cluster,
 			return RandomKeyTmplSet{}, microerror.Mask(err)
 		}
 
-		enc, err := encryptor(kmsClient, kmsKeyARN, buf.Bytes())
+		enc, err := encrypter.Encrypt(ctx, key, buf.String())
 		if err != nil {
 			return RandomKeyTmplSet{}, microerror.Mask(err)
 		}
 
-		com, err := compactor(enc)
+		com, err := compactor([]byte(enc))
 		if err != nil {
 			return RandomKeyTmplSet{}, microerror.Mask(err)
 		}

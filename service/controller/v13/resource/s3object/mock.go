@@ -1,6 +1,7 @@
 package s3object
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"strings"
@@ -70,11 +71,11 @@ type CloudConfigMock struct {
 	template string
 }
 
-func (c *CloudConfigMock) NewMasterTemplate(customObject v1alpha1.AWSConfig, certs legacy.CompactTLSAssets, randomKeys randomkeys.Cluster, kmsKeyARN string) (string, error) {
+func (c *CloudConfigMock) NewMasterTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, certs legacy.CompactTLSAssets, randomKeys randomkeys.Cluster) (string, error) {
 	return c.template, nil
 }
 
-func (c *CloudConfigMock) NewWorkerTemplate(customObject v1alpha1.AWSConfig, certs legacy.CompactTLSAssets) (string, error) {
+func (c *CloudConfigMock) NewWorkerTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, certs legacy.CompactTLSAssets) (string, error) {
 	return c.template, nil
 }
 

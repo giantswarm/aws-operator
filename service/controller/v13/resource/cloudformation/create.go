@@ -11,6 +11,7 @@ import (
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
 	"github.com/giantswarm/aws-operator/service/controller/v13/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v13/key"
 )
 
@@ -26,6 +27,18 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		sc, err := controllercontext.FromContext(ctx)
 		if err != nil {
 			return microerror.Mask(err)
+		}
+
+		if r.encrypterBackend == encrypter.VaultBackend {
+			customObject, err := key.ToCustomObject(obj)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			err = r.addRoleAccess(sc, customObject)
+			if err != nil {
+				return microerror.Mask(err)
+			}
 		}
 
 		_, err = sc.AWSClient.CloudFormation.CreateStack(&stackInput)

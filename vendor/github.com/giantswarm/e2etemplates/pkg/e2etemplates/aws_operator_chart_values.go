@@ -4,6 +4,9 @@ package e2etemplates
 // variables will be expanded before writing the contents to a file.
 const AWSOperatorChartValues = `Installation:
   V1:
+    Auth:
+      Vault:
+        Address: http://vault.default.svc.cluster.local:8200
     Guest:
       Kubernetes:
         API:
@@ -14,6 +17,8 @@ const AWSOperatorChartValues = `Installation:
                 IssueURL: ""
                 UsernameClaim: ""
                 GroupsClaim: ""
+      SSH:
+        SSOPublicKey: 'test'
       Update:
         Enabled: ${GUEST_UPDATE_ENABLED}
     Name: ci-aws-operator
@@ -24,6 +29,9 @@ const AWSOperatorChartValues = `Installation:
         IncludeTags: true
         Route53:
           Enabled: true
+        Encrypter: 'kms'
+    Registry:
+      Domain: quay.io
     Secret:
       AWSOperator:
         IDRSAPub: ${IDRSA_PUB}
