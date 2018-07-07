@@ -31,7 +31,8 @@ type Config struct {
 
 // Resource is bridgezone resource making sure we have fallback delegation in
 // old DNS structure. This is only for the migration period. When we delete the
-// "intermediate" this resource becomes noop and we do not need it anymore.
+// "intermediate" zone this resource becomes noop and we do not need it
+// anymore.
 //
 // Old structure looks like:
 //
@@ -61,7 +62,8 @@ type Config struct {
 //
 // NOTE: In the code below k8s.eu-central-1.aws.gigantic.io zone is called
 // "intermediate" and new_cluster.k8s.eu-central-1.aws.gigantic.io is called
-// "final".
+// "final". This resource ensures we have delegation from the intermediate zone
+// to the final zone, but only if the intermediate zone exists.
 //
 // After we have guest clusters managed by this resource set (v13) and newer it
 // means we can delete delegation to
@@ -135,6 +137,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		intermediateZoneID, err = r.findHostedZoneID(ctx, defaultGuest, intermediateZone)
 		if IsNotFound(err) {
+			// If the intermeidate zone is not found we are after
+			// the migraiton period and this resource becomes noop.
 			r.logger.LogCtx(ctx, "level", "debug", "message", "intermediate zone does not exist, skipping the resource")
 			return nil
 		} else if err != nil {
@@ -150,6 +154,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		finalZoneID, err = r.findHostedZoneID(ctx, defaultGuest, finalZone)
 		if IsNotFound(err) {
+			// The final zone is not yet created. Retry in the next
+			// reconciliation loop.
 			r.logger.LogCtx(ctx, "level", "debug", "message", "final zone not found, skipping the resource")
 			return nil
 		} else if err != nil {
