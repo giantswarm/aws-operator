@@ -42,6 +42,7 @@ type TLSManager interface {
 type Encrypter interface {
 	EncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error)
 	Encrypt(ctx context.Context, key, plaintext string) (string, error)
+	IsKeyNotFound(error) bool
 }
 
 type RoleManager interface {

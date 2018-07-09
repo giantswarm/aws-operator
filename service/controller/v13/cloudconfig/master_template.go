@@ -45,6 +45,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 		}
 		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = c.k8sAPIExtraArgs
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
+		params.RegistryDomain = c.registryDomain
 		params.SSOPublicKey = c.SSOPublicKey
 	}
 

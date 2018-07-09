@@ -27,6 +27,7 @@ data:
           ssoPublicKey: '{{ .Values.Installation.V1.Guest.SSH.SSOPublicKey }}'
         update:
           enabled: {{ .Values.Installation.V1.Guest.Update.Enabled }}
+      registryDomain: '{{ .Values.Installation.V1.Registry.Domain }}'
       installation:
         name: '{{ .Values.Installation.V1.Name }}'
         {{- if .Values.Installation.V1.Guest }}

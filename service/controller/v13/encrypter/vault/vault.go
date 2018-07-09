@@ -75,10 +75,7 @@ func (e *Encrypter) CreateKey(ctx context.Context, customObject v1alpha1.AWSConf
 		return microerror.Mask(err)
 	}
 
-	keyName, err := e.EncryptionKey(ctx, customObject)
-	if err != nil {
-		return microerror.Mask(err)
-	}
+	keyName := e.keyName(customObject)
 
 	payload := &struct{}{}
 
@@ -90,6 +87,28 @@ func (e *Encrypter) CreateKey(ctx context.Context, customObject v1alpha1.AWSConf
 	}
 
 	resp, err := e.httpClient.Do(req)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusNoContent {
+		return microerror.Mask(invalidHTTPStatusCodeError)
+	}
+
+	// We need to make the key deletable.
+	keyConfigPayload := &KeyConfigPayload{
+		DeletionAllowed: true,
+	}
+
+	p = path.Join("transit", "keys", keyName, "config")
+
+	req, err = e.newPayloadRequest(p, keyConfigPayload)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	resp, err = e.httpClient.Do(req)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -140,10 +159,7 @@ func (e *Encrypter) CurrentState(ctx context.Context, customObject v1alpha1.AWSC
 		return state, microerror.Mask(err)
 	}
 
-	keyName, err := e.EncryptionKey(ctx, customObject)
-	if err != nil {
-		return state, microerror.Mask(err)
-	}
+	keyName := e.keyName(customObject)
 
 	p := path.Join("transit", "keys", keyName)
 
@@ -174,10 +190,7 @@ func (e *Encrypter) CurrentState(ctx context.Context, customObject v1alpha1.AWSC
 func (e *Encrypter) DesiredState(ctx context.Context, customObject v1alpha1.AWSConfig) (encrypter.EncryptionKeyState, error) {
 	state := encrypter.EncryptionKeyState{}
 
-	keyName, err := e.EncryptionKey(ctx, customObject)
-	if err != nil {
-		return state, microerror.Mask(err)
-	}
+	keyName := e.keyName(customObject)
 
 	state.KeyName = keyName
 
@@ -185,9 +198,34 @@ func (e *Encrypter) DesiredState(ctx context.Context, customObject v1alpha1.AWSC
 }
 
 func (e *Encrypter) EncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {
-	clusterID := key.ClusterID(customObject)
+	err := e.ensureToken()
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
 
-	return clusterID, nil
+	keyName := e.keyName(customObject)
+
+	p := path.Join("transit", "keys", keyName)
+
+	req, err := e.newRequest("GET", p)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	resp, err := e.httpClient.Do(req)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return "", microerror.Mask(keyNotFoundError)
+	} else if resp.StatusCode != http.StatusOK {
+		body, _ := ioutil.ReadAll(resp.Body)
+		return "", microerror.Maskf(invalidHTTPStatusCodeError, "want %d, got %d, response body: %q", http.StatusOK, resp.StatusCode, body)
+	}
+
+	return keyName, nil
 }
 
 func (e *Encrypter) Encrypt(ctx context.Context, key, plaintext string) (string, error) {
@@ -230,6 +268,10 @@ func (e *Encrypter) Encrypt(ctx context.Context, key, plaintext string) (string,
 	ciphertext := encryptResp.Data.Ciphertext
 
 	return ciphertext, nil
+}
+
+func (e *Encrypter) IsKeyNotFound(err error) bool {
+	return IsKeyNotFound(err)
 }
 
 func (e *Encrypter) Decrypt(key, ciphertext string) (string, error) {
@@ -523,4 +565,8 @@ func (e *Encrypter) postAWSAuthRole(path string, role *AWSAuthRole) error {
 	}
 
 	return nil
+}
+
+func (e *Encrypter) keyName(customObject v1alpha1.AWSConfig) string {
+	return key.ClusterID(customObject)
 }

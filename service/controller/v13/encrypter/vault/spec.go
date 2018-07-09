@@ -66,3 +66,7 @@ type AWSAuthRoleResponse struct {
 type AWSAuthRole struct {
 	BoundIAMRoleARN []string `json:"bound_iam_role_arn"`
 }
+
+type KeyConfigPayload struct {
+	DeletionAllowed bool `json:"deletion_allowed"`
+}

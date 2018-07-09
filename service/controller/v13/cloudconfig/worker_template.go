@@ -35,6 +35,7 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 			certs:         certs,
 		}
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
+		params.RegistryDomain = c.registryDomain
 		params.SSOPublicKey = c.SSOPublicKey
 	}
 
