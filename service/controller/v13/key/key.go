@@ -49,6 +49,7 @@ const (
 )
 
 const (
+	DockerVolumeResourceNameKey   = "DockerVolumeResourceName"
 	MasterImageIDKey              = "MasterImageID"
 	MasterInstanceResourceNameKey = "MasterInstanceResourceName"
 	MasterInstanceTypeKey         = "MasterInstanceType"
@@ -187,6 +188,19 @@ func ClusterVersion(customObject v1alpha1.AWSConfig) string {
 
 func CustomerID(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Customer.ID
+}
+
+func DockerVolumeResourceName(customObject v1alpha1.AWSConfig) string {
+	clusterID := strings.Replace(ClusterID(customObject), "-", "", -1)
+
+	h := sha1.New()
+	h.Write([]byte(strconv.FormatInt(time.Now().UnixNano(), 10)))
+	timeHash := fmt.Sprintf("%x", h.Sum(nil))[0:5]
+
+	upperTimeHash := strings.ToUpper(timeHash)
+	upperClusterID := strings.ToUpper(clusterID)
+
+	return fmt.Sprintf("DockerVolume%s%s", upperClusterID, upperTimeHash)
 }
 
 func DockerVolumeName(customObject v1alpha1.AWSConfig) string {

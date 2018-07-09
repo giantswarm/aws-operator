@@ -183,6 +183,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack has to be scaled")
 
 			desiredStackState.MasterInstanceResourceName = currentStackState.MasterInstanceResourceName
+			desiredStackState.DockerVolumeResourceName = currentStackState.DockerVolumeResourceName
 
 			updateStackInput, err := r.computeUpdateState(ctx, customObject, desiredStackState)
 			if err != nil {
