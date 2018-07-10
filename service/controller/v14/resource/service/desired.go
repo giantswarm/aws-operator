@@ -22,11 +22,13 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			Name:      "master",
 			Namespace: key.ClusterID(customObject),
 			Labels: map[string]string{
-				"app":                        "master",
-				"cluster":                    key.ClusterID(customObject),
-				"customer":                   key.CustomerID(customObject),
-				"giantswarm.io/cluster":      key.ClusterID(customObject),
-				"giantswarm.io/organization": key.CustomerID(customObject),
+				"app":                          "master",
+				"cluster":                      key.ClusterID(customObject),
+				"customer":                     key.CustomerID(customObject),
+				"giantswarm.io/cluster":        key.ClusterID(customObject),
+				"giantswarm.io/etcd_domain":    key.ClusterEtcdDomain(customObject),
+				"giantswarm.io/organization":   key.CustomerID(customObject),
+				"giantswarm.io/version_bundle": key.VersionBundleVersion(customObject),
 			},
 			Annotations: map[string]string{
 				"giantswarm.io/prometheus-cluster": key.ClusterID(customObject),

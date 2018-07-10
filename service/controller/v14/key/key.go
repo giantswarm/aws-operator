@@ -147,6 +147,9 @@ func ClusterCustomer(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Customer.ID
 }
 
+func ClusterEtcdDomain(customObject v1alpha1.AWSConfig) string {
+	return customObject.Spec.Cluster.Etcd.Domain
+}
 func ClusterID(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.ID
 }
