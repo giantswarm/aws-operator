@@ -22,6 +22,36 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Made master docker volume ephemeral.",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Fixed volume attachments while upgrading.",
+				Kind:        versionbundle.KindFixed,
+			},
+			{
+				Component:   "aws-operator",
+				Description: "Added Vault encrypter as an alternative to KMS (especially for China where it is disabled).",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "aws-operator",
+				Description: "Enabled migration resource with credentials logic.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "aws-operator",
+				Description: "Add public routes for accessing Vault ELB when using Vault encrypter.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "aws-operator",
+				Description: "Made docker registry domain for component images configurable.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "aws-operator",
+				Description: "Set version bundle version stack output via parameter.",
+				Kind:        versionbundle.KindAdded,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
