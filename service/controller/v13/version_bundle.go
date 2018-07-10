@@ -19,12 +19,12 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "aws-operator",
-				Description: "Fix volume attachments while upgrading.",
+				Description: "Fixed volume attachments while upgrading.",
 				Kind:        versionbundle.KindFixed,
 			},
 			{
 				Component:   "aws-operator",
-				Description: "Add encrypter interface, make KMS code satisfy it and add Vault encrypter.",
+				Description: "Added Vault encrypter as an alternative to KMS (especially for China where it is disabled).",
 				Kind:        versionbundle.KindAdded,
 			},
 			{
@@ -34,22 +34,17 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "aws-operator",
-				Description: "Add public for accessing Vault ELB when using Vault encrypter.",
+				Description: "Add public routes for accessing Vault ELB when using Vault encrypter.",
 				Kind:        versionbundle.KindAdded,
 			},
 			{
 				Component:   "aws-operator",
-				Description: "Improve logging for shouldScale method.",
-				Kind:        versionbundle.KindChanged,
-			},
-			{
-				Component:   "aws-operator",
-				Description: "Add registry domain parameter and inject it into k8scloudconfig.",
+				Description: "Made docker registry domain for component images configurable.",
 				Kind:        versionbundle.KindAdded,
 			},
 			{
 				Component:   "aws-operator",
-				Description: "Set version bundle version output via parameter.",
+				Description: "Set version bundle version stack output via parameter.",
 				Kind:        versionbundle.KindAdded,
 			},
 		},
