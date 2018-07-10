@@ -57,6 +57,26 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Add support for etcd monitoring.",
 				Kind:        versionbundle.KindAdded,
 			},
+			{
+				Component:   "cloudconfig",
+				Description: "Increased timeout for kubelet systemd unit.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Added RBAC rules for node-operator and prometheus.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Enabled monitoring for ingress controller metrics.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Set worker processes to 4 for Nginx Ingress Controller.",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
@@ -89,6 +109,6 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    "aws-operator",
-		Version: "3.1.3",
+		Version: "3.2.0",
 	}
 }
