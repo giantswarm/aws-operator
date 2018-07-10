@@ -46,6 +46,7 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 		StackState: adapter.StackState{
 			Name: stackState.Name,
 
+			DockerVolumeResourceName:   stackState.DockerVolumeResourceName,
 			MasterImageID:              stackState.MasterImageID,
 			MasterInstanceResourceName: stackState.MasterInstanceResourceName,
 			MasterInstanceType:         stackState.MasterInstanceType,

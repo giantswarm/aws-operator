@@ -2,6 +2,8 @@ package guest
 
 const Outputs = `{{define "outputs"}}
 Outputs:
+  DockerVolumeResourceName:
+    Value: {{ .Outputs.Master.DockerVolume.ResourceName }}
   MasterImageID:
     Value: {{ .Outputs.Master.ImageID }}
   MasterInstanceResourceName:

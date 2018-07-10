@@ -5,7 +5,7 @@ const Instance = `{{define "instance"}}
     Type: "AWS::EC2::Instance"
     Description: Master instance
     DependsOn:
-    - DockerVolume
+    - {{ .Instance.Master.DockerVolume.ResourceName }}
     - EtcdVolume
     Properties:
       AvailabilityZone: {{ .Instance.Master.AZ }}
@@ -20,7 +20,7 @@ const Instance = `{{define "instance"}}
       Tags:
       - Key: Name
         Value: {{ .Instance.Cluster.ID }}-master
-  DockerVolume:
+  {{ .Instance.Master.DockerVolume.ResourceName }}:
     Type: AWS::EC2::Volume
     Properties:
       Encrypted: true
@@ -44,7 +44,7 @@ const Instance = `{{define "instance"}}
     Type: AWS::EC2::VolumeAttachment
     Properties:
       InstanceId: !Ref {{ .Instance.Master.Instance.ResourceName }}
-      VolumeId: !Ref DockerVolume
+      VolumeId: !Ref {{ .Instance.Master.DockerVolume.ResourceName }}
       Device: /dev/xvdc
   {{ .Instance.Master.Instance.ResourceName }}EtcdMountPoint:
     Type: AWS::EC2::VolumeAttachment
