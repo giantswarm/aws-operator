@@ -17,6 +17,41 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Added CA public key into trusted user keys for SSO ssh.",
 				Kind:        versionbundle.KindAdded,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Fix volume attachments while upgrading.",
+				Kind:        versionbundle.KindFixed,
+			},
+			{
+				Component:   "aws-operator",
+				Description: "Add encrypter interface, make KMS code satisfy it and add Vault encrypter.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "aws-operator",
+				Description: "Enabled migration resource with credentials logic.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "aws-operator",
+				Description: "Add public for accessing Vault ELB when using Vault encrypter.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "aws-operator",
+				Description: "Improve logging for shouldScale method.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "aws-operator",
+				Description: "Add registry domain parameter and inject it into k8scloudconfig.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "aws-operator",
+				Description: "Set version bundle version output via parameter.",
+				Kind:        versionbundle.KindAdded,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
