@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v12patch1/controllercontext"
 )
 
 func Test_CurrentState(t *testing.T) {

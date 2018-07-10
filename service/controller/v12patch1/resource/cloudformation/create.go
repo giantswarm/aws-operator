@@ -10,8 +10,8 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
-	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v12/key"
+	"github.com/giantswarm/aws-operator/service/controller/v12patch1/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v12patch1/key"
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {

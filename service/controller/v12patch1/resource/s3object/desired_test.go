@@ -13,7 +13,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v12patch1/controllercontext"
 )
 
 func Test_DesiredState(t *testing.T) {

@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
 
-	"github.com/giantswarm/aws-operator/service/controller/v12/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v12patch1/controllercontext"
 )
 
 func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
