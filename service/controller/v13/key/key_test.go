@@ -266,6 +266,46 @@ func Test_EC2ServiceDomain(t *testing.T) {
 	}
 }
 
+func Test_DockerVolumeResourceName_Format(t *testing.T) {
+	t.Parallel()
+
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "test-cluster",
+			},
+		},
+	}
+
+	n := DockerVolumeResourceName(customObject)
+
+	prefix := "DockerVolume"
+
+	if !strings.HasPrefix(n, prefix) {
+		t.Fatalf("expected %s to have prefix %s", n, prefix)
+	}
+}
+
+func Test_DockerVolumeResourceName_Inequivalence(t *testing.T) {
+	t.Parallel()
+
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: "test-cluster",
+			},
+		},
+	}
+
+	n1 := DockerVolumeResourceName(customObject)
+	time.Sleep(1 * time.Millisecond)
+	n2 := DockerVolumeResourceName(customObject)
+
+	if n1 == n2 {
+		t.Fatalf("expected %s to differ from %s", n1, n2)
+	}
+}
+
 func Test_EtcdVolumeName(t *testing.T) {
 	t.Parallel()
 	expectedName := "test-cluster-etcd"
@@ -482,23 +522,12 @@ func Test_MasterInstanceResourceName_Format(t *testing.T) {
 		},
 	}
 
-	n1 := MasterInstanceResourceName(customObject)
-	time.Sleep(1 * time.Millisecond)
-	n2 := MasterInstanceResourceName(customObject)
+	n := MasterInstanceResourceName(customObject)
 
 	prefix := "MasterInstance"
 
-	if !strings.HasPrefix(n1, prefix) {
-		t.Fatalf("expected %s to have prefix %s", n1, prefix)
-	}
-	if strings.Contains(n1, "-") {
-		t.Fatalf("expected %s to not contain dashes", n1)
-	}
-	if !strings.HasPrefix(n2, prefix) {
-		t.Fatalf("expected %s to have prefix %s", n2, prefix)
-	}
-	if strings.Contains(n2, "-") {
-		t.Fatalf("expected %s to not contain dashes", n2)
+	if !strings.HasPrefix(n, prefix) {
+		t.Fatalf("expected %s to have prefix %s", n, prefix)
 	}
 }
 
@@ -1401,5 +1430,29 @@ func Test_WorkerRoleARN(t *testing.T) {
 				t.Errorf("unexpected Worker role ARN, expecting %q, want %q", tc.expectedRoleARN, roleARN)
 			}
 		})
+	}
+}
+
+func Test_getResourcenameWithTimeHash_Format(t *testing.T) {
+	t.Parallel()
+
+	clusterID := "test-cluster"
+	prefix := "FooResource"
+
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			Cluster: v1alpha1.Cluster{
+				ID: clusterID,
+			},
+		},
+	}
+
+	n := getResourcenameWithTimeHash(prefix, customObject)
+
+	if !strings.HasPrefix(n, prefix) {
+		t.Fatalf("expected %s to have prefix %s", n, prefix)
+	}
+	if strings.Contains(n, "-") {
+		t.Fatalf("expected %s to not contain dashes", n)
 	}
 }
