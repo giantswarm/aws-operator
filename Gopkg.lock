@@ -248,15 +248,17 @@
   revision = "a53b3bf982c863948719acb122321ee511dce813"
 
 [[projects]]
-  branch = "master"
+  branch = "ipam-e2e-tests"
   name = "github.com/giantswarm/e2etests"
   packages = [
     "clusterstate",
     "clusterstate/provider",
+    "ipam",
+    "ipam/provider",
     "scaling",
     "scaling/provider"
   ]
-  revision = "e087f8cfb8a483310a909546a72cf8dc5bbd28d7"
+  revision = "9715b15b7aaa9af733822db3e84a740d06d412e7"
 
 [[projects]]
   branch = "master"
@@ -1354,6 +1356,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "92c050b56eacfeabf5888774a733b15487c480c9ac87109109f79d92376f5b7c"
+  inputs-digest = "1a5731535525f415be2414f6be3fcef10d7941058cb2a049568dd3fa70691eec"
   solver-name = "gps-cdcl"
   solver-version = 1
