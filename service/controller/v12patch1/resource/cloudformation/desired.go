@@ -40,6 +40,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		mainStack = StackState{
 			Name: key.MainGuestStackName(customObject),
 
+			DockerVolumeResourceName:   key.DockerVolumeResourceName(customObject),
 			MasterImageID:              imageID,
 			MasterInstanceResourceName: key.MasterInstanceResourceName(customObject),
 			MasterInstanceType:         masterInstanceType,
