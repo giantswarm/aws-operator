@@ -52,6 +52,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Set version bundle version stack output via parameter.",
 				Kind:        versionbundle.KindAdded,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Add support for etcd monitoring.",
+				Kind:        versionbundle.KindAdded,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
