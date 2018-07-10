@@ -52,6 +52,26 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Set version bundle version stack output via parameter.",
 				Kind:        versionbundle.KindAdded,
 			},
+			{
+				Component:   "cloudconfig",
+				Description: "Increased timeout for kubelet systemd unit.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Added RBAC rules for node-operator and prometheus.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Enabled monitoring for ingress controller metrics.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Set worker processes to 4 for Nginx Ingress Controller.",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
