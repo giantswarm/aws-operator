@@ -66,6 +66,15 @@ const (
 
 const (
 	ClusterIDLabel = "giantswarm.io/cluster"
+
+	LabelApp           = "app"
+	LabelCluster       = "giantswarm.io/cluster"
+	LabelCustomer      = "customer"
+	LabelEtcdDomain    = "giantswarm.io/etcd-domain"
+	LabelOrganization  = "giantswarm.io/organization"
+	LabelVersionBundle = "giantswarm.io/version-bundle"
+
+	LegacyLabelCluster = "cluster"
 )
 
 const (
