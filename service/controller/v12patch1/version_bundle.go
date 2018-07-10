@@ -42,6 +42,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Remove Nginx version from Server header in Ingress Controller",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Made master docker volume ephemeral.",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
@@ -74,6 +79,6 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    "aws-operator",
-		Version: "3.1.2",
+		Version: "3.1.3",
 	}
 }
