@@ -191,16 +191,7 @@ func CustomerID(customObject v1alpha1.AWSConfig) string {
 }
 
 func DockerVolumeResourceName(customObject v1alpha1.AWSConfig) string {
-	clusterID := strings.Replace(ClusterID(customObject), "-", "", -1)
-
-	h := sha1.New()
-	h.Write([]byte(strconv.FormatInt(time.Now().UnixNano(), 10)))
-	timeHash := fmt.Sprintf("%x", h.Sum(nil))[0:5]
-
-	upperTimeHash := strings.ToUpper(timeHash)
-	upperClusterID := strings.ToUpper(clusterID)
-
-	return fmt.Sprintf("DockerVolume%s%s", upperClusterID, upperTimeHash)
+	return getResourcenameWithTimeHash("DockerVolume", customObject)
 }
 
 func DockerVolumeName(customObject v1alpha1.AWSConfig) string {
@@ -303,16 +294,7 @@ func MasterImageID(customObject v1alpha1.AWSConfig) string {
 }
 
 func MasterInstanceResourceName(customObject v1alpha1.AWSConfig) string {
-	clusterID := strings.Replace(ClusterID(customObject), "-", "", -1)
-
-	h := sha1.New()
-	h.Write([]byte(strconv.FormatInt(time.Now().UnixNano(), 10)))
-	timeHash := fmt.Sprintf("%x", h.Sum(nil))[0:5]
-
-	upperTimeHash := strings.ToUpper(timeHash)
-	upperClusterID := strings.ToUpper(clusterID)
-
-	return fmt.Sprintf("MasterInstance%s%s", upperClusterID, upperTimeHash)
+	return getResourcenameWithTimeHash("MasterInstance", customObject)
 }
 
 func MasterInstanceName(customObject v1alpha1.AWSConfig) string {
@@ -499,4 +481,19 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 	}
 
 	return imageID, nil
+}
+
+// getResourcenameWithTimeHash returns the string compared from specific prefix,
+// time hash and cluster ID.
+func getResourcenameWithTimeHash(prefix string, customObject v1alpha1.AWSConfig) string {
+	clusterID := strings.Replace(ClusterID(customObject), "-", "", -1)
+
+	h := sha1.New()
+	h.Write([]byte(strconv.FormatInt(time.Now().UnixNano(), 10)))
+	timeHash := fmt.Sprintf("%x", h.Sum(nil))[0:5]
+
+	upperTimeHash := strings.ToUpper(timeHash)
+	upperClusterID := strings.ToUpper(clusterID)
+
+	return fmt.Sprintf("%s%s%s", prefix, upperClusterID, upperTimeHash)
 }
