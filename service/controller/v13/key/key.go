@@ -186,12 +186,12 @@ func ClusterVersion(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Version
 }
 
-func CustomerID(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.Cluster.Customer.ID
-}
-
 func ClusterEtcdDomain(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Etcd.Domain
+}
+
+func CustomerID(customObject v1alpha1.AWSConfig) string {
+	return customObject.Spec.Cluster.Customer.ID
 }
 
 func DockerVolumeResourceName(customObject v1alpha1.AWSConfig) string {
