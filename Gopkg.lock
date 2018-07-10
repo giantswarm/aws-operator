@@ -230,7 +230,7 @@
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "fd0ebd0ec770f6ffb095dc5daa2fa23ca505e762"
+  revision = "4e46ca575b4e7fded983e72facad8da587a21f1c"
 
 [[projects]]
   branch = "master"
@@ -258,7 +258,7 @@
     "scaling",
     "scaling/provider"
   ]
-  revision = "9715b15b7aaa9af733822db3e84a740d06d412e7"
+  revision = "5053d999059478622b72b9e3f8b756bd82acc046"
 
 [[projects]]
   branch = "master"

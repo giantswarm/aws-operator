@@ -2,6 +2,7 @@ package ipam
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/e2etests/ipam/provider"
@@ -47,20 +48,23 @@ func (c *IPAM) Test(ctx context.Context) error {
 
 	clusters := []string{clusterOne, clusterTwo, clusterThree}
 
-	// First create all three guest clusters
+	c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating three guest clusters: %#v", clusters))
+
 	for _, cn := range clusters {
-		err = c.provider.RequestGuestClusterCreation(cn)
+		err = c.provider.CreateCluster(cn)
 		if err != nil {
 			return microerror.Mask(err)
 		}
+		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("create guest cluster %s", cn))
 	}
 
 	guestFrameworks := make(map[string]*framework.Guest)
 
-	// Wait for them to be ready.
-	for _, clusterName := range clusters {
+	c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for three guest clusters to be ready: %#v", clusters))
+
+	for _, cn := range clusters {
 		cfg := framework.GuestConfig{
-			ClusterName: clusterName,
+			ClusterName: cn,
 			Logger:      c.logger,
 		}
 		guestFramework, err := framework.NewGuest(cfg)
@@ -68,18 +72,20 @@ func (c *IPAM) Test(ctx context.Context) error {
 			return microerror.Mask(err)
 		}
 
-		guestFrameworks[clusterName] = guestFramework
+		guestFrameworks[cn] = guestFramework
 		err = guestFramework.Setup()
 		if err != nil {
 			return microerror.Mask(err)
 		}
+		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("guest cluster %s ready", cn))
 	}
 
 	// TODO: Verify subnet properties for three created clusters.
 
-	// Now terminate guest cluster #2 and create guest cluster #4.
-	c.provider.RequestGuestClusterDeletion(clusterTwo)
-	err = c.provider.RequestGuestClusterCreation(clusterFour)
+	c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminating guest cluster %s and immediately creating new guest cluster %s", clusterTwo, clusterFour))
+
+	c.provider.DeleteCluster(clusterTwo)
+	err = c.provider.CreateCluster(clusterFour)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -91,6 +97,7 @@ func (c *IPAM) Test(ctx context.Context) error {
 			return microerror.Mask(err)
 		}
 		delete(guestFrameworks, clusterTwo)
+		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("guest cluster %s down", clusterTwo))
 	}
 
 	{
@@ -108,13 +115,18 @@ func (c *IPAM) Test(ctx context.Context) error {
 		if err != nil {
 			return microerror.Mask(err)
 		}
+		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("guest cluster %s up", clusterFour))
 	}
 
 	// TODO: Verify that fourth cluster subnet allocation doesn't overlap with
 	// terminated second cluster.
 
-	for _, cn := range []string{clusterOne, clusterThree, clusterFour} {
-		c.provider.RequestGuestClusterDeletion(cn)
+	clusters = []string{clusterOne, clusterThree, clusterFour}
+
+	c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting remaining guest clusters: %#v", clusters))
+
+	for _, cn := range clusters {
+		c.provider.DeleteCluster(cn)
 		delete(guestFrameworks, cn)
 	}
 
