@@ -66,6 +66,17 @@ const (
 
 const (
 	ClusterIDLabel = "giantswarm.io/cluster"
+
+	AnnotationEtcdDomain        = "giantswarm.io/etcd-domain"
+	AnnotationPrometheusCluster = "giantswarm.io/prometheus-cluster"
+
+	LabelApp           = "app"
+	LabelCluster       = "giantswarm.io/cluster"
+	LabelCustomer      = "customer"
+	LabelOrganization  = "giantswarm.io/organization"
+	LabelVersionBundle = "giantswarm.io/version-bundle"
+
+	LegacyLabelCluster = "cluster"
 )
 
 const (
@@ -154,6 +165,10 @@ func ClusterCloudProviderTag(customObject v1alpha1.AWSConfig) string {
 
 func ClusterCustomer(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Customer.ID
+}
+
+func ClusterEtcdDomain(customObject v1alpha1.AWSConfig) string {
+	return customObject.Spec.Cluster.Etcd.Domain
 }
 
 func ClusterID(customObject v1alpha1.AWSConfig) string {

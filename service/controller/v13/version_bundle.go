@@ -53,6 +53,11 @@ func VersionBundle() versionbundle.Bundle {
 				Kind:        versionbundle.KindAdded,
 			},
 			{
+				Component:   "aws-operator",
+				Description: "Add support for etcd monitoring.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
 				Component:   "cloudconfig",
 				Description: "Increased timeout for kubelet systemd unit.",
 				Kind:        versionbundle.KindChanged,
