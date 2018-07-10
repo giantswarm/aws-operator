@@ -17,6 +17,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Added CA public key into trusted user keys for SSO ssh.",
 				Kind:        versionbundle.KindAdded,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Made master docker volume ephemeral.",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{

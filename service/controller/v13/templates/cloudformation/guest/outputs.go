@@ -2,6 +2,8 @@ package guest
 
 const Outputs = `{{define "outputs"}}
 Outputs:
+  DockerVolumeResourceName:
+    Value: {{ .Outputs.Master.DockerVolume.ResourceName }}
   MasterImageID:
     Value: {{ .Outputs.Master.ImageID }}
   MasterInstanceResourceName:
@@ -21,5 +23,6 @@ Outputs:
   WorkerCloudConfigVersion:
     Value: {{ .Outputs.Worker.CloudConfig.Version }}
   VersionBundleVersion:
-    Value: {{ .Outputs.VersionBundle.Version }}
+    Value:
+      Ref: VersionBundleVersionParameter
 {{end}}`
