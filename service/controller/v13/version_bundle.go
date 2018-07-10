@@ -19,6 +19,11 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "aws-operator",
+				Description: "Made master docker volume ephemeral.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "aws-operator",
 				Description: "Fixed volume attachments while upgrading.",
 				Kind:        versionbundle.KindFixed,
 			},
