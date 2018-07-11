@@ -26,6 +26,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter/vault"
 	"github.com/giantswarm/aws-operator/service/controller/v13/key"
+	"github.com/giantswarm/aws-operator/service/controller/v13/resource/bridgezone"
 	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v13/resource/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/v13/resource/ebsvolume"
 	"github.com/giantswarm/aws-operator/service/controller/v13/resource/encryptionkey"
@@ -198,6 +199,23 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var bridgeZoneResource controller.Resource
+	{
+		c := bridgezone.Config{
+			HostAWSConfig: config.HostAWSConfig,
+			HostRoute53:   config.HostAWSClients.Route53,
+			K8sClient:     config.K8sClient,
+			Logger:        config.Logger,
+
+			Route53Enabled: config.Route53Enabled,
+		}
+
+		bridgeZoneResource, err = bridgezone.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var s3BucketResource controller.Resource
 	{
 		c := s3bucket.Config{
@@ -355,6 +373,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	resources := []controller.Resource{
 		migrationResource,
 		hostedZoneResource,
+		bridgeZoneResource,
 		encryptionKeyResource,
 		s3BucketResource,
 		s3BucketObjectResource,
