@@ -5,6 +5,7 @@ import (
 	"github.com/giantswarm/micrologger"
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
+	"reflect"
 )
 
 const (
@@ -52,6 +53,32 @@ func (r *Resource) Name() string {
 	return Name
 }
 
+func getServiceByName(list []*apiv1.Service, name string) (*apiv1.Service, error) {
+	for _, l := range list {
+		if l.Name == name {
+			return l, nil
+		}
+	}
+
+	return nil, microerror.Mask(notFoundError)
+}
+
+func isServiceModified(a, b *apiv1.Service) bool {
+	if !reflect.DeepEqual(a.Spec, b.Spec) {
+		return true
+	}
+
+	if !reflect.DeepEqual(a.Labels, b.Labels) {
+		return true
+	}
+
+	if !reflect.DeepEqual(a.Annotations, b.Annotations) {
+		return true
+	}
+
+	return false
+}
+
 func toService(v interface{}) (*apiv1.Service, error) {
 	if v == nil {
 		return nil, nil
@@ -63,4 +90,17 @@ func toService(v interface{}) (*apiv1.Service, error) {
 	}
 
 	return service, nil
+}
+
+func toServices(v interface{}) ([]*apiv1.Service, error) {
+	if v == nil {
+		return nil, nil
+	}
+
+	services, ok := v.([]*apiv1.Service)
+	if !ok {
+		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", []*apiv1.Service{}, v)
+	}
+
+	return services, nil
 }
