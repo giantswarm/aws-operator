@@ -85,6 +85,7 @@ type StackState struct {
 
 	HostedZoneNameServers string
 
+	DockerVolumeResourceName   string
 	MasterImageID              string
 	MasterInstanceType         string
 	MasterInstanceResourceName string
