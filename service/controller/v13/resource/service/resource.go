@@ -64,7 +64,7 @@ func getServiceByName(list []*apiv1.Service, name string) (*apiv1.Service, error
 }
 
 func isServiceModified(a, b *apiv1.Service) bool {
-	if !reflect.DeepEqual(a.Spec, b.Spec) {
+	if !portsEqual(a, b) {
 		return true
 	}
 
@@ -103,4 +103,27 @@ func toServices(v interface{}) ([]*apiv1.Service, error) {
 	}
 
 	return services, nil
+}
+
+// portsEqual is a function that is checking if ports in the service have same important values.
+func portsEqual(a, b *apiv1.Service) bool {
+	if len(a.Spec.Ports) != len(b.Spec.Ports) {
+		return false
+	}
+
+	for i := 0; i < len(a.Spec.Ports); i++ {
+		portA := a.Spec.Ports[i]
+		portB := b.Spec.Ports[i]
+
+		if portA.Name != portB.Name {
+			return false
+		}
+		if !reflect.DeepEqual(portA.Port, portB.Port) {
+			return false
+		}
+		if !reflect.DeepEqual(portA.Protocol, portB.Protocol) {
+			return false
+		}
+	}
+	return true
 }
