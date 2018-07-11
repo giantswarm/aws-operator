@@ -64,6 +64,13 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	var currentState StackState
 	{
+		var hostedZoneNameServers string
+		if r.route53Enabled {
+			hostedZoneNameServers, err = sc.CloudFormation.GetOutputValue(stackOutputs, key.HostedZoneNameServers)
+			if err != nil {
+				return StackState{}, microerror.Mask(err)
+			}
+		}
 		dockerVolumeResourceName, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.DockerVolumeResourceNameKey)
 		if cloudformationservice.IsOutputNotFound(err) {
 			// Since we are transitioning between versions we will have situations in
@@ -139,6 +146,8 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 		currentState = StackState{
 			Name: stackName,
+
+			HostedZoneNameServers: hostedZoneNameServers,
 
 			DockerVolumeResourceName:   dockerVolumeResourceName,
 			MasterImageID:              masterImageID,
