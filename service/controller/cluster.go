@@ -19,6 +19,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v12"
 	v12adapter "github.com/giantswarm/aws-operator/service/controller/v12/adapter"
 	v12cloudconfig "github.com/giantswarm/aws-operator/service/controller/v12/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v12patch1"
+	v12patch1adapter "github.com/giantswarm/aws-operator/service/controller/v12patch1/adapter"
+	v12patch1cloudconfig "github.com/giantswarm/aws-operator/service/controller/v12patch1/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v13"
 	v13adapter "github.com/giantswarm/aws-operator/service/controller/v13/adapter"
 	v13cloudconfig "github.com/giantswarm/aws-operator/service/controller/v13/cloudconfig"
@@ -480,6 +483,44 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 		}
 	}
 
+	var resourceSetV12Patch1 *controller.ResourceSet
+	{
+		c := v12patch1.ClusterResourceSetConfig{
+			CertsSearcher:      certWatcher,
+			G8sClient:          config.G8sClient,
+			HostAWSConfig:      hostAWSConfig,
+			HostAWSClients:     awsHostClients,
+			K8sClient:          config.K8sClient,
+			Logger:             config.Logger,
+			RandomkeysSearcher: randomKeySearcher,
+
+			AccessLogsExpiration:   config.AccessLogsExpiration,
+			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
+			DeleteLoggingBucket:    config.DeleteLoggingBucket,
+			GuestUpdateEnabled:     config.GuestUpdateEnabled,
+			PodInfraContainerImage: config.PodInfraContainerImage,
+			Route53Enabled:         config.Route53Enabled,
+			IncludeTags:            config.IncludeTags,
+			InstallationName:       config.InstallationName,
+			OIDC: v12patch1cloudconfig.OIDCConfig{
+				ClientID:      config.OIDC.ClientID,
+				IssuerURL:     config.OIDC.IssuerURL,
+				UsernameClaim: config.OIDC.UsernameClaim,
+				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			APIWhitelist: v12patch1adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
+			},
+			ProjectName: config.ProjectName,
+		}
+
+		resourceSetV12Patch1, err = v12patch1.NewClusterResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var resourceSetV13 *controller.ResourceSet
 	{
 		c := v13.ClusterResourceSetConfig{
@@ -537,6 +578,7 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 				resourceSetV9Patch1,
 				resourceSetV9Patch2,
 				resourceSetV12,
+				resourceSetV12Patch1,
 				resourceSetV13,
 			},
 		}
