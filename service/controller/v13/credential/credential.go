@@ -31,7 +31,7 @@ func GetARN(k8sClient kubernetes.Interface, obj interface{}) (string, error) {
 // GetDefaultARN is used only by the bridgezone resource. It should be removed
 // when the resource is removed.
 func GetDefaultARN(k8sClient kubernetes.Interface) (string, error) {
-	ns := "default"
+	ns := "giantswarm"
 	name := "credential-default"
 	credential, err := k8sClient.CoreV1().Secrets(ns).Get(name, apismetav1.GetOptions{})
 	if err != nil {
