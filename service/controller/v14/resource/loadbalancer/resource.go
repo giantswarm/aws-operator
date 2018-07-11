@@ -7,7 +7,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "loadbalancerv13"
+	Name = "loadbalancerv14"
 )
 
 // Config represents the configuration used to create a new loadbalancer resource.

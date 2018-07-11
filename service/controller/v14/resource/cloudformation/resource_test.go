@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/aws-operator/service/controller/v13/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v14/adapter"
 	"github.com/giantswarm/micrologger/microloggertest"
 )
 
