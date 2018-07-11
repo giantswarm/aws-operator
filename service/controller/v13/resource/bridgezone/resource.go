@@ -261,14 +261,21 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		delete := route53.ChangeActionDelete
 		ns := route53.RRTypeNs
 
+		// Some junk values they are required but ignored during
+		// delete.
+		ttl := int64(900)
+		values := []*route53.ResourceRecord{}
+
 		in := &route53.ChangeResourceRecordSetsInput{
 			ChangeBatch: &route53.ChangeBatch{
 				Changes: []*route53.Change{
 					{
 						Action: &delete,
 						ResourceRecordSet: &route53.ResourceRecordSet{
-							Name: &finalZone,
-							Type: &ns,
+							Name:            &finalZone,
+							Type:            &ns,
+							TTL:             &ttl,
+							ResourceRecords: values,
 						},
 					},
 				},
