@@ -2,7 +2,7 @@ package adapter
 
 // The template related to this adapter can be found in the following import.
 //
-//     github.com/giantswarm/aws-operator/service/controller/v13/templates/cloudformation/guest/recordsets.go
+//     github.com/giantswarm/aws-operator/service/controller/v14/templates/cloudformation/guest/recordsets.go
 //
 
 type recordSetsAdapter struct {
