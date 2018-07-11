@@ -2,6 +2,7 @@ package bridgezone
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -174,7 +175,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "got name servers of final zone: %v")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "got name servers of final zone: %v", finalZoneNS)
 	}
 
 	{
@@ -208,6 +209,15 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			},
 			HostedZoneId: &intermediateZoneID,
 		}
+		fmt.Printf("1 ==============================================================================\n")
+		fmt.Printf("================================================================================\n")
+		fmt.Printf("================================================================================\n")
+		fmt.Printf("================================================================================\n")
+		fmt.Printf("%s\n", in.GoString())
+		fmt.Printf("================================================================================\n")
+		fmt.Printf("================================================================================\n")
+		fmt.Printf("================================================================================\n")
+		fmt.Printf("================================================================================\n")
 		_, err := defaultGuest.ChangeResourceRecordSetsWithContext(ctx, in)
 		if err != nil {
 			return microerror.Mask(err)
