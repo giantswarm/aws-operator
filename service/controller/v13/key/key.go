@@ -179,6 +179,11 @@ func ClusterNamespace(customObject v1alpha1.AWSConfig) string {
 	return ClusterID(customObject)
 }
 
+// ClusterNetworkCIDR returns allocated guest cluster subnet CIDR.
+func ClusterNetworkCIDR(customObject v1alpha1.AWSConfig) string {
+	return customObject.Status.Cluster.Network.CIDR
+}
+
 // ClusterOrganization returns the org name from the custom object.
 // It uses ClusterCustomer until this field is renamed in the custom object.
 func ClusterOrganization(customObject v1alpha1.AWSConfig) string {
