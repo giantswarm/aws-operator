@@ -78,6 +78,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 			// Make a copy and set the resource version so the service can be updated.
 			serviceToUpdate := desiredService.DeepCopy()
 			serviceToUpdate.ObjectMeta.ResourceVersion = currentService.ObjectMeta.ResourceVersion
+			serviceToUpdate.Spec.ClusterIP = currentService.Spec.ClusterIP
 
 			servicesToUpdate = append(servicesToUpdate, serviceToUpdate)
 
