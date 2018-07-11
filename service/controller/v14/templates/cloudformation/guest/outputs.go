@@ -4,6 +4,10 @@ const Outputs = `{{define "outputs"}}
 Outputs:
   DockerVolumeResourceName:
     Value: {{ .Outputs.Master.DockerVolume.ResourceName }}
+  {{ if .Route53Enabled }}
+  HostedZoneNameServers:
+    Value: !Join [ ',', !GetAtt 'HostedZone.NameServers' ]
+  {{ end }}
   MasterImageID:
     Value: {{ .Outputs.Master.ImageID }}
   MasterInstanceResourceName:

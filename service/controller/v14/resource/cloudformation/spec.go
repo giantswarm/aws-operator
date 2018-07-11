@@ -20,6 +20,8 @@ const (
 type StackState struct {
 	Name string
 
+	HostedZoneNameServers string
+
 	DockerVolumeResourceName   string
 	MasterImageID              string
 	MasterInstanceType         string
