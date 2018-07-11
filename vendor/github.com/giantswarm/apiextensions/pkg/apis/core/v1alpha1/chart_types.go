@@ -39,18 +39,21 @@ func NewChartConfigCRD() *apiextensionsv1beta1.CustomResourceDefinition {
 				Plural:   "chartconfigs",
 				Singular: "chartconfig",
 			},
+			Subresources: &apiextensionsv1beta1.CustomResourceSubresources{
+				Status: &apiextensionsv1beta1.CustomResourceSubresourceStatus{},
+			},
 		},
 	}
 }
 
 // +genclient
-// +genclient:noStatus
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 type ChartConfig struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`
-	Spec              ChartConfigSpec `json:"spec"`
+	Spec              ChartConfigSpec   `json:"spec"`
+	Status            ChartConfigStatus `json:"status"`
 }
 
 type ChartConfigSpec struct {
@@ -74,6 +77,9 @@ type ChartConfigSpecChart struct {
 	// Release is the name of the Helm release when the chart is deployed,
 	// e.g. node-exporter.
 	Release string `json:"release" yaml:"release"`
+	// Secret references a secret containing secret values that should be
+	// applied to the chart.
+	Secret ChartConfigSpecSecret `json:"secret" yaml:"secret"`
 }
 
 type ChartConfigSpecConfigMap struct {
@@ -86,6 +92,24 @@ type ChartConfigSpecConfigMap struct {
 	// ResourceVersion is the Kubernetes resource version of the configmap.
 	// Used to detect if the configmap has changed, e.g. 12345.
 	ResourceVersion string `json:"resourceVersion" yaml:"resourceVersion"`
+}
+
+type ChartConfigSpecSecret struct {
+	// Name is the name of the secret containing chart values to apply,
+	// e.g. node-exporter-chart-secret.
+	Name string `json:"name" yaml:"name"`
+	// Namespace is the namespace of the secret,
+	// e.g. kube-system.
+	Namespace string `json:"namespace" yaml:"namespace"`
+	// ResourceVersion is the Kubernetes resource version of the secret.
+	// Used to detect if the secret has changed, e.g. 12345.
+	ResourceVersion string `json:"resourceVersion" yaml:"resourceVersion"`
+}
+
+type ChartConfigStatus struct {
+	// ReleaseStatus is the status of the Helm release when the chart is
+	// installed, e.g. DEPLOYED.
+	ReleaseStatus string `json:"releaseStatus" yaml:"releaseStatus"`
 }
 
 type ChartConfigSpecVersionBundle struct {

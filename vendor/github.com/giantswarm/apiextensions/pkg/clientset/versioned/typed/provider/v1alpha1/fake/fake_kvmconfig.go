@@ -100,6 +100,18 @@ func (c *FakeKVMConfigs) Update(kVMConfig *v1alpha1.KVMConfig) (result *v1alpha1
 	return obj.(*v1alpha1.KVMConfig), err
 }
 
+// UpdateStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+func (c *FakeKVMConfigs) UpdateStatus(kVMConfig *v1alpha1.KVMConfig) (*v1alpha1.KVMConfig, error) {
+	obj, err := c.Fake.
+		Invokes(testing.NewUpdateSubresourceAction(kvmconfigsResource, "status", c.ns, kVMConfig), &v1alpha1.KVMConfig{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1alpha1.KVMConfig), err
+}
+
 // Delete takes name of the kVMConfig and deletes it. Returns an error if one occurs.
 func (c *FakeKVMConfigs) Delete(name string, options *v1.DeleteOptions) error {
 	_, err := c.Fake.

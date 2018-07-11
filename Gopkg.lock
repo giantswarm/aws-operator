@@ -206,7 +206,7 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake"
   ]
-  revision = "eb901a8e7d95ce8b1017d54c655f90a2ddd786ea"
+  revision = "9c787c8b185291acab218e191f76e919248a3b34"
 
 [[projects]]
   branch = "master"
