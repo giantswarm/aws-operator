@@ -2,15 +2,33 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
 	apiv1 "k8s.io/api/core/v1"
-
-	"fmt"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
+	servicesToUpdate, err := toServices(updateChange)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	if len(servicesToUpdate) > 0 {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "updating services")
+
+		for _, serviceToUpdate := range servicesToUpdate {
+			_, err := r.k8sClient.CoreV1().Services(serviceToUpdate.Namespace).Update(serviceToUpdate)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "updated services")
+	} else {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "no need to update services")
+	}
 	return nil
 }
 
@@ -67,7 +85,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		}
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d chartconfigs which have to be updated", len(servicesToUpdate)))
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d services which have to be updated", len(servicesToUpdate)))
 
 	return servicesToUpdate, nil
 }
