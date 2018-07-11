@@ -124,6 +124,7 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 	stackState := StackState{
 		Name: key.MainGuestStackName(customObject),
 
+		DockerVolumeResourceName:   key.DockerVolumeResourceName(customObject),
 		MasterImageID:              imageID,
 		MasterInstanceResourceName: key.MasterInstanceResourceName(customObject),
 		MasterInstanceType:         key.MasterInstanceType(customObject),
@@ -522,6 +523,7 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 	stackState := StackState{
 		Name: key.MainGuestStackName(customObject),
 
+		DockerVolumeResourceName:   key.DockerVolumeResourceName(customObject),
 		MasterImageID:              imageID,
 		MasterInstanceResourceName: key.MasterInstanceResourceName(customObject),
 		MasterInstanceType:         key.MasterInstanceType(customObject),
@@ -648,6 +650,7 @@ func TestMainGuestTemplateChinaRegion(t *testing.T) {
 	stackState := StackState{
 		Name: key.MainGuestStackName(customObject),
 
+		DockerVolumeResourceName:   key.DockerVolumeResourceName(customObject),
 		MasterImageID:              imageID,
 		MasterInstanceResourceName: key.MasterInstanceResourceName(customObject),
 		MasterInstanceType:         key.MasterInstanceType(customObject),

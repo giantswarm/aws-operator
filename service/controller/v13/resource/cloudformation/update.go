@@ -60,9 +60,22 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 			}
 		}
 
+		customObject, err := key.ToCustomObject(obj)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		updateStackInput := stackStateToUpdate.UpdateStackInput
+		updateStackInput.Parameters = []*cloudformation.Parameter{
+			&cloudformation.Parameter{
+				ParameterKey:   aws.String(versionBundleVersionParameterKey),
+				ParameterValue: aws.String(key.VersionBundleVersion(customObject)),
+			},
+		}
+
 		// Once the etcd volume is cleaned up and the master instance is down we can
 		// go ahead to let CloudFormation do its job.
-		_, err = sc.AWSClient.CloudFormation.UpdateStack(&stackStateToUpdate.UpdateStackInput)
+		_, err = sc.AWSClient.CloudFormation.UpdateStack(&updateStackInput)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -170,6 +183,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack has to be scaled")
 
 			desiredStackState.MasterInstanceResourceName = currentStackState.MasterInstanceResourceName
+			desiredStackState.DockerVolumeResourceName = currentStackState.DockerVolumeResourceName
 
 			updateStackInput, err := r.computeUpdateState(ctx, customObject, desiredStackState)
 			if err != nil {

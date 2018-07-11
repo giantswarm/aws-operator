@@ -39,7 +39,8 @@ type instanceAdapterMaster struct {
 }
 
 type instanceAdapterMasterDockerVolume struct {
-	Name string
+	Name         string
+	ResourceName string
 }
 
 type instanceAdapterMasterEtcdVolume struct {
@@ -86,6 +87,8 @@ func (i *instanceAdapter) Adapt(config Config) error {
 		i.Master.EncrypterBackend = config.EncrypterBackend
 
 		i.Master.DockerVolume.Name = key.DockerVolumeName(config.CustomObject)
+
+		i.Master.DockerVolume.ResourceName = config.StackState.DockerVolumeResourceName
 
 		i.Master.EtcdVolume.Name = key.EtcdVolumeName(config.CustomObject)
 
