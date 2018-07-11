@@ -1,7 +1,11 @@
 package guest
 
-const RecordSets = `{{define "recordsets"}}
+const RecordSets = `{{define "record_sets"}}
 {{ if .Route53Enabled }}
+  HostedZone:
+    Type: 'AWS::Route53::HostedZone'
+    Properties:
+      Name: '{{ .ClusterID }}.k8s.{{ .BaseDomain }}.'
   ApiRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
@@ -9,14 +13,14 @@ const RecordSets = `{{define "recordsets"}}
         DNSName: !GetAtt ApiLoadBalancer.DNSName
         HostedZoneId: !GetAtt ApiLoadBalancer.CanonicalHostedZoneNameID
         EvaluateTargetHealth: false
-      Name: {{.APIELBDomain}}
-      HostedZoneId: {{.APIELBHostedZones}}
+      Name: 'api.{{ .ClusterID }}.k8s.{{ .BaseDomain }}.'
+      HostedZoneId: !Ref 'HostedZone'
       Type: A
   EtcdRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
-      Name: {{.EtcdELBDomain}}
-      HostedZoneId: {{.EtcdELBHostedZones}}
+      Name: 'etcd.{{ .ClusterID }}.k8s.{{ .BaseDomain }}.'
+      HostedZoneId: !Ref 'HostedZone'
       TTL: '900'
       Type: CNAME
       ResourceRecords:
@@ -28,17 +32,17 @@ const RecordSets = `{{define "recordsets"}}
         DNSName: !GetAtt IngressLoadBalancer.DNSName
         HostedZoneId: !GetAtt IngressLoadBalancer.CanonicalHostedZoneNameID
         EvaluateTargetHealth: false
-      Name: {{.IngressELBDomain}}
-      HostedZoneId: {{.IngressELBHostedZones}}
+      Name: 'ingress.{{ .ClusterID }}.k8s.{{ .BaseDomain }}.'
+      HostedZoneId: !Ref 'HostedZone'
       Type: A
   IngressWildcardRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
-      Name: '{{.IngressWildcardELBDomain}}'
-      HostedZoneId: {{.IngressELBHostedZones}}
+      Name: '*.{{ .ClusterID }}.k8s.{{ .BaseDomain }}.'
+      HostedZoneId: !Ref 'HostedZone'
       TTL: '900'
       Type: CNAME
       ResourceRecords:
-        - {{.IngressELBDomain}}
+        - !Ref 'IngressRecordSet'
 {{end}}
 {{end}}`

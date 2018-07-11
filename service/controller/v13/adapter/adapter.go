@@ -122,6 +122,8 @@ func NewGuest(cfg Config) (Adapter, error) {
 func NewHostPre(cfg Config) (Adapter, error) {
 	a := Adapter{}
 
+	a.ClusterID = key.ClusterID(cfg.CustomObject)
+
 	hydraters := []hydrater{
 		a.getHostIamRoles,
 	}
@@ -138,8 +140,11 @@ func NewHostPre(cfg Config) (Adapter, error) {
 func NewHostPost(cfg Config) (Adapter, error) {
 	a := Adapter{}
 
+	a.ClusterID = key.ClusterID(cfg.CustomObject)
+
 	hydraters := []hydrater{
-		a.getHostRouteTables,
+		a.getHostPostRouteTables,
+		a.getHostPostRecordSets,
 	}
 
 	for _, h := range hydraters {
