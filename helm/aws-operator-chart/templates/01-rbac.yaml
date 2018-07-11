@@ -25,6 +25,7 @@ rules:
       - provider.giantswarm.io
     resources:
       - awsconfigs
+      - awsconfigs/status
     verbs:
       - "*"
   - apiGroups:
