@@ -50,6 +50,7 @@ const (
 
 const (
 	DockerVolumeResourceNameKey   = "DockerVolumeResourceName"
+	HostedZoneNameServers         = "HostedZoneNameServers"
 	MasterImageIDKey              = "MasterImageID"
 	MasterInstanceResourceNameKey = "MasterInstanceResourceName"
 	MasterInstanceTypeKey         = "MasterInstanceType"
@@ -148,6 +149,7 @@ func CloudFormationGuestTemplates() []string {
 func CloudFormationHostPostTemplates() []string {
 	return []string{
 		hostpost.Main,
+		hostpost.RecordSets,
 		hostpost.RouteTables,
 	}
 }
@@ -225,6 +227,14 @@ func EC2ServiceDomain(customObject v1alpha1.AWSConfig) string {
 	}
 
 	return domain
+}
+
+func BaseDomain(customObject v1alpha1.AWSConfig) string {
+	// TODO remove other zones and make it a BaseDomain in the CR.
+	// CloudFormation creates a separate HostedZone with the same name.
+	// Probably the easiest way for now is to just allow single domain for
+	// everything which we do now.
+	return customObject.Spec.AWS.HostedZones.API.Name
 }
 
 func HostedZoneNameAPI(customObject v1alpha1.AWSConfig) string {
