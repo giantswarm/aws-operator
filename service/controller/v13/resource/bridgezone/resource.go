@@ -350,7 +350,7 @@ func (r *Resource) getNameServers(ctx context.Context, client *route53.Route53, 
 
 	rs := *out.ResourceRecordSets[0]
 
-	if *rs.Name != name {
+	if strings.TrimSuffix(*rs.Name, ".") != name {
 		return nil, microerror.Maskf(executionError, "expected NS recrod with name %q , found %q", name, *rs.Name)
 	}
 
