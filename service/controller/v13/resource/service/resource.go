@@ -92,21 +92,11 @@ func toService(v interface{}) (*apiv1.Service, error) {
 	return service, nil
 }
 
-func toServices(v interface{}) ([]*apiv1.Service, error) {
-	if v == nil {
-		return nil, nil
-	}
-
-	services, ok := v.([]*apiv1.Service)
-	if !ok {
-		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", []*apiv1.Service{}, v)
-	}
-
-	return services, nil
-}
-
 // portsEqual is a function that is checking if ports in the service have same important values.
 func portsEqual(a, b *apiv1.Service) bool {
+	if a == nil || b == nil {
+		return false
+	}
 	if len(a.Spec.Ports) != len(b.Spec.Ports) {
 		return false
 	}

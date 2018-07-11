@@ -6,23 +6,20 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
-	apiv1 "k8s.io/api/core/v1"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
-	servicesToUpdate, err := toServices(updateChange)
+	serviceToUpdate, err := toService(updateChange)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	if len(servicesToUpdate) > 0 {
+	if serviceToUpdate != nil {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "updating services")
 
-		for _, serviceToUpdate := range servicesToUpdate {
-			_, err := r.k8sClient.CoreV1().Services(serviceToUpdate.Namespace).Update(serviceToUpdate)
-			if err != nil {
-				return microerror.Mask(err)
-			}
+		_, err := r.k8sClient.CoreV1().Services(serviceToUpdate.Namespace).Update(serviceToUpdate)
+		if err != nil {
+			return microerror.Mask(err)
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "updated services")
@@ -52,41 +49,30 @@ func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 
 // Service resources are updated.
 func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	currentServices, err := toServices(currentState)
+	currentService, err := toService(currentState)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	desiredServices, err := toServices(desiredState)
+	desiredService, err := toService(desiredState)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out which services have to be updated")
 
-	servicesToUpdate := make([]*apiv1.Service, 0)
-
-	for _, currentService := range currentServices {
-		desiredService, err := getServiceByName(desiredServices, currentService.Name)
-		if IsNotFound(err) {
-			// Ignore here. These are handled by newDeleteChangeForUpdatePatch().
-			continue
-		} else if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		if isServiceModified(desiredService, currentService) {
-			// Make a copy and set the resource version so the service can be updated.
-			serviceToUpdate := desiredService.DeepCopy()
+	if isServiceModified(desiredService, currentService) {
+		// Make a copy and set the resource version so the service can be updated.
+		serviceToUpdate := desiredService.DeepCopy()
+		if currentService != nil {
 			serviceToUpdate.ObjectMeta.ResourceVersion = currentService.ObjectMeta.ResourceVersion
 			serviceToUpdate.Spec.ClusterIP = currentService.Spec.ClusterIP
-
-			servicesToUpdate = append(servicesToUpdate, serviceToUpdate)
-
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found service '%s' that has to be updated", desiredService.GetName()))
 		}
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found service '%s' that has to be updated", desiredService.GetName()))
+
+		return serviceToUpdate, nil
+	} else {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "no services needs update")
+
+		return nil, nil
 	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d services which have to be updated", len(servicesToUpdate)))
-
-	return servicesToUpdate, nil
 }
