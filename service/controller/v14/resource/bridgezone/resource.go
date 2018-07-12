@@ -285,7 +285,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 						ResourceRecordSet: &route53.ResourceRecordSet{
 							Name:            &finalZone,
 							Type:            &ns,
-							TTL:             &dumpDNS,
+							TTL:             &dumpTTL,
 							ResourceRecords: dumpValues,
 						},
 					},
