@@ -273,8 +273,9 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 		// Some junk values they are required but ignored during
 		// delete.
-		ttl := int64(900)
-		values := []*route53.ResourceRecord{}
+		dumpDNS := "a.pl"
+		dumpTTL := int64(900)
+		dumpValues := []*route53.ResourceRecord{{Value: &dumpDNS}}
 
 		in := &route53.ChangeResourceRecordSetsInput{
 			ChangeBatch: &route53.ChangeBatch{
@@ -284,8 +285,8 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 						ResourceRecordSet: &route53.ResourceRecordSet{
 							Name:            &finalZone,
 							Type:            &ns,
-							TTL:             &ttl,
-							ResourceRecords: values,
+							TTL:             &dumpDNS,
+							ResourceRecords: dumpValues,
 						},
 					},
 				},
