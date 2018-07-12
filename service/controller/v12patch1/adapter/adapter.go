@@ -38,6 +38,7 @@ type Adapter struct {
 	ASGType                    string
 	AvailabilityZone           string
 	ClusterID                  string
+	DockerVolumeResourceName   string
 	MasterInstanceResourceName string
 	WorkerImageID              string
 
@@ -89,6 +90,7 @@ func NewGuest(cfg Config) (Adapter, error) {
 	// make that much sense to change a lot fo adapters right away since the focus
 	// is to get actual user stories done.
 	a.MasterInstanceResourceName = cfg.StackState.MasterInstanceResourceName
+	a.DockerVolumeResourceName = cfg.StackState.DockerVolumeResourceName
 
 	hydraters := []hydrater{
 		a.getAutoScalingGroup,
