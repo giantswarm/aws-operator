@@ -175,7 +175,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "got name servers of final zone: %v", finalZoneNS)
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("got name servers of final zone: %v", finalZoneNS))
 	}
 
 	{
@@ -184,8 +184,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		ttl := int64(900)
 		var values []*route53.ResourceRecord
 		for _, ns := range finalZoneNS {
+			copy := ns
 			v := &route53.ResourceRecord{
-				Value: &ns,
+				Value: &copy,
 			}
 			values = append(values, v)
 		}
@@ -209,15 +210,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			},
 			HostedZoneId: &intermediateZoneID,
 		}
-		fmt.Printf("1 ------------------------------------------------------------------------------\n")
-		fmt.Printf("--------------------------------------------------------------------------------\n")
-		fmt.Printf("--------------------------------------------------------------------------------\n")
-		fmt.Printf("--------------------------------------------------------------------------------\n")
-		fmt.Printf("%s\n", in.GoString())
-		fmt.Printf("--------------------------------------------------------------------------------\n")
-		fmt.Printf("--------------------------------------------------------------------------------\n")
-		fmt.Printf("--------------------------------------------------------------------------------\n")
-		fmt.Printf("--------------------------------------------------------------------------------\n")
 		_, err := defaultGuest.ChangeResourceRecordSetsWithContext(ctx, in)
 		if err != nil {
 			return microerror.Mask(err)
@@ -364,16 +356,6 @@ func (r *Resource) getNameServers(ctx context.Context, client *route53.Route53, 
 	if strings.TrimSuffix(*rs.Name, ".") != name {
 		return nil, microerror.Maskf(executionError, "expected NS recrod with name %q , found %q", name, *rs.Name)
 	}
-
-	fmt.Printf("1 ------------------------------------------------------------------------------\n")
-	fmt.Printf("--------------------------------------------------------------------------------\n")
-	fmt.Printf("--------------------------------------------------------------------------------\n")
-	fmt.Printf("--------------------------------------------------------------------------------\n")
-	fmt.Printf("%s\n", rs.GoString())
-	fmt.Printf("--------------------------------------------------------------------------------\n")
-	fmt.Printf("--------------------------------------------------------------------------------\n")
-	fmt.Printf("--------------------------------------------------------------------------------\n")
-	fmt.Printf("--------------------------------------------------------------------------------\n")
 
 	var servers []string
 	for _, r := range rs.ResourceRecords {
