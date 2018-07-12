@@ -14,12 +14,19 @@ const (
 	//
 	dnsNotReadyPattern = "dial tcp: lookup .* on .*:53: no such host"
 
-	// eofPattern is a regular expression representing EOF errors for the
+	// nodeEOFPattern is a regular expression representing EOF errors for the
 	// guest API domain. Also see the following match example.
 	//
 	//     https://play.golang.org/p/L6f4ItJLufv
 	//
-	eofPattern = `Get https://api\..*/api/v1/nodes.* (unexpected )?EOF`
+	nodeEOFPattern = `Get https://api\..*/api/v1/nodes.* (unexpected )?EOF`
+
+	// resourceEOFPattern is a regular expression representing EOF errors for the
+	// guest API domain. Also see the following match example.
+	//
+	//     https://play.golang.org/p/2x2BXd5iHuP
+	//
+	resourceEOFPattern = `[Get|Post] https://api\..*/api/v1/namespaces/*/.* (unexpected )?EOF`
 
 	// transientInvalidCertificatePattern regular expression defines the kind
 	// of transient errors related to certificates returned while the guest API is
@@ -32,7 +39,8 @@ const (
 
 var (
 	dnsNotReadyRegexp                 = regexp.MustCompile(dnsNotReadyPattern)
-	eofRegexp                         = regexp.MustCompile(eofPattern)
+	nodeEOFRegexp                     = regexp.MustCompile(nodeEOFPattern)
+	resourceEOFRegexp                 = regexp.MustCompile(resourceEOFPattern)
 	transientInvalidCertificateRegexp = regexp.MustCompile(transientInvalidCertificatePattern)
 )
 
@@ -50,7 +58,8 @@ func IsAPINotAvailable(err error) bool {
 
 	regexps := []*regexp.Regexp{
 		dnsNotReadyRegexp,
-		eofRegexp,
+		nodeEOFRegexp,
+		resourceEOFRegexp,
 		transientInvalidCertificateRegexp,
 	}
 	for _, re := range regexps {
