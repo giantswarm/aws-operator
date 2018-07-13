@@ -1,15 +1,14 @@
 package collector
 
 import (
-	"strings"
-
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/giantswarm/microerror"
 )
 
 const (
-	// trustedAdvisorUnsupportedErrorMessage is the error message returned
+	// trustedAdvisorSubscriptionRequiredExceptionCode is the error code returned
 	// if Trusted Advisor is not supported (support plan is not Business or Enterprise).
-	trustedAdvisorUnsupportedErrorMessage = "AWS Premium Support Subscription is required to use this service."
+	trustedAdvisorSubscriptionRequiredExceptionCode = "SubscriptionRequiredException"
 )
 
 var invalidConfigError = microerror.New("invalid config")
@@ -43,5 +42,15 @@ func IsNilUsage(err error) bool {
 // IsUnsupportedPlan asserts that an error is due to Trusted Advisor
 // not being available with the current support plan.
 func IsUnsupportedPlan(err error) bool {
-	return strings.Contains(err.Error(), trustedAdvisorUnsupportedErrorMessage)
+	c := microerror.Cause(err)
+	aerr, ok := c.(awserr.Error)
+	if !ok {
+		return false
+	}
+
+	if aerr.Code() == trustedAdvisorSubscriptionRequiredExceptionCode {
+		return true
+	}
+
+	return false
 }
