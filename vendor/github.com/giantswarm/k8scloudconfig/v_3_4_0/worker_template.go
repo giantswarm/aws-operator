@@ -316,7 +316,7 @@ coreos:
       --network-plugin=cni \
       --register-node=true \
       --allow-privileged=true \
-      --feature-gates=ExpandPersistentVolumes=true,PodPriority=true \
+      --feature-gates=ExpandPersistentVolumes=true,PodPriority=true,CustomResourceSubresources=true \
       --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml \
       --node-labels="ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
       --kube-reserved="cpu=200m,memory=250Mi" \

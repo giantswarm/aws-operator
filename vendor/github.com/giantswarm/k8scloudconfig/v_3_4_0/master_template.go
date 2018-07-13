@@ -605,6 +605,7 @@ write_files:
       server-name-hash-bucket-size: "1024"
       server-name-hash-max-size: "1024"
       server-tokens: "false"
+      worker-processes: "4"
 - path: /srv/ingress-controller-dep.yml
   owner: root
   permissions: 0644
@@ -908,6 +909,20 @@ write_files:
       name: node-operator
       apiGroup: rbac.authorization.k8s.io
     ---
+    ## prometheus-external is prometheus from host cluster
+    kind: ClusterRoleBinding
+    apiVersion: rbac.authorization.k8s.io/v1
+    metadata:
+      name: prometheus-external
+    subjects:
+    - kind: User
+      name: prometheus.{{.BaseDomain}}
+      apiGroup: rbac.authorization.k8s.io
+    roleRef:
+      kind: ClusterRole
+      name: prometheus-external
+      apiGroup: rbac.authorization.k8s.io
+    ---
     ## Calico
     kind: ClusterRoleBinding
     apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -980,6 +995,28 @@ write_files:
     - apiGroups: [""]
       resources: ["pods"]
       verbs: ["list", "delete"]
+    ---
+    ## prometheus-external
+    kind: ClusterRole
+    apiVersion: rbac.authorization.k8s.io/v1
+    metadata:
+      name: prometheus-external
+    rules:
+    - apiGroups: [""]
+      resources:
+      - nodes
+      - nodes/proxy
+      - services
+      - endpoints
+      - pods
+      verbs: ["get", "list", "watch"]
+    - apiGroups:
+      - extensions
+      resources:
+      - ingresses
+      verbs: ["get", "list", "watch"]
+    - nonResourceURLs: ["/metrics"]
+      verbs: ["get"]
     ---
     ## Calico
     kind: ClusterRole
@@ -1598,7 +1635,7 @@ write_files:
         - --repair-malformed-updates=false
         - --service-account-lookup=true
         - --authorization-mode=RBAC
-        - --feature-gates=ExpandPersistentVolumes=true,PodPriority=true
+        - --feature-gates=ExpandPersistentVolumes=true,PodPriority=true,CustomResourceSubresources=true
         - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,DefaultStorageClass,PersistentVolumeClaimResize,PodSecurityPolicy,Priority
         - --cloud-provider={{.Cluster.Kubernetes.CloudProvider}}
         - --service-cluster-ip-range={{.Cluster.Kubernetes.API.ClusterIPRange}}
@@ -1709,7 +1746,7 @@ write_files:
         - --terminated-pod-gc-threshold=10
         - --use-service-account-credentials=true
         - --kubeconfig=/etc/kubernetes/config/controller-manager-kubeconfig.yml
-        - --feature-gates=ExpandPersistentVolumes=true,PodPriority=true
+        - --feature-gates=ExpandPersistentVolumes=true,PodPriority=true,CustomResourceSubresources=true
         - --root-ca-file=/etc/kubernetes/ssl/apiserver-ca.pem
         - --service-account-private-key-file=/etc/kubernetes/ssl/service-account-key.pem
         resources:
@@ -1775,7 +1812,7 @@ write_files:
         - --logtostderr=true
         - --v=2
         - --profiling=false
-        - --feature-gates=ExpandPersistentVolumes=true,PodPriority=true
+        - --feature-gates=ExpandPersistentVolumes=true,PodPriority=true,CustomResourceSubresources=true
         - --kubeconfig=/etc/kubernetes/config/scheduler-kubeconfig.yml
         resources:
           requests:
@@ -1963,7 +2000,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       LimitNOFILE=40000
-      Environment=IMAGE={{ .RegistryDomain }}/giantswarm/etcd:v3.3.3
+      Environment=IMAGE={{ .RegistryDomain }}/giantswarm/etcd:v3.3.8
       Environment=NAME=%p.service
       EnvironmentFile=/etc/network-environment
       ExecStartPre=-/usr/bin/docker stop  $NAME
@@ -2121,7 +2158,7 @@ coreos:
       --register-node=true \
       --register-with-taints=node-role.kubernetes.io/master=:NoSchedule \
       --allow-privileged=true \
-      --feature-gates=ExpandPersistentVolumes=true,PodPriority=true \
+      --feature-gates=ExpandPersistentVolumes=true,PodPriority=true,CustomResourceSubresources=true \
       --pod-manifest-path=/etc/kubernetes/manifests \
       --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml \
       --node-labels="node-role.kubernetes.io/master,role=master,ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \

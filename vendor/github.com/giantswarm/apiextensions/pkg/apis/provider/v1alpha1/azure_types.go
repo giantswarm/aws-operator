@@ -49,7 +49,6 @@ func NewAzureConfigCRD() *apiextensionsv1beta1.CustomResourceDefinition {
 }
 
 // +genclient
-// +genclient:noStatus
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 type AzureConfig struct {
@@ -96,10 +95,9 @@ type AzureConfigSpecAzureVirtualNetwork struct {
 	// CIDR is the CIDR for the Virtual Network.
 	CIDR string `json:"cidr" yaml:"cidr"`
 
+	// TODO: remove Master, Worker and Calico subnet cidr after azure-operator v2 is deleted.
 	// MasterSubnetCIDR is the CIDR for the master subnet.
 	MasterSubnetCIDR string `json:"masterSubnetCIDR" yaml:"masterSubnetCIDR"`
-	// VPNSubnetCIDR is the CIDR for the vpn gateway subnet.
-	VPNSubnetCIDR string `json:"vpnSubnetCIDR" yaml:"vpnSubnetCIDR"`
 	// WorkerSubnetCIDR is the CIDR for the worker subnet.
 	WorkerSubnetCIDR string `json:"workerSubnetCIDR" yaml:"workerSubnetCIDR"`
 
