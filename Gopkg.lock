@@ -206,7 +206,7 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake"
   ]
-  revision = "9c787c8b185291acab218e191f76e919248a3b34"
+  revision = "343bac0517a0df7b1ddf604b3049c6dd589ad235"
 
 [[projects]]
   branch = "master"
@@ -274,6 +274,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/giantswarm/ipam"
+  packages = ["."]
+  revision = "9f5e82f904b3f54b19ac8cb58cbbadb59d50eb89"
+
+[[projects]]
+  branch = "master"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "v_2_0_2",
@@ -337,6 +343,12 @@
     "microloggertest"
   ]
   revision = "39f8cfb7c2583edb28552d9e4b12193e5bddaf60"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/giantswarm/microstorage"
+  packages = ["."]
+  revision = "4411a6307c6b844b7f9e68aaba37407b41b1c4d7"
 
 [[projects]]
   branch = "master"
@@ -1356,6 +1368,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1a5731535525f415be2414f6be3fcef10d7941058cb2a049568dd3fa70691eec"
+  inputs-digest = "216326e928aa8b301d60300316d67658e426d8585dd9ca9bdd2a5b2d0f4a44b4"
   solver-name = "gps-cdcl"
   solver-version = 1

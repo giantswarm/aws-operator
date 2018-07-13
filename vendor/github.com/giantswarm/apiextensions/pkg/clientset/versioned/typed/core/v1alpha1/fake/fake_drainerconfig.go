@@ -100,18 +100,6 @@ func (c *FakeDrainerConfigs) Update(drainerConfig *v1alpha1.DrainerConfig) (resu
 	return obj.(*v1alpha1.DrainerConfig), err
 }
 
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeDrainerConfigs) UpdateStatus(drainerConfig *v1alpha1.DrainerConfig) (*v1alpha1.DrainerConfig, error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(drainerconfigsResource, "status", c.ns, drainerConfig), &v1alpha1.DrainerConfig{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1alpha1.DrainerConfig), err
-}
-
 // Delete takes name of the drainerConfig and deletes it. Returns an error if one occurs.
 func (c *FakeDrainerConfigs) Delete(name string, options *v1.DeleteOptions) error {
 	_, err := c.Fake.

@@ -237,11 +237,7 @@ func (c *Controller) ProcessEvents(ctx context.Context, deleteChan chan watch.Ev
 				c.UpdateFunc(nil, e.Object)
 				t.ObserveDuration()
 			case err := <-errChan:
-				if IsStatusForbidden(err) {
-					return microerror.Maskf(statusForbiddenError, "controller might be missing RBAC rule for %s CRD", c.crd.Name)
-				} else if err != nil {
-					return microerror.Mask(err)
-				}
+				return microerror.Mask(err)
 			case <-ctx.Done():
 				return nil
 			}

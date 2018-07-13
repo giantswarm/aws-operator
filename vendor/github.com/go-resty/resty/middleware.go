@@ -25,33 +25,19 @@ import (
 //___________________________________
 
 func parseRequestURL(c *Client, r *Request) error {
-	// GitHub #103 Path Params
-	if len(r.pathParams) > 0 {
-		for p, v := range r.pathParams {
-			r.URL = strings.Replace(r.URL, "{"+p+"}", v, -1)
-		}
-	}
-	if len(c.pathParams) > 0 {
-		for p, v := range c.pathParams {
-			r.URL = strings.Replace(r.URL, "{"+p+"}", v, -1)
-		}
-	}
-
 	// Parsing request URL
 	reqURL, err := url.Parse(r.URL)
 	if err != nil {
 		return err
 	}
 
-	// If Request.URL is relative path then added c.HostURL into
-	// the request URL otherwise Request.URL will be used as-is
-	if !reqURL.IsAbs() {
-		r.URL = reqURL.String()
-		if len(r.URL) > 0 && r.URL[0] != '/' {
-			r.URL = "/" + r.URL
-		}
+	// GitHub #103 Path Params
+	reqURL.Path = composeRequestURL(reqURL.Path, c, r)
 
-		reqURL, err = url.Parse(c.HostURL + r.URL)
+	// If Request.Url is relative path then added c.HostUrl into
+	// the request URL otherwise Request.Url will be used as-is
+	if !reqURL.IsAbs() {
+		reqURL, err = url.Parse(c.HostURL + reqURL.String())
 		if err != nil {
 			return err
 		}
@@ -226,9 +212,12 @@ func requestLogger(c *Client, r *Request) error {
 		reqLog := "\n---------------------- REQUEST LOG -----------------------\n" +
 			fmt.Sprintf("%s  %s  %s\n", r.Method, rr.URL.RequestURI(), rr.Proto) +
 			fmt.Sprintf("HOST   : %s\n", rr.URL.Host) +
-			fmt.Sprintf("HEADERS:\n") +
-			composeHeaders(rr.Header) + "\n" +
-			fmt.Sprintf("BODY   :\n%v\n", r.fmtBodyString()) +
+			fmt.Sprintf("HEADERS:\n")
+
+		for h, v := range rr.Header {
+			reqLog += fmt.Sprintf("%25s: %v\n", h, strings.Join(v, ", "))
+		}
+		reqLog += fmt.Sprintf("BODY   :\n%v\n", r.fmtBodyString()) +
 			"----------------------------------------------------------\n"
 
 		c.Log.Print(reqLog)
@@ -247,9 +236,11 @@ func responseLogger(c *Client, res *Response) error {
 			fmt.Sprintf("STATUS 		: %s\n", res.Status()) +
 			fmt.Sprintf("RECEIVED AT	: %v\n", res.ReceivedAt().Format(time.RFC3339Nano)) +
 			fmt.Sprintf("RESPONSE TIME	: %v\n", res.Time()) +
-			"HEADERS:\n" +
-			composeHeaders(res.Header()) + "\n"
+			"HEADERS:\n"
 
+		for h, v := range res.Header() {
+			resLog += fmt.Sprintf("%30s: %v\n", h, strings.Join(v, ", "))
+		}
 		if res.Request.isSaveResponse {
 			resLog += fmt.Sprintf("BODY   :\n***** RESPONSE WRITTEN INTO FILE *****\n")
 		} else {
@@ -436,11 +427,14 @@ func saveResponseIntoFile(c *Client, res *Response) error {
 		if err != nil {
 			return err
 		}
-		defer closeq(outFile)
+		defer func() {
+			_ = outFile.Close()
+		}()
 
 		// io.Copy reads maximum 32kb size, it is perfect for large file download too
-		defer closeq(res.RawResponse.Body)
-
+		defer func() {
+			_ = res.RawResponse.Body.Close()
+		}()
 		written, err := io.Copy(outFile, res.RawResponse.Body)
 		if err != nil {
 			return err

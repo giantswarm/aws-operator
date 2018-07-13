@@ -37,7 +37,6 @@ type DrainerConfigsGetter interface {
 type DrainerConfigInterface interface {
 	Create(*v1alpha1.DrainerConfig) (*v1alpha1.DrainerConfig, error)
 	Update(*v1alpha1.DrainerConfig) (*v1alpha1.DrainerConfig, error)
-	UpdateStatus(*v1alpha1.DrainerConfig) (*v1alpha1.DrainerConfig, error)
 	Delete(name string, options *v1.DeleteOptions) error
 	DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error
 	Get(name string, options v1.GetOptions) (*v1alpha1.DrainerConfig, error)
@@ -115,22 +114,6 @@ func (c *drainerConfigs) Update(drainerConfig *v1alpha1.DrainerConfig) (result *
 		Namespace(c.ns).
 		Resource("drainerconfigs").
 		Name(drainerConfig.Name).
-		Body(drainerConfig).
-		Do().
-		Into(result)
-	return
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-
-func (c *drainerConfigs) UpdateStatus(drainerConfig *v1alpha1.DrainerConfig) (result *v1alpha1.DrainerConfig, err error) {
-	result = &v1alpha1.DrainerConfig{}
-	err = c.client.Put().
-		Namespace(c.ns).
-		Resource("drainerconfigs").
-		Name(drainerConfig.Name).
-		SubResource("status").
 		Body(drainerConfig).
 		Do().
 		Into(result)

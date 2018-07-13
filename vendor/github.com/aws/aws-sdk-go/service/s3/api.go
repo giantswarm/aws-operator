@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/awsutil"
 	"github.com/aws/aws-sdk-go/aws/client"
 	"github.com/aws/aws-sdk-go/aws/request"
@@ -7576,7 +7575,7 @@ func (s *Condition) SetKeyPrefixEquals(v string) *Condition {
 }
 
 type ContinuationEvent struct {
-	_ struct{} `locationName:"ContinuationEvent" type:"structure"`
+	_ struct{} `type:"structure"`
 }
 
 // String returns the string representation
@@ -10047,7 +10046,7 @@ func (s *EncryptionConfiguration) SetReplicaKmsKeyID(v string) *EncryptionConfig
 }
 
 type EndEvent struct {
-	_ struct{} `locationName:"EndEvent" type:"structure"`
+	_ struct{} `type:"structure"`
 }
 
 // String returns the string representation
@@ -10167,7 +10166,6 @@ type FilterRule struct {
 	// the filtering rule applies. Maximum prefix length can be up to 1,024 characters.
 	// Overlapping prefixes and suffixes are not supported. For more information,
 	// go to Configuring Event Notifications (http://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html)
-	// in the Amazon Simple Storage Service Developer Guide.
 	Name *string `type:"string" enum:"FilterRuleName"`
 
 	Value *string `type:"string"`
@@ -13026,7 +13024,7 @@ type InputSerialization struct {
 	// Describes the serialization of a CSV-encoded object.
 	CSV *CSVInput `type:"structure"`
 
-	// Specifies object's compression format. Valid values: NONE, GZIP, BZIP2. Default
+	// Specifies object's compression format. Valid values: NONE, GZIP. Default
 	// Value: NONE.
 	CompressionType *string `type:"string" enum:"CompressionType"`
 
@@ -13532,7 +13530,6 @@ type LambdaFunctionConfiguration struct {
 
 	// Container for object key name filtering rules. For information about key
 	// name filtering, go to Configuring Event Notifications (http://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html)
-	// in the Amazon Simple Storage Service Developer Guide.
 	Filter *NotificationConfigurationFilter `type:"structure"`
 
 	// Optional unique identifier for configurations in a notification configuration.
@@ -15980,8 +15977,7 @@ type NoncurrentVersionExpiration struct {
 	// Specifies the number of days an object is noncurrent before Amazon S3 can
 	// perform the associated action. For information about the noncurrent days
 	// calculations, see How Amazon S3 Calculates When an Object Became Noncurrent
-	// (http://docs.aws.amazon.com/AmazonS3/latest/dev/s3-access-control.html) in
-	// the Amazon Simple Storage Service Developer Guide.
+	// (http://docs.aws.amazon.com/AmazonS3/latest/dev/s3-access-control.html)
 	NoncurrentDays *int64 `type:"integer"`
 }
 
@@ -16013,8 +16009,7 @@ type NoncurrentVersionTransition struct {
 	// Specifies the number of days an object is noncurrent before Amazon S3 can
 	// perform the associated action. For information about the noncurrent days
 	// calculations, see How Amazon S3 Calculates When an Object Became Noncurrent
-	// (http://docs.aws.amazon.com/AmazonS3/latest/dev/s3-access-control.html) in
-	// the Amazon Simple Storage Service Developer Guide.
+	// (http://docs.aws.amazon.com/AmazonS3/latest/dev/s3-access-control.html)
 	NoncurrentDays *int64 `type:"integer"`
 
 	// The class of storage used to store the object.
@@ -16163,7 +16158,6 @@ func (s *NotificationConfigurationDeprecated) SetTopicConfiguration(v *TopicConf
 
 // Container for object key name filtering rules. For information about key
 // name filtering, go to Configuring Event Notifications (http://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html)
-// in the Amazon Simple Storage Service Developer Guide.
 type NotificationConfigurationFilter struct {
 	_ struct{} `type:"structure"`
 
@@ -16580,7 +16574,7 @@ func (s *Progress) SetBytesScanned(v int64) *Progress {
 }
 
 type ProgressEvent struct {
-	_ struct{} `locationName:"ProgressEvent" type:"structure" payload:"Details"`
+	_ struct{} `type:"structure" payload:"Details"`
 
 	// The Progress event details.
 	Details *Progress `locationName:"Details" type:"structure"`
@@ -16614,7 +16608,7 @@ func (s *ProgressEvent) UnmarshalEvent(
 	if err := payloadUnmarshaler.UnmarshalPayload(
 		bytes.NewReader(msg.Payload), s,
 	); err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal payload, %v", err)
 	}
 	return nil
 }
@@ -18749,7 +18743,6 @@ type QueueConfiguration struct {
 
 	// Container for object key name filtering rules. For information about key
 	// name filtering, go to Configuring Event Notifications (http://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html)
-	// in the Amazon Simple Storage Service Developer Guide.
 	Filter *NotificationConfigurationFilter `type:"structure"`
 
 	// Optional unique identifier for configurations in a notification configuration.
@@ -18863,7 +18856,7 @@ func (s *QueueConfigurationDeprecated) SetQueue(v string) *QueueConfigurationDep
 }
 
 type RecordsEvent struct {
-	_ struct{} `locationName:"RecordsEvent" type:"structure" payload:"Payload"`
+	_ struct{} `type:"structure" payload:"Payload"`
 
 	// The byte array of partial, one or more result records.
 	//
@@ -19907,11 +19900,8 @@ func (r *readSelectObjectContentEventStream) unmarshalerForEventType(
 	case "Stats":
 		return &StatsEvent{}, nil
 	default:
-		return nil, awserr.New(
-			request.ErrCodeSerialization,
-			fmt.Sprintf("unknown event type name, %s, for SelectObjectContentEventStream", eventType),
-			nil,
-		)
+		return nil, fmt.Errorf(
+			"unknown event type name, %s, for SelectObjectContentEventStream", eventType)
 	}
 }
 
@@ -19921,7 +19911,7 @@ func (r *readSelectObjectContentEventStream) unmarshalerForEventType(
 // Amazon S3 uses this to parse object data into records, and returns only records
 // that match the specified SQL expression. You must also specify the data serialization
 // format for the response. For more information, go to S3Select API Documentation
-// (http://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectSELECTContent.html).
+// (https://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectSELECTContent.html)
 type SelectObjectContentInput struct {
 	_ struct{} `locationName:"SelectObjectContentRequest" type:"structure" xmlURI:"http://s3.amazonaws.com/doc/2006-03-01/"`
 
@@ -19959,15 +19949,15 @@ type SelectObjectContentInput struct {
 	RequestProgress *RequestProgress `type:"structure"`
 
 	// The SSE Algorithm used to encrypt the object. For more information, go to
-	//  Server-Side Encryption (Using Customer-Provided Encryption Keys (http://docs.aws.amazon.com/AmazonS3/latest/dev/ServerSideEncryptionCustomerKeys.html).
+	//  Server-Side Encryption (Using Customer-Provided Encryption Keys (https://docs.aws.amazon.com/AmazonS3/latest/dev/ServerSideEncryptionCustomerKeys.html)
 	SSECustomerAlgorithm *string `location:"header" locationName:"x-amz-server-side-encryption-customer-algorithm" type:"string"`
 
 	// The SSE Customer Key. For more information, go to  Server-Side Encryption
-	// (Using Customer-Provided Encryption Keys (http://docs.aws.amazon.com/AmazonS3/latest/dev/ServerSideEncryptionCustomerKeys.html).
+	// (Using Customer-Provided Encryption Keys (https://docs.aws.amazon.com/AmazonS3/latest/dev/ServerSideEncryptionCustomerKeys.html)
 	SSECustomerKey *string `location:"header" locationName:"x-amz-server-side-encryption-customer-key" type:"string"`
 
 	// The SSE Customer Key MD5. For more information, go to  Server-Side Encryption
-	// (Using Customer-Provided Encryption Keys (http://docs.aws.amazon.com/AmazonS3/latest/dev/ServerSideEncryptionCustomerKeys.html).
+	// (Using Customer-Provided Encryption Keys (https://docs.aws.amazon.com/AmazonS3/latest/dev/ServerSideEncryptionCustomerKeys.html)
 	SSECustomerKeyMD5 *string `location:"header" locationName:"x-amz-server-side-encryption-customer-key-MD5" type:"string"`
 }
 
@@ -20474,7 +20464,7 @@ func (s *Stats) SetBytesScanned(v int64) *Stats {
 }
 
 type StatsEvent struct {
-	_ struct{} `locationName:"StatsEvent" type:"structure" payload:"Details"`
+	_ struct{} `type:"structure" payload:"Details"`
 
 	// The Stats event details.
 	Details *Stats `locationName:"Details" type:"structure"`
@@ -20508,7 +20498,7 @@ func (s *StatsEvent) UnmarshalEvent(
 	if err := payloadUnmarshaler.UnmarshalPayload(
 		bytes.NewReader(msg.Payload), s,
 	); err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal payload, %v", err)
 	}
 	return nil
 }
@@ -20766,7 +20756,6 @@ type TopicConfiguration struct {
 
 	// Container for object key name filtering rules. For information about key
 	// name filtering, go to Configuring Event Notifications (http://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html)
-	// in the Amazon Simple Storage Service Developer Guide.
 	Filter *NotificationConfigurationFilter `type:"structure"`
 
 	// Optional unique identifier for configurations in a notification configuration.
@@ -21700,9 +21689,6 @@ const (
 
 	// CompressionTypeGzip is a CompressionType enum value
 	CompressionTypeGzip = "GZIP"
-
-	// CompressionTypeBzip2 is a CompressionType enum value
-	CompressionTypeBzip2 = "BZIP2"
 )
 
 // Requests Amazon S3 to encode the object keys in the response and specifies

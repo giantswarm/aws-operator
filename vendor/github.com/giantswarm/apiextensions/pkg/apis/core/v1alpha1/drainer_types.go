@@ -7,6 +7,18 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	DrainerConfigStatusStatusTrue = "True"
+)
+
+const (
+	DrainerConfigStatusTypeDrained = "Drained"
+)
+
+const (
+	DrainerConfigStatusTypeTimeout = "Timeout"
+)
+
 // NewDrainerConfigCRD returns a new custom resource definition for
 // DrainerConfig. This might look something like the following.
 //
@@ -22,8 +34,6 @@ import (
 //         kind: DrainerConfig
 //         plural: drainerconfigs
 //         singular: drainerconfig
-//       subresources:
-//         status: {}
 //
 func NewDrainerConfigCRD() *apiextensionsv1beta1.CustomResourceDefinition {
 	return &apiextensionsv1beta1.CustomResourceDefinition{
@@ -43,14 +53,12 @@ func NewDrainerConfigCRD() *apiextensionsv1beta1.CustomResourceDefinition {
 				Plural:   "drainerconfigs",
 				Singular: "drainerconfig",
 			},
-			Subresources: &apiextensionsv1beta1.CustomResourceSubresources{
-				Status: &apiextensionsv1beta1.CustomResourceSubresourceStatus{},
-			},
 		},
 	}
 }
 
 // +genclient
+// +genclient:noStatus
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 type DrainerConfig struct {
