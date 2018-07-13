@@ -15,7 +15,9 @@ import (
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v12"
+	"github.com/giantswarm/aws-operator/service/controller/v12patch1"
 	"github.com/giantswarm/aws-operator/service/controller/v13"
+	"github.com/giantswarm/aws-operator/service/controller/v14"
 	"github.com/giantswarm/aws-operator/service/controller/v8"
 	"github.com/giantswarm/aws-operator/service/controller/v9patch1"
 	"github.com/giantswarm/aws-operator/service/controller/v9patch2"
@@ -238,6 +240,24 @@ func newDrainerResourceRouter(config DrainerConfig) (*controller.ResourceRouter,
 		}
 	}
 
+	var v12Patch1ResourceSet *controller.ResourceSet
+	{
+		c := v12patch1.DrainerResourceSetConfig{
+			G8sClient:     config.G8sClient,
+			HostAWSConfig: hostAWSConfig,
+			K8sClient:     config.K8sClient,
+			Logger:        config.Logger,
+
+			GuestUpdateEnabled: config.GuestUpdateEnabled,
+			ProjectName:        config.ProjectName,
+		}
+
+		v12Patch1ResourceSet, err = v12patch1.NewDrainerResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var v13ResourceSet *controller.ResourceSet
 	{
 		c := v13.DrainerResourceSetConfig{
@@ -256,6 +276,24 @@ func newDrainerResourceRouter(config DrainerConfig) (*controller.ResourceRouter,
 		}
 	}
 
+	var v14ResourceSet *controller.ResourceSet
+	{
+		c := v14.DrainerResourceSetConfig{
+			G8sClient:     config.G8sClient,
+			HostAWSConfig: hostAWSConfig,
+			K8sClient:     config.K8sClient,
+			Logger:        config.Logger,
+
+			GuestUpdateEnabled: config.GuestUpdateEnabled,
+			ProjectName:        config.ProjectName,
+		}
+
+		v14ResourceSet, err = v14.NewDrainerResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var resourceRouter *controller.ResourceRouter
 	{
 		c := controller.ResourceRouterConfig{
@@ -266,7 +304,9 @@ func newDrainerResourceRouter(config DrainerConfig) (*controller.ResourceRouter,
 				v9patch1ResourceSet,
 				v9patch2ResourceSet,
 				v12ResourceSet,
+				v12Patch1ResourceSet,
 				v13ResourceSet,
+				v14ResourceSet,
 			},
 		}
 

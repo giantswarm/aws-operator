@@ -49,6 +49,7 @@ const (
 )
 
 const (
+	DockerVolumeResourceNameKey   = "DockerVolumeResourceName"
 	MasterImageIDKey              = "MasterImageID"
 	MasterInstanceResourceNameKey = "MasterInstanceResourceName"
 	MasterInstanceTypeKey         = "MasterInstanceType"
@@ -65,6 +66,17 @@ const (
 
 const (
 	ClusterIDLabel = "giantswarm.io/cluster"
+
+	AnnotationEtcdDomain        = "giantswarm.io/etcd-domain"
+	AnnotationPrometheusCluster = "giantswarm.io/prometheus-cluster"
+
+	LabelApp           = "app"
+	LabelCluster       = "giantswarm.io/cluster"
+	LabelCustomer      = "customer"
+	LabelOrganization  = "giantswarm.io/organization"
+	LabelVersionBundle = "giantswarm.io/version-bundle"
+
+	LegacyLabelCluster = "cluster"
 )
 
 const (
@@ -155,6 +167,10 @@ func ClusterCustomer(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Customer.ID
 }
 
+func ClusterEtcdDomain(customObject v1alpha1.AWSConfig) string {
+	return customObject.Spec.Cluster.Etcd.Domain
+}
+
 func ClusterID(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.ID
 }
@@ -187,6 +203,10 @@ func ClusterVersion(customObject v1alpha1.AWSConfig) string {
 
 func CustomerID(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Customer.ID
+}
+
+func DockerVolumeResourceName(customObject v1alpha1.AWSConfig) string {
+	return getResourcenameWithTimeHash("DockerVolume", customObject)
 }
 
 func DockerVolumeName(customObject v1alpha1.AWSConfig) string {
@@ -289,16 +309,7 @@ func MasterImageID(customObject v1alpha1.AWSConfig) string {
 }
 
 func MasterInstanceResourceName(customObject v1alpha1.AWSConfig) string {
-	clusterID := strings.Replace(ClusterID(customObject), "-", "", -1)
-
-	h := sha1.New()
-	h.Write([]byte(strconv.FormatInt(time.Now().UnixNano(), 10)))
-	timeHash := fmt.Sprintf("%x", h.Sum(nil))[0:5]
-
-	upperTimeHash := strings.ToUpper(timeHash)
-	upperClusterID := strings.ToUpper(clusterID)
-
-	return fmt.Sprintf("MasterInstance%s%s", upperClusterID, upperTimeHash)
+	return getResourcenameWithTimeHash("MasterInstance", customObject)
 }
 
 func MasterInstanceName(customObject v1alpha1.AWSConfig) string {
@@ -485,4 +496,19 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 	}
 
 	return imageID, nil
+}
+
+// getResourcenameWithTimeHash returns the string compared from specific prefix,
+// time hash and cluster ID.
+func getResourcenameWithTimeHash(prefix string, customObject v1alpha1.AWSConfig) string {
+	clusterID := strings.Replace(ClusterID(customObject), "-", "", -1)
+
+	h := sha1.New()
+	h.Write([]byte(strconv.FormatInt(time.Now().UnixNano(), 10)))
+	timeHash := fmt.Sprintf("%x", h.Sum(nil))[0:5]
+
+	upperTimeHash := strings.ToUpper(timeHash)
+	upperClusterID := strings.ToUpper(clusterID)
+
+	return fmt.Sprintf("%s%s%s", prefix, upperClusterID, upperTimeHash)
 }

@@ -16,9 +16,10 @@ type outputsAdapter struct {
 }
 
 type outputsAdapterMaster struct {
-	ImageID     string
-	Instance    outputsAdapterMasterInstance
-	CloudConfig outputsAdapterMasterCloudConfig
+	ImageID      string
+	Instance     outputsAdapterMasterInstance
+	CloudConfig  outputsAdapterMasterCloudConfig
+	DockerVolume outputsAdapterMasterDockerVolume
 }
 
 type outputsAdapterMasterInstance struct {
@@ -28,6 +29,10 @@ type outputsAdapterMasterInstance struct {
 
 type outputsAdapterMasterCloudConfig struct {
 	Version string
+}
+
+type outputsAdapterMasterDockerVolume struct {
+	ResourceName string
 }
 
 type outputsAdapterWorker struct {
@@ -52,6 +57,7 @@ type outputsAdapterVersionBundle struct {
 }
 
 func (a *outputsAdapter) Adapt(config Config) error {
+	a.Master.DockerVolume.ResourceName = config.StackState.DockerVolumeResourceName
 	a.Master.ImageID = config.StackState.MasterImageID
 	a.Master.Instance.ResourceName = config.StackState.MasterInstanceResourceName
 	a.Master.Instance.Type = config.StackState.MasterInstanceType
