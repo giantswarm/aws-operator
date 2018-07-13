@@ -164,10 +164,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		if len(drainerConfigs.Items) > 0 {
 			for _, drainerConfig := range drainerConfigs.Items {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "inspecting drainer config for the guest cluster")
+				r.logger.LogCtx(ctx, "level", "debug", "message", "inspecting drainer config for the guest cluster", "node", drainerConfig.GetName())
 
 				if drainerConfig.Status.HasDrainedCondition() {
-					r.logger.LogCtx(ctx, "level", "debug", "message", "drainer config of guest cluster has drained condition")
+					r.logger.LogCtx(ctx, "level", "debug", "message", "drainer config of guest cluster has drained condition", "node", drainerConfig.GetName())
 
 					err := r.finishDraining(ctx, drainerConfig, workerASGName)
 					if err != nil {
@@ -176,7 +176,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				}
 
 				if drainerConfig.Status.HasTimeoutCondition() {
-					r.logger.LogCtx(ctx, "level", "debug", "message", "drainer config of guest cluster has timeout condition")
+					r.logger.LogCtx(ctx, "level", "debug", "message", "drainer config of guest cluster has timeout condition", "node", drainerConfig.GetName())
 
 					err := r.finishDraining(ctx, drainerConfig, workerASGName)
 					if err != nil {
@@ -184,7 +184,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 					}
 				}
 
-				r.logger.LogCtx(ctx, "level", "debug", "message", "inspected drainer config for the guest cluster")
+				r.logger.LogCtx(ctx, "level", "debug", "message", "inspected drainer config for the guest cluster", "node", drainerConfig.GetName())
 			}
 		} else {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "no drainer configs to inspect for the guest cluster")
