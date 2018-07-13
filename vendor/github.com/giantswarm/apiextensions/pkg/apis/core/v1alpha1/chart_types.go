@@ -20,6 +20,8 @@ import (
 //         kind: ChartConfig
 //         plural: chartconfigs
 //         singular: chartconfig
+//       subresources:
+//         status: {}
 //
 func NewChartConfigCRD() *apiextensionsv1beta1.CustomResourceDefinition {
 	return &apiextensionsv1beta1.CustomResourceDefinition{
