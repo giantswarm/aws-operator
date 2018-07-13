@@ -10,6 +10,10 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 )
 
+const (
+	Namespace = "aws_operator"
+)
+
 type Config struct {
 	G8sClient versioned.Interface
 	Logger    micrologger.Logger
@@ -56,16 +60,21 @@ func New(config Config) (*Collector, error) {
 }
 
 func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
-	ch <- vpcsDesc
 	ch <- clustersDesc
+
+	ch <- serviceLimit
+	ch <- serviceUsage
+	ch <- trustedAdvisorSupport
+
+	ch <- vpcsDesc
 }
 
 func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	c.logger.Log("level", "debug", "message", "collecting metrics")
 
-	c.collectVPCs(ch)
-
 	c.collectClusterInfo(ch)
+	c.collectTrustedAdvisorChecks(ch)
+	c.collectVPCs(ch)
 
 	c.logger.Log("level", "debug", "message", "finished collecting metrics")
 }
