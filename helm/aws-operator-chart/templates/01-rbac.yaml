@@ -30,6 +30,12 @@ rules:
   - apiGroups:
       - core.giantswarm.io
     resources:
+      - nodeconfigs
+    verbs:
+      - "*"
+  - apiGroups:
+      - core.giantswarm.io
+    resources:
       - drainerconfigs
     verbs:
       - "*"
