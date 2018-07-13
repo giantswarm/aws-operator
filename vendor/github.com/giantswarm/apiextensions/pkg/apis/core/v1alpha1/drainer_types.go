@@ -7,6 +7,18 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	DrainerConfigStatusStatusTrue = "True"
+)
+
+const (
+	DrainerConfigStatusTypeDrained = "Drained"
+)
+
+const (
+	DrainerConfigStatusTypeTimeout = "Timeout"
+)
+
 // NewDrainerConfigCRD returns a new custom resource definition for
 // DrainerConfig. This might look something like the following.
 //

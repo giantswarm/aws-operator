@@ -52,9 +52,9 @@ func (s StatusCluster) WithUpdatingCondition() []StatusClusterCondition {
 	return withCondition(s.Conditions, StatusClusterTypeUpdated, StatusClusterTypeUpdating, StatusClusterStatusTrue)
 }
 
-func hasCondition(conditions []StatusClusterCondition, search string, status string) bool {
+func hasCondition(conditions []StatusClusterCondition, s string, t string) bool {
 	for _, c := range conditions {
-		if c.Status == search && c.Type == status {
+		if c.Status == s && c.Type == t {
 			return true
 		}
 	}
