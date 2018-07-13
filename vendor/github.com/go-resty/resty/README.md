@@ -1,20 +1,21 @@
 <p align="center">
 <h1 align="center">Resty</h1>
-<p align="center">Simple HTTP and REST client library for Go</p>
+<p align="center">Simple HTTP and REST client library for Go (inspired by Ruby rest-client)</p>
 <p align="center"><a href="#features">Features</a> section describes in detail about Resty capabilities</p>
 </p>
 <p align="center">
-<p align="center"><a href="https://travis-ci.org/go-resty/resty"><img src="https://travis-ci.org/go-resty/resty.svg?branch=master" alt="Build Status"></a> <a href="https://codecov.io/gh/go-resty/resty/branch/master"><img src="https://codecov.io/gh/go-resty/resty/branch/master/graph/badge.svg" alt="Code Coverage"></a> <a href="https://goreportcard.com/report/go-resty/resty"><img src="https://goreportcard.com/badge/go-resty/resty" alt="Go Report Card"></a> <a href="https://github.com/go-resty/resty/releases/latest"><img src="https://img.shields.io/badge/version-1.6-blue.svg" alt="Release Version"></a> <a href="https://godoc.org/github.com/go-resty/resty"><img src="https://godoc.org/github.com/go-resty/resty?status.svg" alt="GoDoc"></a> <a href="LICENSE"><img src="https://img.shields.io/github/license/go-resty/resty.svg" alt="License"></a></p>
+<p align="center"><a href="https://travis-ci.org/go-resty/resty"><img src="https://travis-ci.org/go-resty/resty.svg?branch=master" alt="Build Status"></a> <a href="https://codecov.io/gh/go-resty/resty/branch/master"><img src="https://codecov.io/gh/go-resty/resty/branch/master/graph/badge.svg" alt="Code Coverage"></a> <a href="https://goreportcard.com/report/go-resty/resty"><img src="https://goreportcard.com/badge/go-resty/resty" alt="Go Report Card"></a> <a href="https://github.com/go-resty/resty/releases/latest"><img src="https://img.shields.io/badge/version-1.7.0-blue.svg" alt="Release Version"></a> <a href="https://godoc.org/github.com/go-resty/resty"><img src="https://godoc.org/github.com/go-resty/resty?status.svg" alt="GoDoc"></a> <a href="LICENSE"><img src="https://img.shields.io/github/license/go-resty/resty.svg" alt="License"></a></p>
 </p>
 
 ## News
 
-  * v1.6 [released](https://github.com/go-resty/resty/releases/latest) and tagged on May 28, 2018.
+  * [Collecting Inputs for Resty v2.0](https://github.com/go-resty/resty/issues/166)
+  * v1.7.0 [released](https://github.com/go-resty/resty/releases/latest) and tagged on Jul 04, 2018.
   * v1.0 released - Resty's first version was released on Sep 15, 2015 then it grew gradually as a very handy and helpful library. Its been a two years; `v1.0` was released on Sep 25, 2017. I'm very thankful to Resty users and its [contributors](https://github.com/go-resty/resty/graphs/contributors).
 
 ## Features
 
-  * GET, POST, PUT, DELETE, HEAD, PATCH, OPTIONS, ...
+  * GET, POST, PUT, DELETE, HEAD, PATCH, OPTIONS, etc.
   * Simple and chainable methods for settings and request
   * Request Body can be `string`, `[]byte`, `struct`, `map`, `slice` and `io.Reader` too
     * Auto detects `Content-Type`
@@ -30,7 +31,7 @@
         - Supports [RFC7807](https://tools.ietf.org/html/rfc7807) - `application/problem+json` & `application/problem+xml`
   * Easy to upload one or more file(s) via `multipart/form-data`
     * Auto detects file content type
-  * Request URL [Path Params](https://godoc.org/github.com/go-resty/resty#Request.SetPathParams)
+  * Request URL [Path Params (aka URI Params)](https://godoc.org/github.com/go-resty/resty#Request.SetPathParams)
   * Backoff Retry Mechanism with retry condition function [reference](retry_test.go)
   * resty client HTTP & REST [Request](https://godoc.org/github.com/go-resty/resty#Client.OnBeforeRequest) and [Response](https://godoc.org/github.com/go-resty/resty#Client.OnAfterResponse) middlewares
   * `Request.SetContext` supported `go1.7` and above
@@ -56,7 +57,7 @@
     * goroutine concurrent safe
     * REST and HTTP modes
     * Debug mode - clean and informative logging presentation
-    * Gzip - Go does it automatically also resty fallback handling too
+    * Gzip - Go does it automatically also resty has fallback handling too
     * Works fine with `HTTP/2` and `HTTP/1.1`
   * [Bazel support](#bazel-support)
   * Easily mock resty for testing, [for e.g.](#mocking-http-requests-using-httpmock-library)
@@ -83,14 +84,20 @@ Resty works with `go1.3` and above.
 
 Please refer section [Versioning](#versioning) for detailed info.
 
-```sh
-# install the library
+##### go.mod
+
+```bash
+require github.com/go-resty/resty v1.7.0
+```
+
+##### go get
+```bash
 go get -u gopkg.in/resty.v1
 ```
 
 #### Latest Version - Development Edge
 
-```sh
+```bash
 # install the latest & greatest library
 go get -u github.com/go-resty/resty
 ```
@@ -581,7 +588,7 @@ client1.R().Get("http://httpbin.org")
 
 // Client 2
 client2 := resty.New()
-client1.R().Head("http://httpbin.org")
+client2.R().Head("http://httpbin.org")
 // ...
 
 // Bend it as per your need!!!
