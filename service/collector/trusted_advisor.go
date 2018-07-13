@@ -3,7 +3,6 @@ package collector
 import (
 	"fmt"
 	"strconv"
-	"strings"
 	"sync"
 
 	"github.com/aws/aws-sdk-go/service/support"
@@ -16,9 +15,8 @@ const (
 	// for checks related to service limits and usage.
 	serviceLimitCategory = "service_limits"
 
-	// trustedAdvisorUnsupportedErrorMessage is the error message returned
-	// if Trusted Advisor is not supported (support plan is not Business or Enterprise).
-	trustedAdvisorUnsupportedErrorMessage = "AWS Premium Support Subscription is required to use this service."
+	// resourceMetadataLength is the length of resource metadata we expect.
+	resourceMetadataLength = 6
 
 	regionIndex    = 0
 	serviceIndex   = 1
@@ -101,7 +99,7 @@ func (c *Collector) collectTrustedAdvisorChecks(ch chan<- prometheus.Metric) {
 
 	checks, err := c.getTrustedAdvisorChecks()
 	if err != nil {
-		if strings.Contains(err.Error(), trustedAdvisorUnsupportedErrorMessage) {
+		if IsUnsupportedPlan(err) {
 			c.logger.Log("level", "info", "message", "Trusted Advisor not available in support plan, cannot fetch service usage metrics")
 			ch <- trustedAdvisorNotSupported()
 			return
@@ -193,6 +191,10 @@ func (c *Collector) getTrustedAdvisorResources(id *string) ([]*support.TrustedAd
 }
 
 func resourceToMetrics(resource *support.TrustedAdvisorResourceDetail) (prometheus.Metric, prometheus.Metric, error) {
+	if len(resource.Metadata) != resourceMetadataLength {
+		return nil, nil, invalidResourceError
+	}
+
 	region := resource.Metadata[regionIndex]
 	service := resource.Metadata[serviceIndex]
 	limitName := resource.Metadata[limitNameIndex]
