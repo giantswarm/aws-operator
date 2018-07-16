@@ -443,3 +443,226 @@ func Test_isServiceModified(t *testing.T) {
 		})
 	}
 }
+
+func Test_portsEqual(t *testing.T) {
+	testCases := []struct {
+		name           string
+		serviceA       *corev1.Service
+		serviceB       *corev1.Service
+		expectedResult bool
+	}{
+		{
+			name: "case 0: basic match",
+			serviceA: &corev1.Service{
+				ObjectMeta: apismetav1.ObjectMeta{
+					Name:      "service1",
+					Namespace: "xy123",
+				},
+				Spec: corev1.ServiceSpec{
+					Ports: []corev1.ServicePort{
+						{
+							Protocol:   corev1.ProtocolTCP,
+							Port:       443,
+							TargetPort: intstr.FromInt(443),
+						},
+					},
+				},
+			},
+			serviceB: &corev1.Service{
+				ObjectMeta: apismetav1.ObjectMeta{
+					Name:      "service1",
+					Namespace: "xy123",
+				},
+				Spec: corev1.ServiceSpec{
+					Ports: []corev1.ServicePort{
+						{
+							Protocol:   corev1.ProtocolTCP,
+							Port:       443,
+							TargetPort: intstr.FromInt(443),
+						},
+					},
+				},
+			},
+			expectedResult: true,
+		},
+		{
+			name: "case 1: port count mismatch",
+			serviceA: &corev1.Service{
+				ObjectMeta: apismetav1.ObjectMeta{
+					Name:      "service1",
+					Namespace: "xy123",
+				},
+				Spec: corev1.ServiceSpec{
+					Ports: []corev1.ServicePort{
+						{
+							Protocol:   corev1.ProtocolTCP,
+							Port:       443,
+							TargetPort: intstr.FromInt(443),
+						},
+					},
+				},
+			},
+			serviceB: &corev1.Service{
+				ObjectMeta: apismetav1.ObjectMeta{
+					Name:      "service1",
+					Namespace: "xy123",
+				},
+				Spec: corev1.ServiceSpec{
+					Ports: []corev1.ServicePort{
+						{
+							Protocol:   corev1.ProtocolTCP,
+							Port:       443,
+							TargetPort: intstr.FromInt(443),
+						},
+						{
+							Protocol:   corev1.ProtocolTCP,
+							Port:       442,
+							TargetPort: intstr.FromInt(442),
+						},
+					},
+				},
+			},
+			expectedResult: false,
+		},
+		{
+			name: "case 2: port count mismatch 2",
+			serviceA: &corev1.Service{
+				ObjectMeta: apismetav1.ObjectMeta{
+					Name:      "service1",
+					Namespace: "xy123",
+				},
+				Spec: corev1.ServiceSpec{
+					Ports: []corev1.ServicePort{},
+				},
+			},
+			serviceB: &corev1.Service{
+				ObjectMeta: apismetav1.ObjectMeta{
+					Name:      "service1",
+					Namespace: "xy123",
+				},
+				Spec: corev1.ServiceSpec{
+					Ports: []corev1.ServicePort{
+						{
+							Protocol:   corev1.ProtocolTCP,
+							Port:       443,
+							TargetPort: intstr.FromInt(443),
+						},
+					},
+				},
+			},
+			expectedResult: false,
+		},
+		{
+			name: "case 3: protocol mismatch",
+			serviceA: &corev1.Service{
+				ObjectMeta: apismetav1.ObjectMeta{
+					Name:      "service1",
+					Namespace: "xy123",
+				},
+				Spec: corev1.ServiceSpec{
+					Ports: []corev1.ServicePort{
+						{
+							Protocol:   corev1.ProtocolUDP,
+							Port:       443,
+							TargetPort: intstr.FromInt(443),
+						},
+					},
+				},
+			},
+			serviceB: &corev1.Service{
+				ObjectMeta: apismetav1.ObjectMeta{
+					Name:      "service1",
+					Namespace: "xy123",
+				},
+				Spec: corev1.ServiceSpec{
+					Ports: []corev1.ServicePort{
+						{
+							Protocol:   corev1.ProtocolTCP,
+							Port:       443,
+							TargetPort: intstr.FromInt(443),
+						},
+					},
+				},
+			},
+			expectedResult: false,
+		},
+		{
+			name: "case 4: port number mismatch",
+			serviceA: &corev1.Service{
+				ObjectMeta: apismetav1.ObjectMeta{
+					Name:      "service1",
+					Namespace: "xy123",
+				},
+				Spec: corev1.ServiceSpec{
+					Ports: []corev1.ServicePort{
+						{
+							Protocol:   corev1.ProtocolTCP,
+							Port:       443,
+							TargetPort: intstr.FromInt(443),
+						},
+					},
+				},
+			},
+			serviceB: &corev1.Service{
+				ObjectMeta: apismetav1.ObjectMeta{
+					Name:      "service1",
+					Namespace: "xy123",
+				},
+				Spec: corev1.ServiceSpec{
+					Ports: []corev1.ServicePort{
+						{
+							Protocol:   corev1.ProtocolTCP,
+							Port:       445,
+							TargetPort: intstr.FromInt(443),
+						},
+					},
+				},
+			},
+			expectedResult: false,
+		},
+		{
+			name: "case 5: targetPort number mismatch",
+			serviceA: &corev1.Service{
+				ObjectMeta: apismetav1.ObjectMeta{
+					Name:      "service1",
+					Namespace: "xy123",
+				},
+				Spec: corev1.ServiceSpec{
+					Ports: []corev1.ServicePort{
+						{
+							Protocol:   corev1.ProtocolTCP,
+							Port:       443,
+							TargetPort: intstr.FromInt(443),
+						},
+					},
+				},
+			},
+			serviceB: &corev1.Service{
+				ObjectMeta: apismetav1.ObjectMeta{
+					Name:      "service1",
+					Namespace: "xy123",
+				},
+				Spec: corev1.ServiceSpec{
+					Ports: []corev1.ServicePort{
+						{
+							Protocol:   corev1.ProtocolTCP,
+							Port:       443,
+							TargetPort: intstr.FromInt(445),
+						},
+					},
+				},
+			},
+			expectedResult: false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := portsEqual(tc.serviceA, tc.serviceB)
+
+			if result != tc.expectedResult {
+				t.Fatalf("portEqual '%s' failed, got %t, want %t", tc.name, result, tc.expectedResult)
+			}
+		})
+	}
+}
