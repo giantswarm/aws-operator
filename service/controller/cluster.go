@@ -152,11 +152,6 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 		}
 	}
 
-	resourceRouter, err := newClusterResourceRouter(config)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
 	var newInformer *informer.Informer
 	{
 		c := informer.Config{
@@ -173,15 +168,20 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 		}
 	}
 
+	resourceSets, err := newClusterResourceSets(config)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	var operatorkitController *controller.Controller
 	{
 		c := controller.Config{
-			CRD:            v1alpha1.NewAWSConfigCRD(),
-			CRDClient:      crdClient,
-			Informer:       newInformer,
-			Logger:         config.Logger,
-			ResourceRouter: resourceRouter,
-			RESTClient:     config.G8sClient.ProviderV1alpha1().RESTClient(),
+			CRD:          v1alpha1.NewAWSConfigCRD(),
+			CRDClient:    crdClient,
+			Informer:     newInformer,
+			Logger:       config.Logger,
+			ResourceSets: resourceSets,
+			RESTClient:   config.G8sClient.ProviderV1alpha1().RESTClient(),
 
 			Name: config.ProjectName,
 		}
@@ -199,7 +199,7 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 	return c, nil
 }
 
-func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter, error) {
+func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, error) {
 	var err error
 
 	guestAWSConfig := awsclient.Config{
@@ -610,31 +610,19 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 		}
 	}
 
-	var resourceRouter *controller.ResourceRouter
-	{
-		c := controller.ResourceRouterConfig{
-			Logger: config.Logger,
-
-			ResourceSets: []*controller.ResourceSet{
-				resourceSetV1,
-				resourceSetV2,
-				resourceSetV3,
-				resourceSetV6,
-				resourceSetV8,
-				resourceSetV9Patch1,
-				resourceSetV9Patch2,
-				resourceSetV12,
-				resourceSetV12Patch1,
-				resourceSetV13,
-				resourceSetV14,
-			},
-		}
-
-		resourceRouter, err = controller.NewResourceRouter(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
+	resourceSets := []*controller.ResourceSet{
+		resourceSetV1,
+		resourceSetV2,
+		resourceSetV3,
+		resourceSetV6,
+		resourceSetV8,
+		resourceSetV9Patch1,
+		resourceSetV9Patch2,
+		resourceSetV12,
+		resourceSetV12Patch1,
+		resourceSetV13,
+		resourceSetV14,
 	}
 
-	return resourceRouter, nil
+	return resourceSets, nil
 }
