@@ -94,7 +94,7 @@ required = [
   name = "github.com/giantswarm/micrologger"
 
 [[constraint]]
-  branch = "master"
+  branch = "merge-router"
   name = "github.com/giantswarm/operatorkit"
 
 [[constraint]]
