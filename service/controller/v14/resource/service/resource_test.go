@@ -76,7 +76,7 @@ func Test_toService(t *testing.T) {
 			},
 		},
 		{
-			name: "case 1: wrong type",
+			name: "case 1: wrong type (v1.Service instead of *v1.Service)",
 			input: corev1.Service{
 				ObjectMeta: apismetav1.ObjectMeta{
 					Name:      "master",
