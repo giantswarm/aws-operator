@@ -41,9 +41,9 @@ jobs:
           if [ "${CIRCLE_BRANCH}" == "master" ]; then
             ./architect deploy
           fi
-  
-  
-  
+
+
+
   e2eTestCurPRClusterState:
     environment:
       TESTED_VERSION: "current"
@@ -127,13 +127,6 @@ workflows:
   build_e2e:
     jobs:
       - build
-      - hold:
-          type: approval
-          filters:
-            branches:
-              ignore: master
-          requires:
-          - build
 
 
 
