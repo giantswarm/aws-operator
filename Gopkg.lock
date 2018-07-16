@@ -57,6 +57,7 @@
     "aws/signer/v4",
     "internal/sdkio",
     "internal/sdkrand",
+    "internal/sdkuri",
     "internal/shareddefaults",
     "private/protocol",
     "private/protocol/ec2query",
@@ -83,10 +84,12 @@
     "service/s3",
     "service/s3/s3iface",
     "service/sts",
-    "service/sts/stsiface"
+    "service/sts/stsiface",
+    "service/support",
+    "service/support/supportiface"
   ]
-  revision = "852052a10992d92f68b9a60862a3312292524903"
-  version = "v1.14.17"
+  revision = "9e9afa0895e9daff556cc18f90dc53eb91f41ffd"
+  version = "v1.14.26"
 
 [[projects]]
   branch = "master"
@@ -270,7 +273,7 @@
   branch = "master"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
-  revision = "b48ae48e60b4891baf6f3ab23eff9ed469532ad0"
+  revision = "84047810776e7ffb8484cc6efe2ccac2b73d1246"
 
 [[projects]]
   branch = "master"
@@ -296,7 +299,7 @@
   branch = "master"
   name = "github.com/giantswarm/k8sportforward"
   packages = ["."]
-  revision = "00489ad5cc81835cf9bf13e9dfa538fa6f3f729e"
+  revision = "5f1a090222cf476117c0d42705846928c577aa5b"
 
 [[projects]]
   branch = "master"
@@ -396,8 +399,8 @@
 [[projects]]
   name = "github.com/go-ini/ini"
   packages = ["."]
-  revision = "06f5f3d67269ccec1fe5fe4134ba6e982984f7f5"
-  version = "v1.37.0"
+  revision = "358ee7663966325963d4e8b2e1fbd570c5195153"
+  version = "v1.38.1"
 
 [[projects]]
   name = "github.com/go-kit/kit"
@@ -479,7 +482,7 @@
   branch = "master"
   name = "github.com/google/go-github"
   packages = ["github"]
-  revision = "60d040d2dafa18fa3e86cbf22fbc3208ef9ef1e0"
+  revision = "e96f1f1b07a5be7cba161bc7c1fd636044bfd75c"
 
 [[projects]]
   branch = "master"
@@ -741,7 +744,7 @@
     "publicsuffix",
     "trace"
   ]
-  revision = "4cb1c02c05b0e749b0365f61ae859a8e0cfceed9"
+  revision = "d0887baf81f4598189d4e12a37c6da86f0bba4d0"
 
 [[projects]]
   branch = "master"
@@ -1368,6 +1371,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "216326e928aa8b301d60300316d67658e426d8585dd9ca9bdd2a5b2d0f4a44b4"
+  inputs-digest = "ab83485507913f5af9447d0b37505957add18e4f8b2504ac137e862813dff094"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -35,6 +35,12 @@ rules:
     verbs:
       - "*"
   - apiGroups:
+      - core.giantswarm.io
+    resources:
+      - drainerconfigs
+    verbs:
+      - "*"
+  - apiGroups:
       - ""
     resources:
       - namespaces
