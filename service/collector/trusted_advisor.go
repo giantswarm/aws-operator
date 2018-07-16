@@ -57,20 +57,10 @@ var (
 		nil, nil,
 	)
 
-	getChecksError = prometheus.NewCounter(prometheus.CounterOpts{
+	trustedAdvisorError = prometheus.NewCounter(prometheus.CounterOpts{
 		Namespace: Namespace,
-		Name:      "trusted_advisor_get_checks_error_count",
-		Help:      "Counter for the number of errors encountered getting Trusted Advisor checks.",
-	})
-	getResourcesError = prometheus.NewCounter(prometheus.CounterOpts{
-		Namespace: Namespace,
-		Name:      "trusted_advisor_get_resources_error_count",
-		Help:      "Counter for the number of errors encountered getting Trusted Advisor resources.",
-	})
-	convertResourcesError = prometheus.NewCounter(prometheus.CounterOpts{
-		Namespace: Namespace,
-		Name:      "trusted_advisor_convert_resources_error_count",
-		Help:      "Counter for the number of errors encountered converting Trusted Advisor resources.",
+		Name:      "trusted_advisor_error_count",
+		Help:      "Counter for the number of errors encountered calling Trusted Advisor.",
 	})
 
 	getChecksDuration = prometheus.NewHistogram(prometheus.HistogramOpts{
@@ -86,9 +76,7 @@ var (
 )
 
 func init() {
-	prometheus.MustRegister(getChecksError)
-	prometheus.MustRegister(getResourcesError)
-	prometheus.MustRegister(convertResourcesError)
+	prometheus.MustRegister(trustedAdvisorError)
 
 	prometheus.MustRegister(getChecksDuration)
 	prometheus.MustRegister(getResourcesDuration)
@@ -106,7 +94,7 @@ func (c *Collector) collectTrustedAdvisorChecks(ch chan<- prometheus.Metric) {
 		}
 
 		c.logger.Log("level", "error", "message", "could not get Trusted Advisor checks", "stack", fmt.Sprintf("%#v", err))
-		getChecksError.Inc()
+		trustedAdvisorError.Inc()
 		return
 	}
 	ch <- trustedAdvisorSupported()
@@ -127,7 +115,7 @@ func (c *Collector) collectTrustedAdvisorChecks(ch chan<- prometheus.Metric) {
 			resources, err := c.getTrustedAdvisorResources(id)
 			if err != nil {
 				c.logger.Log("level", "error", "message", "could not get Trusted Advisor resource", "stack", fmt.Sprintf("%#v", err), "id", *id)
-				getResourcesError.Inc()
+				trustedAdvisorError.Inc()
 				return
 			}
 
@@ -140,7 +128,7 @@ func (c *Collector) collectTrustedAdvisorChecks(ch chan<- prometheus.Metric) {
 				limit, usage, err := resourceToMetrics(resource)
 				if err != nil {
 					c.logger.Log("level", "error", "message", "could not convert Trusted Advisor resource into metrics", "stack", fmt.Sprintf("%#v", err), "id", *id)
-					convertResourcesError.Inc()
+					trustedAdvisorError.Inc()
 					return
 				}
 
