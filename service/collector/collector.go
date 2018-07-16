@@ -1,6 +1,8 @@
 package collector
 
 import (
+	"sync"
+
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -8,6 +10,10 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+)
+
+const (
+	Namespace = "aws_operator"
 )
 
 type Config struct {
@@ -56,16 +62,36 @@ func New(config Config) (*Collector, error) {
 }
 
 func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
-	ch <- vpcsDesc
 	ch <- clustersDesc
+
+	ch <- serviceLimit
+	ch <- serviceUsage
+	ch <- trustedAdvisorSupport
+
+	ch <- vpcsDesc
 }
 
 func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	c.logger.Log("level", "debug", "message", "collecting metrics")
 
-	c.collectVPCs(ch)
+	collectFuncs := []func(chan<- prometheus.Metric){
+		c.collectClusterInfo,
+		c.collectTrustedAdvisorChecks,
+		c.collectVPCs,
+	}
 
-	c.collectClusterInfo(ch)
+	var wg sync.WaitGroup
+
+	for _, collectFunc := range collectFuncs {
+		wg.Add(1)
+
+		go func(collectFunc func(ch chan<- prometheus.Metric)) {
+			defer wg.Done()
+			collectFunc(ch)
+		}(collectFunc)
+	}
+
+	wg.Wait()
 
 	c.logger.Log("level", "debug", "message", "finished collecting metrics")
 }

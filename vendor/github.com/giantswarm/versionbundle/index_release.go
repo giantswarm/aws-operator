@@ -158,7 +158,8 @@ func mapReleaseChangelogs(r Release) map[string]struct{} {
 	return changelogs
 }
 
-// TODO define and implement validation rules
+// ValidateIndexReleases ensures semantic rules for collection of indexReleases
+// so that when used together, they form consistent and integral release index.
 func ValidateIndexReleases(indexReleases []IndexRelease) error {
 	if len(indexReleases) == 0 {
 		return nil
@@ -206,10 +207,18 @@ func validateReleaseAuthorities(indexReleases []IndexRelease) error {
 }
 
 func validateReleaseDates(indexReleases []IndexRelease) error {
+	releaseDates := make(map[time.Time]string)
 	for _, release := range indexReleases {
 		if release.Date.IsZero() {
 			return microerror.Maskf(invalidReleaseError, "release %s has empty release date", release.Version)
 		}
+
+		ver, exists := releaseDates[release.Date]
+		if exists {
+			return microerror.Maskf(invalidReleaseError, "releases %s and %s have duplicate release dates", ver, release.Version)
+		}
+
+		releaseDates[release.Date] = release.Version
 	}
 
 	return nil

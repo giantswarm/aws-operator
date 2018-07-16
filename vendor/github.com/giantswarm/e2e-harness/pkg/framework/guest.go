@@ -1,6 +1,7 @@
 package framework
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -24,11 +25,15 @@ const (
 )
 
 type GuestConfig struct {
-	Logger micrologger.Logger
+	ClusterName  string
+	CommonDomain string
+	Logger       micrologger.Logger
 }
 
 type Guest struct {
-	logger micrologger.Logger
+	clusterName  string
+	commonDomain string
+	logger       micrologger.Logger
 
 	g8sClient  versioned.Interface
 	k8sClient  kubernetes.Interface
@@ -36,12 +41,22 @@ type Guest struct {
 }
 
 func NewGuest(config GuestConfig) (*Guest, error) {
+	if config.ClusterName == "" {
+		// If config.ClusterName is not defined, default to environment variable.
+		config.ClusterName = os.Getenv("CLUSTER_NAME")
+	}
+	if config.CommonDomain == "" {
+		// If config.CommonDomain is not defined, default to environment variable.
+		config.CommonDomain = os.Getenv("COMMON_DOMAIN")
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
 	g := &Guest{
-		logger: config.Logger,
+		clusterName:  config.ClusterName,
+		commonDomain: config.CommonDomain,
+		logger:       config.Logger,
 
 		g8sClient:  nil,
 		k8sClient:  nil,
@@ -90,14 +105,14 @@ func (g *Guest) Initialize() error {
 	var guestK8sClient kubernetes.Interface
 	var guestRestConfig *rest.Config
 	{
-		n := os.ExpandEnv("${CLUSTER_NAME}-api")
+		n := fmt.Sprintf("%s-api", g.clusterName)
 		s, err := hostK8sClient.CoreV1().Secrets("default").Get(n, metav1.GetOptions{})
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
 		guestRestConfig = &rest.Config{
-			Host: os.ExpandEnv("https://api.${CLUSTER_NAME}.k8s.${COMMON_DOMAIN}"),
+			Host: fmt.Sprintf("https://api.%s.k8s.%s", g.clusterName, g.commonDomain),
 			TLSClientConfig: rest.TLSClientConfig{
 				CAData:   s.Data["ca"],
 				CertData: s.Data["crt"],
@@ -155,7 +170,7 @@ func (g *Guest) WaitForAPIDown() error {
 
 		return microerror.Maskf(waitError, "k8s API is still up")
 	}
-	b := NewConstantBackoff(ShortMaxWait, ShortMaxInterval)
+	b := NewConstantBackoff(LongMaxWait, ShortMaxInterval)
 	n := func(err error, delay time.Duration) {
 		g.logger.Log("level", "debug", "message", err.Error())
 	}
