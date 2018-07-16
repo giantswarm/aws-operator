@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"net"
+
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs/legacy"
@@ -48,25 +50,28 @@ type ClusterConfig struct {
 	K8sExtClient apiextensionsclient.Interface
 	Logger       micrologger.Logger
 
-	AccessLogsExpiration   int
-	AdvancedMonitoringEC2  bool
-	APIWhitelist           FrameworkConfigAPIWhitelistConfig
-	DeleteLoggingBucket    bool
-	EncrypterBackend       string
-	GuestAWSConfig         ClusterConfigAWSConfig
-	GuestUpdateEnabled     bool
-	HostAWSConfig          ClusterConfigAWSConfig
-	IncludeTags            bool
-	InstallationName       string
-	OIDC                   ClusterConfigOIDC
-	PodInfraContainerImage string
-	ProjectName            string
-	PubKeyFile             string
-	PublicRouteTables      string
-	RegistryDomain         string
-	Route53Enabled         bool
-	SSOPublicKey           string
-	VaultAddress           string
+	AccessLogsExpiration       int
+	AdvancedMonitoringEC2      bool
+	APIWhitelist               FrameworkConfigAPIWhitelistConfig
+	DeleteLoggingBucket        bool
+	EncrypterBackend           string
+	GuestAWSConfig             ClusterConfigAWSConfig
+	GuestPrivateSubnetMaskBits int
+	GuestPublicSubnetMaskBits  int
+	GuestUpdateEnabled         bool
+	HostAWSConfig              ClusterConfigAWSConfig
+	IncludeTags                bool
+	InstallationName           string
+	IPAMNetworkRange           net.IPNet
+	OIDC                       ClusterConfigOIDC
+	PodInfraContainerImage     string
+	ProjectName                string
+	PubKeyFile                 string
+	PublicRouteTables          string
+	RegistryDomain             string
+	Route53Enabled             bool
+	SSOPublicKey               string
+	VaultAddress               string
 }
 
 type ClusterConfigAWSConfig struct {
@@ -587,6 +592,7 @@ func newClusterResourceRouter(config ClusterConfig) (*controller.ResourceRouter,
 			Route53Enabled:         config.Route53Enabled,
 			IncludeTags:            config.IncludeTags,
 			InstallationName:       config.InstallationName,
+			IPAMNetworkRange:       config.IPAMNetworkRange,
 			OIDC: v14cloudconfig.OIDCConfig{
 				ClientID:      config.OIDC.ClientID,
 				IssuerURL:     config.OIDC.IssuerURL,

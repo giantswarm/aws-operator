@@ -2,6 +2,8 @@ package v14
 
 import (
 	"context"
+	"net"
+	"reflect"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs/legacy"
@@ -49,22 +51,25 @@ type ClusterResourceSetConfig struct {
 	Logger             micrologger.Logger
 	RandomkeysSearcher randomkeys.Interface
 
-	AccessLogsExpiration   int
-	AdvancedMonitoringEC2  bool
-	APIWhitelist           adapter.APIWhitelist
-	EncrypterBackend       string
-	GuestUpdateEnabled     bool
-	IncludeTags            bool
-	InstallationName       string
-	DeleteLoggingBucket    bool
-	OIDC                   cloudconfig.OIDCConfig
-	ProjectName            string
-	PublicRouteTables      string
-	Route53Enabled         bool
-	PodInfraContainerImage string
-	RegistryDomain         string
-	SSOPublicKey           string
-	VaultAddress           string
+	AccessLogsExpiration       int
+	AdvancedMonitoringEC2      bool
+	APIWhitelist               adapter.APIWhitelist
+	EncrypterBackend           string
+	GuestPrivateSubnetMaskBits int
+	GuestPublicSubnetMaskBits  int
+	GuestUpdateEnabled         bool
+	IncludeTags                bool
+	InstallationName           string
+	IPAMNetworkRange           net.IPNet
+	DeleteLoggingBucket        bool
+	OIDC                       cloudconfig.OIDCConfig
+	ProjectName                string
+	PublicRouteTables          string
+	Route53Enabled             bool
+	PodInfraContainerImage     string
+	RegistryDomain             string
+	SSOPublicKey               string
+	VaultAddress               string
 }
 
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
@@ -110,6 +115,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 	if config.InstallationName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
+	}
+	if reflect.DeepEqual(config.IPAMNetworkRange, net.IPNet{}) {
+		return nil, microerror.Maskf(invalidConfigError, "%T.IPAMNetworkRange must not be empty", config)
 	}
 	if config.ProjectName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ProjectName must not be empty", config)
@@ -189,6 +197,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		c := ipam.Config{
 			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
+
+			NetworkRange: config.IPAMNetworkRange,
 		}
 
 		ipamResource, err = ipam.New(c)

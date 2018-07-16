@@ -22,6 +22,7 @@ func commonViperSettings(f *flag.Flag, v *viper.Viper) {
 	v.Set(f.Service.AWS.PubKeyFile, "test")
 	v.Set(f.Service.Guest.SSH.SSOPublicKey, "test")
 
+	v.Set(f.Service.Installation.Guest.IPAM.Network.CIDR, "10.1.0.0/16")
 	v.Set(f.Service.Installation.Name, "test")
 	v.Set(f.Service.AWS.LoggingBucket.Delete, true)
 

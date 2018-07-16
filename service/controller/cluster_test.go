@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"net"
 	"testing"
 
 	versionedfake "github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
@@ -10,6 +11,11 @@ import (
 )
 
 func newTestClusterConfig() ClusterConfig {
+	_, ipamNetworkCIDR, err := net.ParseCIDR("10.1.0.0/16")
+	if err != nil {
+		panic(err)
+	}
+
 	return ClusterConfig{
 		G8sClient:    versionedfake.NewSimpleClientset(),
 		K8sClient:    kubernetesfake.NewSimpleClientset(),
@@ -30,6 +36,7 @@ func newTestClusterConfig() ClusterConfig {
 			SessionToken:    "host-token",
 		},
 		InstallationName:    "test",
+		IPAMNetworkRange:    *ipamNetworkCIDR,
 		DeleteLoggingBucket: true,
 		ProjectName:         "aws-operator",
 		PubKeyFile:          "~/.ssh/id_rsa.pub",

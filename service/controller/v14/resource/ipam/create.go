@@ -49,8 +49,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 }
 
 func (r *Resource) allocateSubnet(ctx context.Context) (string, error) {
-	reservedSubnets := r.reservedSubnets
-
+	var reservedSubnets []net.IPNet
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "getting allocated subnets from VPCs")
 		vpcSubnets, err := getVPCSubnets(ctx)
@@ -78,7 +77,7 @@ func (r *Resource) allocateSubnet(ctx context.Context) (string, error) {
 	reservedSubnets = deduplicateSubnets(reservedSubnets)
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "finding free subnet")
-	subnet, err := ipam.Free(r.networkRange, r.networkMask, reservedSubnets)
+	subnet, err := ipam.Free(r.networkRange, r.networkRange.Mask, reservedSubnets)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}

@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"net"
 	"sync"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
@@ -105,6 +106,11 @@ func New(config Config) (*Service, error) {
 
 	var clusterController *controller.Cluster
 	{
+		_, ipamNetworkRange, err := net.ParseCIDR(config.Viper.GetString(config.Flag.Service.Installation.Guest.IPAM.Network.CIDR))
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
 		c := controller.ClusterConfig{
 			G8sClient:    g8sClient,
 			K8sClient:    k8sClient,
@@ -125,7 +131,9 @@ func New(config Config) (*Service, error) {
 				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
 				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
 			},
-			GuestUpdateEnabled: config.Viper.GetBool(config.Flag.Service.Guest.Update.Enabled),
+			GuestPrivateSubnetMaskBits: config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PrivateSubnetMaskBits),
+			GuestPublicSubnetMaskBits:  config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PublicSubnetMaskBits),
+			GuestUpdateEnabled:         config.Viper.GetBool(config.Flag.Service.Guest.Update.Enabled),
 			HostAWSConfig: controller.ClusterConfigAWSConfig{
 				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
 				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
@@ -134,6 +142,7 @@ func New(config Config) (*Service, error) {
 			},
 			IncludeTags:      config.Viper.GetBool(config.Flag.Service.AWS.IncludeTags),
 			InstallationName: config.Viper.GetString(config.Flag.Service.Installation.Name),
+			IPAMNetworkRange: *ipamNetworkRange,
 			OIDC: controller.ClusterConfigOIDC{
 				ClientID:      config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID),
 				IssuerURL:     config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL),
