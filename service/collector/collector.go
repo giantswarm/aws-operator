@@ -1,6 +1,8 @@
 package collector
 
 import (
+	"sync"
+
 	awsutil "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -72,9 +74,24 @@ func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	c.logger.Log("level", "debug", "message", "collecting metrics")
 
-	c.collectClusterInfo(ch)
-	c.collectTrustedAdvisorChecks(ch)
-	c.collectVPCs(ch)
+	collectFuncs := []func(chan<- prometheus.Metric){
+		c.collectClusterInfo,
+		c.collectTrustedAdvisorChecks,
+		c.collectVPCs,
+	}
+
+	var wg sync.WaitGroup
+
+	for _, collectFunc := range collectFuncs {
+		wg.Add(1)
+
+		go func(collectFunc func(ch chan<- prometheus.Metric)) {
+			defer wg.Done()
+			collectFunc(ch)
+		}(collectFunc)
+	}
+
+	wg.Wait()
 
 	c.logger.Log("level", "debug", "message", "finished collecting metrics")
 }
