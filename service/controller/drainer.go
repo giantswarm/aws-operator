@@ -17,6 +17,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v12"
 	"github.com/giantswarm/aws-operator/service/controller/v12patch1"
 	"github.com/giantswarm/aws-operator/service/controller/v13"
+	"github.com/giantswarm/aws-operator/service/controller/v14"
 	"github.com/giantswarm/aws-operator/service/controller/v8"
 	"github.com/giantswarm/aws-operator/service/controller/v9patch1"
 	"github.com/giantswarm/aws-operator/service/controller/v9patch2"
@@ -102,11 +103,6 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 		}
 	}
 
-	resourceRouter, err := newDrainerResourceRouter(config)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
 	var newInformer *informer.Informer
 	{
 		c := informer.Config{
@@ -123,15 +119,20 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 		}
 	}
 
+	resourceSets, err := newDrainerResourceSets(config)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	var operatorkitController *controller.Controller
 	{
 		c := controller.Config{
-			CRD:            v1alpha1.NewAWSConfigCRD(),
-			CRDClient:      crdClient,
-			Informer:       newInformer,
-			Logger:         config.Logger,
-			ResourceRouter: resourceRouter,
-			RESTClient:     config.G8sClient.ProviderV1alpha1().RESTClient(),
+			CRD:          v1alpha1.NewAWSConfigCRD(),
+			CRDClient:    crdClient,
+			Informer:     newInformer,
+			Logger:       config.Logger,
+			ResourceSets: resourceSets,
+			RESTClient:   config.G8sClient.ProviderV1alpha1().RESTClient(),
 
 			// Name is used to compute finalizer names. This here results in something
 			// like operatorkit.giantswarm.io/aws-operator-drainer.
@@ -151,7 +152,7 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 	return d, nil
 }
 
-func newDrainerResourceRouter(config DrainerConfig) (*controller.ResourceRouter, error) {
+func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, error) {
 	var err error
 
 	guestAWSConfig := awsclient.Config{
@@ -275,26 +276,33 @@ func newDrainerResourceRouter(config DrainerConfig) (*controller.ResourceRouter,
 		}
 	}
 
-	var resourceRouter *controller.ResourceRouter
+	var v14ResourceSet *controller.ResourceSet
 	{
-		c := controller.ResourceRouterConfig{
-			Logger: config.Logger,
+		c := v14.DrainerResourceSetConfig{
+			G8sClient:     config.G8sClient,
+			HostAWSConfig: hostAWSConfig,
+			K8sClient:     config.K8sClient,
+			Logger:        config.Logger,
 
-			ResourceSets: []*controller.ResourceSet{
-				v8ResourceSet,
-				v9patch1ResourceSet,
-				v9patch2ResourceSet,
-				v12ResourceSet,
-				v12Patch1ResourceSet,
-				v13ResourceSet,
-			},
+			GuestUpdateEnabled: config.GuestUpdateEnabled,
+			ProjectName:        config.ProjectName,
 		}
 
-		resourceRouter, err = controller.NewResourceRouter(c)
+		v14ResourceSet, err = v14.NewDrainerResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	return resourceRouter, nil
+	resourceSets := []*controller.ResourceSet{
+		v8ResourceSet,
+		v9patch1ResourceSet,
+		v9patch2ResourceSet,
+		v12ResourceSet,
+		v12Patch1ResourceSet,
+		v13ResourceSet,
+		v14ResourceSet,
+	}
+
+	return resourceSets, nil
 }

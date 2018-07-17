@@ -100,6 +100,18 @@ func (c *FakeAzureConfigs) Update(azureConfig *v1alpha1.AzureConfig) (result *v1
 	return obj.(*v1alpha1.AzureConfig), err
 }
 
+// UpdateStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+func (c *FakeAzureConfigs) UpdateStatus(azureConfig *v1alpha1.AzureConfig) (*v1alpha1.AzureConfig, error) {
+	obj, err := c.Fake.
+		Invokes(testing.NewUpdateSubresourceAction(azureconfigsResource, "status", c.ns, azureConfig), &v1alpha1.AzureConfig{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1alpha1.AzureConfig), err
+}
+
 // Delete takes name of the azureConfig and deletes it. Returns an error if one occurs.
 func (c *FakeAzureConfigs) Delete(name string, options *v1.DeleteOptions) error {
 	_, err := c.Fake.

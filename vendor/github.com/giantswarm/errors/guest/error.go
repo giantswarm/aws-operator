@@ -14,16 +14,32 @@ const (
 	//
 	dnsNotReadyPattern = "dial tcp: lookup .* on .*:53: no such host"
 
-	// eofPattern is a regular expression representing EOF errors for the
+	// nodeEOFPattern is a regular expression representing EOF errors for the
 	// guest API domain. Also see the following match example.
 	//
 	//     https://play.golang.org/p/L6f4ItJLufv
 	//
-	eofPattern = `Get https://api\..*/api/v1/nodes.* (unexpected )?EOF`
+	nodeEOFPattern = `Get https://api\..*/api/v1/nodes.* (unexpected )?EOF`
 
-	// transientInvalidCertificatePattern regular expression defines the kind
-	// of transient errors related to certificates returned while the guest API is
-	// not fully up. Also see the following match example.
+	// resourceEOFPattern is a regular expression representing EOF errors for the
+	// guest API domain. Also see the following match example.
+	//
+	//     https://play.golang.org/p/2x2BXd5iHuP
+	//
+	resourceEOFPattern = `[Get|Post] https://api\..*/api/v1/namespaces/*/.* (unexpected )?EOF`
+
+	// tlsHandshakeTimeoutPattern is a regular expression representing TLS
+	// handshake timeout errors related to establishing connections to guest
+	// clusters while the guest API is not fully up. Also see the following match
+	// example.
+	//
+	//     https://play.golang.org/p/KuH2V0IXo-J
+	//
+	tlsHandshakeTimeoutPattern = `Get https://api\..*/api/v1/nodes.* net/http: TLS handshake timeout`
+
+	// transientInvalidCertificatePattern is a regular expression representing the
+	// kind of transient errors related to certificates returned while the guest
+	// API is not fully up. Also see the following match example.
 	//
 	//     https://play.golang.org/p/iiYvBhPOg4f
 	//
@@ -32,7 +48,9 @@ const (
 
 var (
 	dnsNotReadyRegexp                 = regexp.MustCompile(dnsNotReadyPattern)
-	eofRegexp                         = regexp.MustCompile(eofPattern)
+	nodeEOFRegexp                     = regexp.MustCompile(nodeEOFPattern)
+	resourceEOFRegexp                 = regexp.MustCompile(resourceEOFPattern)
+	tlsHandshakeTimeoutRegexp         = regexp.MustCompile(tlsHandshakeTimeoutPattern)
 	transientInvalidCertificateRegexp = regexp.MustCompile(transientInvalidCertificatePattern)
 )
 
@@ -50,7 +68,9 @@ func IsAPINotAvailable(err error) bool {
 
 	regexps := []*regexp.Regexp{
 		dnsNotReadyRegexp,
-		eofRegexp,
+		nodeEOFRegexp,
+		resourceEOFRegexp,
+		tlsHandshakeTimeoutRegexp,
 		transientInvalidCertificateRegexp,
 	}
 	for _, re := range regexps {

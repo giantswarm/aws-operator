@@ -8,8 +8,6 @@ import (
 )
 
 const (
-	Namespace = "aws_operator"
-
 	ClusterTag      = "giantswarm.io/cluster"
 	InstallationTag = "giantswarm.io/installation"
 	NameTag         = "Name"

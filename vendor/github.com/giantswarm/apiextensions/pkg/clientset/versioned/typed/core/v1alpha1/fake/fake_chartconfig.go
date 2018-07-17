@@ -100,6 +100,18 @@ func (c *FakeChartConfigs) Update(chartConfig *v1alpha1.ChartConfig) (result *v1
 	return obj.(*v1alpha1.ChartConfig), err
 }
 
+// UpdateStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+func (c *FakeChartConfigs) UpdateStatus(chartConfig *v1alpha1.ChartConfig) (*v1alpha1.ChartConfig, error) {
+	obj, err := c.Fake.
+		Invokes(testing.NewUpdateSubresourceAction(chartconfigsResource, "status", c.ns, chartConfig), &v1alpha1.ChartConfig{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1alpha1.ChartConfig), err
+}
+
 // Delete takes name of the chartConfig and deletes it. Returns an error if one occurs.
 func (c *FakeChartConfigs) Delete(name string, options *v1.DeleteOptions) error {
 	_, err := c.Fake.
