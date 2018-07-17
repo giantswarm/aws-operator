@@ -120,7 +120,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	{
 		for _, instance := range instances {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "looking for drainer config for the guest cluster")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "looking for drainer config for the guest cluster", "node", *instance.InstanceId)
 
 			privateDNS, err := r.privateDNSForInstance(ctx, *instance.InstanceId)
 			if err != nil {
@@ -132,7 +132,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 			_, err = r.g8sClient.CoreV1alpha1().DrainerConfigs(n).Get(privateDNS, o)
 			if errors.IsNotFound(err) {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "did not find drainer config for guest cluster node")
+				r.logger.LogCtx(ctx, "level", "debug", "message", "did not find drainer config for guest cluster node", "node", *instance.InstanceId)
 
 				err := r.createDrainerConfig(ctx, customObject, *instance.InstanceId, privateDNS)
 				if err != nil {
@@ -142,9 +142,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			} else if err != nil {
 				return microerror.Mask(err)
 			} else {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "found drainer config for the guest cluster")
+				r.logger.LogCtx(ctx, "level", "debug", "message", "found drainer config for the guest cluster", "node", *instance.InstanceId)
 
-				r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for inspection of drainer config for the guest cluster")
+				r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for inspection of drainer config for the guest cluster", "node", *instance.InstanceId)
 			}
 		}
 	}
@@ -197,7 +197,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 }
 
 func (r *Resource) completeLifecycleHook(ctx context.Context, instanceID, workerASGName string) error {
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completing lifecycle hook action for guest cluster instance '%s'", instanceID))
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completing lifecycle hook action for guest cluster node '%s'", instanceID))
 
 	i := &autoscaling.CompleteLifecycleActionInput{
 		AutoScalingGroupName:  aws.String(workerASGName),
@@ -213,11 +213,11 @@ func (r *Resource) completeLifecycleHook(ctx context.Context, instanceID, worker
 
 	_, err = sc.AWSClient.AutoScaling.CompleteLifecycleAction(i)
 	if IsNoActiveLifecycleAction(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("no lifecycle hook action for guest cluster instance '%s'", instanceID))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("no lifecycle hook action for guest cluster node '%s'", instanceID))
 	} else if err != nil {
 		return microerror.Mask(err)
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed lifecycle hook action for guest cluster instance '%s'", instanceID))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed lifecycle hook action for guest cluster node '%s'", instanceID))
 	}
 
 	return nil
