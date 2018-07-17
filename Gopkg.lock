@@ -245,10 +245,10 @@
   revision = "a5cd49efce41a33fe79729984116f2026ad67cb0"
 
 [[projects]]
-  branch = "master"
+  branch = "add-ipam-config"
   name = "github.com/giantswarm/e2etemplates"
   packages = ["pkg/e2etemplates"]
-  revision = "a53b3bf982c863948719acb122321ee511dce813"
+  revision = "67e2353b2e31f25e6687d90b97c137f15f67069d"
 
 [[projects]]
   branch = "ipam-e2e-tests"
@@ -1371,6 +1371,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "df6ec791683da595bc797dabb1f321671010ed71aaa2f34aeee0d89d8d6840af"
+  inputs-digest = "db33ffa4611c89213e02f8859b1418e3b7e1f6bc0283e17bc7147da27f0771df"
   solver-name = "gps-cdcl"
   solver-version = 1
