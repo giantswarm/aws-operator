@@ -76,7 +76,7 @@ func Resources(c *awsclient.Client, g *framework.Guest, h *framework.Host) error
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		err = h.InstallStableOperator("node-operator", "nodeconfig", e2etemplates.NodeOperatorChartValues)
+		err = h.InstallStableOperator("node-operator", "drainerconfig", e2etemplates.NodeOperatorChartValues)
 		if err != nil {
 			return microerror.Mask(err)
 		}
