@@ -67,7 +67,17 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		var hostedZoneNameServers string
 		if r.route53Enabled {
 			hostedZoneNameServers, err = sc.CloudFormation.GetOutputValue(stackOutputs, key.HostedZoneNameServers)
-			if err != nil {
+			// TODO This is for migration from v13 to v14. Remove this check when all guest clusters are managed by v14 or newer.
+			//
+			// It should finally look like:
+			//
+			//	if err != nil {
+			//		return StackState{}, microerror.Mask(err)
+			//	}
+			//
+			if cloudformationservice.IsOutputNotFound(err) {
+				// Fall trough. Empty string is handled in host post stack creation.
+			} else if err != nil {
 				return StackState{}, microerror.Mask(err)
 			}
 		}

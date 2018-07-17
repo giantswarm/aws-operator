@@ -196,6 +196,11 @@ func (r *Resource) createHostPreStack(ctx context.Context, customObject v1alpha1
 }
 
 func (r *Resource) createHostPostStack(ctx context.Context, customObject v1alpha1.AWSConfig, guestMainStackState StackState) error {
+	// TODO This is for migration from v13 to v14. Remove this check when all guest clusters are managed by v14 or newer.
+	if guestMainStackState.HostedZoneNameServers == "" {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "skipping the host cluster post cloud formation stack creation, waiting for the guest cluster main stack to be updated")
+	}
+
 	stackName := key.MainHostPostStackName(customObject)
 	mainTemplate, err := r.getMainHostPostTemplateBody(ctx, customObject, guestMainStackState)
 	if err != nil {
