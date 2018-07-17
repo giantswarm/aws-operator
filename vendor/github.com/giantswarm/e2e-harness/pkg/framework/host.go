@@ -76,6 +76,8 @@ func NewHost(c HostConfig) (*Host, error) {
 		g8sClient:  g8sClient,
 		k8sClient:  k8sClient,
 		restConfig: restConfig,
+
+		clusterID: c.ClusterID,
 	}
 
 	return h, nil
