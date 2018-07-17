@@ -33,7 +33,8 @@ func TestMain(m *testing.M) {
 		c := framework.GuestConfig{
 			Logger: logger,
 
-			ClusterID: env.ClusterID(),
+			ClusterID:    env.ClusterID(),
+			CommonDomain: env.CommonDomain(),
 		}
 
 		g, err = framework.NewGuest(c)
@@ -44,7 +45,7 @@ func TestMain(m *testing.M) {
 
 	{
 		c := framework.HostConfig{
-			Logger: l,
+			Logger: logger,
 
 			ClusterID: env.ClusterID(),
 		}
