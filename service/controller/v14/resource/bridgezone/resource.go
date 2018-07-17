@@ -233,7 +233,6 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	}
 
 	baseDomain := key.BaseDomain(customObject)
-	// TODO use key package and use it in tempates.
 	intermediateZone := "k8s." + baseDomain
 	finalZone := key.ClusterID(customObject) + ".k8s." + baseDomain
 
