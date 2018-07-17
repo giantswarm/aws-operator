@@ -54,6 +54,9 @@ func (r *Resource) Name() string {
 }
 
 func isServiceModified(a, b *apiv1.Service) bool {
+	if a == nil || b == nil {
+		return true
+	}
 	if !portsEqual(a, b) {
 		return true
 	}
