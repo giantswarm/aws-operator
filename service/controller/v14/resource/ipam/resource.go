@@ -17,14 +17,16 @@ type Config struct {
 	G8sClient versioned.Interface
 	Logger    micrologger.Logger
 
-	NetworkRange net.IPNet
+	AllocatedSubnetMaskBits int
+	NetworkRange            net.IPNet
 }
 
 type Resource struct {
 	g8sClient versioned.Interface
 	logger    micrologger.Logger
 
-	networkRange net.IPNet
+	allocatedSubnetMask net.IPMask
+	networkRange        net.IPNet
 }
 
 func New(config Config) (*Resource, error) {
@@ -42,7 +44,8 @@ func New(config Config) (*Resource, error) {
 		g8sClient: config.G8sClient,
 		logger:    config.Logger,
 
-		networkRange: config.NetworkRange,
+		allocatedSubnetMask: net.CIDRMask(config.AllocatedSubnetMaskBits, 32),
+		networkRange:        config.NetworkRange,
 	}
 
 	return newResource, nil

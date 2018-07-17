@@ -3,7 +3,6 @@ package v14
 import (
 	"context"
 	"net"
-	"reflect"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs/legacy"
@@ -42,6 +41,13 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v14/resource/service"
 )
 
+const (
+	// minAllocatedSubnetMaskBits is the maximum size of guest subnet i.e.
+	// smaller number here -> larger subnet per guest cluster. For now anything
+	// under 16 doesn't make sense in here.
+	minAllocatedSubnetMaskBits = 16
+)
+
 type ClusterResourceSetConfig struct {
 	CertsSearcher      legacy.Searcher
 	G8sClient          versioned.Interface
@@ -57,6 +63,7 @@ type ClusterResourceSetConfig struct {
 	EncrypterBackend           string
 	GuestPrivateSubnetMaskBits int
 	GuestPublicSubnetMaskBits  int
+	GuestSubnetMaskBits        int
 	GuestUpdateEnabled         bool
 	IncludeTags                bool
 	InstallationName           string
@@ -103,6 +110,15 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSClients.Route53 must not be empty", config)
 	}
 
+	if config.GuestSubnetMaskBits < minAllocatedSubnetMaskBits {
+		return nil, microerror.Maskf(invalidConfigError, "%T.GuestSubnetMaskBits (%d) must not be smaller than %d", config, config.GuestSubnetMaskBits, minAllocatedSubnetMaskBits)
+	}
+	if config.GuestPrivateSubnetMaskBits <= config.GuestSubnetMaskBits {
+		return nil, microerror.Maskf(invalidConfigError, "%T.GuestPrivateSubnetMaskBits (%d) must not be smaller or equal than %T.GuestSubnetMaskBits (%d)", config, config.GuestPrivateSubnetMaskBits, config, config.GuestSubnetMaskBits)
+	}
+	if config.GuestPublicSubnetMaskBits <= config.GuestSubnetMaskBits {
+		return nil, microerror.Maskf(invalidConfigError, "%T.GuestPublicSubnetMaskBits (%d) must not be smaller or equal than %T.GuestSubnetMaskBits (%d)", config, config.GuestPublicSubnetMaskBits, config, config.GuestSubnetMaskBits)
+	}
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
 	}
@@ -115,9 +131,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 	if config.InstallationName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
-	}
-	if reflect.DeepEqual(config.IPAMNetworkRange, net.IPNet{}) {
-		return nil, microerror.Maskf(invalidConfigError, "%T.IPAMNetworkRange must not be empty", config)
 	}
 	if config.ProjectName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ProjectName must not be empty", config)
@@ -198,7 +211,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
 
-			NetworkRange: config.IPAMNetworkRange,
+			AllocatedSubnetMaskBits: config.GuestSubnetMaskBits,
+			NetworkRange:            config.IPAMNetworkRange,
 		}
 
 		ipamResource, err = ipam.New(c)

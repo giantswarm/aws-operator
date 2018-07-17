@@ -133,6 +133,7 @@ func New(config Config) (*Service, error) {
 			},
 			GuestPrivateSubnetMaskBits: config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PrivateSubnetMaskBits),
 			GuestPublicSubnetMaskBits:  config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PublicSubnetMaskBits),
+			GuestSubnetMaskBits:        config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.SubnetMaskBits),
 			GuestUpdateEnabled:         config.Viper.GetBool(config.Flag.Service.Guest.Update.Enabled),
 			HostAWSConfig: controller.ClusterConfigAWSConfig{
 				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),

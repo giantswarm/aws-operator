@@ -77,7 +77,7 @@ func (r *Resource) allocateSubnet(ctx context.Context) (string, error) {
 	reservedSubnets = deduplicateSubnets(reservedSubnets)
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "finding free subnet")
-	subnet, err := ipam.Free(r.networkRange, r.networkRange.Mask, reservedSubnets)
+	subnet, err := ipam.Free(r.networkRange, r.allocatedSubnetMask, reservedSubnets)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}

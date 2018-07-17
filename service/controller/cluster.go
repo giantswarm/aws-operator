@@ -58,6 +58,7 @@ type ClusterConfig struct {
 	GuestAWSConfig             ClusterConfigAWSConfig
 	GuestPrivateSubnetMaskBits int
 	GuestPublicSubnetMaskBits  int
+	GuestSubnetMaskBits        int
 	GuestUpdateEnabled         bool
 	HostAWSConfig              ClusterConfigAWSConfig
 	IncludeTags                bool
@@ -583,16 +584,19 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			Logger:             config.Logger,
 			RandomkeysSearcher: randomKeySearcher,
 
-			AccessLogsExpiration:   config.AccessLogsExpiration,
-			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
-			DeleteLoggingBucket:    config.DeleteLoggingBucket,
-			EncrypterBackend:       config.EncrypterBackend,
-			GuestUpdateEnabled:     config.GuestUpdateEnabled,
-			PodInfraContainerImage: config.PodInfraContainerImage,
-			Route53Enabled:         config.Route53Enabled,
-			IncludeTags:            config.IncludeTags,
-			InstallationName:       config.InstallationName,
-			IPAMNetworkRange:       config.IPAMNetworkRange,
+			AccessLogsExpiration:       config.AccessLogsExpiration,
+			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
+			DeleteLoggingBucket:        config.DeleteLoggingBucket,
+			EncrypterBackend:           config.EncrypterBackend,
+			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
+			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
+			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
+			GuestUpdateEnabled:         config.GuestUpdateEnabled,
+			PodInfraContainerImage:     config.PodInfraContainerImage,
+			Route53Enabled:             config.Route53Enabled,
+			IncludeTags:                config.IncludeTags,
+			InstallationName:           config.InstallationName,
+			IPAMNetworkRange:           config.IPAMNetworkRange,
 			OIDC: v14cloudconfig.OIDCConfig{
 				ClientID:      config.OIDC.ClientID,
 				IssuerURL:     config.OIDC.IssuerURL,

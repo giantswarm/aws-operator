@@ -29,6 +29,9 @@ func newTestClusterConfig() ClusterConfig {
 			Region:          "guest-myregion",
 			SessionToken:    "guest-token",
 		},
+		GuestSubnetMaskBits:        24,
+		GuestPrivateSubnetMaskBits: 25,
+		GuestPublicSubnetMaskBits:  25,
 		HostAWSConfig: ClusterConfigAWSConfig{
 			AccessKeyID:     "host-key",
 			AccessKeySecret: "host-secret",

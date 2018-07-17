@@ -138,8 +138,9 @@ func mainError() error {
 
 	daemonCommand.PersistentFlags().String(f.Service.Installation.Name, "", "Installation name for tagging AWS resources.")
 	daemonCommand.PersistentFlags().String(f.Service.Installation.Guest.IPAM.Network.CIDR, "", "Guest cluster network segment from which IPAM allocates subnets.")
-	daemonCommand.PersistentFlags().Int(f.Service.Installation.Guest.IPAM.Network.PrivateSubnetMaskBits, 25, "Number of bits in guest cluster private subnet network mask.")
-	daemonCommand.PersistentFlags().Int(f.Service.Installation.Guest.IPAM.Network.PublicSubnetMaskBits, 25, "Number of bits in guest cluster public subnet network mask.")
+	daemonCommand.PersistentFlags().Int(f.Service.Installation.Guest.IPAM.Network.SubnetMaskBits, 24, "Number of bits in guest cluster subnet network mask.")
+	daemonCommand.PersistentFlags().Int(f.Service.Installation.Guest.IPAM.Network.PrivateSubnetMaskBits, 25, "Number of bits in guest cluster private subnet network mask. This must be smaller than SubnetMaskBits.")
+	daemonCommand.PersistentFlags().Int(f.Service.Installation.Guest.IPAM.Network.PublicSubnetMaskBits, 25, "Number of bits in guest cluster public subnet network mask. This must be smaller than SubnetMaskBits.")
 	daemonCommand.PersistentFlags().String(f.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID, "", "OIDC authorization provider ClientID.")
 	daemonCommand.PersistentFlags().String(f.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL, "", "OIDC authorization provider IssuerURL.")
 	daemonCommand.PersistentFlags().String(f.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.UsernameClaim, "", "OIDC authorization provider UsernameClaim.")
