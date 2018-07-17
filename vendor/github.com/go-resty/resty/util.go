@@ -15,10 +15,10 @@ import (
 	"net/http"
 	"net/textproto"
 	"os"
-	"path"
 	"path/filepath"
 	"reflect"
 	"runtime"
+	"sort"
 	"strings"
 )
 
@@ -151,10 +151,7 @@ func addFile(w *multipart.Writer, fieldName, path string) error {
 	if err != nil {
 		return err
 	}
-	defer func() {
-		_ = file.Close()
-	}()
-
+	defer closeq(file)
 	return writeMultipartFormFile(w, fieldName, filepath.Base(path), file)
 }
 
@@ -220,43 +217,27 @@ func releaseBuffer(buf *bytes.Buffer) {
 	}
 }
 
-func composeRequestURL(pathURL string, c *Client, r *Request) string {
-	if !strings.HasPrefix(pathURL, "/") {
-		pathURL = "/" + pathURL
-	}
-
-	hasTrailingSlash := false
-	if strings.HasSuffix(pathURL, "/") && len(pathURL) > 1 {
-		hasTrailingSlash = true
-	}
-
-	reqURL := "/"
-	for _, segment := range strings.Split(pathURL, "/") {
-		if strings.HasPrefix(segment, "{") && strings.HasSuffix(segment, "}") {
-			key := segment[1 : len(segment)-1]
-			if val, found := r.pathParams[key]; found {
-				reqURL = path.Join(reqURL, val)
-				continue
-			}
-
-			if val, found := c.pathParams[key]; found {
-				reqURL = path.Join(reqURL, val)
-				continue
-			}
-		}
-
-		reqURL = path.Join(reqURL, segment)
-	}
-
-	if hasTrailingSlash {
-		reqURL = reqURL + "/"
-	}
-
-	return reqURL
-}
-
 func closeq(v interface{}) {
 	if c, ok := v.(io.Closer); ok {
-		_ = c.Close()
+		sliently(c.Close())
 	}
+}
+
+func sliently(_ ...interface{}) {}
+
+func composeHeaders(hdrs http.Header) string {
+	var str []string
+	for _, k := range sortHeaderKeys(hdrs) {
+		str = append(str, fmt.Sprintf("%25s: %s", k, strings.Join(hdrs[k], ", ")))
+	}
+	return strings.Join(str, "\n")
+}
+
+func sortHeaderKeys(hdrs http.Header) []string {
+	var keys []string
+	for key := range hdrs {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	return keys
 }

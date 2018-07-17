@@ -23,6 +23,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/aws/aws-sdk-go/service/sts/stsiface"
+	"github.com/aws/aws-sdk-go/service/support"
+	"github.com/aws/aws-sdk-go/service/support/supportiface"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v2/resource/cloudformation/adapter"
@@ -45,13 +47,16 @@ type Clients struct {
 	IAM            iamiface.IAMAPI
 	KMS            kmsiface.KMSAPI
 	Route53        *route53.Route53
-	STS            stsiface.STSAPI
 	S3             s3iface.S3API
+	STS            stsiface.STSAPI
+	Support        supportiface.SupportAPI
 }
 
 const (
 	accountIDPosition = 4
 	accountIDLength   = 12
+
+	trustedAdvisorRegion = "us-east-1" // trusted advisor only available in this region.
 )
 
 func NewClients(config Config) Clients {
@@ -88,6 +93,8 @@ func (c *Config) AccountID() string {
 }
 
 func newClients(p client.ConfigProvider, cfgs ...*aws.Config) Clients {
+	supportCfgs := append(cfgs, aws.NewConfig().WithRegion(trustedAdvisorRegion))
+
 	return Clients{
 		AutoScaling:    autoscaling.New(p, cfgs...),
 		CloudFormation: cloudformation.New(p, cfgs...),
@@ -96,8 +103,9 @@ func newClients(p client.ConfigProvider, cfgs ...*aws.Config) Clients {
 		IAM:            iam.New(p, cfgs...),
 		KMS:            kms.New(p, cfgs...),
 		Route53:        route53.New(p, cfgs...),
-		STS:            sts.New(p, cfgs...),
 		S3:             s3.New(p, cfgs...),
+		STS:            sts.New(p, cfgs...),
+		Support:        support.New(p, supportCfgs...),
 	}
 }
 

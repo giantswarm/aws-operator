@@ -1,14 +1,12 @@
 package v1alpha1
 
-const (
-	StatusClusterStatusFalse = "False"
-	StatusClusterStatusTrue  = "True"
-)
+func (s StatusCluster) HasCreatedCondition() bool {
+	return hasCondition(s.Conditions, StatusClusterStatusTrue, StatusClusterTypeCreated)
+}
 
-const (
-	StatusClusterTypeUpdated  = "Updated"
-	StatusClusterTypeUpdating = "Updating"
-)
+func (s StatusCluster) HasCreatingCondition() bool {
+	return hasCondition(s.Conditions, StatusClusterStatusTrue, StatusClusterTypeCreating)
+}
 
 func (s StatusCluster) HasUpdatedCondition() bool {
 	return hasCondition(s.Conditions, StatusClusterStatusTrue, StatusClusterTypeUpdated)
@@ -38,6 +36,14 @@ func (s StatusCluster) LatestVersion() string {
 	return latest.Semver
 }
 
+func (s StatusCluster) WithCreatedCondition() []StatusClusterCondition {
+	return withCondition(s.Conditions, StatusClusterTypeCreating, StatusClusterTypeCreated, StatusClusterStatusTrue)
+}
+
+func (s StatusCluster) WithCreatingCondition() []StatusClusterCondition {
+	return withCondition(s.Conditions, StatusClusterTypeCreated, StatusClusterTypeCreating, StatusClusterStatusTrue)
+}
+
 func (s StatusCluster) WithUpdatedCondition() []StatusClusterCondition {
 	return withCondition(s.Conditions, StatusClusterTypeUpdating, StatusClusterTypeUpdated, StatusClusterStatusTrue)
 }
@@ -46,9 +52,9 @@ func (s StatusCluster) WithUpdatingCondition() []StatusClusterCondition {
 	return withCondition(s.Conditions, StatusClusterTypeUpdated, StatusClusterTypeUpdating, StatusClusterStatusTrue)
 }
 
-func hasCondition(conditions []StatusClusterCondition, search string, status string) bool {
+func hasCondition(conditions []StatusClusterCondition, s string, t string) bool {
 	for _, c := range conditions {
-		if c.Status == search && c.Type == status {
+		if c.Status == s && c.Type == t {
 			return true
 		}
 	}

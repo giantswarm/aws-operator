@@ -152,7 +152,7 @@
   branch = "master"
   name = "github.com/giantswarm/k8sportforward"
   packages = ["."]
-  revision = "00489ad5cc81835cf9bf13e9dfa538fa6f3f729e"
+  revision = "5f1a090222cf476117c0d42705846928c577aa5b"
 
 [[projects]]
   branch = "master"
