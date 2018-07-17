@@ -233,7 +233,7 @@
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "4e46ca575b4e7fded983e72facad8da587a21f1c"
+  revision = "03a01ba8d4c357c125e4e8bb8219cb30086f283b"
 
 [[projects]]
   branch = "master"
@@ -468,7 +468,7 @@
   branch = "master"
   name = "github.com/google/go-github"
   packages = ["github"]
-  revision = "b14883f2b71b5f7dd303ed96d00bfaefeaeecea2"
+  revision = "c0b63e2f9bb198baf328c8abf1ddcbe05ff9427e"
 
 [[projects]]
   branch = "master"
@@ -807,7 +807,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "e92b116572682a5b432ddd840aeaba2a559eeff1"
+  revision = "2731d4fa720b67f9fe38e9051a2a9b38e4609260"
 
 [[projects]]
   name = "google.golang.org/grpc"
