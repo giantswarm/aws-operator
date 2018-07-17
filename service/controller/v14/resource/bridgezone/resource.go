@@ -2,7 +2,6 @@ package bridgezone
 
 import (
 	"context"
-	"fmt"
 	"reflect"
 	"strings"
 
@@ -37,41 +36,52 @@ type Config struct {
 //
 // Old structure looks like:
 //
-//	installation.eu-central-1.aws.gigantic.io
-//	└── NS installation.k8s.eu-central-1.aws.gigantic.io
+//	installation.eu-central-1.aws.gigantic.io (host account)
+//	└── NS k8s.installation.eu-central-1.aws.gigantic.io (default geust account)
 //	    ├── A api.old_cluster.k8s.installation.eu-central-1.aws.gigantic.io
 //	    └── A ingress.old_cluster.k8s.installation.eu-central-1.aws.gigantic.io
 //
 // New structure looks like:
 //
-//	installation.eu-central-1.aws.gigantic.io
-//	└── NS new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
+//	installation.eu-central-1.aws.gigantic.io (host account)
+//	└── NS new_cluster.k8s.installation.eu-central-1.aws.gigantic.io (byoc guest account)
 //	    ├── A api.new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
 //	    └── A ingress.new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
 //
 // For the migration period for new clusters we need also to add delegation to
 // k8s.eu-central-1.aws.gigantic.io because of the AWS DNS caching issues.
 //
-//	installation.eu-central-1.aws.gigantic.io
-//	├── NS k8s.installation.eu-central-1.aws.gigantic.io
-//	│   ├── NS new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
+//	installation.eu-central-1.aws.gigantic.io (host account)
+//	├── NS k8s.installation.eu-central-1.aws.gigantic.io (default guest account)
+//	│   ├── NS new_cluster.k8s.installation.eu-central-1.aws.gigantic.io (byoc guest account)
 //	│   ├── A api.old_cluster.k8s.installation.eu-central-1.aws.gigantic.io
 //	│   └── A ingress.old_cluster.k8s.installation.eu-central-1.aws.gigantic.io
-//	└── NS new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
+//	└── NS new_cluster.k8s.installation.eu-central-1.aws.gigantic.io (byoc guest account)
 //	    ├── A api.new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
 //	    └── A ingress.new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
 //
 // NOTE: In the code below k8s.eu-central-1.aws.gigantic.io zone is called
-// "intermediate" and new_cluster.k8s.eu-central-1.aws.gigantic.io is called
-// "final". This resource ensures we have delegation from the intermediate zone
-// to the final zone, but only if the intermediate zone exists.
+// "intermediate" and new_cluster.k8s.eu-central-1.aws.gigantic.io zone is
+// called "final". This resource *only* ensures we have delegation from the
+// intermediate zone to the final zone, but only if the intermediate zone
+// exists.
 //
-// After we have guest clusters managed by this resource set (v14) and newer it
-// means we can delete delegation to
-// k8s.installation.eu-central-1.aws.gigantic.io from
+// After we have guest clusters managed by this resource set (v14) and newer
+// the DNS layout should look like:
+//
+//	installation.eu-central-1.aws.gigantic.io (host account)
+//	├── NS k8s.installation.eu-central-1.aws.gigantic.io (default guest account)
+//	│   └── NS new_cluster.k8s.installation.eu-central-1.aws.gigantic.io (byoc guest account)
+//	└── NS new_cluster.k8s.installation.eu-central-1.aws.gigantic.io (byoc guest account)
+//	    ├── A api.new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
+//	    └── A ingress.new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
+//
+// At this point we should be fine with removing
+// k8s.installation.eu-central-1.aws.gigantic.io NS record from
 // installation.eu-central-1.aws.gigantic.io zone. Then after a couple of days
 // when delegation propagates and DNS caches are refreshed we can delete
-// k8s.installation.eu-central-1.aws.gigantic.io zone.
+// k8s.installation.eu-central-1.aws.gigantic.io zone from the default guest
+// account.
 type Resource struct {
 	hostAWSConfig aws.Config
 	hostRoute53   *route53.Route53
@@ -165,33 +175,32 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "final zone found")
 	}
 
-	var finalZoneNS []string
+	var finalZoneRecords []*route53.ResourceRecord
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "getting final zone name servers")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "getting final zone name servers and TTL from intermediate")
 
-		finalZoneNS, err = r.getNameServers(ctx, guest, finalZoneID, finalZone)
+		nameServers, _, err := r.getNameServersAndTTL(ctx, guest, finalZoneID, finalZone)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("got name servers of final zone: %v", finalZoneNS))
+		for _, ns := range nameServers {
+			copy := ns
+			v := &route53.ResourceRecord{
+				Value: &copy,
+			}
+			finalZoneRecords = append(finalZoneRecords, v)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "got final zone name servers and TTL from intermediate zone")
 	}
 
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring intermediate zone delegation")
 
-		ttl := int64(900)
-		var values []*route53.ResourceRecord
-		for _, ns := range finalZoneNS {
-			copy := ns
-			v := &route53.ResourceRecord{
-				Value: &copy,
-			}
-			values = append(values, v)
-		}
-
 		upsert := route53.ChangeActionUpsert
 		ns := route53.RRTypeNs
+		ttl := int64(900)
 
 		in := &route53.ChangeResourceRecordSetsInput{
 			ChangeBatch: &route53.ChangeBatch{
@@ -202,7 +211,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 							Name:            &finalZone,
 							Type:            &ns,
 							TTL:             &ttl,
-							ResourceRecords: values,
+							ResourceRecords: finalZoneRecords,
 						},
 					},
 				},
@@ -255,17 +264,34 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "intermediate zone found")
 	}
 
+	var finalZoneTTL int64
+	var finalZoneRecords []*route53.ResourceRecord
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "getting intermediate zone name servers")
+
+		nameServers, ttl, err := r.getNameServersAndTTL(ctx, defaultGuest, intermediateZoneID, finalZone)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		finalZoneTTL = ttl
+
+		for _, ns := range nameServers {
+			copy := ns
+			v := &route53.ResourceRecord{
+				Value: &copy,
+			}
+			finalZoneRecords = append(finalZoneRecords, v)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "got intermediate zone name servers")
+	}
+
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring deletion of intermediate zone delegation")
 
 		delete := route53.ChangeActionDelete
 		ns := route53.RRTypeNs
-
-		// Some junk values they are required but ignored during
-		// delete.
-		dumpDNS := "a.pl"
-		dumpTTL := int64(900)
-		dumpValues := []*route53.ResourceRecord{{Value: &dumpDNS}}
 
 		in := &route53.ChangeResourceRecordSetsInput{
 			ChangeBatch: &route53.ChangeBatch{
@@ -275,8 +301,8 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 						ResourceRecordSet: &route53.ResourceRecordSet{
 							Name:            &finalZone,
 							Type:            &ns,
-							TTL:             &dumpTTL,
-							ResourceRecords: dumpValues,
+							TTL:             &finalZoneTTL,
+							ResourceRecords: finalZoneRecords,
 						},
 					},
 				},
@@ -328,7 +354,7 @@ func (r *Resource) findHostedZoneID(ctx context.Context, client *route53.Route53
 	}
 }
 
-func (r *Resource) getNameServers(ctx context.Context, client *route53.Route53, zoneID, name string) ([]string, error) {
+func (r *Resource) getNameServersAndTTL(ctx context.Context, client *route53.Route53, zoneID, name string) (nameServers []string, ttl int64, err error) {
 	one := "1"
 	ns := route53.RRTypeNs
 	in := &route53.ListResourceRecordSetsInput{
@@ -339,20 +365,20 @@ func (r *Resource) getNameServers(ctx context.Context, client *route53.Route53, 
 	}
 	out, err := client.ListResourceRecordSetsWithContext(ctx, in)
 	if err != nil {
-		return nil, microerror.Mask(err)
+		return nil, 0, microerror.Mask(err)
 	}
 
 	if len(out.ResourceRecordSets) == 0 {
-		return nil, microerror.Maskf(executionError, "NS recrod %q for HostedZone %q not found", name, zoneID)
+		return nil, 0, microerror.Maskf(executionError, "NS recrod %q for HostedZone %q not found", name, zoneID)
 	}
 	if len(out.ResourceRecordSets) != 1 {
-		return nil, microerror.Maskf(executionError, "expected single NS recrod %q for HostedZone %q, found %#v", name, zoneID, out.ResourceRecordSets)
+		return nil, 0, microerror.Maskf(executionError, "expected single NS recrod %q for HostedZone %q, found %#v", name, zoneID, out.ResourceRecordSets)
 	}
 
 	rs := *out.ResourceRecordSets[0]
 
 	if strings.TrimSuffix(*rs.Name, ".") != name {
-		return nil, microerror.Maskf(executionError, "expected NS recrod with name %q , found %q", name, *rs.Name)
+		return nil, 0, microerror.Maskf(executionError, "expected NS recrod with name %q , found %q", name, *rs.Name)
 	}
 
 	var servers []string
@@ -360,7 +386,7 @@ func (r *Resource) getNameServers(ctx context.Context, client *route53.Route53, 
 		servers = append(servers, *r.Value)
 	}
 
-	return servers, nil
+	return servers, *rs.TTL, nil
 }
 
 func (r *Resource) route53Clients(ctx context.Context) (guest, defaultGuest *route53.Route53, err error) {
