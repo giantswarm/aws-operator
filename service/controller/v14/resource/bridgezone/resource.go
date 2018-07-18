@@ -37,7 +37,7 @@ type Config struct {
 // Old structure looks like:
 //
 //	installation.eu-central-1.aws.gigantic.io (host account)
-//	└── NS k8s.installation.eu-central-1.aws.gigantic.io (default geust account)
+//	└── NS k8s.installation.eu-central-1.aws.gigantic.io (default guest account)
 //	    ├── A api.old_cluster.k8s.installation.eu-central-1.aws.gigantic.io
 //	    └── A ingress.old_cluster.k8s.installation.eu-central-1.aws.gigantic.io
 //
