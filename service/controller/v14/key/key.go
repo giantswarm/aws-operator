@@ -396,6 +396,15 @@ func TargetLogBucketName(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-g8s-access-logs", ClusterID(customObject))
 }
 
+func ToClusterStatus(v interface{}) (v1alpha1.StatusCluster, error) {
+	customObject, err := ToCustomObject(v)
+	if err != nil {
+		return v1alpha1.StatusCluster{}, microerror.Mask(err)
+	}
+
+	return customObject.Status.Cluster, nil
+}
+
 func ToCustomObject(v interface{}) (v1alpha1.AWSConfig, error) {
 	if v == nil {
 		return v1alpha1.AWSConfig{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &v1alpha1.AWSConfig{}, v)
@@ -410,6 +419,26 @@ func ToCustomObject(v interface{}) (v1alpha1.AWSConfig, error) {
 	customObject = *customObject.DeepCopy()
 
 	return customObject, nil
+}
+
+func ToNodeCount(v interface{}) (int, error) {
+	customObject, err := ToCustomObject(v)
+	if err != nil {
+		return 0, microerror.Mask(err)
+	}
+
+	nodeCount := MasterCount(customObject) + WorkerCount(customObject)
+
+	return nodeCount, nil
+}
+
+func ToVersionBundleVersion(v interface{}) (string, error) {
+	customObject, err := ToCustomObject(v)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	return VersionBundleVersion(customObject), nil
 }
 
 // VersionBundleVersion returns the version contained in the Version Bundle.
