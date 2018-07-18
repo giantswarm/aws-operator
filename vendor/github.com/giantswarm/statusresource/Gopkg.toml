@@ -27,20 +27,17 @@
 
 
 [[constraint]]
+  branch = "nodes"
+  name = "github.com/giantswarm/apiextensions"
+
+[[constraint]]
   branch = "master"
   name = "github.com/giantswarm/microerror"
 
 [[constraint]]
-  name = "k8s.io/client-go"
-  version = "kubernetes-1.10.4"
-
-[[constraint]]
-  name = "k8s.io/apimachinery"
-  version = "kubernetes-1.10.4"
-
-[[constraint]]
   branch = "master"
-  name = "github.com/fortytw2/leaktest"
+  name = "github.com/giantswarm/micrologger"
+
 
 
 [prune]
