@@ -2,7 +2,6 @@ package framework
 
 import (
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/cenkalti/backoff"
@@ -25,42 +24,44 @@ const (
 )
 
 type GuestConfig struct {
-	ClusterName  string
+	Logger micrologger.Logger
+
+	ClusterID    string
 	CommonDomain string
-	Logger       micrologger.Logger
 }
 
 type Guest struct {
-	clusterName  string
-	commonDomain string
-	logger       micrologger.Logger
+	logger micrologger.Logger
 
 	g8sClient  versioned.Interface
 	k8sClient  kubernetes.Interface
 	restConfig *rest.Config
+
+	clusterID    string
+	commonDomain string
 }
 
 func NewGuest(config GuestConfig) (*Guest, error) {
-	if config.ClusterName == "" {
-		// If config.ClusterName is not defined, default to environment variable.
-		config.ClusterName = os.Getenv("CLUSTER_NAME")
-	}
-	if config.CommonDomain == "" {
-		// If config.CommonDomain is not defined, default to environment variable.
-		config.CommonDomain = os.Getenv("COMMON_DOMAIN")
-	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
+	if config.ClusterID == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ClusterID must not be empty", config)
+	}
+	if config.CommonDomain == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CommonDomain must not be empty", config)
+	}
+
 	g := &Guest{
-		clusterName:  config.ClusterName,
-		commonDomain: config.CommonDomain,
-		logger:       config.Logger,
+		logger: config.Logger,
 
 		g8sClient:  nil,
 		k8sClient:  nil,
 		restConfig: nil,
+
+		clusterID:    config.ClusterID,
+		commonDomain: config.CommonDomain,
 	}
 
 	return g, nil
@@ -105,14 +106,14 @@ func (g *Guest) Initialize() error {
 	var guestK8sClient kubernetes.Interface
 	var guestRestConfig *rest.Config
 	{
-		n := fmt.Sprintf("%s-api", g.clusterName)
+		n := fmt.Sprintf("%s-api", g.clusterID)
 		s, err := hostK8sClient.CoreV1().Secrets("default").Get(n, metav1.GetOptions{})
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
 		guestRestConfig = &rest.Config{
-			Host: fmt.Sprintf("https://api.%s.k8s.%s", g.clusterName, g.commonDomain),
+			Host: fmt.Sprintf("https://api.%s.k8s.%s", g.clusterID, g.commonDomain),
 			TLSClientConfig: rest.TLSClientConfig{
 				CAData:   s.Data["ca"],
 				CertData: s.Data["crt"],

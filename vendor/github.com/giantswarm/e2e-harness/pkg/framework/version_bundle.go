@@ -18,11 +18,21 @@ const (
 	defaultRepo  = "installations"
 )
 
+// VBVParams holds information which we can use to query  versionbundle
+// version information from the installations repository.
 type VBVParams struct {
+	// Component is the name of an authority inside a versionbundle IndexRelease.
+	// e.g. aws-operator
 	Component string
-	Provider  string
-	Token     string
-	VType     string
+	// Provider is the provider of a versionbundle IndexRelease.
+	// This can be aws, azure or kvm.
+	Provider string
+	// Token is a Github token which is authorized to read from the installations
+	// repository.
+	Token string
+	// VType is the version type of a versionbundle IndexRelease which can be
+	// either wip or active.
+	VType string
 }
 
 var logger micrologger.Logger
