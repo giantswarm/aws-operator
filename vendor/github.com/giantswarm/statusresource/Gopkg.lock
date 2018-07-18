@@ -8,10 +8,10 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "nodes"
+  branch = "master"
   name = "github.com/giantswarm/apiextensions"
   packages = ["pkg/apis/provider/v1alpha1"]
-  revision = "c7d611b32d8800de33f70d6c4c76d6f72bcc7fdb"
+  revision = "4dd4ba547409a0be555dc933432897f94b5acb2b"
 
 [[projects]]
   branch = "master"
@@ -107,7 +107,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "a49355c7e3f8fe157a85be2f77e6e269a0f89602"
+  revision = "a2144134853fc9a27a7b1e3eb4f19f1a76df13c9"
 
 [[projects]]
   branch = "master"
@@ -119,7 +119,7 @@
     "http2/hpack",
     "idna"
   ]
-  revision = "d0887baf81f4598189d4e12a37c6da86f0bba4d0"
+  revision = "8887df42c721e930089d31b28391090a10a497d7"
 
 [[projects]]
   branch = "master"
@@ -244,6 +244,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "36745380dc0c5244565be1f57b84718698bdb84f048d207c7766841fda968809"
+  inputs-digest = "4fe3dd317914259dcb448c5435030b1db98c3d71f6ef1bff47c49c771c1527cd"
   solver-name = "gps-cdcl"
   solver-version = 1

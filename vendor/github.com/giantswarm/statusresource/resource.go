@@ -12,9 +12,9 @@ const (
 )
 
 type Config struct {
-	ClusterStatusFunc func(obj interface{}) (providerv1alpha1.StatusCluster, error)
+	ClusterStatusFunc func(v interface{}) (providerv1alpha1.StatusCluster, error)
 	Logger            micrologger.Logger
-	NodeCountFunc     func(obj interface{}) (int, error)
+	NodeCountFunc     func(v interface{}) (int, error)
 	// RESTClient needs to be configured with a serializer capable of serializing
 	// and deserializing the object which is watched by the informer. Otherwise
 	// deserialization will fail when trying to manage the cluster status.
@@ -28,15 +28,15 @@ type Config struct {
 	//     g8sClient.CoreV1alpha1().RESTClient()
 	//
 	RESTClient               rest.Interface
-	VersionBundleVersionFunc func(obj interface{}) (string, error)
+	VersionBundleVersionFunc func(v interface{}) (string, error)
 }
 
 type Resource struct {
-	clusterStatusFunc        func(obj interface{}) (providerv1alpha1.StatusCluster, error)
+	clusterStatusFunc        func(v interface{}) (providerv1alpha1.StatusCluster, error)
 	logger                   micrologger.Logger
-	nodeCountFunc            func(obj interface{}) (int, error)
+	nodeCountFunc            func(v interface{}) (int, error)
 	restClient               rest.Interface
-	versionBundleVersionFunc func(obj interface{}) (string, error)
+	versionBundleVersionFunc func(v interface{}) (string, error)
 }
 
 func New(config Config) (*Resource, error) {

@@ -59,7 +59,7 @@ type StatusClusterNode struct {
 }
 
 // StatusClusterVersion expresses the versions in which a guest cluster was and
-// may still is.
+// may still be.
 type StatusClusterVersion struct {
 	// Date is the time of the given guest cluster version being updated.
 	Date time.Time `json:"date" yaml:"date"`

@@ -42,7 +42,7 @@ required = [
   name = "github.com/docker/distribution"
 
 [[override]]
-  branch = "nodes"
+  branch = "master"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]
@@ -106,7 +106,7 @@ required = [
   name = "github.com/giantswarm/randomkeytpr"
 
 [[override]]
-  branch = "nodes"
+  branch = "master"
   name = "github.com/giantswarm/statusresource"
 
 [[constraint]]

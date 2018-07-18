@@ -50,7 +50,7 @@ func (s StatusCluster) WithCreatingCondition() []StatusClusterCondition {
 }
 
 func (s StatusCluster) WithNewVersion(version string) []StatusClusterVersion {
-	return withVersion(s.Versions, time.Now(), version, ClusterVersionLimit)
+	return withVersion(s.Versions, StatusClusterVersion{Date: time.Now(), Semver: version}, ClusterVersionLimit)
 }
 
 func (s StatusCluster) WithUpdatedCondition() []StatusClusterCondition {
@@ -100,7 +100,10 @@ func withCondition(conditions []StatusClusterCondition, search string, replace s
 	return newConditions
 }
 
-func withVersion(versions []StatusClusterVersion, date time.Time, version string, limit int) []StatusClusterVersion {
+// withVersion computes a list of version history using the given list and new
+// version structure to append. withVersion also limits total amount of elements
+// in the list by cutting off the tail with respect to the limit parameter.
+func withVersion(versions []StatusClusterVersion, version StatusClusterVersion, limit int) []StatusClusterVersion {
 	var newVersions []StatusClusterVersion
 
 	start := 0
@@ -114,10 +117,7 @@ func withVersion(versions []StatusClusterVersion, date time.Time, version string
 		newVersions = append(newVersions, versions[i])
 	}
 
-	newVersions = append(newVersions, StatusClusterVersion{
-		Date:   date,
-		Semver: version,
-	})
+	newVersions = append(newVersions, version)
 
 	return newVersions
 }
