@@ -9,6 +9,7 @@ import (
 	"github.com/giantswarm/e2eclients/aws"
 	"github.com/giantswarm/micrologger"
 
+	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/aws-operator/integration/setup"
 )
 
@@ -31,6 +32,9 @@ func TestMain(m *testing.M) {
 	{
 		c := framework.GuestConfig{
 			Logger: logger,
+
+			ClusterID:    env.ClusterID(),
+			CommonDomain: env.CommonDomain(),
 		}
 
 		g, err = framework.NewGuest(c)
@@ -40,7 +44,11 @@ func TestMain(m *testing.M) {
 	}
 
 	{
-		c := framework.HostConfig{}
+		c := framework.HostConfig{
+			Logger: logger,
+
+			ClusterID: env.ClusterID(),
+		}
 
 		h, err = framework.NewHost(c)
 		if err != nil {
