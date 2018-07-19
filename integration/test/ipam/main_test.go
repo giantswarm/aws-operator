@@ -3,6 +3,7 @@
 package ipam
 
 import (
+	"os"
 	"testing"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
@@ -36,7 +37,7 @@ func init() {
 
 	{
 		c := framework.GuestConfig{
-			ClusterID:    "guest0",
+			ClusterID:    os.Getenv("CLUSTER_NAME"),
 			CommonDomain: "gauss.eu-central-1.aws.gigantic.io",
 			Logger:       l,
 		}
@@ -49,7 +50,7 @@ func init() {
 
 	{
 		c := framework.HostConfig{
-			ClusterID: "host0",
+			ClusterID: os.Getenv("CLUSTER_NAME"),
 			Logger:    l,
 		}
 
