@@ -209,7 +209,7 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake"
   ]
-  revision = "6cb2b75722069008d2a01e29be897236224c9f9f"
+  revision = "ab3f5839d9c1ce1bcfb7e3cf9f8d432e0a90bde1"
 
 [[projects]]
   branch = "master"
@@ -233,7 +233,7 @@
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "4e46ca575b4e7fded983e72facad8da587a21f1c"
+  revision = "853b084af585eed79801f11450c98fdddd7a7fe0"
 
 [[projects]]
   branch = "master"
@@ -482,7 +482,7 @@
   branch = "master"
   name = "github.com/google/go-github"
   packages = ["github"]
-  revision = "b14883f2b71b5f7dd303ed96d00bfaefeaeecea2"
+  revision = "c0b63e2f9bb198baf328c8abf1ddcbe05ff9427e"
 
 [[projects]]
   branch = "master"
@@ -821,7 +821,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "ff3583edef7de132f219f0efc00e097cabcc0ec0"
+  revision = "2731d4fa720b67f9fe38e9051a2a9b38e4609260"
 
 [[projects]]
   name = "google.golang.org/grpc"
