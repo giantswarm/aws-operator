@@ -64,8 +64,8 @@ func (c *IPAM) Test(ctx context.Context) error {
 
 	for _, cn := range clusters {
 		cfg := framework.GuestConfig{
-			ClusterName: cn,
-			Logger:      c.logger,
+			ClusterID: cn,
+			Logger:    c.logger,
 		}
 		guestFramework, err := framework.NewGuest(cfg)
 		if err != nil {
@@ -102,8 +102,8 @@ func (c *IPAM) Test(ctx context.Context) error {
 
 	{
 		cfg := framework.GuestConfig{
-			ClusterName: clusterFour,
-			Logger:      c.logger,
+			ClusterID: clusterFour,
+			Logger:    c.logger,
 		}
 		guestFramework, err := framework.NewGuest(cfg)
 		if err != nil {

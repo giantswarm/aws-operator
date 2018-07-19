@@ -36,7 +36,9 @@ func init() {
 
 	{
 		c := framework.GuestConfig{
-			Logger: l,
+			ClusterID:    "guest0",
+			CommonDomain: "gauss.eu-central-1.aws.gigantic.io",
+			Logger:       l,
 		}
 
 		g, err = framework.NewGuest(c)
@@ -46,7 +48,10 @@ func init() {
 	}
 
 	{
-		c := framework.HostConfig{}
+		c := framework.HostConfig{
+			ClusterID: "host0",
+			Logger:    l,
+		}
 
 		h, err = framework.NewHost(c)
 		if err != nil {

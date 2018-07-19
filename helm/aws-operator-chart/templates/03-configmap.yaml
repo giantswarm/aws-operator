@@ -34,7 +34,7 @@ data:
         guest:
           ipam:
             network:
-              cidr: '{{ .Values.Installation.V1.Guest.IPAM.NetworkCIDR }}'
+              CIDR: '{{ .Values.Installation.V1.Guest.IPAM.NetworkCIDR }}'
               subnetMaskBits: '{{ .Values.Installation.V1.Guest.IPAM.CIDRMask }}'
               privateSubnetMaskBits: '{{ .Values.Installation.V1.Guest.IPAM.PrivateSubnetMask }}'
               publicSubnetMaskBits: '{{ .Values.Installation.V1.Guest.IPAM.PublicSubnetMask }}'

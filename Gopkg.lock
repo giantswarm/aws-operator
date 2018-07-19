@@ -261,7 +261,7 @@
     "scaling",
     "scaling/provider"
   ]
-  revision = "5053d999059478622b72b9e3f8b756bd82acc046"
+  revision = "e5a944d74a62f4cc2a8e77b67dd12e2abe014aca"
 
 [[projects]]
   branch = "master"
