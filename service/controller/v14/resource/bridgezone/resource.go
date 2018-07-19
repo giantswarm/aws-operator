@@ -49,7 +49,7 @@ type Config struct {
 //	    └── A ingress.new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
 //
 // For the migration period for new clusters we need also to add delegation to
-// k8s.eu-central-1.aws.gigantic.io because of the AWS DNS caching issues.
+// k8s.installation.eu-central-1.aws.gigantic.io because of the AWS DNS caching issues.
 //
 //	installation.eu-central-1.aws.gigantic.io (host account)
 //	├── NS k8s.installation.eu-central-1.aws.gigantic.io (default guest account)
@@ -60,8 +60,8 @@ type Config struct {
 //	    ├── A api.new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
 //	    └── A ingress.new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
 //
-// NOTE: In the code below k8s.eu-central-1.aws.gigantic.io zone is called
-// "intermediate" and new_cluster.k8s.eu-central-1.aws.gigantic.io zone is
+// NOTE: In the code below k8s.installation.eu-central-1.aws.gigantic.io zone is called
+// "intermediate" and new_cluster.k8s.installation.eu-central-1.aws.gigantic.io zone is
 // called "final". This resource *only* ensures we have delegation from the
 // intermediate zone to the final zone, but only if the intermediate zone
 // exists.
