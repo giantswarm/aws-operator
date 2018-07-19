@@ -1,15 +1,16 @@
 package guest
 
-const Subnets = `{{define "subnets"}}
+const Subnets = `{{ define "subnets" }}
+{{- $v := .Guest.Subnets }}
   PublicSubnet:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: {{ .PublicSubnetAZ }}
-      CidrBlock: {{ .PublicSubnetCIDR }}
-      MapPublicIpOnLaunch: {{ .PublicSubnetMapPublicIPOnLaunch }}
+      AvailabilityZone: {{ $v.PublicSubnetAZ }}
+      CidrBlock: {{ $v.PublicSubnetCIDR }}
+      MapPublicIpOnLaunch: {{ $v.PublicSubnetMapPublicIPOnLaunch }}
       Tags:
       - Key: Name
-        Value: {{ .PublicSubnetName }}
+        Value: {{ $v.PublicSubnetName }}
       VpcId: !Ref VPC
 
   PublicSubnetRouteTableAssociation:
@@ -21,12 +22,12 @@ const Subnets = `{{define "subnets"}}
   PrivateSubnet:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: {{ .PrivateSubnetAZ }}
-      CidrBlock: {{ .PrivateSubnetCIDR }}
-      MapPublicIpOnLaunch: {{ .PrivateSubnetMapPublicIPOnLaunch }}
+      AvailabilityZone: {{ $v.PrivateSubnetAZ }}
+      CidrBlock: {{ $v.PrivateSubnetCIDR }}
+      MapPublicIpOnLaunch: {{ $v.PrivateSubnetMapPublicIPOnLaunch }}
       Tags:
       - Key: Name
-        Value: {{ .PrivateSubnetName }}
+        Value: {{ $v.PrivateSubnetName }}
       VpcId: !Ref VPC
 
   PrivateSubnetRouteTableAssociation:
@@ -34,4 +35,4 @@ const Subnets = `{{define "subnets"}}
     Properties:
       RouteTableId: !Ref PrivateRouteTable
       SubnetId: !Ref PrivateSubnet
-{{end}}`
+{{ end }}`

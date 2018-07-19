@@ -9,21 +9,18 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v14/key"
 )
 
-// The template related to this adapter can be found in the following import.
-//
-//     github.com/giantswarm/aws-operator/service/controller/v14/templates/cloudformation/guest/vpc.go
-//
-
-type vpcAdapter struct {
+type guestVPCAdapter struct {
 	CidrBlock        string
+	ClusterID        string
 	InstallationName string
 	HostAccountID    string
 	PeerVPCID        string
 	PeerRoleArn      string
 }
 
-func (v *vpcAdapter) getVpc(cfg Config) error {
+func (v *guestVPCAdapter) Adapt(cfg Config) error {
 	v.CidrBlock = cfg.CustomObject.Spec.AWS.VPC.CIDR
+	v.ClusterID = clusterID(cfg)
 	v.InstallationName = cfg.InstallationName
 	v.HostAccountID = cfg.HostAccountID
 	v.PeerVPCID = key.PeerID(cfg.CustomObject)

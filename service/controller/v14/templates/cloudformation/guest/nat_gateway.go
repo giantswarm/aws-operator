@@ -1,6 +1,7 @@
 package guest
 
 const NatGateway = `{{define "nat_gateway"}}
+  {{- $v := .Guest.NATGateway }}
   NATGateway:
     Type: AWS::EC2::NatGateway
     Properties:
@@ -11,7 +12,7 @@ const NatGateway = `{{define "nat_gateway"}}
       SubnetId: !Ref PublicSubnet
       Tags:
         - Key: Name
-          Value: {{ .ClusterID }}
+          Value: {{ $v.ClusterID }}
   NATEIP:
     Type: AWS::EC2::EIP
     Properties:

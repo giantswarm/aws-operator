@@ -1,13 +1,14 @@
 package guest
 
-const RouteTables = `{{define "route_tables"}}
+const RouteTables = `{{ define "route_tables" }}
+{{- $v := .Guest.RouteTables }}
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
       - Key: Name
-        Value: {{ .PublicRouteTableName }}
+        Value: {{ $v.PublicRouteTableName }}
 
   PrivateRouteTable:
     Type: AWS::EC2::RouteTable
@@ -15,13 +16,13 @@ const RouteTables = `{{define "route_tables"}}
       VpcId: !Ref VPC
       Tags:
       - Key: Name
-        Value: {{ .PrivateRouteTableName }}
+        Value: {{ $v.PrivateRouteTableName }}
 
   VPCPeeringRoute:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId: !Ref PrivateRouteTable
-      DestinationCidrBlock: {{ .HostClusterCIDR }}
+      DestinationCidrBlock: {{ $v.HostClusterCIDR }}
       VpcPeeringConnectionId:
         Ref: "VPCPeeringConnection"
-{{end}}`
+{{ end }}`

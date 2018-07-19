@@ -47,16 +47,16 @@ func TestAdapterHostIAMRolesRegularFields(t *testing.T) {
 				CustomObject:   customObject,
 				GuestAccountID: guestAccountID,
 			}
-			err := a.getHostIamRoles(cfg)
+			err := a.HostPre.IAMRoles.Adapt(cfg)
 			if err != nil {
 				t.Errorf("unexpected error %v", err)
 			}
 
-			if a.PeerAccessRoleName != tc.expectedPeerAccessRoleName {
-				t.Errorf("unexpected PeerAccessRoleName, got %q, want %q", a.PeerAccessRoleName, tc.expectedPeerAccessRoleName)
+			if a.HostPre.IAMRoles.PeerAccessRoleName != tc.expectedPeerAccessRoleName {
+				t.Errorf("unexpected PeerAccessRoleName, got %q, want %q", a.HostPre.IAMRoles.PeerAccessRoleName, tc.expectedPeerAccessRoleName)
 			}
-			if a.GuestAccountID != tc.expectedGuestAccountID {
-				t.Errorf("unexpected GuestAccountID, got %q, want %q", a.GuestAccountID, tc.expectedGuestAccountID)
+			if a.HostPre.IAMRoles.GuestAccountID != tc.expectedGuestAccountID {
+				t.Errorf("unexpected GuestAccountID, got %q, want %q", a.HostPre.IAMRoles.GuestAccountID, tc.expectedGuestAccountID)
 			}
 		})
 	}

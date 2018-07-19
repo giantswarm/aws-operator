@@ -46,33 +46,33 @@ func TestAdapterIamPoliciesRegularFields(t *testing.T) {
 				CustomObject: tc.customObject,
 				Clients:      clients,
 			}
-			err := a.getIamPolicies(cfg)
+			err := a.Guest.IAMPolicies.Adapt(cfg)
 			if err != nil {
 				t.Errorf("unexpected error %v", err)
 			}
 
-			if a.MasterPolicyName != tc.expectedMasterPolicyName {
-				t.Errorf("unexpected MasterPolicyName, got %q, want %q", a.MasterPolicyName, tc.expectedMasterPolicyName)
+			if a.Guest.IAMPolicies.MasterPolicyName != tc.expectedMasterPolicyName {
+				t.Errorf("unexpected MasterPolicyName, got %q, want %q", a.Guest.IAMPolicies.MasterPolicyName, tc.expectedMasterPolicyName)
 			}
 
-			if a.MasterRoleName != tc.expectedMasterRoleName {
-				t.Errorf("unexpected MasterRoleName, got %q, want %q", a.MasterRoleName, tc.expectedMasterRoleName)
+			if a.Guest.IAMPolicies.MasterRoleName != tc.expectedMasterRoleName {
+				t.Errorf("unexpected MasterRoleName, got %q, want %q", a.Guest.IAMPolicies.MasterRoleName, tc.expectedMasterRoleName)
 			}
 
-			if a.MasterProfileName != tc.expectedMasterProfileName {
-				t.Errorf("unexpected MasterProfileName, got %q, want %q", a.MasterProfileName, tc.expectedMasterProfileName)
+			if a.Guest.IAMPolicies.MasterProfileName != tc.expectedMasterProfileName {
+				t.Errorf("unexpected MasterProfileName, got %q, want %q", a.Guest.IAMPolicies.MasterProfileName, tc.expectedMasterProfileName)
 			}
 
-			if a.WorkerPolicyName != tc.expectedWorkerPolicyName {
-				t.Errorf("unexpected WorkerPolicyName, got %q, want %q", a.WorkerPolicyName, tc.expectedWorkerPolicyName)
+			if a.Guest.IAMPolicies.WorkerPolicyName != tc.expectedWorkerPolicyName {
+				t.Errorf("unexpected WorkerPolicyName, got %q, want %q", a.Guest.IAMPolicies.WorkerPolicyName, tc.expectedWorkerPolicyName)
 			}
 
-			if a.WorkerRoleName != tc.expectedWorkerRoleName {
-				t.Errorf("unexpected WorkerRoleName, got %q, want %q", a.WorkerRoleName, tc.expectedWorkerRoleName)
+			if a.Guest.IAMPolicies.WorkerRoleName != tc.expectedWorkerRoleName {
+				t.Errorf("unexpected WorkerRoleName, got %q, want %q", a.Guest.IAMPolicies.WorkerRoleName, tc.expectedWorkerRoleName)
 			}
 
-			if a.WorkerProfileName != tc.expectedWorkerProfileName {
-				t.Errorf("unexpected WorkerProfileName, got %q, want %q", a.WorkerProfileName, tc.expectedWorkerProfileName)
+			if a.Guest.IAMPolicies.WorkerProfileName != tc.expectedWorkerProfileName {
+				t.Errorf("unexpected WorkerProfileName, got %q, want %q", a.Guest.IAMPolicies.WorkerProfileName, tc.expectedWorkerProfileName)
 			}
 		})
 	}
@@ -134,7 +134,7 @@ func TestAdapterIamPoliciesKMSKeyARN(t *testing.T) {
 				CustomObject:     tc.customObject,
 				Clients:          clients,
 			}
-			err := a.getIamPolicies(cfg)
+			err := a.Guest.IAMPolicies.Adapt(cfg)
 			if tc.expectedError && err == nil {
 				t.Errorf("expected error didn't happen")
 			}
@@ -144,8 +144,8 @@ func TestAdapterIamPoliciesKMSKeyARN(t *testing.T) {
 					t.Errorf("unexpected error %v", err)
 				}
 
-				if a.KMSKeyARN != tc.expectedKMSKeyARN {
-					t.Errorf("unexpected KMSKeyARN, got %q, want %q", a.KMSKeyARN, tc.expectedKMSKeyARN)
+				if a.Guest.IAMPolicies.KMSKeyARN != tc.expectedKMSKeyARN {
+					t.Errorf("unexpected KMSKeyARN, got %q, want %q", a.Guest.IAMPolicies.KMSKeyARN, tc.expectedKMSKeyARN)
 				}
 			}
 		})
@@ -196,7 +196,7 @@ func TestAdapterIamPoliciesS3Bucket(t *testing.T) {
 				CustomObject: tc.customObject,
 				Clients:      clients,
 			}
-			err := a.getIamPolicies(cfg)
+			err := a.Guest.IAMPolicies.Adapt(cfg)
 			if tc.expectedError && err == nil {
 				t.Errorf("expected error didn't happen")
 			}
@@ -206,8 +206,8 @@ func TestAdapterIamPoliciesS3Bucket(t *testing.T) {
 					t.Errorf("unexpected error %v", err)
 				}
 
-				if a.S3Bucket != tc.expectedS3Bucket {
-					t.Errorf("unexpected S3Bucket, got %q, want %q", a.S3Bucket, tc.expectedS3Bucket)
+				if a.Guest.IAMPolicies.S3Bucket != tc.expectedS3Bucket {
+					t.Errorf("unexpected S3Bucket, got %q, want %q", a.Guest.IAMPolicies.S3Bucket, tc.expectedS3Bucket)
 				}
 			}
 		})

@@ -4,12 +4,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v14/key"
 )
 
-// The template related to this adapter can be found in the following import.
-//
-//     github.com/giantswarm/aws-operator/service/controller/v14/templates/cloudformation/guest/subnets.go
-//
-
-type subnetsAdapter struct {
+type guestSubnetsAdapter struct {
 	PublicSubnetAZ                   string
 	PublicSubnetCIDR                 string
 	PublicSubnetName                 string
@@ -20,7 +15,7 @@ type subnetsAdapter struct {
 	PrivateSubnetMapPublicIPOnLaunch bool
 }
 
-func (s *subnetsAdapter) getSubnets(cfg Config) error {
+func (s *guestSubnetsAdapter) Adapt(cfg Config) error {
 	s.PublicSubnetAZ = key.AvailabilityZone(cfg.CustomObject)
 	s.PublicSubnetCIDR = cfg.CustomObject.Spec.AWS.VPC.PublicSubnetCIDR
 	s.PublicSubnetName = key.SubnetName(cfg.CustomObject, suffixPublic)

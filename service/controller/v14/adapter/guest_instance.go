@@ -10,50 +10,45 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v14/templates"
 )
 
-// The template related to this adapter can be found in the following import.
-//
-//     github.com/giantswarm/aws-operator/service/controller/v14/templates/cloudformation/guest/instance.go
-//
-
-type instanceAdapter struct {
-	Cluster instanceAdapterCluster
-	Image   instanceAdapterImage
-	Master  instanceAdapterMaster
+type guestInstanceAdapter struct {
+	Cluster guestInstanceAdapterCluster
+	Image   guestInstanceAdapterImage
+	Master  guestInstanceAdapterMaster
 }
 
-type instanceAdapterCluster struct {
+type guestInstanceAdapterCluster struct {
 	ID string
 }
 
-type instanceAdapterImage struct {
+type guestInstanceAdapterImage struct {
 	ID string
 }
 
-type instanceAdapterMaster struct {
+type guestInstanceAdapterMaster struct {
 	AZ               string
 	CloudConfig      string
 	EncrypterBackend string
-	DockerVolume     instanceAdapterMasterDockerVolume
-	EtcdVolume       instanceAdapterMasterEtcdVolume
-	Instance         instanceAdapterMasterInstance
+	DockerVolume     guestInstanceAdapterMasterDockerVolume
+	EtcdVolume       guestInstanceAdapterMasterEtcdVolume
+	Instance         guestInstanceAdapterMasterInstance
 }
 
-type instanceAdapterMasterDockerVolume struct {
+type guestInstanceAdapterMasterDockerVolume struct {
 	Name         string
 	ResourceName string
 }
 
-type instanceAdapterMasterEtcdVolume struct {
+type guestInstanceAdapterMasterEtcdVolume struct {
 	Name string
 }
 
-type instanceAdapterMasterInstance struct {
+type guestInstanceAdapterMasterInstance struct {
 	ResourceName string
 	Type         string
 	Monitoring   bool
 }
 
-func (i *instanceAdapter) Adapt(config Config) error {
+func (i *guestInstanceAdapter) Adapt(config Config) error {
 	{
 		i.Cluster.ID = key.ClusterID(config.CustomObject)
 	}

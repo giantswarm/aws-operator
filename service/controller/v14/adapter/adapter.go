@@ -28,36 +28,7 @@ package adapter
 import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
-
-	"github.com/giantswarm/aws-operator/service/controller/v14/key"
 )
-
-type hydrater func(Config) error
-
-type Adapter struct {
-	ASGType                    string
-	AvailabilityZone           string
-	ClusterID                  string
-	DockerVolumeResourceName   string
-	MasterInstanceResourceName string
-	WorkerImageID              string
-
-	Instance       *instanceAdapter
-	LifecycleHooks *lifecycleHooksAdapter
-	Outputs        *outputsAdapter
-
-	autoScalingGroupAdapter
-	iamPoliciesAdapter
-	hostIamRolesAdapter
-	launchConfigAdapter
-	loadBalancersAdapter
-	recordSetsAdapter
-	routeTablesAdapter
-	securityGroupsAdapter
-	hostRouteTablesAdapter
-	subnetsAdapter
-	vpcAdapter
-}
 
 type Config struct {
 	APIWhitelist      APIWhitelist
@@ -73,41 +44,30 @@ type Config struct {
 	StackState        StackState
 }
 
+type Adapter struct {
+	Guest    guestAdapter
+	HostPost hostPostAdapter
+	HostPre  hostPreAdapter
+}
+
 func NewGuest(cfg Config) (Adapter, error) {
-	a := Adapter{
-		Instance:       &instanceAdapter{},
-		LifecycleHooks: &lifecycleHooksAdapter{},
-		Outputs:        &outputsAdapter{},
-	}
-
-	a.ASGType = prefixWorker
-	a.ClusterID = key.ClusterID(cfg.CustomObject)
-	a.WorkerImageID = cfg.StackState.WorkerImageID
-	// set api whitelisting
-	a.APIWhitelistEnabled = cfg.APIWhitelist.Enabled
-
-	// TODO this is totally odd but is a necessary evil because of the different
-	// approaches adapters are managed right now. Over time we should refactor the
-	// adapters and get the configuration more straight. Right now it does not
-	// make that much sense to change a lot fo adapters right away since the focus
-	// is to get actual user stories done.
-	a.MasterInstanceResourceName = cfg.StackState.MasterInstanceResourceName
-	a.DockerVolumeResourceName = cfg.StackState.DockerVolumeResourceName
+	a := Adapter{}
 
 	hydraters := []hydrater{
-		a.getAutoScalingGroup,
-		a.getIamPolicies,
-		a.getLaunchConfiguration,
-		a.getLoadBalancers,
-		a.getRecordSets,
-		a.getRouteTables,
-		a.getSecurityGroups,
-		a.getSubnets,
-		a.getVpc,
-
-		a.Instance.Adapt,
-		a.LifecycleHooks.Adapt,
-		a.Outputs.Adapt,
+		a.Guest.AutoScalingGroup.Adapt,
+		a.Guest.IAMPolicies.Adapt,
+		a.Guest.InternetGateway.Adapt,
+		a.Guest.Instance.Adapt,
+		a.Guest.LaunchConfiguration.Adapt,
+		a.Guest.LifecycleHooks.Adapt,
+		a.Guest.LoadBalancers.Adapt,
+		a.Guest.NATGateway.Adapt,
+		a.Guest.Outputs.Adapt,
+		a.Guest.RecordSets.Adapt,
+		a.Guest.RouteTables.Adapt,
+		a.Guest.SecurityGroups.Adapt,
+		a.Guest.Subnets.Adapt,
+		a.Guest.VPC.Adapt,
 	}
 
 	for _, h := range hydraters {
@@ -122,10 +82,8 @@ func NewGuest(cfg Config) (Adapter, error) {
 func NewHostPre(cfg Config) (Adapter, error) {
 	a := Adapter{}
 
-	a.ClusterID = key.ClusterID(cfg.CustomObject)
-
 	hydraters := []hydrater{
-		a.getHostIamRoles,
+		a.HostPre.IAMRoles.Adapt,
 	}
 
 	for _, h := range hydraters {
@@ -140,11 +98,9 @@ func NewHostPre(cfg Config) (Adapter, error) {
 func NewHostPost(cfg Config) (Adapter, error) {
 	a := Adapter{}
 
-	a.ClusterID = key.ClusterID(cfg.CustomObject)
-
 	hydraters := []hydrater{
-		a.getHostPostRouteTables,
-		a.getHostPostRecordSets,
+		a.HostPost.RecordSets.Adapt,
+		a.HostPost.RouteTables.Adapt,
 	}
 
 	for _, h := range hydraters {
@@ -155,3 +111,31 @@ func NewHostPost(cfg Config) (Adapter, error) {
 
 	return a, nil
 }
+
+type guestAdapter struct {
+	AutoScalingGroup    guestAutoScalingGroupAdapter
+	IAMPolicies         guestIAMPoliciesAdapter
+	InternetGateway     guestInternetGatewayAdapter
+	Instance            guestInstanceAdapter
+	LaunchConfiguration guestLaunchConfigAdapter
+	LifecycleHooks      guestLifecycleHooksAdapter
+	LoadBalancers       guestLoadBalancersAdapter
+	NATGateway          guestNATGatewayAdapter
+	Outputs             guestOutputsAdapter
+	RecordSets          guestRecordSetsAdapter
+	RouteTables         guestRouteTablesAdapter
+	SecurityGroups      guestSecurityGroupsAdapter
+	Subnets             guestSubnetsAdapter
+	VPC                 guestVPCAdapter
+}
+
+type hostPostAdapter struct {
+	RouteTables hostPostRouteTablesAdapter
+	RecordSets  hostPostRecordSetsAdapter
+}
+
+type hostPreAdapter struct {
+	IAMRoles hostPreIAMRolesAdapter
+}
+
+type hydrater func(Config) error
