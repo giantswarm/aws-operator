@@ -2,25 +2,16 @@
 
 
 [[projects]]
-  branch = "master"
-  name = "github.com/docker/spdystream"
-  packages = [
-    ".",
-    "spdy"
-  ]
-  revision = "bc6354cbbc295e925e4c611ffe90c1f287ee54db"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/fortytw2/leaktest"
-  packages = ["."]
-  revision = "b008db64ef8daabb22ff6daa557f33b41d8f6ccd"
-
-[[projects]]
   name = "github.com/ghodss/yaml"
   packages = ["."]
   revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
   version = "v1.0.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/giantswarm/apiextensions"
+  packages = ["pkg/apis/provider/v1alpha1"]
+  revision = "4dd4ba547409a0be555dc933432897f94b5acb2b"
 
 [[projects]]
   branch = "master"
@@ -29,13 +20,40 @@
   revision = "325932fa68e70dd4464598f11e2f710ac1aaec46"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/giantswarm/micrologger"
+  packages = [
+    ".",
+    "loggermeta"
+  ]
+  revision = "39f8cfb7c2583edb28552d9e4b12193e5bddaf60"
+
+[[projects]]
+  name = "github.com/go-kit/kit"
+  packages = ["log"]
+  revision = "4dc7be5d2d12881735283bcab7352178e190fc71"
+  version = "v0.6.0"
+
+[[projects]]
+  name = "github.com/go-logfmt/logfmt"
+  packages = ["."]
+  revision = "390ab7935ee28ec6b286364bba9b4dd6410cb3d5"
+  version = "v0.3.0"
+
+[[projects]]
+  name = "github.com/go-stack/stack"
+  packages = ["."]
+  revision = "259ab82a6cad3992b4e21ff5cac294ccb06474bc"
+  version = "v1.7.0"
+
+[[projects]]
   name = "github.com/gogo/protobuf"
   packages = [
     "proto",
     "sortkeys"
   ]
-  revision = "7d68e886eac4f7e34d0d82241a6273d6c304c5cf"
-  version = "v1.1.0"
+  revision = "636bf0302bc95575d69441b25a2603156ffdddf1"
+  version = "v1.1.1"
 
 [[projects]]
   branch = "master"
@@ -62,6 +80,12 @@
   revision = "08cceb5d0b5331634b9826762a8fd53b29b86ad8"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/kr/logfmt"
+  packages = ["."]
+  revision = "b84e30acd515aadc4b783ad4ff83aff3299bdfe0"
+
+[[projects]]
   name = "github.com/modern-go/concurrent"
   packages = ["."]
   revision = "bacd9c7ef1dd9b15be4a9909b8ac7a4e313eec94"
@@ -83,7 +107,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "a49355c7e3f8fe157a85be2f77e6e269a0f89602"
+  revision = "a2144134853fc9a27a7b1e3eb4f19f1a76df13c9"
 
 [[projects]]
   branch = "master"
@@ -95,7 +119,7 @@
     "http2/hpack",
     "idna"
   ]
-  revision = "d0887baf81f4598189d4e12a37c6da86f0bba4d0"
+  revision = "8887df42c721e930089d31b28391090a10a497d7"
 
 [[projects]]
   branch = "master"
@@ -146,17 +170,23 @@
   version = "v2.2.1"
 
 [[projects]]
-  branch = "master"
-  name = "k8s.io/api"
-  packages = ["core/v1"]
-  revision = "183f3326a9353bd6d41430fc80f96259331d029c"
+  name = "k8s.io/apiextensions-apiserver"
+  packages = [
+    "pkg/apis/apiextensions",
+    "pkg/apis/apiextensions/v1beta1"
+  ]
+  revision = "8e7f43002fec5394a8d96ebca781aa9d4b37aaef"
+  version = "kubernetes-1.10.4"
 
 [[projects]]
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
+    "pkg/api/meta",
     "pkg/api/resource",
     "pkg/apis/meta/v1",
+    "pkg/apis/meta/v1/unstructured",
+    "pkg/apis/meta/v1beta1",
     "pkg/conversion",
     "pkg/conversion/queryparams",
     "pkg/fields",
@@ -174,8 +204,6 @@
     "pkg/util/clock",
     "pkg/util/errors",
     "pkg/util/framer",
-    "pkg/util/httpstream",
-    "pkg/util/httpstream/spdy",
     "pkg/util/intstr",
     "pkg/util/json",
     "pkg/util/net",
@@ -187,7 +215,6 @@
     "pkg/util/yaml",
     "pkg/version",
     "pkg/watch",
-    "third_party/forked/golang/netutil",
     "third_party/forked/golang/reflect"
   ]
   revision = "17529ec7eadb8de8e7dc835201455f53571f655a"
@@ -198,25 +225,25 @@
   packages = [
     "pkg/apis/clientauthentication",
     "pkg/apis/clientauthentication/v1alpha1",
+    "pkg/apis/clientauthentication/v1beta1",
     "pkg/version",
     "plugin/pkg/client/auth/exec",
     "rest",
     "rest/watch",
     "tools/clientcmd/api",
     "tools/metrics",
-    "tools/portforward",
     "transport",
-    "transport/spdy",
     "util/cert",
+    "util/connrotation",
     "util/flowcontrol",
     "util/integer"
   ]
-  revision = "26a26f55b28aa1b338fbaf6fbbe0bcd76aed05e0"
-  version = "kubernetes-1.10.4"
+  revision = "7d04d0e2a0a1a4d4a1cd6baa432a2301492e4e65"
+  version = "v8.0.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "195274eddcd3335518e10f36af966d59cefcf8b580058b398f5cfdf1012eb6f0"
+  inputs-digest = "4fe3dd317914259dcb448c5435030b1db98c3d71f6ef1bff47c49c771c1527cd"
   solver-name = "gps-cdcl"
   solver-version = 1
