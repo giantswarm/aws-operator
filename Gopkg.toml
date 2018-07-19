@@ -107,6 +107,10 @@ required = [
 
 [[constraint]]
   branch = "master"
+  name = "github.com/giantswarm/statusresource"
+
+[[constraint]]
+  branch = "master"
   name = "github.com/giantswarm/versionbundle"
 
 [[constraint]]
