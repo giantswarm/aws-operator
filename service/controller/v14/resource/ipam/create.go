@@ -113,7 +113,7 @@ func getAWSConfigSubnets(g8sClient versioned.Interface) ([]net.IPNet, error) {
 		cidr := key.ClusterNetworkCIDR(ac)
 		_, n, err := net.ParseCIDR(cidr)
 		if err != nil {
-			return nil, microerror.Mask(err)
+			return nil, microerror.Maskf(err, "cidr: %s", cidr)
 		}
 
 		results = append(results, *n)

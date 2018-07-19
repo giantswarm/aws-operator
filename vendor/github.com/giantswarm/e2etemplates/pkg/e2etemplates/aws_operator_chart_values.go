@@ -9,7 +9,7 @@ const AWSOperatorChartValues = `Installation:
         Address: http://vault.default.svc.cluster.local:8200
     Guest:
       IPAM:
-        CIDR: "10.12.0.0/16"
+        NetworkCIDR: "10.12.0.0/16"
         CIDRMask: 24
         PrivateSubnetMask: 25
         PublicSubnetMask: 25
