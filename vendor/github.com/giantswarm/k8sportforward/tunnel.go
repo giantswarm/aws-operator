@@ -1,6 +1,7 @@
 package k8sportforward
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -12,6 +13,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
+	"k8s.io/apimachinery/pkg/util/httpstream"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/portforward"
 	"k8s.io/client-go/transport/spdy"
@@ -58,8 +60,37 @@ func (f *Forwarder) ForwardPort(config TunnelConfig) (*Tunnel, error) {
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
+
 	dialer := spdy.NewDialer(upgrader, &http.Client{Transport: transport}, "POST", u)
 
+	tunnel, err := newTunnel(dialer, config)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+	return tunnel, err
+}
+
+type TunnelConfig struct {
+	Remote    int
+	Namespace string
+	PodName   string
+}
+
+type Tunnel struct {
+	TunnelConfig
+	Local int
+
+	stopChan chan struct{}
+}
+
+// Close disconnects a tunnel connection. It always returns nil error to fulfil
+// io.Closer interface.
+func (t *Tunnel) Close() error {
+	close(t.stopChan)
+	return nil
+}
+
+func newTunnel(dialer httpstream.Dialer, config TunnelConfig) (*Tunnel, error) {
 	local, err := getAvailablePort()
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -85,9 +116,14 @@ func (f *Forwarder) ForwardPort(config TunnelConfig) (*Tunnel, error) {
 		return nil, microerror.Mask(err)
 	}
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	errChan := make(chan error)
 	go func() {
-		errChan <- pf.ForwardPorts()
+		select {
+		case errChan <- pf.ForwardPorts():
+		case <-ctx.Done():
+		}
 	}()
 
 	select {
@@ -96,26 +132,6 @@ func (f *Forwarder) ForwardPort(config TunnelConfig) (*Tunnel, error) {
 	case <-pf.Ready:
 		return tunnel, nil
 	}
-}
-
-type TunnelConfig struct {
-	Remote    int
-	Namespace string
-	PodName   string
-}
-
-type Tunnel struct {
-	TunnelConfig
-	Local int
-
-	stopChan chan struct{}
-}
-
-// Close disconnects a tunnel connection. It always returns nil error to fulfil
-// io.Closer interface.
-func (t *Tunnel) Close() error {
-	close(t.stopChan)
-	return nil
 }
 
 func getAvailablePort() (int, error) {
