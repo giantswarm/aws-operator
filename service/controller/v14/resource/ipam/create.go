@@ -74,12 +74,12 @@ func (r *Resource) allocateSubnet(ctx context.Context) (string, error) {
 		reservedSubnets = append(reservedSubnets, awsConfigSubnets...)
 	}
 
-	reservedSubnets = deduplicateSubnets(reservedSubnets)
+	reservedSubnets = canonicalizeSubnets(r.networkRange, reservedSubnets)
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "finding free subnet")
 	subnet, err := ipam.Free(r.networkRange, r.allocatedSubnetMask, reservedSubnets)
 	if err != nil {
-		return "", microerror.Mask(err)
+		return "", microerror.Maskf(err, "networkRange: %s, allocatedSubnetMask: %s, reservedSubnets: %#v", r.networkRange.String(), r.allocatedSubnetMask.String(), reservedSubnets)
 	}
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found free subnet: %s", subnet.String()))
@@ -87,10 +87,18 @@ func (r *Resource) allocateSubnet(ctx context.Context) (string, error) {
 	return subnet.String(), nil
 }
 
-func deduplicateSubnets(subnets []net.IPNet) []net.IPNet {
+func canonicalizeSubnets(network net.IPNet, subnets []net.IPNet) []net.IPNet {
 	// Naive deduplication as net.IPNet cannot be used as key for map. This
 	// should be ok for current foreseeable future.
-	for i := 0; i < len(subnets)-1; i++ {
+	for i := 0; i < len(subnets); i++ {
+		// Remove subnets that don't belong to our desired network.
+		if !network.Contains(subnets[i].IP) {
+			subnets = append(subnets[:i], subnets[i+1:]...)
+			i--
+			continue
+		}
+
+		// Remove duplicates.
 		for j := i + 1; j < len(subnets); j++ {
 			if reflect.DeepEqual(subnets[i], subnets[j]) {
 				subnets = append(subnets[:j], subnets[j+1:]...)
@@ -111,9 +119,13 @@ func getAWSConfigSubnets(g8sClient versioned.Interface) ([]net.IPNet, error) {
 	var results []net.IPNet
 	for _, ac := range awsConfigList.Items {
 		cidr := key.ClusterNetworkCIDR(ac)
+		if cidr == "" {
+			continue
+		}
+
 		_, n, err := net.ParseCIDR(cidr)
 		if err != nil {
-			return nil, microerror.Maskf(err, "cidr: %s", cidr)
+			return nil, microerror.Mask(err)
 		}
 
 		results = append(results, *n)
