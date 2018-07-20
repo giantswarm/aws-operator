@@ -27,7 +27,6 @@ package adapter
 
 import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/aws-operator/service/controller/v14/key"
 	"github.com/giantswarm/microerror"
 )
 
@@ -83,8 +82,6 @@ func NewGuest(cfg Config) (Adapter, error) {
 func NewHostPre(cfg Config) (Adapter, error) {
 	a := Adapter{}
 
-	a.ClusterID = key.ClusterID(cfg.CustomObject)
-
 	hydraters := []hydrater{
 		a.HostPre.IAMRoles.Adapt,
 	}
@@ -100,8 +97,6 @@ func NewHostPre(cfg Config) (Adapter, error) {
 
 func NewHostPost(cfg Config) (Adapter, error) {
 	a := Adapter{}
-
-	a.ClusterID = key.ClusterID(cfg.CustomObject)
 
 	hydraters := []hydrater{
 		a.HostPost.RecordSets.Adapt,
