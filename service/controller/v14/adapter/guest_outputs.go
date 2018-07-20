@@ -4,11 +4,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v14/key"
 )
 
-// The template related to this adapter can be found in the following import.
-//
-//     github.com/giantswarm/aws-operator/service/controller/v14/templates/cloudformation/guest/outputs.go
-//
-
 type guestOutputsAdapter struct {
 	Master         guestOutputsAdapterMaster
 	Worker         guestOutputsAdapterWorker
