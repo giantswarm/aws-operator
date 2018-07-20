@@ -51,6 +51,13 @@ func TestAdapterGuestMain(t *testing.T) {
 						},
 					},
 				},
+				Status: v1alpha1.AWSConfigStatus{
+					Cluster: v1alpha1.StatusCluster{
+						Network: v1alpha1.StatusClusterNetwork{
+							CIDR: "10.1.4.0/24",
+						},
+					},
+				},
 			},
 			errorMatcher:             nil,
 			expectedASGType:          "worker",
@@ -72,6 +79,13 @@ func TestAdapterGuestMain(t *testing.T) {
 						},
 						Workers: []v1alpha1.AWSConfigSpecAWSNode{
 							{},
+						},
+					},
+				},
+				Status: v1alpha1.AWSConfigStatus{
+					Cluster: v1alpha1.StatusCluster{
+						Network: v1alpha1.StatusClusterNetwork{
+							CIDR: "10.1.4.0/24",
 						},
 					},
 				},
@@ -101,20 +115,25 @@ func TestAdapterGuestMain(t *testing.T) {
 					IAM: &IAMClientMock{},
 					STS: &STSClientMock{},
 				},
-				InstallationName: "myinstallation",
-				HostAccountID:    "myHostAccountID",
+				InstallationName:      "myinstallation",
+				HostAccountID:         "myHostAccountID",
+				PrivateSubnetMaskBits: 25,
+				PublicSubnetMaskBits:  25,
 				StackState: StackState{
 					MasterImageID: "master-image-id",
 					WorkerImageID: "worker-image-id",
 				},
 			}
 			a, err := NewGuest(config)
-			if tc.errorMatcher != nil && err == nil {
-				t.Fatal("expected error didn't happen")
-			}
-
-			if tc.errorMatcher != nil && !tc.errorMatcher(err) {
-				t.Fatal("expected", true, "got", false)
+			switch {
+			case err == nil && tc.errorMatcher == nil:
+				// correct; carry on
+			case err != nil && tc.errorMatcher == nil:
+				t.Fatalf("error == %#v, want nil", err)
+			case err == nil && tc.errorMatcher != nil:
+				t.Fatalf("error == nil, want non-nil")
+			case !tc.errorMatcher(err):
+				t.Fatalf("error == %#v, want matching", err)
 			}
 
 			if tc.expectedASGType != a.ASGType {

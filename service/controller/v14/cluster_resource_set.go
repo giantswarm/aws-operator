@@ -318,12 +318,14 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 				SubnetList: config.APIWhitelist.SubnetList,
 			},
 
-			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
-			EncrypterBackend:      config.EncrypterBackend,
-			EncrypterRoleManager:  encrypterRoleManager,
-			InstallationName:      config.InstallationName,
-			PublicRouteTables:     config.PublicRouteTables,
-			Route53Enabled:        config.Route53Enabled,
+			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
+			EncrypterBackend:           config.EncrypterBackend,
+			EncrypterRoleManager:       encrypterRoleManager,
+			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
+			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
+			InstallationName:           config.InstallationName,
+			PublicRouteTables:          config.PublicRouteTables,
+			Route53Enabled:             config.Route53Enabled,
 		}
 
 		ops, err := cloudformationresource.New(c)

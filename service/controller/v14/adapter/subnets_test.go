@@ -27,23 +27,26 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 				Spec: v1alpha1.AWSConfigSpec{
 					AWS: v1alpha1.AWSConfigSpecAWS{
 						AZ: "eu-central-1a",
-						VPC: v1alpha1.AWSConfigSpecAWSVPC{
-							PublicSubnetCIDR:  "10.1.1.0/25",
-							PrivateSubnetCIDR: "10.1.2.0/25",
-						},
 					},
 					Cluster: v1alpha1.Cluster{
 						ID: "test-cluster",
 					},
 				},
+				Status: v1alpha1.AWSConfigStatus{
+					Cluster: v1alpha1.StatusCluster{
+						Network: v1alpha1.StatusClusterNetwork{
+							CIDR: "10.1.1.0/24",
+						},
+					},
+				},
 			},
 			expectedError:                            false,
 			expectedPublicSubnetAZ:                   "eu-central-1a",
-			expectedPublicSubnetCIDR:                 "10.1.1.0/25",
+			expectedPublicSubnetCIDR:                 "10.1.1.128/25",
 			expectedPublicSubnetName:                 "test-cluster-public",
 			expectedPublicSubnetMapPublicIPOnLaunch:  false,
 			expectedPrivateSubnetAZ:                  "eu-central-1a",
-			expectedPrivateSubnetCIDR:                "10.1.2.0/25",
+			expectedPrivateSubnetCIDR:                "10.1.1.0/25",
 			expectedPrivateSubnetName:                "test-cluster-private",
 			expectedPrivateSubnetMapPublicIPOnLaunch: false,
 		},
@@ -55,8 +58,10 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 
 		t.Run(tc.description, func(t *testing.T) {
 			cfg := Config{
-				CustomObject: tc.customObject,
-				Clients:      clients,
+				CustomObject:          tc.customObject,
+				Clients:               clients,
+				PrivateSubnetMaskBits: 25,
+				PublicSubnetMaskBits:  25,
 			}
 			err := a.getSubnets(cfg)
 			if tc.expectedError && err == nil {

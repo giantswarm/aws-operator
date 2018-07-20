@@ -23,7 +23,7 @@ type vpcAdapter struct {
 }
 
 func (v *vpcAdapter) getVpc(cfg Config) error {
-	v.CidrBlock = cfg.CustomObject.Spec.AWS.VPC.CIDR
+	v.CidrBlock = key.ClusterNetworkCIDR(cfg.CustomObject)
 	v.InstallationName = cfg.InstallationName
 	v.HostAccountID = cfg.HostAccountID
 	v.PeerVPCID = key.PeerID(cfg.CustomObject)
