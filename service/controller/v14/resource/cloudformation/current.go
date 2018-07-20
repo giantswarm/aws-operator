@@ -67,9 +67,11 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		var hostedZoneNameServers string
 		if r.route53Enabled {
 			hostedZoneNameServers, err = sc.CloudFormation.GetOutputValue(stackOutputs, key.HostedZoneNameServers)
-			// TODO This is for migration from v13 to v14. Remove this check when all guest clusters are managed by v14 or newer.
+			// TODO introduced: aws-operator@v14; remove with: aws-operator@v13
+			// This output was introduced in v14 so it isn't accessible from CF
+			// stacks created by earlier versions. We need to handle that.
 			//
-			// It should finally look like:
+			// Final version of the code:
 			//
 			//	if err != nil {
 			//		return StackState{}, microerror.Mask(err)
@@ -80,6 +82,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			} else if err != nil {
 				return StackState{}, microerror.Mask(err)
 			}
+			// TODO end
 		}
 		dockerVolumeResourceName, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.DockerVolumeResourceNameKey)
 		if cloudformationservice.IsOutputNotFound(err) {
