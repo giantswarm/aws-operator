@@ -102,6 +102,7 @@ func (r *Resource) getMainHostPreTemplateBody(ctx context.Context, customObject 
 	cfg := adapter.Config{
 		CustomObject:   customObject,
 		GuestAccountID: guestAccountID,
+		Route53Enabled: r.route53Enabled,
 	}
 	adp, err := adapter.NewHostPre(cfg)
 	if err != nil {
@@ -116,7 +117,7 @@ func (r *Resource) getMainHostPreTemplateBody(ctx context.Context, customObject 
 	return rendered, nil
 }
 
-func (r *Resource) getMainHostPostTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {
+func (r *Resource) getMainHostPostTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig, guestMainStackState StackState) (string, error) {
 	sc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)
@@ -137,6 +138,10 @@ func (r *Resource) getMainHostPostTemplateBody(ctx context.Context, customObject
 		HostClients:       *r.hostClients,
 		EncrypterBackend:  r.encrypterBackend,
 		PublicRouteTables: r.publicRouteTables,
+		Route53Enabled:    r.route53Enabled,
+		StackState: adapter.StackState{
+			HostedZoneNameServers: guestMainStackState.HostedZoneNameServers,
+		},
 	}
 	adp, err := adapter.NewHostPost(cfg)
 	if err != nil {

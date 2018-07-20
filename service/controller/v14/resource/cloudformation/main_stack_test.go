@@ -425,6 +425,7 @@ func TestMainHostPostTemplateExistingFields(t *testing.T) {
 	}
 
 	cfg := testConfig()
+	cfg.Route53Enabled = true
 	ec2Mock := &adapter.EC2ClientMock{}
 	ec2Mock.SetMatchingRouteTables(1)
 	cfg.HostClients = &adapter.Clients{
@@ -442,10 +443,14 @@ func TestMainHostPostTemplateExistingFields(t *testing.T) {
 		STS: &adapter.STSClientMock{},
 	}
 
+	stackState := StackState{
+		HostedZoneNameServers: "a.com.,b.com.",
+	}
+
 	ctx := context.TODO()
 	ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
 
-	body, err := newResource.getMainHostPostTemplateBody(ctx, customObject)
+	body, err := newResource.getMainHostPostTemplateBody(ctx, customObject, stackState)
 
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
@@ -459,6 +464,13 @@ func TestMainHostPostTemplateExistingFields(t *testing.T) {
 	if !strings.Contains(body, "  PrivateRoute1:") {
 		fmt.Println(body)
 		t.Fatal("route header not found")
+	}
+
+	if !strings.Contains(body, "  GuestNSRecordSet:") {
+		fmt.Println(body)
+		t.Fatal("GuestNSRecordSet resource not found")
+	} else if !strings.Contains(body, "ResourceRecords: !Split [ ',', 'a.com.,b.com.' ]") {
+		t.Fatal("GuestNSRecordSet.ResourceRecords resource not found")
 	}
 }
 
