@@ -3,12 +3,15 @@ package statusresource
 import (
 	"context"
 	"encoding/json"
+	"reflect"
 
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/errors/guest"
 	"github.com/giantswarm/microerror"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/kubernetes"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -48,6 +51,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				Value: Status{
 					Cluster: providerv1alpha1.StatusCluster{
 						Conditions: []providerv1alpha1.StatusClusterCondition{},
+						Nodes:      []providerv1alpha1.StatusClusterNode{},
 						Versions:   []providerv1alpha1.StatusClusterVersion{},
 					},
 				},
@@ -92,6 +96,70 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				Path:  "/status/cluster/conditions",
 				Value: clusterStatus.WithUpdatingCondition(),
 			})
+		}
+	}
+
+	// Update the node status based on what the guest cluster API tells us.
+	//
+	// TODO this is a workaround until we can read the node status information
+	// from the NodeConfig CR status. This is not possible right now because the
+	// NodeConfig CRs are still used for draining by older guest clusters.
+	{
+		var k8sClient kubernetes.Interface
+		{
+			i, err := r.clusterIDFunc(obj)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			e, err := r.clusterEndpointFunc(obj)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			k8sClient, err = r.guestCluster.NewK8sClient(ctx, i, e)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+
+		o := metav1.ListOptions{}
+		list, err := k8sClient.CoreV1().Nodes().List(o)
+		if guest.IsAPINotAvailable(err) {
+			// fall through
+		} else if err != nil {
+			return microerror.Mask(err)
+		} else {
+			var nodes []providerv1alpha1.StatusClusterNode
+
+			for _, node := range list.Items {
+				l := node.GetLabels()
+				n := node.GetName()
+
+				labelProvider := "giantswarm.io/provider"
+				p, ok := l[labelProvider]
+				if !ok {
+					return microerror.Maskf(missingLabelError, labelProvider)
+				}
+				labelVersion := p + "-operator.giantswarm.io/version"
+				v, ok := l[labelVersion]
+				if !ok {
+					return microerror.Maskf(missingLabelError, labelVersion)
+				}
+
+				nodes = append(nodes, providerv1alpha1.StatusClusterNode{
+					Name:    n,
+					Version: v,
+				})
+			}
+
+			nodesDiffer := !reflect.DeepEqual(clusterStatus.Nodes, nodes)
+
+			if nodesDiffer {
+				patches = append(patches, Patch{
+					Op:    "replace",
+					Path:  "/status/cluster/nodes",
+					Value: nodes,
+				})
+			}
 		}
 	}
 

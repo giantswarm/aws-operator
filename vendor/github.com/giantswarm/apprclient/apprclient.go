@@ -144,14 +144,20 @@ func (c *Client) PromoteChart(name, release, channel string) error {
 	return nil
 }
 
-// PullChartTarball downloads a tarball with the chart described by the given
-// chart name and channel, returning the file path.
+// PullChartTarball downloads a tarball with the chart described by
+// the given chart name and channel, returning the file path.
 func (c *Client) PullChartTarball(name, channel string) (string, error) {
 	release, err := c.GetReleaseVersion(name, channel)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
+	return c.PullChartTarballFromRelease(name, release)
+}
+
+// PullChartTarballFromRelease downloads a tarball with the chart described
+// by the given chart name and release, returning the file path.
+func (c *Client) PullChartTarballFromRelease(name, release string) (string, error) {
 	p := path.Join("packages", c.organization, name, release, "helm", "pull")
 
 	req, err := c.newRequest("GET", p)

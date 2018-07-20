@@ -49,8 +49,8 @@ required = [
   branch = "master"
   name = "github.com/giantswarm/apprclient"
 
-[[constraint]]
-  branch = "legacy"
+[[override]]
+  branch = "update-legacy"
   name = "github.com/giantswarm/certs"
 
 [[constraint]]
@@ -105,8 +105,8 @@ required = [
   branch = "master"
   name = "github.com/giantswarm/randomkeytpr"
 
-[[constraint]]
-  branch = "master"
+[[override]]
+  branch = "versions"
   name = "github.com/giantswarm/statusresource"
 
 [[constraint]]
