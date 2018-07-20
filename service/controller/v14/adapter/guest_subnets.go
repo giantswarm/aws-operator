@@ -4,7 +4,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v14/key"
 )
 
-type guestSubnetsAdapter struct {
+type GuestSubnetsAdapter struct {
 	PublicSubnetAZ                   string
 	PublicSubnetCIDR                 string
 	PublicSubnetName                 string
@@ -15,7 +15,7 @@ type guestSubnetsAdapter struct {
 	PrivateSubnetMapPublicIPOnLaunch bool
 }
 
-func (s *guestSubnetsAdapter) Adapt(cfg Config) error {
+func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 	s.PublicSubnetAZ = key.AvailabilityZone(cfg.CustomObject)
 	s.PublicSubnetCIDR = cfg.CustomObject.Spec.AWS.VPC.PublicSubnetCIDR
 	s.PublicSubnetName = key.SubnetName(cfg.CustomObject, suffixPublic)

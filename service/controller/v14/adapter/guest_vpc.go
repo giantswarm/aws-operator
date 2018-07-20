@@ -9,7 +9,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v14/key"
 )
 
-type guestVPCAdapter struct {
+type GuestVPCAdapter struct {
 	CidrBlock        string
 	ClusterID        string
 	InstallationName string
@@ -18,7 +18,7 @@ type guestVPCAdapter struct {
 	PeerRoleArn      string
 }
 
-func (v *guestVPCAdapter) Adapt(cfg Config) error {
+func (v *GuestVPCAdapter) Adapt(cfg Config) error {
 	v.CidrBlock = cfg.CustomObject.Spec.AWS.VPC.CIDR
 	v.ClusterID = clusterID(cfg)
 	v.InstallationName = cfg.InstallationName

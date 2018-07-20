@@ -6,13 +6,13 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v14/key"
 )
 
-type guestRouteTablesAdapter struct {
+type GuestRouteTablesAdapter struct {
 	HostClusterCIDR       string
 	PublicRouteTableName  string
 	PrivateRouteTableName string
 }
 
-func (r *guestRouteTablesAdapter) Adapt(cfg Config) error {
+func (r *GuestRouteTablesAdapter) Adapt(cfg Config) error {
 	hostClusterCIDR, err := VpcCIDR(cfg.HostClients, key.PeerID(cfg.CustomObject))
 	if err != nil {
 		return microerror.Mask(err)

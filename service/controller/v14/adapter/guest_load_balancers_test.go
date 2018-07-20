@@ -15,7 +15,7 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 		customObject                             v1alpha1.AWSConfig
 		errorMatcher                             func(error) bool
 		expectedAPIElbName                       string
-		expectedAPIElbPortsToOpen                []guestLoadBalancersAdapterPortPair
+		expectedAPIElbPortsToOpen                []GuestLoadBalancersAdapterPortPair
 		expectedAPIElbScheme                     string
 		expectedAPIElbSecurityGroupID            string
 		expectedAPIElbSubnetID                   string
@@ -25,7 +25,7 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 		expectedELBHealthCheckTimeout            int
 		expectedELBHealthCheckUnhealthyThreshold int
 		expectedIngressElbName                   string
-		expectedIngressElbPortsToOpen            []guestLoadBalancersAdapterPortPair
+		expectedIngressElbPortsToOpen            []GuestLoadBalancersAdapterPortPair
 		expectedIngressElbScheme                 string
 	}{
 		{
@@ -58,7 +58,7 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 			},
 			errorMatcher:       nil,
 			expectedAPIElbName: "test-cluster-api",
-			expectedAPIElbPortsToOpen: []guestLoadBalancersAdapterPortPair{
+			expectedAPIElbPortsToOpen: []GuestLoadBalancersAdapterPortPair{
 				{
 					PortELB:      443,
 					PortInstance: 443,
@@ -71,7 +71,7 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 			expectedELBHealthCheckTimeout:            3,
 			expectedELBHealthCheckUnhealthyThreshold: 2,
 			expectedIngressElbName:                   "test-cluster-ingress",
-			expectedIngressElbPortsToOpen: []guestLoadBalancersAdapterPortPair{
+			expectedIngressElbPortsToOpen: []GuestLoadBalancersAdapterPortPair{
 				{
 					PortELB:      443,
 					PortInstance: 30011,

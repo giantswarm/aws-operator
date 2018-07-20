@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v14/key"
 )
 
-type guestAutoScalingGroupAdapter struct {
+type GuestAutoScalingGroupAdapter struct {
 	ASGMaxSize             int
 	ASGMinSize             int
 	ASGType                string
@@ -20,7 +20,7 @@ type guestAutoScalingGroupAdapter struct {
 	WorkerAZ               string
 }
 
-func (a *guestAutoScalingGroupAdapter) Adapt(cfg Config) error {
+func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	workers := key.WorkerCount(cfg.CustomObject)
 	if workers <= 0 {
 		return microerror.Maskf(invalidConfigError, "at least 1 worker required, found %d", workers)

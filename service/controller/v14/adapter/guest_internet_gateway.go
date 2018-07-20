@@ -1,10 +1,10 @@
 package adapter
 
-type guestInternetGatewayAdapter struct {
+type GuestInternetGatewayAdapter struct {
 	ClusterID string
 }
 
-func (a *guestInternetGatewayAdapter) Adapt(cfg Config) error {
+func (a *GuestInternetGatewayAdapter) Adapt(cfg Config) error {
 	a.ClusterID = clusterID(cfg)
 
 	return nil

@@ -2,24 +2,24 @@ package adapter
 
 import "github.com/giantswarm/aws-operator/service/controller/v14/key"
 
-type guestLifecycleHooksAdapter struct {
-	Worker guestLifecycleHooksAdapterWorker
+type GuestLifecycleHooksAdapter struct {
+	Worker GuestLifecycleHooksAdapterWorker
 }
 
-type guestLifecycleHooksAdapterWorker struct {
-	ASG           guestLifecycleHooksAdapterASG
-	LifecycleHook guestLifecycleHooksAdapterLifecycleHook
+type GuestLifecycleHooksAdapterWorker struct {
+	ASG           GuestLifecycleHooksAdapterASG
+	LifecycleHook GuestLifecycleHooksAdapterLifecycleHook
 }
 
-type guestLifecycleHooksAdapterASG struct {
+type GuestLifecycleHooksAdapterASG struct {
 	Ref string
 }
 
-type guestLifecycleHooksAdapterLifecycleHook struct {
+type GuestLifecycleHooksAdapterLifecycleHook struct {
 	Name string
 }
 
-func (a *guestLifecycleHooksAdapter) Adapt(config Config) error {
+func (a *GuestLifecycleHooksAdapter) Adapt(config Config) error {
 	a.Worker.ASG.Ref = key.WorkerASGRef
 	a.Worker.LifecycleHook.Name = key.NodeDrainerLifecycleHookName
 

@@ -45,9 +45,9 @@ type Config struct {
 }
 
 type Adapter struct {
-	Guest    guestAdapter
-	HostPost hostPostAdapter
-	HostPre  hostPreAdapter
+	Guest    GuestAdapter
+	HostPost HostPostAdapter
+	HostPre  HostPreAdapter
 }
 
 func NewGuest(cfg Config) (Adapter, error) {
@@ -112,30 +112,30 @@ func NewHostPost(cfg Config) (Adapter, error) {
 	return a, nil
 }
 
-type guestAdapter struct {
-	AutoScalingGroup    guestAutoScalingGroupAdapter
-	IAMPolicies         guestIAMPoliciesAdapter
-	InternetGateway     guestInternetGatewayAdapter
-	Instance            guestInstanceAdapter
-	LaunchConfiguration guestLaunchConfigAdapter
-	LifecycleHooks      guestLifecycleHooksAdapter
-	LoadBalancers       guestLoadBalancersAdapter
-	NATGateway          guestNATGatewayAdapter
-	Outputs             guestOutputsAdapter
-	RecordSets          guestRecordSetsAdapter
-	RouteTables         guestRouteTablesAdapter
-	SecurityGroups      guestSecurityGroupsAdapter
-	Subnets             guestSubnetsAdapter
-	VPC                 guestVPCAdapter
+type GuestAdapter struct {
+	AutoScalingGroup    GuestAutoScalingGroupAdapter
+	IAMPolicies         GuestIAMPoliciesAdapter
+	InternetGateway     GuestInternetGatewayAdapter
+	Instance            GuestInstanceAdapter
+	LaunchConfiguration GuestLaunchConfigAdapter
+	LifecycleHooks      GuestLifecycleHooksAdapter
+	LoadBalancers       GuestLoadBalancersAdapter
+	NATGateway          GuestNATGatewayAdapter
+	Outputs             GuestOutputsAdapter
+	RecordSets          GuestRecordSetsAdapter
+	RouteTables         GuestRouteTablesAdapter
+	SecurityGroups      GuestSecurityGroupsAdapter
+	Subnets             GuestSubnetsAdapter
+	VPC                 GuestVPCAdapter
 }
 
-type hostPostAdapter struct {
-	RouteTables hostPostRouteTablesAdapter
-	RecordSets  hostPostRecordSetsAdapter
+type HostPostAdapter struct {
+	RouteTables HostPostRouteTablesAdapter
+	RecordSets  HostPostRecordSetsAdapter
 }
 
-type hostPreAdapter struct {
-	IAMRoles hostPreIAMRolesAdapter
+type HostPreAdapter struct {
+	IAMRoles HostPreIAMRolesAdapter
 }
 
 type hydrater func(Config) error

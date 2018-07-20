@@ -4,14 +4,14 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v14/key"
 )
 
-type guestOutputsAdapter struct {
-	Master         guestOutputsAdapterMaster
-	Worker         guestOutputsAdapterWorker
+type GuestOutputsAdapter struct {
+	Master         GuestOutputsAdapterMaster
+	Worker         GuestOutputsAdapterWorker
 	Route53Enabled bool
-	VersionBundle  guestOutputsAdapterVersionBundle
+	VersionBundle  GuestOutputsAdapterVersionBundle
 }
 
-func (a *guestOutputsAdapter) Adapt(config Config) error {
+func (a *GuestOutputsAdapter) Adapt(config Config) error {
 	a.Route53Enabled = route53Enabled(config)
 	a.Master.DockerVolume.ResourceName = config.StackState.DockerVolumeResourceName
 	a.Master.ImageID = config.StackState.MasterImageID
@@ -31,43 +31,43 @@ func (a *guestOutputsAdapter) Adapt(config Config) error {
 	return nil
 }
 
-type guestOutputsAdapterMaster struct {
+type GuestOutputsAdapterMaster struct {
 	ImageID      string
-	Instance     guestOutputsAdapterMasterInstance
-	CloudConfig  guestOutputsAdapterMasterCloudConfig
-	DockerVolume guestOutputsAdapterMasterDockerVolume
+	Instance     GuestOutputsAdapterMasterInstance
+	CloudConfig  GuestOutputsAdapterMasterCloudConfig
+	DockerVolume GuestOutputsAdapterMasterDockerVolume
 }
 
-type guestOutputsAdapterMasterInstance struct {
+type GuestOutputsAdapterMasterInstance struct {
 	ResourceName string
 	Type         string
 }
 
-type guestOutputsAdapterMasterCloudConfig struct {
+type GuestOutputsAdapterMasterCloudConfig struct {
 	Version string
 }
 
-type guestOutputsAdapterMasterDockerVolume struct {
+type GuestOutputsAdapterMasterDockerVolume struct {
 	ResourceName string
 }
 
-type guestOutputsAdapterWorker struct {
-	ASG          guestOutputsAdapterWorkerASG
+type GuestOutputsAdapterWorker struct {
+	ASG          GuestOutputsAdapterWorkerASG
 	Count        string
 	ImageID      string
 	InstanceType string
-	CloudConfig  guestOutputsAdapterWorkerCloudConfig
+	CloudConfig  GuestOutputsAdapterWorkerCloudConfig
 }
 
-type guestOutputsAdapterWorkerASG struct {
+type GuestOutputsAdapterWorkerASG struct {
 	Key string
 	Ref string
 }
 
-type guestOutputsAdapterWorkerCloudConfig struct {
+type GuestOutputsAdapterWorkerCloudConfig struct {
 	Version string
 }
 
-type guestOutputsAdapterVersionBundle struct {
+type GuestOutputsAdapterVersionBundle struct {
 	Version string
 }

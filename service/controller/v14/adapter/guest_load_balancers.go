@@ -16,10 +16,10 @@ const (
 	healthCheckUnhealthyThreshold = 2
 )
 
-type guestLoadBalancersAdapter struct {
+type GuestLoadBalancersAdapter struct {
 	APIElbHealthCheckTarget          string
 	APIElbName                       string
-	APIElbPortsToOpen                []guestLoadBalancersAdapterPortPair
+	APIElbPortsToOpen                []GuestLoadBalancersAdapterPortPair
 	APIElbScheme                     string
 	APIElbSecurityGroupID            string
 	ELBHealthCheckHealthyThreshold   int
@@ -28,12 +28,12 @@ type guestLoadBalancersAdapter struct {
 	ELBHealthCheckUnhealthyThreshold int
 	IngressElbHealthCheckTarget      string
 	IngressElbName                   string
-	IngressElbPortsToOpen            []guestLoadBalancersAdapterPortPair
+	IngressElbPortsToOpen            []GuestLoadBalancersAdapterPortPair
 	IngressElbScheme                 string
 	MasterInstanceResourceName       string
 }
 
-func (a *guestLoadBalancersAdapter) Adapt(cfg Config) error {
+func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	// API load balancer settings.
 	apiElbName, err := key.LoadBalancerName(cfg.CustomObject.Spec.Cluster.Kubernetes.API.Domain, cfg.CustomObject)
 	if err != nil {
@@ -42,7 +42,7 @@ func (a *guestLoadBalancersAdapter) Adapt(cfg Config) error {
 
 	a.APIElbHealthCheckTarget = heathCheckTarget(cfg.CustomObject.Spec.Cluster.Kubernetes.API.SecurePort)
 	a.APIElbName = apiElbName
-	a.APIElbPortsToOpen = []guestLoadBalancersAdapterPortPair{
+	a.APIElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
 		{
 			PortELB:      key.KubernetesAPISecurePort(cfg.CustomObject),
 			PortInstance: key.KubernetesAPISecurePort(cfg.CustomObject),
@@ -58,7 +58,7 @@ func (a *guestLoadBalancersAdapter) Adapt(cfg Config) error {
 
 	a.IngressElbHealthCheckTarget = heathCheckTarget(key.IngressControllerSecurePort(cfg.CustomObject))
 	a.IngressElbName = ingressElbName
-	a.IngressElbPortsToOpen = []guestLoadBalancersAdapterPortPair{
+	a.IngressElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
 		{
 			PortELB: httpsPort,
 
@@ -81,7 +81,7 @@ func (a *guestLoadBalancersAdapter) Adapt(cfg Config) error {
 	return nil
 }
 
-type guestLoadBalancersAdapterPortPair struct {
+type GuestLoadBalancersAdapterPortPair struct {
 	// PortELB is the port the ELB should listen on.
 	PortELB int
 	// PortInstance is the port on the instance the ELB forwards traffic to.

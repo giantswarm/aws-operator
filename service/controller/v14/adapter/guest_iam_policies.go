@@ -11,7 +11,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v14/key"
 )
 
-type guestIAMPoliciesAdapter struct {
+type GuestIAMPoliciesAdapter struct {
 	EC2ServiceDomain  string
 	KMSKeyARN         string
 	MasterRoleName    string
@@ -24,7 +24,7 @@ type guestIAMPoliciesAdapter struct {
 	WorkerProfileName string
 }
 
-func (i *guestIAMPoliciesAdapter) Adapt(cfg Config) error {
+func (i *GuestIAMPoliciesAdapter) Adapt(cfg Config) error {
 	clusterID := key.ClusterID(cfg.CustomObject)
 
 	i.EC2ServiceDomain = key.EC2ServiceDomain(cfg.CustomObject)

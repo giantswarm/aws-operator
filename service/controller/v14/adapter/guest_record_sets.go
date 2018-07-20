@@ -1,13 +1,13 @@
 package adapter
 
-type guestRecordSetsAdapter struct {
+type GuestRecordSetsAdapter struct {
 	BaseDomain                 string
 	ClusterID                  string
 	MasterInstanceResourceName string
 	Route53Enabled             bool
 }
 
-func (a *guestRecordSetsAdapter) Adapt(config Config) error {
+func (a *GuestRecordSetsAdapter) Adapt(config Config) error {
 	a.BaseDomain = baseDomain(config)
 	a.ClusterID = clusterID(config)
 	a.MasterInstanceResourceName = masterInstanceResourceName(config)

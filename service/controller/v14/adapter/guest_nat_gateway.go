@@ -1,10 +1,10 @@
 package adapter
 
-type guestNATGatewayAdapter struct {
+type GuestNATGatewayAdapter struct {
 	ClusterID string
 }
 
-func (a *guestNATGatewayAdapter) Adapt(cfg Config) error {
+func (a *GuestNATGatewayAdapter) Adapt(cfg Config) error {
 	a.ClusterID = clusterID(cfg)
 
 	return nil

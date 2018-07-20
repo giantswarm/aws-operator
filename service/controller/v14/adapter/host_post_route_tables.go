@@ -15,12 +15,12 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v14/key"
 )
 
-type hostPostRouteTablesAdapter struct {
-	PrivateRouteTables []hostPostRouteTablesAdapterRouteTable
-	PublicRouteTables  []hostPostRouteTablesAdapterRouteTable
+type HostPostRouteTablesAdapter struct {
+	PrivateRouteTables []HostPostRouteTablesAdapterRouteTable
+	PublicRouteTables  []HostPostRouteTablesAdapterRouteTable
 }
 
-func (i *hostPostRouteTablesAdapter) Adapt(cfg Config) error {
+func (i *HostPostRouteTablesAdapter) Adapt(cfg Config) error {
 	peerConnectionID, err := waitForPeeringConnectionID(cfg)
 	if err != nil {
 		return microerror.Mask(err)
@@ -32,7 +32,7 @@ func (i *hostPostRouteTablesAdapter) Adapt(cfg Config) error {
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		rt := hostPostRouteTablesAdapterRouteTable{
+		rt := HostPostRouteTablesAdapterRouteTable{
 			Name:         routeTableName,
 			RouteTableID: routeTableID,
 			// Requester CIDR block, we create the peering connection from the guest's private subnet.
@@ -50,7 +50,7 @@ func (i *hostPostRouteTablesAdapter) Adapt(cfg Config) error {
 			if err != nil {
 				return microerror.Mask(err)
 			}
-			rt := hostPostRouteTablesAdapterRouteTable{
+			rt := HostPostRouteTablesAdapterRouteTable{
 				Name:         routeTableName,
 				RouteTableID: routeTableID,
 				// Requester CIDR block, we create the peering connection from the
@@ -64,7 +64,7 @@ func (i *hostPostRouteTablesAdapter) Adapt(cfg Config) error {
 	return nil
 }
 
-type hostPostRouteTablesAdapterRouteTable struct {
+type HostPostRouteTablesAdapterRouteTable struct {
 	Name             string
 	RouteTableID     string
 	CidrBlock        string

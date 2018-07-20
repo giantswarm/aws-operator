@@ -11,7 +11,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v14/templates"
 )
 
-type guestLaunchConfigAdapter struct {
+type GuestLaunchConfigAdapter struct {
 	ASGType                        string
 	WorkerAssociatePublicIPAddress bool
 	WorkerBlockDeviceMappings      []BlockDeviceMapping
@@ -29,7 +29,7 @@ type BlockDeviceMapping struct {
 	VolumeType          string
 }
 
-func (l *guestLaunchConfigAdapter) Adapt(cfg Config) error {
+func (l *GuestLaunchConfigAdapter) Adapt(cfg Config) error {
 	l.ASGType = asgType(cfg)
 	l.WorkerInstanceType = key.WorkerInstanceType(cfg.CustomObject)
 	l.WorkerImageID = workerImageID(cfg)

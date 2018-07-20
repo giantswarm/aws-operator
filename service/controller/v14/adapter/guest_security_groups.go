@@ -29,7 +29,7 @@ const (
 	ingressSecurityGroupName = "IngressSecurityGroup"
 )
 
-type guestSecurityGroupsAdapter struct {
+type GuestSecurityGroupsAdapter struct {
 	APIWhitelistEnabled       bool
 	MasterSecurityGroupName   string
 	MasterSecurityGroupRules  []securityGroupRule
@@ -39,7 +39,7 @@ type guestSecurityGroupsAdapter struct {
 	IngressSecurityGroupRules []securityGroupRule
 }
 
-func (s *guestSecurityGroupsAdapter) Adapt(cfg Config) error {
+func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
 	hostClusterCIDR, err := VpcCIDR(cfg.HostClients, key.PeerID(cfg.CustomObject))
 	if err != nil {
 		return microerror.Mask(err)
@@ -62,7 +62,7 @@ func (s *guestSecurityGroupsAdapter) Adapt(cfg Config) error {
 	return nil
 }
 
-func (s *guestSecurityGroupsAdapter) getMasterRules(cfg Config, hostClusterCIDR string) ([]securityGroupRule, error) {
+func (s *GuestSecurityGroupsAdapter) getMasterRules(cfg Config, hostClusterCIDR string) ([]securityGroupRule, error) {
 	// Allow traffic to the Kubernetes API server depending on the API
 	// whitelisting rules.
 	apiRules, err := getKubernetesAPIRules(cfg, hostClusterCIDR)
@@ -112,7 +112,7 @@ func (s *guestSecurityGroupsAdapter) getMasterRules(cfg Config, hostClusterCIDR 
 	return append(apiRules, otherRules...), nil
 }
 
-func (s *guestSecurityGroupsAdapter) getWorkerRules(customObject v1alpha1.AWSConfig, hostClusterCIDR string) []securityGroupRule {
+func (s *GuestSecurityGroupsAdapter) getWorkerRules(customObject v1alpha1.AWSConfig, hostClusterCIDR string) []securityGroupRule {
 	return []securityGroupRule{
 		// Allow traffic from the ingress security group to the ingress controller.
 		{
@@ -165,7 +165,7 @@ func (s *guestSecurityGroupsAdapter) getWorkerRules(customObject v1alpha1.AWSCon
 	}
 }
 
-func (s *guestSecurityGroupsAdapter) getIngressRules(customObject v1alpha1.AWSConfig) []securityGroupRule {
+func (s *GuestSecurityGroupsAdapter) getIngressRules(customObject v1alpha1.AWSConfig) []securityGroupRule {
 	return []securityGroupRule{
 		// Allow all http and https traffic to the ingress load balancer.
 		{
