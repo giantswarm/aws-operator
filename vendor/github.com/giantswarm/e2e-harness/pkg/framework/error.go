@@ -9,6 +9,13 @@ func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
 
+var missingVaultTokenError = microerror.New("missing Vault token")
+
+// IsMissingVaultToken asserts missingVaultTokenError.
+func IsMissingVaultToken(err error) bool {
+	return microerror.Cause(err) == missingVaultTokenError
+}
+
 var notFoundError = microerror.New("not found")
 
 // IsNotFound asserts notFoundError.

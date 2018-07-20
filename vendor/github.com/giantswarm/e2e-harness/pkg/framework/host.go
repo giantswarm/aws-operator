@@ -30,7 +30,8 @@ type HostConfig struct {
 	Backoff *backoff.ExponentialBackOff
 	Logger  micrologger.Logger
 
-	ClusterID string
+	ClusterID  string
+	VaultToken string
 }
 
 type Host struct {
@@ -41,12 +42,13 @@ type Host struct {
 	k8sClient  kubernetes.Interface
 	restConfig *rest.Config
 
-	clusterID string
+	clusterID  string
+	vaultToken string
 }
 
 func NewHost(c HostConfig) (*Host, error) {
 	if c.Backoff == nil {
-		c.Backoff = newCustomExponentialBackoff()
+		c.Backoff = NewExponentialBackoff(ShortMaxWait, backoff.DefaultMaxInterval)
 	}
 	if c.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", c)
@@ -77,7 +79,8 @@ func NewHost(c HostConfig) (*Host, error) {
 		k8sClient:  k8sClient,
 		restConfig: restConfig,
 
-		clusterID: c.ClusterID,
+		clusterID:  c.ClusterID,
+		vaultToken: c.VaultToken,
 	}
 
 	return h, nil
@@ -413,13 +416,17 @@ func (h *Host) crd(crdName string) func() error {
 }
 
 func (h *Host) installVault() error {
+	if h.vaultToken == "" {
+		return microerror.Mask(missingVaultTokenError)
+	}
+
 	operation := func() error {
 		// NOTE we ignore errors here because we cannot get really useful error
 		// handling done. This here should anyway only be a quick fix until we use
 		// the helm client lib. Then error handling will be better.
 		HelmCmd("delete --purge vault")
 
-		err := HelmCmd("registry install quay.io/giantswarm/vaultlab-chart:stable -- --set vaultToken=${VAULT_TOKEN} -n vault")
+		err := HelmCmd(fmt.Sprintf("registry install quay.io/giantswarm/vaultlab-chart:stable -- --set vaultToken=%s -n vault", h.vaultToken))
 		if err != nil {
 			return microerror.Mask(err)
 		}

@@ -3,11 +3,15 @@ package statusresource
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"reflect"
+	"time"
 
+	"github.com/cenkalti/backoff"
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/errors/guest"
 	"github.com/giantswarm/microerror"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -15,25 +19,100 @@ import (
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	accessor, err := meta.Accessor(obj)
+	// TODO
+	//
+	// fetch new object
+	//
+	// compute patches
+	//
+	// Apply the computed list of patches to make the status update take effect.
+	// In case there are no patches we do not need to do anything here. So we
+	// prevent unnecessary API calls.
+	{
+		o := func() error {
+			accessor, err := meta.Accessor(obj)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			newObj, err := r.restClient.Get().AbsPath(accessor.GetSelfLink()).Do().Get()
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			newAccessor, err := meta.Accessor(newObj)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			patches, err := r.computePatches(ctx, newAccessor, newObj)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			if len(patches) > 0 {
+				err := r.applyPatches(ctx, newAccessor, patches)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+			}
+
+			return nil
+		}
+		b := backoff.NewExponentialBackOff()
+		n := func(err error, d time.Duration) {
+			r.logger.LogCtx(ctx, "level", "warning", "message", "retrying status patching due to error", "stack", fmt.Sprintf("%#v", err))
+		}
+
+		err := backoff.RetryNotify(o, b, n)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	return nil
+}
+
+func (r *Resource) applyPatches(ctx context.Context, accessor metav1.Object, patches []Patch) error {
+	patches = append(patches, Patch{
+		Op:    "test",
+		Value: accessor.GetResourceVersion(),
+		Path:  "/metadata/resourceVersion",
+	})
+
+	b, err := json.Marshal(patches)
 	if err != nil {
 		return microerror.Mask(err)
 	}
+
+	err = r.restClient.Patch(types.JSONPatchType).AbsPath(accessor.GetSelfLink()).Body(b).Do().Error()
+	if errors.IsConflict(err) {
+		return microerror.Mask(err)
+	} else if errors.IsResourceExpired(err) {
+		return microerror.Mask(err)
+	} else if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
+func (r *Resource) computePatches(ctx context.Context, accessor metav1.Object, obj interface{}) ([]Patch, error) {
 	clusterStatus, err := r.clusterStatusFunc(obj)
 	if err != nil {
-		return microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 
 	currentVersion := clusterStatus.LatestVersion()
 	desiredVersion, err := r.versionBundleVersionFunc(obj)
 	if err != nil {
-		return microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 
 	currentNodeCount := len(clusterStatus.Nodes)
 	desiredNodeCount, err := r.nodeCountFunc(obj)
 	if err != nil {
-		return microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 
 	var patches []Patch
@@ -109,15 +188,15 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		{
 			i, err := r.clusterIDFunc(obj)
 			if err != nil {
-				return microerror.Mask(err)
+				return nil, microerror.Mask(err)
 			}
 			e, err := r.clusterEndpointFunc(obj)
 			if err != nil {
-				return microerror.Mask(err)
+				return nil, microerror.Mask(err)
 			}
 			k8sClient, err = r.guestCluster.NewK8sClient(ctx, i, e)
 			if err != nil {
-				return microerror.Mask(err)
+				return nil, microerror.Mask(err)
 			}
 		}
 
@@ -126,7 +205,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		if guest.IsAPINotAvailable(err) {
 			// fall through
 		} else if err != nil {
-			return microerror.Mask(err)
+			return nil, microerror.Mask(err)
 		} else {
 			var nodes []providerv1alpha1.StatusClusterNode
 
@@ -137,12 +216,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				labelProvider := "giantswarm.io/provider"
 				p, ok := l[labelProvider]
 				if !ok {
-					return microerror.Maskf(missingLabelError, labelProvider)
+					return nil, microerror.Maskf(missingLabelError, labelProvider)
 				}
 				labelVersion := p + "-operator.giantswarm.io/version"
 				v, ok := l[labelVersion]
 				if !ok {
-					return microerror.Maskf(missingLabelError, labelVersion)
+					return nil, microerror.Maskf(missingLabelError, labelVersion)
 				}
 
 				nodes = append(nodes, providerv1alpha1.StatusClusterNode{
@@ -165,38 +244,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	// TODO emit metrics when update did not complete within a certain timeframe
 	// TODO update status condition when guest cluster is migrating from creating to created status
+	// TODO cancel complete reconciliation if patches were applied to prevent duplicated event processing
 
-	// Apply the computed list of patches to make the status update take effect.
-	// In case there are no patches we do not need to do anything here. So we
-	// prevent unnecessary API calls.
-	if len(patches) > 0 {
-		err := r.patchObject(ctx, accessor, patches)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	return nil
-}
-
-func (r *Resource) patchObject(ctx context.Context, accessor metav1.Object, patches []Patch) error {
-	patches = append(patches, Patch{
-		Op:    "test",
-		Value: accessor.GetResourceVersion(),
-		Path:  "/metadata/resourceVersion",
-	})
-
-	b, err := json.Marshal(patches)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	err = r.restClient.Patch(types.JSONPatchType).AbsPath(accessor.GetSelfLink()).Body(b).Do().Error()
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	return nil
+	return patches, nil
 }
 
 func allNodesHaveVersion(nodes []providerv1alpha1.StatusClusterNode, version string) bool {

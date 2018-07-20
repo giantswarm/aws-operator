@@ -50,7 +50,7 @@ required = [
   name = "github.com/giantswarm/apprclient"
 
 [[override]]
-  branch = "update-legacy"
+  branch = "legacy"
   name = "github.com/giantswarm/certs"
 
 [[constraint]]

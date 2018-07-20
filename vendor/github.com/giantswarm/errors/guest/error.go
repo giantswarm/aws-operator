@@ -12,7 +12,7 @@ const (
 	//
 	//     https://play.golang.org/p/ipBkwqlc4Td
 	//
-	dnsNotReadyPattern = "dial tcp: lookup .* on .*:53: no such host"
+	dnsNotReadyPattern = "dial tcp: lookup .* on .*:53: (no such host|server misbehaving)"
 
 	// nodeEOFPattern is a regular expression representing EOF errors for the
 	// guest API domain. Also see the following match example.
