@@ -37,6 +37,9 @@ const (
 	// EnvVarTestDir is the process environment variable representing the
 	// TEST_DIR env var.
 	EnvVarTestDir = "TEST_DIR"
+	// EnvVaultToken is the process environment variable representing the
+	// VAULT_TOKEN env var.
+	EnvVaultToken = "VAULT_TOKEN"
 	// EnvVarVersionBundleVersion is the process environment variable representing
 	// the VERSION_BUNDLE_VERSION env var.
 	EnvVarVersionBundleVersion = "VERSION_BUNDLE_VERSION"
@@ -48,6 +51,7 @@ var (
 	guestAWSArn          string
 	testedVersion        string
 	testDir              string
+	vaultToken           string
 	versionBundleVersion string
 )
 
@@ -79,6 +83,11 @@ func init() {
 	commonDomain = os.Getenv(EnvVarCommonDomain)
 	if commonDomain == "" {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarCommonDomain))
+	}
+
+	vaultToken = os.Getenv(EnvVaultToken)
+	if vaultToken == "" {
+		panic(fmt.Sprintf("env var %q must not be empty", EnvVaultToken))
 	}
 
 	var err error
@@ -156,6 +165,10 @@ func TestHash() string {
 	s := fmt.Sprintf("%x", h.Sum(nil))[0:5]
 
 	return s
+}
+
+func VaultToken() string {
+	return vaultToken
 }
 
 func VersionBundleVersion() string {
