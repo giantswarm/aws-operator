@@ -49,7 +49,7 @@ required = [
   branch = "master"
   name = "github.com/giantswarm/apprclient"
 
-[[override]]
+[[constraint]]
   branch = "legacy"
   name = "github.com/giantswarm/certs"
 
