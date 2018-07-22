@@ -89,8 +89,8 @@
     "service/support",
     "service/support/supportiface"
   ]
-  revision = "8cf662a972fa7fba8f2c1ec57648cf840e2bb401"
-  version = "v1.14.30"
+  revision = "bc3f534c19ffdf835e524e11f0f825b3eaf541c3"
+  version = "v1.14.31"
 
 [[projects]]
   branch = "master"
@@ -129,7 +129,7 @@
     "digestset",
     "reference"
   ]
-  revision = "749f6afb4572201e3c37325d0ffedb6f32be8950"
+  revision = "0dae0957e5fe3156c265d22bef4cba9efbf388e2"
 
 [[projects]]
   name = "github.com/docker/docker"
@@ -210,7 +210,7 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake"
   ]
-  revision = "4dd4ba547409a0be555dc933432897f94b5acb2b"
+  revision = "dbe7aa4771048f64040c9e6148a708c21226a1b2"
 
 [[projects]]
   branch = "master"
@@ -388,7 +388,7 @@
   branch = "versions"
   name = "github.com/giantswarm/statusresource"
   packages = ["."]
-  revision = "b9fcdaa7351e83a64400d2623d73d7ee3eb9a9a5"
+  revision = "3dd40c6edac14d314d54200264933e218d08a382"
 
 [[projects]]
   branch = "master"
@@ -482,7 +482,7 @@
   branch = "master"
   name = "github.com/google/go-github"
   packages = ["github"]
-  revision = "c0b63e2f9bb198baf328c8abf1ddcbe05ff9427e"
+  revision = "8a103ad706081e816a4e3bc678a45a0758491289"
 
 [[projects]]
   branch = "master"
@@ -821,7 +821,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "fedd2861243fd1a8152376292b921b394c7bef7e"
+  revision = "02b4e95473316948020af0b7a4f0f22c73929b0e"
 
 [[projects]]
   name = "google.golang.org/grpc"

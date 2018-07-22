@@ -38,7 +38,7 @@
     "digestset",
     "reference"
   ]
-  revision = "749f6afb4572201e3c37325d0ffedb6f32be8950"
+  revision = "0dae0957e5fe3156c265d22bef4cba9efbf388e2"
 
 [[projects]]
   name = "github.com/docker/docker"
@@ -118,10 +118,10 @@
   revision = "fa0af96de35e5a2d7c51f5ba9e49a4f346496c00"
 
 [[projects]]
-  branch = "master"
+  branch = "waiting-for-connection"
   name = "github.com/giantswarm/errors"
   packages = ["guest"]
-  revision = "856ccc5369b1336eea4861803efdbfd8243ee7e6"
+  revision = "e43af2edf5c77f7b2f4d84281324c54c3c14082b"
 
 [[projects]]
   branch = "master"
@@ -931,6 +931,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8bffc8862448bc8446370f9db105c39593249ff589b21cdb39dbce44e6a8590f"
+  inputs-digest = "33e8d6077b34cebd70a9dab4b4957aec440d382c18dc598b90ce139d461e523d"
   solver-name = "gps-cdcl"
   solver-version = 1
