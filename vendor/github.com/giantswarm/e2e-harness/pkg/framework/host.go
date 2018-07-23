@@ -140,7 +140,7 @@ func (h *Host) CreateNamespace(ns string) error {
 		return microerror.Mask(err)
 	}
 
-	activeNamespace := func() error {
+	o := func() error {
 		ns, err := h.k8sClient.CoreV1().
 			Namespaces().
 			Get(ns, metav1.GetOptions{})
@@ -157,7 +157,13 @@ func (h *Host) CreateNamespace(ns string) error {
 		return nil
 	}
 
-	return waitFor(activeNamespace)
+	n := newNotify("namespace active")
+	err = backoff.RetryNotify(o, h.backoff, n)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
 }
 
 func (h *Host) DeleteGuestCluster(name, cr, logEntry string) error {
@@ -252,8 +258,9 @@ func (h *Host) InstallResource(name, values, version string, conditions ...func(
 		return microerror.Mask(err)
 	}
 
-	for _, c := range conditions {
-		err = waitFor(c)
+	for i, c := range conditions {
+		n := newNotify(fmt.Sprintf("condition %d active", i))
+		err = backoff.RetryNotify(c, h.backoff, n)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -371,7 +378,7 @@ func (h *Host) Teardown() {
 func (h *Host) WaitForPodLog(namespace, needle, podName string) error {
 	needle = os.ExpandEnv(needle)
 
-	timeout := time.After(defaultTimeout * time.Second)
+	timeout := time.After(LongMaxWait)
 
 	req := h.k8sClient.CoreV1().
 		RESTClient().
@@ -438,7 +445,14 @@ func (h *Host) installVault() error {
 		return microerror.Mask(err)
 	}
 
-	return waitFor(h.runningPod("default", "app=vault"))
+	o := h.runningPod("default", "app=vault")
+	n := newNotify("vault pod running")
+	err = backoff.RetryNotify(o, h.backoff, n)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
 }
 
 func (h *Host) runningPod(namespace, labelSelector string) func() error {

@@ -106,7 +106,7 @@ required = [
   name = "github.com/giantswarm/randomkeytpr"
 
 [[constraint]]
-  branch = "master"
+  branch = "cancel"
   name = "github.com/giantswarm/statusresource"
 
 [[constraint]]

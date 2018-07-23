@@ -121,7 +121,7 @@
   branch = "master"
   name = "github.com/giantswarm/errors"
   packages = ["guest"]
-  revision = "57bc941af0be633160a3d35d8d36912d3bd627ed"
+  revision = "cf09767ac71d8449b49372f33b5b7e3b5006c0aa"
 
 [[projects]]
   branch = "master"
@@ -159,7 +159,10 @@
 [[projects]]
   branch = "master"
   name = "github.com/giantswarm/operatorkit"
-  packages = ["client/k8srestconfig"]
+  packages = [
+    "client/k8srestconfig",
+    "controller/context/reconciliationcanceledcontext"
+  ]
   revision = "c73ec04de943dfc8db8420ee73b63b2940026641"
 
 [[projects]]
@@ -931,6 +934,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "398c177cd26b60dd44b53369a6eb2d408cb91574c1865f59fcf8bf656e6539c3"
+  inputs-digest = "ec0c18a03a6bedd5bbb435e1e8f634e4376e9f968f4d2562f73f19da6135bf4d"
   solver-name = "gps-cdcl"
   solver-version = 1

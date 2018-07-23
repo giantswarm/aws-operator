@@ -11,6 +11,7 @@ import (
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/errors/guest"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,6 +32,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	//
 	// In case there are no patches we do not need to do anything. So we prevent
 	// unnecessary API calls.
+	var modified bool
 	{
 		o := func() error {
 			accessor, err := meta.Accessor(obj)
@@ -58,6 +60,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				if err != nil {
 					return microerror.Mask(err)
 				}
+
+				modified = true
 			}
 
 			return nil
@@ -71,6 +75,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		if err != nil {
 			return microerror.Mask(err)
 		}
+	}
+
+	if modified {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "patched CR status")
+		reconciliationcanceledcontext.SetCanceled(ctx)
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling reconciliation for custom object")
 	}
 
 	return nil
@@ -247,7 +257,6 @@ func (r *Resource) computePatches(ctx context.Context, accessor metav1.Object, o
 
 	// TODO emit metrics when update did not complete within a certain timeframe
 	// TODO update status condition when guest cluster is migrating from creating to created status
-	// TODO cancel complete reconciliation if patches were applied to prevent duplicated event processing
 
 	return patches, nil
 }
