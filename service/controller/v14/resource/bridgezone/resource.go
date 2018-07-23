@@ -128,7 +128,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	if !r.route53Enabled {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "route53 disabled, skipping execution")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "route53 disabled")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
 		return nil
 	}
 
@@ -143,41 +144,43 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	var intermediateZoneID string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "searching for intermediate zone in default guest account")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "getting intermediate zone ID")
 
 		intermediateZoneID, err = r.findHostedZoneID(ctx, defaultGuest, intermediateZone)
 		if IsNotFound(err) {
 			// If the intermeidate zone is not found we are after
 			// the migraiton period and this resource becomes noop.
-			r.logger.LogCtx(ctx, "level", "debug", "message", "intermediate zone does not exist, skipping the resource")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "intermediate zone not found")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
 			return nil
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "intermediate zone found")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "got intermediate zone ID")
 	}
 
 	var finalZoneID string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "searching for final zone in guest account")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "getting final zone ID")
 
 		finalZoneID, err = r.findHostedZoneID(ctx, defaultGuest, finalZone)
 		if IsNotFound(err) {
 			// The final zone is not yet created. Retry in the next
 			// reconciliation loop.
-			r.logger.LogCtx(ctx, "level", "debug", "message", "final zone not found, skipping the resource")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "final zone not found")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
 			return nil
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "final zone found")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "got final zone ID")
 	}
 
 	var finalZoneRecords []*route53.ResourceRecord
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "getting final zone name servers and TTL from intermediate")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "getting final zone name servers")
 
 		nameServers, _, err := r.getNameServersAndTTL(ctx, guest, finalZoneID, finalZone)
 		if err != nil {
@@ -192,11 +195,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			finalZoneRecords = append(finalZoneRecords, v)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "got final zone name servers and TTL from intermediate zone")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "got final zone name servers")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring intermediate zone delegation")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring final zone delegation from intermediate zone")
 
 		upsert := route53.ChangeActionUpsert
 		ns := route53.RRTypeNs
@@ -223,7 +226,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured intermediate zone delegation")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured final zone delegation from intermediate zone")
 	}
 
 	return nil
@@ -236,7 +239,8 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	}
 
 	if !r.route53Enabled {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "route53 disabled, skipping execution")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "route53 disabled")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
 		return nil
 	}
 
@@ -251,26 +255,32 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 	var intermediateZoneID string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "searching for intermediate zone in default guest account")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "getting intermediate zone ID")
 
 		intermediateZoneID, err = r.findHostedZoneID(ctx, defaultGuest, intermediateZone)
 		if IsNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "intermediate zone does not exist, skipping the resource")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "intermediate zone not found")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
 			return nil
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "intermediate zone found")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "got intermediate zone ID")
 	}
 
 	var finalZoneTTL int64
 	var finalZoneRecords []*route53.ResourceRecord
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "getting intermediate zone name servers")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "getting final zone delegation name servers and TTL from intermediate zone")
 
 		nameServers, ttl, err := r.getNameServersAndTTL(ctx, defaultGuest, intermediateZoneID, finalZone)
-		if err != nil {
+		if IsNotFound(err) {
+			// Delegation may be already deleted. It must be handled.
+			r.logger.LogCtx(ctx, "level", "debug", "message", "final zone delegation not found in intermediate zone")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
+			return nil
+		} else if err != nil {
 			return microerror.Mask(err)
 		}
 
@@ -284,11 +294,11 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			finalZoneRecords = append(finalZoneRecords, v)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "got intermediate zone name servers")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "got final zone delegation name servers and TTL from intermediate zone")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring deletion of intermediate zone delegation")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring deletion of final zone delegation from intermediate zone")
 
 		delete := route53.ChangeActionDelete
 		ns := route53.RRTypeNs
@@ -314,7 +324,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "deletion of intermediate zone delegation ensured")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured deletion of final zone delegation from intermediate zone")
 	}
 
 	return nil
@@ -369,7 +379,7 @@ func (r *Resource) getNameServersAndTTL(ctx context.Context, client *route53.Rou
 	}
 
 	if len(out.ResourceRecordSets) == 0 {
-		return nil, 0, microerror.Maskf(executionError, "NS recrod %q for HostedZone %q not found", name, zoneID)
+		return nil, 0, microerror.Maskf(notFoundError, "NS recrod %q for HostedZone %q not found", name, zoneID)
 	}
 	if len(out.ResourceRecordSets) != 1 {
 		return nil, 0, microerror.Maskf(executionError, "expected single NS recrod %q for HostedZone %q, found %#v", name, zoneID, out.ResourceRecordSets)
