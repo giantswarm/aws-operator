@@ -19,15 +19,18 @@ import (
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	// TODO
+	// We process the status updates within its own backoff here to gurantee its
+	// execution independent of any eventual retries via the retry resource. It
+	// might happen that the reconciled object is not the latest version so any
+	// patch would fail. In case the patch fails we retry until we succeed. The
+	// steps of the backoff operation are as follows.
 	//
-	// fetch new object
+	//     Fetch latest version of runtime object.
+	//     Compute patches for runtime object.
+	//     Apply computed list of patches.
 	//
-	// compute patches
-	//
-	// Apply the computed list of patches to make the status update take effect.
-	// In case there are no patches we do not need to do anything here. So we
-	// prevent unnecessary API calls.
+	// In case there are no patches we do not need to do anything. So we prevent
+	// unnecessary API calls.
 	{
 		o := func() error {
 			accessor, err := meta.Accessor(obj)

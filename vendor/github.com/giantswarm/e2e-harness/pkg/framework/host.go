@@ -57,6 +57,9 @@ func NewHost(c HostConfig) (*Host, error) {
 	if c.ClusterID == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ClusterID must not be empty", c)
 	}
+	if c.VaultToken == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.VaultToken must not be empty", c)
+	}
 
 	restConfig, err := clientcmd.BuildConfigFromFlags("", harness.DefaultKubeConfig)
 	if err != nil {
@@ -416,10 +419,6 @@ func (h *Host) crd(crdName string) func() error {
 }
 
 func (h *Host) installVault() error {
-	if h.vaultToken == "" {
-		return microerror.Mask(missingVaultTokenError)
-	}
-
 	operation := func() error {
 		// NOTE we ignore errors here because we cannot get really useful error
 		// handling done. This here should anyway only be a quick fix until we use

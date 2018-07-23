@@ -109,7 +109,7 @@
     "pkg/clientset/versioned/typed/example/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1"
   ]
-  revision = "4dd4ba547409a0be555dc933432897f94b5acb2b"
+  revision = "dbe7aa4771048f64040c9e6148a708c21226a1b2"
 
 [[projects]]
   branch = "master"
@@ -118,10 +118,10 @@
   revision = "fa0af96de35e5a2d7c51f5ba9e49a4f346496c00"
 
 [[projects]]
-  branch = "waiting-for-connection"
+  branch = "master"
   name = "github.com/giantswarm/errors"
   packages = ["guest"]
-  revision = "e43af2edf5c77f7b2f4d84281324c54c3c14082b"
+  revision = "57bc941af0be633160a3d35d8d36912d3bd627ed"
 
 [[projects]]
   branch = "master"
@@ -422,7 +422,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "fedd2861243fd1a8152376292b921b394c7bef7e"
+  revision = "02b4e95473316948020af0b7a4f0f22c73929b0e"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -931,6 +931,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "33e8d6077b34cebd70a9dab4b4957aec440d382c18dc598b90ce139d461e523d"
+  inputs-digest = "398c177cd26b60dd44b53369a6eb2d408cb91574c1865f59fcf8bf656e6539c3"
   solver-name = "gps-cdcl"
   solver-version = 1

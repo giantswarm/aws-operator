@@ -42,7 +42,7 @@ required = [
   name = "github.com/giantswarm/apiextensions"
 
 [[override]]
-  branch = "waiting-for-connection"
+  branch = "master"
   name = "github.com/giantswarm/errors"
 
 [[constraint]]
