@@ -105,8 +105,8 @@ required = [
   branch = "master"
   name = "github.com/giantswarm/randomkeytpr"
 
-[[override]]
-  branch = "versions"
+[[constraint]]
+  branch = "master"
   name = "github.com/giantswarm/statusresource"
 
 [[constraint]]

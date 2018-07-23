@@ -385,10 +385,10 @@
   revision = "d30333b6c23134aade3841156fa441a2045a957f"
 
 [[projects]]
-  branch = "versions"
+  branch = "master"
   name = "github.com/giantswarm/statusresource"
   packages = ["."]
-  revision = "d70608b76180eee1cad3a7a6b9fe5eac72b2a18f"
+  revision = "18fc5555eb2164f7abcf69e1254c8e6692db73ba"
 
 [[projects]]
   branch = "master"
@@ -1371,6 +1371,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f31bdf7782c821f38149541c47ca7ec09cf29d72c635ebbb6921e61af092524a"
+  inputs-digest = "7846f02b0c43e07059b0ad5ac66ad0524a789e74db2b8f109f61d5624c62ef61"
   solver-name = "gps-cdcl"
   solver-version = 1
