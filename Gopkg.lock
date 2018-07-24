@@ -222,7 +222,6 @@
   branch = "legacy"
   name = "github.com/giantswarm/certs"
   packages = [
-    ".",
     "legacy",
     "legacy/legacytest"
   ]
@@ -267,13 +266,7 @@
   branch = "master"
   name = "github.com/giantswarm/errors"
   packages = ["guest"]
-  revision = "cf09767ac71d8449b49372f33b5b7e3b5006c0aa"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/giantswarm/guestcluster"
-  packages = ["."]
-  revision = "6118d8f8ce7bcbaa0ab502371acd2058ed2d976d"
+  revision = "9e78ca0e32a019481beb21ae3e158d1bb150730d"
 
 [[projects]]
   branch = "master"
@@ -348,7 +341,7 @@
   revision = "39f8cfb7c2583edb28552d9e4b12193e5bddaf60"
 
 [[projects]]
-  branch = "master"
+  branch = "e2e"
   name = "github.com/giantswarm/operatorkit"
   packages = [
     "client/k8scrdclient",
@@ -364,7 +357,7 @@
     "controller/resource/retryresource",
     "informer"
   ]
-  revision = "c73ec04de943dfc8db8420ee73b63b2940026641"
+  revision = "e2e2176cc1311b981303722bb25c1394c3c3b1fb"
 
 [[projects]]
   branch = "master"
@@ -383,12 +376,6 @@
     "randomkeytprtest"
   ]
   revision = "d30333b6c23134aade3841156fa441a2045a957f"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/giantswarm/statusresource"
-  packages = ["."]
-  revision = "33a62b1606bd2374aeb076e001e1c88187a5e4c0"
 
 [[projects]]
   branch = "master"
@@ -1371,6 +1358,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7846f02b0c43e07059b0ad5ac66ad0524a789e74db2b8f109f61d5624c62ef61"
+  inputs-digest = "89b62192417312440f0b3f1c1310009f41d27fdc6005075cb5d91f3641cdf650"
   solver-name = "gps-cdcl"
   solver-version = 1
