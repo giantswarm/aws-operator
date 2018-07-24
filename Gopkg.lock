@@ -385,10 +385,10 @@
   revision = "d30333b6c23134aade3841156fa441a2045a957f"
 
 [[projects]]
-  branch = "cancel"
+  branch = "master"
   name = "github.com/giantswarm/statusresource"
   packages = ["."]
-  revision = "4da1ee18d9262ec3c080344c390a46a917dc05ec"
+  revision = "33a62b1606bd2374aeb076e001e1c88187a5e4c0"
 
 [[projects]]
   branch = "master"
@@ -482,7 +482,7 @@
   branch = "master"
   name = "github.com/google/go-github"
   packages = ["github"]
-  revision = "8a103ad706081e816a4e3bc678a45a0758491289"
+  revision = "e1be32f26e66c63933619603172ead18ebf4f79d"
 
 [[projects]]
   branch = "master"
@@ -728,7 +728,7 @@
     "ed25519/internal/edwards25519",
     "ssh/terminal"
   ]
-  revision = "a2144134853fc9a27a7b1e3eb4f19f1a76df13c9"
+  revision = "c126467f60eb25f8f27e5a981f32a87e3965053f"
 
 [[projects]]
   branch = "master"
@@ -1371,6 +1371,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "522d22b79d8a3a8673d13a008816578a8c98222dbc167dfa3d0ffb823f9f864b"
+  inputs-digest = "7846f02b0c43e07059b0ad5ac66ad0524a789e74db2b8f109f61d5624c62ef61"
   solver-name = "gps-cdcl"
   solver-version = 1
