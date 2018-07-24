@@ -65,28 +65,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	oldSpec := *customObject.Spec.DeepCopy()
 
-	if customObject.Spec.AWS.CredentialSecret.Name == "" {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "CR is missing credential, setting the default")
-
-		customObject.Spec.AWS.CredentialSecret.Namespace = credentialSecretDefaultNamespace
-		customObject.Spec.AWS.CredentialSecret.Name = credentialSecretDefaultName
-	}
-
-	if reflect.DeepEqual(providerv1alpha1.AWSConfigSpecAWSHostedZones{}, customObject.Spec.AWS.HostedZones) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "CR is missing hosted zone names")
-
-		apiDomain := customObject.Spec.Cluster.Kubernetes.API.Domain
-		zone, err := zoneFromAPIDomain(apiDomain)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("settings all zones to %q", zone))
-
-		customObject.Spec.AWS.HostedZones.API.Name = zone
-		customObject.Spec.AWS.HostedZones.Etcd.Name = zone
-		customObject.Spec.AWS.HostedZones.Ingress.Name = zone
-	}
+	r.migrateSpec(ctx, &customObject.Spec)
 
 	if reflect.DeepEqual(customObject.Spec, oldSpec) {
 		return nil
@@ -106,6 +85,33 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 }
 
 func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
+	return nil
+}
+
+func (r *Resource) migrateSpec(ctx context.Context, spec *providerv1alpha1.AWSConfigSpec) error {
+	if spec.AWS.CredentialSecret.Name == "" {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "CR is missing credential, setting the default")
+
+		spec.AWS.CredentialSecret.Namespace = credentialSecretDefaultNamespace
+		spec.AWS.CredentialSecret.Name = credentialSecretDefaultName
+	}
+
+	if reflect.DeepEqual(providerv1alpha1.AWSConfigSpecAWSHostedZones{}, spec.AWS.HostedZones) {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "CR is missing hosted zone names")
+
+		apiDomain := spec.Cluster.Kubernetes.API.Domain
+		zone, err := zoneFromAPIDomain(apiDomain)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("settings all zones to %q", zone))
+
+		spec.AWS.HostedZones.API.Name = zone
+		spec.AWS.HostedZones.Etcd.Name = zone
+		spec.AWS.HostedZones.Ingress.Name = zone
+	}
+
 	return nil
 }
 
