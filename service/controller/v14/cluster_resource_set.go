@@ -405,7 +405,18 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	//}
 
 	resources := []controller.Resource{
+		// TODO our host clusters are in quite inconsistent states. Status sub
+		// resources do not seem to be enabled everywhere. This results in
+		// unpredictable behaviour across the board. For now we disable the status
+		// resource to not make the situation worse. Above some dependencies are
+		// prepared but also commented. Later we can easily enable this again but
+		// this needs more extensive testing.
+		//
+		//     https://github.com/giantswarm/giantswarm/issues/3822
+		//
+
 		//statusResource,
+
 		migrationResource,
 		hostedZoneResource,
 		bridgeZoneResource,
