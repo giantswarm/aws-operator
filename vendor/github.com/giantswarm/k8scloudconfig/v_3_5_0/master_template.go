@@ -1439,6 +1439,8 @@ write_files:
       MANIFESTS="${MANIFESTS} default-backend-svc.yml"
       MANIFESTS="${MANIFESTS} ingress-controller-cm.yml"
       MANIFESTS="${MANIFESTS} ingress-controller-dep.yml"
+      {{ end -}}
+      {{ if not .DisableIngressControllerService -}}
       MANIFESTS="${MANIFESTS} ingress-controller-svc.yml"
       {{ end -}}
 
