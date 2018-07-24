@@ -164,7 +164,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "getting final zone ID")
 
-		finalZoneID, err = r.findHostedZoneID(ctx, defaultGuest, finalZone)
+		finalZoneID, err = r.findHostedZoneID(ctx, guest, finalZone)
 		if IsNotFound(err) {
 			// The final zone is not yet created. Retry in the next
 			// reconciliation loop.
