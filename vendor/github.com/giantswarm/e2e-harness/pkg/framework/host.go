@@ -30,7 +30,8 @@ type HostConfig struct {
 	Backoff *backoff.ExponentialBackOff
 	Logger  micrologger.Logger
 
-	ClusterID string
+	ClusterID  string
+	VaultToken string
 }
 
 type Host struct {
@@ -41,12 +42,13 @@ type Host struct {
 	k8sClient  kubernetes.Interface
 	restConfig *rest.Config
 
-	clusterID string
+	clusterID  string
+	vaultToken string
 }
 
 func NewHost(c HostConfig) (*Host, error) {
 	if c.Backoff == nil {
-		c.Backoff = newCustomExponentialBackoff()
+		c.Backoff = NewExponentialBackoff(ShortMaxWait, backoff.DefaultMaxInterval)
 	}
 	if c.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", c)
@@ -54,6 +56,9 @@ func NewHost(c HostConfig) (*Host, error) {
 
 	if c.ClusterID == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ClusterID must not be empty", c)
+	}
+	if c.VaultToken == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.VaultToken must not be empty", c)
 	}
 
 	restConfig, err := clientcmd.BuildConfigFromFlags("", harness.DefaultKubeConfig)
@@ -77,7 +82,8 @@ func NewHost(c HostConfig) (*Host, error) {
 		k8sClient:  k8sClient,
 		restConfig: restConfig,
 
-		clusterID: c.ClusterID,
+		clusterID:  c.ClusterID,
+		vaultToken: c.VaultToken,
 	}
 
 	return h, nil
@@ -134,7 +140,7 @@ func (h *Host) CreateNamespace(ns string) error {
 		return microerror.Mask(err)
 	}
 
-	activeNamespace := func() error {
+	o := func() error {
 		ns, err := h.k8sClient.CoreV1().
 			Namespaces().
 			Get(ns, metav1.GetOptions{})
@@ -151,7 +157,13 @@ func (h *Host) CreateNamespace(ns string) error {
 		return nil
 	}
 
-	return waitFor(activeNamespace)
+	n := newNotify("namespace active")
+	err = backoff.RetryNotify(o, h.backoff, n)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
 }
 
 func (h *Host) DeleteGuestCluster(name, cr, logEntry string) error {
@@ -246,8 +258,9 @@ func (h *Host) InstallResource(name, values, version string, conditions ...func(
 		return microerror.Mask(err)
 	}
 
-	for _, c := range conditions {
-		err = waitFor(c)
+	for i, c := range conditions {
+		n := newNotify(fmt.Sprintf("condition %d active", i))
+		err = backoff.RetryNotify(c, h.backoff, n)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -365,7 +378,7 @@ func (h *Host) Teardown() {
 func (h *Host) WaitForPodLog(namespace, needle, podName string) error {
 	needle = os.ExpandEnv(needle)
 
-	timeout := time.After(defaultTimeout * time.Second)
+	timeout := time.After(LongMaxWait)
 
 	req := h.k8sClient.CoreV1().
 		RESTClient().
@@ -419,7 +432,7 @@ func (h *Host) installVault() error {
 		// the helm client lib. Then error handling will be better.
 		HelmCmd("delete --purge vault")
 
-		err := HelmCmd("registry install quay.io/giantswarm/vaultlab-chart:stable -- --set vaultToken=${VAULT_TOKEN} -n vault")
+		err := HelmCmd(fmt.Sprintf("registry install quay.io/giantswarm/vaultlab-chart:stable -- --set vaultToken=%s -n vault", h.vaultToken))
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -432,7 +445,14 @@ func (h *Host) installVault() error {
 		return microerror.Mask(err)
 	}
 
-	return waitFor(h.runningPod("default", "app=vault"))
+	o := h.runningPod("default", "app=vault")
+	n := newNotify("vault pod running")
+	err = backoff.RetryNotify(o, h.backoff, n)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
 }
 
 func (h *Host) runningPod(namespace, labelSelector string) func() error {

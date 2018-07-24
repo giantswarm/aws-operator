@@ -6,52 +6,21 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
-const (
-	// dnsNotReadyPattern is a regular expression representing DNS errors for
-	// the guest API domain. Also see the following match example.
-	//
-	//     https://play.golang.org/p/ipBkwqlc4Td
-	//
-	dnsNotReadyPattern = "dial tcp: lookup .* on .*:53: no such host"
-
-	// nodeEOFPattern is a regular expression representing EOF errors for the
-	// guest API domain. Also see the following match example.
-	//
-	//     https://play.golang.org/p/L6f4ItJLufv
-	//
-	nodeEOFPattern = `Get https://api\..*/api/v1/nodes.* (unexpected )?EOF`
-
-	// resourceEOFPattern is a regular expression representing EOF errors for the
-	// guest API domain. Also see the following match example.
-	//
-	//     https://play.golang.org/p/2x2BXd5iHuP
-	//
-	resourceEOFPattern = `[Get|Post] https://api\..*/api/v1/namespaces/*/.* (unexpected )?EOF`
-
-	// tlsHandshakeTimeoutPattern is a regular expression representing TLS
-	// handshake timeout errors related to establishing connections to guest
-	// clusters while the guest API is not fully up. Also see the following match
-	// example.
-	//
-	//     https://play.golang.org/p/KuH2V0IXo-J
-	//
-	tlsHandshakeTimeoutPattern = `Get https://api\..*/api/v1/nodes.* net/http: TLS handshake timeout`
-
-	// transientInvalidCertificatePattern is a regular expression representing the
-	// kind of transient errors related to certificates returned while the guest
-	// API is not fully up. Also see the following match example.
-	//
-	//     https://play.golang.org/p/iiYvBhPOg4f
-	//
-	transientInvalidCertificatePattern = `[Get|Post] https://api\..*: x509: certificate is valid for ingress.local, not api\..*`
-)
-
 var (
-	dnsNotReadyRegexp                 = regexp.MustCompile(dnsNotReadyPattern)
-	nodeEOFRegexp                     = regexp.MustCompile(nodeEOFPattern)
-	resourceEOFRegexp                 = regexp.MustCompile(resourceEOFPattern)
-	tlsHandshakeTimeoutRegexp         = regexp.MustCompile(tlsHandshakeTimeoutPattern)
-	transientInvalidCertificateRegexp = regexp.MustCompile(transientInvalidCertificatePattern)
+	APINotAvailablePatterns = []*regexp.Regexp{
+		// A regular expression representing DNS errors for the guest API domain.
+		regexp.MustCompile(`dial tcp: lookup .* on .*:53: (no such host|server misbehaving)`),
+		// A regular expression representing EOF errors for the guest API domain.
+		regexp.MustCompile(`Get https://api\..*/api/v1/nodes.* (unexpected )?EOF`),
+		// A regular expression representing EOF errors for the guest API domain.
+		regexp.MustCompile(`[Get|Post] https://api\..*/api/v1/namespaces/*/.* (unexpected )?EOF`),
+		// A regular expression representing TLS errors related to establishing
+		// connections to guest clusters while the guest API is not fully up.
+		regexp.MustCompile(`Get https://api\..*/api/v1/nodes.* net/http: (TLS handshake timeout|request canceled).*?`),
+		// A regular expression representing the kind of transient errors related to
+		// certificates returned while the guest API is not fully up.
+		regexp.MustCompile(`[Get|Post] https://api\..*: x509: (certificate is valid for ingress.local, not api\..*|certificate signed by unknown authority \(possibly because of "crypto/rsa: verification error" while trying to verify candidate authority certificate.*?\))`),
+	}
 )
 
 // APINotAvailableError is returned when the guest Kubernetes API is not
@@ -66,14 +35,7 @@ func IsAPINotAvailable(err error) bool {
 
 	c := microerror.Cause(err)
 
-	regexps := []*regexp.Regexp{
-		dnsNotReadyRegexp,
-		nodeEOFRegexp,
-		resourceEOFRegexp,
-		tlsHandshakeTimeoutRegexp,
-		transientInvalidCertificateRegexp,
-	}
-	for _, re := range regexps {
+	for _, re := range APINotAvailablePatterns {
 		matched := re.MatchString(c.Error())
 
 		if matched {

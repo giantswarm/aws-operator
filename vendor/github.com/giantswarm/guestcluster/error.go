@@ -1,4 +1,4 @@
-package statusresource
+package guestcluster
 
 import (
 	"github.com/giantswarm/microerror"
@@ -11,9 +11,9 @@ func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
 
-var missingLabelError = microerror.New("missing label")
+var timeoutError = microerror.New("timeout")
 
-// IsMissingLabel asserts missingLabelError.
-func IsMissingLabel(err error) bool {
-	return microerror.Cause(err) == missingLabelError
+// IsTimeout asserts timeoutError.
+func IsTimeout(err error) bool {
+	return microerror.Cause(err) == timeoutError
 }
