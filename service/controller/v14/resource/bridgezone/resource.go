@@ -388,7 +388,7 @@ func (r *Resource) getNameServersAndTTL(ctx context.Context, client *route53.Rou
 	rs := *out.ResourceRecordSets[0]
 
 	if strings.TrimSuffix(*rs.Name, ".") != name {
-		return nil, 0, microerror.Maskf(executionError, "expected NS recrod with name %q , found %q", name, *rs.Name)
+		return nil, 0, microerror.Maskf(notFoundError, "NS recrod %q for HostedZone %q not found", name, zoneID)
 	}
 
 	var servers []string
