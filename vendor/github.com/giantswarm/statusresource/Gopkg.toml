@@ -1,0 +1,68 @@
+# Gopkg.toml example
+#
+# Refer to https://golang.github.io/dep/docs/Gopkg.toml.html
+# for detailed Gopkg.toml documentation.
+#
+# required = ["github.com/user/thing/cmd/thing"]
+# ignored = ["github.com/user/project/pkgX", "bitbucket.org/user/project/pkgA/pkgY"]
+#
+# [[constraint]]
+#   name = "github.com/user/project"
+#   version = "1.0.0"
+#
+# [[constraint]]
+#   name = "github.com/user/project2"
+#   branch = "dev"
+#   source = "github.com/myfork/project2"
+#
+# [[override]]
+#   name = "github.com/x/y"
+#   version = "2.4.0"
+#
+# [prune]
+#   non-go = false
+#   go-tests = true
+#   unused-packages = true
+
+
+
+required = [
+  "github.com/docker/distribution/reference",
+  "k8s.io/apiserver/pkg/endpoints/request"
+]
+
+
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/docker/distribution"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/apiextensions"
+
+[[override]]
+  branch = "master"
+  name = "github.com/giantswarm/errors"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/guestcluster"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/microerror"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/micrologger"
+
+[[constraint]]
+  name = "k8s.io/apiserver"
+  version = "kubernetes-1.10.4"
+
+
+
+[prune]
+  go-tests = true
+  unused-packages = true
