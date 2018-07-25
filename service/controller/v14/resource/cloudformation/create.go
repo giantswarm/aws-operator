@@ -75,6 +75,15 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
 
 			return nil
+		} else if IsResourceNotReady(err) {
+			// There might be cases in which AWS is not fast enough to create the
+			// resources we want to watch. We skip here and try again on the next
+			// resync.
+			r.logger.LogCtx(ctx, "level", "debug", "message", "guest cluster main stack creation is not complete")
+			resourcecanceledcontext.SetCanceled(ctx)
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
+
+			return nil
 		} else if ctx.Err() != nil {
 			return microerror.Mask(ctx.Err())
 		} else if err != nil {
