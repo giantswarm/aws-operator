@@ -56,6 +56,27 @@ func IsNotFound(err error) bool {
 	return microerror.Cause(err) == notFoundError
 }
 
+var resourceNotReadyError = microerror.New("resource not ready")
+
+// IsResourceNotReady asserts resourceNotReadyError.
+func IsResourceNotReady(err error) bool {
+	c := microerror.Cause(err)
+
+	if c == nil {
+		return false
+	}
+
+	if strings.Contains(c.Error(), "ResourceNotReady") {
+		return true
+	}
+
+	if c == resourceNotReadyError {
+		return true
+	}
+
+	return false
+}
+
 var wrongTypeError = microerror.New("wrong type")
 
 // IsWrongType asserts wrongTypeError.
