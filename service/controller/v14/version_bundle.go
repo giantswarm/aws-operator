@@ -9,8 +9,8 @@ func VersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "aws-operator",
-				Description: "Add your changes here.",
-				Kind:        versionbundle.KindChanged,
+				Description: "Added Route53 support for BYOC accoutns.",
+				Kind:        versionbundle.KindAdded,
 			},
 		},
 		Components: []versionbundle.Component{
