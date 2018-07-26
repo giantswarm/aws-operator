@@ -8,11 +8,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v15/key"
 )
 
-// The template related to this adapter can be found in the following import.
-//
-//     github.com/giantswarm/aws-operator/service/controller/v15/templates/cloudformation/guest/load_balancers.go
-//
-
 const (
 	// Default values for health checks.
 	healthCheckHealthyThreshold   = 2
