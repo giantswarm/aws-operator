@@ -5,11 +5,6 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
-// The template related to this adapter can be found in the following import.
-//
-//     github.com/giantswarm/aws-operator/service/controller/v15/templates/cloudformation/guest/recordsets.go
-//
-
 type recordSetsAdapter struct {
 	BaseDomain                 string
 	GuestHostedZoneNameServers string
