@@ -2,6 +2,11 @@ package adapter
 
 import "github.com/giantswarm/aws-operator/service/controller/v15/key"
 
+// The template related to this adapter can be found in the following import.
+//
+//     github.com/giantswarm/aws-operator/service/controller/v15/templates/cloudformation/hostpre/iam_roles.go
+//
+
 type hostIamRolesAdapter struct {
 	PeerAccessRoleName string
 	GuestAccountID     string

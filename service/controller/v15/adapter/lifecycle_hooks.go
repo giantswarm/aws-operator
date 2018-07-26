@@ -2,6 +2,11 @@ package adapter
 
 import "github.com/giantswarm/aws-operator/service/controller/v15/key"
 
+// The template related to this adapter can be found in the following import.
+//
+//     github.com/giantswarm/aws-operator/service/controller/v15/templates/cloudformation/guest/lifecycle_hooks.go
+//
+
 type lifecycleHooksAdapter struct {
 	Worker lifecycleHooksAdapterWorker
 }

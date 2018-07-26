@@ -15,6 +15,11 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v15/key"
 )
 
+// The template related to this adapter can be found in the following import.
+//
+//     github.com/giantswarm/aws-operator/service/controller/v15/templates/cloudformation/hostpost/route_tables.go
+//
+
 type hostRouteTablesAdapter struct {
 	PrivateRouteTables []RouteTable
 	PublicRouteTables  []RouteTable

@@ -11,6 +11,11 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v15/templates"
 )
 
+// The template related to this adapter can be found in the following import.
+//
+//     github.com/giantswarm/aws-operator/service/controller/v15/templates/cloudformation/guest/launch_configuration.go
+//
+
 type launchConfigAdapter struct {
 	WorkerAssociatePublicIPAddress bool
 	WorkerBlockDeviceMappings      []BlockDeviceMapping
