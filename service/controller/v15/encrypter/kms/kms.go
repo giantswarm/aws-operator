@@ -7,9 +7,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/aws-operator/service/controller/v14/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v14/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/v14/key"
+	"github.com/giantswarm/aws-operator/service/controller/v15/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v15/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v15/key"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 )

@@ -6,7 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/v14/ebs"
+	"github.com/giantswarm/aws-operator/service/controller/v15/ebs"
 )
 
 type EBSServiceMock struct {

@@ -12,12 +12,12 @@ import (
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/randomkeys"
 
-	"github.com/giantswarm/aws-operator/service/controller/v14/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v15/encrypter"
 )
 
 const (
 	// Name is the identifier of the resource.
-	Name = "s3objectv14"
+	Name = "s3objectv15"
 )
 
 // Config represents the configuration used to create a new cloudformation resource.

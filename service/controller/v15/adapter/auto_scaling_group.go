@@ -5,7 +5,7 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v14/key"
+	"github.com/giantswarm/aws-operator/service/controller/v15/key"
 )
 
 // template related to this adapter: service/templates/cloudformation/guest/auto_scaling_group.yaml
