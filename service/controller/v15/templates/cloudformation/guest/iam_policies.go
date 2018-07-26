@@ -1,21 +1,22 @@
 package guest
 
 const IAMPolicies = `{{define "iam_policies"}}
+{{- $v := .Guest.IAMPolicies }}
   MasterRole:
     Type: "AWS::IAM::Role"
     Properties:
-      RoleName: {{.MasterRoleName}}
+      RoleName: {{ $v.MasterRoleName }}
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
           Effect: "Allow"
           Principal:
-            Service: {{.EC2ServiceDomain}}
+            Service: {{ $v.EC2ServiceDomain }}
           Action: "sts:AssumeRole"
   MasterRolePolicy:
     Type: "AWS::IAM::Policy"
     Properties:
-      PolicyName: {{.MasterPolicyName}}
+      PolicyName: {{ $v.MasterPolicyName }}
       Roles:
         - Ref: "MasterRole"
       PolicyDocument:
@@ -24,10 +25,10 @@ const IAMPolicies = `{{define "iam_policies"}}
           - Effect: "Allow"
             Action: "ec2:*"
             Resource: "*"
-{{ if .KMSKeyARN }}
+{{ if $v.KMSKeyARN }}
           - Effect: "Allow"
             Action: "kms:Decrypt"
-            Resource: "{{.KMSKeyARN}}"
+            Resource: "{{ $v.KMSKeyARN }}"
 {{ end }}
           - Effect: "Allow"
             Action:
@@ -37,11 +38,11 @@ const IAMPolicies = `{{define "iam_policies"}}
 
           - Effect: "Allow"
             Action: "s3:ListBucket"
-            Resource: "arn:{{.RegionARN}}:s3:::{{.S3Bucket}}"
+            Resource: "arn:{{ $v.RegionARN }}:s3:::{{ $v.S3Bucket }}"
 
           - Effect: "Allow"
             Action: "s3:GetObject"
-            Resource: "arn:{{.RegionARN}}:s3:::{{.S3Bucket}}/*"
+            Resource: "arn:{{ $v.RegionARN }}:s3:::{{ $v.S3Bucket }}/*"
 
           - Effect: "Allow"
             Action: "elasticloadbalancing:*"
@@ -49,25 +50,25 @@ const IAMPolicies = `{{define "iam_policies"}}
   MasterInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
-      InstanceProfileName: {{.MasterProfileName}}
+      InstanceProfileName: {{ $v.MasterProfileName }}
       Roles:
         - Ref: "MasterRole"
 
   WorkerRole:
     Type: "AWS::IAM::Role"
     Properties:
-      RoleName: {{.WorkerRoleName}}
+      RoleName: {{ $v.WorkerRoleName }}
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
           Effect: "Allow"
           Principal:
-            Service: {{.EC2ServiceDomain}}
+            Service: {{ $v.EC2ServiceDomain }}
           Action: "sts:AssumeRole"
   WorkerRolePolicy:
     Type: "AWS::IAM::Policy"
     Properties:
-      PolicyName: {{.WorkerPolicyName}}
+      PolicyName: {{ $v.WorkerPolicyName }}
       Roles:
         - Ref: "WorkerRole"
       PolicyDocument:
@@ -84,10 +85,10 @@ const IAMPolicies = `{{define "iam_policies"}}
           - Effect: "Allow"
             Action: "ec2:DetachVolume"
             Resource: "*"
-{{ if .KMSKeyARN }}
+{{ if $v.KMSKeyARN }}
           - Effect: "Allow"
             Action: "kms:Decrypt"
-            Resource: "{{.KMSKeyARN}}"
+            Resource: "{{ $v.KMSKeyARN }}"
 {{ end }}
           - Effect: "Allow"
             Action:
@@ -97,11 +98,11 @@ const IAMPolicies = `{{define "iam_policies"}}
 
           - Effect: "Allow"
             Action: "s3:ListBucket"
-            Resource: "arn:{{.RegionARN}}:s3:::{{.S3Bucket}}"
+            Resource: "arn:{{ $v.RegionARN }}:s3:::{{ $v.S3Bucket }}"
 
           - Effect: "Allow"
             Action: "s3:GetObject"
-            Resource: "arn:{{.RegionARN}}:s3:::{{.S3Bucket}}/*"
+            Resource: "arn:{{ $v.RegionARN }}:s3:::{{ $v.S3Bucket }}/*"
 
           - Effect: "Allow"
             Action:
@@ -116,7 +117,7 @@ const IAMPolicies = `{{define "iam_policies"}}
   WorkerInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
-      InstanceProfileName: {{.WorkerProfileName}}
+      InstanceProfileName: {{ $v.WorkerProfileName }}
       Roles:
         - Ref: "WorkerRole"
-{{end}}`
+{{ end }}`

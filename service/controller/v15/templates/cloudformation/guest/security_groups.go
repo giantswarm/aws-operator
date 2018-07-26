@@ -1,20 +1,21 @@
 package guest
 
 const SecurityGroups = `{{define "security_groups" }}
+{{- $v := .Guest.SecurityGroups }}
   MasterSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: {{ .MasterSecurityGroupName }}
+      GroupDescription: {{ $v.MasterSecurityGroupName }}
       VpcId: !Ref VPC
       SecurityGroupIngress:
-      {{ range .MasterSecurityGroupRules }}
+      {{ range $v.MasterSecurityGroupRules }}
       -
         IpProtocol: {{ .Protocol }}
         FromPort: {{ .Port }}
         ToPort: {{ .Port }}
         CidrIp: {{ .SourceCIDR }}
       {{ end }}
-      {{- if .APIWhitelistEnabled }}
+      {{- if $v.APIWhitelistEnabled }}
       -
         IpProtocol: tcp
         FromPort: 443
@@ -23,15 +24,15 @@ const SecurityGroups = `{{define "security_groups" }}
       {{- end }}
       Tags:
         - Key: Name
-          Value:  {{ .MasterSecurityGroupName }}
+          Value:  {{ $v.MasterSecurityGroupName }}
 
   WorkerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: {{ .WorkerSecurityGroupName }}
+      GroupDescription: {{ $v.WorkerSecurityGroupName }}
       VpcId: !Ref VPC
       SecurityGroupIngress:
-      {{ range .WorkerSecurityGroupRules }}
+      {{ range $v.WorkerSecurityGroupRules }}
       -
         IpProtocol: {{ .Protocol }}
         FromPort: {{ .Port }}
@@ -44,15 +45,15 @@ const SecurityGroups = `{{define "security_groups" }}
       {{ end }}
       Tags:
         - Key: Name
-          Value:  {{ .WorkerSecurityGroupName }}
+          Value:  {{ $v.WorkerSecurityGroupName }}
 
   IngressSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: {{ .IngressSecurityGroupName }}
+      GroupDescription: {{ $v.IngressSecurityGroupName }}
       VpcId: !Ref VPC
       SecurityGroupIngress:
-      {{ range .IngressSecurityGroupRules }}
+      {{ range $v.IngressSecurityGroupRules }}
       -
         IpProtocol: {{ .Protocol }}
         FromPort: {{ .Port }}
@@ -61,7 +62,7 @@ const SecurityGroups = `{{define "security_groups" }}
       {{ end }}
       Tags:
         - Key: Name
-          Value: {{ .IngressSecurityGroupName }}
+          Value: {{ $v.IngressSecurityGroupName }}
 
   # Allow all access between masters and workers for calico. This is done after
   # the other rules to avoid circular dependencies.
@@ -105,4 +106,4 @@ const SecurityGroups = `{{define "security_groups" }}
       ToPort: -1
       SourceSecurityGroupId: !Ref MasterSecurityGroup
 
-{{end}}`
+{{ end }}`

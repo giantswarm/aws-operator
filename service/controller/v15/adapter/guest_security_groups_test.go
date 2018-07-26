@@ -148,7 +148,7 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 				Clients:      Clients{},
 				HostClients:  hostClients,
 			}
-			err := a.getSecurityGroups(cfg)
+			err := a.Guest.SecurityGroups.Adapt(cfg)
 			if tc.expectedError && err == nil {
 				t.Error("expected error didn't happen")
 			}
@@ -157,24 +157,24 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 				t.Errorf("unexpected error %v", err)
 			}
 
-			if a.MasterSecurityGroupName != tc.expectedMasterSecurityGroupName {
-				t.Errorf("unexpected MasterGroupName, got %q, want %q", a.MasterSecurityGroupName, tc.expectedMasterSecurityGroupName)
+			if a.Guest.SecurityGroups.MasterSecurityGroupName != tc.expectedMasterSecurityGroupName {
+				t.Errorf("unexpected MasterGroupName, got %q, want %q", a.Guest.SecurityGroups.MasterSecurityGroupName, tc.expectedMasterSecurityGroupName)
 			}
 
-			if a.WorkerSecurityGroupName != tc.expectedWorkerSecurityGroupName {
-				t.Errorf("unexpected WorkerGroupName, got %q, want %q", a.WorkerSecurityGroupName, tc.expectedWorkerSecurityGroupName)
+			if a.Guest.SecurityGroups.WorkerSecurityGroupName != tc.expectedWorkerSecurityGroupName {
+				t.Errorf("unexpected WorkerGroupName, got %q, want %q", a.Guest.SecurityGroups.WorkerSecurityGroupName, tc.expectedWorkerSecurityGroupName)
 			}
 
-			if !reflect.DeepEqual(a.WorkerSecurityGroupRules, tc.expectedWorkerSecurityGroupRules) {
-				t.Errorf("unexpected Worker Security Group Rules, got %v, want %v", a.WorkerSecurityGroupRules, tc.expectedWorkerSecurityGroupRules)
+			if !reflect.DeepEqual(a.Guest.SecurityGroups.WorkerSecurityGroupRules, tc.expectedWorkerSecurityGroupRules) {
+				t.Errorf("unexpected Worker Security Group Rules, got %v, want %v", a.Guest.SecurityGroups.WorkerSecurityGroupRules, tc.expectedWorkerSecurityGroupRules)
 			}
 
-			if a.IngressSecurityGroupName != tc.expectedIngressSecurityGroupName {
-				t.Errorf("unexpected IngressGroupName, got %q, want %q", a.IngressSecurityGroupName, tc.expectedIngressSecurityGroupName)
+			if a.Guest.SecurityGroups.IngressSecurityGroupName != tc.expectedIngressSecurityGroupName {
+				t.Errorf("unexpected IngressGroupName, got %q, want %q", a.Guest.SecurityGroups.IngressSecurityGroupName, tc.expectedIngressSecurityGroupName)
 			}
 
-			if !reflect.DeepEqual(a.IngressSecurityGroupRules, tc.expectedIngressSecurityGroupRules) {
-				t.Errorf("unexpected Ingress Security Group Rules, got %v, want %v", a.IngressSecurityGroupRules, tc.expectedIngressSecurityGroupRules)
+			if !reflect.DeepEqual(a.Guest.SecurityGroups.IngressSecurityGroupRules, tc.expectedIngressSecurityGroupRules) {
+				t.Errorf("unexpected Ingress Security Group Rules, got %v, want %v", a.Guest.SecurityGroups.IngressSecurityGroupRules, tc.expectedIngressSecurityGroupRules)
 			}
 		})
 	}
