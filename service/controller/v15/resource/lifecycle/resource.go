@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	Name = "lifecyclev14"
+	Name = "lifecyclev15"
 )
 
 type ResourceConfig struct {

@@ -11,13 +11,13 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/v14/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/v14/key"
+	"github.com/giantswarm/aws-operator/service/controller/v15/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v15/key"
 )
 
 // The template related to this adapter can be found in the following import.
 //
-//     github.com/giantswarm/aws-operator/service/controller/v14/templates/cloudformation/hostpost/route_tables.go
+//     github.com/giantswarm/aws-operator/service/controller/v15/templates/cloudformation/hostpost/route_tables.go
 //
 
 type hostRouteTablesAdapter struct {

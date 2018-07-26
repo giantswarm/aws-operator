@@ -6,13 +6,13 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v14/key"
-	"github.com/giantswarm/aws-operator/service/controller/v14/templates"
+	"github.com/giantswarm/aws-operator/service/controller/v15/key"
+	"github.com/giantswarm/aws-operator/service/controller/v15/templates"
 )
 
 // The template related to this adapter can be found in the following import.
 //
-//     github.com/giantswarm/aws-operator/service/controller/v14/templates/cloudformation/guest/instance.go
+//     github.com/giantswarm/aws-operator/service/controller/v15/templates/cloudformation/guest/instance.go
 //
 
 type instanceAdapter struct {
