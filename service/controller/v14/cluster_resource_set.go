@@ -12,7 +12,7 @@ import (
 	"github.com/giantswarm/operatorkit/controller/resource/metricsresource"
 	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
 	"github.com/giantswarm/randomkeys"
-	"github.com/giantswarm/statusresource"
+	_ "github.com/giantswarm/statusresource"
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
@@ -371,24 +371,53 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var statusResource controller.Resource
-	{
-		c := statusresource.Config{
-			ClusterStatusFunc:        key.ToClusterStatus,
-			NodeCountFunc:            key.ToNodeCount,
-			Logger:                   config.Logger,
-			RESTClient:               config.G8sClient.ProviderV1alpha1().RESTClient(),
-			VersionBundleVersionFunc: key.ToVersionBundleVersion,
-		}
+	//var guestCluster guestcluster.Interface
+	//{
+	//	c := guestcluster.Config{
+	//		CertsSearcher: certsSearcher,
+	//		Logger:        config.Logger,
+	//
+	//		CertID: certs.APICert,
+	//	}
+	//
+	//	guestCluster, err = guestcluster.New(c)
+	//	if err != nil {
+	//		return nil, microerror.Mask(err)
+	//	}
+	//}
 
-		statusResource, err = statusresource.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
+	//var statusResource controller.Resource
+	//{
+	//	c := statusresource.Config{
+	//		ClusterEndpointFunc:      key.ToClusterEndpoint,
+	//		ClusterIDFunc:            key.ToClusterID,
+	//		ClusterStatusFunc:        key.ToClusterStatus,
+	//		GuestCluster:             guestCluster,
+	//		NodeCountFunc:            key.ToNodeCount,
+	//		Logger:                   config.Logger,
+	//		RESTClient:               config.G8sClient.ProviderV1alpha1().RESTClient(),
+	//		VersionBundleVersionFunc: key.ToVersionBundleVersion,
+	//	}
+	//
+	//	statusResource, err = statusresource.New(c)
+	//	if err != nil {
+	//		return nil, microerror.Mask(err)
+	//	}
+	//}
 
 	resources := []controller.Resource{
-		statusResource,
+		// TODO our host clusters are in quite inconsistent states. Status sub
+		// resources do not seem to be enabled everywhere. This results in
+		// unpredictable behaviour across the board. For now we disable the status
+		// resource to not make the situation worse. Above some dependencies are
+		// prepared but also commented. Later we can easily enable this again but
+		// this needs more extensive testing.
+		//
+		//     https://github.com/giantswarm/giantswarm/issues/3822
+		//
+
+		//statusResource,
+
 		migrationResource,
 		hostedZoneResource,
 		bridgeZoneResource,

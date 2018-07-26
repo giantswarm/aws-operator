@@ -14,6 +14,7 @@ const (
 type Interface interface {
 	GetReleaseVersion(name, channel string) (string, error)
 	PullChartTarball(name, channel string) (string, error)
+	PullChartTarballFromRelease(name, release string) (string, error)
 }
 
 // Channel represents a CNR channel.

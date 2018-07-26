@@ -141,7 +141,7 @@ func Test_Draining(t *testing.T) {
 				default:
 					tlsConfig, err := rest.TLSConfigFor(g.RestConfig())
 					if err != nil {
-						fmt.Printf("expected %#v got %#v", nil, err)
+						fmt.Printf("expected %#v got %#v (%s)\n", nil, err, err.Error())
 						continue
 					}
 					client := &http.Client{
@@ -154,7 +154,7 @@ func Test_Draining(t *testing.T) {
 					u := restClient.Get().AbsPath("api", "v1", "namespaces", "e2e-app", "services", "e2e-app:8000", "proxy/").URL()
 					resp, err := client.Get(u.String())
 					if err != nil {
-						fmt.Printf("expected %#v got %#v\n", nil, err)
+						fmt.Printf("expected %#v got %#v (%s)\n", nil, err, err.Error())
 						continue
 					} else {
 						defer resp.Body.Close()
@@ -162,14 +162,14 @@ func Test_Draining(t *testing.T) {
 
 					b, err := ioutil.ReadAll(resp.Body)
 					if err != nil {
-						fmt.Printf("expected %#v got %#v\n", nil, err)
+						fmt.Printf("expected %#v got %#v (%s)\n", nil, err, err.Error())
 						continue
 					}
 
 					var r E2EAppResponse
 					err = json.Unmarshal(b, &r)
 					if err != nil {
-						fmt.Printf("expected %#v got %#v\n", nil, err)
+						fmt.Printf("expected %#v got %#v (%s)\n", nil, err, err.Error())
 						continue
 					}
 
@@ -217,7 +217,7 @@ func Test_Draining(t *testing.T) {
 	{
 		newLogger.Log("level", "debug", "message", "validating test data")
 
-		acceptable := float64(10)
+		acceptable := float64(20)
 		percOfFail := failure * 100 / success
 
 		newLogger.Log("level", "debug", "message", fmt.Sprintf("failure count is %f", failure))

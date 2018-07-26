@@ -65,7 +65,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	oldSpec := *customObject.Spec.DeepCopy()
 
-	if customObject.Spec.AWS.CredentialSecret.Name != "" {
+	if customObject.Spec.AWS.CredentialSecret.Name == "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "CR is missing credential, setting the default")
 
 		customObject.Spec.AWS.CredentialSecret.Namespace = credentialSecretDefaultNamespace

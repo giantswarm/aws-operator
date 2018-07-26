@@ -10,3 +10,10 @@ var invalidConfigError = microerror.New("invalid config")
 func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
+
+var missingLabelError = microerror.New("missing label")
+
+// IsMissingLabel asserts missingLabelError.
+func IsMissingLabel(err error) bool {
+	return microerror.Cause(err) == missingLabelError
+}

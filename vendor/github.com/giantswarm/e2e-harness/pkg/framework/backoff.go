@@ -1,6 +1,8 @@
 package framework
 
 import (
+	"fmt"
+	"log"
 	"time"
 
 	"github.com/cenkalti/backoff"
@@ -68,4 +70,10 @@ func (b *BackOffMaxElapsedTime) NextBackOff() time.Duration {
 func (b *BackOffMaxElapsedTime) Reset() {
 	b.start = time.Time{}
 	b.delegate.Reset()
+}
+
+func newNotify(operationName string) func(error, time.Duration) {
+	return func(err error, delay time.Duration) {
+		log.Printf(fmt.Sprintf("%s failed, retrying with delay %.0fm%.0fs: '%#v'", operationName, delay.Minutes(), delay.Seconds(), err))
+	}
 }
