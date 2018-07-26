@@ -10,11 +10,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v15/templates"
 )
 
-// The template related to this adapter can be found in the following import.
-//
-//     github.com/giantswarm/aws-operator/service/controller/v15/templates/cloudformation/guest/instance.go
-//
-
 type instanceAdapter struct {
 	Cluster instanceAdapterCluster
 	Image   instanceAdapterImage
