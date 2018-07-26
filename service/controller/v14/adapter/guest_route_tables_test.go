@@ -48,7 +48,7 @@ func TestAdapterRouteTablesRegularFields(t *testing.T) {
 				Clients:      Clients{},
 				HostClients:  hostClients,
 			}
-			err := a.getRouteTables(cfg)
+			err := a.Guest.RouteTables.Adapt(cfg)
 			if tc.expectedError && err == nil {
 				t.Error("expected error didn't happen")
 			}
@@ -57,16 +57,16 @@ func TestAdapterRouteTablesRegularFields(t *testing.T) {
 				t.Errorf("unexpected error %v", err)
 			}
 
-			if a.HostClusterCIDR != tc.expectedHostClusterCIDR {
-				t.Errorf("unexpected HostClusterCIDR, got %q, want %q", a.HostClusterCIDR, tc.expectedHostClusterCIDR)
+			if a.Guest.RouteTables.HostClusterCIDR != tc.expectedHostClusterCIDR {
+				t.Errorf("unexpected HostClusterCIDR, got %q, want %q", a.Guest.RouteTables.HostClusterCIDR, tc.expectedHostClusterCIDR)
 			}
 
-			if a.PublicRouteTableName != tc.expectedPublicRouteTableName {
-				t.Errorf("unexpected PublicRouteTableName, got %q, want %q", a.PublicRouteTableName, tc.expectedPrivateRouteTableName)
+			if a.Guest.RouteTables.PublicRouteTableName != tc.expectedPublicRouteTableName {
+				t.Errorf("unexpected PublicRouteTableName, got %q, want %q", a.Guest.RouteTables.PublicRouteTableName, tc.expectedPrivateRouteTableName)
 			}
 
-			if a.PrivateRouteTableName != tc.expectedPrivateRouteTableName {
-				t.Errorf("unexpected PrivateRouteTableName, got %q, want %q", a.PrivateRouteTableName, tc.expectedPrivateRouteTableName)
+			if a.Guest.RouteTables.PrivateRouteTableName != tc.expectedPrivateRouteTableName {
+				t.Errorf("unexpected PrivateRouteTableName, got %q, want %q", a.Guest.RouteTables.PrivateRouteTableName, tc.expectedPrivateRouteTableName)
 			}
 		})
 	}

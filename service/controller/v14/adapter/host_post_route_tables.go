@@ -15,24 +15,12 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v14/key"
 )
 
-// The template related to this adapter can be found in the following import.
-//
-//     github.com/giantswarm/aws-operator/service/controller/v14/templates/cloudformation/hostpost/route_tables.go
-//
-
-type hostRouteTablesAdapter struct {
-	PrivateRouteTables []RouteTable
-	PublicRouteTables  []RouteTable
+type HostPostRouteTablesAdapter struct {
+	PrivateRouteTables []HostPostRouteTablesAdapterRouteTable
+	PublicRouteTables  []HostPostRouteTablesAdapterRouteTable
 }
 
-type RouteTable struct {
-	Name             string
-	RouteTableID     string
-	CidrBlock        string
-	PeerConnectionID string
-}
-
-func (i *hostRouteTablesAdapter) getHostPostRouteTables(cfg Config) error {
+func (i *HostPostRouteTablesAdapter) Adapt(cfg Config) error {
 	peerConnectionID, err := waitForPeeringConnectionID(cfg)
 	if err != nil {
 		return microerror.Mask(err)
@@ -44,7 +32,7 @@ func (i *hostRouteTablesAdapter) getHostPostRouteTables(cfg Config) error {
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		rt := RouteTable{
+		rt := HostPostRouteTablesAdapterRouteTable{
 			Name:         routeTableName,
 			RouteTableID: routeTableID,
 			// Requester CIDR block, we create the peering connection from the guest's private subnet.
@@ -62,7 +50,7 @@ func (i *hostRouteTablesAdapter) getHostPostRouteTables(cfg Config) error {
 			if err != nil {
 				return microerror.Mask(err)
 			}
-			rt := RouteTable{
+			rt := HostPostRouteTablesAdapterRouteTable{
 				Name:         routeTableName,
 				RouteTableID: routeTableID,
 				// Requester CIDR block, we create the peering connection from the
@@ -74,6 +62,13 @@ func (i *hostRouteTablesAdapter) getHostPostRouteTables(cfg Config) error {
 		}
 	}
 	return nil
+}
+
+type HostPostRouteTablesAdapterRouteTable struct {
+	Name             string
+	RouteTableID     string
+	CidrBlock        string
+	PeerConnectionID string
 }
 
 // waitForPeeringConnectionID keeps asking for the peering connection ID until it is obtained or

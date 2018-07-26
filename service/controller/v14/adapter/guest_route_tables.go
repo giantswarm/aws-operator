@@ -6,18 +6,13 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v14/key"
 )
 
-// The template related to this adapter can be found in the following import.
-//
-//     github.com/giantswarm/aws-operator/service/controller/v14/templates/cloudformation/guest/route_tables.go
-//
-
-type routeTablesAdapter struct {
+type GuestRouteTablesAdapter struct {
 	HostClusterCIDR       string
 	PublicRouteTableName  string
 	PrivateRouteTableName string
 }
 
-func (r *routeTablesAdapter) getRouteTables(cfg Config) error {
+func (r *GuestRouteTablesAdapter) Adapt(cfg Config) error {
 	hostClusterCIDR, err := VpcCIDR(cfg.HostClients, key.PeerID(cfg.CustomObject))
 	if err != nil {
 		return microerror.Mask(err)

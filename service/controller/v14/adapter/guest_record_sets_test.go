@@ -13,6 +13,7 @@ func TestAdapterRecordSetsRegularFields(t *testing.T) {
 		customObject           v1alpha1.AWSConfig
 		route53Enabled         bool
 		expectedBaseDomain     string
+		expectedClusterID      string
 		expectedRoute53Enabled bool
 	}{
 		{
@@ -45,6 +46,7 @@ func TestAdapterRecordSetsRegularFields(t *testing.T) {
 			},
 			route53Enabled:         true,
 			expectedRoute53Enabled: true,
+			expectedClusterID:      "test-cluster",
 			expectedBaseDomain:     "installation.aws.eu-central-1.gigantic.io",
 		},
 	}
@@ -58,16 +60,19 @@ func TestAdapterRecordSetsRegularFields(t *testing.T) {
 				Clients:        clients,
 				Route53Enabled: tc.route53Enabled,
 			}
-			err := a.getRecordSets(cfg)
+			err := a.Guest.RecordSets.Adapt(cfg)
 			if err != nil {
 				t.Errorf("unexpected error %v", err)
 			}
 
-			if a.BaseDomain != tc.expectedBaseDomain {
-				t.Fatalf("BaseDomain == %q, want %q", a.BaseDomain, tc.expectedBaseDomain)
+			if a.Guest.RecordSets.BaseDomain != tc.expectedBaseDomain {
+				t.Fatalf("BaseDomain == %q, want %q", a.Guest.RecordSets.BaseDomain, tc.expectedBaseDomain)
 			}
-			if a.Route53Enabled != tc.expectedRoute53Enabled {
-				t.Fatalf("Route53Enabled == %v, want %v", a.Route53Enabled, tc.expectedRoute53Enabled)
+			if a.Guest.RecordSets.ClusterID != tc.expectedClusterID {
+				t.Fatalf("ClusterID == %q, want %q", a.Guest.RecordSets.ClusterID, tc.expectedClusterID)
+			}
+			if a.Guest.RecordSets.Route53Enabled != tc.expectedRoute53Enabled {
+				t.Fatalf("Route53Enabled == %v, want %v", a.Guest.RecordSets.Route53Enabled, tc.expectedRoute53Enabled)
 			}
 		})
 	}

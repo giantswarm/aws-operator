@@ -117,7 +117,7 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 				Clients:      Clients{},
 				HostClients:  Clients{},
 			}
-			err := a.getAutoScalingGroup(cfg)
+			err := a.Guest.AutoScalingGroup.Adapt(cfg)
 			if tc.expectedError && err == nil {
 				t.Error("expected error didn't happen")
 			}
@@ -127,32 +127,32 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 			}
 
 			if !tc.expectedError {
-				if a.ASGMaxSize != tc.expectedASGMaxSize {
-					t.Errorf("unexpected output, got %d, want %d", a.ASGMaxSize, tc.expectedASGMaxSize)
+				if a.Guest.AutoScalingGroup.ASGMaxSize != tc.expectedASGMaxSize {
+					t.Errorf("unexpected output, got %d, want %d", a.Guest.AutoScalingGroup.ASGMaxSize, tc.expectedASGMaxSize)
 				}
 
-				if a.ASGMinSize != tc.expectedASGMinSize {
-					t.Errorf("unexpected output, got %d, want %d", a.ASGMinSize, tc.expectedASGMinSize)
+				if a.Guest.AutoScalingGroup.ASGMinSize != tc.expectedASGMinSize {
+					t.Errorf("unexpected output, got %d, want %d", a.Guest.AutoScalingGroup.ASGMinSize, tc.expectedASGMinSize)
 				}
 
-				if a.HealthCheckGracePeriod != tc.expectedHealthCheckGracePeriod {
-					t.Errorf("unexpected output, got %d, want %d", a.HealthCheckGracePeriod, tc.expectedHealthCheckGracePeriod)
+				if a.Guest.AutoScalingGroup.HealthCheckGracePeriod != tc.expectedHealthCheckGracePeriod {
+					t.Errorf("unexpected output, got %d, want %d", a.Guest.AutoScalingGroup.HealthCheckGracePeriod, tc.expectedHealthCheckGracePeriod)
 				}
 
-				if a.MaxBatchSize != tc.expectedMaxBatchSize {
-					t.Errorf("unexpected output, got %q, want %q", a.MaxBatchSize, tc.expectedMaxBatchSize)
+				if a.Guest.AutoScalingGroup.MaxBatchSize != tc.expectedMaxBatchSize {
+					t.Errorf("unexpected output, got %q, want %q", a.Guest.AutoScalingGroup.MaxBatchSize, tc.expectedMaxBatchSize)
 				}
 
-				if a.MinInstancesInService != tc.expectedMinInstancesInService {
-					t.Errorf("unexpected output, got %q, want %q", a.MinInstancesInService, tc.expectedMinInstancesInService)
+				if a.Guest.AutoScalingGroup.MinInstancesInService != tc.expectedMinInstancesInService {
+					t.Errorf("unexpected output, got %q, want %q", a.Guest.AutoScalingGroup.MinInstancesInService, tc.expectedMinInstancesInService)
 				}
 
-				if a.RollingUpdatePauseTime != tc.expectedRollingUpdatePauseTime {
-					t.Errorf("unexpected output, got %q, want %q", a.RollingUpdatePauseTime, tc.expectedRollingUpdatePauseTime)
+				if a.Guest.AutoScalingGroup.RollingUpdatePauseTime != tc.expectedRollingUpdatePauseTime {
+					t.Errorf("unexpected output, got %q, want %q", a.Guest.AutoScalingGroup.RollingUpdatePauseTime, tc.expectedRollingUpdatePauseTime)
 				}
 
-				if a.WorkerAZ != tc.expectedAZ {
-					t.Errorf("unexpected output, got %q, want %q", a.WorkerAZ, tc.expectedAZ)
+				if a.Guest.AutoScalingGroup.WorkerAZ != tc.expectedAZ {
+					t.Errorf("unexpected output, got %q, want %q", a.Guest.AutoScalingGroup.WorkerAZ, tc.expectedAZ)
 				}
 
 			}

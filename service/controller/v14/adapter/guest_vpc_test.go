@@ -55,27 +55,26 @@ func TestAdapterVPCRegularFields(t *testing.T) {
 					STS: &STSClientMock{},
 				},
 			}
-			err := a.getVpc(cfg)
+			err := a.Guest.VPC.Adapt(cfg)
 			if err != nil {
 				t.Errorf("unexpected error %v", err)
 			}
 
-			if a.CidrBlock != tc.expectedCIDR {
-				t.Errorf("unexpected CidrBlock, got %q, want %q", a.CidrBlock, tc.expectedCIDR)
+			if a.Guest.VPC.CidrBlock != tc.expectedCIDR {
+				t.Errorf("unexpected CidrBlock, got %q, want %q", a.Guest.VPC.CidrBlock, tc.expectedCIDR)
 			}
 
-			if a.PeerVPCID != tc.expectedPeerVPCID {
-				t.Errorf("unexpected PeerVPCID, got %q, want %q", a.PeerVPCID, tc.expectedPeerVPCID)
+			if a.Guest.VPC.PeerVPCID != tc.expectedPeerVPCID {
+				t.Errorf("unexpected PeerVPCID, got %q, want %q", a.Guest.VPC.PeerVPCID, tc.expectedPeerVPCID)
 			}
 
-			if a.InstallationName != tc.expectedInstallationName {
-				t.Errorf("unexpected InstallationName, got %q, want %q", a.InstallationName, tc.expectedInstallationName)
+			if a.Guest.VPC.InstallationName != tc.expectedInstallationName {
+				t.Errorf("unexpected InstallationName, got %q, want %q", a.Guest.VPC.InstallationName, tc.expectedInstallationName)
 			}
 
-			if a.HostAccountID != tc.expectedHostAccountID {
-				t.Errorf("unexpected HostAccountID, got %q, want %q", a.HostAccountID, tc.expectedHostAccountID)
+			if a.Guest.VPC.HostAccountID != tc.expectedHostAccountID {
+				t.Errorf("unexpected HostAccountID, got %q, want %q", a.Guest.VPC.HostAccountID, tc.expectedHostAccountID)
 			}
-
 		})
 	}
 }
@@ -110,13 +109,13 @@ func TestAdapterVPCPeerRoleField(t *testing.T) {
 					STS: &STSClientMock{},
 				},
 			}
-			err := a.getVpc(cfg)
+			err := a.Guest.VPC.Adapt(cfg)
 			if err != nil {
 				t.Errorf("unexpected error %v", err)
 			}
 
-			if a.PeerRoleArn != tc.expectedPeerRoleArn {
-				t.Errorf("unexpected PeerRoleArn, got %q, want %q", a.PeerRoleArn, tc.expectedPeerRoleArn)
+			if a.Guest.VPC.PeerRoleArn != tc.expectedPeerRoleArn {
+				t.Errorf("unexpected PeerRoleArn, got %q, want %q", a.Guest.VPC.PeerRoleArn, tc.expectedPeerRoleArn)
 			}
 		})
 	}

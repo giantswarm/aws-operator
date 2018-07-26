@@ -60,7 +60,7 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 				CustomObject: tc.customObject,
 				Clients:      clients,
 			}
-			err := a.getLaunchConfiguration(cfg)
+			err := a.Guest.LaunchConfiguration.Adapt(cfg)
 			if tc.expectedError && err == nil {
 				t.Error("expected error didn't happen")
 			}
@@ -69,14 +69,17 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 				t.Errorf("unexpected error %v", err)
 			}
 
-			if a.WorkerInstanceType != tc.expectedInstanceType {
-				t.Errorf("unexpected InstanceType, got %q, want %q", a.WorkerInstanceType, tc.expectedInstanceType)
+			if a.Guest.LaunchConfiguration.ASGType != prefixWorker {
+				t.Errorf("unexpected ASGType, got %q, want %q", a.Guest.LaunchConfiguration.ASGType, prefixWorker)
 			}
-			if a.WorkerAssociatePublicIPAddress != tc.expectedAssociatePublicIPAddress {
-				t.Errorf("unexpected WorkerAssociatePublicIPAddress, got %t, want %t", a.WorkerAssociatePublicIPAddress, tc.expectedAssociatePublicIPAddress)
+			if a.Guest.LaunchConfiguration.WorkerInstanceType != tc.expectedInstanceType {
+				t.Errorf("unexpected InstanceType, got %q, want %q", a.Guest.LaunchConfiguration.WorkerInstanceType, tc.expectedInstanceType)
 			}
-			if !reflect.DeepEqual(a.WorkerBlockDeviceMappings, tc.expectedBlockDeviceMappings) {
-				t.Errorf("unexpected BlockDeviceMappings, got %v, want %v", a.WorkerBlockDeviceMappings, tc.expectedBlockDeviceMappings)
+			if a.Guest.LaunchConfiguration.WorkerAssociatePublicIPAddress != tc.expectedAssociatePublicIPAddress {
+				t.Errorf("unexpected WorkerAssociatePublicIPAddress, got %t, want %t", a.Guest.LaunchConfiguration.WorkerAssociatePublicIPAddress, tc.expectedAssociatePublicIPAddress)
+			}
+			if !reflect.DeepEqual(a.Guest.LaunchConfiguration.WorkerBlockDeviceMappings, tc.expectedBlockDeviceMappings) {
+				t.Errorf("unexpected BlockDeviceMappings, got %v, want %v", a.Guest.LaunchConfiguration.WorkerBlockDeviceMappings, tc.expectedBlockDeviceMappings)
 			}
 		})
 	}
@@ -120,13 +123,13 @@ func TestAdapterLaunchConfigurationSmallCloudConfig(t *testing.T) {
 		CustomObject: customObject,
 		Clients:      clients,
 	}
-	err := a.getLaunchConfiguration(cfg)
+	err := a.Guest.LaunchConfiguration.Adapt(cfg)
 
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
 	}
 
-	data, err := base64.StdEncoding.DecodeString(a.WorkerSmallCloudConfig)
+	data, err := base64.StdEncoding.DecodeString(a.Guest.LaunchConfiguration.WorkerSmallCloudConfig)
 	if err != nil {
 		t.Errorf("unexpected error decoding SmallCloudConfig %v", err)
 	}

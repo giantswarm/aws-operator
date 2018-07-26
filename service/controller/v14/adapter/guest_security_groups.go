@@ -12,28 +12,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v14/key"
 )
 
-// The template related to this adapter can be found in the following import.
-//
-//     github.com/giantswarm/aws-operator/service/controller/v14/templates/cloudformation/guest/security_groups.go
-//
-
-type securityGroupsAdapter struct {
-	APIWhitelistEnabled       bool
-	MasterSecurityGroupName   string
-	MasterSecurityGroupRules  []securityGroupRule
-	WorkerSecurityGroupName   string
-	WorkerSecurityGroupRules  []securityGroupRule
-	IngressSecurityGroupName  string
-	IngressSecurityGroupRules []securityGroupRule
-}
-
-type securityGroupRule struct {
-	Port                int
-	Protocol            string
-	SourceCIDR          string
-	SourceSecurityGroup string
-}
-
 const (
 	allPorts             = -1
 	cadvisorPort         = 4194
@@ -51,7 +29,17 @@ const (
 	ingressSecurityGroupName = "IngressSecurityGroup"
 )
 
-func (s *securityGroupsAdapter) getSecurityGroups(cfg Config) error {
+type GuestSecurityGroupsAdapter struct {
+	APIWhitelistEnabled       bool
+	MasterSecurityGroupName   string
+	MasterSecurityGroupRules  []securityGroupRule
+	WorkerSecurityGroupName   string
+	WorkerSecurityGroupRules  []securityGroupRule
+	IngressSecurityGroupName  string
+	IngressSecurityGroupRules []securityGroupRule
+}
+
+func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
 	hostClusterCIDR, err := VpcCIDR(cfg.HostClients, key.PeerID(cfg.CustomObject))
 	if err != nil {
 		return microerror.Mask(err)
@@ -74,7 +62,7 @@ func (s *securityGroupsAdapter) getSecurityGroups(cfg Config) error {
 	return nil
 }
 
-func (s *securityGroupsAdapter) getMasterRules(cfg Config, hostClusterCIDR string) ([]securityGroupRule, error) {
+func (s *GuestSecurityGroupsAdapter) getMasterRules(cfg Config, hostClusterCIDR string) ([]securityGroupRule, error) {
 	// Allow traffic to the Kubernetes API server depending on the API
 	// whitelisting rules.
 	apiRules, err := getKubernetesAPIRules(cfg, hostClusterCIDR)
@@ -124,7 +112,7 @@ func (s *securityGroupsAdapter) getMasterRules(cfg Config, hostClusterCIDR strin
 	return append(apiRules, otherRules...), nil
 }
 
-func (s *securityGroupsAdapter) getWorkerRules(customObject v1alpha1.AWSConfig, hostClusterCIDR string) []securityGroupRule {
+func (s *GuestSecurityGroupsAdapter) getWorkerRules(customObject v1alpha1.AWSConfig, hostClusterCIDR string) []securityGroupRule {
 	return []securityGroupRule{
 		// Allow traffic from the ingress security group to the ingress controller.
 		{
@@ -177,7 +165,7 @@ func (s *securityGroupsAdapter) getWorkerRules(customObject v1alpha1.AWSConfig, 
 	}
 }
 
-func (s *securityGroupsAdapter) getIngressRules(customObject v1alpha1.AWSConfig) []securityGroupRule {
+func (s *GuestSecurityGroupsAdapter) getIngressRules(customObject v1alpha1.AWSConfig) []securityGroupRule {
 	return []securityGroupRule{
 		// Allow all http and https traffic to the ingress load balancer.
 		{
@@ -191,6 +179,13 @@ func (s *securityGroupsAdapter) getIngressRules(customObject v1alpha1.AWSConfig)
 			SourceCIDR: defaultCIDR,
 		},
 	}
+}
+
+type securityGroupRule struct {
+	Port                int
+	Protocol            string
+	SourceCIDR          string
+	SourceSecurityGroup string
 }
 
 func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupRule, error) {

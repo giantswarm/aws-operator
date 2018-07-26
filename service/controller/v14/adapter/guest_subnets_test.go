@@ -58,7 +58,7 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 				CustomObject: tc.customObject,
 				Clients:      clients,
 			}
-			err := a.getSubnets(cfg)
+			err := a.Guest.Subnets.Adapt(cfg)
 			if tc.expectedError && err == nil {
 				t.Error("expected error didn't happen")
 			}
@@ -67,36 +67,36 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 				t.Errorf("unexpected error %v", err)
 			}
 
-			if a.PublicSubnetAZ != tc.expectedPublicSubnetAZ {
-				t.Errorf("unexpected PublicSubnetAZ, got %q, want %q", a.PublicSubnetAZ, tc.expectedPublicSubnetAZ)
+			if a.Guest.Subnets.PublicSubnetAZ != tc.expectedPublicSubnetAZ {
+				t.Errorf("unexpected PublicSubnetAZ, got %q, want %q", a.Guest.Subnets.PublicSubnetAZ, tc.expectedPublicSubnetAZ)
 			}
 
-			if a.PublicSubnetCIDR != tc.expectedPublicSubnetCIDR {
-				t.Errorf("unexpected PublicSubnetCIDR, got %q, want %q", a.PublicSubnetCIDR, tc.expectedPublicSubnetCIDR)
+			if a.Guest.Subnets.PublicSubnetCIDR != tc.expectedPublicSubnetCIDR {
+				t.Errorf("unexpected PublicSubnetCIDR, got %q, want %q", a.Guest.Subnets.PublicSubnetCIDR, tc.expectedPublicSubnetCIDR)
 			}
 
-			if a.PublicSubnetName != tc.expectedPublicSubnetName {
-				t.Errorf("unexpected PublicSubnetName, got %q, want %q", a.PublicSubnetName, tc.expectedPublicSubnetName)
+			if a.Guest.Subnets.PublicSubnetName != tc.expectedPublicSubnetName {
+				t.Errorf("unexpected PublicSubnetName, got %q, want %q", a.Guest.Subnets.PublicSubnetName, tc.expectedPublicSubnetName)
 			}
 
-			if a.PublicSubnetMapPublicIPOnLaunch != tc.expectedPublicSubnetMapPublicIPOnLaunch {
-				t.Errorf("unexpected PublicSubnetMapPublicIPOnLaunch, got %t, want %t", a.PublicSubnetMapPublicIPOnLaunch, tc.expectedPublicSubnetMapPublicIPOnLaunch)
+			if a.Guest.Subnets.PublicSubnetMapPublicIPOnLaunch != tc.expectedPublicSubnetMapPublicIPOnLaunch {
+				t.Errorf("unexpected PublicSubnetMapPublicIPOnLaunch, got %t, want %t", a.Guest.Subnets.PublicSubnetMapPublicIPOnLaunch, tc.expectedPublicSubnetMapPublicIPOnLaunch)
 			}
 
-			if a.PrivateSubnetAZ != tc.expectedPrivateSubnetAZ {
-				t.Errorf("unexpected PrivateSubnetAZ, got %q, want %q", a.PrivateSubnetAZ, tc.expectedPrivateSubnetAZ)
+			if a.Guest.Subnets.PrivateSubnetAZ != tc.expectedPrivateSubnetAZ {
+				t.Errorf("unexpected PrivateSubnetAZ, got %q, want %q", a.Guest.Subnets.PrivateSubnetAZ, tc.expectedPrivateSubnetAZ)
 			}
 
-			if a.PrivateSubnetCIDR != tc.expectedPrivateSubnetCIDR {
-				t.Errorf("unexpected PrivateSubnetCIDR, got %q, want %q", a.PrivateSubnetCIDR, tc.expectedPrivateSubnetCIDR)
+			if a.Guest.Subnets.PrivateSubnetCIDR != tc.expectedPrivateSubnetCIDR {
+				t.Errorf("unexpected PrivateSubnetCIDR, got %q, want %q", a.Guest.Subnets.PrivateSubnetCIDR, tc.expectedPrivateSubnetCIDR)
 			}
 
-			if a.PrivateSubnetName != tc.expectedPrivateSubnetName {
-				t.Errorf("unexpected PrivateSubnetName, got %q, want %q", a.PrivateSubnetName, tc.expectedPrivateSubnetName)
+			if a.Guest.Subnets.PrivateSubnetName != tc.expectedPrivateSubnetName {
+				t.Errorf("unexpected PrivateSubnetName, got %q, want %q", a.Guest.Subnets.PrivateSubnetName, tc.expectedPrivateSubnetName)
 			}
 
-			if a.PrivateSubnetMapPublicIPOnLaunch != tc.expectedPrivateSubnetMapPublicIPOnLaunch {
-				t.Errorf("unexpected PrivateSubnetMapPublicIPOnLaunch, got %t, want %t", a.PrivateSubnetMapPublicIPOnLaunch, tc.expectedPrivateSubnetMapPublicIPOnLaunch)
+			if a.Guest.Subnets.PrivateSubnetMapPublicIPOnLaunch != tc.expectedPrivateSubnetMapPublicIPOnLaunch {
+				t.Errorf("unexpected PrivateSubnetMapPublicIPOnLaunch, got %t, want %t", a.Guest.Subnets.PrivateSubnetMapPublicIPOnLaunch, tc.expectedPrivateSubnetMapPublicIPOnLaunch)
 			}
 		})
 	}
