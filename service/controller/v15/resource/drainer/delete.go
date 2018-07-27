@@ -1,4 +1,4 @@
-package lifecycle
+package drainer
 
 import (
 	"context"

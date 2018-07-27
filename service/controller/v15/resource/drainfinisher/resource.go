@@ -1,4 +1,4 @@
-package lifecycle
+package drainfinisher
 
 import (
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	Name = "lifecyclev15"
+	Name = "drainfinisherv15"
 )
 
 type ResourceConfig struct {
