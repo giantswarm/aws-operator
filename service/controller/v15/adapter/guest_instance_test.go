@@ -52,7 +52,7 @@ func Test_Adapter_Instance_RegularFields(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.Description, func(t *testing.T) {
-			a := &instanceAdapter{}
+			a := &GuestInstanceAdapter{}
 			err := a.Adapt(tc.Config)
 			if err != nil {
 				t.Fatal("expected", nil, "got", err)
@@ -133,7 +133,7 @@ func Test_Adapter_Instance_SmallCloudConfig(t *testing.T) {
 				},
 			}
 
-			a := &instanceAdapter{}
+			a := &GuestInstanceAdapter{}
 			err := a.Adapt(cfg)
 			if err != nil {
 				t.Fatalf("unexpected error %v", err)

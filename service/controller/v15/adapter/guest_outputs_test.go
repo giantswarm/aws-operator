@@ -28,7 +28,7 @@ func Test_CloudFormation_Adapter_Outputs_MasterCloudConfigVersion(t *testing.T) 
 
 	for _, tc := range testCases {
 		t.Run(tc.Description, func(t *testing.T) {
-			a := &outputsAdapter{}
+			a := &GuestOutputsAdapter{}
 
 			err := a.Adapt(tc.Config)
 			if err != nil {
@@ -64,7 +64,7 @@ func Test_CloudFormation_Adapter_Outputs_WorkerCloudConfigVersion(t *testing.T) 
 
 	for _, tc := range testCases {
 		t.Run(tc.Description, func(t *testing.T) {
-			a := &outputsAdapter{}
+			a := &GuestOutputsAdapter{}
 
 			err := a.Adapt(tc.Config)
 			if err != nil {
@@ -112,7 +112,7 @@ func Test_CloudFormation_Adapter_Outputs_WorkerCount(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.Description, func(t *testing.T) {
-			a := &outputsAdapter{}
+			a := &GuestOutputsAdapter{}
 
 			err := a.Adapt(tc.Config)
 			if err != nil {

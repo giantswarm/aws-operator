@@ -1,12 +1,13 @@
 package guest
 
 const InternetGateway = `{{define "internet_gateway"}}
+{{- $v := .Guest.InternetGateway }}
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
         - Key: Name
-          Value: {{ .ClusterID }}
+          Value: {{ $v.ClusterID }}
 
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment

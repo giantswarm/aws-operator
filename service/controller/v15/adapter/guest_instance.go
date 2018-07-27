@@ -10,45 +10,45 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v15/templates"
 )
 
-type instanceAdapter struct {
-	Cluster instanceAdapterCluster
-	Image   instanceAdapterImage
-	Master  instanceAdapterMaster
+type GuestInstanceAdapter struct {
+	Cluster GuestInstanceAdapterCluster
+	Image   GuestInstanceAdapterImage
+	Master  GuestInstanceAdapterMaster
 }
 
-type instanceAdapterCluster struct {
+type GuestInstanceAdapterCluster struct {
 	ID string
 }
 
-type instanceAdapterImage struct {
+type GuestInstanceAdapterImage struct {
 	ID string
 }
 
-type instanceAdapterMaster struct {
+type GuestInstanceAdapterMaster struct {
 	AZ               string
 	CloudConfig      string
 	EncrypterBackend string
-	DockerVolume     instanceAdapterMasterDockerVolume
-	EtcdVolume       instanceAdapterMasterEtcdVolume
-	Instance         instanceAdapterMasterInstance
+	DockerVolume     GuestInstanceAdapterMasterDockerVolume
+	EtcdVolume       GuestInstanceAdapterMasterEtcdVolume
+	Instance         GuestInstanceAdapterMasterInstance
 }
 
-type instanceAdapterMasterDockerVolume struct {
+type GuestInstanceAdapterMasterDockerVolume struct {
 	Name         string
 	ResourceName string
 }
 
-type instanceAdapterMasterEtcdVolume struct {
+type GuestInstanceAdapterMasterEtcdVolume struct {
 	Name string
 }
 
-type instanceAdapterMasterInstance struct {
+type GuestInstanceAdapterMasterInstance struct {
 	ResourceName string
 	Type         string
 	Monitoring   bool
 }
 
-func (i *instanceAdapter) Adapt(config Config) error {
+func (i *GuestInstanceAdapter) Adapt(config Config) error {
 	{
 		i.Cluster.ID = key.ClusterID(config.CustomObject)
 	}

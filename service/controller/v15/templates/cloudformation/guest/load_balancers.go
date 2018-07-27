@@ -1,28 +1,29 @@
 package guest
 
 const LoadBalancers = `{{define "load_balancers"}}
+{{- $v := .Guest.LoadBalancers }}
   ApiLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     Properties:
       ConnectionSettings:
         IdleTimeout: 1200
       HealthCheck:
-        HealthyThreshold: {{ .ELBHealthCheckHealthyThreshold }}
-        Interval: {{ .ELBHealthCheckInterval }}
-        Target: {{ .APIElbHealthCheckTarget }}
-        Timeout: {{ .ELBHealthCheckTimeout }}
-        UnhealthyThreshold: {{ .ELBHealthCheckUnhealthyThreshold }}
+        HealthyThreshold: {{ $v.ELBHealthCheckHealthyThreshold }}
+        Interval: {{ $v.ELBHealthCheckInterval }}
+        Target: {{ $v.APIElbHealthCheckTarget }}
+        Timeout: {{ $v.ELBHealthCheckTimeout }}
+        UnhealthyThreshold: {{ $v.ELBHealthCheckUnhealthyThreshold }}
       Instances:
-      - !Ref {{ .MasterInstanceResourceName }}
+      - !Ref {{ $v.MasterInstanceResourceName }}
       Listeners:
-      {{ range .APIElbPortsToOpen}}
+      {{ range $v.APIElbPortsToOpen}}
       - InstancePort: {{ .PortInstance }}
         InstanceProtocol: TCP
         LoadBalancerPort: {{ .PortELB }}
         Protocol: TCP
       {{ end }}
-      LoadBalancerName: {{ .APIElbName }}
-      Scheme: {{ .APIElbScheme }}
+      LoadBalancerName: {{ $v.APIElbName }}
+      Scheme: {{ $v.APIElbScheme }}
       SecurityGroups:
         - !Ref MasterSecurityGroup
       Subnets:
@@ -35,19 +36,19 @@ const LoadBalancers = `{{define "load_balancers"}}
       ConnectionSettings:
         IdleTimeout: 60
       HealthCheck:
-        HealthyThreshold: {{ .ELBHealthCheckHealthyThreshold }}
-        Interval: {{ .ELBHealthCheckInterval }}
-        Target: {{ .IngressElbHealthCheckTarget }}
-        Timeout: {{ .ELBHealthCheckTimeout }}
-        UnhealthyThreshold: {{ .ELBHealthCheckUnhealthyThreshold }}
+        HealthyThreshold: {{ $v.ELBHealthCheckHealthyThreshold }}
+        Interval: {{ $v.ELBHealthCheckInterval }}
+        Target: {{ $v.IngressElbHealthCheckTarget }}
+        Timeout: {{ $v.ELBHealthCheckTimeout }}
+        UnhealthyThreshold: {{ $v.ELBHealthCheckUnhealthyThreshold }}
       Listeners:
-      {{ range .IngressElbPortsToOpen}}
+      {{ range $v.IngressElbPortsToOpen}}
       - InstancePort: {{ .PortInstance }}
         InstanceProtocol: TCP
         LoadBalancerPort: {{ .PortELB }}
         Protocol: TCP
       {{ end }}
-      LoadBalancerName: {{ .IngressElbName }}
+      LoadBalancerName: {{ $v.IngressElbName }}
       Policies:
       - PolicyName: "EnableProxyProtocol"
         PolicyType: "ProxyProtocolPolicyType"
@@ -55,10 +56,10 @@ const LoadBalancers = `{{define "load_balancers"}}
         - Name: "ProxyProtocol"
           Value: "true"
         InstancePorts:
-        {{ range .IngressElbPortsToOpen}}
+        {{ range $v.IngressElbPortsToOpen}}
         - {{ .PortInstance }}
         {{ end }}
-      Scheme: {{ .IngressElbScheme }}
+      Scheme: {{ $v.IngressElbScheme }}
       SecurityGroups:
         - !Ref IngressSecurityGroup
       Subnets:

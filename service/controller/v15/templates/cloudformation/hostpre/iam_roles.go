@@ -1,14 +1,15 @@
 package hostpre
 
-const IAMRoles = `{{define "iam_roles"}}
+const IAMRoles = `{{ define "iam_roles" }}
+{{- $v := .HostPre.IAMRoles }}
   PeerRole:
     Type: 'AWS::IAM::Role'
     Properties:
-      RoleName: {{ .PeerAccessRoleName }}
+      RoleName: {{ $v.PeerAccessRoleName }}
       AssumeRolePolicyDocument:
         Statement:
           - Principal:
-              AWS: '{{ .GuestAccountID }}'
+              AWS: '{{ $v.GuestAccountID }}'
             Action:
               - 'sts:AssumeRole'
             Effect: Allow
@@ -21,4 +22,4 @@ const IAMRoles = `{{define "iam_roles"}}
               - Effect: Allow
                 Action: 'ec2:AcceptVpcPeeringConnection'
                 Resource: '*'
-{{end}}`
+{{ end }}`

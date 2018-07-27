@@ -1,31 +1,32 @@
 package guest
 
 const Outputs = `{{define "outputs"}}
+{{- $v := .Guest.Outputs }}
 Outputs:
   DockerVolumeResourceName:
-    Value: {{ .Outputs.Master.DockerVolume.ResourceName }}
-  {{ if .Route53Enabled }}
+    Value: {{ $v.Master.DockerVolume.ResourceName }}
+  {{ if $v.Route53Enabled }}
   HostedZoneNameServers:
     Value: !Join [ ',', !GetAtt 'HostedZone.NameServers' ]
   {{ end }}
   MasterImageID:
-    Value: {{ .Outputs.Master.ImageID }}
+    Value: {{ $v.Master.ImageID }}
   MasterInstanceResourceName:
-    Value: {{ .Outputs.Master.Instance.ResourceName }}
+    Value: {{ $v.Master.Instance.ResourceName }}
   MasterInstanceType:
-    Value: {{ .Outputs.Master.Instance.Type }}
+    Value: {{ $v.Master.Instance.Type }}
   MasterCloudConfigVersion:
-    Value: {{ .Outputs.Master.CloudConfig.Version }}
-  {{ .Outputs.Worker.ASG.Key }}:
-    Value: !Ref {{ .Outputs.Worker.ASG.Ref }}
+    Value: {{ $v.Master.CloudConfig.Version }}
+  {{ $v.Worker.ASG.Key }}:
+    Value: !Ref {{ $v.Worker.ASG.Ref }}
   WorkerCount:
-    Value: {{ .Outputs.Worker.Count }}
+    Value: {{ $v.Worker.Count }}
   WorkerImageID:
-    Value: {{ .Outputs.Worker.ImageID }}
+    Value: {{ $v.Worker.ImageID }}
   WorkerInstanceType:
-    Value: {{ .Outputs.Worker.InstanceType }}
+    Value: {{ $v.Worker.InstanceType }}
   WorkerCloudConfigVersion:
-    Value: {{ .Outputs.Worker.CloudConfig.Version }}
+    Value: {{ $v.Worker.CloudConfig.Version }}
   VersionBundleVersion:
     Value:
       Ref: VersionBundleVersionParameter

@@ -8,11 +8,11 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v15/key"
 )
 
-// template related to this adapter: service/templates/cloudformation/guest/auto_scaling_group.yaml
-
-type autoScalingGroupAdapter struct {
+type GuestAutoScalingGroupAdapter struct {
 	ASGMaxSize             int
 	ASGMinSize             int
+	ASGType                string
+	ClusterID              string
 	HealthCheckGracePeriod int
 	MaxBatchSize           string
 	MinInstancesInService  string
@@ -20,7 +20,7 @@ type autoScalingGroupAdapter struct {
 	WorkerAZ               string
 }
 
-func (a *autoScalingGroupAdapter) getAutoScalingGroup(cfg Config) error {
+func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	workers := key.WorkerCount(cfg.CustomObject)
 	if workers <= 0 {
 		return microerror.Maskf(invalidConfigError, "at least 1 worker required, found %d", workers)
@@ -29,6 +29,8 @@ func (a *autoScalingGroupAdapter) getAutoScalingGroup(cfg Config) error {
 	a.WorkerAZ = key.AvailabilityZone(cfg.CustomObject)
 	a.ASGMaxSize = workers + 1
 	a.ASGMinSize = workers
+	a.ASGType = asgType(cfg)
+	a.ClusterID = clusterID(cfg)
 	a.MaxBatchSize = workerCountRatio(workers, asgMaxBatchSizeRatio)
 	a.MinInstancesInService = workerCountRatio(workers, asgMinInstancesRatio)
 	a.HealthCheckGracePeriod = gracePeriodSeconds

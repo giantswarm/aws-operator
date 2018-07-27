@@ -15,7 +15,7 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 		customObject                             v1alpha1.AWSConfig
 		errorMatcher                             func(error) bool
 		expectedAPIElbName                       string
-		expectedAPIElbPortsToOpen                portPairs
+		expectedAPIElbPortsToOpen                []GuestLoadBalancersAdapterPortPair
 		expectedAPIElbScheme                     string
 		expectedAPIElbSecurityGroupID            string
 		expectedAPIElbSubnetID                   string
@@ -25,7 +25,7 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 		expectedELBHealthCheckTimeout            int
 		expectedELBHealthCheckUnhealthyThreshold int
 		expectedIngressElbName                   string
-		expectedIngressElbPortsToOpen            portPairs
+		expectedIngressElbPortsToOpen            []GuestLoadBalancersAdapterPortPair
 		expectedIngressElbScheme                 string
 	}{
 		{
@@ -58,7 +58,7 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 			},
 			errorMatcher:       nil,
 			expectedAPIElbName: "test-cluster-api",
-			expectedAPIElbPortsToOpen: portPairs{
+			expectedAPIElbPortsToOpen: []GuestLoadBalancersAdapterPortPair{
 				{
 					PortELB:      443,
 					PortInstance: 443,
@@ -71,7 +71,7 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 			expectedELBHealthCheckTimeout:            3,
 			expectedELBHealthCheckUnhealthyThreshold: 2,
 			expectedIngressElbName:                   "test-cluster-ingress",
-			expectedIngressElbPortsToOpen: portPairs{
+			expectedIngressElbPortsToOpen: []GuestLoadBalancersAdapterPortPair{
 				{
 					PortELB:      443,
 					PortInstance: 30011,
@@ -98,7 +98,7 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 				CustomObject: tc.customObject,
 				Clients:      clients,
 			}
-			err := a.getLoadBalancers(cfg)
+			err := a.Guest.LoadBalancers.Adapt(cfg)
 
 			if tc.errorMatcher != nil && err == nil {
 				t.Error("expected error didn't happen")
@@ -108,44 +108,44 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 				t.Error("expected", true, "got", false)
 			}
 
-			if tc.expectedAPIElbName != a.APIElbName {
-				t.Errorf("expected API ELB Name, got %q, want %q", a.APIElbName, tc.expectedAPIElbName)
+			if tc.expectedAPIElbName != a.Guest.LoadBalancers.APIElbName {
+				t.Errorf("expected API ELB Name, got %q, want %q", a.Guest.LoadBalancers.APIElbName, tc.expectedAPIElbName)
 			}
 
-			if !reflect.DeepEqual(tc.expectedAPIElbPortsToOpen, a.APIElbPortsToOpen) {
-				t.Errorf("expected API ELB Ports To Open, got %q, want %q", a.APIElbPortsToOpen, tc.expectedAPIElbPortsToOpen)
+			if !reflect.DeepEqual(tc.expectedAPIElbPortsToOpen, a.Guest.LoadBalancers.APIElbPortsToOpen) {
+				t.Errorf("expected API ELB Ports To Open, got %q, want %q", a.Guest.LoadBalancers.APIElbPortsToOpen, tc.expectedAPIElbPortsToOpen)
 			}
 
-			if tc.expectedAPIElbScheme != a.APIElbScheme {
-				t.Errorf("expected API ELB Scheme, got %q, want %q", a.APIElbScheme, tc.expectedAPIElbScheme)
+			if tc.expectedAPIElbScheme != a.Guest.LoadBalancers.APIElbScheme {
+				t.Errorf("expected API ELB Scheme, got %q, want %q", a.Guest.LoadBalancers.APIElbScheme, tc.expectedAPIElbScheme)
 			}
 
-			if tc.expectedELBHealthCheckHealthyThreshold != a.ELBHealthCheckHealthyThreshold {
-				t.Errorf("expected ELB health check healthy threshold, got %q, want %q", a.ELBHealthCheckHealthyThreshold, tc.expectedELBHealthCheckHealthyThreshold)
+			if tc.expectedELBHealthCheckHealthyThreshold != a.Guest.LoadBalancers.ELBHealthCheckHealthyThreshold {
+				t.Errorf("expected ELB health check healthy threshold, got %q, want %q", a.Guest.LoadBalancers.ELBHealthCheckHealthyThreshold, tc.expectedELBHealthCheckHealthyThreshold)
 			}
 
-			if tc.expectedELBHealthCheckInterval != a.ELBHealthCheckInterval {
-				t.Errorf("expected ELB health check interval, got %q, want %q", a.ELBHealthCheckInterval, tc.expectedELBHealthCheckInterval)
+			if tc.expectedELBHealthCheckInterval != a.Guest.LoadBalancers.ELBHealthCheckInterval {
+				t.Errorf("expected ELB health check interval, got %q, want %q", a.Guest.LoadBalancers.ELBHealthCheckInterval, tc.expectedELBHealthCheckInterval)
 			}
 
-			if tc.expectedELBHealthCheckTimeout != a.ELBHealthCheckTimeout {
-				t.Errorf("expected ELB health check timeout, got %q, want %q", a.ELBHealthCheckTimeout, tc.expectedELBHealthCheckTimeout)
+			if tc.expectedELBHealthCheckTimeout != a.Guest.LoadBalancers.ELBHealthCheckTimeout {
+				t.Errorf("expected ELB health check timeout, got %q, want %q", a.Guest.LoadBalancers.ELBHealthCheckTimeout, tc.expectedELBHealthCheckTimeout)
 			}
 
-			if tc.expectedELBHealthCheckUnhealthyThreshold != a.ELBHealthCheckUnhealthyThreshold {
-				t.Errorf("expected ELB health check unhealthy threshold, got %q, want %q", a.ELBHealthCheckUnhealthyThreshold, tc.expectedELBHealthCheckUnhealthyThreshold)
+			if tc.expectedELBHealthCheckUnhealthyThreshold != a.Guest.LoadBalancers.ELBHealthCheckUnhealthyThreshold {
+				t.Errorf("expected ELB health check unhealthy threshold, got %q, want %q", a.Guest.LoadBalancers.ELBHealthCheckUnhealthyThreshold, tc.expectedELBHealthCheckUnhealthyThreshold)
 			}
 
-			if tc.expectedIngressElbName != a.IngressElbName {
-				t.Errorf("expected Ingress ELB Name, got %q, want %q", a.IngressElbName, tc.expectedIngressElbName)
+			if tc.expectedIngressElbName != a.Guest.LoadBalancers.IngressElbName {
+				t.Errorf("expected Ingress ELB Name, got %q, want %q", a.Guest.LoadBalancers.IngressElbName, tc.expectedIngressElbName)
 			}
 
-			if !reflect.DeepEqual(tc.expectedIngressElbPortsToOpen, a.IngressElbPortsToOpen) {
-				t.Errorf("expected Ingress ELB Ports To Open, got %v, want %v", a.IngressElbPortsToOpen, tc.expectedIngressElbPortsToOpen)
+			if !reflect.DeepEqual(tc.expectedIngressElbPortsToOpen, a.Guest.LoadBalancers.IngressElbPortsToOpen) {
+				t.Errorf("expected Ingress ELB Ports To Open, got %v, want %v", a.Guest.LoadBalancers.IngressElbPortsToOpen, tc.expectedIngressElbPortsToOpen)
 			}
 
-			if tc.expectedIngressElbScheme != a.IngressElbScheme {
-				t.Errorf("expected Ingress ELB Scheme, got %q, want %q", a.IngressElbScheme, tc.expectedIngressElbScheme)
+			if tc.expectedIngressElbScheme != a.Guest.LoadBalancers.IngressElbScheme {
+				t.Errorf("expected Ingress ELB Scheme, got %q, want %q", a.Guest.LoadBalancers.IngressElbScheme, tc.expectedIngressElbScheme)
 			}
 		})
 	}
