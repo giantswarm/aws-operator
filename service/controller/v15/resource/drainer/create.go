@@ -32,7 +32,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	workerASGName := controllerCtx.Status.Drainer.WorkerASGName
 	if workerASGName == "" {
-		// TODO add log fmt entry about controllercontext.Context.Status values retrival.
 		r.logger.LogCtx(ctx, "level", "debug", "message", "worker ASG name is not available yet")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 		return nil
