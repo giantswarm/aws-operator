@@ -17,7 +17,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v15/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v15/credential"
 	"github.com/giantswarm/aws-operator/service/controller/v15/key"
-	"github.com/giantswarm/aws-operator/service/controller/v15/resource/lifecycle"
+	"github.com/giantswarm/aws-operator/service/controller/v15/resource/drainer"
+	"github.com/giantswarm/aws-operator/service/controller/v15/resource/drainfinisher"
+	"github.com/giantswarm/aws-operator/service/controller/v15/resource/workerasgname"
 )
 
 type DrainerResourceSetConfig struct {
@@ -33,21 +35,48 @@ type DrainerResourceSetConfig struct {
 func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
-	var lifecycleResource controller.Resource
+	var drainerResource controller.Resource
 	{
-		c := lifecycle.ResourceConfig{
+		c := drainer.ResourceConfig{
 			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
 		}
 
-		lifecycleResource, err = lifecycle.NewResource(c)
+		drainerResource, err = drainer.NewResource(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var drainFinisherResource controller.Resource
+	{
+		c := drainfinisher.ResourceConfig{
+			G8sClient: config.G8sClient,
+			Logger:    config.Logger,
+		}
+
+		drainFinisherResource, err = drainfinisher.NewResource(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var workerASGNameResource controller.Resource
+	{
+		c := workerasgname.ResourceConfig{
+			Logger: config.Logger,
+		}
+
+		workerASGNameResource, err = workerasgname.NewResource(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
 	resources := []controller.Resource{
-		lifecycleResource,
+		workerASGNameResource,
+		drainerResource,
+		drainFinisherResource,
 	}
 
 	{
