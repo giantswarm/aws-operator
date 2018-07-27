@@ -44,7 +44,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	var instances []*autoscaling.Instance
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding out the guest cluster nodes being in state '%s'", autoscaling.LifecycleStateTerminatingWait))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding the guest cluster nodes being in state '%s'", autoscaling.LifecycleStateTerminatingWait))
 
 		i := &autoscaling.DescribeAutoScalingGroupsInput{
 			AutoScalingGroupNames: []*string{
@@ -80,7 +80,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring drainer configs for %d guest cluster nodes being in state '%s'", len(instances), autoscaling.LifecycleStateTerminatingWait)
 
 		for _, instance := range instances {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding out drainer config for guest cluster nodes '%s'", *instance.InstanceId))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding drainer config for guest cluster nodes '%s'", *instance.InstanceId))
 
 			privateDNS, err := r.privateDNSForInstance(ctx, *instance.InstanceId)
 			if err != nil {

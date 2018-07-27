@@ -52,7 +52,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	var workerASGName string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding out the guest cluster worker ASG name in the cloud formation stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the guest cluster worker ASG name in the cloud formation stack")
 
 		stackOutputs, _, err := controllerCtx.CloudFormation.DescribeOutputsAndStatus(key.MainGuestStackName(customObject))
 		if cloudformationservice.IsStackNotFound(err) {

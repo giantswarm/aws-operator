@@ -41,7 +41,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	var drainedDrainerConfigs []corev1alpha1.DrainerConfig
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding out drained drainer configs for the guest cluster")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding drained drainer configs for the guest cluster")
 
 		n := v1.NamespaceAll
 		o := metav1.ListOptions{
