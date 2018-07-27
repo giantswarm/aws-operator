@@ -39,8 +39,20 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			return microerror.Mask(err)
 		}
 
+		stackName := aws.String(key.MainGuestStackName(customObject))
+
+		enableTerminationProtection := false
+		updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
+			EnableTerminationProtection: &enableTerminationProtection,
+			StackName:                   stackName,
+		}
+		_, err = r.hostClients.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
 		i := &cloudformation.DeleteStackInput{
-			StackName: aws.String(key.MainGuestStackName(customObject)),
+			StackName: stackName,
 		}
 		_, err = sc.AWSClient.CloudFormation.DeleteStack(i)
 		if err != nil {
@@ -62,8 +74,20 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	if stackStateToDelete.Name != "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting the host cluster pre stack")
 
+		stackName := aws.String(key.MainHostPreStackName(customObject))
+
+		enableTerminationProtection := false
+		updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
+			EnableTerminationProtection: &enableTerminationProtection,
+			StackName:                   stackName,
+		}
+		_, err = r.hostClients.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
 		i := &cloudformation.DeleteStackInput{
-			StackName: aws.String(key.MainHostPreStackName(customObject)),
+			StackName: stackName,
 		}
 		_, err = r.hostClients.CloudFormation.DeleteStack(i)
 		if err != nil {
@@ -78,8 +102,20 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	if stackStateToDelete.Name != "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting the host cluster post stack")
 
+		stackName := aws.String(key.MainHostPostStackName(customObject))
+
+		enableTerminationProtection := false
+		updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
+			EnableTerminationProtection: &enableTerminationProtection,
+			StackName:                   stackName,
+		}
+		_, err = r.hostClients.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
 		i := &cloudformation.DeleteStackInput{
-			StackName: aws.String(key.MainHostPostStackName(customObject)),
+			StackName: stackName,
 		}
 		_, err = r.hostClients.CloudFormation.DeleteStack(i)
 		if err != nil {
