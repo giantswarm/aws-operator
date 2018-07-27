@@ -1,17 +1,29 @@
 package controllercontext
 
 type Status struct {
-	// HostedZones information is filled by the hostedzone resouce. This
-	// information is used when creating CloudFormation templates.
-	HostedZones HostedZones
+	// Cluster carries an information between cluster controller resource.
+	Cluster Cluster
+	// Drainer carries an information between drainer controller resource.
+	Drainer Drainer
 }
 
-type HostedZones struct {
-	API     HostedZonesZone
-	Etcd    HostedZonesZone
-	Ingress HostedZonesZone
+type Cluster struct {
+	// HostedZones is filled by the hostedzone resource. This information
+	// is used when creating CloudFormation templates.
+	HostedZones ClusterHostedZones
 }
 
-type HostedZonesZone struct {
+type ClusterHostedZones struct {
+	API     ClusterHostedZonesZone
+	Etcd    ClusterHostedZonesZone
+	Ingress ClusterHostedZonesZone
+}
+
+type ClusterHostedZonesZone struct {
 	ID string
+}
+
+type Drainer struct {
+	// WorkerASGName is filled by the workerasgname resource.
+	WorkerASGName string
 }
