@@ -1,4 +1,4 @@
-package lifecycle
+package drainer
 
 import "github.com/aws/aws-sdk-go/service/autoscaling"
 
