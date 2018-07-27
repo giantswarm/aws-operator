@@ -5,7 +5,6 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 
 	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v15/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/v15/controllercontext"
@@ -59,15 +58,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		if cloudformationservice.IsStackNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster worker ASG name in the cloud formation stack")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack is not yet created")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling reconciliation")
-			reconciliationcanceledcontext.SetCanceled(ctx)
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 
 		} else if cloudformationservice.IsOutputsNotAccessible(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster worker ASG name in the cloud formation stack")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack output values are not accessible due to stack state transition")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling reconciliation")
-			reconciliationcanceledcontext.SetCanceled(ctx)
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 
 		} else if err != nil {
@@ -85,9 +82,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			// TODO remove this condition as soon as all guest clusters in existence
 			// obtain a ASG name.
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster worker ASG name in the cloud formation stack")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack is not yet upgraded")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling reconciliation")
-			reconciliationcanceledcontext.SetCanceled(ctx)
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack is not upgraded to the newest version yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 
 		} else if err != nil {
