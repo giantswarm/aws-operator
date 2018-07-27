@@ -17,12 +17,8 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v15/key"
 )
 
-// EnsureCreated tries to drain guest cluster nodes when necessary. Once it
-// detects a guest cluster node being in terminating/wait state in EC2 a
-// DrainerConfig is created to instruct the node-operator to drain the specific
-// node. The node-operator updates the DrainerConfig state as soon as it has
-// drained the node and the aws-operator here completes the lifecycle hook of
-// the drained node and deletes the DrainerConfig.
+// EnsureCreated creates DrainerConfigs for ASG instances in terminating/wait
+// state then lets node-operator to do its job.
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	customObject, err := key.ToCustomObject(obj)
 	if err != nil {

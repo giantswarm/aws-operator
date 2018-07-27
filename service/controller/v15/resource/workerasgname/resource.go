@@ -39,6 +39,7 @@ func (r *Resource) Name() string {
 	return Name
 }
 
+// EnsureCreated retrieves worker ASG name from CF stack when it is ready.
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	customObject, err := key.ToCustomObject(obj)
 	if err != nil {
