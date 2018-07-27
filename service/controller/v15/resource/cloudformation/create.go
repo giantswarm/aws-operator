@@ -60,6 +60,16 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			return microerror.Mask(err)
 		}
 
+		enableTerminationProtection := key.EnableTerminationProtection
+		updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
+			EnableTerminationProtection: &enableTerminationProtection,
+			StackName:                   stackInput.StackName,
+		}
+		_, err = r.hostClients.CloudFormation.UpdateTerminationProtectionRequest(updateTerminationProtection)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
 		ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 		defer cancel()
 
@@ -192,6 +202,16 @@ func (r *Resource) createHostPreStack(ctx context.Context, customObject v1alpha1
 		return microerror.Mask(err)
 	}
 
+	enableTerminationProtection := key.EnableTerminationProtection
+	updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
+		EnableTerminationProtection: &enableTerminationProtection,
+		StackName:                   aws.String(stackName),
+	}
+	_, err = r.hostClients.CloudFormation.UpdateTerminationProtectionRequest(updateTerminationProtection)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	err = r.hostClients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
 		StackName: aws.String(stackName),
 	})
@@ -242,6 +262,16 @@ func (r *Resource) createHostPostStack(ctx context.Context, customObject v1alpha
 
 		return nil
 	} else if err != nil {
+		return microerror.Mask(err)
+	}
+
+	enableTerminationProtection := key.EnableTerminationProtection
+	updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
+		EnableTerminationProtection: &enableTerminationProtection,
+		StackName:                   aws.String(stackName),
+	}
+	_, err = r.hostClients.CloudFormation.UpdateTerminationProtectionRequest(updateTerminationProtection)
+	if err != nil {
 		return microerror.Mask(err)
 	}
 
