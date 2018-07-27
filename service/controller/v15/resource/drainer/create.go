@@ -62,7 +62,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		if len(instances) == 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find the guest cluster nodes being in state '%s'", autoscaling.LifecycleStateTerminatingWait))
-			r.logger.LogCtx(ctx, "level", "debug", "message", "nothing to do")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 

@@ -63,7 +63,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		if len(drainedDrainerConfigs) == 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find drained drainer configs for the guest cluster")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "nothing to do")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 
