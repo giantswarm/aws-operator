@@ -65,7 +65,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			EnableTerminationProtection: &enableTerminationProtection,
 			StackName:                   stackInput.StackName,
 		}
-		_, err = r.hostClients.CloudFormation.UpdateTerminationProtectionRequest(updateTerminationProtection)
+		_, err = r.hostClients.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -207,7 +207,7 @@ func (r *Resource) createHostPreStack(ctx context.Context, customObject v1alpha1
 		EnableTerminationProtection: &enableTerminationProtection,
 		StackName:                   aws.String(stackName),
 	}
-	_, err = r.hostClients.CloudFormation.UpdateTerminationProtectionRequest(updateTerminationProtection)
+	_, err = r.hostClients.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -270,7 +270,7 @@ func (r *Resource) createHostPostStack(ctx context.Context, customObject v1alpha
 		EnableTerminationProtection: &enableTerminationProtection,
 		StackName:                   aws.String(stackName),
 	}
-	_, err = r.hostClients.CloudFormation.UpdateTerminationProtectionRequest(updateTerminationProtection)
+	_, err = r.hostClients.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
 	if err != nil {
 		return microerror.Mask(err)
 	}
