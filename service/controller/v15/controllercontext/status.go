@@ -1,9 +1,9 @@
 package controllercontext
 
 type Status struct {
-	// Cluster carries an information between cluster controller resource.
+	// Cluster carries information between cluster controller resource.
 	Cluster Cluster
-	// Drainer carries an information between drainer controller resource.
+	// Drainer carries information between drainer controller resource.
 	Drainer Drainer
 }
 
