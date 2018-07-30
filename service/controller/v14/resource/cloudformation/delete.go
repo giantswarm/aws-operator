@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
 	"github.com/giantswarm/aws-operator/service/controller/v14/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v14/encrypter"
@@ -24,11 +25,13 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	}
 
 	if stackStateToDelete.Status == cloudformation.ResourceStatusUpdateInProgress {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "cannot delete CF stacks due to stack state transitioning")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "did not ensure deletion of CF stacks")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for CF stacks to finish updating")
 
-		// TODO control flow via more proper mechanism via something like the
-		// context like it is done for cancelation already.
-		return microerror.Maskf(deletionMustBeRetriedError, "stack state is transitioning")
+		resourcecanceledcontext.SetCanceled(ctx)
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
+		return nil
 	}
 
 	if stackStateToDelete.Name != "" {
