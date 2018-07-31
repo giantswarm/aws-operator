@@ -19,10 +19,11 @@
     "autorest/date",
     "autorest/to",
     "autorest/validation",
+    "logger",
     "version"
   ]
-  revision = "bca49d5b51a50dc5bb17bbf6204c711c6dbded06"
-  version = "v10.14.0"
+  revision = "dd94e014aaf16d1df746762e392aa201c1b4c461"
+  version = "v10.15.0"
 
 [[projects]]
   name = "github.com/BurntSushi/toml"
@@ -89,8 +90,8 @@
     "service/support",
     "service/support/supportiface"
   ]
-  revision = "468b9714c11f10b22e533253b35eb9c28f4be691"
-  version = "v1.14.32"
+  revision = "123c8c8326730972861f45fe2e6e7b1d64b4d487"
+  version = "v1.15.1"
 
 [[projects]]
   branch = "master"
@@ -151,8 +152,8 @@
 [[projects]]
   name = "github.com/docker/go-connections"
   packages = ["nat"]
-  revision = "3ede32e2033de7505e6500d6c868c2b9ed9f169d"
-  version = "v0.3.0"
+  revision = "7395e3f8aa162843a74ed6d48e79627d9792ac55"
+  version = "v0.4.0"
 
 [[projects]]
   name = "github.com/docker/go-units"
@@ -216,7 +217,7 @@
   branch = "master"
   name = "github.com/giantswarm/apprclient"
   packages = ["."]
-  revision = "ecfadcaded8db37b8f4e130ad08b7a9bb4fb959f"
+  revision = "30620a9d0ecdb133f82257768ece76ebc1b6f8ef"
 
 [[projects]]
   branch = "legacy"
@@ -235,7 +236,7 @@
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "280a83f10efb0ccd3a7546d7300641719448870b"
+  revision = "fff26fea7e8d05a87c62cc477b197c0186d038f2"
 
 [[projects]]
   branch = "master"
@@ -267,19 +268,19 @@
   branch = "master"
   name = "github.com/giantswarm/errors"
   packages = ["guest"]
-  revision = "9e78ca0e32a019481beb21ae3e158d1bb150730d"
+  revision = "2b68497b52129c0b5befe81abee57e766a81da7d"
 
 [[projects]]
   branch = "master"
   name = "github.com/giantswarm/guestcluster"
   packages = ["."]
-  revision = "6118d8f8ce7bcbaa0ab502371acd2058ed2d976d"
+  revision = "af4b0eb24a293b1950709ac8099fa377e9702266"
 
 [[projects]]
   branch = "master"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
-  revision = "3914877fd51ce6d6fed716e770748abc8ab73501"
+  revision = "96dbe271d80db79342f735a964c421e05daa0e97"
 
 [[projects]]
   branch = "master"
@@ -293,13 +294,13 @@
     "v_3_3_3",
     "v_3_4_0"
   ]
-  revision = "39cb58590d0ff3307f404d407ac9b90bc4052937"
+  revision = "fa0193c7d6833775c652d3e0267e6603e472484f"
 
 [[projects]]
   branch = "master"
   name = "github.com/giantswarm/k8sportforward"
   packages = ["."]
-  revision = "eae67c7a8dfb02cba708181b8066e1b11713288d"
+  revision = "85abe7e11c90cf56ee1eda142ea3051fd61f5b82"
 
 [[projects]]
   branch = "master"
@@ -316,7 +317,7 @@
   branch = "master"
   name = "github.com/giantswarm/microerror"
   packages = ["."]
-  revision = "325932fa68e70dd4464598f11e2f710ac1aaec46"
+  revision = "a8d5d4f526c526b4b773062958847fe7e0b7f449"
 
 [[projects]]
   branch = "master"
@@ -335,7 +336,7 @@
     "server",
     "tls"
   ]
-  revision = "19f5fe4a59000232718a4e563090d8346bd06ad9"
+  revision = "ce14380d3198ff00c82888ee3ed7e9d0efaa383a"
 
 [[projects]]
   branch = "master"
@@ -364,7 +365,7 @@
     "controller/resource/retryresource",
     "informer"
   ]
-  revision = "b549537227f0b5de6525ed65361a4bc660ba90c4"
+  revision = "6cc3caa2831a7d1fca262962d5690a6d3408b60c"
 
 [[projects]]
   branch = "master"
@@ -373,7 +374,7 @@
     ".",
     "randomkeystest"
   ]
-  revision = "b2516ed0f070900eddc2b2654ce4f3d356ddf24a"
+  revision = "32106653e4aa60bef71a2b6d62154b923660412e"
 
 [[projects]]
   branch = "master"
@@ -482,7 +483,7 @@
   branch = "master"
   name = "github.com/google/go-github"
   packages = ["github"]
-  revision = "b93adc1c7febaf7dad1bed965e5310a86bc2623e"
+  revision = "32c30013be0212dd7246d50d79172453d1fd2472"
 
 [[projects]]
   branch = "master"
@@ -553,8 +554,8 @@
 [[projects]]
   name = "github.com/imdario/mergo"
   packages = ["."]
-  revision = "9316a62528ac99aaecb4e47eadd6dc8aa6533d58"
-  version = "v0.3.5"
+  revision = "9f23e2d6bd2a77f959b2bf6acdbefd708a83a4a4"
+  version = "v0.3.6"
 
 [[projects]]
   name = "github.com/inconshreveable/mousetrap"
@@ -673,7 +674,7 @@
     "nfs",
     "xfs"
   ]
-  revision = "ae68e2d4c00fed4943b5f6698d504a5fe083da8a"
+  revision = "05ee40e3a273f7245e8777337fc7b46e533a9a92"
 
 [[projects]]
   name = "github.com/spf13/afero"
@@ -744,7 +745,7 @@
     "publicsuffix",
     "trace"
   ]
-  revision = "3673e40ba22529d22c3fd7c93e97b0ce50fa7bdd"
+  revision = "a0f8a16cb08c06df97cbdf9c47f4731ba548c33c"
 
 [[projects]]
   branch = "master"
@@ -768,7 +769,7 @@
     "unix",
     "windows"
   ]
-  revision = "e072cadbbdc8dd3d3ffa82b8b4b9304c261d9311"
+  revision = "bd9dbc187b6e1dacfdd2722a87e83093c2d7bd6e"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -821,7 +822,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "02b4e95473316948020af0b7a4f0f22c73929b0e"
+  revision = "2a72893556e4d1f6c795a4c039314c9fa751eedb"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -870,8 +871,8 @@
     "json",
     "jwt"
   ]
-  revision = "76dd09796242edb5b897103a75df2645c028c960"
-  version = "v2.1.6"
+  revision = "349dc03548930652802aadc09fb126e2b7cb6d80"
+  version = "v2.1.7"
 
 [[projects]]
   name = "gopkg.in/yaml.v2"
@@ -1353,14 +1354,14 @@
     "pkg/volume/util/recyclerclient",
     "pkg/volume/util/types"
   ]
-  revision = "32ac1c9073b132b8ba18aa830f46b77dcceb0723"
-  version = "v1.10.5"
+  revision = "a21fdbd78dde8f5447f5f6c331f7eb6f80bd684e"
+  version = "v1.10.6"
 
 [[projects]]
   branch = "master"
   name = "k8s.io/utils"
   packages = ["exec"]
-  revision = "73fcbfe1475a06d24a3e101012024bdf9e884cbb"
+  revision = "66066c83e385e385ccc3c964b44fd7dcd413d0ed"
 
 [[projects]]
   branch = "master"

@@ -38,7 +38,7 @@
     "digestset",
     "reference"
   ]
-  revision = "749f6afb4572201e3c37325d0ffedb6f32be8950"
+  revision = "0dae0957e5fe3156c265d22bef4cba9efbf388e2"
 
 [[projects]]
   name = "github.com/docker/docker"
@@ -60,8 +60,8 @@
 [[projects]]
   name = "github.com/docker/go-connections"
   packages = ["nat"]
-  revision = "3ede32e2033de7505e6500d6c868c2b9ed9f169d"
-  version = "v0.3.0"
+  revision = "7395e3f8aa162843a74ed6d48e79627d9792ac55"
+  version = "v0.4.0"
 
 [[projects]]
   name = "github.com/docker/go-units"
@@ -109,37 +109,37 @@
     "pkg/clientset/versioned/typed/example/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1"
   ]
-  revision = "384d9ad387472ec2fb6a6cbc3c3b77cc84d7837a"
+  revision = "dbe7aa4771048f64040c9e6148a708c21226a1b2"
 
 [[projects]]
   branch = "master"
   name = "github.com/giantswarm/certs"
   packages = ["."]
-  revision = "fa0af96de35e5a2d7c51f5ba9e49a4f346496c00"
+  revision = "e91f12dea59971a68d08a48479014e33d1b90540"
 
 [[projects]]
   branch = "master"
   name = "github.com/giantswarm/errors"
   packages = ["guest"]
-  revision = "1aa8d2252e47796136320c0cf768b79fb3d969d6"
+  revision = "9e78ca0e32a019481beb21ae3e158d1bb150730d"
 
 [[projects]]
   branch = "master"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
-  revision = "b48ae48e60b4891baf6f3ab23eff9ed469532ad0"
+  revision = "382dab3023ef7ed0de57a13607a1dad541b397a0"
 
 [[projects]]
   branch = "master"
   name = "github.com/giantswarm/k8sportforward"
   packages = ["."]
-  revision = "00489ad5cc81835cf9bf13e9dfa538fa6f3f729e"
+  revision = "eae67c7a8dfb02cba708181b8066e1b11713288d"
 
 [[projects]]
   branch = "master"
   name = "github.com/giantswarm/microerror"
   packages = ["."]
-  revision = "325932fa68e70dd4464598f11e2f710ac1aaec46"
+  revision = "a8d5d4f526c526b4b773062958847fe7e0b7f449"
 
 [[projects]]
   branch = "master"
@@ -154,7 +154,7 @@
   branch = "master"
   name = "github.com/giantswarm/operatorkit"
   packages = ["client/k8srestconfig"]
-  revision = "070ef8e414feb53402e4107057e89ced6f6e2a3e"
+  revision = "b549537227f0b5de6525ed65361a4bc660ba90c4"
 
 [[projects]]
   name = "github.com/go-kit/kit"
@@ -195,8 +195,8 @@
     "proto",
     "sortkeys"
   ]
-  revision = "1adfc126b41513cc696b209667c8656ea7aac67c"
-  version = "v1.0.0"
+  revision = "636bf0302bc95575d69441b25a2603156ffdddf1"
+  version = "v1.1.1"
 
 [[projects]]
   branch = "master"
@@ -311,7 +311,7 @@
   branch = "master"
   name = "github.com/prometheus/client_model"
   packages = ["go"]
-  revision = "99fa1f4be8e564e8a6b613da7fa6f46c9edafc6c"
+  revision = "5c3871d89910bfb32f5fcab2aa4b9ec68e65a99f"
 
 [[projects]]
   branch = "master"
@@ -332,7 +332,7 @@
     "nfs",
     "xfs"
   ]
-  revision = "40f013a808ec4fa79def444a1a56de4d1727efcb"
+  revision = "05ee40e3a273f7245e8777337fc7b46e533a9a92"
 
 [[projects]]
   name = "github.com/spf13/cobra"
@@ -354,7 +354,7 @@
     "ed25519/internal/edwards25519",
     "ssh/terminal"
   ]
-  revision = "a49355c7e3f8fe157a85be2f77e6e269a0f89602"
+  revision = "c126467f60eb25f8f27e5a981f32a87e3965053f"
 
 [[projects]]
   branch = "master"
@@ -368,7 +368,7 @@
     "internal/timeseries",
     "trace"
   ]
-  revision = "ed29d75add3d7c4bf7ca65aac0c6df3d1420216f"
+  revision = "c4299a1a0d8524c11563db160fbf9bddbceadb21"
 
 [[projects]]
   branch = "master"
@@ -377,7 +377,7 @@
     "unix",
     "windows"
   ]
-  revision = "151529c776cdc58ddbe7963ba9af779f3577b419"
+  revision = "bd9dbc187b6e1dacfdd2722a87e83093c2d7bd6e"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -416,7 +416,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "ff3583edef7de132f219f0efc00e097cabcc0ec0"
+  revision = "2a72893556e4d1f6c795a4c039314c9fa751eedb"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -465,8 +465,8 @@
     "json",
     "jwt"
   ]
-  revision = "76dd09796242edb5b897103a75df2645c028c960"
-  version = "v2.1.6"
+  revision = "349dc03548930652802aadc09fb126e2b7cb6d80"
+  version = "v2.1.7"
 
 [[projects]]
   name = "gopkg.in/yaml.v2"
@@ -475,7 +475,6 @@
   version = "v2.2.1"
 
 [[projects]]
-  branch = "release-1.10"
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1alpha1",
@@ -508,6 +507,7 @@
     "storage/v1beta1"
   ]
   revision = "8b7507fac302640dd5f1efbf9643199952cc58db"
+  version = "kubernetes-1.10.4"
 
 [[projects]]
   name = "k8s.io/apiextensions-apiserver"
@@ -749,7 +749,7 @@
   branch = "master"
   name = "k8s.io/kube-openapi"
   packages = ["pkg/util/proto"]
-  revision = "d83b052f768a50a309c692a9c271da3f3276ff88"
+  revision = "d8ea2fe547a448256204cfc68dfee7b26c720acb"
 
 [[projects]]
   name = "k8s.io/kubernetes"
@@ -907,14 +907,14 @@
     "pkg/volume/util/recyclerclient",
     "pkg/volume/util/types"
   ]
-  revision = "32ac1c9073b132b8ba18aa830f46b77dcceb0723"
-  version = "v1.10.5"
+  revision = "a21fdbd78dde8f5447f5f6c331f7eb6f80bd684e"
+  version = "v1.10.6"
 
 [[projects]]
   branch = "master"
   name = "k8s.io/utils"
   packages = ["exec"]
-  revision = "ab9069044f32ba0c6da081bb46bb0b12e3862c21"
+  revision = "66066c83e385e385ccc3c964b44fd7dcd413d0ed"
 
 [[projects]]
   branch = "master"
