@@ -11,42 +11,54 @@ const (
 	idleTimeoutSecondsOutOfRangeErrorFormat string = "ELB idle timeout seconds %s cannot exceed AWS maximum of 3600"
 )
 
-var idleTimeoutSecondsOutOfRangeError = microerror.New("idle timeout seconds out of range")
+var idleTimeoutSecondsOutOfRangeError = &microerror.Error{
+	Kind: "idleTimeoutSecondsOutOfRangeError",
+}
 
 // IsIdleTimeoutSecondsOutOfRangeError asserts idleTimeoutSecondsOutOfRangeError.
 func IsIdleTimeoutSecondsOutOfRangeError(err error) bool {
 	return microerror.Cause(err) == idleTimeoutSecondsOutOfRangeError
 }
 
-var invalidConfigError = microerror.New("invalid config")
+var invalidConfigError = &microerror.Error{
+	Kind: "invalidConfigError",
+}
 
 // IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
 
-var invalidCloudconfigExtensionNameError = microerror.New("invalid cloudconfig extension name")
+var invalidCloudconfigExtensionNameError = &microerror.Error{
+	Kind: "invalidCloudconfigExtensionNameError",
+}
 
 //  asserts invalidCloudconfigExtensionNameError.
 func IsInvalidCloudconfigExtensionName(err error) bool {
 	return microerror.Cause(err) == invalidCloudconfigExtensionNameError
 }
 
-var malformedCloudConfigKeyError = microerror.New("malformed key in the cloudconfig")
+var malformedCloudConfigKeyError = &microerror.Error{
+	Kind: "malformedCloudConfigKeyError",
+}
 
 // IsMalformedCloudConfigKey asserts malformedCloudConfigKeyError.
 func IsMalformedCloudConfigKey(err error) bool {
 	return microerror.Cause(err) == malformedCloudConfigKeyError
 }
 
-var missingCloudConfigKeyError = microerror.New("missing key in the cloudconfig")
+var missingCloudConfigKeyError = &microerror.Error{
+	Kind: "missingCloudConfigKeyError",
+}
 
 // IsMissingCloudConfigKey asserts missingCloudConfigKeyError.
 func IsMissingCloudConfigKey(err error) bool {
 	return microerror.Cause(err) == missingCloudConfigKeyError
 }
 
-var secretsRetrievalFailedError = microerror.New("secrets retrieval failed")
+var secretsRetrievalFailedError = &microerror.Error{
+	Kind: "secretsRetrievalFailedError",
+}
 
 // IsSecretsRetrievalFailed asserts secretsRetrievalFailedError.
 func IsSecretsRetrievalFailed(err error) bool {
@@ -55,70 +67,90 @@ func IsSecretsRetrievalFailed(err error) bool {
 
 // Validation errors
 
-var invalidAvailabilityZoneError = microerror.New("invalid availability zone")
+var invalidAvailabilityZoneError = &microerror.Error{
+	Kind: "invalidAvailabilityZoneError",
+}
 
 // IsInvalidAvailabilityZone asserts invalidAvailabilityZoneError.
 func IsInvalidAvailabilityZone(err error) bool {
 	return microerror.Cause(err) == invalidAvailabilityZoneError
 }
 
-var workersListEmptyError = microerror.New("workers list empty")
+var workersListEmptyError = &microerror.Error{
+	Kind: "workersListEmptyError",
+}
 
 // IsWorkersListEmpty asserts workersListEmptyError.
 func IsWorkersListEmpty(err error) bool {
 	return microerror.Cause(err) == workersListEmptyError
 }
 
-var differentImageIDsError = microerror.New("different image IDs")
+var differentImageIDsError = &microerror.Error{
+	Kind: "differentImageIDsError",
+}
 
 // IsDifferentImageIDs assert differentImageIDsError.
 func IsDifferentImageIDs(err error) bool {
 	return microerror.Cause(err) == differentImageIDsError
 }
 
-var differentInstanceTypesError = microerror.New("different instance types")
+var differentInstanceTypesError = &microerror.Error{
+	Kind: "differentInstanceTypesError",
+}
 
 // IsDifferentInstanceTypes asserts differentInstanceTypesError.
 func IsDifferentInstanceTypes(err error) bool {
 	return microerror.Cause(err) == differentInstanceTypesError
 }
 
-var invalidMasterNodeCountError = microerror.New("invalid master node count")
+var invalidMasterNodeCountError = &microerror.Error{
+	Kind: "invalidMasterNodeCountError",
+}
 
 // IsInvalidMasterNodeCount asserts invalidMasterNodeCountError.
 func IsInvalidMasterNodeCount(err error) bool {
 	return microerror.Cause(err) == invalidMasterNodeCountError
 }
 
-var invalidWorkerNodeCountError = microerror.New("invalid worker node count")
+var invalidWorkerNodeCountError = &microerror.Error{
+	Kind: "invalidWorkerNodeCountError",
+}
 
 // IsInvalidWorkerNodeCount asserts invalidWorkerNodeCountError.
 func IsInvalidWorkerNodeCount(err error) bool {
 	return microerror.Cause(err) == invalidWorkerNodeCountError
 }
 
-var executionFailedError = microerror.New("execution failed")
+var executionFailedError = &microerror.Error{
+	Kind: "executionFailedError",
+}
 
 // IsExecutionFailedError asserts isExecutionFailedError.
 func IsExecutionFailedError(err error) bool {
 	return microerror.Cause(err) == executionFailedError
 }
 
-var notFoundError = microerror.New("not found")
+var notFoundError = &microerror.Error{
+	Kind: "notFoundError",
+}
 
 // IsNotFound asserts NotFoundError.
 func IsNotFound(err error) bool {
 	return microerror.Cause(err) == notFoundError
 }
 
-var tooManyResultsError = microerror.New("too many results")
+var tooManyResultsError = &microerror.Error{
+	Kind: "tooManyResultsError",
+}
 
 // IsTooManyResults asserts tooManyResultsError.
 func IsTooManyResults(err error) bool {
 	return microerror.Cause(err) == tooManyResultsError
 }
 
-var wrongTypeError = microerror.New("wrong type")
+var wrongTypeError = &microerror.Error{
+	Kind: "wrongTypeError",
+}
 
 // IsWrongType asserts wrongTypeError.
 func IsWrongType(err error) bool {

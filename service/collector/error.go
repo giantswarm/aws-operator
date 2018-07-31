@@ -11,28 +11,36 @@ const (
 	trustedAdvisorSubscriptionRequiredExceptionCode = "SubscriptionRequiredException"
 )
 
-var invalidConfigError = microerror.New("invalid config")
+var invalidConfigError = &microerror.Error{
+	Kind: "invalidConfigError",
+}
 
 // IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
 
-var invalidResourceError = microerror.New("invalid resource")
+var invalidResourceError = &microerror.Error{
+	Kind: "invalidResourceError",
+}
 
 // IsInvalidResource asserts invalidResourceError.
 func IsInvalidResource(err error) bool {
 	return microerror.Cause(err) == invalidResourceError
 }
 
-var nilLimitError = microerror.New("nil limit")
+var nilLimitError = &microerror.Error{
+	Kind: "nilLimitError",
+}
 
 // IsNilLimit asserts nilLimitError.
 func IsNilLimit(err error) bool {
 	return microerror.Cause(err) == nilLimitError
 }
 
-var nilUsageError = microerror.New("nil usage")
+var nilUsageError = &microerror.Error{
+	Kind: "nilUsageError",
+}
 
 // IsNilUsage asserts nilUsageError.
 func IsNilUsage(err error) bool {

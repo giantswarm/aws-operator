@@ -19,7 +19,13 @@ import (
 	"k8s.io/helm/cmd/helm/installer"
 	"k8s.io/helm/pkg/chartutil"
 	helmclient "k8s.io/helm/pkg/helm"
+	hapirelease "k8s.io/helm/pkg/proto/hapi/release"
 	hapiservices "k8s.io/helm/pkg/proto/hapi/services"
+)
+
+const (
+	// runReleaseTestTimeout is the timeout in seconds when running tests.
+	runReleaseTestTimout = 300
 )
 
 // Config represents the configuration used to create a helm client.
@@ -392,6 +398,47 @@ func (c *Client) InstallFromTarball(path, ns string, options ...helmclient.Insta
 	}
 
 	return nil
+}
+
+// RunReleaseTest runs the tests for a Helm Release. The releaseName is the
+// name of the Helm Release that is set when the Helm Chart is installed. This
+// is the same action as running the helm test command.
+func (c *Client) RunReleaseTest(releaseName string, options ...helmclient.ReleaseTestOption) error {
+	c.logger.Log("level", "debug", "message", fmt.Sprintf("running release tests for '%s'", releaseName))
+
+	t, err := c.newTunnel()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	defer c.closeTunnel(t)
+
+	resChan, errChan := c.newHelmClientFromTunnel(t).RunReleaseTest(releaseName, helmclient.ReleaseTestTimeout(int64(runReleaseTestTimout)))
+	if IsReleaseNotFound(err) {
+		return backoff.Permanent(microerror.Maskf(releaseNotFoundError, releaseName))
+	} else if err != nil {
+		return microerror.Mask(err)
+	}
+
+	for {
+		select {
+		case err := <-errChan:
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		case res := <-resChan:
+			c.logger.Log("level", "debug", "message", res.Msg)
+
+			switch res.Status {
+			case hapirelease.TestRun_SUCCESS:
+				c.logger.Log("level", "debug", "message", fmt.Sprintf("successfully ran tests for release '%s'", releaseName))
+				return nil
+			case hapirelease.TestRun_FAILURE:
+				return microerror.Maskf(testReleaseFailureError, "'%s' has failed tests", releaseName)
+			}
+		case <-time.After(runReleaseTestTimout * time.Second):
+			return microerror.Mask(testReleaseTimeoutError)
+		}
+	}
 }
 
 // UpdateReleaseFromTarball updates the given release using the chart packaged
