@@ -13,13 +13,6 @@ func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
 
-var wrongTypeError = microerror.New("wrong type")
-
-// IsWrongType asserts wrongTypeError.
-func IsWrongType(err error) bool {
-	return microerror.Cause(err) == wrongTypeError
-}
-
 func IsKeyNotFound(err error) bool {
 	aerr, ok := err.(awserr.Error)
 	if ok && aerr.Code() == kms.ErrCodeNotFoundException {
