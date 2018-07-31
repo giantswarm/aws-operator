@@ -14,15 +14,11 @@ const (
 type Config struct {
 	Encrypter encrypter.Interface
 	Logger    micrologger.Logger
-
-	InstallationName string
 }
 
 type Resource struct {
 	encrypter encrypter.Interface
 	logger    micrologger.Logger
-
-	installationName string
 }
 
 func New(config Config) (*Resource, error) {
@@ -33,15 +29,9 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	if config.InstallationName == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
-	}
-
 	r := &Resource{
 		encrypter: config.Encrypter,
 		logger:    config.Logger,
-
-		installationName: config.InstallationName,
 	}
 
 	return r, nil

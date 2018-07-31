@@ -157,8 +157,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		c := encryptionkey.Config{
 			Encrypter: encrypterObject,
 			Logger:    config.Logger,
-
-			InstallationName: config.InstallationName,
 		}
 
 		encryptionKeyResource, err = encryptionkey.New(c)
