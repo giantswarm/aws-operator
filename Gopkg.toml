@@ -74,7 +74,7 @@ required = [
   name = "github.com/giantswarm/helmclient"
 
 [[constraint]]
-  branch = "master"
+  branch = "ingress-service-param"
   name = "github.com/giantswarm/k8scloudconfig"
 
 [[constraint]]
