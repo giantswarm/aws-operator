@@ -4,60 +4,33 @@ import (
 	"context"
 
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/controller"
 
-	"github.com/giantswarm/aws-operator/service/controller/v15/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v15/key"
 )
 
-func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
-	deleteInput, err := toEncryptionKeyState(deleteChange)
+func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
+	customObject, err := key.ToCustomObject(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	if deleteInput.KeyName != "" {
-		err := r.encrypter.DeleteKey(ctx, deleteInput.KeyName)
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring deletion of encryption key")
+
+		current, err := r.encrypter.CurrentState(ctx, customObject)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting encryption Key: deleted")
-	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting encryption Key: already deleted")
+		if current.KeyName != "" {
+			err = r.encrypter.DeleteKey(ctx, current.KeyName)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured deletion of encryption key")
 	}
 
 	return nil
-}
-
-func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*controller.Patch, error) {
-	delete, err := r.newDeleteChange(ctx, obj, currentState, desiredState)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	patch := controller.NewPatch()
-	patch.SetDeleteChange(delete)
-
-	return patch, nil
-}
-
-func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	currentKeyState, err := toEncryptionKeyState(currentState)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	desiredKeyState, err := toEncryptionKeyState(desiredState)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the encryption key should be deleted")
-
-	var keyToDelete encrypter.EncryptionKeyState
-	if currentKeyState.KeyName != "" {
-		keyToDelete = desiredKeyState
-	}
-
-	return keyToDelete, nil
 }
