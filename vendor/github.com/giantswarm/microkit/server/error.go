@@ -6,28 +6,36 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
-var invalidConfigError = microerror.New("invalid config")
+var invalidConfigError = &microerror.Error{
+	Kind: "invalidConfigError",
+}
 
 // IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
 
-var invalidContextError = microerror.New("invalid context")
+var invalidContextError = &microerror.Error{
+	Kind: "invalidContextError",
+}
 
 // IsInvalidContext asserts invalidContextError.
 func IsInvalidContext(err error) bool {
 	return microerror.Cause(err) == invalidContextError
 }
 
-var invalidTransactionIDError = microerror.New("invalid transaction ID")
+var invalidTransactionIDError = &microerror.Error{
+	Kind: "invalidTransactionIDError",
+}
 
 // IsInvalidTransactionID asserts invalidTransactionIDError.
 func IsInvalidTransactionID(err error) bool {
 	return microerror.Cause(err) == invalidTransactionIDError
 }
 
-var serverClosedError = microerror.New("server closed")
+var serverClosedError = &microerror.Error{
+	Kind: "serverClosedError",
+}
 
 // IsServerClosed asserts serverClosedError.
 func IsServerClosed(err error) bool {

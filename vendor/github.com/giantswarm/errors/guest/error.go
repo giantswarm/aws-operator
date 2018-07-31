@@ -25,7 +25,9 @@ var (
 
 // APINotAvailableError is returned when the guest Kubernetes API is not
 // available.
-var APINotAvailableError = microerror.New("API not available")
+var APINotAvailableError = &microerror.Error{
+	Kind: "APINotAvailableError",
+}
 
 // IsAPINotAvailable asserts APINotAvailableError.
 func IsAPINotAvailable(err error) bool {

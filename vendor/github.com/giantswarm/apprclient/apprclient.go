@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -264,6 +265,14 @@ func (c *Client) doFile(req *http.Request) (string, error) {
 		return "", microerror.Mask(err)
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		buf := new(bytes.Buffer)
+		_, err = buf.ReadFrom(resp.Body)
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
+		return "", microerror.Maskf(invalidStatusCodeError, fmt.Sprintf("got StatusCode %d with body %s", resp.StatusCode, buf.String()))
+	}
 
 	tmpfile, err := afero.TempFile(c.fs, "", "chart-tarball")
 	if err != nil {
