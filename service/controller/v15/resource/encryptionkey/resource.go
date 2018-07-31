@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	name = "kmskeyv14"
+	name = "encryptionkeyv15"
 )
 
 type Config struct {
