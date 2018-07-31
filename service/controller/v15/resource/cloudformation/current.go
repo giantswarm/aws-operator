@@ -2,7 +2,6 @@ package cloudformation
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
@@ -33,15 +32,17 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	// stack. We dispatch our custom StackState structure and enrich it with all
 	// information necessary to reconcile the cloudformation resource.
 	var stackOutputs []*cloudformation.Output
-	var stackStatus string
 	{
-		stackOutputs, stackStatus, err = sc.CloudFormation.DescribeOutputsAndStatus(stackName)
+		stackOutputs, err = sc.CloudFormation.DescribeOutputsAndStatus(stackName)
 		if cloudformationservice.IsStackNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster main stack in the AWS API")
 			return StackState{}, nil
 
-		} else if cloudformationservice.IsOutputsNotAccessible(err) {
+		} else if cloudformationservice.IsStackInTransition(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack output values are not accessible due to stack state transition")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			resourcecanceledcontext.SetCanceled(ctx)
+
 			return StackState{}, nil
 
 		} else if err != nil {
@@ -50,17 +51,6 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	}
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "found the guest cluster main stack in the AWS API")
-
-	// In case the current guest cluster is already being updated, we cancel the
-	// reconciliation until the current update is done in order to reduce
-	// unnecessary friction.
-	if stackStatus == cloudformation.ResourceStatusUpdateInProgress {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("guest cluster main stack is in state '%s'", cloudformation.ResourceStatusUpdateInProgress))
-		resourcecanceledcontext.SetCanceled(ctx)
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
-
-		return StackState{}, nil
-	}
 
 	var currentState StackState
 	{
@@ -167,8 +157,6 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			MasterInstanceResourceName: masterInstanceResourceName,
 			MasterInstanceType:         masterInstanceType,
 			MasterCloudConfigVersion:   masterCloudConfigVersion,
-
-			Status: stackStatus,
 
 			WorkerCount:              workerCount,
 			WorkerImageID:            workerImageID,
