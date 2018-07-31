@@ -1,4 +1,4 @@
-package encrypter
+package vault
 
 import (
 	"bytes"
@@ -55,7 +55,7 @@ func CreateRawTLSAssets(assets legacy.AssetsBundle) *RawTLSAssets {
 	}
 }
 
-func (r *RawTLSAssets) Encrypt(ctx context.Context, e Interface, key string) (*EncryptedTLSAssets, error) {
+func (r *RawTLSAssets) Encrypt(ctx context.Context, e *Encrypter, key string) (*EncryptedTLSAssets, error) {
 	var err error
 	encrypt := func(data []byte) (b []byte) {
 		if err != nil {

@@ -39,7 +39,6 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 		},
 		CustomObject:      customObject,
 		Clients:           adapterClients,
-		EncrypterBackend:  r.encrypterBackend,
 		HostClients:       *r.hostClients,
 		InstallationName:  r.installationName,
 		HostAccountID:     hostAccountID,
@@ -134,7 +133,6 @@ func (r *Resource) getMainHostPostTemplateBody(ctx context.Context, customObject
 		CustomObject:      customObject,
 		Clients:           adapterClients,
 		HostClients:       *r.hostClients,
-		EncrypterBackend:  r.encrypterBackend,
 		PublicRouteTables: r.publicRouteTables,
 		Route53Enabled:    r.route53Enabled,
 		StackState: adapter.StackState{

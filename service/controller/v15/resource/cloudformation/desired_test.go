@@ -41,7 +41,6 @@ func Test_Resource_Cloudformation_GetDesiredState(t *testing.T) {
 
 		c.HostClients = &adapter.Clients{}
 		c.Logger = microloggertest.New()
-		c.EncrypterBackend = "kms"
 
 		newResource, err = New(c)
 		if err != nil {

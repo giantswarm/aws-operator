@@ -22,6 +22,10 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v15/key"
 )
 
+const (
+	decrypterVaultRole = "decrypter"
+)
+
 type Encrypter struct {
 	httpClient *http.Client
 	logger     micrologger.Logger
@@ -151,7 +155,7 @@ func (e *Encrypter) DeleteKey(ctx context.Context, keyName string) error {
 	return nil
 }
 
-func (e *Encrypter) CurrentState(ctx context.Context, customObject v1alpha1.AWSConfig) (encrypter.EncryptionKeyState, error) {
+func (e *Encrypter) GetCurrentState(ctx context.Context, customObject v1alpha1.AWSConfig) (encrypter.EncryptionKeyState, error) {
 	state := encrypter.EncryptionKeyState{}
 
 	err := e.ensureToken()
@@ -187,7 +191,7 @@ func (e *Encrypter) CurrentState(ctx context.Context, customObject v1alpha1.AWSC
 	return state, nil
 }
 
-func (e *Encrypter) DesiredState(ctx context.Context, customObject v1alpha1.AWSConfig) (encrypter.EncryptionKeyState, error) {
+func (e *Encrypter) GetDesiredState(ctx context.Context, customObject v1alpha1.AWSConfig) (encrypter.EncryptionKeyState, error) {
 	state := encrypter.EncryptionKeyState{}
 
 	keyName := e.keyName(customObject)
@@ -195,6 +199,78 @@ func (e *Encrypter) DesiredState(ctx context.Context, customObject v1alpha1.AWSC
 	state.KeyName = keyName
 
 	return state, nil
+}
+
+func (e *Encrypter) EnsureCreatedAuthorizedIAMRoles(ctx context.Context, iamRoleARNs ...string) error {
+	e.logger.LogCtx(ctx, "level", "debug", "message", "ensuring authorized vault IAM roles in the Vault API")
+
+	err := e.ensureToken()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	p := path.Join("auth", "aws", "role", decrypterVaultRole)
+
+	role, err := e.getAWSAuthRole(p)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	combinedIAMRoleARNs := stringSlice(role.BoundIAMRoleARN).Add(iamRoleARNs...)
+
+	if len(combinedIAMRoleARNs) != len(role.BoundIAMRoleARN) {
+		e.logger.LogCtx(ctx, "level", "debug", "message", "adding authorized IAM role ARMs in the Vault API")
+
+		role.BoundIAMRoleARN = combinedIAMRoleARNs
+
+		err = e.postAWSAuthRole(p, role)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		e.logger.LogCtx(ctx, "level", "debug", "message", "added authorized IAM role ARMs in the Vault API")
+	} else {
+		e.logger.LogCtx(ctx, "level", "debug", "message", "authorized IAM role ARMs already exist in the Vault API")
+	}
+
+	e.logger.LogCtx(ctx, "level", "debug", "message", "ensured authorized IAM roles in the Vault API")
+	return nil
+}
+
+func (e *Encrypter) EnsureDeletedAuthorizedIAMRoles(ctx context.Context, iamRoleARNs ...string) error {
+	e.logger.LogCtx(ctx, "level", "debug", "message", "ensuring deletion authorized IAM roles in the Vault API")
+
+	err := e.ensureToken()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	p := path.Join("auth", "aws", "role", decrypterVaultRole)
+
+	role, err := e.getAWSAuthRole(p)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	combinedIAMRoleARNs := stringSlice(role.BoundIAMRoleARN).Delete(iamRoleARNs...)
+
+	if len(combinedIAMRoleARNs) != len(role.BoundIAMRoleARN) {
+		e.logger.LogCtx(ctx, "level", "debug", "message", "deleting authorized IAM role ARMs in the Vault API")
+
+		role.BoundIAMRoleARN = combinedIAMRoleARNs
+
+		err = e.postAWSAuthRole(p, role)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		e.logger.LogCtx(ctx, "level", "debug", "message", "deleted authorized IAM role ARMs in the Vault API")
+	} else {
+		e.logger.LogCtx(ctx, "level", "debug", "message", "authorized IAM role ARMs do not exist in the Vault API")
+	}
+
+	e.logger.LogCtx(ctx, "level", "debug", "message", "ensured deletion authorized IAM roles in the Vault API")
+	return nil
 }
 
 func (e *Encrypter) EncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {
@@ -317,68 +393,6 @@ func (e *Encrypter) Decrypt(key, ciphertext string) (string, error) {
 	}
 
 	return string(plaintext), nil
-}
-
-func (e *Encrypter) AddIAMRoleToAuth(vaultRoleName string, iamRoleARNs ...string) error {
-	err := e.ensureToken()
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	p := path.Join("auth", "aws", "role", vaultRoleName)
-
-	role, err := e.getAWSAuthRole(p)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	if len(role.BoundIAMRoleARN) == 0 {
-		role.BoundIAMRoleARN = iamRoleARNs
-	} else {
-		joinedBoundIAMRoleARN := strings.Join(role.BoundIAMRoleARN, ",")
-		for _, iamRoleARN := range iamRoleARNs {
-			if !strings.Contains(joinedBoundIAMRoleARN, iamRoleARN) {
-				role.BoundIAMRoleARN = append(role.BoundIAMRoleARN, iamRoleARN)
-			}
-		}
-	}
-
-	err = e.postAWSAuthRole(p, role)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	return nil
-}
-
-func (e *Encrypter) RemoveIAMRoleFromAuth(vaultRoleName string, iamRoleARNs ...string) error {
-	err := e.ensureToken()
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	p := path.Join("auth", "aws", "role", vaultRoleName)
-
-	role, err := e.getAWSAuthRole(p)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	wantedIamRoles := []string{}
-	toRemoveIamRoleARNs := strings.Join(iamRoleARNs, ",")
-	for _, iamRole := range role.BoundIAMRoleARN {
-		if !strings.Contains(toRemoveIamRoleARNs, iamRole) {
-			wantedIamRoles = append(wantedIamRoles, iamRole)
-		}
-	}
-	role.BoundIAMRoleARN = wantedIamRoles
-
-	err = e.postAWSAuthRole(p, role)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	return nil
 }
 
 func (e *Encrypter) Address() string {

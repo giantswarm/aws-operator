@@ -63,7 +63,6 @@ func Test_Resource_Cloudformation_GetCloudFormationTags(t *testing.T) {
 		STS:            &adapter.STSClientMock{},
 	}
 	c.Logger = microloggertest.New()
-	c.EncrypterBackend = "kms"
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
