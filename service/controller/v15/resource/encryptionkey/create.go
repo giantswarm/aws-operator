@@ -28,10 +28,16 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		if current.KeyName == "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "creating encryption key")
+
 			err = r.encrypter.CreateKey(ctx, customObject, desired.KeyName)
 			if err != nil {
 				return microerror.Mask(err)
 			}
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "created encryption key")
+		} else {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key already created")
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured encryption key")
