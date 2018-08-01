@@ -219,7 +219,7 @@ func (e *Encrypter) EnsureCreatedAuthorizedIAMRoles(ctx context.Context, iamRole
 	combinedIAMRoleARNs := stringSlice(role.BoundIAMRoleARN).Add(iamRoleARNs...)
 
 	if len(combinedIAMRoleARNs) != len(role.BoundIAMRoleARN) {
-		e.logger.LogCtx(ctx, "level", "debug", "message", "adding authorized IAM role ARMs in the Vault API")
+		e.logger.LogCtx(ctx, "level", "debug", "message", "adding authorized IAM role ARNs in the Vault API")
 
 		role.BoundIAMRoleARN = combinedIAMRoleARNs
 
@@ -228,9 +228,9 @@ func (e *Encrypter) EnsureCreatedAuthorizedIAMRoles(ctx context.Context, iamRole
 			return microerror.Mask(err)
 		}
 
-		e.logger.LogCtx(ctx, "level", "debug", "message", "added authorized IAM role ARMs in the Vault API")
+		e.logger.LogCtx(ctx, "level", "debug", "message", "added authorized IAM role ARNs in the Vault API")
 	} else {
-		e.logger.LogCtx(ctx, "level", "debug", "message", "authorized IAM role ARMs already exist in the Vault API")
+		e.logger.LogCtx(ctx, "level", "debug", "message", "authorized IAM role ARNs already exist in the Vault API")
 	}
 
 	e.logger.LogCtx(ctx, "level", "debug", "message", "ensured authorized IAM roles in the Vault API")
@@ -255,7 +255,7 @@ func (e *Encrypter) EnsureDeletedAuthorizedIAMRoles(ctx context.Context, iamRole
 	combinedIAMRoleARNs := stringSlice(role.BoundIAMRoleARN).Delete(iamRoleARNs...)
 
 	if len(combinedIAMRoleARNs) != len(role.BoundIAMRoleARN) {
-		e.logger.LogCtx(ctx, "level", "debug", "message", "deleting authorized IAM role ARMs in the Vault API")
+		e.logger.LogCtx(ctx, "level", "debug", "message", "deleting authorized IAM role ARNs in the Vault API")
 
 		role.BoundIAMRoleARN = combinedIAMRoleARNs
 
@@ -264,9 +264,9 @@ func (e *Encrypter) EnsureDeletedAuthorizedIAMRoles(ctx context.Context, iamRole
 			return microerror.Mask(err)
 		}
 
-		e.logger.LogCtx(ctx, "level", "debug", "message", "deleted authorized IAM role ARMs in the Vault API")
+		e.logger.LogCtx(ctx, "level", "debug", "message", "deleted authorized IAM role ARNs in the Vault API")
 	} else {
-		e.logger.LogCtx(ctx, "level", "debug", "message", "authorized IAM role ARMs do not exist in the Vault API")
+		e.logger.LogCtx(ctx, "level", "debug", "message", "authorized IAM role ARNs do not exist in the Vault API")
 	}
 
 	e.logger.LogCtx(ctx, "level", "debug", "message", "ensured deletion authorized IAM roles in the Vault API")
