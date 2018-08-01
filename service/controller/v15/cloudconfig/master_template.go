@@ -37,8 +37,8 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 
 		params.Cluster = customObject.Spec.Cluster
 		params.DisableEncryptionAtREST = true
-		DisableIngressController = true
-		DisableIngressControllerService = false
+		params.DisableIngressController = true
+		params.DisableIngressControllerService = false
 		params.EtcdPort = customObject.Spec.Cluster.Etcd.Port
 		params.Extension = &MasterExtension{
 			certs:            certs,
