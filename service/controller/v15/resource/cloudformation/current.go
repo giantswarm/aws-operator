@@ -43,14 +43,14 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		} else if cloudformationservice.IsStackInTransition(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster main stack outputs in the AWS API")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack is in transition state")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			resourcecanceledcontext.SetCanceled(ctx)
 			if key.IsDeleted(customObject) {
 				// Keep finalizers to as long as we don't
 				// encounter IsStackNotFound.
 				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
 				finalizerskeptcontext.SetKept(ctx)
 			}
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			resourcecanceledcontext.SetCanceled(ctx)
 
 			return StackState{}, nil
 
