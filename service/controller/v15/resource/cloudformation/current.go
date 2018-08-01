@@ -19,8 +19,6 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return StackState{}, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "looking for the guest cluster main stack in the AWS API")
-
 	stackName := key.MainGuestStackName(customObject)
 
 	sc, err := controllercontext.FromContext(ctx)
@@ -34,13 +32,17 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	// information necessary to reconcile the cloudformation resource.
 	var stackOutputs []*cloudformation.Output
 	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the guest cluster main stack outputs in the AWS API")
+
 		stackOutputs, err = sc.CloudFormation.DescribeOutputsAndStatus(stackName)
 		if cloudformationservice.IsStackNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster main stack in the AWS API")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster main stack outputs in the AWS API")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack is does not exist")
 			return StackState{}, nil
 
 		} else if cloudformationservice.IsStackInTransition(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack output values are not accessible due to stack state transition")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster main stack outputs in the AWS API")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack is in transition state")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			resourcecanceledcontext.SetCanceled(ctx)
 			if key.IsDeleted(customObject) {
@@ -55,9 +57,9 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		} else if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
-	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "found the guest cluster main stack in the AWS API")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found the guest cluster main stack outputs in the AWS API")
+	}
 
 	var currentState StackState
 	{
