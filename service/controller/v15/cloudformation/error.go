@@ -51,7 +51,7 @@ func IsStackNotFound(err error) bool {
 	return false
 }
 
-var stackInTransitionError = &micorerror.Error{
+var stackInTransitionError = &microerror.Error{
 	Kind: "stackInTransitionError",
 }
 
