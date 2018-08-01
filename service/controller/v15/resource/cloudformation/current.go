@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
 	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v15/cloudformation"
@@ -42,6 +43,12 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack output values are not accessible due to stack state transition")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			resourcecanceledcontext.SetCanceled(ctx)
+			if key.IsDeleted(customObject) {
+				// Keep finalizers to as long as we don't
+				// encounter IsStackNotFound.
+				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+				finalizerskeptcontext.SetKept(ctx)
+			}
 
 			return StackState{}, nil
 
