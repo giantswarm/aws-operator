@@ -55,14 +55,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the guest cluster worker ASG name in the cloud formation stack")
 
-		stackOutputs, _, err := controllerCtx.CloudFormation.DescribeOutputsAndStatus(key.MainGuestStackName(customObject))
+		stackOutputs, err := controllerCtx.CloudFormation.DescribeOutputsAndStatus(key.MainGuestStackName(customObject))
 		if cloudformationservice.IsStackNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster worker ASG name in the cloud formation stack")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack is not yet created")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 
-		} else if cloudformationservice.IsOutputsNotAccessible(err) {
+		} else if cloudformationservice.IsStackInTransition(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster worker ASG name in the cloud formation stack")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack output values are not accessible due to stack state transition")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
