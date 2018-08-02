@@ -5,14 +5,18 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
-var invalidConfigError = microerror.New("invalid config")
+var invalidConfigError = &microerror.Error{
+	Kind: "invalidConfigError",
+}
 
 // IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
 
-var volumeNotFoundError = microerror.New("volume not found")
+var volumeNotFoundError = &microerror.Error{
+	Kind: "volumeNotFoundError",
+}
 
 // IsVolumeNotFound asserts volume not found error from upstream's API code.
 func IsVolumeNotFound(err error) bool {

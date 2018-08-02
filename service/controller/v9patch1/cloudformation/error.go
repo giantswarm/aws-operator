@@ -6,28 +6,36 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
-var invalidConfigError = microerror.New("invalid config")
+var invalidConfigError = &microerror.Error{
+	Kind: "invalidConfigError",
+}
 
 // IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
 
-var outputNotFoundError = microerror.New("output not found")
+var outputNotFoundError = &microerror.Error{
+	Kind: "outputNotFoundError",
+}
 
 // IsOutputNotFound asserts outputNotFoundError.
 func IsOutputNotFound(err error) bool {
 	return microerror.Cause(err) == outputNotFoundError
 }
 
-var outputsNotAccessibleError = microerror.New("outputs not accessible")
+var outputsNotAccessibleError = &microerror.Error{
+	Kind: "outputsNotAccessibleError",
+}
 
 // IsOutputsNotAccessible asserts outputsNotAccessibleError.
 func IsOutputsNotAccessible(err error) bool {
 	return microerror.Cause(err) == outputsNotAccessibleError
 }
 
-var stackNotFoundError = microerror.New("stack not found")
+var stackNotFoundError = &microerror.Error{
+	Kind: "stackNotFoundError",
+}
 
 // IsStackNotFound asserts stackNotFoundError and stack not found errors from
 // the upstream's API message.
@@ -52,7 +60,9 @@ func IsStackNotFound(err error) bool {
 	return false
 }
 
-var tooManyStacksError = microerror.New("too many stacks")
+var tooManyStacksError = &microerror.Error{
+	Kind: "tooManyStacksError",
+}
 
 // IsTooManyStacks asserts tooManyStacksError.
 func IsTooManyStacks(err error) bool {

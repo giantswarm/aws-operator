@@ -65,7 +65,7 @@ func (s *Searcher) SearchCluster(clusterID string) (Cluster, error) {
 
 	keys := []struct {
 		RandomKey *RandomKey
-		Type      key
+		Type      Key
 	}{
 		{RandomKey: &cluster.APIServerEncryptionKey, Type: EncryptionKey},
 	}
@@ -80,10 +80,10 @@ func (s *Searcher) SearchCluster(clusterID string) (Cluster, error) {
 	return cluster, nil
 }
 
-func (s *Searcher) search(randomKey *RandomKey, clusterID string, key key) error {
+func (s *Searcher) search(randomKey *RandomKey, clusterID string, key Key) error {
 	// Select only secrets that match the given key and the given
 	// cluster clusterID.
-	selector := fmt.Sprintf("%s=%s, %s=%s", RandomKeyLabel, key, ClusterIDLabel, clusterID)
+	selector := fmt.Sprintf("%s=%s, %s=%s", legacyRandomKeyLabel, key, legacyClusterIDLabel, clusterID)
 
 	watcher, err := s.k8sClient.Core().Secrets(SecretNamespace).Watch(metav1.ListOptions{
 		LabelSelector: selector,
@@ -121,17 +121,17 @@ func (s *Searcher) search(randomKey *RandomKey, clusterID string, key key) error
 	}
 }
 
-func fillRandomKeyFromSecret(randomkey *RandomKey, obj runtime.Object, clusterID string, key key) error {
+func fillRandomKeyFromSecret(randomkey *RandomKey, obj runtime.Object, clusterID string, key Key) error {
 	secret, ok := obj.(*corev1.Secret)
 	if !ok || secret == nil {
 		return microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", secret, obj)
 	}
 
-	gotClusterID := secret.Labels[ClusterIDLabel]
+	gotClusterID := secret.Labels[legacyClusterIDLabel]
 	if clusterID != gotClusterID {
 		return microerror.Maskf(invalidSecretError, "expected clusterID = %q, got %q", clusterID, gotClusterID)
 	}
-	gotKeys := secret.Labels[RandomKeyLabel]
+	gotKeys := secret.Labels[legacyRandomKeyLabel]
 	if string(key) != gotKeys {
 		return microerror.Maskf(invalidSecretError, "expected random key = %q, got %q", key, gotKeys)
 	}
