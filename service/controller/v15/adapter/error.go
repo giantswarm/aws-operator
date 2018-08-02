@@ -33,7 +33,7 @@ func IsMalformedAmazonAccountID(err error) bool {
 
 var maxNumberOfRulesPassed = &microerror.Error{
 	Kind: "maxNumberOfRulesPassed",
-  Desc: "exceeded the limit of rules by network interface",
+	Desc: "exceeded the limit of rules by network interface",
 }
 
 // IsMaxNumberOfRulesPassed asserts maxNumberOfRulesPassed.
