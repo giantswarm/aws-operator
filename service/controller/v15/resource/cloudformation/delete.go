@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
 	"github.com/giantswarm/aws-operator/service/controller/v15/controllercontext"
@@ -28,6 +29,8 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		r.logger.LogCtx(ctx, "level", "debug", "message", "cannot delete CF stacks due to stack state transitioning")
 
 		resourcecanceledcontext.SetCanceled(ctx)
+		finalizerskeptcontext.SetKept(ctx)
+
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 		return nil
