@@ -301,7 +301,7 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Fatal("PrivateSubnet element not found")
 	}
-	if !strings.Contains(body, "MasterSecurityGroup:") {
+	if !strings.Contains(body, "MasterSecurityGroup0:") {
 		fmt.Println(body)
 		t.Fatal("MasterSecurityGroup element not found")
 	}

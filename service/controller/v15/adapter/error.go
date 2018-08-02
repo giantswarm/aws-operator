@@ -1,6 +1,8 @@
 package adapter
 
-import "github.com/giantswarm/microerror"
+import (
+	"github.com/giantswarm/microerror"
+)
 
 var emptyAmazonAccountIDError = microerror.New("empty amazon account ID")
 
@@ -21,6 +23,13 @@ var malformedAmazonAccountIDError = microerror.New("malformed amazon account ID"
 // IsMalformedAmazonAccountID asserts malformedAmazonAccountIDError.
 func IsMalformedAmazonAccountID(err error) bool {
 	return microerror.Cause(err) == malformedAmazonAccountIDError
+}
+
+var maxNumberOfRulesPassed = microerror.New("exceeded the limit of rules by network interface")
+
+// IsMaxNumberOfRulesPassed asserts maxNumberOfRulesPassed.
+func IsMaxNumberOfRulesPassed(err error) bool {
+	return microerror.Cause(err) == maxNumberOfRulesPassed
 }
 
 var notFoundError = microerror.New("not found")

@@ -13,8 +13,7 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 		description                       string
 		customObject                      v1alpha1.AWSConfig
 		expectedError                     bool
-		expectedMasterSecurityGroupName   string
-		expectedMasterSecurityGroupRules  []securityGroupRule
+		expectedMasterSecurityGroups      []securityGroup
 		expectedWorkerSecurityGroupName   string
 		expectedWorkerSecurityGroupRules  []securityGroupRule
 		expectedIngressSecurityGroupName  string
@@ -32,6 +31,9 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 					Cluster: v1alpha1.Cluster{
 						ID: "test-cluster",
 						Kubernetes: v1alpha1.ClusterKubernetes{
+							API: v1alpha1.ClusterKubernetesAPI{
+								SecurePort: 443,
+							},
 							IngressController: v1alpha1.ClusterKubernetesIngressController{
 								SecurePort:   30010,
 								InsecurePort: 30011,
@@ -40,38 +42,47 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 					},
 				},
 			},
-			expectedError:                   false,
-			expectedMasterSecurityGroupName: "test-cluster-master",
-			expectedMasterSecurityGroupRules: []securityGroupRule{
+			expectedError: false,
+			expectedMasterSecurityGroups: []securityGroup{
 				{
-					Port:       443,
-					Protocol:   "tcp",
-					SourceCIDR: "0.0.0.0/0",
-				},
-				{
-					Port:       4194,
-					Protocol:   "tcp",
-					SourceCIDR: "10.0.0.0/16",
-				},
-				{
-					Port:       10250,
-					Protocol:   "tcp",
-					SourceCIDR: "10.0.0.0/16",
-				},
-				{
-					Port:       10300,
-					Protocol:   "tcp",
-					SourceCIDR: "10.0.0.0/16",
-				},
-				{
-					Port:       10301,
-					Protocol:   "tcp",
-					SourceCIDR: "10.0.0.0/16",
-				},
-				{
-					Port:       22,
-					Protocol:   "tcp",
-					SourceCIDR: "10.0.0.0/16",
+					SecurityGroupName: "test-cluster-master0",
+					SecurityGroupRules: []securityGroupRule{
+						{
+							Port:       443,
+							Protocol:   "tcp",
+							SourceCIDR: "0.0.0.0/0",
+						},
+						{
+							Port:       4194,
+							Protocol:   "tcp",
+							SourceCIDR: "10.0.0.0/16",
+						},
+						{
+							Port:       2379,
+							Protocol:   "tcp",
+							SourceCIDR: "10.0.0.0/16",
+						},
+						{
+							Port:       10250,
+							Protocol:   "tcp",
+							SourceCIDR: "10.0.0.0/16",
+						},
+						{
+							Port:       10300,
+							Protocol:   "tcp",
+							SourceCIDR: "10.0.0.0/16",
+						},
+						{
+							Port:       10301,
+							Protocol:   "tcp",
+							SourceCIDR: "10.0.0.0/16",
+						},
+						{
+							Port:       22,
+							Protocol:   "tcp",
+							SourceCIDR: "10.0.0.0/16",
+						},
+					},
 				},
 			},
 			expectedWorkerSecurityGroupName: "test-cluster-worker",
@@ -157,8 +168,8 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 				t.Errorf("unexpected error %v", err)
 			}
 
-			if a.Guest.SecurityGroups.MasterSecurityGroupName != tc.expectedMasterSecurityGroupName {
-				t.Errorf("unexpected MasterGroupName, got %q, want %q", a.Guest.SecurityGroups.MasterSecurityGroupName, tc.expectedMasterSecurityGroupName)
+			if !reflect.DeepEqual(a.Guest.SecurityGroups.MasterSecurityGroups, tc.expectedMasterSecurityGroups) {
+				t.Errorf("unexpected Master Security Group, got %v, want %v", a.Guest.SecurityGroups.MasterSecurityGroups, tc.expectedMasterSecurityGroups)
 			}
 
 			if a.Guest.SecurityGroups.WorkerSecurityGroupName != tc.expectedWorkerSecurityGroupName {
@@ -488,6 +499,51 @@ func TestAdapterSecurityGroupsKubernetesAPIRules(t *testing.T) {
 
 			if !reflect.DeepEqual(tc.expectedRules, rules) {
 				t.Fatalf("expected master rules %v got %v", tc.expectedRules, rules)
+			}
+		})
+	}
+}
+
+func TestAdapterSecurityGroupsParseRulesIntoSecurityGroups(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		description                    string
+		prefixName                     string
+		numberOfRules                  int
+		expectedNumberOfSecurityGroups int
+	}{
+		{
+			description:                    "case 0: No security groups",
+			prefixName:                     "empty",
+			numberOfRules:                  0,
+			expectedNumberOfSecurityGroups: 0,
+		},
+		{
+			description:                    "case 1: Less than max nº rules by security group",
+			prefixName:                     "empty",
+			numberOfRules:                  maxNumberOfRulesBySecurityGroup,
+			expectedNumberOfSecurityGroups: 1,
+		},
+		{
+			description:                    "case 2: More than max nº rules by security group",
+			prefixName:                     "empty",
+			numberOfRules:                  maxNumberOfRulesBySecurityGroup + 1,
+			expectedNumberOfSecurityGroups: 2,
+		},
+	}
+
+	for _, tc := range testCases {
+		rules := []securityGroupRule{}
+		for i := 0; i < tc.numberOfRules; i++ {
+			rule := securityGroupRule{}
+			rules = append(rules, rule)
+		}
+
+		t.Run(tc.description, func(t *testing.T) {
+			securityGroups := parseRulesIntoSecurityGroups(rules, tc.prefixName)
+
+			if tc.expectedNumberOfSecurityGroups != len(securityGroups) {
+				t.Fatalf("expected %d master rules got %d", tc.expectedNumberOfSecurityGroups, len(securityGroups))
 			}
 		})
 	}
