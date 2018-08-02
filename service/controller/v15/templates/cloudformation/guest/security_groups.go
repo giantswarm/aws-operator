@@ -2,13 +2,14 @@ package guest
 
 const SecurityGroups = `{{define "security_groups" }}
 {{- $v := .Guest.SecurityGroups }}
-  MasterSecurityGroup:
+  {{ range $i, $elem :=  $v.MasterSecurityGroups }}
+  MasterSecurityGroup{{ $i }}:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: {{ $v.MasterSecurityGroupName }}
+      GroupDescription: {{ $elem.SecurityGroupName }}
       VpcId: !Ref VPC
       SecurityGroupIngress:
-      {{ range $v.MasterSecurityGroupRules }}
+      {{ range $elem.SecurityGroupRules }}
       -
         IpProtocol: {{ .Protocol }}
         FromPort: {{ .Port }}
@@ -24,8 +25,8 @@ const SecurityGroups = `{{define "security_groups" }}
       {{- end }}
       Tags:
         - Key: Name
-          Value:  {{ $v.MasterSecurityGroupName }}
-
+          Value:  {{ $elem.SecurityGroupName }}
+  {{ end }}
   WorkerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:

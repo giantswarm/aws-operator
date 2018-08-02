@@ -2,6 +2,7 @@ package adapter
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -21,6 +22,9 @@ const (
 	kubeStateMetricsPort = 10301
 	sshPort              = 22
 
+	maxNumberOfRulesBySecurityGroup    = 50
+	maxNumberOfRulesByNetworkInterface = 250
+
 	allProtocols = "-1"
 	tcpProtocol  = "tcp"
 
@@ -29,10 +33,22 @@ const (
 	ingressSecurityGroupName = "IngressSecurityGroup"
 )
 
+type securityGroupRule struct {
+	Port                int
+	Protocol            string
+	SourceCIDR          string
+	SourceSecurityGroup string
+}
+
+type securityGroup struct {
+	SecurityGroupName  string
+	SecurityGroupRules []securityGroupRule
+}
+
 type GuestSecurityGroupsAdapter struct {
 	APIWhitelistEnabled       bool
 	MasterSecurityGroupName   string
-	MasterSecurityGroupRules  []securityGroupRule
+	MasterSecurityGroups      []securityGroup
 	WorkerSecurityGroupName   string
 	WorkerSecurityGroupRules  []securityGroupRule
 	IngressSecurityGroupName  string
@@ -50,8 +66,8 @@ func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
 		return microerror.Mask(err)
 	}
 
-	s.MasterSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, prefixMaster)
-	s.MasterSecurityGroupRules = masterRules
+	securityGroupName := key.SecurityGroupName(cfg.CustomObject, prefixMaster)
+	s.MasterSecurityGroups = parseRulesIntoSecurityGroups(masterRules, securityGroupName)
 
 	s.WorkerSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, prefixWorker)
 	s.WorkerSecurityGroupRules = s.getWorkerRules(cfg.CustomObject, hostClusterCIDR)
@@ -109,7 +125,13 @@ func (s *GuestSecurityGroupsAdapter) getMasterRules(cfg Config, hostClusterCIDR 
 			SourceCIDR: hostClusterCIDR,
 		},
 	}
-	return append(apiRules, otherRules...), nil
+
+	masterRules := append(apiRules, otherRules...)
+	if len(masterRules) > maxNumberOfRulesByNetworkInterface {
+		return nil, maxNumberOfRulesPassed
+	}
+
+	return masterRules, nil
 }
 
 func (s *GuestSecurityGroupsAdapter) getWorkerRules(customObject v1alpha1.AWSConfig, hostClusterCIDR string) []securityGroupRule {
@@ -179,13 +201,6 @@ func (s *GuestSecurityGroupsAdapter) getIngressRules(customObject v1alpha1.AWSCo
 			SourceCIDR: defaultCIDR,
 		},
 	}
-}
-
-type securityGroupRule struct {
-	Port                int
-	Protocol            string
-	SourceCIDR          string
-	SourceSecurityGroup string
 }
 
 func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupRule, error) {
@@ -275,4 +290,24 @@ func getHostClusterNATGatewayRules(cfg Config) ([]securityGroupRule, error) {
 	}
 
 	return gatewayRules, nil
+}
+
+func parseRulesIntoSecurityGroups(rules []securityGroupRule, prefixName string) []securityGroup {
+	chunkSize := maxNumberOfRulesBySecurityGroup
+	securityGroups := []securityGroup{}
+
+	for i := 0; i < maxNumberOfRulesByNetworkInterface && i < len(rules); i += maxNumberOfRulesBySecurityGroup {
+		if len(rules)-i < maxNumberOfRulesBySecurityGroup {
+			chunkSize = len(rules)
+		}
+		fmt.Printf("chunkSize: %d len: %d i: %d, ", chunkSize, len(rules), i)
+		securityGroupRules := rules[i:chunkSize]
+		securityGroup := securityGroup{
+			SecurityGroupName:  prefixName + strconv.Itoa(i),
+			SecurityGroupRules: securityGroupRules,
+		}
+		securityGroups = append(securityGroups, securityGroup)
+	}
+
+	return securityGroups
 }
