@@ -2,7 +2,9 @@ package workerasgname
 
 import "github.com/giantswarm/microerror"
 
-var invalidConfigError = microerror.New("invalid config")
+var invalidConfigError = &microerror.Error{
+	Kind: "invalidConfigError",
+}
 
 // IsInsserts invalidConfigError.
 func IsInvalidConfig(err error) bool {

@@ -6,21 +6,27 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
-var alreadyExistsError = microerror.New("already exists")
+var alreadyExistsError = &microerror.Error{
+	Kind: "alreadyExistsError",
+}
 
 // IsAlreadyExists asserts alreadyExistsError.
 func IsAlreadyExists(err error) bool {
 	return microerror.Cause(err) == alreadyExistsError
 }
 
-var invalidConfigError = microerror.New("invalid config")
+var invalidConfigError = &microerror.Error{
+	Kind: "invalidConfigError",
+}
 
 // IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
 
-var notFoundError = microerror.New("not found")
+var notFoundError = &microerror.Error{
+	Kind: "notFoundError",
+}
 
 // IsNotFound asserts notFoundError.
 func IsNotFound(err error) bool {
@@ -39,7 +45,9 @@ func IsStackNotFound(err error) bool {
 	return strings.Contains(microerror.Cause(err).Error(), "does not exist")
 }
 
-var wrongTypeError = microerror.New("wrong type")
+var wrongTypeError = &microerror.Error{
+	Kind: "wrongTypeError",
+}
 
 // IsWrongType asserts wrongTypeError.
 func IsWrongType(err error) bool {
