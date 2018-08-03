@@ -16,7 +16,6 @@ var (
 	awsAPIHostedZoneGuest     string
 	awsIngressHostedZoneGuest string
 	awsRegion                 string
-	awsRouteTable0            string
 	circleSHA                 string
 	clusterName               string
 	commonDomain              string
@@ -48,7 +47,6 @@ func init() {
 	getenv("AWS_API_HOSTED_ZONE_GUEST", &awsAPIHostedZoneGuest)
 	getenv("AWS_INGRESS_HOSTED_ZONE_GUEST", &awsIngressHostedZoneGuest)
 	getenv("AWS_REGION", &awsRegion)
-	getenv("AWS_ROUTE_TABLE_0", &awsRouteTable0)
 	getenv("CIRCLE_SHA1", &circleSHA)
 	// TODO rename to CLUSTER_ID. Note this also had to be changed in the
 	// framework package of e2e-harness.
