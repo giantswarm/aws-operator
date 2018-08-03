@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
-	"github.com/giantswarm/kvm-operator/integration/env"
 )
 
 var (
@@ -115,7 +114,7 @@ func AWSRouteTable0() string {
 }
 
 func AWSRouteTable1() string {
-	return env.ClusterID() + "_1"
+	return ClusterID() + "_1"
 }
 
 func CircleSHA() string {
