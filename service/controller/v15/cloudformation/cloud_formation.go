@@ -62,7 +62,9 @@ func (c *CloudFormation) DescribeOutputsAndStatus(stackName string) ([]*cloudfor
 	{
 		okStatuses := []string{
 			cloudformation.StackStatusCreateComplete,
+			cloudformation.StackStatusRollbackComplete,
 			cloudformation.StackStatusUpdateComplete,
+			cloudformation.StackStatusUpdateRollbackComplete,
 		}
 
 		for _, s := range okStatuses {
