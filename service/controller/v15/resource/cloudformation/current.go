@@ -2,6 +2,7 @@ package cloudformation
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
@@ -34,15 +35,16 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the guest cluster main stack outputs in the AWS API")
 
-		stackOutputs, err = sc.CloudFormation.DescribeOutputsAndStatus(stackName)
+		var stackStatus string
+		stackOutputs, stackStatus, err = sc.CloudFormation.DescribeOutputsAndStatus(stackName)
 		if cloudformationservice.IsStackNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster main stack outputs in the AWS API")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack is does not exist")
 			return StackState{}, nil
 
-		} else if cloudformationservice.IsStackInTransition(err) {
+		} else if cloudformationservice.IsOutputsNotAccessible(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster main stack outputs in the AWS API")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack is in transition state")
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the guest cluster main stack has status '%s'", stackStatus))
 			if key.IsDeleted(customObject) {
 				// Keep finalizers to as long as we don't
 				// encounter IsStackNotFound.

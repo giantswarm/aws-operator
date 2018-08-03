@@ -26,7 +26,10 @@ func New(config Config) (*CloudFormation, error) {
 	return c, nil
 }
 
-func (c *CloudFormation) DescribeOutputsAndStatus(stackName string) ([]*cloudformation.Output, error) {
+// DescribeOutputsAndStatus returns stack outputs, stack status and error. The
+// stack status is returned when the error is nil or the error is matched by
+// IsOutputsNotAccessible.
+func (c *CloudFormation) DescribeOutputsAndStatus(stackName string) ([]*cloudformation.Output, string, error) {
 	// At first we fetch the CF stack state by describing it via the AWS golang
 	// SDK. We are interested in the stack outputs and the stack status, since
 	// this tells us if we are able to access outputs at all.
@@ -39,13 +42,13 @@ func (c *CloudFormation) DescribeOutputsAndStatus(stackName string) ([]*cloudfor
 
 		o, err := c.client.DescribeStacks(i)
 		if IsStackNotFound(err) {
-			return nil, microerror.Maskf(stackNotFoundError, "stack name '%s'", stackName)
+			return nil, "", microerror.Maskf(stackNotFoundError, "stack name '%s'", stackName)
 		} else if err != nil {
-			return nil, microerror.Mask(err)
+			return nil, "", microerror.Mask(err)
 		}
 
 		if len(o.Stacks) > 1 {
-			return nil, microerror.Maskf(tooManyStacksError, "expected 1 stack, got %d", len(o.Stacks))
+			return nil, "", microerror.Maskf(tooManyStacksError, "expected 1 stack, got %d", len(o.Stacks))
 		}
 
 		stackOutputs = o.Stacks[0].Outputs
@@ -57,56 +60,20 @@ func (c *CloudFormation) DescribeOutputsAndStatus(stackName string) ([]*cloudfor
 	// unaccessible. This can lead to a stack that cannot be deleted. it can also
 	// be called during creation, while the outputs are still not accessible.
 	{
-		errorStatuses := []string{
-			cloudformation.StackStatusCreateInProgress,
-			cloudformation.StackStatusRollbackInProgress,
-			cloudformation.StackStatusRollbackComplete,
-			cloudformation.StackStatusUpdateInProgress,
+		okStatuses := []string{
+			cloudformation.StackStatusCreateComplete,
+			cloudformation.StackStatusUpdateComplete,
 		}
 
-		// TODO to discuss in the PR:
-		//
-		//
-		// Complete states:
-		//
-		//	StackStatusDeleteComplete = "DELETE_COMPLETE"
-		//	StackStatusUpdateComplete = "UPDATE_COMPLETE"
-		//	StackStatusCreateComplete = "CREATE_COMPLETE"
-		//
-		//
-		// Rollback complete states:
-		//
-		//	StackStatusRollbackComplete = "ROLLBACK_COMPLETE"
-		//	StackStatusUpdateRollbackComplete = "UPDATE_ROLLBACK_COMPLETE"
-		//
-		//
-		// Failed states:
-		//
-		//	StackStatusCreateFailed = "CREATE_FAILED"
-		//	StackStatusRollbackFailed = "ROLLBACK_FAILED"
-		//	StackStatusDeleteFailed = "DELETE_FAILED"
-		//	StackStatusUpdateRollbackFailed = "UPDATE_ROLLBACK_FAILED"
-		//
-		//
-		// In progress states:
-		//
-		//	StackStatusCreateInProgress = "CREATE_IN_PROGRESS"
-		//	StackStatusDeleteInProgress = "DELETE_IN_PROGRESS"
-		//	StackStatusReviewInProgress = "REVIEW_IN_PROGRESS"
-		//	StackStatusRollbackInProgress = "ROLLBACK_IN_PROGRESS"
-		//	StackStatusUpdateCompleteCleanupInProgress = "UPDATE_COMPLETE_CLEANUP_IN_PROGRESS"
-		//	StackStatusUpdateInProgress = "UPDATE_IN_PROGRESS"
-		//	StackStatusUpdateRollbackCompleteCleanupInProgress = "UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS"
-		//	StackStatusUpdateRollbackInProgress = "UPDATE_ROLLBACK_IN_PROGRESS"
-
-		for _, s := range errorStatuses {
+		for _, s := range okStatuses {
 			if stackStatus == s {
-				return nil, microerror.Maskf(stackInTransitionError, "due to stack state '%s'", stackStatus)
+				break
 			}
+			return nil, stackStatus, microerror.Maskf(outputsNotAccessibleError, "stack state '%s'", stackStatus)
 		}
 	}
 
-	return stackOutputs, nil
+	return stackOutputs, stackStatus, nil
 }
 
 func (c *CloudFormation) GetOutputValue(outputs []*cloudformation.Output, key string) (string, error) {

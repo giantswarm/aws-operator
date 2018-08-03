@@ -24,6 +24,15 @@ func IsOutputNotFound(err error) bool {
 	return microerror.Cause(err) == outputNotFoundError
 }
 
+var outputsNotAccessibleError = &microerror.Error{
+	Kind: "outputsNotAccessibleError",
+}
+
+// IsOutputsNotAccessible asserts outputsNotAccessibleError.
+func IsOutputsNotAccessible(err error) bool {
+	return microerror.Cause(err) == outputsNotAccessibleError
+}
+
 var stackNotFoundError = &microerror.Error{
 	Kind: "stackNotFoundError",
 }
@@ -49,15 +58,6 @@ func IsStackNotFound(err error) bool {
 	}
 
 	return false
-}
-
-var stackInTransitionError = &microerror.Error{
-	Kind: "stackInTransitionError",
-}
-
-// IsStackInTransition asserts stackInTransitionError.
-func IsStackInTransition(err error) bool {
-	return microerror.Cause(err) == stackInTransitionError
 }
 
 var tooManyStacksError = &microerror.Error{
