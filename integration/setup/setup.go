@@ -33,8 +33,8 @@ const (
 func HostPeerVPC(c *awsclient.Client, g *framework.Guest, h *framework.Host) (string, error) {
 	log.Printf("Creating Host Peer VPC stack")
 
-	os.Setenv("AWS_ROUTE_TABLE_0", env.ClusterID()+"_0")
-	os.Setenv("AWS_ROUTE_TABLE_1", env.ClusterID()+"_1")
+	os.Setenv("AWS_ROUTE_TABLE_0", env.AWSRouteTable0())
+	os.Setenv("AWS_ROUTE_TABLE_1", env.AWSRouteTable1())
 	stackName := "host-peer-" + env.ClusterID()
 	stackInput := &cloudformation.CreateStackInput{
 		StackName:        aws.String(stackName),

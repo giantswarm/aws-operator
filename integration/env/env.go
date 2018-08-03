@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
+	"github.com/giantswarm/kvm-operator/integration/env"
 )
 
 var (
@@ -17,7 +18,6 @@ var (
 	awsIngressHostedZoneGuest string
 	awsRegion                 string
 	awsRouteTable0            string
-	awsRouteTable1            string
 	circleSHA                 string
 	clusterName               string
 	commonDomain              string
@@ -50,7 +50,6 @@ func init() {
 	getenv("AWS_INGRESS_HOSTED_ZONE_GUEST", &awsIngressHostedZoneGuest)
 	getenv("AWS_REGION", &awsRegion)
 	getenv("AWS_ROUTE_TABLE_0", &awsRouteTable0)
-	getenv("AWS_ROUTE_TABLE_1", &awsRouteTable1)
 	getenv("CIRCLE_SHA1", &circleSHA)
 	// TODO rename to CLUSTER_ID. Note this also had to be changed in the
 	// framework package of e2e-harness.
@@ -112,11 +111,11 @@ func AWSRegion() string {
 }
 
 func AWSRouteTable0() string {
-	return awsRouteTable0
+	return ClusterID() + "_0"
 }
 
 func AWSRouteTable1() string {
-	return awsRouteTable1
+	return env.ClusterID() + "_1"
 }
 
 func CircleSHA() string {
