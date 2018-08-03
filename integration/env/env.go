@@ -12,106 +12,110 @@ import (
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 )
 
-const (
-	// EnvVarCircleSHA is the process environment variable representing the
-	// CIRCLE_SHA1 env var.
-	EnvVarCircleSHA = "CIRCLE_SHA1"
-	// EnvVarClusterID is the process environment variable representing the
-	// CLUSTER_NAME env var.
-	//
-	// TODO rename to CLUSTER_ID. Note this also had to be changed in the
-	// framework package of e2e-harness.
-	EnvVarClusterID = "CLUSTER_NAME"
-	// EnvVarCommonDomain is the process environment variable representing the
-	// COMMON_DOMAIN env var.
-	EnvVarCommonDomain = "COMMON_DOMAIN"
-	// EnvVarGithubBotToken is the process environment variable representing
-	// the GITHUB_BOT_TOKEN env var.
-	EnvVarGithubBotToken = "GITHUB_BOT_TOKEN"
-	// EnvVarGuestAWSArn is the process environment variable representing
-	// the GUEST_AWS_ARN env var.
-	EnvVarGuestAWSArn = "GUEST_AWS_ARN"
-	// EnvVarTestedVersion is the process environment variable representing the
-	// TESTED_VERSION env var.
-	EnvVarTestedVersion = "TESTED_VERSION"
-	// EnvVarTestDir is the process environment variable representing the
-	// TEST_DIR env var.
-	EnvVarTestDir = "TEST_DIR"
-	// EnvVaultToken is the process environment variable representing the
-	// VAULT_TOKEN env var.
-	EnvVaultToken = "VAULT_TOKEN"
-	// EnvVarVersionBundleVersion is the process environment variable representing
-	// the VERSION_BUNDLE_VERSION env var.
-	EnvVarVersionBundleVersion = "VERSION_BUNDLE_VERSION"
-)
-
 var (
-	circleSHA            string
-	commonDomain         string
-	guestAWSArn          string
-	testedVersion        string
-	testDir              string
-	vaultToken           string
-	versionBundleVersion string
+	awsAPIHostedZoneGuest     string
+	awsIngressHostedZoneGuest string
+	awsRegion                 string
+	awsRouteTable0            string
+	awsRouteTable1            string
+	circleSHA                 string
+	clusterName               string
+	commonDomain              string
+	guestAWSARN               string
+	guestAWSAccessKeyID       string
+	guestAWSAccessKeySecret   string
+	guestAWSAccessKeyToken    string
+	hostAWSAccessKeyID        string
+	hostAWSAccessKeySecret    string
+	hostAWSAccessKeyToken     string
+	idRSAPub                  string
+	testedVersion             string
+	testDir                   string
+	registryPullSecret        string
+	vaultToken                string
+	versionBundleVersion      string
 )
 
 func init() {
-	circleSHA = os.Getenv(EnvVarCircleSHA)
-	if circleSHA == "" {
-		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarCircleSHA))
-	}
-
-	guestAWSArn = os.Getenv(EnvVarGuestAWSArn)
-	if guestAWSArn == "" {
-		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarGuestAWSArn))
-	}
-
-	testedVersion = os.Getenv(EnvVarTestedVersion)
-	if testedVersion == "" {
-		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarTestedVersion))
-	}
-
-	testDir = os.Getenv(EnvVarTestDir)
-
-	// NOTE that implications of changing the order of initialization here means
-	// breaking the initialization behaviour.
-	clusterID := os.Getenv(EnvVarClusterID)
-	if clusterID == "" {
-		os.Setenv(EnvVarClusterID, ClusterID())
-	}
-
-	commonDomain = os.Getenv(EnvVarCommonDomain)
-	if commonDomain == "" {
-		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarCommonDomain))
-	}
-
-	vaultToken = os.Getenv(EnvVaultToken)
-	if vaultToken == "" {
-		panic(fmt.Sprintf("env var %q must not be empty", EnvVaultToken))
-	}
-
-	var err error
-	token := os.Getenv(EnvVarGithubBotToken)
-	params := &framework.VBVParams{
-		Component: "aws-operator",
-		Provider:  "aws",
-		Token:     token,
-		VType:     TestedVersion(),
-	}
-	versionBundleVersion, err = framework.GetVersionBundleVersion(params)
-	if err != nil {
-		panic(err.Error())
-	}
-	// TODO there should be a not found error returned by the framework in such
-	// cases.
-	if VersionBundleVersion() == "" {
-		if strings.ToLower(TestedVersion()) == "wip" {
-			log.Println("WIP version bundle version not present, exiting.")
-			os.Exit(0)
+	getenv := func(key string, value *string) {
+		*value = os.Getenv(key)
+		if *value == "" {
+			panic(fmt.Sprintf("env var '%s' must not be empty", key))
 		}
-		panic("version bundle version  must not be empty")
 	}
-	os.Setenv(EnvVarVersionBundleVersion, VersionBundleVersion())
+
+	var blackHole string
+
+	getenv("AWS_API_HOSTED_ZONE_GUEST", &awsAPIHostedZoneGuest)
+	getenv("AWS_INGRESS_HOSTED_ZONE_GUEST", &awsIngressHostedZoneGuest)
+	getenv("AWS_REGION", &awsRegion)
+	getenv("AWS_ROUTE_TABLE_0", &awsRouteTable0)
+	getenv("AWS_ROUTE_TABLE_1", &awsRouteTable1)
+	getenv("CIRCLE_SHA1", &circleSHA)
+	// TODO rename to CLUSTER_ID. Note this also had to be changed in the
+	// framework package of e2e-harness.
+	getenv("CLUSTER_NAME", &clusterName)
+	getenv("COMMON_DOMAIN", &commonDomain)
+	getenv("GITHUB_BOT_TOKEN", &blackHole)
+	getenv("GUEST_AWS_ARN", &guestAWSARN)
+	getenv("GUEST_AWS_ACCESS_KEY_ID", &guestAWSAccessKeyID)
+	getenv("GUEST_AWS_SECRET_ACCESS_KEY", &guestAWSAccessKeySecret)
+	getenv("GUEST_AWS_SESSION_TOKEN", &guestAWSAccessKeyToken)
+	getenv("HOST_AWS_ACCESS_KEY_ID", &hostAWSAccessKeyID)
+	getenv("HOST_AWS_SECRET_ACCESS_KEY", &hostAWSAccessKeySecret)
+	getenv("HOST_AWS_SESSION_TOKEN", &hostAWSAccessKeyToken)
+	getenv("IDRSA_PUB", &idRSAPub)
+	getenv("TESTED_VERSION", &testedVersion)
+	getenv("TEST_DIR", &testDir)
+	getenv("REGISTRY_PULL_SECRET", &registryPullSecret)
+	getenv("VAULT_TOKEN", &vaultToken)
+
+	// This get versionBundleVersion. This should be remove with release-operator.
+	{
+		var token string
+		getenv("GITHUB_BOT_TOKEN", &token)
+
+		params := &framework.VBVParams{
+			Component: "aws-operator",
+			Provider:  "aws",
+			Token:     token,
+			VType:     TestedVersion(),
+		}
+		versionBundleVersion, err = framework.GetVersionBundleVersion(params)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		// TODO there should be a not found error returned by the framework in such
+		// cases.
+		if VersionBundleVersion() == "" {
+			if strings.ToLower(TestedVersion()) == "wip" {
+				log.Println("WIP version bundle version not present, exiting.")
+				os.Exit(0)
+			}
+			panic("version bundle version  must not be empty")
+		}
+	}
+}
+
+func AWSAPIHostedZoneGuest() string {
+	return awsAPIHostedZoneGuest
+}
+
+func AWSIngressHostedZoneGuest() string {
+	return awsIngressHostedZoneGuest
+}
+
+func AWSRegion() string {
+	return awsRegion
+}
+
+func AWSRouteTable0() string {
+	return awsRouteTable0
+}
+
+func AWSRouteTable1() string {
+	return awsRouteTable1
 }
 
 func CircleSHA() string {
@@ -139,12 +143,44 @@ func ClusterID() string {
 	return strings.Join(parts, "-")
 }
 
+func ClusterName() string {
+	return clusterName
+}
+
 func CommonDomain() string {
 	return commonDomain
 }
 
-func GuestAWSArn() string {
-	return guestAWSArn
+func GuestAWSARN() string {
+	return guestAWSARN
+}
+
+func GuestAWSAccessKeyID() string {
+	return guestAWSAccessKeyID
+}
+
+func GuestAWSAccessKeySecret() string {
+	return guestAWSAccessKeySecret
+}
+
+func GuestAWSAccessKeyToken() string {
+	return guestAWSAccessKeyToken
+}
+
+func HostAWSAccessKeyID() string {
+	return hostAWSAccessKeyID
+}
+
+func HostAWSAccessKeySecret() string {
+	return hostAWSAccessKeySecret
+}
+
+func HostAWSAccessKeyToken() string {
+	return hostAWSAccessKeyToken
+}
+
+func IDRSAPub() string {
+	return idRSAPub
 }
 
 func TestedVersion() string {
@@ -153,6 +189,10 @@ func TestedVersion() string {
 
 func TestDir() string {
 	return testDir
+}
+
+func RegistryPullSecret() string {
+	return registryPullSecret
 }
 
 func TestHash() string {

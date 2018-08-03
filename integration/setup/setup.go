@@ -3,7 +3,6 @@
 package setup
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
 	"testing"
@@ -14,6 +13,7 @@ import (
 	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	awsclient "github.com/giantswarm/e2eclients/aws"
+	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
 	"github.com/giantswarm/e2etemplates/pkg/e2etemplates"
 	"github.com/giantswarm/microerror"
 	"k8s.io/api/core/v1"
@@ -30,7 +30,7 @@ const (
 	credentialNamespace   = "giantswarm"
 )
 
-func HostPeerVPC(c *awsclient.Client, g *framework.Guest, h *framework.Host) error {
+func HostPeerVPC(c *awsclient.Client, g *framework.Guest, h *framework.Host) (string, error) {
 	log.Printf("Creating Host Peer VPC stack")
 
 	os.Setenv("AWS_ROUTE_TABLE_0", env.ClusterID()+"_0")
@@ -43,31 +43,32 @@ func HostPeerVPC(c *awsclient.Client, g *framework.Guest, h *framework.Host) err
 	}
 	_, err := c.CloudFormation.CreateStack(stackInput)
 	if err != nil {
-		return microerror.Mask(err)
+		return "", microerror.Mask(err)
 	}
 	err = c.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
 		StackName: aws.String(stackName),
 	})
 	if err != nil {
-		return microerror.Mask(err)
+		return "", microerror.Mask(err)
 	}
 	describeOutput, err := c.CloudFormation.DescribeStacks(&cloudformation.DescribeStacksInput{
 		StackName: aws.String(stackName),
 	})
 	if err != nil {
-		return microerror.Mask(err)
+		return "", microerror.Mask(err)
 	}
+	var vpcPeerID string
 	for _, o := range describeOutput.Stacks[0].Outputs {
 		if *o.OutputKey == "VPCID" {
-			os.Setenv("AWS_VPC_PEER_ID", *o.OutputValue)
+			vpcPeerID = *o.OutputValue
 			break
 		}
 	}
 	log.Printf("Host Peer VPC stack created")
-	return nil
+	return vpcPeerID, nil
 }
 
-func Resources(c *awsclient.Client, g *framework.Guest, h *framework.Host) error {
+func Resources(c *awsclient.Client, g *framework.Guest, h *framework.Host, vpcPeerID string) error {
 	var err error
 
 	{
@@ -80,7 +81,10 @@ func Resources(c *awsclient.Client, g *framework.Guest, h *framework.Host) error
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		err = h.InstallBranchOperator("aws-operator", "awsconfig", e2etemplates.AWSOperatorChartValues)
+	}
+
+	{
+		err = installAWSOperator(h)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -95,9 +99,10 @@ func Resources(c *awsclient.Client, g *framework.Guest, h *framework.Host) error
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		// TODO this should probably be in the e2e-harness framework as well just like
-		// the other stuff.
-		err = installAWSResource()
+	}
+
+	{
+		err = installAWSConfig(h, vpcPeerID)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -110,7 +115,7 @@ func WrapTestMain(c *awsclient.Client, g *framework.Guest, h *framework.Host, m 
 	var v int
 	var err error
 
-	err = HostPeerVPC(c, g, h)
+	vpcPeerID, err := HostPeerVPC(c, g, h)
 	if err != nil {
 		log.Printf("%#v\n", err)
 		v = 1
@@ -122,7 +127,7 @@ func WrapTestMain(c *awsclient.Client, g *framework.Guest, h *framework.Host, m 
 		v = 1
 	}
 
-	err = Resources(c, g, h)
+	err = Resources(c, g, h, vpcPeerID)
 	if err != nil {
 		log.Printf("%#v\n", err)
 		v = 1
@@ -167,39 +172,96 @@ func WrapTestMain(c *awsclient.Client, g *framework.Guest, h *framework.Host, m 
 	os.Exit(v)
 }
 
-func installAWSResource() error {
-	o := func() error {
-		// NOTE we ignore errors here because we cannot get really useful error
-		// handling done. This here should anyway only be a quick fix until we use
-		// the helm client lib. Then error handling will be better.
-		framework.HelmCmd("delete --purge aws-config-e2e")
+func installAWSOperator(h *framework.Host) error {
+	var err error
 
-		awsResourceChartValuesEnv := os.ExpandEnv(e2etemplates.ApiextensionsAWSConfigE2EChartValues)
-		d := []byte(awsResourceChartValuesEnv)
+	var values string
+	{
+		c := chartvalues.AWSOperatorConfig{
+			Guest: chartvalues.AWSOperatorConfigGuest{
+				// TODO remove this setting
+				Update: chartvalues.AWSOperatorConfigGuestUpdate{
+					Enabled: true,
+				},
+			},
+			Provider: chartvalues.AWSOperatorConfigProvider{
+				AWS: chartvalues.AWSOperatorConfigProviderAWS{
+					Encrypter: "kms",
+					Region:    env.AWSRegion(),
+				},
+			},
+			Secret: chartvalues.AWSOperatorConfigSecret{
+				AWSOperator: chartvalues.AWSOperatorConfigSecretAWSOperator{
+					IDRSAPub: env.IDRSAPub(),
+					SecretYaml: chartvalues.AWSOperatorConfigSecretAWSOperatorSecretYaml{
+						Service: chartvalues.AWSOperatorConfigSecretAWSOperatorSecretYamlService{
+							AWS: chartvalues.AWSOperatorConfigSecretAWSOperatorSecretYamlServiceAWS{
+								AccessKey: chartvalues.AWSOperatorConfigSecretAWSOperatorSecretYamlServiceAWSAccessKey{
+									ID:     env.GuestAWSAccessKeyID(),
+									Secret: env.GuestAWSAccessKeySecret(),
+									Token:  env.GuestAWSAccessKeyToken(),
+								},
+								HostAccessKey: chartvalues.AWSOperatorConfigSecretAWSOperatorSecretYamlServiceAWSAccessKey{
+									ID:     env.HostAWSAccessKeyID(),
+									Secret: env.HostAWSAccessKeySecret(),
+									Token:  env.HostAWSAccessKeyToken(),
+								},
+							},
+						},
+					},
+				},
+			},
+			RegistryPullSecret: env.RegistryPullSecret(),
+		}
 
-		err := ioutil.WriteFile(awsResourceValuesFile, d, 0644)
+		values, err = chartvalues.NewAWSOperator(c)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		err = framework.HelmCmd("registry install quay.io/giantswarm/apiextensions-aws-config-e2e-chart:stable -- -n aws-config-e2e --values " + awsResourceValuesFile)
+	}
+
+	err = h.InstallBranchOperator("aws-operator", "awsconfig", values)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	return nil
+}
+
+func installAWSConfig(h *framework.Host, vpcPeerID string) error {
+	var err error
+
+	var values string
+	{
+		c := chartvalues.APIExtensionsAWSConfigE2EConfig{
+			CommonDomain: env.CommonDomain(),
+			// TODO(PK) can this be replaced with env.ClusterID?
+			ClusterName:          env.ClusterName(),
+			SSHPublicKey:         env.IDRSAPub(),
+			VersionBundleVersion: env.VersionBundleVersion(),
+
+			AWS: chartvalues.APIExtensionsAWSConfigE2EConfigAWS{
+				Region:            env.AWSRegion(),
+				APIHostedZone:     env.AWSAPIHostedZoneGuest(),
+				IngressHostedZone: env.AWSIngressHostedZoneGuest(),
+				RouteTable0:       env.AWSRouteTable0(),
+				RouteTable1:       env.AWSRouteTable1(),
+				VPCPeerID:         vpcPeerID,
+			},
+		}
+
+		values, err = chartvalues.NewAPIExtensionsAWSConfigE2E(c)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-
-		return nil
-	}
-	b := framework.NewExponentialBackoff(framework.ShortMaxWait, framework.ShortMaxInterval)
-	n := func(err error, delay time.Duration) {
-		log.Println("level", "debug", "message", err.Error())
 	}
 
-	err := backoff.RetryNotify(o, b, n)
+	err = h.InstallResource("apiextensions-aws-config-e2e", values, ":stable")
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	return nil
+	return err
 }
 
 func installCredential(h *framework.Host) error {
@@ -213,7 +275,7 @@ func installCredential(h *framework.Host) error {
 				Name: credentialName,
 			},
 			Data: map[string][]byte{
-				awsOperatorArnKey: []byte(env.GuestAWSArn()),
+				awsOperatorArnKey: []byte(env.GuestAWSARN()),
 			},
 		}
 
