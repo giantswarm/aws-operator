@@ -72,6 +72,7 @@ func init() {
 
 	// This get versionBundleVersion. This should be remove with release-operator.
 	{
+		var err error
 		var token string
 		getenv("GITHUB_BOT_TOKEN", &token)
 
