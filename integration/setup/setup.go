@@ -234,9 +234,8 @@ func installAWSConfig(h *framework.Host, vpcPeerID string) error {
 	var values string
 	{
 		c := chartvalues.APIExtensionsAWSConfigE2EConfig{
-			CommonDomain: env.CommonDomain(),
-			// TODO(PK) can this be replaced with env.ClusterID?
-			ClusterName:          env.ClusterName(),
+			CommonDomain:         env.CommonDomain(),
+			ClusterName:          env.ClusterID(),
 			SSHPublicKey:         env.IDRSAPub(),
 			VersionBundleVersion: env.VersionBundleVersion(),
 
