@@ -11,6 +11,11 @@ import (
 )
 
 const (
+	component = "aws-operator"
+	provider  = "aws"
+)
+
+const (
 	EnvVarCircleCI             = "CIRCLECI"
 	EnvVarCircleSHA            = "CIRCLE_SHA1"
 	EnvVarGithubBotToken       = "GITHUB_BOT_TOKEN"
@@ -57,8 +62,8 @@ func init() {
 
 	token := os.Getenv(EnvVarGithubBotToken)
 	params := &framework.VBVParams{
-		Component: "aws-operator",
-		Provider:  "aws",
+		Component: component,
+		Provider:  provider,
 		Token:     token,
 		VType:     TestedVersion(),
 	}
