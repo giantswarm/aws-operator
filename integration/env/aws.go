@@ -33,47 +33,47 @@ var (
 
 func init() {
 	awsAPIHostedZoneGuest = os.Getenv(EnvVarAWSAPIHostedZoneGuest)
-	if testedVersion == "" {
+	if awsAPIHostedZoneGuest == "" {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarAWSAPIHostedZoneGuest))
 	}
 
 	awsIngressHostedZoneGuest = os.Getenv(EnvVarAWSIngressHostedZoneGuest)
-	if testedVersion == "" {
+	if awsIngressHostedZoneGuest == "" {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarAWSIngressHostedZoneGuest))
 	}
 
 	awsRegion = os.Getenv(EnvVarAWSRegion)
-	if testedVersion == "" {
+	if awsRegion == "" {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarAWSRegion))
 	}
 
 	guestAWSARN = os.Getenv(EnvVarGuestAWSARN)
-	if testedVersion == "" {
+	if guestAWSARN == "" {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarGuestAWSARN))
 	}
 
 	guestAWSAccessKeyID = os.Getenv(EnvVarGuestAWSAccessKeyID)
-	if testedVersion == "" {
+	if guestAWSAccessKeyID == "" {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarGuestAWSAccessKeyID))
 	}
 
 	guestAWSAccessKeySecret = os.Getenv(EnvVarGuestAWSAccessKeySecret)
-	if testedVersion == "" {
+	if guestAWSAccessKeySecret == "" {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarGuestAWSAccessKeySecret))
 	}
 
 	hostAWSAccessKeyID = os.Getenv(EnvVarHostAWSAccessKeyID)
-	if testedVersion == "" {
+	if hostAWSAccessKeyID == "" {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarHostAWSAccessKeyID))
 	}
 
 	hostAWSAccessKeySecret = os.Getenv(EnvVarHostAWSAccessKeySecret)
-	if testedVersion == "" {
+	if hostAWSAccessKeySecret == "" {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarHostAWSAccessKeySecret))
 	}
 
 	idRSAPub = os.Getenv(EnvVarIDRSAPub)
-	if testedVersion == "" {
+	if idRSAPub == "" {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarIDRSAPub))
 	}
 }

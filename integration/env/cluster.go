@@ -17,7 +17,7 @@ var (
 
 func init() {
 	commonDomain = os.Getenv(EnvVarCommonDomain)
-	if circleSHA == "" {
+	if commonDomain == "" {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarCommonDomain))
 	}
 

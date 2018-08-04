@@ -54,7 +54,7 @@ func init() {
 	}
 
 	registryPullSecret = os.Getenv(EnvVarRegistryPullSecret)
-	if testedVersion == "" {
+	if registryPullSecret == "" {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarRegistryPullSecret))
 	}
 
