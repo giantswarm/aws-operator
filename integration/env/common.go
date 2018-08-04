@@ -57,8 +57,8 @@ func init() {
 
 	token := os.Getenv(EnvVarGithubBotToken)
 	params := &framework.VBVParams{
-		Component: "azure-operator",
-		Provider:  "azure",
+		Component: "aws-operator",
+		Provider:  "aws",
 		Token:     token,
 		VType:     TestedVersion(),
 	}
