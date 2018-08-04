@@ -21,10 +21,8 @@ var (
 	guestAWSARN               string
 	guestAWSAccessKeyID       string
 	guestAWSAccessKeySecret   string
-	guestAWSAccessKeyToken    string
 	hostAWSAccessKeyID        string
 	hostAWSAccessKeySecret    string
-	hostAWSAccessKeyToken     string
 	idRSAPub                  string
 	testedVersion             string
 	testDir                   string
@@ -52,10 +50,8 @@ func init() {
 	getenv("GUEST_AWS_ARN", &guestAWSARN)
 	getenv("GUEST_AWS_ACCESS_KEY_ID", &guestAWSAccessKeyID)
 	getenv("GUEST_AWS_SECRET_ACCESS_KEY", &guestAWSAccessKeySecret)
-	getenv("GUEST_AWS_SESSION_TOKEN", &guestAWSAccessKeyToken)
 	getenv("HOST_AWS_ACCESS_KEY_ID", &hostAWSAccessKeyID)
 	getenv("HOST_AWS_SECRET_ACCESS_KEY", &hostAWSAccessKeySecret)
-	getenv("HOST_AWS_SESSION_TOKEN", &hostAWSAccessKeyToken)
 	getenv("IDRSA_PUB", &idRSAPub)
 	getenv("TESTED_VERSION", &testedVersion)
 	getenv("TEST_DIR", &testDir)
@@ -153,7 +149,7 @@ func GuestAWSAccessKeySecret() string {
 }
 
 func GuestAWSAccessKeyToken() string {
-	return guestAWSAccessKeyToken
+	return ""
 }
 
 func HostAWSAccessKeyID() string {
@@ -165,7 +161,7 @@ func HostAWSAccessKeySecret() string {
 }
 
 func HostAWSAccessKeyToken() string {
-	return hostAWSAccessKeyToken
+	return ""
 }
 
 func IDRSAPub() string {
