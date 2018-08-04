@@ -59,6 +59,7 @@ func (c *CloudFormation) DescribeOutputsAndStatus(stackName string) ([]*cloudfor
 	// implementations. If the stack creation failed, the outputs can be
 	// unaccessible. This can lead to a stack that cannot be deleted. it can also
 	// be called during creation, while the outputs are still not accessible.
+	var outputsAccessible bool
 	{
 		okStatuses := []string{
 			cloudformation.StackStatusCreateComplete,
@@ -69,10 +70,14 @@ func (c *CloudFormation) DescribeOutputsAndStatus(stackName string) ([]*cloudfor
 
 		for _, s := range okStatuses {
 			if stackStatus == s {
+				outputsAccessible = true
 				break
 			}
-			return nil, stackStatus, microerror.Maskf(outputsNotAccessibleError, "stack state '%s'", stackStatus)
 		}
+	}
+
+	if !outputsAccessible {
+		return nil, stackStatus, microerror.Maskf(outputsNotAccessibleError, "stack state '%s'", stackStatus)
 	}
 
 	return stackOutputs, stackStatus, nil
