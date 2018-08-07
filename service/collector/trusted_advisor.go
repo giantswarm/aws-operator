@@ -8,6 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/support"
 	"github.com/giantswarm/microerror"
 	"github.com/prometheus/client_golang/prometheus"
+
+	"github.com/giantswarm/aws-operator/client/aws"
 )
 
 const (
@@ -24,6 +26,7 @@ const (
 	limitIndex     = 3
 	usageIndex     = 4
 
+	accountIDLabel = "account_id"
 	regionLabel    = "region"
 	serviceLabel   = "service"
 	limitNameLabel = "name"
@@ -34,6 +37,7 @@ var (
 		prometheus.BuildFQName(Namespace, "", "service_limit"),
 		"Service limits as reported by Trusted Advisor.",
 		[]string{
+			accountIDLabel,
 			regionLabel,
 			serviceLabel,
 			limitNameLabel,
@@ -44,6 +48,7 @@ var (
 		prometheus.BuildFQName(Namespace, "", "service_usage"),
 		"Service usage as reported by Trusted Advisor.",
 		[]string{
+			accountIDLabel,
 			regionLabel,
 			serviceLabel,
 			limitNameLabel,
@@ -82,10 +87,16 @@ func init() {
 	prometheus.MustRegister(getResourcesDuration)
 }
 
-func (c *Collector) collectTrustedAdvisorChecks(ch chan<- prometheus.Metric) {
+func (c *Collector) collectAccountsTrustedAdvisorChecks(ch chan<- prometheus.Metric, clients []aws.Clients) {
+	for _, client := range clients {
+		go c.collectTrustedAdvisorChecks(ch, client)
+	}
+}
+
+func (c *Collector) collectTrustedAdvisorChecks(ch chan<- prometheus.Metric, awsClients aws.Clients) {
 	c.logger.Log("level", "debug", "message", "collecting metrics for trusted advisor checks")
 
-	checks, err := c.getTrustedAdvisorChecks()
+	checks, err := c.getTrustedAdvisorChecks(awsClients)
 	if err != nil {
 		if IsUnsupportedPlan(err) {
 			c.logger.Log("level", "info", "message", "Trusted Advisor not available in support plan, cannot fetch service usage metrics")
@@ -112,9 +123,16 @@ func (c *Collector) collectTrustedAdvisorChecks(ch chan<- prometheus.Metric) {
 		go func(id *string) {
 			defer wg.Done()
 
-			resources, err := c.getTrustedAdvisorResources(id)
+			resources, err := c.getTrustedAdvisorResources(id, awsClients)
 			if err != nil {
 				c.logger.Log("level", "error", "message", "could not get Trusted Advisor resource", "stack", fmt.Sprintf("%#v", err), "id", *id)
+				trustedAdvisorError.Inc()
+				return
+			}
+
+			accountID, err := c.awsAccountID(awsClients)
+			if err != nil {
+				c.logger.Log("level", "error", "message", "could not get aws account id", "stack", fmt.Sprintf("%#v", err))
 				trustedAdvisorError.Inc()
 				return
 			}
@@ -125,7 +143,7 @@ func (c *Collector) collectTrustedAdvisorChecks(ch chan<- prometheus.Metric) {
 					continue
 				}
 
-				limit, usage, err := resourceToMetrics(resource)
+				limit, usage, err := resourceToMetrics(resource, accountID)
 				if err != nil {
 					c.logger.Log("level", "error", "message", "could not convert Trusted Advisor resource into metrics", "stack", fmt.Sprintf("%#v", err), "id", *id)
 					trustedAdvisorError.Inc()
@@ -144,14 +162,14 @@ func (c *Collector) collectTrustedAdvisorChecks(ch chan<- prometheus.Metric) {
 }
 
 // getTrustedAdvisorCheckDescriptions calls Trusted Advisor API to get all available checks.
-func (c *Collector) getTrustedAdvisorChecks() ([]*support.TrustedAdvisorCheckDescription, error) {
+func (c *Collector) getTrustedAdvisorChecks(awsClients aws.Clients) ([]*support.TrustedAdvisorCheckDescription, error) {
 	timer := prometheus.NewTimer(getChecksDuration)
 
 	englishLanguage := "en"
 	describeChecksInput := &support.DescribeTrustedAdvisorChecksInput{
 		Language: &englishLanguage,
 	}
-	describeChecksOutput, err := c.awsClients.Support.DescribeTrustedAdvisorChecks(describeChecksInput)
+	describeChecksOutput, err := awsClients.Support.DescribeTrustedAdvisorChecks(describeChecksInput)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -162,13 +180,13 @@ func (c *Collector) getTrustedAdvisorChecks() ([]*support.TrustedAdvisorCheckDes
 }
 
 // getTrustedAdvisorResources calls Trusted Advisor API to get flagged resources of the given check ID.
-func (c *Collector) getTrustedAdvisorResources(id *string) ([]*support.TrustedAdvisorResourceDetail, error) {
+func (c *Collector) getTrustedAdvisorResources(id *string, awsClients aws.Clients) ([]*support.TrustedAdvisorResourceDetail, error) {
 	timer := prometheus.NewTimer(getResourcesDuration)
 
 	checkResultInput := &support.DescribeTrustedAdvisorCheckResultInput{
 		CheckId: id,
 	}
-	checkResultOutput, err := c.awsClients.Support.DescribeTrustedAdvisorCheckResult(checkResultInput)
+	checkResultOutput, err := awsClients.Support.DescribeTrustedAdvisorCheckResult(checkResultInput)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -178,7 +196,7 @@ func (c *Collector) getTrustedAdvisorResources(id *string) ([]*support.TrustedAd
 	return checkResultOutput.Result.FlaggedResources, nil
 }
 
-func resourceToMetrics(resource *support.TrustedAdvisorResourceDetail) (prometheus.Metric, prometheus.Metric, error) {
+func resourceToMetrics(resource *support.TrustedAdvisorResourceDetail, accountID string) (prometheus.Metric, prometheus.Metric, error) {
 	if len(resource.Metadata) != resourceMetadataLength {
 		return nil, nil, invalidResourceError
 	}
@@ -208,10 +226,10 @@ func resourceToMetrics(resource *support.TrustedAdvisorResourceDetail) (promethe
 	}
 
 	limitMetric := prometheus.MustNewConstMetric(
-		serviceLimit, prometheus.GaugeValue, float64(limitInt), *region, *service, *limitName,
+		serviceLimit, prometheus.GaugeValue, float64(limitInt), accountID, *region, *service, *limitName,
 	)
 	usageMetric := prometheus.MustNewConstMetric(
-		serviceUsage, prometheus.GaugeValue, float64(usageInt), *region, *service, *limitName,
+		serviceUsage, prometheus.GaugeValue, float64(usageInt), accountID, *region, *service, *limitName,
 	)
 
 	return limitMetric, usageMetric, nil

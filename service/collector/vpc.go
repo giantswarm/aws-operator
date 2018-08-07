@@ -5,6 +5,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/prometheus/client_golang/prometheus"
+
+	"github.com/giantswarm/aws-operator/client/aws"
 )
 
 const (
@@ -16,6 +18,7 @@ const (
 
 	GaugeValue float64 = 1
 
+	AccountIdLabel    = "account_id"
 	CidrLabel         = "cidr"
 	ClusterLabel      = "cluster_id"
 	IDLabel           = "id"
@@ -31,6 +34,7 @@ var (
 		prometheus.BuildFQName(Namespace, "", "vpc_info"),
 		"VPC information.",
 		[]string{
+			AccountIdLabel,
 			CidrLabel,
 			ClusterLabel,
 			IDLabel,
@@ -44,11 +48,17 @@ var (
 	)
 )
 
-func (c *Collector) collectVPCs(ch chan<- prometheus.Metric) {
+func (c *Collector) collectAccountsVPCs(ch chan<- prometheus.Metric, clients []aws.Clients) {
+	for _, client := range clients {
+		go c.collectVPCs(ch, client)
+	}
+}
+
+func (c *Collector) collectVPCs(ch chan<- prometheus.Metric, awsClients aws.Clients) {
 	c.logger.Log("level", "debug", "message", "collecting metrics for vpcs")
 
 	i := &ec2.DescribeVpcsInput{}
-	o, err := c.awsClients.EC2.DescribeVpcs(i)
+	o, err := awsClients.EC2.DescribeVpcs(i)
 	if err != nil {
 		c.logger.Log("level", "error", "message", "could not list vpcs", "stack", fmt.Sprintf("%#v", err))
 	}
@@ -87,10 +97,17 @@ func (c *Collector) collectVPCs(ch chan<- prometheus.Metric) {
 			}
 		}
 
+		accountID, err := c.awsAccountID(awsClients)
+		if err != nil {
+			c.logger.Log("level", "error", "message", "could not get aws account id", "stack", fmt.Sprintf("%#v", err))
+			continue
+		}
+
 		ch <- prometheus.MustNewConstMetric(
 			vpcsDesc,
 			prometheus.GaugeValue,
 			GaugeValue,
+			accountID,
 			*vpc.CidrBlock,
 			cluster,
 			*vpc.VpcId,

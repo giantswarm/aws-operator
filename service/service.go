@@ -190,9 +190,9 @@ func New(config Config) (*Service, error) {
 	var awsConfig awsclient.Config
 	{
 		awsConfig = awsclient.Config{
-			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
-			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
-			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
+			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
+			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
+			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
 			Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
 		}
 	}
@@ -201,6 +201,7 @@ func New(config Config) (*Service, error) {
 	{
 		c := collector.Config{
 			G8sClient: g8sClient,
+			K8sClient: k8sClient,
 			Logger:    config.Logger,
 
 			AwsConfig:        awsConfig,
