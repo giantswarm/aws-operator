@@ -15,14 +15,14 @@ import (
 func (c Collector) getARNs() ([]string, error) {
 	var ARNs []string
 
-	// List AWSConfigs
+	// List AWSConfigs.
 	awsConfigClient := c.g8sClient.ProviderV1alpha1().AWSConfigs("")
 	awsConfigs, err := awsConfigClient.List(v1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	// Get unique ARNs
+	// Get unique ARNs.
 	arnsMap := make(map[string]bool)
 	for _, awsConfig := range awsConfigs.Items {
 		arn, err := credential.GetARN(c.k8sClient, &awsConfig)
@@ -49,10 +49,10 @@ func (c Collector) getAWSClients() ([]aws.Clients, error) {
 		return nil, microerror.Mask(err)
 	}
 
-	// Host cluster account
+	// Host cluster account.
 	clients = append(clients, aws.NewClients(c.awsConfig))
 
-	// Guest cluster accounts
+	// Guest cluster accounts.
 	for _, arn := range ARNs {
 		awsConfig := c.awsConfig
 		awsConfig.RoleARN = arn
