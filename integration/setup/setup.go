@@ -3,11 +3,11 @@
 package setup
 
 import (
+	"context"
 	"io/ioutil"
 	"log"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -16,6 +16,7 @@ import (
 	awsclient "github.com/giantswarm/e2eclients/aws"
 	"github.com/giantswarm/e2etemplates/pkg/e2etemplates"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -168,6 +169,18 @@ func WrapTestMain(c *awsclient.Client, g *framework.Guest, h *framework.Host, m 
 }
 
 func installAWSResource() error {
+	var err error
+
+	var l micrologger.Logger
+	{
+		c := micrologger.Config{}
+
+		l, err = micrologger.New(c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
 	o := func() error {
 		// NOTE we ignore errors here because we cannot get really useful error
 		// handling done. This here should anyway only be a quick fix until we use
@@ -189,12 +202,9 @@ func installAWSResource() error {
 
 		return nil
 	}
-	b := framework.NewExponentialBackoff(framework.ShortMaxWait, framework.ShortMaxInterval)
-	n := func(err error, delay time.Duration) {
-		log.Println("level", "debug", "message", err.Error())
-	}
-
-	err := backoff.RetryNotify(o, b, n)
+	b := backoff.NewExponential(framework.ShortMaxWait, framework.ShortMaxInterval)
+	n := backoff.NewNotifier(l, context.Background())
+	err = backoff.RetryNotify(o, b, n)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -203,6 +213,18 @@ func installAWSResource() error {
 }
 
 func installCredential(h *framework.Host) error {
+	var err error
+
+	var l micrologger.Logger
+	{
+		c := micrologger.Config{}
+
+		l, err = micrologger.New(c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
 	o := func() error {
 		k8sClient := h.K8sClient()
 
@@ -224,12 +246,9 @@ func installCredential(h *framework.Host) error {
 
 		return nil
 	}
-	b := framework.NewExponentialBackoff(framework.ShortMaxWait, framework.ShortMaxInterval)
-	n := func(err error, delay time.Duration) {
-		log.Println("level", "debug", "message", err.Error())
-	}
-
-	err := backoff.RetryNotify(o, b, n)
+	b := backoff.NewExponential(framework.ShortMaxWait, framework.ShortMaxInterval)
+	n := backoff.NewNotifier(l, context.Background())
+	err = backoff.RetryNotify(o, b, n)
 	if err != nil {
 		return microerror.Mask(err)
 	}
