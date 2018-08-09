@@ -4,7 +4,9 @@ import (
 	"context"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/certs"
 	"github.com/giantswarm/certs/legacy"
+	"github.com/giantswarm/guestcluster"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
@@ -364,53 +366,42 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	//var guestCluster guestcluster.Interface
-	//{
-	//	c := guestcluster.Config{
-	//		CertsSearcher: certsSearcher,
-	//		Logger:        config.Logger,
-	//
-	//		CertID: certs.APICert,
-	//	}
-	//
-	//	guestCluster, err = guestcluster.New(c)
-	//	if err != nil {
-	//		return nil, microerror.Mask(err)
-	//	}
-	//}
+	var guestCluster guestcluster.Interface
+	{
+		c := guestcluster.Config{
+			CertsSearcher: certsSearcher,
+			Logger:        config.Logger,
 
-	//var statusResource controller.Resource
-	//{
-	//	c := statusresource.Config{
-	//		ClusterEndpointFunc:      key.ToClusterEndpoint,
-	//		ClusterIDFunc:            key.ToClusterID,
-	//		ClusterStatusFunc:        key.ToClusterStatus,
-	//		GuestCluster:             guestCluster,
-	//		NodeCountFunc:            key.ToNodeCount,
-	//		Logger:                   config.Logger,
-	//		RESTClient:               config.G8sClient.ProviderV1alpha1().RESTClient(),
-	//		VersionBundleVersionFunc: key.ToVersionBundleVersion,
-	//	}
-	//
-	//	statusResource, err = statusresource.New(c)
-	//	if err != nil {
-	//		return nil, microerror.Mask(err)
-	//	}
-	//}
+			CertID: certs.APICert,
+		}
+
+		guestCluster, err = guestcluster.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var statusResource controller.Resource
+	{
+		c := statusresource.Config{
+			ClusterEndpointFunc:      key.ToClusterEndpoint,
+			ClusterIDFunc:            key.ToClusterID,
+			ClusterStatusFunc:        key.ToClusterStatus,
+			GuestCluster:             guestCluster,
+			NodeCountFunc:            key.ToNodeCount,
+			Logger:                   config.Logger,
+			RESTClient:               config.G8sClient.ProviderV1alpha1().RESTClient(),
+			VersionBundleVersionFunc: key.ToVersionBundleVersion,
+		}
+
+		statusResource, err = statusresource.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
 
 	resources := []controller.Resource{
-		// TODO our host clusters are in quite inconsistent states. Status sub
-		// resources do not seem to be enabled everywhere. This results in
-		// unpredictable behaviour across the board. For now we disable the status
-		// resource to not make the situation worse. Above some dependencies are
-		// prepared but also commented. Later we can easily enable this again but
-		// this needs more extensive testing.
-		//
-		//     https://github.com/giantswarm/giantswarm/issues/3822
-		//
-
-		//statusResource,
-
+		statusResource,
 		migrationResource,
 		hostedZoneResource,
 		bridgeZoneResource,
