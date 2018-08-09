@@ -313,13 +313,15 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:dac4656dab9fd31234dc48f735e582db0d275283aed1db6c8d137e9dc3602ef7"
+  digest = "1:c2ff5545229a429a7e5f38c8f509ac3c1517c08df1960df0139b5092fd61b2d7"
   name = "github.com/giantswarm/e2etests"
   packages = [
     "clusterstate",
     "clusterstate/provider",
     "scaling",
     "scaling/provider",
+    "update",
+    "update/provider",
   ]
   pruneopts = "UT"
   revision = "be3a134ea48a62878bba3034d91a18597851cc37"
@@ -342,11 +344,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:b7cdfa02bef5914403adad095027fa7c03cfe53d87604bddcc507d51df4d465f"
+  digest = "1:a46f31b76e413dd8c7c93c20ad6e4a6599c5baee60be60d3b423bf5e5f62c7f5"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
   pruneopts = "UT"
-  revision = "f5b26d053033c4c140aa79a4ced025362669e474"
+  revision = "4462d519f9a0c8968ab498c5ab8fd21975f5d58c"
 
 [[projects]]
   branch = "master"
@@ -1631,6 +1633,7 @@
     "github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake",
     "github.com/giantswarm/apprclient",
     "github.com/giantswarm/backoff",
+    "github.com/giantswarm/certs",
     "github.com/giantswarm/certs/legacy",
     "github.com/giantswarm/certs/legacy/legacytest",
     "github.com/giantswarm/e2e-harness/pkg/framework",
@@ -1640,6 +1643,9 @@
     "github.com/giantswarm/e2etests/clusterstate/provider",
     "github.com/giantswarm/e2etests/scaling",
     "github.com/giantswarm/e2etests/scaling/provider",
+    "github.com/giantswarm/e2etests/update",
+    "github.com/giantswarm/e2etests/update/provider",
+    "github.com/giantswarm/guestcluster",
     "github.com/giantswarm/helmclient",
     "github.com/giantswarm/k8scloudconfig/v_2_0_2",
     "github.com/giantswarm/k8scloudconfig/v_3_0_0",
