@@ -27,6 +27,10 @@ import (
 	"github.com/giantswarm/e2e-harness/pkg/harness"
 )
 
+const (
+	defaultNamespace = "default"
+)
+
 type HostConfig struct {
 	Backoff backoff.Interface
 	Logger  micrologger.Logger
@@ -61,7 +65,7 @@ func NewHost(c HostConfig) (*Host, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ClusterID must not be empty", c)
 	}
 	if c.TargetNamespace == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.TargetNamespace must not be empty", c)
+		c.TargetNamespace = defaultNamespace
 	}
 	if c.VaultToken == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.VaultToken must not be empty", c)
