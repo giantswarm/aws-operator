@@ -312,8 +312,8 @@
   revision = "cb44aefe3ea5b72262e2342cc6172297a5856c0c"
 
 [[projects]]
-  branch = "master"
-  digest = "1:c2ff5545229a429a7e5f38c8f509ac3c1517c08df1960df0139b5092fd61b2d7"
+  branch = "max"
+  digest = "1:c53dc213477dc69d2ec90c9c4c4b6fe36ada4a0946d4d3db1e0a7a6d93fc8e5b"
   name = "github.com/giantswarm/e2etests"
   packages = [
     "clusterstate",
@@ -324,7 +324,7 @@
     "update/provider",
   ]
   pruneopts = "UT"
-  revision = "be3a134ea48a62878bba3034d91a18597851cc37"
+  revision = "0e0987cc75687dce912363ceb18028f9ce5946aa"
 
 [[projects]]
   branch = "master"
@@ -878,12 +878,12 @@
   revision = "7c0cea34c8ece3fbeb2b27ab9b59511d360fb394"
 
 [[projects]]
-  digest = "1:9424f440bba8f7508b69414634aef3b2b3a877e522d8a4624692412805407bb7"
+  digest = "1:dab83a1bbc7ad3d7a6ba1a1cc1760f25ac38cdf7d96a5cdd55cd915a4f5ceaf9"
   name = "github.com/spf13/pflag"
   packages = ["."]
   pruneopts = "UT"
-  revision = "583c0c0531f06d5278b7d917446061adc344b5cd"
-  version = "v1.0.1"
+  revision = "9a97c102cda95a86cec2345a6f09f55a939babf5"
+  version = "v1.0.2"
 
 [[projects]]
   digest = "1:4fc8a61287ccfb4286e1ca5ad2ce3b0b301d746053bf44ac38cf34e40ae10372"

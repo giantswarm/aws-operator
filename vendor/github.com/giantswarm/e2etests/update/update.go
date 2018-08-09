@@ -65,7 +65,7 @@ func (u *Update) Test(ctx context.Context) error {
 
 			return microerror.Mask(missesDesiredStatusError)
 		}
-		b := backoff.NewConstant(10*time.Minute, 2*time.Minute)
+		b := backoff.NewConstant(u.maxWait, 5*time.Minute)
 		n := backoff.NewNotifier(u.logger, ctx)
 
 		err := backoff.RetryNotify(o, b, n)
