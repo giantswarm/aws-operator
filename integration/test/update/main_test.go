@@ -70,7 +70,8 @@ func init() {
 			HostFramework: h,
 			Logger:        l,
 
-			ClusterID: env.ClusterID(),
+			ClusterID:   env.ClusterID(),
+			GithubToken: env.GithubToken(),
 		}
 
 		p, err = provider.NewAWS(c)
