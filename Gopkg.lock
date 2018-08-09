@@ -46,7 +46,7 @@
   version = "v1.4.2"
 
 [[projects]]
-  digest = "1:e8d68f40ac1c285cc7fe45338fb6bec4381372eb2d416e3d52cdc2fe6eb78ba1"
+  digest = "1:46ccfa9e2507d6ea3443783a5b97c7d9e202faa07069f678085cfbee8b9545ba"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -100,8 +100,8 @@
     "service/support/supportiface",
   ]
   pruneopts = "UT"
-  revision = "f9728bfcd31e85d264b4ab20299bbbba241c00ca"
-  version = "v1.15.7"
+  revision = "36aaf21bb9b41f47fdc9b477577d0b604925d489"
+  version = "v1.15.8"
 
 [[projects]]
   branch = "master"
@@ -304,12 +304,12 @@
   revision = "1eb793c222c9392676ec08c368708763b02f746c"
 
 [[projects]]
-  branch = "master"
-  digest = "1:246372bfc7525abb46a9d8912f51f6e589bdb5d7f2730bb9dd26390fa2852be8"
+  branch = "backwards"
+  digest = "1:671c20dfc353ea34e86a15ff48d688d13528c478702f245afe091e1640374578"
   name = "github.com/giantswarm/e2etemplates"
   packages = ["pkg/e2etemplates"]
   pruneopts = "UT"
-  revision = "fa85e487f49b50f99921c80ce508d110827b2f9d"
+  revision = "092d1198077c969cd05293c92e3f6e4227823856"
 
 [[projects]]
   branch = "master"
@@ -322,7 +322,7 @@
     "scaling/provider",
   ]
   pruneopts = "UT"
-  revision = "fe7475e753b0a4afec21f427de52206f3316424d"
+  revision = "be3a134ea48a62878bba3034d91a18597851cc37"
 
 [[projects]]
   branch = "master"
@@ -342,11 +342,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:d08142629439841fe5d8902f400c53de132717d48471bc26b19ccb58a59d5346"
+  digest = "1:b7cdfa02bef5914403adad095027fa7c03cfe53d87604bddcc507d51df4d465f"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
   pruneopts = "UT"
-  revision = "96dbe271d80db79342f735a964c421e05daa0e97"
+  revision = "f5b26d053033c4c140aa79a4ced025362669e474"
 
 [[projects]]
   branch = "master"
@@ -589,11 +589,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:b0ea4e54e723ef36ba0963c718686854a7766eb3af6a793366cc65f2d5b552cc"
+  digest = "1:727ab28b8d1e550f028acd4d7343718464be789a3153b500998590527a13b96a"
   name = "github.com/google/go-github"
   packages = ["github"]
   pruneopts = "UT"
-  revision = "fbd7fb9c7f3d27aa691e8421690e00be916f8d8d"
+  revision = "8c40ff417df53f2b031ca687be1b2e0bd7aa8fe9"
 
 [[projects]]
   branch = "master"
@@ -901,15 +901,16 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:583f2f436bab7b59a7bd3e759f1375b06f460760ed1f9235604d143eaab83009"
+  digest = "1:8e241498e35f550e5192ee6b1f6ff2c0a7ffe81feff9541d297facffe1383979"
   name = "golang.org/x/crypto"
   packages = [
     "ed25519",
     "ed25519/internal/edwards25519",
+    "pbkdf2",
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "f027049dab0ad238e394a753dba2d14753473a04"
+  revision = "de0752318171da717af4ce24d0a2e8626afaeb11"
 
 [[projects]]
   branch = "master"
@@ -1018,7 +1019,7 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "daca94659cb50e9f37c1b834680f2e46358f10b0"
+  revision = "383e8b2c3b9e36c4076b235b32537292176bae20"
 
 [[projects]]
   digest = "1:7ccedf0aab474a6aef9d7222cd2429a34fddb996bbd1f60ec0f9fe69d80b36ae"
@@ -1065,7 +1066,7 @@
   version = "v0.9.1"
 
 [[projects]]
-  digest = "1:3c30f2d65883ac85b43ffca835de179b24677392b4df001517862e113d0439ff"
+  digest = "1:b57bb9a6a2a03558d63166f1afc3c0c4f91ad137f63bf2bee995e9baeb976a9c"
   name = "gopkg.in/square/go-jose.v2"
   packages = [
     ".",
@@ -1074,8 +1075,8 @@
     "jwt",
   ]
   pruneopts = "UT"
-  revision = "349dc03548930652802aadc09fb126e2b7cb6d80"
-  version = "v2.1.7"
+  revision = "8254d6c783765f38c8675fae4427a1fe73fbd09d"
+  version = "v2.1.8"
 
 [[projects]]
   branch = "v2"

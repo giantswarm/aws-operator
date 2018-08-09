@@ -62,7 +62,7 @@ required = [
   name = "github.com/giantswarm/e2eclients"
 
 [[constraint]]
-  branch = "master"
+  branch = "backwards"
   name = "github.com/giantswarm/e2etemplates"
 
 [[constraint]]
