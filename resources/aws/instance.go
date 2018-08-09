@@ -1,11 +1,13 @@
 package aws
 
 import (
+	"context"
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/cenkalti/backoff"
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -145,7 +147,8 @@ func (i *Instance) CreateIfNotExists() (bool, error) {
 
 func (i *Instance) CreateOrFail() error {
 	var reservation *ec2.Reservation
-	reserveOperation := func() error {
+
+	o := func() error {
 		var err error
 
 		instancesInput := &ec2.RunInstancesInput{
@@ -176,8 +179,10 @@ func (i *Instance) CreateOrFail() error {
 		}
 		return nil
 	}
-	reserveNotify := NewNotify(i.Logger, "creating instance")
-	if err := backoff.RetryNotify(reserveOperation, NewCustomExponentialBackoff(), reserveNotify); err != nil {
+	b := backoff.NewExponential(2*time.Minute, 10*time.Second)
+	n := backoff.NewNotifier(i.Logger, context.Background())
+	err := backoff.RetryNotify(o, b, n)
+	if err != nil {
 		return microerror.Mask(err)
 	}
 

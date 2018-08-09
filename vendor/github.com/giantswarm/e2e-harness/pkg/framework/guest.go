@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"k8s.io/api/core/v1"
@@ -171,7 +171,7 @@ func (g *Guest) WaitForAPIDown() error {
 
 		return microerror.Maskf(waitError, "k8s API is still up")
 	}
-	b := NewConstantBackoff(LongMaxWait, ShortMaxInterval)
+	b := backoff.NewConstant(LongMaxWait, ShortMaxInterval)
 	n := func(err error, delay time.Duration) {
 		g.logger.Log("level", "debug", "message", err.Error())
 	}
@@ -197,7 +197,7 @@ func (g *Guest) WaitForAPIUp() error {
 
 		return nil
 	}
-	b := NewConstantBackoff(LongMaxWait, LongMaxInterval)
+	b := backoff.NewConstant(LongMaxWait, LongMaxInterval)
 	n := func(err error, delay time.Duration) {
 		g.logger.Log("level", "debug", "message", err.Error())
 	}
@@ -251,7 +251,7 @@ func (g *Guest) WaitForNodesUp(numberOfNodes int) error {
 
 		return nil
 	}
-	b := NewConstantBackoff(LongMaxWait, LongMaxInterval)
+	b := backoff.NewConstant(LongMaxWait, LongMaxInterval)
 	n := func(err error, delay time.Duration) {
 		g.logger.Log("level", "debug", "message", err.Error())
 	}
