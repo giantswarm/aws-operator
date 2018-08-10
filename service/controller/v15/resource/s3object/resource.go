@@ -1,7 +1,6 @@
 package s3object
 
 import (
-	"context"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -9,7 +8,6 @@ import (
 	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/randomkeys"
 
 	"github.com/giantswarm/aws-operator/service/controller/v15/encrypter"
@@ -22,7 +20,6 @@ const (
 
 // Config represents the configuration used to create a new cloudformation resource.
 type Config struct {
-	// Dependencies.
 	CertWatcher       legacy.Searcher
 	Encrypter         encrypter.Interface
 	Logger            micrologger.Logger
@@ -31,7 +28,6 @@ type Config struct {
 
 // Resource implements the cloudformation resource.
 type Resource struct {
-	// Dependencies.
 	certWatcher       legacy.Searcher
 	encrypter         encrypter.Interface
 	logger            micrologger.Logger
@@ -40,7 +36,6 @@ type Resource struct {
 
 // New creates a new configured cloudformation resource.
 func New(config Config) (*Resource, error) {
-	// Dependencies.
 	if config.CertWatcher == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.CertWatcher must not be empty")
 	}
@@ -55,7 +50,6 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
-		// Dependencies.
 		certWatcher:       config.CertWatcher,
 		encrypter:         config.Encrypter,
 		logger:            config.Logger,
@@ -69,22 +63,14 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
-	return nil
-}
-
-func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*controller.Patch, error) {
-	return controller.NewPatch(), nil
-}
-
 func toBucketObjectState(v interface{}) (map[string]BucketObjectState, error) {
 	if v == nil {
-		return map[string]BucketObjectState{}, nil
+		return nil, nil
 	}
 
 	bucketObjectState, ok := v.(map[string]BucketObjectState)
 	if !ok {
-		return map[string]BucketObjectState{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", bucketObjectState, v)
+		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", bucketObjectState, v)
 	}
 
 	return bucketObjectState, nil

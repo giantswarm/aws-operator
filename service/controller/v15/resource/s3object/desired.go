@@ -3,7 +3,9 @@ package s3object
 import (
 	"context"
 
+	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/randomkeys"
 
 	"github.com/giantswarm/aws-operator/service/controller/v15/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v15/controllercontext"
@@ -12,72 +14,72 @@ import (
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
 	customObject, err := key.ToCustomObject(obj)
-	output := map[string]BucketObjectState{}
 	if err != nil {
-		return output, microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
-
 	sc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	accountID, err := sc.AWSService.GetAccountID()
-	if err != nil {
-		return output, microerror.Mask(err)
-	}
-
-	clusterID := key.ClusterID(customObject)
-
 	_, err = r.encrypter.EncryptionKey(ctx, customObject)
 	if r.encrypter.IsKeyNotFound(err) {
 		// we can get here during deletion, if the key is already deleted we can safely exit.
-		return output, nil
-	}
-	if err != nil {
-		return output, microerror.Mask(err)
-	}
-
-	certs, err := r.certWatcher.SearchCerts(clusterID)
-	if err != nil {
-		return output, microerror.Mask(err)
+		return nil, nil
+	} else if err != nil {
+		return nil, microerror.Mask(err)
 	}
 
-	tlsAssets, err := r.encrypter.EncryptTLSAssets(ctx, customObject, certs)
-	if err != nil {
-		return output, microerror.Mask(err)
+	var accountID string
+	var certs legacy.AssetsBundle
+	var tlsAssets *legacy.CompactTLSAssets
+	var clusterKeys randomkeys.Cluster
+	{
+		accountID, err = sc.AWSService.GetAccountID()
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		certs, err = r.certWatcher.SearchCerts(key.ClusterID(customObject))
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		tlsAssets, err = r.encrypter.EncryptTLSAssets(ctx, customObject, certs)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		clusterKeys, err = r.randomKeySearcher.SearchCluster(key.ClusterID(customObject))
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
-	clusterKeys, err := r.randomKeySearcher.SearchCluster(clusterID)
-	if err != nil {
-		return output, microerror.Mask(err)
+	output := map[string]BucketObjectState{}
+
+	{
+		b, err := sc.CloudConfig.NewMasterTemplate(ctx, customObject, *tlsAssets, clusterKeys)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		k := key.BucketObjectName(cloudconfig.CloudConfigVersion, prefixMaster)
+		output[k] = BucketObjectState{
+			Bucket: key.BucketName(customObject, accountID),
+			Body:   b,
+			Key:    k,
+		}
 	}
 
-	masterBody, err := sc.CloudConfig.NewMasterTemplate(ctx, customObject, *tlsAssets, clusterKeys)
-	if err != nil {
-		return output, microerror.Mask(err)
+	{
+		b, err := sc.CloudConfig.NewWorkerTemplate(ctx, customObject, *tlsAssets)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		k := key.BucketObjectName(cloudconfig.CloudConfigVersion, prefixWorker)
+		output[k] = BucketObjectState{
+			Bucket: key.BucketName(customObject, accountID),
+			Body:   b,
+			Key:    k,
+		}
 	}
-
-	masterObjectName := key.BucketObjectName(cloudconfig.CloudConfigVersion, prefixMaster)
-	masterCloudConfig := BucketObjectState{
-		Bucket: key.BucketName(customObject, accountID),
-		Body:   masterBody,
-		Key:    masterObjectName,
-	}
-	output[masterObjectName] = masterCloudConfig
-
-	workerBody, err := sc.CloudConfig.NewWorkerTemplate(ctx, customObject, *tlsAssets)
-	if err != nil {
-		return output, microerror.Mask(err)
-	}
-
-	workerObjectName := key.BucketObjectName(cloudconfig.CloudConfigVersion, prefixWorker)
-	workerCloudConfig := BucketObjectState{
-		Bucket: key.BucketName(customObject, accountID),
-		Body:   workerBody,
-		Key:    workerObjectName,
-	}
-	output[workerObjectName] = workerCloudConfig
 
 	return output, nil
 }
