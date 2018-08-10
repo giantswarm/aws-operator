@@ -33,7 +33,7 @@ func Test_Resource_Cloudformation_newDelete(t *testing.T) {
 			expectedStackName: "",
 		},
 		{
-			description: "case 2: current state not empty, desired state empty but different, expected current state",
+			description: "case 1: current state not empty, desired state empty but different, expected current state",
 			obj: &v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
