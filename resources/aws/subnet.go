@@ -1,12 +1,14 @@
 package aws
 
 import (
+	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/cenkalti/backoff"
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -87,7 +89,7 @@ func (s *Subnet) CreateOrFail() error {
 		return microerror.Mask(err)
 	}
 
-	tagOperation := func() error {
+	o := func() error {
 		if _, err := s.Clients.EC2.CreateTags(&ec2.CreateTagsInput{
 			Resources: []*string{subnet.Subnet.SubnetId},
 			Tags: []*ec2.Tag{
@@ -105,8 +107,10 @@ func (s *Subnet) CreateOrFail() error {
 		}
 		return nil
 	}
-	tagNotify := NewNotify(s.Logger, "tag subnet")
-	if err := backoff.RetryNotify(tagOperation, NewCustomExponentialBackoff(), tagNotify); err != nil {
+	b := backoff.NewExponential(2*time.Minute, 10*time.Second)
+	n := backoff.NewNotifier(s.Logger, context.Background())
+	err = backoff.RetryNotify(o, b, n)
+	if err != nil {
 		return microerror.Mask(err)
 	}
 
@@ -121,7 +125,7 @@ func (s *Subnet) Delete() error {
 		return microerror.Mask(err)
 	}
 
-	deleteOperation := func() error {
+	o := func() error {
 		if _, err := s.Clients.EC2.DeleteSubnet(&ec2.DeleteSubnetInput{
 			SubnetId: aws.String(subnetID),
 		}); err != nil {
@@ -129,8 +133,10 @@ func (s *Subnet) Delete() error {
 		}
 		return nil
 	}
-	deleteNotify := NewNotify(s.Logger, "deleting subnet")
-	if err := backoff.RetryNotify(deleteOperation, NewCustomExponentialBackoff(), deleteNotify); err != nil {
+	b := backoff.NewExponential(2*time.Minute, 10*time.Second)
+	n := backoff.NewNotifier(s.Logger, context.Background())
+	err = backoff.RetryNotify(o, b, n)
+	if err != nil {
 		return microerror.Mask(err)
 	}
 

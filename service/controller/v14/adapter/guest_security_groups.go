@@ -50,6 +50,8 @@ func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
 		return microerror.Mask(err)
 	}
 
+	s.APIWhitelistEnabled = cfg.APIWhitelist.Enabled
+
 	s.MasterSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, prefixMaster)
 	s.MasterSecurityGroupRules = masterRules
 
