@@ -108,6 +108,8 @@ func BucketName(customObject v1alpha1.AWSConfig, accountID string) string {
 	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(customObject))
 }
 
+// TODO what should the path look like when we want to use the version bundle
+// version of the operator?
 func BucketObjectName(templateVersion string, prefix string) string {
 	return fmt.Sprintf("cloudconfig/%s/%s", templateVersion, prefix)
 }
