@@ -3,7 +3,6 @@ package key
 import (
 	"crypto/sha1"
 	"fmt"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -119,7 +118,7 @@ func BucketName(customObject v1alpha1.AWSConfig, accountID string) string {
 //     /version/3.4.0/cloudconfig/v_3_2_5/worker
 //
 func BucketObjectName(customObject v1alpha1.AWSConfig, role string) string {
-	return fmt.Sprintf("/version/%s/cloudconfig/%s/%s", VersionBundleVersion(customObject), CloudConfigVersion, role)
+	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", VersionBundleVersion(customObject), CloudConfigVersion, role)
 }
 
 func CredentialName(customObject v1alpha1.AWSConfig) string {
@@ -409,11 +408,11 @@ func SecurityGroupName(customObject v1alpha1.AWSConfig, groupName string) string
 }
 
 func SmallCloudConfigHTTPURL(customObject v1alpha1.AWSConfig, accountID string, role string) string {
-	return fmt.Sprintf("https://%s", SmallCloudConfigPath(customObject, accountID, role))
+	return fmt.Sprintf("https://%s/%s", S3ServiceDomain(customObject), SmallCloudConfigPath(customObject, accountID, role))
 }
 
 func SmallCloudConfigPath(customObject v1alpha1.AWSConfig, accountID string, role string) string {
-	return filepath.Join(S3ServiceDomain(customObject), BucketName(customObject, accountID), BucketObjectName(customObject, role))
+	return fmt.Sprintf("%s/%s", BucketName(customObject, accountID), BucketObjectName(customObject, role))
 }
 
 func SmallCloudConfigS3URL(customObject v1alpha1.AWSConfig, accountID string, role string) string {

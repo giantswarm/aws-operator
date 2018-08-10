@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+
 	"github.com/giantswarm/aws-operator/service/controller/v15/key"
 )
 
@@ -94,7 +95,7 @@ func Test_Adapter_Instance_SmallCloudConfig(t *testing.T) {
 		},
 		{
 			Description:  "case 1 S3 URL different region",
-			ExpectedLine: fmt.Sprintf("s3://s3.eu-central-1.amazonaws.com/000000000000-g8s-test-cluster/version/0.1.0/cloudconfig/%s/master", key.CloudConfigVersion),
+			ExpectedLine: fmt.Sprintf("s3://000000000000-g8s-test-cluster/version/0.1.0/cloudconfig/%s/master", key.CloudConfigVersion),
 			Region:       "eu-central-1",
 		},
 	}

@@ -1085,7 +1085,7 @@ func Test_BucketObjectName(t *testing.T) {
 	}
 	role := "worker"
 
-	e := fmt.Sprintf("/version/0.1.0/cloudconfig/%s/worker", CloudConfigVersion)
+	e := fmt.Sprintf("version/0.1.0/cloudconfig/%s/worker", CloudConfigVersion)
 	a := BucketObjectName(customObject, role)
 	if e != a {
 		t.Fatalf("expected %s got %s", e, a)
