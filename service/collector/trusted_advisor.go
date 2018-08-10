@@ -88,9 +88,17 @@ func init() {
 }
 
 func (c *Collector) collectAccountsTrustedAdvisorChecks(ch chan<- prometheus.Metric, clients []aws.Clients) {
+	var wg sync.WaitGroup
+
 	for _, client := range clients {
-		go c.collectTrustedAdvisorChecks(ch, client)
+		wg.Add(1)
+		go func(awsClients aws.Clients) {
+			defer wg.Done()
+			c.collectTrustedAdvisorChecks(ch, awsClients)
+		}(client)
 	}
+
+	wg.Wait()
 }
 
 func (c *Collector) collectTrustedAdvisorChecks(ch chan<- prometheus.Metric, awsClients aws.Clients) {

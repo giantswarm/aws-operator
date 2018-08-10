@@ -2,6 +2,7 @@ package collector
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/prometheus/client_golang/prometheus"
@@ -49,9 +50,17 @@ var (
 )
 
 func (c *Collector) collectAccountsVPCs(ch chan<- prometheus.Metric, clients []aws.Clients) {
+	var wg sync.WaitGroup
+
 	for _, client := range clients {
-		go c.collectVPCs(ch, client)
+		wg.Add(1)
+		go func(awsClients aws.Clients) {
+			defer wg.Done()
+			c.collectVPCs(ch, awsClients)
+		}(client)
 	}
+
+	wg.Wait()
 }
 
 func (c *Collector) collectVPCs(ch chan<- prometheus.Metric, awsClients aws.Clients) {
