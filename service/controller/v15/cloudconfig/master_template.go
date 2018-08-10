@@ -2,7 +2,6 @@ package cloudconfig
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/legacy"
@@ -55,10 +54,6 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 		cloudConfigConfig := k8scloudconfig.DefaultCloudConfigConfig()
 		cloudConfigConfig.Params = params
 		cloudConfigConfig.Template = k8scloudconfig.MasterTemplate
-
-		fmt.Printf("\n")
-		fmt.Printf("%#v\n", cloudConfigConfig.Params.Cluster.Kubernetes.Kubelet.Labels)
-		fmt.Printf("\n")
 
 		newCloudConfig, err = k8scloudconfig.NewCloudConfig(cloudConfigConfig)
 		if err != nil {
