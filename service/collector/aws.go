@@ -11,7 +11,7 @@ import (
 
 // getARNs list all unique aws IAM ARN from credential secret.
 func (c Collector) getARNs() ([]string, error) {
-	var ARNs []string
+	var arns []string
 
 	// List AWSConfigs.
 	awsConfigClient := c.g8sClient.ProviderV1alpha1().AWSConfigs("")
@@ -31,10 +31,10 @@ func (c Collector) getARNs() ([]string, error) {
 	}
 
 	for arn, _ := range arnsMap {
-		ARNs = append(ARNs, arn)
+		arns = append(arns, arn)
 	}
 
-	return ARNs, nil
+	return arns, nil
 }
 
 // getAWSClients return a list of aws clients for every guest cluster account plus
@@ -42,7 +42,7 @@ func (c Collector) getARNs() ([]string, error) {
 func (c Collector) getAWSClients() ([]aws.Clients, error) {
 	var clients []aws.Clients
 
-	ARNs, err := c.getARNs()
+	arns, err := c.getARNs()
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -51,7 +51,7 @@ func (c Collector) getAWSClients() ([]aws.Clients, error) {
 	clients = append(clients, aws.NewClients(c.awsConfig))
 
 	// Guest cluster accounts.
-	for _, arn := range ARNs {
+	for _, arn := range arns {
 		awsConfig := c.awsConfig
 		awsConfig.RoleARN = arn
 
