@@ -1,12 +1,14 @@
 package aws
 
 import (
+	"context"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
-	"github.com/cenkalti/backoff"
+	"github.com/giantswarm/backoff"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -111,7 +113,7 @@ func (v *VPCPeeringConnection) CreateOrFail() error {
 
 	v.id = *vpcPeeringConnection.VpcPeeringConnection.VpcPeeringConnectionId
 
-	acceptOperation := func() error {
+	o := func() error {
 		if _, err := v.HostClients.EC2.AcceptVpcPeeringConnection(
 			&ec2.AcceptVpcPeeringConnectionInput{
 				VpcPeeringConnectionId: aws.String(v.id),
@@ -122,8 +124,10 @@ func (v *VPCPeeringConnection) CreateOrFail() error {
 
 		return nil
 	}
-	acceptNotify := NewNotify(v.Logger, "accepting vpc peering connection")
-	if err := backoff.RetryNotify(acceptOperation, NewCustomExponentialBackoff(), acceptNotify); err != nil {
+	b := backoff.NewExponential(2*time.Minute, 10*time.Second)
+	n := backoff.NewNotifier(v.Logger, context.Background())
+	err = backoff.RetryNotify(o, b, n)
+	if err != nil {
 		return microerror.Mask(err)
 	}
 
@@ -163,7 +167,7 @@ func (v *VPCPeeringConnection) GetID() (string, error) {
 func (v VPCPeeringConnection) FindExisting() (*ec2.VpcPeeringConnection, error) {
 	var peeringConnection *ec2.VpcPeeringConnection
 
-	findOperation := func() error {
+	o := func() error {
 		conn, err := v.findExisting()
 		if err != nil {
 			return err
@@ -182,11 +186,11 @@ func (v VPCPeeringConnection) FindExisting() (*ec2.VpcPeeringConnection, error) 
 
 		return nil
 	}
-
-	findNotify := NewNotify(v.Logger, "finding vpc peering connection")
-	if err := backoff.RetryNotify(findOperation, NewCustomExponentialBackoff(), findNotify); err != nil {
+	b := backoff.NewExponential(2*time.Minute, 10*time.Second)
+	n := backoff.NewNotifier(v.Logger, context.Background())
+	err := backoff.RetryNotify(o, b, n)
+	if err != nil {
 		return nil, microerror.Mask(err)
-
 	}
 
 	return peeringConnection, nil

@@ -32,8 +32,8 @@
 [[projects]]
   name = "github.com/cenkalti/backoff"
   packages = ["."]
-  revision = "61153c768f31ee5f130071d08fc82b85208528de"
-  version = "v1.1.0"
+  revision = "2ea60e5f094469f9e65adb9cd103795b73ae743e"
+  version = "v2.0.0"
 
 [[projects]]
   name = "github.com/coreos/go-semver"
@@ -60,7 +60,7 @@
     "digestset",
     "reference"
   ]
-  revision = "0dae0957e5fe3156c265d22bef4cba9efbf388e2"
+  revision = "4a75b72fd3621c1892143614474ff2b05d30e4b3"
 
 [[projects]]
   name = "github.com/docker/docker"
@@ -107,10 +107,10 @@
   revision = "d6023ce2651d8eafb5c75bb0c7167536102ec9f5"
 
 [[projects]]
-  branch = "master"
   name = "github.com/fatih/camelcase"
   packages = ["."]
   revision = "44e46d280b43ec1531bb25252440e34f1b800b65"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/ghodss/yaml"
@@ -131,34 +131,40 @@
     "pkg/clientset/versioned/typed/example/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1"
   ]
-  revision = "dbe7aa4771048f64040c9e6148a708c21226a1b2"
+  revision = "b8a446f6cdfde2c50e005628a22630538956446f"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/giantswarm/backoff"
+  packages = ["."]
+  revision = "889af437b4d98f8a1ccb66cb85b93de13d8c666e"
+
+[[projects]]
+  branch = "master"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
     "pkg/harness"
   ]
-  revision = "0195240d6f11565e602721d796bd0ced9a972605"
-  version = "0195240"
+  revision = "aed53bfc34ca056fc52001f3e52d3d87acb7f350"
 
 [[projects]]
   branch = "master"
   name = "github.com/giantswarm/errors"
   packages = ["guest"]
-  revision = "9e78ca0e32a019481beb21ae3e158d1bb150730d"
+  revision = "51a7ca6b403dc133497da26a0a30684a5df56752"
 
 [[projects]]
   branch = "master"
   name = "github.com/giantswarm/k8sportforward"
   packages = ["."]
-  revision = "eae67c7a8dfb02cba708181b8066e1b11713288d"
+  revision = "85abe7e11c90cf56ee1eda142ea3051fd61f5b82"
 
 [[projects]]
   branch = "master"
   name = "github.com/giantswarm/microerror"
   packages = ["."]
-  revision = "a8d5d4f526c526b4b773062958847fe7e0b7f449"
+  revision = "5e90ca360be950271aab9e13e45dd75293932580"
 
 [[projects]]
   branch = "master"
@@ -168,7 +174,7 @@
     "loggermeta",
     "microloggertest"
   ]
-  revision = "39f8cfb7c2583edb28552d9e4b12193e5bddaf60"
+  revision = "d757f42e4a3efca1fe82e633579b28c586e08698"
 
 [[projects]]
   branch = "master"
@@ -191,8 +197,8 @@
 [[projects]]
   name = "github.com/go-resty/resty"
   packages = ["."]
-  revision = "fccc498aed22c31ff3768bcac00795f94149a21d"
-  version = "v1.7.0"
+  revision = "97a15579492cd5f35632499f315d7a8df94160a1"
+  version = "v1.8.0"
 
 [[projects]]
   name = "github.com/go-stack/stack"
@@ -252,7 +258,7 @@
   branch = "master"
   name = "github.com/google/go-github"
   packages = ["github"]
-  revision = "32c30013be0212dd7246d50d79172453d1fd2472"
+  revision = "8c40ff417df53f2b031ca687be1b2e0bd7aa8fe9"
 
 [[projects]]
   branch = "master"
@@ -306,8 +312,8 @@
 [[projects]]
   name = "github.com/json-iterator/go"
   packages = ["."]
-  revision = "ab8a2e0c74be9d3be70b3184d9acc634935ded82"
-  version = "1.1.4"
+  revision = "1624edc4454b8682399def8740d46db5e4362ba4"
+  version = "1.1.5"
 
 [[projects]]
   branch = "master"
@@ -371,7 +377,7 @@
     "internal/bitbucket.org/ww/goautoneg",
     "model"
   ]
-  revision = "7600349dcfe1abd18d72d3a1770870d9800a7801"
+  revision = "c7de2306084e37d54b8be01f3541a8464345e9a5"
 
 [[projects]]
   branch = "master"
@@ -411,9 +417,10 @@
   packages = [
     "ed25519",
     "ed25519/internal/edwards25519",
+    "pbkdf2",
     "ssh/terminal"
   ]
-  revision = "c126467f60eb25f8f27e5a981f32a87e3965053f"
+  revision = "f027049dab0ad238e394a753dba2d14753473a04"
 
 [[projects]]
   branch = "master"
@@ -429,7 +436,7 @@
     "publicsuffix",
     "trace"
   ]
-  revision = "a0f8a16cb08c06df97cbdf9c47f4731ba548c33c"
+  revision = "f9ce57c11b242f0f1599cf25c89d8cb02c45295a"
 
 [[projects]]
   branch = "master"
@@ -453,7 +460,7 @@
     "unix",
     "windows"
   ]
-  revision = "bd9dbc187b6e1dacfdd2722a87e83093c2d7bd6e"
+  revision = "904bdc257025c7b3f43c19360ad3ab85783fad78"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -506,7 +513,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "2a72893556e4d1f6c795a4c039314c9fa751eedb"
+  revision = "daca94659cb50e9f37c1b834680f2e46358f10b0"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -525,7 +532,9 @@
     "internal",
     "internal/backoff",
     "internal/channelz",
+    "internal/envconfig",
     "internal/grpcrand",
+    "internal/transport",
     "keepalive",
     "metadata",
     "naming",
@@ -535,11 +544,10 @@
     "resolver/passthrough",
     "stats",
     "status",
-    "tap",
-    "transport"
+    "tap"
   ]
-  revision = "168a6198bcb0ef175f7dacec0b8691fc141dc9b8"
-  version = "v1.13.0"
+  revision = "32fb0ac620c32ba40a4626ddf94d90d12cce3455"
+  version = "v1.14.0"
 
 [[projects]]
   name = "gopkg.in/inf.v0"
@@ -555,8 +563,8 @@
     "json",
     "jwt"
   ]
-  revision = "349dc03548930652802aadc09fb126e2b7cb6d80"
-  version = "v2.1.7"
+  revision = "8254d6c783765f38c8675fae4427a1fe73fbd09d"
+  version = "v2.1.8"
 
 [[projects]]
   name = "gopkg.in/yaml.v2"
@@ -844,7 +852,7 @@
   branch = "master"
   name = "k8s.io/kube-openapi"
   packages = ["pkg/util/proto"]
-  revision = "d8ea2fe547a448256204cfc68dfee7b26c720acb"
+  revision = "e3762e86a74c878ffed47484592986685639c2cd"
 
 [[projects]]
   name = "k8s.io/kubernetes"
@@ -1009,7 +1017,7 @@
   branch = "master"
   name = "k8s.io/utils"
   packages = ["exec"]
-  revision = "66066c83e385e385ccc3c964b44fd7dcd413d0ed"
+  revision = "045dc31ee5c40e8240241ce28dc24d7b56130373"
 
 [[projects]]
   branch = "master"
@@ -1020,6 +1028,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3accc91b84de7cbbab5f48f851f6a5d84bc0c7f952a466b34dba217551ace3b0"
+  inputs-digest = "e122cfc2973a9abe10b35df3ae3b90ce742c56e2ec781796f1e8c3d6eca396c3"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -3,19 +3,20 @@
 package setup
 
 import (
+	"context"
 	"log"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/cenkalti/backoff"
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	awsclient "github.com/giantswarm/e2eclients/aws"
 	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
 	"github.com/giantswarm/e2etemplates/pkg/e2etemplates"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -231,6 +232,16 @@ func installAWSOperator(h *framework.Host) error {
 func installAWSConfig(h *framework.Host, vpcPeerID string) error {
 	var err error
 
+	var l micrologger.Logger
+	{
+		c := micrologger.Config{}
+
+		l, err = micrologger.New(c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
 	var values string
 	{
 		c := chartvalues.APIExtensionsAWSConfigE2EConfig{
@@ -260,10 +271,22 @@ func installAWSConfig(h *framework.Host, vpcPeerID string) error {
 		return microerror.Mask(err)
 	}
 
-	return err
+	return nil
 }
 
 func installCredential(h *framework.Host) error {
+	var err error
+
+	var l micrologger.Logger
+	{
+		c := micrologger.Config{}
+
+		l, err = micrologger.New(c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
 	o := func() error {
 		k8sClient := h.K8sClient()
 
@@ -285,12 +308,9 @@ func installCredential(h *framework.Host) error {
 
 		return nil
 	}
-	b := framework.NewExponentialBackoff(framework.ShortMaxWait, framework.ShortMaxInterval)
-	n := func(err error, delay time.Duration) {
-		log.Println("level", "debug", "message", err.Error())
-	}
-
-	err := backoff.RetryNotify(o, b, n)
+	b := backoff.NewExponential(framework.ShortMaxWait, framework.ShortMaxInterval)
+	n := backoff.NewNotifier(l, context.Background())
+	err = backoff.RetryNotify(o, b, n)
 	if err != nil {
 		return microerror.Mask(err)
 	}
