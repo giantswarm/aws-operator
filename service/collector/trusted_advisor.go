@@ -118,6 +118,11 @@ func (c *Collector) collectTrustedAdvisorChecks(ch chan<- prometheus.Metric, aws
 	}
 	ch <- trustedAdvisorSupported()
 
+	accountID, err := c.awsAccountID(awsClients)
+	if err != nil {
+		c.logger.Log("level", "error", "message", "could not get aws account id", "stack", fmt.Sprintf("%#v", err))
+	}
+
 	var wg sync.WaitGroup
 
 	for _, check := range checks {
@@ -134,13 +139,6 @@ func (c *Collector) collectTrustedAdvisorChecks(ch chan<- prometheus.Metric, aws
 			resources, err := c.getTrustedAdvisorResources(id, awsClients)
 			if err != nil {
 				c.logger.Log("level", "error", "message", "could not get Trusted Advisor resource", "stack", fmt.Sprintf("%#v", err), "id", *id)
-				trustedAdvisorError.Inc()
-				return
-			}
-
-			accountID, err := c.awsAccountID(awsClients)
-			if err != nil {
-				c.logger.Log("level", "error", "message", "could not get aws account id", "stack", fmt.Sprintf("%#v", err))
 				trustedAdvisorError.Inc()
 				return
 			}
