@@ -232,16 +232,6 @@ func installAWSOperator(h *framework.Host) error {
 func installAWSConfig(h *framework.Host, vpcPeerID string) error {
 	var err error
 
-	var l micrologger.Logger
-	{
-		c := micrologger.Config{}
-
-		l, err = micrologger.New(c)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
 	var values string
 	{
 		c := chartvalues.APIExtensionsAWSConfigE2EConfig{
