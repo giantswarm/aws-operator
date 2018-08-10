@@ -3,6 +3,7 @@
 package teardown
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -31,26 +32,26 @@ func Teardown(c *awsclient.Client, g *framework.Guest, h *framework.Host) error 
 	var err error
 
 	{
-		err = framework.HelmCmd("delete aws-operator --purge")
+		err = framework.HelmCmd(fmt.Sprintf("delete %s-aws-operator --purge", h.TargetNamespace()))
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		err = framework.HelmCmd("delete cert-operator --purge")
+		err = framework.HelmCmd(fmt.Sprintf("delete %s-cert-operator --purge", h.TargetNamespace()))
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		err = framework.HelmCmd("delete node-operator --purge")
+		err = framework.HelmCmd(fmt.Sprintf("delete %s-node-operator --purge", h.TargetNamespace()))
 		if err != nil {
 			return microerror.Mask(err)
 		}
 	}
 
 	{
-		err = framework.HelmCmd("delete cert-config-e2e --purge")
+		err = framework.HelmCmd(fmt.Sprintf("delete %s-cert-config-e2e --purge", h.TargetNamespace()))
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		err = framework.HelmCmd("delete aws-config-e2e --purge")
+		err = framework.HelmCmd(fmt.Sprintf("delete %s-aws-config-e2e --purge", h.TargetNamespace()))
 		if err != nil {
 			return microerror.Mask(err)
 		}
