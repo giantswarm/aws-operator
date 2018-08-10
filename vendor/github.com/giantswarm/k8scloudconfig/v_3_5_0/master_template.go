@@ -1437,15 +1437,15 @@ write_files:
       MANIFESTS="${MANIFESTS} kube-proxy-sa.yaml"
       MANIFESTS="${MANIFESTS} kube-proxy-ds.yaml"
       MANIFESTS="${MANIFESTS} coredns.yaml"
-{{ if not .DisableIngressController -}}
+      {{ if not .DisableIngressController -}}
       MANIFESTS="${MANIFESTS} default-backend-dep.yml"
       MANIFESTS="${MANIFESTS} default-backend-svc.yml"
       MANIFESTS="${MANIFESTS} ingress-controller-cm.yml"
       MANIFESTS="${MANIFESTS} ingress-controller-dep.yml"
-{{ end -}}
-{{ if not .DisableIngressControllerService -}}
+      {{ end -}}
+      {{ if not .DisableIngressControllerService -}}
       MANIFESTS="${MANIFESTS} ingress-controller-svc.yml"
-{{ end -}}
+      {{ end -}}
 
       for manifest in $MANIFESTS
       do
