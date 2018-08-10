@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"time"
 
-	"github.com/cenkalti/backoff"
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/errors/guest"
 	"github.com/giantswarm/k8sportforward"
 	"github.com/giantswarm/microerror"
@@ -99,7 +99,7 @@ func (c *Client) DeleteRelease(releaseName string, options ...helmclient.DeleteO
 
 		return nil
 	}
-	b := newExponentialBackoff(2*time.Minute, backoff.DefaultMaxInterval)
+	b := backoff.NewExponential(2*time.Minute, 60*time.Second)
 	n := func(err error, delay time.Duration) {
 		c.logger.Log("level", "debug", "message", "failed deleting release", "stack", fmt.Sprintf("%#v", err))
 	}
@@ -233,7 +233,7 @@ func (c *Client) EnsureTillerInstalled() error {
 
 			return nil
 		}
-		b := newExponentialBackoff(2*time.Minute, 5*time.Second)
+		b := backoff.NewExponential(2*time.Minute, 5*time.Second)
 		n := func(err error, delay time.Duration) {
 			c.logger.Log("level", "debug", "message", "failed pinging tiller", "stack", fmt.Sprintf("%#v", err))
 		}
@@ -273,7 +273,7 @@ func (c *Client) GetReleaseContent(releaseName string) (*ReleaseContent, error) 
 
 			return nil
 		}
-		b := newExponentialBackoff(2*time.Minute, backoff.DefaultMaxInterval)
+		b := backoff.NewExponential(2*time.Minute, 60*time.Second)
 		n := func(err error, delay time.Duration) {
 			c.logger.Log("level", "debug", "message", "failed fetching release content")
 		}
@@ -326,7 +326,7 @@ func (c *Client) GetReleaseHistory(releaseName string) (*ReleaseHistory, error) 
 
 			return nil
 		}
-		b := newExponentialBackoff(2*time.Minute, backoff.DefaultMaxInterval)
+		b := backoff.NewExponential(2*time.Minute, 60*time.Second)
 		n := func(err error, delay time.Duration) {
 			c.logger.Log("level", "debug", "message", "failed fetching release content", "stack", fmt.Sprintf("%#v", err))
 		}
@@ -387,7 +387,7 @@ func (c *Client) InstallFromTarball(path, ns string, options ...helmclient.Insta
 
 		return nil
 	}
-	b := newExponentialBackoff(2*time.Minute, backoff.DefaultMaxInterval)
+	b := backoff.NewExponential(2*time.Minute, 60*time.Second)
 	n := func(err error, delay time.Duration) {
 		c.logger.Log("level", "debug", "message", "failed installing from tarball", "stack", fmt.Sprintf("%#v", err))
 	}
@@ -468,7 +468,7 @@ func (c *Client) UpdateReleaseFromTarball(releaseName, path string, options ...h
 
 		return nil
 	}
-	b := newExponentialBackoff(2*time.Minute, backoff.DefaultMaxInterval)
+	b := backoff.NewExponential(2*time.Minute, 60*time.Second)
 	n := func(err error, delay time.Duration) {
 		c.logger.Log("level", "debug", "message", "failed updating release from tarball", "stack", fmt.Sprintf("%#v", err))
 	}

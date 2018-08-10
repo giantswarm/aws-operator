@@ -1,10 +1,17 @@
 package statusresource
 
 import (
+	"context"
+	"encoding/json"
+	"strings"
+
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/guestcluster"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
 )
 
@@ -92,4 +99,37 @@ func New(config Config) (*Resource, error) {
 
 func (r *Resource) Name() string {
 	return Name
+}
+
+func (r *Resource) applyPatches(ctx context.Context, accessor metav1.Object, patches []Patch) error {
+	patches = append(patches, Patch{
+		Op:    "test",
+		Value: accessor.GetResourceVersion(),
+		Path:  "/metadata/resourceVersion",
+	})
+
+	b, err := json.Marshal(patches)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	p := ensureSelfLink(accessor.GetSelfLink())
+
+	err = r.restClient.Patch(types.JSONPatchType).AbsPath(p).Body(b).Do().Error()
+	if errors.IsConflict(err) {
+		return microerror.Mask(err)
+	} else if errors.IsResourceExpired(err) {
+		return microerror.Mask(err)
+	} else if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
+func ensureSelfLink(p string) string {
+	if strings.HasSuffix(p, "/status") {
+		return p
+	}
+
+	return p + "/status"
 }

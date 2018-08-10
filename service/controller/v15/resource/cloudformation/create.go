@@ -47,7 +47,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		}
 
 		stackInput.Parameters = []*cloudformation.Parameter{
-			&cloudformation.Parameter{
+			{
 				ParameterKey:   aws.String(versionBundleVersionParameterKey),
 				ParameterValue: aws.String(key.VersionBundleVersion(customObject)),
 			},

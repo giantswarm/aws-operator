@@ -7,8 +7,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -49,7 +49,7 @@ func New(config Config) (*EBS, error) {
 func (e *EBS) DeleteVolume(ctx context.Context, volumeID string) error {
 	e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting EBS volume %s", volumeID))
 
-	deleteOperation := func() error {
+	o := func() error {
 		_, err := e.client.DeleteVolume(&ec2.DeleteVolumeInput{
 			VolumeId: aws.String(volumeID),
 		})
@@ -62,18 +62,10 @@ func (e *EBS) DeleteVolume(ctx context.Context, volumeID string) error {
 
 		return nil
 	}
-	deleteNotify := func(err error, delay time.Duration) {
-		e.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("deleting EBS volume failed, retrying with delay %s", delay.String()))
-	}
-	deleteBackoff := &backoff.ExponentialBackOff{
-		InitialInterval:     backoff.DefaultInitialInterval,
-		RandomizationFactor: backoff.DefaultRandomizationFactor,
-		Multiplier:          backoff.DefaultMultiplier,
-		MaxInterval:         backoff.DefaultMaxInterval,
-		MaxElapsedTime:      30 * time.Second,
-		Clock:               backoff.SystemClock,
-	}
-	if err := backoff.RetryNotify(deleteOperation, deleteBackoff, deleteNotify); err != nil {
+	b := backoff.NewExponential(30*time.Second, 5*time.Second)
+	n := backoff.NewNotifier(e.logger, context.Background())
+	err := backoff.RetryNotify(o, b, n)
+	if err != nil {
 		return microerror.Mask(err)
 	}
 
