@@ -37,6 +37,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated S3 object '%s'", key))
 		} else {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not update S3 object '%s'", key))
+			r.logger.LogCtx(ctx, "level", "debug", "message", "S3 object already up to date")
 		}
 	}
 

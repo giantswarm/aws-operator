@@ -36,6 +36,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created S3 object '%s'", key))
 		} else {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not create S3 object '%s'", key))
+			r.logger.LogCtx(ctx, "level", "debug", "message", "S3 object already exists")
 		}
 	}
 
