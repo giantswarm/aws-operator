@@ -39,7 +39,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		stackOutputs, stackStatus, err = sc.CloudFormation.DescribeOutputsAndStatus(stackName)
 		if cloudformationservice.IsStackNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster main stack outputs in the AWS API")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack is does not exist")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack does not exist")
 			return StackState{}, nil
 
 		} else if cloudformationservice.IsOutputsNotAccessible(err) {
