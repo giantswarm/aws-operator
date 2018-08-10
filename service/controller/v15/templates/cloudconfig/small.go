@@ -21,14 +21,14 @@ const Small = `#!/bin/bash
 # Wait for S3 bucket to be available.
 retry=30
 
-until [ $(curl --output /dev/null --silent --head --fail -w "%{http_code}" {{ .HTTPURL }}) -eq "403" ]; do
+until [ $(curl --output /dev/null --silent --head --fail -w "%{http_code}" {{ .S3HTTPURL }}) -eq "403" ]; do
    retry=$(( retry - 1))
    if [ $retry -le 0 ]; then
      echo "timed out waiting for S3 bucket"
      exit 1
    fi
 
-   echo "waiting for {{ .HTTPURL }} to be available"
+   echo "waiting for {{ .S3HTTPURL }} to be available"
    sleep 5
 done
 

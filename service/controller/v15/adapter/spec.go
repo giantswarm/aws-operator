@@ -145,10 +145,10 @@ type KMSClient interface {
 // SmallCloudconfigConfig represents the data structure required for executing
 // the small cloudconfig template.
 type SmallCloudconfigConfig struct {
-	HTTPURL  string
 	Region   string
 	Registry string
 	Role     string
+	S3HTTPURL  string
 	S3URL    string
 }
 

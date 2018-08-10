@@ -407,12 +407,12 @@ func SecurityGroupName(customObject v1alpha1.AWSConfig, groupName string) string
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), groupName)
 }
 
-func SmallCloudConfigHTTPURL(customObject v1alpha1.AWSConfig, accountID string, role string) string {
-	return fmt.Sprintf("https://%s/%s", S3ServiceDomain(customObject), SmallCloudConfigPath(customObject, accountID, role))
-}
-
 func SmallCloudConfigPath(customObject v1alpha1.AWSConfig, accountID string, role string) string {
 	return fmt.Sprintf("%s/%s", BucketName(customObject, accountID), BucketObjectName(customObject, role))
+}
+
+func SmallCloudConfigS3HTTPURL(customObject v1alpha1.AWSConfig, accountID string, role string) string {
+	return fmt.Sprintf("https://%s/%s", S3ServiceDomain(customObject), SmallCloudConfigPath(customObject, accountID, role))
 }
 
 func SmallCloudConfigS3URL(customObject v1alpha1.AWSConfig, accountID string, role string) string {
