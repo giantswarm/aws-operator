@@ -2,7 +2,6 @@ package adapter
 
 import (
 	"encoding/base64"
-	"fmt"
 
 	"github.com/giantswarm/microerror"
 
@@ -64,14 +63,12 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 		if err != nil {
 			return microerror.Mask(err)
 		}
-
 		c := SmallCloudconfigConfig{
-			MachineType:             prefixMaster,
-			Region:                  key.Region(config.CustomObject),
-			S3Domain:                key.S3ServiceDomain(config.CustomObject),
-			S3URI:                   fmt.Sprintf("%s-g8s-%s", accountID, i.Cluster.ID),
-			CloudConfigVersion:      config.StackState.MasterCloudConfigVersion,
-			AWSCliContainerRegistry: key.AWSCliContainerRegistry(config.CustomObject),
+			HTTPURL:  key.SmallCloudConfigHTTPURL(config.CustomObject, accountID, prefixMaster),
+			Region:   key.Region(config.CustomObject),
+			Registry: key.AWSCliContainerRegistry(config.CustomObject),
+			Role:     prefixMaster,
+			S3URL:    key.SmallCloudConfigS3URL(config.CustomObject, accountID, prefixMaster),
 		}
 		rendered, err := templates.Render(key.CloudConfigSmallTemplates(), c)
 		if err != nil {

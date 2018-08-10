@@ -7,7 +7,6 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
-	"github.com/giantswarm/aws-operator/service/controller/v15/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v15/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v15/key"
 )
@@ -60,7 +59,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		k := key.BucketObjectName(cloudconfig.CloudConfigVersion, prefixMaster)
+		k := key.BucketObjectName(customObject, prefixMaster)
 		output[k] = BucketObjectState{
 			Bucket: key.BucketName(customObject, accountID),
 			Body:   b,
@@ -73,7 +72,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		k := key.BucketObjectName(cloudconfig.CloudConfigVersion, prefixWorker)
+		k := key.BucketObjectName(customObject, prefixWorker)
 		output[k] = BucketObjectState{
 			Bucket: key.BucketName(customObject, accountID),
 			Body:   b,
