@@ -3357,9 +3357,9 @@ func (i *Installation) GetAppID() int64 {
 }
 
 // GetCreatedAt returns the CreatedAt field if it's non-nil, zero value otherwise.
-func (i *Installation) GetCreatedAt() time.Time {
+func (i *Installation) GetCreatedAt() Timestamp {
 	if i == nil || i.CreatedAt == nil {
-		return time.Time{}
+		return Timestamp{}
 	}
 	return *i.CreatedAt
 }
@@ -3429,9 +3429,9 @@ func (i *Installation) GetTargetType() string {
 }
 
 // GetUpdatedAt returns the UpdatedAt field if it's non-nil, zero value otherwise.
-func (i *Installation) GetUpdatedAt() time.Time {
+func (i *Installation) GetUpdatedAt() Timestamp {
 	if i == nil || i.UpdatedAt == nil {
-		return time.Time{}
+		return Timestamp{}
 	}
 	return *i.UpdatedAt
 }
@@ -6098,6 +6098,38 @@ func (p *Plan) GetSpace() int {
 		return 0
 	}
 	return *p.Space
+}
+
+// GetConfigURL returns the ConfigURL field if it's non-nil, zero value otherwise.
+func (p *PreReceiveHook) GetConfigURL() string {
+	if p == nil || p.ConfigURL == nil {
+		return ""
+	}
+	return *p.ConfigURL
+}
+
+// GetEnforcement returns the Enforcement field if it's non-nil, zero value otherwise.
+func (p *PreReceiveHook) GetEnforcement() string {
+	if p == nil || p.Enforcement == nil {
+		return ""
+	}
+	return *p.Enforcement
+}
+
+// GetID returns the ID field if it's non-nil, zero value otherwise.
+func (p *PreReceiveHook) GetID() int64 {
+	if p == nil || p.ID == nil {
+		return 0
+	}
+	return *p.ID
+}
+
+// GetName returns the Name field if it's non-nil, zero value otherwise.
+func (p *PreReceiveHook) GetName() string {
+	if p == nil || p.Name == nil {
+		return ""
+	}
+	return *p.Name
 }
 
 // GetBody returns the Body field if it's non-nil, zero value otherwise.
@@ -9764,6 +9796,14 @@ func (r *RepoStatus) GetURL() string {
 	return *r.URL
 }
 
+// GetStrict returns the Strict field if it's non-nil, zero value otherwise.
+func (r *RequiredStatusChecksRequest) GetStrict() bool {
+	if r == nil || r.Strict == nil {
+		return false
+	}
+	return *r.Strict
+}
+
 // GetName returns the Name field if it's non-nil, zero value otherwise.
 func (s *ServiceHook) GetName() string {
 	if s == nil || s.Name == nil {
@@ -10810,6 +10850,14 @@ func (t *Tree) GetSHA() string {
 		return ""
 	}
 	return *t.SHA
+}
+
+// GetTruncated returns the Truncated field if it's non-nil, zero value otherwise.
+func (t *Tree) GetTruncated() bool {
+	if t == nil || t.Truncated == nil {
+		return false
+	}
+	return *t.Truncated
 }
 
 // GetContent returns the Content field if it's non-nil, zero value otherwise.

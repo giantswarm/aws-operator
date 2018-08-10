@@ -1,4 +1,4 @@
-package helmclient
+package backoff
 
 import (
 	"time"
@@ -6,7 +6,7 @@ import (
 	"github.com/cenkalti/backoff"
 )
 
-func newExponentialBackoff(maxWait, maxInterval time.Duration) *backoff.ExponentialBackOff {
+func NewExponential(maxWait, maxInterval time.Duration) backoff.BackOff {
 	b := &backoff.ExponentialBackOff{
 		InitialInterval:     backoff.DefaultInitialInterval,
 		RandomizationFactor: backoff.DefaultRandomizationFactor,

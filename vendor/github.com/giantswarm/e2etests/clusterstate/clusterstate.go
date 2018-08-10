@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/apprclient"
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/helmclient"
 	"github.com/giantswarm/microerror"
@@ -242,7 +242,7 @@ func (c *ClusterState) CheckTestAppIsInstalled() error {
 		return nil
 	}
 
-	b := framework.NewConstantBackoff(framework.ShortMaxWait, framework.ShortMaxInterval)
+	b := backoff.NewConstant(framework.ShortMaxWait, framework.ShortMaxInterval)
 	n := func(err error, delay time.Duration) {
 		c.logger.Log("level", "debug", "message", err.Error())
 	}
