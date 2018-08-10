@@ -48,6 +48,7 @@ const (
 var (
 	circleSHA            string
 	commonDomain         string
+	githubToken          string
 	guestAWSArn          string
 	testedVersion        string
 	testDir              string
@@ -90,12 +91,16 @@ func init() {
 		panic(fmt.Sprintf("env var %q must not be empty", EnvVaultToken))
 	}
 
+	githubToken = os.Getenv(EnvVarGithubBotToken)
+	if githubToken == "" {
+		panic(fmt.Sprintf("env var %q must not be empty", EnvVarGithubBotToken))
+	}
+
 	var err error
-	token := os.Getenv(EnvVarGithubBotToken)
 	params := &framework.VBVParams{
 		Component: "aws-operator",
 		Provider:  "aws",
-		Token:     token,
+		Token:     githubToken,
 		VType:     TestedVersion(),
 	}
 	versionBundleVersion, err = framework.GetVersionBundleVersion(params)
@@ -141,6 +146,10 @@ func ClusterID() string {
 
 func CommonDomain() string {
 	return commonDomain
+}
+
+func GithubToken() string {
+	return githubToken
 }
 
 func GuestAWSArn() string {

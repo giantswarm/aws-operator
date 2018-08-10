@@ -2,10 +2,13 @@ package adapter
 
 import (
 	"encoding/base64"
+	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+
+	"github.com/giantswarm/aws-operator/service/controller/v15/key"
 )
 
 func Test_Adapter_Instance_RegularFields(t *testing.T) {
@@ -86,18 +89,13 @@ func Test_Adapter_Instance_SmallCloudConfig(t *testing.T) {
 		Region       string
 	}{
 		{
-			Description:  "case 0 userdata file",
-			ExpectedLine: "USERDATA_FILE=master",
+			Description:  "case 0 HTTP URL",
+			ExpectedLine: fmt.Sprintf("https://s3.eu-west-1.amazonaws.com/000000000000-g8s-test-cluster/version/0.1.0/cloudconfig/%s/master", key.CloudConfigVersion),
 			Region:       "eu-west-1",
 		},
 		{
-			Description:  "scase 1 http URI",
-			ExpectedLine: "s3_http_uri=\"https://s3.eu-west-1.amazonaws.com/000000000000-g8s-test-cluster/cloudconfig/foo/$USERDATA_FILE\"",
-			Region:       "eu-west-1",
-		},
-		{
-			Description:  "scase 2 http URI different region",
-			ExpectedLine: "s3_http_uri=\"https://s3.eu-central-1.amazonaws.com/000000000000-g8s-test-cluster/cloudconfig/foo/$USERDATA_FILE\"",
+			Description:  "case 1 S3 URL different region",
+			ExpectedLine: fmt.Sprintf("s3://000000000000-g8s-test-cluster/version/0.1.0/cloudconfig/%s/master", key.CloudConfigVersion),
 			Region:       "eu-central-1",
 		},
 	}
@@ -122,6 +120,9 @@ func Test_Adapter_Instance_SmallCloudConfig(t *testing.T) {
 							},
 						},
 						Region: tc.Region,
+					},
+					VersionBundle: v1alpha1.AWSConfigSpecVersionBundle{
+						Version: "0.1.0",
 					},
 				},
 			}

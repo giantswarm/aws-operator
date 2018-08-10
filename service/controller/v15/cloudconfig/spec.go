@@ -7,12 +7,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v15/encrypter/vault"
 )
 
-const (
-	// CloudConfigVersion defines the version of k8scloudconfig in use.
-	// It is used in the main stack output and S3 object paths.
-	CloudConfigVersion = "v_3_4_0"
-)
-
 // TemplateData is a composed data type that adds encrypter type info to
 // AWSConfigSpec.
 type TemplateData struct {
