@@ -249,8 +249,8 @@ func (h *Host) InstallResource(name, values, version string, conditions ...func(
 	}
 
 	{
-		installCmd := fmt.Sprintf("registry install quay.io/giantswarm/%[1]s-chart%[2]s -- -n %[1]s --namespace %[4]s --values %[3]s --set namespace=%[4]s", name, version, tmpfile.Name(), h.targetNamespace)
-		deleteCmd := fmt.Sprintf("delete --purge %s", name)
+		installCmd := fmt.Sprintf("registry install quay.io/giantswarm/%[1]s-chart%[2]s -- -n %[4]s-%[1]s --namespace %[4]s --values %[3]s --set namespace=%[4]s", name, version, tmpfile.Name(), h.targetNamespace)
+		deleteCmd := fmt.Sprintf("delete --purge %s-%s", h.targetNamespace, name)
 		o := func() error {
 			// NOTE we ignore errors here because we cannot get really useful error
 			// handling done. This here should anyway only be a quick fix until we use
@@ -290,9 +290,9 @@ func (h *Host) InstallCertResource() error {
 			// NOTE we ignore errors here because we cannot get really useful error
 			// handling done. This here should anyway only be a quick fix until we use
 			// the helm client lib. Then error handling will be better.
-			HelmCmd("delete --purge cert-config-e2e")
+			HelmCmd(fmt.Sprintf("delete --purge %s-cert-config-e2e", h.targetNamespace))
 
-			cmdStr := fmt.Sprintf("registry install quay.io/giantswarm/apiextensions-cert-config-e2e-chart:stable -- -n cert-config-e2e --set commonDomain=${COMMON_DOMAIN} --set clusterName=%[1]s --set namespace=%[2]s --namespace %[2]s", h.clusterID, h.targetNamespace)
+			cmdStr := fmt.Sprintf("registry install quay.io/giantswarm/apiextensions-cert-config-e2e-chart:stable -- -n %[2]s-cert-config-e2e --set commonDomain=${COMMON_DOMAIN} --set clusterName=%[1]s --set namespace=%[2]s --namespace %[2]s", h.clusterID, h.targetNamespace)
 			err := HelmCmd(cmdStr)
 			if err != nil {
 				return microerror.Mask(err)
@@ -379,6 +379,10 @@ func (h *Host) Setup() error {
 	}
 
 	return nil
+}
+
+func (h *Host) TargetNamespace() string {
+	return h.targetNamespace
 }
 
 func (h *Host) Teardown() {

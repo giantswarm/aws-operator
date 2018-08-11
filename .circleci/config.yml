@@ -41,9 +41,9 @@ jobs:
           if [ "${CIRCLE_BRANCH}" == "master" ]; then
             ./architect deploy
           fi
-  
-  
-  
+
+
+
   e2eTestCurPRClusterState:
     environment:
       TESTED_VERSION: "current"
@@ -118,6 +118,22 @@ jobs:
     environment:
       TESTED_VERSION: "wip"
       TEST_DIR: "integration/test/scaling"
+    <<: *e2eTest
+
+
+
+  # Note we only have update tests for the current version because it anyway
+  # tests one version transition. Having the same tests for WIP only runs the
+  # same test twice and we can simply save resources by not doing so.
+  e2eTestCurMasterUpdate:
+    environment:
+      TESTED_VERSION: "current"
+      TEST_DIR: "integration/test/update"
+    <<: *e2eTest
+  e2eTestCurPRUpdate:
+    environment:
+      TESTED_VERSION: "current"
+      TEST_DIR: "integration/test/update"
     <<: *e2eTest
 
 
@@ -199,3 +215,15 @@ workflows:
               only: master
           requires:
           - build
+
+
+
+      - e2eTestCurMasterUpdate:
+          filters:
+            branches:
+              only: master
+          requires:
+          - build
+      - e2eTestCurPRUpdate:
+          requires:
+          - hold
