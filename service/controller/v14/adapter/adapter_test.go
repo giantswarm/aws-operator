@@ -31,7 +31,6 @@ func TestAdapterGuestMain(t *testing.T) {
 		errorMatcher             func(error) bool
 		expectedASGType          string
 		expectedEC2ServiceDomain string
-		expectedClusterID        string
 		expectedMasterImageID    string
 		expectedWorkerImageID    string
 	}{
@@ -62,7 +61,6 @@ func TestAdapterGuestMain(t *testing.T) {
 			errorMatcher:             nil,
 			expectedASGType:          "worker",
 			expectedEC2ServiceDomain: "ec2.amazonaws.com",
-			expectedClusterID:        "test-cluster",
 			expectedMasterImageID:    "master-image-id",
 			expectedWorkerImageID:    "worker-image-id",
 		},
@@ -93,7 +91,6 @@ func TestAdapterGuestMain(t *testing.T) {
 			errorMatcher:             nil,
 			expectedASGType:          "worker",
 			expectedEC2ServiceDomain: "ec2.amazonaws.com.cn",
-			expectedClusterID:        "test-cluster",
 			expectedMasterImageID:    "master-image-id",
 			expectedWorkerImageID:    "worker-image-id",
 		},
@@ -136,20 +133,19 @@ func TestAdapterGuestMain(t *testing.T) {
 				t.Fatalf("error == %#v, want matching", err)
 			}
 
-			if tc.expectedASGType != a.ASGType {
-				t.Fatalf("unexpected ASG type, expected %q, got %q", tc.expectedASGType, a.ASGType)
+			if tc.expectedASGType != a.Guest.AutoScalingGroup.ASGType {
+				t.Fatalf("unexpected ASG type, expected %q, got %q", tc.expectedASGType, a.Guest.AutoScalingGroup.ASGType)
+			}
+			if tc.expectedASGType != a.Guest.LaunchConfiguration.ASGType {
+				t.Fatalf("unexpected ASG type, expected %q, got %q", tc.expectedASGType, a.Guest.LaunchConfiguration.ASGType)
 			}
 
-			if tc.expectedEC2ServiceDomain != a.EC2ServiceDomain {
-				t.Fatalf("unexpected EC2 service domain, expected %q, got %q", tc.expectedEC2ServiceDomain, a.EC2ServiceDomain)
+			if tc.expectedEC2ServiceDomain != a.Guest.IAMPolicies.EC2ServiceDomain {
+				t.Fatalf("unexpected EC2 service domain, expected %q, got %q", tc.expectedEC2ServiceDomain, a.Guest.IAMPolicies.EC2ServiceDomain)
 			}
 
-			if tc.expectedClusterID != a.ClusterID {
-				t.Fatalf("unexpected cluster ID, expected %q, got %q", tc.expectedClusterID, a.ClusterID)
-			}
-
-			if tc.expectedWorkerImageID != a.WorkerImageID {
-				t.Fatalf("unexpected WorkerImageID, expected %q, got %q", tc.expectedWorkerImageID, a.WorkerImageID)
+			if tc.expectedWorkerImageID != a.Guest.LaunchConfiguration.WorkerImageID {
+				t.Fatalf("unexpected WorkerImageID, expected %q, got %q", tc.expectedWorkerImageID, a.Guest.LaunchConfiguration.WorkerImageID)
 			}
 		})
 	}

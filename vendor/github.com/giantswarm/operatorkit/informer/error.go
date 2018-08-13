@@ -5,7 +5,9 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-var alreadyRegisteredError = microerror.New("already registered")
+var alreadyRegisteredError = &microerror.Error{
+	Kind: "alreadyRegisteredError",
+}
 
 // IsAlreadyRegisteredError asserts alreadyRegisteredError.
 func IsAlreadyRegisteredError(err error) bool {
@@ -21,14 +23,36 @@ func IsAlreadyRegisteredError(err error) bool {
 	return false
 }
 
-var invalidConfigError = microerror.New("invalid config")
+var contextCanceledError = &microerror.Error{
+	Kind: "contextCanceledError",
+}
+
+// IsContextCanceled asserts contextCanceledError.
+func IsContextCanceled(err error) bool {
+	return microerror.Cause(err) == contextCanceledError
+}
+
+var initializationTimedOutError = &microerror.Error{
+	Kind: "initializationTimedOutError",
+}
+
+// IsInitializationTimedOut asserts initializationTimedOutError.
+func IsInitializationTimedOut(err error) bool {
+	return microerror.Cause(err) == initializationTimedOutError
+}
+
+var invalidConfigError = &microerror.Error{
+	Kind: "invalidConfigError",
+}
 
 // IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
 
-var invalidEventError = microerror.New("invalid event")
+var invalidEventError = &microerror.Error{
+	Kind: "invalidEventError",
+}
 
 // IsInvalidEvent asserts invalidEventError.
 func IsInvalidEvent(err error) bool {

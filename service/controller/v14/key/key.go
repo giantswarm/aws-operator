@@ -411,6 +411,24 @@ func TargetLogBucketName(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-g8s-access-logs", ClusterID(customObject))
 }
 
+func ToClusterEndpoint(v interface{}) (string, error) {
+	customObject, err := ToCustomObject(v)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	return ClusterAPIEndpoint(customObject), nil
+}
+
+func ToClusterID(v interface{}) (string, error) {
+	customObject, err := ToCustomObject(v)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	return ClusterID(customObject), nil
+}
+
 func ToClusterStatus(v interface{}) (v1alpha1.StatusCluster, error) {
 	customObject, err := ToCustomObject(v)
 	if err != nil {

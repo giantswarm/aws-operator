@@ -34,10 +34,6 @@ required = [
   version = "1.13.3"
 
 [[constraint]]
-  name = "github.com/cenkalti/backoff"
-  version = "1.1.0"
-
-[[constraint]]
   branch = "master"
   name = "github.com/docker/distribution"
 
@@ -50,6 +46,10 @@ required = [
   name = "github.com/giantswarm/apprclient"
 
 [[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/backoff"
+
+[[override]]
   branch = "legacy"
   name = "github.com/giantswarm/certs"
 

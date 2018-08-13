@@ -48,7 +48,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		}
 
 		stackInput.Parameters = []*cloudformation.Parameter{
-			&cloudformation.Parameter{
+			{
 				ParameterKey:   aws.String(versionBundleVersionParameterKey),
 				ParameterValue: aws.String(key.VersionBundleVersion(customObject)),
 			},
@@ -70,6 +70,15 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		if ctx.Err() == context.DeadlineExceeded {
 			// We waited longer than we wanted to get a reasonable result and be sure
 			// the stack got properly created. We skip here and try again on the next
+			// resync.
+			r.logger.LogCtx(ctx, "level", "debug", "message", "guest cluster main stack creation is not complete")
+			resourcecanceledcontext.SetCanceled(ctx)
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
+
+			return nil
+		} else if IsResourceNotReady(err) {
+			// There might be cases in which AWS is not fast enough to create the
+			// resources we want to watch. We skip here and try again on the next
 			// resync.
 			r.logger.LogCtx(ctx, "level", "debug", "message", "guest cluster main stack creation is not complete")
 			resourcecanceledcontext.SetCanceled(ctx)

@@ -27,7 +27,19 @@ rules:
       - awsconfigs
       - awsconfigs/status
     verbs:
-      - "*"
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - provider.giantswarm.io
+    resources:
+      - awsconfigs/status
+    verbs:
+      - create
+      - patch
+      - update
   - apiGroups:
       - core.giantswarm.io
     resources:

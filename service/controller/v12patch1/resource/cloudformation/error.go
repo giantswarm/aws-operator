@@ -7,7 +7,9 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
-var alreadyExistsError = microerror.New("already exists")
+var alreadyExistsError = &microerror.Error{
+	Kind: "alreadyExistsError",
+}
 
 // IsAlreadyExists asserts alreadyExistsError.
 func IsAlreadyExists(err error) bool {
@@ -28,35 +30,45 @@ func IsAlreadyExists(err error) bool {
 	return false
 }
 
-var deletionMustBeRetriedError = microerror.New("deletion must be retried")
+var deletionMustBeRetriedError = &microerror.Error{
+	Kind: "deletionMustBeRetriedError",
+}
 
 // IsDeletionMustBeRetried asserts deletionMustBeRetriedError.
 func IsDeletionMustBeRetried(err error) bool {
 	return microerror.Cause(err) == deletionMustBeRetriedError
 }
 
-var executionFailedError = microerror.New("execution failed")
+var executionFailedError = &microerror.Error{
+	Kind: "executionFailedError",
+}
 
 // IsExecutionFailed asserts executionFailedError.
 func IsExecutionFailed(err error) bool {
 	return microerror.Cause(err) == executionFailedError
 }
 
-var invalidConfigError = microerror.New("invalid config")
+var invalidConfigError = &microerror.Error{
+	Kind: "invalidConfigError",
+}
 
 // IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
 
-var notFoundError = microerror.New("not found")
+var notFoundError = &microerror.Error{
+	Kind: "notFoundError",
+}
 
 // IsNotFound asserts notFoundError.
 func IsNotFound(err error) bool {
 	return microerror.Cause(err) == notFoundError
 }
 
-var wrongTypeError = microerror.New("wrong type")
+var wrongTypeError = &microerror.Error{
+	Kind: "wrongTypeError",
+}
 
 // IsWrongType asserts wrongTypeError.
 func IsWrongType(err error) bool {

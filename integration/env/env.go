@@ -37,6 +37,9 @@ const (
 	// EnvVarTestDir is the process environment variable representing the
 	// TEST_DIR env var.
 	EnvVarTestDir = "TEST_DIR"
+	// EnvVaultToken is the process environment variable representing the
+	// VAULT_TOKEN env var.
+	EnvVaultToken = "VAULT_TOKEN"
 	// EnvVarVersionBundleVersion is the process environment variable representing
 	// the VERSION_BUNDLE_VERSION env var.
 	EnvVarVersionBundleVersion = "VERSION_BUNDLE_VERSION"
@@ -45,9 +48,11 @@ const (
 var (
 	circleSHA            string
 	commonDomain         string
+	githubToken          string
 	guestAWSArn          string
 	testedVersion        string
 	testDir              string
+	vaultToken           string
 	versionBundleVersion string
 )
 
@@ -81,12 +86,21 @@ func init() {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarCommonDomain))
 	}
 
+	vaultToken = os.Getenv(EnvVaultToken)
+	if vaultToken == "" {
+		panic(fmt.Sprintf("env var %q must not be empty", EnvVaultToken))
+	}
+
+	githubToken = os.Getenv(EnvVarGithubBotToken)
+	if githubToken == "" {
+		panic(fmt.Sprintf("env var %q must not be empty", EnvVarGithubBotToken))
+	}
+
 	var err error
-	token := os.Getenv(EnvVarGithubBotToken)
 	params := &framework.VBVParams{
 		Component: "aws-operator",
 		Provider:  "aws",
-		Token:     token,
+		Token:     githubToken,
 		VType:     TestedVersion(),
 	}
 	versionBundleVersion, err = framework.GetVersionBundleVersion(params)
@@ -134,6 +148,10 @@ func CommonDomain() string {
 	return commonDomain
 }
 
+func GithubToken() string {
+	return githubToken
+}
+
 func GuestAWSArn() string {
 	return guestAWSArn
 }
@@ -156,6 +174,10 @@ func TestHash() string {
 	s := fmt.Sprintf("%x", h.Sum(nil))[0:5]
 
 	return s
+}
+
+func VaultToken() string {
+	return vaultToken
 }
 
 func VersionBundleVersion() string {

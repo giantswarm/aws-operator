@@ -26,9 +26,28 @@
 
 
 
+required = [
+  "github.com/docker/distribution/reference",
+  "k8s.io/apiserver/pkg/endpoints/request"
+]
+
+
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/docker/distribution"
+
 [[constraint]]
   branch = "master"
   name = "github.com/giantswarm/apiextensions"
+
+[[override]]
+  branch = "master"
+  name = "github.com/giantswarm/errors"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/guestcluster"
 
 [[constraint]]
   branch = "master"
@@ -37,6 +56,10 @@
 [[constraint]]
   branch = "master"
   name = "github.com/giantswarm/micrologger"
+
+[[constraint]]
+  name = "k8s.io/apiserver"
+  version = "kubernetes-1.10.4"
 
 
 

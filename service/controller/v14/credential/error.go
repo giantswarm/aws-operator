@@ -2,7 +2,9 @@ package credential
 
 import "github.com/giantswarm/microerror"
 
-var arnNotFound = microerror.New("arn not found")
+var arnNotFound = &microerror.Error{
+	Kind: "arnNotFound",
+}
 
 // IsArnNotFoundError asserts arnNotFound.
 func IsArnNotFoundError(err error) bool {

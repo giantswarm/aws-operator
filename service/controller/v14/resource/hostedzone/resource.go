@@ -123,17 +123,17 @@ func (r *Resource) setStatus(ctx context.Context, obj interface{}) error {
 
 			if hzName == apiZone {
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found api hosted zone ID %q for domain %q", hzID, hzName))
-				controllerCtx.Status.HostedZones.API.ID = hzID
+				controllerCtx.Status.Cluster.HostedZones.API.ID = hzID
 				apiFound = true
 			}
 			if hzName == etcdZone {
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found etcd hosted zone ID %q for domain %q", hzID, hzName))
-				controllerCtx.Status.HostedZones.Etcd.ID = hzID
+				controllerCtx.Status.Cluster.HostedZones.Etcd.ID = hzID
 				etcdFound = true
 			}
 			if hzName == ingressZone {
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found ingress hosted zone ID %q for domain %q", hzID, hzName))
-				controllerCtx.Status.HostedZones.Ingress.ID = hzID
+				controllerCtx.Status.Cluster.HostedZones.Ingress.ID = hzID
 				ingressFound = true
 			}
 		}

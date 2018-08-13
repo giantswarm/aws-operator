@@ -3,21 +3,24 @@
 package setup
 
 import (
+	"context"
 	"io/ioutil"
 	"log"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/cenkalti/backoff"
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	awsclient "github.com/giantswarm/e2eclients/aws"
 	"github.com/giantswarm/e2etemplates/pkg/e2etemplates"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"fmt"
 
 	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/aws-operator/integration/teardown"
@@ -97,7 +100,7 @@ func Resources(c *awsclient.Client, g *framework.Guest, h *framework.Host) error
 		}
 		// TODO this should probably be in the e2e-harness framework as well just like
 		// the other stuff.
-		err = installAWSResource()
+		err = installAWSResource(h.TargetNamespace())
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -143,7 +146,7 @@ func WrapTestMain(c *awsclient.Client, g *framework.Guest, h *framework.Host, m 
 	if os.Getenv("KEEP_RESOURCES") != "true" {
 		name := "aws-operator"
 		customResource := "awsconfig"
-		logEntry := "deleted the guest cluster main stack"
+		logEntry := "removed finalizer 'operatorkit.giantswarm.io/aws-operator'"
 		h.DeleteGuestCluster(name, customResource, logEntry)
 
 		// only do full teardown when not on CI
@@ -167,12 +170,24 @@ func WrapTestMain(c *awsclient.Client, g *framework.Guest, h *framework.Host, m 
 	os.Exit(v)
 }
 
-func installAWSResource() error {
+func installAWSResource(targetNamespace string) error {
+	var err error
+
+	var l micrologger.Logger
+	{
+		c := micrologger.Config{}
+
+		l, err = micrologger.New(c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
 	o := func() error {
 		// NOTE we ignore errors here because we cannot get really useful error
 		// handling done. This here should anyway only be a quick fix until we use
 		// the helm client lib. Then error handling will be better.
-		framework.HelmCmd("delete --purge aws-config-e2e")
+		framework.HelmCmd(fmt.Sprintf("delete --purge %s-aws-config-e2e", targetNamespace))
 
 		awsResourceChartValuesEnv := os.ExpandEnv(e2etemplates.ApiextensionsAWSConfigE2EChartValues)
 		d := []byte(awsResourceChartValuesEnv)
@@ -182,19 +197,16 @@ func installAWSResource() error {
 			return microerror.Mask(err)
 		}
 
-		err = framework.HelmCmd("registry install quay.io/giantswarm/apiextensions-aws-config-e2e-chart:stable -- -n aws-config-e2e --values " + awsResourceValuesFile)
+		err = framework.HelmCmd(fmt.Sprintf("registry install quay.io/giantswarm/apiextensions-aws-config-e2e-chart:stable -- -n %s-aws-config-e2e --values %s", targetNamespace, awsResourceValuesFile))
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
 		return nil
 	}
-	b := framework.NewExponentialBackoff(framework.ShortMaxWait, framework.ShortMaxInterval)
-	n := func(err error, delay time.Duration) {
-		log.Println("level", "debug", "message", err.Error())
-	}
-
-	err := backoff.RetryNotify(o, b, n)
+	b := backoff.NewExponential(framework.ShortMaxWait, framework.ShortMaxInterval)
+	n := backoff.NewNotifier(l, context.Background())
+	err = backoff.RetryNotify(o, b, n)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -203,6 +215,18 @@ func installAWSResource() error {
 }
 
 func installCredential(h *framework.Host) error {
+	var err error
+
+	var l micrologger.Logger
+	{
+		c := micrologger.Config{}
+
+		l, err = micrologger.New(c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
 	o := func() error {
 		k8sClient := h.K8sClient()
 
@@ -224,12 +248,9 @@ func installCredential(h *framework.Host) error {
 
 		return nil
 	}
-	b := framework.NewExponentialBackoff(framework.ShortMaxWait, framework.ShortMaxInterval)
-	n := func(err error, delay time.Duration) {
-		log.Println("level", "debug", "message", err.Error())
-	}
-
-	err := backoff.RetryNotify(o, b, n)
+	b := backoff.NewExponential(framework.ShortMaxWait, framework.ShortMaxInterval)
+	n := backoff.NewNotifier(l, context.Background())
+	err = backoff.RetryNotify(o, b, n)
 	if err != nil {
 		return microerror.Mask(err)
 	}

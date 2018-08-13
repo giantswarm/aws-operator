@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -144,14 +145,20 @@ func (c *Client) PromoteChart(name, release, channel string) error {
 	return nil
 }
 
-// PullChartTarball downloads a tarball with the chart described by the given
-// chart name and channel, returning the file path.
+// PullChartTarball downloads a tarball with the chart described by
+// the given chart name and channel, returning the file path.
 func (c *Client) PullChartTarball(name, channel string) (string, error) {
 	release, err := c.GetReleaseVersion(name, channel)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
+	return c.PullChartTarballFromRelease(name, release)
+}
+
+// PullChartTarballFromRelease downloads a tarball with the chart described
+// by the given chart name and release, returning the file path.
+func (c *Client) PullChartTarballFromRelease(name, release string) (string, error) {
 	p := path.Join("packages", c.organization, name, release, "helm", "pull")
 
 	req, err := c.newRequest("GET", p)
@@ -258,6 +265,14 @@ func (c *Client) doFile(req *http.Request) (string, error) {
 		return "", microerror.Mask(err)
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		buf := new(bytes.Buffer)
+		_, err = buf.ReadFrom(resp.Body)
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
+		return "", microerror.Maskf(invalidStatusCodeError, fmt.Sprintf("got StatusCode %d with body %s", resp.StatusCode, buf.String()))
+	}
 
 	tmpfile, err := afero.TempFile(c.fs, "", "chart-tarball")
 	if err != nil {
