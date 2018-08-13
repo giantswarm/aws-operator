@@ -305,20 +305,15 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:671c20dfc353ea34e86a15ff48d688d13528c478702f245afe091e1640374578"
+  digest = "1:9460ee7740a80b6924b39e59ed575867ed6a22f2f88babcdc107865ad1ed964c"
   name = "github.com/giantswarm/e2etemplates"
-<<<<<<< HEAD
   packages = [
     "internal/render",
     "pkg/chartvalues",
-    "pkg/e2etemplates"
+    "pkg/e2etemplates",
   ]
-  revision = "fa85e487f49b50f99921c80ce508d110827b2f9d"
-=======
-  packages = ["pkg/e2etemplates"]
   pruneopts = "UT"
   revision = "cb44aefe3ea5b72262e2342cc6172297a5856c0c"
->>>>>>> master
 
 [[projects]]
   branch = "master"
@@ -1609,9 +1604,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-<<<<<<< HEAD
-  inputs-digest = "38b2ce1bc7cac74a24173cc6140757156b81493bec6d3affc7ac9fe18dcb84ab"
-=======
   input-imports = [
     "github.com/Azure/go-autorest/autorest",
     "github.com/aws/aws-sdk-go/aws",
@@ -1650,6 +1642,7 @@
     "github.com/giantswarm/certs/legacy/legacytest",
     "github.com/giantswarm/e2e-harness/pkg/framework",
     "github.com/giantswarm/e2eclients/aws",
+    "github.com/giantswarm/e2etemplates/pkg/chartvalues",
     "github.com/giantswarm/e2etemplates/pkg/e2etemplates",
     "github.com/giantswarm/e2etests/clusterstate",
     "github.com/giantswarm/e2etests/clusterstate/provider",
@@ -1708,6 +1701,5 @@
     "k8s.io/client-go/rest",
     "k8s.io/client-go/tools/cache",
   ]
->>>>>>> master
   solver-name = "gps-cdcl"
   solver-version = 1
