@@ -17,7 +17,6 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-
 	sc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)

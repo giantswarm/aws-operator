@@ -2,14 +2,16 @@ package adapter
 
 import (
 	"encoding/base64"
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/aws-operator/service/controller/v15/key"
 )
 
-func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
+func Test_AdapterLaunchConfiguration_RegularFields(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
 		description                      string
@@ -85,15 +87,19 @@ func TestAdapterLaunchConfigurationRegularFields(t *testing.T) {
 	}
 }
 
-func TestAdapterLaunchConfigurationSmallCloudConfig(t *testing.T) {
+func Test_AdapterLaunchConfiguration_SmallCloudConfig(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
 		description  string
 		expectedLine string
 	}{
 		{
-			description:  "userdata file",
-			expectedLine: "USERDATA_FILE=worker",
+			description:  "contains HTTP URL",
+			expectedLine: fmt.Sprintf("https://s3.myregion.amazonaws.com/000000000000-g8s-test-cluster/version/0.1.0/cloudconfig/%s/worker", key.CloudConfigVersion),
+		},
+		{
+			description:  "contains S3 URL",
+			expectedLine: fmt.Sprintf("aws s3 --region myregion cp s3://000000000000-g8s-test-cluster/version/0.1.0/cloudconfig/%s/worker", key.CloudConfigVersion),
 		},
 	}
 
@@ -116,6 +122,9 @@ func TestAdapterLaunchConfigurationSmallCloudConfig(t *testing.T) {
 						InstanceType: "myinstancetype",
 					},
 				},
+			},
+			VersionBundle: v1alpha1.AWSConfigSpecVersionBundle{
+				Version: "0.1.0",
 			},
 		},
 	}
