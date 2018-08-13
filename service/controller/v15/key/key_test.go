@@ -1200,9 +1200,9 @@ func Test_PrivateSubnetCIDR(t *testing.T) {
 func Test_CIDR(t *testing.T) {
 	t.Parallel()
 	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			AWS: v1alpha1.AWSConfigSpecAWS{
-				VPC: v1alpha1.AWSConfigSpecAWSVPC{
+		Status: v1alpha1.AWSConfigStatus{
+			Cluster: v1alpha1.StatusCluster{
+				Network: v1alpha1.StatusClusterNetwork{
 					CIDR: "172.31.0.0/16",
 				},
 			},

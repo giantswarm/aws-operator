@@ -34,11 +34,13 @@ type Config struct {
 	Logger               micrologger.Logger
 	EncrypterRoleManager encrypter.RoleManager
 
-	AdvancedMonitoringEC2 bool
-	EncrypterBackend      string
-	InstallationName      string
-	PublicRouteTables     string
-	Route53Enabled        bool
+	AdvancedMonitoringEC2      bool
+	EncrypterBackend           string
+	GuestPrivateSubnetMaskBits int
+	GuestPublicSubnetMaskBits  int
+	InstallationName           string
+	PublicRouteTables          string
+	Route53Enabled             bool
 }
 
 // Resource implements the cloudformation resource.
@@ -48,11 +50,13 @@ type Resource struct {
 	hostClients          *adapter.Clients
 	logger               micrologger.Logger
 
-	encrypterBackend  string
-	installationName  string
-	monitoring        bool
-	publicRouteTables string
-	route53Enabled    bool
+	encrypterBackend           string
+	guestPrivateSubnetMaskBits int
+	guestPublicSubnetMaskBits  int
+	installationName           string
+	monitoring                 bool
+	publicRouteTables          string
+	route53Enabled             bool
 }
 
 // New creates a new configured cloudformation resource.
@@ -66,6 +70,9 @@ func New(config Config) (*Resource, error) {
 	if config.EncrypterBackend == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.EncrypterBackend must not be empty")
 	}
+	// GuestPrivateSubnetMaskBits && GuestPublicSubnetMaskBits has been
+	// validated on upper level because all IPAM related configuration
+	// information is present there.
 
 	newService := &Resource{
 		apiWhiteList:         config.APIWhitelist,
@@ -73,11 +80,13 @@ func New(config Config) (*Resource, error) {
 		logger:               config.Logger,
 		encrypterRoleManager: config.EncrypterRoleManager,
 
-		encrypterBackend:  config.EncrypterBackend,
-		installationName:  config.InstallationName,
-		monitoring:        config.AdvancedMonitoringEC2,
-		publicRouteTables: config.PublicRouteTables,
-		route53Enabled:    config.Route53Enabled,
+		encrypterBackend:           config.EncrypterBackend,
+		guestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
+		guestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
+		installationName:           config.InstallationName,
+		monitoring:                 config.AdvancedMonitoringEC2,
+		publicRouteTables:          config.PublicRouteTables,
+		route53Enabled:             config.Route53Enabled,
 	}
 
 	return newService, nil

@@ -41,7 +41,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				},
 			},
 		},
-		Status: statusWithAllocatedSubnet("10.1.1.0/24"),
 	}
 
 	testCases := []struct {
@@ -399,8 +398,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 		}
 		c.Logger = microloggertest.New()
 		c.EncrypterBackend = "kms"
-		c.GuestPrivateSubnetMaskBits = 25
-		c.GuestPublicSubnetMaskBits = 25
 
 		newResource, err = New(c)
 		if err != nil {
@@ -462,7 +459,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				},
 			},
 		},
-		Status: statusWithAllocatedSubnet("10.1.1.0/24"),
 	}
 
 	testCases := []struct {
@@ -854,8 +850,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 		}
 		c.Logger = microloggertest.New()
 		c.EncrypterBackend = "kms"
-		c.GuestPrivateSubnetMaskBits = 25
-		c.GuestPublicSubnetMaskBits = 25
 
 		newResource, err = New(c)
 		if err != nil {
