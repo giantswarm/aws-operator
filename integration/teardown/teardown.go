@@ -29,6 +29,7 @@ func HostPeerVPC(c *awsclient.Client, g *framework.Guest, h *framework.Host) err
 }
 
 func Teardown(c *awsclient.Client, g *framework.Guest, h *framework.Host) error {
+	var err error
 	var errors []error
 
 	{
