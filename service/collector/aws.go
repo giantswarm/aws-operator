@@ -50,9 +50,27 @@ func (c Collector) getAWSClients() ([]aws.Clients, error) {
 		return nil, microerror.Mask(err)
 	}
 
+	// addClientFunc add awsClients to clients using account id as key to guaranatee uniqueness.
+	addClientFunc := func(awsClients aws.Clients, clients *map[string]aws.Clients) error {
+		accountID, err := c.awsAccountID(awsClients)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		_, ok := (*clients)[accountID]
+		if !ok {
+			(*clients)[accountID] = awsClients
+		}
+
+		return nil
+	}
+
 	// Host cluster account.
 	awsClients := aws.NewClients(c.awsConfig)
-	c.addClient(awsClients, &clientsMap)
+	err = addClientFunc(awsClients, &clientsMap)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
 
 	// Guest cluster accounts.
 	for _, arn := range arns {
@@ -60,7 +78,10 @@ func (c Collector) getAWSClients() ([]aws.Clients, error) {
 		awsConfig.RoleARN = arn
 
 		awsClients := aws.NewClients(awsConfig)
-		c.addClient(awsClients, &clientsMap)
+		err = addClientFunc(awsClients, &clientsMap)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
 	// Convert map to slice.
@@ -69,21 +90,6 @@ func (c Collector) getAWSClients() ([]aws.Clients, error) {
 	}
 
 	return clients, nil
-}
-
-// addClient add awsClients to clients using account id as key to guaranatee uniqueness.
-func (c Collector) addClient(awsClients aws.Clients, clients *map[string]aws.Clients) error {
-	accountID, err := c.awsAccountID(awsClients)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	_, ok := (*clients)[accountID]
-	if !ok {
-		(*clients)[accountID] = awsClients
-	}
-
-	return nil
 }
 
 // awsAccountID return the AWS account ID.
