@@ -179,12 +179,6 @@ func installAWSOperator(h *framework.Host) error {
 	var values string
 	{
 		c := chartvalues.AWSOperatorConfig{
-			Guest: chartvalues.AWSOperatorConfigGuest{
-				// TODO remove this setting
-				Update: chartvalues.AWSOperatorConfigGuestUpdate{
-					Enabled: true,
-				},
-			},
 			Provider: chartvalues.AWSOperatorConfigProvider{
 				AWS: chartvalues.AWSOperatorConfigProviderAWS{
 					Encrypter: "kms",

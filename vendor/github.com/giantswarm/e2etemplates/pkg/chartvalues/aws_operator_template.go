@@ -18,7 +18,7 @@ const awsOperatorTemplate = `Installation:
       SSH:
         SSOPublicKey: 'test'
       Update:
-        Enabled: {{ .Guest.Update.Enabled }}
+        Enabled: true
     Name: ci-aws-operator
     Provider:
       AWS:
@@ -37,13 +37,13 @@ const awsOperatorTemplate = `Installation:
           service:
             aws:
               accesskey:
-                id: {{ .Secret.AWSOperator.SecretYaml.Service.AWS.AccessKey.ID }}
-                secret: {{ .Secret.AWSOperator.SecretYaml.Service.AWS.AccessKey.Secret }}
-                token: {{ .Secret.AWSOperator.SecretYaml.Service.AWS.AccessKey.Token }}
+                id: '{{ .Secret.AWSOperator.SecretYaml.Service.AWS.AccessKey.ID }}'
+                secret: '{{ .Secret.AWSOperator.SecretYaml.Service.AWS.AccessKey.Secret }}'
+                token: '{{ .Secret.AWSOperator.SecretYaml.Service.AWS.AccessKey.Token }}'
               hostaccesskey:
-                id: {{ .Secret.AWSOperator.SecretYaml.Service.AWS.HostAccessKey.ID }}
-                secret: {{ .Secret.AWSOperator.SecretYaml.Service.AWS.HostAccessKey.Secret }}
-                token: {{ .Secret.AWSOperator.SecretYaml.Service.AWS.HostAccessKey.Token }}
+                id: '{{ .Secret.AWSOperator.SecretYaml.Service.AWS.HostAccessKey.ID }}'
+                secret: '{{ .Secret.AWSOperator.SecretYaml.Service.AWS.HostAccessKey.Secret }}'
+                token: '{{ .Secret.AWSOperator.SecretYaml.Service.AWS.HostAccessKey.Token }}'
 
       Registry:
         PullSecret:
