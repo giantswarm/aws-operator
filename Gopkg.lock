@@ -1667,6 +1667,7 @@
     "github.com/giantswarm/operatorkit/client/k8scrdclient",
     "github.com/giantswarm/operatorkit/client/k8srestconfig",
     "github.com/giantswarm/operatorkit/controller",
+    "github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext",
     "github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext",
     "github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext",
     "github.com/giantswarm/operatorkit/controller/context/updateallowedcontext",

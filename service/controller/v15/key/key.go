@@ -274,6 +274,10 @@ func IsChinaRegion(customObject v1alpha1.AWSConfig) bool {
 	return strings.HasPrefix(Region(customObject), "cn-")
 }
 
+func IsDeleted(customObject v1alpha1.AWSConfig) bool {
+	return customObject.GetDeletionTimestamp() != nil
+}
+
 func KubernetesAPISecurePort(customObject v1alpha1.AWSConfig) int {
 	return customObject.Spec.Cluster.Kubernetes.API.SecurePort
 }
