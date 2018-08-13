@@ -3,13 +3,13 @@ package collector
 import (
 	"sync"
 
-	awsutil "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/prometheus/client_golang/prometheus"
-
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"github.com/prometheus/client_golang/prometheus"
+	"k8s.io/client-go/kubernetes"
 
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	awsutil "github.com/giantswarm/aws-operator/client/aws"
 )
 
 const (
@@ -18,6 +18,7 @@ const (
 
 type Config struct {
 	G8sClient versioned.Interface
+	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 
 	AwsConfig        awsutil.Config
@@ -26,15 +27,19 @@ type Config struct {
 
 type Collector struct {
 	g8sClient versioned.Interface
+	k8sClient kubernetes.Interface
 	logger    micrologger.Logger
 
-	awsClients       awsutil.Clients
+	awsConfig        awsutil.Config
 	installationName string
 }
 
 func New(config Config) (*Collector, error) {
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
+	}
+	if config.K8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
@@ -48,13 +53,12 @@ func New(config Config) (*Collector, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
 	}
 
-	awsClients := awsutil.NewClients(config.AwsConfig)
-
 	c := &Collector{
 		g8sClient: config.G8sClient,
+		k8sClient: config.K8sClient,
 		logger:    config.Logger,
 
-		awsClients:       awsClients,
+		awsConfig:        config.AwsConfig,
 		installationName: config.InstallationName,
 	}
 
@@ -74,20 +78,26 @@ func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	c.logger.Log("level", "debug", "message", "collecting metrics")
 
-	collectFuncs := []func(chan<- prometheus.Metric){
-		c.collectClusterInfo,
-		c.collectTrustedAdvisorChecks,
-		c.collectVPCs,
+	// Get aws clients
+	clients, err := c.getAWSClients()
+	if err != nil {
+		c.logger.Log("level", "error", "message", "could not get aws clients", "error", err.Error())
 	}
 
 	var wg sync.WaitGroup
 
+	collectFuncs := []func(chan<- prometheus.Metric, []awsutil.Clients){
+		c.collectClusterInfo,
+		c.collectAccountsTrustedAdvisorChecks,
+		c.collectAccountsVPCs,
+	}
+
 	for _, collectFunc := range collectFuncs {
 		wg.Add(1)
 
-		go func(collectFunc func(ch chan<- prometheus.Metric)) {
+		go func(collectFunc func(chan<- prometheus.Metric, []awsutil.Clients)) {
 			defer wg.Done()
-			collectFunc(ch)
+			collectFunc(ch, clients)
 		}(collectFunc)
 	}
 

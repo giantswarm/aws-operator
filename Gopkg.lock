@@ -2,18 +2,18 @@
 
 
 [[projects]]
-  digest = "1:14573483d61ac02ca4d4ab65e252b0acd0b40fbaf3a7b4fd5d4c2c6747ce4542"
+  digest = "1:fbfc602d1d5dd4fa71cceff5273ef8ca7412823893baa961cf555b460a82a9d7"
   name = "github.com/Azure/azure-sdk-for-go"
   packages = [
-    "services/compute/mgmt/2018-04-01/compute",
+    "services/compute/mgmt/2018-06-01/compute",
     "version",
   ]
   pruneopts = "UT"
-  revision = "fad8443a79b0e755c18c3bec29a8d2bedab0b421"
-  version = "v15.3.0"
+  revision = "4e8cbbfb1aeab140cd0fa97fd16b64ee18c3ca6a"
+  version = "v19.1.0"
 
 [[projects]]
-  digest = "1:e37f563b93009102b29dc79fda0d58f87c99caa90555c3d0cac9c234bab46714"
+  digest = "1:6e63a47726e0a04c0dbf265fcf31c518cdf26fe78d8535346507e43fb652a8df"
   name = "github.com/Azure/go-autorest"
   packages = [
     "autorest",
@@ -26,8 +26,8 @@
     "version",
   ]
   pruneopts = "UT"
-  revision = "22deab8fa353631a78351bd7808fcb5002024b67"
-  version = "v10.15.1"
+  revision = "39013ecb48eaf6ced3f4e3e1d95515140ce6b3cf"
+  version = "v10.15.2"
 
 [[projects]]
   digest = "1:b16fbfbcc20645cb419f78325bb2e85ec729b338e996a228124d68931a6f2a37"
@@ -46,7 +46,7 @@
   version = "v1.4.2"
 
 [[projects]]
-  digest = "1:46ccfa9e2507d6ea3443783a5b97c7d9e202faa07069f678085cfbee8b9545ba"
+  digest = "1:257e2df2e66adc5455be33cadb952826f89b75257420bedf38a1891917af6177"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -100,8 +100,8 @@
     "service/support/supportiface",
   ]
   pruneopts = "UT"
-  revision = "36aaf21bb9b41f47fdc9b477577d0b604925d489"
-  version = "v1.15.8"
+  revision = "859b69a01f8cb52b639bd8c868b116144bddc74a"
+  version = "v1.15.9"
 
 [[projects]]
   branch = "master"
@@ -152,7 +152,7 @@
     "reference",
   ]
   pruneopts = "UT"
-  revision = "4a75b72fd3621c1892143614474ff2b05d30e4b3"
+  revision = "b7446e89bfcec2a0b33d2bdf4a50309e19c40e14"
 
 [[projects]]
   digest = "1:67bf6da2a62f206f3387976fcd8f4df00371719a6e9517e0e2b54c32edf342d9"
@@ -283,25 +283,25 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:56d779cbe3f106b64f00a506dc89c6945212d2aed986f5d45d69a2c1d2d0f557"
+  digest = "1:b09f24f56fefce552b8c6fb512f79c4ca16425d29bc07f7afb5355080f54f5ba"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
     "pkg/harness",
   ]
   pruneopts = "UT"
-  revision = "7cc3f26ba2196a4ddbbb3fb995f28c2dca678364"
+  revision = "9218541e7e6b23dbac5bca8478a34043173196f6"
 
 [[projects]]
   branch = "master"
-  digest = "1:885419a4c48fa76cea615a30e6938c7df2c8c942247c58db62ba547f57f6a84d"
+  digest = "1:b38f5b8b06e943c8cbdd64afae8c11d54780de49b55711bb3a5a57261ee9434c"
   name = "github.com/giantswarm/e2eclients"
   packages = [
     "aws",
     "azure",
   ]
   pruneopts = "UT"
-  revision = "1eb793c222c9392676ec08c368708763b02f746c"
+  revision = "425207429a641c7e43d409680d54ae78f049e04e"
 
 [[projects]]
   branch = "master"
@@ -322,16 +322,18 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:dac4656dab9fd31234dc48f735e582db0d275283aed1db6c8d137e9dc3602ef7"
+  digest = "1:9074841a2de8bfcc96152f97e81ad7d7077877becec1a6c9c38913386e721089"
   name = "github.com/giantswarm/e2etests"
   packages = [
     "clusterstate",
     "clusterstate/provider",
     "scaling",
     "scaling/provider",
+    "update",
+    "update/provider",
   ]
   pruneopts = "UT"
-  revision = "be3a134ea48a62878bba3034d91a18597851cc37"
+  revision = "41054d9e07cf3d8552b8094140e56a7da24cbf61"
 
 [[projects]]
   branch = "master"
@@ -351,11 +353,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:b7cdfa02bef5914403adad095027fa7c03cfe53d87604bddcc507d51df4d465f"
+  digest = "1:a46f31b76e413dd8c7c93c20ad6e4a6599c5baee60be60d3b423bf5e5f62c7f5"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
   pruneopts = "UT"
-  revision = "f5b26d053033c4c140aa79a4ced025362669e474"
+  revision = "4462d519f9a0c8968ab498c5ab8fd21975f5d58c"
 
 [[projects]]
   branch = "master"
@@ -598,11 +600,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:727ab28b8d1e550f028acd4d7343718464be789a3153b500998590527a13b96a"
+  digest = "1:20d9743f5ec3b456ab33198ef8401d6645f718bd4ead0948b22635ed5e8084f0"
   name = "github.com/google/go-github"
   packages = ["github"]
   pruneopts = "UT"
-  revision = "8c40ff417df53f2b031ca687be1b2e0bd7aa8fe9"
+  revision = "aeb507123774a5f482e5e39b7067dd144d4cb182"
 
 [[projects]]
   branch = "master"
@@ -885,12 +887,12 @@
   revision = "7c0cea34c8ece3fbeb2b27ab9b59511d360fb394"
 
 [[projects]]
-  digest = "1:9424f440bba8f7508b69414634aef3b2b3a877e522d8a4624692412805407bb7"
+  digest = "1:dab83a1bbc7ad3d7a6ba1a1cc1760f25ac38cdf7d96a5cdd55cd915a4f5ceaf9"
   name = "github.com/spf13/pflag"
   packages = ["."]
   pruneopts = "UT"
-  revision = "583c0c0531f06d5278b7d917446061adc344b5cd"
-  version = "v1.0.1"
+  revision = "9a97c102cda95a86cec2345a6f09f55a939babf5"
+  version = "v1.0.2"
 
 [[projects]]
   digest = "1:4fc8a61287ccfb4286e1ca5ad2ce3b0b301d746053bf44ac38cf34e40ae10372"
@@ -960,14 +962,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:4d16433c0d2c24761b8a507e8c2e9c8cf9193b497d6b38aaeffca038070bc8f5"
+  digest = "1:82b7731afcda03e0629a4a3013632f8b8b2384f43e063f74763125e988252e9c"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "904bdc257025c7b3f43c19360ad3ab85783fad78"
+  revision = "f0d5e33068cb57c22a181f5df0ffda885309eb5a"
 
 [[projects]]
   digest = "1:e5a8511f063c38c51ab9ab80e718e9149f692652aeb4e393a8c020dd1bf38ca2"
@@ -1643,6 +1645,7 @@
     "github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake",
     "github.com/giantswarm/apprclient",
     "github.com/giantswarm/backoff",
+    "github.com/giantswarm/certs",
     "github.com/giantswarm/certs/legacy",
     "github.com/giantswarm/certs/legacy/legacytest",
     "github.com/giantswarm/e2e-harness/pkg/framework",
@@ -1652,6 +1655,9 @@
     "github.com/giantswarm/e2etests/clusterstate/provider",
     "github.com/giantswarm/e2etests/scaling",
     "github.com/giantswarm/e2etests/scaling/provider",
+    "github.com/giantswarm/e2etests/update",
+    "github.com/giantswarm/e2etests/update/provider",
+    "github.com/giantswarm/guestcluster",
     "github.com/giantswarm/helmclient",
     "github.com/giantswarm/k8scloudconfig/v_2_0_2",
     "github.com/giantswarm/k8scloudconfig/v_3_0_0",
@@ -1673,6 +1679,7 @@
     "github.com/giantswarm/operatorkit/client/k8scrdclient",
     "github.com/giantswarm/operatorkit/client/k8srestconfig",
     "github.com/giantswarm/operatorkit/controller",
+    "github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext",
     "github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext",
     "github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext",
     "github.com/giantswarm/operatorkit/controller/context/updateallowedcontext",

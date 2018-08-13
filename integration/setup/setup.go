@@ -149,7 +149,7 @@ func WrapTestMain(c *awsclient.Client, g *framework.Guest, h *framework.Host, m 
 	if os.Getenv("KEEP_RESOURCES") != "true" {
 		name := "aws-operator"
 		customResource := "awsconfig"
-		logEntry := "deleted the guest cluster main stack"
+		logEntry := "removed finalizer 'operatorkit.giantswarm.io/aws-operator'"
 		h.DeleteGuestCluster(name, customResource, logEntry)
 
 		// only do full teardown when not on CI

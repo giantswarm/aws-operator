@@ -31,6 +31,7 @@ var (
 	circleSHA            string
 	clusterID            string
 	registryPullSecret   string
+	githubToken          string
 	testDir              string
 	testedVersion        string
 	keepResources        string
@@ -48,6 +49,11 @@ func init() {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarCircleSHA))
 	}
 
+	githubToken = os.Getenv(EnvVarGithubBotToken)
+	if githubToken == "" {
+		panic(fmt.Sprintf("env var %q must not be empty", EnvVarGithubBotToken))
+	}
+
 	testedVersion = os.Getenv(EnvVarTestedVersion)
 	if testedVersion == "" {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarTestedVersion))
@@ -60,11 +66,10 @@ func init() {
 
 	testDir = os.Getenv(EnvVarTestDir)
 
-	token := os.Getenv(EnvVarGithubBotToken)
 	params := &framework.VBVParams{
 		Component: component,
 		Provider:  provider,
-		Token:     token,
+		Token:     githubToken,
 		VType:     TestedVersion(),
 	}
 	versionBundleVersion, err = framework.GetVersionBundleVersion(params)
@@ -114,6 +119,10 @@ func ClusterID() string {
 
 func KeepResources() string {
 	return keepResources
+}
+
+func GithubToken() string {
+	return githubToken
 }
 
 func RegistryPullSecret() string {
