@@ -223,12 +223,12 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 
 	awsHostClients := awsclient.NewClients(hostAWSConfig)
 
-	var certWatcher *legacy.Service
+	var certsSearcher *legacy.Service
 	{
 		certConfig := legacy.DefaultServiceConfig()
 		certConfig.K8sClient = config.K8sClient
 		certConfig.Logger = config.Logger
-		certWatcher, err = legacy.NewService(certConfig)
+		certsSearcher, err = legacy.NewService(certConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -261,7 +261,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV1 *controller.ResourceSet
 	{
 		c := v1.ResourceSetConfig{
-			CertsSearcher:      certWatcher,
+			CertsSearcher:      certsSearcher,
 			GuestAWSConfig:     guestAWSConfig,
 			HostAWSConfig:      hostAWSConfig,
 			K8sClient:          config.K8sClient,
@@ -287,7 +287,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV2 *controller.ResourceSet
 	{
 		c := v2.ResourceSetConfig{
-			CertsSearcher:      certWatcher,
+			CertsSearcher:      certsSearcher,
 			GuestAWSClients:    awsClients,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
@@ -311,7 +311,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV3 *controller.ResourceSet
 	{
 		c := v3.ResourceSetConfig{
-			CertsSearcher:      certWatcher,
+			CertsSearcher:      certsSearcher,
 			GuestAWSClients:    awsClients,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
@@ -336,7 +336,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV6 *controller.ResourceSet
 	{
 		c := v6.ResourceSetConfig{
-			CertsSearcher:      certWatcher,
+			CertsSearcher:      certsSearcher,
 			GuestAWSClients:    awsClients,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
@@ -363,7 +363,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV8 *controller.ResourceSet
 	{
 		c := v8.ClusterResourceSetConfig{
-			CertsSearcher:      certWatcher,
+			CertsSearcher:      certsSearcher,
 			GuestAWSClients:    awsClients,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
@@ -390,7 +390,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV9Patch1 *controller.ResourceSet
 	{
 		c := v9patch1.ClusterResourceSetConfig{
-			CertsSearcher:      certWatcher,
+			CertsSearcher:      certsSearcher,
 			GuestAWSClients:    awsClients,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
@@ -422,7 +422,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV9Patch2 *controller.ResourceSet
 	{
 		c := v9patch2.ClusterResourceSetConfig{
-			CertsSearcher:      certWatcher,
+			CertsSearcher:      certsSearcher,
 			GuestAWSClients:    awsClients,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
@@ -454,7 +454,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV12 *controller.ResourceSet
 	{
 		c := v12.ClusterResourceSetConfig{
-			CertsSearcher:      certWatcher,
+			CertsSearcher:      certsSearcher,
 			G8sClient:          config.G8sClient,
 			HostAWSConfig:      hostAWSConfig,
 			HostAWSClients:     awsHostClients,
@@ -492,7 +492,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV12Patch1 *controller.ResourceSet
 	{
 		c := v12patch1.ClusterResourceSetConfig{
-			CertsSearcher:      certWatcher,
+			CertsSearcher:      certsSearcher,
 			G8sClient:          config.G8sClient,
 			HostAWSConfig:      hostAWSConfig,
 			HostAWSClients:     awsHostClients,
@@ -530,7 +530,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV13 *controller.ResourceSet
 	{
 		c := v13.ClusterResourceSetConfig{
-			CertsSearcher:      certWatcher,
+			CertsSearcher:      certsSearcher,
 			G8sClient:          config.G8sClient,
 			HostAWSConfig:      hostAWSConfig,
 			HostAWSClients:     awsHostClients,
@@ -573,7 +573,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV14 *controller.ResourceSet
 	{
 		c := v14.ClusterResourceSetConfig{
-			CertsSearcher:      certWatcher,
+			CertsSearcher:      certsSearcher,
 			G8sClient:          config.G8sClient,
 			HostAWSConfig:      hostAWSConfig,
 			HostAWSClients:     awsHostClients,
@@ -616,7 +616,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV15 *controller.ResourceSet
 	{
 		c := v15.ClusterResourceSetConfig{
-			CertsSearcher:      certWatcher,
+			CertsSearcher:      certsSearcher,
 			G8sClient:          config.G8sClient,
 			HostAWSConfig:      hostAWSConfig,
 			HostAWSClients:     awsHostClients,

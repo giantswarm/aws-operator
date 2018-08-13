@@ -2,11 +2,9 @@ package adapter
 
 import (
 	"encoding/base64"
-	"fmt"
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v15/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v15/key"
 	"github.com/giantswarm/aws-operator/service/controller/v15/templates"
 )
@@ -29,10 +27,10 @@ type BlockDeviceMapping struct {
 	VolumeType          string
 }
 
-func (l *GuestLaunchConfigAdapter) Adapt(cfg Config) error {
-	l.ASGType = asgType(cfg)
-	l.WorkerInstanceType = key.WorkerInstanceType(cfg.CustomObject)
-	l.WorkerImageID = workerImageID(cfg)
+func (l *GuestLaunchConfigAdapter) Adapt(config Config) error {
+	l.ASGType = asgType(config)
+	l.WorkerInstanceType = key.WorkerInstanceType(config.CustomObject)
+	l.WorkerImageID = workerImageID(config)
 	l.WorkerAssociatePublicIPAddress = false
 
 	l.WorkerBlockDeviceMappings = []BlockDeviceMapping{
@@ -43,23 +41,19 @@ func (l *GuestLaunchConfigAdapter) Adapt(cfg Config) error {
 			VolumeType:          defaultEBSVolumeType,
 		},
 	}
-	l.WorkerInstanceMonitoring = cfg.StackState.WorkerInstanceMonitoring
+	l.WorkerInstanceMonitoring = config.StackState.WorkerInstanceMonitoring
 
 	// small cloud config field.
-	accountID, err := AccountID(cfg.Clients)
+	accountID, err := AccountID(config.Clients)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	clusterID := key.ClusterID(cfg.CustomObject)
-	s3URI := fmt.Sprintf("%s-g8s-%s", accountID, clusterID)
-
 	c := SmallCloudconfigConfig{
-		MachineType:             prefixWorker,
-		Region:                  key.Region(cfg.CustomObject),
-		S3Domain:                key.S3ServiceDomain(cfg.CustomObject),
-		S3URI:                   s3URI,
-		CloudConfigVersion:      cloudconfig.CloudConfigVersion,
-		AWSCliContainerRegistry: key.AWSCliContainerRegistry(cfg.CustomObject),
+		Region:    key.Region(config.CustomObject),
+		Registry:  key.AWSCliContainerRegistry(config.CustomObject),
+		Role:      prefixWorker,
+		S3HTTPURL: key.SmallCloudConfigS3HTTPURL(config.CustomObject, accountID, prefixWorker),
+		S3URL:     key.SmallCloudConfigS3URL(config.CustomObject, accountID, prefixWorker),
 	}
 	rendered, err := templates.Render(key.CloudConfigSmallTemplates(), c)
 	if err != nil {

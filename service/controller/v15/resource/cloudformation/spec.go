@@ -32,8 +32,6 @@ type StackState struct {
 	ShouldScale  bool
 	ShouldUpdate bool
 
-	Status string
-
 	WorkerCount              string
 	WorkerImageID            string
 	WorkerInstanceMonitoring bool
