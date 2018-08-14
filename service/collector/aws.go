@@ -24,8 +24,10 @@ func (c Collector) getARNs() ([]string, error) {
 	arnsMap := make(map[string]bool)
 	for _, awsConfig := range awsConfigs.Items {
 		arn, err := credential.GetARN(c.k8sClient, &awsConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
+		// Collect as many ARNs as possible in order to provide most metrics.
+		// Ignore old cluster which do not have credential.
+		if err == nil {
+			arnsMap[arn] = true
 		}
 		arnsMap[arn] = true
 	}
