@@ -1,6 +1,8 @@
 package collector
 
 import (
+	"fmt"
+
 	"github.com/giantswarm/microerror"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -24,11 +26,25 @@ func (c Collector) getARNs() ([]string, error) {
 	arnsMap := make(map[string]bool)
 	for _, awsConfig := range awsConfigs.Items {
 		arn, err := credential.GetARN(c.k8sClient, &awsConfig)
-		if err != nil {
+		// Collect as many ARNs as possible in order to provide most metrics.
+		// Ignore old cluster which do not have credential.
+		if credential.IsCredentialNameEmptyError(err) {
+			continue
+		} else if credential.IsCredentialNamespaceEmptyError(err) {
+			continue
+		} else if err != nil {
 			return nil, microerror.Mask(err)
 		}
+
 		arnsMap[arn] = true
 	}
+
+	// Ensure we check the default guest account for old cluster not having credential.
+	arn, err := credential.GetDefaultARN(c.k8sClient)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+	arnsMap[arn] = true
 
 	for arn, _ := range arnsMap {
 		arns = append(arns, arn)
@@ -85,8 +101,9 @@ func (c Collector) getAWSClients() ([]aws.Clients, error) {
 	}
 
 	// Convert map to slice.
-	for _, client := range clientsMap {
+	for accountID, client := range clientsMap {
 		clients = append(clients, client)
+		c.logger.Log("level", "debug", "message", fmt.Sprintf("collecting metrics in account: %s", accountID))
 	}
 
 	return clients, nil
