@@ -28,8 +28,9 @@ func (c Collector) getARNs() ([]string, error) {
 		arn, err := credential.GetARN(c.k8sClient, &awsConfig)
 		// Collect as many ARNs as possible in order to provide most metrics.
 		// Ignore old cluster which do not have credential.
-		if credential.IsCredentialNameEmptyError(err) ||
-			credential.IsCredentialNamespaceEmptyError(err) {
+		if credential.IsCredentialNameEmptyError(err) {
+			continue
+		} else if credential.IsCredentialNamespaceEmptyError(err) {
 			continue
 		} else if err != nil {
 			return nil, microerror.Mask(err)
