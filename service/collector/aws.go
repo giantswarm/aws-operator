@@ -1,6 +1,8 @@
 package collector
 
 import (
+	"fmt"
+
 	"github.com/giantswarm/microerror"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -92,8 +94,9 @@ func (c Collector) getAWSClients() ([]aws.Clients, error) {
 	}
 
 	// Convert map to slice.
-	for _, client := range clientsMap {
+	for accountID, client := range clientsMap {
 		clients = append(clients, client)
+		c.logger.Log("level", "debug", "message", fmt.Sprintf("collecting metrics in account: %s", accountID))
 	}
 
 	return clients, nil
