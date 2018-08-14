@@ -40,22 +40,53 @@ func (c Collector) getARNs() ([]string, error) {
 // getAWSClients return a list of aws clients for every guest cluster account plus
 // the host cluster account.
 func (c Collector) getAWSClients() ([]aws.Clients, error) {
-	var clients []aws.Clients
+	var (
+		clients    []aws.Clients
+		clientsMap = make(map[string]aws.Clients)
+	)
 
 	arns, err := c.getARNs()
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
+	// addClientFunc add awsClients to clients using account id as key to guaranatee uniqueness.
+	addClientFunc := func(awsClients aws.Clients, clients *map[string]aws.Clients) error {
+		accountID, err := c.awsAccountID(awsClients)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		_, ok := (*clients)[accountID]
+		if !ok {
+			(*clients)[accountID] = awsClients
+		}
+
+		return nil
+	}
+
 	// Host cluster account.
-	clients = append(clients, aws.NewClients(c.awsConfig))
+	awsClients := aws.NewClients(c.awsConfig)
+	err = addClientFunc(awsClients, &clientsMap)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
 
 	// Guest cluster accounts.
 	for _, arn := range arns {
 		awsConfig := c.awsConfig
 		awsConfig.RoleARN = arn
 
-		clients = append(clients, aws.NewClients(awsConfig))
+		awsClients := aws.NewClients(awsConfig)
+		err = addClientFunc(awsClients, &clientsMap)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	// Convert map to slice.
+	for _, client := range clientsMap {
+		clients = append(clients, client)
 	}
 
 	return clients, nil
