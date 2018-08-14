@@ -50,8 +50,9 @@ func init() {
 
 	{
 		c := framework.HostConfig{
-			ClusterID: os.Getenv("CLUSTER_NAME"),
-			Logger:    l,
+			ClusterID:  os.Getenv("CLUSTER_NAME"),
+			Logger:     l,
+			VaultToken: "95eba8ed-f6fc-958a-f490-c7fd0eda5e9e",
 		}
 
 		h, err = framework.NewHost(c)

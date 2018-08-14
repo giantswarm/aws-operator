@@ -8,7 +8,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/cenkalti/backoff"
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	awsclient "github.com/giantswarm/e2eclients/aws"
 	"github.com/giantswarm/microerror"
@@ -146,7 +146,7 @@ func (aws *AWS) CreateCluster(clusterName string) error {
 
 		return nil
 	}
-	b := framework.NewExponentialBackoff(framework.ShortMaxWait, framework.ShortMaxInterval)
+	b := backoff.NewConstant(framework.ShortMaxWait, framework.ShortMaxInterval)
 	n := func(err error, delay time.Duration) {
 		log.Println("level", "debug", "message", err.Error())
 	}
