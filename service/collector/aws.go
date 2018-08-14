@@ -40,9 +40,10 @@ func (c Collector) getARNs() ([]string, error) {
 
 	// Ensure we check the default guest account for old cluster not having credential.
 	arn, err := credential.GetDefaultARN(c.k8sClient)
-	if err == nil {
-		arnsMap[arn] = true
+	if err != nil {
+		return nil, microerror.Mask(err)
 	}
+	arnsMap[arn] = true
 
 	for arn, _ := range arnsMap {
 		arns = append(arns, arn)
