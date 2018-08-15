@@ -304,7 +304,7 @@
   revision = "425207429a641c7e43d409680d54ae78f049e04e"
 
 [[projects]]
-  branch = "APIExtensionsAWSConfigE2E"
+  branch = "master"
   digest = "1:9116ec6d908b1dbb5b980c2805b1df5f1d8006e330399c34bfda9b8a25635f47"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
@@ -313,7 +313,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "a298add12a5f4d0ff4d3ea90e26914c21ec4d616"
+  revision = "2d78ba87e4847f916732d40333b5bebd36274417"
 
 [[projects]]
   branch = "master"
