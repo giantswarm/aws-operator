@@ -12,7 +12,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
-	awsclient "github.com/giantswarm/e2eclients/aws"
 	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
 	"github.com/giantswarm/e2etemplates/pkg/e2etemplates"
 	"github.com/giantswarm/microerror"
@@ -21,7 +20,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/integration/env"
-	"github.com/giantswarm/aws-operator/integration/teardown"
 )
 
 const (
@@ -31,112 +29,30 @@ const (
 	credentialNamespace   = "giantswarm"
 )
 
-func HostPeerVPC(c *awsclient.Client, g *framework.Guest, h *framework.Host) (string, error) {
-	log.Printf("creating Host Peer VPC stack")
-
-	os.Setenv("AWS_ROUTE_TABLE_0", env.AWSRouteTable0())
-	os.Setenv("AWS_ROUTE_TABLE_1", env.AWSRouteTable1())
-	os.Setenv("CLUSTER_NAME", env.ClusterID())
-	stackName := "host-peer-" + env.ClusterID()
-	stackInput := &cloudformation.CreateStackInput{
-		StackName:        aws.String(stackName),
-		TemplateBody:     aws.String(os.ExpandEnv(e2etemplates.AWSHostVPCStack)),
-		TimeoutInMinutes: aws.Int64(2),
-	}
-	_, err := c.CloudFormation.CreateStack(stackInput)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-	err = c.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
-		StackName: aws.String(stackName),
-	})
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-	describeOutput, err := c.CloudFormation.DescribeStacks(&cloudformation.DescribeStacksInput{
-		StackName: aws.String(stackName),
-	})
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-	var vpcPeerID string
-	for _, o := range describeOutput.Stacks[0].Outputs {
-		if *o.OutputKey == "VPCID" {
-			vpcPeerID = *o.OutputValue
-			break
-		}
-	}
-	log.Printf("created Host Peer VPC stack")
-	return vpcPeerID, nil
-}
-
-func Resources(c *awsclient.Client, g *framework.Guest, h *framework.Host, vpcPeerID string) error {
-	var err error
-
-	{
-		// TODO configure chart values like for the other operators below.
-		err = h.InstallStableOperator("cert-operator", "certconfig", e2etemplates.CertOperatorChartValues)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		err = h.InstallStableOperator("node-operator", "drainerconfig", e2etemplates.NodeOperatorChartValues)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	{
-		err = installAWSOperator(h)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	{
-		err = h.InstallCertResource()
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		err = installCredential(h)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	{
-		err = installAWSConfig(h, vpcPeerID)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	return nil
-}
-
-func WrapTestMain(c *awsclient.Client, g *framework.Guest, h *framework.Host, m *testing.M) {
+func Setup(m *testing.M, config Config) {
 	var v int
 	var err error
 
-	vpcPeerID, err := HostPeerVPC(c, g, h)
+	vpcPeerID, err := installHostPeerVPC(config)
 	if err != nil {
 		log.Printf("%#v\n", err)
 		v = 1
 	}
 
-	err = h.Setup()
+	err = config.Host.Setup()
 	if err != nil {
 		log.Printf("%#v\n", err)
 		v = 1
 	}
 
-	err = Resources(c, g, h, vpcPeerID)
+	err = installResources(config, vpcPeerID)
 	if err != nil {
 		log.Printf("%#v\n", err)
 		v = 1
 	}
 
 	if v == 0 {
-		err = g.Setup()
+		err = config.Guest.Setup()
 		if err != nil {
 			log.Printf("%#v\n", err)
 			v = 1
@@ -151,30 +67,24 @@ func WrapTestMain(c *awsclient.Client, g *framework.Guest, h *framework.Host, m 
 		name := "aws-operator"
 		customResource := "awsconfig"
 		logEntry := "removed finalizer 'operatorkit.giantswarm.io/aws-operator'"
-		h.DeleteGuestCluster(name, customResource, logEntry)
+		config.Host.DeleteGuestCluster(name, customResource, logEntry)
 
 		// only do full teardown when not on CI
 		if os.Getenv("CIRCLECI") != "true" {
-			err := teardown.Teardown(c, g, h)
+			err := teardown(config)
 			if err != nil {
 				log.Printf("%#v\n", err)
 				v = 1
 			}
 			// TODO there should be error handling for the framework teardown.
-			h.Teardown()
-		}
-
-		err := teardown.HostPeerVPC(c, g, h)
-		if err != nil {
-			log.Printf("%#v\n", err)
-			v = 1
+			config.Host.Teardown()
 		}
 	}
 
 	os.Exit(v)
 }
 
-func installAWSOperator(h *framework.Host) error {
+func installAWSOperator(config Config) error {
 	var err error
 
 	var values string
@@ -217,14 +127,14 @@ func installAWSOperator(h *framework.Host) error {
 
 	}
 
-	err = h.InstallBranchOperator("aws-operator", "awsconfig", values)
+	err = config.Host.InstallBranchOperator("aws-operator", "awsconfig", values)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 	return nil
 }
 
-func installAWSConfig(h *framework.Host, vpcPeerID string) error {
+func installAWSConfig(config Config, vpcPeerID string) error {
 	var err error
 
 	var values string
@@ -251,7 +161,7 @@ func installAWSConfig(h *framework.Host, vpcPeerID string) error {
 		}
 	}
 
-	err = h.InstallResource("apiextensions-aws-config-e2e", values, ":stable")
+	err = config.Host.InstallResource("apiextensions-aws-config-e2e", values, ":stable")
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -259,7 +169,7 @@ func installAWSConfig(h *framework.Host, vpcPeerID string) error {
 	return nil
 }
 
-func installCredential(h *framework.Host) error {
+func installCredential(config Config) error {
 	var err error
 
 	var l micrologger.Logger
@@ -273,7 +183,7 @@ func installCredential(h *framework.Host) error {
 	}
 
 	o := func() error {
-		k8sClient := h.K8sClient()
+		k8sClient := config.Host.K8sClient()
 
 		k8sClient.CoreV1().Secrets(credentialNamespace).Delete(credentialName, &metav1.DeleteOptions{})
 
@@ -298,6 +208,88 @@ func installCredential(h *framework.Host) error {
 	err = backoff.RetryNotify(o, b, n)
 	if err != nil {
 		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
+func installHostPeerVPC(config Config) (string, error) {
+	log.Printf("creating Host Peer VPC stack")
+
+	os.Setenv("AWS_ROUTE_TABLE_0", env.AWSRouteTable0())
+	os.Setenv("AWS_ROUTE_TABLE_1", env.AWSRouteTable1())
+	os.Setenv("CLUSTER_NAME", env.ClusterID())
+	stackName := "host-peer-" + env.ClusterID()
+	stackInput := &cloudformation.CreateStackInput{
+		StackName:        aws.String(stackName),
+		TemplateBody:     aws.String(os.ExpandEnv(e2etemplates.AWSHostVPCStack)),
+		TimeoutInMinutes: aws.Int64(2),
+	}
+	_, err := config.AWSClient.CloudFormation.CreateStack(stackInput)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	err = config.AWSClient.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
+		StackName: aws.String(stackName),
+	})
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	describeOutput, err := config.AWSClient.CloudFormation.DescribeStacks(&cloudformation.DescribeStacksInput{
+		StackName: aws.String(stackName),
+	})
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	var vpcPeerID string
+	for _, o := range describeOutput.Stacks[0].Outputs {
+		if *o.OutputKey == "VPCID" {
+			vpcPeerID = *o.OutputValue
+			break
+		}
+	}
+	log.Printf("created Host Peer VPC stack")
+	return vpcPeerID, nil
+}
+
+func installResources(config Config, vpcPeerID string) error {
+	var err error
+
+	{
+		// TODO configure chart values like for the other operators below.
+		err = config.Host.InstallStableOperator("cert-operator", "certconfig", e2etemplates.CertOperatorChartValues)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		err = config.Host.InstallStableOperator("node-operator", "drainerconfig", e2etemplates.NodeOperatorChartValues)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	{
+		err = installAWSOperator(config)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	{
+		err = config.Host.InstallCertResource()
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		err = installCredential(config)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	{
+		err = installAWSConfig(config, vpcPeerID)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
 	return nil
