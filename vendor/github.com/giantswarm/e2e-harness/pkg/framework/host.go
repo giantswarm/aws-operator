@@ -492,7 +492,7 @@ func (h *Host) runningPod(namespace, labelSelector string) func() error {
 		pod := pods.Items[0]
 		phase := pod.Status.Phase
 		if phase != v1.PodRunning {
-			return microerror.Maskf(unexpectedStatusPhaseError, "current status: %s", string(phase))
+			return microerror.Maskf(unexpectedStatusPhaseError, "pod selected with %q is in phase %q instead of %q", labelSelector, string(phase), string(v1.PodRunning))
 		}
 		return nil
 	}
