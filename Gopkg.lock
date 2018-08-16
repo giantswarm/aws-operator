@@ -305,7 +305,7 @@
 
 [[projects]]
   branch = "add-ipam-config"
-  digest = "1:00387a6fb28dff68beec9f241cd2995b1bc91c51f2e1e14770e2d7db52d6d79a"
+  digest = "1:2ee504029967701a6960982d76557ce2af443b6fc7a687eec80bb9fb85ccaa27"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
     "internal/render",
@@ -313,7 +313,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "d1860ef93d1a47f30c6effa89d702826fe5ac186"
+  revision = "bb0df77105117dead0e836a5e4ece3d5764efc12"
 
 [[projects]]
   branch = "ipam-e2e-tests"
