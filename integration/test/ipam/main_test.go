@@ -12,6 +12,7 @@ import (
 	"github.com/giantswarm/e2etests/ipam/provider"
 	"github.com/giantswarm/micrologger"
 
+	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/aws-operator/integration/setup"
 )
 
@@ -52,7 +53,7 @@ func init() {
 		c := framework.HostConfig{
 			ClusterID:  os.Getenv("CLUSTER_NAME"),
 			Logger:     l,
-			VaultToken: "95eba8ed-f6fc-958a-f490-c7fd0eda5e9e",
+			VaultToken: env.VaultToken(),
 		}
 
 		h, err = framework.NewHost(c)
