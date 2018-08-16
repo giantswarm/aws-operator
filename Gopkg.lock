@@ -257,7 +257,7 @@
   branch = "add-ipam-config"
   name = "github.com/giantswarm/e2etemplates"
   packages = ["pkg/e2etemplates"]
-  revision = "36e3ba6e45bb0a00cff0751f301bb80904d882bc"
+  revision = "d1860ef93d1a47f30c6effa89d702826fe5ac186"
 
 [[projects]]
   branch = "ipam-e2e-tests"
