@@ -27,9 +27,12 @@ const (
 	awsResourceValuesFile = "/tmp/aws-operator-values.yaml"
 	credentialName        = "credential-default"
 	credentialNamespace   = "giantswarm"
+	provider              = "aws"
 )
 
 func Setup(m *testing.M, config Config) {
+	ctx := context.Background()
+
 	var v int
 	var err error
 
@@ -64,10 +67,7 @@ func Setup(m *testing.M, config Config) {
 	}
 
 	if os.Getenv("KEEP_RESOURCES") != "true" {
-		name := "aws-operator"
-		customResource := "awsconfig"
-		logEntry := "removed finalizer 'operatorkit.giantswarm.io/aws-operator'"
-		config.Host.DeleteGuestCluster(name, customResource, logEntry)
+		config.Host.DeleteGuestCluster(ctx, provider)
 
 		// only do full teardown when not on CI
 		if os.Getenv("CIRCLECI") != "true" {
