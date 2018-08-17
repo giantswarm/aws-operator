@@ -53,8 +53,8 @@ required = [
   branch = "legacy"
   name = "github.com/giantswarm/certs"
 
-[[override]]
-  branch = "delete-guest"
+[[constraint]]
+  branch = "master"
   name = "github.com/giantswarm/e2e-harness"
 
 [[constraint]]

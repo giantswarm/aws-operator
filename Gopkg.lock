@@ -282,7 +282,7 @@
   revision = "eef93b00a45bfe1872e9161af968c6234c7cd61e"
 
 [[projects]]
-  branch = "delete-guest"
+  branch = "master"
   digest = "1:171cfb76860fd84c1637a1f2f01659c1ef637e15f28d8281068cb85125415096"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
@@ -290,7 +290,7 @@
     "pkg/harness",
   ]
   pruneopts = "UT"
-  revision = "388ad3e0dd96d7484872651c6ee159f85552c2c1"
+  revision = "356ee815b2f63562157d4f30149f7e8b19ae2a74"
 
 [[projects]]
   branch = "master"
