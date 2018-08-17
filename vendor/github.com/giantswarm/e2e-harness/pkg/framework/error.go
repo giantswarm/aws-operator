@@ -2,6 +2,15 @@ package framework
 
 import "github.com/giantswarm/microerror"
 
+var clusterDeletionError = &microerror.Error{
+	Kind: "clusterDeletionError",
+}
+
+// IsClusterDeletion asserts clusterDeletionError.
+func IsClusterDeletion(err error) bool {
+	return microerror.Cause(err) == clusterDeletionError
+}
+
 var invalidConfigError = &microerror.Error{
 	Kind: "invalidConfigError",
 }
@@ -40,6 +49,15 @@ func IsTooManyResults(err error) bool {
 
 var unexpectedStatusPhaseError = &microerror.Error{
 	Kind: "unexpectedStatusPhaseError",
+}
+
+var unknownProviderError = &microerror.Error{
+	Kind: "unknownProviderError",
+}
+
+// IsUnknownProvider asserts unknownProviderError.
+func IsUnknownProvider(err error) bool {
+	return microerror.Cause(err) == unknownProviderError
 }
 
 // IsUnexpectedStatusPhase asserts notFoundError.
