@@ -18,6 +18,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
@@ -177,17 +178,81 @@ func (h *Host) CreateNamespace(ns string) error {
 	return nil
 }
 
-func (h *Host) DeleteGuestCluster(name, cr, logEntry string) error {
-	if err := runCmd(fmt.Sprintf("kubectl delete %s %s", cr, h.clusterID)); err != nil {
-		return microerror.Mask(err)
+func (h *Host) DeleteGuestCluster(ctx context.Context, provider string) error {
+	{
+		h.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("triggering deletion of CR for guest cluster %#q", h.clusterID))
+
+		o := func() error {
+			var err error
+
+			switch provider {
+			case "aws":
+				err = h.g8sClient.ProviderV1alpha1().AWSConfigs("default").Delete(h.clusterID, &metav1.DeleteOptions{})
+			case "azure":
+				err = h.g8sClient.ProviderV1alpha1().AzureConfigs("default").Delete(h.clusterID, &metav1.DeleteOptions{})
+			case "kvm":
+				err = h.g8sClient.ProviderV1alpha1().KVMConfigs("default").Delete(h.clusterID, &metav1.DeleteOptions{})
+			default:
+				return microerror.Maskf(unknownProviderError, "%#q not recognized", provider)
+			}
+
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			return nil
+		}
+
+		n := backoff.NewNotifier(h.logger, context.Background())
+		err := backoff.RetryNotify(o, h.backoff, n)
+		if apierrors.IsNotFound(err) {
+			h.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not trigger deletion of CR for guest cluster %#q", h.clusterID))
+			h.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("CR for guest cluster %#q does not exist", h.clusterID))
+		} else if err != nil {
+			h.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not trigger deletion of CR for guest cluster %#q", h.clusterID))
+			return microerror.Mask(err)
+		}
+
+		h.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("triggered deletion of CR for guest cluster %#q", h.clusterID))
 	}
 
-	operatorPodName, err := h.PodName("giantswarm", fmt.Sprintf("app=%s", name))
-	if err != nil {
-		return microerror.Mask(err)
+	{
+		h.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensuring deletion of CR for guest cluster %#q", h.clusterID))
+
+		o := func() error {
+			var err error
+
+			switch provider {
+			case "aws":
+				_, err = h.g8sClient.ProviderV1alpha1().AWSConfigs("default").Get(h.clusterID, metav1.GetOptions{})
+			case "azure":
+				_, err = h.g8sClient.ProviderV1alpha1().AzureConfigs("default").Get(h.clusterID, metav1.GetOptions{})
+			case "kvm":
+				_, err = h.g8sClient.ProviderV1alpha1().KVMConfigs("default").Get(h.clusterID, metav1.GetOptions{})
+			default:
+				return microerror.Maskf(unknownProviderError, "%#q not recognized", provider)
+			}
+
+			if apierrors.IsNotFound(err) {
+				return nil
+			} else if err != nil {
+				return microerror.Mask(err)
+			} else {
+				return microerror.Maskf(clusterDeletionError, "guest cluster %#q CR still exists", h.clusterID)
+			}
+		}
+
+		b := backoff.NewExponential(LongMaxWait, 60*time.Second)
+		n := backoff.NewNotifier(h.logger, context.Background())
+		err := backoff.RetryNotify(o, b, n)
+		if err != nil {
+			h.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not ensure deletion of CR for guest cluster %#q", h.clusterID))
+			return microerror.Mask(err)
+		}
+
+		h.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensured deletion of CR for guest cluster %#q", h.clusterID))
 	}
 
-	return h.WaitForPodLog("giantswarm", logEntry, operatorPodName)
+	return nil
 }
 
 // G8sClient returns the host cluster framework's Giant Swarm client.
