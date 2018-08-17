@@ -4,67 +4,44 @@ package setup
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
-	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/integration/env"
 )
 
-func teardown(config Config) error {
-	var err error
-	var errors []error
-
-	{
-		err = framework.HelmCmd(fmt.Sprintf("delete %s-aws-operator --purge", config.Host.TargetNamespace()))
-		if err != nil {
-			errors = append(errors, microerror.Mask(err))
-		}
-		err = framework.HelmCmd(fmt.Sprintf("delete %s-cert-operator --purge", config.Host.TargetNamespace()))
-		if err != nil {
-			errors = append(errors, microerror.Mask(err))
-		}
-		err = framework.HelmCmd(fmt.Sprintf("delete %s-node-operator --purge", config.Host.TargetNamespace()))
-		if err != nil {
-			errors = append(errors, microerror.Mask(err))
-		}
+func teardownResources(config Config) {
+	releases := []string{
+		config.Host.TargetNamespace() + "-aws-operator",
+		config.Host.TargetNamespace() + "-cert-operator",
+		config.Host.TargetNamespace() + "-node-operator",
+		config.Host.TargetNamespace() + "-cert-config-e2e",
+		config.Host.TargetNamespace() + "-aws-config-e2e",
 	}
 
-	{
-		err = framework.HelmCmd(fmt.Sprintf("delete %s-cert-config-e2e --purge", config.Host.TargetNamespace()))
+	for _, release := range releases {
+		config.Logger.LogCtx(ctx, "level", "debug", fmt.Sprintf("deleting release %s", release))
+
+		err := framework.HelmCmd(fmt.Sprintf("delete %s --purge", release))
 		if err != nil {
-			errors = append(errors, microerror.Mask(err))
+			config.Logger.LogCtx(ctx, "level", "error", "message", fmt.Sprintf("did not delete release %s", release), "stack", fmt.Sprintf("%#v", err))
 		}
-		err = framework.HelmCmd(fmt.Sprintf("delete %s-aws-config-e2e --purge", config.Host.TargetNamespace()))
-		if err != nil {
-			errors = append(errors, microerror.Mask(err))
-		}
-	}
 
-	if len(errors) > 0 {
-		return microerror.Mask(errors[0])
+		config.Logger.LogCtx(ctx, "level", "debug", fmt.Sprintf("deleted release %s", release))
 	}
-
-	err = deleteHostPeerVPC(config)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	return nil
 }
 
-func deleteHostPeerVPC(config Config) error {
-	log.Printf("Deleting Host Peer VPC stack")
+func teardownHostPeerVPC(config Config) {
+	config.Logger.LogCtx(ctx, "level", "debug", "deleting host peer VPC stack")
 
 	_, err := config.AWSClient.CloudFormation.DeleteStack(&cloudformation.DeleteStackInput{
 		StackName: aws.String("host-peer-" + env.ClusterID()),
 	})
 	if err != nil {
-		return microerror.Mask(err)
+		config.Logger.LogCtx(ctx, "level", "error", "message", "did not delete host VPC stack due to error", "stack", fmt.Sprintf("%#v", err))
 	}
 
-	return nil
+	config.Logger.LogCtx(ctx, "level", "debug", "deleted host peer VPC stack")
 }

@@ -4,6 +4,7 @@ package setup
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -29,59 +30,61 @@ const (
 	credentialNamespace   = "giantswarm"
 )
 
-func Setup(m *testing.M, config Config) {
-	var v int
-	var err error
+func Setup(ctx context.Context, m *testing.M, config Config) {
+	err := config.Validate()
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
+	exitCode, err := setup(m, config)
+	if err != nil {
+		config.Logger.LogCtx(ctx, "level", "error", "message", "e2e setup failed", "stack", fmt.Sprintf("%#v", err))
+		os.Exit(1)
+	}
+	os.Exit(exitCode)
+}
+
+func setup(m *testing.M, config Config) (int, error) {
 	vpcPeerID, err := installHostPeerVPC(config)
 	if err != nil {
-		log.Printf("%#v\n", err)
-		v = 1
+		return microerror.Mask(err)
+	} else {
+		defer teardownHostPeerVPC(config)
 	}
 
 	err = config.Host.Setup()
 	if err != nil {
-		log.Printf("%#v\n", err)
-		v = 1
+		return microerror.Mask(err)
+	} else if !env.KeepResources() && !env.CircleCI() {
+		config.Host.Teardown()
 	}
 
 	err = installResources(config, vpcPeerID)
 	if err != nil {
-		log.Printf("%#v\n", err)
-		v = 1
+		return microerror.Mask(err)
+	} else if !env.KeepResources() && !env.CircleCI() {
+		defer teardownResources(config)
 	}
 
-	if v == 0 {
-		err = config.Guest.Setup()
-		if err != nil {
-			log.Printf("%#v\n", err)
-			v = 1
-		}
+	err = config.Guest.Setup()
+	if err != nil {
+		return microerror.Mask(err)
 	}
 
-	if v == 0 {
-		v = m.Run()
-	}
+	code := m.Run()
 
-	if os.Getenv("KEEP_RESOURCES") != "true" {
+	if !env.KeepResources() {
 		name := "aws-operator"
 		customResource := "awsconfig"
 		logEntry := "removed finalizer 'operatorkit.giantswarm.io/aws-operator'"
-		config.Host.DeleteGuestCluster(name, customResource, logEntry)
 
-		// only do full teardown when not on CI
-		if os.Getenv("CIRCLECI") != "true" {
-			err := teardown(config)
-			if err != nil {
-				log.Printf("%#v\n", err)
-				v = 1
-			}
-			// TODO there should be error handling for the framework teardown.
-			config.Host.Teardown()
+		err := config.Host.DeleteGuestCluster(name, customResource, logEntry)
+		if err != nil {
+			return microerror.Mask(err)
 		}
 	}
 
-	os.Exit(v)
+	return code, nil
 }
 
 func installAWSOperator(config Config) error {
