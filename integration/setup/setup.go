@@ -59,7 +59,7 @@ func setup(m *testing.M, config Config) (int, error) {
 	if err != nil {
 		return 0, microerror.Mask(err)
 	} else if !env.KeepResources() && !env.CircleCI() {
-		config.Host.Teardown()
+		defer config.Host.Teardown()
 	}
 
 	err = installResources(ctx, config, vpcPeerID)
