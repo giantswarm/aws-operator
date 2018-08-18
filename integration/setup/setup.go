@@ -5,7 +5,6 @@ package setup
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"testing"
 
@@ -16,7 +15,6 @@ import (
 	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
 	"github.com/giantswarm/e2etemplates/pkg/e2etemplates"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/micrologger"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -28,66 +26,69 @@ const (
 	awsResourceValuesFile = "/tmp/aws-operator-values.yaml"
 	credentialName        = "credential-default"
 	credentialNamespace   = "giantswarm"
+	provider              = "aws"
 )
 
 func Setup(ctx context.Context, m *testing.M, config Config) {
 	err := config.Validate()
 	if err != nil {
-		return microerror.Mask(err)
+		config.Logger.LogCtx(ctx, "level", "error", "message", "error during e2e config validation", "stack", fmt.Sprintf("%#v", err))
+		os.Exit(1)
 	}
 
 	exitCode, err := setup(m, config)
 	if err != nil {
-		config.Logger.LogCtx(ctx, "level", "error", "message", "e2e setup failed", "stack", fmt.Sprintf("%#v", err))
+		config.Logger.LogCtx(ctx, "level", "error", "message", "error during e2e setup", "stack", fmt.Sprintf("%#v", err))
 		os.Exit(1)
 	}
+
 	os.Exit(exitCode)
 }
 
 func setup(m *testing.M, config Config) (int, error) {
-	vpcPeerID, err := installHostPeerVPC(config)
+	ctx := context.Background()
+
+	vpcPeerID, err := installHostPeerVPC(ctx, config)
 	if err != nil {
-		return microerror.Mask(err)
+		return 0, microerror.Mask(err)
 	} else {
-		defer teardownHostPeerVPC(config)
+		defer teardownHostPeerVPC(ctx, config)
 	}
 
 	err = config.Host.Setup()
 	if err != nil {
-		return microerror.Mask(err)
+		return 0, microerror.Mask(err)
 	} else if !env.KeepResources() && !env.CircleCI() {
 		config.Host.Teardown()
 	}
 
-	err = installResources(config, vpcPeerID)
+	err = installResources(ctx, config, vpcPeerID)
 	if err != nil {
-		return microerror.Mask(err)
+		return 0, microerror.Mask(err)
 	} else if !env.KeepResources() && !env.CircleCI() {
-		defer teardownResources(config)
+		defer teardownResources(ctx, config)
 	}
 
 	err = config.Guest.Setup()
 	if err != nil {
-		return microerror.Mask(err)
+		return 0, microerror.Mask(err)
 	}
 
 	code := m.Run()
 
 	if !env.KeepResources() {
-		name := "aws-operator"
-		customResource := "awsconfig"
-		logEntry := "removed finalizer 'operatorkit.giantswarm.io/aws-operator'"
-
-		err := config.Host.DeleteGuestCluster(name, customResource, logEntry)
+		err := config.Host.DeleteGuestCluster(ctx, provider)
 		if err != nil {
-			return microerror.Mask(err)
+			return 0, microerror.Mask(err)
 		}
 	}
 
 	return code, nil
 }
 
-func installAWSOperator(config Config) error {
+func installAWSOperator(ctx context.Context, config Config) error {
+	config.Logger.LogCtx(ctx, "level", "debug", "message", "installing aws-operator")
+
 	var err error
 
 	var values string
@@ -125,6 +126,7 @@ func installAWSOperator(config Config) error {
 
 		values, err = chartvalues.NewAWSOperator(c)
 		if err != nil {
+			config.Logger.LogCtx(ctx, "level", "debug", "message", "did not install aws-operator")
 			return microerror.Mask(err)
 		}
 
@@ -132,12 +134,17 @@ func installAWSOperator(config Config) error {
 
 	err = config.Host.InstallBranchOperator("aws-operator", "awsconfig", values)
 	if err != nil {
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "did not install aws-operator")
 		return microerror.Mask(err)
 	}
+
+	config.Logger.LogCtx(ctx, "level", "debug", "message", "installed aws-operator")
 	return nil
 }
 
-func installAWSConfig(config Config, vpcPeerID string) error {
+func installAWSConfig(ctx context.Context, config Config, vpcPeerID string) error {
+	config.Logger.LogCtx(ctx, "level", "debug", "message", "installing awsconfig")
+
 	var err error
 
 	var values string
@@ -160,30 +167,24 @@ func installAWSConfig(config Config, vpcPeerID string) error {
 
 		values, err = chartvalues.NewAPIExtensionsAWSConfigE2E(c)
 		if err != nil {
+			config.Logger.LogCtx(ctx, "level", "debug", "message", "did not install awsconfig")
 			return microerror.Mask(err)
 		}
 	}
 
 	err = config.Host.InstallResource("apiextensions-aws-config-e2e", values, ":stable")
 	if err != nil {
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "did not install awsconfig")
 		return microerror.Mask(err)
 	}
 
+	config.Logger.LogCtx(ctx, "level", "debug", "message", "installed awsconfig")
 	return nil
 }
 
-func installCredential(config Config) error {
+func installCredential(ctx context.Context, config Config) error {
+	config.Logger.LogCtx(ctx, "level", "debug", "message", "installing credential secret")
 	var err error
-
-	var l micrologger.Logger
-	{
-		c := micrologger.Config{}
-
-		l, err = micrologger.New(c)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
 
 	o := func() error {
 		k8sClient := config.Host.K8sClient()
@@ -207,17 +208,19 @@ func installCredential(config Config) error {
 		return nil
 	}
 	b := backoff.NewExponential(framework.ShortMaxWait, framework.ShortMaxInterval)
-	n := backoff.NewNotifier(l, context.Background())
+	n := backoff.NewNotifier(config.Logger, context.Background())
 	err = backoff.RetryNotify(o, b, n)
 	if err != nil {
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "did not install credential secret")
 		return microerror.Mask(err)
 	}
 
+	config.Logger.LogCtx(ctx, "level", "debug", "message", "installed credential secret")
 	return nil
 }
 
-func installHostPeerVPC(config Config) (string, error) {
-	log.Printf("creating Host Peer VPC stack")
+func installHostPeerVPC(ctx context.Context, config Config) (string, error) {
+	config.Logger.LogCtx(ctx, "level", "debug", "message", "creating host peer VPC stack")
 
 	os.Setenv("AWS_ROUTE_TABLE_0", env.AWSRouteTable0())
 	os.Setenv("AWS_ROUTE_TABLE_1", env.AWSRouteTable1())
@@ -230,18 +233,21 @@ func installHostPeerVPC(config Config) (string, error) {
 	}
 	_, err := config.AWSClient.CloudFormation.CreateStack(stackInput)
 	if err != nil {
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "did not create host peer VPC stack")
 		return "", microerror.Mask(err)
 	}
 	err = config.AWSClient.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
 		StackName: aws.String(stackName),
 	})
 	if err != nil {
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "did not create host peer VPC stack")
 		return "", microerror.Mask(err)
 	}
 	describeOutput, err := config.AWSClient.CloudFormation.DescribeStacks(&cloudformation.DescribeStacksInput{
 		StackName: aws.String(stackName),
 	})
 	if err != nil {
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "did not create host peer VPC stack")
 		return "", microerror.Mask(err)
 	}
 	var vpcPeerID string
@@ -251,11 +257,12 @@ func installHostPeerVPC(config Config) (string, error) {
 			break
 		}
 	}
-	log.Printf("created Host Peer VPC stack")
+
+	config.Logger.LogCtx(ctx, "level", "debug", "message", "created host peer VPC stack")
 	return vpcPeerID, nil
 }
 
-func installResources(config Config, vpcPeerID string) error {
+func installResources(ctx context.Context, config Config, vpcPeerID string) error {
 	var err error
 
 	{
@@ -271,7 +278,7 @@ func installResources(config Config, vpcPeerID string) error {
 	}
 
 	{
-		err = installAWSOperator(config)
+		err = installAWSOperator(ctx, config)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -282,14 +289,14 @@ func installResources(config Config, vpcPeerID string) error {
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		err = installCredential(config)
+		err = installCredential(ctx, config)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 	}
 
 	{
-		err = installAWSConfig(config, vpcPeerID)
+		err = installAWSConfig(ctx, config, vpcPeerID)
 		if err != nil {
 			return microerror.Mask(err)
 		}

@@ -118,7 +118,7 @@ func ClusterID() string {
 }
 
 func KeepResources() bool {
-	return string.ToLower(keepResources) == "true"
+	return strings.ToLower(keepResources) == "true"
 }
 
 func GithubToken() string {

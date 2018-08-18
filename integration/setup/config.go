@@ -11,20 +11,20 @@ type Config struct {
 	AWSClient *awsclient.Client
 	Guest     *framework.Guest
 	Host      *framework.Host
-	Logger    *micrologger.Logger
+	Logger    micrologger.Logger
 }
 
 func (c Config) Validate() error {
-	if config.AWSClient == nil {
+	if c.AWSClient == nil {
 		return microerror.Maskf(invalidConfigError, "%T.AWSClient must not be empty", c)
 	}
-	if config.Guest == nil {
+	if c.Guest == nil {
 		return microerror.Maskf(invalidConfigError, "%T.Guest must not be empty", c)
 	}
-	if config.Host == nil {
+	if c.Host == nil {
 		return microerror.Maskf(invalidConfigError, "%T.Host must not be empty", c)
 	}
-	if config.Logger == nil {
+	if c.Logger == nil {
 		return microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", c)
 	}
 
