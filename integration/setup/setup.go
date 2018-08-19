@@ -36,6 +36,12 @@ func Setup(m *testing.M, config Config) {
 	var v int
 	var err error
 
+	err = config.Validate()
+	if err != nil {
+		log.Printf("%#v\n", err)
+		os.Exit(1)
+	}
+
 	vpcPeerID, err := installHostPeerVPC(config)
 	if err != nil {
 		log.Printf("%#v\n", err)
@@ -92,7 +98,7 @@ func installAWSOperator(config Config) error {
 		c := chartvalues.AWSOperatorConfig{
 			Provider: chartvalues.AWSOperatorConfigProvider{
 				AWS: chartvalues.AWSOperatorConfigProviderAWS{
-					Encrypter: "kms",
+					Encrypter: config.Encrypter,
 					Region:    env.AWSRegion(),
 				},
 			},

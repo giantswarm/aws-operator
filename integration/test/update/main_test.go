@@ -110,6 +110,8 @@ func TestMain(m *testing.M) {
 			AWSClient: c,
 			Guest:     g,
 			Host:      h,
+
+			Encrypter: "kms",
 		}
 
 		setup.Setup(m, c)

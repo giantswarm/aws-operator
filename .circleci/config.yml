@@ -138,6 +138,32 @@ jobs:
 
 
 
+  e2eTestCurPRVaultEncrypter:
+    environment:
+      TESTED_VERSION: "current"
+      TEST_DIR: "integration/test/vaultencrypter"
+    <<: *e2eTest
+
+  e2eTestCurMasterVaultEncrypter:
+    environment:
+      TESTED_VERSION: "current"
+      TEST_DIR: "integration/test/vaultencrypter"
+    <<: *e2eTest
+
+  e2eTestWIPPRVaultEncrypter:
+    environment:
+      TESTED_VERSION: "wip"
+      TEST_DIR: "integration/test/vaultencrypter"
+    <<: *e2eTest
+
+  e2eTestWIPMasterVaultEncrypter:
+    environment:
+      TESTED_VERSION: "wip"
+      TEST_DIR: "integration/test/vaultencrypter"
+    <<: *e2eTest
+
+
+
 workflows:
   version: 2
   build_e2e:
@@ -227,3 +253,24 @@ workflows:
       - e2eTestCurPRUpdate:
           requires:
           - hold
+
+
+
+      - e2eTestCurPRVaultEncrypter:
+          requires:
+          - hold
+      - e2eTestWIPPRVaultEncrypter:
+          requires:
+          - hold
+      - e2eTestCurMasterVaultEncrypter:
+          filters:
+            branches:
+              only: master
+          requires:
+          - build
+      - e2eTestWIPMasterVaultEncrypter:
+          filters:
+            branches:
+              only: master
+          requires:
+          - build

@@ -1,14 +1,12 @@
 // +build k8srequired
 
-package clusterstate
+package vaultencrypter
 
 import (
 	"testing"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
-	e2eclient "github.com/giantswarm/e2eclients/aws"
-	"github.com/giantswarm/e2etests/clusterstate"
-	"github.com/giantswarm/e2etests/clusterstate/provider"
+	"github.com/giantswarm/e2eclients/aws"
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/integration/env"
@@ -16,10 +14,9 @@ import (
 )
 
 var (
-	c  *e2eclient.Client
-	cs *clusterstate.ClusterState
-	g  *framework.Guest
-	h  *framework.Host
+	c *aws.Client
+	g *framework.Guest
+	h *framework.Host
 )
 
 func init() {
@@ -64,37 +61,7 @@ func init() {
 	}
 
 	{
-		c, err = e2eclient.NewClient()
-		if err != nil {
-			panic(err.Error())
-		}
-	}
-
-	var p *provider.AWS
-	{
-
-		ac := provider.AWSConfig{
-			AWSClient:     c,
-			HostFramework: h,
-			Logger:        l,
-
-			ClusterID: env.ClusterID(),
-		}
-
-		p, err = provider.NewAWS(ac)
-		if err != nil {
-			panic(err.Error())
-		}
-	}
-
-	{
-		cc := clusterstate.Config{
-			GuestFramework: g,
-			Logger:         l,
-			Provider:       p,
-		}
-
-		cs, err = clusterstate.New(cc)
+		c, err = aws.NewClient()
 		if err != nil {
 			panic(err.Error())
 		}
@@ -110,7 +77,7 @@ func TestMain(m *testing.M) {
 			Guest:     g,
 			Host:      h,
 
-			Encrypter: "kms",
+			Encrypter: "vault",
 		}
 
 		setup.Setup(m, c)
