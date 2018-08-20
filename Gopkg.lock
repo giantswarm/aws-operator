@@ -283,14 +283,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:943b115ad0bf540f2f70bd77ef9c121e24e6d84fb4f7682856cd738fc9bb8de1"
+  digest = "1:171cfb76860fd84c1637a1f2f01659c1ef637e15f28d8281068cb85125415096"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
     "pkg/harness",
   ]
   pruneopts = "UT"
-  revision = "e4b3a2c22571076a898e46873b392382507bd223"
+  revision = "356ee815b2f63562157d4f30149f7e8b19ae2a74"
 
 [[projects]]
   branch = "master"
