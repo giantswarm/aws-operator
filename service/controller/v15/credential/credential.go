@@ -62,7 +62,14 @@ func readCredential(k8sClient kubernetes.Interface, obj interface{}) (*v1.Secret
 	}
 
 	credentialName := key.CredentialName(customObject)
+	if credentialName == "" {
+		return nil, microerror.Mask(credentialNameEmpty)
+	}
+
 	credentialNamespace := key.CredentialNamespace(customObject)
+	if credentialName == "" {
+		return nil, microerror.Mask(credentialNamespaceEmpty)
+	}
 
 	credential, err := k8sClient.CoreV1().Secrets(credentialNamespace).Get(credentialName, apismetav1.GetOptions{})
 	if err != nil {

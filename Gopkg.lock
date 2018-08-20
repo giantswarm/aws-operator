@@ -283,14 +283,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:b09f24f56fefce552b8c6fb512f79c4ca16425d29bc07f7afb5355080f54f5ba"
+  digest = "1:171cfb76860fd84c1637a1f2f01659c1ef637e15f28d8281068cb85125415096"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
     "pkg/harness",
   ]
   pruneopts = "UT"
-  revision = "9218541e7e6b23dbac5bca8478a34043173196f6"
+  revision = "356ee815b2f63562157d4f30149f7e8b19ae2a74"
 
 [[projects]]
   branch = "master"
@@ -305,11 +305,15 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:671c20dfc353ea34e86a15ff48d688d13528c478702f245afe091e1640374578"
+  digest = "1:9116ec6d908b1dbb5b980c2805b1df5f1d8006e330399c34bfda9b8a25635f47"
   name = "github.com/giantswarm/e2etemplates"
-  packages = ["pkg/e2etemplates"]
+  packages = [
+    "internal/render",
+    "pkg/chartvalues",
+    "pkg/e2etemplates",
+  ]
   pruneopts = "UT"
-  revision = "cb44aefe3ea5b72262e2342cc6172297a5856c0c"
+  revision = "2d78ba87e4847f916732d40333b5bebd36274417"
 
 [[projects]]
   branch = "master"
@@ -1639,6 +1643,7 @@
     "github.com/giantswarm/certs/legacy/legacytest",
     "github.com/giantswarm/e2e-harness/pkg/framework",
     "github.com/giantswarm/e2eclients/aws",
+    "github.com/giantswarm/e2etemplates/pkg/chartvalues",
     "github.com/giantswarm/e2etemplates/pkg/e2etemplates",
     "github.com/giantswarm/e2etests/clusterstate",
     "github.com/giantswarm/e2etests/clusterstate/provider",
