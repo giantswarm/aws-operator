@@ -12,7 +12,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v15/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/v15/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v15/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v15/key"
 )
@@ -127,14 +126,14 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		MasterImageID:              imageID,
 		MasterInstanceResourceName: key.MasterInstanceResourceName(customObject),
 		MasterInstanceType:         key.MasterInstanceType(customObject),
-		MasterCloudConfigVersion:   cloudconfig.CloudConfigVersion,
+		MasterCloudConfigVersion:   key.CloudConfigVersion,
 		MasterInstanceMonitoring:   false,
 
 		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
 		WorkerImageID:            imageID,
 		WorkerInstanceMonitoring: true,
 		WorkerInstanceType:       key.WorkerInstanceType(customObject),
-		WorkerCloudConfigVersion: cloudconfig.CloudConfigVersion,
+		WorkerCloudConfigVersion: key.CloudConfigVersion,
 
 		VersionBundleVersion: key.VersionBundleVersion(customObject),
 	}
@@ -231,7 +230,7 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		t.Fatal("WorkerInstanceMonitoring output element not found")
 	}
 
-	if !strings.Contains(body, "Value: "+cloudconfig.CloudConfigVersion) {
+	if !strings.Contains(body, "Value: "+key.CloudConfigVersion) {
 		fmt.Println(body)
 		t.Fatal("output element not found")
 	}
@@ -526,14 +525,14 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 		MasterImageID:              imageID,
 		MasterInstanceResourceName: key.MasterInstanceResourceName(customObject),
 		MasterInstanceType:         key.MasterInstanceType(customObject),
-		MasterCloudConfigVersion:   cloudconfig.CloudConfigVersion,
+		MasterCloudConfigVersion:   key.CloudConfigVersion,
 		MasterInstanceMonitoring:   false,
 
 		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
 		WorkerImageID:            imageID,
 		WorkerInstanceMonitoring: true,
 		WorkerInstanceType:       key.WorkerInstanceType(customObject),
-		WorkerCloudConfigVersion: cloudconfig.CloudConfigVersion,
+		WorkerCloudConfigVersion: key.CloudConfigVersion,
 
 		VersionBundleVersion: key.VersionBundleVersion(customObject),
 	}
@@ -653,14 +652,14 @@ func TestMainGuestTemplateChinaRegion(t *testing.T) {
 		MasterImageID:              imageID,
 		MasterInstanceResourceName: key.MasterInstanceResourceName(customObject),
 		MasterInstanceType:         key.MasterInstanceType(customObject),
-		MasterCloudConfigVersion:   cloudconfig.CloudConfigVersion,
+		MasterCloudConfigVersion:   key.CloudConfigVersion,
 		MasterInstanceMonitoring:   false,
 
 		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
 		WorkerImageID:            imageID,
 		WorkerInstanceMonitoring: true,
 		WorkerInstanceType:       key.WorkerInstanceType(customObject),
-		WorkerCloudConfigVersion: cloudconfig.CloudConfigVersion,
+		WorkerCloudConfigVersion: key.CloudConfigVersion,
 
 		VersionBundleVersion: key.VersionBundleVersion(customObject),
 	}

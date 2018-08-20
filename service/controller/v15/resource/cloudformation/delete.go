@@ -22,14 +22,6 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		return microerror.Mask(err)
 	}
 
-	if stackStateToDelete.Status == cloudformation.ResourceStatusUpdateInProgress {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "cannot delete CF stacks due to stack state transitioning")
-
-		// TODO control flow via more proper mechanism via something like the
-		// context like it is done for cancelation already.
-		return microerror.Maskf(deletionMustBeRetriedError, "stack state is transitioning")
-	}
-
 	if stackStateToDelete.Name != "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting the guest cluster main stack")
 
@@ -103,21 +95,9 @@ func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desir
 	if err != nil {
 		return StackState{}, microerror.Mask(err)
 	}
-	desiredStackState, err := toStackState(desiredState)
-	if err != nil {
-		return StackState{}, microerror.Mask(err)
-	}
 
-	// For deletion we need the current and desired state in order to process it
-	// reliable. There are cases in which the current state does not contain a
-	// name because of stack state transitions but provides the stack status
-	// itself. The desired state never provides the current stack state in return.
-	// This is why we have to compute the delete state using both entities. Note
-	// that for deletion some properties of the stack state are omitted due to
-	// unimportance to the process.
 	deleteState := StackState{
-		Name:   desiredStackState.Name,
-		Status: currentStackState.Status,
+		Name: currentStackState.Name,
 	}
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "found the guest cluster main stack that has to be deleted")

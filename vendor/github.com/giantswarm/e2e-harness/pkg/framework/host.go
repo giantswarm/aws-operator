@@ -2,6 +2,7 @@ package framework
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -11,12 +12,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
@@ -26,29 +28,35 @@ import (
 	"github.com/giantswarm/e2e-harness/pkg/harness"
 )
 
+const (
+	defaultNamespace = "default"
+)
+
 type HostConfig struct {
-	Backoff *backoff.ExponentialBackOff
+	Backoff backoff.Interface
 	Logger  micrologger.Logger
 
-	ClusterID  string
-	VaultToken string
+	ClusterID       string
+	TargetNamespace string
+	VaultToken      string
 }
 
 type Host struct {
-	backoff *backoff.ExponentialBackOff
+	backoff backoff.Interface
 	logger  micrologger.Logger
 
 	g8sClient  *versioned.Clientset
 	k8sClient  kubernetes.Interface
 	restConfig *rest.Config
 
-	clusterID  string
-	vaultToken string
+	clusterID       string
+	targetNamespace string
+	vaultToken      string
 }
 
 func NewHost(c HostConfig) (*Host, error) {
 	if c.Backoff == nil {
-		c.Backoff = NewExponentialBackoff(ShortMaxWait, backoff.DefaultMaxInterval)
+		c.Backoff = backoff.NewExponential(ShortMaxWait, 60*time.Second)
 	}
 	if c.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", c)
@@ -56,6 +64,9 @@ func NewHost(c HostConfig) (*Host, error) {
 
 	if c.ClusterID == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ClusterID must not be empty", c)
+	}
+	if c.TargetNamespace == "" {
+		c.TargetNamespace = defaultNamespace
 	}
 	if c.VaultToken == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.VaultToken must not be empty", c)
@@ -82,8 +93,9 @@ func NewHost(c HostConfig) (*Host, error) {
 		k8sClient:  k8sClient,
 		restConfig: restConfig,
 
-		clusterID:  c.ClusterID,
-		vaultToken: c.VaultToken,
+		clusterID:       c.ClusterID,
+		targetNamespace: c.TargetNamespace,
+		vaultToken:      c.VaultToken,
 	}
 
 	return h, nil
@@ -157,7 +169,7 @@ func (h *Host) CreateNamespace(ns string) error {
 		return nil
 	}
 
-	n := newNotify("namespace active")
+	n := backoff.NewNotifier(h.logger, context.Background())
 	err = backoff.RetryNotify(o, h.backoff, n)
 	if err != nil {
 		return microerror.Mask(err)
@@ -166,17 +178,81 @@ func (h *Host) CreateNamespace(ns string) error {
 	return nil
 }
 
-func (h *Host) DeleteGuestCluster(name, cr, logEntry string) error {
-	if err := runCmd(fmt.Sprintf("kubectl delete %s %s", cr, h.clusterID)); err != nil {
-		return microerror.Mask(err)
+func (h *Host) DeleteGuestCluster(ctx context.Context, provider string) error {
+	{
+		h.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("triggering deletion of CR for guest cluster %#q", h.clusterID))
+
+		o := func() error {
+			var err error
+
+			switch provider {
+			case "aws":
+				err = h.g8sClient.ProviderV1alpha1().AWSConfigs("default").Delete(h.clusterID, &metav1.DeleteOptions{})
+			case "azure":
+				err = h.g8sClient.ProviderV1alpha1().AzureConfigs("default").Delete(h.clusterID, &metav1.DeleteOptions{})
+			case "kvm":
+				err = h.g8sClient.ProviderV1alpha1().KVMConfigs("default").Delete(h.clusterID, &metav1.DeleteOptions{})
+			default:
+				return microerror.Maskf(unknownProviderError, "%#q not recognized", provider)
+			}
+
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			return nil
+		}
+
+		n := backoff.NewNotifier(h.logger, context.Background())
+		err := backoff.RetryNotify(o, h.backoff, n)
+		if apierrors.IsNotFound(err) {
+			h.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not trigger deletion of CR for guest cluster %#q", h.clusterID))
+			h.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("CR for guest cluster %#q does not exist", h.clusterID))
+		} else if err != nil {
+			h.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not trigger deletion of CR for guest cluster %#q", h.clusterID))
+			return microerror.Mask(err)
+		}
+
+		h.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("triggered deletion of CR for guest cluster %#q", h.clusterID))
 	}
 
-	operatorPodName, err := h.PodName("giantswarm", fmt.Sprintf("app=%s", name))
-	if err != nil {
-		return microerror.Mask(err)
+	{
+		h.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensuring deletion of CR for guest cluster %#q", h.clusterID))
+
+		o := func() error {
+			var err error
+
+			switch provider {
+			case "aws":
+				_, err = h.g8sClient.ProviderV1alpha1().AWSConfigs("default").Get(h.clusterID, metav1.GetOptions{})
+			case "azure":
+				_, err = h.g8sClient.ProviderV1alpha1().AzureConfigs("default").Get(h.clusterID, metav1.GetOptions{})
+			case "kvm":
+				_, err = h.g8sClient.ProviderV1alpha1().KVMConfigs("default").Get(h.clusterID, metav1.GetOptions{})
+			default:
+				return microerror.Maskf(unknownProviderError, "%#q not recognized", provider)
+			}
+
+			if apierrors.IsNotFound(err) {
+				return nil
+			} else if err != nil {
+				return microerror.Mask(err)
+			} else {
+				return microerror.Maskf(clusterDeletionError, "guest cluster %#q CR still exists", h.clusterID)
+			}
+		}
+
+		b := backoff.NewExponential(LongMaxWait, 60*time.Second)
+		n := backoff.NewNotifier(h.logger, context.Background())
+		err := backoff.RetryNotify(o, b, n)
+		if err != nil {
+			h.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not ensure deletion of CR for guest cluster %#q", h.clusterID))
+			return microerror.Mask(err)
+		}
+
+		h.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensured deletion of CR for guest cluster %#q", h.clusterID))
 	}
 
-	return h.WaitForPodLog("giantswarm", logEntry, operatorPodName)
+	return nil
 }
 
 // G8sClient returns the host cluster framework's Giant Swarm client.
@@ -237,29 +313,31 @@ func (h *Host) InstallResource(name, values, version string, conditions ...func(
 		return microerror.Mask(err)
 	}
 
-	installCmd := fmt.Sprintf("registry install quay.io/giantswarm/%[1]s-chart%[2]s -- -n %[1]s --values %[3]s", name, version, tmpfile.Name())
-	deleteCmd := fmt.Sprintf("delete --purge %s", name)
-	operation := func() error {
-		// NOTE we ignore errors here because we cannot get really useful error
-		// handling done. This here should anyway only be a quick fix until we use
-		// the helm client lib. Then error handling will be better.
-		HelmCmd(deleteCmd)
+	{
+		installCmd := fmt.Sprintf("registry install quay.io/giantswarm/%[1]s-chart%[2]s -- -n %[4]s-%[1]s --namespace %[4]s --values %[3]s --set namespace=%[4]s", name, version, tmpfile.Name(), h.targetNamespace)
+		deleteCmd := fmt.Sprintf("delete --purge %s-%s", h.targetNamespace, name)
+		o := func() error {
+			// NOTE we ignore errors here because we cannot get really useful error
+			// handling done. This here should anyway only be a quick fix until we use
+			// the helm client lib. Then error handling will be better.
+			HelmCmd(deleteCmd)
 
-		err := HelmCmd(installCmd)
+			err := HelmCmd(installCmd)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			return nil
+		}
+		n := backoff.NewNotifier(h.logger, context.Background())
+		err = backoff.RetryNotify(o, h.backoff, n)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-
-		return nil
-	}
-	notify := newNotify(name + " install")
-	err = backoff.RetryNotify(operation, h.backoff, notify)
-	if err != nil {
-		return microerror.Mask(err)
 	}
 
-	for i, c := range conditions {
-		n := newNotify(fmt.Sprintf("condition %d active", i))
+	for _, c := range conditions {
+		n := backoff.NewNotifier(h.logger, context.Background())
 		err = backoff.RetryNotify(c, h.backoff, n)
 		if err != nil {
 			return microerror.Mask(err)
@@ -277,9 +355,9 @@ func (h *Host) InstallCertResource() error {
 			// NOTE we ignore errors here because we cannot get really useful error
 			// handling done. This here should anyway only be a quick fix until we use
 			// the helm client lib. Then error handling will be better.
-			HelmCmd("delete --purge cert-config-e2e")
+			HelmCmd(fmt.Sprintf("delete --purge %s-cert-config-e2e", h.targetNamespace))
 
-			cmdStr := fmt.Sprintf("registry install quay.io/giantswarm/apiextensions-cert-config-e2e-chart:stable -- -n cert-config-e2e --set commonDomain=${COMMON_DOMAIN} --set clusterName=%s", h.clusterID)
+			cmdStr := fmt.Sprintf("registry install quay.io/giantswarm/apiextensions-cert-config-e2e-chart:stable -- -n %[2]s-cert-config-e2e --set commonDomain=${COMMON_DOMAIN} --set clusterName=%[1]s --set namespace=%[2]s --namespace %[2]s", h.clusterID, h.targetNamespace)
 			err := HelmCmd(cmdStr)
 			if err != nil {
 				return microerror.Mask(err)
@@ -287,8 +365,8 @@ func (h *Host) InstallCertResource() error {
 
 			return nil
 		}
-		b := NewExponentialBackoff(ShortMaxWait, ShortMaxInterval)
-		n := newNotify("cert-config-e2e-chart install")
+		b := backoff.NewExponential(ShortMaxWait, ShortMaxInterval)
+		n := backoff.NewNotifier(h.logger, context.Background())
 		err := backoff.RetryNotify(o, b, n)
 		if err != nil {
 			return microerror.Mask(err)
@@ -311,7 +389,7 @@ func (h *Host) InstallCertResource() error {
 
 			return nil
 		}
-		b := NewExponentialBackoff(ShortMaxWait, ShortMaxInterval)
+		b := backoff.NewExponential(ShortMaxWait, ShortMaxInterval)
 		n := func(err error, delay time.Duration) {
 			h.logger.Log("level", "debug", "message", err.Error())
 		}
@@ -366,6 +444,10 @@ func (h *Host) Setup() error {
 	}
 
 	return nil
+}
+
+func (h *Host) TargetNamespace() string {
+	return h.targetNamespace
 }
 
 func (h *Host) Teardown() {
@@ -426,30 +508,34 @@ func (h *Host) crd(crdName string) func() error {
 }
 
 func (h *Host) installVault() error {
-	operation := func() error {
-		// NOTE we ignore errors here because we cannot get really useful error
-		// handling done. This here should anyway only be a quick fix until we use
-		// the helm client lib. Then error handling will be better.
-		HelmCmd("delete --purge vault")
+	{
+		o := func() error {
+			// NOTE we ignore errors here because we cannot get really useful error
+			// handling done. This here should anyway only be a quick fix until we use
+			// the helm client lib. Then error handling will be better.
+			HelmCmd("delete --purge vault")
 
-		err := HelmCmd(fmt.Sprintf("registry install quay.io/giantswarm/vaultlab-chart:stable -- --set vaultToken=%s -n vault", h.vaultToken))
+			err := HelmCmd(fmt.Sprintf("registry install quay.io/giantswarm/vaultlab-chart:stable -- --set vaultToken=%s -n vault", h.vaultToken))
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			return nil
+		}
+		n := backoff.NewNotifier(h.logger, context.Background())
+		err := backoff.RetryNotify(o, h.backoff, n)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-
-		return nil
-	}
-	notify := newNotify("vaultlab-chart install")
-	err := backoff.RetryNotify(operation, h.backoff, notify)
-	if err != nil {
-		return microerror.Mask(err)
 	}
 
-	o := h.runningPod("default", "app=vault")
-	n := newNotify("vault pod running")
-	err = backoff.RetryNotify(o, h.backoff, n)
-	if err != nil {
-		return microerror.Mask(err)
+	{
+		o := h.runningPod("default", "app=vault")
+		n := backoff.NewNotifier(h.logger, context.Background())
+		err := backoff.RetryNotify(o, h.backoff, n)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
 	return nil
@@ -471,7 +557,7 @@ func (h *Host) runningPod(namespace, labelSelector string) func() error {
 		pod := pods.Items[0]
 		phase := pod.Status.Phase
 		if phase != v1.PodRunning {
-			return microerror.Maskf(unexpectedStatusPhaseError, "current status: %s", string(phase))
+			return microerror.Maskf(unexpectedStatusPhaseError, "pod selected with %q is in phase %q instead of %q", labelSelector, string(phase), string(v1.PodRunning))
 		}
 		return nil
 	}

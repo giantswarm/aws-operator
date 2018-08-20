@@ -33,7 +33,7 @@ func Test_Resource_Cloudformation_newDelete(t *testing.T) {
 			expectedStackName: "",
 		},
 		{
-			description: "case 1: current state empty, desired state not empty, expected desired state",
+			description: "case 1: current state not empty, desired state empty but different, expected current state",
 			obj: &v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
@@ -41,14 +41,14 @@ func Test_Resource_Cloudformation_newDelete(t *testing.T) {
 					},
 				},
 			},
-			currentState: StackState{},
-			desiredState: StackState{
-				Name: "desired",
+			currentState: StackState{
+				Name: "current",
 			},
-			expectedStackName: "desired",
+			desiredState:      StackState{},
+			expectedStackName: "current",
 		},
 		{
-			description: "case 2: current state not empty, desired state not empty but different, expected desired state",
+			description: "case 2: current state not empty, desired state not empty but different, expected current state",
 			obj: &v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
@@ -62,7 +62,7 @@ func Test_Resource_Cloudformation_newDelete(t *testing.T) {
 			desiredState: StackState{
 				Name: "desired",
 			},
-			expectedStackName: "desired",
+			expectedStackName: "current",
 		},
 		{
 			description: "case 3: current state not empty, desired state not empty but equal, expected desired state",

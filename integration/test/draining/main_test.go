@@ -64,5 +64,13 @@ func TestMain(m *testing.M) {
 		}
 	}
 
-	setup.WrapTestMain(c, g, h, m)
+	{
+		c := setup.Config{
+			AWSClient: c,
+			Guest:     g,
+			Host:      h,
+		}
+
+		setup.Setup(m, c)
+	}
 }

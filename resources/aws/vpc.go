@@ -1,12 +1,13 @@
 package aws
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/cenkalti/backoff"
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 )
@@ -138,7 +139,7 @@ func (v *VPC) Delete() error {
 		return microerror.Mask(err)
 	}
 
-	deleteOperation := func() error {
+	o := func() error {
 		if _, err := v.Clients.EC2.DeleteVpc(&ec2.DeleteVpcInput{
 			VpcId: vpc.VpcId,
 		}); err != nil {
@@ -146,13 +147,10 @@ func (v *VPC) Delete() error {
 		}
 		return nil
 	}
-
-	// Increase backoff to allow time for the Cloud Formation stack to delete.
-	deleteBackoff := NewCustomExponentialBackoff()
-	deleteBackoff.MaxElapsedTime = 8 * time.Minute
-
-	deleteNotify := NewNotify(v.Logger, "deleting vpc")
-	if err := backoff.RetryNotify(deleteOperation, deleteBackoff, deleteNotify); err != nil {
+	b := backoff.NewExponential(8*time.Minute, 30*time.Second)
+	n := backoff.NewNotifier(v.Logger, context.Background())
+	err = backoff.RetryNotify(o, b, n)
+	if err != nil {
 		return microerror.Mask(err)
 	}
 
