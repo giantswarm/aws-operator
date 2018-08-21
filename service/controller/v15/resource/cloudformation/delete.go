@@ -41,6 +41,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 
 		stackName := aws.String(key.MainGuestStackName(customObject))
 
+		r.logger.LogCtx(ctx, "level", "debug", "message", "disable protection guest main")
 		enableTerminationProtection := false
 		updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
 			EnableTerminationProtection: &enableTerminationProtection,
@@ -76,6 +77,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 
 		stackName := aws.String(key.MainHostPreStackName(customObject))
 
+		r.logger.LogCtx(ctx, "level", "debug", "message", "disable protection host pre")
 		enableTerminationProtection := false
 		updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
 			EnableTerminationProtection: &enableTerminationProtection,
@@ -104,6 +106,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 
 		stackName := aws.String(key.MainHostPostStackName(customObject))
 
+		r.logger.LogCtx(ctx, "level", "debug", "message", "disable protection host post")
 		enableTerminationProtection := false
 		updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
 			EnableTerminationProtection: &enableTerminationProtection,

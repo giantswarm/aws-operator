@@ -60,6 +60,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			return microerror.Mask(err)
 		}
 
+		r.logger.LogCtx(ctx, "level", "debug", "message", "enable protection guest main")
 		enableTerminationProtection := key.EnableTerminationProtection
 		updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
 			EnableTerminationProtection: &enableTerminationProtection,
@@ -202,6 +203,7 @@ func (r *Resource) createHostPreStack(ctx context.Context, customObject v1alpha1
 		return microerror.Mask(err)
 	}
 
+	r.logger.LogCtx(ctx, "level", "debug", "message", "enable protection host pre")
 	enableTerminationProtection := key.EnableTerminationProtection
 	updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
 		EnableTerminationProtection: &enableTerminationProtection,
@@ -265,6 +267,7 @@ func (r *Resource) createHostPostStack(ctx context.Context, customObject v1alpha
 		return microerror.Mask(err)
 	}
 
+	r.logger.LogCtx(ctx, "level", "debug", "message", "enable protection host post")
 	enableTerminationProtection := key.EnableTerminationProtection
 	updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
 		EnableTerminationProtection: &enableTerminationProtection,
