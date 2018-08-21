@@ -39,7 +39,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			EnableTerminationProtection: &enableTerminationProtection,
 			StackName:                   stackName,
 		}
-		_, err = r.hostClients.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
+		_, err = sc.AWSClient.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
 		if err != nil {
 			return microerror.Mask(err)
 		}
