@@ -60,17 +60,6 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "enable protection guest main")
-		enableTerminationProtection := key.EnableTerminationProtection
-		updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
-			EnableTerminationProtection: &enableTerminationProtection,
-			StackName:                   stackInput.StackName,
-		}
-		_, err = r.hostClients.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
 		ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 		defer cancel()
 
@@ -98,6 +87,17 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		} else if ctx.Err() != nil {
 			return microerror.Mask(ctx.Err())
 		} else if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "enable protection guest main")
+		enableTerminationProtection := key.EnableTerminationProtection
+		updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
+			EnableTerminationProtection: &enableTerminationProtection,
+			StackName:                   stackInput.StackName,
+		}
+		_, err = r.hostClients.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
+		if err != nil {
 			return microerror.Mask(err)
 		}
 
@@ -203,6 +203,13 @@ func (r *Resource) createHostPreStack(ctx context.Context, customObject v1alpha1
 		return microerror.Mask(err)
 	}
 
+	err = r.hostClients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
+		StackName: aws.String(stackName),
+	})
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	r.logger.LogCtx(ctx, "level", "debug", "message", "enable protection host pre")
 	enableTerminationProtection := key.EnableTerminationProtection
 	updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
@@ -210,13 +217,6 @@ func (r *Resource) createHostPreStack(ctx context.Context, customObject v1alpha1
 		StackName:                   aws.String(stackName),
 	}
 	_, err = r.hostClients.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	err = r.hostClients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
-		StackName: aws.String(stackName),
-	})
 	if err != nil {
 		return microerror.Mask(err)
 	}
