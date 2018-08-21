@@ -90,17 +90,6 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "enable protection guest main")
-		enableTerminationProtection := key.EnableTerminationProtection
-		updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
-			EnableTerminationProtection: &enableTerminationProtection,
-			StackName:                   stackInput.StackName,
-		}
-		_, err = r.hostClients.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
 		r.logger.LogCtx(ctx, "level", "debug", "message", "created the guest cluster main stack")
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not creating the guest cluster main stack")
@@ -156,6 +145,9 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		}
 
 		createState.SetTags(r.getCloudFormationTags(customObject))
+
+		enableTerminationProtection := key.EnableTerminationProtection
+		createState.EnableTerminationProtection = &enableTerminationProtection
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack does not have to be created")
 
@@ -178,9 +170,11 @@ func (r *Resource) createHostPreStack(ctx context.Context, customObject v1alpha1
 	if err != nil {
 		return microerror.Mask(err)
 	}
+	enableTerminationProtection := key.EnableTerminationProtection
 	createStack := &cloudformation.CreateStackInput{
-		StackName:    aws.String(stackName),
-		TemplateBody: aws.String(mainTemplate),
+		StackName:                   aws.String(stackName),
+		TemplateBody:                aws.String(mainTemplate),
+		EnableTerminationProtection: &enableTerminationProtection,
 		// CAPABILITY_NAMED_IAM is required for creating IAM roles (worker policy)
 		Capabilities: []*string{
 			aws.String(namedIAMCapability),
@@ -210,17 +204,6 @@ func (r *Resource) createHostPreStack(ctx context.Context, customObject v1alpha1
 		return microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "enable protection host pre")
-	enableTerminationProtection := key.EnableTerminationProtection
-	updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
-		EnableTerminationProtection: &enableTerminationProtection,
-		StackName:                   aws.String(stackName),
-	}
-	_, err = r.hostClients.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
 	r.logger.LogCtx(ctx, "level", "debug", "message", "created the host cluster pre cloud formation stack")
 
 	return nil
@@ -232,9 +215,11 @@ func (r *Resource) createHostPostStack(ctx context.Context, customObject v1alpha
 	if err != nil {
 		return microerror.Mask(err)
 	}
+	enableTerminationProtection := key.EnableTerminationProtection
 	createStack := &cloudformation.CreateStackInput{
-		StackName:    aws.String(stackName),
-		TemplateBody: aws.String(mainTemplate),
+		StackName:                   aws.String(stackName),
+		TemplateBody:                aws.String(mainTemplate),
+		EnableTerminationProtection: &enableTerminationProtection,
 	}
 	createStack.SetTags(r.getCloudFormationTags(customObject))
 
@@ -250,17 +235,6 @@ func (r *Resource) createHostPostStack(ctx context.Context, customObject v1alpha
 
 		return nil
 	} else if err != nil {
-		return microerror.Mask(err)
-	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", "enable protection host post")
-	enableTerminationProtection := key.EnableTerminationProtection
-	updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
-		EnableTerminationProtection: &enableTerminationProtection,
-		StackName:                   aws.String(stackName),
-	}
-	_, err = r.hostClients.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
-	if err != nil {
 		return microerror.Mask(err)
 	}
 
