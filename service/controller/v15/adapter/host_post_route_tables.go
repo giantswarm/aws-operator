@@ -113,6 +113,8 @@ func waitForPeeringConnectionID(cfg Config) (string, error) {
 		}
 		if len(output.VpcPeeringConnections) > 1 {
 			return microerror.Maskf(tooManyResultsError, "peering connections")
+		} else if len(output.VpcPeeringConnections) == 0 {
+			return microerror.Maskf(notFoundError, "peering connections")
 		}
 		peeringID = *output.VpcPeeringConnections[0].VpcPeeringConnectionId
 		return nil
