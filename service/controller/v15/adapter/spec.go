@@ -89,13 +89,19 @@ type StackState struct {
 	MasterImageID              string
 	MasterInstanceType         string
 	MasterInstanceResourceName string
-	MasterCloudConfigVersion   string
-	MasterInstanceMonitoring   bool
+	// TODO the cloud config versions shouldn't be injected here. These should
+	// actually always only be the ones the operator has hard coded. No other
+	// version should be used here ever.
+	MasterCloudConfigVersion string
+	MasterInstanceMonitoring bool
 
 	WorkerCount              string
 	WorkerImageID            string
 	WorkerInstanceMonitoring bool
 	WorkerInstanceType       string
+	// TODO the cloud config versions shouldn't be injected here. These should
+	// actually always only be the ones the operator has hard coded. No other
+	// version should be used here ever.
 	WorkerCloudConfigVersion string
 
 	VersionBundleVersion string
@@ -113,7 +119,8 @@ type CFClient interface {
 	WaitUntilStackCreateCompleteWithContext(ctx aws.Context, input *awscloudformation.DescribeStacksInput, opts ...request.WaiterOption) error
 }
 
-// EC2Client describes the methods required to be implemented by a EC2 AWS client.
+// EC2Client describes the methods required to be implemented by a EC2 AWS
+// client.
 type EC2Client interface {
 	DescribeAddresses(*ec2.DescribeAddressesInput) (*ec2.DescribeAddressesOutput, error)
 	DescribeSecurityGroups(*ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error)
@@ -123,34 +130,37 @@ type EC2Client interface {
 	DescribeVpcPeeringConnections(*ec2.DescribeVpcPeeringConnectionsInput) (*ec2.DescribeVpcPeeringConnectionsOutput, error)
 }
 
-// IAMClient describes the methods required to be implemented by a IAM AWS client.
+// IAMClient describes the methods required to be implemented by a IAM AWS
+// client.
 type IAMClient interface {
 	GetUser(*iam.GetUserInput) (*iam.GetUserOutput, error)
 	GetRole(*iam.GetRoleInput) (*iam.GetRoleOutput, error)
 }
 
-// KMSClient describes the methods required to be implemented by a KMS AWS client.
+// KMSClient describes the methods required to be implemented by a KMS AWS
+// client.
 type KMSClient interface {
 	DescribeKey(*kms.DescribeKeyInput) (*kms.DescribeKeyOutput, error)
 }
 
-// SmallCloudconfigConfig represents the data structure required for executing the
-// small cloudconfig template.
+// SmallCloudconfigConfig represents the data structure required for executing
+// the small cloudconfig template.
 type SmallCloudconfigConfig struct {
-	MachineType             string
-	Region                  string
-	S3Domain                string
-	S3URI                   string
-	CloudConfigVersion      string
-	AWSCliContainerRegistry string
+	Region    string
+	Registry  string
+	Role      string
+	S3HTTPURL string
+	S3URL     string
 }
 
-// ELBClient describes the methods required to be implemented by a ELB AWS client.
+// ELBClient describes the methods required to be implemented by a ELB AWS
+// client.
 type ELBClient interface {
 	DescribeLoadBalancers(*elb.DescribeLoadBalancersInput) (*elb.DescribeLoadBalancersOutput, error)
 }
 
-// STSClient describes the methods required to be implemented by a STS AWS client.
+// STSClient describes the methods required to be implemented by a STS AWS
+// client.
 type STSClient interface {
 	GetCallerIdentity(*sts.GetCallerIdentityInput) (*sts.GetCallerIdentityOutput, error)
 }

@@ -17,6 +17,10 @@ import (
 )
 
 const (
+	// CloudConfigVersion defines the version of k8scloudconfig in use.
+	// It is used in the main stack output and S3 object paths.
+	CloudConfigVersion = "v_3_4_0"
+
 	// CloudProviderTagName is used to add Cloud Provider tags to AWS resources.
 	CloudProviderTagName = "kubernetes.io/cluster/%s"
 
@@ -111,8 +115,13 @@ func BucketName(customObject v1alpha1.AWSConfig, accountID string) string {
 	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(customObject))
 }
 
-func BucketObjectName(templateVersion string, prefix string) string {
-	return fmt.Sprintf("cloudconfig/%s/%s", templateVersion, prefix)
+// BucketObjectName computes the S3 object path to the actual cloud config.
+//
+//     /version/3.4.0/cloudconfig/v_3_2_5/master
+//     /version/3.4.0/cloudconfig/v_3_2_5/worker
+//
+func BucketObjectName(customObject v1alpha1.AWSConfig, role string) string {
+	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", VersionBundleVersion(customObject), CloudConfigVersion, role)
 }
 
 func CredentialName(customObject v1alpha1.AWSConfig) string {
@@ -268,6 +277,10 @@ func IsChinaRegion(customObject v1alpha1.AWSConfig) bool {
 	return strings.HasPrefix(Region(customObject), "cn-")
 }
 
+func IsDeleted(customObject v1alpha1.AWSConfig) bool {
+	return customObject.GetDeletionTimestamp() != nil
+}
+
 func KubernetesAPISecurePort(customObject v1alpha1.AWSConfig) int {
 	return customObject.Spec.Cluster.Kubernetes.API.SecurePort
 }
@@ -399,6 +412,18 @@ func S3ServiceDomain(customObject v1alpha1.AWSConfig) string {
 
 func SecurityGroupName(customObject v1alpha1.AWSConfig, groupName string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), groupName)
+}
+
+func SmallCloudConfigPath(customObject v1alpha1.AWSConfig, accountID string, role string) string {
+	return fmt.Sprintf("%s/%s", BucketName(customObject, accountID), BucketObjectName(customObject, role))
+}
+
+func SmallCloudConfigS3HTTPURL(customObject v1alpha1.AWSConfig, accountID string, role string) string {
+	return fmt.Sprintf("https://%s/%s", S3ServiceDomain(customObject), SmallCloudConfigPath(customObject, accountID, role))
+}
+
+func SmallCloudConfigS3URL(customObject v1alpha1.AWSConfig, accountID string, role string) string {
+	return fmt.Sprintf("s3://%s", SmallCloudConfigPath(customObject, accountID, role))
 }
 
 func SubnetName(customObject v1alpha1.AWSConfig, suffix string) string {

@@ -6,7 +6,6 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v15/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v15/key"
 )
 
@@ -44,14 +43,14 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			MasterImageID:              imageID,
 			MasterInstanceResourceName: key.MasterInstanceResourceName(customObject),
 			MasterInstanceType:         masterInstanceType,
-			MasterCloudConfigVersion:   cloudconfig.CloudConfigVersion,
+			MasterCloudConfigVersion:   key.CloudConfigVersion,
 			MasterInstanceMonitoring:   r.monitoring,
 
 			WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
 			WorkerImageID:            imageID,
 			WorkerInstanceMonitoring: r.monitoring,
 			WorkerInstanceType:       workerInstanceType,
-			WorkerCloudConfigVersion: cloudconfig.CloudConfigVersion,
+			WorkerCloudConfigVersion: key.CloudConfigVersion,
 
 			VersionBundleVersion: key.VersionBundleVersion(customObject),
 		}

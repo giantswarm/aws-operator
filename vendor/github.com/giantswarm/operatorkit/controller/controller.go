@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cenkalti/backoff"
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/micrologger/loggermeta"
@@ -18,7 +18,6 @@ import (
 	"k8s.io/client-go/rest"
 
 	"github.com/giantswarm/operatorkit/client/k8scrdclient"
-	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 	"github.com/giantswarm/operatorkit/informer"
@@ -57,7 +56,7 @@ type Config struct {
 	//
 	RESTClient rest.Interface
 
-	BackOffFactory func() backoff.BackOff
+	BackOffFactory func() backoff.Interface
 	// Name is the name which the controller uses on finalizers for resources.
 	// The name used should be unique in the kubernetes cluster, to ensure that
 	// two operators which handle the same resource add two distinct finalizers.
@@ -77,7 +76,7 @@ type Controller struct {
 	errorCollector chan error
 	mutex          sync.Mutex
 
-	backOffFactory func() backoff.BackOff
+	backOffFactory func() backoff.Interface
 	name           string
 }
 
@@ -100,7 +99,7 @@ func New(config Config) (*Controller, error) {
 	}
 
 	if config.BackOffFactory == nil {
-		config.BackOffFactory = DefaultBackOffFactory()
+		config.BackOffFactory = func() backoff.Interface { return backoff.NewMaxRetries(7, 1*time.Second) }
 	}
 	if config.Name == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.Name must not be empty")
@@ -139,9 +138,7 @@ func (c *Controller) Boot() {
 			return nil
 		}
 
-		notifier := func(err error, d time.Duration) {
-			c.logger.LogCtx(ctx, "level", "warning", "message", "retrying controller boot due to error", "stack", fmt.Sprintf("%#v", err))
-		}
+		notifier := backoff.NewNotifier(c.logger, ctx)
 
 		err := backoff.RetryNotify(operation, c.backOffFactory(), notifier)
 		if err != nil {
@@ -171,19 +168,16 @@ func (c *Controller) DeleteFunc(obj interface{}) {
 		// handle the reconciled runtime object, we stop here. Note that we just
 		// remove the finalizer regardless because at this point there will never be
 		// a chance to remove it otherwhise because nobody wanted to handle this
-		// runtime object anyway.
-
-		c.logger.Log("level", "debug", "message", "removing finalizer from runtime object")
-
-		err = c.removeFinalizer(obj)
+		// runtime object anyway. Otherwise we can end up in deadlock
+		// trying to reconcile this object over and over.
+		err = c.removeFinalizer(context.Background(), obj)
 		if err != nil {
 			c.logger.Log("level", "error", "message", "stop reconciliation due to error", "stack", fmt.Sprintf("%#v", err))
 			return
 		}
 
-		c.logger.Log("level", "debug", "message", "removed finalizer from runtime object")
-
 		return
+
 	} else if err != nil {
 		c.logger.Log("level", "error", "message", "stop reconciliation due to error", "stack", fmt.Sprintf("%#v", err))
 		return
@@ -212,18 +206,10 @@ func (c *Controller) DeleteFunc(obj interface{}) {
 		return
 	}
 
-	if !finalizerskeptcontext.IsKept(ctx) {
-		c.logger.LogCtx(ctx, "level", "debug", "message", "removing finalizer from runtime object")
-
-		err = c.removeFinalizer(obj)
-		if err != nil {
-			c.logger.LogCtx(ctx, "level", "error", "message", "stop reconciliation due to error", "stack", fmt.Sprintf("%#v", err))
-			return
-		}
-
-		c.logger.LogCtx(ctx, "level", "debug", "message", "removed finalizer from runtime object")
-	} else {
-		c.logger.LogCtx(ctx, "level", "debug", "message", "not removing finalizer from runtime object due to request of keeping it")
+	err = c.removeFinalizer(ctx, obj)
+	if err != nil {
+		c.logger.LogCtx(ctx, "level", "error", "message", "stop reconciliation due to error", "stack", fmt.Sprintf("%#v", err))
+		return
 	}
 }
 
@@ -253,9 +239,7 @@ func (c *Controller) ProcessEvents(ctx context.Context, deleteChan chan watch.Ev
 		}
 	}
 
-	notifier := func(err error, d time.Duration) {
-		c.logger.LogCtx(ctx, "level", "warning", "message", "retrying event processing due to error", "stack", fmt.Sprintf("%#v", err))
-	}
+	notifier := backoff.NewNotifier(c.logger, ctx)
 
 	err := backoff.RetryNotify(operation, c.backOffFactory(), notifier)
 	if err != nil {

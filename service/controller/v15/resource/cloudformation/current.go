@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
 	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v15/cloudformation"
@@ -19,8 +20,6 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return StackState{}, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "looking for the guest cluster main stack in the AWS API")
-
 	stackName := key.MainGuestStackName(customObject)
 
 	sc, err := controllercontext.FromContext(ctx)
@@ -33,33 +32,35 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	// stack. We dispatch our custom StackState structure and enrich it with all
 	// information necessary to reconcile the cloudformation resource.
 	var stackOutputs []*cloudformation.Output
-	var stackStatus string
 	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the guest cluster main stack outputs in the AWS API")
+
+		var stackStatus string
 		stackOutputs, stackStatus, err = sc.CloudFormation.DescribeOutputsAndStatus(stackName)
 		if cloudformationservice.IsStackNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster main stack in the AWS API")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster main stack outputs in the AWS API")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack does not exist")
 			return StackState{}, nil
 
 		} else if cloudformationservice.IsOutputsNotAccessible(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack output values are not accessible due to stack state transition")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster main stack outputs in the AWS API")
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the guest cluster main stack has status '%s'", stackStatus))
+			if key.IsDeleted(customObject) {
+				// Keep finalizers to as long as we don't
+				// encounter IsStackNotFound.
+				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+				finalizerskeptcontext.SetKept(ctx)
+			}
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			resourcecanceledcontext.SetCanceled(ctx)
+
 			return StackState{}, nil
 
 		} else if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
-	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "found the guest cluster main stack in the AWS API")
-
-	// In case the current guest cluster is already being updated, we cancel the
-	// reconciliation until the current update is done in order to reduce
-	// unnecessary friction.
-	if stackStatus == cloudformation.ResourceStatusUpdateInProgress {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("guest cluster main stack is in state '%s'", cloudformation.ResourceStatusUpdateInProgress))
-		resourcecanceledcontext.SetCanceled(ctx)
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
-
-		return StackState{}, nil
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found the guest cluster main stack outputs in the AWS API")
 	}
 
 	var currentState StackState
@@ -167,8 +168,6 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			MasterInstanceResourceName: masterInstanceResourceName,
 			MasterInstanceType:         masterInstanceType,
 			MasterCloudConfigVersion:   masterCloudConfigVersion,
-
-			Status: stackStatus,
 
 			WorkerCount:              workerCount,
 			WorkerImageID:            workerImageID,

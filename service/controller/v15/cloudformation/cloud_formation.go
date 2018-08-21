@@ -26,6 +26,9 @@ func New(config Config) (*CloudFormation, error) {
 	return c, nil
 }
 
+// DescribeOutputsAndStatus returns stack outputs, stack status and error. The
+// stack status is returned when the error is nil or the error is matched by
+// IsOutputsNotAccessible.
 func (c *CloudFormation) DescribeOutputsAndStatus(stackName string) ([]*cloudformation.Output, string, error) {
 	// At first we fetch the CF stack state by describing it via the AWS golang
 	// SDK. We are interested in the stack outputs and the stack status, since
@@ -56,18 +59,25 @@ func (c *CloudFormation) DescribeOutputsAndStatus(stackName string) ([]*cloudfor
 	// implementations. If the stack creation failed, the outputs can be
 	// unaccessible. This can lead to a stack that cannot be deleted. it can also
 	// be called during creation, while the outputs are still not accessible.
+	var outputsAccessible bool
 	{
-		errorStatuses := []string{
-			cloudformation.StackStatusRollbackInProgress,
+		okStatuses := []string{
+			cloudformation.StackStatusCreateComplete,
 			cloudformation.StackStatusRollbackComplete,
-			cloudformation.StackStatusCreateInProgress,
+			cloudformation.StackStatusUpdateComplete,
+			cloudformation.StackStatusUpdateRollbackComplete,
 		}
 
-		for _, s := range errorStatuses {
+		for _, s := range okStatuses {
 			if stackStatus == s {
-				return nil, "", microerror.Maskf(outputsNotAccessibleError, "due to stack state '%s'", stackStatus)
+				outputsAccessible = true
+				break
 			}
 		}
+	}
+
+	if !outputsAccessible {
+		return nil, stackStatus, microerror.Maskf(outputsNotAccessibleError, "stack state '%s'", stackStatus)
 	}
 
 	return stackOutputs, stackStatus, nil

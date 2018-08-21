@@ -1,7 +1,6 @@
 package v3
 
 import (
-	"github.com/cenkalti/backoff"
 	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -23,10 +22,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v3/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/v3/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/v3/resource/service"
-)
-
-const (
-	ResourceRetries uint64 = 3
 )
 
 type ResourceSetConfig struct {
@@ -268,8 +263,7 @@ func NewResourceSet(config ResourceSetConfig) (*controller.ResourceSet, error) {
 
 	{
 		c := retryresource.WrapConfig{
-			BackOffFactory: func() backoff.BackOff { return backoff.WithMaxTries(backoff.NewExponentialBackOff(), ResourceRetries) },
-			Logger:         config.Logger,
+			Logger: config.Logger,
 		}
 
 		resources, err = retryresource.Wrap(resources, c)

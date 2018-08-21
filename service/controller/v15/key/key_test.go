@@ -1076,13 +1076,19 @@ func Test_VersionBundleVersion(t *testing.T) {
 
 func Test_BucketObjectName(t *testing.T) {
 	t.Parallel()
-	version := "v_0_1_0"
-	suffix := "mysuffix"
+	customObject := v1alpha1.AWSConfig{
+		Spec: v1alpha1.AWSConfigSpec{
+			VersionBundle: v1alpha1.AWSConfigSpecVersionBundle{
+				Version: "0.1.0",
+			},
+		},
+	}
+	role := "worker"
 
-	expectedBucketObjectName := "cloudconfig/v_0_1_0/mysuffix"
-	actualBucketObjectName := BucketObjectName(version, suffix)
-	if expectedBucketObjectName != actualBucketObjectName {
-		t.Fatalf("Expected bucket object name %q but was %q", expectedBucketObjectName, actualBucketObjectName)
+	e := fmt.Sprintf("version/0.1.0/cloudconfig/%s/worker", CloudConfigVersion)
+	a := BucketObjectName(customObject, role)
+	if e != a {
+		t.Fatalf("expected %s got %s", e, a)
 	}
 }
 

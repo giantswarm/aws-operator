@@ -1,12 +1,13 @@
 package adapter
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/cenkalti/backoff"
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -86,7 +87,8 @@ func waitForPeeringConnectionID(cfg Config) (string, error) {
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-	queryOperation := func() error {
+
+	o := func() error {
 		output, err := cfg.Clients.EC2.DescribeVpcPeeringConnections(input)
 		if err != nil {
 			return microerror.Mask(err)
@@ -97,20 +99,13 @@ func waitForPeeringConnectionID(cfg Config) (string, error) {
 		peeringID = *output.VpcPeeringConnections[0].VpcPeeringConnectionId
 		return nil
 	}
-	queryNotify := func(err error, delay time.Duration) {
-		logger.Log("error", fmt.Sprintf("query VPC peering connection ID failed, retrying with delay %.0fm%.0fs: '%#v'", delay.Minutes(), delay.Seconds(), err))
-	}
-	bo := &backoff.ExponentialBackOff{
-		InitialInterval:     backoff.DefaultInitialInterval,
-		RandomizationFactor: backoff.DefaultRandomizationFactor,
-		Multiplier:          backoff.DefaultMultiplier,
-		MaxInterval:         backoff.DefaultMaxInterval,
-		MaxElapsedTime:      2 * time.Minute,
-		Clock:               backoff.SystemClock,
-	}
-	if err := backoff.RetryNotify(queryOperation, bo, queryNotify); err != nil {
+	b := backoff.NewExponential(2*time.Minute, 10*time.Second)
+	n := backoff.NewNotifier(logger, context.Background())
+	err = backoff.RetryNotify(o, b, n)
+	if err != nil {
 		return "", microerror.Mask(err)
 	}
+
 	return peeringID, nil
 }
 

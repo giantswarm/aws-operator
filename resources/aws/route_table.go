@@ -1,12 +1,14 @@
 package aws
 
 import (
+	"context"
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
-	"github.com/cenkalti/backoff"
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -84,7 +86,7 @@ func (r *RouteTable) CreateOrFail() error {
 		return microerror.Mask(err)
 	}
 
-	tagOperation := func() error {
+	o := func() error {
 		if _, err := r.Client.CreateTags(&ec2.CreateTagsInput{
 			Resources: []*string{routeTable.RouteTable.RouteTableId},
 			Tags: []*ec2.Tag{
@@ -98,8 +100,10 @@ func (r *RouteTable) CreateOrFail() error {
 		}
 		return nil
 	}
-	tagNotify := NewNotify(r.Logger, "tag route table")
-	if err := backoff.RetryNotify(tagOperation, NewCustomExponentialBackoff(), tagNotify); err != nil {
+	b := backoff.NewExponential(2*time.Minute, 10*time.Second)
+	n := backoff.NewNotifier(r.Logger, context.Background())
+	err = backoff.RetryNotify(o, b, n)
+	if err != nil {
 		return microerror.Mask(err)
 	}
 
@@ -166,7 +170,7 @@ func (r RouteTable) MakePublic() error {
 // CreateNatGatewayRoute creates a default route to the NAT gateway for the
 // private subnet. Retry is needed due to a delay while the gateway is created.
 func (r RouteTable) CreateNatGatewayRoute(natGatewayID string) (bool, error) {
-	createOperation := func() error {
+	o := func() error {
 		_, err := r.Client.CreateRoute(&ec2.CreateRouteInput{
 			RouteTableId:         aws.String(r.id),
 			DestinationCidrBlock: aws.String("0.0.0.0/0"),
@@ -183,8 +187,10 @@ func (r RouteTable) CreateNatGatewayRoute(natGatewayID string) (bool, error) {
 
 		return nil
 	}
-	createNotify := NewNotify(r.Logger, "creating nat gateway route")
-	if err := backoff.RetryNotify(createOperation, NewCustomExponentialBackoff(), createNotify); err != nil {
+	b := backoff.NewExponential(2*time.Minute, 10*time.Second)
+	n := backoff.NewNotifier(r.Logger, context.Background())
+	err := backoff.RetryNotify(o, b, n)
+	if err != nil {
 		return false, microerror.Mask(err)
 	}
 
