@@ -3,11 +3,10 @@
 package ipam
 
 import (
-	"os"
 	"testing"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
-	e2eclient "github.com/giantswarm/e2eclients/aws"
+	aws "github.com/giantswarm/e2eclients/aws"
 	"github.com/giantswarm/e2etests/ipam"
 	"github.com/giantswarm/e2etests/ipam/provider"
 	"github.com/giantswarm/micrologger"
@@ -17,7 +16,7 @@ import (
 )
 
 var (
-	c *e2eclient.Client
+	c *aws.Client
 	g *framework.Guest
 	i *ipam.IPAM
 	h *framework.Host
@@ -38,9 +37,10 @@ func init() {
 
 	{
 		c := framework.GuestConfig{
-			ClusterID:    os.Getenv("CLUSTER_NAME"),
-			CommonDomain: "gauss.eu-central-1.aws.gigantic.io",
-			Logger:       l,
+			Logger: l,
+
+			ClusterID:    env.ClusterID(),
+			CommonDomain: env.CommonDomain(),
 		}
 
 		g, err = framework.NewGuest(c)
@@ -51,19 +51,13 @@ func init() {
 
 	{
 		c := framework.HostConfig{
-			ClusterID:  os.Getenv("CLUSTER_NAME"),
-			Logger:     l,
+			Logger: l,
+
+			ClusterID:  env.ClusterID(),
 			VaultToken: env.VaultToken(),
 		}
 
 		h, err = framework.NewHost(c)
-		if err != nil {
-			panic(err.Error())
-		}
-	}
-
-	{
-		c, err = e2eclient.NewClient()
 		if err != nil {
 			panic(err.Error())
 		}
@@ -91,6 +85,13 @@ func init() {
 		}
 
 		i, err = ipam.New(ic)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
+	{
+		c, err = aws.NewClient()
 		if err != nil {
 			panic(err.Error())
 		}

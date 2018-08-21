@@ -29,7 +29,7 @@ versionBundleVersion: {{ .VersionBundleVersion }}
 aws:
   region: ${ .AWSRegion }
   apiHostedZone: {{ .AWSAPIHostedZoneGuest }}
-  ingressHostedZone: {{ .AWSIngressHostedZone }}
+  ingressHostedZone: {{ .AWSIngressHostedZoneGuest }}
   routeTable0: {{ .AWSRouteTable0 }}
   routeTable1: {{ .AWSRouteTable1 }}
   vpcPeerId: {{ .AWSVPCPeerID }}
