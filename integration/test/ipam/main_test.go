@@ -63,6 +63,13 @@ func init() {
 		}
 	}
 
+	{
+		c, err = aws.NewClient()
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
 	var p *provider.AWS
 	{
 
@@ -70,6 +77,10 @@ func init() {
 			AWSClient:     c,
 			HostFramework: h,
 			Logger:        l,
+
+			ChartValuesConfig: provider.ChartValuesConfig{
+				ClusterName: env.ClusterID(),
+			},
 		}
 
 		p, err = provider.NewAWS(ac)
@@ -82,16 +93,11 @@ func init() {
 		ic := ipam.Config{
 			Logger:   l,
 			Provider: p,
+
+			CommonDomain: env.CommonDomain(),
 		}
 
 		i, err = ipam.New(ic)
-		if err != nil {
-			panic(err.Error())
-		}
-	}
-
-	{
-		c, err = aws.NewClient()
 		if err != nil {
 			panic(err.Error())
 		}
