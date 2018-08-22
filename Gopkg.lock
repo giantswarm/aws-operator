@@ -317,7 +317,7 @@
 
 [[projects]]
   branch = "ipam-e2e-tests"
-  digest = "1:d480bf270c9a4241419a615168d01e4d563665283af08bb2e2ca8f39f15cc0d8"
+  digest = "1:f8e845893d6fba4742470823bd2fbedf1babbb031166d421ea1f4295b1b9643a"
   name = "github.com/giantswarm/e2etests"
   packages = [
     "clusterstate",
@@ -330,7 +330,7 @@
     "update/provider",
   ]
   pruneopts = "UT"
-  revision = "4073fa9ba2367a76c8ae8f648a880be9f3ddc9cf"
+  revision = "c63cbf435706b52813aa229a89153dfa7dfaf044"
 
 [[projects]]
   branch = "master"
