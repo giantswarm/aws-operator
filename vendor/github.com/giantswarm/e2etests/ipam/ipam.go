@@ -13,11 +13,15 @@ import (
 type Config struct {
 	Logger   micrologger.Logger
 	Provider provider.Interface
+
+	CommonDomain string
 }
 
 type IPAM struct {
 	logger   micrologger.Logger
 	provider provider.Interface
+
+	commonDomain string
 }
 
 func New(config Config) (*IPAM, error) {
@@ -27,10 +31,15 @@ func New(config Config) (*IPAM, error) {
 	if config.Provider == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Provider must not be empty", config)
 	}
+	if config.CommonDomain == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CommonDomain must not be empty", config)
+	}
 
 	s := &IPAM{
 		logger:   config.Logger,
 		provider: config.Provider,
+
+		commonDomain: config.CommonDomain,
 	}
 
 	return s, nil
@@ -64,8 +73,10 @@ func (c *IPAM) Test(ctx context.Context) error {
 
 	for _, cn := range clusters {
 		cfg := framework.GuestConfig{
-			ClusterID: cn,
-			Logger:    c.logger,
+			Logger: c.logger,
+
+			ClusterID:    cn,
+			CommonDomain: c.commonDomain,
 		}
 		guestFramework, err := framework.NewGuest(cfg)
 		if err != nil {
@@ -102,8 +113,10 @@ func (c *IPAM) Test(ctx context.Context) error {
 
 	{
 		cfg := framework.GuestConfig{
-			ClusterID: clusterFour,
-			Logger:    c.logger,
+			Logger: c.logger,
+
+			ClusterID:    clusterFour,
+			CommonDomain: c.commonDomain,
 		}
 		guestFramework, err := framework.NewGuest(cfg)
 		if err != nil {

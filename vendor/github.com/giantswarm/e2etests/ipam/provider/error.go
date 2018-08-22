@@ -22,3 +22,12 @@ var tooManyResultsError = microerror.New("too many results")
 func IsTooManyResults(err error) bool {
 	return microerror.Cause(err) == tooManyResultsError
 }
+
+var waitError = &microerror.Error{
+	Kind: "waitError",
+}
+
+// IsWait asserts waitError.
+func IsWait(err error) bool {
+	return microerror.Cause(err) == waitError
+}

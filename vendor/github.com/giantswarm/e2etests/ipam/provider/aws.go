@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -13,6 +14,7 @@ import (
 	awsclient "github.com/giantswarm/e2eclients/aws"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // apiextensionsAWSConfigE2EChartValues is modified version of
@@ -22,12 +24,12 @@ import (
 // would be too high risk for unintentional disruption of other tests if
 // ${CLUSTER_NAME} would be dynamically changed on the fly.
 const apiextensionsAWSConfigE2EChartValues = `commonDomain: {{ .CommonDomain }}
-clusterName: %s
+clusterName: {{ .ClusterName }}
 clusterVersion: v_0_1_0
-sshPublicKey: {{ .SSHPublicKey}}
+sshPublicKey: {{ .SSHPublicKey }}
 versionBundleVersion: {{ .VersionBundleVersion }}
 aws:
-  region: ${ .AWSRegion }
+  region: {{ .AWSRegion }}
   apiHostedZone: {{ .AWSAPIHostedZoneGuest }}
   ingressHostedZone: {{ .AWSIngressHostedZoneGuest }}
   routeTable0: {{ .AWSRouteTable0 }}
@@ -76,6 +78,11 @@ func NewAWS(config AWSConfig) (*AWS, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
+	hostAWSConfig, err := config.HostFramework.AWSCluster(config.ClusterName)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	a := &AWS{
 		awsClient:     config.AWSClient,
 		hostFramework: config.HostFramework,
@@ -87,7 +94,7 @@ func NewAWS(config AWSConfig) (*AWS, error) {
 			AWSRegion:                 getValue(config.AWSRegion, "AWS_REGION"),
 			AWSRouteTable0:            getValue(config.AWSRouteTable0, "AWS_ROUTE_TABLE_0"),
 			AWSRouteTable1:            getValue(config.AWSRouteTable1, "AWS_ROUTE_TABLE_1"),
-			AWSVPCPeerID:              getValue(config.AWSVPCPeerID, "AWS_VPC_PEER_ID"),
+			AWSVPCPeerID:              hostAWSConfig.Spec.AWS.VPC.PeerID,
 			CommonDomain:              getValue(config.CommonDomain, "COMMON_DOMAIN"),
 			SSHPublicKey:              getValue(config.SSHPublicKey, "IDRSA_PUB"),
 			VersionBundleVersion:      getValue(config.VersionBundleVersion, "VERSION_BUNDLE_VERSION"),
@@ -101,6 +108,11 @@ func NewAWS(config AWSConfig) (*AWS, error) {
 func (aws *AWS) CreateCluster(clusterName string) error {
 	if clusterName == "" {
 		return microerror.Maskf(invalidConfigError, "clusterName must not be empty")
+	}
+
+	err := aws.installCertResources(clusterName)
+	if err != nil {
+		return microerror.Mask(err)
 	}
 
 	deploymentName := awsConfigDeploymentName(clusterName)
@@ -139,7 +151,7 @@ func (aws *AWS) CreateCluster(clusterName string) error {
 			return microerror.Mask(err)
 		}
 
-		err = framework.HelmCmd("registry install quay.io/giantswarm/apiextensions-aws-config-e2e-chart:stable -- -n aws-config-e2e --values " + f.Name())
+		err = framework.HelmCmd(fmt.Sprintf("registry install quay.io/giantswarm/apiextensions-aws-config-e2e-chart:stable -- -n %s --values %s", awsConfigDeploymentName(clusterName), f.Name()))
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -151,7 +163,7 @@ func (aws *AWS) CreateCluster(clusterName string) error {
 		log.Println("level", "debug", "message", err.Error())
 	}
 
-	err := backoff.RetryNotify(o, b, n)
+	err = backoff.RetryNotify(o, b, n)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -167,8 +179,70 @@ func (aws *AWS) DeleteCluster(clusterName string) {
 	framework.HelmCmd(fmt.Sprintf("delete --purge %s", deploymentName))
 }
 
+func (aws *AWS) installCertResources(clusterName string) error {
+	{
+		aws.logger.Log("level", "debug", "message", "installing cert resource chart")
+
+		o := func() error {
+			// NOTE we ignore errors here because we cannot get really useful error
+			// handling done. This here should anyway only be a quick fix until we use
+			// the helm client lib. Then error handling will be better.
+			framework.HelmCmd(fmt.Sprintf("delete --purge %s", certDeploymentName(clusterName)))
+
+			cmdStr := fmt.Sprintf("registry install quay.io/giantswarm/apiextensions-cert-config-e2e-chart:stable -- -n %s --set commonDomain=${COMMON_DOMAIN} --set clusterName=%s", certDeploymentName(clusterName), clusterName)
+			err := framework.HelmCmd(cmdStr)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			return nil
+		}
+		b := backoff.NewExponential(framework.ShortMaxWait, framework.ShortMaxInterval)
+		n := backoff.NewNotifier(aws.logger, context.Background())
+		err := backoff.RetryNotify(o, b, n)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		aws.logger.Log("level", "debug", "message", "installed cert resource chart")
+	}
+
+	{
+		aws.logger.Log("level", "debug", "message", "waiting for k8s secret to be there")
+
+		o := func() error {
+			n := fmt.Sprintf("%s-api", clusterName)
+			_, err := aws.hostFramework.K8sClient().CoreV1().Secrets("default").Get(n, metav1.GetOptions{})
+			if err != nil {
+				// TODO remove this when not needed for debugging anymore
+				fmt.Printf("%#v\n", err)
+				return microerror.Maskf(waitError, "k8s secret is still missing")
+			}
+
+			return nil
+		}
+		b := backoff.NewExponential(framework.ShortMaxWait, framework.ShortMaxInterval)
+		n := func(err error, delay time.Duration) {
+			aws.logger.Log("level", "debug", "message", err.Error())
+		}
+
+		err := backoff.RetryNotify(o, b, n)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		aws.logger.Log("level", "debug", "message", "k8s secret is there")
+	}
+
+	return nil
+}
+
 func awsConfigDeploymentName(clusterName string) string {
 	return fmt.Sprintf("aws-config-e2e-%s", clusterName)
+}
+
+func certDeploymentName(clusterName string) string {
+	return fmt.Sprintf("%s-cert-config-e2e", clusterName)
 }
 
 // getValue returns val if not empty, otherwise os.Getenv(envName).
