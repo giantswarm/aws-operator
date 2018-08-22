@@ -52,7 +52,6 @@ type AWS struct {
 
 	chartValuesConfig   ChartValuesConfig
 	chartValuesTemplate *template.Template
-	hostClusterName     string
 }
 
 type ChartValuesConfig struct {
@@ -79,6 +78,11 @@ func NewAWS(config AWSConfig) (*AWS, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
+	hostAWSConfig, err := config.HostFramework.AWSCluster(config.ClusterName)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	a := &AWS{
 		awsClient:     config.AWSClient,
 		hostFramework: config.HostFramework,
@@ -90,12 +94,12 @@ func NewAWS(config AWSConfig) (*AWS, error) {
 			AWSRegion:                 getValue(config.AWSRegion, "AWS_REGION"),
 			AWSRouteTable0:            getValue(config.AWSRouteTable0, "AWS_ROUTE_TABLE_0"),
 			AWSRouteTable1:            getValue(config.AWSRouteTable1, "AWS_ROUTE_TABLE_1"),
+			AWSVPCPeerID:              hostAWSConfig.Spec.AWS.VPC.PeerID,
 			CommonDomain:              getValue(config.CommonDomain, "COMMON_DOMAIN"),
 			SSHPublicKey:              getValue(config.SSHPublicKey, "IDRSA_PUB"),
 			VersionBundleVersion:      getValue(config.VersionBundleVersion, "VERSION_BUNDLE_VERSION"),
 		},
 		chartValuesTemplate: template.Must(template.New("awsConfigChartValues").Parse(apiextensionsAWSConfigE2EChartValues)),
-		hostClusterName:     getValue(config.ClusterName, "CLUSTER_NAME"),
 	}
 
 	return a, nil
@@ -107,11 +111,6 @@ func (aws *AWS) CreateCluster(clusterName string) error {
 	}
 
 	err := aws.installCertResources(clusterName)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	hostAWSConfig, err := aws.hostFramework.AWSCluster(aws.hostClusterName)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -147,7 +146,8 @@ func (aws *AWS) CreateCluster(clusterName string) error {
 
 		chartValuesConfig := aws.chartValuesConfig
 		chartValuesConfig.ClusterName = clusterName
-		chartValuesConfig.AWSVPCPeerID = hostAWSConfig.Spec.AWS.VPC.PeerID
+		chartValuesConfig.AWSRouteTable0 = clusterName + "_0"
+		chartValuesConfig.AWSRouteTable1 = clusterName + "_1"
 		err = aws.chartValuesTemplate.Execute(f, chartValuesConfig)
 		if err != nil {
 			return microerror.Mask(err)
