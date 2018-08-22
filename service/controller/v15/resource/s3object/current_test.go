@@ -47,7 +47,6 @@ func Test_CurrentState(t *testing.T) {
 			obj:              clusterTpo,
 			expectedIAMError: true,
 		},
-
 		{
 			description:     "S3 error",
 			obj:             clusterTpo,
@@ -97,23 +96,21 @@ func Test_CurrentState(t *testing.T) {
 			if err != nil && !tc.expectedIAMError && !tc.expectedS3Error {
 				t.Errorf("unexpected error %v", err)
 			}
-			currentState, ok := result.(map[string]BucketObjectState)
-			if !ok {
-				t.Errorf("expected '%T', got '%T'", currentState, result)
-			}
-
 			if err == nil && tc.expectedIAMError {
 				t.Error("expected IAM error didn't happen")
 			}
-
 			if err == nil && tc.expectedS3Error {
 				t.Error("expected S3 error didn't happen")
 			}
 
 			if !tc.expectedIAMError && !tc.expectedS3Error {
-				var bucketObject BucketObjectState
+				currentState, ok := result.(map[string]BucketObjectState)
+				if !ok {
+					t.Errorf("expected '%T', got '%T'", currentState, result)
+				}
 
-				if bucketObject, ok = currentState[tc.expectedKey]; !ok {
+				bucketObject, ok := currentState[tc.expectedKey]
+				if !ok {
 					t.Errorf("expected S3 key %q not found", tc.expectedKey)
 				}
 

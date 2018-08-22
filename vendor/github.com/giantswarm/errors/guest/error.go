@@ -17,6 +17,9 @@ var (
 		// A regular expression representing TLS errors related to establishing
 		// connections to guest clusters while the guest API is not fully up.
 		regexp.MustCompile(`[Get|Patch|Post] https://api\..*/api/v1/nodes.* net/http: (TLS handshake timeout|request canceled).*?`),
+		// A regular expression representing timeout errors related to establishing
+		// TCP connections to guest clusters while the guest API is not fully up.
+		regexp.MustCompile(`[Get|Patch|Post] https://api\..* dial tcp .* i/o timeout`),
 		// A regular expression representing the kind of transient errors related to
 		// certificates returned while the guest API is not fully up.
 		regexp.MustCompile(`[Get|Patch|Post] https://api\..*: x509: (certificate is valid for ingress.local, not api\..*|certificate signed by unknown authority \(possibly because of "crypto/rsa: verification error" while trying to verify candidate authority certificate.*?\))`),

@@ -15,3 +15,25 @@ const ApiextensionsChartConfigE2EChartValues = `chart:
     resourceVersion: {{ .Secret.ResourceVersion }}
 versionBundleVersion: {{ .VersionBundleVersion }}
 `
+
+type ApiextensionsChartConfigValues struct {
+	Channel              string
+	ConfigMap            ApiextensionsChartConfigConfigMap
+	Name                 string
+	Namespace            string
+	Release              string
+	Secret               ApiextensionsChartConfigSecret
+	VersionBundleVersion string
+}
+
+type ApiextensionsChartConfigConfigMap struct {
+	Name            string
+	Namespace       string
+	ResourceVersion string
+}
+
+type ApiextensionsChartConfigSecret struct {
+	Name            string
+	Namespace       string
+	ResourceVersion string
+}

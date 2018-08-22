@@ -3,6 +3,8 @@ package collector
 import (
 	"github.com/prometheus/client_golang/prometheus"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/giantswarm/aws-operator/client/aws"
 )
 
 const (
@@ -21,7 +23,7 @@ var clustersDesc *prometheus.Desc = prometheus.NewDesc(
 	nil,
 )
 
-func (c *Collector) collectClusterInfo(ch chan<- prometheus.Metric) {
+func (c *Collector) collectClusterInfo(ch chan<- prometheus.Metric, clients []aws.Clients) {
 	c.logger.Log("level", "debug", "message", "collecting metrics for clusters")
 
 	opts := v1.ListOptions{
