@@ -37,6 +37,10 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 
 		params.Cluster = customObject.Spec.Cluster
 		params.DisableEncryptionAtREST = true
+		params.DisableIngressController = true
+		// Ingress controller service remains in k8scloudconfig and will be
+		// removed in a later migration.
+		params.DisableIngressControllerService = false
 		params.EtcdPort = customObject.Spec.Cluster.Etcd.Port
 		params.Extension = &MasterExtension{
 			certs:            certs,
