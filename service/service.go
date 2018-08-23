@@ -232,7 +232,7 @@ func New(config Config) (*Service, error) {
 	{
 		c := statusresource.CollectorConfig{
 			Logger:  config.Logger,
-			Watcher: g8sClient.ProviderV1alpha1().AzureConfigs("").Watch,
+			Watcher: g8sClient.ProviderV1alpha1().AWSConfigs("").Watch,
 		}
 
 		statusResourceCollector, err = statusresource.NewCollector(c)
