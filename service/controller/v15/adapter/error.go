@@ -56,6 +56,15 @@ func IsWrongType(err error) bool {
 	return microerror.Cause(err) == wrongTypeError
 }
 
+var tooFewResultsError = &microerror.Error{
+	Kind: "tooFewResultsError",
+}
+
+// IsTooFewResults asserts tooFewResultsError.
+func IsTooFewResults(err error) bool {
+	return microerror.Cause(err) == tooFewResultsError
+}
+
 var tooManyResultsError = &microerror.Error{
 	Kind: "tooManyResultsError",
 }
