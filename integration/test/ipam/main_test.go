@@ -91,10 +91,12 @@ func init() {
 
 	{
 		ic := ipam.Config{
-			Logger:   l,
-			Provider: p,
+			HostFramework: h,
+			Logger:        l,
+			Provider:      p,
 
-			CommonDomain: env.CommonDomain(),
+			CommonDomain:    env.CommonDomain(),
+			HostClusterName: env.ClusterID(),
 		}
 
 		i, err = ipam.New(ic)

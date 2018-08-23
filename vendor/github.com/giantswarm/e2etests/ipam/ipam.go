@@ -11,20 +11,27 @@ import (
 )
 
 type Config struct {
-	Logger   micrologger.Logger
-	Provider provider.Interface
+	HostFramework *framework.Host
+	Logger        micrologger.Logger
+	Provider      provider.Interface
 
-	CommonDomain string
+	CommonDomain    string
+	HostClusterName string
 }
 
 type IPAM struct {
-	logger   micrologger.Logger
-	provider provider.Interface
+	hostFramework *framework.Host
+	logger        micrologger.Logger
+	provider      provider.Interface
 
-	commonDomain string
+	commonDomain    string
+	hostClusterName string
 }
 
 func New(config Config) (*IPAM, error) {
+	if config.HostFramework == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.HostFramework must not be empty", config)
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
@@ -34,26 +41,42 @@ func New(config Config) (*IPAM, error) {
 	if config.CommonDomain == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.CommonDomain must not be empty", config)
 	}
+	if config.HostClusterName == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.HostClusterName must not be empty", config)
+	}
 
 	s := &IPAM{
-		logger:   config.Logger,
-		provider: config.Provider,
+		hostFramework: config.HostFramework,
+		logger:        config.Logger,
+		provider:      config.Provider,
 
-		commonDomain: config.CommonDomain,
+		commonDomain:    config.CommonDomain,
+		hostClusterName: config.HostClusterName,
 	}
 
 	return s, nil
 }
 
 func (c *IPAM) Test(ctx context.Context) error {
-	var err error
 
-	const (
-		clusterOne   = "cluster0"
-		clusterTwo   = "cluster1"
-		clusterThree = "cluster2"
-		clusterFour  = "cluster3"
+	var (
+		clusterOne   = c.hostClusterName + "-cluster0"
+		clusterTwo   = c.hostClusterName + "-cluster1"
+		clusterThree = c.hostClusterName + "-cluster2"
+		clusterFour  = c.hostClusterName + "-cluster3"
+
+		// allocatedSubnets[clusterName]subnetCIDRStr
+		allocatedSubnets = make(map[string]string)
+		err              error
 	)
+
+	defer func() {
+		c.logger.LogCtx(ctx, "level", "debug", "message", "ensuring all guest clusters possibly created in test are deleted.")
+
+		for _, cn := range []string{clusterOne, clusterTwo, clusterThree, clusterFour} {
+			c.provider.DeleteCluster(cn)
+		}
+	}()
 
 	clusters := []string{clusterOne, clusterTwo, clusterThree}
 
@@ -89,9 +112,20 @@ func (c *IPAM) Test(ctx context.Context) error {
 			return microerror.Mask(err)
 		}
 		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("guest cluster %s ready", cn))
-	}
 
-	// TODO: Verify subnet properties for three created clusters.
+		awsConfig, err := c.hostFramework.AWSCluster(cn)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		// Verify that there are no duplicate subnet allocations.
+		subnet := awsConfig.Status.Cluster.Network.CIDR
+		otherCluster, exists := allocatedSubnets[subnet]
+		if exists {
+			return microerror.Maskf(alreadyExistsError, "subnet %s already exists for %s", subnet, otherCluster)
+		}
+		allocatedSubnets[subnet] = cn
+	}
 
 	c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminating guest cluster %s and immediately creating new guest cluster %s", clusterTwo, clusterFour))
 
@@ -131,16 +165,19 @@ func (c *IPAM) Test(ctx context.Context) error {
 		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("guest cluster %s up", clusterFour))
 	}
 
-	// TODO: Verify that fourth cluster subnet allocation doesn't overlap with
-	// terminated second cluster.
+	{
+		// Verify that allocated subnet for clusterFour doesn't overlap with
+		// terminated clusterTwo or any other existing cluster.
+		awsConfig, err := c.hostFramework.AWSCluster(clusterFour)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 
-	clusters = []string{clusterOne, clusterThree, clusterFour}
-
-	c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting remaining guest clusters: %#v", clusters))
-
-	for _, cn := range clusters {
-		c.provider.DeleteCluster(cn)
-		delete(guestFrameworks, cn)
+		subnet := awsConfig.Status.Cluster.Network.CIDR
+		otherCluster, exists := allocatedSubnets[subnet]
+		if exists {
+			return microerror.Maskf(alreadyExistsError, "subnet %s already exists for %s", subnet, otherCluster)
+		}
 	}
 
 	return err
