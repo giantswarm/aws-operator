@@ -9,7 +9,7 @@ func VersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "aws-operator",
-				Description: "Enabled termination protection in CloudFormation stacks.",
+				Description: "Enabled termination protection for CloudFormation stacks.",
 				Kind:        versionbundle.KindChanged,
 			},
 			{

@@ -146,8 +146,7 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 
 		createState.SetTags(r.getCloudFormationTags(customObject))
 
-		enableTerminationProtection := key.EnableTerminationProtection
-		createState.EnableTerminationProtection = &enableTerminationProtection
+		createState.EnableTerminationProtection = aws.Bool(key.EnableTerminationProtection)
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack does not have to be created")
 
@@ -170,11 +169,10 @@ func (r *Resource) createHostPreStack(ctx context.Context, customObject v1alpha1
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	enableTerminationProtection := key.EnableTerminationProtection
 	createStack := &cloudformation.CreateStackInput{
 		StackName:                   aws.String(stackName),
 		TemplateBody:                aws.String(mainTemplate),
-		EnableTerminationProtection: &enableTerminationProtection,
+		EnableTerminationProtection: aws.Bool(key.EnableTerminationProtection),
 		// CAPABILITY_NAMED_IAM is required for creating IAM roles (worker policy)
 		Capabilities: []*string{
 			aws.String(namedIAMCapability),
@@ -215,11 +213,10 @@ func (r *Resource) createHostPostStack(ctx context.Context, customObject v1alpha
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	enableTerminationProtection := key.EnableTerminationProtection
 	createStack := &cloudformation.CreateStackInput{
 		StackName:                   aws.String(stackName),
 		TemplateBody:                aws.String(mainTemplate),
-		EnableTerminationProtection: &enableTerminationProtection,
+		EnableTerminationProtection: aws.Bool(key.EnableTerminationProtection),
 	}
 	createStack.SetTags(r.getCloudFormationTags(customObject))
 

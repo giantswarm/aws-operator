@@ -33,9 +33,8 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 
 		stackName := aws.String(key.MainGuestStackName(customObject))
 
-		enableTerminationProtection := false
 		updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
-			EnableTerminationProtection: &enableTerminationProtection,
+			EnableTerminationProtection: aws.Bool(false),
 			StackName:                   stackName,
 		}
 		_, err = sc.AWSClient.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
@@ -68,9 +67,8 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 
 		stackName := aws.String(key.MainHostPreStackName(customObject))
 
-		enableTerminationProtection := false
 		updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
-			EnableTerminationProtection: &enableTerminationProtection,
+			EnableTerminationProtection: aws.Bool(false),
 			StackName:                   stackName,
 		}
 		_, err = r.hostClients.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
@@ -96,9 +94,8 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 
 		stackName := aws.String(key.MainHostPostStackName(customObject))
 
-		enableTerminationProtection := false
 		updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
-			EnableTerminationProtection: &enableTerminationProtection,
+			EnableTerminationProtection: aws.Bool(false),
 			StackName:                   stackName,
 		}
 		_, err = r.hostClients.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)

@@ -31,7 +31,7 @@ const (
 	// and managed by a cluster.
 	CloudProviderTagOwnedValue = "owned"
 
-	// EnableTerminationProtection is used to protect the CF stacks from deletion
+	// EnableTerminationProtection is used to protect the CF stacks from deletion.
 	EnableTerminationProtection = true
 
 	// InstallationTagName is used for AWS resource tagging.
