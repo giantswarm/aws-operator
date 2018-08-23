@@ -8,6 +8,11 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
+				Component:   "aws-operator",
+				Description: "Enabled termination protection for CloudFormation stacks.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
 				Component:   "cloudconfig",
 				Description: "Kubernetes (hyperkube) updated with version 1.11.1.",
 				Kind:        versionbundle.KindChanged,
