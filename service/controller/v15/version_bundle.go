@@ -13,6 +13,11 @@ func VersionBundle() versionbundle.Bundle {
 				Kind:        versionbundle.KindChanged,
 			},
 			{
+				Component:   "aws-operator",
+				Description: "Enabled termination protection for CloudFormation stacks.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
 				Component:   "cloudconfig",
 				Description: "Removed nginx-ingress-controller related components (will be managed by chart-operator).",
 				Kind:        versionbundle.KindRemoved,

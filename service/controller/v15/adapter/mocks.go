@@ -231,6 +231,9 @@ func (c *CloudFormationMock) DescribeStacks(*awscloudformation.DescribeStacksInp
 func (c *CloudFormationMock) UpdateStack(*awscloudformation.UpdateStackInput) (*awscloudformation.UpdateStackOutput, error) {
 	return nil, nil
 }
+func (c *CloudFormationMock) UpdateTerminationProtection(*awscloudformation.UpdateTerminationProtectionInput) (*awscloudformation.UpdateTerminationProtectionOutput, error) {
+	return nil, nil
+}
 func (c *CloudFormationMock) WaitUntilStackCreateComplete(*awscloudformation.DescribeStacksInput) error {
 	return nil
 }
