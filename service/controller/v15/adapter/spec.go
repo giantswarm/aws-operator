@@ -114,6 +114,7 @@ type CFClient interface {
 	DeleteStack(*awscloudformation.DeleteStackInput) (*awscloudformation.DeleteStackOutput, error)
 	DescribeStacks(*awscloudformation.DescribeStacksInput) (*awscloudformation.DescribeStacksOutput, error)
 	UpdateStack(*awscloudformation.UpdateStackInput) (*awscloudformation.UpdateStackOutput, error)
+	UpdateTerminationProtection(*awscloudformation.UpdateTerminationProtectionInput) (*awscloudformation.UpdateTerminationProtectionOutput, error)
 	WaitUntilStackCreateComplete(*awscloudformation.DescribeStacksInput) error
 	WaitUntilStackCreateCompleteWithContext(ctx aws.Context, input *awscloudformation.DescribeStacksInput, opts ...request.WaiterOption) error
 }
