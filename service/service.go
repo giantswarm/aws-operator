@@ -11,6 +11,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8srestconfig"
+	"github.com/giantswarm/statusresource"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/viper"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -45,10 +46,11 @@ type Service struct {
 	Healthz *healthz.Service
 	Version *version.Service
 
-	metricsCollector  *collector.Collector
-	bootOnce          sync.Once
-	clusterController *controller.Cluster
-	drainerController *controller.Drainer
+	bootOnce                sync.Once
+	clusterController       *controller.Cluster
+	drainerController       *controller.Drainer
+	metricsCollector        *collector.Collector
+	statusResourceCollector *statusresource.Collector
 }
 
 // New creates a new configured service object.
@@ -226,17 +228,30 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var statusResourceCollector *statusresource.Collector
+	{
+		c := statusresource.CollectorConfig{
+			Logger:  config.Logger,
+			Watcher: g8sClient.ProviderV1alpha1().AzureConfigs("").Watch,
+		}
+
+		statusResourceCollector, err = statusresource.NewCollector(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var versionService *version.Service
 	{
-		versionConfig := version.DefaultConfig()
+		c := version.Config{
+			Description:    config.Description,
+			GitCommit:      config.GitCommit,
+			Name:           config.ProjectName,
+			Source:         config.Source,
+			VersionBundles: NewVersionBundles(),
+		}
 
-		versionConfig.Description = config.Description
-		versionConfig.GitCommit = config.GitCommit
-		versionConfig.Name = config.ProjectName
-		versionConfig.Source = config.Source
-		versionConfig.VersionBundles = NewVersionBundles()
-
-		versionService, err = version.New(versionConfig)
+		versionService, err = version.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -246,10 +261,11 @@ func New(config Config) (*Service, error) {
 		Healthz: healthzService,
 		Version: versionService,
 
-		metricsCollector:  metricsCollector,
-		bootOnce:          sync.Once{},
-		clusterController: clusterController,
-		drainerController: drainerController,
+		bootOnce:                sync.Once{},
+		clusterController:       clusterController,
+		drainerController:       drainerController,
+		metricsCollector:        metricsCollector,
+		statusResourceCollector: statusResourceCollector,
 	}
 
 	return s, nil
@@ -258,6 +274,7 @@ func New(config Config) (*Service, error) {
 func (s *Service) Boot(ctx context.Context) {
 	s.bootOnce.Do(func() {
 		prometheus.MustRegister(s.metricsCollector)
+		go s.statusResourceCollector.Boot(ctx)
 
 		go s.clusterController.Boot()
 		go s.drainerController.Boot()
