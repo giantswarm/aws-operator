@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/cenkalti/backoff"
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/errors/guest"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
@@ -65,7 +65,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 			return nil
 		}
-		b := backoff.NewExponentialBackOff()
+		b := r.backOffFactory()
 		n := func(err error, d time.Duration) {
 			r.logger.LogCtx(ctx, "level", "warning", "message", "retrying status patching due to error", "stack", fmt.Sprintf("%#v", err))
 		}
@@ -166,6 +166,8 @@ func (r *Resource) computeCreateEventPatches(ctx context.Context, obj interface{
 				Path:  "/status/cluster/conditions",
 				Value: clusterStatus.WithCreatingCondition(),
 			})
+
+			r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("setting %#q status condition", providerv1alpha1.StatusClusterTypeCreating))
 		}
 	}
 
@@ -183,6 +185,8 @@ func (r *Resource) computeCreateEventPatches(ctx context.Context, obj interface{
 				Path:  "/status/cluster/conditions",
 				Value: clusterStatus.WithCreatedCondition(),
 			})
+
+			r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("setting %#q status condition", providerv1alpha1.StatusClusterTypeCreated))
 		}
 	}
 
@@ -200,6 +204,8 @@ func (r *Resource) computeCreateEventPatches(ctx context.Context, obj interface{
 				Path:  "/status/cluster/conditions",
 				Value: clusterStatus.WithUpdatingCondition(),
 			})
+
+			r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("setting %#q status condition", providerv1alpha1.StatusClusterTypeUpdating))
 		}
 	}
 
@@ -218,6 +224,8 @@ func (r *Resource) computeCreateEventPatches(ctx context.Context, obj interface{
 				Path:  "/status/cluster/conditions",
 				Value: clusterStatus.WithUpdatedCondition(),
 			})
+
+			r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("setting %#q status condition", providerv1alpha1.StatusClusterTypeUpdated))
 		}
 	}
 
