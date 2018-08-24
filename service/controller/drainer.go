@@ -295,7 +295,7 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 			return nil, microerror.Mask(err)
 		}
 	}
-	
+
 	var v14Patch1ResourceSet *controller.ResourceSet
 	{
 		c := v14patch1.DrainerResourceSetConfig{

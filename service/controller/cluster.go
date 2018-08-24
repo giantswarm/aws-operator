@@ -615,7 +615,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			return nil, microerror.Mask(err)
 		}
 	}
-	
+
 	var resourceSetV14Patch1 *controller.ResourceSet
 	{
 		c := v14patch1.ClusterResourceSetConfig{
