@@ -11,3 +11,7 @@ type Patch struct {
 type Status struct {
 	Cluster providerv1alpha1.StatusCluster `json:"cluster" yaml:"cluster"`
 }
+
+type Provider interface {
+	ClusterStatus() providerv1alpha1.StatusCluster
+}
