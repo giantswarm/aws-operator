@@ -314,7 +314,6 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
-
 	var v15ResourceSet *controller.ResourceSet
 	{
 		c := v15.DrainerResourceSetConfig{
