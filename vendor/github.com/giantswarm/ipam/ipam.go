@@ -127,6 +127,13 @@ func space(freeIPRanges []ipRange, mask net.IPMask) (net.IP, error) {
 	return nil, microerror.Maskf(spaceExhaustedError, "tried to fit: %v", mask)
 }
 
+// Contains returns true when the subnet is a part of the network, false
+// otherwise.
+func Contains(network, subnet net.IPNet) bool {
+	subnetRange := newIPRange(subnet)
+	return network.Contains(subnetRange.start) && network.Contains(subnetRange.end)
+}
+
 // Free takes a network, a mask, and a list of subnets.
 // An available network, within the first network, is returned.
 func Free(network net.IPNet, mask net.IPMask, subnets []net.IPNet) (net.IPNet, error) {

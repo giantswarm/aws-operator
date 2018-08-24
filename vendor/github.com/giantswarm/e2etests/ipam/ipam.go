@@ -3,9 +3,11 @@ package ipam
 import (
 	"context"
 	"fmt"
+	"net"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/e2etests/ipam/provider"
+	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 )
@@ -124,6 +126,15 @@ func (c *IPAM) Test(ctx context.Context) error {
 		if exists {
 			return microerror.Maskf(alreadyExistsError, "subnet %s already exists for %s", subnet, otherCluster)
 		}
+
+		// Verify that allocated subnets don't overlap.
+		for k, _ := range allocatedSubnets {
+			err := verifyNoOverlap(subnet, k)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+
 		allocatedSubnets[subnet] = cn
 	}
 
@@ -178,7 +189,36 @@ func (c *IPAM) Test(ctx context.Context) error {
 		if exists {
 			return microerror.Maskf(alreadyExistsError, "subnet %s already exists for %s", subnet, otherCluster)
 		}
+
+		for k, _ := range allocatedSubnets {
+			err := verifyNoOverlap(subnet, k)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
 	}
 
 	return err
+}
+
+func verifyNoOverlap(subnet1, subnet2 string) error {
+	_, net1, err := net.ParseCIDR(subnet1)
+	if err != nil {
+		return err
+	}
+
+	_, net2, err := net.ParseCIDR(subnet2)
+	if err != nil {
+		return err
+	}
+
+	if ipam.Contains(*net1, *net2) {
+		return microerror.Maskf(subnetsOverlapError, "subnet %s contains %s", net1, net2)
+	}
+
+	if ipam.Contains(*net2, *net1) {
+		return microerror.Maskf(subnetsOverlapError, "subnet %s contains %s", net2, net1)
+	}
+
+	return nil
 }

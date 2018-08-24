@@ -29,6 +29,15 @@ func IsNotFound(err error) bool {
 	return microerror.Cause(err) == notFoundError
 }
 
+var subnetsOverlapError = &microerror.Error{
+	Kind: "subnetsOverlap",
+}
+
+// IssubnetsOverlap asserts subnetsOverlapError.
+func IsSubnetsOverlap(err error) bool {
+	return microerror.Cause(err) == subnetsOverlapError
+}
+
 var waitError = &microerror.Error{
 	Kind: "wait",
 }
