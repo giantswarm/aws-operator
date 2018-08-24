@@ -11,8 +11,8 @@ import (
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/service/controller/v14/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v14/key"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch1/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch1/key"
 )
 
 // EnsureCreated completes ASG lifecycle hooks for nodes drained by
