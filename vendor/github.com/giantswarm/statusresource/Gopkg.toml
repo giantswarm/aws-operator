@@ -41,6 +41,10 @@ required = [
   branch = "master"
   name = "github.com/giantswarm/apiextensions"
 
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/backoff"
+
 [[override]]
   branch = "master"
   name = "github.com/giantswarm/errors"
@@ -56,6 +60,10 @@ required = [
 [[constraint]]
   branch = "master"
   name = "github.com/giantswarm/micrologger"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/prometheus/client_golang"
 
 [[constraint]]
   name = "k8s.io/apiserver"

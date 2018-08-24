@@ -399,7 +399,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 	var statusResource controller.Resource
 	{
-		c := statusresource.Config{
+		c := statusresource.ResourceConfig{
 			ClusterEndpointFunc:      key.ToClusterEndpoint,
 			ClusterIDFunc:            key.ToClusterID,
 			ClusterStatusFunc:        key.ToClusterStatus,
@@ -410,7 +410,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			VersionBundleVersionFunc: key.ToVersionBundleVersion,
 		}
 
-		statusResource, err = statusresource.New(c)
+		statusResource, err = statusresource.NewResource(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
