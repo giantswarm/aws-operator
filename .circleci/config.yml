@@ -96,6 +96,32 @@ jobs:
 
 
 
+  e2eTestCurPRIPAM:
+    environment:
+      TESTED_VERSION: "current"
+      TEST_DIR: "integration/test/ipam"
+    <<: *e2eTest
+
+  e2eTestCurMasterIPAM:
+    environment:
+      TESTED_VERSION: "current"
+      TEST_DIR: "integration/test/ipam"
+    <<: *e2eTest
+
+  e2eTestWIPPRIPAM:
+    environment:
+      TESTED_VERSION: "wip"
+      TEST_DIR: "integration/test/ipam"
+    <<: *e2eTest
+
+  e2eTestWIPMasterIPAM:
+    environment:
+      TESTED_VERSION: "wip"
+      TEST_DIR: "integration/test/ipam"
+    <<: *e2eTest
+
+
+
   e2eTestCurPRScaling:
     environment:
       TESTED_VERSION: "current"
