@@ -6,7 +6,7 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/v14/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch1/encrypter"
 )
 
 type EncrypterMock struct {

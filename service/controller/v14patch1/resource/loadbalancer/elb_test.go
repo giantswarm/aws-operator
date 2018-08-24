@@ -11,7 +11,7 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v14/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch1/controllercontext"
 )
 
 func Test_clusterLoadBalancers(t *testing.T) {
