@@ -8,9 +8,9 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "aws-operator",
-				Description: "Added Route53 support for BYOC accounts.",
-				Kind:        versionbundle.KindAdded,
+				Component:   "cloudconfig",
+				Description: "Removed nginx-ingress-controller related components (will be managed by chart-operator).",
+				Kind:        versionbundle.KindRemoved,
 			},
 		},
 		Components: []versionbundle.Component{
@@ -38,12 +38,8 @@ func VersionBundle() versionbundle.Bundle {
 				Name:    "kubernetes",
 				Version: "1.10.4",
 			},
-			{
-				Name:    "nginx-ingress-controller",
-				Version: "0.12.0",
-			},
 		},
 		Name:    "aws-operator",
-		Version: "3.3.0",
+		Version: "3.3.1",
 	}
 }
