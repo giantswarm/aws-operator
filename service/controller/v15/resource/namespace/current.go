@@ -2,12 +2,14 @@ package namespace
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
-	apiv1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/service/controller/v15/key"
 )
@@ -18,12 +20,11 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "looking for the namespace in the Kubernetes API")
-
-	// Lookup the current state of the namespace.
-	var namespace *apiv1.Namespace
+	var namespace *corev1.Namespace
 	{
-		manifest, err := r.k8sClient.CoreV1().Namespaces().Get(key.ClusterNamespace(customObject), apismetav1.GetOptions{})
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the namespace in the Kubernetes API")
+
+		manifest, err := r.k8sClient.CoreV1().Namespaces().Get(key.ClusterNamespace(customObject), metav1.GetOptions{})
 		if apierrors.IsNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the namespace in the Kubernetes API")
 			// fall through
@@ -36,12 +37,28 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	}
 
 	// In case the namespace is already terminating we do not need to do any
-	// further work. Then we cancel the reconciliation to prevent the current and
-	// any further resource from being processed.
-	if namespace != nil && namespace.Status.Phase == "Terminating" {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "namespace is in state 'Terminating'")
+	// further work. We cancel the namespace resource to prevent any further work,
+	// but keep the finalizers until the namespace got finally deleted. This is to
+	// prevent issues with the monitoring and alerting systems. The cluster status
+	// conditions of the watched CR are used to inhibit alerts, for instance when
+	// the cluster is being deleted.
+	if namespace != nil && namespace.Status.Phase == corev1.NamespaceTerminating {
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("namespace is %#q", corev1.NamespaceTerminating))
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+		finalizerskeptcontext.SetKept(ctx)
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 		resourcecanceledcontext.SetCanceled(ctx)
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
+
+		return nil, nil
+	}
+
+	if namespace == nil && key.IsDeleted(customObject) {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "resource deletion completed")
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		resourcecanceledcontext.SetCanceled(ctx)
 
 		return nil, nil
 	}
