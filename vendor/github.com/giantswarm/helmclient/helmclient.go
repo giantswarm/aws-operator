@@ -400,6 +400,22 @@ func (c *Client) InstallFromTarball(path, ns string, options ...helmclient.Insta
 	return nil
 }
 
+// PingTiller proxies the underlying Helm client PingTiller method.
+func (c *Client) PingTiller() error {
+	t, err := c.newTunnel()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	defer c.closeTunnel(t)
+
+	err = c.newHelmClientFromTunnel(t).PingTiller()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
 // RunReleaseTest runs the tests for a Helm Release. The releaseName is the
 // name of the Helm Release that is set when the Helm Chart is installed. This
 // is the same action as running the helm test command.

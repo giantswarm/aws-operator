@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"strings"
+	"time"
 
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/guestcluster"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -19,7 +21,8 @@ const (
 	Name = "status"
 )
 
-type Config struct {
+type ResourceConfig struct {
+	BackOffFactory      func() backoff.Interface
 	ClusterEndpointFunc func(v interface{}) (string, error)
 	ClusterIDFunc       func(v interface{}) (string, error)
 	ClusterStatusFunc   func(v interface{}) (providerv1alpha1.StatusCluster, error)
@@ -47,6 +50,7 @@ type Config struct {
 }
 
 type Resource struct {
+	backOffFactory           func() backoff.Interface
 	clusterEndpointFunc      func(v interface{}) (string, error)
 	clusterIDFunc            func(v interface{}) (string, error)
 	clusterStatusFunc        func(v interface{}) (providerv1alpha1.StatusCluster, error)
@@ -57,7 +61,10 @@ type Resource struct {
 	versionBundleVersionFunc func(v interface{}) (string, error)
 }
 
-func New(config Config) (*Resource, error) {
+func NewResource(config ResourceConfig) (*Resource, error) {
+	if config.BackOffFactory == nil {
+		config.BackOffFactory = func() backoff.Interface { return backoff.NewMaxRetries(3, 1*time.Second) }
+	}
 	if config.ClusterEndpointFunc == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ClusterEndpointFunc must not be empty", config)
 	}
@@ -84,6 +91,7 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
+		backOffFactory:           config.BackOffFactory,
 		clusterEndpointFunc:      config.ClusterEndpointFunc,
 		clusterIDFunc:            config.ClusterIDFunc,
 		clusterStatusFunc:        config.ClusterStatusFunc,
