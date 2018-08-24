@@ -13,6 +13,11 @@ func VersionBundle() versionbundle.Bundle {
 				Kind:        versionbundle.KindChanged,
 			},
 			{
+				Component:   "aws-operator",
+				Description: "Add description in the Security Group rules.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
 				Component:   "cloudconfig",
 				Description: "Kubernetes (hyperkube) updated with version 1.11.1.",
 				Kind:        versionbundle.KindChanged,
