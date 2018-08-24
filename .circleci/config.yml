@@ -200,8 +200,6 @@ workflows:
 
 
 
-
-
       - e2eTestCurPRDraining:
           requires:
           - hold
@@ -215,6 +213,27 @@ workflows:
           requires:
           - build
       - e2eTestWIPMasterDraining:
+          filters:
+            branches:
+              only: master
+          requires:
+          - build
+
+
+
+      - e2eTestCurPRIPAM:
+          requires:
+          - hold
+      - e2eTestWIPPRIPAM:
+          requires:
+          - hold
+      - e2eTestCurMasterIPAM:
+          filters:
+            branches:
+              only: master
+          requires:
+          - build
+      - e2eTestWIPMasterIPAM:
           filters:
             branches:
               only: master
