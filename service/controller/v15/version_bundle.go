@@ -8,6 +8,11 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
+				Component:   "kubernetes",
+				Description: "Updated to 1.11.1.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
 				Component:   "aws-operator",
 				Description: "Enabled termination protection for CloudFormation stacks.",
 				Kind:        versionbundle.KindChanged,
@@ -19,8 +24,8 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "cloudconfig",
-				Description: "Kubernetes (hyperkube) updated with version 1.11.1.",
-				Kind:        versionbundle.KindChanged,
+				Description: "Removed nginx-ingress-controller related components (will be managed by chart-operator).",
+				Kind:        versionbundle.KindRemoved,
 			},
 		},
 		Components: []versionbundle.Component{
@@ -47,10 +52,6 @@ func VersionBundle() versionbundle.Bundle {
 			{
 				Name:    "kubernetes",
 				Version: "1.11.1",
-			},
-			{
-				Name:    "nginx-ingress-controller",
-				Version: "0.12.0",
 			},
 		},
 		Name:    "aws-operator",
