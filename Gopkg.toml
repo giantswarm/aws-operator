@@ -62,8 +62,7 @@ required = [
   name = "github.com/giantswarm/e2eclients"
 
 [[constraint]]
-  # TODO: Change this back to master before merge.
-  branch = "add-ipam-config"
+  branch = "master"
   name = "github.com/giantswarm/e2etemplates"
 
 [[constraint]]
