@@ -5,22 +5,23 @@ const AutoScalingGroup = `{{define "autoscaling_group"}}
   {{ $v.ASGType }}AutoScalingGroup:
     Type: "AWS::AutoScaling::AutoScalingGroup"
     Properties:
-      VPCZoneIdentifier:
-        - !Ref PrivateSubnet
       AvailabilityZones: [{{ $v.WorkerAZ }}]
       DesiredCapacity: {{ $v.ASGMinSize }}
-      MinSize: {{ $v.ASGMinSize }}
+      HealthCheckGracePeriod: {{ $v.HealthCheckGracePeriod }}
+      HealthCheckType: ELB
       MaxSize: {{ $v.ASGMaxSize }}
+      MinSize: {{ $v.ASGMinSize }}
       LaunchConfigurationName: !Ref {{ $v.ASGType }}LaunchConfiguration
       LoadBalancerNames:
         - !Ref IngressLoadBalancer
-      HealthCheckGracePeriod: {{ $v.HealthCheckGracePeriod }}
       MetricsCollection:
         - Granularity: "1Minute"
       Tags:
         - Key: Name
           Value: {{ $v.ClusterID }}-{{ $v.ASGType }}
           PropagateAtLaunch: true
+      VPCZoneIdentifier:
+        - !Ref PrivateSubnet
     UpdatePolicy:
       AutoScalingRollingUpdate:
         # minimum amount of instances that must always be running during a rolling update
