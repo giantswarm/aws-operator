@@ -18,6 +18,11 @@ func VersionBundle() versionbundle.Bundle {
 				Kind:        versionbundle.KindChanged,
 			},
 			{
+				Component:   "aws-operator",
+				Description: "Add description in the Security Group rules.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
 				Component:   "cloudconfig",
 				Description: "Removed nginx-ingress-controller related components (will be managed by chart-operator).",
 				Kind:        versionbundle.KindRemoved,

@@ -74,41 +74,41 @@ func (s *GuestSecurityGroupsAdapter) getMasterRules(cfg Config, hostClusterCIDR 
 
 	// Other security group rules for the master.
 	otherRules := []securityGroupRule{
-		// Allow traffic from host cluster CIDR to 4194 for cadvisor scraping.
 		{
-			Port:       cadvisorPort,
-			Protocol:   tcpProtocol,
-			SourceCIDR: hostClusterCIDR,
+			Description: "Allow traffic from control plane CIDR to 4194 for cadvisor scraping.",
+			Port:        cadvisorPort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  hostClusterCIDR,
 		},
-		// Allow traffic from host cluster CIDR to 2379 for etcd backup.
 		{
-			Port:       etcdPort,
-			Protocol:   tcpProtocol,
-			SourceCIDR: hostClusterCIDR,
+			Description: "Allow traffic from control plane CIDR to 2379 for etcd backup.",
+			Port:        etcdPort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  hostClusterCIDR,
 		},
-		// Allow traffic from host cluster CIDR to 10250 for kubelet scraping.
 		{
-			Port:       kubeletPort,
-			Protocol:   tcpProtocol,
-			SourceCIDR: hostClusterCIDR,
+			Description: "Allow traffic from control plane CIDR to 10250 for kubelet scraping.",
+			Port:        kubeletPort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  hostClusterCIDR,
 		},
-		// Allow traffic from host cluster CIDR to 10300 for node-exporter scraping.
 		{
-			Port:       nodeExporterPort,
-			Protocol:   tcpProtocol,
-			SourceCIDR: hostClusterCIDR,
+			Description: "Allow traffic from control plane CIDR to 10300 for node-exporter scraping.",
+			Port:        nodeExporterPort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  hostClusterCIDR,
 		},
-		// Allow traffic from host cluster CIDR to 10301 for kube-state-metrics scraping.
 		{
-			Port:       kubeStateMetricsPort,
-			Protocol:   tcpProtocol,
-			SourceCIDR: hostClusterCIDR,
+			Description: "Allow traffic from control plane CIDR to 10301 for kube-state-metrics scraping.",
+			Port:        kubeStateMetricsPort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  hostClusterCIDR,
 		},
-		// Only allow ssh traffic from the host cluster.
 		{
-			Port:       sshPort,
-			Protocol:   tcpProtocol,
-			SourceCIDR: hostClusterCIDR,
+			Description: "Only allow ssh traffic from the control plane.",
+			Port:        sshPort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  hostClusterCIDR,
 		},
 	}
 	return append(apiRules, otherRules...), nil
@@ -116,74 +116,76 @@ func (s *GuestSecurityGroupsAdapter) getMasterRules(cfg Config, hostClusterCIDR 
 
 func (s *GuestSecurityGroupsAdapter) getWorkerRules(customObject v1alpha1.AWSConfig, hostClusterCIDR string) []securityGroupRule {
 	return []securityGroupRule{
-		// Allow traffic from the ingress security group to the ingress controller.
 		{
+			Description:         "Allow traffic from the ingress security group to the ingress controller port 443.",
 			Port:                key.IngressControllerSecurePort(customObject),
 			Protocol:            tcpProtocol,
 			SourceSecurityGroup: ingressSecurityGroupName,
 		},
 		{
+			Description:         "Allow traffic from the ingress security group to the ingress controller port 80.",
 			Port:                key.IngressControllerInsecurePort(customObject),
 			Protocol:            tcpProtocol,
 			SourceSecurityGroup: ingressSecurityGroupName,
 		},
-		// Allow traffic from host cluster to ingress controller secure port,
-		// for guest cluster scraping.
 		{
-			Port:       key.IngressControllerSecurePort(customObject),
-			Protocol:   tcpProtocol,
-			SourceCIDR: hostClusterCIDR,
+			Description: "Allow traffic from control plane to ingress controller secure port for tenant cluster scraping.",
+			Port:        key.IngressControllerSecurePort(customObject),
+			Protocol:    tcpProtocol,
+			SourceCIDR:  hostClusterCIDR,
 		},
-		// Allow traffic from host cluster CIDR to 4194 for cadvisor scraping.
 		{
-			Port:       cadvisorPort,
-			Protocol:   tcpProtocol,
-			SourceCIDR: hostClusterCIDR,
+			Description: "Allow traffic from control plane CIDR to 4194 for cadvisor scraping.",
+			Port:        cadvisorPort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  hostClusterCIDR,
 		},
-		// Allow traffic from host cluster CIDR to 10250 for kubelet scraping.
 		{
-			Port:       kubeletPort,
-			Protocol:   tcpProtocol,
-			SourceCIDR: hostClusterCIDR,
+			Description: "Allow traffic from control plane CIDR to 10250 for kubelet scraping.",
+			Port:        kubeletPort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  hostClusterCIDR,
 		},
-		// Allow traffic from host cluster CIDR to 10300 for node-exporter scraping.
 		{
-			Port:       nodeExporterPort,
-			Protocol:   tcpProtocol,
-			SourceCIDR: hostClusterCIDR,
+			Description: "Allow traffic from control plane CIDR to 10300 for node-exporter scraping.",
+			Port:        nodeExporterPort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  hostClusterCIDR,
 		},
-		// Allow traffic from host cluster CIDR to 10301 for kube-state-metrics scraping.
 		{
-			Port:       kubeStateMetricsPort,
-			Protocol:   tcpProtocol,
-			SourceCIDR: hostClusterCIDR,
+			Description: "Allow traffic from control plane CIDR to 10301 for kube-state-metrics scraping.",
+			Port:        kubeStateMetricsPort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  hostClusterCIDR,
 		},
-		// Only allow ssh traffic from the host cluster.
 		{
-			Port:       sshPort,
-			Protocol:   tcpProtocol,
-			SourceCIDR: hostClusterCIDR,
+			Description: "Only allow ssh traffic from the control plane.",
+			Port:        sshPort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  hostClusterCIDR,
 		},
 	}
 }
 
 func (s *GuestSecurityGroupsAdapter) getIngressRules(customObject v1alpha1.AWSConfig) []securityGroupRule {
 	return []securityGroupRule{
-		// Allow all http and https traffic to the ingress load balancer.
 		{
-			Port:       httpPort,
-			Protocol:   tcpProtocol,
-			SourceCIDR: defaultCIDR,
+			Description: "Allow all http traffic to the ingress load balancer.",
+			Port:        httpPort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  defaultCIDR,
 		},
 		{
-			Port:       httpsPort,
-			Protocol:   tcpProtocol,
-			SourceCIDR: defaultCIDR,
+			Description: "Allow all https traffic to the ingress load balancer.",
+			Port:        httpsPort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  defaultCIDR,
 		},
 	}
 }
 
 type securityGroupRule struct {
+	Description         string
 	Port                int
 	Protocol            string
 	SourceCIDR          string
@@ -194,17 +196,17 @@ func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupR
 	// When API whitelisting is enabled, add separate security group rule per each subnet.
 	if cfg.APIWhitelist.Enabled {
 		rules := []securityGroupRule{
-			// Allow traffic from host cluster CIDR.
 			{
-				Port:       key.KubernetesAPISecurePort(cfg.CustomObject),
-				Protocol:   tcpProtocol,
-				SourceCIDR: hostClusterCIDR,
+				Description: "Allow traffic from control plane CIDR.",
+				Port:        key.KubernetesAPISecurePort(cfg.CustomObject),
+				Protocol:    tcpProtocol,
+				SourceCIDR:  hostClusterCIDR,
 			},
-			// Allow traffic from guest cluster CIDR.
 			{
-				Port:       key.KubernetesAPISecurePort(cfg.CustomObject),
-				Protocol:   tcpProtocol,
-				SourceCIDR: cfg.CustomObject.Spec.AWS.VPC.CIDR,
+				Description: "Allow traffic from tenant cluster CIDR.",
+				Port:        key.KubernetesAPISecurePort(cfg.CustomObject),
+				Protocol:    tcpProtocol,
+				SourceCIDR:  cfg.CustomObject.Spec.AWS.VPC.CIDR,
 			},
 		}
 
@@ -213,9 +215,10 @@ func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupR
 		for _, subnet := range whitelistSubnets {
 			if subnet != "" {
 				subnetRule := securityGroupRule{
-					Port:       key.KubernetesAPISecurePort(cfg.CustomObject),
-					Protocol:   tcpProtocol,
-					SourceCIDR: subnet,
+					Description: "Custom Whitelist CIDR.",
+					Port:        key.KubernetesAPISecurePort(cfg.CustomObject),
+					Protocol:    tcpProtocol,
+					SourceCIDR:  subnet,
 				}
 				rules = append(rules, subnetRule)
 			}
@@ -236,9 +239,10 @@ func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupR
 		// When API whitelisting is disabled, allow all traffic.
 		allowAllRule := []securityGroupRule{
 			{
-				Port:       key.KubernetesAPISecurePort(cfg.CustomObject),
-				Protocol:   tcpProtocol,
-				SourceCIDR: defaultCIDR,
+				Description: "Allow all traffic to the master instance.",
+				Port:        key.KubernetesAPISecurePort(cfg.CustomObject),
+				Protocol:    tcpProtocol,
+				SourceCIDR:  defaultCIDR,
 			},
 		}
 
@@ -268,9 +272,10 @@ func getHostClusterNATGatewayRules(cfg Config) ([]securityGroupRule, error) {
 
 	for _, address := range output.Addresses {
 		gatewayRule := securityGroupRule{
-			Port:       key.KubernetesAPISecurePort(cfg.CustomObject),
-			Protocol:   tcpProtocol,
-			SourceCIDR: fmt.Sprintf("%s/32", *address.PublicIp),
+			Description: "Allow traffic from gateways.",
+			Port:        key.KubernetesAPISecurePort(cfg.CustomObject),
+			Protocol:    tcpProtocol,
+			SourceCIDR:  fmt.Sprintf("%s/32", *address.PublicIp),
 		}
 
 		gatewayRules = append(gatewayRules, gatewayRule)
