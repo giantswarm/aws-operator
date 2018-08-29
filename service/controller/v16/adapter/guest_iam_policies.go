@@ -7,8 +7,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v15/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/v15/key"
+	"github.com/giantswarm/aws-operator/service/controller/v16/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v16/key"
 )
 
 type GuestIAMPoliciesAdapter struct {
