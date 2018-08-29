@@ -64,7 +64,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find the guest cluster nodes being in state '%s'", autoscaling.LifecycleStateTerminatingWait))
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
-
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d guest cluster nodes being in state '%s'", len(instances), autoscaling.LifecycleStateTerminatingWait))
@@ -79,6 +78,17 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			privateDNS, err := r.privateDNSForInstance(ctx, *instance.InstanceId)
 			if err != nil {
 				return microerror.Mask(err)
+			}
+			if privateDNS == "" {
+				// It might happen that state transitioning within EC2 happen while we
+				// try to gather information. An EC2 instance might be in
+				// Terminating:Wait state and then moves to Terminated before we get a
+				// chance to gather the drainer configs here. The operator then did its
+				// job already and we only have to deal with the edge case situation. So
+				// we just stop here and move on with the other instances.
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("no private DNS for instance %#q", *instance.InstanceId))
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not draining instance %#q", *instance.InstanceId))
+				continue
 			}
 
 			n := customObject.GetNamespace()

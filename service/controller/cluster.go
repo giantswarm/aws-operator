@@ -30,6 +30,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v14"
 	v14adapter "github.com/giantswarm/aws-operator/service/controller/v14/adapter"
 	v14cloudconfig "github.com/giantswarm/aws-operator/service/controller/v14/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch1"
+	v14patch1adapter "github.com/giantswarm/aws-operator/service/controller/v14patch1/adapter"
+	v14patch1cloudconfig "github.com/giantswarm/aws-operator/service/controller/v14patch1/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v15"
 	v15adapter "github.com/giantswarm/aws-operator/service/controller/v15/adapter"
 	v15cloudconfig "github.com/giantswarm/aws-operator/service/controller/v15/cloudconfig"
@@ -619,6 +622,49 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var resourceSetV14Patch1 *controller.ResourceSet
+	{
+		c := v14patch1.ClusterResourceSetConfig{
+			CertsSearcher:      certsSearcher,
+			G8sClient:          config.G8sClient,
+			HostAWSConfig:      hostAWSConfig,
+			HostAWSClients:     awsHostClients,
+			K8sClient:          config.K8sClient,
+			Logger:             config.Logger,
+			RandomkeysSearcher: randomKeySearcher,
+
+			AccessLogsExpiration:   config.AccessLogsExpiration,
+			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
+			DeleteLoggingBucket:    config.DeleteLoggingBucket,
+			EncrypterBackend:       config.EncrypterBackend,
+			GuestUpdateEnabled:     config.GuestUpdateEnabled,
+			PodInfraContainerImage: config.PodInfraContainerImage,
+			Route53Enabled:         config.Route53Enabled,
+			IncludeTags:            config.IncludeTags,
+			InstallationName:       config.InstallationName,
+			OIDC: v14patch1cloudconfig.OIDCConfig{
+				ClientID:      config.OIDC.ClientID,
+				IssuerURL:     config.OIDC.IssuerURL,
+				UsernameClaim: config.OIDC.UsernameClaim,
+				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			APIWhitelist: v14patch1adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
+			},
+			ProjectName:       config.ProjectName,
+			PublicRouteTables: config.PublicRouteTables,
+			RegistryDomain:    config.RegistryDomain,
+			SSOPublicKey:      config.SSOPublicKey,
+			VaultAddress:      config.VaultAddress,
+		}
+
+		resourceSetV14Patch1, err = v14patch1.NewClusterResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var resourceSetV15 *controller.ResourceSet
 	{
 		c := v15.ClusterResourceSetConfig{
@@ -678,6 +724,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		resourceSetV12Patch1,
 		resourceSetV13,
 		resourceSetV14,
+		resourceSetV14Patch1,
 		resourceSetV15,
 	}
 
