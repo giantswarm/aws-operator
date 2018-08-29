@@ -14,5 +14,5 @@ type Interface interface {
 	// cluster. Provider specific operator reconciles on it and deletes the
 	// guest cluster eventually. This function does not wait for guest cluster
 	// to get deleted but only deletes the chart deployment of provider config.
-	DeleteCluster(clusterName string)
+	DeleteCluster(clusterName string) error
 }

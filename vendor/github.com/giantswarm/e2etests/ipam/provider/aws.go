@@ -6,36 +6,16 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"text/template"
 	"time"
 
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	awsclient "github.com/giantswarm/e2eclients/aws"
+	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
-// apiextensionsAWSConfigE2EChartValues is modified version of
-// e2etemplates.ApiextensionsAWSConfigE2EChartValues for IPAM test scenario.
-// Major difference is lack of subnet fields and need to replace clusterName
-// format string value. ClusterName is not based on env variable because there
-// would be too high risk for unintentional disruption of other tests if
-// ${CLUSTER_NAME} would be dynamically changed on the fly.
-const apiextensionsAWSConfigE2EChartValues = `commonDomain: {{ .CommonDomain }}
-clusterName: {{ .ClusterName }}
-clusterVersion: v_0_1_0
-sshPublicKey: {{ .SSHPublicKey }}
-versionBundleVersion: {{ .VersionBundleVersion }}
-aws:
-  region: {{ .AWSRegion }}
-  apiHostedZone: {{ .AWSAPIHostedZoneGuest }}
-  ingressHostedZone: {{ .AWSIngressHostedZoneGuest }}
-  routeTable0: {{ .AWSRouteTable0 }}
-  routeTable1: {{ .AWSRouteTable1 }}
-  vpcPeerId: {{ .AWSVPCPeerID }}
-`
 
 type AWSConfig struct {
 	AWSClient     *awsclient.Client
@@ -50,9 +30,8 @@ type AWS struct {
 	hostFramework *framework.Host
 	logger        micrologger.Logger
 
-	chartValuesConfig   ChartValuesConfig
-	chartValuesTemplate *template.Template
-	hostClusterName     string
+	chartValuesConfig ChartValuesConfig
+	hostClusterName   string
 }
 
 type ChartValuesConfig struct {
@@ -94,8 +73,7 @@ func NewAWS(config AWSConfig) (*AWS, error) {
 			SSHPublicKey:              getValue(config.SSHPublicKey, "IDRSA_PUB"),
 			VersionBundleVersion:      getValue(config.VersionBundleVersion, "VERSION_BUNDLE_VERSION"),
 		},
-		chartValuesTemplate: template.Must(template.New("awsConfigChartValues").Parse(apiextensionsAWSConfigE2EChartValues)),
-		hostClusterName:     getValue(config.ClusterName, "CLUSTER_NAME"),
+		hostClusterName: getValue(config.ClusterName, "CLUSTER_NAME"),
 	}
 
 	return a, nil
@@ -122,7 +100,10 @@ func (aws *AWS) CreateCluster(clusterName string) error {
 		// NOTE we ignore errors here because we cannot get really useful error
 		// handling done. This here should anyway only be a quick fix until we use
 		// the helm client lib. Then error handling will be better.
-		framework.HelmCmd(fmt.Sprintf("delete --purge %s", deploymentName))
+		err := framework.HelmCmd(fmt.Sprintf("delete --purge %s", deploymentName))
+		if err != nil {
+			return microerror.Mask(err)
+		}
 
 		f, err := ioutil.TempFile("/tmp", deploymentName)
 		if err != nil {
@@ -133,26 +114,46 @@ func (aws *AWS) CreateCluster(clusterName string) error {
 			fName := f.Name()
 			err = f.Close()
 			if err != nil {
-				// XXX: Tempfile leak.
+				// XXX: Tempfile cannot be removed due to error. It must be
+				// removed manually.
 				aws.logger.Log("level", "error", "message", fmt.Sprintf("failed to close & remove tempfile '%s'", fName))
 				return
 			}
 			err = os.Remove(fName)
 			if err != nil {
-				// XXX: Tempfile leak.
+				// XXX: Tempfile cannot be removed due to error. It must be
+				// removed manually.
 				aws.logger.Log("level", "error", "message", fmt.Sprintf("failed to close & remove tempfile '%s'", fName))
 				return
 			}
 		}()
 
-		chartValuesConfig := aws.chartValuesConfig
-		chartValuesConfig.ClusterName = clusterName
-		chartValuesConfig.AWSRouteTable0 = clusterName + "_0"
-		chartValuesConfig.AWSRouteTable1 = clusterName + "_1"
-		chartValuesConfig.AWSVPCPeerID = hostAWSConfig.Spec.AWS.VPC.PeerID
-		err = aws.chartValuesTemplate.Execute(f, chartValuesConfig)
-		if err != nil {
-			return microerror.Mask(err)
+		{
+			c := chartvalues.APIExtensionsAWSConfigE2EConfig{
+				CommonDomain:         aws.chartValuesConfig.CommonDomain,
+				ClusterName:          clusterName,
+				SSHPublicKey:         aws.chartValuesConfig.SSHPublicKey,
+				VersionBundleVersion: aws.chartValuesConfig.VersionBundleVersion,
+
+				AWS: chartvalues.APIExtensionsAWSConfigE2EConfigAWS{
+					Region:            aws.chartValuesConfig.AWSRegion,
+					APIHostedZone:     aws.chartValuesConfig.AWSAPIHostedZoneGuest,
+					IngressHostedZone: aws.chartValuesConfig.AWSIngressHostedZoneGuest,
+					RouteTable0:       clusterName + "_0",
+					RouteTable1:       clusterName + "_1",
+					VPCPeerID:         hostAWSConfig.Spec.AWS.VPC.PeerID,
+				},
+			}
+
+			values, err := chartvalues.NewAPIExtensionsAWSConfigE2E(c)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			_, err = f.WriteString(values)
+			if err != nil {
+				return microerror.Mask(err)
+			}
 		}
 
 		err = framework.HelmCmd(fmt.Sprintf("registry install quay.io/giantswarm/apiextensions-aws-config-e2e-chart:stable -- -n %s --values %s", awsConfigDeploymentName(clusterName), f.Name()))
@@ -175,12 +176,14 @@ func (aws *AWS) CreateCluster(clusterName string) error {
 	return nil
 }
 
-func (aws *AWS) DeleteCluster(clusterName string) {
+func (aws *AWS) DeleteCluster(clusterName string) error {
 	deploymentName := awsConfigDeploymentName(clusterName)
-	// NOTE we ignore errors here because we cannot get really useful error
-	// handling done. This here should anyway only be a quick fix until we use
-	// the helm client lib. Then error handling will be better.
-	framework.HelmCmd(fmt.Sprintf("delete --purge %s", deploymentName))
+	err := framework.HelmCmd(fmt.Sprintf("delete --purge %s", deploymentName))
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
 }
 
 func (aws *AWS) installCertResources(clusterName string) error {
@@ -188,13 +191,13 @@ func (aws *AWS) installCertResources(clusterName string) error {
 		aws.logger.Log("level", "debug", "message", "installing cert resource chart")
 
 		o := func() error {
-			// NOTE we ignore errors here because we cannot get really useful error
-			// handling done. This here should anyway only be a quick fix until we use
-			// the helm client lib. Then error handling will be better.
-			framework.HelmCmd(fmt.Sprintf("delete --purge %s", certDeploymentName(clusterName)))
+			err := framework.HelmCmd(fmt.Sprintf("delete --purge %s", certDeploymentName(clusterName)))
+			if err != nil {
+				return microerror.Mask(err)
+			}
 
 			cmdStr := fmt.Sprintf("registry install quay.io/giantswarm/apiextensions-cert-config-e2e-chart:stable -- -n %s --set commonDomain=${COMMON_DOMAIN} --set clusterName=%s", certDeploymentName(clusterName), clusterName)
-			err := framework.HelmCmd(cmdStr)
+			err = framework.HelmCmd(cmdStr)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -218,8 +221,6 @@ func (aws *AWS) installCertResources(clusterName string) error {
 			n := fmt.Sprintf("%s-api", clusterName)
 			_, err := aws.hostFramework.K8sClient().CoreV1().Secrets("default").Get(n, metav1.GetOptions{})
 			if err != nil {
-				// TODO remove this when not needed for debugging anymore
-				fmt.Printf("%#v\n", err)
 				return microerror.Maskf(waitError, "k8s secret is still missing")
 			}
 
