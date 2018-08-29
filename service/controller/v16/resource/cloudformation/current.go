@@ -9,9 +9,9 @@ import (
 	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v15/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v15/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v15/key"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v16/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v16/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v16/key"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {

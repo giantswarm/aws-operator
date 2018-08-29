@@ -3,7 +3,7 @@ package adapter
 import (
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v15/key"
+	"github.com/giantswarm/aws-operator/service/controller/v16/key"
 )
 
 type GuestRouteTablesAdapter struct {
