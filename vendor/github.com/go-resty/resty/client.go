@@ -58,10 +58,10 @@ var (
 	jsonContentType = "application/json; charset=utf-8"
 	formContentType = "application/x-www-form-urlencoded"
 
-	jsonCheck = regexp.MustCompile(`(?i:(application|text)/(problem\+json|json))`)
-	xmlCheck  = regexp.MustCompile(`(?i:(application|text)/(problem\+xml|xml))`)
+	jsonCheck = regexp.MustCompile(`(?i:(application|text)/(json|.*\+json)(;|$))`)
+	xmlCheck  = regexp.MustCompile(`(?i:(application|text)/(xml|.*\+xml)(;|$))`)
 
-	hdrUserAgentValue = "go-resty v%s - https://github.com/go-resty/resty"
+	hdrUserAgentValue = "go-resty/%s (https://github.com/go-resty/resty)"
 	bufPool           = &sync.Pool{New: func() interface{} { return &bytes.Buffer{} }}
 )
 
@@ -87,6 +87,7 @@ type Client struct {
 	JSONMarshal           func(v interface{}) ([]byte, error)
 	JSONUnmarshal         func(data []byte, v interface{}) error
 
+	jsonEscapeHTML     bool
 	httpClient         *http.Client
 	setContentLength   bool
 	isHTTPMode         bool
@@ -310,6 +311,7 @@ func (c *Client) R() *Request {
 		multipartFiles:  []*File{},
 		multipartFields: []*multipartField{},
 		pathParams:      map[string]string{},
+		jsonEscapeHTML:  true,
 	}
 
 	return r
@@ -734,6 +736,14 @@ func (c *Client) SetPathParams(params map[string]string) *Client {
 	for p, v := range params {
 		c.pathParams[p] = v
 	}
+	return c
+}
+
+// SetJSONEscapeHTML method is to enable/disable the HTML escape on JSON marshal.
+//
+// NOTE: This option only applicable to standard JSON Marshaller.
+func (c *Client) SetJSONEscapeHTML(b bool) *Client {
+	c.jsonEscapeHTML = b
 	return c
 }
 
