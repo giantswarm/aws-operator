@@ -83,7 +83,7 @@ const SecurityGroups = `{{define "security_groups" }}
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup
     Properties:
-      Description: Allow access between masters and workers for calico.
+      # Allow access between masters and workers for calico.
       GroupId: !Ref MasterSecurityGroup
       IpProtocol: -1
       FromPort: -1
