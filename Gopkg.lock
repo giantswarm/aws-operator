@@ -254,6 +254,15 @@
   revision = "425207429a641c7e43d409680d54ae78f049e04e"
 
 [[projects]]
+  branch = "aws"
+  name = "github.com/giantswarm/e2esetup"
+  packages = [
+    "aws",
+    "aws/env"
+  ]
+  revision = "ce2d894ce5596e3641aa869a3bbf19ae9b721ccd"
+
+[[projects]]
   branch = "master"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
@@ -1389,6 +1398,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "cc69745db9b83d4fb520d933f6befe920fffa28ef5ad3df708d76e41a0e219c0"
+  inputs-digest = "2f035220f0fc166ab42173f956fc4c19a106acb6a7d36957d3aca203311b778c"
   solver-name = "gps-cdcl"
   solver-version = 1
