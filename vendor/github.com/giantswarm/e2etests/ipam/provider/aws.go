@@ -97,9 +97,6 @@ func (aws *AWS) CreateCluster(clusterName string) error {
 	deploymentName := awsConfigDeploymentName(clusterName)
 
 	o := func() error {
-		// NOTE we ignore errors here because we cannot get really useful error
-		// handling done. This here should anyway only be a quick fix until we use
-		// the helm client lib. Then error handling will be better.
 		err := framework.HelmCmd(fmt.Sprintf("delete --purge %s", deploymentName))
 		if err != nil {
 			return microerror.Mask(err)
@@ -116,14 +113,14 @@ func (aws *AWS) CreateCluster(clusterName string) error {
 			if err != nil {
 				// XXX: Tempfile cannot be removed due to error. It must be
 				// removed manually.
-				aws.logger.Log("level", "error", "message", fmt.Sprintf("failed to close & remove tempfile '%s'", fName))
+				aws.logger.Log("level", "error", "message", fmt.Sprintf("failed to close & remove tempfile '%s' - it must be removed manually", fName))
 				return
 			}
 			err = os.Remove(fName)
 			if err != nil {
 				// XXX: Tempfile cannot be removed due to error. It must be
 				// removed manually.
-				aws.logger.Log("level", "error", "message", fmt.Sprintf("failed to close & remove tempfile '%s'", fName))
+				aws.logger.Log("level", "error", "message", fmt.Sprintf("failed to close & remove tempfile '%s' - it must be removed manually", fName))
 				return
 			}
 		}()

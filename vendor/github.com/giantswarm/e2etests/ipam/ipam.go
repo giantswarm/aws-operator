@@ -76,8 +76,6 @@ func (c *IPAM) Test(ctx context.Context) error {
 	)
 
 	defer func() {
-		c.logger.LogCtx(ctx, "level", "debug", "message", "ensuring all guest clusters possibly created in test are deleted.")
-
 		for _, cn := range []string{clusterOne, clusterTwo, clusterThree, clusterFour} {
 			err := c.provider.DeleteCluster(cn)
 			if err != nil {
@@ -86,7 +84,7 @@ func (c *IPAM) Test(ctx context.Context) error {
 		}
 	}()
 
-	// clusters to create in first batch
+	// This is a list of clusters that are created in first test phase.
 	clusters := []string{clusterOne, clusterTwo, clusterThree}
 
 	{
@@ -98,7 +96,7 @@ func (c *IPAM) Test(ctx context.Context) error {
 			if err != nil {
 				return microerror.Mask(err)
 			}
-			c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("create guest cluster %s", cn))
+			c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created guest cluster %s", cn))
 		}
 	}
 
@@ -184,7 +182,7 @@ func (c *IPAM) Test(ctx context.Context) error {
 	}
 
 	{
-		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for guest cluster %s to become up", clusterFour))
+		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for guest cluster %s to come up", clusterFour))
 
 		cfg := framework.GuestConfig{
 			Logger: c.logger,
