@@ -6,6 +6,11 @@ const awsOperatorTemplate = `Installation:
       Vault:
         Address: http://vault.default.svc.cluster.local:8200
     Guest:
+      IPAM:
+        NetworkCIDR: "10.12.0.0/16"
+        CIDRMask: 24
+        PrivateSubnetMask: 25
+        PublicSubnetMask: 25
       Kubernetes:
         API:
           Auth:
