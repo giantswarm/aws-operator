@@ -73,11 +73,11 @@ func Setup(ctx context.Context, m *testing.M, config Config) error {
 		v = m.Run()
 	}
 
-	if os.Getenv("KEEP_RESOURCES") != "true" {
+	if env.KeepResources() != "true" {
 		config.Host.DeleteGuestCluster(ctx, provider)
 
 		// only do full teardown when not on CI
-		if os.Getenv("CIRCLECI") != "true" {
+		if env.CircleCI() != "true" {
 			err := teardown(config)
 			if err != nil {
 				errors = append(errors, err)

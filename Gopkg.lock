@@ -260,7 +260,7 @@
     "aws",
     "aws/env"
   ]
-  revision = "ce2d894ce5596e3641aa869a3bbf19ae9b721ccd"
+  revision = "dafff584adfd36cbc736d53eb16e8f62d8991cf4"
 
 [[projects]]
   branch = "master"
