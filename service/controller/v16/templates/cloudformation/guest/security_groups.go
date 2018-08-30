@@ -10,7 +10,6 @@ const SecurityGroups = `{{define "security_groups" }}
       SecurityGroupIngress:
       {{ range $v.MasterSecurityGroupRules }}
       -
-        Description: {{ .Description }}
         IpProtocol: {{ .Protocol }}
         FromPort: {{ .Port }}
         ToPort: {{ .Port }}
@@ -18,7 +17,6 @@ const SecurityGroups = `{{define "security_groups" }}
       {{ end }}
       {{- if $v.APIWhitelistEnabled }}
       -
-        Description: NAT gateway IP
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
@@ -36,7 +34,6 @@ const SecurityGroups = `{{define "security_groups" }}
       SecurityGroupIngress:
       {{ range $v.WorkerSecurityGroupRules }}
       -
-        Description: {{ .Description }}
         IpProtocol: {{ .Protocol }}
         FromPort: {{ .Port }}
         ToPort: {{ .Port }}
@@ -58,7 +55,6 @@ const SecurityGroups = `{{define "security_groups" }}
       SecurityGroupIngress:
       {{ range $v.IngressSecurityGroupRules }}
       -
-        Description: {{ .Description }}
         IpProtocol: {{ .Protocol }}
         FromPort: {{ .Port }}
         ToPort: {{ .Port }}
@@ -74,7 +70,7 @@ const SecurityGroups = `{{define "security_groups" }}
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup
     Properties:
-      Description: Allow access between masters and workers for calico.
+      # Allow access between masters and workers for calico.
       GroupId: !Ref MasterSecurityGroup
       IpProtocol: -1
       FromPort: -1
@@ -85,7 +81,7 @@ const SecurityGroups = `{{define "security_groups" }}
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup
     Properties:
-      Description: Allow access between masters and workers for calico.
+      # Allow access between masters and workers for calico.
       GroupId: !Ref MasterSecurityGroup
       IpProtocol: -1
       FromPort: -1
@@ -96,7 +92,7 @@ const SecurityGroups = `{{define "security_groups" }}
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: WorkerSecurityGroup
     Properties:
-      Description: Allow access between masters and workers for calico.
+      # Allow access between masters and workers for calico.
       GroupId: !Ref WorkerSecurityGroup
       IpProtocol: -1
       FromPort: -1
@@ -107,7 +103,7 @@ const SecurityGroups = `{{define "security_groups" }}
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: WorkerSecurityGroup
     Properties:
-      Description: Allow access between masters and workers for calico.
+      # Allow access between masters and workers for calico.
       GroupId: !Ref WorkerSecurityGroup
       IpProtocol: -1
       FromPort: -1
