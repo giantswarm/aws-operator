@@ -240,9 +240,10 @@
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
+    "pkg/framework/filelogger",
     "pkg/harness"
   ]
-  revision = "356ee815b2f63562157d4f30149f7e8b19ae2a74"
+  revision = "0e6c1c20224b2c43cc27484d01d85269361870f2"
 
 [[projects]]
   branch = "master"
