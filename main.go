@@ -128,6 +128,8 @@ func mainError() error {
 
 	daemonCommand.PersistentFlags().String(f.Service.Guest.SSH.SSOPublicKey, "", "Public key for trusted SSO CA.")
 
+	daemonCommand.PersistentFlags().String(f.Service.AWS.ImagePullProgressDeadline, "", "If no pulling progress is made before this deadline the image pulling is cancelled. If empty, default value of 1m is used.")
+
 	daemonCommand.PersistentFlags().Bool(f.Service.AWS.LoggingBucket.Delete, false, "Should be logging bucket deleted.")
 
 	daemonCommand.PersistentFlags().Bool(f.Service.AWS.Route53.Enabled, true, "Should Route53 be enabled.")
