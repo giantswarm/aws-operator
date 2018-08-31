@@ -3,6 +3,10 @@ package helmclient
 import "k8s.io/helm/pkg/helm"
 
 const (
+	// defaultMaxHistory is the maximum number of release versions stored per
+	// release by default.
+	defaultMaxHistory = 10
+
 	tillerDefaultNamespace = "kube-system"
 	tillerImageSpec        = "quay.io/giantswarm/tiller:v2.8.2"
 	tillerLabelSelector    = "app=helm,name=tiller"

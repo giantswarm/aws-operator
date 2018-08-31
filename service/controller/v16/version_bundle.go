@@ -8,24 +8,9 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "kubernetes",
-				Description: "Updated to 1.11.1.",
-				Kind:        versionbundle.KindChanged,
-			},
-			{
 				Component:   "aws-operator",
-				Description: "Enabled termination protection for CloudFormation stacks.",
+				Description: "Add your changes here.",
 				Kind:        versionbundle.KindChanged,
-			},
-			{
-				Component:   "aws-operator",
-				Description: "Add description in the Security Group rules.",
-				Kind:        versionbundle.KindChanged,
-			},
-			{
-				Component:   "cloudconfig",
-				Description: "Removed nginx-ingress-controller related components (will be managed by chart-operator).",
-				Kind:        versionbundle.KindRemoved,
 			},
 		},
 		Components: []versionbundle.Component{
@@ -55,6 +40,6 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    "aws-operator",
-		Version: "4.0.0",
+		Version: "4.1.0",
 	}
 }
