@@ -65,6 +65,7 @@ type ClusterConfig struct {
 	GuestAWSConfig         ClusterConfigAWSConfig
 	GuestUpdateEnabled     bool
 	HostAWSConfig          ClusterConfigAWSConfig
+	ImagePullProgressDeadline string
 	IncludeTags            bool
 	InstallationName       string
 	OIDC                   ClusterConfigOIDC
@@ -721,6 +722,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			DeleteLoggingBucket:    config.DeleteLoggingBucket,
 			EncrypterBackend:       config.EncrypterBackend,
 			GuestUpdateEnabled:     config.GuestUpdateEnabled,
+			ImagePullProgressDeadline: config.ImagePullProgressDeadline,
 			PodInfraContainerImage: config.PodInfraContainerImage,
 			Route53Enabled:         config.Route53Enabled,
 			IncludeTags:            config.IncludeTags,

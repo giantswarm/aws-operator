@@ -20,10 +20,11 @@ type Config struct {
 	Encrypter encrypter.Interface
 	Logger    micrologger.Logger
 
-	OIDC                   OIDCConfig
-	PodInfraContainerImage string
-	RegistryDomain         string
-	SSOPublicKey           string
+	ImagePullProgressDeadline string
+	OIDC                      OIDCConfig
+	PodInfraContainerImage    string
+	RegistryDomain            string
+	SSOPublicKey              string
 }
 
 // CloudConfig implements the cloud config service interface.
@@ -75,6 +76,10 @@ func New(config Config) (*CloudConfig, error) {
 
 	var k8sKubeletExtraArgs []string
 	{
+		if config.ImagePullProgressDeadline != "" {
+			k8sKubeletExtraArgs = append(k8sKubeletExtraArgs, fmt.Sprintf("--image-pull-progress-deadline=%s", config.ImagePullProgressDeadline))
+		}
+
 		if config.PodInfraContainerImage != "" {
 			k8sKubeletExtraArgs = append(k8sKubeletExtraArgs, fmt.Sprintf("--pod-infra-container-image=%s", config.PodInfraContainerImage))
 		}

@@ -58,6 +58,7 @@ type ClusterResourceSetConfig struct {
 	APIWhitelist           adapter.APIWhitelist
 	EncrypterBackend       string
 	GuestUpdateEnabled     bool
+	ImagePullProgressDeadline string
 	IncludeTags            bool
 	InstallationName       string
 	DeleteLoggingBucket    bool
@@ -506,6 +507,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 				Encrypter: encrypterObject,
 				Logger:    config.Logger,
 
+				ImagePullProgressDeadline: config.ImagePullProgressDeadline,
 				OIDC: config.OIDC,
 				PodInfraContainerImage: config.PodInfraContainerImage,
 				RegistryDomain:         config.RegistryDomain,
