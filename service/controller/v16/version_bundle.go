@@ -8,8 +8,8 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "aws-operator",
-				Description: "Add your changes here.",
+				Component:   "cloudconfig",
+				Description: "Addded kubelet setting --image-pull-progress-deadline for pulling images in AWS China regions.",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
