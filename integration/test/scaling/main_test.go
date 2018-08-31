@@ -119,6 +119,4 @@ func TestMain(m *testing.M) {
 			os.Exit(1)
 		}
 	}
-
-	os.Exit(0)
 }
