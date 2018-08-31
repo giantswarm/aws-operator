@@ -57,26 +57,26 @@ type ClusterConfig struct {
 	K8sExtClient apiextensionsclient.Interface
 	Logger       micrologger.Logger
 
-	AccessLogsExpiration   int
-	AdvancedMonitoringEC2  bool
-	APIWhitelist           FrameworkConfigAPIWhitelistConfig
-	DeleteLoggingBucket    bool
-	EncrypterBackend       string
-	GuestAWSConfig         ClusterConfigAWSConfig
-	GuestUpdateEnabled     bool
-	HostAWSConfig          ClusterConfigAWSConfig
+	AccessLogsExpiration      int
+	AdvancedMonitoringEC2     bool
+	APIWhitelist              FrameworkConfigAPIWhitelistConfig
+	DeleteLoggingBucket       bool
+	EncrypterBackend          string
+	GuestAWSConfig            ClusterConfigAWSConfig
+	GuestUpdateEnabled        bool
+	HostAWSConfig             ClusterConfigAWSConfig
 	ImagePullProgressDeadline string
-	IncludeTags            bool
-	InstallationName       string
-	OIDC                   ClusterConfigOIDC
-	PodInfraContainerImage string
-	ProjectName            string
-	PubKeyFile             string
-	PublicRouteTables      string
-	RegistryDomain         string
-	Route53Enabled         bool
-	SSOPublicKey           string
-	VaultAddress           string
+	IncludeTags               bool
+	InstallationName          string
+	OIDC                      ClusterConfigOIDC
+	PodInfraContainerImage    string
+	ProjectName               string
+	PubKeyFile                string
+	PublicRouteTables         string
+	RegistryDomain            string
+	Route53Enabled            bool
+	SSOPublicKey              string
+	VaultAddress              string
 }
 
 type ClusterConfigAWSConfig struct {
@@ -717,16 +717,16 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			Logger:             config.Logger,
 			RandomkeysSearcher: randomKeySearcher,
 
-			AccessLogsExpiration:   config.AccessLogsExpiration,
-			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
-			DeleteLoggingBucket:    config.DeleteLoggingBucket,
-			EncrypterBackend:       config.EncrypterBackend,
-			GuestUpdateEnabled:     config.GuestUpdateEnabled,
+			AccessLogsExpiration:      config.AccessLogsExpiration,
+			AdvancedMonitoringEC2:     config.AdvancedMonitoringEC2,
+			DeleteLoggingBucket:       config.DeleteLoggingBucket,
+			EncrypterBackend:          config.EncrypterBackend,
+			GuestUpdateEnabled:        config.GuestUpdateEnabled,
 			ImagePullProgressDeadline: config.ImagePullProgressDeadline,
-			PodInfraContainerImage: config.PodInfraContainerImage,
-			Route53Enabled:         config.Route53Enabled,
-			IncludeTags:            config.IncludeTags,
-			InstallationName:       config.InstallationName,
+			PodInfraContainerImage:    config.PodInfraContainerImage,
+			Route53Enabled:            config.Route53Enabled,
+			IncludeTags:               config.IncludeTags,
+			InstallationName:          config.InstallationName,
 			OIDC: v16cloudconfig.OIDCConfig{
 				ClientID:      config.OIDC.ClientID,
 				IssuerURL:     config.OIDC.IssuerURL,

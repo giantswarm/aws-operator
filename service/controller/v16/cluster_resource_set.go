@@ -53,23 +53,23 @@ type ClusterResourceSetConfig struct {
 	Logger             micrologger.Logger
 	RandomkeysSearcher randomkeys.Interface
 
-	AccessLogsExpiration   int
-	AdvancedMonitoringEC2  bool
-	APIWhitelist           adapter.APIWhitelist
-	EncrypterBackend       string
-	GuestUpdateEnabled     bool
+	AccessLogsExpiration      int
+	AdvancedMonitoringEC2     bool
+	APIWhitelist              adapter.APIWhitelist
+	EncrypterBackend          string
+	GuestUpdateEnabled        bool
 	ImagePullProgressDeadline string
-	IncludeTags            bool
-	InstallationName       string
-	DeleteLoggingBucket    bool
-	OIDC                   cloudconfig.OIDCConfig
-	ProjectName            string
-	PublicRouteTables      string
-	Route53Enabled         bool
-	PodInfraContainerImage string
-	RegistryDomain         string
-	SSOPublicKey           string
-	VaultAddress           string
+	IncludeTags               bool
+	InstallationName          string
+	DeleteLoggingBucket       bool
+	OIDC                      cloudconfig.OIDCConfig
+	ProjectName               string
+	PublicRouteTables         string
+	Route53Enabled            bool
+	PodInfraContainerImage    string
+	RegistryDomain            string
+	SSOPublicKey              string
+	VaultAddress              string
 }
 
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
