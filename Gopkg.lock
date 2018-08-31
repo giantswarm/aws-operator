@@ -46,7 +46,7 @@
   version = "v1.4.2"
 
 [[projects]]
-  digest = "1:da79da6cac05f15cdea39be364329b666a801078130c7e6c3f5ec4fc92899195"
+  digest = "1:fe4de10ebdcbfca6fdf196ef826835c604e2f006b5643ce9e42fa5cadccf0234"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -100,8 +100,8 @@
     "service/support/supportiface",
   ]
   pruneopts = "UT"
-  revision = "e21dfa909e14ce93f88f1f3505764bc4952a11be"
-  version = "v1.15.18"
+  revision = "7715ed93fca215da2c707088a0cca5646ad91543"
+  version = "v1.15.24"
 
 [[projects]]
   branch = "master"
@@ -152,7 +152,7 @@
     "reference",
   ]
   pruneopts = "UT"
-  revision = "02bf4a2887a491eaa5333acae99e67bf8e68df1a"
+  revision = "b12bd4004afc203f1cbd2072317c8fda30b89710"
 
 [[projects]]
   digest = "1:67bf6da2a62f206f3387976fcd8f4df00371719a6e9517e0e2b54c32edf342d9"
@@ -234,7 +234,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ab769e6353ffff5b77decced37f60761e8852c62b1bb0afb3b438da94ead46f7"
+  digest = "1:1d4bb8ca943ec77214edafd53b4e55e6477087b85dacb06c6fa75f1716bc3ba3"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/core/v1alpha1",
@@ -251,7 +251,7 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake",
   ]
   pruneopts = "UT"
-  revision = "427166f178767c667affce0e68a88c0f77df4972"
+  revision = "4c9945ca5b9cb966b22566c8e3fd789fefd5db98"
 
 [[projects]]
   branch = "master"
@@ -316,21 +316,19 @@
   revision = "bb4e1e045f232011219dfd16ef35fb8afda60594"
 
 [[projects]]
-  branch = "ipam-e2e-tests"
-  digest = "1:ce59380bfc0a92ef300c087906b78745d3885631a96cdfd07190243f44e6ff70"
+  branch = "master"
+  digest = "1:9074841a2de8bfcc96152f97e81ad7d7077877becec1a6c9c38913386e721089"
   name = "github.com/giantswarm/e2etests"
   packages = [
     "clusterstate",
     "clusterstate/provider",
-    "ipam",
-    "ipam/provider",
     "scaling",
     "scaling/provider",
     "update",
     "update/provider",
   ]
   pruneopts = "UT"
-  revision = "118d147645fca0600cac871d900b0a8916b21e3a"
+  revision = "8391748d9b75fc5f2c3a11359331cb124cfc0451"
 
 [[projects]]
   branch = "master"
@@ -350,19 +348,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:43aa91fb105fdfde473cb8dadf0964f6b641959bad438466f09185de4eaf8bed"
+  digest = "1:6d69831daa85788b0daceda0f13e3fb10d4a39885c706555355e5109f613af4a"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
   pruneopts = "UT"
-  revision = "95121dddf902715f9b1799fc64dbf7119d471dec"
-
-[[projects]]
-  branch = "master"
-  digest = "1:6bd49e15179a5351604f234dbb12f4d3fb1c64b6885e0221582003a22af47271"
-  name = "github.com/giantswarm/ipam"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "088a71e10de0b950fc9f64e52cf125c86dfb8fa0"
+  revision = "ec20d46eb68e6fd0cda0a6c0132df4a3fc1a8318"
 
 [[projects]]
   branch = "master"
@@ -384,11 +374,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:49101d1a9e4d6f96c18cc9fe87c9107629dc6031b658cb8b9baea4f2c791789a"
+  digest = "1:aff4157beb61837e21efdd4a73927fa85ceab4b21a80d1f00a092d535844c5ae"
   name = "github.com/giantswarm/k8sportforward"
   packages = ["."]
   pruneopts = "UT"
-  revision = "85abe7e11c90cf56ee1eda142ea3051fd61f5b82"
+  revision = "cee042b3bd70531ea52f41df02c04430879806e2"
 
 [[projects]]
   branch = "master"
@@ -413,7 +403,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:310f40b39fafa31cfb2120c87ef28292ae24f8ce746a7b851845e6832bd3884e"
+  digest = "1:5c1520d3b53997d03f3848c91bca0e982701f1589a69917ba4a9e553910a2b64"
   name = "github.com/giantswarm/microkit"
   packages = [
     "command",
@@ -421,6 +411,8 @@
     "command/daemon/flag",
     "command/daemon/flag/config",
     "command/daemon/flag/server",
+    "command/daemon/flag/server/enable",
+    "command/daemon/flag/server/enable/debug",
     "command/daemon/flag/server/listen",
     "command/daemon/flag/server/log",
     "command/daemon/flag/server/tls",
@@ -430,7 +422,7 @@
     "tls",
   ]
   pruneopts = "UT"
-  revision = "ce14380d3198ff00c82888ee3ed7e9d0efaa383a"
+  revision = "6d9fca5cdb031ccb8712dbe465b1fc4bd9ad6c52"
 
 [[projects]]
   branch = "master"
@@ -443,14 +435,6 @@
   ]
   pruneopts = "UT"
   revision = "d757f42e4a3efca1fe82e633579b28c586e08698"
-
-[[projects]]
-  branch = "master"
-  digest = "1:ddd43139c09097ebf88f8748425ae83d37770763aae32f6a855782847161e587"
-  name = "github.com/giantswarm/microstorage"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "4411a6307c6b844b7f9e68aaba37407b41b1c4d7"
 
 [[projects]]
   branch = "master"
@@ -540,20 +524,20 @@
   version = "v0.3.0"
 
 [[projects]]
-  digest = "1:cf9c32df6fe209f9b5db1aa91c6e4084d3867baa9063803df07c5b80a37f1f90"
+  digest = "1:b7fc4c3fd91df516486f53cc86f4b55a0c815782dbe852c5a19cce8e6c577aac"
   name = "github.com/go-resty/resty"
   packages = ["."]
   pruneopts = "UT"
-  revision = "97a15579492cd5f35632499f315d7a8df94160a1"
-  version = "v1.8.0"
+  revision = "d4920dcf5b7689548a6db640278a9b35a5b48ec6"
+  version = "v1.9.1"
 
 [[projects]]
-  digest = "1:c4a2528ccbcabf90f9f3c464a5fc9e302d592861bbfd0b7135a7de8a943d0406"
+  digest = "1:586ea76dbd0374d6fb649a91d70d652b7fe0ccffb8910a77468e7702e7901f3d"
   name = "github.com/go-stack/stack"
   packages = ["."]
   pruneopts = "UT"
-  revision = "259ab82a6cad3992b4e21ff5cac294ccb06474bc"
-  version = "v1.7.0"
+  revision = "2fee6af1a9795aafbe0253a0cfbdf668e1fb8a9a"
+  version = "v1.8.0"
 
 [[projects]]
   digest = "1:9ae31ce33b4bab257668963e844d98765b44160be4ee98cafc44637a213e530d"
@@ -615,11 +599,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:4be3c01ef56542da4f1268c52a8b88bae5309ec3dade7755e250bc933e13ac70"
+  digest = "1:6c50492d5d411683c7b84bf9ce6d6bf90a740fe20edaef05499ce406f4bc0e45"
   name = "github.com/google/go-github"
   packages = ["github"]
   pruneopts = "UT"
-  revision = "d7732128a00e8e95e8fe896017da18ee20b2180d"
+  revision = "3dd825b438d329c9c1c74ce4271a95f2cb7ad78d"
 
 [[projects]]
   branch = "master"
@@ -666,19 +650,18 @@
   version = "v1.6.2"
 
 [[projects]]
-  branch = "master"
-  digest = "1:cf296baa185baae04a9a7004efee8511d08e2f5f51d4cbe5375da89722d681db"
+  digest = "1:8ec8d88c248041a6df5f6574b87bc00e7e0b493881dad2e7ef47b11dc69093b5"
   name = "github.com/hashicorp/golang-lru"
   packages = [
     ".",
     "simplelru",
   ]
   pruneopts = "UT"
-  revision = "0fb14efe8c47ae851c0034ed7a448854d3d34cf3"
+  revision = "20f1fb78b0740ba8c3cb143a61e86ba5c8669768"
+  version = "v0.5.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:a361611b8c8c75a1091f00027767f7779b29cb37c456a71b8f2604c88057ab40"
+  digest = "1:c0d19ab64b32ce9fe5cf4ddceba78d5bc9807f0016db6b1183599da3dcc24d10"
   name = "github.com/hashicorp/hcl"
   packages = [
     ".",
@@ -693,7 +676,8 @@
     "json/token",
   ]
   pruneopts = "UT"
-  revision = "ef8a98b0bbce4a65b5aa4c368430a80ddc533168"
+  revision = "8cb6e5b959231cc1119e43259c4a608f9c51a241"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -767,12 +751,12 @@
   version = "v1.0.1"
 
 [[projects]]
-  branch = "master"
-  digest = "1:5ab79470a1d0fb19b041a624415612f8236b3c06070161a910562f2b2d064355"
+  digest = "1:645110e089152bd0f4a011a2648fbb0e4df5977be73ca605781157ac297f50c4"
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
   pruneopts = "UT"
-  revision = "f15292f7a699fcc1a38a80977f80a046874ba8ac"
+  revision = "fa473d140ef3c6adf42d6b391fe76707f1f243c8"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
@@ -824,14 +808,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:39a12a429383c8ec9d13c762d386825f84ff4c981aef416cf598923a510756c8"
+  digest = "1:1e7e38945e6406ec04688d7f020d04fe8d5ea84ea7e0fe220ef2a24cb30acc34"
   name = "github.com/prometheus/client_golang"
   packages = [
     "prometheus",
     "prometheus/promhttp",
   ]
   pruneopts = "UT"
-  revision = "ebce7d0078c0109cbb4de5d50a2b799920b0f0d0"
+  revision = "676eaf6b948046fcd9dbbcf5cc9ff5077921aa81"
 
 [[projects]]
   branch = "master"
@@ -954,7 +938,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "922f4815f713f213882e8ef45e0d315b164d705c"
+  revision = "8a410e7b638dca158bf9e766925842f6651ff828"
 
 [[projects]]
   branch = "master"
@@ -977,14 +961,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:7710ea76bd73d3154e86eaf2db8b36a6dffbd6114e4e37b516f1d232c03ddd8d"
+  digest = "1:9c99029818a3d4f53bcfd6c0158ca068aeacfecb29283f82a1f9c79b8d2a7da4"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "11551d06cbcc94edc80a0facaccbda56473c19c1"
+  revision = "d99a578cf41bfccdeaf48b0845c823a4b8b0ad5e"
 
 [[projects]]
   digest = "1:e5a8511f063c38c51ab9ab80e718e9149f692652aeb4e393a8c020dd1bf38ca2"
@@ -1667,15 +1651,12 @@
     "github.com/giantswarm/e2etemplates/pkg/e2etemplates",
     "github.com/giantswarm/e2etests/clusterstate",
     "github.com/giantswarm/e2etests/clusterstate/provider",
-    "github.com/giantswarm/e2etests/ipam",
-    "github.com/giantswarm/e2etests/ipam/provider",
     "github.com/giantswarm/e2etests/scaling",
     "github.com/giantswarm/e2etests/scaling/provider",
     "github.com/giantswarm/e2etests/update",
     "github.com/giantswarm/e2etests/update/provider",
     "github.com/giantswarm/guestcluster",
     "github.com/giantswarm/helmclient",
-    "github.com/giantswarm/ipam",
     "github.com/giantswarm/k8scloudconfig/v_2_0_2",
     "github.com/giantswarm/k8scloudconfig/v_3_0_0",
     "github.com/giantswarm/k8scloudconfig/v_3_1_1",
