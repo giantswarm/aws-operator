@@ -317,7 +317,12 @@ func (h *Host) InstallOperator(name, cr, values, version string) error {
 		return microerror.Mask(err)
 	}
 	podName, err := h.PodName(h.targetNamespace, fmt.Sprintf("app=%s", name))
-	if err != nil {
+	if IsNotFound(err) {
+		podName, err = h.PodName("giantswarm", fmt.Sprintf("app=%s", name))
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	} else if err != nil {
 		return microerror.Mask(err)
 	}
 
