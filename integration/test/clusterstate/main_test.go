@@ -108,9 +108,6 @@ func init() {
 func TestMain(m *testing.M) {
 	ctx := context.Background()
 
-	var err error
-	var v int
-
 	{
 		c := e2esetup.Config{
 			AWSClient: c,
@@ -118,12 +115,12 @@ func TestMain(m *testing.M) {
 			Host:      h,
 		}
 
-		err = e2esetup.Setup(ctx, m, c)
+		err := e2esetup.Setup(ctx, m, c)
 		if err != nil {
-			l.Log(fmt.Sprintf("%#v\n", err))
-			v = 1
+			l.LogCtx(ctx, "level", "error", "message", "e2e test failed", "stack", fmt.Sprintf("%#v\n", err))
+			os.Exit(1)
 		}
 	}
 
-	os.Exit(v)
+	os.Exit(0)
 }
