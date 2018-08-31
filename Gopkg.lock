@@ -243,7 +243,7 @@
     "pkg/framework/filelogger",
     "pkg/harness"
   ]
-  revision = "0e6c1c20224b2c43cc27484d01d85269361870f2"
+  revision = "0ab361fab5e732e0cc782be4b17c2e11cfb8137d"
 
 [[projects]]
   branch = "master"

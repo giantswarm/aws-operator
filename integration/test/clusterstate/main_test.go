@@ -53,9 +53,8 @@ func init() {
 		c := framework.HostConfig{
 			Logger: l,
 
-			ClusterID:       env.ClusterID(),
-			VaultToken:      env.VaultToken(),
-			TargetNamespace: "giantswarm",
+			ClusterID:  env.ClusterID(),
+			VaultToken: env.VaultToken(),
 		}
 
 		h, err = framework.NewHost(c)

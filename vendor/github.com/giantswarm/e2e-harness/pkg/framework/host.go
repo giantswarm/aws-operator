@@ -316,12 +316,12 @@ func (h *Host) InstallOperator(name, cr, values, version string) error {
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	podName, err := h.PodName("giantswarm", fmt.Sprintf("app=%s", name))
+	podName, err := h.PodName(h.targetNamespace, fmt.Sprintf("app=%s", name))
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	err = h.filelogger.StartLoggingPod("giantswarm", podName)
+	err = h.filelogger.StartLoggingPod(h.targetNamespace, podName)
 	if err != nil {
 		return microerror.Mask(err)
 	}
