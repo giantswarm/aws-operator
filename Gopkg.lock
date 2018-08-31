@@ -304,6 +304,15 @@
   revision = "425207429a641c7e43d409680d54ae78f049e04e"
 
 [[projects]]
+  branch = "aws"
+  name = "github.com/giantswarm/e2esetup"
+  packages = [
+    "aws",
+    "aws/env"
+  ]
+  revision = "dafff584adfd36cbc736d53eb16e8f62d8991cf4"
+
+[[projects]]
   branch = "master"
   digest = "1:2ee504029967701a6960982d76557ce2af443b6fc7a687eec80bb9fb85ccaa27"
   name = "github.com/giantswarm/e2etemplates"
@@ -1609,6 +1618,7 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
+  inputs-digest = "2f035220f0fc166ab42173f956fc4c19a106acb6a7d36957d3aca203311b778c"
   input-imports = [
     "github.com/Azure/go-autorest/autorest",
     "github.com/aws/aws-sdk-go/aws",

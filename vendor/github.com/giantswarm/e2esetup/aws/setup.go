@@ -1,6 +1,4 @@
-// +build k8srequired
-
-package setup
+package aws
 
 import (
 	"context"
@@ -19,7 +17,7 @@ import (
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/integration/env"
+	"github.com/giantswarm/e2esetup/aws/env"
 )
 
 const (
@@ -30,34 +28,43 @@ const (
 	provider              = "aws"
 )
 
-func Setup(m *testing.M, config Config) {
-	ctx := context.Background()
-
+func Setup(ctx context.Context, m *testing.M, config Config) error {
 	var v int
 	var err error
+	var errors []error
+
+	if config.AWSClient == nil {
+		return microerror.Maskf(invalidConfigError, "%T.AWSClient must not be empty", config)
+	}
+	if config.Guest == nil {
+		return microerror.Maskf(invalidConfigError, "%T.Guest must not be empty", config)
+	}
+	if config.Host == nil {
+		return microerror.Maskf(invalidConfigError, "%T.Host must not be empty", config)
+	}
 
 	vpcPeerID, err := installHostPeerVPC(config)
 	if err != nil {
-		log.Printf("%#v\n", err)
+		errors = append(errors, err)
 		v = 1
 	}
 
 	err = config.Host.Setup()
 	if err != nil {
-		log.Printf("%#v\n", err)
+		errors = append(errors, err)
 		v = 1
 	}
 
 	err = installResources(config, vpcPeerID)
 	if err != nil {
-		log.Printf("%#v\n", err)
+		errors = append(errors, err)
 		v = 1
 	}
 
 	if v == 0 {
 		err = config.Guest.Setup()
 		if err != nil {
-			log.Printf("%#v\n", err)
+			errors = append(errors, err)
 			v = 1
 		}
 	}
@@ -66,14 +73,14 @@ func Setup(m *testing.M, config Config) {
 		v = m.Run()
 	}
 
-	if os.Getenv("KEEP_RESOURCES") != "true" {
+	if env.KeepResources() != "true" {
 		config.Host.DeleteGuestCluster(ctx, provider)
 
 		// only do full teardown when not on CI
-		if os.Getenv("CIRCLECI") != "true" {
+		if env.CircleCI() != "true" {
 			err := teardown(config)
 			if err != nil {
-				log.Printf("%#v\n", err)
+				errors = append(errors, err)
 				v = 1
 			}
 			// TODO there should be error handling for the framework teardown.
@@ -81,7 +88,11 @@ func Setup(m *testing.M, config Config) {
 		}
 	}
 
-	os.Exit(v)
+	if len(errors) > 0 {
+		return microerror.Mask(errors[0])
+	}
+
+	return nil
 }
 
 func installAWSOperator(config Config) error {

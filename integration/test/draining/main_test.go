@@ -3,35 +3,40 @@
 package draining
 
 import (
+	"context"
+	"fmt"
+	"os"
 	"testing"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/e2eclients/aws"
+	e2esetup "github.com/giantswarm/e2esetup/aws"
+	"github.com/giantswarm/e2esetup/aws/env"
 	"github.com/giantswarm/micrologger"
-
-	"github.com/giantswarm/aws-operator/integration/env"
-	"github.com/giantswarm/aws-operator/integration/setup"
 )
 
 var (
+	c *aws.Client
 	g *framework.Guest
 	h *framework.Host
-	c *aws.Client
+	l micrologger.Logger
 )
 
-// TestMain allows us to have common setup and teardown steps that are run
-// once for all the tests https://golang.org/pkg/testing/#hdr-Main.
-func TestMain(m *testing.M) {
+func init() {
 	var err error
 
-	logger, err := micrologger.New(micrologger.Config{})
-	if err != nil {
-		panic(err.Error())
+	{
+		c := micrologger.Config{}
+
+		l, err = micrologger.New(c)
+		if err != nil {
+			panic(err.Error())
+		}
 	}
 
 	{
 		c := framework.GuestConfig{
-			Logger: logger,
+			Logger: l,
 
 			ClusterID:    env.ClusterID(),
 			CommonDomain: env.CommonDomain(),
@@ -45,7 +50,7 @@ func TestMain(m *testing.M) {
 
 	{
 		c := framework.HostConfig{
-			Logger: logger,
+			Logger: l,
 
 			ClusterID:  env.ClusterID(),
 			VaultToken: env.VaultToken(),
@@ -63,14 +68,24 @@ func TestMain(m *testing.M) {
 			panic(err.Error())
 		}
 	}
+}
+
+// TestMain allows us to have common setup and teardown steps that are run
+// once for all the tests https://golang.org/pkg/testing/#hdr-Main.
+func TestMain(m *testing.M) {
+	ctx := context.Background()
 
 	{
-		c := setup.Config{
+		c := e2esetup.Config{
 			AWSClient: c,
 			Guest:     g,
 			Host:      h,
 		}
 
-		setup.Setup(m, c)
+		err := e2esetup.Setup(ctx, m, c)
+		if err != nil {
+			l.LogCtx(ctx, "level", "error", "message", "e2e test failed", "stack", fmt.Sprintf("%#v\n", err))
+			os.Exit(1)
+		}
 	}
 }

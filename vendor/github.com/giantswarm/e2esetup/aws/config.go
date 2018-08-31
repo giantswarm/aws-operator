@@ -1,4 +1,4 @@
-package setup
+package aws
 
 import (
 	"github.com/giantswarm/e2e-harness/pkg/framework"

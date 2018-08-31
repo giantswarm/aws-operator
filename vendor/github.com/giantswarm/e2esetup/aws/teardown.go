@@ -1,6 +1,4 @@
-// +build k8srequired
-
-package setup
+package aws
 
 import (
 	"fmt"
@@ -11,7 +9,7 @@ import (
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/integration/env"
+	"github.com/giantswarm/e2esetup/aws/env"
 )
 
 func teardown(config Config) error {

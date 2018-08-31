@@ -12,6 +12,7 @@ import (
 
 	"github.com/giantswarm/apprclient"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
+	"github.com/giantswarm/e2esetup/aws/env"
 	"github.com/giantswarm/helmclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -19,7 +20,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 
-	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/aws-operator/service/controller/v13/key"
 )
 

@@ -3,16 +3,18 @@
 package clusterstate
 
 import (
+	"context"
+	"fmt"
+	"os"
 	"testing"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	e2eclient "github.com/giantswarm/e2eclients/aws"
+	e2esetup "github.com/giantswarm/e2esetup/aws"
+	"github.com/giantswarm/e2esetup/aws/env"
 	"github.com/giantswarm/e2etests/clusterstate"
 	"github.com/giantswarm/e2etests/clusterstate/provider"
 	"github.com/giantswarm/micrologger"
-
-	"github.com/giantswarm/aws-operator/integration/env"
-	"github.com/giantswarm/aws-operator/integration/setup"
 )
 
 var (
@@ -20,12 +22,12 @@ var (
 	cs *clusterstate.ClusterState
 	g  *framework.Guest
 	h  *framework.Host
+	l  micrologger.Logger
 )
 
 func init() {
 	var err error
 
-	var l micrologger.Logger
 	{
 		c := micrologger.Config{}
 
@@ -104,13 +106,19 @@ func init() {
 // TestMain allows us to have common setup and teardown steps that are run
 // once for all the tests https://golang.org/pkg/testing/#hdr-Main.
 func TestMain(m *testing.M) {
+	ctx := context.Background()
+
 	{
-		c := setup.Config{
+		c := e2esetup.Config{
 			AWSClient: c,
 			Guest:     g,
 			Host:      h,
 		}
 
-		setup.Setup(m, c)
+		err := e2esetup.Setup(ctx, m, c)
+		if err != nil {
+			l.LogCtx(ctx, "level", "error", "message", "e2e test failed", "stack", fmt.Sprintf("%#v\n", err))
+			os.Exit(1)
+		}
 	}
 }
