@@ -316,9 +316,13 @@ func (h *Host) InstallOperator(name, cr, values, version string) error {
 	if err != nil {
 		return microerror.Mask(err)
 	}
+	podNamespace := h.targetNamespace
+
 	podName, err := h.PodName(h.targetNamespace, fmt.Sprintf("app=%s", name))
 	if IsNotFound(err) {
-		podName, err = h.PodName("giantswarm", fmt.Sprintf("app=%s", name))
+		podNamespace = "giantswarm"
+
+		podName, err = h.PodName(podNamespace, fmt.Sprintf("app=%s", name))
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -326,7 +330,7 @@ func (h *Host) InstallOperator(name, cr, values, version string) error {
 		return microerror.Mask(err)
 	}
 
-	err = h.filelogger.StartLoggingPod(h.targetNamespace, podName)
+	err = h.filelogger.StartLoggingPod(podNamespace, podName)
 	if err != nil {
 		return microerror.Mask(err)
 	}
