@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	_ "net/http/pprof"
 	"net/url"
 	"strconv"
 	"strings"
@@ -37,6 +38,10 @@ type Config struct {
 	// endpoints registered that are listed in the endpoint collection.
 	Router *mux.Router
 
+	// EnableDebugServer boolean flag to enable debug server on
+	// http://127.0.0.1:6060/debug. This server is primarily used to expose
+	// net/http/pprof.Handler.
+	EnableDebugServer bool
 	// Endpoints is the server's configured list of endpoints. These are the
 	// custom endpoints configured by the client.
 	Endpoints []Endpoint
@@ -138,11 +143,12 @@ func New(config Config) (Server, error) {
 		listenMetricsUrl:  listenMetricsURL,
 		shutdownOnce:      sync.Once{},
 
-		endpoints:      config.Endpoints,
-		handlerWrapper: config.HandlerWrapper,
-		logAccess:      config.LogAccess,
-		requestFuncs:   config.RequestFuncs,
-		serviceName:    config.ServiceName,
+		enableDebugServer: config.EnableDebugServer,
+		endpoints:         config.Endpoints,
+		handlerWrapper:    config.HandlerWrapper,
+		logAccess:         config.LogAccess,
+		requestFuncs:      config.RequestFuncs,
+		serviceName:       config.ServiceName,
 		tlsCertFiles: tls.CertFiles{
 			RootCAs: []string{config.TLSCAFile},
 			Cert:    config.TLSCrtFile,
@@ -170,12 +176,13 @@ type server struct {
 	shutdownOnce      sync.Once
 
 	// Settings.
-	endpoints      []Endpoint
-	handlerWrapper func(h http.Handler) http.Handler
-	logAccess      bool
-	requestFuncs   []kithttp.RequestFunc
-	serviceName    string
-	tlsCertFiles   tls.CertFiles
+	enableDebugServer bool
+	endpoints         []Endpoint
+	handlerWrapper    func(h http.Handler) http.Handler
+	logAccess         bool
+	requestFuncs      []kithttp.RequestFunc
+	serviceName       string
+	tlsCertFiles      tls.CertFiles
 }
 
 func (s *server) Boot() {
@@ -279,6 +286,15 @@ func (s *server) Boot() {
 			// Register prometheus metrics endpoint to the same server as the rest of
 			// the endpoints.
 			s.router.Path("/metrics").Handler(promhttp.Handler())
+		}
+
+		if s.enableDebugServer {
+			go func() {
+				s.logger.Log("level", "debug", "message", "running debug server at http://127.0.0.1:6060/debug")
+				// When net/http/pprof is imported, its init() registers /debug
+				// handles to DefaultServeMux automatically.
+				s.logger.Log("level", "debug", "message", fmt.Sprintf("%#v", http.ListenAndServe("127.0.0.1:6060", nil)))
+			}()
 		}
 
 		// Register the router which has all of the configured custom endpoints

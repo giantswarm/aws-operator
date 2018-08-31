@@ -2,8 +2,7 @@ package endpoint
 
 import (
 	"github.com/giantswarm/microendpoint/endpoint/healthz"
-	versionendpoint "github.com/giantswarm/microendpoint/endpoint/version"
-	healthzservice "github.com/giantswarm/microendpoint/service/healthz"
+	"github.com/giantswarm/microendpoint/endpoint/version"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -15,6 +14,11 @@ type Config struct {
 	Service *service.Service
 }
 
+type Endpoint struct {
+	Healthz *healthz.Endpoint
+	Version *version.Endpoint
+}
+
 func New(config Config) (*Endpoint, error) {
 	var err error
 
@@ -22,9 +26,6 @@ func New(config Config) (*Endpoint, error) {
 	{
 		c := healthz.Config{
 			Logger: config.Logger,
-			Services: []healthzservice.Service{
-				config.Service.Healthz,
-			},
 		}
 
 		healthzEndpoint, err = healthz.New(c)
@@ -33,28 +34,23 @@ func New(config Config) (*Endpoint, error) {
 		}
 	}
 
-	var versionEndpoint *versionendpoint.Endpoint
+	var versionEndpoint *version.Endpoint
 	{
-		c := versionendpoint.Config{
+		c := version.Config{
 			Logger:  config.Logger,
 			Service: config.Service.Version,
 		}
 
-		versionEndpoint, err = versionendpoint.New(c)
+		versionEndpoint, err = version.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	newEndpoint := &Endpoint{
+	e := &Endpoint{
 		Healthz: healthzEndpoint,
 		Version: versionEndpoint,
 	}
-	return newEndpoint, nil
-}
 
-// Endpoint is the endpoint collection.
-type Endpoint struct {
-	Healthz *healthz.Endpoint
-	Version *versionendpoint.Endpoint
+	return e, nil
 }
