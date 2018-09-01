@@ -25,6 +25,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
+	"github.com/giantswarm/e2e-harness/pkg/framework/filelogger"
 	"github.com/giantswarm/e2e-harness/pkg/harness"
 )
 
@@ -42,8 +43,9 @@ type HostConfig struct {
 }
 
 type Host struct {
-	backoff backoff.Interface
-	logger  micrologger.Logger
+	backoff    backoff.Interface
+	logger     micrologger.Logger
+	filelogger *filelogger.FileLogger
 
 	g8sClient  *versioned.Clientset
 	k8sClient  kubernetes.Interface
@@ -84,10 +86,23 @@ func NewHost(c HostConfig) (*Host, error) {
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
+	var fileLogger *filelogger.FileLogger
+	{
+		fc := filelogger.Config{
+			Backoff:   c.Backoff,
+			K8sClient: k8sClient,
+			Logger:    c.Logger,
+		}
+		fileLogger, err = filelogger.New(fc)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
 
 	h := &Host{
-		backoff: c.Backoff,
-		logger:  c.Logger,
+		backoff:    c.Backoff,
+		logger:     c.Logger,
+		filelogger: fileLogger,
 
 		g8sClient:  g8sClient,
 		k8sClient:  k8sClient,
@@ -297,7 +312,47 @@ func (h *Host) InstallBranchOperator(name, cr, values string) error {
 }
 
 func (h *Host) InstallOperator(name, cr, values, version string) error {
-	return h.InstallResource(name, values, version, h.crd(cr))
+	err := h.InstallResource(name, values, version, h.crd(cr))
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	// TODO introduced: https://github.com/giantswarm/e2e-harness/pull/121
+	// This fallback from h.targetNamespace was introduced because not all our
+	// operators accept and apply configured namespaces.
+	//
+	// Tracking issue: https://github.com/giantswarm/giantswarm/issues/4123
+	//
+	// Final version of the code:
+	//
+	//	podName, err := h.PodName(h.targetNamespace, fmt.Sprintf("app=%s", name))
+	//	if err != nil {
+	//		return microerror.Mask(err)
+	//	}
+	//	err = h.filelogger.StartLoggingPod(h.targetNamespace, podName)
+	//	if err != nil {
+	//		return microerror.Mask(err)
+	//	}
+	//
+	podNamespace := h.targetNamespace
+
+	podName, err := h.PodName(podNamespace, fmt.Sprintf("app=%s", name))
+	if IsNotFound(err) {
+		podNamespace = "giantswarm"
+		podName, err = h.PodName(podNamespace, fmt.Sprintf("app=%s", name))
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	} else if err != nil {
+		return microerror.Mask(err)
+	}
+
+	err = h.filelogger.StartLoggingPod(podNamespace, podName)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	// TODO end
+
+	return nil
 }
 
 func (h *Host) InstallResource(name, values, version string, conditions ...func() error) error {

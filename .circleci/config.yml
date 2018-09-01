@@ -11,6 +11,9 @@ e2eTest: &e2eTest
     - run: ./e2e-harness localkube
     - run: ./e2e-harness setup --remote=false
     - run: ./e2e-harness test --test-dir=${TEST_DIR}
+    - store_artifacts:
+        path: .e2e-harness/workdir/logs
+        destination: logs
     - run:
         command: ./e2e-harness teardown
         when: always
