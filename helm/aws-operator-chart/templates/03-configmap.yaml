@@ -13,8 +13,7 @@ data:
         accessLogsExpiration: '{{ .Values.Installation.V1.Provider.AWS.S3AccessLogsExpiration }}'
         advancedMonitoringEC2: '{{ .Values.Installation.V1.Provider.AWS.AdvancedMonitoringEC2 }}'
         encrypter: '{{ .Values.Installation.V1.Provider.AWS.Encrypter }}'
-        # TODO Remove test value.
-        imagePullProgressDeadline: '10m'
+        imagePullProgressDeadline: '{{ .Values.Installation.V1.Provider.AWS.ImagePullProgressDeadline }}'
         includeTags: '{{ .Values.Installation.V1.Provider.AWS.IncludeTags }}'
         loggingBucket:
           delete: '{{ .Values.Installation.V1.Provider.AWS.DeleteLoggingBucket }}'
