@@ -17,7 +17,7 @@ const LaunchConfiguration = `{{define "launch_configuration"}}
       - DeviceName: "{{ .DeviceName }}"
         Ebs:
           DeleteOnTermination: {{ .DeleteOnTermination }}
-          VolumeSize: {{ $v.WorkerDockerVolumeSizeGB }}
+          VolumeSize: {{ .VolumeSize }}
           VolumeType: {{ .VolumeType }}
       {{ end }}
       AssociatePublicIpAddress: {{ $v.WorkerAssociatePublicIPAddress }}

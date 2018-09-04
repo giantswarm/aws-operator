@@ -97,8 +97,9 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 				},
 				Workers: []v1alpha1.AWSConfigSpecAWSNode{
 					{
-						ImageID:      "ami-1234-worker",
-						InstanceType: "m3.large",
+						DockerVolumeSizeGB: "150",
+						ImageID:            "ami-1234-worker",
+						InstanceType:       "m3.large",
 					},
 				},
 				Ingress: v1alpha1.AWSConfigSpecAWSIngress{
@@ -113,6 +114,11 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 				},
 			},
 		},
+	}
+
+	dockerVolumeSizeGB, err := key.WorkerDockerVolumeSizeGB(customObject)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	imageID, err := key.ImageID(customObject)
@@ -131,6 +137,7 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		MasterInstanceMonitoring:   false,
 
 		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
+		WorkerDockerVolumeSizeGB: dockerVolumeSizeGB,
 		WorkerImageID:            imageID,
 		WorkerInstanceMonitoring: true,
 		WorkerInstanceType:       key.WorkerInstanceType(customObject),
@@ -496,8 +503,9 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 				},
 				Workers: []v1alpha1.AWSConfigSpecAWSNode{
 					{
-						ImageID:      "ami-1234-worker",
-						InstanceType: "m3.large",
+						DockerVolumeSizeGB: "150",
+						ImageID:            "ami-1234-worker",
+						InstanceType:       "m3.large",
 					},
 				},
 				Ingress: v1alpha1.AWSConfigSpecAWSIngress{
@@ -512,6 +520,11 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 				},
 			},
 		},
+	}
+
+	dockerVolumeSizeGB, err := key.WorkerDockerVolumeSizeGB(customObject)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	imageID, err := key.ImageID(customObject)
@@ -530,6 +543,7 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 		MasterInstanceMonitoring:   false,
 
 		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
+		WorkerDockerVolumeSizeGB: dockerVolumeSizeGB,
 		WorkerImageID:            imageID,
 		WorkerInstanceMonitoring: true,
 		WorkerInstanceType:       key.WorkerInstanceType(customObject),

@@ -22,7 +22,7 @@ Outputs:
   WorkerCount:
     Value: {{ $v.Worker.Count }}
   WorkerDockerVolumeSizeGB:
-	Value: {{ $v.Worker.DockerVolumeSizeGB }}
+    Value: {{ $v.Worker.DockerVolumeSizeGB }}
   WorkerImageID:
     Value: {{ $v.Worker.ImageID }}
   WorkerInstanceType:

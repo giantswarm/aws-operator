@@ -65,6 +65,7 @@ const (
 	MasterCloudConfigVersionKey   = "MasterCloudConfigVersion"
 	WorkerASGKey                  = "WorkerASGName"
 	WorkerCountKey                = "WorkerCount"
+	WorkerDockerVolumeSizeKey     = "WorkerDockerVolumeSizeGB"
 	WorkerImageIDKey              = "WorkerImageID"
 	WorkerInstanceMonitoring      = "Monitoring"
 	WorkerInstanceTypeKey         = "WorkerInstanceType"

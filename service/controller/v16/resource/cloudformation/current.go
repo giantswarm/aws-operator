@@ -113,12 +113,12 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 				//
 				// TODO remove this condition as soon as all guest clusters in existence
 				// obtain a docker volume size.
-				dockerVolumeSizeGB = "100"
+				v = "100"
 			} else if err != nil {
 				return StackState{}, microerror.Mask(err)
 			}
 
-			sz, err = strconv.ParseUint(v, 10, 32)
+			sz, err := strconv.ParseUint(v, 10, 32)
 			if err != nil {
 				return StackState{}, microerror.Mask(err)
 			}
