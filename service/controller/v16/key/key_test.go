@@ -3,6 +3,7 @@ package key
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -771,6 +772,99 @@ func Test_WorkerCount(t *testing.T) {
 
 	if WorkerCount(customObject) != expectedCount {
 		t.Fatalf("Expected worker count %d but was %d", expectedCount, WorkerCount(customObject))
+	}
+}
+
+func Test_WorkerDockerVolumeSizeGB(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name         string
+		customObject v1alpha1.AWSConfig
+		expectedSize int
+		errorMatcher func(error) bool
+	}{
+		{
+			name: "case 0: worker with 350GB docker volume",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{
+							{
+								DockerVolumeSizeGB: "350",
+							},
+						},
+					},
+				},
+			},
+			expectedSize: 350,
+			errorMatcher: nil,
+		},
+		{
+			name: "case 1: no workers",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{},
+					},
+				},
+			},
+			expectedSize: 0,
+			errorMatcher: nil,
+		},
+		{
+			name: "case 2: missing field for worker",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{
+							{},
+						},
+					},
+				},
+			},
+			expectedSize: 0,
+			errorMatcher: nil,
+		},
+		{
+			name: "case 3: invalid number",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{
+							{
+								DockerVolumeSizeGB: "foobar",
+							},
+						},
+					},
+				},
+			},
+			expectedSize: 0,
+			errorMatcher: func(err error) bool {
+				_, ok := microerror.Cause(err).(*strconv.NumError)
+				return ok
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			sz, err := WorkerDockerVolumeSizeGB(tc.customObject)
+
+			switch {
+			case err == nil && tc.errorMatcher == nil:
+				// correct; carry on
+			case err != nil && tc.errorMatcher == nil:
+				t.Fatalf("error == %#v, want nil", err)
+			case err == nil && tc.errorMatcher != nil:
+				t.Fatalf("error == nil, want non-nil")
+			case !tc.errorMatcher(err):
+				t.Fatalf("error == %#v, want matching", err)
+			}
+
+			if sz != tc.expectedSize {
+				t.Fatalf("Expected worker docker volume size  %d but was %d", tc.expectedSize, sz)
+			}
+		})
 	}
 }
 

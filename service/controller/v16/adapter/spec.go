@@ -96,6 +96,7 @@ type StackState struct {
 	MasterInstanceMonitoring bool
 
 	WorkerCount              string
+	WorkerDockerVolumeSizeGB int
 	WorkerImageID            string
 	WorkerInstanceMonitoring bool
 	WorkerInstanceType       string

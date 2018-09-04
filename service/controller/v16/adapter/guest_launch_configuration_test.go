@@ -31,6 +31,34 @@ func Test_AdapterLaunchConfiguration_RegularFields(t *testing.T) {
 					AWS: v1alpha1.AWSConfigSpecAWS{
 						Workers: []v1alpha1.AWSConfigSpecAWSNode{
 							{
+								DockerVolumeSizeGB: "250",
+								InstanceType:       "myinstancetype",
+							},
+						},
+					},
+				},
+			},
+			expectedInstanceType:             "myinstancetype",
+			expectedAssociatePublicIPAddress: false,
+			expectedBlockDeviceMappings: []BlockDeviceMapping{
+				{
+					DeleteOnTermination: true,
+					DeviceName:          defaultEBSVolumeMountPoint,
+					VolumeSize:          250,
+					VolumeType:          defaultEBSVolumeType,
+				},
+			},
+		},
+		{
+			description: "basic matching, verify that default value is used for docker volume when field is missing in CR",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "test-cluster",
+					},
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{
+							{
 								InstanceType: "myinstancetype",
 							},
 						},
@@ -58,11 +86,19 @@ func Test_AdapterLaunchConfiguration_RegularFields(t *testing.T) {
 		a := Adapter{}
 
 		t.Run(tc.description, func(t *testing.T) {
+			workerDockerVolumeSizeGB, err := key.WorkerDockerVolumeSizeGB(tc.customObject)
+			if err != nil {
+				t.Fatal(err)
+			}
+
 			cfg := Config{
 				CustomObject: tc.customObject,
 				Clients:      clients,
+				StackState: StackState{
+					WorkerDockerVolumeSizeGB: workerDockerVolumeSizeGB,
+				},
 			}
-			err := a.Guest.LaunchConfiguration.Adapt(cfg)
+			err = a.Guest.LaunchConfiguration.Adapt(cfg)
 			if tc.expectedError && err == nil {
 				t.Error("expected error didn't happen")
 			}
