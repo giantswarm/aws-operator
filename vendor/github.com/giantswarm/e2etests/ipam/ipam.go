@@ -79,7 +79,7 @@ func (c *IPAM) Test(ctx context.Context) error {
 		for _, cn := range []string{clusterOne, clusterTwo, clusterThree, clusterFour} {
 			err := c.provider.DeleteCluster(cn)
 			if err != nil {
-				c.logger.LogCtx(ctx, "level", "error", "message", fmt.Sprintf("cluster %s deletion failed: %#v", cn, err))
+				c.logger.LogCtx(ctx, "level", "error", "message", fmt.Sprintf("cluster %s deletion failed", cn), "stack", fmt.Sprintf("%#v", err))
 			}
 		}
 	}()
@@ -88,7 +88,6 @@ func (c *IPAM) Test(ctx context.Context) error {
 	clusters := []string{clusterOne, clusterTwo, clusterThree}
 
 	{
-
 		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating three guest clusters: %#v", clusters))
 
 		for _, cn := range clusters {

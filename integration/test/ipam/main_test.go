@@ -79,7 +79,9 @@ func init() {
 			Logger:        l,
 
 			ChartValuesConfig: provider.ChartValuesConfig{
-				ClusterName: env.ClusterID(),
+				AWSRouteTable0: env.ClusterID() + "_0",
+				AWSRouteTable1: env.ClusterID() + "_1",
+				ClusterName:    env.ClusterID(),
 			},
 		}
 

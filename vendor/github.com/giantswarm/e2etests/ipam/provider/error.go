@@ -3,7 +3,7 @@ package provider
 import "github.com/giantswarm/microerror"
 
 var notFoundError = &microerror.Error{
-	Kind: "not found",
+	Kind: "notFound",
 }
 
 // IsNotFound asserts NotFoundError.
@@ -12,7 +12,7 @@ func IsNotFound(err error) bool {
 }
 
 var invalidConfigError = &microerror.Error{
-	Kind: "invalid config",
+	Kind: "invalidConfig",
 }
 
 // IsInvalidConfig asserts invalidConfigError.
@@ -21,7 +21,7 @@ func IsInvalidConfig(err error) bool {
 }
 
 var tooManyResultsError = &microerror.Error{
-	Kind: "too many results",
+	Kind: "tooManyResults",
 }
 
 // IsTooManyResults asserts tooManyResultsError.

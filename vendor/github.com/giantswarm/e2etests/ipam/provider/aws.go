@@ -15,6 +15,8 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/giantswarm/e2etests/ipam/env"
 )
 
 type AWSConfig struct {
@@ -64,16 +66,16 @@ func NewAWS(config AWSConfig) (*AWS, error) {
 		logger:        config.Logger,
 
 		chartValuesConfig: ChartValuesConfig{
-			AWSAPIHostedZoneGuest:     getValue(config.AWSAPIHostedZoneGuest, "AWS_API_HOSTED_ZONE_GUEST"),
-			AWSIngressHostedZoneGuest: getValue(config.AWSIngressHostedZoneGuest, "AWS_INGRESS_HOSTED_ZONE_GUEST"),
-			AWSRegion:                 getValue(config.AWSRegion, "AWS_REGION"),
-			AWSRouteTable0:            getValue(config.AWSRouteTable0, "AWS_ROUTE_TABLE_0"),
-			AWSRouteTable1:            getValue(config.AWSRouteTable1, "AWS_ROUTE_TABLE_1"),
-			CommonDomain:              getValue(config.CommonDomain, "COMMON_DOMAIN"),
-			SSHPublicKey:              getValue(config.SSHPublicKey, "IDRSA_PUB"),
-			VersionBundleVersion:      getValue(config.VersionBundleVersion, "VERSION_BUNDLE_VERSION"),
+			AWSAPIHostedZoneGuest:     getValue(config.AWSAPIHostedZoneGuest, env.AWSAPIHostedZoneGuest),
+			AWSIngressHostedZoneGuest: getValue(config.AWSIngressHostedZoneGuest, env.AWSIngressHostedZoneGuest),
+			AWSRegion:                 getValue(config.AWSRegion, env.AWSRegion),
+			AWSRouteTable0:            getValue(config.AWSRouteTable0, env.AWSRouteTable0),
+			AWSRouteTable1:            getValue(config.AWSRouteTable1, env.AWSRouteTable1),
+			CommonDomain:              getValue(config.CommonDomain, env.CommonDomain),
+			SSHPublicKey:              getValue(config.SSHPublicKey, env.SSHPublicKey),
+			VersionBundleVersion:      getValue(config.VersionBundleVersion, env.VersionBundleVersion),
 		},
-		hostClusterName: getValue(config.ClusterName, "CLUSTER_NAME"),
+		hostClusterName: getValue(config.ClusterName, env.ClusterName),
 	}
 
 	return a, nil
@@ -244,13 +246,13 @@ func awsConfigDeploymentName(clusterName string) string {
 }
 
 func certDeploymentName(clusterName string) string {
-	return fmt.Sprintf("%s-cert-config-e2e", clusterName)
+	return fmt.Sprintf("cert-config-e2e-%s", clusterName)
 }
 
-// getValue returns val if not empty, otherwise os.Getenv(envName).
-func getValue(val, envName string) string {
+// getValue returns val if not empty, otherwise getEnv().
+func getValue(val string, getEnv func() string) string {
 	if val == "" {
-		return os.Getenv(envName)
+		return getEnv()
 	}
 	return val
 }

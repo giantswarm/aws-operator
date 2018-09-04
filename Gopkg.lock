@@ -316,19 +316,22 @@
   revision = "bb4e1e045f232011219dfd16ef35fb8afda60594"
 
 [[projects]]
-  branch = "master"
-  digest = "1:9074841a2de8bfcc96152f97e81ad7d7077877becec1a6c9c38913386e721089"
+  branch = "ipam-e2e-tests"
+  digest = "1:9b616ec768254b86fd9494ce8bf52d57f5db9dec1f022bc72271a64bdbcbbd7b"
   name = "github.com/giantswarm/e2etests"
   packages = [
     "clusterstate",
     "clusterstate/provider",
+    "ipam",
+    "ipam/env",
+    "ipam/provider",
     "scaling",
     "scaling/provider",
     "update",
     "update/provider",
   ]
   pruneopts = "UT"
-  revision = "8391748d9b75fc5f2c3a11359331cb124cfc0451"
+  revision = "d957731d59a6276d106dad7e550e2996befda58c"
 
 [[projects]]
   branch = "master"
@@ -353,6 +356,14 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "ec20d46eb68e6fd0cda0a6c0132df4a3fc1a8318"
+
+[[projects]]
+  branch = "master"
+  digest = "1:6bd49e15179a5351604f234dbb12f4d3fb1c64b6885e0221582003a22af47271"
+  name = "github.com/giantswarm/ipam"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "088a71e10de0b950fc9f64e52cf125c86dfb8fa0"
 
 [[projects]]
   branch = "master"
@@ -435,6 +446,14 @@
   ]
   pruneopts = "UT"
   revision = "d757f42e4a3efca1fe82e633579b28c586e08698"
+
+[[projects]]
+  branch = "master"
+  digest = "1:ddd43139c09097ebf88f8748425ae83d37770763aae32f6a855782847161e587"
+  name = "github.com/giantswarm/microstorage"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "4411a6307c6b844b7f9e68aaba37407b41b1c4d7"
 
 [[projects]]
   branch = "master"
@@ -1651,12 +1670,15 @@
     "github.com/giantswarm/e2etemplates/pkg/e2etemplates",
     "github.com/giantswarm/e2etests/clusterstate",
     "github.com/giantswarm/e2etests/clusterstate/provider",
+    "github.com/giantswarm/e2etests/ipam",
+    "github.com/giantswarm/e2etests/ipam/provider",
     "github.com/giantswarm/e2etests/scaling",
     "github.com/giantswarm/e2etests/scaling/provider",
     "github.com/giantswarm/e2etests/update",
     "github.com/giantswarm/e2etests/update/provider",
     "github.com/giantswarm/guestcluster",
     "github.com/giantswarm/helmclient",
+    "github.com/giantswarm/ipam",
     "github.com/giantswarm/k8scloudconfig/v_2_0_2",
     "github.com/giantswarm/k8scloudconfig/v_3_0_0",
     "github.com/giantswarm/k8scloudconfig/v_3_1_1",
