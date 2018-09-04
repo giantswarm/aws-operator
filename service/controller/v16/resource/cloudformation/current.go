@@ -3,6 +3,7 @@ package cloudformation
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
@@ -99,10 +100,32 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		} else if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
-		workerDockerVolumeSizeGB, err := key.WorkerDockerVolumeSizeGB(customObject)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
+
+		var workerDockerVolumeSizeGB int
+		{
+			v, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.WorkerDockerVolumeSizeKey)
+			if cloudformationservice.IsOutputNotFound(err) {
+				// Since we are transitioning between versions we will have situations in
+				// which old clusters are updated to new versions and miss the docker
+				// volume resource name in the CF stack outputs. We ignore this problem
+				// for now and move on regardless. On the next resync period the output
+				// value will be there, once the cluster got updated.
+				//
+				// TODO remove this condition as soon as all guest clusters in existence
+				// obtain a docker volume size.
+				dockerVolumeSizeGB = "100"
+			} else if err != nil {
+				return StackState{}, microerror.Mask(err)
+			}
+
+			sz, err = strconv.ParseUint(v, 10, 32)
+			if err != nil {
+				return StackState{}, microerror.Mask(err)
+			}
+
+			workerDockerVolumeSizeGB = int(sz)
 		}
+
 		masterImageID, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.MasterImageIDKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
