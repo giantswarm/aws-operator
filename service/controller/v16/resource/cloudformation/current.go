@@ -99,6 +99,10 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		} else if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
+		workerDockerVolumeSizeGB, err := key.WorkerDockerVolumeSizeGB(customObject)
+		if err != nil {
+			return StackState{}, microerror.Mask(err)
+		}
 		masterImageID, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.MasterImageIDKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
@@ -170,6 +174,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			MasterCloudConfigVersion:   masterCloudConfigVersion,
 
 			WorkerCount:              workerCount,
+			WorkerDockerVolumeSizeGB: workerDockerVolumeSizeGB,
 			WorkerImageID:            workerImageID,
 			WorkerInstanceType:       workerInstanceType,
 			WorkerCloudConfigVersion: workerCloudConfigVersion,
