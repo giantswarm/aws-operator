@@ -52,7 +52,7 @@ func New(config Config) (*FileLogger, error) {
 }
 
 func (f FileLogger) StartLoggingPod(namespace, name string) error {
-	req := f.k8sClient.CoreV1().RESTClient().Get().Namespace(namespace).Name(name).Resource("pods").SubResource("log").Param("follow", strconv.FormatBool(true)).Param("container", name)
+	req := f.k8sClient.CoreV1().RESTClient().Get().Namespace(namespace).Name(name).Resource("pods").SubResource("log").Param("follow", strconv.FormatBool(true))
 
 	var readCloser io.ReadCloser
 	var err error
