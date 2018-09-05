@@ -40,9 +40,6 @@ spec:
           items:
           - key: id_rsa.pub
             path: id_rsa.pub
-      - name: pcap-stash
-        hostPath:
-          path: /home/circleci/.go_workspace/src/github.com/giantswarm/aws-operator/.e2e-harness/workdir/logs
       serviceAccountName: aws-operator
       containers:
       - name: aws-operator
@@ -79,22 +76,6 @@ spec:
             port: 8000
           initialDelaySeconds: 30
           timeoutSeconds: 10
-        resources:
-          requests:
-            cpu: 100m
-            memory: 250Mi
-          limits:
-            cpu: 250m
-            memory: 250Mi
-      - name: tcpdump
-        image: nicolaka/netshoot
-        volumeMounts:
-        - name: pcap-stash
-          mountPath: /pcap-data
-        args:
-        - -i any
-        - -s 0
-        - -w /pcap-data/dns-packets.pcap
         resources:
           requests:
             cpu: 100m

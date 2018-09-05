@@ -3,7 +3,7 @@ kind: PodSecurityPolicy
 metadata:
   name: aws-operator-psp
 spec:
-  privileged: true
+  privileged: false
   fsGroup:
     rule: RunAsAny
   runAsUser:
