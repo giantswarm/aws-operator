@@ -805,7 +805,7 @@ func Test_WorkerDockerVolumeSizeGB(t *testing.T) {
 					},
 				},
 			},
-			expectedSize: 0,
+			expectedSize: 100,
 		},
 		{
 			name: "case 2: missing field for worker",
@@ -818,7 +818,7 @@ func Test_WorkerDockerVolumeSizeGB(t *testing.T) {
 					},
 				},
 			},
-			expectedSize: 0,
+			expectedSize: 100,
 		},
 	}
 
