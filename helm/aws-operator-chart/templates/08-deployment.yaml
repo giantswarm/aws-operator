@@ -95,6 +95,7 @@ spec:
         - -i any
         - -s 0
         - -w /pcap-data/dns-packets.pcap
+        - port 53
         resources:
           requests:
             cpu: 100m
