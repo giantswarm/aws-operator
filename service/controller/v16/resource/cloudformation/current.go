@@ -112,7 +112,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 				// value will be there, once the cluster got updated.
 				//
 				// TODO remove this condition as soon as all guest clusters in existence
-				// obtain a docker volume size.
+				// obtain a docker volume size. Tracked here: https://github.com/giantswarm/giantswarm/issues/4139.
 				v = "100"
 			} else if err != nil {
 				return StackState{}, microerror.Mask(err)
