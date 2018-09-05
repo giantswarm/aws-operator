@@ -346,7 +346,7 @@ func (h *Host) InstallOperator(name, cr, values, version string) error {
 		return microerror.Mask(err)
 	}
 
-	err = h.filelogger.StartLoggingPod(podNamespace, podName)
+	err = h.filelogger.StartLoggingPod(podNamespace, podName, name)
 	if err != nil {
 		return microerror.Mask(err)
 	}

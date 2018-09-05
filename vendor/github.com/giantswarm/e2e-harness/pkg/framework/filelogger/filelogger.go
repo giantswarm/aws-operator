@@ -51,8 +51,8 @@ func New(config Config) (*FileLogger, error) {
 	return f, nil
 }
 
-func (f FileLogger) StartLoggingPod(namespace, name string) error {
-	req := f.k8sClient.CoreV1().RESTClient().Get().Namespace(namespace).Name(name).Resource("pods").SubResource("log").Param("follow", strconv.FormatBool(true)).Param("container", name)
+func (f FileLogger) StartLoggingPod(namespace, podName, containerName string) error {
+	req := f.k8sClient.CoreV1().RESTClient().Get().Namespace(namespace).Name(podName).Resource("pods").SubResource("log").Param("follow", strconv.FormatBool(true)).Param("container", containerName)
 
 	var readCloser io.ReadCloser
 	var err error
@@ -70,7 +70,7 @@ func (f FileLogger) StartLoggingPod(namespace, name string) error {
 		return microerror.Mask(err)
 	}
 
-	go f.scan(readCloser, name)
+	go f.scan(readCloser, podName)
 	return nil
 }
 
