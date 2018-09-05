@@ -51,8 +51,9 @@ const (
 
 	InstanceIDAnnotation = "aws-operator.giantswarm.io/instance"
 
-	defaultAWSCliContainerRegistry = "quay.io/coreos/awscli:025a357f05242fdad6a81e8a6b520098aa65a600"
 	chinaAWSCliContainerRegistry   = "docker://registry-intl.cn-shanghai.aliyuncs.com/giantswarm/awscli:latest"
+	defaultAWSCliContainerRegistry = "quay.io/coreos/awscli:025a357f05242fdad6a81e8a6b520098aa65a600"
+	defaultDockerVolumeSizeGB      = 100
 )
 
 const (
@@ -512,7 +513,11 @@ func WorkerCount(customObject v1alpha1.AWSConfig) int {
 // size.
 func WorkerDockerVolumeSizeGB(customObject v1alpha1.AWSConfig) int {
 	if len(customObject.Spec.AWS.Workers) <= 0 {
-		return 0
+		return defaultDockerVolumeSizeGB
+	}
+
+	if customObject.Spec.AWS.Workers[0].DockerVolumeSizeGB <= 0 {
+		return defaultDockerVolumeSizeGB
 	}
 
 	return customObject.Spec.AWS.Workers[0].DockerVolumeSizeGB
