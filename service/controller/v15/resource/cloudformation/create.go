@@ -145,6 +145,8 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		}
 
 		createState.SetTags(r.getCloudFormationTags(customObject))
+
+		createState.EnableTerminationProtection = aws.Bool(key.EnableTerminationProtection)
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack does not have to be created")
 
@@ -168,8 +170,9 @@ func (r *Resource) createHostPreStack(ctx context.Context, customObject v1alpha1
 		return microerror.Mask(err)
 	}
 	createStack := &cloudformation.CreateStackInput{
-		StackName:    aws.String(stackName),
-		TemplateBody: aws.String(mainTemplate),
+		StackName:                   aws.String(stackName),
+		TemplateBody:                aws.String(mainTemplate),
+		EnableTerminationProtection: aws.Bool(key.EnableTerminationProtection),
 		// CAPABILITY_NAMED_IAM is required for creating IAM roles (worker policy)
 		Capabilities: []*string{
 			aws.String(namedIAMCapability),
@@ -205,28 +208,15 @@ func (r *Resource) createHostPreStack(ctx context.Context, customObject v1alpha1
 }
 
 func (r *Resource) createHostPostStack(ctx context.Context, customObject v1alpha1.AWSConfig, guestMainStackState StackState) error {
-	// TODO introduced: aws-operator@v14; remove with: aws-operator@v13
-	// This output was introduced in v14 so it isn't accessible from CF
-	// stacks created by earlier versions. We need to handle that.
-	//
-	// Final version of the code:
-	//
-	//	// Just remove.
-	//
-	if guestMainStackState.HostedZoneNameServers == "" {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack is not updated yet")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
-	}
-	// TODO end
-
 	stackName := key.MainHostPostStackName(customObject)
 	mainTemplate, err := r.getMainHostPostTemplateBody(ctx, customObject, guestMainStackState)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 	createStack := &cloudformation.CreateStackInput{
-		StackName:    aws.String(stackName),
-		TemplateBody: aws.String(mainTemplate),
+		StackName:                   aws.String(stackName),
+		TemplateBody:                aws.String(mainTemplate),
+		EnableTerminationProtection: aws.Bool(key.EnableTerminationProtection),
 	}
 	createStack.SetTags(r.getCloudFormationTags(customObject))
 

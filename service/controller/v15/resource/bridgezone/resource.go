@@ -4,6 +4,7 @@ import (
 	"context"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/giantswarm/microerror"
@@ -30,9 +31,9 @@ type Config struct {
 }
 
 // Resource is bridgezone resource making sure we have fallback delegation in
-// old DNS structure. This is only for the migration period. When we delete the
-// "intermediate" zone this resource becomes noop and we do not need it
-// anymore.
+// old DNS structure. TODO This is only for the migration period. TODO When we
+// delete the "intermediate" zone this resource becomes noop and we do not need
+// it anymore.
 //
 // Old structure looks like:
 //
@@ -84,7 +85,6 @@ type Config struct {
 // account.
 type Resource struct {
 	hostAWSConfig aws.Config
-	hostRoute53   *route53.Route53
 	k8sClient     kubernetes.Interface
 	logger        micrologger.Logger
 
@@ -107,7 +107,6 @@ func New(config Config) (*Resource, error) {
 
 	r := &Resource{
 		hostAWSConfig: config.HostAWSConfig,
-		hostRoute53:   config.HostRoute53,
 		k8sClient:     config.K8sClient,
 		logger:        config.Logger,
 
@@ -221,10 +220,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			},
 			HostedZoneId: &intermediateZoneID,
 		}
+		time.Sleep(1 * time.Second)
 		_, err := defaultGuest.ChangeResourceRecordSetsWithContext(ctx, in)
 		if err != nil {
 			return microerror.Mask(err)
 		}
+		time.Sleep(1 * time.Second)
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured final zone delegation from intermediate zone")
 	}
@@ -319,10 +320,12 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			},
 			HostedZoneId: &intermediateZoneID,
 		}
+		time.Sleep(1 * time.Second)
 		_, err := defaultGuest.ChangeResourceRecordSetsWithContext(ctx, in)
 		if err != nil {
 			return microerror.Mask(err)
 		}
+		time.Sleep(1 * time.Second)
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured deletion of final zone delegation from intermediate zone")
 	}
@@ -337,10 +340,12 @@ func (r *Resource) findHostedZoneID(ctx context.Context, client *route53.Route53
 			Marker: marker,
 		}
 
+		time.Sleep(1 * time.Second)
 		out, err := client.ListHostedZones(in)
 		if err != nil {
 			return "", microerror.Mask(err)
 		}
+		time.Sleep(1 * time.Second)
 
 		for _, hz := range out.HostedZones {
 			if hz.Name == nil || hz.Id == nil {
@@ -373,10 +378,12 @@ func (r *Resource) getNameServersAndTTL(ctx context.Context, client *route53.Rou
 		StartRecordName: &name,
 		StartRecordType: &ns,
 	}
+	time.Sleep(1 * time.Second)
 	out, err := client.ListResourceRecordSetsWithContext(ctx, in)
 	if err != nil {
 		return nil, 0, microerror.Mask(err)
 	}
+	time.Sleep(1 * time.Second)
 
 	if len(out.ResourceRecordSets) == 0 {
 		return nil, 0, microerror.Maskf(notFoundError, "NS record %q for HostedZone %q not found", name, zoneID)

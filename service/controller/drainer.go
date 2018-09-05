@@ -18,7 +18,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v12patch1"
 	"github.com/giantswarm/aws-operator/service/controller/v13"
 	"github.com/giantswarm/aws-operator/service/controller/v14"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch1"
 	"github.com/giantswarm/aws-operator/service/controller/v15"
+	"github.com/giantswarm/aws-operator/service/controller/v16"
 	"github.com/giantswarm/aws-operator/service/controller/v8"
 	"github.com/giantswarm/aws-operator/service/controller/v9patch1"
 	"github.com/giantswarm/aws-operator/service/controller/v9patch2"
@@ -295,6 +297,24 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var v14Patch1ResourceSet *controller.ResourceSet
+	{
+		c := v14patch1.DrainerResourceSetConfig{
+			G8sClient:     config.G8sClient,
+			HostAWSConfig: hostAWSConfig,
+			K8sClient:     config.K8sClient,
+			Logger:        config.Logger,
+
+			GuestUpdateEnabled: config.GuestUpdateEnabled,
+			ProjectName:        config.ProjectName,
+		}
+
+		v14Patch1ResourceSet, err = v14patch1.NewDrainerResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var v15ResourceSet *controller.ResourceSet
 	{
 		c := v15.DrainerResourceSetConfig{
@@ -313,6 +333,24 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var v16ResourceSet *controller.ResourceSet
+	{
+		c := v16.DrainerResourceSetConfig{
+			G8sClient:     config.G8sClient,
+			HostAWSConfig: hostAWSConfig,
+			K8sClient:     config.K8sClient,
+			Logger:        config.Logger,
+
+			GuestUpdateEnabled: config.GuestUpdateEnabled,
+			ProjectName:        config.ProjectName,
+		}
+
+		v16ResourceSet, err = v16.NewDrainerResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resourceSets := []*controller.ResourceSet{
 		v8ResourceSet,
 		v9patch1ResourceSet,
@@ -321,7 +359,9 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		v12Patch1ResourceSet,
 		v13ResourceSet,
 		v14ResourceSet,
+		v14Patch1ResourceSet,
 		v15ResourceSet,
+		v16ResourceSet,
 	}
 
 	return resourceSets, nil
