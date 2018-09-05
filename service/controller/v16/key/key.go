@@ -510,23 +510,12 @@ func WorkerCount(customObject v1alpha1.AWSConfig) int {
 // WorkerDockerVolumeSizeGB returns size of a docker volume configured for
 // worker nodes. If there are no workers in custom object, 0 is returned as
 // size.
-func WorkerDockerVolumeSizeGB(customObject v1alpha1.AWSConfig) (int, error) {
+func WorkerDockerVolumeSizeGB(customObject v1alpha1.AWSConfig) int {
 	if len(customObject.Spec.AWS.Workers) <= 0 {
-		return 0, nil
+		return 0
 	}
 
-	v := customObject.Spec.AWS.Workers[0].DockerVolumeSizeGB
-
-	if v == "" {
-		return 0, nil
-	}
-
-	sz, err := strconv.ParseUint(v, 10, 32)
-	if err != nil {
-		return 0, microerror.Mask(err)
-	}
-
-	return int(sz), nil
+	return customObject.Spec.AWS.Workers[0].DockerVolumeSizeGB
 }
 
 func WorkerImageID(customObject v1alpha1.AWSConfig) string {

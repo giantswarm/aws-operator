@@ -24,11 +24,6 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			return StackState{}, microerror.Mask(err)
 		}
 
-		workerDockerVolumeSizeGB, err := key.WorkerDockerVolumeSizeGB(customObject)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-
 		// FIXME: the instance type should not depend on the number of workers.
 		// issue: https://github.com/giantswarm/awstpr/issues/47
 		var workerInstanceType string
@@ -52,7 +47,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			MasterInstanceMonitoring:   r.monitoring,
 
 			WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
-			WorkerDockerVolumeSizeGB: workerDockerVolumeSizeGB,
+			WorkerDockerVolumeSizeGB: key.WorkerDockerVolumeSizeGB(customObject),
 			WorkerImageID:            imageID,
 			WorkerInstanceMonitoring: r.monitoring,
 			WorkerInstanceType:       workerInstanceType,

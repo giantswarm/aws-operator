@@ -110,7 +110,7 @@ type AzureConfigSpecAzureNode struct {
 	// VMSize is the master vm size (e.g. Standard_A1)
 	VMSize string `json:"vmSize" yaml:"vmSize"`
 	// Size of a volume mounted to /var/lib/docker.
-	DockerVolumeSizeGB string `json:"dockerVolumeSizeGB" yaml:"dockerVolumeSizeGB"`
+	DockerVolumeSizeGB int `json:"dockerVolumeSizeGB" yaml:"dockerVolumeSizeGB"`
 }
 
 type AzureConfigSpecVersionBundle struct {

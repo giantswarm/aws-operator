@@ -31,7 +31,7 @@ func Test_AdapterLaunchConfiguration_RegularFields(t *testing.T) {
 					AWS: v1alpha1.AWSConfigSpecAWS{
 						Workers: []v1alpha1.AWSConfigSpecAWSNode{
 							{
-								DockerVolumeSizeGB: "250",
+								DockerVolumeSizeGB: 250,
 								InstanceType:       "myinstancetype",
 							},
 						},
@@ -86,19 +86,14 @@ func Test_AdapterLaunchConfiguration_RegularFields(t *testing.T) {
 		a := Adapter{}
 
 		t.Run(tc.description, func(t *testing.T) {
-			workerDockerVolumeSizeGB, err := key.WorkerDockerVolumeSizeGB(tc.customObject)
-			if err != nil {
-				t.Fatal(err)
-			}
-
 			cfg := Config{
 				CustomObject: tc.customObject,
 				Clients:      clients,
 				StackState: StackState{
-					WorkerDockerVolumeSizeGB: workerDockerVolumeSizeGB,
+					WorkerDockerVolumeSizeGB: key.WorkerDockerVolumeSizeGB(tc.customObject),
 				},
 			}
-			err = a.Guest.LaunchConfiguration.Adapt(cfg)
+			err := a.Guest.LaunchConfiguration.Adapt(cfg)
 			if tc.expectedError && err == nil {
 				t.Error("expected error didn't happen")
 			}
