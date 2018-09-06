@@ -31,3 +31,9 @@ func (c Config) Validate() error {
 
 	return nil
 }
+
+type extendedConfig struct {
+	Config
+	VaultAddress string
+	VPCPeerID    string
+}

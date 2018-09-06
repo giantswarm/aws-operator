@@ -42,10 +42,26 @@ func Setup(m *testing.M, config Config) {
 		os.Exit(1)
 	}
 
+	// TODO create vpc and vault in parallel.
+
 	vpcPeerID, err := installHostPeerVPC(config)
 	if err != nil {
 		log.Printf("%#v\n", err)
 		v = 1
+	}
+
+	// TODO make encrypter vault install conditional depending on encrypter.
+
+	vaultAddress, err := installEncrypterVault(config)
+	if err != nil {
+		log.Printf("%#v\n", err)
+		v = 1
+	}
+
+	extConfig := extendedConfig{
+		Config:       config,
+		VaultAddress: vaultAddress,
+		VPCPeerID:    vpcPeerID,
 	}
 
 	err = config.Host.Setup()
@@ -54,7 +70,7 @@ func Setup(m *testing.M, config Config) {
 		v = 1
 	}
 
-	err = installResources(config, vpcPeerID)
+	err = installResources(extConfig)
 	if err != nil {
 		log.Printf("%#v\n", err)
 		v = 1
@@ -90,7 +106,7 @@ func Setup(m *testing.M, config Config) {
 	os.Exit(v)
 }
 
-func installAWSOperator(config Config) error {
+func installAWSOperator(config extendedConfig) error {
 	var err error
 
 	var values string
@@ -98,8 +114,9 @@ func installAWSOperator(config Config) error {
 		c := chartvalues.AWSOperatorConfig{
 			Provider: chartvalues.AWSOperatorConfigProvider{
 				AWS: chartvalues.AWSOperatorConfigProviderAWS{
-					Encrypter: config.Encrypter,
-					Region:    env.AWSRegion(),
+					Encrypter:    config.Encrypter,
+					Region:       env.AWSRegion(),
+					VaultAddress: config.VaultAddress,
 				},
 			},
 			Secret: chartvalues.AWSOperatorConfigSecret{
@@ -140,7 +157,7 @@ func installAWSOperator(config Config) error {
 	return nil
 }
 
-func installAWSConfig(config Config, vpcPeerID string) error {
+func installAWSConfig(config extendedConfig) error {
 	var err error
 
 	var values string
@@ -157,7 +174,7 @@ func installAWSConfig(config Config, vpcPeerID string) error {
 				IngressHostedZone: env.AWSIngressHostedZoneGuest(),
 				RouteTable0:       env.AWSRouteTable0(),
 				RouteTable1:       env.AWSRouteTable1(),
-				VPCPeerID:         vpcPeerID,
+				VPCPeerID:         config.VPCPeerID,
 			},
 		}
 
@@ -219,6 +236,42 @@ func installCredential(config Config) error {
 	return nil
 }
 
+func installEncrypterVault(config Config) (string, error) {
+	log.Printf("creating encrypter vault")
+
+	stackName := "encrypter-vault-" + env.ClusterID()
+	stackInput := &cloudformation.CreateStackInput{
+		StackName:        aws.String(stackName),
+		TemplateBody:     aws.String(encrypterVaultTemplate),
+		TimeoutInMinutes: aws.Int64(10),
+	}
+	_, err := config.AWSClient.CloudFormation.CreateStack(stackInput)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	err = config.AWSClient.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
+		StackName: aws.String(stackName),
+	})
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	describeOutput, err := config.AWSClient.CloudFormation.DescribeStacks(&cloudformation.DescribeStacksInput{
+		StackName: aws.String(stackName),
+	})
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	var vaultAddress string
+	for _, o := range describeOutput.Stacks[0].Outputs {
+		if *o.OutputKey == "VaultAddress" {
+			vaultAddress = *o.OutputValue
+			break
+		}
+	}
+	log.Printf("created encrypter vault")
+	return vaultAddress, nil
+}
+
 func installHostPeerVPC(config Config) (string, error) {
 	log.Printf("creating Host Peer VPC stack")
 
@@ -258,7 +311,7 @@ func installHostPeerVPC(config Config) (string, error) {
 	return vpcPeerID, nil
 }
 
-func installResources(config Config, vpcPeerID string) error {
+func installResources(config extendedConfig) error {
 	var err error
 
 	{
@@ -285,14 +338,14 @@ func installResources(config Config, vpcPeerID string) error {
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		err = installCredential(config)
+		err = installCredential(config.Config)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 	}
 
 	{
-		err = installAWSConfig(config, vpcPeerID)
+		err = installAWSConfig(config)
 		if err != nil {
 			return microerror.Mask(err)
 		}
