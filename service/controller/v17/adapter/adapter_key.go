@@ -1,6 +1,6 @@
 package adapter
 
-import "github.com/giantswarm/aws-operator/service/controller/v16/key"
+import "github.com/giantswarm/aws-operator/service/controller/v17/key"
 
 func asgType(config Config) string {
 	return prefixWorker

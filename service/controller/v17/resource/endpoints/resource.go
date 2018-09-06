@@ -9,7 +9,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "endpointsv16"
+	Name = "endpointsv17"
 
 	httpsPort           = 443
 	masterEndpointsName = "master"
