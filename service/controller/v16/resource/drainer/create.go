@@ -39,7 +39,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	var instances []*autoscaling.Instance
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding the guest cluster nodes being in state '%s'", autoscaling.LifecycleStateTerminatingWait))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding the guest cluster nodes being in state %#q", autoscaling.LifecycleStateTerminatingWait))
 
 		i := &autoscaling.DescribeAutoScalingGroupsInput{
 			AutoScalingGroupNames: []*string{
@@ -61,19 +61,19 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		if len(instances) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find the guest cluster nodes being in state '%s'", autoscaling.LifecycleStateTerminatingWait))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find the guest cluster nodes being in state %#q", autoscaling.LifecycleStateTerminatingWait))
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d guest cluster nodes being in state '%s'", len(instances), autoscaling.LifecycleStateTerminatingWait))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d guest cluster nodes being in state %#q", len(instances), autoscaling.LifecycleStateTerminatingWait))
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring drainer configs for %d guest cluster nodes being in state '%s'", len(instances), autoscaling.LifecycleStateTerminatingWait)
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensuring drainer configs for %d guest cluster nodes being in state %#q", len(instances), autoscaling.LifecycleStateTerminatingWait))
 
 		for _, instance := range instances {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding drainer config for guest cluster nodes '%s'", *instance.InstanceId))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding drainer config for guest cluster nodes %#q", *instance.InstanceId))
 
 			privateDNS, err := r.privateDNSForInstance(ctx, *instance.InstanceId)
 			if err != nil {
@@ -96,7 +96,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 			_, err = r.g8sClient.CoreV1alpha1().DrainerConfigs(n).Get(privateDNS, o)
 			if errors.IsNotFound(err) {
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find drainer config for guest cluster node '%s'", *instance.InstanceId))
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find drainer config for guest cluster node %#q", *instance.InstanceId))
 
 				err := r.createDrainerConfig(ctx, customObject, *instance.InstanceId, privateDNS)
 				if err != nil {
@@ -107,17 +107,17 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				return microerror.Mask(err)
 			}
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found drainer config for guest cluster node '%s'", *instance.InstanceId))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found drainer config for guest cluster node %#q", *instance.InstanceId))
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured drainer configs for %d guest cluster nodes being in state '%s'", len(instances), autoscaling.LifecycleStateTerminatingWait)
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensured drainer configs for %d guest cluster nodes being in state %#q", len(instances), autoscaling.LifecycleStateTerminatingWait))
 	}
 
 	return nil
 }
 
 func (r *Resource) createDrainerConfig(ctx context.Context, customObject providerv1alpha1.AWSConfig, instanceID, privateDNS string) error {
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating drainer config for guest cluster nodes '%s'", instanceID))
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating drainer config for guest cluster nodes %#q", instanceID))
 
 	n := customObject.GetNamespace()
 	c := &corev1alpha1.DrainerConfig{
@@ -153,7 +153,7 @@ func (r *Resource) createDrainerConfig(ctx context.Context, customObject provide
 		return microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created drainer config for guest cluster node '%s'", instanceID))
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created drainer config for guest cluster node %#q", instanceID))
 	return nil
 }
 
