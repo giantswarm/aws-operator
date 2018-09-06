@@ -246,12 +246,12 @@ func installEncrypterVault(config Config) (string, error) {
 		TimeoutInMinutes: aws.Int64(10),
 		Parameters: []*cloudformation.Parameter{
 			{
-				ParameterKey:   "AccessKey",
-				ParameterValue: env.HostAWSAccessKeyID(),
+				ParameterKey:   aws.String("AccessKey"),
+				ParameterValue: aws.String(env.HostAWSAccessKeyID()),
 			},
 			{
-				ParameterKey:   "SecretKeyId",
-				ParameterValue: env.HostAWSAccessKeySecret(),
+				ParameterKey:   aws.String("SecretKeyId"),
+				ParameterValue: aws.String(env.HostAWSAccessKeySecret()),
 			},
 		},
 	}
