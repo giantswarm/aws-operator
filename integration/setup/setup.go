@@ -244,6 +244,16 @@ func installEncrypterVault(config Config) (string, error) {
 		StackName:        aws.String(stackName),
 		TemplateBody:     aws.String(encrypterVaultTemplate),
 		TimeoutInMinutes: aws.Int64(10),
+		Parameters: []*cloudformation.Parameter{
+			{
+				ParameterKey:   "AccessKey",
+				ParameterValue: env.HostAWSAccessKeyID(),
+			},
+			{
+				ParameterKey:   "SecretKeyId",
+				ParameterValue: env.HostAWSAccessKeySecret(),
+			},
+		},
 	}
 	_, err := config.AWSClient.CloudFormation.CreateStack(stackInput)
 	if err != nil {
