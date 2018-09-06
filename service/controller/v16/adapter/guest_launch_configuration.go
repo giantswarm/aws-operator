@@ -33,11 +33,15 @@ func (l *GuestLaunchConfigAdapter) Adapt(config Config) error {
 	l.WorkerImageID = workerImageID(config)
 	l.WorkerAssociatePublicIPAddress = false
 
+	if config.StackState.WorkerDockerVolumeSizeGB <= 0 {
+		config.StackState.WorkerDockerVolumeSizeGB = defaultEBSVolumeSize
+	}
+
 	l.WorkerBlockDeviceMappings = []BlockDeviceMapping{
 		{
 			DeleteOnTermination: true,
 			DeviceName:          defaultEBSVolumeMountPoint,
-			VolumeSize:          defaultEBSVolumeSize,
+			VolumeSize:          config.StackState.WorkerDockerVolumeSizeGB,
 			VolumeType:          defaultEBSVolumeType,
 		},
 	}

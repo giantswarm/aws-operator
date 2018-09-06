@@ -774,6 +774,65 @@ func Test_WorkerCount(t *testing.T) {
 	}
 }
 
+func Test_WorkerDockerVolumeSizeGB(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name         string
+		customObject v1alpha1.AWSConfig
+		expectedSize int
+	}{
+		{
+			name: "case 0: worker with 350GB docker volume",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{
+							{
+								DockerVolumeSizeGB: 350,
+							},
+						},
+					},
+				},
+			},
+			expectedSize: 350,
+		},
+		{
+			name: "case 1: no workers",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{},
+					},
+				},
+			},
+			expectedSize: 100,
+		},
+		{
+			name: "case 2: missing field for worker",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{
+							{},
+						},
+					},
+				},
+			},
+			expectedSize: 100,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			sz := WorkerDockerVolumeSizeGB(tc.customObject)
+
+			if sz != tc.expectedSize {
+				t.Fatalf("Expected worker docker volume size  %d but was %d", tc.expectedSize, sz)
+			}
+		})
+	}
+}
+
 func Test_WorkerImageID(t *testing.T) {
 	t.Parallel()
 	tests := []struct {

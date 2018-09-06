@@ -9,7 +9,7 @@ func VersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "aws-operator",
-				Description: "Add your changes here.",
+				Description: "Made worker node docker volume size to be configurable.",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
