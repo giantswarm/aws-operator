@@ -9,7 +9,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	"github.com/giantswarm/aws-operator/service/controller/v16/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v17/adapter"
 )
 
 func Test_Resource_Cloudformation_GetCloudFormationTags(t *testing.T) {

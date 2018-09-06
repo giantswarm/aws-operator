@@ -10,10 +10,10 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v16/templates/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v16/templates/cloudformation/guest"
-	"github.com/giantswarm/aws-operator/service/controller/v16/templates/cloudformation/hostpost"
-	"github.com/giantswarm/aws-operator/service/controller/v16/templates/cloudformation/hostpre"
+	"github.com/giantswarm/aws-operator/service/controller/v17/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v17/templates/cloudformation/guest"
+	"github.com/giantswarm/aws-operator/service/controller/v17/templates/cloudformation/hostpost"
+	"github.com/giantswarm/aws-operator/service/controller/v17/templates/cloudformation/hostpre"
 )
 
 const (
@@ -578,9 +578,9 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 		NOTE 1: AMIs should always be for HVM virtualisation and not PV.
 		NOTE 2: You also need to update the tests.
 
-		service/controller/v16/key/key_test.go
-		service/controller/v16/adapter/adapter_test.go
-		service/controller/v16/resource/cloudformation/main_stack_test.go
+		service/controller/v17/key/key_test.go
+		service/controller/v17/adapter/adapter_test.go
+		service/controller/v17/resource/cloudformation/main_stack_test.go
 
 		Current Release: CoreOS Container Linux stable 1745.4.0 (HVM)
 	*/
