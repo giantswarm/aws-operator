@@ -38,7 +38,7 @@ Resources:
         - Ref: VaultSecurityGroup
       NetworkInterfaces: 
         - AssociatePublicIpAddress: "true"
-	  DeleteOnTermination : "true"
+          DeleteOnTermination : "true"
           DeviceIndex: "0"
           GroupSet: 
             - Ref: VaultSecurityGroup
