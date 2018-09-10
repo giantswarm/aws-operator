@@ -224,6 +224,10 @@ func (r *Resource) shouldScale(ctx context.Context, currentState, desiredState S
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to master cloudconfig version")
 		return false
 	}
+	if currentState.WorkerDockerVolumeSizeGB != desiredState.WorkerDockerVolumeSizeGB {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to worker docker volume size")
+		return false
+	}
 	if currentState.WorkerImageID != desiredState.WorkerImageID {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to worker image id")
 		return false
@@ -253,10 +257,14 @@ func (r *Resource) shouldScale(ctx context.Context, currentState, desiredState S
 //
 //     The instance type of master nodes changes (indicates updates).
 //     The instance type of worker nodes changes (indicates updates).
+//     The size of a docker volume for worker nodes changes.
 //     The version bundle version changes (indicates updates).
 //
 func shouldUpdate(currentState, desiredState StackState) bool {
 	if currentState.MasterInstanceType != desiredState.MasterInstanceType {
+		return true
+	}
+	if currentState.WorkerDockerVolumeSizeGB != desiredState.WorkerDockerVolumeSizeGB {
 		return true
 	}
 	if currentState.WorkerInstanceType != desiredState.WorkerInstanceType {

@@ -47,6 +47,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			MasterInstanceMonitoring:   r.monitoring,
 
 			WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
+			WorkerDockerVolumeSizeGB: key.WorkerDockerVolumeSizeGB(customObject),
 			WorkerImageID:            imageID,
 			WorkerInstanceMonitoring: r.monitoring,
 			WorkerInstanceType:       workerInstanceType,
