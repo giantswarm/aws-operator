@@ -167,7 +167,6 @@ Resources:
             SCRIPT
             chmod a+x /usr/local/bin/vaultinit.sh
             vaultinit.sh
-          - { EncrypterAccessRoleARN: !GetAtt EncrypterAccessRole.Arn }
       Tags:
       - Key: Name
         Value: vault-poc-vault
