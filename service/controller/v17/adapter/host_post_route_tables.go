@@ -144,6 +144,9 @@ func routeTableID(name string, cfg Config) (string, error) {
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
+	if len(output.RouteTables) == 0 {
+		return "", microerror.Maskf(tooFewResultsError, "route tables: %s", name)
+	}
 	if len(output.RouteTables) > 1 {
 		return "", microerror.Maskf(tooManyResultsError, "route tables: %s", name)
 	}

@@ -2,7 +2,6 @@ package cloudformation
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -119,18 +118,6 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 
 	if currentStackState.Name == "" || desiredStackState.Name != currentStackState.Name {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack has to be created")
-
-		{
-			r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if network segment has been allocated")
-
-			cidr := key.ClusterNetworkCIDR(customObject)
-			if cidr == "" {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster network segment has not been allocated yet")
-				return cloudformation.CreateStackInput{}, nil
-			}
-
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the guest cluster has allocated network segment: %s", cidr))
-		}
 
 		if err := r.validateCluster(customObject); err != nil {
 			return cloudformation.CreateStackInput{}, microerror.Mask(err)
