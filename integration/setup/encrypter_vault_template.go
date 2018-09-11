@@ -34,8 +34,6 @@ Resources:
       ImageId: ami-4f508c22
       InstanceType: t2.micro
       KeyName: vault-poc
-      SecurityGroups:
-        - Ref: VaultSecurityGroup
       NetworkInterfaces: 
         - AssociatePublicIpAddress: "true"
           DeleteOnTermination : "true"
