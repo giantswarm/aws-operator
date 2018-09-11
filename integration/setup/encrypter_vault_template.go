@@ -168,7 +168,7 @@ Resources:
             chmod a+x /usr/local/bin/vaultinit.sh
             vaultinit.sh
 
-	  - {}
+          - {}
       Tags:
       - Key: Name
         Value: vault-poc-vault
