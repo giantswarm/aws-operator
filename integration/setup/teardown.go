@@ -44,13 +44,13 @@ func teardown(config Config) error {
 		}
 	}
 
-	if len(errors) > 0 {
-		return microerror.Mask(errors[0])
-	}
-
 	err = deleteHostPeerVPC(config)
 	if err != nil {
-		return microerror.Mask(err)
+		errors = append(errors, microerror.Mask(err))
+	}
+
+	if len(errors) > 0 {
+		return microerror.Mask(errors[0])
 	}
 
 	return nil
