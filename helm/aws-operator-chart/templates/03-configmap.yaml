@@ -13,7 +13,7 @@ data:
         accessLogsExpiration: '{{ .Values.Installation.V1.Provider.AWS.S3AccessLogsExpiration }}'
         advancedMonitoringEC2: '{{ .Values.Installation.V1.Provider.AWS.AdvancedMonitoringEC2 }}'
         encrypter: '{{ .Values.Installation.V1.Provider.AWS.Encrypter }}'
-        hasTrustedAdvisorSupportPlan: '{{ .Values.Installation.V1.Provider.AWS.HasTrustedAdvisorSupportPlan }}'
+        trustedAdvisorEnabled: '{{ .Values.Installation.V1.Provider.AWS.TrustedAdvisor.Enabled }}'
         includeTags: '{{ .Values.Installation.V1.Provider.AWS.IncludeTags }}'
         loggingBucket:
           delete: '{{ .Values.Installation.V1.Provider.AWS.DeleteLoggingBucket }}'

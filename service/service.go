@@ -206,9 +206,9 @@ func New(config Config) (*Service, error) {
 			K8sClient: k8sClient,
 			Logger:    config.Logger,
 
-			AwsConfig:               awsConfig,
-			InstallationName:        config.Viper.GetString(config.Flag.Service.Installation.Name),
-			TrustedAdvisorSupported: config.Viper.GetBool(config.Flag.Service.AWS.HasTrustedAdvisorSupportPlan),
+			AwsConfig:             awsConfig,
+			InstallationName:      config.Viper.GetString(config.Flag.Service.Installation.Name),
+			TrustedAdvisorEnabled: config.Viper.GetBool(config.Flag.Service.AWS.TrustedAdvisor.Enabled),
 		}
 
 		metricsCollector, err = collector.New(c)
@@ -275,6 +275,7 @@ func New(config Config) (*Service, error) {
 func (s *Service) Boot(ctx context.Context) {
 	s.bootOnce.Do(func() {
 		prometheus.MustRegister(s.metricsCollector)
+		go s.metricsCollector.Boot(ctx)
 		go s.statusResourceCollector.Boot(ctx)
 
 		go s.clusterController.Boot()

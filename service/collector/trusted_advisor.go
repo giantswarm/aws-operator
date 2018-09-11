@@ -80,18 +80,7 @@ var (
 	})
 )
 
-func init() {
-	prometheus.MustRegister(trustedAdvisorError)
-
-	prometheus.MustRegister(getChecksDuration)
-	prometheus.MustRegister(getResourcesDuration)
-}
-
 func (c *Collector) collectAccountsTrustedAdvisorChecks(ch chan<- prometheus.Metric, clients []aws.Clients) {
-	if !c.trustedAdvisorSupported {
-		return
-	}
-
 	var wg sync.WaitGroup
 
 	for _, client := range clients {
