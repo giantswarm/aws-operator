@@ -382,7 +382,7 @@ func PrivateSubnetCIDR(customObject v1alpha1.AWSConfig) string {
 }
 
 func CIDR(customObject v1alpha1.AWSConfig) string {
-	return ClusterNetworkCIDR(customObject)
+	return customObject.Spec.AWS.VPC.CIDR
 }
 
 func Region(customObject v1alpha1.AWSConfig) string {

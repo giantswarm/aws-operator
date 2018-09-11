@@ -26,12 +26,18 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	r.logger.LogCtx(ctx, "level", "debug", "message", "checking if subnet needs to be allocated for cluster")
 
 	if key.ClusterNetworkCIDR(customObject) == "" {
+		var subnetCIDR string
+		if key.CIDR(customObject) != "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "using cluster CIDR from legacy field in CR")
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "allocating subnet for cluster")
+			subnetCIDR = key.CIDR(customObject)
+		} else {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "allocating subnet for cluster")
 
-		subnetCIDR, err := r.allocateSubnet(ctx)
-		if err != nil {
-			return microerror.Mask(err)
+			subnetCIDR, err = r.allocateSubnet(ctx)
+			if err != nil {
+				return microerror.Mask(err)
+			}
 		}
 
 		customObject.Status.Cluster.Network.CIDR = subnetCIDR
