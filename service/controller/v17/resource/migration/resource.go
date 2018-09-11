@@ -14,6 +14,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/service/controller/v17/key"
 )
@@ -57,29 +58,45 @@ func (r *Resource) Name() string {
 }
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	customObject, err := key.ToCustomObject(obj)
-	if err != nil {
-		return microerror.Mask(err)
+	var customObject providerv1alpha1.AWSConfig
+	var oldSpec providerv1alpha1.AWSConfigSpec
+	{
+		o, err := key.ToCustomObject(obj)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		// We have to always fetch the latest version of the resource in order to
+		// update it below using the latest resource version.
+		m, err := r.g8sClient.ProviderV1alpha1().AWSConfigs(o.GetNamespace()).Get(o.GetName(), metav1.GetOptions{})
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		customObject = *m.DeepCopy()
+		oldSpec = *m.Spec.DeepCopy()
+
+		err = r.migrateSpec(ctx, &customObject.Spec)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		if reflect.DeepEqual(customObject.Spec, oldSpec) {
+			return nil
+		}
 	}
-	customObject = *customObject.DeepCopy()
 
-	oldSpec := *customObject.Spec.DeepCopy()
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "updating CR")
 
-	r.migrateSpec(ctx, &customObject.Spec)
+		_, err := r.g8sClient.ProviderV1alpha1().AWSConfigs(customObject.GetNamespace()).Update(&customObject)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 
-	if reflect.DeepEqual(customObject.Spec, oldSpec) {
-		return nil
+		r.logger.LogCtx(ctx, "level", "debug", "message", "updated CR")
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling reconciliation")
+		reconciliationcanceledcontext.SetCanceled(ctx)
 	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", "updating CR")
-
-	_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(awsConfigNamespace).Update(&customObject)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", "CR updated, canceling reconciliation")
-	reconciliationcanceledcontext.SetCanceled(ctx)
 
 	return nil
 }
