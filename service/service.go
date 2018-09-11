@@ -206,8 +206,9 @@ func New(config Config) (*Service, error) {
 			K8sClient: k8sClient,
 			Logger:    config.Logger,
 
-			AwsConfig:        awsConfig,
-			InstallationName: config.Viper.GetString(config.Flag.Service.Installation.Name),
+			AwsConfig:               awsConfig,
+			InstallationName:        config.Viper.GetString(config.Flag.Service.Installation.Name),
+			TrustedAdvisorSupported: config.Viper.GetBool(config.Flag.Service.AWS.HasTrustedAdvisorSupportPlan),
 		}
 
 		metricsCollector, err = collector.New(c)

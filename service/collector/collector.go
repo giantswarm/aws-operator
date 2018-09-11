@@ -21,8 +21,9 @@ type Config struct {
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 
-	AwsConfig        awsutil.Config
-	InstallationName string
+	AwsConfig               awsutil.Config
+	InstallationName        string
+	TrustedAdvisorSupported bool
 }
 
 type Collector struct {
@@ -30,8 +31,9 @@ type Collector struct {
 	k8sClient kubernetes.Interface
 	logger    micrologger.Logger
 
-	awsConfig        awsutil.Config
-	installationName string
+	awsConfig               awsutil.Config
+	installationName        string
+	trustedAdvisorSupported bool
 }
 
 func New(config Config) (*Collector, error) {
@@ -58,8 +60,9 @@ func New(config Config) (*Collector, error) {
 		k8sClient: config.K8sClient,
 		logger:    config.Logger,
 
-		awsConfig:        config.AwsConfig,
-		installationName: config.InstallationName,
+		awsConfig:               config.AwsConfig,
+		installationName:        config.InstallationName,
+		trustedAdvisorSupported: config.TrustedAdvisorSupported,
 	}
 
 	return c, nil
