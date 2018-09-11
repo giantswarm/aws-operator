@@ -13,7 +13,6 @@ Resources:
   VaultSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: "Internet Group"
       GroupDescription: "SSH traffic in, all traffic out."
       SecurityGroupIngress:
       - IpProtocol: tcp
