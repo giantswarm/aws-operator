@@ -8,8 +8,8 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
-	"github.com/giantswarm/aws-operator/service/controller/v14patch1/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/v14patch1/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch2/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch2/templates/cloudconfig"
 )
 
 func renderRandomKeyTmplSet(ctx context.Context, encrypter encrypter.Interface, key string, clusterKeys randomkeys.Cluster) (RandomKeyTmplSet, error) {
