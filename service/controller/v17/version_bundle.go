@@ -9,7 +9,7 @@ func VersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "aws-operator",
-				Description: "Add your changes here.",
+				Description: "Add security group descriptions for master nodes.",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
