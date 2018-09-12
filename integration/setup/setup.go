@@ -327,13 +327,23 @@ func installHostPeerVPC(config Config) (vpcID, encrypterVaultSubnetID string, er
 	if err != nil {
 		return "", "", microerror.Mask(err)
 	}
-	for _, o := range describeOutput.Stacks[0].Outputs {
-		if *o.OutputKey == "VPCID" {
-			vpcID = *o.OutputValue
+
+	outputFn := func(key string) (string, error) {
+		for _, o := range describeOutput.Stacks[0].Outputs {
+			if *o.OutputKey == "VPCID" {
+				return *o.OutputValue, nil
+			}
 		}
-		if *o.OutputKey == "VPCVaultSubnet" {
-			encrypterVaultSubnetID = *o.OutputValue
-		}
+		return "", microerror.Maskf(executionFailedError, "CF stack output for key %#q not found", key)
+	}
+
+	vpcID, err = outputFn("VPCID")
+	if err != nil {
+		return "", "", microerror.Mask(err)
+	}
+	vpcID, err = outputFn("VPCVaultSubnet")
+	if err != nil {
+		return "", "", microerror.Mask(err)
 	}
 
 	log.Printf("created Host Peer VPC stack")
