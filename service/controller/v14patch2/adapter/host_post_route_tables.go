@@ -12,8 +12,8 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/v14patch1/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/v14patch1/key"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch2/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch2/key"
 )
 
 type HostPostRouteTablesAdapter struct {

@@ -11,8 +11,8 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v14patch1/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v14patch1/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch2/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch2/encrypter"
 )
 
 func Test_CurrentState(t *testing.T) {
