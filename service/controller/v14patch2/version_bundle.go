@@ -9,7 +9,7 @@ func VersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "cloudconfig",
-				Description: "Removed nginx-ingress-controller related components (will be managed by chart-operator).",
+				Description: "Add kube-proxy configuration files, required for updating kube-proxy daemonset.",
 				Kind:        versionbundle.KindRemoved,
 			},
 		},
@@ -40,6 +40,6 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    "aws-operator",
-		Version: "3.3.1",
+		Version: "3.3.2",
 	}
 }
