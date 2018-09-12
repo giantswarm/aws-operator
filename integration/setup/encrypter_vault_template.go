@@ -8,6 +8,10 @@ Parameters:
     Type: String
   SecretKeyId:
     Type: String
+  SubnetId:
+    Type: String
+  VpcId
+    Type: String
 
 Resources:
   VaultSecurityGroup:
@@ -23,6 +27,8 @@ Resources:
         FromPort: '8200'
         ToPort: '8200'
         CidrIp: 0.0.0.0/0
+      VpcId:
+        Ref: VpcId
       Tags:
       - Key: Name
         Value: vault-poc
@@ -39,6 +45,8 @@ Resources:
           DeviceIndex: "0"
           GroupSet: 
             - Ref: VaultSecurityGroup
+	  SubnetId:
+	    Ref: SubnetId
       UserData:
         Fn::Base64: !Sub
           - |

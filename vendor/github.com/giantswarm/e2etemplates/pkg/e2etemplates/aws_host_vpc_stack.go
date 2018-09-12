@@ -24,9 +24,22 @@ Resources:
       Tags:
       - Key: Name
         Value: ${AWS_ROUTE_TABLE_1}
+
+  VPCVaultSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.11.0.0/24
+      VpcId: !Ref VPC
+      - Key: Name
+        Value: ${CLUSTER_NAME}-vault
+
 Outputs:
   VPCID:
-    Description: Accepter VPC ID
+    Description: VPC ID.
     Value: !Ref VPC
+  VPCVaultSubnet:
+    Description: VPC Subnet for encrypter vault.
+    Value: !Ref VPCVaultSubnet
+
 
 `

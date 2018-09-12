@@ -42,27 +42,27 @@ func Setup(m *testing.M, config Config) {
 		os.Exit(1)
 	}
 
-	// TODO create vpc and vault in parallel.
-
-	vpcPeerID, err := installHostPeerVPC(config)
-	if err != nil {
-		log.Printf("%#v\n", err)
-		v = 1
-	}
-
-	// TODO make encrypter vault install conditional depending on encrypter.
-
-	vaultAddress, err := installEncrypterVault(config)
+	vpcPeerID, encrypterVaultSubnetID, err := installHostPeerVPC(config)
 	if err != nil {
 		log.Printf("%#v\n", err)
 		v = 1
 	}
 
 	extConfig := extendedConfig{
-		Config:       config,
-		VaultAddress: vaultAddress,
-		VPCPeerID:    vpcPeerID,
+		Config:                 config,
+		VPCPeerID:              vpcPeerID,
+		EncrypterVaultSubnetID: encrypterVaultSubnetID,
 	}
+
+	// TODO make encrypter vault install conditional depending on encrypter.
+
+	vaultAddress, err := installEncrypterVault(extConfig)
+	if err != nil {
+		log.Printf("%#v\n", err)
+		v = 1
+	}
+
+	extConfig.VaultAddress = vaultAddress
 
 	err = config.Host.Setup()
 	if err != nil {
@@ -236,7 +236,7 @@ func installCredential(config Config) error {
 	return nil
 }
 
-func installEncrypterVault(config Config) (string, error) {
+func installEncrypterVault(config extendedConfig) (string, error) {
 	log.Printf("creating encrypter vault")
 
 	stackName := "encrypter-vault-" + env.ClusterID()
@@ -252,6 +252,14 @@ func installEncrypterVault(config Config) (string, error) {
 			{
 				ParameterKey:   aws.String("SecretKeyId"),
 				ParameterValue: aws.String(env.HostAWSAccessKeySecret()),
+			},
+			{
+				ParameterKey:   aws.String("SubnetId"),
+				ParameterValue: aws.String(config.EncrypterVaultSubnetID),
+			},
+			{
+				ParameterKey:   aws.String("VpcId"),
+				ParameterValue: aws.String(config.VPCPeerID),
 			},
 		},
 	}
@@ -282,7 +290,7 @@ func installEncrypterVault(config Config) (string, error) {
 	return vaultAddress, nil
 }
 
-func installHostPeerVPC(config Config) (string, error) {
+func installHostPeerVPC(config Config) (vpcID, encrypterVaultSubnetID string, err error) {
 	log.Printf("creating Host Peer VPC stack")
 
 	os.Setenv("AWS_ROUTE_TABLE_0", env.AWSRouteTable0())
@@ -290,35 +298,46 @@ func installHostPeerVPC(config Config) (string, error) {
 	os.Setenv("CLUSTER_NAME", env.ClusterID())
 	stackName := "host-peer-" + env.ClusterID()
 	stackInput := &cloudformation.CreateStackInput{
-		StackName:        aws.String(stackName),
+		StackName: aws.String(stackName),
+		// ---
+		// ---
+		// ---
+		// ---
+		// TODO Update template in e2etemplates.
+		// ---
+		// ---
+		// ---
+		// ---
 		TemplateBody:     aws.String(os.ExpandEnv(e2etemplates.AWSHostVPCStack)),
 		TimeoutInMinutes: aws.Int64(2),
 	}
-	_, err := config.AWSClient.CloudFormation.CreateStack(stackInput)
+	_, err = config.AWSClient.CloudFormation.CreateStack(stackInput)
 	if err != nil {
-		return "", microerror.Mask(err)
+		return "", "", microerror.Mask(err)
 	}
 	err = config.AWSClient.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
 		StackName: aws.String(stackName),
 	})
 	if err != nil {
-		return "", microerror.Mask(err)
+		return "", "", microerror.Mask(err)
 	}
 	describeOutput, err := config.AWSClient.CloudFormation.DescribeStacks(&cloudformation.DescribeStacksInput{
 		StackName: aws.String(stackName),
 	})
 	if err != nil {
-		return "", microerror.Mask(err)
+		return "", "", microerror.Mask(err)
 	}
-	var vpcPeerID string
 	for _, o := range describeOutput.Stacks[0].Outputs {
 		if *o.OutputKey == "VPCID" {
-			vpcPeerID = *o.OutputValue
-			break
+			vpcID = *o.OutputValue
+		}
+		if *o.OutputKey == "VPCVaultSubnet" {
+			encrypterVaultSubnetID = *o.OutputValue
 		}
 	}
+
 	log.Printf("created Host Peer VPC stack")
-	return vpcPeerID, nil
+	return vpcID, encrypterVaultSubnetID, nil
 }
 
 func installResources(config extendedConfig) error {
