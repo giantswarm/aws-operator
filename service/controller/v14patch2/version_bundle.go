@@ -1,4 +1,4 @@
-package v17
+package v14patch1
 
 import (
 	"github.com/giantswarm/versionbundle"
@@ -8,9 +8,9 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "aws-operator",
-				Description: "Add security group descriptions for master nodes.",
-				Kind:        versionbundle.KindChanged,
+				Component:   "cloudconfig",
+				Description: "Removed nginx-ingress-controller related components (will be managed by chart-operator).",
+				Kind:        versionbundle.KindRemoved,
 			},
 		},
 		Components: []versionbundle.Component{
@@ -36,10 +36,10 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "kubernetes",
-				Version: "1.11.1",
+				Version: "1.10.4",
 			},
 		},
 		Name:    "aws-operator",
-		Version: "4.2.0",
+		Version: "3.3.1",
 	}
 }
