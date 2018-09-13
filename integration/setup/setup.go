@@ -106,6 +106,19 @@ func Setup(m *testing.M, config Config) {
 	os.Exit(v)
 }
 
+func getCloudFormationStackOutput(cf *cloudformation.DescribeStacksOutput, name, key string) (string, error) {
+	if len(describeOutput.Stacks) != 1 {
+		return "", microerror.Maskf(executionFailedError, "expected single CF stack with name %#q", name)
+	}
+
+	for _, o := range describeOutput.Stacks[0].Outputs {
+		if *o.OutputKey == key {
+			return *o.OutputValue, nil
+		}
+	}
+	return "", microerror.Maskf(executionFailedError, "CF stack %#q output for key %#q not found", name, key)
+}
+
 func installAWSOperator(config extendedConfig) error {
 	var err error
 
@@ -280,11 +293,9 @@ func installEncrypterVault(config extendedConfig) (string, error) {
 		return "", microerror.Mask(err)
 	}
 	var vaultAddress string
-	for _, o := range describeOutput.Stacks[0].Outputs {
-		if *o.OutputKey == "VaultAddress" {
-			vaultAddress = *o.OutputValue
-			break
-		}
+	vaultAddress, err = getCloudFormationStackOutput(describeOutput, stackName, "VaultAddress")
+	if err != nil {
+		return "", "", microerror.Mask(err)
 	}
 	log.Printf("created encrypter vault")
 	return vaultAddress, nil
@@ -328,20 +339,11 @@ func installHostPeerVPC(config Config) (vpcID, encrypterVaultSubnetID string, er
 		return "", "", microerror.Mask(err)
 	}
 
-	outputFn := func(key string) (string, error) {
-		for _, o := range describeOutput.Stacks[0].Outputs {
-			if *o.OutputKey == key {
-				return *o.OutputValue, nil
-			}
-		}
-		return "", microerror.Maskf(executionFailedError, "CF stack output for key %#q not found", key)
-	}
-
-	vpcID, err = outputFn("VPCID")
+	vpcID, err = getCloudFormationStackOutput(describeOutput, stackName, "VPCID")
 	if err != nil {
 		return "", "", microerror.Mask(err)
 	}
-	encrypterVaultSubnetID, err = outputFn("VPCVaultSubnet")
+	encrypterVaultSubnetID, err = getCloudFormationStackOutput(describeOutput, stackName, "VPCVaultSubnet")
 	if err != nil {
 		return "", "", microerror.Mask(err)
 	}
