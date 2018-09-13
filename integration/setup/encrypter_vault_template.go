@@ -10,7 +10,7 @@ Parameters:
     Type: String
   SubnetId:
     Type: String
-  VpcId
+  VpcId:
     Type: String
 
 Resources:

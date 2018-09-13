@@ -30,6 +30,7 @@ Resources:
     Properties:
       CidrBlock: 10.11.0.0/24
       VpcId: !Ref VPC
+      Tags:
       - Key: Name
         Value: ${CLUSTER_NAME}-vault
 
