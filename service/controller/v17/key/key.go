@@ -134,6 +134,11 @@ func CredentialNamespace(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.CredentialSecret.Namespace
 }
 
+// ClusterNetworkCIDR returns allocated guest cluster subnet CIDR.
+func ClusterNetworkCIDR(customObject v1alpha1.AWSConfig) string {
+	return customObject.Status.Cluster.Network.CIDR
+}
+
 func CloudConfigSmallTemplates() []string {
 	return []string{
 		cloudconfig.Small,
