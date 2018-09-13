@@ -36,7 +36,7 @@ Resources:
   VaultInstance:
     Type: AWS::EC2::Instance
     Properties:
-      ImageId: ami-4f508c22
+      ImageId: ami-7c412f13
       InstanceType: t2.micro
       KeyName: vault-poc
       NetworkInterfaces: 
