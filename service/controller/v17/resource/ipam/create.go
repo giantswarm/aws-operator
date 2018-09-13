@@ -23,7 +23,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "checking if subnet needs to be allocated for cluster")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if subnet needs to be allocated for cluster")
 
 	if key.ClusterNetworkCIDR(customObject) == "" {
 		var subnetCIDR string
@@ -31,10 +31,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		// this version and have subnet allocation in their Status field.
 		// Tracked here: https://github.com/giantswarm/giantswarm/issues/4192.
 		if key.CIDR(customObject) != "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "using cluster CIDR from legacy field in CR")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "found out allocated cluster CIDR from legacy field in CR")
 
 			subnetCIDR = key.CIDR(customObject)
 		} else {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "didn't find out allocated subnet for cluster")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "allocating subnet for cluster")
 
 			subnetCIDR, err = r.allocateSubnet(ctx)
@@ -57,7 +58,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("subnet %s allocated for cluster", subnetCIDR))
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "subnet doesn't need to be allocated for cluster")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found out subnet doesn't need to be allocated for cluster")
 	}
 
 	return nil
