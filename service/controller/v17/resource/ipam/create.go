@@ -29,6 +29,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		var subnetCIDR string
 		// TODO(tuommaki): Remove this when all tenant clusters are upgraded to
 		// this version and have subnet allocation in their Status field.
+		// Tracked here: https://github.com/giantswarm/giantswarm/issues/4192.
 		if key.CIDR(customObject) != "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "using cluster CIDR from legacy field in CR")
 
@@ -42,8 +43,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			}
 		}
 
+		// Ensure that latest version of customObject is used.
+		customObject, err := r.g8sClient.ProviderV1alpha1().AWSConfigs(customObject.Namespace).Get(customObject.Name, apismetav1.GetOptions{})
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
 		customObject.Status.Cluster.Network.CIDR = subnetCIDR
-		_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(customObject.Namespace).UpdateStatus(&customObject)
+		_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(customObject.Namespace).UpdateStatus(customObject)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -82,17 +89,18 @@ func (r *Resource) allocateSubnet(ctx context.Context) (string, error) {
 		reservedSubnets = append(reservedSubnets, awsConfigSubnets...)
 	}
 
-	reservedSubnets = canonicalizeSubnets(r.networkRange, reservedSubnets)
+	{
+		reservedSubnets = canonicalizeSubnets(r.networkRange, reservedSubnets)
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "finding free subnet")
-	subnet, err := ipam.Free(r.networkRange, r.allocatedSubnetMask, reservedSubnets)
-	if err != nil {
-		return "", microerror.Maskf(err, "networkRange: %s, allocatedSubnetMask: %s, reservedSubnets: %#v", r.networkRange.String(), r.allocatedSubnetMask.String(), reservedSubnets)
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding free subnet")
+		subnet, err := ipam.Free(r.networkRange, r.allocatedSubnetMask, reservedSubnets)
+		if err != nil {
+			return "", microerror.Maskf(err, "networkRange: %s, allocatedSubnetMask: %s, reservedSubnets: %#v", r.networkRange.String(), r.allocatedSubnetMask.String(), reservedSubnets)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found free subnet: %s", subnet.String()))
+		return subnet.String(), nil
 	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found free subnet: %s", subnet.String()))
-
-	return subnet.String(), nil
 }
 
 func canonicalizeSubnets(network net.IPNet, subnets []net.IPNet) []net.IPNet {
