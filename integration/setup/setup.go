@@ -330,7 +330,7 @@ func installHostPeerVPC(config Config) (vpcID, encrypterVaultSubnetID string, er
 
 	outputFn := func(key string) (string, error) {
 		for _, o := range describeOutput.Stacks[0].Outputs {
-			if *o.OutputKey == "VPCID" {
+			if *o.OutputKey == key {
 				return *o.OutputValue, nil
 			}
 		}
