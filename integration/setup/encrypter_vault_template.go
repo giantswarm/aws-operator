@@ -45,8 +45,8 @@ Resources:
           DeviceIndex: "0"
           GroupSet: 
             - Ref: VaultSecurityGroup
-	  SubnetId:
-	    Ref: SubnetId
+          SubnetId:
+            Ref: SubnetId
       UserData:
         Fn::Base64: !Sub
           - |
