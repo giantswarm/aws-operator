@@ -341,7 +341,7 @@ func installHostPeerVPC(config Config) (vpcID, encrypterVaultSubnetID string, er
 	if err != nil {
 		return "", "", microerror.Mask(err)
 	}
-	vpcID, err = outputFn("VPCVaultSubnet")
+	encrypterVaultSubnetID, err = outputFn("VPCVaultSubnet")
 	if err != nil {
 		return "", "", microerror.Mask(err)
 	}
