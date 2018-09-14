@@ -10,7 +10,7 @@ func VersionBundle() versionbundle.Bundle {
 			{
 				Component:   "cloudconfig",
 				Description: "Add kube-proxy configuration files, required for updating kube-proxy daemonset.",
-				Kind:        versionbundle.KindRemoved,
+				Kind:        versionbundle.KindAdded,
 			},
 		},
 		Components: []versionbundle.Component{
