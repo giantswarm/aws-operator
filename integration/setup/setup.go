@@ -107,11 +107,11 @@ func Setup(m *testing.M, config Config) {
 }
 
 func getCloudFormationStackOutput(cf *cloudformation.DescribeStacksOutput, name, key string) (string, error) {
-	if len(describeOutput.Stacks) != 1 {
+	if len(cf.Stacks) != 1 {
 		return "", microerror.Maskf(executionFailedError, "expected single CF stack with name %#q", name)
 	}
 
-	for _, o := range describeOutput.Stacks[0].Outputs {
+	for _, o := range cf.Stacks[0].Outputs {
 		if *o.OutputKey == key {
 			return *o.OutputValue, nil
 		}
@@ -295,7 +295,7 @@ func installEncrypterVault(config extendedConfig) (string, error) {
 	var vaultAddress string
 	vaultAddress, err = getCloudFormationStackOutput(describeOutput, stackName, "VaultAddress")
 	if err != nil {
-		return "", "", microerror.Mask(err)
+		return "", microerror.Mask(err)
 	}
 	log.Printf("created encrypter vault")
 	return vaultAddress, nil
