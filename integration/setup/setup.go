@@ -36,6 +36,8 @@ func Setup(m *testing.M, config Config) {
 	var v int
 	var err error
 
+	// Perform teardown before execution. Errors are ingored and not logged.
+
 	vpcPeerID, err := installHostPeerVPC(config)
 	if err != nil {
 		log.Printf("%#v\n", err)
@@ -76,8 +78,6 @@ func Setup(m *testing.M, config Config) {
 				// teardown errors are logged inside the function.
 				v = 1
 			}
-			// TODO there should be error handling for the framework teardown.
-			config.Host.Teardown()
 		}
 	}
 

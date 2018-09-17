@@ -9,7 +9,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/integration/env"
@@ -30,7 +29,7 @@ func teardown(ctx context.Context, config Config) error {
 		}
 
 		for _, release := range releases {
-			err = framework.HelmCmd(fmt.Sprintf("delete %s --purge", release))
+			err = config.Resource.Delete(release)
 			if err != nil {
 				config.Logger.LogCtx(ctx, "level", "error", "message", fmt.Sprintf("failed to delete release %#q", release), "stack", fmt.Sprintf("%#v", err))
 				errors = append(errors, microerror.Mask(err))
@@ -44,6 +43,11 @@ func teardown(ctx context.Context, config Config) error {
 			config.Logger.LogCtx(ctx, "level", "error", "message", fmt.Sprintf("failed to delete host peering VPC"), "stack", fmt.Sprintf("%#v", err))
 			errors = append(errors, microerror.Mask(err))
 		}
+	}
+
+	{
+		// TODO there should be error handling for the framework teardown.
+		config.Host.Teardown()
 	}
 
 	if len(errors) > 0 {
