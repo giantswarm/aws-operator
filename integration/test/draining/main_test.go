@@ -17,6 +17,7 @@ var (
 	g *framework.Guest
 	h *framework.Host
 	c *aws.Client
+	l micrologger.Logger
 )
 
 // TestMain allows us to have common setup and teardown steps that are run
@@ -24,14 +25,18 @@ var (
 func TestMain(m *testing.M) {
 	var err error
 
-	logger, err := micrologger.New(micrologger.Config{})
-	if err != nil {
-		panic(err.Error())
+	{
+		c := micrologger.Config{}
+
+		l, err = micrologger.New(c)
+		if err != nil {
+			panic(err.Error())
+		}
 	}
 
 	{
 		c := framework.GuestConfig{
-			Logger: logger,
+			Logger: l,
 
 			ClusterID:    env.ClusterID(),
 			CommonDomain: env.CommonDomain(),
@@ -45,7 +50,7 @@ func TestMain(m *testing.M) {
 
 	{
 		c := framework.HostConfig{
-			Logger: logger,
+			Logger: l,
 
 			ClusterID:  env.ClusterID(),
 			VaultToken: env.VaultToken(),
@@ -69,6 +74,7 @@ func TestMain(m *testing.M) {
 			AWSClient: c,
 			Guest:     g,
 			Host:      h,
+			Logger:    l,
 		}
 
 		setup.Setup(m, c)
