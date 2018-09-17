@@ -3,6 +3,7 @@
 package setup
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -14,43 +15,39 @@ import (
 	"github.com/giantswarm/aws-operator/integration/env"
 )
 
-func teardown(config Config) error {
+func teardown(ctx context.Context, config Config) error {
 	var err error
 	var errors []error
 
 	{
-		err = framework.HelmCmd(fmt.Sprintf("delete %s-aws-operator --purge", config.Host.TargetNamespace()))
-		if err != nil {
-			errors = append(errors, microerror.Mask(err))
+		releases := []string{
+			fmt.Sprintf("%s-aws-operator", config.Host.TargetNamespace()),
+			fmt.Sprintf("%s-cert-operator", config.Host.TargetNamespace()),
+			fmt.Sprintf("%s-node-operator", config.Host.TargetNamespace()),
+
+			fmt.Sprintf("%s-cert-config-e2e", config.Host.TargetNamespace()),
+			fmt.Sprintf("%s-aws-config-e2e", config.Host.TargetNamespace()),
 		}
-		err = framework.HelmCmd(fmt.Sprintf("delete %s-cert-operator --purge", config.Host.TargetNamespace()))
-		if err != nil {
-			errors = append(errors, microerror.Mask(err))
-		}
-		err = framework.HelmCmd(fmt.Sprintf("delete %s-node-operator --purge", config.Host.TargetNamespace()))
-		if err != nil {
-			errors = append(errors, microerror.Mask(err))
+
+		for _, release := range releases {
+			err = framework.HelmCmd(fmt.Sprintf("delete %s --purge", release))
+			if err != nil {
+				config.Logger.LogCtx(ctx, "level", "error", "message", fmt.Sprintf("failed to delete release %#q", release), "stack", fmt.Sprintf("%#v", err))
+				errors = append(errors, microerror.Mask(err))
+			}
 		}
 	}
 
 	{
-		err = framework.HelmCmd(fmt.Sprintf("delete %s-cert-config-e2e --purge", config.Host.TargetNamespace()))
+		err = deleteHostPeerVPC(config)
 		if err != nil {
-			errors = append(errors, microerror.Mask(err))
-		}
-		err = framework.HelmCmd(fmt.Sprintf("delete %s-aws-config-e2e --purge", config.Host.TargetNamespace()))
-		if err != nil {
+			config.Logger.LogCtx(ctx, "level", "error", "message", fmt.Sprintf("failed to delete host peering VPC"), "stack", fmt.Sprintf("%#v", err))
 			errors = append(errors, microerror.Mask(err))
 		}
 	}
 
 	if len(errors) > 0 {
 		return microerror.Mask(errors[0])
-	}
-
-	err = deleteHostPeerVPC(config)
-	if err != nil {
-		return microerror.Mask(err)
 	}
 
 	return nil

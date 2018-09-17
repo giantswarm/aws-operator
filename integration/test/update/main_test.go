@@ -20,13 +20,13 @@ var (
 	c *aws.Client
 	g *framework.Guest
 	h *framework.Host
+	l micrologger.Logger
 	u *update.Update
 )
 
 func init() {
 	var err error
 
-	var l micrologger.Logger
 	{
 		c := micrologger.Config{}
 
@@ -110,6 +110,7 @@ func TestMain(m *testing.M) {
 			AWSClient: c,
 			Guest:     g,
 			Host:      h,
+			Logger:    l,
 		}
 
 		setup.Setup(m, c)
