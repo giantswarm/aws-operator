@@ -242,6 +242,12 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Owner:        FileOwner,
 			Permissions:  0766,
 		},
+		{
+			AssetContent: cloudconfig.KubeProxyConfig,
+			Path:         "/etc/kubernetes/config/proxy-config.yml",
+			Owner:        FileOwner,
+			Permissions:  0644,
+		},
 	}
 
 	var newFiles []k8scloudconfig.FileAsset
