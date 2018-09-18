@@ -53,8 +53,8 @@ required = [
   branch = "legacy"
   name = "github.com/giantswarm/certs"
 
-[[constraint]]
-  branch = "master"
+[[override]]
+  branch = "resource-del-idempotent"
   name = "github.com/giantswarm/e2e-harness"
 
 [[constraint]]

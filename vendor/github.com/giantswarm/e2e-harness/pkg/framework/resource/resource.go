@@ -1,6 +1,7 @@
 package resource
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -76,11 +77,21 @@ func New(config Config) (*Resource, error) {
 	return c, nil
 }
 
-func (r *Resource) Delete(name string) error {
+func (r *Resource) EnsureDeleted(ctx context.Context, name string) error {
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensuring deletion of release %#q", name))
+
 	err := r.helmClient.DeleteRelease(name, helm.DeletePurge(true))
-	if err != nil {
+	if helmclient.IsReleaseNotFound(err) {
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("release %#q does not exist", name))
+	} else if helmclient.IsTillerNotFound(err) {
+		r.logger.LogCtx(ctx, "level", "warning", "message", "tiller is not installed")
+	} else if err != nil {
 		return microerror.Mask(err)
+	} else {
+		r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("deleted release %#q", name))
 	}
+
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensured deletion of release %#q", name))
 
 	return nil
 }

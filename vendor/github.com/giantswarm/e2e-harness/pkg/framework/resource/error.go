@@ -11,6 +11,15 @@ func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
 
+var releaseNotFoundError = &microerror.Error{
+	Kind: "releaseNotFoundError",
+}
+
+// IsReleaseNotFound asserts releaseNotFoundError.
+func IsReleaseNotFound(err error) bool {
+	return microerror.Cause(err) == releaseNotFoundError
+}
+
 var releaseStatusNotMatchingError = &microerror.Error{
 	Kind: "releaseStatusNotMatchingError",
 }

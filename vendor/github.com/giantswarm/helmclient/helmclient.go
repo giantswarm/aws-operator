@@ -543,7 +543,9 @@ func (c *Client) newTunnel() (*k8sportforward.Tunnel, error) {
 	}
 
 	podName, err := getPodName(c.k8sClient, tillerLabelSelector, c.tillerNamespace)
-	if err != nil {
+	if IsNotFound(err) {
+		return nil, microerror.Maskf(tillerNotFoundError, "label selector: %#q namespace: %#q", tillerLabelSelector, c.tillerNamespace)
+	} else if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
@@ -583,7 +585,7 @@ func getPodName(client kubernetes.Interface, labelSelector, namespace string) (s
 		return "", microerror.Maskf(tooManyResultsError, "%d", len(pods.Items))
 	}
 	if len(pods.Items) == 0 {
-		return "", microerror.Maskf(podNotFoundError, "%s", labelSelector)
+		return "", microerror.Maskf(notFoundError, "%s", labelSelector)
 	}
 	pod := pods.Items[0]
 
