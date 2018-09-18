@@ -5,7 +5,7 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/legacy"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_5_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_5_1"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v14patch2/templates/cloudconfig"
@@ -140,6 +140,12 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Path:         "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
 			Owner:        "root:root",
 			Permissions:  0700,
+		},
+		{
+			AssetContent: cloudconfig.KubeProxyConfig,
+			Path:         "/etc/kubernetes/config/proxy-config.yml",
+			Owner:        FileOwner,
+			Permissions:  0644,
 		},
 	}
 

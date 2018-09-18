@@ -5,7 +5,7 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/legacy"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_5_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_5_1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
@@ -241,6 +241,12 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Path:         "/opt/ebs-nvme-mapping",
 			Owner:        FileOwner,
 			Permissions:  0766,
+		},
+		{
+			AssetContent: cloudconfig.KubeProxyConfig,
+			Path:         "/etc/kubernetes/config/proxy-config.yml",
+			Owner:        FileOwner,
+			Permissions:  0644,
 		},
 	}
 

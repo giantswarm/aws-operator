@@ -71,9 +71,9 @@ func Setup(m *testing.M, config Config) {
 
 		// only do full teardown when not on CI
 		if os.Getenv("CIRCLECI") != "true" {
-			err := teardown(config)
+			err := teardown(ctx, config)
 			if err != nil {
-				log.Printf("%#v\n", err)
+				// teardown errors are logged inside the function.
 				v = 1
 			}
 			// TODO there should be error handling for the framework teardown.
