@@ -6,7 +6,9 @@ import (
 	"testing"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
+	"github.com/giantswarm/e2e-harness/pkg/framework/resource"
 	"github.com/giantswarm/e2eclients/aws"
+	"github.com/giantswarm/helmclient"
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/integration/env"
@@ -14,10 +16,12 @@ import (
 )
 
 var (
-	g *framework.Guest
-	h *framework.Host
-	c *aws.Client
-	l micrologger.Logger
+	g          *framework.Guest
+	h          *framework.Host
+	helmClient *helmclient.Client
+	c          *aws.Client
+	l          micrologger.Logger
+	r          *resource.Resource
 )
 
 // TestMain allows us to have common setup and teardown steps that are run
@@ -63,6 +67,31 @@ func TestMain(m *testing.M) {
 	}
 
 	{
+		c := helmclient.Config{
+			Logger:          l,
+			K8sClient:       h.K8sClient(),
+			RestConfig:      h.RestConfig(),
+			TillerNamespace: "giantswarm",
+		}
+		helmClient, err = helmclient.New(c)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
+	{
+		c := resource.Config{
+			Logger:     l,
+			HelmClient: helmClient,
+			Namespace:  "giantswarm",
+		}
+		r, err = resource.New(c)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
+	{
 		c, err = aws.NewClient()
 		if err != nil {
 			panic(err.Error())
@@ -75,6 +104,7 @@ func TestMain(m *testing.M) {
 			Guest:     g,
 			Host:      h,
 			Logger:    l,
+			Resource:  r,
 		}
 
 		setup.Setup(m, c)
