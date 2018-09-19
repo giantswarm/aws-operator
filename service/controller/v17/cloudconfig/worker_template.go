@@ -168,7 +168,7 @@ func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: cloudconfig.DecryptTLSAssetsService,
 			Name:         "decrypt-tls-assets.service",
-			Enable:       true,
+			Enable:       false,
 			Command:      "start",
 		},
 		{
