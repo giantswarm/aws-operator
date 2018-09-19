@@ -37,3 +37,12 @@ var releaseVersionNotMatchingError = &microerror.Error{
 func IsReleaseVersionNotMatching(err error) bool {
 	return microerror.Cause(err) == releaseVersionNotMatchingError
 }
+
+var tillerNotFoundError = &microerror.Error{
+	Kind: "tillerNotFoundError",
+}
+
+// IsTillerNotFound asserts tillerNotFoundError.
+func IsTillerNotFound(err error) bool {
+	return microerror.Cause(err) == tillerNotFoundError
+}

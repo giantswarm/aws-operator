@@ -283,7 +283,7 @@
 
 [[projects]]
   branch = "resource-del-idempotent"
-  digest = "1:46718857fcbafaf6adb05505749a2eed8dfb8eb9fd6213252a9128b7efd57240"
+  digest = "1:b91b2d15035b246ea00ea62b509a7fe98239b1463f4832a65a7f6762472daefb"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
@@ -292,7 +292,7 @@
     "pkg/harness",
   ]
   pruneopts = "UT"
-  revision = "8209ebe185fed5144224c0c20071ab268a1c5c7e"
+  revision = "f8dfbe8968c99ea8e1e7268244cef85006767b0d"
 
 [[projects]]
   branch = "master"

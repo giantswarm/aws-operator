@@ -77,6 +77,19 @@ func New(config Config) (*Resource, error) {
 	return c, nil
 }
 
+func (r *Resource) Delete(name string) error {
+	err := r.helmClient.DeleteRelease(name, helm.DeletePurge(true))
+	if helmclient.IsReleaseNotFound(err) {
+		return microerror.Maskf(releaseNotFoundError, name)
+	} else if helmclient.IsTillerNotFound(err) {
+		return microerror.Mask(tillerNotFoundError)
+	} else if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
 func (r *Resource) EnsureDeleted(ctx context.Context, name string) error {
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensuring deletion of release %#q", name))
 
@@ -84,7 +97,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, name string) error {
 	if helmclient.IsReleaseNotFound(err) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("release %#q does not exist", name))
 	} else if helmclient.IsTillerNotFound(err) {
-		r.logger.LogCtx(ctx, "level", "warning", "message", "tiller is not installed")
+		r.logger.LogCtx(ctx, "level", "warning", "message", "tiller is not found/installed")
 	} else if err != nil {
 		return microerror.Mask(err)
 	} else {
