@@ -69,8 +69,8 @@ required = [
   branch = "master"
   name = "github.com/giantswarm/e2etests"
 
-[[constraint]]
-  branch = "master"
+[[override]]
+  branch = "fix-tiller-not-found"
   name = "github.com/giantswarm/helmclient"
 
 [[constraint]]

@@ -349,12 +349,12 @@
   revision = "af4b0eb24a293b1950709ac8099fa377e9702266"
 
 [[projects]]
-  branch = "master"
-  digest = "1:18a8a1977a2baeaeef5698c1024986824092a83ec938097d0406a557a52ac4e2"
+  branch = "fix-tiller-not-found"
+  digest = "1:e9b104c7c0729cb4b035846670a387183cd4786f7cdecd9b0c53d92687ad0eb3"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
   pruneopts = "UT"
-  revision = "cd4d9ef16c56892c70865eeec2efc00dec51ab90"
+  revision = "c0713f6ed449d3b15bd8a4464c4a1333b4717893"
 
 [[projects]]
   branch = "master"

@@ -86,15 +86,15 @@ func New(config Config) (*Client, error) {
 func (c *Client) DeleteRelease(releaseName string, options ...helmclient.DeleteOption) error {
 	o := func() error {
 		t, err := c.newTunnel()
-		if err != nil {
+		if IsTillerNotFound(err) {
+			return backoff.Permanent(microerror.Mask(err))
+		} else if err != nil {
 			return microerror.Mask(err)
 		}
 		defer c.closeTunnel(t)
 
 		_, err = c.newHelmClientFromTunnel(t).DeleteRelease(releaseName, options...)
 		if IsReleaseNotFound(err) {
-			return backoff.Permanent(microerror.Mask(err))
-		} else if IsTillerNotFound(err) {
 			return backoff.Permanent(microerror.Mask(err))
 		} else if err != nil {
 			return microerror.Mask(err)
@@ -230,7 +230,9 @@ func (c *Client) EnsureTillerInstalled() error {
 
 		o := func() error {
 			t, err := c.newTunnel()
-			if err != nil {
+			if IsTillerNotFound(err) {
+				return backoff.Permanent(microerror.Mask(err))
+			} else if err != nil {
 				return microerror.Mask(err)
 			}
 			defer c.closeTunnel(t)
@@ -274,15 +276,15 @@ func (c *Client) GetReleaseContent(releaseName string) (*ReleaseContent, error) 
 	{
 		o := func() error {
 			t, err := c.newTunnel()
-			if err != nil {
+			if IsTillerNotFound(err) {
+				return backoff.Permanent(microerror.Mask(err))
+			} else if err != nil {
 				return microerror.Mask(err)
 			}
 			defer c.closeTunnel(t)
 
 			resp, err = c.newHelmClientFromTunnel(t).ReleaseContent(releaseName)
 			if IsReleaseNotFound(err) {
-				return backoff.Permanent(microerror.Mask(err))
-			} else if IsTillerNotFound(err) {
 				return backoff.Permanent(microerror.Mask(err))
 			} else if err != nil {
 				return microerror.Mask(err)
@@ -329,15 +331,15 @@ func (c *Client) GetReleaseHistory(releaseName string) (*ReleaseHistory, error) 
 	{
 		o := func() error {
 			t, err := c.newTunnel()
-			if err != nil {
+			if IsTillerNotFound(err) {
+				return backoff.Permanent(microerror.Mask(err))
+			} else if err != nil {
 				return microerror.Mask(err)
 			}
 			defer c.closeTunnel(t)
 
 			resp, err = c.newHelmClientFromTunnel(t).ReleaseHistory(releaseName, helmclient.WithMaxHistory(1))
 			if IsReleaseNotFound(err) {
-				return backoff.Permanent(microerror.Mask(err))
-			} else if IsTillerNotFound(err) {
 				return backoff.Permanent(microerror.Mask(err))
 			} else if err != nil {
 				return microerror.Mask(err)
@@ -382,7 +384,9 @@ func (c *Client) GetReleaseHistory(releaseName string) (*ReleaseHistory, error) 
 func (c *Client) InstallFromTarball(path, ns string, options ...helmclient.InstallOption) error {
 	o := func() error {
 		t, err := c.newTunnel()
-		if err != nil {
+		if IsTillerNotFound(err) {
+			return backoff.Permanent(microerror.Mask(err))
+		} else if err != nil {
 			return microerror.Mask(err)
 		}
 		defer c.closeTunnel(t)
@@ -391,8 +395,6 @@ func (c *Client) InstallFromTarball(path, ns string, options ...helmclient.Insta
 		if IsCannotReuseRelease(err) {
 			return backoff.Permanent(microerror.Mask(err))
 		} else if IsReleaseNotFound(err) {
-			return backoff.Permanent(microerror.Mask(err))
-		} else if IsTillerNotFound(err) {
 			return backoff.Permanent(microerror.Mask(err))
 		} else if err != nil {
 			if IsInvalidGZipHeader(err) {
@@ -452,8 +454,6 @@ func (c *Client) RunReleaseTest(releaseName string, options ...helmclient.Releas
 	resChan, errChan := c.newHelmClientFromTunnel(t).RunReleaseTest(releaseName, helmclient.ReleaseTestTimeout(int64(runReleaseTestTimout)))
 	if IsReleaseNotFound(err) {
 		return backoff.Permanent(microerror.Mask(err))
-	} else if IsTillerNotFound(err) {
-		return backoff.Permanent(microerror.Mask(err))
 	} else if err != nil {
 		return microerror.Mask(err)
 	}
@@ -485,7 +485,9 @@ func (c *Client) RunReleaseTest(releaseName string, options ...helmclient.Releas
 func (c *Client) UpdateReleaseFromTarball(releaseName, path string, options ...helmclient.UpdateOption) error {
 	o := func() error {
 		t, err := c.newTunnel()
-		if err != nil {
+		if IsTillerNotFound(err) {
+			return backoff.Permanent(microerror.Mask(err))
+		} else if err != nil {
 			return microerror.Mask(err)
 		}
 		defer c.closeTunnel(t)
