@@ -9,7 +9,6 @@ import (
 	"github.com/giantswarm/operatorkit/controller"
 
 	"github.com/giantswarm/aws-operator/service/controller/v17/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v17/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v17/key"
 )
 
@@ -48,13 +47,6 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		_, err = sc.AWSClient.CloudFormation.DeleteStack(i)
 		if err != nil {
 			return microerror.Mask(err)
-		}
-
-		if r.encrypterBackend == encrypter.VaultBackend {
-			err = r.removeRoleAccess(sc, customObject)
-			if err != nil {
-				return microerror.Mask(err)
-			}
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "deleted the guest cluster main stack")

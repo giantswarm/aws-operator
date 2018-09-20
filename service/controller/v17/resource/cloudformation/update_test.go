@@ -397,7 +397,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 			STS: &adapter.STSClientMock{},
 		}
 		c.Logger = microloggertest.New()
-		c.EncrypterBackend = "kms"
 
 		newResource, err = New(c)
 		if err != nil {
@@ -849,7 +848,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 			STS: &adapter.STSClientMock{},
 		}
 		c.Logger = microloggertest.New()
-		c.EncrypterBackend = "kms"
 
 		newResource, err = New(c)
 		if err != nil {
