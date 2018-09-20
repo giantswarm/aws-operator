@@ -19,7 +19,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "cloudconfig",
-				Description: "Removed nginx-ingress-controller related components (will be managed by chart-operator).",
+				Description: "Removed nginx-ingress-controller related components (managed by chart-operator).",
 				Kind:        versionbundle.KindRemoved,
 			},
 		},
