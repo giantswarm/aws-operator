@@ -46,7 +46,16 @@ func New(config Config) (*Endpoint, error) {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
 	if len(config.Services) == 0 {
-		return nil, microerror.Maskf(invalidConfigError, "config.Services must not be empty")
+		c := healthz.Config{
+			Logger: config.Logger,
+		}
+
+		h, err := healthz.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		config.Services = append(config.Services, h)
 	}
 
 	newEndpoint := &Endpoint{

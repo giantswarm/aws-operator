@@ -6,9 +6,11 @@ import (
 	"testing"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
+	"github.com/giantswarm/e2e-harness/pkg/framework/resource"
 	"github.com/giantswarm/e2eclients/aws"
 	"github.com/giantswarm/e2etests/scaling"
 	"github.com/giantswarm/e2etests/scaling/provider"
+	"github.com/giantswarm/helmclient"
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/integration/env"
@@ -16,16 +18,18 @@ import (
 )
 
 var (
-	c *aws.Client
-	g *framework.Guest
-	h *framework.Host
-	s *scaling.Scaling
+	c          *aws.Client
+	g          *framework.Guest
+	h          *framework.Host
+	helmClient *helmclient.Client
+	l          micrologger.Logger
+	s          *scaling.Scaling
+	r          *resource.Resource
 )
 
 func init() {
 	var err error
 
-	var l micrologger.Logger
 	{
 		c := micrologger.Config{}
 
@@ -58,6 +62,31 @@ func init() {
 		}
 
 		h, err = framework.NewHost(c)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
+	{
+		c := helmclient.Config{
+			Logger:          l,
+			K8sClient:       h.K8sClient(),
+			RestConfig:      h.RestConfig(),
+			TillerNamespace: "giantswarm",
+		}
+		helmClient, err = helmclient.New(c)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
+	{
+		c := resource.Config{
+			Logger:     l,
+			HelmClient: helmClient,
+			Namespace:  "giantswarm",
+		}
+		r, err = resource.New(c)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -107,6 +136,8 @@ func TestMain(m *testing.M) {
 			AWSClient: c,
 			Guest:     g,
 			Host:      h,
+			Logger:    l,
+			Resource:  r,
 		}
 
 		setup.Setup(m, c)

@@ -519,6 +519,7 @@ type PullRequestEvent struct {
 	// the pull request was closed with unmerged commits. If the action is "closed"
 	// and the merged key is true, the pull request was merged.
 	Action      *string      `json:"action,omitempty"`
+	Assignee    *User        `json:"assignee,omitempty"`
 	Number      *int         `json:"number,omitempty"`
 	PullRequest *PullRequest `json:"pull_request,omitempty"`
 
@@ -630,39 +631,39 @@ func (p PushEventCommit) String() string {
 
 // PushEventRepository represents the repo object in a PushEvent payload.
 type PushEventRepository struct {
-	ID              *int64              `json:"id,omitempty"`
-	NodeID          *string             `json:"node_id,omitempty"`
-	Name            *string             `json:"name,omitempty"`
-	FullName        *string             `json:"full_name,omitempty"`
-	Owner           *PushEventRepoOwner `json:"owner,omitempty"`
-	Private         *bool               `json:"private,omitempty"`
-	Description     *string             `json:"description,omitempty"`
-	Fork            *bool               `json:"fork,omitempty"`
-	CreatedAt       *Timestamp          `json:"created_at,omitempty"`
-	PushedAt        *Timestamp          `json:"pushed_at,omitempty"`
-	UpdatedAt       *Timestamp          `json:"updated_at,omitempty"`
-	Homepage        *string             `json:"homepage,omitempty"`
-	Size            *int                `json:"size,omitempty"`
-	StargazersCount *int                `json:"stargazers_count,omitempty"`
-	WatchersCount   *int                `json:"watchers_count,omitempty"`
-	Language        *string             `json:"language,omitempty"`
-	HasIssues       *bool               `json:"has_issues,omitempty"`
-	HasDownloads    *bool               `json:"has_downloads,omitempty"`
-	HasWiki         *bool               `json:"has_wiki,omitempty"`
-	HasPages        *bool               `json:"has_pages,omitempty"`
-	ForksCount      *int                `json:"forks_count,omitempty"`
-	OpenIssuesCount *int                `json:"open_issues_count,omitempty"`
-	DefaultBranch   *string             `json:"default_branch,omitempty"`
-	MasterBranch    *string             `json:"master_branch,omitempty"`
-	Organization    *string             `json:"organization,omitempty"`
-	URL             *string             `json:"url,omitempty"`
-	ArchiveURL      *string             `json:"archive_url,omitempty"`
-	HTMLURL         *string             `json:"html_url,omitempty"`
-	StatusesURL     *string             `json:"statuses_url,omitempty"`
-	GitURL          *string             `json:"git_url,omitempty"`
-	SSHURL          *string             `json:"ssh_url,omitempty"`
-	CloneURL        *string             `json:"clone_url,omitempty"`
-	SVNURL          *string             `json:"svn_url,omitempty"`
+	ID              *int64     `json:"id,omitempty"`
+	NodeID          *string    `json:"node_id,omitempty"`
+	Name            *string    `json:"name,omitempty"`
+	FullName        *string    `json:"full_name,omitempty"`
+	Owner           *User      `json:"owner,omitempty"`
+	Private         *bool      `json:"private,omitempty"`
+	Description     *string    `json:"description,omitempty"`
+	Fork            *bool      `json:"fork,omitempty"`
+	CreatedAt       *Timestamp `json:"created_at,omitempty"`
+	PushedAt        *Timestamp `json:"pushed_at,omitempty"`
+	UpdatedAt       *Timestamp `json:"updated_at,omitempty"`
+	Homepage        *string    `json:"homepage,omitempty"`
+	Size            *int       `json:"size,omitempty"`
+	StargazersCount *int       `json:"stargazers_count,omitempty"`
+	WatchersCount   *int       `json:"watchers_count,omitempty"`
+	Language        *string    `json:"language,omitempty"`
+	HasIssues       *bool      `json:"has_issues,omitempty"`
+	HasDownloads    *bool      `json:"has_downloads,omitempty"`
+	HasWiki         *bool      `json:"has_wiki,omitempty"`
+	HasPages        *bool      `json:"has_pages,omitempty"`
+	ForksCount      *int       `json:"forks_count,omitempty"`
+	OpenIssuesCount *int       `json:"open_issues_count,omitempty"`
+	DefaultBranch   *string    `json:"default_branch,omitempty"`
+	MasterBranch    *string    `json:"master_branch,omitempty"`
+	Organization    *string    `json:"organization,omitempty"`
+	URL             *string    `json:"url,omitempty"`
+	ArchiveURL      *string    `json:"archive_url,omitempty"`
+	HTMLURL         *string    `json:"html_url,omitempty"`
+	StatusesURL     *string    `json:"statuses_url,omitempty"`
+	GitURL          *string    `json:"git_url,omitempty"`
+	SSHURL          *string    `json:"ssh_url,omitempty"`
+	CloneURL        *string    `json:"clone_url,omitempty"`
+	SVNURL          *string    `json:"svn_url,omitempty"`
 }
 
 // PushEventRepoOwner is a basic representation of user/org in a PushEvent payload.

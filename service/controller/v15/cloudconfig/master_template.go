@@ -5,7 +5,7 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/legacy"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_4_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_6_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
@@ -37,6 +37,10 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 
 		params.Cluster = customObject.Spec.Cluster
 		params.DisableEncryptionAtREST = true
+		params.DisableIngressController = true
+		// Ingress controller service remains in k8scloudconfig and will be
+		// removed in a later migration.
+		params.DisableIngressControllerService = false
 		params.EtcdPort = customObject.Spec.Cluster.Etcd.Port
 		params.Extension = &MasterExtension{
 			certs:            certs,

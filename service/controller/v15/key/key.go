@@ -19,7 +19,7 @@ import (
 const (
 	// CloudConfigVersion defines the version of k8scloudconfig in use.
 	// It is used in the main stack output and S3 object paths.
-	CloudConfigVersion = "v_3_4_0"
+	CloudConfigVersion = "v_3_6_0"
 
 	// CloudProviderTagName is used to add Cloud Provider tags to AWS resources.
 	CloudProviderTagName = "kubernetes.io/cluster/%s"
@@ -30,6 +30,9 @@ const (
 	// CloudProviderTagOwnedValue is used to indicate an AWS resource is owned
 	// and managed by a cluster.
 	CloudProviderTagOwnedValue = "owned"
+
+	// EnableTerminationProtection is used to protect the CF stacks from deletion.
+	EnableTerminationProtection = true
 
 	// InstallationTagName is used for AWS resource tagging.
 	InstallationTagName = "giantswarm.io/installation"
