@@ -282,8 +282,8 @@
   revision = "eef93b00a45bfe1872e9161af968c6234c7cd61e"
 
 [[projects]]
-  branch = "resource-del-idempotent"
-  digest = "1:b91b2d15035b246ea00ea62b509a7fe98239b1463f4832a65a7f6762472daefb"
+  branch = "master"
+  digest = "1:4745da3e682f516f2a682d469be4d3ab8e8e7a71d7d40ff6ea8c8489dce0cda0"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
@@ -292,7 +292,7 @@
     "pkg/harness",
   ]
   pruneopts = "UT"
-  revision = "f8dfbe8968c99ea8e1e7268244cef85006767b0d"
+  revision = "403620aa641c24772e883babe9857b6d10afabec"
 
 [[projects]]
   branch = "master"
@@ -349,12 +349,12 @@
   revision = "af4b0eb24a293b1950709ac8099fa377e9702266"
 
 [[projects]]
-  branch = "fix-tiller-not-found"
+  branch = "master"
   digest = "1:e9b104c7c0729cb4b035846670a387183cd4786f7cdecd9b0c53d92687ad0eb3"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
   pruneopts = "UT"
-  revision = "c0713f6ed449d3b15bd8a4464c4a1333b4717893"
+  revision = "c525db03e3dd92de174edbe51baa1108eddb3d3d"
 
 [[projects]]
   branch = "master"

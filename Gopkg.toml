@@ -53,8 +53,8 @@ required = [
   branch = "legacy"
   name = "github.com/giantswarm/certs"
 
-[[override]]
-  branch = "resource-del-idempotent"
+[[constraint]]
+  branch = "master"
   name = "github.com/giantswarm/e2e-harness"
 
 [[constraint]]
@@ -69,8 +69,8 @@ required = [
   branch = "master"
   name = "github.com/giantswarm/e2etests"
 
-[[override]]
-  branch = "fix-tiller-not-found"
+[[constraint]]
+  branch = "master"
   name = "github.com/giantswarm/helmclient"
 
 [[constraint]]
