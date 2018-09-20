@@ -486,6 +486,7 @@ write_files:
       name: calico-node
       namespace: kube-system
 {{ end -}}
+{{- if not .DisableCoreDNS }}
 - path: /srv/coredns.yaml
   owner: root
   permissions: 0644
@@ -662,6 +663,7 @@ write_files:
         }
       ]
     }
+{{- end }}
 {{- if not .DisableIngressController }}
 - path: /srv/default-backend-dep.yml
   owner: root
@@ -1453,7 +1455,9 @@ write_files:
       {{ end -}}
       MANIFESTS="${MANIFESTS} kube-proxy-sa.yaml"
       MANIFESTS="${MANIFESTS} kube-proxy-ds.yaml"
+      {{- if not .DisableCoreDNS }}
       MANIFESTS="${MANIFESTS} coredns.yaml"
+      {{ end -}}
       {{ if not .DisableIngressController -}}
       MANIFESTS="${MANIFESTS} default-backend-dep.yml"
       MANIFESTS="${MANIFESTS} default-backend-svc.yml"
