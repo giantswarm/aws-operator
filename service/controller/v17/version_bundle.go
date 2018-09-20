@@ -12,6 +12,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Add security group descriptions for master nodes.",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "cloudconfig",
+				Description: "Removed CoreDNS related components (will be managed by chart-operator).",
+				Kind:        versionbundle.KindRemoved,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
