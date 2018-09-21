@@ -55,7 +55,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	output := map[string]BucketObjectState{}
 
 	{
-		b, err := sc.CloudConfig.NewMasterTemplate(ctx, customObject, *tlsAssets, clusterKeys)
+		b, err := r.cloudConfig.NewMasterTemplate(ctx, customObject, *tlsAssets, clusterKeys)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -68,7 +68,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 
 	{
-		b, err := sc.CloudConfig.NewWorkerTemplate(ctx, customObject, *tlsAssets)
+		b, err := r.cloudConfig.NewWorkerTemplate(ctx, customObject, *tlsAssets)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

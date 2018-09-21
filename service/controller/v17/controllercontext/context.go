@@ -7,7 +7,6 @@ import (
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v17/cloudconfig"
 	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v17/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/v17/ebs"
 )
@@ -19,7 +18,6 @@ const controllerKey contextKey = "controller"
 type Context struct {
 	AWSClient      awsclient.Clients
 	AWSService     awsservice.Interface
-	CloudConfig    cloudconfig.Interface
 	CloudFormation cloudformationservice.CloudFormation
 	EBSService     ebs.Interface
 
