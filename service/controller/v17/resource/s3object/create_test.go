@@ -161,6 +161,7 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 	{
 		c := Config{}
 		c.CertWatcher = legacytest.NewService()
+		c.CloudConfig = cloudconfig
 		c.Encrypter = &encrypter.EncrypterMock{}
 		c.Logger = microloggertest.New()
 		c.RandomKeySearcher = randomkeystest.NewSearcher()
@@ -174,9 +175,8 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			c := controllercontext.Context{
-				AWSClient:   awsClients,
-				AWSService:  awsService,
-				CloudConfig: cloudconfig,
+				AWSClient:  awsClients,
+				AWSService: awsService,
 			}
 			ctx := context.TODO()
 			ctx = controllercontext.NewContext(ctx, c)

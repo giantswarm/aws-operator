@@ -10,6 +10,7 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/randomkeys"
 
+	"github.com/giantswarm/aws-operator/service/controller/v17/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v17/encrypter"
 )
 
@@ -21,6 +22,7 @@ const (
 // Config represents the configuration used to create a new cloudformation resource.
 type Config struct {
 	CertWatcher       legacy.Searcher
+	CloudConfig       cloudconfig.Interface
 	Encrypter         encrypter.Interface
 	Logger            micrologger.Logger
 	RandomKeySearcher randomkeys.Interface
@@ -29,6 +31,7 @@ type Config struct {
 // Resource implements the cloudformation resource.
 type Resource struct {
 	certWatcher       legacy.Searcher
+	cloudConfig       cloudconfig.Interface
 	encrypter         encrypter.Interface
 	logger            micrologger.Logger
 	randomKeySearcher randomkeys.Interface
@@ -38,6 +41,9 @@ type Resource struct {
 func New(config Config) (*Resource, error) {
 	if config.CertWatcher == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.CertWatcher must not be empty")
+	}
+	if config.CloudConfig == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CloudConfig must not be empty", config)
 	}
 	if config.Encrypter == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Encrypter must not be empty")
@@ -51,6 +57,7 @@ func New(config Config) (*Resource, error) {
 
 	r := &Resource{
 		certWatcher:       config.CertWatcher,
+		cloudConfig:       config.CloudConfig,
 		encrypter:         config.Encrypter,
 		logger:            config.Logger,
 		randomKeySearcher: config.RandomKeySearcher,
