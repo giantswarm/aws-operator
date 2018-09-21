@@ -158,6 +158,24 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		return nil, microerror.Maskf(invalidConfigError, "unknown encrypter backend %q", config.EncrypterBackend)
 	}
 
+	var cloudConfig *cloudconfig.CloudConfig
+	{
+		c := cloudconfig.Config{
+			Encrypter: encrypterObject,
+			Logger:    config.Logger,
+
+			OIDC: config.OIDC,
+			PodInfraContainerImage: config.PodInfraContainerImage,
+			RegistryDomain:         config.RegistryDomain,
+			SSOPublicKey:           config.SSOPublicKey,
+		}
+
+		cloudConfig, err = cloudconfig.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var encryptionKeyResource controller.Resource
 	{
 		c := encryptionkey.Config{
@@ -242,6 +260,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	{
 		c := s3object.Config{
 			CertWatcher:       config.CertsSearcher,
+			CloudConfig:       cloudConfig,
 			Encrypter:         encrypterObject,
 			Logger:            config.Logger,
 			RandomKeySearcher: config.RandomkeysSearcher,
@@ -501,24 +520,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			}
 		}
 
-		var cloudConfig *cloudconfig.CloudConfig
-		{
-			c := cloudconfig.Config{
-				Encrypter: encrypterObject,
-				Logger:    config.Logger,
-
-				OIDC: config.OIDC,
-				PodInfraContainerImage: config.PodInfraContainerImage,
-				RegistryDomain:         config.RegistryDomain,
-				SSOPublicKey:           config.SSOPublicKey,
-			}
-
-			cloudConfig, err = cloudconfig.New(c)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-		}
-
 		var ebsService ebs.Interface
 		{
 			c := ebs.Config{
@@ -546,7 +547,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		c := controllercontext.Context{
 			AWSClient:      awsClient,
 			AWSService:     awsService,
-			CloudConfig:    cloudConfig,
 			CloudFormation: *cloudFormationService,
 			EBSService:     ebsService,
 		}
