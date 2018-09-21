@@ -69,6 +69,7 @@ func Test_DesiredState(t *testing.T) {
 				c.Logger = microloggertest.New()
 				c.Encrypter = &encrypter.EncrypterMock{}
 				c.CertWatcher = legacytest.NewService()
+				c.CloudConfig = cloudconfig
 				c.RandomKeySearcher = randomkeystest.NewSearcher()
 				newResource, err = New(c)
 				if err != nil {
@@ -77,9 +78,8 @@ func Test_DesiredState(t *testing.T) {
 			}
 
 			c := controllercontext.Context{
-				AWSClient:   awsClients,
-				AWSService:  awsService,
-				CloudConfig: cloudconfig,
+				AWSClient:  awsClients,
+				AWSService: awsService,
 			}
 			ctx := context.TODO()
 			ctx = controllercontext.NewContext(ctx, c)
