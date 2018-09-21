@@ -115,7 +115,7 @@ func (k *Encrypter) DeleteKey(ctx context.Context, keyAlias string) error {
 	return nil
 }
 
-func (k *Encrypter) CurrentState(ctx context.Context, customObject v1alpha1.AWSConfig) (encrypter.EncryptionKeyState, error) {
+func (k *Encrypter) GetCurrentState(ctx context.Context, customObject v1alpha1.AWSConfig) (encrypter.EncryptionKeyState, error) {
 	var currentState encrypter.EncryptionKeyState
 
 	clusterID := key.ClusterID(customObject)
@@ -136,13 +136,27 @@ func (k *Encrypter) CurrentState(ctx context.Context, customObject v1alpha1.AWSC
 	return currentState, nil
 }
 
-func (k *Encrypter) DesiredState(ctx context.Context, customObject v1alpha1.AWSConfig) (encrypter.EncryptionKeyState, error) {
+func (k *Encrypter) GetDesiredState(ctx context.Context, customObject v1alpha1.AWSConfig) (encrypter.EncryptionKeyState, error) {
 	desiredState := encrypter.EncryptionKeyState{}
 
 	clusterID := key.ClusterID(customObject)
 	desiredState.KeyName = toAlias(clusterID)
 
 	return desiredState, nil
+}
+
+func (k *Encrypter) EnsureCreatedAuthorizedIAMRoles(ctx context.Context, iamRoleARNs ...string) error {
+	k.logger.LogCtx(ctx, "level", "debug", "message", "ensuring authorized vault IAM roles")
+	k.logger.LogCtx(ctx, "level", "debug", "message", "no action for KMS backend")
+	k.logger.LogCtx(ctx, "level", "debug", "message", "endured authorized vault IAM roles")
+	return nil
+}
+
+func (k *Encrypter) EnsureDeletedAuthorizedIAMRoles(ctx context.Context, iamRoleARNs ...string) error {
+	k.logger.LogCtx(ctx, "level", "debug", "message", "ensuring deletion of authorized vault IAM roles")
+	k.logger.LogCtx(ctx, "level", "debug", "message", "no action for KMS backend")
+	k.logger.LogCtx(ctx, "level", "debug", "message", "endured deletion of authorized vault IAM roles")
+	return nil
 }
 
 func (k *Encrypter) EncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {

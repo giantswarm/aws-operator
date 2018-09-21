@@ -126,7 +126,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	}
 
 	var encrypterObject encrypter.Interface
-	var encrypterRoleManager encrypter.RoleManager
+	var encrypterResource encrypter.Resource
 	switch config.EncrypterBackend {
 	case encrypter.VaultBackend:
 		c := &vault.EncrypterConfig{
@@ -135,11 +135,12 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			Address: config.VaultAddress,
 		}
 
-		encrypterObject, err = vault.NewEncrypter(c)
+		e, err := vault.NewEncrypter(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		encrypterRoleManager = encrypterObject.(encrypter.RoleManager)
+		encrypterObject = e
+		encrypterResource = e
 	case encrypter.KMSBackend:
 		c := &kms.EncrypterConfig{
 			Logger: config.Logger,
@@ -147,10 +148,12 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			InstallationName: config.InstallationName,
 		}
 
-		encrypterObject, err = kms.NewEncrypter(c)
+		e, err := kms.NewEncrypter(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
+		encrypterObject = e
+		encrypterResource = e
 	default:
 		return nil, microerror.Maskf(invalidConfigError, "unknown encrypter backend %q", config.EncrypterBackend)
 	}
@@ -176,7 +179,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var encryptionKeyResource controller.Resource
 	{
 		c := encryptionkey.Config{
-			Encrypter: encrypterObject,
+			Encrypter: encrypterResource,
 			Logger:    config.Logger,
 		}
 
@@ -314,8 +317,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			},
 
 			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
-			EncrypterBackend:      config.EncrypterBackend,
-			EncrypterRoleManager:  encrypterRoleManager,
 			InstallationName:      config.InstallationName,
 			PublicRouteTables:     config.PublicRouteTables,
 			Route53Enabled:        config.Route53Enabled,
