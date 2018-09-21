@@ -646,6 +646,7 @@ write_files:
       - name: dns-tcp
         port: 53
         protocol: TCP
+{{- end }}
 - path: /srv/network-policy.json
   owner: root
   permissions: 0644
@@ -663,7 +664,6 @@ write_files:
         }
       ]
     }
-{{- end }}
 {{- if not .DisableIngressController }}
 - path: /srv/default-backend-dep.yml
   owner: root
