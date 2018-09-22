@@ -14,7 +14,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "cloudconfig",
-				Description: "Removed CoreDNS related components (will be managed by chart-operator).",
+				Description: "Removed CoreDNS related components (now managed by chart-operator).",
 				Kind:        versionbundle.KindRemoved,
 			},
 		},
