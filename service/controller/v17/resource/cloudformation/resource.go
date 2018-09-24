@@ -8,7 +8,6 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/v17/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/v17/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v17/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v17/key"
 )
@@ -101,38 +100,6 @@ func (r *Resource) getCloudFormationTags(customObject v1alpha1.AWSConfig) []*aws
 	}
 
 	return stackTags
-}
-
-func (r *Resource) addRoleAccess(sc *controllercontext.Context, customObject v1alpha1.AWSConfig) error {
-	accountID, err := sc.AWSService.GetAccountID()
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	masterRoleARN := key.MasterRoleARN(customObject, accountID)
-	workerRoleARN := key.WorkerRoleARN(customObject, accountID)
-
-	err = r.encrypterRoleManager.AddIAMRoleToAuth(encrypter.DecrypterVaultRole, masterRoleARN, workerRoleARN)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	return nil
-}
-
-func (r *Resource) removeRoleAccess(sc *controllercontext.Context, customObject v1alpha1.AWSConfig) error {
-	accountID, err := sc.AWSService.GetAccountID()
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	masterRoleARN := key.MasterRoleARN(customObject, accountID)
-	workerRoleARN := key.WorkerRoleARN(customObject, accountID)
-
-	err = r.encrypterRoleManager.RemoveIAMRoleFromAuth(encrypter.DecrypterVaultRole, masterRoleARN, workerRoleARN)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	return nil
 }
 
 func toCreateStackInput(v interface{}) (awscloudformation.CreateStackInput, error) {

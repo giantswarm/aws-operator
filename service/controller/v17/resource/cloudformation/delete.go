@@ -51,7 +51,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		}
 
 		if r.encrypterBackend == encrypter.VaultBackend {
-			err = r.removeRoleAccess(sc, customObject)
+			err = r.encrypterRoleManager.EnsureDeletedAuthorizedIAMRoles(ctx, customObject)
 			if err != nil {
 				return microerror.Mask(err)
 			}
