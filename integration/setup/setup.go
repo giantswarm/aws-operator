@@ -33,10 +33,16 @@ const (
 func Setup(m *testing.M, config Config) {
 	ctx := context.Background()
 
+	// Perform teardown before execution.
+	{
+		err := teardown(ctx, config)
+		if err != nil {
+			os.Exit(1)
+		}
+	}
+
 	var v int
 	var err error
-
-	// Perform teardown before execution. Errors are ingored and not logged.
 
 	vpcPeerID, err := installHostPeerVPC(config)
 	if err != nil {
