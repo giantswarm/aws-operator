@@ -302,9 +302,7 @@ func (e *Encrypter) EnsureCreatedAuthorizedIAMRoles(ctx context.Context, customO
 	{
 		e.logger.LogCtx(ctx, "level", "debug", "message", "finding decrypter AWS auth role")
 
-		p := authAWSRolePath(decrypterVaultRole)
-
-		roleData, err = e.getAWSAuthRole(p)
+		roleData, err = e.getAWSAuthRole(decrypterVaultRole)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -359,9 +357,7 @@ func (e *Encrypter) EnsureDeletedAuthorizedIAMRoles(ctx context.Context, customO
 	{
 		e.logger.LogCtx(ctx, "level", "debug", "message", "finding out decrypter AWS auth role")
 
-		p := authAWSRolePath(decrypterVaultRole)
-
-		roleData, err = e.getAWSAuthRole(p)
+		roleData, err = e.getAWSAuthRole(decrypterVaultRole)
 		if err != nil {
 			return microerror.Mask(err)
 		}
