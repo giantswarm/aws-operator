@@ -18,8 +18,13 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
+	"github.com/giantswarm/aws-operator/service/controller/v17/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v17/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v17/key"
+)
+
+const (
+	decrypterVaultRole = "decrypter"
 )
 
 type Encrypter struct {
@@ -270,6 +275,50 @@ func (e *Encrypter) Encrypt(ctx context.Context, key, plaintext string) (string,
 	return ciphertext, nil
 }
 
+func (e *Encrypter) EnsureCreatedAuthorizedIAMRoles(ctx context.Context, customObject v1alpha1.AWSConfig) error {
+	ctlCtx, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	accountID, err := ctlCtx.AWSService.GetAccountID()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	masterRoleARN := key.MasterRoleARN(customObject, accountID)
+	workerRoleARN := key.WorkerRoleARN(customObject, accountID)
+
+	err = e.addIAMRoleToAuth(decrypterVaultRole, masterRoleARN, workerRoleARN)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
+func (e *Encrypter) EnsureDeletedAuthorizedIAMRoles(ctx context.Context, customObject v1alpha1.AWSConfig) error {
+	ctlCtx, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	accountID, err := ctlCtx.AWSService.GetAccountID()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	masterRoleARN := key.MasterRoleARN(customObject, accountID)
+	workerRoleARN := key.WorkerRoleARN(customObject, accountID)
+
+	err = e.removeIAMRoleFromAuth(decrypterVaultRole, masterRoleARN, workerRoleARN)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
 func (e *Encrypter) IsKeyNotFound(err error) bool {
 	return IsKeyNotFound(err)
 }
@@ -319,7 +368,7 @@ func (e *Encrypter) Decrypt(key, ciphertext string) (string, error) {
 	return string(plaintext), nil
 }
 
-func (e *Encrypter) AddIAMRoleToAuth(vaultRoleName string, iamRoleARNs ...string) error {
+func (e *Encrypter) addIAMRoleToAuth(vaultRoleName string, iamRoleARNs ...string) error {
 	err := e.ensureToken()
 	if err != nil {
 		return microerror.Mask(err)
@@ -346,7 +395,7 @@ func (e *Encrypter) AddIAMRoleToAuth(vaultRoleName string, iamRoleARNs ...string
 	return nil
 }
 
-func (e *Encrypter) RemoveIAMRoleFromAuth(vaultRoleName string, iamRoleARNs ...string) error {
+func (e *Encrypter) removeIAMRoleFromAuth(vaultRoleName string, iamRoleARNs ...string) error {
 	err := e.ensureToken()
 	if err != nil {
 		return microerror.Mask(err)

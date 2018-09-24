@@ -50,6 +50,7 @@ func New(config Config) (*CloudConfig, error) {
 	if config.Encrypter == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Encrypter must not be empty", config)
 	}
+
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
