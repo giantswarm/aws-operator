@@ -244,7 +244,7 @@
     "pkg/framework/resource",
     "pkg/harness"
   ]
-  revision = "7d4199c1b499743a910ec0fca8eff7fe9ca69247"
+  revision = "403620aa641c24772e883babe9857b6d10afabec"
 
 [[projects]]
   branch = "master"
@@ -294,7 +294,7 @@
   branch = "master"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
-  revision = "1bc4dcdb7e3c4b3d8900dd31c3dac2aa64d318c4"
+  revision = "c525db03e3dd92de174edbe51baa1108eddb3d3d"
 
 [[projects]]
   branch = "master"
@@ -311,7 +311,7 @@
     "v_3_5_1",
     "v_3_6_0"
   ]
-  revision = "9304162505e7d19c1f456b7a6cae50c67f641a77"
+  revision = "cde5c654f6e4e51ea2cb992fdbed2ab3bf188dff"
 
 [[projects]]
   branch = "master"
@@ -1220,6 +1220,20 @@
   ]
   revision = "9ad53aac42165a5fadc6c87be0dea6b115f93090"
   version = "v2.10.0"
+
+[[projects]]
+  name = "k8s.io/kube-aggregator"
+  packages = [
+    "pkg/apis/apiregistration",
+    "pkg/apis/apiregistration/v1",
+    "pkg/apis/apiregistration/v1beta1",
+    "pkg/client/clientset_generated/clientset",
+    "pkg/client/clientset_generated/clientset/scheme",
+    "pkg/client/clientset_generated/clientset/typed/apiregistration/v1",
+    "pkg/client/clientset_generated/clientset/typed/apiregistration/v1beta1"
+  ]
+  revision = "239337b3ca87b9f2ce4d2f03b7a5ed985ffa8206"
+  version = "kubernetes-1.10.4"
 
 [[projects]]
   branch = "master"

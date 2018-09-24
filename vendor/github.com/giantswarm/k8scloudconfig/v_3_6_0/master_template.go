@@ -1455,7 +1455,7 @@ write_files:
       {{ end -}}
       MANIFESTS="${MANIFESTS} kube-proxy-sa.yaml"
       MANIFESTS="${MANIFESTS} kube-proxy-ds.yaml"
-      {{- if not .DisableCoreDNS }}
+      {{ if not .DisableCoreDNS }}
       MANIFESTS="${MANIFESTS} coredns.yaml"
       {{ end -}}
       {{ if not .DisableIngressController -}}
