@@ -274,6 +274,14 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Enable:       false,
 			Command:      "start",
 		},
+		// Set bigger timeouts for NVME driver.
+		// Workaround for https://github.com/coreos/bugs/issues/2484
+		{
+			AssetContent: cloudconfig.NVMESetTimeoutsUnit,
+			Name:         "nvme-set-timeouts.service",
+			Enable:       true,
+			Command:      "start",
+		},
 		{
 			AssetContent: cloudconfig.DecryptTLSAssetsService,
 			Name:         "decrypt-tls-assets.service",
