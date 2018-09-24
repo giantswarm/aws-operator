@@ -276,22 +276,62 @@ func (e *Encrypter) Encrypt(ctx context.Context, key, plaintext string) (string,
 }
 
 func (e *Encrypter) EnsureCreatedAuthorizedIAMRoles(ctx context.Context, customObject v1alpha1.AWSConfig) error {
+	err := e.ensureToken()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	ctlCtx, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	accountID, err := ctlCtx.AWSService.GetAccountID()
-	if err != nil {
-		return microerror.Mask(err)
+	var masterRoleARN string
+	var workerRoleARN string
+	{
+		accountID, err := ctlCtx.AWSService.GetAccountID()
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		masterRoleARN = key.MasterRoleARN(customObject, accountID)
+		workerRoleARN = key.WorkerRoleARN(customObject, accountID)
 	}
 
-	masterRoleARN := key.MasterRoleARN(customObject, accountID)
-	workerRoleARN := key.WorkerRoleARN(customObject, accountID)
+	var roleData *AWSAuthRole
+	{
+		e.logger.LogCtx(ctx, "level", "debug", "message", "finding decrypter AWS auth role")
 
-	err = e.addIAMRoleToAuth(decrypterVaultRole, masterRoleARN, workerRoleARN)
-	if err != nil {
-		return microerror.Mask(err)
+		p := authAWSRolePath(decrypterVaultRole)
+
+		roleData, err = e.getAWSAuthRole(p)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		e.logger.LogCtx(ctx, "level", "debug", "message", "found decrypter AWS auth role")
+	}
+
+	{
+		e.logger.LogCtx(ctx, "level", "debug", "message", "ensuring decrypter AWS auth role ARNs")
+
+		currentARNs := roleData.BoundIAMRoleARN
+		desiredARNs := stringSlice(roleData.BoundIAMRoleARN).Add(masterRoleARN, workerRoleARN)
+
+		if len(currentARNs) != len(desiredARNs) {
+			e.logger.LogCtx(ctx, "level", "debug", "message", "updating decrypter AWS auth role")
+
+			roleData.BoundIAMRoleARN = desiredARNs
+
+			err = e.postAWSAuthRole(decrypterVaultRole, roleData)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		} else {
+			e.logger.LogCtx(ctx, "level", "debug", "message", "decrypter AWS auth role is up to date")
+		}
+
+		e.logger.LogCtx(ctx, "level", "debug", "message", "ensured decrypter AWS auth role ARNs")
 	}
 
 	return nil
@@ -303,17 +343,52 @@ func (e *Encrypter) EnsureDeletedAuthorizedIAMRoles(ctx context.Context, customO
 		return microerror.Mask(err)
 	}
 
-	accountID, err := ctlCtx.AWSService.GetAccountID()
-	if err != nil {
-		return microerror.Mask(err)
+	var masterRoleARN string
+	var workerRoleARN string
+	{
+		accountID, err := ctlCtx.AWSService.GetAccountID()
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		masterRoleARN = key.MasterRoleARN(customObject, accountID)
+		workerRoleARN = key.WorkerRoleARN(customObject, accountID)
 	}
 
-	masterRoleARN := key.MasterRoleARN(customObject, accountID)
-	workerRoleARN := key.WorkerRoleARN(customObject, accountID)
+	var roleData *AWSAuthRole
+	{
+		e.logger.LogCtx(ctx, "level", "debug", "message", "finding out decrypter AWS auth role")
 
-	err = e.removeIAMRoleFromAuth(decrypterVaultRole, masterRoleARN, workerRoleARN)
-	if err != nil {
-		return microerror.Mask(err)
+		p := authAWSRolePath(decrypterVaultRole)
+
+		roleData, err = e.getAWSAuthRole(p)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		e.logger.LogCtx(ctx, "level", "debug", "message", "found decrypter AWS auth role")
+	}
+
+	{
+		e.logger.LogCtx(ctx, "level", "debug", "message", "ensuring deletion of decrypter AWS auth role ARNs")
+
+		currentARNs := roleData.BoundIAMRoleARN
+		desiredARNs := stringSlice(roleData.BoundIAMRoleARN).Delete(masterRoleARN, workerRoleARN)
+
+		if len(currentARNs) != len(desiredARNs) {
+			e.logger.LogCtx(ctx, "level", "debug", "message", "updating decrypter AWS auth role")
+
+			roleData.BoundIAMRoleARN = desiredARNs
+
+			err = e.postAWSAuthRole(decrypterVaultRole, roleData)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		} else {
+			e.logger.LogCtx(ctx, "level", "debug", "message", "decrypter AWS auth role is up to date")
+		}
+
+		e.logger.LogCtx(ctx, "level", "debug", "message", "ensured decrypter AWS auth role ARNs")
 	}
 
 	return nil
@@ -366,60 +441,6 @@ func (e *Encrypter) Decrypt(key, ciphertext string) (string, error) {
 	}
 
 	return string(plaintext), nil
-}
-
-func (e *Encrypter) addIAMRoleToAuth(vaultRoleName string, iamRoleARNs ...string) error {
-	err := e.ensureToken()
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	p := path.Join("auth", "aws", "role", vaultRoleName)
-
-	role, err := e.getAWSAuthRole(p)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	combinedIAMRoleARNs := stringSlice(role.BoundIAMRoleARN).Add(iamRoleARNs...)
-
-	if len(role.BoundIAMRoleARN) != len(combinedIAMRoleARNs) {
-		role.BoundIAMRoleARN = combinedIAMRoleARNs
-
-		err = e.postAWSAuthRole(p, role)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	return nil
-}
-
-func (e *Encrypter) removeIAMRoleFromAuth(vaultRoleName string, iamRoleARNs ...string) error {
-	err := e.ensureToken()
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	p := path.Join("auth", "aws", "role", vaultRoleName)
-
-	role, err := e.getAWSAuthRole(p)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	combinedIAMRoleARNs := stringSlice(role.BoundIAMRoleARN).Delete(iamRoleARNs...)
-
-	if len(role.BoundIAMRoleARN) != len(combinedIAMRoleARNs) {
-		role.BoundIAMRoleARN = combinedIAMRoleARNs
-
-		err = e.postAWSAuthRole(p, role)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	return nil
 }
 
 func (e *Encrypter) Address() string {
@@ -561,7 +582,9 @@ func (e *Encrypter) getPKCS7() (string, error) {
 	return strings.Replace(string(responseData), "\n", "", -1), nil
 }
 
-func (e *Encrypter) getAWSAuthRole(path string) (*AWSAuthRole, error) {
+func (e *Encrypter) getAWSAuthRole(name string) (*AWSAuthRole, error) {
+	path := authAWSRolePath(name)
+
 	req, err := e.newRequest("GET", path)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -587,8 +610,10 @@ func (e *Encrypter) getAWSAuthRole(path string) (*AWSAuthRole, error) {
 	return &roleResponse.Data, nil
 }
 
-func (e *Encrypter) postAWSAuthRole(path string, role *AWSAuthRole) error {
-	req, err := e.newPayloadRequest(path, role)
+func (e *Encrypter) postAWSAuthRole(name string, data *AWSAuthRole) error {
+	path := authAWSRolePath(name)
+
+	req, err := e.newPayloadRequest(path, data)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -610,4 +635,8 @@ func (e *Encrypter) postAWSAuthRole(path string, role *AWSAuthRole) error {
 
 func (e *Encrypter) keyName(customObject v1alpha1.AWSConfig) string {
 	return key.ClusterID(customObject)
+}
+
+func authAWSRolePath(role string) string {
+	return path.Join("auth", "aws", "role", role)
 }
