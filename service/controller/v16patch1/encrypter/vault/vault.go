@@ -18,8 +18,8 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/v16/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/v16/key"
+	"github.com/giantswarm/aws-operator/service/controller/v16patch1/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v16patch1/key"
 )
 
 type Encrypter struct {
