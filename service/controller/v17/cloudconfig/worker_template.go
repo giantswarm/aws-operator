@@ -183,6 +183,15 @@ func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Enable:       true,
 			Command:      "start",
 		},
+		// Set bigger timeouts for NVME driver.
+		// Workaround for https://github.com/coreos/bugs/issues/2484
+		// TODO issue: https://github.com/giantswarm/giantswarm/issues/4255
+		{
+			AssetContent: cloudconfig.NVMESetTimeoutsUnit,
+			Name:         "nvme-set-timeouts.service",
+			Enable:       true,
+			Command:      "start",
+		},
 	}
 
 	var newUnits []k8scloudconfig.UnitAsset

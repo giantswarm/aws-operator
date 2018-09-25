@@ -12,11 +12,16 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Add security group descriptions for master nodes.",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Set higher timeouts for NVME driver.",
+				Kind:        versionbundle.KindAdded,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
 				Name:    "calico",
-				Version: "3.0.5",
+				Version: "3.2.0",
 			},
 			{
 				Name:    "containerlinux",
@@ -28,7 +33,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "etcd",
-				Version: "3.3.3",
+				Version: "3.3.8",
 			},
 			{
 				Name:    "coredns",
