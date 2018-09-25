@@ -46,7 +46,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "kubernetes",
-				Version: "1.11.1-cec4fb8023db783fbf26fb056bf6c76abfcd96cf-giantswarm",
+				Version: "1.11.1",
 			},
 		},
 		Name:    "aws-operator",
