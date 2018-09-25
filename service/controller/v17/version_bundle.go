@@ -18,7 +18,7 @@ func VersionBundle() versionbundle.Bundle {
 				Kind:        versionbundle.KindRemoved,
 			},
 			{
-        Component:   "aws-operator",
+				Component:   "aws-operator",
 				Description: "Set higher timeouts for NVME driver.",
 				Kind:        versionbundle.KindAdded,
 			},
