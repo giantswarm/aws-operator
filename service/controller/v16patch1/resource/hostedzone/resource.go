@@ -9,12 +9,12 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/v16/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v16/key"
+	"github.com/giantswarm/aws-operator/service/controller/v16patch1/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v16patch1/key"
 )
 
 const (
-	name = "hostedzonev16"
+	name = "hostedzonev16patch1"
 )
 
 type Config struct {
