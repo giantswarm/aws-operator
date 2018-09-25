@@ -12,12 +12,12 @@ const (
 )
 
 type Config struct {
-	Encrypter encrypter.Interface
+	Encrypter encrypter.Resource
 	Logger    micrologger.Logger
 }
 
 type Resource struct {
-	encrypter encrypter.Interface
+	encrypter encrypter.Resource
 	logger    micrologger.Logger
 }
 
