@@ -171,6 +171,15 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	unitsMeta := []k8scloudconfig.UnitMetadata{
+		// Set bigger timeouts for NVME driver.
+		// Workaround for https://github.com/coreos/bugs/issues/2484
+		// TODO issue: https://github.com/giantswarm/giantswarm/issues/4255
+		{
+			AssetContent: cloudconfig.NVMESetTimeoutsUnit,
+			Name:         "nvme-set-timeouts.service",
+			Enable:       true,
+			Command:      "start",
+		},
 		{
 			AssetContent: cloudconfig.DecryptTLSAssetsService,
 			Name:         "decrypt-tls-assets.service",

@@ -8,8 +8,8 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "cloudconfig",
-				Description: "Add kube-proxy configuration files, required for updating kube-proxy daemonset.",
+				Component:   "aws-operator",
+				Description: "Set higher timeouts for NVME driver.",
 				Kind:        versionbundle.KindAdded,
 			},
 		},
@@ -40,6 +40,6 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    "aws-operator",
-		Version: "3.3.2",
+		Version: "3.3.3",
 	}
 }
