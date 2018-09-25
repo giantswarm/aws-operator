@@ -6,13 +6,13 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v14patch2/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v14patch2/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v14patch2/key"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v14patch3/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch3/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch3/key"
 )
 
 const (
-	Name = "workerasgnamev14patch2"
+	Name = "workerasgnamev14patch3"
 )
 
 type ResourceConfig struct {
