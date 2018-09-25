@@ -418,6 +418,7 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		v14ResourceSet,
 		v14Patch1ResourceSet,
 		v14Patch2ResourceSet,
+		v14Patch3ResourceSet,
 		v15ResourceSet,
 		v16ResourceSet,
 		v17ResourceSet,

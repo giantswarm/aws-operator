@@ -900,6 +900,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		resourceSetV14,
 		resourceSetV14Patch1,
 		resourceSetV14Patch2,
+		resourceSetV14Patch3,
 		resourceSetV15,
 		resourceSetV16,
 		resourceSetV17,
