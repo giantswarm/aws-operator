@@ -10,7 +10,7 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v16/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v16patch1/controllercontext"
 )
 
 func Test_Resource_Endpoints_GetDesiredState(t *testing.T) {
