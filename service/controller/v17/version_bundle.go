@@ -17,11 +17,16 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Removed CoreDNS related components (now managed by chart-operator).",
 				Kind:        versionbundle.KindRemoved,
 			},
+			{
+        Component:   "aws-operator",
+				Description: "Set higher timeouts for NVME driver.",
+				Kind:        versionbundle.KindAdded,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
 				Name:    "calico",
-				Version: "3.0.5",
+				Version: "3.2.0",
 			},
 			{
 				Name:    "containerlinux",
@@ -33,7 +38,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "etcd",
-				Version: "3.3.3",
+				Version: "3.3.8",
 			},
 			{
 				Name:    "coredns",
