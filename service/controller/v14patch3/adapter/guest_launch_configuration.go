@@ -6,9 +6,9 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v14patch2/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v14patch2/key"
-	"github.com/giantswarm/aws-operator/service/controller/v14patch2/templates"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch3/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch3/key"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch3/templates"
 )
 
 type GuestLaunchConfigAdapter struct {

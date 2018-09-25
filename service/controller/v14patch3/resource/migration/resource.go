@@ -15,11 +15,11 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 
-	"github.com/giantswarm/aws-operator/service/controller/v14patch2/key"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch3/key"
 )
 
 const (
-	name = "migrationv14patch2"
+	name = "migrationv14patch3"
 
 	awsConfigNamespace               = "default"
 	credentialSecretDefaultNamespace = "giantswarm"
