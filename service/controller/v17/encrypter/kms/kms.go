@@ -221,12 +221,17 @@ func (k *Encrypter) DesiredState(ctx context.Context, customObject v1alpha1.AWSC
 }
 
 func (k *Encrypter) EncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {
-	output, err := k.describeKey(ctx, customObject)
+	out, err := k.describeKey(ctx, customObject)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
-	return *output.KeyMetadata.Arn, nil
+	// When key is scheduled for deletion we consider it deleted.
+	if out.KeyMetadata.DeletionDate != nil {
+		return "", microerror.Mask(keyNotFoundError)
+	}
+
+	return *out.KeyMetadata.Arn, nil
 }
 
 func (k *Encrypter) Encrypt(ctx context.Context, key, plaintext string) (string, error) {
