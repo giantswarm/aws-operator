@@ -17,6 +17,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Patched Kubernetes v1.11.1 with apimachinery fix to plug apiserver memory leak.",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Set higher timeouts for NVME driver.",
+				Kind:        versionbundle.KindAdded,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
