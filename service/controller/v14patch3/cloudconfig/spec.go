@@ -3,8 +3,8 @@ package cloudconfig
 import (
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/aws-operator/service/controller/v14patch2/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/v14patch2/encrypter/vault"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch3/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch3/encrypter/vault"
 )
 
 const (

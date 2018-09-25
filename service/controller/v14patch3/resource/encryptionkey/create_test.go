@@ -7,7 +7,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	"github.com/giantswarm/aws-operator/service/controller/v14patch2/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch3/encrypter"
 )
 
 func Test_Resource_EncryptionKey_newCreate(t *testing.T) {

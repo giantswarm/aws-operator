@@ -11,9 +11,9 @@ import (
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
 
-	"github.com/giantswarm/aws-operator/service/controller/v14patch2/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v14patch2/ebs"
-	"github.com/giantswarm/aws-operator/service/controller/v14patch2/key"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch3/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch3/ebs"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch3/key"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
