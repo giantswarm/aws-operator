@@ -1,4 +1,4 @@
-package v_3_6_0
+package v_3_6_1
 
 const MasterTemplate = `#cloud-config
 users:
@@ -913,7 +913,7 @@ write_files:
           serviceAccountName: kube-proxy
           containers:
             - name: kube-proxy
-              image: {{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.1
+              image: {{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.1-cec4fb8023db783fbf26fb056bf6c76abfcd96cf-giantswarm
               command:
               - /hyperkube
               - proxy
@@ -1691,7 +1691,7 @@ write_files:
       priorityClassName: system-node-critical
       containers:
       - name: k8s-api-server
-        image: {{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.1
+        image: {{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.1-cec4fb8023db783fbf26fb056bf6c76abfcd96cf-giantswarm
         env:
         - name: HOST_IP
           valueFrom:
@@ -1814,7 +1814,7 @@ write_files:
       priorityClassName: system-node-critical
       containers:
       - name: k8s-controller-manager
-        image: {{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.1
+        image: {{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.1-cec4fb8023db783fbf26fb056bf6c76abfcd96cf-giantswarm
         command:
         - /hyperkube
         - controller-manager
@@ -1887,7 +1887,7 @@ write_files:
       priorityClassName: system-node-critical
       containers:
       - name: k8s-scheduler
-        image: {{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.1
+        image: {{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.1-cec4fb8023db783fbf26fb056bf6c76abfcd96cf-giantswarm
         command:
         - /hyperkube
         - scheduler
@@ -2191,7 +2191,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE={{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.1"
+      Environment="IMAGE={{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.1-cec4fb8023db783fbf26fb056bf6c76abfcd96cf-giantswarm"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
