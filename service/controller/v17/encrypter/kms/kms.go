@@ -90,10 +90,10 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 		e.logger.LogCtx(ctx, "level", "debug", "message", "created encryption key")
 	}
 
-	// This is importand key roation is enabled before creation alias.
-	// Otherwise it is not guaranteed it will be reconciled. Right now we
-	// *always* enable rotation before aliasing the key. So it is enough
-	// reconcile aliasing properly to make sure rotation is enabled.
+	// NOTE: Key roation must be enabled before creation alias. Otherwise
+	// it is not guaranteed it will be reconciled. Right now we *always*
+	// enable rotation before aliasing the key. So it is enough reconcile
+	// aliasing properly to make sure rotation is enabled.
 	{
 		e.logger.LogCtx(ctx, "level", "debug", "message", "enabling encryption key rotation")
 
