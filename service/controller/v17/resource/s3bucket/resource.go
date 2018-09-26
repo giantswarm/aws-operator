@@ -1,12 +1,12 @@
 package s3bucket
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
+	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/v17/key"
 )
 
@@ -107,21 +107,12 @@ func containsBucketState(bucketStateName string, bucketStateList []BucketState) 
 }
 
 func (r *Resource) getS3BucketTags(customObject v1alpha1.AWSConfig) []*s3.Tag {
-	clusterTags := key.ClusterTags(customObject, r.installationName)
-	s3Tags := []*s3.Tag{}
-
-	if r.includeTags {
-		for k, v := range clusterTags {
-			tag := &s3.Tag{
-				Key:   aws.String(k),
-				Value: aws.String(v),
-			}
-
-			s3Tags = append(s3Tags, tag)
-		}
+	if !r.includeTags {
+		return []*s3.Tag{}
 	}
 
-	return s3Tags
+	tags := key.ClusterTags(customObject, r.installationName)
+	return awstags.NewS3(tags)
 }
 
 func (r *Resource) canBeDeleted(bucket BucketState) bool {
