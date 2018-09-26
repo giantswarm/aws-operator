@@ -27,6 +27,8 @@ func commonViperSettings(f *flag.Flag, v *viper.Viper) {
 
 	v.Set(f.Service.Kubernetes.Address, "http://127.0.0.1:6443")
 	v.Set(f.Service.Kubernetes.InCluster, "false")
+
+	v.Set(f.Service.RegistryDomain, "quay.io")
 }
 
 func Test_Service_New(t *testing.T) {

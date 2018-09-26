@@ -8,9 +8,8 @@ import (
 )
 
 const (
-	KMSBackend         = "kms"
-	VaultBackend       = "vault"
-	DecrypterVaultRole = "decrypter"
+	KMSBackend   = "kms"
+	VaultBackend = "vault"
 )
 
 type EncryptionKeyState struct {
@@ -46,6 +45,6 @@ type Encrypter interface {
 }
 
 type RoleManager interface {
-	AddIAMRoleToAuth(vaultRoleName string, iamRoleARNs ...string) error
-	RemoveIAMRoleFromAuth(vaultRoleName string, iamRoleARNs ...string) error
+	EnsureCreatedAuthorizedIAMRoles(context.Context, v1alpha1.AWSConfig) error
+	EnsureDeletedAuthorizedIAMRoles(context.Context, v1alpha1.AWSConfig) error
 }

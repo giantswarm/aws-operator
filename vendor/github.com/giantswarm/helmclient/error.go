@@ -76,13 +76,13 @@ func IsInvalidGZipHeader(err error) bool {
 	return false
 }
 
-var podNotFoundError = &microerror.Error{
-	Kind: "podNotFoundError",
+var notFoundError = &microerror.Error{
+	Kind: "notFoundError",
 }
 
-// IsPodNotFound asserts podNotFoundError.
-func IsPodNotFound(err error) bool {
-	return microerror.Cause(err) == podNotFoundError
+// IsNotFound asserts notFoundError.
+func IsNotFound(err error) bool {
+	return microerror.Cause(err) == notFoundError
 }
 
 const (
@@ -140,6 +140,15 @@ var tillerInstallationFailedError = &microerror.Error{
 // IsTillerInstallationFailed asserts tillerInstallationFailedError.
 func IsTillerInstallationFailed(err error) bool {
 	return microerror.Cause(err) == tillerInstallationFailedError
+}
+
+var tillerNotFoundError = &microerror.Error{
+	Kind: "tillerNotFoundError",
+}
+
+// IsTillerNotFound asserts tillerNotFoundError.
+func IsTillerNotFound(err error) bool {
+	return microerror.Cause(err) == tillerNotFoundError
 }
 
 var tooManyResultsError = &microerror.Error{

@@ -283,15 +283,16 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:726112bfd9e23024cd645e47c9da62db7c29f690eac83beb2590d342a688a5c8"
+  digest = "1:4745da3e682f516f2a682d469be4d3ab8e8e7a71d7d40ff6ea8c8489dce0cda0"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
     "pkg/framework/filelogger",
+    "pkg/framework/resource",
     "pkg/harness",
   ]
   pruneopts = "UT"
-  revision = "b8f538cd46acde7bd3570348948080de2b07b8ae"
+  revision = "403620aa641c24772e883babe9857b6d10afabec"
 
 [[projects]]
   branch = "master"
@@ -306,7 +307,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2df237e6d22c8ffb25732393da87172c5d317360c42814df88db3cb63fe92792"
+  digest = "1:6bd0de7b2a972f3b1df08b866903eac77137c2adccf5e1ed21079cfc92062418"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
     "internal/render",
@@ -314,7 +315,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "77c5115a3324281bfdb691bff20f871f22282ff0"
+  revision = "c137a54b2e623c634834f0c5dc7c26993b6c30df"
 
 [[projects]]
   branch = "master"
@@ -349,11 +350,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2fbe37396ec5830be0ea79a76f1a8f109ebb6227bc99f073e60cdad6980d5785"
+  digest = "1:e9b104c7c0729cb4b035846670a387183cd4786f7cdecd9b0c53d92687ad0eb3"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
   pruneopts = "UT"
-  revision = "1bc4dcdb7e3c4b3d8900dd31c3dac2aa64d318c4"
+  revision = "c525db03e3dd92de174edbe51baa1108eddb3d3d"
 
 [[projects]]
   branch = "master"
@@ -1433,6 +1434,22 @@
   version = "v2.10.0"
 
 [[projects]]
+  digest = "1:2af67bd2524aa5fce3cb4bd6e20fbf773b8cf5a9dfc0d1bea7441d98d55f37b5"
+  name = "k8s.io/kube-aggregator"
+  packages = [
+    "pkg/apis/apiregistration",
+    "pkg/apis/apiregistration/v1",
+    "pkg/apis/apiregistration/v1beta1",
+    "pkg/client/clientset_generated/clientset",
+    "pkg/client/clientset_generated/clientset/scheme",
+    "pkg/client/clientset_generated/clientset/typed/apiregistration/v1",
+    "pkg/client/clientset_generated/clientset/typed/apiregistration/v1beta1",
+  ]
+  pruneopts = "UT"
+  revision = "239337b3ca87b9f2ce4d2f03b7a5ed985ffa8206"
+  version = "kubernetes-1.10.4"
+
+[[projects]]
   branch = "master"
   digest = "1:a2c842a1e0aed96fd732b535514556323a6f5edfded3b63e5e0ab1bce188aa54"
   name = "k8s.io/kube-openapi"
@@ -1657,6 +1674,7 @@
     "github.com/giantswarm/certs/legacy",
     "github.com/giantswarm/certs/legacy/legacytest",
     "github.com/giantswarm/e2e-harness/pkg/framework",
+    "github.com/giantswarm/e2e-harness/pkg/framework/resource",
     "github.com/giantswarm/e2eclients/aws",
     "github.com/giantswarm/e2etemplates/pkg/chartvalues",
     "github.com/giantswarm/e2etemplates/pkg/e2etemplates",

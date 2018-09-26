@@ -168,7 +168,7 @@ func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: cloudconfig.DecryptTLSAssetsService,
 			Name:         "decrypt-tls-assets.service",
-			Enable:       true,
+			Enable:       false,
 			Command:      "start",
 		},
 		{
@@ -180,6 +180,15 @@ func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: cloudconfig.PersistentVarLibDockerMount,
 			Name:         "var-lib-docker.mount",
+			Enable:       true,
+			Command:      "start",
+		},
+		// Set bigger timeouts for NVME driver.
+		// Workaround for https://github.com/coreos/bugs/issues/2484
+		// TODO issue: https://github.com/giantswarm/giantswarm/issues/4255
+		{
+			AssetContent: cloudconfig.NVMESetTimeoutsUnit,
+			Name:         "nvme-set-timeouts.service",
 			Enable:       true,
 			Command:      "start",
 		},

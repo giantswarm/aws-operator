@@ -33,6 +33,14 @@ const (
 func Setup(m *testing.M, config Config) {
 	ctx := context.Background()
 
+	// Perform teardown before execution.
+	{
+		err := teardown(ctx, config)
+		if err != nil {
+			os.Exit(1)
+		}
+	}
+
 	var v int
 	var err error
 
@@ -76,8 +84,6 @@ func Setup(m *testing.M, config Config) {
 				// teardown errors are logged inside the function.
 				v = 1
 			}
-			// TODO there should be error handling for the framework teardown.
-			config.Host.Teardown()
 		}
 	}
 
