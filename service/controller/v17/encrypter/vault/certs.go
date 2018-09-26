@@ -10,15 +10,15 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v17/encrypter"
 )
 
-func (k *Encrypter) EncryptTLSAssets(ctx context.Context, customObject v1alpha1.AWSConfig, assets legacy.AssetsBundle) (*legacy.CompactTLSAssets, error) {
+func (e *Encrypter) EncryptTLSAssets(ctx context.Context, customObject v1alpha1.AWSConfig, assets legacy.AssetsBundle) (*legacy.CompactTLSAssets, error) {
 	rawTLS := encrypter.CreateRawTLSAssets(assets)
 
-	key, err := k.EncryptionKey(ctx, customObject)
+	key, err := e.EncryptionKey(ctx, customObject)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	encTLS, err := rawTLS.Encrypt(ctx, k, key)
+	encTLS, err := rawTLS.Encrypt(ctx, e, key)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
