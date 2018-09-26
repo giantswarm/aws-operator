@@ -20,6 +20,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v14"
 	"github.com/giantswarm/aws-operator/service/controller/v14patch1"
 	"github.com/giantswarm/aws-operator/service/controller/v14patch2"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch3"
 	"github.com/giantswarm/aws-operator/service/controller/v15"
 	"github.com/giantswarm/aws-operator/service/controller/v16"
 	"github.com/giantswarm/aws-operator/service/controller/v16patch1"
@@ -336,6 +337,24 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var v14Patch3ResourceSet *controller.ResourceSet
+	{
+		c := v14patch3.DrainerResourceSetConfig{
+			G8sClient:     config.G8sClient,
+			HostAWSConfig: hostAWSConfig,
+			K8sClient:     config.K8sClient,
+			Logger:        config.Logger,
+
+			GuestUpdateEnabled: config.GuestUpdateEnabled,
+			ProjectName:        config.ProjectName,
+		}
+
+		v14Patch3ResourceSet, err = v14patch3.NewDrainerResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var v15ResourceSet *controller.ResourceSet
 	{
 		c := v15.DrainerResourceSetConfig{
@@ -418,6 +437,7 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		v14ResourceSet,
 		v14Patch1ResourceSet,
 		v14Patch2ResourceSet,
+		v14Patch3ResourceSet,
 		v15ResourceSet,
 		v16ResourceSet,
 		v16Patch1ResourceSet,
