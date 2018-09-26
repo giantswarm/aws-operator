@@ -223,7 +223,6 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 			return microerror.Mask(err)
 
 		} else {
-
 			e.logger.LogCtx(ctx, "level", "debug", "message", "found encryption key")
 			e.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
@@ -333,7 +332,6 @@ func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, customObject
 			return microerror.Mask(err)
 
 		} else {
-
 			e.logger.LogCtx(ctx, "level", "debug", "message", "found encryption key")
 		}
 	}
