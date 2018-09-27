@@ -8,15 +8,25 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "aws-operator",
-				Description: "Made worker node docker volume size to be configurable.",
+				Component:   "calico",
+				Description: "Updated calico to 3.2.0.",
 				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "kubernetes",
+				Description: "Patched Kubernetes v1.11.1 with apimachinery fix to plug apiserver memory leak.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "aws-operator",
+				Description: "Set higher timeouts for NVME driver.",
+				Kind:        versionbundle.KindAdded,
 			},
 		},
 		Components: []versionbundle.Component{
 			{
 				Name:    "calico",
-				Version: "3.0.5",
+				Version: "3.2.0",
 			},
 			{
 				Name:    "containerlinux",
@@ -40,6 +50,6 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    "aws-operator",
-		Version: "4.1.0",
+		Version: "4.1.1",
 	}
 }
