@@ -43,7 +43,7 @@ var stackNotFoundError = &microerror.Error{
 // FIXME: The validation error returned by the CloudFormation API doesn't make
 // things easy to check, other than looking for the returned string. There's no
 // constant in the AWS golang SDK for defining this string, it comes from the
-// service.
+// service. This is the same in setup/error.go.
 func IsStackNotFound(err error) bool {
 	if err == nil {
 		return false

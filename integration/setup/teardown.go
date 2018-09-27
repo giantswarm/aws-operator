@@ -42,6 +42,9 @@ func teardown(ctx context.Context, config Config) error {
 		stackName := "host-peer-" + env.ClusterID()
 		wait := true
 
+		// TODO extract cloudformation stack client which can be also
+		// used in cloudformation resource.
+		// Issue: https://github.com/giantswarm/giantswarm/issues/3783.
 		err := ensureDeletedStack(ctx, config, stackName, wait)
 		if err != nil {
 			config.Logger.LogCtx(ctx, "level", "error", "message", fmt.Sprintf("failed to delete host VPC stack"), "stack", fmt.Sprintf("%#v", err))
@@ -123,7 +126,9 @@ func getStack(ctx context.Context, config Config, stackName string) (*cloudforma
 	}
 
 	out, err := config.AWSClient.CloudFormation.DescribeStacks(in)
-	if err != nil {
+	if IsStackNotFound(err) {
+		return nil, microerror.Maskf(notFoundError, err.Error())
+	} else if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
