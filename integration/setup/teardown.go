@@ -76,7 +76,7 @@ func ensureDeletedStack(ctx context.Context, config Config, stackName string, wa
 			return nil
 
 		} else if err != nil {
-			return err
+			return microerror.Mask(err)
 		}
 
 		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found stack %#q", stackName))
