@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"text/template"
 
-	"github.com/giantswarm/certs/legacy"
+	"github.com/giantswarm/legacycerts/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeytpr"
 )

@@ -2,7 +2,7 @@ package cloudconfig
 
 import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/certs/legacy"
+	"github.com/giantswarm/legacycerts/legacy"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_0_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeytpr"

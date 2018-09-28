@@ -6,7 +6,7 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs"
-	"github.com/giantswarm/certs/legacy"
+	"github.com/giantswarm/legacycerts/legacy"
 	"github.com/giantswarm/guestcluster"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"

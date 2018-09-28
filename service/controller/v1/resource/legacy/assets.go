@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/kms/kmsiface"
-	"github.com/giantswarm/certs/legacy"
+	"github.com/giantswarm/legacycerts/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeytpr"
 )

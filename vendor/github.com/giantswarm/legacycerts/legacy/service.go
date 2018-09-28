@@ -140,7 +140,7 @@ func (s *Service) SearchCertsForComponent(clusterID, componentName string) (Asse
 				return nil, microerror.Maskf(secretsRetrievalFailedError, "there was an error in the watcher: %v", apierrors.FromObject(event.Object))
 			}
 		case <-time.After(WatchTimeOut):
-			return nil, microerror.Maskf(secretsRetrievalFailedError, "timed out waiting for secrets")
+			return nil, microerror.Maskf(secretsRetrievalFailedError, "timeout while watching secret %#q", componentName)
 		}
 	}
 }
