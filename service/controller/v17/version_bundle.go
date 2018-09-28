@@ -13,6 +13,11 @@ func VersionBundle() versionbundle.Bundle {
 				Kind:        versionbundle.KindChanged,
 			},
 			{
+				Component:   "cloudconfig",
+				Description: "Removed CoreDNS related components (now managed by chart-operator).",
+				Kind:        versionbundle.KindRemoved,
+			},
+			{
 				Component:   "aws-operator",
 				Description: "Set higher timeouts for NVME driver.",
 				Kind:        versionbundle.KindAdded,
