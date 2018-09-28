@@ -36,6 +36,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 		}
 
 		params.Cluster = customObject.Spec.Cluster
+		params.DisableCoreDNS = true
 		params.DisableEncryptionAtREST = true
 		params.DisableIngressController = true
 		// Ingress controller service remains in k8scloudconfig and will be
