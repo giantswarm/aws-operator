@@ -13,8 +13,8 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v17/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v17/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v18/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v18/encrypter"
 )
 
 func Test_DesiredState(t *testing.T) {
