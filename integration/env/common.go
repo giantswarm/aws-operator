@@ -18,7 +18,6 @@ const (
 const (
 	EnvVarCircleCI             = "CIRCLECI"
 	EnvVarCircleSHA            = "CIRCLE_SHA1"
-	EnvVarGithubBotToken       = "GITHUB_BOT_TOKEN"
 	EnvVarKeepResources        = "KEEP_RESOURCES"
 	EnvVarRegistryPullSecret   = "REGISTRY_PULL_SECRET"
 	EnvVarTestedVersion        = "TESTED_VERSION"
@@ -47,11 +46,6 @@ func init() {
 	circleSHA = os.Getenv(EnvVarCircleSHA)
 	if circleSHA == "" {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarCircleSHA))
-	}
-
-	githubToken = os.Getenv(EnvVarGithubBotToken)
-	if githubToken == "" {
-		panic(fmt.Sprintf("env var %q must not be empty", EnvVarGithubBotToken))
 	}
 
 	testedVersion = os.Getenv(EnvVarTestedVersion)
