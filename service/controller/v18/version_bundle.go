@@ -9,7 +9,17 @@ func VersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "aws-operator",
-				Description: "Add your changes here.",
+				Description: "Add security group descriptions for master nodes.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Removed CoreDNS related components (now managed by chart-operator).",
+				Kind:        versionbundle.KindRemoved,
+			},
+			{
+				Component:   "aws-operator",
+				Description: "Set higher timeouts for NVME driver.",
 				Kind:        versionbundle.KindAdded,
 			},
 		},
@@ -40,6 +50,6 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    "aws-operator",
-		Version: "4.3.0",
+		Version: "4.2.0",
 	}
 }
