@@ -312,7 +312,7 @@
     "v_3_6_0",
     "v_3_6_1"
   ]
-  revision = "cde5c654f6e4e51ea2cb992fdbed2ab3bf188dff"
+  revision = "f006b0a1fd85172bfb34fca24ad60b82de50eb75"
 
 [[projects]]
   branch = "master"
