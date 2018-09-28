@@ -1,4 +1,4 @@
-package v17
+package v18
 
 import (
 	"github.com/giantswarm/versionbundle"
@@ -50,6 +50,6 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    "aws-operator",
-		Version: "4.2.0",
+		Version: "4.3.0",
 	}
 }
