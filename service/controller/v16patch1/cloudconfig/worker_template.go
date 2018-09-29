@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/legacycerts/legacy"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_6_1"
+	"github.com/giantswarm/legacycerts/legacy"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v16patch1/templates/cloudconfig"
