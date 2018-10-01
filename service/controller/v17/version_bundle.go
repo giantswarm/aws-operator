@@ -13,6 +13,26 @@ func VersionBundle() versionbundle.Bundle {
 				Kind:        versionbundle.KindChanged,
 			},
 			{
+				Component:   "cloudconfig",
+				Description: "Removed CoreDNS related components (now managed by chart-operator).",
+				Kind:        versionbundle.KindRemoved,
+			},
+			{
+				Component:   "aws-operator",
+				Description: "Set higher timeouts for NVME driver.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "calico",
+				Description: "Updated calico to 3.2.0.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "kubernetes",
+				Description: "Patched Kubernetes v1.11.1 with apimachinery fix to plug apiserver memory leak.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
 				Component:   "aws-operator",
 				Description: "Set higher timeouts for NVME driver.",
 				Kind:        versionbundle.KindAdded,

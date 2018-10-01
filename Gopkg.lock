@@ -271,7 +271,7 @@
 
 [[projects]]
   branch = "legacy"
-  digest = "1:ff9e08b04b14a464c6c6d18866aea33f616c75631288374748a1ea0626551550"
+  digest = "1:1bba2a9c29d857b60b368e642122493c4060b0cf47f1794e592479659d7770a6"
   name = "github.com/giantswarm/certs"
   packages = [
     ".",
@@ -279,7 +279,7 @@
     "legacy/legacytest",
   ]
   pruneopts = "UT"
-  revision = "eef93b00a45bfe1872e9161af968c6234c7cd61e"
+  revision = "90d45998c4c54176bc0eb0b70d33efc4af7a5204"
 
 [[projects]]
   branch = "master"
@@ -374,7 +374,7 @@
     "v_3_6_1",
   ]
   pruneopts = "UT"
-  revision = "54ae1d87febe98a8ef9fa66d98f05f9e6b200f2e"
+  revision = "f006b0a1fd85172bfb34fca24ad60b82de50eb75"
 
 [[projects]]
   branch = "master"
