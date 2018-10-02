@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/giantswarm/aws-operator/service/controller/v12patch1/controllercontext"
-	"github.com/giantswarm/certs/legacy"
+	"github.com/giantswarm/legacycerts/legacy"
 	"github.com/giantswarm/microerror"
 )
 

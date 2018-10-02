@@ -60,7 +60,7 @@ type Host struct {
 
 func NewHost(c HostConfig) (*Host, error) {
 	if c.Backoff == nil {
-		c.Backoff = backoff.NewExponential(ShortMaxWait, 60*time.Second)
+		c.Backoff = backoff.NewExponential(backoff.ShortMaxWait, backoff.LongMaxInterval)
 	}
 	if c.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", c)
@@ -263,7 +263,7 @@ func (h *Host) DeleteGuestCluster(ctx context.Context, provider string) error {
 			}
 		}
 
-		b := backoff.NewExponential(LongMaxWait, 60*time.Second)
+		b := backoff.NewExponential(backoff.LongMaxWait, backoff.LongMaxInterval)
 		n := backoff.NewNotifier(h.logger, context.Background())
 		err := backoff.RetryNotify(o, b, n)
 		if err != nil {
@@ -427,7 +427,7 @@ func (h *Host) InstallCertResource() error {
 
 			return nil
 		}
-		b := backoff.NewExponential(ShortMaxWait, ShortMaxInterval)
+		b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
 		n := backoff.NewNotifier(h.logger, context.Background())
 		err := backoff.RetryNotify(o, b, n)
 		if err != nil {
@@ -451,7 +451,7 @@ func (h *Host) InstallCertResource() error {
 
 			return nil
 		}
-		b := backoff.NewExponential(ShortMaxWait, ShortMaxInterval)
+		b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
 		n := func(err error, delay time.Duration) {
 			h.logger.Log("level", "debug", "message", err.Error())
 		}
@@ -527,7 +527,7 @@ func (h *Host) Teardown() {
 func (h *Host) WaitForPodLog(namespace, needle, podName string) error {
 	needle = os.ExpandEnv(needle)
 
-	timeout := time.After(LongMaxWait)
+	timeout := time.After(backoff.LongMaxWait)
 
 	req := h.k8sClient.CoreV1().
 		RESTClient().
