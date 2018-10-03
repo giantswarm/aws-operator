@@ -1,7 +1,7 @@
 package legacytest
 
 import (
-	"github.com/giantswarm/certs/legacy"
+	"github.com/giantswarm/legacycerts/legacy"
 )
 
 type Service struct {

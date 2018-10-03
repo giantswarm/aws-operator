@@ -3,7 +3,7 @@ package controller
 import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	"github.com/giantswarm/certs/legacy"
+	"github.com/giantswarm/legacycerts/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8scrdclient"
@@ -49,6 +49,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v17"
 	v17adapter "github.com/giantswarm/aws-operator/service/controller/v17/adapter"
 	v17cloudconfig "github.com/giantswarm/aws-operator/service/controller/v17/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v18"
+	v18adapter "github.com/giantswarm/aws-operator/service/controller/v18/adapter"
+	v18cloudconfig "github.com/giantswarm/aws-operator/service/controller/v18/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v2"
 	"github.com/giantswarm/aws-operator/service/controller/v3"
 	"github.com/giantswarm/aws-operator/service/controller/v6"
@@ -932,6 +935,49 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var resourceSetV18 *controller.ResourceSet
+	{
+		c := v18.ClusterResourceSetConfig{
+			CertsSearcher:      certsSearcher,
+			G8sClient:          config.G8sClient,
+			HostAWSConfig:      hostAWSConfig,
+			HostAWSClients:     awsHostClients,
+			K8sClient:          config.K8sClient,
+			Logger:             config.Logger,
+			RandomkeysSearcher: randomKeySearcher,
+
+			AccessLogsExpiration:   config.AccessLogsExpiration,
+			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
+			DeleteLoggingBucket:    config.DeleteLoggingBucket,
+			EncrypterBackend:       config.EncrypterBackend,
+			GuestUpdateEnabled:     config.GuestUpdateEnabled,
+			PodInfraContainerImage: config.PodInfraContainerImage,
+			Route53Enabled:         config.Route53Enabled,
+			IncludeTags:            config.IncludeTags,
+			InstallationName:       config.InstallationName,
+			OIDC: v18cloudconfig.OIDCConfig{
+				ClientID:      config.OIDC.ClientID,
+				IssuerURL:     config.OIDC.IssuerURL,
+				UsernameClaim: config.OIDC.UsernameClaim,
+				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			APIWhitelist: v18adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
+			},
+			ProjectName:       config.ProjectName,
+			PublicRouteTables: config.PublicRouteTables,
+			RegistryDomain:    config.RegistryDomain,
+			SSOPublicKey:      config.SSOPublicKey,
+			VaultAddress:      config.VaultAddress,
+		}
+
+		resourceSetV18, err = v18.NewClusterResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resourceSets := []*controller.ResourceSet{
 		resourceSetV1,
 		resourceSetV2,
@@ -951,6 +997,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		resourceSetV16,
 		resourceSetV16Patch1,
 		resourceSetV17,
+		resourceSetV18,
 	}
 
 	return resourceSets, nil

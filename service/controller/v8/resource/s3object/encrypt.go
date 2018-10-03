@@ -9,7 +9,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
-	"github.com/giantswarm/certs/legacy"
+	"github.com/giantswarm/legacycerts/legacy"
 	"github.com/giantswarm/microerror"
 )
 
