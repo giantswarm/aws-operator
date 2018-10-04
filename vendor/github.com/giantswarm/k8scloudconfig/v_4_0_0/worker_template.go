@@ -195,8 +195,8 @@ storage:
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain,{{ .SSOPublicKey }}"
- 
+        source: "data:text/plain;base64,{{ index .Files "conf/trusted-user-ca-keys.pem" }}"
+
     - path: /etc/kubernetes/config/proxy-config.yaml
       filesystem: root
       mode: 0644
@@ -214,13 +214,13 @@ storage:
       mode: 0644
       contents:
         source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/kubelet-config.yaml.tmpl" }}"
-        
+
     - path: /etc/kubernetes/config/kubelet-kubeconfig.yaml
       filesystem: root
       mode: 0644
       contents:
         source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/kubelet-kubeconfig.yaml" }}"
-  
+
     - path: /opt/wait-for-domains
       filesystem: root
       mode: 0544

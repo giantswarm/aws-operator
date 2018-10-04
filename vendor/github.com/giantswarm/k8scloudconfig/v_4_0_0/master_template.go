@@ -305,7 +305,7 @@ storage:
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain,{{ .SSOPublicKey }}"
+        source: "data:text/plain;base64,{{ index .Files "conf/trusted-user-ca-keys.pem" }}"
 
     {{- if not .DisableCalico }}
     - path: /srv/calico-all.yaml
@@ -380,6 +380,12 @@ storage:
       mode: 0644
       contents:
         source: "data:text/plain;charset=utf-8;base64,{{  index .Files "k8s-resource/rbac_roles.yaml" }}"
+
+    - path: /srv/priority_classes.yaml
+      filesystem: root
+      mode: 0644
+      contents:
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "k8s-resource/priority_classes.yaml" }}"
 
     - path: /srv/psp_policies.yaml
       filesystem: root
