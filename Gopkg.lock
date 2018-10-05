@@ -270,12 +270,12 @@
   revision = "ad43cca0891cbff638be34f232c85a23dc96fee9"
 
 [[projects]]
-  branch = "legacy"
-  digest = "1:8d1b98f871e9933fcc7e51ec73abf49ef853239675e4a5ee19493bcb21f4d544"
+  branch = "master"
+  digest = "1:599c1b654f17a75113602140aa7e5797cc318a7dd6648876757e7f1462b35578"
   name = "github.com/giantswarm/certs"
   packages = ["."]
   pruneopts = "UT"
-  revision = "90d45998c4c54176bc0eb0b70d33efc4af7a5204"
+  revision = "d7c7c20319a880eec51586b9f9865720abdf0d6c"
 
 [[projects]]
   branch = "master"
