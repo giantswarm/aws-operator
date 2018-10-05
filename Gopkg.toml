@@ -145,7 +145,10 @@ required = [
   name = "k8s.io/client-go"
   version = "kubernetes-1.10.4"
 
-
+[[prune.project]]
+  name = "github.com/giantswarm/k8scloudconfig"
+  unused-packages = false
+  non-go = false
 
 [prune]
   go-tests = true
