@@ -12,8 +12,6 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/spf13/afero"
 	"k8s.io/helm/pkg/helm"
-
-	"github.com/giantswarm/e2e-harness/pkg/framework"
 )
 
 const (
@@ -122,7 +120,7 @@ func (r *Resource) Install(name, values, channel string, conditions ...func() er
 	}
 
 	for _, c := range conditions {
-		err = backoff.Retry(c, backoff.NewExponential(framework.ShortMaxWait, framework.ShortMaxInterval))
+		err = backoff.Retry(c, backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval))
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -166,7 +164,7 @@ func (r *Resource) WaitForStatus(release string, status string) error {
 		r.logger.Log("level", "debug", "message", fmt.Sprintf("failed to get release status '%s': retrying in %s", status, t), "stack", fmt.Sprintf("%v", err))
 	}
 
-	b := backoff.NewExponential(framework.ShortMaxWait, framework.LongMaxInterval)
+	b := backoff.NewExponential(backoff.MediumMaxWait, backoff.LongMaxInterval)
 	err := backoff.RetryNotify(operation, b, notify)
 	if err != nil {
 		return microerror.Mask(err)
@@ -190,7 +188,7 @@ func (r *Resource) WaitForVersion(release string, version string) error {
 		r.logger.Log("level", "debug", "message", fmt.Sprintf("failed to get release version '%s': retrying in %s", version, t), "stack", fmt.Sprintf("%v", err))
 	}
 
-	b := backoff.NewExponential(framework.ShortMaxWait, framework.LongMaxInterval)
+	b := backoff.NewExponential(backoff.ShortMaxWait, backoff.LongMaxInterval)
 	err := backoff.RetryNotify(operation, b, notify)
 	if err != nil {
 		return microerror.Mask(err)

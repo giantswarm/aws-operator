@@ -263,11 +263,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:6f3cde87eaf787a81904a579bae0d1d1eb36908c944c556615b02bfd2642bb1a"
+  digest = "1:aee5f8435859ee2e6c032c21d92b3b4853cd81387a3738ac1ac20c85cf3ab560"
   name = "github.com/giantswarm/backoff"
   packages = ["."]
   pruneopts = "UT"
-  revision = "889af437b4d98f8a1ccb66cb85b93de13d8c666e"
+  revision = "ad43cca0891cbff638be34f232c85a23dc96fee9"
 
 [[projects]]
   branch = "legacy"
@@ -279,7 +279,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:4745da3e682f516f2a682d469be4d3ab8e8e7a71d7d40ff6ea8c8489dce0cda0"
+  digest = "1:62e0a2730956732654f8030dd9bae1bac2facd233164321c1db8a5906a0bb8d4"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
@@ -288,7 +288,7 @@
     "pkg/harness",
   ]
   pruneopts = "UT"
-  revision = "403620aa641c24772e883babe9857b6d10afabec"
+  revision = "05bd411c3155f53d3a73c8c4653cb9daa894c982"
 
 [[projects]]
   branch = "master"
