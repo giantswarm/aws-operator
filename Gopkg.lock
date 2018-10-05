@@ -278,8 +278,8 @@
   revision = "d7c7c20319a880eec51586b9f9865720abdf0d6c"
 
 [[projects]]
-  branch = "master"
-  digest = "1:62e0a2730956732654f8030dd9bae1bac2facd233164321c1db8a5906a0bb8d4"
+  branch = "crd-wait"
+  digest = "1:b1149a1c45ee3cc52cf101512f3e1f3a5f519e070fa606f0d1d7675a7796066d"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
@@ -288,7 +288,7 @@
     "pkg/harness",
   ]
   pruneopts = "UT"
-  revision = "05bd411c3155f53d3a73c8c4653cb9daa894c982"
+  revision = "0c3c74f6dd01b6e826a392ec89a1dc19695e2307"
 
 [[projects]]
   branch = "master"
