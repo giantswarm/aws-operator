@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/certs"
 	"github.com/giantswarm/legacycerts/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -244,12 +245,25 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 
 	awsHostClients := awsclient.NewClients(hostAWSConfig)
 
-	var certsSearcher *legacy.Service
+	var certsSearcher *certs.Searcher
+	{
+		c := certs.Config{
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+		}
+
+		certsSearcher, err = certs.NewSearcher(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var legacyCertsSearcher *legacy.Service
 	{
 		certConfig := legacy.DefaultServiceConfig()
 		certConfig.K8sClient = config.K8sClient
 		certConfig.Logger = config.Logger
-		certsSearcher, err = legacy.NewService(certConfig)
+		legacyCertsSearcher, err = legacy.NewService(certConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -266,14 +280,14 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
-	var randomKeySearcher randomkeys.Interface
+	var randomKeysSearcher randomkeys.Interface
 	{
 		c := randomkeys.Config{
 			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 		}
 
-		randomKeySearcher, err = randomkeys.NewSearcher(c)
+		randomKeysSearcher, err = randomkeys.NewSearcher(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -282,7 +296,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV1 *controller.ResourceSet
 	{
 		c := v1.ResourceSetConfig{
-			CertsSearcher:      certsSearcher,
+			CertsSearcher:      legacyCertsSearcher,
 			GuestAWSConfig:     guestAWSConfig,
 			HostAWSConfig:      hostAWSConfig,
 			K8sClient:          config.K8sClient,
@@ -308,7 +322,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV2 *controller.ResourceSet
 	{
 		c := v2.ResourceSetConfig{
-			CertsSearcher:      certsSearcher,
+			CertsSearcher:      legacyCertsSearcher,
 			GuestAWSClients:    awsClients,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
@@ -332,7 +346,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV3 *controller.ResourceSet
 	{
 		c := v3.ResourceSetConfig{
-			CertsSearcher:      certsSearcher,
+			CertsSearcher:      legacyCertsSearcher,
 			GuestAWSClients:    awsClients,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
@@ -357,7 +371,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV6 *controller.ResourceSet
 	{
 		c := v6.ResourceSetConfig{
-			CertsSearcher:      certsSearcher,
+			CertsSearcher:      legacyCertsSearcher,
 			GuestAWSClients:    awsClients,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
@@ -384,7 +398,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV8 *controller.ResourceSet
 	{
 		c := v8.ClusterResourceSetConfig{
-			CertsSearcher:      certsSearcher,
+			CertsSearcher:      legacyCertsSearcher,
 			GuestAWSClients:    awsClients,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
@@ -411,12 +425,12 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV9Patch1 *controller.ResourceSet
 	{
 		c := v9patch1.ClusterResourceSetConfig{
-			CertsSearcher:      certsSearcher,
+			CertsSearcher:      legacyCertsSearcher,
 			GuestAWSClients:    awsClients,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeySearcher,
+			RandomkeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration: config.AccessLogsExpiration,
 			GuestUpdateEnabled:   config.GuestUpdateEnabled,
@@ -443,12 +457,12 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV9Patch2 *controller.ResourceSet
 	{
 		c := v9patch2.ClusterResourceSetConfig{
-			CertsSearcher:      certsSearcher,
+			CertsSearcher:      legacyCertsSearcher,
 			GuestAWSClients:    awsClients,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeySearcher,
+			RandomkeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration: config.AccessLogsExpiration,
 			GuestUpdateEnabled:   config.GuestUpdateEnabled,
@@ -475,13 +489,13 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV12 *controller.ResourceSet
 	{
 		c := v12.ClusterResourceSetConfig{
-			CertsSearcher:      certsSearcher,
+			CertsSearcher:      legacyCertsSearcher,
 			G8sClient:          config.G8sClient,
 			HostAWSConfig:      hostAWSConfig,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeySearcher,
+			RandomkeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration:   config.AccessLogsExpiration,
 			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
@@ -513,13 +527,13 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV12Patch1 *controller.ResourceSet
 	{
 		c := v12patch1.ClusterResourceSetConfig{
-			CertsSearcher:      certsSearcher,
+			CertsSearcher:      legacyCertsSearcher,
 			G8sClient:          config.G8sClient,
 			HostAWSConfig:      hostAWSConfig,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeySearcher,
+			RandomkeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration:   config.AccessLogsExpiration,
 			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
@@ -551,13 +565,13 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV13 *controller.ResourceSet
 	{
 		c := v13.ClusterResourceSetConfig{
-			CertsSearcher:      certsSearcher,
+			CertsSearcher:      legacyCertsSearcher,
 			G8sClient:          config.G8sClient,
 			HostAWSConfig:      hostAWSConfig,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeySearcher,
+			RandomkeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration:   config.AccessLogsExpiration,
 			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
@@ -594,13 +608,13 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV14 *controller.ResourceSet
 	{
 		c := v14.ClusterResourceSetConfig{
-			CertsSearcher:      certsSearcher,
+			CertsSearcher:      legacyCertsSearcher,
 			G8sClient:          config.G8sClient,
 			HostAWSConfig:      hostAWSConfig,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeySearcher,
+			RandomkeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration:   config.AccessLogsExpiration,
 			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
@@ -637,13 +651,13 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV14Patch1 *controller.ResourceSet
 	{
 		c := v14patch1.ClusterResourceSetConfig{
-			CertsSearcher:      certsSearcher,
+			CertsSearcher:      legacyCertsSearcher,
 			G8sClient:          config.G8sClient,
 			HostAWSConfig:      hostAWSConfig,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeySearcher,
+			RandomkeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration:   config.AccessLogsExpiration,
 			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
@@ -680,13 +694,13 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV14Patch2 *controller.ResourceSet
 	{
 		c := v14patch2.ClusterResourceSetConfig{
-			CertsSearcher:      certsSearcher,
+			CertsSearcher:      legacyCertsSearcher,
 			G8sClient:          config.G8sClient,
 			HostAWSConfig:      hostAWSConfig,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeySearcher,
+			RandomkeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration:   config.AccessLogsExpiration,
 			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
@@ -723,13 +737,13 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV14Patch3 *controller.ResourceSet
 	{
 		c := v14patch3.ClusterResourceSetConfig{
-			CertsSearcher:      certsSearcher,
+			CertsSearcher:      legacyCertsSearcher,
 			G8sClient:          config.G8sClient,
 			HostAWSConfig:      hostAWSConfig,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeySearcher,
+			RandomkeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration:   config.AccessLogsExpiration,
 			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
@@ -766,13 +780,13 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV15 *controller.ResourceSet
 	{
 		c := v15.ClusterResourceSetConfig{
-			CertsSearcher:      certsSearcher,
+			CertsSearcher:      legacyCertsSearcher,
 			G8sClient:          config.G8sClient,
 			HostAWSConfig:      hostAWSConfig,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeySearcher,
+			RandomkeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration:   config.AccessLogsExpiration,
 			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
@@ -809,13 +823,13 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV16 *controller.ResourceSet
 	{
 		c := v16.ClusterResourceSetConfig{
-			CertsSearcher:      certsSearcher,
+			CertsSearcher:      legacyCertsSearcher,
 			G8sClient:          config.G8sClient,
 			HostAWSConfig:      hostAWSConfig,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeySearcher,
+			RandomkeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration:   config.AccessLogsExpiration,
 			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
@@ -852,13 +866,13 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV16Patch1 *controller.ResourceSet
 	{
 		c := v16patch1.ClusterResourceSetConfig{
-			CertsSearcher:      certsSearcher,
+			CertsSearcher:      legacyCertsSearcher,
 			G8sClient:          config.G8sClient,
 			HostAWSConfig:      hostAWSConfig,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeySearcher,
+			RandomkeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration:   config.AccessLogsExpiration,
 			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
@@ -895,13 +909,13 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV17 *controller.ResourceSet
 	{
 		c := v17.ClusterResourceSetConfig{
-			CertsSearcher:      certsSearcher,
+			CertsSearcher:      legacyCertsSearcher,
 			G8sClient:          config.G8sClient,
 			HostAWSConfig:      hostAWSConfig,
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeySearcher,
+			RandomkeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration:   config.AccessLogsExpiration,
 			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
@@ -944,7 +958,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			HostAWSClients:     awsHostClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeySearcher,
+			RandomKeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration:   config.AccessLogsExpiration,
 			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,

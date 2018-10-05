@@ -7,7 +7,6 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs"
 	"github.com/giantswarm/guestcluster"
-	"github.com/giantswarm/legacycerts/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
@@ -45,13 +44,13 @@ import (
 )
 
 type ClusterResourceSetConfig struct {
-	CertsSearcher      legacy.Searcher
+	CertsSearcher      certs.Interface
 	G8sClient          versioned.Interface
 	HostAWSConfig      aws.Config
 	HostAWSClients     aws.Clients
 	K8sClient          kubernetes.Interface
 	Logger             micrologger.Logger
-	RandomkeysSearcher randomkeys.Interface
+	RandomKeysSearcher randomkeys.Interface
 
 	AccessLogsExpiration   int
 	AdvancedMonitoringEC2  bool
@@ -108,7 +107,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
-	if config.RandomkeysSearcher == nil {
+	if config.RandomKeysSearcher == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.RandomkeysSearcher must not be empty", config)
 	}
 
@@ -256,11 +255,11 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var s3BucketObjectResource controller.Resource
 	{
 		c := s3object.Config{
-			CertWatcher:       config.CertsSearcher,
-			CloudConfig:       cloudConfig,
-			Encrypter:         encrypterObject,
-			Logger:            config.Logger,
-			RandomKeySearcher: config.RandomkeysSearcher,
+			CertsSearcher:      config.CertsSearcher,
+			CloudConfig:        cloudConfig,
+			Encrypter:          encrypterObject,
+			Logger:             config.Logger,
+			RandomKeysSearcher: config.RandomKeysSearcher,
 		}
 
 		ops, err := s3object.New(c)
