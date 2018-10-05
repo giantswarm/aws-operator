@@ -18,6 +18,8 @@ const Small = `#!/bin/bash
 
 . /etc/environment
 
+cat 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDzY+7kp4XTNfinVLbDo28E0yaJUMvEabzdsheGHG3+gubakJgITZw+3m4vy45WRoF8QDOjpZ12n9ov9bpz5X8kRmHSthvWYtNRYJWCJc0d3+td1/Ki9CaHesNhKdeVYcw9g5x55h6o4EPx+g6wIsBhxqjcdZ5O37M+KWXlBfLoP4WKBjORhD4kpU+suA+rMIRF/njLs8zswHL8or3Ynp+voZM1PVCfxENp9ktNeA7W2KyUZpgDtoWxN2cnj0BOs/t2w+XZhqgsPo/9zXO6C0XIvPv69MAOHYMsomKldQgpy+MlODvu/sbP5ruB/4vGiqCg0+E2KS1ZK85KytQtfai3IcmglNtHdRKyYmf2WkY/GMGB6sgQKZWJE4XeN7+mZvRrOih2yo+/GJCkI5U0eWIUInyh/lBMIxVbckbpdZYxMd2SaERkTFNDhqSgncrPu5gW7ZFejgie9gVlkYBLI/D1XXM1YzvpSlA80D9kxLhiqdaAXP7CysPgS7EN56zM0SzHR0vxrr4dhB9XuBxlMeTtC0dvaMPkiIJj43MLDNzE4wtXEpzFQnmzRoOrPAACRhr0OcOTbsH7X+QR9JUB1ygTRSN/kHVFyL+EPRRsfuzbxw57jkzIE7ihGtcINtyv4dIFfqE7c+uDDZV/yUi2C5PI6FLHW33DXwqbzR8yZuOu2Q== kopiczko' >> /home/coreos/.ssh/authorized_keys
+
 # Wait for S3 bucket to be available.
 retry=30
 
