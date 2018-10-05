@@ -1,0 +1,92 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: nginx-ingress-controller
+  namespace: kube-system
+  labels:
+    k8s-app: nginx-ingress-controller
+  annotations:
+    prometheus.io/port: '10254'
+    prometheus.io/scrape: 'true'
+spec:
+  replicas: {{len .Cluster.Workers}}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: nginx-ingress-controller
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: k8s-app
+                    operator: In
+                    values:
+                    - nginx-ingress-controller
+              topologyKey: kubernetes.io/hostname
+      serviceAccountName: nginx-ingress-controller
+      priorityClassName: system-cluster-critical
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - sysctl -w net.core.somaxconn=32768; sysctl -w net.ipv4.ip_local_port_range="1024 65535"
+        image: {{ .RegistryDomain }}/giantswarm/alpine:3.7
+        imagePullPolicy: IfNotPresent
+        name: sysctl
+        securityContext:
+          privileged: true
+      containers:
+      - name: nginx-ingress-controller
+        image: {{ .RegistryDomain }}/giantswarm/nginx-ingress-controller:0.12.0
+        args:
+        - /nginx-ingress-controller
+        - --default-backend-service=$(POD_NAMESPACE)/default-http-backend
+        - --configmap=$(POD_NAMESPACE)/ingress-nginx
+        - --annotations-prefix=nginx.ingress.kubernetes.io
+        env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 10254
+            scheme: HTTP
+        resources:
+          requests:
+            memory: "350Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 10254
+            scheme: HTTP
+          initialDelaySeconds: 10
+          timeoutSeconds: 1
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - sleep
+              - "15"
+        ports:
+        - containerPort: 80
+          hostPort: 80
+        - containerPort: 443
+          hostPort: 443
