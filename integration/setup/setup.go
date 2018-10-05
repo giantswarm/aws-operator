@@ -11,7 +11,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/backoff"
-	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
 	"github.com/giantswarm/e2etemplates/pkg/e2etemplates"
 	"github.com/giantswarm/microerror"
@@ -209,7 +208,7 @@ func installCredential(config Config) error {
 
 		return nil
 	}
-	b := backoff.NewExponential(framework.ShortMaxWait, framework.ShortMaxInterval)
+	b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
 	n := backoff.NewNotifier(l, context.Background())
 	err = backoff.RetryNotify(o, b, n)
 	if err != nil {
