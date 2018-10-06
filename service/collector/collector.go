@@ -90,6 +90,7 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 		c.collectClusterInfo,
 		c.collectAccountsTrustedAdvisorChecks,
 		c.collectAccountsVPCs,
+		c.collectAccountsRoutes,
 	}
 
 	for _, collectFunc := range collectFuncs {
