@@ -50,7 +50,7 @@ required = [
   name = "github.com/giantswarm/backoff"
 
 [[override]]
-  branch = "legacy"
+  branch = "master"
   name = "github.com/giantswarm/certs"
 
 [[constraint]]

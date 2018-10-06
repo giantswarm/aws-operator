@@ -46,7 +46,6 @@ func newFilesClusterCommon(cluster Cluster) Files {
 	return Files{
 		// TODO(r7vme): Only used by Calico and should be removed
 		// when Calico will migrate to the ones below.
-		// https://github.com/giantswarm/giantswarm/issues/4173
 		{
 			AbsolutePath: "/etc/kubernetes/ssl/etcd/client-ca.pem",
 			Data:         cluster.EtcdServer.CA,
