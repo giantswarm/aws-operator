@@ -10,6 +10,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
+	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
 	"github.com/giantswarm/e2etemplates/pkg/e2etemplates"
@@ -132,7 +134,7 @@ func installAWSOperator(config Config) error {
 
 	}
 
-	err = config.Host.InstallBranchOperator("aws-operator", "awsconfig", values)
+	err = config.Host.InstallBranchOperator("aws-operator", providerv1alpha1.NewAWSConfigCRD().Name, values)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -262,11 +264,11 @@ func installResources(config Config, vpcPeerID string) error {
 
 	{
 		// TODO configure chart values like for the other operators below.
-		err = config.Host.InstallStableOperator("cert-operator", "certconfig", e2etemplates.CertOperatorChartValues)
+		err = config.Host.InstallStableOperator("cert-operator", corev1alpha1.NewCertConfigCRD().Name, e2etemplates.CertOperatorChartValues)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		err = config.Host.InstallStableOperator("node-operator", "drainerconfig", e2etemplates.NodeOperatorChartValues)
+		err = config.Host.InstallStableOperator("node-operator", corev1alpha1.NewDrainerConfigCRD().Name, e2etemplates.NodeOperatorChartValues)
 		if err != nil {
 			return microerror.Mask(err)
 		}
