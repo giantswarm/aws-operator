@@ -1,5 +1,5 @@
 /*
-Copyright The Helm Authors.
+Copyright 2016 The Kubernetes Authors All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -44,8 +44,6 @@ type Client struct {
 // NewClient creates a new client.
 func NewClient(opts ...Option) *Client {
 	var c Client
-	// set some sane defaults
-	c.Option(ConnectTimeout(5))
 	return c.Option(opts...)
 }
 
@@ -97,7 +95,6 @@ func (h *Client) InstallReleaseFromChart(chart *chart.Chart, ns string, opts ...
 	req.Namespace = ns
 	req.DryRun = reqOpts.dryRun
 	req.DisableHooks = reqOpts.disableHooks
-	req.DisableCrdHook = reqOpts.disableCRDHook
 	req.ReuseName = reqOpts.reuseName
 	ctx := NewContext()
 
@@ -302,7 +299,7 @@ func (h *Client) RunReleaseTest(rlsName string, opts ...ReleaseTestOption) (<-ch
 	return h.test(ctx, req)
 }
 
-// PingTiller pings the Tiller pod and ensure's that it is up and running
+// PingTiller pings the Tiller pod and ensure's that it is up and runnning
 func (h *Client) PingTiller() error {
 	ctx := NewContext()
 	return h.ping(ctx)
@@ -347,22 +344,8 @@ func (h *Client) list(ctx context.Context, req *rls.ListReleasesRequest) (*rls.L
 	if err != nil {
 		return nil, err
 	}
-	var resp *rls.ListReleasesResponse
-	for {
-		r, err := s.Recv()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return nil, err
-		}
-		if resp == nil {
-			resp = r
-			continue
-		}
-		resp.Releases = append(resp.Releases, r.GetReleases()[0])
-	}
-	return resp, nil
+
+	return s.Recv()
 }
 
 // Executes tiller.InstallRelease RPC.
