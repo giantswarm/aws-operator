@@ -38,8 +38,7 @@ const (
 
 	// accountIDIndex represents the index in which we can find the account ID in the user ARN
 	// (splitting by colon)
-	accountIDIndex  = 4
-	accountIDLength = 12
+	accountIDIndex = 4
 
 	// The number of seconds AWS will wait, before issuing a health check on
 	// instances in an Auto Scaling Group.

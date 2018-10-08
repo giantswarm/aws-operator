@@ -304,7 +304,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:6f61295d8c0e5a2a57a699da99fe5c18669f717405f350e6bd0d4e88c2dd22d6"
+  digest = "1:fc36fa563dd868a18c91c145ef5f61a97e832f8af5649d9100c0aaa40f51a141"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
     "internal/render",
@@ -312,7 +312,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "74499b3def489b32db37ce7de60aff59c0076194"
+  revision = "1e4569c89a56aeb02b9ac57847b7cd8aaa9cc603"
 
 [[projects]]
   branch = "master"
@@ -358,11 +358,6 @@
   digest = "1:eb6cc81f52025c79845c781c55cd273787230177cc38c20e24c570e487d51d26"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
-    "v_2_0_2",
-    "v_3_0_0",
-    "v_3_1_1",
-    "v_3_2_2",
-    "v_3_2_6",
     "v_3_3_3",
     "v_3_4_0",
     "v_3_5_0",
@@ -479,17 +474,6 @@
   ]
   pruneopts = "UT"
   revision = "0688a8c5c0d7ac6aa1cf2ebb4323ed1ef3cbe46f"
-
-[[projects]]
-  branch = "master"
-  digest = "1:fc3eb67258768222142b0fdbcd953de5aa4df896caa2aa5245a8b185c0e8dacb"
-  name = "github.com/giantswarm/randomkeytpr"
-  packages = [
-    ".",
-    "randomkeytprtest",
-  ]
-  pruneopts = "UT"
-  revision = "d30333b6c23134aade3841156fa441a2045a957f"
 
 [[projects]]
   branch = "master"
@@ -611,11 +595,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2647ad0f5fefe305282aea5f60fab961db50b263ac23954de2c442b9a18f6315"
+  digest = "1:efd8f45d0a95c208928c448abf8a52942ab43a09870b8a8c07ea3912a2c2edea"
   name = "github.com/google/go-github"
   packages = ["github"]
   pruneopts = "UT"
-  revision = "4c1b69f57a48deb714630b7731fbad49ce3a5f42"
+  revision = "902ef4c51cabd60fa6e10422eb06a6ebaef6ad5e"
 
 [[projects]]
   digest = "1:a63cff6b5d8b95638bfe300385d93b2a6d9d687734b863da8e09dc834510a690"
@@ -1692,11 +1676,6 @@
     "github.com/giantswarm/e2etests/update/provider",
     "github.com/giantswarm/guestcluster",
     "github.com/giantswarm/helmclient",
-    "github.com/giantswarm/k8scloudconfig/v_2_0_2",
-    "github.com/giantswarm/k8scloudconfig/v_3_0_0",
-    "github.com/giantswarm/k8scloudconfig/v_3_1_1",
-    "github.com/giantswarm/k8scloudconfig/v_3_2_2",
-    "github.com/giantswarm/k8scloudconfig/v_3_2_6",
     "github.com/giantswarm/k8scloudconfig/v_3_3_3",
     "github.com/giantswarm/k8scloudconfig/v_3_4_0",
     "github.com/giantswarm/k8scloudconfig/v_3_5_0",
@@ -1727,8 +1706,6 @@
     "github.com/giantswarm/operatorkit/informer",
     "github.com/giantswarm/randomkeys",
     "github.com/giantswarm/randomkeys/randomkeystest",
-    "github.com/giantswarm/randomkeytpr",
-    "github.com/giantswarm/randomkeytpr/randomkeytprtest",
     "github.com/giantswarm/statusresource",
     "github.com/giantswarm/versionbundle",
     "github.com/prometheus/client_golang/prometheus",
@@ -1745,7 +1722,6 @@
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/fake",
     "k8s.io/client-go/rest",
-    "k8s.io/client-go/tools/cache",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
