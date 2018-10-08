@@ -50,7 +50,7 @@ required = [
   name = "github.com/giantswarm/backoff"
 
 [[override]]
-  branch = "legacy"
+  branch = "master"
   name = "github.com/giantswarm/certs"
 
 [[constraint]]
@@ -145,8 +145,15 @@ required = [
   name = "k8s.io/client-go"
   version = "kubernetes-1.10.4"
 
-
+[[prune.project]]
+  name = "github.com/giantswarm/k8scloudconfig"
+  unused-packages = false
+  non-go = false
 
 [prune]
   go-tests = true
   unused-packages = true
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/legacycerts"

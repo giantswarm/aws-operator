@@ -5,23 +5,33 @@ import "fmt"
 // These constants are used when filtering the secrets, to only retrieve the
 // ones we are interested in.
 const (
-	// componentLabel is the label used in the secret to identify a secret
+	// certificateLabel is the label used in the secret to identify a secret
+	// containing the certificate.
+	certificateLabel = "giantswarm.io/certificate"
+	// clusterLabel is the label used in the secret to identify a secret
+	// containing the certificate.
+	clusterLabel = "giantswarm.io/cluster"
+
+	// legacyCertificateLabel is the label used in the secret to identify a secret
 	// containing the certificate.
 	//
-	// TODO replace with "giantswarm.io/certificate" and add to
-	// https://github.com/giantswarm/fmt.
-	certficateLabel = "clusterComponent"
-	// clusterIDLabel is the label used in the secret to identify a secret
+	// TODO use certificateLabel instead when all cert secrets have it.
+	legacyCertificateLabel = "clusterComponent"
+	// legacyClusterIDLabel is the label used in the secret to identify a secret
 	// containing the certificate.
 	//
-	// TODO replace with "giantswarm.io/cluster-id"
-	clusterIDLabel = "clusterID"
+	// TODO use clusterIDLabel instead when all cert secrets have it.
+	legacyClusterIDLabel = "clusterID"
 
 	SecretNamespace = "default"
 )
 
 // Cert is a certificate name.
 type Cert string
+
+func (c Cert) String() string {
+	return string(c)
+}
 
 // These constants used as Cert parsing a secret received from the API.
 const (
@@ -49,8 +59,19 @@ var AllCerts = []Cert{
 	WorkerCert,
 }
 
-// K8sSecretName returns Kubernetes Secret object name for the certificate name
-// and the guest cluster ID.
-func K8sSecretName(clusterID, certificate Cert) string {
+// K8sName returns Kubernetes object name for the certificate name and
+// the guest cluster ID.
+func K8sName(clusterID string, certificate Cert) string {
 	return fmt.Sprintf("%s-%s", clusterID, certificate)
+}
+
+// K8sLabels returns labels for the Kubernetes  object for the certificate name
+// and the guest cluster ID.
+func K8sLabels(clusterID string, certificate Cert) map[string]string {
+	return map[string]string{
+		certificateLabel:       string(certificate),
+		clusterLabel:           clusterID,
+		legacyCertificateLabel: string(certificate),
+		legacyClusterIDLabel:   clusterID,
+	}
 }

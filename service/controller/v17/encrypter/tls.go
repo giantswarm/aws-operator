@@ -6,7 +6,7 @@ import (
 	"context"
 	"encoding/base64"
 
-	"github.com/giantswarm/certs/legacy"
+	"github.com/giantswarm/legacycerts/legacy"
 	"github.com/giantswarm/microerror"
 )
 

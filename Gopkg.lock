@@ -263,27 +263,23 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:6f3cde87eaf787a81904a579bae0d1d1eb36908c944c556615b02bfd2642bb1a"
+  digest = "1:aee5f8435859ee2e6c032c21d92b3b4853cd81387a3738ac1ac20c85cf3ab560"
   name = "github.com/giantswarm/backoff"
   packages = ["."]
   pruneopts = "UT"
-  revision = "889af437b4d98f8a1ccb66cb85b93de13d8c666e"
-
-[[projects]]
-  branch = "legacy"
-  digest = "1:1bba2a9c29d857b60b368e642122493c4060b0cf47f1794e592479659d7770a6"
-  name = "github.com/giantswarm/certs"
-  packages = [
-    ".",
-    "legacy",
-    "legacy/legacytest",
-  ]
-  pruneopts = "UT"
-  revision = "90d45998c4c54176bc0eb0b70d33efc4af7a5204"
+  revision = "ad43cca0891cbff638be34f232c85a23dc96fee9"
 
 [[projects]]
   branch = "master"
-  digest = "1:4745da3e682f516f2a682d469be4d3ab8e8e7a71d7d40ff6ea8c8489dce0cda0"
+  digest = "1:599c1b654f17a75113602140aa7e5797cc318a7dd6648876757e7f1462b35578"
+  name = "github.com/giantswarm/certs"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "d7c7c20319a880eec51586b9f9865720abdf0d6c"
+
+[[projects]]
+  branch = "master"
+  digest = "1:62e0a2730956732654f8030dd9bae1bac2facd233164321c1db8a5906a0bb8d4"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
@@ -292,7 +288,7 @@
     "pkg/harness",
   ]
   pruneopts = "UT"
-  revision = "403620aa641c24772e883babe9857b6d10afabec"
+  revision = "05bd411c3155f53d3a73c8c4653cb9daa894c982"
 
 [[projects]]
   branch = "master"
@@ -307,7 +303,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:6bd0de7b2a972f3b1df08b866903eac77137c2adccf5e1ed21079cfc92062418"
+  digest = "1:6f61295d8c0e5a2a57a699da99fe5c18669f717405f350e6bd0d4e88c2dd22d6"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
     "internal/render",
@@ -315,11 +311,11 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "c137a54b2e623c634834f0c5dc7c26993b6c30df"
+  revision = "74499b3def489b32db37ce7de60aff59c0076194"
 
 [[projects]]
   branch = "master"
-  digest = "1:9074841a2de8bfcc96152f97e81ad7d7077877becec1a6c9c38913386e721089"
+  digest = "1:b2e76a48751a4152e03b77c8578e034aa488b1dbe3ab4eaab2a231c4b7d025ea"
   name = "github.com/giantswarm/e2etests"
   packages = [
     "clusterstate",
@@ -330,7 +326,7 @@
     "update/provider",
   ]
   pruneopts = "UT"
-  revision = "bc2f34dab1e20f4be9cfdf04bb1881d47f0daffe"
+  revision = "dc4d7b3d481b35ff65c59784b4bd61bb44987d89"
 
 [[projects]]
   branch = "master"
@@ -358,7 +354,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:839e2660c82320ee0af94124e000f127303a2ed10b9a13770b3d74904954820c"
+  digest = "1:e0a93cfccb17ca549047d7e68681f197524f94366e64ea0e2eb31bad1edf74ee"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "v_2_0_2",
@@ -373,8 +369,8 @@
     "v_3_6_0",
     "v_3_6_1",
   ]
-  pruneopts = "UT"
-  revision = "f006b0a1fd85172bfb34fca24ad60b82de50eb75"
+  pruneopts = "T"
+  revision = "b753e8317eeb051670a6f3e1eaaa9f6e1f39332e"
 
 [[projects]]
   branch = "master"
@@ -383,6 +379,17 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "3608d312c501d5f4e4390399c5e8a97866205e36"
+
+[[projects]]
+  branch = "master"
+  digest = "1:931a71d13de5a7698a29eb18a260da8fe3d6a97754dc8b1ac6207114a7f43b7a"
+  name = "github.com/giantswarm/legacycerts"
+  packages = [
+    "legacy",
+    "legacy/legacytest",
+  ]
+  pruneopts = "UT"
+  revision = "1361f24559d91405efb0e98a6f4cd64ec3cef90c"
 
 [[projects]]
   branch = "master"
@@ -1672,8 +1679,6 @@
     "github.com/giantswarm/apprclient",
     "github.com/giantswarm/backoff",
     "github.com/giantswarm/certs",
-    "github.com/giantswarm/certs/legacy",
-    "github.com/giantswarm/certs/legacy/legacytest",
     "github.com/giantswarm/e2e-harness/pkg/framework",
     "github.com/giantswarm/e2e-harness/pkg/framework/resource",
     "github.com/giantswarm/e2eclients/aws",
@@ -1698,6 +1703,8 @@
     "github.com/giantswarm/k8scloudconfig/v_3_5_1",
     "github.com/giantswarm/k8scloudconfig/v_3_6_0",
     "github.com/giantswarm/k8scloudconfig/v_3_6_1",
+    "github.com/giantswarm/legacycerts/legacy",
+    "github.com/giantswarm/legacycerts/legacy/legacytest",
     "github.com/giantswarm/microendpoint/endpoint/healthz",
     "github.com/giantswarm/microendpoint/endpoint/version",
     "github.com/giantswarm/microendpoint/service/healthz",

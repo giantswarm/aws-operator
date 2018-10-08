@@ -25,4 +25,5 @@ Installation:
       Registry:
         PullSecret:
           DockerConfigJSON: "{\"auths\":{\"quay.io\":{\"auth\":\"$REGISTRY_PULL_SECRET\"}}}"
+labelSelector: 'giantswarm.io/cluster=${CLUSTER_NAME}'
 `
