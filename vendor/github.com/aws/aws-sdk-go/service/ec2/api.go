@@ -23588,6 +23588,9 @@ type AllocateHostsInput struct {
 	//
 	// Quantity is a required field
 	Quantity *int64 `locationName:"quantity" type:"integer" required:"true"`
+
+	// The tags to apply to the Dedicated Host during creation.
+	TagSpecifications []*TagSpecification `locationName:"TagSpecification" locationNameList:"item" type:"list"`
 }
 
 // String returns the string representation
@@ -23649,6 +23652,13 @@ func (s *AllocateHostsInput) SetQuantity(v int64) *AllocateHostsInput {
 	return s
 }
 
+// SetTagSpecifications sets the TagSpecifications field's value.
+func (s *AllocateHostsInput) SetTagSpecifications(v []*TagSpecification) *AllocateHostsInput {
+	s.TagSpecifications = v
+	return s
+}
+
+// Contains the output of AllocateHosts.
 type AllocateHostsOutput struct {
 	_ struct{} `type:"structure"`
 
@@ -27980,7 +27990,8 @@ type CreateFlowLogsInput struct {
 	// can also specify a subfolder in the bucket. To specify a subfolder in the
 	// bucket, use the following ARN format: bucket_ARN/subfolder_name/. For example,
 	// to specify a subfolder named my-logs in a bucket named my-bucket, use the
-	// following ARN: arn:aws:s3:::my-bucket/my-logs/.
+	// following ARN: arn:aws:s3:::my-bucket/my-logs/. You cannot use AWSLogs as
+	// a subfolder name. This is a reserved term.
 	LogDestination *string `type:"string"`
 
 	// Specifies the type of destination to which the flow log data is to be published.
@@ -28261,7 +28272,9 @@ func (s *CreateFpgaImageOutput) SetFpgaImageId(v string) *CreateFpgaImageOutput 
 type CreateImageInput struct {
 	_ struct{} `type:"structure"`
 
-	// Information about one or more block device mappings.
+	// Information about one or more block device mappings. This parameter cannot
+	// be used to modify the encryption status of existing volumes or snapshots.
+	// To create an AMI with encrypted snapshots, use the CopyImage action.
 	BlockDeviceMappings []*BlockDeviceMapping `locationName:"blockDeviceMapping" locationNameList:"BlockDeviceMapping" type:"list"`
 
 	// A description for the new image.
@@ -39942,6 +39955,14 @@ type DescribeRouteTablesInput struct {
 	//    * vpc-id - The ID of the VPC for the route table.
 	Filters []*Filter `locationName:"Filter" locationNameList:"Filter" type:"list"`
 
+	// The maximum number of results to return in a single call. To retrieve the
+	// remaining results, make another call with the returned NextToken value. This
+	// value can be between 5 and 100.
+	MaxResults *int64 `type:"integer"`
+
+	// The token to retrieve the next page of results.
+	NextToken *string `type:"string"`
+
 	// One or more route table IDs.
 	//
 	// Default: Describes all your route tables.
@@ -39970,14 +39991,31 @@ func (s *DescribeRouteTablesInput) SetFilters(v []*Filter) *DescribeRouteTablesI
 	return s
 }
 
+// SetMaxResults sets the MaxResults field's value.
+func (s *DescribeRouteTablesInput) SetMaxResults(v int64) *DescribeRouteTablesInput {
+	s.MaxResults = &v
+	return s
+}
+
+// SetNextToken sets the NextToken field's value.
+func (s *DescribeRouteTablesInput) SetNextToken(v string) *DescribeRouteTablesInput {
+	s.NextToken = &v
+	return s
+}
+
 // SetRouteTableIds sets the RouteTableIds field's value.
 func (s *DescribeRouteTablesInput) SetRouteTableIds(v []*string) *DescribeRouteTablesInput {
 	s.RouteTableIds = v
 	return s
 }
 
+// Contains the output of DescribeRouteTables.
 type DescribeRouteTablesOutput struct {
 	_ struct{} `type:"structure"`
+
+	// The token to use to retrieve the next page of results. This value is null
+	// when there are no more results to return.
+	NextToken *string `locationName:"nextToken" type:"string"`
 
 	// Information about one or more route tables.
 	RouteTables []*RouteTable `locationName:"routeTableSet" locationNameList:"item" type:"list"`
@@ -39991,6 +40029,12 @@ func (s DescribeRouteTablesOutput) String() string {
 // GoString returns the string representation
 func (s DescribeRouteTablesOutput) GoString() string {
 	return s.String()
+}
+
+// SetNextToken sets the NextToken field's value.
+func (s *DescribeRouteTablesOutput) SetNextToken(v string) *DescribeRouteTablesOutput {
+	s.NextToken = &v
+	return s
 }
 
 // SetRouteTables sets the RouteTables field's value.
@@ -41799,11 +41843,11 @@ type DescribeTagsInput struct {
 	//
 	//    * resource-id - The ID of the resource.
 	//
-	//    * resource-type - The resource type (customer-gateway | dhcp-options |
-	//    elastic-ip | fleet | fpga-image | image | instance | internet-gateway
-	//    | launch-template | natgateway | network-acl | network-interface | reserved-instances
-	//    | route-table | security-group | snapshot | spot-instances-request | subnet
-	//    | volume | vpc | vpc-peering-connection | vpn-connection | vpn-gateway).
+	//    * resource-type - The resource type (customer-gateway | dedicated-host
+	//    | dhcp-options | elastic-ip | fleet | fpga-image | image | instance |
+	//    internet-gateway | launch-template | natgateway | network-acl | network-interface
+	//    | reserved-instances | route-table | security-group | snapshot | spot-instances-request
+	//    | subnet | volume | vpc | vpc-peering-connection | vpn-connection | vpn-gateway).
 	//
 	//    * tag:<key> - The key/value combination of the tag. For example, specify
 	//    "tag:Owner" for the filter name and "TeamA" for the filter value to find
@@ -45008,9 +45052,14 @@ type EbsBlockDevice struct {
 	DeleteOnTermination *bool `locationName:"deleteOnTermination" type:"boolean"`
 
 	// Indicates whether the EBS volume is encrypted. Encrypted volumes can only
-	// be attached to instances that support Amazon EBS encryption. If you are creating
-	// a volume from a snapshot, you can't specify an encryption value. This is
-	// because only blank volumes can be encrypted on creation.
+	// be attached to instances that support Amazon EBS encryption.
+	//
+	// If you are creating a volume from a snapshot, you cannot specify an encryption
+	// value. This is because only blank volumes can be encrypted on creation. If
+	// you are creating a snapshot from an existing EBS volume, you cannot specify
+	// an encryption value that differs from that of the EBS volume. We recommend
+	// that you omit the encryption value from the block device mappings when creating
+	// an image from an instance.
 	Encrypted *bool `locationName:"encrypted" type:"boolean"`
 
 	// The number of I/O operations per second (IOPS) that the volume supports.
@@ -67096,8 +67145,8 @@ type TagSpecification struct {
 	_ struct{} `type:"structure"`
 
 	// The type of resource to tag. Currently, the resource types that support tagging
-	// on creation are fleet, instance, snapshot, and volume. To tag a resource
-	// after it has been created, see CreateTags.
+	// on creation are fleet, dedicated-host, instance, snapshot, and volume. To
+	// tag a resource after it has been created, see CreateTags.
 	ResourceType *string `locationName:"resourceType" type:"string" enum:"ResourceType"`
 
 	// The tags to apply to the resource.
@@ -71041,6 +71090,9 @@ const (
 	// InstanceTypeF12xlarge is a InstanceType enum value
 	InstanceTypeF12xlarge = "f1.2xlarge"
 
+	// InstanceTypeF14xlarge is a InstanceType enum value
+	InstanceTypeF14xlarge = "f1.4xlarge"
+
 	// InstanceTypeF116xlarge is a InstanceType enum value
 	InstanceTypeF116xlarge = "f1.16xlarge"
 
@@ -71109,6 +71161,15 @@ const (
 
 	// InstanceTypeZ1d12xlarge is a InstanceType enum value
 	InstanceTypeZ1d12xlarge = "z1d.12xlarge"
+
+	// InstanceTypeU6tb1Metal is a InstanceType enum value
+	InstanceTypeU6tb1Metal = "u-6tb1.metal"
+
+	// InstanceTypeU9tb1Metal is a InstanceType enum value
+	InstanceTypeU9tb1Metal = "u-9tb1.metal"
+
+	// InstanceTypeU12tb1Metal is a InstanceType enum value
+	InstanceTypeU12tb1Metal = "u-12tb1.metal"
 )
 
 const (
@@ -71484,6 +71545,9 @@ const (
 const (
 	// ResourceTypeCustomerGateway is a ResourceType enum value
 	ResourceTypeCustomerGateway = "customer-gateway"
+
+	// ResourceTypeDedicatedHost is a ResourceType enum value
+	ResourceTypeDedicatedHost = "dedicated-host"
 
 	// ResourceTypeDhcpOptions is a ResourceType enum value
 	ResourceTypeDhcpOptions = "dhcp-options"
