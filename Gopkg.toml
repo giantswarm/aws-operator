@@ -95,6 +95,10 @@ required = [
 
 [[constraint]]
   branch = "master"
+  name = "github.com/giantswarm/legacycerts"
+
+[[constraint]]
+  branch = "master"
   name = "github.com/giantswarm/operatorkit"
 
 [[constraint]]
@@ -141,15 +145,12 @@ required = [
   name = "k8s.io/client-go"
   version = "kubernetes-1.10.4"
 
-[[prune.project]]
-  name = "github.com/giantswarm/k8scloudconfig"
-  unused-packages = false
-  non-go = false
+
 
 [prune]
   go-tests = true
   unused-packages = true
 
-[[constraint]]
-  branch = "master"
-  name = "github.com/giantswarm/legacycerts"
+[[prune.project]]
+  name = "github.com/giantswarm/k8scloudconfig"
+  unused-packages = false
