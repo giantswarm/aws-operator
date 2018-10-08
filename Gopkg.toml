@@ -157,5 +157,4 @@ required = [
 
 [[prune.project]]
   name = "github.com/giantswarm/k8scloudconfig"
-  non-go = false
   unused-packages = false
