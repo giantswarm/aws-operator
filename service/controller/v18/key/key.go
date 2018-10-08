@@ -573,7 +573,6 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 
 	/*
 		Container Linux AMIs for each active AWS region.
-		From: https://coreos.com/os/docs/latest/booting-on-ec2.html
 
 		NOTE 1: AMIs should always be for HVM virtualisation and not PV.
 		NOTE 2: You also need to update the tests.
@@ -583,12 +582,25 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 		service/controller/v18/resource/cloudformation/main_stack_test.go
 
 		Current Release: CoreOS Container Linux stable 1745.4.0 (HVM)
+		AMI IDs copied from https://stable.release.core-os.net/amd64-usr/1745.4.0/coreos_production_ami_hvm.txt.
 	*/
 	imageIDs := map[string]string{
+		"ap-northeast-1": "ami-21d9265e",
+		"ap-northeast-2": "ami-efe94281",
+		"ap-south-1":     "ami-0799b568",
 		"ap-southeast-1": "ami-73b28f0f",
+		"ap-southeast-2": "ami-8fbf6ced",
+		"ca-central-1":   "ami-fb39b99f",
 		"cn-north-1":     "ami-2a875e47",
+		"cn-northwest-1": "ami-00b8ac62",
 		"eu-central-1":   "ami-32042fd9",
 		"eu-west-1":      "ami-82645dfb",
+		"eu-west-3":      "ami-8d6cddf0",
+		"sa-east-1":      "ami-c32d73af",
+		"us-east-1":      "ami-93d3b4ec",
+		"us-east-2":      "ami-e5cdf180",
+		"us-gov-west-1":  "ami-2960f648",
+		"us-west-1":      "ami-5e63783e",
 		"us-west-2":      "ami-574f362f",
 	}
 
