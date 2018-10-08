@@ -505,7 +505,7 @@ func (h *Host) PodName(namespace, labelSelector string) (string, error) {
 	return pod.Name, nil
 }
 
-// RestConfig returns a deep copy of host cluster framework's rest config.
+// RestConfig returns the host cluster framework's rest config.
 func (h *Host) RestConfig() *rest.Config {
 	return h.restConfig
 }
