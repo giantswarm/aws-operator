@@ -160,21 +160,12 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, error) {
 	var err error
 
-	guestAWSConfig := awsclient.Config{
-		AccessKeyID:     config.GuestAWSConfig.AccessKeyID,
-		AccessKeySecret: config.GuestAWSConfig.AccessKeySecret,
-		SessionToken:    config.GuestAWSConfig.SessionToken,
-		Region:          config.GuestAWSConfig.Region,
-	}
-
 	hostAWSConfig := awsclient.Config{
 		AccessKeyID:     config.HostAWSConfig.AccessKeyID,
 		AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
 		SessionToken:    config.HostAWSConfig.SessionToken,
 		Region:          config.HostAWSConfig.Region,
 	}
-
-	awsClients := awsclient.NewClients(guestAWSConfig)
 
 	var v12ResourceSet *controller.ResourceSet
 	{

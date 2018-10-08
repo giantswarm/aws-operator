@@ -27,7 +27,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/support/supportiface"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v2/resource/cloudformation/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v18/adapter"
 )
 
 type Config struct {

@@ -10,7 +10,6 @@ import (
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/informer"
 	"github.com/giantswarm/randomkeys"
-	"github.com/giantswarm/randomkeytpr"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
 
@@ -213,21 +212,12 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, error) {
 	var err error
 
-	guestAWSConfig := awsclient.Config{
-		AccessKeyID:     config.GuestAWSConfig.AccessKeyID,
-		AccessKeySecret: config.GuestAWSConfig.AccessKeySecret,
-		SessionToken:    config.GuestAWSConfig.SessionToken,
-		Region:          config.GuestAWSConfig.Region,
-	}
-
 	hostAWSConfig := awsclient.Config{
 		AccessKeyID:     config.HostAWSConfig.AccessKeyID,
 		AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
 		SessionToken:    config.HostAWSConfig.SessionToken,
 		Region:          config.HostAWSConfig.Region,
 	}
-
-	awsClients := awsclient.NewClients(guestAWSConfig)
 
 	awsHostClients := awsclient.NewClients(hostAWSConfig)
 
@@ -237,17 +227,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		certConfig.K8sClient = config.K8sClient
 		certConfig.Logger = config.Logger
 		certsSearcher, err = legacy.NewService(certConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var keyWatcher *randomkeytpr.Service
-	{
-		keyConfig := randomkeytpr.DefaultServiceConfig()
-		keyConfig.K8sClient = config.K8sClient
-		keyConfig.Logger = config.Logger
-		keyWatcher, err = randomkeytpr.NewService(keyConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

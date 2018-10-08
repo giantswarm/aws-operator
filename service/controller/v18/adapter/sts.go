@@ -8,6 +8,10 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
+const (
+	accountIDLength = 12
+)
+
 func AccountID(clients Clients) (string, error) {
 	resp, err := clients.STS.GetCallerIdentity(&sts.GetCallerIdentityInput{})
 	if err != nil {
