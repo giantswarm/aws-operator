@@ -18,7 +18,6 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"k8s.io/api/core/v1"
-	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -49,9 +48,8 @@ type Host struct {
 	logger     micrologger.Logger
 	filelogger *filelogger.FileLogger
 
-	extClient            *apiextensionsclient.Clientset
 	g8sClient            *versioned.Clientset
-	k8sClient            *kubernetes.Clientset
+	k8sClient            kubernetes.Interface
 	k8sAggregationClient *aggregationclient.Clientset
 	restConfig           *rest.Config
 
@@ -79,10 +77,6 @@ func NewHost(c HostConfig) (*Host, error) {
 	}
 
 	restConfig, err := clientcmd.BuildConfigFromFlags("", harness.DefaultKubeConfig)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-	extClient, err := apiextensionsclient.NewForConfig(restConfig)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -116,7 +110,6 @@ func NewHost(c HostConfig) (*Host, error) {
 		logger:     c.Logger,
 		filelogger: fileLogger,
 
-		extClient:            extClient,
 		g8sClient:            g8sClient,
 		k8sClient:            k8sClient,
 		k8sAggregationClient: k8sAggregationClient,
@@ -317,18 +310,16 @@ func (h *Host) InstallStableOperator(name, cr, values string) error {
 	return nil
 }
 
-func (h *Host) InstallBranchOperator(name, crd, values string) error {
-	err := h.InstallOperator(name, crd, values, "@1.0.0-${CIRCLE_SHA1}")
+func (h *Host) InstallBranchOperator(name, cr, values string) error {
+	err := h.InstallOperator(name, cr, values, "@1.0.0-${CIRCLE_SHA1}")
 	if err != nil {
 		return microerror.Mask(err)
 	}
 	return nil
 }
 
-func (h *Host) InstallOperator(name, crd, values, version string) error {
-	ctx := context.TODO()
-
-	err := h.InstallResource(name, values, version, h.crd(ctx, crd))
+func (h *Host) InstallOperator(name, cr, values, version string) error {
+	err := h.InstallResource(name, values, version, h.crd(cr))
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -574,27 +565,12 @@ func (h *Host) WaitForPodLog(namespace, needle, podName string) error {
 	return microerror.Mask(notFoundError)
 }
 
-func (h *Host) crd(ctx context.Context, name string) func() error {
+func (h *Host) crd(crdName string) func() error {
 	return func() error {
-		o := func() error {
-			_, err := h.extClient.ApiextensionsV1beta1().CustomResourceDefinitions().Get(name, metav1.GetOptions{})
-			if apierrors.IsNotFound(err) {
-				return microerror.Mask(err)
-			} else {
-				return backoff.Permanent(microerror.Mask(err))
-			}
-
-			return nil
-		}
-		b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
-		n := backoff.NewNotifier(h.logger, ctx)
-		err := backoff.RetryNotify(o, b, n)
-
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		return nil
+		// FIXME: use proper clientset call when apiextensions are in place,
+		// `k8sClient.ExtensionsV1beta1().ThirdPartyResources().Get(tprName, metav1.GetOptions{})` finding
+		// the tpr is not enough for being able to create a tpo.
+		return runCmd("kubectl get " + crdName)
 	}
 }
 
