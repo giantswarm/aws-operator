@@ -46,7 +46,7 @@
   version = "v1.4.2"
 
 [[projects]]
-  digest = "1:cfa7c8a18bf22a1617b5ab23ca3410a42a19fb8a6913ae4b873a6b47457dffd0"
+  digest = "1:a050f0c49ff9c7e8c69545f821a2f8e5ccbbb5037cc9314e51877eee101a4ce0"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -101,8 +101,8 @@
     "service/support/supportiface",
   ]
   pruneopts = "UT"
-  revision = "59124d90523f4c0491f997f9a36aef265fe3502c"
-  version = "v1.15.49"
+  revision = "dd947f47decb37a7c3bee72501bfc790701ab5ad"
+  version = "v1.15.50"
 
 [[projects]]
   branch = "master"
@@ -234,8 +234,8 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:244f8644f7ad52dfcfdefcf22b26a40fe80f3358cb37cbd63d335eb9f90471f8"
+  branch = "remove-vault"
+  digest = "1:d19be6df873f0b0cedb4194eed811a3e626e1e25c36deffaa792e5623ecc6bd9"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/core/v1alpha1",
@@ -252,15 +252,15 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake",
   ]
   pruneopts = "UT"
-  revision = "d945bb5acf74afb5fd92d36e5370380d22dc92ea"
+  revision = "32b77c42e2529112c988b2389b8801328a9068bd"
 
 [[projects]]
   branch = "master"
-  digest = "1:24abdf37fb22ffbfeced3527b364a0134f79ab5941fc6f4ac69ee220a141fbab"
+  digest = "1:c5f3894b999ae57c67280ff1c376ed699bee2f111525c18cea2df8417198d881"
   name = "github.com/giantswarm/apprclient"
   packages = ["."]
   pruneopts = "UT"
-  revision = "2ed09ae3c695b60124865f516a4e5ddd2e2c80b7"
+  revision = "cb559dedc96d02988cc90b975f1d4ec1c3197de1"
 
 [[projects]]
   branch = "master"
@@ -289,7 +289,7 @@
     "pkg/harness",
   ]
   pruneopts = "UT"
-  revision = "05bd411c3155f53d3a73c8c4653cb9daa894c982"
+  revision = "52bca47e762aaa93c4e9742020f7719942263ada"
 
 [[projects]]
   branch = "master"
@@ -595,11 +595,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:efd8f45d0a95c208928c448abf8a52942ab43a09870b8a8c07ea3912a2c2edea"
+  digest = "1:c42fb0b13261a9bcd08451ee1859e61bea33aa6743916a2e3fb61f33ff6b25c7"
   name = "github.com/google/go-github"
   packages = ["github"]
   pruneopts = "UT"
-  revision = "902ef4c51cabd60fa6e10422eb06a6ebaef6ad5e"
+  revision = "dd29b543e14c33e6373773f2c5ea008b29aeac95"
 
 [[projects]]
   digest = "1:a63cff6b5d8b95638bfe300385d93b2a6d9d687734b863da8e09dc834510a690"

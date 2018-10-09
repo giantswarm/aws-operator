@@ -37,8 +37,8 @@ required = [
   branch = "master"
   name = "github.com/docker/distribution"
 
-[[constraint]]
-  branch = "master"
+[[override]]
+  branch = "remove-vault"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]
