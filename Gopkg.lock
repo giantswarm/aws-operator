@@ -234,8 +234,8 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "remove-vault"
-  digest = "1:d19be6df873f0b0cedb4194eed811a3e626e1e25c36deffaa792e5623ecc6bd9"
+  branch = "master"
+  digest = "1:d94d9588aec831e11ac5c7812f86336dac9bd9197d0a1c11c4fa92e17ad3e9e7"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/core/v1alpha1",
@@ -252,7 +252,7 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake",
   ]
   pruneopts = "UT"
-  revision = "32b77c42e2529112c988b2389b8801328a9068bd"
+  revision = "de2e518b9b9ce196838462ab602febb94e6dafdf"
 
 [[projects]]
   branch = "master"
