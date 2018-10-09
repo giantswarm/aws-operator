@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
-	"github.com/giantswarm/e2e-harness/pkg/framework/resource"
+	"github.com/giantswarm/e2e-harness/pkg/release"
 	"github.com/giantswarm/e2eclients/aws"
 	"github.com/giantswarm/e2etests/update"
 	"github.com/giantswarm/e2etests/update/provider"
@@ -25,7 +25,7 @@ var (
 	helmClient *helmclient.Client
 	l          micrologger.Logger
 	u          *update.Update
-	r          *resource.Resource
+	r          *release.Release
 )
 
 func init() {
@@ -82,12 +82,12 @@ func init() {
 	}
 
 	{
-		c := resource.Config{
+		c := release.Config{
 			Logger:     l,
 			HelmClient: helmClient,
 			Namespace:  "giantswarm",
 		}
-		r, err = resource.New(c)
+		r, err = release.New(c)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -140,7 +140,7 @@ func TestMain(m *testing.M) {
 			Guest:     g,
 			Host:      h,
 			Logger:    l,
-			Resource:  r,
+			Release:   r,
 		}
 
 		setup.Setup(m, c)
