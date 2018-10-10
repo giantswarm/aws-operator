@@ -4,6 +4,7 @@ import (
 	"github.com/giantswarm/aws-operator/flag/service/aws/accesskey"
 	"github.com/giantswarm/aws-operator/flag/service/aws/loggingbucket"
 	"github.com/giantswarm/aws-operator/flag/service/aws/route53"
+	"github.com/giantswarm/aws-operator/flag/service/aws/trustedadvisor"
 )
 
 type AWS struct {
@@ -19,5 +20,6 @@ type AWS struct {
 	Region                 string
 	Route53                route53.Route53
 	S3AccessLogsExpiration string
+	TrustedAdvisor         trustedadvisor.TrustedAdvisor
 	VaultAddress           string
 }

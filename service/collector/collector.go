@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"context"
 	"sync"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
@@ -21,8 +22,9 @@ type Config struct {
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 
-	AwsConfig        awsutil.Config
-	InstallationName string
+	AwsConfig             awsutil.Config
+	InstallationName      string
+	TrustedAdvisorEnabled bool
 }
 
 type Collector struct {
@@ -30,8 +32,11 @@ type Collector struct {
 	k8sClient kubernetes.Interface
 	logger    micrologger.Logger
 
-	awsConfig        awsutil.Config
-	installationName string
+	bootOnce sync.Once
+
+	awsConfig             awsutil.Config
+	installationName      string
+	trustedAdvisorEnabled bool
 }
 
 func New(config Config) (*Collector, error) {
@@ -58,11 +63,29 @@ func New(config Config) (*Collector, error) {
 		k8sClient: config.K8sClient,
 		logger:    config.Logger,
 
-		awsConfig:        config.AwsConfig,
-		installationName: config.InstallationName,
+		bootOnce: sync.Once{},
+
+		awsConfig:             config.AwsConfig,
+		installationName:      config.InstallationName,
+		trustedAdvisorEnabled: config.TrustedAdvisorEnabled,
 	}
 
 	return c, nil
+}
+
+func (c *Collector) Boot(ctx context.Context) {
+	c.bootOnce.Do(func() {
+		if c.trustedAdvisorEnabled {
+			prometheus.MustRegister(trustedAdvisorError)
+
+			prometheus.MustRegister(getChecksDuration)
+			prometheus.MustRegister(getResourcesDuration)
+
+			c.logger.Log("level", "debug", "message", "trusted advisor metrics collection enabled")
+		} else {
+			c.logger.Log("level", "debug", "message", "trusted advisor metrics collection disabled")
+		}
+	})
 }
 
 func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
@@ -70,7 +93,10 @@ func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 
 	ch <- serviceLimit
 	ch <- serviceUsage
-	ch <- trustedAdvisorSupport
+
+	if c.trustedAdvisorEnabled {
+		ch <- trustedAdvisorSupport
+	}
 
 	ch <- vpcsDesc
 }
@@ -88,8 +114,11 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 
 	collectFuncs := []func(chan<- prometheus.Metric, []awsutil.Clients){
 		c.collectClusterInfo,
-		c.collectAccountsTrustedAdvisorChecks,
 		c.collectAccountsVPCs,
+	}
+
+	if c.trustedAdvisorEnabled {
+		collectFuncs = append(collectFuncs, c.collectAccountsTrustedAdvisorChecks)
 	}
 
 	for _, collectFunc := range collectFuncs {
