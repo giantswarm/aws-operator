@@ -71,7 +71,7 @@ type KVMConfigSpecKVM struct {
 	Network         KVMConfigSpecKVMNetwork         `json:"network" yaml:"network"`
 	// NOTE THIS IS DEPRECATED
 	NodeController KVMConfigSpecKVMNodeController `json:"nodeController" yaml:"nodeController"`
-	PortMappings   []KVMConfigSpecKVMPortMappings `json:"portMappings yaml:"portMappings"`
+	PortMappings   []KVMConfigSpecKVMPortMappings `json:"portMappings" yaml:"portMappings"`
 	Workers        []KVMConfigSpecKVMNode         `json:"workers" yaml:"workers"`
 }
 

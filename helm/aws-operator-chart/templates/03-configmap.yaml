@@ -6,6 +6,9 @@ metadata:
 data:
   config.yaml: |
     server:
+      enable:
+        debug:
+          server: true
       listen:
         address: 'http://0.0.0.0:8000'
     service:

@@ -112,43 +112,7 @@ func (r *Resource) computeCreateEventPatches(ctx context.Context, obj interface{
 	// fields that are managed by the statusresource library implementation. There
 	// might be other properties managed by external authorities who have to
 	// manage their own initialization.
-	{
-		conditionsEmpty := clusterStatus.Conditions == nil
-		nodesEmpty := clusterStatus.Nodes == nil
-		versionsEmpty := clusterStatus.Versions == nil
-
-		if conditionsEmpty && nodesEmpty && versionsEmpty {
-			patches = append(patches, Patch{
-				Op:    "add",
-				Path:  "/status",
-				Value: Status{},
-			})
-		}
-
-		if conditionsEmpty {
-			patches = append(patches, Patch{
-				Op:    "add",
-				Path:  "/status/cluster/conditions",
-				Value: []providerv1alpha1.StatusClusterCondition{},
-			})
-		}
-
-		if nodesEmpty {
-			patches = append(patches, Patch{
-				Op:    "add",
-				Path:  "/status/cluster/nodes",
-				Value: []providerv1alpha1.StatusClusterNode{},
-			})
-		}
-
-		if versionsEmpty {
-			patches = append(patches, Patch{
-				Op:    "add",
-				Path:  "/status/cluster/versions",
-				Value: []providerv1alpha1.StatusClusterVersion{},
-			})
-		}
-	}
+	patches = ensureDefaultPatches(clusterStatus, patches)
 
 	// After initialization the most likely implication is the guest cluster being
 	// in a creation status. In case no other conditions are given and no nodes
