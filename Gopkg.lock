@@ -46,7 +46,7 @@
   version = "v1.4.2"
 
 [[projects]]
-  digest = "1:a050f0c49ff9c7e8c69545f821a2f8e5ccbbb5037cc9314e51877eee101a4ce0"
+  digest = "1:e416c6af25d3d053131ed048fe8fdfe610208a8df0728b2e4b04b8ef1746d45b"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -101,8 +101,8 @@
     "service/support/supportiface",
   ]
   pruneopts = "UT"
-  revision = "dd947f47decb37a7c3bee72501bfc790701ab5ad"
-  version = "v1.15.50"
+  revision = "eee06b117565431c7f0002553e4e40f128858d17"
+  version = "v1.15.51"
 
 [[projects]]
   branch = "master"
@@ -289,7 +289,7 @@
     "pkg/harness",
   ]
   pruneopts = "UT"
-  revision = "52bca47e762aaa93c4e9742020f7719942263ada"
+  revision = "6ef74d34e88744f831574a861a176cf34438f3f7"
 
 [[projects]]
   branch = "master"
@@ -347,11 +347,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a7c5636a10a5693ab1df9c432704696085df0ef00fdc06fafbe6fff315ffffa5"
+  digest = "1:3228a56c6d429de153928f005709174e3606fc5d97ecfea612cf33413aa5ded6"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
   pruneopts = "UT"
-  revision = "8c3425d2c09be34df48ee947302b34bd76f75804"
+  revision = "cc5508a1d97cba484638bba1081a86a6f5a02ffa"
 
 [[projects]]
   branch = "master"
@@ -445,7 +445,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:b8b40056c375b1e73808d7ca246aba85f974cceb0c061ac588e6383123e95f29"
+  digest = "1:acba487087dbf1c4f7ea19b0a695bbd65e1074ba48e21778d777884440d1ad25"
   name = "github.com/giantswarm/operatorkit"
   packages = [
     "client/k8scrdclient",
@@ -462,7 +462,7 @@
     "informer",
   ]
   pruneopts = "UT"
-  revision = "5c624728d9f58d3aebe2993e5c6c2091fd8d662c"
+  revision = "590c70603978ef27bc4574718b1374baea774133"
 
 [[projects]]
   branch = "master"
@@ -925,7 +925,7 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "e3636079e1a4c1f337f212cc5cd2aca108f6c900"
+  revision = "7c1a557ab941a71c619514f229f0b27ccb0c27cf"
 
 [[projects]]
   branch = "master"
