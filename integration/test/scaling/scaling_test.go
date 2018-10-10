@@ -8,7 +8,7 @@ import (
 )
 
 func Test_Scaling_Workers(t *testing.T) {
-	err := s.Test(context.Background())
+	err := scalingTest.Test(context.Background())
 	if err != nil {
 		t.Fatalf("%#v", err)
 	}
