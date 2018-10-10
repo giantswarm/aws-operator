@@ -1,7 +1,6 @@
 package setup
 
 import (
-	"github.com/giantswarm/apprclient"
 	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
@@ -51,21 +50,6 @@ func NewConfig() (Config, error) {
 		}
 	}
 
-	var apprClient *apprclient.Client
-	{
-		c := apprclient.Config{
-			Logger: logger,
-
-			Address:      quayAddress,
-			Organization: organization,
-		}
-
-		apprClient, err = apprclient.New(c)
-		if err != nil {
-			return Config{}, microerror.Mask(err)
-		}
-	}
-
 	var guest *framework.Guest
 	{
 		c := framework.GuestConfig{
@@ -98,12 +82,13 @@ func NewConfig() (Config, error) {
 
 	var fileLogger *filelogger.FileLogger
 	{
-		fc := filelogger.Config{
+		c := filelogger.Config{
 			Backoff:   backoff.NewExponential(backoff.ShortMaxWait, backoff.LongMaxInterval),
 			K8sClient: host.K8sClient(),
 			Logger:    logger,
 		}
-		fileLogger, err = filelogger.New(fc)
+
+		fileLogger, err = filelogger.New(c)
 		if err != nil {
 			return Config{}, microerror.Mask(err)
 		}
@@ -126,7 +111,6 @@ func NewConfig() (Config, error) {
 	var newRelease *release.Release
 	{
 		c := release.Config{
-			ApprClient: apprClient,
 			ExtClient:  host.ExtClient(),
 			FileLogger: fileLogger,
 			G8sClient:  host.G8sClient(),
@@ -146,8 +130,6 @@ func NewConfig() (Config, error) {
 	var newResource *resource.Resource
 	{
 		c := resource.Config{
-
-			ApprClient: apprClient,
 			HelmClient: helmClient,
 			Logger:     logger,
 
