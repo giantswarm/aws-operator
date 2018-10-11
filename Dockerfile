@@ -8,6 +8,9 @@ ADD ./aws-operator /opt/aws-operator/aws-operator
 RUN mkdir -p /opt/aws-operator/service
 ADD service/templates/ /opt/aws-operator/service/templates
 
+RUN mkdir -p /opt/ignition
+ADD vendor/github.com/giantswarm/k8scloudconfig/ /opt/ignition
+
 WORKDIR /opt/aws-operator
 
 EXPOSE 8000

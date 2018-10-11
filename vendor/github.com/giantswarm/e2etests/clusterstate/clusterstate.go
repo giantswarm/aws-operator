@@ -242,7 +242,7 @@ func (c *ClusterState) CheckTestAppIsInstalled() error {
 		return nil
 	}
 
-	b := backoff.NewConstant(framework.ShortMaxWait, framework.ShortMaxInterval)
+	b := backoff.NewConstant(backoff.ShortMaxWait, backoff.ShortMaxInterval)
 	n := func(err error, delay time.Duration) {
 		c.logger.Log("level", "debug", "message", err.Error())
 	}

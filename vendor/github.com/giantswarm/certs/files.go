@@ -44,22 +44,8 @@ func NewFilesClusterWorker(cluster Cluster) Files {
 
 func newFilesClusterCommon(cluster Cluster) Files {
 	return Files{
-		// Calico client.
-		{
-			AbsolutePath: "/etc/kubernetes/ssl/calico/client-ca.pem",
-			Data:         cluster.CalicoClient.CA,
-		},
-		{
-			AbsolutePath: "/etc/kubernetes/ssl/calico/client-crt.pem",
-			Data:         cluster.CalicoClient.Crt,
-		},
-		{
-			AbsolutePath: "/etc/kubernetes/ssl/calico/client-key.pem",
-			Data:         cluster.CalicoClient.Key,
-		},
-		// Temporary Etcd client keys reusing server keys.
-		// TODO Remove these when operator support for new flannel & calico
-		// specific etcd client keys has been rolled out.
+		// TODO(r7vme): Only used by Calico and should be removed
+		// when Calico will migrate to the ones below.
 		{
 			AbsolutePath: "/etc/kubernetes/ssl/etcd/client-ca.pem",
 			Data:         cluster.EtcdServer.CA,
@@ -74,15 +60,15 @@ func newFilesClusterCommon(cluster Cluster) Files {
 		},
 		// Calico Etcd client.
 		{
-			AbsolutePath: "/etc/kubernetes/ssl/etcd/calico-client-ca.pem",
+			AbsolutePath: "/etc/kubernetes/ssl/calico/etcd-ca",
 			Data:         cluster.CalicoEtcdClient.CA,
 		},
 		{
-			AbsolutePath: "/etc/kubernetes/ssl/etcd/calico-client-crt.pem",
+			AbsolutePath: "/etc/kubernetes/ssl/calico/etcd-cert",
 			Data:         cluster.CalicoEtcdClient.Crt,
 		},
 		{
-			AbsolutePath: "/etc/kubernetes/ssl/etcd/calico-client-key.pem",
+			AbsolutePath: "/etc/kubernetes/ssl/calico/etcd-key",
 			Data:         cluster.CalicoEtcdClient.Key,
 		},
 	}

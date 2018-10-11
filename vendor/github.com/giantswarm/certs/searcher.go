@@ -65,7 +65,6 @@ func (s *Searcher) SearchCluster(clusterID string) (Cluster, error) {
 		optional bool
 	}{
 		{TLS: &cluster.APIServer, Cert: APICert},
-		{TLS: &cluster.CalicoClient, Cert: CalicoCert},
 		{TLS: &cluster.CalicoEtcdClient, Cert: CalicoEtcdClientCert, optional: true},
 		{TLS: &cluster.EtcdServer, Cert: EtcdCert},
 		{TLS: &cluster.ServiceAccount, Cert: ServiceAccountCert},
@@ -160,7 +159,7 @@ func (s *Searcher) SearchTLS(clusterID string, cert Cert) (TLS, error) {
 func (s *Searcher) search(tls *TLS, clusterID string, cert Cert) error {
 	// Select only secrets that match the given certificate and the given
 	// cluster clusterID.
-	selector := fmt.Sprintf("%s=%s, %s=%s", certficateLabel, cert, clusterIDLabel, clusterID)
+	selector := fmt.Sprintf("%s=%s, %s=%s", legacyCertificateLabel, cert, legacyClusterIDLabel, clusterID)
 
 	watcher, err := s.k8sClient.Core().Secrets(SecretNamespace).Watch(metav1.ListOptions{
 		LabelSelector: selector,
@@ -204,11 +203,11 @@ func fillTLSFromSecret(tls *TLS, obj runtime.Object, clusterID string, cert Cert
 		return microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", secret, obj)
 	}
 
-	gotClusterID := secret.Labels[clusterIDLabel]
+	gotClusterID := secret.Labels[legacyClusterIDLabel]
 	if clusterID != gotClusterID {
 		return microerror.Maskf(invalidSecretError, "expected clusterID = %q, got %q", clusterID, gotClusterID)
 	}
-	gotcert := secret.Labels[certficateLabel]
+	gotcert := secret.Labels[legacyCertificateLabel]
 	if string(cert) != gotcert {
 		return microerror.Maskf(invalidSecretError, "expected certificate = %q, got %q", cert, gotcert)
 	}

@@ -14,33 +14,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring encryption key")
-
-		current, err := r.encrypter.CurrentState(ctx, customObject)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		desired, err := r.encrypter.DesiredState(ctx, customObject)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		if current.KeyName == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "creating encryption key")
-
-			err = r.encrypter.CreateKey(ctx, customObject, desired.KeyName)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			r.logger.LogCtx(ctx, "level", "debug", "message", "created encryption key")
-		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key already created")
-		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured encryption key")
+	err = r.encrypter.EnsureCreatedEncryptionKey(ctx, customObject)
+	if err != nil {
+		return microerror.Mask(err)
 	}
 
 	return nil

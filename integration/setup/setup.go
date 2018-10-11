@@ -11,7 +11,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/backoff"
-	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
 	"github.com/giantswarm/e2etemplates/pkg/e2etemplates"
 	"github.com/giantswarm/microerror"
@@ -32,6 +31,14 @@ const (
 
 func Setup(m *testing.M, config Config) {
 	ctx := context.Background()
+
+	// Perform teardown before execution.
+	{
+		err := teardown(ctx, config)
+		if err != nil {
+			os.Exit(1)
+		}
+	}
 
 	var v int
 	var err error
@@ -71,13 +78,11 @@ func Setup(m *testing.M, config Config) {
 
 		// only do full teardown when not on CI
 		if os.Getenv("CIRCLECI") != "true" {
-			err := teardown(config)
+			err := teardown(ctx, config)
 			if err != nil {
-				log.Printf("%#v\n", err)
+				// teardown errors are logged inside the function.
 				v = 1
 			}
-			// TODO there should be error handling for the framework teardown.
-			config.Host.Teardown()
 		}
 	}
 
@@ -203,7 +208,7 @@ func installCredential(config Config) error {
 
 		return nil
 	}
-	b := backoff.NewExponential(framework.ShortMaxWait, framework.ShortMaxInterval)
+	b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
 	n := backoff.NewNotifier(l, context.Background())
 	err = backoff.RetryNotify(o, b, n)
 	if err != nil {

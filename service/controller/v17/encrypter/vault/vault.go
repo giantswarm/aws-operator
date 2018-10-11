@@ -18,8 +18,12 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/v17/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v17/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v17/key"
+)
+
+const (
+	decrypterVaultRole = "decrypter"
 )
 
 type Encrypter struct {
@@ -67,134 +71,6 @@ func NewEncrypter(c *EncrypterConfig) (*Encrypter, error) {
 	}
 
 	return e, nil
-}
-
-func (e *Encrypter) CreateKey(ctx context.Context, customObject v1alpha1.AWSConfig, _ string) error {
-	err := e.ensureToken()
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	keyName := e.keyName(customObject)
-
-	payload := &struct{}{}
-
-	p := path.Join("transit", "keys", keyName)
-
-	req, err := e.newPayloadRequest(p, payload)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	resp, err := e.httpClient.Do(req)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusNoContent {
-		return microerror.Mask(invalidHTTPStatusCodeError)
-	}
-
-	// We need to make the key deletable.
-	keyConfigPayload := &KeyConfigPayload{
-		DeletionAllowed: true,
-	}
-
-	p = path.Join("transit", "keys", keyName, "config")
-
-	req, err = e.newPayloadRequest(p, keyConfigPayload)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	resp, err = e.httpClient.Do(req)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusNoContent {
-		return microerror.Mask(invalidHTTPStatusCodeError)
-	}
-
-	return nil
-}
-
-func (e *Encrypter) DeleteKey(ctx context.Context, keyName string) error {
-	err := e.ensureToken()
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	p := path.Join("transit", "keys", keyName)
-
-	req, err := e.newRequest("DELETE", p)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	resp, err := e.httpClient.Do(req)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode == http.StatusBadRequest {
-		// key not found, fallthrough
-		return nil
-	}
-	if resp.StatusCode != http.StatusNoContent {
-		return microerror.Maskf(invalidHTTPStatusCodeError, "want 204, got %d", resp.StatusCode)
-	}
-
-	return nil
-}
-
-func (e *Encrypter) CurrentState(ctx context.Context, customObject v1alpha1.AWSConfig) (encrypter.EncryptionKeyState, error) {
-	state := encrypter.EncryptionKeyState{}
-
-	err := e.ensureToken()
-	if err != nil {
-		return state, microerror.Mask(err)
-	}
-
-	keyName := e.keyName(customObject)
-
-	p := path.Join("transit", "keys", keyName)
-
-	req, err := e.newRequest("GET", p)
-	if err != nil {
-		return state, microerror.Mask(err)
-	}
-
-	resp, err := e.httpClient.Do(req)
-	if err != nil {
-		return state, microerror.Mask(err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode == http.StatusNotFound {
-		// fallthrough
-		return state, nil
-	} else if resp.StatusCode != http.StatusOK {
-		body, _ := ioutil.ReadAll(resp.Body)
-		return state, microerror.Maskf(invalidHTTPStatusCodeError, "want 200, got %d, response body: %q", resp.StatusCode, body)
-	}
-
-	state.KeyName = keyName
-
-	return state, nil
-}
-
-func (e *Encrypter) DesiredState(ctx context.Context, customObject v1alpha1.AWSConfig) (encrypter.EncryptionKeyState, error) {
-	state := encrypter.EncryptionKeyState{}
-
-	keyName := e.keyName(customObject)
-
-	state.KeyName = keyName
-
-	return state, nil
 }
 
 func (e *Encrypter) EncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {
@@ -270,6 +146,252 @@ func (e *Encrypter) Encrypt(ctx context.Context, key, plaintext string) (string,
 	return ciphertext, nil
 }
 
+func (e *Encrypter) EnsureCreatedAuthorizedIAMRoles(ctx context.Context, customObject v1alpha1.AWSConfig) error {
+	err := e.ensureToken()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	ctlCtx, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	var masterRoleARN string
+	var workerRoleARN string
+	{
+		accountID, err := ctlCtx.AWSService.GetAccountID()
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		masterRoleARN = key.MasterRoleARN(customObject, accountID)
+		workerRoleARN = key.WorkerRoleARN(customObject, accountID)
+	}
+
+	var roleData *AWSAuthRole
+	{
+		e.logger.LogCtx(ctx, "level", "debug", "message", "finding decrypter AWS auth role")
+
+		roleData, err = e.getAuthAWSRole(decrypterVaultRole)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		e.logger.LogCtx(ctx, "level", "debug", "message", "found decrypter AWS auth role")
+	}
+
+	{
+		e.logger.LogCtx(ctx, "level", "debug", "message", "ensuring decrypter AWS auth role ARNs")
+
+		currentARNs := roleData.BoundIAMRoleARN
+		desiredARNs := stringSlice(roleData.BoundIAMRoleARN).Add(masterRoleARN, workerRoleARN)
+
+		if len(currentARNs) != len(desiredARNs) {
+			e.logger.LogCtx(ctx, "level", "debug", "message", "updating decrypter AWS auth role")
+
+			roleData.BoundIAMRoleARN = desiredARNs
+
+			err = e.postAuthAWSRole(decrypterVaultRole, roleData)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		} else {
+			e.logger.LogCtx(ctx, "level", "debug", "message", "decrypter AWS auth role is up to date")
+		}
+
+		e.logger.LogCtx(ctx, "level", "debug", "message", "ensured decrypter AWS auth role ARNs")
+	}
+
+	return nil
+}
+
+func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) error {
+	err := e.ensureToken()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	{
+		e.logger.LogCtx(ctx, "level", "debug", "message", "finding out encryption key")
+
+		_, err := e.EncryptionKey(ctx, customObject)
+		if IsKeyNotFound(err) {
+			e.logger.LogCtx(ctx, "level", "debug", "message", "did not find encryption key")
+
+		} else if err != nil {
+			return microerror.Mask(err)
+
+		} else {
+			e.logger.LogCtx(ctx, "level", "debug", "message", "found encryption key")
+			e.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+	}
+
+	{
+		e.logger.LogCtx(ctx, "level", "debug", "message", "creating encryption key")
+
+		key := e.keyName(customObject)
+		path := transitKeysPath(key)
+		payload := &struct{}{}
+
+		req, err := e.newPayloadRequest(path, payload)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		resp, err := e.httpClient.Do(req)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusNoContent {
+			body, _ := ioutil.ReadAll(resp.Body)
+			return microerror.Maskf(invalidHTTPStatusCodeError, "want 204, got %d, response body: %#q", resp.StatusCode, body)
+		}
+
+		e.logger.LogCtx(ctx, "level", "debug", "message", "created encryption key")
+	}
+
+	return nil
+}
+
+func (e *Encrypter) EnsureDeletedAuthorizedIAMRoles(ctx context.Context, customObject v1alpha1.AWSConfig) error {
+	ctlCtx, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	var masterRoleARN string
+	var workerRoleARN string
+	{
+		accountID, err := ctlCtx.AWSService.GetAccountID()
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		masterRoleARN = key.MasterRoleARN(customObject, accountID)
+		workerRoleARN = key.WorkerRoleARN(customObject, accountID)
+	}
+
+	var roleData *AWSAuthRole
+	{
+		e.logger.LogCtx(ctx, "level", "debug", "message", "finding out decrypter AWS auth role")
+
+		roleData, err = e.getAuthAWSRole(decrypterVaultRole)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		e.logger.LogCtx(ctx, "level", "debug", "message", "found decrypter AWS auth role")
+	}
+
+	{
+		e.logger.LogCtx(ctx, "level", "debug", "message", "ensuring deletion of decrypter AWS auth role ARNs")
+
+		currentARNs := roleData.BoundIAMRoleARN
+		desiredARNs := stringSlice(roleData.BoundIAMRoleARN).Delete(masterRoleARN, workerRoleARN)
+
+		if len(currentARNs) != len(desiredARNs) {
+			e.logger.LogCtx(ctx, "level", "debug", "message", "updating decrypter AWS auth role")
+
+			roleData.BoundIAMRoleARN = desiredARNs
+
+			err = e.postAuthAWSRole(decrypterVaultRole, roleData)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		} else {
+			e.logger.LogCtx(ctx, "level", "debug", "message", "decrypter AWS auth role is up to date")
+		}
+
+		e.logger.LogCtx(ctx, "level", "debug", "message", "ensured decrypter AWS auth role ARNs")
+	}
+
+	return nil
+}
+
+func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) error {
+	err := e.ensureToken()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	{
+		e.logger.LogCtx(ctx, "level", "debug", "message", "finding out encryption key")
+
+		_, err := e.EncryptionKey(ctx, customObject)
+		if IsKeyNotFound(err) {
+			e.logger.LogCtx(ctx, "level", "debug", "message", "did not find encryption key")
+			e.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+
+		} else if err != nil {
+			return microerror.Mask(err)
+
+		} else {
+			e.logger.LogCtx(ctx, "level", "debug", "message", "found encryption key")
+		}
+	}
+
+	{
+		e.logger.LogCtx(ctx, "level", "debug", "message", "ensuring encryption key is deletable")
+
+		key := e.keyName(customObject)
+		path := transitKeysConfigPath(key)
+		payload := &KeyConfigPayload{
+			DeletionAllowed: true,
+		}
+
+		req, err := e.newPayloadRequest(path, payload)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		resp, err := e.httpClient.Do(req)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusNoContent {
+			body, _ := ioutil.ReadAll(resp.Body)
+			return microerror.Maskf(invalidHTTPStatusCodeError, "want 204, got %d, response body: %q", resp.StatusCode, body)
+		}
+
+		e.logger.LogCtx(ctx, "level", "debug", "message", "ensured encryption key is deletable")
+	}
+
+	{
+		e.logger.LogCtx(ctx, "level", "debug", "message", "deleting encryption key")
+
+		key := e.keyName(customObject)
+		path := transitKeysPath(key)
+
+		req, err := e.newRequest("DELETE", path)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		resp, err := e.httpClient.Do(req)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusNoContent {
+			body, _ := ioutil.ReadAll(resp.Body)
+			return microerror.Maskf(invalidHTTPStatusCodeError, "want 204, got %d, response body: %q", resp.StatusCode, body)
+		}
+
+		e.logger.LogCtx(ctx, "level", "debug", "message", "deleted encryption key")
+	}
+
+	return nil
+}
+
 func (e *Encrypter) IsKeyNotFound(err error) bool {
 	return IsKeyNotFound(err)
 }
@@ -317,68 +439,6 @@ func (e *Encrypter) Decrypt(key, ciphertext string) (string, error) {
 	}
 
 	return string(plaintext), nil
-}
-
-func (e *Encrypter) AddIAMRoleToAuth(vaultRoleName string, iamRoleARNs ...string) error {
-	err := e.ensureToken()
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	p := path.Join("auth", "aws", "role", vaultRoleName)
-
-	role, err := e.getAWSAuthRole(p)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	if len(role.BoundIAMRoleARN) == 0 {
-		role.BoundIAMRoleARN = iamRoleARNs
-	} else {
-		joinedBoundIAMRoleARN := strings.Join(role.BoundIAMRoleARN, ",")
-		for _, iamRoleARN := range iamRoleARNs {
-			if !strings.Contains(joinedBoundIAMRoleARN, iamRoleARN) {
-				role.BoundIAMRoleARN = append(role.BoundIAMRoleARN, iamRoleARN)
-			}
-		}
-	}
-
-	err = e.postAWSAuthRole(p, role)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	return nil
-}
-
-func (e *Encrypter) RemoveIAMRoleFromAuth(vaultRoleName string, iamRoleARNs ...string) error {
-	err := e.ensureToken()
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	p := path.Join("auth", "aws", "role", vaultRoleName)
-
-	role, err := e.getAWSAuthRole(p)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	wantedIamRoles := []string{}
-	toRemoveIamRoleARNs := strings.Join(iamRoleARNs, ",")
-	for _, iamRole := range role.BoundIAMRoleARN {
-		if !strings.Contains(toRemoveIamRoleARNs, iamRole) {
-			wantedIamRoles = append(wantedIamRoles, iamRole)
-		}
-	}
-	role.BoundIAMRoleARN = wantedIamRoles
-
-	err = e.postAWSAuthRole(p, role)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	return nil
 }
 
 func (e *Encrypter) Address() string {
@@ -520,7 +580,9 @@ func (e *Encrypter) getPKCS7() (string, error) {
 	return strings.Replace(string(responseData), "\n", "", -1), nil
 }
 
-func (e *Encrypter) getAWSAuthRole(path string) (*AWSAuthRole, error) {
+func (e *Encrypter) getAuthAWSRole(name string) (*AWSAuthRole, error) {
+	path := authAWSRolePath(name)
+
 	req, err := e.newRequest("GET", path)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -546,8 +608,10 @@ func (e *Encrypter) getAWSAuthRole(path string) (*AWSAuthRole, error) {
 	return &roleResponse.Data, nil
 }
 
-func (e *Encrypter) postAWSAuthRole(path string, role *AWSAuthRole) error {
-	req, err := e.newPayloadRequest(path, role)
+func (e *Encrypter) postAuthAWSRole(name string, data *AWSAuthRole) error {
+	path := authAWSRolePath(name)
+
+	req, err := e.newPayloadRequest(path, data)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -569,4 +633,16 @@ func (e *Encrypter) postAWSAuthRole(path string, role *AWSAuthRole) error {
 
 func (e *Encrypter) keyName(customObject v1alpha1.AWSConfig) string {
 	return key.ClusterID(customObject)
+}
+
+func authAWSRolePath(role string) string {
+	return path.Join("auth", "aws", "role", role)
+}
+
+func transitKeysConfigPath(key string) string {
+	return path.Join("transit", "keys", key, "config")
+}
+
+func transitKeysPath(key string) string {
+	return path.Join("transit", "keys", key)
 }
