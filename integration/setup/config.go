@@ -14,10 +14,10 @@ import (
 )
 
 const (
-	namespace      = "giantswarm"
-	organization   = "giantswarm"
-	tilleNamespace = "kube-system"
-	quayAddress    = "https://quay.io"
+	namespace       = "giantswarm"
+	organization    = "giantswarm"
+	tillerNamespace = "kube-system"
+	quayAddress     = "https://quay.io"
 )
 
 type Config struct {
