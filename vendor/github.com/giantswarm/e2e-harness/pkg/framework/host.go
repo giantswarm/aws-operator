@@ -18,6 +18,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"k8s.io/api/core/v1"
+	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -48,8 +49,9 @@ type Host struct {
 	logger     micrologger.Logger
 	filelogger *filelogger.FileLogger
 
+	extClient            *apiextensionsclient.Clientset
 	g8sClient            *versioned.Clientset
-	k8sClient            kubernetes.Interface
+	k8sClient            *kubernetes.Clientset
 	k8sAggregationClient *aggregationclient.Clientset
 	restConfig           *rest.Config
 
@@ -77,6 +79,10 @@ func NewHost(c HostConfig) (*Host, error) {
 	}
 
 	restConfig, err := clientcmd.BuildConfigFromFlags("", harness.DefaultKubeConfig)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+	extClient, err := apiextensionsclient.NewForConfig(restConfig)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -110,6 +116,7 @@ func NewHost(c HostConfig) (*Host, error) {
 		logger:     c.Logger,
 		filelogger: fileLogger,
 
+		extClient:            extClient,
 		g8sClient:            g8sClient,
 		k8sClient:            k8sClient,
 		k8sAggregationClient: k8sAggregationClient,
@@ -275,6 +282,10 @@ func (h *Host) DeleteGuestCluster(ctx context.Context, provider string) error {
 	}
 
 	return nil
+}
+
+func (h *Host) ExtClient() apiextensionsclient.Interface {
+	return h.extClient
 }
 
 // G8sClient returns the host cluster framework's Giant Swarm client.

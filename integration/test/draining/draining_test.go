@@ -72,9 +72,9 @@ func Test_Draining(t *testing.T) {
 	{
 		c := helmclient.Config{
 			Logger:    newLogger,
-			K8sClient: g.K8sClient(),
+			K8sClient: config.Guest.K8sClient(),
 
-			RestConfig: g.RestConfig(),
+			RestConfig: config.Guest.RestConfig(),
 		}
 
 		helmClient, err = helmclient.New(c)
@@ -110,7 +110,7 @@ func Test_Draining(t *testing.T) {
 		o := metav1.ListOptions{
 			LabelSelector: "app=e2e-app",
 		}
-		l, err := g.K8sClient().CoreV1().Pods(ChartNamespace).List(o)
+		l, err := config.Guest.K8sClient().CoreV1().Pods(ChartNamespace).List(o)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
@@ -139,7 +139,7 @@ func Test_Draining(t *testing.T) {
 				case <-done:
 					return
 				default:
-					tlsConfig, err := rest.TLSConfigFor(g.RestConfig())
+					tlsConfig, err := rest.TLSConfigFor(config.Guest.RestConfig())
 					if err != nil {
 						fmt.Printf("expected %#v got %#v (%s)\n", nil, err, err.Error())
 						continue
@@ -150,7 +150,7 @@ func Test_Draining(t *testing.T) {
 						},
 					}
 
-					restClient := g.K8sClient().Discovery().RESTClient()
+					restClient := config.Guest.K8sClient().Discovery().RESTClient()
 					u := restClient.Get().AbsPath("api", "v1", "namespaces", "e2e-app", "services", "e2e-app:8000", "proxy/").URL()
 					resp, err := client.Get(u.String())
 					if err != nil {
@@ -204,7 +204,7 @@ func Test_Draining(t *testing.T) {
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
-		err = g.WaitForNodesUp(masterCount + workerCount - 1)
+		err = config.Guest.WaitForNodesUp(masterCount + workerCount - 1)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
@@ -231,7 +231,7 @@ func Test_Draining(t *testing.T) {
 }
 
 func numberOfMasters(clusterID string) (int, error) {
-	cluster, err := h.AWSCluster(clusterID)
+	cluster, err := config.Host.AWSCluster(clusterID)
 	if err != nil {
 		return 0, microerror.Mask(err)
 	}
@@ -240,7 +240,7 @@ func numberOfMasters(clusterID string) (int, error) {
 }
 
 func numberOfWorkers(clusterID string) (int, error) {
-	cluster, err := h.AWSCluster(clusterID)
+	cluster, err := config.Host.AWSCluster(clusterID)
 	if err != nil {
 		return 0, microerror.Mask(err)
 	}
@@ -253,5 +253,5 @@ func removeWorker(clusterID string) error {
 	patch[0].Op = "remove"
 	patch[0].Path = "/spec/aws/workers/1"
 
-	return h.ApplyAWSConfigPatch(patch, clusterID)
+	return config.Host.ApplyAWSConfigPatch(patch, clusterID)
 }

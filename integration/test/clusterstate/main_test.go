@@ -5,95 +5,23 @@ package clusterstate
 import (
 	"testing"
 
-	"github.com/giantswarm/e2e-harness/pkg/framework"
-	"github.com/giantswarm/e2e-harness/pkg/framework/resource"
-	e2eclient "github.com/giantswarm/e2eclients/aws"
 	"github.com/giantswarm/e2etests/clusterstate"
 	"github.com/giantswarm/e2etests/clusterstate/provider"
-	"github.com/giantswarm/helmclient"
-	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/aws-operator/integration/setup"
 )
 
 var (
-	c          *e2eclient.Client
-	cs         *clusterstate.ClusterState
-	g          *framework.Guest
-	h          *framework.Host
-	helmClient *helmclient.Client
-	l          micrologger.Logger
-	r          *resource.Resource
+	config           setup.Config
+	clusterStateTest *clusterstate.ClusterState
 )
 
 func init() {
 	var err error
 
 	{
-		c := micrologger.Config{}
-
-		l, err = micrologger.New(c)
-		if err != nil {
-			panic(err.Error())
-		}
-	}
-
-	{
-		c := framework.GuestConfig{
-			Logger: l,
-
-			ClusterID:    env.ClusterID(),
-			CommonDomain: env.CommonDomain(),
-		}
-
-		g, err = framework.NewGuest(c)
-		if err != nil {
-			panic(err.Error())
-		}
-	}
-
-	{
-		c := framework.HostConfig{
-			Logger: l,
-
-			ClusterID:  env.ClusterID(),
-			VaultToken: env.VaultToken(),
-		}
-
-		h, err = framework.NewHost(c)
-		if err != nil {
-			panic(err.Error())
-		}
-	}
-
-	{
-		c := helmclient.Config{
-			Logger:          l,
-			K8sClient:       h.K8sClient(),
-			RestConfig:      h.RestConfig(),
-			TillerNamespace: "giantswarm",
-		}
-		helmClient, err = helmclient.New(c)
-		if err != nil {
-			panic(err.Error())
-		}
-	}
-
-	{
-		c := resource.Config{
-			Logger:     l,
-			HelmClient: helmClient,
-			Namespace:  "giantswarm",
-		}
-		r, err = resource.New(c)
-		if err != nil {
-			panic(err.Error())
-		}
-	}
-
-	{
-		c, err = e2eclient.NewClient()
+		config, err = setup.NewConfig()
 		if err != nil {
 			panic(err.Error())
 		}
@@ -103,9 +31,9 @@ func init() {
 	{
 
 		ac := provider.AWSConfig{
-			AWSClient:     c,
-			HostFramework: h,
-			Logger:        l,
+			AWSClient:     config.AWSClient,
+			HostFramework: config.Host,
+			Logger:        config.Logger,
 
 			ClusterID: env.ClusterID(),
 		}
@@ -117,13 +45,13 @@ func init() {
 	}
 
 	{
-		cc := clusterstate.Config{
-			GuestFramework: g,
-			Logger:         l,
+		c := clusterstate.Config{
+			GuestFramework: config.Guest,
+			Logger:         config.Logger,
 			Provider:       p,
 		}
 
-		cs, err = clusterstate.New(cc)
+		clusterStateTest, err = clusterstate.New(c)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -133,15 +61,5 @@ func init() {
 // TestMain allows us to have common setup and teardown steps that are run
 // once for all the tests https://golang.org/pkg/testing/#hdr-Main.
 func TestMain(m *testing.M) {
-	{
-		c := setup.Config{
-			AWSClient: c,
-			Guest:     g,
-			Host:      h,
-			Logger:    l,
-			Resource:  r,
-		}
-
-		setup.Setup(m, c)
-	}
+	setup.Setup(m, config)
 }
