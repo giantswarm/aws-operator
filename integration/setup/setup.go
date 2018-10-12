@@ -294,7 +294,7 @@ func installResources(ctx context.Context, config Config, vpcPeerID string) erro
 				RegistryPullSecret: env.RegistryPullSecret(),
 			}
 
-			values, err = chartvalues.NewCertOperator(c)
+			values, err = chartvalues.NewNodeOperator(c)
 			if err != nil {
 				return microerror.Mask(err)
 			}
