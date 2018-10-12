@@ -135,7 +135,7 @@ func installAWSOperator(ctx context.Context, config Config) error {
 
 	}
 
-	err = config.Release.InstallOperator(ctx, "aws-operator", release.NewStableVersion(), values, providerv1alpha1.NewAWSConfigCRD())
+	err = config.Release.InstallOperator(ctx, "aws-operator", release.NewVersion(env.CircleSHA()), values, providerv1alpha1.NewAWSConfigCRD())
 	if err != nil {
 		return microerror.Mask(err)
 	}
