@@ -264,14 +264,43 @@ func installResources(ctx context.Context, config Config, vpcPeerID string) erro
 	var err error
 
 	{
-		certOperatorChartValues := os.ExpandEnv(e2etemplates.CertOperatorChartValues)
-		err = config.Release.InstallOperator(ctx, "cert-operator", release.NewStableVersion(), certOperatorChartValues, corev1alpha1.NewCertConfigCRD())
+		var values string
+		{
+			c := chartvalues.CertOperatorConfig{
+				ClusterName:        env.ClusterID(),
+				CommonDomain:       env.CommonDomain(),
+				RegistryPullSecret: env.RegistryPullSecret(),
+				Vault: chartvalues.CertOperatorVault{
+					Token: env.VaultToken(),
+				},
+			}
+
+			values, err = chartvalues.NewCertOperator(c)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+
+		err = config.Release.InstallOperator(ctx, "cert-operator", release.NewStableVersion(), values, corev1alpha1.NewCertConfigCRD())
 		if err != nil {
 			return microerror.Mask(err)
 		}
+	}
 
-		nodeOperatorChartValues := os.ExpandEnv(e2etemplates.NodeOperatorChartValues)
-		err = config.Release.InstallOperator(ctx, "node-operator", release.NewStableVersion(), nodeOperatorChartValues, corev1alpha1.NewNodeConfigCRD())
+	{
+		var values string
+		{
+			c := chartvalues.NodeOperatorConfig{
+				RegistryPullSecret: env.RegistryPullSecret(),
+			}
+
+			values, err = chartvalues.NewCertOperator(c)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+
+		err = config.Release.InstallOperator(ctx, "node-operator", release.NewStableVersion(), values, corev1alpha1.NewNodeConfigCRD())
 		if err != nil {
 			return microerror.Mask(err)
 		}

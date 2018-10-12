@@ -1,30 +1,31 @@
 package chartvalues
 
-const kvmOperatorTemplate = `clusterRoleBindingName: {{ .ClusterRole.BindingName }}
+const certOperatorTemplate = `clusterRoleBindingName: {{ .ClusterRole.BindingName }}
 clusterRoleBindingNamePSP: {{ .ClusterRolePSP.BindingName }}
 clusterRoleName: {{ .ClusterRole.Name }}
 clusterRoleNamePSP: {{ .ClusterRolePSP.Name }}
 Installation:
   V1:
+    Auth:
+      Vault:
+        Address: http://vault.default.svc.cluster.local:8200
+        CA:
+          TTL: 1440h
     GiantSwarm:
-      KVMOperator:
+      CertOperator:
         CRD:
           LabelSelector: 'giantswarm.io/cluster={{ .ClusterName }}'
     Guest:
-      SSH:
-        SSOPublicKey: 'test'
       Kubernetes:
         API:
-          Auth:
-            Provider:
-              OIDC:
-                ClientID: ""
-                IssueURL: ""
-                UsernameClaim: ""
-                GroupsClaim: ""
-      Update:
-        Enabled: true
+          EndpointBase: {{ .CommonDomain }}
     Secret:
+      CertOperator:
+        SecretYaml: |
+          service:
+            vault:
+              config:
+                token: {{ .Vault.Token }}
       Registry:
         PullSecret:
           DockerConfigJSON: "{\"auths\":{\"quay.io\":{\"auth\":\"{{ .RegistryPullSecret }}\"}}}"

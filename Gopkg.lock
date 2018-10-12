@@ -305,7 +305,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:fc36fa563dd868a18c91c145ef5f61a97e832f8af5649d9100c0aaa40f51a141"
+  digest = "1:c5337a5b810c5145f375bfa500a4275912108220ba0b3e20f7ad0ede08f7a61e"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
     "internal/render",
@@ -313,7 +313,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "1e4569c89a56aeb02b9ac57847b7cd8aaa9cc603"
+  revision = "b753d25173f168afc5386c55d2495e6a8363d889"
 
 [[projects]]
   branch = "master"
@@ -1665,6 +1665,7 @@
     "github.com/giantswarm/backoff",
     "github.com/giantswarm/certs",
     "github.com/giantswarm/e2e-harness/pkg/framework",
+    "github.com/giantswarm/e2e-harness/pkg/framework/filelogger",
     "github.com/giantswarm/e2e-harness/pkg/framework/resource",
     "github.com/giantswarm/e2e-harness/pkg/release",
     "github.com/giantswarm/e2eclients/aws",
