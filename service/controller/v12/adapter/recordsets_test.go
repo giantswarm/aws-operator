@@ -12,11 +12,8 @@ func TestAdapterRecordSetsRegularFields(t *testing.T) {
 		description                   string
 		customObject                  v1alpha1.AWSConfig
 		route53Enabled                bool
-		expectedAPIHostedZone         string
 		expectedAPIDomain             string
-		expectedEtcdHostedZone        string
 		expectedEtcdDomain            string
-		expectedIngressHostedZone     string
 		expectedIngressDomain         string
 		expectedIngressWildcardDomain string
 		expectedRoute53Enabled        bool
@@ -43,15 +40,11 @@ func TestAdapterRecordSetsRegularFields(t *testing.T) {
 					AWS: v1alpha1.AWSConfigSpecAWS{},
 				},
 			},
-			route53Enabled:                true,
-			expectedAPIHostedZone:         "apiHostedZones",
-			expectedAPIDomain:             "api.domain",
-			expectedEtcdHostedZone:        "etcdHostedZone",
-			expectedEtcdDomain:            "etcd.domain",
-			expectedIngressHostedZone:     "ingressHostedZone",
-			expectedIngressDomain:         "ingress.domain",
-			expectedIngressWildcardDomain: "ingressWildcardDomain",
-			expectedRoute53Enabled:        true,
+			route53Enabled:         true,
+			expectedAPIDomain:      "api.domain",
+			expectedEtcdDomain:     "etcd.domain",
+			expectedIngressDomain:  "ingress.domain",
+			expectedRoute53Enabled: true,
 		},
 	}
 
@@ -73,20 +66,11 @@ func TestAdapterRecordSetsRegularFields(t *testing.T) {
 				t.Errorf("unexpected error %v", err)
 			}
 
-			if a.APIELBHostedZones != tc.expectedAPIHostedZone {
-				t.Errorf("unexpected APIELBHostedZones, got %q, want %q", a.APIELBHostedZones, tc.expectedAPIHostedZone)
-			}
 			if a.APIELBDomain != tc.expectedAPIDomain {
 				t.Errorf("unexpected APIELBDomain, got %q, want %q", a.APIELBDomain, tc.expectedAPIDomain)
 			}
-			if a.EtcdELBHostedZones != tc.expectedEtcdHostedZone {
-				t.Errorf("unexpected EtcdELBHostedZones, got %q, want %q", a.EtcdELBHostedZones, tc.expectedEtcdHostedZone)
-			}
 			if a.EtcdELBDomain != tc.expectedEtcdDomain {
 				t.Errorf("unexpected EtcdELBDomain, got %q, want %q", a.EtcdELBDomain, tc.expectedEtcdDomain)
-			}
-			if a.IngressELBHostedZones != tc.expectedIngressHostedZone {
-				t.Errorf("unexpected IngressELBHostedZones, got %q, want %q", a.IngressELBHostedZones, tc.expectedIngressHostedZone)
 			}
 			if a.IngressELBDomain != tc.expectedIngressDomain {
 				t.Errorf("unexpected IngressELBDomain, got %q, want %q", a.IngressELBDomain, tc.expectedIngressDomain)
