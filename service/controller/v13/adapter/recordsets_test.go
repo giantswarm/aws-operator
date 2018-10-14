@@ -40,17 +40,7 @@ func TestAdapterRecordSetsRegularFields(t *testing.T) {
 							Domain: "etcd.domain",
 						},
 					},
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						API: v1alpha1.AWSConfigSpecAWSAPI{
-							HostedZones: "apiHostedZones",
-						},
-						Etcd: v1alpha1.AWSConfigSpecAWSEtcd{
-							HostedZones: "etcdHostedZone",
-						},
-						Ingress: v1alpha1.AWSConfigSpecAWSIngress{
-							HostedZones: "ingressHostedZone",
-						},
-					},
+					AWS: v1alpha1.AWSConfigSpecAWS{},
 				},
 			},
 			route53Enabled:                true,

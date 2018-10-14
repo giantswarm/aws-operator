@@ -14,17 +14,7 @@ func TestAdapterHostIAMRolesRegularFields(t *testing.T) {
 			Cluster: v1alpha1.Cluster{
 				ID: "test-cluster",
 			},
-			AWS: v1alpha1.AWSConfigSpecAWS{
-				API: v1alpha1.AWSConfigSpecAWSAPI{
-					HostedZones: "apiHostedZones",
-				},
-				Etcd: v1alpha1.AWSConfigSpecAWSEtcd{
-					HostedZones: "etcdHostedZone",
-				},
-				Ingress: v1alpha1.AWSConfigSpecAWSIngress{
-					HostedZones: "ingressHostedZone",
-				},
-			},
+			AWS: v1alpha1.AWSConfigSpecAWS{},
 		},
 	}
 

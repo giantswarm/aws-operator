@@ -83,11 +83,6 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 				},
 			},
 			AWS: v1alpha1.AWSConfigSpecAWS{
-				API: v1alpha1.AWSConfigSpecAWSAPI{
-					ELB: v1alpha1.AWSConfigSpecAWSAPIELB{
-						IdleTimeoutSeconds: 3600,
-					},
-				},
 				Region: "eu-central-1",
 				AZ:     "eu-central-1a",
 				Masters: []v1alpha1.AWSConfigSpecAWSNode{
@@ -100,11 +95,6 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 					{
 						ImageID:      "ami-1234-worker",
 						InstanceType: "m3.large",
-					},
-				},
-				Ingress: v1alpha1.AWSConfigSpecAWSIngress{
-					ELB: v1alpha1.AWSConfigSpecAWSIngressELB{
-						IdleTimeoutSeconds: 60,
 					},
 				},
 				VPC: v1alpha1.AWSConfigSpecAWSVPC{
@@ -469,11 +459,6 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 				},
 			},
 			AWS: v1alpha1.AWSConfigSpecAWS{
-				API: v1alpha1.AWSConfigSpecAWSAPI{
-					ELB: v1alpha1.AWSConfigSpecAWSAPIELB{
-						IdleTimeoutSeconds: 3600,
-					},
-				},
 				Region: "eu-central-1",
 				AZ:     "eu-central-1a",
 				Masters: []v1alpha1.AWSConfigSpecAWSNode{
@@ -486,11 +471,6 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 					{
 						ImageID:      "ami-1234-worker",
 						InstanceType: "m3.large",
-					},
-				},
-				Ingress: v1alpha1.AWSConfigSpecAWSIngress{
-					ELB: v1alpha1.AWSConfigSpecAWSIngressELB{
-						IdleTimeoutSeconds: 60,
 					},
 				},
 				VPC: v1alpha1.AWSConfigSpecAWSVPC{
@@ -595,11 +575,6 @@ func TestMainGuestTemplateChinaRegion(t *testing.T) {
 				},
 			},
 			AWS: v1alpha1.AWSConfigSpecAWS{
-				API: v1alpha1.AWSConfigSpecAWSAPI{
-					ELB: v1alpha1.AWSConfigSpecAWSAPIELB{
-						IdleTimeoutSeconds: 3600,
-					},
-				},
 				Region: "cn-north-1",
 				AZ:     "cn-north-1a",
 				Masters: []v1alpha1.AWSConfigSpecAWSNode{
@@ -612,11 +587,6 @@ func TestMainGuestTemplateChinaRegion(t *testing.T) {
 					{
 						ImageID:      "ami-1234-worker",
 						InstanceType: "m3.large",
-					},
-				},
-				Ingress: v1alpha1.AWSConfigSpecAWSIngress{
-					ELB: v1alpha1.AWSConfigSpecAWSIngressELB{
-						IdleTimeoutSeconds: 60,
 					},
 				},
 				VPC: v1alpha1.AWSConfigSpecAWSVPC{
