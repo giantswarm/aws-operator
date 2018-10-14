@@ -26,12 +26,8 @@
 
 
 [[constraint]]
-  branch = "master"
+  branch = "teemow-remove-aws-elb-settings"
   name = "github.com/giantswarm/apiextensions"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/giantswarm/clustertpr"
 
 [[constraint]]
   branch = "master"

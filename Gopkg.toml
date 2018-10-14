@@ -38,7 +38,7 @@ required = [
   name = "github.com/docker/distribution"
 
 [[constraint]]
-  branch = "master"
+  branch = "teemow-remove-aws-elb-settings"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]
@@ -74,7 +74,7 @@ required = [
   name = "github.com/giantswarm/helmclient"
 
 [[constraint]]
-  branch = "master"
+  branch = "teemow-prune-unused-versions"
   name = "github.com/giantswarm/k8scloudconfig"
 
 [[constraint]]
@@ -106,7 +106,7 @@ required = [
   name = "github.com/giantswarm/randomkeys"
 
 [[constraint]]
-  branch = "master"
+  branch = "teemow-update-apiextensions"
   name = "github.com/giantswarm/statusresource"
 
 [[constraint]]
@@ -144,6 +144,10 @@ required = [
 [[constraint]]
   name = "k8s.io/client-go"
   version = "kubernetes-1.10.4"
+
+[[constraint]]
+  name = "github.com/giantswarm/guestcluster"
+  branch = "teemow-update-apiextensions"
 
 
 

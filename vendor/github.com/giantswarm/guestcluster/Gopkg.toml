@@ -38,7 +38,7 @@ required = [
   name = "github.com/docker/distribution"
 
 [[constraint]]
-  branch = "master"
+  branch = "teemow-remove-aws-elb-settings"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]

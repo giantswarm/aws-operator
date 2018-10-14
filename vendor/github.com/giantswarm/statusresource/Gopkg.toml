@@ -38,7 +38,7 @@ required = [
   name = "github.com/docker/distribution"
 
 [[constraint]]
-  branch = "master"
+  branch = "teemow-remove-aws-elb-settings"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]
@@ -50,7 +50,7 @@ required = [
   name = "github.com/giantswarm/errors"
 
 [[constraint]]
-  branch = "master"
+  branch = "teemow-update-apiextensions"
   name = "github.com/giantswarm/guestcluster"
 
 [[constraint]]

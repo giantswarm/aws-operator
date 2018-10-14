@@ -97,7 +97,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "master"
+  branch = "teemow-remove-aws-elb-settings"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/core/v1alpha1",
@@ -109,7 +109,7 @@
     "pkg/clientset/versioned/typed/example/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1"
   ]
-  revision = "dbe7aa4771048f64040c9e6148a708c21226a1b2"
+  revision = "7b256083d4e1bd68c50f89df78b7ec8875effda5"
 
 [[projects]]
   branch = "master"
@@ -925,6 +925,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b360af37bfc084c1a6049cf5ddd419a537c3a77b7abcfc0121941fb8debd4650"
+  inputs-digest = "3bdccae14e7ee134ad3f12b19313bce06aa32f103a3fc94f2a3ba437f19edc0e"
   solver-name = "gps-cdcl"
   solver-version = 1

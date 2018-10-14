@@ -65,10 +65,8 @@ type AWSConfigSpec struct {
 }
 
 type AWSConfigSpecAWS struct {
-	API              AWSConfigSpecAWSAPI  `json:"api" yaml:"api"`
-	AZ               string               `json:"az" yaml:"az"`
-	CredentialSecret CredentialSecret     `json:"credentialSecret" yaml:"credentialSecret"`
-	Etcd             AWSConfigSpecAWSEtcd `json:"etcd" yaml:"etcd"`
+	AZ               string           `json:"az" yaml:"az"`
+	CredentialSecret CredentialSecret `json:"credentialSecret" yaml:"credentialSecret"`
 
 	// HostedZones is AWS hosted zones names in the host cluster account.
 	// For each zone there will be "CLUSTER_ID.k8s" NS record created in
@@ -81,33 +79,10 @@ type AWSConfigSpecAWS struct {
 	//	- *.CLUSTER_ID.k8s.{{ .Spec.AWS.HostedZones.Ingress.Name }}
 	HostedZones AWSConfigSpecAWSHostedZones `json:"hostedZones" yaml:"hostedZones"`
 
-	Ingress AWSConfigSpecAWSIngress `json:"ingress" yaml:"ingress"`
-	Masters []AWSConfigSpecAWSNode  `json:"masters" yaml:"masters"`
-	Region  string                  `json:"region" yaml:"region"`
-	VPC     AWSConfigSpecAWSVPC     `json:"vpc" yaml:"vpc"`
-	Workers []AWSConfigSpecAWSNode  `json:"workers" yaml:"workers"`
-}
-
-// AWSConfigSpecAWSAPI deprecated since aws-operator v12 resources.
-type AWSConfigSpecAWSAPI struct {
-	HostedZones string                 `json:"hostedZones" yaml:"hostedZones"`
-	ELB         AWSConfigSpecAWSAPIELB `json:"elb" yaml:"elb"`
-}
-
-// AWSConfigSpecAWSAPIELB deprecated since aws-operator v12 resources.
-type AWSConfigSpecAWSAPIELB struct {
-	IdleTimeoutSeconds int `json:"idleTimeoutSeconds" yaml:"idleTimeoutSeconds"`
-}
-
-// AWSConfigSpecAWSEtcd deprecated since aws-operator v12 resources.
-type AWSConfigSpecAWSEtcd struct {
-	HostedZones string                  `json:"hostedZones" yaml:"hostedZones"`
-	ELB         AWSConfigSpecAWSEtcdELB `json:"elb" yaml:"elb"`
-}
-
-// AWSConfigSpecAWSEtcdELB deprecated since aws-operator v12 resources.
-type AWSConfigSpecAWSEtcdELB struct {
-	IdleTimeoutSeconds int `json:"idleTimeoutSeconds" yaml:"idleTimeoutSeconds"`
+	Masters []AWSConfigSpecAWSNode `json:"masters" yaml:"masters"`
+	Region  string                 `json:"region" yaml:"region"`
+	VPC     AWSConfigSpecAWSVPC    `json:"vpc" yaml:"vpc"`
+	Workers []AWSConfigSpecAWSNode `json:"workers" yaml:"workers"`
 }
 
 type AWSConfigSpecAWSHostedZones struct {
@@ -118,17 +93,6 @@ type AWSConfigSpecAWSHostedZones struct {
 
 type AWSConfigSpecAWSHostedZonesZone struct {
 	Name string `json:"name" yaml:"name"`
-}
-
-// AWSConfigSpecAWSIngress deprecated since aws-operator v12 resources.
-type AWSConfigSpecAWSIngress struct {
-	HostedZones string                     `json:"hostedZones" yaml:"hostedZones"`
-	ELB         AWSConfigSpecAWSIngressELB `json:"elb" yaml:"elb"`
-}
-
-// AWSConfigSpecAWSIngressELB deprecated since aws-operator v12 resources.
-type AWSConfigSpecAWSIngressELB struct {
-	IdleTimeoutSeconds int `json:"idleTimeoutSeconds" yaml:"idleTimeoutSeconds"`
 }
 
 type AWSConfigSpecAWSNode struct {
