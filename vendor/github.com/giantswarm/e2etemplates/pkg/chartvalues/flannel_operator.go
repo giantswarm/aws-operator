@@ -5,24 +5,24 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
-type KVMOperatorConfig struct {
+type FlannelOperatorConfig struct {
 	ClusterName        string
-	ClusterRole        KVMOperatorClusterRole
-	ClusterRolePSP     KVMOperatorClusterRole
-	PSP                KVMOperatorPSP
+	ClusterRole        FlannelOperatorClusterRole
+	ClusterRolePSP     FlannelOperatorClusterRole
 	RegistryPullSecret string
+	PSP                FlannelOperatorPSP
 }
 
-type KVMOperatorClusterRole struct {
+type FlannelOperatorClusterRole struct {
 	BindingName string
 	Name        string
 }
 
-type KVMOperatorPSP struct {
+type FlannelOperatorPSP struct {
 	Name string
 }
 
-func NewKVMOperator(config KVMOperatorConfig) (string, error) {
+func NewFlannelOperator(config FlannelOperatorConfig) (string, error) {
 	if config.ClusterName == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.ClusterName must not be empty", config)
 	}
@@ -45,7 +45,7 @@ func NewKVMOperator(config KVMOperatorConfig) (string, error) {
 		return "", microerror.Maskf(invalidConfigError, "%T.RegistryPullSecret must not be empty", config)
 	}
 
-	values, err := render.Render(kvmOperatorTemplate, config)
+	values, err := render.Render(flannelOperatorTemplate, config)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}

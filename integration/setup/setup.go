@@ -10,7 +10,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
+	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/backoff"
+	"github.com/giantswarm/e2e-harness/pkg/release"
 	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
 	"github.com/giantswarm/e2etemplates/pkg/e2etemplates"
 	"github.com/giantswarm/microerror"
@@ -55,7 +58,7 @@ func Setup(m *testing.M, config Config) {
 		v = 1
 	}
 
-	err = installResources(config, vpcPeerID)
+	err = installResources(ctx, config, vpcPeerID)
 	if err != nil {
 		log.Printf("%#v\n", err)
 		v = 1
@@ -89,7 +92,7 @@ func Setup(m *testing.M, config Config) {
 	os.Exit(v)
 }
 
-func installAWSOperator(config Config) error {
+func installAWSOperator(ctx context.Context, config Config) error {
 	var err error
 
 	var values string
@@ -132,14 +135,14 @@ func installAWSOperator(config Config) error {
 
 	}
 
-	err = config.Host.InstallBranchOperator("aws-operator", "awsconfig", values)
+	err = config.Release.InstallOperator(ctx, "aws-operator", release.NewVersion(env.CircleSHA()), values, providerv1alpha1.NewAWSConfigCRD())
 	if err != nil {
 		return microerror.Mask(err)
 	}
 	return nil
 }
 
-func installAWSConfig(config Config, vpcPeerID string) error {
+func installAWSConfig(ctx context.Context, config Config, vpcPeerID string) error {
 	var err error
 
 	var values string
@@ -166,7 +169,7 @@ func installAWSConfig(config Config, vpcPeerID string) error {
 		}
 	}
 
-	err = config.Host.InstallResource("apiextensions-aws-config-e2e", values, ":stable")
+	err = config.Release.Install(ctx, "apiextensions-aws-config-e2e", release.NewStableVersion(), values)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -257,23 +260,54 @@ func installHostPeerVPC(config Config) (string, error) {
 	return vpcPeerID, nil
 }
 
-func installResources(config Config, vpcPeerID string) error {
+func installResources(ctx context.Context, config Config, vpcPeerID string) error {
 	var err error
 
 	{
-		// TODO configure chart values like for the other operators below.
-		err = config.Host.InstallStableOperator("cert-operator", "certconfig", e2etemplates.CertOperatorChartValues)
-		if err != nil {
-			return microerror.Mask(err)
+		var values string
+		{
+			c := chartvalues.CertOperatorConfig{
+				ClusterName:        env.ClusterID(),
+				CommonDomain:       env.CommonDomain(),
+				RegistryPullSecret: env.RegistryPullSecret(),
+				Vault: chartvalues.CertOperatorVault{
+					Token: env.VaultToken(),
+				},
+			}
+
+			values, err = chartvalues.NewCertOperator(c)
+			if err != nil {
+				return microerror.Mask(err)
+			}
 		}
-		err = config.Host.InstallStableOperator("node-operator", "drainerconfig", e2etemplates.NodeOperatorChartValues)
+
+		err = config.Release.InstallOperator(ctx, "cert-operator", release.NewStableVersion(), values, corev1alpha1.NewCertConfigCRD())
 		if err != nil {
 			return microerror.Mask(err)
 		}
 	}
 
 	{
-		err = installAWSOperator(config)
+		var values string
+		{
+			c := chartvalues.NodeOperatorConfig{
+				RegistryPullSecret: env.RegistryPullSecret(),
+			}
+
+			values, err = chartvalues.NewNodeOperator(c)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+
+		err = config.Release.InstallOperator(ctx, "node-operator", release.NewStableVersion(), values, corev1alpha1.NewNodeConfigCRD())
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	{
+		err = installAWSOperator(ctx, config)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -291,7 +325,7 @@ func installResources(config Config, vpcPeerID string) error {
 	}
 
 	{
-		err = installAWSConfig(config, vpcPeerID)
+		err = installAWSConfig(ctx, config, vpcPeerID)
 		if err != nil {
 			return microerror.Mask(err)
 		}
