@@ -99,6 +99,10 @@ func installAWSOperator(ctx context.Context, config Config) error {
 			},
 			Secret: chartvalues.AWSOperatorConfigSecret{
 				AWSOperator: chartvalues.AWSOperatorConfigSecretAWSOperator{
+					CredentialDefault: chartvalues.AWSOperatorConfigSecretAWSOperatorCredentialDefault{
+						AdminARN:       env.GuestAWSARN(),
+						AWSOperatorARN: env.GuestAWSARN(),
+					},
 					IDRSAPub: env.IDRSAPub(),
 					SecretYaml: chartvalues.AWSOperatorConfigSecretAWSOperatorSecretYaml{
 						Service: chartvalues.AWSOperatorConfigSecretAWSOperatorSecretYamlService{
