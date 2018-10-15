@@ -21,10 +21,7 @@ import (
 )
 
 const (
-	awsOperatorArnKey     = "aws.awsoperator.arn"
 	awsResourceValuesFile = "/tmp/aws-operator-values.yaml"
-	credentialName        = "credential-default"
-	credentialNamespace   = "giantswarm"
 	provider              = "aws"
 )
 
