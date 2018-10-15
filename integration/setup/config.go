@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	namespace       = "giantswarm"
+	namespace       = "default"
 	organization    = "giantswarm"
 	tillerNamespace = "kube-system"
 	quayAddress     = "https://quay.io"
