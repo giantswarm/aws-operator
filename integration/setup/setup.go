@@ -12,15 +12,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/aws-operator/integration/env"
-	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/release"
 	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
 	"github.com/giantswarm/e2etemplates/pkg/e2etemplates"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/micrologger"
-	"k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/giantswarm/aws-operator/integration/env"
 )
 
 const (
@@ -174,50 +171,6 @@ func installAWSConfig(ctx context.Context, config Config, vpcPeerID string) erro
 	return nil
 }
 
-func installCredential(config Config) error {
-	var err error
-
-	var l micrologger.Logger
-	{
-		c := micrologger.Config{}
-
-		l, err = micrologger.New(c)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	o := func() error {
-		k8sClient := config.Host.K8sClient()
-
-		k8sClient.CoreV1().Secrets(credentialNamespace).Delete(credentialName, &metav1.DeleteOptions{})
-
-		secret := &v1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: credentialName,
-			},
-			Data: map[string][]byte{
-				awsOperatorArnKey: []byte(env.GuestAWSARN()),
-			},
-		}
-
-		_, err := k8sClient.CoreV1().Secrets(credentialNamespace).Create(secret)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		return nil
-	}
-	b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
-	n := backoff.NewNotifier(l, context.Background())
-	err = backoff.RetryNotify(o, b, n)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	return nil
-}
-
 func installHostPeerVPC(config Config) (string, error) {
 	log.Printf("creating Host Peer VPC stack")
 
@@ -337,10 +290,6 @@ func installResources(ctx context.Context, config Config, vpcPeerID string) erro
 
 	{
 		err = config.Host.InstallCertResource()
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		err = installCredential(config)
 		if err != nil {
 			return microerror.Mask(err)
 		}
