@@ -310,8 +310,8 @@
   revision = "fbdbd487bc645dcb941f3f889a6db3345947fe3e"
 
 [[projects]]
-  branch = "master"
-  digest = "1:c571cee14e80465a8e4a34910616a289817bbd92e8a90bbd694fb31057286764"
+  branch = "aws-credential-default"
+  digest = "1:da411fe8a9b6513e21ba8beae86e14fa016f54bbd3910ef380dae2a19fab17cc"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
     "internal/render",
@@ -319,7 +319,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "2317c4461793d11afa8fc01e23c62761688614c1"
+  revision = "d98a9928bf94bad3476068148f06a40451543e3d"
 
 [[projects]]
   branch = "master"
