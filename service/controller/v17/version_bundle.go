@@ -56,10 +56,6 @@ func VersionBundle() versionbundle.Bundle {
 				Version: "3.3.8",
 			},
 			{
-				Name:    "coredns",
-				Version: "1.1.1",
-			},
-			{
 				Name:    "kubernetes",
 				Version: "1.11.1",
 			},
