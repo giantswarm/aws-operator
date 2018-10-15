@@ -18,7 +18,7 @@ Installation:
     Guest:
       Kubernetes:
         API:
-          EndpointBase: {{ .CommonDomain }}
+          EndpointBase: k8s.{{ .CommonDomain }}
     Secret:
       CertOperator:
         SecretYaml: |
