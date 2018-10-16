@@ -13,6 +13,7 @@ import (
 
 const (
 	AccountLabel = "account"
+	ELBLabel     = "elb"
 )
 
 var (
@@ -20,6 +21,7 @@ var (
 		prometheus.BuildFQName(Namespace, "", "elb_instance_out_of_service_count"),
 		"Gauge about ELB instances being out of service.",
 		[]string{
+			ELBLabel,
 			AccountLabel,
 			ClusterLabel,
 			InstallationLabel,
@@ -123,6 +125,7 @@ func (c *Collector) collectELBs(ch chan<- prometheus.Metric, awsClients aws.Clie
 			elbsDesc,
 			prometheus.GaugeValue,
 			count,
+			*l.LoadBalancerName,
 			account,
 			cluster,
 			installation,
