@@ -2,6 +2,7 @@ package collector
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
@@ -14,7 +15,8 @@ import (
 )
 
 const (
-	Namespace = "aws_operator"
+	GaugeValue float64 = 1
+	Namespace          = "aws_operator"
 )
 
 type Config struct {
@@ -75,9 +77,21 @@ func New(config Config) (*Collector, error) {
 
 func (c *Collector) Boot(ctx context.Context) {
 	c.bootOnce.Do(func() {
+		{
+			c.logger.LogCtx(ctx, "level", "debug", "message", "registering collector")
+
+			err := prometheus.Register(c)
+			if IsAlreadyRegisteredError(err) {
+				c.logger.LogCtx(ctx, "level", "debug", "message", "collector already registered")
+			} else if err != nil {
+				c.logger.Log("level", "error", "message", "registering collector failed", "stack", fmt.Sprintf("%#v", err))
+			} else {
+				c.logger.LogCtx(ctx, "level", "debug", "message", "registered collector")
+			}
+		}
+
 		if c.trustedAdvisorEnabled {
 			prometheus.MustRegister(trustedAdvisorError)
-
 			prometheus.MustRegister(getChecksDuration)
 			prometheus.MustRegister(getResourcesDuration)
 
@@ -98,6 +112,7 @@ func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 		ch <- trustedAdvisorSupport
 	}
 
+	ch <- elbsDesc
 	ch <- vpcsDesc
 }
 
@@ -115,6 +130,7 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	collectFuncs := []func(chan<- prometheus.Metric, []awsutil.Clients){
 		c.collectClusterInfo,
 		c.collectAccountsVPCs,
+		c.collectAccountsELBs,
 	}
 
 	if c.trustedAdvisorEnabled {

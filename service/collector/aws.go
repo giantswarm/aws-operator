@@ -11,6 +11,16 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v15/credential"
 )
 
+const (
+	ClusterTag      = "giantswarm.io/cluster"
+	InstallationTag = "giantswarm.io/installation"
+	OrganizationTag = "giantswarm.io/organization"
+
+	ClusterLabel      = "cluster_id"
+	InstallationLabel = "installation"
+	OrganizationLabel = "organization"
+)
+
 // getARNs list all unique aws IAM ARN from credential secret.
 func (c Collector) getARNs() ([]string, error) {
 	var arns []string
