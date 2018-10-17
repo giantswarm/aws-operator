@@ -129,8 +129,8 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 
 	collectFuncs := []func(chan<- prometheus.Metric, []awsutil.Clients){
 		c.collectClusterInfo,
-		c.collectAccountsVPCs,
 		c.collectAccountsELBs,
+		c.collectAccountsVPCs,
 	}
 
 	if c.trustedAdvisorEnabled {

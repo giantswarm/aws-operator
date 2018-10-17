@@ -16,6 +16,10 @@ const (
 	ELBLabel     = "elb"
 )
 
+const (
+	StateOutOfService = "OutOfService"
+)
+
 var (
 	elbsDesc *prometheus.Desc = prometheus.NewDesc(
 		prometheus.BuildFQName(Namespace, "", "elb_instance_out_of_service_count"),
@@ -115,7 +119,7 @@ func (c *Collector) collectELBs(ch chan<- prometheus.Metric, awsClients aws.Clie
 				return microerror.Mask(err)
 			}
 			for _, s := range o.InstanceStates {
-				if *s.State == "OutOfService" {
+				if *s.State == StateOutOfService {
 					count++
 				}
 			}
