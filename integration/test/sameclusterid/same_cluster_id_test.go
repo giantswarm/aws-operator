@@ -1,6 +1,6 @@
 // +build k8srequired
 
-package clusterstate
+package sameclusterid
 
 import (
 	"context"
