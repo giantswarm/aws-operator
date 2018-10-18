@@ -53,8 +53,8 @@ required = [
   branch = "master"
   name = "github.com/giantswarm/certs"
 
-[[constraint]]
-  branch = "master"
+[[override]]
+  branch = "namespace"
   name = "github.com/giantswarm/e2e-harness"
 
 [[constraint]]

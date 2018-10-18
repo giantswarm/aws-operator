@@ -46,7 +46,7 @@
   version = "v1.4.2"
 
 [[projects]]
-  digest = "1:0c7a616e91fdbf006aa99635fb5607b6eea4df668a91e5bc46e9a9842fa70847"
+  digest = "1:b0871122d3ff01bd3f6966008b289e3136f0c95acbeb92501055cc56153d85c7"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -101,8 +101,8 @@
     "service/support/supportiface",
   ]
   pruneopts = "UT"
-  revision = "66832f7f150914a46ffbfc03210f3b9cb0e4c005"
-  version = "v1.15.57"
+  revision = "2324d8a7db41970a80d19791bd30b94f632ce0cc"
+  version = "v1.15.58"
 
 [[projects]]
   branch = "master"
@@ -279,8 +279,8 @@
   revision = "4bf2b99ebf79cb800cb21ec1a4541e6582e3a0b7"
 
 [[projects]]
-  branch = "master"
-  digest = "1:388d013980329ddf136ac4be05146e1e0ad428b8146f980848a48c63b84d01a3"
+  branch = "namespace"
+  digest = "1:5468027ef1f2d0dfb4407f0b0fc0cd406ae3bcd346d69a3a7c3f188cfe8faafd"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
@@ -290,7 +290,7 @@
     "pkg/release",
   ]
   pruneopts = "UT"
-  revision = "3557509449cae022e9461ea164377f28e3ffaa70"
+  revision = "d045be136bb9f29e8eec72c624a0f8aebd440ccf"
 
 [[projects]]
   branch = "master"
@@ -1457,7 +1457,7 @@
   name = "k8s.io/kube-openapi"
   packages = ["pkg/util/proto"]
   pruneopts = "UT"
-  revision = "5d05df014ac640f14b5e777958248251c2ef5e86"
+  revision = "e494cc58111187acad93e64529228a2fc0153e39"
 
 [[projects]]
   digest = "1:0cbc5b5dd9e675751a7f0b8cc4477f3900dbb31fed90c7793455a219d209ae25"
