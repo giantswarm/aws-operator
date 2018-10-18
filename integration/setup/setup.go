@@ -52,12 +52,6 @@ func Setup(m *testing.M, config Config) {
 		v = 1
 	}
 
-	err = config.Host.Setup()
-	if err != nil {
-		log.Printf("%#v\n", err)
-		v = 1
-	}
-
 	err = installResources(ctx, config, vpcPeerID)
 	if err != nil {
 		log.Printf("%#v\n", err)
@@ -262,6 +256,31 @@ func installHostPeerVPC(config Config) (string, error) {
 
 func installResources(ctx context.Context, config Config, vpcPeerID string) error {
 	var err error
+
+	{
+		err := config.K8s.EnsureNamespace(ctx, namespace)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	{
+		c := chartvalues.E2ESetupVaultConfig{
+			Vault: chartvalues.E2ESetupVaultConfigVault{
+				Token: env.VaultToken(),
+			},
+		}
+
+		values, err := chartvalues.NewE2ESetupVault(c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		err = config.Release.Install(ctx, "e2esetup-vault", release.NewStableVersion(), values, config.Release.Condition().PodExists(ctx, "default", "app=vault"))
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
 
 	{
 		var values string
