@@ -47,6 +47,15 @@ func IsReleaseVersionNotMatching(err error) bool {
 	return microerror.Cause(err) == releaseVersionNotMatchingError
 }
 
+var tillerNotFoundError = &microerror.Error{
+	Kind: "tillerNotFoundError",
+}
+
+// IsTillerNotFound asserts tillerNotFoundError.
+func IsTillerNotFound(err error) bool {
+	return microerror.Cause(err) == tillerNotFoundError
+}
+
 var tooManyResultsError = &microerror.Error{
 	Kind: "tooManyResultsError",
 }
@@ -56,11 +65,11 @@ func IsTooManyResults(err error) bool {
 	return microerror.Cause(err) == tooManyResultsError
 }
 
-var tillerNotFoundError = &microerror.Error{
-	Kind: "tillerNotFoundError",
+var unexpectedStatusPhaseError = &microerror.Error{
+	Kind: "unexpectedStatusPhaseError",
 }
 
-// IsTillerNotFound asserts tillerNotFoundError.
-func IsTillerNotFound(err error) bool {
-	return microerror.Cause(err) == tillerNotFoundError
+// IsUnexpectedStatusPhase asserts notFoundError.
+func IsUnexpectedStatusPhase(err error) bool {
+	return microerror.Cause(err) == unexpectedStatusPhaseError
 }

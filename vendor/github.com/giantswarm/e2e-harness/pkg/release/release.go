@@ -97,6 +97,7 @@ func New(config Config) (*Release, error) {
 
 		c := conditionSetConfig{
 			ExtClient: config.ExtClient,
+			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 		}
 
@@ -104,7 +105,6 @@ func New(config Config) (*Release, error) {
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-
 	}
 
 	r := &Release{
@@ -119,6 +119,10 @@ func New(config Config) (*Release, error) {
 	}
 
 	return r, nil
+}
+
+func (r *Release) Condition() ConditionSet {
+	return r.condition
 }
 
 func (r *Release) Delete(ctx context.Context, name string) error {
@@ -154,6 +158,8 @@ func (r *Release) EnsureDeleted(ctx context.Context, name string) error {
 }
 
 func (r *Release) Install(ctx context.Context, name string, version Version, values string, conditions ...func() error) error {
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating release %#q", name))
+
 	var err error
 
 	chartname := fmt.Sprintf("%s-chart", name)
@@ -183,11 +189,13 @@ func (r *Release) Install(ctx context.Context, name string, version Version, val
 		}
 	}
 
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created release %#q", name))
+
 	return nil
 }
 
 func (r *Release) InstallOperator(ctx context.Context, name string, version Version, values string, crd *apiextensionsv1beta1.CustomResourceDefinition) error {
-	err := r.Install(ctx, name, version, values, r.condition.CRD(ctx, crd))
+	err := r.Install(ctx, name, version, values, r.condition.CRDExists(ctx, crd))
 	if err != nil {
 		return microerror.Mask(err)
 	}
