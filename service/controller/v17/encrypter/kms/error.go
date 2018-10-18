@@ -38,3 +38,12 @@ func IsKeyNotFound(err error) bool {
 
 	return false
 }
+
+var keyScheduledForDeletionError = &microerror.Error{
+	Kind: "keyScheduledForDeletionError",
+}
+
+// IsKeyScheduledForDeletion asserts keyScheduledForDeletionError.
+func IsKeyScheduledForDeletion(err error) bool {
+	return microerror.Cause(err) == keyScheduledForDeletionError
+}
