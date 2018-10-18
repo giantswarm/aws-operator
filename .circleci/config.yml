@@ -102,6 +102,32 @@ jobs:
 
 
 
+  e2eTestCurPRSameClusterID:
+    environment:
+      TESTED_VERSION: "current"
+      TEST_DIR: "integration/test/sameclusterid"
+    <<: *e2eTest
+
+  e2eTestCurMasterSameClusterID:
+    environment:
+      TESTED_VERSION: "current"
+      TEST_DIR: "integration/test/sameclusterid"
+    <<: *e2eTest
+
+  e2eTestWIPPRSameClusterID:
+    environment:
+      TESTED_VERSION: "wip"
+      TEST_DIR: "integration/test/sameclusterid"
+    <<: *e2eTest
+
+  e2eTestWIPMasterSameClusterID:
+    environment:
+      TESTED_VERSION: "wip"
+      TEST_DIR: "integration/test/sameclusterid"
+    <<: *e2eTest
+
+
+
   e2eTestCurPRScaling:
     environment:
       TESTED_VERSION: "current"
@@ -180,8 +206,6 @@ workflows:
 
 
 
-
-
       - e2eTestCurPRDraining:
           requires:
           - hold
@@ -195,6 +219,27 @@ workflows:
           requires:
           - build
       - e2eTestWIPMasterDraining:
+          filters:
+            branches:
+              only: master
+          requires:
+          - build
+
+
+
+      - e2eTestCurPRSameClusterID:
+          requires:
+          - hold
+      - e2eTestWIPPRSameClusterID:
+          requires:
+          - hold
+      - e2eTestCurMasterSameClusterID:
+          filters:
+            branches:
+              only: master
+          requires:
+          - build
+      - e2eTestWIPMasterSameClusterID:
           filters:
             branches:
               only: master
