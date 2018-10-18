@@ -16,13 +16,25 @@ func Test_Same_Cluster_ID(t *testing.T) {
 	var err error
 	ctx := context.Background()
 
-	err = setup.DeleteTenantCluster(ctx, config)
-	if err != nil {
-		t.Fatalf("expected %#v got %#v", nil, err)
+	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "deleting tenant cluster")
+
+		err = setup.DeleteTenantCluster(ctx, config)
+		if err != nil {
+			t.Fatalf("expected %#v got %#v", nil, err)
+		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "deleted tenant cluster")
 	}
 
-	err = setup.CreateTenantCluster(ctx, config)
-	if err != nil {
-		t.Fatalf("expected %#v got %#v", nil, err)
+	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "creating tenant cluster")
+
+		err = setup.CreateTenantCluster(ctx, config)
+		if err != nil {
+			t.Fatalf("expected %#v got %#v", nil, err)
+		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "created tenant cluster")
 	}
 }
