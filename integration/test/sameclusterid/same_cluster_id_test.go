@@ -5,6 +5,8 @@ package sameclusterid
 import (
 	"context"
 	"testing"
+
+	"github.com/giantswarm/aws-operator/integration/setup"
 )
 
 // Test_Same_Cluster_ID makes sure we can create the cluster with the same ID
