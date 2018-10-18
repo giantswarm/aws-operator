@@ -12,7 +12,6 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8srestconfig"
 	"github.com/giantswarm/statusresource"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/viper"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
@@ -274,7 +273,6 @@ func New(config Config) (*Service, error) {
 
 func (s *Service) Boot(ctx context.Context) {
 	s.bootOnce.Do(func() {
-		prometheus.MustRegister(s.metricsCollector)
 		go s.metricsCollector.Boot(ctx)
 		go s.statusResourceCollector.Boot(ctx)
 
