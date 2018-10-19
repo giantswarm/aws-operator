@@ -78,10 +78,14 @@ func (s *Service) GetHealthz(ctx context.Context) (healthzservice.Response, erro
 			if s.awsConfig.Region == "" {
 				s.awsConfig.Region = AWSRegion
 			}
-			clients := awsutil.NewClients(s.awsConfig)
+			clients, err := awsutil.NewClients(s.awsConfig)
+			if err != nil {
+				ch <- err.Error()
+				return
+			}
 
 			// Get the current user.
-			_, err := clients.IAM.GetUser(&iam.GetUserInput{})
+			_, err = clients.IAM.GetUser(&iam.GetUserInput{})
 			if err != nil {
 				ch <- err.Error()
 				return
