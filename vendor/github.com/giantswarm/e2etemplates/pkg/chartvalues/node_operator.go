@@ -6,10 +6,14 @@ import (
 )
 
 type NodeOperatorConfig struct {
+	Namespace          string
 	RegistryPullSecret string
 }
 
 func NewNodeOperator(config NodeOperatorConfig) (string, error) {
+	if config.Namespace == "" {
+		config.Namespace = "giantswarm"
+	}
 	if config.RegistryPullSecret == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.RegistryPullSecret must not be empty", config)
 	}

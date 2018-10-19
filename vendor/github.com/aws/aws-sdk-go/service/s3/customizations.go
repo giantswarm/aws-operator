@@ -3,7 +3,6 @@ package s3
 import (
 	"github.com/aws/aws-sdk-go/aws/client"
 	"github.com/aws/aws-sdk-go/aws/request"
-	"github.com/aws/aws-sdk-go/internal/s3err"
 )
 
 func init() {
@@ -22,7 +21,6 @@ func defaultInitClientFn(c *client.Client) {
 	// S3 uses custom error unmarshaling logic
 	c.Handlers.UnmarshalError.Clear()
 	c.Handlers.UnmarshalError.PushBack(unmarshalError)
-	c.Handlers.UnmarshalError.PushBackNamed(s3err.RequestFailureWrapperHandler())
 }
 
 func defaultInitRequestFn(r *request.Request) {
@@ -44,7 +42,6 @@ func defaultInitRequestFn(r *request.Request) {
 		r.Handlers.Validate.PushFront(populateLocationConstraint)
 	case opCopyObject, opUploadPartCopy, opCompleteMultipartUpload:
 		r.Handlers.Unmarshal.PushFront(copyMultipartStatusOKUnmarhsalError)
-		r.Handlers.Unmarshal.PushBackNamed(s3err.RequestFailureWrapperHandler())
 	case opPutObject, opUploadPart:
 		r.Handlers.Build.PushBack(computeBodyHashes)
 		// Disabled until #1837 root issue is resolved.

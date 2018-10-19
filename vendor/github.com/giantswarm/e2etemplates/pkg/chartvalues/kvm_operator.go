@@ -9,6 +9,7 @@ type KVMOperatorConfig struct {
 	ClusterName        string
 	ClusterRole        KVMOperatorClusterRole
 	ClusterRolePSP     KVMOperatorClusterRole
+	Namespace          string
 	PSP                KVMOperatorPSP
 	RegistryPullSecret string
 }
@@ -37,6 +38,9 @@ func NewKVMOperator(config KVMOperatorConfig) (string, error) {
 	}
 	if config.ClusterRolePSP.Name == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.ClusterRolePSP.Name must not be empty", config)
+	}
+	if config.Namespace == "" {
+		config.Namespace = "giantswarm"
 	}
 	if config.PSP.Name == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.PSP.Name must not be empty", config)
