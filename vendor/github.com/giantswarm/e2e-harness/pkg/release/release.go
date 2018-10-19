@@ -97,6 +97,7 @@ func New(config Config) (*Release, error) {
 
 		c := conditionSetConfig{
 			ExtClient: config.ExtClient,
+			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 		}
 
@@ -104,7 +105,6 @@ func New(config Config) (*Release, error) {
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-
 	}
 
 	r := &Release{
@@ -121,39 +121,55 @@ func New(config Config) (*Release, error) {
 	return r, nil
 }
 
+func (r *Release) Condition() ConditionSet {
+	return r.condition
+}
+
 func (r *Release) Delete(ctx context.Context, name string) error {
-	err := r.helmClient.DeleteRelease(name, helm.DeletePurge(true))
+	releaseName := fmt.Sprintf("%s-%s", r.namespace, name)
+
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting release %#q", releaseName))
+
+	err := r.helmClient.DeleteRelease(releaseName, helm.DeletePurge(true))
 	if helmclient.IsReleaseNotFound(err) {
-		return microerror.Maskf(releaseNotFoundError, name)
+		return microerror.Maskf(releaseNotFoundError, releaseName)
 	} else if helmclient.IsTillerNotFound(err) {
 		return microerror.Mask(tillerNotFoundError)
 	} else if err != nil {
 		return microerror.Mask(err)
 	}
 
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted release %#q", releaseName))
+
 	return nil
 }
 
 func (r *Release) EnsureDeleted(ctx context.Context, name string) error {
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensuring deletion of release %#q", name))
+	releaseName := fmt.Sprintf("%s-%s", r.namespace, name)
 
-	err := r.helmClient.DeleteRelease(name, helm.DeletePurge(true))
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensuring deletion of release %#q", releaseName))
+
+	err := r.helmClient.DeleteRelease(releaseName, helm.DeletePurge(true))
 	if helmclient.IsReleaseNotFound(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("release %#q does not exist", name))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("release %#q does not exist", releaseName))
 	} else if helmclient.IsTillerNotFound(err) {
 		r.logger.LogCtx(ctx, "level", "warning", "message", "tiller is not found/installed")
 	} else if err != nil {
 		return microerror.Mask(err)
 	} else {
-		r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("deleted release %#q", name))
+		r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("deleted release %#q", releaseName))
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensured deletion of release %#q", name))
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensured deletion of release %#q", releaseName))
 
 	return nil
 }
 
 func (r *Release) Install(ctx context.Context, name string, version Version, values string, conditions ...func() error) error {
+	releaseName := fmt.Sprintf("%s-%s", r.namespace, name)
+
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating release %#q", releaseName))
+
 	var err error
 
 	chartname := fmt.Sprintf("%s-chart", name)
@@ -171,7 +187,7 @@ func (r *Release) Install(ctx context.Context, name string, version Version, val
 		}
 	}
 
-	err = r.helmClient.InstallFromTarball(tarball, r.namespace, helm.ReleaseName(name), helm.ValueOverrides([]byte(values)), helm.InstallWait(true))
+	err = r.helmClient.InstallFromTarball(tarball, r.namespace, helm.ReleaseName(releaseName), helm.ValueOverrides([]byte(values)), helm.InstallWait(true))
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -183,11 +199,13 @@ func (r *Release) Install(ctx context.Context, name string, version Version, val
 		}
 	}
 
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created release %#q", releaseName))
+
 	return nil
 }
 
 func (r *Release) InstallOperator(ctx context.Context, name string, version Version, values string, crd *apiextensionsv1beta1.CustomResourceDefinition) error {
-	err := r.Install(ctx, name, version, values, r.condition.CRD(ctx, crd))
+	err := r.Install(ctx, name, version, values, r.condition.CRDExists(ctx, crd))
 	if err != nil {
 		return microerror.Mask(err)
 	}

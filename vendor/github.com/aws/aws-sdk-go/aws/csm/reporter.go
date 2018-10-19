@@ -90,13 +90,14 @@ func (rep *Reporter) sendAPICallAttemptMetric(r *request.Request) {
 }
 
 func setError(m *metric, err awserr.Error) {
-	msg := err.Error()
+	msg := err.Message()
 	code := err.Code()
 
 	switch code {
 	case "RequestError",
 		"SerializationError",
 		request.CanceledErrorCode:
+
 		m.SDKException = &code
 		m.SDKExceptionMessage = &msg
 	default:
@@ -118,7 +119,6 @@ func (rep *Reporter) sendAPICallMetric(r *request.Request) {
 		Timestamp:     (*metricTime)(&now),
 		Type:          aws.String("ApiCall"),
 		AttemptCount:  aws.Int(r.RetryCount + 1),
-		Region:        r.Config.Region,
 		Latency:       aws.Int(int(time.Now().Sub(r.Time) / time.Millisecond)),
 		XAmzRequestID: aws.String(r.RequestID),
 	}
@@ -223,10 +223,8 @@ func (rep *Reporter) InjectHandlers(handlers *request.Handlers) {
 	}
 
 	apiCallHandler := request.NamedHandler{Name: APICallMetricHandlerName, Fn: rep.sendAPICallMetric}
-	apiCallAttemptHandler := request.NamedHandler{Name: APICallAttemptMetricHandlerName, Fn: rep.sendAPICallAttemptMetric}
-
 	handlers.Complete.PushFrontNamed(apiCallHandler)
-	handlers.Complete.PushFrontNamed(apiCallAttemptHandler)
 
+	apiCallAttemptHandler := request.NamedHandler{Name: APICallAttemptMetricHandlerName, Fn: rep.sendAPICallAttemptMetric}
 	handlers.AfterRetry.PushFrontNamed(apiCallAttemptHandler)
 }

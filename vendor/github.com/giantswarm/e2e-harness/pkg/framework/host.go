@@ -138,7 +138,7 @@ func (h *Host) ApplyAWSConfigPatch(patch []PatchSpec, clusterName string) error 
 
 	_, err = h.g8sClient.
 		ProviderV1alpha1().
-		AWSConfigs("default").
+		AWSConfigs(h.targetNamespace).
 		Patch(clusterName, types.JSONPatchType, patchBytes)
 
 	if err != nil {
@@ -150,7 +150,7 @@ func (h *Host) ApplyAWSConfigPatch(patch []PatchSpec, clusterName string) error 
 
 func (h *Host) AWSCluster(name string) (*v1alpha1.AWSConfig, error) {
 	cluster, err := h.g8sClient.ProviderV1alpha1().
-		AWSConfigs("default").
+		AWSConfigs(h.targetNamespace).
 		Get(name, metav1.GetOptions{})
 
 	if err != nil {
@@ -216,11 +216,11 @@ func (h *Host) DeleteGuestCluster(ctx context.Context, provider string) error {
 
 			switch provider {
 			case "aws":
-				err = h.g8sClient.ProviderV1alpha1().AWSConfigs("default").Delete(h.clusterID, &metav1.DeleteOptions{})
+				err = h.g8sClient.ProviderV1alpha1().AWSConfigs(h.targetNamespace).Delete(h.clusterID, &metav1.DeleteOptions{})
 			case "azure":
-				err = h.g8sClient.ProviderV1alpha1().AzureConfigs("default").Delete(h.clusterID, &metav1.DeleteOptions{})
+				err = h.g8sClient.ProviderV1alpha1().AzureConfigs(h.targetNamespace).Delete(h.clusterID, &metav1.DeleteOptions{})
 			case "kvm":
-				err = h.g8sClient.ProviderV1alpha1().KVMConfigs("default").Delete(h.clusterID, &metav1.DeleteOptions{})
+				err = h.g8sClient.ProviderV1alpha1().KVMConfigs(h.targetNamespace).Delete(h.clusterID, &metav1.DeleteOptions{})
 			default:
 				return microerror.Maskf(unknownProviderError, "%#q not recognized", provider)
 			}
@@ -252,11 +252,11 @@ func (h *Host) DeleteGuestCluster(ctx context.Context, provider string) error {
 
 			switch provider {
 			case "aws":
-				_, err = h.g8sClient.ProviderV1alpha1().AWSConfigs("default").Get(h.clusterID, metav1.GetOptions{})
+				_, err = h.g8sClient.ProviderV1alpha1().AWSConfigs(h.targetNamespace).Get(h.clusterID, metav1.GetOptions{})
 			case "azure":
-				_, err = h.g8sClient.ProviderV1alpha1().AzureConfigs("default").Get(h.clusterID, metav1.GetOptions{})
+				_, err = h.g8sClient.ProviderV1alpha1().AzureConfigs(h.targetNamespace).Get(h.clusterID, metav1.GetOptions{})
 			case "kvm":
-				_, err = h.g8sClient.ProviderV1alpha1().KVMConfigs("default").Get(h.clusterID, metav1.GetOptions{})
+				_, err = h.g8sClient.ProviderV1alpha1().KVMConfigs(h.targetNamespace).Get(h.clusterID, metav1.GetOptions{})
 			default:
 				return microerror.Maskf(unknownProviderError, "%#q not recognized", provider)
 			}

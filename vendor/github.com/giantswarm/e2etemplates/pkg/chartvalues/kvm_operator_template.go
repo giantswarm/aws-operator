@@ -1,6 +1,7 @@
 package chartvalues
 
-const kvmOperatorTemplate = `clusterRoleBindingName: {{ .ClusterRole.BindingName }}
+const kvmOperatorTemplate = `
+clusterRoleBindingName: {{ .ClusterRole.BindingName }}
 clusterRoleBindingNamePSP: {{ .ClusterRolePSP.BindingName }}
 clusterRoleName: {{ .ClusterRole.Name }}
 clusterRoleNamePSP: {{ .ClusterRolePSP.Name }}
@@ -28,5 +29,6 @@ Installation:
       Registry:
         PullSecret:
           DockerConfigJSON: "{\"auths\":{\"quay.io\":{\"auth\":\"{{ .RegistryPullSecret }}\"}}}"
+namespace: {{ .Namespace }}
 pspName: {{ .PSP.Name }}
 `

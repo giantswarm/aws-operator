@@ -42,12 +42,17 @@ Installation:
       Domain: quay.io
     Secret:
       AzureOperator:
+        CredentialDefault:
+          clientid: {{ .Secret.AzureOperator.CredentialDefault.ClientID }}
+          clientsecret: {{ .Secret.AzureOperator.CredentialDefault.ClientSecret }}
+          subscriptionid: {{ .Secret.AzureOperator.CredentialDefault.SubscriptionID }}
+          tenantid: {{ .Secret.AzureOperator.CredentialDefault.TenantID }}
         SecretYaml: |
           service:
             azure:
               clientid: {{ .Secret.AzureOperator.SecretYaml.Service.Azure.ClientID }}
               clientsecret: {{ .Secret.AzureOperator.SecretYaml.Service.Azure.ClientSecret }}
-              subscriptionid: {{ .Secret.AzureOperator.SecretYaml.Service.Azure.SubsciptionID }}
+              subscriptionid: {{ .Secret.AzureOperator.SecretYaml.Service.Azure.SubscriptionID }}
               tenantid: {{ .Secret.AzureOperator.SecretYaml.Service.Azure.TenantID }}
               template:
                 uri:

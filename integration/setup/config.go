@@ -1,20 +1,22 @@
 package setup
 
 import (
-	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/e2e-harness/pkg/framework/filelogger"
 	"github.com/giantswarm/e2e-harness/pkg/framework/resource"
 	"github.com/giantswarm/e2e-harness/pkg/release"
 	e2eclientsaws "github.com/giantswarm/e2eclients/aws"
+	"github.com/giantswarm/e2esetup/k8s"
 	"github.com/giantswarm/helmclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+
+	"github.com/giantswarm/aws-operator/integration/env"
 )
 
 const (
-	namespace       = "default"
+	namespace       = "giantswarm"
 	organization    = "giantswarm"
 	tillerNamespace = "kube-system"
 	quayAddress     = "https://quay.io"
@@ -24,6 +26,7 @@ type Config struct {
 	AWSClient *e2eclientsaws.Client
 	Guest     *framework.Guest
 	Host      *framework.Host
+	K8s       *k8s.Setup
 	Release   *release.Release
 	Resource  *resource.Resource
 	Logger    micrologger.Logger
@@ -76,6 +79,19 @@ func NewConfig() (Config, error) {
 		}
 
 		host, err = framework.NewHost(c)
+		if err != nil {
+			return Config{}, microerror.Mask(err)
+		}
+	}
+
+	var k8sSetup *k8s.Setup
+	{
+		c := k8s.SetupConfig{
+			K8sClient: host.K8sClient(),
+			Logger:    logger,
+		}
+
+		k8sSetup, err = k8s.NewSetup(c)
 		if err != nil {
 			return Config{}, microerror.Mask(err)
 		}
@@ -150,6 +166,7 @@ func NewConfig() (Config, error) {
 		AWSClient: awsClient,
 		Guest:     guest,
 		Host:      host,
+		K8s:       k8sSetup,
 		Release:   newRelease,
 		Resource:  newResource,
 		Logger:    logger,
