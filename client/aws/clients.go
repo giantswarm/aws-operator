@@ -62,9 +62,6 @@ func NewClients(config Config) (Clients, error) {
 	if config.Region == "" {
 		return Clients{}, microerror.Maskf(invalidConfigError, "%T.Region must not be empty", config)
 	}
-	if config.SessionToken == "" {
-		return Clients{}, microerror.Maskf(invalidConfigError, "%T.SessionToken must not be empty", config)
-	}
 
 	var s *session.Session
 	{
