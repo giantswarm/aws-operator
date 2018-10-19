@@ -1,8 +1,6 @@
 package aws
 
 import (
-	"strings"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/client"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -26,8 +24,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/support"
 	"github.com/aws/aws-sdk-go/service/support/supportiface"
 	"github.com/giantswarm/microerror"
+)
 
-	"github.com/giantswarm/aws-operator/service/controller/v18/adapter"
+const (
+	// trustedAdvisorRegion describes the AWS region in which the trusted advisor
+	// service is available.
+	trustedAdvisorRegion = "us-east-1"
 )
 
 type Config struct {
@@ -52,14 +54,11 @@ type Clients struct {
 	Support        supportiface.SupportAPI
 }
 
-const (
-	accountIDPosition = 4
-	accountIDLength   = 12
-
-	trustedAdvisorRegion = "us-east-1" // trusted advisor only available in this region.
-)
-
 func NewClients(config Config) Clients {
+	if config.AccessKeyID == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.AccessKeyID must not be empty", config)
+	}
+
 	s := newSession(config)
 
 	if config.RoleARN != "" {
@@ -68,28 +67,6 @@ func NewClients(config Config) Clients {
 	} else {
 		return newClients(s)
 	}
-}
-
-func (c *Config) SetAccountID(iamClient iamiface.IAMAPI) error {
-	resp, err := iamClient.GetUser(&iam.GetUserInput{})
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	userArn := *resp.User.Arn
-	accountID := strings.Split(userArn, ":")[accountIDPosition]
-
-	if err := adapter.ValidateAccountID(accountID); err != nil {
-		return microerror.Mask(err)
-	}
-
-	c.accountID = accountID
-
-	return nil
-}
-
-func (c *Config) AccountID() string {
-	return c.accountID
 }
 
 func newClients(p client.ConfigProvider, cfgs ...*aws.Config) Clients {
