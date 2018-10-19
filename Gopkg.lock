@@ -303,11 +303,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:5ad5c525f99c4568ca9219e51708231cbe0710659ec3fd5a26d232139b840a82"
+  digest = "1:b50befcc0b01f8000103d2c07a8b47be2547d272a01b8689cc044281d48fe069"
   name = "github.com/giantswarm/e2esetup"
   packages = ["k8s"]
   pruneopts = "UT"
-  revision = "47891250152bdd807b032f78bb4f320a64c74149"
+  revision = "fbdbd487bc645dcb941f3f889a6db3345947fe3e"
 
 [[projects]]
   branch = "master"

@@ -39,7 +39,7 @@ func NewSetup(config SetupConfig) (*Setup, error) {
 	return s, nil
 }
 
-func (s *Setup) EnsureNamespace(ctx context.Context, namespace string) error {
+func (s *Setup) EnsureNamespaceCreated(ctx context.Context, namespace string) error {
 	s.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensuring Kubernetes Namespace %#q", namespace))
 
 	o := func() error {
@@ -77,6 +77,33 @@ func (s *Setup) EnsureNamespace(ctx context.Context, namespace string) error {
 	}
 
 	s.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensured Kubernetes Namespace %#q", namespace))
+
+	return nil
+}
+
+func (s *Setup) EnsureNamespaceDeleted(ctx context.Context, namespace string) error {
+	s.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensuring deletion of Kubernetes Namespace %#q", namespace))
+
+	o := func() error {
+		{
+			err := s.k8sClient.CoreV1().Namespaces().Delete(namespace, &metav1.DeleteOptions{})
+			if errors.IsNotFound(err) {
+				// fall through
+			} else if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+
+		return nil
+	}
+	b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
+
+	err := backoff.Retry(o, b)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	s.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensured deletion of Kubernetes Namespace %#q", namespace))
 
 	return nil
 }
