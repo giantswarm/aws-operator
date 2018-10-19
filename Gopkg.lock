@@ -310,16 +310,14 @@
   revision = "fbdbd487bc645dcb941f3f889a6db3345947fe3e"
 
 [[projects]]
-  branch = "aws-credential-default"
-  digest = "1:da411fe8a9b6513e21ba8beae86e14fa016f54bbd3910ef380dae2a19fab17cc"
+  branch = "master"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
     "internal/render",
     "pkg/chartvalues",
-    "pkg/e2etemplates",
+    "pkg/e2etemplates"
   ]
-  pruneopts = "UT"
-  revision = "d98a9928bf94bad3476068148f06a40451543e3d"
+  revision = "33b1a1239b499d811a7bf4391264eb663943784d"
 
 [[projects]]
   branch = "master"
