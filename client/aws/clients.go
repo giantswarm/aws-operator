@@ -2,7 +2,6 @@ package aws
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/client"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -35,10 +34,9 @@ const (
 type Config struct {
 	AccessKeyID     string
 	AccessKeySecret string
-	SessionToken    string
 	Region          string
 	RoleARN         string
-	accountID       string
+	SessionToken    string
 }
 
 type Clients struct {
@@ -54,42 +52,56 @@ type Clients struct {
 	Support        supportiface.SupportAPI
 }
 
-func NewClients(config Config) Clients {
+func NewClients(config Config) (Clients, error) {
 	if config.AccessKeyID == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.AccessKeyID must not be empty", config)
+		return Clients{}, microerror.Maskf(invalidConfigError, "%T.AccessKeyID must not be empty", config)
+	}
+	if config.AccessKeySecret == "" {
+		return Clients{}, microerror.Maskf(invalidConfigError, "%T.AccessKeySecret must not be empty", config)
+	}
+	if config.Region == "" {
+		return Clients{}, microerror.Maskf(invalidConfigError, "%T.Region must not be empty", config)
+	}
+	if config.SessionToken == "" {
+		return Clients{}, microerror.Maskf(invalidConfigError, "%T.SessionToken must not be empty", config)
 	}
 
-	s := newSession(config)
+	var s *session.Session
+	{
+		c := &aws.Config{
+			Credentials: credentials.NewStaticCredentials(config.AccessKeyID, config.AccessKeySecret, config.SessionToken),
+			Region:      aws.String(config.Region),
+		}
 
+		s = session.New(c)
+	}
+
+	var c Clients
 	if config.RoleARN != "" {
 		creds := stscreds.NewCredentials(s, config.RoleARN)
-		return newClients(s, &aws.Config{Credentials: creds})
+		c = newClients(s, &aws.Config{Credentials: creds})
 	} else {
-		return newClients(s)
+		c = newClients(s)
 	}
+
+	return c, nil
 }
 
-func newClients(p client.ConfigProvider, cfgs ...*aws.Config) Clients {
-	supportCfgs := append(cfgs, aws.NewConfig().WithRegion(trustedAdvisorRegion))
+func newClients(session *session.Session, configs ...*aws.Config) Clients {
+	supportConfigs := append(configs, aws.NewConfig().WithRegion(trustedAdvisorRegion))
 
-	return Clients{
-		AutoScaling:    autoscaling.New(p, cfgs...),
-		CloudFormation: cloudformation.New(p, cfgs...),
-		EC2:            ec2.New(p, cfgs...),
-		ELB:            elb.New(p, cfgs...),
-		IAM:            iam.New(p, cfgs...),
-		KMS:            kms.New(p, cfgs...),
-		Route53:        route53.New(p, cfgs...),
-		S3:             s3.New(p, cfgs...),
-		STS:            sts.New(p, cfgs...),
-		Support:        support.New(p, supportCfgs...),
+	c := Clients{
+		AutoScaling:    autoscaling.New(session, configs...),
+		CloudFormation: cloudformation.New(session, configs...),
+		EC2:            ec2.New(session, configs...),
+		ELB:            elb.New(session, configs...),
+		IAM:            iam.New(session, configs...),
+		KMS:            kms.New(session, configs...),
+		Route53:        route53.New(session, configs...),
+		S3:             s3.New(session, configs...),
+		STS:            sts.New(session, configs...),
+		Support:        support.New(session, supportConfigs...),
 	}
-}
 
-func newSession(config Config) *session.Session {
-	awsCfg := &aws.Config{
-		Credentials: credentials.NewStaticCredentials(config.AccessKeyID, config.AccessKeySecret, config.SessionToken),
-		Region:      aws.String(config.Region),
-	}
-	return session.New(awsCfg)
+	return c
 }

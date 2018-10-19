@@ -1,24 +1,14 @@
 package aws
 
-import "strings"
-
-const (
-	AlreadyAssociated        = "Resource.AlreadyAssociated"
-	InvalidSubnetConflict    = "InvalidSubnet.Conflict"
-	RoleDuplicate            = "EntityAlreadyExists: Role"
-	KeyPairDuplicate         = "InvalidKeyPair.Duplicate"
-	RouteDuplicate           = "RouteAlreadyExists"
-	SecurityGroupDuplicate   = "InvalidGroup.Duplicate"
-	ELBAlreadyExists         = "DuplicateLoadBalancerName"
-	ELBConfigurationMismatch = "already exists and it is configured with different parameters"
+import (
+	"github.com/giantswarm/microerror"
 )
 
-// IsIAMRoleDuplicateError checks for duplicate IAM Role errors.
-func IsIAMRoleDuplicateError(err error) bool {
-	return strings.Contains(err.Error(), RoleDuplicate)
+var invalidConfigError = &microerror.Error{
+	Kind: "invalidConfigError",
 }
 
-// IsRouteDuplicateError checks for duplicate Route errors.
-func IsRouteDuplicateError(err error) bool {
-	return strings.Contains(err.Error(), RouteDuplicate)
+// IsInvalidConfig asserts invalidConfigError.
+func IsInvalidConfig(err error) bool {
+	return microerror.Cause(err) == invalidConfigError
 }

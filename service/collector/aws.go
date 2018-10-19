@@ -6,7 +6,7 @@ import (
 	"github.com/giantswarm/microerror"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/client/aws"
+	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v15/credential"
 )
@@ -65,10 +65,10 @@ func (c Collector) getARNs() ([]string, error) {
 
 // getAWSClients return a list of aws clients for every guest cluster account plus
 // the host cluster account.
-func (c Collector) getAWSClients() ([]aws.Clients, error) {
+func (c Collector) getAWSClients() ([]clientaws.Clients, error) {
 	var (
-		clients    []aws.Clients
-		clientsMap = make(map[string]aws.Clients)
+		clients    []clientaws.Clients
+		clientsMap = make(map[string]clientaws.Clients)
 	)
 
 	arns, err := c.getARNs()
@@ -77,7 +77,7 @@ func (c Collector) getAWSClients() ([]aws.Clients, error) {
 	}
 
 	// addClientFunc add awsClients to clients using account id as key to guaranatee uniqueness.
-	addClientFunc := func(awsClients aws.Clients, clients *map[string]aws.Clients) error {
+	addClientFunc := func(awsClients clientaws.Clients, clients *map[string]clientaws.Clients) error {
 		accountID, err := c.awsAccountID(awsClients)
 		if err != nil {
 			return microerror.Mask(err)
@@ -91,19 +91,25 @@ func (c Collector) getAWSClients() ([]aws.Clients, error) {
 		return nil
 	}
 
-	// Host cluster account.
-	awsClients := aws.NewClients(c.awsConfig)
+	// Control plane account.
+	awsClients, err := clientaws.NewClients(c.awsConfig)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
 	err = addClientFunc(awsClients, &clientsMap)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	// Guest cluster accounts.
+	// Tenant cluster accounts.
 	for _, arn := range arns {
 		awsConfig := c.awsConfig
 		awsConfig.RoleARN = arn
 
-		awsClients := aws.NewClients(awsConfig)
+		awsClients, err := clientaws.NewClients(awsConfig)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 		err = addClientFunc(awsClients, &clientsMap)
 		if err != nil {
 			return nil, microerror.Mask(err)
@@ -120,7 +126,7 @@ func (c Collector) getAWSClients() ([]aws.Clients, error) {
 }
 
 // awsAccountID return the AWS account ID.
-func (c Collector) awsAccountID(awsClients aws.Clients) (string, error) {
+func (c Collector) awsAccountID(awsClients clientaws.Clients) (string, error) {
 	config := awsservice.Config{
 		Clients: awsservice.Clients{
 			KMS: awsClients.KMS,

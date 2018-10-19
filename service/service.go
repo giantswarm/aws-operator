@@ -17,7 +17,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
-	awsclient "github.com/giantswarm/aws-operator/client/aws"
+	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller"
@@ -188,13 +188,13 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var awsConfig awsclient.Config
+	var awsConfig clientaws.Config
 	{
-		awsConfig = awsclient.Config{
+		awsConfig = clientaws.Config{
 			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
 			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
-			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
 			Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
+			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
 		}
 	}
 
