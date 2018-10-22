@@ -8,15 +8,25 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "aws-operator",
-				Description: "Add your changes here.",
-				Kind:        versionbundle.KindAdded,
+				Component:   "cloudconfig",
+				Description: "Updated Calico to 3.2.3.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Updated Calico manifest with resource limits.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "cloudconfig",
+				Description: "Enabled admission plugins: DefaultTolerationSeconds, MutatingAdmissionWebhook, ValidatingAdmissionWebhook.",
+				Kind:        versionbundle.KindChanged,
 			},
 		},
 		Components: []versionbundle.Component{
 			{
 				Name:    "calico",
-				Version: "3.2.0",
+				Version: "3.2.3",
 			},
 			{
 				Name:    "containerlinux",
@@ -29,10 +39,6 @@ func VersionBundle() versionbundle.Bundle {
 			{
 				Name:    "etcd",
 				Version: "3.3.8",
-			},
-			{
-				Name:    "coredns",
-				Version: "1.1.1",
 			},
 			{
 				Name:    "kubernetes",

@@ -44,6 +44,10 @@ func (c *FakeCoreV1alpha1) ChartConfigs(namespace string) v1alpha1.ChartConfigIn
 	return &FakeChartConfigs{c, namespace}
 }
 
+func (c *FakeCoreV1alpha1) Clusters(namespace string) v1alpha1.ClusterInterface {
+	return &FakeClusters{c, namespace}
+}
+
 func (c *FakeCoreV1alpha1) DrainerConfigs(namespace string) v1alpha1.DrainerConfigInterface {
 	return &FakeDrainerConfigs{c, namespace}
 }
@@ -66,6 +70,10 @@ func (c *FakeCoreV1alpha1) KVMClusterConfigs(namespace string) v1alpha1.KVMClust
 
 func (c *FakeCoreV1alpha1) NodeConfigs(namespace string) v1alpha1.NodeConfigInterface {
 	return &FakeNodeConfigs{c, namespace}
+}
+
+func (c *FakeCoreV1alpha1) Releases(namespace string) v1alpha1.ReleaseInterface {
+	return &FakeReleases{c, namespace}
 }
 
 func (c *FakeCoreV1alpha1) StorageConfigs(namespace string) v1alpha1.StorageConfigInterface {

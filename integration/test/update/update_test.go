@@ -8,7 +8,7 @@ import (
 )
 
 func Test_Update(t *testing.T) {
-	err := u.Test(context.Background())
+	err := updateTest.Test(context.Background())
 	if err != nil {
 		t.Fatalf("%#v", err)
 	}

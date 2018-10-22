@@ -12,7 +12,6 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8srestconfig"
 	"github.com/giantswarm/statusresource"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/viper"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
@@ -22,7 +21,6 @@ import (
 	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller"
-	"github.com/giantswarm/aws-operator/service/healthz"
 )
 
 const (
@@ -43,7 +41,6 @@ type Config struct {
 }
 
 type Service struct {
-	Healthz *healthz.Service
 	Version *version.Service
 
 	bootOnce                sync.Once
@@ -206,23 +203,12 @@ func New(config Config) (*Service, error) {
 			K8sClient: k8sClient,
 			Logger:    config.Logger,
 
-			AwsConfig:        awsConfig,
-			InstallationName: config.Viper.GetString(config.Flag.Service.Installation.Name),
+			AwsConfig:             awsConfig,
+			InstallationName:      config.Viper.GetString(config.Flag.Service.Installation.Name),
+			TrustedAdvisorEnabled: config.Viper.GetBool(config.Flag.Service.AWS.TrustedAdvisor.Enabled),
 		}
 
 		metricsCollector, err = collector.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var healthzService *healthz.Service
-	{
-		c := healthz.Config{
-			AwsConfig: awsConfig,
-			Logger:    config.Logger,
-		}
-		healthzService, err = healthz.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -258,7 +244,6 @@ func New(config Config) (*Service, error) {
 	}
 
 	s := &Service{
-		Healthz: healthzService,
 		Version: versionService,
 
 		bootOnce:                sync.Once{},
@@ -273,7 +258,7 @@ func New(config Config) (*Service, error) {
 
 func (s *Service) Boot(ctx context.Context) {
 	s.bootOnce.Do(func() {
-		prometheus.MustRegister(s.metricsCollector)
+		go s.metricsCollector.Boot(ctx)
 		go s.statusResourceCollector.Boot(ctx)
 
 		go s.clusterController.Boot()

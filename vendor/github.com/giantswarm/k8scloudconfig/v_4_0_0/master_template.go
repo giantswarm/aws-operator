@@ -257,6 +257,7 @@ systemd:
       --network-plugin=cni \
       --register-node=true \
       --register-with-taints=node-role.kubernetes.io/master=:NoSchedule \
+      --pod-manifest-path=/etc/kubernetes/manifests \
       --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yaml \
       --node-labels="node-role.kubernetes.io/master,role=master,ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
       --v=2"

@@ -18,6 +18,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"k8s.io/api/core/v1"
+	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -48,8 +49,9 @@ type Host struct {
 	logger     micrologger.Logger
 	filelogger *filelogger.FileLogger
 
+	extClient            *apiextensionsclient.Clientset
 	g8sClient            *versioned.Clientset
-	k8sClient            kubernetes.Interface
+	k8sClient            *kubernetes.Clientset
 	k8sAggregationClient *aggregationclient.Clientset
 	restConfig           *rest.Config
 
@@ -77,6 +79,10 @@ func NewHost(c HostConfig) (*Host, error) {
 	}
 
 	restConfig, err := clientcmd.BuildConfigFromFlags("", harness.DefaultKubeConfig)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+	extClient, err := apiextensionsclient.NewForConfig(restConfig)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -110,6 +116,7 @@ func NewHost(c HostConfig) (*Host, error) {
 		logger:     c.Logger,
 		filelogger: fileLogger,
 
+		extClient:            extClient,
 		g8sClient:            g8sClient,
 		k8sClient:            k8sClient,
 		k8sAggregationClient: k8sAggregationClient,
@@ -131,7 +138,7 @@ func (h *Host) ApplyAWSConfigPatch(patch []PatchSpec, clusterName string) error 
 
 	_, err = h.g8sClient.
 		ProviderV1alpha1().
-		AWSConfigs("default").
+		AWSConfigs(h.targetNamespace).
 		Patch(clusterName, types.JSONPatchType, patchBytes)
 
 	if err != nil {
@@ -143,7 +150,7 @@ func (h *Host) ApplyAWSConfigPatch(patch []PatchSpec, clusterName string) error 
 
 func (h *Host) AWSCluster(name string) (*v1alpha1.AWSConfig, error) {
 	cluster, err := h.g8sClient.ProviderV1alpha1().
-		AWSConfigs("default").
+		AWSConfigs(h.targetNamespace).
 		Get(name, metav1.GetOptions{})
 
 	if err != nil {
@@ -209,11 +216,11 @@ func (h *Host) DeleteGuestCluster(ctx context.Context, provider string) error {
 
 			switch provider {
 			case "aws":
-				err = h.g8sClient.ProviderV1alpha1().AWSConfigs("default").Delete(h.clusterID, &metav1.DeleteOptions{})
+				err = h.g8sClient.ProviderV1alpha1().AWSConfigs(h.targetNamespace).Delete(h.clusterID, &metav1.DeleteOptions{})
 			case "azure":
-				err = h.g8sClient.ProviderV1alpha1().AzureConfigs("default").Delete(h.clusterID, &metav1.DeleteOptions{})
+				err = h.g8sClient.ProviderV1alpha1().AzureConfigs(h.targetNamespace).Delete(h.clusterID, &metav1.DeleteOptions{})
 			case "kvm":
-				err = h.g8sClient.ProviderV1alpha1().KVMConfigs("default").Delete(h.clusterID, &metav1.DeleteOptions{})
+				err = h.g8sClient.ProviderV1alpha1().KVMConfigs(h.targetNamespace).Delete(h.clusterID, &metav1.DeleteOptions{})
 			default:
 				return microerror.Maskf(unknownProviderError, "%#q not recognized", provider)
 			}
@@ -245,11 +252,11 @@ func (h *Host) DeleteGuestCluster(ctx context.Context, provider string) error {
 
 			switch provider {
 			case "aws":
-				_, err = h.g8sClient.ProviderV1alpha1().AWSConfigs("default").Get(h.clusterID, metav1.GetOptions{})
+				_, err = h.g8sClient.ProviderV1alpha1().AWSConfigs(h.targetNamespace).Get(h.clusterID, metav1.GetOptions{})
 			case "azure":
-				_, err = h.g8sClient.ProviderV1alpha1().AzureConfigs("default").Get(h.clusterID, metav1.GetOptions{})
+				_, err = h.g8sClient.ProviderV1alpha1().AzureConfigs(h.targetNamespace).Get(h.clusterID, metav1.GetOptions{})
 			case "kvm":
-				_, err = h.g8sClient.ProviderV1alpha1().KVMConfigs("default").Get(h.clusterID, metav1.GetOptions{})
+				_, err = h.g8sClient.ProviderV1alpha1().KVMConfigs(h.targetNamespace).Get(h.clusterID, metav1.GetOptions{})
 			default:
 				return microerror.Maskf(unknownProviderError, "%#q not recognized", provider)
 			}
@@ -275,6 +282,10 @@ func (h *Host) DeleteGuestCluster(ctx context.Context, provider string) error {
 	}
 
 	return nil
+}
+
+func (h *Host) ExtClient() apiextensionsclient.Interface {
+	return h.extClient
 }
 
 // G8sClient returns the host cluster framework's Giant Swarm client.

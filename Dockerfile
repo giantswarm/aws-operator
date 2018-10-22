@@ -1,12 +1,9 @@
-FROM alpine:3.7
+FROM alpine:3.8
 
 RUN apk add --no-cache ca-certificates
 
 RUN mkdir -p /opt/aws-operator
 ADD ./aws-operator /opt/aws-operator/aws-operator
-
-RUN mkdir -p /opt/aws-operator/service
-ADD service/templates/ /opt/aws-operator/service/templates
 
 RUN mkdir -p /opt/ignition
 ADD vendor/github.com/giantswarm/k8scloudconfig/ /opt/ignition
