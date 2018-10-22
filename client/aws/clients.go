@@ -63,6 +63,8 @@ func NewClients(config Config) (Clients, error) {
 		return Clients{}, microerror.Maskf(invalidConfigError, "%T.Region must not be empty", config)
 	}
 
+	var err error
+
 	var s *session.Session
 	{
 		c := &aws.Config{
@@ -70,7 +72,10 @@ func NewClients(config Config) (Clients, error) {
 			Region:      aws.String(config.Region),
 		}
 
-		s = session.New(c)
+		s, err = session.NewSession(c)
+		if err != nil {
+			return Clients{}, microerror.Mask(err)
+		}
 	}
 
 	var c Clients
