@@ -3,17 +3,6 @@ package controller
 import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	"github.com/giantswarm/certs"
-	"github.com/giantswarm/legacycerts/legacy"
-	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/client/k8scrdclient"
-	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/informer"
-	"github.com/giantswarm/randomkeys"
-	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	"k8s.io/client-go/kubernetes"
-
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v12"
 	v12adapter "github.com/giantswarm/aws-operator/service/controller/v12/adapter"
@@ -51,6 +40,16 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v18"
 	v18adapter "github.com/giantswarm/aws-operator/service/controller/v18/adapter"
 	v18cloudconfig "github.com/giantswarm/aws-operator/service/controller/v18/cloudconfig"
+	"github.com/giantswarm/certs"
+	"github.com/giantswarm/legacycerts/legacy"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/operatorkit/client/k8scrdclient"
+	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/informer"
+	"github.com/giantswarm/randomkeys"
+	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	"k8s.io/client-go/kubernetes"
 )
 
 type ClusterConfig struct {
@@ -244,17 +243,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		certConfig.K8sClient = config.K8sClient
 		certConfig.Logger = config.Logger
 		legacyCertsSearcher, err = legacy.NewService(certConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var keyWatcher *randomkeytpr.Service
-	{
-		keyConfig := randomkeytpr.DefaultServiceConfig()
-		keyConfig.K8sClient = config.K8sClient
-		keyConfig.Logger = config.Logger
-		keyWatcher, err = randomkeytpr.NewService(keyConfig)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
