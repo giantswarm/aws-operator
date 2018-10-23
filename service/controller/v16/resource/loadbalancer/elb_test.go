@@ -311,7 +311,7 @@ func Test_splitLoadBalancers(t *testing.T) {
 			result := splitLoadBalancers(tc.loadBalancerNames, tc.chunkSize)
 
 			if !reflect.DeepEqual(result, tc.expectedChunks) {
-				t.Fatalf("chunks == %q, want %q", result, tc.expectedChunks)
+				t.Fatalf("chunks == %#v, want %#v", result, tc.expectedChunks)
 			}
 		})
 	}
