@@ -11,7 +11,7 @@ import (
 	"github.com/giantswarm/micrologger"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/giantswarm/aws-operator/client/aws"
+	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v16patch1/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v16patch1/credential"
 	"github.com/giantswarm/aws-operator/service/controller/v16patch1/key"
@@ -22,7 +22,7 @@ const (
 )
 
 type Config struct {
-	HostAWSConfig aws.Config
+	HostAWSConfig clientaws.Config
 	HostRoute53   *route53.Route53
 	K8sClient     kubernetes.Interface
 	Logger        micrologger.Logger
@@ -84,7 +84,7 @@ type Config struct {
 // k8s.installation.eu-central-1.aws.gigantic.io zone from the default guest
 // account.
 type Resource struct {
-	hostAWSConfig aws.Config
+	hostAWSConfig clientaws.Config
 	k8sClient     kubernetes.Interface
 	logger        micrologger.Logger
 
@@ -92,7 +92,7 @@ type Resource struct {
 }
 
 func New(config Config) (*Resource, error) {
-	if reflect.DeepEqual(aws.Config{}, config.HostAWSConfig) {
+	if reflect.DeepEqual(clientaws.Config{}, config.HostAWSConfig) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSConfig must not be empty", config)
 	}
 	if config.HostRoute53 == nil {
@@ -425,7 +425,13 @@ func (r *Resource) route53Clients(ctx context.Context) (guest, defaultGuest *rou
 
 		c := r.hostAWSConfig
 		c.RoleARN = arn
-		defaultGuest = aws.NewClients(c).Route53
+
+		newClients, err := clientaws.NewClients(c)
+		if err != nil {
+			return nil, nil, microerror.Mask(err)
+		}
+
+		defaultGuest = newClients.Route53
 	}
 
 	return guest, defaultGuest, nil
