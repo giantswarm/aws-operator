@@ -128,7 +128,10 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 			c := config.HostAWSConfig
 			c.RoleARN = arn
 
-			awsClient = aws.NewClients(c)
+			awsClient, err = aws.NewClients(c)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
 		}
 
 		var cloudFormationService *cloudformationservice.CloudFormation

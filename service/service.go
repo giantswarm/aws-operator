@@ -17,11 +17,10 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
-	awsclient "github.com/giantswarm/aws-operator/client/aws"
+	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller"
-	"github.com/giantswarm/aws-operator/service/healthz"
 )
 
 const (
@@ -42,7 +41,6 @@ type Config struct {
 }
 
 type Service struct {
-	Healthz *healthz.Service
 	Version *version.Service
 
 	bootOnce                sync.Once
@@ -188,13 +186,13 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var awsConfig awsclient.Config
+	var awsConfig clientaws.Config
 	{
-		awsConfig = awsclient.Config{
+		awsConfig = clientaws.Config{
 			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
 			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
-			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
 			Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
+			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
 		}
 	}
 
@@ -211,18 +209,6 @@ func New(config Config) (*Service, error) {
 		}
 
 		metricsCollector, err = collector.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var healthzService *healthz.Service
-	{
-		c := healthz.Config{
-			AwsConfig: awsConfig,
-			Logger:    config.Logger,
-		}
-		healthzService, err = healthz.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -258,7 +244,6 @@ func New(config Config) (*Service, error) {
 	}
 
 	s := &Service{
-		Healthz: healthzService,
 		Version: versionService,
 
 		bootOnce:                sync.Once{},

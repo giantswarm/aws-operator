@@ -1,4 +1,4 @@
-package healthz
+package aws
 
 import (
 	"github.com/giantswarm/microerror"
