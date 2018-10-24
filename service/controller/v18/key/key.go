@@ -103,7 +103,13 @@ func AutoScalingGroupName(customObject v1alpha1.AWSConfig, groupName string) str
 }
 
 func AvailabilityZone(customObject v1alpha1.AWSConfig) string {
-	return customObject.AvailabilityZones()[0]
+	availabilityZones := customObject.AvailabilityZones()
+
+	if len(availabilityZones) == 0 {
+		return ""
+	}
+
+	return availabilityZones[0]
 }
 
 func AWSCliContainerRegistry(customObject v1alpha1.AWSConfig) string {
