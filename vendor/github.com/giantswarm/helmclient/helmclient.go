@@ -394,7 +394,9 @@ func (c *Client) InstallFromTarball(path, ns string, options ...helmclient.Insta
 		release, err := c.newHelmClientFromTunnel(t).InstallRelease(path, ns, options...)
 		if IsCannotReuseRelease(err) {
 			return backoff.Permanent(microerror.Mask(err))
-		} else if IsReleaseNotFound(err) {
+		} else if IsReleaseAlreadyExists(err) {
+			return backoff.Permanent(microerror.Mask(err))
+		} else if IsTarballNotFound(err) {
 			return backoff.Permanent(microerror.Mask(err))
 		} else if err != nil {
 			if IsInvalidGZipHeader(err) {

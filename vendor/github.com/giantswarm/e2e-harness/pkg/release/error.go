@@ -1,6 +1,8 @@
 package release
 
-import "github.com/giantswarm/microerror"
+import (
+	"github.com/giantswarm/microerror"
+)
 
 var invalidConfigError = &microerror.Error{
 	Kind: "invalidConfigError",
@@ -18,6 +20,15 @@ var notFoundError = &microerror.Error{
 // IsNotFound asserts notFoundError.
 func IsNotFound(err error) bool {
 	return microerror.Cause(err) == notFoundError
+}
+
+var releaseAlreadyExistsError = &microerror.Error{
+	Kind: "releaseAlreadyExistsError",
+}
+
+// IsReleaseAlreadyExists asserts releaseAlreadyExistsError.
+func IsReleaseAlreadyExists(err error) bool {
+	return microerror.Cause(err) == releaseAlreadyExistsError
 }
 
 var releaseNotFoundError = &microerror.Error{
@@ -47,13 +58,13 @@ func IsReleaseVersionNotMatching(err error) bool {
 	return microerror.Cause(err) == releaseVersionNotMatchingError
 }
 
-var tooManyResultsError = &microerror.Error{
-	Kind: "tooManyResultsError",
+var tarballNotFoundError = &microerror.Error{
+	Kind: "tarballNotFoundError",
 }
 
-// IsTooManyResults asserts invalidConfigError.
-func IsTooManyResults(err error) bool {
-	return microerror.Cause(err) == tooManyResultsError
+// IsTarballNotFound asserts tarballNotFoundError.
+func IsTarballNotFound(err error) bool {
+	return microerror.Cause(err) == tarballNotFoundError
 }
 
 var tillerNotFoundError = &microerror.Error{
@@ -63,4 +74,22 @@ var tillerNotFoundError = &microerror.Error{
 // IsTillerNotFound asserts tillerNotFoundError.
 func IsTillerNotFound(err error) bool {
 	return microerror.Cause(err) == tillerNotFoundError
+}
+
+var tooManyResultsError = &microerror.Error{
+	Kind: "tooManyResultsError",
+}
+
+// IsTooManyResults asserts invalidConfigError.
+func IsTooManyResults(err error) bool {
+	return microerror.Cause(err) == tooManyResultsError
+}
+
+var unexpectedStatusPhaseError = &microerror.Error{
+	Kind: "unexpectedStatusPhaseError",
+}
+
+// IsUnexpectedStatusPhase asserts notFoundError.
+func IsUnexpectedStatusPhase(err error) bool {
+	return microerror.Cause(err) == unexpectedStatusPhaseError
 }

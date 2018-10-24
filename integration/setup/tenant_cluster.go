@@ -10,10 +10,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/aws-operator/integration/env"
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/release"
 	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
 	"github.com/giantswarm/e2etemplates/pkg/e2etemplates"
 	"github.com/giantswarm/microerror"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func CreateTenantCluster(ctx context.Context, config Config) error {
@@ -31,12 +34,68 @@ func CreateTenantCluster(ctx context.Context, config Config) error {
 }
 
 func DeleteTenantCluster(ctx context.Context, config Config) error {
-	err := config.Release.Delete(ctx, "apiextensions-aws-config-e2e")
+	err := config.Release.EnsureDeleted(ctx, "apiextensions-aws-config-e2e", crNotExistsCondition(ctx, config))
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
 	return nil
+}
+
+func crExistsCondition(ctx context.Context, config Config) release.ConditionFunc {
+	return func() error {
+		name := env.ClusterID()
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for creation of CR %#q in namespace %#q", name, namespace))
+
+		o := func() error {
+			_, err := config.Host.G8sClient().ProviderV1alpha1().AWSConfigs(namespace).Get(name, metav1.GetOptions{})
+			if apierrors.IsNotFound(err) {
+				return microerror.Maskf(notFoundError, "CR %#q in namespace %#q", name, namespace)
+			} else if err != nil {
+				return backoff.Permanent(microerror.Mask(err))
+			}
+
+			return nil
+		}
+		b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
+		n := backoff.NewNotifier(config.Logger, ctx)
+		err := backoff.RetryNotify(o, b, n)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for creation of CR %#q in namespace %#q", name, namespace))
+		return nil
+	}
+}
+
+func crNotExistsCondition(ctx context.Context, config Config) release.ConditionFunc {
+	return func() error {
+		name := env.ClusterID()
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for deletion of CR %#q in namespace %#q", name, namespace))
+
+		o := func() error {
+			_, err := config.Host.G8sClient().ProviderV1alpha1().AWSConfigs(namespace).Get(name, metav1.GetOptions{})
+			if apierrors.IsNotFound(err) {
+				return nil
+			} else if err != nil {
+				return backoff.Permanent(microerror.Mask(err))
+			}
+
+			return microerror.Maskf(stillExistsError, "CR %#q in namespace %#q", name, namespace)
+		}
+		b := backoff.NewExponential(backoff.LongMaxWait, backoff.LongMaxInterval)
+		n := backoff.NewNotifier(config.Logger, ctx)
+		err := backoff.RetryNotify(o, b, n)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for deletion of CR %#q in namespace %#q", name, namespace))
+		return nil
+	}
 }
 
 func ensureHostVPC(ctx context.Context, config Config) (string, error) {
@@ -126,7 +185,7 @@ func installAWSConfig(ctx context.Context, config Config, vpcPeerID string) erro
 		}
 	}
 
-	err = config.Release.Install(ctx, "apiextensions-aws-config-e2e", release.NewStableVersion(), values)
+	err = config.Release.Install(ctx, "apiextensions-aws-config-e2e", release.NewStableVersion(), values, crExistsCondition(ctx, config))
 	if err != nil {
 		return microerror.Mask(err)
 	}
