@@ -51,12 +51,12 @@ jobs:
     docker:
       - image: busybox
     steps:
-      - run: true
+      - run: "true"
   pr:
     docker:
       - image: busybox
     steps:
-      - run: true
+      - run: "true"
 
 
 
