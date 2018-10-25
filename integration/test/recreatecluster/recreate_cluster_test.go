@@ -9,10 +9,10 @@ import (
 	"github.com/giantswarm/aws-operator/integration/setup"
 )
 
-// Test_Same_Cluster_ID makes sure we can create the cluster with the same ID
+// Test_Recreate_Cluster makes sure we can create the cluster for the same CR
 // after previous one is deleted. This improves coverage of resources
 // idempotentency.
-func Test_Same_Cluster_ID(t *testing.T) {
+func Test_Recreate_Cluster(t *testing.T) {
 	var err error
 	ctx := context.Background()
 

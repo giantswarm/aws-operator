@@ -102,28 +102,28 @@ jobs:
 
 
 
-  e2eTestCurPRSameClusterID:
+  e2eTestCurPRRecreateCluster:
     environment:
       TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/sameclusterid"
+      TEST_DIR: "integration/test/recreatecluster"
     <<: *e2eTest
 
-  e2eTestCurMasterSameClusterID:
+  e2eTestCurMasterRecreateCluster:
     environment:
       TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/sameclusterid"
+      TEST_DIR: "integration/test/recreatecluster"
     <<: *e2eTest
 
-  e2eTestWIPPRSameClusterID:
+  e2eTestWIPPRRecreateCluster:
     environment:
       TESTED_VERSION: "wip"
-      TEST_DIR: "integration/test/sameclusterid"
+      TEST_DIR: "integration/test/recreatecluster"
     <<: *e2eTest
 
-  e2eTestWIPMasterSameClusterID:
+  e2eTestWIPMasterRecreateCluster:
     environment:
       TESTED_VERSION: "wip"
-      TEST_DIR: "integration/test/sameclusterid"
+      TEST_DIR: "integration/test/recreatecluster"
     <<: *e2eTest
 
 
@@ -227,19 +227,19 @@ workflows:
 
 
 
-      - e2eTestCurPRSameClusterID:
+      - e2eTestCurPRRecreateCluster:
           requires:
           - hold
-      - e2eTestWIPPRSameClusterID:
+      - e2eTestWIPPRRecreateCluster:
           requires:
           - hold
-      - e2eTestCurMasterSameClusterID:
+      - e2eTestCurMasterRecreateCluster:
           filters:
             branches:
               only: master
           requires:
           - build
-      - e2eTestWIPMasterSameClusterID:
+      - e2eTestWIPMasterRecreateCluster:
           filters:
             branches:
               only: master
