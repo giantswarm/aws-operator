@@ -14,7 +14,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "cloudconfig",
-				Description: "Updated Calico manifest with resource limits.",
+				Description: "Updated Calico manifest with resource limits to get QoS policy guaranteed.",
 				Kind:        versionbundle.KindChanged,
 			},
 			{
