@@ -47,6 +47,8 @@ jobs:
           if [ "${CIRCLE_BRANCH}" == "master" ]; then
             ./architect deploy
           fi
+  master: {}
+  pr: {}
 
 
 
