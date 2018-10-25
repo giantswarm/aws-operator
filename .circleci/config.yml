@@ -48,11 +48,13 @@ jobs:
             ./architect deploy
           fi
   master:
-    machine: true
+    docker:
+      - image: busybox
     steps:
       - run: true
   pr:
-    machine: true
+    docker:
+      - image: busybox
     steps:
       - run: true
 
