@@ -219,7 +219,10 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		Region:          config.HostAWSConfig.Region,
 	}
 
-	awsHostClients := awsclient.NewClients(hostAWSConfig)
+	awsHostClients, err := awsclient.NewClients(hostAWSConfig)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
 
 	var certsSearcher *legacy.Service
 	{

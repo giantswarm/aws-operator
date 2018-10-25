@@ -10,6 +10,7 @@ type CertOperatorConfig struct {
 	ClusterRole        CertOperatorClusterRole
 	ClusterRolePSP     CertOperatorClusterRole
 	CommonDomain       string
+	Namespace          string
 	RegistryPullSecret string
 	PSP                CertOperatorPSP
 	Vault              CertOperatorVault
@@ -46,6 +47,9 @@ func NewCertOperator(config CertOperatorConfig) (string, error) {
 	}
 	if config.CommonDomain == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.CommonDomain must not be empty", config)
+	}
+	if config.Namespace == "" {
+		config.Namespace = "giantswarm"
 	}
 	if config.PSP.Name == "" {
 		config.PSP.Name = "cert-operator-psp"
