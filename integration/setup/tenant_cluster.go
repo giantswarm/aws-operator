@@ -19,6 +19,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	crNamespace = "default"
+)
+
 func EnsureTenantClusterCreated(ctx context.Context, config Config) error {
 	vpcID, err := ensureHostVPC(ctx, config)
 	if err != nil {
@@ -46,12 +50,12 @@ func crExistsCondition(ctx context.Context, config Config) release.ConditionFunc
 	return func() error {
 		name := env.ClusterID()
 
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for creation of CR %#q in namespace %#q", name, namespace))
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for creation of CR %#q in namespace %#q", name, crNamespace))
 
 		o := func() error {
-			_, err := config.Host.G8sClient().ProviderV1alpha1().AWSConfigs(namespace).Get(name, metav1.GetOptions{})
+			_, err := config.Host.G8sClient().ProviderV1alpha1().AWSConfigs(crNamespace).Get(name, metav1.GetOptions{})
 			if apierrors.IsNotFound(err) {
-				return microerror.Maskf(notFoundError, "CR %#q in namespace %#q", name, namespace)
+				return microerror.Maskf(notFoundError, "CR %#q in namespace %#q", name, crNamespace)
 			} else if err != nil {
 				return backoff.Permanent(microerror.Mask(err))
 			}
@@ -65,7 +69,7 @@ func crExistsCondition(ctx context.Context, config Config) release.ConditionFunc
 			return microerror.Mask(err)
 		}
 
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for creation of CR %#q in namespace %#q", name, namespace))
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for creation of CR %#q in namespace %#q", name, crNamespace))
 		return nil
 	}
 }
@@ -74,17 +78,17 @@ func crNotExistsCondition(ctx context.Context, config Config) release.ConditionF
 	return func() error {
 		name := env.ClusterID()
 
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for deletion of CR %#q in namespace %#q", name, namespace))
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for deletion of CR %#q in namespace %#q", name, crNamespace))
 
 		o := func() error {
-			_, err := config.Host.G8sClient().ProviderV1alpha1().AWSConfigs(namespace).Get(name, metav1.GetOptions{})
+			_, err := config.Host.G8sClient().ProviderV1alpha1().AWSConfigs(crNamespace).Get(name, metav1.GetOptions{})
 			if apierrors.IsNotFound(err) {
 				return nil
 			} else if err != nil {
 				return backoff.Permanent(microerror.Mask(err))
 			}
 
-			return microerror.Maskf(stillExistsError, "CR %#q in namespace %#q", name, namespace)
+			return microerror.Maskf(stillExistsError, "CR %#q in namespace %#q", name, crNamespace)
 		}
 		b := backoff.NewExponential(backoff.LongMaxWait, backoff.LongMaxInterval)
 		n := backoff.NewNotifier(config.Logger, ctx)
@@ -93,7 +97,7 @@ func crNotExistsCondition(ctx context.Context, config Config) release.ConditionF
 			return microerror.Mask(err)
 		}
 
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for deletion of CR %#q in namespace %#q", name, namespace))
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for deletion of CR %#q in namespace %#q", name, crNamespace))
 		return nil
 	}
 }
