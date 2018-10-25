@@ -3,30 +3,66 @@ package collector
 import (
 	"fmt"
 
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v15/credential"
 )
 
-const (
-	ClusterTag      = "giantswarm.io/cluster"
-	InstallationTag = "giantswarm.io/installation"
-	OrganizationTag = "giantswarm.io/organization"
+type HelperConfig struct {
+	G8sClient versioned.Interface
+	K8sClient kubernetes.Interface
+	Logger    micrologger.Logger
 
-	ClusterLabel      = "cluster_id"
-	InstallationLabel = "installation"
-	OrganizationLabel = "organization"
-)
+	AwsConfig clientaws.Config
+}
 
-// getARNs list all unique aws IAM ARN from credential secret.
-func (c Collector) getARNs() ([]string, error) {
+type Helper struct {
+	g8sClient versioned.Interface
+	k8sClient kubernetes.Interface
+	logger    micrologger.Logger
+
+	awsConfig clientaws.Config
+}
+
+func NewHelper(config HelperConfig) (*Helper, error) {
+	if config.G8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
+	}
+	if config.K8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
+	}
+	if config.Logger == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
+	}
+
+	var emptyAwsConfig clientaws.Config
+	if config.AwsConfig == emptyAwsConfig {
+		return nil, microerror.Maskf(invalidConfigError, "%T.AwsConfig must not be empty", config)
+	}
+
+	h := &Helper{
+		g8sClient: config.G8sClient,
+		k8sClient: config.K8sClient,
+		logger:    config.Logger,
+
+		awsConfig: config.AwsConfig,
+	}
+
+	return h, nil
+}
+
+// GetARNs list all unique aws IAM ARN from credential secret.
+func (h *Helper) GetARNs() ([]string, error) {
 	var arns []string
 
 	// List AWSConfigs.
-	awsConfigClient := c.g8sClient.ProviderV1alpha1().AWSConfigs("")
+	awsConfigClient := h.g8sClient.ProviderV1alpha1().AWSConfigs("")
 	awsConfigs, err := awsConfigClient.List(v1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -35,7 +71,7 @@ func (c Collector) getARNs() ([]string, error) {
 	// Get unique ARNs.
 	arnsMap := make(map[string]bool)
 	for _, awsConfig := range awsConfigs.Items {
-		arn, err := credential.GetARN(c.k8sClient, &awsConfig)
+		arn, err := credential.GetARN(h.k8sClient, &awsConfig)
 		// Collect as many ARNs as possible in order to provide most metrics.
 		// Ignore old cluster which do not have credential.
 		if credential.IsCredentialNameEmptyError(err) {
@@ -50,7 +86,7 @@ func (c Collector) getARNs() ([]string, error) {
 	}
 
 	// Ensure we check the default guest account for old cluster not having credential.
-	arn, err := credential.GetDefaultARN(c.k8sClient)
+	arn, err := credential.GetDefaultARN(h.k8sClient)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -63,22 +99,22 @@ func (c Collector) getARNs() ([]string, error) {
 	return arns, nil
 }
 
-// getAWSClients return a list of aws clients for every guest cluster account plus
+// GetAWSClients return a list of aws clients for every guest cluster account plus
 // the host cluster account.
-func (c Collector) getAWSClients() ([]clientaws.Clients, error) {
+func (h *Helper) GetAWSClients() ([]clientaws.Clients, error) {
 	var (
 		clients    []clientaws.Clients
 		clientsMap = make(map[string]clientaws.Clients)
 	)
 
-	arns, err := c.getARNs()
+	arns, err := h.GetARNs()
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
 	// addClientFunc add awsClients to clients using account id as key to guaranatee uniqueness.
 	addClientFunc := func(awsClients clientaws.Clients, clients *map[string]clientaws.Clients) error {
-		accountID, err := c.awsAccountID(awsClients)
+		accountID, err := h.AWSAccountID(awsClients)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -92,7 +128,7 @@ func (c Collector) getAWSClients() ([]clientaws.Clients, error) {
 	}
 
 	// Control plane account.
-	awsClients, err := clientaws.NewClients(c.awsConfig)
+	awsClients, err := clientaws.NewClients(h.awsConfig)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -103,7 +139,7 @@ func (c Collector) getAWSClients() ([]clientaws.Clients, error) {
 
 	// Tenant cluster accounts.
 	for _, arn := range arns {
-		awsConfig := c.awsConfig
+		awsConfig := h.awsConfig
 		awsConfig.RoleARN = arn
 
 		awsClients, err := clientaws.NewClients(awsConfig)
@@ -119,20 +155,20 @@ func (c Collector) getAWSClients() ([]clientaws.Clients, error) {
 	// Convert map to slice.
 	for accountID, client := range clientsMap {
 		clients = append(clients, client)
-		c.logger.Log("level", "debug", "message", fmt.Sprintf("collecting metrics in account: %s", accountID))
+		h.logger.Log("level", "debug", "message", fmt.Sprintf("collecting metrics in account: %s", accountID))
 	}
 
 	return clients, nil
 }
 
-// awsAccountID return the AWS account ID.
-func (c Collector) awsAccountID(awsClients clientaws.Clients) (string, error) {
+// AWSAccountID return the AWS account ID.
+func (h *Helper) AWSAccountID(awsClients clientaws.Clients) (string, error) {
 	config := awsservice.Config{
 		Clients: awsservice.Clients{
 			KMS: awsClients.KMS,
 			STS: awsClients.STS,
 		},
-		Logger: c.logger,
+		Logger: h.logger,
 	}
 
 	awsService, err := awsservice.New(config)

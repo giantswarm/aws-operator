@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	exporterkitcollector "github.com/giantswarm/exporterkit/collector"
 	"github.com/giantswarm/microendpoint/service/version"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -45,8 +46,9 @@ type Service struct {
 
 	bootOnce                sync.Once
 	clusterController       *controller.Cluster
+	collectorSet            *exporterkitcollector.Set
 	drainerController       *controller.Drainer
-	metricsCollector        *collector.Collector
+	legacyCollector         *collector.Collector
 	statusResourceCollector *statusresource.Collector
 }
 
@@ -196,19 +198,63 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var metricsCollector *collector.Collector
+	var newHelper *collector.Helper
 	{
-		c := collector.Config{
+		c := collector.HelperConfig{
 			G8sClient: g8sClient,
 			K8sClient: k8sClient,
 			Logger:    config.Logger,
 
-			AwsConfig:             awsConfig,
+			AwsConfig: awsConfig,
+		}
+
+		newHelper, err = collector.NewHelper(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var legacyCollector *collector.Collector
+	{
+		c := collector.Config{
+			Helper: newHelper,
+			Logger: config.Logger,
+
 			InstallationName:      config.Viper.GetString(config.Flag.Service.Installation.Name),
 			TrustedAdvisorEnabled: config.Viper.GetBool(config.Flag.Service.AWS.TrustedAdvisor.Enabled),
 		}
 
-		metricsCollector, err = collector.New(c)
+		legacyCollector, err = collector.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var elbCollector *collector.ELBCollector
+	{
+		c := collector.ELBConfig{
+			Helper: newHelper,
+			Logger: config.Logger,
+
+			InstallationName: config.Viper.GetString(config.Flag.Service.Installation.Name),
+		}
+
+		elbCollector, err = collector.NewELB(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var collectorSet *exporterkitcollector.Set
+	{
+		c := exporterkitcollector.SetConfig{
+			Collectors: []exporterkitcollector.Interface{
+				elbCollector,
+			},
+			Logger: config.Logger,
+		}
+
+		collectorSet, err = exporterkitcollector.NewSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -248,8 +294,9 @@ func New(config Config) (*Service, error) {
 
 		bootOnce:                sync.Once{},
 		clusterController:       clusterController,
+		collectorSet:            collectorSet,
 		drainerController:       drainerController,
-		metricsCollector:        metricsCollector,
+		legacyCollector:         legacyCollector,
 		statusResourceCollector: statusResourceCollector,
 	}
 
@@ -258,7 +305,8 @@ func New(config Config) (*Service, error) {
 
 func (s *Service) Boot(ctx context.Context) {
 	s.bootOnce.Do(func() {
-		go s.metricsCollector.Boot(ctx)
+		go s.collectorSet.Boot(ctx)
+		go s.legacyCollector.Boot(ctx)
 		go s.statusResourceCollector.Boot(ctx)
 
 		go s.clusterController.Boot()
