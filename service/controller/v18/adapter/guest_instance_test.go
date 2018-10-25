@@ -36,8 +36,8 @@ func Test_Adapter_Instance_RegularFields(t *testing.T) {
 							ID: "test-cluster",
 						},
 						AWS: v1alpha1.AWSConfigSpecAWS{
-							AZ:     "eu-central-1a",
-							Region: "eu-west-1",
+							AvailabilityZones: []string{"eu-central-1a"},
+							Region:            "eu-west-1",
 						},
 					},
 				},
