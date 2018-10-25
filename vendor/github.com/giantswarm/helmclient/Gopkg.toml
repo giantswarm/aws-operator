@@ -52,6 +52,10 @@ required = [
 
 [[constraint]]
   branch = "master"
+  name = "github.com/giantswarm/e2esetup"
+
+[[constraint]]
+  branch = "master"
   name = "github.com/giantswarm/errors"
 
 [[constraint]]
@@ -85,6 +89,10 @@ required = [
 [[constraint]]
   name = "k8s.io/helm"
   version = "=2.8.2"
+
+[[constraint]]
+  name = "github.com/mholt/archiver"
+  version = "=2.1.0"
 
 
 

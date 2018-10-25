@@ -1,6 +1,8 @@
 package release
 
-import "github.com/giantswarm/microerror"
+import (
+	"github.com/giantswarm/microerror"
+)
 
 var invalidConfigError = &microerror.Error{
 	Kind: "invalidConfigError",
@@ -18,6 +20,15 @@ var notFoundError = &microerror.Error{
 // IsNotFound asserts notFoundError.
 func IsNotFound(err error) bool {
 	return microerror.Cause(err) == notFoundError
+}
+
+var releaseAlreadyExistsError = &microerror.Error{
+	Kind: "releaseAlreadyExistsError",
+}
+
+// IsReleaseAlreadyExists asserts releaseAlreadyExistsError.
+func IsReleaseAlreadyExists(err error) bool {
+	return microerror.Cause(err) == releaseAlreadyExistsError
 }
 
 var releaseNotFoundError = &microerror.Error{
@@ -45,6 +56,15 @@ var releaseVersionNotMatchingError = &microerror.Error{
 // IsReleaseVersionNotMatching asserts releaseVersionNotMatchingError
 func IsReleaseVersionNotMatching(err error) bool {
 	return microerror.Cause(err) == releaseVersionNotMatchingError
+}
+
+var tarballNotFoundError = &microerror.Error{
+	Kind: "tarballNotFoundError",
+}
+
+// IsTarballNotFound asserts tarballNotFoundError.
+func IsTarballNotFound(err error) bool {
+	return microerror.Cause(err) == tarballNotFoundError
 }
 
 var tillerNotFoundError = &microerror.Error{
