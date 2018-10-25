@@ -48,9 +48,13 @@ jobs:
             ./architect deploy
           fi
   master:
-    steps: []
+    machine: true
+    steps:
+      - run: true
   pr:
-    steps: []
+    machine: true
+    steps:
+      - run: true
 
 
 
