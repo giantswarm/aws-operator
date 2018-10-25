@@ -40,7 +40,7 @@ func Test_AvailabilityZone(t *testing.T) {
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			AWS: v1alpha1.AWSConfigSpecAWS{
-				AZ: "eu-central-1a",
+				AvailabilityZones: []string{"eu-central-1a"},
 			},
 		},
 	}

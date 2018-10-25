@@ -87,8 +87,8 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 						IdleTimeoutSeconds: 3600,
 					},
 				},
-				Region: "eu-central-1",
-				AZ:     "eu-central-1a",
+				Region:            "eu-central-1",
+				AvailabilityZones: []string{"eu-central-1a"},
 				Masters: []v1alpha1.AWSConfigSpecAWSNode{
 					{
 						ImageID:      "ami-1234-master",

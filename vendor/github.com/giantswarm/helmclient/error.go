@@ -1,6 +1,7 @@
 package helmclient
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/giantswarm/microerror"
@@ -85,6 +86,32 @@ func IsNotFound(err error) bool {
 	return microerror.Cause(err) == notFoundError
 }
 
+var (
+	releaseAlreadyExistsRegexp = regexp.MustCompile(`release named \S+ already exists`)
+)
+
+var releaseAlreadyExistsError = &microerror.Error{
+	Kind: "releaseAlreadyExistsError",
+}
+
+// IsReleaseAlreadyExists asserts releaseAlreadyExistsError.
+func IsReleaseAlreadyExists(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	c := microerror.Cause(err)
+
+	if c == releaseAlreadyExistsError {
+		return true
+	}
+	if releaseAlreadyExistsRegexp.MatchString(c.Error()) {
+		return true
+	}
+
+	return false
+}
+
 const (
 	releaseNotFoundErrorPrefix = "No such release:"
 	releaseNotFoundErrorSuffix = "not found"
@@ -109,6 +136,32 @@ func IsReleaseNotFound(err error) bool {
 		return true
 	}
 	if c == releaseNotFoundError {
+		return true
+	}
+
+	return false
+}
+
+var (
+	tarballNotFoundRegexp = regexp.MustCompile(`stat \S+: no such file or directory`)
+)
+
+var tarballNotFoundError = &microerror.Error{
+	Kind: "tarballNotFoundError",
+}
+
+// IsTarballNotFound asserts tarballNotFoundError.
+func IsTarballNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	c := microerror.Cause(err)
+
+	if c == tarballNotFoundError {
+		return true
+	}
+	if tarballNotFoundRegexp.MatchString(c.Error()) {
 		return true
 	}
 
