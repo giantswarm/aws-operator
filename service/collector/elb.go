@@ -35,14 +35,14 @@ var (
 )
 
 type ELBConfig struct {
-	Helper *Helper
+	Helper *helper
 	Logger micrologger.Logger
 
 	InstallationName string
 }
 
 type ELBCollector struct {
-	helper *Helper
+	helper *helper
 	logger micrologger.Logger
 
 	installationName string

@@ -14,7 +14,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v15/credential"
 )
 
-type HelperConfig struct {
+type helperConfig struct {
 	G8sClient versioned.Interface
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
@@ -22,7 +22,7 @@ type HelperConfig struct {
 	AwsConfig clientaws.Config
 }
 
-type Helper struct {
+type helper struct {
 	g8sClient versioned.Interface
 	k8sClient kubernetes.Interface
 	logger    micrologger.Logger
@@ -30,7 +30,7 @@ type Helper struct {
 	awsConfig clientaws.Config
 }
 
-func NewHelper(config HelperConfig) (*Helper, error) {
+func newHelper(config helperConfig) (*helper, error) {
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
@@ -46,7 +46,7 @@ func NewHelper(config HelperConfig) (*Helper, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.AwsConfig must not be empty", config)
 	}
 
-	h := &Helper{
+	h := &helper{
 		g8sClient: config.G8sClient,
 		k8sClient: config.K8sClient,
 		logger:    config.Logger,
@@ -58,7 +58,7 @@ func NewHelper(config HelperConfig) (*Helper, error) {
 }
 
 // GetARNs list all unique aws IAM ARN from credential secret.
-func (h *Helper) GetARNs() ([]string, error) {
+func (h *helper) GetARNs() ([]string, error) {
 	var arns []string
 
 	// List AWSConfigs.
@@ -101,7 +101,7 @@ func (h *Helper) GetARNs() ([]string, error) {
 
 // GetAWSClients return a list of aws clients for every guest cluster account plus
 // the host cluster account.
-func (h *Helper) GetAWSClients() ([]clientaws.Clients, error) {
+func (h *helper) GetAWSClients() ([]clientaws.Clients, error) {
 	var (
 		clients    []clientaws.Clients
 		clientsMap = make(map[string]clientaws.Clients)
@@ -162,7 +162,7 @@ func (h *Helper) GetAWSClients() ([]clientaws.Clients, error) {
 }
 
 // AWSAccountID return the AWS account ID.
-func (h *Helper) AWSAccountID(awsClients clientaws.Clients) (string, error) {
+func (h *helper) AWSAccountID(awsClients clientaws.Clients) (string, error) {
 	config := awsservice.Config{
 		Clients: awsservice.Clients{
 			KMS: awsClients.KMS,

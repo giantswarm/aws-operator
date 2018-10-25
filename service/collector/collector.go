@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/prometheus/client_golang/prometheus"
+	"k8s.io/client-go/kubernetes"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
 )
@@ -34,15 +36,17 @@ const (
 // in the collector set list. See also service/service.go.
 
 type Config struct {
-	Helper *Helper
-	Logger micrologger.Logger
+	G8sClient versioned.Interface
+	K8sClient kubernetes.Interface
+	Logger    micrologger.Logger
 
+	AWSConfig             clientaws.Config
 	InstallationName      string
 	TrustedAdvisorEnabled bool
 }
 
 type Collector struct {
-	helper *Helper
+	helper *helper
 	logger micrologger.Logger
 
 	bootOnce sync.Once
@@ -52,9 +56,6 @@ type Collector struct {
 }
 
 func New(config Config) (*Collector, error) {
-	if config.Helper == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Helper must not be empty", config)
-	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
@@ -63,8 +64,26 @@ func New(config Config) (*Collector, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
 	}
 
+	var err error
+
+	var h *helper
+	{
+		c := helperConfig{
+			G8sClient: config.G8sClient,
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+
+			AwsConfig: config.AWSConfig,
+		}
+
+		h, err = newHelper(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	c := &Collector{
-		helper: config.Helper,
+		helper: h,
 		logger: config.Logger,
 
 		bootOnce: sync.Once{},

@@ -46,9 +46,9 @@ type Service struct {
 
 	bootOnce                sync.Once
 	clusterController       *controller.Cluster
-	collectorSet            *exporterkitcollector.Set
 	drainerController       *controller.Drainer
 	legacyCollector         *collector.Collector
+	operatorCollector       *exporterkitcollector.Set
 	statusResourceCollector *statusresource.Collector
 }
 
@@ -198,22 +198,6 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var newHelper *collector.Helper
-	{
-		c := collector.HelperConfig{
-			G8sClient: g8sClient,
-			K8sClient: k8sClient,
-			Logger:    config.Logger,
-
-			AwsConfig: awsConfig,
-		}
-
-		newHelper, err = collector.NewHelper(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var legacyCollector *collector.Collector
 	{
 		c := collector.Config{
@@ -230,31 +214,19 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var elbCollector *collector.ELBCollector
-	{
-		c := collector.ELBConfig{
-			Helper: newHelper,
-			Logger: config.Logger,
-
-			InstallationName: config.Viper.GetString(config.Flag.Service.Installation.Name),
-		}
-
-		elbCollector, err = collector.NewELB(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var collectorSet *exporterkitcollector.Set
+	var operatorCollector *collector.Set
 	{
 		c := exporterkitcollector.SetConfig{
-			Collectors: []exporterkitcollector.Interface{
-				elbCollector,
-			},
-			Logger: config.Logger,
+			G8sClient: g8sClient,
+			K8sClient: k8sClient,
+			Logger:    config.Logger,
+
+			AwsConfig:             awsConfig,
+			InstallationName:      config.Viper.GetString(config.Flag.Service.Installation.Name),
+			TrustedAdvisorEnabled: config.Viper.GetBool(config.Flag.Service.AWS.TrustedAdvisor.Enabled),
 		}
 
-		collectorSet, err = exporterkitcollector.NewSet(c)
+		operatorCollector, err = collector.NewSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -294,9 +266,9 @@ func New(config Config) (*Service, error) {
 
 		bootOnce:                sync.Once{},
 		clusterController:       clusterController,
-		collectorSet:            collectorSet,
 		drainerController:       drainerController,
 		legacyCollector:         legacyCollector,
+		operatorCollector:       operatorCollector,
 		statusResourceCollector: statusResourceCollector,
 	}
 
@@ -305,8 +277,8 @@ func New(config Config) (*Service, error) {
 
 func (s *Service) Boot(ctx context.Context) {
 	s.bootOnce.Do(func() {
-		go s.collectorSet.Boot(ctx)
 		go s.legacyCollector.Boot(ctx)
+		go s.operatorCollector.Boot(ctx)
 		go s.statusResourceCollector.Boot(ctx)
 
 		go s.clusterController.Boot()
