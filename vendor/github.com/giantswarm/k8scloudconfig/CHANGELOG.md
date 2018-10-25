@@ -16,13 +16,13 @@ version directory, and then changes are introduced.
 - Enabled admission plugins: DefaultTolerationSeconds, MutatingAdmissionWebhook, ValidatingAdmissionWebhook.
 - Use patched GiantSwarm build of Kubernetes (`hyperkube:v1.11.1-cec4fb8023db783fbf26fb056bf6c76abfcd96cf-giantswarm`).
 - Updated Calico to 3.2.3
-- Updated Calico manifest with resource limits.
+- Updated Calico manifest with resource limits to get QoS policy guaranteed.
 
 ## [v3.6.2]
 
 ### Changed
 - Updated Calico to 3.2.3
-- Updated Calico manifest with resource limits.
+- Updated Calico manifest with resource limits to get QoS policy guaranteed.
 - Enabled admission plugins: DefaultTolerationSeconds, MutatingAdmissionWebhook, ValidatingAdmissionWebhook.
 
 ## [v3.6.1]
