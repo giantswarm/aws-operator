@@ -2,7 +2,6 @@ package kms
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
@@ -51,12 +50,6 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 		return microerror.Mask(err)
 	}
 
-	var keyAlias string
-	{
-		clusterID := key.ClusterID(customObject)
-		keyAlias = toAlias(clusterID)
-	}
-
 	var oldKeyScheduledForDeletion bool
 	{
 		e.logger.LogCtx(ctx, "level", "debug", "message", "finding out encryption key")
@@ -87,7 +80,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 		e.logger.LogCtx(ctx, "level", "debug", "message", "deleting old encryption key alias")
 
 		in := &kms.DeleteAliasInput{
-			AliasName: aws.String(keyAlias),
+			AliasName: aws.String(keyAlias(customObject)),
 		}
 
 		_, err = ctlCtx.AWSClient.KMS.DeleteAlias(in)
@@ -142,7 +135,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 		e.logger.LogCtx(ctx, "level", "debug", "message", "creating encryption key alias")
 
 		in := &kms.CreateAliasInput{
-			AliasName:   aws.String(keyAlias),
+			AliasName:   aws.String(keyAlias(customObject)),
 			TargetKeyId: keyID,
 		}
 
@@ -219,9 +212,6 @@ func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, customObject
 func (k *Encrypter) CurrentState(ctx context.Context, customObject v1alpha1.AWSConfig) (encrypter.EncryptionKeyState, error) {
 	var currentState encrypter.EncryptionKeyState
 
-	clusterID := key.ClusterID(customObject)
-	alias := toAlias(clusterID)
-
 	output, err := k.describeKey(ctx, customObject)
 	if IsKeyNotFound(err) {
 		// Fall through.
@@ -232,7 +222,7 @@ func (k *Encrypter) CurrentState(ctx context.Context, customObject v1alpha1.AWSC
 	}
 
 	currentState.KeyID = *output.KeyMetadata.KeyId
-	currentState.KeyName = alias
+	currentState.KeyName = keyAlias(customObject)
 
 	return currentState, nil
 }
@@ -240,8 +230,7 @@ func (k *Encrypter) CurrentState(ctx context.Context, customObject v1alpha1.AWSC
 func (k *Encrypter) DesiredState(ctx context.Context, customObject v1alpha1.AWSConfig) (encrypter.EncryptionKeyState, error) {
 	desiredState := encrypter.EncryptionKeyState{}
 
-	clusterID := key.ClusterID(customObject)
-	desiredState.KeyName = toAlias(clusterID)
+	desiredState.KeyName = keyAlias(customObject)
 
 	return desiredState, nil
 }
@@ -289,10 +278,8 @@ func (k *Encrypter) describeKey(ctx context.Context, customObject v1alpha1.AWSCo
 		return nil, microerror.Mask(err)
 	}
 
-	clusterID := key.ClusterID(customObject)
-	alias := toAlias(clusterID)
 	input := &kms.DescribeKeyInput{
-		KeyId: aws.String(alias),
+		KeyId: aws.String(keyAlias(customObject)),
 	}
 
 	out, err := sc.AWSClient.KMS.DescribeKey(input)
@@ -307,8 +294,4 @@ func (k *Encrypter) describeKey(ctx context.Context, customObject v1alpha1.AWSCo
 	}
 
 	return out, nil
-}
-
-func toAlias(keyID string) string {
-	return fmt.Sprintf("alias/%s", keyID)
 }
