@@ -65,10 +65,26 @@ type AWSConfigSpec struct {
 }
 
 type AWSConfigSpecAWS struct {
-	API              AWSConfigSpecAWSAPI  `json:"api" yaml:"api"`
-	AZ               string               `json:"az" yaml:"az"`
-	CredentialSecret CredentialSecret     `json:"credentialSecret" yaml:"credentialSecret"`
-	Etcd             AWSConfigSpecAWSEtcd `json:"etcd" yaml:"etcd"`
+	API AWSConfigSpecAWSAPI `json:"api" yaml:"api"`
+	// TODO remove the deprecated AZ field due to AvailabilityZones.
+	//
+	//     https://github.com/giantswarm/giantswarm/issues/4507
+	//
+	AZ string `json:"az" yaml:"az"`
+	// AvailabilityZones is a list of AWS availability zone references defining
+	// where to run the tenant cluster's worker nodes. There are limitations on
+	// availability zones settings due to binary IP range splitting. When for
+	// instance choosing 3 availability zones, the configured IP range will be
+	// split into 4 ranges and thus one of it will not be able to be utilized.
+	// Such limitations have to be considered when designing the network topology
+	// and configuring tenant cluster HA via AZs. The elements of the list might
+	// look something like this.
+	//
+	//     eu-west-1a, eu-west-1b
+	//
+	AvailabilityZones []string             `json:"availabilityZones" yaml:"availabilityZones"`
+	CredentialSecret  CredentialSecret     `json:"credentialSecret" yaml:"credentialSecret"`
+	Etcd              AWSConfigSpecAWSEtcd `json:"etcd" yaml:"etcd"`
 
 	// HostedZones is AWS hosted zones names in the host cluster account.
 	// For each zone there will be "CLUSTER_ID.k8s" NS record created in
