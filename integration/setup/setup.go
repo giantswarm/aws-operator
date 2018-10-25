@@ -33,7 +33,7 @@ func Setup(m *testing.M, config Config) {
 		v = 1
 	}
 
-	err = CreateTenantCluster(ctx, config)
+	err = EnsureTenantClusterCreated(ctx, config)
 	if err != nil {
 		log.Printf("%#v\n", err)
 		v = 1

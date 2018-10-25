@@ -19,7 +19,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func CreateTenantCluster(ctx context.Context, config Config) error {
+func EnsureTenantClusterCreated(ctx context.Context, config Config) error {
 	vpcID, err := ensureHostVPC(ctx, config)
 	if err != nil {
 		return microerror.Mask(err)
@@ -33,7 +33,7 @@ func CreateTenantCluster(ctx context.Context, config Config) error {
 	return nil
 }
 
-func DeleteTenantCluster(ctx context.Context, config Config) error {
+func EnsureTenantClusterDeleted(ctx context.Context, config Config) error {
 	err := config.Release.EnsureDeleted(ctx, "apiextensions-aws-config-e2e", crNotExistsCondition(ctx, config))
 	if err != nil {
 		return microerror.Mask(err)
