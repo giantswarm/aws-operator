@@ -1,6 +1,8 @@
 package collector
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
@@ -76,10 +78,20 @@ func (c *ELBCollector) Collect(ch chan<- prometheus.Metric) error {
 		return microerror.Mask(err)
 	}
 
+	fmt.Printf("\n")
+	fmt.Printf("len(awsClientsList): %#v\n", len(awsClientsList))
+	fmt.Printf("\n")
+
+	fmt.Printf("\n")
+	fmt.Printf("start collect\n")
+	fmt.Printf("\n")
+
 	var g errgroup.Group
 
 	for _, awsClients := range awsClientsList {
+		fmt.Printf("1\n")
 		g.Go(func() error {
+			fmt.Printf("2\n")
 			err := c.collectForAccount(ch, awsClients)
 			if err != nil {
 				return microerror.Mask(err)
@@ -93,6 +105,10 @@ func (c *ELBCollector) Collect(ch chan<- prometheus.Metric) error {
 	if err != nil {
 		return microerror.Mask(err)
 	}
+
+	fmt.Printf("\n")
+	fmt.Printf("end collect\n")
+	fmt.Printf("\n")
 
 	return nil
 }
@@ -117,6 +133,10 @@ func (c *ELBCollector) collectForAccount(ch chan<- prometheus.Metric, awsClients
 		}
 		loadbalancers = o.LoadBalancerDescriptions
 	}
+
+	fmt.Printf("\n")
+	fmt.Printf("start loop\n")
+	fmt.Printf("\n")
 
 	for _, l := range loadbalancers {
 		var tags []*elb.Tag
@@ -173,6 +193,19 @@ func (c *ELBCollector) collectForAccount(ch chan<- prometheus.Metric, awsClients
 			}
 		}
 
+		fmt.Printf("\n")
+		fmt.Printf("\n")
+		fmt.Printf("\n")
+		fmt.Printf("  count: %#v\n", count)
+		fmt.Printf("  *l.LoadBalancerName: %#v\n", *l.LoadBalancerName)
+		fmt.Printf("  account: %#v\n", account)
+		fmt.Printf("  cluster: %#v\n", cluster)
+		fmt.Printf("  installation: %#v\n", installation)
+		fmt.Printf("  organization: %#v\n", organization)
+		fmt.Printf("\n")
+		fmt.Printf("\n")
+		fmt.Printf("\n")
+
 		ch <- prometheus.MustNewConstMetric(
 			elbsDesc,
 			prometheus.GaugeValue,
@@ -184,6 +217,10 @@ func (c *ELBCollector) collectForAccount(ch chan<- prometheus.Metric, awsClients
 			organization,
 		)
 	}
+
+	fmt.Printf("\n")
+	fmt.Printf("end loop\n")
+	fmt.Printf("\n")
 
 	return nil
 }
