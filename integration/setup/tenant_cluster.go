@@ -34,6 +34,22 @@ func EnsureTenantClusterCreated(ctx context.Context, config Config) error {
 		return microerror.Mask(err)
 	}
 
+	err = config.Guest.Setup()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "waiting for guest cluster to be ready")
+
+		err := config.Guest.WaitForGuestReady()
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "waited for guest cluster to be ready")
+	}
+
 	return nil
 }
 
@@ -41,6 +57,18 @@ func EnsureTenantClusterDeleted(ctx context.Context, config Config) error {
 	err := config.Release.EnsureDeleted(ctx, "apiextensions-aws-config-e2e", crNotExistsCondition(ctx, config))
 	if err != nil {
 		return microerror.Mask(err)
+	}
+
+	{
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "waiting for guest cluster API to be down")
+
+		err := config.Guest.WaitForAPIDown()
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "waited for guest cluster API to be down")
 	}
 
 	return nil

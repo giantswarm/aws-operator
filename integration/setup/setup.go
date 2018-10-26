@@ -33,14 +33,16 @@ func Setup(m *testing.M, config Config) {
 		v = 1
 	}
 
-	err = EnsureTenantClusterCreated(ctx, config)
-	if err != nil {
-		log.Printf("%#v\n", err)
-		v = 1
+	if v == 0 {
+		err = config.Guest.Initialize()
+		if err != nil {
+			log.Printf("%#v\n", err)
+			v = 1
+		}
 	}
 
 	if v == 0 {
-		err = config.Guest.Setup()
+		err = EnsureTenantClusterCreated(ctx, config)
 		if err != nil {
 			log.Printf("%#v\n", err)
 			v = 1
