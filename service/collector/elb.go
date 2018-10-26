@@ -78,7 +78,9 @@ func (c *ELBCollector) Collect(ch chan<- prometheus.Metric) error {
 
 	var g errgroup.Group
 
-	for _, awsClients := range awsClientsList {
+	for _, item := range awsClientsList {
+		awsClients := item
+
 		g.Go(func() error {
 			err := c.collectForAccount(ch, awsClients)
 			if err != nil {
