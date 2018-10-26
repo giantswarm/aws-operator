@@ -118,6 +118,7 @@ func installAWSOperator(ctx context.Context, config Config) error {
 	if err != nil {
 		return microerror.Mask(err)
 	}
+
 	return nil
 }
 
