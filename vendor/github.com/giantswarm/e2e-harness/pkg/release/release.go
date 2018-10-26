@@ -3,6 +3,7 @@ package release
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
@@ -158,7 +159,7 @@ func (r *Release) EnsureDeleted(ctx context.Context, name string, conditions ...
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting release %#q", name))
 
 		err := r.Delete(ctx, name)
-		if helmclient.IsReleaseNotFound(err) {
+		if IsReleaseNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("release %#q already deleted", name))
 		} else if err != nil {
 			return microerror.Mask(err)
@@ -184,21 +185,57 @@ func (r *Release) EnsureDeleted(ctx context.Context, name string, conditions ...
 }
 
 // EnsureInstalled makes sure the release is installed and all conditions are
-// met.
+// met. If release name ends with "-operator" suffix it also selects
+// a "app=${name}" pod and streams it logs to the ./logs directory.
 //
 // NOTE: It does not update the release if it already exists.
 func (r *Release) EnsureInstalled(ctx context.Context, name string, version Version, values string, conditions ...func() error) error {
+	var err error
+	isOperator := strings.HasSuffix(name, "-operator")
+
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating release %#q", name))
 
 		err := r.Install(ctx, name, version, values)
-		if helmclient.IsReleaseAlreadyExists(err) {
+		if IsReleaseAlreadyExists(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("release %#q already created", name))
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created release %#q", name))
+	}
+
+	if isOperator {
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensuring operator pod exists for release %#q", name))
+
+		c := r.Condition().PodExists(ctx, r.namespace, fmt.Sprintf("app=%s", name))
+		err := r.waitForConditions(ctx, c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensured operator pod exists for release %#q", name))
+	}
+
+	var operatorPodName string
+	var operatorPodNamespace string = r.namespace
+	if isOperator {
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding operator pod name for release %#q", name))
+
+		operatorPodName, err = r.podName(operatorPodNamespace, fmt.Sprintf("app=%s", name))
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found operator pod name for release %#q", name))
+	}
+
+	if isOperator {
+		err := r.fileLogger.EnsurePodLogging(ctx, operatorPodNamespace, operatorPodName)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
 	{
@@ -242,6 +279,10 @@ func (r *Release) Install(ctx context.Context, name string, version Version, val
 	return nil
 }
 
+// TODO Remove once we are done with migration to EnsureInstalled.
+//
+//	Issue https://github.com/giantswarm/giantswarm/issues/4355.
+//
 func (r *Release) InstallOperator(ctx context.Context, name string, version Version, values string, crd *apiextensionsv1beta1.CustomResourceDefinition) error {
 	err := r.Install(ctx, name, version, values, r.condition.CRDExists(ctx, crd))
 	if err != nil {
@@ -266,14 +307,21 @@ func (r *Release) InstallOperator(ctx context.Context, name string, version Vers
 	//
 	podNamespace := r.namespace
 
-	podName, err := r.podName(podNamespace, fmt.Sprintf("app=%s", name))
+	labelSelector := fmt.Sprintf("app=%s", name)
+
+	podName, err := r.podName(podNamespace, labelSelector)
 	if IsNotFound(err) {
 		podNamespace = "giantswarm"
-		podName, err = r.podName(podNamespace, fmt.Sprintf("app=%s", name))
+		podName, err = r.podName(podNamespace, labelSelector)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 	} else if err != nil {
+		return microerror.Mask(err)
+	}
+
+	err = r.Condition().PodExists(ctx, podNamespace, labelSelector)()
+	if err != nil {
 		return microerror.Mask(err)
 	}
 
