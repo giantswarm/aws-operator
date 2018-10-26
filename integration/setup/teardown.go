@@ -9,10 +9,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
-
-	"github.com/giantswarm/aws-operator/integration/env"
 )
 
 func teardown(ctx context.Context, config Config) error {
@@ -30,7 +29,7 @@ func teardown(ctx context.Context, config Config) error {
 		}
 
 		for _, release := range releases {
-			err = config.Resource.EnsureDeleted(ctx, release)
+			err = config.Release.EnsureDeleted(ctx, release)
 			if err != nil {
 				config.Logger.LogCtx(ctx, "level", "error", "message", fmt.Sprintf("failed to delete release %#q", release), "stack", fmt.Sprintf("%#v", err))
 				errors = append(errors, microerror.Mask(err))

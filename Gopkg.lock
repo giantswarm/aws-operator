@@ -278,17 +278,16 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:9ec05a558c80680333069137952b9c1c39259a8f6889c469621efffdf8447b8b"
+  digest = "1:6f3c3be4d30ca7e5328bf11aae1928715a220168f9398fba641a59af018c436f"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
-    "pkg/framework/resource",
     "pkg/harness",
     "pkg/internal/filelogger",
     "pkg/release",
   ]
   pruneopts = "UT"
-  revision = "a625a25d8a46d08c4192533b4a2ebe54fe5af752"
+  revision = "1be216b4c01168c442155b79316c7f837872b865"
 
 [[projects]]
   branch = "master"
@@ -1670,7 +1669,6 @@
     "github.com/giantswarm/backoff",
     "github.com/giantswarm/certs",
     "github.com/giantswarm/e2e-harness/pkg/framework",
-    "github.com/giantswarm/e2e-harness/pkg/framework/resource",
     "github.com/giantswarm/e2e-harness/pkg/release",
     "github.com/giantswarm/e2eclients/aws",
     "github.com/giantswarm/e2esetup/k8s",

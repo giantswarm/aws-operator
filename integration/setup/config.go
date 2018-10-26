@@ -3,7 +3,6 @@ package setup
 import (
 	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
-	"github.com/giantswarm/e2e-harness/pkg/framework/resource"
 	"github.com/giantswarm/e2e-harness/pkg/release"
 	e2eclientsaws "github.com/giantswarm/e2eclients/aws"
 	"github.com/giantswarm/e2esetup/k8s"
@@ -25,7 +24,6 @@ type Config struct {
 	Host      *framework.Host
 	K8s       *k8s.Setup
 	Release   *release.Release
-	Resource  *resource.Resource
 	Logger    micrologger.Logger
 }
 
@@ -128,29 +126,12 @@ func NewConfig() (Config, error) {
 		}
 	}
 
-	var newResource *resource.Resource
-	{
-		c := resource.Config{
-			HelmClient: helmClient,
-			Logger:     logger,
-
-			Namespace: namespace,
-		}
-
-		newResource, err = resource.New(c)
-		if err != nil {
-			return Config{}, microerror.Mask(err)
-		}
-
-	}
-
 	c := Config{
 		AWSClient: awsClient,
 		Guest:     guest,
 		Host:      host,
 		K8s:       k8sSetup,
 		Release:   newRelease,
-		Resource:  newResource,
 		Logger:    logger,
 	}
 

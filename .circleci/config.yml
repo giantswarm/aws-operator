@@ -112,6 +112,32 @@ jobs:
 
 
 
+  e2eTestCurPRRecreateCluster:
+    environment:
+      TESTED_VERSION: "current"
+      TEST_DIR: "integration/test/recreatecluster"
+    <<: *e2eTest
+
+  e2eTestCurMasterRecreateCluster:
+    environment:
+      TESTED_VERSION: "current"
+      TEST_DIR: "integration/test/recreatecluster"
+    <<: *e2eTest
+
+  e2eTestWIPPRRecreateCluster:
+    environment:
+      TESTED_VERSION: "wip"
+      TEST_DIR: "integration/test/recreatecluster"
+    <<: *e2eTest
+
+  e2eTestWIPMasterRecreateCluster:
+    environment:
+      TESTED_VERSION: "wip"
+      TEST_DIR: "integration/test/recreatecluster"
+    <<: *e2eTest
+
+
+
   e2eTestCurPRScaling:
     environment:
       TESTED_VERSION: "current"
@@ -202,6 +228,21 @@ workflows:
           requires:
             - pr
       - e2eTestWIPPRDraining:
+          requires:
+            - pr
+
+
+
+      - e2eTestCurMasterRecreateCluster:
+          requires:
+            - master
+      - e2eTestWIPMasterRecreateCluster:
+          requires:
+            - master
+      - e2eTestCurPRRecreateCluster:
+          requires:
+            - pr
+      - e2eTestWIPPRRecreateCluster:
           requires:
             - pr
 
