@@ -380,7 +380,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 				KMSClient: awsClient.KMS,
 				Logger:    config.Logger,
 
-				OIDC: config.OIDC,
+				OIDC:                   config.OIDC,
 				PodInfraContainerImage: config.PodInfraContainerImage,
 			}
 
