@@ -30,7 +30,7 @@ func Test_Recreate_Cluster(t *testing.T) {
 	{
 		config.Logger.LogCtx(ctx, "level", "debug", "message", "creating tenant cluster")
 
-		err = setup.EnsureTenantClusterDeleted(ctx, config)
+		err = setup.EnsureTenantClusterCreated(ctx, config)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
