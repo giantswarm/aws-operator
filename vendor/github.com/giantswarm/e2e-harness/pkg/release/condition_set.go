@@ -86,7 +86,7 @@ func (c *conditionSet) PodExists(ctx context.Context, namespace, labelSelector s
 
 			return nil
 		}
-		b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
+		b := backoff.NewExponential(backoff.MediumMaxWait, backoff.LongMaxInterval)
 
 		err := backoff.Retry(o, b)
 		if err != nil {

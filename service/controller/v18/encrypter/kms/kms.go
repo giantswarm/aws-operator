@@ -2,7 +2,6 @@ package kms
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
@@ -51,6 +50,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 		return microerror.Mask(err)
 	}
 
+	var oldKeyScheduledForDeletion bool
 	{
 		e.logger.LogCtx(ctx, "level", "debug", "message", "finding out encryption key")
 
@@ -58,15 +58,37 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 		if IsKeyNotFound(err) {
 			e.logger.LogCtx(ctx, "level", "debug", "message", "did not find encryption key")
 
+		} else if IsKeyScheduledForDeletion(err) {
+			e.logger.LogCtx(ctx, "level", "debug", "message", "found encryption key")
+			e.logger.LogCtx(ctx, "level", "debug", "message", "current encryption key is scheduled for deletion and will be recreated")
+			oldKeyScheduledForDeletion = true
+
 		} else if err != nil {
 			return microerror.Mask(err)
 
 		} else {
-
 			e.logger.LogCtx(ctx, "level", "debug", "message", "found encryption key")
 			e.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
+	}
+
+	if oldKeyScheduledForDeletion {
+		// In such case we just delete the alias so we can alias newly
+		// created key.
+
+		e.logger.LogCtx(ctx, "level", "debug", "message", "deleting old encryption key alias")
+
+		in := &kms.DeleteAliasInput{
+			AliasName: aws.String(keyAlias(customObject)),
+		}
+
+		_, err = ctlCtx.AWSClient.KMS.DeleteAlias(in)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		e.logger.LogCtx(ctx, "level", "debug", "message", "deleted old encryption key alias")
 	}
 
 	var keyID *string
@@ -112,11 +134,8 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 	{
 		e.logger.LogCtx(ctx, "level", "debug", "message", "creating encryption key alias")
 
-		clusterID := key.ClusterID(customObject)
-		keyAlias := aws.String(toAlias(clusterID))
-
 		in := &kms.CreateAliasInput{
-			AliasName:   keyAlias,
+			AliasName:   aws.String(keyAlias(customObject)),
 			TargetKeyId: keyID,
 		}
 
@@ -143,7 +162,7 @@ func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, customObject
 
 		// TODO we should search by tags here in case alias failed to create and cluster was deleted early. Issue: https://github.com/giantswarm/giantswarm/issues/4262.
 		out, err := e.describeKey(ctx, customObject)
-		if IsKeyNotFound(err) {
+		if IsKeyNotFound(err) || IsKeyScheduledForDeletion(err) {
 			e.logger.LogCtx(ctx, "level", "debug", "message", "did not find encryption key")
 			e.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
@@ -193,9 +212,6 @@ func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, customObject
 func (k *Encrypter) CurrentState(ctx context.Context, customObject v1alpha1.AWSConfig) (encrypter.EncryptionKeyState, error) {
 	var currentState encrypter.EncryptionKeyState
 
-	clusterID := key.ClusterID(customObject)
-	alias := toAlias(clusterID)
-
 	output, err := k.describeKey(ctx, customObject)
 	if IsKeyNotFound(err) {
 		// Fall through.
@@ -206,7 +222,7 @@ func (k *Encrypter) CurrentState(ctx context.Context, customObject v1alpha1.AWSC
 	}
 
 	currentState.KeyID = *output.KeyMetadata.KeyId
-	currentState.KeyName = alias
+	currentState.KeyName = keyAlias(customObject)
 
 	return currentState, nil
 }
@@ -214,8 +230,7 @@ func (k *Encrypter) CurrentState(ctx context.Context, customObject v1alpha1.AWSC
 func (k *Encrypter) DesiredState(ctx context.Context, customObject v1alpha1.AWSConfig) (encrypter.EncryptionKeyState, error) {
 	desiredState := encrypter.EncryptionKeyState{}
 
-	clusterID := key.ClusterID(customObject)
-	desiredState.KeyName = toAlias(clusterID)
+	desiredState.KeyName = keyAlias(customObject)
 
 	return desiredState, nil
 }
@@ -254,7 +269,7 @@ func (k *Encrypter) Encrypt(ctx context.Context, key, plaintext string) (string,
 }
 
 func (e *Encrypter) IsKeyNotFound(err error) bool {
-	return IsKeyNotFound(err)
+	return IsKeyNotFound(err) || IsKeyScheduledForDeletion(err)
 }
 
 func (k *Encrypter) describeKey(ctx context.Context, customObject v1alpha1.AWSConfig) (*kms.DescribeKeyOutput, error) {
@@ -263,22 +278,20 @@ func (k *Encrypter) describeKey(ctx context.Context, customObject v1alpha1.AWSCo
 		return nil, microerror.Mask(err)
 	}
 
-	clusterID := key.ClusterID(customObject)
-	alias := toAlias(clusterID)
 	input := &kms.DescribeKeyInput{
-		KeyId: aws.String(alias),
+		KeyId: aws.String(keyAlias(customObject)),
 	}
 
-	output, err := sc.AWSClient.KMS.DescribeKey(input)
+	out, err := sc.AWSClient.KMS.DescribeKey(input)
 	if IsKeyNotFound(err) {
 		return nil, microerror.Mask(keyNotFoundError)
 	} else if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	return output, nil
-}
+	if out.KeyMetadata.DeletionDate != nil {
+		return nil, microerror.Mask(keyScheduledForDeletionError)
+	}
 
-func toAlias(keyID string) string {
-	return fmt.Sprintf("alias/%s", keyID)
+	return out, nil
 }

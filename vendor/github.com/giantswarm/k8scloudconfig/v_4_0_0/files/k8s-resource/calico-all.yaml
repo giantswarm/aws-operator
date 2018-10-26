@@ -1,6 +1,7 @@
 # Extra changes:
-#  - added "nodename_file_optional" set to true (can be removed on the next upgrade)
-#  - added resource limits
+#  - Added "nodename_file_optional" set to true (can be removed on the next upgrade).
+#  - Added resource limits to calico-node and calico-kube-controller.
+#  - Added resource limits to install-cni.
 #
 # Calico Version v3.2.3
 # https://docs.projectcalico.org/v3.2/releases#v3.2.3
@@ -265,6 +266,15 @@ spec:
                 configMapKeyRef:
                   name: calico-config
                   key: veth_mtu
+          # install-cni also monitors etcd certificates,
+          # so use reasonable resource limits.
+          resources:
+            requests:
+              cpu: 50m
+              memory: 100Mi
+            limits:
+              cpu: 50m
+              memory: 100Mi
           volumeMounts:
             - mountPath: /host/opt/cni/bin
               name: cni-bin-dir

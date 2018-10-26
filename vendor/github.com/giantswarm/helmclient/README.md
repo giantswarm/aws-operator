@@ -2,3 +2,14 @@
 
 # helmclient
 Package helmclient implements Helm related primitives to work against Tiller.
+
+## Projects using `helmclient`
+
+### Test libraries
+
+- https://github.com/giantswarm/e2e-harness
+
+### Services & operators
+
+- https://github.com/giantswarm/chart-operator
+- https://github.com/giantswarm/cluster-operator

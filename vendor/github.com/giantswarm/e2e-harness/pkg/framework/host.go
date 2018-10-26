@@ -15,6 +15,8 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/backoff"
+	"github.com/giantswarm/e2e-harness/pkg/harness"
+	"github.com/giantswarm/e2e-harness/pkg/internal/filelogger"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"k8s.io/api/core/v1"
@@ -26,9 +28,6 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	aggregationclient "k8s.io/kube-aggregator/pkg/client/clientset_generated/clientset"
-
-	"github.com/giantswarm/e2e-harness/pkg/framework/filelogger"
-	"github.com/giantswarm/e2e-harness/pkg/harness"
 )
 
 const (
@@ -101,7 +100,6 @@ func NewHost(c HostConfig) (*Host, error) {
 	var fileLogger *filelogger.FileLogger
 	{
 		fc := filelogger.Config{
-			Backoff:   c.Backoff,
 			K8sClient: k8sClient,
 			Logger:    c.Logger,
 		}
@@ -346,7 +344,7 @@ func (h *Host) InstallOperator(name, cr, values, version string) error {
 	//	if err != nil {
 	//		return microerror.Mask(err)
 	//	}
-	//	err = h.filelogger.StartLoggingPod(h.targetNamespace, podName)
+	//	err = h.filelogger.EnsurePodLogging(h.targetNamespace, podName)
 	//	if err != nil {
 	//		return microerror.Mask(err)
 	//	}
@@ -364,7 +362,7 @@ func (h *Host) InstallOperator(name, cr, values, version string) error {
 		return microerror.Mask(err)
 	}
 
-	err = h.filelogger.StartLoggingPod(podNamespace, podName)
+	err = h.filelogger.EnsurePodLogging(context.Background(), podNamespace, podName)
 	if err != nil {
 		return microerror.Mask(err)
 	}

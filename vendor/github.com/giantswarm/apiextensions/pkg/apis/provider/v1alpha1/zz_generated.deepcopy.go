@@ -110,6 +110,11 @@ func (in *AWSConfigSpec) DeepCopy() *AWSConfigSpec {
 func (in *AWSConfigSpecAWS) DeepCopyInto(out *AWSConfigSpecAWS) {
 	*out = *in
 	out.API = in.API
+	if in.AvailabilityZones != nil {
+		in, out := &in.AvailabilityZones, &out.AvailabilityZones
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	out.CredentialSecret = in.CredentialSecret
 	out.Etcd = in.Etcd
 	out.HostedZones = in.HostedZones
