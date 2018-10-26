@@ -19,7 +19,7 @@ type helperConfig struct {
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 
-	AwsConfig clientaws.Config
+	AWSConfig clientaws.Config
 }
 
 type helper struct {
@@ -41,9 +41,9 @@ func newHelper(config helperConfig) (*helper, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	var emptyAwsConfig clientaws.Config
-	if config.AwsConfig == emptyAwsConfig {
-		return nil, microerror.Maskf(invalidConfigError, "%T.AwsConfig must not be empty", config)
+	var emptyAWSConfig clientaws.Config
+	if config.AWSConfig == emptyAWSConfig {
+		return nil, microerror.Maskf(invalidConfigError, "%T.AWSConfig must not be empty", config)
 	}
 
 	h := &helper{
@@ -51,7 +51,7 @@ func newHelper(config helperConfig) (*helper, error) {
 		k8sClient: config.K8sClient,
 		logger:    config.Logger,
 
-		awsConfig: config.AwsConfig,
+		awsConfig: config.AWSConfig,
 	}
 
 	return h, nil

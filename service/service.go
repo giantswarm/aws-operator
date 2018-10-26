@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	exporterkitcollector "github.com/giantswarm/exporterkit/collector"
 	"github.com/giantswarm/microendpoint/service/version"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -48,7 +47,7 @@ type Service struct {
 	clusterController       *controller.Cluster
 	drainerController       *controller.Drainer
 	legacyCollector         *collector.Collector
-	operatorCollector       *exporterkitcollector.Set
+	operatorCollector       *collector.Set
 	statusResourceCollector *statusresource.Collector
 }
 
@@ -201,9 +200,11 @@ func New(config Config) (*Service, error) {
 	var legacyCollector *collector.Collector
 	{
 		c := collector.Config{
-			Helper: newHelper,
-			Logger: config.Logger,
+			G8sClient: g8sClient,
+			K8sClient: k8sClient,
+			Logger:    config.Logger,
 
+			AWSConfig:             awsConfig,
 			InstallationName:      config.Viper.GetString(config.Flag.Service.Installation.Name),
 			TrustedAdvisorEnabled: config.Viper.GetBool(config.Flag.Service.AWS.TrustedAdvisor.Enabled),
 		}
@@ -216,12 +217,12 @@ func New(config Config) (*Service, error) {
 
 	var operatorCollector *collector.Set
 	{
-		c := exporterkitcollector.SetConfig{
+		c := collector.SetConfig{
 			G8sClient: g8sClient,
 			K8sClient: k8sClient,
 			Logger:    config.Logger,
 
-			AwsConfig:             awsConfig,
+			AWSConfig:             awsConfig,
 			InstallationName:      config.Viper.GetString(config.Flag.Service.Installation.Name),
 			TrustedAdvisorEnabled: config.Viper.GetBool(config.Flag.Service.AWS.TrustedAdvisor.Enabled),
 		}

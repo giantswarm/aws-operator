@@ -73,7 +73,7 @@ func New(config Config) (*Collector, error) {
 			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 
-			AwsConfig: config.AWSConfig,
+			AWSConfig: config.AWSConfig,
 		}
 
 		h, err = newHelper(c)

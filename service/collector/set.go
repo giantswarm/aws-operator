@@ -38,7 +38,7 @@ func NewSet(config SetConfig) (*Set, error) {
 			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 
-			AwsConfig: config.AWSConfig,
+			AWSConfig: config.AWSConfig,
 		}
 
 		h, err = newHelper(c)
