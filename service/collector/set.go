@@ -47,7 +47,7 @@ func NewSet(config SetConfig) (*Set, error) {
 		}
 	}
 
-	var elbCollector *ELBCollector
+	var elbCollector *ELB
 	{
 		c := ELBConfig{
 			Helper: h,
@@ -70,6 +70,7 @@ func NewSet(config SetConfig) (*Set, error) {
 			},
 			Logger: config.Logger,
 		}
+
 		collectorSet, err = collector.NewSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)

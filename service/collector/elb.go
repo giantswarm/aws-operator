@@ -41,14 +41,14 @@ type ELBConfig struct {
 	InstallationName string
 }
 
-type ELBCollector struct {
+type ELB struct {
 	helper *helper
 	logger micrologger.Logger
 
 	installationName string
 }
 
-func NewELB(config ELBConfig) (*ELBCollector, error) {
+func NewELB(config ELBConfig) (*ELB, error) {
 	if config.Helper == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Helper must not be empty", config)
 	}
@@ -60,18 +60,18 @@ func NewELB(config ELBConfig) (*ELBCollector, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
 	}
 
-	c := &ELBCollector{
+	e := &ELB{
 		helper: config.Helper,
 		logger: config.Logger,
 
 		installationName: config.InstallationName,
 	}
 
-	return c, nil
+	return e, nil
 }
 
-func (c *ELBCollector) Collect(ch chan<- prometheus.Metric) error {
-	awsClientsList, err := c.helper.GetAWSClients()
+func (e *ELB) Collect(ch chan<- prometheus.Metric) error {
+	awsClientsList, err := e.helper.GetAWSClients()
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -82,7 +82,7 @@ func (c *ELBCollector) Collect(ch chan<- prometheus.Metric) error {
 		awsClients := item
 
 		g.Go(func() error {
-			err := c.collectForAccount(ch, awsClients)
+			err := e.collectForAccount(ch, awsClients)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -99,13 +99,13 @@ func (c *ELBCollector) Collect(ch chan<- prometheus.Metric) error {
 	return nil
 }
 
-func (c *ELBCollector) Describe(ch chan<- *prometheus.Desc) error {
+func (e *ELB) Describe(ch chan<- *prometheus.Desc) error {
 	ch <- elbsDesc
 	return nil
 }
 
-func (c *ELBCollector) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaws.Clients) error {
-	account, err := c.helper.AWSAccountID(awsClients)
+func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaws.Clients) error {
+	account, err := e.helper.AWSAccountID(awsClients)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -153,7 +153,7 @@ func (c *ELBCollector) collectForAccount(ch chan<- prometheus.Metric, awsClients
 			}
 		}
 
-		if installation != c.installationName {
+		if installation != e.installationName {
 			continue
 		}
 
