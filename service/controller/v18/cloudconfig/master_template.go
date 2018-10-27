@@ -4,19 +4,24 @@ import (
 	"context"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/aws-operator/service/controller/v18/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v18/encrypter/vault"
+	"github.com/giantswarm/aws-operator/service/controller/v18/templates/cloudconfig"
 	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_6_2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
-
-	"github.com/giantswarm/aws-operator/service/controller/v18/encrypter/vault"
-	"github.com/giantswarm/aws-operator/service/controller/v18/templates/cloudconfig"
 )
 
 // NewMasterTemplate generates a new master cloud config template and returns it
 // as a base64 encoded string.
 func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster) (string, error) {
 	var err error
+
+	ctlCtx, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
 
 	encryptionKey, err := c.encrypter.EncryptionKey(ctx, customObject)
 	if err != nil {
@@ -45,6 +50,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 		params.EtcdPort = customObject.Spec.Cluster.Etcd.Port
 		params.Extension = &MasterExtension{
 			baseExtension: be,
+			ctxctx:        ctlCtx,
 
 			ClusterCerts:     clusterCerts,
 			RandomKeyTmplSet: randomKeyTmplSet,
@@ -83,6 +89,12 @@ type RandomKeyTmplSet struct {
 
 type MasterExtension struct {
 	baseExtension
+
+	// TODO Pass context to k8scloudconfig rendering fucntions
+	//
+	// See https://github.com/giantswarm/giantswarm/issues/4329.
+	//
+	ctxCtx *controllercontext.Context
 
 	ClusterCerts     certs.Cluster
 	RandomKeyTmplSet RandomKeyTmplSet
@@ -146,6 +158,12 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		certFiles := certs.NewFilesClusterMaster(e.ClusterCerts)
 
 		for _, f := range certFiles {
+			// TODO We should just pass ctx to Files.
+			//
+			// See https://github.com/giantswarm/giantswarm/issues/4329.
+			//
+			ctx = controllercontext.NewContext(c, e.ctlCtx)
+
 			data, err := e.encryptAndGzip(ctx, f.Data)
 			if err != nil {
 				return nil, microerror.Mask(err)
@@ -153,7 +171,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 			meta := k8scloudconfig.FileMetadata{
 				AssetContent: string(data),
-				Path:         f.AbsolutePath,
+				Path:         f.AbsolutePath + ".enc",
 				Owner:        FileOwner,
 				Permissions:  0766,
 			}
