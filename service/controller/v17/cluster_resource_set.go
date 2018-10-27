@@ -161,7 +161,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			Encrypter: encrypterObject,
 			Logger:    config.Logger,
 
-			OIDC: config.OIDC,
+			OIDC:                   config.OIDC,
 			PodInfraContainerImage: config.PodInfraContainerImage,
 			RegistryDomain:         config.RegistryDomain,
 			SSOPublicKey:           config.SSOPublicKey,

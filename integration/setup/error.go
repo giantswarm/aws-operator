@@ -3,6 +3,7 @@ package setup
 import (
 	"strings"
 
+	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
 )
 
@@ -13,6 +14,29 @@ var notFoundError = &microerror.Error{
 // IsNotFound asserts notFoundError.
 func IsNotFound(err error) bool {
 	return microerror.Cause(err) == notFoundError
+}
+
+var stackAlreadyExistsError = &microerror.Error{
+	Kind: "stackAlreadyExistsError",
+}
+
+// IsStackAlreadyExists asserts alreadyExistsError.
+func IsStackAlreadyExists(err error) bool {
+	c := microerror.Cause(err)
+
+	if c == nil {
+		return false
+	}
+
+	if strings.Contains(c.Error(), cloudformation.ErrCodeAlreadyExistsException) {
+		return true
+	}
+
+	if c == stackAlreadyExistsError {
+		return true
+	}
+
+	return false
 }
 
 var stackNotFoundError = &microerror.Error{
