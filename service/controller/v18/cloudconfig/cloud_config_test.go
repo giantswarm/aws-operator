@@ -10,11 +10,11 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/aws-operator/service/controller/v18/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v18/encrypter"
 	"github.com/giantswarm/certs"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys"
-
-	"github.com/giantswarm/aws-operator/service/controller/v18/encrypter"
 )
 
 func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
@@ -41,11 +41,14 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
+		ctlCtx := controllercontext.Context{}
+		ctx := controllercontext.NewContext(context.Background(), ctlCtx)
+
 		ccService, err := testNewCloudConfigService()
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
-		template, err := ccService.NewMasterTemplate(context.Background(), tc.CustomObject, certs.Cluster{}, tc.ClusterKeys)
+		template, err := ccService.NewMasterTemplate(ctx, tc.CustomObject, certs.Cluster{}, tc.ClusterKeys)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}

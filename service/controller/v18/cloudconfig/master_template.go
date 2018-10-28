@@ -50,7 +50,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 		params.EtcdPort = customObject.Spec.Cluster.Etcd.Port
 		params.Extension = &MasterExtension{
 			baseExtension: be,
-			ctxCtx:        ctlCtx,
+			ctlCtx:        ctlCtx,
 
 			ClusterCerts:     clusterCerts,
 			RandomKeyTmplSet: randomKeyTmplSet,
@@ -94,7 +94,7 @@ type MasterExtension struct {
 	//
 	// See https://github.com/giantswarm/giantswarm/issues/4329.
 	//
-	ctxCtx *controllercontext.Context
+	ctlCtx *controllercontext.Context
 
 	ClusterCerts     certs.Cluster
 	RandomKeyTmplSet RandomKeyTmplSet
@@ -162,7 +162,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			//
 			// See https://github.com/giantswarm/giantswarm/issues/4329.
 			//
-			ctx = controllercontext.NewContext(c, e.ctlCtx)
+			ctx = controllercontext.NewContext(ctx, *e.ctlCtx)
 
 			data, err := e.encryptAndGzip(ctx, f.Data)
 			if err != nil {
