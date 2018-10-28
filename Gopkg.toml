@@ -81,7 +81,7 @@ required = [
   name = "github.com/giantswarm/helmclient"
 
 [[constraint]]
-  branch = "teemow-k8s-1.12.2"
+  branch = "master"
   name = "github.com/giantswarm/k8scloudconfig"
 
 [[constraint]]
