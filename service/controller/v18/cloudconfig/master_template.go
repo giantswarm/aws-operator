@@ -50,7 +50,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 		params.EtcdPort = customObject.Spec.Cluster.Etcd.Port
 		params.Extension = &MasterExtension{
 			baseExtension: be,
-			ctxctx:        ctlCtx,
+			ctxCtx:        ctlCtx,
 
 			ClusterCerts:     clusterCerts,
 			RandomKeyTmplSet: randomKeyTmplSet,
