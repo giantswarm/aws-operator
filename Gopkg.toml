@@ -37,7 +37,7 @@ required = [
   name = "github.com/docker/distribution"
 
 [[override]]
-  branch = "az-number"
+  branch = "master"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]

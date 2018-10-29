@@ -232,7 +232,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "az-number"
+  branch = "master"
   digest = "1:a3234643d3b8fabad7ca43737ed18c1d48cddf71ea22b949f41d8464c9a50978"
   name = "github.com/giantswarm/apiextensions"
   packages = [
@@ -250,7 +250,7 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake",
   ]
   pruneopts = "UT"
-  revision = "b69ac06610fad4bf39411617a4cea66d1b6c518c"
+  revision = "ff40ac5722755f6af2e3ce7527056bb5c203200a"
 
 [[projects]]
   branch = "master"
@@ -932,7 +932,7 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "45a5f77698d342a8c2ef8423abdf0ba6880b008a"
+  revision = "dab2b1051b5dd33a57e97c4774ed152e6a6c9a13"
 
 [[projects]]
   branch = "master"
