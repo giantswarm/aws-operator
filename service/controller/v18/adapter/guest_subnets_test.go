@@ -26,7 +26,7 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					AWS: v1alpha1.AWSConfigSpecAWS{
-						AvailabilityZones: []string{"eu-central-1a"},
+						AZ: "eu-central-1a",
 						VPC: v1alpha1.AWSConfigSpecAWSVPC{
 							PublicSubnetCIDR:  "10.1.1.0/25",
 							PrivateSubnetCIDR: "10.1.2.0/25",
