@@ -250,7 +250,7 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake",
   ]
   pruneopts = "UT"
-  revision = "5cbc19019e914d3a15289c4040154291073b2626"
+  revision = "c21224a10aae5c85eb55d5e82ad12b8691efce91"
 
 [[projects]]
   branch = "master"
@@ -345,6 +345,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:f9913f3a27cb225866dc43b92ea368315d46f80c7ee65fc6abe073d5dd1bccbb"
+  name = "github.com/giantswarm/exporterkit"
+  packages = ["collector"]
+  pruneopts = "UT"
+  revision = "a60dbc99e177d2c5cb847c65dd60ecb1eca4796f"
+
+[[projects]]
+  branch = "master"
   digest = "1:6736460230363efcaeef32fd5f524a1e8ab6161032e3ed7b0181034d0c04a9fa"
   name = "github.com/giantswarm/guestcluster"
   packages = ["."]
@@ -361,7 +369,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:d234898c00d513caf83fafde62676c62dbc5f560bf1c5df5c2d6bb214bc2244a"
+  digest = "1:70bf17672e63020b31035ae366e3df4e577d44182447411c07e4f1310d474388"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "v_3_3_3",
@@ -373,7 +381,7 @@
     "v_3_6_2",
   ]
   pruneopts = "T"
-  revision = "a388cb52f146257de88fb40ef5ab9803bd65b0e5"
+  revision = "4378d4d4e4ef6f1e890c54cb8d8ce5cbb0b00389"
 
 [[projects]]
   branch = "master"
@@ -827,7 +835,7 @@
     "prometheus/promhttp",
   ]
   pruneopts = "UT"
-  revision = "16f375c74db6ccf880e1cd9c6c6087a6d58e5d12"
+  revision = "f30f428035633da15d00d3dfefb0128c5e569ef4"
 
 [[projects]]
   branch = "master"
@@ -874,12 +882,12 @@
   version = "v1.1.2"
 
 [[projects]]
-  digest = "1:516e71bed754268937f57d4ecb190e01958452336fa73dbac880894164e91c1f"
+  digest = "1:08d65904057412fc0270fc4812a1c90c594186819243160dc779a402d4b6d0bc"
   name = "github.com/spf13/cast"
   packages = ["."]
   pruneopts = "UT"
-  revision = "8965335b8c7107321228e3e3702cab9832751bac"
-  version = "v1.2.0"
+  revision = "8c9545af88b134710ab1cd196795e7f2388358d7"
+  version = "v1.3.0"
 
 [[projects]]
   digest = "1:645cabccbb4fa8aab25a956cbcbdf6a6845ca736b2c64e197ca7cbb9d210b939"
@@ -932,7 +940,7 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "85e1b3f9139abd58575d728a509643924e3b2ebf"
+  revision = "e84da0312774c21d64ee2317962ef669b27ffb41"
 
 [[projects]]
   branch = "master"
@@ -973,14 +981,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:6c93c46c00889c28f5a105e7cb5ba56672fd4a2351375fa819acb44e66d427df"
+  digest = "1:718ce2cce5e0ea56394a3ad854c33ccaecba93604aaab0df6b7b7e1f50f02b1a"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "d989b31c87461dc8ab2f1cac6792814e27fadea9"
+  revision = "2772b66316d2c587efeb188dcd5ebc6987656e84"
 
 [[projects]]
   digest = "1:e5a8511f063c38c51ab9ab80e718e9149f692652aeb4e393a8c020dd1bf38ca2"
@@ -1454,7 +1462,7 @@
   name = "k8s.io/kube-openapi"
   packages = ["pkg/util/proto"]
   pruneopts = "UT"
-  revision = "96e8bb74ecdddb93a882ef95d2b8ec49e93168ee"
+  revision = "3a9b63ab1e397dc12a9764df998f99bc59dfd9ae"
 
 [[projects]]
   digest = "1:0cbc5b5dd9e675751a7f0b8cc4477f3900dbb31fed90c7793455a219d209ae25"
@@ -1680,6 +1688,7 @@
     "github.com/giantswarm/e2etests/scaling/provider",
     "github.com/giantswarm/e2etests/update",
     "github.com/giantswarm/e2etests/update/provider",
+    "github.com/giantswarm/exporterkit/collector",
     "github.com/giantswarm/guestcluster",
     "github.com/giantswarm/helmclient",
     "github.com/giantswarm/k8scloudconfig/v_3_3_3",
@@ -1718,6 +1727,7 @@
     "github.com/spf13/afero",
     "github.com/spf13/viper",
     "github.com/stretchr/testify/assert",
+    "golang.org/x/sync/errgroup",
     "k8s.io/api/core/v1",
     "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset",
     "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/fake",

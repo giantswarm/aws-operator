@@ -111,7 +111,7 @@ func (c *Collector) collectTrustedAdvisorChecks(ch chan<- prometheus.Metric, aws
 	}
 	ch <- trustedAdvisorSupported()
 
-	accountID, err := c.awsAccountID(awsClients)
+	accountID, err := c.helper.AWSAccountID(awsClients)
 	if err != nil {
 		c.logger.Log("level", "error", "message", "could not get aws account id", "stack", fmt.Sprintf("%#v", err))
 	}
