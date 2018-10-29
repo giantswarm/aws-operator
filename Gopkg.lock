@@ -345,6 +345,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:f9913f3a27cb225866dc43b92ea368315d46f80c7ee65fc6abe073d5dd1bccbb"
+  name = "github.com/giantswarm/exporterkit"
+  packages = ["collector"]
+  pruneopts = "UT"
+  revision = "a60dbc99e177d2c5cb847c65dd60ecb1eca4796f"
+
+[[projects]]
+  branch = "master"
   digest = "1:6736460230363efcaeef32fd5f524a1e8ab6161032e3ed7b0181034d0c04a9fa"
   name = "github.com/giantswarm/guestcluster"
   packages = ["."]
@@ -602,11 +610,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:8c90219e8a1f5f7cad019b77697aaae2b236db5a1a46ae688e5ede406e109182"
+  digest = "1:9eb94c610ee41dd363268a09d327ad8a9608178d2d40a01153df724d400d7d1c"
   name = "github.com/google/go-github"
   packages = ["github"]
   pruneopts = "UT"
-  revision = "60c18f2b2f5c1fa591b80d73f33234584a61ee8c"
+  revision = "e64590964d2c9cc256bc8783053ab19fd7b7a592"
 
 [[projects]]
   digest = "1:a63cff6b5d8b95638bfe300385d93b2a6d9d687734b863da8e09dc834510a690"
@@ -1041,7 +1049,7 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "8b5d7a19e2d98fbad9aaf9c599776bf066d7c70f"
+  revision = "b69ba1387ce2108ac9bc8e8e5e5a46e7d5c72313"
 
 [[projects]]
   digest = "1:bf7e2328a58176b7f29f3b425b0555745e9a18ed803f5fd8f6c2c13913a60bb4"
@@ -1680,6 +1688,7 @@
     "github.com/giantswarm/e2etests/scaling/provider",
     "github.com/giantswarm/e2etests/update",
     "github.com/giantswarm/e2etests/update/provider",
+    "github.com/giantswarm/exporterkit/collector",
     "github.com/giantswarm/guestcluster",
     "github.com/giantswarm/helmclient",
     "github.com/giantswarm/k8scloudconfig/v_3_3_3",
@@ -1718,6 +1727,7 @@
     "github.com/spf13/afero",
     "github.com/spf13/viper",
     "github.com/stretchr/testify/assert",
+    "golang.org/x/sync/errgroup",
     "k8s.io/api/core/v1",
     "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset",
     "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/fake",
