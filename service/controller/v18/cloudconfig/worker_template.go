@@ -2,19 +2,25 @@ package cloudconfig
 
 import (
 	"context"
+	"encoding/base64"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/aws-operator/service/controller/v18/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v18/templates/cloudconfig"
 	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_6_2"
 	"github.com/giantswarm/microerror"
-
-	"github.com/giantswarm/aws-operator/service/controller/v18/templates/cloudconfig"
 )
 
 // NewWorkerTemplate generates a new worker cloud config template and returns it
 // as a base64 encoded string.
 func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, clusterCerts certs.Cluster) (string, error) {
 	var err error
+
+	ctlCtx, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
 
 	encryptionKey, err := c.encrypter.EncryptionKey(ctx, customObject)
 	if err != nil {
@@ -32,6 +38,7 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 		params.Cluster = customObject.Spec.Cluster
 		params.Extension = &WorkerExtension{
 			baseExtension: be,
+			ctlCtx:        ctlCtx,
 
 			ClusterCerts: clusterCerts,
 		}
@@ -63,11 +70,20 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 type WorkerExtension struct {
 	baseExtension
 
+	// TODO Pass context to k8scloudconfig rendering fucntions
+	//
+	// See https://github.com/giantswarm/giantswarm/issues/4329.
+	//
+	ctlCtx *controllercontext.Context
+
 	ClusterCerts certs.Cluster
 }
 
 func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
-	// TODO https://github.com/giantswarm/giantswarm/issues/4329
+	// TODO Pass context to k8scloudconfig rendering fucntions
+	//
+	// See https://github.com/giantswarm/giantswarm/issues/4329.
+	//
 	ctx := context.TODO()
 
 	filesMeta := []k8scloudconfig.FileMetadata{
@@ -89,13 +105,21 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		certFiles := certs.NewFilesClusterWorker(e.ClusterCerts)
 
 		for _, f := range certFiles {
+			// TODO We should just pass ctx to Files.
+			//
+			// See https://github.com/giantswarm/giantswarm/issues/4329.
+			//
+			ctx = controllercontext.NewContext(ctx, *e.ctlCtx)
+
 			data, err := e.encryptAndGzip(ctx, f.Data)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
 
+			b64Data := base64.StdEncoding.EncodeToString(data)
+
 			meta := k8scloudconfig.FileMetadata{
-				AssetContent: string(data),
+				AssetContent: b64Data,
 				Path:         f.AbsolutePath,
 				Owner:        FileOwner,
 				Permissions:  0700,

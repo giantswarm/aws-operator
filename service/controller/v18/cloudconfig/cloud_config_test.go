@@ -93,12 +93,15 @@ func Test_Service_CloudConfig_NewWorkerTemplate(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
+		ctlCtx := controllercontext.Context{}
+		ctx := controllercontext.NewContext(context.Background(), ctlCtx)
+
 		ccService, err := testNewCloudConfigService()
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
 
-		template, err := ccService.NewWorkerTemplate(context.Background(), tc.CustomObject, certs.Cluster{})
+		template, err := ccService.NewWorkerTemplate(ctx, tc.CustomObject, certs.Cluster{})
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}

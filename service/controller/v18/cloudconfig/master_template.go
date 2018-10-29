@@ -2,6 +2,7 @@ package cloudconfig
 
 import (
 	"context"
+	"encoding/base64"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/aws-operator/service/controller/v18/controllercontext"
@@ -101,7 +102,10 @@ type MasterExtension struct {
 }
 
 func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
-	// TODO https://github.com/giantswarm/giantswarm/issues/4329
+	// TODO Pass context to k8scloudconfig rendering fucntions
+	//
+	// See https://github.com/giantswarm/giantswarm/issues/4329.
+	//
 	ctx := context.TODO()
 
 	filesMeta := []k8scloudconfig.FileMetadata{
@@ -169,8 +173,10 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 				return nil, microerror.Mask(err)
 			}
 
+			b64Data := base64.StdEncoding.EncodeToString(data)
+
 			meta := k8scloudconfig.FileMetadata{
-				AssetContent: string(data),
+				AssetContent: b64Data,
 				Path:         f.AbsolutePath + ".enc",
 				Owner:        FileOwner,
 				Permissions:  0766,
