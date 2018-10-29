@@ -1,6 +1,6 @@
 package v1alpha1
 
-func (a AWSConfig) AvailabilityZones() []string {
+func (a AWSConfig) AvailabilityZones() int {
 	return a.Spec.AWS.AvailabilityZones
 }
 

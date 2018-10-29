@@ -35,7 +35,7 @@ func (c *Collector) collectClusterInfo(ch chan<- prometheus.Metric, clients []aw
 	for {
 		opts.Continue = continueToken
 
-		clustersConfigList, err := c.g8sClient.ProviderV1alpha1().AWSConfigs("").List(opts)
+		clustersConfigList, err := c.helper.g8sClient.ProviderV1alpha1().AWSConfigs("").List(opts)
 		if err != nil {
 			c.logger.Log(err)
 		}
