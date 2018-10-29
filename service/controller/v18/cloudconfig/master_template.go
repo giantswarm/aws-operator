@@ -180,6 +180,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 				Path:         f.AbsolutePath + ".enc",
 				Owner:        FileOwner,
 				Permissions:  0766,
+				Encoding:     "gzip+base64",
 			}
 
 			filesMeta = append(filesMeta, meta)

@@ -123,6 +123,7 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 				Path:         f.AbsolutePath,
 				Owner:        FileOwner,
 				Permissions:  0700,
+				Encoding:     "gzip+base64",
 			}
 
 			filesMeta = append(filesMeta, meta)
