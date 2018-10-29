@@ -19,55 +19,75 @@ const (
 	Namespace          = "aws_operator"
 )
 
+const (
+	ClusterTag      = "giantswarm.io/cluster"
+	InstallationTag = "giantswarm.io/installation"
+	OrganizationTag = "giantswarm.io/organization"
+)
+
+const (
+	ClusterLabel      = "cluster_id"
+	InstallationLabel = "installation"
+	OrganizationLabel = "organization"
+)
+
+// NOTE the collector implementation below is deprecated. Further collector
+// implementations should align with the exporterkit interface and be configured
+// in the collector set list. See also service/service.go.
+
 type Config struct {
 	G8sClient versioned.Interface
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 
-	AwsConfig             clientaws.Config
+	AWSConfig             clientaws.Config
 	InstallationName      string
 	TrustedAdvisorEnabled bool
 }
 
 type Collector struct {
-	g8sClient versioned.Interface
-	k8sClient kubernetes.Interface
-	logger    micrologger.Logger
+	helper *helper
+	logger micrologger.Logger
 
 	bootOnce sync.Once
 
-	awsConfig             clientaws.Config
 	installationName      string
 	trustedAdvisorEnabled bool
 }
 
 func New(config Config) (*Collector, error) {
-	if config.G8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
-	}
-	if config.K8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
-	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	var emptyAwsConfig clientaws.Config
-	if config.AwsConfig == emptyAwsConfig {
-		return nil, microerror.Maskf(invalidConfigError, "%T.AwsConfig must not be empty", config)
-	}
 	if config.InstallationName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
 	}
 
+	var err error
+
+	var h *helper
+	{
+		c := helperConfig{
+			G8sClient: config.G8sClient,
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+
+			AWSConfig: config.AWSConfig,
+		}
+
+		h, err = newHelper(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	c := &Collector{
-		g8sClient: config.G8sClient,
-		k8sClient: config.K8sClient,
-		logger:    config.Logger,
+		helper: h,
+		logger: config.Logger,
 
 		bootOnce: sync.Once{},
 
-		awsConfig:             config.AwsConfig,
 		installationName:      config.InstallationName,
 		trustedAdvisorEnabled: config.TrustedAdvisorEnabled,
 	}
@@ -112,7 +132,6 @@ func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 		ch <- trustedAdvisorSupport
 	}
 
-	ch <- elbsDesc
 	ch <- vpcsDesc
 }
 
@@ -120,7 +139,7 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	c.logger.Log("level", "debug", "message", "collecting metrics")
 
 	// Get aws clients
-	clients, err := c.getAWSClients()
+	clients, err := c.helper.GetAWSClients()
 	if err != nil {
 		c.logger.Log("level", "error", "message", "could not get aws clients", "error", err.Error())
 	}
@@ -129,7 +148,6 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 
 	collectFuncs := []func(chan<- prometheus.Metric, []clientaws.Clients){
 		c.collectClusterInfo,
-		c.collectAccountsELBs,
 		c.collectAccountsVPCs,
 	}
 
