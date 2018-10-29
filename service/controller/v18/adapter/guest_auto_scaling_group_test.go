@@ -26,8 +26,8 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: defaultCluster,
 					AWS: v1alpha1.AWSConfigSpecAWS{
-						AvailabilityZones: []string{"myaz"},
-						Workers:           []v1alpha1.AWSConfigSpecAWSNode{},
+						AZ:      "myaz",
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{},
 					},
 				},
 			},
@@ -39,7 +39,7 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: defaultCluster,
 					AWS: v1alpha1.AWSConfigSpecAWS{
-						AvailabilityZones: []string{"myaz"},
+						AZ: "myaz",
 						Workers: []v1alpha1.AWSConfigSpecAWSNode{
 							{},
 						},
@@ -61,7 +61,7 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: defaultCluster,
 					AWS: v1alpha1.AWSConfigSpecAWS{
-						AvailabilityZones: []string{"myaz"},
+						AZ: "myaz",
 						Workers: []v1alpha1.AWSConfigSpecAWSNode{
 							{},
 							{},
@@ -85,7 +85,7 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: defaultCluster,
 					AWS: v1alpha1.AWSConfigSpecAWS{
-						AvailabilityZones: []string{"myaz"},
+						AZ: "myaz",
 						Workers: []v1alpha1.AWSConfigSpecAWSNode{
 							{},
 							{},

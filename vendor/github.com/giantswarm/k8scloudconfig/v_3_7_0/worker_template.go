@@ -311,7 +311,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE={{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.1-cec4fb8023db783fbf26fb056bf6c76abfcd96cf-giantswarm"
+      Environment="IMAGE={{ .RegistryDomain }}/{{ .Images.Kubernetes }}"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
@@ -345,7 +345,7 @@ coreos:
       -v /usr/sbin/mkfs.xfs:/usr/sbin/mkfs.xfs \
       -v /usr/lib64/libxfs.so.0:/usr/lib/libxfs.so.0 \
       -v /usr/lib64/libxcmd.so.0:/usr/lib/libxcmd.so.0 \
-      -v /usr/lib64/libreadline.so.6:/usr/lib/libreadline.so.6 \
+      -v /usr/lib64/libreadline.so.7:/usr/lib/libreadline.so.7 \
       -e ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/client-ca.pem \
       -e ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/client-crt.pem \
       -e ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/client-key.pem \
@@ -360,7 +360,6 @@ coreos:
       --containerized \
       --enable-server \
       --logtostderr=true \
-      --cadvisor-port=4194 \
       --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
       --network-plugin=cni \
       --register-node=true \

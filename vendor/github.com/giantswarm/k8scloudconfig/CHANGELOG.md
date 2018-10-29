@@ -18,6 +18,13 @@ version directory, and then changes are introduced.
 - Updated Calico to 3.2.3
 - Updated Calico manifest with resource limits to get QoS policy guaranteed.
 
+## [v3.7.0]
+
+### Changed
+- Updated Kubernetes to 1.12.1
+- Updated etcd to 3.3.9
+- Kubernetes and etcd images are now held in one place
+
 ## [v3.6.2]
 
 ### Changed
