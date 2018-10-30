@@ -67,6 +67,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 }
 
 func (r *Resource) allocateSubnet(ctx context.Context) (string, error) {
+	var err error
 	var reservedSubnets []net.IPNet
 
 	{
