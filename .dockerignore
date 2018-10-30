@@ -1,3 +1,3 @@
 *
 !aws-operator
-!service/templates/
+!vendor/github.com/giantswarm/k8scloudconfig/

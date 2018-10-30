@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	"github.com/giantswarm/certs/legacy"
+	"github.com/giantswarm/legacycerts/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
@@ -352,7 +352,10 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			c := config.HostAWSConfig
 			c.RoleARN = arn
 
-			awsClient = aws.NewClients(c)
+			awsClient, err = aws.NewClients(c)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
 		}
 
 		var awsService *awsservice.Service
@@ -377,7 +380,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 				KMSClient: awsClient.KMS,
 				Logger:    config.Logger,
 
-				OIDC: config.OIDC,
+				OIDC:                   config.OIDC,
 				PodInfraContainerImage: config.PodInfraContainerImage,
 			}
 

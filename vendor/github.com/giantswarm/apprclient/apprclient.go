@@ -50,7 +50,7 @@ type Client struct {
 // New creates a new configured appr client.
 func New(config Config) (*Client, error) {
 	if config.Fs == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Fs must not be empty", config)
+		config.Fs = afero.NewOsFs()
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)

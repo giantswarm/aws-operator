@@ -3,12 +3,11 @@ package s3object
 import (
 	"context"
 
-	"github.com/giantswarm/certs/legacy"
-	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/randomkeys"
-
 	"github.com/giantswarm/aws-operator/service/controller/v17/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v17/key"
+	"github.com/giantswarm/legacycerts/legacy"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/randomkeys"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
@@ -22,7 +21,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 
 	_, err = r.encrypter.EncryptionKey(ctx, customObject)
-	if r.encrypter.IsKeyNotFound(err) {
+	if r.encrypter.IsKeyNotFound(err) && key.IsDeleted(customObject) {
 		// we can get here during deletion, if the key is already deleted we can safely exit.
 		return nil, nil
 	} else if err != nil {
@@ -55,7 +54,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	output := map[string]BucketObjectState{}
 
 	{
-		b, err := sc.CloudConfig.NewMasterTemplate(ctx, customObject, *tlsAssets, clusterKeys)
+		b, err := r.cloudConfig.NewMasterTemplate(ctx, customObject, *tlsAssets, clusterKeys)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -68,7 +67,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 
 	{
-		b, err := sc.CloudConfig.NewWorkerTemplate(ctx, customObject, *tlsAssets)
+		b, err := r.cloudConfig.NewWorkerTemplate(ctx, customObject, *tlsAssets)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

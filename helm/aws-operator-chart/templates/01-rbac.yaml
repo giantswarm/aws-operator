@@ -95,7 +95,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: aws-operator
-    namespace: giantswarm
+    namespace: {{ .Values.namespace }}
 roleRef:
   kind: ClusterRole
   name: aws-operator
@@ -122,7 +122,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: aws-operator
-    namespace: giantswarm
+    namespace: {{ .Values.namespace }}
 roleRef:
   kind: ClusterRole
   name: aws-operator-psp

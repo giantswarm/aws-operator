@@ -47,6 +47,16 @@ jobs:
           if [ "${CIRCLE_BRANCH}" == "master" ]; then
             ./architect deploy
           fi
+  master:
+    docker:
+      - image: busybox
+    steps:
+      - run: "true"
+  pr:
+    docker:
+      - image: busybox
+    steps:
+      - run: "true"
 
 
 
@@ -128,6 +138,32 @@ jobs:
 
 
 
+  e2eTestCurPRRecreateCluster:
+    environment:
+      TESTED_VERSION: "current"
+      TEST_DIR: "integration/test/recreatecluster"
+    <<: *e2eTest
+
+  e2eTestCurMasterRecreateCluster:
+    environment:
+      TESTED_VERSION: "current"
+      TEST_DIR: "integration/test/recreatecluster"
+    <<: *e2eTest
+
+  e2eTestWIPPRRecreateCluster:
+    environment:
+      TESTED_VERSION: "wip"
+      TEST_DIR: "integration/test/recreatecluster"
+    <<: *e2eTest
+
+  e2eTestWIPMasterRecreateCluster:
+    environment:
+      TESTED_VERSION: "wip"
+      TEST_DIR: "integration/test/recreatecluster"
+    <<: *e2eTest
+
+
+
   e2eTestCurPRScaling:
     environment:
       TESTED_VERSION: "current"
@@ -177,104 +213,100 @@ workflows:
       - build
       - hold:
           type: approval
+      - master:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+      - pr:
+          requires:
+            - build
+            - hold
           filters:
             branches:
               ignore: master
+
+
+
+      - e2eTestCurMasterClusterState:
           requires:
-          - build
-
-
-
+            - master
+      - e2eTestWIPMasterClusterState:
+          requires:
+            - master
       - e2eTestCurPRClusterState:
           requires:
-          - hold
+            - pr
       - e2eTestWIPPRClusterState:
           requires:
-          - hold
-      - e2eTestCurMasterClusterState:
-          filters:
-            branches:
-              only: master
+            - pr
+
+
+
+      - e2eTestCurMasterDraining:
           requires:
-          - build
-      - e2eTestWIPMasterClusterState:
-          filters:
-            branches:
-              only: master
+            - master
+      - e2eTestWIPMasterDraining:
           requires:
-          - build
-
-
-
+            - master
       - e2eTestCurPRDraining:
           requires:
-          - hold
+            - pr
       - e2eTestWIPPRDraining:
           requires:
-          - hold
-      - e2eTestCurMasterDraining:
-          filters:
-            branches:
-              only: master
+            - pr
+
+
+
+      - e2eTestCurMasterIPAM:
           requires:
-          - build
-      - e2eTestWIPMasterDraining:
-          filters:
-            branches:
-              only: master
+            - master
+      - e2eTestWIPMasterIPAM:
           requires:
-          - build
-
-
-
+            - master
       - e2eTestCurPRIPAM:
           requires:
-          - hold
+            - pr
       - e2eTestWIPPRIPAM:
           requires:
-          - hold
-      - e2eTestCurMasterIPAM:
-          filters:
-            branches:
-              only: master
+            - pr
+
+
+
+      - e2eTestCurMasterRecreateCluster:
           requires:
-          - build
-      - e2eTestWIPMasterIPAM:
-          filters:
-            branches:
-              only: master
+            - master
+      - e2eTestWIPMasterRecreateCluster:
           requires:
-          - build
+            - master
+      - e2eTestCurPRRecreateCluster:
+          requires:
+            - pr
+      - e2eTestWIPPRRecreateCluster:
+          requires:
+            - pr
 
 
 
+      - e2eTestCurMasterScaling:
+          requires:
+            - master
+      - e2eTestWIPMasterScaling:
+          requires:
+            - master
       - e2eTestCurPRScaling:
           requires:
-          - hold
+            - pr
       - e2eTestWIPPRScaling:
           requires:
-          - hold
-      - e2eTestCurMasterScaling:
-          filters:
-            branches:
-              only: master
-          requires:
-          - build
-      - e2eTestWIPMasterScaling:
-          filters:
-            branches:
-              only: master
-          requires:
-          - build
+            - pr
 
 
 
       - e2eTestCurMasterUpdate:
-          filters:
-            branches:
-              only: master
           requires:
-          - build
+          - master
       - e2eTestCurPRUpdate:
           requires:
-          - hold
+          - pr

@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/certs/legacy"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_6_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_6_1"
+	"github.com/giantswarm/legacycerts/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
@@ -36,6 +36,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 		}
 
 		params.Cluster = customObject.Spec.Cluster
+		params.DisableCoreDNS = true
 		params.DisableEncryptionAtREST = true
 		params.DisableIngressController = true
 		// Ingress controller service remains in k8scloudconfig and will be
@@ -272,6 +273,15 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			AssetContent: cloudconfig.NVMEUdevTriggerUnit,
 			Name:         "ebs-nvme-udev-trigger.service",
 			Enable:       false,
+			Command:      "start",
+		},
+		// Set bigger timeouts for NVME driver.
+		// Workaround for https://github.com/coreos/bugs/issues/2484
+		// TODO issue: https://github.com/giantswarm/giantswarm/issues/4255
+		{
+			AssetContent: cloudconfig.NVMESetTimeoutsUnit,
+			Name:         "nvme-set-timeouts.service",
+			Enable:       true,
 			Command:      "start",
 		},
 		{

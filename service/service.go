@@ -13,17 +13,15 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8srestconfig"
 	"github.com/giantswarm/statusresource"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/viper"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
-	awsclient "github.com/giantswarm/aws-operator/client/aws"
+	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller"
-	"github.com/giantswarm/aws-operator/service/healthz"
 )
 
 const (
@@ -44,13 +42,13 @@ type Config struct {
 }
 
 type Service struct {
-	Healthz *healthz.Service
 	Version *version.Service
 
 	bootOnce                sync.Once
 	clusterController       *controller.Cluster
 	drainerController       *controller.Drainer
-	metricsCollector        *collector.Collector
+	legacyCollector         *collector.Collector
+	operatorCollector       *collector.Set
 	statusResourceCollector *statusresource.Collector
 }
 
@@ -199,40 +197,47 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var awsConfig awsclient.Config
+	var awsConfig clientaws.Config
 	{
-		awsConfig = awsclient.Config{
+		awsConfig = clientaws.Config{
 			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
 			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
-			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
 			Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
+			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
 		}
 	}
 
-	var metricsCollector *collector.Collector
+	var legacyCollector *collector.Collector
 	{
 		c := collector.Config{
 			G8sClient: g8sClient,
 			K8sClient: k8sClient,
 			Logger:    config.Logger,
 
-			AwsConfig:        awsConfig,
-			InstallationName: config.Viper.GetString(config.Flag.Service.Installation.Name),
+			AWSConfig:             awsConfig,
+			InstallationName:      config.Viper.GetString(config.Flag.Service.Installation.Name),
+			TrustedAdvisorEnabled: config.Viper.GetBool(config.Flag.Service.AWS.TrustedAdvisor.Enabled),
 		}
 
-		metricsCollector, err = collector.New(c)
+		legacyCollector, err = collector.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	var healthzService *healthz.Service
+	var operatorCollector *collector.Set
 	{
-		c := healthz.Config{
-			AwsConfig: awsConfig,
+		c := collector.SetConfig{
+			G8sClient: g8sClient,
+			K8sClient: k8sClient,
 			Logger:    config.Logger,
+
+			AWSConfig:             awsConfig,
+			InstallationName:      config.Viper.GetString(config.Flag.Service.Installation.Name),
+			TrustedAdvisorEnabled: config.Viper.GetBool(config.Flag.Service.AWS.TrustedAdvisor.Enabled),
 		}
-		healthzService, err = healthz.New(c)
+
+		operatorCollector, err = collector.NewSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -268,13 +273,13 @@ func New(config Config) (*Service, error) {
 	}
 
 	s := &Service{
-		Healthz: healthzService,
 		Version: versionService,
 
 		bootOnce:                sync.Once{},
 		clusterController:       clusterController,
 		drainerController:       drainerController,
-		metricsCollector:        metricsCollector,
+		legacyCollector:         legacyCollector,
+		operatorCollector:       operatorCollector,
 		statusResourceCollector: statusResourceCollector,
 	}
 
@@ -283,7 +288,8 @@ func New(config Config) (*Service, error) {
 
 func (s *Service) Boot(ctx context.Context) {
 	s.bootOnce.Do(func() {
-		prometheus.MustRegister(s.metricsCollector)
+		go s.legacyCollector.Boot(ctx)
+		go s.operatorCollector.Boot(ctx)
 		go s.statusResourceCollector.Boot(ctx)
 
 		go s.clusterController.Boot()

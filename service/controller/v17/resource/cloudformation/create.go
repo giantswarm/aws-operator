@@ -17,6 +17,10 @@ import (
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
+	customObject, err := key.ToCustomObject(obj)
+	if err != nil {
+		return microerror.Mask(err)
+	}
 	stackInput, err := toCreateStackInput(createChange)
 	if err != nil {
 		return microerror.Mask(err)
@@ -36,15 +40,10 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 				return microerror.Mask(err)
 			}
 
-			err = r.addRoleAccess(sc, customObject)
+			err = r.encrypterRoleManager.EnsureCreatedAuthorizedIAMRoles(ctx, customObject)
 			if err != nil {
 				return microerror.Mask(err)
 			}
-		}
-
-		customObject, err := key.ToCustomObject(obj)
-		if err != nil {
-			return microerror.Mask(err)
 		}
 
 		stackInput.Parameters = []*cloudformation.Parameter{

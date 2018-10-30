@@ -8,25 +8,16 @@ import (
 	"os"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/giantswarm/backoff"
-	"github.com/giantswarm/e2e-harness/pkg/framework"
-	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
-	"github.com/giantswarm/e2etemplates/pkg/e2etemplates"
-	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/micrologger"
-	"k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
+	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
+	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/aws-operator/integration/env"
+	"github.com/giantswarm/e2e-harness/pkg/release"
+	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
+	"github.com/giantswarm/microerror"
 )
 
 const (
-	awsOperatorArnKey     = "aws.awsoperator.arn"
 	awsResourceValuesFile = "/tmp/aws-operator-values.yaml"
-	credentialName        = "credential-default"
-	credentialNamespace   = "giantswarm"
 	provider              = "aws"
 )
 
@@ -36,26 +27,22 @@ func Setup(m *testing.M, config Config) {
 	var v int
 	var err error
 
-	vpcPeerID, err := installHostPeerVPC(config)
-	if err != nil {
-		log.Printf("%#v\n", err)
-		v = 1
-	}
-
-	err = config.Host.Setup()
-	if err != nil {
-		log.Printf("%#v\n", err)
-		v = 1
-	}
-
-	err = installResources(config, vpcPeerID)
+	err = installResources(ctx, config)
 	if err != nil {
 		log.Printf("%#v\n", err)
 		v = 1
 	}
 
 	if v == 0 {
-		err = config.Guest.Setup()
+		err = config.Guest.Initialize()
+		if err != nil {
+			log.Printf("%#v\n", err)
+			v = 1
+		}
+	}
+
+	if v == 0 {
+		err = EnsureTenantClusterCreated(ctx, config)
 		if err != nil {
 			log.Printf("%#v\n", err)
 			v = 1
@@ -71,20 +58,18 @@ func Setup(m *testing.M, config Config) {
 
 		// only do full teardown when not on CI
 		if os.Getenv("CIRCLECI") != "true" {
-			err := teardown(config)
+			err := teardown(ctx, config)
 			if err != nil {
-				log.Printf("%#v\n", err)
+				// teardown errors are logged inside the function.
 				v = 1
 			}
-			// TODO there should be error handling for the framework teardown.
-			config.Host.Teardown()
 		}
 	}
 
 	os.Exit(v)
 }
 
-func installAWSOperator(config Config) error {
+func installAWSOperator(ctx context.Context, config Config) error {
 	var err error
 
 	var values string
@@ -98,6 +83,10 @@ func installAWSOperator(config Config) error {
 			},
 			Secret: chartvalues.AWSOperatorConfigSecret{
 				AWSOperator: chartvalues.AWSOperatorConfigSecretAWSOperator{
+					CredentialDefault: chartvalues.AWSOperatorConfigSecretAWSOperatorCredentialDefault{
+						AdminARN:       env.GuestAWSARN(),
+						AWSOperatorARN: env.GuestAWSARN(),
+					},
 					IDRSAPub: env.IDRSAPub(),
 					SecretYaml: chartvalues.AWSOperatorConfigSecretAWSOperatorSecretYaml{
 						Service: chartvalues.AWSOperatorConfigSecretAWSOperatorSecretYamlService{
@@ -127,148 +116,86 @@ func installAWSOperator(config Config) error {
 
 	}
 
-	err = config.Host.InstallBranchOperator("aws-operator", "awsconfig", values)
+	err = config.Release.InstallOperator(ctx, "aws-operator", release.NewVersion(env.CircleSHA()), values, providerv1alpha1.NewAWSConfigCRD())
 	if err != nil {
 		return microerror.Mask(err)
 	}
 	return nil
 }
 
-func installAWSConfig(config Config, vpcPeerID string) error {
-	var err error
-
-	var values string
-	{
-		c := chartvalues.APIExtensionsAWSConfigE2EConfig{
-			CommonDomain:         env.CommonDomain(),
-			ClusterName:          env.ClusterID(),
-			SSHPublicKey:         env.IDRSAPub(),
-			VersionBundleVersion: env.VersionBundleVersion(),
-
-			AWS: chartvalues.APIExtensionsAWSConfigE2EConfigAWS{
-				Region:            env.AWSRegion(),
-				APIHostedZone:     env.AWSAPIHostedZoneGuest(),
-				IngressHostedZone: env.AWSIngressHostedZoneGuest(),
-				RouteTable0:       env.AWSRouteTable0(),
-				RouteTable1:       env.AWSRouteTable1(),
-				VPCPeerID:         vpcPeerID,
-			},
-		}
-
-		values, err = chartvalues.NewAPIExtensionsAWSConfigE2E(c)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	err = config.Host.InstallResource("apiextensions-aws-config-e2e", values, ":stable")
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	return nil
-}
-
-func installCredential(config Config) error {
-	var err error
-
-	var l micrologger.Logger
-	{
-		c := micrologger.Config{}
-
-		l, err = micrologger.New(c)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	o := func() error {
-		k8sClient := config.Host.K8sClient()
-
-		k8sClient.CoreV1().Secrets(credentialNamespace).Delete(credentialName, &metav1.DeleteOptions{})
-
-		secret := &v1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: credentialName,
-			},
-			Data: map[string][]byte{
-				awsOperatorArnKey: []byte(env.GuestAWSARN()),
-			},
-		}
-
-		_, err := k8sClient.CoreV1().Secrets(credentialNamespace).Create(secret)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		return nil
-	}
-	b := backoff.NewExponential(framework.ShortMaxWait, framework.ShortMaxInterval)
-	n := backoff.NewNotifier(l, context.Background())
-	err = backoff.RetryNotify(o, b, n)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	return nil
-}
-
-func installHostPeerVPC(config Config) (string, error) {
-	log.Printf("creating Host Peer VPC stack")
-
-	os.Setenv("AWS_ROUTE_TABLE_0", env.AWSRouteTable0())
-	os.Setenv("AWS_ROUTE_TABLE_1", env.AWSRouteTable1())
-	os.Setenv("CLUSTER_NAME", env.ClusterID())
-	stackName := "host-peer-" + env.ClusterID()
-	stackInput := &cloudformation.CreateStackInput{
-		StackName:        aws.String(stackName),
-		TemplateBody:     aws.String(os.ExpandEnv(e2etemplates.AWSHostVPCStack)),
-		TimeoutInMinutes: aws.Int64(2),
-	}
-	_, err := config.AWSClient.CloudFormation.CreateStack(stackInput)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-	err = config.AWSClient.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
-		StackName: aws.String(stackName),
-	})
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-	describeOutput, err := config.AWSClient.CloudFormation.DescribeStacks(&cloudformation.DescribeStacksInput{
-		StackName: aws.String(stackName),
-	})
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-	var vpcPeerID string
-	for _, o := range describeOutput.Stacks[0].Outputs {
-		if *o.OutputKey == "VPCID" {
-			vpcPeerID = *o.OutputValue
-			break
-		}
-	}
-	log.Printf("created Host Peer VPC stack")
-	return vpcPeerID, nil
-}
-
-func installResources(config Config, vpcPeerID string) error {
+func installResources(ctx context.Context, config Config) error {
 	var err error
 
 	{
-		// TODO configure chart values like for the other operators below.
-		err = config.Host.InstallStableOperator("cert-operator", "certconfig", e2etemplates.CertOperatorChartValues)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		err = config.Host.InstallStableOperator("node-operator", "drainerconfig", e2etemplates.NodeOperatorChartValues)
+		err := config.K8s.EnsureNamespaceCreated(ctx, namespace)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 	}
 
 	{
-		err = installAWSOperator(config)
+		c := chartvalues.E2ESetupVaultConfig{
+			Vault: chartvalues.E2ESetupVaultConfigVault{
+				Token: env.VaultToken(),
+			},
+		}
+
+		values, err := chartvalues.NewE2ESetupVault(c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		err = config.Release.Install(ctx, "e2esetup-vault", release.NewStableVersion(), values, config.Release.Condition().PodExists(ctx, "default", "app=vault"))
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	{
+		var values string
+		{
+			c := chartvalues.CertOperatorConfig{
+				ClusterName:        env.ClusterID(),
+				CommonDomain:       env.CommonDomain(),
+				RegistryPullSecret: env.RegistryPullSecret(),
+				Vault: chartvalues.CertOperatorVault{
+					Token: env.VaultToken(),
+				},
+			}
+
+			values, err = chartvalues.NewCertOperator(c)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+
+		err = config.Release.InstallOperator(ctx, "cert-operator", release.NewStableVersion(), values, corev1alpha1.NewCertConfigCRD())
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	{
+		var values string
+		{
+			c := chartvalues.NodeOperatorConfig{
+				RegistryPullSecret: env.RegistryPullSecret(),
+			}
+
+			values, err = chartvalues.NewNodeOperator(c)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+
+		err = config.Release.InstallOperator(ctx, "node-operator", release.NewStableVersion(), values, corev1alpha1.NewNodeConfigCRD())
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	{
+		err = installAWSOperator(ctx, config)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -276,17 +203,6 @@ func installResources(config Config, vpcPeerID string) error {
 
 	{
 		err = config.Host.InstallCertResource()
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		err = installCredential(config)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	{
-		err = installAWSConfig(config, vpcPeerID)
 		if err != nil {
 			return microerror.Mask(err)
 		}

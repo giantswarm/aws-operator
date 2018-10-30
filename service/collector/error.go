@@ -3,6 +3,7 @@ package collector
 import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/giantswarm/microerror"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 const (
@@ -10,6 +11,24 @@ const (
 	// if Trusted Advisor is not supported (support plan is not Business or Enterprise).
 	trustedAdvisorSubscriptionRequiredExceptionCode = "SubscriptionRequiredException"
 )
+
+var alreadyRegisteredError = &microerror.Error{
+	Kind: "alreadyRegisteredError",
+}
+
+// IsAlreadyRegisteredError asserts alreadyRegisteredError.
+func IsAlreadyRegisteredError(err error) bool {
+	c := microerror.Cause(err)
+	_, ok := c.(prometheus.AlreadyRegisteredError)
+	if ok {
+		return true
+	}
+	if c == alreadyRegisteredError {
+		return true
+	}
+
+	return false
+}
 
 var invalidConfigError = &microerror.Error{
 	Kind: "invalidConfigError",

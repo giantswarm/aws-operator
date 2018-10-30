@@ -6,7 +6,6 @@ type TLS struct {
 
 type Cluster struct {
 	APIServer        TLS
-	CalicoClient     TLS
 	CalicoEtcdClient TLS
 	EtcdServer       TLS
 	ServiceAccount   TLS

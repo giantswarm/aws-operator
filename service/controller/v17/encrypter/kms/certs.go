@@ -4,26 +4,21 @@ import (
 	"context"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/certs/legacy"
+	"github.com/giantswarm/legacycerts/legacy"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v17/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v17/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/v17/key"
 )
 
-func (k *Encrypter) EncryptTLSAssets(ctx context.Context, customObject v1alpha1.AWSConfig, assets legacy.AssetsBundle) (*legacy.CompactTLSAssets, error) {
+func (e *Encrypter) EncryptTLSAssets(ctx context.Context, customObject v1alpha1.AWSConfig, assets legacy.AssetsBundle) (*legacy.CompactTLSAssets, error) {
 	rawTLS := encrypter.CreateRawTLSAssets(assets)
 
-	sc, err := controllercontext.FromContext(ctx)
+	key, err := e.EncryptionKey(ctx, customObject)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	clusterID := key.ClusterID(customObject)
-	kmsKeyARN, err := sc.AWSService.GetKeyArn(clusterID)
-
-	encTLS, err := rawTLS.Encrypt(ctx, k, kmsKeyARN)
+	encTLS, err := rawTLS.Encrypt(ctx, e, key)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
