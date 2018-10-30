@@ -19,6 +19,8 @@ const (
 // StackState is the state representation on which the resource methods work.
 type StackState struct {
 	Name string
+	// Status is set only for current state.
+	Status string
 
 	HostedZoneNameServers string
 

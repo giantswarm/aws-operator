@@ -7,13 +7,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
-
 	"github.com/giantswarm/aws-operator/service/controller/v18/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v18/ebs"
 	"github.com/giantswarm/aws-operator/service/controller/v18/key"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
@@ -261,6 +260,17 @@ func (r *Resource) shouldScale(ctx context.Context, currentState, desiredState S
 //     The version bundle version changes (indicates updates).
 //
 func shouldUpdate(currentState, desiredState StackState) bool {
+	switch currentState.Status {
+	case cloudformation.StackStatusRollbackComplete:
+		return true
+	case cloudformation.StackStatusRollbackFailed:
+		return true
+	case cloudformation.StackStatusUpdateRollbackComplete:
+		return true
+	case cloudformation.StackStatusUpdateRollbackFailed:
+		return true
+	}
+
 	if currentState.MasterInstanceType != desiredState.MasterInstanceType {
 		return true
 	}

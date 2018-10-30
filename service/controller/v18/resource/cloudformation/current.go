@@ -6,13 +6,12 @@ import (
 	"strconv"
 
 	"github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
-	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
-
 	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v18/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/v18/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v18/key"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
+	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
@@ -33,10 +32,10 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	// stack. We dispatch our custom StackState structure and enrich it with all
 	// information necessary to reconcile the cloudformation resource.
 	var stackOutputs []*cloudformation.Output
+	var stackStatus string
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the guest cluster main stack outputs in the AWS API")
 
-		var stackStatus string
 		stackOutputs, stackStatus, err = sc.CloudFormation.DescribeOutputsAndStatus(stackName)
 		if cloudformationservice.IsStackNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster main stack outputs in the AWS API")
@@ -186,7 +185,8 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		}
 
 		currentState = StackState{
-			Name: stackName,
+			Name:   stackName,
+			Status: stackStatus,
 
 			HostedZoneNameServers: hostedZoneNameServers,
 
