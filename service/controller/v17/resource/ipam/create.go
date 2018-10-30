@@ -23,15 +23,21 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "checking if subnet needs to be allocated for cluster")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if subnet needs to be allocated for cluster")
 
 	if key.ClusterNetworkCIDR(customObject) == "" {
 		var subnetCIDR string
+		// TODO(tuommaki): Remove this when all tenant clusters are upgraded to this
+		// version and have subnet allocation in their Status field.
+		//
+		//     https://github.com/giantswarm/giantswarm/issues/4192
+		//
 		if key.CIDR(customObject) != "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "using cluster CIDR from legacy field in CR")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "found out allocated cluster CIDR from legacy field in CR")
 
 			subnetCIDR = key.CIDR(customObject)
 		} else {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "didn't find out allocated subnet for cluster")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "allocating subnet for cluster")
 
 			subnetCIDR, err = r.allocateSubnet(ctx)
@@ -40,15 +46,21 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			}
 		}
 
+		// Ensure that latest version of customObject is used.
+		customObject, err := r.g8sClient.ProviderV1alpha1().AWSConfigs(customObject.Namespace).Get(customObject.Name, apismetav1.GetOptions{})
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
 		customObject.Status.Cluster.Network.CIDR = subnetCIDR
-		_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(customObject.Namespace).UpdateStatus(&customObject)
+		_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(customObject.Namespace).UpdateStatus(customObject)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("subnet %s allocated for cluster", subnetCIDR))
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "subnet doesn't need to be allocated for cluster")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found out subnet doesn't need to be allocated for cluster")
 	}
 
 	return nil
@@ -56,39 +68,44 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 func (r *Resource) allocateSubnet(ctx context.Context) (string, error) {
 	var reservedSubnets []net.IPNet
+
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "getting allocated subnets from VPCs")
+
 		vpcSubnets, err := getVPCSubnets(ctx)
 		if err != nil {
 			return "", microerror.Mask(err)
 		}
+		reservedSubnets = append(reservedSubnets, vpcSubnets...)
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "got allocated subnets from VPCs")
-
-		reservedSubnets = append(reservedSubnets, vpcSubnets...)
 	}
 
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "getting allocated subnets from AWSConfigs")
+
 		awsConfigSubnets, err := getAWSConfigSubnets(r.g8sClient)
 		if err != nil {
 			return "", microerror.Mask(err)
 		}
+		reservedSubnets = append(reservedSubnets, awsConfigSubnets...)
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "got allocated subnets from AWSConfigs")
-
-		reservedSubnets = append(reservedSubnets, awsConfigSubnets...)
 	}
 
 	reservedSubnets = canonicalizeSubnets(r.networkRange, reservedSubnets)
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "finding free subnet")
-	subnet, err := ipam.Free(r.networkRange, r.allocatedSubnetMask, reservedSubnets)
-	if err != nil {
-		return "", microerror.Maskf(err, "networkRange: %s, allocatedSubnetMask: %s, reservedSubnets: %#v", r.networkRange.String(), r.allocatedSubnetMask.String(), reservedSubnets)
-	}
+	var subnet net.IPNet
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding free subnet")
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found free subnet: %s", subnet.String()))
+		subnet, err = ipam.Free(r.networkRange, r.allocatedSubnetMask, reservedSubnets)
+		if err != nil {
+			return "", microerror.Maskf(err, "networkRange: %s, allocatedSubnetMask: %s, reservedSubnets: %#v", r.networkRange.String(), r.allocatedSubnetMask.String(), reservedSubnets)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found free subnet %#q", subnet.String()))
+	}
 
 	return subnet.String(), nil
 }
