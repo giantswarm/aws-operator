@@ -20,9 +20,10 @@
 #  version = "2.4.0"
 
 
+
 [[constraint]]
-  name = "github.com/cenkalti/backoff"
-  version = "1.1.0"
+  branch = "master"
+  name = "github.com/giantswarm/backoff"
 
 [[constraint]]
   branch = "master"
@@ -38,4 +39,4 @@
 
 [[constraint]]
   name = "github.com/stretchr/testify"
-  version = "1.2.0"
+  version = "=1.2.0"

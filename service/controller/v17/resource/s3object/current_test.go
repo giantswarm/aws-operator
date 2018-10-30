@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/certs/legacy/legacytest"
+	"github.com/giantswarm/legacycerts/legacy/legacytest"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys/randomkeystest"
 
@@ -75,6 +75,7 @@ func Test_CurrentState(t *testing.T) {
 			{
 				c := Config{}
 				c.CertWatcher = legacytest.NewService()
+				c.CloudConfig = cloudconfig
 				c.Encrypter = &encrypter.EncrypterMock{}
 				c.Logger = microloggertest.New()
 				c.RandomKeySearcher = randomkeystest.NewSearcher()
@@ -85,9 +86,8 @@ func Test_CurrentState(t *testing.T) {
 			}
 
 			c := controllercontext.Context{
-				AWSClient:   awsClients,
-				AWSService:  awsService,
-				CloudConfig: cloudconfig,
+				AWSClient:  awsClients,
+				AWSService: awsService,
 			}
 			ctx := context.TODO()
 			ctx = controllercontext.NewContext(ctx, c)

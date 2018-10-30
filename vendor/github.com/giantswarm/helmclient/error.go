@@ -1,6 +1,7 @@
 package helmclient
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/giantswarm/microerror"
@@ -76,13 +77,39 @@ func IsInvalidGZipHeader(err error) bool {
 	return false
 }
 
-var podNotFoundError = &microerror.Error{
-	Kind: "podNotFoundError",
+var notFoundError = &microerror.Error{
+	Kind: "notFoundError",
 }
 
-// IsPodNotFound asserts podNotFoundError.
-func IsPodNotFound(err error) bool {
-	return microerror.Cause(err) == podNotFoundError
+// IsNotFound asserts notFoundError.
+func IsNotFound(err error) bool {
+	return microerror.Cause(err) == notFoundError
+}
+
+var (
+	releaseAlreadyExistsRegexp = regexp.MustCompile(`release named \S+ already exists`)
+)
+
+var releaseAlreadyExistsError = &microerror.Error{
+	Kind: "releaseAlreadyExistsError",
+}
+
+// IsReleaseAlreadyExists asserts releaseAlreadyExistsError.
+func IsReleaseAlreadyExists(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	c := microerror.Cause(err)
+
+	if c == releaseAlreadyExistsError {
+		return true
+	}
+	if releaseAlreadyExistsRegexp.MatchString(c.Error()) {
+		return true
+	}
+
+	return false
 }
 
 const (
@@ -115,6 +142,32 @@ func IsReleaseNotFound(err error) bool {
 	return false
 }
 
+var (
+	tarballNotFoundRegexp = regexp.MustCompile(`stat \S+: no such file or directory`)
+)
+
+var tarballNotFoundError = &microerror.Error{
+	Kind: "tarballNotFoundError",
+}
+
+// IsTarballNotFound asserts tarballNotFoundError.
+func IsTarballNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	c := microerror.Cause(err)
+
+	if c == tarballNotFoundError {
+		return true
+	}
+	if tarballNotFoundRegexp.MatchString(c.Error()) {
+		return true
+	}
+
+	return false
+}
+
 var testReleaseFailureError = &microerror.Error{
 	Kind: "testReleaseFailureError",
 }
@@ -140,6 +193,15 @@ var tillerInstallationFailedError = &microerror.Error{
 // IsTillerInstallationFailed asserts tillerInstallationFailedError.
 func IsTillerInstallationFailed(err error) bool {
 	return microerror.Cause(err) == tillerInstallationFailedError
+}
+
+var tillerNotFoundError = &microerror.Error{
+	Kind: "tillerNotFoundError",
+}
+
+// IsTillerNotFound asserts tillerNotFoundError.
+func IsTillerNotFound(err error) bool {
+	return microerror.Cause(err) == tillerNotFoundError
 }
 
 var tooManyResultsError = &microerror.Error{

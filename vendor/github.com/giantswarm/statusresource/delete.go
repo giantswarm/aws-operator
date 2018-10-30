@@ -101,6 +101,13 @@ func (r *Resource) computeDeleteEventPatches(ctx context.Context, obj interface{
 
 	var patches []Patch
 
+	// In case a CR might not have a status at all, we cannot work with it below.
+	// We have to initialize it upfront to be safe. Note that we only initialize
+	// fields that are managed by the statusresource library implementation. There
+	// might be other properties managed by external authorities who have to
+	// manage their own initialization.
+	patches = ensureDefaultPatches(clusterStatus, patches)
+
 	// Ensure the cluster is set into a deleting status on the delete event.
 	{
 		notDeleting := !clusterStatus.HasDeletingCondition()

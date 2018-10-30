@@ -6,8 +6,8 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs"
-	"github.com/giantswarm/certs/legacy"
 	"github.com/giantswarm/guestcluster"
+	"github.com/giantswarm/legacycerts/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
@@ -155,6 +155,24 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		return nil, microerror.Maskf(invalidConfigError, "unknown encrypter backend %q", config.EncrypterBackend)
 	}
 
+	var cloudConfig *cloudconfig.CloudConfig
+	{
+		c := cloudconfig.Config{
+			Encrypter: encrypterObject,
+			Logger:    config.Logger,
+
+			OIDC:                   config.OIDC,
+			PodInfraContainerImage: config.PodInfraContainerImage,
+			RegistryDomain:         config.RegistryDomain,
+			SSOPublicKey:           config.SSOPublicKey,
+		}
+
+		cloudConfig, err = cloudconfig.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var encryptionKeyResource controller.Resource
 	{
 		c := encryptionkey.Config{
@@ -239,6 +257,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	{
 		c := s3object.Config{
 			CertWatcher:       config.CertsSearcher,
+			CloudConfig:       cloudConfig,
 			Encrypter:         encrypterObject,
 			Logger:            config.Logger,
 			RandomKeySearcher: config.RandomkeysSearcher,
@@ -481,7 +500,10 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			c := config.HostAWSConfig
 			c.RoleARN = arn
 
-			awsClient = aws.NewClients(c)
+			awsClient, err = aws.NewClients(c)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
 		}
 
 		var awsService *awsservice.Service
@@ -495,24 +517,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			}
 
 			awsService, err = awsservice.New(c)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-		}
-
-		var cloudConfig *cloudconfig.CloudConfig
-		{
-			c := cloudconfig.Config{
-				Encrypter: encrypterObject,
-				Logger:    config.Logger,
-
-				OIDC: config.OIDC,
-				PodInfraContainerImage: config.PodInfraContainerImage,
-				RegistryDomain:         config.RegistryDomain,
-				SSOPublicKey:           config.SSOPublicKey,
-			}
-
-			cloudConfig, err = cloudconfig.New(c)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
@@ -545,7 +549,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		c := controllercontext.Context{
 			AWSClient:      awsClient,
 			AWSService:     awsService,
-			CloudConfig:    cloudConfig,
 			CloudFormation: *cloudFormationService,
 			EBSService:     ebsService,
 		}

@@ -22,7 +22,6 @@
 
 
 required = [
-  "github.com/Azure/go-autorest/autorest",
   "github.com/docker/distribution/reference",
   "k8s.io/apiserver/pkg/endpoints/request"
 ]
@@ -31,7 +30,7 @@ required = [
 
 [[constraint]]
   name = "github.com/aws/aws-sdk-go"
-  version = "1.13.3"
+  version = "=1.14.7"
 
 [[constraint]]
   branch = "master"
@@ -49,8 +48,8 @@ required = [
   branch = "master"
   name = "github.com/giantswarm/backoff"
 
-[[override]]
-  branch = "legacy"
+[[constraint]]
+  branch = "master"
   name = "github.com/giantswarm/certs"
 
 [[constraint]]
@@ -68,6 +67,14 @@ required = [
 [[constraint]]
   branch = "master"
   name = "github.com/giantswarm/e2etests"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/exporterkit"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/giantswarm/guestcluster"
 
 [[constraint]]
   branch = "master"
@@ -95,15 +102,15 @@ required = [
 
 [[constraint]]
   branch = "master"
+  name = "github.com/giantswarm/legacycerts"
+
+[[constraint]]
+  branch = "master"
   name = "github.com/giantswarm/operatorkit"
 
 [[constraint]]
   branch = "master"
   name = "github.com/giantswarm/randomkeys"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/giantswarm/randomkeytpr"
 
 [[constraint]]
   branch = "master"
@@ -116,10 +123,6 @@ required = [
 [[constraint]]
   branch = "master"
   name = "github.com/prometheus/client_golang"
-
-[[constraint]]
-  name = "github.com/spf13/viper"
-  version = "1.0.0"
 
 [[constraint]]
   name = "github.com/stretchr/testify"
@@ -150,3 +153,7 @@ required = [
 [prune]
   go-tests = true
   unused-packages = true
+
+[[prune.project]]
+  name = "github.com/giantswarm/k8scloudconfig"
+  unused-packages = false

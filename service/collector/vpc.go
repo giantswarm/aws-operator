@@ -11,23 +11,15 @@ import (
 )
 
 const (
-	ClusterTag      = "giantswarm.io/cluster"
-	InstallationTag = "giantswarm.io/installation"
-	NameTag         = "Name"
-	OrganizationTag = "giantswarm.io/organization"
-	StackNameTag    = "aws:cloudformation:stack-name"
+	NameTag      = "Name"
+	StackNameTag = "aws:cloudformation:stack-name"
 
-	GaugeValue float64 = 1
-
-	AccountIdLabel    = "account_id"
-	CidrLabel         = "cidr"
-	ClusterLabel      = "cluster_id"
-	IDLabel           = "id"
-	InstallationLabel = "installation"
-	NameLabel         = "name"
-	OrganizationLabel = "organization"
-	StackNameLabel    = "stack_name"
-	StateLabel        = "state"
+	AccountIdLabel = "account_id"
+	CidrLabel      = "cidr"
+	IDLabel        = "id"
+	NameLabel      = "name"
+	StackNameLabel = "stack_name"
+	StateLabel     = "state"
 )
 
 var (
@@ -72,21 +64,12 @@ func (c *Collector) collectVPCs(ch chan<- prometheus.Metric, awsClients aws.Clie
 		c.logger.Log("level", "error", "message", "could not list vpcs", "stack", fmt.Sprintf("%#v", err))
 	}
 
-	accountID, err := c.awsAccountID(awsClients)
+	accountID, err := c.helper.AWSAccountID(awsClients)
 	if err != nil {
 		c.logger.Log("level", "error", "message", "could not get aws account id", "stack", fmt.Sprintf("%#v", err))
 	}
 
 	for _, vpc := range o.Vpcs {
-		installationName := installationFromTags(vpc.Tags)
-
-		c.logger.Log("level", "debug", "message", fmt.Sprintf("VPC '%s' belongs to installation '%s'", *vpc.VpcId, installationName))
-		if installationName != c.installationName {
-			c.logger.Log("level", "debug", "message", fmt.Sprintf("VPC '%s' is being skipped for metrics collection", *vpc.VpcId))
-			continue
-		}
-		c.logger.Log("level", "debug", "message", fmt.Sprintf("VPC '%s' is being used for metrics collection", *vpc.VpcId))
-
 		cluster := ""
 		installation := ""
 		name := ""
@@ -111,6 +94,13 @@ func (c *Collector) collectVPCs(ch chan<- prometheus.Metric, awsClients aws.Clie
 			}
 		}
 
+		c.logger.Log("level", "debug", "message", fmt.Sprintf("VPC '%s' belongs to installation '%s'", *vpc.VpcId, installation))
+		if installation != c.installationName {
+			c.logger.Log("level", "debug", "message", fmt.Sprintf("VPC '%s' is being skipped for metrics collection", *vpc.VpcId))
+			continue
+		}
+		c.logger.Log("level", "debug", "message", fmt.Sprintf("VPC '%s' is being used for metrics collection", *vpc.VpcId))
+
 		ch <- prometheus.MustNewConstMetric(
 			vpcsDesc,
 			prometheus.GaugeValue,
@@ -128,20 +118,4 @@ func (c *Collector) collectVPCs(ch chan<- prometheus.Metric, awsClients aws.Clie
 	}
 
 	c.logger.Log("level", "debug", "message", "finished collecting metrics for vpcs")
-}
-
-func installationFromTags(tags []*ec2.Tag) string {
-	for _, t := range tags {
-		if *t.Key == InstallationTag {
-			return *t.Value
-		}
-
-		// TODO the old hard coded tag "Installation" should be removed at some
-		// point. Then we can get rid of this extra check.
-		if *t.Key == "Installation" {
-			return *t.Value
-		}
-	}
-
-	return ""
 }

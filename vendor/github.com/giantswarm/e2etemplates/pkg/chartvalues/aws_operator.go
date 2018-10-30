@@ -31,8 +31,14 @@ type AWSOperatorConfigSecret struct {
 }
 
 type AWSOperatorConfigSecretAWSOperator struct {
-	IDRSAPub   string
-	SecretYaml AWSOperatorConfigSecretAWSOperatorSecretYaml
+	CredentialDefault AWSOperatorConfigSecretAWSOperatorCredentialDefault
+	IDRSAPub          string
+	SecretYaml        AWSOperatorConfigSecretAWSOperatorSecretYaml
+}
+
+type AWSOperatorConfigSecretAWSOperatorCredentialDefault struct {
+	AdminARN       string
+	AWSOperatorARN string
 }
 
 type AWSOperatorConfigSecretAWSOperatorSecretYaml struct {
@@ -64,6 +70,12 @@ func NewAWSOperator(config AWSOperatorConfig) (string, error) {
 	}
 	if config.Provider.AWS.Encrypter == "" {
 		config.Provider.AWS.Encrypter = defaultEncrypter
+	}
+	if config.Secret.AWSOperator.CredentialDefault.AdminARN == "" {
+		return "", microerror.Maskf(invalidConfigError, "%T.Secret.AWSOperator.CredentialDefault.AdminARN must not be empty", config)
+	}
+	if config.Secret.AWSOperator.CredentialDefault.AWSOperatorARN == "" {
+		return "", microerror.Maskf(invalidConfigError, "%T.Secret.AWSOperator.CredentialDefault.AWSOperatorARN must not be empty", config)
 	}
 	if config.Secret.AWSOperator.SecretYaml.Service.AWS.AccessKey.ID == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.Secret.AWSOperator.SecretYaml.Service.AWS.AccessKey.ID must not be empty", config)

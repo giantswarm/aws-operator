@@ -13,6 +13,9 @@ type Params struct {
 	// DisableCalico flag. When set removes all calico related Kubernetes
 	// manifests from the cloud config together with their initialization.
 	DisableCalico bool
+	// DisableCoreDNS flag. When set removes all CoreDNS related Kubernetes
+	// manifests from the cloud config together with their initialization.
+	DisableCoreDNS bool
 	// DisableEncryptionAtREST flag. When set removes all manifests from the cloud
 	// config related to Kubernetes encryption at REST.
 	DisableEncryptionAtREST bool

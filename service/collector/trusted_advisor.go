@@ -80,13 +80,6 @@ var (
 	})
 )
 
-func init() {
-	prometheus.MustRegister(trustedAdvisorError)
-
-	prometheus.MustRegister(getChecksDuration)
-	prometheus.MustRegister(getResourcesDuration)
-}
-
 func (c *Collector) collectAccountsTrustedAdvisorChecks(ch chan<- prometheus.Metric, clients []aws.Clients) {
 	var wg sync.WaitGroup
 
@@ -118,7 +111,7 @@ func (c *Collector) collectTrustedAdvisorChecks(ch chan<- prometheus.Metric, aws
 	}
 	ch <- trustedAdvisorSupported()
 
-	accountID, err := c.awsAccountID(awsClients)
+	accountID, err := c.helper.AWSAccountID(awsClients)
 	if err != nil {
 		c.logger.Log("level", "error", "message", "could not get aws account id", "stack", fmt.Sprintf("%#v", err))
 	}

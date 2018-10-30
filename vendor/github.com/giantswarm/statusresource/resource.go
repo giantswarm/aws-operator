@@ -134,6 +134,46 @@ func (r *Resource) applyPatches(ctx context.Context, accessor metav1.Object, pat
 	return nil
 }
 
+func ensureDefaultPatches(clusterStatus providerv1alpha1.StatusCluster, patches []Patch) []Patch {
+	conditionsEmpty := clusterStatus.Conditions == nil
+	nodesEmpty := clusterStatus.Nodes == nil
+	versionsEmpty := clusterStatus.Versions == nil
+
+	if conditionsEmpty && nodesEmpty && versionsEmpty {
+		patches = append(patches, Patch{
+			Op:    "add",
+			Path:  "/status",
+			Value: Status{},
+		})
+	}
+
+	if conditionsEmpty {
+		patches = append(patches, Patch{
+			Op:    "add",
+			Path:  "/status/cluster/conditions",
+			Value: []providerv1alpha1.StatusClusterCondition{},
+		})
+	}
+
+	if nodesEmpty {
+		patches = append(patches, Patch{
+			Op:    "add",
+			Path:  "/status/cluster/nodes",
+			Value: []providerv1alpha1.StatusClusterNode{},
+		})
+	}
+
+	if versionsEmpty {
+		patches = append(patches, Patch{
+			Op:    "add",
+			Path:  "/status/cluster/versions",
+			Value: []providerv1alpha1.StatusClusterVersion{},
+		})
+	}
+
+	return patches
+}
+
 func ensureSelfLink(p string) string {
 	if strings.HasSuffix(p, "/status") {
 		return p

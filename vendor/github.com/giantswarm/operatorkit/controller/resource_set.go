@@ -11,7 +11,6 @@ import (
 
 	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
 	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
-	"github.com/giantswarm/operatorkit/controller/context/updatenecessarycontext"
 )
 
 type ResourceSetConfig struct {
@@ -70,7 +69,6 @@ func NewResourceSet(c ResourceSetConfig) (*ResourceSet, error) {
 func (r *ResourceSet) InitCtx(ctx context.Context, obj interface{}) (context.Context, error) {
 	ctx = finalizerskeptcontext.NewContext(ctx, make(chan struct{}))
 	ctx = updateallowedcontext.NewContext(ctx, make(chan struct{}))
-	ctx = updatenecessarycontext.NewContext(ctx, make(chan struct{}))
 
 	ctx, err := r.initCtx(ctx, obj)
 	if err != nil {
@@ -86,6 +84,7 @@ func (r *ResourceSet) InitCtx(ctx context.Context, obj interface{}) (context.Con
 			meta = loggermeta.New()
 		}
 		meta.KeyVals["object"] = accessor.GetSelfLink()
+		meta.KeyVals["version"] = accessor.GetResourceVersion()
 
 		ctx = loggermeta.NewContext(ctx, meta)
 	}
