@@ -1688,7 +1688,7 @@ write_files:
   owner: root
   permissions: 0644
   content: |
-    apiVersion: audit.k8s.io/v1beta1
+    apiVersion: audit.k8s.io/v1
     kind: Policy
     rules:
       # TODO: Filter safe system requests.
