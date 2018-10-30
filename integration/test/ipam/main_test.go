@@ -5,11 +5,9 @@ package ipam
 import (
 	"testing"
 
-	"github.com/giantswarm/e2etests/ipam"
-	"github.com/giantswarm/e2etests/ipam/provider"
-
 	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/aws-operator/integration/setup"
+	"github.com/giantswarm/e2etests/ipam"
 )
 
 var (
@@ -27,38 +25,31 @@ func init() {
 		}
 	}
 
-	var p *provider.AWS
+	var p *Provider
 	{
 
-		ac := provider.AWSConfig{
-			AWSClient:     config.AWSClient,
-			HostFramework: config.Host,
-			Logger:        config.Logger,
-
-			ChartValuesConfig: provider.ChartValuesConfig{
-				AWSRouteTable0: env.ClusterID() + "_0",
-				AWSRouteTable1: env.ClusterID() + "_1",
-				ClusterName:    env.ClusterID(),
-			},
+		c := ProviderConfig{
+			AWSClient: config.AWSClient,
+			Host:      config.Host,
+			Logger:    config.Logger,
+			Release:   config.Release,
 		}
 
-		p, err = provider.NewAWS(ac)
+		p, err = NewProvider(c)
 		if err != nil {
 			panic(err.Error())
 		}
 	}
 
 	{
-		ic := ipam.Config{
-			HostFramework: config.Host,
-			Logger:        config.Logger,
-			Provider:      p,
+		c := ipam.Config{
+			Logger:   config.Logger,
+			Provider: p,
 
-			CommonDomain:    env.CommonDomain(),
-			HostClusterName: env.ClusterID(),
+			ClusterID: env.ClusterID(),
 		}
 
-		ipamTest, err = ipam.New(ic)
+		ipamTest, err = ipam.New(c)
 		if err != nil {
 			panic(err.Error())
 		}

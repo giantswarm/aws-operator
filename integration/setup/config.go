@@ -131,8 +131,8 @@ func NewConfig() (Config, error) {
 		Guest:     guest,
 		Host:      host,
 		K8s:       k8sSetup,
-		Release:   newRelease,
 		Logger:    logger,
+		Release:   newRelease,
 	}
 
 	return c, nil

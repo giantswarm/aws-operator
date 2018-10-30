@@ -42,7 +42,7 @@ func Setup(m *testing.M, config Config) {
 	}
 
 	if v == 0 {
-		err = EnsureTenantClusterCreated(ctx, config)
+		err = EnsureTenantClusterCreated(ctx, env.ClusterID(), config)
 		if err != nil {
 			log.Printf("%#v\n", err)
 			v = 1
