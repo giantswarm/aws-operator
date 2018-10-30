@@ -4,6 +4,8 @@ const LoadBalancers = `{{define "load_balancers"}}
 {{- $v := .Guest.LoadBalancers }}
   ApiLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
+    DependsOn:
+      - VPCGatewayAttachment
     Properties:
       ConnectionSettings:
         IdleTimeout: 1200
@@ -31,7 +33,8 @@ const LoadBalancers = `{{define "load_balancers"}}
 
   IngressLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
-    DependsOn: VPCGatewayAttachment
+    DependsOn:
+      - VPCGatewayAttachment
     Properties:
       ConnectionSettings:
         IdleTimeout: 60
