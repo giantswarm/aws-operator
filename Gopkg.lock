@@ -262,11 +262,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ab67fdefbc890c7880ffc2904048d7b9d14e29ebc716f8d637a17b16bb91d9e6"
+  digest = "1:9112970141e9f6c339fe9c0d4aaad25e8643f511662622dc3eba4c8a1df1e644"
   name = "github.com/giantswarm/backoff"
   packages = ["."]
   pruneopts = "UT"
-  revision = "9d3f2935ad1be88042bb0c2d46f2f41cfe573fd8"
+  revision = "9922087c8f77cf4aff19bb8cf4c488a9dc4206f8"
 
 [[projects]]
   branch = "master"
@@ -322,7 +322,7 @@
 
 [[projects]]
   branch = "ipam-e2e-tests"
-  digest = "1:9b616ec768254b86fd9494ce8bf52d57f5db9dec1f022bc72271a64bdbcbbd7b"
+  digest = "1:617fd29b9c61dc0d5dfea879345a5751985d5f7a2d8c46f26e8fc725e35dd21d"
   name = "github.com/giantswarm/e2etests"
   packages = [
     "clusterstate",
@@ -336,7 +336,7 @@
     "update/provider",
   ]
   pruneopts = "UT"
-  revision = "d957731d59a6276d106dad7e550e2996befda58c"
+  revision = "cf92204d15805452ecba7528108389c3b4639554"
 
 [[projects]]
   branch = "master"
@@ -958,7 +958,7 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "bc7917b19d8f099105de72dc62898400be07c984"
+  revision = "4d3f4d9ffa16a13f451c3b2999e9c49e9750bf06"
 
 [[projects]]
   branch = "master"
