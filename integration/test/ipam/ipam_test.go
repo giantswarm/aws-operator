@@ -8,7 +8,7 @@ import (
 )
 
 func Test_IPAM(t *testing.T) {
-	err := i.Test(context.Background())
+	err := ipamTest.Test(context.Background())
 	if err != nil {
 		t.Fatalf("%#v", err)
 	}
