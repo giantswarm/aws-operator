@@ -27,7 +27,6 @@ func init() {
 
 	var p *Provider
 	{
-
 		c := ProviderConfig{
 			AWSClient: config.AWSClient,
 			Host:      config.Host,
