@@ -10,6 +10,7 @@ import (
 type AWS struct {
 	AccessKey              accesskey.AccessKey
 	AdvancedMonitoringEC2  string
+	AvailabilityZones      string
 	Encrypter              string
 	HostAccessKey          accesskey.AccessKey
 	IncludeTags            string
