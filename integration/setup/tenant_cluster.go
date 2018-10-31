@@ -120,15 +120,15 @@ func CRNotExistsCondition(ctx context.Context, id string, config Config) release
 	}
 }
 
-func ensureHostVPC(ctx context.Context, id string, config Config) (string, error) {
-	stackName := "host-peer-" + id
+func ensureHostVPC(ctx context.Context, config Config) (string, error) {
+	stackName := "host-peer-" + env.ClusterID()
 
 	{
 		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating stack %#q", stackName))
 
 		os.Setenv("AWS_ROUTE_TABLE_0", env.AWSRouteTable0())
 		os.Setenv("AWS_ROUTE_TABLE_1", env.AWSRouteTable1())
-		os.Setenv("CLUSTER_NAME", id)
+		os.Setenv("CLUSTER_NAME", env.ClusterID())
 		stackInput := &cloudformation.CreateStackInput{
 			StackName:        aws.String(stackName),
 			TemplateBody:     aws.String(os.ExpandEnv(e2etemplates.AWSHostVPCStack)),
@@ -181,7 +181,7 @@ func ensureHostVPC(ctx context.Context, id string, config Config) (string, error
 }
 
 func InstallAWSConfig(ctx context.Context, id string, config Config) error {
-	vpcID, err := ensureHostVPC(ctx, id, config)
+	vpcID, err := ensureHostVPC(ctx, config)
 	if err != nil {
 		return microerror.Mask(err)
 	}
