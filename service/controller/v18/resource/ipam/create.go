@@ -9,7 +9,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
-	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/service/controller/v18/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v18/key"
@@ -47,7 +47,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		// Ensure that latest version of customObject is used.
-		customObject, err := r.g8sClient.ProviderV1alpha1().AWSConfigs(customObject.Namespace).Get(customObject.Name, apismetav1.GetOptions{})
+		customObject, err := r.g8sClient.ProviderV1alpha1().AWSConfigs(customObject.Namespace).Get(customObject.Name, metav1.GetOptions{})
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -135,7 +135,7 @@ func canonicalizeSubnets(network net.IPNet, subnets []net.IPNet) []net.IPNet {
 }
 
 func getAWSConfigSubnets(g8sClient versioned.Interface) ([]net.IPNet, error) {
-	awsConfigList, err := g8sClient.ProviderV1alpha1().AWSConfigs(apismetav1.NamespaceAll).List(apismetav1.ListOptions{})
+	awsConfigList, err := g8sClient.ProviderV1alpha1().AWSConfigs(metav1.NamespaceAll).List(metav1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
