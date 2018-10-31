@@ -254,11 +254,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:52b90433ee4b5f9e36ff682ad51e30cc37ce1056cf122117418ab86cf93271ac"
+  digest = "1:667e0c4e7e70690a7ef214b1b0f328ed9ca6c54ef098752714ceca458adcce26"
   name = "github.com/giantswarm/apprclient"
   packages = ["."]
   pruneopts = "UT"
-  revision = "cb2d770a55861efc2a44051319d83e1868ae5941"
+  revision = "32ca5964784f42e0ef298432468c698bae681958"
 
 [[projects]]
   branch = "master"
@@ -627,11 +627,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:9eb94c610ee41dd363268a09d327ad8a9608178d2d40a01153df724d400d7d1c"
+  digest = "1:48eb9796709860b572117e24b3c60596cf477c719b379afb9bed4d246708d41b"
   name = "github.com/google/go-github"
   packages = ["github"]
   pruneopts = "UT"
-  revision = "e64590964d2c9cc256bc8783053ab19fd7b7a592"
+  revision = "01a88aee87606a81629924290413387b3ca30b00"
 
 [[projects]]
   digest = "1:a63cff6b5d8b95638bfe300385d93b2a6d9d687734b863da8e09dc834510a690"
@@ -979,14 +979,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:1bce229fad01cbad9bd00e70ca32afff25ac2cea3dd710d50f88c967c1c3df65"
+  digest = "1:70afbb0d0abb4b9f7d4a6616dab26f6a74e35d6fbbcb37de72876a49df6d7361"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
     "internal",
   ]
   pruneopts = "UT"
-  revision = "9dcd33a902f40452422c2367fefcb95b54f9f8f8"
+  revision = "8527f56f71077909d6ead7facfe18fbf05ebdf83"
 
 [[projects]]
   branch = "master"
@@ -998,14 +998,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:8b6c36c46245d5b3b0989843601823648281ca706a99dfffa0915083b9aa1b19"
+  digest = "1:417d27a82efb8473554234a282be33d23b0d6adc121e636b55950f913ac071d6"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "f7626d0b1519d8323581a047ca8b372ebf28de9a"
+  revision = "9b800f95dbbc54abff0acf7ee32d88ba4e328c89"
 
 [[projects]]
   digest = "1:e5a8511f063c38c51ab9ab80e718e9149f692652aeb4e393a8c020dd1bf38ca2"
@@ -1702,7 +1702,6 @@
     "github.com/giantswarm/e2etests/clusterstate",
     "github.com/giantswarm/e2etests/clusterstate/provider",
     "github.com/giantswarm/e2etests/ipam",
-    "github.com/giantswarm/e2etests/ipam/provider",
     "github.com/giantswarm/e2etests/scaling",
     "github.com/giantswarm/e2etests/scaling/provider",
     "github.com/giantswarm/e2etests/update",
