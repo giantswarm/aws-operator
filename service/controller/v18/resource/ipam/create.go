@@ -60,7 +60,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("subnet %s allocated for cluster", subnetCIDR))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found out subnet %#q allocated for cluster", subnetCIDR))
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found out subnet doesn't need to be allocated for cluster")
 	}
