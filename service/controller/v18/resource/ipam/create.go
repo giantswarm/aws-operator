@@ -161,7 +161,7 @@ func getAWSConfigSubnets(g8sClient versioned.Interface) ([]net.IPNet, error) {
 }
 
 func getVPCSubnets(ctx context.Context) ([]net.IPNet, error) {
-	sc, err := controllercontext.FromContext(ctx)
+	ctlCtx, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
