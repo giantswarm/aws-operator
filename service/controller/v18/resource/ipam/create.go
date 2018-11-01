@@ -172,7 +172,7 @@ func getVPCSubnets(ctx context.Context) ([]net.IPNet, error) {
 	}
 
 	var results []net.IPNet
-	for _, subnet := range subsOut.Subnets {
+	for _, subnet := range out.Subnets {
 		_, n, err := net.ParseCIDR(*subnet.CidrBlock)
 		if err != nil {
 			return nil, microerror.Mask(err)
