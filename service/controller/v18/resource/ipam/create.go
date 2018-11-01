@@ -93,7 +93,7 @@ func (r *Resource) allocateSubnet(ctx context.Context) (string, error) {
 		}
 		reservedSubnets = append(reservedSubnets, awsConfigSubnets...)
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "got allocated subnets from AWSConfigs")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from AWSConfigs")
 	}
 
 	reservedSubnets = canonicalizeSubnets(r.networkRange, reservedSubnets)
