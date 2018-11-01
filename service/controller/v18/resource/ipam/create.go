@@ -166,7 +166,7 @@ func getVPCSubnets(ctx context.Context) ([]net.IPNet, error) {
 		return nil, microerror.Mask(err)
 	}
 
-	subsOut, err := sc.AWSClient.EC2.DescribeSubnets(nil)
+	out, err := ctlCtx.AWSClient.EC2.DescribeSubnets(nil)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
