@@ -73,7 +73,7 @@ func (r *Resource) allocateSubnet(ctx context.Context) (string, error) {
 	var reservedSubnets []net.IPNet
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "getting allocated subnets from VPCs")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from VPCs")
 
 		vpcSubnets, err := getVPCSubnets(ctx)
 		if err != nil {
