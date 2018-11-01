@@ -85,7 +85,7 @@ func (r *Resource) allocateSubnet(ctx context.Context) (string, error) {
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "getting allocated subnets from AWSConfigs")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from AWSConfigs")
 
 		awsConfigSubnets, err := getAWSConfigSubnets(r.g8sClient)
 		if err != nil {
