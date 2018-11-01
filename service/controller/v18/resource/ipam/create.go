@@ -37,7 +37,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 			subnetCIDR = key.CIDR(customObject)
 		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "didn't find out allocated subnet for cluster")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find out allocated subnet for cluster")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "allocating subnet for cluster")
 
 			subnetCIDR, err = r.allocateSubnet(ctx)
