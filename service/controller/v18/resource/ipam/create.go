@@ -81,7 +81,7 @@ func (r *Resource) allocateSubnet(ctx context.Context) (string, error) {
 		}
 		reservedSubnets = append(reservedSubnets, vpcSubnets...)
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "got allocated subnets from VPCs")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from VPCs")
 	}
 
 	{
