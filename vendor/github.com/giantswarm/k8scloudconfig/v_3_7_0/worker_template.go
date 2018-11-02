@@ -17,17 +17,17 @@ write_files:
   permissions: 644
   content: |
     {{ .SSOPublicKey }}
-- path: /etc/kubernetes/config/proxy-config.yaml
+- path: /etc/kubernetes/config/proxy-config.yml
   owner: root
   permissions: 0644
   content: |
     apiVersion: kubeproxy.config.k8s.io/v1alpha1
     clientConnection:
-      kubeconfig: /etc/kubernetes/config/proxy-kubeconfig.yaml
+      kubeconfig: /etc/kubernetes/config/proxy-kubeconfig.yml
     kind: KubeProxyConfiguration
     mode: iptables
     resourceContainer: /kube-proxy
-- path: /etc/kubernetes/config/proxy-kubeconfig.yaml
+- path: /etc/kubernetes/config/proxy-kubeconfig.yml
   owner: root
   permissions: 0644
   content: |
@@ -59,11 +59,6 @@ write_files:
     port: 10250
     healthzBindAddress: ${DEFAULT_IPV4}
     healthzPort: 10248
-    featureGates:
-      RotateKubeletServerCertificate: true
-      RotateKubeletClientCertificate: true
-    serverTLSBootstrap: true
-    rotateCertificates: true
     clusterDNS:
       - {{.Cluster.Kubernetes.DNS.IP}}
     clusterDomain: {{.Cluster.Kubernetes.Domain}}
@@ -75,12 +70,13 @@ write_files:
       memory.available: "5s"
     evictionMaxPodGracePeriod: 60
     authentication:
-      x509:
-        clientCAFile: /etc/kubernetes/ssl/worker-ca.pem
+      anonymous:
+        enabled: true # Defaults to false as of 1.10
+      webhook:
+        enabled: false # Deafults to true as of 1.10
     authorization:
       mode: AlwaysAllow # Deafults to webhook as of 1.10
-    readOnlyPort: 10255 # Used by heapster. Defaults to 0 (disabled) as of 1.10. Needed for metrics.
-- path: /etc/kubernetes/config/kubelet-bootstrap-kubeconfig.yaml
+- path: /etc/kubernetes/config/kubelet-kubeconfig.yml
   owner: root
   permissions: 0644
   content: |
@@ -348,6 +344,9 @@ coreos:
       -v /usr/lib64/libxfs.so.0:/usr/lib/libxfs.so.0 \
       -v /usr/lib64/libxcmd.so.0:/usr/lib/libxcmd.so.0 \
       -v /usr/lib64/libreadline.so.7:/usr/lib/libreadline.so.7 \
+      -e ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/client-ca.pem \
+      -e ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/client-crt.pem \
+      -e ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/client-key.pem \
       --name $NAME \
       $IMAGE \
       /hyperkube kubelet \
@@ -362,8 +361,7 @@ coreos:
       --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
       --network-plugin=cni \
       --register-node=true \
-      --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yaml \
-      --bootstrap-kubeconfig=/etc/kubernetes/config/kubelet-bootstrap-kubeconfig.yaml \
+      --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml \
       --node-labels="ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
       --v=2"
       ExecStop=-/usr/bin/docker stop -t 10 $NAME
