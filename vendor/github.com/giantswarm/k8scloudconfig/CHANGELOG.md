@@ -29,6 +29,7 @@ version directory, and then changes are introduced.
 - Updated rbac resources to v1
 - Remove static pod path from worker nodes
 - Remove readonly port from kubelet
+- Add DBUS socket and ClusterCIDR to kube-proxy
 
 ## [v3.6.2]
 

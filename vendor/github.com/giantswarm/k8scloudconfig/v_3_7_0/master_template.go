@@ -962,6 +962,8 @@ write_files:
               - mountPath: /etc/kubernetes/config/
                 name: config-kubernetes
                 readOnly: true
+              - mountPath: /var/run/dbus/system_bus_socket
+                name: dbus
               - mountPath: /etc/kubernetes/ssl
                 name: ssl-certs-kubernetes
                 readOnly: true
@@ -975,6 +977,9 @@ write_files:
           - hostPath:
               path: /etc/kubernetes/ssl
             name: ssl-certs-kubernetes
+          - hostPath:
+              path: /var/run/dbus/system_bus_socket
+            name: dbus
           - hostPath:
               path: /usr/share/ca-certificates
             name: ssl-certs-host
@@ -1404,8 +1409,8 @@ write_files:
       #!/bin/bash
 
       export KUBECONFIG=/etc/kubernetes/config/addons-kubeconfig.yml
-      # kubectl 1.8.4
-      KUBECTL={{ .RegistryDomain }}/giantswarm/docker-kubectl:8cabd75bacbcdad7ac5d85efc3ca90c2fabf023b
+      # kubectl 1.12.2
+      KUBECTL={{ .RegistryDomain }}/giantswarm/docker-kubectl:f5cae44c480bd797dc770dd5f62d40b74063c0d7
 
       /usr/bin/docker pull $KUBECTL
 
@@ -1535,6 +1540,7 @@ write_files:
     kind: KubeProxyConfiguration
     mode: iptables
     resourceContainer: /kube-proxy
+    clusterCIDR: {{.Cluster.Calico.Subnet}}/{{.Cluster.Calico.CIDR}}
 - path: /etc/kubernetes/config/proxy-kubeconfig.yml
   owner: root
   permissions: 0644

@@ -27,6 +27,7 @@ write_files:
     kind: KubeProxyConfiguration
     mode: iptables
     resourceContainer: /kube-proxy
+    clusterCIDR: {{.Cluster.Calico.Subnet}}/{{.Cluster.Calico.CIDR}}
 - path: /etc/kubernetes/config/proxy-kubeconfig.yml
   owner: root
   permissions: 0644
