@@ -4,6 +4,8 @@ const NatGateway = `{{define "nat_gateway"}}
   {{- $v := .Guest.NATGateway }}
   NATGateway:
     Type: AWS::EC2::NatGateway
+    DependsOn:
+      - VPCGatewayAttachment
     Properties:
       AllocationId:
         Fn::GetAtt:
