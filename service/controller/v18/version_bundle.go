@@ -14,12 +14,27 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "calico",
-				Description: "Updated Calico manifest with resource limits to get QoS policy guaranteed.",
+				Description: "Update to 3.2.3. Also the manifest has proper resource limits to get QoS policy guaranteed.",
 				Kind:        versionbundle.KindChanged,
 			},
 			{
 				Component:   "kubernetes",
 				Description: "Enabled admission plugins: DefaultTolerationSeconds, MutatingAdmissionWebhook, ValidatingAdmissionWebhook.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "container-linux",
+				Description: "Update to latest stable 1855.5.0",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "etcd",
+				Description: "Update to 3.3.9",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "docker",
+				Description: "Update to 18.06.1",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
