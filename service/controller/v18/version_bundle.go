@@ -9,12 +9,12 @@ func VersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "kubernetes",
-				Description: "Update Kubernetes to 1.12.1. More info here: https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.12.md",
+				Description: "Updated Kubernetes to 1.12.1. More info here: https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.12.md",
 				Kind:        versionbundle.KindChanged,
 			},
 			{
 				Component:   "calico",
-				Description: "Update to 3.2.3. Also the manifest has proper resource limits to get QoS policy guaranteed.",
+				Description: "Updated to 3.2.3. Also the manifest has proper resource limits to get QoS policy guaranteed.",
 				Kind:        versionbundle.KindChanged,
 			},
 			{
@@ -24,17 +24,17 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "container-linux",
-				Description: "Update to latest stable 1855.5.0",
+				Description: "Updated to latest stable 1855.5.0",
 				Kind:        versionbundle.KindChanged,
 			},
 			{
 				Component:   "etcd",
-				Description: "Update to 3.3.9",
+				Description: "Updated to 3.3.9",
 				Kind:        versionbundle.KindChanged,
 			},
 			{
 				Component:   "docker",
-				Description: "Update to 18.06.1",
+				Description: "Updated to 18.06.1",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
