@@ -179,7 +179,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 				AssetContent: b64Data,
 				Path:         f.AbsolutePath + ".enc",
 				Owner:        FileOwner,
-				Permissions:  0766,
+				Permissions:  0700,
 				Encoding:     "gzip+base64",
 			}
 

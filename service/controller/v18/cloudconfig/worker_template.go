@@ -120,7 +120,7 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 			meta := k8scloudconfig.FileMetadata{
 				AssetContent: b64Data,
-				Path:         f.AbsolutePath,
+				Path:         f.AbsolutePath + ".enc",
 				Owner:        FileOwner,
 				Permissions:  0700,
 				Encoding:     "gzip+base64",
