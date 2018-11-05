@@ -5,7 +5,7 @@ import "github.com/aws/aws-sdk-go/service/cloudformation"
 const (
 	// defaultCreationTimeout is the timeout in minutes for the creation of the
 	// stack.
-	defaultCreationTimeout = 10
+	defaultCreationTimeout = 20
 
 	workerRoleKey = "WorkerRole"
 

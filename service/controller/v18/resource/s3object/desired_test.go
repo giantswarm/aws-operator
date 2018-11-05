@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/legacycerts/legacy/legacytest"
+	"github.com/giantswarm/certs/certstest"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys/randomkeystest"
 
@@ -65,12 +65,14 @@ func Test_DesiredState(t *testing.T) {
 			var err error
 			var newResource *Resource
 			{
-				c := Config{}
-				c.Logger = microloggertest.New()
-				c.Encrypter = &encrypter.EncrypterMock{}
-				c.CertWatcher = legacytest.NewService()
-				c.CloudConfig = cloudconfig
-				c.RandomKeySearcher = randomkeystest.NewSearcher()
+				c := Config{
+					CertsSearcher:      certstest.NewSearcher(),
+					CloudConfig:        cloudconfig,
+					Encrypter:          &encrypter.EncrypterMock{},
+					Logger:             microloggertest.New(),
+					RandomKeysSearcher: randomkeystest.NewSearcher(),
+				}
+
 				newResource, err = New(c)
 				if err != nil {
 					t.Fatal("expected", nil, "got", err)
