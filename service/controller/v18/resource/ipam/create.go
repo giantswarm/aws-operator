@@ -44,7 +44,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			if err != nil {
 				return microerror.Mask(err)
 			}
-			
+
 			r.logger.LogCtx(ctx, "level", "debug", "message", "allocated subnet for cluster")
 		}
 
