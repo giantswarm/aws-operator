@@ -37,13 +37,15 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 			subnetCIDR = key.CIDR(customObject)
 		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "didn't find out allocated subnet for cluster")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find out allocated subnet for cluster")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "allocating subnet for cluster")
 
 			subnetCIDR, err = r.allocateSubnet(ctx)
 			if err != nil {
 				return microerror.Mask(err)
 			}
+			
+			r.logger.LogCtx(ctx, "level", "debug", "message", "allocated subnet for cluster")
 		}
 
 		// Ensure that latest version of customObject is used.
@@ -58,7 +60,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("subnet %s allocated for cluster", subnetCIDR))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found out subnet %#q allocated for cluster", subnetCIDR))
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found out subnet doesn't need to be allocated for cluster")
 	}
@@ -71,7 +73,7 @@ func (r *Resource) allocateSubnet(ctx context.Context) (string, error) {
 	var reservedSubnets []net.IPNet
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "getting allocated subnets from VPCs")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from VPCs")
 
 		vpcSubnets, err := getVPCSubnets(ctx)
 		if err != nil {
@@ -79,11 +81,11 @@ func (r *Resource) allocateSubnet(ctx context.Context) (string, error) {
 		}
 		reservedSubnets = append(reservedSubnets, vpcSubnets...)
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "got allocated subnets from VPCs")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from VPCs")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "getting allocated subnets from AWSConfigs")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from AWSConfigs")
 
 		awsConfigSubnets, err := getAWSConfigSubnets(r.g8sClient)
 		if err != nil {
@@ -91,7 +93,7 @@ func (r *Resource) allocateSubnet(ctx context.Context) (string, error) {
 		}
 		reservedSubnets = append(reservedSubnets, awsConfigSubnets...)
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "got allocated subnets from AWSConfigs")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from AWSConfigs")
 	}
 
 	reservedSubnets = canonicalizeSubnets(r.networkRange, reservedSubnets)
@@ -159,18 +161,18 @@ func getAWSConfigSubnets(g8sClient versioned.Interface) ([]net.IPNet, error) {
 }
 
 func getVPCSubnets(ctx context.Context) ([]net.IPNet, error) {
-	sc, err := controllercontext.FromContext(ctx)
+	ctlCtx, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	subsOut, err := sc.AWSClient.EC2.DescribeSubnets(nil)
+	out, err := ctlCtx.AWSClient.EC2.DescribeSubnets(nil)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
 	var results []net.IPNet
-	for _, subnet := range subsOut.Subnets {
+	for _, subnet := range out.Subnets {
 		_, n, err := net.ParseCIDR(*subnet.CidrBlock)
 		if err != nil {
 			return nil, microerror.Mask(err)
