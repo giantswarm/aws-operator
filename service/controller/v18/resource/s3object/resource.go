@@ -5,7 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/giantswarm/legacycerts/legacy"
+	"github.com/giantswarm/certs"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/randomkeys"
@@ -21,26 +21,26 @@ const (
 
 // Config represents the configuration used to create a new cloudformation resource.
 type Config struct {
-	CertWatcher       legacy.Searcher
-	CloudConfig       cloudconfig.Interface
-	Encrypter         encrypter.Interface
-	Logger            micrologger.Logger
-	RandomKeySearcher randomkeys.Interface
+	CertsSearcher      certs.Interface
+	CloudConfig        cloudconfig.Interface
+	Encrypter          encrypter.Interface
+	Logger             micrologger.Logger
+	RandomKeysSearcher randomkeys.Interface
 }
 
 // Resource implements the cloudformation resource.
 type Resource struct {
-	certWatcher       legacy.Searcher
-	cloudConfig       cloudconfig.Interface
-	encrypter         encrypter.Interface
-	logger            micrologger.Logger
-	randomKeySearcher randomkeys.Interface
+	certsSearcher      certs.Interface
+	cloudConfig        cloudconfig.Interface
+	encrypter          encrypter.Interface
+	logger             micrologger.Logger
+	randomKeysSearcher randomkeys.Interface
 }
 
 // New creates a new configured cloudformation resource.
 func New(config Config) (*Resource, error) {
-	if config.CertWatcher == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.CertWatcher must not be empty")
+	if config.CertsSearcher == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.CertsSearcher must not be empty")
 	}
 	if config.CloudConfig == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.CloudConfig must not be empty", config)
@@ -51,16 +51,16 @@ func New(config Config) (*Resource, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
-	if config.RandomKeySearcher == nil {
+	if config.RandomKeysSearcher == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.RandomKeySearcher must not be empty")
 	}
 
 	r := &Resource{
-		certWatcher:       config.CertWatcher,
-		cloudConfig:       config.CloudConfig,
-		encrypter:         config.Encrypter,
-		logger:            config.Logger,
-		randomKeySearcher: config.RandomKeySearcher,
+		certsSearcher:      config.CertsSearcher,
+		cloudConfig:        config.CloudConfig,
+		encrypter:          config.Encrypter,
+		logger:             config.Logger,
+		randomKeysSearcher: config.RandomKeysSearcher,
 	}
 
 	return r, nil
