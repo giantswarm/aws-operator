@@ -6,13 +6,14 @@ import (
 	"context"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/aws-operator/integration/setup"
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/e2e-harness/pkg/release"
 	e2eclientsaws "github.com/giantswarm/e2eclients/aws"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -55,12 +56,14 @@ func NewProvider(config ProviderConfig) (*Provider, error) {
 }
 
 func (p *Provider) CreateCluster(ctx context.Context, id string) error {
-	setupConfig, err := p.newSetupConfig(id)
-	if err != nil {
-		return microerror.Mask(err)
+	setupConfig := setup.Config{
+		AWSClient: p.awsClient,
+		Host:      p.host,
+		Logger:    p.logger,
+		Release:   p.release,
 	}
 
-	err = setup.InstallAWSConfig(ctx, id, setupConfig)
+	err := setup.InstallAWSConfig(ctx, id, setupConfig)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -69,12 +72,14 @@ func (p *Provider) CreateCluster(ctx context.Context, id string) error {
 }
 
 func (p *Provider) DeleteCluster(ctx context.Context, id string) error {
-	setupConfig, err := p.newSetupConfig(id)
-	if err != nil {
-		return microerror.Mask(err)
+	setupConfig := setup.Config{
+		AWSClient: p.awsClient,
+		Host:      p.host,
+		Logger:    p.logger,
+		Release:   p.release,
 	}
 
-	err = p.release.EnsureDeleted(ctx, "apiextensions-aws-config-e2e", setup.CRNotExistsCondition(ctx, id, setupConfig))
+	err := p.release.EnsureDeleted(ctx, "apiextensions-aws-config-e2e", setup.CRNotExistsCondition(ctx, id, setupConfig))
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -92,12 +97,24 @@ func (p *Provider) GetClusterStatus(ctx context.Context, id string) (v1alpha1.St
 }
 
 func (p *Provider) WaitForClusterCreated(ctx context.Context, id string) error {
-	setupConfig, err := p.newSetupConfig(id)
-	if err != nil {
-		return microerror.Mask(err)
-	}
+	o := func() error {
+		customResource, err := p.host.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(id, metav1.GetOptions{})
+		if err != nil {
+			return microerror.Mask(err)
+		}
 
-	err = setupConfig.Guest.WaitForGuestReady()
+		// In case the CR status indicates the tenant cluster has a Created status
+		// condition, we return nil and stop retrying.
+		if customResource.ClusterStatus().HasCreatedCondition() {
+			return nil
+		}
+
+		return microerror.Mask(missingCreatedConditionError)
+	}
+	b := backoff.NewExponential(backoff.LongMaxWait, backoff.LongMaxInterval)
+	n := backoff.NewNotifier(p.logger, ctx)
+
+	err := backoff.RetryNotify(o, b, n)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -106,49 +123,23 @@ func (p *Provider) WaitForClusterCreated(ctx context.Context, id string) error {
 }
 
 func (p *Provider) WaitForClusterDeleted(ctx context.Context, id string) error {
-	setupConfig, err := p.newSetupConfig(id)
-	if err != nil {
-		return microerror.Mask(err)
-	}
+	o := func() error {
+		_, err := p.host.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(id, metav1.GetOptions{})
+		if errors.IsNotFound(err) {
+			return nil
+		} else if err != nil {
+			return microerror.Mask(err)
+		}
 
-	err = setupConfig.Guest.WaitForAPIDown()
+		return microerror.Mask(clusterCRStillExistsError)
+	}
+	b := backoff.NewExponential(backoff.LongMaxWait, backoff.LongMaxInterval)
+	n := backoff.NewNotifier(p.logger, ctx)
+
+	err := backoff.RetryNotify(o, b, n)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
 	return nil
-}
-
-func (p *Provider) newSetupConfig(id string) (setup.Config, error) {
-	var err error
-
-	var newTenant *framework.Guest
-	{
-		c := framework.GuestConfig{
-			Logger: p.logger,
-
-			ClusterID:    id,
-			CommonDomain: env.CommonDomain(),
-		}
-
-		newTenant, err = framework.NewGuest(c)
-		if err != nil {
-			return setup.Config{}, microerror.Mask(err)
-		}
-	}
-
-	err = newTenant.Initialize()
-	if err != nil {
-		return setup.Config{}, microerror.Mask(err)
-	}
-
-	setupConfig := setup.Config{
-		AWSClient: p.awsClient,
-		Guest:     newTenant,
-		Host:      p.host,
-		Logger:    p.logger,
-		Release:   p.release,
-	}
-
-	return setupConfig, nil
 }
