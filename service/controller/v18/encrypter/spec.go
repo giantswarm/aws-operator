@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/legacycerts/legacy"
 )
 
 const (
@@ -19,7 +18,6 @@ type EncryptionKeyState struct {
 
 type Interface interface {
 	Encrypter
-	TLSManager
 	Resource
 }
 
@@ -37,8 +35,4 @@ type Resource interface {
 type RoleManager interface {
 	EnsureCreatedAuthorizedIAMRoles(context.Context, v1alpha1.AWSConfig) error
 	EnsureDeletedAuthorizedIAMRoles(context.Context, v1alpha1.AWSConfig) error
-}
-
-type TLSManager interface {
-	EncryptTLSAssets(ctx context.Context, customObject v1alpha1.AWSConfig, assets legacy.AssetsBundle) (*legacy.CompactTLSAssets, error)
 }
