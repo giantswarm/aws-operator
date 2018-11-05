@@ -368,7 +368,7 @@
   revision = "4c5b72d1baefacd07a5ca1ce4b298662760565e8"
 
 [[projects]]
-  branch = "teemow-add-proxy-fixes-1.12"
+  branch = "master"
   digest = "1:8b7b4b42a0dface4c096d0b7f49397c1b9b83fa52a29ef599b9076846a1b77ce"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
@@ -381,7 +381,7 @@
     "v_3_7_0",
   ]
   pruneopts = "T"
-  revision = "ff2013d95f137f3f7963db001b17fdd41c804001"
+  revision = "b6a8b6dc00374b6d8fbd59b4108984e72b428c6e"
 
 [[projects]]
   branch = "master"
