@@ -5,7 +5,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/v18/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v18/key"
-	"github.com/giantswarm/legacycerts/legacy"
+	"github.com/giantswarm/certs"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 )
@@ -29,23 +29,18 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 
 	var accountID string
-	var certs legacy.AssetsBundle
-	var tlsAssets *legacy.CompactTLSAssets
+	var clusterCerts certs.Cluster
 	var clusterKeys randomkeys.Cluster
 	{
 		accountID, err = sc.AWSService.GetAccountID()
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		certs, err = r.certWatcher.SearchCerts(key.ClusterID(customObject))
+		clusterCerts, err = r.certsSearcher.SearchCluster(key.ClusterID(customObject))
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		tlsAssets, err = r.encrypter.EncryptTLSAssets(ctx, customObject, certs)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-		clusterKeys, err = r.randomKeySearcher.SearchCluster(key.ClusterID(customObject))
+		clusterKeys, err = r.randomKeysSearcher.SearchCluster(key.ClusterID(customObject))
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -54,7 +49,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	output := map[string]BucketObjectState{}
 
 	{
-		b, err := r.cloudConfig.NewMasterTemplate(ctx, customObject, *tlsAssets, clusterKeys)
+		b, err := r.cloudConfig.NewMasterTemplate(ctx, customObject, clusterCerts, clusterKeys)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -67,7 +62,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 
 	{
-		b, err := r.cloudConfig.NewWorkerTemplate(ctx, customObject, *tlsAssets)
+		b, err := r.cloudConfig.NewWorkerTemplate(ctx, customObject, clusterCerts)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

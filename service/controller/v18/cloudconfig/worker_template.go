@@ -2,19 +2,25 @@ package cloudconfig
 
 import (
 	"context"
+	"encoding/base64"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_6_2"
-	"github.com/giantswarm/legacycerts/legacy"
-	"github.com/giantswarm/microerror"
-
+	"github.com/giantswarm/aws-operator/service/controller/v18/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v18/templates/cloudconfig"
+	"github.com/giantswarm/certs"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_6_2"
+	"github.com/giantswarm/microerror"
 )
 
 // NewWorkerTemplate generates a new worker cloud config template and returns it
 // as a base64 encoded string.
-func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, certs legacy.CompactTLSAssets) (string, error) {
+func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, clusterCerts certs.Cluster) (string, error) {
 	var err error
+
+	ctlCtx, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
 
 	encryptionKey, err := c.encrypter.EncryptionKey(ctx, customObject)
 	if err != nil {
@@ -32,7 +38,9 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 		params.Cluster = customObject.Spec.Cluster
 		params.Extension = &WorkerExtension{
 			baseExtension: be,
-			certs:         certs,
+			ctlCtx:        ctlCtx,
+
+			ClusterCerts: clusterCerts,
 		}
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
 		params.RegistryDomain = c.registryDomain
@@ -61,78 +69,28 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 
 type WorkerExtension struct {
 	baseExtension
-	certs legacy.CompactTLSAssets
+
+	// TODO Pass context to k8scloudconfig rendering fucntions
+	//
+	// See https://github.com/giantswarm/giantswarm/issues/4329.
+	//
+	ctlCtx *controllercontext.Context
+
+	ClusterCerts certs.Cluster
 }
 
 func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
+	// TODO Pass context to k8scloudconfig rendering fucntions
+	//
+	// See https://github.com/giantswarm/giantswarm/issues/4329.
+	//
+	ctx := context.TODO()
+
 	filesMeta := []k8scloudconfig.FileMetadata{
 		{
 			AssetContent: cloudconfig.DecryptTLSAssetsScript,
 			Path:         "/opt/bin/decrypt-tls-assets",
 			Owner:        "root:root",
-			Permissions:  0700,
-		},
-		{
-			AssetContent: e.certs.WorkerCrt,
-			Path:         "/etc/kubernetes/ssl/worker-crt.pem.enc",
-			Owner:        "root:root",
-			Encoding:     GzipBase64Encoding,
-			Permissions:  0700,
-		},
-		{
-			AssetContent: e.certs.WorkerCA,
-			Path:         "/etc/kubernetes/ssl/worker-ca.pem.enc",
-			Owner:        "root:root",
-			Encoding:     GzipBase64Encoding,
-			Permissions:  0700,
-		},
-		{
-			AssetContent: e.certs.WorkerKey,
-			Path:         "/etc/kubernetes/ssl/worker-key.pem.enc",
-			Owner:        "root:root",
-			Encoding:     GzipBase64Encoding,
-			Permissions:  0700,
-		},
-		{
-			AssetContent: e.certs.CalicoClientCrt,
-			Path:         "/etc/kubernetes/ssl/calico/client-crt.pem.enc",
-			Owner:        "root:root",
-			Encoding:     GzipBase64Encoding,
-			Permissions:  0700,
-		},
-		{
-			AssetContent: e.certs.CalicoClientCA,
-			Path:         "/etc/kubernetes/ssl/calico/client-ca.pem.enc",
-			Owner:        "root:root",
-			Encoding:     GzipBase64Encoding,
-			Permissions:  0700,
-		},
-		{
-			AssetContent: e.certs.CalicoClientKey,
-			Path:         "/etc/kubernetes/ssl/calico/client-key.pem.enc",
-			Owner:        "root:root",
-			Encoding:     GzipBase64Encoding,
-			Permissions:  0700,
-		},
-		{
-			AssetContent: e.certs.EtcdServerCrt,
-			Path:         "/etc/kubernetes/ssl/etcd/client-crt.pem.enc",
-			Owner:        "root:root",
-			Encoding:     GzipBase64Encoding,
-			Permissions:  0700,
-		},
-		{
-			AssetContent: e.certs.EtcdServerCA,
-			Path:         "/etc/kubernetes/ssl/etcd/client-ca.pem.enc",
-			Owner:        "root:root",
-			Encoding:     GzipBase64Encoding,
-			Permissions:  0700,
-		},
-		{
-			AssetContent: e.certs.EtcdServerKey,
-			Path:         "/etc/kubernetes/ssl/etcd/client-key.pem.enc",
-			Owner:        "root:root",
-			Encoding:     GzipBase64Encoding,
 			Permissions:  0700,
 		},
 		{
@@ -143,7 +101,36 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		},
 	}
 
-	var newFiles []k8scloudconfig.FileAsset
+	{
+		certFiles := certs.NewFilesClusterWorker(e.ClusterCerts)
+
+		for _, f := range certFiles {
+			// TODO We should just pass ctx to Files.
+			//
+			// See https://github.com/giantswarm/giantswarm/issues/4329.
+			//
+			ctx = controllercontext.NewContext(ctx, *e.ctlCtx)
+
+			data, err := e.encryptAndGzip(ctx, f.Data)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+
+			b64Data := base64.StdEncoding.EncodeToString(data)
+
+			meta := k8scloudconfig.FileMetadata{
+				AssetContent: b64Data,
+				Path:         f.AbsolutePath + ".enc",
+				Owner:        FileOwner,
+				Permissions:  0700,
+				Encoding:     "gzip+base64",
+			}
+
+			filesMeta = append(filesMeta, meta)
+		}
+	}
+
+	var fileAssets []k8scloudconfig.FileAsset
 
 	for _, m := range filesMeta {
 		data := e.templateData()
@@ -152,15 +139,15 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			return nil, microerror.Mask(err)
 		}
 
-		fileAsset := k8scloudconfig.FileAsset{
+		asset := k8scloudconfig.FileAsset{
 			Metadata: m,
 			Content:  c,
 		}
 
-		newFiles = append(newFiles, fileAsset)
+		fileAssets = append(fileAssets, asset)
 	}
 
-	return newFiles, nil
+	return fileAssets, nil
 }
 
 func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
