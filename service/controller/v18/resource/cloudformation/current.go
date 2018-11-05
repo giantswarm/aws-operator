@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
-	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
-
 	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v18/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/v18/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v18/key"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
+	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
@@ -23,9 +23,41 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	stackName := key.MainGuestStackName(customObject)
 
-	sc, err := controllercontext.FromContext(ctx)
+	ctlCtx, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return StackState{}, microerror.Mask(err)
+	}
+
+	if key.IsDeleted(customObject) {
+		stackNames := []string{
+			key.MainGuestStackName(customObject),
+			key.MainHostPreStackName(customObject),
+			key.MainHostPostStackName(customObject),
+		}
+
+		for _, stackName := range stackNames {
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding stack %#q in the AWS API", stackName))
+
+			in := &cloudformation.DescribeStacksInput{
+				StackName: aws.String(stackName),
+			}
+
+			out, err := ctlCtx.AWSClient.CloudFormation.DescribeStacks(in)
+			if cloudformationservice.IsStackNotFound(err) {
+				// This handling is far from perfect. We use different
+				// packages here. This is all going to be addressed in
+				// scope of
+				// https://github.com/giantswarm/giantswarm/issues/3783.
+
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find stack %#q in the AWS API", stackName))
+			} else if err != nil {
+				return nil, microerror.Mask(err)
+			} else {
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found stack %#q in the AWS API", stackName))
+				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizer")
+				finalizerskeptcontext.SetKept(ctx)
+			}
+		}
 	}
 
 	// In order to compute the current state of the guest cluster's cloud
@@ -37,7 +69,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the guest cluster main stack outputs in the AWS API")
 
 		var stackStatus string
-		stackOutputs, stackStatus, err = sc.CloudFormation.DescribeOutputsAndStatus(stackName)
+		stackOutputs, stackStatus, err = ctlCtx.CloudFormation.DescribeOutputsAndStatus(stackName)
 		if cloudformationservice.IsStackNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster main stack outputs in the AWS API")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack does not exist")
@@ -68,7 +100,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	{
 		var hostedZoneNameServers string
 		if r.route53Enabled {
-			hostedZoneNameServers, err = sc.CloudFormation.GetOutputValue(stackOutputs, key.HostedZoneNameServers)
+			hostedZoneNameServers, err = ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.HostedZoneNameServers)
 			// TODO introduced: aws-operator@v14; remove with: aws-operator@v13
 			// This output was introduced in v14 so it isn't accessible from CF
 			// stacks created by earlier versions. We need to handle that.
@@ -86,7 +118,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			}
 			// TODO end
 		}
-		dockerVolumeResourceName, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.DockerVolumeResourceNameKey)
+		dockerVolumeResourceName, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.DockerVolumeResourceNameKey)
 		if cloudformationservice.IsOutputNotFound(err) {
 			// Since we are transitioning between versions we will have situations in
 			// which old clusters are updated to new versions and miss the docker
@@ -103,7 +135,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 		var workerDockerVolumeSizeGB int
 		{
-			v, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.WorkerDockerVolumeSizeKey)
+			v, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerDockerVolumeSizeKey)
 			if cloudformationservice.IsOutputNotFound(err) {
 				// Since we are transitioning between versions we will have situations in
 				// which old clusters are updated to new versions and miss the docker
@@ -126,11 +158,11 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			workerDockerVolumeSizeGB = int(sz)
 		}
 
-		masterImageID, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.MasterImageIDKey)
+		masterImageID, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.MasterImageIDKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
-		masterInstanceResourceName, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.MasterInstanceResourceNameKey)
+		masterInstanceResourceName, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.MasterInstanceResourceNameKey)
 		if cloudformationservice.IsOutputNotFound(err) {
 			// Since we are transitioning between versions we will have situations in
 			// which old clusters are updated to new versions and miss the master
@@ -144,33 +176,33 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		} else if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
-		masterInstanceType, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.MasterInstanceTypeKey)
+		masterInstanceType, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.MasterInstanceTypeKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
-		masterCloudConfigVersion, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.MasterCloudConfigVersionKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-
-		workerCount, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.WorkerCountKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-		workerImageID, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.WorkerImageIDKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-		workerInstanceType, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.WorkerInstanceTypeKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-		workerCloudConfigVersion, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.WorkerCloudConfigVersionKey)
+		masterCloudConfigVersion, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.MasterCloudConfigVersionKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
 
-		versionBundleVersion, err := sc.CloudFormation.GetOutputValue(stackOutputs, key.VersionBundleVersionKey)
+		workerCount, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerCountKey)
+		if err != nil {
+			return StackState{}, microerror.Mask(err)
+		}
+		workerImageID, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerImageIDKey)
+		if err != nil {
+			return StackState{}, microerror.Mask(err)
+		}
+		workerInstanceType, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerInstanceTypeKey)
+		if err != nil {
+			return StackState{}, microerror.Mask(err)
+		}
+		workerCloudConfigVersion, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerCloudConfigVersionKey)
+		if err != nil {
+			return StackState{}, microerror.Mask(err)
+		}
+
+		versionBundleVersion, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.VersionBundleVersionKey)
 		if cloudformationservice.IsOutputNotFound(err) {
 			// Since we are transitioning between versions we will have situations in
 			// which old clusters are updated to new versions and miss the version
