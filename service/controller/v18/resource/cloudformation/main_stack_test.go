@@ -346,7 +346,7 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 	}
 
 	// image ids should be fixed despite the values in the custom object
-	if !strings.Contains(body, "ImageId: ami-32042fd9") {
+	if !strings.Contains(body, "ImageId: ami-0e6601a88a9753474") {
 		fmt.Println(body)
 		t.Fatal("Fixed image ID not found")
 	}
