@@ -8,6 +8,11 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
+				Component:   "aws-operator",
+				Description: "Fixed a bug with removing CR before all Cloud Formation stacks are deleted.",
+				Kind:        versionbundle.KindFixed,
+			},
+			{
 				Component:   "cloudconfig",
 				Description: "Updated Calico to 3.2.3.",
 				Kind:        versionbundle.KindChanged,
