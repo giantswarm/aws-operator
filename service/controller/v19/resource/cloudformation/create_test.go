@@ -9,8 +9,8 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v18/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/v18/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v19/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v19/controllercontext"
 )
 
 func Test_Resource_Cloudformation_newCreate(t *testing.T) {
