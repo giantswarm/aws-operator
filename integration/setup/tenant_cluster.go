@@ -49,7 +49,7 @@ func EnsureTenantClusterCreated(ctx context.Context, id string, config Config) e
 }
 
 func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config) error {
-	err := config.Release.EnsureDeleted(ctx, fmt.Sprintf("tenant-cluster-%s", id), CRNotExistsCondition(ctx, id, config))
+	err := config.Release.EnsureDeleted(ctx, id, CRNotExistsCondition(ctx, id, config))
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -210,7 +210,7 @@ func InstallAWSConfig(ctx context.Context, id string, config Config) error {
 		}
 	}
 
-	err = config.Release.Install(ctx, fmt.Sprintf("tenant-cluster-%s", id), release.NewStableChartInfo("apiextensions-aws-config-e2e-chart"), values, crExistsCondition(ctx, id, config))
+	err = config.Release.Install(ctx, id, release.NewStableChartInfo("apiextensions-aws-config-e2e-chart"), values, crExistsCondition(ctx, id, config))
 	if err != nil {
 		return microerror.Mask(err)
 	}
