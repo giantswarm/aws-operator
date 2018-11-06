@@ -257,7 +257,7 @@ func (r *Release) Install(ctx context.Context, name string, chartInfo ChartInfo,
 
 	var err error
 
-	tarball, err := r.pullTarball(releaseName, chartInfo)
+	tarball, err := r.pullTarball(name, chartInfo)
 	if err != nil {
 		return microerror.Mask(err)
 	}
