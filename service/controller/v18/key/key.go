@@ -8,12 +8,11 @@ import (
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/microerror"
-
 	"github.com/giantswarm/aws-operator/service/controller/v18/templates/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v18/templates/cloudformation/guest"
 	"github.com/giantswarm/aws-operator/service/controller/v18/templates/cloudformation/hostpost"
 	"github.com/giantswarm/aws-operator/service/controller/v18/templates/cloudformation/hostpre"
+	"github.com/giantswarm/microerror"
 )
 
 const (
@@ -104,6 +103,10 @@ func AutoScalingGroupName(customObject v1alpha1.AWSConfig, groupName string) str
 
 func AvailabilityZone(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.AZ
+}
+
+func AvailabilityZones(customObject v1alpha1.AWSConfig) int {
+	return customObject.Spec.AWS.AvailabilityZones
 }
 
 func AWSCliContainerRegistry(customObject v1alpha1.AWSConfig) string {
