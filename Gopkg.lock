@@ -280,7 +280,7 @@
   revision = "4bf2b99ebf79cb800cb21ec1a4541e6582e3a0b7"
 
 [[projects]]
-  branch = "release"
+  branch = "master"
   digest = "1:0eb5dca43bceab5f3ecbcd289733495fcb21347bf6dc0d0a0d65ef46fef4f337"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
@@ -290,7 +290,7 @@
     "pkg/release",
   ]
   pruneopts = "UT"
-  revision = "a3281af2857008f2c37240474120c9329d32413e"
+  revision = "d1767fe564326c5ffe0ab6f329d1def75f8dca01"
 
 [[projects]]
   branch = "master"
@@ -960,7 +960,7 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "4d3f4d9ffa16a13f451c3b2999e9c49e9750bf06"
+  revision = "bfa7d42eb568d3c454e1853744768cc80718040d"
 
 [[projects]]
   branch = "master"
@@ -1001,14 +1001,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:509feef845f6af582cb82caad5eb176016b30714facdc754d84869ca31305b59"
+  digest = "1:f97031542387802b6fd8867c3f29488c2852aac19954ed51df6231a4fadf1707"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "7155702f2d47d94b134229da97195d0130cab001"
+  revision = "3a76605856fddce5718553cbb8bd50ca492a7274"
 
 [[projects]]
   digest = "1:e5a8511f063c38c51ab9ab80e718e9149f692652aeb4e393a8c020dd1bf38ca2"
