@@ -9,7 +9,7 @@ func VersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "aws-operator",
-				Description: "Fixed a bug with removing CR before all Cloud Formation stacks are deleted.",
+				Description: "Fixed a bug with removing CR finalizers before all Cloud Formation stacks are deleted.",
 				Kind:        versionbundle.KindFixed,
 			},
 			{
