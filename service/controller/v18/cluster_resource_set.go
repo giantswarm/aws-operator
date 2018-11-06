@@ -6,18 +6,6 @@ import (
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	"github.com/giantswarm/certs"
-	"github.com/giantswarm/guestcluster"
-	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
-	"github.com/giantswarm/operatorkit/controller/resource/metricsresource"
-	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
-	"github.com/giantswarm/randomkeys"
-	"github.com/giantswarm/statusresource"
-	"k8s.io/client-go/kubernetes"
-
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v18/adapter"
@@ -43,6 +31,17 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v18/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/v18/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/v18/resource/service"
+	"github.com/giantswarm/certs"
+	"github.com/giantswarm/guestcluster"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
+	"github.com/giantswarm/operatorkit/controller/resource/metricsresource"
+	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
+	"github.com/giantswarm/randomkeys"
+	"github.com/giantswarm/statusresource"
+	"k8s.io/client-go/kubernetes"
 )
 
 const (
@@ -227,7 +226,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			Logger:    config.Logger,
 
 			AllocatedSubnetMaskBits: config.GuestSubnetMaskBits,
-			NetworkRange:            config.IPAMNetworkRange,
+			// TODO(tuommaki): Wire up this!
+			AvailabilityZones: []string{"eu-west-1a", "eu-west-1b", "eu-west-1c"},
+			NetworkRange:      config.IPAMNetworkRange,
 		}
 
 		ipamResource, err = ipam.New(c)
