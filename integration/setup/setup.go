@@ -41,7 +41,7 @@ func Setup(m *testing.M, config Config) {
 		}
 	}
 
-	if v == 0 {
+	if v == 0 && config.UseDefaultTenant {
 		err = EnsureTenantClusterCreated(ctx, env.ClusterID(), config)
 		if err != nil {
 			log.Printf("%#v\n", err)
@@ -54,7 +54,9 @@ func Setup(m *testing.M, config Config) {
 	}
 
 	if os.Getenv("KEEP_RESOURCES") != "true" {
-		config.Host.DeleteGuestCluster(ctx, provider)
+		if config.UseDefaultTenant {
+			config.Host.DeleteGuestCluster(ctx, provider)
+		}
 
 		// only do full teardown when not on CI
 		if os.Getenv("CIRCLECI") != "true" {
