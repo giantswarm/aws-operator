@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"net"
 	"reflect"
+	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
@@ -16,6 +17,11 @@ import (
 	"github.com/giantswarm/microerror"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
+func init() {
+	// Seed RNG for AZ shuffling.
+	rand.Seed(time.Now().UnixNano())
+}
 
 // EnsureCreated allocates guest cluster network segment. It gathers existing
 // subnets from existing AWSConfig/Status objects and existing VPCs from AWS.
