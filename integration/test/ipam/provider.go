@@ -4,6 +4,7 @@ package ipam
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/aws-operator/integration/setup"
@@ -79,7 +80,7 @@ func (p *Provider) DeleteCluster(ctx context.Context, id string) error {
 		Release:   p.release,
 	}
 
-	err := p.release.EnsureDeleted(ctx, "apiextensions-aws-config-e2e", setup.CRNotExistsCondition(ctx, id, setupConfig))
+	err := p.release.EnsureDeleted(ctx, fmt.Sprintf("tenant-cluster-%s", id), setup.CRNotExistsCondition(ctx, id, setupConfig))
 	if err != nil {
 		return microerror.Mask(err)
 	}
