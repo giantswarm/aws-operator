@@ -42,7 +42,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 				StackName: aws.String(stackName),
 			}
 
-			out, err := ctlCtx.AWSClient.CloudFormation.DescribeStacks(in)
+			_, err := ctlCtx.AWSClient.CloudFormation.DescribeStacks(in)
 			if cloudformationservice.IsStackNotFound(err) {
 				// This handling is far from perfect. We use different
 				// packages here. This is all going to be addressed in
