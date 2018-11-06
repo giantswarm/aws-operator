@@ -7,8 +7,8 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v18/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v18/key"
+	"github.com/giantswarm/aws-operator/service/controller/v19/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v19/key"
 )
 
 const (
