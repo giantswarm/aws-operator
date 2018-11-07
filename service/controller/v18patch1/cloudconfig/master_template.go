@@ -5,9 +5,9 @@ import (
 	"encoding/base64"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/aws-operator/service/controller/v18/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v18/encrypter/vault"
-	"github.com/giantswarm/aws-operator/service/controller/v18/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v18patch1/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v18patch1/encrypter/vault"
+	"github.com/giantswarm/aws-operator/service/controller/v18patch1/templates/cloudconfig"
 	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_7_0"
 	"github.com/giantswarm/microerror"

@@ -7,9 +7,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v18/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v18/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v18/key"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v18patch1/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v18patch1/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v18patch1/key"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"

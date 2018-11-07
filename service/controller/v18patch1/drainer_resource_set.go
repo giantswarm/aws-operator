@@ -1,4 +1,4 @@
-package v18
+package v18patch1
 
 import (
 	"context"
@@ -13,13 +13,13 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v18/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v18/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v18/credential"
-	"github.com/giantswarm/aws-operator/service/controller/v18/key"
-	"github.com/giantswarm/aws-operator/service/controller/v18/resource/drainer"
-	"github.com/giantswarm/aws-operator/service/controller/v18/resource/drainfinisher"
-	"github.com/giantswarm/aws-operator/service/controller/v18/resource/workerasgname"
+	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v18patch1/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v18patch1/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v18patch1/credential"
+	"github.com/giantswarm/aws-operator/service/controller/v18patch1/key"
+	"github.com/giantswarm/aws-operator/service/controller/v18patch1/resource/drainer"
+	"github.com/giantswarm/aws-operator/service/controller/v18patch1/resource/drainfinisher"
+	"github.com/giantswarm/aws-operator/service/controller/v18patch1/resource/workerasgname"
 )
 
 type DrainerResourceSetConfig struct {

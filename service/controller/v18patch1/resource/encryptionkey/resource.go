@@ -4,11 +4,11 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/v18/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v18patch1/encrypter"
 )
 
 const (
-	name = "encryptionkeyv18"
+	name = "encryptionkeyv18patch1"
 )
 
 type Config struct {

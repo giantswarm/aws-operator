@@ -1,4 +1,4 @@
-package v18
+package v18patch1
 
 import (
 	"github.com/giantswarm/versionbundle"
