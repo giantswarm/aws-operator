@@ -312,8 +312,8 @@
   revision = "4e790eb032b59136b2a946e1ead01592df4c870a"
 
 [[projects]]
-  branch = "master"
-  digest = "1:e32c2801d8ce7f5f29980fc24b6bac3d6a93a328496e6f86e4f18110827065f4"
+  branch = "optional-label-selector"
+  digest = "1:4fd5d4158b55b3fd6adb28c75712a403301838633660a9249b7939757e542758"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
     "internal/render",
@@ -321,7 +321,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "110f14799e892ebe0dfda4a8898fd8963d466138"
+  revision = "76af59e00424ec47c0bd595755f9a0d341aa4b86"
 
 [[projects]]
   branch = "ipam-e2e-tests"
@@ -382,7 +382,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:8b7b4b42a0dface4c096d0b7f49397c1b9b83fa52a29ef599b9076846a1b77ce"
+  digest = "1:c80e85078d15cf3373be5dfceaf78617b631d1edbd38161f4b17c34b757a0a17"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "v_3_3_3",
@@ -394,7 +394,7 @@
     "v_3_7_0",
   ]
   pruneopts = "T"
-  revision = "b6a8b6dc00374b6d8fbd59b4108984e72b428c6e"
+  revision = "1b74b9361ef3b35f9c10227815a1989339923b5c"
 
 [[projects]]
   branch = "master"
@@ -438,7 +438,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:5c1520d3b53997d03f3848c91bca0e982701f1589a69917ba4a9e553910a2b64"
+  digest = "1:e84b052d9547d99b68c1e7555404f9c1934cce841011dc5c72504b4bc9566097"
   name = "github.com/giantswarm/microkit"
   packages = [
     "command",
@@ -457,7 +457,7 @@
     "tls",
   ]
   pruneopts = "UT"
-  revision = "21181e2cc3c8f5ce7aa32dfdd38aa11643a0a5bf"
+  revision = "aaff79223ca0620a1b6506f0b598da59557659e6"
 
 [[projects]]
   branch = "master"
