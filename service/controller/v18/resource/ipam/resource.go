@@ -18,6 +18,7 @@ type Config struct {
 	Logger    micrologger.Logger
 
 	AllocatedSubnetMaskBits int
+	AvailabilityZones       []string
 	NetworkRange            net.IPNet
 }
 
@@ -26,6 +27,7 @@ type Resource struct {
 	logger    micrologger.Logger
 
 	allocatedSubnetMask net.IPMask
+	availabilityZones   []string
 	networkRange        net.IPNet
 }
 
@@ -36,6 +38,10 @@ func New(config Config) (*Resource, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
+
+	if len(config.AvailabilityZones) == 0 {
+		return nil, microerror.Maskf(invalidConfigError, "%T.AvailabilityZones must not be empty", config)
+	}
 	if reflect.DeepEqual(config.NetworkRange, net.IPNet{}) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.NetworkRange must not be empty", config)
 	}
@@ -45,6 +51,7 @@ func New(config Config) (*Resource, error) {
 		logger:    config.Logger,
 
 		allocatedSubnetMask: net.CIDRMask(config.AllocatedSubnetMaskBits, 32),
+		availabilityZones:   config.AvailabilityZones,
 		networkRange:        config.NetworkRange,
 	}
 

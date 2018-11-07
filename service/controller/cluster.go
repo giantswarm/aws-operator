@@ -86,10 +86,11 @@ type ClusterConfig struct {
 }
 
 type ClusterConfigAWSConfig struct {
-	AccessKeyID     string
-	AccessKeySecret string
-	Region          string
-	SessionToken    string
+	AccessKeyID       string
+	AccessKeySecret   string
+	AvailabilityZones []string
+	Region            string
+	SessionToken      string
 }
 
 // ClusterConfigOIDC represents the configuration of the OIDC authorization
@@ -745,6 +746,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
 			DeleteLoggingBucket:        config.DeleteLoggingBucket,
 			EncrypterBackend:           config.EncrypterBackend,
+			GuestAvailabilityZones:     config.GuestAWSConfig.AvailabilityZones,
 			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
 			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
 			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
