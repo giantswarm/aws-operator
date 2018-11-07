@@ -1436,6 +1436,19 @@ write_files:
           done
       done
 
+      PROXY_MANIFESTS="kube-proxy-sa.yaml kube-proxy-ds.yaml"
+      for manifest in $PROXY_MANIFESTS
+      do
+          while
+              /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/$manifest
+              [ "$?" -ne "0" ]
+          do
+              echo "failed to apply /srv/$manifest, retrying in 5 sec"
+              sleep 5s
+          done
+      done
+      echo "kube-proxy successfully installed"
+
       {{ if not .DisableCalico -}}
 
       # apply calico
@@ -1482,8 +1495,6 @@ write_files:
       {{ range .ExtraManifests -}}
       MANIFESTS="${MANIFESTS} {{ . }}"
       {{ end -}}
-      MANIFESTS="${MANIFESTS} kube-proxy-sa.yaml"
-      MANIFESTS="${MANIFESTS} kube-proxy-ds.yaml"
       {{ if not .DisableCoreDNS }}
       MANIFESTS="${MANIFESTS} coredns.yaml"
       {{ end -}}

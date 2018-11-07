@@ -312,8 +312,8 @@
   revision = "4e790eb032b59136b2a946e1ead01592df4c870a"
 
 [[projects]]
-  branch = "optional-label-selector"
-  digest = "1:4fd5d4158b55b3fd6adb28c75712a403301838633660a9249b7939757e542758"
+  branch = "master"
+  digest = "1:309682a225e763c6ef6be519488ba7888187b0a261b3c2ef3623b7188e9f66d9"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
     "internal/render",
@@ -321,7 +321,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "76af59e00424ec47c0bd595755f9a0d341aa4b86"
+  revision = "3aa5db40ae4484507d28cb2ec6992889a506d86e"
 
 [[projects]]
   branch = "ipam-e2e-tests"
@@ -382,7 +382,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c80e85078d15cf3373be5dfceaf78617b631d1edbd38161f4b17c34b757a0a17"
+  digest = "1:208f2d22ffd819b407db0c885b56acb86b58e0ce55b8c7a47fe8b0f02ba5f0a7"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "v_3_3_3",
@@ -394,7 +394,7 @@
     "v_3_7_0",
   ]
   pruneopts = "T"
-  revision = "1b74b9361ef3b35f9c10227815a1989339923b5c"
+  revision = "5a69fc09728cccb426e841c18ca3a92f6bba50df"
 
 [[projects]]
   branch = "master"
