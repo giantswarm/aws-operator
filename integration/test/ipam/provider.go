@@ -71,6 +71,11 @@ func (p *Provider) CreateCluster(ctx context.Context, id string) error {
 		return microerror.Mask(err)
 	}
 
+	err = setup.InstallCertConfigs(ctx, id, setupConfig)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	p.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created tenant cluster %#q", id))
 
 	return nil
@@ -86,7 +91,12 @@ func (p *Provider) DeleteCluster(ctx context.Context, id string) error {
 		Release:   p.release,
 	}
 
-	err := p.release.EnsureDeleted(ctx, id, setup.CRNotExistsCondition(ctx, id, setupConfig))
+	err := p.release.EnsureDeleted(ctx, fmt.Sprintf("e2esetup-awsconfig-%s", id), setup.CRNotExistsCondition(ctx, id, setupConfig))
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	err = p.release.EnsureDeleted(ctx, fmt.Sprintf("e2esetup-certs-%s", id))
 	if err != nil {
 		return microerror.Mask(err)
 	}

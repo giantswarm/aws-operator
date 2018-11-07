@@ -122,6 +122,7 @@ func installAWSOperator(ctx context.Context, config Config) error {
 	if err != nil {
 		return microerror.Mask(err)
 	}
+
 	return nil
 }
 
@@ -154,21 +155,18 @@ func installResources(ctx context.Context, config Config) error {
 	}
 
 	{
-		var values string
-		{
-			c := chartvalues.CertOperatorConfig{
-				ClusterName:        env.ClusterID(),
-				CommonDomain:       env.CommonDomain(),
-				RegistryPullSecret: env.RegistryPullSecret(),
-				Vault: chartvalues.CertOperatorVault{
-					Token: env.VaultToken(),
-				},
-			}
+		c := chartvalues.CertOperatorConfig{
+			ClusterName:        env.ClusterID(),
+			CommonDomain:       env.CommonDomain(),
+			RegistryPullSecret: env.RegistryPullSecret(),
+			Vault: chartvalues.CertOperatorVault{
+				Token: env.VaultToken(),
+			},
+		}
 
-			values, err = chartvalues.NewCertOperator(c)
-			if err != nil {
-				return microerror.Mask(err)
-			}
+		values, err := chartvalues.NewCertOperator(c)
+		if err != nil {
+			return microerror.Mask(err)
 		}
 
 		err = config.Release.InstallOperator(ctx, "cert-operator", release.NewStableVersion(), values, corev1alpha1.NewCertConfigCRD())
@@ -178,16 +176,13 @@ func installResources(ctx context.Context, config Config) error {
 	}
 
 	{
-		var values string
-		{
-			c := chartvalues.NodeOperatorConfig{
-				RegistryPullSecret: env.RegistryPullSecret(),
-			}
+		c := chartvalues.NodeOperatorConfig{
+			RegistryPullSecret: env.RegistryPullSecret(),
+		}
 
-			values, err = chartvalues.NewNodeOperator(c)
-			if err != nil {
-				return microerror.Mask(err)
-			}
+		values, err := chartvalues.NewNodeOperator(c)
+		if err != nil {
+			return microerror.Mask(err)
 		}
 
 		err = config.Release.InstallOperator(ctx, "node-operator", release.NewStableVersion(), values, corev1alpha1.NewNodeConfigCRD())
@@ -198,13 +193,6 @@ func installResources(ctx context.Context, config Config) error {
 
 	{
 		err = installAWSOperator(ctx, config)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	{
-		err = config.Host.InstallCertResource()
 		if err != nil {
 			return microerror.Mask(err)
 		}

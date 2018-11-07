@@ -29,6 +29,11 @@ func EnsureTenantClusterCreated(ctx context.Context, id string, config Config) e
 		return microerror.Mask(err)
 	}
 
+	err = InstallCertConfigs(ctx, id, config)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	err = config.Guest.Setup()
 	if err != nil {
 		return microerror.Mask(err)
@@ -210,7 +215,28 @@ func InstallAWSConfig(ctx context.Context, id string, config Config) error {
 		}
 	}
 
-	err = config.Release.Install(ctx, id, release.NewStableChartInfo("apiextensions-aws-config-e2e-chart"), values, crExistsCondition(ctx, id, config))
+	err = config.Release.Install(ctx, fmt.Sprintf("e2esetup-awsconfig-%s", id), release.NewStableChartInfo("apiextensions-aws-config-e2e-chart"), values, crExistsCondition(ctx, id, config))
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
+func InstallCertConfigs(ctx context.Context, id string, config Config) error {
+	c := chartvalues.E2ESetupCertsConfig{
+		Cluster: chartvalues.E2ESetupCertsConfigCluster{
+			ID: id,
+		},
+		CommonDomain: env.CommonDomain(),
+	}
+
+	values, err := chartvalues.NewE2ESetupCerts(c)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	err = config.Release.Install(ctx, fmt.Sprintf("e2esetup-certs-%s", id), release.NewStableChartInfo("e2esetup-certs-chart"), values, config.Release.Condition().SecretExists(ctx, "default", fmt.Sprintf("api-%s", id)))
 	if err != nil {
 		return microerror.Mask(err)
 	}
