@@ -25,7 +25,32 @@ func Test_selectRandomAZs_properties(t *testing.T) {
 		azs          []string
 		n            int
 		errorMatcher func(error) bool
-	}{}
+	}{
+		{
+			name:         "case 0: select one AZ out of three",
+			azs:          []string{"eu-west-1a", "eu-west-1b", "eu-west-1c"},
+			n:            1,
+			errorMatcher: nil,
+		},
+		{
+			name:         "case 1: select three AZs out of three",
+			azs:          []string{"eu-west-1a", "eu-west-1b", "eu-west-1c"},
+			n:            2,
+			errorMatcher: nil,
+		},
+		{
+			name:         "case 2: select three AZs out of three",
+			azs:          []string{"eu-west-1a", "eu-west-1b", "eu-west-1c"},
+			n:            3,
+			errorMatcher: nil,
+		},
+		{
+			name:         "case 3: error when requesting more AZs than there are configured",
+			azs:          []string{"eu-west-1a", "eu-west-1b", "eu-west-1c"},
+			n:            5,
+			errorMatcher: IsInvalidParameter,
+		},
+	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
