@@ -147,12 +147,22 @@ func extractAuthorities(content, vType string) ([]versionbundle.Authority, error
 		return nil, microerror.Mask(err)
 	}
 
+	if len(indexReleases) < 2 {
+		return nil, microerror.Maskf(notFoundError, "release index length must be bigger than 2 but got %d", len(indexReleases))
+	}
+
+	// TODO At some point we should get rid of "wip" and "current" wording in the code below.
+	//
+	//	See https://github.com/giantswarm/giantswarm/issues/3313
+	//
 	sortedReleases := versionbundle.SortIndexReleasesByVersion(indexReleases)
 	sort.Sort(sort.Reverse(sortedReleases))
-	for _, ir := range sortedReleases {
-		if vType == "wip" && !ir.Active || vType == "current" && ir.Active {
-			return ir.Authorities, nil
-		}
+	switch vType {
+	case "latest", "wip":
+		return sortedReleases[0].Authorities, nil
+	case "previous", "current":
+		return sortedReleases[1].Authorities, nil
 	}
-	return nil, microerror.Mask(notFoundError)
+
+	return nil, microerror.Maskf(notFoundError, "unknown version type %#q", vType)
 }

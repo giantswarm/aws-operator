@@ -281,7 +281,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:0eb5dca43bceab5f3ecbcd289733495fcb21347bf6dc0d0a0d65ef46fef4f337"
+  digest = "1:d051f91bf3b115ee3c00633a78287942e38c1b50cf62655bd02166509129431c"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
@@ -290,7 +290,7 @@
     "pkg/release",
   ]
   pruneopts = "UT"
-  revision = "d1767fe564326c5ffe0ab6f329d1def75f8dca01"
+  revision = "3745b233e840c5073e5b14a2281c774412409298"
 
 [[projects]]
   branch = "master"
@@ -309,11 +309,11 @@
   name = "github.com/giantswarm/e2esetup"
   packages = ["k8s"]
   pruneopts = "UT"
-  revision = "fbdbd487bc645dcb941f3f889a6db3345947fe3e"
+  revision = "4e790eb032b59136b2a946e1ead01592df4c870a"
 
 [[projects]]
   branch = "master"
-  digest = "1:f2b40525a588e4de3a7ebfcaed237af83391551be6f5ced0d0c8c009ea83da9a"
+  digest = "1:e32c2801d8ce7f5f29980fc24b6bac3d6a93a328496e6f86e4f18110827065f4"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
     "internal/render",
@@ -321,7 +321,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "33b1a1239b499d811a7bf4391264eb663943784d"
+  revision = "110f14799e892ebe0dfda4a8898fd8963d466138"
 
 [[projects]]
   branch = "ipam-e2e-tests"
@@ -960,7 +960,7 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "bfa7d42eb568d3c454e1853744768cc80718040d"
+  revision = "e4dc69e5b2fd71dcaf8bd5d054eb936deb78d1fa"
 
 [[projects]]
   branch = "master"
@@ -978,18 +978,18 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "10aee181995363b41f712a55844a0dd52ea04646"
+  revision = "a544f70c90f196e50d198126db0c4cb2b562fec0"
 
 [[projects]]
   branch = "master"
-  digest = "1:81bafe9ef203750ed218e086d9930b21c086232ccc2a272e104d2af56baf6df5"
+  digest = "1:bd33fb266abe5db1fb1c04e58e98192068f05a8d22fae2a9f22270c8422bb331"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
     "internal",
   ]
   pruneopts = "UT"
-  revision = "ca4130e427c7982e64cb9b5e717ff67bdb725037"
+  revision = "f42d05182288abf10faef86d16c0d07b8d40ea2d"
 
 [[projects]]
   branch = "master"
@@ -1482,7 +1482,7 @@
   name = "k8s.io/kube-openapi"
   packages = ["pkg/util/proto"]
   pruneopts = "UT"
-  revision = "72693cb1fadd73ae2742f6fe29af77d1aecdd8cd"
+  revision = "a9a16210091c9a2b6a937e06a182955c03654c4c"
 
 [[projects]]
   digest = "1:0cbc5b5dd9e675751a7f0b8cc4477f3900dbb31fed90c7793455a219d209ae25"
