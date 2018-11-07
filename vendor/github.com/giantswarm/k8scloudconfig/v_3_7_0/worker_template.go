@@ -27,6 +27,7 @@ write_files:
     kind: KubeProxyConfiguration
     mode: iptables
     resourceContainer: /kube-proxy
+    clusterCIDR: {{.Cluster.Calico.Subnet}}/{{.Cluster.Calico.CIDR}}
 - path: /etc/kubernetes/config/proxy-kubeconfig.yml
   owner: root
   permissions: 0644
@@ -62,7 +63,6 @@ write_files:
     clusterDNS:
       - {{.Cluster.Kubernetes.DNS.IP}}
     clusterDomain: {{.Cluster.Kubernetes.Domain}}
-    staticPodPath: /etc/kubernetes/manifests
     evictionSoft:
       memory.available: "500Mi"
     evictionHard:
@@ -77,7 +77,6 @@ write_files:
         enabled: false # Deafults to true as of 1.10
     authorization:
       mode: AlwaysAllow # Deafults to webhook as of 1.10
-    readOnlyPort: 10255 # Used by heapster. Defaults to 0 (disabled) as of 1.10. Needed for metrics.
 - path: /etc/kubernetes/config/kubelet-kubeconfig.yml
   owner: root
   permissions: 0644

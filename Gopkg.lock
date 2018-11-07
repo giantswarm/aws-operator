@@ -277,11 +277,11 @@
     "certstest",
   ]
   pruneopts = "UT"
-  revision = "4e25073c53baae82ad68e2a24b53ae368f3d44ed"
+  revision = "4bf2b99ebf79cb800cb21ec1a4541e6582e3a0b7"
 
 [[projects]]
   branch = "master"
-  digest = "1:6f3c3be4d30ca7e5328bf11aae1928715a220168f9398fba641a59af018c436f"
+  digest = "1:0eb5dca43bceab5f3ecbcd289733495fcb21347bf6dc0d0a0d65ef46fef4f337"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "pkg/framework",
@@ -290,7 +290,7 @@
     "pkg/release",
   ]
   pruneopts = "UT"
-  revision = "1be216b4c01168c442155b79316c7f837872b865"
+  revision = "d1767fe564326c5ffe0ab6f329d1def75f8dca01"
 
 [[projects]]
   branch = "master"
@@ -374,15 +374,15 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:6bd49e15179a5351604f234dbb12f4d3fb1c64b6885e0221582003a22af47271"
+  digest = "1:25fb9a678838e49c2561d58606e554b73348626f4961793fb089c57bfde5f3ee"
   name = "github.com/giantswarm/ipam"
   packages = ["."]
   pruneopts = "UT"
-  revision = "c602ada3153f4d322c4e726800f84cec2cf534dd"
+  revision = "79a61ffad296f3f418d8f381e4f5f702d5245b50"
 
 [[projects]]
   branch = "master"
-  digest = "1:636dba52aa976a05a9e9ca637cb0849c868031cdcc5c88efeaf137f6c1e04201"
+  digest = "1:8b7b4b42a0dface4c096d0b7f49397c1b9b83fa52a29ef599b9076846a1b77ce"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "v_3_3_3",
@@ -391,10 +391,10 @@
     "v_3_5_1",
     "v_3_6_0",
     "v_3_6_1",
-    "v_3_6_2",
+    "v_3_7_0",
   ]
   pruneopts = "T"
-  revision = "ad1b57374455997f8817f33ee3aa11a29666baf9"
+  revision = "b6a8b6dc00374b6d8fbd59b4108984e72b428c6e"
 
 [[projects]]
   branch = "master"
@@ -481,7 +481,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a7bcb9a077073286e8b85819076d8b3c6e1a89d355db732bad9590c8a6cd379f"
+  digest = "1:9d8c4379a39c1688d5cc9dc81245b156113c53afc8cd2633a9edc7f628048d24"
   name = "github.com/giantswarm/operatorkit"
   packages = [
     "client/k8scrdclient",
@@ -497,7 +497,7 @@
     "informer",
   ]
   pruneopts = "UT"
-  revision = "4409402cf31da7437585c0e0d40e4d35c70e3988"
+  revision = "e9785ee38d04722cf70bc2faef16eb6a20a5c055"
 
 [[projects]]
   branch = "master"
@@ -847,7 +847,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a9a2ce85044aca7cc828cd18dcaea6345eaacef2615fbd213effeca9c4ac9b71"
+  digest = "1:26663fafdea73a38075b07e8e9d82fc0056379d2be8bb4e13899e8fda7c7dd23"
   name = "github.com/prometheus/client_golang"
   packages = [
     "prometheus",
@@ -855,7 +855,7 @@
     "prometheus/promhttp",
   ]
   pruneopts = "UT"
-  revision = "f30f428035633da15d00d3dfefb0128c5e569ef4"
+  revision = "abad2d1bd44235a26707c172eab6bca5bf2dbad3"
 
 [[projects]]
   branch = "master"
@@ -960,11 +960,11 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "4d3f4d9ffa16a13f451c3b2999e9c49e9750bf06"
+  revision = "bfa7d42eb568d3c454e1853744768cc80718040d"
 
 [[projects]]
   branch = "master"
-  digest = "1:a4976a9773b2129a5801aca2ba59f2844223159389b24c865875ece9ee6ef017"
+  digest = "1:57105923da2e822b869ade0a9cbd40fe35a6d7995f26edafc9bef14a625438b3"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -978,18 +978,18 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "c44066c5c816ec500d459a2a324a753f78531ae0"
+  revision = "10aee181995363b41f712a55844a0dd52ea04646"
 
 [[projects]]
   branch = "master"
-  digest = "1:70afbb0d0abb4b9f7d4a6616dab26f6a74e35d6fbbcb37de72876a49df6d7361"
+  digest = "1:81bafe9ef203750ed218e086d9930b21c086232ccc2a272e104d2af56baf6df5"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
     "internal",
   ]
   pruneopts = "UT"
-  revision = "8527f56f71077909d6ead7facfe18fbf05ebdf83"
+  revision = "ca4130e427c7982e64cb9b5e717ff67bdb725037"
 
 [[projects]]
   branch = "master"
@@ -1001,14 +1001,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:417d27a82efb8473554234a282be33d23b0d6adc121e636b55950f913ac071d6"
+  digest = "1:f97031542387802b6fd8867c3f29488c2852aac19954ed51df6231a4fadf1707"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "9b800f95dbbc54abff0acf7ee32d88ba4e328c89"
+  revision = "3a76605856fddce5718553cbb8bd50ca492a7274"
 
 [[projects]]
   digest = "1:e5a8511f063c38c51ab9ab80e718e9149f692652aeb4e393a8c020dd1bf38ca2"
@@ -1048,7 +1048,7 @@
   revision = "fbb02b2291d28baffd63558aa44b4b56f178d650"
 
 [[projects]]
-  digest = "1:6247f76e55a1e1a5c19a81e2d4b4dff6730461eeb5bbb0a16dd4a8ec8637ee93"
+  digest = "1:08206298775e5b462e6c0333f4471b44e63f1a70e42952b6ede4ecc9572281eb"
   name = "google.golang.org/appengine"
   packages = [
     "internal",
@@ -1060,8 +1060,8 @@
     "urlfetch",
   ]
   pruneopts = "UT"
-  revision = "ae0ab99deb4dc413a2b4bd6c8bdd0eb67f1e4d06"
-  version = "v1.2.0"
+  revision = "4a4468ece617fc8205e99368fa2200e9d1fad421"
+  version = "v1.3.0"
 
 [[projects]]
   branch = "master"
@@ -1069,7 +1069,7 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "b69ba1387ce2108ac9bc8e8e5e5a46e7d5c72313"
+  revision = "c830210a61dfaa790e1920f8d0470fc27bc2efbe"
 
 [[projects]]
   digest = "1:bf7e2328a58176b7f29f3b425b0555745e9a18ed803f5fd8f6c2c13913a60bb4"
@@ -1482,7 +1482,7 @@
   name = "k8s.io/kube-openapi"
   packages = ["pkg/util/proto"]
   pruneopts = "UT"
-  revision = "0d1aeffe1c68f49accbd05c185ae534fe1372a3f"
+  revision = "72693cb1fadd73ae2742f6fe29af77d1aecdd8cd"
 
 [[projects]]
   digest = "1:0cbc5b5dd9e675751a7f0b8cc4477f3900dbb31fed90c7793455a219d209ae25"
@@ -1651,7 +1651,7 @@
   name = "k8s.io/utils"
   packages = ["exec"]
   pruneopts = "UT"
-  revision = "4c3feeb576b06ef8fea769809bd3db5e5e78dc23"
+  revision = "1bd4f387aa67de2eec07a362c10bc8bd7fe74237"
 
 [[projects]]
   branch = "master"
@@ -1720,7 +1720,7 @@
     "github.com/giantswarm/k8scloudconfig/v_3_5_1",
     "github.com/giantswarm/k8scloudconfig/v_3_6_0",
     "github.com/giantswarm/k8scloudconfig/v_3_6_1",
-    "github.com/giantswarm/k8scloudconfig/v_3_6_2",
+    "github.com/giantswarm/k8scloudconfig/v_3_7_0",
     "github.com/giantswarm/legacycerts/legacy",
     "github.com/giantswarm/legacycerts/legacy/legacytest",
     "github.com/giantswarm/microendpoint/endpoint/healthz",

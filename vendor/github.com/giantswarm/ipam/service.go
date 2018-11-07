@@ -2,6 +2,7 @@ package ipam
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"time"
 
@@ -101,8 +102,8 @@ func (s *Service) listSubnets(ctx context.Context) ([]net.IPNet, error) {
 
 // CreateSubnet returns the next available subnet, of the configured size,
 // from the configured network.
-func (s *Service) CreateSubnet(ctx context.Context, mask net.IPMask, annotation string) (net.IPNet, error) {
-	s.logger.LogCtx(ctx, "level", "info", "message", "creating new subnet")
+func (s *Service) CreateSubnet(ctx context.Context, mask net.IPMask, annotation string, reserved []net.IPNet) (net.IPNet, error) {
+	s.logger.LogCtx(ctx, "level", "debug", "message", "creating subnet")
 	defer updateMetrics("create", time.Now())
 
 	existingSubnets, err := s.listSubnets(ctx)
@@ -110,15 +111,15 @@ func (s *Service) CreateSubnet(ctx context.Context, mask net.IPMask, annotation 
 		return net.IPNet{}, microerror.Mask(err)
 	}
 
+	existingSubnets = append(existingSubnets, reserved...)
 	existingSubnets = append(existingSubnets, s.allocatedSubnets...)
+	existingSubnets = CanonicalizeSubnets(s.network, existingSubnets)
 
-	s.logger.LogCtx(ctx, "level", "info", "message", "computing next subnet")
 	subnet, err := Free(s.network, mask, existingSubnets)
 	if err != nil {
 		return net.IPNet{}, microerror.Mask(err)
 	}
 
-	s.logger.LogCtx(ctx, "level", "info", "message", "putting subnet", "subnet", subnet.String())
 	kv, err := microstorage.NewKV(encodeKey(subnet), annotation)
 	if err != nil {
 		return net.IPNet{}, microerror.Mask(err)
@@ -127,13 +128,15 @@ func (s *Service) CreateSubnet(ctx context.Context, mask net.IPMask, annotation 
 		return net.IPNet{}, microerror.Mask(err)
 	}
 
+	s.logger.LogCtx(ctx, "level", "debug", "message", "created subnet")
+
 	return subnet, nil
 }
 
 // DeleteSubnet deletes the given subnet from IPAM storage,
 // meaning it can be given out again.
 func (s *Service) DeleteSubnet(ctx context.Context, subnet net.IPNet) error {
-	s.logger.LogCtx(ctx, "level", "info", "message", "deleting subnet", "subnet", subnet.String())
+	s.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting subnet %#q", subnet.String()))
 	defer updateMetrics("delete", time.Now())
 
 	k, err := microstorage.NewK(encodeKey(subnet))
@@ -143,6 +146,8 @@ func (s *Service) DeleteSubnet(ctx context.Context, subnet net.IPNet) error {
 	if err := s.storage.Delete(ctx, k); err != nil {
 		return microerror.Mask(err)
 	}
+
+	s.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted subnet %#q", subnet.String()))
 
 	return nil
 }

@@ -4,6 +4,7 @@ package ipam
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/aws-operator/integration/setup"
@@ -56,6 +57,8 @@ func NewProvider(config ProviderConfig) (*Provider, error) {
 }
 
 func (p *Provider) CreateCluster(ctx context.Context, id string) error {
+	p.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating tenant cluster %#q", id))
+
 	setupConfig := setup.Config{
 		AWSClient: p.awsClient,
 		Host:      p.host,
@@ -68,10 +71,14 @@ func (p *Provider) CreateCluster(ctx context.Context, id string) error {
 		return microerror.Mask(err)
 	}
 
+	p.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created tenant cluster %#q", id))
+
 	return nil
 }
 
 func (p *Provider) DeleteCluster(ctx context.Context, id string) error {
+	p.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting tenant cluster %#q", id))
+
 	setupConfig := setup.Config{
 		AWSClient: p.awsClient,
 		Host:      p.host,
@@ -79,10 +86,12 @@ func (p *Provider) DeleteCluster(ctx context.Context, id string) error {
 		Release:   p.release,
 	}
 
-	err := p.release.EnsureDeleted(ctx, "apiextensions-aws-config-e2e", setup.CRNotExistsCondition(ctx, id, setupConfig))
+	err := p.release.EnsureDeleted(ctx, id, setup.CRNotExistsCondition(ctx, id, setupConfig))
 	if err != nil {
 		return microerror.Mask(err)
 	}
+
+	p.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted tenant cluster %#q", id))
 
 	return nil
 }
@@ -97,6 +106,8 @@ func (p *Provider) GetClusterStatus(ctx context.Context, id string) (v1alpha1.St
 }
 
 func (p *Provider) WaitForClusterCreated(ctx context.Context, id string) error {
+	p.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for tenant cluster %#q to be created", id))
+
 	o := func() error {
 		customResource, err := p.host.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(id, metav1.GetOptions{})
 		if err != nil {
@@ -111,7 +122,7 @@ func (p *Provider) WaitForClusterCreated(ctx context.Context, id string) error {
 
 		return microerror.Mask(missingCreatedConditionError)
 	}
-	b := backoff.NewExponential(backoff.LongMaxWait, backoff.LongMaxInterval)
+	b := backoff.NewConstant(backoff.LongMaxWait, backoff.LongMaxInterval)
 	n := backoff.NewNotifier(p.logger, ctx)
 
 	err := backoff.RetryNotify(o, b, n)
@@ -119,10 +130,14 @@ func (p *Provider) WaitForClusterCreated(ctx context.Context, id string) error {
 		return microerror.Mask(err)
 	}
 
+	p.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for tenant cluster %#q to be created", id))
+
 	return nil
 }
 
 func (p *Provider) WaitForClusterDeleted(ctx context.Context, id string) error {
+	p.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for tenant cluster %#q to be deleted", id))
+
 	o := func() error {
 		_, err := p.host.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(id, metav1.GetOptions{})
 		if errors.IsNotFound(err) {
@@ -133,13 +148,15 @@ func (p *Provider) WaitForClusterDeleted(ctx context.Context, id string) error {
 
 		return microerror.Mask(clusterCRStillExistsError)
 	}
-	b := backoff.NewExponential(backoff.LongMaxWait, backoff.LongMaxInterval)
+	b := backoff.NewConstant(backoff.LongMaxWait, backoff.LongMaxInterval)
 	n := backoff.NewNotifier(p.logger, ctx)
 
 	err := backoff.RetryNotify(o, b, n)
 	if err != nil {
 		return microerror.Mask(err)
 	}
+
+	p.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for tenant cluster %#q to be deleted", id))
 
 	return nil
 }

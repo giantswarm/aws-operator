@@ -23,6 +23,10 @@ func init() {
 		if err != nil {
 			panic(err.Error())
 		}
+
+		// We disable the default tenant cluster here, because the IPAM tests runs
+		// multiple customized tenant clusters.
+		config.UseDefaultTenant = false
 	}
 
 	var p *Provider

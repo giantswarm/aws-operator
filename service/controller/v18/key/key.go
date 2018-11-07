@@ -18,7 +18,7 @@ import (
 const (
 	// CloudConfigVersion defines the version of k8scloudconfig in use.
 	// It is used in the main stack output and S3 object paths.
-	CloudConfigVersion = "v_3_6_0"
+	CloudConfigVersion = "v_3_7_0"
 
 	// CloudProviderTagName is used to add Cloud Provider tags to AWS resources.
 	CloudProviderTagName = "kubernetes.io/cluster/%s"
@@ -589,27 +589,28 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 		service/controller/v18/adapter/adapter_test.go
 		service/controller/v18/resource/cloudformation/main_stack_test.go
 
-		Current Release: CoreOS Container Linux stable 1745.4.0 (HVM)
-		AMI IDs copied from https://stable.release.core-os.net/amd64-usr/1745.4.0/coreos_production_ami_hvm.txt.
+		Current Release: CoreOS Container Linux stable 1855.5.0 (HVM)
+		AMI IDs copied from https://stable.release.core-os.net/amd64-usr/1855.5.0/coreos_production_ami_hvm.txt.
 	*/
 	imageIDs := map[string]string{
-		"ap-northeast-1": "ami-21d9265e",
-		"ap-northeast-2": "ami-efe94281",
-		"ap-south-1":     "ami-0799b568",
-		"ap-southeast-1": "ami-73b28f0f",
-		"ap-southeast-2": "ami-8fbf6ced",
-		"ca-central-1":   "ami-fb39b99f",
-		"cn-north-1":     "ami-2a875e47",
-		"cn-northwest-1": "ami-00b8ac62",
-		"eu-central-1":   "ami-32042fd9",
-		"eu-west-1":      "ami-82645dfb",
-		"eu-west-3":      "ami-8d6cddf0",
-		"sa-east-1":      "ami-c32d73af",
-		"us-east-1":      "ami-93d3b4ec",
-		"us-east-2":      "ami-e5cdf180",
-		"us-gov-west-1":  "ami-2960f648",
-		"us-west-1":      "ami-5e63783e",
-		"us-west-2":      "ami-574f362f",
+		"ap-northeast-1": "ami-0b0fc6983c9be8f9e",
+		"ap-northeast-2": "ami-09143ca0b3755b428",
+		"ap-south-1":     "ami-03eba32062e159d3c",
+		"ap-southeast-1": "ami-0d0079786d2ee66ae",
+		"ap-southeast-2": "ami-029d8ef1a02553d2d",
+		"ca-central-1":   "ami-09985fec721ff6f89",
+		"cn-north-1":     "ami-0211d60ca1aaa3c7d",
+		"cn-northwest-1": "ami-0deaa8ada18aec612",
+		"eu-central-1":   "ami-0e6601a88a9753474",
+		"eu-west-1":      "ami-06c40d1010f762df9",
+		"eu-west-2":      "ami-0f55bf46b69b768bd",
+		"eu-west-3":      "ami-0a2c50627b8b434df",
+		"sa-east-1":      "ami-0c188431919e8b2f1",
+		"us-east-1":      "ami-0f74e41ea6c13f74b",
+		"us-east-2":      "ami-0ba531e8a11f8965d",
+		"us-gov-west-1":  "ami-9d58c2fc",
+		"us-west-1":      "ami-08b3af8ec59b84ef9",
+		"us-west-2":      "ami-05507591f0fcb2b75",
 	}
 
 	imageID, ok := imageIDs[region]
