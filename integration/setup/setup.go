@@ -33,14 +33,6 @@ func Setup(m *testing.M, config Config) {
 		v = 1
 	}
 
-	if v == 0 {
-		err = config.Guest.Initialize()
-		if err != nil {
-			log.Printf("%#v\n", err)
-			v = 1
-		}
-	}
-
 	if v == 0 && config.UseDefaultTenant {
 		err = EnsureTenantClusterCreated(ctx, env.ClusterID(), config)
 		if err != nil {
@@ -115,7 +107,6 @@ func installAWSOperator(ctx context.Context, config Config) error {
 		if err != nil {
 			return microerror.Mask(err)
 		}
-
 	}
 
 	err = config.Release.InstallOperator(ctx, "aws-operator", release.NewVersion(env.CircleSHA()), values, providerv1alpha1.NewAWSConfigCRD())

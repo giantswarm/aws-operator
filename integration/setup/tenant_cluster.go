@@ -34,13 +34,18 @@ func EnsureTenantClusterCreated(ctx context.Context, id string, config Config) e
 		return microerror.Mask(err)
 	}
 
-	err = config.Guest.Setup()
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
 	{
 		config.Logger.LogCtx(ctx, "level", "debug", "message", "waiting for guest cluster to be ready")
+
+		err = config.Guest.Initialize()
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		err = config.Guest.Setup()
+		if err != nil {
+			return microerror.Mask(err)
+		}
 
 		err := config.Guest.WaitForGuestReady()
 		if err != nil {
