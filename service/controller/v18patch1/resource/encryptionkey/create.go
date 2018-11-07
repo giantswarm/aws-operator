@@ -5,7 +5,7 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v18/key"
+	"github.com/giantswarm/aws-operator/service/controller/v18patch1/key"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
