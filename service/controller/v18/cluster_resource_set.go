@@ -64,6 +64,7 @@ type ClusterResourceSetConfig struct {
 	AdvancedMonitoringEC2      bool
 	APIWhitelist               adapter.APIWhitelist
 	EncrypterBackend           string
+	GuestAvailabilityZones     []string
 	GuestPrivateSubnetMaskBits int
 	GuestPublicSubnetMaskBits  int
 	GuestSubnetMaskBits        int
@@ -226,9 +227,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			Logger:    config.Logger,
 
 			AllocatedSubnetMaskBits: config.GuestSubnetMaskBits,
-			// TODO(tuommaki): Wire up this!
-			AvailabilityZones: []string{"eu-west-1a", "eu-west-1b", "eu-west-1c"},
-			NetworkRange:      config.IPAMNetworkRange,
+			AvailabilityZones:       config.GuestAvailabilityZones,
+			NetworkRange:            config.IPAMNetworkRange,
 		}
 
 		ipamResource, err = ipam.New(c)
