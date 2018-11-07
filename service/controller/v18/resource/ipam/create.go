@@ -6,7 +6,6 @@ import (
 	"math/bits"
 	"math/rand"
 	"net"
-	"reflect"
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
@@ -120,7 +119,7 @@ func (r *Resource) allocateSubnet(ctx context.Context) (net.IPNet, error) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from AWSConfigs")
 	}
 
-	reservedSubnets = canonicalizeSubnets(r.networkRange, reservedSubnets)
+	reservedSubnets = ipam.CanonicalizeSubnets(r.networkRange, reservedSubnets)
 
 	var subnet net.IPNet
 	{
@@ -151,29 +150,6 @@ func (r *Resource) selectRandomAZs(n int) ([]string, error) {
 
 	shuffledAZs = shuffledAZs[0:n]
 	return shuffledAZs, nil
-}
-
-func canonicalizeSubnets(network net.IPNet, subnets []net.IPNet) []net.IPNet {
-	// Naive deduplication as net.IPNet cannot be used as key for map. This
-	// should be ok for current foreseeable future.
-	for i := 0; i < len(subnets); i++ {
-		// Remove subnets that don't belong to our desired network.
-		if !network.Contains(subnets[i].IP) {
-			subnets = append(subnets[:i], subnets[i+1:]...)
-			i--
-			continue
-		}
-
-		// Remove duplicates.
-		for j := i + 1; j < len(subnets); j++ {
-			if reflect.DeepEqual(subnets[i], subnets[j]) {
-				subnets = append(subnets[:j], subnets[j+1:]...)
-				j--
-			}
-		}
-	}
-
-	return subnets
 }
 
 func getAWSConfigSubnets(g8sClient versioned.Interface) ([]net.IPNet, error) {
