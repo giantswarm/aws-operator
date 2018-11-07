@@ -1,4 +1,4 @@
-package v_3_6_2
+package v_3_7_1
 
 const MasterTemplate = `#cloud-config
 users:
@@ -445,7 +445,7 @@ write_files:
     ---
 
     kind: ClusterRole
-    apiVersion: rbac.authorization.k8s.io/v1beta1
+    apiVersion: rbac.authorization.k8s.io/v1
     metadata:
       name: calico-kube-controllers
     rules:
@@ -470,7 +470,7 @@ write_files:
           - list
     ---
     kind: ClusterRoleBinding
-    apiVersion: rbac.authorization.k8s.io/v1beta1
+    apiVersion: rbac.authorization.k8s.io/v1
     metadata:
       name: calico-kube-controllers
     roleRef:
@@ -485,7 +485,7 @@ write_files:
     ---
 
     kind: ClusterRole
-    apiVersion: rbac.authorization.k8s.io/v1beta1
+    apiVersion: rbac.authorization.k8s.io/v1
     metadata:
       name: calico-node
     rules:
@@ -498,7 +498,7 @@ write_files:
 
     ---
 
-    apiVersion: rbac.authorization.k8s.io/v1beta1
+    apiVersion: rbac.authorization.k8s.io/v1
     kind: ClusterRoleBinding
     metadata:
       name: calico-node
@@ -938,7 +938,7 @@ write_files:
           serviceAccountName: kube-proxy
           containers:
             - name: kube-proxy
-              image: {{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.1-cec4fb8023db783fbf26fb056bf6c76abfcd96cf-giantswarm
+              image: {{ .RegistryDomain }}/{{ .Images.Kubernetes }}
               command:
               - /hyperkube
               - proxy
@@ -963,6 +963,8 @@ write_files:
               - mountPath: /etc/kubernetes/config/
                 name: config-kubernetes
                 readOnly: true
+              - mountPath: /var/run/dbus/system_bus_socket
+                name: dbus
               - mountPath: /etc/kubernetes/ssl
                 name: ssl-certs-kubernetes
                 readOnly: true
@@ -977,6 +979,9 @@ write_files:
               path: /etc/kubernetes/ssl
             name: ssl-certs-kubernetes
           - hostPath:
+              path: /var/run/dbus/system_bus_socket
+            name: dbus
+          - hostPath:
               path: /usr/share/ca-certificates
             name: ssl-certs-host
           - hostPath:
@@ -988,7 +993,7 @@ write_files:
   content: |
     ## User
     kind: ClusterRoleBinding
-    apiVersion: rbac.authorization.k8s.io/v1beta1
+    apiVersion: rbac.authorization.k8s.io/v1
     metadata:
       name: giantswarm-admin
     subjects:
@@ -1002,7 +1007,7 @@ write_files:
     ---
     ## Worker
     kind: ClusterRoleBinding
-    apiVersion: rbac.authorization.k8s.io/v1beta1
+    apiVersion: rbac.authorization.k8s.io/v1
     metadata:
       name: kubelet
     subjects:
@@ -1015,7 +1020,7 @@ write_files:
       apiGroup: rbac.authorization.k8s.io
     ---
     kind: ClusterRoleBinding
-    apiVersion: rbac.authorization.k8s.io/v1beta1
+    apiVersion: rbac.authorization.k8s.io/v1
     metadata:
       name: proxy
     subjects:
@@ -1029,7 +1034,7 @@ write_files:
     ---
     ## Master
     kind: ClusterRoleBinding
-    apiVersion: rbac.authorization.k8s.io/v1beta1
+    apiVersion: rbac.authorization.k8s.io/v1
     metadata:
       name: kube-controller-manager
     subjects:
@@ -1042,7 +1047,7 @@ write_files:
       apiGroup: rbac.authorization.k8s.io
     ---
     kind: ClusterRoleBinding
-    apiVersion: rbac.authorization.k8s.io/v1beta1
+    apiVersion: rbac.authorization.k8s.io/v1
     metadata:
       name: kube-scheduler
     subjects:
@@ -1085,7 +1090,7 @@ write_files:
     ---
     ## IC
     kind: ClusterRoleBinding
-    apiVersion: rbac.authorization.k8s.io/v1beta1
+    apiVersion: rbac.authorization.k8s.io/v1
     metadata:
       name: nginx-ingress-controller
     subjects:
@@ -1098,7 +1103,7 @@ write_files:
       apiGroup: rbac.authorization.k8s.io
     ---
     kind: RoleBinding
-    apiVersion: rbac.authorization.k8s.io/v1beta1
+    apiVersion: rbac.authorization.k8s.io/v1
     metadata:
       name: nginx-ingress-controller
       namespace: kube-system
@@ -1158,7 +1163,7 @@ write_files:
       name: nginx-ingress-controller
       namespace: kube-system
     ---
-    apiVersion: rbac.authorization.k8s.io/v1beta1
+    apiVersion: rbac.authorization.k8s.io/v1
     kind: ClusterRole
     metadata:
       name: nginx-ingress-controller
@@ -1211,7 +1216,7 @@ write_files:
         verbs:
           - update
     ---
-    apiVersion: rbac.authorization.k8s.io/v1beta1
+    apiVersion: rbac.authorization.k8s.io/v1
     kind: Role
     metadata:
       name: nginx-ingress-role
@@ -1316,7 +1321,7 @@ write_files:
   content: |
     # restrictedPSP grants access to use
     # the restricted PSP.
-    apiVersion: rbac.authorization.k8s.io/v1beta1
+    apiVersion: rbac.authorization.k8s.io/v1
     kind: ClusterRole
     metadata:
       name: restricted-psp-user
@@ -1332,7 +1337,7 @@ write_files:
     ---
     # privilegedPSP grants access to use the privileged
     # PSP.
-    apiVersion: rbac.authorization.k8s.io/v1beta1
+    apiVersion: rbac.authorization.k8s.io/v1
     kind: ClusterRole
     metadata:
       name: privileged-psp-user
@@ -1349,7 +1354,7 @@ write_files:
   owner: root
   permissions: 0644
   content: |
-    apiVersion: rbac.authorization.k8s.io/v1beta1
+    apiVersion: rbac.authorization.k8s.io/v1
     kind: ClusterRoleBinding
     metadata:
         name: privileged-psp-users
@@ -1373,7 +1378,7 @@ write_files:
     ---
     # grants the restricted PSP role to
     # the all authenticated users.
-    apiVersion: rbac.authorization.k8s.io/v1beta1
+    apiVersion: rbac.authorization.k8s.io/v1
     kind: ClusterRoleBinding
     metadata:
         name: restricted-psp-users
@@ -1405,8 +1410,8 @@ write_files:
       #!/bin/bash
 
       export KUBECONFIG=/etc/kubernetes/config/addons-kubeconfig.yml
-      # kubectl 1.8.4
-      KUBECTL={{ .RegistryDomain }}/giantswarm/docker-kubectl:8cabd75bacbcdad7ac5d85efc3ca90c2fabf023b
+      # kubectl 1.12.2
+      KUBECTL={{ .RegistryDomain }}/giantswarm/docker-kubectl:f5cae44c480bd797dc770dd5f62d40b74063c0d7
 
       /usr/bin/docker pull $KUBECTL
 
@@ -1431,6 +1436,19 @@ write_files:
               sleep 5s
           done
       done
+
+      PROXY_MANIFESTS="kube-proxy-sa.yaml kube-proxy-ds.yaml"
+      for manifest in $PROXY_MANIFESTS
+      do
+          while
+              /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/$manifest
+              [ "$?" -ne "0" ]
+          do
+              echo "failed to apply /srv/$manifest, retrying in 5 sec"
+              sleep 5s
+          done
+      done
+      echo "kube-proxy successfully installed"
 
       {{ if not .DisableCalico -}}
 
@@ -1478,8 +1496,6 @@ write_files:
       {{ range .ExtraManifests -}}
       MANIFESTS="${MANIFESTS} {{ . }}"
       {{ end -}}
-      MANIFESTS="${MANIFESTS} kube-proxy-sa.yaml"
-      MANIFESTS="${MANIFESTS} kube-proxy-ds.yaml"
       {{ if not .DisableCoreDNS }}
       MANIFESTS="${MANIFESTS} coredns.yaml"
       {{ end -}}
@@ -1536,6 +1552,7 @@ write_files:
     kind: KubeProxyConfiguration
     mode: iptables
     resourceContainer: /kube-proxy
+    clusterCIDR: {{.Cluster.Calico.Subnet}}/{{.Cluster.Calico.CIDR}}
 - path: /etc/kubernetes/config/proxy-kubeconfig.yml
   owner: root
   permissions: 0644
@@ -1586,7 +1603,6 @@ write_files:
         enabled: false # Deafults to true as of 1.10
     authorization:
       mode: AlwaysAllow # Deafults to webhook as of 1.10
-    readOnlyPort: 10255 # Used by heapster. Defaults to 0 (disabled) as of 1.10. Needed for metrics.
 - path: /etc/kubernetes/config/kubelet-kubeconfig.yml
   owner: root
   permissions: 0644
@@ -1685,11 +1701,11 @@ write_files:
         - identity: {}
 {{ end -}}
 
-- path: /etc/kubernetes/manifests/audit-policy.yml
+- path: /etc/kubernetes/policies/audit-policy.yml
   owner: root
   permissions: 0644
   content: |
-    apiVersion: audit.k8s.io/v1beta1
+    apiVersion: audit.k8s.io/v1
     kind: Policy
     rules:
       # TODO: Filter safe system requests.
@@ -1716,7 +1732,7 @@ write_files:
       priorityClassName: system-node-critical
       containers:
       - name: k8s-api-server
-        image: {{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.1-cec4fb8023db783fbf26fb056bf6c76abfcd96cf-giantswarm
+        image: {{ .RegistryDomain }}/{{ .Images.Kubernetes }}
         env:
         - name: HOST_IP
           valueFrom:
@@ -1759,7 +1775,7 @@ write_files:
         - --audit-log-maxage=30
         - --audit-log-maxbackup=30
         - --audit-log-maxsize=100
-        - --audit-policy-file=/etc/kubernetes/manifests/audit-policy.yml
+        - --audit-policy-file=/etc/kubernetes/policies/audit-policy.yml
         - --experimental-encryption-provider-config=/etc/kubernetes/encryption/k8s-encryption-config.yaml
         - --requestheader-client-ca-file=/etc/kubernetes/ssl/apiserver-ca.pem
         - --requestheader-allowed-names=aggregator,{{.Cluster.Kubernetes.API.Domain}},{{.Cluster.Kubernetes.Kubelet.Domain}}
@@ -1792,6 +1808,9 @@ write_files:
         - mountPath: /etc/kubernetes/encryption/
           name: k8s-encryption
           readOnly: true
+        - mountPath: /etc/kubernetes/policies
+          name: k8s-policies
+          readOnly: true
         - mountPath: /etc/kubernetes/manifests
           name: k8s-manifests
           readOnly: true
@@ -1813,6 +1832,9 @@ write_files:
       - hostPath:
           path: /etc/kubernetes/encryption/
         name: k8s-encryption
+      - hostPath:
+          path: /etc/kubernetes/policies
+        name: k8s-policies
       - hostPath:
           path: /etc/kubernetes/manifests
         name: k8s-manifests
@@ -1839,7 +1861,7 @@ write_files:
       priorityClassName: system-node-critical
       containers:
       - name: k8s-controller-manager
-        image: {{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.1-cec4fb8023db783fbf26fb056bf6c76abfcd96cf-giantswarm
+        image: {{ .RegistryDomain }}/{{ .Images.Kubernetes }}
         command:
         - /hyperkube
         - controller-manager
@@ -1912,7 +1934,7 @@ write_files:
       priorityClassName: system-node-critical
       containers:
       - name: k8s-scheduler
-        image: {{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.1-cec4fb8023db783fbf26fb056bf6c76abfcd96cf-giantswarm
+        image: {{ .RegistryDomain }}/{{ .Images.Kubernetes }}
         command:
         - /hyperkube
         - scheduler
@@ -2119,7 +2141,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       LimitNOFILE=40000
-      Environment=IMAGE={{ .RegistryDomain }}/giantswarm/etcd:v3.3.8
+      Environment=IMAGE={{ .RegistryDomain }}/{{ .Images.Etcd }}
       Environment=NAME=%p.service
       EnvironmentFile=/etc/network-environment
       ExecStartPre=-/usr/bin/docker stop  $NAME
@@ -2168,7 +2190,7 @@ coreos:
       [Service]
       Type=oneshot
       EnvironmentFile=/etc/network-environment
-      Environment=IMAGE={{ .RegistryDomain }}/giantswarm/etcd:v3.3.3
+      Environment=IMAGE={{ .RegistryDomain }}/{{ .Images.Etcd }}
       Environment=NAME=%p.service
       ExecStartPre=-/usr/bin/docker stop  $NAME
       ExecStartPre=-/usr/bin/docker rm  $NAME
@@ -2216,7 +2238,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE={{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.1-cec4fb8023db783fbf26fb056bf6c76abfcd96cf-giantswarm"
+      Environment="IMAGE={{ .RegistryDomain }}/{{ .Images.Kubernetes }}"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
@@ -2251,7 +2273,7 @@ coreos:
       -v /usr/sbin/mkfs.xfs:/usr/sbin/mkfs.xfs \
       -v /usr/lib64/libxfs.so.0:/usr/lib/libxfs.so.0 \
       -v /usr/lib64/libxcmd.so.0:/usr/lib/libxcmd.so.0 \
-      -v /usr/lib64/libreadline.so.6:/usr/lib/libreadline.so.6 \
+      -v /usr/lib64/libreadline.so.7:/usr/lib/libreadline.so.7 \
       -e ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/server-ca.pem \
       -e ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/server-crt.pem \
       -e ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/server-key.pem \
@@ -2266,7 +2288,6 @@ coreos:
       --containerized \
       --enable-server \
       --logtostderr=true \
-      --cadvisor-port=4194 \
       --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
       --network-plugin=cni \
       --register-node=true \
