@@ -5,11 +5,11 @@ package setup
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/aws-operator/integration/env"
+	"github.com/giantswarm/aws-operator/integration/key"
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/release"
 	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
@@ -130,49 +130,66 @@ func CRNotExistsCondition(ctx context.Context, id string, config Config) release
 	}
 }
 
-func ensureHostVPC(ctx context.Context, id string, config Config) (string, error) {
-	stackName := "host-peer-" + id
+func ensureHostVPC(ctx context.Context, config Config) (string, error) {
+	var err error
 
+	var template string
 	{
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating stack %#q", stackName))
-
-		os.Setenv("AWS_ROUTE_TABLE_0", env.AWSRouteTable0())
-		os.Setenv("AWS_ROUTE_TABLE_1", env.AWSRouteTable1())
-		os.Setenv("CLUSTER_NAME", id)
-		stackInput := &cloudformation.CreateStackInput{
-			StackName:        aws.String(stackName),
-			TemplateBody:     aws.String(os.ExpandEnv(e2etemplates.AWSHostVPCStack)),
-			TimeoutInMinutes: aws.Int64(2),
+		c := e2etemplates.AWSHostPeerStackConfig{
+			Stack: e2etemplates.AWSHostPeerStackConfigStack{
+				Name: key.HostPeerStackName(),
+			},
+			RouteTable0: e2etemplates.AWSHostPeerStackConfigRouteTable0{
+				Name: env.AWSRouteTable0(),
+			},
+			RouteTable1: e2etemplates.AWSHostPeerStackConfigRouteTable1{
+				Name: env.AWSRouteTable1(),
+			},
 		}
-		_, err := config.AWSClient.CloudFormation.CreateStack(stackInput)
-		if IsStackAlreadyExists(err) {
-			config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("stack %#q is already created", stackName))
-		} else if err != nil {
+
+		template, err = e2etemplates.NewAWSHostPeerStack(c)
+		if err != nil {
 			return "", microerror.Mask(err)
-		} else {
-			config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created stack %#q", stackName))
 		}
 	}
 
 	{
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for stack %#q complete status", stackName))
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating stack %#q", key.HostPeerStackName()))
+
+		stackInput := &cloudformation.CreateStackInput{
+			StackName:        aws.String(key.HostPeerStackName()),
+			TemplateBody:     aws.String(template),
+			TimeoutInMinutes: aws.Int64(2),
+		}
+		_, err := config.AWSClient.CloudFormation.CreateStack(stackInput)
+		if IsStackAlreadyExists(err) {
+			config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("stack %#q is already created", key.HostPeerStackName()))
+		} else if err != nil {
+			return "", microerror.Mask(err)
+		} else {
+			config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created stack %#q", key.HostPeerStackName()))
+		}
+	}
+
+	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for stack %#q complete status", key.HostPeerStackName()))
 
 		err := config.AWSClient.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
-			StackName: aws.String(stackName),
+			StackName: aws.String(key.HostPeerStackName()),
 		})
 		if err != nil {
 			return "", microerror.Mask(err)
 		}
 
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for stack %#q complete status", stackName))
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for stack %#q complete status", key.HostPeerStackName()))
 	}
 
 	var vpcID string
 	{
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding `VPCID` output in stack %#q", stackName))
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding `VPCID` output in stack %#q", key.HostPeerStackName()))
 
 		describeOutput, err := config.AWSClient.CloudFormation.DescribeStacks(&cloudformation.DescribeStacksInput{
-			StackName: aws.String(stackName),
+			StackName: aws.String(key.HostPeerStackName()),
 		})
 		if err != nil {
 			return "", microerror.Mask(err)
@@ -184,14 +201,14 @@ func ensureHostVPC(ctx context.Context, id string, config Config) (string, error
 			}
 		}
 
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found `VPCID` output in stack %#q", stackName))
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found `VPCID` output in stack %#q", key.HostPeerStackName()))
 	}
 
 	return vpcID, nil
 }
 
 func InstallAWSConfig(ctx context.Context, id string, config Config) error {
-	vpcID, err := ensureHostVPC(ctx, id, config)
+	vpcID, err := ensureHostVPC(ctx, config)
 	if err != nil {
 		return microerror.Mask(err)
 	}
