@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -118,7 +119,7 @@ func crNotExistsCondition(ctx context.Context, config Config) release.ConditionF
 
 			return microerror.Maskf(stillExistsError, "CR %#q in namespace %#q", name, crNamespace)
 		}
-		b := backoff.NewExponential(backoff.LongMaxWait, backoff.LongMaxInterval)
+		b := backoff.NewExponential(60*time.Minute, backoff.LongMaxInterval)
 		n := backoff.NewNotifier(config.Logger, ctx)
 		err := backoff.RetryNotify(o, b, n)
 		if err != nil {
