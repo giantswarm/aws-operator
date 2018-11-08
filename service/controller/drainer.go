@@ -5,14 +5,6 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/client/k8scrdclient"
-	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/informer"
-	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	"k8s.io/client-go/kubernetes"
-
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v12"
 	"github.com/giantswarm/aws-operator/service/controller/v12patch1"
@@ -26,6 +18,13 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v16patch1"
 	"github.com/giantswarm/aws-operator/service/controller/v17"
 	"github.com/giantswarm/aws-operator/service/controller/v18"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/operatorkit/client/k8scrdclient"
+	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/informer"
+	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	"k8s.io/client-go/kubernetes"
 )
 
 type DrainerConfig struct {
@@ -44,7 +43,6 @@ type DrainerConfigAWS struct {
 	AccessKeyID     string
 	AccessKeySecret string
 	Region          string
-	SessionToken    string
 }
 
 type Drainer struct {
@@ -163,7 +161,6 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 	hostAWSConfig := awsclient.Config{
 		AccessKeyID:     config.HostAWSConfig.AccessKeyID,
 		AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
-		SessionToken:    config.HostAWSConfig.SessionToken,
 		Region:          config.HostAWSConfig.Region,
 	}
 

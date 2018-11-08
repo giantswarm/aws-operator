@@ -6,15 +6,14 @@ import (
 	"os"
 	"path"
 
+	"github.com/giantswarm/aws-operator/flag"
+	"github.com/giantswarm/aws-operator/server"
+	"github.com/giantswarm/aws-operator/service"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/microkit/command"
 	microserver "github.com/giantswarm/microkit/server"
 	"github.com/giantswarm/micrologger"
 	"github.com/spf13/viper"
-
-	"github.com/giantswarm/aws-operator/flag"
-	"github.com/giantswarm/aws-operator/server"
-	"github.com/giantswarm/aws-operator/service"
 )
 
 var (
@@ -110,12 +109,10 @@ func mainError() error {
 
 	daemonCommand.PersistentFlags().String(f.Service.AWS.AccessKey.ID, "", "ID of the AWS access key for the account to create guest clusters in.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.AccessKey.Secret, "", "Secret of the AWS access key for the  account to create guest clusters in.")
-	daemonCommand.PersistentFlags().String(f.Service.AWS.AccessKey.Session, "", "Session token of the AWS access key for the  account to create guest clusters in. (Can be empty)")
 	daemonCommand.PersistentFlags().StringSlice(f.Service.AWS.AvailabilityZones, []string{}, "Availability zones as a slice.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.Encrypter, "kms", "Encryption backend to use.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.ID, "", "ID of the AWS access key for the host cluster account. If empty, guest cluster account is used.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.Secret, "", "Secret of the AWS access key for the host cluster account. If empty, guest cluster account is used.")
-	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.Session, "", "Session token of the AWS access key for the host cluster account. If empty, guest cluster token is used.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.PublicRouteTables, "", "Names of the public route tables in host cluster separated by commas, required for accessing public ELBs from guest nodes.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.Region, "", "Region for checking for orphan AWS resources.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.VaultAddress, "", "Server address for Vault encryption.")

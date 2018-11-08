@@ -128,7 +128,6 @@ func New(config Config) (*Service, error) {
 				AccessKeyID:       config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
 				AccessKeySecret:   config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
 				AvailabilityZones: config.Viper.GetStringSlice(config.Flag.Service.AWS.AvailabilityZones),
-				SessionToken:      config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
 				Region:            config.Viper.GetString(config.Flag.Service.AWS.Region),
 			},
 			GuestPrivateSubnetMaskBits: config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PrivateSubnetMaskBits),
@@ -139,7 +138,6 @@ func New(config Config) (*Service, error) {
 				AccessKeyID:       config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
 				AccessKeySecret:   config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
 				AvailabilityZones: config.Viper.GetStringSlice(config.Flag.Service.AWS.AvailabilityZones),
-				SessionToken:      config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
 				Region:            config.Viper.GetString(config.Flag.Service.AWS.Region),
 			},
 			IncludeTags:      config.Viper.GetBool(config.Flag.Service.AWS.IncludeTags),
@@ -179,13 +177,11 @@ func New(config Config) (*Service, error) {
 			GuestAWSConfig: controller.DrainerConfigAWS{
 				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
 				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
-				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
 				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
 			},
 			HostAWSConfig: controller.DrainerConfigAWS{
 				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
 				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
-				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
 				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
 			},
 			GuestUpdateEnabled: config.Viper.GetBool(config.Flag.Service.Guest.Update.Enabled),
@@ -204,7 +200,6 @@ func New(config Config) (*Service, error) {
 			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
 			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
 			Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
-			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
 		}
 	}
 

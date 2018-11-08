@@ -36,7 +36,6 @@ type Config struct {
 	AccessKeySecret string
 	Region          string
 	RoleARN         string
-	SessionToken    string
 }
 
 type Clients struct {
@@ -67,8 +66,10 @@ func NewClients(config Config) (Clients, error) {
 
 	var s *session.Session
 	{
+		sessionToken := ""
+
 		c := &aws.Config{
-			Credentials: credentials.NewStaticCredentials(config.AccessKeyID, config.AccessKeySecret, config.SessionToken),
+			Credentials: credentials.NewStaticCredentials(config.AccessKeyID, config.AccessKeySecret, sessionToken),
 			Region:      aws.String(config.Region),
 		}
 

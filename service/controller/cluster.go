@@ -90,7 +90,6 @@ type ClusterConfigAWSConfig struct {
 	AccessKeySecret   string
 	AvailabilityZones []string
 	Region            string
-	SessionToken      string
 }
 
 // ClusterConfigOIDC represents the configuration of the OIDC authorization
@@ -222,7 +221,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	hostAWSConfig := awsclient.Config{
 		AccessKeyID:     config.HostAWSConfig.AccessKeyID,
 		AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
-		SessionToken:    config.HostAWSConfig.SessionToken,
 		Region:          config.HostAWSConfig.Region,
 	}
 

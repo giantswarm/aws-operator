@@ -4,11 +4,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/micrologger"
-
 	"github.com/giantswarm/aws-operator/service/controller/v12patch1/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v12patch1/key"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 )
 
 const (
@@ -19,7 +18,6 @@ const (
 type AWSConfig struct {
 	AccessKeyID     string
 	AccessKeySecret string
-	SessionToken    string
 	Region          string
 	accountID       string
 }
