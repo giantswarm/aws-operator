@@ -43,7 +43,6 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 				},
 			},
 		},
-		Status: statusWithAllocatedSubnet("10.1.1.0/24"),
 	}
 
 	testCases := []struct {
@@ -54,14 +53,14 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 		description       string
 	}{
 		{
-			description:       "0: current and desired state empty, expected empty",
+			description:       "current and desired state empty, expected empty",
 			obj:               clusterTpo,
 			currentState:      StackState{},
 			desiredState:      StackState{},
 			expectedStackName: "",
 		},
 		{
-			description:  "1: current state empty, desired state not empty, expected desired state",
+			description:  "current state empty, desired state not empty, expected desired state",
 			obj:          clusterTpo,
 			currentState: StackState{},
 			desiredState: StackState{
@@ -70,7 +69,7 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 			expectedStackName: "desired",
 		},
 		{
-			description: "2: current state not empty, desired state not empty but different, expected desired state",
+			description: "current state not empty, desired state not empty but different, expected desired state",
 			obj:         clusterTpo,
 			currentState: StackState{
 				Name: "current",
@@ -95,8 +94,6 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 		}
 		c.Logger = microloggertest.New()
 		c.EncrypterBackend = "kms"
-		c.GuestPrivateSubnetMaskBits = 25
-		c.GuestPublicSubnetMaskBits = 25
 
 		newResource, err = New(c)
 		if err != nil {

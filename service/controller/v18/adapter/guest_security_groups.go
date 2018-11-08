@@ -111,7 +111,6 @@ func (s *GuestSecurityGroupsAdapter) getMasterRules(cfg Config, hostClusterCIDR 
 			SourceCIDR:  hostClusterCIDR,
 		},
 	}
-
 	return append(apiRules, otherRules...), nil
 }
 

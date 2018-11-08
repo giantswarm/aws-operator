@@ -19,12 +19,24 @@ import (
 func testConfig() Config {
 	c := Config{}
 
+	c.GuestPrivateSubnetMaskBits = 25
+	c.GuestPublicSubnetMaskBits = 25
 	c.HostClients = &adapter.Clients{}
 	c.Logger = microloggertest.New()
 	c.EncrypterBackend = "kms"
 	c.InstallationName = "myinstallation"
 
 	return c
+}
+
+func statusWithAllocatedSubnet(cidr string) v1alpha1.AWSConfigStatus {
+	return v1alpha1.AWSConfigStatus{
+		Cluster: v1alpha1.StatusCluster{
+			Network: v1alpha1.StatusClusterNetwork{
+				CIDR: cidr,
+			},
+		},
+	}
 }
 
 func TestMainGuestTemplateGetEmptyBody(t *testing.T) {
@@ -107,13 +119,9 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 						IdleTimeoutSeconds: 60,
 					},
 				},
-				VPC: v1alpha1.AWSConfigSpecAWSVPC{
-					CIDR:              "10.1.1.0/24",
-					PublicSubnetCIDR:  "10.1.1.0/25",
-					PrivateSubnetCIDR: "10.1.2.0/25",
-				},
 			},
 		},
+		Status: statusWithAllocatedSubnet("10.1.1.0/24"),
 	}
 
 	imageID, err := key.ImageID(customObject)
@@ -320,7 +328,15 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 	}
 	if !strings.Contains(body, "CidrBlock: 10.1.1.0/24") {
 		fmt.Println(body)
-		t.Fatal("CidrBlock element not found")
+		t.Fatal("CidrBlock element for VPC CIDR not found")
+	}
+	if !strings.Contains(body, "CidrBlock: 10.1.1.0/25") {
+		fmt.Println(body)
+		t.Fatal("CidrBlock element for private subnet not found")
+	}
+	if !strings.Contains(body, "CidrBlock: 10.1.1.128/25") {
+		fmt.Println(body)
+		t.Fatal("CidrBlock element for public subnet not found")
 	}
 
 	// arn depends on region
@@ -508,13 +524,9 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 						IdleTimeoutSeconds: 60,
 					},
 				},
-				VPC: v1alpha1.AWSConfigSpecAWSVPC{
-					CIDR:              "10.1.1.0/24",
-					PublicSubnetCIDR:  "10.1.1.0/25",
-					PrivateSubnetCIDR: "10.1.2.0/25",
-				},
 			},
 		},
+		Status: statusWithAllocatedSubnet("10.1.1.0/24"),
 	}
 
 	imageID, err := key.ImageID(customObject)
@@ -636,13 +648,9 @@ func TestMainGuestTemplateChinaRegion(t *testing.T) {
 						IdleTimeoutSeconds: 60,
 					},
 				},
-				VPC: v1alpha1.AWSConfigSpecAWSVPC{
-					CIDR:              "10.1.1.0/24",
-					PublicSubnetCIDR:  "10.1.1.0/25",
-					PrivateSubnetCIDR: "10.1.2.0/25",
-				},
 			},
 		},
+		Status: statusWithAllocatedSubnet("10.1.1.0/24"),
 	}
 
 	imageID, err := key.ImageID(customObject)

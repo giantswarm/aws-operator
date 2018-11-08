@@ -8,11 +8,12 @@ import (
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/microerror"
+
 	"github.com/giantswarm/aws-operator/service/controller/v18/templates/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v18/templates/cloudformation/guest"
 	"github.com/giantswarm/aws-operator/service/controller/v18/templates/cloudformation/hostpost"
 	"github.com/giantswarm/aws-operator/service/controller/v18/templates/cloudformation/hostpre"
-	"github.com/giantswarm/microerror"
 )
 
 const (
@@ -105,10 +106,6 @@ func AvailabilityZone(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.AZ
 }
 
-func AvailabilityZones(customObject v1alpha1.AWSConfig) int {
-	return customObject.Spec.AWS.AvailabilityZones
-}
-
 func AWSCliContainerRegistry(customObject v1alpha1.AWSConfig) string {
 	if IsChinaRegion(customObject) {
 		return chinaAWSCliContainerRegistry
@@ -196,11 +193,6 @@ func ClusterID(customObject v1alpha1.AWSConfig) string {
 
 func ClusterNamespace(customObject v1alpha1.AWSConfig) string {
 	return ClusterID(customObject)
-}
-
-// ClusterNetworkCIDR returns allocated guest cluster subnet CIDR.
-func ClusterNetworkCIDR(customObject v1alpha1.AWSConfig) string {
-	return customObject.Status.Cluster.Network.CIDR
 }
 
 // ClusterOrganization returns the org name from the custom object.

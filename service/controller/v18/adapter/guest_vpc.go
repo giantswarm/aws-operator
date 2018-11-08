@@ -19,7 +19,7 @@ type GuestVPCAdapter struct {
 }
 
 func (v *GuestVPCAdapter) Adapt(cfg Config) error {
-	v.CidrBlock = key.ClusterNetworkCIDR(cfg.CustomObject)
+	v.CidrBlock = cfg.CustomObject.Spec.AWS.VPC.CIDR
 	v.ClusterID = clusterID(cfg)
 	v.InstallationName = cfg.InstallationName
 	v.HostAccountID = cfg.HostAccountID

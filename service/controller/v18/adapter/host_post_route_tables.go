@@ -56,7 +56,7 @@ func (i *HostPostRouteTablesAdapter) Adapt(cfg Config) error {
 				RouteTableID: routeTableID,
 				// Requester CIDR block, we create the peering connection from the
 				// guest's CIDR for being able to access Vault's ELB.
-				CidrBlock:        key.ClusterNetworkCIDR(cfg.CustomObject),
+				CidrBlock:        key.CIDR(cfg.CustomObject),
 				PeerConnectionID: peerConnectionID,
 			}
 			i.PublicRouteTables = append(i.PublicRouteTables, rt)
@@ -143,9 +143,6 @@ func routeTableID(name string, cfg Config) (string, error) {
 	output, err := cfg.HostClients.EC2.DescribeRouteTables(input)
 	if err != nil {
 		return "", microerror.Mask(err)
-	}
-	if len(output.RouteTables) == 0 {
-		return "", microerror.Maskf(tooFewResultsError, "route tables: %s", name)
 	}
 	if len(output.RouteTables) > 1 {
 		return "", microerror.Maskf(tooManyResultsError, "route tables: %s", name)
