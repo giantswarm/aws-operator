@@ -312,15 +312,16 @@
   revision = "4e790eb032b59136b2a946e1ead01592df4c870a"
 
 [[projects]]
-  branch = "master"
-  digest = "1:c53358b6b1558b3940421e4e192d95f8f14ad6873c362f6e40aab7d5b7083259"
+  branch = "configure-cidr"
+  digest = "1:9de002c75185dde8dbf68a4e8d78902b68adb015d01d2e340e438259e2d8a6ea"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
     "internal/render",
     "pkg/chartvalues",
+    "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "292f351b6af90365a5fa54b685136cf0f704c1a4"
+  revision = "bf6f9ae3cb09d3d0a68223afa1b27d9f9f0939d5"
 
 [[projects]]
   branch = "master"
@@ -1701,6 +1702,7 @@
     "github.com/giantswarm/e2eclients/aws",
     "github.com/giantswarm/e2esetup/k8s",
     "github.com/giantswarm/e2etemplates/pkg/chartvalues",
+    "github.com/giantswarm/e2etemplates/pkg/e2etemplates",
     "github.com/giantswarm/e2etests/clusterstate",
     "github.com/giantswarm/e2etests/clusterstate/provider",
     "github.com/giantswarm/e2etests/ipam",

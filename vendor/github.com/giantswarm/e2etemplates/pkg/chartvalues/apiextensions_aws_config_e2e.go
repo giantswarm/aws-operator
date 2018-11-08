@@ -16,9 +16,12 @@ type APIExtensionsAWSConfigE2EConfig struct {
 }
 
 type APIExtensionsAWSConfigE2EConfigAWS struct {
-	Region            string
 	APIHostedZone     string
 	IngressHostedZone string
+	NetworkCIDR       string
+	PrivateSubnetCIDR string
+	PublicSubnetCIDR  string
+	Region            string
 	RouteTable0       string
 	RouteTable1       string
 	VPCPeerID         string
@@ -38,14 +41,23 @@ func NewAPIExtensionsAWSConfigE2E(config APIExtensionsAWSConfigE2EConfig) (strin
 	if config.VersionBundleVersion == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.VersionBundleVersion must not be empty", config)
 	}
-	if config.AWS.Region == "" {
-		return "", microerror.Maskf(invalidConfigError, "%T.AWS.Region must not be empty", config)
-	}
 	if config.AWS.APIHostedZone == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.AWS.APIHostedZone must not be empty", config)
 	}
 	if config.AWS.IngressHostedZone == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.AWS.IngressHostedZone must not be empty", config)
+	}
+	if config.AWS.NetworkCIDR == "" {
+		return "", microerror.Maskf(invalidConfigError, "%T.AWS.NetworkCIDR must not be empty", config)
+	}
+	if config.AWS.PrivateSubnetCIDR == "" {
+		return "", microerror.Maskf(invalidConfigError, "%T.AWS.PrivateSubnetCIDR must not be empty", config)
+	}
+	if config.AWS.PublicSubnetCIDR == "" {
+		return "", microerror.Maskf(invalidConfigError, "%T.AWS.PublicSubnetCIDR must not be empty", config)
+	}
+	if config.AWS.Region == "" {
+		return "", microerror.Maskf(invalidConfigError, "%T.AWS.Region must not be empty", config)
 	}
 	if config.AWS.RouteTable0 == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.AWS.RouteTable0 must not be empty", config)
