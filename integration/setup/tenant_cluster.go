@@ -223,9 +223,12 @@ func InstallAWSConfig(ctx context.Context, id string, config Config) error {
 			VersionBundleVersion: env.VersionBundleVersion(),
 
 			AWS: chartvalues.APIExtensionsAWSConfigE2EConfigAWS{
-				Region:            env.AWSRegion(),
 				APIHostedZone:     env.AWSAPIHostedZoneGuest(),
 				IngressHostedZone: env.AWSIngressHostedZoneGuest(),
+				NetworkCIDR:       env.NetworkCIDR(),
+				PrivateSubnetCIDR: env.PrivateSubnetCIDR(),
+				PublicSubnetCIDR:  env.PublicSubnetCIDR(),
+				Region:            env.AWSRegion(),
 				RouteTable0:       env.AWSRouteTable0(),
 				RouteTable1:       env.AWSRouteTable1(),
 				VPCPeerID:         vpcID,
