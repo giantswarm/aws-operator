@@ -260,14 +260,14 @@
   revision = "fbdbd487bc645dcb941f3f889a6db3345947fe3e"
 
 [[projects]]
-  branch = "fix-aws-operator"
+  branch = "master"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
     "internal/render",
     "pkg/chartvalues",
     "pkg/e2etemplates"
   ]
-  revision = "cdd3b9fd5ec4a00bf6b39523d2bb26510043e859"
+  revision = "3aa5db40ae4484507d28cb2ec6992889a506d86e"
 
 [[projects]]
   branch = "master"
@@ -1420,6 +1420,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "483d486caa929d17affb475129b611dbd0d6e04184386b55e33ce28fbca19221"
+  inputs-digest = "12958cd6eb5a1cb1546314a65a64a092db7198f180b26390f33092343486c4da"
   solver-name = "gps-cdcl"
   solver-version = 1
