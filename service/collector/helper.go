@@ -92,7 +92,7 @@ func (h *helper) GetARNs() ([]string, error) {
 	}
 	arnsMap[arn] = true
 
-	for arn, _ := range arnsMap {
+	for arn := range arnsMap {
 		arns = append(arns, arn)
 	}
 

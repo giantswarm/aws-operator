@@ -4,6 +4,7 @@ package apprclient
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -13,6 +14,7 @@ import (
 	"path"
 	"time"
 
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/spf13/afero"
@@ -95,7 +97,7 @@ func (c *Client) DeleteRelease(name, release string) error {
 	}
 
 	var r Response
-	_, err = c.do(req, &r)
+	err = c.do(req, &r)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -118,7 +120,7 @@ func (c *Client) GetReleaseVersion(name, channel string) (string, error) {
 	}
 
 	var ch Channel
-	_, err = c.do(req, &ch)
+	err = c.do(req, &ch)
 
 	if err != nil {
 		return "", microerror.Mask(err)
@@ -137,7 +139,7 @@ func (c *Client) PromoteChart(name, release, channel string) error {
 	}
 
 	ch := &Channel{}
-	_, err = c.do(req, ch)
+	err = c.do(req, ch)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -195,7 +197,7 @@ func (c *Client) PushChartTarball(name, release, tarballPath string) error {
 	}
 
 	var r Response
-	_, err = c.do(req, &r)
+	err = c.do(req, &r)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -244,48 +246,83 @@ func (c *Client) newPayloadRequest(path string, payload *Payload) (*http.Request
 	return req, nil
 }
 
-func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-	defer resp.Body.Close()
+func (c *Client) do(req *http.Request, v interface{}) error {
+	o := func() error {
+		resp, err := c.httpClient.Do(req)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		defer resp.Body.Close()
 
-	err = json.NewDecoder(resp.Body).Decode(v)
+		err = json.NewDecoder(resp.Body).Decode(v)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		return nil
+	}
+	b := backoff.NewExponential(backoff.TinyMaxWait, backoff.TinyMaxInterval)
+	// Pass context to the public methods.
+	//
+	//	See https://github.com/giantswarm/giantswarm/issues/4449
+	//
+	n := backoff.NewNotifier(c.logger, context.TODO())
+
+	err := backoff.RetryNotify(o, b, n)
 	if err != nil {
-		return nil, microerror.Mask(err)
+		return microerror.Mask(err)
 	}
 
-	return resp, nil
+	return nil
 }
 
 func (c *Client) doFile(req *http.Request) (string, error) {
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		buf := new(bytes.Buffer)
-		_, err = buf.ReadFrom(resp.Body)
+	var tmpFileName string
+
+	o := func() error {
+		resp, err := c.httpClient.Do(req)
 		if err != nil {
-			return "", microerror.Mask(err)
+			return microerror.Mask(err)
 		}
-		return "", microerror.Maskf(invalidStatusCodeError, fmt.Sprintf("got StatusCode %d with body %s", resp.StatusCode, buf.String()))
-	}
+		defer resp.Body.Close()
 
-	tmpfile, err := afero.TempFile(c.fs, "", "chart-tarball")
+		if resp.StatusCode != http.StatusOK {
+			buf := new(bytes.Buffer)
+			_, err = buf.ReadFrom(resp.Body)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			return microerror.Maskf(invalidStatusCodeError, fmt.Sprintf("got StatusCode %d with body %s", resp.StatusCode, buf.String()))
+		}
+
+		tmpfile, err := afero.TempFile(c.fs, "", "chart-tarball")
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		defer tmpfile.Close()
+
+		_, err = io.Copy(tmpfile, resp.Body)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		tmpFileName = tmpfile.Name()
+
+		return nil
+	}
+	b := backoff.NewExponential(backoff.TinyMaxWait, backoff.TinyMaxInterval)
+	// Pass context to the public methods.
+	//
+	//	See https://github.com/giantswarm/giantswarm/issues/4449
+	//
+	n := backoff.NewNotifier(c.logger, context.TODO())
+
+	err := backoff.RetryNotify(o, b, n)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-	defer tmpfile.Close()
 
-	_, err = io.Copy(tmpfile, resp.Body)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	return tmpfile.Name(), nil
+	return tmpFileName, nil
 }
 
 func (c *Client) readBlob(path string) (string, error) {

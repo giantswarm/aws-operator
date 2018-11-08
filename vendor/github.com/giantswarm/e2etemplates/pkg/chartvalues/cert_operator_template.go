@@ -15,7 +15,7 @@ Installation:
     GiantSwarm:
       CertOperator:
         CRD:
-          LabelSelector: 'giantswarm.io/cluster={{ .ClusterName }}'
+          LabelSelector: {{ .CRD.LabelSelector }}
     Guest:
       Kubernetes:
         API:

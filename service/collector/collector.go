@@ -123,8 +123,6 @@ func (c *Collector) Boot(ctx context.Context) {
 }
 
 func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
-	ch <- clustersDesc
-
 	ch <- serviceLimit
 	ch <- serviceUsage
 
@@ -144,9 +142,7 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 
 	var wg sync.WaitGroup
 
-	collectFuncs := []func(chan<- prometheus.Metric, []clientaws.Clients){
-		c.collectClusterInfo,
-	}
+	collectFuncs := []func(chan<- prometheus.Metric, []clientaws.Clients){}
 
 	if c.trustedAdvisorEnabled {
 		collectFuncs = append(collectFuncs, c.collectAccountsTrustedAdvisorChecks)

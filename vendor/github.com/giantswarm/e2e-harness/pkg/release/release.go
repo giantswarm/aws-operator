@@ -189,14 +189,14 @@ func (r *Release) EnsureDeleted(ctx context.Context, name string, conditions ...
 // a "app=${name}" pod and streams it logs to the ./logs directory.
 //
 // NOTE: It does not update the release if it already exists.
-func (r *Release) EnsureInstalled(ctx context.Context, name string, version Version, values string, conditions ...func() error) error {
+func (r *Release) EnsureInstalled(ctx context.Context, name string, chartInfo ChartInfo, values string, conditions ...func() error) error {
 	var err error
 	isOperator := strings.HasSuffix(name, "-operator")
 
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating release %#q", name))
 
-		err := r.Install(ctx, name, version, values)
+		err := r.Install(ctx, name, chartInfo, values)
 		if IsReleaseAlreadyExists(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("release %#q already created", name))
 		} else if err != nil {
@@ -252,12 +252,12 @@ func (r *Release) EnsureInstalled(ctx context.Context, name string, version Vers
 	return nil
 }
 
-func (r *Release) Install(ctx context.Context, name string, version Version, values string, conditions ...func() error) error {
+func (r *Release) Install(ctx context.Context, name string, chartInfo ChartInfo, values string, conditions ...func() error) error {
 	releaseName := fmt.Sprintf("%s-%s", r.namespace, name)
 
 	var err error
 
-	tarball, err := r.pullTarball(fmt.Sprintf("%s-chart", name), version)
+	tarball, err := r.pullTarball(name, chartInfo)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -283,8 +283,8 @@ func (r *Release) Install(ctx context.Context, name string, version Version, val
 //
 //	Issue https://github.com/giantswarm/giantswarm/issues/4355.
 //
-func (r *Release) InstallOperator(ctx context.Context, name string, version Version, values string, crd *apiextensionsv1beta1.CustomResourceDefinition) error {
-	err := r.Install(ctx, name, version, values, r.condition.CRDExists(ctx, crd))
+func (r *Release) InstallOperator(ctx context.Context, name string, chartInfo ChartInfo, values string, crd *apiextensionsv1beta1.CustomResourceDefinition) error {
+	err := r.Install(ctx, name, chartInfo, values, r.condition.CRDExists(ctx, crd))
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -382,7 +382,7 @@ func (r *Release) WaitForStatus(ctx context.Context, release string, status stri
 	return nil
 }
 
-func (r *Release) WaitForVersion(ctx context.Context, release string, version string) error {
+func (r *Release) WaitForChartInfo(ctx context.Context, release string, version string) error {
 	operation := func() error {
 		rh, err := r.helmClient.GetReleaseHistory(release)
 		if err != nil {
@@ -425,9 +425,14 @@ func (r *Release) podName(namespace, labelSelector string) (string, error) {
 	return pod.Name, nil
 }
 
-func (r *Release) pullTarball(chart string, version Version) (string, error) {
-	if version.isChannel {
-		tarball, err := r.apprClient.PullChartTarball(chart, version.String())
+func (r *Release) pullTarball(releaseName string, chartInfo ChartInfo) (string, error) {
+	chartName := chartInfo.name
+	if chartName == "" {
+		chartName = fmt.Sprintf("%s-chart", releaseName)
+	}
+
+	if chartInfo.isChannel {
+		tarball, err := r.apprClient.PullChartTarball(chartName, chartInfo.version)
 		if err != nil {
 			return "", microerror.Mask(err)
 		}
@@ -435,7 +440,7 @@ func (r *Release) pullTarball(chart string, version Version) (string, error) {
 		return tarball, nil
 	}
 
-	tarball, err := r.apprClient.PullChartTarballFromRelease(chart, version.String())
+	tarball, err := r.apprClient.PullChartTarballFromRelease(chartName, chartInfo.version)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
