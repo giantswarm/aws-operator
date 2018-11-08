@@ -1,6 +1,7 @@
 *.swp
 aws-operator
 TODO
+*.swp
 !vendor/**
 
 .e2e-harness

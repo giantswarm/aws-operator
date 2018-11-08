@@ -24,8 +24,8 @@ func teardown(ctx context.Context, config Config) error {
 			fmt.Sprintf("%s-cert-operator", config.Host.TargetNamespace()),
 			fmt.Sprintf("%s-node-operator", config.Host.TargetNamespace()),
 
-			fmt.Sprintf("%s-cert-config-e2e", config.Host.TargetNamespace()),
-			fmt.Sprintf("%s-aws-config-e2e", config.Host.TargetNamespace()),
+			fmt.Sprintf("e2esetup-awsconfig-%s", env.ClusterID()),
+			fmt.Sprintf("e2esetup-certs-%s", env.ClusterID()),
 		}
 
 		for _, release := range releases {

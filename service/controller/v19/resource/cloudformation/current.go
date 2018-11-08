@@ -21,6 +21,25 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return StackState{}, microerror.Mask(err)
 	}
 
+	// The IPAM resource is executed before the CloudFormation resource in order
+	// to allocate a free IP range for the tenant subnet. This CIDR is put into
+	// the CR status. In case it is missing, the IPAM resource did not yet
+	// allocate it and the CloudFormation resource cannot proceed. We cancel here
+	// and wait for the CIDR to be available in the CR status.
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding tenant subnet in CR status")
+
+		if key.ClusterNetworkCIDR(customObject) == "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find tenant subnet in CR status")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			resourcecanceledcontext.SetCanceled(ctx)
+
+			return StackState{}, microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found tenant subnet in CR status")
+	}
+
 	stackName := key.MainGuestStackName(customObject)
 
 	ctlCtx, err := controllercontext.FromContext(ctx)

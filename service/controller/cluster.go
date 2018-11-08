@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"net"
+
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
@@ -58,32 +60,37 @@ type ClusterConfig struct {
 	K8sExtClient apiextensionsclient.Interface
 	Logger       micrologger.Logger
 
-	AccessLogsExpiration   int
-	AdvancedMonitoringEC2  bool
-	APIWhitelist           FrameworkConfigAPIWhitelistConfig
-	DeleteLoggingBucket    bool
-	EncrypterBackend       string
-	GuestAWSConfig         ClusterConfigAWSConfig
-	GuestUpdateEnabled     bool
-	HostAWSConfig          ClusterConfigAWSConfig
-	IncludeTags            bool
-	InstallationName       string
-	OIDC                   ClusterConfigOIDC
-	PodInfraContainerImage string
-	ProjectName            string
-	PubKeyFile             string
-	PublicRouteTables      string
-	RegistryDomain         string
-	Route53Enabled         bool
-	SSOPublicKey           string
-	VaultAddress           string
+	AccessLogsExpiration       int
+	AdvancedMonitoringEC2      bool
+	APIWhitelist               FrameworkConfigAPIWhitelistConfig
+	DeleteLoggingBucket        bool
+	EncrypterBackend           string
+	GuestAWSConfig             ClusterConfigAWSConfig
+	GuestPrivateSubnetMaskBits int
+	GuestPublicSubnetMaskBits  int
+	GuestSubnetMaskBits        int
+	GuestUpdateEnabled         bool
+	HostAWSConfig              ClusterConfigAWSConfig
+	IncludeTags                bool
+	InstallationName           string
+	IPAMNetworkRange           net.IPNet
+	OIDC                       ClusterConfigOIDC
+	PodInfraContainerImage     string
+	ProjectName                string
+	PubKeyFile                 string
+	PublicRouteTables          string
+	RegistryDomain             string
+	Route53Enabled             bool
+	SSOPublicKey               string
+	VaultAddress               string
 }
 
 type ClusterConfigAWSConfig struct {
-	AccessKeyID     string
-	AccessKeySecret string
-	Region          string
-	SessionToken    string
+	AccessKeyID       string
+	AccessKeySecret   string
+	AvailabilityZones []string
+	Region            string
+	SessionToken      string
 }
 
 // ClusterConfigOIDC represents the configuration of the OIDC authorization

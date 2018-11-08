@@ -172,7 +172,30 @@ type AWSConfigSpecVersionBundle struct {
 }
 
 type AWSConfigStatus struct {
-	Cluster StatusCluster `json:"cluster" yaml:"cluster"`
+	AWS     AWSConfigStatusAWS `json:"aws" yaml:"aws"`
+	Cluster StatusCluster      `json:"cluster" yaml:"cluster"`
+}
+
+type AWSConfigStatusAWS struct {
+	AvailabilityZones []AWSConfigStatusAWSAvailabilityZone `json:"availabilityZones" yaml:"availabilityZones"`
+}
+
+type AWSConfigStatusAWSAvailabilityZone struct {
+	Name   string                                   `json:"name" yaml:"name"`
+	Subnet AWSConfigStatusAWSAvailabilityZoneSubnet `json:"subnet" yaml:"subnet"`
+}
+
+type AWSConfigStatusAWSAvailabilityZoneSubnet struct {
+	Private AWSConfigStatusAWSAvailabilityZoneSubnetPrivate `json:"private" yaml:"private"`
+	Public  AWSConfigStatusAWSAvailabilityZoneSubnetPublic  `json:"public" yaml:"public"`
+}
+
+type AWSConfigStatusAWSAvailabilityZoneSubnetPrivate struct {
+	CIDR string `json:"cidr" yaml:"cidr"`
+}
+
+type AWSConfigStatusAWSAvailabilityZoneSubnetPublic struct {
+	CIDR string `json:"cidr" yaml:"cidr"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

@@ -4,9 +4,14 @@ package service
 
 import (
 	"context"
+	"net"
 	"sync"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	clientaws "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/flag"
+	"github.com/giantswarm/aws-operator/service/collector"
+	"github.com/giantswarm/aws-operator/service/controller"
 	"github.com/giantswarm/microendpoint/service/version"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -16,11 +21,6 @@ import (
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-
-	clientaws "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/flag"
-	"github.com/giantswarm/aws-operator/service/collector"
-	"github.com/giantswarm/aws-operator/service/controller"
 )
 
 const (
@@ -105,6 +105,11 @@ func New(config Config) (*Service, error) {
 
 	var clusterController *controller.Cluster
 	{
+		_, ipamNetworkRange, err := net.ParseCIDR(config.Viper.GetString(config.Flag.Service.Installation.Guest.IPAM.Network.CIDR))
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
 		c := controller.ClusterConfig{
 			G8sClient:    g8sClient,
 			K8sClient:    k8sClient,
@@ -120,20 +125,26 @@ func New(config Config) (*Service, error) {
 			DeleteLoggingBucket:   config.Viper.GetBool(config.Flag.Service.AWS.LoggingBucket.Delete),
 			EncrypterBackend:      config.Viper.GetString(config.Flag.Service.AWS.Encrypter),
 			GuestAWSConfig: controller.ClusterConfigAWSConfig{
-				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
-				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
-				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
-				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
+				AccessKeyID:       config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
+				AccessKeySecret:   config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
+				AvailabilityZones: config.Viper.GetStringSlice(config.Flag.Service.AWS.AvailabilityZones),
+				SessionToken:      config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
+				Region:            config.Viper.GetString(config.Flag.Service.AWS.Region),
 			},
-			GuestUpdateEnabled: config.Viper.GetBool(config.Flag.Service.Guest.Update.Enabled),
+			GuestPrivateSubnetMaskBits: config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PrivateSubnetMaskBits),
+			GuestPublicSubnetMaskBits:  config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PublicSubnetMaskBits),
+			GuestSubnetMaskBits:        config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.SubnetMaskBits),
+			GuestUpdateEnabled:         config.Viper.GetBool(config.Flag.Service.Guest.Update.Enabled),
 			HostAWSConfig: controller.ClusterConfigAWSConfig{
-				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
-				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
-				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
-				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
+				AccessKeyID:       config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
+				AccessKeySecret:   config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
+				AvailabilityZones: config.Viper.GetStringSlice(config.Flag.Service.AWS.AvailabilityZones),
+				SessionToken:      config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
+				Region:            config.Viper.GetString(config.Flag.Service.AWS.Region),
 			},
 			IncludeTags:      config.Viper.GetBool(config.Flag.Service.AWS.IncludeTags),
 			InstallationName: config.Viper.GetString(config.Flag.Service.Installation.Name),
+			IPAMNetworkRange: *ipamNetworkRange,
 			OIDC: controller.ClusterConfigOIDC{
 				ClientID:      config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID),
 				IssuerURL:     config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL),

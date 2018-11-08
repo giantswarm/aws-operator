@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"net"
 	"testing"
 
 	versionedfake "github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
@@ -10,6 +11,11 @@ import (
 )
 
 func newTestClusterConfig() ClusterConfig {
+	_, ipamNetworkCIDR, err := net.ParseCIDR("10.1.0.0/16")
+	if err != nil {
+		panic(err)
+	}
+
 	return ClusterConfig{
 		G8sClient:    versionedfake.NewSimpleClientset(),
 		K8sClient:    kubernetesfake.NewSimpleClientset(),
@@ -18,18 +24,24 @@ func newTestClusterConfig() ClusterConfig {
 
 		AccessLogsExpiration: 365,
 		GuestAWSConfig: ClusterConfigAWSConfig{
-			AccessKeyID:     "guest-key",
-			AccessKeySecret: "guest-secret",
-			Region:          "guest-myregion",
-			SessionToken:    "guest-token",
+			AccessKeyID:       "guest-key",
+			AccessKeySecret:   "guest-secret",
+			AvailabilityZones: []string{"eu-west-1a", "eu-west-1b", "eu-west-1c"},
+			Region:            "guest-myregion",
+			SessionToken:      "guest-token",
 		},
+		GuestSubnetMaskBits:        24,
+		GuestPrivateSubnetMaskBits: 25,
+		GuestPublicSubnetMaskBits:  25,
 		HostAWSConfig: ClusterConfigAWSConfig{
-			AccessKeyID:     "host-key",
-			AccessKeySecret: "host-secret",
-			Region:          "host-myregion",
-			SessionToken:    "host-token",
+			AccessKeyID:       "host-key",
+			AccessKeySecret:   "host-secret",
+			AvailabilityZones: []string{"eu-west-1a", "eu-west-1b", "eu-west-1c"},
+			Region:            "host-myregion",
+			SessionToken:      "host-token",
 		},
 		InstallationName:    "test",
+		IPAMNetworkRange:    *ipamNetworkCIDR,
 		DeleteLoggingBucket: true,
 		ProjectName:         "aws-operator",
 		PubKeyFile:          "~/.ssh/id_rsa.pub",
@@ -83,16 +95,18 @@ func Test_NewCluster_Fails_Without_Regions(t *testing.T) {
 		{
 			description: "region exists in guest and host",
 			guestCredentials: ClusterConfigAWSConfig{
-				AccessKeyID:     "key",
-				AccessKeySecret: "secret",
-				Region:          "myregion",
-				SessionToken:    "token",
+				AccessKeyID:       "key",
+				AccessKeySecret:   "secret",
+				AvailabilityZones: []string{"eu-west-1a", "eu-west-1b", "eu-west-1c"},
+				Region:            "myregion",
+				SessionToken:      "token",
 			},
 			hostCredentials: ClusterConfigAWSConfig{
-				AccessKeyID:     "key",
-				AccessKeySecret: "secret",
-				Region:          "myregion",
-				SessionToken:    "token",
+				AccessKeyID:       "key",
+				AccessKeySecret:   "secret",
+				AvailabilityZones: []string{"eu-west-1a", "eu-west-1b", "eu-west-1c"},
+				Region:            "myregion",
+				SessionToken:      "token",
 			},
 			expectedError: false,
 		},

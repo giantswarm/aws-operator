@@ -2,21 +2,10 @@ package v19
 
 import (
 	"context"
+	"net"
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	"github.com/giantswarm/certs"
-	"github.com/giantswarm/guestcluster"
-	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
-	"github.com/giantswarm/operatorkit/controller/resource/metricsresource"
-	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
-	"github.com/giantswarm/randomkeys"
-	"github.com/giantswarm/statusresource"
-	"k8s.io/client-go/kubernetes"
-
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v19/adapter"
@@ -35,12 +24,31 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v19/resource/encryptionkey"
 	"github.com/giantswarm/aws-operator/service/controller/v19/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/v19/resource/hostedzone"
+	"github.com/giantswarm/aws-operator/service/controller/v19/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/v19/resource/loadbalancer"
 	"github.com/giantswarm/aws-operator/service/controller/v19/resource/migration"
 	"github.com/giantswarm/aws-operator/service/controller/v19/resource/namespace"
 	"github.com/giantswarm/aws-operator/service/controller/v19/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/v19/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/v19/resource/service"
+	"github.com/giantswarm/certs"
+	"github.com/giantswarm/guestcluster"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
+	"github.com/giantswarm/operatorkit/controller/resource/metricsresource"
+	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
+	"github.com/giantswarm/randomkeys"
+	"github.com/giantswarm/statusresource"
+	"k8s.io/client-go/kubernetes"
+)
+
+const (
+	// minAllocatedSubnetMaskBits is the maximum size of guest subnet i.e.
+	// smaller number here -> larger subnet per guest cluster. For now anything
+	// under 16 doesn't make sense in here.
+	minAllocatedSubnetMaskBits = 16
 )
 
 type ClusterResourceSetConfig struct {
@@ -52,22 +60,27 @@ type ClusterResourceSetConfig struct {
 	Logger             micrologger.Logger
 	RandomKeysSearcher randomkeys.Interface
 
-	AccessLogsExpiration   int
-	AdvancedMonitoringEC2  bool
-	APIWhitelist           adapter.APIWhitelist
-	EncrypterBackend       string
-	GuestUpdateEnabled     bool
-	IncludeTags            bool
-	InstallationName       string
-	DeleteLoggingBucket    bool
-	OIDC                   cloudconfig.OIDCConfig
-	ProjectName            string
-	PublicRouteTables      string
-	Route53Enabled         bool
-	PodInfraContainerImage string
-	RegistryDomain         string
-	SSOPublicKey           string
-	VaultAddress           string
+	AccessLogsExpiration       int
+	AdvancedMonitoringEC2      bool
+	APIWhitelist               adapter.APIWhitelist
+	EncrypterBackend           string
+	GuestAvailabilityZones     []string
+	GuestPrivateSubnetMaskBits int
+	GuestPublicSubnetMaskBits  int
+	GuestSubnetMaskBits        int
+	GuestUpdateEnabled         bool
+	IncludeTags                bool
+	InstallationName           string
+	IPAMNetworkRange           net.IPNet
+	DeleteLoggingBucket        bool
+	OIDC                       cloudconfig.OIDCConfig
+	ProjectName                string
+	PublicRouteTables          string
+	Route53Enabled             bool
+	PodInfraContainerImage     string
+	RegistryDomain             string
+	SSOPublicKey               string
+	VaultAddress               string
 }
 
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
@@ -101,6 +114,15 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSClients.Route53 must not be empty", config)
 	}
 
+	if config.GuestSubnetMaskBits < minAllocatedSubnetMaskBits {
+		return nil, microerror.Maskf(invalidConfigError, "%T.GuestSubnetMaskBits (%d) must not be smaller than %d", config, config.GuestSubnetMaskBits, minAllocatedSubnetMaskBits)
+	}
+	if config.GuestPrivateSubnetMaskBits <= config.GuestSubnetMaskBits {
+		return nil, microerror.Maskf(invalidConfigError, "%T.GuestPrivateSubnetMaskBits (%d) must not be smaller or equal than %T.GuestSubnetMaskBits (%d)", config, config.GuestPrivateSubnetMaskBits, config, config.GuestSubnetMaskBits)
+	}
+	if config.GuestPublicSubnetMaskBits <= config.GuestSubnetMaskBits {
+		return nil, microerror.Maskf(invalidConfigError, "%T.GuestPublicSubnetMaskBits (%d) must not be smaller or equal than %T.GuestSubnetMaskBits (%d)", config, config.GuestPublicSubnetMaskBits, config, config.GuestSubnetMaskBits)
+	}
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
 	}
@@ -193,6 +215,23 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		migrationResource, err = migration.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var ipamResource controller.Resource
+	{
+		c := ipam.Config{
+			G8sClient: config.G8sClient,
+			Logger:    config.Logger,
+
+			AllocatedSubnetMaskBits: config.GuestSubnetMaskBits,
+			AvailabilityZones:       config.GuestAvailabilityZones,
+			NetworkRange:            config.IPAMNetworkRange,
+		}
+
+		ipamResource, err = ipam.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -312,12 +351,14 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 				SubnetList: config.APIWhitelist.SubnetList,
 			},
 
-			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
-			EncrypterBackend:      config.EncrypterBackend,
-			EncrypterRoleManager:  encrypterRoleManager,
-			InstallationName:      config.InstallationName,
-			PublicRouteTables:     config.PublicRouteTables,
-			Route53Enabled:        config.Route53Enabled,
+			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
+			EncrypterBackend:           config.EncrypterBackend,
+			EncrypterRoleManager:       encrypterRoleManager,
+			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
+			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
+			InstallationName:           config.InstallationName,
+			PublicRouteTables:          config.PublicRouteTables,
+			Route53Enabled:             config.Route53Enabled,
 		}
 
 		ops, err := cloudformationresource.New(c)
@@ -437,6 +478,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	resources := []controller.Resource{
 		statusResource,
 		migrationResource,
+		ipamResource,
 		hostedZoneResource,
 		bridgeZoneResource,
 		encryptionKeyResource,

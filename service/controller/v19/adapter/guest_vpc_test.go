@@ -20,8 +20,14 @@ func TestAdapterVPCRegularFields(t *testing.T) {
 			},
 			AWS: v1alpha1.AWSConfigSpecAWS{
 				VPC: v1alpha1.AWSConfigSpecAWSVPC{
-					CIDR:   cidr,
 					PeerID: peerID,
+				},
+			},
+		},
+		Status: v1alpha1.AWSConfigStatus{
+			Cluster: v1alpha1.StatusCluster{
+				Network: v1alpha1.StatusClusterNetwork{
+					CIDR: cidr,
 				},
 			},
 		},

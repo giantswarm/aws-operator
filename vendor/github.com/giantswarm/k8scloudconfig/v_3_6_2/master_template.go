@@ -153,6 +153,7 @@ write_files:
             - effect: NoExecute
               operator: Exists
           serviceAccountName: calico-node
+          priorityClassName: system-cluster-critical
           # Minimize downtime during a rolling upgrade or deletion; tell Kubernetes to do a "force
           # deletion": https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods.
           terminationGracePeriodSeconds: 0
