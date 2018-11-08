@@ -324,7 +324,7 @@
   revision = "3aa5db40ae4484507d28cb2ec6992889a506d86e"
 
 [[projects]]
-  branch = "ipam-e2e-tests"
+  branch = "master"
   digest = "1:a59dd9648249d4c2dd92ec3cf103d5251444eb8a97248d478865ba3c5603cef5"
   name = "github.com/giantswarm/e2etests"
   packages = [
@@ -338,7 +338,7 @@
     "update/provider",
   ]
   pruneopts = "UT"
-  revision = "cd337f998b1304f404e30b7c52658e6fa38307c7"
+  revision = "9d919c61ea245283a3f9778ab04478f914909760"
 
 [[projects]]
   branch = "master"
@@ -382,7 +382,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:208f2d22ffd819b407db0c885b56acb86b58e0ce55b8c7a47fe8b0f02ba5f0a7"
+  digest = "1:db15c0e3e086378c2a352765f87ccc40a29c26573dd01de93e199a26e77a8691"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "v_3_3_3",
@@ -394,7 +394,7 @@
     "v_3_7_0",
   ]
   pruneopts = "T"
-  revision = "5a69fc09728cccb426e841c18ca3a92f6bba50df"
+  revision = "edd11b9583ccec94df97a3c66ab0ec36c8c14642"
 
 [[projects]]
   branch = "master"
@@ -964,7 +964,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:57105923da2e822b869ade0a9cbd40fe35a6d7995f26edafc9bef14a625438b3"
+  digest = "1:5c34978c158aaa136f8a410079962b0e724dccf9bce3feb17a8f99e0d2067215"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -978,7 +978,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "a544f70c90f196e50d198126db0c4cb2b562fec0"
+  revision = "03003ca0c849e57b6ea29a4bab8d3cb6e4d568fe"
 
 [[projects]]
   branch = "master"
@@ -993,22 +993,22 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:39ebcc2b11457b703ae9ee2e8cca0f68df21969c6102cb3b705f76cca0ea0239"
+  digest = "1:b521f10a2d8fa85c04a8ef4e62f2d1e14d303599a55d64dabf9f5a02f84d35eb"
   name = "golang.org/x/sync"
   packages = ["errgroup"]
   pruneopts = "UT"
-  revision = "1d60e4601c6fd243af51cc01ddf169918a5407ca"
+  revision = "42b317875d0fa942474b76e1b46a6060d720ae6e"
 
 [[projects]]
   branch = "master"
-  digest = "1:f97031542387802b6fd8867c3f29488c2852aac19954ed51df6231a4fadf1707"
+  digest = "1:6a875550c3b582f6c2d7e2ce44aba792511f00016d7c46b0a4fb26f730ef3058"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "3a76605856fddce5718553cbb8bd50ca492a7274"
+  revision = "66b7b1311ac80bbafcd2daeef9a5e6e2cd1e2399"
 
 [[projects]]
   digest = "1:e5a8511f063c38c51ab9ab80e718e9149f692652aeb4e393a8c020dd1bf38ca2"
@@ -1041,11 +1041,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c9e7a4b4d47c0ed205d257648b0e5b0440880cb728506e318f8ac7cd36270bc4"
+  digest = "1:9fdc2b55e8e0fafe4b41884091e51e77344f7dc511c5acedcfd98200003bff90"
   name = "golang.org/x/time"
   packages = ["rate"]
   pruneopts = "UT"
-  revision = "fbb02b2291d28baffd63558aa44b4b56f178d650"
+  revision = "85acf8d2951cb2a3bde7632f9ff273ef0379bcbd"
 
 [[projects]]
   digest = "1:08206298775e5b462e6c0333f4471b44e63f1a70e42952b6ede4ecc9572281eb"
@@ -1069,7 +1069,7 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "c830210a61dfaa790e1920f8d0470fc27bc2efbe"
+  revision = "5fc9ac5403620be16bcdb0c8e7644b1178472c3b"
 
 [[projects]]
   digest = "1:bf7e2328a58176b7f29f3b425b0555745e9a18ed803f5fd8f6c2c13913a60bb4"
