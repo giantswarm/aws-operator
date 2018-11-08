@@ -5,15 +5,15 @@ import (
 	"os"
 	"os/signal"
 	"sync"
+	"syscall"
 
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/micrologger"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
 	"github.com/giantswarm/microkit/command/daemon/flag"
 	microflag "github.com/giantswarm/microkit/flag"
 	"github.com/giantswarm/microkit/server"
+	"github.com/giantswarm/micrologger"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -128,9 +128,11 @@ func (c *command) Execute(cmd *cobra.Command, args []string) {
 		go newServer.Boot()
 	}
 
-	// Listen to OS signals.
+	// Listen to OS signals. Pressing Ctrl+C produces SIGINT. SIGTERM handled
+	// here for graceful HTTP server shutdown and return of successful exit
+	// status.
 	listener := make(chan os.Signal, 2)
-	signal.Notify(listener, os.Interrupt, os.Kill)
+	signal.Notify(listener, syscall.SIGINT, syscall.SIGTERM)
 
 	<-listener
 
@@ -142,6 +144,7 @@ func (c *command) Execute(cmd *cobra.Command, args []string) {
 			newServer.Shutdown()
 		}()
 
+		wg.Wait()
 		os.Exit(0)
 	}()
 
