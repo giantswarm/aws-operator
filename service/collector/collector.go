@@ -131,8 +131,6 @@ func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 	if c.trustedAdvisorEnabled {
 		ch <- trustedAdvisorSupport
 	}
-
-	ch <- vpcsDesc
 }
 
 func (c *Collector) Collect(ch chan<- prometheus.Metric) {
@@ -148,7 +146,6 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 
 	collectFuncs := []func(chan<- prometheus.Metric, []clientaws.Clients){
 		c.collectClusterInfo,
-		c.collectAccountsVPCs,
 	}
 
 	if c.trustedAdvisorEnabled {
