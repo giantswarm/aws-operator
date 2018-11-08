@@ -1,4 +1,4 @@
-package v18
+package v18patch1
 
 import (
 	"github.com/giantswarm/versionbundle"
@@ -7,11 +7,6 @@ import (
 func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
-			{
-				Component:   "aws-operator",
-				Description: "Fixed a bug with removing CR finalizers before all Cloud Formation stacks are deleted.",
-				Kind:        versionbundle.KindFixed,
-			},
 			{
 				Component:   "kubernetes",
 				Description: "Updated Kubernetes to 1.12.1. More info here: https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.12.md",
