@@ -65,8 +65,7 @@ required = [
   name = "github.com/giantswarm/e2etemplates"
 
 [[constraint]]
-  # TODO: Change this back to master before merge.
-  branch = "ipam-e2e-tests"
+  branch = "master"
   name = "github.com/giantswarm/e2etests"
 
 [[constraint]]
