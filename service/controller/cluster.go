@@ -817,7 +817,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			VaultAddress:      config.VaultAddress,
 		}
 
-		resourceSetV18, err = v18patch1.NewClusterResourceSet(c)
+		resourceSetV18patch1, err = v18patch1.NewClusterResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
