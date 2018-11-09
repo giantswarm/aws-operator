@@ -233,7 +233,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:56046027389380a8939eb29d385506cd19d07240ea75646b3c253621cbf95aa1"
+  digest = "1:5a5f9f98ac3791731d94790b188749995d1ecdbbfd0877b79a8c0601afefafa7"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/core/v1alpha1",
@@ -250,7 +250,7 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake",
   ]
   pruneopts = "UT"
-  revision = "befa4980fcfb7bf19596f088d3ee14de811451e6"
+  revision = "24d8e598770525f5814578177d3950f43e2808ca"
 
 [[projects]]
   branch = "master"
@@ -630,11 +630,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:48eb9796709860b572117e24b3c60596cf477c719b379afb9bed4d246708d41b"
+  digest = "1:d226d0f3f08498c5965527df6b78d9e3a89a60057a4743c2a3ab4b349f9382f9"
   name = "github.com/google/go-github"
   packages = ["github"]
   pruneopts = "UT"
-  revision = "01a88aee87606a81629924290413387b3ca30b00"
+  revision = "99760a16213d6fdde13f4e477438f876b6c9c6eb"
 
 [[projects]]
   digest = "1:a63cff6b5d8b95638bfe300385d93b2a6d9d687734b863da8e09dc834510a690"
@@ -875,7 +875,7 @@
     "model",
   ]
   pruneopts = "UT"
-  revision = "7e9e6cabbd393fc208072eedef99188d0ce788b6"
+  revision = "0b1957f9d949dfa3084171a6ec5642b38055276a"
 
 [[projects]]
   branch = "master"
@@ -1688,6 +1688,7 @@
     "github.com/aws/aws-sdk-go/service/sts/stsiface",
     "github.com/aws/aws-sdk-go/service/support",
     "github.com/aws/aws-sdk-go/service/support/supportiface",
+    "github.com/coreos/go-semver/semver",
     "github.com/docker/distribution/reference",
     "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1",
     "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1",

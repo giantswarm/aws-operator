@@ -33,6 +33,10 @@ required = [
   version = "=1.14.7"
 
 [[constraint]]
+  name = "github.com/coreos/go-semver"
+  version = "=v0.2.0"
+
+[[constraint]]
   branch = "master"
   name = "github.com/docker/distribution"
 
