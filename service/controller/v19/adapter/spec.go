@@ -12,8 +12,6 @@ import (
 )
 
 const (
-	prefixIngress = "ingress"
-
 	// asgMaxBatchSizeRatio is the % of instances to be updated during a
 	// rolling update.
 	asgMaxBatchSizeRatio = 0.3
