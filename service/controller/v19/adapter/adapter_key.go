@@ -2,10 +2,6 @@ package adapter
 
 import "github.com/giantswarm/aws-operator/service/controller/v19/key"
 
-func asgType(config Config) string {
-	return prefixWorker
-}
-
 func baseDomain(config Config) string {
 	return key.BaseDomain(config.CustomObject)
 }

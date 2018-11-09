@@ -55,7 +55,7 @@ func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
 	s.MasterSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.PrefixMaster)
 	s.MasterSecurityGroupRules = masterRules
 
-	s.WorkerSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, prefixWorker)
+	s.WorkerSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.PrefixWorker)
 	s.WorkerSecurityGroupRules = s.getWorkerRules(cfg.CustomObject, hostClusterCIDR)
 
 	s.IngressSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, prefixIngress)

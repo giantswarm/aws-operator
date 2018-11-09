@@ -12,7 +12,6 @@ import (
 )
 
 const (
-	prefixWorker  = "worker"
 	prefixIngress = "ingress"
 
 	// asgMaxBatchSizeRatio is the % of instances to be updated during a

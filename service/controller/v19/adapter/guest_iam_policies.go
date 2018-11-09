@@ -31,9 +31,9 @@ func (i *GuestIAMPoliciesAdapter) Adapt(cfg Config) error {
 	i.MasterPolicyName = key.PolicyName(cfg.CustomObject, key.PrefixMaster)
 	i.MasterProfileName = key.InstanceProfileName(cfg.CustomObject, key.PrefixMaster)
 	i.MasterRoleName = key.RoleName(cfg.CustomObject, key.PrefixMaster)
-	i.WorkerPolicyName = key.PolicyName(cfg.CustomObject, prefixWorker)
-	i.WorkerProfileName = key.InstanceProfileName(cfg.CustomObject, prefixWorker)
-	i.WorkerRoleName = key.RoleName(cfg.CustomObject, prefixWorker)
+	i.WorkerPolicyName = key.PolicyName(cfg.CustomObject, key.PrefixWorker)
+	i.WorkerProfileName = key.InstanceProfileName(cfg.CustomObject, key.PrefixWorker)
+	i.WorkerRoleName = key.RoleName(cfg.CustomObject, key.PrefixWorker)
 	i.RegionARN = key.RegionARN(cfg.CustomObject)
 
 	// KMSKeyARN
