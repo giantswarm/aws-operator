@@ -313,7 +313,7 @@
 
 [[projects]]
   branch = "configure-cidr"
-  digest = "1:9de002c75185dde8dbf68a4e8d78902b68adb015d01d2e340e438259e2d8a6ea"
+  digest = "1:43d0c3f9b06b4dd54aefb89803cf62f2f7c47032474e23bb5d5ea11754cfa602"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
     "internal/render",
@@ -321,7 +321,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "bf6f9ae3cb09d3d0a68223afa1b27d9f9f0939d5"
+  revision = "39f55f6e451df3cdca45bf486931388017ba476e"
 
 [[projects]]
   branch = "master"
@@ -1069,7 +1069,7 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "5fc9ac5403620be16bcdb0c8e7644b1178472c3b"
+  revision = "b5d43981345bdb2c233eb4bf3277847b48c6fdc6"
 
 [[projects]]
   digest = "1:bf7e2328a58176b7f29f3b425b0555745e9a18ed803f5fd8f6c2c13913a60bb4"

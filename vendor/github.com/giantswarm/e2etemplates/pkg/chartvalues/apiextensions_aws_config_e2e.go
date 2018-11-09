@@ -18,13 +18,19 @@ type APIExtensionsAWSConfigE2EConfig struct {
 type APIExtensionsAWSConfigE2EConfigAWS struct {
 	APIHostedZone     string
 	IngressHostedZone string
-	NetworkCIDR       string
+	// NetworkCIDR is deprecated and optional meanwhile. When left empty IPAM is
+	// activated.
+	NetworkCIDR string
+	// PrivateSubnetCIDR is deprecated and optional meanwhile. When left empty
+	// IPAM is activated.
 	PrivateSubnetCIDR string
-	PublicSubnetCIDR  string
-	Region            string
-	RouteTable0       string
-	RouteTable1       string
-	VPCPeerID         string
+	// PublicSubnetCIDR is deprecated and optional meanwhile. When left empty IPAM
+	// is activated.
+	PublicSubnetCIDR string
+	Region           string
+	RouteTable0      string
+	RouteTable1      string
+	VPCPeerID        string
 }
 
 // NewAPIExtensionsAWSConfigE2E renders values required by apiextensions-aws-config-e2e-chart.
@@ -46,15 +52,6 @@ func NewAPIExtensionsAWSConfigE2E(config APIExtensionsAWSConfigE2EConfig) (strin
 	}
 	if config.AWS.IngressHostedZone == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.AWS.IngressHostedZone must not be empty", config)
-	}
-	if config.AWS.NetworkCIDR == "" {
-		return "", microerror.Maskf(invalidConfigError, "%T.AWS.NetworkCIDR must not be empty", config)
-	}
-	if config.AWS.PrivateSubnetCIDR == "" {
-		return "", microerror.Maskf(invalidConfigError, "%T.AWS.PrivateSubnetCIDR must not be empty", config)
-	}
-	if config.AWS.PublicSubnetCIDR == "" {
-		return "", microerror.Maskf(invalidConfigError, "%T.AWS.PublicSubnetCIDR must not be empty", config)
 	}
 	if config.AWS.Region == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.AWS.Region must not be empty", config)
