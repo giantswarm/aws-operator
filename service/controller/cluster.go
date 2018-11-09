@@ -822,7 +822,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			return nil, microerror.Mask(err)
 		}
 	}
-  
+
 	var resourceSetV19 *controller.ResourceSet
 	{
 		c := v19.ClusterResourceSetConfig{
@@ -834,7 +834,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			Logger:             config.Logger,
 			RandomKeysSearcher: randomKeysSearcher,
 
-      AccessLogsExpiration:       config.AccessLogsExpiration,
+			AccessLogsExpiration:       config.AccessLogsExpiration,
 			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
 			DeleteLoggingBucket:        config.DeleteLoggingBucket,
 			EncrypterBackend:           config.EncrypterBackend,
@@ -871,7 +871,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
-  resourceSets := []*controller.ResourceSet{
+	resourceSets := []*controller.ResourceSet{
 		resourceSetV12,
 		resourceSetV12Patch1,
 		resourceSetV13,

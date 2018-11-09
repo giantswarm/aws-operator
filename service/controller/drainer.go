@@ -417,9 +417,9 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-  }
+	}
 
-  resourceSets := []*controller.ResourceSet{
+	resourceSets := []*controller.ResourceSet{
 		v12ResourceSet,
 		v12Patch1ResourceSet,
 		v13ResourceSet,
