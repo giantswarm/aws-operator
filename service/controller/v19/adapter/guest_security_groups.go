@@ -52,7 +52,7 @@ func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
 
 	s.APIWhitelistEnabled = cfg.APIWhitelist.Enabled
 
-	s.MasterSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, prefixMaster)
+	s.MasterSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.PrefixMaster)
 	s.MasterSecurityGroupRules = masterRules
 
 	s.WorkerSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, prefixWorker)

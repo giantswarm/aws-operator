@@ -53,7 +53,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		k := key.BucketObjectName(customObject, prefixMaster)
+		k := key.BucketObjectName(customObject, key.PrefixMaster)
 		output[k] = BucketObjectState{
 			Bucket: key.BucketName(customObject, accountID),
 			Body:   b,

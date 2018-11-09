@@ -1,7 +1,6 @@
 package s3object
 
 const (
-	prefixMaster = "master"
 	prefixWorker = "worker"
 )
 

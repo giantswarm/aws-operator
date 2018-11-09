@@ -12,7 +12,6 @@ import (
 )
 
 const (
-	prefixMaster  = "master"
 	prefixWorker  = "worker"
 	prefixIngress = "ingress"
 
