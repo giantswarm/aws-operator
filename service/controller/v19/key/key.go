@@ -94,9 +94,9 @@ const (
 )
 
 const (
-	PrefixMaster  = "master"
-	PrefixIngress = "ingress"
-	PrefixWorker  = "worker"
+	KindMaster  = "master"
+	KindIngress = "ingress"
+	KindWorker  = "worker"
 )
 
 func ClusterAPIEndpoint(customObject v1alpha1.AWSConfig) string {

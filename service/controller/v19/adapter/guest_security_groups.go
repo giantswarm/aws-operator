@@ -52,13 +52,13 @@ func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
 
 	s.APIWhitelistEnabled = cfg.APIWhitelist.Enabled
 
-	s.MasterSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.PrefixMaster)
+	s.MasterSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.KindMaster)
 	s.MasterSecurityGroupRules = masterRules
 
-	s.WorkerSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.PrefixWorker)
+	s.WorkerSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.KindWorker)
 	s.WorkerSecurityGroupRules = s.getWorkerRules(cfg.CustomObject, hostClusterCIDR)
 
-	s.IngressSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.PrefixIngress)
+	s.IngressSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.KindIngress)
 	s.IngressSecurityGroupRules = s.getIngressRules(cfg.CustomObject)
 
 	return nil

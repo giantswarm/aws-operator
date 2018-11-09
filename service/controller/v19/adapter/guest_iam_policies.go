@@ -28,12 +28,12 @@ func (i *GuestIAMPoliciesAdapter) Adapt(cfg Config) error {
 	clusterID := key.ClusterID(cfg.CustomObject)
 
 	i.EC2ServiceDomain = key.EC2ServiceDomain(cfg.CustomObject)
-	i.MasterPolicyName = key.PolicyName(cfg.CustomObject, key.PrefixMaster)
-	i.MasterProfileName = key.InstanceProfileName(cfg.CustomObject, key.PrefixMaster)
-	i.MasterRoleName = key.RoleName(cfg.CustomObject, key.PrefixMaster)
-	i.WorkerPolicyName = key.PolicyName(cfg.CustomObject, key.PrefixWorker)
-	i.WorkerProfileName = key.InstanceProfileName(cfg.CustomObject, key.PrefixWorker)
-	i.WorkerRoleName = key.RoleName(cfg.CustomObject, key.PrefixWorker)
+	i.MasterPolicyName = key.PolicyName(cfg.CustomObject, key.KindMaster)
+	i.MasterProfileName = key.InstanceProfileName(cfg.CustomObject, key.KindMaster)
+	i.MasterRoleName = key.RoleName(cfg.CustomObject, key.KindMaster)
+	i.WorkerPolicyName = key.PolicyName(cfg.CustomObject, key.KindWorker)
+	i.WorkerProfileName = key.InstanceProfileName(cfg.CustomObject, key.KindWorker)
+	i.WorkerRoleName = key.RoleName(cfg.CustomObject, key.KindWorker)
 	i.RegionARN = key.RegionARN(cfg.CustomObject)
 
 	// KMSKeyARN
