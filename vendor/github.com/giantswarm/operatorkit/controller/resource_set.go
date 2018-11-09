@@ -93,6 +93,10 @@ func (r *ResourceSet) InitCtx(ctx context.Context, obj interface{}) (context.Con
 }
 
 func (r *ResourceSet) Handles(obj interface{}) bool {
+	fmt.Printf("r:              %#v\n", r)
+	fmt.Printf("r.handles:      %#v\n", r.handles)
+	fmt.Printf("obj:            %#v\n", obj)
+	fmt.Printf("r.handles(obj): %#v\n", r.handles(obj))
 	return r.handles(obj)
 }
 
