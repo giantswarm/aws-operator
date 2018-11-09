@@ -142,6 +142,10 @@ func HostAWSAccessKeyToken() string {
 	return hostAWSAccessKeyToken
 }
 
+func HostPeerStackName() string {
+	return fmt.Sprintf("host-peer-%s", ClusterID())
+}
+
 func IDRSAPub() string {
 	return idRSAPub
 }
