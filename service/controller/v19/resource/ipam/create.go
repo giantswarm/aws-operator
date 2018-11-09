@@ -39,15 +39,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		//
 		//     https://github.com/giantswarm/giantswarm/issues/4192
 		//
-		if key.CIDR(customObject) != "" {
+		_, presentSubnet, err := net.ParseCIDR(key.CIDR(customObject))
+		if err == nil {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "found out allocated cluster CIDR from legacy field in CR")
 
-			_, c, err := net.ParseCIDR(key.CIDR(customObject))
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			subnetCIDR = *c
+			subnetCIDR = *presentSubnet
 		} else {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find out allocated subnet for cluster")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "allocating subnet for cluster")
