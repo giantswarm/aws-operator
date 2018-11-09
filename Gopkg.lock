@@ -290,7 +290,7 @@
     "pkg/release",
   ]
   pruneopts = "UT"
-  revision = "3745b233e840c5073e5b14a2281c774412409298"
+  revision = "814097f75c8dd7e83613d63ba768d5fc197aa5fe"
 
 [[projects]]
   branch = "master"
@@ -312,7 +312,7 @@
   revision = "4e790eb032b59136b2a946e1ead01592df4c870a"
 
 [[projects]]
-  branch = "configure-cidr"
+  branch = "master"
   digest = "1:43d0c3f9b06b4dd54aefb89803cf62f2f7c47032474e23bb5d5ea11754cfa602"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
@@ -321,7 +321,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "39f55f6e451df3cdca45bf486931388017ba476e"
+  revision = "ff048e5673ddf594e6e313e45e8dc4718389aa16"
 
 [[projects]]
   branch = "master"
