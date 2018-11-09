@@ -76,7 +76,7 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	a.ELBHealthCheckInterval = healthCheckInterval
 	a.ELBHealthCheckTimeout = healthCheckTimeout
 	a.ELBHealthCheckUnhealthyThreshold = healthCheckUnhealthyThreshold
-	a.MasterInstanceResourceName = masterInstanceResourceName(cfg)
+	a.MasterInstanceResourceName = cfg.StackState.MasterInstanceResourceName
 
 	return nil
 }
