@@ -21,7 +21,7 @@ func compareVersions(v1 string, v2 string) (int, error) {
 }
 
 func isIPAMEnabled() bool {
-	n, err := compareVersions(TestedVersion(), "4.4.0")
+	n, err := compareVersions(VersionBundleVersion(), "4.4.0")
 	if err != nil {
 		panic(fmt.Sprintf("%#v", microerror.Mask(err)))
 	}
