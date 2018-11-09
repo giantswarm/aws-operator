@@ -25,6 +25,12 @@ type Config struct {
 	K8s       *k8s.Setup
 	Release   *release.Release
 	Logger    micrologger.Logger
+
+	// UseDefaultTenant defines whether the standard test setup should ensure the
+	// default tenant cluster. This is enabled by default. Most tests simply use
+	// the standard test tenant cluster. One exception is IPAM. There we launch
+	// multiple tenant clusters and do not want to make use of the default one.
+	UseDefaultTenant bool
 }
 
 func NewConfig() (Config, error) {
@@ -131,8 +137,10 @@ func NewConfig() (Config, error) {
 		Guest:     guest,
 		Host:      host,
 		K8s:       k8sSetup,
-		Release:   newRelease,
 		Logger:    logger,
+		Release:   newRelease,
+
+		UseDefaultTenant: true,
 	}
 
 	return c, nil

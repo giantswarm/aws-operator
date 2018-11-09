@@ -12,6 +12,7 @@ func commonViperSettings(f *flag.Flag, v *viper.Viper) {
 	v.Set(f.Service.AWS.AccessKey.ID, "accessKeyID")
 	v.Set(f.Service.AWS.AccessKey.Secret, "accessKeySecret")
 	v.Set(f.Service.AWS.AccessKey.Session, "session")
+	v.Set(f.Service.AWS.AvailabilityZones, []string{"eu-west-1a", "eu-west-1b", "eu-west-1c"})
 	v.Set(f.Service.AWS.Encrypter, "kms")
 	v.Set(f.Service.AWS.HostAccessKey.ID, "accessKeyID")
 	v.Set(f.Service.AWS.HostAccessKey.Secret, "accessKeySecret")
@@ -22,6 +23,10 @@ func commonViperSettings(f *flag.Flag, v *viper.Viper) {
 	v.Set(f.Service.AWS.PubKeyFile, "test")
 	v.Set(f.Service.Guest.SSH.SSOPublicKey, "test")
 
+	v.Set(f.Service.Installation.Guest.IPAM.Network.CIDR, "10.1.0.0/16")
+	v.Set(f.Service.Installation.Guest.IPAM.Network.SubnetMaskBits, "24")
+	v.Set(f.Service.Installation.Guest.IPAM.Network.PrivateSubnetMaskBits, "25")
+	v.Set(f.Service.Installation.Guest.IPAM.Network.PublicSubnetMaskBits, "25")
 	v.Set(f.Service.Installation.Name, "test")
 	v.Set(f.Service.AWS.LoggingBucket.Delete, true)
 

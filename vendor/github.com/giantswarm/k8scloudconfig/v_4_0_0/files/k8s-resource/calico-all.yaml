@@ -1,7 +1,12 @@
+# CALICO HAS SEPARATE MANIFEST FOR AZURE
+# the azure manifest can be found in: https://github.com/giantswarm/azure-operator/blob/master/service/controller/vX/cloudconfig/template.go
+# where X is the version of azure operator
+#
 # Extra changes:
 #  - Added "nodename_file_optional" set to true (can be removed on the next upgrade).
 #  - Added resource limits to calico-node and calico-kube-controller.
 #  - Added resource limits to install-cni.
+#  - Added 'priorityClassName: system-cluster-critical' to calico daemonset.
 #
 # Calico Version v3.2.3
 # https://docs.projectcalico.org/v3.2/releases#v3.2.3

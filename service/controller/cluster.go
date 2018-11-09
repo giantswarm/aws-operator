@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"net"
+
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
@@ -40,6 +42,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v18"
 	v18adapter "github.com/giantswarm/aws-operator/service/controller/v18/adapter"
 	v18cloudconfig "github.com/giantswarm/aws-operator/service/controller/v18/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v19"
+	v19adapter "github.com/giantswarm/aws-operator/service/controller/v19/adapter"
+	v19cloudconfig "github.com/giantswarm/aws-operator/service/controller/v19/cloudconfig"
 	"github.com/giantswarm/certs"
 	"github.com/giantswarm/legacycerts/legacy"
 	"github.com/giantswarm/microerror"
@@ -58,32 +63,37 @@ type ClusterConfig struct {
 	K8sExtClient apiextensionsclient.Interface
 	Logger       micrologger.Logger
 
-	AccessLogsExpiration   int
-	AdvancedMonitoringEC2  bool
-	APIWhitelist           FrameworkConfigAPIWhitelistConfig
-	DeleteLoggingBucket    bool
-	EncrypterBackend       string
-	GuestAWSConfig         ClusterConfigAWSConfig
-	GuestUpdateEnabled     bool
-	HostAWSConfig          ClusterConfigAWSConfig
-	IncludeTags            bool
-	InstallationName       string
-	OIDC                   ClusterConfigOIDC
-	PodInfraContainerImage string
-	ProjectName            string
-	PubKeyFile             string
-	PublicRouteTables      string
-	RegistryDomain         string
-	Route53Enabled         bool
-	SSOPublicKey           string
-	VaultAddress           string
+	AccessLogsExpiration       int
+	AdvancedMonitoringEC2      bool
+	APIWhitelist               FrameworkConfigAPIWhitelistConfig
+	DeleteLoggingBucket        bool
+	EncrypterBackend           string
+	GuestAWSConfig             ClusterConfigAWSConfig
+	GuestPrivateSubnetMaskBits int
+	GuestPublicSubnetMaskBits  int
+	GuestSubnetMaskBits        int
+	GuestUpdateEnabled         bool
+	HostAWSConfig              ClusterConfigAWSConfig
+	IncludeTags                bool
+	InstallationName           string
+	IPAMNetworkRange           net.IPNet
+	OIDC                       ClusterConfigOIDC
+	PodInfraContainerImage     string
+	ProjectName                string
+	PubKeyFile                 string
+	PublicRouteTables          string
+	RegistryDomain             string
+	Route53Enabled             bool
+	SSOPublicKey               string
+	VaultAddress               string
 }
 
 type ClusterConfigAWSConfig struct {
-	AccessKeyID     string
-	AccessKeySecret string
-	Region          string
-	SessionToken    string
+	AccessKeyID       string
+	AccessKeySecret   string
+	AvailabilityZones []string
+	Region            string
+	SessionToken      string
 }
 
 // ClusterConfigOIDC represents the configuration of the OIDC authorization
@@ -767,6 +777,54 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var resourceSetV19 *controller.ResourceSet
+	{
+		c := v19.ClusterResourceSetConfig{
+			CertsSearcher:      certsSearcher,
+			G8sClient:          config.G8sClient,
+			HostAWSConfig:      hostAWSConfig,
+			HostAWSClients:     awsHostClients,
+			K8sClient:          config.K8sClient,
+			Logger:             config.Logger,
+			RandomKeysSearcher: randomKeysSearcher,
+
+			AccessLogsExpiration:       config.AccessLogsExpiration,
+			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
+			DeleteLoggingBucket:        config.DeleteLoggingBucket,
+			EncrypterBackend:           config.EncrypterBackend,
+			GuestAvailabilityZones:     config.GuestAWSConfig.AvailabilityZones,
+			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
+			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
+			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
+			GuestUpdateEnabled:         config.GuestUpdateEnabled,
+			PodInfraContainerImage:     config.PodInfraContainerImage,
+			Route53Enabled:             config.Route53Enabled,
+			IncludeTags:                config.IncludeTags,
+			InstallationName:           config.InstallationName,
+			IPAMNetworkRange:           config.IPAMNetworkRange,
+			OIDC: v19cloudconfig.OIDCConfig{
+				ClientID:      config.OIDC.ClientID,
+				IssuerURL:     config.OIDC.IssuerURL,
+				UsernameClaim: config.OIDC.UsernameClaim,
+				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			APIWhitelist: v19adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
+			},
+			ProjectName:       config.ProjectName,
+			PublicRouteTables: config.PublicRouteTables,
+			RegistryDomain:    config.RegistryDomain,
+			SSOPublicKey:      config.SSOPublicKey,
+			VaultAddress:      config.VaultAddress,
+		}
+
+		resourceSetV19, err = v19.NewClusterResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resourceSets := []*controller.ResourceSet{
 		resourceSetV12,
 		resourceSetV12Patch1,
@@ -780,6 +838,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		resourceSetV16Patch1,
 		resourceSetV17,
 		resourceSetV18,
+		resourceSetV19,
 	}
 
 	return resourceSets, nil

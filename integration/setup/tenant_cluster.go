@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -23,24 +24,29 @@ const (
 	crNamespace = "default"
 )
 
-func EnsureTenantClusterCreated(ctx context.Context, config Config) error {
-	vpcID, err := ensureHostVPC(ctx, config)
+func EnsureTenantClusterCreated(ctx context.Context, id string, config Config) error {
+	err := InstallAWSConfig(ctx, id, config)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	err = installAWSConfig(ctx, config, vpcID)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	err = config.Guest.Setup()
+	err = InstallCertConfigs(ctx, id, config)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
 	{
 		config.Logger.LogCtx(ctx, "level", "debug", "message", "waiting for guest cluster to be ready")
+
+		err = config.Guest.Initialize()
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		err = config.Guest.Setup()
+		if err != nil {
+			return microerror.Mask(err)
+		}
 
 		err := config.Guest.WaitForGuestReady()
 		if err != nil {
@@ -53,14 +59,13 @@ func EnsureTenantClusterCreated(ctx context.Context, config Config) error {
 	return nil
 }
 
-func EnsureTenantClusterDeleted(ctx context.Context, config Config) error {
-	err := config.Release.EnsureDeleted(ctx, "apiextensions-aws-config-e2e", crNotExistsCondition(ctx, config))
+func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config) error {
+	err := config.Release.EnsureDeleted(ctx, id, CRNotExistsCondition(ctx, id, config))
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
 	{
-
 		config.Logger.LogCtx(ctx, "level", "debug", "message", "waiting for guest cluster API to be down")
 
 		err := config.Guest.WaitForAPIDown()
@@ -74,16 +79,14 @@ func EnsureTenantClusterDeleted(ctx context.Context, config Config) error {
 	return nil
 }
 
-func crExistsCondition(ctx context.Context, config Config) release.ConditionFunc {
+func crExistsCondition(ctx context.Context, id string, config Config) release.ConditionFunc {
 	return func() error {
-		name := env.ClusterID()
-
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for creation of CR %#q in namespace %#q", name, crNamespace))
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for creation of CR %#q in namespace %#q", id, crNamespace))
 
 		o := func() error {
-			_, err := config.Host.G8sClient().ProviderV1alpha1().AWSConfigs(crNamespace).Get(name, metav1.GetOptions{})
+			_, err := config.Host.G8sClient().ProviderV1alpha1().AWSConfigs(crNamespace).Get(id, metav1.GetOptions{})
 			if apierrors.IsNotFound(err) {
-				return microerror.Maskf(notFoundError, "CR %#q in namespace %#q", name, crNamespace)
+				return microerror.Maskf(notFoundError, "CR %#q in namespace %#q", id, crNamespace)
 			} else if err != nil {
 				return backoff.Permanent(microerror.Mask(err))
 			}
@@ -97,35 +100,33 @@ func crExistsCondition(ctx context.Context, config Config) release.ConditionFunc
 			return microerror.Mask(err)
 		}
 
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for creation of CR %#q in namespace %#q", name, crNamespace))
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for creation of CR %#q in namespace %#q", id, crNamespace))
 		return nil
 	}
 }
 
-func crNotExistsCondition(ctx context.Context, config Config) release.ConditionFunc {
+func CRNotExistsCondition(ctx context.Context, id string, config Config) release.ConditionFunc {
 	return func() error {
-		name := env.ClusterID()
-
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for deletion of CR %#q in namespace %#q", name, crNamespace))
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for deletion of CR %#q in namespace %#q", id, crNamespace))
 
 		o := func() error {
-			_, err := config.Host.G8sClient().ProviderV1alpha1().AWSConfigs(crNamespace).Get(name, metav1.GetOptions{})
+			_, err := config.Host.G8sClient().ProviderV1alpha1().AWSConfigs(crNamespace).Get(id, metav1.GetOptions{})
 			if apierrors.IsNotFound(err) {
 				return nil
 			} else if err != nil {
 				return backoff.Permanent(microerror.Mask(err))
 			}
 
-			return microerror.Maskf(stillExistsError, "CR %#q in namespace %#q", name, crNamespace)
+			return microerror.Maskf(stillExistsError, "CR %#q in namespace %#q", id, crNamespace)
 		}
-		b := backoff.NewExponential(backoff.LongMaxWait, backoff.LongMaxInterval)
+		b := backoff.NewExponential(60*time.Minute, 5*time.Minute)
 		n := backoff.NewNotifier(config.Logger, ctx)
 		err := backoff.RetryNotify(o, b, n)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for deletion of CR %#q in namespace %#q", name, crNamespace))
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for deletion of CR %#q in namespace %#q", id, crNamespace))
 		return nil
 	}
 }
@@ -190,14 +191,17 @@ func ensureHostVPC(ctx context.Context, config Config) (string, error) {
 	return vpcID, nil
 }
 
-func installAWSConfig(ctx context.Context, config Config, vpcPeerID string) error {
-	var err error
+func InstallAWSConfig(ctx context.Context, id string, config Config) error {
+	vpcID, err := ensureHostVPC(ctx, config)
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
 	var values string
 	{
 		c := chartvalues.APIExtensionsAWSConfigE2EConfig{
 			CommonDomain:         env.CommonDomain(),
-			ClusterName:          env.ClusterID(),
+			ClusterName:          id,
 			SSHPublicKey:         env.IDRSAPub(),
 			VersionBundleVersion: env.VersionBundleVersion(),
 
@@ -207,7 +211,7 @@ func installAWSConfig(ctx context.Context, config Config, vpcPeerID string) erro
 				IngressHostedZone: env.AWSIngressHostedZoneGuest(),
 				RouteTable0:       env.AWSRouteTable0(),
 				RouteTable1:       env.AWSRouteTable1(),
-				VPCPeerID:         vpcPeerID,
+				VPCPeerID:         vpcID,
 			},
 		}
 
@@ -217,7 +221,28 @@ func installAWSConfig(ctx context.Context, config Config, vpcPeerID string) erro
 		}
 	}
 
-	err = config.Release.Install(ctx, "apiextensions-aws-config-e2e", release.NewStableVersion(), values, crExistsCondition(ctx, config))
+	err = config.Release.Install(ctx, fmt.Sprintf("e2esetup-awsconfig-%s", id), release.NewStableChartInfo("apiextensions-aws-config-e2e-chart"), values, crExistsCondition(ctx, id, config))
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
+func InstallCertConfigs(ctx context.Context, id string, config Config) error {
+	c := chartvalues.E2ESetupCertsConfig{
+		Cluster: chartvalues.E2ESetupCertsConfigCluster{
+			ID: id,
+		},
+		CommonDomain: env.CommonDomain(),
+	}
+
+	values, err := chartvalues.NewE2ESetupCerts(c)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	err = config.Release.Install(ctx, fmt.Sprintf("e2esetup-certs-%s", id), release.NewStableChartInfo("e2esetup-certs-chart"), values, config.Release.Condition().SecretExists(ctx, "default", fmt.Sprintf("%s-api", id)))
 	if err != nil {
 		return microerror.Mask(err)
 	}
