@@ -5,14 +5,12 @@ package env
 import (
 	"fmt"
 	"os"
-	"strconv"
 )
 
 const (
 	EnvVarAWSAPIHostedZoneGuest     = "AWS_API_HOSTED_ZONE_GUEST"
 	EnvVarAWSIngressHostedZoneGuest = "AWS_INGRESS_HOSTED_ZONE_GUEST"
 	EnvVarAWSRegion                 = "AWS_REGION"
-	EnvVarCircleBuildNumber         = "CIRCLE_BUILD_NUM"
 	EnvVarGuestAWSARN               = "GUEST_AWS_ARN"
 	EnvVarGuestAWSAccessKeyID       = "GUEST_AWS_ACCESS_KEY_ID"
 	EnvVarGuestAWSAccessKeySecret   = "GUEST_AWS_SECRET_ACCESS_KEY"
@@ -27,7 +25,6 @@ var (
 	awsAPIHostedZoneGuest     string
 	awsIngressHostedZoneGuest string
 	awsRegion                 string
-	circleBuildNumber         string
 	guestAWSARN               string
 	guestAWSAccessKeyID       string
 	guestAWSAccessKeySecret   string
@@ -52,11 +49,6 @@ func init() {
 	awsRegion = os.Getenv(EnvVarAWSRegion)
 	if awsRegion == "" {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarAWSRegion))
-	}
-
-	circleBuildNumber = os.Getenv(EnvVarCircleBuildNumber)
-	if circleBuildNumber == "" {
-		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarCircleBuildNumber))
 	}
 
 	guestAWSARN = os.Getenv(EnvVarGuestAWSARN)
@@ -151,22 +143,25 @@ func IDRSAPub() string {
 }
 
 func NetworkCIDR() string {
-	return fmt.Sprintf("10.12.%d.0/24", subnetBlock())
+	if isIPAMEnabled() {
+		return ""
+	}
+
+	return "10.12.0.0/24"
 }
 
 func PrivateSubnetCIDR() string {
-	return fmt.Sprintf("10.12.%d.0/25", subnetBlock())
+	if isIPAMEnabled() {
+		return ""
+	}
+
+	return "10.12.0.0/25"
 }
 
 func PublicSubnetCIDR() string {
-	return fmt.Sprintf("10.12.%d.128/25", subnetBlock())
-}
-
-func subnetBlock() int {
-	n, err := strconv.Atoi(circleBuildNumber)
-	if err != nil {
-		panic(err)
+	if isIPAMEnabled() {
+		return ""
 	}
 
-	return n % 256
+	return "10.12.0.128/25"
 }
