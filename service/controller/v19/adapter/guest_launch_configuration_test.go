@@ -102,8 +102,8 @@ func Test_AdapterLaunchConfiguration_RegularFields(t *testing.T) {
 				t.Errorf("unexpected error %v", err)
 			}
 
-			if a.Guest.LaunchConfiguration.ASGType != prefixWorker {
-				t.Errorf("unexpected ASGType, got %q, want %q", a.Guest.LaunchConfiguration.ASGType, prefixWorker)
+			if a.Guest.LaunchConfiguration.ASGType != key.KindWorker {
+				t.Errorf("unexpected ASGType, got %q, want %q", a.Guest.LaunchConfiguration.ASGType, key.KindWorker)
 			}
 			if a.Guest.LaunchConfiguration.WorkerInstanceType != tc.expectedInstanceType {
 				t.Errorf("unexpected InstanceType, got %q, want %q", a.Guest.LaunchConfiguration.WorkerInstanceType, tc.expectedInstanceType)

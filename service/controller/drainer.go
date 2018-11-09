@@ -18,6 +18,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v16patch1"
 	"github.com/giantswarm/aws-operator/service/controller/v17"
 	"github.com/giantswarm/aws-operator/service/controller/v18"
+	"github.com/giantswarm/aws-operator/service/controller/v18patch1"
 	"github.com/giantswarm/aws-operator/service/controller/v19"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -383,6 +384,24 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var v18patch1ResourceSet *controller.ResourceSet
+	{
+		c := v18patch1.DrainerResourceSetConfig{
+			G8sClient:     config.G8sClient,
+			HostAWSConfig: hostAWSConfig,
+			K8sClient:     config.K8sClient,
+			Logger:        config.Logger,
+
+			GuestUpdateEnabled: config.GuestUpdateEnabled,
+			ProjectName:        config.ProjectName,
+		}
+
+		v18patch1ResourceSet, err = v18patch1.NewDrainerResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var v19ResourceSet *controller.ResourceSet
 	{
 		c := v19.DrainerResourceSetConfig{
@@ -394,7 +413,6 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 			GuestUpdateEnabled: config.GuestUpdateEnabled,
 			ProjectName:        config.ProjectName,
 		}
-
 		v19ResourceSet, err = v19.NewDrainerResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
@@ -414,6 +432,7 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		v16Patch1ResourceSet,
 		v17ResourceSet,
 		v18ResourceSet,
+		v18patch1ResourceSet,
 		v19ResourceSet,
 	}
 
