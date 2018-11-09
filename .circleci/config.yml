@@ -112,17 +112,22 @@ jobs:
 
 
 
-  e2eTestCurPRIPAM:
-    environment:
-      TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/ipam"
-    <<: *e2eTest
-
-  e2eTestCurMasterIPAM:
-    environment:
-      TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/ipam"
-    <<: *e2eTest
+# TODO enable this as soon as v20 is a thing. We track this in our roadmap
+# issue.
+#
+#     https://github.com/giantswarm/giantswarm/pull/2202
+#
+#  e2eTestCurMasterIPAM:
+#    environment:
+#      TESTED_VERSION: "current"
+#      TEST_DIR: "integration/test/ipam"
+#    <<: *e2eTest
+#
+#  e2eTestCurPRIPAM:
+#    environment:
+#      TESTED_VERSION: "current"
+#      TEST_DIR: "integration/test/ipam"
+#    <<: *e2eTest
 
   e2eTestWIPPRIPAM:
     environment:
@@ -259,15 +264,15 @@ workflows:
 
 
 
-      - e2eTestCurMasterIPAM:
-          requires:
-            - master
+#      - e2eTestCurMasterIPAM:
+#          requires:
+#            - master
+#      - e2eTestCurPRIPAM:
+#          requires:
+#            - pr
       - e2eTestWIPMasterIPAM:
           requires:
             - master
-      - e2eTestCurPRIPAM:
-          requires:
-            - pr
       - e2eTestWIPPRIPAM:
           requires:
             - pr
