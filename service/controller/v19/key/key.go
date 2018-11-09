@@ -93,6 +93,12 @@ const (
 	WorkerASGRef                 = "workerAutoScalingGroup"
 )
 
+const (
+	KindMaster  = "master"
+	KindIngress = "ingress"
+	KindWorker  = "worker"
+)
+
 func ClusterAPIEndpoint(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Kubernetes.API.Domain
 }
