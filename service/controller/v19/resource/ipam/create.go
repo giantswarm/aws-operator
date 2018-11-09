@@ -6,6 +6,7 @@ import (
 	"math/bits"
 	"math/rand"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
@@ -39,7 +40,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		//
 		//     https://github.com/giantswarm/giantswarm/issues/4192
 		//
-		if key.CIDR(customObject) != "" {
+		if key.CIDR(customObject) != "" && strings.ToLower(key.CIDR(customObject)) != "deprecated" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "found out allocated cluster CIDR from legacy field in CR")
 
 			_, c, err := net.ParseCIDR(key.CIDR(customObject))
