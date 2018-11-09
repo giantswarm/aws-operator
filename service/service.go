@@ -43,9 +43,9 @@ type Config struct {
 type Service struct {
 	Version *version.Service
 
-	bootOnce                sync.Once
-	clusterController       *controller.Cluster
-	drainerController       *controller.Drainer
+	bootOnce          sync.Once
+	clusterController *controller.Cluster
+	//drainerController       *controller.Drainer
 	legacyCollector         *collector.Collector
 	operatorCollector       *collector.Set
 	statusResourceCollector *statusresource.Collector
@@ -168,35 +168,35 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var drainerController *controller.Drainer
-	{
-		c := controller.DrainerConfig{
-			G8sClient:    g8sClient,
-			K8sClient:    k8sClient,
-			K8sExtClient: k8sExtClient,
-			Logger:       config.Logger,
-
-			GuestAWSConfig: controller.DrainerConfigAWS{
-				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
-				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
-				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
-				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
-			},
-			HostAWSConfig: controller.DrainerConfigAWS{
-				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
-				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
-				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
-				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
-			},
-			GuestUpdateEnabled: config.Viper.GetBool(config.Flag.Service.Guest.Update.Enabled),
-			ProjectName:        config.ProjectName,
-		}
-
-		drainerController, err = controller.NewDrainer(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
+	//var //drainerController *controller.Drainer
+	//{
+	//	c := controller.DrainerConfig{
+	//		G8sClient:    g8sClient,
+	//		K8sClient:    k8sClient,
+	//		K8sExtClient: k8sExtClient,
+	//		Logger:       config.Logger,
+	//
+	//		GuestAWSConfig: controller.DrainerConfigAWS{
+	//			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
+	//			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
+	//			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
+	//			Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
+	//		},
+	//		HostAWSConfig: controller.DrainerConfigAWS{
+	//			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
+	//			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
+	//			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
+	//			Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
+	//		},
+	//		GuestUpdateEnabled: config.Viper.GetBool(config.Flag.Service.Guest.Update.Enabled),
+	//		ProjectName:        config.ProjectName,
+	//	}
+	//
+	//	//drainerController, err = controller.NewDrainer(c)
+	//	if err != nil {
+	//		return nil, microerror.Mask(err)
+	//	}
+	//}
 
 	var awsConfig clientaws.Config
 	{
@@ -276,9 +276,9 @@ func New(config Config) (*Service, error) {
 	s := &Service{
 		Version: versionService,
 
-		bootOnce:                sync.Once{},
-		clusterController:       clusterController,
-		drainerController:       drainerController,
+		bootOnce:          sync.Once{},
+		clusterController: clusterController,
+		//drainerController:       drainerController,
 		legacyCollector:         legacyCollector,
 		operatorCollector:       operatorCollector,
 		statusResourceCollector: statusResourceCollector,
@@ -294,6 +294,6 @@ func (s *Service) Boot(ctx context.Context) {
 		go s.statusResourceCollector.Boot(ctx)
 
 		go s.clusterController.Boot()
-		go s.drainerController.Boot()
+		//go s.drainerController.Boot()
 	})
 }

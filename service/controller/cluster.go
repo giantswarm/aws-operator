@@ -6,39 +6,6 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v12"
-	v12adapter "github.com/giantswarm/aws-operator/service/controller/v12/adapter"
-	v12cloudconfig "github.com/giantswarm/aws-operator/service/controller/v12/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v12patch1"
-	v12patch1adapter "github.com/giantswarm/aws-operator/service/controller/v12patch1/adapter"
-	v12patch1cloudconfig "github.com/giantswarm/aws-operator/service/controller/v12patch1/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v13"
-	v13adapter "github.com/giantswarm/aws-operator/service/controller/v13/adapter"
-	v13cloudconfig "github.com/giantswarm/aws-operator/service/controller/v13/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v14"
-	v14adapter "github.com/giantswarm/aws-operator/service/controller/v14/adapter"
-	v14cloudconfig "github.com/giantswarm/aws-operator/service/controller/v14/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v14patch1"
-	v14patch1adapter "github.com/giantswarm/aws-operator/service/controller/v14patch1/adapter"
-	v14patch1cloudconfig "github.com/giantswarm/aws-operator/service/controller/v14patch1/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v14patch2"
-	v14patch2adapter "github.com/giantswarm/aws-operator/service/controller/v14patch2/adapter"
-	v14patch2cloudconfig "github.com/giantswarm/aws-operator/service/controller/v14patch2/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v14patch3"
-	v14patch3adapter "github.com/giantswarm/aws-operator/service/controller/v14patch3/adapter"
-	v14patch3cloudconfig "github.com/giantswarm/aws-operator/service/controller/v14patch3/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v15"
-	v15adapter "github.com/giantswarm/aws-operator/service/controller/v15/adapter"
-	v15cloudconfig "github.com/giantswarm/aws-operator/service/controller/v15/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v16"
-	v16adapter "github.com/giantswarm/aws-operator/service/controller/v16/adapter"
-	v16cloudconfig "github.com/giantswarm/aws-operator/service/controller/v16/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v16patch1"
-	v16patch1adapter "github.com/giantswarm/aws-operator/service/controller/v16patch1/adapter"
-	v16patch1cloudconfig "github.com/giantswarm/aws-operator/service/controller/v16patch1/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v17"
-	v17adapter "github.com/giantswarm/aws-operator/service/controller/v17/adapter"
-	v17cloudconfig "github.com/giantswarm/aws-operator/service/controller/v17/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v18"
 	v18adapter "github.com/giantswarm/aws-operator/service/controller/v18/adapter"
 	v18cloudconfig "github.com/giantswarm/aws-operator/service/controller/v18/cloudconfig"
@@ -49,7 +16,6 @@ import (
 	v19adapter "github.com/giantswarm/aws-operator/service/controller/v19/adapter"
 	v19cloudconfig "github.com/giantswarm/aws-operator/service/controller/v19/cloudconfig"
 	"github.com/giantswarm/certs"
-	"github.com/giantswarm/legacycerts/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8scrdclient"
@@ -250,16 +216,16 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
-	var legacyCertsSearcher *legacy.Service
-	{
-		certConfig := legacy.DefaultServiceConfig()
-		certConfig.K8sClient = config.K8sClient
-		certConfig.Logger = config.Logger
-		legacyCertsSearcher, err = legacy.NewService(certConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
+	//var legacyCertsSearcher *legacy.Service
+	//{
+	//	certConfig := legacy.DefaultServiceConfig()
+	//	certConfig.K8sClient = config.K8sClient
+	//	certConfig.Logger = config.Logger
+	//	legacyCertsSearcher, err = legacy.NewService(certConfig)
+	//	if err != nil {
+	//		return nil, microerror.Mask(err)
+	//	}
+	//}
 
 	var randomKeysSearcher randomkeys.Interface
 	{
@@ -274,468 +240,468 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
-	var resourceSetV12 *controller.ResourceSet
-	{
-		c := v12.ClusterResourceSetConfig{
-			CertsSearcher:      legacyCertsSearcher,
-			G8sClient:          config.G8sClient,
-			HostAWSConfig:      hostAWSConfig,
-			HostAWSClients:     awsHostClients,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeysSearcher,
+	//var resourceSetV12 *controller.ResourceSet
+	//{
+	//	c := v12.ClusterResourceSetConfig{
+	//		CertsSearcher:      legacyCertsSearcher,
+	//		G8sClient:          config.G8sClient,
+	//		HostAWSConfig:      hostAWSConfig,
+	//		HostAWSClients:     awsHostClients,
+	//		K8sClient:          config.K8sClient,
+	//		Logger:             config.Logger,
+	//		RandomkeysSearcher: randomKeysSearcher,
+	//
+	//		AccessLogsExpiration:   config.AccessLogsExpiration,
+	//		AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
+	//		DeleteLoggingBucket:    config.DeleteLoggingBucket,
+	//		GuestUpdateEnabled:     config.GuestUpdateEnabled,
+	//		PodInfraContainerImage: config.PodInfraContainerImage,
+	//		Route53Enabled:         config.Route53Enabled,
+	//		IncludeTags:            config.IncludeTags,
+	//		InstallationName:       config.InstallationName,
+	//		OIDC: v12cloudconfig.OIDCConfig{
+	//			ClientID:      config.OIDC.ClientID,
+	//			IssuerURL:     config.OIDC.IssuerURL,
+	//			UsernameClaim: config.OIDC.UsernameClaim,
+	//			GroupsClaim:   config.OIDC.GroupsClaim,
+	//		},
+	//		APIWhitelist: v12adapter.APIWhitelist{
+	//			Enabled:    config.APIWhitelist.Enabled,
+	//			SubnetList: config.APIWhitelist.SubnetList,
+	//		},
+	//		ProjectName: config.ProjectName,
+	//	}
+	//
+	//	resourceSetV12, err = v12.NewClusterResourceSet(c)
+	//	if err != nil {
+	//		return nil, microerror.Mask(err)
+	//	}
+	//}
 
-			AccessLogsExpiration:   config.AccessLogsExpiration,
-			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
-			DeleteLoggingBucket:    config.DeleteLoggingBucket,
-			GuestUpdateEnabled:     config.GuestUpdateEnabled,
-			PodInfraContainerImage: config.PodInfraContainerImage,
-			Route53Enabled:         config.Route53Enabled,
-			IncludeTags:            config.IncludeTags,
-			InstallationName:       config.InstallationName,
-			OIDC: v12cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			APIWhitelist: v12adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
-			},
-			ProjectName: config.ProjectName,
-		}
+	//var resourceSetV12Patch1 *controller.ResourceSet
+	//{
+	//	c := v12patch1.ClusterResourceSetConfig{
+	//		CertsSearcher:      legacyCertsSearcher,
+	//		G8sClient:          config.G8sClient,
+	//		HostAWSConfig:      hostAWSConfig,
+	//		HostAWSClients:     awsHostClients,
+	//		K8sClient:          config.K8sClient,
+	//		Logger:             config.Logger,
+	//		RandomkeysSearcher: randomKeysSearcher,
+	//
+	//		AccessLogsExpiration:   config.AccessLogsExpiration,
+	//		AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
+	//		DeleteLoggingBucket:    config.DeleteLoggingBucket,
+	//		GuestUpdateEnabled:     config.GuestUpdateEnabled,
+	//		PodInfraContainerImage: config.PodInfraContainerImage,
+	//		Route53Enabled:         config.Route53Enabled,
+	//		IncludeTags:            config.IncludeTags,
+	//		InstallationName:       config.InstallationName,
+	//		OIDC: v12patch1cloudconfig.OIDCConfig{
+	//			ClientID:      config.OIDC.ClientID,
+	//			IssuerURL:     config.OIDC.IssuerURL,
+	//			UsernameClaim: config.OIDC.UsernameClaim,
+	//			GroupsClaim:   config.OIDC.GroupsClaim,
+	//		},
+	//		APIWhitelist: v12patch1adapter.APIWhitelist{
+	//			Enabled:    config.APIWhitelist.Enabled,
+	//			SubnetList: config.APIWhitelist.SubnetList,
+	//		},
+	//		ProjectName: config.ProjectName,
+	//	}
+	//
+	//	resourceSetV12Patch1, err = v12patch1.NewClusterResourceSet(c)
+	//	if err != nil {
+	//		return nil, microerror.Mask(err)
+	//	}
+	//}
+	//
+	//var resourceSetV13 *controller.ResourceSet
+	//{
+	//	c := v13.ClusterResourceSetConfig{
+	//		CertsSearcher:      legacyCertsSearcher,
+	//		G8sClient:          config.G8sClient,
+	//		HostAWSConfig:      hostAWSConfig,
+	//		HostAWSClients:     awsHostClients,
+	//		K8sClient:          config.K8sClient,
+	//		Logger:             config.Logger,
+	//		RandomkeysSearcher: randomKeysSearcher,
+	//
+	//		AccessLogsExpiration:   config.AccessLogsExpiration,
+	//		AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
+	//		DeleteLoggingBucket:    config.DeleteLoggingBucket,
+	//		EncrypterBackend:       config.EncrypterBackend,
+	//		GuestUpdateEnabled:     config.GuestUpdateEnabled,
+	//		PodInfraContainerImage: config.PodInfraContainerImage,
+	//		Route53Enabled:         config.Route53Enabled,
+	//		IncludeTags:            config.IncludeTags,
+	//		InstallationName:       config.InstallationName,
+	//		OIDC: v13cloudconfig.OIDCConfig{
+	//			ClientID:      config.OIDC.ClientID,
+	//			IssuerURL:     config.OIDC.IssuerURL,
+	//			UsernameClaim: config.OIDC.UsernameClaim,
+	//			GroupsClaim:   config.OIDC.GroupsClaim,
+	//		},
+	//		APIWhitelist: v13adapter.APIWhitelist{
+	//			Enabled:    config.APIWhitelist.Enabled,
+	//			SubnetList: config.APIWhitelist.SubnetList,
+	//		},
+	//		ProjectName:       config.ProjectName,
+	//		PublicRouteTables: config.PublicRouteTables,
+	//		RegistryDomain:    config.RegistryDomain,
+	//		SSOPublicKey:      config.SSOPublicKey,
+	//		VaultAddress:      config.VaultAddress,
+	//	}
+	//
+	//	resourceSetV13, err = v13.NewClusterResourceSet(c)
+	//	if err != nil {
+	//		return nil, microerror.Mask(err)
+	//	}
+	//}
 
-		resourceSetV12, err = v12.NewClusterResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
+	//var resourceSetV14 *controller.ResourceSet
+	//{
+	//	c := v14.ClusterResourceSetConfig{
+	//		CertsSearcher:      legacyCertsSearcher,
+	//		G8sClient:          config.G8sClient,
+	//		HostAWSConfig:      hostAWSConfig,
+	//		HostAWSClients:     awsHostClients,
+	//		K8sClient:          config.K8sClient,
+	//		Logger:             config.Logger,
+	//		RandomkeysSearcher: randomKeysSearcher,
+	//
+	//		AccessLogsExpiration:   config.AccessLogsExpiration,
+	//		AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
+	//		DeleteLoggingBucket:    config.DeleteLoggingBucket,
+	//		EncrypterBackend:       config.EncrypterBackend,
+	//		GuestUpdateEnabled:     config.GuestUpdateEnabled,
+	//		PodInfraContainerImage: config.PodInfraContainerImage,
+	//		Route53Enabled:         config.Route53Enabled,
+	//		IncludeTags:            config.IncludeTags,
+	//		InstallationName:       config.InstallationName,
+	//		OIDC: v14cloudconfig.OIDCConfig{
+	//			ClientID:      config.OIDC.ClientID,
+	//			IssuerURL:     config.OIDC.IssuerURL,
+	//			UsernameClaim: config.OIDC.UsernameClaim,
+	//			GroupsClaim:   config.OIDC.GroupsClaim,
+	//		},
+	//		APIWhitelist: v14adapter.APIWhitelist{
+	//			Enabled:    config.APIWhitelist.Enabled,
+	//			SubnetList: config.APIWhitelist.SubnetList,
+	//		},
+	//		ProjectName:       config.ProjectName,
+	//		PublicRouteTables: config.PublicRouteTables,
+	//		RegistryDomain:    config.RegistryDomain,
+	//		SSOPublicKey:      config.SSOPublicKey,
+	//		VaultAddress:      config.VaultAddress,
+	//	}
+	//
+	//	resourceSetV14, err = v14.NewClusterResourceSet(c)
+	//	if err != nil {
+	//		return nil, microerror.Mask(err)
+	//	}
+	//}
+	//
+	//var resourceSetV14Patch1 *controller.ResourceSet
+	//{
+	//	c := v14patch1.ClusterResourceSetConfig{
+	//		CertsSearcher:      legacyCertsSearcher,
+	//		G8sClient:          config.G8sClient,
+	//		HostAWSConfig:      hostAWSConfig,
+	//		HostAWSClients:     awsHostClients,
+	//		K8sClient:          config.K8sClient,
+	//		Logger:             config.Logger,
+	//		RandomkeysSearcher: randomKeysSearcher,
+	//
+	//		AccessLogsExpiration:   config.AccessLogsExpiration,
+	//		AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
+	//		DeleteLoggingBucket:    config.DeleteLoggingBucket,
+	//		EncrypterBackend:       config.EncrypterBackend,
+	//		GuestUpdateEnabled:     config.GuestUpdateEnabled,
+	//		PodInfraContainerImage: config.PodInfraContainerImage,
+	//		Route53Enabled:         config.Route53Enabled,
+	//		IncludeTags:            config.IncludeTags,
+	//		InstallationName:       config.InstallationName,
+	//		OIDC: v14patch1cloudconfig.OIDCConfig{
+	//			ClientID:      config.OIDC.ClientID,
+	//			IssuerURL:     config.OIDC.IssuerURL,
+	//			UsernameClaim: config.OIDC.UsernameClaim,
+	//			GroupsClaim:   config.OIDC.GroupsClaim,
+	//		},
+	//		APIWhitelist: v14patch1adapter.APIWhitelist{
+	//			Enabled:    config.APIWhitelist.Enabled,
+	//			SubnetList: config.APIWhitelist.SubnetList,
+	//		},
+	//		ProjectName:       config.ProjectName,
+	//		PublicRouteTables: config.PublicRouteTables,
+	//		RegistryDomain:    config.RegistryDomain,
+	//		SSOPublicKey:      config.SSOPublicKey,
+	//		VaultAddress:      config.VaultAddress,
+	//	}
+	//
+	//	resourceSetV14Patch1, err = v14patch1.NewClusterResourceSet(c)
+	//	if err != nil {
+	//		return nil, microerror.Mask(err)
+	//	}
+	//}
+	//
+	//var resourceSetV14Patch2 *controller.ResourceSet
+	//{
+	//	c := v14patch2.ClusterResourceSetConfig{
+	//		CertsSearcher:      legacyCertsSearcher,
+	//		G8sClient:          config.G8sClient,
+	//		HostAWSConfig:      hostAWSConfig,
+	//		HostAWSClients:     awsHostClients,
+	//		K8sClient:          config.K8sClient,
+	//		Logger:             config.Logger,
+	//		RandomkeysSearcher: randomKeysSearcher,
+	//
+	//		AccessLogsExpiration:   config.AccessLogsExpiration,
+	//		AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
+	//		DeleteLoggingBucket:    config.DeleteLoggingBucket,
+	//		EncrypterBackend:       config.EncrypterBackend,
+	//		GuestUpdateEnabled:     config.GuestUpdateEnabled,
+	//		PodInfraContainerImage: config.PodInfraContainerImage,
+	//		Route53Enabled:         config.Route53Enabled,
+	//		IncludeTags:            config.IncludeTags,
+	//		InstallationName:       config.InstallationName,
+	//		OIDC: v14patch2cloudconfig.OIDCConfig{
+	//			ClientID:      config.OIDC.ClientID,
+	//			IssuerURL:     config.OIDC.IssuerURL,
+	//			UsernameClaim: config.OIDC.UsernameClaim,
+	//			GroupsClaim:   config.OIDC.GroupsClaim,
+	//		},
+	//		APIWhitelist: v14patch2adapter.APIWhitelist{
+	//			Enabled:    config.APIWhitelist.Enabled,
+	//			SubnetList: config.APIWhitelist.SubnetList,
+	//		},
+	//		ProjectName:       config.ProjectName,
+	//		PublicRouteTables: config.PublicRouteTables,
+	//		RegistryDomain:    config.RegistryDomain,
+	//		SSOPublicKey:      config.SSOPublicKey,
+	//		VaultAddress:      config.VaultAddress,
+	//	}
+	//
+	//	resourceSetV14Patch2, err = v14patch2.NewClusterResourceSet(c)
+	//	if err != nil {
+	//		return nil, microerror.Mask(err)
+	//	}
+	//}
+	//
+	//var resourceSetV14Patch3 *controller.ResourceSet
+	//{
+	//	c := v14patch3.ClusterResourceSetConfig{
+	//		CertsSearcher:      legacyCertsSearcher,
+	//		G8sClient:          config.G8sClient,
+	//		HostAWSConfig:      hostAWSConfig,
+	//		HostAWSClients:     awsHostClients,
+	//		K8sClient:          config.K8sClient,
+	//		Logger:             config.Logger,
+	//		RandomkeysSearcher: randomKeysSearcher,
+	//
+	//		AccessLogsExpiration:   config.AccessLogsExpiration,
+	//		AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
+	//		DeleteLoggingBucket:    config.DeleteLoggingBucket,
+	//		EncrypterBackend:       config.EncrypterBackend,
+	//		GuestUpdateEnabled:     config.GuestUpdateEnabled,
+	//		PodInfraContainerImage: config.PodInfraContainerImage,
+	//		Route53Enabled:         config.Route53Enabled,
+	//		IncludeTags:            config.IncludeTags,
+	//		InstallationName:       config.InstallationName,
+	//		OIDC: v14patch3cloudconfig.OIDCConfig{
+	//			ClientID:      config.OIDC.ClientID,
+	//			IssuerURL:     config.OIDC.IssuerURL,
+	//			UsernameClaim: config.OIDC.UsernameClaim,
+	//			GroupsClaim:   config.OIDC.GroupsClaim,
+	//		},
+	//		APIWhitelist: v14patch3adapter.APIWhitelist{
+	//			Enabled:    config.APIWhitelist.Enabled,
+	//			SubnetList: config.APIWhitelist.SubnetList,
+	//		},
+	//		ProjectName:       config.ProjectName,
+	//		PublicRouteTables: config.PublicRouteTables,
+	//		RegistryDomain:    config.RegistryDomain,
+	//		SSOPublicKey:      config.SSOPublicKey,
+	//		VaultAddress:      config.VaultAddress,
+	//	}
+	//
+	//	resourceSetV14Patch3, err = v14patch3.NewClusterResourceSet(c)
+	//	if err != nil {
+	//		return nil, microerror.Mask(err)
+	//	}
+	//}
 
-	var resourceSetV12Patch1 *controller.ResourceSet
-	{
-		c := v12patch1.ClusterResourceSetConfig{
-			CertsSearcher:      legacyCertsSearcher,
-			G8sClient:          config.G8sClient,
-			HostAWSConfig:      hostAWSConfig,
-			HostAWSClients:     awsHostClients,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeysSearcher,
-
-			AccessLogsExpiration:   config.AccessLogsExpiration,
-			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
-			DeleteLoggingBucket:    config.DeleteLoggingBucket,
-			GuestUpdateEnabled:     config.GuestUpdateEnabled,
-			PodInfraContainerImage: config.PodInfraContainerImage,
-			Route53Enabled:         config.Route53Enabled,
-			IncludeTags:            config.IncludeTags,
-			InstallationName:       config.InstallationName,
-			OIDC: v12patch1cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			APIWhitelist: v12patch1adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
-			},
-			ProjectName: config.ProjectName,
-		}
-
-		resourceSetV12Patch1, err = v12patch1.NewClusterResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var resourceSetV13 *controller.ResourceSet
-	{
-		c := v13.ClusterResourceSetConfig{
-			CertsSearcher:      legacyCertsSearcher,
-			G8sClient:          config.G8sClient,
-			HostAWSConfig:      hostAWSConfig,
-			HostAWSClients:     awsHostClients,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeysSearcher,
-
-			AccessLogsExpiration:   config.AccessLogsExpiration,
-			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
-			DeleteLoggingBucket:    config.DeleteLoggingBucket,
-			EncrypterBackend:       config.EncrypterBackend,
-			GuestUpdateEnabled:     config.GuestUpdateEnabled,
-			PodInfraContainerImage: config.PodInfraContainerImage,
-			Route53Enabled:         config.Route53Enabled,
-			IncludeTags:            config.IncludeTags,
-			InstallationName:       config.InstallationName,
-			OIDC: v13cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			APIWhitelist: v13adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
-			},
-			ProjectName:       config.ProjectName,
-			PublicRouteTables: config.PublicRouteTables,
-			RegistryDomain:    config.RegistryDomain,
-			SSOPublicKey:      config.SSOPublicKey,
-			VaultAddress:      config.VaultAddress,
-		}
-
-		resourceSetV13, err = v13.NewClusterResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var resourceSetV14 *controller.ResourceSet
-	{
-		c := v14.ClusterResourceSetConfig{
-			CertsSearcher:      legacyCertsSearcher,
-			G8sClient:          config.G8sClient,
-			HostAWSConfig:      hostAWSConfig,
-			HostAWSClients:     awsHostClients,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeysSearcher,
-
-			AccessLogsExpiration:   config.AccessLogsExpiration,
-			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
-			DeleteLoggingBucket:    config.DeleteLoggingBucket,
-			EncrypterBackend:       config.EncrypterBackend,
-			GuestUpdateEnabled:     config.GuestUpdateEnabled,
-			PodInfraContainerImage: config.PodInfraContainerImage,
-			Route53Enabled:         config.Route53Enabled,
-			IncludeTags:            config.IncludeTags,
-			InstallationName:       config.InstallationName,
-			OIDC: v14cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			APIWhitelist: v14adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
-			},
-			ProjectName:       config.ProjectName,
-			PublicRouteTables: config.PublicRouteTables,
-			RegistryDomain:    config.RegistryDomain,
-			SSOPublicKey:      config.SSOPublicKey,
-			VaultAddress:      config.VaultAddress,
-		}
-
-		resourceSetV14, err = v14.NewClusterResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var resourceSetV14Patch1 *controller.ResourceSet
-	{
-		c := v14patch1.ClusterResourceSetConfig{
-			CertsSearcher:      legacyCertsSearcher,
-			G8sClient:          config.G8sClient,
-			HostAWSConfig:      hostAWSConfig,
-			HostAWSClients:     awsHostClients,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeysSearcher,
-
-			AccessLogsExpiration:   config.AccessLogsExpiration,
-			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
-			DeleteLoggingBucket:    config.DeleteLoggingBucket,
-			EncrypterBackend:       config.EncrypterBackend,
-			GuestUpdateEnabled:     config.GuestUpdateEnabled,
-			PodInfraContainerImage: config.PodInfraContainerImage,
-			Route53Enabled:         config.Route53Enabled,
-			IncludeTags:            config.IncludeTags,
-			InstallationName:       config.InstallationName,
-			OIDC: v14patch1cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			APIWhitelist: v14patch1adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
-			},
-			ProjectName:       config.ProjectName,
-			PublicRouteTables: config.PublicRouteTables,
-			RegistryDomain:    config.RegistryDomain,
-			SSOPublicKey:      config.SSOPublicKey,
-			VaultAddress:      config.VaultAddress,
-		}
-
-		resourceSetV14Patch1, err = v14patch1.NewClusterResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var resourceSetV14Patch2 *controller.ResourceSet
-	{
-		c := v14patch2.ClusterResourceSetConfig{
-			CertsSearcher:      legacyCertsSearcher,
-			G8sClient:          config.G8sClient,
-			HostAWSConfig:      hostAWSConfig,
-			HostAWSClients:     awsHostClients,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeysSearcher,
-
-			AccessLogsExpiration:   config.AccessLogsExpiration,
-			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
-			DeleteLoggingBucket:    config.DeleteLoggingBucket,
-			EncrypterBackend:       config.EncrypterBackend,
-			GuestUpdateEnabled:     config.GuestUpdateEnabled,
-			PodInfraContainerImage: config.PodInfraContainerImage,
-			Route53Enabled:         config.Route53Enabled,
-			IncludeTags:            config.IncludeTags,
-			InstallationName:       config.InstallationName,
-			OIDC: v14patch2cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			APIWhitelist: v14patch2adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
-			},
-			ProjectName:       config.ProjectName,
-			PublicRouteTables: config.PublicRouteTables,
-			RegistryDomain:    config.RegistryDomain,
-			SSOPublicKey:      config.SSOPublicKey,
-			VaultAddress:      config.VaultAddress,
-		}
-
-		resourceSetV14Patch2, err = v14patch2.NewClusterResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var resourceSetV14Patch3 *controller.ResourceSet
-	{
-		c := v14patch3.ClusterResourceSetConfig{
-			CertsSearcher:      legacyCertsSearcher,
-			G8sClient:          config.G8sClient,
-			HostAWSConfig:      hostAWSConfig,
-			HostAWSClients:     awsHostClients,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeysSearcher,
-
-			AccessLogsExpiration:   config.AccessLogsExpiration,
-			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
-			DeleteLoggingBucket:    config.DeleteLoggingBucket,
-			EncrypterBackend:       config.EncrypterBackend,
-			GuestUpdateEnabled:     config.GuestUpdateEnabled,
-			PodInfraContainerImage: config.PodInfraContainerImage,
-			Route53Enabled:         config.Route53Enabled,
-			IncludeTags:            config.IncludeTags,
-			InstallationName:       config.InstallationName,
-			OIDC: v14patch3cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			APIWhitelist: v14patch3adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
-			},
-			ProjectName:       config.ProjectName,
-			PublicRouteTables: config.PublicRouteTables,
-			RegistryDomain:    config.RegistryDomain,
-			SSOPublicKey:      config.SSOPublicKey,
-			VaultAddress:      config.VaultAddress,
-		}
-
-		resourceSetV14Patch3, err = v14patch3.NewClusterResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var resourceSetV15 *controller.ResourceSet
-	{
-		c := v15.ClusterResourceSetConfig{
-			CertsSearcher:      legacyCertsSearcher,
-			G8sClient:          config.G8sClient,
-			HostAWSConfig:      hostAWSConfig,
-			HostAWSClients:     awsHostClients,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeysSearcher,
-
-			AccessLogsExpiration:   config.AccessLogsExpiration,
-			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
-			DeleteLoggingBucket:    config.DeleteLoggingBucket,
-			EncrypterBackend:       config.EncrypterBackend,
-			GuestUpdateEnabled:     config.GuestUpdateEnabled,
-			PodInfraContainerImage: config.PodInfraContainerImage,
-			Route53Enabled:         config.Route53Enabled,
-			IncludeTags:            config.IncludeTags,
-			InstallationName:       config.InstallationName,
-			OIDC: v15cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			APIWhitelist: v15adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
-			},
-			ProjectName:       config.ProjectName,
-			PublicRouteTables: config.PublicRouteTables,
-			RegistryDomain:    config.RegistryDomain,
-			SSOPublicKey:      config.SSOPublicKey,
-			VaultAddress:      config.VaultAddress,
-		}
-
-		resourceSetV15, err = v15.NewClusterResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var resourceSetV16 *controller.ResourceSet
-	{
-		c := v16.ClusterResourceSetConfig{
-			CertsSearcher:      legacyCertsSearcher,
-			G8sClient:          config.G8sClient,
-			HostAWSConfig:      hostAWSConfig,
-			HostAWSClients:     awsHostClients,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeysSearcher,
-
-			AccessLogsExpiration:   config.AccessLogsExpiration,
-			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
-			DeleteLoggingBucket:    config.DeleteLoggingBucket,
-			EncrypterBackend:       config.EncrypterBackend,
-			GuestUpdateEnabled:     config.GuestUpdateEnabled,
-			PodInfraContainerImage: config.PodInfraContainerImage,
-			Route53Enabled:         config.Route53Enabled,
-			IncludeTags:            config.IncludeTags,
-			InstallationName:       config.InstallationName,
-			OIDC: v16cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			APIWhitelist: v16adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
-			},
-			ProjectName:       config.ProjectName,
-			PublicRouteTables: config.PublicRouteTables,
-			RegistryDomain:    config.RegistryDomain,
-			SSOPublicKey:      config.SSOPublicKey,
-			VaultAddress:      config.VaultAddress,
-		}
-
-		resourceSetV16, err = v16.NewClusterResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var resourceSetV16Patch1 *controller.ResourceSet
-	{
-		c := v16patch1.ClusterResourceSetConfig{
-			CertsSearcher:      legacyCertsSearcher,
-			G8sClient:          config.G8sClient,
-			HostAWSConfig:      hostAWSConfig,
-			HostAWSClients:     awsHostClients,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeysSearcher,
-
-			AccessLogsExpiration:   config.AccessLogsExpiration,
-			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
-			DeleteLoggingBucket:    config.DeleteLoggingBucket,
-			EncrypterBackend:       config.EncrypterBackend,
-			GuestUpdateEnabled:     config.GuestUpdateEnabled,
-			PodInfraContainerImage: config.PodInfraContainerImage,
-			Route53Enabled:         config.Route53Enabled,
-			IncludeTags:            config.IncludeTags,
-			InstallationName:       config.InstallationName,
-			OIDC: v16patch1cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			APIWhitelist: v16patch1adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
-			},
-			ProjectName:       config.ProjectName,
-			PublicRouteTables: config.PublicRouteTables,
-			RegistryDomain:    config.RegistryDomain,
-			SSOPublicKey:      config.SSOPublicKey,
-			VaultAddress:      config.VaultAddress,
-		}
-
-		resourceSetV16Patch1, err = v16patch1.NewClusterResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var resourceSetV17 *controller.ResourceSet
-	{
-		c := v17.ClusterResourceSetConfig{
-			CertsSearcher:      legacyCertsSearcher,
-			G8sClient:          config.G8sClient,
-			HostAWSConfig:      hostAWSConfig,
-			HostAWSClients:     awsHostClients,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			RandomkeysSearcher: randomKeysSearcher,
-
-			AccessLogsExpiration:   config.AccessLogsExpiration,
-			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
-			DeleteLoggingBucket:    config.DeleteLoggingBucket,
-			EncrypterBackend:       config.EncrypterBackend,
-			GuestUpdateEnabled:     config.GuestUpdateEnabled,
-			PodInfraContainerImage: config.PodInfraContainerImage,
-			Route53Enabled:         config.Route53Enabled,
-			IncludeTags:            config.IncludeTags,
-			InstallationName:       config.InstallationName,
-			OIDC: v17cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			APIWhitelist: v17adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
-			},
-			ProjectName:       config.ProjectName,
-			PublicRouteTables: config.PublicRouteTables,
-			RegistryDomain:    config.RegistryDomain,
-			SSOPublicKey:      config.SSOPublicKey,
-			VaultAddress:      config.VaultAddress,
-		}
-
-		resourceSetV17, err = v17.NewClusterResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
+	//var resourceSetV15 *controller.ResourceSet
+	//{
+	//	c := v15.ClusterResourceSetConfig{
+	//		CertsSearcher:      legacyCertsSearcher,
+	//		G8sClient:          config.G8sClient,
+	//		HostAWSConfig:      hostAWSConfig,
+	//		HostAWSClients:     awsHostClients,
+	//		K8sClient:          config.K8sClient,
+	//		Logger:             config.Logger,
+	//		RandomkeysSearcher: randomKeysSearcher,
+	//
+	//		AccessLogsExpiration:   config.AccessLogsExpiration,
+	//		AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
+	//		DeleteLoggingBucket:    config.DeleteLoggingBucket,
+	//		EncrypterBackend:       config.EncrypterBackend,
+	//		GuestUpdateEnabled:     config.GuestUpdateEnabled,
+	//		PodInfraContainerImage: config.PodInfraContainerImage,
+	//		Route53Enabled:         config.Route53Enabled,
+	//		IncludeTags:            config.IncludeTags,
+	//		InstallationName:       config.InstallationName,
+	//		OIDC: v15cloudconfig.OIDCConfig{
+	//			ClientID:      config.OIDC.ClientID,
+	//			IssuerURL:     config.OIDC.IssuerURL,
+	//			UsernameClaim: config.OIDC.UsernameClaim,
+	//			GroupsClaim:   config.OIDC.GroupsClaim,
+	//		},
+	//		APIWhitelist: v15adapter.APIWhitelist{
+	//			Enabled:    config.APIWhitelist.Enabled,
+	//			SubnetList: config.APIWhitelist.SubnetList,
+	//		},
+	//		ProjectName:       config.ProjectName,
+	//		PublicRouteTables: config.PublicRouteTables,
+	//		RegistryDomain:    config.RegistryDomain,
+	//		SSOPublicKey:      config.SSOPublicKey,
+	//		VaultAddress:      config.VaultAddress,
+	//	}
+	//
+	//	resourceSetV15, err = v15.NewClusterResourceSet(c)
+	//	if err != nil {
+	//		return nil, microerror.Mask(err)
+	//	}
+	//}
+	//
+	//var resourceSetV16 *controller.ResourceSet
+	//{
+	//	c := v16.ClusterResourceSetConfig{
+	//		CertsSearcher:      legacyCertsSearcher,
+	//		G8sClient:          config.G8sClient,
+	//		HostAWSConfig:      hostAWSConfig,
+	//		HostAWSClients:     awsHostClients,
+	//		K8sClient:          config.K8sClient,
+	//		Logger:             config.Logger,
+	//		RandomkeysSearcher: randomKeysSearcher,
+	//
+	//		AccessLogsExpiration:   config.AccessLogsExpiration,
+	//		AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
+	//		DeleteLoggingBucket:    config.DeleteLoggingBucket,
+	//		EncrypterBackend:       config.EncrypterBackend,
+	//		GuestUpdateEnabled:     config.GuestUpdateEnabled,
+	//		PodInfraContainerImage: config.PodInfraContainerImage,
+	//		Route53Enabled:         config.Route53Enabled,
+	//		IncludeTags:            config.IncludeTags,
+	//		InstallationName:       config.InstallationName,
+	//		OIDC: v16cloudconfig.OIDCConfig{
+	//			ClientID:      config.OIDC.ClientID,
+	//			IssuerURL:     config.OIDC.IssuerURL,
+	//			UsernameClaim: config.OIDC.UsernameClaim,
+	//			GroupsClaim:   config.OIDC.GroupsClaim,
+	//		},
+	//		APIWhitelist: v16adapter.APIWhitelist{
+	//			Enabled:    config.APIWhitelist.Enabled,
+	//			SubnetList: config.APIWhitelist.SubnetList,
+	//		},
+	//		ProjectName:       config.ProjectName,
+	//		PublicRouteTables: config.PublicRouteTables,
+	//		RegistryDomain:    config.RegistryDomain,
+	//		SSOPublicKey:      config.SSOPublicKey,
+	//		VaultAddress:      config.VaultAddress,
+	//	}
+	//
+	//	resourceSetV16, err = v16.NewClusterResourceSet(c)
+	//	if err != nil {
+	//		return nil, microerror.Mask(err)
+	//	}
+	//}
+	//
+	//var resourceSetV16Patch1 *controller.ResourceSet
+	//{
+	//	c := v16patch1.ClusterResourceSetConfig{
+	//		CertsSearcher:      legacyCertsSearcher,
+	//		G8sClient:          config.G8sClient,
+	//		HostAWSConfig:      hostAWSConfig,
+	//		HostAWSClients:     awsHostClients,
+	//		K8sClient:          config.K8sClient,
+	//		Logger:             config.Logger,
+	//		RandomkeysSearcher: randomKeysSearcher,
+	//
+	//		AccessLogsExpiration:   config.AccessLogsExpiration,
+	//		AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
+	//		DeleteLoggingBucket:    config.DeleteLoggingBucket,
+	//		EncrypterBackend:       config.EncrypterBackend,
+	//		GuestUpdateEnabled:     config.GuestUpdateEnabled,
+	//		PodInfraContainerImage: config.PodInfraContainerImage,
+	//		Route53Enabled:         config.Route53Enabled,
+	//		IncludeTags:            config.IncludeTags,
+	//		InstallationName:       config.InstallationName,
+	//		OIDC: v16patch1cloudconfig.OIDCConfig{
+	//			ClientID:      config.OIDC.ClientID,
+	//			IssuerURL:     config.OIDC.IssuerURL,
+	//			UsernameClaim: config.OIDC.UsernameClaim,
+	//			GroupsClaim:   config.OIDC.GroupsClaim,
+	//		},
+	//		APIWhitelist: v16patch1adapter.APIWhitelist{
+	//			Enabled:    config.APIWhitelist.Enabled,
+	//			SubnetList: config.APIWhitelist.SubnetList,
+	//		},
+	//		ProjectName:       config.ProjectName,
+	//		PublicRouteTables: config.PublicRouteTables,
+	//		RegistryDomain:    config.RegistryDomain,
+	//		SSOPublicKey:      config.SSOPublicKey,
+	//		VaultAddress:      config.VaultAddress,
+	//	}
+	//
+	//	resourceSetV16Patch1, err = v16patch1.NewClusterResourceSet(c)
+	//	if err != nil {
+	//		return nil, microerror.Mask(err)
+	//	}
+	//}
+	//
+	//var resourceSetV17 *controller.ResourceSet
+	//{
+	//	c := v17.ClusterResourceSetConfig{
+	//		CertsSearcher:      legacyCertsSearcher,
+	//		G8sClient:          config.G8sClient,
+	//		HostAWSConfig:      hostAWSConfig,
+	//		HostAWSClients:     awsHostClients,
+	//		K8sClient:          config.K8sClient,
+	//		Logger:             config.Logger,
+	//		RandomkeysSearcher: randomKeysSearcher,
+	//
+	//		AccessLogsExpiration:   config.AccessLogsExpiration,
+	//		AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
+	//		DeleteLoggingBucket:    config.DeleteLoggingBucket,
+	//		EncrypterBackend:       config.EncrypterBackend,
+	//		GuestUpdateEnabled:     config.GuestUpdateEnabled,
+	//		PodInfraContainerImage: config.PodInfraContainerImage,
+	//		Route53Enabled:         config.Route53Enabled,
+	//		IncludeTags:            config.IncludeTags,
+	//		InstallationName:       config.InstallationName,
+	//		OIDC: v17cloudconfig.OIDCConfig{
+	//			ClientID:      config.OIDC.ClientID,
+	//			IssuerURL:     config.OIDC.IssuerURL,
+	//			UsernameClaim: config.OIDC.UsernameClaim,
+	//			GroupsClaim:   config.OIDC.GroupsClaim,
+	//		},
+	//		APIWhitelist: v17adapter.APIWhitelist{
+	//			Enabled:    config.APIWhitelist.Enabled,
+	//			SubnetList: config.APIWhitelist.SubnetList,
+	//		},
+	//		ProjectName:       config.ProjectName,
+	//		PublicRouteTables: config.PublicRouteTables,
+	//		RegistryDomain:    config.RegistryDomain,
+	//		SSOPublicKey:      config.SSOPublicKey,
+	//		VaultAddress:      config.VaultAddress,
+	//	}
+	//
+	//	resourceSetV17, err = v17.NewClusterResourceSet(c)
+	//	if err != nil {
+	//		return nil, microerror.Mask(err)
+	//	}
+	//}
 
 	var resourceSetV18 *controller.ResourceSet
 	{
@@ -872,17 +838,17 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	}
 
 	resourceSets := []*controller.ResourceSet{
-		resourceSetV12,
-		resourceSetV12Patch1,
-		resourceSetV13,
-		resourceSetV14,
-		resourceSetV14Patch1,
-		resourceSetV14Patch2,
-		resourceSetV14Patch3,
-		resourceSetV15,
-		resourceSetV16,
-		resourceSetV16Patch1,
-		resourceSetV17,
+		//resourceSetV12,
+		//resourceSetV12Patch1,
+		//resourceSetV13,
+		//resourceSetV14,
+		//resourceSetV14Patch1,
+		//resourceSetV14Patch2,
+		//resourceSetV14Patch3,
+		//resourceSetV15,
+		//resourceSetV16,
+		//resourceSetV16Patch1,
+		//resourceSetV17,
 		resourceSetV18,
 		resourceSetV18patch1,
 		resourceSetV19,
