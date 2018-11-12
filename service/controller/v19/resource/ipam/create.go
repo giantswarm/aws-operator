@@ -42,7 +42,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		//
 		var statusAZs []v1alpha1.AWSConfigStatusAWSAvailabilityZone
 		var subnetCIDR net.IPNet
-		if customObject.ClusterStatus().HasUpdatedCondition() {
+		if customObject.ClusterStatus().HasUpdatingCondition() || customObject.ClusterStatus().HasUpdatedCondition() {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "reusing allocated cluster CIDR")
 
 			statusAZs = []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
