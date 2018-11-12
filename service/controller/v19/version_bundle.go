@@ -8,9 +8,9 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "TODO",
-				Description: "Add changes here.",
-				Kind:        versionbundle.KindChanged,
+				Component:   "aws-operator",
+				Description: "Added support for using multiple availability zones for workers.",
+				Kind:        versionbundle.KindAdded,
 			},
 		},
 		Components: []versionbundle.Component{
