@@ -32,10 +32,25 @@ jobs:
         chmod +x ./architect
         ./architect version
 
+    - run: |
+        date +"%Y" > /tmp/year
+        date +"%m" > /tmp/month
+        date +"%d" > /tmp/day
+    - restore_cache:
+        keys:
+        - go-cache-v1-{{ checksum "/tmp/year" }}-{{ checksum "/tmp/month" }}-{{ checksum "/tmp/day" }}
+        - go-cache-v1-{{ checksum "/tmp/year" }}-{{ checksum "/tmp/month" }}
+        - go-cache-v1-{{ checksum "/tmp/year" }}
+
     - run: ./architect build
 
     - store_test_results:
         path: /tmp/results
+
+    - save_cache:
+        key: go-cache-v1-{{ checksum "/tmp/year" }}-{{ checksum "/tmp/month" }}-{{ checksum "/tmp/day" }}
+        paths:
+        - /tmp/go/cache
 
     - persist_to_workspace:
         root: .
@@ -229,12 +244,12 @@ workflows:
 
 
 
-      - e2eTestCurMasterClusterState:
-          requires:
-            - master
-      - e2eTestWIPMasterClusterState:
-          requires:
-            - master
+#      - e2eTestCurMasterClusterState:
+#          requires:
+#            - master
+#      - e2eTestWIPMasterClusterState:
+#          requires:
+#            - master
       - e2eTestCurPRClusterState:
           requires:
             - pr
@@ -244,12 +259,12 @@ workflows:
 
 
 
-      - e2eTestCurMasterDraining:
-          requires:
-            - master
-      - e2eTestWIPMasterDraining:
-          requires:
-            - master
+#      - e2eTestCurMasterDraining:
+#          requires:
+#            - master
+#      - e2eTestWIPMasterDraining:
+#          requires:
+#            - master
       - e2eTestCurPRDraining:
           requires:
             - pr
@@ -274,12 +289,12 @@ workflows:
 
 
 
-      - e2eTestCurMasterRecreateCluster:
-          requires:
-            - master
-      - e2eTestWIPMasterRecreateCluster:
-          requires:
-            - master
+#      - e2eTestCurMasterRecreateCluster:
+#          requires:
+#            - master
+#      - e2eTestWIPMasterRecreateCluster:
+#          requires:
+#            - master
       - e2eTestCurPRRecreateCluster:
           requires:
             - pr
@@ -289,12 +304,12 @@ workflows:
 
 
 
-      - e2eTestCurMasterScaling:
-          requires:
-            - master
-      - e2eTestWIPMasterScaling:
-          requires:
-            - master
+#      - e2eTestCurMasterScaling:
+#          requires:
+#            - master
+#      - e2eTestWIPMasterScaling:
+#          requires:
+#            - master
       - e2eTestCurPRScaling:
           requires:
             - pr
@@ -304,9 +319,9 @@ workflows:
 
 
 
-      - e2eTestCurMasterUpdate:
-          requires:
-          - master
+#      - e2eTestCurMasterUpdate:
+#          requires:
+#          - master
       - e2eTestCurPRUpdate:
           requires:
           - pr

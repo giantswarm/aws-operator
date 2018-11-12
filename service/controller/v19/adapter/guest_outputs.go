@@ -14,7 +14,7 @@ type GuestOutputsAdapter struct {
 }
 
 func (a *GuestOutputsAdapter) Adapt(config Config) error {
-	a.Route53Enabled = route53Enabled(config)
+	a.Route53Enabled = config.Route53Enabled
 	a.Master.DockerVolume.ResourceName = config.StackState.DockerVolumeResourceName
 	a.Master.ImageID = config.StackState.MasterImageID
 	a.Master.Instance.ResourceName = config.StackState.MasterInstanceResourceName

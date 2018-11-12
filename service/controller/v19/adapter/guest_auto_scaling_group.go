@@ -29,8 +29,8 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	a.WorkerAZ = key.AvailabilityZone(cfg.CustomObject)
 	a.ASGMaxSize = workers + 1
 	a.ASGMinSize = workers
-	a.ASGType = asgType(cfg)
-	a.ClusterID = clusterID(cfg)
+	a.ASGType = key.KindWorker
+	a.ClusterID = key.ClusterID(cfg.CustomObject)
 	a.MaxBatchSize = workerCountRatio(workers, asgMaxBatchSizeRatio)
 	a.MinInstancesInService = workerCountRatio(workers, asgMinInstancesRatio)
 	a.HealthCheckGracePeriod = gracePeriodSeconds

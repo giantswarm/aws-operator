@@ -28,9 +28,9 @@ type BlockDeviceMapping struct {
 }
 
 func (l *GuestLaunchConfigAdapter) Adapt(config Config) error {
-	l.ASGType = asgType(config)
+	l.ASGType = key.KindWorker
 	l.WorkerInstanceType = key.WorkerInstanceType(config.CustomObject)
-	l.WorkerImageID = workerImageID(config)
+	l.WorkerImageID = config.StackState.WorkerImageID
 	l.WorkerAssociatePublicIPAddress = false
 
 	if config.StackState.WorkerDockerVolumeSizeGB <= 0 {
@@ -55,9 +55,9 @@ func (l *GuestLaunchConfigAdapter) Adapt(config Config) error {
 	c := SmallCloudconfigConfig{
 		Region:    key.Region(config.CustomObject),
 		Registry:  key.AWSCliContainerRegistry(config.CustomObject),
-		Role:      prefixWorker,
-		S3HTTPURL: key.SmallCloudConfigS3HTTPURL(config.CustomObject, accountID, prefixWorker),
-		S3URL:     key.SmallCloudConfigS3URL(config.CustomObject, accountID, prefixWorker),
+		Role:      key.KindWorker,
+		S3HTTPURL: key.SmallCloudConfigS3HTTPURL(config.CustomObject, accountID, key.KindWorker),
+		S3URL:     key.SmallCloudConfigS3URL(config.CustomObject, accountID, key.KindWorker),
 	}
 	rendered, err := templates.Render(key.CloudConfigSmallTemplates(), c)
 	if err != nil {
