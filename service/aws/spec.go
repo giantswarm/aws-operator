@@ -19,3 +19,8 @@ type KMSClient interface {
 type STSClient interface {
 	GetCallerIdentity(*sts.GetCallerIdentityInput) (*sts.GetCallerIdentityOutput, error)
 }
+
+type Interface interface {
+	GetAccountID() (string, error)
+	GetKeyArn(clusterID string) (string, error)
+}
