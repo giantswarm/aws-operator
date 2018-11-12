@@ -3,6 +3,7 @@ package key
 import (
 	"crypto/sha1"
 	"fmt"
+	"net"
 	"strconv"
 	"strings"
 	"time"
@@ -13,6 +14,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v19/templates/cloudformation/hostpost"
 	"github.com/giantswarm/aws-operator/service/controller/v19/templates/cloudformation/hostpre"
 	"github.com/giantswarm/microerror"
+	"github.com/richardlehane/crock32"
 )
 
 const (
@@ -436,6 +438,59 @@ func SmallCloudConfigS3HTTPURL(customObject v1alpha1.AWSConfig, accountID string
 
 func SmallCloudConfigS3URL(customObject v1alpha1.AWSConfig, accountID string, role string) string {
 	return fmt.Sprintf("s3://%s", SmallCloudConfigPath(customObject, accountID, role))
+}
+
+// SubnetID generates Crockford Base32 (http://www.crockford.com/wrmg/base32.html)
+// encoded representation of subnet CIDR to be used as a shared identifier for
+// specific network e.g. in CloudFormation template resource names.
+func SubnetID(cidr string) (string, error) {
+	var bs []byte
+	{
+		_, snet, err := net.ParseCIDR(cidr)
+		if err != nil {
+			return "", microerror.Maskf(malformedCloudConfigKeyError, err.Error())
+		}
+
+		bs = snet.IP
+		bs = append(bs, snet.Mask...)
+	}
+
+	var id string
+	{
+		for i := 0; i < len(bs); i += 8 {
+			var num uint64
+			switch {
+			case len(bs)-i > 7:
+				num |= uint64(bs[i+7])
+				fallthrough
+			case len(bs)-i > 6:
+				num |= uint64(bs[i+6]) << 8
+				fallthrough
+			case len(bs)-i > 5:
+				num |= uint64(bs[i+5]) << 16
+				fallthrough
+			case len(bs)-i > 4:
+				num |= uint64(bs[i+4]) << 24
+				fallthrough
+			case len(bs)-i > 3:
+				num |= uint64(bs[i+3]) << 32
+				fallthrough
+			case len(bs)-i > 2:
+				num |= uint64(bs[i+2]) << 40
+				fallthrough
+			case len(bs)-i > 1:
+				num |= uint64(bs[i+1]) << 48
+				fallthrough
+			case len(bs)-i > 0:
+				num |= uint64(bs[i]) << 56
+			default:
+				break
+			}
+			id = id + crock32.Encode(num)
+		}
+	}
+
+	return id, nil
 }
 
 func SubnetName(customObject v1alpha1.AWSConfig, suffix string) string {

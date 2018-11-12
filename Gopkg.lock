@@ -892,6 +892,14 @@
   revision = "185b4288413d2a0dd0806f78c90dde719829e5ae"
 
 [[projects]]
+  branch = "master"
+  digest = "1:929f128c45b1313e322fafb28d50b85ddc294c353adc5adcd69f865e3a9a644f"
+  name = "github.com/richardlehane/crock32"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "37983cc40bb96bb057018ce9db1d2f6588beb3da"
+
+[[projects]]
   digest = "1:6a4a11ba764a56d2758899ec6f3848d24698d48442ebce85ee7a3f63284526cd"
   name = "github.com/spf13/afero"
   packages = [
@@ -1749,6 +1757,7 @@
     "github.com/giantswarm/statusresource",
     "github.com/giantswarm/versionbundle",
     "github.com/prometheus/client_golang/prometheus",
+    "github.com/richardlehane/crock32",
     "github.com/spf13/afero",
     "github.com/spf13/viper",
     "github.com/stretchr/testify/assert",
