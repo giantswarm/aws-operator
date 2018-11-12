@@ -30,7 +30,7 @@ type BlockDeviceMapping struct {
 func (l *GuestLaunchConfigAdapter) Adapt(config Config) error {
 	l.ASGType = key.KindWorker
 	l.WorkerInstanceType = key.WorkerInstanceType(config.CustomObject)
-	l.WorkerImageID = workerImageID(config)
+	l.WorkerImageID = config.StackState.WorkerImageID
 	l.WorkerAssociatePublicIPAddress = false
 
 	if config.StackState.WorkerDockerVolumeSizeGB <= 0 {
