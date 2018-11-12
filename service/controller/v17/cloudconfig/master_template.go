@@ -2,6 +2,7 @@ package cloudconfig
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_6_1"
@@ -53,6 +54,8 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 		params.RegistryDomain = c.registryDomain
 		params.SSOPublicKey = c.SSOPublicKey
 	}
+
+	c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("labels: %#v", params.Cluster.Kubernetes.Kubelet.Labels))
 
 	var newCloudConfig *k8scloudconfig.CloudConfig
 	{

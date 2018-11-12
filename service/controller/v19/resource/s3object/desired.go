@@ -2,6 +2,7 @@ package s3object
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/giantswarm/aws-operator/service/controller/v19/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v19/key"
@@ -47,6 +48,8 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 
 	output := map[string]BucketObjectState{}
+
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("labels: %#v", customObject.Spec.Cluster.Kubernetes.Kubelet.Labels))
 
 	{
 		b, err := r.cloudConfig.NewMasterTemplate(ctx, customObject, clusterCerts, clusterKeys)
