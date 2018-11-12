@@ -18,7 +18,7 @@ import (
 const (
 	// CloudConfigVersion defines the version of k8scloudconfig in use.
 	// It is used in the main stack output and S3 object paths.
-	CloudConfigVersion = "v_3_7_0"
+	CloudConfigVersion = "v_3_7_1"
 
 	// CloudProviderTagName is used to add Cloud Provider tags to AWS resources.
 	CloudProviderTagName = "kubernetes.io/cluster/%s"
@@ -91,6 +91,12 @@ const (
 const (
 	NodeDrainerLifecycleHookName = "NodeDrainer"
 	WorkerASGRef                 = "workerAutoScalingGroup"
+)
+
+const (
+	KindMaster  = "master"
+	KindIngress = "ingress"
+	KindWorker  = "worker"
 )
 
 func ClusterAPIEndpoint(customObject v1alpha1.AWSConfig) string {
@@ -219,10 +225,6 @@ func ClusterTags(customObject v1alpha1.AWSConfig, installationName string) map[s
 	}
 
 	return tags
-}
-
-func ClusterVersion(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.Cluster.Version
 }
 
 func CustomerID(customObject v1alpha1.AWSConfig) string {

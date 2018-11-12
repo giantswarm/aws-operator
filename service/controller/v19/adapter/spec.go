@@ -12,10 +12,6 @@ import (
 )
 
 const (
-	prefixMaster  = "master"
-	prefixWorker  = "worker"
-	prefixIngress = "ingress"
-
 	// asgMaxBatchSizeRatio is the % of instances to be updated during a
 	// rolling update.
 	asgMaxBatchSizeRatio = 0.3
@@ -54,10 +50,6 @@ const (
 
 	httpPort  = 80
 	httpsPort = 443
-
-	// RootDirElement marks the directory that should be taken as root when evaluating
-	// template's relative paths.
-	RootDirElement = "aws-operator"
 )
 
 // APIWhitelist defines guest cluster k8s api whitelisting.

@@ -20,7 +20,7 @@ type GuestVPCAdapter struct {
 
 func (v *GuestVPCAdapter) Adapt(cfg Config) error {
 	v.CidrBlock = key.ClusterNetworkCIDR(cfg.CustomObject)
-	v.ClusterID = clusterID(cfg)
+	v.ClusterID = key.ClusterID(cfg.CustomObject)
 	v.InstallationName = cfg.InstallationName
 	v.HostAccountID = cfg.HostAccountID
 	v.PeerVPCID = key.PeerID(cfg.CustomObject)

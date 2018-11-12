@@ -216,25 +216,6 @@ func Test_ClusterTags(t *testing.T) {
 	}
 }
 
-func Test_ClusterVersion(t *testing.T) {
-	t.Parallel()
-	expectedVersion := "v_0_1_0"
-
-	cluster := v1alpha1.Cluster{
-		Version: expectedVersion,
-	}
-
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: cluster,
-		},
-	}
-
-	if ClusterVersion(customObject) != expectedVersion {
-		t.Fatalf("Expected cluster version %s but was %s", expectedVersion, ClusterVersion(customObject))
-	}
-}
-
 func Test_EC2ServiceDomain(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
