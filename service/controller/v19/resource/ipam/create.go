@@ -45,7 +45,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "reusing allocated cluster CIDR")
 
 			statusAZs = []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
-				v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+				{
 					Name: key.AvailabilityZone(customObject),
 					Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
 						Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
