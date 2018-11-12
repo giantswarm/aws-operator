@@ -6,7 +6,6 @@ import (
 	"math/bits"
 	"math/rand"
 	"net"
-	"strings"
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
@@ -34,57 +33,82 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if subnet needs to be allocated for cluster")
 
 	if key.ClusterNetworkCIDR(customObject) == "" {
-		var subnetCIDR net.IPNet
-		// TODO(tuommaki): Remove this when all tenant clusters are upgraded to this
-		// version and have subnet allocation in their Status field.
+		// TODO remove the status checks for older clusters when all tenant clusters
+		// are upgraded to this version and have subnet allocation in their Status
+		// field.
 		//
 		//     https://github.com/giantswarm/giantswarm/issues/4192
 		//
-		if key.CIDR(customObject) != "" && strings.ToLower(key.CIDR(customObject)) != "deprecated" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "found out allocated cluster CIDR from legacy field in CR")
+		var statusAZs []v1alpha1.AWSConfigStatusAWSAvailabilityZone
+		var subnetCIDR net.IPNet
+		if customObject.ClusterStatus().HasUpdatedCondition() {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "reusing allocated cluster CIDR")
+
+			statusAZs = []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+				v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+					Name: key.AvailabilityZone(customObject),
+					Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
+						Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
+							CIDR: key.PrivateSubnetCIDR(customObject),
+						},
+						Public: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
+							CIDR: key.PrivateSubnetCIDR(customObject),
+						},
+					},
+				},
+			}
 
 			_, c, err := net.ParseCIDR(key.CIDR(customObject))
 			if err != nil {
 				return microerror.Mask(err)
 			}
-
 			subnetCIDR = *c
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("reused allocated cluster CIDR %#q", subnetCIDR))
+
 		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find out allocated subnet for cluster")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "allocating subnet for cluster")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "allocating cluster subnet CIDR")
 
 			subnetCIDR, err = r.allocateSubnet(ctx)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", "allocated subnet for cluster")
+			randomAZs, err := r.selectRandomAZs(key.AvailabilityZones(customObject))
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			statusAZs, err = splitSubnetToStatusAZs(subnetCIDR, randomAZs)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("allocated cluster subnet CIDR %#q", subnetCIDR))
 		}
 
-		azs, err := r.selectRandomAZs(key.AvailabilityZones(customObject))
-		if err != nil {
-			return microerror.Mask(err)
+		// Once we have all information together, regardless the update path, we
+		// update the CR status. Note that we try to use the latest resource version
+		// of the CR to get the status update properly sorted without any conflict.
+		{
+			r.logger.LogCtx(ctx, "level", "debug", "message", "updating CR status")
+
+			customObject, err := r.g8sClient.ProviderV1alpha1().AWSConfigs(customObject.Namespace).Get(customObject.Name, metav1.GetOptions{})
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			customObject.Status.Cluster.Network.CIDR = subnetCIDR.String()
+			customObject.Status.AWS.AvailabilityZones = statusAZs
+
+			_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(customObject.Namespace).UpdateStatus(customObject)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "updated CR status")
 		}
 
-		statusAZs, err := splitSubnetToStatusAZs(subnetCIDR, azs)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		// Ensure that latest version of customObject is used.
-		customObject, err := r.g8sClient.ProviderV1alpha1().AWSConfigs(customObject.Namespace).Get(customObject.Name, metav1.GetOptions{})
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		customObject.Status.Cluster.Network.CIDR = subnetCIDR.String()
-		customObject.Status.AWS.AvailabilityZones = statusAZs
-		_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(customObject.Namespace).UpdateStatus(customObject)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found out subnet %#q allocated for cluster", subnetCIDR))
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found out subnet doesn't need to be allocated for cluster")
 	}
