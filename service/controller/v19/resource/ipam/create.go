@@ -53,7 +53,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 							CIDR: key.PrivateSubnetCIDR(customObject),
 						},
 						Public: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
-							CIDR: key.PrivateSubnetCIDR(customObject),
+							CIDR: key.PublicSubnetCIDR(customObject),
 						},
 					},
 				},
