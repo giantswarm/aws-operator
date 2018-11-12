@@ -2,6 +2,7 @@ package key
 
 import (
 	"fmt"
+	"net"
 	"reflect"
 	"strings"
 	"testing"
@@ -712,45 +713,30 @@ func Test_SecurityGroupName(t *testing.T) {
 
 func Test_SubnetID(t *testing.T) {
 	testCases := []struct {
-		name         string
-		cidr         string
-		expectedID   string
-		errorMatcher func(error) bool
+		name       string
+		cidr       string
+		expectedID string
 	}{
 		{
-			name:         "case 0: generate ID for IPv4 subnet: 10.100.4.0/24",
-			cidr:         "10.10.4.0/24",
-			expectedID:   "m2g403zzzzr0",
-			errorMatcher: nil,
+			name:       "case 0: generate ID for IPv4 subnet: 10.100.4.0/24",
+			cidr:       "10.10.4.0/24",
+			expectedID: "10o10o4o0m24",
 		},
 		{
-			name:         "case 1: generate ID for IPv6 subnet: ",
-			cidr:         "fe80::4f5d:eebf:3c34:1f7d/96",
-			expectedID:   "fx000000000004yqfeqw000000fzzzzzzzzzzzzfzzzzzw000000",
-			errorMatcher: nil,
-		},
-		{
-			name:         "case 2: invalid cidr",
-			cidr:         "invalid cidr",
-			expectedID:   "",
-			errorMatcher: IsMalformedCloudConfigKey,
+			name:       "case 1: generate ID for IPv6 subnet: ",
+			cidr:       "fe80::4f5d:eebf:0:0/96",
+			expectedID: "fe80xx4f5dxeebfx0x0m96",
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			id, err := SubnetID(tc.cidr)
-
-			switch {
-			case err == nil && tc.errorMatcher == nil:
-				// correct; carry on
-			case err != nil && tc.errorMatcher == nil:
-				t.Fatalf("error == %#v, want nil", err)
-			case err == nil && tc.errorMatcher != nil:
-				t.Fatalf("error == nil, want non-nil")
-			case !tc.errorMatcher(err):
-				t.Fatalf("error == %#v, want matching", err)
+			_, snet, err := net.ParseCIDR(tc.cidr)
+			if err != nil {
+				t.Fatal(err)
 			}
+
+			id := SubnetID(snet)
 
 			if id != tc.expectedID {
 				t.Fatalf("SubnetID == %q, want %q", id, tc.expectedID)
