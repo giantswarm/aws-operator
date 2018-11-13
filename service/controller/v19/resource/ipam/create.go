@@ -61,7 +61,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "allocated subnet for cluster")
 		}
 
-		azs, err := r.selectRandomAZs(key.AvailabilityZones(customObject))
+		azs, err := r.selectRandomAZs(key.RequestedAvailabilityZones(customObject))
 		if err != nil {
 			return microerror.Mask(err)
 		}

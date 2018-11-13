@@ -1,6 +1,7 @@
 package adapter
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
@@ -9,46 +10,96 @@ import (
 func TestAdapterSubnetsRegularFields(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
-		description                              string
-		customObject                             v1alpha1.AWSConfig
-		expectedError                            bool
-		expectedPublicSubnetAZ                   string
-		expectedPublicSubnetCIDR                 string
-		expectedPublicSubnetName                 string
-		expectedPublicSubnetMapPublicIPOnLaunch  bool
-		expectedPrivateSubnetAZ                  string
-		expectedPrivateSubnetCIDR                string
-		expectedPrivateSubnetName                string
-		expectedPrivateSubnetMapPublicIPOnLaunch bool
+		name                   string
+		customObject           v1alpha1.AWSConfig
+		expectedPublicSubnets  []Subnet
+		expectedPrivateSubnets []Subnet
+		errorMatcher           func(error) bool
 	}{
 		{
-			description: "basic matching, all fields present",
+			name: "case 0: basic test that subnets are present for all three AZs",
 			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						AZ: "eu-central-1a",
-					},
-					Cluster: v1alpha1.Cluster{
-						ID: "test-cluster",
-					},
-				},
 				Status: v1alpha1.AWSConfigStatus{
-					Cluster: v1alpha1.StatusCluster{
-						Network: v1alpha1.StatusClusterNetwork{
-							CIDR: "10.1.1.0/24",
+					AWS: v1alpha1.AWSConfigStatusAWS{
+						AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+							v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+								Name: "eu-west-1b",
+								Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
+									Public: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
+										CIDR: "10.100.1.0/25",
+									},
+									Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
+										CIDR: "10.100.1.128/25",
+									},
+								},
+							},
+							v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+								Name: "eu-west-1a",
+								Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
+									Public: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
+										CIDR: "10.100.2.0/25",
+									},
+									Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
+										CIDR: "10.100.2.128/25",
+									},
+								},
+							},
+							v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+								Name: "eu-west-1c",
+								Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
+									Public: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
+										CIDR: "10.100.3.0/25",
+									},
+									Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
+										CIDR: "10.100.3.128/25",
+									},
+								},
+							},
 						},
 					},
 				},
 			},
-			expectedError:                            false,
-			expectedPublicSubnetAZ:                   "eu-central-1a",
-			expectedPublicSubnetCIDR:                 "10.1.1.128/25",
-			expectedPublicSubnetName:                 "test-cluster-public",
-			expectedPublicSubnetMapPublicIPOnLaunch:  false,
-			expectedPrivateSubnetAZ:                  "eu-central-1a",
-			expectedPrivateSubnetCIDR:                "10.1.1.0/25",
-			expectedPrivateSubnetName:                "test-cluster-private",
-			expectedPrivateSubnetMapPublicIPOnLaunch: false,
+			expectedPublicSubnets: []Subnet{
+				{
+					Index:            0,
+					AvailabilityZone: "eu-west-1a",
+					CIDR:             "10.100.2.0/25",
+					Name:             "PublicSubnet0",
+				},
+				{
+					Index:            1,
+					AvailabilityZone: "eu-west-1b",
+					CIDR:             "10.100.1.0/25",
+					Name:             "PublicSubnet1",
+				},
+				{
+					Index:            2,
+					AvailabilityZone: "eu-west-1c",
+					CIDR:             "10.100.3.0/25",
+					Name:             "PublicSubnet2",
+				},
+			},
+			expectedPrivateSubnets: []Subnet{
+				{
+					Index:            0,
+					AvailabilityZone: "eu-west-1a",
+					CIDR:             "10.100.2.128/25",
+					Name:             "PrivateSubnet0",
+				},
+				{
+					Index:            1,
+					AvailabilityZone: "eu-west-1b",
+					CIDR:             "10.100.1.128/25",
+					Name:             "PrivateSubnet1",
+				},
+				{
+					Index:            2,
+					AvailabilityZone: "eu-west-1c",
+					CIDR:             "10.100.3.128/25",
+					Name:             "PrivateSubnet2",
+				},
+			},
+			errorMatcher: nil,
 		},
 	}
 
@@ -56,52 +107,30 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 		a := Adapter{}
 		clients := Clients{}
 
-		t.Run(tc.description, func(t *testing.T) {
+		t.Run(tc.name, func(t *testing.T) {
 			cfg := Config{
-				CustomObject:          tc.customObject,
-				Clients:               clients,
-				PrivateSubnetMaskBits: 25,
-				PublicSubnetMaskBits:  25,
+				CustomObject: tc.customObject,
+				Clients:      clients,
 			}
+
 			err := a.Guest.Subnets.Adapt(cfg)
-			if tc.expectedError && err == nil {
-				t.Error("expected error didn't happen")
+
+			switch {
+			case err == nil && tc.errorMatcher == nil:
+				// correct; carry on
+			case err != nil && tc.errorMatcher == nil:
+				t.Fatalf("error == %#v, want nil", err)
+			case err == nil && tc.errorMatcher != nil:
+				t.Fatalf("error == nil, want non-nil")
+			case !tc.errorMatcher(err):
+				t.Fatalf("error == %#v, want matching", err)
 			}
 
-			if !tc.expectedError && err != nil {
-				t.Errorf("unexpected error %v", err)
+			if !reflect.DeepEqual(a.Guest.Subnets.PublicSubnets, tc.expectedPublicSubnets) {
+				t.Fatalf("got PublicSubnets %#v, expected %#v", a.Guest.Subnets.PublicSubnets, tc.expectedPublicSubnets)
 			}
-
-			if a.Guest.Subnets.PublicSubnetAZ != tc.expectedPublicSubnetAZ {
-				t.Errorf("unexpected PublicSubnetAZ, got %q, want %q", a.Guest.Subnets.PublicSubnetAZ, tc.expectedPublicSubnetAZ)
-			}
-
-			if a.Guest.Subnets.PublicSubnetCIDR != tc.expectedPublicSubnetCIDR {
-				t.Errorf("unexpected PublicSubnetCIDR, got %q, want %q", a.Guest.Subnets.PublicSubnetCIDR, tc.expectedPublicSubnetCIDR)
-			}
-
-			if a.Guest.Subnets.PublicSubnetName != tc.expectedPublicSubnetName {
-				t.Errorf("unexpected PublicSubnetName, got %q, want %q", a.Guest.Subnets.PublicSubnetName, tc.expectedPublicSubnetName)
-			}
-
-			if a.Guest.Subnets.PublicSubnetMapPublicIPOnLaunch != tc.expectedPublicSubnetMapPublicIPOnLaunch {
-				t.Errorf("unexpected PublicSubnetMapPublicIPOnLaunch, got %t, want %t", a.Guest.Subnets.PublicSubnetMapPublicIPOnLaunch, tc.expectedPublicSubnetMapPublicIPOnLaunch)
-			}
-
-			if a.Guest.Subnets.PrivateSubnetAZ != tc.expectedPrivateSubnetAZ {
-				t.Errorf("unexpected PrivateSubnetAZ, got %q, want %q", a.Guest.Subnets.PrivateSubnetAZ, tc.expectedPrivateSubnetAZ)
-			}
-
-			if a.Guest.Subnets.PrivateSubnetCIDR != tc.expectedPrivateSubnetCIDR {
-				t.Errorf("unexpected PrivateSubnetCIDR, got %q, want %q", a.Guest.Subnets.PrivateSubnetCIDR, tc.expectedPrivateSubnetCIDR)
-			}
-
-			if a.Guest.Subnets.PrivateSubnetName != tc.expectedPrivateSubnetName {
-				t.Errorf("unexpected PrivateSubnetName, got %q, want %q", a.Guest.Subnets.PrivateSubnetName, tc.expectedPrivateSubnetName)
-			}
-
-			if a.Guest.Subnets.PrivateSubnetMapPublicIPOnLaunch != tc.expectedPrivateSubnetMapPublicIPOnLaunch {
-				t.Errorf("unexpected PrivateSubnetMapPublicIPOnLaunch, got %t, want %t", a.Guest.Subnets.PrivateSubnetMapPublicIPOnLaunch, tc.expectedPrivateSubnetMapPublicIPOnLaunch)
+			if !reflect.DeepEqual(a.Guest.Subnets.PrivateSubnets, tc.expectedPrivateSubnets) {
+				t.Fatalf("got PrivateSubnets %#v, expected %#v", a.Guest.Subnets.PrivateSubnets, tc.expectedPrivateSubnets)
 			}
 		})
 	}

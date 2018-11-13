@@ -3,6 +3,7 @@ package key
 import (
 	"crypto/sha1"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -111,8 +112,12 @@ func AvailabilityZone(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.AZ
 }
 
-func AvailabilityZones(customObject v1alpha1.AWSConfig) int {
-	return customObject.Spec.AWS.AvailabilityZones
+func AvailabilityZones(customObject v1alpha1.AWSConfig) []v1alpha1.AWSConfigStatusAWSAvailabilityZone {
+	zones := customObject.Status.AWS.AvailabilityZones
+	sort.Slice(zones, func(i, j int) bool {
+		return zones[i].Name < zones[j].Name
+	})
+	return zones
 }
 
 func AWSCliContainerRegistry(customObject v1alpha1.AWSConfig) string {
@@ -402,6 +407,10 @@ func RegionARN(customObject v1alpha1.AWSConfig) string {
 	}
 
 	return regionARN
+}
+
+func RequestedAvailabilityZones(customObject v1alpha1.AWSConfig) int {
+	return customObject.Spec.AWS.AvailabilityZones
 }
 
 func RoleName(customObject v1alpha1.AWSConfig, profileType string) string {
