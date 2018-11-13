@@ -1,6 +1,7 @@
 package adapter
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
@@ -9,26 +10,41 @@ import (
 func TestAdapterRouteTablesRegularFields(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
-		description                   string
-		customObject                  v1alpha1.AWSConfig
-		expectedError                 bool
-		expectedHostClusterCIDR       string
-		expectedPublicRouteTableName  string
-		expectedPrivateRouteTableName string
+		description                    string
+		customObject                   v1alpha1.AWSConfig
+		expectedError                  bool
+		expectedHostClusterCIDR        string
+		expectedPublicRouteTableName   RouteTableName
+		expectedPrivateRouteTableNames []RouteTableName
 	}{
 		{
 			description: "basic matching, all fields present",
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						AvailabilityZones: 2,
+					},
 					Cluster: v1alpha1.Cluster{
 						ID: "test-cluster",
 					},
 				},
 			},
-			expectedError:                 false,
-			expectedHostClusterCIDR:       "10.0.0.0/16",
-			expectedPublicRouteTableName:  "test-cluster-public",
-			expectedPrivateRouteTableName: "test-cluster-private",
+			expectedError:           false,
+			expectedHostClusterCIDR: "10.0.0.0/16",
+			expectedPublicRouteTableName: RouteTableName{
+				ResourceName: "PublicRouteTable00",
+				InternalName: "test-cluster-public",
+			},
+			expectedPrivateRouteTableNames: []RouteTableName{
+				{
+					ResourceName: "PrivateRouteTable00",
+					InternalName: "test-cluster-private00",
+				},
+				{
+					ResourceName: "PrivateRouteTable01",
+					InternalName: "test-cluster-private01",
+				},
+			},
 		},
 	}
 
@@ -61,12 +77,12 @@ func TestAdapterRouteTablesRegularFields(t *testing.T) {
 				t.Errorf("unexpected HostClusterCIDR, got %q, want %q", a.Guest.RouteTables.HostClusterCIDR, tc.expectedHostClusterCIDR)
 			}
 
-			if a.Guest.RouteTables.PublicRouteTableName != tc.expectedPublicRouteTableName {
-				t.Errorf("unexpected PublicRouteTableName, got %q, want %q", a.Guest.RouteTables.PublicRouteTableName, tc.expectedPrivateRouteTableName)
+			if !reflect.DeepEqual(a.Guest.RouteTables.PublicRouteTableName, tc.expectedPublicRouteTableName) {
+				t.Errorf("unexpected PublicRouteTableName, got %q, want %q", a.Guest.RouteTables.PublicRouteTableName, tc.expectedPublicRouteTableName)
 			}
 
-			if a.Guest.RouteTables.PrivateRouteTableName != tc.expectedPrivateRouteTableName {
-				t.Errorf("unexpected PrivateRouteTableName, got %q, want %q", a.Guest.RouteTables.PrivateRouteTableName, tc.expectedPrivateRouteTableName)
+			if !reflect.DeepEqual(a.Guest.RouteTables.PrivateRouteTableNames, tc.expectedPrivateRouteTableNames) {
+				t.Errorf("unexpected PrivateRouteTableNames, got %q, want %q", a.Guest.RouteTables.PrivateRouteTableNames, tc.expectedPrivateRouteTableNames)
 			}
 		})
 	}

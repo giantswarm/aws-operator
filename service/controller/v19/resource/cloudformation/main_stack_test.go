@@ -99,8 +99,9 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 						IdleTimeoutSeconds: 3600,
 					},
 				},
-				Region: "eu-central-1",
-				AZ:     "eu-central-1a",
+				Region:            "eu-central-1",
+				AZ:                "eu-central-1a",
+				AvailabilityZones: 1,
 				Masters: []v1alpha1.AWSConfigSpecAWSNode{
 					{
 						ImageID:      "ami-1234-master",
@@ -294,17 +295,17 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Fatal("NATGateway element not found")
 	}
-	if !strings.Contains(body, "PublicRouteTable:") {
+	if !strings.Contains(body, "PublicRouteTable00:") {
 		fmt.Println(body)
-		t.Fatal("PublicRouteTable element not found")
+		t.Fatal("PublicRouteTable00 element not found")
 	}
 	if !strings.Contains(body, "PublicSubnet:") {
 		fmt.Println(body)
 		t.Fatal("PublicSubnet element not found")
 	}
-	if !strings.Contains(body, "PrivateRouteTable:") {
+	if !strings.Contains(body, "PrivateRouteTable00:") {
 		fmt.Println(body)
-		t.Fatal("PrivateRouteTable element not found")
+		t.Fatal("PrivateRouteTable00 element not found")
 	}
 	if !strings.Contains(body, "PrivateSubnet:") {
 		fmt.Println(body)

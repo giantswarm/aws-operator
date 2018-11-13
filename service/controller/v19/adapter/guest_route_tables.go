@@ -1,15 +1,22 @@
 package adapter
 
 import (
+	"fmt"
+
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v19/key"
 )
 
+type RouteTableName struct {
+	ResourceName string
+	InternalName string
+}
+
 type GuestRouteTablesAdapter struct {
-	HostClusterCIDR       string
-	PublicRouteTableName  string
-	PrivateRouteTableName string
+	HostClusterCIDR        string
+	PublicRouteTableName   RouteTableName
+	PrivateRouteTableNames []RouteTableName
 }
 
 func (r *GuestRouteTablesAdapter) Adapt(cfg Config) error {
@@ -19,8 +26,19 @@ func (r *GuestRouteTablesAdapter) Adapt(cfg Config) error {
 	}
 
 	r.HostClusterCIDR = hostClusterCIDR
-	r.PublicRouteTableName = key.RouteTableName(cfg.CustomObject, suffixPublic)
-	r.PrivateRouteTableName = key.RouteTableName(cfg.CustomObject, suffixPrivate)
+	r.PublicRouteTableName = RouteTableName{
+		ResourceName: "PublicRouteTable00",
+		InternalName: key.RouteTableName(cfg.CustomObject, suffixPublic),
+	}
+
+	for i := 0; i < key.AvailabilityZones(cfg.CustomObject); i++ {
+		suffix := fmt.Sprintf("%s%02d", suffixPrivate, i)
+		rtName := RouteTableName{
+			ResourceName: fmt.Sprintf("PrivateRouteTable%02d", i),
+			InternalName: key.RouteTableName(cfg.CustomObject, suffix),
+		}
+		r.PrivateRouteTableNames = append(r.PrivateRouteTableNames, rtName)
+	}
 
 	return nil
 }

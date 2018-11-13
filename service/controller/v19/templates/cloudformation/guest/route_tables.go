@@ -2,21 +2,23 @@ package guest
 
 const RouteTables = `{{ define "route_tables" }}
 {{- $v := .Guest.RouteTables }}
-  PublicRouteTable:
+  {{ $v.PublicRouteTableName.ResourceName }}:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
       - Key: Name
-        Value: {{ $v.PublicRouteTableName }}
+        Value: {{ $v.PublicRouteTableName.InternalName }}
 
-  PrivateRouteTable:
+  {{- range $v.PrivateRouteTableNames }}
+  {{ .ResourceName }}:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
       - Key: Name
-        Value: {{ $v.PrivateRouteTableName }}
+        Value: {{ .InternalName }}
+  {{ end }}
 
   VPCPeeringRoute:
     Type: AWS::EC2::Route
