@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v18patch1/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v18patch1/templates/cloudconfig"
 	"github.com/giantswarm/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_7_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_7_1"
 	"github.com/giantswarm/microerror"
 )
 

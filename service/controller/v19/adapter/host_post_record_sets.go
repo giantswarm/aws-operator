@@ -1,5 +1,7 @@
 package adapter
 
+import "github.com/giantswarm/aws-operator/service/controller/v19/key"
+
 type HostPostRecordSetsAdapter struct {
 	BaseDomain                 string
 	ClusterID                  string
@@ -8,10 +10,10 @@ type HostPostRecordSetsAdapter struct {
 }
 
 func (r *HostPostRecordSetsAdapter) Adapt(config Config) error {
-	r.BaseDomain = baseDomain(config)
-	r.ClusterID = clusterID(config)
-	r.Route53Enabled = route53Enabled(config)
-	r.GuestHostedZoneNameServers = hostedZoneNameServers(config)
+	r.BaseDomain = key.BaseDomain(config.CustomObject)
+	r.ClusterID = key.ClusterID(config.CustomObject)
+	r.Route53Enabled = config.Route53Enabled
+	r.GuestHostedZoneNameServers = config.StackState.HostedZoneNameServers
 
 	return nil
 }
