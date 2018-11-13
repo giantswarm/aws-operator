@@ -31,7 +31,7 @@ func (r *GuestRouteTablesAdapter) Adapt(cfg Config) error {
 		InternalName: key.RouteTableName(cfg.CustomObject, suffixPublic),
 	}
 
-	for i := 0; i < key.AvailabilityZones(cfg.CustomObject); i++ {
+	for i := 0; i < key.SpecAvailabilityZones(cfg.CustomObject); i++ {
 		suffix := fmt.Sprintf("%s%02d", suffixPrivate, i)
 		rtName := RouteTableName{
 			ResourceName: fmt.Sprintf("PrivateRouteTable%02d", i),

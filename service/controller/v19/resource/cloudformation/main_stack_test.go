@@ -488,6 +488,24 @@ func TestMainHostPostTemplateExistingFields(t *testing.T) {
 				},
 			},
 		},
+		Status: v1alpha1.AWSConfigStatus{
+			AWS: v1alpha1.AWSConfigStatusAWS{
+				AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+					v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+
+						Name: "eu-central-1a",
+						Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
+							Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
+								CIDR: "10.100.1.0/25",
+							},
+							Public: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
+								CIDR: "10.100.1.128/25",
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 
 	cfg := testConfig()

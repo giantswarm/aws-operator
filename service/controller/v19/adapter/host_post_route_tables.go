@@ -27,20 +27,29 @@ func (i *HostPostRouteTablesAdapter) Adapt(cfg Config) error {
 		return microerror.Mask(err)
 	}
 
+	var tenantPrivateSubnetCidrs []string
+	{
+		for _, az := range key.StatusAvailabilityZones(cfg.CustomObject) {
+			tenantPrivateSubnetCidrs = append(tenantPrivateSubnetCidrs, az.Subnet.Private.CIDR)
+		}
+	}
+
 	// private routes.
 	for _, routeTableName := range cfg.CustomObject.Spec.AWS.VPC.RouteTableNames {
 		routeTableID, err := routeTableID(routeTableName, cfg)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		rt := HostPostRouteTablesAdapterRouteTable{
-			Name:         routeTableName,
-			RouteTableID: routeTableID,
-			// Requester CIDR block, we create the peering connection from the guest's private subnet.
-			CidrBlock:        key.PrivateSubnetCIDR(cfg.CustomObject),
-			PeerConnectionID: peerConnectionID,
+		for _, cidrBlock := range tenantPrivateSubnetCidrs {
+			rt := HostPostRouteTablesAdapterRouteTable{
+				Name:         routeTableName,
+				RouteTableID: routeTableID,
+				// Requester CIDR block, we create the peering connection from the guest's private subnets.
+				CidrBlock:        cidrBlock,
+				PeerConnectionID: peerConnectionID,
+			}
+			i.PrivateRouteTables = append(i.PrivateRouteTables, rt)
 		}
-		i.PrivateRouteTables = append(i.PrivateRouteTables, rt)
 	}
 
 	// public routes for vault.
