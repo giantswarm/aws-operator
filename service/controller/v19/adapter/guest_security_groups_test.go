@@ -237,17 +237,19 @@ func TestAdapterSecurityGroupsKubernetesAPIRules(t *testing.T) {
 			description: "case 1: API whitelisting enabled with default rules",
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						VPC: v1alpha1.AWSConfigSpecAWSVPC{
-							CIDR: "10.1.1.0/24",
-						},
-					},
 					Cluster: v1alpha1.Cluster{
 						ID: "test-cluster",
 						Kubernetes: v1alpha1.ClusterKubernetes{
 							API: v1alpha1.ClusterKubernetesAPI{
 								SecurePort: 443,
 							},
+						},
+					},
+				},
+				Status: v1alpha1.AWSConfigStatus{
+					Cluster: v1alpha1.StatusCluster{
+						Network: v1alpha1.StatusClusterNetwork{
+							CIDR: "10.1.1.0/24",
 						},
 					},
 				},
@@ -274,17 +276,19 @@ func TestAdapterSecurityGroupsKubernetesAPIRules(t *testing.T) {
 			description: "case 2: API whitelisting enabled with single configured subnet",
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						VPC: v1alpha1.AWSConfigSpecAWSVPC{
-							CIDR: "10.1.1.0/24",
-						},
-					},
 					Cluster: v1alpha1.Cluster{
 						ID: "test-cluster",
 						Kubernetes: v1alpha1.ClusterKubernetes{
 							API: v1alpha1.ClusterKubernetesAPI{
 								SecurePort: 443,
 							},
+						},
+					},
+				},
+				Status: v1alpha1.AWSConfigStatus{
+					Cluster: v1alpha1.StatusCluster{
+						Network: v1alpha1.StatusClusterNetwork{
+							CIDR: "10.1.1.0/24",
 						},
 					},
 				},
@@ -318,17 +322,19 @@ func TestAdapterSecurityGroupsKubernetesAPIRules(t *testing.T) {
 			description: "case 3: API whitelisting enabled with multiple configured subnets",
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						VPC: v1alpha1.AWSConfigSpecAWSVPC{
-							CIDR: "10.1.1.0/24",
-						},
-					},
 					Cluster: v1alpha1.Cluster{
 						ID: "test-cluster",
 						Kubernetes: v1alpha1.ClusterKubernetes{
 							API: v1alpha1.ClusterKubernetesAPI{
 								SecurePort: 443,
 							},
+						},
+					},
+				},
+				Status: v1alpha1.AWSConfigStatus{
+					Cluster: v1alpha1.StatusCluster{
+						Network: v1alpha1.StatusClusterNetwork{
+							CIDR: "10.1.1.0/24",
 						},
 					},
 				},
@@ -374,17 +380,19 @@ func TestAdapterSecurityGroupsKubernetesAPIRules(t *testing.T) {
 			description: "case 4: API whitelisting enabled with NAT gateway EIPs",
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						VPC: v1alpha1.AWSConfigSpecAWSVPC{
-							CIDR: "10.1.1.0/24",
-						},
-					},
 					Cluster: v1alpha1.Cluster{
 						ID: "test-cluster",
 						Kubernetes: v1alpha1.ClusterKubernetes{
 							API: v1alpha1.ClusterKubernetesAPI{
 								SecurePort: 443,
 							},
+						},
+					},
+				},
+				Status: v1alpha1.AWSConfigStatus{
+					Cluster: v1alpha1.StatusCluster{
+						Network: v1alpha1.StatusClusterNetwork{
+							CIDR: "10.1.1.0/24",
 						},
 					},
 				},
@@ -427,17 +435,19 @@ func TestAdapterSecurityGroupsKubernetesAPIRules(t *testing.T) {
 			description: "case 5: API whitelisting enabled with subnets and NAT gateway EIPs",
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						VPC: v1alpha1.AWSConfigSpecAWSVPC{
-							CIDR: "10.1.1.0/24",
-						},
-					},
 					Cluster: v1alpha1.Cluster{
 						ID: "test-cluster",
 						Kubernetes: v1alpha1.ClusterKubernetes{
 							API: v1alpha1.ClusterKubernetesAPI{
 								SecurePort: 443,
 							},
+						},
+					},
+				},
+				Status: v1alpha1.AWSConfigStatus{
+					Cluster: v1alpha1.StatusCluster{
+						Network: v1alpha1.StatusClusterNetwork{
+							CIDR: "10.1.1.0/24",
 						},
 					},
 				},

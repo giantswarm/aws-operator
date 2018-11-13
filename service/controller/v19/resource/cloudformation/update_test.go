@@ -41,7 +41,7 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				},
 			},
 		},
-		Status: statusWithAllocatedSubnet("10.1.1.0/24"),
+		Status: statusWithAllocatedSubnet("10.1.1.0/24", []string{"eu-central-1a"}),
 	}
 
 	testCases := []struct {
@@ -462,7 +462,7 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				},
 			},
 		},
-		Status: statusWithAllocatedSubnet("10.1.1.0/24"),
+		Status: statusWithAllocatedSubnet("10.1.1.0/24", []string{"eu-central-1a"}),
 	}
 
 	testCases := []struct {
