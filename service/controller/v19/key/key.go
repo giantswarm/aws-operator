@@ -382,6 +382,10 @@ func PrivateSubnetCIDR(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.VPC.PrivateSubnetCIDR
 }
 
+func PublicSubnetCIDR(customObject v1alpha1.AWSConfig) string {
+	return customObject.Spec.AWS.VPC.PublicSubnetCIDR
+}
+
 func CIDR(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.VPC.CIDR
 }
