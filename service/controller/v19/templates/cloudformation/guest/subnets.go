@@ -2,37 +2,42 @@ package guest
 
 const Subnets = `{{ define "subnets" }}
 {{- $v := .Guest.Subnets }}
-  PublicSubnet:
-    Type: AWS::EC2::Subnet
-    Properties:
-      AvailabilityZone: {{ $v.PublicSubnetAZ }}
-      CidrBlock: {{ $v.PublicSubnetCIDR }}
-      MapPublicIpOnLaunch: {{ $v.PublicSubnetMapPublicIPOnLaunch }}
-      Tags:
-      - Key: Name
-        Value: {{ $v.PublicSubnetName }}
-      VpcId: !Ref VPC
+  {{- range $v.PublicSubnets }}
+    {{ .Name }}:
+      Type: AWS::EC2::Subnet
+      Properties:
+        AvailabilityZone: {{ .AvailabilityZone }}
+        CidrBlock: {{ .CIDR }}
+        MapPublicIpOnLaunch: {{ .MapPublicIPOnLaunch }}
+        Tags:
+        - Key: Name
+          Value: {{ .Name }}
+        VpcId: !Ref VPC
 
-  PublicSubnetRouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PublicRouteTable
-      SubnetId: !Ref PublicSubnet
+    PublicRouteTableAssociation{{ .Index }}:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+        RouteTableId: !Ref PublicRouteTable
+        SubnetId: !Ref {{ .Name }}
 
-  PrivateSubnet:
-    Type: AWS::EC2::Subnet
-    Properties:
-      AvailabilityZone: {{ $v.PrivateSubnetAZ }}
-      CidrBlock: {{ $v.PrivateSubnetCIDR }}
-      MapPublicIpOnLaunch: {{ $v.PrivateSubnetMapPublicIPOnLaunch }}
-      Tags:
-      - Key: Name
-        Value: {{ $v.PrivateSubnetName }}
-      VpcId: !Ref VPC
+  {{ end }}
 
-  PrivateSubnetRouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PrivateRouteTable
-      SubnetId: !Ref PrivateSubnet
+  {{- range $v.PrivateSubnets }}
+    {{ .Name }}:
+      Type: AWS::EC2::Subnet
+      Properties:
+        AvailabilityZone: {{ .AvailabilityZone }}
+        CidrBlock: {{ .CIDR }}
+        MapPublicIpOnLaunch: {{ .MapPublicIPOnLaunch }}
+        Tags:
+        - Key: Name
+          Value: {{ .Name }}
+        VpcId: !Ref VPC
+
+    PrivateRouteTableAssociation{{ .Index }}:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+        RouteTableId: !Ref PrivateRouteTable{{ .Index }}
+        SubnetId: !Ref {{ .Name }}
+  {{ end }}
 {{ end }}`

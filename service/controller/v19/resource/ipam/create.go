@@ -6,6 +6,7 @@ import (
 	"math/bits"
 	"math/rand"
 	"net"
+	"sort"
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
@@ -75,7 +76,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				return microerror.Mask(err)
 			}
 
-			randomAZs, err := r.selectRandomAZs(key.AvailabilityZones(customObject))
+			randomAZs, err := r.selectRandomAZs(key.SpecAvailabilityZones(customObject))
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -178,6 +179,7 @@ func (r *Resource) selectRandomAZs(n int) ([]string, error) {
 	})
 
 	shuffledAZs = shuffledAZs[0:n]
+	sort.Strings(shuffledAZs)
 	return shuffledAZs, nil
 }
 
