@@ -113,7 +113,7 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 				},
 				Region:            "eu-central-1",
 				AZ:                "eu-central-1a",
-				AvailabilityZones: 1,
+				AvailabilityZones: 2,
 				Masters: []v1alpha1.AWSConfigSpecAWSNode{
 					{
 						ImageID:      "ami-1234-master",
@@ -352,6 +352,10 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		t.Fatal("PublicSubnet element not found")
 	}
 	if !strings.Contains(body, "PrivateRouteTable00:") {
+		fmt.Println(body)
+		t.Fatal("PrivateRouteTable00 element not found")
+	}
+	if !strings.Contains(body, "PrivateRouteTable01:") {
 		fmt.Println(body)
 		t.Fatal("PrivateRouteTable00 element not found")
 	}
