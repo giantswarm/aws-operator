@@ -2,6 +2,7 @@ package adapter
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/giantswarm/aws-operator/service/controller/v19/key"
 )
@@ -20,7 +21,11 @@ type GuestSubnetsAdapter struct {
 }
 
 func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
-	for i, az := range key.AvailabilityZones(cfg.CustomObject) {
+	zones := key.StatusAvailabilityZones(cfg.CustomObject)
+	sort.Slice(zones, func(i, j int) bool {
+		return zones[i].Name < zones[j].Name
+	})
+	for i, az := range zones {
 		snet := Subnet{
 			Index:               i,
 			AvailabilityZone:    az.Name,

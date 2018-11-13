@@ -3,7 +3,6 @@ package key
 import (
 	"crypto/sha1"
 	"fmt"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -110,14 +109,6 @@ func AutoScalingGroupName(customObject v1alpha1.AWSConfig, groupName string) str
 
 func AvailabilityZone(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.AZ
-}
-
-func AvailabilityZones(customObject v1alpha1.AWSConfig) []v1alpha1.AWSConfigStatusAWSAvailabilityZone {
-	zones := customObject.Status.AWS.AvailabilityZones
-	sort.Slice(zones, func(i, j int) bool {
-		return zones[i].Name < zones[j].Name
-	})
-	return zones
 }
 
 func AWSCliContainerRegistry(customObject v1alpha1.AWSConfig) string {
@@ -409,10 +400,6 @@ func RegionARN(customObject v1alpha1.AWSConfig) string {
 	return regionARN
 }
 
-func RequestedAvailabilityZones(customObject v1alpha1.AWSConfig) int {
-	return customObject.Spec.AWS.AvailabilityZones
-}
-
 func RoleName(customObject v1alpha1.AWSConfig, profileType string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, RoleNameTemplate)
 }
@@ -445,6 +432,14 @@ func SmallCloudConfigS3HTTPURL(customObject v1alpha1.AWSConfig, accountID string
 
 func SmallCloudConfigS3URL(customObject v1alpha1.AWSConfig, accountID string, role string) string {
 	return fmt.Sprintf("s3://%s", SmallCloudConfigPath(customObject, accountID, role))
+}
+
+func SpecAvailabilityZones(customObject v1alpha1.AWSConfig) int {
+	return customObject.Spec.AWS.AvailabilityZones
+}
+
+func StatusAvailabilityZones(customObject v1alpha1.AWSConfig) []v1alpha1.AWSConfigStatusAWSAvailabilityZone {
+	return customObject.Status.AWS.AvailabilityZones
 }
 
 func SubnetName(customObject v1alpha1.AWSConfig, suffix string) string {
