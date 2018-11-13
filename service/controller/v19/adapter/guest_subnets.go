@@ -39,7 +39,7 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 			Index:               i,
 			AvailabilityZone:    az.Name,
 			CIDR:                az.Subnet.Private.CIDR,
-			Name:                fmt.Sprintf("PrivateSubnet%d", i),
+			Name:                fmt.Sprintf("PrivateSubnet%02d", i),
 			MapPublicIPOnLaunch: false,
 		}
 		s.PrivateSubnets = append(s.PrivateSubnets, snet)
