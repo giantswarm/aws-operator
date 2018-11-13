@@ -112,10 +112,8 @@ func TestAdapterGuestMain(t *testing.T) {
 					IAM: &IAMClientMock{},
 					STS: &STSClientMock{},
 				},
-				InstallationName:      "myinstallation",
-				HostAccountID:         "myHostAccountID",
-				PrivateSubnetMaskBits: 25,
-				PublicSubnetMaskBits:  25,
+				InstallationName: "myinstallation",
+				HostAccountID:    "myHostAccountID",
 				StackState: StackState{
 					MasterImageID: "master-image-id",
 					WorkerImageID: "worker-image-id",

@@ -29,14 +29,26 @@ func testConfig() Config {
 	return c
 }
 
-func statusWithAllocatedSubnet(cidr string) v1alpha1.AWSConfigStatus {
-	return v1alpha1.AWSConfigStatus{
+func statusWithAllocatedSubnet(cidr string, azs []string) v1alpha1.AWSConfigStatus {
+	var statusAZs []v1alpha1.AWSConfigStatusAWSAvailabilityZone
+	for _, az := range azs {
+		statusAZs = append(statusAZs, v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+			Name: az,
+		})
+	}
+
+	status := v1alpha1.AWSConfigStatus{
+		AWS: v1alpha1.AWSConfigStatusAWS{
+			AvailabilityZones: statusAZs,
+		},
 		Cluster: v1alpha1.StatusCluster{
 			Network: v1alpha1.StatusClusterNetwork{
 				CIDR: cidr,
 			},
 		},
 	}
+
+	return status
 }
 
 func TestMainGuestTemplateGetEmptyBody(t *testing.T) {
@@ -121,7 +133,39 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 				},
 			},
 		},
-		Status: statusWithAllocatedSubnet("10.1.1.0/24"),
+		Status: v1alpha1.AWSConfigStatus{
+			AWS: v1alpha1.AWSConfigStatusAWS{
+				AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+					v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+						Name: "eu-central-1a",
+						Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
+							Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
+								CIDR: "10.1.1.0/26",
+							},
+							Public: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
+								CIDR: "10.1.1.64/26",
+							},
+						},
+					},
+					v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+						Name: "eu-central-1b",
+						Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
+							Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
+								CIDR: "10.1.1.128/26",
+							},
+							Public: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
+								CIDR: "10.1.1.196/26",
+							},
+						},
+					},
+				},
+			},
+			Cluster: v1alpha1.StatusCluster{
+				Network: v1alpha1.StatusClusterNetwork{
+					CIDR: "10.1.1.0/24",
+				},
+			},
+		},
 	}
 
 	imageID, err := key.ImageID(customObject)
@@ -298,7 +342,11 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Fatal("PublicRouteTable element not found")
 	}
-	if !strings.Contains(body, "PublicSubnet:") {
+	if !strings.Contains(body, "PublicSubnet00:") {
+		fmt.Println(body)
+		t.Fatal("PublicSubnet element not found")
+	}
+	if !strings.Contains(body, "PublicSubnet01:") {
 		fmt.Println(body)
 		t.Fatal("PublicSubnet element not found")
 	}
@@ -306,7 +354,11 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Fatal("PrivateRouteTable element not found")
 	}
-	if !strings.Contains(body, "PrivateSubnet:") {
+	if !strings.Contains(body, "PrivateSubnet00:") {
+		fmt.Println(body)
+		t.Fatal("PrivateSubnet element not found")
+	}
+	if !strings.Contains(body, "PrivateSubnet01:") {
 		fmt.Println(body)
 		t.Fatal("PrivateSubnet element not found")
 	}
@@ -330,13 +382,21 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Fatal("CidrBlock element for VPC CIDR not found")
 	}
-	if !strings.Contains(body, "CidrBlock: 10.1.1.0/25") {
+	if !strings.Contains(body, "CidrBlock: 10.1.1.0/26") {
 		fmt.Println(body)
-		t.Fatal("CidrBlock element for private subnet not found")
+		t.Fatal("CidrBlock element for private subnet 0 not found")
 	}
-	if !strings.Contains(body, "CidrBlock: 10.1.1.128/25") {
+	if !strings.Contains(body, "CidrBlock: 10.1.1.128/26") {
 		fmt.Println(body)
-		t.Fatal("CidrBlock element for public subnet not found")
+		t.Fatal("CidrBlock element for private subnet 1 not found")
+	}
+	if !strings.Contains(body, "CidrBlock: 10.1.1.64/26") {
+		fmt.Println(body)
+		t.Fatal("CidrBlock element for public subnet 0 not found")
+	}
+	if !strings.Contains(body, "CidrBlock: 10.1.1.196/26") {
+		fmt.Println(body)
+		t.Fatal("CidrBlock element for public subnet 1 not found")
 	}
 
 	// arn depends on region
@@ -526,7 +586,7 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 				},
 			},
 		},
-		Status: statusWithAllocatedSubnet("10.1.1.0/24"),
+		Status: statusWithAllocatedSubnet("10.1.1.0/24", []string{"eu-central-1a"}),
 	}
 
 	imageID, err := key.ImageID(customObject)
@@ -650,7 +710,7 @@ func TestMainGuestTemplateChinaRegion(t *testing.T) {
 				},
 			},
 		},
-		Status: statusWithAllocatedSubnet("10.1.1.0/24"),
+		Status: statusWithAllocatedSubnet("10.1.1.0/24", []string{"cn-north-1a"}),
 	}
 
 	imageID, err := key.ImageID(customObject)

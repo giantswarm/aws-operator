@@ -6,6 +6,7 @@ import (
 	"math/bits"
 	"math/rand"
 	"net"
+	"sort"
 	"strings"
 	"time"
 
@@ -62,7 +63,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "allocated subnet for cluster")
 		}
 
-		azs, err := r.selectRandomAZs(key.AvailabilityZones(customObject))
+		azs, err := r.selectRandomAZs(key.SpecAvailabilityZones(customObject))
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -151,6 +152,7 @@ func (r *Resource) selectRandomAZs(n int) ([]string, error) {
 	})
 
 	shuffledAZs = shuffledAZs[0:n]
+	sort.Strings(shuffledAZs)
 	return shuffledAZs, nil
 }
 
