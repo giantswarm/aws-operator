@@ -22,7 +22,7 @@ const RecordSets = `{{define "record_sets"}}
     Properties:
       Name: 'etcd.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
       HostedZoneId: !Ref 'HostedZone'
-      TTL: '900'
+      TTL: '60'
       Type: CNAME
       ResourceRecords:
         - !GetAtt {{ $v.MasterInstanceResourceName }}.PrivateDnsName
