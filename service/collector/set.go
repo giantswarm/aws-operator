@@ -62,11 +62,27 @@ func NewSet(config SetConfig) (*Set, error) {
 		}
 	}
 
+	var vpcCollector *VPC
+	{
+		c := VPCConfig{
+			Helper: h,
+			Logger: config.Logger,
+
+			InstallationName: config.InstallationName,
+		}
+
+		vpcCollector, err = NewVPC(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var collectorSet *collector.Set
 	{
 		c := collector.SetConfig{
 			Collectors: []collector.Interface{
 				elbCollector,
+				vpcCollector,
 			},
 			Logger: config.Logger,
 		}
