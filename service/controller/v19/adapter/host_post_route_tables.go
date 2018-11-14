@@ -17,8 +17,8 @@ import (
 )
 
 type HostPostRouteTablesAdapter struct {
-	PrivateRouteTables []HostPostRouteTablesAdapterRouteTable
-	PublicRouteTables  []HostPostRouteTablesAdapterRouteTable
+	PrivateRoutes []HostPostRouteTablesAdapterRoute
+	PublicRoutes  []HostPostRouteTablesAdapterRoute
 }
 
 func (i *HostPostRouteTablesAdapter) Adapt(cfg Config) error {
@@ -41,14 +41,14 @@ func (i *HostPostRouteTablesAdapter) Adapt(cfg Config) error {
 			return microerror.Mask(err)
 		}
 		for _, cidrBlock := range tenantPrivateSubnetCidrs {
-			rt := HostPostRouteTablesAdapterRouteTable{
+			rt := HostPostRouteTablesAdapterRoute{
 				Name:         routeTableName,
 				RouteTableID: routeTableID,
 				// Requester CIDR block, we create the peering connection from the guest's private subnets.
 				CidrBlock:        cidrBlock,
 				PeerConnectionID: peerConnectionID,
 			}
-			i.PrivateRouteTables = append(i.PrivateRouteTables, rt)
+			i.PrivateRoutes = append(i.PrivateRoutes, rt)
 		}
 	}
 
@@ -60,7 +60,7 @@ func (i *HostPostRouteTablesAdapter) Adapt(cfg Config) error {
 			if err != nil {
 				return microerror.Mask(err)
 			}
-			rt := HostPostRouteTablesAdapterRouteTable{
+			rt := HostPostRouteTablesAdapterRoute{
 				Name:         routeTableName,
 				RouteTableID: routeTableID,
 				// Requester CIDR block, we create the peering connection from the
@@ -68,13 +68,13 @@ func (i *HostPostRouteTablesAdapter) Adapt(cfg Config) error {
 				CidrBlock:        key.ClusterNetworkCIDR(cfg.CustomObject),
 				PeerConnectionID: peerConnectionID,
 			}
-			i.PublicRouteTables = append(i.PublicRouteTables, rt)
+			i.PublicRoutes = append(i.PublicRoutes, rt)
 		}
 	}
 	return nil
 }
 
-type HostPostRouteTablesAdapterRouteTable struct {
+type HostPostRouteTablesAdapterRoute struct {
 	Name             string
 	RouteTableID     string
 	CidrBlock        string
