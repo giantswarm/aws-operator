@@ -17,8 +17,7 @@ import (
 )
 
 const (
-	awsResourceValuesFile = "/tmp/aws-operator-values.yaml"
-	provider              = "aws"
+	provider = "aws"
 )
 
 func Setup(m *testing.M, config Config) {
