@@ -10,7 +10,7 @@ const NatGateway = `{{define "nat_gateway"}}
     Properties:
       AllocationId:
         Fn::GetAtt:
-        - NATEIP
+        - {{ .NATEIPName }}
         - AllocationId
       SubnetId: !Ref {{ .PublicSubnetName }}
       Tags:
