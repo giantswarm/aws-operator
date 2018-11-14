@@ -4,7 +4,7 @@ package setup
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"os"
 	"testing"
 
@@ -28,14 +28,14 @@ func Setup(m *testing.M, config Config) {
 
 	err = installResources(ctx, config)
 	if err != nil {
-		log.Printf("%#v\n", err)
+		config.Logger.LogCtx(ctx, "level", "error", "message", "failed to install AWS resources", "stack", fmt.Sprintf("%#v", err))
 		v = 1
 	}
 
 	if v == 0 && config.UseDefaultTenant {
 		err = EnsureTenantClusterCreated(ctx, env.ClusterID(), config)
 		if err != nil {
-			log.Printf("%#v\n", err)
+			config.Logger.LogCtx(ctx, "level", "error", "message", "failed to create tenant cluster", "stack", fmt.Sprintf("%#v", err))
 			v = 1
 		}
 	}
@@ -46,7 +46,11 @@ func Setup(m *testing.M, config Config) {
 
 	if os.Getenv("KEEP_RESOURCES") != "true" {
 		if config.UseDefaultTenant {
-			config.Host.DeleteGuestCluster(ctx, provider)
+			err := EnsureTenantClusterDeleted(ctx, env.ClusterID(), config)
+			if err != nil {
+				config.Logger.LogCtx(ctx, "level", "error", "message", "failed to delete tenant cluster", "stack", fmt.Sprintf("%#v", err))
+				v = 1
+			}
 		}
 
 		// only do full teardown when not on CI
