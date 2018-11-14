@@ -4,13 +4,14 @@ package setup
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"os"
 	"testing"
 
 	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/aws-operator/integration/env"
+	"github.com/giantswarm/aws-operator/integration/key"
 	"github.com/giantswarm/e2e-harness/pkg/release"
 	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
 	"github.com/giantswarm/microerror"
@@ -28,14 +29,14 @@ func Setup(m *testing.M, config Config) {
 
 	err = installResources(ctx, config)
 	if err != nil {
-		log.Printf("%#v\n", err)
+		config.Logger.LogCtx(ctx, "level", "error", "message", "failed to install AWS resources", "stack", fmt.Sprintf("%#v", err))
 		v = 1
 	}
 
 	if v == 0 && config.UseDefaultTenant {
 		err = EnsureTenantClusterCreated(ctx, env.ClusterID(), config)
 		if err != nil {
-			log.Printf("%#v\n", err)
+			config.Logger.LogCtx(ctx, "level", "error", "message", "failed to create tenant cluster", "stack", fmt.Sprintf("%#v", err))
 			v = 1
 		}
 	}
@@ -46,7 +47,11 @@ func Setup(m *testing.M, config Config) {
 
 	if os.Getenv("KEEP_RESOURCES") != "true" {
 		if config.UseDefaultTenant {
-			config.Host.DeleteGuestCluster(ctx, provider)
+			err := EnsureTenantClusterDeleted(ctx, env.ClusterID(), config)
+			if err != nil {
+				config.Logger.LogCtx(ctx, "level", "error", "message", "failed to delete tenant cluster", "stack", fmt.Sprintf("%#v", err))
+				v = 1
+			}
 		}
 
 		// only do full teardown when not on CI
@@ -108,7 +113,7 @@ func installAWSOperator(ctx context.Context, config Config) error {
 		}
 	}
 
-	err = config.Release.InstallOperator(ctx, "aws-operator", release.NewVersion(env.CircleSHA()), values, providerv1alpha1.NewAWSConfigCRD())
+	err = config.Release.InstallOperator(ctx, key.AWSOperatorReleaseName(), release.NewVersion(env.CircleSHA()), values, providerv1alpha1.NewAWSConfigCRD())
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -138,7 +143,7 @@ func installResources(ctx context.Context, config Config) error {
 			return microerror.Mask(err)
 		}
 
-		err = config.Release.Install(ctx, "e2esetup-vault", release.NewStableVersion(), values, config.Release.Condition().PodExists(ctx, "default", "app=vault"))
+		err = config.Release.Install(ctx, key.VaultReleaseName(), release.NewStableVersion(), values, config.Release.Condition().PodExists(ctx, "default", "app=vault"))
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -158,7 +163,7 @@ func installResources(ctx context.Context, config Config) error {
 			return microerror.Mask(err)
 		}
 
-		err = config.Release.InstallOperator(ctx, "cert-operator", release.NewStableVersion(), values, corev1alpha1.NewCertConfigCRD())
+		err = config.Release.InstallOperator(ctx, key.CertOperatorReleaseName(), release.NewStableVersion(), values, corev1alpha1.NewCertConfigCRD())
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -174,7 +179,7 @@ func installResources(ctx context.Context, config Config) error {
 			return microerror.Mask(err)
 		}
 
-		err = config.Release.InstallOperator(ctx, "node-operator", release.NewStableVersion(), values, corev1alpha1.NewNodeConfigCRD())
+		err = config.Release.InstallOperator(ctx, key.NodeOperatorReleaseName(), release.NewStableVersion(), values, corev1alpha1.NewNodeConfigCRD())
 		if err != nil {
 			return microerror.Mask(err)
 		}
