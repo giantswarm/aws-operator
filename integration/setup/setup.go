@@ -45,7 +45,7 @@ func Setup(m *testing.M, config Config) {
 		v = m.Run()
 	}
 
-	if os.Getenv("KEEP_RESOURCES") != "true" {
+	if !env.KeepResources() {
 		if config.UseDefaultTenant {
 			err := EnsureTenantClusterDeleted(ctx, env.ClusterID(), config)
 			if err != nil {
@@ -54,8 +54,7 @@ func Setup(m *testing.M, config Config) {
 			}
 		}
 
-		// only do full teardown when not on CI
-		if os.Getenv("CIRCLECI") != "true" {
+		if !env.CircleCI() {
 			err := teardown(ctx, config)
 			if err != nil {
 				// teardown errors are logged inside the function.

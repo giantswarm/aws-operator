@@ -88,8 +88,8 @@ func init() {
 	os.Setenv(EnvVarVersionBundleVersion, VersionBundleVersion())
 }
 
-func CircleCI() string {
-	return circleCI
+func CircleCI() bool {
+	return circleCI == "true"
 }
 
 func CircleSHA() string {
@@ -108,7 +108,7 @@ func ClusterID() string {
 	var parts []string
 
 	//parts = append(parts, "ci")
-	parts = append(parts, "pk-")
+	parts = append(parts, "pk")
 	parts = append(parts, TestedVersion()[0:3])
 	parts = append(parts, CircleSHA()[0:5])
 	if TestHash() != "" {
@@ -118,9 +118,9 @@ func ClusterID() string {
 	return strings.Join(parts, "-")
 }
 
-func KeepResources() string {
-	//return keepResources
-	return "true"
+func KeepResources() bool {
+	//return keepResources == "true"
+	return true
 }
 
 func GithubToken() string {
