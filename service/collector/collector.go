@@ -129,8 +129,6 @@ func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 	if c.trustedAdvisorEnabled {
 		ch <- trustedAdvisorSupport
 	}
-
-	ch <- vpcsDesc
 }
 
 func (c *Collector) Collect(ch chan<- prometheus.Metric) {
@@ -144,9 +142,7 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 
 	var wg sync.WaitGroup
 
-	collectFuncs := []func(chan<- prometheus.Metric, []clientaws.Clients){
-		c.collectAccountsVPCs,
-	}
+	collectFuncs := []func(chan<- prometheus.Metric, []clientaws.Clients){}
 
 	if c.trustedAdvisorEnabled {
 		collectFuncs = append(collectFuncs, c.collectAccountsTrustedAdvisorChecks)
