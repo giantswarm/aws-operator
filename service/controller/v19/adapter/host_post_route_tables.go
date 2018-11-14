@@ -17,8 +17,8 @@ import (
 )
 
 type HostPostRouteTablesAdapter struct {
-	PrivateRouteTables []HostPostRouteTablesAdapterRouteTable
-	PublicRouteTables  []HostPostRouteTablesAdapterRouteTable
+	PrivateRoutes []HostPostRouteTablesAdapterRoute
+	PublicRoutes  []HostPostRouteTablesAdapterRoute
 }
 
 func (i *HostPostRouteTablesAdapter) Adapt(cfg Config) error {
@@ -27,20 +27,29 @@ func (i *HostPostRouteTablesAdapter) Adapt(cfg Config) error {
 		return microerror.Mask(err)
 	}
 
+	var tenantPrivateSubnetCidrs []string
+	{
+		for _, az := range key.StatusAvailabilityZones(cfg.CustomObject) {
+			tenantPrivateSubnetCidrs = append(tenantPrivateSubnetCidrs, az.Subnet.Private.CIDR)
+		}
+	}
+
 	// private routes.
 	for _, routeTableName := range cfg.CustomObject.Spec.AWS.VPC.RouteTableNames {
 		routeTableID, err := routeTableID(routeTableName, cfg)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		rt := HostPostRouteTablesAdapterRouteTable{
-			Name:         routeTableName,
-			RouteTableID: routeTableID,
-			// Requester CIDR block, we create the peering connection from the guest's private subnet.
-			CidrBlock:        key.PrivateSubnetCIDR(cfg.CustomObject),
-			PeerConnectionID: peerConnectionID,
+		for _, cidrBlock := range tenantPrivateSubnetCidrs {
+			rt := HostPostRouteTablesAdapterRoute{
+				RouteTableName: routeTableName,
+				RouteTableID:   routeTableID,
+				// Requester CIDR block, we create the peering connection from the guest's private subnets.
+				CidrBlock:        cidrBlock,
+				PeerConnectionID: peerConnectionID,
+			}
+			i.PrivateRoutes = append(i.PrivateRoutes, rt)
 		}
-		i.PrivateRouteTables = append(i.PrivateRouteTables, rt)
 	}
 
 	// public routes for vault.
@@ -51,22 +60,22 @@ func (i *HostPostRouteTablesAdapter) Adapt(cfg Config) error {
 			if err != nil {
 				return microerror.Mask(err)
 			}
-			rt := HostPostRouteTablesAdapterRouteTable{
-				Name:         routeTableName,
-				RouteTableID: routeTableID,
+			rt := HostPostRouteTablesAdapterRoute{
+				RouteTableName: routeTableName,
+				RouteTableID:   routeTableID,
 				// Requester CIDR block, we create the peering connection from the
 				// guest's CIDR for being able to access Vault's ELB.
 				CidrBlock:        key.ClusterNetworkCIDR(cfg.CustomObject),
 				PeerConnectionID: peerConnectionID,
 			}
-			i.PublicRouteTables = append(i.PublicRouteTables, rt)
+			i.PublicRoutes = append(i.PublicRoutes, rt)
 		}
 	}
 	return nil
 }
 
-type HostPostRouteTablesAdapterRouteTable struct {
-	Name             string
+type HostPostRouteTablesAdapterRoute struct {
+	RouteTableName   string
 	RouteTableID     string
 	CidrBlock        string
 	PeerConnectionID string

@@ -343,9 +343,9 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Fatal("NATGateway01 element not found")
 	}
-	if !strings.Contains(body, "PublicRouteTable:") {
+	if !strings.Contains(body, "PublicRouteTable00:") {
 		fmt.Println(body)
-		t.Fatal("PublicRouteTable element not found")
+		t.Fatal("PublicRouteTable00 element not found")
 	}
 	if !strings.Contains(body, "PublicSubnet00:") {
 		fmt.Println(body)
@@ -355,9 +355,13 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Fatal("PublicSubnet element not found")
 	}
-	if !strings.Contains(body, "PrivateRouteTable:") {
+	if !strings.Contains(body, "PrivateRouteTable00:") {
 		fmt.Println(body)
-		t.Fatal("PrivateRouteTable element not found")
+		t.Fatal("PrivateRouteTable00 element not found")
+	}
+	if !strings.Contains(body, "PrivateRouteTable01:") {
+		fmt.Println(body)
+		t.Fatal("PrivateRouteTable00 element not found")
 	}
 	if !strings.Contains(body, "PrivateSubnet00:") {
 		fmt.Println(body)
@@ -485,6 +489,24 @@ func TestMainHostPostTemplateExistingFields(t *testing.T) {
 						"route_table_2",
 					},
 					PeerID: "mypeerid",
+				},
+			},
+		},
+		Status: v1alpha1.AWSConfigStatus{
+			AWS: v1alpha1.AWSConfigStatusAWS{
+				AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+					v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+
+						Name: "eu-central-1a",
+						Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
+							Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
+								CIDR: "10.100.1.0/25",
+							},
+							Public: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
+								CIDR: "10.100.1.128/25",
+							},
+						},
+					},
 				},
 			},
 		},
