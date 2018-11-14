@@ -6,26 +6,26 @@ import (
 	"fmt"
 )
 
-func awsConfigReleaseName(clusterID string) string {
+func AWSConfigReleaseName(clusterID string) string {
 	return fmt.Sprintf("e2esetup-awsconfig-%s", clusterID)
 }
 
-func awsOperatorReleaseName() string {
+func AWSOperatorReleaseName() string {
 	return "aws-operator"
 }
 
-func certOperatorReleaseName() string {
+func CertOperatorReleaseName() string {
 	return "cert-operator"
 }
 
-func certsReleaseName(clusterID string) string {
+func CertsReleaseName(clusterID string) string {
 	return fmt.Sprintf("e2esetup-certs-%s", clusterID)
 }
 
-func nodeOperatorReleaseName() string {
+func NodeOperatorReleaseName() string {
 	return "node-operator"
 }
 
-func vaultReleaseName() string {
+func VaultReleaseName() string {
 	return "e2esetup-vault"
 }
