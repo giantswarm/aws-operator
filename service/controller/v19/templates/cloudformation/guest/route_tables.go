@@ -8,7 +8,7 @@ const RouteTables = `{{ define "route_tables" }}
       VpcId: !Ref VPC
       Tags:
       - Key: Name
-        Value: {{ $v.PublicRouteTableName.InternalName }}
+        Value: {{ $v.PublicRouteTableName.TagName }}
 
   {{- range $v.PrivateRouteTableNames }}
   {{ .ResourceName }}:
@@ -17,7 +17,7 @@ const RouteTables = `{{ define "route_tables" }}
       VpcId: !Ref VPC
       Tags:
       - Key: Name
-        Value: {{ .InternalName }}
+        Value: {{ .TagName }}
 
   {{ .VPCPeeringRouteName }}:
     Type: AWS::EC2::Route

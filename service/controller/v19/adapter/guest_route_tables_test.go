@@ -33,17 +33,17 @@ func TestAdapterRouteTablesRegularFields(t *testing.T) {
 			expectedHostClusterCIDR: "10.0.0.0/16",
 			expectedPublicRouteTableName: RouteTableName{
 				ResourceName: "PublicRouteTable00",
-				InternalName: "test-cluster-public",
+				TagName:      "test-cluster-public",
 			},
 			expectedPrivateRouteTableNames: []RouteTableName{
 				{
 					ResourceName:        "PrivateRouteTable00",
-					InternalName:        "test-cluster-private00",
+					TagName:             "test-cluster-private00",
 					VPCPeeringRouteName: "VPCPeeringRoute00",
 				},
 				{
 					ResourceName:        "PrivateRouteTable01",
-					InternalName:        "test-cluster-private01",
+					TagName:             "test-cluster-private01",
 					VPCPeeringRouteName: "VPCPeeringRoute01",
 				},
 			},

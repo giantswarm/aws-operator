@@ -10,7 +10,7 @@ import (
 
 type RouteTableName struct {
 	ResourceName        string
-	InternalName        string
+	TagName             string
 	VPCPeeringRouteName string
 }
 
@@ -29,14 +29,14 @@ func (r *GuestRouteTablesAdapter) Adapt(cfg Config) error {
 	r.HostClusterCIDR = hostClusterCIDR
 	r.PublicRouteTableName = RouteTableName{
 		ResourceName: "PublicRouteTable00",
-		InternalName: key.RouteTableName(cfg.CustomObject, suffixPublic),
+		TagName:      key.RouteTableName(cfg.CustomObject, suffixPublic),
 	}
 
 	for i := 0; i < key.SpecAvailabilityZones(cfg.CustomObject); i++ {
 		suffix := fmt.Sprintf("%s%02d", suffixPrivate, i)
 		rtName := RouteTableName{
 			ResourceName:        fmt.Sprintf("PrivateRouteTable%02d", i),
-			InternalName:        key.RouteTableName(cfg.CustomObject, suffix),
+			TagName:             key.RouteTableName(cfg.CustomObject, suffix),
 			VPCPeeringRouteName: fmt.Sprintf("VPCPeeringRoute%02d", i),
 		}
 		r.PrivateRouteTableNames = append(r.PrivateRouteTableNames, rtName)

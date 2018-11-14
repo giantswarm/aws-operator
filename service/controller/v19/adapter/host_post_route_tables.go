@@ -42,8 +42,8 @@ func (i *HostPostRouteTablesAdapter) Adapt(cfg Config) error {
 		}
 		for _, cidrBlock := range tenantPrivateSubnetCidrs {
 			rt := HostPostRouteTablesAdapterRoute{
-				Name:         routeTableName,
-				RouteTableID: routeTableID,
+				RouteTableName: routeTableName,
+				RouteTableID:   routeTableID,
 				// Requester CIDR block, we create the peering connection from the guest's private subnets.
 				CidrBlock:        cidrBlock,
 				PeerConnectionID: peerConnectionID,
@@ -61,8 +61,8 @@ func (i *HostPostRouteTablesAdapter) Adapt(cfg Config) error {
 				return microerror.Mask(err)
 			}
 			rt := HostPostRouteTablesAdapterRoute{
-				Name:         routeTableName,
-				RouteTableID: routeTableID,
+				RouteTableName: routeTableName,
+				RouteTableID:   routeTableID,
 				// Requester CIDR block, we create the peering connection from the
 				// guest's CIDR for being able to access Vault's ELB.
 				CidrBlock:        key.ClusterNetworkCIDR(cfg.CustomObject),
@@ -75,7 +75,7 @@ func (i *HostPostRouteTablesAdapter) Adapt(cfg Config) error {
 }
 
 type HostPostRouteTablesAdapterRoute struct {
-	Name             string
+	RouteTableName   string
 	RouteTableID     string
 	CidrBlock        string
 	PeerConnectionID string
