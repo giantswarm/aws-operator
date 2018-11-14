@@ -18,13 +18,13 @@ const RouteTables = `{{ define "route_tables" }}
       Tags:
       - Key: Name
         Value: {{ .InternalName }}
-  {{ end }}
 
-  VPCPeeringRoute:
+  {{ .VPCPeeringRouteName }}:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTable
+      RouteTableId: !Ref {{ .ResourceName }}
       DestinationCidrBlock: {{ $v.HostClusterCIDR }}
       VpcPeeringConnectionId:
         Ref: "VPCPeeringConnection"
+  {{ end }}
 {{ end }}`

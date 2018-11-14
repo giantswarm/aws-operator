@@ -37,12 +37,14 @@ func TestAdapterRouteTablesRegularFields(t *testing.T) {
 			},
 			expectedPrivateRouteTableNames: []RouteTableName{
 				{
-					ResourceName: "PrivateRouteTable00",
-					InternalName: "test-cluster-private00",
+					ResourceName:        "PrivateRouteTable00",
+					InternalName:        "test-cluster-private00",
+					VPCPeeringRouteName: "VPCPeeringRoute00",
 				},
 				{
-					ResourceName: "PrivateRouteTable01",
-					InternalName: "test-cluster-private01",
+					ResourceName:        "PrivateRouteTable01",
+					InternalName:        "test-cluster-private01",
+					VPCPeeringRouteName: "VPCPeeringRoute01",
 				},
 			},
 		},
