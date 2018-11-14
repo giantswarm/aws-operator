@@ -1,13 +1,13 @@
 package collector
 
 import (
-	"fmt"
-	"sync"
-
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/prometheus/client_golang/prometheus"
+	"golang.org/x/sync/errgroup"
 
-	"github.com/giantswarm/aws-operator/client/aws"
+	clientaws "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 )
 
 const (
@@ -41,65 +41,108 @@ var (
 	)
 )
 
-func (c *Collector) collectAccountsVPCs(ch chan<- prometheus.Metric, clients []aws.Clients) {
-	var wg sync.WaitGroup
+type VPCConfig struct {
+	Helper *helper
+	Logger micrologger.Logger
 
-	for _, client := range clients {
-		wg.Add(1)
-		go func(awsClients aws.Clients) {
-			defer wg.Done()
-			c.collectVPCs(ch, awsClients)
-		}(client)
-	}
-
-	wg.Wait()
+	InstallationName string
 }
 
-func (c *Collector) collectVPCs(ch chan<- prometheus.Metric, awsClients aws.Clients) {
-	c.logger.Log("level", "debug", "message", "collecting metrics for vpcs")
+type VPC struct {
+	helper *helper
+	logger micrologger.Logger
 
-	i := &ec2.DescribeVpcsInput{}
-	o, err := awsClients.EC2.DescribeVpcs(i)
-	if err != nil {
-		c.logger.Log("level", "error", "message", "could not list vpcs", "stack", fmt.Sprintf("%#v", err))
+	installationName string
+}
+
+func NewVPC(config VPCConfig) (*VPC, error) {
+	if config.Helper == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Helper must not be empty", config)
+	}
+	if config.Logger == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	accountID, err := c.helper.AWSAccountID(awsClients)
+	if config.InstallationName == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
+	}
+
+	v := &VPC{
+		helper: config.Helper,
+		logger: config.Logger,
+
+		installationName: config.InstallationName,
+	}
+
+	return v, nil
+}
+
+func (v *VPC) Collect(ch chan<- prometheus.Metric) error {
+	awsClientsList, err := v.helper.GetAWSClients()
 	if err != nil {
-		c.logger.Log("level", "error", "message", "could not get aws account id", "stack", fmt.Sprintf("%#v", err))
+		return microerror.Mask(err)
+	}
+
+	var g errgroup.Group
+
+	for _, item := range awsClientsList {
+		awsClients := item
+
+		g.Go(func() error {
+			err := v.collectForAccount(ch, awsClients)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			return nil
+		})
+	}
+
+	err = g.Wait()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
+func (v *VPC) Describe(ch chan<- *prometheus.Desc) error {
+	ch <- vpcsDesc
+	return nil
+}
+
+func (v *VPC) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaws.Clients) error {
+	o, err := awsClients.EC2.DescribeVpcs(&ec2.DescribeVpcsInput{})
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	accountID, err := v.helper.AWSAccountID(awsClients)
+	if err != nil {
+		return microerror.Mask(err)
 	}
 
 	for _, vpc := range o.Vpcs {
-		cluster := ""
-		installation := ""
-		name := ""
-		organization := ""
-		stackName := ""
+		var cluster, installation, name, organization, stackName string
 
 		for _, tag := range vpc.Tags {
-			if *tag.Key == ClusterTag {
+			switch *tag.Key {
+			case ClusterTag:
 				cluster = *tag.Value
-			}
-			if *tag.Key == InstallationTag {
+			case InstallationTag:
 				installation = *tag.Value
-			}
-			if *tag.Key == NameTag {
+			case NameTag:
 				name = *tag.Value
-			}
-			if *tag.Key == OrganizationTag {
+			case OrganizationTag:
 				organization = *tag.Value
-			}
-			if *tag.Key == StackNameTag {
+			case StackNameTag:
 				stackName = *tag.Value
 			}
 		}
 
-		c.logger.Log("level", "debug", "message", fmt.Sprintf("VPC '%s' belongs to installation '%s'", *vpc.VpcId, installation))
-		if installation != c.installationName {
-			c.logger.Log("level", "debug", "message", fmt.Sprintf("VPC '%s' is being skipped for metrics collection", *vpc.VpcId))
+		if installation != v.installationName {
 			continue
 		}
-		c.logger.Log("level", "debug", "message", fmt.Sprintf("VPC '%s' is being used for metrics collection", *vpc.VpcId))
 
 		ch <- prometheus.MustNewConstMetric(
 			vpcsDesc,
@@ -117,5 +160,5 @@ func (c *Collector) collectVPCs(ch chan<- prometheus.Metric, awsClients aws.Clie
 		)
 	}
 
-	c.logger.Log("level", "debug", "message", "finished collecting metrics for vpcs")
+	return nil
 }
