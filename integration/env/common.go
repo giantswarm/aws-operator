@@ -108,7 +108,7 @@ func ClusterID() string {
 	var parts []string
 
 	//parts = append(parts, "ci")
-	parts = append(parts, "pawel-ci")
+	parts = append(parts, "pk-")
 	parts = append(parts, TestedVersion()[0:3])
 	parts = append(parts, CircleSHA()[0:5])
 	if TestHash() != "" {
