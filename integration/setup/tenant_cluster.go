@@ -60,7 +60,7 @@ func EnsureTenantClusterCreated(ctx context.Context, id string, config Config) e
 }
 
 func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config) error {
-	err := config.Release.EnsureDeleted(ctx, id, CRNotExistsCondition(ctx, id, config))
+	err := config.Release.EnsureDeleted(ctx, awsConfigReleaseName(id), CRNotExistsCondition(ctx, id, config))
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -221,7 +221,7 @@ func InstallAWSConfig(ctx context.Context, id string, config Config) error {
 		}
 	}
 
-	err = config.Release.Install(ctx, fmt.Sprintf("e2esetup-awsconfig-%s", id), release.NewStableChartInfo("apiextensions-aws-config-e2e-chart"), values, crExistsCondition(ctx, id, config))
+	err = config.Release.Install(ctx, awsConfigReleaseName(id), release.NewStableChartInfo("apiextensions-aws-config-e2e-chart"), values, crExistsCondition(ctx, id, config))
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -242,7 +242,7 @@ func InstallCertConfigs(ctx context.Context, id string, config Config) error {
 		return microerror.Mask(err)
 	}
 
-	err = config.Release.Install(ctx, fmt.Sprintf("e2esetup-certs-%s", id), release.NewStableChartInfo("e2esetup-certs-chart"), values, config.Release.Condition().SecretExists(ctx, "default", fmt.Sprintf("%s-api", id)))
+	err = config.Release.Install(ctx, certsReleaseName(id), release.NewStableChartInfo("e2esetup-certs-chart"), values, config.Release.Condition().SecretExists(ctx, "default", fmt.Sprintf("%s-api", id)))
 	if err != nil {
 		return microerror.Mask(err)
 	}

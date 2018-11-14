@@ -112,7 +112,7 @@ func installAWSOperator(ctx context.Context, config Config) error {
 		}
 	}
 
-	err = config.Release.InstallOperator(ctx, "aws-operator", release.NewVersion(env.CircleSHA()), values, providerv1alpha1.NewAWSConfigCRD())
+	err = config.Release.InstallOperator(ctx, awsOperatorReleaseName(), release.NewVersion(env.CircleSHA()), values, providerv1alpha1.NewAWSConfigCRD())
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -142,7 +142,7 @@ func installResources(ctx context.Context, config Config) error {
 			return microerror.Mask(err)
 		}
 
-		err = config.Release.Install(ctx, "e2esetup-vault", release.NewStableVersion(), values, config.Release.Condition().PodExists(ctx, "default", "app=vault"))
+		err = config.Release.Install(ctx, vaultReleaseName(), release.NewStableVersion(), values, config.Release.Condition().PodExists(ctx, "default", "app=vault"))
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -162,7 +162,7 @@ func installResources(ctx context.Context, config Config) error {
 			return microerror.Mask(err)
 		}
 
-		err = config.Release.InstallOperator(ctx, "cert-operator", release.NewStableVersion(), values, corev1alpha1.NewCertConfigCRD())
+		err = config.Release.InstallOperator(ctx, certOperatorReleaseName(), release.NewStableVersion(), values, corev1alpha1.NewCertConfigCRD())
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -178,7 +178,7 @@ func installResources(ctx context.Context, config Config) error {
 			return microerror.Mask(err)
 		}
 
-		err = config.Release.InstallOperator(ctx, "node-operator", release.NewStableVersion(), values, corev1alpha1.NewNodeConfigCRD())
+		err = config.Release.InstallOperator(ctx, nodeOperatorReleaseName(), release.NewStableVersion(), values, corev1alpha1.NewNodeConfigCRD())
 		if err != nil {
 			return microerror.Mask(err)
 		}
