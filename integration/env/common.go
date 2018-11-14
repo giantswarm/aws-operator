@@ -88,8 +88,8 @@ func init() {
 	os.Setenv(EnvVarVersionBundleVersion, VersionBundleVersion())
 }
 
-func CircleCI() string {
-	return circleCI
+func CircleCI() bool {
+	return circleCI == strings.ToLower("true")
 }
 
 func CircleSHA() string {
@@ -117,8 +117,8 @@ func ClusterID() string {
 	return strings.Join(parts, "-")
 }
 
-func KeepResources() string {
-	return keepResources
+func KeepResources() bool {
+	return keepResources == strings.ToLower("true")
 }
 
 func GithubToken() string {
