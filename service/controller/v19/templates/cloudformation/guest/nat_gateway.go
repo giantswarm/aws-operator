@@ -2,7 +2,8 @@ package guest
 
 const NatGateway = `{{define "nat_gateway"}}
   {{- $v := .Guest.NATGateway }}
-  NATGateway:
+  {{- range $v.Gateways }}
+  {{ .NATGWName }}:
     Type: AWS::EC2::NatGateway
     DependsOn:
       - VPCGatewayAttachment
@@ -11,19 +12,20 @@ const NatGateway = `{{define "nat_gateway"}}
         Fn::GetAtt:
         - NATEIP
         - AllocationId
-      SubnetId: !Ref PublicSubnet
+      SubnetId: !Ref {{ .PublicSubnetName }}
       Tags:
         - Key: Name
-          Value: {{ $v.ClusterID }}
-  NATEIP:
+          Value: {{ .ClusterID }}
+  {{ .NATEIPName }}:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
-  NATRoute:
+  {{ .NATRouteName }}:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTable
+      RouteTableId: !Ref {{ .PrivateRouteTableName }}
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: "NATGateway"
+        Ref: "{{ .NATGWName }}"
+{{end}}
 {{end}}`
