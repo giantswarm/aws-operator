@@ -15,7 +15,10 @@ data:
       aws:
         accessLogsExpiration: '{{ .Values.Installation.V1.Provider.AWS.S3AccessLogsExpiration }}'
         advancedMonitoringEC2: '{{ .Values.Installation.V1.Provider.AWS.AdvancedMonitoringEC2 }}'
-        availabilityZones: '{{ .Values.Installation.V1.Provider.AWS.AvailabilityZones }}'
+        availabilityZones: |-
+          {{- range .Values.Installation.V1.Provider.AWS.AvailabilityZones }}
+          - {{- . }}
+          {{- end }}
         encrypter: '{{ .Values.Installation.V1.Provider.AWS.Encrypter }}'
         trustedAdvisorEnabled: '{{ .Values.Installation.V1.Provider.AWS.TrustedAdvisor.Enabled }}'
         includeTags: '{{ .Values.Installation.V1.Provider.AWS.IncludeTags }}'
