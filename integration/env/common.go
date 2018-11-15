@@ -89,7 +89,7 @@ func init() {
 }
 
 func CircleCI() bool {
-	return circleCI == "true"
+	return circleCI == strings.ToLower("true")
 }
 
 func CircleSHA() string {
@@ -119,7 +119,7 @@ func ClusterID() string {
 }
 
 func KeepResources() bool {
-	//return keepResources == "true"
+	//return keepResources == strings.ToLower("true")
 	return true
 }
 
