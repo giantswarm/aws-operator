@@ -132,6 +132,7 @@ func (c *conditionSet) SecretNotExist(ctx context.Context, namespace, name strin
 		}
 		b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
 		n := backoff.NewNotifier(c.logger, ctx)
+
 		err := backoff.RetryNotify(o, b, n)
 		if err != nil {
 			return microerror.Mask(err)
