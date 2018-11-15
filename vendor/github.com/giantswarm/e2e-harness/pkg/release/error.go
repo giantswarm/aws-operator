@@ -58,6 +58,15 @@ func IsReleaseVersionNotMatching(err error) bool {
 	return microerror.Cause(err) == releaseVersionNotMatchingError
 }
 
+var stillExistsError = &microerror.Error{
+	Kind: "stillExistsError",
+}
+
+// IsStillExists asserts stillExistsError.
+func IsStillExists(err error) bool {
+	return microerror.Cause(err) == stillExistsError
+}
+
 var tarballNotFoundError = &microerror.Error{
 	Kind: "tarballNotFoundError",
 }
