@@ -78,50 +78,56 @@ func (e *EBS) DeleteVolume(ctx context.Context, volumeID string) error {
 // specified the instance will be stopped first.
 func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment VolumeAttachment, force bool, shutdown bool, wait bool) error {
 	if shutdown {
-		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("stopping instance %s", attachment.InstanceID))
+		{
+			e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminating instance %#q", attachment.InstanceID))
 
-		i := &ec2.StopInstancesInput{
-			InstanceIds: []*string{
-				aws.String(attachment.InstanceID),
-			},
-		}
-		_, err := e.client.StopInstances(i)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		if wait {
-			e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for instance %s being stopped", attachment.InstanceID))
-
-			i := &ec2.DescribeInstancesInput{
+			i := &ec2.TerminateInstancesInput{
 				InstanceIds: []*string{
 					aws.String(attachment.InstanceID),
 				},
 			}
-			err := e.client.WaitUntilInstanceStopped(i)
+			_, err := e.client.TerminateInstances(i)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 
-			e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for instance %s being stopped", attachment.InstanceID))
+			e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminated instance %#q", attachment.InstanceID))
 		}
 
-		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("stopped instance %s", attachment.InstanceID))
+		if wait {
+			{
+				e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for instance %#q being terminated", attachment.InstanceID))
+
+				i := &ec2.DescribeInstancesInput{
+					InstanceIds: []*string{
+						aws.String(attachment.InstanceID),
+					},
+				}
+				err := e.client.WaitUntilInstanceTerminated(i)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+
+				e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for instance %#q being terminated", attachment.InstanceID))
+			}
+		}
 	}
 
-	e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detaching EBS volume %s from instance %s", volumeID, attachment.InstanceID))
+	{
+		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detaching EBS volume %#q from instance %#q", volumeID, attachment.InstanceID))
 
-	_, err := e.client.DetachVolume(&ec2.DetachVolumeInput{
-		Device:     aws.String(attachment.Device),
-		InstanceId: aws.String(attachment.InstanceID),
-		VolumeId:   aws.String(volumeID),
-		Force:      aws.Bool(force),
-	})
-	if err != nil {
-		return microerror.Mask(err)
+		_, err := e.client.DetachVolume(&ec2.DetachVolumeInput{
+			Device:     aws.String(attachment.Device),
+			InstanceId: aws.String(attachment.InstanceID),
+			VolumeId:   aws.String(volumeID),
+			Force:      aws.Bool(force),
+		})
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detached EBS volume %#q from instance %#q", volumeID, attachment.InstanceID))
 	}
-
-	e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detached EBS volume %s from instance %s", volumeID, attachment.InstanceID))
 
 	return nil
 }
