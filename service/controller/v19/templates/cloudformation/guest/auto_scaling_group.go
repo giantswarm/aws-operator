@@ -6,7 +6,9 @@ const AutoScalingGroup = `{{define "autoscaling_group"}}
     Type: "AWS::AutoScaling::AutoScalingGroup"
     Properties:
       VPCZoneIdentifier:
-        - !Ref PrivateSubnet
+      {{- range $s := $v.PrivateSubnets }}
+        - !Ref {{ $s }}
+      {{end}}
       AvailabilityZones: [{{ $v.WorkerAZ }}]
       DesiredCapacity: {{ $v.ASGMinSize }}
       MinSize: {{ $v.ASGMinSize }}

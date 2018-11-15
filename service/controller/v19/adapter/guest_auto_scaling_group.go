@@ -1,6 +1,7 @@
 package adapter
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/giantswarm/microerror"
@@ -16,6 +17,7 @@ type GuestAutoScalingGroupAdapter struct {
 	HealthCheckGracePeriod int
 	MaxBatchSize           string
 	MinInstancesInService  string
+	PrivateSubnets         []string
 	RollingUpdatePauseTime string
 	WorkerAZ               string
 }
@@ -35,6 +37,10 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	a.MinInstancesInService = workerCountRatio(workers, asgMinInstancesRatio)
 	a.HealthCheckGracePeriod = gracePeriodSeconds
 	a.RollingUpdatePauseTime = rollingUpdatePauseTime
+
+	for i := 0; i < key.SpecAvailabilityZones(cfg.CustomObject); i++ {
+		a.PrivateSubnets = append(a.PrivateSubnets, fmt.Sprintf("PrivateSubnet%02d", i))
+	}
 
 	return nil
 }
