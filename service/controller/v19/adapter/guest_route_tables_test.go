@@ -32,7 +32,7 @@ func TestAdapterRouteTablesRegularFields(t *testing.T) {
 			expectedError:           false,
 			expectedHostClusterCIDR: "10.0.0.0/16",
 			expectedPublicRouteTableName: RouteTableName{
-				ResourceName: "PublicRouteTable00",
+				ResourceName: "PublicRouteTable",
 				TagName:      "test-cluster-public",
 			},
 			expectedPrivateRouteTableNames: []RouteTableName{

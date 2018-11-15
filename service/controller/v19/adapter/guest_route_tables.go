@@ -28,7 +28,7 @@ func (r *GuestRouteTablesAdapter) Adapt(cfg Config) error {
 
 	r.HostClusterCIDR = hostClusterCIDR
 	r.PublicRouteTableName = RouteTableName{
-		ResourceName: "PublicRouteTable00",
+		ResourceName: "PublicRouteTable",
 		TagName:      key.RouteTableName(cfg.CustomObject, suffixPublic),
 	}
 

@@ -343,9 +343,9 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Fatal("NATGateway01 element not found")
 	}
-	if !strings.Contains(body, "PublicRouteTable00:") {
+	if !strings.Contains(body, "PublicRouteTable:") {
 		fmt.Println(body)
-		t.Fatal("PublicRouteTable00 element not found")
+		t.Fatal("PublicRouteTable element not found")
 	}
 	if !strings.Contains(body, "PublicSubnet00:") {
 		fmt.Println(body)
