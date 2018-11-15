@@ -16,7 +16,7 @@ const Instance = `{{ define "instance" }}
       Monitoring: {{ $v.Master.Instance.Monitoring }}
       SecurityGroupIds:
       - !Ref MasterSecurityGroup
-      SubnetId: !Ref PrivateSubnet
+      SubnetId: !Ref {{ $v.Master.PrivateSubnet }}
       UserData: {{ $v.Master.CloudConfig }}
       Tags:
       - Key: Name

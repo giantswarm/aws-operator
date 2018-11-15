@@ -51,6 +51,21 @@ func TestAdapterGuestMain(t *testing.T) {
 					},
 				},
 				Status: v1alpha1.AWSConfigStatus{
+					AWS: v1alpha1.AWSConfigStatusAWS{
+						AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+							v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+								Name: "eu-central-1a",
+								Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
+									Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
+										CIDR: "10.1.4.0/25",
+									},
+									Public: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
+										CIDR: "10.1.4.128/25",
+									},
+								},
+							},
+						},
+					},
 					Cluster: v1alpha1.StatusCluster{
 						Network: v1alpha1.StatusClusterNetwork{
 							CIDR: "10.1.4.0/24",
@@ -81,6 +96,21 @@ func TestAdapterGuestMain(t *testing.T) {
 					},
 				},
 				Status: v1alpha1.AWSConfigStatus{
+					AWS: v1alpha1.AWSConfigStatusAWS{
+						AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+							v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+								Name: "cn-north-1a",
+								Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
+									Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
+										CIDR: "10.1.4.0/25",
+									},
+									Public: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
+										CIDR: "10.1.4.128/25",
+									},
+								},
+							},
+						},
+					},
 					Cluster: v1alpha1.StatusCluster{
 						Network: v1alpha1.StatusClusterNetwork{
 							CIDR: "10.1.4.0/24",
