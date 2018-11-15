@@ -57,8 +57,6 @@ func NewProvider(config ProviderConfig) (*Provider, error) {
 }
 
 func (p *Provider) CreateCluster(ctx context.Context, id string) error {
-	p.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating tenant cluster %#q", id))
-
 	setupConfig := setup.Config{
 		AWSClient: p.awsClient,
 		Host:      p.host,
@@ -66,24 +64,16 @@ func (p *Provider) CreateCluster(ctx context.Context, id string) error {
 		Release:   p.release,
 	}
 
-	err := setup.InstallAWSConfig(ctx, id, setupConfig)
+	wait := false
+	err := setup.EnsureTenantClusterCreated(ctx, id, setupConfig, wait)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-
-	err = setup.InstallCertConfigs(ctx, id, setupConfig)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	p.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created tenant cluster %#q", id))
 
 	return nil
 }
 
 func (p *Provider) DeleteCluster(ctx context.Context, id string) error {
-	p.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting tenant cluster %#q", id))
-
 	setupConfig := setup.Config{
 		AWSClient: p.awsClient,
 		Host:      p.host,
@@ -91,17 +81,11 @@ func (p *Provider) DeleteCluster(ctx context.Context, id string) error {
 		Release:   p.release,
 	}
 
-	err := p.release.EnsureDeleted(ctx, fmt.Sprintf("e2esetup-awsconfig-%s", id), setup.CRNotExistsCondition(ctx, id, setupConfig))
+	wait := false
+	err := setup.EnsureTenantClusterDeleted(ctx, id, setupConfig, wait)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-
-	err = p.release.EnsureDeleted(ctx, fmt.Sprintf("e2esetup-certs-%s", id))
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	p.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted tenant cluster %#q", id))
 
 	return nil
 }

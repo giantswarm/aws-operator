@@ -18,4 +18,7 @@ type ConditionSet interface {
 	// SecretExists returns a function waiting for the Secret to appear in the
 	// Kubernetes API described by the given name.
 	SecretExists(ctx context.Context, namespace, name string) ConditionFunc
+	// SecretNotExist returns a function waiting for the Secret to
+	// disappear in the Kubernetes API described by the given name.
+	SecretNotExist(ctx context.Context, namespace, name string) ConditionFunc
 }
