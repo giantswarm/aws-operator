@@ -52,6 +52,10 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 			PortELB:      key.KubernetesAPISecurePort(cfg.CustomObject),
 			PortInstance: key.KubernetesAPISecurePort(cfg.CustomObject),
 		},
+		{
+			PortELB:      key.EtcdPort(cfg.CustomObject),
+			PortInstance: key.EtcdPort(cfg.CustomObject),
+		},
 	}
 	a.APIElbScheme = externalELBScheme
 

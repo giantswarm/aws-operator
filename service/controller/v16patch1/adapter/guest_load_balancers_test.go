@@ -39,6 +39,10 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
 						ID: "test-cluster",
+						Etcd: v1alpha1.ClusterEtcd{
+							Domain: "etcd.test-cluster.aws.giantswarm.io",
+							Port:   2379,
+						},
 						Kubernetes: v1alpha1.ClusterKubernetes{
 							API: v1alpha1.ClusterKubernetesAPI{
 								Domain:     "api.test-cluster.aws.giantswarm.io",
@@ -62,6 +66,10 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 				{
 					PortELB:      443,
 					PortInstance: 443,
+				},
+				{
+					PortELB:      2379,
+					PortInstance: 2379,
 				},
 			},
 			expectedAPIElbScheme:                     "internet-facing",

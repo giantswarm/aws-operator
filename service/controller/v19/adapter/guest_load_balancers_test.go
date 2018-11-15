@@ -73,6 +73,10 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 					PortELB:      443,
 					PortInstance: 443,
 				},
+				{
+					PortELB:      2379,
+					PortInstance: 2379,
+				},
 			},
 			expectedAPIElbScheme: "internet-facing",
 			expectedEtcdElbName:  "test-cluster-etcd",

@@ -20,6 +20,10 @@ const RecordSets = `{{define "record_sets"}}
   EtcdRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
+      AliasTarget:
+        DNSName: !GetAtt ApiLoadBalancer.DNSName
+        HostedZoneId: !GetAtt ApiLoadBalancer.CanonicalHostedZoneNameID
+        EvaluateTargetHealth: false
       Name: 'etcd.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
       HostedZoneId: !Ref 'HostedZone'
       TTL: '900'
