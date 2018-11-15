@@ -25,26 +25,23 @@ const (
 	crNamespace = "default"
 )
 
-func EnsureTenantClusterCreated(ctx context.Context, id string, config Config) error {
-	err := InstallAWSConfig(ctx, id, config)
+func EnsureTenantClusterCreated(ctx context.Context, id string, config Config, wait bool) error {
+	config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating tenant cluster %#q", id))
+
+	err := ensureAWSConfigInstalled(ctx, id, config)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	err = InstallCertConfigs(ctx, id, config)
+	err = ensureCertConfigsInstalled(ctx, id, config)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	{
-		config.Logger.LogCtx(ctx, "level", "debug", "message", "waiting for guest cluster to be ready")
+	if wait {
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for guest cluster %#q to be ready", id))
 
 		err = config.Guest.Initialize()
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		err = config.Guest.Setup()
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -54,29 +51,38 @@ func EnsureTenantClusterCreated(ctx context.Context, id string, config Config) e
 			return microerror.Mask(err)
 		}
 
-		config.Logger.LogCtx(ctx, "level", "debug", "message", "waited for guest cluster to be ready")
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for guest cluster %#q to be ready", id))
 	}
 
+	config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created tenant cluster %#q", id))
 	return nil
 }
 
-func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config) error {
+func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config, wait bool) error {
+	config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting tenant cluster %#q", id))
+
 	err := config.Release.EnsureDeleted(ctx, key.AWSConfigReleaseName(id), CRNotExistsCondition(ctx, id, config))
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	{
-		config.Logger.LogCtx(ctx, "level", "debug", "message", "waiting for guest cluster API to be down")
+	err = config.Release.EnsureDeleted(ctx, key.CertsReleaseName(id), config.Release.Condition().SecretNotExist(ctx, "default", fmt.Sprintf("%s-api", id)))
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	if wait {
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for guest cluster %#q API to be down", id))
 
 		err := config.Guest.WaitForAPIDown()
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		config.Logger.LogCtx(ctx, "level", "debug", "message", "waited for guest cluster API to be down")
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for guest cluster %#q API to be down", id))
 	}
 
+	config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted tenant cluster %#q", id))
 	return nil
 }
 
@@ -132,7 +138,45 @@ func CRNotExistsCondition(ctx context.Context, id string, config Config) release
 	}
 }
 
-func ensureHostVPC(ctx context.Context, config Config) (string, error) {
+func ensureAWSConfigInstalled(ctx context.Context, id string, config Config) error {
+	vpcID, err := ensureHostVPCCreated(ctx, config)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	var values string
+	{
+		c := chartvalues.APIExtensionsAWSConfigE2EConfig{
+			CommonDomain:         env.CommonDomain(),
+			ClusterName:          id,
+			SSHPublicKey:         env.IDRSAPub(),
+			VersionBundleVersion: env.VersionBundleVersion(),
+
+			AWS: chartvalues.APIExtensionsAWSConfigE2EConfigAWS{
+				Region:            env.AWSRegion(),
+				APIHostedZone:     env.AWSAPIHostedZoneGuest(),
+				IngressHostedZone: env.AWSIngressHostedZoneGuest(),
+				RouteTable0:       env.AWSRouteTable0(),
+				RouteTable1:       env.AWSRouteTable1(),
+				VPCPeerID:         vpcID,
+			},
+		}
+
+		values, err = chartvalues.NewAPIExtensionsAWSConfigE2E(c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	err = config.Release.EnsureInstalled(ctx, key.AWSConfigReleaseName(id), release.NewStableChartInfo("apiextensions-aws-config-e2e-chart"), values, crExistsCondition(ctx, id, config))
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
+func ensureHostVPCCreated(ctx context.Context, config Config) (string, error) {
 	stackName := "host-peer-" + env.ClusterID()
 
 	{
@@ -192,45 +236,7 @@ func ensureHostVPC(ctx context.Context, config Config) (string, error) {
 	return vpcID, nil
 }
 
-func InstallAWSConfig(ctx context.Context, id string, config Config) error {
-	vpcID, err := ensureHostVPC(ctx, config)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	var values string
-	{
-		c := chartvalues.APIExtensionsAWSConfigE2EConfig{
-			CommonDomain:         env.CommonDomain(),
-			ClusterName:          id,
-			SSHPublicKey:         env.IDRSAPub(),
-			VersionBundleVersion: env.VersionBundleVersion(),
-
-			AWS: chartvalues.APIExtensionsAWSConfigE2EConfigAWS{
-				Region:            env.AWSRegion(),
-				APIHostedZone:     env.AWSAPIHostedZoneGuest(),
-				IngressHostedZone: env.AWSIngressHostedZoneGuest(),
-				RouteTable0:       env.AWSRouteTable0(),
-				RouteTable1:       env.AWSRouteTable1(),
-				VPCPeerID:         vpcID,
-			},
-		}
-
-		values, err = chartvalues.NewAPIExtensionsAWSConfigE2E(c)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	err = config.Release.Install(ctx, key.AWSConfigReleaseName(id), release.NewStableChartInfo("apiextensions-aws-config-e2e-chart"), values, crExistsCondition(ctx, id, config))
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	return nil
-}
-
-func InstallCertConfigs(ctx context.Context, id string, config Config) error {
+func ensureCertConfigsInstalled(ctx context.Context, id string, config Config) error {
 	c := chartvalues.E2ESetupCertsConfig{
 		Cluster: chartvalues.E2ESetupCertsConfigCluster{
 			ID: id,
@@ -243,7 +249,7 @@ func InstallCertConfigs(ctx context.Context, id string, config Config) error {
 		return microerror.Mask(err)
 	}
 
-	err = config.Release.Install(ctx, key.CertsReleaseName(id), release.NewStableChartInfo("e2esetup-certs-chart"), values, config.Release.Condition().SecretExists(ctx, "default", fmt.Sprintf("%s-api", id)))
+	err = config.Release.EnsureInstalled(ctx, key.CertsReleaseName(id), release.NewStableChartInfo("e2esetup-certs-chart"), values, config.Release.Condition().SecretExists(ctx, "default", fmt.Sprintf("%s-api", id)))
 	if err != nil {
 		return microerror.Mask(err)
 	}
