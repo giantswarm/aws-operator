@@ -14,11 +14,11 @@ const Subnets = `{{ define "subnets" }}
         Value: {{ .Name }}
       VpcId: !Ref VPC
 
-  PublicRouteTableAssociation{{ .Index }}:
+  {{ .RouteTableAssociation.Name }}:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PublicRouteTable
-      SubnetId: !Ref {{ .Name }}
+      RouteTableId: !Ref {{ .RouteTableAssociation.RouteTableName }}
+      SubnetId: !Ref {{ .RouteTableAssociation.SubnetName }}
 
   {{ end }}
 
@@ -34,10 +34,10 @@ const Subnets = `{{ define "subnets" }}
         Value: {{ .Name }}
       VpcId: !Ref VPC
 
-  PrivateRouteTableAssociation{{ .Index }}:
+  {{ .RouteTableAssociation.Name  }}:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PrivateRouteTable{{ .Index }}
-      SubnetId: !Ref {{ .Name }}
+      RouteTableId: !Ref {{ .RouteTableAssociation.RouteTableName }}
+      SubnetId: !Ref {{ .RouteTableAssociation.SubnetName }}
   {{ end }}
 {{ end }}`

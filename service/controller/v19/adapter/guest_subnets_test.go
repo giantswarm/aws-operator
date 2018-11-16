@@ -65,18 +65,33 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 					AvailabilityZone: "eu-west-1a",
 					CIDR:             "10.100.2.0/25",
 					Name:             "PublicSubnet00",
+					RouteTableAssociation: RouteTableAssociation{
+						Name:           "PublicRouteTableAssociation00",
+						RouteTableName: "PublicRouteTable",
+						SubnetName:     "PublicSubnet00",
+					},
 				},
 				{
 					Index:            1,
 					AvailabilityZone: "eu-west-1b",
 					CIDR:             "10.100.1.0/25",
 					Name:             "PublicSubnet01",
+					RouteTableAssociation: RouteTableAssociation{
+						Name:           "PublicRouteTableAssociation01",
+						RouteTableName: "PublicRouteTable",
+						SubnetName:     "PublicSubnet01",
+					},
 				},
 				{
 					Index:            2,
 					AvailabilityZone: "eu-west-1c",
 					CIDR:             "10.100.3.0/25",
 					Name:             "PublicSubnet02",
+					RouteTableAssociation: RouteTableAssociation{
+						Name:           "PublicRouteTableAssociation02",
+						RouteTableName: "PublicRouteTable",
+						SubnetName:     "PublicSubnet02",
+					},
 				},
 			},
 			expectedPrivateSubnets: []Subnet{
@@ -85,18 +100,33 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 					AvailabilityZone: "eu-west-1a",
 					CIDR:             "10.100.2.128/25",
 					Name:             "PrivateSubnet00",
+					RouteTableAssociation: RouteTableAssociation{
+						Name:           "PrivateRouteTableAssociation00",
+						RouteTableName: "PrivateRouteTable00",
+						SubnetName:     "PrivateSubnet00",
+					},
 				},
 				{
 					Index:            1,
 					AvailabilityZone: "eu-west-1b",
 					CIDR:             "10.100.1.128/25",
 					Name:             "PrivateSubnet01",
+					RouteTableAssociation: RouteTableAssociation{
+						Name:           "PrivateRouteTableAssociation01",
+						RouteTableName: "PrivateRouteTable01",
+						SubnetName:     "PrivateSubnet01",
+					},
 				},
 				{
 					Index:            2,
 					AvailabilityZone: "eu-west-1c",
 					CIDR:             "10.100.3.128/25",
 					Name:             "PrivateSubnet02",
+					RouteTableAssociation: RouteTableAssociation{
+						Name:           "PrivateRouteTableAssociation02",
+						RouteTableName: "PrivateRouteTable02",
+						SubnetName:     "PrivateSubnet02",
+					},
 				},
 			},
 			errorMatcher: nil,
