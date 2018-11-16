@@ -239,11 +239,6 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		t.Fatal("launch configuration element not found")
 	}
 
-	if !strings.Contains(body, "AvailabilityZones: [eu-central-1a]") {
-		fmt.Println(body)
-		t.Fatal("asg element not found")
-	}
-
 	if !strings.Contains(body, "Outputs:") {
 		fmt.Println(body)
 		t.Fatal("outputs header not found")
@@ -343,9 +338,9 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Fatal("NATGateway01 element not found")
 	}
-	if !strings.Contains(body, "PublicRouteTable00:") {
+	if !strings.Contains(body, "PublicRouteTable:") {
 		fmt.Println(body)
-		t.Fatal("PublicRouteTable00 element not found")
+		t.Fatal("PublicRouteTable element not found")
 	}
 	if !strings.Contains(body, "PublicSubnet00:") {
 		fmt.Println(body)
