@@ -97,6 +97,7 @@ const (
 	KindMaster  = "master"
 	KindIngress = "ingress"
 	KindWorker  = "worker"
+	KindEtcdELB = "etcd-elb"
 )
 
 func ClusterAPIEndpoint(customObject v1alpha1.AWSConfig) string {
