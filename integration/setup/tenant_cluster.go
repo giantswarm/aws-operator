@@ -10,6 +10,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/aws-operator/integration/key"
 	"github.com/giantswarm/backoff"
@@ -19,6 +20,7 @@ import (
 	"github.com/giantswarm/microerror"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/dynamic"
 )
 
 const (
@@ -61,7 +63,7 @@ func EnsureTenantClusterCreated(ctx context.Context, id string, config Config, w
 func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config, wait bool) error {
 	config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting tenant cluster %#q", id))
 
-	err := config.Release.EnsureDeleted(ctx, key.AWSConfigReleaseName(id), CRNotExistsCondition(ctx, id, config))
+	err := config.Release.EnsureDeleted(ctx, key.AWSConfigReleaseName(id), crNotFoundCondition(ctx, id, config))
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -88,10 +90,51 @@ func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config, w
 
 func crExistsCondition(ctx context.Context, id string, config Config) release.ConditionFunc {
 	return func() error {
+		// TODO turn those into parameters
+		crd := providerv1alpha1.NewAWSConfigCRD()
+		namespace := crNamespace
+		name := id
+
+		resource := &metav1.APIResource{
+			Name:         crd.Spec.Names.Plural,
+			SingularName: crd.Spec.Names.Singular,
+			Namespaced:   crd.Spec.Scope == "Namespaced",
+			Group:        crd.Spec.Group,
+			Version:      crd.Spec.Version,
+			Kind:         crd.Spec.Names.Kind,
+		}
+
+		// In client-go@10.12.x it will be:
+		//
+		//	gvr := metav1.GroupVersionResource{
+		//		Group:        crd.Spec.Group,
+		//		Version:      crd.Spec.Version,
+		//		Resource:         crd.Spec.Names.Plural,
+		//	}
+		//
+
+		// TODO expose dynamic client in Host & Guest
+		var dynamicClient *dynamic.Client
+		{
+			var err error
+			// In client-go@10.12.x it will be:
+			//
+			//	dynamicClient, err := dynamic.NewForConfig(config.Host.RestConfig())
+			//
+			dynamicClient, err = dynamic.NewClient(config.Host.RestConfig())
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+
 		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for creation of CR %#q in namespace %#q", id, crNamespace))
 
 		o := func() error {
-			_, err := config.Host.G8sClient().ProviderV1alpha1().AWSConfigs(crNamespace).Get(id, metav1.GetOptions{})
+			// In client-go@10.12.x it will be:
+			//
+			//	_, err := dynamicClient.Reosurce(gvr).Namespace(namespace).Get(name, metav1.GetOptions{})
+			//
+			_, err := dynamicClient.Resource(resource, namespace).Get(name, metav1.GetOptions{})
 			if apierrors.IsNotFound(err) {
 				return microerror.Maskf(notFoundError, "CR %#q in namespace %#q", id, crNamespace)
 			} else if err != nil {
@@ -112,7 +155,7 @@ func crExistsCondition(ctx context.Context, id string, config Config) release.Co
 	}
 }
 
-func CRNotExistsCondition(ctx context.Context, id string, config Config) release.ConditionFunc {
+func crNotFoundCondition(ctx context.Context, id string, config Config) release.ConditionFunc {
 	return func() error {
 		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for deletion of CR %#q in namespace %#q", id, crNamespace))
 
