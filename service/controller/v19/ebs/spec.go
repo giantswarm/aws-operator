@@ -26,8 +26,8 @@ type EC2Client interface {
 	DeleteVolume(*ec2.DeleteVolumeInput) (*ec2.DeleteVolumeOutput, error)
 	DescribeVolumes(*ec2.DescribeVolumesInput) (*ec2.DescribeVolumesOutput, error)
 	DetachVolume(*ec2.DetachVolumeInput) (*ec2.VolumeAttachment, error)
-	StopInstances(*ec2.StopInstancesInput) (*ec2.StopInstancesOutput, error)
-	WaitUntilInstanceStopped(*ec2.DescribeInstancesInput) error
+	TerminateInstances(*ec2.TerminateInstancesInput) (*ec2.TerminateInstancesOutput, error)
+	WaitUntilInstanceTerminated(*ec2.DescribeInstancesInput) error
 }
 
 // Volume is an EBS volume and its attachments.
