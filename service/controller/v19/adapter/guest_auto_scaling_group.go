@@ -19,7 +19,7 @@ type GuestAutoScalingGroupAdapter struct {
 	MinInstancesInService  string
 	PrivateSubnets         []string
 	RollingUpdatePauseTime string
-	WorkerAZ               string
+	WorkerAZs              []string
 }
 
 func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
@@ -28,7 +28,6 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 		return microerror.Maskf(invalidConfigError, "at least 1 worker required, found %d", workers)
 	}
 
-	a.WorkerAZ = key.AvailabilityZone(cfg.CustomObject)
 	a.ASGMaxSize = workers + 1
 	a.ASGMinSize = workers
 	a.ASGType = key.KindWorker
@@ -38,8 +37,9 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	a.HealthCheckGracePeriod = gracePeriodSeconds
 	a.RollingUpdatePauseTime = rollingUpdatePauseTime
 
-	for i := 0; i < key.SpecAvailabilityZones(cfg.CustomObject); i++ {
+	for i, az := range key.StatusAvailabilityZones(cfg.CustomObject) {
 		a.PrivateSubnets = append(a.PrivateSubnets, fmt.Sprintf("PrivateSubnet%02d", i))
+		a.WorkerAZs = append(a.WorkerAZs, az.Name)
 	}
 
 	return nil

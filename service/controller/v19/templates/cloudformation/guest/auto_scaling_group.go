@@ -9,7 +9,10 @@ const AutoScalingGroup = `{{define "autoscaling_group"}}
       {{- range $s := $v.PrivateSubnets }}
         - !Ref {{ $s }}
       {{end}}
-      AvailabilityZones: [{{ $v.WorkerAZ }}]
+      AvailabilityZones:
+      {{- range $az := $v.WorkerAZs }}
+        - {{ $az }}
+      {{end}}
       DesiredCapacity: {{ $v.ASGMinSize }}
       MinSize: {{ $v.ASGMinSize }}
       MaxSize: {{ $v.ASGMaxSize }}

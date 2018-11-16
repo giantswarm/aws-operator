@@ -239,11 +239,6 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		t.Fatal("launch configuration element not found")
 	}
 
-	if !strings.Contains(body, "AvailabilityZones: [eu-central-1a]") {
-		fmt.Println(body)
-		t.Fatal("asg element not found")
-	}
-
 	if !strings.Contains(body, "Outputs:") {
 		fmt.Println(body)
 		t.Fatal("outputs header not found")
