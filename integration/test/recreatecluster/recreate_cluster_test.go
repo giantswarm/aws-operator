@@ -17,24 +17,18 @@ func Test_Recreate_Cluster(t *testing.T) {
 	ctx := context.Background()
 
 	{
-		config.Logger.LogCtx(ctx, "level", "debug", "message", "deleting tenant cluster")
-
-		err := setup.EnsureTenantClusterDeleted(ctx, env.ClusterID(), config)
+		wait := true
+		err := setup.EnsureTenantClusterDeleted(ctx, env.ClusterID(), config, wait)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
-
-		config.Logger.LogCtx(ctx, "level", "debug", "message", "deleted tenant cluster")
 	}
 
 	{
-		config.Logger.LogCtx(ctx, "level", "debug", "message", "creating tenant cluster")
-
-		err := setup.EnsureTenantClusterCreated(ctx, env.ClusterID(), config)
+		wait := true
+		err := setup.EnsureTenantClusterCreated(ctx, env.ClusterID(), config, wait)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
-
-		config.Logger.LogCtx(ctx, "level", "debug", "message", "created tenant cluster")
 	}
 }

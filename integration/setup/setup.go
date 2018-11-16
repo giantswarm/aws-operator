@@ -34,7 +34,8 @@ func Setup(m *testing.M, config Config) {
 	}
 
 	if v == 0 && config.UseDefaultTenant {
-		err = EnsureTenantClusterCreated(ctx, env.ClusterID(), config)
+		wait := true
+		err = EnsureTenantClusterCreated(ctx, env.ClusterID(), config, wait)
 		if err != nil {
 			config.Logger.LogCtx(ctx, "level", "error", "message", "failed to create tenant cluster", "stack", fmt.Sprintf("%#v", err))
 			v = 1
@@ -45,17 +46,17 @@ func Setup(m *testing.M, config Config) {
 		v = m.Run()
 	}
 
-	if os.Getenv("KEEP_RESOURCES") != "true" {
+	if !env.KeepResources() {
 		if config.UseDefaultTenant {
-			err := EnsureTenantClusterDeleted(ctx, env.ClusterID(), config)
+			wait := true
+			err := EnsureTenantClusterDeleted(ctx, env.ClusterID(), config, wait)
 			if err != nil {
 				config.Logger.LogCtx(ctx, "level", "error", "message", "failed to delete tenant cluster", "stack", fmt.Sprintf("%#v", err))
 				v = 1
 			}
 		}
 
-		// only do full teardown when not on CI
-		if os.Getenv("CIRCLECI") != "true" {
+		if !env.CircleCI() {
 			err := teardown(ctx, config)
 			if err != nil {
 				// teardown errors are logged inside the function.

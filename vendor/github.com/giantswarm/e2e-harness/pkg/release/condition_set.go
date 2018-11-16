@@ -118,3 +118,26 @@ func (c *conditionSet) SecretExists(ctx context.Context, namespace, name string)
 		return nil
 	}
 }
+
+func (c *conditionSet) SecretNotExist(ctx context.Context, namespace, name string) ConditionFunc {
+	return func() error {
+		o := func() error {
+			_, err := c.k8sClient.CoreV1().Secrets(namespace).Get(name, metav1.GetOptions{})
+			if apierrors.IsNotFound(err) {
+				return nil
+			} else if err != nil {
+				return backoff.Permanent(microerror.Mask(err))
+			}
+			return microerror.Maskf(stillExistsError, "secret %#q in namespace %#q", name, namespace)
+		}
+		b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
+		n := backoff.NewNotifier(c.logger, ctx)
+
+		err := backoff.RetryNotify(o, b, n)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		return nil
+	}
+}
