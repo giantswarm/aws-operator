@@ -52,12 +52,24 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 			PortELB:      key.KubernetesAPISecurePort(cfg.CustomObject),
 			PortInstance: key.KubernetesAPISecurePort(cfg.CustomObject),
 		},
+	}
+	a.APIElbScheme = externalELBScheme
+
+	// etcd load balancer settings.
+	etcdElbName, err := key.LoadBalancerName(key.EtcdDomain(cfg.CustomObject), cfg.CustomObject)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	a.EtcdElbHealthCheckTarget = heathCheckTarget(key.EtcdPort(cfg.CustomObject))
+	a.EtcdElbName = etcdElbName
+	a.EtcdElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
 		{
 			PortELB:      key.EtcdPort(cfg.CustomObject),
 			PortInstance: key.EtcdPort(cfg.CustomObject),
 		},
 	}
-	a.APIElbScheme = externalELBScheme
+	a.EtcdElbScheme = internalELBScheme
 
 	// etcd load balancer settings.
 	etcdElbName, err := key.LoadBalancerName(key.EtcdDomain(cfg.CustomObject), cfg.CustomObject)
