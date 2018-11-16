@@ -20,6 +20,7 @@ import (
 	"github.com/giantswarm/microerror"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 )
 
@@ -95,15 +96,6 @@ func crExistsCondition(ctx context.Context, id string, config Config) release.Co
 		namespace := crNamespace
 		name := id
 
-		resource := &metav1.APIResource{
-			Name:         crd.Spec.Names.Plural,
-			SingularName: crd.Spec.Names.Singular,
-			Namespaced:   crd.Spec.Scope == "Namespaced",
-			Group:        crd.Spec.Group,
-			Version:      crd.Spec.Version,
-			Kind:         crd.Spec.Names.Kind,
-		}
-
 		// In client-go@10.12.x it will be:
 		//
 		//	gvr := metav1.GroupVersionResource{
@@ -112,16 +104,33 @@ func crExistsCondition(ctx context.Context, id string, config Config) release.Co
 		//		Resource:         crd.Spec.Names.Plural,
 		//	}
 		//
+		resource := &metav1.APIResource{
+			Name:       crd.Spec.Names.Plural,
+			Namespaced: crd.Spec.Scope == "Namespaced",
+			//Group:      crd.Spec.Group,
+			//Version:    crd.Spec.Version,
+			//Kind:       crd.Spec.Names.Kind,
+			//Verbs:      metav1.Verbs{"get", "list", "watch", "create", "update", "patch", "delete"},
+		}
+		gv := &schema.GroupVersion{
+			Group:   crd.Spec.Group,
+			Version: crd.Spec.Version,
+		}
 
 		// TODO expose dynamic client in Host & Guest
 		var dynamicClient *dynamic.Client
 		{
 			var err error
+
+			c := config.Host.RestConfig()
+			configShallowCopy := *c
+			configShallowCopy.GroupVersion = gv
+
 			// In client-go@10.12.x it will be:
 			//
 			//	dynamicClient, err := dynamic.NewForConfig(config.Host.RestConfig())
 			//
-			dynamicClient, err = dynamic.NewClient(config.Host.RestConfig())
+			dynamicClient, err = dynamic.NewClient(&configShallowCopy)
 			if err != nil {
 				return microerror.Mask(err)
 			}
