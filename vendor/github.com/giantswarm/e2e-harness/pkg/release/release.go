@@ -144,7 +144,7 @@ func (r *Release) Delete(ctx context.Context, name string) error {
 	if helmclient.IsReleaseNotFound(err) {
 		return microerror.Maskf(releaseNotFoundError, "failed to delete release %#q", name)
 	} else if helmclient.IsTillerNotFound(err) {
-		return microerror.Mask(tillerNotFoundError)
+		return microerror.Maskf(tillerNotFoundError, "failed to delete release %#q", name)
 	} else if err != nil {
 		return microerror.Mask(err)
 	}
@@ -257,16 +257,16 @@ func (r *Release) Install(ctx context.Context, name string, chartInfo ChartInfo,
 
 	var err error
 
-	tarball, err := r.pullTarball(name, chartInfo)
+	tarballPath, err := r.pullTarball(name, chartInfo)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	err = r.helmClient.InstallFromTarball(tarball, r.namespace, helm.ReleaseName(releaseName), helm.ValueOverrides([]byte(values)), helm.InstallWait(true))
+	err = r.helmClient.InstallFromTarball(tarballPath, r.namespace, helm.ReleaseName(releaseName), helm.ValueOverrides([]byte(values)), helm.InstallWait(true))
 	if helmclient.IsReleaseAlreadyExists(err) {
 		return microerror.Maskf(releaseAlreadyExistsError, "failed to install release %#q", releaseName)
 	} else if helmclient.IsTarballNotFound(err) {
-		return microerror.Maskf(releaseAlreadyExistsError, "failed to install tarball %#q", tarball)
+		return microerror.Maskf(tarballNotFoundError, "failed to install release %#q from tarball %#q", releaseName, tarballPath)
 	} else if err != nil {
 		return microerror.Mask(err)
 	}
@@ -334,16 +334,22 @@ func (r *Release) InstallOperator(ctx context.Context, name string, chartInfo Ch
 	return nil
 }
 
-func (r *Release) Update(ctx context.Context, name, values, channel string, conditions ...func() error) error {
-	chartname := fmt.Sprintf("%s-chart", name)
+func (r *Release) Update(ctx context.Context, name string, chartInfo ChartInfo, values string, conditions ...func() error) error {
+	releaseName := fmt.Sprintf("%s-%s", r.namespace, name)
 
-	tarballPath, err := r.apprClient.PullChartTarball(chartname, channel)
+	var err error
+
+	tarballPath, err := r.pullTarball(name, chartInfo)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	err = r.helmClient.UpdateReleaseFromTarball(name, tarballPath, helm.UpdateValueOverrides([]byte(values)))
-	if err != nil {
+	err = r.helmClient.UpdateReleaseFromTarball(releaseName, tarballPath, helm.UpdateValueOverrides([]byte(values)))
+	if helmclient.IsReleaseAlreadyExists(err) {
+		return microerror.Maskf(releaseAlreadyExistsError, "failed to update release %#q", releaseName)
+	} else if helmclient.IsTarballNotFound(err) {
+		return microerror.Maskf(tarballNotFoundError, "failed to update release %#q from tarball %#q", releaseName, tarballPath)
+	} else if err != nil {
 		return microerror.Mask(err)
 	}
 

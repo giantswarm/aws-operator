@@ -250,12 +250,12 @@ workflows:
 #      - e2eTestWIPMasterClusterState:
 #          requires:
 #            - master
-      - e2eTestCurPRClusterState:
-          requires:
-            - pr
-      - e2eTestWIPPRClusterState:
-          requires:
-            - pr
+#      - e2eTestCurPRClusterState:
+#          requires:
+#            - pr
+#      - e2eTestWIPPRClusterState:
+#          requires:
+#            - pr
 
 
 
