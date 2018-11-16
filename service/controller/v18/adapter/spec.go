@@ -15,6 +15,7 @@ const (
 	prefixMaster  = "master"
 	prefixWorker  = "worker"
 	prefixIngress = "ingress"
+	prefixEtcdELB = "etcd-elb"
 
 	// asgMaxBatchSizeRatio is the % of instances to be updated during a
 	// rolling update.
