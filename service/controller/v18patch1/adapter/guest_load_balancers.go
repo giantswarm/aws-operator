@@ -22,6 +22,11 @@ type GuestLoadBalancersAdapter struct {
 	APIElbPortsToOpen                []GuestLoadBalancersAdapterPortPair
 	APIElbScheme                     string
 	APIElbSecurityGroupID            string
+	EtcdElbHealthCheckTarget         string
+	EtcdElbName                      string
+	EtcdElbPortsToOpen               []GuestLoadBalancersAdapterPortPair
+	EtcdElbScheme                    string
+	EtcdElbSecurityGroupID           string
 	ELBHealthCheckHealthyThreshold   int
 	ELBHealthCheckInterval           int
 	ELBHealthCheckTimeout            int
@@ -47,12 +52,24 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 			PortELB:      key.KubernetesAPISecurePort(cfg.CustomObject),
 			PortInstance: key.KubernetesAPISecurePort(cfg.CustomObject),
 		},
+	}
+	a.APIElbScheme = externalELBScheme
+
+	// etcd load balancer settings.
+	etcdElbName, err := key.LoadBalancerName(key.EtcdDomain(cfg.CustomObject), cfg.CustomObject)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	a.EtcdElbHealthCheckTarget = heathCheckTarget(key.EtcdPort(cfg.CustomObject))
+	a.EtcdElbName = etcdElbName
+	a.EtcdElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
 		{
 			PortELB:      key.EtcdPort(cfg.CustomObject),
 			PortInstance: key.EtcdPort(cfg.CustomObject),
 		},
 	}
-	a.APIElbScheme = externalELBScheme
+	a.EtcdElbScheme = internalELBScheme
 
 	// Ingress load balancer settings.
 	ingressElbName, err := key.LoadBalancerName(cfg.CustomObject.Spec.Cluster.Kubernetes.IngressController.Domain, cfg.CustomObject)

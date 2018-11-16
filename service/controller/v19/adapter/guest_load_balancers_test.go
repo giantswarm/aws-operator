@@ -19,6 +19,11 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 		expectedAPIElbScheme                     string
 		expectedAPIElbSecurityGroupID            string
 		expectedAPIElbSubnetID                   string
+		expectedEtcdElbName                      string
+		expectedEtcdElbPortsToOpen               []GuestLoadBalancersAdapterPortPair
+		expectedEtcdElbScheme                    string
+		expectedEtcdElbSecurityGroupID           string
+		expectedEtcdElbSubnetID                  string
 		expectedELBAZ                            string
 		expectedELBHealthCheckHealthyThreshold   int
 		expectedELBHealthCheckInterval           int
@@ -67,12 +72,16 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 					PortELB:      443,
 					PortInstance: 443,
 				},
+			},
+			expectedAPIElbScheme: "internet-facing",
+			expectedEtcdElbName:  "test-cluster-etcd",
+			expectedEtcdElbPortsToOpen: []GuestLoadBalancersAdapterPortPair{
 				{
 					PortELB:      2379,
 					PortInstance: 2379,
 				},
 			},
-			expectedAPIElbScheme:                     "internet-facing",
+			expectedEtcdElbScheme:                    "internal",
 			expectedELBAZ:                            "eu-central-1a",
 			expectedELBHealthCheckHealthyThreshold:   2,
 			expectedELBHealthCheckInterval:           5,
@@ -126,6 +135,18 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 
 			if tc.expectedAPIElbScheme != a.Guest.LoadBalancers.APIElbScheme {
 				t.Errorf("expected API ELB Scheme, got %q, want %q", a.Guest.LoadBalancers.APIElbScheme, tc.expectedAPIElbScheme)
+			}
+
+			if tc.expectedEtcdElbName != a.Guest.LoadBalancers.EtcdElbName {
+				t.Errorf("expected etcd ELB Name, got %q, want %q", a.Guest.LoadBalancers.EtcdElbName, tc.expectedEtcdElbName)
+			}
+
+			if !reflect.DeepEqual(tc.expectedEtcdElbPortsToOpen, a.Guest.LoadBalancers.EtcdElbPortsToOpen) {
+				t.Errorf("expected etcd ELB Ports To Open, got %q, want %q", a.Guest.LoadBalancers.EtcdElbPortsToOpen, tc.expectedEtcdElbPortsToOpen)
+			}
+
+			if tc.expectedEtcdElbScheme != a.Guest.LoadBalancers.EtcdElbScheme {
+				t.Errorf("expected etcd ELB Scheme, got %q, want %q", a.Guest.LoadBalancers.EtcdElbScheme, tc.expectedEtcdElbScheme)
 			}
 
 			if tc.expectedELBHealthCheckHealthyThreshold != a.Guest.LoadBalancers.ELBHealthCheckHealthyThreshold {

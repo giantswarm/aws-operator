@@ -297,6 +297,10 @@ func KubernetesAPISecurePort(customObject v1alpha1.AWSConfig) int {
 	return customObject.Spec.Cluster.Kubernetes.API.SecurePort
 }
 
+func EtcdDomain(customObject v1alpha1.AWSConfig) string {
+	return customObject.Spec.Cluster.Etcd.Domain
+}
+
 func EtcdPort(customObject v1alpha1.AWSConfig) int {
 	return customObject.Spec.Cluster.Etcd.Port
 }
