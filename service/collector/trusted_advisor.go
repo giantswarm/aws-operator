@@ -1,73 +1,44 @@
 package collector
 
 import (
-	"fmt"
 	"strconv"
-	"sync"
 
 	"github.com/aws/aws-sdk-go/service/support"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 	"github.com/prometheus/client_golang/prometheus"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 )
 
 const (
-	// serviceLimitCategory is the category returned by Trusted Advisor
-	// for checks related to service limits and usage.
-	serviceLimitCategory = "service_limits"
+	// categoryServiceLimit is the category returned by Trusted Advisor for checks
+	// related to service limits and usage.
+	categoryServiceLimit = "service_limits"
+)
 
+const (
+	indexRegion  = 0
+	indexService = 1
+	indexName    = 2
+	indexLimit   = 3
+	indexUsage   = 4
+)
+
+const (
 	// resourceMetadataLength is the length of resource metadata we expect.
 	resourceMetadataLength = 6
+)
 
-	regionIndex    = 0
-	serviceIndex   = 1
-	limitNameIndex = 2
-	limitIndex     = 3
-	usageIndex     = 4
-
-	accountIDLabel = "account_id"
-	regionLabel    = "region"
-	serviceLabel   = "service"
-	limitNameLabel = "name"
+const (
+	labelAccountID = "account_id"
+	labelRegion    = "region"
+	labelService   = "service"
+	labelName      = "name"
 )
 
 var (
-	serviceLimit *prometheus.Desc = prometheus.NewDesc(
-		prometheus.BuildFQName(Namespace, "", "service_limit"),
-		"Service limits as reported by Trusted Advisor.",
-		[]string{
-			accountIDLabel,
-			regionLabel,
-			serviceLabel,
-			limitNameLabel,
-		},
-		nil,
-	)
-	serviceUsage *prometheus.Desc = prometheus.NewDesc(
-		prometheus.BuildFQName(Namespace, "", "service_usage"),
-		"Service usage as reported by Trusted Advisor.",
-		[]string{
-			accountIDLabel,
-			regionLabel,
-			serviceLabel,
-			limitNameLabel,
-		},
-		nil,
-	)
-
-	trustedAdvisorSupport *prometheus.Desc = prometheus.NewDesc(
-		prometheus.BuildFQName(Namespace, "", "trusted_advisor_supported"),
-		"Gauge describing whether Trusted Advisor is available with your support plan.",
-		nil, nil,
-	)
-
-	trustedAdvisorError = prometheus.NewCounter(prometheus.CounterOpts{
-		Namespace: Namespace,
-		Name:      "trusted_advisor_error_count",
-		Help:      "Counter for the number of errors encountered calling Trusted Advisor.",
-	})
-
 	getChecksDuration = prometheus.NewHistogram(prometheus.HistogramOpts{
 		Namespace: Namespace,
 		Name:      "trusted_advisor_get_checks_duration",
@@ -78,90 +49,162 @@ var (
 		Name:      "trusted_advisor_get_resources_duration",
 		Help:      "Histogram for the duration of Trusted Advisor get resource calls.",
 	})
+	serviceLimit *prometheus.Desc = prometheus.NewDesc(
+		prometheus.BuildFQName(Namespace, "", "service_limit"),
+		"Service limits as reported by Trusted Advisor.",
+		[]string{
+			labelAccountID,
+			labelRegion,
+			labelService,
+			labelName,
+		},
+		nil,
+	)
+	serviceUsage *prometheus.Desc = prometheus.NewDesc(
+		prometheus.BuildFQName(Namespace, "", "service_usage"),
+		"Service usage as reported by Trusted Advisor.",
+		[]string{
+			labelAccountID,
+			labelRegion,
+			labelService,
+			labelName,
+		},
+		nil,
+	)
+	trustedAdvisorSupport *prometheus.Desc = prometheus.NewDesc(
+		prometheus.BuildFQName(Namespace, "", "trusted_advisor_supported"),
+		"Gauge describing whether Trusted Advisor is available with your support plan.",
+		nil, nil,
+	)
 )
 
-func (c *Collector) collectAccountsTrustedAdvisorChecks(ch chan<- prometheus.Metric, clients []aws.Clients) {
-	var wg sync.WaitGroup
-
-	for _, client := range clients {
-		wg.Add(1)
-		go func(awsClients aws.Clients) {
-			defer wg.Done()
-			c.collectTrustedAdvisorChecks(ch, awsClients)
-		}(client)
-	}
-
-	wg.Wait()
+type TrustedAdvisorConfig struct {
+	Helper *helper
+	Logger micrologger.Logger
 }
 
-func (c *Collector) collectTrustedAdvisorChecks(ch chan<- prometheus.Metric, awsClients aws.Clients) {
-	c.logger.Log("level", "debug", "message", "collecting metrics for trusted advisor checks")
+type TrustedAdvisor struct {
+	helper *helper
+	logger micrologger.Logger
+}
 
-	checks, err := c.getTrustedAdvisorChecks(awsClients)
-	if err != nil {
-		if IsUnsupportedPlan(err) {
-			c.logger.Log("level", "info", "message", "Trusted Advisor not available in support plan, cannot fetch service usage metrics")
-			ch <- trustedAdvisorNotSupported()
-			return
-		}
-
-		c.logger.Log("level", "error", "message", "could not get Trusted Advisor checks", "stack", fmt.Sprintf("%#v", err))
-		trustedAdvisorError.Inc()
-		return
+func NewTrustedAdvisor(config TrustedAdvisorConfig) (*TrustedAdvisor, error) {
+	if config.Helper == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Helper must not be empty", config)
 	}
-	ch <- trustedAdvisorSupported()
-
-	accountID, err := c.helper.AWSAccountID(awsClients)
-	if err != nil {
-		c.logger.Log("level", "error", "message", "could not get aws account id", "stack", fmt.Sprintf("%#v", err))
+	if config.Logger == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	var wg sync.WaitGroup
+	t := &TrustedAdvisor{
+		helper: config.Helper,
+		logger: config.Logger,
+	}
+
+	return t, nil
+}
+
+func (t *TrustedAdvisor) Collect(ch chan<- prometheus.Metric) error {
+	awsClientsList, err := t.helper.GetAWSClients()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	var g errgroup.Group
+
+	for _, item := range awsClientsList {
+		awsClients := item
+
+		g.Go(func() error {
+			err := t.collectForAccount(ch, awsClients)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			return nil
+		})
+	}
+
+	err = g.Wait()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
+func (t *TrustedAdvisor) Describe(ch chan<- *prometheus.Desc) error {
+	ch <- serviceLimit
+	ch <- serviceUsage
+	ch <- trustedAdvisorSupport
+	return nil
+}
+
+func (t *TrustedAdvisor) collectForAccount(ch chan<- prometheus.Metric, awsClients aws.Clients) error {
+	accountID, err := t.helper.AWSAccountID(awsClients)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	checks, err := t.getTrustedAdvisorChecks(awsClients)
+	if IsUnsupportedPlan(err) {
+		ch <- trustedAdvisorNotSupported()
+		return microerror.Mask(err)
+	} else if err != nil {
+		return microerror.Mask(err)
+	} else {
+		ch <- trustedAdvisorSupported()
+	}
+
+	var g errgroup.Group
 
 	for _, check := range checks {
 		// Ignore any checks that don't relate to service limits.
-		if *check.Category != serviceLimitCategory {
+		if *check.Category != categoryServiceLimit {
 			continue
 		}
 
-		wg.Add(1)
+		// Register the check ID for the current loop scope so it can safely be used
+		// in the goroutine below, which is execute in parallel.
+		id := check.Id
 
-		go func(id *string) {
-			defer wg.Done()
-
-			resources, err := c.getTrustedAdvisorResources(id, awsClients)
+		g.Go(func() error {
+			resources, err := t.getTrustedAdvisorResources(id, awsClients)
 			if err != nil {
-				c.logger.Log("level", "error", "message", "could not get Trusted Advisor resource", "stack", fmt.Sprintf("%#v", err), "id", *id)
-				trustedAdvisorError.Inc()
-				return
+				return microerror.Mask(err)
 			}
 
 			for _, resource := range resources {
-				// One Trusted Advisor check returns the nil string for current usage. Skip it.
+				// One Trusted Advisor check returns the nil string for current usage.
+				// Skip it.
 				if len(resource.Metadata) == 6 && resource.Metadata[4] == nil {
 					continue
 				}
 
 				limit, usage, err := resourceToMetrics(resource, accountID)
 				if err != nil {
-					c.logger.Log("level", "error", "message", "could not convert Trusted Advisor resource into metrics", "stack", fmt.Sprintf("%#v", err), "id", *id)
-					trustedAdvisorError.Inc()
-					return
+					return microerror.Mask(err)
 				}
 
 				ch <- limit
 				ch <- usage
 			}
-		}(check.Id)
+
+			return nil
+		})
 	}
 
-	wg.Wait()
+	err = g.Wait()
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
-	c.logger.Log("level", "debug", "message", "finished collecting metrics for trusted advisor checks")
+	return nil
 }
 
-// getTrustedAdvisorCheckDescriptions calls Trusted Advisor API to get all available checks.
-func (c *Collector) getTrustedAdvisorChecks(awsClients aws.Clients) ([]*support.TrustedAdvisorCheckDescription, error) {
+// getTrustedAdvisorCheckDescriptions calls Trusted Advisor API to get all
+// available checks.
+func (t *TrustedAdvisor) getTrustedAdvisorChecks(awsClients aws.Clients) ([]*support.TrustedAdvisorCheckDescription, error) {
 	timer := prometheus.NewTimer(getChecksDuration)
 
 	englishLanguage := "en"
@@ -178,8 +221,9 @@ func (c *Collector) getTrustedAdvisorChecks(awsClients aws.Clients) ([]*support.
 	return describeChecksOutput.Checks, nil
 }
 
-// getTrustedAdvisorResources calls Trusted Advisor API to get flagged resources of the given check ID.
-func (c *Collector) getTrustedAdvisorResources(id *string, awsClients aws.Clients) ([]*support.TrustedAdvisorResourceDetail, error) {
+// getTrustedAdvisorResources calls Trusted Advisor API to get flagged resources
+// of the given check ID.
+func (t *TrustedAdvisor) getTrustedAdvisorResources(id *string, awsClients aws.Clients) ([]*support.TrustedAdvisorResourceDetail, error) {
 	timer := prometheus.NewTimer(getResourcesDuration)
 
 	checkResultInput := &support.DescribeTrustedAdvisorCheckResultInput{
@@ -200,12 +244,12 @@ func resourceToMetrics(resource *support.TrustedAdvisorResourceDetail, accountID
 		return nil, nil, invalidResourceError
 	}
 
-	region := resource.Metadata[regionIndex]
-	service := resource.Metadata[serviceIndex]
-	limitName := resource.Metadata[limitNameIndex]
+	region := resource.Metadata[indexRegion]
+	service := resource.Metadata[indexService]
+	limitName := resource.Metadata[indexName]
 
-	limit := resource.Metadata[limitIndex]
-	usage := resource.Metadata[usageIndex]
+	limit := resource.Metadata[indexLimit]
+	usage := resource.Metadata[indexUsage]
 
 	if limit == nil {
 		return nil, nil, nilLimitError
