@@ -1442,9 +1442,9 @@ write_files:
           done
       done
 
-	  # wait for etcd dns (return code 35 is bad certificate which is good enough here)
+      # wait for etcd dns (return code 35 is bad certificate which is good enough here)
       while
-	      curl "https://{{ .Cluster.Etcd.Domain }}:{{ .EtcdPort }}" -k 2>/dev/null >/dev/null
+          curl "https://{{ .Cluster.Etcd.Domain }}:{{ .EtcdPort }}" -k 2>/dev/null >/dev/null
           RET_CODE=$?
           [ "$RET_CODE" -ne "35" ]
       do
@@ -1452,16 +1452,16 @@ write_files:
           sleep 3s
       done
 
-	  # check for other master and remove it
-	  THIS_MACHINE=$(cat /etc/hostname)
-	  for master in $(/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL get nodes --no-headers=true --selector role=master | awk '{print $1}')
-	  do
-	      if [ "$master" -ne "$THIS_MACHINE" ]; then
-		      /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL delete node $master
-		  fi
-	  done
+      # check for other master and remove it
+      THIS_MACHINE=$(cat /etc/hostname)
+      for master in $(/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL get nodes --no-headers=true --selector role=master | awk '{print $1}')
+      do
+          if [ "$master" -ne "$THIS_MACHINE" ]; then
+              /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL delete node $master
+          fi
+      done
 
-	  # install kube-proxy
+      # install kube-proxy
       PROXY_MANIFESTS="kube-proxy-sa.yaml kube-proxy-ds.yaml"
       for manifest in $PROXY_MANIFESTS
       do
