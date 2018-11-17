@@ -382,7 +382,7 @@
 
 [[projects]]
   branch = "teemow-wait-for-etcd-and-remove-old-master"
-  digest = "1:8cfd3b9a1e016d1f0174ed015400cf92d4888f236911ed83d8bb10a238e305f5"
+  digest = "1:9666fc6d81b51ae696eb6f12f063ca3d585e8c4458a520f8ac7ef5c73f5a8af6"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "v_3_3_3",
@@ -395,7 +395,7 @@
     "v_3_7_2",
   ]
   pruneopts = "T"
-  revision = "a1cef09722742e9bc379d6bdf1be45690dbcb0e4"
+  revision = "3984c62fdbc3eb0237473f69273dfef90311a35d"
 
 [[projects]]
   branch = "master"
