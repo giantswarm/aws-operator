@@ -381,8 +381,8 @@
   revision = "79a61ffad296f3f418d8f381e4f5f702d5245b50"
 
 [[projects]]
-  branch = "master"
-  digest = "1:db15c0e3e086378c2a352765f87ccc40a29c26573dd01de93e199a26e77a8691"
+  branch = "teemow-wait-for-etcd-and-remove-old-master"
+  digest = "1:8cfd3b9a1e016d1f0174ed015400cf92d4888f236911ed83d8bb10a238e305f5"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "v_3_3_3",
@@ -392,10 +392,10 @@
     "v_3_6_0",
     "v_3_6_1",
     "v_3_7_0",
-    "v_3_7_1",
+    "v_3_7_2",
   ]
   pruneopts = "T"
-  revision = "edd11b9583ccec94df97a3c66ab0ec36c8c14642"
+  revision = "a1cef09722742e9bc379d6bdf1be45690dbcb0e4"
 
 [[projects]]
   branch = "master"
@@ -1722,7 +1722,7 @@
     "github.com/giantswarm/k8scloudconfig/v_3_6_0",
     "github.com/giantswarm/k8scloudconfig/v_3_6_1",
     "github.com/giantswarm/k8scloudconfig/v_3_7_0",
-    "github.com/giantswarm/k8scloudconfig/v_3_7_1",
+    "github.com/giantswarm/k8scloudconfig/v_3_7_2",
     "github.com/giantswarm/legacycerts/legacy",
     "github.com/giantswarm/legacycerts/legacy/legacytest",
     "github.com/giantswarm/microendpoint/endpoint/healthz",
