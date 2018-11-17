@@ -1456,7 +1456,7 @@ write_files:
       THIS_MACHINE=$(cat /etc/hostname)
       for master in $(/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL get nodes --no-headers=true --selector role=master | awk '{print $1}')
       do
-          if [ "$master" -ne "$THIS_MACHINE" ]; then
+          if [ "$master" != "$THIS_MACHINE" ]; then
               /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL delete node $master
           fi
       done
