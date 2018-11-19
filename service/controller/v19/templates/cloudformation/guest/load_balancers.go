@@ -58,7 +58,10 @@ const LoadBalancers = `{{define "load_balancers"}}
       SecurityGroups:
         - !Ref MasterSecurityGroup
       Subnets:
-        - !Ref PrivateSubnet
+      {{- range $s := $v.PrivateSubnets }}
+        - !Ref {{ $s }}
+      {{end}}
+
 
   IngressLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
