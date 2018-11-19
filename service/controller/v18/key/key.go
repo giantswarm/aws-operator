@@ -288,11 +288,11 @@ func KubernetesAPISecurePort(customObject v1alpha1.AWSConfig) int {
 }
 
 func EtcdDomain(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.Cluster.Etcd.Domain
+	return strings.Join(".", "etcd", ClusterID(customObject), "k8s", BaseDomain(customObject))
 }
 
 func EtcdPort(customObject v1alpha1.AWSConfig) int {
-	return customObject.Spec.Cluster.Etcd.Port
+	return 2379
 }
 
 // LoadBalancerName produces a unique name for the load balancer.

@@ -24,7 +24,7 @@ const RecordSets = `{{define "record_sets"}}
         DNSName: !GetAtt EtcdLoadBalancer.DNSName
         HostedZoneId: !GetAtt EtcdLoadBalancer.CanonicalHostedZoneNameID
         EvaluateTargetHealth: false
-      Name: 'etcd.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
+      Name: '{{ $v.EtcdElbDomain }}.'
       HostedZoneId: !Ref 'HostedZone'
       TTL: '900'
       Type: CNAME
