@@ -6,12 +6,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
+
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/v19/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v19/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v19/key"
-	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/micrologger"
 )
 
 type Encrypter struct {

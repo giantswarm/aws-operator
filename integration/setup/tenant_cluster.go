@@ -10,8 +10,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/giantswarm/aws-operator/integration/env"
-	"github.com/giantswarm/aws-operator/integration/key"
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/release"
 	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
@@ -19,6 +17,9 @@ import (
 	"github.com/giantswarm/microerror"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/giantswarm/aws-operator/integration/env"
+	"github.com/giantswarm/aws-operator/integration/key"
 )
 
 const (
