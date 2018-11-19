@@ -10,13 +10,18 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/release"
 	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
 	"github.com/giantswarm/e2etemplates/pkg/e2etemplates"
 	"github.com/giantswarm/microerror"
+	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/rest"
 
 	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/aws-operator/integration/key"
@@ -62,7 +67,7 @@ func EnsureTenantClusterCreated(ctx context.Context, id string, config Config, w
 func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config, wait bool) error {
 	config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting tenant cluster %#q", id))
 
-	err := config.Release.EnsureDeleted(ctx, key.AWSConfigReleaseName(id), CRNotExistsCondition(ctx, id, config))
+	err := config.Release.EnsureDeleted(ctx, key.AWSConfigReleaseName(id), crNotFoundCondition(ctx, config, providerv1alpha1.NewAWSConfigCRD(), crNamespace, id))
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -87,14 +92,57 @@ func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config, w
 	return nil
 }
 
-func crExistsCondition(ctx context.Context, id string, config Config) release.ConditionFunc {
+func crExistsCondition(ctx context.Context, config Config, crd *apiextensionsv1beta1.CustomResourceDefinition, crNamespace, crName string) release.ConditionFunc {
 	return func() error {
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for creation of CR %#q in namespace %#q", id, crNamespace))
+		// In client-go@10.12.x it will be:
+		//
+		//	gvr := metav1.GroupVersionResource{
+		//		Group:    crd.Spec.Group,
+		//		Version:  crd.Spec.Version,
+		//		Resource: crd.Spec.Names.Plural,
+		//	}
+		//
+		resource := &metav1.APIResource{
+			Name:       crd.Spec.Names.Plural,
+			Namespaced: crd.Spec.Scope == "Namespaced",
+		}
+		gv := &schema.GroupVersion{
+			Group:   crd.Spec.Group,
+			Version: crd.Spec.Version,
+		}
+
+		var dynamicClient *dynamic.Client
+		{
+			var err error
+
+			c := config.Host.RestConfig()
+			configShallowCopy := *c
+			configShallowCopy.APIPath = "/apis"
+			configShallowCopy.GroupVersion = gv
+			if configShallowCopy.UserAgent == "" {
+				configShallowCopy.UserAgent = rest.DefaultKubernetesUserAgent()
+			}
+
+			// In client-go@10.12.x it will be:
+			//
+			//	dynamicClient, err := dynamic.NewForConfig(config.Host.RestConfig())
+			//
+			dynamicClient, err = dynamic.NewClient(&configShallowCopy)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for creation of CR %#q in namespace %#q", crName, crNamespace))
 
 		o := func() error {
-			_, err := config.Host.G8sClient().ProviderV1alpha1().AWSConfigs(crNamespace).Get(id, metav1.GetOptions{})
+			// In client-go@10.12.x it will be:
+			//
+			//	_, err := dynamicClient.Reosurce(gvr).Namespace(crNamespace).Get(crName, metav1.GetOptions{})
+			//
+			_, err := dynamicClient.Resource(resource, crNamespace).Get(crName, metav1.GetOptions{})
 			if apierrors.IsNotFound(err) {
-				return microerror.Maskf(notFoundError, "CR %#q in namespace %#q", id, crNamespace)
+				return microerror.Maskf(notFoundError, "CR %#q in namespace %#q", crName, crNamespace)
 			} else if err != nil {
 				return backoff.Permanent(microerror.Mask(err))
 			}
@@ -108,24 +156,67 @@ func crExistsCondition(ctx context.Context, id string, config Config) release.Co
 			return microerror.Mask(err)
 		}
 
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for creation of CR %#q in namespace %#q", id, crNamespace))
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for creation of CR %#q in namespace %#q", crName, crNamespace))
 		return nil
 	}
 }
 
-func CRNotExistsCondition(ctx context.Context, id string, config Config) release.ConditionFunc {
+func crNotFoundCondition(ctx context.Context, config Config, crd *apiextensionsv1beta1.CustomResourceDefinition, crNamespace, crName string) release.ConditionFunc {
 	return func() error {
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for deletion of CR %#q in namespace %#q", id, crNamespace))
+		// In client-go@10.12.x it will be:
+		//
+		//	gvr := metav1.GroupVersionResource{
+		//		Group:    crd.Spec.Group,
+		//		Version:  crd.Spec.Version,
+		//		Resource: crd.Spec.Names.Plural,
+		//	}
+		//
+		resource := &metav1.APIResource{
+			Name:       crd.Spec.Names.Plural,
+			Namespaced: crd.Spec.Scope == "Namespaced",
+		}
+		gv := &schema.GroupVersion{
+			Group:   crd.Spec.Group,
+			Version: crd.Spec.Version,
+		}
+
+		var dynamicClient *dynamic.Client
+		{
+			var err error
+
+			c := config.Host.RestConfig()
+			configShallowCopy := *c
+			configShallowCopy.APIPath = "/apis"
+			configShallowCopy.GroupVersion = gv
+			if configShallowCopy.UserAgent == "" {
+				configShallowCopy.UserAgent = rest.DefaultKubernetesUserAgent()
+			}
+
+			// In client-go@10.12.x it will be:
+			//
+			//	dynamicClient, err := dynamic.NewForConfig(config.Host.RestConfig())
+			//
+			dynamicClient, err = dynamic.NewClient(&configShallowCopy)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for deletion of CR %#q in namespace %#q", crName, crNamespace))
 
 		o := func() error {
-			_, err := config.Host.G8sClient().ProviderV1alpha1().AWSConfigs(crNamespace).Get(id, metav1.GetOptions{})
+			// In client-go@10.12.x it will be:
+			//
+			//	_, err := dynamicClient.Reosurce(gvr).Namespace(crNamespace).Get(crName, metav1.GetOptions{})
+			//
+			_, err := dynamicClient.Resource(resource, crNamespace).Get(crName, metav1.GetOptions{})
 			if apierrors.IsNotFound(err) {
 				return nil
 			} else if err != nil {
 				return backoff.Permanent(microerror.Mask(err))
 			}
 
-			return microerror.Maskf(stillExistsError, "CR %#q in namespace %#q", id, crNamespace)
+			return microerror.Maskf(stillExistsError, "CR %#q in namespace %#q", crName, crNamespace)
 		}
 		b := backoff.NewExponential(60*time.Minute, 5*time.Minute)
 		n := backoff.NewNotifier(config.Logger, ctx)
@@ -134,7 +225,7 @@ func CRNotExistsCondition(ctx context.Context, id string, config Config) release
 			return microerror.Mask(err)
 		}
 
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for deletion of CR %#q in namespace %#q", id, crNamespace))
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for deletion of CR %#q in namespace %#q", crName, crNamespace))
 		return nil
 	}
 }
@@ -169,7 +260,7 @@ func ensureAWSConfigInstalled(ctx context.Context, id string, config Config) err
 		}
 	}
 
-	err = config.Release.EnsureInstalled(ctx, key.AWSConfigReleaseName(id), release.NewStableChartInfo("apiextensions-aws-config-e2e-chart"), values, crExistsCondition(ctx, id, config))
+	err = config.Release.EnsureInstalled(ctx, key.AWSConfigReleaseName(id), release.NewStableChartInfo("apiextensions-aws-config-e2e-chart"), values, crExistsCondition(ctx, config, providerv1alpha1.NewAWSConfigCRD(), crNamespace, id))
 	if err != nil {
 		return microerror.Mask(err)
 	}
