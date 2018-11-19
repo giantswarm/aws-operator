@@ -22,6 +22,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/rest"
 )
 
 const (
@@ -124,7 +125,11 @@ func crExistsCondition(ctx context.Context, id string, config Config) release.Co
 
 			c := config.Host.RestConfig()
 			configShallowCopy := *c
+			configShallowCopy.APIPath = "/apis"
 			configShallowCopy.GroupVersion = gv
+			if configShallowCopy.UserAgent == "" {
+				configShallowCopy.UserAgent = rest.DefaultKubernetesUserAgent()
+			}
 
 			// In client-go@10.12.x it will be:
 			//
@@ -144,10 +149,13 @@ func crExistsCondition(ctx context.Context, id string, config Config) release.Co
 			//	_, err := dynamicClient.Reosurce(gvr).Namespace(namespace).Get(name, metav1.GetOptions{})
 			//
 			_, err := dynamicClient.Resource(resource, namespace).Get(name, metav1.GetOptions{})
-			if apierrors.IsNotFound(err) {
-				return microerror.Maskf(notFoundError, "CR %#q in namespace %#q", id, crNamespace)
-			} else if err != nil {
-				return backoff.Permanent(microerror.Mask(err))
+			//if apierrors.IsNotFound(err) {
+			//	return microerror.Maskf(notFoundError, "CR %#q in namespace %#q", id, crNamespace)
+			//} else if err != nil {
+			//	return backoff.Permanent(microerror.Mask(err))
+			//}
+			if err != nil {
+				return microerror.Mask(err)
 			}
 
 			return nil
