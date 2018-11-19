@@ -381,7 +381,7 @@
   revision = "79a61ffad296f3f418d8f381e4f5f702d5245b50"
 
 [[projects]]
-  branch = "teemow-wait-for-etcd-and-remove-old-master"
+  branch = "master"
   digest = "1:03850c2d6705fdd9db7b931df5fe666e8674d845f4e8ee2cc1e2fe742d6128d5"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
@@ -395,7 +395,7 @@
     "v_3_7_2",
   ]
   pruneopts = "T"
-  revision = "e9b782e9e718324b6df65b7227468769ad435f2f"
+  revision = "8fdb44663c709da33987e24bb07162847bf86893"
 
 [[projects]]
   branch = "master"
@@ -1754,10 +1754,12 @@
     "github.com/stretchr/testify/assert",
     "golang.org/x/sync/errgroup",
     "k8s.io/api/core/v1",
+    "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1",
     "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset",
     "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/fake",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
+    "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/apiserver/pkg/endpoints/request",
     "k8s.io/client-go/dynamic",
