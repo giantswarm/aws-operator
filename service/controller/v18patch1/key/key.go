@@ -288,7 +288,7 @@ func KubernetesAPISecurePort(customObject v1alpha1.AWSConfig) int {
 }
 
 func EtcdDomain(customObject v1alpha1.AWSConfig) string {
-	return strings.Join(".", "etcd", ClusterID(customObject), "k8s", BaseDomain(customObject))
+	return strings.Join([]string{"etcd", ClusterID(customObject), "k8s", BaseDomain(customObject)}, ".")
 }
 
 func EtcdPort(customObject v1alpha1.AWSConfig) int {
