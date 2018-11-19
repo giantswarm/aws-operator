@@ -193,10 +193,16 @@ func (s *GuestSecurityGroupsAdapter) getIngressRules(customObject v1alpha1.AWSCo
 func (s *GuestSecurityGroupsAdapter) getEtcdRules(customObject v1alpha1.AWSConfig) []securityGroupRule {
 	return []securityGroupRule{
 		{
-			Description: "Allow all etcd traffic to the etcd load balancer.",
+			Description: "Allow all etcd traffic from the VPC to the etcd load balancer.",
 			Port:        etcdPort,
 			Protocol:    tcpProtocol,
 			SourceCIDR:  defaultCIDR,
+		},
+		{
+			Description: "Allow traffic from control plane to etcd port for backup and metrics.",
+			Port:        etcdPort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  hostClusterCIDR,
 		},
 	}
 }
