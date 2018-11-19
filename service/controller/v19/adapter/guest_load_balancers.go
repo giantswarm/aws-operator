@@ -37,6 +37,7 @@ type GuestLoadBalancersAdapter struct {
 	IngressElbScheme                 string
 	MasterInstanceResourceName       string
 	PublicSubnets                    []string
+	PrivateSubnets                   []string
 }
 
 func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
@@ -102,6 +103,7 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 
 	for i := 0; i < key.SpecAvailabilityZones(cfg.CustomObject); i++ {
 		a.PublicSubnets = append(a.PublicSubnets, fmt.Sprintf("PublicSubnet%02d", i))
+		a.PrivateSubnets = append(a.PrivateSubnets, fmt.Sprintf("PrivateSubnet%02d", i))
 	}
 
 	return nil
