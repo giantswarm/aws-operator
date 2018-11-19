@@ -22,7 +22,6 @@ type GuestLoadBalancersAdapter struct {
 	APIElbPortsToOpen                []GuestLoadBalancersAdapterPortPair
 	APIElbScheme                     string
 	APIElbSecurityGroupID            string
-	EtcdElbDomain                    string
 	EtcdElbHealthCheckTarget         string
 	EtcdElbName                      string
 	EtcdElbPortsToOpen               []GuestLoadBalancersAdapterPortPair
@@ -64,7 +63,6 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 
 	a.EtcdElbHealthCheckTarget = heathCheckTarget(key.EtcdPort(cfg.CustomObject))
 	a.EtcdElbName = etcdElbName
-	a.EtcdElbDomain = key.EtcdDomain(cfg.CustomObject)
 	a.EtcdElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
 		{
 			PortELB:      key.EtcdPort(cfg.CustomObject),
