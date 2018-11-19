@@ -3,9 +3,10 @@ package service
 import (
 	"testing"
 
-	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/spf13/viper"
+
+	"github.com/giantswarm/aws-operator/flag"
 )
 
 func commonViperSettings(f *flag.Flag, v *viper.Viper) {

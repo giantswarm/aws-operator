@@ -10,11 +10,12 @@ import (
 
 	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/aws-operator/integration/env"
-	"github.com/giantswarm/aws-operator/integration/key"
 	"github.com/giantswarm/e2e-harness/pkg/release"
 	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/integration/env"
+	"github.com/giantswarm/aws-operator/integration/key"
 )
 
 const (

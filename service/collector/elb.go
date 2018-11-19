@@ -5,9 +5,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
 
-	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+
+	clientaws "github.com/giantswarm/aws-operator/client/aws"
 )
 
 const (
