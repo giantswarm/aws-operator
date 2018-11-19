@@ -7,7 +7,6 @@ import (
 	"fmt"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/aws-operator/integration/setup"
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/e2e-harness/pkg/release"
@@ -16,6 +15,8 @@ import (
 	"github.com/giantswarm/micrologger"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/giantswarm/aws-operator/integration/setup"
 )
 
 type ProviderConfig struct {

@@ -3,7 +3,6 @@
 package setup
 
 import (
-	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/e2e-harness/pkg/release"
 	e2eclientsaws "github.com/giantswarm/e2eclients/aws"
@@ -11,6 +10,8 @@ import (
 	"github.com/giantswarm/helmclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+
+	"github.com/giantswarm/aws-operator/integration/env"
 )
 
 const (
