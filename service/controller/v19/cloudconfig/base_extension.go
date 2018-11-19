@@ -6,9 +6,10 @@ import (
 	"context"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/microerror"
+
 	"github.com/giantswarm/aws-operator/service/controller/v19/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v19/encrypter/vault"
-	"github.com/giantswarm/microerror"
 )
 
 type baseExtension struct {

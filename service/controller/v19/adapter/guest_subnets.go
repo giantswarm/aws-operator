@@ -3,9 +3,10 @@ package adapter
 import (
 	"net"
 
-	"github.com/giantswarm/aws-operator/service/controller/v19/key"
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/service/controller/v19/key"
 )
 
 type GuestSubnetsAdapter struct {
