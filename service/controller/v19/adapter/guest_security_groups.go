@@ -64,7 +64,7 @@ func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
 	s.IngressSecurityGroupRules = s.getIngressRules(cfg.CustomObject)
 
 	s.EtcdELBSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.KindEtcd)
-	s.EtcdELBSecurityGroupRules = s.getEtcdRules(cfg.CustomObject)
+	s.EtcdELBSecurityGroupRules = s.getEtcdRules(cfg.CustomObject, hostClusterCIDR)
 
 	return nil
 }
@@ -190,7 +190,7 @@ func (s *GuestSecurityGroupsAdapter) getIngressRules(customObject v1alpha1.AWSCo
 	}
 }
 
-func (s *GuestSecurityGroupsAdapter) getEtcdRules(customObject v1alpha1.AWSConfig) []securityGroupRule {
+func (s *GuestSecurityGroupsAdapter) getEtcdRules(customObject v1alpha1.AWSConfig, hostClusterCIDR string) []securityGroupRule {
 	return []securityGroupRule{
 		{
 			Description: "Allow all etcd traffic from the VPC to the etcd load balancer.",
