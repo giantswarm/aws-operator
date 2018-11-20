@@ -129,6 +129,8 @@ func mainError() error {
 
 	daemonCommand.PersistentFlags().String(f.Service.Guest.SSH.SSOPublicKey, "", "Public key for trusted SSO CA.")
 
+	daemonCommand.PersistentFlags().Bool(f.Service.AWS.AdvancedMonitoringEC2, false, "Advanced EC2 monitoring.")
+
 	daemonCommand.PersistentFlags().Bool(f.Service.AWS.LoggingBucket.Delete, false, "Should be logging bucket deleted.")
 
 	daemonCommand.PersistentFlags().Bool(f.Service.AWS.Route53.Enabled, true, "Should Route53 be enabled.")
@@ -136,6 +138,10 @@ func mainError() error {
 	daemonCommand.PersistentFlags().String(f.Service.AWS.PodInfraContainerImage, "", "Image to be used for the pause container. If empty, default image from gcr.io/google_containers/pause-amd64 is used.")
 
 	daemonCommand.PersistentFlags().Bool(f.Service.AWS.IncludeTags, true, "Should resource tags be included (especially for restricted regions, like S3 buckets in China regions).")
+
+	daemonCommand.PersistentFlags().Int(f.Service.AWS.S3AccessLogsExpiration, 365, "S3 access logs expiration policy.")
+
+	daemonCommand.PersistentFlags().String(f.Service.AWS.TrustedAdvisor.Enabled, "", "Whether trusted advisor metrics collection is enabled.")
 
 	daemonCommand.PersistentFlags().String(f.Service.Installation.Name, "", "Installation name for tagging AWS resources.")
 	daemonCommand.PersistentFlags().String(f.Service.Installation.Guest.IPAM.Network.CIDR, "", "Guest cluster network segment from which IPAM allocates subnets.")
@@ -158,8 +164,6 @@ func mainError() error {
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.CrtFile, "", "Certificate file path to use to authenticate with Kubernetes.")
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.KeyFile, "", "Key file path to use to authenticate with Kubernetes.")
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.Username, "", "Username (if the Kubernetes cluster is using basic authentication).")
-	daemonCommand.PersistentFlags().Int(f.Service.AWS.S3AccessLogsExpiration, 365, "S3 access logs expiration policy.")
-	daemonCommand.PersistentFlags().Bool(f.Service.AWS.AdvancedMonitoringEC2, false, "Advanced EC2 monitoring.")
 
 	newCommand.CobraCommand().Execute()
 
