@@ -295,7 +295,7 @@ func shouldUpdate(currentState, desiredState StackState) bool {
 // gets stopped and its volumes get detached. This function makes sure that
 // the stopped instance is also terminated.
 func (r *Resource) terminateOldMasterInstance(ctx context.Context, obj interface{}) error {
-	var result ec2.DescribeInstancesOutput
+	var result *ec2.DescribeInstancesOutput
 
 	customObject, err := key.ToCustomObject(obj)
 	if err != nil {
@@ -336,7 +336,7 @@ func (r *Resource) terminateOldMasterInstance(ctx context.Context, obj interface
 			},
 		}
 
-		result, err := sc.AWSClient.EC2.DescribeInstances(i)
+		result, err = sc.AWSClient.EC2.DescribeInstances(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
