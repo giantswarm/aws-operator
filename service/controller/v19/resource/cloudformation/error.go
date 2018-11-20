@@ -97,3 +97,11 @@ var wrongTypeError = &microerror.Error{
 func IsWrongType(err error) bool {
 	return microerror.Cause(err) == wrongTypeError
 }
+
+var moreThanOneOldMasterError = &microerror.Error{
+	Kind: "moreThanOneOldMasterError",
+}
+
+func HasMoreThanOneOldMaster(err error) bool {
+	return microerror.Cause(err) == moreThanOneOldMasterError
+}

@@ -2,6 +2,7 @@ package cloudformation
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -35,41 +36,38 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 		}
 
 		if stackStateToUpdate.ShouldUpdate && !stackStateToUpdate.ShouldScale {
-			// Fetch the etcd volume information.
-			filterFuncs := []func(t *ec2.Tag) bool{
-				ebs.NewDockerVolumeFilter(customObject),
-				ebs.NewEtcdVolumeFilter(customObject),
-			}
-			volumes, err := sc.EBSService.ListVolumes(customObject, filterFuncs...)
-			if err != nil {
-				return microerror.Mask(err)
-			}
+			{
+				// Fetch the etcd volume information.
+				filterFuncs := []func(t *ec2.Tag) bool{
+					ebs.NewDockerVolumeFilter(customObject),
+					ebs.NewEtcdVolumeFilter(customObject),
+				}
+				volumes, err := sc.EBSService.ListVolumes(customObject, filterFuncs...)
+				if err != nil {
+					return microerror.Mask(err)
+				}
 
-			// First shutdown the instances and wait for it to be stopped. Then detach
-			// the etcd and docker volume without forcing.
-			force := false
-			shutdown := true
-			wait := true
-			instance := ""
+				// First shutdown the instances and wait for it to be stopped. Then detach
+				// the etcd and docker volume without forcing.
+				force := false
+				shutdown := true
+				wait := true
 
-			for _, v := range volumes {
-				for _, a := range v.Attachments {
-					instance = a.InstanceID
-					err := sc.EBSService.DetachVolume(ctx, v.VolumeID, a, force, shutdown, wait)
-					if err != nil {
-						return microerror.Mask(err)
+				for _, v := range volumes {
+					for _, a := range v.Attachments {
+						err := sc.EBSService.DetachVolume(ctx, v.VolumeID, a, force, shutdown, wait)
+						if err != nil {
+							return microerror.Mask(err)
+						}
 					}
 				}
 			}
 
-			i := &ec2.TerminateInstancesInput{
-				InstanceIds: []*string{
-					aws.String(instance),
-				},
-			}
-			_, err = sc.AWSClient.EC2.TerminateInstances(i)
-			if err != nil {
-				return microerror.Mask(err)
+			{
+				err := r.terminateOldMasterInstance(ctx, obj)
+				if err != nil {
+					return microerror.Mask(err)
+				}
 			}
 		}
 
@@ -288,4 +286,86 @@ func shouldUpdate(currentState, desiredState StackState) bool {
 	}
 
 	return false
+}
+
+// Terminates the master instance of the cluster.
+//
+// To detect the old master instance we find the instance by its name and
+// the instance state "stopped". Within the upgrade process the master first
+// gets stopped and its volumes get detached. This function makes sure that
+// the stopped instance is also terminated.
+func (r *Resource) terminateOldMasterInstance(ctx context.Context, obj interface{}) error {
+	var result ec2.DescribeInstancesOutput
+
+	customObject, err := key.ToCustomObject(obj)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	sc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	{
+		i := &ec2.DescribeInstancesInput{
+			Filters: []*ec2.Filter{
+				{
+					Name: aws.String("tag:Name"),
+					Values: []*string{
+						aws.String(key.MasterInstanceName(customObject)),
+					},
+				},
+				{
+					Name: aws.String("instance-state-name"),
+					Values: []*string{
+						aws.String("stopped"),
+					},
+				},
+				{
+					Name: aws.String("tag:giantswarm.io/cluster"),
+					Values: []*string{
+						aws.String(key.ClusterID(customObject)),
+					},
+				},
+			},
+		}
+
+		result, err := sc.AWSClient.EC2.DescribeInstances(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if len(result.Reservations) > 1 {
+			return microerror.Maskf(moreThanOneOldMasterError, "Expected one stopped old master. Found %d stopped masters with the name %s.", len(result.Reservations), key.MasterInstanceName)
+		}
+
+		if len(result.Reservations) < 1 {
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("No old master found with state 'stopped' and name %s", key.MasterInstanceName(customObject)))
+			return nil
+		}
+
+		if len(result.Reservations[0].Instances) > 1 {
+			return microerror.Maskf(moreThanOneOldMasterError, "Expected one stopped old master. Found %d stopped masters with the name %s.", len(result.Reservations), key.MasterInstanceName)
+		}
+
+		if len(result.Reservations[0].Instances) < 1 {
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("No old master found with state 'stopped' and name %s", key.MasterInstanceName(customObject)))
+			return nil
+		}
+	}
+
+	{
+		i := &ec2.TerminateInstancesInput{
+			InstanceIds: []*string{
+				aws.String(*result.Reservations[0].Instances[0].InstanceId),
+			},
+		}
+		_, err := sc.AWSClient.EC2.TerminateInstances(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	return nil
 }
