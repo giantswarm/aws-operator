@@ -20,12 +20,13 @@ const RecordSets = `{{define "record_sets"}}
   EtcdRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
-      Name: 'etcd.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
+      AliasTarget:
+        DNSName: !GetAtt EtcdLoadBalancer.DNSName
+        HostedZoneId: !GetAtt EtcdLoadBalancer.CanonicalHostedZoneNameID
+        EvaluateTargetHealth: false
+      Name: '{{ $v.EtcdDomain }}.'
       HostedZoneId: !Ref 'HostedZone'
-      TTL: '60'
-      Type: CNAME
-      ResourceRecords:
-        - !GetAtt {{ $v.MasterInstanceResourceName }}.PrivateDnsName
+      Type: A
   IngressRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
