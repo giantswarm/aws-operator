@@ -11,12 +11,13 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	"github.com/giantswarm/aws-operator/service/controller/v19/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v19/key"
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/giantswarm/aws-operator/service/controller/v19/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v19/key"
 )
 
 func init() {

@@ -8,10 +8,6 @@ import (
 	"sync"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	clientaws "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/flag"
-	"github.com/giantswarm/aws-operator/service/collector"
-	"github.com/giantswarm/aws-operator/service/controller"
 	"github.com/giantswarm/microendpoint/service/version"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -21,6 +17,11 @@ import (
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+
+	clientaws "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/flag"
+	"github.com/giantswarm/aws-operator/service/collector"
+	"github.com/giantswarm/aws-operator/service/controller"
 )
 
 const (
