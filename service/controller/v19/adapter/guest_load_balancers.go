@@ -102,6 +102,7 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	a.MasterInstanceResourceName = cfg.StackState.MasterInstanceResourceName
 
 	a.PublicSubnets = []string{"PublicSubnet"}
+	a.PrivateSubnets = []string{"PrivateSubnet"}
 
 	for i := 1; i < key.SpecAvailabilityZones(cfg.CustomObject); i++ {
 		a.PublicSubnets = append(a.PublicSubnets, fmt.Sprintf("PublicSubnet%02d", i))
