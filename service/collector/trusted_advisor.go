@@ -71,11 +71,6 @@ var (
 		},
 		nil,
 	)
-	trustedAdvisorSupport *prometheus.Desc = prometheus.NewDesc(
-		prometheus.BuildFQName(Namespace, "", "trusted_advisor_supported"),
-		"Gauge describing whether Trusted Advisor is available with your support plan.",
-		nil, nil,
-	)
 )
 
 type TrustedAdvisorConfig struct {
@@ -136,7 +131,6 @@ func (t *TrustedAdvisor) Collect(ch chan<- prometheus.Metric) error {
 func (t *TrustedAdvisor) Describe(ch chan<- *prometheus.Desc) error {
 	ch <- serviceLimit
 	ch <- serviceUsage
-	ch <- trustedAdvisorSupport
 	return nil
 }
 
@@ -148,12 +142,9 @@ func (t *TrustedAdvisor) collectForAccount(ch chan<- prometheus.Metric, awsClien
 
 	checks, err := t.getTrustedAdvisorChecks(awsClients)
 	if IsUnsupportedPlan(err) {
-		ch <- trustedAdvisorNotSupported()
 		return microerror.Mask(err)
 	} else if err != nil {
 		return microerror.Mask(err)
-	} else {
-		ch <- trustedAdvisorSupported()
 	}
 
 	var g errgroup.Group
@@ -276,16 +267,4 @@ func resourceToMetrics(resource *support.TrustedAdvisorResourceDetail, accountID
 	)
 
 	return limitMetric, usageMetric, nil
-}
-
-func trustedAdvisorSupported() prometheus.Metric {
-	return prometheus.MustNewConstMetric(
-		trustedAdvisorSupport, prometheus.GaugeValue, float64(1),
-	)
-}
-
-func trustedAdvisorNotSupported() prometheus.Metric {
-	return prometheus.MustNewConstMetric(
-		trustedAdvisorSupport, prometheus.GaugeValue, float64(0),
-	)
 }
