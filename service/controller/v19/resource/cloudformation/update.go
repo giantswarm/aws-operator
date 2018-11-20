@@ -296,13 +296,14 @@ func shouldUpdate(currentState, desiredState StackState) bool {
 // the stopped instance is also terminated.
 func (r *Resource) terminateOldMasterInstance(ctx context.Context, obj interface{}) error {
 	var result ec2.DescribeInstancesOutput
-	instanceName := key.MasterInstanceName(customObject)
-	instanceState := "stopped"
 
 	customObject, err := key.ToCustomObject(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
+
+	instanceName := key.MasterInstanceName(customObject)
+	instanceState := "stopped"
 
 	sc, err := controllercontext.FromContext(ctx)
 	if err != nil {
@@ -364,7 +365,7 @@ func (r *Resource) terminateOldMasterInstance(ctx context.Context, obj interface
 	{
 		instanceID := *result.Reservations[0].Instances[0].InstanceId
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminating master instance with ID %#q, instanceID))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminating master instance with ID %#q", instanceID))
 
 		i := &ec2.TerminateInstancesInput{
 			InstanceIds: []*string{
@@ -376,7 +377,7 @@ func (r *Resource) terminateOldMasterInstance(ctx context.Context, obj interface
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminated master instance with ID %#q, instanceID))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminated master instance with ID %#q", instanceID))
 	}
 
 	return nil
