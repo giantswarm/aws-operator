@@ -296,6 +296,8 @@ func shouldUpdate(currentState, desiredState StackState) bool {
 // the stopped instance is also terminated.
 func (r *Resource) terminateOldMasterInstance(ctx context.Context, obj interface{}) error {
 	var result ec2.DescribeInstancesOutput
+	instanceName := key.MasterInstanceName(customObject)
+	instanceState := "stopped"
 
 	customObject, err := key.ToCustomObject(obj)
 	if err != nil {
@@ -308,18 +310,20 @@ func (r *Resource) terminateOldMasterInstance(ctx context.Context, obj interface
 	}
 
 	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding master instance with name %#q in state %#q", instanceName, instanceState))
+
 		i := &ec2.DescribeInstancesInput{
 			Filters: []*ec2.Filter{
 				{
 					Name: aws.String("tag:Name"),
 					Values: []*string{
-						aws.String(key.MasterInstanceName(customObject)),
+						aws.String(instanceName),
 					},
 				},
 				{
 					Name: aws.String("instance-state-name"),
 					Values: []*string{
-						aws.String("stopped"),
+						aws.String(instanceState),
 					},
 				},
 				{
@@ -337,34 +341,42 @@ func (r *Resource) terminateOldMasterInstance(ctx context.Context, obj interface
 		}
 
 		if len(result.Reservations) > 1 {
-			return microerror.Maskf(moreThanOneOldMasterError, "Expected one stopped old master. Found %d stopped masters with the name %s.", len(result.Reservations), key.MasterInstanceName)
+			return microerror.Maskf(executionFailedError, "expected at most one master instance with name %#q in state %#q but got %d", instanceName, instanceState, len(result.Reservations))
 		}
 
 		if len(result.Reservations) < 1 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("No old master found with state 'stopped' and name %s", key.MasterInstanceName(customObject)))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find master instance with name %#q in state %#q", instanceName, instanceState))
 			return nil
 		}
 
 		if len(result.Reservations[0].Instances) > 1 {
-			return microerror.Maskf(moreThanOneOldMasterError, "Expected one stopped old master. Found %d stopped masters with the name %s.", len(result.Reservations), key.MasterInstanceName)
+			return microerror.Maskf(executionFailedError, "expected at most one master instance with name %#q in state %#q but got %d", instanceName, instanceState, len(result.Reservations))
 		}
 
 		if len(result.Reservations[0].Instances) < 1 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("No old master found with state 'stopped' and name %s", key.MasterInstanceName(customObject)))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find master instance with state `stopped` and name %#q", key.MasterInstanceName(customObject)))
 			return nil
 		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found master instance with name %#q in state %#q", instanceName, instanceState))
 	}
 
 	{
+		instanceID := *result.Reservations[0].Instances[0].InstanceId
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminating master instance with ID %#q, instanceID))
+
 		i := &ec2.TerminateInstancesInput{
 			InstanceIds: []*string{
-				aws.String(*result.Reservations[0].Instances[0].InstanceId),
+				aws.String(instanceID),
 			},
 		}
 		_, err := sc.AWSClient.EC2.TerminateInstances(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminated master instance with ID %#q, instanceID))
 	}
 
 	return nil
