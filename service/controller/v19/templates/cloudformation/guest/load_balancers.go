@@ -29,7 +29,9 @@ const LoadBalancers = `{{define "load_balancers"}}
       SecurityGroups:
         - !Ref MasterSecurityGroup
       Subnets:
-        - !Ref PublicSubnet
+      {{- range $s := $v.PublicSubnets }}
+        - !Ref {{ $s }}
+      {{end}}
 
   EtcdLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
@@ -93,5 +95,7 @@ const LoadBalancers = `{{define "load_balancers"}}
       SecurityGroups:
         - !Ref IngressSecurityGroup
       Subnets:
-        - !Ref PublicSubnet
+      {{- range $s := $v.PublicSubnets }}
+        - !Ref {{ $s }}
+      {{end}}
 {{end}}`

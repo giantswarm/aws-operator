@@ -4,12 +4,11 @@ import (
 	"context"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/microerror"
-
 	"github.com/giantswarm/aws-operator/service/controller/v19/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v19/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v19/key"
 	"github.com/giantswarm/aws-operator/service/controller/v19/templates"
+	"github.com/giantswarm/microerror"
 )
 
 func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig, stackState StackState) (string, error) {
@@ -36,16 +35,14 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 			Enabled:    r.apiWhiteList.Enabled,
 			SubnetList: r.apiWhiteList.SubnetList,
 		},
-		CustomObject:          customObject,
-		Clients:               adapterClients,
-		EncrypterBackend:      r.encrypterBackend,
-		PrivateSubnetMaskBits: r.guestPrivateSubnetMaskBits,
-		PublicSubnetMaskBits:  r.guestPublicSubnetMaskBits,
-		HostClients:           *r.hostClients,
-		InstallationName:      r.installationName,
-		HostAccountID:         hostAccountID,
-		PublicRouteTables:     r.publicRouteTables,
-		Route53Enabled:        r.route53Enabled,
+		CustomObject:      customObject,
+		Clients:           adapterClients,
+		EncrypterBackend:  r.encrypterBackend,
+		HostClients:       *r.hostClients,
+		InstallationName:  r.installationName,
+		HostAccountID:     hostAccountID,
+		PublicRouteTables: r.publicRouteTables,
+		Route53Enabled:    r.route53Enabled,
 		StackState: adapter.StackState{
 			Name: stackState.Name,
 

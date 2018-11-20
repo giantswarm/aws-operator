@@ -36,6 +36,7 @@ type GuestLoadBalancersAdapter struct {
 	IngressElbPortsToOpen            []GuestLoadBalancersAdapterPortPair
 	IngressElbScheme                 string
 	MasterInstanceResourceName       string
+	PublicSubnets                    []string
 }
 
 func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
@@ -98,6 +99,10 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	a.ELBHealthCheckTimeout = healthCheckTimeout
 	a.ELBHealthCheckUnhealthyThreshold = healthCheckUnhealthyThreshold
 	a.MasterInstanceResourceName = cfg.StackState.MasterInstanceResourceName
+
+	for i := 0; i < key.SpecAvailabilityZones(cfg.CustomObject); i++ {
+		a.PublicSubnets = append(a.PublicSubnets, fmt.Sprintf("PublicSubnet%02d", i))
+	}
 
 	return nil
 }

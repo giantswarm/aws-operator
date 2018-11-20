@@ -1,64 +1,68 @@
 package adapter
 
 import (
-	"net"
-
-	"github.com/giantswarm/ipam"
-	"github.com/giantswarm/microerror"
+	"fmt"
+	"sort"
 
 	"github.com/giantswarm/aws-operator/service/controller/v19/key"
 )
 
+type Subnet struct {
+	Index                 int
+	AvailabilityZone      string
+	CIDR                  string
+	Name                  string
+	MapPublicIPOnLaunch   bool
+	RouteTableAssociation RouteTableAssociation
+}
+
+type RouteTableAssociation struct {
+	Name           string
+	RouteTableName string
+	SubnetName     string
+}
+
 type GuestSubnetsAdapter struct {
-	PublicSubnetAZ                   string
-	PublicSubnetCIDR                 string
-	PublicSubnetName                 string
-	PublicSubnetMapPublicIPOnLaunch  bool
-	PrivateSubnetAZ                  string
-	PrivateSubnetCIDR                string
-	PrivateSubnetName                string
-	PrivateSubnetMapPublicIPOnLaunch bool
+	PublicSubnets  []Subnet
+	PrivateSubnets []Subnet
 }
 
 func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
-	publicSubnet, privateSubnet, err := allocatePublicAndPrivateSubnets(cfg)
-	if err != nil {
-		return microerror.Mask(err)
-	}
+	zones := key.StatusAvailabilityZones(cfg.CustomObject)
+	sort.Slice(zones, func(i, j int) bool {
+		return zones[i].Name < zones[j].Name
+	})
+	for i, az := range zones {
+		snetName := fmt.Sprintf("PublicSubnet%02d", i)
+		snet := Subnet{
+			Index:               i,
+			AvailabilityZone:    az.Name,
+			CIDR:                az.Subnet.Public.CIDR,
+			Name:                snetName,
+			MapPublicIPOnLaunch: false,
+			RouteTableAssociation: RouteTableAssociation{
+				Name:           fmt.Sprintf("PublicRouteTableAssociation%02d", i),
+				RouteTableName: "PublicRouteTable",
+				SubnetName:     snetName,
+			},
+		}
+		s.PublicSubnets = append(s.PublicSubnets, snet)
 
-	s.PublicSubnetAZ = key.AvailabilityZone(cfg.CustomObject)
-	s.PublicSubnetCIDR = publicSubnet.String()
-	s.PublicSubnetName = key.SubnetName(cfg.CustomObject, suffixPublic)
-	s.PublicSubnetMapPublicIPOnLaunch = false
-	s.PrivateSubnetAZ = key.AvailabilityZone(cfg.CustomObject)
-	s.PrivateSubnetCIDR = privateSubnet.String()
-	s.PrivateSubnetName = key.SubnetName(cfg.CustomObject, suffixPrivate)
-	s.PrivateSubnetMapPublicIPOnLaunch = false
+		snetName = fmt.Sprintf("PrivateSubnet%02d", i)
+		snet = Subnet{
+			Index:               i,
+			AvailabilityZone:    az.Name,
+			CIDR:                az.Subnet.Private.CIDR,
+			Name:                snetName,
+			MapPublicIPOnLaunch: false,
+			RouteTableAssociation: RouteTableAssociation{
+				Name:           fmt.Sprintf("PrivateRouteTableAssociation%02d", i),
+				RouteTableName: fmt.Sprintf("PrivateRouteTable%02d", i),
+				SubnetName:     snetName,
+			},
+		}
+		s.PrivateSubnets = append(s.PrivateSubnets, snet)
+	}
 
 	return nil
-}
-
-func allocatePublicAndPrivateSubnets(cfg Config) (net.IPNet, net.IPNet, error) {
-	_, subnet, err := net.ParseCIDR(key.ClusterNetworkCIDR(cfg.CustomObject))
-	if err != nil {
-		return net.IPNet{}, net.IPNet{}, microerror.Mask(err)
-	}
-
-	privateSubnetMask := net.CIDRMask(cfg.PrivateSubnetMaskBits, 32)
-	publicSubnetMask := net.CIDRMask(cfg.PublicSubnetMaskBits, 32)
-
-	var reservedSubnets []net.IPNet
-	privateSubnet, err := ipam.Free(*subnet, privateSubnetMask, reservedSubnets)
-	if err != nil {
-		return net.IPNet{}, net.IPNet{}, microerror.Mask(err)
-	}
-
-	reservedSubnets = append(reservedSubnets, privateSubnet)
-
-	publicSubnet, err := ipam.Free(*subnet, publicSubnetMask, reservedSubnets)
-	if err != nil {
-		return net.IPNet{}, net.IPNet{}, microerror.Mask(err)
-	}
-
-	return publicSubnet, privateSubnet, nil
 }

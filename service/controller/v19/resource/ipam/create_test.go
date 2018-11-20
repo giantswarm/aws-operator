@@ -91,10 +91,11 @@ func Test_selectRandomAZs_random(t *testing.T) {
 	}
 
 	nTestRounds := 25
+	numAZs := len(originalAZs) - 1
 	selectedAZs := make([][]string, 0)
 
 	for i := 0; i < nTestRounds; i++ {
-		azs, err := r.selectRandomAZs(len(originalAZs))
+		azs, err := r.selectRandomAZs(numAZs)
 		if err != nil {
 			t.Fatalf("unexpected error: %#v", err)
 		}
@@ -102,7 +103,7 @@ func Test_selectRandomAZs_random(t *testing.T) {
 		differsFromOriginal := false
 		differsFromEarlier := false
 		for _, selectedAZs := range selectedAZs {
-			for j, az := range originalAZs {
+			for j, az := range originalAZs[:numAZs] {
 				if azs[j] != az {
 					differsFromOriginal = true
 				}

@@ -13,7 +13,9 @@ const InternetGateway = `{{define "internet_gateway"}}
     Type: AWS::EC2::VPCGatewayAttachment
     DependsOn:
       - PublicRouteTable
-      - PrivateRouteTable
+      {{- range $rt := $v.PrivateRouteTables }}
+      - {{ $rt }}
+      {{- end }}
     Properties:
       InternetGatewayId:
         Ref: InternetGateway
