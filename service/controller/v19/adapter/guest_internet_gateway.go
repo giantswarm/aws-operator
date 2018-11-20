@@ -13,8 +13,9 @@ type GuestInternetGatewayAdapter struct {
 
 func (a *GuestInternetGatewayAdapter) Adapt(cfg Config) error {
 	a.ClusterID = key.ClusterID(cfg.CustomObject)
+	a.PrivateRouteTables = []string{"PrivateRouteTable"}
 
-	for i := 0; i < key.SpecAvailabilityZones(cfg.CustomObject); i++ {
+	for i := 1; i < key.SpecAvailabilityZones(cfg.CustomObject); i++ {
 		a.PrivateRouteTables = append(a.PrivateRouteTables, fmt.Sprintf("PrivateRouteTable%02d", i))
 	}
 
