@@ -41,7 +41,7 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	a.WorkerAZs = []string{key.AvailabilityZone(cfg.CustomObject)}
 
 	for i, az := range key.StatusAvailabilityZones(cfg.CustomObject)[1:] {
-		a.PrivateSubnets = append(a.PrivateSubnets, fmt.Sprintf("PrivateSubnet%02d", i))
+		a.PrivateSubnets = append(a.PrivateSubnets, fmt.Sprintf("PrivateSubnet%02d", i+1))
 		a.WorkerAZs = append(a.WorkerAZs, az.Name)
 	}
 
