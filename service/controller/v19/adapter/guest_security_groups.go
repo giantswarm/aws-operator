@@ -37,6 +37,8 @@ type GuestSecurityGroupsAdapter struct {
 	WorkerSecurityGroupRules  []securityGroupRule
 	IngressSecurityGroupName  string
 	IngressSecurityGroupRules []securityGroupRule
+	EtcdELBSecurityGroupName  string
+	EtcdELBSecurityGroupRules []securityGroupRule
 }
 
 func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
@@ -60,6 +62,9 @@ func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
 
 	s.IngressSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.KindIngress)
 	s.IngressSecurityGroupRules = s.getIngressRules(cfg.CustomObject)
+
+	s.EtcdELBSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.KindEtcd)
+	s.EtcdELBSecurityGroupRules = s.getEtcdRules(cfg.CustomObject, hostClusterCIDR)
 
 	return nil
 }
@@ -181,6 +186,23 @@ func (s *GuestSecurityGroupsAdapter) getIngressRules(customObject v1alpha1.AWSCo
 			Port:        httpsPort,
 			Protocol:    tcpProtocol,
 			SourceCIDR:  defaultCIDR,
+		},
+	}
+}
+
+func (s *GuestSecurityGroupsAdapter) getEtcdRules(customObject v1alpha1.AWSConfig, hostClusterCIDR string) []securityGroupRule {
+	return []securityGroupRule{
+		{
+			Description: "Allow all etcd traffic from the VPC to the etcd load balancer.",
+			Port:        etcdPort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  defaultCIDR,
+		},
+		{
+			Description: "Allow traffic from control plane to etcd port for backup and metrics.",
+			Port:        etcdPort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  hostClusterCIDR,
 		},
 	}
 }

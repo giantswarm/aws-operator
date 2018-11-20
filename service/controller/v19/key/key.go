@@ -98,6 +98,7 @@ const (
 	KindMaster  = "master"
 	KindIngress = "ingress"
 	KindWorker  = "worker"
+	KindEtcd    = "etcd-elb"
 )
 
 func ClusterAPIEndpoint(customObject v1alpha1.AWSConfig) string {
@@ -292,6 +293,14 @@ func IsDeleted(customObject v1alpha1.AWSConfig) bool {
 
 func KubernetesAPISecurePort(customObject v1alpha1.AWSConfig) int {
 	return customObject.Spec.Cluster.Kubernetes.API.SecurePort
+}
+
+func EtcdDomain(customObject v1alpha1.AWSConfig) string {
+	return strings.Join([]string{"etcd", ClusterID(customObject), "k8s", BaseDomain(customObject)}, ".")
+}
+
+func EtcdPort(customObject v1alpha1.AWSConfig) int {
+	return 2379
 }
 
 // LoadBalancerName produces a unique name for the load balancer.
