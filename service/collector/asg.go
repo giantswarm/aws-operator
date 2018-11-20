@@ -17,9 +17,22 @@ const (
 )
 
 var (
-	asgDesiredCapacityDesc *prometheus.Desc = prometheus.NewDesc(
-		prometheus.BuildFQName(Namespace, Subsystem, "desired_capacity_count"),
+	asgDesiredDesc *prometheus.Desc = prometheus.NewDesc(
+		prometheus.BuildFQName(Namespace, Subsystem, "desired_count"),
 		"Gauge about the number of EC2 instances that should be in the ASG.",
+		[]string{
+			ASGLabel,
+			AccountLabel,
+			ClusterLabel,
+			InstallationLabel,
+			OrganizationLabel,
+		},
+		nil,
+	)
+
+	asgInserviceDesc *prometheus.Desc = prometheus.NewDesc(
+		prometheus.BuildFQName(Namespace, Subsystem, "inservice_count"),
+		"Gauge about the number of EC2 instances in the ASG that are in state InService.",
 		[]string{
 			ASGLabel,
 			AccountLabel,
@@ -97,7 +110,7 @@ func (a *ASG) Collect(ch chan<- prometheus.Metric) error {
 }
 
 func (a *ASG) Describe(ch chan<- *prometheus.Desc) error {
-	ch <- asgDesiredCapacityDesc
+	ch <- asgDesiredDesc
 	return nil
 }
 
@@ -154,9 +167,20 @@ func (a *ASG) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		}
 
 		ch <- prometheus.MustNewConstMetric(
-			asgDesiredCapacityDesc,
+			asgDesiredDesc,
 			prometheus.GaugeValue,
 			float64(*asg.DesiredCapacity),
+			*asg.AutoScalingGroupName,
+			account,
+			cluster,
+			installation,
+			organization,
+		)
+
+		ch <- prometheus.MustNewConstMetric(
+			asgInserviceDesc,
+			prometheus.GaugeValue,
+			float64(len(asg.Instances)),
 			*asg.AutoScalingGroupName,
 			account,
 			cluster,
