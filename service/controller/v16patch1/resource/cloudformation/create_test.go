@@ -19,10 +19,6 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
 				ID: "test-cluster",
-				Etcd: v1alpha1.ClusterEtcd{
-					Port:   2379,
-					Domain: "etcd.mydomain.com",
-				},
 				Kubernetes: v1alpha1.ClusterKubernetes{
 					IngressController: v1alpha1.ClusterKubernetesIngressController{
 						Domain: "mysubdomain.mydomain.com",

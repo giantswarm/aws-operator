@@ -19,11 +19,6 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 		expectedAPIElbScheme                     string
 		expectedAPIElbSecurityGroupID            string
 		expectedAPIElbSubnetID                   string
-		expectedEtcdElbName                      string
-		expectedEtcdElbPortsToOpen               []GuestLoadBalancersAdapterPortPair
-		expectedEtcdElbScheme                    string
-		expectedEtcdElbSecurityGroupID           string
-		expectedEtcdElbSubnetID                  string
 		expectedELBAZ                            string
 		expectedELBHealthCheckHealthyThreshold   int
 		expectedELBHealthCheckInterval           int
@@ -44,10 +39,6 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
 						ID: "test-cluster",
-						Etcd: v1alpha1.ClusterEtcd{
-							Domain: "etcd.test-cluster.aws.giantswarm.io",
-							Port:   2379,
-						},
 						Kubernetes: v1alpha1.ClusterKubernetes{
 							API: v1alpha1.ClusterKubernetesAPI{
 								Domain:     "api.test-cluster.aws.giantswarm.io",
@@ -73,15 +64,7 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 					PortInstance: 443,
 				},
 			},
-			expectedAPIElbScheme: "internet-facing",
-			expectedEtcdElbName:  "test-cluster-etcd",
-			expectedEtcdElbPortsToOpen: []GuestLoadBalancersAdapterPortPair{
-				{
-					PortELB:      2379,
-					PortInstance: 2379,
-				},
-			},
-			expectedEtcdElbScheme:                    "internal",
+			expectedAPIElbScheme:                     "internet-facing",
 			expectedELBAZ:                            "eu-central-1a",
 			expectedELBHealthCheckHealthyThreshold:   2,
 			expectedELBHealthCheckInterval:           5,
@@ -135,18 +118,6 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 
 			if tc.expectedAPIElbScheme != a.Guest.LoadBalancers.APIElbScheme {
 				t.Errorf("expected API ELB Scheme, got %q, want %q", a.Guest.LoadBalancers.APIElbScheme, tc.expectedAPIElbScheme)
-			}
-
-			if tc.expectedEtcdElbName != a.Guest.LoadBalancers.EtcdElbName {
-				t.Errorf("expected etcd ELB Name, got %q, want %q", a.Guest.LoadBalancers.EtcdElbName, tc.expectedEtcdElbName)
-			}
-
-			if !reflect.DeepEqual(tc.expectedEtcdElbPortsToOpen, a.Guest.LoadBalancers.EtcdElbPortsToOpen) {
-				t.Errorf("expected etcd ELB Ports To Open, got %q, want %q", a.Guest.LoadBalancers.EtcdElbPortsToOpen, tc.expectedEtcdElbPortsToOpen)
-			}
-
-			if tc.expectedEtcdElbScheme != a.Guest.LoadBalancers.EtcdElbScheme {
-				t.Errorf("expected etcd ELB Scheme, got %q, want %q", a.Guest.LoadBalancers.EtcdElbScheme, tc.expectedEtcdElbScheme)
 			}
 
 			if tc.expectedELBHealthCheckHealthyThreshold != a.Guest.LoadBalancers.ELBHealthCheckHealthyThreshold {

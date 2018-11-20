@@ -21,10 +21,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
 				ID: "test-cluster",
-				Etcd: v1alpha1.ClusterEtcd{
-					Port:   2379,
-					Domain: "etcd.mydomain.com",
-				},
 				Kubernetes: v1alpha1.ClusterKubernetes{
 					API: v1alpha1.ClusterKubernetesAPI{
 						Domain: "mysubdomain.mydomain.com",
@@ -443,10 +439,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
 				ID: "test-cluster",
-				Etcd: v1alpha1.ClusterEtcd{
-					Port:   2379,
-					Domain: "etcd.mydomain.com",
-				},
 				Kubernetes: v1alpha1.ClusterKubernetes{
 					API: v1alpha1.ClusterKubernetesAPI{
 						Domain: "mysubdomain.mydomain.com",

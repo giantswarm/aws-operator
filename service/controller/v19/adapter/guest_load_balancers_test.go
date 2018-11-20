@@ -82,13 +82,6 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 					PortInstance: 2379,
 				},
 			},
-			expectedEtcdElbName: "test-cluster-etcd",
-			expectedEtcdElbPortsToOpen: []GuestLoadBalancersAdapterPortPair{
-				{
-					PortELB:      2379,
-					PortInstance: 2379,
-				},
-			},
 			expectedEtcdElbScheme:                    "internal",
 			expectedELBAZ:                            "eu-central-1a",
 			expectedELBHealthCheckHealthyThreshold:   2,

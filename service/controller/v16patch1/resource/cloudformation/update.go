@@ -50,26 +50,13 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 			force := false
 			shutdown := true
 			wait := true
-			instance := ""
-
 			for _, v := range volumes {
 				for _, a := range v.Attachments {
-					instance = a.InstanceID
 					err := sc.EBSService.DetachVolume(ctx, v.VolumeID, a, force, shutdown, wait)
 					if err != nil {
 						return microerror.Mask(err)
 					}
 				}
-			}
-
-			i := &ec2.TerminateInstancesInput{
-				InstanceIds: []*string{
-					aws.String(instance),
-				},
-			}
-			_, err = sc.AWSClient.EC2.TerminateInstances(i)
-			if err != nil {
-				return microerror.Mask(err)
 			}
 		}
 

@@ -71,22 +71,6 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	}
 	a.EtcdElbScheme = internalELBScheme
 
-	// etcd load balancer settings.
-	etcdElbName, err := key.LoadBalancerName(key.EtcdDomain(cfg.CustomObject), cfg.CustomObject)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	a.EtcdElbHealthCheckTarget = heathCheckTarget(key.EtcdPort(cfg.CustomObject))
-	a.EtcdElbName = etcdElbName
-	a.EtcdElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
-		{
-			PortELB:      key.EtcdPort(cfg.CustomObject),
-			PortInstance: key.EtcdPort(cfg.CustomObject),
-		},
-	}
-	a.EtcdElbScheme = internalELBScheme
-
 	// Ingress load balancer settings.
 	ingressElbName, err := key.LoadBalancerName(cfg.CustomObject.Spec.Cluster.Kubernetes.IngressController.Domain, cfg.CustomObject)
 	if err != nil {
