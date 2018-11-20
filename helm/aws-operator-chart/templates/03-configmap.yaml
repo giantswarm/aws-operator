@@ -17,7 +17,6 @@ data:
         advancedMonitoringEC2: '{{ .Values.Installation.V1.Provider.AWS.AdvancedMonitoringEC2 }}'
         availabilityZones: '{{ range $index, $element := .Values.Installation.V1.Provider.AWS.AvailabilityZones }}{{if $index}} {{end}}{{$element}}{{end}}'
         encrypter: '{{ .Values.Installation.V1.Provider.AWS.Encrypter }}'
-        trustedAdvisorEnabled: '{{ .Values.Installation.V1.Provider.AWS.TrustedAdvisor.Enabled }}'
         includeTags: '{{ .Values.Installation.V1.Provider.AWS.IncludeTags }}'
         loggingBucket:
           delete: '{{ .Values.Installation.V1.Provider.AWS.DeleteLoggingBucket }}'
@@ -25,6 +24,8 @@ data:
         region: '{{ .Values.Installation.V1.Provider.AWS.Region }}'
         route53:
           enabled: '{{ .Values.Installation.V1.Provider.AWS.Route53.Enabled }}'
+        trustedAdvisor:
+          enabled: '{{ .Values.Installation.V1.Provider.AWS.TrustedAdvisor.Enabled }}'
         publicRouteTables: '{{ .Values.Installation.V1.Provider.AWS.PublicRouteTableNames }}'
         vaultAddress: '{{ .Values.Installation.V1.Auth.Vault.Address }}'
       guest:
