@@ -10,11 +10,12 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/aws-operator/service/controller/v19/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v19/encrypter"
 	"github.com/giantswarm/certs"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys"
+
+	"github.com/giantswarm/aws-operator/service/controller/v19/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v19/encrypter"
 )
 
 func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {

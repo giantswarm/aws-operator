@@ -3,11 +3,12 @@ package s3object
 import (
 	"context"
 
-	"github.com/giantswarm/aws-operator/service/controller/v19/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v19/key"
 	"github.com/giantswarm/certs"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
+
+	"github.com/giantswarm/aws-operator/service/controller/v19/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v19/key"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {

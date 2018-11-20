@@ -5,9 +5,10 @@ package ipam
 import (
 	"testing"
 
+	"github.com/giantswarm/e2etests/ipam"
+
 	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/aws-operator/integration/setup"
-	"github.com/giantswarm/e2etests/ipam"
 )
 
 var (
