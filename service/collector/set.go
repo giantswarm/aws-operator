@@ -101,6 +101,7 @@ func NewSet(config SetConfig) (*Set, error) {
 		}
 
 		if config.TrustedAdvisorEnabled {
+			config.Logger.Log("level", "debug", "message", "trusted advisor collector is enabled")
 			c.Collectors = append(c.Collectors, trustedAdvisorCollector)
 		}
 
