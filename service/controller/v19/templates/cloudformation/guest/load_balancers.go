@@ -56,7 +56,7 @@ const LoadBalancers = `{{define "load_balancers"}}
       LoadBalancerName: {{ $v.EtcdElbName }}
       Scheme: {{ $v.EtcdElbScheme }}
       SecurityGroups:
-        - !Ref MasterSecurityGroup
+        - !Ref EtcdELBSecurityGroup
       Subnets:
       {{- range $s := $v.PrivateSubnets }}
         - !Ref {{ $s }}
