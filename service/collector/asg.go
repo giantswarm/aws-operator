@@ -1,7 +1,6 @@
 package collector
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/microerror"
@@ -131,27 +130,9 @@ func (a *ASG) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 	}
 
 	for _, asg := range autoScalingGroups {
-		var tags []*autoscaling.TagDescription
-		{
-			i := &autoscaling.DescribeTagsInput{
-				Filters: []*autoscaling.Filter{
-					{
-						Name:   aws.String("auto-scaling-group"),
-						Values: []*string{asg.AutoScalingGroupName},
-					},
-				},
-			}
-
-			o, err := awsClients.AutoScaling.DescribeTags(i)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-			tags = append(tags, o.Tags...)
-		}
-
 		var cluster, installation, organization string
 
-		for _, tag := range tags {
+		for _, tag := range asg.Tags {
 			switch *tag.Key {
 			case ClusterTag:
 				cluster = *tag.Value
