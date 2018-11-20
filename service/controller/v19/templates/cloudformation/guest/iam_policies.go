@@ -114,6 +114,14 @@ const IAMPolicies = `{{define "iam_policies"}}
               - "ecr:ListImages"
               - "ecr:BatchGetImage"
             Resource: "*"
+
+          - Effect: "Allow"
+            Action:
+              - "autoscaling:DescribeAutoScalingGroups"
+              - "autoscaling:DescribeAutoScalingInstances"
+              - "autoscaling:SetDesiredCapacity"
+              - "autoscaling:TerminateInstanceInAutoScalingGroup"
+            Resource: "*"
   WorkerInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
