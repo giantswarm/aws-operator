@@ -12,8 +12,7 @@ import (
 )
 
 const (
-	AccountLabel = "account"
-	ELBLabel     = "elb"
+	ELBLabel = "elb"
 )
 
 const (

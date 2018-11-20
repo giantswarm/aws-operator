@@ -47,6 +47,21 @@ func NewSet(config SetConfig) (*Set, error) {
 		}
 	}
 
+	var asgCollector *ASG
+	{
+		c := ASGConfig{
+			Helper: h,
+			Logger: config.Logger,
+
+			InstallationName: config.InstallationName,
+		}
+
+		asgCollector, err = NewASG(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var elbCollector *ELB
 	{
 		c := ELBConfig{
@@ -81,6 +96,7 @@ func NewSet(config SetConfig) (*Set, error) {
 	{
 		c := collector.SetConfig{
 			Collectors: []collector.Interface{
+				asgCollector,
 				elbCollector,
 				vpcCollector,
 			},
