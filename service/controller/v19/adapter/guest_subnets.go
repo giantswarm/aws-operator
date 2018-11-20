@@ -8,7 +8,6 @@ import (
 )
 
 type Subnet struct {
-	Index                 int
 	AvailabilityZone      string
 	CIDR                  string
 	Name                  string
@@ -32,10 +31,39 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 	sort.Slice(zones, func(i, j int) bool {
 		return zones[i].Name < zones[j].Name
 	})
-	for i, az := range zones {
+
+	s.PublicSubnets = []Subnet{
+		Subnet{
+			AvailabilityZone:    zones[0].Name,
+			CIDR:                zones[0].Subnet.Public.CIDR,
+			Name:                "PublicSubnet",
+			MapPublicIPOnLaunch: false,
+			RouteTableAssociation: RouteTableAssociation{
+				Name:           "PublicRouteTableAssociation",
+				RouteTableName: "PublicRouteTable",
+				SubnetName:     "PublicSubnet",
+			},
+		},
+	}
+
+	s.PrivateSubnets = []Subnet{
+		Subnet{
+			AvailabilityZone:    zones[0].Name,
+			CIDR:                zones[0].Subnet.Private.CIDR,
+			Name:                "PrivateSubnet",
+			MapPublicIPOnLaunch: false,
+			RouteTableAssociation: RouteTableAssociation{
+				Name:           "PrivateRouteTableAssociation",
+				RouteTableName: "PrivateRouteTable",
+				SubnetName:     "PrivateSubnet",
+			},
+		},
+	}
+
+	for i := 1; i < len(zones); i++ {
+		az := zones[i]
 		snetName := fmt.Sprintf("PublicSubnet%02d", i)
 		snet := Subnet{
-			Index:               i,
 			AvailabilityZone:    az.Name,
 			CIDR:                az.Subnet.Public.CIDR,
 			Name:                snetName,
@@ -50,7 +78,6 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 
 		snetName = fmt.Sprintf("PrivateSubnet%02d", i)
 		snet = Subnet{
-			Index:               i,
 			AvailabilityZone:    az.Name,
 			CIDR:                az.Subnet.Private.CIDR,
 			Name:                snetName,

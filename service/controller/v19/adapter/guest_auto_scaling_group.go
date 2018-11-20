@@ -37,7 +37,10 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	a.HealthCheckGracePeriod = gracePeriodSeconds
 	a.RollingUpdatePauseTime = rollingUpdatePauseTime
 
-	for i, az := range key.StatusAvailabilityZones(cfg.CustomObject) {
+	a.PrivateSubnets = []string{"PrivateSubnet"}
+	a.WorkerAZs = []string{key.AvailabilityZone(cfg.CustomObject)}
+
+	for i, az := range key.StatusAvailabilityZones(cfg.CustomObject)[1:] {
 		a.PrivateSubnets = append(a.PrivateSubnets, fmt.Sprintf("PrivateSubnet%02d", i))
 		a.WorkerAZs = append(a.WorkerAZs, az.Name)
 	}
