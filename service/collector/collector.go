@@ -2,18 +2,20 @@ package collector
 
 const (
 	GaugeValue float64 = 1
-	Namespace          = "aws_operator"
+	namespace          = "aws_operator"
 )
 
 const (
-	ClusterTag      = "giantswarm.io/cluster"
-	InstallationTag = "giantswarm.io/installation"
-	OrganizationTag = "giantswarm.io/organization"
+	tagCluster      = "giantswarm.io/cluster"
+	tagInstallation = "giantswarm.io/installation"
+	tagOrganization = "giantswarm.io/organization"
 )
 
 const (
-	AccountLabel      = "account"
-	ClusterLabel      = "cluster_id"
-	InstallationLabel = "installation"
-	OrganizationLabel = "organization"
+	labelAccount      = "account"
+	labelAccountID    = "account_id"
+	labelCluster      = "cluster_id"
+	labelName         = "name"
+	labelInstallation = "installation"
+	labelOrganization = "organization"
 )
