@@ -119,9 +119,17 @@ const IAMPolicies = `{{define "iam_policies"}}
             Action:
               - "autoscaling:DescribeAutoScalingGroups"
               - "autoscaling:DescribeAutoScalingInstances"
+            Resource: "*"
+
+          - Effect: "Allow"
+            Action:
               - "autoscaling:SetDesiredCapacity"
               - "autoscaling:TerminateInstanceInAutoScalingGroup"
             Resource: "*"
+            Condition:
+              StringEquals:
+                aws:RequestTag/giantswarm.io/cluster: "{{ $v.ClusterID }}"
+
   WorkerInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
