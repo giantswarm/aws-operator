@@ -47,7 +47,6 @@ type Service struct {
 	bootOnce                sync.Once
 	clusterController       *controller.Cluster
 	drainerController       *controller.Drainer
-	legacyCollector         *collector.Collector
 	operatorCollector       *collector.Set
 	statusResourceCollector *statusresource.Collector
 }
@@ -209,24 +208,6 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var legacyCollector *collector.Collector
-	{
-		c := collector.Config{
-			G8sClient: g8sClient,
-			K8sClient: k8sClient,
-			Logger:    config.Logger,
-
-			AWSConfig:             awsConfig,
-			InstallationName:      config.Viper.GetString(config.Flag.Service.Installation.Name),
-			TrustedAdvisorEnabled: config.Viper.GetBool(config.Flag.Service.AWS.TrustedAdvisor.Enabled),
-		}
-
-		legacyCollector, err = collector.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var operatorCollector *collector.Set
 	{
 		c := collector.SetConfig{
@@ -280,7 +261,6 @@ func New(config Config) (*Service, error) {
 		bootOnce:                sync.Once{},
 		clusterController:       clusterController,
 		drainerController:       drainerController,
-		legacyCollector:         legacyCollector,
 		operatorCollector:       operatorCollector,
 		statusResourceCollector: statusResourceCollector,
 	}
@@ -290,7 +270,6 @@ func New(config Config) (*Service, error) {
 
 func (s *Service) Boot(ctx context.Context) {
 	s.bootOnce.Do(func() {
-		go s.legacyCollector.Boot(ctx)
 		go s.operatorCollector.Boot(ctx)
 		go s.statusResourceCollector.Boot(ctx)
 
