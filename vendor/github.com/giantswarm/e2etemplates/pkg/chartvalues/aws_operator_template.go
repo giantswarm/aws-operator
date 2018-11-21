@@ -28,9 +28,9 @@ const awsOperatorTemplate = `Installation:
     Provider:
       AWS:
         AvailabilityZones:
-		  - eu-central-1a
-		  - eu-central-1b
-		  - eu-central-1c
+          - eu-central-1a
+          - eu-central-1b
+          - eu-central-1c
         Region: '{{ .Provider.AWS.Region }}'
         DeleteLoggingBucket: true
         IncludeTags: true
