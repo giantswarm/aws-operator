@@ -313,7 +313,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:309682a225e763c6ef6be519488ba7888187b0a261b3c2ef3623b7188e9f66d9"
+  digest = "1:b172e84507abbf9464a897f5fd99e2775cfdcbbcce2cb27b9b31a81a74ce53cb"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
     "internal/render",
@@ -321,7 +321,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "3aa5db40ae4484507d28cb2ec6992889a506d86e"
+  revision = "20093457d208abba63b6094d32dac724f874bf06"
 
 [[projects]]
   branch = "master"
@@ -387,9 +387,7 @@
   packages = [
     "v_3_3_3",
     "v_3_4_0",
-    "v_3_5_0",
     "v_3_5_1",
-    "v_3_6_0",
     "v_3_6_1",
     "v_3_7_0",
     "v_3_7_2",
@@ -1717,9 +1715,7 @@
     "github.com/giantswarm/ipam",
     "github.com/giantswarm/k8scloudconfig/v_3_3_3",
     "github.com/giantswarm/k8scloudconfig/v_3_4_0",
-    "github.com/giantswarm/k8scloudconfig/v_3_5_0",
     "github.com/giantswarm/k8scloudconfig/v_3_5_1",
-    "github.com/giantswarm/k8scloudconfig/v_3_6_0",
     "github.com/giantswarm/k8scloudconfig/v_3_6_1",
     "github.com/giantswarm/k8scloudconfig/v_3_7_0",
     "github.com/giantswarm/k8scloudconfig/v_3_7_2",
