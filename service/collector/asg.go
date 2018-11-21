@@ -16,7 +16,7 @@ const (
 )
 
 var (
-	asgDesiredDesc *prometheus.Desc = prometheus.NewDesc(
+	asgDesiredDesc = prometheus.NewDesc(
 		prometheus.BuildFQName(Namespace, Subsystem, "desired_count"),
 		"Gauge about the number of EC2 instances that should be in the ASG.",
 		[]string{
@@ -29,7 +29,7 @@ var (
 		nil,
 	)
 
-	asgInserviceDesc *prometheus.Desc = prometheus.NewDesc(
+	asgInserviceDesc = prometheus.NewDesc(
 		prometheus.BuildFQName(Namespace, Subsystem, "inservice_count"),
 		"Gauge about the number of EC2 instances in the ASG that are in state InService.",
 		[]string{
