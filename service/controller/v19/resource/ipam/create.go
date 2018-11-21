@@ -28,14 +28,29 @@ func init() {
 // EnsureCreated allocates guest cluster network segment. It gathers existing
 // subnets from existing AWSConfig/Status objects and existing VPCs from AWS.
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	customObject, err := key.ToCustomObject(obj)
-	if err != nil {
-		return microerror.Mask(err)
+	var err error
+
+	var customResource v1alpha1.AWSConfig
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "fetching latest version of custom resource")
+
+		oldObj, err := key.ToCustomObject(obj)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		newObj, err := r.g8sClient.ProviderV1alpha1().AWSConfigs(oldObj.GetNamespace()).Get(oldObj.GetName(), metav1.GetOptions{})
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		customResource = *newObj
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "fetchted latest version of custom resource")
 	}
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if subnet needs to be allocated for cluster")
 
-	if key.ClusterNetworkCIDR(customObject) == "" {
+	if key.ClusterNetworkCIDR(customResource) == "" {
 		// TODO remove the status checks for older clusters when all tenant clusters
 		// are upgraded to this version and have subnet allocation in their Status
 		// field.
@@ -44,24 +59,24 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		//
 		var statusAZs []v1alpha1.AWSConfigStatusAWSAvailabilityZone
 		var subnetCIDR net.IPNet
-		if customObject.ClusterStatus().HasUpdatingCondition() || customObject.ClusterStatus().HasUpdatedCondition() {
+		if customResource.ClusterStatus().HasUpdatingCondition() || customResource.ClusterStatus().HasUpdatedCondition() {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "reusing allocated cluster CIDR")
 
 			statusAZs = []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
 				{
-					Name: key.AvailabilityZone(customObject),
+					Name: key.AvailabilityZone(customResource),
 					Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
 						Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
-							CIDR: key.PrivateSubnetCIDR(customObject),
+							CIDR: key.PrivateSubnetCIDR(customResource),
 						},
 						Public: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
-							CIDR: key.PublicSubnetCIDR(customObject),
+							CIDR: key.PublicSubnetCIDR(customResource),
 						},
 					},
 				},
 			}
 
-			_, c, err := net.ParseCIDR(key.CIDR(customObject))
+			_, c, err := net.ParseCIDR(key.CIDR(customResource))
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -77,7 +92,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				return microerror.Mask(err)
 			}
 
-			randomAZs, err := r.selectRandomAZs(key.SpecAvailabilityZones(customObject))
+			randomAZs, err := r.selectRandomAZs(key.SpecAvailabilityZones(customResource))
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -96,17 +111,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		{
 			r.logger.LogCtx(ctx, "level", "debug", "message", "updating CR status")
 
-			m, err := r.g8sClient.ProviderV1alpha1().AWSConfigs(customObject.Namespace).Get(customObject.Name, metav1.GetOptions{})
-			if err != nil {
-				return microerror.Mask(err)
-			}
+			customResource.Status.Cluster.Network.CIDR = subnetCIDR.String()
+			customResource.Status.AWS.AvailabilityZones = statusAZs
 
-			customObject.SetResourceVersion(m.GetResourceVersion())
-
-			customObject.Status.Cluster.Network.CIDR = subnetCIDR.String()
-			customObject.Status.AWS.AvailabilityZones = statusAZs
-
-			_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(customObject.Namespace).UpdateStatus(&customObject)
+			_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(customResource.Namespace).UpdateStatus(&customResource)
 			if err != nil {
 				return microerror.Mask(err)
 			}
