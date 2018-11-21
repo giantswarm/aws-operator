@@ -119,6 +119,7 @@ const IAMPolicies = `{{define "iam_policies"}}
             Action:
               - "autoscaling:DescribeAutoScalingGroups"
               - "autoscaling:DescribeAutoScalingInstances"
+              - "autoscaling:DescribeTags"
             Resource: "*"
 
           - Effect: "Allow"
