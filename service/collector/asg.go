@@ -128,55 +128,65 @@ func (a *ASG) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		return microerror.Mask(err)
 	}
 
-	var autoScalingGroups []*autoscaling.Group
-	{
-		i := &autoscaling.DescribeAutoScalingGroupsInput{}
-		o, err := awsClients.AutoScaling.DescribeAutoScalingGroups(i)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		autoScalingGroups = o.AutoScalingGroups
-	}
-
-	for _, asg := range autoScalingGroups {
-		var cluster, installation, organization string
-
-		for _, tag := range asg.Tags {
-			switch *tag.Key {
-			case ClusterTag:
-				cluster = *tag.Value
-			case InstallationTag:
-				installation = *tag.Value
-			case OrganizationTag:
-				organization = *tag.Value
+	var nextToken *string
+	for {
+		var autoScalingGroups []*autoscaling.Group
+		{
+			i := &autoscaling.DescribeAutoScalingGroupsInput{
+				NextToken: nextToken,
 			}
+			o, err := awsClients.AutoScaling.DescribeAutoScalingGroups(i)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			autoScalingGroups = o.AutoScalingGroups
+			nextToken = o.NextToken
 		}
 
-		if installation != a.installationName {
-			continue
+		for _, asg := range autoScalingGroups {
+			var cluster, installation, organization string
+
+			for _, tag := range asg.Tags {
+				switch *tag.Key {
+				case ClusterTag:
+					cluster = *tag.Value
+				case InstallationTag:
+					installation = *tag.Value
+				case OrganizationTag:
+					organization = *tag.Value
+				}
+			}
+
+			if installation != a.installationName {
+				continue
+			}
+
+			ch <- prometheus.MustNewConstMetric(
+				asgDesiredDesc,
+				prometheus.GaugeValue,
+				float64(*asg.DesiredCapacity),
+				*asg.AutoScalingGroupName,
+				account,
+				cluster,
+				installation,
+				organization,
+			)
+
+			ch <- prometheus.MustNewConstMetric(
+				asgInserviceDesc,
+				prometheus.GaugeValue,
+				float64(len(asg.Instances)),
+				*asg.AutoScalingGroupName,
+				account,
+				cluster,
+				installation,
+				organization,
+			)
 		}
 
-		ch <- prometheus.MustNewConstMetric(
-			asgDesiredDesc,
-			prometheus.GaugeValue,
-			float64(*asg.DesiredCapacity),
-			*asg.AutoScalingGroupName,
-			account,
-			cluster,
-			installation,
-			organization,
-		)
-
-		ch <- prometheus.MustNewConstMetric(
-			asgInserviceDesc,
-			prometheus.GaugeValue,
-			float64(len(asg.Instances)),
-			*asg.AutoScalingGroupName,
-			account,
-			cluster,
-			installation,
-			organization,
-		)
+		if nextToken == nil {
+			break
+		}
 	}
 
 	return nil
