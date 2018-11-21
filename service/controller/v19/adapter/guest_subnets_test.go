@@ -61,18 +61,16 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 			},
 			expectedPublicSubnets: []Subnet{
 				{
-					Index:            0,
 					AvailabilityZone: "eu-west-1a",
 					CIDR:             "10.100.2.0/25",
-					Name:             "PublicSubnet00",
+					Name:             "PublicSubnet",
 					RouteTableAssociation: RouteTableAssociation{
-						Name:           "PublicRouteTableAssociation00",
+						Name:           "PublicRouteTableAssociation",
 						RouteTableName: "PublicRouteTable",
-						SubnetName:     "PublicSubnet00",
+						SubnetName:     "PublicSubnet",
 					},
 				},
 				{
-					Index:            1,
 					AvailabilityZone: "eu-west-1b",
 					CIDR:             "10.100.1.0/25",
 					Name:             "PublicSubnet01",
@@ -83,7 +81,6 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 					},
 				},
 				{
-					Index:            2,
 					AvailabilityZone: "eu-west-1c",
 					CIDR:             "10.100.3.0/25",
 					Name:             "PublicSubnet02",
@@ -96,18 +93,16 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 			},
 			expectedPrivateSubnets: []Subnet{
 				{
-					Index:            0,
 					AvailabilityZone: "eu-west-1a",
 					CIDR:             "10.100.2.128/25",
-					Name:             "PrivateSubnet00",
+					Name:             "PrivateSubnet",
 					RouteTableAssociation: RouteTableAssociation{
-						Name:           "PrivateRouteTableAssociation00",
-						RouteTableName: "PrivateRouteTable00",
-						SubnetName:     "PrivateSubnet00",
+						Name:           "PrivateRouteTableAssociation",
+						RouteTableName: "PrivateRouteTable",
+						SubnetName:     "PrivateSubnet",
 					},
 				},
 				{
-					Index:            1,
 					AvailabilityZone: "eu-west-1b",
 					CIDR:             "10.100.1.128/25",
 					Name:             "PrivateSubnet01",
@@ -118,7 +113,6 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 					},
 				},
 				{
-					Index:            2,
 					AvailabilityZone: "eu-west-1c",
 					CIDR:             "10.100.3.128/25",
 					Name:             "PrivateSubnet02",

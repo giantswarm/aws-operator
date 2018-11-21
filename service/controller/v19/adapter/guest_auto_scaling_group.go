@@ -28,6 +28,13 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 		return microerror.Maskf(invalidConfigError, "at least 1 worker required, found %d", workers)
 	}
 
+	{
+		numAZs := len(key.StatusAvailabilityZones(cfg.CustomObject))
+		if numAZs < 1 {
+			return microerror.Maskf(invalidConfigError, "at least one configured availability zone required")
+		}
+	}
+
 	a.ASGMaxSize = workers + 1
 	a.ASGMinSize = workers
 	a.ASGType = key.KindWorker
@@ -37,8 +44,13 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	a.HealthCheckGracePeriod = gracePeriodSeconds
 	a.RollingUpdatePauseTime = rollingUpdatePauseTime
 
-	for i, az := range key.StatusAvailabilityZones(cfg.CustomObject) {
-		a.PrivateSubnets = append(a.PrivateSubnets, fmt.Sprintf("PrivateSubnet%02d", i))
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
+	a.PrivateSubnets = []string{"PrivateSubnet"}
+	a.WorkerAZs = []string{key.AvailabilityZone(cfg.CustomObject)}
+
+	for i, az := range key.StatusAvailabilityZones(cfg.CustomObject)[1:] {
+		a.PrivateSubnets = append(a.PrivateSubnets, fmt.Sprintf("PrivateSubnet%02d", i+1))
 		a.WorkerAZs = append(a.WorkerAZs, az.Name)
 	}
 

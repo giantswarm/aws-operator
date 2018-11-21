@@ -68,8 +68,10 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 			return microerror.Maskf(notFoundError, "CustomObject has no availability zones")
 		}
 
+		// Since CloudFormation cannot recognize resource renaming, use non-indexed
+		// resource name for first AZ.
 		i.Master.AZ = zones[0].Name
-		i.Master.PrivateSubnet = "PrivateSubnet00"
+		i.Master.PrivateSubnet = "PrivateSubnet"
 
 		accountID, err := AccountID(config.Clients)
 		if err != nil {

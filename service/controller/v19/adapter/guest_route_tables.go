@@ -32,7 +32,17 @@ func (r *GuestRouteTablesAdapter) Adapt(cfg Config) error {
 		TagName:      key.RouteTableName(cfg.CustomObject, suffixPublic),
 	}
 
-	for i := 0; i < key.SpecAvailabilityZones(cfg.CustomObject); i++ {
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
+	r.PrivateRouteTableNames = []RouteTableName{
+		{
+			ResourceName:        "PrivateRouteTable",
+			TagName:             key.RouteTableName(cfg.CustomObject, suffixPrivate),
+			VPCPeeringRouteName: "VPCPeeringRoute",
+		},
+	}
+
+	for i := 1; i < key.SpecAvailabilityZones(cfg.CustomObject); i++ {
 		suffix := fmt.Sprintf("%s%02d", suffixPrivate, i)
 		rtName := RouteTableName{
 			ResourceName:        fmt.Sprintf("PrivateRouteTable%02d", i),

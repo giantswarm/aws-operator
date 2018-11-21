@@ -20,7 +20,20 @@ type GuestNATGatewayAdapter struct {
 }
 
 func (a *GuestNATGatewayAdapter) Adapt(cfg Config) error {
-	for i := 0; i < key.SpecAvailabilityZones(cfg.CustomObject); i++ {
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
+	a.Gateways = []Gateway{
+		{
+			ClusterID:             key.ClusterID(cfg.CustomObject),
+			NATGWName:             "NATGateway",
+			NATEIPName:            "NATEIP",
+			NATRouteName:          "NATRoute",
+			PrivateRouteTableName: "PrivateRouteTable",
+			PublicSubnetName:      "PublicSubnet",
+		},
+	}
+
+	for i := 1; i < key.SpecAvailabilityZones(cfg.CustomObject); i++ {
 		gw := Gateway{
 			ClusterID:             key.ClusterID(cfg.CustomObject),
 			NATGWName:             fmt.Sprintf("NATGateway%02d", i),

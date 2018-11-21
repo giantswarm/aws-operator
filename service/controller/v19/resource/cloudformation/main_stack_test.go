@@ -330,9 +330,9 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Fatal("InternetGateway element not found")
 	}
-	if !strings.Contains(body, "NATGateway00:") {
+	if !strings.Contains(body, "NATGateway:") {
 		fmt.Println(body)
-		t.Fatal("NATGateway00 element not found")
+		t.Fatal("NATGateway element not found")
 	}
 	if !strings.Contains(body, "NATGateway01:") {
 		fmt.Println(body)
@@ -342,23 +342,23 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Fatal("PublicRouteTable element not found")
 	}
-	if !strings.Contains(body, "PublicSubnet00:") {
+	if !strings.Contains(body, "PublicSubnet:") {
 		fmt.Println(body)
 		t.Fatal("PublicSubnet element not found")
 	}
 	if !strings.Contains(body, "PublicSubnet01:") {
 		fmt.Println(body)
-		t.Fatal("PublicSubnet element not found")
+		t.Fatal("PublicSubnet01 element not found")
 	}
-	if !strings.Contains(body, "PrivateRouteTable00:") {
+	if !strings.Contains(body, "PrivateRouteTable:") {
 		fmt.Println(body)
-		t.Fatal("PrivateRouteTable00 element not found")
+		t.Fatal("PrivateRouteTable element not found")
 	}
 	if !strings.Contains(body, "PrivateRouteTable01:") {
 		fmt.Println(body)
-		t.Fatal("PrivateRouteTable00 element not found")
+		t.Fatal("PrivateRouteTable element not found")
 	}
-	if !strings.Contains(body, "PrivateSubnet00:") {
+	if !strings.Contains(body, "PrivateSubnet:") {
 		fmt.Println(body)
 		t.Fatal("PrivateSubnet element not found")
 	}

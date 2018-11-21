@@ -14,7 +14,11 @@ type GuestInternetGatewayAdapter struct {
 func (a *GuestInternetGatewayAdapter) Adapt(cfg Config) error {
 	a.ClusterID = key.ClusterID(cfg.CustomObject)
 
-	for i := 0; i < key.SpecAvailabilityZones(cfg.CustomObject); i++ {
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
+	a.PrivateRouteTables = []string{"PrivateRouteTable"}
+
+	for i := 1; i < key.SpecAvailabilityZones(cfg.CustomObject); i++ {
 		a.PrivateRouteTables = append(a.PrivateRouteTables, fmt.Sprintf("PrivateRouteTable%02d", i))
 	}
 
