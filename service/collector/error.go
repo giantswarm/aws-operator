@@ -3,32 +3,7 @@ package collector
 import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/giantswarm/microerror"
-	"github.com/prometheus/client_golang/prometheus"
 )
-
-const (
-	// trustedAdvisorSubscriptionRequiredExceptionCode is the error code returned
-	// if Trusted Advisor is not supported (support plan is not Business or Enterprise).
-	trustedAdvisorSubscriptionRequiredExceptionCode = "SubscriptionRequiredException"
-)
-
-var alreadyRegisteredError = &microerror.Error{
-	Kind: "alreadyRegisteredError",
-}
-
-// IsAlreadyRegisteredError asserts alreadyRegisteredError.
-func IsAlreadyRegisteredError(err error) bool {
-	c := microerror.Cause(err)
-	_, ok := c.(prometheus.AlreadyRegisteredError)
-	if ok {
-		return true
-	}
-	if c == alreadyRegisteredError {
-		return true
-	}
-
-	return false
-}
 
 var invalidConfigError = &microerror.Error{
 	Kind: "invalidConfigError",
@@ -66,16 +41,24 @@ func IsNilUsage(err error) bool {
 	return microerror.Cause(err) == nilUsageError
 }
 
-// IsUnsupportedPlan asserts that an error is due to Trusted Advisor
-// not being available with the current support plan.
+var unsupportedPlanError = &microerror.Error{
+	Kind: "unsupportedPlanError",
+}
+
+// IsUnsupportedPlan asserts that an error is due to Trusted Advisor not being
+// available with the current support plan.
 func IsUnsupportedPlan(err error) bool {
 	c := microerror.Cause(err)
+
+	if c == nilUsageError {
+		return true
+	}
+
 	aerr, ok := c.(awserr.Error)
 	if !ok {
 		return false
 	}
-
-	if aerr.Code() == trustedAdvisorSubscriptionRequiredExceptionCode {
+	if aerr.Code() == "SubscriptionRequiredException" {
 		return true
 	}
 
