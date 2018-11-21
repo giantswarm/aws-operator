@@ -47,7 +47,7 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	// Since CloudFormation cannot recognize resource renaming, use non-indexed
 	// resource name for first AZ.
 	a.PrivateSubnets = []string{"PrivateSubnet"}
-	a.WorkerAZs = []string{key.AvailabilityZone(cfg.CustomObject)}
+	a.WorkerAZs = []string{key.StatusAvailabilityZones(cfg.CustomObject)[0].Name}
 
 	for i, az := range key.StatusAvailabilityZones(cfg.CustomObject)[1:] {
 		a.PrivateSubnets = append(a.PrivateSubnets, fmt.Sprintf("PrivateSubnet%02d", i+1))
