@@ -96,15 +96,17 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		{
 			r.logger.LogCtx(ctx, "level", "debug", "message", "updating CR status")
 
-			customObject, err := r.g8sClient.ProviderV1alpha1().AWSConfigs(customObject.Namespace).Get(customObject.Name, metav1.GetOptions{})
+			m, err := r.g8sClient.ProviderV1alpha1().AWSConfigs(customObject.Namespace).Get(customObject.Name, metav1.GetOptions{})
 			if err != nil {
 				return microerror.Mask(err)
 			}
 
+			customObject.SetResourceVersion(m.GetResourceVersion())
+
 			customObject.Status.Cluster.Network.CIDR = subnetCIDR.String()
 			customObject.Status.AWS.AvailabilityZones = statusAZs
 
-			_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(customObject.Namespace).UpdateStatus(customObject)
+			_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(customObject.Namespace).UpdateStatus(&customObject)
 			if err != nil {
 				return microerror.Mask(err)
 			}
