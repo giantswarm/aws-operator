@@ -382,7 +382,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:db15c0e3e086378c2a352765f87ccc40a29c26573dd01de93e199a26e77a8691"
+  digest = "1:03850c2d6705fdd9db7b931df5fe666e8674d845f4e8ee2cc1e2fe742d6128d5"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "v_3_3_3",
@@ -392,10 +392,10 @@
     "v_3_6_0",
     "v_3_6_1",
     "v_3_7_0",
-    "v_3_7_1",
+    "v_3_7_2",
   ]
   pruneopts = "T"
-  revision = "edd11b9583ccec94df97a3c66ab0ec36c8c14642"
+  revision = "8fdb44663c709da33987e24bb07162847bf86893"
 
 [[projects]]
   branch = "master"
@@ -1722,7 +1722,7 @@
     "github.com/giantswarm/k8scloudconfig/v_3_6_0",
     "github.com/giantswarm/k8scloudconfig/v_3_6_1",
     "github.com/giantswarm/k8scloudconfig/v_3_7_0",
-    "github.com/giantswarm/k8scloudconfig/v_3_7_1",
+    "github.com/giantswarm/k8scloudconfig/v_3_7_2",
     "github.com/giantswarm/legacycerts/legacy",
     "github.com/giantswarm/legacycerts/legacy/legacytest",
     "github.com/giantswarm/microendpoint/endpoint/healthz",
@@ -1754,10 +1754,12 @@
     "github.com/stretchr/testify/assert",
     "golang.org/x/sync/errgroup",
     "k8s.io/api/core/v1",
+    "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1",
     "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset",
     "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/fake",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
+    "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/apiserver/pkg/endpoints/request",
     "k8s.io/client-go/dynamic",
