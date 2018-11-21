@@ -62,6 +62,19 @@ func NewSet(config SetConfig) (*Set, error) {
 		}
 	}
 
+	var trustedAdvisorCollector *TrustedAdvisor
+	{
+		c := TrustedAdvisorConfig{
+			Helper: h,
+			Logger: config.Logger,
+		}
+
+		trustedAdvisorCollector, err = NewTrustedAdvisor(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var vpcCollector *VPC
 	{
 		c := VPCConfig{
@@ -85,6 +98,11 @@ func NewSet(config SetConfig) (*Set, error) {
 				vpcCollector,
 			},
 			Logger: config.Logger,
+		}
+
+		if config.TrustedAdvisorEnabled {
+			config.Logger.Log("level", "debug", "message", "trusted advisor collector is enabled")
+			c.Collectors = append(c.Collectors, trustedAdvisorCollector)
 		}
 
 		collectorSet, err = collector.NewSet(c)

@@ -113,15 +113,15 @@ func (h *helper) GetAWSClients() ([]clientaws.Clients, error) {
 	}
 
 	// addClientFunc add awsClients to clients using account id as key to guaranatee uniqueness.
-	addClientFunc := func(awsClients clientaws.Clients, clients *map[string]clientaws.Clients) error {
+	addClientFunc := func(awsClients clientaws.Clients, clients map[string]clientaws.Clients) error {
 		accountID, err := h.AWSAccountID(awsClients)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		_, ok := (*clients)[accountID]
+		_, ok := clients[accountID]
 		if !ok {
-			(*clients)[accountID] = awsClients
+			clients[accountID] = awsClients
 		}
 
 		return nil
@@ -132,7 +132,7 @@ func (h *helper) GetAWSClients() ([]clientaws.Clients, error) {
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	err = addClientFunc(awsClients, &clientsMap)
+	err = addClientFunc(awsClients, clientsMap)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -146,7 +146,7 @@ func (h *helper) GetAWSClients() ([]clientaws.Clients, error) {
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		err = addClientFunc(awsClients, &clientsMap)
+		err = addClientFunc(awsClients, clientsMap)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
