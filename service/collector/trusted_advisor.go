@@ -142,7 +142,10 @@ func (t *TrustedAdvisor) collectForAccount(ch chan<- prometheus.Metric, awsClien
 
 	checks, err := t.getTrustedAdvisorChecks(awsClients)
 	if IsUnsupportedPlan(err) {
-		return microerror.Mask(err)
+		// While iterating through all kinds of account related AWS clients, we may
+		// or may not be able to work against the Trusted Advisor API, depending on
+		// the account's support plans.
+		return nil
 	} else if err != nil {
 		return microerror.Mask(err)
 	}
