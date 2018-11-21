@@ -117,6 +117,7 @@ func (a *ASG) Collect(ch chan<- prometheus.Metric) error {
 // Describe emits the description for the metrics collected here.
 func (a *ASG) Describe(ch chan<- *prometheus.Desc) error {
 	ch <- asgDesiredDesc
+	ch <- asgInserviceDesc
 	return nil
 }
 
