@@ -10,8 +10,10 @@ import (
 )
 
 const (
+	// ASGLabel is the metric's label key that will hold the ASG name.
 	ASGLabel = "asg"
 
+	// Subsystem will become the second part of the metric name, right after namespace.
 	Subsystem = "asg"
 )
 
@@ -43,6 +45,7 @@ var (
 	)
 )
 
+// ASGConfig is this collector's configuration struct.
 type ASGConfig struct {
 	Helper *helper
 	Logger micrologger.Logger
@@ -50,6 +53,7 @@ type ASGConfig struct {
 	InstallationName string
 }
 
+// ASG is the main struct for this collector.
 type ASG struct {
 	helper *helper
 	logger micrologger.Logger
@@ -57,6 +61,7 @@ type ASG struct {
 	installationName string
 }
 
+// NewASG creates a new AutoScalingGroup metrics collector.
 func NewASG(config ASGConfig) (*ASG, error) {
 	if config.Helper == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Helper must not be empty", config)
@@ -79,6 +84,7 @@ func NewASG(config ASGConfig) (*ASG, error) {
 	return a, nil
 }
 
+// Collect is the main metrics collection function.
 func (a *ASG) Collect(ch chan<- prometheus.Metric) error {
 	awsClientsList, err := a.helper.GetAWSClients()
 	if err != nil {
@@ -108,11 +114,13 @@ func (a *ASG) Collect(ch chan<- prometheus.Metric) error {
 	return nil
 }
 
+// Describe emits the description for the metrics collected here.
 func (a *ASG) Describe(ch chan<- *prometheus.Desc) error {
 	ch <- asgDesiredDesc
 	return nil
 }
 
+// collectForAccount collects and emits metrics for one AWS account.
 func (a *ASG) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaws.Clients) error {
 	account, err := a.helper.AWSAccountID(awsClients)
 	if err != nil {
