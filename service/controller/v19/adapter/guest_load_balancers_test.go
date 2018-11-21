@@ -35,9 +35,24 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 		expectedIngressElbScheme                 string
 	}{
 		{
+			description: "empty custom object with AZs (to test for missing cloud config key",
+			customObject: v1alpha1.AWSConfig{
+				Status: v1alpha1.AWSConfigStatus{
+					AWS: v1alpha1.AWSConfigStatusAWS{
+						AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+							{
+								Name: "eu-central-1a",
+							},
+						},
+					},
+				},
+			},
+			errorMatcher: key.IsMissingCloudConfigKey,
+		},
+		{
 			description:  "empty custom object",
 			customObject: v1alpha1.AWSConfig{},
-			errorMatcher: key.IsMissingCloudConfigKey,
+			errorMatcher: IsInvalidConfig,
 		},
 		{
 			description: "basic matching, all fields present",
@@ -63,6 +78,15 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 					},
 					AWS: v1alpha1.AWSConfigSpecAWS{
 						AZ: "eu-central-1a",
+					},
+				},
+				Status: v1alpha1.AWSConfigStatus{
+					AWS: v1alpha1.AWSConfigStatusAWS{
+						AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+							{
+								Name: "eu-central-1a",
+							},
+						},
 					},
 				},
 			},

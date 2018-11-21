@@ -20,6 +20,8 @@ type GuestNATGatewayAdapter struct {
 }
 
 func (a *GuestNATGatewayAdapter) Adapt(cfg Config) error {
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
 	a.Gateways = []Gateway{
 		{
 			ClusterID:             key.ClusterID(cfg.CustomObject),

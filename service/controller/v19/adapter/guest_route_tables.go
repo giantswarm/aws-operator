@@ -32,6 +32,8 @@ func (r *GuestRouteTablesAdapter) Adapt(cfg Config) error {
 		TagName:      key.RouteTableName(cfg.CustomObject, suffixPublic),
 	}
 
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
 	r.PrivateRouteTableNames = []RouteTableName{
 		{
 			ResourceName:        "PrivateRouteTable",

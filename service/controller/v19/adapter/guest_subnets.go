@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	"github.com/giantswarm/aws-operator/service/controller/v19/key"
+	"github.com/giantswarm/microerror"
 )
 
 type Subnet struct {
@@ -32,6 +33,15 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 		return zones[i].Name < zones[j].Name
 	})
 
+	{
+		numAZs := len(zones)
+		if numAZs < 1 {
+			return microerror.Maskf(invalidConfigError, "at least one configured availability zone required")
+		}
+	}
+
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
 	s.PublicSubnets = []Subnet{
 		Subnet{
 			AvailabilityZone:    zones[0].Name,

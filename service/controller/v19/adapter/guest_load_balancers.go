@@ -41,6 +41,13 @@ type GuestLoadBalancersAdapter struct {
 }
 
 func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
+	{
+		numAZs := len(key.StatusAvailabilityZones(cfg.CustomObject))
+		if numAZs < 1 {
+			return microerror.Maskf(invalidConfigError, "at least one configured availability zone required")
+		}
+	}
+
 	// API load balancer settings.
 	apiElbName, err := key.LoadBalancerName(cfg.CustomObject.Spec.Cluster.Kubernetes.API.Domain, cfg.CustomObject)
 	if err != nil {
@@ -101,6 +108,8 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	a.ELBHealthCheckUnhealthyThreshold = healthCheckUnhealthyThreshold
 	a.MasterInstanceResourceName = cfg.StackState.MasterInstanceResourceName
 
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
 	a.PublicSubnets = []string{"PublicSubnet"}
 	a.PrivateSubnets = []string{"PrivateSubnet"}
 
