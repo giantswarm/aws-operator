@@ -12,6 +12,7 @@ const (
 )
 
 const (
+	AccountLabel      = "account"
 	ClusterLabel      = "cluster_id"
 	InstallationLabel = "installation"
 	OrganizationLabel = "organization"
