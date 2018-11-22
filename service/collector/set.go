@@ -62,6 +62,21 @@ func NewSet(config SetConfig) (*Set, error) {
 		}
 	}
 
+	var ec2InstancesCollector *EC2Instances
+	{
+		c := EC2InstancesConfig{
+			Helper: h,
+			Logger: config.Logger,
+
+			InstallationName: config.InstallationName,
+		}
+
+		ec2InstancesCollector, err = NewEC2Instances(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var elbCollector *ELB
 	{
 		c := ELBConfig{
@@ -110,6 +125,7 @@ func NewSet(config SetConfig) (*Set, error) {
 		c := collector.SetConfig{
 			Collectors: []collector.Interface{
 				asgCollector,
+				ec2InstancesCollector,
 				elbCollector,
 				vpcCollector,
 			},

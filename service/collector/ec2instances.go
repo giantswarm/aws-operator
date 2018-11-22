@@ -1,0 +1,236 @@
+package collector
+
+import (
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/ec2"
+	clientaws "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
+	"github.com/prometheus/client_golang/prometheus"
+	"golang.org/x/sync/errgroup"
+)
+
+const (
+	// instanceLabel is the metric's label key that will hold the ec2 instance ID.
+	instanceLabel = "ec2instance"
+
+	// ec2Subsystem will become the second part of the metric name, right after namespace.
+	ec2Subsystem = "ec2"
+)
+
+var (
+	ec2InstanceStatus = prometheus.NewDesc(
+		prometheus.BuildFQName(Namespace, ec2Subsystem, "status"),
+		"Gauge indicating the status of an EC2 instance. 1 = healthy, 0 = unhealthy",
+		[]string{
+			instanceLabel,
+			AccountLabel,
+			ClusterLabel,
+			InstallationLabel,
+			OrganizationLabel,
+		},
+		nil,
+	)
+)
+
+// EC2InstancesConfig is this collector's configuration struct.
+type EC2InstancesConfig struct {
+	Helper *helper
+	Logger micrologger.Logger
+
+	InstallationName string
+}
+
+// EC2Instances is the main struct for this collector.
+type EC2Instances struct {
+	helper *helper
+	logger micrologger.Logger
+
+	installationName string
+}
+
+// NewEC2Instances creates a new EC2 instance metrics collector.
+func NewEC2Instances(config EC2InstancesConfig) (*EC2Instances, error) {
+	if config.Helper == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Helper must not be empty", config)
+	}
+	if config.Logger == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
+	}
+
+	if config.InstallationName == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
+	}
+
+	e := &EC2Instances{
+		helper: config.Helper,
+		logger: config.Logger,
+
+		installationName: config.InstallationName,
+	}
+
+	return e, nil
+}
+
+// Collect is the main metrics collection function.
+func (e *EC2Instances) Collect(ch chan<- prometheus.Metric) error {
+	awsClientsList, err := e.helper.GetAWSClients()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	var g errgroup.Group
+
+	for _, item := range awsClientsList {
+		awsClients := item
+
+		g.Go(func() error {
+			err := e.collectForAccount(ch, awsClients)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			return nil
+		})
+	}
+
+	err = g.Wait()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
+// Describe emits the description for the metrics collected here.
+func (e *EC2Instances) Describe(ch chan<- *prometheus.Desc) error {
+	ch <- ec2InstanceStatus
+	return nil
+}
+
+// collectForAccount collects and emits our metric for one AWS account.
+//
+// We gather two separate collections first, then match them by instance ID:
+// - instance information, including tags
+// - instance status information
+func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaws.Clients) error {
+	account, err := e.helper.AWSAccountID(awsClients)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	// Collect instance status info.
+	// map key will be the instance ID.
+	var instanceStatuses map[string]*ec2.InstanceStatus
+	{
+		input := &ec2.DescribeInstanceStatusInput{
+			IncludeAllInstances: aws.Bool(true),
+			MaxResults:          aws.Int64(1000),
+		}
+
+		for {
+			o, err := awsClients.EC2.DescribeInstanceStatus(input)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			// collect statuses
+			for _, s := range o.InstanceStatuses {
+				instanceStatuses[*s.InstanceId] = s
+			}
+
+			if o.NextToken == nil {
+				break
+			}
+			input.SetNextToken(*o.NextToken)
+		}
+	}
+
+	// Collect instance info.
+	var instances map[string]*ec2.Instance
+	{
+		input := &ec2.DescribeInstancesInput{
+			Filters: []*ec2.Filter{
+				&ec2.Filter{
+					Name: aws.String("String"),
+					Values: []*string{
+						aws.String("String"), // Required
+						// More values...
+					},
+				},
+			},
+			MaxResults: aws.Int64(1000),
+		}
+
+		for {
+			o, err := awsClients.EC2.DescribeInstances(input)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			for _, reservation := range o.Reservations {
+				for _, instance := range reservation.Instances {
+
+					installation := ""
+					for _, tag := range instance.Tags {
+						if *tag.Key == InstallationTag {
+							installation = *tag.Value
+						}
+					}
+
+					// We discard instances not tagged as belonging to this installation.
+					if installation != e.installationName {
+						continue
+					}
+
+					instances[*instance.InstanceId] = instance
+				}
+			}
+
+			if o.NextToken == nil {
+				break
+			}
+			input.SetNextToken(*o.NextToken)
+		}
+	}
+
+	// Iterate over found instances and emit metrics.
+	for instanceID := range instances {
+
+		// Skip if we don't have a status for this instance.
+		statuses, statusesAvailable := instanceStatuses[instanceID]
+		if !statusesAvailable {
+			continue
+		}
+
+		var cluster, installation, organization string
+		for _, tag := range instances[instanceID].Tags {
+			switch *tag.Key {
+			case ClusterTag:
+				cluster = *tag.Value
+			case InstallationTag:
+				installation = *tag.Value
+			case OrganizationTag:
+				organization = *tag.Value
+			}
+		}
+
+		up := 0
+		if *statuses.InstanceState.Name == "running" && *statuses.InstanceStatus.Status == "ok" {
+			up = 1
+		}
+
+		ch <- prometheus.MustNewConstMetric(
+			ec2InstanceStatus,
+			prometheus.GaugeValue,
+			float64(up),
+			instanceID,
+			account,
+			cluster,
+			installation,
+			organization,
+		)
+	}
+
+	return nil
+}
