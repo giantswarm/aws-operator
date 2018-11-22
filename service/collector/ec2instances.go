@@ -172,14 +172,6 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 
 			for _, reservation := range o.Reservations {
 				for _, instance := range reservation.Instances {
-
-					installation := ""
-					for _, tag := range instance.Tags {
-						if *tag.Key == tagInstallation {
-							installation = *tag.Value
-						}
-					}
-
 					instances[*instance.InstanceId] = instance
 				}
 			}
