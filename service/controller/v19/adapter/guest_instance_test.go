@@ -40,6 +40,15 @@ func Test_Adapter_Instance_RegularFields(t *testing.T) {
 							Region: "eu-west-1",
 						},
 					},
+					Status: v1alpha1.AWSConfigStatus{
+						AWS: v1alpha1.AWSConfigStatusAWS{
+							AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+								v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+									Name: "eu-west-1a",
+								},
+							},
+						},
+					},
 				},
 				StackState: StackState{
 					MasterInstanceType: "m3.large",
@@ -123,6 +132,15 @@ func Test_Adapter_Instance_SmallCloudConfig(t *testing.T) {
 					},
 					VersionBundle: v1alpha1.AWSConfigSpecVersionBundle{
 						Version: "0.1.0",
+					},
+				},
+				Status: v1alpha1.AWSConfigStatus{
+					AWS: v1alpha1.AWSConfigStatusAWS{
+						AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+							v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+								Name: "eu-west-1a",
+							},
+						},
 					},
 				},
 			}

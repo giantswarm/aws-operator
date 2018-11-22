@@ -2,6 +2,7 @@ package adapter
 
 import (
 	"encoding/base64"
+	"sort"
 
 	"github.com/giantswarm/microerror"
 
@@ -30,6 +31,7 @@ type GuestInstanceAdapterMaster struct {
 	DockerVolume     GuestInstanceAdapterMasterDockerVolume
 	EtcdVolume       GuestInstanceAdapterMasterEtcdVolume
 	Instance         GuestInstanceAdapterMasterInstance
+	PrivateSubnet    string
 }
 
 type GuestInstanceAdapterMasterDockerVolume struct {
@@ -57,7 +59,19 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 	}
 
 	{
-		i.Master.AZ = key.AvailabilityZone(config.CustomObject)
+		zones := key.StatusAvailabilityZones(config.CustomObject)
+		sort.Slice(zones, func(i, j int) bool {
+			return zones[i].Name < zones[j].Name
+		})
+
+		if len(zones) < 1 {
+			return microerror.Maskf(notFoundError, "CustomObject has no availability zones")
+		}
+
+		// Since CloudFormation cannot recognize resource renaming, use non-indexed
+		// resource name for first AZ.
+		i.Master.AZ = zones[0].Name
+		i.Master.PrivateSubnet = "PrivateSubnet"
 
 		accountID, err := AccountID(config.Clients)
 		if err != nil {

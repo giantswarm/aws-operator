@@ -2,7 +2,7 @@ package hostpost
 
 const RouteTables = `{{ define "route_tables" }}
   {{- $v := .HostPost.RouteTables }}
-  {{ range $i, $t := $v.PrivateRouteTables }}
+  {{ range $i, $t := $v.PrivateRoutes }}
   PrivateRoute{{$i}}:
     Type: AWS::EC2::Route
     Properties:
@@ -11,7 +11,7 @@ const RouteTables = `{{ define "route_tables" }}
       VpcPeeringConnectionId: {{$t.PeerConnectionID}}
   {{end}}
 
-  {{ range $i, $t := $v.PublicRouteTables }}
+  {{ range $i, $t := $v.PublicRoutes }}
   PublicRoute{{$i}}:
     Type: AWS::EC2::Route
     Properties:

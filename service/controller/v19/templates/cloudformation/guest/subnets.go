@@ -2,37 +2,42 @@ package guest
 
 const Subnets = `{{ define "subnets" }}
 {{- $v := .Guest.Subnets }}
-  PublicSubnet:
+  {{- range $v.PublicSubnets }}
+  {{ .Name }}:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: {{ $v.PublicSubnetAZ }}
-      CidrBlock: {{ $v.PublicSubnetCIDR }}
-      MapPublicIpOnLaunch: {{ $v.PublicSubnetMapPublicIPOnLaunch }}
+      AvailabilityZone: {{ .AvailabilityZone }}
+      CidrBlock: {{ .CIDR }}
+      MapPublicIpOnLaunch: {{ .MapPublicIPOnLaunch }}
       Tags:
       - Key: Name
-        Value: {{ $v.PublicSubnetName }}
+        Value: {{ .Name }}
       VpcId: !Ref VPC
 
-  PublicSubnetRouteTableAssociation:
+  {{ .RouteTableAssociation.Name }}:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PublicRouteTable
-      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref {{ .RouteTableAssociation.RouteTableName }}
+      SubnetId: !Ref {{ .RouteTableAssociation.SubnetName }}
 
-  PrivateSubnet:
+  {{ end }}
+
+  {{- range $v.PrivateSubnets }}
+  {{ .Name }}:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: {{ $v.PrivateSubnetAZ }}
-      CidrBlock: {{ $v.PrivateSubnetCIDR }}
-      MapPublicIpOnLaunch: {{ $v.PrivateSubnetMapPublicIPOnLaunch }}
+      AvailabilityZone: {{ .AvailabilityZone }}
+      CidrBlock: {{ .CIDR }}
+      MapPublicIpOnLaunch: {{ .MapPublicIPOnLaunch }}
       Tags:
       - Key: Name
-        Value: {{ $v.PrivateSubnetName }}
+        Value: {{ .Name }}
       VpcId: !Ref VPC
 
-  PrivateSubnetRouteTableAssociation:
+  {{ .RouteTableAssociation.Name  }}:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PrivateRouteTable
-      SubnetId: !Ref PrivateSubnet
+      RouteTableId: !Ref {{ .RouteTableAssociation.RouteTableName }}
+      SubnetId: !Ref {{ .RouteTableAssociation.SubnetName }}
+  {{ end }}
 {{ end }}`

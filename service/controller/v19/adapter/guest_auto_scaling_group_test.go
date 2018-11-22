@@ -1,6 +1,7 @@
 package adapter
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
@@ -12,7 +13,7 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 		description                    string
 		customObject                   v1alpha1.AWSConfig
 		expectedError                  bool
-		expectedAZ                     string
+		expectedAZs                    []string
 		expectedASGMaxSize             int
 		expectedASGMinSize             int
 		expectedHealthCheckGracePeriod int
@@ -26,7 +27,6 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: defaultCluster,
 					AWS: v1alpha1.AWSConfigSpecAWS{
-						AZ:      "myaz",
 						Workers: []v1alpha1.AWSConfigSpecAWSNode{},
 					},
 				},
@@ -45,9 +45,18 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 						},
 					},
 				},
+				Status: v1alpha1.AWSConfigStatus{
+					AWS: v1alpha1.AWSConfigStatusAWS{
+						AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+							v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+								Name: "myaz",
+							},
+						},
+					},
+				},
 			},
 			expectedError:                  false,
-			expectedAZ:                     "myaz",
+			expectedAZs:                    []string{"myaz"},
 			expectedASGMaxSize:             2, // headroom is +1
 			expectedASGMinSize:             1,
 			expectedHealthCheckGracePeriod: gracePeriodSeconds,
@@ -69,9 +78,18 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 						},
 					},
 				},
+				Status: v1alpha1.AWSConfigStatus{
+					AWS: v1alpha1.AWSConfigStatusAWS{
+						AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+							v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+								Name: "myaz",
+							},
+						},
+					},
+				},
 			},
 			expectedError:                  false,
-			expectedAZ:                     "myaz",
+			expectedAZs:                    []string{"myaz"},
 			expectedASGMaxSize:             4,
 			expectedASGMinSize:             3,
 			expectedHealthCheckGracePeriod: gracePeriodSeconds,
@@ -97,9 +115,18 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 						},
 					},
 				},
+				Status: v1alpha1.AWSConfigStatus{
+					AWS: v1alpha1.AWSConfigStatusAWS{
+						AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+							v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+								Name: "myaz",
+							},
+						},
+					},
+				},
 			},
 			expectedError:                  false,
-			expectedAZ:                     "myaz",
+			expectedAZs:                    []string{"myaz"},
 			expectedASGMaxSize:             8,
 			expectedASGMinSize:             7,
 			expectedHealthCheckGracePeriod: gracePeriodSeconds,
@@ -151,8 +178,8 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 					t.Errorf("unexpected output, got %q, want %q", a.Guest.AutoScalingGroup.RollingUpdatePauseTime, tc.expectedRollingUpdatePauseTime)
 				}
 
-				if a.Guest.AutoScalingGroup.WorkerAZ != tc.expectedAZ {
-					t.Errorf("unexpected output, got %q, want %q", a.Guest.AutoScalingGroup.WorkerAZ, tc.expectedAZ)
+				if !reflect.DeepEqual(a.Guest.AutoScalingGroup.WorkerAZs, tc.expectedAZs) {
+					t.Errorf("unexpected output, got %q, want %q", a.Guest.AutoScalingGroup.WorkerAZs, tc.expectedAZs)
 				}
 
 			}
