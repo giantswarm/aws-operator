@@ -36,9 +36,18 @@ type GuestLoadBalancersAdapter struct {
 	IngressElbPortsToOpen            []GuestLoadBalancersAdapterPortPair
 	IngressElbScheme                 string
 	MasterInstanceResourceName       string
+	PublicSubnets                    []string
+	PrivateSubnets                   []string
 }
 
 func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
+	{
+		numAZs := len(key.StatusAvailabilityZones(cfg.CustomObject))
+		if numAZs < 1 {
+			return microerror.Maskf(invalidConfigError, "at least one configured availability zone required")
+		}
+	}
+
 	// API load balancer settings.
 	apiElbName, err := key.LoadBalancerName(cfg.CustomObject.Spec.Cluster.Kubernetes.API.Domain, cfg.CustomObject)
 	if err != nil {
@@ -98,6 +107,16 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	a.ELBHealthCheckTimeout = healthCheckTimeout
 	a.ELBHealthCheckUnhealthyThreshold = healthCheckUnhealthyThreshold
 	a.MasterInstanceResourceName = cfg.StackState.MasterInstanceResourceName
+
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
+	a.PublicSubnets = []string{"PublicSubnet"}
+	a.PrivateSubnets = []string{"PrivateSubnet"}
+
+	for i := 1; i < key.SpecAvailabilityZones(cfg.CustomObject); i++ {
+		a.PublicSubnets = append(a.PublicSubnets, fmt.Sprintf("PublicSubnet%02d", i))
+		a.PrivateSubnets = append(a.PrivateSubnets, fmt.Sprintf("PrivateSubnet%02d", i))
+	}
 
 	return nil
 }

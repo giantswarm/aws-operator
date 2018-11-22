@@ -29,7 +29,9 @@ const LoadBalancers = `{{define "load_balancers"}}
       SecurityGroups:
         - !Ref MasterSecurityGroup
       Subnets:
-        - !Ref PublicSubnet
+      {{- range $s := $v.PublicSubnets }}
+        - !Ref {{ $s }}
+      {{end}}
 
   EtcdLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
@@ -54,9 +56,12 @@ const LoadBalancers = `{{define "load_balancers"}}
       LoadBalancerName: {{ $v.EtcdElbName }}
       Scheme: {{ $v.EtcdElbScheme }}
       SecurityGroups:
-        - !Ref MasterSecurityGroup
+        - !Ref EtcdELBSecurityGroup
       Subnets:
-        - !Ref PrivateSubnet
+      {{- range $s := $v.PrivateSubnets }}
+        - !Ref {{ $s }}
+      {{end}}
+
 
   IngressLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
@@ -93,5 +98,7 @@ const LoadBalancers = `{{define "load_balancers"}}
       SecurityGroups:
         - !Ref IngressSecurityGroup
       Subnets:
-        - !Ref PublicSubnet
+      {{- range $s := $v.PublicSubnets }}
+        - !Ref {{ $s }}
+      {{end}}
 {{end}}`
