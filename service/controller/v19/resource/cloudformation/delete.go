@@ -38,26 +38,30 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			StackName:                   stackName,
 		}
 		_, err = sc.AWSClient.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
-		if err != nil {
+		if IsDeleteInProgress(err) {
+			// fall through
+		} else if IsNotExists(err) {
+			// fall through
+		} else if err != nil {
 			return microerror.Mask(err)
-		}
-
-		i := &cloudformation.DeleteStackInput{
-			StackName: stackName,
-		}
-		_, err = sc.AWSClient.CloudFormation.DeleteStack(i)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		if r.encrypterBackend == encrypter.VaultBackend {
-			err = r.encrypterRoleManager.EnsureDeletedAuthorizedIAMRoles(ctx, customObject)
+		} else {
+			i := &cloudformation.DeleteStackInput{
+				StackName: stackName,
+			}
+			_, err = sc.AWSClient.CloudFormation.DeleteStack(i)
 			if err != nil {
 				return microerror.Mask(err)
 			}
-		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "deleted the guest cluster main stack")
+			if r.encrypterBackend == encrypter.VaultBackend {
+				err = r.encrypterRoleManager.EnsureDeletedAuthorizedIAMRoles(ctx, customObject)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+			}
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "deleted the guest cluster main stack")
+		}
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting the guest cluster main stack")
 	}
@@ -72,19 +76,23 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			StackName:                   stackName,
 		}
 		_, err = r.hostClients.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
-		if err != nil {
+		if IsDeleteInProgress(err) {
+			// fall through
+		} else if IsNotExists(err) {
+			// fall through
+		} else if err != nil {
 			return microerror.Mask(err)
-		}
+		} else {
+			i := &cloudformation.DeleteStackInput{
+				StackName: stackName,
+			}
+			_, err = r.hostClients.CloudFormation.DeleteStack(i)
+			if err != nil {
+				return microerror.Mask(err)
+			}
 
-		i := &cloudformation.DeleteStackInput{
-			StackName: stackName,
+			r.logger.LogCtx(ctx, "level", "debug", "message", "deleted the host cluster pre stack")
 		}
-		_, err = r.hostClients.CloudFormation.DeleteStack(i)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", "deleted the host cluster pre stack")
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting the host cluster pre stack")
 	}
@@ -99,19 +107,23 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			StackName:                   stackName,
 		}
 		_, err = r.hostClients.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
-		if err != nil {
+		if IsDeleteInProgress(err) {
+			// fall through
+		} else if IsNotExists(err) {
+			// fall through
+		} else if err != nil {
 			return microerror.Mask(err)
-		}
+		} else {
+			i := &cloudformation.DeleteStackInput{
+				StackName: stackName,
+			}
+			_, err = r.hostClients.CloudFormation.DeleteStack(i)
+			if err != nil {
+				return microerror.Mask(err)
+			}
 
-		i := &cloudformation.DeleteStackInput{
-			StackName: stackName,
+			r.logger.LogCtx(ctx, "level", "debug", "message", "deleted the host cluster post stack")
 		}
-		_, err = r.hostClients.CloudFormation.DeleteStack(i)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", "deleted the host cluster post stack")
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting the host cluster post stack")
 	}

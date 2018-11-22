@@ -30,6 +30,29 @@ func IsAlreadyExists(err error) bool {
 	return false
 }
 
+var deleteInProgressError = &microerror.Error{
+	Kind: "deleteInProgressError",
+}
+
+// IsDeleteInProgress asserts deleteInProgressError.
+func IsDeleteInProgress(err error) bool {
+	c := microerror.Cause(err)
+
+	if c == nil {
+		return false
+	}
+
+	if strings.Contains(c.Error(), cloudformation.ResourceStatusDeleteInProgress) {
+		return true
+	}
+
+	if c == deleteInProgressError {
+		return true
+	}
+
+	return false
+}
+
 var deletionMustBeRetriedError = &microerror.Error{
 	Kind: "deletionMustBeRetriedError",
 }
@@ -57,13 +80,27 @@ func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
 
-var notFoundError = &microerror.Error{
-	Kind: "notFoundError",
+var notExistsError = &microerror.Error{
+	Kind: "notExistsError",
 }
 
-// IsNotFound asserts notFoundError.
-func IsNotFound(err error) bool {
-	return microerror.Cause(err) == notFoundError
+// IsNotExists asserts notExistsError.
+func IsNotExists(err error) bool {
+	c := microerror.Cause(err)
+
+	if c == nil {
+		return false
+	}
+
+	if strings.Contains(c.Error(), "does not exist") {
+		return true
+	}
+
+	if c == notExistsError {
+		return true
+	}
+
+	return false
 }
 
 var resourceNotReadyError = &microerror.Error{
