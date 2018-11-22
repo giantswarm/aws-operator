@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -151,13 +152,14 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 	// Collect instance info.
 	instances := map[string]*ec2.Instance{}
 	{
+		installationFilter := fmt.Sprintf("tag:%s=%s", tagInstallation, e.installationName)
+
 		input := &ec2.DescribeInstancesInput{
 			Filters: []*ec2.Filter{
 				&ec2.Filter{
-					Name: aws.String("String"),
+					Name: aws.String("tag:key=value"),
 					Values: []*string{
-						aws.String("String"), // Required
-						// More values...
+						aws.String(installationFilter),
 					},
 				},
 			},
@@ -178,11 +180,6 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 						if *tag.Key == tagInstallation {
 							installation = *tag.Value
 						}
-					}
-
-					// We discard instances not tagged as belonging to this installation.
-					if installation != e.installationName {
-						continue
 					}
 
 					instances[*instance.InstanceId] = instance
