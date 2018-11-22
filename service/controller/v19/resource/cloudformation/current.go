@@ -76,8 +76,6 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found stack %#q in the AWS API", stackName))
 				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizer")
 				finalizerskeptcontext.SetKept(ctx)
-
-				break
 			}
 		}
 
