@@ -204,7 +204,17 @@ func getAWSConfigSubnets(g8sClient versioned.Interface) ([]net.IPNet, error) {
 	for _, ac := range awsConfigList.Items {
 		cidr := key.ClusterNetworkCIDR(ac)
 		if cidr == "" {
-			continue
+			// To prevent race condition when pre-v19 and v19+ clusters are
+			// created within short period of time and v19+ CR gets picked
+			// first. The pre-v19 CR might not have Status section yet.
+			//
+			// TODO: When AWSConfig.Spec.AWS.VPC.CIDR field is not used
+			// anymore, it (and correspondingly this branch) should be
+			// removed.
+			cidr = key.CIDR(ac)
+			if cidr == "" {
+				continue
+			}
 		}
 
 		_, n, err := net.ParseCIDR(cidr)
