@@ -1,6 +1,7 @@
 package adapter
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/giantswarm/microerror"
@@ -16,8 +17,9 @@ type GuestAutoScalingGroupAdapter struct {
 	HealthCheckGracePeriod int
 	MaxBatchSize           string
 	MinInstancesInService  string
+	PrivateSubnets         []string
 	RollingUpdatePauseTime string
-	WorkerAZ               string
+	WorkerAZs              []string
 }
 
 func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
@@ -26,7 +28,13 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 		return microerror.Maskf(invalidConfigError, "at least 1 worker required, found %d", workers)
 	}
 
-	a.WorkerAZ = key.AvailabilityZone(cfg.CustomObject)
+	{
+		numAZs := len(key.StatusAvailabilityZones(cfg.CustomObject))
+		if numAZs < 1 {
+			return microerror.Maskf(invalidConfigError, "at least one configured availability zone required")
+		}
+	}
+
 	a.ASGMaxSize = workers + 1
 	a.ASGMinSize = workers
 	a.ASGType = key.KindWorker
@@ -35,6 +43,16 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	a.MinInstancesInService = workerCountRatio(workers, asgMinInstancesRatio)
 	a.HealthCheckGracePeriod = gracePeriodSeconds
 	a.RollingUpdatePauseTime = rollingUpdatePauseTime
+
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
+	a.PrivateSubnets = []string{"PrivateSubnet"}
+	a.WorkerAZs = []string{key.StatusAvailabilityZones(cfg.CustomObject)[0].Name}
+
+	for i, az := range key.StatusAvailabilityZones(cfg.CustomObject)[1:] {
+		a.PrivateSubnets = append(a.PrivateSubnets, fmt.Sprintf("PrivateSubnet%02d", i+1))
+		a.WorkerAZs = append(a.WorkerAZs, az.Name)
+	}
 
 	return nil
 }

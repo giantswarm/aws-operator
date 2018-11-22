@@ -9,6 +9,11 @@ func VersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "aws-operator",
+				Description: "Added support for using multiple availability zones for workers.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "aws-operator",
 				Description: "Increase master root disk to 20GB.",
 				Kind:        versionbundle.KindChanged,
 			},
