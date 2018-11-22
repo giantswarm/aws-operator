@@ -381,8 +381,8 @@
   revision = "79a61ffad296f3f418d8f381e4f5f702d5245b50"
 
 [[projects]]
-  branch = "master"
-  digest = "1:03850c2d6705fdd9db7b931df5fe666e8674d845f4e8ee2cc1e2fe742d6128d5"
+  branch = "teemow-check-etcd-dns-10-times-in-row"
+  digest = "1:ae0aae9fc0c6590e1720bcb6c66b11bc4d4be104a76801526ee1bfd802a90966"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "v_3_3_3",
@@ -393,7 +393,7 @@
     "v_3_7_2",
   ]
   pruneopts = "T"
-  revision = "8fdb44663c709da33987e24bb07162847bf86893"
+  revision = "8a0758ed012fd7c14383c22905f34a4e1e7063b5"
 
 [[projects]]
   branch = "master"

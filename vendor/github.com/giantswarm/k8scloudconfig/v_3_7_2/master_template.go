@@ -1443,13 +1443,20 @@ write_files:
       done
 
       # wait for etcd dns (return code 35 is bad certificate which is good enough here)
-      while
-          curl "https://{{ .Cluster.Etcd.Domain }}:{{ .EtcdPort }}" -k 2>/dev/null >/dev/null
-          RET_CODE=$?
-          [ "$RET_CODE" -ne "35" ]
+      # since dns is flapping while we switch back to an elb for etcd we do this 10 times in a row
+      n=0
+      until [ $n -ge 10 ]
       do
-          echo "Waiting for etcd to be ready . . "
-          sleep 3s
+        while
+            curl "https://{{ .Cluster.Etcd.Domain }}:{{ .EtcdPort }}" -k 2>/dev/null >/dev/null
+            RET_CODE=$?
+            [ "$RET_CODE" -ne "35" ]
+        do
+            n=0 # reset because it failed again
+            echo "Waiting for etcd to be ready . . "
+            sleep 3s
+        done
+        n=$[$n+1]
       done
 
       # check for other master and remove it
