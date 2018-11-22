@@ -12,22 +12,22 @@ import (
 
 const (
 	// instanceLabel is the metric's label key that will hold the ec2 instance ID.
-	instanceLabel = "ec2instance"
+	labelInstance = "ec2instance"
 
 	// ec2Subsystem will become the second part of the metric name, right after namespace.
-	ec2Subsystem = "ec2"
+	subsystemEC2 = "ec2"
 )
 
 var (
 	ec2InstanceStatus = prometheus.NewDesc(
-		prometheus.BuildFQName(Namespace, ec2Subsystem, "status"),
+		prometheus.BuildFQName(namespace, subsystemEC2, "status"),
 		"Gauge indicating the status of an EC2 instance. 1 = healthy, 0 = unhealthy",
 		[]string{
-			instanceLabel,
-			AccountLabel,
-			ClusterLabel,
-			InstallationLabel,
-			OrganizationLabel,
+			labelInstance,
+			labelAccount,
+			labelCluster,
+			labelInstallation,
+			labelOrganization,
 		},
 		nil,
 	)
@@ -173,7 +173,7 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 
 					installation := ""
 					for _, tag := range instance.Tags {
-						if *tag.Key == InstallationTag {
+						if *tag.Key == tagInstallation {
 							installation = *tag.Value
 						}
 					}
@@ -206,11 +206,11 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 		var cluster, installation, organization string
 		for _, tag := range instances[instanceID].Tags {
 			switch *tag.Key {
-			case ClusterTag:
+			case tagCluster:
 				cluster = *tag.Value
-			case InstallationTag:
+			case tagInstallation:
 				installation = *tag.Value
-			case OrganizationTag:
+			case tagOrganization:
 				organization = *tag.Value
 			}
 		}
