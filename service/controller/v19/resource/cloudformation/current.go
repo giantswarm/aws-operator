@@ -78,6 +78,18 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 				finalizerskeptcontext.SetKept(ctx)
 			}
 		}
+
+		// When a tenant cluster is deleted it might be not completely created yet
+		// in the first place. There can be issues with unaccessible stack output
+		// values in such cases, causing the deletion process to get into a
+		// deadlock. To remedy such cases we simply return the stack state
+		// containing the stack name, without trying to access any stack output
+		// values.
+		currentState := StackState{
+			Name: key.MainGuestStackName(customObject),
+		}
+
+		return currentState, nil
 	}
 
 	// In order to compute the current state of the guest cluster's cloud
