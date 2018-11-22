@@ -1,6 +1,8 @@
 package collector
 
 import (
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
@@ -216,7 +218,10 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 		}
 
 		up := 0
-		if *statuses.InstanceState.Name == "running" && *statuses.InstanceStatus.Status == "ok" {
+		if statuses.InstanceState.Name != nil &&
+			strings.ToLower(*statuses.InstanceState.Name) == "running" &&
+			statuses.InstanceState.Name != nil &&
+			strings.ToLower(*statuses.InstanceStatus.Status) == "ok" {
 			up = 1
 		}
 
