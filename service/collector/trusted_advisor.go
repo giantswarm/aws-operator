@@ -32,25 +32,23 @@ const (
 )
 
 const (
-	labelAccountID = "account_id"
-	labelRegion    = "region"
-	labelService   = "service"
-	labelName      = "name"
+	labelRegion  = "region"
+	labelService = "service"
 )
 
 var (
 	getChecksDuration = prometheus.NewHistogram(prometheus.HistogramOpts{
-		Namespace: Namespace,
+		Namespace: namespace,
 		Name:      "trusted_advisor_get_checks_duration",
 		Help:      "Histogram for the duration of Trusted Advisor get checks calls.",
 	})
 	getResourcesDuration = prometheus.NewHistogram(prometheus.HistogramOpts{
-		Namespace: Namespace,
+		Namespace: namespace,
 		Name:      "trusted_advisor_get_resources_duration",
 		Help:      "Histogram for the duration of Trusted Advisor get resource calls.",
 	})
 	serviceLimit *prometheus.Desc = prometheus.NewDesc(
-		prometheus.BuildFQName(Namespace, "", "service_limit"),
+		prometheus.BuildFQName(namespace, "", "service_limit"),
 		"Service limits as reported by Trusted Advisor.",
 		[]string{
 			labelAccountID,
@@ -61,7 +59,7 @@ var (
 		nil,
 	)
 	serviceUsage *prometheus.Desc = prometheus.NewDesc(
-		prometheus.BuildFQName(Namespace, "", "service_usage"),
+		prometheus.BuildFQName(namespace, "", "service_usage"),
 		"Service usage as reported by Trusted Advisor.",
 		[]string{
 			labelAccountID,

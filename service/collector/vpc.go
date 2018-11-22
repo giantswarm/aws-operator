@@ -12,31 +12,35 @@ import (
 )
 
 const (
-	NameTag      = "Name"
-	StackNameTag = "aws:cloudformation:stack-name"
+	labelCIDR  = "cidr"
+	labelID    = "id"
+	labelStack = "stack_name"
+	labelState = "state"
+)
 
-	AccountIdLabel = "account_id"
-	CidrLabel      = "cidr"
-	IDLabel        = "id"
-	NameLabel      = "name"
-	StackNameLabel = "stack_name"
-	StateLabel     = "state"
+const (
+	tagName  = "Name"
+	tagStack = "aws:cloudformation:stack-name"
+)
+
+const (
+	subsystemVPC = "vpc"
 )
 
 var (
 	vpcsDesc *prometheus.Desc = prometheus.NewDesc(
-		prometheus.BuildFQName(Namespace, "", "vpc_info"),
+		prometheus.BuildFQName(namespace, subsystemVPC, "info"),
 		"VPC information.",
 		[]string{
-			AccountIdLabel,
-			CidrLabel,
-			ClusterLabel,
-			IDLabel,
-			InstallationLabel,
-			NameLabel,
-			OrganizationLabel,
-			StackNameLabel,
-			StateLabel,
+			labelAccountID,
+			labelCIDR,
+			labelCluster,
+			labelID,
+			labelInstallation,
+			labelName,
+			labelOrganization,
+			labelStack,
+			labelState,
 		},
 		nil,
 	)
@@ -128,15 +132,15 @@ func (v *VPC) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 
 		for _, tag := range vpc.Tags {
 			switch *tag.Key {
-			case ClusterTag:
+			case tagCluster:
 				cluster = *tag.Value
-			case InstallationTag:
+			case tagInstallation:
 				installation = *tag.Value
-			case NameTag:
+			case tagName:
 				name = *tag.Value
-			case OrganizationTag:
+			case tagOrganization:
 				organization = *tag.Value
-			case StackNameTag:
+			case tagStack:
 				stackName = *tag.Value
 			}
 		}
