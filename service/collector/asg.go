@@ -10,36 +10,39 @@ import (
 )
 
 const (
-	// ASGLabel is the metric's label key that will hold the ASG name.
-	ASGLabel = "asg"
+	// labelASG is the metric's label key that will hold the ASG name.
+	labelASG = "asg"
+)
 
-	// Subsystem will become the second part of the metric name, right after namespace.
-	Subsystem = "asg"
+const (
+	// subsystemASG will become the second part of the metric name, right after
+	// namespace.
+	subsystemASG = "asg"
 )
 
 var (
 	asgDesiredDesc = prometheus.NewDesc(
-		prometheus.BuildFQName(Namespace, Subsystem, "desired_count"),
+		prometheus.BuildFQName(namespace, subsystemASG, "desired_count"),
 		"Gauge about the number of EC2 instances that should be in the ASG.",
 		[]string{
-			ASGLabel,
-			AccountLabel,
-			ClusterLabel,
-			InstallationLabel,
-			OrganizationLabel,
+			labelASG,
+			labelAccount,
+			labelCluster,
+			labelInstallation,
+			labelOrganization,
 		},
 		nil,
 	)
 
 	asgInserviceDesc = prometheus.NewDesc(
-		prometheus.BuildFQName(Namespace, Subsystem, "inservice_count"),
+		prometheus.BuildFQName(namespace, subsystemASG, "inservice_count"),
 		"Gauge about the number of EC2 instances in the ASG that are in state InService.",
 		[]string{
-			ASGLabel,
-			AccountLabel,
-			ClusterLabel,
-			InstallationLabel,
-			OrganizationLabel,
+			labelASG,
+			labelAccount,
+			labelCluster,
+			labelInstallation,
+			labelOrganization,
 		},
 		nil,
 	)
@@ -148,11 +151,11 @@ func (a *ASG) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 
 			for _, tag := range asg.Tags {
 				switch *tag.Key {
-				case ClusterTag:
+				case tagCluster:
 					cluster = *tag.Value
-				case InstallationTag:
+				case tagInstallation:
 					installation = *tag.Value
-				case OrganizationTag:
+				case tagOrganization:
 					organization = *tag.Value
 				}
 			}

@@ -12,23 +12,27 @@ import (
 )
 
 const (
-	ELBLabel = "elb"
+	labelELB = "elb"
 )
 
 const (
-	StateOutOfService = "OutOfService"
+	subsystemELB = "elb"
+)
+
+const (
+	stateOutOfService = "OutOfService"
 )
 
 var (
 	elbsDesc *prometheus.Desc = prometheus.NewDesc(
-		prometheus.BuildFQName(Namespace, "", "elb_instance_out_of_service_count"),
+		prometheus.BuildFQName(namespace, subsystemELB, "instance_out_of_service_count"),
 		"Gauge about ELB instances being out of service.",
 		[]string{
-			ELBLabel,
-			AccountLabel,
-			ClusterLabel,
-			InstallationLabel,
-			OrganizationLabel,
+			labelELB,
+			labelAccount,
+			labelCluster,
+			labelInstallation,
+			labelOrganization,
 		},
 		nil,
 	)
@@ -142,13 +146,13 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		var installation string
 		var organization string
 		for _, t := range tags {
-			if *t.Key == ClusterTag {
+			if *t.Key == tagCluster {
 				cluster = *t.Value
 			}
-			if *t.Key == InstallationTag {
+			if *t.Key == tagInstallation {
 				installation = *t.Value
 			}
-			if *t.Key == OrganizationTag {
+			if *t.Key == tagOrganization {
 				organization = *t.Value
 			}
 		}
@@ -169,7 +173,7 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 				return microerror.Mask(err)
 			}
 			for _, s := range o.InstanceStates {
-				if *s.State == StateOutOfService {
+				if *s.State == stateOutOfService {
 					count++
 				}
 			}
