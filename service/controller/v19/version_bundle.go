@@ -8,8 +8,8 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "TODO",
-				Description: "Add changes here.",
+				Component:   "aws-operator",
+				Description: "Increase master root disk to 20GB.",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
