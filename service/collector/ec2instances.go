@@ -123,7 +123,7 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 
 	// Collect instance status info.
 	// map key will be the instance ID.
-	var instanceStatuses map[string]*ec2.InstanceStatus
+	instanceStatuses := map[string]*ec2.InstanceStatus{}
 	{
 		input := &ec2.DescribeInstanceStatusInput{
 			IncludeAllInstances: aws.Bool(true),
@@ -149,7 +149,7 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 	}
 
 	// Collect instance info.
-	var instances map[string]*ec2.Instance
+	instances := map[string]*ec2.Instance{}
 	{
 		input := &ec2.DescribeInstancesInput{
 			Filters: []*ec2.Filter{
