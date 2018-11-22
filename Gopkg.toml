@@ -81,7 +81,7 @@ required = [
   name = "github.com/giantswarm/helmclient"
 
 [[constraint]]
-  branch = "teemow-check-etcd-dns-10-times-in-row"
+  branch = "master"
   name = "github.com/giantswarm/k8scloudconfig"
 
 [[constraint]]
