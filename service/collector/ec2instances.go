@@ -114,7 +114,7 @@ func (e *EC2Instances) Describe(ch chan<- *prometheus.Desc) error {
 // collectForAccount collects and emits our metric for one AWS account.
 //
 // We gather two separate collections first, then match them by instance ID:
-// - instance information, including tags
+// - instance information, including tags, only for those tagged for our installation
 // - instance status information
 func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaws.Clients) error {
 	account, err := e.helper.AWSAccountID(awsClients)
@@ -152,14 +152,12 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 	// Collect instance info.
 	instances := map[string]*ec2.Instance{}
 	{
-		installationFilter := fmt.Sprintf("tag:%s=%s", tagInstallation, e.installationName)
-
 		input := &ec2.DescribeInstancesInput{
 			Filters: []*ec2.Filter{
 				&ec2.Filter{
-					Name: aws.String("tag:key=value"),
+					Name: aws.String(fmt.Sprintf("tag:%s", tagInstallation)),
 					Values: []*string{
-						aws.String(installationFilter),
+						aws.String(e.installationName),
 					},
 				},
 			},
