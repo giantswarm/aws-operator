@@ -16,12 +16,16 @@ const (
 )
 
 const (
+	subsystemELB = "elb"
+)
+
+const (
 	stateOutOfService = "OutOfService"
 )
 
 var (
 	elbsDesc *prometheus.Desc = prometheus.NewDesc(
-		prometheus.BuildFQName(namespace, "", "elb_instance_out_of_service_count"),
+		prometheus.BuildFQName(namespace, subsystemELB, "instance_out_of_service_count"),
 		"Gauge about ELB instances being out of service.",
 		[]string{
 			labelELB,

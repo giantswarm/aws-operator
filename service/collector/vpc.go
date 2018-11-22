@@ -12,20 +12,24 @@ import (
 )
 
 const (
-	tagName  = "Name"
-	tagStack = "aws:cloudformation:stack-name"
-)
-
-const (
 	labelCIDR  = "cidr"
 	labelID    = "id"
 	labelStack = "stack_name"
 	labelState = "state"
 )
 
+const (
+	tagName  = "Name"
+	tagStack = "aws:cloudformation:stack-name"
+)
+
+const (
+	subsystemVPC = "vpc"
+)
+
 var (
 	vpcsDesc *prometheus.Desc = prometheus.NewDesc(
-		prometheus.BuildFQName(namespace, "", "vpc_info"),
+		prometheus.BuildFQName(namespace, subsystemVPC, "info"),
 		"VPC information.",
 		[]string{
 			labelAccountID,
