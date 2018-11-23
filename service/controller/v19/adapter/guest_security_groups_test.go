@@ -377,61 +377,6 @@ func TestAdapterSecurityGroupsKubernetesAPIRules(t *testing.T) {
 			},
 		},
 		{
-			description: "case 4: API whitelisting enabled with NAT gateway EIPs",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						ID: "test-cluster",
-						Kubernetes: v1alpha1.ClusterKubernetes{
-							API: v1alpha1.ClusterKubernetesAPI{
-								SecurePort: 443,
-							},
-						},
-					},
-				},
-				Status: v1alpha1.AWSConfigStatus{
-					Cluster: v1alpha1.StatusCluster{
-						Network: v1alpha1.StatusClusterNetwork{
-							CIDR: "10.1.1.0/24",
-						},
-					},
-				},
-			},
-			apiWhitelistingEnabled: true,
-			elasticIPs: []string{
-				"21.1.136.42",
-				"21.2.136.84",
-			},
-			hostClusterCIDR: "10.0.0.0/16",
-			expectedError:   false,
-			expectedRules: []securityGroupRule{
-				{
-					Description: "Allow traffic from control plane CIDR.",
-					Port:        443,
-					Protocol:    "tcp",
-					SourceCIDR:  "10.0.0.0/16",
-				},
-				{
-					Description: "Allow traffic from tenant cluster CIDR.",
-					Port:        443,
-					Protocol:    "tcp",
-					SourceCIDR:  "10.1.1.0/24",
-				},
-				{
-					Description: "Allow traffic from gateways.",
-					Port:        443,
-					Protocol:    "tcp",
-					SourceCIDR:  "21.1.136.42/32",
-				},
-				{
-					Description: "Allow traffic from gateways.",
-					Port:        443,
-					Protocol:    "tcp",
-					SourceCIDR:  "21.2.136.84/32",
-				},
-			},
-		},
-		{
 			description: "case 5: API whitelisting enabled with subnets and NAT gateway EIPs",
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
@@ -484,18 +429,6 @@ func TestAdapterSecurityGroupsKubernetesAPIRules(t *testing.T) {
 					Port:        443,
 					Protocol:    "tcp",
 					SourceCIDR:  "192.168.1.1/24",
-				},
-				{
-					Description: "Allow traffic from gateways.",
-					Port:        443,
-					Protocol:    "tcp",
-					SourceCIDR:  "21.1.136.42/32",
-				},
-				{
-					Description: "Allow traffic from gateways.",
-					Port:        443,
-					Protocol:    "tcp",
-					SourceCIDR:  "21.2.136.84/32",
 				},
 			},
 		},

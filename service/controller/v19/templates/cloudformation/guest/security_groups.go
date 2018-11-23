@@ -17,12 +17,15 @@ const SecurityGroups = `{{define "security_groups" }}
         CidrIp: {{ .SourceCIDR }}
       {{ end }}
       {{- if $v.APIWhitelistEnabled }}
+      {{- $g := .Guest.NATGateway }}
+      {{- range $g.Gateways }}
       -
         Description: Allow NAT gateway IP
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
-        CidrIp: !Join [ "/", [ !Ref NATEIP, "32" ] ]
+        CidrIp: !Join [ "/", [ !Ref {{ .NATEIPName }}, "32" ] ]
+      {{- end}}
       {{- end }}
       Tags:
         - Key: Name

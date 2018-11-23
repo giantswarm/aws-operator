@@ -1,11 +1,8 @@
 package adapter
 
 import (
-	"fmt"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
@@ -247,16 +244,6 @@ func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupR
 			}
 		}
 
-		// Whitelist public EIPs of the host cluster NAT gateways.
-		hostClusterNATGatewayRules, err := getHostClusterNATGatewayRules(cfg)
-		if err != nil {
-			return []securityGroupRule{}, microerror.Mask(err)
-		}
-
-		for _, gatewayRule := range hostClusterNATGatewayRules {
-			rules = append(rules, gatewayRule)
-		}
-
 		return rules, nil
 	} else {
 		// When API whitelisting is disabled, allow all traffic.
@@ -271,38 +258,4 @@ func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupR
 
 		return allowAllRule, nil
 	}
-}
-
-func getHostClusterNATGatewayRules(cfg Config) ([]securityGroupRule, error) {
-	gatewayRules := []securityGroupRule{}
-
-	// Get all EIPs tagged with the host cluster installation tag.
-	// Each EIP is associated with a host cluster NAT gateway.
-	describeAddressesInput := &ec2.DescribeAddressesInput{
-		Filters: []*ec2.Filter{
-			{
-				Name: aws.String("tag:giantswarm.io/installation"),
-				Values: []*string{
-					aws.String(cfg.InstallationName),
-				},
-			},
-		},
-	}
-	output, err := cfg.HostClients.EC2.DescribeAddresses(describeAddressesInput)
-	if err != nil {
-		return gatewayRules, microerror.Mask(err)
-	}
-
-	for _, address := range output.Addresses {
-		gatewayRule := securityGroupRule{
-			Description: "Allow traffic from gateways.",
-			Port:        key.KubernetesAPISecurePort(cfg.CustomObject),
-			Protocol:    tcpProtocol,
-			SourceCIDR:  fmt.Sprintf("%s/32", *address.PublicIp),
-		}
-
-		gatewayRules = append(gatewayRules, gatewayRule)
-	}
-
-	return gatewayRules, nil
 }
