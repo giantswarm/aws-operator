@@ -53,9 +53,9 @@ type ELB struct {
 }
 
 type loadBalancer struct {
-	instancesOutOfService float64
-	name                  string
-	tags                  map[string]string
+	InstancesOutOfService float64
+	Name                  string
+	Tags                  map[string]string
 }
 
 func NewELB(config ELBConfig) (*ELB, error) {
@@ -144,14 +144,14 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 
 		for _, d := range o.TagDescriptions {
 			lb := loadBalancer{
-				name: *d.LoadBalancerName,
+				Name: *d.LoadBalancerName,
 			}
 
 			for _, t := range d.Tags {
-				lb.tags[*t.Key] = *t.Value
+				lb.Tags[*t.Key] = *t.Value
 			}
 
-			if lb.tags[tagInstallation] != e.installationName {
+			if lb.Tags[tagInstallation] != e.installationName {
 				continue
 			}
 
@@ -164,7 +164,7 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		// specified ELBs so it must be done with N API calls.
 		for _, lb := range lbs {
 			i := &elb.DescribeInstanceHealthInput{
-				LoadBalancerName: &lb.name,
+				LoadBalancerName: &lb.Name,
 			}
 
 			o, err := awsClients.ELB.DescribeInstanceHealth(i)
@@ -174,7 +174,7 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 
 			for _, s := range o.InstanceStates {
 				if *s.State == stateOutOfService {
-					lb.instancesOutOfService++
+					lb.InstancesOutOfService++
 				}
 			}
 		}
@@ -185,12 +185,12 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 			ch <- prometheus.MustNewConstMetric(
 				elbsDesc,
 				prometheus.GaugeValue,
-				lb.instancesOutOfService,
-				lb.name,
+				lb.InstancesOutOfService,
+				lb.Name,
 				account,
-				lb.tags[tagCluster],
-				lb.tags[tagInstallation],
-				lb.tags[tagOrganization],
+				lb.Tags[tagCluster],
+				lb.Tags[tagInstallation],
+				lb.Tags[tagOrganization],
 			)
 		}
 	}
