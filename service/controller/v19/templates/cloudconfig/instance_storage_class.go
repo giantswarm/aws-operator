@@ -17,6 +17,7 @@ write_files:
         addonmanager.kubernetes.io/mode: EnsureExists
     provisioner: kubernetes.io/aws-ebs
     allowVolumeExpansion: true
+    volumeBindingMode: WaitForFirstConsumer
     parameters:
       type: gp2
 `
