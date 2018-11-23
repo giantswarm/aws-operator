@@ -15,11 +15,11 @@ import (
 	"github.com/giantswarm/micrologger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/service/controller/v19/key"
+	"github.com/giantswarm/aws-operator/service/controller/v20/key"
 )
 
 const (
-	name = "migrationv19"
+	name = "migrationv20"
 
 	awsConfigNamespace               = "default"
 	credentialSecretDefaultNamespace = "giantswarm"

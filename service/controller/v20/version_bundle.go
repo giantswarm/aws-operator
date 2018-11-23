@@ -1,4 +1,4 @@
-package v19
+package v20
 
 import (
 	"github.com/giantswarm/versionbundle"

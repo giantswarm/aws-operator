@@ -10,9 +10,9 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
-	"github.com/giantswarm/aws-operator/service/controller/v19/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v19/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/v19/key"
+	"github.com/giantswarm/aws-operator/service/controller/v20/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v20/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v20/key"
 )
 
 type Encrypter struct {

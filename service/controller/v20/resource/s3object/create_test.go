@@ -12,8 +12,8 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v19/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v19/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v20/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v20/encrypter"
 )
 
 func Test_Resource_S3Object_newCreate(t *testing.T) {
