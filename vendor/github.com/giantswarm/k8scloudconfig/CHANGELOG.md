@@ -18,6 +18,18 @@ version directory, and then changes are introduced.
 - Updated Calico to 3.2.3
 - Updated Calico manifest with resource limits to get QoS policy guaranteed.
 
+## [v3.7.2]
+
+### Changed
+- Remove the old master from the k8s api before upgrading calico (k8s-addons)
+- Wait until etcd DNS is resolvable before upgrading calico. Networking pods crashlooping isn't fun!
+
+## [v3.7.1]
+
+### Changed
+- The pod priority class for calico got lost. We found it again! 
+- kube-proxy is now installed before calico during cluster creation and upgrades. 
+
 ## [v3.7.0]
 
 ### Changed
