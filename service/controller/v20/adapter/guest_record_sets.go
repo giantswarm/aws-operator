@@ -1,6 +1,6 @@
 package adapter
 
-import "github.com/giantswarm/aws-operator/service/controller/v19/key"
+import "github.com/giantswarm/aws-operator/service/controller/v20/key"
 
 type GuestRecordSetsAdapter struct {
 	BaseDomain                 string
