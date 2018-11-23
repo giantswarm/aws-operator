@@ -14,10 +14,16 @@ import (
 )
 
 const (
-	// instanceLabel is the metric's label key that will hold the ec2 instance ID.
+	// labelInstance is the metric's label key that will hold the ec2 instance ID.
 	labelInstance = "ec2instance"
 
-	// ec2Subsystem will become the second part of the metric name, right after namespace.
+	// labelInstanceState is a label that will contain the instance state string
+	labelInstanceState = "state"
+
+	// labelInstanceStatus is a label that will contain the instance status check value
+	labelInstanceStatus = "status"
+
+	// subsystemEC2 will become the second part of the metric name, right after namespace.
 	subsystemEC2 = "ec2"
 )
 
@@ -31,6 +37,8 @@ var (
 			labelCluster,
 			labelInstallation,
 			labelOrganization,
+			labelInstanceState,
+			labelInstanceStatus,
 		},
 		nil,
 	)
@@ -192,7 +200,7 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 			continue
 		}
 
-		var cluster, installation, organization string
+		var cluster, installation, organization, state, status string
 		for _, tag := range instances[instanceID].Tags {
 			switch *tag.Key {
 			case tagCluster:
@@ -205,10 +213,13 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 		}
 
 		up := 0
-		if statuses.InstanceState.Name != nil &&
-			strings.ToLower(*statuses.InstanceState.Name) == "running" &&
-			statuses.InstanceState.Name != nil &&
-			strings.ToLower(*statuses.InstanceStatus.Status) == "ok" {
+		if statuses.InstanceState.Name != nil {
+			state = strings.ToLower(*statuses.InstanceState.Name)
+		}
+		if statuses.InstanceStatus.Status != nil {
+			status = strings.ToLower(*statuses.InstanceStatus.Status)
+		}
+		if state == "running" && status == "ok" {
 			up = 1
 		}
 
@@ -221,6 +232,8 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 			cluster,
 			installation,
 			organization,
+			state,
+			status,
 		)
 	}
 
