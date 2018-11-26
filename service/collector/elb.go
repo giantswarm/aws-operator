@@ -145,6 +145,7 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		for _, d := range o.TagDescriptions {
 			lb := loadBalancer{
 				Name: *d.LoadBalancerName,
+				Tags: make(map[string]string),
 			}
 
 			for _, t := range d.Tags {
