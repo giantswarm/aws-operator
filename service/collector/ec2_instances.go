@@ -193,7 +193,6 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 
 	// Iterate over found instances and emit metrics.
 	for instanceID := range instances {
-
 		// Skip if we don't have a status for this instance.
 		statuses, statusesAvailable := instanceStatuses[instanceID]
 		if !statusesAvailable {
