@@ -10,6 +10,10 @@ const Instance = `{{ define "instance" }}
     - EtcdVolume
     Properties:
       AvailabilityZone: {{ $v.Master.AZ }}
+      BlockDeviceMappings:
+      - DeviceName: "/dev/xvda"
+        Ebs:
+          VolumeSize: 20
       IamInstanceProfile: !Ref MasterInstanceProfile
       ImageId: {{ $v.Image.ID }}
       InstanceType: {{ $v.Master.Instance.Type }}

@@ -9,38 +9,8 @@ func VersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "aws-operator",
-				Description: "Add support for using multiple availability zones. See https://docs.giantswarm.io/basics/multiaz/.",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "aws-operator",
-				Description: "Switch back to an internal elb for etcd. Calico connection handling problems have been fixed upstream.",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "aws-operator",
-				Description: "Upgrade: Terminate the old master right after detaching of its volumes.",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "aws-operator",
-				Description: "Add autoscaling permissions to the IAM policy of the cluster.",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "cloud-config",
-				Description: "The pod priority class for calico got lost. We found it again!",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "k8s-addons",
-				Description: "kube-proxy is now installed before calico during cluster creation and upgrades.",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "cloud-config",
-				Description: "Calico upgrade improvements: Remove the old master from the k8s api and wait until etcd DNS is resolvable before upgrading calico. Networking pods crashlooping isn't fun!",
-				Kind:        versionbundle.KindAdded,
+				Description: "Increase master root disk to 20GB.",
+				Kind:        versionbundle.KindChanged,
 			},
 		},
 		Components: []versionbundle.Component{
@@ -66,6 +36,6 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    "aws-operator",
-		Version: "4.4.0",
+		Version: "4.4.1",
 	}
 }
