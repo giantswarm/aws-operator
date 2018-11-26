@@ -29,7 +29,7 @@ const (
 
 var (
 	ec2InstanceStatus = prometheus.NewDesc(
-		prometheus.BuildFQName(namespace, subsystemEC2, "status"),
+		prometheus.BuildFQName(namespace, subsystemEC2, "instance_status"),
 		"Gauge indicating the status of an EC2 instance. 1 = healthy, 0 = unhealthy",
 		[]string{
 			labelInstance,
