@@ -15,7 +15,7 @@ import (
 
 const (
 	// labelInstance is the metric's label key that will hold the ec2 instance ID.
-	labelInstance = "ec2instance"
+	labelInstance = "ec2_instance"
 
 	// labelInstanceState is a label that will contain the instance state string
 	labelInstanceState = "state"
