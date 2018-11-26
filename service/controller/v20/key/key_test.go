@@ -615,23 +615,75 @@ func Test_Region(t *testing.T) {
 
 func Test_RouteTableName(t *testing.T) {
 	t.Parallel()
-	expectedName := "test-cluster-private"
-	suffix := "private"
-
-	cluster := v1alpha1.Cluster{
-		ID: "test-cluster",
-	}
-
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: cluster,
+	testCases := []struct {
+		name         string
+		customObject v1alpha1.AWSConfig
+		idx          int
+		suffix       string
+		expectedName string
+	}{
+		{
+			name: "case 0: test with index 0",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "test-cluster",
+					},
+				},
+			},
+			idx:          0,
+			suffix:       "private",
+			expectedName: "test-cluster-private",
+		},
+		{
+			name: "case 1: test with index 1",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "test-cluster",
+					},
+				},
+			},
+			idx:          1,
+			suffix:       "private",
+			expectedName: "test-cluster-private01",
+		},
+		{
+			name: "case 2: test with index 2",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "test-cluster",
+					},
+				},
+			},
+			idx:          2,
+			suffix:       "private",
+			expectedName: "test-cluster-private02",
+		},
+		{
+			name: "case 3: test with index -2",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "test-cluster",
+					},
+				},
+			},
+			idx:          -2,
+			suffix:       "private",
+			expectedName: "test-cluster-private",
 		},
 	}
 
-	if RouteTableName(customObject, suffix) != expectedName {
-		t.Fatalf("Expected route table name %s but was %s", expectedName, RouteTableName(customObject, suffix))
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			rtName := RouteTableName(tc.customObject, tc.suffix, tc.idx)
+			if rtName != tc.expectedName {
+				t.Fatalf("Expected route table name %s but was %s", tc.expectedName, rtName)
+			}
+		})
 	}
-
 }
 
 func Test_S3ServiceDomain(t *testing.T) {

@@ -108,14 +108,9 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	a.ELBHealthCheckUnhealthyThreshold = healthCheckUnhealthyThreshold
 	a.MasterInstanceResourceName = cfg.StackState.MasterInstanceResourceName
 
-	// Since CloudFormation cannot recognize resource renaming, use non-indexed
-	// resource name for first AZ.
-	a.PublicSubnets = []string{"PublicSubnet"}
-	a.PrivateSubnets = []string{"PrivateSubnet"}
-
-	for i := 1; i < key.SpecAvailabilityZones(cfg.CustomObject); i++ {
-		a.PublicSubnets = append(a.PublicSubnets, fmt.Sprintf("PublicSubnet%02d", i))
-		a.PrivateSubnets = append(a.PrivateSubnets, fmt.Sprintf("PrivateSubnet%02d", i))
+	for i := 0; i < len(key.StatusAvailabilityZones(cfg.CustomObject)); i++ {
+		a.PublicSubnets = append(a.PublicSubnets, key.PublicSubnetName(i))
+		a.PrivateSubnets = append(a.PrivateSubnets, key.PrivateSubnetName(i))
 	}
 
 	return nil
