@@ -1,4 +1,4 @@
-package v19
+package v20
 
 import (
 	"github.com/giantswarm/versionbundle"
@@ -41,11 +41,6 @@ func VersionBundle() versionbundle.Bundle {
 				Component:   "cloud-config",
 				Description: "Calico upgrade improvements: Remove the old master from the k8s api and wait until etcd DNS is resolvable before upgrading calico. Networking pods crashlooping isn't fun!",
 				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "aws-operator",
-				Description: "Increase master root disk to 20GB.",
-				Kind:        versionbundle.KindChanged,
 			},
 		},
 		Components: []versionbundle.Component{
