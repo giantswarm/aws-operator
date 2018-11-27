@@ -469,7 +469,7 @@ func (r *Release) waitForConditions(ctx context.Context, conditions ...func() er
 
 			return nil
 		}
-		b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
+		b := backoff.NewExponential(backoff.MediumMaxWait, backoff.ShortMaxInterval)
 		n := backoff.NewNotifier(r.logger, ctx)
 
 		err = backoff.RetryNotify(o, b, n)
