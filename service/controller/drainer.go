@@ -14,6 +14,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v17"
 	"github.com/giantswarm/aws-operator/service/controller/v18"
 	"github.com/giantswarm/aws-operator/service/controller/v19"
+	"github.com/giantswarm/aws-operator/service/controller/v20"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8scrdclient"
@@ -305,6 +306,23 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var v20ResourceSet *controller.ResourceSet
+	{
+		c := v20.DrainerResourceSetConfig{
+			G8sClient:     config.G8sClient,
+			HostAWSConfig: hostAWSConfig,
+			K8sClient:     config.K8sClient,
+			Logger:        config.Logger,
+
+			GuestUpdateEnabled: config.GuestUpdateEnabled,
+			ProjectName:        config.ProjectName,
+		}
+		v20ResourceSet, err = v20.NewDrainerResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resourceSets := []*controller.ResourceSet{
 		v12ResourceSet,
 		v12Patch1ResourceSet,
@@ -314,6 +332,7 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		v17ResourceSet,
 		v18ResourceSet,
 		v19ResourceSet,
+		v20ResourceSet,
 	}
 
 	return resourceSets, nil
