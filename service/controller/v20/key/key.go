@@ -376,6 +376,33 @@ func MasterRoleARN(customObject v1alpha1.AWSConfig, accountID string) string {
 	return baseRoleARN(customObject, accountID, "master")
 }
 
+func NATEIPName(idx int) string {
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
+	if idx < 1 {
+		return "NATEIP"
+	}
+	return fmt.Sprintf("NATEIP%02d", idx)
+}
+
+func NATGatewayName(idx int) string {
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
+	if idx < 1 {
+		return "NATGateway"
+	}
+	return fmt.Sprintf("NATGateway%02d", idx)
+}
+
+func NATRouteName(idx int) string {
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
+	if idx < 1 {
+		return "NATRoute"
+	}
+	return fmt.Sprintf("NATRoute%02d", idx)
+}
+
 func PeerAccessRoleName(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-vpc-peer-access", ClusterID(customObject))
 }
@@ -388,12 +415,66 @@ func PolicyName(customObject v1alpha1.AWSConfig, profileType string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, PolicyNameTemplate)
 }
 
+func PrivateRouteTableAssociationName(idx int) string {
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
+	if idx < 1 {
+		return "PrivateRouteTableAssociation"
+	}
+	return fmt.Sprintf("PrivateRouteTableAssociation%02d", idx)
+}
+
+func PrivateRouteTableName(idx int) string {
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
+	if idx < 1 {
+		return "PrivateRouteTable"
+	}
+	return fmt.Sprintf("PrivateRouteTable%02d", idx)
+}
+
 func PrivateSubnetCIDR(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.VPC.PrivateSubnetCIDR
 }
 
+func PrivateSubnetName(idx int) string {
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
+	if idx < 1 {
+		return "PrivateSubnet"
+	}
+	return fmt.Sprintf("PrivateSubnet%02d", idx)
+}
+
 func PublicSubnetCIDR(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.VPC.PublicSubnetCIDR
+}
+
+func PublicRouteTableAssociationName(idx int) string {
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
+	if idx < 1 {
+		return "PublicRouteTableAssociation"
+	}
+	return fmt.Sprintf("PublicRouteTableAssociation%02d", idx)
+}
+
+func PublicRouteTableName(idx int) string {
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
+	if idx < 1 {
+		return "PublicRouteTable"
+	}
+	return fmt.Sprintf("PublicRouteTable%02d", idx)
+}
+
+func PublicSubnetName(idx int) string {
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
+	if idx < 1 {
+		return "PublicSubnet"
+	}
+	return fmt.Sprintf("PublicSubnet%02d", idx)
 }
 
 func CIDR(customObject v1alpha1.AWSConfig) string {
@@ -418,8 +499,13 @@ func RoleName(customObject v1alpha1.AWSConfig, profileType string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, RoleNameTemplate)
 }
 
-func RouteTableName(customObject v1alpha1.AWSConfig, suffix string) string {
-	return fmt.Sprintf("%s-%s", ClusterID(customObject), suffix)
+func RouteTableName(customObject v1alpha1.AWSConfig, suffix string, idx int) string {
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
+	if idx < 1 {
+		return fmt.Sprintf("%s-%s", ClusterID(customObject), suffix)
+	}
+	return fmt.Sprintf("%s-%s%02d", ClusterID(customObject), suffix, idx)
 }
 
 func S3ServiceDomain(customObject v1alpha1.AWSConfig) string {
@@ -530,6 +616,15 @@ func ToVersionBundleVersion(v interface{}) (string, error) {
 // VersionBundleVersion returns the version contained in the Version Bundle.
 func VersionBundleVersion(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.VersionBundle.Version
+}
+
+func VPCPeeringRouteName(idx int) string {
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
+	if idx < 1 {
+		return "VPCPeeringRoute"
+	}
+	return fmt.Sprintf("VPCPeeringRoute%02d", idx)
 }
 
 func WorkerCount(customObject v1alpha1.AWSConfig) int {

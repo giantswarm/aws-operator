@@ -1,7 +1,6 @@
 package adapter
 
 import (
-	"fmt"
 	"sort"
 
 	"github.com/giantswarm/aws-operator/service/controller/v20/key"
@@ -40,61 +39,30 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 		}
 	}
 
-	// Since CloudFormation cannot recognize resource renaming, use non-indexed
-	// resource name for first AZ.
-	s.PublicSubnets = []Subnet{
-		Subnet{
-			AvailabilityZone:    zones[0].Name,
-			CIDR:                zones[0].Subnet.Public.CIDR,
-			Name:                "PublicSubnet",
-			MapPublicIPOnLaunch: false,
-			RouteTableAssociation: RouteTableAssociation{
-				Name:           "PublicSubnetRouteTableAssociation",
-				RouteTableName: "PublicRouteTable",
-				SubnetName:     "PublicSubnet",
-			},
-		},
-	}
-
-	s.PrivateSubnets = []Subnet{
-		Subnet{
-			AvailabilityZone:    zones[0].Name,
-			CIDR:                zones[0].Subnet.Private.CIDR,
-			Name:                "PrivateSubnet",
-			MapPublicIPOnLaunch: false,
-			RouteTableAssociation: RouteTableAssociation{
-				Name:           "PrivateSubnetRouteTableAssociation",
-				RouteTableName: "PrivateRouteTable",
-				SubnetName:     "PrivateSubnet",
-			},
-		},
-	}
-
-	for i := 1; i < len(zones); i++ {
-		az := zones[i]
-		snetName := fmt.Sprintf("PublicSubnet%02d", i)
+	for i, az := range zones {
+		snetName := key.PublicSubnetName(i)
 		snet := Subnet{
 			AvailabilityZone:    az.Name,
 			CIDR:                az.Subnet.Public.CIDR,
 			Name:                snetName,
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: RouteTableAssociation{
-				Name:           fmt.Sprintf("PublicSubnetRouteTableAssociation%02d", i),
+				Name:           key.PublicRouteTableAssociationName(i),
 				RouteTableName: "PublicRouteTable",
 				SubnetName:     snetName,
 			},
 		}
 		s.PublicSubnets = append(s.PublicSubnets, snet)
 
-		snetName = fmt.Sprintf("PrivateSubnet%02d", i)
+		snetName = key.PrivateSubnetName(i)
 		snet = Subnet{
 			AvailabilityZone:    az.Name,
 			CIDR:                az.Subnet.Private.CIDR,
 			Name:                snetName,
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: RouteTableAssociation{
-				Name:           fmt.Sprintf("PrivateSubnetRouteTableAssociation%02d", i),
-				RouteTableName: fmt.Sprintf("PrivateRouteTable%02d", i),
+				Name:           key.PrivateRouteTableAssociationName(i),
+				RouteTableName: key.PrivateRouteTableName(i),
 				SubnetName:     snetName,
 			},
 		}
