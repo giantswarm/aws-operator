@@ -52,6 +52,12 @@ type ELB struct {
 	installationName string
 }
 
+type loadBalancer struct {
+	InstancesOutOfService float64
+	Name                  string
+	Tags                  map[string]string
+}
+
 func NewELB(config ELBConfig) (*ELB, error) {
 	if config.Helper == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Helper must not be empty", config)
@@ -124,71 +130,70 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		loadbalancers = o.LoadBalancerDescriptions
 	}
 
-	for _, l := range loadbalancers {
-		var tags []*elb.Tag
-		{
-			i := &elb.DescribeTagsInput{
-				LoadBalancerNames: []*string{
-					l.LoadBalancerName,
-				},
-			}
-
-			o, err := awsClients.ELB.DescribeTags(i)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-			for _, d := range o.TagDescriptions {
-				tags = append(tags, d.Tags...)
-			}
+	var lbs []loadBalancer
+	{
+		i := &elb.DescribeTagsInput{}
+		for _, l := range loadbalancers {
+			i.LoadBalancerNames = append(i.LoadBalancerNames, l.LoadBalancerName)
 		}
 
-		var cluster string
-		var installation string
-		var organization string
-		for _, t := range tags {
-			if *t.Key == tagCluster {
-				cluster = *t.Value
-			}
-			if *t.Key == tagInstallation {
-				installation = *t.Value
-			}
-			if *t.Key == tagOrganization {
-				organization = *t.Value
-			}
+		o, err := awsClients.ELB.DescribeTags(i)
+		if err != nil {
+			return microerror.Mask(err)
 		}
 
-		if installation != e.installationName {
-			continue
-		}
+		for _, d := range o.TagDescriptions {
+			lb := loadBalancer{
+				Name: *d.LoadBalancerName,
+				Tags: make(map[string]string),
+			}
 
-		var count float64
-		{
+			for _, t := range d.Tags {
+				lb.Tags[*t.Key] = *t.Value
+			}
+
+			if lb.Tags[tagInstallation] != e.installationName {
+				continue
+			}
+
+			lbs = append(lbs, lb)
+		}
+	}
+
+	{
+		// AWS API doesn't provide a method to describe instance health for all
+		// specified ELBs so it must be done with N API calls.
+		for _, lb := range lbs {
 			i := &elb.DescribeInstanceHealthInput{
-				Instances:        l.Instances,
-				LoadBalancerName: l.LoadBalancerName,
+				LoadBalancerName: &lb.Name,
 			}
 
 			o, err := awsClients.ELB.DescribeInstanceHealth(i)
 			if err != nil {
 				return microerror.Mask(err)
 			}
+
 			for _, s := range o.InstanceStates {
 				if *s.State == stateOutOfService {
-					count++
+					lb.InstancesOutOfService++
 				}
 			}
 		}
+	}
 
-		ch <- prometheus.MustNewConstMetric(
-			elbsDesc,
-			prometheus.GaugeValue,
-			count,
-			*l.LoadBalancerName,
-			account,
-			cluster,
-			installation,
-			organization,
-		)
+	{
+		for _, lb := range lbs {
+			ch <- prometheus.MustNewConstMetric(
+				elbsDesc,
+				prometheus.GaugeValue,
+				lb.InstancesOutOfService,
+				lb.Name,
+				account,
+				lb.Tags[tagCluster],
+				lb.Tags[tagInstallation],
+				lb.Tags[tagOrganization],
+			)
+		}
 	}
 
 	return nil
