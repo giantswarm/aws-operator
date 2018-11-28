@@ -3,6 +3,7 @@
 package draining
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -40,6 +41,8 @@ const (
 // investigated further in the future.
 //
 func Test_Draining(t *testing.T) {
+	ctx := context.Background()
+
 	var err error
 
 	var newLogger micrologger.Logger
@@ -82,7 +85,7 @@ func Test_Draining(t *testing.T) {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
 
-		err = helmClient.EnsureTillerInstalled()
+		err = helmClient.EnsureTillerInstalled(ctx)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
@@ -97,7 +100,7 @@ func Test_Draining(t *testing.T) {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
 
-		err = helmClient.InstallFromTarball(tarballPath, ChartNamespace)
+		err = helmClient.InstallReleaseFromTarball(ctx, tarballPath, ChartNamespace)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
