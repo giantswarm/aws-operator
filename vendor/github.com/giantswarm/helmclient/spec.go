@@ -1,6 +1,10 @@
 package helmclient
 
-import "k8s.io/helm/pkg/helm"
+import (
+	"context"
+
+	"k8s.io/helm/pkg/helm"
+)
 
 const (
 	// defaultMaxHistory is the maximum number of release versions stored per
@@ -17,30 +21,32 @@ const (
 // Interface describes the methods provided by the helm client.
 type Interface interface {
 	// DeleteRelease uninstalls a chart given its release name.
-	DeleteRelease(releaseName string, options ...helm.DeleteOption) error
+	DeleteRelease(ctx context.Context, releaseName string, options ...helm.DeleteOption) error
 	// EnsureTillerInstalled installs Tiller by creating its deployment and waiting
 	// for it to start. A service account and cluster role binding are also created.
 	// As a first step, it checks if Tiller is already ready, in which case it
 	// returns early.
-	EnsureTillerInstalled() error
+	EnsureTillerInstalled(ctx context.Context) error
 	// GetReleaseContent gets the current status of the Helm Release. The
 	// releaseName is the name of the Helm Release that is set when the Chart
 	// is installed.
-	GetReleaseContent(releaseName string) (*ReleaseContent, error)
+	GetReleaseContent(ctx context.Context, releaseName string) (*ReleaseContent, error)
 	// GetReleaseHistory gets the current installed version of the Helm Release.
 	// The releaseName is the name of the Helm Release that is set when the Helm
 	// Chart is installed.
-	GetReleaseHistory(releaseName string) (*ReleaseHistory, error)
-	// InstallFromTarball installs a Helm Chart packaged in the given tarball.
-	InstallFromTarball(path, ns string, options ...helm.InstallOption) error
+	GetReleaseHistory(ctx context.Context, releaseName string) (*ReleaseHistory, error)
+	// InstallReleaseFromTarball installs a Helm Chart packaged in the given tarball.
+	InstallReleaseFromTarball(ctx context.Context, path, ns string, options ...helm.InstallOption) error
+	// ListReleaseContents gets the current status of all Helm Releases.
+	ListReleaseContents(ctx context.Context) ([]*ReleaseContent, error)
 	// PingTiller proxies the underlying Helm client PingTiller method.
-	PingTiller() error
+	PingTiller(ctx context.Context) error
 	// RunReleaseTest runs the tests for a Helm Release. This is the same
 	// action as running the helm test command.
-	RunReleaseTest(releaseName string, options ...helm.ReleaseTestOption) error
+	RunReleaseTest(ctx context.Context, releaseName string, options ...helm.ReleaseTestOption) error
 	// UpdateReleaseFromTarball updates the given release using the chart packaged
 	// in the tarball.
-	UpdateReleaseFromTarball(releaseName, path string, options ...helm.UpdateOption) error
+	UpdateReleaseFromTarball(ctx context.Context, releaseName, path string, options ...helm.UpdateOption) error
 }
 
 // ReleaseContent returns status information about a Helm Release.
