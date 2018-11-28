@@ -1,8 +1,6 @@
 package adapter
 
 import (
-	"fmt"
-
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v20/key"
@@ -29,25 +27,14 @@ func (r *GuestRouteTablesAdapter) Adapt(cfg Config) error {
 	r.HostClusterCIDR = hostClusterCIDR
 	r.PublicRouteTableName = RouteTableName{
 		ResourceName: "PublicRouteTable",
-		TagName:      key.RouteTableName(cfg.CustomObject, suffixPublic),
+		TagName:      key.RouteTableName(cfg.CustomObject, suffixPublic, 0),
 	}
 
-	// Since CloudFormation cannot recognize resource renaming, use non-indexed
-	// resource name for first AZ.
-	r.PrivateRouteTableNames = []RouteTableName{
-		{
-			ResourceName:        "PrivateRouteTable",
-			TagName:             key.RouteTableName(cfg.CustomObject, suffixPrivate),
-			VPCPeeringRouteName: "VPCPeeringRoute",
-		},
-	}
-
-	for i := 1; i < key.SpecAvailabilityZones(cfg.CustomObject); i++ {
-		suffix := fmt.Sprintf("%s%02d", suffixPrivate, i)
+	for i := 0; i < len(key.StatusAvailabilityZones(cfg.CustomObject)); i++ {
 		rtName := RouteTableName{
-			ResourceName:        fmt.Sprintf("PrivateRouteTable%02d", i),
-			TagName:             key.RouteTableName(cfg.CustomObject, suffix),
-			VPCPeeringRouteName: fmt.Sprintf("VPCPeeringRoute%02d", i),
+			ResourceName:        key.PrivateRouteTableName(i),
+			TagName:             key.RouteTableName(cfg.CustomObject, suffixPrivate, i),
+			VPCPeeringRouteName: key.VPCPeeringRouteName(i),
 		}
 		r.PrivateRouteTableNames = append(r.PrivateRouteTableNames, rtName)
 	}
