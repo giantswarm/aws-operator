@@ -49,7 +49,7 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 			Name:                "PublicSubnet",
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: RouteTableAssociation{
-				Name:           "PublicRouteTableAssociation",
+				Name:           "PublicSubnetRouteTableAssociation",
 				RouteTableName: "PublicRouteTable",
 				SubnetName:     "PublicSubnet",
 			},
@@ -63,7 +63,7 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 			Name:                "PrivateSubnet",
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: RouteTableAssociation{
-				Name:           "PrivateRouteTableAssociation",
+				Name:           "PrivateSubnetRouteTableAssociation",
 				RouteTableName: "PrivateRouteTable",
 				SubnetName:     "PrivateSubnet",
 			},
@@ -79,7 +79,7 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 			Name:                snetName,
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: RouteTableAssociation{
-				Name:           fmt.Sprintf("PublicRouteTableAssociation%02d", i),
+				Name:           fmt.Sprintf("PublicSubnetRouteTableAssociation%02d", i),
 				RouteTableName: "PublicRouteTable",
 				SubnetName:     snetName,
 			},
@@ -93,7 +93,7 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 			Name:                snetName,
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: RouteTableAssociation{
-				Name:           fmt.Sprintf("PrivateRouteTableAssociation%02d", i),
+				Name:           fmt.Sprintf("PrivateSubnetRouteTableAssociation%02d", i),
 				RouteTableName: fmt.Sprintf("PrivateRouteTable%02d", i),
 				SubnetName:     snetName,
 			},
