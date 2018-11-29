@@ -70,12 +70,12 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 		return microerror.Mask(err)
 	}
 
-	a.EtcdElbHealthCheckTarget = heathCheckTarget(key.EtcdPort(cfg.CustomObject))
+	a.EtcdElbHealthCheckTarget = heathCheckTarget(key.EtcdPort())
 	a.EtcdElbName = etcdElbName
 	a.EtcdElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
 		{
-			PortELB:      key.EtcdPort(cfg.CustomObject),
-			PortInstance: key.EtcdPort(cfg.CustomObject),
+			PortELB:      key.EtcdPort(),
+			PortInstance: key.EtcdPort(),
 		},
 	}
 	a.EtcdElbScheme = internalELBScheme

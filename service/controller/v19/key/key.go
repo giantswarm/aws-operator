@@ -191,7 +191,7 @@ func ClusterCustomer(customObject v1alpha1.AWSConfig) string {
 }
 
 func ClusterEtcdDomain(customObject v1alpha1.AWSConfig) string {
-	return fmt.Sprintf("%s:%d", customObject.Spec.Cluster.Etcd.Domain, customObject.Spec.Cluster.Etcd.Port)
+	return fmt.Sprintf("%s:%d", customObject.Spec.Cluster.Etcd.Domain, EtcdPort())
 }
 
 func ClusterID(customObject v1alpha1.AWSConfig) string {
@@ -299,7 +299,7 @@ func EtcdDomain(customObject v1alpha1.AWSConfig) string {
 	return strings.Join([]string{"etcd", ClusterID(customObject), "k8s", BaseDomain(customObject)}, ".")
 }
 
-func EtcdPort(customObject v1alpha1.AWSConfig) int {
+func EtcdPort() int {
 	return 2379
 }
 

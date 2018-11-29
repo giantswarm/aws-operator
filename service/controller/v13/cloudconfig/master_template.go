@@ -10,6 +10,7 @@ import (
 	"github.com/giantswarm/randomkeys"
 
 	"github.com/giantswarm/aws-operator/service/controller/v13/encrypter/vault"
+	"github.com/giantswarm/aws-operator/service/controller/v13/key"
 	"github.com/giantswarm/aws-operator/service/controller/v13/templates/cloudconfig"
 )
 
@@ -37,7 +38,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 
 		params.Cluster = customObject.Spec.Cluster
 		params.DisableEncryptionAtREST = true
-		params.EtcdPort = customObject.Spec.Cluster.Etcd.Port
+		params.EtcdPort = key.EtcdPort()
 		params.Extension = &MasterExtension{
 			certs:            certs,
 			baseExtension:    be,

@@ -190,6 +190,10 @@ func DockerVolumeName(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-docker", ClusterID(customObject))
 }
 
+func EtcdPort() int {
+	return 2379
+}
+
 func EtcdVolumeName(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-etcd", ClusterID(customObject))
 }

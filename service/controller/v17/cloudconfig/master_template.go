@@ -10,6 +10,7 @@ import (
 	"github.com/giantswarm/randomkeys"
 
 	"github.com/giantswarm/aws-operator/service/controller/v17/encrypter/vault"
+	"github.com/giantswarm/aws-operator/service/controller/v17/key"
 	"github.com/giantswarm/aws-operator/service/controller/v17/templates/cloudconfig"
 )
 
@@ -42,7 +43,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 		// Ingress controller service remains in k8scloudconfig and will be
 		// removed in a later migration.
 		params.DisableIngressControllerService = false
-		params.EtcdPort = customObject.Spec.Cluster.Etcd.Port
+		params.EtcdPort = key.EtcdPort()
 		params.Extension = &MasterExtension{
 			certs:            certs,
 			baseExtension:    be,

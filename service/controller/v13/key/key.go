@@ -168,7 +168,7 @@ func ClusterCustomer(customObject v1alpha1.AWSConfig) string {
 }
 
 func ClusterEtcdDomain(customObject v1alpha1.AWSConfig) string {
-	return fmt.Sprintf("%s:%d", customObject.Spec.Cluster.Etcd.Domain, customObject.Spec.Cluster.Etcd.Port)
+	return fmt.Sprintf("%s:%d", customObject.Spec.Cluster.Etcd.Domain, EtcdPort())
 }
 
 func ClusterID(customObject v1alpha1.AWSConfig) string {
@@ -211,6 +211,10 @@ func DockerVolumeResourceName(customObject v1alpha1.AWSConfig) string {
 
 func DockerVolumeName(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-docker", ClusterID(customObject))
+}
+
+func EtcdPort() int {
+	return 2379
 }
 
 func EtcdVolumeName(customObject v1alpha1.AWSConfig) string {

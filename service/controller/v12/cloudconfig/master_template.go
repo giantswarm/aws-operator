@@ -7,6 +7,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
+	"github.com/giantswarm/aws-operator/service/controller/v12/key"
 	"github.com/giantswarm/aws-operator/service/controller/v12/templates/cloudconfig"
 )
 
@@ -24,7 +25,7 @@ func (c *CloudConfig) NewMasterTemplate(customObject v1alpha1.AWSConfig, certs l
 	{
 		params.Cluster = customObject.Spec.Cluster
 		params.DisableEncryptionAtREST = true
-		params.EtcdPort = customObject.Spec.Cluster.Etcd.Port
+		params.EtcdPort = key.EtcdPort()
 		params.Extension = &MasterExtension{
 			certs:            certs,
 			customObject:     customObject,

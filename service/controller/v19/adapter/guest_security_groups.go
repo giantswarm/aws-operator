@@ -15,7 +15,6 @@ import (
 const (
 	allPorts             = -1
 	cadvisorPort         = 4194
-	etcdPort             = 2379
 	kubeletPort          = 10250
 	nodeExporterPort     = 10300
 	kubeStateMetricsPort = 10301
@@ -87,7 +86,7 @@ func (s *GuestSecurityGroupsAdapter) getMasterRules(cfg Config, hostClusterCIDR 
 		},
 		{
 			Description: "Allow traffic from control plane CIDR to 2379 for etcd backup.",
-			Port:        etcdPort,
+			Port:        key.EtcdPort(),
 			Protocol:    tcpProtocol,
 			SourceCIDR:  hostClusterCIDR,
 		},
@@ -194,13 +193,13 @@ func (s *GuestSecurityGroupsAdapter) getEtcdRules(customObject v1alpha1.AWSConfi
 	return []securityGroupRule{
 		{
 			Description: "Allow all etcd traffic from the VPC to the etcd load balancer.",
-			Port:        etcdPort,
+			Port:        key.EtcdPort(),
 			Protocol:    tcpProtocol,
 			SourceCIDR:  defaultCIDR,
 		},
 		{
 			Description: "Allow traffic from control plane to etcd port for backup and metrics.",
-			Port:        etcdPort,
+			Port:        key.EtcdPort(),
 			Protocol:    tcpProtocol,
 			SourceCIDR:  hostClusterCIDR,
 		},
