@@ -415,13 +415,13 @@ func PolicyName(customObject v1alpha1.AWSConfig, profileType string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, PolicyNameTemplate)
 }
 
-func PrivateRouteTableAssociationName(idx int) string {
+func PrivateSubnetRouteTableAssociationName(idx int) string {
 	// Since CloudFormation cannot recognize resource renaming, use non-indexed
 	// resource name for first AZ.
 	if idx < 1 {
-		return "PrivateRouteTableAssociation"
+		return "PrivateSubnetRouteTableAssociation"
 	}
-	return fmt.Sprintf("PrivateRouteTableAssociation%02d", idx)
+	return fmt.Sprintf("PrivateSubnetRouteTableAssociation%02d", idx)
 }
 
 func PrivateRouteTableName(idx int) string {
@@ -450,13 +450,13 @@ func PublicSubnetCIDR(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.VPC.PublicSubnetCIDR
 }
 
-func PublicRouteTableAssociationName(idx int) string {
+func PublicSubnetRouteTableAssociationName(idx int) string {
 	// Since CloudFormation cannot recognize resource renaming, use non-indexed
 	// resource name for first AZ.
 	if idx < 1 {
-		return "PublicRouteTableAssociation"
+		return "PublicSubnetRouteTableAssociation"
 	}
-	return fmt.Sprintf("PublicRouteTableAssociation%02d", idx)
+	return fmt.Sprintf("PublicSubnetRouteTableAssociation%02d", idx)
 }
 
 func PublicRouteTableName(idx int) string {

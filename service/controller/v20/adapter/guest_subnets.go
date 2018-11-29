@@ -47,7 +47,7 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 			Name:                snetName,
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: RouteTableAssociation{
-				Name:           key.PublicRouteTableAssociationName(i),
+				Name:           key.PublicSubnetRouteTableAssociationName(i),
 				RouteTableName: "PublicRouteTable",
 				SubnetName:     snetName,
 			},
@@ -61,7 +61,7 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 			Name:                snetName,
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: RouteTableAssociation{
-				Name:           key.PrivateRouteTableAssociationName(i),
+				Name:           key.PrivateSubnetRouteTableAssociationName(i),
 				RouteTableName: key.PrivateRouteTableName(i),
 				SubnetName:     snetName,
 			},

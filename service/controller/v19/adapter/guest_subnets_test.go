@@ -65,7 +65,7 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 					CIDR:             "10.100.2.0/25",
 					Name:             "PublicSubnet",
 					RouteTableAssociation: RouteTableAssociation{
-						Name:           "PublicRouteTableAssociation",
+						Name:           "PublicSubnetRouteTableAssociation",
 						RouteTableName: "PublicRouteTable",
 						SubnetName:     "PublicSubnet",
 					},
@@ -75,7 +75,7 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 					CIDR:             "10.100.1.0/25",
 					Name:             "PublicSubnet01",
 					RouteTableAssociation: RouteTableAssociation{
-						Name:           "PublicRouteTableAssociation01",
+						Name:           "PublicSubnetRouteTableAssociation01",
 						RouteTableName: "PublicRouteTable",
 						SubnetName:     "PublicSubnet01",
 					},
@@ -85,7 +85,7 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 					CIDR:             "10.100.3.0/25",
 					Name:             "PublicSubnet02",
 					RouteTableAssociation: RouteTableAssociation{
-						Name:           "PublicRouteTableAssociation02",
+						Name:           "PublicSubnetRouteTableAssociation02",
 						RouteTableName: "PublicRouteTable",
 						SubnetName:     "PublicSubnet02",
 					},
@@ -97,7 +97,7 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 					CIDR:             "10.100.2.128/25",
 					Name:             "PrivateSubnet",
 					RouteTableAssociation: RouteTableAssociation{
-						Name:           "PrivateRouteTableAssociation",
+						Name:           "PrivateSubnetRouteTableAssociation",
 						RouteTableName: "PrivateRouteTable",
 						SubnetName:     "PrivateSubnet",
 					},
@@ -107,7 +107,7 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 					CIDR:             "10.100.1.128/25",
 					Name:             "PrivateSubnet01",
 					RouteTableAssociation: RouteTableAssociation{
-						Name:           "PrivateRouteTableAssociation01",
+						Name:           "PrivateSubnetRouteTableAssociation01",
 						RouteTableName: "PrivateRouteTable01",
 						SubnetName:     "PrivateSubnet01",
 					},
@@ -117,7 +117,7 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 					CIDR:             "10.100.3.128/25",
 					Name:             "PrivateSubnet02",
 					RouteTableAssociation: RouteTableAssociation{
-						Name:           "PrivateRouteTableAssociation02",
+						Name:           "PrivateSubnetRouteTableAssociation02",
 						RouteTableName: "PrivateRouteTable02",
 						SubnetName:     "PrivateSubnet02",
 					},
