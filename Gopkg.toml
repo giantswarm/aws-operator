@@ -36,8 +36,8 @@ required = [
   branch = "master"
   name = "github.com/docker/distribution"
 
-[[constraint]]
-  branch = "master"
+[[override]]
+  branch = "clean-api"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]
@@ -81,7 +81,7 @@ required = [
   name = "github.com/giantswarm/helmclient"
 
 [[constraint]]
-  branch = "master"
+  branch = "clean-api"
   name = "github.com/giantswarm/k8scloudconfig"
 
 [[constraint]]

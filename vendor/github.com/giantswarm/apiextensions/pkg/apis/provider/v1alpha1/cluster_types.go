@@ -54,11 +54,8 @@ type ClusterKubernetes struct {
 }
 
 type ClusterKubernetesAPI struct {
-	AltNames       string `json:"altNames" yaml:"altNames"`
 	ClusterIPRange string `json:"clusterIPRange" yaml:"clusterIPRange"`
 	Domain         string `json:"domain" yaml:"domain"`
-	IP             net.IP `json:"ip" yaml:"ip"`
-	InsecurePort   int    `json:"insecurePort" yaml:"insecurePort"`
 	SecurePort     int    `json:"securePort" yaml:"securePort"`
 }
 
