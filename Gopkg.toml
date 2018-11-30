@@ -112,9 +112,13 @@ required = [
   branch = "master"
   name = "github.com/giantswarm/randomkeys"
 
+[[override]]
+  branch = "use-tenant-lib"
+  name = "github.com/giantswarm/statusresource"
+
 [[constraint]]
   branch = "master"
-  name = "github.com/giantswarm/statusresource"
+  name = "github.com/giantswarm/tenantcluster"
 
 [[constraint]]
   branch = "master"

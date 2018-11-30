@@ -124,7 +124,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:6067579e266d65be3aeb6d6977aca302c2a5d0435a3b2b3e3fcc14531f0b12a6"
+  digest = "1:bc029e131b9f7a73ab8d917b45b351fd9d751af9f1b9dfcb514f20bbcb4b7c4c"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/core/v1alpha1",
@@ -137,7 +137,7 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "43587e392cc73ed2416631ff51a12d57c7c14f07"
+  revision = "fa2fbedf46454ca0d7ee7957f39754cde392aa70"
 
 [[projects]]
   branch = "master"
@@ -165,11 +165,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:156320efa39529797476d36dea158eb4a505aaea7067e187cf17218c09539df2"
+  digest = "1:a8ffb07ea9cff14a45fa47ede55006d108a80033f8f6f9b38a20b312b9d21b2c"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
   pruneopts = "UT"
-  revision = "b14d5a5816ed61298ee2c90d524c4d285a0202b5"
+  revision = "e0f6f9b00515307f8e4807ce38578f620cda130a"
 
 [[projects]]
   branch = "master"
@@ -189,34 +189,22 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:8bdd7b8d9bbb9a2f4ed3231ac48be133bbe73338df1258527da455e27d154269"
+  digest = "1:7fed84053b8cc25567538a09e6e3aaf928cdd953cb335334ddde98aa3bcc3a12"
   name = "github.com/giantswarm/micrologger"
   packages = [
     ".",
     "loggermeta",
   ]
   pruneopts = "UT"
-  revision = "39ed6a99d31b8962e38dfaff287125fb756e8b2a"
+  revision = "22dc3b5565d150e1f94fbed50df3baf6cd40fac9"
 
 [[projects]]
   branch = "master"
-  digest = "1:c47fc21eb20c8cd92036cb818e30252045138655534906028a7a845d2a249b3b"
+  digest = "1:2535a47998ceb3a36fa812634d5f0dc689459e54cf1456299d88ec531c9a6ff8"
   name = "github.com/giantswarm/operatorkit"
-  packages = [
-    "client/k8srestconfig",
-    "controller/context/finalizerskeptcontext",
-    "controller/context/reconciliationcanceledcontext",
-  ]
+  packages = ["client/k8srestconfig"]
   pruneopts = "UT"
-  revision = "894bebfb2a6835b15394c329617a442a0725939f"
-
-[[projects]]
-  branch = "master"
-  digest = "1:d9667362ca1728cc39f13558618a45aab72db57b78786b6315869b69f8e1576c"
-  name = "github.com/giantswarm/tenantcluster"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "5f3dcee834cbb83ef2a9462566948676d5ef9a08"
+  revision = "6f0fa5277dfb4a893fde10c7860eca3f8c68ebc7"
 
 [[projects]]
   digest = "1:0cfcded8689c2c964c223650009c5dd9e283c22d57f18f2335aafa16cc22acf1"
@@ -353,7 +341,7 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "1624edc4454b8682399def8740d46db5e4362ba4"
-  version = "1.1.5"
+  version = "v1.1.5"
 
 [[projects]]
   branch = "master"
@@ -412,15 +400,15 @@
   version = "v1.2"
 
 [[projects]]
-  branch = "master"
-  digest = "1:60550d27cee0a4d6f3ef35c169b9f0cf596636f77df11e2acea8626ce76d959c"
+  digest = "1:735956b5e94182229dfbdc5b401d7a71f20f54f1259dbc2969ec2b56bfbb34f2"
   name = "github.com/prometheus/client_golang"
   packages = [
     "prometheus",
     "prometheus/internal",
   ]
   pruneopts = "UT"
-  revision = "32b1bb4674c4db541df5b547bb1a325337522022"
+  revision = "abad2d1bd44235a26707c172eab6bca5bf2dbad3"
+  version = "v0.9.1"
 
 [[projects]]
   branch = "master"
@@ -1094,20 +1082,12 @@
   analyzer-version = 1
   input-imports = [
     "github.com/docker/distribution/reference",
-    "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1",
-    "github.com/giantswarm/backoff",
-    "github.com/giantswarm/errors/guest",
+    "github.com/giantswarm/apiextensions/pkg/clientset/versioned",
+    "github.com/giantswarm/certs",
+    "github.com/giantswarm/helmclient",
     "github.com/giantswarm/microerror",
     "github.com/giantswarm/micrologger",
-    "github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext",
-    "github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext",
-    "github.com/giantswarm/tenantcluster",
-    "github.com/prometheus/client_golang/prometheus",
-    "k8s.io/apimachinery/pkg/api/errors",
-    "k8s.io/apimachinery/pkg/api/meta",
-    "k8s.io/apimachinery/pkg/apis/meta/v1",
-    "k8s.io/apimachinery/pkg/types",
-    "k8s.io/apimachinery/pkg/watch",
+    "github.com/giantswarm/operatorkit/client/k8srestconfig",
     "k8s.io/apiserver/pkg/endpoints/request",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/rest",

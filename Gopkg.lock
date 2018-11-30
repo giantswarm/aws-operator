@@ -382,7 +382,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:075a723474a2f5dde212732a35d4bf30947374396cc2a67a5ab50654b163e5c5"
+  digest = "1:3d95090483f5622822037a095afa37c364674a05d2cc5139247cfd20108e9bd6"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "v_3_3_3",
@@ -393,7 +393,7 @@
     "v_3_7_2",
   ]
   pruneopts = "T"
-  revision = "8e75ac4c46644a19f8b99913311abe6f9a996dea"
+  revision = "85fe0450d35eb5ca547330e456e1c3606098c4ec"
 
 [[projects]]
   branch = "master"
@@ -511,12 +511,20 @@
   revision = "0688a8c5c0d7ac6aa1cf2ebb4323ed1ef3cbe46f"
 
 [[projects]]
-  branch = "master"
-  digest = "1:7e6e1b2104f98d3d9422d3d5a55c4eb6f7867e514ef88fafb7a3057f9555c7a6"
+  branch = "use-tenant-lib"
+  digest = "1:559127ca99a84695b5f73d2c21f14cb576287b36a9ddeed1c24a55dbe5b90087"
   name = "github.com/giantswarm/statusresource"
   packages = ["."]
   pruneopts = "UT"
-  revision = "f4a1a0068353f19876ed0c4f8adee74b1a33dd00"
+  revision = "6396b12281853c3ee4da89701107f93aa5a6f62c"
+
+[[projects]]
+  branch = "master"
+  digest = "1:d9667362ca1728cc39f13558618a45aab72db57b78786b6315869b69f8e1576c"
+  name = "github.com/giantswarm/tenantcluster"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "5f3dcee834cbb83ef2a9462566948676d5ef9a08"
 
 [[projects]]
   branch = "master"
@@ -1744,6 +1752,7 @@
     "github.com/giantswarm/randomkeys",
     "github.com/giantswarm/randomkeys/randomkeystest",
     "github.com/giantswarm/statusresource",
+    "github.com/giantswarm/tenantcluster",
     "github.com/giantswarm/versionbundle",
     "github.com/prometheus/client_golang/prometheus",
     "github.com/spf13/afero",
