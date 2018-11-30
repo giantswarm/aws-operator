@@ -26,7 +26,7 @@
 
 
 [[constraint]]
-  branch = "clean-api"
+  branch = "master"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]

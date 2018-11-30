@@ -18,7 +18,6 @@ type Cluster struct {
 
 type ClusterCalico struct {
 	CIDR   int    `json:"cidr" yaml:"cidr"`
-	Domain string `json:"domain" yaml:"domain"`
 	MTU    int    `json:"mtu" yaml:"mtu"`
 	Subnet string `json:"subnet" yaml:"subnet"`
 }
