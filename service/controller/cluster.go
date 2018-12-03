@@ -429,7 +429,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 
 	var resourceSetV14Patch4 *controller.ResourceSet
 	{
-		c := v14patch3.ClusterResourceSetConfig{
+		c := v14patch4.ClusterResourceSetConfig{
 			CertsSearcher:      legacyCertsSearcher,
 			G8sClient:          config.G8sClient,
 			HostAWSConfig:      hostAWSConfig,
@@ -556,7 +556,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
-	var resourceSetV17patch1 *controller.ResourceSet
+	var resourceSetV17Patch1 *controller.ResourceSet
 	{
 		c := v17patch1.ClusterResourceSetConfig{
 			CertsSearcher:      legacyCertsSearcher,
@@ -593,7 +593,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			VaultAddress:      config.VaultAddress,
 		}
 
-		resourceSetV17, err = v17patch1.NewClusterResourceSet(c)
+		resourceSetV17Patch1, err = v17patch1.NewClusterResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
