@@ -6,10 +6,10 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v14patch3/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/v14patch3/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v14patch3/key"
-	"github.com/giantswarm/aws-operator/service/controller/v14patch3/templates"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch4/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch4/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch4/key"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch4/templates"
 )
 
 func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig, stackState StackState) (string, error) {

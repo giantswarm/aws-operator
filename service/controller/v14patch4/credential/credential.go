@@ -6,7 +6,7 @@ import (
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/giantswarm/aws-operator/service/controller/v14patch3/key"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch4/key"
 )
 
 const (

@@ -7,9 +7,9 @@ import (
 	"github.com/giantswarm/legacycerts/legacy"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v14patch3/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v14patch3/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/v14patch3/key"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch4/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch4/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch4/key"
 )
 
 func (k *Encrypter) EncryptTLSAssets(ctx context.Context, customObject v1alpha1.AWSConfig, assets legacy.AssetsBundle) (*legacy.CompactTLSAssets, error) {
