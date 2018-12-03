@@ -131,6 +131,17 @@ const IAMPolicies = `{{define "iam_policies"}}
               StringEquals:
                 aws:RequestTag/giantswarm.io/cluster: "{{ $v.ClusterID }}"
 
+          - Effect: "Allow"
+            Action:
+              - "route53:ListHostedZones"
+              - "route53:ListResourceRecordSets"
+            Resource: "*"
+
+          - Effect: "Allow"
+            Action:
+              - "route53:ChangeResourceRecordSets"
+            Resource: "arn:aws:route53:::hostedzone/*"
+
   WorkerInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:

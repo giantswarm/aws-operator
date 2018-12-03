@@ -9,7 +9,7 @@ func VersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "aws-operator",
-				Description: ".",
+				Description: "Added a policy in the worker role to allow list and create host zones.",
 				Kind:        versionbundle.KindAdded,
 			},
 		},
