@@ -11,9 +11,9 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v17/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/v17/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v17/key"
+	"github.com/giantswarm/aws-operator/service/controller/v17patch1/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v17patch1/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v17patch1/key"
 )
 
 func testConfig() Config {

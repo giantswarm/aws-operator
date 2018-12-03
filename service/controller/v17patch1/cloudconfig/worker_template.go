@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/legacycerts/legacy"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v17/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v17patch1/templates/cloudconfig"
 )
 
 // NewWorkerTemplate generates a new worker cloud config template and returns it
