@@ -74,10 +74,6 @@ required = [
 
 [[constraint]]
   branch = "master"
-  name = "github.com/giantswarm/guestcluster"
-
-[[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/helmclient"
 
 [[constraint]]
@@ -112,8 +108,8 @@ required = [
   branch = "master"
   name = "github.com/giantswarm/randomkeys"
 
-[[override]]
-  branch = "use-tenant-lib"
+[[constraint]]
+  branch = "master"
   name = "github.com/giantswarm/statusresource"
 
 [[constraint]]
