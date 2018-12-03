@@ -1,4 +1,4 @@
-package guestcluster
+package tenantcluster
 
 import (
 	"context"
@@ -13,7 +13,8 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-// Config represents the configuration used to create a new guest cluster service.
+// Config represents the configuration used to create a new tenant cluster
+// service.
 type Config struct {
 	CertsSearcher certs.Interface
 	Logger        micrologger.Logger
@@ -22,8 +23,8 @@ type Config struct {
 	TillerNamespace string
 }
 
-// GuestCluster provides functionality for connecting to guest clusters.
-type GuestCluster struct {
+// TenantCluster provides functionality for connecting to tenant clusters.
+type TenantCluster struct {
 	certsSearcher certs.Interface
 	logger        micrologger.Logger
 
@@ -31,8 +32,8 @@ type GuestCluster struct {
 	tillerNamespace string
 }
 
-// New creates a new guest cluster service.
-func New(config Config) (*GuestCluster, error) {
+// New creates a new tenant cluster service.
+func New(config Config) (*TenantCluster, error) {
 	if config.CertsSearcher == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.CertsSearcher must not be empty", config)
 	}
@@ -47,7 +48,7 @@ func New(config Config) (*GuestCluster, error) {
 		config.TillerNamespace = TillerDefaultNamespace
 	}
 
-	g := &GuestCluster{
+	g := &TenantCluster{
 		certsSearcher: config.CertsSearcher,
 		logger:        config.Logger,
 
@@ -58,9 +59,9 @@ func New(config Config) (*GuestCluster, error) {
 	return g, nil
 }
 
-// NewG8sClient returns a generated clientset for the specified guest cluster.
-func (g *GuestCluster) NewG8sClient(ctx context.Context, clusterID, apiDomain string) (versioned.Interface, error) {
-	g.logger.LogCtx(ctx, "level", "debug", "message", "creating G8s client for the guest cluster")
+// NewG8sClient returns a generated clientset for the specified tenant cluster.
+func (g *TenantCluster) NewG8sClient(ctx context.Context, clusterID, apiDomain string) (versioned.Interface, error) {
+	g.logger.LogCtx(ctx, "level", "debug", "message", "creating G8s client for the tenant cluster")
 
 	restConfig, err := g.newRestConfig(ctx, clusterID, apiDomain)
 	if err != nil {
@@ -72,14 +73,14 @@ func (g *GuestCluster) NewG8sClient(ctx context.Context, clusterID, apiDomain st
 		return nil, microerror.Mask(err)
 	}
 
-	g.logger.LogCtx(ctx, "level", "debug", "message", "created G8s client for the guest cluster")
+	g.logger.LogCtx(ctx, "level", "debug", "message", "created G8s client for the tenant cluster")
 
 	return g8sClient, nil
 }
 
-// NewHelmClient returns a Helm client for the specified guest cluster.
-func (g *GuestCluster) NewHelmClient(ctx context.Context, clusterID, apiDomain string) (helmclient.Interface, error) {
-	g.logger.LogCtx(ctx, "level", "debug", "message", "creating Helm client for the guest cluster")
+// NewHelmClient returns a Helm client for the specified tenant cluster.
+func (g *TenantCluster) NewHelmClient(ctx context.Context, clusterID, apiDomain string) (helmclient.Interface, error) {
+	g.logger.LogCtx(ctx, "level", "debug", "message", "creating Helm client for the tenant cluster")
 
 	restConfig, err := g.newRestConfig(ctx, clusterID, apiDomain)
 	if err != nil {
@@ -103,14 +104,14 @@ func (g *GuestCluster) NewHelmClient(ctx context.Context, clusterID, apiDomain s
 		return nil, microerror.Mask(err)
 	}
 
-	g.logger.LogCtx(ctx, "level", "debug", "message", "created Helm client for the guest cluster")
+	g.logger.LogCtx(ctx, "level", "debug", "message", "created Helm client for the tenant cluster")
 
 	return helmClient, nil
 }
 
-// NewK8sClient returns a Kubernetes clientset for the specified guest cluster.
-func (g *GuestCluster) NewK8sClient(ctx context.Context, clusterID, apiDomain string) (kubernetes.Interface, error) {
-	g.logger.LogCtx(ctx, "level", "debug", "message", "creating K8s client for the guest cluster")
+// NewK8sClient returns a Kubernetes clientset for the specified tenant cluster.
+func (g *TenantCluster) NewK8sClient(ctx context.Context, clusterID, apiDomain string) (kubernetes.Interface, error) {
+	g.logger.LogCtx(ctx, "level", "debug", "message", "creating K8s client for the tenant cluster")
 
 	restConfig, err := g.newRestConfig(ctx, clusterID, apiDomain)
 	if err != nil {
@@ -122,17 +123,17 @@ func (g *GuestCluster) NewK8sClient(ctx context.Context, clusterID, apiDomain st
 		return nil, microerror.Mask(err)
 	}
 
-	g.logger.LogCtx(ctx, "level", "debug", "message", "created K8s client for the guest cluster")
+	g.logger.LogCtx(ctx, "level", "debug", "message", "created K8s client for the tenant cluster")
 
 	return k8sClient, nil
 }
 
-// newRestConfig returns a Kubernetes REST config for the specified guest
+// newRestConfig returns a Kubernetes REST config for the specified tenant
 // cluster.
-func (g *GuestCluster) newRestConfig(ctx context.Context, clusterID, apiDomain string) (*rest.Config, error) {
+func (g *TenantCluster) newRestConfig(ctx context.Context, clusterID, apiDomain string) (*rest.Config, error) {
 	var err error
 
-	g.logger.LogCtx(ctx, "level", "debug", "message", "looking for certificates for the guest cluster")
+	g.logger.LogCtx(ctx, "level", "debug", "message", "looking for certificates for the tenant cluster")
 
 	var tls certs.TLS
 	{
@@ -144,7 +145,7 @@ func (g *GuestCluster) newRestConfig(ctx context.Context, clusterID, apiDomain s
 		}
 	}
 
-	g.logger.LogCtx(ctx, "level", "debug", "message", "found certificates for the guest cluster")
+	g.logger.LogCtx(ctx, "level", "debug", "message", "found certificates for the tenant cluster")
 
 	var restConfig *rest.Config
 	{

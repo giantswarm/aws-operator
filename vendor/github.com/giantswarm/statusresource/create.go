@@ -11,6 +11,7 @@ import (
 	"github.com/giantswarm/errors/guest"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
+	"github.com/giantswarm/tenantcluster"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -114,9 +115,9 @@ func (r *Resource) computeCreateEventPatches(ctx context.Context, obj interface{
 	// manage their own initialization.
 	patches = ensureDefaultPatches(clusterStatus, patches)
 
-	// After initialization the most likely implication is the guest cluster being
+	// After initialization the most likely implication is the tenant cluster being
 	// in a creation status. In case no other conditions are given and no nodes
-	// are known and no versions are set, we set the guest cluster status to a
+	// are known and no versions are set, we set the tenant cluster status to a
 	// creating condition.
 	{
 		notCreating := !clusterStatus.HasCreatingCondition()
@@ -135,7 +136,7 @@ func (r *Resource) computeCreateEventPatches(ctx context.Context, obj interface{
 		}
 	}
 
-	// Once the guest cluster is created we set the according status condition so
+	// Once the tenant cluster is created we set the according status condition so
 	// the cluster status reflects the transitioning from creating to created.
 	{
 		isCreating := clusterStatus.HasCreatingCondition()
@@ -154,9 +155,9 @@ func (r *Resource) computeCreateEventPatches(ctx context.Context, obj interface{
 		}
 	}
 
-	// When we notice the current and the desired guest cluster version differs,
+	// When we notice the current and the desired tenant cluster version differs,
 	// an update is about to be processed. So we set the status condition
-	// indicating the guest cluster is updating now.
+	// indicating the tenant cluster is updating now.
 	{
 		isCreated := clusterStatus.HasCreatedCondition()
 		notUpdating := !clusterStatus.HasUpdatingCondition()
@@ -174,7 +175,7 @@ func (r *Resource) computeCreateEventPatches(ctx context.Context, obj interface{
 	}
 
 	// Set the status cluster condition to updated when an update successfully
-	// took place. Precondition for this is the guest cluster is updating and all
+	// took place. Precondition for this is the tenant cluster is updating and all
 	// nodes being known and all nodes having the same versions.
 	{
 		isUpdating := clusterStatus.HasUpdatingCondition()
@@ -194,7 +195,7 @@ func (r *Resource) computeCreateEventPatches(ctx context.Context, obj interface{
 	}
 
 	// Check all node versions held by the cluster status and add the version the
-	// guest cluster successfully migrated to, to the historical list of versions.
+	// tenant cluster successfully migrated to, to the historical list of versions.
 	{
 		hasTransitioned := clusterStatus.HasCreatedCondition() || clusterStatus.HasUpdatedCondition()
 		notSet := !clusterStatus.HasVersion(desiredVersion)
@@ -207,17 +208,21 @@ func (r *Resource) computeCreateEventPatches(ctx context.Context, obj interface{
 				Path:  "/status/cluster/versions",
 				Value: clusterStatus.WithNewVersion(desiredVersion),
 			})
+
+			r.logger.LogCtx(ctx, "level", "info", "message", "setting status versions")
 		}
 	}
 
-	// Update the node status based on what the guest cluster API tells us.
+	// Update the node status based on what the tenant cluster API tells us.
 	//
 	// TODO this is a workaround until we can read the node status information
 	// from the NodeConfig CR status. This is not possible right now because the
-	// NodeConfig CRs are still used for draining by older guest clusters.
+	// NodeConfig CRs are still used for draining by older tenant clusters.
 	{
 		var k8sClient kubernetes.Interface
 		{
+			r.logger.LogCtx(ctx, "level", "debug", "message", "creating Kubernetes client for tenant cluster")
+
 			i, err := r.clusterIDFunc(obj)
 			if err != nil {
 				return nil, microerror.Mask(err)
@@ -226,50 +231,59 @@ func (r *Resource) computeCreateEventPatches(ctx context.Context, obj interface{
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
-			k8sClient, err = r.guestCluster.NewK8sClient(ctx, i, e)
-			if err != nil {
+			k8sClient, err = r.tenantCluster.NewK8sClient(ctx, i, e)
+			if tenantcluster.IsTimeout(err) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "did not create Kubernetes client for tenant cluster")
+				r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for certificates timed out")
+			} else if err != nil {
 				return nil, microerror.Mask(err)
+			} else {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "created Kubernetes client for tenant cluster")
 			}
 		}
 
-		o := metav1.ListOptions{}
-		list, err := k8sClient.CoreV1().Nodes().List(o)
-		if guest.IsAPINotAvailable(err) {
-			// fall through
-		} else if err != nil {
-			return nil, microerror.Mask(err)
-		} else {
-			var nodes []providerv1alpha1.StatusClusterNode
+		if k8sClient != nil {
+			o := metav1.ListOptions{}
+			list, err := k8sClient.CoreV1().Nodes().List(o)
+			if guest.IsAPINotAvailable(err) {
+				// fall through
+			} else if err != nil {
+				return nil, microerror.Mask(err)
+			} else {
+				var nodes []providerv1alpha1.StatusClusterNode
 
-			for _, node := range list.Items {
-				l := node.GetLabels()
-				n := node.GetName()
+				for _, node := range list.Items {
+					l := node.GetLabels()
+					n := node.GetName()
 
-				labelProvider := "giantswarm.io/provider"
-				p, ok := l[labelProvider]
-				if !ok {
-					return nil, microerror.Maskf(missingLabelError, labelProvider)
+					labelProvider := "giantswarm.io/provider"
+					p, ok := l[labelProvider]
+					if !ok {
+						return nil, microerror.Maskf(missingLabelError, labelProvider)
+					}
+					labelVersion := p + "-operator.giantswarm.io/version"
+					v, ok := l[labelVersion]
+					if !ok {
+						return nil, microerror.Maskf(missingLabelError, labelVersion)
+					}
+
+					nodes = append(nodes, providerv1alpha1.StatusClusterNode{
+						Name:    n,
+						Version: v,
+					})
 				}
-				labelVersion := p + "-operator.giantswarm.io/version"
-				v, ok := l[labelVersion]
-				if !ok {
-					return nil, microerror.Maskf(missingLabelError, labelVersion)
+
+				nodesDiffer := nodes != nil && !reflect.DeepEqual(clusterStatus.Nodes, nodes)
+
+				if nodesDiffer {
+					patches = append(patches, Patch{
+						Op:    "replace",
+						Path:  "/status/cluster/nodes",
+						Value: nodes,
+					})
+
+					r.logger.LogCtx(ctx, "level", "info", "message", "setting status nodes")
 				}
-
-				nodes = append(nodes, providerv1alpha1.StatusClusterNode{
-					Name:    n,
-					Version: v,
-				})
-			}
-
-			nodesDiffer := nodes != nil && !reflect.DeepEqual(clusterStatus.Nodes, nodes)
-
-			if nodesDiffer {
-				patches = append(patches, Patch{
-					Op:    "replace",
-					Path:  "/status/cluster/nodes",
-					Value: nodes,
-				})
 			}
 		}
 	}

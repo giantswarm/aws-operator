@@ -7,7 +7,6 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs"
-	"github.com/giantswarm/guestcluster"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
@@ -16,6 +15,7 @@ import (
 	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
 	"github.com/giantswarm/randomkeys"
 	"github.com/giantswarm/statusresource"
+	"github.com/giantswarm/tenantcluster"
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
@@ -442,16 +442,16 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var guestCluster guestcluster.Interface
+	var tenantCluster tenantcluster.Interface
 	{
-		c := guestcluster.Config{
+		c := tenantcluster.Config{
 			CertsSearcher: certsSearcher,
 			Logger:        config.Logger,
 
 			CertID: certs.APICert,
 		}
 
-		guestCluster, err = guestcluster.New(c)
+		tenantCluster, err = tenantcluster.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -463,10 +463,10 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			ClusterEndpointFunc:      key.ToClusterEndpoint,
 			ClusterIDFunc:            key.ToClusterID,
 			ClusterStatusFunc:        key.ToClusterStatus,
-			GuestCluster:             guestCluster,
 			NodeCountFunc:            key.ToNodeCount,
 			Logger:                   config.Logger,
 			RESTClient:               config.G8sClient.ProviderV1alpha1().RESTClient(),
+			TenantCluster:            tenantCluster,
 			VersionBundleVersionFunc: key.ToVersionBundleVersion,
 		}
 

@@ -1,4 +1,4 @@
-package guestcluster
+package tenantcluster
 
 import (
 	"context"
@@ -13,10 +13,10 @@ const (
 )
 
 type Interface interface {
-	// NewG8sClient returns a new generated clientset for a guest cluster.
+	// NewG8sClient returns a new generated clientset for a tenant cluster.
 	NewG8sClient(ctx context.Context, clusterID, apiDomain string) (versioned.Interface, error)
-	// NewHelmClient returns a new Giant Swarm Helm client for a guest cluster.
+	// NewHelmClient returns a new Giant Swarm Helm client for a tenant cluster.
 	NewHelmClient(ctx context.Context, clusterID, apiDomain string) (helmclient.Interface, error)
-	// NewK8sClient returns a new Kubernetes clientset for a guest cluster.
+	// NewK8sClient returns a new Kubernetes clientset for a tenant cluster.
 	NewK8sClient(ctx context.Context, clusterID, apiDomain string) (kubernetes.Interface, error)
 }

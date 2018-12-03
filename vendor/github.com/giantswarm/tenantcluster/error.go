@@ -1,4 +1,4 @@
-package guestcluster
+package tenantcluster
 
 import (
 	"github.com/giantswarm/microerror"
