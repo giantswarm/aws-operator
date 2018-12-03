@@ -10,8 +10,10 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v12patch1"
 	"github.com/giantswarm/aws-operator/service/controller/v13"
 	"github.com/giantswarm/aws-operator/service/controller/v14patch3"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch4"
 	"github.com/giantswarm/aws-operator/service/controller/v16patch1"
 	"github.com/giantswarm/aws-operator/service/controller/v17"
+	"github.com/giantswarm/aws-operator/service/controller/v17patch1"
 	"github.com/giantswarm/aws-operator/service/controller/v18"
 	"github.com/giantswarm/aws-operator/service/controller/v19"
 	"github.com/giantswarm/aws-operator/service/controller/v20"
@@ -235,6 +237,24 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var v14Patch4ResourceSet *controller.ResourceSet
+	{
+		c := v14patch4.DrainerResourceSetConfig{
+			G8sClient:     config.G8sClient,
+			HostAWSConfig: hostAWSConfig,
+			K8sClient:     config.K8sClient,
+			Logger:        config.Logger,
+
+			GuestUpdateEnabled: config.GuestUpdateEnabled,
+			ProjectName:        config.ProjectName,
+		}
+
+		v14Patch4ResourceSet, err = v14patch4.NewDrainerResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var v16Patch1ResourceSet *controller.ResourceSet
 	{
 		c := v16patch1.DrainerResourceSetConfig{
@@ -266,6 +286,24 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		}
 
 		v17ResourceSet, err = v17.NewDrainerResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var v17patch1ResourceSet *controller.ResourceSet
+	{
+		c := v17patch1.DrainerResourceSetConfig{
+			G8sClient:     config.G8sClient,
+			HostAWSConfig: hostAWSConfig,
+			K8sClient:     config.K8sClient,
+			Logger:        config.Logger,
+
+			GuestUpdateEnabled: config.GuestUpdateEnabled,
+			ProjectName:        config.ProjectName,
+		}
+
+		v17patch1ResourceSet, err = v17patch1.NewDrainerResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -328,8 +366,10 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		v12Patch1ResourceSet,
 		v13ResourceSet,
 		v14Patch3ResourceSet,
+		v14Patch4ResourceSet,
 		v16Patch1ResourceSet,
 		v17ResourceSet,
+		v17patch1ResourceSet,
 		v18ResourceSet,
 		v19ResourceSet,
 		v20ResourceSet,

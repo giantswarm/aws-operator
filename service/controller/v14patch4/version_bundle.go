@@ -8,8 +8,8 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "aws-operator",
-				Description: "Set higher timeouts for NVME driver.",
+				Component:   "kubernetes",
+				Description: "Update to 1.10.11 (CVE-2018-1002105).",
 				Kind:        versionbundle.KindAdded,
 			},
 		},
@@ -36,10 +36,10 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "kubernetes",
-				Version: "1.10.4",
+				Version: "1.10.11",
 			},
 		},
 		Name:    "aws-operator",
-		Version: "3.3.3",
+		Version: "3.3.4",
 	}
 }
