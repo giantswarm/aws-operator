@@ -7,8 +7,10 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v12patch1"
 	"github.com/giantswarm/aws-operator/service/controller/v13"
 	"github.com/giantswarm/aws-operator/service/controller/v14patch3"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch4"
 	"github.com/giantswarm/aws-operator/service/controller/v16patch1"
 	"github.com/giantswarm/aws-operator/service/controller/v17"
+	"github.com/giantswarm/aws-operator/service/controller/v17patch1"
 	"github.com/giantswarm/aws-operator/service/controller/v18"
 	"github.com/giantswarm/aws-operator/service/controller/v19"
 	"github.com/giantswarm/aws-operator/service/controller/v20"
@@ -23,8 +25,10 @@ func NewVersionBundles() []versionbundle.Bundle {
 	versionBundles = append(versionBundles, v12patch1.VersionBundle())
 	versionBundles = append(versionBundles, v13.VersionBundle())
 	versionBundles = append(versionBundles, v14patch3.VersionBundle())
+	versionBundles = append(versionBundles, v14patch4.VersionBundle())
 	versionBundles = append(versionBundles, v16patch1.VersionBundle())
 	versionBundles = append(versionBundles, v17.VersionBundle())
+	versionBundles = append(versionBundles, v17patch1.VersionBundle())
 	versionBundles = append(versionBundles, v18.VersionBundle())
 	versionBundles = append(versionBundles, v19.VersionBundle())
 	versionBundles = append(versionBundles, v20.VersionBundle())

@@ -18,12 +18,18 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v14patch3"
 	v14patch3adapter "github.com/giantswarm/aws-operator/service/controller/v14patch3/adapter"
 	v14patch3cloudconfig "github.com/giantswarm/aws-operator/service/controller/v14patch3/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v14patch4"
+	v14patch4adapter "github.com/giantswarm/aws-operator/service/controller/v14patch4/adapter"
+	v14patch4cloudconfig "github.com/giantswarm/aws-operator/service/controller/v14patch4/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v16patch1"
 	v16patch1adapter "github.com/giantswarm/aws-operator/service/controller/v16patch1/adapter"
 	v16patch1cloudconfig "github.com/giantswarm/aws-operator/service/controller/v16patch1/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v17"
 	v17adapter "github.com/giantswarm/aws-operator/service/controller/v17/adapter"
 	v17cloudconfig "github.com/giantswarm/aws-operator/service/controller/v17/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v17patch1"
+	v17patch1adapter "github.com/giantswarm/aws-operator/service/controller/v17patch1/adapter"
+	v17patch1cloudconfig "github.com/giantswarm/aws-operator/service/controller/v17patch1/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v18"
 	v18adapter "github.com/giantswarm/aws-operator/service/controller/v18/adapter"
 	v18cloudconfig "github.com/giantswarm/aws-operator/service/controller/v18/cloudconfig"
@@ -421,6 +427,49 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var resourceSetV14Patch4 *controller.ResourceSet
+	{
+		c := v14patch4.ClusterResourceSetConfig{
+			CertsSearcher:      legacyCertsSearcher,
+			G8sClient:          config.G8sClient,
+			HostAWSConfig:      hostAWSConfig,
+			HostAWSClients:     awsHostClients,
+			K8sClient:          config.K8sClient,
+			Logger:             config.Logger,
+			RandomkeysSearcher: randomKeysSearcher,
+
+			AccessLogsExpiration:   config.AccessLogsExpiration,
+			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
+			DeleteLoggingBucket:    config.DeleteLoggingBucket,
+			EncrypterBackend:       config.EncrypterBackend,
+			GuestUpdateEnabled:     config.GuestUpdateEnabled,
+			PodInfraContainerImage: config.PodInfraContainerImage,
+			Route53Enabled:         config.Route53Enabled,
+			IncludeTags:            config.IncludeTags,
+			InstallationName:       config.InstallationName,
+			OIDC: v14patch4cloudconfig.OIDCConfig{
+				ClientID:      config.OIDC.ClientID,
+				IssuerURL:     config.OIDC.IssuerURL,
+				UsernameClaim: config.OIDC.UsernameClaim,
+				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			APIWhitelist: v14patch4adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
+			},
+			ProjectName:       config.ProjectName,
+			PublicRouteTables: config.PublicRouteTables,
+			RegistryDomain:    config.RegistryDomain,
+			SSOPublicKey:      config.SSOPublicKey,
+			VaultAddress:      config.VaultAddress,
+		}
+
+		resourceSetV14Patch4, err = v14patch4.NewClusterResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var resourceSetV16Patch1 *controller.ResourceSet
 	{
 		c := v16patch1.ClusterResourceSetConfig{
@@ -502,6 +551,49 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 
 		resourceSetV17, err = v17.NewClusterResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var resourceSetV17Patch1 *controller.ResourceSet
+	{
+		c := v17patch1.ClusterResourceSetConfig{
+			CertsSearcher:      legacyCertsSearcher,
+			G8sClient:          config.G8sClient,
+			HostAWSConfig:      hostAWSConfig,
+			HostAWSClients:     awsHostClients,
+			K8sClient:          config.K8sClient,
+			Logger:             config.Logger,
+			RandomkeysSearcher: randomKeysSearcher,
+
+			AccessLogsExpiration:   config.AccessLogsExpiration,
+			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
+			DeleteLoggingBucket:    config.DeleteLoggingBucket,
+			EncrypterBackend:       config.EncrypterBackend,
+			GuestUpdateEnabled:     config.GuestUpdateEnabled,
+			PodInfraContainerImage: config.PodInfraContainerImage,
+			Route53Enabled:         config.Route53Enabled,
+			IncludeTags:            config.IncludeTags,
+			InstallationName:       config.InstallationName,
+			OIDC: v17patch1cloudconfig.OIDCConfig{
+				ClientID:      config.OIDC.ClientID,
+				IssuerURL:     config.OIDC.IssuerURL,
+				UsernameClaim: config.OIDC.UsernameClaim,
+				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			APIWhitelist: v17patch1adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
+			},
+			ProjectName:       config.ProjectName,
+			PublicRouteTables: config.PublicRouteTables,
+			RegistryDomain:    config.RegistryDomain,
+			SSOPublicKey:      config.SSOPublicKey,
+			VaultAddress:      config.VaultAddress,
+		}
+
+		resourceSetV17Patch1, err = v17patch1.NewClusterResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -651,8 +743,10 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		resourceSetV12Patch1,
 		resourceSetV13,
 		resourceSetV14Patch3,
+		resourceSetV14Patch4,
 		resourceSetV16Patch1,
 		resourceSetV17,
+		resourceSetV17Patch1,
 		resourceSetV18,
 		resourceSetV19,
 		resourceSetV20,
