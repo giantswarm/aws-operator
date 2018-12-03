@@ -358,14 +358,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c47459aa2f876155168ba26b05f82b8854ad9081b13cfbd3562cb9f935e53dea"
-  name = "github.com/giantswarm/guestcluster"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "c2165954af1d7b6dc8300cc69a11227e1b943f72"
-
-[[projects]]
-  branch = "master"
   digest = "1:e541a2a3befc54580757b4269cab73bb5a218361413376e3eaddd6f40db7196e"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
@@ -382,7 +374,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:075a723474a2f5dde212732a35d4bf30947374396cc2a67a5ab50654b163e5c5"
+  digest = "1:3d95090483f5622822037a095afa37c364674a05d2cc5139247cfd20108e9bd6"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "v_3_3_3",
@@ -393,7 +385,7 @@
     "v_3_7_2",
   ]
   pruneopts = "T"
-  revision = "8e75ac4c46644a19f8b99913311abe6f9a996dea"
+  revision = "85fe0450d35eb5ca547330e456e1c3606098c4ec"
 
 [[projects]]
   branch = "master"
@@ -512,11 +504,19 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:7e6e1b2104f98d3d9422d3d5a55c4eb6f7867e514ef88fafb7a3057f9555c7a6"
+  digest = "1:559127ca99a84695b5f73d2c21f14cb576287b36a9ddeed1c24a55dbe5b90087"
   name = "github.com/giantswarm/statusresource"
   packages = ["."]
   pruneopts = "UT"
-  revision = "f4a1a0068353f19876ed0c4f8adee74b1a33dd00"
+  revision = "a0e50ac781c07143b071fc506dfe7983e7e6687a"
+
+[[projects]]
+  branch = "master"
+  digest = "1:d9667362ca1728cc39f13558618a45aab72db57b78786b6315869b69f8e1576c"
+  name = "github.com/giantswarm/tenantcluster"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "5f3dcee834cbb83ef2a9462566948676d5ef9a08"
 
 [[projects]]
   branch = "master"
@@ -527,12 +527,12 @@
   revision = "9a4f3249a5b5a080d13f1db2580cf09ba5d14ca1"
 
 [[projects]]
-  digest = "1:15e27372d379b45b18ac917b9dafc45c45485239490ece18cca97a12f9591146"
+  digest = "1:6295a00553abd595aa3c647d36b58eae91410f107ad554873aaaf7c71ca55855"
   name = "github.com/go-ini/ini"
   packages = ["."]
   pruneopts = "UT"
-  revision = "9c8236e659b76e87bf02044d06fde8683008ff3e"
-  version = "v1.39.0"
+  revision = "ffaaebdac6e54ce73b4e196b8406920921304ec9"
+  version = "v1.39.1"
 
 [[projects]]
   digest = "1:83a37f3bd4ccd13469775ef771e943e6c7cfaba6926decff6c83135e56512f08"
@@ -960,11 +960,11 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "eb0de9b17e854e9b1ccd9963efafc79862359959"
+  revision = "505ab145d0a99da450461ae2c1a9f6cd10d1f447"
 
 [[projects]]
   branch = "master"
-  digest = "1:c12edd415c90eb884aebe3de625e98a39fe1c9a6c8141d0b21261153de70b6f2"
+  digest = "1:818e5ec92ac1d615a333837441cfe79914c5702734b74334da5ae2b3768011fe"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -978,7 +978,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "fae4c4e3ad76c295c3d6d259f898136b4bf833a8"
+  revision = "351d144fa1fc0bd934e2408202be0c29f25e35a0"
 
 [[projects]]
   branch = "master"
@@ -1065,11 +1065,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:56b0bca90b7e5d1facf5fbdacba23e4e0ce069d25381b8e2f70ef1e7ebfb9c1a"
+  digest = "1:077c1c599507b3b3e9156d17d36e1e61928ee9b53a5b420f10f28ebd4a0b275c"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "31ac5d88444a9e7ad18077db9a165d793ad06a2e"
+  revision = "bd91e49a0898e27abb88c339b432fa53d7497ac0"
 
 [[projects]]
   digest = "1:bf7e2328a58176b7f29f3b425b0555745e9a18ed803f5fd8f6c2c13913a60bb4"
@@ -1711,7 +1711,6 @@
     "github.com/giantswarm/e2etests/update",
     "github.com/giantswarm/e2etests/update/provider",
     "github.com/giantswarm/exporterkit/collector",
-    "github.com/giantswarm/guestcluster",
     "github.com/giantswarm/helmclient",
     "github.com/giantswarm/ipam",
     "github.com/giantswarm/k8scloudconfig/v_3_3_3",
@@ -1744,6 +1743,7 @@
     "github.com/giantswarm/randomkeys",
     "github.com/giantswarm/randomkeys/randomkeystest",
     "github.com/giantswarm/statusresource",
+    "github.com/giantswarm/tenantcluster",
     "github.com/giantswarm/versionbundle",
     "github.com/prometheus/client_golang/prometheus",
     "github.com/spf13/afero",
