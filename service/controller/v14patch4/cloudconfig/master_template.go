@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_5_1"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_5_2"
 	"github.com/giantswarm/legacycerts/legacy"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
