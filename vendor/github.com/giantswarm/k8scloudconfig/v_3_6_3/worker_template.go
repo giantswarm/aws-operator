@@ -311,7 +311,7 @@ coreos:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE={{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.5
+      Environment="IMAGE={{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.5"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
