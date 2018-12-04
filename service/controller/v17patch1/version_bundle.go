@@ -12,11 +12,16 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Update to 1.11.5 (CVE-2018-1002105).",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "kubernetes",
+				Description: "Enabled admission plugins: DefaultTolerationSeconds, MutatingAdmissionWebhook, ValidatingAdmissionWebhook.",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
 				Name:    "calico",
-				Version: "3.2.0",
+				Version: "3.2.3",
 			},
 			{
 				Name:    "containerlinux",
