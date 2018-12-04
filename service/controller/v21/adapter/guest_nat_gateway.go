@@ -1,7 +1,7 @@
 package adapter
 
 import (
-	"github.com/giantswarm/aws-operator/service/controller/v20/key"
+	"github.com/giantswarm/aws-operator/service/controller/v21/key"
 )
 
 type Gateway struct {

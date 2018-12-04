@@ -5,7 +5,7 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v20/key"
+	"github.com/giantswarm/aws-operator/service/controller/v21/key"
 )
 
 const (
