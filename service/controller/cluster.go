@@ -734,7 +734,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			SSOPublicKey:      config.SSOPublicKey,
 			VaultAddress:      config.VaultAddress,
 		}
-		
+
 		resourceSetV20, err = v20.NewClusterResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
