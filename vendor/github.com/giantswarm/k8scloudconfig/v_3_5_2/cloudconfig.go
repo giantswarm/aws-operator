@@ -1,4 +1,4 @@
-package v_3_7_3
+package v_3_5_2
 
 import (
 	"bytes"
@@ -13,8 +13,6 @@ import (
 
 const (
 	defaultRegistryDomain = "quay.io"
-	kubernetesImage       = "giantswarm/hyperkube:v1.12.3"
-	etcdImage             = "giantswarm/etcd:v3.3.9"
 )
 
 type CloudConfigConfig struct {
@@ -51,12 +49,6 @@ func NewCloudConfig(config CloudConfigConfig) (*CloudConfig, error) {
 	if config.Params.RegistryDomain == "" {
 		config.Params.RegistryDomain = defaultRegistryDomain
 	}
-	// Set the kubernetes/etcd images since they are used multiple times
-	config.Params.Images = Images{
-		Kubernetes: kubernetesImage,
-		Etcd:       etcdImage,
-	}
-
 	// extract cluster base domain
 	config.Params.BaseDomain = strings.TrimPrefix(config.Params.Cluster.Kubernetes.API.Domain, "api.")
 

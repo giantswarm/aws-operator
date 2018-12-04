@@ -21,9 +21,20 @@ version directory, and then changes are introduced.
 ## [v3.7.3] WIP
 
 ### Changed
+- update kubernetes to 1.12.3 (CVE-2018-1002105)
 
 ### Removed
 - Remove params and manifests for CoreDNS and Ingress Controller now they are migrated to charts. 
+
+## [v3.6.3] WIP
+
+### Changed
+- update kubernetes to 1.10.11 (CVE-2018-1002105)
+
+## [v3.5.2] WIP
+
+### Changed
+- update kubernetes to 1.10.11 (CVE-2018-1002105)
 
 ## [v3.7.2]
 
@@ -307,6 +318,8 @@ chart-operator).
 
 [v4.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_0_0
 [v3.7.3]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_7_3
+[v3.6.3]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_6_3
+[v3.5.2]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_5_2
 [v3.7.2]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_7_2
 [v3.7.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_7_1
 [v3.7.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_7_0
