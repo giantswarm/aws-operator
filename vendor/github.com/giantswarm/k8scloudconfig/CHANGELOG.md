@@ -18,6 +18,21 @@ version directory, and then changes are introduced.
 - Updated Calico to 3.2.3
 - Updated Calico manifest with resource limits to get QoS policy guaranteed.
 
+## [v3.7.3] WIP
+
+### Changed
+- update kubernetes to 1.12.3 (CVE-2018-1002105)
+
+## [v3.6.3] WIP
+- update kubernetes to 1.11.5 (CVE-2018-1002105)
+
+### Changed
+- update kubernetes to 1.10.11 (CVE-2018-1002105)
+
+## [v3.5.2] WIP
+
+### Changed
+
 ## [v3.7.2]
 
 ### Changed
@@ -299,6 +314,12 @@ chart-operator).
 
 
 [v4.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_0_0
+[v3.7.3]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_7_3
+[v3.6.3]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_6_3
+[v3.5.2]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_5_2
+[v3.7.2]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_7_2
+[v3.7.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_7_1
+[v3.7.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_7_0
 [v3.6.2]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_6_2
 [v3.6.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_6_1
 [v3.6.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_6_0
