@@ -29,6 +29,10 @@ Outputs:
     Value: {{ $v.Worker.InstanceType }}
   WorkerCloudConfigVersion:
     Value: {{ $v.Worker.CloudConfig.Version }}
+  WorkerMax:
+    Value: {{ $v.Worker.Max }}
+  WorkerMin:
+    Value: {{ $v.Worker.Min }}
   VersionBundleVersion:
     Value:
       Ref: VersionBundleVersionParameter

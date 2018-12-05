@@ -9,6 +9,7 @@ import (
 )
 
 type GuestAutoScalingGroupAdapter struct {
+	ASGDesiredCapacity     int
 	ASGMaxSize             int
 	ASGMinSize             int
 	ASGType                string
@@ -22,9 +23,19 @@ type GuestAutoScalingGroupAdapter struct {
 }
 
 func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
-	workers := key.WorkerCount(cfg.CustomObject)
-	if workers <= 0 {
-		return microerror.Maskf(invalidConfigError, "at least 1 worker required, found %d", workers)
+	maxWorkers := key.ScalingMax(cfg.CustomObject)
+	minWorkers := key.ScalingMin(cfg.CustomObject)
+
+	if minWorkers <= 0 {
+		return microerror.Maskf(invalidConfigError, "at least 1 worker required, found %d", minWorkers)
+	}
+
+	if maxWorkers < minWorkers {
+		return microerror.Maskf(invalidConfigError, "maximum number of workers (%d) is smaller than minimum number of workers (%d)", maxWorkers, minWorkers)
+	}
+
+	if maxWorkers == minWorkers {
+		maxWorkers++
 	}
 
 	{
@@ -34,12 +45,16 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 		}
 	}
 
-	a.ASGMaxSize = workers + 1
-	a.ASGMinSize = workers
+	// Find out the minimum desired number of workers.
+	currentDesiredMinWorkers := minDesiredWorkers(minWorkers, maxWorkers, key.StatusScalingDesiredCapacity(cfg.CustomObject))
+
+	a.ASGDesiredCapacity = currentDesiredMinWorkers
+	a.ASGMaxSize = maxWorkers
+	a.ASGMinSize = minWorkers
 	a.ASGType = key.KindWorker
 	a.ClusterID = key.ClusterID(cfg.CustomObject)
-	a.MaxBatchSize = workerCountRatio(workers, asgMaxBatchSizeRatio)
-	a.MinInstancesInService = workerCountRatio(workers, asgMinInstancesRatio)
+	a.MaxBatchSize = workerCountRatio(currentDesiredMinWorkers, asgMaxBatchSizeRatio)
+	a.MinInstancesInService = workerCountRatio(currentDesiredMinWorkers, asgMinInstancesRatio)
 	a.HealthCheckGracePeriod = gracePeriodSeconds
 	a.RollingUpdatePauseTime = rollingUpdatePauseTime
 
@@ -60,4 +75,16 @@ func workerCountRatio(workers int, ratio float32) string {
 	}
 
 	return strconv.Itoa(rounded)
+}
+
+func minDesiredWorkers(minWorkers, maxWorkers, statusDesiredCapacity int) int {
+	if statusDesiredCapacity > maxWorkers {
+		return maxWorkers
+	}
+
+	if statusDesiredCapacity > minWorkers {
+		return statusDesiredCapacity
+	}
+
+	return minWorkers
 }

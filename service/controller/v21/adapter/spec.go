@@ -86,15 +86,16 @@ type StackState struct {
 	MasterCloudConfigVersion string
 	MasterInstanceMonitoring bool
 
-	WorkerCount              string
-	WorkerDockerVolumeSizeGB int
-	WorkerImageID            string
-	WorkerInstanceMonitoring bool
-	WorkerInstanceType       string
 	// TODO the cloud config versions shouldn't be injected here. These should
 	// actually always only be the ones the operator has hard coded. No other
 	// version should be used here ever.
 	WorkerCloudConfigVersion string
+	WorkerDockerVolumeSizeGB int
+	WorkerImageID            string
+	WorkerInstanceMonitoring bool
+	WorkerInstanceType       string
+	WorkerMax                int
+	WorkerMin                int
 
 	VersionBundleVersion string
 }

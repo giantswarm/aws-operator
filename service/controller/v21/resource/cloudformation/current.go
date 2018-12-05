@@ -217,6 +217,10 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			return StackState{}, microerror.Mask(err)
 		}
 
+		workerCloudConfigVersion, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerCloudConfigVersionKey)
+		if err != nil {
+			return StackState{}, microerror.Mask(err)
+		}
 		workerCount, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerCountKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
@@ -229,8 +233,16 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
-		workerCloudConfigVersion, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerCloudConfigVersionKey)
-		if err != nil {
+		workerMax, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerMaxKey)
+		if cloudformationservice.IsOutputNotFound(err) {
+			workerMax = workerCount
+		} else if err != nil {
+			return StackState{}, microerror.Mask(err)
+		}
+		workerMin, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerMinKey)
+		if cloudformationservice.IsOutputNotFound(err) {
+			workerMin = workerCount
+		} else if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
 
@@ -260,11 +272,12 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			MasterInstanceType:         masterInstanceType,
 			MasterCloudConfigVersion:   masterCloudConfigVersion,
 
-			WorkerCount:              workerCount,
+			WorkerCloudConfigVersion: workerCloudConfigVersion,
 			WorkerDockerVolumeSizeGB: workerDockerVolumeSizeGB,
 			WorkerImageID:            workerImageID,
 			WorkerInstanceType:       workerInstanceType,
-			WorkerCloudConfigVersion: workerCloudConfigVersion,
+			WorkerMax:                workerMax,
+			WorkerMin:                workerMin,
 
 			VersionBundleVersion: versionBundleVersion,
 		}

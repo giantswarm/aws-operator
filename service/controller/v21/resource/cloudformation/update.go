@@ -251,13 +251,15 @@ func (r *Resource) shouldScale(ctx context.Context, currentState, desiredState S
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to worker cloudconfig version")
 		return false
 	}
+	if currentState.WorkerMax != desiredState.WorkerMax {
+		return true
+	}
+	if currentState.WorkerMin != desiredState.WorkerMin {
+		return true
+	}
 	if currentState.VersionBundleVersion != desiredState.VersionBundleVersion {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to version bundle version")
 		return false
-	}
-
-	if currentState.WorkerCount != desiredState.WorkerCount {
-		return true
 	}
 
 	return false

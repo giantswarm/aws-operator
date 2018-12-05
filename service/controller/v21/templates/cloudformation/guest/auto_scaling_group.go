@@ -13,7 +13,7 @@ const AutoScalingGroup = `{{define "autoscaling_group"}}
       {{- range $az := $v.WorkerAZs }}
         - {{ $az }}
       {{end}}
-      DesiredCapacity: {{ $v.ASGMinSize }}
+      DesiredCapacity: {{ $v.ASGDesiredCapacity }}
       MinSize: {{ $v.ASGMinSize }}
       MaxSize: {{ $v.ASGMaxSize }}
       LaunchConfigurationName: !Ref {{ $v.ASGType }}LaunchConfiguration

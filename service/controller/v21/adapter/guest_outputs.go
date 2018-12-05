@@ -23,11 +23,12 @@ func (a *GuestOutputsAdapter) Adapt(config Config) error {
 
 	a.Worker.ASG.Key = key.WorkerASGKey
 	a.Worker.ASG.Ref = key.WorkerASGRef
-	a.Worker.Count = config.StackState.WorkerCount
+	a.Worker.CloudConfig.Version = config.StackState.WorkerCloudConfigVersion
 	a.Worker.DockerVolumeSizeGB = strconv.Itoa(config.StackState.WorkerDockerVolumeSizeGB)
 	a.Worker.ImageID = config.StackState.WorkerImageID
 	a.Worker.InstanceType = config.StackState.WorkerInstanceType
-	a.Worker.CloudConfig.Version = config.StackState.WorkerCloudConfigVersion
+	a.Worker.Max = config.StackState.WorkerMax
+	a.Worker.Min = config.StackState.WorkerMin
 
 	a.VersionBundle.Version = config.StackState.VersionBundleVersion
 
@@ -56,11 +57,12 @@ type GuestOutputsAdapterMasterDockerVolume struct {
 
 type GuestOutputsAdapterWorker struct {
 	ASG                GuestOutputsAdapterWorkerASG
-	Count              string
+	CloudConfig        GuestOutputsAdapterWorkerCloudConfig
 	DockerVolumeSizeGB string
 	ImageID            string
 	InstanceType       string
-	CloudConfig        GuestOutputsAdapterWorkerCloudConfig
+	Max                int
+	Min                int
 }
 
 type GuestOutputsAdapterWorkerASG struct {
