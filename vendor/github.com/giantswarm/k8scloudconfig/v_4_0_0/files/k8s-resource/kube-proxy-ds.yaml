@@ -33,7 +33,7 @@ spec:
       serviceAccountName: kube-proxy
       containers:
         - name: kube-proxy
-          image: {{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.1
+          image: {{ .RegistryDomain }}/{{ .Images.Kubernetes }}
           command:
           - /hyperkube
           - proxy

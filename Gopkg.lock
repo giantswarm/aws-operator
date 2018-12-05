@@ -373,10 +373,11 @@
   revision = "79a61ffad296f3f418d8f381e4f5f702d5245b50"
 
 [[projects]]
-  branch = "master"
-  digest = "1:9f9d5a1a936bf9aca61eeaba5f6d233708cb87d05384171940c9a032acf6856d"
+  branch = "update_v_4_0_0"
+  digest = "1:202984d00cc5b0d84762129aea0a01b72ab40b48dda8a7666e1cb684b3b9ccf0"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
+    "ignition/v_2_2_0",
     "v_3_3_3",
     "v_3_4_0",
     "v_3_5_1",
@@ -386,9 +387,10 @@
     "v_3_7_0",
     "v_3_7_2",
     "v_3_7_3",
+    "v_4_0_0",
   ]
   pruneopts = "T"
-  revision = "473efb000ff3109d6bf14ae69b2e2f4e9f290170"
+  revision = "8bf12eb9cc0cd8169b2cb01c1680ec04da5f2ff6"
 
 [[projects]]
   branch = "master"
@@ -1716,6 +1718,7 @@
     "github.com/giantswarm/exporterkit/collector",
     "github.com/giantswarm/helmclient",
     "github.com/giantswarm/ipam",
+    "github.com/giantswarm/k8scloudconfig/ignition/v_2_2_0",
     "github.com/giantswarm/k8scloudconfig/v_3_3_3",
     "github.com/giantswarm/k8scloudconfig/v_3_4_0",
     "github.com/giantswarm/k8scloudconfig/v_3_5_1",
@@ -1725,6 +1728,7 @@
     "github.com/giantswarm/k8scloudconfig/v_3_7_0",
     "github.com/giantswarm/k8scloudconfig/v_3_7_2",
     "github.com/giantswarm/k8scloudconfig/v_3_7_3",
+    "github.com/giantswarm/k8scloudconfig/v_4_0_0",
     "github.com/giantswarm/legacycerts/legacy",
     "github.com/giantswarm/legacycerts/legacy/legacytest",
     "github.com/giantswarm/microendpoint/endpoint/healthz",
