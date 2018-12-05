@@ -71,6 +71,7 @@ type ClusterConfig struct {
 	GuestSubnetMaskBits        int
 	GuestUpdateEnabled         bool
 	HostAWSConfig              ClusterConfigAWSConfig
+	IgnitionPath               string
 	IncludeTags                bool
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
@@ -763,6 +764,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			GuestUpdateEnabled:         config.GuestUpdateEnabled,
 			PodInfraContainerImage:     config.PodInfraContainerImage,
 			Route53Enabled:             config.Route53Enabled,
+			IgnitionPath:               config.IgnitionPath,
 			IncludeTags:                config.IncludeTags,
 			InstallationName:           config.InstallationName,
 			IPAMNetworkRange:           config.IPAMNetworkRange,

@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	FileOwner          = "root:root"
-	FilePermission     = 0700
-	GzipBase64Encoding = "gzip+base64"
+	FileOwnerUser  = "root"
+	FileOwnerGroup = "root"
+	FilePermission = 0700
 )
 
 // Config represents the configuration used to create a cloud config service.
@@ -20,6 +20,7 @@ type Config struct {
 	Encrypter encrypter.Interface
 	Logger    micrologger.Logger
 
+	IgnitionPath           string
 	OIDC                   OIDCConfig
 	PodInfraContainerImage string
 	RegistryDomain         string
@@ -31,6 +32,7 @@ type CloudConfig struct {
 	encrypter encrypter.Interface
 	logger    micrologger.Logger
 
+	ignitionPath        string
 	k8sAPIExtraArgs     []string
 	k8sKubeletExtraArgs []string
 	registryDomain      string
@@ -52,6 +54,9 @@ func New(config Config) (*CloudConfig, error) {
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
+	}
+	if config.IgnitionPath == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.IgnitionPath must not be empty", config)
 	}
 	if config.RegistryDomain == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.RegistryDomain must not be empty", config)
@@ -84,6 +89,7 @@ func New(config Config) (*CloudConfig, error) {
 		encrypter: config.Encrypter,
 		logger:    config.Logger,
 
+		ignitionPath:        config.IgnitionPath,
 		k8sAPIExtraArgs:     k8sAPIExtraArgs,
 		k8sKubeletExtraArgs: k8sKubeletExtraArgs,
 		registryDomain:      config.RegistryDomain,

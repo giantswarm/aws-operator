@@ -6,7 +6,7 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_7_3"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_0_0"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v21/controllercontext"
@@ -46,6 +46,12 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
 		params.RegistryDomain = c.registryDomain
 		params.SSOPublicKey = c.SSOPublicKey
+
+		ignitionPath := k8scloudconfig.GetIgnitionPath(c.ignitionPath)
+		params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
 	}
 
 	var newCloudConfig *k8scloudconfig.CloudConfig
@@ -65,7 +71,7 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 		}
 	}
 
-	return newCloudConfig.Base64(), nil
+	return newCloudConfig.String(), nil
 }
 
 type WorkerExtension struct {
@@ -91,14 +97,20 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		{
 			AssetContent: cloudconfig.DecryptTLSAssetsScript,
 			Path:         "/opt/bin/decrypt-tls-assets",
-			Owner:        "root:root",
-			Permissions:  0700,
+			Owner: k8scloudconfig.Owner{
+				User:  FileOwnerUser,
+				Group: FileOwnerGroup,
+			},
+			Permissions: 0700,
 		},
 		{
 			AssetContent: cloudconfig.WaitDockerConf,
 			Path:         "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
-			Owner:        "root:root",
-			Permissions:  0700,
+			Owner: k8scloudconfig.Owner{
+				User:  FileOwnerUser,
+				Group: FileOwnerGroup,
+			},
+			Permissions: 0700,
 		},
 	}
 
@@ -122,9 +134,12 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			meta := k8scloudconfig.FileMetadata{
 				AssetContent: b64Data,
 				Path:         f.AbsolutePath + ".enc",
-				Owner:        FileOwner,
-				Permissions:  0700,
-				Encoding:     "gzip+base64",
+				Owner: k8scloudconfig.Owner{
+					User:  FileOwnerUser,
+					Group: FileOwnerGroup,
+				},
+				Permissions: 0700,
+				Compression: true,
 			}
 
 			filesMeta = append(filesMeta, meta)
@@ -135,7 +150,7 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 	for _, m := range filesMeta {
 		data := e.templateData()
-		c, err := k8scloudconfig.RenderAssetContent(m.AssetContent, data)
+		c, err := k8scloudconfig.RenderFileAssetContent(m.AssetContent, data)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -156,20 +171,17 @@ func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: cloudconfig.DecryptTLSAssetsService,
 			Name:         "decrypt-tls-assets.service",
-			Enable:       false,
-			Command:      "start",
+			Enabled:      false,
 		},
 		{
 			AssetContent: cloudconfig.WorkerFormatVarLibDockerService,
 			Name:         "format-var-lib-docker.service",
-			Enable:       true,
-			Command:      "start",
+			Enabled:      true,
 		},
 		{
 			AssetContent: cloudconfig.PersistentVarLibDockerMount,
 			Name:         "var-lib-docker.mount",
-			Enable:       true,
-			Command:      "start",
+			Enabled:      true,
 		},
 		// Set bigger timeouts for NVME driver.
 		// Workaround for https://github.com/coreos/bugs/issues/2484
@@ -177,8 +189,7 @@ func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: cloudconfig.NVMESetTimeoutsUnit,
 			Name:         "nvme-set-timeouts.service",
-			Enable:       true,
-			Command:      "start",
+			Enabled:      true,
 		},
 	}
 
@@ -202,12 +213,7 @@ func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 }
 
 func (e *WorkerExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
-	newSections := []k8scloudconfig.VerbatimSection{
-		{
-			Name:    "storageclass",
-			Content: cloudconfig.InstanceStorageClass,
-		},
-	}
+	newSections := []k8scloudconfig.VerbatimSection{}
 
 	return newSections
 }

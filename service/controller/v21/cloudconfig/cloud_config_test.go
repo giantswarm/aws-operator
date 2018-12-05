@@ -1,16 +1,15 @@
 package cloudconfig
 
 import (
-	"bytes"
-	"compress/gzip"
 	"context"
-	"encoding/base64"
-	"io"
 	"strings"
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
+	ignition "github.com/giantswarm/k8scloudconfig/ignition/v_2_2_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_0_0"
+	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys"
 
@@ -54,21 +53,22 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
 
-		decoded, err := testDecodeTemplate(template)
+		templateBytes := []byte(template)
+		_, err = ignition.ConvertTemplatetoJSON(templateBytes)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
 
 		expectedStrings := []string{
-			"- path: /etc/kubernetes/ssl/etcd/client-ca.pem",
-			"- path: /etc/kubernetes/ssl/etcd/client-crt.pem",
-			"- path: /etc/kubernetes/ssl/etcd/client-key.pem",
-			"- name: decrypt-tls-assets.service",
-			"H4sIAAAAAAAA/1SNMQ7CMAxF957CF+jQNSviCuwldYgVYTd2aBQh7o4CVREeLL33pf8T8eLgzF7bWkj4JBzoNswrXVCNhB1s06Bo8lCP5gaAEf6wC0OvWOxDq8pGC+oRzmj+6r/UL2GzH43A8x1dt9MhYW90EDDFQFUoR6EQa8YglGv/KceKYR+hBblQaQ6er3cAAAD//9QjGEbUAAAA",
+			"/etc/kubernetes/ssl/etcd/client-ca.pem.enc",
+			"/etc/kubernetes/ssl/etcd/client-crt.pem.enc",
+			"/etc/kubernetes/ssl/etcd/client-key.pem.enc",
+			"decrypt-tls-assets.service",
+			"SDRzSUFBQUFBQUFBLzFTTk1RN0NNQXhGOTU3Q0YralFOU3ZpQ3V3bGRZZ1ZZVGQyYUJRaDdvNENWUkVlTEwzM3BmOFQ4ZUxnekY3YldrajRKQnpvTnN3clhWQ05oQjFzMDZCbzhsQ1A1Z2FBRWY2d0MwT3ZXT3hEcThwR0Mrb1J6bWorNnIvVUwyR3pINDNBOHgxZHQ5TWhZVzkwRURERlFGVW9SNkVRYThZZ2xHdi9LY2VLWVIraEJibFFhUTZlcjNjQUFBRC8vOVFqR0ViVUFBQUE=",
 		}
 		for _, expectedString := range expectedStrings {
-			if !strings.Contains(decoded, expectedString) {
-				t.Fatalf("want decoded to conain %q", expectedString)
+			if !strings.Contains(template, expectedString) {
+				t.Fatalf("want ignition to contain %q", expectedString)
 			}
 		}
 	}
@@ -107,53 +107,32 @@ func Test_Service_CloudConfig_NewWorkerTemplate(t *testing.T) {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
 
-		decoded, err := testDecodeTemplate(template)
-		if err != nil {
-			t.Fatalf("expected %#v got %#v", nil, err)
-		}
-
 		expectedStrings := []string{
-			"- path: /etc/kubernetes/ssl/etcd/client-ca.pem",
-			"- path: /etc/kubernetes/ssl/etcd/client-crt.pem",
-			"- path: /etc/kubernetes/ssl/etcd/client-key.pem",
-			"- name: decrypt-tls-assets.service",
-			"--region 123456789-super-magic-aws-region kms decrypt",
+			"/etc/kubernetes/ssl/etcd/client-ca.pem.enc",
+			"/etc/kubernetes/ssl/etcd/client-crt.pem.enc",
+			"/etc/kubernetes/ssl/etcd/client-key.pem.enc",
+			"decrypt-tls-assets.service",
 		}
 		for _, expectedString := range expectedStrings {
-			if !strings.Contains(decoded, expectedString) {
-				t.Fatalf("want decoded to conain %q", expectedString)
+			if !strings.Contains(template, expectedString) {
+				t.Fatalf("want ignition to contain %q", expectedString)
 			}
 		}
 	}
 }
 
-func testDecodeTemplate(template string) (string, error) {
-	decoded, err := base64.StdEncoding.DecodeString(template)
-	if err != nil {
-		return "", err
-	}
-	r, err := gzip.NewReader(bytes.NewReader(decoded))
-	if err != nil {
-		return "", err
-	}
-	var b bytes.Buffer
-	_, err = io.Copy(&b, r)
-	if err != nil {
-		return "", err
-	}
-	r.Close()
-
-	return b.String(), nil
-}
-
 func testNewCloudConfigService() (*CloudConfig, error) {
-	var err error
-
 	var ccService *CloudConfig
 	{
+		packagePath, err := k8scloudconfig.GetPackagePath()
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
 		c := Config{
 			Encrypter:      &encrypter.EncrypterMock{},
 			Logger:         microloggertest.New(),
+			IgnitionPath:   packagePath,
 			RegistryDomain: "quay.io",
 		}
 
