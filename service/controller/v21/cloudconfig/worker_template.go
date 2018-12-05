@@ -139,7 +139,6 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 					Group: FileOwnerGroup,
 				},
 				Permissions: 0700,
-				Compression: true,
 			}
 
 			filesMeta = append(filesMeta, meta)

@@ -139,7 +139,6 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 				User:  FileOwnerUser,
 				Group: FileOwnerGroup,
 			},
-			Compression: true,
 			Permissions: 0644,
 		},
 		{
@@ -227,7 +226,6 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 					Group: FileOwnerGroup,
 				},
 				Permissions: 0700,
-				Compression: true,
 			}
 
 			filesMeta = append(filesMeta, meta)
