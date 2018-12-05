@@ -69,7 +69,7 @@ required = [
   name = "github.com/giantswarm/e2etests"
 
 [[constraint]]
-  branch = "master"
+  branch = "async-collect"
   name = "github.com/giantswarm/exporterkit"
 
 [[constraint]]
@@ -101,7 +101,6 @@ required = [
   name = "github.com/giantswarm/legacycerts"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/operatorkit"
 
 [[constraint]]

@@ -10,15 +10,6 @@ const (
 )
 
 var (
-	cacheLastUpdatedGauge = prometheus.NewGauge(
-		prometheus.GaugeOpts{
-			Namespace: PrometheusNamespace,
-			Subsystem: PrometheusSubsystem,
-			Name:      "cache_last_updated",
-			Help:      "A gauge metric expressing the time of the last cache update.",
-		},
-	)
-
 	cacheSizeGauge = prometheus.NewGauge(
 		prometheus.GaugeOpts{
 			Namespace: PrometheusNamespace,
@@ -49,7 +40,6 @@ var (
 )
 
 func init() {
-	prometheus.MustRegister(cacheLastUpdatedGauge)
 	prometheus.MustRegister(cacheSizeGauge)
 	prometheus.MustRegister(watcherCloseCounter)
 	prometheus.MustRegister(watchEventCounter)

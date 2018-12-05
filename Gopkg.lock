@@ -349,12 +349,12 @@
   revision = "d4c171b8af43355ae5cb35bfd63a24aae3fbcc16"
 
 [[projects]]
-  branch = "master"
-  digest = "1:f9913f3a27cb225866dc43b92ea368315d46f80c7ee65fc6abe073d5dd1bccbb"
+  branch = "async-collect"
+  digest = "1:d5d997c647671bf489effcd9b7f30dd31c1756330ccc1ccdaf08fc01d51af9bb"
   name = "github.com/giantswarm/exporterkit"
   packages = ["collector"]
   pruneopts = "UT"
-  revision = "a60dbc99e177d2c5cb847c65dd60ecb1eca4796f"
+  revision = "e42aaf7ef7475b0f26692880224bf22652190935"
 
 [[projects]]
   branch = "master"
@@ -474,8 +474,8 @@
   revision = "5a0784e0ee23c5b732c0d15023ac3dce8aef145a"
 
 [[projects]]
-  branch = "master"
-  digest = "1:7e9b52f2a65b7fee454e3124eefefea3d0988a0fc636819cd4ba9999d7a14551"
+  branch = "admission-controller-endpoint"
+  digest = "1:9d8c4379a39c1688d5cc9dc81245b156113c53afc8cd2633a9edc7f628048d24"
   name = "github.com/giantswarm/operatorkit"
   packages = [
     "client/k8scrdclient",
@@ -489,10 +489,9 @@
     "controller/resource/metricsresource",
     "controller/resource/retryresource",
     "informer",
-    "informer/collector",
   ]
   pruneopts = "UT"
-  revision = "894bebfb2a6835b15394c329617a442a0725939f"
+  revision = "d19ac57a9b4fe364a5d7e4e75f8e016d9066c9dd"
 
 [[projects]]
   branch = "master"
