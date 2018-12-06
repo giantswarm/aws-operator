@@ -2,7 +2,6 @@ package cloudconfig
 
 import (
 	"bytes"
-	"compress/gzip"
 	"context"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
@@ -38,7 +37,7 @@ func (e *baseExtension) templateData() templateData {
 	return data
 }
 
-func (e *baseExtension) encryptAndGzip(ctx context.Context, data []byte) ([]byte, error) {
+func (e *baseExtension) encrypt(ctx context.Context, data []byte) ([]byte, error) {
 	var encrypted []byte
 	{
 		e, err := e.encrypter.Encrypt(ctx, e.encryptionKey, string(data))
@@ -48,23 +47,5 @@ func (e *baseExtension) encryptAndGzip(ctx context.Context, data []byte) ([]byte
 		encrypted = []byte(e)
 	}
 
-	var gzipped []byte
-	{
-		buf := new(bytes.Buffer)
-		w := gzip.NewWriter(buf)
-
-		_, err := w.Write(encrypted)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		err = w.Close()
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		gzipped = buf.Bytes()
-	}
-
-	return gzipped, nil
+	return encrypted, nil
 }

@@ -124,7 +124,7 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			//
 			ctx = controllercontext.NewContext(ctx, *e.ctlCtx)
 
-			data, err := e.encryptAndGzip(ctx, f.Data)
+			data, err := e.encrypt(ctx, f.Data)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
