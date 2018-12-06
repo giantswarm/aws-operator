@@ -10,26 +10,6 @@ const Small = `{
         }
       ]
     }
-  },
-  "storage": {
-    "filesystems": [
-      {
-        "mount": {
-          "device": "/dev/nvme1n1",
-          "format": "xfs",
-          "label": "docker"
-        },
-        "name": "docker"
-      },
-      {
-        "mount": {
-          "device": "/dev/nvme2n1",
-          "format": "ext4",
-          "label": "etcd"
-        },
-        "name": "var-lib-etcd"
-      }
-    ]
   }
 }
 `
