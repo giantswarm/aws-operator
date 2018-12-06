@@ -262,7 +262,7 @@ storage:
         name: {{ .Metadata.Owner.Group }}
       mode: {{printf "%#o" .Metadata.Permissions}}
       contents:
-        source: "data:text/plain;charset=utf-8,{{ .Content }}"
+        source: "data:text/plain;charset=utf-8;base64,{{ .Content }}"
         {{ if .Metadata.Compression }}
         compression: gzip
         {{end}}

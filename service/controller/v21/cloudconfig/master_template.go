@@ -259,7 +259,7 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: cloudconfig.NVMEUdevTriggerUnit,
 			Name:         "ebs-nvme-udev-trigger.service",
-			Enabled:      false,
+			Enabled:      true,
 		},
 		// Set bigger timeouts for NVME driver.
 		// Workaround for https://github.com/coreos/bugs/issues/2484
@@ -272,10 +272,7 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: cloudconfig.DecryptTLSAssetsService,
 			Name:         "decrypt-tls-assets.service",
-			// Do not enable TLS assets decrypt unit so that it won't get automatically
-			// executed on master reboot. This will prevent eventual races with the
-			// asset files creation.
-			Enabled: false,
+			Enabled:      true,
 		},
 		{
 			AssetContent: cloudconfig.MasterFormatVarLibDockerService,
@@ -290,10 +287,7 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: cloudconfig.DecryptKeysAssetsService,
 			Name:         "decrypt-keys-assets.service",
-			// Do not enable key decrypt unit so that it won't get automatically
-			// executed on master reboot. This will prevent eventual races with the
-			// key files creation.
-			Enabled: false,
+			Enabled:      true,
 		},
 		// Format etcd EBS volume.
 		{

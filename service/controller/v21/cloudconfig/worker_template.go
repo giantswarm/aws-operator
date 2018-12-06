@@ -170,7 +170,7 @@ func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: cloudconfig.DecryptTLSAssetsService,
 			Name:         "decrypt-tls-assets.service",
-			Enabled:      false,
+			Enabled:      true,
 		},
 		{
 			AssetContent: cloudconfig.WorkerFormatVarLibDockerService,

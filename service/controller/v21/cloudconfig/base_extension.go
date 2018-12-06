@@ -1,7 +1,6 @@
 package cloudconfig
 
 import (
-	"bytes"
 	"context"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
