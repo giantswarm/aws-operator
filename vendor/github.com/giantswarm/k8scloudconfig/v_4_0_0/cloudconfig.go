@@ -14,7 +14,7 @@ import (
 
 const (
 	defaultRegistryDomain = "quay.io"
-	kubernetesImage       = "giantswarm/hyperkube:v1.12.3"
+	kubernetesImage       = "giantswarm/hyperkube:v1.13.0"
 	etcdImage             = "giantswarm/etcd:v3.3.9"
 )
 
@@ -27,6 +27,16 @@ func DefaultCloudConfigConfig() CloudConfigConfig {
 	return CloudConfigConfig{
 		Params:   Params{},
 		Template: "",
+	}
+}
+
+func DefaultParams() Params {
+	return Params{
+		RegistryDomain: defaultRegistryDomain,
+		Images: Images{
+			Kubernetes: kubernetesImage,
+			Etcd:       etcdImage,
+		},
 	}
 }
 
@@ -47,15 +57,6 @@ func NewCloudConfig(config CloudConfigConfig) (*CloudConfig, error) {
 	// Default to 443 for non AWS providers.
 	if config.Params.EtcdPort == 0 {
 		config.Params.EtcdPort = 443
-	}
-	// Set default registry to quay.io
-	if config.Params.RegistryDomain == "" {
-		config.Params.RegistryDomain = defaultRegistryDomain
-	}
-	// Set the kubernetes/etcd images since they are used multiple times
-	config.Params.Images = Images{
-		Kubernetes: kubernetesImage,
-		Etcd:       etcdImage,
 	}
 
 	// extract cluster base domain

@@ -36,6 +36,10 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 			encryptionKey: encryptionKey,
 		}
 
+		// Default registry, kubernetes, etcd images etcd.
+		// Required for proper rending of the templates.
+		params = k8scloudconfig.DefaultParams()
+
 		params.Cluster = customObject.Spec.Cluster
 		params.Extension = &WorkerExtension{
 			baseExtension: be,

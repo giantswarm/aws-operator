@@ -42,6 +42,8 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 			encryptionKey: encryptionKey,
 		}
 
+		params = k8scloudconfig.DefaultParams()
+
 		params.Cluster = customObject.Spec.Cluster
 		params.DisableCoreDNS = true
 		params.DisableEncryptionAtREST = true
