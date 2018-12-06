@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export KUBECONFIG=/etc/kubernetes/config/addons-kubeconfig.yml
+export KUBECONFIG=/etc/kubernetes/config/addons-kubeconfig.yaml
 # kubectl 1.12.2
 KUBECTL={{ .RegistryDomain }}/giantswarm/docker-kubectl:f5cae44c480bd797dc770dd5f62d40b74063c0d7
 
