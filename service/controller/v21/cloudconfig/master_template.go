@@ -2,7 +2,6 @@ package cloudconfig
 
 import (
 	"context"
-	"encoding/base64"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
@@ -16,7 +15,7 @@ import (
 )
 
 // NewMasterTemplate generates a new master cloud config template and returns it
-// as a base64 encoded string.
+// as a string.
 func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster) (string, error) {
 	var err error
 
@@ -218,10 +217,8 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 				return nil, microerror.Mask(err)
 			}
 
-			b64Data := base64.StdEncoding.EncodeToString(data)
-
 			meta := k8scloudconfig.FileMetadata{
-				AssetContent: b64Data,
+				AssetContent: string(data),
 				Path:         f.AbsolutePath + ".enc",
 				Owner: k8scloudconfig.Owner{
 					User:  FileOwnerUser,

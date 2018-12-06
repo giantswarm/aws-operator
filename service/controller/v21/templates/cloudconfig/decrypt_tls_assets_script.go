@@ -131,11 +131,9 @@ rkt run \
     for encKey in $(find /etc/kubernetes/ssl -name "*.pem.enc"); do
       echo decrypting $encKey
       f=$(mktemp $encKey.XXXXXXXX)
-      decoded=$(mktemp)
-      cat $encKey | base64 -d > $decoded
       /usr/bin/aws \
         --region {{.AWS.Region}} kms decrypt \
-        --ciphertext-blob fileb://$decoded \
+        --ciphertext-blob fileb://$encKey \
         --output text \
         --query Plaintext \
       | base64 -d > $f

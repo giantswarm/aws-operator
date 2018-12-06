@@ -2,6 +2,7 @@ package cloudconfig
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -52,7 +53,7 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
-
+		fmt.Printf("%s", template)
 		templateBytes := []byte(template)
 		_, err = ignition.ConvertTemplatetoJSON(templateBytes)
 		if err != nil {
@@ -64,7 +65,7 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 			"/etc/kubernetes/ssl/etcd/client-crt.pem.enc",
 			"/etc/kubernetes/ssl/etcd/client-key.pem.enc",
 			"decrypt-tls-assets.service",
-			"SDRzSUFBQUFBQUFBLzFTTk1RN0NNQXhGOTU3Q0YralFOU3ZpQ3V3bGRZZ1ZZVGQyYUJRaDdvNENWUkVlTEwzM3BmOFQ4ZUxnekY3YldrajRKQnpvTnN3clhWQ05oQjFzMDZCbzhsQ1A1Z2FBRWY2d0MwT3ZXT3hEcThwR0Mrb1J6bWorNnIvVUwyR3pINDNBOHgxZHQ5TWhZVzkwRURERlFGVW9SNkVRYThZZ2xHdi9LY2VLWVIraEJibFFhUTZlcjNjQUFBRC8vOVFqR0ViVUFBQUE=",
+			"a2luZDogRW5jcnlwdGlvbkNvbmZpZwphcGlWZXJzaW9uOiB2MQpyZXNvdXJjZXM6CiAgLSByZXNvdXJjZXM6CiAgICAtIHNlY3JldHMKICAgIHByb3ZpZGVyczoKICAgIC0gYWVzY2JjOgogICAgICAgIGtleXM6CiAgICAgICAgLSBuYW1lOiBrZXkxCiAgICAgICAgICBzZWNyZXQ6IGZla2hmaXdvaXFob2lmaHdxZWZvaXF3ZWZvaWtxaHdlZgogICAgLSBpZGVudGl0eToge30=",
 		}
 		for _, expectedString := range expectedStrings {
 			if !strings.Contains(template, expectedString) {

@@ -3,7 +3,6 @@ package cloudconfig
 import (
 	"bytes"
 	"context"
-	"encoding/base64"
 	"text/template"
 
 	"github.com/giantswarm/microerror"
@@ -35,9 +34,7 @@ func renderRandomKeyTmplSet(ctx context.Context, encrypter encrypter.Interface, 
 			return RandomKeyTmplSet{}, microerror.Mask(err)
 		}
 
-		encoded := base64.StdEncoding.EncodeToString([]byte(enc))
-
-		randomKeyTmplSet.APIServerEncryptionKey = encoded
+		randomKeyTmplSet.APIServerEncryptionKey = enc
 	}
 
 	return randomKeyTmplSet, nil
