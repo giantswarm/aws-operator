@@ -55,6 +55,9 @@ systemd:
       After=k8s-setup-network-env.service docker.service
       Requires=k8s-setup-network-env.service docker.service
       [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      TimeoutStartSec=0
       EnvironmentFile=/etc/network-environment
       ExecStart=/bin/bash -c '/usr/bin/envsubst </etc/kubernetes/config/kubelet-config.yaml.tmpl >/etc/kubernetes/config/kubelet-config.yaml'
       [Install]
@@ -141,7 +144,7 @@ systemd:
       -v /usr/sbin/mkfs.xfs:/usr/sbin/mkfs.xfs \
       -v /usr/lib64/libxfs.so.0:/usr/lib/libxfs.so.0 \
       -v /usr/lib64/libxcmd.so.0:/usr/lib/libxcmd.so.0 \
-      -v /usr/lib64/libreadline.so.6:/usr/lib/libreadline.so.6 \
+      -v /usr/lib64/libreadline.so.7:/usr/lib/libreadline.so.7 \
       -e ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/client-ca.pem \
       -e ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/client-crt.pem \
       -e ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/client-key.pem \
@@ -156,7 +159,6 @@ systemd:
       --containerized \
       --enable-server \
       --logtostderr=true \
-      --cadvisor-port=4194 \
       --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
       --network-plugin=cni \
       --register-node=true \
