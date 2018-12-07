@@ -66,7 +66,7 @@ systemd:
       RemainAfterExit=yes
       TimeoutStartSec=0
       EnvironmentFile=/etc/network-environment
-      ExecStart=/bin/bash -c '/usr/bin/envsubst </etc/kubernetes/config/kubelet-config.yaml.tmpl >/etc/kubernetes/config/kubelet-config.yaml'
+      ExecStart=/bin/bash -c '/usr/bin/envsubst </etc/kubernetes/config/kubelet.yaml.tmpl >/etc/kubernetes/config/kubelet.yaml'
       [Install]
       WantedBy=multi-user.target
   - name: docker.service
@@ -229,7 +229,7 @@ systemd:
       -v /var/lib/kubelet/:/var/lib/kubelet:rw,rshared \
       -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
-      -v /etc/kubernetes/manifests/:/etc/kubernetes/manifests/ \
+      -v /etc/kubernetes/kubeconfig/:/etc/kubernetes/kubeconfig/ \
       -v /etc/cni/net.d/:/etc/cni/net.d/ \
       -v /opt/cni/bin/:/opt/cni/bin/ \
       -v /usr/sbin/iscsiadm:/usr/sbin/iscsiadm \
@@ -251,7 +251,7 @@ systemd:
       {{ . }} \
       {{ end -}}
       --node-ip=${DEFAULT_IPV4} \
-      --config=/etc/kubernetes/config/kubelet-config.yaml \
+      --config=/etc/kubernetes/config/kubelet.yaml \
       --containerized \
       --enable-server \
       --logtostderr=true \
@@ -259,7 +259,6 @@ systemd:
       --network-plugin=cni \
       --register-node=true \
       --register-with-taints=node-role.kubernetes.io/master=:NoSchedule \
-      --pod-manifest-path=/etc/kubernetes/manifests \
       --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yaml \
       --node-labels="node-role.kubernetes.io/master,role=master,ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
       --v=2"
@@ -420,53 +419,53 @@ storage:
       contents:
         source: "data:text/plain;charset=utf-8;base64,{{  index .Files "conf/k8s-addons" }}"
 
-    - path: /etc/kubernetes/config/addons-kubeconfig.yaml
+    - path: /etc/kubernetes/kubeconfig/addons.yaml
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/addons-kubeconfig.yaml" }}"
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/addons.yaml" }}"
 
-    - path: /etc/kubernetes/config/proxy-config.yaml
+    - path: /srv/proxy-config.yaml
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/proxy-config.yaml" }}"
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/kube-proxy.yaml" }}"
 
-    - path: /etc/kubernetes/config/proxy-kubeconfig.yaml
+    - path: /etc/kubernetes/kubeconfig/kube-proxy.yaml
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/proxy-kubeconfig.yaml" }}"
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/kube-proxy.yaml" }}"
 
-    - path: /etc/kubernetes/config/kubelet-config.yaml.tmpl
+    - path: /etc/kubernetes/config/kubelet.yaml.tmpl
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/kubelet-config.yaml.tmpl" }}"
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/kubelet.yaml.tmpl" }}"
 
-    - path: /etc/kubernetes/config/kubelet-kubeconfig.yaml
+    - path: /etc/kubernetes/kubeconfig/kubelet.yaml
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/kubelet-kubeconfig.yaml" }}"
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/kubelet.yaml" }}"
 
-    - path: /etc/kubernetes/config/controller-manager-kubeconfig.yaml
+    - path: /etc/kubernetes/kubeconfig/controller-manager.yaml
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/controller-manager-kubeconfig.yaml" }}"
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/controller-manager.yaml" }}"
 
-    - path: /etc/kubernetes/config/scheduler-config.yaml
+    - path: /etc/kubernetes/config/scheduler.yaml
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/scheduler-config.yaml" }}"
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/scheduler.yaml" }}"
 
-    - path: /etc/kubernetes/config/scheduler-kubeconfig.yaml
+    - path: /etc/kubernetes/kubeconfig/scheduler.yaml
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/scheduler-kubeconfig.yaml" }}"
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/scheduler.yaml" }}"
 
     {{ if not .DisableEncryptionAtREST -}}
     - path: /etc/kubernetes/encryption/k8s-encryption-config.yaml

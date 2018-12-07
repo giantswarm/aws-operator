@@ -59,7 +59,7 @@ systemd:
       RemainAfterExit=yes
       TimeoutStartSec=0
       EnvironmentFile=/etc/network-environment
-      ExecStart=/bin/bash -c '/usr/bin/envsubst </etc/kubernetes/config/kubelet-config.yaml.tmpl >/etc/kubernetes/config/kubelet-config.yaml'
+      ExecStart=/bin/bash -c '/usr/bin/envsubst </etc/kubernetes/config/kubelet.yaml.tmpl >/etc/kubernetes/config/kubelet.yaml'
       [Install]
       WantedBy=multi-user.target
   - name: docker.service
@@ -134,6 +134,7 @@ systemd:
       -v /var/lib/kubelet/:/var/lib/kubelet:rw,rshared \
       -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
+      -v /etc/kubernetes/kubeconfig/:/etc/kubernetes/kubeconfig/ \
       -v /etc/cni/net.d/:/etc/cni/net.d/ \
       -v /opt/cni/bin/:/opt/cni/bin/ \
       -v /usr/sbin/iscsiadm:/usr/sbin/iscsiadm \
@@ -155,14 +156,14 @@ systemd:
       {{ . }} \
       {{ end -}}
       --node-ip=${DEFAULT_IPV4} \
-      --config=/etc/kubernetes/config/kubelet-config.yaml \
+      --config=/etc/kubernetes/config/kubelet.yaml \
       --containerized \
       --enable-server \
       --logtostderr=true \
       --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
       --network-plugin=cni \
       --register-node=true \
-      --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml \
+      --kubeconfig=/etc/kubernetes/kubeconfig/kubelet.yaml \
       --node-labels="ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
       --v=2"
       ExecStop=-/usr/bin/docker stop -t 10 $NAME
@@ -198,12 +199,6 @@ storage:
       mode: 0644
       contents:
         source: "data:text/plain;base64,{{ index .Files "conf/trusted-user-ca-keys.pem" }}"
-
-    - path: /etc/kubernetes/config/proxy-config.yaml
-      filesystem: root
-      mode: 0644
-      contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/proxy-config.yaml" }}"
 
     - path: /etc/kubernetes/config/proxy-kubeconfig.yaml
       filesystem: root
