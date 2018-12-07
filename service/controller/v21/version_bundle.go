@@ -8,8 +8,8 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "aws-operator",
-				Description: "Add your changes here.",
+				Component:   "cloudconfig",
+				Description: "Replace cloudinit with ignition.",
 				Kind:        versionbundle.KindAdded,
 			},
 		},
