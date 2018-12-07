@@ -212,7 +212,7 @@ storage:
       contents:
         source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/kubelet-config.yaml.tmpl" }}"
 
-    - path: /etc/kubernetes/config/kubelet-kubeconfig.yaml
+    - path: /etc/kubernetes/config/kubelet.yaml
       filesystem: root
       mode: 0644
       contents:
