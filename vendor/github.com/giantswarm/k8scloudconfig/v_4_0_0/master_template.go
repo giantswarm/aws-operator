@@ -266,7 +266,7 @@ systemd:
       ExecStop=-/usr/bin/docker stop -t 10 $NAME
       ExecStopPost=-/usr/bin/docker rm -f $NAME
       [Install]
-      WantedBy=multi-user.target
+      WantedBy=network-online.target
   - name: etcd2.service
     enabled: false
     mask: true
