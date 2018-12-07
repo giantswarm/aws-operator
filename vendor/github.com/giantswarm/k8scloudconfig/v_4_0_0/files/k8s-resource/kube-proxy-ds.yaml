@@ -71,10 +71,7 @@ spec:
         configMap:
           name: kube-proxy
       - hostPath:
-          path: /etc/kubernetes/config/
-        name: k8s-config
-      - hostPath:
-          path: /etc/kubernetes/config/
+          path: /etc/kubernetes/kubeconfig/
         name: k8s-kubeconfig
       - hostPath:
           path: /etc/kubernetes/ssl

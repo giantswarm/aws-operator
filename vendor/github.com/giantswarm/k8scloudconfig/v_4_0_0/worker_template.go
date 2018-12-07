@@ -200,23 +200,17 @@ storage:
       contents:
         source: "data:text/plain;base64,{{ index .Files "conf/trusted-user-ca-keys.pem" }}"
 
-    - path: /etc/kubernetes/config/proxy-kubeconfig.yaml
-      filesystem: root
-      mode: 0644
-      contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/proxy-kubeconfig.yaml" }}"
-
     - path: /etc/kubernetes/config/kubelet.yaml.tmpl
       filesystem: root
       mode: 0644
       contents:
         source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/kubelet.yaml.tmpl" }}"
 
-    - path: /etc/kubernetes/config/kubelet.yaml
+    - path: /etc/kubernetes/kubeconfig/kubelet.yaml
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/kubelet-kubeconfig.yaml" }}"
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/kubelet.yaml" }}"
 
     - path: /opt/wait-for-domains
       filesystem: root
