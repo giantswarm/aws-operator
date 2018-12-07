@@ -436,7 +436,7 @@ storage:
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/kube-proxy.yaml" }}"
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/kube-proxy-master.yaml" }}"
 
     - path: /etc/kubernetes/config/kubelet.yaml.tmpl
       filesystem: root
