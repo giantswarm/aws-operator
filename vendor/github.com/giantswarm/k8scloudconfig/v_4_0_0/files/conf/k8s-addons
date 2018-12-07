@@ -50,7 +50,7 @@ done
 # create kube-proxy configmap
 while
     /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv $KUBECTL create configmap kube-proxy --from-file=kube-proxy.yaml=/srv/kube-proxy-config.yaml -o yaml --dry-run \
-    | /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} -i --log-driver=none -a stdin -a stdout -a stderr --net=host --rm $KUBECTL apply -n kube-system -f -
+    | /usr/bin/docker run  -i --log-driver=none -a stdin -a stdout -a stderr -e KUBECONFIG=${KUBECONFIG} -v /etc/kubernetes:/etc/kubernetes --net=host --rm $KUBECTL apply -n kube-system -f -
     [ "$?" -ne "0" ]
 do
     echo "failed to configure kube-proxy from /srv/kube-proxy-confg.yaml, retrying in 5 sec"
