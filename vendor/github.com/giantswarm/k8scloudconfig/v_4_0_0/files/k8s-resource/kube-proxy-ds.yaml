@@ -37,7 +37,7 @@ spec:
           command:
           - /hyperkube
           - proxy
-          - --config=/etc/kubernetes/config/proxy-config.yaml
+          - --config=/etc/kubernetes/config/kube-proxy.yaml
           - --v=2
           livenessProbe:
             httpGet:

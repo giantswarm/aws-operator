@@ -360,6 +360,12 @@ storage:
         source: "data:text/plain;charset=utf-8;base64,{{  index .Files "k8s-resource/ingress-controller-svc.yaml" }}"
     {{- end }}
 
+    - path: /srv/kube-proxy-config.yaml
+      filesystem: root
+      mode: 0644
+      contents:
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/kube-proxy.yaml" }}"
+
     - path: /srv/kube-proxy-sa.yaml
       filesystem: root
       mode: 0644
@@ -425,12 +431,6 @@ storage:
       mode: 0644
       contents:
         source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/addons.yaml" }}"
-
-    - path: /srv/proxy-config.yaml
-      filesystem: root
-      mode: 0644
-      contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/kube-proxy.yaml" }}"
 
     - path: /etc/kubernetes/kubeconfig/kube-proxy.yaml
       filesystem: root
