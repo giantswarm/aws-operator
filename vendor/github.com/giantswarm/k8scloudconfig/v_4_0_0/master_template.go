@@ -208,6 +208,7 @@ systemd:
       Environment="IMAGE={{ .RegistryDomain }}/{{ .Images.Kubernetes }}"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
+      ExecStartPre=/bin/sh -c "until ip r get ${DEFAULT_IPV4} > /dev/null; do echo 'waiting for a network'; sleep 1; done"
       ExecStartPre=/usr/bin/docker pull $IMAGE
       ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
       ExecStartPre=-/usr/bin/docker rm -f $NAME
@@ -266,7 +267,7 @@ systemd:
       ExecStop=-/usr/bin/docker stop -t 10 $NAME
       ExecStopPost=-/usr/bin/docker rm -f $NAME
       [Install]
-      WantedBy=network-online.target
+      WantedBy=multi-user.target
   - name: etcd2.service
     enabled: false
     mask: true
