@@ -212,6 +212,12 @@ storage:
       contents:
         source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/kubelet-worker.yaml" }}"
 
+    - path: /etc/kubernetes/kubeconfig/kube-proxy.yaml
+      filesystem: root
+      mode: 0644
+      contents:
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/kube-proxy.yaml" }}"
+
     - path: /opt/wait-for-domains
       filesystem: root
       mode: 0544
