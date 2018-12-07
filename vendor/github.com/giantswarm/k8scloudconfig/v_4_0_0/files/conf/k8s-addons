@@ -72,7 +72,7 @@ done
 echo "kube-proxy successfully installed"
 
 # restart ds to apply config from configmap
-/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv $KUBECTL delete pods -l k8s-app=kube-proxy -n kube-system
+/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL delete pods -l k8s-app=kube-proxy -n kube-system
 
 {{ if not .DisableCalico -}}
 

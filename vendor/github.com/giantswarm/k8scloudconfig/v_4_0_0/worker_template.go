@@ -210,7 +210,7 @@ storage:
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/kubelet.yaml" }}"
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/kubelet-worker.yaml" }}"
 
     - path: /opt/wait-for-domains
       filesystem: root
