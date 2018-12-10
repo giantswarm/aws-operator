@@ -37,7 +37,7 @@ spec:
           command:
           - /hyperkube
           - proxy
-          - --config=/etc/kubernetes/config/kube-proxy.yaml
+          - --config=/etc/kubernetes/config/proxy-config.yml
           - --v=2
           livenessProbe:
             httpGet:
@@ -67,11 +67,11 @@ spec:
             name: lib-modules
             readOnly: true
       volumes:
-      - name: k8s-config
-        configMap:
-          name: kube-proxy
       - hostPath:
-          path: /etc/kubernetes/kubeconfig/
+          path: /etc/kubernetes/config/
+        name: k8s-config
+      - hostPath:
+          path: /etc/kubernetes/config/
         name: k8s-kubeconfig
       - hostPath:
           path: /etc/kubernetes/ssl

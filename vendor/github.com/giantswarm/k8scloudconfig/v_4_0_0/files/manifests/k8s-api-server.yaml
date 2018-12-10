@@ -23,16 +23,13 @@ spec:
     - {{ . }}
     {{ end -}}
     - --allow-privileged=true
-    - --insecure-bind-address=0.0.0.0
     - --anonymous-auth=false
-    - --insecure-port=0
     - --kubelet-https=true
     - --kubelet-preferred-address-types=InternalIP
     - --secure-port={{.Cluster.Kubernetes.API.SecurePort}}
     - --bind-address=$(HOST_IP)
     - --etcd-prefix={{.Cluster.Etcd.Prefix}}
     - --profiling=false
-    - --repair-malformed-updates=false
     - --service-account-lookup=true
     - --authorization-mode=RBAC
     - --enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,DefaultStorageClass,PersistentVolumeClaimResize,PodSecurityPolicy,Priority,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook

@@ -208,7 +208,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		for _, f := range certFiles {
 			// TODO We should just pass ctx to Files.
 			//
-			//	See https://github.com/giantswarm/giantswarm/issues/4329.
+			// 	See https://github.com/giantswarm/giantswarm/issues/4329.
 			//
 			ctx = controllercontext.NewContext(ctx, *e.ctlCtx)
 

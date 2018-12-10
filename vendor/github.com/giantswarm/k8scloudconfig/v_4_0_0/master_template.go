@@ -208,7 +208,8 @@ systemd:
       Environment="IMAGE={{ .RegistryDomain }}/{{ .Images.Kubernetes }}"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
-      ExecStartPre=/bin/sh -c "until ip r get ${DEFAULT_IPV4} > /dev/null; do echo 'waiting for a network'; sleep 1; done"
+      # https://github.com/kubernetes/kubernetes/issues/71078
+      ExecStartPre=/bin/sleep 60
       ExecStartPre=/usr/bin/docker pull $IMAGE
       ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
       ExecStartPre=-/usr/bin/docker rm -f $NAME
@@ -361,6 +362,12 @@ storage:
         source: "data:text/plain;charset=utf-8;base64,{{  index .Files "k8s-resource/ingress-controller-svc.yaml" }}"
     {{- end }}
 
+    - path: /etc/kubernetes/config/proxy-config.yml
+      filesystem: root
+      mode: 0644
+      contents:
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/kube-proxy.yaml" }}"
+
     - path: /srv/kube-proxy-config.yaml
       filesystem: root
       mode: 0644
@@ -432,6 +439,12 @@ storage:
       mode: 0644
       contents:
         source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/addons.yaml" }}"
+
+    - path: /etc/kubernetes/config/proxy-kubeconfig.yaml
+      filesystem: root
+      mode: 0644
+      contents:
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/kube-proxy-master.yaml" }}"
 
     - path: /etc/kubernetes/kubeconfig/kube-proxy.yaml
       filesystem: root
