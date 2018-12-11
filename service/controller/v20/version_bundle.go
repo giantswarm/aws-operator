@@ -8,6 +8,11 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
+				Component:   "aws-operator",
+				Description: "Added a policy in the worker role to allow listing and creating host zones.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
 				Component:   "kubernetes",
 				Description: "Upgrade to 1.12.3 (CVE-2018-1002105).",
 				Kind:        versionbundle.KindAdded,
