@@ -30,6 +30,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v21/resource/namespace"
 	"github.com/giantswarm/aws-operator/service/controller/v21/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/v21/resource/s3object"
+	"github.com/giantswarm/aws-operator/service/controller/v21/resource/scalingstatus"
 	"github.com/giantswarm/aws-operator/service/controller/v21/resource/service"
 	"github.com/giantswarm/certs"
 	"github.com/giantswarm/microerror"
@@ -336,6 +337,19 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var scalingStatusResource controller.Resource
+	{
+		c := scalingstatus.ResourceConfig{
+			G8sClient: config.G8sClient,
+			Logger:    config.Logger,
+		}
+
+		scalingStatusResource, err = scalingstatus.NewResource(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var cloudformationResource controller.Resource
 	{
 		c := cloudformationresource.Config{
@@ -486,6 +500,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		s3BucketObjectResource,
 		loadBalancerResource,
 		ebsVolumeResource,
+		scalingStatusResource,
 		cloudformationResource,
 		namespaceResource,
 		serviceResource,
