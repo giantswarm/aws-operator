@@ -6,7 +6,7 @@ var invalidConfigError = &microerror.Error{
 	Kind: "invalidConfigError",
 }
 
-// IsInsserts invalidConfigError.
+// IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }

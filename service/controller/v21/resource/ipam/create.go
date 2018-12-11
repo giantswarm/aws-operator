@@ -45,7 +45,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 		customResource = *newObj
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "fetchted latest version of custom resource")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "fetched latest version of custom resource")
 	}
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if subnet needs to be allocated for cluster")
