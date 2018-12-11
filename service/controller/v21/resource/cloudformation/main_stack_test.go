@@ -104,6 +104,10 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 				Etcd: v1alpha1.ClusterEtcd{
 					Domain: "etcd.domain",
 				},
+				Scaling: v1alpha1.ClusterScaling{
+					Max: 3,
+					Min: 3,
+				},
 			},
 			AWS: v1alpha1.AWSConfigSpecAWS{
 				API: v1alpha1.AWSConfigSpecAWSAPI{
@@ -184,12 +188,14 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		MasterCloudConfigVersion:   key.CloudConfigVersion,
 		MasterInstanceMonitoring:   false,
 
+		WorkerCloudConfigVersion: key.CloudConfigVersion,
 		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
 		WorkerDockerVolumeSizeGB: key.WorkerDockerVolumeSizeGB(customObject),
 		WorkerImageID:            imageID,
 		WorkerInstanceMonitoring: true,
 		WorkerInstanceType:       key.WorkerInstanceType(customObject),
-		WorkerCloudConfigVersion: key.CloudConfigVersion,
+		WorkerMax:                key.ScalingMax(customObject),
+		WorkerMin:                key.ScalingMin(customObject),
 
 		VersionBundleVersion: key.VersionBundleVersion(customObject),
 	}
@@ -476,6 +482,10 @@ func TestMainHostPostTemplateExistingFields(t *testing.T) {
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
 				ID: "test-cluster",
+				Scaling: v1alpha1.ClusterScaling{
+					Max: 3,
+					Min: 3,
+				},
 			},
 			AWS: v1alpha1.AWSConfigSpecAWS{
 				VPC: v1alpha1.AWSConfigSpecAWSVPC{
@@ -579,6 +589,10 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 				Etcd: v1alpha1.ClusterEtcd{
 					Domain: "etcd.domain",
 				},
+				Scaling: v1alpha1.ClusterScaling{
+					Max: 1,
+					Min: 1,
+				},
 			},
 			AWS: v1alpha1.AWSConfigSpecAWS{
 				API: v1alpha1.AWSConfigSpecAWSAPI{
@@ -626,12 +640,14 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 		MasterCloudConfigVersion:   key.CloudConfigVersion,
 		MasterInstanceMonitoring:   false,
 
+		WorkerCloudConfigVersion: key.CloudConfigVersion,
 		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
 		WorkerDockerVolumeSizeGB: key.WorkerDockerVolumeSizeGB(customObject),
 		WorkerImageID:            imageID,
 		WorkerInstanceMonitoring: true,
 		WorkerInstanceType:       key.WorkerInstanceType(customObject),
-		WorkerCloudConfigVersion: key.CloudConfigVersion,
+		WorkerMax:                key.ScalingMax(customObject),
+		WorkerMin:                key.ScalingMin(customObject),
 
 		VersionBundleVersion: key.VersionBundleVersion(customObject),
 	}
@@ -704,6 +720,10 @@ func TestMainGuestTemplateChinaRegion(t *testing.T) {
 				Etcd: v1alpha1.ClusterEtcd{
 					Domain: "etcd.domain",
 				},
+				Scaling: v1alpha1.ClusterScaling{
+					Max: 1,
+					Min: 1,
+				},
 			},
 			AWS: v1alpha1.AWSConfigSpecAWS{
 				API: v1alpha1.AWSConfigSpecAWSAPI{
@@ -750,11 +770,13 @@ func TestMainGuestTemplateChinaRegion(t *testing.T) {
 		MasterCloudConfigVersion:   key.CloudConfigVersion,
 		MasterInstanceMonitoring:   false,
 
+		WorkerCloudConfigVersion: key.CloudConfigVersion,
 		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
 		WorkerImageID:            imageID,
 		WorkerInstanceMonitoring: true,
 		WorkerInstanceType:       key.WorkerInstanceType(customObject),
-		WorkerCloudConfigVersion: key.CloudConfigVersion,
+		WorkerMax:                key.ScalingMax(customObject),
+		WorkerMin:                key.ScalingMin(customObject),
 
 		VersionBundleVersion: key.VersionBundleVersion(customObject),
 	}

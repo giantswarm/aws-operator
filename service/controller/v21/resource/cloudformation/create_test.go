@@ -31,6 +31,10 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 						Domain: "mysubdomain.mydomain.com",
 					},
 				},
+				Scaling: v1alpha1.ClusterScaling{
+					Max: 1,
+					Min: 1,
+				},
 			},
 			AWS: v1alpha1.AWSConfigSpecAWS{
 				AZ: "eu-central-1a",

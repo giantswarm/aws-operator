@@ -182,12 +182,10 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 				return StackState{}, microerror.Mask(err)
 			}
 
-			sz, err := strconv.ParseUint(v, 10, 32)
+			workerDockerVolumeSizeGB, err = strconv.Atoi(v)
 			if err != nil {
 				return StackState{}, microerror.Mask(err)
 			}
-
-			workerDockerVolumeSizeGB = int(sz)
 		}
 
 		masterImageID, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.MasterImageIDKey)
@@ -233,17 +231,33 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
-		workerMax, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerMaxKey)
-		if cloudformationservice.IsOutputNotFound(err) {
-			workerMax = workerCount
-		} else if err != nil {
-			return StackState{}, microerror.Mask(err)
+		var workerMax int
+		{
+			max, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerMaxKey)
+			if cloudformationservice.IsOutputNotFound(err) {
+				max = workerCount
+			} else if err != nil {
+				return StackState{}, microerror.Mask(err)
+			}
+
+			workerMax, err = strconv.Atoi(max)
+			if err != nil {
+				return StackState{}, microerror.Mask(err)
+			}
 		}
-		workerMin, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerMinKey)
-		if cloudformationservice.IsOutputNotFound(err) {
-			workerMin = workerCount
-		} else if err != nil {
-			return StackState{}, microerror.Mask(err)
+		var workerMin int
+		{
+			min, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerMinKey)
+			if cloudformationservice.IsOutputNotFound(err) {
+				min = workerCount
+			} else if err != nil {
+				return StackState{}, microerror.Mask(err)
+			}
+
+			workerMin, err = strconv.Atoi(min)
+			if err != nil {
+				return StackState{}, microerror.Mask(err)
+			}
 		}
 
 		versionBundleVersion, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.VersionBundleVersionKey)

@@ -68,7 +68,7 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 			description: "basic matching, all fields present",
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: defaultCluster,
+					Cluster: defaultClusterWithScaling(3, 3),
 					AWS: v1alpha1.AWSConfigSpecAWS{
 						AZ: "myaz",
 						Workers: []v1alpha1.AWSConfigSpecAWSNode{
@@ -101,7 +101,7 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 			description: "7 node cluster, batch size and min instances are correct",
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: defaultCluster,
+					Cluster: defaultClusterWithScaling(7, 7),
 					AWS: v1alpha1.AWSConfigSpecAWS{
 						AZ: "myaz",
 						Workers: []v1alpha1.AWSConfigSpecAWSNode{

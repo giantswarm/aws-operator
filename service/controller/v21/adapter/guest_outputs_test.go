@@ -81,32 +81,37 @@ func Test_CloudFormation_Adapter_Outputs_WorkerCloudConfigVersion(t *testing.T) 
 func Test_CloudFormation_Adapter_Outputs_WorkerCount(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
-		Description         string
-		Config              Config
-		ExpectedWorkerCount string
+		Description       string
+		Config            Config
+		ExpectedWorkerMax int
+		ExpectedWorkerMin int
 	}{
 		{
-			Description: "worker count should match the number of workers within the configured custom object when one worker is given",
+			Description: "worker's max/min value should match the configuration",
 			Config: Config{
 				Clients:      Clients{},
 				CustomObject: v1alpha1.AWSConfig{},
 				StackState: StackState{
-					WorkerCount: "1",
+					WorkerMax: 10,
+					WorkerMin: 3,
 				},
 			},
-			ExpectedWorkerCount: "1",
+			ExpectedWorkerMax: 10,
+			ExpectedWorkerMin: 3,
 		},
 
 		{
-			Description: "worker count should match the number of workers within the configured custom object when three workers are given",
+			Description: "worker' max/min value should match the configuration",
 			Config: Config{
 				Clients:      Clients{},
 				CustomObject: v1alpha1.AWSConfig{},
 				StackState: StackState{
-					WorkerCount: "3",
+					WorkerMax: 3,
+					WorkerMin: 3,
 				},
 			},
-			ExpectedWorkerCount: "3",
+			ExpectedWorkerMax: 3,
+			ExpectedWorkerMin: 3,
 		},
 	}
 
@@ -119,8 +124,11 @@ func Test_CloudFormation_Adapter_Outputs_WorkerCount(t *testing.T) {
 				t.Fatalf("expected %#v got %#v", nil, err)
 			}
 
-			if a.Worker.Count != tc.ExpectedWorkerCount {
-				t.Fatalf("expected %s got %s", tc.ExpectedWorkerCount, a.Worker.Count)
+			if a.Worker.Max != tc.ExpectedWorkerMax {
+				t.Fatalf("expected max: %d got %d", tc.ExpectedWorkerMax, a.Worker.Max)
+			}
+			if a.Worker.Min != tc.ExpectedWorkerMin {
+				t.Fatalf("expected min: %d got %d", tc.ExpectedWorkerMin, a.Worker.Min)
 			}
 		})
 	}

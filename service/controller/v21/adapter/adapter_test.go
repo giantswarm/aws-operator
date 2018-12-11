@@ -8,6 +8,9 @@ import (
 
 var (
 	defaultCluster = v1alpha1.Cluster{
+		Etcd: v1alpha1.ClusterEtcd{
+			Domain: "etcd.domain",
+		},
 		ID: "test-cluster",
 		Kubernetes: v1alpha1.ClusterKubernetes{
 			API: v1alpha1.ClusterKubernetesAPI{
@@ -17,11 +20,19 @@ var (
 				Domain: "ingress.domain",
 			},
 		},
-		Etcd: v1alpha1.ClusterEtcd{
-			Domain: "etcd.domain",
+		Scaling: v1alpha1.ClusterScaling{
+			Max: 1,
+			Min: 1,
 		},
 	}
 )
+
+func defaultClusterWithScaling(min, max int) v1alpha1.Cluster {
+	c := defaultCluster
+	c.Scaling.Min = min
+	c.Scaling.Max = max
+	return c
+}
 
 func TestAdapterGuestMain(t *testing.T) {
 	t.Parallel()
