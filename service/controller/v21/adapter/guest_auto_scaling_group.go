@@ -77,6 +77,31 @@ func workerCountRatio(workers int, ratio float32) string {
 	return strconv.Itoa(rounded)
 }
 
+// minDesiredWorkers calculates appropriate minimum value to be set for ASG
+// Desired value and to be used for computation of workerCountRatio.
+//
+// When cluster-autoscaler has scaled cluster and ASG's Desired value is higher
+// than minimum number of instances allowed for that ASG, then it makes sense to
+// consider Desired value as minimum number of running instances for further
+// operational computations.
+//
+// Example:
+// Initially ASG has minimum of 3 workers and maximum of 10. Due to amount of
+// workload deployed on workers, cluster-autoscaler has scaled current Desired
+// number of instances to 5. Therefore it makes sense to consider 5 as minimum
+// number of nodes also when working on batch updates on ASG instances.
+//
+// Example 2:
+// When end user is scaling cluster and adding restrictions to its size, it
+// might be that initial ASG configuration is following:
+// 		- Min: 3
+//		- Max: 10
+// 		- Desired: 10
+//
+// Now end user decides that it must be scaled down so maximum size is decreased
+// to 7. When desired number of instances is temporarily bigger than maximum
+// number of instances, it must be fixed to be maximum number of instances.
+//
 func minDesiredWorkers(minWorkers, maxWorkers, statusDesiredCapacity int) int {
 	if statusDesiredCapacity > maxWorkers {
 		return maxWorkers
