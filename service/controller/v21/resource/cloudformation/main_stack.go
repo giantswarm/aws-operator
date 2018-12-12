@@ -54,7 +54,7 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 			MasterInstanceMonitoring:   stackState.MasterInstanceMonitoring,
 
 			WorkerCloudConfigVersion: stackState.WorkerCloudConfigVersion,
-			WorkerCount:              stackState.WorkerCount,
+			WorkerDesired:            stackState.WorkerDesired,
 			WorkerDockerVolumeSizeGB: stackState.WorkerDockerVolumeSizeGB,
 			WorkerImageID:            stackState.WorkerImageID,
 			WorkerInstanceMonitoring: stackState.WorkerInstanceMonitoring,

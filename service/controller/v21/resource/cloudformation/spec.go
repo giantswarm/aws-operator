@@ -33,7 +33,7 @@ type StackState struct {
 	ShouldUpdate bool
 
 	WorkerCloudConfigVersion string
-	WorkerCount              string
+	WorkerDesired            int
 	WorkerDockerVolumeSizeGB int
 	WorkerImageID            string
 	WorkerInstanceMonitoring bool

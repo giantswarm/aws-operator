@@ -3,11 +3,11 @@ package cloudformation
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	"github.com/giantswarm/aws-operator/client/aws"
@@ -19,12 +19,13 @@ import (
 func testConfig() Config {
 	c := Config{}
 
+	c.EncrypterBackend = "kms"
+	c.G8sClient = fake.NewSimpleClientset()
 	c.GuestPrivateSubnetMaskBits = 25
 	c.GuestPublicSubnetMaskBits = 25
 	c.HostClients = &adapter.Clients{}
-	c.Logger = microloggertest.New()
-	c.EncrypterBackend = "kms"
 	c.InstallationName = "myinstallation"
+	c.Logger = microloggertest.New()
 
 	return c
 }
@@ -189,13 +190,10 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		MasterInstanceMonitoring:   false,
 
 		WorkerCloudConfigVersion: key.CloudConfigVersion,
-		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
 		WorkerDockerVolumeSizeGB: key.WorkerDockerVolumeSizeGB(customObject),
 		WorkerImageID:            imageID,
 		WorkerInstanceMonitoring: true,
 		WorkerInstanceType:       key.WorkerInstanceType(customObject),
-		WorkerMax:                key.ScalingMax(customObject),
-		WorkerMin:                key.ScalingMin(customObject),
 
 		VersionBundleVersion: key.VersionBundleVersion(customObject),
 	}
@@ -266,10 +264,7 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Fatal("master CloudConfig version output element not found")
 	}
-	if !strings.Contains(body, key.WorkerCountKey+":") {
-		fmt.Println(body)
-		t.Fatal("workers output element not found")
-	}
+
 	if !strings.Contains(body, key.WorkerImageIDKey+":") {
 		fmt.Println(body)
 		t.Fatal("WorkerImageID output element not found")
@@ -641,13 +636,10 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 		MasterInstanceMonitoring:   false,
 
 		WorkerCloudConfigVersion: key.CloudConfigVersion,
-		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
 		WorkerDockerVolumeSizeGB: key.WorkerDockerVolumeSizeGB(customObject),
 		WorkerImageID:            imageID,
 		WorkerInstanceMonitoring: true,
 		WorkerInstanceType:       key.WorkerInstanceType(customObject),
-		WorkerMax:                key.ScalingMax(customObject),
-		WorkerMin:                key.ScalingMin(customObject),
 
 		VersionBundleVersion: key.VersionBundleVersion(customObject),
 	}
@@ -771,12 +763,9 @@ func TestMainGuestTemplateChinaRegion(t *testing.T) {
 		MasterInstanceMonitoring:   false,
 
 		WorkerCloudConfigVersion: key.CloudConfigVersion,
-		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
 		WorkerImageID:            imageID,
 		WorkerInstanceMonitoring: true,
 		WorkerInstanceType:       key.WorkerInstanceType(customObject),
-		WorkerMax:                key.ScalingMax(customObject),
-		WorkerMin:                key.ScalingMin(customObject),
 
 		VersionBundleVersion: key.VersionBundleVersion(customObject),
 	}

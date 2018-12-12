@@ -19,8 +19,6 @@ Outputs:
     Value: {{ $v.Master.CloudConfig.Version }}
   {{ $v.Worker.ASG.Key }}:
     Value: !Ref {{ $v.Worker.ASG.Ref }}
-  WorkerCount:
-    Value: {{ $v.Worker.Count }}
   WorkerDockerVolumeSizeGB:
     Value: {{ $v.Worker.DockerVolumeSizeGB }}
   WorkerImageID:
@@ -29,10 +27,6 @@ Outputs:
     Value: {{ $v.Worker.InstanceType }}
   WorkerCloudConfigVersion:
     Value: {{ $v.Worker.CloudConfig.Version }}
-  WorkerMax:
-    Value: {{ $v.Worker.Max }}
-  WorkerMin:
-    Value: {{ $v.Worker.Min }}
   VersionBundleVersion:
     Value:
       Ref: VersionBundleVersionParameter

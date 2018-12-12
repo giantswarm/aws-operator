@@ -90,7 +90,7 @@ type StackState struct {
 	// actually always only be the ones the operator has hard coded. No other
 	// version should be used here ever.
 	WorkerCloudConfigVersion string
-	WorkerCount              string
+	WorkerDesired            int
 	WorkerDockerVolumeSizeGB int
 	WorkerImageID            string
 	WorkerInstanceMonitoring bool

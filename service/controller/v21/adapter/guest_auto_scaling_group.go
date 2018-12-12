@@ -46,7 +46,7 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	}
 
 	// Find out the minimum desired number of workers.
-	currentDesiredMinWorkers := minDesiredWorkers(minWorkers, maxWorkers, key.StatusScalingDesiredCapacity(cfg.CustomObject))
+	currentDesiredMinWorkers := minDesiredWorkers(minWorkers, maxWorkers, cfg.StackState.WorkerDesired)
 
 	a.ASGDesiredCapacity = currentDesiredMinWorkers
 	a.ASGMaxSize = maxWorkers
