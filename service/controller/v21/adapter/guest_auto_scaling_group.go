@@ -34,6 +34,8 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 		return microerror.Maskf(invalidConfigError, "maximum number of workers (%d) is smaller than minimum number of workers (%d)", maxWorkers, minWorkers)
 	}
 
+	// When ASG size is static, add room for one additional instance so that
+	// ASG can start new instance while old one is being drained.
 	if maxWorkers == minWorkers {
 		maxWorkers++
 	}
