@@ -204,6 +204,15 @@ func IsTillerNotFound(err error) bool {
 	return microerror.Cause(err) == tillerNotFoundError
 }
 
+var tillerOutdatedError = &microerror.Error{
+	Kind: "tillerOutdatedError",
+}
+
+// IsTillerOutdated asserts tillerOutdatedError.
+func IsTillerOutdated(err error) bool {
+	return microerror.Cause(err) == tillerOutdatedError
+}
+
 var tooManyResultsError = &microerror.Error{
 	Kind: "tooManyResultsError",
 }
