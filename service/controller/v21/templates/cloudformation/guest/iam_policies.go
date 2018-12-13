@@ -120,6 +120,8 @@ const IAMPolicies = `{{define "iam_policies"}}
               - "autoscaling:DescribeAutoScalingGroups"
               - "autoscaling:DescribeAutoScalingInstances"
               - "autoscaling:DescribeTags"
+              - "autoscaling:DescribeLaunchConfigurations"
+              - "ec2:DescribeLaunchTemplateVersions"
             Resource: "*"
 
           - Effect: "Allow"
