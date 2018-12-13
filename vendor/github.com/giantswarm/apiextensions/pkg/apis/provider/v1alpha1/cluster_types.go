@@ -12,6 +12,7 @@ type Cluster struct {
 	ID         string            `json:"id" yaml:"id"`
 	Kubernetes ClusterKubernetes `json:"kubernetes" yaml:"kubernetes"`
 	Masters    []ClusterNode     `json:"masters" yaml:"masters"`
+	Scaling    ClusterScaling    `json:"scaling" yaml:"scaling"`
 	Version    string            `json:"version" yaml:"version"`
 	Workers    []ClusterNode     `json:"workers" yaml:"workers"`
 }
@@ -100,4 +101,11 @@ type ClusterKubernetesSSHUser struct {
 
 type ClusterNode struct {
 	ID string `json:"id" yaml:"id"`
+}
+
+type ClusterScaling struct {
+	// Max defines maximum number of worker nodes guest cluster is allowed to have.
+	Max int `json:"max" yaml:"max"`
+	// Min defines minimum number of worker nodes required to be present in guest cluster.
+	Min int `json:"min" yaml:"min"`
 }

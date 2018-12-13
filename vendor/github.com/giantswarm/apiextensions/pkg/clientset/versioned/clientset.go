@@ -19,6 +19,7 @@ limitations under the License.
 package versioned
 
 import (
+	appv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/app/v1alpha1"
 	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/core/v1alpha1"
 	examplev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/example/v1alpha1"
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/provider/v1alpha1"
@@ -30,6 +31,9 @@ import (
 
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
+	AppV1alpha1() appv1alpha1.AppV1alpha1Interface
+	// Deprecated: please explicitly pick a version if possible.
+	App() appv1alpha1.AppV1alpha1Interface
 	CoreV1alpha1() corev1alpha1.CoreV1alpha1Interface
 	// Deprecated: please explicitly pick a version if possible.
 	Core() corev1alpha1.CoreV1alpha1Interface
@@ -45,9 +49,21 @@ type Interface interface {
 // version included in a Clientset.
 type Clientset struct {
 	*discovery.DiscoveryClient
+	appV1alpha1      *appv1alpha1.AppV1alpha1Client
 	coreV1alpha1     *corev1alpha1.CoreV1alpha1Client
 	exampleV1alpha1  *examplev1alpha1.ExampleV1alpha1Client
 	providerV1alpha1 *providerv1alpha1.ProviderV1alpha1Client
+}
+
+// AppV1alpha1 retrieves the AppV1alpha1Client
+func (c *Clientset) AppV1alpha1() appv1alpha1.AppV1alpha1Interface {
+	return c.appV1alpha1
+}
+
+// Deprecated: App retrieves the default version of AppClient.
+// Please explicitly pick a version.
+func (c *Clientset) App() appv1alpha1.AppV1alpha1Interface {
+	return c.appV1alpha1
 }
 
 // CoreV1alpha1 retrieves the CoreV1alpha1Client
@@ -99,6 +115,10 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 	}
 	var cs Clientset
 	var err error
+	cs.appV1alpha1, err = appv1alpha1.NewForConfig(&configShallowCopy)
+	if err != nil {
+		return nil, err
+	}
 	cs.coreV1alpha1, err = corev1alpha1.NewForConfig(&configShallowCopy)
 	if err != nil {
 		return nil, err
@@ -124,6 +144,7 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 // panics if there is an error in the config.
 func NewForConfigOrDie(c *rest.Config) *Clientset {
 	var cs Clientset
+	cs.appV1alpha1 = appv1alpha1.NewForConfigOrDie(c)
 	cs.coreV1alpha1 = corev1alpha1.NewForConfigOrDie(c)
 	cs.exampleV1alpha1 = examplev1alpha1.NewForConfigOrDie(c)
 	cs.providerV1alpha1 = providerv1alpha1.NewForConfigOrDie(c)
@@ -135,6 +156,7 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 // New creates a new Clientset for the given RESTClient.
 func New(c rest.Interface) *Clientset {
 	var cs Clientset
+	cs.appV1alpha1 = appv1alpha1.New(c)
 	cs.coreV1alpha1 = corev1alpha1.New(c)
 	cs.exampleV1alpha1 = examplev1alpha1.New(c)
 	cs.providerV1alpha1 = providerv1alpha1.New(c)

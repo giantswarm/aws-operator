@@ -229,7 +229,7 @@ func (g *Guest) WaitForGuestReady() error {
 }
 
 func (g *Guest) WaitForNodesUp(numberOfNodes int) error {
-	g.logger.Log("level", "debug", "message", "waiting for k8s nodes to be up")
+	g.logger.Log("level", "debug", "message", fmt.Sprintf("waiting for %d k8s nodes to be in %#q state", numberOfNodes, v1.NodeReady))
 
 	o := func() error {
 		nodes, err := g.k8sClient.CoreV1().Nodes().List(metav1.ListOptions{})
@@ -238,15 +238,19 @@ func (g *Guest) WaitForNodesUp(numberOfNodes int) error {
 		}
 
 		if len(nodes.Items) != numberOfNodes {
-			return microerror.Maskf(waitError, "worker nodes are still not found")
+			return microerror.Maskf(waitError, "found %d k8s nodes but want %d", len(nodes.Items), numberOfNodes)
 		}
 
+		var notReadyCnt int
 		for _, n := range nodes.Items {
 			for _, c := range n.Status.Conditions {
 				if c.Type == v1.NodeReady && c.Status != v1.ConditionTrue {
-					return microerror.Maskf(waitError, "worker nodes are still not ready")
+					notReadyCnt++
 				}
 			}
+		}
+		if notReadyCnt > 0 {
+			return microerror.Maskf(waitError, "found %d k8s nodes but %d of them are still not %#q state", len(nodes.Items), notReadyCnt, v1.NodeReady)
 		}
 
 		return nil
@@ -261,7 +265,6 @@ func (g *Guest) WaitForNodesUp(numberOfNodes int) error {
 		return microerror.Mask(err)
 	}
 
-	g.logger.Log("level", "debug", "message", "k8s nodes are up")
-
+	g.logger.Log("level", "debug", "message", fmt.Sprintf("waited for %d k8s nodes to be in %#q state", numberOfNodes, v1.NodeReady))
 	return nil
 }
