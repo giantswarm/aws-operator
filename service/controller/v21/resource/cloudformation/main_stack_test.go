@@ -239,6 +239,14 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		t.Fatal("asg header not found")
 	}
 
+	if !strings.Contains(body, "Key: k8s.io/cluster-autoscaler/enabled") {
+		t.Fatal("cluster-autoscaler's tag missing from worker asg")
+	}
+
+	if !strings.Contains(body, fmt.Sprintf("Key: k8s.io/cluster-autoscaler/%s", key.ClusterID(customObject))) {
+		t.Fatal("cluster-autoscaler's cluster tag missing from worker asg")
+	}
+
 	if !strings.Contains(body, "InstanceType: m3.large") {
 		t.Fatal("launch configuration element not found")
 	}

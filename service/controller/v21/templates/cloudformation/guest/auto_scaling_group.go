@@ -26,6 +26,12 @@ const AutoScalingGroup = `{{define "autoscaling_group"}}
         - Key: Name
           Value: {{ $v.ClusterID }}-{{ $v.ASGType }}
           PropagateAtLaunch: true
+        - Key: k8s.io/cluster-autoscaler/enabled
+          Value: true
+          PropagateAtLaunch: false
+        - Key: k8s.io/cluster-autoscaler/{{ $v.ClusterID }}
+          Value: true
+          PropagateAtLaunch: false
     UpdatePolicy:
       AutoScalingRollingUpdate:
         # minimum amount of instances that must always be running during a rolling update
