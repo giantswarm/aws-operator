@@ -99,7 +99,7 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				WorkerCloudConfigVersion: "1.0.0",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
-				WorkerMax:                4,
+				WorkerMax:                3,
 				WorkerMin:                3,
 
 				VersionBundleVersion: "1.0.0",
@@ -514,7 +514,7 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				WorkerCloudConfigVersion: "1.0.0",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
-				WorkerMax:                4,
+				WorkerMax:                3,
 				WorkerMin:                3,
 
 				VersionBundleVersion: "1.0.0",

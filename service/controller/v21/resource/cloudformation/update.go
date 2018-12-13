@@ -285,13 +285,7 @@ func (r *Resource) shouldScale(ctx context.Context, currentState, desiredState S
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to worker cloudconfig version")
 		return false
 	}
-	// When worker ASG size is static (i.e. min == max), ASG.Max is actually
-	// max+1 so that there's room for one additional instance when cluster is
-	// being rolled. Hence two different checks in here.
-	if desiredState.WorkerMin == desiredState.WorkerMax && (currentState.WorkerMax-1) != desiredState.WorkerMax {
-		return true
-	}
-	if desiredState.WorkerMin != desiredState.WorkerMax && currentState.WorkerMax != desiredState.WorkerMax {
+	if currentState.WorkerMax != desiredState.WorkerMax {
 		return true
 	}
 	if currentState.WorkerMin != desiredState.WorkerMin {
