@@ -47,6 +47,25 @@ const IAMPolicies = `{{define "iam_policies"}}
           - Effect: "Allow"
             Action: "elasticloadbalancing:*"
             Resource: "*"
+
+          - Effect: "Allow"
+            Action:
+              - "autoscaling:DescribeAutoScalingGroups"
+              - "autoscaling:DescribeAutoScalingInstances"
+              - "autoscaling:DescribeTags"
+              - "autoscaling:DescribeLaunchConfigurations"
+              - "ec2:DescribeLaunchTemplateVersions"
+            Resource: "*"
+
+          - Effect: "Allow"
+            Action:
+              - "autoscaling:SetDesiredCapacity"
+              - "autoscaling:TerminateInstanceInAutoScalingGroup"
+            Resource: "*"
+            Condition:
+              StringEquals:
+                aws:RequestTag/giantswarm.io/cluster: "{{ $v.ClusterID }}"
+
   MasterInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
@@ -114,22 +133,6 @@ const IAMPolicies = `{{define "iam_policies"}}
               - "ecr:ListImages"
               - "ecr:BatchGetImage"
             Resource: "*"
-
-          - Effect: "Allow"
-            Action:
-              - "autoscaling:DescribeAutoScalingGroups"
-              - "autoscaling:DescribeAutoScalingInstances"
-              - "autoscaling:DescribeTags"
-            Resource: "*"
-
-          - Effect: "Allow"
-            Action:
-              - "autoscaling:SetDesiredCapacity"
-              - "autoscaling:TerminateInstanceInAutoScalingGroup"
-            Resource: "*"
-            Condition:
-              StringEquals:
-                aws:RequestTag/giantswarm.io/cluster: "{{ $v.ClusterID }}"
 
   WorkerInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
