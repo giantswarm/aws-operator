@@ -64,7 +64,7 @@ const IAMPolicies = `{{define "iam_policies"}}
             Resource: "*"
             Condition:
               StringEquals:
-                aws:RequestTag/giantswarm.io/cluster: "{{ $v.ClusterID }}"
+                autoscaling:ResourceTag/giantswarm.io/cluster: "{{ $v.ClusterID }}"
 
   MasterInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
