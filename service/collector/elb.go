@@ -120,20 +120,27 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		return microerror.Mask(err)
 	}
 
-	var loadbalancers []*elb.LoadBalancerDescription
+	var loadBalancers []*elb.LoadBalancerDescription
 	{
 		i := &elb.DescribeLoadBalancersInput{}
 		o, err := awsClients.ELB.DescribeLoadBalancers(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		loadbalancers = o.LoadBalancerDescriptions
+		loadBalancers = o.LoadBalancerDescriptions
+
+		if len(loadBalancers) == 0 {
+			// E.g. during cluster creation there are no load balancers present
+			// yet so further AWS API calls would fail on validation. No
+			// metrics to emit either so we can short circuit here.
+			return nil
+		}
 	}
 
 	var lbs []loadBalancer
 	{
 		i := &elb.DescribeTagsInput{}
-		for _, l := range loadbalancers {
+		for _, l := range loadBalancers {
 			i.LoadBalancerNames = append(i.LoadBalancerNames, l.LoadBalancerName)
 		}
 
