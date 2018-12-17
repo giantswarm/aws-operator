@@ -11,7 +11,7 @@ const (
 	// release by default.
 	defaultMaxHistory = 10
 
-	defaultTillerImage     = "quay.io/giantswarm/tiller:v2.8.2"
+	defaultTillerImage     = "quay.io/giantswarm/tiller:v2.12.0"
 	defaultTillerNamespace = "kube-system"
 	tillerLabelSelector    = "app=helm,name=tiller"
 	tillerPodName          = "tiller-giantswarm"

@@ -272,10 +272,11 @@ func (c *Client) EnsureTillerInstalled(ctx context.Context) error {
 	}
 
 	i := &installer.Options{
-		ImageSpec:      c.tillerImage,
-		MaxHistory:     defaultMaxHistory,
-		Namespace:      c.tillerNamespace,
-		ServiceAccount: tillerPodName,
+		AutoMountServiceAccountToken: true,
+		ImageSpec:                    c.tillerImage,
+		MaxHistory:                   defaultMaxHistory,
+		Namespace:                    c.tillerNamespace,
+		ServiceAccount:               tillerPodName,
 	}
 
 	// Install the tiller deployment in the tenant cluster.
