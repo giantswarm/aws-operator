@@ -267,8 +267,6 @@ systemd:
       ExecStopPost=-/usr/bin/docker rm -f $NAME
       [Install]
       WantedBy=multi-user.target
-      Requires=network-online.target
-      After=network-online.target
   - name: etcd2.service
     enabled: false
     mask: true
@@ -301,6 +299,8 @@ systemd:
       Type=oneshot
       EnvironmentFile=/etc/network-environment
       ExecStart=/opt/k8s-addons
+      # https://github.com/kubernetes/kubernetes/issues/71078
+      ExecStartPost=/usr/bin/systemctl restart k8s-kubelet.service
       [Install]
       WantedBy=multi-user.target
 
