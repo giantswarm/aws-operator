@@ -13,10 +13,12 @@ version directory, and then changes are introduced.
 
 ### Changed
 - Switched from cloudinit to ignition.
+- Double the inotify watches.
 
 ## [v3.7.4] WIP
 
 ### Changed
+- Double the inotify watches.
 
 ### Removed
 

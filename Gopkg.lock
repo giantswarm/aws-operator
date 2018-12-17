@@ -216,7 +216,7 @@
     "pkg/harness",
     "pkg/release"
   ]
-  revision = "b40d6c4bd0ebf5c4ae9584b74b2dee411b672c69"
+  revision = "377e40fd69b43251b0527f37a8c4c6ab1f5b3aa2"
 
 [[projects]]
   branch = "master"
@@ -291,7 +291,7 @@
     "v_3_7_2",
     "v_3_7_3"
   ]
-  revision = "ae5aad7fcb2679e1bc1630b9387993519712b117"
+  revision = "f5524a6086a6e54ddb255731a8a823ffc30d811b"
 
 [[projects]]
   branch = "master"
