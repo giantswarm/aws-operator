@@ -18,6 +18,10 @@ import (
 )
 
 const (
+	HeartBeatUpdateThreshold = 30 * time.Minute
+)
+
+const (
 	Name = "status"
 )
 
@@ -180,4 +184,12 @@ func ensureSelfLink(p string) string {
 	}
 
 	return p + "/status"
+}
+
+func isHeartBeatOverdue(c providerv1alpha1.StatusClusterCondition) bool {
+	if time.Now().Add(-HeartBeatUpdateThreshold).After(c.LastHeartbeatTime.Time) {
+		return true
+	}
+
+	return false
 }
