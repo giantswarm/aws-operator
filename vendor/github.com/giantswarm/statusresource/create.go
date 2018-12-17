@@ -134,6 +134,16 @@ func (r *Resource) computeCreateEventPatches(ctx context.Context, obj interface{
 
 			r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("setting %#q status condition", providerv1alpha1.StatusClusterTypeCreating))
 		}
+
+		if clusterStatus.HasCreatingCondition() && isHeartBeatOverdue(clusterStatus.GetCreatingCondition()) {
+			patches = append(patches, Patch{
+				Op:    "replace",
+				Path:  "/status/cluster/conditions",
+				Value: clusterStatus.UpdateHeartBeatOfCreatingCondition(),
+			})
+
+			r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("updating heartbeat for %#q status condition", providerv1alpha1.StatusClusterTypeCreating))
+		}
 	}
 
 	// Once the tenant cluster is created we set the according status condition so
@@ -152,6 +162,16 @@ func (r *Resource) computeCreateEventPatches(ctx context.Context, obj interface{
 			})
 
 			r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("setting %#q status condition", providerv1alpha1.StatusClusterTypeCreated))
+		}
+
+		if clusterStatus.HasCreatedCondition() && isHeartBeatOverdue(clusterStatus.GetCreatedCondition()) {
+			patches = append(patches, Patch{
+				Op:    "replace",
+				Path:  "/status/cluster/conditions",
+				Value: clusterStatus.UpdateHeartBeatOfCreatedCondition(),
+			})
+
+			r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("updating heartbeat for %#q status condition", providerv1alpha1.StatusClusterTypeCreated))
 		}
 	}
 
@@ -172,6 +192,16 @@ func (r *Resource) computeCreateEventPatches(ctx context.Context, obj interface{
 
 			r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("setting %#q status condition", providerv1alpha1.StatusClusterTypeUpdating))
 		}
+
+		if clusterStatus.HasUpdatingCondition() && isHeartBeatOverdue(clusterStatus.GetUpdatingCondition()) {
+			patches = append(patches, Patch{
+				Op:    "replace",
+				Path:  "/status/cluster/conditions",
+				Value: clusterStatus.UpdateHeartBeatOfUpdatingCondition(),
+			})
+
+			r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("updating heartbeat for %#q status condition", providerv1alpha1.StatusClusterTypeUpdating))
+		}
 	}
 
 	// Set the status cluster condition to updated when an update successfully
@@ -191,6 +221,16 @@ func (r *Resource) computeCreateEventPatches(ctx context.Context, obj interface{
 			})
 
 			r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("setting %#q status condition", providerv1alpha1.StatusClusterTypeUpdated))
+		}
+
+		if clusterStatus.HasUpdatedCondition() && isHeartBeatOverdue(clusterStatus.GetUpdatedCondition()) {
+			patches = append(patches, Patch{
+				Op:    "replace",
+				Path:  "/status/cluster/conditions",
+				Value: clusterStatus.UpdateHeartBeatOfUpdatedCondition(),
+			})
+
+			r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("updating heartbeat for %#q status condition", providerv1alpha1.StatusClusterTypeUpdated))
 		}
 	}
 
@@ -267,13 +307,10 @@ func (r *Resource) computeCreateEventPatches(ctx context.Context, obj interface{
 						return nil, microerror.Maskf(missingLabelError, labelVersion)
 					}
 
-					nodes = append(nodes, providerv1alpha1.StatusClusterNode{
-						Name:    n,
-						Version: v,
-					})
+					nodes = append(nodes, providerv1alpha1.NewStatusClusterNode(n, v))
 				}
 
-				nodesDiffer := nodes != nil && !reflect.DeepEqual(clusterStatus.Nodes, nodes)
+				nodesDiffer := nodes != nil && !allNodesEqual(clusterStatus.Nodes, nodes)
 
 				if nodesDiffer {
 					patches = append(patches, Patch{
@@ -305,4 +342,24 @@ func allNodesHaveVersion(nodes []providerv1alpha1.StatusClusterNode, version str
 	}
 
 	return true
+}
+
+func allNodesEqual(aNodes []providerv1alpha1.StatusClusterNode, bNodes []providerv1alpha1.StatusClusterNode) bool {
+	aRemoved := removeTimesFromNodes(aNodes)
+	bRemoved := removeTimesFromNodes(bNodes)
+
+	return reflect.DeepEqual(aRemoved, bRemoved)
+}
+
+func removeTimesFromNodes(nodes []providerv1alpha1.StatusClusterNode) []providerv1alpha1.StatusClusterNode {
+	var newNodes []providerv1alpha1.StatusClusterNode
+
+	for _, n := range nodes {
+		newNodes = append(newNodes, providerv1alpha1.StatusClusterNode{
+			Name:    n.Name,
+			Version: n.Version,
+		})
+	}
+
+	return newNodes
 }

@@ -38,6 +38,7 @@ type StatusCluster struct {
 	// Resources is a list of arbitrary conditions of operatorkit resource
 	// implementations.
 	Resources []StatusClusterResource `json:"resources" yaml:"resources"`
+	Scaling   StatusClusterScaling    `json:"scaling" yaml:"scaling"`
 	// Versions is a list that acts like a historical track record of versions a
 	// guest cluster went through. A version is only added to the list as soon as
 	// the guest cluster successfully migrated to the version added here.
@@ -101,6 +102,12 @@ type StatusClusterResourceCondition struct {
 	Status string `json:"status" yaml:"status"`
 	// Type may be anything an operatorkit resource may define.
 	Type string `json:"type" yaml:"type"`
+}
+
+// StatusClusterScaling expresses the current status of desired number of
+// worker nodes in guest cluster.
+type StatusClusterScaling struct {
+	DesiredCapacity int `json:"desiredCapacity" yaml:"desiredCapacity"`
 }
 
 // StatusClusterVersion expresses the versions in which a guest cluster was and
