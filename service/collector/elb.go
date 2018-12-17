@@ -148,6 +148,8 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		// maxELBsInOneBatch. In order to not spend so much time on this,
 		// perform requests concurrently and synchronize them with errgroup.
 		errGroup, _ := errgroup.WithContext(context.Background())
+		// Allocate list for ELB tag description results. Length is number of
+		// AWS API batches + 1 for possible left over from uneven number.
 		tagOutputs := make([]*elb.DescribeTagsOutput, len(loadBalancers)/maxELBsInOneDescribeTagsBatch+1)
 
 		i := 0
