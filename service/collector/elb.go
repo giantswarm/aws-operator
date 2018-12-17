@@ -154,9 +154,9 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		tagInput := &elb.DescribeTagsInput{}
 		for _, lb := range loadBalancers {
 			if len(tagInput.LoadBalancerNames) == maxELBsInOneDescribeTagsBatch {
-				tagInput := tagInput
+				copyTagInput := tagInput
 				errGroup.Go(func() error {
-					o, err := awsClients.ELB.DescribeTags(tagInput)
+					o, err := awsClients.ELB.DescribeTags(copyTagInput)
 					if err != nil {
 						return microerror.Mask(err)
 					}
