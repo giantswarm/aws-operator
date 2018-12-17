@@ -62,8 +62,11 @@ systemd:
       After=k8s-setup-network-env.service docker.service
       Requires=k8s-setup-network-env.service docker.service
       [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      TimeoutStartSec=0
       EnvironmentFile=/etc/network-environment
-      ExecStart=/bin/bash -c '/usr/bin/envsubst </etc/kubernetes/config/kubelet-config.yaml.tmpl >/etc/kubernetes/config/kubelet-config.yaml'
+      ExecStart=/bin/bash -c '/usr/bin/envsubst </etc/kubernetes/config/kubelet.yaml.tmpl >/etc/kubernetes/config/kubelet.yaml'
       [Install]
       WantedBy=multi-user.target
   - name: docker.service
@@ -113,7 +116,7 @@ systemd:
       RestartSec=0
       TimeoutStopSec=10
       LimitNOFILE=40000
-      Environment=IMAGE={{ .RegistryDomain }}/giantswarm/etcd:v3.3.8
+      Environment=IMAGE={{ .RegistryDomain }}/{{ .Images.Etcd }}
       Environment=NAME=%p.service
       EnvironmentFile=/etc/network-environment
       ExecStartPre=-/usr/bin/docker stop  $NAME
@@ -160,7 +163,7 @@ systemd:
       [Service]
       Type=oneshot
       EnvironmentFile=/etc/network-environment
-      Environment=IMAGE={{ .RegistryDomain }}/giantswarm/etcd:v3.3.3
+      Environment=IMAGE={{ .RegistryDomain }}/{{ .Images.Etcd }}
       Environment=NAME=%p.service
       ExecStartPre=-/usr/bin/docker stop  $NAME
       ExecStartPre=-/usr/bin/docker rm  $NAME
@@ -202,7 +205,7 @@ systemd:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE={{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.1-cec4fb8023db783fbf26fb056bf6c76abfcd96cf-giantswarm"
+      Environment="IMAGE={{ .RegistryDomain }}/{{ .Images.Kubernetes }}"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
@@ -226,6 +229,7 @@ systemd:
       -v /var/lib/kubelet/:/var/lib/kubelet:rw,rshared \
       -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
+      -v /etc/kubernetes/kubeconfig/:/etc/kubernetes/kubeconfig/ \
       -v /etc/kubernetes/manifests/:/etc/kubernetes/manifests/ \
       -v /etc/cni/net.d/:/etc/cni/net.d/ \
       -v /opt/cni/bin/:/opt/cni/bin/ \
@@ -237,7 +241,7 @@ systemd:
       -v /usr/sbin/mkfs.xfs:/usr/sbin/mkfs.xfs \
       -v /usr/lib64/libxfs.so.0:/usr/lib/libxfs.so.0 \
       -v /usr/lib64/libxcmd.so.0:/usr/lib/libxcmd.so.0 \
-      -v /usr/lib64/libreadline.so.6:/usr/lib/libreadline.so.6 \
+      -v /usr/lib64/libreadline.so.7:/usr/lib/libreadline.so.7 \
       -e ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/server-ca.pem \
       -e ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/server-crt.pem \
       -e ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/server-key.pem \
@@ -248,23 +252,23 @@ systemd:
       {{ . }} \
       {{ end -}}
       --node-ip=${DEFAULT_IPV4} \
-      --config=/etc/kubernetes/config/kubelet-config.yaml \
+      --config=/etc/kubernetes/config/kubelet.yaml \
       --containerized \
       --enable-server \
       --logtostderr=true \
-      --cadvisor-port=4194 \
       --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
       --network-plugin=cni \
       --register-node=true \
       --register-with-taints=node-role.kubernetes.io/master=:NoSchedule \
-      --pod-manifest-path=/etc/kubernetes/manifests \
-      --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yaml \
+      --kubeconfig=/etc/kubernetes/kubeconfig/kubelet.yaml \
       --node-labels="node-role.kubernetes.io/master,role=master,ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
       --v=2"
       ExecStop=-/usr/bin/docker stop -t 10 $NAME
       ExecStopPost=-/usr/bin/docker rm -f $NAME
       [Install]
       WantedBy=multi-user.target
+      Requires=network-online.target
+      After=network-online.target
   - name: etcd2.service
     enabled: false
     mask: true
@@ -358,6 +362,18 @@ storage:
         source: "data:text/plain;charset=utf-8;base64,{{  index .Files "k8s-resource/ingress-controller-svc.yaml" }}"
     {{- end }}
 
+    - path: /etc/kubernetes/config/proxy-config.yml
+      filesystem: root
+      mode: 0644
+      contents:
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/kube-proxy.yaml" }}"
+
+    - path: /srv/kube-proxy-config.yaml
+      filesystem: root
+      mode: 0644
+      contents:
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/kube-proxy.yaml" }}"
+
     - path: /srv/kube-proxy-sa.yaml
       filesystem: root
       mode: 0644
@@ -418,53 +434,53 @@ storage:
       contents:
         source: "data:text/plain;charset=utf-8;base64,{{  index .Files "conf/k8s-addons" }}"
 
-    - path: /etc/kubernetes/config/addons-kubeconfig.yaml
+    - path: /etc/kubernetes/kubeconfig/addons.yaml
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/addons-kubeconfig.yaml" }}"
-
-    - path: /etc/kubernetes/config/proxy-config.yaml
-      filesystem: root
-      mode: 0644
-      contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/proxy-config.yaml" }}"
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/addons.yaml" }}"
 
     - path: /etc/kubernetes/config/proxy-kubeconfig.yaml
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/proxy-kubeconfig.yaml" }}"
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/kube-proxy-master.yaml" }}"
 
-    - path: /etc/kubernetes/config/kubelet-config.yaml.tmpl
+    - path: /etc/kubernetes/kubeconfig/kube-proxy.yaml
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/kubelet-config.yaml.tmpl" }}"
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/kube-proxy-master.yaml" }}"
 
-    - path: /etc/kubernetes/config/kubelet-kubeconfig.yaml
+    - path: /etc/kubernetes/config/kubelet.yaml.tmpl
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/kubelet-kubeconfig.yaml" }}"
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/kubelet.yaml.tmpl" }}"
 
-    - path: /etc/kubernetes/config/controller-manager-kubeconfig.yaml
+    - path: /etc/kubernetes/kubeconfig/kubelet.yaml
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/controller-manager-kubeconfig.yaml" }}"
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/kubelet-master.yaml" }}"
 
-    - path: /etc/kubernetes/config/scheduler-config.yaml
+    - path: /etc/kubernetes/kubeconfig/controller-manager.yaml
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/scheduler-config.yaml" }}"
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/controller-manager.yaml" }}"
 
-    - path: /etc/kubernetes/config/scheduler-kubeconfig.yaml
+    - path: /etc/kubernetes/config/scheduler.yaml
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/scheduler-kubeconfig.yaml" }}"
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/scheduler.yaml" }}"
+
+    - path: /etc/kubernetes/kubeconfig/scheduler.yaml
+      filesystem: root
+      mode: 0644
+      contents:
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/scheduler.yaml" }}"
 
     {{ if not .DisableEncryptionAtREST -}}
     - path: /etc/kubernetes/encryption/k8s-encryption-config.yaml
@@ -474,11 +490,11 @@ storage:
         source: "data:text/plain;charset=utf-8;base64,{{  index .Files "k8s-resource/k8s-encryption-config.yaml" }}"
 
     {{ end -}}
-    - path: /etc/kubernetes/manifests/audit-policy.yaml
+    - path: /etc/kubernetes/policies/audit-policy.yaml
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "manifests/audit-policy.yaml" }}"
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "policies/audit-policy.yaml" }}"
 
     - path: /etc/kubernetes/manifests/k8s-api-server.yaml
       filesystem: root

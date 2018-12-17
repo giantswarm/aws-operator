@@ -1,5 +1,5 @@
 /*
-Copyright 2016 The Kubernetes Authors All rights reserved.
+Copyright The Helm Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import (
 // If a .helmignore file is present, the directory loader will skip loading any files
 // matching it. But .helmignore is not evaluated when reading out of an archive.
 func Load(name string) (*chart.Chart, error) {
+	name = filepath.FromSlash(name)
 	fi, err := os.Stat(name)
 	if err != nil {
 		return nil, err

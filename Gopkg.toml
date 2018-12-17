@@ -49,7 +49,7 @@ required = [
   name = "github.com/giantswarm/backoff"
 
 [[constraint]]
-  branch = "master"
+  branch = "service-account-files"
   name = "github.com/giantswarm/certs"
 
 [[constraint]]
@@ -109,11 +109,11 @@ required = [
   name = "github.com/giantswarm/randomkeys"
 
 [[constraint]]
-  branch = "master"
+  branch = "service-account-files"
   name = "github.com/giantswarm/statusresource"
 
 [[constraint]]
-  branch = "master"
+  branch = "service-account-files"
   name = "github.com/giantswarm/tenantcluster"
 
 [[constraint]]

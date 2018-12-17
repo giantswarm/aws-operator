@@ -10,11 +10,11 @@ spec:
   priorityClassName: system-node-critical
   containers:
   - name: k8s-scheduler
-    image: {{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.1
+    image: {{ .RegistryDomain }}/{{ .Images.Kubernetes }}
     command:
     - /hyperkube
     - scheduler
-    - --config=/etc/kubernetes/config/scheduler-config.yaml
+    - --config=/etc/kubernetes/config/scheduler.yaml
     - --v=2
     resources:
       requests:
@@ -31,6 +31,9 @@ spec:
     - mountPath: /etc/kubernetes/config/
       name: k8s-config
       readOnly: true
+    - mountPath: /etc/kubernetes/kubeconfig/
+      name: k8s-kubeconfig
+      readOnly: true
     - mountPath: /etc/kubernetes/ssl/
       name: ssl-certs-kubernetes
       readOnly: true
@@ -38,6 +41,9 @@ spec:
   - hostPath:
       path: /etc/kubernetes/config
     name: k8s-config
+  - hostPath:
+      path: /etc/kubernetes/kubeconfig
+    name: k8s-kubeconfig
   - hostPath:
       path: /etc/kubernetes/ssl
     name: ssl-certs-kubernetes
