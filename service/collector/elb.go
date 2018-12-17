@@ -1,6 +1,8 @@
 package collector
 
 import (
+	"context"
+
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
@@ -13,6 +15,8 @@ import (
 
 const (
 	labelELB = "elb"
+	// maxELBsInOneDescribeTagsBatch - https://docs.aws.amazon.com/elasticloadbalancing/2012-06-01/APIReference/API_DescribeTags.html
+	maxELBsInOneDescribeTagsBatch = 20
 )
 
 const (
@@ -139,31 +143,75 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 
 	var lbs []loadBalancer
 	{
-		i := &elb.DescribeTagsInput{}
-		for _, l := range loadBalancers {
-			i.LoadBalancerNames = append(i.LoadBalancerNames, l.LoadBalancerName)
+		// AWS API has a limit for maximum number of LoadBalancerNames in
+		// single Describe request so it must be done in batches of
+		// maxELBsInOneBatch. In order to not spend so much time on this,
+		// perform requests concurrently and synchronize them with errgroup.
+		errGroup, _ := errgroup.WithContext(context.Background())
+		tagOutputs := make([]*elb.DescribeTagsOutput, len(loadBalancers)/maxELBsInOneDescribeTagsBatch+1)
+
+		i := 0
+		tagInput := &elb.DescribeTagsInput{}
+		for _, lb := range loadBalancers {
+			if len(tagInput.LoadBalancerNames) == maxELBsInOneDescribeTagsBatch {
+				tagInput := tagInput
+				errGroup.Go(func() error {
+					o, err := awsClients.ELB.DescribeTags(tagInput)
+					if err != nil {
+						return microerror.Mask(err)
+					}
+					tagOutputs[i] = o
+					return nil
+				})
+
+				tagInput = &elb.DescribeTagsInput{}
+				i++
+			}
+
+			tagInput.LoadBalancerNames = append(tagInput.LoadBalancerNames, lb.LoadBalancerName)
 		}
 
-		o, err := awsClients.ELB.DescribeTags(i)
+		// Last batch.
+		if len(tagInput.LoadBalancerNames) > 0 {
+			errGroup.Go(func() error {
+				o, err := awsClients.ELB.DescribeTags(tagInput)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+				tagOutputs[i] = o
+				return nil
+			})
+		}
+
+		// Now wait for all requests to complete.
+		err := errGroup.Wait()
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		for _, d := range o.TagDescriptions {
-			lb := loadBalancer{
-				Name: *d.LoadBalancerName,
-				Tags: make(map[string]string),
-			}
-
-			for _, t := range d.Tags {
-				lb.Tags[*t.Key] = *t.Value
-			}
-
-			if lb.Tags[tagInstallation] != e.installationName {
+		// Extract tags from responses and create further loadBalancer types
+		// based on these.
+		for _, o := range tagOutputs {
+			if o == nil {
 				continue
 			}
 
-			lbs = append(lbs, lb)
+			for _, d := range o.TagDescriptions {
+				lb := loadBalancer{
+					Name: *d.LoadBalancerName,
+					Tags: make(map[string]string),
+				}
+
+				for _, t := range d.Tags {
+					lb.Tags[*t.Key] = *t.Value
+				}
+
+				if lb.Tags[tagInstallation] != e.installationName {
+					continue
+				}
+
+				lbs = append(lbs, lb)
+			}
 		}
 	}
 
