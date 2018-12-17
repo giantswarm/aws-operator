@@ -79,10 +79,10 @@
   revision = "9922087c8f77cf4aff19bb8cf4c488a9dc4206f8"
 
 [[projects]]
-  branch = "service-account-files"
+  branch = "master"
   name = "github.com/giantswarm/certs"
   packages = ["."]
-  revision = "680177bd0b8343959badfc025b5a196e2a52b844"
+  revision = "98bddd6005f6ac728b43f0ef8cf81e7756792a93"
 
 [[projects]]
   branch = "master"
@@ -554,6 +554,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4f0198034b3d5f675c132c14410623612071835ad96e8f472930d69cdba20854"
+  inputs-digest = "b360af37bfc084c1a6049cf5ddd419a537c3a77b7abcfc0121941fb8debd4650"
   solver-name = "gps-cdcl"
   solver-version = 1

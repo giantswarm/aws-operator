@@ -58,7 +58,7 @@ required = [
   name = "github.com/giantswarm/micrologger"
 
 [[constraint]]
-  branch = "service-account-files"
+  branch = "master"
   name = "github.com/giantswarm/tenantcluster"
 
 [[constraint]]

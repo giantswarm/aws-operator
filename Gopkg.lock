@@ -199,13 +199,13 @@
   revision = "9922087c8f77cf4aff19bb8cf4c488a9dc4206f8"
 
 [[projects]]
-  branch = "service-account-files"
+  branch = "master"
   name = "github.com/giantswarm/certs"
   packages = [
     ".",
     "certstest"
   ]
-  revision = "680177bd0b8343959badfc025b5a196e2a52b844"
+  revision = "98bddd6005f6ac728b43f0ef8cf81e7756792a93"
 
 [[projects]]
   branch = "master"
@@ -391,16 +391,16 @@
   revision = "0688a8c5c0d7ac6aa1cf2ebb4323ed1ef3cbe46f"
 
 [[projects]]
-  branch = "service-account-files"
+  branch = "master"
   name = "github.com/giantswarm/statusresource"
   packages = ["."]
-  revision = "b8bd31c492edc13e2773f6c987e01c8c0ec24cb4"
+  revision = "e8ae0e4ac501178487e4a998081f8fb79cdc1a68"
 
 [[projects]]
-  branch = "service-account-files"
+  branch = "master"
   name = "github.com/giantswarm/tenantcluster"
   packages = ["."]
-  revision = "f8f9831c5f3a9c0e3f2b11b979cdf14fb0f7b6fa"
+  revision = "3a8ad1e20481bf6976c3b509caa64247472f7029"
 
 [[projects]]
   branch = "master"
@@ -1122,6 +1122,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "284c633dd4c328b099389355d0aa345bc9a15c8660e337c6a41a0a7c434ac710"
+  inputs-digest = "27ba153297bee2ab027f821a52eac8952fd578466b9083d1a5b81c1beab942bc"
   solver-name = "gps-cdcl"
   solver-version = 1

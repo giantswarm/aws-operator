@@ -42,7 +42,7 @@ required = [
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]
-  branch = "service-account-files"
+  branch = "master"
   name = "github.com/giantswarm/certs"
 
 [[constraint]]

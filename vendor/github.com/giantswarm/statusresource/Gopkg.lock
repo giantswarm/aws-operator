@@ -85,10 +85,10 @@
   revision = "9922087c8f77cf4aff19bb8cf4c488a9dc4206f8"
 
 [[projects]]
-  branch = "service-account-files"
+  branch = "master"
   name = "github.com/giantswarm/certs"
   packages = ["."]
-  revision = "680177bd0b8343959badfc025b5a196e2a52b844"
+  revision = "98bddd6005f6ac728b43f0ef8cf81e7756792a93"
 
 [[projects]]
   branch = "master"
@@ -134,10 +134,10 @@
   revision = "894bebfb2a6835b15394c329617a442a0725939f"
 
 [[projects]]
-  branch = "service-account-files"
+  branch = "master"
   name = "github.com/giantswarm/tenantcluster"
   packages = ["."]
-  revision = "f8f9831c5f3a9c0e3f2b11b979cdf14fb0f7b6fa"
+  revision = "284968ca1af0ecbd55077e5087293d156e8318da"
 
 [[projects]]
   name = "github.com/go-kit/kit"
@@ -612,6 +612,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "38f3e569b9c727e532dac81c0c02e1680bd7cf61401c3c7a449ba0cc6068a668"
+  inputs-digest = "2ef1468d9245eea4adc2328bbc5fa82206e7e99fd9b4bb59f33ffbc3601cda65"
   solver-name = "gps-cdcl"
   solver-version = 1
