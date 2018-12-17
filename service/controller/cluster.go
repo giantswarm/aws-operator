@@ -452,54 +452,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			GuestUpdateEnabled:         config.GuestUpdateEnabled,
 			PodInfraContainerImage:     config.PodInfraContainerImage,
 			Route53Enabled:             config.Route53Enabled,
-			IncludeTags:                config.IncludeTags,
-			InstallationName:           config.InstallationName,
-			IPAMNetworkRange:           config.IPAMNetworkRange,
-			OIDC: v21cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			APIWhitelist: v21adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
-			},
-			ProjectName:       config.ProjectName,
-			PublicRouteTables: config.PublicRouteTables,
-			RegistryDomain:    config.RegistryDomain,
-			SSOPublicKey:      config.SSOPublicKey,
-			VaultAddress:      config.VaultAddress,
-		}
-
-		resourceSetV21, err = v21.NewClusterResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var resourceSetV21 *controller.ResourceSet
-	{
-		c := v21.ClusterResourceSetConfig{
-			CertsSearcher:      certsSearcher,
-			G8sClient:          config.G8sClient,
-			HostAWSConfig:      hostAWSConfig,
-			HostAWSClients:     awsHostClients,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			RandomKeysSearcher: randomKeysSearcher,
-
-			AccessLogsExpiration:       config.AccessLogsExpiration,
-			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
-			DeleteLoggingBucket:        config.DeleteLoggingBucket,
-			EncrypterBackend:           config.EncrypterBackend,
-			GuestAvailabilityZones:     config.GuestAWSConfig.AvailabilityZones,
-			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
-			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
-			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
-			GuestUpdateEnabled:         config.GuestUpdateEnabled,
-			PodInfraContainerImage:     config.PodInfraContainerImage,
-			Route53Enabled:             config.Route53Enabled,
 			IgnitionPath:               config.IgnitionPath,
 			IncludeTags:                config.IncludeTags,
 			InstallationName:           config.InstallationName,

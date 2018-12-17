@@ -246,23 +246,6 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
-	var v21ResourceSet *controller.ResourceSet
-	{
-		c := v21.DrainerResourceSetConfig{
-			G8sClient:     config.G8sClient,
-			HostAWSConfig: hostAWSConfig,
-			K8sClient:     config.K8sClient,
-			Logger:        config.Logger,
-
-			GuestUpdateEnabled: config.GuestUpdateEnabled,
-			ProjectName:        config.ProjectName,
-		}
-		v21ResourceSet, err = v21.NewDrainerResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	resourceSets := []*controller.ResourceSet{
 		v17patch1ResourceSet,
 		v18ResourceSet,
