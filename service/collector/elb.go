@@ -190,10 +190,6 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		// Extract tags from responses and create further loadBalancer types
 		// based on these.
 		for _, o := range tagOutputs {
-			if o == nil {
-				continue
-			}
-
 			for _, d := range o.TagDescriptions {
 				lb := loadBalancer{
 					Name: *d.LoadBalancerName,
