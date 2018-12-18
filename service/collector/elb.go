@@ -150,22 +150,22 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		// single Describe request so it must be done in batches of
 		// maxELBsInOneBatch. In order to not spend so much time on this,
 		// perform requests concurrently and synchronize them with errgroup.
-		errGroup, _ := errgroup.WithContext(context.Background())
+		errGroup, _ := errgroup.WithContext(context.TODO())
 		// Slice for ELB tag description results.
 		var tagOutputs []*elb.DescribeTagsOutput
 
-		loadBalancerNamesCopy := loadBalancerNames
+		lbNames := loadBalancerNames
 		mutex := &sync.Mutex{}
-		for len(loadBalancerNamesCopy) > 0 {
+		for len(lbNames) > 0 {
 			batchSize := maxELBsInOneDescribeTagsBatch
-			if len(loadBalancerNamesCopy) < batchSize {
-				batchSize = len(loadBalancerNamesCopy)
+			if len(lbNames) < batchSize {
+				batchSize = len(lbNames)
 			}
 
 			tagInput := &elb.DescribeTagsInput{
-				LoadBalancerNames: loadBalancerNamesCopy[0:batchSize],
+				LoadBalancerNames: lbNames[0:batchSize],
 			}
-			loadBalancerNamesCopy = loadBalancerNamesCopy[batchSize:]
+			lbNames = lbNames[batchSize:]
 
 			errGroup.Go(func() error {
 				o, err := awsClients.ELB.DescribeTags(tagInput)
