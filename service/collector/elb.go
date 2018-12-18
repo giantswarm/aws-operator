@@ -2,6 +2,7 @@ package collector
 
 import (
 	"context"
+	"sync"
 
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/prometheus/client_golang/prometheus"
@@ -124,16 +125,18 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		return microerror.Mask(err)
 	}
 
-	var loadBalancers []*elb.LoadBalancerDescription
+	var loadBalancerNames []*string
 	{
 		i := &elb.DescribeLoadBalancersInput{}
 		o, err := awsClients.ELB.DescribeLoadBalancers(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		loadBalancers = o.LoadBalancerDescriptions
+		for _, d := range o.LoadBalancerDescriptions {
+			loadBalancerNames = append(loadBalancerNames, d.LoadBalancerName)
+		}
 
-		if len(loadBalancers) == 0 {
+		if len(loadBalancerNames) == 0 {
 			// E.g. during cluster creation there are no load balancers present
 			// yet so further AWS API calls would fail on validation. No
 			// metrics to emit either so we can short circuit here.
@@ -148,39 +151,32 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		// maxELBsInOneBatch. In order to not spend so much time on this,
 		// perform requests concurrently and synchronize them with errgroup.
 		errGroup, _ := errgroup.WithContext(context.Background())
-		// Allocate list for ELB tag description results. Length is number of
-		// AWS API batches + 1 for possible left over from uneven number.
-		tagOutputs := make([]*elb.DescribeTagsOutput, len(loadBalancers)/maxELBsInOneDescribeTagsBatch+1)
+		// Slice for ELB tag description results.
+		var tagOutputs []*elb.DescribeTagsOutput
 
-		i := 0
-		tagInput := &elb.DescribeTagsInput{}
-		for _, lb := range loadBalancers {
-			if len(tagInput.LoadBalancerNames) == maxELBsInOneDescribeTagsBatch {
-				copyTagInput := tagInput
-				errGroup.Go(func() error {
-					o, err := awsClients.ELB.DescribeTags(copyTagInput)
-					if err != nil {
-						return microerror.Mask(err)
-					}
-					tagOutputs[i] = o
-					return nil
-				})
-
-				tagInput = &elb.DescribeTagsInput{}
-				i++
+		loadBalancerNamesCopy := loadBalancerNames
+		mutex := &sync.Mutex{}
+		for len(loadBalancerNamesCopy) > 0 {
+			batchSize := maxELBsInOneDescribeTagsBatch
+			if len(loadBalancerNamesCopy) < batchSize {
+				batchSize = len(loadBalancerNamesCopy)
 			}
 
-			tagInput.LoadBalancerNames = append(tagInput.LoadBalancerNames, lb.LoadBalancerName)
-		}
+			tagInput := &elb.DescribeTagsInput{
+				LoadBalancerNames: loadBalancerNamesCopy[0:batchSize],
+			}
+			loadBalancerNamesCopy = loadBalancerNamesCopy[batchSize:]
 
-		// Last batch.
-		if len(tagInput.LoadBalancerNames) > 0 {
 			errGroup.Go(func() error {
 				o, err := awsClients.ELB.DescribeTags(tagInput)
 				if err != nil {
 					return microerror.Mask(err)
 				}
-				tagOutputs[i] = o
+
+				mutex.Lock()
+				tagOutputs = append(tagOutputs, o)
+				mutex.Unlock()
+
 				return nil
 			})
 		}
