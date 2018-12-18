@@ -1,8 +1,0 @@
-kind: KubeSchedulerConfiguration
-algorithmSource:
-  provider: DefaultProvider
-apiVersion: componentconfig/v1alpha1
-clientConnection:
-  kubeconfig: /etc/kubernetes/config/scheduler-kubeconfig.yaml
-failureDomains: kubernetes.io/hostname,failure-domain.beta.kubernetes.io/zone,failure-domain.beta.kubernetes.io/region
-hardPodAffinitySymmetricWeight: 1

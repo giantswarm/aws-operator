@@ -1,8 +1,8 @@
 #!/bin/bash
 
-export KUBECONFIG=/etc/kubernetes/config/addons-kubeconfig.yaml
-# kubectl 1.8.4
-KUBECTL={{ .RegistryDomain }}/giantswarm/docker-kubectl:8cabd75bacbcdad7ac5d85efc3ca90c2fabf023b
+export KUBECONFIG=/etc/kubernetes/kubeconfig/addons.yaml
+# kubectl 1.12.2
+KUBECTL={{ .RegistryDomain }}/giantswarm/docker-kubectl:f5cae44c480bd797dc770dd5f62d40b74063c0d7
 
 /usr/bin/docker pull $KUBECTL
 
@@ -27,6 +27,52 @@ do
         sleep 5s
     done
 done
+
+# check for other master and remove it
+THIS_MACHINE=$(cat /etc/hostname)
+for master in $(/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL get nodes --no-headers=true --selector role=master | awk '{print $1}')
+do
+    if [ "$master" != "$THIS_MACHINE" ]; then
+        /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL delete node $master
+    fi
+done
+
+# wait for etcd dns (return code 35 is bad certificate which is good enough here)
+while
+    curl "https://{{ .Cluster.Etcd.Domain }}:{{ .EtcdPort }}" -k 2>/dev/null >/dev/null
+    RET_CODE=$?
+    [ "$RET_CODE" -ne "35" ]
+do
+    echo "Waiting for etcd to be ready . . "
+    sleep 3s
+done
+
+# create kube-proxy configmap
+while
+    /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv $KUBECTL create configmap kube-proxy --from-file=kube-proxy.yaml=/srv/kube-proxy-config.yaml -o yaml --dry-run \
+    | /usr/bin/docker run  -i --log-driver=none -a stdin -a stdout -a stderr -e KUBECONFIG=${KUBECONFIG} -v /etc/kubernetes:/etc/kubernetes --net=host --rm $KUBECTL apply -n kube-system -f -
+    [ "$?" -ne "0" ]
+do
+    echo "failed to configure kube-proxy from /srv/kube-proxy-confg.yaml, retrying in 5 sec"
+    sleep 5s
+done
+
+# install kube-proxy
+PROXY_MANIFESTS="kube-proxy-sa.yaml kube-proxy-ds.yaml"
+for manifest in $PROXY_MANIFESTS
+do
+    while
+        /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/$manifest
+        [ "$?" -ne "0" ]
+    do
+        echo "failed to apply /srv/$manifest, retrying in 5 sec"
+        sleep 5s
+    done
+done
+echo "kube-proxy successfully installed"
+
+# restart ds to apply config from configmap
+/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL delete pods -l k8s-app=kube-proxy -n kube-system
 
 {{ if not .DisableCalico -}}
 
@@ -85,9 +131,9 @@ MANIFESTS=""
 {{ range .ExtraManifests -}}
 MANIFESTS="${MANIFESTS} {{ . }}"
 {{ end -}}
-MANIFESTS="${MANIFESTS} kube-proxy-sa.yaml"
-MANIFESTS="${MANIFESTS} kube-proxy-ds.yaml"
+{{ if not .DisableCoreDNS }}
 MANIFESTS="${MANIFESTS} coredns.yaml"
+{{ end -}}
 {{ if not .DisableIngressController -}}
 MANIFESTS="${MANIFESTS} default-backend-dep.yaml"
 MANIFESTS="${MANIFESTS} default-backend-svc.yaml"

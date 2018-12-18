@@ -1,6 +1,6 @@
 ## User
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: giantswarm-admin
 subjects:
@@ -14,7 +14,7 @@ roleRef:
 ---
 ## Worker
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: kubelet
 subjects:
@@ -27,7 +27,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: proxy
 subjects:
@@ -41,7 +41,7 @@ roleRef:
 ---
 ## Master
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: kube-controller-manager
 subjects:
@@ -54,7 +54,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: kube-scheduler
 subjects:
@@ -97,7 +97,7 @@ roleRef:
 ---
 ## IC
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: nginx-ingress-controller
 subjects:
@@ -110,7 +110,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ---
 kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: nginx-ingress-controller
   namespace: kube-system

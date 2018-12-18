@@ -55,8 +55,11 @@ systemd:
       After=k8s-setup-network-env.service docker.service
       Requires=k8s-setup-network-env.service docker.service
       [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      TimeoutStartSec=0
       EnvironmentFile=/etc/network-environment
-      ExecStart=/bin/bash -c '/usr/bin/envsubst </etc/kubernetes/config/kubelet-config.yaml.tmpl >/etc/kubernetes/config/kubelet-config.yaml'
+      ExecStart=/bin/bash -c '/usr/bin/envsubst </etc/kubernetes/config/kubelet.yaml.tmpl >/etc/kubernetes/config/kubelet.yaml'
       [Install]
       WantedBy=multi-user.target
   - name: docker.service
@@ -107,7 +110,7 @@ systemd:
       RestartSec=0
       TimeoutStopSec=10
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE={{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.1-cec4fb8023db783fbf26fb056bf6c76abfcd96cf-giantswarm"
+      Environment="IMAGE={{ .RegistryDomain }}/{{ .Images.Kubernetes }}"
       Environment="NAME=%p.service"
       Environment="NETWORK_CONFIG_CONTAINER="
       ExecStartPre=/usr/bin/docker pull $IMAGE
@@ -131,6 +134,7 @@ systemd:
       -v /var/lib/kubelet/:/var/lib/kubelet:rw,rshared \
       -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
       -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
+      -v /etc/kubernetes/kubeconfig/:/etc/kubernetes/kubeconfig/ \
       -v /etc/cni/net.d/:/etc/cni/net.d/ \
       -v /opt/cni/bin/:/opt/cni/bin/ \
       -v /usr/sbin/iscsiadm:/usr/sbin/iscsiadm \
@@ -141,7 +145,7 @@ systemd:
       -v /usr/sbin/mkfs.xfs:/usr/sbin/mkfs.xfs \
       -v /usr/lib64/libxfs.so.0:/usr/lib/libxfs.so.0 \
       -v /usr/lib64/libxcmd.so.0:/usr/lib/libxcmd.so.0 \
-      -v /usr/lib64/libreadline.so.6:/usr/lib/libreadline.so.6 \
+      -v /usr/lib64/libreadline.so.7:/usr/lib/libreadline.so.7 \
       -e ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/client-ca.pem \
       -e ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/client-crt.pem \
       -e ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/client-key.pem \
@@ -152,15 +156,14 @@ systemd:
       {{ . }} \
       {{ end -}}
       --node-ip=${DEFAULT_IPV4} \
-      --config=/etc/kubernetes/config/kubelet-config.yaml \
+      --config=/etc/kubernetes/config/kubelet.yaml \
       --containerized \
       --enable-server \
       --logtostderr=true \
-      --cadvisor-port=4194 \
       --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
       --network-plugin=cni \
       --register-node=true \
-      --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml \
+      --kubeconfig=/etc/kubernetes/kubeconfig/kubelet.yaml \
       --node-labels="ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
       --v=2"
       ExecStop=-/usr/bin/docker stop -t 10 $NAME
@@ -197,29 +200,35 @@ storage:
       contents:
         source: "data:text/plain;base64,{{ index .Files "conf/trusted-user-ca-keys.pem" }}"
 
-    - path: /etc/kubernetes/config/proxy-config.yaml
+    - path: /etc/kubernetes/config/kubelet.yaml.tmpl
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/proxy-config.yaml" }}"
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/kubelet.yaml.tmpl" }}"
+
+    - path: /etc/kubernetes/kubeconfig/kubelet.yaml
+      filesystem: root
+      mode: 0644
+      contents:
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/kubelet-worker.yaml" }}"
+
+    - path: /etc/kubernetes/config/proxy-config.yml
+      filesystem: root
+      mode: 0644
+      contents:
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/kube-proxy.yaml" }}"
 
     - path: /etc/kubernetes/config/proxy-kubeconfig.yaml
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/proxy-kubeconfig.yaml" }}"
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/kube-proxy-worker.yaml" }}"
 
-    - path: /etc/kubernetes/config/kubelet-config.yaml.tmpl
+    - path: /etc/kubernetes/kubeconfig/kube-proxy.yaml
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/kubelet-config.yaml.tmpl" }}"
-
-    - path: /etc/kubernetes/config/kubelet-kubeconfig.yaml
-      filesystem: root
-      mode: 0644
-      contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/kubelet-kubeconfig.yaml" }}"
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "kubeconfig/kube-proxy-worker.yaml" }}"
 
     - path: /opt/wait-for-domains
       filesystem: root
@@ -260,7 +269,7 @@ storage:
         name: {{ .Metadata.Owner.Group }}
       mode: {{printf "%#o" .Metadata.Permissions}}
       contents:
-        source: "data:text/plain;charset=utf-8,{{ .Content }}"
+        source: "data:text/plain;charset=utf-8;base64,{{ .Content }}"
         {{ if .Metadata.Compression }}
         compression: gzip
         {{end}}

@@ -13,14 +13,12 @@ version directory, and then changes are introduced.
 
 ### Changed
 - Switched from cloudinit to ignition.
-- Enabled admission plugins: DefaultTolerationSeconds, MutatingAdmissionWebhook, ValidatingAdmissionWebhook.
-- Use patched GiantSwarm build of Kubernetes (`hyperkube:v1.11.1-cec4fb8023db783fbf26fb056bf6c76abfcd96cf-giantswarm`).
-- Updated Calico to 3.2.3
-- Updated Calico manifest with resource limits to get QoS policy guaranteed.
+- Double the inotify watches.
 
 ## [v3.7.4] WIP
 
 ### Changed
+- Double the inotify watches.
 
 ### Removed
 

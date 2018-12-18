@@ -102,15 +102,7 @@ func newFilesClusterMaster(cluster Cluster) Files {
 			AbsolutePath: "/etc/kubernetes/ssl/etcd/server-key.pem",
 			Data:         cluster.EtcdServer.Key,
 		},
-		// Service account.
-		{
-			AbsolutePath: "/etc/kubernetes/ssl/service-account-ca.pem",
-			Data:         cluster.ServiceAccount.CA,
-		},
-		{
-			AbsolutePath: "/etc/kubernetes/ssl/service-account-crt.pem",
-			Data:         cluster.ServiceAccount.Crt,
-		},
+		// Service account (only key file is used).
 		{
 			AbsolutePath: "/etc/kubernetes/ssl/service-account-key.pem",
 			Data:         cluster.ServiceAccount.Key,

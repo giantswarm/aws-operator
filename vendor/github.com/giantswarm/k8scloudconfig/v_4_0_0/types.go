@@ -48,10 +48,17 @@ type Params struct {
 	// RegistryDomain is the host of the docker image registry to use.
 	RegistryDomain string
 	SSOPublicKey   string
+	// Container images used in the cloud-config templates
+	Images Images
 }
 
 func (p *Params) Validate() error {
 	return nil
+}
+
+type Images struct {
+	Kubernetes string
+	Etcd       string
 }
 
 type Hyperkube struct {
