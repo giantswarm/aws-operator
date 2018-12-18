@@ -341,7 +341,7 @@
   revision = "79a61ffad296f3f418d8f381e4f5f702d5245b50"
 
 [[projects]]
-  branch = "workaround_master-losing_connection"
+  branch = "master"
   digest = "1:0652d64cf95cdff690b4b706b21590cde91b19ecc84bae42d10a9207b568f422"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
@@ -353,7 +353,7 @@
     "v_4_0_0",
   ]
   pruneopts = "T"
-  revision = "9d78420ba52a3700cb25e64bbf799ab4b01e73fa"
+  revision = "5678acc24eade39f62f29826ef0c95385fb2be7d"
 
 [[projects]]
   branch = "master"
