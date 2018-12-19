@@ -98,12 +98,7 @@ func Test_Adapter_Instance_SmallCloudConfig(t *testing.T) {
 		Region       string
 	}{
 		{
-			Description:  "case 0 HTTP URL",
-			ExpectedLine: fmt.Sprintf("https://s3.eu-west-1.amazonaws.com/000000000000-g8s-test-cluster/version/0.1.0/cloudconfig/%s/master", key.CloudConfigVersion),
-			Region:       "eu-west-1",
-		},
-		{
-			Description:  "case 1 S3 URL different region",
+			Description:  "case 0 S3 URL",
 			ExpectedLine: fmt.Sprintf("s3://000000000000-g8s-test-cluster/version/0.1.0/cloudconfig/%s/master", key.CloudConfigVersion),
 			Region:       "eu-central-1",
 		},

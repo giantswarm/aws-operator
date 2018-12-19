@@ -34,12 +34,7 @@ func renderRandomKeyTmplSet(ctx context.Context, encrypter encrypter.Interface, 
 			return RandomKeyTmplSet{}, microerror.Mask(err)
 		}
 
-		com, err := compactor([]byte(enc))
-		if err != nil {
-			return RandomKeyTmplSet{}, microerror.Mask(err)
-		}
-
-		randomKeyTmplSet.APIServerEncryptionKey = com
+		randomKeyTmplSet.APIServerEncryptionKey = enc
 	}
 
 	return randomKeyTmplSet, nil

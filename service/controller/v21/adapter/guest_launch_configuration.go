@@ -53,11 +53,7 @@ func (l *GuestLaunchConfigAdapter) Adapt(config Config) error {
 		return microerror.Mask(err)
 	}
 	c := SmallCloudconfigConfig{
-		Region:    key.Region(config.CustomObject),
-		Registry:  key.AWSCliContainerRegistry(config.CustomObject),
-		Role:      key.KindWorker,
-		S3HTTPURL: key.SmallCloudConfigS3HTTPURL(config.CustomObject, accountID, key.KindWorker),
-		S3URL:     key.SmallCloudConfigS3URL(config.CustomObject, accountID, key.KindWorker),
+		S3URL: key.SmallCloudConfigS3URL(config.CustomObject, accountID, key.KindWorker),
 	}
 	rendered, err := templates.Render(key.CloudConfigSmallTemplates(), c)
 	if err != nil {

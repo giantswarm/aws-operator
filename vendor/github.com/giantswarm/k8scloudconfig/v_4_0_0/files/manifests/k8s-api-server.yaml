@@ -10,7 +10,7 @@ spec:
   priorityClassName: system-node-critical
   containers:
   - name: k8s-api-server
-    image: {{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.1
+    image: {{ .RegistryDomain }}/{{ .Images.Kubernetes }}
     env:
     - name: HOST_IP
       valueFrom:
@@ -23,16 +23,13 @@ spec:
     - {{ . }}
     {{ end -}}
     - --allow-privileged=true
-    - --insecure-bind-address=0.0.0.0
     - --anonymous-auth=false
-    - --insecure-port=0
     - --kubelet-https=true
     - --kubelet-preferred-address-types=InternalIP
     - --secure-port={{.Cluster.Kubernetes.API.SecurePort}}
     - --bind-address=$(HOST_IP)
     - --etcd-prefix={{.Cluster.Etcd.Prefix}}
     - --profiling=false
-    - --repair-malformed-updates=false
     - --service-account-lookup=true
     - --authorization-mode=RBAC
     - --enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,DefaultStorageClass,PersistentVolumeClaimResize,PodSecurityPolicy,Priority,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook
@@ -53,7 +50,7 @@ spec:
     - --audit-log-maxage=30
     - --audit-log-maxbackup=30
     - --audit-log-maxsize=100
-    - --audit-policy-file=/etc/kubernetes/manifests/audit-policy.yaml
+    - --audit-policy-file=/etc/kubernetes/policies/audit-policy.yaml
     - --experimental-encryption-provider-config=/etc/kubernetes/encryption/k8s-encryption-config.yaml
     - --requestheader-client-ca-file=/etc/kubernetes/ssl/apiserver-ca.pem
     - --requestheader-allowed-names=aggregator,{{.Cluster.Kubernetes.API.Domain}},{{.Cluster.Kubernetes.Kubelet.Domain}}
@@ -89,6 +86,9 @@ spec:
     - mountPath: /etc/kubernetes/manifests
       name: k8s-manifests
       readOnly: true
+    - mountPath: /etc/kubernetes/policies
+      name: k8s-policies
+      readOnly: true
     - mountPath: /etc/kubernetes/secrets/
       name: k8s-secrets
       readOnly: true
@@ -110,6 +110,9 @@ spec:
   - hostPath:
       path: /etc/kubernetes/manifests
     name: k8s-manifests
+  - hostPath:
+      path: /etc/kubernetes/policies
+    name: k8s-policies
   - hostPath:
       path: /etc/kubernetes/secrets
     name: k8s-secrets
