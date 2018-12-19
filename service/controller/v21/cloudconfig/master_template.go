@@ -2,11 +2,10 @@ package cloudconfig
 
 import (
 	"context"
-	"encoding/base64"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_3_7_3"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_0_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
@@ -16,7 +15,7 @@ import (
 )
 
 // NewMasterTemplate generates a new master cloud config template and returns it
-// as a base64 encoded string.
+// as a string.
 func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster) (string, error) {
 	var err error
 
@@ -42,6 +41,8 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 			encryptionKey: encryptionKey,
 		}
 
+		params = k8scloudconfig.DefaultParams()
+
 		params.Cluster = customObject.Spec.Cluster
 		params.DisableCoreDNS = true
 		params.DisableEncryptionAtREST = true
@@ -61,6 +62,12 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
 		params.RegistryDomain = c.registryDomain
 		params.SSOPublicKey = c.SSOPublicKey
+
+		ignitionPath := k8scloudconfig.GetIgnitionPath(c.ignitionPath)
+		params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
 	}
 
 	var newCloudConfig *k8scloudconfig.CloudConfig
@@ -80,7 +87,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 		}
 	}
 
-	return newCloudConfig.Base64(), nil
+	return newCloudConfig.String(), nil
 }
 
 // RandomKeyTmplSet holds a collection of rendered templates for random key
@@ -107,55 +114,91 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	//
 	//	See https://github.com/giantswarm/giantswarm/issues/4329.
 	//
+	var storageClass string
+	_, ok := e.encrypter.(*vault.Encrypter)
+	if ok {
+		storageClass = cloudconfig.InstanceStorageClassContent
+	} else {
+		storageClass = cloudconfig.InstanceStorageClassEncryptedContent
+	}
 	ctx := context.TODO()
 
 	filesMeta := []k8scloudconfig.FileMetadata{
 		{
 			AssetContent: cloudconfig.DecryptTLSAssetsScript,
 			Path:         "/opt/bin/decrypt-tls-assets",
-			Owner:        FileOwner,
-			Permissions:  FilePermission,
+			Owner: k8scloudconfig.Owner{
+				User:  FileOwnerUser,
+				Group: FileOwnerGroup,
+			},
+			Permissions: FilePermission,
 		},
 		{
 			AssetContent: e.RandomKeyTmplSet.APIServerEncryptionKey,
 			Path:         "/etc/kubernetes/encryption/k8s-encryption-config.yaml.enc",
-			Owner:        FileOwner,
-			Encoding:     GzipBase64Encoding,
-			Permissions:  0644,
+			Owner: k8scloudconfig.Owner{
+				User:  FileOwnerUser,
+				Group: FileOwnerGroup,
+			},
+			Permissions: 0644,
 		},
 		{
 			AssetContent: cloudconfig.WaitDockerConf,
 			Path:         "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
-			Owner:        FileOwner,
-			Permissions:  FilePermission,
+			Owner: k8scloudconfig.Owner{
+				User:  FileOwnerUser,
+				Group: FileOwnerGroup,
+			},
+			Permissions: FilePermission,
 		},
 		{
 			AssetContent: cloudconfig.DecryptKeysAssetsScript,
 			Path:         "/opt/bin/decrypt-keys-assets",
-			Owner:        FileOwner,
-			Permissions:  FilePermission,
+			Owner: k8scloudconfig.Owner{
+				User:  FileOwnerUser,
+				Group: FileOwnerGroup,
+			},
+			Permissions: FilePermission,
 		},
 		// Add use-proxy-protocol to ingress-controller ConfigMap, this doesn't work
 		// on KVM because of dependencies on hardware LB configuration.
 		{
 			AssetContent: cloudconfig.IngressControllerConfigMap,
 			Path:         "/srv/ingress-controller-cm.yml",
-			Owner:        FileOwner,
-			Permissions:  0644,
+			Owner: k8scloudconfig.Owner{
+				User:  FileOwnerUser,
+				Group: FileOwnerGroup,
+			},
+			Permissions: 0644,
 		},
 		// NVME disks udev rules and script.
 		// Workaround for https://github.com/coreos/bugs/issues/2399
 		{
 			AssetContent: cloudconfig.NVMEUdevRule,
 			Path:         "/etc/udev/rules.d/10-ebs-nvme-mapping.rules",
-			Owner:        FileOwner,
-			Permissions:  0644,
+			Owner: k8scloudconfig.Owner{
+				User:  FileOwnerUser,
+				Group: FileOwnerGroup,
+			},
+			Permissions: 0644,
 		},
 		{
 			AssetContent: cloudconfig.NVMEUdevScript,
 			Path:         "/opt/ebs-nvme-mapping",
-			Owner:        FileOwner,
-			Permissions:  0766,
+			Owner: k8scloudconfig.Owner{
+				User:  FileOwnerUser,
+				Group: FileOwnerGroup,
+			},
+			Permissions: 0766,
+		},
+		{
+			AssetContent: storageClass,
+			Path:         "/srv/default-storage-class.yaml",
+			Owner: k8scloudconfig.Owner{
+				User:  FileOwnerUser,
+				Group: FileOwnerGroup,
+			},
+			Permissions: 0644,
 		},
 	}
 
@@ -165,23 +208,23 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		for _, f := range certFiles {
 			// TODO We should just pass ctx to Files.
 			//
-			//	See https://github.com/giantswarm/giantswarm/issues/4329.
+			// 	See https://github.com/giantswarm/giantswarm/issues/4329.
 			//
 			ctx = controllercontext.NewContext(ctx, *e.ctlCtx)
 
-			data, err := e.encryptAndGzip(ctx, f.Data)
+			data, err := e.encrypt(ctx, f.Data)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
 
-			b64Data := base64.StdEncoding.EncodeToString(data)
-
 			meta := k8scloudconfig.FileMetadata{
-				AssetContent: b64Data,
+				AssetContent: string(data),
 				Path:         f.AbsolutePath + ".enc",
-				Owner:        FileOwner,
-				Permissions:  0700,
-				Encoding:     "gzip+base64",
+				Owner: k8scloudconfig.Owner{
+					User:  FileOwnerUser,
+					Group: FileOwnerGroup,
+				},
+				Permissions: 0700,
 			}
 
 			filesMeta = append(filesMeta, meta)
@@ -192,7 +235,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 	for _, fm := range filesMeta {
 		data := e.templateData()
-		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, data)
+		c, err := k8scloudconfig.RenderFileAssetContent(fm.AssetContent, data)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -215,8 +258,7 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: cloudconfig.NVMEUdevTriggerUnit,
 			Name:         "ebs-nvme-udev-trigger.service",
-			Enable:       false,
-			Command:      "start",
+			Enabled:      true,
 		},
 		// Set bigger timeouts for NVME driver.
 		// Workaround for https://github.com/coreos/bugs/issues/2484
@@ -224,52 +266,39 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: cloudconfig.NVMESetTimeoutsUnit,
 			Name:         "nvme-set-timeouts.service",
-			Enable:       true,
-			Command:      "start",
+			Enabled:      true,
 		},
 		{
 			AssetContent: cloudconfig.DecryptTLSAssetsService,
 			Name:         "decrypt-tls-assets.service",
-			// Do not enable TLS assets decrypt unit so that it won't get automatically
-			// executed on master reboot. This will prevent eventual races with the
-			// asset files creation.
-			Enable:  false,
-			Command: "start",
+			Enabled:      true,
 		},
 		{
 			AssetContent: cloudconfig.MasterFormatVarLibDockerService,
 			Name:         "format-var-lib-docker.service",
-			Enable:       true,
-			Command:      "start",
+			Enabled:      true,
 		},
 		{
 			AssetContent: cloudconfig.EphemeralVarLibDockerMount,
 			Name:         "var-lib-docker.mount",
-			Enable:       true,
-			Command:      "start",
+			Enabled:      true,
 		},
 		{
 			AssetContent: cloudconfig.DecryptKeysAssetsService,
 			Name:         "decrypt-keys-assets.service",
-			// Do not enable key decrypt unit so that it won't get automatically
-			// executed on master reboot. This will prevent eventual races with the
-			// key files creation.
-			Enable:  false,
-			Command: "start",
+			Enabled:      true,
 		},
 		// Format etcd EBS volume.
 		{
 			AssetContent: cloudconfig.FormatEtcdVolume,
 			Name:         "format-etcd-ebs.service",
-			Enable:       true,
-			Command:      "start",
+			Enabled:      true,
 		},
 		// Mount etcd EBS volume.
 		{
 			AssetContent: cloudconfig.MountEtcdVolume,
 			Name:         "var-lib-etcd.mount",
-			Enable:       true,
-			Command:      "start",
+			Enabled:      true,
 		},
 	}
 
@@ -293,23 +322,7 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 }
 
 func (e *MasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
-	var storageClasss string
-	_, ok := e.encrypter.(*vault.Encrypter)
-	if ok {
-		storageClasss = cloudconfig.InstanceStorageClass
-	} else {
-		storageClasss = cloudconfig.InstanceStorageClassEncrypted
-	}
+	newSections := []k8scloudconfig.VerbatimSection{}
 
-	newSections := []k8scloudconfig.VerbatimSection{
-		{
-			Name:    "storage",
-			Content: cloudconfig.InstanceStorage,
-		},
-		{
-			Name:    "storageclass",
-			Content: storageClasss,
-		},
-	}
 	return newSections
 }

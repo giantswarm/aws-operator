@@ -40,6 +40,7 @@ func newTestClusterConfig() ClusterConfig {
 			Region:            "host-myregion",
 			SessionToken:      "host-token",
 		},
+		IgnitionPath:        "test",
 		InstallationName:    "test",
 		IPAMNetworkRange:    *ipamNetworkCIDR,
 		DeleteLoggingBucket: true,

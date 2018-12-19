@@ -3,6 +3,7 @@ package cloudconfig
 const DecryptKeysAssetsService = `
 [Unit]
 Description=Decrypt Secret Keys
+Before=k8s-kubelet.service
 
 [Service]
 Type=oneshot
