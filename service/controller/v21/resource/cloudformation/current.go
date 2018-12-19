@@ -246,19 +246,19 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 				return StackState{}, microerror.Mask(err)
 			}
 			if len(o.AutoScalingGroups) == 0 {
-				return StackState{}, microerror.Maskf(notExistsError, "asg for name %s", workerASGName)
+				return StackState{}, microerror.Maskf(executionFailedError, "asg for name %s", workerASGName)
 			}
 			asg := o.AutoScalingGroups[0]
 			if asg.DesiredCapacity == nil {
-				return StackState{}, microerror.Maskf(notExistsError, "desired capacity for asg is nil")
+				return StackState{}, microerror.Maskf(executionFailedError, "desired capacity for asg is nil")
 			}
 			workerDesired = int(*asg.DesiredCapacity)
 			if asg.MaxSize == nil {
-				return StackState{}, microerror.Maskf(notExistsError, "max size for asg is nil")
+				return StackState{}, microerror.Maskf(executionFailedError, "max size for asg is nil")
 			}
 			workerMax = int(*asg.MaxSize)
 			if asg.MinSize == nil {
-				return StackState{}, microerror.Maskf(notExistsError, "min size for asg is nil")
+				return StackState{}, microerror.Maskf(executionFailedError, "min size for asg is nil")
 			}
 			workerMin = int(*asg.MinSize)
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found out worker asg properties: desiredCapacity: %d, min: %d, max: %d", workerDesired, workerMin, workerMax))
