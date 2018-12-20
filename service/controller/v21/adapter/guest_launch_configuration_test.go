@@ -126,12 +126,8 @@ func Test_AdapterLaunchConfiguration_SmallCloudConfig(t *testing.T) {
 		expectedLine string
 	}{
 		{
-			description:  "contains HTTP URL",
-			expectedLine: fmt.Sprintf("https://s3.myregion.amazonaws.com/000000000000-g8s-test-cluster/version/0.1.0/cloudconfig/%s/worker", key.CloudConfigVersion),
-		},
-		{
 			description:  "contains S3 URL",
-			expectedLine: fmt.Sprintf("aws s3 --region myregion cp s3://000000000000-g8s-test-cluster/version/0.1.0/cloudconfig/%s/worker", key.CloudConfigVersion),
+			expectedLine: fmt.Sprintf("s3://000000000000-g8s-test-cluster/version/0.1.0/cloudconfig/%s/worker", key.CloudConfigVersion),
 		},
 	}
 

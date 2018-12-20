@@ -23,4 +23,6 @@ EnvironmentFile=-/etc/environment
 ExecStart=/usr/bin/udevadm control --reload-rules
 ExecStart=/usr/bin/udevadm trigger -y "nvme[0-9]*n[0-9]*"
 ExecStart=/usr/bin/udevadm settle
+[Install]
+WantedBy=multi-user.target
 `

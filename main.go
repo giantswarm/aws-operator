@@ -127,6 +127,8 @@ func mainError() error {
 
 	daemonCommand.PersistentFlags().Bool(f.Service.Guest.Update.Enabled, false, "Whether updates of guest cluster nodes are allowed to be processed upon reconciliation.")
 
+	daemonCommand.PersistentFlags().String(f.Service.Guest.Ignition.Path, "/opt/ignition", "Default path for the ignition base directory.")
+
 	daemonCommand.PersistentFlags().String(f.Service.Guest.SSH.SSOPublicKey, "", "Public key for trusted SSO CA.")
 
 	daemonCommand.PersistentFlags().Bool(f.Service.AWS.AdvancedMonitoringEC2, false, "Advanced EC2 monitoring.")

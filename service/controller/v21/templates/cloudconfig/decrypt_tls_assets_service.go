@@ -3,6 +3,7 @@ package cloudconfig
 const DecryptTLSAssetsService = `
 [Unit]
 Description=Decrypt TLS certificates
+Before=k8s-kubelet.service
 
 [Service]
 Type=oneshot

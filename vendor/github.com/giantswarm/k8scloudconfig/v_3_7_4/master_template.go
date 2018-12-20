@@ -2018,6 +2018,7 @@ write_files:
   owner: root
   permissions: 0600
   content: |
+    fs.inotify.max_user_watches = 16384
     kernel.kptr_restrict = 2
     kernel.sysrq = 0
     net.ipv4.conf.all.log_martians = 1

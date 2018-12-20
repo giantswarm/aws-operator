@@ -33,7 +33,7 @@ spec:
       serviceAccountName: kube-proxy
       containers:
         - name: kube-proxy
-          image: {{ .RegistryDomain }}/giantswarm/hyperkube:v1.11.1
+          image: {{ .RegistryDomain }}/{{ .Images.Kubernetes }}
           command:
           - /hyperkube
           - proxy
@@ -56,7 +56,9 @@ spec:
             name: ssl-certs-host
             readOnly: true
           - mountPath: /etc/kubernetes/config/
-            name: config-kubernetes
+            name: k8s-config
+          - mountPath: /etc/kubernetes/kubeconfig/
+            name: k8s-kubeconfig
             readOnly: true
           - mountPath: /etc/kubernetes/ssl
             name: ssl-certs-kubernetes
@@ -67,7 +69,10 @@ spec:
       volumes:
       - hostPath:
           path: /etc/kubernetes/config/
-        name: config-kubernetes
+        name: k8s-config
+      - hostPath:
+          path: /etc/kubernetes/config/
+        name: k8s-kubeconfig
       - hostPath:
           path: /etc/kubernetes/ssl
         name: ssl-certs-kubernetes

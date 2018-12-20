@@ -22,6 +22,7 @@ func commonViperSettings(f *flag.Flag, v *viper.Viper) {
 	v.Set(f.Service.AWS.S3AccessLogsExpiration, 365)
 	v.Set(f.Service.AWS.Region, "myregion")
 	v.Set(f.Service.AWS.PubKeyFile, "test")
+	v.Set(f.Service.Guest.Ignition.Path, "test")
 	v.Set(f.Service.Guest.SSH.SSOPublicKey, "test")
 
 	v.Set(f.Service.Installation.Guest.IPAM.Network.CIDR, "10.1.0.0/16")
