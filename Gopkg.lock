@@ -283,7 +283,7 @@
   revision = "79a61ffad296f3f418d8f381e4f5f702d5245b50"
 
 [[projects]]
-  branch = "remove-yamls"
+  branch = "master"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
@@ -293,7 +293,7 @@
     "v_3_7_3",
     "v_4_0_0"
   ]
-  revision = "39b6b002d435c727655b62d253ffcdabdfe93e63"
+  revision = "a0d447244e037529c31a7cef6c585477527de266"
 
 [[projects]]
   branch = "master"
@@ -1124,6 +1124,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8b093f651ffed42f41687cc822f1593ade26aae2a80d8e53bb29f221eb26352e"
+  inputs-digest = "7fdbbd5131214ca30163fb8aee45b4b59b74fbf23722159a8d51f2bb97cc43a2"
   solver-name = "gps-cdcl"
   solver-version = 1
