@@ -13,16 +13,9 @@ type Params struct {
 	// DisableCalico flag. When set removes all calico related Kubernetes
 	// manifests from the cloud config together with their initialization.
 	DisableCalico bool
-	// DisableCoreDNS flag. When set removes all CoreDNS related Kubernetes
-	// manifests from the cloud config together with their initialization.
-	DisableCoreDNS bool
 	// DisableEncryptionAtREST flag. When set removes all manifests from the cloud
 	// config related to Kubernetes encryption at REST.
 	DisableEncryptionAtREST bool
-	// DisableIngressController flag. When set removes all manifests from the
-	// cloud config related to Ingress Controller. There is a separate param
-	// for the Ingress Controller service as these will be migrated separately.
-	DisableIngressController bool
 	// DisableIngressControllerService flag. When set removes the manifest for
 	// the Ingress Controller service. This allows us to migrate providers to
 	// chart-operator independently.

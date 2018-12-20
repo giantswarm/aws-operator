@@ -222,11 +222,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:30dd2f86ad2d0f6c8401fb14c2f1974ce304bae7968088832a777cf5eaee8046"
+  digest = "1:cb9e0c807ef811f4739c14dd4ce51c858938215a9e7bbb5bb25e1e439f303308"
   name = "github.com/giantswarm/apprclient"
   packages = ["."]
   pruneopts = "UT"
-  revision = "96fb6e0c3eef4eae111cc1dcdc0f655f152747fd"
+  revision = "875ffc3f0ea820360b967d69a1a1e88c26cd7480"
 
 [[projects]]
   branch = "master"
@@ -342,7 +342,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:0652d64cf95cdff690b4b706b21590cde91b19ecc84bae42d10a9207b568f422"
+  digest = "1:d31b1b57163567e9db29e8a16a599540aaadebc40658c0171840be9406eaa3f5"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
@@ -353,7 +353,7 @@
     "v_4_0_0",
   ]
   pruneopts = "T"
-  revision = "5678acc24eade39f62f29826ef0c95385fb2be7d"
+  revision = "a0d447244e037529c31a7cef6c585477527de266"
 
 [[projects]]
   branch = "master"
@@ -967,7 +967,7 @@
     "windows",
   ]
   pruneopts = "UT"
-  revision = "dcdaa6325bcb8d3c07805583fe12153f08a41e2b"
+  revision = "074acd46bca67915925527c07849494d115e7c43"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -1022,7 +1022,7 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "67d6565462c5a0d99b88193d59fefa10ca7e3010"
+  revision = "5a97ab628bfb2f65f6befec18f4bc7bc7f382b77"
 
 [[projects]]
   digest = "1:8f56475624fb72854d06ca16c2f7032e3cea14a63074e9c199ba8d46431c1127"
