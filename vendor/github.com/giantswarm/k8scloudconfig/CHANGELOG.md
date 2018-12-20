@@ -15,6 +15,10 @@ version directory, and then changes are introduced.
 - Switched from cloudinit to ignition.
 - Double the inotify watches.
 
+### Removed
+
+- Ingress Controller and CoreDNS manifests. Now migrated to chart-operator.
+
 ## [v3.7.4] WIP
 
 ### Changed
