@@ -19,28 +19,33 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/app/v1alpha1"
+	v1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/application/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/scheme"
 	serializer "k8s.io/apimachinery/pkg/runtime/serializer"
 	rest "k8s.io/client-go/rest"
 )
 
-type AppV1alpha1Interface interface {
+type ApplicationV1alpha1Interface interface {
 	RESTClient() rest.Interface
+	AppsGetter
 	AppCatalogsGetter
 }
 
-// AppV1alpha1Client is used to interact with features provided by the app.giantswarm.io group.
-type AppV1alpha1Client struct {
+// ApplicationV1alpha1Client is used to interact with features provided by the application.giantswarm.io group.
+type ApplicationV1alpha1Client struct {
 	restClient rest.Interface
 }
 
-func (c *AppV1alpha1Client) AppCatalogs(namespace string) AppCatalogInterface {
+func (c *ApplicationV1alpha1Client) Apps(namespace string) AppInterface {
+	return newApps(c, namespace)
+}
+
+func (c *ApplicationV1alpha1Client) AppCatalogs(namespace string) AppCatalogInterface {
 	return newAppCatalogs(c, namespace)
 }
 
-// NewForConfig creates a new AppV1alpha1Client for the given config.
-func NewForConfig(c *rest.Config) (*AppV1alpha1Client, error) {
+// NewForConfig creates a new ApplicationV1alpha1Client for the given config.
+func NewForConfig(c *rest.Config) (*ApplicationV1alpha1Client, error) {
 	config := *c
 	if err := setConfigDefaults(&config); err != nil {
 		return nil, err
@@ -49,12 +54,12 @@ func NewForConfig(c *rest.Config) (*AppV1alpha1Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &AppV1alpha1Client{client}, nil
+	return &ApplicationV1alpha1Client{client}, nil
 }
 
-// NewForConfigOrDie creates a new AppV1alpha1Client for the given config and
+// NewForConfigOrDie creates a new ApplicationV1alpha1Client for the given config and
 // panics if there is an error in the config.
-func NewForConfigOrDie(c *rest.Config) *AppV1alpha1Client {
+func NewForConfigOrDie(c *rest.Config) *ApplicationV1alpha1Client {
 	client, err := NewForConfig(c)
 	if err != nil {
 		panic(err)
@@ -62,9 +67,9 @@ func NewForConfigOrDie(c *rest.Config) *AppV1alpha1Client {
 	return client
 }
 
-// New creates a new AppV1alpha1Client for the given RESTClient.
-func New(c rest.Interface) *AppV1alpha1Client {
-	return &AppV1alpha1Client{c}
+// New creates a new ApplicationV1alpha1Client for the given RESTClient.
+func New(c rest.Interface) *ApplicationV1alpha1Client {
+	return &ApplicationV1alpha1Client{c}
 }
 
 func setConfigDefaults(config *rest.Config) error {
@@ -82,7 +87,7 @@ func setConfigDefaults(config *rest.Config) error {
 
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
-func (c *AppV1alpha1Client) RESTClient() rest.Interface {
+func (c *ApplicationV1alpha1Client) RESTClient() rest.Interface {
 	if c == nil {
 		return nil
 	}

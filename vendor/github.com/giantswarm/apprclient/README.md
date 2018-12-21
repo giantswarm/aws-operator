@@ -12,6 +12,7 @@ against some CNR implementation.
 ### Test libraries
 
 - https://github.com/giantswarm/e2e-harness
+- https://github.com/giantswarm/e2etests
 
 ### Libraries
 
