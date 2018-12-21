@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	group   = "app.giantswarm.io"
+	group   = "application.giantswarm.io"
 	version = "v1alpha1"
 )
 
@@ -17,6 +17,8 @@ const (
 var knownTypes = []runtime.Object{
 	&AppCatalog{},
 	&AppCatalogList{},
+	&App{},
+	&AppList{},
 }
 
 // SchemeGroupVersion is group version used to register these objects

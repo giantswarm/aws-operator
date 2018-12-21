@@ -16,8 +16,3 @@ type Interface interface {
 	PullChartTarball(name, channel string) (string, error)
 	PullChartTarballFromRelease(name, release string) (string, error)
 }
-
-// Channel represents a CNR channel.
-type Channel struct {
-	Current string `json:"current"`
-}
