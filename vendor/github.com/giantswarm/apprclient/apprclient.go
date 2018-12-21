@@ -263,7 +263,7 @@ func (c *Client) do(ctx context.Context, req *http.Request, v interface{}) error
 
 		return nil
 	}
-	b := backoff.NewExponential(backoff.TinyMaxWait, backoff.TinyMaxInterval)
+	b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
 	n := backoff.NewNotifier(c.logger, ctx)
 
 	err := backoff.RetryNotify(o, b, n)
@@ -310,7 +310,7 @@ func (c *Client) doFile(ctx context.Context, req *http.Request) (string, error) 
 
 		return nil
 	}
-	b := backoff.NewExponential(backoff.TinyMaxWait, backoff.TinyMaxInterval)
+	b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
 	n := backoff.NewNotifier(c.logger, ctx)
 
 	err := backoff.RetryNotify(o, b, n)
