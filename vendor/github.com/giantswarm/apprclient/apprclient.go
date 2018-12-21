@@ -119,7 +119,7 @@ func (c *Client) GetReleaseVersion(name, channel string) (string, error) {
 		return "", microerror.Mask(err)
 	}
 
-	var ch Channel
+	var ch cnrChannel
 	err = c.do(req, &ch)
 
 	if err != nil {
@@ -138,7 +138,7 @@ func (c *Client) PromoteChart(name, release, channel string) error {
 		return microerror.Mask(err)
 	}
 
-	ch := &Channel{}
+	ch := &cnrChannel{}
 	err = c.do(req, ch)
 	if err != nil {
 		return microerror.Mask(err)

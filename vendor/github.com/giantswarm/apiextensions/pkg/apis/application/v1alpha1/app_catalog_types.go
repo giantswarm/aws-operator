@@ -11,9 +11,9 @@ import (
 //     apiVersion: apiextensions.k8s.io/v1beta1
 //     kind: CustomResourceDefinition
 //     metadata:
-//       name: appcatalog.app.giantswarm.io
+//       name: appcatalog.application.giantswarm.io
 //     spec:
-//       group: app.giantswarm.io
+//       group: application.giantswarm.io
 //       scope: Cluster
 //       version: v1alpha1
 //       names:
@@ -28,10 +28,10 @@ func NewAppCatalogCRD() *apiextensionsv1beta1.CustomResourceDefinition {
 			Kind:       "CustomResourceDefinition",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "appcatalogs.app.giantswarm.io",
+			Name: "appcatalogs.application.giantswarm.io",
 		},
 		Spec: apiextensionsv1beta1.CustomResourceDefinitionSpec{
-			Group:   "app.giantswarm.io",
+			Group:   "application.giantswarm.io",
 			Scope:   "Cluster",
 			Version: "v1alpha1",
 			Names: apiextensionsv1beta1.CustomResourceDefinitionNames{
