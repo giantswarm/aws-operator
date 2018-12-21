@@ -20,8 +20,8 @@ package fake
 
 import (
 	clientset "github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	appv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/app/v1alpha1"
-	fakeappv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/app/v1alpha1/fake"
+	applicationv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/application/v1alpha1"
+	fakeapplicationv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/application/v1alpha1/fake"
 	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/core/v1alpha1"
 	fakecorev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/core/v1alpha1/fake"
 	examplev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/example/v1alpha1"
@@ -76,14 +76,14 @@ func (c *Clientset) Discovery() discovery.DiscoveryInterface {
 
 var _ clientset.Interface = &Clientset{}
 
-// AppV1alpha1 retrieves the AppV1alpha1Client
-func (c *Clientset) AppV1alpha1() appv1alpha1.AppV1alpha1Interface {
-	return &fakeappv1alpha1.FakeAppV1alpha1{Fake: &c.Fake}
+// ApplicationV1alpha1 retrieves the ApplicationV1alpha1Client
+func (c *Clientset) ApplicationV1alpha1() applicationv1alpha1.ApplicationV1alpha1Interface {
+	return &fakeapplicationv1alpha1.FakeApplicationV1alpha1{Fake: &c.Fake}
 }
 
-// App retrieves the AppV1alpha1Client
-func (c *Clientset) App() appv1alpha1.AppV1alpha1Interface {
-	return &fakeappv1alpha1.FakeAppV1alpha1{Fake: &c.Fake}
+// Application retrieves the ApplicationV1alpha1Client
+func (c *Clientset) Application() applicationv1alpha1.ApplicationV1alpha1Interface {
+	return &fakeapplicationv1alpha1.FakeApplicationV1alpha1{Fake: &c.Fake}
 }
 
 // CoreV1alpha1 retrieves the CoreV1alpha1Client

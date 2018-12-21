@@ -131,15 +131,6 @@ MANIFESTS=""
 {{ range .ExtraManifests -}}
 MANIFESTS="${MANIFESTS} {{ . }}"
 {{ end -}}
-{{ if not .DisableCoreDNS }}
-MANIFESTS="${MANIFESTS} coredns.yaml"
-{{ end -}}
-{{ if not .DisableIngressController -}}
-MANIFESTS="${MANIFESTS} default-backend-dep.yaml"
-MANIFESTS="${MANIFESTS} default-backend-svc.yaml"
-MANIFESTS="${MANIFESTS} ingress-controller-cm.yaml"
-MANIFESTS="${MANIFESTS} ingress-controller-dep.yaml"
-{{ end -}}
 {{ if not .DisableIngressControllerService -}}
 MANIFESTS="${MANIFESTS} ingress-controller-svc.yaml"
 {{ end -}}
