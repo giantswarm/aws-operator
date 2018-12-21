@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
@@ -122,8 +123,8 @@ func (k *KVM) RemoveWorker() error {
 	return nil
 }
 
-func (k *KVM) WaitForNodes(num int) error {
-	err := k.guestFramework.WaitForNodesUp(num)
+func (k *KVM) WaitForNodes(ctx context.Context, num int) error {
+	err := k.guestFramework.WaitForNodesReady(ctx, num)
 	if err != nil {
 		return microerror.Mask(err)
 	}

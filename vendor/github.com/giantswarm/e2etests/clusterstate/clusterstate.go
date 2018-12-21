@@ -99,7 +99,7 @@ func (c *ClusterState) Test(ctx context.Context) error {
 	{
 		c.logger.LogCtx(ctx, "level", "debug", "message", "waiting for guest cluster")
 
-		err = c.guestFramework.WaitForGuestReady()
+		err = c.guestFramework.WaitForGuestReady(ctx)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -143,7 +143,7 @@ func (c *ClusterState) Test(ctx context.Context) error {
 	{
 		c.logger.LogCtx(ctx, "level", "debug", "message", "waiting for guest cluster")
 
-		err = c.guestFramework.WaitForGuestReady()
+		err = c.guestFramework.WaitForGuestReady(ctx)
 		if err != nil {
 			return microerror.Mask(err)
 		}

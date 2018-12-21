@@ -1,6 +1,7 @@
 package framework
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -144,13 +145,13 @@ func (g *Guest) Initialize() error {
 // Constructing the frameworks can be done right away but setting them up can
 // only happen as soon as certain requirements have been met. A requirement for
 // the guest framework is a set up host cluster.
-func (g *Guest) Setup() error {
+func (g *Guest) Setup(ctx context.Context) error {
 	err := g.Initialize()
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	err = g.WaitForGuestReady()
+	err = g.WaitForGuestReady(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -212,7 +213,7 @@ func (g *Guest) WaitForAPIUp() error {
 	return nil
 }
 
-func (g *Guest) WaitForGuestReady() error {
+func (g *Guest) WaitForGuestReady(ctx context.Context) error {
 	var err error
 
 	err = g.WaitForAPIUp()
@@ -220,7 +221,7 @@ func (g *Guest) WaitForGuestReady() error {
 		return microerror.Mask(err)
 	}
 
-	err = g.WaitForNodesUp(minimumNodesReady)
+	err = g.WaitForNodesReady(ctx, minimumNodesReady)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -228,8 +229,8 @@ func (g *Guest) WaitForGuestReady() error {
 	return nil
 }
 
-func (g *Guest) WaitForNodesUp(numberOfNodes int) error {
-	g.logger.Log("level", "debug", "message", fmt.Sprintf("waiting for %d k8s nodes to be in %#q state", numberOfNodes, v1.NodeReady))
+func (g *Guest) WaitForNodesReady(ctx context.Context, expectedNodes int) error {
+	g.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for %d k8s nodes to be in %#q state", expectedNodes, v1.NodeReady))
 
 	o := func() error {
 		nodes, err := g.k8sClient.CoreV1().Nodes().List(metav1.ListOptions{})
@@ -237,34 +238,29 @@ func (g *Guest) WaitForNodesUp(numberOfNodes int) error {
 			return microerror.Mask(err)
 		}
 
-		if len(nodes.Items) != numberOfNodes {
-			return microerror.Maskf(waitError, "found %d k8s nodes but want %d", len(nodes.Items), numberOfNodes)
-		}
-
-		var notReadyCnt int
+		var nodesReady int
 		for _, n := range nodes.Items {
 			for _, c := range n.Status.Conditions {
-				if c.Type == v1.NodeReady && c.Status != v1.ConditionTrue {
-					notReadyCnt++
+				if c.Type == v1.NodeReady && c.Status == v1.ConditionTrue {
+					nodesReady++
 				}
 			}
 		}
-		if notReadyCnt > 0 {
-			return microerror.Maskf(waitError, "found %d k8s nodes but %d of them are still not %#q state", len(nodes.Items), notReadyCnt, v1.NodeReady)
+
+		if nodesReady != expectedNodes {
+			return microerror.Maskf(waitError, "found %d/%d k8s nodes in %#q state but %d are expected", nodesReady, len(nodes.Items), v1.NodeReady, expectedNodes)
 		}
 
 		return nil
 	}
 	b := backoff.NewConstant(backoff.LongMaxWait, backoff.LongMaxInterval)
-	n := func(err error, delay time.Duration) {
-		g.logger.Log("level", "debug", "message", err.Error())
-	}
+	n := backoff.NewNotifier(g.logger, ctx)
 
 	err := backoff.RetryNotify(o, b, n)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	g.logger.Log("level", "debug", "message", fmt.Sprintf("waited for %d k8s nodes to be in %#q state", numberOfNodes, v1.NodeReady))
+	g.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for %d k8s nodes to be in %#q state", expectedNodes, v1.NodeReady))
 	return nil
 }
