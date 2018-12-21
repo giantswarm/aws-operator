@@ -52,7 +52,7 @@ func EnsureTenantClusterCreated(ctx context.Context, id string, config Config, w
 			return microerror.Mask(err)
 		}
 
-		err := config.Guest.WaitForGuestReady()
+		err := config.Guest.WaitForGuestReady(ctx)
 		if err != nil {
 			return microerror.Mask(err)
 		}
