@@ -95,7 +95,7 @@ func Test_Draining(t *testing.T) {
 	{
 		newLogger.Log("level", "debug", "message", "installing e2e-app for testing")
 
-		tarballPath, err := apprClient.PullChartTarball(ChartName, ChartChannel)
+		tarballPath, err := apprClient.PullChartTarball(ctx, ChartName, ChartChannel)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}

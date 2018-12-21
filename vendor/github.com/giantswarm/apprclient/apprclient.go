@@ -88,7 +88,7 @@ func New(config Config) (*Client, error) {
 }
 
 // DeleteRelease removes a release from the server.
-func (c *Client) DeleteRelease(name, release string) error {
+func (c *Client) DeleteRelease(ctx context.Context, name, release string) error {
 	p := path.Join("packages", c.organization, name, release, "helm")
 
 	req, err := c.newRequest("DELETE", p)
@@ -97,7 +97,7 @@ func (c *Client) DeleteRelease(name, release string) error {
 	}
 
 	var r Response
-	err = c.do(req, &r)
+	err = c.do(ctx, req, &r)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -111,7 +111,7 @@ func (c *Client) DeleteRelease(name, release string) error {
 
 // GetReleaseVersion queries CNR for the release version of the chart
 // represented by the given name and channel.
-func (c *Client) GetReleaseVersion(name, channel string) (string, error) {
+func (c *Client) GetReleaseVersion(ctx context.Context, name, channel string) (string, error) {
 	p := path.Join("packages", c.organization, name, "channels", channel)
 
 	req, err := c.newRequest("GET", p)
@@ -120,7 +120,7 @@ func (c *Client) GetReleaseVersion(name, channel string) (string, error) {
 	}
 
 	var ch cnrChannel
-	err = c.do(req, &ch)
+	err = c.do(ctx, req, &ch)
 
 	if err != nil {
 		return "", microerror.Mask(err)
@@ -130,7 +130,7 @@ func (c *Client) GetReleaseVersion(name, channel string) (string, error) {
 }
 
 // PromoteChart puts a release of the given chart in a channel.
-func (c *Client) PromoteChart(name, release, channel string) error {
+func (c *Client) PromoteChart(ctx context.Context, name, release, channel string) error {
 	p := path.Join("packages", c.organization, name, "channels", channel, release)
 
 	req, err := c.newRequest("POST", p)
@@ -139,7 +139,7 @@ func (c *Client) PromoteChart(name, release, channel string) error {
 	}
 
 	ch := &cnrChannel{}
-	err = c.do(req, ch)
+	err = c.do(ctx, req, ch)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -149,18 +149,18 @@ func (c *Client) PromoteChart(name, release, channel string) error {
 
 // PullChartTarball downloads a tarball with the chart described by
 // the given chart name and channel, returning the file path.
-func (c *Client) PullChartTarball(name, channel string) (string, error) {
-	release, err := c.GetReleaseVersion(name, channel)
+func (c *Client) PullChartTarball(ctx context.Context, name, channel string) (string, error) {
+	release, err := c.GetReleaseVersion(ctx, name, channel)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
-	return c.PullChartTarballFromRelease(name, release)
+	return c.PullChartTarballFromRelease(ctx, name, release)
 }
 
 // PullChartTarballFromRelease downloads a tarball with the chart described
 // by the given chart name and release, returning the file path.
-func (c *Client) PullChartTarballFromRelease(name, release string) (string, error) {
+func (c *Client) PullChartTarballFromRelease(ctx context.Context, name, release string) (string, error) {
 	p := path.Join("packages", c.organization, name, release, "helm", "pull")
 
 	req, err := c.newRequest("GET", p)
@@ -168,7 +168,7 @@ func (c *Client) PullChartTarballFromRelease(name, release string) (string, erro
 		return "", microerror.Mask(err)
 	}
 
-	chartTarballPath, err := c.doFile(req)
+	chartTarballPath, err := c.doFile(ctx, req)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -178,7 +178,7 @@ func (c *Client) PullChartTarballFromRelease(name, release string) (string, erro
 
 // PushChartTarball sends a tarball to the server to be installed for the given
 // name and release
-func (c *Client) PushChartTarball(name, release, tarballPath string) error {
+func (c *Client) PushChartTarball(ctx context.Context, name, release, tarballPath string) error {
 	p := path.Join("packages", c.organization, name)
 
 	blob, err := c.readBlob(tarballPath)
@@ -197,7 +197,7 @@ func (c *Client) PushChartTarball(name, release, tarballPath string) error {
 	}
 
 	var r Response
-	err = c.do(req, &r)
+	err = c.do(ctx, req, &r)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -246,7 +246,9 @@ func (c *Client) newPayloadRequest(path string, payload *Payload) (*http.Request
 	return req, nil
 }
 
-func (c *Client) do(req *http.Request, v interface{}) error {
+func (c *Client) do(ctx context.Context, req *http.Request, v interface{}) error {
+	req = req.WithContext(ctx)
+
 	o := func() error {
 		resp, err := c.httpClient.Do(req)
 		if err != nil {
@@ -262,11 +264,7 @@ func (c *Client) do(req *http.Request, v interface{}) error {
 		return nil
 	}
 	b := backoff.NewExponential(backoff.TinyMaxWait, backoff.TinyMaxInterval)
-	// Pass context to the public methods.
-	//
-	//	See https://github.com/giantswarm/giantswarm/issues/4449
-	//
-	n := backoff.NewNotifier(c.logger, context.TODO())
+	n := backoff.NewNotifier(c.logger, ctx)
 
 	err := backoff.RetryNotify(o, b, n)
 	if err != nil {
@@ -276,8 +274,10 @@ func (c *Client) do(req *http.Request, v interface{}) error {
 	return nil
 }
 
-func (c *Client) doFile(req *http.Request) (string, error) {
+func (c *Client) doFile(ctx context.Context, req *http.Request) (string, error) {
 	var tmpFileName string
+
+	req = req.WithContext(ctx)
 
 	o := func() error {
 		resp, err := c.httpClient.Do(req)
@@ -311,11 +311,7 @@ func (c *Client) doFile(req *http.Request) (string, error) {
 		return nil
 	}
 	b := backoff.NewExponential(backoff.TinyMaxWait, backoff.TinyMaxInterval)
-	// Pass context to the public methods.
-	//
-	//	See https://github.com/giantswarm/giantswarm/issues/4449
-	//
-	n := backoff.NewNotifier(c.logger, context.TODO())
+	n := backoff.NewNotifier(c.logger, ctx)
 
 	err := backoff.RetryNotify(o, b, n)
 	if err != nil {
