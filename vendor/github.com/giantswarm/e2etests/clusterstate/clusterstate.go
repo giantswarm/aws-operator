@@ -208,7 +208,7 @@ func (c *ClusterState) InstallTestApp(ctx context.Context) error {
 	{
 		c.logger.Log("level", "debug", "message", "installing e2e-app for testing")
 
-		tarballPath, err := apprClient.PullChartTarball(ChartName, ChartChannel)
+		tarballPath, err := apprClient.PullChartTarball(ctx, ChartName, ChartChannel)
 		if err != nil {
 			return microerror.Mask(err)
 		}

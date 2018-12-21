@@ -1,5 +1,7 @@
 package apprclient
 
+import "context"
+
 const (
 	httpClientTimeout = 5
 
@@ -12,7 +14,7 @@ const (
 
 // Interface describes the methods provided by the appr client.
 type Interface interface {
-	GetReleaseVersion(name, channel string) (string, error)
-	PullChartTarball(name, channel string) (string, error)
-	PullChartTarballFromRelease(name, release string) (string, error)
+	GetReleaseVersion(ctx context.Context, name, channel string) (string, error)
+	PullChartTarball(ctx context.Context, name, channel string) (string, error)
+	PullChartTarballFromRelease(ctx context.Context, name, release string) (string, error)
 }
