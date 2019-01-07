@@ -207,7 +207,7 @@ func Test_Draining(t *testing.T) {
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
-		err = config.Guest.WaitForNodesUp(masterCount + workerCount - 1)
+		err = config.Guest.WaitForNodesReady(ctx, masterCount+workerCount-1)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
