@@ -248,7 +248,7 @@
   revision = "98bddd6005f6ac728b43f0ef8cf81e7756792a93"
 
 [[projects]]
-  branch = "nodesReady"
+  branch = "master"
   digest = "1:d7e30f4e71126e55308dafdf8afb33ac67d9ac1c077128b07899a8d898f50dc7"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
@@ -292,7 +292,7 @@
   revision = "35883a1a7f3352874473a6be2e5a72cd8bcd09d9"
 
 [[projects]]
-  branch = "nodesReady"
+  branch = "master"
   digest = "1:d716e9b0034fbb6cb896cce7144afd6f0b1a0925cf19f9a58a51d7759fbd1306"
   name = "github.com/giantswarm/e2etests"
   packages = [
