@@ -29,7 +29,7 @@ const VPC = `{{define "vpc"}}
       VpcId: !Ref VPC
       RouteTableIds:
         {{- range $v.RouteTableNames }}
-        - !Ref .ResourceName
+        - !Ref {{ .ResourceName }}
         {{- end}}
       Policy: !Ref VPCS3EndpointPolicy
 {{end}}`
