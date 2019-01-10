@@ -74,9 +74,9 @@ const IAMPolicies = `{{define "iam_policies"}}
         - Ref: "MasterRole"
 
   VPCS3EndpointPolicy:
-    Type: "AWS::IAM::Role"
+    Type: "AWS::IAM::Policy"
     Properties:
-      RoleName: {{ $v.ClusterID }}-vpc-s3-endpoint
+      PolicyName: {{ $v.ClusterID }}-vpc-s3-endpoint
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
