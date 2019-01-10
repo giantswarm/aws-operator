@@ -24,12 +24,12 @@ const VPC = `{{define "vpc"}}
         - Key: Name
           Value: {{ $v.ClusterID }}
   VPCS3Endpoint:
-    Type: 'AWS::EC2::VPCEndpoint',
+    Type: 'AWS::EC2::VPCEndpoint'
     Properties:
       VpcId: !Ref VPC
       RouteTableIds:
         {{- range $v.RouteTableNames }}
         - !Ref .ResourceName
-        {{end}}
+        {{- end}}
       Policy: !Ref VPCS3EndpointPolicy
 {{end}}`
