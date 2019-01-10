@@ -73,6 +73,17 @@ const IAMPolicies = `{{define "iam_policies"}}
       Roles:
         - Ref: "MasterRole"
 
+  VPCS3EndpointPolicy:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: {{ $v.ClusterID }}-vpc-s3-endpoint
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "*"
+            Resource: "arn:{{ $v.RegionARN }}:s3::{{ $v.GuestAccountID }}:*"
+
   WorkerRole:
     Type: "AWS::IAM::Role"
     Properties:

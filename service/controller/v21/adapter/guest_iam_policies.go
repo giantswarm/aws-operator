@@ -14,6 +14,7 @@ import (
 type GuestIAMPoliciesAdapter struct {
 	ClusterID         string
 	EC2ServiceDomain  string
+	GuestAccountID    string
 	KMSKeyARN         string
 	MasterRoleName    string
 	MasterPolicyName  string
@@ -30,6 +31,7 @@ func (i *GuestIAMPoliciesAdapter) Adapt(cfg Config) error {
 
 	i.ClusterID = clusterID
 	i.EC2ServiceDomain = key.EC2ServiceDomain(cfg.CustomObject)
+	i.GuestAccountID = cfg.GuestAccountID
 	i.MasterPolicyName = key.PolicyName(cfg.CustomObject, key.KindMaster)
 	i.MasterProfileName = key.InstanceProfileName(cfg.CustomObject, key.KindMaster)
 	i.MasterRoleName = key.RoleName(cfg.CustomObject, key.KindMaster)
