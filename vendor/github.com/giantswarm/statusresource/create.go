@@ -307,7 +307,7 @@ func (r *Resource) computeCreateEventPatches(ctx context.Context, obj interface{
 						return nil, microerror.Maskf(missingLabelError, labelVersion)
 					}
 
-					nodes = append(nodes, providerv1alpha1.NewStatusClusterNode(n, v))
+					nodes = append(nodes, providerv1alpha1.NewStatusClusterNode(n, v, l))
 				}
 
 				nodesDiffer := nodes != nil && !allNodesEqual(clusterStatus.Nodes, nodes)

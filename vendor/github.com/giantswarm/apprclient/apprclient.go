@@ -177,7 +177,7 @@ func (c *Client) PullChartTarballFromRelease(ctx context.Context, name, release 
 }
 
 // PushChartTarball sends a tarball to the server to be installed for the given
-// name and release
+// name and release.
 func (c *Client) PushChartTarball(ctx context.Context, name, release, tarballPath string) error {
 	p := path.Join("packages", c.organization, name)
 
