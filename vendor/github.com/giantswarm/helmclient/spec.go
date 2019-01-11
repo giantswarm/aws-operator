@@ -10,6 +10,10 @@ const (
 	// defaultMaxHistory is the maximum number of release versions stored per
 	// release by default.
 	defaultMaxHistory = 10
+	// httpClientTimeout is the timeout when pulling tarballs.
+	httpClientTimeout = 5
+	// runReleaseTestTimeout is the timeout in seconds when running tests.
+	runReleaseTestTimout = 300
 
 	defaultTillerImage     = "quay.io/giantswarm/tiller:v2.12.0"
 	defaultTillerNamespace = "kube-system"
@@ -39,30 +43,17 @@ type Interface interface {
 	InstallReleaseFromTarball(ctx context.Context, path, ns string, options ...helm.InstallOption) error
 	// ListReleaseContents gets the current status of all Helm Releases.
 	ListReleaseContents(ctx context.Context) ([]*ReleaseContent, error)
+	// LoadChart loads a Helm Chart and returns its structure.
+	LoadChart(ctx context.Context, chartPath string) (Chart, error)
 	// PingTiller proxies the underlying Helm client PingTiller method.
 	PingTiller(ctx context.Context) error
+	// PullChartTarball downloads a tarball from the provided tarball URL,
+	// returning the file path.
+	PullChartTarball(ctx context.Context, tarballURL string) (string, error)
 	// RunReleaseTest runs the tests for a Helm Release. This is the same
 	// action as running the helm test command.
 	RunReleaseTest(ctx context.Context, releaseName string, options ...helm.ReleaseTestOption) error
 	// UpdateReleaseFromTarball updates the given release using the chart packaged
 	// in the tarball.
 	UpdateReleaseFromTarball(ctx context.Context, releaseName, path string, options ...helm.UpdateOption) error
-}
-
-// ReleaseContent returns status information about a Helm Release.
-type ReleaseContent struct {
-	// Name is the name of the Helm Release.
-	Name string
-	// Status is the Helm status code of the Release.
-	Status string
-	// Values are the values provided when installing the Helm Release.
-	Values map[string]interface{}
-}
-
-// ReleaseHistory returns version information about a Helm Release.
-type ReleaseHistory struct {
-	// Name is the name of the Helm Release.
-	Name string
-	// Version is the version of the Helm Chart that has been deployed.
-	Version string
 }

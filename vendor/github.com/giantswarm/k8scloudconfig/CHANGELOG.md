@@ -18,6 +18,7 @@ version directory, and then changes are introduced.
 ### Removed
 
 - Ingress Controller and CoreDNS manifests. Now migrated to chart-operator.
+- Removed nodename_file_optional from calico configmap.
 
 ## [v3.7.4] WIP
 
@@ -25,6 +26,7 @@ version directory, and then changes are introduced.
 - Double the inotify watches.
 
 ### Removed
+- Removed nodename_file_optional from calico configmap.
 
 ## [v3.7.3]
 
