@@ -274,7 +274,7 @@ func (s *Service) Boot(ctx context.Context) {
 		go s.operatorCollector.Boot(ctx)
 		go s.statusResourceCollector.Boot(ctx)
 
-		go s.clusterController.Boot()
-		go s.drainerController.Boot()
+		go s.clusterController.Boot(ctx)
+		go s.drainerController.Boot(ctx)
 	})
 }
