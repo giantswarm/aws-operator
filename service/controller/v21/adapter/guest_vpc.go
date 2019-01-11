@@ -17,6 +17,7 @@ type GuestVPCAdapter struct {
 	HostAccountID    string
 	PeerVPCID        string
 	PeerRoleArn      string
+	RegionARN        string
 	RouteTableNames  []RouteTableName
 }
 
@@ -27,6 +28,7 @@ func (v *GuestVPCAdapter) Adapt(cfg Config) error {
 	v.InstallationName = cfg.InstallationName
 	v.HostAccountID = cfg.HostAccountID
 	v.PeerVPCID = key.PeerID(cfg.CustomObject)
+	v.RegionARN = key.RegionARN(cfg.CustomObject)
 
 	// PeerRoleArn.
 	roleName := key.PeerAccessRoleName(cfg.CustomObject)
