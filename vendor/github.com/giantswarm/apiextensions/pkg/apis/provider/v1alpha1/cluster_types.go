@@ -13,8 +13,11 @@ type Cluster struct {
 	Kubernetes ClusterKubernetes `json:"kubernetes" yaml:"kubernetes"`
 	Masters    []ClusterNode     `json:"masters" yaml:"masters"`
 	Scaling    ClusterScaling    `json:"scaling" yaml:"scaling"`
-	Version    string            `json:"version" yaml:"version"`
-	Workers    []ClusterNode     `json:"workers" yaml:"workers"`
+
+	// Version is DEPRECATED and should just be dropped.
+	Version string `json:"version" yaml:"version"`
+
+	Workers []ClusterNode `json:"workers" yaml:"workers"`
 }
 
 type ClusterCalico struct {

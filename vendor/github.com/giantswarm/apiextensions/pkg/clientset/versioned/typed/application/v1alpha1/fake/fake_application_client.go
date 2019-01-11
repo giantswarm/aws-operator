@@ -1,5 +1,5 @@
 /*
-Copyright 2018 Giant Swarm GmbH.
+Copyright 2019 Giant Swarm GmbH.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -34,6 +34,10 @@ func (c *FakeApplicationV1alpha1) Apps(namespace string) v1alpha1.AppInterface {
 
 func (c *FakeApplicationV1alpha1) AppCatalogs(namespace string) v1alpha1.AppCatalogInterface {
 	return &FakeAppCatalogs{c, namespace}
+}
+
+func (c *FakeApplicationV1alpha1) Charts(namespace string) v1alpha1.ChartInterface {
+	return &FakeCharts{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

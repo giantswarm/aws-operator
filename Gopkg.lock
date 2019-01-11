@@ -198,7 +198,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:62ba3542f209037ea2c5900c2e10789e6f0ab88c25b1c13998c593ad749af08d"
+  digest = "1:ae7abec97444b67d00c9d1413cd272c5fa013362272c3573c855b706a084a6c7"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/application/v1alpha1",
@@ -218,7 +218,7 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1/fake",
   ]
   pruneopts = "UT"
-  revision = "d938fdf2412efa6aee9f3c7f0eaa9cc9b357efca"
+  revision = "f6f902443c1891eba281cbea6e137cfbe2c2f9ac"
 
 [[projects]]
   branch = "master"
@@ -258,7 +258,7 @@
     "pkg/release",
   ]
   pruneopts = "UT"
-  revision = "1bddc65a2e3db47248c255251bd24ffc728e1a24"
+  revision = "4a94ba016067a6192f9885361c9ece6ee9a593c8"
 
 [[projects]]
   branch = "master"
@@ -306,7 +306,7 @@
     "update/provider",
   ]
   pruneopts = "UT"
-  revision = "5ac3447a452af09194dd3bcd1e03ac90081f8772"
+  revision = "ff5e577923387afb68f12d1209a78923577f2d2e"
 
 [[projects]]
   branch = "master"
@@ -471,12 +471,12 @@
   revision = "0688a8c5c0d7ac6aa1cf2ebb4323ed1ef3cbe46f"
 
 [[projects]]
-  branch = "master"
-  digest = "1:e8c024dc58e367cc53bcf48efa99c3e9cecfc1658922d19e266da6f066206f3f"
+  branch = "add-node-labels-to-status"
+  digest = "1:91ed2d8a69849fecbefcbe1318c5a442041a6a66f50cb509d19dfb6b728e558d"
   name = "github.com/giantswarm/statusresource"
   packages = ["."]
   pruneopts = "UT"
-  revision = "e8ae0e4ac501178487e4a998081f8fb79cdc1a68"
+  revision = "0df2ea54d21395fd2868a040af617c826f5a3980"
 
 [[projects]]
   branch = "master"

@@ -5,8 +5,9 @@ import (
 	"time"
 )
 
-func NewStatusClusterNode(name string, version string) StatusClusterNode {
+func NewStatusClusterNode(name, version string, labels map[string]string) StatusClusterNode {
 	return StatusClusterNode{
+		Labels:             labels,
 		LastHeartbeatTime:  DeepCopyTime{time.Now()},
 		LastTransitionTime: DeepCopyTime{time.Now()},
 		Name:               name,
