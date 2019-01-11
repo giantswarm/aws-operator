@@ -33,8 +33,8 @@ const VPC = `{{define "vpc"}}
         {{- end}}
       PolicyDocument:
         Version: "2012-10-17"
-          Statement:
-            - Effect: "Allow"
-              Action: "*"
-              Resource: "arn:{{ $v.RegionARN }}:s3::{{ $v.GuestAccountID }}:*"
+        Statement:
+          - Effect: "Allow"
+            Action: "*"
+            Resource: "arn:{{ $v.RegionARN }}:s3::{{ $v.GuestAccountID }}:*"
 {{end}}`
