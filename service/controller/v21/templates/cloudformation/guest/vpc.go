@@ -31,7 +31,7 @@ const VPC = `{{define "vpc"}}
         {{- range $v.RouteTableNames }}
         - !Ref {{ .ResourceName }}
         {{- end}}
-      ServiceName: 'com.amazonaws.{{ $v. }}.s3'
+      ServiceName: 'com.amazonaws.{{ $v.Region }}.s3'
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
