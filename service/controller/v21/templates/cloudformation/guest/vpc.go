@@ -31,5 +31,10 @@ const VPC = `{{define "vpc"}}
         {{- range $v.RouteTableNames }}
         - !Ref {{ .ResourceName }}
         {{- end}}
-      Policy: !Ref VPCS3EndpointPolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Action: "*"
+              Resource: "arn:{{ $v.RegionARN }}:s3::{{ $v.GuestAccountID }}:*"
 {{end}}`
