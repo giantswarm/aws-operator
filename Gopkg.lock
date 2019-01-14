@@ -472,11 +472,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:91ed2d8a69849fecbefcbe1318c5a442041a6a66f50cb509d19dfb6b728e558d"
+  digest = "1:9e7a2e513329d9b5004d2aefdeb5790ce57bf596b409149b58b90d251957b6e8"
   name = "github.com/giantswarm/statusresource"
   packages = ["."]
   pruneopts = "UT"
-  revision = "145388906b7a0700b2d957c5f8019e710de2cc1a"
+  revision = "d29ade17a2244e84d55e8471af5f187ad32d5604"
 
 [[projects]]
   branch = "master"

@@ -109,7 +109,7 @@ required = [
   name = "github.com/giantswarm/randomkeys"
 
 [[constraint]]
-  branch = "add-node-labels-to-status"
+  branch = "master"
   name = "github.com/giantswarm/statusresource"
 
 [[constraint]]
