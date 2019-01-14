@@ -288,6 +288,15 @@
   version = "v2.0.7"
 
 [[projects]]
+  name = "github.com/spf13/afero"
+  packages = [
+    ".",
+    "mem"
+  ]
+  revision = "a5d6946387efe7d64d09dcba68cdd523dc1273a3"
+  version = "v1.2.0"
+
+[[projects]]
   name = "github.com/spf13/pflag"
   packages = ["."]
   revision = "298182f68c66c05229eb03ac171abe6e309ee79a"
@@ -590,6 +599,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "56662089c807a30fc6e2f95117de8649694c406bbd270677269bc76edced6d8b"
+  inputs-digest = "fff4afa219310e7cefef69ec7518e01f802989f059fe798b0b9327cf60a44e1e"
   solver-name = "gps-cdcl"
   solver-version = 1
