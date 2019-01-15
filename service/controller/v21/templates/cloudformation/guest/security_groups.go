@@ -143,4 +143,22 @@ const SecurityGroups = `{{define "security_groups" }}
       ToPort: -1
       SourceSecurityGroupId: !Ref MasterSecurityGroup
 
+  VPCDefaultSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId !GetAtt VPC.DefaultSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: !Ref VPC.DefaultSecurityGroup
+
+  VPCDefaultSecurityGroupEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId !GetAtt VPC.DefaultSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      CidrIp: 0.0.0.0/0
+
 {{ end }}`
