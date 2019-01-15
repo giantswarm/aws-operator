@@ -35,9 +35,14 @@ const VPC = `{{define "vpc"}}
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
-          - Sid: "{{ $v.ClusterID }}-vpc-s3-endpoint-policy"
+          - Sid: "{{ $v.ClusterID }}-vpc-s3-endpoint-policy-bucket"
             Principal : "*"
             Effect: "Allow"
             Action: "*"
             Resource: "arn:{{ $v.RegionARN }}:s3::{{ $v.GuestAccountID }}:*"
+          - Sid: "{{ $v.ClusterID }}-vpc-s3-endpoint-policy-object"
+            Principal : "*"
+            Effect: "Allow"
+            Action: "*"
+            Resource: "arn:{{ $v.RegionARN }}:s3::{{ $v.GuestAccountID }}:*/*"
 {{end}}`
