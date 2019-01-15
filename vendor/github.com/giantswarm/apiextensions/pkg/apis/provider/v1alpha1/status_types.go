@@ -68,6 +68,8 @@ type StatusClusterNetwork struct {
 
 // StatusClusterNode holds information about a guest cluster node.
 type StatusClusterNode struct {
+	// Labels contains the kubernetes labels for corresponding node.
+	Labels map[string]string `json:"labels,omitempty" yaml:"labels,omitempty"`
 	// LastHeartbeatTime is the last time we got an update on a given condition.
 	LastHeartbeatTime DeepCopyTime `json:"lastHeartbeatTime" yaml:"lastHeartbeatTime"`
 	// LastTransitionTime is the last time the condition transitioned from one

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"strings"
 	"time"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/giantswarm/k8sportforward"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"github.com/spf13/afero"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -22,13 +24,9 @@ import (
 	"k8s.io/helm/cmd/helm/installer"
 	"k8s.io/helm/pkg/chartutil"
 	helmclient "k8s.io/helm/pkg/helm"
+	hapichart "k8s.io/helm/pkg/proto/hapi/chart"
 	hapirelease "k8s.io/helm/pkg/proto/hapi/release"
 	hapiservices "k8s.io/helm/pkg/proto/hapi/services"
-)
-
-const (
-	// runReleaseTestTimeout is the timeout in seconds when running tests.
-	runReleaseTestTimout = 300
 )
 
 var (
@@ -47,6 +45,7 @@ var (
 
 // Config represents the configuration used to create a helm client.
 type Config struct {
+	Fs afero.Fs
 	// HelmClient sets a helm client used for all operations of the initiated
 	// client. If this is nil, a new helm client will be created for each
 	// operation via proper port forwarding. Setting the helm client here manually
@@ -62,7 +61,9 @@ type Config struct {
 
 // Client knows how to talk with a Helm Tiller server.
 type Client struct {
+	fs         afero.Fs
 	helmClient helmclient.Interface
+	httpClient *http.Client
 	k8sClient  kubernetes.Interface
 	logger     micrologger.Logger
 
@@ -73,6 +74,9 @@ type Client struct {
 
 // New creates a new configured Helm client.
 func New(config Config) (*Client, error) {
+	if config.Fs == nil {
+		config.Fs = afero.NewOsFs()
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
@@ -91,8 +95,15 @@ func New(config Config) (*Client, error) {
 		config.TillerNamespace = defaultTillerNamespace
 	}
 
+	// Set client timeout to prevent leakages.
+	httpClient := &http.Client{
+		Timeout: time.Second * httpClientTimeout,
+	}
+
 	c := &Client{
+		fs:         config.Fs,
 		helmClient: config.HelmClient,
+		httpClient: httpClient,
 		k8sClient:  config.K8sClient,
 		logger:     config.Logger,
 
@@ -541,6 +552,21 @@ func (c *Client) ListReleaseContents(ctx context.Context) ([]*ReleaseContent, er
 	return contents, nil
 }
 
+// LoadChart loads a Helm Chart and returns relevant parts of its structure.
+func (c *Client) LoadChart(ctx context.Context, chartPath string) (Chart, error) {
+	helmChart, err := chartutil.Load(chartPath)
+	if err != nil {
+		return Chart{}, microerror.Mask(err)
+	}
+
+	chart, err := newChart(helmChart)
+	if err != nil {
+		return Chart{}, microerror.Mask(err)
+	}
+
+	return chart, nil
+}
+
 // PingTiller proxies the underlying Helm client PingTiller method.
 func (c *Client) PingTiller(ctx context.Context) error {
 	t, err := c.newTunnel()
@@ -676,6 +702,18 @@ func (c *Client) installTiller(ctx context.Context, installerOptions *installer.
 	}
 
 	return nil
+}
+
+func newChart(helmChart *hapichart.Chart) (Chart, error) {
+	if helmChart == nil || helmChart.Metadata == nil {
+		return Chart{}, microerror.Maskf(executionFailedError, "expected non nil argument but got %#v", helmChart)
+	}
+
+	chart := Chart{
+		Version: helmChart.Metadata.Version,
+	}
+
+	return chart, nil
 }
 
 func (c *Client) newHelmClientFromTunnel(t *k8sportforward.Tunnel) helmclient.Interface {

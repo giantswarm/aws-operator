@@ -63,15 +63,15 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f873115799ceb3da57abaf3ac11a58db3b1de1ba89910edc0dc8c86895270471"
+  digest = "1:737e5dff2a3cfe5cbc46e44b916e90797b265302a6612bb913145cebb127a1c6"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
+    "internal/filelogger",
     "pkg/framework",
     "pkg/harness",
-    "pkg/internal/filelogger",
   ]
   pruneopts = "UT"
-  revision = "1be216b4c01168c442155b79316c7f837872b865"
+  revision = "1bddc65a2e3db47248c255251bd24ffc728e1a24"
 
 [[projects]]
   branch = "master"
@@ -581,6 +581,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/cenkalti/backoff",
+    "github.com/giantswarm/backoff",
     "github.com/giantswarm/e2e-harness/pkg/framework",
     "github.com/giantswarm/k8sportforward",
     "github.com/giantswarm/microerror",
