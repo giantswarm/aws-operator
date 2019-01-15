@@ -30,11 +30,6 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 		STS:            sc.AWSClient.STS,
 	}
 
-	guestAccountID, err := adapter.AccountID(adapterClients)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
 	cfg := adapter.Config{
 		APIWhitelist: adapter.APIWhitelist{
 			Enabled:    r.apiWhiteList.Enabled,
@@ -46,7 +41,6 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 		HostClients:       *r.hostClients,
 		InstallationName:  r.installationName,
 		HostAccountID:     hostAccountID,
-		GuestAccountID:    guestAccountID,
 		PublicRouteTables: r.publicRouteTables,
 		Route53Enabled:    r.route53Enabled,
 		StackState: adapter.StackState{
