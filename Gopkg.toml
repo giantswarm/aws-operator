@@ -36,8 +36,8 @@ required = [
   branch = "master"
   name = "github.com/docker/distribution"
 
-[[constraint]]
-  branch = "master"
+[[override]]
+  branch = "kubernetes-1.13.2"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]
@@ -49,15 +49,15 @@ required = [
   name = "github.com/giantswarm/backoff"
 
 [[constraint]]
-  branch = "master"
+  branch = "kubernetes-1.13.2"
   name = "github.com/giantswarm/certs"
 
 [[constraint]]
-  branch = "master"
+  branch = "kubernetes-1.13.2"
   name = "github.com/giantswarm/e2e-harness"
 
 [[constraint]]
-  branch = "master"
+  branch = "kubernetes-1.13.2"
   name = "github.com/giantswarm/e2eclients"
 
 [[constraint]]
@@ -65,7 +65,7 @@ required = [
   name = "github.com/giantswarm/e2etemplates"
 
 [[constraint]]
-  branch = "master"
+  branch = "kubernetes-1.13.2"
   name = "github.com/giantswarm/e2etests"
 
 [[constraint]]
@@ -73,7 +73,7 @@ required = [
   name = "github.com/giantswarm/exporterkit"
 
 [[constraint]]
-  branch = "master"
+  branch = "kubernetes-1.13.2"
   name = "github.com/giantswarm/helmclient"
 
 [[constraint]]
@@ -97,23 +97,23 @@ required = [
   name = "github.com/giantswarm/micrologger"
 
 [[constraint]]
-  branch = "master"
+  branch = "kubernetes-1.13.2"
   name = "github.com/giantswarm/legacycerts"
 
 [[constraint]]
-  branch = "master"
+  branch = "kubernetes-1.13.2"
   name = "github.com/giantswarm/operatorkit"
 
 [[constraint]]
-  branch = "master"
+  branch = "kubernetes-1.13.2"
   name = "github.com/giantswarm/randomkeys"
 
 [[constraint]]
-  branch = "master"
+  branch = "kubernetes-1.13.2"
   name = "github.com/giantswarm/statusresource"
 
 [[constraint]]
-  branch = "master"
+  branch = "kubernetes-1.13.2"
   name = "github.com/giantswarm/tenantcluster"
 
 [[constraint]]
@@ -130,23 +130,23 @@ required = [
 
 [[constraint]]
   name = "k8s.io/api"
-  version = "kubernetes-1.10.4"
+  version = "kubernetes-1.13.2"
 
 [[constraint]]
   name = "k8s.io/apiextensions-apiserver"
-  version = "kubernetes-1.10.4"
+  version = "kubernetes-1.13.2"
 
 [[constraint]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.10.4"
+  version = "kubernetes-1.13.2"
 
 [[constraint]]
   name = "k8s.io/apiserver"
-  version = "kubernetes-1.10.4"
+  version = "kubernetes-1.13.2"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.10.4"
+  version = "kubernetes-1.13.2"
 
 
 

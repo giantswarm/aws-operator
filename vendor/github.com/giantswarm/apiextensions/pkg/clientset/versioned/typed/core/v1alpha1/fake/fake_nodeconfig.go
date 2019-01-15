@@ -62,7 +62,7 @@ func (c *FakeNodeConfigs) List(opts v1.ListOptions) (result *v1alpha1.NodeConfig
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha1.NodeConfigList{}
+	list := &v1alpha1.NodeConfigList{ListMeta: obj.(*v1alpha1.NodeConfigList).ListMeta}
 	for _, item := range obj.(*v1alpha1.NodeConfigList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -131,7 +131,7 @@ func (c *FakeNodeConfigs) DeleteCollection(options *v1.DeleteOptions, listOption
 // Patch applies the patch and returns the patched nodeConfig.
 func (c *FakeNodeConfigs) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.NodeConfig, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(nodeconfigsResource, c.ns, name, data, subresources...), &v1alpha1.NodeConfig{})
+		Invokes(testing.NewPatchSubresourceAction(nodeconfigsResource, c.ns, name, pt, data, subresources...), &v1alpha1.NodeConfig{})
 
 	if obj == nil {
 		return nil, err
