@@ -12,7 +12,6 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "TODO.",
 				Kind:        versionbundle.KindAdded,
 			},
-
 		},
 		Components: []versionbundle.Component{
 			{

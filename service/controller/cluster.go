@@ -21,6 +21,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v21"
 	v21adapter "github.com/giantswarm/aws-operator/service/controller/v21/adapter"
 	v21cloudconfig "github.com/giantswarm/aws-operator/service/controller/v21/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v22"
 	v22adapter "github.com/giantswarm/aws-operator/service/controller/v22/adapter"
 	v22cloudconfig "github.com/giantswarm/aws-operator/service/controller/v22/cloudconfig"
 	"github.com/giantswarm/certs"
@@ -33,7 +34,6 @@ import (
 	"github.com/giantswarm/randomkeys"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
-	"github.com/giantswarm/aws-operator/service/controller/v22"
 )
 
 type ClusterConfig struct {

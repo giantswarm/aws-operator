@@ -11,6 +11,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v19"
 	"github.com/giantswarm/aws-operator/service/controller/v20"
 	"github.com/giantswarm/aws-operator/service/controller/v21"
+	"github.com/giantswarm/aws-operator/service/controller/v22"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8scrdclient"
@@ -18,7 +19,6 @@ import (
 	"github.com/giantswarm/operatorkit/informer"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
-	"github.com/giantswarm/aws-operator/service/controller/v22"
 )
 
 type DrainerConfig struct {
