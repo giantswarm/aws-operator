@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
@@ -122,8 +123,8 @@ func (a *AWS) RemoveWorker() error {
 	return nil
 }
 
-func (a *AWS) WaitForNodes(num int) error {
-	err := a.guestFramework.WaitForNodesUp(num)
+func (a *AWS) WaitForNodes(ctx context.Context, num int) error {
+	err := a.guestFramework.WaitForNodesReady(ctx, num)
 	if err != nil {
 		return microerror.Mask(err)
 	}

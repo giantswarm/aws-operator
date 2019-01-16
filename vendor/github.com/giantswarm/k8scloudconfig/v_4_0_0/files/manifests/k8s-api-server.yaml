@@ -24,6 +24,7 @@ spec:
     {{ end -}}
     - --allow-privileged=true
     - --anonymous-auth=false
+    - --insecure-port=0
     - --kubelet-https=true
     - --kubelet-preferred-address-types=InternalIP
     - --secure-port={{.Cluster.Kubernetes.API.SecurePort}}

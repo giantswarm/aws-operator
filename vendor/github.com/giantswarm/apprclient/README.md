@@ -19,5 +19,7 @@ against some CNR implementation.
 ### Services & operators
 
 - https://github.com/giantswarm/aws-operator
+- https://github.com/giantswarm/azure-operator
 - https://github.com/giantswarm/chart-operator
 - https://github.com/giantswarm/cluster-operator
+- https://github.com/giantswarm/kvm-operator

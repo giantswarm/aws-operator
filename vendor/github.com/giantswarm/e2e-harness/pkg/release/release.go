@@ -257,7 +257,7 @@ func (r *Release) Install(ctx context.Context, name string, chartInfo ChartInfo,
 
 	var err error
 
-	tarballPath, err := r.pullTarball(name, chartInfo)
+	tarballPath, err := r.pullTarball(ctx, name, chartInfo)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -339,7 +339,7 @@ func (r *Release) Update(ctx context.Context, name string, chartInfo ChartInfo, 
 
 	var err error
 
-	tarballPath, err := r.pullTarball(name, chartInfo)
+	tarballPath, err := r.pullTarball(ctx, name, chartInfo)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -431,14 +431,14 @@ func (r *Release) podName(namespace, labelSelector string) (string, error) {
 	return pod.Name, nil
 }
 
-func (r *Release) pullTarball(releaseName string, chartInfo ChartInfo) (string, error) {
+func (r *Release) pullTarball(ctx context.Context, releaseName string, chartInfo ChartInfo) (string, error) {
 	chartName := chartInfo.name
 	if chartName == "" {
 		chartName = fmt.Sprintf("%s-chart", releaseName)
 	}
 
 	if chartInfo.isChannel {
-		tarball, err := r.apprClient.PullChartTarball(chartName, chartInfo.version)
+		tarball, err := r.apprClient.PullChartTarball(ctx, chartName, chartInfo.version)
 		if err != nil {
 			return "", microerror.Mask(err)
 		}
@@ -446,7 +446,7 @@ func (r *Release) pullTarball(releaseName string, chartInfo ChartInfo) (string, 
 		return tarball, nil
 	}
 
-	tarball, err := r.apprClient.PullChartTarballFromRelease(chartName, chartInfo.version)
+	tarball, err := r.apprClient.PullChartTarballFromRelease(ctx, chartName, chartInfo.version)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}

@@ -134,23 +134,11 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		var hostedZoneNameServers string
 		if r.route53Enabled {
 			hostedZoneNameServers, err = ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.HostedZoneNameServers)
-			// TODO introduced: aws-operator@v14; remove with: aws-operator@v13
-			// This output was introduced in v14 so it isn't accessible from CF
-			// stacks created by earlier versions. We need to handle that.
-			//
-			// Final version of the code:
-			//
-			//	if err != nil {
-			//		return StackState{}, microerror.Mask(err)
-			//	}
-			//
-			if cloudformationservice.IsOutputNotFound(err) {
-				// Fall trough. Empty string is handled in host post stack creation.
-			} else if err != nil {
+			if err != nil {
 				return StackState{}, microerror.Mask(err)
 			}
-			// TODO end
 		}
+
 		dockerVolumeResourceName, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.DockerVolumeResourceNameKey)
 		if cloudformationservice.IsOutputNotFound(err) {
 			// Since we are transitioning between versions we will have situations in
@@ -194,17 +182,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			return StackState{}, microerror.Mask(err)
 		}
 		masterInstanceResourceName, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.MasterInstanceResourceNameKey)
-		if cloudformationservice.IsOutputNotFound(err) {
-			// Since we are transitioning between versions we will have situations in
-			// which old clusters are updated to new versions and miss the master
-			// instance resource name in the CF stack outputs. We ignore this problem
-			// for now and move on regardless. On the next resync period the output
-			// value will be there, once the cluster got updated.
-			//
-			// TODO remove this condition as soon as all guest clusters in existence
-			// obtain a master instance resource.
-			masterInstanceResourceName = ""
-		} else if err != nil {
+		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
 		masterInstanceType, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.MasterInstanceTypeKey)
@@ -265,17 +243,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		}
 
 		versionBundleVersion, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.VersionBundleVersionKey)
-		if cloudformationservice.IsOutputNotFound(err) {
-			// Since we are transitioning between versions we will have situations in
-			// which old clusters are updated to new versions and miss the version
-			// bundle version in the CF stack outputs. We ignore this problem for now
-			// and move on regardless. The reconciliation will detect the guest cluster
-			// needs to be updated and once this is done, we should be fine again.
-			//
-			// TODO remove this condition as soon as all guest clusters in existence
-			// obtain a version bundle version.
-			versionBundleVersion = ""
-		} else if err != nil {
+		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
 
