@@ -18,6 +18,7 @@ import (
 	"github.com/giantswarm/operatorkit/informer"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
+	"github.com/giantswarm/aws-operator/service/controller/v22"
 )
 
 type DrainerConfig struct {
@@ -246,12 +247,30 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var v22ResourceSet *controller.ResourceSet
+	{
+		c := v22.DrainerResourceSetConfig{
+			G8sClient:     config.G8sClient,
+			HostAWSConfig: hostAWSConfig,
+			K8sClient:     config.K8sClient,
+			Logger:        config.Logger,
+
+			GuestUpdateEnabled: config.GuestUpdateEnabled,
+			ProjectName:        config.ProjectName,
+		}
+		v22ResourceSet, err = v22.NewDrainerResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resourceSets := []*controller.ResourceSet{
 		v17patch1ResourceSet,
 		v18ResourceSet,
 		v19ResourceSet,
 		v20ResourceSet,
 		v21ResourceSet,
+		v22ResourceSet,
 	}
 
 	return resourceSets, nil

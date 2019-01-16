@@ -8,15 +8,11 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "cloudconfig",
-				Description: "Replace cloudinit with ignition.",
+				Component:   "Todo",
+				Description: "TODO.",
 				Kind:        versionbundle.KindAdded,
 			},
-			{
-				Component:   "aws-operator",
-				Description: "Add S3 VPC endpoint.",
-				Kind:        versionbundle.KindAdded,
-			},
+
 		},
 		Components: []versionbundle.Component{
 			{
@@ -41,6 +37,6 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    "aws-operator",
-		Version: "4.5.0",
+		Version: "4.6.0",
 	}
 }
