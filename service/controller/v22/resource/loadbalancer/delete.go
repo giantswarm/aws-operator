@@ -8,8 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v21/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v21/key"
+	"github.com/giantswarm/aws-operator/service/controller/v22/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v22/key"
 )
 
 // EnsureDeleted ensures that any ELBs from Kubernetes LoadBalancer services

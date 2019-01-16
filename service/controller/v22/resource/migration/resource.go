@@ -16,11 +16,11 @@ import (
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/service/controller/v21/key"
+	"github.com/giantswarm/aws-operator/service/controller/v22/key"
 )
 
 const (
-	name = "migrationv21"
+	name = "migrationv22"
 
 	awsConfigNamespace               = "default"
 	credentialSecretDefaultNamespace = "giantswarm"

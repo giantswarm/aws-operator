@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v21/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v22/controllercontext"
 )
 
 func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
