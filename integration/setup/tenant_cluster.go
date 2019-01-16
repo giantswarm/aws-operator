@@ -16,11 +16,12 @@ import (
 	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
 	"github.com/giantswarm/e2etemplates/pkg/e2etemplates"
 	"github.com/giantswarm/microerror"
+	"github.com/kubernetes/client-go/dynamic"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/dynamic"
+
 	"k8s.io/client-go/rest"
 
 	"github.com/giantswarm/aws-operator/integration/env"
@@ -94,40 +95,17 @@ func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config, w
 
 func crExistsCondition(ctx context.Context, config Config, crd *apiextensionsv1beta1.CustomResourceDefinition, crNamespace, crName string) release.ConditionFunc {
 	return func() error {
-		// In client-go@10.12.x it will be:
-		//
-		//	gvr := metav1.GroupVersionResource{
-		//		Group:    crd.Spec.Group,
-		//		Version:  crd.Spec.Version,
-		//		Resource: crd.Spec.Names.Plural,
-		//	}
-		//
-		resource := &metav1.APIResource{
-			Name:       crd.Spec.Names.Plural,
-			Namespaced: crd.Spec.Scope == "Namespaced",
-		}
-		gv := &schema.GroupVersion{
-			Group:   crd.Spec.Group,
-			Version: crd.Spec.Version,
+		gvr := schema.GroupVersionResource{
+			Group:    crd.Spec.Group,
+			Version:  crd.Spec.Version,
+			Resource: crd.Spec.Names.Plural,
 		}
 
-		var dynamicClient *dynamic.Client
+		var dynamicClient dynamic.Interface
 		{
 			var err error
 
-			c := config.Host.RestConfig()
-			configShallowCopy := *c
-			configShallowCopy.APIPath = "/apis"
-			configShallowCopy.GroupVersion = gv
-			if configShallowCopy.UserAgent == "" {
-				configShallowCopy.UserAgent = rest.DefaultKubernetesUserAgent()
-			}
-
-			// In client-go@10.12.x it will be:
-			//
-			//	dynamicClient, err := dynamic.NewForConfig(config.Host.RestConfig())
-			//
-			dynamicClient, err = dynamic.NewClient(&configShallowCopy)
+			dynamicClient, err = dynamic.NewForConfig(rest.CopyConfig(config.Host.RestConfig()))
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -136,11 +114,7 @@ func crExistsCondition(ctx context.Context, config Config, crd *apiextensionsv1b
 		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for creation of CR %#q in namespace %#q", crName, crNamespace))
 
 		o := func() error {
-			// In client-go@10.12.x it will be:
-			//
-			//	_, err := dynamicClient.Reosurce(gvr).Namespace(crNamespace).Get(crName, metav1.GetOptions{})
-			//
-			_, err := dynamicClient.Resource(resource, crNamespace).Get(crName, metav1.GetOptions{})
+			_, err := dynamicClient.Resource(gvr).Namespace(crNamespace).Get(crName, metav1.GetOptions{})
 			if apierrors.IsNotFound(err) {
 				return microerror.Maskf(notFoundError, "CR %#q in namespace %#q", crName, crNamespace)
 			} else if err != nil {
@@ -163,40 +137,17 @@ func crExistsCondition(ctx context.Context, config Config, crd *apiextensionsv1b
 
 func crNotFoundCondition(ctx context.Context, config Config, crd *apiextensionsv1beta1.CustomResourceDefinition, crNamespace, crName string) release.ConditionFunc {
 	return func() error {
-		// In client-go@10.12.x it will be:
-		//
-		//	gvr := metav1.GroupVersionResource{
-		//		Group:    crd.Spec.Group,
-		//		Version:  crd.Spec.Version,
-		//		Resource: crd.Spec.Names.Plural,
-		//	}
-		//
-		resource := &metav1.APIResource{
-			Name:       crd.Spec.Names.Plural,
-			Namespaced: crd.Spec.Scope == "Namespaced",
-		}
-		gv := &schema.GroupVersion{
-			Group:   crd.Spec.Group,
-			Version: crd.Spec.Version,
+		gvr := schema.GroupVersionResource{
+			Group:    crd.Spec.Group,
+			Version:  crd.Spec.Version,
+			Resource: crd.Spec.Names.Plural,
 		}
 
-		var dynamicClient *dynamic.Client
+		var dynamicClient dynamic.Interface
 		{
 			var err error
 
-			c := config.Host.RestConfig()
-			configShallowCopy := *c
-			configShallowCopy.APIPath = "/apis"
-			configShallowCopy.GroupVersion = gv
-			if configShallowCopy.UserAgent == "" {
-				configShallowCopy.UserAgent = rest.DefaultKubernetesUserAgent()
-			}
-
-			// In client-go@10.12.x it will be:
-			//
-			//	dynamicClient, err := dynamic.NewForConfig(config.Host.RestConfig())
-			//
-			dynamicClient, err = dynamic.NewClient(&configShallowCopy)
+			dynamicClient, err = dynamic.NewForConfig(rest.CopyConfig(config.Host.RestConfig()))
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -205,11 +156,7 @@ func crNotFoundCondition(ctx context.Context, config Config, crd *apiextensionsv
 		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for deletion of CR %#q in namespace %#q", crName, crNamespace))
 
 		o := func() error {
-			// In client-go@10.12.x it will be:
-			//
-			//	_, err := dynamicClient.Reosurce(gvr).Namespace(crNamespace).Get(crName, metav1.GetOptions{})
-			//
-			_, err := dynamicClient.Resource(resource, crNamespace).Get(crName, metav1.GetOptions{})
+			_, err := dynamicClient.Resource(gvr).Namespace(crNamespace).Get(crName, metav1.GetOptions{})
 			if apierrors.IsNotFound(err) {
 				return nil
 			} else if err != nil {

@@ -21,7 +21,7 @@
   version = "v21.3.0"
 
 [[projects]]
-  digest = "1:9e8ebf3883dce8687221c4022bdb3b0bfdcde430b911be9cc7e52478a026893c"
+  digest = "1:dc97a596a142334aa5c8e96d8d5088e609ba53458dea4ed3f672a8b5919c84cc"
   name = "github.com/Azure/go-autorest"
   packages = [
     "autorest",
@@ -34,8 +34,8 @@
     "tracing",
   ]
   pruneopts = "UT"
-  revision = "be17756531f50014397912b7aa557ec335e39b98"
-  version = "v11.3.0"
+  revision = "16ac8fb5da89a244e30e83bc535dfb2c36fc5217"
+  version = "v11.3.1"
 
 [[projects]]
   digest = "1:9f3b30d9f8e0d7040f729b82dcbc8f0dead820a133b3147ce355fc451f32d761"
@@ -290,7 +290,7 @@
   revision = "e55a4007948ed0e6e603e09843b3991b9c4aecf3"
 
 [[projects]]
-  branch = "azure-sdks"
+  branch = "kubernetes-1.13.2"
   digest = "1:ca2da4674b37799f46cd8771562e5df83d917a78f480ad261623e290b9ca62a5"
   name = "github.com/giantswarm/e2eclients"
   packages = [
@@ -298,7 +298,7 @@
     "azure",
   ]
   pruneopts = "UT"
-  revision = "d190b512b1d77abaaf1ee007d6b6d39a988a3a69"
+  revision = "b2a8532e11360baaf6f1ce4fbbe032e58a421bf4"
 
 [[projects]]
   branch = "kubernetes-1.13.2"
@@ -335,7 +335,7 @@
     "update/provider",
   ]
   pruneopts = "UT"
-  revision = "99009ab9efb77ac6314e6bfe8dce7db6d7b18738"
+  revision = "a56fd09ed5ad9349336885f4efa376a7359eb84e"
 
 [[projects]]
   branch = "master"
@@ -620,11 +620,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:68e99c595077f4e93e311ab2ac27a561966478b32c8f203ff82ee0d60c496a01"
+  digest = "1:45f8763c5ab5a1b7cf5fd870baf5c170e04cb5b2fc2edb8de2cd2e9177846140"
   name = "github.com/google/go-github"
   packages = ["github"]
   pruneopts = "UT"
-  revision = "2205ffae75b1b3b1675bfc4c55838c65ed5008fa"
+  revision = "e740a6811a5bc7a8fba64fe1594860d4f982b4c3"
 
 [[projects]]
   digest = "1:a63cff6b5d8b95638bfe300385d93b2a6d9d687734b863da8e09dc834510a690"
@@ -775,6 +775,14 @@
   revision = "b84e30acd515aadc4b783ad4ff83aff3299bdfe0"
 
 [[projects]]
+  digest = "1:241574b23ece9309396ef59b348e10540e3943c44b265d7b1b9da8262ac10137"
+  name = "github.com/kubernetes/client-go"
+  packages = ["dynamic"]
+  pruneopts = "UT"
+  revision = "e64494209f554a6723674bd494d69445fb76a1d4"
+  version = "v10.0.0"
+
+[[projects]]
   digest = "1:c568d7727aa262c32bdf8a3f7db83614f7af0ed661474b24588de635c20024c7"
   name = "github.com/magiconair/properties"
   packages = ["."]
@@ -872,7 +880,7 @@
     "prometheus/promhttp",
   ]
   pruneopts = "UT"
-  revision = "d2ead25884778582e740573999f7b07f47e171b4"
+  revision = "18d13eacc9cce330610a70daf4ed0fef2e846589"
 
 [[projects]]
   branch = "master"
@@ -880,7 +888,7 @@
   name = "github.com/prometheus/client_model"
   packages = ["go"]
   pruneopts = "UT"
-  revision = "f287a105a20ec685d797f65cd0ce8fbeaef42da1"
+  revision = "56726106282f1985ea77d5305743db7231b0c0a8"
 
 [[projects]]
   branch = "master"
@@ -1022,14 +1030,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:62bf0fe61cbb370876c32f605ce8f9dd16ace3fdeab28f7a9d7b46f2ee2a87a4"
+  digest = "1:e007b54f54cbd4214aa6d97a67d57bc2539991adb4e22ea92c482bbece8de469"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
     "internal",
   ]
   pruneopts = "UT"
-  revision = "36a7019397c4c86cf59eeab3bc0d188bac444277"
+  revision = "5dab4167f31cbd76b407f1486c86b40748bc5073"
 
 [[projects]]
   branch = "master"
@@ -1117,7 +1125,7 @@
   revision = "db91494dd46c1fdcbbde05e5ff5eb56df8f7d79a"
 
 [[projects]]
-  digest = "1:8f56475624fb72854d06ca16c2f7032e3cea14a63074e9c199ba8d46431c1127"
+  digest = "1:6dfe7f3314a390dc9e21368dd41236169bf40ae69674f42b7bd45db537751a94"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -1154,8 +1162,8 @@
     "tap",
   ]
   pruneopts = "UT"
-  revision = "df014850f6dee74ba2fc94874043a9f3f75fbfd8"
-  version = "v1.17.0"
+  revision = "a02b0774206b209466313a0b525d2c738fe407eb"
+  version = "v1.18.0"
 
 [[projects]]
   digest = "1:2d1fbdc6777e5408cabeb02bf336305e724b925ff4546ded0fa8715a7267922a"
@@ -1298,12 +1306,11 @@
   version = "kubernetes-1.13.2"
 
 [[projects]]
-  digest = "1:345df413275d94283477c83a3a295be237071e0ea3acbbc34b16f7b5681d9d28"
+  digest = "1:5c0f2546253617266213a6bb7075d5c70b7a4e0db993c73bde2ed867cbe5d7ee"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
     "discovery/fake",
-    "dynamic",
     "kubernetes",
     "kubernetes/fake",
     "kubernetes/scheme",
@@ -1458,7 +1465,7 @@
   name = "k8s.io/kube-openapi"
   packages = ["pkg/util/proto"]
   pruneopts = "UT"
-  revision = "0317810137be915b9cf888946c6e115c1bfac693"
+  revision = "ced9eb3070a5f1c548ef46e8dfe2a97c208d9f03"
 
 [[projects]]
   digest = "1:7719608fe0b52a4ece56c2dde37bedd95b938677d1ab0f84b8a7852e4c59f849"
@@ -1552,6 +1559,7 @@
     "github.com/giantswarm/statusresource",
     "github.com/giantswarm/tenantcluster",
     "github.com/giantswarm/versionbundle",
+    "github.com/kubernetes/client-go/dynamic",
     "github.com/prometheus/client_golang/prometheus",
     "github.com/spf13/afero",
     "github.com/spf13/viper",
@@ -1563,10 +1571,8 @@
     "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/fake",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
-    "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/apiserver/pkg/endpoints/request",
-    "k8s.io/client-go/dynamic",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/fake",
     "k8s.io/client-go/rest",
