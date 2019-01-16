@@ -27,6 +27,7 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8scrdclient"
 	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/controller/sentry"
 	"github.com/giantswarm/operatorkit/informer"
 	"github.com/giantswarm/randomkeys"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -38,6 +39,7 @@ type ClusterConfig struct {
 	K8sClient    kubernetes.Interface
 	K8sExtClient apiextensionsclient.Interface
 	Logger       micrologger.Logger
+	Sentry       *sentry.Service
 
 	AccessLogsExpiration       int
 	AdvancedMonitoringEC2      bool
@@ -61,6 +63,7 @@ type ClusterConfig struct {
 	PublicRouteTables          string
 	RegistryDomain             string
 	Route53Enabled             bool
+	SentryEnabled              bool
 	SSOPublicKey               string
 	VaultAddress               string
 }
@@ -179,8 +182,10 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 			Logger:       config.Logger,
 			ResourceSets: resourceSets,
 			RESTClient:   config.G8sClient.ProviderV1alpha1().RESTClient(),
+			Sentry:       config.Sentry,
 
-			Name: config.ProjectName,
+			Name:          config.ProjectName,
+			SentryEnabled: config.SentryEnabled,
 		}
 
 		operatorkitController, err = controller.New(c)

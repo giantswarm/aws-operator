@@ -5,6 +5,7 @@ import (
 	"github.com/giantswarm/aws-operator/flag/service/guest"
 	"github.com/giantswarm/aws-operator/flag/service/installation"
 	"github.com/giantswarm/aws-operator/flag/service/kubernetes"
+	"github.com/giantswarm/aws-operator/flag/service/sentry"
 )
 
 type Service struct {
@@ -13,4 +14,5 @@ type Service struct {
 	Installation   installation.Installation
 	Kubernetes     kubernetes.Kubernetes
 	RegistryDomain string
+	Sentry         sentry.Sentry
 }

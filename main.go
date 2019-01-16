@@ -167,6 +167,11 @@ func mainError() error {
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.KeyFile, "", "Key file path to use to authenticate with Kubernetes.")
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.Username, "", "Username (if the Kubernetes cluster is using basic authentication).")
 
+	daemonCommand.PersistentFlags().Bool(f.Service.Sentry.Enabled, false, "Enable or disable Sentry error capturing.")
+	daemonCommand.PersistentFlags().String(f.Service.Sentry.DSN, "", "Sentry DSN.")
+	daemonCommand.PersistentFlags().String(f.Service.Sentry.Environment, "", "Sentry environment.")
+	daemonCommand.PersistentFlags().String(f.Service.Sentry.Release, "", "Sentry release.")
+
 	newCommand.CobraCommand().Execute()
 
 	return nil

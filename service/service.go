@@ -12,6 +12,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8srestconfig"
+	"github.com/giantswarm/operatorkit/controller/sentry"
 	"github.com/giantswarm/statusresource"
 	"github.com/spf13/viper"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -103,6 +104,24 @@ func New(config Config) (*Service, error) {
 		return nil, microerror.Mask(err)
 	}
 
+	var sentryService *sentry.Service
+	{
+		if config.Viper.GetBool(config.Flag.Service.Sentry.Enabled) {
+			c := sentry.Config{
+				Logger: config.Logger,
+
+				DSN:         config.Viper.GetString(config.Flag.Service.Sentry.DSN),
+				Environment: config.Viper.GetString(config.Flag.Service.Sentry.Environment),
+				Release:     config.Viper.GetString(config.Flag.Service.Sentry.Release),
+			}
+
+			sentryService, err = sentry.New(c)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+		}
+	}
+
 	var clusterController *controller.Cluster
 	{
 		_, ipamNetworkRange, err := net.ParseCIDR(config.Viper.GetString(config.Flag.Service.Installation.Guest.IPAM.Network.CIDR))
@@ -115,6 +134,7 @@ func New(config Config) (*Service, error) {
 			K8sClient:    k8sClient,
 			K8sExtClient: k8sExtClient,
 			Logger:       config.Logger,
+			Sentry:       sentryService,
 
 			APIWhitelist: controller.FrameworkConfigAPIWhitelistConfig{
 				Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Enabled),
@@ -159,6 +179,7 @@ func New(config Config) (*Service, error) {
 			PublicRouteTables:      config.Viper.GetString(config.Flag.Service.AWS.PublicRouteTables),
 			Route53Enabled:         config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 			RegistryDomain:         config.Viper.GetString(config.Flag.Service.RegistryDomain),
+			SentryEnabled:          config.Viper.GetBool(config.Flag.Service.Sentry.Enabled),
 			SSOPublicKey:           config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
 			VaultAddress:           config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
 		}
