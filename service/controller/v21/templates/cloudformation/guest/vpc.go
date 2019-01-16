@@ -23,4 +23,26 @@ const VPC = `{{define "vpc"}}
       Tags:
         - Key: Name
           Value: {{ $v.ClusterID }}
+  VPCS3Endpoint:
+    Type: 'AWS::EC2::VPCEndpoint'
+    Properties:
+      VpcId: !Ref VPC
+      RouteTableIds:
+        {{- range $v.RouteTableNames }}
+        - !Ref {{ .ResourceName }}
+        {{- end}}
+      ServiceName: 'com.amazonaws.{{ $v.Region }}.s3'
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "{{ $v.ClusterID }}-vpc-s3-endpoint-policy-bucket"
+            Principal : "*"
+            Effect: "Allow"
+            Action: "s3:*"
+            Resource: "arn:{{ $v.RegionARN }}:s3:::*"
+          - Sid: "{{ $v.ClusterID }}-vpc-s3-endpoint-policy-object"
+            Principal : "*"
+            Effect: "Allow"
+            Action: "s3:*"
+            Resource: "arn:{{ $v.RegionARN }}:s3:::*/*"
 {{end}}`
