@@ -11,8 +11,8 @@ import (
 	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v21/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/v21/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v22/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v22/controllercontext"
 )
 
 func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {

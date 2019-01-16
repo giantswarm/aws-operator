@@ -6,7 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v21/key"
+	"github.com/giantswarm/aws-operator/service/controller/v22/key"
 )
 
 type GuestVPCAdapter struct {

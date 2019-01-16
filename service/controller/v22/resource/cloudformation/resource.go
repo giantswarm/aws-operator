@@ -7,14 +7,14 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
-	"github.com/giantswarm/aws-operator/service/controller/v21/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/v21/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/v21/key"
+	"github.com/giantswarm/aws-operator/service/controller/v22/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v22/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v22/key"
 )
 
 const (
 	// Name is the identifier of the resource.
-	Name = "cloudformationv21"
+	Name = "cloudformationv22"
 )
 
 type AWSConfig struct {

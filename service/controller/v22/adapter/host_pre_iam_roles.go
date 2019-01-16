@@ -1,6 +1,6 @@
 package adapter
 
-import "github.com/giantswarm/aws-operator/service/controller/v21/key"
+import "github.com/giantswarm/aws-operator/service/controller/v22/key"
 
 type HostPreIAMRolesAdapter struct {
 	PeerAccessRoleName string

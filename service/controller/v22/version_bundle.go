@@ -1,4 +1,4 @@
-package v21
+package v22
 
 import (
 	"github.com/giantswarm/versionbundle"
@@ -8,13 +8,8 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "cloudconfig",
-				Description: "Replace cloudinit with ignition.",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "aws-operator",
-				Description: "Add S3 VPC endpoint.",
+				Component:   "Todo",
+				Description: "TODO.",
 				Kind:        versionbundle.KindAdded,
 			},
 		},
@@ -41,6 +36,6 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    "aws-operator",
-		Version: "4.5.0",
+		Version: "4.6.0",
 	}
 }

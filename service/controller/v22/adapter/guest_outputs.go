@@ -3,7 +3,7 @@ package adapter
 import (
 	"strconv"
 
-	"github.com/giantswarm/aws-operator/service/controller/v21/key"
+	"github.com/giantswarm/aws-operator/service/controller/v22/key"
 )
 
 type GuestOutputsAdapter struct {
