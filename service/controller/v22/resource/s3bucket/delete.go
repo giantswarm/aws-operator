@@ -10,9 +10,16 @@ import (
 	"github.com/giantswarm/operatorkit/controller"
 
 	"github.com/giantswarm/aws-operator/service/controller/v22/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v22/key"
 )
 
 func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
+	cr, err := key.ToCustomObject(obj)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	clusterID := key.ClusterID(cr)
+
 	bucketsInput, err := toBucketState(deleteChange)
 	if err != nil {
 		return microerror.Mask(err)
@@ -57,6 +64,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 				if err != nil {
 					return microerror.Mask(err)
 				}
+				s3ObjectsTotal.WithLabelValues(clusterID, bucketInput.Name).Inc()
 			}
 
 			if !repeat {
@@ -107,6 +115,7 @@ func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desir
 	}
 
 	var bucketsToDelete []BucketState
+
 	for _, bucket := range currentBuckets {
 		// Destination Logs Bucket should not be deleted because it has to keep logs
 		// even when cluster is removed (rotation of these logs are managed externally).

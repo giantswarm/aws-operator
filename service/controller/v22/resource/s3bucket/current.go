@@ -25,6 +25,12 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
+	// TODO in order to make the resource more performant the current state
+	// fetching could be parallelized. The target log bucket is one action. The
+	// account ID related bucket is another.
+	//
+	//     https://github.com/giantswarm/giantswarm/issues/5126
+	//
 	accountID, err := sc.AWSService.GetAccountID()
 	if err != nil {
 		return nil, microerror.Mask(err)
