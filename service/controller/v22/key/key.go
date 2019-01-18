@@ -66,6 +66,8 @@ const (
 	MasterCloudConfigVersionKey   = "MasterCloudConfigVersion"
 	WorkerASGKey                  = "WorkerASGName"
 	WorkerCountKey                = "WorkerCount"
+	WorkerMaxKey                  = "WorkerMax"
+	WorkerMinKey                  = "WorkerMin"
 	WorkerDockerVolumeSizeKey     = "WorkerDockerVolumeSizeGB"
 	WorkerImageIDKey              = "WorkerImageID"
 	WorkerInstanceMonitoring      = "Monitoring"
@@ -518,6 +520,14 @@ func S3ServiceDomain(customObject v1alpha1.AWSConfig) string {
 	return s3Domain
 }
 
+func ScalingMax(customObject v1alpha1.AWSConfig) int {
+	return customObject.Spec.Cluster.Scaling.Max
+}
+
+func ScalingMin(customObject v1alpha1.AWSConfig) int {
+	return customObject.Spec.Cluster.Scaling.Min
+}
+
 func SecurityGroupName(customObject v1alpha1.AWSConfig, groupName string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), groupName)
 }
@@ -540,6 +550,10 @@ func SpecAvailabilityZones(customObject v1alpha1.AWSConfig) int {
 
 func StatusAvailabilityZones(customObject v1alpha1.AWSConfig) []v1alpha1.AWSConfigStatusAWSAvailabilityZone {
 	return customObject.Status.AWS.AvailabilityZones
+}
+
+func StatusScalingDesiredCapacity(customObject v1alpha1.AWSConfig) int {
+	return customObject.Status.Cluster.Scaling.DesiredCapacity
 }
 
 func SubnetName(customObject v1alpha1.AWSConfig, suffix string) string {

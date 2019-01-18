@@ -19,6 +19,8 @@ Outputs:
     Value: {{ $v.Master.CloudConfig.Version }}
   {{ $v.Worker.ASG.Key }}:
     Value: !Ref {{ $v.Worker.ASG.Ref }}
+  WorkerCount:
+    Value: {{ $v.Worker.Count }}
   WorkerDockerVolumeSizeGB:
     Value: {{ $v.Worker.DockerVolumeSizeGB }}
   WorkerImageID:

@@ -34,10 +34,41 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 			expectedError: true,
 		},
 		{
+			description: "having one worker leaves 1 worker head room for updates",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: defaultCluster,
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						AZ: "myaz",
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{
+							{},
+						},
+					},
+				},
+				Status: v1alpha1.AWSConfigStatus{
+					AWS: v1alpha1.AWSConfigStatusAWS{
+						AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+							v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+								Name: "myaz",
+							},
+						},
+					},
+				},
+			},
+			expectedError:                  false,
+			expectedAZs:                    []string{"myaz"},
+			expectedASGMaxSize:             2, // headroom is +1
+			expectedASGMinSize:             1,
+			expectedHealthCheckGracePeriod: gracePeriodSeconds,
+			expectedMaxBatchSize:           "1",
+			expectedMinInstancesInService:  "1",
+			expectedRollingUpdatePauseTime: rollingUpdatePauseTime,
+		},
+		{
 			description: "basic matching, all fields present",
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: defaultClusterWithScaling(3, 4),
+					Cluster: defaultCluster,
 					AWS: v1alpha1.AWSConfigSpecAWS{
 						AZ: "myaz",
 						Workers: []v1alpha1.AWSConfigSpecAWSNode{
@@ -70,7 +101,7 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 			description: "7 node cluster, batch size and min instances are correct",
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: defaultClusterWithScaling(7, 7),
+					Cluster: defaultCluster,
 					AWS: v1alpha1.AWSConfigSpecAWS{
 						AZ: "myaz",
 						Workers: []v1alpha1.AWSConfigSpecAWSNode{
@@ -96,7 +127,7 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 			},
 			expectedError:                  false,
 			expectedAZs:                    []string{"myaz"},
-			expectedASGMaxSize:             7,
+			expectedASGMaxSize:             8,
 			expectedASGMinSize:             7,
 			expectedHealthCheckGracePeriod: gracePeriodSeconds,
 			expectedMaxBatchSize:           "2",

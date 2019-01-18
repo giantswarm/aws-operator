@@ -19,11 +19,6 @@ func Test_migrateSpec(t *testing.T) {
 		{
 			name: "case 0: fill missing fields",
 			spec: providerv1alpha1.AWSConfigSpec{
-				AWS: providerv1alpha1.AWSConfigSpecAWS{
-					Workers: []providerv1alpha1.AWSConfigSpecAWSNode{
-						providerv1alpha1.AWSConfigSpecAWSNode{},
-					},
-				},
 				Cluster: providerv1alpha1.Cluster{
 					Kubernetes: providerv1alpha1.ClusterKubernetes{
 						API: providerv1alpha1.ClusterKubernetesAPI{
@@ -49,19 +44,12 @@ func Test_migrateSpec(t *testing.T) {
 							Name: "gauss.eu-central-1.aws.gigantic.io",
 						},
 					},
-					Workers: []providerv1alpha1.AWSConfigSpecAWSNode{
-						providerv1alpha1.AWSConfigSpecAWSNode{},
-					},
 				},
 				Cluster: providerv1alpha1.Cluster{
 					Kubernetes: providerv1alpha1.ClusterKubernetes{
 						API: providerv1alpha1.ClusterKubernetesAPI{
 							Domain: "api.eggs2.k8s.gauss.eu-central-1.aws.gigantic.io",
 						},
-					},
-					Scaling: providerv1alpha1.ClusterScaling{
-						Max: 1,
-						Min: 1,
 					},
 				},
 			},
@@ -86,19 +74,12 @@ func Test_migrateSpec(t *testing.T) {
 							Name: "test-ingress.gigantic.io",
 						},
 					},
-					Workers: []providerv1alpha1.AWSConfigSpecAWSNode{
-						providerv1alpha1.AWSConfigSpecAWSNode{},
-					},
 				},
 				Cluster: providerv1alpha1.Cluster{
 					Kubernetes: providerv1alpha1.ClusterKubernetes{
 						API: providerv1alpha1.ClusterKubernetesAPI{
 							Domain: "api.eggs5.k8s.gauss.eu-central-1.aws.gigantic.io",
 						},
-					},
-					Scaling: providerv1alpha1.ClusterScaling{
-						Max: 4,
-						Min: 2,
 					},
 				},
 			},
@@ -119,19 +100,12 @@ func Test_migrateSpec(t *testing.T) {
 							Name: "test-ingress.gigantic.io",
 						},
 					},
-					Workers: []providerv1alpha1.AWSConfigSpecAWSNode{
-						providerv1alpha1.AWSConfigSpecAWSNode{},
-					},
 				},
 				Cluster: providerv1alpha1.Cluster{
 					Kubernetes: providerv1alpha1.ClusterKubernetes{
 						API: providerv1alpha1.ClusterKubernetesAPI{
 							Domain: "api.eggs5.k8s.gauss.eu-central-1.aws.gigantic.io",
 						},
-					},
-					Scaling: providerv1alpha1.ClusterScaling{
-						Max: 4,
-						Min: 2,
 					},
 				},
 			},

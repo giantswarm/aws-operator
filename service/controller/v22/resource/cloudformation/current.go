@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
@@ -170,12 +171,10 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 				return StackState{}, microerror.Mask(err)
 			}
 
-			sz, err := strconv.ParseUint(v, 10, 32)
+			workerDockerVolumeSizeGB, err = strconv.Atoi(v)
 			if err != nil {
 				return StackState{}, microerror.Mask(err)
 			}
-
-			workerDockerVolumeSizeGB = int(sz)
 		}
 
 		masterImageID, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.MasterImageIDKey)
@@ -195,7 +194,11 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			return StackState{}, microerror.Mask(err)
 		}
 
-		workerCount, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerCountKey)
+		workerASGName, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerASGKey)
+		if err != nil {
+			return StackState{}, microerror.Mask(err)
+		}
+		workerCloudConfigVersion, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerCloudConfigVersionKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
@@ -207,9 +210,36 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
-		workerCloudConfigVersion, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerCloudConfigVersionKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
+		var workerDesired, workerMin, workerMax int
+		{
+			r.logger.LogCtx(ctx, "level", "debug", "message", "finding out worker asg properties")
+
+			i := &autoscaling.DescribeAutoScalingGroupsInput{
+				AutoScalingGroupNames: []*string{
+					&workerASGName,
+				},
+			}
+			o, err := ctlCtx.AWSClient.AutoScaling.DescribeAutoScalingGroups(i)
+			if err != nil {
+				return StackState{}, microerror.Mask(err)
+			}
+			if len(o.AutoScalingGroups) == 0 {
+				return StackState{}, microerror.Maskf(executionFailedError, "asg for name %s", workerASGName)
+			}
+			asg := o.AutoScalingGroups[0]
+			if asg.DesiredCapacity == nil {
+				return StackState{}, microerror.Maskf(executionFailedError, "desired capacity for asg is nil")
+			}
+			workerDesired = int(*asg.DesiredCapacity)
+			if asg.MaxSize == nil {
+				return StackState{}, microerror.Maskf(executionFailedError, "max size for asg is nil")
+			}
+			workerMax = int(*asg.MaxSize)
+			if asg.MinSize == nil {
+				return StackState{}, microerror.Maskf(executionFailedError, "min size for asg is nil")
+			}
+			workerMin = int(*asg.MinSize)
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found out worker asg properties: desiredCapacity: %d, min: %d, max: %d", workerDesired, workerMin, workerMax))
 		}
 
 		versionBundleVersion, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.VersionBundleVersionKey)
@@ -228,11 +258,13 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			MasterInstanceType:         masterInstanceType,
 			MasterCloudConfigVersion:   masterCloudConfigVersion,
 
-			WorkerCount:              workerCount,
+			WorkerCloudConfigVersion: workerCloudConfigVersion,
+			WorkerDesired:            workerDesired,
 			WorkerDockerVolumeSizeGB: workerDockerVolumeSizeGB,
 			WorkerImageID:            workerImageID,
 			WorkerInstanceType:       workerInstanceType,
-			WorkerCloudConfigVersion: workerCloudConfigVersion,
+			WorkerMax:                workerMax,
+			WorkerMin:                workerMin,
 
 			VersionBundleVersion: versionBundleVersion,
 		}

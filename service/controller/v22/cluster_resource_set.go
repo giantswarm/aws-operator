@@ -344,6 +344,12 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var cloudformationResource controller.Resource
 	{
 		c := cloudformationresource.Config{
+			APIWhitelist: adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
+			},
+			EncrypterRoleManager: encrypterRoleManager,
+			G8sClient:            config.G8sClient,
 			HostClients: &adapter.Clients{
 				EC2:            config.HostAWSClients.EC2,
 				IAM:            config.HostAWSClients.IAM,
@@ -351,14 +357,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 				CloudFormation: config.HostAWSClients.CloudFormation,
 			},
 			Logger: config.Logger,
-			APIWhitelist: adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
-			},
 
 			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
 			EncrypterBackend:           config.EncrypterBackend,
-			EncrypterRoleManager:       encrypterRoleManager,
 			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
 			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
 			InstallationName:           config.InstallationName,

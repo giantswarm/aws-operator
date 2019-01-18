@@ -6,6 +6,7 @@ import (
 
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	"github.com/giantswarm/aws-operator/client/aws"
@@ -30,6 +31,10 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 					API: v1alpha1.ClusterKubernetesAPI{
 						Domain: "mysubdomain.mydomain.com",
 					},
+				},
+				Scaling: v1alpha1.ClusterScaling{
+					Max: 1,
+					Min: 1,
 				},
 			},
 			AWS: v1alpha1.AWSConfigSpecAWS{
@@ -99,6 +104,7 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 		}
 		c.Logger = microloggertest.New()
 		c.EncrypterBackend = "kms"
+		c.G8sClient = fake.NewSimpleClientset()
 		c.GuestPrivateSubnetMaskBits = 25
 		c.GuestPublicSubnetMaskBits = 25
 

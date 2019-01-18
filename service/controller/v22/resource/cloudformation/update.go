@@ -11,6 +11,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/service/controller/v22/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v22/ebs"
@@ -25,6 +26,25 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	stackStateToUpdate, err := toStackState(updateChange)
 	if err != nil {
 		return microerror.Mask(err)
+	}
+
+	// Update Status.Cluster.Scaling.DesiredCapacity before proceeding with
+	// CloudFormation stack updates in case it fails for some reason so current
+	// status is still updated periodically and therefore can provide little
+	// bit more insight into cluster state despite of possible temporary
+	// problem.
+	{
+		newObj, err := r.g8sClient.ProviderV1alpha1().AWSConfigs(customObject.GetNamespace()).Get(customObject.GetName(), metav1.GetOptions{})
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		newObj.Status.Cluster.Scaling.DesiredCapacity = stackStateToUpdate.WorkerDesired
+
+		_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(newObj.Namespace).UpdateStatus(newObj)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
 	if stackStateToUpdate.Name != "" {
@@ -159,6 +179,12 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		if shouldUpdate(currentStackState, desiredStackState) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack has to be updated")
 
+			// Update latest ASG.Desired value to desired stack state. When
+			// ASG.Min != ASG.Max, cluster-autoscaler is managing ASG.Desired
+			// and therefore current latest value should be used for
+			// calculations that involve ASG sizing.
+			desiredStackState.WorkerDesired = currentStackState.WorkerDesired
+
 			updateStackInput, err := r.computeUpdateState(ctx, customObject, desiredStackState)
 			if err != nil {
 				return StackState{}, microerror.Mask(err)
@@ -169,6 +195,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 				ShouldScale:      false,
 				ShouldUpdate:     true,
 				UpdateStackInput: updateStackInput,
+				WorkerDesired:    currentStackState.WorkerDesired,
 			}
 
 			return updateState, nil
@@ -193,6 +220,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		if r.shouldScale(ctx, currentStackState, desiredStackState) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack has to be scaled")
 
+			desiredStackState.WorkerDesired = currentStackState.WorkerDesired
 			desiredStackState.MasterInstanceResourceName = currentStackState.MasterInstanceResourceName
 			desiredStackState.DockerVolumeResourceName = currentStackState.DockerVolumeResourceName
 
@@ -206,6 +234,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 				ShouldScale:      true,
 				ShouldUpdate:     false,
 				UpdateStackInput: updateStackInput,
+				WorkerDesired:    currentStackState.WorkerDesired,
 			}
 
 			return updateState, nil
@@ -214,7 +243,12 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		}
 	}
 
-	return StackState{}, nil
+	// Always return at least current ASG.Desired when no error occurred.
+	defaultState := StackState{
+		WorkerDesired: currentStackState.WorkerDesired,
+	}
+
+	return defaultState, nil
 }
 
 // shouldScale determines whether the reconciled guest cluster should be scaled.
@@ -251,13 +285,15 @@ func (r *Resource) shouldScale(ctx context.Context, currentState, desiredState S
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to worker cloudconfig version")
 		return false
 	}
+	if currentState.WorkerMax != desiredState.WorkerMax {
+		return true
+	}
+	if currentState.WorkerMin != desiredState.WorkerMin {
+		return true
+	}
 	if currentState.VersionBundleVersion != desiredState.VersionBundleVersion {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to version bundle version")
 		return false
-	}
-
-	if currentState.WorkerCount != desiredState.WorkerCount {
-		return true
 	}
 
 	return false

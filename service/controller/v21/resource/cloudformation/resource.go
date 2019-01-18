@@ -3,7 +3,6 @@ package cloudformation
 import (
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -30,10 +29,9 @@ type AWSConfig struct {
 // resource.
 type Config struct {
 	APIWhitelist         adapter.APIWhitelist
-	EncrypterRoleManager encrypter.RoleManager
-	G8sClient            versioned.Interface
 	HostClients          *adapter.Clients
 	Logger               micrologger.Logger
+	EncrypterRoleManager encrypter.RoleManager
 
 	AdvancedMonitoringEC2      bool
 	EncrypterBackend           string
@@ -48,7 +46,6 @@ type Config struct {
 type Resource struct {
 	apiWhiteList         adapter.APIWhitelist
 	encrypterRoleManager encrypter.RoleManager
-	g8sClient            versioned.Interface
 	hostClients          *adapter.Clients
 	logger               micrologger.Logger
 
@@ -63,17 +60,14 @@ type Resource struct {
 
 // New creates a new configured cloudformation resource.
 func New(config Config) (*Resource, error) {
-	if config.EncrypterBackend == "" {
-		return nil, microerror.Maskf(invalidConfigError, "config.EncrypterBackend must not be empty")
-	}
-	if config.G8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.G8sClient must not be empty")
-	}
 	if config.HostClients == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.HostClients must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
+	}
+	if config.EncrypterBackend == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.EncrypterBackend must not be empty")
 	}
 	// GuestPrivateSubnetMaskBits && GuestPublicSubnetMaskBits has been
 	// validated on upper level because all IPAM related configuration
@@ -81,10 +75,9 @@ func New(config Config) (*Resource, error) {
 
 	newService := &Resource{
 		apiWhiteList:         config.APIWhitelist,
-		encrypterRoleManager: config.EncrypterRoleManager,
-		g8sClient:            config.G8sClient,
 		hostClients:          config.HostClients,
 		logger:               config.Logger,
+		encrypterRoleManager: config.EncrypterRoleManager,
 
 		encrypterBackend:           config.EncrypterBackend,
 		guestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,

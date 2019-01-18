@@ -132,6 +132,15 @@ func (r *Resource) migrateSpec(ctx context.Context, spec *providerv1alpha1.AWSCo
 		spec.AWS.HostedZones.Ingress.Name = zone
 	}
 
+	if spec.Cluster.Scaling.Min == 0 && spec.Cluster.Scaling.Max == 0 {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "CR is missing cluster scaling configuration")
+
+		nWorkers := len(spec.AWS.Workers)
+
+		spec.Cluster.Scaling.Min = nWorkers
+		spec.Cluster.Scaling.Max = nWorkers
+	}
+
 	return nil
 }
 
