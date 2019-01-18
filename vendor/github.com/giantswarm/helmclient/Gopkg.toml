@@ -47,7 +47,7 @@ required = [
   name = "github.com/giantswarm/backoff"
 
 [[constraint]]
-  branch = "kubernetes-1.13.2"
+  branch = "master"
   name = "github.com/giantswarm/e2esetup"
 
 [[constraint]]
@@ -55,7 +55,7 @@ required = [
   name = "github.com/giantswarm/errors"
 
 [[constraint]]
-  branch = "kubernetes-1.13.2"
+  branch = "master"
   name = "github.com/giantswarm/k8sportforward"
 
 [[constraint]]

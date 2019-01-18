@@ -38,7 +38,7 @@
     "digestset",
     "reference"
   ]
-  revision = "b1fd12d0c173a11f402cdf3ed725fc7e7b2a2553"
+  revision = "b75069ef13a1de846c0cdf964f5917f5b00c1a47"
 
 [[projects]]
   branch = "master"
@@ -56,7 +56,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "kubernetes-1.13.2"
+  branch = "master"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/application/v1alpha1",
@@ -70,7 +70,7 @@
     "pkg/clientset/versioned/typed/example/v1alpha1",
     "pkg/clientset/versioned/typed/provider/v1alpha1"
   ]
-  revision = "243452e56259a3c7e00616ef89d97b912c63e776"
+  revision = "0584389c4f82e52ba980c14dc31434d922245a46"
 
 [[projects]]
   branch = "master"
@@ -79,10 +79,10 @@
   revision = "4763148864dc4815b691a69b4f60b4f4a8f88dad"
 
 [[projects]]
-  branch = "kubernetes-1.13.2"
+  branch = "master"
   name = "github.com/giantswarm/certs"
   packages = ["."]
-  revision = "f90d1279b2a57f3b15cf33f8f9ccadc18c68178d"
+  revision = "fa33cb56aee232aee5d6bb4d954846c21952d206"
 
 [[projects]]
   branch = "master"
@@ -91,16 +91,16 @@
   revision = "d4c171b8af43355ae5cb35bfd63a24aae3fbcc16"
 
 [[projects]]
-  branch = "kubernetes-1.13.2"
+  branch = "master"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
-  revision = "ba3cea3292c859683d500d66bf1382581b9d4f04"
+  revision = "21bfc966a189d131b08ba4014ca4ffaadc3e1809"
 
 [[projects]]
-  branch = "kubernetes-1.13.2"
+  branch = "master"
   name = "github.com/giantswarm/k8sportforward"
   packages = ["."]
-  revision = "b9e2aa9da6149a7399eb59d5326a4794c77e7392"
+  revision = "85e779854c8e1b948bb2551e3750cfdae8ddfdbf"
 
 [[projects]]
   branch = "master"
@@ -118,10 +118,10 @@
   revision = "39ed6a99d31b8962e38dfaff287125fb756e8b2a"
 
 [[projects]]
-  branch = "kubernetes-1.13.2"
+  branch = "master"
   name = "github.com/giantswarm/operatorkit"
   packages = ["client/k8srestconfig"]
-  revision = "dfeb06fe04cff5c9a6fbf8ef777f0fb31ee40462"
+  revision = "43dd8d30de6553f21effdd2d11c363613a9997bb"
 
 [[projects]]
   name = "github.com/go-kit/kit"
@@ -315,7 +315,7 @@
     ".",
     "internal"
   ]
-  revision = "36a7019397c4c86cf59eeab3bc0d188bac444277"
+  revision = "5dab4167f31cbd76b407f1486c86b40748bc5073"
 
 [[projects]]
   branch = "master"
@@ -324,7 +324,7 @@
     "unix",
     "windows"
   ]
-  revision = "2be51725563103c17124a318f1745b66f2347acb"
+  revision = "11f53e03133963fb11ae0588e08b5e0b85be8be5"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -409,8 +409,8 @@
     "status",
     "tap"
   ]
-  revision = "df014850f6dee74ba2fc94874043a9f3f75fbfd8"
-  version = "v1.17.0"
+  revision = "a02b0774206b209466313a0b525d2c738fe407eb"
+  version = "v1.18.0"
 
 [[projects]]
   name = "gopkg.in/inf.v0"
@@ -626,6 +626,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5b189ac66cc3f6e82cd6de3d3db49fbb565fdd79cb68e9f4fe934e938967069c"
+  inputs-digest = "d8456b307c32575306c0f682893b7d20fd30266d5223af1670521501e4b60f31"
   solver-name = "gps-cdcl"
   solver-version = 1
