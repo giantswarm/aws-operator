@@ -14,6 +14,7 @@ version directory, and then changes are introduced.
 ### Changed
 - Switched from cloudinit to ignition.
 - Double the inotify watches.
+- Switch kube-proxy from `iptables` to `ipvs`.
 
 ### Removed
 

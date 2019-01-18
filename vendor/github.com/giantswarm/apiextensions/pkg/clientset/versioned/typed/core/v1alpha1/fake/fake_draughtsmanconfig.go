@@ -62,7 +62,7 @@ func (c *FakeDraughtsmanConfigs) List(opts v1.ListOptions) (result *v1alpha1.Dra
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha1.DraughtsmanConfigList{}
+	list := &v1alpha1.DraughtsmanConfigList{ListMeta: obj.(*v1alpha1.DraughtsmanConfigList).ListMeta}
 	for _, item := range obj.(*v1alpha1.DraughtsmanConfigList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -119,7 +119,7 @@ func (c *FakeDraughtsmanConfigs) DeleteCollection(options *v1.DeleteOptions, lis
 // Patch applies the patch and returns the patched draughtsmanConfig.
 func (c *FakeDraughtsmanConfigs) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.DraughtsmanConfig, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(draughtsmanconfigsResource, c.ns, name, data, subresources...), &v1alpha1.DraughtsmanConfig{})
+		Invokes(testing.NewPatchSubresourceAction(draughtsmanconfigsResource, c.ns, name, pt, data, subresources...), &v1alpha1.DraughtsmanConfig{})
 
 	if obj == nil {
 		return nil, err

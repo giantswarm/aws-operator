@@ -4,3 +4,8 @@
 utilities to work with random keys created by [kubernetesd][kubernetesd].
 
 [kubernetesd]: https://github.com/giantswarm/kubernetesd
+
+## License
+
+randomkeys is under the Apache 2.0 license. See the [LICENSE](LICENSE) file for
+details.

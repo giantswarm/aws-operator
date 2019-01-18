@@ -53,7 +53,7 @@ while
     | /usr/bin/docker run  -i --log-driver=none -a stdin -a stdout -a stderr -e KUBECONFIG=${KUBECONFIG} -v /etc/kubernetes:/etc/kubernetes --net=host --rm $KUBECTL apply -n kube-system -f -
     [ "$?" -ne "0" ]
 do
-    echo "failed to configure kube-proxy from /srv/kube-proxy-confg.yaml, retrying in 5 sec"
+    echo "failed to configure kube-proxy from /srv/kube-proxy-config.yaml, retrying in 5 sec"
     sleep 5s
 done
 

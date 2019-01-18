@@ -62,7 +62,7 @@ func (c *FakeAWSClusterConfigs) List(opts v1.ListOptions) (result *v1alpha1.AWSC
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha1.AWSClusterConfigList{}
+	list := &v1alpha1.AWSClusterConfigList{ListMeta: obj.(*v1alpha1.AWSClusterConfigList).ListMeta}
 	for _, item := range obj.(*v1alpha1.AWSClusterConfigList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -119,7 +119,7 @@ func (c *FakeAWSClusterConfigs) DeleteCollection(options *v1.DeleteOptions, list
 // Patch applies the patch and returns the patched aWSClusterConfig.
 func (c *FakeAWSClusterConfigs) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.AWSClusterConfig, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(awsclusterconfigsResource, c.ns, name, data, subresources...), &v1alpha1.AWSClusterConfig{})
+		Invokes(testing.NewPatchSubresourceAction(awsclusterconfigsResource, c.ns, name, pt, data, subresources...), &v1alpha1.AWSClusterConfig{})
 
 	if obj == nil {
 		return nil, err
