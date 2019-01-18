@@ -62,7 +62,7 @@ func (c *FakeCertConfigs) List(opts v1.ListOptions) (result *v1alpha1.CertConfig
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha1.CertConfigList{}
+	list := &v1alpha1.CertConfigList{ListMeta: obj.(*v1alpha1.CertConfigList).ListMeta}
 	for _, item := range obj.(*v1alpha1.CertConfigList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -119,7 +119,7 @@ func (c *FakeCertConfigs) DeleteCollection(options *v1.DeleteOptions, listOption
 // Patch applies the patch and returns the patched certConfig.
 func (c *FakeCertConfigs) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.CertConfig, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(certconfigsResource, c.ns, name, data, subresources...), &v1alpha1.CertConfig{})
+		Invokes(testing.NewPatchSubresourceAction(certconfigsResource, c.ns, name, pt, data, subresources...), &v1alpha1.CertConfig{})
 
 	if obj == nil {
 		return nil, err

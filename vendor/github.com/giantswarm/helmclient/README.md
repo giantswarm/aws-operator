@@ -20,3 +20,8 @@ Package helmclient implements Helm related primitives to work against Tiller.
 - https://github.com/giantswarm/aws-operator
 - https://github.com/giantswarm/chart-operator
 - https://github.com/giantswarm/cluster-operator
+
+## License
+
+helmclient is under the Apache 2.0 license. See the [LICENSE](LICENSE) file
+for details.

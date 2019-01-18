@@ -62,7 +62,7 @@ func (c *FakeKVMClusterConfigs) List(opts v1.ListOptions) (result *v1alpha1.KVMC
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha1.KVMClusterConfigList{}
+	list := &v1alpha1.KVMClusterConfigList{ListMeta: obj.(*v1alpha1.KVMClusterConfigList).ListMeta}
 	for _, item := range obj.(*v1alpha1.KVMClusterConfigList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -119,7 +119,7 @@ func (c *FakeKVMClusterConfigs) DeleteCollection(options *v1.DeleteOptions, list
 // Patch applies the patch and returns the patched kVMClusterConfig.
 func (c *FakeKVMClusterConfigs) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.KVMClusterConfig, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(kvmclusterconfigsResource, c.ns, name, data, subresources...), &v1alpha1.KVMClusterConfig{})
+		Invokes(testing.NewPatchSubresourceAction(kvmclusterconfigsResource, c.ns, name, pt, data, subresources...), &v1alpha1.KVMClusterConfig{})
 
 	if obj == nil {
 		return nil, err
