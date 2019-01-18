@@ -36,8 +36,8 @@ required = [
   branch = "master"
   name = "github.com/docker/distribution"
 
-[[override]]
-  branch = "kubernetes-1.13.2"
+[[constraint]]
+  branch = "master"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]
@@ -49,15 +49,15 @@ required = [
   name = "github.com/giantswarm/backoff"
 
 [[constraint]]
-  branch = "kubernetes-1.13.2"
+  branch = "master"
   name = "github.com/giantswarm/certs"
 
 [[constraint]]
-  branch = "kubernetes-1.13.2"
+  branch = "master"
   name = "github.com/giantswarm/e2e-harness"
 
 [[constraint]]
-  branch = "kubernetes-1.13.2"
+  branch = "master"
   name = "github.com/giantswarm/e2eclients"
 
 [[constraint]]
@@ -65,7 +65,7 @@ required = [
   name = "github.com/giantswarm/e2etemplates"
 
 [[constraint]]
-  branch = "kubernetes-1.13.2"
+  branch = "master"
   name = "github.com/giantswarm/e2etests"
 
 [[constraint]]
@@ -73,7 +73,7 @@ required = [
   name = "github.com/giantswarm/exporterkit"
 
 [[constraint]]
-  branch = "kubernetes-1.13.2"
+  branch = "master"
   name = "github.com/giantswarm/helmclient"
 
 [[constraint]]
@@ -97,23 +97,23 @@ required = [
   name = "github.com/giantswarm/micrologger"
 
 [[constraint]]
-  branch = "kubernetes-1.13.2"
+  branch = "master"
   name = "github.com/giantswarm/legacycerts"
 
 [[constraint]]
-  branch = "kubernetes-1.13.2"
+  branch = "master"
   name = "github.com/giantswarm/operatorkit"
 
 [[constraint]]
-  branch = "kubernetes-1.13.2"
+  branch = "master"
   name = "github.com/giantswarm/randomkeys"
 
 [[constraint]]
-  branch = "kubernetes-1.13.2"
+  branch = "master"
   name = "github.com/giantswarm/statusresource"
 
 [[constraint]]
-  branch = "kubernetes-1.13.2"
+  branch = "master"
   name = "github.com/giantswarm/tenantcluster"
 
 [[constraint]]
