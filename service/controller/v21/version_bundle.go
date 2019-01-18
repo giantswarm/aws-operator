@@ -12,6 +12,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Replace cloudinit with ignition.",
 				Kind:        versionbundle.KindAdded,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Add S3 VPC endpoint.",
+				Kind:        versionbundle.KindAdded,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
