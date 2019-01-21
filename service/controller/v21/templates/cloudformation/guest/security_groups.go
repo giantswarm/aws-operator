@@ -143,22 +143,4 @@ const SecurityGroups = `{{define "security_groups" }}
       ToPort: -1
       SourceSecurityGroupId: !Ref MasterSecurityGroup
 
-  VPCDefaultSecurityGroupIngress:
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      GroupId !GetAtt VPC.DefaultSecurityGroup
-      Description: Lockdown Default Security Group ingress traffic.
-      IpProtocol: -1
-      FromPort: -1
-      ToPort: -1
-      SourceSecurityGroupId: !Ref VPC.DefaultSecurityGroup
-
-  VPCDefaultSecurityGroupEgress:
-    Type: AWS::EC2::SecurityGroupEgress
-    Properties:
-      GroupId !GetAtt VPC.DefaultSecurityGroup
-      Description: Lockdown Default Security Group egress traffic.
-      IpProtocol: -1
-      CidrIp: 127.0.0.1/32
-
 {{ end }}`
