@@ -160,5 +160,4 @@ const SecurityGroups = `{{define "security_groups" }}
       Description: Lockdown Default Security Group egress traffic.
       IpProtocol: -1
       CidrIp: 127.0.0.1/32
-
 {{ end }}`
