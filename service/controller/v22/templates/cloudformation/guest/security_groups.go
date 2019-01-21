@@ -146,7 +146,7 @@ const SecurityGroups = `{{define "security_groups" }}
   VPCDefaultSecurityGroupIngress:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
-      GroupId !GetAtt VPC.DefaultSecurityGroup
+      GroupId: !GetAtt VPC.DefaultSecurityGroup
       Description: Lockdown Default Security Group ingress traffic.
       IpProtocol: -1
       FromPort: -1
@@ -156,7 +156,7 @@ const SecurityGroups = `{{define "security_groups" }}
   VPCDefaultSecurityGroupEgress:
     Type: AWS::EC2::SecurityGroupEgress
     Properties:
-      GroupId !GetAtt VPC.DefaultSecurityGroup
+      GroupId: !GetAtt VPC.DefaultSecurityGroup
       Description: Lockdown Default Security Group egress traffic.
       IpProtocol: -1
       CidrIp: 127.0.0.1/32
