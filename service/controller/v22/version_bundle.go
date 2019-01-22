@@ -8,9 +8,9 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "Todo",
-				Description: "TODO.",
-				Kind:        versionbundle.KindAdded,
+				Component:   "node-operator",
+				Description: "Improved node draining during updates and scaling.",
+				Kind:        versionbundle.KindChanged,
 			},
 		},
 		Components: []versionbundle.Component{
