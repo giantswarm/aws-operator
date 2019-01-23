@@ -8,8 +8,8 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "Todo",
-				Description: "TODO.",
+				Component:   "aws-operator",
+				Description: "Add support for cluster auto-scaling.",
 				Kind:        versionbundle.KindAdded,
 			},
 		},
