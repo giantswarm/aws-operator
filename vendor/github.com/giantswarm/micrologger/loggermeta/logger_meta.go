@@ -40,6 +40,10 @@ func NewContext(ctx context.Context, v *LoggerMeta) context.Context {
 
 // FromContext returns the logger struct, if any.
 func FromContext(ctx context.Context) (*LoggerMeta, bool) {
+	if ctx == nil {
+		return nil, true
+	}
+
 	v, ok := ctx.Value(loggerMetaKey).(*LoggerMeta)
 	return v, ok
 }
