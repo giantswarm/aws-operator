@@ -34,6 +34,8 @@ import (
 	"github.com/giantswarm/randomkeys"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
+
+	_ "github.com/getsentry/raven-go"
 )
 
 type ClusterConfig struct {
@@ -64,6 +66,9 @@ type ClusterConfig struct {
 	PublicRouteTables          string
 	RegistryDomain             string
 	Route53Enabled             bool
+	SentryDSN                  string
+	SentryEnvironment          string
+	SentryRelease              string
 	SSOPublicKey               string
 	VaultAddress               string
 }
@@ -184,6 +189,10 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 			RESTClient:   config.G8sClient.ProviderV1alpha1().RESTClient(),
 
 			Name: config.ProjectName,
+
+			SentryDSN:         config.SentryDSN,
+			SentryEnvironment: config.SentryEnvironment,
+			SentryRelease:     config.SentryRelease,
 		}
 
 		operatorkitController, err = controller.New(c)

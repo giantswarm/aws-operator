@@ -159,6 +159,9 @@ func New(config Config) (*Service, error) {
 			PublicRouteTables:      config.Viper.GetString(config.Flag.Service.AWS.PublicRouteTables),
 			Route53Enabled:         config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 			RegistryDomain:         config.Viper.GetString(config.Flag.Service.RegistryDomain),
+			SentryDSN:              config.Viper.GetString(config.Flag.Service.Sentry.DSN),
+			SentryEnvironment:      config.Viper.GetString(config.Flag.Service.Sentry.Environment),
+			SentryRelease:          config.Viper.GetString(config.Flag.Service.Sentry.Release),
 			SSOPublicKey:           config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
 			VaultAddress:           config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
 		}

@@ -27,6 +27,9 @@ required = [
 ]
 
 
+[[constraint]]
+  name = "github.com/getsentry/raven-go"
+  version = "v0.2.0"
 
 [[constraint]]
   name = "github.com/aws/aws-sdk-go"
