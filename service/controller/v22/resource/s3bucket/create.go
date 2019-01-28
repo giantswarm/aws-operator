@@ -93,7 +93,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			}
 		}
 
-		if bucketInput.LoggingEnabled {
+		if bucketInput.IsLoggingEnabled {
 			_, err = sc.AWSClient.S3.PutBucketLogging(&s3.PutBucketLoggingInput{
 				Bucket: aws.String(bucketInput.Name),
 				BucketLoggingStatus: &s3.BucketLoggingStatus{

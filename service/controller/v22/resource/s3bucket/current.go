@@ -61,8 +61,8 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		inputBucket.LoggingEnabled = isLoggingEnabled(lc)
 		inputBucket.IsLoggingBucket = isLoggingBucket(inputBucketName, lc)
+		inputBucket.IsLoggingEnabled = isLoggingEnabled(lc)
 
 		currentBucketState = append(currentBucketState, inputBucket)
 	}
