@@ -35,24 +35,32 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating S3 bucket %q", bucketInput.Name))
 
-		_, err = sc.AWSClient.S3.CreateBucket(&s3.CreateBucketInput{
-			Bucket: aws.String(bucketInput.Name),
-		})
-		if IsBucketAlreadyExists(err) || IsBucketAlreadyOwnedByYou(err) {
-			// Fall through.
-			return nil
-		} else if err != nil {
-			return microerror.Mask(err)
+		{
+			i := &s3.CreateBucketInput{
+				Bucket: aws.String(bucketInput.Name),
+			}
+
+			_, err = sc.AWSClient.S3.CreateBucket(i)
+			if IsBucketAlreadyExists(err) || IsBucketAlreadyOwnedByYou(err) {
+				// Fall through.
+				return nil
+			} else if err != nil {
+				return microerror.Mask(err)
+			}
 		}
 
-		_, err = sc.AWSClient.S3.PutBucketTagging(&s3.PutBucketTaggingInput{
-			Bucket: aws.String(bucketInput.Name),
-			Tagging: &s3.Tagging{
-				TagSet: r.getS3BucketTags(customObject),
-			},
-		})
-		if err != nil {
-			return microerror.Mask(err)
+		{
+			i := &s3.PutBucketTaggingInput{
+				Bucket: aws.String(bucketInput.Name),
+				Tagging: &s3.Tagging{
+					TagSet: r.getS3BucketTags(customObject),
+				},
+			}
+
+			_, err = sc.AWSClient.S3.PutBucketTagging(i)
+			if err != nil {
+				return microerror.Mask(err)
+			}
 		}
 
 		if bucketInput.IsLoggingBucket {
@@ -85,7 +93,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			}
 		}
 
-		if bucketInput.LoggingEnabled {
+		if bucketInput.IsLoggingEnabled {
 			_, err = sc.AWSClient.S3.PutBucketLogging(&s3.PutBucketLoggingInput{
 				Bucket: aws.String(bucketInput.Name),
 				BucketLoggingStatus: &s3.BucketLoggingStatus{
@@ -99,6 +107,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 				return microerror.Mask(err)
 			}
 		}
+
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating S3 bucket %q: created", bucketInput.Name))
 	}
 

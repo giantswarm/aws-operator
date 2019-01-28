@@ -6,9 +6,9 @@ import (
 
 // BucketState is the state representation on which the resource methods work.
 type BucketState struct {
-	Name            string
-	IsLoggingBucket bool
-	LoggingEnabled  bool
+	Name             string
+	IsLoggingBucket  bool
+	IsLoggingEnabled bool
 }
 
 type Clients struct {
