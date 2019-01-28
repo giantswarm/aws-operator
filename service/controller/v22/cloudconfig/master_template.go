@@ -252,7 +252,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		c := base64.StdEncoding.EncodeToString([]byte(cm.AssetContent))
 		asset := k8scloudconfig.FileAsset{
 			Metadata: cm,
-			Content: c,
+			Content:  c,
 		}
 
 		fileAssets = append(fileAssets, asset)
