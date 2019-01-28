@@ -77,6 +77,28 @@ func IsBucketAlreadyOwnedByYou(err error) bool {
 	return false
 }
 
+var bucketNotEmptyError = &microerror.Error{
+	Kind: "bucketNotEmptyError",
+}
+
+// IsBucketNotEmpty asserts bucketNotEmptyError.
+func IsBucketNotEmpty(err error) bool {
+	c := microerror.Cause(err)
+	aerr, ok := c.(awserr.Error)
+	if !ok {
+		return false
+	}
+
+	if aerr.Code() == "BucketNotEmpty" {
+		return true
+	}
+	if c == bucketNotEmptyError {
+		return true
+	}
+
+	return false
+}
+
 var wrongTypeError = &microerror.Error{
 	Kind: "wrongTypeError",
 }
