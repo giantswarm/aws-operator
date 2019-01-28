@@ -62,7 +62,7 @@ func (c *FakeKVMConfigs) List(opts v1.ListOptions) (result *v1alpha1.KVMConfigLi
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha1.KVMConfigList{}
+	list := &v1alpha1.KVMConfigList{ListMeta: obj.(*v1alpha1.KVMConfigList).ListMeta}
 	for _, item := range obj.(*v1alpha1.KVMConfigList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -131,7 +131,7 @@ func (c *FakeKVMConfigs) DeleteCollection(options *v1.DeleteOptions, listOptions
 // Patch applies the patch and returns the patched kVMConfig.
 func (c *FakeKVMConfigs) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.KVMConfig, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(kvmconfigsResource, c.ns, name, data, subresources...), &v1alpha1.KVMConfig{})
+		Invokes(testing.NewPatchSubresourceAction(kvmconfigsResource, c.ns, name, pt, data, subresources...), &v1alpha1.KVMConfig{})
 
 	if obj == nil {
 		return nil, err

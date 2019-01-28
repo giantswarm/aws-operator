@@ -62,7 +62,7 @@ func (c *FakeFlannelConfigs) List(opts v1.ListOptions) (result *v1alpha1.Flannel
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha1.FlannelConfigList{}
+	list := &v1alpha1.FlannelConfigList{ListMeta: obj.(*v1alpha1.FlannelConfigList).ListMeta}
 	for _, item := range obj.(*v1alpha1.FlannelConfigList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -119,7 +119,7 @@ func (c *FakeFlannelConfigs) DeleteCollection(options *v1.DeleteOptions, listOpt
 // Patch applies the patch and returns the patched flannelConfig.
 func (c *FakeFlannelConfigs) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.FlannelConfig, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(flannelconfigsResource, c.ns, name, data, subresources...), &v1alpha1.FlannelConfig{})
+		Invokes(testing.NewPatchSubresourceAction(flannelconfigsResource, c.ns, name, pt, data, subresources...), &v1alpha1.FlannelConfig{})
 
 	if obj == nil {
 		return nil, err

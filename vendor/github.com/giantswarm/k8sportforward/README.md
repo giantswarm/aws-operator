@@ -4,7 +4,10 @@
 
 Package `k8sportforward` exposes functionality similar to `kubectl port-forward`.
 
+## License
 
+k8sportforward is under the Apache 2.0 license. See the [LICENSE](LICENSE) file for
+details.
 
 ## Projects using k8sportforward
 

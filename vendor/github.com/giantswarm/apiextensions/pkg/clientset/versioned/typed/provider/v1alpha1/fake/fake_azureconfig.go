@@ -62,7 +62,7 @@ func (c *FakeAzureConfigs) List(opts v1.ListOptions) (result *v1alpha1.AzureConf
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha1.AzureConfigList{}
+	list := &v1alpha1.AzureConfigList{ListMeta: obj.(*v1alpha1.AzureConfigList).ListMeta}
 	for _, item := range obj.(*v1alpha1.AzureConfigList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -131,7 +131,7 @@ func (c *FakeAzureConfigs) DeleteCollection(options *v1.DeleteOptions, listOptio
 // Patch applies the patch and returns the patched azureConfig.
 func (c *FakeAzureConfigs) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.AzureConfig, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(azureconfigsResource, c.ns, name, data, subresources...), &v1alpha1.AzureConfig{})
+		Invokes(testing.NewPatchSubresourceAction(azureconfigsResource, c.ns, name, pt, data, subresources...), &v1alpha1.AzureConfig{})
 
 	if obj == nil {
 		return nil, err

@@ -39,13 +39,6 @@ func (b Bundles) Validate() error {
 		}
 	}
 
-	bundleName := b[0].Name
-	for _, bundle := range b {
-		if bundle.Name != bundleName {
-			return microerror.Maskf(invalidBundlesError, "name must be the same for all version bundles")
-		}
-	}
-
 	return nil
 }
 
@@ -54,7 +47,7 @@ func (b Bundles) hasDuplicatedVersions() bool {
 		var seen int
 
 		for _, b2 := range b {
-			if b1.Version == b2.Version && b1.Provider == b2.Provider {
+			if b1.Version == b2.Version && b1.Provider == b2.Provider && b1.Name == b2.Name {
 				seen++
 
 				if seen >= 2 {

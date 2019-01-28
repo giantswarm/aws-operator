@@ -17,6 +17,7 @@ const (
 
 	defaultTillerImage     = "quay.io/giantswarm/tiller:v2.12.0"
 	defaultTillerNamespace = "kube-system"
+	roleBindingNamePrefix  = "tiller"
 	tillerLabelSelector    = "app=helm,name=tiller"
 	tillerPodName          = "tiller-giantswarm"
 	tillerPort             = 44134

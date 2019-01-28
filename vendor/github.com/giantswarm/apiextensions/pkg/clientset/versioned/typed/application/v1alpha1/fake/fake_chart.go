@@ -62,7 +62,7 @@ func (c *FakeCharts) List(opts v1.ListOptions) (result *v1alpha1.ChartList, err 
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha1.ChartList{}
+	list := &v1alpha1.ChartList{ListMeta: obj.(*v1alpha1.ChartList).ListMeta}
 	for _, item := range obj.(*v1alpha1.ChartList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -131,7 +131,7 @@ func (c *FakeCharts) DeleteCollection(options *v1.DeleteOptions, listOptions v1.
 // Patch applies the patch and returns the patched chart.
 func (c *FakeCharts) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.Chart, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(chartsResource, c.ns, name, data, subresources...), &v1alpha1.Chart{})
+		Invokes(testing.NewPatchSubresourceAction(chartsResource, c.ns, name, pt, data, subresources...), &v1alpha1.Chart{})
 
 	if obj == nil {
 		return nil, err

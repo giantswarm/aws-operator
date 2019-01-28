@@ -62,7 +62,7 @@ func (c *FakeApps) List(opts v1.ListOptions) (result *v1alpha1.AppList, err erro
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha1.AppList{}
+	list := &v1alpha1.AppList{ListMeta: obj.(*v1alpha1.AppList).ListMeta}
 	for _, item := range obj.(*v1alpha1.AppList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -131,7 +131,7 @@ func (c *FakeApps) DeleteCollection(options *v1.DeleteOptions, listOptions v1.Li
 // Patch applies the patch and returns the patched app.
 func (c *FakeApps) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.App, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(appsResource, c.ns, name, data, subresources...), &v1alpha1.App{})
+		Invokes(testing.NewPatchSubresourceAction(appsResource, c.ns, name, pt, data, subresources...), &v1alpha1.App{})
 
 	if obj == nil {
 		return nil, err

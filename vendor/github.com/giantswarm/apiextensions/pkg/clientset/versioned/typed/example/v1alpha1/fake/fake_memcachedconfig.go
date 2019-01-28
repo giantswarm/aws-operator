@@ -62,7 +62,7 @@ func (c *FakeMemcachedConfigs) List(opts v1.ListOptions) (result *v1alpha1.Memca
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha1.MemcachedConfigList{}
+	list := &v1alpha1.MemcachedConfigList{ListMeta: obj.(*v1alpha1.MemcachedConfigList).ListMeta}
 	for _, item := range obj.(*v1alpha1.MemcachedConfigList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -119,7 +119,7 @@ func (c *FakeMemcachedConfigs) DeleteCollection(options *v1.DeleteOptions, listO
 // Patch applies the patch and returns the patched memcachedConfig.
 func (c *FakeMemcachedConfigs) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.MemcachedConfig, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(memcachedconfigsResource, c.ns, name, data, subresources...), &v1alpha1.MemcachedConfig{})
+		Invokes(testing.NewPatchSubresourceAction(memcachedconfigsResource, c.ns, name, pt, data, subresources...), &v1alpha1.MemcachedConfig{})
 
 	if obj == nil {
 		return nil, err
