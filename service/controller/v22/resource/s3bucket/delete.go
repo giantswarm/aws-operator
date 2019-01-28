@@ -107,6 +107,7 @@ func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desir
 	}
 
 	var bucketsToDelete []BucketState
+
 	for _, bucket := range currentBuckets {
 		// Destination Logs Bucket should not be deleted because it has to keep logs
 		// even when cluster is removed (rotation of these logs are managed externally).

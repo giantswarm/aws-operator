@@ -29,14 +29,14 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	// other buckets can not forward logs to it
 	bucketsState := []BucketState{
 		{
-			Name:            key.TargetLogBucketName(customObject),
-			IsLoggingBucket: true,
-			LoggingEnabled:  true,
+			Name:             key.TargetLogBucketName(customObject),
+			IsLoggingBucket:  true,
+			IsLoggingEnabled: true,
 		},
 		{
-			Name:            key.BucketName(customObject, accountID),
-			IsLoggingBucket: false,
-			LoggingEnabled:  true,
+			Name:             key.BucketName(customObject, accountID),
+			IsLoggingBucket:  false,
+			IsLoggingEnabled: true,
 		},
 	}
 
