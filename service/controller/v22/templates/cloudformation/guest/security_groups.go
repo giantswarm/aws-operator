@@ -147,7 +147,7 @@ const SecurityGroups = `{{define "security_groups" }}
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
       GroupId: !GetAtt VPC.DefaultSecurityGroup
-      Description: Lockdown Default Security Group ingress traffic.
+      Description: "Allow inbound traffic from instances assigned to the same security group."
       IpProtocol: -1
       FromPort: -1
       ToPort: -1
@@ -157,7 +157,7 @@ const SecurityGroups = `{{define "security_groups" }}
     Type: AWS::EC2::SecurityGroupEgress
     Properties:
       GroupId: !GetAtt VPC.DefaultSecurityGroup
-      Description: Lockdown Default Security Group egress traffic.
+      Description: "Allow outbound traffic from loopback address."
       IpProtocol: -1
       CidrIp: 127.0.0.1/32
 {{ end }}`
