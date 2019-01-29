@@ -50,29 +50,43 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			var bucketEmpty bool
 			var count int
 			for {
-				i := &s3.ListObjectsV2Input{
-					Bucket: aws.String(bucketName),
-				}
-				o, err := sc.AWSClient.S3.ListObjectsV2(i)
-				if err != nil {
-					return microerror.Mask(err)
-				}
-				if len(o.Contents) == 0 {
-					bucketEmpty = true
-					break
-				}
-
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting %d objects", len(o.Contents)))
-
-				for _, o := range o.Contents {
-					i := &s3.DeleteObjectInput{
+				var objects []*s3.ObjectIdentifier
+				{
+					i := &s3.ListObjectsV2Input{
 						Bucket: aws.String(bucketName),
-						Key:    o.Key,
 					}
-					_, err := sc.AWSClient.S3.DeleteObject(i)
+					o, err := sc.AWSClient.S3.ListObjectsV2(i)
 					if err != nil {
 						return microerror.Mask(err)
 					}
+					if len(o.Contents) == 0 {
+						bucketEmpty = true
+						break
+					}
+
+					for _, o := range o.Contents {
+						objects = append(objects, &s3.ObjectIdentifier{
+							Key: o.Key,
+						})
+					}
+				}
+
+				{
+					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting %d objects", len(objects)))
+
+					i := &s3.DeleteObjectsInput{
+						Bucket: aws.String(bucketName),
+						Delete: &s3.Delete{
+							Objects: objects,
+							Quiet:   aws.Bool(true),
+						},
+					}
+					_, err := sc.AWSClient.S3.DeleteObjects(i)
+					if err != nil {
+						return microerror.Mask(err)
+					}
+
+					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted %d objects", len(objects)))
 				}
 
 				count++
@@ -84,18 +98,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 				}
 			}
 
-			if bucketEmpty {
-				i := &s3.DeleteBucketInput{
-					Bucket: aws.String(bucketName),
-				}
-
-				_, err = sc.AWSClient.S3.DeleteBucket(i)
-				if err != nil {
-					return microerror.Mask(err)
-				}
-
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted S3 bucket %q", bucketName))
-			} else {
+			if !bucketEmpty {
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("bucket %q not empty", bucketName))
 
 				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
@@ -103,7 +106,21 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 
 				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 				resourcecanceledcontext.SetCanceled(ctx)
+
+				return nil
 			}
+
+			{
+				i := &s3.DeleteBucketInput{
+					Bucket: aws.String(bucketName),
+				}
+				_, err = sc.AWSClient.S3.DeleteBucket(i)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+			}
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted S3 bucket %q", bucketName))
 
 			return nil
 		})
