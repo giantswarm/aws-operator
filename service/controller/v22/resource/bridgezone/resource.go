@@ -107,6 +107,9 @@ type Config struct {
 // cluster_id.k8s.installation.eu-central-1.aws.gigantic.io delegation in the
 // installation.eu-central-1.aws.gigantic.io. Till this happens this resource
 // cannot be deleted.
+//
+//	See https://github.com/giantswarm/aws-operator/pull/1373.
+//
 type Resource struct {
 	hostAWSConfig clientaws.Config
 	k8sClient     kubernetes.Interface
