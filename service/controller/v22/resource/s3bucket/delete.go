@@ -48,7 +48,6 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting S3 bucket %q", bucketName))
 
 			var count int
-			var repeat bool
 			for {
 				i := &s3.ListObjectsV2Input{
 					Bucket: aws.String(bucketName),
@@ -56,9 +55,6 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 				o, err := sc.AWSClient.S3.ListObjectsV2(i)
 				if err != nil {
 					return microerror.Mask(err)
-				}
-				if o.IsTruncated != nil && *o.IsTruncated {
-					repeat = true
 				}
 				if len(o.Contents) == 0 {
 					break
@@ -82,10 +78,6 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 					r.logger.LogCtx(ctx, "level", "debug", "message", "loop limit reached for S3 bucket deletion")
 
 					r.logger.LogCtx(ctx, "level", "debug", "message", "canceling S3 bucket deletion")
-					repeat = false
-				}
-
-				if !repeat {
 					break
 				}
 			}
