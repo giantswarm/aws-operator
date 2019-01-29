@@ -17,10 +17,10 @@ import (
 
 const (
 	// loopLimit is the maximum amount of delete actions we want to allow per
-	// reconciliation loop. Reason here is to execute resources fast and prevent
-	// them blocking other resources for too long. In case a S3 bucket has
-	// thousands of objects, we delete 3 times 1000 thousand and continue with the
-	// next reconciliation loop.
+	// S3 bucket. Reason here is to execute resources fast and prevent
+	// them blocking other resources for too long. In case a S3 bucket has more
+	// than 3000 objects, we delete 3 batches of 1000 objects and leave the rest
+	// for the next reconciliation loop.
 	loopLimit = 3
 )
 
@@ -47,6 +47,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting S3 bucket %q", bucketName))
 
+			var bucketEmpty bool
 			var count int
 			for {
 				i := &s3.ListObjectsV2Input{
@@ -57,6 +58,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 					return microerror.Mask(err)
 				}
 				if len(o.Contents) == 0 {
+					bucketEmpty = true
 					break
 				}
 
@@ -82,7 +84,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 				}
 			}
 
-			{
+			if bucketEmpty {
 				i := &s3.DeleteBucketInput{
 					Bucket: aws.String(bucketName),
 				}
@@ -91,24 +93,24 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 				if err != nil {
 					return microerror.Mask(err)
 				}
-			}
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted S3 bucket %q", bucketName))
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted S3 bucket %q", bucketName))
+			} else {
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("bucket %q not empty", bucketName))
+
+				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+				finalizerskeptcontext.SetKept(ctx)
+
+				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+				resourcecanceledcontext.SetCanceled(ctx)
+			}
 
 			return nil
 		})
 	}
 
 	err = g.Wait()
-	if IsBucketNotEmpty(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
-		finalizerskeptcontext.SetKept(ctx)
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-		resourcecanceledcontext.SetCanceled(ctx)
-
-		return nil
-	} else if IsBucketNotFound(err) {
+	if IsBucketNotFound(err) {
 		// Fall through.
 		return nil
 	} else if err != nil {
