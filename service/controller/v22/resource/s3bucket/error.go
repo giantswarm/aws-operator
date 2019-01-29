@@ -81,7 +81,12 @@ var bucketNotEmptyError = &microerror.Error{
 	Kind: "bucketNotEmptyError",
 }
 
-// IsBucketNotEmpty asserts bucketNotEmptyError.
+// IsBucketNotEmpty asserts bucketNotEmptyError. It also checks for
+// BucketNotEmpty error codes from the AWS SDK. An error we expect looks like
+// the one below.
+//
+//     BucketNotEmpty: The bucket you tried to delete is not empty\n\tstatus code: 409, request id: 4B2CDF3222517C9D, host id: mOJAOuJsV/3CEeAkyTw1k3s5HLFsa5PHMkUfZv5lqtOKxiR67jclbqIHrzvtDa7E676h908MIY0=
+//
 func IsBucketNotEmpty(err error) bool {
 	c := microerror.Cause(err)
 	aerr, ok := c.(awserr.Error)
