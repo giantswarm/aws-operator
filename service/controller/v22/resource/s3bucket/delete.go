@@ -47,6 +47,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting S3 bucket %q", bucketName))
 
+			var bucketEmpty bool
 			var count int
 			var repeat bool
 			for {
@@ -61,6 +62,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 					repeat = true
 				}
 				if len(o.Contents) == 0 {
+					bucketEmpty = true
 					break
 				}
 
@@ -90,7 +92,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 				}
 			}
 
-			{
+			if bucketEmpty {
 				i := &s3.DeleteBucketInput{
 					Bucket: aws.String(bucketName),
 				}
@@ -99,24 +101,24 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 				if err != nil {
 					return microerror.Mask(err)
 				}
-			}
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted S3 bucket %q", bucketName))
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted S3 bucket %q", bucketName))
+			} else {
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("bucket %q not empty", bucketName))
+
+				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+				finalizerskeptcontext.SetKept(ctx)
+
+				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+				resourcecanceledcontext.SetCanceled(ctx)
+			}
 
 			return nil
 		})
 	}
 
 	err = g.Wait()
-	if IsBucketNotEmpty(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
-		finalizerskeptcontext.SetKept(ctx)
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-		resourcecanceledcontext.SetCanceled(ctx)
-
-		return nil
-	} else if IsBucketNotFound(err) {
+	if IsBucketNotFound(err) {
 		// Fall through.
 		return nil
 	} else if err != nil {
