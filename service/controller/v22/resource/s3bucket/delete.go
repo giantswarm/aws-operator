@@ -18,9 +18,9 @@ import (
 const (
 	// loopLimit is the maximum amount of delete actions we want to allow per
 	// reconciliation loop. Reason here is to execute resources fast and prevent
-	// them blocking other resources for too long. In case a S3 bucket has
-	// thousands of objects, we delete 3 times 1000 thousand and continue with the
-	// next reconciliation loop.
+	// them blocking other resources for too long. In case a S3 bucket has more
+	// than 3000 objects, we delete 3 batches of 1000 objects and leave the rest
+	// for the next reconciliation loop.
 	loopLimit = 3
 )
 
