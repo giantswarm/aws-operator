@@ -45,7 +45,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 				return nil
 			}
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting S3 bucket %q", bucketName))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting S3 bucket %#q", bucketName))
 
 			var bucketEmpty bool
 			var count int
@@ -99,7 +99,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			}
 
 			if !bucketEmpty {
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("bucket %q not empty", bucketName))
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("bucket %#q not empty", bucketName))
 
 				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
 				finalizerskeptcontext.SetKept(ctx)
@@ -120,7 +120,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 				}
 			}
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted S3 bucket %q", bucketName))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted S3 bucket %#q", bucketName))
 
 			return nil
 		})
