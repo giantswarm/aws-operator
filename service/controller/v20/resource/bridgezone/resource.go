@@ -37,45 +37,63 @@ type Config struct {
 //
 // Old structure looks like:
 //
-//	installation.eu-central-1.aws.gigantic.io (host account)
-//	└── NS k8s.installation.eu-central-1.aws.gigantic.io (default guest account)
-//	    ├── A api.old_cluster.k8s.installation.eu-central-1.aws.gigantic.io
-//	    └── A ingress.old_cluster.k8s.installation.eu-central-1.aws.gigantic.io
+//	installation.eu-central-1.aws.gigantic.io (control plane account)
+//	└── NS k8s.installation.eu-central-1.aws.gigantic.io (default control plane account)
+//
+//	k8s.installation.eu-central-1.aws.gigantic.io (default control plane account)
+//	├── A api.old_cluster_a.k8s.installation.eu-central-1.aws.gigantic.io
+//	├── A ingress.old_cluster_a.k8s.installation.eu-central-1.aws.gigantic.io
+//	├── A api.old_cluster_b.k8s.installation.eu-central-1.aws.gigantic.io
+//	└── A ingress.old_cluster_b.k8s.installation.eu-central-1.aws.gigantic.io
 //
 // New structure looks like:
 //
-//	installation.eu-central-1.aws.gigantic.io (host account)
-//	└── NS new_cluster.k8s.installation.eu-central-1.aws.gigantic.io (byoc guest account)
-//	    ├── A api.new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
-//	    └── A ingress.new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
+//	installation.eu-central-1.aws.gigantic.io (control plane account)
+//	└── NS new_cluster_a.k8s.installation.eu-central-1.aws.gigantic.io (byoc tenant account)
+//	└── NS new_cluster_b.k8s.installation.eu-central-1.aws.gigantic.io (byoc tenant account)
+//
+//	new_cluster_a.k8s.installation.eu-central-1.aws.gigantic.io (byoc tenant account)
+//	├── A api.new_cluster_a.k8s.installation.eu-central-1.aws.gigantic.io
+//	└── A ingress.new_cluster_a.k8s.installation.eu-central-1.aws.gigantic.io
+//
+//	new_cluster_b.k8s.installation.eu-central-1.aws.gigantic.io (byoc tenant account)
+//	├── A api.new_cluster_b.k8s.installation.eu-central-1.aws.gigantic.io
+//	└── A ingress.new_cluster_b.k8s.installation.eu-central-1.aws.gigantic.io
 //
 // For the migration period for new clusters we need also to add delegation to
 // k8s.installation.eu-central-1.aws.gigantic.io because of the AWS DNS caching issues.
 //
-//	installation.eu-central-1.aws.gigantic.io (host account)
-//	├── NS k8s.installation.eu-central-1.aws.gigantic.io (default guest account)
-//	│   ├── NS new_cluster.k8s.installation.eu-central-1.aws.gigantic.io (byoc guest account)
-//	│   ├── A api.old_cluster.k8s.installation.eu-central-1.aws.gigantic.io
-//	│   └── A ingress.old_cluster.k8s.installation.eu-central-1.aws.gigantic.io
-//	└── NS new_cluster.k8s.installation.eu-central-1.aws.gigantic.io (byoc guest account)
-//	    ├── A api.new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
-//	    └── A ingress.new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
+//	installation.eu-central-1.aws.gigantic.io (control plane account)
+//	├── NS k8s.installation.eu-central-1.aws.gigantic.io (default tenant account)
+//	└── NS cluster_id.k8s.installation.eu-central-1.aws.gigantic.io (byoc tenant account)
+
+//	k8s.installation.eu-central-1.aws.gigantic.io (default tenant account)
+//	├── NS cluster_id.k8s.installation.eu-central-1.aws.gigantic.io (byoc tenant account)
+//	├── A api.old_cluster.k8s.installation.eu-central-1.aws.gigantic.io
+//	└── A ingress.old_cluster.k8s.installation.eu-central-1.aws.gigantic.io
+
+//	cluster_id.k8s.installation.eu-central-1.aws.gigantic.io (byoc tenant account)
+//	├── A api.cluster_id.k8s.installation.eu-central-1.aws.gigantic.io
+//	└── A ingress.cluster_id.k8s.installation.eu-central-1.aws.gigantic.io
 //
 // NOTE: In the code below k8s.installation.eu-central-1.aws.gigantic.io zone is called
-// "intermediate" and new_cluster.k8s.installation.eu-central-1.aws.gigantic.io zone is
+// "intermediate" and cluster_id.k8s.installation.eu-central-1.aws.gigantic.io zone is
 // called "final". This resource *only* ensures we have delegation from the
 // intermediate zone to the final zone, but only if the intermediate zone
 // exists.
 //
-// After we have guest clusters managed by this resource set (v14) and newer
-// the DNS layout should look like:
+// After everything is fully migrated the DNS layout should look like:
 //
-//	installation.eu-central-1.aws.gigantic.io (host account)
+//	installation.eu-central-1.aws.gigantic.io (control plane account)
 //	├── NS k8s.installation.eu-central-1.aws.gigantic.io (default guest account)
-//	│   └── NS new_cluster.k8s.installation.eu-central-1.aws.gigantic.io (byoc guest account)
-//	└── NS new_cluster.k8s.installation.eu-central-1.aws.gigantic.io (byoc guest account)
-//	    ├── A api.new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
-//	    └── A ingress.new_cluster.k8s.installation.eu-central-1.aws.gigantic.io
+//	└── NS cluster_id.k8s.installation.eu-central-1.aws.gigantic.io (byoc guest account)
+//
+//	k8s.installation.eu-central-1.aws.gigantic.io (default guest account)
+//	└── NS cluster_id.k8s.installation.eu-central-1.aws.gigantic.io (byoc guest account)
+//
+//	cluster_id.k8s.installation.eu-central-1.aws.gigantic.io (byoc guest account)
+//	├── A api.cluster_id.k8s.installation.eu-central-1.aws.gigantic.io
+//	└── A ingress.cluster_id.k8s.installation.eu-central-1.aws.gigantic.io
 //
 // At this point we should be fine with removing
 // k8s.installation.eu-central-1.aws.gigantic.io NS record from
@@ -83,6 +101,12 @@ type Config struct {
 // when delegation propagates and DNS caches are refreshed we can delete
 // k8s.installation.eu-central-1.aws.gigantic.io zone from the default guest
 // account.
+//
+// NOTE: To complete full migration we need to start reconciling "hostpost"
+// CloudFormation stack. This stack is responsible for creating
+// cluster_id.k8s.installation.eu-central-1.aws.gigantic.io delegation in the
+// installation.eu-central-1.aws.gigantic.io. Till this happens this resource
+// cannot be deleted.
 type Resource struct {
 	hostAWSConfig clientaws.Config
 	k8sClient     kubernetes.Interface
