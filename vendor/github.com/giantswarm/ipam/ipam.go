@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"math"
+	"math/bits"
 	"net"
 	"reflect"
 	"sort"
@@ -120,8 +121,30 @@ func space(freeIPRanges []ipRange, mask net.IPMask) (net.IP, error) {
 		start := ipToDecimal(freeIPRange.start)
 		end := ipToDecimal(freeIPRange.end)
 
+		// When subnet allocations contain various different subnet sizes, it can be
+		// that free IP range starts from smaller network than what we are finding
+		// for. Therefore we must first adjust the start IP such that it can hold the
+		// whole network that we are looking space for.
+		//
+		// Example: Free IP range starts at 10.1.2.192 and ends 10.1.255.255.
+		//          We look for next available /24 network so first suitable
+		//          start IP for this would be 10.1.3.0.
+		//
+		ones, _ := mask.Size()
+		trailingZeros := bits.TrailingZeros32(uint32(start))
+		for (start < end) && (ones < (32 - trailingZeros)) {
+			var mask uint32
+			for i := 0; i < trailingZeros; i++ {
+				mask |= 1 << uint32(i)
+			}
+
+			start = int(uint32(start) | mask)
+			start++
+			trailingZeros = bits.TrailingZeros32(uint32(start))
+		}
+
 		if end-start+1 >= size(mask) {
-			return freeIPRange.start, nil
+			return decimalToIP(start), nil
 		}
 	}
 

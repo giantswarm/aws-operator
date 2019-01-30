@@ -77,7 +77,7 @@ required = [
   name = "github.com/giantswarm/helmclient"
 
 [[constraint]]
-  branch = "fix-subnet-allocation-bug"
+  branch = "master"
   name = "github.com/giantswarm/ipam"
 
 [[constraint]]
