@@ -8,9 +8,14 @@ type Status struct {
 }
 
 type Cluster struct {
+	AWSAccount ClusterAWSAccount
 	// HostedZones is filled by the hostedzone resource. This information
 	// is used when creating CloudFormation templates.
 	HostedZones ClusterHostedZones
+}
+
+type ClusterAWSAccount struct {
+	ID string
 }
 
 type ClusterHostedZones struct {

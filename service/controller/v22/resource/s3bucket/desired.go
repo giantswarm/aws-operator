@@ -15,12 +15,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	sc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	accountID, err := sc.AWSService.GetAccountID()
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -34,7 +29,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			IsLoggingEnabled: true,
 		},
 		{
-			Name:             key.BucketName(customObject, accountID),
+			Name:             key.BucketName(customObject, cc.Status.Cluster.AWSAccount.ID),
 			IsLoggingBucket:  false,
 			IsLoggingEnabled: true,
 		},

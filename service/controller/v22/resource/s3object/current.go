@@ -21,28 +21,21 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "looking for S3 objects")
 
-	sc, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	accountID, err := sc.AWSService.GetAccountID()
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	bucketName := key.BucketName(customObject, accountID)
+	bucketName := key.BucketName(customObject, cc.Status.Cluster.AWSAccount.ID)
 	input := &s3.ListObjectsV2Input{
 		Bucket: aws.String(bucketName),
 	}
-	result, err := sc.AWSClient.S3.ListObjectsV2(input)
+	result, err := cc.AWSClient.S3.ListObjectsV2(input)
 	// the bucket can be already deleted with all the objects in it, it is ok if so.
 	if IsBucketNotFound(err) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "S3 object's bucket not found, no current objects present")
 		return nil, nil
-	}
-	// we don't expect other errors.
-	if err != nil {
+	} else if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
@@ -66,7 +59,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 }
 
 func (r *Resource) getBucketObjectBody(ctx context.Context, bucketName string, keyName string) (string, error) {
-	sc, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -74,7 +67,7 @@ func (r *Resource) getBucketObjectBody(ctx context.Context, bucketName string, k
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(keyName),
 	}
-	result, err := sc.AWSClient.S3.GetObject(input)
+	result, err := cc.AWSClient.S3.GetObject(input)
 	if IsObjectNotFound(err) || IsBucketNotFound(err) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find S3 object '%s'", keyName))
 		return "", nil

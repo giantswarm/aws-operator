@@ -20,7 +20,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "looking for the S3 buckets")
 
-	sc, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -31,14 +31,9 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	//
 	//     https://github.com/giantswarm/giantswarm/issues/5126
 	//
-	accountID, err := sc.AWSService.GetAccountID()
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
 	bucketStateNames := []string{
 		key.TargetLogBucketName(customObject),
-		key.BucketName(customObject, accountID),
+		key.BucketName(customObject, cc.Status.Cluster.AWSAccount.ID),
 	}
 
 	var currentBucketState []BucketState
