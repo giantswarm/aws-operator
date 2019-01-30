@@ -2,6 +2,7 @@ package cloudconfig
 
 import (
 	"context"
+	"encoding/base64"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
@@ -200,6 +201,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		},
 	}
 
+	certsMeta := []k8scloudconfig.FileMetadata{}
 	{
 		certFiles := certs.NewFilesClusterMaster(e.ClusterCerts)
 
@@ -225,7 +227,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 				Permissions: 0700,
 			}
 
-			filesMeta = append(filesMeta, meta)
+			certsMeta = append(certsMeta, meta)
 		}
 	}
 
@@ -240,6 +242,16 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 		asset := k8scloudconfig.FileAsset{
 			Metadata: fm,
+			Content:  c,
+		}
+
+		fileAssets = append(fileAssets, asset)
+	}
+
+	for _, cm := range certsMeta {
+		c := base64.StdEncoding.EncodeToString([]byte(cm.AssetContent))
+		asset := k8scloudconfig.FileAsset{
+			Metadata: cm,
 			Content:  c,
 		}
 

@@ -12,6 +12,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Add support for cluster auto-scaling.",
 				Kind:        versionbundle.KindAdded,
 			},
+			{
+				Component:   "node-operator",
+				Description: "Improved node draining during updates and scaling.",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
