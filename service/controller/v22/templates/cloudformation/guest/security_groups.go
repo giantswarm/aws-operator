@@ -143,16 +143,6 @@ const SecurityGroups = `{{define "security_groups" }}
       ToPort: -1
       SourceSecurityGroupId: !Ref MasterSecurityGroup
 
-  VPCDefaultSecurityGroupIngress:
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      GroupId: !GetAtt VPC.DefaultSecurityGroup
-      Description: "Allow inbound traffic from instances assigned to the same security group."
-      IpProtocol: -1
-      FromPort: -1
-      ToPort: -1
-      SourceSecurityGroupId: !GetAtt VPC.DefaultSecurityGroup
-
   VPCDefaultSecurityGroupEgress:
     Type: AWS::EC2::SecurityGroupEgress
     Properties:
