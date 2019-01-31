@@ -143,4 +143,11 @@ const SecurityGroups = `{{define "security_groups" }}
       ToPort: -1
       SourceSecurityGroupId: !Ref MasterSecurityGroup
 
+  VPCDefaultSecurityGroupEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !GetAtt VPC.DefaultSecurityGroup
+      Description: "Allow outbound traffic from loopback address."
+      IpProtocol: -1
+      CidrIp: 127.0.0.1/32
 {{ end }}`
