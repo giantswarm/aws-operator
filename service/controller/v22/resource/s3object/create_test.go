@@ -13,7 +13,6 @@ import (
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v22/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v22/encrypter"
 )
 
 func Test_Resource_S3Object_newCreate(t *testing.T) {
@@ -162,7 +161,6 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 		c := Config{
 			CertsSearcher:      certstest.NewSearcher(),
 			CloudConfig:        cloudConfig,
-			Encrypter:          &encrypter.EncrypterMock{},
 			Logger:             microloggertest.New(),
 			RandomKeysSearcher: randomkeystest.NewSearcher(),
 		}

@@ -8,7 +8,8 @@ type Status struct {
 }
 
 type Cluster struct {
-	AWSAccount ClusterAWSAccount
+	AWSAccount    ClusterAWSAccount
+	EncryptionKey string
 	// HostedZones is filled by the hostedzone resource. This information
 	// is used when creating CloudFormation templates.
 	HostedZones ClusterHostedZones

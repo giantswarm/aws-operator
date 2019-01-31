@@ -25,11 +25,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 		return "", microerror.Mask(err)
 	}
 
-	encryptionKey, err := c.encrypter.EncryptionKey(ctx, customObject)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, c.encrypter, encryptionKey, clusterKeys)
+	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, c.encrypter, ctlCtx.Status.Cluster.EncryptionKey, clusterKeys)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -39,7 +35,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 		be := baseExtension{
 			customObject:  customObject,
 			encrypter:     c.encrypter,
-			encryptionKey: encryptionKey,
+			encryptionKey: ctlCtx.Status.Cluster.EncryptionKey,
 		}
 
 		params = k8scloudconfig.DefaultParams()
@@ -109,9 +105,9 @@ type MasterExtension struct {
 }
 
 func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
-	// TODO Pass context to k8scloudconfig rendering fucntions
+	// TODO Pass context to k8scloudconfig rendering functions.
 	//
-	//	See https://github.com/giantswarm/giantswarm/issues/4329.
+	//     https://github.com/giantswarm/giantswarm/issues/4329
 	//
 	var storageClass string
 	_, ok := e.encrypter.(*vault.Encrypter)

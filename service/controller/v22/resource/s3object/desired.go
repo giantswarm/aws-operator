@@ -21,15 +21,6 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	_, err = r.encrypter.EncryptionKey(ctx, customObject)
-	if r.encrypter.IsKeyNotFound(err) && key.IsDeleted(customObject) {
-		// We can get here during deletion, if the key is already deleted we can
-		// safely exit.
-		return nil, nil
-	} else if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
 	var clusterCerts certs.Cluster
 	var clusterKeys randomkeys.Cluster
 	{

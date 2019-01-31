@@ -5,6 +5,7 @@ import (
 
 	"github.com/giantswarm/microerror"
 
+	"github.com/giantswarm/aws-operator/service/controller/v22/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v22/key"
 )
 
@@ -18,6 +19,17 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	if err != nil {
 		return microerror.Mask(err)
 	}
+
+	encryptionKey, err := r.encrypter.EncryptionKey(ctx, customObject)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	cc.Status.Cluster.EncryptionKey = encryptionKey
 
 	return nil
 }

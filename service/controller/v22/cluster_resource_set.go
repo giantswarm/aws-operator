@@ -310,12 +310,11 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var s3BucketObjectResource controller.Resource
+	var s3ObjectResource controller.Resource
 	{
 		c := s3object.Config{
 			CertsSearcher:      config.CertsSearcher,
 			CloudConfig:        cloudConfig,
-			Encrypter:          encrypterObject,
 			Logger:             config.Logger,
 			RandomKeysSearcher: config.RandomKeysSearcher,
 		}
@@ -325,7 +324,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			return nil, microerror.Mask(err)
 		}
 
-		s3BucketObjectResource, err = toCRUDResource(config.Logger, ops)
+		s3ObjectResource, err = toCRUDResource(config.Logger, ops)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -503,7 +502,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		bridgeZoneResource,
 		encryptionKeyResource,
 		s3BucketResource,
-		s3BucketObjectResource,
+		s3ObjectResource,
 		loadBalancerResource,
 		ebsVolumeResource,
 		cloudformationResource,

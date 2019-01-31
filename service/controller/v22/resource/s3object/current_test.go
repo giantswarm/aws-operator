@@ -11,7 +11,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v22/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v22/encrypter"
 )
 
 func Test_CurrentState(t *testing.T) {
@@ -64,7 +63,6 @@ func Test_CurrentState(t *testing.T) {
 				c := Config{
 					CertsSearcher:      certstest.NewSearcher(),
 					CloudConfig:        cloudconfig,
-					Encrypter:          &encrypter.EncrypterMock{},
 					Logger:             microloggertest.New(),
 					RandomKeysSearcher: randomkeystest.NewSearcher(),
 				}

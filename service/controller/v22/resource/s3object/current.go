@@ -26,6 +26,14 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
+	if key.IsDeleted(customObject) {
+		if cc.Status.Cluster.EncryptionKey == "" {
+			// We can get here during deletion, if the key is already deleted we can
+			// safely exit.
+			return nil, nil
+		}
+	}
+
 	bucketName := key.BucketName(customObject, cc.Status.Cluster.AWSAccount.ID)
 	input := &s3.ListObjectsV2Input{
 		Bucket: aws.String(bucketName),
