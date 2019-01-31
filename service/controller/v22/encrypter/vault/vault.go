@@ -152,7 +152,7 @@ func (e *Encrypter) EnsureCreatedAuthorizedIAMRoles(ctx context.Context, customO
 		return microerror.Mask(err)
 	}
 
-	ctlCtx, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -160,13 +160,8 @@ func (e *Encrypter) EnsureCreatedAuthorizedIAMRoles(ctx context.Context, customO
 	var masterRoleARN string
 	var workerRoleARN string
 	{
-		accountID, err := ctlCtx.AWSService.GetAccountID()
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		masterRoleARN = key.MasterRoleARN(customObject, accountID)
-		workerRoleARN = key.WorkerRoleARN(customObject, accountID)
+		masterRoleARN = key.MasterRoleARN(customObject, cc.Status.Cluster.AWSAccount.ID)
+		workerRoleARN = key.WorkerRoleARN(customObject, cc.Status.Cluster.AWSAccount.ID)
 	}
 
 	var roleData *AWSAuthRole
@@ -259,7 +254,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 }
 
 func (e *Encrypter) EnsureDeletedAuthorizedIAMRoles(ctx context.Context, customObject v1alpha1.AWSConfig) error {
-	ctlCtx, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -267,13 +262,8 @@ func (e *Encrypter) EnsureDeletedAuthorizedIAMRoles(ctx context.Context, customO
 	var masterRoleARN string
 	var workerRoleARN string
 	{
-		accountID, err := ctlCtx.AWSService.GetAccountID()
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		masterRoleARN = key.MasterRoleARN(customObject, accountID)
-		workerRoleARN = key.WorkerRoleARN(customObject, accountID)
+		masterRoleARN = key.MasterRoleARN(customObject, cc.Status.Cluster.AWSAccount.ID)
+		workerRoleARN = key.WorkerRoleARN(customObject, cc.Status.Cluster.AWSAccount.ID)
 	}
 
 	var roleData *AWSAuthRole

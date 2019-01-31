@@ -16,27 +16,23 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	sc, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
 	_, err = r.encrypter.EncryptionKey(ctx, customObject)
 	if r.encrypter.IsKeyNotFound(err) && key.IsDeleted(customObject) {
-		// we can get here during deletion, if the key is already deleted we can safely exit.
+		// We can get here during deletion, if the key is already deleted we can
+		// safely exit.
 		return nil, nil
 	} else if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	var accountID string
 	var clusterCerts certs.Cluster
 	var clusterKeys randomkeys.Cluster
 	{
-		accountID, err = sc.AWSService.GetAccountID()
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
 		clusterCerts, err = r.certsSearcher.SearchCluster(key.ClusterID(customObject))
 		if err != nil {
 			return nil, microerror.Mask(err)
@@ -56,7 +52,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		}
 		k := key.BucketObjectName(customObject, key.KindMaster)
 		output[k] = BucketObjectState{
-			Bucket: key.BucketName(customObject, accountID),
+			Bucket: key.BucketName(customObject, cc.Status.Cluster.AWSAccount.ID),
 			Body:   b,
 			Key:    k,
 		}
@@ -69,7 +65,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		}
 		k := key.BucketObjectName(customObject, key.KindWorker)
 		output[k] = BucketObjectState{
-			Bucket: key.BucketName(customObject, accountID),
+			Bucket: key.BucketName(customObject, cc.Status.Cluster.AWSAccount.ID),
 			Body:   b,
 			Key:    k,
 		}

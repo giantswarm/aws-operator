@@ -29,15 +29,6 @@ type Config struct {
 	InstallationName     string
 }
 
-// DefaultConfig provides a default configuration to create a new s3bucket
-// resource by best effort.
-func DefaultConfig() Config {
-	return Config{
-		// Dependencies.
-		Logger: nil,
-	}
-}
-
 // Resource implements the s3bucket resource.
 type Resource struct {
 	// Dependencies.
