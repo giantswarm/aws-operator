@@ -1,11 +1,8 @@
 package s3bucket
 
 import (
-	"reflect"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 )
 
@@ -37,6 +34,7 @@ func Test_ContainsBucketState(t *testing.T) {
 		})
 	}
 }
+
 func Test_BucketCanBeDeleted(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
@@ -111,43 +109,6 @@ func Test_BucketCanBeDeleted(t *testing.T) {
 
 			if result != tc.expectedValue {
 				t.Fatalf("Expected %t, found %t", tc.expectedValue, result)
-			}
-		})
-	}
-}
-
-func Test_getS3BucketTags(t *testing.T) {
-	testCases := []struct {
-		obj          v1alpha1.AWSConfig
-		includeTags  bool
-		expectedTags []*s3.Tag
-		description  string
-	}{
-		{
-			description:  "do not include tags",
-			obj:          v1alpha1.AWSConfig{},
-			includeTags:  false,
-			expectedTags: []*s3.Tag{},
-		},
-	}
-
-	c := Config{}
-
-	c.Logger = microloggertest.New()
-	c.InstallationName = "installation-name"
-
-	for _, tc := range testCases {
-		t.Run(tc.description, func(t *testing.T) {
-			c.IncludeTags = tc.includeTags
-
-			r, err := New(c)
-			if err != nil {
-				t.Fatal("expected", nil, "got", err)
-			}
-
-			actual := r.getS3BucketTags(tc.obj)
-			if !reflect.DeepEqual(actual, tc.expectedTags) {
-				t.Errorf("tags don't match, want %#v, got %#v", tc.expectedTags, actual)
 			}
 		})
 	}
