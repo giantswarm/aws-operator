@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
 	"github.com/giantswarm/aws-operator/service/controller/v22/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v22/key"
@@ -26,10 +27,20 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
+	// During deletion, it might happen that the encryption key got already
+	// deleted. In such a case we do not have to do anything here anymore. The
+	// desired state computation usually requires the encryption key to come up
+	// with the deletion state, but in case it is gone we do not have to do
+	// anything here anymore. The current implementation relies on the bucket
+	// deletion of the s3bucket resource, which deletes all S3 objects and the
+	// bucket itself.
 	if key.IsDeleted(customObject) {
 		if cc.Status.Cluster.EncryptionKey == "" {
-			// We can get here during deletion, if the key is already deleted we can
-			// safely exit.
+			r.logger.LogCtx(ctx, "level", "debug", "message", "no encryption key in controller context")
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			resourcecanceledcontext.SetCanceled(ctx)
+
 			return nil, nil
 		}
 	}
