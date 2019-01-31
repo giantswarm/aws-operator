@@ -98,7 +98,12 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 
 		tags := key.ClusterTags(customObject, e.installationName)
 
-		// TODO already created case should be handled here. Otherwise there is a chance alias wasn't created yet and EncryptionKey will tell there is no key. We can check tags to see if the key was created. Issue: https://github.com/giantswarm/giantswarm/issues/4262.
+		// TODO already created case should be handled here. Otherwise there is a
+		// chance alias wasn't created yet and EncryptionKey will tell there is no
+		// key. We can check tags to see if the key was created.
+		//
+		//     https://github.com/giantswarm/giantswarm/issues/4262
+		//
 		in := &kms.CreateKeyInput{
 			Tags: awstags.NewKMS(tags),
 		}
