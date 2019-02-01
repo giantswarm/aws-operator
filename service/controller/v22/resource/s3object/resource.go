@@ -40,19 +40,19 @@ type Resource struct {
 // New creates a new configured cloudformation resource.
 func New(config Config) (*Resource, error) {
 	if config.CertsSearcher == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.CertsSearcher must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.CertsSearcher must not be empty", config)
 	}
 	if config.CloudConfig == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.CloudConfig must not be empty", config)
 	}
 	if config.Encrypter == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.Encrypter must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.Encrypter must not be empty", config)
 	}
 	if config.Logger == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 	if config.RandomKeysSearcher == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.RandomKeySearcher must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.RandomKeySearcher must not be empty", config)
 	}
 
 	r := &Resource{

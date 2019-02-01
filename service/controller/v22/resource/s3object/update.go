@@ -22,7 +22,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 
 	for key, bucketObject := range updateBucketState {
 		if bucketObject.Key != "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updating S3 object '%s'", key))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updating S3 object %#q", key))
 
 			s3PutInput, err := toPutObjectInput(bucketObject)
 			if err != nil {
@@ -34,10 +34,9 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 				return microerror.Mask(err)
 			}
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated S3 object '%s'", key))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated S3 object %#q", key))
 		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not update S3 object '%s'", key))
-			r.logger.LogCtx(ctx, "level", "debug", "message", "S3 object already up to date")
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not update S3 object %#q", key))
 		}
 	}
 
@@ -78,16 +77,16 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 
 	for key, bucketObject := range desiredS3Object {
 		if _, ok := currentS3Object[key]; !ok {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 object '%s' should not be updated", key))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 object %#q should not be updated", key))
 			updateState[key] = BucketObjectState{}
 		}
 
 		currentObject := currentS3Object[key]
 		if currentObject.Body != "" && bucketObject.Body != currentObject.Body {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 object '%s' should be updated", key))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 object %#q should be updated", key))
 			updateState[key] = bucketObject
 		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 object '%s' should not be updated", key))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 object %#q should not be updated", key))
 			updateState[key] = BucketObjectState{}
 		}
 	}

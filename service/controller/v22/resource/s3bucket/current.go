@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/giantswarm/aws-operator/service/controller/v22/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v22/key"
@@ -18,51 +19,69 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "looking for the S3 buckets")
-
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	// TODO in order to make the resource more performant the current state
-	// fetching could be parallelized. The target log bucket is one action. The
-	// account ID related bucket is another.
-	//
-	//     https://github.com/giantswarm/giantswarm/issues/5126
-	//
 	bucketStateNames := []string{
 		key.TargetLogBucketName(customObject),
 		key.BucketName(customObject, cc.Status.Cluster.AWSAccount.ID),
 	}
 
 	var currentBucketState []BucketState
-	for _, inputBucketName := range bucketStateNames {
-		inputBucket := BucketState{
-			Name: inputBucketName,
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the S3 buckets")
+
+		g, ctx := errgroup.WithContext(ctx)
+
+		for _, inputBucketName := range bucketStateNames {
+			bucketName := inputBucketName
+
+			g.Go(func() error {
+				inputBucket := BucketState{
+					Name: bucketName,
+				}
+
+				// TODO this check should not be done here. Here we only fetch the
+				// current state. We have to make a request anyway so fetching what we
+				// want and handling the not found errors as usual should be the way to
+				// go.
+				//
+				//
+				//     https://github.com/giantswarm/giantswarm/issues/5246
+				//
+				isCreated, err := r.isBucketCreated(ctx, bucketName)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+				if !isCreated {
+					return nil
+				}
+
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding the S3 bucket %#q", bucketName))
+
+				lc, err := r.getLoggingConfiguration(ctx, bucketName)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+				inputBucket.IsLoggingBucket = isLoggingBucket(bucketName, lc)
+				inputBucket.IsLoggingEnabled = isLoggingEnabled(lc)
+				currentBucketState = append(currentBucketState, inputBucket)
+
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found the S3 bucket %#q", bucketName))
+
+				return nil
+			})
 		}
 
-		isCreated, err := r.isBucketCreated(ctx, inputBucketName)
+		err := g.Wait()
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		if !isCreated {
-			continue
-		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("find the S3 bucket %q", inputBucketName))
-
-		lc, err := r.getLoggingConfiguration(ctx, inputBucketName)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-		inputBucket.IsLoggingBucket = isLoggingBucket(inputBucketName, lc)
-		inputBucket.IsLoggingEnabled = isLoggingEnabled(lc)
-
-		currentBucketState = append(currentBucketState, inputBucket)
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found the S3 buckets")
 	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", "found the S3 buckets")
 
 	return currentBucketState, nil
 }
