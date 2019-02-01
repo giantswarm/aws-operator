@@ -11,7 +11,6 @@ import (
 	"github.com/giantswarm/randomkeys"
 
 	"github.com/giantswarm/aws-operator/service/controller/v22/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v22/encrypter"
 )
 
 const (
@@ -23,7 +22,6 @@ const (
 type Config struct {
 	CertsSearcher      certs.Interface
 	CloudConfig        cloudconfig.Interface
-	Encrypter          encrypter.Interface
 	Logger             micrologger.Logger
 	RandomKeysSearcher randomkeys.Interface
 }
@@ -32,7 +30,6 @@ type Config struct {
 type Resource struct {
 	certsSearcher      certs.Interface
 	cloudConfig        cloudconfig.Interface
-	encrypter          encrypter.Interface
 	logger             micrologger.Logger
 	randomKeysSearcher randomkeys.Interface
 }
@@ -45,9 +42,6 @@ func New(config Config) (*Resource, error) {
 	if config.CloudConfig == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.CloudConfig must not be empty", config)
 	}
-	if config.Encrypter == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Encrypter must not be empty", config)
-	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
@@ -58,7 +52,6 @@ func New(config Config) (*Resource, error) {
 	r := &Resource{
 		certsSearcher:      config.CertsSearcher,
 		cloudConfig:        config.CloudConfig,
-		encrypter:          config.Encrypter,
 		logger:             config.Logger,
 		randomKeysSearcher: config.RandomKeysSearcher,
 	}

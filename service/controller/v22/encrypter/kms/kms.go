@@ -11,7 +11,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/v22/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v22/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v22/key"
 )
 
@@ -213,32 +212,6 @@ func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, customObject
 	}
 
 	return nil
-}
-
-func (k *Encrypter) CurrentState(ctx context.Context, customObject v1alpha1.AWSConfig) (encrypter.EncryptionKeyState, error) {
-	var currentState encrypter.EncryptionKeyState
-
-	output, err := k.describeKey(ctx, customObject)
-	if IsKeyNotFound(err) {
-		// Fall through.
-		return currentState, nil
-	}
-	if err != nil {
-		return currentState, microerror.Mask(err)
-	}
-
-	currentState.KeyID = *output.KeyMetadata.KeyId
-	currentState.KeyName = keyAlias(customObject)
-
-	return currentState, nil
-}
-
-func (k *Encrypter) DesiredState(ctx context.Context, customObject v1alpha1.AWSConfig) (encrypter.EncryptionKeyState, error) {
-	desiredState := encrypter.EncryptionKeyState{}
-
-	desiredState.KeyName = keyAlias(customObject)
-
-	return desiredState, nil
 }
 
 func (k *Encrypter) EncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {

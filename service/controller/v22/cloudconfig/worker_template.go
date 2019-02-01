@@ -23,17 +23,12 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 		return "", microerror.Mask(err)
 	}
 
-	encryptionKey, err := c.encrypter.EncryptionKey(ctx, customObject)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
 	var params k8scloudconfig.Params
 	{
 		be := baseExtension{
 			customObject:  customObject,
 			encrypter:     c.encrypter,
-			encryptionKey: encryptionKey,
+			encryptionKey: ctlCtx.Status.Cluster.EncryptionKey,
 		}
 
 		// Default registry, kubernetes, etcd images etcd.
