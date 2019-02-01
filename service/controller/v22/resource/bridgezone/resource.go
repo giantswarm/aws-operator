@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"golang.org/x/sync/errgroup"
 	"k8s.io/client-go/kubernetes"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
@@ -168,8 +169,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	g, ctx := errgroup.WithContext(ctx)
+
 	var intermediateZoneID string
-	{
+	g.Go(func() error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "getting intermediate zone ID")
 
 		intermediateZoneID, err = r.findHostedZoneID(ctx, defaultGuest, intermediateZone)
@@ -184,10 +187,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "got intermediate zone ID")
-	}
+
+		return nil
+	})
 
 	var finalZoneID string
-	{
+	g.Go(func() error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "getting final zone ID")
 
 		finalZoneID, err = r.findHostedZoneID(ctx, guest, finalZone)
@@ -202,6 +207,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "got final zone ID")
+
+		return nil
+	})
+
+	err = g.Wait()
+	if err != nil {
+		return microerror.Mask(err)
 	}
 
 	var finalZoneRecords []*route53.ResourceRecord
