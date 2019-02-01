@@ -36,7 +36,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/ebsvolume"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/encryptionkey"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/endpoints"
-	"github.com/giantswarm/aws-operator/service/controller/v22/resource/hostedzone"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/loadbalancer"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/migration"
@@ -251,21 +250,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		ipamResource, err = ipam.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var hostedZoneResource controller.Resource
-	{
-		c := hostedzone.Config{
-			HostRoute53: config.HostAWSClients.Route53,
-			Logger:      config.Logger,
-
-			Route53Enabled: config.Route53Enabled,
-		}
-
-		hostedZoneResource, err = hostedzone.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -498,7 +482,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		statusResource,
 		migrationResource,
 		ipamResource,
-		hostedZoneResource,
 		bridgeZoneResource,
 		encryptionKeyResource,
 		s3BucketResource,
