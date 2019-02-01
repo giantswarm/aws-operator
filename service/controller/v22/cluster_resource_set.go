@@ -38,7 +38,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/loadbalancer"
-	"github.com/giantswarm/aws-operator/service/controller/v22/resource/migration"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/namespace"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/s3object"
@@ -220,19 +219,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		encryptionKeyResource, err = encryptionkey.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var migrationResource controller.Resource
-	{
-		c := migration.Config{
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
-		}
-
-		migrationResource, err = migration.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -480,7 +466,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	resources := []controller.Resource{
 		accountIDResource,
 		statusResource,
-		migrationResource,
 		ipamResource,
 		bridgeZoneResource,
 		encryptionKeyResource,
