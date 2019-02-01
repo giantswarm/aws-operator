@@ -4,8 +4,8 @@ import (
 	"context"
 	"reflect"
 	"strings"
-	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -247,12 +247,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			},
 			HostedZoneId: &intermediateZoneID,
 		}
-		time.Sleep(1 * time.Second)
 		_, err := defaultGuest.ChangeResourceRecordSetsWithContext(ctx, in)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		time.Sleep(1 * time.Second)
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured final zone delegation from intermediate zone")
 	}
@@ -347,12 +345,10 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			},
 			HostedZoneId: &intermediateZoneID,
 		}
-		time.Sleep(1 * time.Second)
 		_, err := defaultGuest.ChangeResourceRecordSetsWithContext(ctx, in)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		time.Sleep(1 * time.Second)
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured deletion of final zone delegation from intermediate zone")
 	}
@@ -360,40 +356,86 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
+// findHostedZoneID fetches Route53 hosted zone IDs based on a given name. The
+// implementation fetches up to 100 matching results to find the right one. The
+// bridgezone resource here is only concerned with the hosted zone ID of the
+// hosted zone name provided. The desired ID will always be carried in the first
+// Route53 response as the one we want to fetch is the most accurate and always
+// listed as the first item in the response. This is because of the
+// lexicographical order of the response items as the API documentation puts it.
+// See also
+// https://godoc.org/github.com/aws/aws-sdk-go/service/route53#Route53.ListHostedZonesByName.
+//
+//     Retrieves a list of your hosted zones in lexicographic order.
+//
+// Here is an example to make it clearer. Let's consider the following hosted
+// zone name.
+//
+//     9cvgo.k8s.ginger.eu-central-1.aws.gigantic.io
+//
+// Given this name, findHostedZoneID will receive a response from Route53
+// similar to the following example, containing a single hosted zone carrying
+// its ID.
+//
+//     {
+//       ...
+//       HostedZones: [{
+//         ...
+//         Id: "/hostedzone/Z1A4QS1NDU6NW6",
+//         Name: "9cvgo.k8s.ginger.eu-central-1.aws.gigantic.io.",
+//         ...
+//       }],
+//       ...
+//     }
+//
+// The example above was about a very specific domain name, which list result
+// could only find a single item in the response. Let's consider a less specific
+// domain name as input for findHostedZoneID.
+//
+//     k8s.ginger.eu-central-1.aws.gigantic.io
+//
+// The result from Route53 will again list all the childs within the given
+// domain name. In the example response below there where only two tenant
+// clusters.
+//
+//     {
+//       ...
+//       HostedZones: [{
+//         ...
+//         Id: "/hostedzone/Z1HJGG5VLG8GZH",
+//         Name: "k8s.ginger.eu-central-1.aws.gigantic.io.",
+//         ...
+//       },{
+//         ...
+//         Id: "/hostedzone/Z1KSFLSM1JEQYM",
+//         Name: "0tz6i.k8s.ginger.eu-central-1.aws.gigantic.io.",
+//         ...
+//       },{
+//         ...
+//         Id: "/hostedzone/Z1A4QS1NDU6NW6",
+//         Name: "9cvgo.k8s.ginger.eu-central-1.aws.gigantic.io.",
+//         ...
+//       }],
+//       ...
+//     }
+//
 func (r *Resource) findHostedZoneID(ctx context.Context, client *route53.Route53, name string) (string, error) {
-	var marker *string
-	for {
-		in := &route53.ListHostedZonesInput{
-			Marker: marker,
-		}
-
-		time.Sleep(1 * time.Second)
-		out, err := client.ListHostedZones(in)
-		if err != nil {
-			return "", microerror.Mask(err)
-		}
-		time.Sleep(1 * time.Second)
-
-		for _, hz := range out.HostedZones {
-			if hz.Name == nil || hz.Id == nil {
-				continue
-			}
-
-			hzName := *hz.Name
-			hzName = strings.TrimSuffix(hzName, ".")
-			hzID := *hz.Id
-
-			if hzName == name {
-				return hzID, nil
-			}
-		}
-
-		// If not all IDs are found, try to search next page.
-		if out.IsTruncated == nil || !*out.IsTruncated {
-			return "", microerror.Maskf(notFoundError, "HostedZone with name %q not found", name)
-		}
-		marker = out.Marker
+	in := &route53.ListHostedZonesByNameInput{
+		DNSName: aws.String(name),
 	}
+
+	out, err := client.ListHostedZonesByName(in)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	for _, hostedZone := range out.HostedZones {
+		if *hostedZone.Name == name {
+			return *hostedZone.Id, nil
+		}
+	}
+
+	return "", microerror.Maskf(notFoundError, "hosted zone name %#q", name)
 }
 
 func (r *Resource) getNameServersAndTTL(ctx context.Context, client *route53.Route53, zoneID, name string) (nameServers []string, ttl int64, err error) {
@@ -405,12 +447,10 @@ func (r *Resource) getNameServersAndTTL(ctx context.Context, client *route53.Rou
 		StartRecordName: &name,
 		StartRecordType: &ns,
 	}
-	time.Sleep(1 * time.Second)
 	out, err := client.ListResourceRecordSetsWithContext(ctx, in)
 	if err != nil {
 		return nil, 0, microerror.Mask(err)
 	}
-	time.Sleep(1 * time.Second)
 
 	if len(out.ResourceRecordSets) == 0 {
 		return nil, 0, microerror.Maskf(notFoundError, "NS record %q for HostedZone %q not found", name, zoneID)

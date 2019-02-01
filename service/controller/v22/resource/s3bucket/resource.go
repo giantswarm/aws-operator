@@ -98,10 +98,6 @@ func containsBucketState(bucketStateName string, bucketStateList []BucketState) 
 }
 
 func (r *Resource) getS3BucketTags(customObject v1alpha1.AWSConfig) []*s3.Tag {
-	if !r.includeTags {
-		return []*s3.Tag{}
-	}
-
 	tags := key.ClusterTags(customObject, r.installationName)
 	return awstags.NewS3(tags)
 }

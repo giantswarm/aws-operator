@@ -21,7 +21,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 	for key, bucketObject := range s3ObjectToCreate {
 		if bucketObject.Key != "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating S3 object '%s'", key))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating S3 object %#q", key))
 
 			s3PutInput, err := toPutObjectInput(bucketObject)
 			if err != nil {
@@ -33,10 +33,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 				return microerror.Mask(err)
 			}
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created S3 object '%s'", key))
-		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not create S3 object '%s'", key))
-			r.logger.LogCtx(ctx, "level", "debug", "message", "S3 object already exists")
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created S3 object %#q", key))
 		}
 	}
 
@@ -62,13 +59,13 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		if !ok {
 			// The desired object does not exist in the current state of the system,
 			// so we want to create it.
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 object '%s' should be created", key))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 object %#q should be created", key))
 			createState[key] = bucketObject
 		} else {
 			// The desired object exists in the current state of the system, so we do
 			// not want to create it. We do track it using an empty object reference
 			// though, in order to get some more useful logging in ApplyCreateChange.
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 object '%s' should not be created", key))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 object %#q should not be created", key))
 			createState[key] = BucketObjectState{}
 		}
 	}

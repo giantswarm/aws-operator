@@ -24,28 +24,25 @@ type Config struct {
 
 // Resource implements the endpoints resource.
 type Resource struct {
-	// Dependencies.
 	k8sClient kubernetes.Interface
 	logger    micrologger.Logger
 }
 
 // New creates a new configured endpoints resource.
 func New(config Config) (*Resource, error) {
-	// Dependencies.
 	if config.K8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.K8sClient must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
 	}
 	if config.Logger == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	newResource := &Resource{
-		// Dependencies.
+	r := &Resource{
 		k8sClient: config.K8sClient,
 		logger:    config.Logger,
 	}
 
-	return newResource, nil
+	return r, nil
 }
 
 func (r *Resource) Name() string {
