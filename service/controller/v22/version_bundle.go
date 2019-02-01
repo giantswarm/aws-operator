@@ -12,6 +12,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Improved node draining during updates and scaling.",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "aws-operator",
+				Description: "Lock down default Security Group",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
