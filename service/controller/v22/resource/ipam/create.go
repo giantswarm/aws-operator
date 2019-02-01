@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"net"
 	"sort"
+	"sync"
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
@@ -14,6 +15,7 @@ import (
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
+	"golang.org/x/sync/errgroup"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/service/controller/v22/controllercontext"
@@ -134,30 +136,46 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 func (r *Resource) allocateSubnet(ctx context.Context) (net.IPNet, error) {
 	var err error
+	var mutex sync.Mutex
 	var reservedSubnets []net.IPNet
 
-	{
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from VPCs")
 
-		vpcSubnets, err := getVPCSubnets(ctx)
+		subnets, err := getVPCSubnets(ctx)
 		if err != nil {
-			return net.IPNet{}, microerror.Mask(err)
+			return microerror.Mask(err)
 		}
-		reservedSubnets = append(reservedSubnets, vpcSubnets...)
+		mutex.Lock()
+		reservedSubnets = append(reservedSubnets, subnets...)
+		mutex.Unlock()
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from VPCs")
-	}
 
-	{
+		return nil
+	})
+
+	g.Go(func() error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from AWSConfigs")
 
-		awsConfigSubnets, err := getAWSConfigSubnets(r.g8sClient)
+		subnets, err := getAWSConfigSubnets(r.g8sClient)
 		if err != nil {
-			return net.IPNet{}, microerror.Mask(err)
+			return microerror.Mask(err)
 		}
-		reservedSubnets = append(reservedSubnets, awsConfigSubnets...)
+		mutex.Lock()
+		reservedSubnets = append(reservedSubnets, subnets...)
+		mutex.Unlock()
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from AWSConfigs")
+
+		return nil
+	})
+
+	err = g.Wait()
+	if err != nil {
+		return net.IPNet{}, microerror.Mask(err)
 	}
 
 	reservedSubnets = ipam.CanonicalizeSubnets(r.networkRange, reservedSubnets)
