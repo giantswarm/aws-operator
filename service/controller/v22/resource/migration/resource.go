@@ -1,6 +1,12 @@
 // Package migration provides an operatorkit resource that migrates awsconfig CRs
 // to reference the default credential secret if they do not already.
 // It can be safely removed once all awsconfig CRs reference a credential secret.
+//
+// Latest changes:
+//	* v22: Added migration code to fill spec.Cluster.Scaling.{Min,Max} values when
+//		   they are zero. When all tenant clusters are migrated to at least v22,
+//         migrations in this file can be removed.
+//
 package migration
 
 import (
