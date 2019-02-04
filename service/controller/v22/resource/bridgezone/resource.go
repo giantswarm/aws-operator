@@ -179,7 +179,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		if IsNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "intermediate zone not found")
 
-			return nil
+			return microerror.Mask(err)
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
@@ -198,7 +198,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		if IsNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "final zone not found")
 
-			return nil
+			return microerror.Mask(err)
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
