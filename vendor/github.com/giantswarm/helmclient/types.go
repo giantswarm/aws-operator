@@ -1,5 +1,7 @@
 package helmclient
 
+import "time"
+
 // Chart returns information about a Helm Chart.
 type Chart struct {
 	// Version is the version of the Helm Chart.
@@ -18,6 +20,10 @@ type ReleaseContent struct {
 
 // ReleaseHistory returns version information about a Helm Release.
 type ReleaseHistory struct {
+	// AppVersion is the app version of the Helm Chart that has been deployed.
+	AppVersion string
+	// LastDeployed is the time the Helm Chart was last deployed.
+	LastDeployed time.Time
 	// Name is the name of the Helm Release.
 	Name string
 	// Version is the version of the Helm Chart that has been deployed.

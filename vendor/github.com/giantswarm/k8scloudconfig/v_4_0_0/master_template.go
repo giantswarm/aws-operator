@@ -179,7 +179,10 @@ systemd:
         --cacert /etc/etcd/server-ca.pem \
         --cert /etc/etcd/server-crt.pem \
         --key /etc/etcd/server-key.pem \
-        defrag
+        defrag \
+        --command-timeout=60s \
+        --dial-timeout=60s \
+        --keepalive-timeout=25s
       [Install]
       WantedBy=multi-user.target
   - name: etcd3-defragmentation.timer

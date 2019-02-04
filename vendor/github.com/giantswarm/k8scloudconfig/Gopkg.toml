@@ -31,10 +31,6 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/giantswarm/clustertpr"
-
-[[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/microerror"
 
 [[constraint]]
