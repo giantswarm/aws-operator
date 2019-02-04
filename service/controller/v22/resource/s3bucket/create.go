@@ -46,6 +46,19 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			}
 		}
 
+		if bucketInput.IsLoggingBucket {
+			i := &s3.PutBucketAclInput{
+				Bucket:       aws.String(key.TargetLogBucketName(customObject)),
+				GrantReadACP: aws.String(key.LogDeliveryURI),
+				GrantWrite:   aws.String(key.LogDeliveryURI),
+			}
+
+			_, err = sc.AWSClient.S3.PutBucketAcl(i)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+
 		g := &errgroup.Group{}
 
 		if r.includeTags {
@@ -58,23 +71,6 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 				}
 
 				_, err = sc.AWSClient.S3.PutBucketTagging(i)
-				if err != nil {
-					return microerror.Mask(err)
-				}
-
-				return nil
-			})
-		}
-
-		if bucketInput.IsLoggingBucket {
-			g.Go(func() error {
-				i := &s3.PutBucketAclInput{
-					Bucket:       aws.String(key.TargetLogBucketName(customObject)),
-					GrantReadACP: aws.String(key.LogDeliveryURI),
-					GrantWrite:   aws.String(key.LogDeliveryURI),
-				}
-
-				_, err = sc.AWSClient.S3.PutBucketAcl(i)
 				if err != nil {
 					return microerror.Mask(err)
 				}
