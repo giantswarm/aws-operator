@@ -46,7 +46,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			}
 		}
 
-		g, ctx := errgroup.WithContext(ctx)
+		g := &errgroup.Group{}
 
 		if r.includeTags {
 			g.Go(func() error {
