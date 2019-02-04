@@ -266,7 +266,7 @@
   revision = "4763148864dc4815b691a69b4f60b4f4a8f88dad"
 
 [[projects]]
-  branch = "search-parallel"
+  branch = "master"
   digest = "1:788b90f0a9ec05644bdf23323c808325902234dc00551fad2f417242fe3e1f3a"
   name = "github.com/giantswarm/certs"
   packages = [
@@ -274,7 +274,7 @@
     "certstest",
   ]
   pruneopts = "UT"
-  revision = "1e71c7fd9178effdc3a5f46f15cb3cd59dfa1e19"
+  revision = "f0fb2f61d78e06f2d1e17f940fd782b92bf29642"
 
 [[projects]]
   branch = "master"
@@ -1044,14 +1044,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:653cc9ff57cf744d21f74e811af4f330415284bfc291d28f716833618c02c876"
+  digest = "1:44b10545049ca2aa524f2985e88854f0e51fa4a1f0ff0b6b98cbfeb7ae3d2837"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "7ae0202eb74c2b534255c71b5a15fa4115aabbcc"
+  revision = "980327fe3c65509adaad5a9ff06abdf7611b4411"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
