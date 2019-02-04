@@ -176,8 +176,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "getting intermediate zone ID")
 
 		id, err := r.findHostedZoneID(ctx, defaultGuest, intermediateZone)
-		if err != nil {
+		if IsNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "intermediate zone not found")
+
+			return nil
+		} else if err != nil {
 			return microerror.Mask(err)
 		}
 		intermediateZoneID = id
@@ -192,8 +195,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "getting final zone ID")
 
 		id, err := r.findHostedZoneID(ctx, guest, finalZone)
-		if err != nil {
+		if IsNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "final zone not found")
+
+			return nil
+		} else if err != nil {
 			return microerror.Mask(err)
 		}
 		finalZoneID = id
