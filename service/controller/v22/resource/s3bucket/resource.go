@@ -29,15 +29,6 @@ type Config struct {
 	InstallationName     string
 }
 
-// DefaultConfig provides a default configuration to create a new s3bucket
-// resource by best effort.
-func DefaultConfig() Config {
-	return Config{
-		// Dependencies.
-		Logger: nil,
-	}
-}
-
 // Resource implements the s3bucket resource.
 type Resource struct {
 	// Dependencies.
@@ -107,10 +98,6 @@ func containsBucketState(bucketStateName string, bucketStateList []BucketState) 
 }
 
 func (r *Resource) getS3BucketTags(customObject v1alpha1.AWSConfig) []*s3.Tag {
-	if !r.includeTags {
-		return []*s3.Tag{}
-	}
-
 	tags := key.ClusterTags(customObject, r.installationName)
 	return awstags.NewS3(tags)
 }

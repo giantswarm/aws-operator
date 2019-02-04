@@ -12,9 +12,7 @@ import (
 	"github.com/giantswarm/randomkeys/randomkeystest"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v22/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v22/encrypter"
 )
 
 func Test_DesiredState(t *testing.T) {
@@ -53,11 +51,6 @@ func Test_DesiredState(t *testing.T) {
 				KMS: &KMSClientMock{},
 			}
 
-			awsService := awsservice.AwsServiceMock{
-				AccountID: "myaccountid",
-				KeyArn:    "mykeyarn",
-			}
-
 			cloudconfig := &CloudConfigMock{
 				template: tc.expectedBody,
 			}
@@ -68,7 +61,6 @@ func Test_DesiredState(t *testing.T) {
 				c := Config{
 					CertsSearcher:      certstest.NewSearcher(),
 					CloudConfig:        cloudconfig,
-					Encrypter:          &encrypter.EncrypterMock{},
 					Logger:             microloggertest.New(),
 					RandomKeysSearcher: randomkeystest.NewSearcher(),
 				}
@@ -80,8 +72,14 @@ func Test_DesiredState(t *testing.T) {
 			}
 
 			c := controllercontext.Context{
-				AWSClient:  awsClients,
-				AWSService: awsService,
+				AWSClient: awsClients,
+				Status: controllercontext.Status{
+					Cluster: controllercontext.Cluster{
+						AWSAccount: controllercontext.ClusterAWSAccount{
+							ID: "myaccountid",
+						},
+					},
+				},
 			}
 			ctx := context.TODO()
 			ctx = controllercontext.NewContext(ctx, c)

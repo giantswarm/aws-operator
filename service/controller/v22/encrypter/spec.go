@@ -11,11 +11,6 @@ const (
 	VaultBackend = "vault"
 )
 
-type EncryptionKeyState struct {
-	KeyID   string
-	KeyName string
-}
-
 type Interface interface {
 	Encrypter
 	Resource

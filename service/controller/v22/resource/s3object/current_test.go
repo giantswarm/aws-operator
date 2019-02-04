@@ -10,9 +10,7 @@ import (
 	"github.com/giantswarm/randomkeys/randomkeystest"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v22/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v22/encrypter"
 )
 
 func Test_CurrentState(t *testing.T) {
@@ -27,13 +25,12 @@ func Test_CurrentState(t *testing.T) {
 	}
 
 	testCases := []struct {
-		obj              *v1alpha1.AWSConfig
-		description      string
-		expectedIAMError bool
-		expectedS3Error  bool
-		expectedKey      string
-		expectedBucket   string
-		expectedBody     string
+		obj             *v1alpha1.AWSConfig
+		description     string
+		expectedS3Error bool
+		expectedKey     string
+		expectedBucket  string
+		expectedBody    string
 	}{
 		{
 			description:    "basic match",
@@ -41,11 +38,6 @@ func Test_CurrentState(t *testing.T) {
 			expectedKey:    "cloudconfig/myversion/worker",
 			expectedBucket: "myaccountid-g8s-test-cluster",
 			expectedBody:   "mybody",
-		},
-		{
-			description:      "IAM error",
-			obj:              clusterTpo,
-			expectedIAMError: true,
 		},
 		{
 			description:     "S3 error",
@@ -63,11 +55,6 @@ func Test_CurrentState(t *testing.T) {
 				},
 			}
 
-			awsService := awsservice.AwsServiceMock{
-				AccountID: "myaccountid",
-				IsError:   tc.expectedIAMError,
-			}
-
 			cloudconfig := &CloudConfigMock{}
 
 			var err error
@@ -76,7 +63,6 @@ func Test_CurrentState(t *testing.T) {
 				c := Config{
 					CertsSearcher:      certstest.NewSearcher(),
 					CloudConfig:        cloudconfig,
-					Encrypter:          &encrypter.EncrypterMock{},
 					Logger:             microloggertest.New(),
 					RandomKeysSearcher: randomkeystest.NewSearcher(),
 				}
@@ -88,24 +74,27 @@ func Test_CurrentState(t *testing.T) {
 			}
 
 			c := controllercontext.Context{
-				AWSClient:  awsClients,
-				AWSService: awsService,
+				AWSClient: awsClients,
+				Status: controllercontext.Status{
+					Cluster: controllercontext.Cluster{
+						AWSAccount: controllercontext.ClusterAWSAccount{
+							ID: "myaccountid",
+						},
+					},
+				},
 			}
 			ctx := context.TODO()
 			ctx = controllercontext.NewContext(ctx, c)
 
 			result, err := newResource.GetCurrentState(ctx, tc.obj)
-			if err != nil && !tc.expectedIAMError && !tc.expectedS3Error {
+			if err != nil && !tc.expectedS3Error {
 				t.Errorf("unexpected error %v", err)
-			}
-			if err == nil && tc.expectedIAMError {
-				t.Error("expected IAM error didn't happen")
 			}
 			if err == nil && tc.expectedS3Error {
 				t.Error("expected S3 error didn't happen")
 			}
 
-			if !tc.expectedIAMError && !tc.expectedS3Error {
+			if !tc.expectedS3Error {
 				currentState, ok := result.(map[string]BucketObjectState)
 				if !ok {
 					t.Errorf("expected '%T', got '%T'", currentState, result)

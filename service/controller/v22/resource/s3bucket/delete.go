@@ -41,10 +41,6 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		bucketName := b.Name
 
 		g.Go(func() error {
-			if bucketName == "" {
-				return nil
-			}
-
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting S3 bucket %#q", bucketName))
 
 			var bucketEmpty bool

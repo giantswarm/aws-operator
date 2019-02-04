@@ -6,6 +6,18 @@ import (
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/certs"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
+	"github.com/giantswarm/operatorkit/controller/resource/metricsresource"
+	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
+	"github.com/giantswarm/randomkeys"
+	"github.com/giantswarm/statusresource"
+	"github.com/giantswarm/tenantcluster"
+	"k8s.io/client-go/kubernetes"
+
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v22/adapter"
@@ -18,12 +30,12 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v22/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/controller/v22/encrypter/vault"
 	"github.com/giantswarm/aws-operator/service/controller/v22/key"
+	"github.com/giantswarm/aws-operator/service/controller/v22/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/bridgezone"
 	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v22/resource/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/ebsvolume"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/encryptionkey"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/endpoints"
-	"github.com/giantswarm/aws-operator/service/controller/v22/resource/hostedzone"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/loadbalancer"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/migration"
@@ -31,17 +43,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/service"
-	"github.com/giantswarm/certs"
-	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
-	"github.com/giantswarm/operatorkit/controller/resource/metricsresource"
-	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
-	"github.com/giantswarm/randomkeys"
-	"github.com/giantswarm/statusresource"
-	"github.com/giantswarm/tenantcluster"
-	"k8s.io/client-go/kubernetes"
 )
 
 const (
@@ -199,6 +200,18 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var accountIDResource controller.Resource
+	{
+		c := accountid.Config{
+			Logger: config.Logger,
+		}
+
+		accountIDResource, err = accountid.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var encryptionKeyResource controller.Resource
 	{
 		c := encryptionkey.Config{
@@ -237,21 +250,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		ipamResource, err = ipam.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var hostedZoneResource controller.Resource
-	{
-		c := hostedzone.Config{
-			HostRoute53: config.HostAWSClients.Route53,
-			Logger:      config.Logger,
-
-			Route53Enabled: config.Route53Enabled,
-		}
-
-		hostedZoneResource, err = hostedzone.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -296,12 +294,11 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var s3BucketObjectResource controller.Resource
+	var s3ObjectResource controller.Resource
 	{
 		c := s3object.Config{
 			CertsSearcher:      config.CertsSearcher,
 			CloudConfig:        cloudConfig,
-			Encrypter:          encrypterObject,
 			Logger:             config.Logger,
 			RandomKeysSearcher: config.RandomKeysSearcher,
 		}
@@ -311,7 +308,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			return nil, microerror.Mask(err)
 		}
 
-		s3BucketObjectResource, err = toCRUDResource(config.Logger, ops)
+		s3ObjectResource, err = toCRUDResource(config.Logger, ops)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -482,14 +479,14 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	}
 
 	resources := []controller.Resource{
+		accountIDResource,
 		statusResource,
 		migrationResource,
 		ipamResource,
-		hostedZoneResource,
 		bridgeZoneResource,
 		encryptionKeyResource,
 		s3BucketResource,
-		s3BucketObjectResource,
+		s3ObjectResource,
 		loadBalancerResource,
 		ebsVolumeResource,
 		cloudformationResource,

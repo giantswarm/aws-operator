@@ -18,7 +18,6 @@ const (
 )
 
 func (r Resource) findMasterInstance(ctx context.Context, instanceName string) (*ec2.Instance, error) {
-
 	sc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
