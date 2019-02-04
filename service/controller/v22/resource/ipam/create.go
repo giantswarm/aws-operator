@@ -139,7 +139,7 @@ func (r *Resource) allocateSubnet(ctx context.Context) (net.IPNet, error) {
 	var mutex sync.Mutex
 	var reservedSubnets []net.IPNet
 
-	g, ctx := errgroup.WithContext(ctx)
+	g := &errgroup.Group{}
 
 	g.Go(func() error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from VPCs")
