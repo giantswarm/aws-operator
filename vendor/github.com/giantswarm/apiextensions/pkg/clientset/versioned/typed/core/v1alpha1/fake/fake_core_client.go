@@ -72,10 +72,6 @@ func (c *FakeCoreV1alpha1) NodeConfigs(namespace string) v1alpha1.NodeConfigInte
 	return &FakeNodeConfigs{c, namespace}
 }
 
-func (c *FakeCoreV1alpha1) Releases(namespace string) v1alpha1.ReleaseInterface {
-	return &FakeReleases{c, namespace}
-}
-
 func (c *FakeCoreV1alpha1) StorageConfigs(namespace string) v1alpha1.StorageConfigInterface {
 	return &FakeStorageConfigs{c, namespace}
 }

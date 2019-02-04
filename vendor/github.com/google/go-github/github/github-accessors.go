@@ -9700,6 +9700,14 @@ func (r *RepositoryContent) GetSize() int {
 	return *r.Size
 }
 
+// GetTarget returns the Target field if it's non-nil, zero value otherwise.
+func (r *RepositoryContent) GetTarget() string {
+	if r == nil || r.Target == nil {
+		return ""
+	}
+	return *r.Target
+}
+
 // GetType returns the Type field if it's non-nil, zero value otherwise.
 func (r *RepositoryContent) GetType() string {
 	if r == nil || r.Type == nil {
@@ -10378,6 +10386,22 @@ func (s *Source) GetID() int64 {
 		return 0
 	}
 	return *s.ID
+}
+
+// GetIssue returns the Issue field.
+func (s *Source) GetIssue() *Issue {
+	if s == nil {
+		return nil
+	}
+	return s.Issue
+}
+
+// GetType returns the Type field if it's non-nil, zero value otherwise.
+func (s *Source) GetType() string {
+	if s == nil || s.Type == nil {
+		return ""
+	}
+	return *s.Type
 }
 
 // GetURL returns the URL field if it's non-nil, zero value otherwise.

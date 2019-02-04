@@ -164,7 +164,7 @@ systemd:
       --network-plugin=cni \
       --register-node=true \
       --kubeconfig=/etc/kubernetes/kubeconfig/kubelet.yaml \
-      --node-labels="ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
+      --node-labels="node-role.kubernetes.io/worker,role=worker,ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
       --v=2"
       ExecStop=-/usr/bin/docker stop -t 10 $NAME
       ExecStopPost=-/usr/bin/docker rm -f $NAME

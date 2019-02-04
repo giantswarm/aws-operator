@@ -177,11 +177,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		id, err := r.findHostedZoneID(ctx, defaultGuest, intermediateZone)
 		if IsNotFound(err) {
-			// If the intermeidate zone is not found we are after
-			// the migraiton period and this resource becomes noop.
 			r.logger.LogCtx(ctx, "level", "debug", "message", "intermediate zone not found")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
-			return nil
+
+			return microerror.Mask(err)
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
@@ -198,11 +196,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		id, err := r.findHostedZoneID(ctx, guest, finalZone)
 		if IsNotFound(err) {
-			// The final zone is not yet created. Retry in the next
-			// reconciliation loop.
 			r.logger.LogCtx(ctx, "level", "debug", "message", "final zone not found")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
-			return nil
+
+			return microerror.Mask(err)
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
@@ -214,7 +210,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	})
 
 	err = g.Wait()
-	if err != nil {
+	if IsNotFound(err) {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
+		return nil
+	} else if err != nil {
 		return microerror.Mask(err)
 	}
 
