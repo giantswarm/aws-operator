@@ -175,7 +175,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	g.Go(func() error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "getting intermediate zone ID")
 
-		intermediateZoneID, err = r.findHostedZoneID(ctx, defaultGuest, intermediateZone)
+		id, err := r.findHostedZoneID(ctx, defaultGuest, intermediateZone)
 		if IsNotFound(err) {
 			// If the intermeidate zone is not found we are after
 			// the migraiton period and this resource becomes noop.
@@ -185,6 +185,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
+		intermediateZoneID = id
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "got intermediate zone ID")
 
@@ -195,7 +196,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	g.Go(func() error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "getting final zone ID")
 
-		finalZoneID, err = r.findHostedZoneID(ctx, guest, finalZone)
+		id, err := r.findHostedZoneID(ctx, guest, finalZone)
 		if IsNotFound(err) {
 			// The final zone is not yet created. Retry in the next
 			// reconciliation loop.
@@ -205,6 +206,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
+		finalZoneID = id
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "got final zone ID")
 
