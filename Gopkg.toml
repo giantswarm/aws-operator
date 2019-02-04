@@ -48,8 +48,8 @@ required = [
   branch = "master"
   name = "github.com/giantswarm/backoff"
 
-[[constraint]]
-  branch = "master"
+[[override]]
+  branch = "search-parallel"
   name = "github.com/giantswarm/certs"
 
 [[constraint]]

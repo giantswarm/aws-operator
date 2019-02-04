@@ -15,6 +15,8 @@ version directory, and then changes are introduced.
 - Switched from cloudinit to ignition.
 - Double the inotify watches.
 - Switch kube-proxy from `iptables` to `ipvs`.
+- Add worker node labels.
+- Increase timeouts for etcd defragmentaion.
 
 ### Removed
 
@@ -53,8 +55,8 @@ version directory, and then changes are introduced.
 ## [v3.7.1]
 
 ### Changed
-- The pod priority class for calico got lost. We found it again! 
-- kube-proxy is now installed before calico during cluster creation and upgrades. 
+- The pod priority class for calico got lost. We found it again!
+- kube-proxy is now installed before calico during cluster creation and upgrades.
 
 ## [v3.7.0]
 
