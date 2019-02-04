@@ -4,9 +4,9 @@
 //
 // Latest changes:
 //
-//	* v22:	Added migration code to fill spec.Cluster.Scaling.{Min,Max} values
-//			when they are zero. When all tenant clusters are migrated to at least v22,
-//			migrations in this file can be removed.
+//	* v22: Added migration code to fill spec.Cluster.Scaling.{Min,Max} values
+//	       when they are zero. When all tenant clusters are migrated to at least v22,
+//	       migrations in this file can be removed.
 //
 package migration
 
