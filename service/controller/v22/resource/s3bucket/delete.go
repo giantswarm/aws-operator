@@ -35,7 +35,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		return microerror.Mask(err)
 	}
 
-	g, ctx := errgroup.WithContext(ctx)
+	g := &errgroup.Group{}
 
 	for _, b := range bucketsInput {
 		bucketName := b.Name

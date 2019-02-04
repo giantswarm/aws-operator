@@ -33,7 +33,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the S3 buckets")
 
-		g, ctx := errgroup.WithContext(ctx)
+		g := &errgroup.Group{}
 
 		for _, inputBucketName := range bucketStateNames {
 			bucketName := inputBucketName

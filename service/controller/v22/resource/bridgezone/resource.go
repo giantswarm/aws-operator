@@ -169,7 +169,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	g, ctx := errgroup.WithContext(ctx)
+	g := &errgroup.Group{}
 
 	var intermediateZoneID string
 	g.Go(func() error {
