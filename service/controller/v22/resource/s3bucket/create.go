@@ -29,40 +29,29 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		return microerror.Mask(err)
 	}
 
+	g := &errgroup.Group{}
+
 	for _, bucketInput := range createBucketsState {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating S3 bucket %#q", bucketInput.Name))
+		bucketInput := bucketInput
 
-		{
-			i := &s3.CreateBucketInput{
-				Bucket: aws.String(bucketInput.Name),
+		g.Go(func() error {
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating S3 bucket %#q", bucketInput.Name))
+
+			{
+				i := &s3.CreateBucketInput{
+					Bucket: aws.String(bucketInput.Name),
+				}
+
+				_, err = sc.AWSClient.S3.CreateBucket(i)
+				if IsBucketAlreadyExists(err) || IsBucketAlreadyOwnedByYou(err) {
+					// Fall through.
+					return nil
+				} else if err != nil {
+					return microerror.Mask(err)
+				}
 			}
 
-			_, err = sc.AWSClient.S3.CreateBucket(i)
-			if IsBucketAlreadyExists(err) || IsBucketAlreadyOwnedByYou(err) {
-				// Fall through.
-				return nil
-			} else if err != nil {
-				return microerror.Mask(err)
-			}
-		}
-
-		if bucketInput.IsLoggingBucket {
-			i := &s3.PutBucketAclInput{
-				Bucket:       aws.String(key.TargetLogBucketName(customObject)),
-				GrantReadACP: aws.String(key.LogDeliveryURI),
-				GrantWrite:   aws.String(key.LogDeliveryURI),
-			}
-
-			_, err = sc.AWSClient.S3.PutBucketAcl(i)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-		}
-
-		g := &errgroup.Group{}
-
-		if r.includeTags {
-			g.Go(func() error {
+			if r.includeTags {
 				i := &s3.PutBucketTaggingInput{
 					Bucket: aws.String(bucketInput.Name),
 					Tagging: &s3.Tagging{
@@ -74,13 +63,22 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 				if err != nil {
 					return microerror.Mask(err)
 				}
+			}
 
-				return nil
-			})
-		}
+			if bucketInput.IsLoggingBucket {
+				i := &s3.PutBucketAclInput{
+					Bucket:       aws.String(key.TargetLogBucketName(customObject)),
+					GrantReadACP: aws.String(key.LogDeliveryURI),
+					GrantWrite:   aws.String(key.LogDeliveryURI),
+				}
 
-		if bucketInput.IsLoggingBucket {
-			g.Go(func() error {
+				_, err = sc.AWSClient.S3.PutBucketAcl(i)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+			}
+
+			if bucketInput.IsLoggingBucket {
 				i := &s3.PutBucketLifecycleConfigurationInput{
 					Bucket: aws.String(key.TargetLogBucketName(customObject)),
 					LifecycleConfiguration: &s3.BucketLifecycleConfiguration{
@@ -101,13 +99,9 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 				if err != nil {
 					return microerror.Mask(err)
 				}
+			}
 
-				return nil
-			})
-		}
-
-		if bucketInput.IsLoggingEnabled {
-			g.Go(func() error {
+			if bucketInput.IsLoggingEnabled {
 				i := &s3.PutBucketLoggingInput{
 					Bucket: aws.String(bucketInput.Name),
 					BucketLoggingStatus: &s3.BucketLoggingStatus{
@@ -122,17 +116,17 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 				if err != nil {
 					return microerror.Mask(err)
 				}
+			}
 
-				return nil
-			})
-		}
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created S3 bucket %#q", bucketInput.Name))
 
-		err := g.Wait()
-		if err != nil {
-			return microerror.Mask(err)
-		}
+			return nil
+		})
+	}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created S3 bucket %#q", bucketInput.Name))
+	err = g.Wait()
+	if err != nil {
+		return microerror.Mask(err)
 	}
 
 	return nil
