@@ -14,7 +14,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "aws-operator",
-				Description: "Lock down default Security Group",
+				Description: "Lock down default Security Group.",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
