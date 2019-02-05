@@ -3,6 +3,7 @@ package s3bucket
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -34,6 +35,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the S3 buckets")
 
 		g := &errgroup.Group{}
+		m := sync.Mutex{}
 
 		for _, inputBucketName := range bucketStateNames {
 			bucketName := inputBucketName
@@ -65,9 +67,12 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 				if err != nil {
 					return microerror.Mask(err)
 				}
+
+				m.Lock()
 				inputBucket.IsLoggingBucket = isLoggingBucket(bucketName, lc)
 				inputBucket.IsLoggingEnabled = isLoggingEnabled(lc)
 				currentBucketState = append(currentBucketState, inputBucket)
+				m.Unlock()
 
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found the S3 bucket %#q", bucketName))
 
