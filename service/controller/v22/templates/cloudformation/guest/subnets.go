@@ -13,7 +13,7 @@ const Subnets = `{{ define "subnets" }}
       - Key: Name
         Value: {{ .Name }}
       - Key: "kubernetes.io/role/elb"
-        Value: ""
+        Value: "1"
       VpcId: !Ref VPC
 
   {{ .RouteTableAssociation.Name }}:
@@ -35,7 +35,7 @@ const Subnets = `{{ define "subnets" }}
       - Key: Name
         Value: {{ .Name }}
       - Key: "kubernetes.io/role/internal-elb"
-        Value: ""
+        Value: "1"
       VpcId: !Ref VPC
 
   {{ .RouteTableAssociation.Name  }}:
