@@ -12,8 +12,6 @@ const (
 	EnvVarAWSIngressHostedZoneGuest = "AWS_INGRESS_HOSTED_ZONE_GUEST"
 	EnvVarAWSRegion                 = "AWS_REGION"
 	EnvVarGuestAWSARN               = "GUEST_AWS_ARN"
-	EnvVarGuestAWSAccessKeyID       = "GUEST_AWS_ACCESS_KEY_ID"
-	EnvVarGuestAWSAccessKeySecret   = "GUEST_AWS_SECRET_ACCESS_KEY"
 	EnvVarGuestAWSAccessKeyToken    = "GUEST_AWS_SESSION_TOKEN"
 	EnvVarHostAWSAccessKeyID        = "HOST_AWS_ACCESS_KEY_ID"
 	EnvVarHostAWSAccessKeySecret    = "HOST_AWS_SECRET_ACCESS_KEY"
@@ -26,8 +24,6 @@ var (
 	awsIngressHostedZoneGuest string
 	awsRegion                 string
 	guestAWSARN               string
-	guestAWSAccessKeyID       string
-	guestAWSAccessKeySecret   string
 	guestAWSAccessKeyToken    string
 	hostAWSAccessKeyID        string
 	hostAWSAccessKeySecret    string
@@ -54,16 +50,6 @@ func init() {
 	guestAWSARN = os.Getenv(EnvVarGuestAWSARN)
 	if guestAWSARN == "" {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarGuestAWSARN))
-	}
-
-	guestAWSAccessKeyID = os.Getenv(EnvVarGuestAWSAccessKeyID)
-	if guestAWSAccessKeyID == "" {
-		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarGuestAWSAccessKeyID))
-	}
-
-	guestAWSAccessKeySecret = os.Getenv(EnvVarGuestAWSAccessKeySecret)
-	if guestAWSAccessKeySecret == "" {
-		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarGuestAWSAccessKeySecret))
 	}
 
 	guestAWSAccessKeyToken = os.Getenv(EnvVarGuestAWSAccessKeyToken)
@@ -110,13 +96,6 @@ func GuestAWSARN() string {
 	return guestAWSARN
 }
 
-func GuestAWSAccessKeyID() string {
-	return guestAWSAccessKeyID
-}
-
-func GuestAWSAccessKeySecret() string {
-	return guestAWSAccessKeySecret
-}
 
 func GuestAWSAccessKeyToken() string {
 	return guestAWSAccessKeyToken

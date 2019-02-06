@@ -10,8 +10,6 @@ import (
 )
 
 func commonViperSettings(f *flag.Flag, v *viper.Viper) {
-	v.Set(f.Service.AWS.AccessKey.ID, "accessKeyID")
-	v.Set(f.Service.AWS.AccessKey.Secret, "accessKeySecret")
 	v.Set(f.Service.AWS.AccessKey.Session, "session")
 	v.Set(f.Service.AWS.AvailabilityZones, []string{"eu-west-1a", "eu-west-1b", "eu-west-1c"})
 	v.Set(f.Service.AWS.Encrypter, "kms")

@@ -111,12 +111,6 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
 	}
 
-	if config.GuestAWSConfig.AccessKeyID == "" {
-		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSConfig.AccessKeyID must not be empty")
-	}
-	if config.GuestAWSConfig.AccessKeySecret == "" {
-		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSConfig.AccessKeySecret must not be empty")
-	}
 	if config.GuestAWSConfig.Region == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSConfig.Region must not be empty")
 	}

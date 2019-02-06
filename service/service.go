@@ -125,8 +125,6 @@ func New(config Config) (*Service, error) {
 			DeleteLoggingBucket:   config.Viper.GetBool(config.Flag.Service.AWS.LoggingBucket.Delete),
 			EncrypterBackend:      config.Viper.GetString(config.Flag.Service.AWS.Encrypter),
 			GuestAWSConfig: controller.ClusterConfigAWSConfig{
-				AccessKeyID:       config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
-				AccessKeySecret:   config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
 				AvailabilityZones: config.Viper.GetStringSlice(config.Flag.Service.AWS.AvailabilityZones),
 				SessionToken:      config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
 				Region:            config.Viper.GetString(config.Flag.Service.AWS.Region),
@@ -178,8 +176,6 @@ func New(config Config) (*Service, error) {
 			Logger:       config.Logger,
 
 			GuestAWSConfig: controller.DrainerConfigAWS{
-				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
-				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
 				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
 				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
 			},

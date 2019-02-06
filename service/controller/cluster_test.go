@@ -24,8 +24,6 @@ func newTestClusterConfig() ClusterConfig {
 
 		AccessLogsExpiration: 365,
 		GuestAWSConfig: ClusterConfigAWSConfig{
-			AccessKeyID:       "guest-key",
-			AccessKeySecret:   "guest-secret",
 			AvailabilityZones: []string{"eu-west-1a", "eu-west-1b", "eu-west-1c"},
 			Region:            "guest-myregion",
 			SessionToken:      "guest-token",
@@ -64,8 +62,6 @@ func Test_NewCluster_Fails_Without_Regions(t *testing.T) {
 		{
 			description: "misisng region in guest",
 			guestCredentials: ClusterConfigAWSConfig{
-				AccessKeyID:     "key",
-				AccessKeySecret: "secret",
 				SessionToken:    "token",
 			},
 			hostCredentials: ClusterConfigAWSConfig{
@@ -80,8 +76,6 @@ func Test_NewCluster_Fails_Without_Regions(t *testing.T) {
 		{
 			description: "missing region in host",
 			guestCredentials: ClusterConfigAWSConfig{
-				AccessKeyID:     "key",
-				AccessKeySecret: "secret",
 				Region:          "myregion",
 				SessionToken:    "token",
 			},
@@ -96,8 +90,7 @@ func Test_NewCluster_Fails_Without_Regions(t *testing.T) {
 		{
 			description: "region exists in guest and host",
 			guestCredentials: ClusterConfigAWSConfig{
-				AccessKeyID:       "key",
-				AccessKeySecret:   "secret",
+
 				AvailabilityZones: []string{"eu-west-1a", "eu-west-1b", "eu-west-1c"},
 				Region:            "myregion",
 				SessionToken:      "token",

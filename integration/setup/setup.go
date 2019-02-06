@@ -92,8 +92,6 @@ func installAWSOperator(ctx context.Context, config Config) error {
 						Service: chartvalues.AWSOperatorConfigSecretAWSOperatorSecretYamlService{
 							AWS: chartvalues.AWSOperatorConfigSecretAWSOperatorSecretYamlServiceAWS{
 								AccessKey: chartvalues.AWSOperatorConfigSecretAWSOperatorSecretYamlServiceAWSAccessKey{
-									ID:     env.GuestAWSAccessKeyID(),
-									Secret: env.GuestAWSAccessKeySecret(),
 									Token:  env.GuestAWSAccessKeyToken(),
 								},
 								HostAccessKey: chartvalues.AWSOperatorConfigSecretAWSOperatorSecretYamlServiceAWSAccessKey{

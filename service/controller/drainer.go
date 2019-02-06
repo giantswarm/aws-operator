@@ -58,12 +58,6 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	if config.GuestAWSConfig.AccessKeyID == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.GuestAWSConfig.AccessKeyID must not be empty", config)
-	}
-	if config.GuestAWSConfig.AccessKeySecret == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.GuestAWSConfig.AccessKeySecret must not be empty", config)
-	}
 	if config.GuestAWSConfig.Region == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.GuestAWSConfig.Region must not be empty", config)
 	}
