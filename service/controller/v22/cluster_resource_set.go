@@ -20,7 +20,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v18/resource/workerasgname"
 	"github.com/giantswarm/aws-operator/service/controller/v22/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v22/cloudconfig"
 	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v22/cloudformation"
@@ -45,6 +44,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/service"
+	"github.com/giantswarm/aws-operator/service/controller/v22/resource/workerasgname"
 )
 
 const (
