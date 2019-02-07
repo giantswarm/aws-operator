@@ -9,11 +9,18 @@ type Status struct {
 
 type Cluster struct {
 	AWSAccount    ClusterAWSAccount
+	ASG           ClusterASG
 	EncryptionKey string
 }
 
 type ClusterAWSAccount struct {
 	ID string
+}
+
+type ClusterASG struct {
+	DesiredCapacity int
+	MaxSize         int
+	MinSize         int
 }
 
 type Drainer struct {

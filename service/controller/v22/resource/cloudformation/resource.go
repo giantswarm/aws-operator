@@ -64,16 +64,16 @@ type Resource struct {
 // New creates a new configured cloudformation resource.
 func New(config Config) (*Resource, error) {
 	if config.EncrypterBackend == "" {
-		return nil, microerror.Maskf(invalidConfigError, "config.EncrypterBackend must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.EncrypterBackend must not be empty", config)
 	}
 	if config.G8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.G8sClient must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
 	if config.HostClients == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.HostClients must not be empty", config)
 	}
 	if config.Logger == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 	// GuestPrivateSubnetMaskBits && GuestPublicSubnetMaskBits has been
 	// validated on upper level because all IPAM related configuration

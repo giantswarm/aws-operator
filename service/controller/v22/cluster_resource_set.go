@@ -20,6 +20,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
+	"github.com/giantswarm/aws-operator/service/controller/v18/resource/workerasgname"
 	"github.com/giantswarm/aws-operator/service/controller/v22/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v22/cloudconfig"
 	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v22/cloudformation"
@@ -31,6 +32,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v22/encrypter/vault"
 	"github.com/giantswarm/aws-operator/service/controller/v22/key"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/accountid"
+	"github.com/giantswarm/aws-operator/service/controller/v22/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/bridgezone"
 	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v22/resource/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/ebsvolume"
@@ -207,6 +209,19 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		accountIDResource, err = accountid.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var asgStatusResource controller.Resource
+	{
+		c := asgstatus.Config{
+			G8sClient: config.G8sClient,
+			Logger:    config.Logger,
+		}
+
+		asgStatusResource, err = asgstatus.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -478,8 +493,22 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var workerASGNameResource controller.Resource
+	{
+		c := workerasgname.ResourceConfig{
+			Logger: config.Logger,
+		}
+
+		workerASGNameResource, err = workerasgname.NewResource(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resources := []controller.Resource{
 		accountIDResource,
+		workerASGNameResource,
+		asgStatusResource,
 		statusResource,
 		migrationResource,
 		ipamResource,
