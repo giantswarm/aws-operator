@@ -50,8 +50,6 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			WorkerInstanceMonitoring: r.monitoring,
 			WorkerInstanceType:       workerInstanceType,
 			WorkerCloudConfigVersion: key.CloudConfigVersion,
-			WorkerMax:                key.ScalingMax(customObject),
-			WorkerMin:                key.ScalingMin(customObject),
 
 			VersionBundleVersion: key.VersionBundleVersion(customObject),
 		}

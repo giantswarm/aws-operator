@@ -99,8 +99,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				WorkerCloudConfigVersion: "1.0.0",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
-				WorkerMax:                3,
-				WorkerMin:                3,
 
 				VersionBundleVersion: "1.0.0",
 			},
@@ -114,8 +112,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				WorkerCloudConfigVersion: "1.0.0",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
-				WorkerMax:                3,
-				WorkerMin:                3,
 
 				VersionBundleVersion: "1.0.0",
 			},
@@ -412,9 +408,13 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
+			cc := testContextWithASG()
+			cc.AWSClient = awsClients
+
 			ctx := updateallowedcontext.NewContext(context.Background(), make(chan struct{}))
-			ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
 			updateallowedcontext.SetUpdateAllowed(ctx)
+
+			ctx = controllercontext.NewContext(ctx, cc)
 
 			result, err := newResource.newUpdateChange(ctx, customObject, tc.currentState, tc.desiredState)
 			if err != nil {
@@ -448,10 +448,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 					IngressController: v1alpha1.ClusterKubernetesIngressController{
 						Domain: "mysubdomain.mydomain.com",
 					},
-				},
-				Scaling: v1alpha1.ClusterScaling{
-					Max: 1,
-					Min: 1,
 				},
 			},
 			AWS: v1alpha1.AWSConfigSpecAWS{
@@ -514,8 +510,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				WorkerCloudConfigVersion: "1.0.0",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
-				WorkerMax:                3,
-				WorkerMin:                3,
 
 				VersionBundleVersion: "1.0.0",
 			},
@@ -529,8 +523,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				WorkerCloudConfigVersion: "1.0.0",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
-				WorkerMax:                3,
-				WorkerMin:                3,
 
 				VersionBundleVersion: "1.0.0",
 			},
@@ -774,8 +766,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				WorkerCloudConfigVersion: "1.0.0",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
-				WorkerMax:                4,
-				WorkerMin:                3,
 
 				VersionBundleVersion: "CHANGED",
 			},
@@ -789,8 +779,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				WorkerCloudConfigVersion: "1.0.0",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
-				WorkerMax:                4,
-				WorkerMin:                3,
 
 				VersionBundleVersion: "1.0.0",
 			},
@@ -810,8 +798,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				WorkerCloudConfigVersion: "1.0.0",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
-				WorkerMax:                4,
-				WorkerMin:                3,
 
 				VersionBundleVersion: "1.0.0",
 			},
@@ -825,8 +811,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				WorkerCloudConfigVersion: "1.0.0",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
-				WorkerMax:                4,
-				WorkerMin:                3,
 
 				VersionBundleVersion: "CHANGED",
 			},
@@ -882,5 +866,19 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				t.Fatalf("expected %v, got %v", *tc.expectedChange.StackName, *updateChange.UpdateStackInput.StackName)
 			}
 		})
+	}
+}
+
+func testContextWithASG() controllercontext.Context {
+	return controllercontext.Context{
+		Status: controllercontext.Status{
+			Cluster: controllercontext.Cluster{
+				ASG: controllercontext.ClusterASG{
+					DesiredCapacity: 1,
+					MaxSize:         1,
+					MinSize:         1,
+				},
+			},
+		},
 	}
 }

@@ -33,13 +33,10 @@ type StackState struct {
 	ShouldUpdate bool
 
 	WorkerCloudConfigVersion string
-	WorkerDesired            int
 	WorkerDockerVolumeSizeGB int
 	WorkerImageID            string
 	WorkerInstanceMonitoring bool
 	WorkerInstanceType       string
-	WorkerMax                int
-	WorkerMin                int
 
 	UpdateStackInput cloudformation.UpdateStackInput
 
