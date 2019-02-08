@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/service/controller/v22/controllercontext"
@@ -86,14 +87,22 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		newObj.Status.Cluster.Scaling.DesiredCapacity = desiredCapacity
+		if newObj.Status.Cluster.Scaling.DesiredCapacity != desiredCapacity {
+			newObj.Status.Cluster.Scaling.DesiredCapacity = desiredCapacity
+			_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(newObj.GetNamespace()).UpdateStatus(newObj)
+			if err != nil {
+				return microerror.Mask(err)
+			}
 
-		_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(newObj.GetNamespace()).UpdateStatus(newObj)
-		if err != nil {
-			return microerror.Mask(err)
+			r.logger.LogCtx(ctx, "level", "debug", "message", "updated status with desired capacity")
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling reconciliation")
+			reconciliationcanceledcontext.SetCanceled(ctx)
+
+			return nil
+		} else {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not update status with desired capacity")
 		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", "updated status with desired capacity")
 	}
 
 	{
