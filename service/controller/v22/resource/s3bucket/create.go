@@ -45,6 +45,8 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 				_, err = sc.AWSClient.S3.CreateBucket(i)
 				if IsBucketAlreadyExists(err) {
 					// Fall through.
+				} else if IsBucketAlreadyOwnedByYou(err) {
+					// Fall through.
 				} else if err != nil {
 					return microerror.Mask(err)
 				}

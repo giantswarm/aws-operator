@@ -355,10 +355,9 @@ func removeTimesFromNodes(nodes []providerv1alpha1.StatusClusterNode) []provider
 	var newNodes []providerv1alpha1.StatusClusterNode
 
 	for _, n := range nodes {
-		newNodes = append(newNodes, providerv1alpha1.StatusClusterNode{
-			Name:    n.Name,
-			Version: n.Version,
-		})
+		n.LastHeartbeatTime = providerv1alpha1.DeepCopyTime{}
+		n.LastTransitionTime = providerv1alpha1.DeepCopyTime{}
+		newNodes = append(newNodes, n)
 	}
 
 	return newNodes
