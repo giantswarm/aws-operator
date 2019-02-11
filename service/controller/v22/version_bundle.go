@@ -17,6 +17,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Lock down default Security Group.",
 				Kind:        versionbundle.KindSecurity,
 			},
+			{
+				Component:   "ignition",
+				Description: "Bring back missing kubelet resources reservation for systemd and container runtime.",
+				Kind:        versionbundle.KindAdded,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
