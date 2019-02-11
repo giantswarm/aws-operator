@@ -17,12 +17,6 @@ type ClusterAWSAccount struct {
 	ID string
 }
 
-type ClusterASG struct {
-	DesiredCapacity int
-	MaxSize         int
-	MinSize         int
-}
-
 type Drainer struct {
 	// WorkerASGName is filled by the workerasgname resource.
 	WorkerASGName string
