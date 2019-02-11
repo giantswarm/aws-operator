@@ -1,0 +1,122 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: k8s-api-server
+  namespace: kube-system
+  annotations:
+    scheduler.alpha.kubernetes.io/critical-pod: ''
+spec:
+  hostNetwork: true
+  priorityClassName: system-node-critical
+  containers:
+  - name: k8s-api-server
+    image: {{ .RegistryDomain }}/{{ .Images.Kubernetes }}
+    env:
+    - name: HOST_IP
+      valueFrom:
+        fieldRef:
+          fieldPath: status.podIP
+    command:
+    - /hyperkube
+    - apiserver
+    {{ range .Hyperkube.Apiserver.Pod.CommandExtraArgs -}}
+    - {{ . }}
+    {{ end -}}
+    - --allow-privileged=true
+    - --anonymous-auth=false
+    - --insecure-port=0
+    - --kubelet-https=true
+    - --kubelet-preferred-address-types=InternalIP
+    - --secure-port={{.Cluster.Kubernetes.API.SecurePort}}
+    - --bind-address=$(HOST_IP)
+    - --etcd-prefix={{.Cluster.Etcd.Prefix}}
+    - --profiling=false
+    - --service-account-lookup=true
+    - --authorization-mode=RBAC
+    - --enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,DefaultStorageClass,PersistentVolumeClaimResize,PodSecurityPolicy,Priority,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook
+    - --cloud-provider={{.Cluster.Kubernetes.CloudProvider}}
+    - --service-cluster-ip-range={{.Cluster.Kubernetes.API.ClusterIPRange}}
+    - --etcd-servers=https://127.0.0.1:2379
+    - --etcd-cafile=/etc/kubernetes/ssl/etcd/server-ca.pem
+    - --etcd-certfile=/etc/kubernetes/ssl/etcd/server-crt.pem
+    - --etcd-keyfile=/etc/kubernetes/ssl/etcd/server-key.pem
+    - --advertise-address=$(HOST_IP)
+    - --runtime-config=api/all=true,scheduling.k8s.io/v1alpha1=true
+    - --logtostderr=true
+    - --tls-cert-file=/etc/kubernetes/ssl/apiserver-crt.pem
+    - --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
+    - --client-ca-file=/etc/kubernetes/ssl/apiserver-ca.pem
+    - --service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem
+    - --audit-log-path=/var/log/apiserver/audit.log
+    - --audit-log-maxage=30
+    - --audit-log-maxbackup=30
+    - --audit-log-maxsize=100
+    - --audit-policy-file=/etc/kubernetes/policies/audit-policy.yaml
+    - --experimental-encryption-provider-config=/etc/kubernetes/encryption/k8s-encryption-config.yaml
+    - --requestheader-client-ca-file=/etc/kubernetes/ssl/apiserver-ca.pem
+    - --requestheader-allowed-names=aggregator,{{.Cluster.Kubernetes.API.Domain}},{{.Cluster.Kubernetes.Kubelet.Domain}}
+    - --requestheader-extra-headers-prefix=X-Remote-Extra-
+    - --requestheader-group-headers=X-Remote-Group
+    - --requestheader-username-headers=X-Remote-User
+    - --proxy-client-cert-file=/etc/kubernetes/ssl/apiserver-crt.pem
+    - --proxy-client-key-file=/etc/kubernetes/ssl/apiserver-key.pem
+    resources:
+      requests:
+        cpu: 300m
+        memory: 300Mi
+    livenessProbe:
+      tcpSocket:
+        port: {{.Cluster.Kubernetes.API.SecurePort}}
+      initialDelaySeconds: 15
+      timeoutSeconds: 15
+    ports:
+    - containerPort: {{.Cluster.Kubernetes.API.SecurePort}}
+      hostPort: {{.Cluster.Kubernetes.API.SecurePort}}
+      name: https
+    volumeMounts:
+    {{ range .Hyperkube.Apiserver.Pod.HyperkubePodHostExtraMounts -}}
+    - mountPath: {{ .Path }}
+      name: {{ .Name }}
+      readOnly: {{ .ReadOnly }}
+    {{ end -}}
+    - mountPath: /var/log/apiserver/
+      name: apiserver-log
+    - mountPath: /etc/kubernetes/encryption/
+      name: k8s-encryption
+      readOnly: true
+    - mountPath: /etc/kubernetes/manifests
+      name: k8s-manifests
+      readOnly: true
+    - mountPath: /etc/kubernetes/policies
+      name: k8s-policies
+      readOnly: true
+    - mountPath: /etc/kubernetes/secrets/
+      name: k8s-secrets
+      readOnly: true
+    - mountPath: /etc/kubernetes/ssl/
+      name: ssl-certs-kubernetes
+      readOnly: true
+  volumes:
+  {{ range .Hyperkube.Apiserver.Pod.HyperkubePodHostExtraMounts -}}
+  - hostPath:
+      path: {{ .Path }}
+    name: {{ .Name }}
+  {{ end -}}
+  - hostPath:
+      path: /var/log/apiserver/
+    name: apiserver-log
+  - hostPath:
+      path: /etc/kubernetes/encryption/
+    name: k8s-encryption
+  - hostPath:
+      path: /etc/kubernetes/manifests
+    name: k8s-manifests
+  - hostPath:
+      path: /etc/kubernetes/policies
+    name: k8s-policies
+  - hostPath:
+      path: /etc/kubernetes/secrets
+    name: k8s-secrets
+  - hostPath:
+      path: /etc/kubernetes/ssl
+    name: ssl-certs-kubernetes

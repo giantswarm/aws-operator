@@ -1,0 +1,12 @@
+# Use most defaults for sshd configuration.
+UsePrivilegeSeparation sandbox
+Subsystem sftp internal-sftp
+ClientAliveInterval 180
+UseDNS no
+UsePAM yes
+PrintLastLog no # handled by PAM
+PrintMotd no # handled by PAM
+# Non defaults (#100)
+ClientAliveCountMax 2
+PasswordAuthentication no
+TrustedUserCAKeys /etc/ssh/trusted-user-ca-keys.pem

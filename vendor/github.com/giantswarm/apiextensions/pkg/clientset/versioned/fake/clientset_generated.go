@@ -28,6 +28,8 @@ import (
 	fakeexamplev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/example/v1alpha1/fake"
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/provider/v1alpha1"
 	fakeproviderv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/provider/v1alpha1/fake"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/release/v1alpha1"
+	fakereleasev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/release/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
@@ -115,4 +117,14 @@ func (c *Clientset) ProviderV1alpha1() providerv1alpha1.ProviderV1alpha1Interfac
 // Provider retrieves the ProviderV1alpha1Client
 func (c *Clientset) Provider() providerv1alpha1.ProviderV1alpha1Interface {
 	return &fakeproviderv1alpha1.FakeProviderV1alpha1{Fake: &c.Fake}
+}
+
+// ReleaseV1alpha1 retrieves the ReleaseV1alpha1Client
+func (c *Clientset) ReleaseV1alpha1() releasev1alpha1.ReleaseV1alpha1Interface {
+	return &fakereleasev1alpha1.FakeReleaseV1alpha1{Fake: &c.Fake}
+}
+
+// Release retrieves the ReleaseV1alpha1Client
+func (c *Clientset) Release() releasev1alpha1.ReleaseV1alpha1Interface {
+	return &fakereleasev1alpha1.FakeReleaseV1alpha1{Fake: &c.Fake}
 }

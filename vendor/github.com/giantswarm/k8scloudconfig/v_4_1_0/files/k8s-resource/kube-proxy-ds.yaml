@@ -1,0 +1,84 @@
+kind: DaemonSet
+apiVersion: extensions/v1beta1
+metadata:
+  name: kube-proxy
+  namespace: kube-system
+  labels:
+    component: kube-proxy
+    k8s-app: kube-proxy
+    kubernetes.io/cluster-service: "true"
+spec:
+  selector:
+    matchLabels:
+      k8s-app: kube-proxy
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        component: kube-proxy
+        k8s-app: kube-proxy
+        kubernetes.io/cluster-service: "true"
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      hostNetwork: true
+      priorityClassName: system-node-critical
+      serviceAccountName: kube-proxy
+      containers:
+        - name: kube-proxy
+          image: {{ .RegistryDomain }}/{{ .Images.Kubernetes }}
+          command:
+          - /hyperkube
+          - proxy
+          - --config=/etc/kubernetes/config/proxy-config.yml
+          - --v=2
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 10256
+            initialDelaySeconds: 10
+            periodSeconds: 3
+          resources:
+            requests:
+              memory: "80Mi"
+              cpu: "75m"
+          securityContext:
+            privileged: true
+          volumeMounts:
+          - mountPath: /etc/ssl/certs
+            name: ssl-certs-host
+            readOnly: true
+          - mountPath: /etc/kubernetes/config/
+            name: k8s-config
+          - mountPath: /etc/kubernetes/kubeconfig/
+            name: k8s-kubeconfig
+            readOnly: true
+          - mountPath: /etc/kubernetes/ssl
+            name: ssl-certs-kubernetes
+            readOnly: true
+          - mountPath: /lib/modules
+            name: lib-modules
+            readOnly: true
+      volumes:
+      - hostPath:
+          path: /etc/kubernetes/config/
+        name: k8s-config
+      - hostPath:
+          path: /etc/kubernetes/config/
+        name: k8s-kubeconfig
+      - hostPath:
+          path: /etc/kubernetes/ssl
+        name: ssl-certs-kubernetes
+      - hostPath:
+          path: /usr/share/ca-certificates
+        name: ssl-certs-host
+      - hostPath:
+          path: /lib/modules
+        name: lib-modules
