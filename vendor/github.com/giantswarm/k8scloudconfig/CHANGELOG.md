@@ -9,7 +9,11 @@ The latest version is considered WIP and it is a subject of change. All other
 versions are frozen. To freeze current version all files are copied to a new
 version directory, and then changes are introduced.
 
-## [v4.0.0] WIP
+## [v4.1.0] WIP
+
+## [v3.8.0] WIP
+
+## [v4.0.0]
 
 ### Changed
 - Switched from cloudinit to ignition.
@@ -23,7 +27,7 @@ version directory, and then changes are introduced.
 - Ingress Controller and CoreDNS manifests. Now migrated to chart-operator.
 - Removed nodename_file_optional from calico configmap.
 
-## [v3.7.4] WIP
+## [v3.7.4]
 
 ### Changed
 - Double the inotify watches.
