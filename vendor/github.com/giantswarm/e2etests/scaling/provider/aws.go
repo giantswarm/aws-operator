@@ -54,27 +54,46 @@ func NewAWS(config AWSConfig) (*AWS, error) {
 }
 
 func (a *AWS) AddWorker() error {
-	customObject, err := a.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(a.clusterID, metav1.GetOptions{})
-	if err != nil {
-		return microerror.Mask(err)
+	// TODO remove the legacy approach when v22 resources are gone in the
+	// aws-operator.
+	{
+		customObject, err := a.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(a.clusterID, metav1.GetOptions{})
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		patches := []Patch{
+			{
+				Op:    "add",
+				Path:  "/spec/aws/workers/-",
+				Value: customObject.Spec.AWS.Workers[0],
+			},
+		}
+
+		b, err := json.Marshal(patches)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		_, err = a.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Patch(a.clusterID, types.JSONPatchType, b)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
-	patches := []Patch{
-		{
-			Op:    "add",
-			Path:  "/spec/aws/workers/-",
-			Value: customObject.Spec.AWS.Workers[0],
-		},
-	}
+	{
+		customObject, err := a.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(a.clusterID, metav1.GetOptions{})
+		if err != nil {
+			return microerror.Mask(err)
+		}
 
-	b, err := json.Marshal(patches)
-	if err != nil {
-		return microerror.Mask(err)
-	}
+		customObject.Spec.Cluster.Scaling.Max++
+		customObject.Spec.Cluster.Scaling.Min++
 
-	_, err = a.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Patch(a.clusterID, types.JSONPatchType, b)
-	if err != nil {
-		return microerror.Mask(err)
+		_, err = a.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Update(customObject)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
 	return nil
@@ -103,21 +122,40 @@ func (a *AWS) NumWorkers() (int, error) {
 }
 
 func (a *AWS) RemoveWorker() error {
-	patches := []Patch{
-		{
-			Op:   "remove",
-			Path: "/spec/aws/workers/1",
-		},
+	// TODO remove the legacy approach when v22 resources are gone in the
+	// aws-operator.
+	{
+		patches := []Patch{
+			{
+				Op:   "remove",
+				Path: "/spec/aws/workers/1",
+			},
+		}
+
+		b, err := json.Marshal(patches)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		_, err = a.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Patch(a.clusterID, types.JSONPatchType, b)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
-	b, err := json.Marshal(patches)
-	if err != nil {
-		return microerror.Mask(err)
-	}
+	{
+		customObject, err := a.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(a.clusterID, metav1.GetOptions{})
+		if err != nil {
+			return microerror.Mask(err)
+		}
 
-	_, err = a.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Patch(a.clusterID, types.JSONPatchType, b)
-	if err != nil {
-		return microerror.Mask(err)
+		customObject.Spec.Cluster.Scaling.Max--
+		customObject.Spec.Cluster.Scaling.Min--
+
+		_, err = a.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Update(customObject)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
 	return nil
