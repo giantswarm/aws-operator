@@ -19,7 +19,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "ignition",
-				Description: "Bring back missing kubelet resources reservation for systemd and container runtime.",
+				Description: "Resource reservation update for system components and container runtime.",
 				Kind:        versionbundle.KindAdded,
 			},
 		},
