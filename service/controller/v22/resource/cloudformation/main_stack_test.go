@@ -3,11 +3,11 @@ package cloudformation
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	"github.com/giantswarm/aws-operator/client/aws"
@@ -19,12 +19,13 @@ import (
 func testConfig() Config {
 	c := Config{}
 
+	c.EncrypterBackend = "kms"
+	c.G8sClient = fake.NewSimpleClientset()
 	c.GuestPrivateSubnetMaskBits = 25
 	c.GuestPublicSubnetMaskBits = 25
 	c.HostClients = &adapter.Clients{}
-	c.Logger = microloggertest.New()
-	c.EncrypterBackend = "kms"
 	c.InstallationName = "myinstallation"
+	c.Logger = microloggertest.New()
 
 	return c
 }
@@ -103,6 +104,10 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 				},
 				Etcd: v1alpha1.ClusterEtcd{
 					Domain: "etcd.domain",
+				},
+				Scaling: v1alpha1.ClusterScaling{
+					Max: 3,
+					Min: 3,
 				},
 			},
 			AWS: v1alpha1.AWSConfigSpecAWS{
@@ -184,12 +189,11 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		MasterCloudConfigVersion:   key.CloudConfigVersion,
 		MasterInstanceMonitoring:   false,
 
-		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
+		WorkerCloudConfigVersion: key.CloudConfigVersion,
 		WorkerDockerVolumeSizeGB: key.WorkerDockerVolumeSizeGB(customObject),
 		WorkerImageID:            imageID,
 		WorkerInstanceMonitoring: true,
 		WorkerInstanceType:       key.WorkerInstanceType(customObject),
-		WorkerCloudConfigVersion: key.CloudConfigVersion,
 
 		VersionBundleVersion: key.VersionBundleVersion(customObject),
 	}
@@ -235,6 +239,14 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		t.Fatal("asg header not found")
 	}
 
+	if !strings.Contains(body, "Key: k8s.io/cluster-autoscaler/enabled") {
+		t.Fatal("cluster-autoscaler's tag missing from worker asg")
+	}
+
+	if !strings.Contains(body, fmt.Sprintf("Key: k8s.io/cluster-autoscaler/%s", key.ClusterID(customObject))) {
+		t.Fatal("cluster-autoscaler's cluster tag missing from worker asg")
+	}
+
 	if !strings.Contains(body, "InstanceType: m3.large") {
 		t.Fatal("launch configuration element not found")
 	}
@@ -260,10 +272,7 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		fmt.Println(body)
 		t.Fatal("master CloudConfig version output element not found")
 	}
-	if !strings.Contains(body, key.WorkerCountKey+":") {
-		fmt.Println(body)
-		t.Fatal("workers output element not found")
-	}
+
 	if !strings.Contains(body, key.WorkerImageIDKey+":") {
 		fmt.Println(body)
 		t.Fatal("WorkerImageID output element not found")
@@ -410,7 +419,7 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 	}
 
 	// image ids should be fixed despite the values in the custom object
-	if !strings.Contains(body, "ImageId: ami-0e6601a88a9753474") {
+	if !strings.Contains(body, "ImageId: ami-0f46c2ed46d8157aa") {
 		fmt.Println(body)
 		t.Fatal("Fixed image ID not found")
 	}
@@ -476,6 +485,10 @@ func TestMainHostPostTemplateExistingFields(t *testing.T) {
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
 				ID: "test-cluster",
+				Scaling: v1alpha1.ClusterScaling{
+					Max: 3,
+					Min: 3,
+				},
 			},
 			AWS: v1alpha1.AWSConfigSpecAWS{
 				VPC: v1alpha1.AWSConfigSpecAWSVPC{
@@ -579,6 +592,10 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 				Etcd: v1alpha1.ClusterEtcd{
 					Domain: "etcd.domain",
 				},
+				Scaling: v1alpha1.ClusterScaling{
+					Max: 1,
+					Min: 1,
+				},
 			},
 			AWS: v1alpha1.AWSConfigSpecAWS{
 				API: v1alpha1.AWSConfigSpecAWSAPI{
@@ -626,12 +643,11 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 		MasterCloudConfigVersion:   key.CloudConfigVersion,
 		MasterInstanceMonitoring:   false,
 
-		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
+		WorkerCloudConfigVersion: key.CloudConfigVersion,
 		WorkerDockerVolumeSizeGB: key.WorkerDockerVolumeSizeGB(customObject),
 		WorkerImageID:            imageID,
 		WorkerInstanceMonitoring: true,
 		WorkerInstanceType:       key.WorkerInstanceType(customObject),
-		WorkerCloudConfigVersion: key.CloudConfigVersion,
 
 		VersionBundleVersion: key.VersionBundleVersion(customObject),
 	}
@@ -704,6 +720,10 @@ func TestMainGuestTemplateChinaRegion(t *testing.T) {
 				Etcd: v1alpha1.ClusterEtcd{
 					Domain: "etcd.domain",
 				},
+				Scaling: v1alpha1.ClusterScaling{
+					Max: 1,
+					Min: 1,
+				},
 			},
 			AWS: v1alpha1.AWSConfigSpecAWS{
 				API: v1alpha1.AWSConfigSpecAWSAPI{
@@ -750,11 +770,10 @@ func TestMainGuestTemplateChinaRegion(t *testing.T) {
 		MasterCloudConfigVersion:   key.CloudConfigVersion,
 		MasterInstanceMonitoring:   false,
 
-		WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
+		WorkerCloudConfigVersion: key.CloudConfigVersion,
 		WorkerImageID:            imageID,
 		WorkerInstanceMonitoring: true,
 		WorkerInstanceType:       key.WorkerInstanceType(customObject),
-		WorkerCloudConfigVersion: key.CloudConfigVersion,
 
 		VersionBundleVersion: key.VersionBundleVersion(customObject),
 	}

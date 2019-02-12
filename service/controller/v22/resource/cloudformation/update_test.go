@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
 
@@ -32,6 +33,10 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 					IngressController: v1alpha1.ClusterKubernetesIngressController{
 						Domain: "mysubdomain.mydomain.com",
 					},
+				},
+				Scaling: v1alpha1.ClusterScaling{
+					Max: 1,
+					Min: 1,
 				},
 			},
 			AWS: v1alpha1.AWSConfigSpecAWS{
@@ -73,7 +78,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -93,7 +97,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -107,7 +110,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -127,7 +129,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -141,7 +142,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -161,7 +161,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -175,7 +174,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "CHANGED",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -195,7 +193,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -209,7 +206,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "CHANGED",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -229,7 +225,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -243,7 +238,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "CHANGED",
 				WorkerInstanceType:       "m3.large",
 
@@ -263,7 +257,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -277,7 +270,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "CHANGED",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -297,7 +289,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -311,7 +302,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				MasterInstanceType:       "CHANGED",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -331,7 +321,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -345,7 +334,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "CHANGED",
 
@@ -365,7 +353,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -379,7 +366,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -403,6 +389,7 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 		}
 		c.Logger = microloggertest.New()
 		c.EncrypterBackend = "kms"
+		c.G8sClient = fake.NewSimpleClientset()
 		c.GuestPrivateSubnetMaskBits = 25
 		c.GuestPublicSubnetMaskBits = 25
 
@@ -421,9 +408,13 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
+			cc := testContextWithASG()
+			cc.AWSClient = awsClients
+
 			ctx := updateallowedcontext.NewContext(context.Background(), make(chan struct{}))
-			ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
 			updateallowedcontext.SetUpdateAllowed(ctx)
+
+			ctx = controllercontext.NewContext(ctx, cc)
 
 			result, err := newResource.newUpdateChange(ctx, customObject, tc.currentState, tc.desiredState)
 			if err != nil {
@@ -498,7 +489,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -518,7 +508,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -532,7 +521,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -552,7 +540,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -566,7 +553,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -586,7 +572,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -600,7 +585,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "CHANGED",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -620,7 +604,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -634,7 +617,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "CHANGED",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -654,7 +636,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -668,7 +649,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "CHANGED",
 				WorkerInstanceType:       "m3.large",
 
@@ -688,7 +668,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -702,7 +681,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "CHANGED",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -722,7 +700,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -736,7 +713,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				MasterInstanceType:       "CHANGED",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -756,7 +732,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -770,7 +745,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "CHANGED",
 
@@ -790,7 +764,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -804,7 +777,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -824,7 +796,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -838,7 +809,6 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				MasterInstanceType:       "m3.large",
 
 				WorkerCloudConfigVersion: "1.0.0",
-				WorkerCount:              "4",
 				WorkerImageID:            "ami-123",
 				WorkerInstanceType:       "m3.large",
 
@@ -855,13 +825,14 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 	{
 		c := Config{}
 
+		c.EncrypterBackend = "kms"
+		c.G8sClient = fake.NewSimpleClientset()
 		c.HostClients = &adapter.Clients{
 			IAM: &adapter.IAMClientMock{},
 			EC2: &adapter.EC2ClientMock{},
 			STS: &adapter.STSClientMock{},
 		}
 		c.Logger = microloggertest.New()
-		c.EncrypterBackend = "kms"
 		c.GuestPrivateSubnetMaskBits = 25
 		c.GuestPublicSubnetMaskBits = 25
 
@@ -895,5 +866,19 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 				t.Fatalf("expected %v, got %v", *tc.expectedChange.StackName, *updateChange.UpdateStackInput.StackName)
 			}
 		})
+	}
+}
+
+func testContextWithASG() controllercontext.Context {
+	return controllercontext.Context{
+		Status: controllercontext.Status{
+			Cluster: controllercontext.Cluster{
+				ASG: controllercontext.ClusterASG{
+					DesiredCapacity: 1,
+					MaxSize:         1,
+					MinSize:         1,
+				},
+			},
+		},
 	}
 }

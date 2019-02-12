@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	"github.com/giantswarm/aws-operator/service/controller/v22/adapter"
@@ -39,9 +40,10 @@ func Test_Resource_Cloudformation_GetDesiredState(t *testing.T) {
 	{
 		c := Config{}
 
+		c.EncrypterBackend = "kms"
+		c.G8sClient = fake.NewSimpleClientset()
 		c.HostClients = &adapter.Clients{}
 		c.Logger = microloggertest.New()
-		c.EncrypterBackend = "kms"
 
 		newResource, err = New(c)
 		if err != nil {

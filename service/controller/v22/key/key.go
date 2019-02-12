@@ -66,6 +66,8 @@ const (
 	MasterCloudConfigVersionKey   = "MasterCloudConfigVersion"
 	WorkerASGKey                  = "WorkerASGName"
 	WorkerCountKey                = "WorkerCount"
+	WorkerMaxKey                  = "WorkerMax"
+	WorkerMinKey                  = "WorkerMin"
 	WorkerDockerVolumeSizeKey     = "WorkerDockerVolumeSizeGB"
 	WorkerImageIDKey              = "WorkerImageID"
 	WorkerInstanceMonitoring      = "Monitoring"
@@ -518,6 +520,14 @@ func S3ServiceDomain(customObject v1alpha1.AWSConfig) string {
 	return s3Domain
 }
 
+func ScalingMax(customObject v1alpha1.AWSConfig) int {
+	return customObject.Spec.Cluster.Scaling.Max
+}
+
+func ScalingMin(customObject v1alpha1.AWSConfig) int {
+	return customObject.Spec.Cluster.Scaling.Min
+}
+
 func SecurityGroupName(customObject v1alpha1.AWSConfig, groupName string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), groupName)
 }
@@ -540,6 +550,10 @@ func SpecAvailabilityZones(customObject v1alpha1.AWSConfig) int {
 
 func StatusAvailabilityZones(customObject v1alpha1.AWSConfig) []v1alpha1.AWSConfigStatusAWSAvailabilityZone {
 	return customObject.Status.AWS.AvailabilityZones
+}
+
+func StatusScalingDesiredCapacity(customObject v1alpha1.AWSConfig) int {
+	return customObject.Status.Cluster.Scaling.DesiredCapacity
 }
 
 func SubnetName(customObject v1alpha1.AWSConfig, suffix string) string {
@@ -704,28 +718,28 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 		service/controller/v22/adapter/adapter_test.go
 		service/controller/v22/resource/cloudformation/main_stack_test.go
 
-		Current Release: CoreOS Container Linux stable 1855.5.0 (HVM)
-		AMI IDs copied from https://stable.release.core-os.net/amd64-usr/1855.5.0/coreos_production_ami_hvm.txt.
+		Current Release: CoreOS Container Linux stable 1967.5.0 (HVM)
+		AMI IDs copied from https://stable.release.core-os.net/amd64-usr/1967.5.0/coreos_production_ami_hvm.txt.
 	*/
 	imageIDs := map[string]string{
-		"ap-northeast-1": "ami-0b0fc6983c9be8f9e",
-		"ap-northeast-2": "ami-09143ca0b3755b428",
-		"ap-south-1":     "ami-03eba32062e159d3c",
-		"ap-southeast-1": "ami-0d0079786d2ee66ae",
-		"ap-southeast-2": "ami-029d8ef1a02553d2d",
-		"ca-central-1":   "ami-09985fec721ff6f89",
-		"cn-north-1":     "ami-0211d60ca1aaa3c7d",
-		"cn-northwest-1": "ami-0deaa8ada18aec612",
-		"eu-central-1":   "ami-0e6601a88a9753474",
-		"eu-west-1":      "ami-06c40d1010f762df9",
-		"eu-west-2":      "ami-0f55bf46b69b768bd",
-		"eu-west-3":      "ami-0a2c50627b8b434df",
-		"sa-east-1":      "ami-0c188431919e8b2f1",
-		"us-east-1":      "ami-0f74e41ea6c13f74b",
-		"us-east-2":      "ami-0ba531e8a11f8965d",
-		"us-gov-west-1":  "ami-9d58c2fc",
-		"us-west-1":      "ami-08b3af8ec59b84ef9",
-		"us-west-2":      "ami-05507591f0fcb2b75",
+		"ap-northeast-1": "ami-07821bd0ea86d4511",
+		"ap-northeast-2": "ami-01b5d118690d7c4db",
+		"ap-south-1":     "ami-09642e32f99945765",
+		"ap-southeast-1": "ami-07739b17529e8c1d0",
+		"ap-southeast-2": "ami-02d7d488d701a460e",
+		"ca-central-1":   "ami-0edacf783a84b0986",
+		"cn-north-1":     "ami-0d405143e313ec9cb",
+		"cn-northwest-1": "ami-0eb5198a7b6239a05",
+		"eu-central-1":   "ami-0f46c2ed46d8157aa",
+		"eu-west-1":      "ami-0628e483315b5d17e",
+		"eu-west-2":      "ami-0ded15c0d8a34dad2",
+		"eu-west-3":      "ami-0dea870ebbbd767e4",
+		"sa-east-1":      "ami-0d28afc45b6f88ba4",
+		"us-east-1":      "ami-0c6731558e5ca73f6",
+		"us-east-2":      "ami-05df30c25dffa0eaf",
+		"us-gov-west-1":  "ami-07630d66",
+		"us-west-1":      "ami-0aaec419396da3b37",
+		"us-west-2":      "ami-0ac262621e0cc606d",
 	}
 
 	imageID, ok := imageIDs[region]
