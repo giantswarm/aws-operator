@@ -371,18 +371,19 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a31dfb1d7cd3dde76025599344fc9363dd6781a67976f9f14798e40f4e623132"
+  digest = "1:c2b8f9530c424d07020ec9a951a65b38aca208b89ade7dc7f6ccca830105ec75"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
     "v_3_6_3",
+    "v_3_6_4",
     "v_3_7_0",
     "v_3_7_2",
     "v_3_7_3",
     "v_4_0_0",
   ]
   pruneopts = "T"
-  revision = "ae697a810ab470f4061f6b6d2f483f9e6248cd8a"
+  revision = "f66d4b0ddf57eca9b72bc941a72c9336db295bfa"
 
 [[projects]]
   branch = "master"
@@ -1521,6 +1522,7 @@
     "github.com/giantswarm/ipam",
     "github.com/giantswarm/k8scloudconfig/ignition/v_2_2_0",
     "github.com/giantswarm/k8scloudconfig/v_3_6_3",
+    "github.com/giantswarm/k8scloudconfig/v_3_6_4",
     "github.com/giantswarm/k8scloudconfig/v_3_7_0",
     "github.com/giantswarm/k8scloudconfig/v_3_7_2",
     "github.com/giantswarm/k8scloudconfig/v_3_7_3",
