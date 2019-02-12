@@ -718,8 +718,8 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 		service/controller/v22/adapter/adapter_test.go
 		service/controller/v22/resource/cloudformation/main_stack_test.go
 
-		Current Release: CoreOS Container Linux stable 1855.5.0 (HVM)
-		AMI IDs copied from https://stable.release.core-os.net/amd64-usr/1855.5.0/coreos_production_ami_hvm.txt.
+		Current Release: CoreOS Container Linux stable 1967.5.0 (HVM)
+		AMI IDs copied from https://stable.release.core-os.net/amd64-usr/1967.5.0/coreos_production_ami_hvm.txt.
 	*/
 	imageIDs := map[string]string{
 		"ap-northeast-1": "ami-07821bd0ea86d4511",
