@@ -313,7 +313,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:dee175e163f61902591e07168bdd76c28f4651a991f20ae5554ec1184b54b0bc"
+  digest = "1:7f9c6e9ffa855559b7c2fd81bf8d80d57fabce9937ce398c6757c90489c36101"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
     "internal/render",
@@ -321,10 +321,10 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "35883a1a7f3352874473a6be2e5a72cd8bcd09d9"
+  revision = "183173df022b8760ee095a0b1f1e6fd8141652e2"
 
 [[projects]]
-  branch = "fix-scaling"
+  branch = "master"
   digest = "1:95d726b7c729bf4aae0f4305190dfc3897914f27c41c8e5188e325be65e58a95"
   name = "github.com/giantswarm/e2etests"
   packages = [
@@ -338,7 +338,7 @@
     "update/provider",
   ]
   pruneopts = "UT"
-  revision = "e0556b2c3d53a2d2265d41d81087e9679ae10ea1"
+  revision = "d619e42f57d867afe63af8f49497aa7ea1ad8cbc"
 
 [[projects]]
   branch = "master"
@@ -374,7 +374,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a60b4aa5598d07b4e18a2c140de5db97bc658f2ff9eb211f8893472a7c19778f"
+  digest = "1:373605fe0ac838a753a4f7f7930ea8513588243d982399360a1c6f1afaddebcf"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
@@ -385,7 +385,7 @@
     "v_4_0_0",
   ]
   pruneopts = "T"
-  revision = "a4ecf9b1998ce8da14b8acee57a2636ed60c56ea"
+  revision = "34af25c82b1ddb58b24d91927446e90029c1e088"
 
 [[projects]]
   branch = "master"
@@ -875,7 +875,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2cd09e6a31595e87e9fab1848e58202b161c595d6fdb1c4ed760f58f08f4bd86"
+  digest = "1:9f4058902e8a1188ffec272c5f4c8f61e29d074afa3849069d6704a3f37abfc0"
   name = "github.com/prometheus/client_golang"
   packages = [
     "prometheus",
@@ -883,7 +883,7 @@
     "prometheus/promhttp",
   ]
   pruneopts = "UT"
-  revision = "df7545b48d957567159544b129b8ced3ac40f17d"
+  revision = "4c99dd66303a54cbf8559dd6110d5c30b1819e4c"
 
 [[projects]]
   branch = "master"
@@ -1011,7 +1011,7 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "193df9c0f06f8bb35fba505183eaf0acc0136505"
+  revision = "74369b46fc6756741c016591724fd1cb8e26845f"
 
 [[projects]]
   branch = "master"
@@ -1033,14 +1033,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e007b54f54cbd4214aa6d97a67d57bc2539991adb4e22ea92c482bbece8de469"
+  digest = "1:24b119cd3ac544771b332f054a7a420b15ab9b8c3978a0b7381aabac1375ba02"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
     "internal",
   ]
   pruneopts = "UT"
-  revision = "99b60b757ec124ebb7d6b7e97f153b19c10ce163"
+  revision = "5f6b76b7c9ddc07924f32b15de8f03ceec72d74b"
 
 [[projects]]
   branch = "master"
@@ -1439,12 +1439,12 @@
   version = "v2.12.0"
 
 [[projects]]
-  digest = "1:e2999bf1bb6eddc2a6aa03fe5e6629120a53088926520ca3b4765f77d7ff7eab"
+  digest = "1:72fd56341405f53c745377e0ebc4abeff87f1a048e0eea6568a20212650f5a82"
   name = "k8s.io/klog"
   packages = ["."]
   pruneopts = "UT"
-  revision = "a5bc97fbc634d635061f3146511332c7e313a55a"
-  version = "v0.1.0"
+  revision = "71442cd4037d612096940ceb0f3fec3f7fff66e0"
+  version = "v0.2.0"
 
 [[projects]]
   digest = "1:0761d08cbab7345aa2b7715073879dde6235aaa5671adcab409a91da67b97b8b"
