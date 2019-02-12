@@ -8,6 +8,11 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
+				Component:   "containerlinux",
+				Description: "Fix for CVE-2019-5736.",
+				Kind:        versionbundle.KindSecurity,
+			},
+			{
 				Component:   "aws-operator",
 				Description: "Add support for cluster auto-scaling.",
 				Kind:        versionbundle.KindAdded,
@@ -30,7 +35,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "containerlinux",
-				Version: "1855.5.0",
+				Version: "1967.5.0",
 			},
 			{
 				Name:    "docker",
