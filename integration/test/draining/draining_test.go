@@ -252,9 +252,32 @@ func numberOfWorkers(clusterID string) (int, error) {
 }
 
 func removeWorker(clusterID string) error {
-	patch := make([]framework.PatchSpec, 1)
-	patch[0].Op = "remove"
-	patch[0].Path = "/spec/aws/workers/1"
+	// TODO remove deprecated approach when v22 is gone.
+	{
+		patch := make([]framework.PatchSpec, 1)
+		patch[0].Op = "remove"
+		patch[0].Path = "/spec/aws/workers/1"
 
-	return config.Host.ApplyAWSConfigPatch(patch, clusterID)
+		err := config.Host.ApplyAWSConfigPatch(patch, clusterID)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	{
+		customObject, err := config.Host.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(clusterID, metav1.GetOptions{})
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		customObject.Spec.Cluster.Scaling.Max--
+		customObject.Spec.Cluster.Scaling.Min--
+
+		_, err = config.Host.G8sClient().ProviderV1alpha1().AWSConfigs("default").Update(customObject)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	return nil
 }
