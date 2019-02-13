@@ -13,7 +13,7 @@ const AutoScalingGroup = `{{define "autoscaling_group"}}
       {{- range $az := $v.WorkerAZs }}
         - {{ $az }}
       {{end}}
-      DesiredCapacity: {{ $v.ASGMinSize }}
+      DesiredCapacity: {{ $v.ASGDesiredCapacity }}
       MinSize: {{ $v.ASGMinSize }}
       MaxSize: {{ $v.ASGMaxSize }}
       LaunchConfigurationName: !Ref {{ $v.ASGType }}LaunchConfiguration
@@ -26,6 +26,12 @@ const AutoScalingGroup = `{{define "autoscaling_group"}}
         - Key: Name
           Value: {{ $v.ClusterID }}-{{ $v.ASGType }}
           PropagateAtLaunch: true
+        - Key: k8s.io/cluster-autoscaler/enabled
+          Value: true
+          PropagateAtLaunch: false
+        - Key: k8s.io/cluster-autoscaler/{{ $v.ClusterID }}
+          Value: true
+          PropagateAtLaunch: false
     UpdatePolicy:
       AutoScalingRollingUpdate:
         # minimum amount of instances that must always be running during a rolling update

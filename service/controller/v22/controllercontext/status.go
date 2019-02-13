@@ -9,6 +9,7 @@ type Status struct {
 
 type Cluster struct {
 	AWSAccount    ClusterAWSAccount
+	ASG           ClusterASG
 	EncryptionKey string
 }
 
