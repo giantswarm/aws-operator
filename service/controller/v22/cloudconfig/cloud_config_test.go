@@ -3,6 +3,7 @@ package cloudconfig
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"strings"
 	"testing"
 
@@ -19,6 +20,11 @@ import (
 )
 
 func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
+	fixturesCerts, err := testLoadFixturesClusterCerts()
+	if err != nil {
+		t.Fatalf("error reading fitures %#v", err)
+	}
+
 	t.Parallel()
 	testCases := []struct {
 		CustomObject v1alpha1.AWSConfig
@@ -40,11 +46,7 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 				APIServerEncryptionKey: randomkeys.RandomKey("fekhfiwoiqhoifhwqefoiqwefoikqhwef"),
 			},
 			ClusterCerts: certs.Cluster{
-				APIServer:        certs.TLS{},
-				CalicoEtcdClient: certs.TLS{},
-				EtcdServer:       certs.TLS{},
-				ServiceAccount:   certs.TLS{},
-				Worker:           certs.TLS{},
+				APIServer: fixturesCerts,
 			},
 		},
 	}
@@ -57,7 +59,7 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
-		template, err := ccService.NewMasterTemplate(ctx, tc.CustomObject, certs.Cluster{}, tc.ClusterKeys)
+		template, err := ccService.NewMasterTemplate(ctx, tc.CustomObject, tc.ClusterCerts, tc.ClusterKeys)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
@@ -84,9 +86,15 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 }
 
 func Test_Service_CloudConfig_NewWorkerTemplate(t *testing.T) {
+	fixturesCerts, err := testLoadFixturesClusterCerts()
+	if err != nil {
+		t.Fatalf("error reading fitures %#v", err)
+	}
+
 	t.Parallel()
 	testCases := []struct {
 		CustomObject v1alpha1.AWSConfig
+		ClusterCerts certs.Cluster
 	}{
 		{
 			CustomObject: v1alpha1.AWSConfig{
@@ -98,6 +106,9 @@ func Test_Service_CloudConfig_NewWorkerTemplate(t *testing.T) {
 						ID: "al9qy",
 					},
 				},
+			},
+			ClusterCerts: certs.Cluster{
+				APIServer: fixturesCerts,
 			},
 		},
 	}
@@ -111,7 +122,7 @@ func Test_Service_CloudConfig_NewWorkerTemplate(t *testing.T) {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
 
-		template, err := ccService.NewWorkerTemplate(ctx, tc.CustomObject, certs.Cluster{})
+		template, err := ccService.NewWorkerTemplate(ctx, tc.CustomObject, tc.ClusterCerts)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
@@ -152,4 +163,23 @@ func testNewCloudConfigService() (*CloudConfig, error) {
 	}
 
 	return ccService, nil
+}
+
+func testLoadFixturesClusterCerts() (certs.TLS, error) {
+	ca, err := ioutil.ReadFile("testdata/ca.crt")
+	if err != nil {
+		return certs.TLS{}, err
+	}
+
+	crt, err := ioutil.ReadFile("testdata/tls.crt")
+	if err != nil {
+		return certs.TLS{}, err
+	}
+
+	key, err := ioutil.ReadFile("testdata/tls.key")
+	if err != nil {
+		return certs.TLS{}, err
+	}
+
+	return certs.TLS{CA: ca, Crt: crt, Key: key}, nil
 }
