@@ -8,7 +8,7 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/v22/key"
+	"github.com/giantswarm/aws-operator/service/controller/v23/key"
 )
 
 func Test_Adapter_Instance_RegularFields(t *testing.T) {

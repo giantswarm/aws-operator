@@ -3,7 +3,7 @@ package adapter
 import (
 	"sort"
 
-	"github.com/giantswarm/aws-operator/service/controller/v22/key"
+	"github.com/giantswarm/aws-operator/service/controller/v23/key"
 	"github.com/giantswarm/microerror"
 )
 

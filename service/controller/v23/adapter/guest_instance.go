@@ -6,8 +6,8 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v22/key"
-	"github.com/giantswarm/aws-operator/service/controller/v22/templates"
+	"github.com/giantswarm/aws-operator/service/controller/v23/key"
+	"github.com/giantswarm/aws-operator/service/controller/v23/templates"
 )
 
 type GuestInstanceAdapter struct {
