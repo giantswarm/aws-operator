@@ -23,6 +23,7 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 	testCases := []struct {
 		CustomObject v1alpha1.AWSConfig
 		ClusterKeys  randomkeys.Cluster
+		ClusterCerts certs.Cluster
 	}{
 		{
 			CustomObject: v1alpha1.AWSConfig{
@@ -37,6 +38,13 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 			},
 			ClusterKeys: randomkeys.Cluster{
 				APIServerEncryptionKey: randomkeys.RandomKey("fekhfiwoiqhoifhwqefoiqwefoikqhwef"),
+			},
+			ClusterCerts: certs.Cluster{
+				APIServer:        certs.TLS{},
+				CalicoEtcdClient: certs.TLS{},
+				EtcdServer:       certs.TLS{},
+				ServiceAccount:   certs.TLS{},
+				Worker:           certs.TLS{},
 			},
 		},
 	}
