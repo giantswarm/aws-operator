@@ -8,14 +8,9 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "kubernetes",
-				Description: "Update to 1.11.5 (CVE-2018-1002105).",
-				Kind:        versionbundle.KindChanged,
-			},
-			{
-				Component:   "kubernetes",
-				Description: "Enabled admission plugins: DefaultTolerationSeconds, MutatingAdmissionWebhook, ValidatingAdmissionWebhook.",
-				Kind:        versionbundle.KindChanged,
+				Component:   "containerlinux",
+				Description: "Fix for CVE-2019-5736.",
+				Kind:        versionbundle.KindSecurity,
 			},
 		},
 		Components: []versionbundle.Component{
@@ -25,11 +20,11 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "containerlinux",
-				Version: "1745.4.0",
+				Version: "1967.5.0",
 			},
 			{
 				Name:    "docker",
-				Version: "18.03.1",
+				Version: "18.06.1",
 			},
 			{
 				Name:    "etcd",
@@ -41,6 +36,6 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    "aws-operator",
-		Version: "4.2.1",
+		Version: "4.2.2",
 	}
 }

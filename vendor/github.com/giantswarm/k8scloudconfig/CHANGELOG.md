@@ -40,11 +40,21 @@ version directory, and then changes are introduced.
 ### Changed
 - update kubernetes to 1.12.3 (CVE-2018-1002105)
 
+## [v3.6.4]
+
+### Changed
+- Update `libreadline` version
+
 ## [v3.6.3]
 - update kubernetes to 1.11.5 (CVE-2018-1002105)
 
 ### Changed
 - update kubernetes to 1.10.11 (CVE-2018-1002105)
+
+## [v3.5.3]
+
+### Changed
+- Update `libreadline` version
 
 ## [v3.5.2]
 
@@ -329,10 +339,11 @@ chart-operator).
 ## [v0.1.0]
 
 
-
+[v4.1.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_1_0
 [v4.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_0_0
 [v3.7.4]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_7_4
 [v3.7.3]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_7_3
+[v3.6.4]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_6_4
 [v3.6.3]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_6_3
 [v3.5.2]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_5_2
 [v3.7.2]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_7_2
@@ -341,6 +352,7 @@ chart-operator).
 [v3.6.2]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_6_2
 [v3.6.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_6_1
 [v3.6.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_6_0
+[v3.5.3]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_5_3
 [v3.5.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_5_0
 [v3.4.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_4_0
 [v3.3.4]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_3_4
