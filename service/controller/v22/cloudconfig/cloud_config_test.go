@@ -45,8 +45,28 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 			ClusterKeys: randomkeys.Cluster{
 				APIServerEncryptionKey: randomkeys.RandomKey("fekhfiwoiqhoifhwqefoiqwefoikqhwef"),
 			},
+			ClusterCerts: certs.Cluster{},
+		},
+		{
+			CustomObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: v1alpha1.Cluster{
+						ID: "al9qy",
+						Etcd: v1alpha1.ClusterEtcd{
+							Port: 2379,
+						},
+					},
+				},
+			},
+			ClusterKeys: randomkeys.Cluster{
+				APIServerEncryptionKey: randomkeys.RandomKey("fekhfiwoiqhoifhwqefoiqwefoikqhwef"),
+			},
 			ClusterCerts: certs.Cluster{
-				APIServer: fixturesCerts,
+				APIServer:        fixturesCerts,
+				CalicoEtcdClient: fixturesCerts,
+				EtcdServer:       fixturesCerts,
+				ServiceAccount:   fixturesCerts,
+				Worker:           fixturesCerts,
 			},
 		},
 	}
@@ -107,8 +127,25 @@ func Test_Service_CloudConfig_NewWorkerTemplate(t *testing.T) {
 					},
 				},
 			},
+			ClusterCerts: certs.Cluster{},
+		},
+		{
+			CustomObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "123456789-super-magic-aws-region",
+					},
+					Cluster: v1alpha1.Cluster{
+						ID: "al9qy",
+					},
+				},
+			},
 			ClusterCerts: certs.Cluster{
-				APIServer: fixturesCerts,
+				APIServer:        fixturesCerts,
+				CalicoEtcdClient: fixturesCerts,
+				EtcdServer:       fixturesCerts,
+				ServiceAccount:   fixturesCerts,
+				Worker:           fixturesCerts,
 			},
 		},
 	}
