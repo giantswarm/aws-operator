@@ -30,6 +30,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v22"
 	v22adapter "github.com/giantswarm/aws-operator/service/controller/v22/adapter"
 	v22cloudconfig "github.com/giantswarm/aws-operator/service/controller/v22/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v23"
+	v23adapter "github.com/giantswarm/aws-operator/service/controller/v23/adapter"
+	v23cloudconfig "github.com/giantswarm/aws-operator/service/controller/v23/cloudconfig"
 	"github.com/giantswarm/certs"
 	"github.com/giantswarm/legacycerts/legacy"
 	"github.com/giantswarm/microerror"
@@ -629,6 +632,55 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var resourceSetV23 *controller.ResourceSet
+	{
+		c := v23.ClusterResourceSetConfig{
+			CertsSearcher:      certsSearcher,
+			G8sClient:          config.G8sClient,
+			HostAWSConfig:      hostAWSConfig,
+			HostAWSClients:     awsHostClients,
+			K8sClient:          config.K8sClient,
+			Logger:             config.Logger,
+			RandomKeysSearcher: randomKeysSearcher,
+
+			AccessLogsExpiration:       config.AccessLogsExpiration,
+			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
+			DeleteLoggingBucket:        config.DeleteLoggingBucket,
+			EncrypterBackend:           config.EncrypterBackend,
+			GuestAvailabilityZones:     config.GuestAWSConfig.AvailabilityZones,
+			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
+			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
+			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
+			GuestUpdateEnabled:         config.GuestUpdateEnabled,
+			PodInfraContainerImage:     config.PodInfraContainerImage,
+			Route53Enabled:             config.Route53Enabled,
+			IgnitionPath:               config.IgnitionPath,
+			IncludeTags:                config.IncludeTags,
+			InstallationName:           config.InstallationName,
+			IPAMNetworkRange:           config.IPAMNetworkRange,
+			OIDC: v23cloudconfig.OIDCConfig{
+				ClientID:      config.OIDC.ClientID,
+				IssuerURL:     config.OIDC.IssuerURL,
+				UsernameClaim: config.OIDC.UsernameClaim,
+				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			APIWhitelist: v23adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
+			},
+			ProjectName:       config.ProjectName,
+			PublicRouteTables: config.PublicRouteTables,
+			RegistryDomain:    config.RegistryDomain,
+			SSOPublicKey:      config.SSOPublicKey,
+			VaultAddress:      config.VaultAddress,
+		}
+
+		resourceSetV23, err = v23.NewClusterResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resourceSets := []*controller.ResourceSet{
 		resourceSetV17Patch1,
 		resourceSetV17Patch2,
@@ -638,6 +690,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		resourceSetV21,
 		resourceSetV21patch1,
 		resourceSetV22,
+		resourceSetV23,
 	}
 
 	return resourceSets, nil

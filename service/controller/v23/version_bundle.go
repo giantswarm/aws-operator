@@ -8,24 +8,9 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "containerlinux",
-				Description: "Fix for CVE-2019-5736.",
-				Kind:        versionbundle.KindSecurity,
-			},
-			{
-				Component:   "aws-operator",
-				Description: "Add support for cluster auto-scaling.",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "node-operator",
-				Description: "Improved node draining during updates and scaling.",
+				Component:   "TODO",
+				Description: "TODO",
 				Kind:        versionbundle.KindChanged,
-			},
-			{
-				Component:   "aws-operator",
-				Description: "Lock down default Security Group.",
-				Kind:        versionbundle.KindSecurity,
 			},
 		},
 		Components: []versionbundle.Component{
@@ -51,6 +36,6 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    "aws-operator",
-		Version: "4.6.0",
+		Version: "4.7.0",
 	}
 }
