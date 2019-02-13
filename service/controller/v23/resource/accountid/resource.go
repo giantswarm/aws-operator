@@ -6,11 +6,11 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/v22/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v23/controllercontext"
 )
 
 const (
-	Name = "accountidv22"
+	Name = "accountidv23"
 )
 
 type Config struct {
