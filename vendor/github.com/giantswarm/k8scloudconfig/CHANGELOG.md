@@ -10,6 +10,8 @@ versions are frozen. To freeze current version all files are copied to a new
 version directory, and then changes are introduced.
 
 ## [v4.1.0] WIP
+### Changed
+- Intall calicoctl, crictl and configure etcctl tooling in masters.
 
 ## [v3.8.0] WIP
 

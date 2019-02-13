@@ -313,7 +313,19 @@ systemd:
       ExecStartPost=/usr/bin/systemctl restart k8s-kubelet.service
       [Install]
       WantedBy=multi-user.target
-
+   
+  - name: debug-tools.service
+    enabled: true
+    contents: |
+      [Unit]
+      Description=Install calicoctl and crictl tools
+      After=network.target
+      [Service]
+      Type=oneshot
+      ExecStart=/opt/install-debug-tools
+      [Install]
+      WantedBy=multi-user.target
+  
 storage:
   files:
     - path: /etc/ssh/trusted-user-ca-keys.pem
@@ -513,6 +525,30 @@ storage:
       mode: 0600
       contents:
         source: "data:text/plain;charset=utf-8;base64,{{  index .Files "conf/ip_vs.conf" }}"
+            
+    - path: /opt/install-debug-tools
+      filesystem: root
+      mode: 0544
+      contents:
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "conf/install-debug-tools" }}"
+
+    - path: /etc/calico/calicoctl.cfg
+      filesystem: root
+      mode: 0644
+      contents:
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "conf/calicoctl.cfg" }}" 
+
+    - path: /etc/crictl.yaml
+      filesystem: root
+      mode: 0644
+      contents:
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "conf/crictl" }}"
+
+    - path: /etc/profile.d/setup-etcdctl.sh
+      filesystem: root
+      mode: 0444
+      contents:
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "conf/etcd-alias" }}"
 
     {{ range .Extension.Files -}}
     - path: {{ .Metadata.Path }}
