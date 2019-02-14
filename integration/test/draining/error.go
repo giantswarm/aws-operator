@@ -14,3 +14,12 @@ var e2eAppError = &microerror.Error{
 func IsE2EAppError(err error) bool {
 	return microerror.Cause(err) == e2eAppError
 }
+
+var podError = &microerror.Error{
+	Kind: "podError",
+}
+
+// IsPod asserts podError.
+func IsPod(err error) bool {
+	return microerror.Cause(err) == podError
+}

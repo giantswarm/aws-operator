@@ -12,11 +12,13 @@ import (
 	"time"
 
 	"github.com/giantswarm/apprclient"
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/helmclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/spf13/afero"
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 
@@ -120,22 +122,32 @@ func Test_Draining(t *testing.T) {
 	{
 		newLogger.Log("level", "debug", "message", "waiting for 2 pods of the e2e-app to be up")
 
-		for {
+		o := func() error {
 			o := metav1.ListOptions{
 				LabelSelector: "app=e2e-app",
 			}
 			l, err := config.Guest.K8sClient().CoreV1().Pods(ChartNamespace).List(o)
 			if err != nil {
-				t.Fatalf("expected %#v got %#v", nil, err)
+				return microerror.Mask(err)
 			}
 
 			if len(l.Items) != 2 {
-				newLogger.Log("level", "debug", "message", fmt.Sprintf("found %d pods", len(l.Items)))
-				time.Sleep(3 * time.Second)
-				continue
+				return microerror.Maskf(podError, "not all pods created")
 			}
 
-			break
+			for _, p := range l.Items {
+				if p.Status.Phase != v1.PodRunning {
+					return microerror.Maskf(podError, "%#q is not running", p.GetName())
+				}
+			}
+
+			return nil
+		}
+		b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
+
+		err := backoff.Retry(o, b)
+		if err != nil {
+			t.Fatalf("expected %#v got %#v", nil, err)
 		}
 
 		newLogger.Log("level", "debug", "message", "waited for 2 pods of the e2e-app to be up")
@@ -208,7 +220,7 @@ func Test_Draining(t *testing.T) {
 			defer newLogger.Log("level", "debug", "message", "requested e2e-app continuously")
 
 			for {
-				time.Sleep(200 * time.Millisecond)
+				time.Sleep(100 * time.Millisecond)
 
 				select {
 				case <-done:
@@ -266,7 +278,7 @@ func Test_Draining(t *testing.T) {
 	{
 		newLogger.Log("level", "debug", "message", "validating test data")
 
-		acceptable := float64(20)
+		acceptable := float64(0)
 		percOfFail := failure * 100 / success
 
 		newLogger.Log("level", "debug", "message", fmt.Sprintf("failure count is %f", failure))
