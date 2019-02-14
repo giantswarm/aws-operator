@@ -27,13 +27,21 @@ import (
 const (
 	CNRAddress      = "https://quay.io"
 	CNROrganization = "giantswarm"
-	ChartChannel    = "stable"
-	ChartName       = "e2e-app-chart"
-	ChartNamespace  = "e2e-app"
 )
 
-// Test_Draining launches the e2e-app in a guest cluster and requests it
-// continuously to verify its availability while scaling down a guest cluster
+const (
+	ChartChannel   = "stable"
+	ChartName      = "e2e-app-chart"
+	ChartNamespace = "e2e-app"
+)
+
+const (
+	e2eAppName   = "e2e-app"
+	e2eAppSource = "https://github.com/giantswarm/e2e-app"
+)
+
+// Test_Draining launches the e2e-app in a tenant cluster and requests it
+// continuously to verify its availability while scaling down a tenant cluster
 // node.
 //
 // TODO bring down the failure tolerance to 0. Right now we accept 10% of failed
@@ -91,7 +99,7 @@ func Test_Draining(t *testing.T) {
 		}
 	}
 
-	// Install the e2e app chart in the guest cluster.
+	// Install the e2e app chart in the tenant cluster.
 	{
 		newLogger.Log("level", "debug", "message", "installing e2e-app for testing")
 
@@ -104,27 +112,33 @@ func Test_Draining(t *testing.T) {
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
+
+		newLogger.Log("level", "debug", "message", "installed e2e-app for testing")
 	}
 
 	// wait for e2e app to be up
-	for {
+	{
 		newLogger.Log("level", "debug", "message", "waiting for 2 pods of the e2e-app to be up")
 
-		o := metav1.ListOptions{
-			LabelSelector: "app=e2e-app",
-		}
-		l, err := config.Guest.K8sClient().CoreV1().Pods(ChartNamespace).List(o)
-		if err != nil {
-			t.Fatalf("expected %#v got %#v", nil, err)
+		for {
+			o := metav1.ListOptions{
+				LabelSelector: "app=e2e-app",
+			}
+			l, err := config.Guest.K8sClient().CoreV1().Pods(ChartNamespace).List(o)
+			if err != nil {
+				t.Fatalf("expected %#v got %#v", nil, err)
+			}
+
+			if len(l.Items) != 2 {
+				newLogger.Log("level", "debug", "message", fmt.Sprintf("found %d pods", len(l.Items)))
+				time.Sleep(3 * time.Second)
+				continue
+			}
+
+			break
 		}
 
-		if len(l.Items) != 2 {
-			newLogger.Log("level", "debug", "message", fmt.Sprintf("found %d pods", len(l.Items)))
-			time.Sleep(3 * time.Second)
-			continue
-		}
-
-		break
+		newLogger.Log("level", "debug", "message", "waited for 2 pods of the e2e-app to be up")
 	}
 
 	// continuously request e2e app
@@ -132,9 +146,67 @@ func Test_Draining(t *testing.T) {
 	var success float64
 	done := make(chan struct{}, 1)
 	{
-		newLogger.Log("level", "debug", "message", "continuously requesting e2e-app")
+		requestE2EApp := func() error {
+			tlsConfig, err := rest.TLSConfigFor(config.Guest.RestConfig())
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			client := &http.Client{
+				Transport: &http.Transport{
+					TLSClientConfig: tlsConfig,
+				},
+			}
+
+			restClient := config.Guest.K8sClient().Discovery().RESTClient()
+			u := restClient.Get().AbsPath("api", "v1", "namespaces", "e2e-app", "services", "e2e-app:8000", "proxy/").URL()
+			resp, err := client.Get(u.String())
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			defer resp.Body.Close()
+
+			b, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			var r E2EAppResponse
+			err = json.Unmarshal(b, &r)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			if r.Name != e2eAppName {
+				return microerror.Maskf(e2eAppError, "expctected name %#q got %#q", e2eAppName, r.Name)
+			} else if r.Source != e2eAppSource {
+				return microerror.Maskf(e2eAppError, "expctected name %#q got %#q", e2eAppSource, r.Source)
+			}
+
+			return nil
+		}
+
+		debugFailure := func(err error) {
+			if err != nil {
+				newLogger.Log("level", "warning", "message", "failed requesting e2e-app", "stack", fmt.Sprintf("%#v", err))
+			}
+
+			o := metav1.ListOptions{
+				LabelSelector: "app=e2e-app",
+			}
+			l, err := config.Guest.K8sClient().CoreV1().Pods(ChartNamespace).List(o)
+			if err != nil {
+				t.Fatalf("expected %#v got %#v", nil, err)
+			}
+
+			for _, p := range l.Items {
+				newLogger.Log("level", "debug", "message", fmt.Sprintf("e2e-app pod %#q has status %#v", p.GetName(), p.Status))
+			}
+		}
 
 		go func() {
+			newLogger.Log("level", "debug", "message", "requesting e2e-app continuously")
+			defer newLogger.Log("level", "debug", "message", "requested e2e-app continuously")
+
 			for {
 				time.Sleep(200 * time.Millisecond)
 
@@ -142,43 +214,9 @@ func Test_Draining(t *testing.T) {
 				case <-done:
 					return
 				default:
-					tlsConfig, err := rest.TLSConfigFor(config.Guest.RestConfig())
+					err := requestE2EApp()
 					if err != nil {
-						fmt.Printf("expected %#v got %#v (%s)\n", nil, err, err.Error())
-						continue
-					}
-					client := &http.Client{
-						Transport: &http.Transport{
-							TLSClientConfig: tlsConfig,
-						},
-					}
-
-					restClient := config.Guest.K8sClient().Discovery().RESTClient()
-					u := restClient.Get().AbsPath("api", "v1", "namespaces", "e2e-app", "services", "e2e-app:8000", "proxy/").URL()
-					resp, err := client.Get(u.String())
-					if err != nil {
-						fmt.Printf("expected %#v got %#v (%s)\n", nil, err, err.Error())
-						continue
-					} else {
-						defer resp.Body.Close()
-					}
-
-					b, err := ioutil.ReadAll(resp.Body)
-					if err != nil {
-						fmt.Printf("expected %#v got %#v (%s)\n", nil, err, err.Error())
-						continue
-					}
-
-					var r E2EAppResponse
-					err = json.Unmarshal(b, &r)
-					if err != nil {
-						fmt.Printf("expected %#v got %#v (%s)\n", nil, err, err.Error())
-						continue
-					}
-
-					if r.Name != "e2e-app" {
-						failure++
-					} else if r.Source != "https://github.com/giantswarm/e2e-app" {
+						debugFailure(err)
 						failure++
 					} else {
 						success++
@@ -191,10 +229,12 @@ func Test_Draining(t *testing.T) {
 	{
 		newLogger.Log("level", "debug", "message", "verifying e2e-app availability 10 more seconds")
 		time.Sleep(10 * time.Second)
+		newLogger.Log("level", "debug", "message", "verified e2e-app availability 10 more seconds")
+	}
 
-		newLogger.Log("level", "debug", "message", "scaling down guest cluster worker")
+	{
+		newLogger.Log("level", "debug", "message", "scaling down tenant cluster worker")
 
-		// scale down guest cluster
 		masterCount, err := numberOfMasters(env.ClusterID())
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
@@ -212,10 +252,16 @@ func Test_Draining(t *testing.T) {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
 
+		newLogger.Log("level", "debug", "message", "scaled down tenant cluster worker")
+	}
+
+	{
 		newLogger.Log("level", "debug", "message", "verifying e2e-app availability 10 more seconds")
 		time.Sleep(10 * time.Second)
-		close(done)
+		newLogger.Log("level", "debug", "message", "verified e2e-app availability 10 more seconds")
 	}
+
+	close(done)
 
 	{
 		newLogger.Log("level", "debug", "message", "validating test data")
