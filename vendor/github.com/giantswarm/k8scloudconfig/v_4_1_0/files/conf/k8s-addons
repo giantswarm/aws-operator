@@ -1,0 +1,148 @@
+#!/bin/bash
+
+export KUBECONFIG=/etc/kubernetes/kubeconfig/addons.yaml
+# kubectl 1.12.2
+KUBECTL={{ .RegistryDomain }}/giantswarm/docker-kubectl:f5cae44c480bd797dc770dd5f62d40b74063c0d7
+
+/usr/bin/docker pull $KUBECTL
+
+# wait for healthy master
+while [ "$(/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL get cs | grep Healthy | wc -l)" -ne "3" ]; do sleep 1 && echo 'Waiting for healthy k8s'; done
+
+# apply Security bootstrap (RBAC and PSP)
+SECURITY_FILES=""
+SECURITY_FILES="${SECURITY_FILES} rbac_bindings.yaml"
+SECURITY_FILES="${SECURITY_FILES} rbac_roles.yaml"
+SECURITY_FILES="${SECURITY_FILES} psp_policies.yaml"
+SECURITY_FILES="${SECURITY_FILES} psp_roles.yaml"
+SECURITY_FILES="${SECURITY_FILES} psp_binding.yaml"
+
+for manifest in $SECURITY_FILES
+do
+    while
+        /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/$manifest
+        [ "$?" -ne "0" ]
+    do
+        echo "failed to apply /srv/$manifest, retrying in 5 sec"
+        sleep 5s
+    done
+done
+
+# check for other master and remove it
+THIS_MACHINE=$(cat /etc/hostname)
+for master in $(/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL get nodes --no-headers=true --selector role=master | awk '{print $1}')
+do
+    if [ "$master" != "$THIS_MACHINE" ]; then
+        /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL delete node $master
+    fi
+done
+
+# wait for etcd dns (return code 35 is bad certificate which is good enough here)
+while
+    curl "https://{{ .Cluster.Etcd.Domain }}:{{ .EtcdPort }}" -k 2>/dev/null >/dev/null
+    RET_CODE=$?
+    [ "$RET_CODE" -ne "35" ]
+do
+    echo "Waiting for etcd to be ready . . "
+    sleep 3s
+done
+
+# create kube-proxy configmap
+while
+    /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv $KUBECTL create configmap kube-proxy --from-file=kube-proxy.yaml=/srv/kube-proxy-config.yaml -o yaml --dry-run \
+    | /usr/bin/docker run  -i --log-driver=none -a stdin -a stdout -a stderr -e KUBECONFIG=${KUBECONFIG} -v /etc/kubernetes:/etc/kubernetes --net=host --rm $KUBECTL apply -n kube-system -f -
+    [ "$?" -ne "0" ]
+do
+    echo "failed to configure kube-proxy from /srv/kube-proxy-config.yaml, retrying in 5 sec"
+    sleep 5s
+done
+
+# install kube-proxy
+PROXY_MANIFESTS="kube-proxy-sa.yaml kube-proxy-ds.yaml"
+for manifest in $PROXY_MANIFESTS
+do
+    while
+        /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/$manifest
+        [ "$?" -ne "0" ]
+    do
+        echo "failed to apply /srv/$manifest, retrying in 5 sec"
+        sleep 5s
+    done
+done
+echo "kube-proxy successfully installed"
+
+# restart ds to apply config from configmap
+/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL delete pods -l k8s-app=kube-proxy -n kube-system
+
+{{ if not .DisableCalico -}}
+
+# apply calico
+CALICO_FILE="calico-all.yaml"
+
+while
+    /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/$CALICO_FILE
+    [ "$?" -ne "0" ]
+do
+    echo "failed to apply /srv/$manifest, retrying in 5 sec"
+    sleep 5s
+done
+
+# wait for healthy calico - we check for pods - desired vs ready
+while
+    # result of this is 'eval [ "$DESIRED_POD_COUNT" -eq "$READY_POD_COUNT" ]'
+    /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL -n kube-system  get ds calico-node 2>/dev/null >/dev/null
+    RET_CODE_1=$?
+    eval $(/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL -n kube-system get ds calico-node | tail -1 | awk '{print "[ \"" $2"\" -eq \""$4"\" ] "}')
+    RET_CODE_2=$?
+    [ "$RET_CODE_1" -ne "0" ] || [ "$RET_CODE_2" -ne "0" ]
+do
+    echo "Waiting for calico to be ready . . "
+    sleep 3s
+done
+
+{{ end -}}
+
+# apply default storage class
+if [ -f /srv/default-storage-class.yaml ]; then
+    while
+        /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/default-storage-class.yaml
+        [ "$?" -ne "0" ]
+    do
+        echo "failed to apply /srv/default-storage-class.yaml, retrying in 5 sec"
+        sleep 5s
+    done
+else
+    echo "no default storage class to apply"
+fi
+
+# apply priority classes:
+PRIORITY_CLASSES_FILE="priority_classes.yaml"
+
+while
+    /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/$PRIORITY_CLASSES_FILE
+    [ "$?" -ne "0" ]
+do
+    echo "failed to apply /srv/$PRIORITY_CLASSES_FILE, retrying in 5 sec"
+    sleep 5s
+done
+
+# apply k8s addons
+MANIFESTS=""
+{{ range .ExtraManifests -}}
+MANIFESTS="${MANIFESTS} {{ . }}"
+{{ end -}}
+{{ if not .DisableIngressControllerService -}}
+MANIFESTS="${MANIFESTS} ingress-controller-svc.yaml"
+{{ end -}}
+
+for manifest in $MANIFESTS
+do
+    while
+        /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/$manifest
+        [ "$?" -ne "0" ]
+    do
+        echo "failed to apply /srv/$manifest, retrying in 5 sec"
+        sleep 5s
+    done
+done
+echo "Addons successfully installed"

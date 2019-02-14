@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	"github.com/giantswarm/aws-operator/service/controller/v22/adapter"
@@ -56,6 +57,8 @@ func Test_Resource_Cloudformation_GetCloudFormationTags(t *testing.T) {
 
 	c := Config{}
 
+	c.EncrypterBackend = "kms"
+	c.G8sClient = fake.NewSimpleClientset()
 	c.HostClients = &adapter.Clients{
 		EC2:            &adapter.EC2ClientMock{},
 		CloudFormation: &adapter.CloudFormationMock{},
@@ -63,7 +66,6 @@ func Test_Resource_Cloudformation_GetCloudFormationTags(t *testing.T) {
 		STS:            &adapter.STSClientMock{},
 	}
 	c.Logger = microloggertest.New()
-	c.EncrypterBackend = "kms"
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {

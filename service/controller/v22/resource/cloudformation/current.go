@@ -170,12 +170,10 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 				return StackState{}, microerror.Mask(err)
 			}
 
-			sz, err := strconv.ParseUint(v, 10, 32)
+			workerDockerVolumeSizeGB, err = strconv.Atoi(v)
 			if err != nil {
 				return StackState{}, microerror.Mask(err)
 			}
-
-			workerDockerVolumeSizeGB = int(sz)
 		}
 
 		masterImageID, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.MasterImageIDKey)
@@ -195,7 +193,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			return StackState{}, microerror.Mask(err)
 		}
 
-		workerCount, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerCountKey)
+		workerCloudConfigVersion, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerCloudConfigVersionKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
@@ -204,10 +202,6 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			return StackState{}, microerror.Mask(err)
 		}
 		workerInstanceType, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerInstanceTypeKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-		workerCloudConfigVersion, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerCloudConfigVersionKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
@@ -228,11 +222,10 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			MasterInstanceType:         masterInstanceType,
 			MasterCloudConfigVersion:   masterCloudConfigVersion,
 
-			WorkerCount:              workerCount,
+			WorkerCloudConfigVersion: workerCloudConfigVersion,
 			WorkerDockerVolumeSizeGB: workerDockerVolumeSizeGB,
 			WorkerImageID:            workerImageID,
 			WorkerInstanceType:       workerInstanceType,
-			WorkerCloudConfigVersion: workerCloudConfigVersion,
 
 			VersionBundleVersion: versionBundleVersion,
 		}

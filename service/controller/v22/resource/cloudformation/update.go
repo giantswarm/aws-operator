@@ -190,7 +190,12 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the guest cluster main stack has to be scaled")
 
-		if r.shouldScale(ctx, currentStackState, desiredStackState) {
+		shouldScale, err := r.shouldScale(ctx, customObject, currentStackState, desiredStackState)
+		if err != nil {
+			return StackState{}, microerror.Mask(err)
+		}
+
+		if shouldScale {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack has to be scaled")
 
 			desiredStackState.MasterInstanceResourceName = currentStackState.MasterInstanceResourceName
@@ -222,45 +227,54 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 // changes. In case anything else changes as well, scaling is not allowed, since
 // any other changes should be covered by general updates, which is a separate
 // step.
-func (r *Resource) shouldScale(ctx context.Context, currentState, desiredState StackState) bool {
+func (r *Resource) shouldScale(ctx context.Context, customObject v1alpha1.AWSConfig, currentState, desiredState StackState) (bool, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return false, microerror.Mask(err)
+	}
+
 	if currentState.MasterImageID != desiredState.MasterImageID {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to master image id")
-		return false
+		return false, nil
 	}
 	if currentState.MasterInstanceType != desiredState.MasterInstanceType {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to master instance type")
-		return false
+		return false, nil
 	}
 	if currentState.MasterCloudConfigVersion != desiredState.MasterCloudConfigVersion {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to master cloudconfig version")
-		return false
+		return false, nil
 	}
 	if currentState.WorkerDockerVolumeSizeGB != desiredState.WorkerDockerVolumeSizeGB {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to worker docker volume size")
-		return false
+		return false, nil
 	}
 	if currentState.WorkerImageID != desiredState.WorkerImageID {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to worker image id")
-		return false
+		return false, nil
 	}
 	if currentState.WorkerInstanceType != desiredState.WorkerInstanceType {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to worker instance type")
-		return false
+		return false, nil
 	}
 	if currentState.WorkerCloudConfigVersion != desiredState.WorkerCloudConfigVersion {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to worker cloudconfig version")
-		return false
+		return false, nil
+	}
+	if !cc.Status.Cluster.ASG.IsEmpty() && cc.Status.Cluster.ASG.MaxSize != key.ScalingMax(customObject) {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "scaling due to scaling.max")
+		return true, nil
+	}
+	if !cc.Status.Cluster.ASG.IsEmpty() && cc.Status.Cluster.ASG.MinSize != key.ScalingMin(customObject) {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "scaling due to scaling.min")
+		return true, nil
 	}
 	if currentState.VersionBundleVersion != desiredState.VersionBundleVersion {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to version bundle version")
-		return false
+		return false, nil
 	}
 
-	if currentState.WorkerCount != desiredState.WorkerCount {
-		return true
-	}
-
-	return false
+	return false, nil
 }
 
 // shouldUpdate determines whether the reconciled guest cluster should be

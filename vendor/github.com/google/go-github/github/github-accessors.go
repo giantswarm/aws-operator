@@ -7324,6 +7324,14 @@ func (p *PullRequest) GetPatchURL() string {
 	return *p.PatchURL
 }
 
+// GetReviewComments returns the ReviewComments field if it's non-nil, zero value otherwise.
+func (p *PullRequest) GetReviewComments() int {
+	if p == nil || p.ReviewComments == nil {
+		return 0
+	}
+	return *p.ReviewComments
+}
+
 // GetReviewCommentsURL returns the ReviewCommentsURL field if it's non-nil, zero value otherwise.
 func (p *PullRequest) GetReviewCommentsURL() string {
 	if p == nil || p.ReviewCommentsURL == nil {
@@ -12146,6 +12154,14 @@ func (u *UserStats) GetTotalUsers() int {
 		return 0
 	}
 	return *u.TotalUsers
+}
+
+// GetReason returns the Reason field if it's non-nil, zero value otherwise.
+func (u *UserSuspendOptions) GetReason() string {
+	if u == nil || u.Reason == nil {
+		return ""
+	}
+	return *u.Reason
 }
 
 // GetAction returns the Action field if it's non-nil, zero value otherwise.

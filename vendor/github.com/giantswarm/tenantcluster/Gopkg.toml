@@ -62,6 +62,10 @@ required = [
   name = "github.com/giantswarm/operatorkit"
 
 [[constraint]]
+  name = "k8s.io/apiextensions-apiserver"
+  version = "kubernetes-1.13.2"
+
+[[constraint]]
   name = "k8s.io/apiserver"
   version = "kubernetes-1.13.2"
 

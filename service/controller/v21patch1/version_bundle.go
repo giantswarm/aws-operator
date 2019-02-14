@@ -8,14 +8,9 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "cloudconfig",
-				Description: "Replace cloudinit with ignition.",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "aws-operator",
-				Description: "Add S3 VPC endpoint.",
-				Kind:        versionbundle.KindAdded,
+				Component:   "containerlinux",
+				Description: "Fix for CVE-2019-5736.",
+				Kind:        versionbundle.KindSecurity,
 			},
 		},
 		Components: []versionbundle.Component{
@@ -25,7 +20,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "containerlinux",
-				Version: "1855.5.0",
+				Version: "1967.5.0",
 			},
 			{
 				Name:    "docker",
@@ -41,6 +36,6 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    "aws-operator",
-		Version: "4.5.0",
+		Version: "4.5.1",
 	}
 }
