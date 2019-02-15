@@ -3,6 +3,7 @@ package cloudconfig
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
@@ -19,7 +20,12 @@ import (
 func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, clusterCerts certs.Cluster) (string, error) {
 	var err error
 
-	c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("files %+v", clusterCerts))
+	clusterCertsJSON, err := json.Marshal(clusterCerts)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("cluster certs %s", string(clusterCertsJSON)))
 
 	ctlCtx, err := controllercontext.FromContext(ctx)
 	if err != nil {
