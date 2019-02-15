@@ -504,12 +504,12 @@
   revision = "7ce5c5accc2e7896575fac81721e1218a966a380"
 
 [[projects]]
-  branch = "remove-heartbeat"
+  branch = "master"
   digest = "1:f5c567930d4fd8a2d34e0231f2e2e1c3a0b40d41d0efbbdc50bf71668a0f375f"
   name = "github.com/giantswarm/statusresource"
   packages = ["."]
   pruneopts = "UT"
-  revision = "453b2c64061680820df8ede2f3d5f460c18d4718"
+  revision = "37ad148a1015fff2d1a45b29ea05114911b7d422"
 
 [[projects]]
   branch = "master"

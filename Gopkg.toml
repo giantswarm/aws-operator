@@ -113,7 +113,7 @@ required = [
   name = "github.com/giantswarm/randomkeys"
 
 [[constraint]]
-  branch = "remove-heartbeat"
+  branch = "master"
   name = "github.com/giantswarm/statusresource"
 
 [[constraint]]
