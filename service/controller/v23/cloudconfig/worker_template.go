@@ -3,6 +3,7 @@ package cloudconfig
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
@@ -17,6 +18,8 @@ import (
 // as a string.
 func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, clusterCerts certs.Cluster) (string, error) {
 	var err error
+
+	c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("files %+v", clusterCerts))
 
 	ctlCtx, err := controllercontext.FromContext(ctx)
 	if err != nil {
@@ -48,6 +51,9 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 
 		ignitionPath := k8scloudconfig.GetIgnitionPath(c.ignitionPath)
 		params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)
+
+		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("files %+v", params.Files))
+
 		if err != nil {
 			return "", microerror.Mask(err)
 		}
