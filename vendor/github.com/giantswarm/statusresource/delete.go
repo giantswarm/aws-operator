@@ -121,16 +121,6 @@ func (r *Resource) computeDeleteEventPatches(ctx context.Context, obj interface{
 
 			r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("setting %#q status condition", providerv1alpha1.StatusClusterTypeDeleting))
 		}
-
-		if clusterStatus.HasDeletingCondition() && isHeartBeatOverdue(clusterStatus.GetDeletingCondition()) {
-			patches = append(patches, Patch{
-				Op:    "replace",
-				Path:  "/status/cluster/conditions",
-				Value: clusterStatus.UpdateHeartBeatOfDeletingCondition(),
-			})
-
-			r.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("updating heartbeat for %#q status condition", providerv1alpha1.StatusClusterTypeDeleting))
-		}
 	}
 
 	return patches, nil

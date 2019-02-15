@@ -227,7 +227,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e03db988b22f0d319bb580195444d3e0776c5240677f0d3d363a0bc9d46827c3"
+  digest = "1:4d461c0afc9f10ba7a0ad76e373217c69aeccfe9c683aa4d77d1307c74d30ea8"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/application/v1alpha1",
@@ -250,7 +250,7 @@
     "pkg/clientset/versioned/typed/release/v1alpha1/fake",
   ]
   pruneopts = "UT"
-  revision = "8c6a552bcf85aae992d9e00569fff4dd3f30f167"
+  revision = "304908ba11ba09bfc343c4781f642da58488746b"
 
 [[projects]]
   branch = "master"
@@ -504,12 +504,12 @@
   revision = "7ce5c5accc2e7896575fac81721e1218a966a380"
 
 [[projects]]
-  branch = "master"
-  digest = "1:25c29c0bd8768d41b9edb20cdff9dc43a85b2bfca355f88520a90607a4a677d1"
+  branch = "remove-heartbeat"
+  digest = "1:f5c567930d4fd8a2d34e0231f2e2e1c3a0b40d41d0efbbdc50bf71668a0f375f"
   name = "github.com/giantswarm/statusresource"
   packages = ["."]
   pruneopts = "UT"
-  revision = "9503629eabf0395bcefa9628ecd8d289aae77fd5"
+  revision = "453b2c64061680820df8ede2f3d5f460c18d4718"
 
 [[projects]]
   branch = "master"
