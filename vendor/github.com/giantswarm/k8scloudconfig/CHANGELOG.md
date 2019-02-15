@@ -10,6 +10,10 @@ versions are frozen. To freeze current version all files are copied to a new
 version directory, and then changes are introduced.
 
 ## [v4.1.0] WIP
+### Changed
+- Intall calicoctl, crictl and configure etcctl tooling in masters.
+- Update kubernetes to 1.13.3.
+- Update etcd to 3.3.12.
 
 ## [v3.8.0] WIP
 

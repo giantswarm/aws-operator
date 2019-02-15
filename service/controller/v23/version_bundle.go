@@ -8,15 +8,25 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "TODO",
-				Description: "TODO",
+				Component:   "kubernetes",
+				Description: "Update kubernetes to 1.13.3",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "etcd",
+				Description: "Update etcd to 3.3.12",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "calico",
+				Description: "Update calico to 3.5.3",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
 		Components: []versionbundle.Component{
 			{
 				Name:    "calico",
-				Version: "3.2.3",
+				Version: "3.5.3",
 			},
 			{
 				Name:    "containerlinux",
@@ -28,11 +38,11 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "etcd",
-				Version: "3.3.9",
+				Version: "3.3.12",
 			},
 			{
 				Name:    "kubernetes",
-				Version: "1.12.3",
+				Version: "1.13.3",
 			},
 		},
 		Name:    "aws-operator",

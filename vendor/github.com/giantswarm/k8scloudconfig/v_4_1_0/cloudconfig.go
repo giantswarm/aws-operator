@@ -12,8 +12,8 @@ import (
 
 const (
 	defaultRegistryDomain = "quay.io"
-	kubernetesImage       = "giantswarm/hyperkube:v1.12.3"
-	etcdImage             = "giantswarm/etcd:v3.3.9"
+	kubernetesImage       = "giantswarm/hyperkube:v1.13.3"
+	etcdImage             = "giantswarm/etcd:v3.3.12"
 	etcdPort              = 443
 )
 

@@ -1,7 +1,7 @@
 kind: KubeSchedulerConfiguration
 algorithmSource:
   provider: DefaultProvider
-apiVersion: componentconfig/v1alpha1
+apiVersion: kubescheduler.config.k8s.io/v1alpha1
 clientConnection:
   kubeconfig: /etc/kubernetes/kubeconfig/scheduler.yaml
 failureDomains: kubernetes.io/hostname,failure-domain.beta.kubernetes.io/zone,failure-domain.beta.kubernetes.io/region
