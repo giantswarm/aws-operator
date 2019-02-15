@@ -14,6 +14,7 @@ version directory, and then changes are introduced.
 - Intall calicoctl, crictl and configure etcctl tooling in masters.
 - Update kubernetes to 1.13.3.
 - Update etcd to 3.3.12.
+- Update calico to 3.5.1.
 
 ## [v3.8.0] WIP
 
