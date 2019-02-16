@@ -1,6 +1,8 @@
 #!/bin/bash
 set -eu
 
+mkdir -p /opt/bin
+
 # download calicoctl
 CALICOCTL_VERSION=v3.5.0
 wget https://github.com/projectcalico/calicoctl/releases/download/${CALICOCTL_VERSION}/calicoctl-linux-amd64

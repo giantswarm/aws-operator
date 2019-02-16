@@ -74,7 +74,7 @@ func (s StatusCluster) LatestVersion() string {
 	latest := s.Versions[0]
 
 	for _, v := range s.Versions {
-		if latest.Date.Before(v.Date) {
+		if latest.LastTransitionTime.Time.Before(v.LastTransitionTime.Time) || latest.Date.Before(v.Date) {
 			latest = v
 		}
 	}
