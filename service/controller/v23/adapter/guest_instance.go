@@ -30,6 +30,7 @@ type GuestInstanceAdapterMaster struct {
 	EncrypterBackend string
 	DockerVolume     GuestInstanceAdapterMasterDockerVolume
 	EtcdVolume       GuestInstanceAdapterMasterEtcdVolume
+	AuditLogVolume   GuestInstanceAdapterMasterAuditLogVolume
 	Instance         GuestInstanceAdapterMasterInstance
 	PrivateSubnet    string
 }
@@ -40,6 +41,10 @@ type GuestInstanceAdapterMasterDockerVolume struct {
 }
 
 type GuestInstanceAdapterMasterEtcdVolume struct {
+	Name string
+}
+
+type GuestInstanceAdapterMasterAuditLogVolume struct {
 	Name string
 }
 
@@ -91,6 +96,8 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 		i.Master.DockerVolume.ResourceName = config.StackState.DockerVolumeResourceName
 
 		i.Master.EtcdVolume.Name = key.EtcdVolumeName(config.CustomObject)
+
+		i.Master.AuditLogVolume.Name = key.AuditLogVolume(config.CustomObject)
 
 		i.Master.Instance.ResourceName = config.StackState.MasterInstanceResourceName
 
