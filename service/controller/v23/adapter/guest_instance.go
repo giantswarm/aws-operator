@@ -97,7 +97,7 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 
 		i.Master.EtcdVolume.Name = key.EtcdVolumeName(config.CustomObject)
 
-		i.Master.AuditLogVolume.Name = key.AuditLogVolume(config.CustomObject)
+		i.Master.AuditLogVolume.Name = key.AuditLogVolumeName(config.CustomObject)
 
 		i.Master.Instance.ResourceName = config.StackState.MasterInstanceResourceName
 
