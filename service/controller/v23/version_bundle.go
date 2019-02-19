@@ -9,7 +9,7 @@ func VersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "kubernetes",
-				Description: "Update kubernetes to 1.13.3",
+				Description: "Update kubernetes to 1.13.3. More info here: https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.13.md",
 				Kind:        versionbundle.KindChanged,
 			},
 			{
