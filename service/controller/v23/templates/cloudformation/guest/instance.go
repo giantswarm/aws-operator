@@ -45,7 +45,7 @@ const Instance = `{{ define "instance" }}
       Tags:
       - Key: Name
         Value: {{ $v.Master.EtcdVolume.Name }}
-  AuditLogVolume:
+  LogVolume:
     Type: AWS::EC2::Volume
     Properties:
 {{ if eq $v.Master.EncrypterBackend "kms" }}
@@ -56,7 +56,7 @@ const Instance = `{{ define "instance" }}
       AvailabilityZone: {{ $v.Master.AZ }}
       Tags:
       - Key: Name
-        Value: {{ $v.Master.AuditLogVolume.Name }}
+        Value: {{ $v.Master.LogVolume.Name }}
   {{ $v.Master.Instance.ResourceName }}DockerMountPoint:
     Type: AWS::EC2::VolumeAttachment
     Properties:
@@ -73,6 +73,6 @@ const Instance = `{{ define "instance" }}
     Type: AWS::EC2::VolumeAttachment
     Properties:
       InstanceId: !Ref {{ $v.Master.Instance.ResourceName }}
-      VolumeId: !Ref AuditLogVolume
+      VolumeId: !Ref LogVolume
       Device: /dev/xvdf
 {{ end }}`
