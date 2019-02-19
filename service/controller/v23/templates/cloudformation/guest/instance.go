@@ -69,7 +69,7 @@ const Instance = `{{ define "instance" }}
       InstanceId: !Ref {{ $v.Master.Instance.ResourceName }}
       VolumeId: !Ref EtcdVolume
       Device: /dev/xvdh
-  {{ $v.Master.Instance.ResourceName }}AuditLogMountPoint:
+  {{ $v.Master.Instance.ResourceName }}LogMountPoint:
     Type: AWS::EC2::VolumeAttachment
     Properties:
       InstanceId: !Ref {{ $v.Master.Instance.ResourceName }}
