@@ -19,14 +19,14 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "calico",
-				Description: "Update calico to 3.5.3",
+				Description: "Update calico to 3.5.1",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
 		Components: []versionbundle.Component{
 			{
 				Name:    "calico",
-				Version: "3.5.3",
+				Version: "3.5.1",
 			},
 			{
 				Name:    "containerlinux",
