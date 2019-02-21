@@ -364,13 +364,6 @@ coreos:
       --network-plugin=cni \
       --register-node=true \
       --kubeconfig=/etc/kubernetes/config/kubelet-kubeconfig.yml \
-      --kube-reserved="cpu=200m,memory=250Mi" \
-      --system-reserved="cpu=150m,memory=250Mi" \
-      --eviction-soft='memory.available<500Mi' \
-      --eviction-hard='memory.available<350Mi' \
-      --eviction-soft-grace-period='memory.available=5s' \
-      --eviction-max-pod-grace-period=60 \
-      --enforce-node-allocatable=pods \
       --node-labels="ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
       --v=2"
       ExecStop=-/usr/bin/docker stop -t 10 $NAME
