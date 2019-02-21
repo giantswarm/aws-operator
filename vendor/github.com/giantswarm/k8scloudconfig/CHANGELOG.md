@@ -15,6 +15,7 @@ version directory, and then changes are introduced.
 - Update kubernetes to 1.13.3.
 - Update etcd to 3.3.12.
 - Update calico to 3.5.1.
+- Add fine-grained Audit Policy
 
 ## [v3.8.0] WIP
 
