@@ -1,0 +1,11 @@
+#!/bin/bash
+domains="{{.Cluster.Etcd.Domain}} {{.Cluster.Kubernetes.API.Domain}}"
+
+for domain in $domains; do
+until nslookup $domain; do
+    echo "Waiting for domain $domain to be available"
+    sleep 5
+done
+
+echo "Successfully resolved domain $domain"
+done

@@ -31,6 +31,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v22/encrypter/vault"
 	"github.com/giantswarm/aws-operator/service/controller/v22/key"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/accountid"
+	"github.com/giantswarm/aws-operator/service/controller/v22/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/bridgezone"
 	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v22/resource/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/ebsvolume"
@@ -43,6 +44,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/v22/resource/service"
+	"github.com/giantswarm/aws-operator/service/controller/v22/resource/workerasgname"
 )
 
 const (
@@ -212,6 +214,19 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var asgStatusResource controller.Resource
+	{
+		c := asgstatus.Config{
+			G8sClient: config.G8sClient,
+			Logger:    config.Logger,
+		}
+
+		asgStatusResource, err = asgstatus.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var encryptionKeyResource controller.Resource
 	{
 		c := encryptionkey.Config{
@@ -341,6 +356,12 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var cloudformationResource controller.Resource
 	{
 		c := cloudformationresource.Config{
+			APIWhitelist: adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
+			},
+			EncrypterRoleManager: encrypterRoleManager,
+			G8sClient:            config.G8sClient,
 			HostClients: &adapter.Clients{
 				EC2:            config.HostAWSClients.EC2,
 				IAM:            config.HostAWSClients.IAM,
@@ -348,14 +369,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 				CloudFormation: config.HostAWSClients.CloudFormation,
 			},
 			Logger: config.Logger,
-			APIWhitelist: adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
-			},
 
 			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
 			EncrypterBackend:           config.EncrypterBackend,
-			EncrypterRoleManager:       encrypterRoleManager,
 			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
 			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
 			InstallationName:           config.InstallationName,
@@ -477,8 +493,22 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var workerASGNameResource controller.Resource
+	{
+		c := workerasgname.ResourceConfig{
+			Logger: config.Logger,
+		}
+
+		workerASGNameResource, err = workerasgname.NewResource(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resources := []controller.Resource{
 		accountIDResource,
+		workerASGNameResource,
+		asgStatusResource,
 		statusResource,
 		migrationResource,
 		ipamResource,

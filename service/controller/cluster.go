@@ -9,6 +9,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v17patch1"
 	v17patch1adapter "github.com/giantswarm/aws-operator/service/controller/v17patch1/adapter"
 	v17patch1cloudconfig "github.com/giantswarm/aws-operator/service/controller/v17patch1/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v17patch2"
+	v17patch2adapter "github.com/giantswarm/aws-operator/service/controller/v17patch2/adapter"
+	v17patch2cloudconfig "github.com/giantswarm/aws-operator/service/controller/v17patch2/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v18"
 	v18adapter "github.com/giantswarm/aws-operator/service/controller/v18/adapter"
 	v18cloudconfig "github.com/giantswarm/aws-operator/service/controller/v18/cloudconfig"
@@ -21,9 +24,15 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v21"
 	v21adapter "github.com/giantswarm/aws-operator/service/controller/v21/adapter"
 	v21cloudconfig "github.com/giantswarm/aws-operator/service/controller/v21/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v21patch1"
+	v21patch1adapter "github.com/giantswarm/aws-operator/service/controller/v21patch1/adapter"
+	v21patch1cloudconfig "github.com/giantswarm/aws-operator/service/controller/v21patch1/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v22"
 	v22adapter "github.com/giantswarm/aws-operator/service/controller/v22/adapter"
 	v22cloudconfig "github.com/giantswarm/aws-operator/service/controller/v22/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v23"
+	v23adapter "github.com/giantswarm/aws-operator/service/controller/v23/adapter"
+	v23cloudconfig "github.com/giantswarm/aws-operator/service/controller/v23/cloudconfig"
 	"github.com/giantswarm/certs"
 	"github.com/giantswarm/legacycerts/legacy"
 	"github.com/giantswarm/microerror"
@@ -294,6 +303,49 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var resourceSetV17Patch2 *controller.ResourceSet
+	{
+		c := v17patch2.ClusterResourceSetConfig{
+			CertsSearcher:      legacyCertsSearcher,
+			G8sClient:          config.G8sClient,
+			HostAWSConfig:      hostAWSConfig,
+			HostAWSClients:     awsHostClients,
+			K8sClient:          config.K8sClient,
+			Logger:             config.Logger,
+			RandomkeysSearcher: randomKeysSearcher,
+
+			AccessLogsExpiration:   config.AccessLogsExpiration,
+			AdvancedMonitoringEC2:  config.AdvancedMonitoringEC2,
+			DeleteLoggingBucket:    config.DeleteLoggingBucket,
+			EncrypterBackend:       config.EncrypterBackend,
+			GuestUpdateEnabled:     config.GuestUpdateEnabled,
+			PodInfraContainerImage: config.PodInfraContainerImage,
+			Route53Enabled:         config.Route53Enabled,
+			IncludeTags:            config.IncludeTags,
+			InstallationName:       config.InstallationName,
+			OIDC: v17patch2cloudconfig.OIDCConfig{
+				ClientID:      config.OIDC.ClientID,
+				IssuerURL:     config.OIDC.IssuerURL,
+				UsernameClaim: config.OIDC.UsernameClaim,
+				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			APIWhitelist: v17patch2adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
+			},
+			ProjectName:       config.ProjectName,
+			PublicRouteTables: config.PublicRouteTables,
+			RegistryDomain:    config.RegistryDomain,
+			SSOPublicKey:      config.SSOPublicKey,
+			VaultAddress:      config.VaultAddress,
+		}
+
+		resourceSetV17Patch2, err = v17patch2.NewClusterResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var resourceSetV18 *controller.ResourceSet
 	{
 		c := v18.ClusterResourceSetConfig{
@@ -482,6 +534,55 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var resourceSetV21patch1 *controller.ResourceSet
+	{
+		c := v21patch1.ClusterResourceSetConfig{
+			CertsSearcher:      certsSearcher,
+			G8sClient:          config.G8sClient,
+			HostAWSConfig:      hostAWSConfig,
+			HostAWSClients:     awsHostClients,
+			K8sClient:          config.K8sClient,
+			Logger:             config.Logger,
+			RandomKeysSearcher: randomKeysSearcher,
+
+			AccessLogsExpiration:       config.AccessLogsExpiration,
+			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
+			DeleteLoggingBucket:        config.DeleteLoggingBucket,
+			EncrypterBackend:           config.EncrypterBackend,
+			GuestAvailabilityZones:     config.GuestAWSConfig.AvailabilityZones,
+			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
+			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
+			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
+			GuestUpdateEnabled:         config.GuestUpdateEnabled,
+			PodInfraContainerImage:     config.PodInfraContainerImage,
+			Route53Enabled:             config.Route53Enabled,
+			IgnitionPath:               config.IgnitionPath,
+			IncludeTags:                config.IncludeTags,
+			InstallationName:           config.InstallationName,
+			IPAMNetworkRange:           config.IPAMNetworkRange,
+			OIDC: v21patch1cloudconfig.OIDCConfig{
+				ClientID:      config.OIDC.ClientID,
+				IssuerURL:     config.OIDC.IssuerURL,
+				UsernameClaim: config.OIDC.UsernameClaim,
+				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			APIWhitelist: v21patch1adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
+			},
+			ProjectName:       config.ProjectName,
+			PublicRouteTables: config.PublicRouteTables,
+			RegistryDomain:    config.RegistryDomain,
+			SSOPublicKey:      config.SSOPublicKey,
+			VaultAddress:      config.VaultAddress,
+		}
+
+		resourceSetV21patch1, err = v21patch1.NewClusterResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var resourceSetV22 *controller.ResourceSet
 	{
 		c := v22.ClusterResourceSetConfig{
@@ -531,13 +632,65 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var resourceSetV23 *controller.ResourceSet
+	{
+		c := v23.ClusterResourceSetConfig{
+			CertsSearcher:      certsSearcher,
+			G8sClient:          config.G8sClient,
+			HostAWSConfig:      hostAWSConfig,
+			HostAWSClients:     awsHostClients,
+			K8sClient:          config.K8sClient,
+			Logger:             config.Logger,
+			RandomKeysSearcher: randomKeysSearcher,
+
+			AccessLogsExpiration:       config.AccessLogsExpiration,
+			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
+			DeleteLoggingBucket:        config.DeleteLoggingBucket,
+			EncrypterBackend:           config.EncrypterBackend,
+			GuestAvailabilityZones:     config.GuestAWSConfig.AvailabilityZones,
+			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
+			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
+			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
+			GuestUpdateEnabled:         config.GuestUpdateEnabled,
+			PodInfraContainerImage:     config.PodInfraContainerImage,
+			Route53Enabled:             config.Route53Enabled,
+			IgnitionPath:               config.IgnitionPath,
+			IncludeTags:                config.IncludeTags,
+			InstallationName:           config.InstallationName,
+			IPAMNetworkRange:           config.IPAMNetworkRange,
+			OIDC: v23cloudconfig.OIDCConfig{
+				ClientID:      config.OIDC.ClientID,
+				IssuerURL:     config.OIDC.IssuerURL,
+				UsernameClaim: config.OIDC.UsernameClaim,
+				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			APIWhitelist: v23adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
+			},
+			ProjectName:       config.ProjectName,
+			PublicRouteTables: config.PublicRouteTables,
+			RegistryDomain:    config.RegistryDomain,
+			SSOPublicKey:      config.SSOPublicKey,
+			VaultAddress:      config.VaultAddress,
+		}
+
+		resourceSetV23, err = v23.NewClusterResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resourceSets := []*controller.ResourceSet{
 		resourceSetV17Patch1,
+		resourceSetV17Patch2,
 		resourceSetV18,
 		resourceSetV19,
 		resourceSetV20,
 		resourceSetV21,
+		resourceSetV21patch1,
 		resourceSetV22,
+		resourceSetV23,
 	}
 
 	return resourceSets, nil

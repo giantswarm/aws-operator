@@ -2,7 +2,6 @@ package cloudformation
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/giantswarm/microerror"
 
@@ -46,7 +45,6 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			MasterCloudConfigVersion:   key.CloudConfigVersion,
 			MasterInstanceMonitoring:   r.monitoring,
 
-			WorkerCount:              strconv.Itoa(key.WorkerCount(customObject)),
 			WorkerDockerVolumeSizeGB: key.WorkerDockerVolumeSizeGB(customObject),
 			WorkerImageID:            imageID,
 			WorkerInstanceMonitoring: r.monitoring,

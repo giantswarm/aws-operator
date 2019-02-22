@@ -63,6 +63,10 @@ required = [
 
 [[constraint]]
   branch = "master"
+  name = "github.com/google/go-cmp"
+
+[[constraint]]
+  branch = "master"
   name = "github.com/prometheus/client_golang"
 
 [[constraint]]
@@ -81,4 +85,5 @@ required = [
 
 [prune]
   go-tests = true
+  non-go = true
   unused-packages = true

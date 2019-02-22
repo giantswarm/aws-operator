@@ -7196,6 +7196,14 @@ func (p *PullRequest) GetDiffURL() string {
 	return *p.DiffURL
 }
 
+// GetDraft returns the Draft field if it's non-nil, zero value otherwise.
+func (p *PullRequest) GetDraft() bool {
+	if p == nil || p.Draft == nil {
+		return false
+	}
+	return *p.Draft
+}
+
 // GetHead returns the Head field.
 func (p *PullRequest) GetHead() *PullRequestBranch {
 	if p == nil {
@@ -7322,6 +7330,14 @@ func (p *PullRequest) GetPatchURL() string {
 		return ""
 	}
 	return *p.PatchURL
+}
+
+// GetReviewComments returns the ReviewComments field if it's non-nil, zero value otherwise.
+func (p *PullRequest) GetReviewComments() int {
+	if p == nil || p.ReviewComments == nil {
+		return 0
+	}
+	return *p.ReviewComments
 }
 
 // GetReviewCommentsURL returns the ReviewCommentsURL field if it's non-nil, zero value otherwise.
@@ -12146,6 +12162,14 @@ func (u *UserStats) GetTotalUsers() int {
 		return 0
 	}
 	return *u.TotalUsers
+}
+
+// GetReason returns the Reason field if it's non-nil, zero value otherwise.
+func (u *UserSuspendOptions) GetReason() string {
+	if u == nil || u.Reason == nil {
+		return ""
+	}
+	return *u.Reason
 }
 
 // GetAction returns the Action field if it's non-nil, zero value otherwise.

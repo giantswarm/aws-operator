@@ -7,11 +7,14 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v17patch1"
+	"github.com/giantswarm/aws-operator/service/controller/v17patch2"
 	"github.com/giantswarm/aws-operator/service/controller/v18"
 	"github.com/giantswarm/aws-operator/service/controller/v19"
 	"github.com/giantswarm/aws-operator/service/controller/v20"
 	"github.com/giantswarm/aws-operator/service/controller/v21"
+	"github.com/giantswarm/aws-operator/service/controller/v21patch1"
 	"github.com/giantswarm/aws-operator/service/controller/v22"
+	"github.com/giantswarm/aws-operator/service/controller/v23"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8scrdclient"
@@ -178,6 +181,24 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var v17patch2ResourceSet *controller.ResourceSet
+	{
+		c := v17patch2.DrainerResourceSetConfig{
+			G8sClient:     config.G8sClient,
+			HostAWSConfig: hostAWSConfig,
+			K8sClient:     config.K8sClient,
+			Logger:        config.Logger,
+
+			GuestUpdateEnabled: config.GuestUpdateEnabled,
+			ProjectName:        config.ProjectName,
+		}
+
+		v17patch2ResourceSet, err = v17patch2.NewDrainerResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var v18ResourceSet *controller.ResourceSet
 	{
 		c := v18.DrainerResourceSetConfig{
@@ -247,6 +268,23 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var v21patch1ResourceSet *controller.ResourceSet
+	{
+		c := v21patch1.DrainerResourceSetConfig{
+			G8sClient:     config.G8sClient,
+			HostAWSConfig: hostAWSConfig,
+			K8sClient:     config.K8sClient,
+			Logger:        config.Logger,
+
+			GuestUpdateEnabled: config.GuestUpdateEnabled,
+			ProjectName:        config.ProjectName,
+		}
+		v21patch1ResourceSet, err = v21patch1.NewDrainerResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var v22ResourceSet *controller.ResourceSet
 	{
 		c := v22.DrainerResourceSetConfig{
@@ -264,13 +302,33 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var v23ResourceSet *controller.ResourceSet
+	{
+		c := v23.DrainerResourceSetConfig{
+			G8sClient:     config.G8sClient,
+			HostAWSConfig: hostAWSConfig,
+			K8sClient:     config.K8sClient,
+			Logger:        config.Logger,
+
+			GuestUpdateEnabled: config.GuestUpdateEnabled,
+			ProjectName:        config.ProjectName,
+		}
+		v23ResourceSet, err = v23.NewDrainerResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resourceSets := []*controller.ResourceSet{
 		v17patch1ResourceSet,
+		v17patch2ResourceSet,
 		v18ResourceSet,
 		v19ResourceSet,
 		v20ResourceSet,
 		v21ResourceSet,
+		v21patch1ResourceSet,
 		v22ResourceSet,
+		v23ResourceSet,
 	}
 
 	return resourceSets, nil
