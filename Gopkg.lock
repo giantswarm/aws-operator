@@ -280,7 +280,7 @@
   revision = "f0fb2f61d78e06f2d1e17f940fd782b92bf29642"
 
 [[projects]]
-  branch = "fix-wait"
+  branch = "master"
   digest = "1:88e4dc60cfaff599348d0f41012885118feae522c3083f205122d204e19f919f"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
@@ -290,7 +290,7 @@
     "pkg/release",
   ]
   pruneopts = "UT"
-  revision = "229fb82becd9b6a5c60f34645350eec6f257dad0"
+  revision = "56e459f1195902e2e42712d83a17fc7d265ee315"
 
 [[projects]]
   branch = "master"
