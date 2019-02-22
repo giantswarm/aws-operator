@@ -22,6 +22,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Update calico to 3.5.1",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "kubernetes",
+				Description: "Improved Audit policy to reduce the amount of Audit logs (high-volume and low-risk).",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
