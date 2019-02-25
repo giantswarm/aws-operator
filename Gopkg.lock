@@ -227,7 +227,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:663c8549e0d55f203394951d776cc548cb6c0c99f4756fea7d7a8752fda1fab4"
+  digest = "1:366fbea7370a38fe01af3cd445f7475d10989ef2ce03e2b509227de4a532ecf6"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/application/v1alpha1",
@@ -250,7 +250,7 @@
     "pkg/clientset/versioned/typed/release/v1alpha1/fake",
   ]
   pruneopts = "UT"
-  revision = "fa5686f0586517057860811376ac9b06598fba76"
+  revision = "acc7fb1e038354fe1eb44c434fea54c4122aa432"
 
 [[projects]]
   branch = "master"
@@ -637,7 +637,7 @@
   name = "github.com/google/go-github"
   packages = ["github"]
   pruneopts = "UT"
-  revision = "00add49aab2728f7c246b27be612b002b22e7f94"
+  revision = "e810655a62ca706a30d22ec9de5a8b05e4987df9"
 
 [[projects]]
   digest = "1:a63cff6b5d8b95638bfe300385d93b2a6d9d687734b863da8e09dc834510a690"
@@ -1014,7 +1014,7 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "a4c6cb3142f211c99e4bf4cd769535b29a9b616f"
+  revision = "ffb98f73852f696ea2bb21a617a5c4b3e067a439"
 
 [[projects]]
   branch = "master"
@@ -1058,14 +1058,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:560aa660b6f65b334a3c13534ec067e3a4f8aad617d2c1fbb53f1494a90feaf8"
+  digest = "1:80200f57d482f61334a482a046ddedbad77c04dbec6ab81a4e1b3c6adbdfadef"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "a9d3bda3a223baa6bba6ef412cb273f0fd163c05"
+  revision = "cc5685c2db1239775905f3911f0067c0fa74762f"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -1471,7 +1471,7 @@
   name = "k8s.io/kube-openapi"
   packages = ["pkg/util/proto"]
   pruneopts = "UT"
-  revision = "ea82251f3668f8c1bde607fa6e20e5bf36e576a4"
+  revision = "aa8624f5a2df0ffbc1e8f4c9f37a2ad5cfcba13b"
 
 [[projects]]
   digest = "1:7719608fe0b52a4ece56c2dde37bedd95b938677d1ab0f84b8a7852e4c59f849"

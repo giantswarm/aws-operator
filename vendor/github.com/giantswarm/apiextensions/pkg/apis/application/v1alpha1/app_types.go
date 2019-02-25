@@ -82,6 +82,7 @@ func NewAppTypeMeta() metav1.TypeMeta {
 //          name: "prometheus-secrets"
 //          namespace: "monitoring"
 //        kubeConfig:
+//          inCluster: false
 //          context:
 //            name: "giantswarm-12345"
 //          secret:
@@ -156,8 +157,19 @@ type AppSpecConfigSecret struct {
 }
 
 type AppSpecKubeConfig struct {
+	// InCluster is a flag for whether to use InCluster credentials. When true the
+	// context name and secret should not be set.
+	InCluster bool `json:"inCluster" yaml:"inCluster"`
+	// Context is the kubeconfig context.
+	Context AppSpecKubeConfigContext `json:"context" yaml:"context"`
 	// Secret references a secret containing the kubconfig.
 	Secret AppSpecKubeConfigSecret `json:"secret" yaml:"secret"`
+}
+
+type AppSpecKubeConfigContext struct {
+	// Name is the name of the kubeconfig context.
+	// e.g. giantswarm-12345.
+	Name string `json:"name" yaml:"name"`
 }
 
 type AppSpecKubeConfigSecret struct {
