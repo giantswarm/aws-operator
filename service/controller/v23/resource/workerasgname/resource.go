@@ -68,7 +68,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 		customObject = *newObj
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "fetchted latest version of custom resource")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "fetched latest version of custom resource")
 	}
 
 	controllerCtx, err := controllercontext.FromContext(ctx)
