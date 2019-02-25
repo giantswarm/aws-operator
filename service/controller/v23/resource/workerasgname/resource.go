@@ -77,7 +77,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the guest cluster worker ASG name in the CR")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster worker ASG name in the CR")
 
 		if customObject.Status.AWS.AutoScalingGroup.Name != "" {
 			controllerCtx.Status.Drainer.WorkerASGName = customObject.Status.AWS.AutoScalingGroup.Name
