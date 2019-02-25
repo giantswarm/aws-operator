@@ -3,14 +3,13 @@ package cloudconfig
 const FormatVarLogService = `
 [Unit]
 Description=Formats EBS volume for log
-After=dev-xvdf.device
-Requires=dev-xvdf.device
+Before=local-fs-pre.target
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/bin/bash -c 'if ! blkid /dev/xvdf; then /usr/sbin/mkfs.ext4 -L etcd /dev/xvdf; fi' 
+ExecStart=-/usr/sbin/mkfs.ext4 /dev/xvdf
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=local-fs-pre.target
 `
