@@ -3,7 +3,7 @@ package cloudconfig
 const FormatVarLogService = `
 [Unit]
 Description=Formats EBS volume for log
-Before=var-log.mount
+Before=var-log.mount local-fs.target
 
 [Service]
 Type=oneshot
