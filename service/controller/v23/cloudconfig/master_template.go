@@ -310,13 +310,13 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: cloudconfig.FormatVarLogService,
 			Name:         "format-var-log.service",
-			Enabled:      true,
+			Enabled:      false,
 		},
 		// Mount log EBS volume.
 		{
 			AssetContent: cloudconfig.EphemeralVarLogMount,
 			Name:         "var-log.mount",
-			Enabled:      true,
+			Enabled:      false,
 		},
 	}
 
