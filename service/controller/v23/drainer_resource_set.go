@@ -64,8 +64,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 	var workerASGNameResource controller.Resource
 	{
 		c := workerasgname.ResourceConfig{
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
+			Logger: config.Logger,
 		}
 
 		workerASGNameResource, err = workerasgname.NewResource(c)
