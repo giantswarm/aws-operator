@@ -243,10 +243,6 @@ func EtcdVolumeName(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-etcd", ClusterID(customObject))
 }
 
-func LogVolumeName(customObject v1alpha1.AWSConfig) string {
-	return fmt.Sprintf("%s-log", ClusterID(customObject))
-}
-
 func EC2ServiceDomain(customObject v1alpha1.AWSConfig) string {
 	domain := "ec2.amazonaws.com"
 

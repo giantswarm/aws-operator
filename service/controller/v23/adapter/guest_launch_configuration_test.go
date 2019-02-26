@@ -48,12 +48,6 @@ func Test_AdapterLaunchConfiguration_RegularFields(t *testing.T) {
 					VolumeSize:          250,
 					VolumeType:          defaultEBSVolumeType,
 				},
-				{
-					DeleteOnTermination: true,
-					DeviceName:          logEBSVolumeMountPoint,
-					VolumeSize:          defaultEBSVolumeSize,
-					VolumeType:          defaultEBSVolumeType,
-				},
 			},
 		},
 		{
@@ -78,12 +72,6 @@ func Test_AdapterLaunchConfiguration_RegularFields(t *testing.T) {
 				{
 					DeleteOnTermination: true,
 					DeviceName:          defaultEBSVolumeMountPoint,
-					VolumeSize:          defaultEBSVolumeSize,
-					VolumeType:          defaultEBSVolumeType,
-				},
-				{
-					DeleteOnTermination: true,
-					DeviceName:          logEBSVolumeMountPoint,
 					VolumeSize:          defaultEBSVolumeSize,
 					VolumeType:          defaultEBSVolumeType,
 				},

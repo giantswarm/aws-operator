@@ -27,8 +27,6 @@ const (
 	// rollingUpdatePauseTime is how long to pause ASG operations after creating
 	// new instances. This allows time for new nodes to join the cluster.
 	rollingUpdatePauseTime = "PT15M"
-	// logEBSVolumeMountPoint is the path for mounting the log EBS volume
-	logEBSVolumeMountPoint = "/dev/xvdf"
 
 	// Subnet keys
 	subnetDescription = "description"
@@ -94,7 +92,6 @@ type StackState struct {
 	WorkerCloudConfigVersion string
 	WorkerDesired            int
 	WorkerDockerVolumeSizeGB int
-	WorkerLogVolumeSizeGB    int
 	WorkerImageID            string
 	WorkerInstanceMonitoring bool
 	WorkerInstanceType       string

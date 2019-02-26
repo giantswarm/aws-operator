@@ -37,21 +37,11 @@ func (l *GuestLaunchConfigAdapter) Adapt(config Config) error {
 		config.StackState.WorkerDockerVolumeSizeGB = defaultEBSVolumeSize
 	}
 
-	if config.StackState.WorkerLogVolumeSizeGB <= 0 {
-		config.StackState.WorkerLogVolumeSizeGB = defaultEBSVolumeSize
-	}
-
 	l.WorkerBlockDeviceMappings = []BlockDeviceMapping{
 		{
 			DeleteOnTermination: true,
 			DeviceName:          defaultEBSVolumeMountPoint,
 			VolumeSize:          config.StackState.WorkerDockerVolumeSizeGB,
-			VolumeType:          defaultEBSVolumeType,
-		},
-		{
-			DeleteOnTermination: true,
-			DeviceName:          logEBSVolumeMountPoint,
-			VolumeSize:          config.StackState.WorkerLogVolumeSizeGB,
 			VolumeType:          defaultEBSVolumeType,
 		},
 	}
