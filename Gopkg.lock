@@ -227,6 +227,7 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:d2ec14d311dbbb8dd49043ab8d55f7c0e62d300a1c01fa2f5f47a1e7d851dbcd"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/application/v1alpha1",
@@ -248,6 +249,7 @@
     "pkg/clientset/versioned/typed/release/v1alpha1",
     "pkg/clientset/versioned/typed/release/v1alpha1/fake",
   ]
+  pruneopts = "UT"
   revision = "f7142f26f519703d5b2543338a05ed3f606dea5b"
 
 [[projects]]
@@ -372,7 +374,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:41f561d9a32690fa8007299110671a7ee51008bfc15cb7e34d0da1e48b674a25"
+  digest = "1:b27137f793ddc96a22ab6ae32aa4ad43022265db9df5af9018891bd1c33e74e2"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
@@ -384,7 +386,8 @@
     "v_4_0_0",
     "v_4_1_0",
   ]
-  revision = "6030155cbf267fffcfe98ecb030b09569cf80f63"
+  pruneopts = "T"
+  revision = "44a194073a519bf1aca2a447abb9353ddb71aa09"
 
 [[projects]]
   branch = "master"
@@ -506,6 +509,7 @@
   digest = "1:f5c567930d4fd8a2d34e0231f2e2e1c3a0b40d41d0efbbdc50bf71668a0f375f"
   name = "github.com/giantswarm/statusresource"
   packages = ["."]
+  pruneopts = "UT"
   revision = "37ad148a1015fff2d1a45b29ea05114911b7d422"
 
 [[projects]]
