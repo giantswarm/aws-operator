@@ -213,11 +213,6 @@ func validateReleaseDates(indexReleases []IndexRelease) error {
 			return microerror.Maskf(invalidReleaseError, "release %s has empty release date", release.Version)
 		}
 
-		ver, exists := releaseDates[release.Date]
-		if exists {
-			return microerror.Maskf(invalidReleaseError, "releases %s and %s have duplicate release dates", ver, release.Version)
-		}
-
 		releaseDates[release.Date] = release.Version
 	}
 
