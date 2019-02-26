@@ -179,7 +179,6 @@ var releaseCRDValidation = &apiextensionsv1beta1.CustomResourceValidation{
 //	              type: object
 //	              required:
 //	                - phase
-//	                - release
 //	              properties:
 //	                disabledDate:
 //	                  type: string
@@ -193,12 +192,6 @@ var releaseCRDValidation = &apiextensionsv1beta1.CustomResourceValidation{
 //	                  - enabled
 //	                  - disabled
 //	                  - eol
-//	                release:
-//	                  type: object
-//	                  properties:
-//	                    name:
-//	                      type: string
-//	                      minLength: 3
 //	  subresources:
 //	    status: {}
 //

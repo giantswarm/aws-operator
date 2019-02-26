@@ -193,7 +193,7 @@ func (g *Guest) WaitForAPIUp() error {
 	o := func() error {
 		_, err := g.k8sClient.CoreV1().Services("default").Get("kubernetes", metav1.GetOptions{})
 		if err != nil {
-			return microerror.Maskf(waitError, "k8s API is still down")
+			return microerror.Maskf(waitError, err.Error())
 		}
 
 		return nil
