@@ -14,8 +14,8 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys"
 
-	"github.com/giantswarm/aws-operator/service/controller/v23/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v23/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v24/encrypter"
 )
 
 func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {

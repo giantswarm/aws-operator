@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	"github.com/giantswarm/aws-operator/service/controller/v23/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v24/adapter"
 )
 
 func Test_Resource_Cloudformation_GetDesiredState(t *testing.T) {

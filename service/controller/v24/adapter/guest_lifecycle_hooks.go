@@ -1,6 +1,6 @@
 package adapter
 
-import "github.com/giantswarm/aws-operator/service/controller/v23/key"
+import "github.com/giantswarm/aws-operator/service/controller/v24/key"
 
 type GuestLifecycleHooksAdapter struct {
 	Worker GuestLifecycleHooksAdapterWorker
