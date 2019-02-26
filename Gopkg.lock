@@ -280,7 +280,7 @@
   revision = "f0fb2f61d78e06f2d1e17f940fd782b92bf29642"
 
 [[projects]]
-  branch = "cleanup"
+  branch = "master"
   digest = "1:bf2d35072c25e5adc59a43fb01b513c7067fa21a82fcf49c2d97329ffbedaeee"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
@@ -290,7 +290,7 @@
     "pkg/release",
   ]
   pruneopts = "UT"
-  revision = "f660d9ff97b8b816686363fef2d1756a155da9de"
+  revision = "5a101474fa6d784552bf4cc9bf620bcfed13a7b2"
 
 [[projects]]
   branch = "master"
@@ -431,7 +431,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e84b052d9547d99b68c1e7555404f9c1934cce841011dc5c72504b4bc9566097"
+  digest = "1:83013eaf386dd720e63ab59999d7ea22390fae720bc7c7d3fa31a8c07efb9894"
   name = "github.com/giantswarm/microkit"
   packages = [
     "command",
@@ -450,7 +450,7 @@
     "tls",
   ]
   pruneopts = "UT"
-  revision = "aaff79223ca0620a1b6506f0b598da59557659e6"
+  revision = "864e4cc9c80644e48e8ac3168b6aafb5cbd0e5bb"
 
 [[projects]]
   branch = "master"
@@ -1180,12 +1180,12 @@
   version = "v0.9.1"
 
 [[projects]]
-  branch = "v2"
   digest = "1:4d2e5a73dc1500038e504a8d78b986630e3626dc027bc030ba5c75da257cdb96"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   pruneopts = "UT"
   revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
+  version = "v2.2.2"
 
 [[projects]]
   digest = "1:0d299a04c6472e4458461d7034c76d014cc6f632a3262cbf21d123b19ce13e65"
