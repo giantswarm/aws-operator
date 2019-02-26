@@ -425,59 +425,6 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 	}
 }
 
-func TestMainHostPreTemplateExistingFields(t *testing.T) {
-	t.Parallel()
-	// customObject with example fields for both asg and launch config
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: v1alpha1.Cluster{
-				ID: "test-cluster",
-			},
-		},
-	}
-
-	cfg := testConfig()
-	cfg.HostClients = &adapter.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-		STS: &adapter.STSClientMock{},
-	}
-	newResource, err := New(cfg)
-	if err != nil {
-		t.Fatalf("unexpected error %v", err)
-	}
-
-	awsClients := aws.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-		STS: &adapter.STSClientMock{},
-	}
-
-	ctx := context.TODO()
-	ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
-
-	body, err := newResource.getMainHostPreTemplateBody(ctx, customObject)
-
-	if err != nil {
-		t.Fatalf("unexpected error %v", err)
-	}
-
-	if !strings.Contains(body, "Description: Main Host Pre-Guest CloudFormation stack.") {
-		fmt.Println(body)
-		t.Fatal("stack header not found")
-	}
-
-	if !strings.Contains(body, "  PeerRole:") {
-		fmt.Println(body)
-		t.Fatal("peer role header not found")
-	}
-
-	if !strings.Contains(body, "  RoleName: test-cluster-vpc-peer-access") {
-		fmt.Println(body)
-		t.Fatal("role name not found")
-	}
-}
-
 func TestMainHostPostTemplateExistingFields(t *testing.T) {
 	t.Parallel()
 	// customObject with example fields for both asg and launch config

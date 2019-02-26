@@ -79,43 +79,6 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 	return rendered, nil
 }
 
-func (r *Resource) getMainHostPreTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {
-	sc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	adapterClients := adapter.Clients{
-		CloudFormation: sc.AWSClient.CloudFormation,
-		EC2:            sc.AWSClient.EC2,
-		IAM:            sc.AWSClient.IAM,
-		KMS:            sc.AWSClient.KMS,
-		ELB:            sc.AWSClient.ELB,
-		STS:            sc.AWSClient.STS,
-	}
-
-	guestAccountID, err := adapter.AccountID(adapterClients)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-	cfg := adapter.Config{
-		CustomObject:   customObject,
-		GuestAccountID: guestAccountID,
-		Route53Enabled: r.route53Enabled,
-	}
-	adp, err := adapter.NewHostPre(cfg)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	rendered, err := templates.Render(key.CloudFormationHostPreTemplates(), adp)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	return rendered, nil
-}
-
 func (r *Resource) getMainHostPostTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig, guestMainStackState StackState) (string, error) {
 	sc, err := controllercontext.FromContext(ctx)
 	if err != nil {

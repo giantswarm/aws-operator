@@ -51,7 +51,6 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	if key.IsDeleted(customObject) {
 		stackNames := []string{
 			key.MainGuestStackName(customObject),
-			key.MainHostPreStackName(customObject),
 			key.MainHostPostStackName(customObject),
 		}
 

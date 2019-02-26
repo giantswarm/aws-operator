@@ -122,14 +122,6 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 			return cloudformation.CreateStackInput{}, microerror.Mask(err)
 		}
 
-		// We need to create the required peering resources in the host account before
-		// getting the guest main stack template body, it requires id values from host
-		// resources.
-		err = r.createHostPreStack(ctx, customObject)
-		if err != nil {
-			return cloudformation.CreateStackInput{}, microerror.Mask(err)
-		}
-
 		var mainTemplate string
 		mainTemplate, err := r.getMainGuestTemplateBody(ctx, customObject, desiredStackState)
 		if err != nil {
@@ -160,50 +152,6 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 	}
 
 	return createState, nil
-}
-
-func (r *Resource) createHostPreStack(ctx context.Context, customObject v1alpha1.AWSConfig) error {
-	stackName := key.MainHostPreStackName(customObject)
-	mainTemplate, err := r.getMainHostPreTemplateBody(ctx, customObject)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	createStack := &cloudformation.CreateStackInput{
-		StackName:                   aws.String(stackName),
-		TemplateBody:                aws.String(mainTemplate),
-		EnableTerminationProtection: aws.Bool(key.EnableTerminationProtection),
-		// CAPABILITY_NAMED_IAM is required for creating IAM roles (worker policy)
-		Capabilities: []*string{
-			aws.String(namedIAMCapability),
-		},
-	}
-	createStack.SetTags(r.getCloudFormationTags(customObject))
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", "creating the host cluster pre cloud formation stack")
-
-	_, err = r.hostClients.CloudFormation.CreateStack(createStack)
-	if IsAlreadyExists(err) {
-		// TODO this here indicates we should have dedicated resources for the pre,
-		// main and post stacks. The workflow would be more straight forward and
-		// easy to manage. Right now we hack around this and add conditionals to
-		// make it work somehow while bypassing the framework primitives.
-		r.logger.LogCtx(ctx, "level", "debug", "message", "the host cluster pre cloud formation stack is already created")
-
-		return nil
-	} else if err != nil {
-		return microerror.Mask(err)
-	}
-
-	err = r.hostClients.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
-		StackName: aws.String(stackName),
-	})
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", "created the host cluster pre cloud formation stack")
-
-	return nil
 }
 
 func (r *Resource) createHostPostStack(ctx context.Context, customObject v1alpha1.AWSConfig, guestMainStackState StackState) error {

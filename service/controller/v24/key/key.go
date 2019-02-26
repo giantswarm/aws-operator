@@ -97,6 +97,10 @@ const (
 )
 
 const (
+	CapabilityNamesIAM = "CAPABILITY_NAMED_IAM"
+)
+
+const (
 	KindMaster  = "master"
 	KindIngress = "ingress"
 	KindWorker  = "worker"
