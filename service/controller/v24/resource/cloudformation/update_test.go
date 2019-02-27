@@ -382,6 +382,7 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 	{
 		c := Config{}
 
+		c.ControlPlaneRegion = "eu-central-1"
 		c.HostClients = &adapter.Clients{
 			IAM: &adapter.IAMClientMock{},
 			EC2: &adapter.EC2ClientMock{},
@@ -825,6 +826,7 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 	{
 		c := Config{}
 
+		c.ControlPlaneRegion = "eu-central-1"
 		c.EncrypterBackend = "kms"
 		c.G8sClient = fake.NewSimpleClientset()
 		c.HostClients = &adapter.Clients{

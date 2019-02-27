@@ -103,6 +103,7 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 			STS:            &adapter.STSClientMock{},
 		}
 		c.Logger = microloggertest.New()
+		c.ControlPlaneRegion = "eu-central-1"
 		c.EncrypterBackend = "kms"
 		c.G8sClient = fake.NewSimpleClientset()
 		c.GuestPrivateSubnetMaskBits = 25

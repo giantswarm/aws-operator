@@ -360,6 +360,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 				Enabled:    config.APIWhitelist.Enabled,
 				SubnetList: config.APIWhitelist.SubnetList,
 			},
+			ControlPlaneRegion:   config.HostAWSConfig.Region,
 			EncrypterRoleManager: encrypterRoleManager,
 			G8sClient:            config.G8sClient,
 			HostClients: &adapter.Clients{

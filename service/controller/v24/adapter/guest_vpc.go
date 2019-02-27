@@ -10,20 +10,22 @@ import (
 )
 
 type GuestVPCAdapter struct {
-	CidrBlock        string
-	ClusterID        string
-	InstallationName string
-	HostAccountID    string
-	PeerVPCID        string
-	PeerRoleArn      string
-	Region           string
-	RegionARN        string
-	RouteTableNames  []RouteTableName
+	CidrBlock          string
+	ClusterID          string
+	ControlPlaneRegion string
+	InstallationName   string
+	HostAccountID      string
+	PeerVPCID          string
+	PeerRoleArn        string
+	Region             string
+	RegionARN          string
+	RouteTableNames    []RouteTableName
 }
 
 func (v *GuestVPCAdapter) Adapt(cfg Config) error {
 	v.CidrBlock = key.ClusterNetworkCIDR(cfg.CustomObject)
 	v.ClusterID = key.ClusterID(cfg.CustomObject)
+	v.ControlPlaneRegion = cfg.ControlPlaneRegion
 	v.InstallationName = cfg.InstallationName
 	v.HostAccountID = cfg.HostAccountID
 	v.PeerVPCID = key.PeerID(cfg.CustomObject)

@@ -19,6 +19,7 @@ import (
 func testConfig() Config {
 	c := Config{}
 
+	c.ControlPlaneRegion = "eu-central-1"
 	c.EncrypterBackend = "kms"
 	c.G8sClient = fake.NewSimpleClientset()
 	c.GuestPrivateSubnetMaskBits = 25

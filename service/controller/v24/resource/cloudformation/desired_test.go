@@ -40,6 +40,7 @@ func Test_Resource_Cloudformation_GetDesiredState(t *testing.T) {
 	{
 		c := Config{}
 
+		c.ControlPlaneRegion = "eu-central-1"
 		c.EncrypterBackend = "kms"
 		c.G8sClient = fake.NewSimpleClientset()
 		c.HostClients = &adapter.Clients{}

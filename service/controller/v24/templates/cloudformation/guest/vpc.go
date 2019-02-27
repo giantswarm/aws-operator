@@ -19,6 +19,7 @@ const VPC = `{{define "vpc"}}
       VpcId: !Ref VPC
       PeerVpcId: {{ $v.PeerVPCID }}
       PeerOwnerId: '{{ $v.HostAccountID }}'
+      PeerRegion: '{{ $v.ControlPlaneRegion }}'
       PeerRoleArn: {{ $v.PeerRoleArn }}
       Tags:
         - Key: Name

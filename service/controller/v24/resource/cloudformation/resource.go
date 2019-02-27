@@ -36,6 +36,7 @@ type Config struct {
 	Logger               micrologger.Logger
 
 	AdvancedMonitoringEC2      bool
+	ControlPlaneRegion         string
 	EncrypterBackend           string
 	GuestPrivateSubnetMaskBits int
 	GuestPublicSubnetMaskBits  int
@@ -52,6 +53,7 @@ type Resource struct {
 	hostClients          *adapter.Clients
 	logger               micrologger.Logger
 
+	controlPlaneRegion         string
 	encrypterBackend           string
 	guestPrivateSubnetMaskBits int
 	guestPublicSubnetMaskBits  int
@@ -63,6 +65,9 @@ type Resource struct {
 
 // New creates a new configured cloudformation resource.
 func New(config Config) (*Resource, error) {
+	if config.ControlPlaneRegion == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ControlPlaneRegion must not be empty", config)
+	}
 	if config.EncrypterBackend == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.EncrypterBackend must not be empty", config)
 	}
@@ -86,6 +91,7 @@ func New(config Config) (*Resource, error) {
 		hostClients:          config.HostClients,
 		logger:               config.Logger,
 
+		controlPlaneRegion:         config.ControlPlaneRegion,
 		encrypterBackend:           config.EncrypterBackend,
 		guestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
 		guestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
