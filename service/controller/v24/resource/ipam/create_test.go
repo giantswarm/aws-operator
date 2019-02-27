@@ -59,7 +59,7 @@ func Test_selectRandomAZs_properties(t *testing.T) {
 				availabilityZones: tc.azs,
 			}
 
-			azs, err := r.selectRandomAZs(tc.n)
+			azs, err := r.selectRandomAZs(tc.azs, tc.n)
 
 			switch {
 			case err == nil && tc.errorMatcher == nil:
@@ -95,7 +95,7 @@ func Test_selectRandomAZs_random(t *testing.T) {
 	selectedAZs := make([][]string, 0)
 
 	for i := 0; i < nTestRounds; i++ {
-		azs, err := r.selectRandomAZs(numAZs)
+		azs, err := r.selectRandomAZs(originalAZs, numAZs)
 		if err != nil {
 			t.Fatalf("unexpected error: %#v", err)
 		}

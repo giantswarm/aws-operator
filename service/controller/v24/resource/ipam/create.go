@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/ipam"
@@ -94,7 +95,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				return microerror.Mask(err)
 			}
 
-			randomAZs, err := r.selectRandomAZs(key.SpecAvailabilityZones(customResource))
+			availabilityZones, err := getAvailabilityZones(ctx)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			randomAZs, err := r.selectRandomAZs(availabilityZones, key.SpecAvailabilityZones(customResource))
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -195,14 +201,14 @@ func (r *Resource) allocateSubnet(ctx context.Context) (net.IPNet, error) {
 	return subnet, nil
 }
 
-func (r *Resource) selectRandomAZs(n int) ([]string, error) {
-	if n > len(r.availabilityZones) {
-		return nil, microerror.Maskf(invalidParameterError, "requested nubmer of AZs %d is bigger than number of available AZs %d", n, len(r.availabilityZones))
+func (r *Resource) selectRandomAZs(azs []string, n int) ([]string, error) {
+	if n > len(azs) {
+		return nil, microerror.Maskf(invalidParameterError, "requested nubmer of AZs %d is bigger than number of available AZs %d", n, len(azs))
 	}
 
 	// availabilityZones must be copied so that original slice doesn't get shuffled.
-	shuffledAZs := make([]string, len(r.availabilityZones))
-	copy(shuffledAZs, r.availabilityZones)
+	shuffledAZs := make([]string, len(azs))
+	copy(shuffledAZs, azs)
 	rand.Shuffle(len(shuffledAZs), func(i, j int) {
 		shuffledAZs[i], shuffledAZs[j] = shuffledAZs[j], shuffledAZs[i]
 	})
@@ -210,6 +216,31 @@ func (r *Resource) selectRandomAZs(n int) ([]string, error) {
 	shuffledAZs = shuffledAZs[0:n]
 	sort.Strings(shuffledAZs)
 	return shuffledAZs, nil
+}
+
+// getAvailabilityZones gets availability zones for region configured in
+// controllercontext client.
+func getAvailabilityZones(ctx context.Context) ([]string, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var azs []string
+	{
+		// List all available AZs.
+		i := &ec2.DescribeAvailabilityZonesInput{}
+		o, err := cc.AWSClient.EC2.DescribeAvailabilityZones(i)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		for _, az := range o.AvailabilityZones {
+			azs = append(azs, *az.ZoneName)
+		}
+	}
+
+	return azs, nil
 }
 
 func getAWSConfigSubnets(g8sClient versioned.Interface) ([]net.IPNet, error) {
