@@ -94,7 +94,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				return microerror.Mask(err)
 			}
 
-			randomAZs, err := r.selectRandomAZs(key.SpecAvailabilityZones(customResource))
+			randomAZs, err := r.selectRandomAZs(r.availabilityZones, key.SpecAvailabilityZones(customResource))
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -195,14 +195,14 @@ func (r *Resource) allocateSubnet(ctx context.Context) (net.IPNet, error) {
 	return subnet, nil
 }
 
-func (r *Resource) selectRandomAZs(n int) ([]string, error) {
-	if n > len(r.availabilityZones) {
-		return nil, microerror.Maskf(invalidParameterError, "requested nubmer of AZs %d is bigger than number of available AZs %d", n, len(r.availabilityZones))
+func (r *Resource) selectRandomAZs(azs []string, n int) ([]string, error) {
+	if n > len(azs) {
+		return nil, microerror.Maskf(invalidParameterError, "requested nubmer of AZs %d is bigger than number of available AZs %d", n, len(azs))
 	}
 
 	// availabilityZones must be copied so that original slice doesn't get shuffled.
-	shuffledAZs := make([]string, len(r.availabilityZones))
-	copy(shuffledAZs, r.availabilityZones)
+	shuffledAZs := make([]string, len(azs))
+	copy(shuffledAZs, azs)
 	rand.Shuffle(len(shuffledAZs), func(i, j int) {
 		shuffledAZs[i], shuffledAZs[j] = shuffledAZs[j], shuffledAZs[i]
 	})
