@@ -249,7 +249,7 @@ func getAvailabilityZonesForInstanceTypes(ctx context.Context, instanceTypes ...
 		// indirect use of spot price API for this seems to be the common thing
 		// to do.
 		//
-		// So what happens here is that for each AZ there is a request to getch
+		// So what happens here is that for each AZ there is a request to fetch
 		// EC2 spot instance price history for last minute to see whether the
 		// instance type is available or not.
 		minuteAgo := time.Now().Add(-11 * time.Minute)
