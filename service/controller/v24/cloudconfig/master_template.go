@@ -306,6 +306,18 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Name:         "var-lib-etcd.mount",
 			Enabled:      true,
 		},
+		// Format log EBS volume.
+		{
+			AssetContent: cloudconfig.FormatVarLogService,
+			Name:         "format-var-log.service",
+			Enabled:      true,
+		},
+		// Mount log EBS volume.
+		{
+			AssetContent: cloudconfig.EphemeralVarLogMount,
+			Name:         "var-log.mount",
+			Enabled:      true,
+		},
 	}
 
 	var newUnits []k8scloudconfig.UnitAsset
