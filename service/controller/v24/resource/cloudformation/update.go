@@ -71,22 +71,9 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 			}
 		}
 
-		customObject, err := key.ToCustomObject(obj)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		updateStackInput := stackStateToUpdate.UpdateStackInput
-		updateStackInput.Parameters = []*cloudformation.Parameter{
-			{
-				ParameterKey:   aws.String(versionBundleVersionParameterKey),
-				ParameterValue: aws.String(key.VersionBundleVersion(customObject)),
-			},
-		}
-
 		// Once the etcd volume is cleaned up and the master instance is down we can
 		// go ahead to let CloudFormation do its job.
-		_, err = sc.AWSClient.CloudFormation.UpdateStack(&updateStackInput)
+		_, err = sc.AWSClient.CloudFormation.UpdateStack(&stackStateToUpdate.UpdateStackInput)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -127,6 +114,12 @@ func (r *Resource) computeUpdateState(ctx context.Context, customObject v1alpha1
 			// CAPABILITY_NAMED_IAM is required for updating IAM roles (worker
 			// policy).
 			aws.String(namedIAMCapability),
+		},
+		Parameters: []*cloudformation.Parameter{
+			{
+				ParameterKey:   aws.String(versionBundleVersionParameterKey),
+				ParameterValue: aws.String(key.VersionBundleVersion(customObject)),
+			},
 		},
 		StackName:    aws.String(stackState.Name),
 		TemplateBody: aws.String(mainTemplate),
