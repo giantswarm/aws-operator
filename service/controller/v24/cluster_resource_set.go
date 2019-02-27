@@ -559,6 +559,11 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	}
 
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
+		cr, err := key.ToCustomObject(obj)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
 		if config.GuestUpdateEnabled {
 			updateallowedcontext.SetUpdateAllowed(ctx)
 		}
@@ -570,6 +575,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 				return nil, microerror.Mask(err)
 			}
 			c := config.HostAWSConfig
+			c.Region = key.Region(cr)
 			c.RoleARN = arn
 
 			awsClient, err = aws.NewClients(c)
