@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
@@ -96,7 +95,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				return microerror.Mask(err)
 			}
 
-			availabilityZones, err := getAvailabilityZonesForInstanceTypes(ctx, key.MasterInstanceType(customResource), key.WorkerInstanceType(customResource))
+			availabilityZones, err := getAvailabilityZonesForInstanceTypes(ctx)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -220,9 +219,9 @@ func (r *Resource) selectRandomAZs(azs []string, n int) ([]string, error) {
 }
 
 // getAvailabilityZonesForInstanceTypes gets availability zones for current
-// region and removes ones that don't have required instance types present.
-func getAvailabilityZonesForInstanceTypes(ctx context.Context, instanceTypes ...string) ([]string, error) {
-	ctlCtx, err := controllercontext.FromContext(ctx)
+// region.
+func getAvailabilityZonesForInstanceTypes(ctx context.Context) ([]string, error) {
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -231,45 +230,13 @@ func getAvailabilityZonesForInstanceTypes(ctx context.Context, instanceTypes ...
 	{
 		// List all available AZs.
 		i := &ec2.DescribeAvailabilityZonesInput{}
-		o, err := ctlCtx.AWSClient.EC2.DescribeAvailabilityZones(i)
+		o, err := cc.AWSClient.EC2.DescribeAvailabilityZones(i)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 
 		for _, az := range o.AvailabilityZones {
 			azs = append(azs, *az.ZoneName)
-		}
-	}
-
-	// Verify that AZs provide specified instance types.
-	if len(instanceTypes) > 0 {
-		// The mechanism here to find out whether given AZ provides required
-		// instance types or not is really a hack, but as of writing this, AWS
-		// SDK doesn't provide direct way to query available instance types and
-		// indirect use of spot price API for this seems to be the common thing
-		// to do.
-		//
-		// So what happens here is that for each AZ there is a request to getch
-		// EC2 spot instance price history for last minute to see whether the
-		// instance type is available or not.
-		minuteAgo := time.Now().Add(-11 * time.Minute)
-
-		var awsInstanceTypes []*string
-		for _, it := range instanceTypes {
-			awsInstanceTypes = append(awsInstanceTypes, aws.String(it))
-		}
-
-		for _, az := range azs {
-			i := &ec2.DescribeSpotPriceHistoryInput{
-				AvailabilityZone: aws.String(az),
-				InstanceTypes:    awsInstanceTypes,
-				StartTime:        &minuteAgo,
-			}
-
-			_, err := ctlCtx.AWSClient.EC2.DescribeSpotPriceHistory(i)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
 		}
 	}
 
