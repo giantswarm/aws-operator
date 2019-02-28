@@ -45,6 +45,18 @@ const Instance = `{{ define "instance" }}
       Tags:
       - Key: Name
         Value: {{ $v.Master.EtcdVolume.Name }}
+  LogVolume:
+    Type: AWS::EC2::Volume
+    Properties:
+{{ if eq $v.Master.EncrypterBackend "kms" }}
+      Encrypted: true
+{{ end }}
+      Size: 100
+      VolumeType: gp2
+      AvailabilityZone: {{ $v.Master.AZ }}
+      Tags:
+      - Key: Name
+        Value: {{ $v.Master.LogVolume.Name }}
   {{ $v.Master.Instance.ResourceName }}DockerMountPoint:
     Type: AWS::EC2::VolumeAttachment
     Properties:
@@ -57,4 +69,10 @@ const Instance = `{{ define "instance" }}
       InstanceId: !Ref {{ $v.Master.Instance.ResourceName }}
       VolumeId: !Ref EtcdVolume
       Device: /dev/xvdh
+  {{ $v.Master.Instance.ResourceName }}LogMountPoint:
+    Type: AWS::EC2::VolumeAttachment
+    Properties:
+      InstanceId: !Ref {{ $v.Master.Instance.ResourceName }}
+      VolumeId: !Ref LogVolume
+      Device: /dev/xvdf
 {{ end }}`
