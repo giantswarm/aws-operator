@@ -71,8 +71,9 @@ type Clients struct {
 	STS            STSClient
 }
 
-type Hydrater func(config Config) error
 type ContextHydrater func(ctx context.Context, config Config) error
+
+type Hydrater func(config Config) error
 
 // TODO we copy this because of a circular import issue with the cloudformation
 // resource. The way how the resource works with the adapter and how infromation
