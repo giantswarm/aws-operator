@@ -30,24 +30,6 @@ func IsDeleteInProgress(err error) bool {
 	return false
 }
 
-var deletionMustBeRetriedError = &microerror.Error{
-	Kind: "deletionMustBeRetriedError",
-}
-
-// IsDeletionMustBeRetried asserts deletionMustBeRetriedError.
-func IsDeletionMustBeRetried(err error) bool {
-	return microerror.Cause(err) == deletionMustBeRetriedError
-}
-
-var executionFailedError = &microerror.Error{
-	Kind: "executionFailedError",
-}
-
-// IsExecutionFailed asserts executionFailedError.
-func IsExecutionFailed(err error) bool {
-	return microerror.Cause(err) == executionFailedError
-}
-
 var invalidConfigError = &microerror.Error{
 	Kind: "invalidConfigError",
 }
@@ -74,29 +56,6 @@ func IsNotExists(err error) bool {
 	}
 
 	if c == notExistsError {
-		return true
-	}
-
-	return false
-}
-
-var resourceNotReadyError = &microerror.Error{
-	Kind: "resourceNotReadyError",
-}
-
-// IsResourceNotReady asserts resourceNotReadyError.
-func IsResourceNotReady(err error) bool {
-	c := microerror.Cause(err)
-
-	if c == nil {
-		return false
-	}
-
-	if strings.Contains(c.Error(), "ResourceNotReady") {
-		return true
-	}
-
-	if c == resourceNotReadyError {
 		return true
 	}
 
