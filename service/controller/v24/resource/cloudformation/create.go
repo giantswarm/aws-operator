@@ -16,10 +16,6 @@ import (
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
-	customObject, err := key.ToCustomObject(obj)
-	if err != nil {
-		return microerror.Mask(err)
-	}
 	stackInput, err := toCreateStackInput(createChange)
 	if err != nil {
 		return microerror.Mask(err)
@@ -43,13 +39,6 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			if err != nil {
 				return microerror.Mask(err)
 			}
-		}
-
-		stackInput.Parameters = []*cloudformation.Parameter{
-			{
-				ParameterKey:   aws.String(versionBundleVersionParameterKey),
-				ParameterValue: aws.String(key.VersionBundleVersion(customObject)),
-			},
 		}
 
 		_, err = sc.AWSClient.CloudFormation.CreateStack(&stackInput)
@@ -113,8 +102,7 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the guest cluster main stack has to be created")
 
-	createState := cloudformation.CreateStackInput{}
-
+	var createState cloudformation.CreateStackInput
 	if currentStackState.Name == "" || desiredStackState.Name != currentStackState.Name {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack has to be created")
 
@@ -127,17 +115,24 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		createState.StackName = aws.String(desiredStackState.Name)
-		createState.TemplateBody = aws.String(mainTemplate)
-		createState.TimeoutInMinutes = aws.Int64(defaultCreationTimeout)
-		// CAPABILITY_NAMED_IAM is required for creating IAM roles (worker policy)
-		createState.Capabilities = []*string{
-			aws.String(namedIAMCapability),
+		createState = cloudformation.CreateStackInput{
+			// CAPABILITY_NAMED_IAM is required for creating worker policy IAM roles.
+			Capabilities: []*string{
+				aws.String(namedIAMCapability),
+			},
+			EnableTerminationProtection: aws.Bool(key.EnableTerminationProtection),
+			Parameters: []*cloudformation.Parameter{
+				{
+					ParameterKey:   aws.String(versionBundleVersionParameterKey),
+					ParameterValue: aws.String(key.VersionBundleVersion(customObject)),
+				},
+			},
+			StackName:        aws.String(desiredStackState.Name),
+			Tags:             r.getCloudFormationTags(customObject),
+			TemplateBody:     aws.String(mainTemplate),
+			TimeoutInMinutes: aws.Int64(defaultCreationTimeout),
 		}
 
-		createState.SetTags(r.getCloudFormationTags(customObject))
-
-		createState.EnableTerminationProtection = aws.Bool(key.EnableTerminationProtection)
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack does not have to be created")
 
