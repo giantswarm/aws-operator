@@ -30,7 +30,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	if stackStateToUpdate.Name != "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "updating the guest cluster main stack")
 
-		sc, err := controllercontext.FromContext(ctx)
+		cc, err := controllercontext.FromContext(ctx)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -42,7 +42,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 					ebs.NewDockerVolumeFilter(customObject),
 					ebs.NewEtcdVolumeFilter(customObject),
 				}
-				volumes, err := sc.EBSService.ListVolumes(customObject, filterFuncs...)
+				volumes, err := cc.EBSService.ListVolumes(customObject, filterFuncs...)
 				if err != nil {
 					return microerror.Mask(err)
 				}
@@ -55,7 +55,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 
 				for _, v := range volumes {
 					for _, a := range v.Attachments {
-						err := sc.EBSService.DetachVolume(ctx, v.VolumeID, a, force, shutdown, wait)
+						err := cc.EBSService.DetachVolume(ctx, v.VolumeID, a, force, shutdown, wait)
 						if err != nil {
 							return microerror.Mask(err)
 						}
@@ -73,7 +73,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 
 		// Once the etcd volume is cleaned up and the master instance is down we can
 		// go ahead to let CloudFormation do its job.
-		_, err = sc.AWSClient.CloudFormation.UpdateStack(&stackStateToUpdate.UpdateStackInput)
+		_, err = cc.AWSClient.CloudFormation.UpdateStack(&stackStateToUpdate.UpdateStackInput)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -312,7 +312,7 @@ func (r *Resource) terminateOldMasterInstance(ctx context.Context, obj interface
 	instanceName := key.MasterInstanceName(customObject)
 	instanceState := "stopped"
 
-	sc, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -343,7 +343,7 @@ func (r *Resource) terminateOldMasterInstance(ctx context.Context, obj interface
 			},
 		}
 
-		result, err = sc.AWSClient.EC2.DescribeInstances(i)
+		result, err = cc.AWSClient.EC2.DescribeInstances(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -379,7 +379,7 @@ func (r *Resource) terminateOldMasterInstance(ctx context.Context, obj interface
 				aws.String(instanceID),
 			},
 		}
-		_, err := sc.AWSClient.EC2.TerminateInstances(i)
+		_, err := cc.AWSClient.EC2.TerminateInstances(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}

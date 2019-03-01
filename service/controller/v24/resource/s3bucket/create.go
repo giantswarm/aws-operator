@@ -24,7 +24,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		return microerror.Mask(err)
 	}
 
-	sc, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -42,7 +42,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 					Bucket: aws.String(bucketInput.Name),
 				}
 
-				_, err = sc.AWSClient.S3.CreateBucket(i)
+				_, err = cc.AWSClient.S3.CreateBucket(i)
 				if IsBucketAlreadyExists(err) {
 					// Fall through.
 				} else if IsBucketAlreadyOwnedByYou(err) {
@@ -60,7 +60,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 					},
 				}
 
-				_, err = sc.AWSClient.S3.PutBucketTagging(i)
+				_, err = cc.AWSClient.S3.PutBucketTagging(i)
 				if err != nil {
 					return microerror.Mask(err)
 				}
@@ -73,7 +73,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 					GrantWrite:   aws.String(key.LogDeliveryURI),
 				}
 
-				_, err = sc.AWSClient.S3.PutBucketAcl(i)
+				_, err = cc.AWSClient.S3.PutBucketAcl(i)
 				if err != nil {
 					return microerror.Mask(err)
 				}
@@ -96,7 +96,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 					},
 				}
 
-				_, err = sc.AWSClient.S3.PutBucketLifecycleConfiguration(i)
+				_, err = cc.AWSClient.S3.PutBucketLifecycleConfiguration(i)
 				if err != nil {
 					return microerror.Mask(err)
 				}
@@ -113,7 +113,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 					},
 				}
 
-				_, err = sc.AWSClient.S3.PutBucketLogging(i)
+				_, err = cc.AWSClient.S3.PutBucketLogging(i)
 				if err != nil {
 					return microerror.Mask(err)
 				}

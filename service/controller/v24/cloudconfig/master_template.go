@@ -20,12 +20,12 @@ import (
 func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster) (string, error) {
 	var err error
 
-	ctlCtx, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
-	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, c.encrypter, ctlCtx.Status.Cluster.EncryptionKey, clusterKeys)
+	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, c.encrypter, cc.Status.Cluster.EncryptionKey, clusterKeys)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -35,7 +35,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 		be := baseExtension{
 			customObject:  customObject,
 			encrypter:     c.encrypter,
-			encryptionKey: ctlCtx.Status.Cluster.EncryptionKey,
+			encryptionKey: cc.Status.Cluster.EncryptionKey,
 		}
 
 		params = k8scloudconfig.DefaultParams()
@@ -48,7 +48,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 		params.EtcdPort = customObject.Spec.Cluster.Etcd.Port
 		params.Extension = &MasterExtension{
 			baseExtension: be,
-			ctlCtx:        ctlCtx,
+			ctlCtx:        cc,
 
 			ClusterCerts:     clusterCerts,
 			RandomKeyTmplSet: randomKeyTmplSet,

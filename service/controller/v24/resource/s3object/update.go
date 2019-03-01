@@ -15,7 +15,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	sc, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -29,7 +29,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 				return microerror.Mask(err)
 			}
 
-			_, err = sc.AWSClient.S3.PutObject(&s3PutInput)
+			_, err = cc.AWSClient.S3.PutObject(&s3PutInput)
 			if err != nil {
 				return microerror.Mask(err)
 			}
