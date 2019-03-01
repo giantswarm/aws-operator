@@ -25,12 +25,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	controllerCtx, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	workerASGName := controllerCtx.Status.Drainer.WorkerASGName
+	workerASGName := cc.Status.Drainer.WorkerASGName
 	if workerASGName == "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "worker ASG name is not available yet")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -47,7 +47,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			},
 		}
 
-		o, err := controllerCtx.AWSClient.AutoScaling.DescribeAutoScalingGroups(i)
+		o, err := cc.AWSClient.AutoScaling.DescribeAutoScalingGroups(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -164,12 +164,12 @@ func (r *Resource) privateDNSForInstance(ctx context.Context, instanceID string)
 		},
 	}
 
-	controllerCtx, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
-	o, err := controllerCtx.AWSClient.EC2.DescribeInstances(i)
+	o, err := cc.AWSClient.EC2.DescribeInstances(i)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}

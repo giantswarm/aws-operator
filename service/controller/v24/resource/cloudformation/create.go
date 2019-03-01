@@ -24,7 +24,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 	if stackInput.StackName != nil {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "creating the guest cluster main stack")
 
-		sc, err := controllercontext.FromContext(ctx)
+		cc, err := controllercontext.FromContext(ctx)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -41,7 +41,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			}
 		}
 
-		_, err = sc.AWSClient.CloudFormation.CreateStack(&stackInput)
+		_, err = cc.AWSClient.CloudFormation.CreateStack(&stackInput)
 		if IsAlreadyExists(err) {
 			// fall through
 		} else if err != nil {
@@ -51,7 +51,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 		defer cancel()
 
-		err = sc.AWSClient.CloudFormation.WaitUntilStackCreateCompleteWithContext(ctx, &cloudformation.DescribeStacksInput{
+		err = cc.AWSClient.CloudFormation.WaitUntilStackCreateCompleteWithContext(ctx, &cloudformation.DescribeStacksInput{
 			StackName: stackInput.StackName,
 		})
 		if ctx.Err() == context.DeadlineExceeded {

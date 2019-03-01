@@ -52,6 +52,10 @@ func (r *Resource) Name() string {
 
 // EnsureCreated retrieves worker ASG name from CF stack when it is ready.
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
 	var customObject v1alpha1.AWSConfig
 	{
@@ -71,16 +75,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "fetched latest version of custom resource")
 	}
 
-	controllerCtx, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster worker ASG name in the CR")
 
 		if customObject.Status.AWS.AutoScalingGroup.Name != "" {
-			controllerCtx.Status.Drainer.WorkerASGName = customObject.Status.AWS.AutoScalingGroup.Name
+			cc.Status.Drainer.WorkerASGName = customObject.Status.AWS.AutoScalingGroup.Name
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", "found the guest cluster worker ASG name in the CR")
 			return nil
@@ -93,7 +92,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the guest cluster worker ASG name in the cloud formation stack")
 
-		stackOutputs, stackStatus, err := controllerCtx.CloudFormation.DescribeOutputsAndStatus(key.MainGuestStackName(customObject))
+		stackOutputs, stackStatus, err := cc.CloudFormation.DescribeOutputsAndStatus(key.MainGuestStackName(customObject))
 		if cloudformationservice.IsStackNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster worker ASG name in the cloud formation stack")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack is not yet created")
@@ -110,7 +109,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		workerASGName, err = controllerCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerASGKey)
+		workerASGName, err = cc.CloudFormation.GetOutputValue(stackOutputs, key.WorkerASGKey)
 		if cloudformationservice.IsOutputNotFound(err) {
 			// Since we are transitioning between versions we will have situations in
 			// which old clusters are updated to new versions and miss the ASG name in

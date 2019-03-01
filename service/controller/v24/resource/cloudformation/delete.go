@@ -26,7 +26,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	if stackStateToDelete.Name != "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting the guest cluster main stack")
 
-		sc, err := controllercontext.FromContext(ctx)
+		cc, err := controllercontext.FromContext(ctx)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -37,7 +37,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			EnableTerminationProtection: aws.Bool(false),
 			StackName:                   stackName,
 		}
-		_, err = sc.AWSClient.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
+		_, err = cc.AWSClient.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
 		if IsDeleteInProgress(err) {
 			// fall through
 		} else if IsNotExists(err) {
@@ -48,7 +48,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			i := &cloudformation.DeleteStackInput{
 				StackName: stackName,
 			}
-			_, err = sc.AWSClient.CloudFormation.DeleteStack(i)
+			_, err = cc.AWSClient.CloudFormation.DeleteStack(i)
 			if err != nil {
 				return microerror.Mask(err)
 			}

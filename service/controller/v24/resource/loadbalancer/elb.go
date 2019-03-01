@@ -21,13 +21,13 @@ func (r *Resource) clusterLoadBalancers(ctx context.Context, customObject v1alph
 	lbState := &LoadBalancerState{}
 	clusterLBNames := []string{}
 
-	sc, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
 	// We get all load balancers because the API does not allow tag filters.
-	output, err := sc.AWSClient.ELB.DescribeLoadBalancers(&elb.DescribeLoadBalancersInput{})
+	output, err := cc.AWSClient.ELB.DescribeLoadBalancers(&elb.DescribeLoadBalancersInput{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -43,7 +43,7 @@ func (r *Resource) clusterLoadBalancers(ctx context.Context, customObject v1alph
 		tagsInput := &elb.DescribeTagsInput{
 			LoadBalancerNames: lbNames,
 		}
-		tagsOutput, err := sc.AWSClient.ELB.DescribeTags(tagsInput)
+		tagsOutput, err := cc.AWSClient.ELB.DescribeTags(tagsInput)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

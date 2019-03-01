@@ -45,7 +45,7 @@ func NewEncrypter(c *EncrypterConfig) (*Encrypter, error) {
 }
 
 func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) error {
-	ctlCtx, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -83,7 +83,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 			AliasName: aws.String(keyAlias(customObject)),
 		}
 
-		_, err = ctlCtx.AWSClient.KMS.DeleteAlias(in)
+		_, err = cc.AWSClient.KMS.DeleteAlias(in)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -107,7 +107,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 			Tags: awstags.NewKMS(tags),
 		}
 
-		out, err := ctlCtx.AWSClient.KMS.CreateKey(in)
+		out, err := cc.AWSClient.KMS.CreateKey(in)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -128,7 +128,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 			KeyId: keyID,
 		}
 
-		_, err = ctlCtx.AWSClient.KMS.EnableKeyRotation(in)
+		_, err = cc.AWSClient.KMS.EnableKeyRotation(in)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -144,7 +144,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 			TargetKeyId: keyID,
 		}
 
-		_, err = ctlCtx.AWSClient.KMS.CreateAlias(in)
+		_, err = cc.AWSClient.KMS.CreateAlias(in)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -156,7 +156,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 }
 
 func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) error {
-	ctlCtx, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -203,7 +203,7 @@ func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, customObject
 			PendingWindowInDays: pendingWindowInDays,
 		}
 
-		_, err = ctlCtx.AWSClient.KMS.ScheduleKeyDeletion(in)
+		_, err = cc.AWSClient.KMS.ScheduleKeyDeletion(in)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -229,7 +229,7 @@ func (k *Encrypter) EncryptionKey(ctx context.Context, customObject v1alpha1.AWS
 }
 
 func (k *Encrypter) Encrypt(ctx context.Context, key, plaintext string) (string, error) {
-	sc, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -239,7 +239,7 @@ func (k *Encrypter) Encrypt(ctx context.Context, key, plaintext string) (string,
 		Plaintext: []byte(plaintext),
 	}
 
-	encryptOutput, err := sc.AWSClient.KMS.Encrypt(encryptInput)
+	encryptOutput, err := cc.AWSClient.KMS.Encrypt(encryptInput)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -252,7 +252,7 @@ func (e *Encrypter) IsKeyNotFound(err error) bool {
 }
 
 func (k *Encrypter) describeKey(ctx context.Context, customObject v1alpha1.AWSConfig) (*kms.DescribeKeyOutput, error) {
-	sc, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -261,7 +261,7 @@ func (k *Encrypter) describeKey(ctx context.Context, customObject v1alpha1.AWSCo
 		KeyId: aws.String(keyAlias(customObject)),
 	}
 
-	out, err := sc.AWSClient.KMS.DescribeKey(input)
+	out, err := cc.AWSClient.KMS.DescribeKey(input)
 	if IsKeyNotFound(err) {
 		return nil, microerror.Mask(keyNotFoundError)
 	} else if err != nil {
