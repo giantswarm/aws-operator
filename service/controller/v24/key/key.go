@@ -11,8 +11,8 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v24/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v24/templates/cloudformation/cpf"
 	"github.com/giantswarm/aws-operator/service/controller/v24/templates/cloudformation/guest"
-	"github.com/giantswarm/aws-operator/service/controller/v24/templates/cloudformation/hostpost"
 	"github.com/giantswarm/aws-operator/service/controller/v24/templates/cloudformation/hostpre"
 )
 
@@ -64,6 +64,8 @@ const (
 	MasterInstanceTypeKey         = "MasterInstanceType"
 	MasterInstanceMonitoring      = "Monitoring"
 	MasterCloudConfigVersionKey   = "MasterCloudConfigVersion"
+	VersionBundleVersionKey       = "VersionBundleVersion"
+	VPCPeeringConnectionIDKey     = "VPCPeeringConnectionID"
 	WorkerASGKey                  = "WorkerASGName"
 	WorkerCountKey                = "WorkerCount"
 	WorkerMaxKey                  = "WorkerMax"
@@ -73,7 +75,6 @@ const (
 	WorkerInstanceMonitoring      = "Monitoring"
 	WorkerInstanceTypeKey         = "WorkerInstanceType"
 	WorkerCloudConfigVersionKey   = "WorkerCloudConfigVersion"
-	VersionBundleVersionKey       = "VersionBundleVersion"
 )
 
 const (
@@ -171,9 +172,9 @@ func CloudFormationGuestTemplates() []string {
 
 func CloudFormationHostPostTemplates() []string {
 	return []string{
-		hostpost.Main,
-		hostpost.RecordSets,
-		hostpost.RouteTables,
+		cpf.Main,
+		cpf.RecordSets,
+		cpf.RouteTables,
 	}
 }
 

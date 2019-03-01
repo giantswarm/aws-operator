@@ -490,11 +490,11 @@ func (r *Resource) getNameServersAndTTL(ctx context.Context, client *route53.Rou
 func (r *Resource) route53Clients(ctx context.Context) (guest, defaultGuest *route53.Route53, err error) {
 	// guest
 	{
-		controllerCtx, err := controllercontext.FromContext(ctx)
+		cc, err := controllercontext.FromContext(ctx)
 		if err != nil {
 			return nil, nil, microerror.Mask(err)
 		}
-		guest = controllerCtx.AWSClient.Route53
+		guest = cc.AWSClient.Route53
 	}
 
 	// defaultGuest

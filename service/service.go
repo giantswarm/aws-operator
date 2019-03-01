@@ -191,6 +191,7 @@ func New(config Config) (*Service, error) {
 			},
 			GuestUpdateEnabled: config.Viper.GetBool(config.Flag.Service.Guest.Update.Enabled),
 			ProjectName:        config.ProjectName,
+			Route53Enabled:     config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 		}
 
 		drainerController, err = controller.NewDrainer(c)

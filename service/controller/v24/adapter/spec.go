@@ -1,6 +1,8 @@
 package adapter
 
 import (
+	"context"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/request"
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
@@ -68,6 +70,10 @@ type Clients struct {
 	ELB            ELBClient
 	STS            STSClient
 }
+
+type ContextHydrater func(ctx context.Context, config Config) error
+
+type Hydrater func(config Config) error
 
 // TODO we copy this because of a circular import issue with the cloudformation
 // resource. The way how the resource works with the adapter and how infromation

@@ -43,7 +43,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	stackName := key.MainGuestStackName(customObject)
 
-	ctlCtx, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return StackState{}, microerror.Mask(err)
 	}
@@ -61,7 +61,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 				StackName: aws.String(stackName),
 			}
 
-			_, err := ctlCtx.AWSClient.CloudFormation.DescribeStacks(in)
+			_, err := cc.AWSClient.CloudFormation.DescribeStacks(in)
 			if cloudformationservice.IsStackNotFound(err) {
 				// This handling is far from perfect. We use different
 				// packages here. This is all going to be addressed in
@@ -100,7 +100,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the guest cluster main stack outputs in the AWS API")
 
 		var stackStatus string
-		stackOutputs, stackStatus, err = ctlCtx.CloudFormation.DescribeOutputsAndStatus(stackName)
+		stackOutputs, stackStatus, err = cc.CloudFormation.DescribeOutputsAndStatus(stackName)
 		if cloudformationservice.IsStackNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster main stack outputs in the AWS API")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack does not exist")
@@ -133,13 +133,13 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		// separate resource.
 		var hostedZoneNameServers string
 		if r.route53Enabled {
-			hostedZoneNameServers, err = ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.HostedZoneNameServers)
+			hostedZoneNameServers, err = cc.CloudFormation.GetOutputValue(stackOutputs, key.HostedZoneNameServers)
 			if err != nil {
 				return StackState{}, microerror.Mask(err)
 			}
 		}
 
-		dockerVolumeResourceName, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.DockerVolumeResourceNameKey)
+		dockerVolumeResourceName, err := cc.CloudFormation.GetOutputValue(stackOutputs, key.DockerVolumeResourceNameKey)
 		if cloudformationservice.IsOutputNotFound(err) {
 			// Since we are transitioning between versions we will have situations in
 			// which old clusters are updated to new versions and miss the docker
@@ -156,7 +156,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 		var workerDockerVolumeSizeGB int
 		{
-			v, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerDockerVolumeSizeKey)
+			v, err := cc.CloudFormation.GetOutputValue(stackOutputs, key.WorkerDockerVolumeSizeKey)
 			if cloudformationservice.IsOutputNotFound(err) {
 				// Since we are transitioning between versions we will have situations in
 				// which old clusters are updated to new versions and miss the docker
@@ -177,37 +177,37 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			}
 		}
 
-		masterImageID, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.MasterImageIDKey)
+		masterImageID, err := cc.CloudFormation.GetOutputValue(stackOutputs, key.MasterImageIDKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
-		masterInstanceResourceName, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.MasterInstanceResourceNameKey)
+		masterInstanceResourceName, err := cc.CloudFormation.GetOutputValue(stackOutputs, key.MasterInstanceResourceNameKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
-		masterInstanceType, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.MasterInstanceTypeKey)
+		masterInstanceType, err := cc.CloudFormation.GetOutputValue(stackOutputs, key.MasterInstanceTypeKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
-		masterCloudConfigVersion, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.MasterCloudConfigVersionKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-
-		workerCloudConfigVersion, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerCloudConfigVersionKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-		workerImageID, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerImageIDKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-		workerInstanceType, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.WorkerInstanceTypeKey)
+		masterCloudConfigVersion, err := cc.CloudFormation.GetOutputValue(stackOutputs, key.MasterCloudConfigVersionKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
 
-		versionBundleVersion, err := ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.VersionBundleVersionKey)
+		workerCloudConfigVersion, err := cc.CloudFormation.GetOutputValue(stackOutputs, key.WorkerCloudConfigVersionKey)
+		if err != nil {
+			return StackState{}, microerror.Mask(err)
+		}
+		workerImageID, err := cc.CloudFormation.GetOutputValue(stackOutputs, key.WorkerImageIDKey)
+		if err != nil {
+			return StackState{}, microerror.Mask(err)
+		}
+		workerInstanceType, err := cc.CloudFormation.GetOutputValue(stackOutputs, key.WorkerInstanceTypeKey)
+		if err != nil {
+			return StackState{}, microerror.Mask(err)
+		}
+
+		versionBundleVersion, err := cc.CloudFormation.GetOutputValue(stackOutputs, key.VersionBundleVersionKey)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}

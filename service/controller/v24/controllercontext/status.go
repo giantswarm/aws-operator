@@ -8,9 +8,11 @@ type Status struct {
 }
 
 type Cluster struct {
-	AWSAccount    ClusterAWSAccount
-	ASG           ClusterASG
-	EncryptionKey string
+	AWSAccount             ClusterAWSAccount
+	ASG                    ClusterASG
+	EncryptionKey          string
+	HostedZoneNameServers  string
+	VPCPeeringConnectionID string
 }
 
 type ClusterAWSAccount struct {
