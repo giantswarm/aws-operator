@@ -27,10 +27,12 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		_, err = r.hostClients.CloudFormation.UpdateTerminationProtection(i)
 		if IsDeleteInProgress(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane initializer CF stack is being deleted")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 			return nil
 		} else if IsNotExists(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane initializer CF stack does not exist")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 			return nil
 		} else if err != nil {
