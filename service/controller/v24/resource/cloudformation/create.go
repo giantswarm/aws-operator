@@ -140,7 +140,7 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		// here usually happens on the second or third attempt dependening on the
 		// resnyc period. It includes the peering routes, which need resources from
 		// the guest stack to be in place before it can be created.
-		err = r.createHostPostStack(ctx, customObject, currentStackState)
+		err = r.createHostPostStack(ctx, customObject)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -149,9 +149,9 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 	return createState, nil
 }
 
-func (r *Resource) createHostPostStack(ctx context.Context, customObject v1alpha1.AWSConfig, guestMainStackState StackState) error {
+func (r *Resource) createHostPostStack(ctx context.Context, customObject v1alpha1.AWSConfig) error {
 	stackName := key.MainHostPostStackName(customObject)
-	mainTemplate, err := r.getMainHostPostTemplateBody(ctx, customObject, guestMainStackState)
+	mainTemplate, err := r.getMainHostPostTemplateBody(ctx, customObject)
 	if err != nil {
 		return microerror.Mask(err)
 	}
