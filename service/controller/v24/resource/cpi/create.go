@@ -13,6 +13,10 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24/templates"
 )
 
+const (
+	capabilityNamesIAM = "CAPABILITY_NAMED_IAM"
+)
+
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	customObject, err := key.ToCustomObject(obj)
 	if err != nil {
@@ -77,7 +81,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		i := &cloudformation.CreateStackInput{
 			Capabilities: []*string{
-				aws.String(key.CapabilityNamesIAM),
+				aws.String(capabilityNamesIAM),
 			},
 			EnableTerminationProtection: aws.Bool(key.EnableTerminationProtection),
 			StackName:                   aws.String(key.MainHostPreStackName(customObject)),
