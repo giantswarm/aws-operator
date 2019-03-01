@@ -26,9 +26,9 @@ type Config struct {
 	Route53Enabled    bool
 }
 
-// Resource implements the CPI resource, which stands for Control Plane
-// Initializer. This was formerly known as the host pre stack. We manage a
-// dedicated CF stack for the IAM role and VPC Peering setup.
+// Resource implements the CPF resource, which stands for Control Plane
+// Finalizer. This was formerly known as the host post stack. We manage a
+// dedicated CF stack for the record sets and routing tables setup.
 type Resource struct {
 	hostClients *adapter.Clients
 	logger      micrologger.Logger
