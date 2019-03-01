@@ -494,12 +494,11 @@ func TestMainHostPostTemplateExistingFields(t *testing.T) {
 	ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
 
 	body, err := newResource.getMainHostPostTemplateBody(ctx, customObject, stackState)
-
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
 
-	if !strings.Contains(body, "Description: Main Host Post-Guest CloudFormation stack.") {
+	if !strings.Contains(body, "Description: Control Plane Finalizer Cloud Formation Stack.") {
 		fmt.Println(body)
 		t.Fatal("stack header not found")
 	}

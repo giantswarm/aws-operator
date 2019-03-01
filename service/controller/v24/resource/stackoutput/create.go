@@ -48,20 +48,28 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster cloud formation stack outputs")
 	}
 
-	{
-		v, err := cc.CloudFormation.GetOutputValue(outputs, key.WorkerASGKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.Drainer.WorkerASGName = v
-	}
-
 	if r.route53Enabled {
 		v, err := cc.CloudFormation.GetOutputValue(outputs, key.HostedZoneNameServers)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 		cc.Status.Cluster.HostedZoneNameServers = v
+	}
+
+	{
+		v, err := cc.CloudFormation.GetOutputValue(outputs, key.VPCPeeringConnectionIDKey)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		cc.Status.Cluster.VPCPeeringConnectionID = v
+	}
+
+	{
+		v, err := cc.CloudFormation.GetOutputValue(outputs, key.WorkerASGKey)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		cc.Status.Drainer.WorkerASGName = v
 	}
 
 	return nil

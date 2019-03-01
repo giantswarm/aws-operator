@@ -1,7 +1,7 @@
-package hostpost
+package cpf
 
 const RecordSets = `{{ define "record_sets" }}
-{{ $v := .HostPost.RecordSets }}
+{{ $v := .RecordSets }}
 {{ if $v.Route53Enabled }}
   GuestNSRecordSet:
     Type: 'AWS::Route53::RecordSet'

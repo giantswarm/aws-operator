@@ -95,7 +95,7 @@ func (r *Resource) getMainHostPostTemplateBody(ctx context.Context, customObject
 		STS:            cc.AWSClient.STS,
 	}
 
-	cfg := adapter.Config{
+	c := adapter.Config{
 		CustomObject:      customObject,
 		Clients:           adapterClients,
 		HostClients:       *r.hostClients,
@@ -106,12 +106,12 @@ func (r *Resource) getMainHostPostTemplateBody(ctx context.Context, customObject
 			HostedZoneNameServers: guestMainStackState.HostedZoneNameServers,
 		},
 	}
-	adp, err := adapter.NewHostPost(cfg)
+	adapter, err := adapter.NewCPF(ctx, c)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
-	rendered, err := templates.Render(key.CloudFormationHostPostTemplates(), adp)
+	rendered, err := templates.Render(key.CloudFormationHostPostTemplates(), adapter)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
