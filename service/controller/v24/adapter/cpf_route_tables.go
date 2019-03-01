@@ -14,12 +14,12 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24/key"
 )
 
-type HostPostRouteTablesAdapter struct {
-	PrivateRoutes []HostPostRouteTablesAdapterRoute
-	PublicRoutes  []HostPostRouteTablesAdapterRoute
+type CPFRouteTables struct {
+	PrivateRoutes []CPFRouteTablesRoute
+	PublicRoutes  []CPFRouteTablesRoute
 }
 
-func (a *HostPostRouteTablesAdapter) Adapt(ctx context.Context, config Config) error {
+func (a *CPFRouteTables) Adapt(ctx context.Context, config Config) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -39,7 +39,7 @@ func (a *HostPostRouteTablesAdapter) Adapt(ctx context.Context, config Config) e
 			return microerror.Mask(err)
 		}
 		for _, cidrBlock := range tenantPrivateSubnetCidrs {
-			rt := HostPostRouteTablesAdapterRoute{
+			rt := CPFRouteTablesRoute{
 				RouteTableName: routeTableName,
 				RouteTableID:   routeTableID,
 				// Requester CIDR block, we create the peering connection from the guest's private subnets.
@@ -58,7 +58,7 @@ func (a *HostPostRouteTablesAdapter) Adapt(ctx context.Context, config Config) e
 			if err != nil {
 				return microerror.Mask(err)
 			}
-			rt := HostPostRouteTablesAdapterRoute{
+			rt := CPFRouteTablesRoute{
 				RouteTableName: routeTableName,
 				RouteTableID:   routeTableID,
 				// Requester CIDR block, we create the peering connection from the
@@ -72,7 +72,7 @@ func (a *HostPostRouteTablesAdapter) Adapt(ctx context.Context, config Config) e
 	return nil
 }
 
-type HostPostRouteTablesAdapterRoute struct {
+type CPFRouteTablesRoute struct {
 	RouteTableName   string
 	RouteTableID     string
 	CidrBlock        string

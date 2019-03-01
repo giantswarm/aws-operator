@@ -8,8 +8,8 @@ import (
 
 // CPF is the adapter collection for the Control Plane Finalizer management.
 type CPF struct {
-	RecordSets  HostPostRecordSetsAdapter
-	RouteTables HostPostRouteTablesAdapter
+	RecordSets  CPFRecordSets
+	RouteTables CPFRouteTables
 }
 
 func NewCPF(ctx context.Context, config Config) (*CPF, error) {
