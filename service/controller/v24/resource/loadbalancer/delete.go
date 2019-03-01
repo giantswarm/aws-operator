@@ -28,13 +28,13 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	if lbState != nil && len(lbState.LoadBalancerNames) > 0 {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting %d load balancers", len(lbState.LoadBalancerNames)))
 
-		sc, err := controllercontext.FromContext(ctx)
+		cc, err := controllercontext.FromContext(ctx)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
 		for _, lbName := range lbState.LoadBalancerNames {
-			_, err := sc.AWSClient.ELB.DeleteLoadBalancer(&elb.DeleteLoadBalancerInput{
+			_, err := cc.AWSClient.ELB.DeleteLoadBalancer(&elb.DeleteLoadBalancerInput{
 				LoadBalancerName: aws.String(lbName),
 			})
 			if err != nil {

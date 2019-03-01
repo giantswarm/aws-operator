@@ -23,12 +23,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	controllerCtx, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	workerASGName := controllerCtx.Status.Drainer.WorkerASGName
+	workerASGName := cc.Status.Drainer.WorkerASGName
 	if workerASGName == "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "worker ASG name is not available yet")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -110,12 +110,12 @@ func (r *Resource) completeLifecycleHook(ctx context.Context, instanceID, worker
 		LifecycleHookName:     aws.String(key.NodeDrainerLifecycleHookName),
 	}
 
-	sc, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	_, err = sc.AWSClient.AutoScaling.CompleteLifecycleAction(i)
+	_, err = cc.AWSClient.AutoScaling.CompleteLifecycleAction(i)
 	if IsNoActiveLifecycleAction(err) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not found lifecycle hook action for guest cluster node '%s'", instanceID))
 	} else if err != nil {

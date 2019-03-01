@@ -92,7 +92,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 }
 
 func (r *Resource) isBucketCreated(ctx context.Context, name string) (bool, error) {
-	sc, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
@@ -100,7 +100,7 @@ func (r *Resource) isBucketCreated(ctx context.Context, name string) (bool, erro
 	headInput := &s3.HeadBucketInput{
 		Bucket: aws.String(name),
 	}
-	_, err = sc.AWSClient.S3.HeadBucket(headInput)
+	_, err = cc.AWSClient.S3.HeadBucket(headInput)
 	if IsBucketNotFound(err) {
 		return false, nil
 	} else if err != nil {
@@ -111,7 +111,7 @@ func (r *Resource) isBucketCreated(ctx context.Context, name string) (bool, erro
 }
 
 func (r *Resource) getLoggingConfiguration(ctx context.Context, name string) (*s3.GetBucketLoggingOutput, error) {
-	sc, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -119,7 +119,7 @@ func (r *Resource) getLoggingConfiguration(ctx context.Context, name string) (*s
 	bucketLoggingInput := &s3.GetBucketLoggingInput{
 		Bucket: aws.String(name),
 	}
-	bucketLoggingOutput, err := sc.AWSClient.S3.GetBucketLogging(bucketLoggingInput)
+	bucketLoggingOutput, err := cc.AWSClient.S3.GetBucketLogging(bucketLoggingInput)
 	if err != nil {
 		return bucketLoggingOutput, microerror.Mask(err)
 	}

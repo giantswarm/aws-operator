@@ -18,7 +18,7 @@ import (
 func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, clusterCerts certs.Cluster) (string, error) {
 	var err error
 
-	ctlCtx, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -28,7 +28,7 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 		be := baseExtension{
 			customObject:  customObject,
 			encrypter:     c.encrypter,
-			encryptionKey: ctlCtx.Status.Cluster.EncryptionKey,
+			encryptionKey: cc.Status.Cluster.EncryptionKey,
 		}
 
 		// Default registry, kubernetes, etcd images etcd.
@@ -38,7 +38,7 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 		params.Cluster = customObject.Spec.Cluster
 		params.Extension = &WorkerExtension{
 			baseExtension: be,
-			ctlCtx:        ctlCtx,
+			ctlCtx:        cc,
 
 			ClusterCerts: clusterCerts,
 		}

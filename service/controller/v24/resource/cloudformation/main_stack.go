@@ -16,18 +16,18 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-	sc, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
 	adapterClients := adapter.Clients{
-		CloudFormation: sc.AWSClient.CloudFormation,
-		EC2:            sc.AWSClient.EC2,
-		IAM:            sc.AWSClient.IAM,
-		KMS:            sc.AWSClient.KMS,
-		ELB:            sc.AWSClient.ELB,
-		STS:            sc.AWSClient.STS,
+		CloudFormation: cc.AWSClient.CloudFormation,
+		EC2:            cc.AWSClient.EC2,
+		IAM:            cc.AWSClient.IAM,
+		KMS:            cc.AWSClient.KMS,
+		ELB:            cc.AWSClient.ELB,
+		STS:            cc.AWSClient.STS,
 	}
 
 	cfg := adapter.Config{
@@ -54,13 +54,13 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 			MasterInstanceMonitoring:   stackState.MasterInstanceMonitoring,
 
 			WorkerCloudConfigVersion: stackState.WorkerCloudConfigVersion,
-			WorkerDesired:            sc.Status.Cluster.ASG.DesiredCapacity,
+			WorkerDesired:            cc.Status.Cluster.ASG.DesiredCapacity,
 			WorkerDockerVolumeSizeGB: stackState.WorkerDockerVolumeSizeGB,
 			WorkerImageID:            stackState.WorkerImageID,
 			WorkerInstanceMonitoring: stackState.WorkerInstanceMonitoring,
 			WorkerInstanceType:       stackState.WorkerInstanceType,
-			WorkerMax:                sc.Status.Cluster.ASG.MaxSize,
-			WorkerMin:                sc.Status.Cluster.ASG.MinSize,
+			WorkerMax:                cc.Status.Cluster.ASG.MaxSize,
+			WorkerMin:                cc.Status.Cluster.ASG.MinSize,
 
 			VersionBundleVersion: stackState.VersionBundleVersion,
 		},
@@ -80,18 +80,18 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 }
 
 func (r *Resource) getMainHostPreTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {
-	sc, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
 	adapterClients := adapter.Clients{
-		CloudFormation: sc.AWSClient.CloudFormation,
-		EC2:            sc.AWSClient.EC2,
-		IAM:            sc.AWSClient.IAM,
-		KMS:            sc.AWSClient.KMS,
-		ELB:            sc.AWSClient.ELB,
-		STS:            sc.AWSClient.STS,
+		CloudFormation: cc.AWSClient.CloudFormation,
+		EC2:            cc.AWSClient.EC2,
+		IAM:            cc.AWSClient.IAM,
+		KMS:            cc.AWSClient.KMS,
+		ELB:            cc.AWSClient.ELB,
+		STS:            cc.AWSClient.STS,
 	}
 
 	guestAccountID, err := adapter.AccountID(adapterClients)
@@ -117,18 +117,18 @@ func (r *Resource) getMainHostPreTemplateBody(ctx context.Context, customObject 
 }
 
 func (r *Resource) getMainHostPostTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig, guestMainStackState StackState) (string, error) {
-	sc, err := controllercontext.FromContext(ctx)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
 	adapterClients := adapter.Clients{
-		CloudFormation: sc.AWSClient.CloudFormation,
-		EC2:            sc.AWSClient.EC2,
-		IAM:            sc.AWSClient.IAM,
-		KMS:            sc.AWSClient.KMS,
-		ELB:            sc.AWSClient.ELB,
-		STS:            sc.AWSClient.STS,
+		CloudFormation: cc.AWSClient.CloudFormation,
+		EC2:            cc.AWSClient.EC2,
+		IAM:            cc.AWSClient.IAM,
+		KMS:            cc.AWSClient.KMS,
+		ELB:            cc.AWSClient.ELB,
+		STS:            cc.AWSClient.STS,
 	}
 
 	cfg := adapter.Config{
