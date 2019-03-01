@@ -129,6 +129,8 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	var currentState StackState
 	{
+		// TODO we should write the hosted zone name servers to the CR status in a
+		// separate resource.
 		var hostedZoneNameServers string
 		if r.route53Enabled {
 			hostedZoneNameServers, err = ctlCtx.CloudFormation.GetOutputValue(stackOutputs, key.HostedZoneNameServers)

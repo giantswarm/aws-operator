@@ -81,9 +81,13 @@ type HostPostRouteTablesAdapterRoute struct {
 	PeerConnectionID string
 }
 
-// waitForPeeringConnectionID keeps asking for the peering connection ID until it is obtained or
-// a timeout expires. It is needed because the peering connection is created as part of the
-// guest stack, we need to wait until the required resources from the guest are in place.
+// TODO that pre condition has network dependencies and should not be part of
+// the adapter. We should rather ensure this in the cpf resource.
+//
+// waitForPeeringConnectionID keeps asking for the peering connection ID until
+// it is obtained or a timeout expires. It is needed because the peering
+// connection is created as part of the guest stack, we need to wait until the
+// required resources from the guest are in place.
 func waitForPeeringConnectionID(cfg Config) (string, error) {
 	clusterID := key.ClusterID(cfg.CustomObject)
 	input := &ec2.DescribeVpcPeeringConnectionsInput{
@@ -138,6 +142,8 @@ func waitForPeeringConnectionID(cfg Config) (string, error) {
 	return peeringID, nil
 }
 
+// TODO we should write the route table IDs to the CR status. This getter has
+// network dependencies, which should not be part of the adapter.
 func routeTableID(name string, cfg Config) (string, error) {
 	input := &ec2.DescribeRouteTablesInput{
 		Filters: []*ec2.Filter{
