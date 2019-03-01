@@ -67,37 +67,6 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	}
 
 	if stackStateToDelete.Name != "" {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting the host cluster pre stack")
-
-		stackName := aws.String(key.MainHostPreStackName(customObject))
-
-		updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
-			EnableTerminationProtection: aws.Bool(false),
-			StackName:                   stackName,
-		}
-		_, err = r.hostClients.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
-		if IsDeleteInProgress(err) {
-			// fall through
-		} else if IsNotExists(err) {
-			// fall through
-		} else if err != nil {
-			return microerror.Mask(err)
-		} else {
-			i := &cloudformation.DeleteStackInput{
-				StackName: stackName,
-			}
-			_, err = r.hostClients.CloudFormation.DeleteStack(i)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			r.logger.LogCtx(ctx, "level", "debug", "message", "deleted the host cluster pre stack")
-		}
-	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting the host cluster pre stack")
-	}
-
-	if stackStateToDelete.Name != "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting the host cluster post stack")
 
 		stackName := aws.String(key.MainHostPostStackName(customObject))

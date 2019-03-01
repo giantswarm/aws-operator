@@ -34,6 +34,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/bridgezone"
 	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v24/resource/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v24/resource/cpi"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/ebsvolume"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/encryptionkey"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/endpoints"
@@ -390,6 +391,27 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var cpiResource controller.Resource
+	{
+		c := cpi.Config{
+			HostClients: &adapter.Clients{
+				EC2:            config.HostAWSClients.EC2,
+				IAM:            config.HostAWSClients.IAM,
+				STS:            config.HostAWSClients.STS,
+				CloudFormation: config.HostAWSClients.CloudFormation,
+			},
+			Logger: config.Logger,
+
+			InstallationName: config.InstallationName,
+			Route53Enabled:   config.Route53Enabled,
+		}
+
+		cpiResource, err = cpi.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var namespaceResource controller.Resource
 	{
 		c := namespace.Config{
@@ -519,6 +541,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		s3ObjectResource,
 		loadBalancerResource,
 		ebsVolumeResource,
+		cpiResource,
 		cloudformationResource,
 		namespaceResource,
 		serviceResource,

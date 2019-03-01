@@ -4,11 +4,12 @@ import (
 	"context"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/microerror"
+
 	"github.com/giantswarm/aws-operator/service/controller/v24/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v24/key"
 	"github.com/giantswarm/aws-operator/service/controller/v24/templates"
-	"github.com/giantswarm/microerror"
 )
 
 func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig, stackState StackState) (string, error) {
@@ -72,43 +73,6 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 	}
 
 	rendered, err := templates.Render(key.CloudFormationGuestTemplates(), adp)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	return rendered, nil
-}
-
-func (r *Resource) getMainHostPreTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	adapterClients := adapter.Clients{
-		CloudFormation: cc.AWSClient.CloudFormation,
-		EC2:            cc.AWSClient.EC2,
-		IAM:            cc.AWSClient.IAM,
-		KMS:            cc.AWSClient.KMS,
-		ELB:            cc.AWSClient.ELB,
-		STS:            cc.AWSClient.STS,
-	}
-
-	guestAccountID, err := adapter.AccountID(adapterClients)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-	cfg := adapter.Config{
-		CustomObject:   customObject,
-		GuestAccountID: guestAccountID,
-		Route53Enabled: r.route53Enabled,
-	}
-	adp, err := adapter.NewHostPre(cfg)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	rendered, err := templates.Render(key.CloudFormationHostPreTemplates(), adp)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
