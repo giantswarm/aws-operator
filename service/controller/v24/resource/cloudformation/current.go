@@ -51,7 +51,6 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	if key.IsDeleted(customObject) {
 		stackNames := []string{
 			key.MainGuestStackName(customObject),
-			key.MainHostPostStackName(customObject),
 		}
 
 		for _, stackName := range stackNames {
@@ -129,16 +128,6 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	var currentState StackState
 	{
-		// TODO we should write the hosted zone name servers to the CR status in a
-		// separate resource.
-		var hostedZoneNameServers string
-		if r.route53Enabled {
-			hostedZoneNameServers, err = cc.CloudFormation.GetOutputValue(stackOutputs, key.HostedZoneNameServers)
-			if err != nil {
-				return StackState{}, microerror.Mask(err)
-			}
-		}
-
 		dockerVolumeResourceName, err := cc.CloudFormation.GetOutputValue(stackOutputs, key.DockerVolumeResourceNameKey)
 		if cloudformationservice.IsOutputNotFound(err) {
 			// Since we are transitioning between versions we will have situations in
@@ -214,8 +203,6 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 		currentState = StackState{
 			Name: stackName,
-
-			HostedZoneNameServers: hostedZoneNameServers,
 
 			DockerVolumeResourceName:   dockerVolumeResourceName,
 			MasterImageID:              masterImageID,

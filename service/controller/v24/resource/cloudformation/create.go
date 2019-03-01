@@ -6,7 +6,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
@@ -106,10 +105,6 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 	if currentStackState.Name == "" || desiredStackState.Name != currentStackState.Name {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack has to be created")
 
-		if err := r.validateCluster(customObject); err != nil {
-			return cloudformation.CreateStackInput{}, microerror.Mask(err)
-		}
-
 		var mainTemplate string
 		mainTemplate, err := r.getMainGuestTemplateBody(ctx, customObject, desiredStackState)
 		if err != nil {
@@ -132,52 +127,9 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 			TemplateBody:     aws.String(mainTemplate),
 			TimeoutInMinutes: aws.Int64(defaultCreationTimeout),
 		}
-
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack does not have to be created")
-
-		// Create host post-main stack once the guest main stack got created. This
-		// here usually happens on the second or third attempt dependening on the
-		// resnyc period. It includes the peering routes, which need resources from
-		// the guest stack to be in place before it can be created.
-		err = r.createHostPostStack(ctx, customObject)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
 	}
 
 	return createState, nil
-}
-
-func (r *Resource) createHostPostStack(ctx context.Context, customObject v1alpha1.AWSConfig) error {
-	stackName := key.MainHostPostStackName(customObject)
-	mainTemplate, err := r.getMainHostPostTemplateBody(ctx, customObject)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	createStack := &cloudformation.CreateStackInput{
-		StackName:                   aws.String(stackName),
-		TemplateBody:                aws.String(mainTemplate),
-		EnableTerminationProtection: aws.Bool(key.EnableTerminationProtection),
-	}
-	createStack.SetTags(r.getCloudFormationTags(customObject))
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", "creating the host cluster post cloud formation stack")
-
-	_, err = r.hostClients.CloudFormation.CreateStack(createStack)
-	if IsAlreadyExists(err) {
-		// TODO this here indicates we should have dedicated resources for the pre,
-		// main and post stacks. The workflow would be more straight forward and
-		// easy to manage. Right now we hack around this and add conditionals to
-		// make it work somehow while bypassing the framework primitives.
-		r.logger.LogCtx(ctx, "level", "debug", "message", "the host cluster post cloud formation stack is already created")
-
-		return nil
-	} else if err != nil {
-		return microerror.Mask(err)
-	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", "created the host cluster post cloud formation stack")
-
-	return nil
 }

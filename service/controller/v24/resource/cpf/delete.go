@@ -17,21 +17,21 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "disabling the termination protection of the tenant cluster's control plane initializer CF stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "disabling the termination protection of the tenant cluster's control plane finalizer cloud formation stack")
 
 		i := &cloudformation.UpdateTerminationProtectionInput{
 			EnableTerminationProtection: aws.Bool(false),
-			StackName:                   aws.String(key.MainHostPreStackName(customObject)),
+			StackName:                   aws.String(key.MainHostPostStackName(customObject)),
 		}
 
 		_, err = r.hostClients.CloudFormation.UpdateTerminationProtection(i)
 		if IsDeleteInProgress(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane initializer CF stack is being deleted")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane finalizer cloud formation stack is being deleted")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 			return nil
 		} else if IsNotExists(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane initializer CF stack does not exist")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane finalizer cloud formation stack does not exist")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 			return nil
@@ -39,14 +39,14 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "disabled the termination protection of the tenant cluster's control plane initializer CF stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "disabled the termination protection of the tenant cluster's control plane finalizer cloud formation stack")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the deletion of the tenant cluster's control plane initializer CF stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the deletion of the tenant cluster's control plane finalizer cloud formation stack")
 
 		i := &cloudformation.DeleteStackInput{
-			StackName: aws.String(key.MainHostPreStackName(customObject)),
+			StackName: aws.String(key.MainHostPostStackName(customObject)),
 		}
 
 		_, err = r.hostClients.CloudFormation.DeleteStack(i)
@@ -54,7 +54,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the deletion of the tenant cluster's control plane initializer CF stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the deletion of the tenant cluster's control plane finalizer cloud formation stack")
 	}
 
 	return nil

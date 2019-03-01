@@ -13,15 +13,17 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "cpiv24"
+	Name = "cpfv24"
 )
 
 type Config struct {
 	HostClients *adapter.Clients
 	Logger      micrologger.Logger
 
-	InstallationName string
-	Route53Enabled   bool
+	EncrypterBackend  string
+	InstallationName  string
+	PublicRouteTables string
+	Route53Enabled    bool
 }
 
 // Resource implements the CPI resource, which stands for Control Plane
@@ -31,8 +33,10 @@ type Resource struct {
 	hostClients *adapter.Clients
 	logger      micrologger.Logger
 
-	installationName string
-	route53Enabled   bool
+	encrypterBackend  string
+	installationName  string
+	publicRouteTables string
+	route53Enabled    bool
 }
 
 func New(config Config) (*Resource, error) {
@@ -43,12 +47,18 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
+	if config.EncrypterBackend == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.EncrypterBackend must not be empty", config)
+	}
+
 	r := &Resource{
 		hostClients: config.HostClients,
 		logger:      config.Logger,
 
-		installationName: config.InstallationName,
-		route53Enabled:   config.Route53Enabled,
+		encrypterBackend:  config.EncrypterBackend,
+		installationName:  config.InstallationName,
+		publicRouteTables: config.PublicRouteTables,
+		route53Enabled:    config.Route53Enabled,
 	}
 
 	return r, nil
