@@ -35,6 +35,7 @@ type DrainerConfig struct {
 	GuestUpdateEnabled bool
 	HostAWSConfig      DrainerConfigAWS
 	ProjectName        string
+	Route53Enabled     bool
 }
 
 type DrainerConfigAWS struct {
@@ -330,6 +331,7 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 
 			GuestUpdateEnabled: config.GuestUpdateEnabled,
 			ProjectName:        config.ProjectName,
+			Route53Enabled:     config.Route53Enabled,
 		}
 
 		v24ResourceSet, err = v24.NewDrainerResourceSet(c)

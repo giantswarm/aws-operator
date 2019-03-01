@@ -19,6 +19,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24/key"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/drainer"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/drainfinisher"
+	"github.com/giantswarm/aws-operator/service/controller/v24/resource/stackoutput"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/workerasgname"
 )
 
@@ -30,6 +31,7 @@ type DrainerResourceSetConfig struct {
 
 	GuestUpdateEnabled bool
 	ProjectName        string
+	Route53Enabled     bool
 }
 
 func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.ResourceSet, error) {
@@ -61,6 +63,20 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var stackOutputResource controller.Resource
+	{
+		c := stackoutput.Config{
+			Logger: config.Logger,
+
+			Route53Enabled: config.Route53Enabled,
+		}
+
+		stackOutputResource, err = stackoutput.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var workerASGNameResource controller.Resource
 	{
 		c := workerasgname.ResourceConfig{
@@ -75,6 +91,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 	}
 
 	resources := []controller.Resource{
+		stackOutputResource,
 		workerASGNameResource,
 		drainerResource,
 		drainFinisherResource,
