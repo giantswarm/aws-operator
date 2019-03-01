@@ -6,8 +6,7 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
-// CPF is the adapter collection managing the Control Plane Finalizer
-// management.
+// CPF is the adapter collection for the Control Plane Finalizer management.
 type CPF struct {
 	RecordSets  HostPostRecordSetsAdapter
 	RouteTables HostPostRouteTablesAdapter
