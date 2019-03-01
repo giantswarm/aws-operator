@@ -116,6 +116,7 @@ func waitForPeeringConnectionID(cfg Config) (string, error) {
 	}
 
 	o := func() error {
+		fmt.Printf("%#v\n", "finding VPC Peering Connection ID")
 		output, err := cfg.Clients.EC2.DescribeVpcPeeringConnections(input)
 		if err != nil {
 			return microerror.Mask(err)
@@ -134,6 +135,10 @@ func waitForPeeringConnectionID(cfg Config) (string, error) {
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
+	fmt.Printf("\n")
+	fmt.Printf("%#v\n", "found VPC Peering Connection ID")
+	fmt.Printf("    %#v\n", peeringID)
+	fmt.Printf("\n")
 
 	return peeringID, nil
 }
