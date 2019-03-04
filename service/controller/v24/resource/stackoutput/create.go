@@ -58,7 +58,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	{
 		v, err := cc.CloudFormation.GetOutputValue(outputs, key.VPCPeeringConnectionIDKey)
-		if cf.IsStackNotFound(err) {
+		if cf.IsOutputNotFound(err) {
 			// TODO this exception is necessary for clusters upgrading from v23 to
 			// v24. The code can be cleaned up in v25 and the controller context value
 			// assignment can be managed like the other examples below.
