@@ -58,10 +58,18 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	{
 		v, err := cc.CloudFormation.GetOutputValue(outputs, key.VPCPeeringConnectionIDKey)
-		if err != nil {
+		if cf.IsStackNotFound(err) {
+			// TODO this exception is necessary for clusters upgrading from v23 to
+			// v24. The code can be cleaned up in v25 and the controller context value
+			// assignment can be managed like the other examples below.
+			//
+			//     https://github.com/giantswarm/giantswarm/issues/5496
+			//
+		} else if err != nil {
 			return microerror.Mask(err)
+		} else {
+			cc.Status.Cluster.VPCPeeringConnectionID = v
 		}
-		cc.Status.Cluster.VPCPeeringConnectionID = v
 	}
 
 	{
