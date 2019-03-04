@@ -48,6 +48,16 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return StackState{}, microerror.Mask(err)
 	}
 
+	// NOTE this is temporary and will be removed in the next PR.
+	//
+	//     https://github.com/giantswarm/aws-operator/pull/1425
+	//
+	if cc.Status.Cluster.VPCPeeringConnectionID == "" {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the VPC Peering Connection ID in the controller context")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		resourcecanceledcontext.SetCanceled(ctx)
+	}
+
 	if key.IsDeleted(customObject) {
 		stackNames := []string{
 			key.MainGuestStackName(customObject),
