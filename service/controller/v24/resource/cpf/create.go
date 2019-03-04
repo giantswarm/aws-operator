@@ -6,8 +6,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
 	"github.com/giantswarm/aws-operator/service/controller/v24/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v24/key"
 	"github.com/giantswarm/aws-operator/service/controller/v24/templates"
 )
@@ -16,6 +18,20 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	cr, err := key.ToCustomObject(obj)
 	if err != nil {
 		return microerror.Mask(err)
+	}
+
+	{
+		cc, err := controllercontext.FromContext(ctx)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if cc.Status.Cluster.VPCPeeringConnectionID == "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the VPC Peering Connection ID in the controller context")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			resourcecanceledcontext.SetCanceled(ctx)
+			return nil
+		}
 	}
 
 	{
