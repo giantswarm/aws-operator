@@ -47,6 +47,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/service"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/stackoutput"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/workerasgname"
+	"github.com/giantswarm/aws-operator/service/routetable"
 )
 
 const (
@@ -64,6 +65,7 @@ type ClusterResourceSetConfig struct {
 	K8sClient          kubernetes.Interface
 	Logger             micrologger.Logger
 	RandomKeysSearcher randomkeys.Interface
+	RouteTable         *routetable.RouteTable
 
 	AccessLogsExpiration       int
 	AdvancedMonitoringEC2      bool
@@ -92,12 +94,10 @@ type ClusterResourceSetConfig struct {
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
-	if config.CertsSearcher == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.CertsSearcher must not be empty", config)
-	}
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
+
 	if config.HostAWSConfig.AccessKeyID == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSConfig.AccessKeyID must not be empty", config)
 	}
@@ -129,16 +129,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	if config.GuestPublicSubnetMaskBits <= config.GuestSubnetMaskBits {
 		return nil, microerror.Maskf(invalidConfigError, "%T.GuestPublicSubnetMaskBits (%d) must not be smaller or equal than %T.GuestSubnetMaskBits (%d)", config, config.GuestPublicSubnetMaskBits, config, config.GuestSubnetMaskBits)
 	}
-	if config.K8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
-	}
-	if config.Logger == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
-	}
-	if config.RandomKeysSearcher == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.RandomkeysSearcher must not be empty", config)
-	}
-
 	if config.IgnitionPath == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.IgnitionPath must not be empty", config)
 	}

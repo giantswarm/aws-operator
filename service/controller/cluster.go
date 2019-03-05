@@ -25,6 +25,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24"
 	v24adapter "github.com/giantswarm/aws-operator/service/controller/v24/adapter"
 	v24cloudconfig "github.com/giantswarm/aws-operator/service/controller/v24/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/routetable"
 )
 
 type ClusterConfig struct {
@@ -32,6 +33,7 @@ type ClusterConfig struct {
 	K8sClient    kubernetes.Interface
 	K8sExtClient apiextensionsclient.Interface
 	Logger       micrologger.Logger
+	RouteTable   *routetable.RouteTable
 
 	AccessLogsExpiration       int
 	AdvancedMonitoringEC2      bool
@@ -91,12 +93,6 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.G8sClient must not be empty")
-	}
-	if config.K8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.K8sClient must not be empty")
-	}
-	if config.K8sExtClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.K8sExtClient must not be empty")
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
@@ -339,6 +335,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
 			RandomKeysSearcher: randomKeysSearcher,
+			RouteTable:         config.RouteTable,
 
 			AccessLogsExpiration:       config.AccessLogsExpiration,
 			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
