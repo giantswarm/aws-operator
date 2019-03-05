@@ -29,7 +29,7 @@ type RouteTable struct {
 }
 
 // New creates a new route table service that has to be booted using Boot to
-// cache the confiured route table IDs associated with their names.
+// cache the configured route table IDs associated with their names.
 func New(config Config) (*RouteTable, error) {
 	if config.EC2 == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.EC2 must not be empty", config)
