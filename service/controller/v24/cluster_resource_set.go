@@ -81,8 +81,8 @@ type ClusterResourceSetConfig struct {
 	DeleteLoggingBucket        bool
 	OIDC                       cloudconfig.OIDCConfig
 	ProjectName                string
-	PublicRouteTables          string
 	Route53Enabled             bool
+	RouteTables                string
 	PodInfraContainerImage     string
 	RegistryDomain             string
 	SSOPublicKey               string
@@ -92,12 +92,10 @@ type ClusterResourceSetConfig struct {
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
-	if config.CertsSearcher == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.CertsSearcher must not be empty", config)
-	}
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
+
 	if config.HostAWSConfig.AccessKeyID == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSConfig.AccessKeyID must not be empty", config)
 	}
@@ -129,16 +127,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	if config.GuestPublicSubnetMaskBits <= config.GuestSubnetMaskBits {
 		return nil, microerror.Maskf(invalidConfigError, "%T.GuestPublicSubnetMaskBits (%d) must not be smaller or equal than %T.GuestSubnetMaskBits (%d)", config, config.GuestPublicSubnetMaskBits, config, config.GuestSubnetMaskBits)
 	}
-	if config.K8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
-	}
-	if config.Logger == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
-	}
-	if config.RandomKeysSearcher == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.RandomkeysSearcher must not be empty", config)
-	}
-
 	if config.IgnitionPath == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.IgnitionPath must not be empty", config)
 	}
@@ -184,6 +172,21 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	default:
 		return nil, microerror.Maskf(invalidConfigError, "unknown encrypter backend %q", config.EncrypterBackend)
 	}
+
+	//var routeTableService *routetable.RouteTable
+	//{
+	//	c := routetable.Config{
+	//		EC2:    config.HostAWSClients.EC2,
+	//		Logger: config.Logger,
+	//
+	//		Names: strings.Split(config.RouteTables, ","),
+	//	}
+	//
+	//	routeTableService, err = routetable.New(c)
+	//	if err != nil {
+	//		return nil, microerror.Mask(err)
+	//	}
+	//}
 
 	var cloudConfig *cloudconfig.CloudConfig
 	{
@@ -377,7 +380,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
 			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
 			InstallationName:           config.InstallationName,
-			PublicRouteTables:          config.PublicRouteTables,
+			PublicRouteTables:          config.RouteTables,
 			Route53Enabled:             config.Route53Enabled,
 		}
 

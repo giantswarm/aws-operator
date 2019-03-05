@@ -24,9 +24,9 @@ data:
         region: '{{ .Values.Installation.V1.Provider.AWS.Region }}'
         route53:
           enabled: '{{ .Values.Installation.V1.Provider.AWS.Route53.Enabled }}'
+        routeTables: '{{ .Values.Installation.V1.Provider.AWS.RouteTableNames }}'
         trustedAdvisor:
           enabled: '{{ .Values.Installation.V1.Provider.AWS.TrustedAdvisor.Enabled }}'
-        publicRouteTables: '{{ .Values.Installation.V1.Provider.AWS.PublicRouteTableNames }}'
         vaultAddress: '{{ .Values.Installation.V1.Auth.Vault.Address }}'
       guest:
         ssh:

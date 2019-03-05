@@ -17,9 +17,9 @@ type AWS struct {
 	LoggingBucket          loggingbucket.LoggingBucket
 	PodInfraContainerImage string
 	PubKeyFile             string
-	PublicRouteTables      string
 	Region                 string
 	Route53                route53.Route53
+	RouteTables            string
 	S3AccessLogsExpiration string
 	TrustedAdvisor         trustedadvisor.TrustedAdvisor
 	VaultAddress           string
