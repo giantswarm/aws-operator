@@ -54,9 +54,9 @@ type ClusterConfig struct {
 	PodInfraContainerImage     string
 	ProjectName                string
 	PubKeyFile                 string
-	PublicRouteTables          string
 	RegistryDomain             string
 	Route53Enabled             bool
+	RouteTables                string
 	SSOPublicKey               string
 	VaultAddress               string
 }
@@ -264,7 +264,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 				SubnetList: config.APIWhitelist.SubnetList,
 			},
 			ProjectName:       config.ProjectName,
-			PublicRouteTables: config.PublicRouteTables,
+			PublicRouteTables: config.RouteTables,
 			RegistryDomain:    config.RegistryDomain,
 			SSOPublicKey:      config.SSOPublicKey,
 			VaultAddress:      config.VaultAddress,
@@ -313,7 +313,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 				SubnetList: config.APIWhitelist.SubnetList,
 			},
 			ProjectName:       config.ProjectName,
-			PublicRouteTables: config.PublicRouteTables,
+			PublicRouteTables: config.RouteTables,
 			RegistryDomain:    config.RegistryDomain,
 			SSOPublicKey:      config.SSOPublicKey,
 			VaultAddress:      config.VaultAddress,
@@ -362,11 +362,11 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 				Enabled:    config.APIWhitelist.Enabled,
 				SubnetList: config.APIWhitelist.SubnetList,
 			},
-			ProjectName:       config.ProjectName,
-			PublicRouteTables: config.PublicRouteTables,
-			RegistryDomain:    config.RegistryDomain,
-			SSOPublicKey:      config.SSOPublicKey,
-			VaultAddress:      config.VaultAddress,
+			ProjectName:    config.ProjectName,
+			RouteTables:    config.RouteTables,
+			RegistryDomain: config.RegistryDomain,
+			SSOPublicKey:   config.SSOPublicKey,
+			VaultAddress:   config.VaultAddress,
 		}
 
 		resourceSetV24, err = v24.NewClusterResourceSet(c)

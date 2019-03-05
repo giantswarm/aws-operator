@@ -133,7 +133,7 @@ func New(config Config) (*Service, error) {
 			EC2:    ec2Client,
 			Logger: config.Logger,
 
-			Names: strings.Split(config.Viper.GetString(config.Flag.Service.AWS.PublicRouteTables), ","),
+			Names: strings.Split(config.Viper.GetString(config.Flag.Service.AWS.RouteTables), ","),
 		}
 
 		routeTableService, err = routetable.New(c)
@@ -196,9 +196,9 @@ func New(config Config) (*Service, error) {
 			PodInfraContainerImage: config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
 			ProjectName:            config.ProjectName,
 			PubKeyFile:             config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile),
-			PublicRouteTables:      config.Viper.GetString(config.Flag.Service.AWS.PublicRouteTables),
-			Route53Enabled:         config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 			RegistryDomain:         config.Viper.GetString(config.Flag.Service.RegistryDomain),
+			Route53Enabled:         config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
+			RouteTables:            config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
 			SSOPublicKey:           config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
 			VaultAddress:           config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
 		}

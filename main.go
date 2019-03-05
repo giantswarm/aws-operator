@@ -116,8 +116,8 @@ func mainError() error {
 	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.ID, "", "ID of the AWS access key for the host cluster account. If empty, guest cluster account is used.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.Secret, "", "Secret of the AWS access key for the host cluster account. If empty, guest cluster account is used.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.Session, "", "Session token of the AWS access key for the host cluster account. If empty, guest cluster token is used.")
-	daemonCommand.PersistentFlags().String(f.Service.AWS.PublicRouteTables, "", "Names of the public route tables in host cluster separated by commas, required for accessing public ELBs from guest nodes.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.Region, "", "Region for checking for orphan AWS resources.")
+	daemonCommand.PersistentFlags().String(f.Service.AWS.RouteTables, "", "Names of the public route tables in control plane separated by commas, required for accessing public ELBs from tenant nodes.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.VaultAddress, "", "Server address for Vault encryption.")
 
 	daemonCommand.PersistentFlags().String(f.Service.RegistryDomain, "quay.io", "Image registry.")

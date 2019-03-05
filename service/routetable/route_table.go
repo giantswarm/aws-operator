@@ -52,7 +52,7 @@ func New(config Config) (*RouteTable, error) {
 
 func (r *RouteTable) Boot(ctx context.Context) error {
 	for _, name := range r.names {
-		id, err := r.searchID(name)
+		id, err := r.searchID(ctx, name)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -72,7 +72,9 @@ func (r *RouteTable) IdForName(name string) (string, error) {
 	return id, nil
 }
 
-func (r *RouteTable) searchID(name string) (string, error) {
+func (r *RouteTable) searchID(ctx context.Context, name string) (string, error) {
+	r.logger.LogCtx(ctx, "level", "debug", "message", "finding route table ID for %#q", name)
+
 	i := &ec2.DescribeRouteTablesInput{
 		Filters: []*ec2.Filter{
 			{
@@ -91,5 +93,9 @@ func (r *RouteTable) searchID(name string) (string, error) {
 		return "", microerror.Maskf(executionFailedError, "expected one route table, got %d", len(o.RouteTables))
 	}
 
-	return *o.RouteTables[0].RouteTableId, nil
+	id := *o.RouteTables[0].RouteTableId
+
+	r.logger.LogCtx(ctx, "level", "debug", "message", "found route table ID %#q for %#q", id, name)
+
+	return id, nil
 }
