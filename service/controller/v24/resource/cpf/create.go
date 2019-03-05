@@ -19,13 +19,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	if err != nil {
 		return microerror.Mask(err)
 	}
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
 	{
-		cc, err := controllercontext.FromContext(ctx)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
 		if cc.Status.Cluster.VPCPeeringConnectionID == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the VPC Peering Connection ID in the controller context")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -41,7 +40,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			StackName: aws.String(key.MainHostPreStackName(cr)),
 		}
 
-		_, err = r.hostClients.CloudFormation.DescribeStacks(i)
+		_, err = r.cloudFormation.DescribeStacks(i)
 		if IsNotExists(err) {
 			// fall through
 		} else if err != nil {
@@ -60,22 +59,30 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane finalizer cloud formation stack")
 
-		var newAdapter *adapter.CPF
+		var cpf *adapter.CPF
 		{
-			c := adapter.Config{
-				CustomObject:      cr,
-				HostClients:       *r.hostClients,
-				EncrypterBackend:  r.encrypterBackend,
-				PublicRouteTables: r.publicRouteTables,
-				Route53Enabled:    r.route53Enabled,
+			c := adapter.CPFConfig{
+				RouteTable: r.routeTable,
+
+				BaseDomain:                 key.BaseDomain(cr),
+				ClusterID:                  key.ClusterID(cr),
+				EncrypterBackend:           r.encrypterBackend,
+				GuestHostedZoneNameServers: cc.Status.Cluster.HostedZoneNameServers,
+				Route53Enabled:             r.route53Enabled,
 			}
-			newAdapter, err = adapter.NewCPF(ctx, c)
+
+			cpf, err = adapter.NewCPF(c)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			err = cpf.Boot(ctx)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 		}
 
-		templateBody, err = templates.Render(key.CloudFormationHostPostTemplates(), newAdapter)
+		templateBody, err = templates.Render(key.CloudFormationHostPostTemplates(), cpf)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -93,7 +100,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			TemplateBody:                aws.String(templateBody),
 		}
 
-		_, err = r.hostClients.CloudFormation.CreateStack(i)
+		_, err = r.cloudFormation.CreateStack(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -108,7 +115,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			StackName: aws.String(key.MainHostPreStackName(cr)),
 		}
 
-		err = r.hostClients.CloudFormation.WaitUntilStackCreateComplete(i)
+		err = r.cloudFormation.WaitUntilStackCreateComplete(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}

@@ -7,8 +7,8 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
-	"github.com/giantswarm/aws-operator/service/controller/v24/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v24/key"
+	"github.com/giantswarm/aws-operator/service/routetable"
 )
 
 const (
@@ -17,8 +17,9 @@ const (
 )
 
 type Config struct {
-	HostClients *adapter.Clients
-	Logger      micrologger.Logger
+	CloudFormation CloudFormation
+	Logger         micrologger.Logger
+	RouteTable     *routetable.RouteTable
 
 	EncrypterBackend  string
 	InstallationName  string
@@ -30,8 +31,9 @@ type Config struct {
 // Finalizer. This was formerly known as the host post stack. We manage a
 // dedicated CF stack for the record sets and routing tables setup.
 type Resource struct {
-	hostClients *adapter.Clients
-	logger      micrologger.Logger
+	cloudFormation CloudFormation
+	logger         micrologger.Logger
+	routeTable     *routetable.RouteTable
 
 	encrypterBackend  string
 	installationName  string
@@ -40,11 +42,14 @@ type Resource struct {
 }
 
 func New(config Config) (*Resource, error) {
-	if config.HostClients == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostClients must not be empty", config)
+	if config.CloudFormation == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CloudFormation must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
+	}
+	if config.RouteTable == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.RouteTable must not be empty", config)
 	}
 
 	if config.EncrypterBackend == "" {
@@ -52,8 +57,9 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
-		hostClients: config.HostClients,
-		logger:      config.Logger,
+		cloudFormation: config.CloudFormation,
+		logger:         config.Logger,
+		routeTable:     config.RouteTable,
 
 		encrypterBackend:  config.EncrypterBackend,
 		installationName:  config.InstallationName,

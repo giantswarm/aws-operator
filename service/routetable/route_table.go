@@ -53,7 +53,7 @@ func New(config Config) (*RouteTable, error) {
 	return r, nil
 }
 
-func (r *RouteTable) IdForName(ctx context.Context, name string) (string, error) {
+func (r *RouteTable) IDForName(ctx context.Context, name string) (string, error) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
@@ -69,6 +69,10 @@ func (r *RouteTable) IdForName(ctx context.Context, name string) (string, error)
 	r.ids[name] = id
 
 	return id, nil
+}
+
+func (r *RouteTable) Names() []string {
+	return r.names
 }
 
 func (r *RouteTable) searchID(ctx context.Context, name string) (string, error) {

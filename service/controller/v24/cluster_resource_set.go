@@ -3,6 +3,7 @@ package v24
 import (
 	"context"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
@@ -48,6 +49,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/service"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/stackoutput"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/workerasgname"
+	"github.com/giantswarm/aws-operator/service/routetable"
 )
 
 const (
@@ -174,20 +176,20 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		return nil, microerror.Maskf(invalidConfigError, "unknown encrypter backend %q", config.EncrypterBackend)
 	}
 
-	//var routeTableService *routetable.RouteTable
-	//{
-	//	c := routetable.Config{
-	//		EC2:    config.HostAWSClients.EC2,
-	//		Logger: config.Logger,
-	//
-	//		Names: strings.Split(config.RouteTables, ","),
-	//	}
-	//
-	//	routeTableService, err = routetable.New(c)
-	//	if err != nil {
-	//		return nil, microerror.Mask(err)
-	//	}
-	//}
+	var routeTableService *routetable.RouteTable
+	{
+		c := routetable.Config{
+			EC2:    config.HostAWSClients.EC2,
+			Logger: config.Logger,
+
+			Names: strings.Split(config.RouteTables, ","),
+		}
+
+		routeTableService, err = routetable.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
 
 	var cloudConfig *cloudconfig.CloudConfig
 	{
@@ -399,15 +401,13 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var cpfResource controller.Resource
 	{
 		c := cpf.Config{
-			HostClients: &adapter.Clients{
-				EC2: config.HostAWSClients.EC2,
-			},
-			Logger: config.Logger,
+			CloudFormation: config.HostAWSClients.CloudFormation,
+			Logger:         config.Logger,
+			RouteTable:     routeTableService,
 
-			EncrypterBackend:  config.EncrypterBackend,
-			InstallationName:  config.InstallationName,
-			PublicRouteTables: config.RouteTables,
-			Route53Enabled:    config.Route53Enabled,
+			EncrypterBackend: config.EncrypterBackend,
+			InstallationName: config.InstallationName,
+			Route53Enabled:   config.Route53Enabled,
 		}
 
 		cpfResource, err = cpf.New(c)

@@ -2,24 +2,61 @@ package adapter
 
 import (
 	"context"
-	"fmt"
-	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v24/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/v24/key"
+	"github.com/giantswarm/aws-operator/service/routetable"
 )
 
-type CPFRouteTables struct {
-	PrivateRoutes []CPFRouteTablesRoute
-	PublicRoutes  []CPFRouteTablesRoute
+type CPFRouteTablesConfig struct {
+	RouteTable *routetable.RouteTable
+
+	AvailabilityZones []v1alpha1.AWSConfigStatusAWSAvailabilityZone
+	EncrypterBackend  string
+	NetworkCIDR       string
 }
 
-func (a *CPFRouteTables) Adapt(ctx context.Context, config Config) error {
+type CPFRouteTables struct {
+	routeTable *routetable.RouteTable
+
+	PrivateRoutes []CPFRouteTablesRoute
+	PublicRoutes  []CPFRouteTablesRoute
+
+	availabilityZones []v1alpha1.AWSConfigStatusAWSAvailabilityZone
+	encrypterBackend  string
+	networkCIDR       string
+}
+
+func NewCPFRouteTables(config CPFRouteTablesConfig) (*CPFRouteTables, error) {
+	if config.RouteTable == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.RouteTable must not be empty", config)
+	}
+
+	if config.AvailabilityZones == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.AvailabilityZones must not be empty", config)
+	}
+	if config.EncrypterBackend == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.EncrypterBackend must not be empty", config)
+	}
+	if config.NetworkCIDR == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.NetworkCIDR must not be empty", config)
+	}
+
+	r := &CPFRouteTables{
+		routeTable: config.RouteTable,
+
+		encrypterBackend:  config.EncrypterBackend,
+		availabilityZones: config.AvailabilityZones,
+		networkCIDR:       config.NetworkCIDR,
+	}
+
+	return r, nil
+}
+
+func (a *CPFRouteTables) Boot(ctx context.Context) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -27,21 +64,22 @@ func (a *CPFRouteTables) Adapt(ctx context.Context, config Config) error {
 
 	var tenantPrivateSubnetCidrs []string
 	{
-		for _, az := range key.StatusAvailabilityZones(config.CustomObject) {
+		for _, az := range a.availabilityZones {
 			tenantPrivateSubnetCidrs = append(tenantPrivateSubnetCidrs, az.Subnet.Private.CIDR)
 		}
 	}
 
 	// private routes.
-	for _, routeTableName := range config.CustomObject.Spec.AWS.VPC.RouteTableNames {
-		routeTableID, err := routeTableID(routeTableName, config)
+	for _, name := range a.routeTable.Names() {
+		id, err := a.routeTable.IDForName(ctx, name)
 		if err != nil {
 			return microerror.Mask(err)
 		}
+
 		for _, cidrBlock := range tenantPrivateSubnetCidrs {
-			rt := CPFRouteTablesRoute{
-				RouteTableName: routeTableName,
-				RouteTableID:   routeTableID,
+			route := CPFRouteTablesRoute{
+				RouteTableName: name,
+				RouteTableID:   id,
 				// Requester CIDR block, we create the peering connection from the
 				// guest's private subnets.
 				CidrBlock: cidrBlock,
@@ -49,62 +87,33 @@ func (a *CPFRouteTables) Adapt(ctx context.Context, config Config) error {
 				// outputs in the stackoutput resource.
 				PeerConnectionID: cc.Status.Cluster.VPCPeeringConnectionID,
 			}
-			a.PrivateRoutes = append(a.PrivateRoutes, rt)
+
+			a.PrivateRoutes = append(a.PrivateRoutes, route)
 		}
 	}
 
 	// public routes for vault.
-	if config.EncrypterBackend == encrypter.VaultBackend {
-		publicRouteTables := strings.Split(config.PublicRouteTables, ",")
-		for _, routeTableName := range publicRouteTables {
-			routeTableID, err := routeTableID(routeTableName, config)
+	if a.encrypterBackend == encrypter.VaultBackend {
+		for _, name := range a.routeTable.Names() {
+			id, err := a.routeTable.IDForName(ctx, name)
 			if err != nil {
 				return microerror.Mask(err)
 			}
-			rt := CPFRouteTablesRoute{
-				RouteTableName: routeTableName,
-				RouteTableID:   routeTableID,
+
+			route := CPFRouteTablesRoute{
+				RouteTableName: name,
+				RouteTableID:   id,
 				// Requester CIDR block, we create the peering connection from the
 				// guest's CIDR for being able to access Vault's ELB.
-				CidrBlock: key.ClusterNetworkCIDR(config.CustomObject),
+				CidrBlock: a.networkCIDR,
 				// The peer connection id is fetched from the cloud formation stack
 				// outputs in the stackoutput resource.
 				PeerConnectionID: cc.Status.Cluster.VPCPeeringConnectionID,
 			}
-			a.PublicRoutes = append(a.PublicRoutes, rt)
+
+			a.PublicRoutes = append(a.PublicRoutes, route)
 		}
 	}
+
 	return nil
-}
-
-type CPFRouteTablesRoute struct {
-	RouteTableName   string
-	RouteTableID     string
-	CidrBlock        string
-	PeerConnectionID string
-}
-
-func routeTableID(name string, config Config) (string, error) {
-	input := &ec2.DescribeRouteTablesInput{
-		Filters: []*ec2.Filter{
-			{
-				Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
-				Values: []*string{
-					aws.String(name),
-				},
-			},
-		},
-	}
-	output, err := config.HostClients.EC2.DescribeRouteTables(input)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-	if len(output.RouteTables) == 0 {
-		return "", microerror.Maskf(tooFewResultsError, "route tables: %s", name)
-	}
-	if len(output.RouteTables) > 1 {
-		return "", microerror.Maskf(tooManyResultsError, "route tables: %s", name)
-	}
-
-	return *output.RouteTables[0].RouteTableId, nil
 }

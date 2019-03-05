@@ -3,29 +3,72 @@ package adapter
 import (
 	"context"
 
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/service/routetable"
 )
+
+type CPFConfig struct {
+	RouteTable *routetable.RouteTable
+
+	AvailabilityZones          []v1alpha1.AWSConfigStatusAWSAvailabilityZone
+	BaseDomain                 string
+	ClusterID                  string
+	EncrypterBackend           string
+	GuestHostedZoneNameServers string
+	NetworkCIDR                string
+	Route53Enabled             bool
+}
 
 // CPF is the adapter collection for the Control Plane Finalizer management.
 type CPF struct {
-	RecordSets  CPFRecordSets
-	RouteTables CPFRouteTables
+	RecordSets  *CPFRecordSets
+	RouteTables *CPFRouteTables
 }
 
-func NewCPF(ctx context.Context, config Config) (*CPF, error) {
-	adapter := &CPF{}
+func NewCPF(config CPFConfig) (*CPF, error) {
+	var err error
 
-	hydraters := []ContextHydrater{
-		adapter.RecordSets.Adapt,
-		adapter.RouteTables.Adapt,
+	var recordSets *CPFRecordSets
+	{
+		recordSets = &CPFRecordSets{
+			BaseDomain:                 config.BaseDomain,
+			ClusterID:                  config.ClusterID,
+			GuestHostedZoneNameServers: config.GuestHostedZoneNameServers,
+			Route53Enabled:             config.Route53Enabled,
+		}
 	}
 
-	for _, h := range hydraters {
-		err := h(ctx, config)
+	var routeTables *CPFRouteTables
+	{
+		c := CPFRouteTablesConfig{
+			RouteTable: config.RouteTable,
+
+			AvailabilityZones: config.AvailabilityZones,
+			EncrypterBackend:  config.EncrypterBackend,
+			NetworkCIDR:       config.NetworkCIDR,
+		}
+
+		routeTables, err = NewCPFRouteTables(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	return adapter, nil
+	cpf := &CPF{
+		RecordSets:  recordSets,
+		RouteTables: routeTables,
+	}
+
+	return cpf, nil
+}
+
+func (a *CPF) Boot(ctx context.Context) error {
+	err := a.RouteTables.Boot(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
 }
