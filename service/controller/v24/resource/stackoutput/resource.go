@@ -15,6 +15,13 @@ type Config struct {
 	Route53Enabled bool
 }
 
+// Resource implements an operatorkit resource and provides a mechanism to fetch
+// information from a cloud formation stack outputs of the Tenant Cluster Main
+// stack.
+//
+// The TCM manages the VPC Peering Connection. The peering connection ID is
+// added to the controller context and used in the CPF stack.
+//
 type Resource struct {
 	logger micrologger.Logger
 

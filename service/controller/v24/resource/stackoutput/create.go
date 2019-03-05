@@ -30,17 +30,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		o, s, err := cc.CloudFormation.DescribeOutputsAndStatus(key.MainGuestStackName(cr))
 		if cf.IsStackNotFound(err) {
-			// TODO this exception is necessary for cluster creation until we use
-			// cross stack references.
-			//
-			//     https://github.com/giantswarm/giantswarm/issues/5519
-			//
-			v, err := searchPeeringConnectionID(cc.AWSClient.EC2, key.ClusterID(cr))
-			if err != nil {
-				return microerror.Mask(err)
-			}
-			cc.Status.Cluster.VPCPeeringConnectionID = v
-
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster cloud formation stack outputs")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster cloud formation stack does not exist")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
