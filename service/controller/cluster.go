@@ -52,9 +52,9 @@ type ClusterConfig struct {
 	PodInfraContainerImage     string
 	ProjectName                string
 	PubKeyFile                 string
-	PublicRouteTables          string
 	RegistryDomain             string
 	Route53Enabled             bool
+	RouteTables                string
 	SSOPublicKey               string
 	VaultAddress               string
 }
@@ -91,12 +91,6 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.G8sClient must not be empty")
-	}
-	if config.K8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.K8sClient must not be empty")
-	}
-	if config.K8sExtClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.K8sExtClient must not be empty")
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
@@ -268,7 +262,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 				SubnetList: config.APIWhitelist.SubnetList,
 			},
 			ProjectName:       config.ProjectName,
-			PublicRouteTables: config.PublicRouteTables,
+			PublicRouteTables: config.RouteTables,
 			RegistryDomain:    config.RegistryDomain,
 			SSOPublicKey:      config.SSOPublicKey,
 			VaultAddress:      config.VaultAddress,
@@ -317,7 +311,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 				SubnetList: config.APIWhitelist.SubnetList,
 			},
 			ProjectName:       config.ProjectName,
-			PublicRouteTables: config.PublicRouteTables,
+			PublicRouteTables: config.RouteTables,
 			RegistryDomain:    config.RegistryDomain,
 			SSOPublicKey:      config.SSOPublicKey,
 			VaultAddress:      config.VaultAddress,
@@ -365,11 +359,11 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 				Enabled:    config.APIWhitelist.Enabled,
 				SubnetList: config.APIWhitelist.SubnetList,
 			},
-			ProjectName:       config.ProjectName,
-			PublicRouteTables: config.PublicRouteTables,
-			RegistryDomain:    config.RegistryDomain,
-			SSOPublicKey:      config.SSOPublicKey,
-			VaultAddress:      config.VaultAddress,
+			ProjectName:    config.ProjectName,
+			RouteTables:    config.RouteTables,
+			RegistryDomain: config.RegistryDomain,
+			SSOPublicKey:   config.SSOPublicKey,
+			VaultAddress:   config.VaultAddress,
 		}
 
 		resourceSetV24, err = v24.NewClusterResourceSet(c)

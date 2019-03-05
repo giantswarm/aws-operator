@@ -103,6 +103,16 @@ func New(config Config) (*Service, error) {
 		return nil, microerror.Mask(err)
 	}
 
+	var awsConfig clientaws.Config
+	{
+		awsConfig = clientaws.Config{
+			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
+			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
+			Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
+			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
+		}
+	}
+
 	var clusterController *controller.Cluster
 	{
 		_, ipamNetworkRange, err := net.ParseCIDR(config.Viper.GetString(config.Flag.Service.Installation.Guest.IPAM.Network.CIDR))
@@ -156,9 +166,9 @@ func New(config Config) (*Service, error) {
 			PodInfraContainerImage: config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
 			ProjectName:            config.ProjectName,
 			PubKeyFile:             config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile),
-			PublicRouteTables:      config.Viper.GetString(config.Flag.Service.AWS.PublicRouteTables),
-			Route53Enabled:         config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 			RegistryDomain:         config.Viper.GetString(config.Flag.Service.RegistryDomain),
+			Route53Enabled:         config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
+			RouteTables:            config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
 			SSOPublicKey:           config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
 			VaultAddress:           config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
 		}
@@ -197,16 +207,6 @@ func New(config Config) (*Service, error) {
 		drainerController, err = controller.NewDrainer(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
-		}
-	}
-
-	var awsConfig clientaws.Config
-	{
-		awsConfig = clientaws.Config{
-			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
-			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
-			Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
-			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
 		}
 	}
 

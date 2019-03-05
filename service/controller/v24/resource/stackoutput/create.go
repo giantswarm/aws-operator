@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 
 	cf "github.com/giantswarm/aws-operator/service/controller/v24/cloudformation"
@@ -65,6 +67,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			//
 			//     https://github.com/giantswarm/giantswarm/issues/5496
 			//
+			v, err := searchPeeringConnectionID(cc.AWSClient.EC2, key.ClusterID(cr))
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			cc.Status.Cluster.VPCPeeringConnectionID = v
 		} else if err != nil {
 			return microerror.Mask(err)
 		} else {
@@ -81,4 +88,36 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	return nil
+}
+
+func searchPeeringConnectionID(client EC2, id string) (string, error) {
+	var peeringID string
+	{
+		i := &ec2.DescribeVpcPeeringConnectionsInput{
+			Filters: []*ec2.Filter{
+				{
+					Name: aws.String("status-code"),
+					Values: []*string{
+						aws.String("active"),
+					},
+				},
+				{
+					Name: aws.String("tag:Name"),
+					Values: []*string{
+						aws.String(id),
+					},
+				},
+			},
+		}
+
+		o, err := client.DescribeVpcPeeringConnections(i)
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
+		if len(o.VpcPeeringConnections) != 1 {
+			return "", microerror.Maskf(executionFailedError, "expected one vpc peering connection, got %d", len(o.VpcPeeringConnections))
+		}
+	}
+
+	return peeringID, nil
 }

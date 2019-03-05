@@ -42,8 +42,11 @@ func (a *CPFRouteTables) Adapt(ctx context.Context, config Config) error {
 			rt := CPFRouteTablesRoute{
 				RouteTableName: routeTableName,
 				RouteTableID:   routeTableID,
-				// Requester CIDR block, we create the peering connection from the guest's private subnets.
-				CidrBlock:        cidrBlock,
+				// Requester CIDR block, we create the peering connection from the
+				// guest's private subnets.
+				CidrBlock: cidrBlock,
+				// The peer connection id is fetched from the cloud formation stack
+				// outputs in the stackoutput resource.
 				PeerConnectionID: cc.Status.Cluster.VPCPeeringConnectionID,
 			}
 			a.PrivateRoutes = append(a.PrivateRoutes, rt)
@@ -63,7 +66,9 @@ func (a *CPFRouteTables) Adapt(ctx context.Context, config Config) error {
 				RouteTableID:   routeTableID,
 				// Requester CIDR block, we create the peering connection from the
 				// guest's CIDR for being able to access Vault's ELB.
-				CidrBlock:        key.ClusterNetworkCIDR(config.CustomObject),
+				CidrBlock: key.ClusterNetworkCIDR(config.CustomObject),
+				// The peer connection id is fetched from the cloud formation stack
+				// outputs in the stackoutput resource.
 				PeerConnectionID: cc.Status.Cluster.VPCPeeringConnectionID,
 			}
 			a.PublicRoutes = append(a.PublicRoutes, rt)
