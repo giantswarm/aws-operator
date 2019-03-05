@@ -5,10 +5,8 @@ package service
 import (
 	"context"
 	"net"
-	"strings"
 	"sync"
 
-	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microendpoint/service/version"
 	"github.com/giantswarm/microerror"
@@ -24,7 +22,6 @@ import (
 	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller"
-	"github.com/giantswarm/aws-operator/service/routetable"
 )
 
 const (
@@ -51,7 +48,6 @@ type Service struct {
 	clusterController       *controller.Cluster
 	drainerController       *controller.Drainer
 	operatorCollector       *collector.Set
-	routeTableService       *routetable.RouteTable
 	statusResourceCollector *statusresource.Collector
 }
 
@@ -117,31 +113,6 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var ec2Client ec2iface.EC2API
-	{
-		clients, err := clientaws.NewClients(awsConfig)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		ec2Client = clients.EC2
-	}
-
-	var routeTableService *routetable.RouteTable
-	{
-		c := routetable.Config{
-			EC2:    ec2Client,
-			Logger: config.Logger,
-
-			Names: strings.Split(config.Viper.GetString(config.Flag.Service.AWS.RouteTables), ","),
-		}
-
-		routeTableService, err = routetable.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var clusterController *controller.Cluster
 	{
 		_, ipamNetworkRange, err := net.ParseCIDR(config.Viper.GetString(config.Flag.Service.Installation.Guest.IPAM.Network.CIDR))
@@ -154,7 +125,6 @@ func New(config Config) (*Service, error) {
 			K8sClient:    k8sClient,
 			K8sExtClient: k8sExtClient,
 			Logger:       config.Logger,
-			RouteTable:   routeTableService,
 
 			APIWhitelist: controller.FrameworkConfigAPIWhitelistConfig{
 				Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Enabled),
@@ -294,7 +264,6 @@ func New(config Config) (*Service, error) {
 		clusterController:       clusterController,
 		drainerController:       drainerController,
 		operatorCollector:       operatorCollector,
-		routeTableService:       routeTableService,
 		statusResourceCollector: statusResourceCollector,
 	}
 
@@ -303,11 +272,6 @@ func New(config Config) (*Service, error) {
 
 func (s *Service) Boot(ctx context.Context) {
 	s.bootOnce.Do(func() {
-		err := s.routeTableService.Boot(ctx)
-		if err != nil {
-			panic(err)
-		}
-
 		go s.operatorCollector.Boot(ctx)
 		go s.statusResourceCollector.Boot(ctx)
 

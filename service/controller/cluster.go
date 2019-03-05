@@ -25,7 +25,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24"
 	v24adapter "github.com/giantswarm/aws-operator/service/controller/v24/adapter"
 	v24cloudconfig "github.com/giantswarm/aws-operator/service/controller/v24/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/routetable"
 )
 
 type ClusterConfig struct {
@@ -33,7 +32,6 @@ type ClusterConfig struct {
 	K8sClient    kubernetes.Interface
 	K8sExtClient apiextensionsclient.Interface
 	Logger       micrologger.Logger
-	RouteTable   *routetable.RouteTable
 
 	AccessLogsExpiration       int
 	AdvancedMonitoringEC2      bool
@@ -335,7 +333,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
 			RandomKeysSearcher: randomKeysSearcher,
-			RouteTable:         config.RouteTable,
 
 			AccessLogsExpiration:       config.AccessLogsExpiration,
 			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,

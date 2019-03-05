@@ -50,24 +50,17 @@ func New(config Config) (*RouteTable, error) {
 	return r, nil
 }
 
-func (r *RouteTable) Boot(ctx context.Context) error {
-	for _, name := range r.names {
-		id, err := r.searchID(ctx, name)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		r.ids[name] = id
-	}
-
-	return nil
-}
-
-func (r *RouteTable) IdForName(name string) (string, error) {
+func (r *RouteTable) IdForName(ctx context.Context, name string) (string, error) {
 	id, ok := r.ids[name]
-	if !ok {
-		return "", microerror.Maskf(notFoundError, name)
+	if ok {
+		return id, nil
 	}
+
+	id, err := r.searchID(ctx, name)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	r.ids[name] = id
 
 	return id, nil
 }

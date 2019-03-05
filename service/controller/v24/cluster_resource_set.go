@@ -47,7 +47,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/service"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/stackoutput"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/workerasgname"
-	"github.com/giantswarm/aws-operator/service/routetable"
 )
 
 const (
@@ -65,7 +64,6 @@ type ClusterResourceSetConfig struct {
 	K8sClient          kubernetes.Interface
 	Logger             micrologger.Logger
 	RandomKeysSearcher randomkeys.Interface
-	RouteTable         *routetable.RouteTable
 
 	AccessLogsExpiration       int
 	AdvancedMonitoringEC2      bool
@@ -174,6 +172,21 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	default:
 		return nil, microerror.Maskf(invalidConfigError, "unknown encrypter backend %q", config.EncrypterBackend)
 	}
+
+	//var routeTableService *routetable.RouteTable
+	//{
+	//	c := routetable.Config{
+	//		EC2:    config.HostAWSClients.EC2,
+	//		Logger: config.Logger,
+	//
+	//		Names: strings.Split(config.RouteTables, ","),
+	//	}
+	//
+	//	routeTableService, err = routetable.New(c)
+	//	if err != nil {
+	//		return nil, microerror.Mask(err)
+	//	}
+	//}
 
 	var cloudConfig *cloudconfig.CloudConfig
 	{
