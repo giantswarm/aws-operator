@@ -80,38 +80,25 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 	return rendered, nil
 }
 
-func (r *Resource) getMainHostPostTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig, guestMainStackState StackState) (string, error) {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return "", microerror.Mask(err)
+func (r *Resource) getMainHostPostTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {
+	var err error
+
+	var newAdapter *adapter.CPF
+	{
+		c := adapter.Config{
+			CustomObject:      customObject,
+			HostClients:       *r.hostClients,
+			EncrypterBackend:  r.encrypterBackend,
+			PublicRouteTables: r.publicRouteTables,
+			Route53Enabled:    r.route53Enabled,
+		}
+		newAdapter, err = adapter.NewCPF(ctx, c)
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
 	}
 
-	adapterClients := adapter.Clients{
-		CloudFormation: cc.AWSClient.CloudFormation,
-		EC2:            cc.AWSClient.EC2,
-		IAM:            cc.AWSClient.IAM,
-		KMS:            cc.AWSClient.KMS,
-		ELB:            cc.AWSClient.ELB,
-		STS:            cc.AWSClient.STS,
-	}
-
-	cfg := adapter.Config{
-		CustomObject:      customObject,
-		Clients:           adapterClients,
-		HostClients:       *r.hostClients,
-		EncrypterBackend:  r.encrypterBackend,
-		PublicRouteTables: r.publicRouteTables,
-		Route53Enabled:    r.route53Enabled,
-		StackState: adapter.StackState{
-			HostedZoneNameServers: guestMainStackState.HostedZoneNameServers,
-		},
-	}
-	adp, err := adapter.NewHostPost(cfg)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	rendered, err := templates.Render(key.CloudFormationHostPostTemplates(), adp)
+	rendered, err := templates.Render(key.CloudFormationHostPostTemplates(), newAdapter)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}

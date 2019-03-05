@@ -59,8 +59,8 @@ const (
 type ClusterResourceSetConfig struct {
 	CertsSearcher      certs.Interface
 	G8sClient          versioned.Interface
-	HostAWSConfig      aws.Config
 	HostAWSClients     aws.Clients
+	HostAWSConfig      aws.Config
 	K8sClient          kubernetes.Interface
 	Logger             micrologger.Logger
 	RandomKeysSearcher randomkeys.Interface

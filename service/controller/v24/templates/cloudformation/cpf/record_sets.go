@@ -1,7 +1,7 @@
-package hostpost
+package cpf
 
 const RecordSets = `{{ define "record_sets" }}
-{{ $v := .HostPost.RecordSets }}
+{{ $v := .RecordSets }}
 {{ if $v.Route53Enabled }}
   GuestNSRecordSet:
     Type: 'AWS::Route53::RecordSet'
@@ -9,7 +9,7 @@ const RecordSets = `{{ define "record_sets" }}
       HostedZoneName: '{{ $v.BaseDomain }}.'
       Name: '{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
       Type: 'NS'
-      TTL: '900'
+      TTL: '300'
       ResourceRecords: !Split [ ',', '{{ $v.GuestHostedZoneNameServers }}' ]
 {{ end }}
 {{ end }}`

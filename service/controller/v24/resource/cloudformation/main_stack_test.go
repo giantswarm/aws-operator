@@ -486,20 +486,21 @@ func TestMainHostPostTemplateExistingFields(t *testing.T) {
 		STS: &adapter.STSClientMock{},
 	}
 
-	stackState := StackState{
-		HostedZoneNameServers: "a.com.,b.com.",
-	}
+	ctx := controllercontext.NewContext(context.Background(), controllercontext.Context{
+		AWSClient: awsClients,
+		Status: controllercontext.Status{
+			Cluster: controllercontext.Cluster{
+				HostedZoneNameServers: "a.com.,b.com.",
+			},
+		},
+	})
 
-	ctx := context.TODO()
-	ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
-
-	body, err := newResource.getMainHostPostTemplateBody(ctx, customObject, stackState)
-
+	body, err := newResource.getMainHostPostTemplateBody(ctx, customObject)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
 
-	if !strings.Contains(body, "Description: Main Host Post-Guest CloudFormation stack.") {
+	if !strings.Contains(body, "Description: Control Plane Finalizer Cloud Formation Stack.") {
 		fmt.Println(body)
 		t.Fatal("stack header not found")
 	}
