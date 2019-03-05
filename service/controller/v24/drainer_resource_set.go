@@ -24,11 +24,10 @@ import (
 )
 
 type DrainerResourceSetConfig struct {
-	G8sClient      versioned.Interface
-	HostAWSClients aws.Clients
-	HostAWSConfig  aws.Config
-	K8sClient      kubernetes.Interface
-	Logger         micrologger.Logger
+	G8sClient     versioned.Interface
+	HostAWSConfig aws.Config
+	K8sClient     kubernetes.Interface
+	Logger        micrologger.Logger
 
 	GuestUpdateEnabled bool
 	ProjectName        string
@@ -67,7 +66,6 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 	var stackOutputResource controller.Resource
 	{
 		c := stackoutput.Config{
-			EC2:    config.HostAWSClients.EC2,
 			Logger: config.Logger,
 
 			Route53Enabled: config.Route53Enabled,

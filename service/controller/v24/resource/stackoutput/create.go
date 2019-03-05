@@ -67,7 +67,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			//
 			//     https://github.com/giantswarm/giantswarm/issues/5496
 			//
-			v, err := r.searchPeeringConnectionID(key.ClusterID(cr))
+			v, err := searchPeeringConnectionID(cc.AWSClient.EC2, key.ClusterID(cr))
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -90,7 +90,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) searchPeeringConnectionID(id string) (string, error) {
+func searchPeeringConnectionID(client EC2, id string) (string, error) {
 	var peeringID string
 	{
 		i := &ec2.DescribeVpcPeeringConnectionsInput{
@@ -110,7 +110,7 @@ func (r *Resource) searchPeeringConnectionID(id string) (string, error) {
 			},
 		}
 
-		o, err := r.ec2.DescribeVpcPeeringConnections(i)
+		o, err := client.DescribeVpcPeeringConnections(i)
 		if err != nil {
 			return "", microerror.Mask(err)
 		}

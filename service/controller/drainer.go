@@ -159,11 +159,6 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		Region:          config.HostAWSConfig.Region,
 	}
 
-	awsHostClients, err := awsclient.NewClients(hostAWSConfig)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
 	var v22ResourceSet *controller.ResourceSet
 	{
 		c := v22.DrainerResourceSetConfig{
@@ -201,11 +196,10 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 	var v24ResourceSet *controller.ResourceSet
 	{
 		c := v24.DrainerResourceSetConfig{
-			G8sClient:      config.G8sClient,
-			HostAWSClients: awsHostClients,
-			HostAWSConfig:  hostAWSConfig,
-			K8sClient:      config.K8sClient,
-			Logger:         config.Logger,
+			G8sClient:     config.G8sClient,
+			HostAWSConfig: hostAWSConfig,
+			K8sClient:     config.K8sClient,
+			Logger:        config.Logger,
 
 			GuestUpdateEnabled: config.GuestUpdateEnabled,
 			ProjectName:        config.ProjectName,

@@ -519,7 +519,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var stackOutputResource controller.Resource
 	{
 		c := stackoutput.Config{
-			EC2:    config.HostAWSClients.EC2,
 			Logger: config.Logger,
 
 			Route53Enabled: config.Route53Enabled,
