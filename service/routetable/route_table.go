@@ -2,6 +2,7 @@ package routetable
 
 import (
 	"context"
+	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -23,7 +24,8 @@ type RouteTable struct {
 
 	// ids is a mapping of route table names and IDs, where the key is the name
 	// and the value is the ID.
-	ids map[string]string
+	ids   map[string]string
+	mutex sync.Mutex
 
 	names []string
 }
@@ -42,7 +44,8 @@ func New(config Config) (*RouteTable, error) {
 		ec2:    config.EC2,
 		logger: config.Logger,
 
-		ids: map[string]string{},
+		ids:   map[string]string{},
+		mutex: sync.Mutex{},
 
 		names: config.Names,
 	}
@@ -51,6 +54,9 @@ func New(config Config) (*RouteTable, error) {
 }
 
 func (r *RouteTable) IdForName(ctx context.Context, name string) (string, error) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
 	id, ok := r.ids[name]
 	if ok {
 		return id, nil
