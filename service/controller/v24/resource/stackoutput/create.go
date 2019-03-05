@@ -117,6 +117,8 @@ func searchPeeringConnectionID(client EC2, id string) (string, error) {
 		if len(o.VpcPeeringConnections) != 1 {
 			return "", microerror.Maskf(executionFailedError, "expected one vpc peering connection, got %d", len(o.VpcPeeringConnections))
 		}
+
+		peeringID = *o.VpcPeeringConnections[0].VpcPeeringConnectionId
 	}
 
 	return peeringID, nil
