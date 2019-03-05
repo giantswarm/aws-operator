@@ -243,7 +243,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		upsert := route53.ChangeActionUpsert
 		ns := route53.RRTypeNs
-		ttl := int64(900)
+		ttl := int64(300)
 
 		in := &route53.ChangeResourceRecordSetsInput{
 			ChangeBatch: &route53.ChangeBatch{

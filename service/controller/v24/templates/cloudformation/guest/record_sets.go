@@ -42,7 +42,7 @@ const RecordSets = `{{define "record_sets"}}
     Properties:
       Name: '*.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
       HostedZoneId: !Ref 'HostedZone'
-      TTL: '900'
+      TTL: '300'
       Type: CNAME
       ResourceRecords:
         - !Ref 'IngressRecordSet'

@@ -9,7 +9,7 @@ const RecordSets = `{{ define "record_sets" }}
       HostedZoneName: '{{ $v.BaseDomain }}.'
       Name: '{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
       Type: 'NS'
-      TTL: '900'
+      TTL: '300'
       ResourceRecords: !Split [ ',', '{{ $v.GuestHostedZoneNameServers }}' ]
 {{ end }}
 {{ end }}`
