@@ -59,8 +59,8 @@ const (
 type ClusterResourceSetConfig struct {
 	CertsSearcher      certs.Interface
 	G8sClient          versioned.Interface
-	HostAWSConfig      aws.Config
 	HostAWSClients     aws.Clients
+	HostAWSConfig      aws.Config
 	K8sClient          kubernetes.Interface
 	Logger             micrologger.Logger
 	RandomKeysSearcher randomkeys.Interface
@@ -519,6 +519,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var stackOutputResource controller.Resource
 	{
 		c := stackoutput.Config{
+			EC2:    config.HostAWSClients.EC2,
 			Logger: config.Logger,
 
 			Route53Enabled: config.Route53Enabled,

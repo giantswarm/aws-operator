@@ -10,3 +10,12 @@ var invalidConfigError = &microerror.Error{
 func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
+
+var executionFailedError = &microerror.Error{
+	Kind: "executionFailedError",
+}
+
+// IsExecutionFailed executionFailedError.
+func IsExecutionFailed(err error) bool {
+	return microerror.Cause(err) == executionFailedError
+}
