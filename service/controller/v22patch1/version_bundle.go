@@ -1,4 +1,4 @@
-package v22
+package v22patch1
 
 import (
 	"github.com/giantswarm/versionbundle"

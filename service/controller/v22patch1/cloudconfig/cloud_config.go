@@ -6,7 +6,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/v22/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v22patch1/encrypter"
 )
 
 const (
