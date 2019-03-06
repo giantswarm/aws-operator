@@ -9,6 +9,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/routetable"
 )
 
+// CPFConfig represents the config for the adapter collection for the Control Plane Finalizer management.
 type CPFConfig struct {
 	RouteTable *routetable.RouteTable
 
