@@ -69,7 +69,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				ClusterID:                  key.ClusterID(cr),
 				EncrypterBackend:           r.encrypterBackend,
 				GuestHostedZoneNameServers: cc.Status.Cluster.HostedZoneNameServers,
-				NetworkCIDR:                key.ClusterNetworkCIDR(cr),
+				NetworkCIDR:                key.StatusNetworkCIDR(cr),
 				Route53Enabled:             r.route53Enabled,
 			}
 

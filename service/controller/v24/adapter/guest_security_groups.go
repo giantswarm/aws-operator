@@ -229,7 +229,7 @@ func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupR
 				Description: "Allow traffic from tenant cluster CIDR.",
 				Port:        key.KubernetesAPISecurePort(cfg.CustomObject),
 				Protocol:    tcpProtocol,
-				SourceCIDR:  key.ClusterNetworkCIDR(cfg.CustomObject),
+				SourceCIDR:  key.StatusNetworkCIDR(cfg.CustomObject),
 			},
 		}
 

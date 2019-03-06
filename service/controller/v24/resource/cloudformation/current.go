@@ -30,7 +30,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding tenant subnet in CR status")
 
-		if key.ClusterNetworkCIDR(customObject) == "" {
+		if key.StatusNetworkCIDR(customObject) == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find tenant subnet in CR status")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			resourcecanceledcontext.SetCanceled(ctx)
