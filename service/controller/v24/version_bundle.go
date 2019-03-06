@@ -12,6 +12,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Mount /var/log directory in an EBS Volume.",
 				Kind:        versionbundle.KindAdded,
 			},
+			{
+				Component:   "containerlinux",
+				Description: "Update CoreOS to 2023.4.0. Fixes CVE-2019-8912",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
@@ -20,7 +25,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "containerlinux",
-				Version: "1967.5.0",
+				Version: "2023.4.0",
 			},
 			{
 				Name:    "docker",
