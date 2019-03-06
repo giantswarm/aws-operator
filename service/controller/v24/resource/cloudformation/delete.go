@@ -114,7 +114,7 @@ func disableMasterTerminationProtection(ctx context.Context, masterInstanceName 
 		return microerror.Mask(err)
 	}
 
-	input := &ec2.DescribeInstancesInput{
+	i := &ec2.DescribeInstancesInput{
 		Filters: []*ec2.Filter{
 			{
 				Name: aws.String("tag:Name"),
@@ -124,22 +124,21 @@ func disableMasterTerminationProtection(ctx context.Context, masterInstanceName 
 			},
 		},
 	}
-	result, err := cc.AWSClient.EC2.DescribeInstances(input)
+	o, err := cc.AWSClient.EC2.DescribeInstances(i)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	for _, reservation := range result.Reservations {
+	for _, reservation := range o.Reservations {
 		for _, instance := range reservation.Instances {
-
-			input := &ec2.ModifyInstanceAttributeInput{
+			i := &ec2.ModifyInstanceAttributeInput{
 				DisableApiTermination: &ec2.AttributeBooleanValue{
 					Value: aws.Bool(false),
 				},
 				InstanceId: aws.String(*instance.InstanceId),
 			}
 
-			_, err = cc.AWSClient.EC2.ModifyInstanceAttribute(input)
+			_, err = cc.AWSClient.EC2.ModifyInstanceAttribute(i)
 			if err != nil {
 				return microerror.Mask(err)
 			}
