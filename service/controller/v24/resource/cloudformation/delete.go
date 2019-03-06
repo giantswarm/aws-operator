@@ -2,9 +2,11 @@ package cloudformation
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
 
@@ -29,6 +31,45 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		cc, err := controllercontext.FromContext(ctx)
 		if err != nil {
 			return microerror.Mask(err)
+		}
+
+		input := &ec2.DescribeInstancesInput{
+			Filters: []*ec2.Filter{
+				{
+					Name: aws.String("tag:Name"),
+					Values: []*string{
+						aws.String(stackStateToDelete.MasterInstanceResourceName),
+					},
+				},
+			},
+		}
+		result, err := cc.AWSClient.EC2.DescribeInstances(input)
+		fmt.Println(result)
+		if IsNotExists(err) {
+			// fall through
+		} else if err != nil {
+			return microerror.Mask(err)
+		} else {
+			for _, reservation := range result.Reservations {
+				for _, instance := range reservation.Instances {
+					r.logger.LogCtx(ctx, "level", "debug", "message", "disabling master instance termination protection")
+					input := &ec2.ModifyInstanceAttributeInput{
+						DisableApiTermination: &ec2.AttributeBooleanValue{
+							Value: aws.Bool(false),
+						},
+						InstanceId: aws.String(*instance.InstanceId),
+					}
+
+					_, err = cc.AWSClient.EC2.ModifyInstanceAttribute(input)
+					if IsNotExists(err) {
+						// fall through
+					} else if err != nil {
+						return microerror.Mask(err)
+					}
+
+					r.logger.LogCtx(ctx, "level", "debug", "message", "disabled master instance termination protection")
+				}
+			}
 		}
 
 		stackName := aws.String(key.MainGuestStackName(customObject))
