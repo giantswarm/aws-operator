@@ -103,6 +103,24 @@ func IsNotExists(err error) bool {
 	return false
 }
 
+var notMasterInstanceExistsError = &microerror.Error{
+	Kind: "notMasterInstanceExistsError",
+}
+
+// IsNotMasterInstanceExists asserts notMasterInstanceExistsError.
+func IsNotMasterInstanceExists(err error) bool {
+	return microerror.Cause(err) == wrongTypeError
+}
+
+var moreThanOneMasterInstanceExistsError = &microerror.Error{
+	Kind: "moreThanOneMasterInstanceExistsError",
+}
+
+// IsMoreThanOneMasterInstanceExists asserts moreThanOneMasterInstanceExistsError.
+func IsMoreThanOneMasterInstanceExists(err error) bool {
+	return microerror.Cause(err) == wrongTypeError
+}
+
 var resourceNotReadyError = &microerror.Error{
 	Kind: "resourceNotReadyError",
 }

@@ -130,6 +130,13 @@ func (r *Resource) disableMasterTerminationProtection(ctx context.Context, maste
 	}
 
 	for _, reservation := range result.Reservations {
+
+		if len(reservation.Instances) < 1 {
+			return microerror.Mask(notMasterInstanceExistsError)
+		} else if len(reservation.Instances) > 1 {
+			return microerror.Mask(moreThanOneMasterInstanceExistsError)
+		}
+
 		for _, instance := range reservation.Instances {
 
 			input := &ec2.ModifyInstanceAttributeInput{
