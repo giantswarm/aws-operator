@@ -22,4 +22,5 @@ const IAMRoles = `
               - Effect: Allow
                 Action: 'ec2:AcceptVpcPeeringConnection'
                 Resource: '*'
+{{end}}
 `
