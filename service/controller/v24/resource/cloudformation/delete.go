@@ -2,7 +2,6 @@ package cloudformation
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -33,44 +32,12 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			return microerror.Mask(err)
 		}
 
-		input := &ec2.DescribeInstancesInput{
-			Filters: []*ec2.Filter{
-				{
-					Name: aws.String("tag:Name"),
-					Values: []*string{
-						aws.String(key.MasterInstanceName(customObject)),
-					},
-				},
-			},
-		}
-		result, err := cc.AWSClient.EC2.DescribeInstances(input)
-		fmt.Println(result)
-		if IsNotExists(err) {
-			// fall through
-		} else if err != nil {
+		err = disableMasterTerminationProtection(ctx, key.MasterInstanceName(customObject))
+		if err != nil {
 			return microerror.Mask(err)
-		} else {
-			for _, reservation := range result.Reservations {
-				for _, instance := range reservation.Instances {
-					r.logger.LogCtx(ctx, "level", "debug", "message", "disabling master instance termination protection")
-					input := &ec2.ModifyInstanceAttributeInput{
-						DisableApiTermination: &ec2.AttributeBooleanValue{
-							Value: aws.Bool(false),
-						},
-						InstanceId: aws.String(*instance.InstanceId),
-					}
-
-					_, err = cc.AWSClient.EC2.ModifyInstanceAttribute(input)
-					if IsNotExists(err) {
-						// fall through
-					} else if err != nil {
-						return microerror.Mask(err)
-					}
-
-					r.logger.LogCtx(ctx, "level", "debug", "message", "disabled master instance termination protection")
-				}
-			}
 		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "disabled master instance termination protection")
 
 		stackName := aws.String(key.MainGuestStackName(customObject))
 
@@ -136,6 +103,47 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		}
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting the host cluster post stack")
+	}
+
+	return nil
+}
+
+func disableMasterTerminationProtection(ctx context.Context, masterInstanceName string) error {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	input := &ec2.DescribeInstancesInput{
+		Filters: []*ec2.Filter{
+			{
+				Name: aws.String("tag:Name"),
+				Values: []*string{
+					aws.String(masterInstanceName),
+				},
+			},
+		},
+	}
+	result, err := cc.AWSClient.EC2.DescribeInstances(input)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	for _, reservation := range result.Reservations {
+		for _, instance := range reservation.Instances {
+
+			input := &ec2.ModifyInstanceAttributeInput{
+				DisableApiTermination: &ec2.AttributeBooleanValue{
+					Value: aws.Bool(false),
+				},
+				InstanceId: aws.String(*instance.InstanceId),
+			}
+
+			_, err = cc.AWSClient.EC2.ModifyInstanceAttribute(input)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
 	}
 
 	return nil
