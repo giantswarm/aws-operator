@@ -64,10 +64,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			c := adapter.CPFConfig{
 				RouteTable: r.routeTable,
 
+				AvailabilityZones:          key.StatusAvailabilityZones(cr),
 				BaseDomain:                 key.BaseDomain(cr),
 				ClusterID:                  key.ClusterID(cr),
 				EncrypterBackend:           r.encrypterBackend,
 				GuestHostedZoneNameServers: cc.Status.Cluster.HostedZoneNameServers,
+				NetworkCIDR:                key.ClusterNetworkCIDR(cr),
 				Route53Enabled:             r.route53Enabled,
 			}
 
