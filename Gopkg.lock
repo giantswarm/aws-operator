@@ -374,20 +374,16 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:b27137f793ddc96a22ab6ae32aa4ad43022265db9df5af9018891bd1c33e74e2"
+  digest = "1:f240cc074898116c801232be75ea4e42d02c69d8f30bd350845257a7a603e820"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
-    "v_3_6_3",
-    "v_3_6_4",
-    "v_3_7_0",
-    "v_3_7_2",
-    "v_3_7_3",
     "v_4_0_0",
     "v_4_1_0",
+    "v_4_1_1",
   ]
   pruneopts = "T"
-  revision = "44a194073a519bf1aca2a447abb9353ddb71aa09"
+  revision = "100d834280834beb78233661a6a6d7aeecba7749"
 
 [[projects]]
   branch = "master"
@@ -396,17 +392,6 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "85e779854c8e1b948bb2551e3750cfdae8ddfdbf"
-
-[[projects]]
-  branch = "master"
-  digest = "1:d413114e6198f1b47262090df89482bc37a1b554806dbc1ea248dfdfbeab2fc0"
-  name = "github.com/giantswarm/legacycerts"
-  packages = [
-    "legacy",
-    "legacy/legacytest",
-  ]
-  pruneopts = "UT"
-  revision = "34d1f6cb72320650a7f77430ea3335b20940fbe9"
 
 [[projects]]
   branch = "master"
@@ -1534,15 +1519,9 @@
     "github.com/giantswarm/helmclient",
     "github.com/giantswarm/ipam",
     "github.com/giantswarm/k8scloudconfig/ignition/v_2_2_0",
-    "github.com/giantswarm/k8scloudconfig/v_3_6_3",
-    "github.com/giantswarm/k8scloudconfig/v_3_6_4",
-    "github.com/giantswarm/k8scloudconfig/v_3_7_0",
-    "github.com/giantswarm/k8scloudconfig/v_3_7_2",
-    "github.com/giantswarm/k8scloudconfig/v_3_7_3",
     "github.com/giantswarm/k8scloudconfig/v_4_0_0",
     "github.com/giantswarm/k8scloudconfig/v_4_1_0",
-    "github.com/giantswarm/legacycerts/legacy",
-    "github.com/giantswarm/legacycerts/legacy/legacytest",
+    "github.com/giantswarm/k8scloudconfig/v_4_1_1",
     "github.com/giantswarm/microendpoint/endpoint/healthz",
     "github.com/giantswarm/microendpoint/endpoint/version",
     "github.com/giantswarm/microendpoint/service/version",

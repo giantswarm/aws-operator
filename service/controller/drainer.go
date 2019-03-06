@@ -14,9 +14,11 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v22"
-	"github.com/giantswarm/aws-operator/service/controller/v23"
-	"github.com/giantswarm/aws-operator/service/controller/v24"
+	v22 "github.com/giantswarm/aws-operator/service/controller/v22"
+	"github.com/giantswarm/aws-operator/service/controller/v22patch1"
+	v23 "github.com/giantswarm/aws-operator/service/controller/v23"
+	"github.com/giantswarm/aws-operator/service/controller/v23patch1"
+	v24 "github.com/giantswarm/aws-operator/service/controller/v24"
 )
 
 type DrainerConfig struct {
@@ -176,6 +178,23 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var v22patch1ResourceSet *controller.ResourceSet
+	{
+		c := v22patch1.DrainerResourceSetConfig{
+			G8sClient:     config.G8sClient,
+			HostAWSConfig: hostAWSConfig,
+			K8sClient:     config.K8sClient,
+			Logger:        config.Logger,
+
+			GuestUpdateEnabled: config.GuestUpdateEnabled,
+			ProjectName:        config.ProjectName,
+		}
+		v22patch1ResourceSet, err = v22patch1.NewDrainerResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var v23ResourceSet *controller.ResourceSet
 	{
 		c := v23.DrainerResourceSetConfig{
@@ -188,6 +207,23 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 			ProjectName:        config.ProjectName,
 		}
 		v23ResourceSet, err = v23.NewDrainerResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var v23patch1ResourceSet *controller.ResourceSet
+	{
+		c := v23patch1.DrainerResourceSetConfig{
+			G8sClient:     config.G8sClient,
+			HostAWSConfig: hostAWSConfig,
+			K8sClient:     config.K8sClient,
+			Logger:        config.Logger,
+
+			GuestUpdateEnabled: config.GuestUpdateEnabled,
+			ProjectName:        config.ProjectName,
+		}
+		v23patch1ResourceSet, err = v23patch1.NewDrainerResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -214,7 +250,9 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 
 	resourceSets := []*controller.ResourceSet{
 		v22ResourceSet,
+		v22patch1ResourceSet,
 		v23ResourceSet,
+		v23patch1ResourceSet,
 		v24ResourceSet,
 	}
 
