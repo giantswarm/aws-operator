@@ -32,12 +32,10 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			return microerror.Mask(err)
 		}
 
-		err = disableMasterTerminationProtection(ctx, key.MasterInstanceName(customObject))
+		err = r.disableMasterTerminationProtection(ctx, key.MasterInstanceName(customObject))
 		if err != nil {
 			return microerror.Mask(err)
 		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", "disabled master instance termination protection")
 
 		stackName := aws.String(key.MainGuestStackName(customObject))
 
@@ -108,11 +106,13 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	return nil
 }
 
-func disableMasterTerminationProtection(ctx context.Context, masterInstanceName string) error {
+func (r *Resource) disableMasterTerminationProtection(ctx context.Context, masterInstanceName string) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
+
+	r.logger.LogCtx(ctx, "level", "debug", "message", "disabling master instance termination protection")
 
 	input := &ec2.DescribeInstancesInput{
 		Filters: []*ec2.Filter{
@@ -145,6 +145,8 @@ func disableMasterTerminationProtection(ctx context.Context, masterInstanceName 
 			}
 		}
 	}
+
+	r.logger.LogCtx(ctx, "level", "debug", "message", "disabled master instance termination protection")
 
 	return nil
 }
