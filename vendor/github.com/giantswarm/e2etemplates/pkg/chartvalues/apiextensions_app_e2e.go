@@ -16,11 +16,12 @@ type APIExtensionsAppE2EConfig struct {
 }
 
 type APIExtensionsAppE2EConfigApp struct {
-	Config    APIExtensionsAppE2EConfigAppConfig
-	Catalog   string
-	Name      string
-	Namespace string
-	Version   string
+	Config     APIExtensionsAppE2EConfigAppConfig
+	Catalog    string
+	KubeConfig APIExtensionsAppE2EConfigAppKubeConfig
+	Name       string
+	Namespace  string
+	Version    string
 }
 
 type APIExtensionsAppE2EConfigAppCatalog struct {
@@ -47,6 +48,16 @@ type APIExtensionsAppE2EConfigAppConfigConfigMap struct {
 }
 
 type APIExtensionsAppE2EConfigAppConfigSecret struct {
+	Name      string
+	Namespace string
+}
+
+type APIExtensionsAppE2EConfigAppKubeConfig struct {
+	InCluster bool
+	Secret    APIExtensionsAppE2EConfigAppConfigKubeConfigSecret
+}
+
+type APIExtensionsAppE2EConfigAppConfigKubeConfigSecret struct {
 	Name      string
 	Namespace string
 }
