@@ -37,7 +37,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane finalizer cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(key.MainHostPreStackName(cr)),
+			StackName: aws.String(key.MainHostPostStackName(cr)),
 		}
 
 		_, err = r.cloudFormation.DescribeStacks(i)
@@ -112,7 +112,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for the creation of the tenant cluster's control plane finalizer cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(key.MainHostPreStackName(cr)),
+			StackName: aws.String(key.MainHostPostStackName(cr)),
 		}
 
 		err = r.cloudFormation.WaitUntilStackCreateComplete(i)
