@@ -100,10 +100,8 @@ func (r *Resource) disableMasterTerminationProtection(ctx context.Context, maste
 
 	for _, reservation := range o.Reservations {
 
-		if len(reservation.Instances) < 1 {
-			return microerror.Mask(notMasterInstanceExistsError)
-		} else if len(reservation.Instances) > 1 {
-			return microerror.Mask(moreThanOneMasterInstanceExistsError)
+		if len(reservation.Instances) != 1 {
+			return microerror.Maskf(masterInstanceExistsError, "expected one master instance, got %d", len(reservation.Instances))
 		}
 
 		for _, instance := range reservation.Instances {
