@@ -1,4 +1,4 @@
-package guest
+package tccp
 
 const VPC = `{{define "vpc"}}
 {{- $v := .Guest.VPC }}

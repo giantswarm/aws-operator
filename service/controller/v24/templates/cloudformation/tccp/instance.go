@@ -1,4 +1,4 @@
-package guest
+package tccp
 
 const Instance = `{{ define "instance" }}
 {{- $v := .Guest.Instance }}

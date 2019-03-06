@@ -1,4 +1,4 @@
-package guest
+package tccp
 
 const RecordSets = `{{define "record_sets"}}
 {{- $v := .Guest.RecordSets }}

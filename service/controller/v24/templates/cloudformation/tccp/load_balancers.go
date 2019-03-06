@@ -1,4 +1,4 @@
-package guest
+package tccp
 
 const LoadBalancers = `{{define "load_balancers"}}
 {{- $v := .Guest.LoadBalancers }}
