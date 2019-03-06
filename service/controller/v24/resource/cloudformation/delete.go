@@ -38,7 +38,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 				{
 					Name: aws.String("tag:Name"),
 					Values: []*string{
-						aws.String(stackStateToDelete.MasterInstanceResourceName),
+						aws.String(key.MasterInstanceName(customObject)),
 					},
 				},
 			},
