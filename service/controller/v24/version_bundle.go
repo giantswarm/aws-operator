@@ -12,6 +12,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Mount /var/log directory in an EBS Volume.",
 				Kind:        versionbundle.KindAdded,
 			},
+			{
+				Component:   "kubernetes",
+				Description: "Use proper hostname annotation for nodes.",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{

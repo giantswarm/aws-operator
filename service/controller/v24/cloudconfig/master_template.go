@@ -294,6 +294,11 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Name:         "decrypt-keys-assets.service",
 			Enabled:      true,
 		},
+		{
+			AssetContent: cloudconfig.SetHostname,
+			Name:         "set-hostname.service",
+			Enabled:      true,
+		},
 		// Format etcd EBS volume.
 		{
 			AssetContent: cloudconfig.FormatEtcdVolume,

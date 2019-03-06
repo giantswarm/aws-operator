@@ -199,6 +199,11 @@ func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Enabled:      true,
 		},
 		{
+			AssetContent: cloudconfig.SetHostname,
+			Name:         "set-hostname.service",
+			Enabled:      true,
+		},
+		{
 			AssetContent: cloudconfig.FormatVarLogService,
 			Name:         "format-var-log.service",
 			Enabled:      true,
