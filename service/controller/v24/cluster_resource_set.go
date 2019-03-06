@@ -419,13 +419,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var cpiResource controller.Resource
 	{
 		c := cpi.Config{
-			HostClients: &adapter.Clients{
-				EC2:            config.HostAWSClients.EC2,
-				IAM:            config.HostAWSClients.IAM,
-				STS:            config.HostAWSClients.STS,
-				CloudFormation: config.HostAWSClients.CloudFormation,
-			},
-			Logger: config.Logger,
+			CloudFormation: config.HostAWSClients.CloudFormation,
+			Logger:         config.Logger,
 
 			InstallationName: config.InstallationName,
 			Route53Enabled:   config.Route53Enabled,
