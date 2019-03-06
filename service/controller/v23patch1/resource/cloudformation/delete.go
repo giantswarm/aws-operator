@@ -5,13 +5,12 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
 
-	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v24/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/v24/key"
+	"github.com/giantswarm/aws-operator/service/controller/v23patch1/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v23patch1/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v23patch1/key"
 )
 
 func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
@@ -27,12 +26,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	if stackStateToDelete.Name != "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting the guest cluster main stack")
 
-		cc, err := controllercontext.FromContext(ctx)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		err = r.disableMasterTerminationProtection(ctx, key.MasterInstanceName(customObject))
+		sc, err := controllercontext.FromContext(ctx)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -43,7 +37,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			EnableTerminationProtection: aws.Bool(false),
 			StackName:                   stackName,
 		}
-		_, err = cc.AWSClient.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
+		_, err = sc.AWSClient.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
 		if IsDeleteInProgress(err) {
 			// fall through
 		} else if IsNotExists(err) {
@@ -54,7 +48,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			i := &cloudformation.DeleteStackInput{
 				StackName: stackName,
 			}
-			_, err = cc.AWSClient.CloudFormation.DeleteStack(i)
+			_, err = sc.AWSClient.CloudFormation.DeleteStack(i)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -70,6 +64,37 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		}
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting the guest cluster main stack")
+	}
+
+	if stackStateToDelete.Name != "" {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting the host cluster pre stack")
+
+		stackName := aws.String(key.MainHostPreStackName(customObject))
+
+		updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
+			EnableTerminationProtection: aws.Bool(false),
+			StackName:                   stackName,
+		}
+		_, err = r.hostClients.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
+		if IsDeleteInProgress(err) {
+			// fall through
+		} else if IsNotExists(err) {
+			// fall through
+		} else if err != nil {
+			return microerror.Mask(err)
+		} else {
+			i := &cloudformation.DeleteStackInput{
+				StackName: stackName,
+			}
+			_, err = r.hostClients.CloudFormation.DeleteStack(i)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "deleted the host cluster pre stack")
+		}
+	} else {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting the host cluster pre stack")
 	}
 
 	if stackStateToDelete.Name != "" {
@@ -102,57 +127,6 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting the host cluster post stack")
 	}
-
-	return nil
-}
-
-func (r *Resource) disableMasterTerminationProtection(ctx context.Context, masterInstanceName string) error {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", "disabling master instance termination protection")
-
-	i := &ec2.DescribeInstancesInput{
-		Filters: []*ec2.Filter{
-			{
-				Name: aws.String("tag:Name"),
-				Values: []*string{
-					aws.String(masterInstanceName),
-				},
-			},
-		},
-	}
-	o, err := cc.AWSClient.EC2.DescribeInstances(i)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	for _, reservation := range o.Reservations {
-
-		if len(reservation.Instances) < 1 {
-			return microerror.Mask(notMasterInstanceExistsError)
-		} else if len(reservation.Instances) > 1 {
-			return microerror.Mask(moreThanOneMasterInstanceExistsError)
-		}
-
-		for _, instance := range reservation.Instances {
-			i := &ec2.ModifyInstanceAttributeInput{
-				DisableApiTermination: &ec2.AttributeBooleanValue{
-					Value: aws.Bool(false),
-				},
-				InstanceId: aws.String(*instance.InstanceId),
-			}
-
-			_, err = cc.AWSClient.EC2.ModifyInstanceAttribute(i)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-		}
-	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", "disabled master instance termination protection")
 
 	return nil
 }
