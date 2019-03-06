@@ -13,6 +13,11 @@ func VersionBundle() versionbundle.Bundle {
 				Kind:        versionbundle.KindAdded,
 			},
 			{
+				Component:   "containerlinux",
+				Description: "Update CoreOS to 2023.4.0. Fixes CVE-2019-8912",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
 				Component:   "kubernetes",
 				Description: "Use proper hostname annotation for nodes.",
 				Kind:        versionbundle.KindChanged,
@@ -25,7 +30,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "containerlinux",
-				Version: "1967.5.0",
+				Version: "2023.4.0",
 			},
 			{
 				Name:    "docker",

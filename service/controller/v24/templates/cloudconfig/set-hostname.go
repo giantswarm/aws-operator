@@ -10,7 +10,7 @@ Before=k8s-kubelet.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/bin/bash/ -c "hostnamectl set-hostname $(curl http://169.254.169.254/latest/meta-data/local-hostname)""
+ExecStart=/bin/bash -c "hostnamectl set-hostname $(curl http://169.254.169.254/latest/meta-data/local-hostname)"
 
 [Install]
 WantedBy=multi-user.target
