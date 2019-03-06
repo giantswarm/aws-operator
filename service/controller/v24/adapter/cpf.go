@@ -51,7 +51,7 @@ func NewCPF(config CPFConfig) (*CPF, error) {
 			NetworkCIDR:       config.NetworkCIDR,
 		}
 
-		routeTables, err = NewCPFRouteTables(c)
+		routeTables, err = newCPFRouteTables(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

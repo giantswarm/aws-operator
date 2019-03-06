@@ -30,7 +30,7 @@ type CPFRouteTables struct {
 	networkCIDR       string
 }
 
-func NewCPFRouteTables(config CPFRouteTablesConfig) (*CPFRouteTables, error) {
+func newCPFRouteTables(config CPFRouteTablesConfig) (*CPFRouteTables, error) {
 	if config.RouteTable == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.RouteTable must not be empty", config)
 	}
