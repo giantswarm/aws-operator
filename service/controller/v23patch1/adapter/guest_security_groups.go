@@ -9,7 +9,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v23/key"
+	"github.com/giantswarm/aws-operator/service/controller/v23patch1/key"
 )
 
 const (

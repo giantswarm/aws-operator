@@ -12,7 +12,7 @@ import (
 	"github.com/giantswarm/randomkeys/randomkeystest"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v22/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v22patch1/controllercontext"
 )
 
 func Test_DesiredState(t *testing.T) {

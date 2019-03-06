@@ -10,9 +10,9 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
-	"github.com/giantswarm/aws-operator/service/controller/v22/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v22/encrypter/vault"
-	"github.com/giantswarm/aws-operator/service/controller/v22/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v22patch1/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v22patch1/encrypter/vault"
+	"github.com/giantswarm/aws-operator/service/controller/v22patch1/templates/cloudconfig"
 )
 
 // NewMasterTemplate generates a new master cloud config template and returns it

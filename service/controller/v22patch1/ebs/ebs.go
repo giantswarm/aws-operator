@@ -12,7 +12,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/v22/key"
+	"github.com/giantswarm/aws-operator/service/controller/v22patch1/key"
 )
 
 const (

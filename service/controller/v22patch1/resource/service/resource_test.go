@@ -8,7 +8,7 @@ import (
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	"github.com/giantswarm/aws-operator/service/controller/v22/key"
+	"github.com/giantswarm/aws-operator/service/controller/v22patch1/key"
 )
 
 func Test_toService(t *testing.T) {

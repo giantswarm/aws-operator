@@ -8,9 +8,9 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
 
-	"github.com/giantswarm/aws-operator/service/controller/v23/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v23/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/v23/key"
+	"github.com/giantswarm/aws-operator/service/controller/v23patch1/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v23patch1/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v23patch1/key"
 )
 
 func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {

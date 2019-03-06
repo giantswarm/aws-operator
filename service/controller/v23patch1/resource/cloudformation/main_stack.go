@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/aws-operator/service/controller/v23/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/v23/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v23/key"
-	"github.com/giantswarm/aws-operator/service/controller/v23/templates"
+	"github.com/giantswarm/aws-operator/service/controller/v23patch1/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v23patch1/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v23patch1/key"
+	"github.com/giantswarm/aws-operator/service/controller/v23patch1/templates"
 	"github.com/giantswarm/microerror"
 )
 

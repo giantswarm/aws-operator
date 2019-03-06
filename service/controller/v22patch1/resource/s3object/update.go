@@ -7,7 +7,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
 
-	"github.com/giantswarm/aws-operator/service/controller/v22/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v22patch1/controllercontext"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {

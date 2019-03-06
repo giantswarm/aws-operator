@@ -18,8 +18,8 @@ import (
 	"golang.org/x/sync/errgroup"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/service/controller/v22/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v22/key"
+	"github.com/giantswarm/aws-operator/service/controller/v22patch1/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v22patch1/key"
 )
 
 func init() {

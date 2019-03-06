@@ -4,8 +4,8 @@
 //
 // Latest changes:
 //
-//	* v22: Added migration code to fill spec.Cluster.Scaling.{Min,Max} values
-//	       when they are zero. When all tenant clusters are migrated to at least v22,
+//	* v22patch1: Added migration code to fill spec.Cluster.Scaling.{Min,Max} values
+//	       when they are zero. When all tenant clusters are migrated to at least v22patch1,
 //	       migrations in this file can be removed.
 //
 package migration
@@ -23,11 +23,11 @@ import (
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/service/controller/v22/key"
+	"github.com/giantswarm/aws-operator/service/controller/v22patch1/key"
 )
 
 const (
-	name = "migrationv22"
+	name = "migrationv22patch1"
 
 	awsConfigNamespace               = "default"
 	credentialSecretDefaultNamespace = "giantswarm"

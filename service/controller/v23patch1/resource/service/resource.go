@@ -11,7 +11,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "servicev23"
+	Name = "servicev23patch1"
 
 	httpsPort         = 443
 	masterServiceName = "master"
