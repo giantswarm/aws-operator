@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	EC2InstanceType = "m5.xlarge"
+	EC2InstanceType = "m4.xlarge"
 )
 
 type AWSConfig struct {

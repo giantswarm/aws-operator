@@ -52,7 +52,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if subnet needs to be allocated for cluster")
 
-	if key.ClusterNetworkCIDR(customResource) == "" {
+	if key.StatusNetworkCIDR(customResource) == "" {
 		// TODO remove the status checks for older clusters when all tenant clusters
 		// are upgraded to this version and have subnet allocation in their Status
 		// field.
@@ -220,7 +220,7 @@ func getAWSConfigSubnets(g8sClient versioned.Interface) ([]net.IPNet, error) {
 
 	var results []net.IPNet
 	for _, ac := range awsConfigList.Items {
-		cidr := key.ClusterNetworkCIDR(ac)
+		cidr := key.StatusNetworkCIDR(ac)
 		if cidr == "" {
 			// To prevent race condition when pre-v19 and v19+ clusters are
 			// created within short period of time and v19+ CR gets picked

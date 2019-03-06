@@ -66,37 +66,6 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting the guest cluster main stack")
 	}
 
-	if stackStateToDelete.Name != "" {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting the host cluster post stack")
-
-		stackName := aws.String(key.MainHostPostStackName(customObject))
-
-		updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
-			EnableTerminationProtection: aws.Bool(false),
-			StackName:                   stackName,
-		}
-		_, err = r.hostClients.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
-		if IsDeleteInProgress(err) {
-			// fall through
-		} else if IsNotExists(err) {
-			// fall through
-		} else if err != nil {
-			return microerror.Mask(err)
-		} else {
-			i := &cloudformation.DeleteStackInput{
-				StackName: stackName,
-			}
-			_, err = r.hostClients.CloudFormation.DeleteStack(i)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			r.logger.LogCtx(ctx, "level", "debug", "message", "deleted the host cluster post stack")
-		}
-	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting the host cluster post stack")
-	}
-
 	return nil
 }
 

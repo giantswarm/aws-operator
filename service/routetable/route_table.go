@@ -18,6 +18,11 @@ type Config struct {
 	Names []string
 }
 
+// RouteTable is a service implementation configured with the private route
+// table names of the control plane. They never change during runtime. Before we
+// fetched the route table IDs for the CPF stack management over and over again.
+// This implementation here is to fetch them once and have them generally
+// available.
 type RouteTable struct {
 	ec2    EC2
 	logger micrologger.Logger
@@ -53,7 +58,7 @@ func New(config Config) (*RouteTable, error) {
 	return r, nil
 }
 
-func (r *RouteTable) IdForName(ctx context.Context, name string) (string, error) {
+func (r *RouteTable) IDForName(ctx context.Context, name string) (string, error) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
@@ -69,6 +74,10 @@ func (r *RouteTable) IdForName(ctx context.Context, name string) (string, error)
 	r.ids[name] = id
 
 	return id, nil
+}
+
+func (r *RouteTable) Names() []string {
+	return r.names
 }
 
 func (r *RouteTable) searchID(ctx context.Context, name string) (string, error) {
