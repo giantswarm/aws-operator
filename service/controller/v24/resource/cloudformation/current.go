@@ -30,7 +30,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding tenant subnet in CR status")
 
-		if key.ClusterNetworkCIDR(customObject) == "" {
+		if key.StatusNetworkCIDR(customObject) == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find tenant subnet in CR status")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			resourcecanceledcontext.SetCanceled(ctx)
@@ -51,7 +51,6 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	if key.IsDeleted(customObject) {
 		stackNames := []string{
 			key.MainGuestStackName(customObject),
-			key.MainHostPostStackName(customObject),
 		}
 
 		for _, stackName := range stackNames {
@@ -129,14 +128,6 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	var currentState StackState
 	{
-		var hostedZoneNameServers string
-		if r.route53Enabled {
-			hostedZoneNameServers, err = cc.CloudFormation.GetOutputValue(stackOutputs, key.HostedZoneNameServers)
-			if err != nil {
-				return StackState{}, microerror.Mask(err)
-			}
-		}
-
 		dockerVolumeResourceName, err := cc.CloudFormation.GetOutputValue(stackOutputs, key.DockerVolumeResourceNameKey)
 		if cloudformationservice.IsOutputNotFound(err) {
 			// Since we are transitioning between versions we will have situations in
@@ -212,8 +203,6 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 		currentState = StackState{
 			Name: stackName,
-
-			HostedZoneNameServers: hostedZoneNameServers,
 
 			DockerVolumeResourceName:   dockerVolumeResourceName,
 			MasterImageID:              masterImageID,

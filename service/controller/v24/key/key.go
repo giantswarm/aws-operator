@@ -205,11 +205,6 @@ func ClusterNamespace(customObject v1alpha1.AWSConfig) string {
 	return ClusterID(customObject)
 }
 
-// ClusterNetworkCIDR returns allocated guest cluster subnet CIDR.
-func ClusterNetworkCIDR(customObject v1alpha1.AWSConfig) string {
-	return customObject.Status.Cluster.Network.CIDR
-}
-
 // ClusterOrganization returns the org name from the custom object.
 // It uses ClusterCustomer until this field is renamed in the custom object.
 func ClusterOrganization(customObject v1alpha1.AWSConfig) string {
@@ -555,6 +550,11 @@ func SpecAvailabilityZones(customObject v1alpha1.AWSConfig) int {
 
 func StatusAvailabilityZones(customObject v1alpha1.AWSConfig) []v1alpha1.AWSConfigStatusAWSAvailabilityZone {
 	return customObject.Status.AWS.AvailabilityZones
+}
+
+// StatusNetworkCIDR returns the allocated tenant cluster subnet CIDR.
+func StatusNetworkCIDR(customObject v1alpha1.AWSConfig) string {
+	return customObject.Status.Cluster.Network.CIDR
 }
 
 func StatusScalingDesiredCapacity(customObject v1alpha1.AWSConfig) int {

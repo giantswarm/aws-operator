@@ -63,9 +63,6 @@ type Resource struct {
 
 // New creates a new configured cloudformation resource.
 func New(config Config) (*Resource, error) {
-	if config.EncrypterBackend == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.EncrypterBackend must not be empty", config)
-	}
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
@@ -75,11 +72,15 @@ func New(config Config) (*Resource, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
+
 	// GuestPrivateSubnetMaskBits && GuestPublicSubnetMaskBits has been
 	// validated on upper level because all IPAM related configuration
 	// information is present there.
+	if config.EncrypterBackend == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.EncrypterBackend must not be empty", config)
+	}
 
-	newService := &Resource{
+	r := &Resource{
 		apiWhiteList:         config.APIWhitelist,
 		encrypterRoleManager: config.EncrypterRoleManager,
 		g8sClient:            config.G8sClient,
@@ -95,7 +96,7 @@ func New(config Config) (*Resource, error) {
 		route53Enabled:             config.Route53Enabled,
 	}
 
-	return newService, nil
+	return r, nil
 }
 
 func (r *Resource) Name() string {
