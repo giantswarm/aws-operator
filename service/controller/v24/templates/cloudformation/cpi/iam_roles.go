@@ -1,15 +1,15 @@
 package cpi
 
-const IAMRoles = `{{ define "iam_roles" }}
-{{- $v := .HostPre.IAMRoles }}
+const IAMRoles = `
+{{ define "iam_roles" }}
   PeerRole:
     Type: 'AWS::IAM::Role'
     Properties:
-      RoleName: {{ $v.PeerAccessRoleName }}
+      RoleName: {{ .IAMRoles.PeerAccessRoleName }}
       AssumeRolePolicyDocument:
         Statement:
           - Principal:
-              AWS: '{{ $v.GuestAccountID }}'
+              AWS: '{{ .IAMRoles.Tenant.AWS.Account.ID }}'
             Action:
               - 'sts:AssumeRole'
             Effect: Allow
@@ -22,4 +22,5 @@ const IAMRoles = `{{ define "iam_roles" }}
               - Effect: Allow
                 Action: 'ec2:AcceptVpcPeeringConnection'
                 Resource: '*'
-{{ end }}`
+{{end}}
+`

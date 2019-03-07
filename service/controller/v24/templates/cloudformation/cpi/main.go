@@ -1,7 +1,10 @@
 package cpi
 
-const Main = `{{define "main"}}AWSTemplateFormatVersion: 2010-09-09
-Description: Main Host Pre-Guest CloudFormation stack.
+const Main = `
+{{define "main"}}
+AWSTemplateFormatVersion: 2010-09-09
+Description: Control Plane Initializer Cloud Formation Stack.
 Resources:
   {{template "iam_roles" .}}
-{{end}}`
+{{end}}
+`
