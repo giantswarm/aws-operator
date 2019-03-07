@@ -1,6 +1,7 @@
 package tccp
 
-const NatGateway = `{{define "nat_gateway"}}
+const NatGateway = `
+{{define "nat_gateway"}}
   {{- $v := .Guest.NATGateway }}
   {{- range $v.Gateways }}
   {{ .NATGWName }}:
@@ -28,4 +29,5 @@ const NatGateway = `{{define "nat_gateway"}}
       NatGatewayId:
         Ref: "{{ .NATGWName }}"
 {{end}}
-{{end}}`
+{{end}}
+`

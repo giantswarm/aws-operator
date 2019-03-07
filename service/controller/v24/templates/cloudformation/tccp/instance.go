@@ -1,6 +1,7 @@
 package tccp
 
-const Instance = `{{ define "instance" }}
+const Instance = `
+{{ define "instance" }}
 {{- $v := .Guest.Instance }}
   {{ $v.Master.Instance.ResourceName }}:
     Type: "AWS::EC2::Instance"
@@ -75,4 +76,5 @@ const Instance = `{{ define "instance" }}
       InstanceId: !Ref {{ $v.Master.Instance.ResourceName }}
       VolumeId: !Ref LogVolume
       Device: /dev/xvdf
-{{ end }}`
+{{ end }}
+`

@@ -1,6 +1,7 @@
 package cpf
 
-const RecordSets = `{{ define "record_sets" }}
+const RecordSets = `
+{{ define "record_sets" }}
 {{ $v := .RecordSets }}
 {{ if $v.Route53Enabled }}
   GuestNSRecordSet:
@@ -12,4 +13,5 @@ const RecordSets = `{{ define "record_sets" }}
       TTL: '300'
       ResourceRecords: !Split [ ',', '{{ $v.GuestHostedZoneNameServers }}' ]
 {{ end }}
-{{ end }}`
+{{ end }}
+`
