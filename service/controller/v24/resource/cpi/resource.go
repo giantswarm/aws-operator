@@ -7,7 +7,6 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
-	"github.com/giantswarm/aws-operator/service/controller/v24/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v24/key"
 )
 
@@ -17,8 +16,8 @@ const (
 )
 
 type Config struct {
-	HostClients *adapter.Clients
-	Logger      micrologger.Logger
+	CloudFormation CloudFormation
+	Logger         micrologger.Logger
 
 	InstallationName string
 }
@@ -27,23 +26,23 @@ type Config struct {
 // Initializer. This was formerly known as the host pre stack. We manage a
 // dedicated CF stack for the IAM role and VPC Peering setup.
 type Resource struct {
-	hostClients *adapter.Clients
-	logger      micrologger.Logger
+	cloudFormation CloudFormation
+	logger         micrologger.Logger
 
 	installationName string
 }
 
 func New(config Config) (*Resource, error) {
-	if config.HostClients == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostClients must not be empty", config)
+	if config.CloudFormation == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CloudFormation must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
 	r := &Resource{
-		hostClients: config.HostClients,
-		logger:      config.Logger,
+		cloudFormation: config.CloudFormation,
+		logger:         config.Logger,
 
 		installationName: config.InstallationName,
 	}
