@@ -1,6 +1,6 @@
-package adapter
+package template
 
-type CPFRecordSets struct {
+type ParamsMainRecordSets struct {
 	BaseDomain                 string
 	ClusterID                  string
 	GuestHostedZoneNameServers string

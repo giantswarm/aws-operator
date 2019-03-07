@@ -11,7 +11,6 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v24/templates/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v24/templates/cloudformation/cpf"
 	"github.com/giantswarm/aws-operator/service/controller/v24/templates/cloudformation/tccp"
 )
 
@@ -166,14 +165,6 @@ func CloudFormationGuestTemplates() []string {
 		tccp.SecurityGroups,
 		tccp.Subnets,
 		tccp.VPC,
-	}
-}
-
-func CloudFormationHostPostTemplates() []string {
-	return []string{
-		cpf.Main,
-		cpf.RecordSets,
-		cpf.RouteTables,
 	}
 }
 
