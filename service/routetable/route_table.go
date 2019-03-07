@@ -2,6 +2,7 @@ package routetable
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -81,7 +82,7 @@ func (r *RouteTable) Names() []string {
 }
 
 func (r *RouteTable) searchID(ctx context.Context, name string) (string, error) {
-	r.logger.LogCtx(ctx, "level", "debug", "message", "finding route table ID for %#q", name)
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding route table ID for %#q", name))
 
 	i := &ec2.DescribeRouteTablesInput{
 		Filters: []*ec2.Filter{
@@ -103,7 +104,7 @@ func (r *RouteTable) searchID(ctx context.Context, name string) (string, error) 
 
 	id := *o.RouteTables[0].RouteTableId
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "found route table ID %#q for %#q", id, name)
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found route table ID %#q for %#q", id, name))
 
 	return id, nil
 }
