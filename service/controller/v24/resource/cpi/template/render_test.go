@@ -5,30 +5,30 @@ import (
 	"testing"
 )
 
-func Test_Template_CloudFormation_CPI(t *testing.T) {
+func Test_Controller_Resource_CPI_Template_Render(t *testing.T) {
 	var err error
 
-	var cpi *CPI
+	var params *MainParams
 	{
-		iamRoles := &CPIIAMRoles{
+		iamRoles := &MainParamsIAMRoles{
 			PeerAccessRoleName: "PeerAccessRoleName",
-			Tenant: CPIIAMRolesTenant{
-				AWS: CPIIAMRolesTenantAWS{
-					Account: CPIIAMRolesTenantAWSAccount{
+			Tenant: MainParamsIAMRolesTenant{
+				AWS: MainParamsIAMRolesTenantAWS{
+					Account: MainParamsIAMRolesTenantAWSAccount{
 						ID: "TenantAWSAccountID",
 					},
 				},
 			},
 		}
 
-		cpi = &CPI{
+		params = &MainParams{
 			IAMRoles: iamRoles,
 		}
 	}
 
 	var templateBody string
 	{
-		templateBody, err = Render(cpi)
+		templateBody, err = Render(params)
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
