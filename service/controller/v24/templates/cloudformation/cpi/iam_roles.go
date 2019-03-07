@@ -1,4 +1,4 @@
-package hostpre
+package cpi
 
 const IAMRoles = `{{ define "iam_roles" }}
 {{- $v := .HostPre.IAMRoles }}

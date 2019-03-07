@@ -12,7 +12,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/v24/templates/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v24/templates/cloudformation/cpf"
-	"github.com/giantswarm/aws-operator/service/controller/v24/templates/cloudformation/hostpre"
+	"github.com/giantswarm/aws-operator/service/controller/v24/templates/cloudformation/cpi"
 	"github.com/giantswarm/aws-operator/service/controller/v24/templates/cloudformation/tccp"
 )
 
@@ -180,8 +180,8 @@ func CloudFormationHostPostTemplates() []string {
 
 func CloudFormationHostPreTemplates() []string {
 	return []string{
-		hostpre.IAMRoles,
-		hostpre.Main,
+		cpi.IAMRoles,
+		cpi.Main,
 	}
 }
 
