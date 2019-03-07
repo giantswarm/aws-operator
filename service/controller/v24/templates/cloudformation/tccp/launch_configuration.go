@@ -1,4 +1,4 @@
-package guest
+package tccp
 
 const LaunchConfiguration = `{{define "launch_configuration"}}
 {{- $v := .Guest.LaunchConfiguration }}

@@ -1,4 +1,4 @@
-package guest
+package tccp
 
 const LifecycleHooks = `{{ define "lifecycle_hooks" }}
 {{- $v := .Guest.LifecycleHooks }}
