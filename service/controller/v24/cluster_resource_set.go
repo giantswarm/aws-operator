@@ -181,8 +181,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		c := routetable.Config{
 			EC2:    config.HostAWSClients.EC2,
 			Logger: config.Logger,
-
-			Names: strings.Split(config.RouteTables, ","),
 		}
 
 		routeTableService, err = routetable.New(c)

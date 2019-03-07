@@ -14,16 +14,11 @@ import (
 type Config struct {
 	EC2    EC2
 	Logger micrologger.Logger
-
-	// Names are the route table names used to lookup IDs.
-	Names []string
 }
 
-// RouteTable is a service implementation configured with the private route
-// table names of the control plane. They never change during runtime. Before we
-// fetched the route table IDs for the CPF stack management over and over again.
-// This implementation here is to fetch them once and have them generally
-// available.
+// RouteTable is a service implementation fetching route table IDs for any given
+// route table name. Once fetched the mapping between name and ID are cached in
+// memory.
 type RouteTable struct {
 	ec2    EC2
 	logger micrologger.Logger
@@ -32,8 +27,6 @@ type RouteTable struct {
 	// and the value is the ID.
 	ids   map[string]string
 	mutex sync.Mutex
-
-	names []string
 }
 
 // New creates a new route table service that has to be booted using Boot to
@@ -52,8 +45,6 @@ func New(config Config) (*RouteTable, error) {
 
 		ids:   map[string]string{},
 		mutex: sync.Mutex{},
-
-		names: config.Names,
 	}
 
 	return r, nil
@@ -75,10 +66,6 @@ func (r *RouteTable) IDForName(ctx context.Context, name string) (string, error)
 	r.ids[name] = id
 
 	return id, nil
-}
-
-func (r *RouteTable) Names() []string {
-	return r.names
 }
 
 func (r *RouteTable) searchID(ctx context.Context, name string) (string, error) {
