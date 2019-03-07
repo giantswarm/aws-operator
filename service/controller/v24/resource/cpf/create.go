@@ -5,9 +5,11 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
+	"github.com/giantswarm/aws-operator/service/controller/v22/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v24/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v24/key"
@@ -59,26 +61,28 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane finalizer cloud formation stack")
 
+		privateRoutes, err := r.newPrivateRoutes(ctx, cr)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		publicRoutes, err := r.newPublicRoutes(ctx, cr)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
 		var cpf *adapter.CPF
 		{
 			c := adapter.CPFConfig{
-				RouteTable: r.routeTable,
-
-				AvailabilityZones:          key.StatusAvailabilityZones(cr),
 				BaseDomain:                 key.BaseDomain(cr),
 				ClusterID:                  key.ClusterID(cr),
-				EncrypterBackend:           r.encrypterBackend,
 				GuestHostedZoneNameServers: cc.Status.Cluster.HostedZoneNameServers,
-				NetworkCIDR:                key.StatusNetworkCIDR(cr),
+				PrivateRoutes:              privateRoutes,
+				PublicRoutes:               publicRoutes,
 				Route53Enabled:             r.route53Enabled,
 			}
 
 			cpf, err = adapter.NewCPF(c)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			err = cpf.Boot(ctx)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -126,4 +130,78 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	return nil
+}
+
+func (r *Resource) newPrivateRoutes(ctx context.Context, cr v1alpha1.AWSConfig) ([]adapter.CPFRouteTablesRoute, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var tenantPrivateSubnetCidrs []string
+	{
+		for _, az := range key.StatusAvailabilityZones(cr) {
+			tenantPrivateSubnetCidrs = append(tenantPrivateSubnetCidrs, az.Subnet.Private.CIDR)
+		}
+	}
+
+	var routes []adapter.CPFRouteTablesRoute
+	for _, name := range r.routeTables {
+		id, err := r.routeTable.IDForName(ctx, name)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		for _, cidrBlock := range tenantPrivateSubnetCidrs {
+			route := adapter.CPFRouteTablesRoute{
+				RouteTableName: name,
+				RouteTableID:   id,
+				// Requester CIDR block, we create the peering connection from the
+				// guest's private subnets.
+				CidrBlock: cidrBlock,
+				// The peer connection id is fetched from the cloud formation stack
+				// outputs in the stackoutput resource.
+				PeerConnectionID: cc.Status.Cluster.VPCPeeringConnectionID,
+			}
+
+			routes = append(routes, route)
+		}
+	}
+
+	return routes, nil
+}
+
+func (r *Resource) newPublicRoutes(ctx context.Context, cr v1alpha1.AWSConfig) ([]adapter.CPFRouteTablesRoute, error) {
+	if r.encrypterBackend != encrypter.VaultBackend {
+		return nil, nil
+	}
+
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var routes []adapter.CPFRouteTablesRoute
+
+	for _, name := range r.routeTables {
+		id, err := r.routeTable.IDForName(ctx, name)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		route := adapter.CPFRouteTablesRoute{
+			RouteTableName: name,
+			RouteTableID:   id,
+			// Requester CIDR block, we create the peering connection from the
+			// guest's CIDR for being able to access Vault's ELB.
+			CidrBlock: key.StatusNetworkCIDR(cr),
+			// The peer connection id is fetched from the cloud formation stack
+			// outputs in the stackoutput resource.
+			PeerConnectionID: cc.Status.Cluster.VPCPeeringConnectionID,
+		}
+
+		routes = append(routes, route)
+	}
+
+	return routes, nil
 }

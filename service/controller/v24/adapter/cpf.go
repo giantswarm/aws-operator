@@ -1,24 +1,12 @@
 package adapter
 
-import (
-	"context"
-
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/microerror"
-
-	"github.com/giantswarm/aws-operator/service/routetable"
-)
-
 // CPFConfig represents the config for the adapter collection for the Control Plane Finalizer management.
 type CPFConfig struct {
-	RouteTable *routetable.RouteTable
-
-	AvailabilityZones          []v1alpha1.AWSConfigStatusAWSAvailabilityZone
 	BaseDomain                 string
 	ClusterID                  string
-	EncrypterBackend           string
 	GuestHostedZoneNameServers string
-	NetworkCIDR                string
+	PrivateRoutes              []CPFRouteTablesRoute
+	PublicRoutes               []CPFRouteTablesRoute
 	Route53Enabled             bool
 }
 
@@ -29,8 +17,6 @@ type CPF struct {
 }
 
 func NewCPF(config CPFConfig) (*CPF, error) {
-	var err error
-
 	var recordSets *CPFRecordSets
 	{
 		recordSets = &CPFRecordSets{
@@ -43,17 +29,9 @@ func NewCPF(config CPFConfig) (*CPF, error) {
 
 	var routeTables *CPFRouteTables
 	{
-		c := CPFRouteTablesConfig{
-			RouteTable: config.RouteTable,
-
-			AvailabilityZones: config.AvailabilityZones,
-			EncrypterBackend:  config.EncrypterBackend,
-			NetworkCIDR:       config.NetworkCIDR,
-		}
-
-		routeTables, err = newCPFRouteTables(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
+		routeTables = &CPFRouteTables{
+			PrivateRoutes: config.PrivateRoutes,
+			PublicRoutes:  config.PublicRoutes,
 		}
 	}
 
@@ -63,13 +41,4 @@ func NewCPF(config CPFConfig) (*CPF, error) {
 	}
 
 	return cpf, nil
-}
-
-func (a *CPF) Boot(ctx context.Context) error {
-	err := a.RouteTables.Boot(ctx)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	return nil
 }
