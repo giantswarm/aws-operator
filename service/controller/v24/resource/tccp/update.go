@@ -142,6 +142,14 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		return StackState{}, microerror.Mask(err)
 	}
 
+	// In case the stack name is empty, the stack does not yet exist. This usually
+	// happens on the very first reconciliation loop, because we do not wait for
+	// the stack to be created. When we create the stack, we need to prevent the
+	// update though.
+	if currentStackState.Name == "" {
+		return StackState{}, nil
+	}
+
 	// We enable/disable updates in order to enable them our test installations
 	// but disable them in production installations. That is useful until we have
 	// full confidence in updating guest clusters. Note that updates also manage
