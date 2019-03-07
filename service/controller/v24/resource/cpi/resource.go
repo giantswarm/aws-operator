@@ -21,7 +21,6 @@ type Config struct {
 	Logger      micrologger.Logger
 
 	InstallationName string
-	Route53Enabled   bool
 }
 
 // Resource implements the CPI resource, which stands for Control Plane
@@ -32,7 +31,6 @@ type Resource struct {
 	logger      micrologger.Logger
 
 	installationName string
-	route53Enabled   bool
 }
 
 func New(config Config) (*Resource, error) {
@@ -48,7 +46,6 @@ func New(config Config) (*Resource, error) {
 		logger:      config.Logger,
 
 		installationName: config.InstallationName,
-		route53Enabled:   config.Route53Enabled,
 	}
 
 	return r, nil

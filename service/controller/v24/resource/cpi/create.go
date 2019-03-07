@@ -59,7 +59,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			c := adapter.Config{
 				CustomObject:   customObject,
 				GuestAccountID: cc.Status.Cluster.AWSAccount.ID,
-				Route53Enabled: r.route53Enabled,
 			}
 
 			newAdapter, err = adapter.NewHostPre(c)

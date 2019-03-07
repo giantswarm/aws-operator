@@ -428,7 +428,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			Logger: config.Logger,
 
 			InstallationName: config.InstallationName,
-			Route53Enabled:   config.Route53Enabled,
 		}
 
 		cpiResource, err = cpi.New(c)
