@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
@@ -46,48 +45,6 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return StackState{}, microerror.Mask(err)
-	}
-
-	if key.IsDeleted(customObject) {
-		stackNames := []string{
-			key.MainGuestStackName(customObject),
-		}
-
-		for _, stackName := range stackNames {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding stack %#q in the AWS API", stackName))
-
-			in := &cloudformation.DescribeStacksInput{
-				StackName: aws.String(stackName),
-			}
-
-			_, err := cc.AWSClient.CloudFormation.DescribeStacks(in)
-			if cloudformationservice.IsStackNotFound(err) {
-				// This handling is far from perfect. We use different
-				// packages here. This is all going to be addressed in
-				// scope of
-				// https://github.com/giantswarm/giantswarm/issues/3783.
-
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find stack %#q in the AWS API", stackName))
-			} else if err != nil {
-				return nil, microerror.Mask(err)
-			} else {
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found stack %#q in the AWS API", stackName))
-				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizer")
-				finalizerskeptcontext.SetKept(ctx)
-			}
-		}
-
-		// When a tenant cluster is deleted it might be not completely created yet
-		// in the first place. There can be issues with unaccessible stack output
-		// values in such cases, causing the deletion process to get into a
-		// deadlock. To remedy such cases we simply return the stack state
-		// containing the stack name, without trying to access any stack output
-		// values.
-		currentState := StackState{
-			Name: key.MainGuestStackName(customObject),
-		}
-
-		return currentState, nil
 	}
 
 	// In order to compute the current state of the guest cluster's cloud
