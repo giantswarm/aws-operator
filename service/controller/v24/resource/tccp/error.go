@@ -1,4 +1,4 @@
-package cloudformation
+package tccp
 
 import (
 	"strings"

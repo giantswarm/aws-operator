@@ -1,4 +1,4 @@
-package cloudformation
+package tccp
 
 import "github.com/aws/aws-sdk-go/service/cloudformation"
 

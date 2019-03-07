@@ -1,4 +1,4 @@
-package cloudformation
+package tccp
 
 import (
 	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
@@ -15,7 +15,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "cloudformationv24"
+	Name = "tccpv24"
 )
 
 type AWSConfig struct {
