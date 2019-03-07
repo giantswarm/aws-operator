@@ -1,4 +1,4 @@
-package adapter
+package cpi
 
 type CPIIAMRoles struct {
 	PeerAccessRoleName string

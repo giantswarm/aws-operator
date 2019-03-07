@@ -3,31 +3,32 @@ package cpi
 import (
 	"strings"
 	"testing"
-
-	"github.com/giantswarm/aws-operator/service/controller/v24/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/v24/key"
-	"github.com/giantswarm/aws-operator/service/controller/v24/templates"
 )
 
-func Test_Resource_CPI_Template(t *testing.T) {
+func Test_Template_CloudFormation_CPI(t *testing.T) {
 	var err error
 
-	var cpi *adapter.CPI
+	var cpi *CPI
 	{
-		c := adapter.CPIConfig{
+		iamRoles := &CPIIAMRoles{
 			PeerAccessRoleName: "PeerAccessRoleName",
-			TenantAWSAccountID: "TenantAWSAccountID",
+			Tenant: CPIIAMRolesTenant{
+				AWS: CPIIAMRolesTenantAWS{
+					Account: CPIIAMRolesTenantAWSAccount{
+						ID: "TenantAWSAccountID",
+					},
+				},
+			},
 		}
 
-		cpi, err = adapter.NewCPI(c)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
+		cpi = &CPI{
+			IAMRoles: iamRoles,
 		}
 	}
 
 	var templateBody string
 	{
-		templateBody, err = templates.Render(key.CloudFormationHostPreTemplates(), cpi)
+		templateBody, err = Render(cpi)
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}

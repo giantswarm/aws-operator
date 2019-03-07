@@ -12,7 +12,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/v24/templates/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v24/templates/cloudformation/cpf"
-	"github.com/giantswarm/aws-operator/service/controller/v24/templates/cloudformation/cpi"
 	"github.com/giantswarm/aws-operator/service/controller/v24/templates/cloudformation/tccp"
 )
 
@@ -175,13 +174,6 @@ func CloudFormationHostPostTemplates() []string {
 		cpf.Main,
 		cpf.RecordSets,
 		cpf.RouteTables,
-	}
-}
-
-func CloudFormationHostPreTemplates() []string {
-	return []string{
-		cpi.IAMRoles,
-		cpi.Main,
 	}
 }
 
