@@ -157,7 +157,7 @@ func (r *Resource) newPrivateRoutes(ctx context.Context, cr v1alpha1.AWSConfig) 
 				RouteTableName: name,
 				RouteTableID:   id,
 				// Requester CIDR block, we create the peering connection from the
-				// guest's private subnets.
+				// tenant's private subnets.
 				CidrBlock: cidrBlock,
 				// The peer connection id is fetched from the cloud formation stack
 				// outputs in the stackoutput resource.
@@ -193,7 +193,7 @@ func (r *Resource) newPublicRoutes(ctx context.Context, cr v1alpha1.AWSConfig) (
 			RouteTableName: name,
 			RouteTableID:   id,
 			// Requester CIDR block, we create the peering connection from the
-			// guest's CIDR for being able to access Vault's ELB.
+			// tenant's CIDR for being able to access Vault's ELB.
 			CidrBlock: key.StatusNetworkCIDR(cr),
 			// The peer connection id is fetched from the cloud formation stack
 			// outputs in the stackoutput resource.
