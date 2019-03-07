@@ -408,6 +408,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			EncrypterBackend: config.EncrypterBackend,
 			InstallationName: config.InstallationName,
 			Route53Enabled:   config.Route53Enabled,
+			RouteTables:      strings.Split(config.RouteTables, ","),
 		}
 
 		cpfResource, err = cpf.New(c)
