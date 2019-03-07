@@ -1,4 +1,4 @@
-package cpi
+package template
 
 import (
 	"strings"

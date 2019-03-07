@@ -10,7 +10,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v24/key"
-	cpitemplate "github.com/giantswarm/aws-operator/service/controller/v24/templates/cloudformation/cpi"
+	"github.com/giantswarm/aws-operator/service/controller/v24/resource/cpi/template"
 )
 
 const (
@@ -49,19 +49,19 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane initializer CF stack")
 
-		var cpi *cpitemplate.CPI
+		var params *template.MainParams
 		{
-			iamRoles, err := r.newIAMRolesData(ctx, cr)
+			iamRoles, err := r.newIAMRolesParams(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 
-			cpi = &cpitemplate.CPI{
+			params = &template.MainParams{
 				IAMRoles: iamRoles,
 			}
 		}
 
-		templateBody, err = cpitemplate.Render(cpi)
+		templateBody, err = template.Render(params)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -108,17 +108,17 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) newIAMRolesData(ctx context.Context, cr v1alpha1.AWSConfig) (*cpitemplate.CPIIAMRoles, error) {
+func (r *Resource) newIAMRolesParams(ctx context.Context, cr v1alpha1.AWSConfig) (*template.MainParamsIAMRoles, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	iamRoles := &cpitemplate.CPIIAMRoles{
+	iamRoles := &template.MainParamsIAMRoles{
 		PeerAccessRoleName: key.PeerAccessRoleName(cr),
-		Tenant: cpitemplate.CPIIAMRolesTenant{
-			AWS: cpitemplate.CPIIAMRolesTenantAWS{
-				Account: cpitemplate.CPIIAMRolesTenantAWSAccount{
+		Tenant: template.MainParamsIAMRolesTenant{
+			AWS: template.MainParamsIAMRolesTenantAWS{
+				Account: template.MainParamsIAMRolesTenantAWSAccount{
 					ID: cc.Status.Cluster.AWSAccount.ID,
 				},
 			},

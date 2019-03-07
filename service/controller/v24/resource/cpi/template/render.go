@@ -1,4 +1,4 @@
-package cpi
+package template
 
 import (
 	"github.com/giantswarm/microerror"
@@ -8,8 +8,8 @@ import (
 
 func Render(v interface{}) (string, error) {
 	l := []string{
-		Main,
-		IAMRoles,
+		MainTemplate,
+		IAMRolesTemplate,
 	}
 
 	s, err := templates.Render(l, v)
