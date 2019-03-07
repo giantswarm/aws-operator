@@ -5,12 +5,12 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v24/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v24/key"
-	"github.com/giantswarm/aws-operator/service/controller/v24/templates"
+	"github.com/giantswarm/aws-operator/service/controller/v24/resource/cpi/template"
 )
 
 const (
@@ -49,25 +49,19 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane initializer CF stack")
 
-		cc, err := controllercontext.FromContext(ctx)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		var cpi *adapter.CPI
+		var params *template.ParamsMain
 		{
-			c := adapter.CPIConfig{
-				PeerAccessRoleName: key.PeerAccessRoleName(cr),
-				TenantAWSAccountID: cc.Status.Cluster.AWSAccount.ID,
-			}
-
-			cpi, err = adapter.NewCPI(c)
+			iamRoles, err := r.newIAMRolesParams(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
 			}
+
+			params = &template.ParamsMain{
+				IAMRoles: iamRoles,
+			}
 		}
 
-		templateBody, err = templates.Render(key.CloudFormationHostPreTemplates(), cpi)
+		templateBody, err = template.Render(params)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -112,4 +106,24 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	return nil
+}
+
+func (r *Resource) newIAMRolesParams(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainIAMRoles, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	iamRoles := &template.ParamsMainIAMRoles{
+		PeerAccessRoleName: key.PeerAccessRoleName(cr),
+		Tenant: template.ParamsMainIAMRolesTenant{
+			AWS: template.ParamsMainIAMRolesTenantAWS{
+				Account: template.ParamsMainIAMRolesTenantAWSAccount{
+					ID: cc.Status.Cluster.AWSAccount.ID,
+				},
+			},
+		},
+	}
+
+	return iamRoles, nil
 }
