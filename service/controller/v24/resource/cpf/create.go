@@ -2,6 +2,7 @@ package cpf
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -144,6 +145,11 @@ func (r *Resource) newPrivateRoutes(ctx context.Context, cr v1alpha1.AWSConfig) 
 			tenantPrivateSubnetCidrs = append(tenantPrivateSubnetCidrs, az.Subnet.Private.CIDR)
 		}
 	}
+
+	fmt.Printf("\n")
+	fmt.Printf("route table names\n")
+	fmt.Printf("    %#v\n", r.routeTables)
+	fmt.Printf("\n")
 
 	var routes []adapter.CPFRouteTablesRoute
 	for _, name := range r.routeTables {
