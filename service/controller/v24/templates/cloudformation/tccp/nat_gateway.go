@@ -1,4 +1,4 @@
-package guest
+package tccp
 
 const NatGateway = `{{define "nat_gateway"}}
   {{- $v := .Guest.NATGateway }}

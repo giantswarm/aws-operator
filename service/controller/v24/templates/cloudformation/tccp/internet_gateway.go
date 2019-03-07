@@ -1,4 +1,4 @@
-package guest
+package tccp
 
 const InternetGateway = `{{define "internet_gateway"}}
 {{- $v := .Guest.InternetGateway }}

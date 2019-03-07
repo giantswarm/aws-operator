@@ -30,7 +30,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			StackName: aws.String(key.MainHostPreStackName(cr)),
 		}
 
-		_, err = r.hostClients.CloudFormation.DescribeStacks(i)
+		_, err = r.cloudFormation.DescribeStacks(i)
 		if IsNotExists(err) {
 			// fall through
 		} else if err != nil {
@@ -88,7 +88,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			TemplateBody:                aws.String(templateBody),
 		}
 
-		_, err = r.hostClients.CloudFormation.CreateStack(i)
+		_, err = r.cloudFormation.CreateStack(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -103,7 +103,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			StackName: aws.String(key.MainHostPreStackName(cr)),
 		}
 
-		err = r.hostClients.CloudFormation.WaitUntilStackCreateComplete(i)
+		err = r.cloudFormation.WaitUntilStackCreateComplete(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}

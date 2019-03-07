@@ -1,4 +1,4 @@
-package hostpre
+package cpi
 
 const Main = `
 {{define "main"}}

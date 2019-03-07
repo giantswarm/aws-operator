@@ -1,4 +1,4 @@
-package guest
+package tccp
 
 const SecurityGroups = `{{define "security_groups" }}
 {{- $v := .Guest.SecurityGroups }}
