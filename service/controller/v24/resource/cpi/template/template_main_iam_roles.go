@@ -1,6 +1,6 @@
 package template
 
-const TemplateIAMRoles = `
+const TemplateMainIAMRoles = `
 {{ define "iam_roles" }}
   PeerRole:
     Type: 'AWS::IAM::Role'

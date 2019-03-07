@@ -9,7 +9,7 @@ import (
 func Render(v interface{}) (string, error) {
 	l := []string{
 		TemplateMain,
-		TemplateIAMRoles,
+		TemplateMainIAMRoles,
 	}
 
 	s, err := templates.Render(l, v)
