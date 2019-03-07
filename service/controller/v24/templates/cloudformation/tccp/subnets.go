@@ -1,4 +1,4 @@
-package guest
+package tccp
 
 const Subnets = `{{ define "subnets" }}
 {{- $v := .Guest.Subnets }}

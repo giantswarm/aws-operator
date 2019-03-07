@@ -1,4 +1,4 @@
-package guest
+package tccp
 
 const RouteTables = `{{ define "route_tables" }}
 {{- $v := .Guest.RouteTables }}

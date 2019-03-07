@@ -1,4 +1,4 @@
-package guest
+package tccp
 
 const IAMPolicies = `{{define "iam_policies"}}
 {{- $v := .Guest.IAMPolicies }}

@@ -1,4 +1,4 @@
-package guest
+package tccp
 
 const Outputs = `{{define "outputs"}}
 {{- $v := .Guest.Outputs }}
