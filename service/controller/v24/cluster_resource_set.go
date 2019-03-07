@@ -34,7 +34,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/bridgezone"
-	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v24/resource/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/cpf"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/cpi"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/ebsvolume"
@@ -48,6 +47,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/service"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/stackoutput"
+	"github.com/giantswarm/aws-operator/service/controller/v24/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/workerasgname"
 	"github.com/giantswarm/aws-operator/service/routetable"
 )
@@ -359,9 +359,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var cloudformationResource controller.Resource
+	var tccpResource controller.Resource
 	{
-		c := cloudformationresource.Config{
+		c := tccp.Config{
 			APIWhitelist: adapter.APIWhitelist{
 				Enabled:    config.APIWhitelist.Enabled,
 				SubnetList: config.APIWhitelist.SubnetList,
@@ -385,12 +385,12 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			Route53Enabled:             config.Route53Enabled,
 		}
 
-		ops, err := cloudformationresource.New(c)
+		ops, err := tccp.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 
-		cloudformationResource, err = toCRUDResource(config.Logger, ops)
+		tccpResource, err = toCRUDResource(config.Logger, ops)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -575,7 +575,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		loadBalancerResource,
 		ebsVolumeResource,
 		cpiResource,
-		cloudformationResource,
+		tccpResource,
 		cpfResource,
 		namespaceResource,
 		serviceResource,
