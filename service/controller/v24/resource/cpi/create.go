@@ -90,21 +90,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the creation of the tenant cluster's control plane initializer CF stack")
 	}
 
-	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for the creation of the tenant cluster's control plane initializer CF stack")
-
-		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(key.MainHostPreStackName(cr)),
-		}
-
-		err = r.cloudFormation.WaitUntilStackCreateComplete(i)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", "waited for the creation of the tenant cluster's control plane initializer CF stack")
-	}
-
 	return nil
 }
 

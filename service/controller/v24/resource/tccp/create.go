@@ -2,12 +2,10 @@ package tccp
 
 import (
 	"context"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
 	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v24/encrypter"
@@ -43,36 +41,6 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		_, err = cc.AWSClient.CloudFormation.CreateStack(&stackInput)
 		if IsAlreadyExists(err) {
 			// fall through
-		} else if err != nil {
-			return microerror.Mask(err)
-		}
-
-		ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
-		defer cancel()
-
-		err = cc.AWSClient.CloudFormation.WaitUntilStackCreateCompleteWithContext(ctx, &cloudformation.DescribeStacksInput{
-			StackName: stackInput.StackName,
-		})
-		if ctx.Err() == context.DeadlineExceeded {
-			// We waited longer than we wanted to get a reasonable result and be sure
-			// the stack got properly created. We skip here and try again on the next
-			// resync.
-			r.logger.LogCtx(ctx, "level", "debug", "message", "guest cluster main stack creation is not complete")
-			resourcecanceledcontext.SetCanceled(ctx)
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
-
-			return nil
-		} else if IsResourceNotReady(err) {
-			// There might be cases in which AWS is not fast enough to create the
-			// resources we want to watch. We skip here and try again on the next
-			// resync.
-			r.logger.LogCtx(ctx, "level", "debug", "message", "guest cluster main stack creation is not complete")
-			resourcecanceledcontext.SetCanceled(ctx)
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
-
-			return nil
-		} else if ctx.Err() != nil {
-			return microerror.Mask(ctx.Err())
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
