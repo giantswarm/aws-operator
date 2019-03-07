@@ -16,6 +16,10 @@ const (
 
 type ReleaseCyclePhase string
 
+func (r ReleaseCyclePhase) String() string {
+	return string(r)
+}
+
 var releaseCycleValidation = &apiextensionsv1beta1.CustomResourceValidation{
 	// See http://json-schema.org/learn.
 	OpenAPIV3Schema: &apiextensionsv1beta1.JSONSchemaProps{
