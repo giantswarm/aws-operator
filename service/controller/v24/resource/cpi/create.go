@@ -18,7 +18,7 @@ const (
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	customObject, err := key.ToCustomObject(obj)
+	cr, err := key.ToCustomObject(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -27,7 +27,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane initializer CF stack")
 
 		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(key.MainHostPreStackName(customObject)),
+			StackName: aws.String(key.MainHostPreStackName(cr)),
 		}
 
 		_, err = r.cloudFormation.DescribeStacks(i)
@@ -54,20 +54,20 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		var newAdapter adapter.Adapter
+		var cpi *adapter.CPI
 		{
-			c := adapter.Config{
-				CustomObject:   customObject,
-				GuestAccountID: cc.Status.Cluster.AWSAccount.ID,
+			c := adapter.CPIConfig{
+				PeerAccessRoleName: key.PeerAccessRoleName(cr),
+				TenantAWSAccountID: cc.Status.Cluster.AWSAccount.ID,
 			}
 
-			newAdapter, err = adapter.NewHostPre(c)
+			cpi, err = adapter.NewCPI(c)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 		}
 
-		templateBody, err = templates.Render(key.CloudFormationHostPreTemplates(), newAdapter)
+		templateBody, err = templates.Render(key.CloudFormationHostPreTemplates(), cpi)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -83,8 +83,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				aws.String(capabilityNamesIAM),
 			},
 			EnableTerminationProtection: aws.Bool(key.EnableTerminationProtection),
-			StackName:                   aws.String(key.MainHostPreStackName(customObject)),
-			Tags:                        r.getCloudFormationTags(customObject),
+			StackName:                   aws.String(key.MainHostPreStackName(cr)),
+			Tags:                        r.getCloudFormationTags(cr),
 			TemplateBody:                aws.String(templateBody),
 		}
 
@@ -100,7 +100,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for the creation of the tenant cluster's control plane initializer CF stack")
 
 		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(key.MainHostPreStackName(customObject)),
+			StackName: aws.String(key.MainHostPreStackName(cr)),
 		}
 
 		err = r.cloudFormation.WaitUntilStackCreateComplete(i)

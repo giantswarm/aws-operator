@@ -45,8 +45,7 @@ type Config struct {
 }
 
 type Adapter struct {
-	Guest   GuestAdapter
-	HostPre HostPreAdapter
+	Guest GuestAdapter
 }
 
 func NewGuest(cfg Config) (Adapter, error) {
@@ -78,22 +77,6 @@ func NewGuest(cfg Config) (Adapter, error) {
 	return a, nil
 }
 
-func NewHostPre(cfg Config) (Adapter, error) {
-	a := Adapter{}
-
-	hydraters := []Hydrater{
-		a.HostPre.IAMRoles.Adapt,
-	}
-
-	for _, h := range hydraters {
-		if err := h(cfg); err != nil {
-			return Adapter{}, microerror.Mask(err)
-		}
-	}
-
-	return a, nil
-}
-
 type GuestAdapter struct {
 	AutoScalingGroup    GuestAutoScalingGroupAdapter
 	IAMPolicies         GuestIAMPoliciesAdapter
@@ -109,8 +92,4 @@ type GuestAdapter struct {
 	SecurityGroups      GuestSecurityGroupsAdapter
 	Subnets             GuestSubnetsAdapter
 	VPC                 GuestVPCAdapter
-}
-
-type HostPreAdapter struct {
-	IAMRoles HostPreIAMRolesAdapter
 }

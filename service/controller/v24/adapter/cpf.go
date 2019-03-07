@@ -1,6 +1,7 @@
 package adapter
 
-// CPFConfig represents the config for the adapter collection for the Control Plane Finalizer management.
+// CPFConfig represents the config for the adapter collection for the Control
+// Plane Finalizer management.
 type CPFConfig struct {
 	BaseDomain                 string
 	ClusterID                  string
