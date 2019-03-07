@@ -1,4 +1,4 @@
-package guest
+package tccp
 
 const AutoScalingGroup = `{{define "autoscaling_group"}}
 {{- $v := .Guest.AutoScalingGroup }}
