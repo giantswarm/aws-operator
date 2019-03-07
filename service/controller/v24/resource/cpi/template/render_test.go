@@ -8,20 +8,20 @@ import (
 func Test_Controller_Resource_CPI_Template_Render(t *testing.T) {
 	var err error
 
-	var params *MainParams
+	var params *ParamsMain
 	{
-		iamRoles := &MainParamsIAMRoles{
+		iamRoles := &ParamsMainIAMRoles{
 			PeerAccessRoleName: "PeerAccessRoleName",
-			Tenant: MainParamsIAMRolesTenant{
-				AWS: MainParamsIAMRolesTenantAWS{
-					Account: MainParamsIAMRolesTenantAWSAccount{
+			Tenant: ParamsMainIAMRolesTenant{
+				AWS: ParamsMainIAMRolesTenantAWS{
+					Account: ParamsMainIAMRolesTenantAWSAccount{
 						ID: "TenantAWSAccountID",
 					},
 				},
 			},
 		}
 
-		params = &MainParams{
+		params = &ParamsMain{
 			IAMRoles: iamRoles,
 		}
 	}

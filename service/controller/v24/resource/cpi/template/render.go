@@ -8,8 +8,8 @@ import (
 
 func Render(v interface{}) (string, error) {
 	l := []string{
-		MainTemplate,
-		IAMRolesTemplate,
+		TemplateMain,
+		TemplateIAMRoles,
 	}
 
 	s, err := templates.Render(l, v)

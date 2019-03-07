@@ -1,18 +1,18 @@
 package template
 
-type MainParamsIAMRoles struct {
+type ParamsMainIAMRoles struct {
 	PeerAccessRoleName string
-	Tenant             MainParamsIAMRolesTenant
+	Tenant             ParamsMainIAMRolesTenant
 }
 
-type MainParamsIAMRolesTenant struct {
-	AWS MainParamsIAMRolesTenantAWS
+type ParamsMainIAMRolesTenant struct {
+	AWS ParamsMainIAMRolesTenantAWS
 }
 
-type MainParamsIAMRolesTenantAWS struct {
-	Account MainParamsIAMRolesTenantAWSAccount
+type ParamsMainIAMRolesTenantAWS struct {
+	Account ParamsMainIAMRolesTenantAWSAccount
 }
 
-type MainParamsIAMRolesTenantAWSAccount struct {
+type ParamsMainIAMRolesTenantAWSAccount struct {
 	ID string
 }

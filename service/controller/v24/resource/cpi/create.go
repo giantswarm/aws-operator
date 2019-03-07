@@ -49,14 +49,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane initializer CF stack")
 
-		var params *template.MainParams
+		var params *template.ParamsMain
 		{
 			iamRoles, err := r.newIAMRolesParams(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 
-			params = &template.MainParams{
+			params = &template.ParamsMain{
 				IAMRoles: iamRoles,
 			}
 		}
@@ -108,17 +108,17 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) newIAMRolesParams(ctx context.Context, cr v1alpha1.AWSConfig) (*template.MainParamsIAMRoles, error) {
+func (r *Resource) newIAMRolesParams(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainIAMRoles, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	iamRoles := &template.MainParamsIAMRoles{
+	iamRoles := &template.ParamsMainIAMRoles{
 		PeerAccessRoleName: key.PeerAccessRoleName(cr),
-		Tenant: template.MainParamsIAMRolesTenant{
-			AWS: template.MainParamsIAMRolesTenantAWS{
-				Account: template.MainParamsIAMRolesTenantAWSAccount{
+		Tenant: template.ParamsMainIAMRolesTenant{
+			AWS: template.ParamsMainIAMRolesTenantAWS{
+				Account: template.ParamsMainIAMRolesTenantAWSAccount{
 					ID: cc.Status.Cluster.AWSAccount.ID,
 				},
 			},
