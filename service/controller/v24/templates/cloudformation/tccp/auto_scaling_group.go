@@ -1,6 +1,7 @@
 package tccp
 
-const AutoScalingGroup = `{{define "autoscaling_group"}}
+const AutoScalingGroup = `
+{{define "autoscaling_group"}}
 {{- $v := .Guest.AutoScalingGroup }}
   {{ $v.ASGType }}AutoScalingGroup:
     Type: "AWS::AutoScaling::AutoScalingGroup"
@@ -40,4 +41,5 @@ const AutoScalingGroup = `{{define "autoscaling_group"}}
         MaxBatchSize: {{ $v.MaxBatchSize }}
         # after creating a new instance, pause operations on the ASG for this amount of time
         PauseTime: {{ $v.RollingUpdatePauseTime }}
-{{end}}`
+{{end}}
+`

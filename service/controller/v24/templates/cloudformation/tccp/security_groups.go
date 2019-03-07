@@ -1,6 +1,7 @@
 package tccp
 
-const SecurityGroups = `{{define "security_groups" }}
+const SecurityGroups = `
+{{define "security_groups" }}
 {{- $v := .Guest.SecurityGroups }}
   MasterSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -150,4 +151,5 @@ const SecurityGroups = `{{define "security_groups" }}
       Description: "Allow outbound traffic from loopback address."
       IpProtocol: -1
       CidrIp: 127.0.0.1/32
-{{ end }}`
+{{ end }}
+`

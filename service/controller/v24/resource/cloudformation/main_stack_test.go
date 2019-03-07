@@ -227,7 +227,7 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		t.Fatalf("unexpected error %v", err)
 	}
 
-	if !strings.Contains(body, "Description: Main Guest CloudFormation stack.") {
+	if !strings.Contains(body, "Description: Tenant Cluster Control Plane Cloud Formation Stack.") {
 		t.Fatal("stack header not found")
 	}
 

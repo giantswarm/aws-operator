@@ -1,7 +1,9 @@
 package tccp
 
-const Main = `{{define "main"}}AWSTemplateFormatVersion: 2010-09-09
-Description: Main Guest CloudFormation stack.
+const Main = `
+{{define "main"}}
+AWSTemplateFormatVersion: 2010-09-09
+Description: Tenant Cluster Control Plane Cloud Formation Stack.
 Parameters:
   VersionBundleVersionParameter:
     Type: String
@@ -21,4 +23,5 @@ Resources:
   {{template "autoscaling_group" .}}
   {{template "record_sets" .}}
 {{template "outputs" .}}
-{{end}}`
+{{end}}
+`

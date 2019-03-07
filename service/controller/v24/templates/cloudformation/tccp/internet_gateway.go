@@ -1,6 +1,7 @@
 package tccp
 
-const InternetGateway = `{{define "internet_gateway"}}
+const InternetGateway = `
+{{define "internet_gateway"}}
 {{- $v := .Guest.InternetGateway }}
   InternetGateway:
     Type: AWS::EC2::InternetGateway
@@ -30,4 +31,5 @@ const InternetGateway = `{{define "internet_gateway"}}
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId:
         Ref: InternetGateway
-{{end}}`
+{{end}}
+`

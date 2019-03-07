@@ -1,6 +1,7 @@
 package tccp
 
-const Outputs = `{{define "outputs"}}
+const Outputs = `
+{{define "outputs"}}
 {{- $v := .Guest.Outputs }}
 Outputs:
   DockerVolumeResourceName:
@@ -32,4 +33,5 @@ Outputs:
   VersionBundleVersion:
     Value:
       Ref: VersionBundleVersionParameter
-{{end}}`
+{{end}}
+`
