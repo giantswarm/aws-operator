@@ -40,7 +40,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster worker ASG name in the CR")
 
 		if customObject.Status.AWS.AutoScalingGroup.Name != "" {
-			cc.Status.Drainer.WorkerASGName = customObject.Status.AWS.AutoScalingGroup.Name
+			cc.Status.TenantCluster.TCCP.ASG.Name = customObject.Status.AWS.AutoScalingGroup.Name
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster worker ASG name in the CR")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -50,10 +50,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster worker ASG name in the CR")
 	}
 
-	if cc.Status.Drainer.WorkerASGName != "" {
+	if cc.Status.TenantCluster.TCCP.ASG.Name != "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "updating CR status")
 
-		customObject.Status.AWS.AutoScalingGroup.Name = cc.Status.Drainer.WorkerASGName
+		customObject.Status.AWS.AutoScalingGroup.Name = cc.Status.TenantCluster.TCCP.ASG.Name
 
 		_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(customObject.Namespace).UpdateStatus(&customObject)
 		if err != nil {
