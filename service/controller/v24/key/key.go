@@ -12,8 +12,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/v24/templates/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v24/templates/cloudformation/cpf"
-	"github.com/giantswarm/aws-operator/service/controller/v24/templates/cloudformation/guest"
-	"github.com/giantswarm/aws-operator/service/controller/v24/templates/cloudformation/hostpre"
+	"github.com/giantswarm/aws-operator/service/controller/v24/templates/cloudformation/tccp"
 )
 
 const (
@@ -152,21 +151,21 @@ func CloudConfigSmallTemplates() []string {
 
 func CloudFormationGuestTemplates() []string {
 	return []string{
-		guest.AutoScalingGroup,
-		guest.IAMPolicies,
-		guest.Instance,
-		guest.InternetGateway,
-		guest.LaunchConfiguration,
-		guest.LoadBalancers,
-		guest.Main,
-		guest.NatGateway,
-		guest.LifecycleHooks,
-		guest.Outputs,
-		guest.RecordSets,
-		guest.RouteTables,
-		guest.SecurityGroups,
-		guest.Subnets,
-		guest.VPC,
+		tccp.AutoScalingGroup,
+		tccp.IAMPolicies,
+		tccp.Instance,
+		tccp.InternetGateway,
+		tccp.LaunchConfiguration,
+		tccp.LoadBalancers,
+		tccp.Main,
+		tccp.NatGateway,
+		tccp.LifecycleHooks,
+		tccp.Outputs,
+		tccp.RecordSets,
+		tccp.RouteTables,
+		tccp.SecurityGroups,
+		tccp.Subnets,
+		tccp.VPC,
 	}
 }
 
@@ -175,13 +174,6 @@ func CloudFormationHostPostTemplates() []string {
 		cpf.Main,
 		cpf.RecordSets,
 		cpf.RouteTables,
-	}
-}
-
-func CloudFormationHostPreTemplates() []string {
-	return []string{
-		hostpre.IAMRoles,
-		hostpre.Main,
 	}
 }
 
@@ -203,11 +195,6 @@ func ClusterID(customObject v1alpha1.AWSConfig) string {
 
 func ClusterNamespace(customObject v1alpha1.AWSConfig) string {
 	return ClusterID(customObject)
-}
-
-// ClusterNetworkCIDR returns allocated guest cluster subnet CIDR.
-func ClusterNetworkCIDR(customObject v1alpha1.AWSConfig) string {
-	return customObject.Status.Cluster.Network.CIDR
 }
 
 // ClusterOrganization returns the org name from the custom object.
@@ -555,6 +542,11 @@ func SpecAvailabilityZones(customObject v1alpha1.AWSConfig) int {
 
 func StatusAvailabilityZones(customObject v1alpha1.AWSConfig) []v1alpha1.AWSConfigStatusAWSAvailabilityZone {
 	return customObject.Status.AWS.AvailabilityZones
+}
+
+// StatusNetworkCIDR returns the allocated tenant cluster subnet CIDR.
+func StatusNetworkCIDR(customObject v1alpha1.AWSConfig) string {
+	return customObject.Status.Cluster.Network.CIDR
 }
 
 func StatusScalingDesiredCapacity(customObject v1alpha1.AWSConfig) int {

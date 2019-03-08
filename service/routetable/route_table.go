@@ -2,6 +2,7 @@ package routetable
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -13,11 +14,11 @@ import (
 type Config struct {
 	EC2    EC2
 	Logger micrologger.Logger
-
-	// Names are the route table names used to lookup IDs.
-	Names []string
 }
 
+// RouteTable is a service implementation fetching route table IDs for any given
+// route table name. Once fetched the mapping between name and ID are cached in
+// memory.
 type RouteTable struct {
 	ec2    EC2
 	logger micrologger.Logger
@@ -26,8 +27,6 @@ type RouteTable struct {
 	// and the value is the ID.
 	ids   map[string]string
 	mutex sync.Mutex
-
-	names []string
 }
 
 // New creates a new route table service that has to be booted using Boot to
@@ -46,14 +45,12 @@ func New(config Config) (*RouteTable, error) {
 
 		ids:   map[string]string{},
 		mutex: sync.Mutex{},
-
-		names: config.Names,
 	}
 
 	return r, nil
 }
 
-func (r *RouteTable) IdForName(ctx context.Context, name string) (string, error) {
+func (r *RouteTable) IDForName(ctx context.Context, name string) (string, error) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
@@ -72,7 +69,7 @@ func (r *RouteTable) IdForName(ctx context.Context, name string) (string, error)
 }
 
 func (r *RouteTable) searchID(ctx context.Context, name string) (string, error) {
-	r.logger.LogCtx(ctx, "level", "debug", "message", "finding route table ID for %#q", name)
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding route table ID for %#q", name))
 
 	i := &ec2.DescribeRouteTablesInput{
 		Filters: []*ec2.Filter{
@@ -94,7 +91,7 @@ func (r *RouteTable) searchID(ctx context.Context, name string) (string, error) 
 
 	id := *o.RouteTables[0].RouteTableId
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "found route table ID %#q for %#q", id, name)
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found route table ID %#q for %#q", id, name))
 
 	return id, nil
 }
