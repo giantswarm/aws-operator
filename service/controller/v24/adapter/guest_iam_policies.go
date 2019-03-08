@@ -52,11 +52,7 @@ func (i *GuestIAMPoliciesAdapter) Adapt(cfg Config) error {
 	}
 
 	// S3Bucket
-	accountID, err := AccountID(cfg.Clients)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	i.S3Bucket = key.BucketName(cfg.CustomObject, accountID)
+	i.S3Bucket = key.BucketName(cfg.CustomObject, cfg.TenantClusterAccountID)
 
 	return nil
 }

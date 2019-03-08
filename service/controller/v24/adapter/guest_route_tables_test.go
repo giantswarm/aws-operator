@@ -67,7 +67,6 @@ func TestAdapterRouteTablesRegularFields(t *testing.T) {
 			EC2: &EC2ClientMock{
 				vpcCIDR: tc.expectedHostClusterCIDR,
 			},
-			STS: &STSClientMock{},
 		}
 
 		a := Adapter{}

@@ -25,7 +25,7 @@ func (v *GuestVPCAdapter) Adapt(cfg Config) error {
 	v.CidrBlock = key.StatusNetworkCIDR(cfg.CustomObject)
 	v.ClusterID = key.ClusterID(cfg.CustomObject)
 	v.InstallationName = cfg.InstallationName
-	v.HostAccountID = cfg.HostAccountID
+	v.HostAccountID = cfg.ControlPlaneAccountID
 	v.PeerVPCID = key.PeerID(cfg.CustomObject)
 	v.Region = key.Region(cfg.CustomObject)
 	v.RegionARN = key.RegionARN(cfg.CustomObject)

@@ -13,22 +13,14 @@ import (
 )
 
 func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig, stackState StackState) (string, error) {
-	hostAccountID, err := adapter.AccountID(*r.hostClients)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
 	adapterClients := adapter.Clients{
-		CloudFormation: cc.AWSClient.CloudFormation,
-		EC2:            cc.AWSClient.EC2,
-		IAM:            cc.AWSClient.IAM,
-		KMS:            cc.AWSClient.KMS,
-		ELB:            cc.AWSClient.ELB,
-		STS:            cc.AWSClient.STS,
+		IAM: cc.AWSClient.IAM,
+		KMS: cc.AWSClient.KMS,
 	}
 
 	cfg := adapter.Config{
@@ -36,14 +28,14 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 			Enabled:    r.apiWhiteList.Enabled,
 			SubnetList: r.apiWhiteList.SubnetList,
 		},
-		CustomObject:      customObject,
-		Clients:           adapterClients,
-		EncrypterBackend:  r.encrypterBackend,
-		HostClients:       *r.hostClients,
-		InstallationName:  r.installationName,
-		HostAccountID:     hostAccountID,
-		PublicRouteTables: r.publicRouteTables,
-		Route53Enabled:    r.route53Enabled,
+		ControlPlaneAccountID: cc.Status.ControlPlane.AWSAccountID,
+		CustomObject:          customObject,
+		Clients:               adapterClients,
+		EncrypterBackend:      r.encrypterBackend,
+		HostClients:           *r.hostClients,
+		InstallationName:      r.installationName,
+		PublicRouteTables:     r.publicRouteTables,
+		Route53Enabled:        r.route53Enabled,
 		StackState: adapter.StackState{
 			Name: stackState.Name,
 
@@ -65,6 +57,7 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 
 			VersionBundleVersion: stackState.VersionBundleVersion,
 		},
+		TenantClusterAccountID: cc.Status.TenantCluster.AWSAccountID,
 	}
 
 	adp, err := adapter.NewGuest(cfg)

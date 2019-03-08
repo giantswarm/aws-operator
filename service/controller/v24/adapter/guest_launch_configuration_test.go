@@ -94,7 +94,6 @@ func Test_AdapterLaunchConfiguration_RegularFields(t *testing.T) {
 		clients := Clients{
 			EC2: &EC2ClientMock{},
 			IAM: &IAMClientMock{},
-			STS: &STSClientMock{},
 		}
 		a := Adapter{}
 
@@ -147,7 +146,6 @@ func Test_AdapterLaunchConfiguration_SmallCloudConfig(t *testing.T) {
 	clients := Clients{
 		EC2: &EC2ClientMock{},
 		IAM: &IAMClientMock{},
-		STS: &STSClientMock{accountID: "000000000000"},
 	}
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
@@ -169,8 +167,9 @@ func Test_AdapterLaunchConfiguration_SmallCloudConfig(t *testing.T) {
 		},
 	}
 	cfg := Config{
-		CustomObject: customObject,
-		Clients:      clients,
+		CustomObject:           customObject,
+		Clients:                clients,
+		TenantClusterAccountID: "000000000000",
 	}
 	err := a.Guest.LaunchConfiguration.Adapt(cfg)
 

@@ -154,7 +154,6 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 				vpcCIDR: "10.0.0.0/16",
 			},
 			IAM: &IAMClientMock{},
-			STS: &STSClientMock{},
 		}
 		a := Adapter{}
 
@@ -506,7 +505,6 @@ func TestAdapterSecurityGroupsKubernetesAPIRules(t *testing.T) {
 			EC2: &EC2ClientMock{
 				elasticIPs: tc.elasticIPs,
 			},
-			STS: &STSClientMock{},
 		}
 
 		t.Run(tc.description, func(t *testing.T) {

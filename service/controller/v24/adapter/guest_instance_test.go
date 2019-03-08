@@ -28,7 +28,6 @@ func Test_Adapter_Instance_RegularFields(t *testing.T) {
 				Clients: Clients{
 					EC2: &EC2ClientMock{},
 					IAM: &IAMClientMock{},
-					STS: &STSClientMock{},
 				},
 				CustomObject: v1alpha1.AWSConfig{
 					Spec: v1alpha1.AWSConfigSpec{
@@ -109,7 +108,6 @@ func Test_Adapter_Instance_SmallCloudConfig(t *testing.T) {
 			clients := Clients{
 				EC2: &EC2ClientMock{},
 				IAM: &IAMClientMock{},
-				STS: &STSClientMock{accountID: "000000000000"},
 			}
 			customObject := v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
@@ -145,6 +143,7 @@ func Test_Adapter_Instance_SmallCloudConfig(t *testing.T) {
 				StackState: StackState{
 					MasterCloudConfigVersion: "foo",
 				},
+				TenantClusterAccountID: "000000000000",
 			}
 
 			a := &GuestInstanceAdapter{}

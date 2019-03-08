@@ -37,7 +37,6 @@ func TestAdapterIamPoliciesRegularFields(t *testing.T) {
 	clients := Clients{
 		KMS: &KMSClientMock{},
 		IAM: &IAMClientMock{},
-		STS: &STSClientMock{},
 	}
 	for _, tc := range testCases {
 		a := Adapter{}
@@ -127,7 +126,6 @@ func TestAdapterIamPoliciesKMSKeyARN(t *testing.T) {
 					keyARN:  tc.expectedKMSKeyARN,
 					isError: tc.expectedError,
 				},
-				STS: &STSClientMock{},
 			}
 			cfg := Config{
 				EncrypterBackend: tc.encrypterBackend,
@@ -171,15 +169,6 @@ func TestAdapterIamPoliciesS3Bucket(t *testing.T) {
 			accountID:        "111111111111",
 			expectedS3Bucket: "111111111111-g8s-test-cluster",
 		},
-		{
-			description: "client error",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: defaultCluster,
-				},
-			},
-			expectedError: true,
-		},
 	}
 	for _, tc := range testCases {
 		a := Adapter{}
@@ -187,14 +176,11 @@ func TestAdapterIamPoliciesS3Bucket(t *testing.T) {
 			clients := Clients{
 				KMS: &KMSClientMock{},
 				IAM: &IAMClientMock{},
-				STS: &STSClientMock{
-					accountID: tc.accountID,
-					isError:   tc.expectedError,
-				},
 			}
 			cfg := Config{
-				CustomObject: tc.customObject,
-				Clients:      clients,
+				CustomObject:           tc.customObject,
+				Clients:                clients,
+				TenantClusterAccountID: tc.accountID,
 			}
 			err := a.Guest.IAMPolicies.Adapt(cfg)
 			if tc.expectedError && err == nil {
