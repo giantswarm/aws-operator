@@ -43,7 +43,7 @@ func addAccountIDToContext(ctx context.Context) error {
 		return microerror.Mask(err)
 	}
 
-	accountID, err := cc.AWSService.GetAccountID()
+	accountID, err := cc.Service.AccountID.Lookup()
 	if err != nil {
 		return microerror.Mask(err)
 	}
