@@ -23,7 +23,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	workerASGName := cc.Status.Drainer.WorkerASGName
+	workerASGName := cc.Status.TenantCluster.TCCP.ASG.Name
 	if workerASGName == "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "worker ASG name is not available yet")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -106,9 +106,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		cc.Status.Cluster.ASG.DesiredCapacity = desiredCapacity
-		cc.Status.Cluster.ASG.MaxSize = maxSize
-		cc.Status.Cluster.ASG.MinSize = minSize
+		cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity = desiredCapacity
+		cc.Status.TenantCluster.TCCP.ASG.MaxSize = maxSize
+		cc.Status.TenantCluster.TCCP.ASG.MinSize = minSize
 	}
 
 	return nil

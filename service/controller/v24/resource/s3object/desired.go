@@ -68,7 +68,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			m.Lock()
 			k := key.BucketObjectName(customObject, key.KindMaster)
 			output[k] = BucketObjectState{
-				Bucket: key.BucketName(customObject, cc.Status.Cluster.AWSAccount.ID),
+				Bucket: key.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
 				Body:   b,
 				Key:    k,
 			}
@@ -86,7 +86,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			m.Lock()
 			k := key.BucketObjectName(customObject, key.KindWorker)
 			output[k] = BucketObjectState{
-				Bucket: key.BucketName(customObject, cc.Status.Cluster.AWSAccount.ID),
+				Bucket: key.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
 				Body:   b,
 				Key:    k,
 			}
