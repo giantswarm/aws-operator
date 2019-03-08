@@ -18,7 +18,6 @@ type Context struct {
 	AWSClient      awsclient.Clients
 	CloudFormation cloudformationservice.CloudFormation
 	EBSService     ebs.Interface
-	Service        ContextService
 
 	// Status holds the data used to communicate between controller's
 	// resources. It can be edited in place as Context is stored as

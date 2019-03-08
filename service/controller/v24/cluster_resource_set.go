@@ -20,7 +20,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	accountidservice "github.com/giantswarm/aws-operator/service/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/v24/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v24/cloudconfig"
 	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v24/cloudformation"
@@ -31,7 +30,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/controller/v24/encrypter/vault"
 	"github.com/giantswarm/aws-operator/service/controller/v24/key"
-	accountidresource "github.com/giantswarm/aws-operator/service/controller/v24/resource/accountid"
+	"github.com/giantswarm/aws-operator/service/controller/v24/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/bridgezone"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/cpf"
@@ -210,11 +209,11 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 	var accountIDResource controller.Resource
 	{
-		c := accountidresource.Config{
+		c := accountid.Config{
 			Logger: config.Logger,
 		}
 
-		accountIDResource, err = accountidresource.New(c)
+		accountIDResource, err = accountid.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -635,19 +634,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			}
 		}
 
-		var accountIDService *accountidservice.AccountID
-		{
-			c := accountidservice.Config{
-				Logger: config.Logger,
-				STS:    awsClient.STS,
-			}
-
-			accountIDService, err = accountidservice.New(c)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-		}
-
 		var ebsService ebs.Interface
 		{
 			c := ebs.Config{
@@ -676,10 +662,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			AWSClient:      awsClient,
 			CloudFormation: *cloudFormationService,
 			EBSService:     ebsService,
-
-			Service: controllercontext.ContextService{
-				AccountID: accountIDService,
-			},
 		}
 		ctx = controllercontext.NewContext(ctx, c)
 
