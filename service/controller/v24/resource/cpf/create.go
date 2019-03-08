@@ -9,11 +9,10 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
-	"github.com/giantswarm/aws-operator/service/controller/v24/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v24/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v24/key"
-	"github.com/giantswarm/aws-operator/service/controller/v24/templates"
+	"github.com/giantswarm/aws-operator/service/controller/v24/resource/cpf/template"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -61,34 +60,24 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane finalizer cloud formation stack")
 
-		privateRoutes, err := r.newPrivateRoutes(ctx, cr)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		publicRoutes, err := r.newPublicRoutes(ctx, cr)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		var cpf *adapter.CPF
+		var params *template.ParamsMain
 		{
-			c := adapter.CPFConfig{
-				BaseDomain:                 key.BaseDomain(cr),
-				ClusterID:                  key.ClusterID(cr),
-				GuestHostedZoneNameServers: cc.Status.TenantCluster.HostedZoneNameServers,
-				PrivateRoutes:              privateRoutes,
-				PublicRoutes:               publicRoutes,
-				Route53Enabled:             r.route53Enabled,
-			}
-
-			cpf, err = adapter.NewCPF(c)
+			recordSets, err := r.newRecordSetsParams(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
 			}
+			routeTables, err := r.newRouteTablesParams(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			params = &template.ParamsMain{
+				RecordSets:  recordSets,
+				RouteTables: routeTables,
+			}
 		}
 
-		templateBody, err = templates.Render(key.CloudFormationHostPostTemplates(), cpf)
+		templateBody, err = template.Render(params)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -132,7 +121,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) newPrivateRoutes(ctx context.Context, cr v1alpha1.AWSConfig) ([]adapter.CPFRouteTablesRoute, error) {
+func (r *Resource) newPrivateRoutes(ctx context.Context, cr v1alpha1.AWSConfig) ([]template.ParamsMainRouteTablesRoute, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -145,7 +134,7 @@ func (r *Resource) newPrivateRoutes(ctx context.Context, cr v1alpha1.AWSConfig) 
 		}
 	}
 
-	var routes []adapter.CPFRouteTablesRoute
+	var routes []template.ParamsMainRouteTablesRoute
 	for _, name := range r.routeTables {
 		id, err := r.routeTable.IDForName(ctx, name)
 		if err != nil {
@@ -153,7 +142,7 @@ func (r *Resource) newPrivateRoutes(ctx context.Context, cr v1alpha1.AWSConfig) 
 		}
 
 		for _, cidrBlock := range tenantPrivateSubnetCidrs {
-			route := adapter.CPFRouteTablesRoute{
+			route := template.ParamsMainRouteTablesRoute{
 				RouteTableName: name,
 				RouteTableID:   id,
 				// Requester CIDR block, we create the peering connection from the
@@ -171,7 +160,7 @@ func (r *Resource) newPrivateRoutes(ctx context.Context, cr v1alpha1.AWSConfig) 
 	return routes, nil
 }
 
-func (r *Resource) newPublicRoutes(ctx context.Context, cr v1alpha1.AWSConfig) ([]adapter.CPFRouteTablesRoute, error) {
+func (r *Resource) newPublicRoutes(ctx context.Context, cr v1alpha1.AWSConfig) ([]template.ParamsMainRouteTablesRoute, error) {
 	if r.encrypterBackend != encrypter.VaultBackend {
 		return nil, nil
 	}
@@ -181,7 +170,7 @@ func (r *Resource) newPublicRoutes(ctx context.Context, cr v1alpha1.AWSConfig) (
 		return nil, microerror.Mask(err)
 	}
 
-	var routes []adapter.CPFRouteTablesRoute
+	var routes []template.ParamsMainRouteTablesRoute
 
 	for _, name := range r.routeTables {
 		id, err := r.routeTable.IDForName(ctx, name)
@@ -189,7 +178,7 @@ func (r *Resource) newPublicRoutes(ctx context.Context, cr v1alpha1.AWSConfig) (
 			return nil, microerror.Mask(err)
 		}
 
-		route := adapter.CPFRouteTablesRoute{
+		route := template.ParamsMainRouteTablesRoute{
 			RouteTableName: name,
 			RouteTableID:   id,
 			// Requester CIDR block, we create the peering connection from the
@@ -204,4 +193,45 @@ func (r *Resource) newPublicRoutes(ctx context.Context, cr v1alpha1.AWSConfig) (
 	}
 
 	return routes, nil
+}
+
+func (r *Resource) newRecordSetsParams(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainRecordSets, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var recordSets *template.ParamsMainRecordSets
+	{
+		recordSets = &template.ParamsMainRecordSets{
+			BaseDomain:                 key.BaseDomain(cr),
+			ClusterID:                  key.ClusterID(cr),
+			GuestHostedZoneNameServers: cc.Status.TenantCluster.HostedZoneNameServers,
+			Route53Enabled:             r.route53Enabled,
+		}
+	}
+
+	return recordSets, nil
+}
+
+func (r *Resource) newRouteTablesParams(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainRouteTables, error) {
+	privateRoutes, err := r.newPrivateRoutes(ctx, cr)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	publicRoutes, err := r.newPublicRoutes(ctx, cr)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var routeTables *template.ParamsMainRouteTables
+	{
+		routeTables = &template.ParamsMainRouteTables{
+			PrivateRoutes: privateRoutes,
+			PublicRoutes:  publicRoutes,
+		}
+	}
+
+	return routeTables, nil
 }
