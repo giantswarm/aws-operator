@@ -380,6 +380,7 @@
     "ignition/v_2_2_0",
     "v_4_0_0",
     "v_4_1_0",
+    "v_4_1_1",
   ]
   pruneopts = "T"
   revision = "100d834280834beb78233661a6a6d7aeecba7749"
@@ -1520,6 +1521,7 @@
     "github.com/giantswarm/k8scloudconfig/ignition/v_2_2_0",
     "github.com/giantswarm/k8scloudconfig/v_4_0_0",
     "github.com/giantswarm/k8scloudconfig/v_4_1_0",
+    "github.com/giantswarm/k8scloudconfig/v_4_1_1",
     "github.com/giantswarm/microendpoint/endpoint/healthz",
     "github.com/giantswarm/microendpoint/endpoint/version",
     "github.com/giantswarm/microendpoint/service/version",

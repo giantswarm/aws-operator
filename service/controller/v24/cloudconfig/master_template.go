@@ -6,7 +6,7 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_1_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_1_1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
@@ -25,7 +25,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 		return "", microerror.Mask(err)
 	}
 
-	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, c.encrypter, cc.Status.Cluster.EncryptionKey, clusterKeys)
+	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, c.encrypter, cc.Status.TenantCluster.EncryptionKey, clusterKeys)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -35,7 +35,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 		be := baseExtension{
 			customObject:  customObject,
 			encrypter:     c.encrypter,
-			encryptionKey: cc.Status.Cluster.EncryptionKey,
+			encryptionKey: cc.Status.TenantCluster.EncryptionKey,
 		}
 
 		params = k8scloudconfig.DefaultParams()
