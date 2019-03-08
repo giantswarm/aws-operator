@@ -31,17 +31,18 @@ import (
 )
 
 type Config struct {
-	APIWhitelist      APIWhitelist
-	CustomObject      v1alpha1.AWSConfig
-	Clients           Clients
-	EncrypterBackend  string
-	GuestAccountID    string
-	HostAccountID     string
-	HostClients       Clients
-	InstallationName  string
-	PublicRouteTables string
-	Route53Enabled    bool
-	StackState        StackState
+	APIWhitelist        APIWhitelist
+	ControlPlaneVPCCidr string
+	CustomObject        v1alpha1.AWSConfig
+	Clients             Clients
+	EncrypterBackend    string
+	GuestAccountID      string
+	HostAccountID       string
+	HostClients         Clients
+	InstallationName    string
+	PublicRouteTables   string
+	Route53Enabled      bool
+	StackState          StackState
 }
 
 type Adapter struct {

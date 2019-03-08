@@ -28,7 +28,6 @@ type EC2ClientMock struct {
 	matchingRouteTables int
 	routeTableID        string
 	vpcID               string
-	vpcCIDR             string
 	unexistingVPC       bool
 	peeringID           string
 	elasticIPs          []string
@@ -107,23 +106,6 @@ func (e *EC2ClientMock) DescribeRouteTables(input *ec2.DescribeRouteTablesInput)
 	output := &ec2.DescribeRouteTablesOutput{
 		RouteTables: rts,
 	}
-	return output, nil
-}
-
-func (e *EC2ClientMock) DescribeVpcs(input *ec2.DescribeVpcsInput) (*ec2.DescribeVpcsOutput, error) {
-	if e.unexistingVPC {
-		return nil, fmt.Errorf("vpc not found")
-	}
-
-	output := &ec2.DescribeVpcsOutput{
-		Vpcs: []*ec2.Vpc{
-			{
-				CidrBlock: aws.String(e.vpcCIDR),
-				VpcId:     aws.String(e.vpcID),
-			},
-		},
-	}
-
 	return output, nil
 }
 

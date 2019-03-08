@@ -42,12 +42,7 @@ type GuestSecurityGroupsAdapter struct {
 }
 
 func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
-	hostClusterCIDR, err := VpcCIDR(cfg.HostClients, key.PeerID(cfg.CustomObject))
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	masterRules, err := s.getMasterRules(cfg, hostClusterCIDR)
+	masterRules, err := s.getMasterRules(cfg, cfg.ControlPlaneVPCCidr)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -58,13 +53,13 @@ func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
 	s.MasterSecurityGroupRules = masterRules
 
 	s.WorkerSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.KindWorker)
-	s.WorkerSecurityGroupRules = s.getWorkerRules(cfg.CustomObject, hostClusterCIDR)
+	s.WorkerSecurityGroupRules = s.getWorkerRules(cfg.CustomObject, cfg.ControlPlaneVPCCidr)
 
 	s.IngressSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.KindIngress)
 	s.IngressSecurityGroupRules = s.getIngressRules(cfg.CustomObject)
 
 	s.EtcdELBSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.KindEtcd)
-	s.EtcdELBSecurityGroupRules = s.getEtcdRules(cfg.CustomObject, hostClusterCIDR)
+	s.EtcdELBSecurityGroupRules = s.getEtcdRules(cfg.CustomObject, cfg.ControlPlaneVPCCidr)
 
 	return nil
 }
