@@ -14,11 +14,11 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	v22 "github.com/giantswarm/aws-operator/service/controller/v22"
+	"github.com/giantswarm/aws-operator/service/controller/v22"
 	"github.com/giantswarm/aws-operator/service/controller/v22patch1"
-	v23 "github.com/giantswarm/aws-operator/service/controller/v23"
+	"github.com/giantswarm/aws-operator/service/controller/v23"
 	"github.com/giantswarm/aws-operator/service/controller/v23patch1"
-	v24 "github.com/giantswarm/aws-operator/service/controller/v24"
+	"github.com/giantswarm/aws-operator/service/controller/v24"
 )
 
 type DrainerConfig struct {
