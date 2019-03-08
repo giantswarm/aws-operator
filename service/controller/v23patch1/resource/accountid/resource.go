@@ -48,7 +48,7 @@ func addAccountIDToContext(ctx context.Context) error {
 		return microerror.Mask(err)
 	}
 
-	cc.Status.Cluster.AWSAccount.ID = accountID
+	cc.Status.TenantCluster.AWSAccountID = accountID
 
 	return nil
 }

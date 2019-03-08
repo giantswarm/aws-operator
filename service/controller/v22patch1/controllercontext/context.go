@@ -24,7 +24,7 @@ type Context struct {
 	// Status holds the data used to communicate between controller's
 	// resources. It can be edited in place as Context is stored as
 	// a pointer within context.Context.
-	Status Status
+	Status ContextStatus
 }
 
 func NewContext(ctx context.Context, c Context) context.Context {

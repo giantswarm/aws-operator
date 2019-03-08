@@ -29,7 +29,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	cc.Status.Cluster.EncryptionKey = encryptionKey
+	cc.Status.TenantCluster.EncryptionKey = encryptionKey
 
 	return nil
 }

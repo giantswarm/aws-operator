@@ -74,11 +74,9 @@ func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
 
 func testContextWithAccountID(id string) controllercontext.Context {
 	return controllercontext.Context{
-		Status: controllercontext.Status{
-			Cluster: controllercontext.Cluster{
-				AWSAccount: controllercontext.ClusterAWSAccount{
-					ID: id,
-				},
+		Status: controllercontext.ContextStatus{
+			TenantCluster: controllercontext.ContextStatusTenantCluster{
+				AWSAccountID: id,
 			},
 		},
 	}

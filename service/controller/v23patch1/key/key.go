@@ -64,6 +64,7 @@ const (
 	MasterInstanceTypeKey         = "MasterInstanceType"
 	MasterInstanceMonitoring      = "Monitoring"
 	MasterCloudConfigVersionKey   = "MasterCloudConfigVersion"
+	VPCPeeringConnectionIDKey     = "VPCPeeringConnectionID"
 	WorkerASGKey                  = "WorkerASGName"
 	WorkerCountKey                = "WorkerCount"
 	WorkerMaxKey                  = "WorkerMax"

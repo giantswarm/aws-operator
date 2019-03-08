@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	Name = "stackoutputv24"
+	Name = "stackoutputv23patch1"
 )
 
 type Config struct {

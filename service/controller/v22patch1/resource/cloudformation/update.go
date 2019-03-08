@@ -261,11 +261,11 @@ func (r *Resource) shouldScale(ctx context.Context, customObject v1alpha1.AWSCon
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to worker cloudconfig version")
 		return false, nil
 	}
-	if !cc.Status.Cluster.ASG.IsEmpty() && cc.Status.Cluster.ASG.MaxSize != key.ScalingMax(customObject) {
+	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MaxSize != key.ScalingMax(customObject) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "scaling due to scaling.max")
 		return true, nil
 	}
-	if !cc.Status.Cluster.ASG.IsEmpty() && cc.Status.Cluster.ASG.MinSize != key.ScalingMin(customObject) {
+	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MinSize != key.ScalingMin(customObject) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "scaling due to scaling.min")
 		return true, nil
 	}
