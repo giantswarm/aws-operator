@@ -55,7 +55,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		cc.Status.Cluster.HostedZoneNameServers = v
+		cc.Status.TenantCluster.HostedZoneNameServers = v
 	}
 
 	{
@@ -71,11 +71,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			if err != nil {
 				return microerror.Mask(err)
 			}
-			cc.Status.Cluster.VPCPeeringConnectionID = v
+			cc.Status.TenantCluster.VPCPeeringConnectionID = v
 		} else if err != nil {
 			return microerror.Mask(err)
 		} else {
-			cc.Status.Cluster.VPCPeeringConnectionID = v
+			cc.Status.TenantCluster.VPCPeeringConnectionID = v
 		}
 	}
 
@@ -84,7 +84,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		cc.Status.Drainer.WorkerASGName = v
+		cc.Status.TenantCluster.TCCP.ASG.Name = v
 	}
 
 	return nil
