@@ -1,6 +1,6 @@
-package cpf
+package template
 
-const RecordSets = `
+const TemplateMainRecordSets = `
 {{ define "record_sets" }}
 {{ $v := .RecordSets }}
 {{ if $v.Route53Enabled }}

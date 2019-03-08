@@ -1,6 +1,6 @@
-package cpf
+package template
 
-const RouteTables = `
+const TemplateMainRouteTables = `
 {{ define "route_tables" }}
   {{ range $i, $r := .RouteTables.PrivateRoutes }}
   PrivateRoute{{$i}}:

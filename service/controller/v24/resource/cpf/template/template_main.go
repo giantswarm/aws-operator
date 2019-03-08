@@ -1,6 +1,6 @@
-package cpf
+package template
 
-const Main = `
+const TemplateMain = `
 {{define "main"}}
 AWSTemplateFormatVersion: 2010-09-09
 Description: Control Plane Finalizer Cloud Formation Stack.
