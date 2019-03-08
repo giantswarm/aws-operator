@@ -10,7 +10,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
-	awsservice "github.com/giantswarm/aws-operator/service/aws"
+	"github.com/giantswarm/aws-operator/service/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/v24/credential"
 )
 
@@ -163,20 +163,22 @@ func (h *helper) GetAWSClients() ([]clientaws.Clients, error) {
 
 // AWSAccountID return the AWS account ID.
 func (h *helper) AWSAccountID(awsClients clientaws.Clients) (string, error) {
-	config := awsservice.Config{
-		Clients: awsservice.Clients{
-			KMS: awsClients.KMS,
-			STS: awsClients.STS,
-		},
-		Logger: h.logger,
+	var err error
+
+	var accountIDService *accountid.AccountID
+	{
+		c := accountid.Config{
+			Logger: h.logger,
+			STS:    awsClients.STS,
+		}
+
+		accountIDService, err = accountid.New(c)
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
 	}
 
-	awsService, err := awsservice.New(config)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	accountID, err := awsService.GetAccountID()
+	accountID, err := accountIDService.Lookup()
 	if err != nil {
 		return "", microerror.Mask(err)
 	}

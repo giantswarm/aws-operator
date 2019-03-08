@@ -20,7 +20,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v24/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v24/cloudconfig"
 	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v24/cloudformation"
@@ -635,17 +634,14 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			}
 		}
 
-		var awsService *awsservice.Service
+		var accountIDService *accountid.Service
 		{
-			c := awsservice.Config{
-				Clients: awsservice.Clients{
-					KMS: awsClient.KMS,
-					STS: awsClient.STS,
-				},
+			c := accountid.Config{
 				Logger: config.Logger,
+				STS:    awsClient.STS,
 			}
 
-			awsService, err = awsservice.New(c)
+			accountIDService, err = accountid.New(c)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
@@ -677,9 +673,12 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 		c := controllercontext.Context{
 			AWSClient:      awsClient,
-			AWSService:     awsService,
 			CloudFormation: *cloudFormationService,
 			EBSService:     ebsService,
+
+			Service: controllercontext.ContextService{
+				AccountID: accountIDService,
+			},
 		}
 		ctx = controllercontext.NewContext(ctx, c)
 
