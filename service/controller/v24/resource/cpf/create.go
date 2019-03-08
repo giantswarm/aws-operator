@@ -26,7 +26,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		if cc.Status.Cluster.VPCPeeringConnectionID == "" {
+		if cc.Status.TenantCluster.VPCPeeringConnectionID == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the VPC Peering Connection ID in the controller context")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			resourcecanceledcontext.SetCanceled(ctx)
@@ -150,7 +150,7 @@ func (r *Resource) newPrivateRoutes(ctx context.Context, cr v1alpha1.AWSConfig) 
 				CidrBlock: cidrBlock,
 				// The peer connection id is fetched from the cloud formation stack
 				// outputs in the stackoutput resource.
-				PeerConnectionID: cc.Status.Cluster.VPCPeeringConnectionID,
+				PeerConnectionID: cc.Status.TenantCluster.VPCPeeringConnectionID,
 			}
 
 			routes = append(routes, route)
@@ -186,7 +186,7 @@ func (r *Resource) newPublicRoutes(ctx context.Context, cr v1alpha1.AWSConfig) (
 			CidrBlock: key.StatusNetworkCIDR(cr),
 			// The peer connection id is fetched from the cloud formation stack
 			// outputs in the stackoutput resource.
-			PeerConnectionID: cc.Status.Cluster.VPCPeeringConnectionID,
+			PeerConnectionID: cc.Status.TenantCluster.VPCPeeringConnectionID,
 		}
 
 		routes = append(routes, route)
@@ -206,7 +206,7 @@ func (r *Resource) newRecordSetsParams(ctx context.Context, cr v1alpha1.AWSConfi
 		recordSets = &template.ParamsMainRecordSets{
 			BaseDomain:                 key.BaseDomain(cr),
 			ClusterID:                  key.ClusterID(cr),
-			GuestHostedZoneNameServers: cc.Status.Cluster.HostedZoneNameServers,
+			GuestHostedZoneNameServers: cc.Status.TenantCluster.HostedZoneNameServers,
 			Route53Enabled:             r.route53Enabled,
 		}
 	}

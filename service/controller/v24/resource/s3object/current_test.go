@@ -75,11 +75,9 @@ func Test_CurrentState(t *testing.T) {
 
 			c := controllercontext.Context{
 				AWSClient: awsClients,
-				Status: controllercontext.Status{
-					Cluster: controllercontext.Cluster{
-						AWSAccount: controllercontext.ClusterAWSAccount{
-							ID: "myaccountid",
-						},
+				Status: controllercontext.ContextStatus{
+					TenantCluster: controllercontext.ContextStatusTenantCluster{
+						AWSAccountID: "myaccountid",
 					},
 				},
 			}
