@@ -44,20 +44,20 @@ func (r *Resource) addAccountIDToContext(ctx context.Context) error {
 		return microerror.Mask(err)
 	}
 
-	var s *accountid.AccountID
+	var accountIDService *accountid.AccountID
 	{
 		c := accountid.Config{
 			Logger: r.logger,
 			STS:    cc.AWSClient.STS,
 		}
 
-		s, err = accountid.New(c)
+		accountIDService, err = accountid.New(c)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 	}
 
-	accountID, err := s.Lookup()
+	accountID, err := accountIDService.Lookup()
 	if err != nil {
 		return microerror.Mask(err)
 	}
