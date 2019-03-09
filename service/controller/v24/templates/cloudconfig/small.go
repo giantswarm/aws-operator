@@ -29,8 +29,7 @@ const Small = `{
           "wipeFilesystem": true,
           "label": "docker",
           "format": "xfs"
-        },
-        "path": "/var/lib/docker"
+        }
       }
     ]
   }
