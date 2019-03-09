@@ -280,16 +280,6 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Enabled:      true,
 		},
 		{
-			AssetContent: cloudconfig.MasterFormatVarLibDockerService,
-			Name:         "format-var-lib-docker.service",
-			Enabled:      true,
-		},
-		{
-			AssetContent: cloudconfig.EphemeralVarLibDockerMount,
-			Name:         "var-lib-docker.mount",
-			Enabled:      true,
-		},
-		{
 			AssetContent: cloudconfig.DecryptKeysAssetsService,
 			Name:         "decrypt-keys-assets.service",
 			Enabled:      true,

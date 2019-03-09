@@ -10,6 +10,29 @@ const Small = `{
         }
       ]
     }
+  },
+  "storage": {
+    "disks": [
+      {
+        "device": "/dev/nvme1n1",
+        "partitions": [
+          {
+            "label": "docker"
+          }
+        ]
+      }
+    ],
+    "filesystems": [
+      {
+        "mount": {
+          "device": "/dev/disk/by-label/docker",
+          "wipeFilesystem": true,
+          "label": "docker",
+          "format": "xfs"
+        },
+        "path": "/var/lib/docker"
+      }
+    ]
   }
 }
 `
