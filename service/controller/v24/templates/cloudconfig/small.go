@@ -12,20 +12,10 @@ const Small = `{
     }
   },
   "storage": {
-    "disks": [
-      {
-        "device": "/dev/xvdc",
-        "partitions": [
-          {
-            "label": "docker"
-          }
-        ]
-      }
-    ],
     "filesystems": [
       {
         "mount": {
-          "device": "/dev/disk/by-label/docker",
+          "device": "{{if eq .InstanceRole "master"}}/dev/xvdc{{else}}/dev/xvdh{{end}}",
           "wipeFilesystem": true,
           "label": "docker",
           "format": "xfs"
