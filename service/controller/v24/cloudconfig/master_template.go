@@ -289,22 +289,10 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Name:         "var-lib-docker.mount",
 			Enabled:      true,
 		},
-		// Format etcd EBS volume.
-		{
-			AssetContent: cloudconfig.FormatEtcdVolume,
-			Name:         "format-etcd-ebs.service",
-			Enabled:      true,
-		},
 		// Mount etcd EBS volume.
 		{
 			AssetContent: cloudconfig.MountEtcdVolume,
 			Name:         "var-lib-etcd.mount",
-			Enabled:      true,
-		},
-		// Format log EBS volume.
-		{
-			AssetContent: cloudconfig.FormatVarLogService,
-			Name:         "format-var-log.service",
 			Enabled:      true,
 		},
 		// Mount log EBS volume.
