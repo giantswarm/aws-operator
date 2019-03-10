@@ -14,7 +14,7 @@ const Small = `{
   "storage": {
     "disks": [
       {
-        "device": "/dev/nvme1n1",
+        "device": "/dev/xvdc",
         "partitions": [
           {
             "label": "docker"
