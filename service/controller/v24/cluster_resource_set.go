@@ -24,7 +24,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v24/credential"
-	"github.com/giantswarm/aws-operator/service/controller/v24/ebs"
 	"github.com/giantswarm/aws-operator/service/controller/v24/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v24/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/controller/v24/encrypter/vault"
@@ -647,18 +646,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			}
 		}
 
-		var ebsService ebs.Interface
-		{
-			c := ebs.Config{
-				Client: tenantClusterAWSClients.EC2,
-				Logger: config.Logger,
-			}
-			ebsService, err = ebs.New(c)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-		}
-
 		c := controllercontext.Context{
 			Client: controllercontext.ContextClient{
 				ControlPlane: controllercontext.ContextClientControlPlane{
@@ -668,8 +655,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 					AWS: tenantClusterAWSClients,
 				},
 			},
-
-			EBSService: ebsService,
 		}
 		ctx = controllercontext.NewContext(ctx, c)
 

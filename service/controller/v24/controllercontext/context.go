@@ -4,8 +4,6 @@ import (
 	"context"
 
 	"github.com/giantswarm/microerror"
-
-	"github.com/giantswarm/aws-operator/service/controller/v24/ebs"
 )
 
 type contextKey string
@@ -13,8 +11,6 @@ type contextKey string
 const controllerKey contextKey = "controller"
 
 type Context struct {
-	EBSService ebs.Interface
-
 	// Client holds the client implementations used for several tenant cluster
 	// specific actions.
 	Client ContextClient
