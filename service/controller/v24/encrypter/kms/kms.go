@@ -83,7 +83,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 			AliasName: aws.String(keyAlias(customObject)),
 		}
 
-		_, err = cc.AWSClient.KMS.DeleteAlias(in)
+		_, err = cc.Client.TenantCluster.AWS.KMS.DeleteAlias(in)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -107,7 +107,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 			Tags: awstags.NewKMS(tags),
 		}
 
-		out, err := cc.AWSClient.KMS.CreateKey(in)
+		out, err := cc.Client.TenantCluster.AWS.KMS.CreateKey(in)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -128,7 +128,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 			KeyId: keyID,
 		}
 
-		_, err = cc.AWSClient.KMS.EnableKeyRotation(in)
+		_, err = cc.Client.TenantCluster.AWS.KMS.EnableKeyRotation(in)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -144,7 +144,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 			TargetKeyId: keyID,
 		}
 
-		_, err = cc.AWSClient.KMS.CreateAlias(in)
+		_, err = cc.Client.TenantCluster.AWS.KMS.CreateAlias(in)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -203,7 +203,7 @@ func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, customObject
 			PendingWindowInDays: pendingWindowInDays,
 		}
 
-		_, err = cc.AWSClient.KMS.ScheduleKeyDeletion(in)
+		_, err = cc.Client.TenantCluster.AWS.KMS.ScheduleKeyDeletion(in)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -239,7 +239,7 @@ func (k *Encrypter) Encrypt(ctx context.Context, key, plaintext string) (string,
 		Plaintext: []byte(plaintext),
 	}
 
-	encryptOutput, err := cc.AWSClient.KMS.Encrypt(encryptInput)
+	encryptOutput, err := cc.Client.TenantCluster.AWS.KMS.Encrypt(encryptInput)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -261,7 +261,7 @@ func (k *Encrypter) describeKey(ctx context.Context, customObject v1alpha1.AWSCo
 		KeyId: aws.String(keyAlias(customObject)),
 	}
 
-	out, err := cc.AWSClient.KMS.DescribeKey(input)
+	out, err := cc.Client.TenantCluster.AWS.KMS.DescribeKey(input)
 	if IsKeyNotFound(err) {
 		return nil, microerror.Mask(keyNotFoundError)
 	} else if err != nil {

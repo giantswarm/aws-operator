@@ -51,7 +51,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 					i := &s3.ListObjectsV2Input{
 						Bucket: aws.String(bucketName),
 					}
-					o, err := cc.AWSClient.S3.ListObjectsV2(i)
+					o, err := cc.Client.TenantCluster.AWS.S3.ListObjectsV2(i)
 					if err != nil {
 						return microerror.Mask(err)
 					}
@@ -77,7 +77,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 							Quiet:   aws.Bool(true),
 						},
 					}
-					_, err := cc.AWSClient.S3.DeleteObjects(i)
+					_, err := cc.Client.TenantCluster.AWS.S3.DeleteObjects(i)
 					if err != nil {
 						return microerror.Mask(err)
 					}
@@ -110,7 +110,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 				i := &s3.DeleteBucketInput{
 					Bucket: aws.String(bucketName),
 				}
-				_, err = cc.AWSClient.S3.DeleteBucket(i)
+				_, err = cc.Client.TenantCluster.AWS.S3.DeleteBucket(i)
 				if err != nil {
 					return microerror.Mask(err)
 				}

@@ -34,7 +34,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		}
 
 		for _, lbName := range lbState.LoadBalancerNames {
-			_, err := cc.AWSClient.ELB.DeleteLoadBalancer(&elb.DeleteLoadBalancerInput{
+			_, err := cc.Client.TenantCluster.AWS.ELB.DeleteLoadBalancer(&elb.DeleteLoadBalancerInput{
 				LoadBalancerName: aws.String(lbName),
 			})
 			if err != nil {

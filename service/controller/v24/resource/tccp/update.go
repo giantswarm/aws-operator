@@ -73,7 +73,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 
 		// Once the etcd volume is cleaned up and the master instance is down we can
 		// go ahead to let CloudFormation do its job.
-		_, err = cc.AWSClient.CloudFormation.UpdateStack(&stackStateToUpdate.UpdateStackInput)
+		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateStack(&stackStateToUpdate.UpdateStackInput)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -343,7 +343,7 @@ func (r *Resource) terminateOldMasterInstance(ctx context.Context, obj interface
 			},
 		}
 
-		result, err = cc.AWSClient.EC2.DescribeInstances(i)
+		result, err = cc.Client.TenantCluster.AWS.EC2.DescribeInstances(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -379,7 +379,7 @@ func (r *Resource) terminateOldMasterInstance(ctx context.Context, obj interface
 				aws.String(instanceID),
 			},
 		}
-		_, err := cc.AWSClient.EC2.TerminateInstances(i)
+		_, err := cc.Client.TenantCluster.AWS.EC2.TerminateInstances(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}

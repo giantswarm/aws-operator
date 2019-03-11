@@ -40,7 +40,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			}
 		}
 
-		_, err = cc.AWSClient.CloudFormation.CreateStack(&stackInput)
+		_, err = cc.Client.TenantCluster.AWS.CloudFormation.CreateStack(&stackInput)
 		if IsAlreadyExists(err) {
 			// fall through
 		} else if err != nil {
@@ -50,7 +50,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 		defer cancel()
 
-		err = cc.AWSClient.CloudFormation.WaitUntilStackCreateCompleteWithContext(ctx, &cloudformation.DescribeStacksInput{
+		err = cc.Client.TenantCluster.AWS.CloudFormation.WaitUntilStackCreateCompleteWithContext(ctx, &cloudformation.DescribeStacksInput{
 			StackName: stackInput.StackName,
 		})
 		if ctx.Err() == context.DeadlineExceeded {

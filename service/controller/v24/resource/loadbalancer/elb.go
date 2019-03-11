@@ -27,7 +27,7 @@ func (r *Resource) clusterLoadBalancers(ctx context.Context, customObject v1alph
 	}
 
 	// We get all load balancers because the API does not allow tag filters.
-	output, err := cc.AWSClient.ELB.DescribeLoadBalancers(&elb.DescribeLoadBalancersInput{})
+	output, err := cc.Client.TenantCluster.AWS.ELB.DescribeLoadBalancers(&elb.DescribeLoadBalancersInput{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -43,7 +43,7 @@ func (r *Resource) clusterLoadBalancers(ctx context.Context, customObject v1alph
 		tagsInput := &elb.DescribeTagsInput{
 			LoadBalancerNames: lbNames,
 		}
-		tagsOutput, err := cc.AWSClient.ELB.DescribeTags(tagsInput)
+		tagsOutput, err := cc.Client.TenantCluster.AWS.ELB.DescribeTags(tagsInput)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

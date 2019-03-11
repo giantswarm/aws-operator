@@ -19,8 +19,8 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 	}
 
 	adapterClients := adapter.Clients{
-		IAM: cc.AWSClient.IAM,
-		KMS: cc.AWSClient.KMS,
+		IAM: cc.Client.TenantCluster.AWS.IAM,
+		KMS: cc.Client.TenantCluster.AWS.KMS,
 	}
 
 	cfg := adapter.Config{

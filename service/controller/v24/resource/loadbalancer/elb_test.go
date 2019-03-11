@@ -210,7 +210,14 @@ func Test_clusterLoadBalancers(t *testing.T) {
 				},
 			}
 			ctx := context.TODO()
-			ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
+			cc := controllercontext.Context{
+				Client: controllercontext.ContextClient{
+					TenantCluster: controllercontext.ContextClientTenantCluster{
+						AWS: awsClients,
+					},
+				},
+			}
+			ctx = controllercontext.NewContext(ctx, cc)
 
 			result, err := newResource.clusterLoadBalancers(ctx, tc.obj)
 			if err != nil {

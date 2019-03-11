@@ -67,7 +67,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			//
 			//     https://github.com/giantswarm/giantswarm/issues/5496
 			//
-			v, err := searchPeeringConnectionID(cc.AWSClient.EC2, key.ClusterID(cr))
+			v, err := searchPeeringConnectionID(cc.Client.TenantCluster.AWS.EC2, key.ClusterID(cr))
 			if err != nil {
 				return microerror.Mask(err)
 			}
