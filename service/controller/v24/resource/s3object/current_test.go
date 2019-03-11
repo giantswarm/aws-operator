@@ -73,8 +73,12 @@ func Test_CurrentState(t *testing.T) {
 				}
 			}
 
-			c := controllercontext.Context{
-				AWSClient: awsClients,
+			cc := controllercontext.Context{
+				Client: controllercontext.ContextClient{
+					TenantCluster: controllercontext.ContextClientTenantCluster{
+						AWS: awsClients,
+					},
+				},
 				Status: controllercontext.ContextStatus{
 					TenantCluster: controllercontext.ContextStatusTenantCluster{
 						AWSAccountID: "myaccountid",
@@ -82,7 +86,7 @@ func Test_CurrentState(t *testing.T) {
 				},
 			}
 			ctx := context.TODO()
-			ctx = controllercontext.NewContext(ctx, c)
+			ctx = controllercontext.NewContext(ctx, cc)
 
 			result, err := newResource.GetCurrentState(ctx, tc.obj)
 			if err != nil && !tc.expectedS3Error {

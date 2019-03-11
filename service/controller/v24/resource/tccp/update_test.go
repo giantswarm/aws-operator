@@ -407,7 +407,7 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesAllowed(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			cc := testContextWithASG()
-			cc.AWSClient = awsClients
+			cc.Client.TenantCluster.AWS = awsClients
 
 			ctx := updateallowedcontext.NewContext(context.Background(), make(chan struct{}))
 			updateallowedcontext.SetUpdateAllowed(ctx)
@@ -848,7 +848,14 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			ctx := context.TODO()
-			ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
+			cc := controllercontext.Context{
+				Client: controllercontext.ContextClient{
+					TenantCluster: controllercontext.ContextClientTenantCluster{
+						AWS: awsClients,
+					},
+				},
+			}
+			ctx = controllercontext.NewContext(ctx, cc)
 
 			result, err := newResource.newUpdateChange(ctx, customObject, tc.currentState, tc.desiredState)
 			if err != nil {
