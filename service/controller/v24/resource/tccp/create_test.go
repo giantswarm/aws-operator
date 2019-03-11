@@ -97,10 +97,8 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 		c := Config{}
 
 		c.HostClients = &adapter.Clients{
-			EC2:            &adapter.EC2ClientMock{},
-			CloudFormation: &adapter.CloudFormationMock{},
-			IAM:            &adapter.IAMClientMock{},
-			STS:            &adapter.STSClientMock{},
+			EC2: &adapter.EC2ClientMock{},
+			IAM: &adapter.IAMClientMock{},
 		}
 		c.Logger = microloggertest.New()
 		c.EncrypterBackend = "kms"
@@ -118,7 +116,6 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 		EC2: &adapter.EC2ClientMock{},
 		IAM: &adapter.IAMClientMock{},
 		KMS: &adapter.KMSClientMock{},
-		STS: &adapter.STSClientMock{},
 	}
 
 	for _, tc := range testCases {

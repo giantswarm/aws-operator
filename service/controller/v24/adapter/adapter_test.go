@@ -140,21 +140,18 @@ func TestAdapterGuestMain(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			config := Config{
-				CustomObject: tc.customObject,
+				ControlPlaneAccountID: "myHostAccountID",
+				CustomObject:          tc.customObject,
 				Clients: Clients{
 					EC2: &EC2ClientMock{},
 					IAM: &IAMClientMock{},
 					KMS: &KMSClientMock{},
-					ELB: &ELBClientMock{},
-					STS: &STSClientMock{},
 				},
 				HostClients: Clients{
 					EC2: &EC2ClientMock{},
 					IAM: &IAMClientMock{},
-					STS: &STSClientMock{},
 				},
 				InstallationName: "myinstallation",
-				HostAccountID:    "myHostAccountID",
 				StackState: StackState{
 					MasterImageID: "master-image-id",
 					WorkerImageID: "worker-image-id",

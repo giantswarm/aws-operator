@@ -58,12 +58,8 @@ func (l *GuestLaunchConfigAdapter) Adapt(config Config) error {
 	l.WorkerInstanceMonitoring = config.StackState.WorkerInstanceMonitoring
 
 	// small cloud config field.
-	accountID, err := AccountID(config.Clients)
-	if err != nil {
-		return microerror.Mask(err)
-	}
 	c := SmallCloudconfigConfig{
-		S3URL: key.SmallCloudConfigS3URL(config.CustomObject, accountID, key.KindWorker),
+		S3URL: key.SmallCloudConfigS3URL(config.CustomObject, config.TenantClusterAccountID, key.KindWorker),
 	}
 	rendered, err := templates.Render(key.CloudConfigSmallTemplates(), c)
 	if err != nil {

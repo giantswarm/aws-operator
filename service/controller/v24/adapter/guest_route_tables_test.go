@@ -65,7 +65,6 @@ func TestAdapterRouteTablesRegularFields(t *testing.T) {
 	for _, tc := range testCases {
 		hostClients := Clients{
 			EC2: &EC2ClientMock{},
-			STS: &STSClientMock{},
 		}
 
 		a := Adapter{}

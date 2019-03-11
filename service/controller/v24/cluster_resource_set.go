@@ -212,6 +212,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	{
 		c := accountid.Config{
 			Logger: config.Logger,
+			STS:    config.HostAWSClients.STS,
 		}
 
 		accountIDResource, err = accountid.New(c)
@@ -369,10 +370,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			EncrypterRoleManager: encrypterRoleManager,
 			G8sClient:            config.G8sClient,
 			HostClients: &adapter.Clients{
-				EC2:            config.HostAWSClients.EC2,
-				IAM:            config.HostAWSClients.IAM,
-				STS:            config.HostAWSClients.STS,
-				CloudFormation: config.HostAWSClients.CloudFormation,
+				EC2: config.HostAWSClients.EC2,
+				IAM: config.HostAWSClients.IAM,
 			},
 			Logger: config.Logger,
 

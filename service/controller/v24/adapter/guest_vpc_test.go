@@ -52,13 +52,12 @@ func TestAdapterVPCRegularFields(t *testing.T) {
 		a := Adapter{}
 		t.Run(tc.description, func(t *testing.T) {
 			cfg := Config{
-				CustomObject:     customObject,
-				Clients:          Clients{},
-				InstallationName: installationName,
-				HostAccountID:    hostAccountID,
+				ControlPlaneAccountID: hostAccountID,
+				CustomObject:          customObject,
+				Clients:               Clients{},
+				InstallationName:      installationName,
 				HostClients: Clients{
 					IAM: &IAMClientMock{},
-					STS: &STSClientMock{},
 				},
 			}
 			err := a.Guest.VPC.Adapt(cfg)
@@ -112,7 +111,6 @@ func TestAdapterVPCPeerRoleField(t *testing.T) {
 				CustomObject: customObject,
 				HostClients: Clients{
 					IAM: &IAMClientMock{peerRoleArn: peerRoleArn},
-					STS: &STSClientMock{},
 				},
 			}
 			err := a.Guest.VPC.Adapt(cfg)
