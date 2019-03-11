@@ -17,25 +17,19 @@ const (
 )
 
 type Config struct {
-	EC2    EC2
 	Logger micrologger.Logger
 }
 
 type Resource struct {
-	ec2    EC2
 	logger micrologger.Logger
 }
 
 func New(config Config) (*Resource, error) {
-	if config.EC2 == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.EC2 must not be empty", config)
-	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
 	r := &Resource{
-		ec2:    config.EC2,
 		logger: config.Logger,
 	}
 
@@ -55,7 +49,7 @@ func (r *Resource) addVPCCIDRToContext(ctx context.Context, cr v1alpha1.AWSConfi
 	var vpcCIDRService *vpccidr.VPCCIDR
 	{
 		c := vpccidr.Config{
-			EC2:    r.ec2,
+			EC2:    cc.Client.ControlPlane.AWS.EC2,
 			Logger: r.logger,
 		}
 
