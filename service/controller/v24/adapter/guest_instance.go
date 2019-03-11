@@ -76,12 +76,8 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 		i.Master.AZ = zones[0].Name
 		i.Master.PrivateSubnet = key.PrivateSubnetName(0)
 
-		accountID, err := AccountID(config.Clients)
-		if err != nil {
-			return microerror.Mask(err)
-		}
 		c := SmallCloudconfigConfig{
-			S3URL: key.SmallCloudConfigS3URL(config.CustomObject, accountID, key.KindMaster),
+			S3URL: key.SmallCloudConfigS3URL(config.CustomObject, config.TenantClusterAccountID, key.KindMaster),
 		}
 		rendered, err := templates.Render(key.CloudConfigSmallTemplates(), c)
 		if err != nil {

@@ -1,16 +1,9 @@
 package adapter
 
 import (
-	"context"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/request"
-	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/kms"
-	"github.com/aws/aws-sdk-go/service/sts"
 )
 
 const (
@@ -63,15 +56,10 @@ type APIWhitelist struct {
 }
 
 type Clients struct {
-	CloudFormation CFClient
-	EC2            EC2Client
-	IAM            IAMClient
-	KMS            KMSClient
-	ELB            ELBClient
-	STS            STSClient
+	EC2 EC2Client
+	IAM IAMClient
+	KMS KMSClient
 }
-
-type ContextHydrater func(ctx context.Context, config Config) error
 
 type Hydrater func(config Config) error
 
@@ -110,18 +98,6 @@ type StackState struct {
 	VersionBundleVersion string
 }
 
-// CFClient describes the methods required to be implemented by a CloudFormation
-// AWS client.
-type CFClient interface {
-	CreateStack(*awscloudformation.CreateStackInput) (*awscloudformation.CreateStackOutput, error)
-	DeleteStack(*awscloudformation.DeleteStackInput) (*awscloudformation.DeleteStackOutput, error)
-	DescribeStacks(*awscloudformation.DescribeStacksInput) (*awscloudformation.DescribeStacksOutput, error)
-	UpdateStack(*awscloudformation.UpdateStackInput) (*awscloudformation.UpdateStackOutput, error)
-	UpdateTerminationProtection(*awscloudformation.UpdateTerminationProtectionInput) (*awscloudformation.UpdateTerminationProtectionOutput, error)
-	WaitUntilStackCreateComplete(*awscloudformation.DescribeStacksInput) error
-	WaitUntilStackCreateCompleteWithContext(ctx aws.Context, input *awscloudformation.DescribeStacksInput, opts ...request.WaiterOption) error
-}
-
 // EC2Client describes the methods required to be implemented by a EC2 AWS
 // client.
 type EC2Client interface {
@@ -150,16 +126,4 @@ type KMSClient interface {
 // the small cloudconfig template.
 type SmallCloudconfigConfig struct {
 	S3URL string
-}
-
-// ELBClient describes the methods required to be implemented by a ELB AWS
-// client.
-type ELBClient interface {
-	DescribeLoadBalancers(*elb.DescribeLoadBalancersInput) (*elb.DescribeLoadBalancersOutput, error)
-}
-
-// STSClient describes the methods required to be implemented by a STS AWS
-// client.
-type STSClient interface {
-	GetCallerIdentity(*sts.GetCallerIdentityInput) (*sts.GetCallerIdentityOutput, error)
 }

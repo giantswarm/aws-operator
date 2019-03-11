@@ -47,6 +47,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/service"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/stackoutput"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/tccp"
+	"github.com/giantswarm/aws-operator/service/controller/v24/resource/vpccidr"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/workerasgname"
 	"github.com/giantswarm/aws-operator/service/routetable"
 )
@@ -211,6 +212,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	{
 		c := accountid.Config{
 			Logger: config.Logger,
+			STS:    config.HostAWSClients.STS,
 		}
 
 		accountIDResource, err = accountid.New(c)
@@ -368,10 +370,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			EncrypterRoleManager: encrypterRoleManager,
 			G8sClient:            config.G8sClient,
 			HostClients: &adapter.Clients{
-				EC2:            config.HostAWSClients.EC2,
-				IAM:            config.HostAWSClients.IAM,
-				STS:            config.HostAWSClients.STS,
-				CloudFormation: config.HostAWSClients.CloudFormation,
+				EC2: config.HostAWSClients.EC2,
+				IAM: config.HostAWSClients.IAM,
 			},
 			Logger: config.Logger,
 
@@ -546,6 +546,19 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var vpcCIDRResource controller.Resource
+	{
+		c := vpccidr.Config{
+			EC2:    config.HostAWSClients.EC2,
+			Logger: config.Logger,
+		}
+
+		vpcCIDRResource, err = vpccidr.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var workerASGNameResource controller.Resource
 	{
 		c := workerasgname.ResourceConfig{
@@ -561,6 +574,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 	resources := []controller.Resource{
 		accountIDResource,
+		vpcCIDRResource,
 		stackOutputResource,
 		workerASGNameResource,
 		asgStatusResource,

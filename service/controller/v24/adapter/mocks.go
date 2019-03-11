@@ -14,8 +14,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/iam/iamiface"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/aws/aws-sdk-go/service/kms/kmsiface"
-	"github.com/aws/aws-sdk-go/service/sts"
-	"github.com/aws/aws-sdk-go/service/sts/stsiface"
 )
 
 type EC2ClientMock struct {
@@ -28,7 +26,6 @@ type EC2ClientMock struct {
 	matchingRouteTables int
 	routeTableID        string
 	vpcID               string
-	vpcCIDR             string
 	unexistingVPC       bool
 	peeringID           string
 	elasticIPs          []string
@@ -107,23 +104,6 @@ func (e *EC2ClientMock) DescribeRouteTables(input *ec2.DescribeRouteTablesInput)
 	output := &ec2.DescribeRouteTablesOutput{
 		RouteTables: rts,
 	}
-	return output, nil
-}
-
-func (e *EC2ClientMock) DescribeVpcs(input *ec2.DescribeVpcsInput) (*ec2.DescribeVpcsOutput, error) {
-	if e.unexistingVPC {
-		return nil, fmt.Errorf("vpc not found")
-	}
-
-	output := &ec2.DescribeVpcsOutput{
-		Vpcs: []*ec2.Vpc{
-			{
-				CidrBlock: aws.String(e.vpcCIDR),
-				VpcId:     aws.String(e.vpcID),
-			},
-		},
-	}
-
 	return output, nil
 }
 
@@ -239,30 +219,4 @@ func (c *CloudFormationMock) WaitUntilStackCreateComplete(*awscloudformation.Des
 }
 func (c *CloudFormationMock) WaitUntilStackCreateCompleteWithContext(ctx aws.Context, input *awscloudformation.DescribeStacksInput, opts ...request.WaiterOption) error {
 	return nil
-}
-
-type STSClientMock struct {
-	stsiface.STSAPI
-
-	accountID string
-	isError   bool
-}
-
-func (i *STSClientMock) GetCallerIdentity(input *sts.GetCallerIdentityInput) (*sts.GetCallerIdentityOutput, error) {
-	if i.isError {
-		return nil, fmt.Errorf("error")
-	}
-	if i.accountID == "" {
-		i.accountID = "00"
-	}
-	// pad accountID to required length
-	toPad := accountIDLength - len(i.accountID)
-	for j := 0; j < toPad; j++ {
-		i.accountID += "0"
-	}
-	output := &sts.GetCallerIdentityOutput{
-		Arn: aws.String("::::" + i.accountID),
-	}
-
-	return output, nil
 }
