@@ -186,7 +186,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	{
 		c := accountid.Config{
 			Logger: config.Logger,
-			STS:    config.ControlPlaneAWSClients.STS,
 		}
 
 		accountIDResource, err = accountid.New(c)
