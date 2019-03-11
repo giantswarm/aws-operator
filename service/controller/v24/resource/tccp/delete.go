@@ -93,7 +93,7 @@ func (r *Resource) disableMasterTerminationProtection(ctx context.Context, maste
 			},
 		},
 	}
-	o, err := cc.AWSClient.EC2.DescribeInstances(i)
+	o, err := cc.Client.TenantCluster.AWS.EC2.DescribeInstances(i)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -116,7 +116,7 @@ func (r *Resource) disableMasterTerminationProtection(ctx context.Context, maste
 				InstanceId: aws.String(*instance.InstanceId),
 			}
 
-			_, err = cc.AWSClient.EC2.ModifyInstanceAttribute(i)
+			_, err = cc.Client.TenantCluster.AWS.EC2.ModifyInstanceAttribute(i)
 			if err != nil {
 				return microerror.Mask(err)
 			}
