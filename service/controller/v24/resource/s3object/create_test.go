@@ -11,7 +11,6 @@ import (
 	"github.com/giantswarm/randomkeys/randomkeystest"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
 )
 
@@ -153,8 +152,6 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 	}
 	cloudConfig := &CloudConfigMock{}
 
-	awsService := awsservice.AwsServiceMock{}
-
 	var err error
 	var newResource *Resource
 	{
@@ -174,8 +171,7 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			c := controllercontext.Context{
-				AWSClient:  awsClients,
-				AWSService: awsService,
+				AWSClient: awsClients,
 			}
 			ctx := context.TODO()
 			ctx = controllercontext.NewContext(ctx, c)

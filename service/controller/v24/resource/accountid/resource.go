@@ -6,6 +6,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
+	"github.com/giantswarm/aws-operator/service/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
 )
 
@@ -37,18 +38,31 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func addAccountIDToContext(ctx context.Context) error {
+func (r *Resource) addAccountIDToContext(ctx context.Context) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	accountID, err := cc.AWSService.GetAccountID()
+	var accountIDService *accountid.AccountID
+	{
+		c := accountid.Config{
+			Logger: r.logger,
+			STS:    cc.AWSClient.STS,
+		}
+
+		accountIDService, err = accountid.New(c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	accountID, err := accountIDService.Lookup()
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	cc.Status.Cluster.AWSAccount.ID = accountID
+	cc.Status.TenantCluster.AWSAccountID = accountID
 
 	return nil
 }

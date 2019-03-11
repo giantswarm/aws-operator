@@ -238,17 +238,14 @@ func (g *Guest) WaitForNodesReady(ctx context.Context, expectedNodes int) error 
 			return microerror.Mask(err)
 		}
 
-		fmt.Printf("\n")
 		var nodesReady int
 		for _, n := range nodes.Items {
-			fmt.Printf("%#v\n", n.GetName())
 			for _, c := range n.Status.Conditions {
 				if c.Type == v1.NodeReady && c.Status == v1.ConditionTrue {
 					nodesReady++
 				}
 			}
 		}
-		fmt.Printf("\n")
 
 		if nodesReady != expectedNodes {
 			return microerror.Maskf(waitError, "found %d/%d k8s nodes in %#q state but %d are expected", nodesReady, len(nodes.Items), v1.NodeReady, expectedNodes)

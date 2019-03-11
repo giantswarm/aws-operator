@@ -14,13 +14,18 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "containerlinux",
-				Description: "Update CoreOS to 2023.4.0. Fixes CVE-2019-8912",
+				Description: "Update CoreOS to 2023.4.0.(CVE-2019-8912).",
 				Kind:        versionbundle.KindChanged,
 			},
 			{
 				Component:   "kubernetes",
 				Description: "Use proper hostname annotation for nodes.",
 				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "kubernetes",
+				Description: "Update to 1.13.4 (CVE-2019-1002100).",
+				Kind:        versionbundle.KindAdded,
 			},
 		},
 		Components: []versionbundle.Component{
@@ -42,7 +47,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "kubernetes",
-				Version: "1.13.3",
+				Version: "1.13.4",
 			},
 		},
 		Name:    "aws-operator",

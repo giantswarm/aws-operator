@@ -6,7 +6,7 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_1_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_1_1"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
@@ -28,7 +28,7 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 		be := baseExtension{
 			customObject:  customObject,
 			encrypter:     c.encrypter,
-			encryptionKey: cc.Status.Cluster.EncryptionKey,
+			encryptionKey: cc.Status.TenantCluster.EncryptionKey,
 		}
 
 		// Default registry, kubernetes, etcd images etcd.

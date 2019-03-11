@@ -102,10 +102,6 @@ required = [
 
 [[constraint]]
   branch = "master"
-  name = "github.com/giantswarm/legacycerts"
-
-[[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/operatorkit"
 
 [[constraint]]

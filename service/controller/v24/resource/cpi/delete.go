@@ -24,7 +24,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			StackName:                   aws.String(key.MainHostPreStackName(customObject)),
 		}
 
-		_, err = r.hostClients.CloudFormation.UpdateTerminationProtection(i)
+		_, err = r.cloudFormation.UpdateTerminationProtection(i)
 		if IsDeleteInProgress(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane initializer CF stack is being deleted")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -49,7 +49,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			StackName: aws.String(key.MainHostPreStackName(customObject)),
 		}
 
-		_, err = r.hostClients.CloudFormation.DeleteStack(i)
+		_, err = r.cloudFormation.DeleteStack(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}

@@ -3,6 +3,7 @@ package v24
 import (
 	"context"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
@@ -19,7 +20,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v24/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v24/cloudconfig"
 	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v24/cloudformation"
@@ -33,7 +33,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/bridgezone"
-	cloudformationresource "github.com/giantswarm/aws-operator/service/controller/v24/resource/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v24/resource/cpf"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/cpi"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/ebsvolume"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/encryptionkey"
@@ -46,7 +46,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/service"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/stackoutput"
+	"github.com/giantswarm/aws-operator/service/controller/v24/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/workerasgname"
+	"github.com/giantswarm/aws-operator/service/routetable"
 )
 
 const (
@@ -173,20 +175,18 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		return nil, microerror.Maskf(invalidConfigError, "unknown encrypter backend %q", config.EncrypterBackend)
 	}
 
-	//var routeTableService *routetable.RouteTable
-	//{
-	//	c := routetable.Config{
-	//		EC2:    config.HostAWSClients.EC2,
-	//		Logger: config.Logger,
-	//
-	//		Names: strings.Split(config.RouteTables, ","),
-	//	}
-	//
-	//	routeTableService, err = routetable.New(c)
-	//	if err != nil {
-	//		return nil, microerror.Mask(err)
-	//	}
-	//}
+	var routeTableService *routetable.RouteTable
+	{
+		c := routetable.Config{
+			EC2:    config.HostAWSClients.EC2,
+			Logger: config.Logger,
+		}
+
+		routeTableService, err = routetable.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
 
 	var cloudConfig *cloudconfig.CloudConfig
 	{
@@ -358,9 +358,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var cloudformationResource controller.Resource
+	var tccpResource controller.Resource
 	{
-		c := cloudformationresource.Config{
+		c := tccp.Config{
 			APIWhitelist: adapter.APIWhitelist{
 				Enabled:    config.APIWhitelist.Enabled,
 				SubnetList: config.APIWhitelist.SubnetList,
@@ -384,12 +384,31 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			Route53Enabled:             config.Route53Enabled,
 		}
 
-		ops, err := cloudformationresource.New(c)
+		ops, err := tccp.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 
-		cloudformationResource, err = toCRUDResource(config.Logger, ops)
+		tccpResource, err = toCRUDResource(config.Logger, ops)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var cpfResource controller.Resource
+	{
+		c := cpf.Config{
+			CloudFormation: config.HostAWSClients.CloudFormation,
+			Logger:         config.Logger,
+			RouteTable:     routeTableService,
+
+			EncrypterBackend: config.EncrypterBackend,
+			InstallationName: config.InstallationName,
+			Route53Enabled:   config.Route53Enabled,
+			RouteTables:      strings.Split(config.RouteTables, ","),
+		}
+
+		cpfResource, err = cpf.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -398,16 +417,10 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var cpiResource controller.Resource
 	{
 		c := cpi.Config{
-			HostClients: &adapter.Clients{
-				EC2:            config.HostAWSClients.EC2,
-				IAM:            config.HostAWSClients.IAM,
-				STS:            config.HostAWSClients.STS,
-				CloudFormation: config.HostAWSClients.CloudFormation,
-			},
-			Logger: config.Logger,
+			CloudFormation: config.HostAWSClients.CloudFormation,
+			Logger:         config.Logger,
 
 			InstallationName: config.InstallationName,
-			Route53Enabled:   config.Route53Enabled,
 		}
 
 		cpiResource, err = cpi.New(c)
@@ -561,7 +574,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		loadBalancerResource,
 		ebsVolumeResource,
 		cpiResource,
-		cloudformationResource,
+		tccpResource,
+		cpfResource,
 		namespaceResource,
 		serviceResource,
 		endpointsResource,
@@ -620,22 +634,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			}
 		}
 
-		var awsService *awsservice.Service
-		{
-			c := awsservice.Config{
-				Clients: awsservice.Clients{
-					KMS: awsClient.KMS,
-					STS: awsClient.STS,
-				},
-				Logger: config.Logger,
-			}
-
-			awsService, err = awsservice.New(c)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-		}
-
 		var ebsService ebs.Interface
 		{
 			c := ebs.Config{
@@ -662,7 +660,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 		c := controllercontext.Context{
 			AWSClient:      awsClient,
-			AWSService:     awsService,
 			CloudFormation: *cloudFormationService,
 			EBSService:     ebsService,
 		}
