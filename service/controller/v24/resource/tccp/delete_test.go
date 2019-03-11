@@ -7,8 +7,6 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/micrologger/microloggertest"
-
-	"github.com/giantswarm/aws-operator/service/controller/v24/adapter"
 )
 
 func Test_Resource_Cloudformation_newDelete(t *testing.T) {
@@ -91,7 +89,6 @@ func Test_Resource_Cloudformation_newDelete(t *testing.T) {
 
 		c.EncrypterBackend = "kms"
 		c.G8sClient = fake.NewSimpleClientset()
-		c.HostClients = &adapter.Clients{}
 		c.Logger = microloggertest.New()
 
 		newResource, err = New(c)

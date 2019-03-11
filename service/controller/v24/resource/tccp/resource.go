@@ -32,7 +32,6 @@ type Config struct {
 	APIWhitelist         adapter.APIWhitelist
 	EncrypterRoleManager encrypter.RoleManager
 	G8sClient            versioned.Interface
-	HostClients          *adapter.Clients
 	Logger               micrologger.Logger
 
 	AdvancedMonitoringEC2      bool
@@ -49,7 +48,6 @@ type Resource struct {
 	apiWhiteList         adapter.APIWhitelist
 	encrypterRoleManager encrypter.RoleManager
 	g8sClient            versioned.Interface
-	hostClients          *adapter.Clients
 	logger               micrologger.Logger
 
 	encrypterBackend           string
@@ -66,9 +64,6 @@ func New(config Config) (*Resource, error) {
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
-	if config.HostClients == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostClients must not be empty", config)
-	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
@@ -84,7 +79,6 @@ func New(config Config) (*Resource, error) {
 		apiWhiteList:         config.APIWhitelist,
 		encrypterRoleManager: config.EncrypterRoleManager,
 		g8sClient:            config.G8sClient,
-		hostClients:          config.HostClients,
 		logger:               config.Logger,
 
 		encrypterBackend:           config.EncrypterBackend,

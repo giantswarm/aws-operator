@@ -343,11 +343,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			},
 			EncrypterRoleManager: encrypterRoleManager,
 			G8sClient:            config.G8sClient,
-			HostClients: &adapter.Clients{
-				EC2: config.ControlPlaneAWSClients.EC2,
-				IAM: config.ControlPlaneAWSClients.IAM,
-			},
-			Logger: config.Logger,
+			Logger:               config.Logger,
 
 			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
 			EncrypterBackend:           config.EncrypterBackend,
