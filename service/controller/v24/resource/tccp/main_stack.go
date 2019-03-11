@@ -29,6 +29,7 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 			SubnetList: r.apiWhiteList.SubnetList,
 		},
 		ControlPlaneAccountID: cc.Status.ControlPlane.AWSAccountID,
+		ControlPlaneVPCCidr:   cc.Status.ControlPlane.VPC.CIDR,
 		CustomObject:          customObject,
 		Clients:               adapterClients,
 		EncrypterBackend:      r.encrypterBackend,

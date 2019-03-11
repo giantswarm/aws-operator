@@ -33,6 +33,7 @@ import (
 type Config struct {
 	APIWhitelist           APIWhitelist
 	ControlPlaneAccountID  string
+	ControlPlaneVPCCidr    string
 	CustomObject           v1alpha1.AWSConfig
 	Clients                Clients
 	EncrypterBackend       string

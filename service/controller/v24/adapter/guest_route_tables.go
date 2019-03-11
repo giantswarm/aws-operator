@@ -1,8 +1,6 @@
 package adapter
 
 import (
-	"github.com/giantswarm/microerror"
-
 	"github.com/giantswarm/aws-operator/service/controller/v24/key"
 )
 
@@ -19,12 +17,7 @@ type GuestRouteTablesAdapter struct {
 }
 
 func (r *GuestRouteTablesAdapter) Adapt(cfg Config) error {
-	hostClusterCIDR, err := VpcCIDR(cfg.HostClients, key.PeerID(cfg.CustomObject))
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	r.HostClusterCIDR = hostClusterCIDR
+	r.HostClusterCIDR = cfg.ControlPlaneVPCCidr
 	r.PublicRouteTableName = RouteTableName{
 		ResourceName: "PublicRouteTable",
 		TagName:      key.RouteTableName(cfg.CustomObject, suffixPublic, 0),

@@ -24,11 +24,6 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 			description: "basic matching, all fields present",
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						VPC: v1alpha1.AWSConfigSpecAWSVPC{
-							PeerID: "vpc-1234",
-						},
-					},
 					Cluster: v1alpha1.Cluster{
 						ID: "test-cluster",
 						Kubernetes: v1alpha1.ClusterKubernetes{
@@ -150,18 +145,17 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		hostClients := Clients{
-			EC2: &EC2ClientMock{
-				vpcCIDR: "10.0.0.0/16",
-			},
+			EC2: &EC2ClientMock{},
 			IAM: &IAMClientMock{},
 		}
 		a := Adapter{}
 
 		t.Run(tc.description, func(t *testing.T) {
 			cfg := Config{
-				CustomObject: tc.customObject,
-				Clients:      Clients{},
-				HostClients:  hostClients,
+				ControlPlaneVPCCidr: "10.0.0.0/16",
+				CustomObject:        tc.customObject,
+				Clients:             Clients{},
+				HostClients:         hostClients,
 			}
 			err := a.Guest.SecurityGroups.Adapt(cfg)
 			if tc.expectedError && err == nil {
