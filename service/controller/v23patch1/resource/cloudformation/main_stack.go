@@ -54,13 +54,13 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 			MasterInstanceMonitoring:   stackState.MasterInstanceMonitoring,
 
 			WorkerCloudConfigVersion: stackState.WorkerCloudConfigVersion,
-			WorkerDesired:            sc.Status.Cluster.ASG.DesiredCapacity,
+			WorkerDesired:            sc.Status.TenantCluster.TCCP.ASG.DesiredCapacity,
 			WorkerDockerVolumeSizeGB: stackState.WorkerDockerVolumeSizeGB,
 			WorkerImageID:            stackState.WorkerImageID,
 			WorkerInstanceMonitoring: stackState.WorkerInstanceMonitoring,
 			WorkerInstanceType:       stackState.WorkerInstanceType,
-			WorkerMax:                sc.Status.Cluster.ASG.MaxSize,
-			WorkerMin:                sc.Status.Cluster.ASG.MinSize,
+			WorkerMax:                sc.Status.TenantCluster.TCCP.ASG.MaxSize,
+			WorkerMin:                sc.Status.TenantCluster.TCCP.ASG.MinSize,
 
 			VersionBundleVersion: stackState.VersionBundleVersion,
 		},

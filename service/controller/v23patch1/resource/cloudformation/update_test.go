@@ -871,12 +871,14 @@ func Test_Resource_Cloudformation_newUpdateChange_updatesNotAllowed(t *testing.T
 
 func testContextWithASG() controllercontext.Context {
 	return controllercontext.Context{
-		Status: controllercontext.Status{
-			Cluster: controllercontext.Cluster{
-				ASG: controllercontext.ClusterASG{
-					DesiredCapacity: 1,
-					MaxSize:         1,
-					MinSize:         1,
+		Status: controllercontext.ContextStatus{
+			TenantCluster: controllercontext.ContextStatusTenantCluster{
+				TCCP: controllercontext.ContextStatusTenantClusterTCCP{
+					ASG: controllercontext.ContextStatusTenantClusterTCCPASG{
+						DesiredCapacity: 1,
+						MaxSize:         1,
+						MinSize:         1,
+					},
 				},
 			},
 		},
