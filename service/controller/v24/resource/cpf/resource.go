@@ -8,7 +8,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/v24/key"
-	"github.com/giantswarm/aws-operator/service/routetable"
 )
 
 const (
@@ -19,7 +18,6 @@ const (
 type Config struct {
 	CloudFormation CloudFormation
 	Logger         micrologger.Logger
-	RouteTable     *routetable.RouteTable
 
 	EncrypterBackend string
 	InstallationName string
@@ -33,7 +31,6 @@ type Config struct {
 type Resource struct {
 	cloudFormation CloudFormation
 	logger         micrologger.Logger
-	routeTable     *routetable.RouteTable
 
 	encrypterBackend string
 	installationName string
@@ -48,9 +45,6 @@ func New(config Config) (*Resource, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
-	if config.RouteTable == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.RouteTable must not be empty", config)
-	}
 
 	if config.EncrypterBackend == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.EncrypterBackend must not be empty", config)
@@ -62,7 +56,6 @@ func New(config Config) (*Resource, error) {
 	r := &Resource{
 		cloudFormation: config.CloudFormation,
 		logger:         config.Logger,
-		routeTable:     config.RouteTable,
 
 		encrypterBackend: config.EncrypterBackend,
 		installationName: config.InstallationName,

@@ -46,7 +46,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/vpccidr"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/workerasgname"
-	"github.com/giantswarm/aws-operator/service/routetable"
 )
 
 const (
@@ -148,19 +147,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	default:
 		return nil, microerror.Maskf(invalidConfigError, "unknown encrypter backend %q", config.EncrypterBackend)
-	}
-
-	var routeTableService *routetable.RouteTable
-	{
-		c := routetable.Config{
-			EC2:    config.ControlPlaneAWSClients.EC2,
-			Logger: config.Logger,
-		}
-
-		routeTableService, err = routetable.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
 	}
 
 	var cloudConfig *cloudconfig.CloudConfig
@@ -374,7 +360,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		c := cpf.Config{
 			CloudFormation: config.ControlPlaneAWSClients.CloudFormation,
 			Logger:         config.Logger,
-			RouteTable:     routeTableService,
 
 			EncrypterBackend: config.EncrypterBackend,
 			InstallationName: config.InstallationName,
