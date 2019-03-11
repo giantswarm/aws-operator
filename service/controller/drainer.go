@@ -237,9 +237,8 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 			K8sClient:     config.K8sClient,
 			Logger:        config.Logger,
 
-			GuestUpdateEnabled: config.GuestUpdateEnabled,
-			ProjectName:        config.ProjectName,
-			Route53Enabled:     config.Route53Enabled,
+			ProjectName:    config.ProjectName,
+			Route53Enabled: config.Route53Enabled,
 		}
 
 		v24ResourceSet, err = v24.NewDrainerResourceSet(c)

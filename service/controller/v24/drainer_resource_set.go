@@ -7,7 +7,6 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
 	"github.com/giantswarm/operatorkit/controller/resource/metricsresource"
 	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
 	"k8s.io/client-go/kubernetes"
@@ -28,9 +27,8 @@ type DrainerResourceSetConfig struct {
 	K8sClient     kubernetes.Interface
 	Logger        micrologger.Logger
 
-	GuestUpdateEnabled bool
-	ProjectName        string
-	Route53Enabled     bool
+	ProjectName    string
+	Route53Enabled bool
 }
 
 func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.ResourceSet, error) {
@@ -130,10 +128,6 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 	}
 
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
-		if config.GuestUpdateEnabled {
-			updateallowedcontext.SetUpdateAllowed(ctx)
-		}
-
 		var tenantClusterAWSClients aws.Clients
 		{
 			arn, err := credential.GetARN(config.K8sClient, obj)
