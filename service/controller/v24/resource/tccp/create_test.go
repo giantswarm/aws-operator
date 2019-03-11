@@ -121,7 +121,14 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			ctx := context.TODO()
-			ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
+			cc := controllercontext.Context{
+				Client: controllercontext.ContextClient{
+					TenantCluster: controllercontext.ContextClientTenantCluster{
+						AWS: awsClients,
+					},
+				},
+			}
+			ctx = controllercontext.NewContext(ctx, cc)
 
 			result, err := newResource.newCreateChange(ctx, tc.obj, tc.currentState, tc.desiredState)
 			if err != nil {

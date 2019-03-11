@@ -633,7 +633,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			updateallowedcontext.SetUpdateAllowed(ctx)
 		}
 
-		var awsClient aws.Clients
+		var tenantClusterAWSClients aws.Clients
 		{
 			arn, err := credential.GetARN(config.K8sClient, obj)
 			if err != nil {
@@ -642,7 +642,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			c := config.HostAWSConfig
 			c.RoleARN = arn
 
-			awsClient, err = aws.NewClients(c)
+			tenantClusterAWSClients, err = aws.NewClients(c)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
@@ -651,7 +651,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		var ebsService ebs.Interface
 		{
 			c := ebs.Config{
-				Client: awsClient.EC2,
+				Client: tenantClusterAWSClients.EC2,
 				Logger: config.Logger,
 			}
 			ebsService, err = ebs.New(c)
@@ -663,7 +663,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		var cloudFormationService *cloudformationservice.CloudFormation
 		{
 			c := cloudformationservice.Config{
-				Client: awsClient.CloudFormation,
+				Client: tenantClusterAWSClients.CloudFormation,
 			}
 
 			cloudFormationService, err = cloudformationservice.New(c)
@@ -673,7 +673,15 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		c := controllercontext.Context{
-			AWSClient:      awsClient,
+			Client: controllercontext.ContextClient{
+				ControlPlane: controllercontext.ContextClientControlPlane{
+					AWS: config.HostAWSClients,
+				},
+				TenantCluster: controllercontext.ContextClientTenantCluster{
+					AWS: tenantClusterAWSClients,
+				},
+			},
+
 			CloudFormation: *cloudFormationService,
 			EBSService:     ebsService,
 		}

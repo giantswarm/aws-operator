@@ -100,7 +100,7 @@ func (r *Resource) isBucketCreated(ctx context.Context, name string) (bool, erro
 	headInput := &s3.HeadBucketInput{
 		Bucket: aws.String(name),
 	}
-	_, err = cc.AWSClient.S3.HeadBucket(headInput)
+	_, err = cc.Client.TenantCluster.AWS.S3.HeadBucket(headInput)
 	if IsBucketNotFound(err) {
 		return false, nil
 	} else if err != nil {
@@ -119,7 +119,7 @@ func (r *Resource) getLoggingConfiguration(ctx context.Context, name string) (*s
 	bucketLoggingInput := &s3.GetBucketLoggingInput{
 		Bucket: aws.String(name),
 	}
-	bucketLoggingOutput, err := cc.AWSClient.S3.GetBucketLogging(bucketLoggingInput)
+	bucketLoggingOutput, err := cc.Client.TenantCluster.AWS.S3.GetBucketLogging(bucketLoggingInput)
 	if err != nil {
 		return bucketLoggingOutput, microerror.Mask(err)
 	}

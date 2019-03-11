@@ -52,7 +52,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			Bucket: aws.String(bucketName),
 		}
 
-		o, err := cc.AWSClient.S3.ListObjectsV2(i)
+		o, err := cc.Client.TenantCluster.AWS.S3.ListObjectsV2(i)
 		if IsBucketNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find the S3 bucket %#q", bucketName))
 			return nil, nil
@@ -101,7 +101,7 @@ func (r *Resource) getBucketObjectBody(ctx context.Context, bucketName string, k
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(keyName),
 	}
-	result, err := cc.AWSClient.S3.GetObject(input)
+	result, err := cc.Client.TenantCluster.AWS.S3.GetObject(input)
 	if IsObjectNotFound(err) || IsBucketNotFound(err) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find S3 object %#q", keyName))
 		return "", nil

@@ -115,7 +115,7 @@ func (r *Resource) completeLifecycleHook(ctx context.Context, instanceID, worker
 		return microerror.Mask(err)
 	}
 
-	_, err = cc.AWSClient.AutoScaling.CompleteLifecycleAction(i)
+	_, err = cc.Client.TenantCluster.AWS.AutoScaling.CompleteLifecycleAction(i)
 	if IsNoActiveLifecycleAction(err) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not found lifecycle hook action for guest cluster node '%s'", instanceID))
 	} else if err != nil {

@@ -270,7 +270,7 @@ func (r *Resource) route53Clients(ctx context.Context) (guest, defaultGuest *rou
 		if err != nil {
 			return nil, nil, microerror.Mask(err)
 		}
-		guest = cc.AWSClient.Route53
+		guest = cc.Client.TenantCluster.AWS.Route53
 	}
 
 	// defaultGuest

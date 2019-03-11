@@ -73,7 +73,14 @@ func TestMainGuestTemplateGetEmptyBody(t *testing.T) {
 	}
 
 	ctx := context.TODO()
-	ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
+	cc := controllercontext.Context{
+		Client: controllercontext.ContextClient{
+			TenantCluster: controllercontext.ContextClientTenantCluster{
+				AWS: awsClients,
+			},
+		},
+	}
+	ctx = controllercontext.NewContext(ctx, cc)
 
 	_, err = newResource.getMainGuestTemplateBody(ctx, customObject, StackState{})
 	if err == nil {
@@ -216,7 +223,14 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 	}
 
 	ctx := context.TODO()
-	ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
+	cc := controllercontext.Context{
+		Client: controllercontext.ContextClient{
+			TenantCluster: controllercontext.ContextClientTenantCluster{
+				AWS: awsClients,
+			},
+		},
+	}
+	ctx = controllercontext.NewContext(ctx, cc)
 
 	body, err := newResource.getMainGuestTemplateBody(ctx, customObject, stackState)
 	if err != nil {
@@ -522,7 +536,14 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 	}
 
 	ctx := context.TODO()
-	ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
+	cc := controllercontext.Context{
+		Client: controllercontext.ContextClient{
+			TenantCluster: controllercontext.ContextClientTenantCluster{
+				AWS: awsClients,
+			},
+		},
+	}
+	ctx = controllercontext.NewContext(ctx, cc)
 
 	body, err := newResource.getMainGuestTemplateBody(ctx, customObject, stackState)
 	if err != nil {
@@ -646,7 +667,14 @@ func TestMainGuestTemplateChinaRegion(t *testing.T) {
 	}
 
 	ctx := context.TODO()
-	ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
+	cc := controllercontext.Context{
+		Client: controllercontext.ContextClient{
+			TenantCluster: controllercontext.ContextClientTenantCluster{
+				AWS: awsClients,
+			},
+		},
+	}
+	ctx = controllercontext.NewContext(ctx, cc)
 
 	body, err := newResource.getMainGuestTemplateBody(ctx, customObject, stackState)
 	if err != nil {

@@ -85,7 +85,7 @@ func (r *Resource) addAccountIDToContext(ctx context.Context) error {
 		{
 			c := accountid.Config{
 				Logger: r.logger,
-				STS:    cc.AWSClient.STS,
+				STS:    cc.Client.TenantCluster.AWS.STS,
 			}
 
 			accountIDService, err = accountid.New(c)

@@ -28,7 +28,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 				return microerror.Mask(err)
 			}
 
-			_, err = cc.AWSClient.S3.PutObject(&s3PutInput)
+			_, err = cc.Client.TenantCluster.AWS.S3.PutObject(&s3PutInput)
 			if err != nil {
 				return microerror.Mask(err)
 			}
