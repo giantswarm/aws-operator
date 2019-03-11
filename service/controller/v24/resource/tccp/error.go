@@ -103,15 +103,6 @@ func IsNotExists(err error) bool {
 	return false
 }
 
-var masterInstanceExistsError = &microerror.Error{
-	Kind: "masterInstanceExistsError",
-}
-
-// IsMasterInstanceExists asserts masterInstanceExistsError.
-func IsMasterInstanceExists(err error) bool {
-	return microerror.Cause(err) == masterInstanceExistsError
-}
-
 var resourceNotReadyError = &microerror.Error{
 	Kind: "resourceNotReadyError",
 }
