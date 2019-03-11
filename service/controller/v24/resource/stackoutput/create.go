@@ -24,11 +24,23 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	var cloudFormation *cf.CloudFormation
+	{
+		c := cf.Config{
+			Client: cc.Client.TenantCluster.AWS.CloudFormation,
+		}
+
+		cloudFormation, err = cf.New(c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
 	var outputs []*cloudformation.Output
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster cloud formation stack outputs")
 
-		o, s, err := cc.CloudFormation.DescribeOutputsAndStatus(key.MainGuestStackName(cr))
+		o, s, err := cloudFormation.DescribeOutputsAndStatus(key.MainGuestStackName(cr))
 		if cf.IsStackNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster cloud formation stack outputs")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster cloud formation stack does not exist")
@@ -51,7 +63,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	if r.route53Enabled {
-		v, err := cc.CloudFormation.GetOutputValue(outputs, key.HostedZoneNameServers)
+		v, err := cloudFormation.GetOutputValue(outputs, key.HostedZoneNameServers)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -59,7 +71,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cc.CloudFormation.GetOutputValue(outputs, key.VPCPeeringConnectionIDKey)
+		v, err := cloudFormation.GetOutputValue(outputs, key.VPCPeeringConnectionIDKey)
 		if cf.IsOutputNotFound(err) {
 			// TODO this exception is necessary for clusters upgrading from v23 to
 			// v24. The code can be cleaned up in v25 and the controller context value
@@ -80,7 +92,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cc.CloudFormation.GetOutputValue(outputs, key.WorkerASGKey)
+		v, err := cloudFormation.GetOutputValue(outputs, key.WorkerASGKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}

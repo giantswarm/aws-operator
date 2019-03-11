@@ -22,7 +22,6 @@ import (
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v24/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v24/cloudconfig"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v24/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v24/credential"
 	"github.com/giantswarm/aws-operator/service/controller/v24/ebs"
@@ -660,18 +659,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			}
 		}
 
-		var cloudFormationService *cloudformationservice.CloudFormation
-		{
-			c := cloudformationservice.Config{
-				Client: tenantClusterAWSClients.CloudFormation,
-			}
-
-			cloudFormationService, err = cloudformationservice.New(c)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-		}
-
 		c := controllercontext.Context{
 			Client: controllercontext.ContextClient{
 				ControlPlane: controllercontext.ContextClientControlPlane{
@@ -682,8 +669,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 				},
 			},
 
-			CloudFormation: *cloudFormationService,
-			EBSService:     ebsService,
+			EBSService: ebsService,
 		}
 		ctx = controllercontext.NewContext(ctx, c)
 
