@@ -53,7 +53,9 @@ func (r *Resource) addPeerRoleARNToContext(ctx context.Context, cr v1alpha1.AWSC
 			RoleName: aws.String(key.PeerAccessRoleName(cr)),
 		}
 		o, err := cc.Client.ControlPlane.AWS.IAM.GetRole(i)
-		if err != nil {
+		if IsNotFound(err) {
+			return microerror.Maskf(notFoundError, key.PeerAccessRoleName(cr))
+		} else if err != nil {
 			return microerror.Mask(err)
 		}
 
