@@ -7,6 +7,11 @@ type ContextStatus struct {
 
 type ContextStatusControlPlane struct {
 	AWSAccountID string
+	VPC          ContextStatusControlPlaneVPC
+}
+
+type ContextStatusControlPlaneVPC struct {
+	CIDR string
 }
 
 type ContextStatusTenantCluster struct {
