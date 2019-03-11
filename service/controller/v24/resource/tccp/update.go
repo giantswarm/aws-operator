@@ -10,7 +10,6 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
 
 	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v24/ebs"
@@ -18,7 +17,11 @@ import (
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
-	customObject, err := key.ToCustomObject(obj)
+	cr, err := key.ToCustomObject(obj)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -27,22 +30,30 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 		return microerror.Mask(err)
 	}
 
-	if stackStateToUpdate.Name != "" {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "updating the guest cluster main stack")
+	var ebsService ebs.Interface
+	{
+		c := ebs.Config{
+			Client: cc.Client.TenantCluster.AWS.EC2,
+			Logger: r.logger,
+		}
 
-		cc, err := controllercontext.FromContext(ctx)
+		ebsService, err = ebs.New(c)
 		if err != nil {
 			return microerror.Mask(err)
 		}
+	}
+
+	if stackStateToUpdate.Name != "" {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "updating the guest cluster main stack")
 
 		if stackStateToUpdate.ShouldUpdate && !stackStateToUpdate.ShouldScale {
 			{
 				// Fetch the etcd volume information.
 				filterFuncs := []func(t *ec2.Tag) bool{
-					ebs.NewDockerVolumeFilter(customObject),
-					ebs.NewEtcdVolumeFilter(customObject),
+					ebs.NewDockerVolumeFilter(cr),
+					ebs.NewEtcdVolumeFilter(cr),
 				}
-				volumes, err := cc.EBSService.ListVolumes(customObject, filterFuncs...)
+				volumes, err := ebsService.ListVolumes(cr, filterFuncs...)
 				if err != nil {
 					return microerror.Mask(err)
 				}
@@ -55,7 +66,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 
 				for _, v := range volumes {
 					for _, a := range v.Attachments {
-						err := cc.EBSService.DetachVolume(ctx, v.VolumeID, a, force, shutdown, wait)
+						err := ebsService.DetachVolume(ctx, v.VolumeID, a, force, shutdown, wait)
 						if err != nil {
 							return microerror.Mask(err)
 						}
@@ -103,8 +114,8 @@ func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 	return patch, nil
 }
 
-func (r *Resource) computeUpdateState(ctx context.Context, customObject v1alpha1.AWSConfig, stackState StackState) (cloudformation.UpdateStackInput, error) {
-	mainTemplate, err := r.getMainGuestTemplateBody(ctx, customObject, stackState)
+func (r *Resource) computeUpdateState(ctx context.Context, cr v1alpha1.AWSConfig, stackState StackState) (cloudformation.UpdateStackInput, error) {
+	mainTemplate, err := r.getMainGuestTemplateBody(ctx, cr, stackState)
 	if err != nil {
 		return cloudformation.UpdateStackInput{}, microerror.Mask(err)
 	}
@@ -118,7 +129,7 @@ func (r *Resource) computeUpdateState(ctx context.Context, customObject v1alpha1
 		Parameters: []*cloudformation.Parameter{
 			{
 				ParameterKey:   aws.String(versionBundleVersionParameterKey),
-				ParameterValue: aws.String(key.VersionBundleVersion(customObject)),
+				ParameterValue: aws.String(key.VersionBundleVersion(cr)),
 			},
 		},
 		StackName:    aws.String(stackState.Name),
@@ -129,7 +140,7 @@ func (r *Resource) computeUpdateState(ctx context.Context, customObject v1alpha1
 }
 
 func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	customObject, err := key.ToCustomObject(obj)
+	cr, err := key.ToCustomObject(obj)
 	if err != nil {
 		return StackState{}, microerror.Mask(err)
 	}
@@ -146,13 +157,13 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 	// but disable them in production installations. That is useful until we have
 	// full confidence in updating guest clusters. Note that updates also manage
 	// scaling at the same time to be more efficient.
-	if updateallowedcontext.IsUpdateAllowed(ctx) {
+	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the guest cluster main stack has to be updated")
 
 		if shouldUpdate(currentStackState, desiredStackState) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack has to be updated")
 
-			updateStackInput, err := r.computeUpdateState(ctx, customObject, desiredStackState)
+			updateStackInput, err := r.computeUpdateState(ctx, cr, desiredStackState)
 			if err != nil {
 				return StackState{}, microerror.Mask(err)
 			}
@@ -168,8 +179,6 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		} else {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack does not have to be updated")
 		}
-	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not computing update state of the guest cluster main stack because updates are not allowed")
 	}
 
 	// We manage scaling separately because the impact and implications of scaling
@@ -183,7 +192,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the guest cluster main stack has to be scaled")
 
-		shouldScale, err := r.shouldScale(ctx, customObject, currentStackState, desiredStackState)
+		shouldScale, err := r.shouldScale(ctx, cr, currentStackState, desiredStackState)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
@@ -194,7 +203,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 			desiredStackState.MasterInstanceResourceName = currentStackState.MasterInstanceResourceName
 			desiredStackState.DockerVolumeResourceName = currentStackState.DockerVolumeResourceName
 
-			updateStackInput, err := r.computeUpdateState(ctx, customObject, desiredStackState)
+			updateStackInput, err := r.computeUpdateState(ctx, cr, desiredStackState)
 			if err != nil {
 				return StackState{}, microerror.Mask(err)
 			}
@@ -220,7 +229,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 // changes. In case anything else changes as well, scaling is not allowed, since
 // any other changes should be covered by general updates, which is a separate
 // step.
-func (r *Resource) shouldScale(ctx context.Context, customObject v1alpha1.AWSConfig, currentState, desiredState StackState) (bool, error) {
+func (r *Resource) shouldScale(ctx context.Context, cr v1alpha1.AWSConfig, currentState, desiredState StackState) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)
@@ -254,11 +263,11 @@ func (r *Resource) shouldScale(ctx context.Context, customObject v1alpha1.AWSCon
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to worker cloudconfig version")
 		return false, nil
 	}
-	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MaxSize != key.ScalingMax(customObject) {
+	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MaxSize != key.ScalingMax(cr) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "scaling due to scaling.max")
 		return true, nil
 	}
-	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MinSize != key.ScalingMin(customObject) {
+	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MinSize != key.ScalingMin(cr) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "scaling due to scaling.min")
 		return true, nil
 	}
@@ -304,12 +313,12 @@ func shouldUpdate(currentState, desiredState StackState) bool {
 func (r *Resource) terminateOldMasterInstance(ctx context.Context, obj interface{}) error {
 	var result *ec2.DescribeInstancesOutput
 
-	customObject, err := key.ToCustomObject(obj)
+	cr, err := key.ToCustomObject(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	instanceName := key.MasterInstanceName(customObject)
+	instanceName := key.MasterInstanceName(cr)
 	instanceState := "stopped"
 
 	cc, err := controllercontext.FromContext(ctx)
@@ -337,7 +346,7 @@ func (r *Resource) terminateOldMasterInstance(ctx context.Context, obj interface
 				{
 					Name: aws.String("tag:giantswarm.io/cluster"),
 					Values: []*string{
-						aws.String(key.ClusterID(customObject)),
+						aws.String(key.ClusterID(cr)),
 					},
 				},
 			},
@@ -362,7 +371,7 @@ func (r *Resource) terminateOldMasterInstance(ctx context.Context, obj interface
 		}
 
 		if len(result.Reservations[0].Instances) < 1 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find master instance with state `stopped` and name %#q", key.MasterInstanceName(customObject)))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find master instance with state `stopped` and name %#q", key.MasterInstanceName(cr)))
 			return nil
 		}
 

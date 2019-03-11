@@ -11,6 +11,7 @@ const Instance = `
     - EtcdVolume
     Properties:
       AvailabilityZone: {{ $v.Master.AZ }}
+      DisableApiTermination: true
       IamInstanceProfile: !Ref MasterInstanceProfile
       ImageId: {{ $v.Image.ID }}
       InstanceType: {{ $v.Master.Instance.Type }}

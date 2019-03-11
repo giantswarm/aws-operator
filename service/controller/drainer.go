@@ -49,43 +49,6 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
-	if config.K8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
-	}
-	if config.K8sExtClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.K8sExtClient must not be empty", config)
-	}
-	if config.Logger == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
-	}
-
-	if config.GuestAWSConfig.AccessKeyID == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.GuestAWSConfig.AccessKeyID must not be empty", config)
-	}
-	if config.GuestAWSConfig.AccessKeySecret == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.GuestAWSConfig.AccessKeySecret must not be empty", config)
-	}
-	if config.GuestAWSConfig.Region == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.GuestAWSConfig.Region must not be empty", config)
-	}
-	// TODO: remove this when all version prior to v11 are removed
-	if config.HostAWSConfig.AccessKeyID == "" && config.HostAWSConfig.AccessKeySecret == "" {
-		config.Logger.Log("debug", "no host cluster account credentials supplied, assuming guest and host uses same account")
-		config.HostAWSConfig = config.GuestAWSConfig
-	} else {
-		if config.HostAWSConfig.AccessKeyID == "" {
-			return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.AccessKeyID must not be empty")
-		}
-		if config.HostAWSConfig.AccessKeySecret == "" {
-			return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.AccessKeySecret must not be empty")
-		}
-		if config.HostAWSConfig.Region == "" {
-			return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.Region must not be empty")
-		}
-	}
-	if config.ProjectName == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.ProjectName must not be empty", config)
-	}
 
 	var err error
 
@@ -154,20 +117,33 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, error) {
 	var err error
 
-	hostAWSConfig := awsclient.Config{
-		AccessKeyID:     config.HostAWSConfig.AccessKeyID,
-		AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
-		SessionToken:    config.HostAWSConfig.SessionToken,
-		Region:          config.HostAWSConfig.Region,
+	var controlPlaneAWSClients awsclient.Clients
+	{
+		c := awsclient.Config{
+			AccessKeyID:     config.HostAWSConfig.AccessKeyID,
+			AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
+			Region:          config.HostAWSConfig.Region,
+			SessionToken:    config.HostAWSConfig.SessionToken,
+		}
+
+		controlPlaneAWSClients, err = awsclient.NewClients(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
 	var v22ResourceSet *controller.ResourceSet
 	{
 		c := v22.DrainerResourceSetConfig{
-			G8sClient:     config.G8sClient,
-			HostAWSConfig: hostAWSConfig,
-			K8sClient:     config.K8sClient,
-			Logger:        config.Logger,
+			G8sClient: config.G8sClient,
+			HostAWSConfig: awsclient.Config{
+				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
+				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
+				SessionToken:    config.HostAWSConfig.SessionToken,
+				Region:          config.HostAWSConfig.Region,
+			},
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
 
 			GuestUpdateEnabled: config.GuestUpdateEnabled,
 			ProjectName:        config.ProjectName,
@@ -181,10 +157,15 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 	var v22patch1ResourceSet *controller.ResourceSet
 	{
 		c := v22patch1.DrainerResourceSetConfig{
-			G8sClient:     config.G8sClient,
-			HostAWSConfig: hostAWSConfig,
-			K8sClient:     config.K8sClient,
-			Logger:        config.Logger,
+			G8sClient: config.G8sClient,
+			HostAWSConfig: awsclient.Config{
+				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
+				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
+				SessionToken:    config.HostAWSConfig.SessionToken,
+				Region:          config.HostAWSConfig.Region,
+			},
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
 
 			GuestUpdateEnabled: config.GuestUpdateEnabled,
 			ProjectName:        config.ProjectName,
@@ -198,10 +179,15 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 	var v23ResourceSet *controller.ResourceSet
 	{
 		c := v23.DrainerResourceSetConfig{
-			G8sClient:     config.G8sClient,
-			HostAWSConfig: hostAWSConfig,
-			K8sClient:     config.K8sClient,
-			Logger:        config.Logger,
+			G8sClient: config.G8sClient,
+			HostAWSConfig: awsclient.Config{
+				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
+				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
+				SessionToken:    config.HostAWSConfig.SessionToken,
+				Region:          config.HostAWSConfig.Region,
+			},
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
 
 			GuestUpdateEnabled: config.GuestUpdateEnabled,
 			ProjectName:        config.ProjectName,
@@ -215,10 +201,15 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 	var v23patch1ResourceSet *controller.ResourceSet
 	{
 		c := v23patch1.DrainerResourceSetConfig{
-			G8sClient:     config.G8sClient,
-			HostAWSConfig: hostAWSConfig,
-			K8sClient:     config.K8sClient,
-			Logger:        config.Logger,
+			G8sClient: config.G8sClient,
+			HostAWSConfig: awsclient.Config{
+				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
+				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
+				SessionToken:    config.HostAWSConfig.SessionToken,
+				Region:          config.HostAWSConfig.Region,
+			},
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
 
 			GuestUpdateEnabled: config.GuestUpdateEnabled,
 			ProjectName:        config.ProjectName,
@@ -232,14 +223,19 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 	var v24ResourceSet *controller.ResourceSet
 	{
 		c := v24.DrainerResourceSetConfig{
-			G8sClient:     config.G8sClient,
-			HostAWSConfig: hostAWSConfig,
-			K8sClient:     config.K8sClient,
-			Logger:        config.Logger,
+			ControlPlaneAWSClients: controlPlaneAWSClients,
+			G8sClient:              config.G8sClient,
+			HostAWSConfig: awsclient.Config{
+				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
+				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
+				Region:          config.HostAWSConfig.Region,
+				SessionToken:    config.HostAWSConfig.SessionToken,
+			},
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
 
-			GuestUpdateEnabled: config.GuestUpdateEnabled,
-			ProjectName:        config.ProjectName,
-			Route53Enabled:     config.Route53Enabled,
+			ProjectName:    config.ProjectName,
+			Route53Enabled: config.Route53Enabled,
 		}
 
 		v24ResourceSet, err = v24.NewDrainerResourceSet(c)

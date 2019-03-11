@@ -4,9 +4,6 @@ import (
 	"context"
 
 	"github.com/giantswarm/microerror"
-
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v24/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v24/ebs"
 )
 
 type contextKey string
@@ -14,9 +11,6 @@ type contextKey string
 const controllerKey contextKey = "controller"
 
 type Context struct {
-	CloudFormation cloudformationservice.CloudFormation
-	EBSService     ebs.Interface
-
 	// Client holds the client implementations used for several tenant cluster
 	// specific actions.
 	Client ContextClient
