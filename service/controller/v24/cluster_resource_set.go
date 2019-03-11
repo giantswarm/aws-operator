@@ -11,7 +11,6 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
 	"github.com/giantswarm/operatorkit/controller/resource/metricsresource"
 	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
 	"github.com/giantswarm/randomkeys"
@@ -74,7 +73,6 @@ type ClusterResourceSetConfig struct {
 	GuestPrivateSubnetMaskBits int
 	GuestPublicSubnetMaskBits  int
 	GuestSubnetMaskBits        int
-	GuestUpdateEnabled         bool
 	IncludeTags                bool
 	IgnitionPath               string
 	InstallationName           string
@@ -627,10 +625,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	}
 
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
-		if config.GuestUpdateEnabled {
-			updateallowedcontext.SetUpdateAllowed(ctx)
-		}
-
 		var tenantClusterAWSClients aws.Clients
 		{
 			arn, err := credential.GetARN(config.K8sClient, obj)

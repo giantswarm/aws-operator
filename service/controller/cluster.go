@@ -446,7 +446,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
 			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
 			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
-			GuestUpdateEnabled:         config.GuestUpdateEnabled,
 			PodInfraContainerImage:     config.PodInfraContainerImage,
 			Route53Enabled:             config.Route53Enabled,
 			IgnitionPath:               config.IgnitionPath,

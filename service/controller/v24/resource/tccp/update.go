@@ -10,7 +10,6 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
 
 	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v24/ebs"
@@ -158,7 +157,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 	// but disable them in production installations. That is useful until we have
 	// full confidence in updating guest clusters. Note that updates also manage
 	// scaling at the same time to be more efficient.
-	if updateallowedcontext.IsUpdateAllowed(ctx) {
+	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the guest cluster main stack has to be updated")
 
 		if shouldUpdate(currentStackState, desiredStackState) {
@@ -180,8 +179,6 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		} else {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack does not have to be updated")
 		}
-	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not computing update state of the guest cluster main stack because updates are not allowed")
 	}
 
 	// We manage scaling separately because the impact and implications of scaling
