@@ -7,7 +7,7 @@ import (
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	err := addAccountIDToContext(ctx)
+	err := r.addAccountIDToContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}

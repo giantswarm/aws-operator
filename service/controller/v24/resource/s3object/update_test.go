@@ -11,7 +11,6 @@ import (
 	"github.com/giantswarm/randomkeys/randomkeystest"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
 )
 
@@ -144,8 +143,6 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 				S3: &S3ClientMock{},
 			}
 
-			awsService := awsservice.AwsServiceMock{}
-
 			cloudConfig := &CloudConfigMock{}
 
 			var err error
@@ -165,8 +162,7 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 			}
 
 			c := controllercontext.Context{
-				AWSClient:  awsClients,
-				AWSService: awsService,
+				AWSClient: awsClients,
 			}
 			ctx := context.TODO()
 			ctx = controllercontext.NewContext(ctx, c)
