@@ -39,6 +39,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/loadbalancer"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/migration"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/namespace"
+	"github.com/giantswarm/aws-operator/service/controller/v24/resource/natgatewayaddresses"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/service"
@@ -421,6 +422,20 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var natGatewayAddressesResource controller.Resource
+	{
+		c := natgatewayaddresses.Config{
+			Logger: config.Logger,
+
+			Installation: config.InstallationName,
+		}
+
+		natGatewayAddressesResource, err = natgatewayaddresses.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var serviceResource controller.Resource
 	{
 		c := service.Config{
@@ -550,6 +565,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		accountIDResource,
 		vpcCIDRResource,
 		stackOutputResource,
+		natGatewayAddressesResource,
 		workerASGNameResource,
 		asgStatusResource,
 		statusResource,
