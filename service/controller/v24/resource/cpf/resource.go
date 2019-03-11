@@ -16,8 +16,7 @@ const (
 )
 
 type Config struct {
-	CloudFormation CloudFormation
-	Logger         micrologger.Logger
+	Logger micrologger.Logger
 
 	EncrypterBackend string
 	InstallationName string
@@ -29,8 +28,7 @@ type Config struct {
 // Finalizer. This was formerly known as the host post stack. We manage a
 // dedicated CF stack for the record sets and routing tables setup.
 type Resource struct {
-	cloudFormation CloudFormation
-	logger         micrologger.Logger
+	logger micrologger.Logger
 
 	encrypterBackend string
 	installationName string
@@ -39,9 +37,6 @@ type Resource struct {
 }
 
 func New(config Config) (*Resource, error) {
-	if config.CloudFormation == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.CloudFormation must not be empty", config)
-	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
@@ -54,8 +49,7 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
-		cloudFormation: config.CloudFormation,
-		logger:         config.Logger,
+		logger: config.Logger,
 
 		encrypterBackend: config.EncrypterBackend,
 		installationName: config.InstallationName,
