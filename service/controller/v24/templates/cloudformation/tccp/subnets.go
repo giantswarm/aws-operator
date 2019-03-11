@@ -1,6 +1,7 @@
 package tccp
 
-const Subnets = `{{ define "subnets" }}
+const Subnets = `
+{{ define "subnets" }}
 {{- $v := .Guest.Subnets }}
   {{- range $v.PublicSubnets }}
   {{ .Name }}:
@@ -44,4 +45,5 @@ const Subnets = `{{ define "subnets" }}
       RouteTableId: !Ref {{ .RouteTableAssociation.RouteTableName }}
       SubnetId: !Ref {{ .RouteTableAssociation.SubnetName }}
   {{ end }}
-{{ end }}`
+{{ end }}
+`

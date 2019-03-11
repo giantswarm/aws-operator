@@ -1,6 +1,7 @@
 package tccp
 
-const IAMPolicies = `{{define "iam_policies"}}
+const IAMPolicies = `
+{{define "iam_policies"}}
 {{- $v := .Guest.IAMPolicies }}
   MasterRole:
     Type: "AWS::IAM::Role"
@@ -140,4 +141,5 @@ const IAMPolicies = `{{define "iam_policies"}}
       InstanceProfileName: {{ $v.WorkerProfileName }}
       Roles:
         - Ref: "WorkerRole"
-{{ end }}`
+{{ end }}
+`

@@ -5,12 +5,12 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v24/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v24/key"
-	"github.com/giantswarm/aws-operator/service/controller/v24/templates"
+	"github.com/giantswarm/aws-operator/service/controller/v24/resource/cpi/template"
 )
 
 const (
@@ -18,7 +18,7 @@ const (
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	customObject, err := key.ToCustomObject(obj)
+	cr, err := key.ToCustomObject(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -27,7 +27,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane initializer CF stack")
 
 		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(key.MainHostPreStackName(customObject)),
+			StackName: aws.String(key.MainHostPreStackName(cr)),
 		}
 
 		_, err = r.cloudFormation.DescribeStacks(i)
@@ -49,25 +49,19 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane initializer CF stack")
 
-		cc, err := controllercontext.FromContext(ctx)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		var newAdapter adapter.Adapter
+		var params *template.ParamsMain
 		{
-			c := adapter.Config{
-				CustomObject:   customObject,
-				GuestAccountID: cc.Status.Cluster.AWSAccount.ID,
-			}
-
-			newAdapter, err = adapter.NewHostPre(c)
+			iamRoles, err := r.newIAMRolesParams(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
 			}
+
+			params = &template.ParamsMain{
+				IAMRoles: iamRoles,
+			}
 		}
 
-		templateBody, err = templates.Render(key.CloudFormationHostPreTemplates(), newAdapter)
+		templateBody, err = template.Render(params)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -83,8 +77,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				aws.String(capabilityNamesIAM),
 			},
 			EnableTerminationProtection: aws.Bool(key.EnableTerminationProtection),
-			StackName:                   aws.String(key.MainHostPreStackName(customObject)),
-			Tags:                        r.getCloudFormationTags(customObject),
+			StackName:                   aws.String(key.MainHostPreStackName(cr)),
+			Tags:                        r.getCloudFormationTags(cr),
 			TemplateBody:                aws.String(templateBody),
 		}
 
@@ -100,7 +94,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for the creation of the tenant cluster's control plane initializer CF stack")
 
 		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(key.MainHostPreStackName(customObject)),
+			StackName: aws.String(key.MainHostPreStackName(cr)),
 		}
 
 		err = r.cloudFormation.WaitUntilStackCreateComplete(i)
@@ -112,4 +106,24 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	return nil
+}
+
+func (r *Resource) newIAMRolesParams(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainIAMRoles, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	iamRoles := &template.ParamsMainIAMRoles{
+		PeerAccessRoleName: key.PeerAccessRoleName(cr),
+		Tenant: template.ParamsMainIAMRolesTenant{
+			AWS: template.ParamsMainIAMRolesTenantAWS{
+				Account: template.ParamsMainIAMRolesTenantAWSAccount{
+					ID: cc.Status.TenantCluster.AWSAccountID,
+				},
+			},
+		},
+	}
+
+	return iamRoles, nil
 }

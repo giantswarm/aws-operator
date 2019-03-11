@@ -9,23 +9,8 @@ func VersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "kubernetes",
-				Description: "Update kubernetes to 1.13.3. More info here: https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.13.md",
-				Kind:        versionbundle.KindChanged,
-			},
-			{
-				Component:   "etcd",
-				Description: "Update etcd to 3.3.12",
-				Kind:        versionbundle.KindChanged,
-			},
-			{
-				Component:   "calico",
-				Description: "Update calico to 3.5.1",
-				Kind:        versionbundle.KindChanged,
-			},
-			{
-				Component:   "kubernetes",
-				Description: "Improved Audit policy to reduce the amount of Audit logs (high-volume and low-risk).",
-				Kind:        versionbundle.KindChanged,
+				Description: "Update to 1.13.4 (CVE-2019-1002100).",
+				Kind:        versionbundle.KindAdded,
 			},
 		},
 		Components: []versionbundle.Component{
@@ -47,10 +32,10 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "kubernetes",
-				Version: "1.13.3",
+				Version: "1.13.4",
 			},
 		},
 		Name:    "aws-operator",
-		Version: "4.7.0",
+		Version: "4.7.1",
 	}
 }

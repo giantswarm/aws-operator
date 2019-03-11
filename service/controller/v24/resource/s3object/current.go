@@ -32,7 +32,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	// deletion of the s3bucket resource, which deletes all S3 objects and the
 	// bucket itself.
 	if key.IsDeleted(customObject) {
-		if cc.Status.Cluster.EncryptionKey == "" {
+		if cc.Status.TenantCluster.EncryptionKey == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "no encryption key in controller context")
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -42,7 +42,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		}
 	}
 
-	bucketName := key.BucketName(customObject, cc.Status.Cluster.AWSAccount.ID)
+	bucketName := key.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID)
 
 	var objects []*s3.Object
 	{

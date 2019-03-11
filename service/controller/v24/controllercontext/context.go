@@ -6,7 +6,6 @@ import (
 	"github.com/giantswarm/microerror"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	awsservice "github.com/giantswarm/aws-operator/service/aws"
 	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v24/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/v24/ebs"
 )
@@ -17,14 +16,13 @@ const controllerKey contextKey = "controller"
 
 type Context struct {
 	AWSClient      awsclient.Clients
-	AWSService     awsservice.Interface
 	CloudFormation cloudformationservice.CloudFormation
 	EBSService     ebs.Interface
 
 	// Status holds the data used to communicate between controller's
 	// resources. It can be edited in place as Context is stored as
 	// a pointer within context.Context.
-	Status Status
+	Status ContextStatus
 }
 
 func NewContext(ctx context.Context, c Context) context.Context {

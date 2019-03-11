@@ -1,6 +1,7 @@
 package tccp
 
-const LoadBalancers = `{{define "load_balancers"}}
+const LoadBalancers = `
+{{define "load_balancers"}}
 {{- $v := .Guest.LoadBalancers }}
   ApiLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
@@ -62,7 +63,6 @@ const LoadBalancers = `{{define "load_balancers"}}
         - !Ref {{ $s }}
       {{end}}
 
-
   IngressLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     DependsOn:
@@ -101,4 +101,5 @@ const LoadBalancers = `{{define "load_balancers"}}
       {{- range $s := $v.PublicSubnets }}
         - !Ref {{ $s }}
       {{end}}
-{{end}}`
+{{end}}
+`

@@ -1,6 +1,7 @@
 package tccp
 
-const RecordSets = `{{define "record_sets"}}
+const RecordSets = `
+{{define "record_sets"}}
 {{- $v := .Guest.RecordSets }}
 {{ if $v.Route53Enabled }}
   HostedZone:
@@ -47,4 +48,5 @@ const RecordSets = `{{define "record_sets"}}
       ResourceRecords:
         - !Ref 'IngressRecordSet'
 {{end}}
-{{end}}`
+{{end}}
+`

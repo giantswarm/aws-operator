@@ -1,25 +1,22 @@
 package controllercontext
 
-type Status struct {
-	// Cluster carries information between cluster controller resource.
-	Cluster Cluster
-	// Drainer carries information between drainer controller resource.
-	Drainer Drainer
+type ContextStatus struct {
+	ControlPlane  ContextStatusControlPlane
+	TenantCluster ContextStatusTenantCluster
 }
 
-type Cluster struct {
-	AWSAccount             ClusterAWSAccount
-	ASG                    ClusterASG
+type ContextStatusControlPlane struct {
+	AWSAccountID string
+}
+
+type ContextStatusTenantCluster struct {
+	AWSAccountID           string
+	TCCP                   ContextStatusTenantClusterTCCP
 	EncryptionKey          string
 	HostedZoneNameServers  string
 	VPCPeeringConnectionID string
 }
 
-type ClusterAWSAccount struct {
-	ID string
-}
-
-type Drainer struct {
-	// WorkerASGName is filled by the workerasgname resource.
-	WorkerASGName string
+type ContextStatusTenantClusterTCCP struct {
+	ASG ContextStatusTenantClusterTCCPASG
 }

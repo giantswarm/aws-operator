@@ -1,6 +1,7 @@
 package tccp
 
-const RouteTables = `{{ define "route_tables" }}
+const RouteTables = `
+{{ define "route_tables" }}
 {{- $v := .Guest.RouteTables }}
   {{ $v.PublicRouteTableName.ResourceName }}:
     Type: AWS::EC2::RouteTable
@@ -27,4 +28,5 @@ const RouteTables = `{{ define "route_tables" }}
       VpcPeeringConnectionId:
         Ref: "VPCPeeringConnection"
   {{ end }}
-{{ end }}`
+{{ end }}
+`
