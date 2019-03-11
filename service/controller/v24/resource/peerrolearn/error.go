@@ -1,8 +1,6 @@
 package peerrolearn
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/giantswarm/microerror"
 )
@@ -25,12 +23,7 @@ func IsNotFound(err error) bool {
 	c := microerror.Cause(err)
 
 	aerr, ok := c.(awserr.Error)
-	fmt.Printf("%#v\n", aerr)
 	if ok {
-		fmt.Printf("%#v\n", aerr.Code())
-		fmt.Printf("%#v\n", aerr.Error())
-		fmt.Printf("%#v\n", aerr.Message())
-		fmt.Printf("%#v\n", aerr.OrigErr())
 		if aerr.Code() == "NoSuchEntity" {
 			return true
 		}
