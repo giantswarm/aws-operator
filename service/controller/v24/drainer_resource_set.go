@@ -13,7 +13,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v24/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v24/credential"
 	"github.com/giantswarm/aws-operator/service/controller/v24/key"
@@ -150,28 +149,14 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 			}
 		}
 
-		var cloudFormationService *cloudformationservice.CloudFormation
-		{
-			c := cloudformationservice.Config{
-				Client: tenantClusterAWSClients.CloudFormation,
-			}
-
-			cloudFormationService, err = cloudformationservice.New(c)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-		}
-
-		c := controllercontext.Context{
+		cc := controllercontext.Context{
 			Client: controllercontext.ContextClient{
 				TenantCluster: controllercontext.ContextClientTenantCluster{
 					AWS: tenantClusterAWSClients,
 				},
 			},
-
-			CloudFormation: *cloudFormationService,
 		}
-		ctx = controllercontext.NewContext(ctx, c)
+		ctx = controllercontext.NewContext(ctx, cc)
 
 		return ctx, nil
 	}
