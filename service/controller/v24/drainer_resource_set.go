@@ -22,10 +22,11 @@ import (
 )
 
 type DrainerResourceSetConfig struct {
-	G8sClient     versioned.Interface
-	HostAWSConfig aws.Config
-	K8sClient     kubernetes.Interface
-	Logger        micrologger.Logger
+	ControlPlaneAWSClients aws.Clients
+	G8sClient              versioned.Interface
+	HostAWSConfig          aws.Config
+	K8sClient              kubernetes.Interface
+	Logger                 micrologger.Logger
 
 	ProjectName    string
 	Route53Enabled bool
@@ -145,6 +146,9 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 
 		cc := controllercontext.Context{
 			Client: controllercontext.ContextClient{
+				ControlPlane: controllercontext.ContextClientControlPlane{
+					AWS: config.ControlPlaneAWSClients,
+				},
 				TenantCluster: controllercontext.ContextClientTenantCluster{
 					AWS: tenantClusterAWSClients,
 				},

@@ -57,13 +57,13 @@ const (
 )
 
 type ClusterResourceSetConfig struct {
-	CertsSearcher      certs.Interface
-	G8sClient          versioned.Interface
-	HostAWSClients     aws.Clients
-	HostAWSConfig      aws.Config
-	K8sClient          kubernetes.Interface
-	Logger             micrologger.Logger
-	RandomKeysSearcher randomkeys.Interface
+	CertsSearcher          certs.Interface
+	ControlPlaneAWSClients aws.Clients
+	G8sClient              versioned.Interface
+	HostAWSConfig          aws.Config
+	K8sClient              kubernetes.Interface
+	Logger                 micrologger.Logger
+	RandomKeysSearcher     randomkeys.Interface
 
 	AccessLogsExpiration       int
 	AdvancedMonitoringEC2      bool
@@ -93,28 +93,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
-	}
-
-	if config.HostAWSConfig.AccessKeyID == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSConfig.AccessKeyID must not be empty", config)
-	}
-	if config.HostAWSConfig.AccessKeySecret == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSConfig.AccessKeySecret must not be empty", config)
-	}
-	if config.HostAWSConfig.Region == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSConfig.Region must not be empty", config)
-	}
-	if config.HostAWSClients.CloudFormation == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSClients.CloudFormation must not be empty", config)
-	}
-	if config.HostAWSClients.EC2 == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSClients.EC2 must not be empty", config)
-	}
-	if config.HostAWSClients.IAM == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSClients.IAM must not be empty", config)
-	}
-	if config.HostAWSClients.Route53 == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSClients.Route53 must not be empty", config)
 	}
 
 	if config.GuestSubnetMaskBits < minAllocatedSubnetMaskBits {
@@ -175,7 +153,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var routeTableService *routetable.RouteTable
 	{
 		c := routetable.Config{
-			EC2:    config.HostAWSClients.EC2,
+			EC2:    config.ControlPlaneAWSClients.EC2,
 			Logger: config.Logger,
 		}
 
@@ -208,7 +186,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	{
 		c := accountid.Config{
 			Logger: config.Logger,
-			STS:    config.HostAWSClients.STS,
+			STS:    config.ControlPlaneAWSClients.STS,
 		}
 
 		accountIDResource, err = accountid.New(c)
@@ -277,7 +255,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	{
 		c := bridgezone.Config{
 			HostAWSConfig: config.HostAWSConfig,
-			HostRoute53:   config.HostAWSClients.Route53,
+			HostRoute53:   config.ControlPlaneAWSClients.Route53,
 			K8sClient:     config.K8sClient,
 			Logger:        config.Logger,
 
@@ -366,8 +344,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			EncrypterRoleManager: encrypterRoleManager,
 			G8sClient:            config.G8sClient,
 			HostClients: &adapter.Clients{
-				EC2: config.HostAWSClients.EC2,
-				IAM: config.HostAWSClients.IAM,
+				EC2: config.ControlPlaneAWSClients.EC2,
+				IAM: config.ControlPlaneAWSClients.IAM,
 			},
 			Logger: config.Logger,
 
@@ -394,7 +372,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var cpfResource controller.Resource
 	{
 		c := cpf.Config{
-			CloudFormation: config.HostAWSClients.CloudFormation,
+			CloudFormation: config.ControlPlaneAWSClients.CloudFormation,
 			Logger:         config.Logger,
 			RouteTable:     routeTableService,
 
@@ -413,7 +391,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var cpiResource controller.Resource
 	{
 		c := cpi.Config{
-			CloudFormation: config.HostAWSClients.CloudFormation,
+			CloudFormation: config.ControlPlaneAWSClients.CloudFormation,
 			Logger:         config.Logger,
 
 			InstallationName: config.InstallationName,
@@ -545,7 +523,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var vpcCIDRResource controller.Resource
 	{
 		c := vpccidr.Config{
-			EC2:    config.HostAWSClients.EC2,
+			EC2:    config.ControlPlaneAWSClients.EC2,
 			Logger: config.Logger,
 		}
 
@@ -643,7 +621,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		c := controllercontext.Context{
 			Client: controllercontext.ContextClient{
 				ControlPlane: controllercontext.ContextClientControlPlane{
-					AWS: config.HostAWSClients,
+					AWS: config.ControlPlaneAWSClients,
 				},
 				TenantCluster: controllercontext.ContextClientTenantCluster{
 					AWS: tenantClusterAWSClients,
