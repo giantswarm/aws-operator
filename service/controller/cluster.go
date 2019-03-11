@@ -98,37 +98,6 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.G8sClient must not be empty")
 	}
-	if config.Logger == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
-	}
-
-	if config.GuestAWSConfig.AccessKeyID == "" {
-		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSConfig.AccessKeyID must not be empty")
-	}
-	if config.GuestAWSConfig.AccessKeySecret == "" {
-		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSConfig.AccessKeySecret must not be empty")
-	}
-	if config.GuestAWSConfig.Region == "" {
-		return nil, microerror.Maskf(invalidConfigError, "config.GuestAWSConfig.Region must not be empty")
-	}
-	// TODO: remove this when all version prior to v11 are removed
-	if config.HostAWSConfig.AccessKeyID == "" && config.HostAWSConfig.AccessKeySecret == "" {
-		config.Logger.Log("debug", "no host cluster account credentials supplied, assuming guest and host uses same account")
-		config.HostAWSConfig = config.GuestAWSConfig
-	} else {
-		if config.HostAWSConfig.AccessKeyID == "" {
-			return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.AccessKeyID must not be empty")
-		}
-		if config.HostAWSConfig.AccessKeySecret == "" {
-			return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.AccessKeySecret must not be empty")
-		}
-		if config.HostAWSConfig.Region == "" {
-			return nil, microerror.Maskf(invalidConfigError, "config.HostAWSConfig.Region must not be empty")
-		}
-	}
-	if config.ProjectName == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.ProjectName must not be empty", config)
-	}
 
 	var crdClient *k8scrdclient.CRDClient
 	{
@@ -193,16 +162,19 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, error) {
 	var err error
 
-	hostAWSConfig := awsclient.Config{
-		AccessKeyID:     config.HostAWSConfig.AccessKeyID,
-		AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
-		SessionToken:    config.HostAWSConfig.SessionToken,
-		Region:          config.HostAWSConfig.Region,
-	}
+	var controlPlaneAWSClients awsclient.Clients
+	{
+		c := awsclient.Config{
+			AccessKeyID:     config.HostAWSConfig.AccessKeyID,
+			AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
+			Region:          config.HostAWSConfig.Region,
+			SessionToken:    config.HostAWSConfig.SessionToken,
+		}
 
-	awsHostClients, err := awsclient.NewClients(hostAWSConfig)
-	if err != nil {
-		return nil, microerror.Mask(err)
+		controlPlaneAWSClients, err = awsclient.NewClients(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
 	var certsSearcher *certs.Searcher
@@ -234,10 +206,15 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV22 *controller.ResourceSet
 	{
 		c := v22.ClusterResourceSetConfig{
-			CertsSearcher:      certsSearcher,
-			G8sClient:          config.G8sClient,
-			HostAWSConfig:      hostAWSConfig,
-			HostAWSClients:     awsHostClients,
+			CertsSearcher: certsSearcher,
+			G8sClient:     config.G8sClient,
+			HostAWSConfig: awsclient.Config{
+				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
+				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
+				SessionToken:    config.HostAWSConfig.SessionToken,
+				Region:          config.HostAWSConfig.Region,
+			},
+			HostAWSClients:     controlPlaneAWSClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
 			RandomKeysSearcher: randomKeysSearcher,
@@ -283,10 +260,15 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV22patch1 *controller.ResourceSet
 	{
 		c := v22patch1.ClusterResourceSetConfig{
-			CertsSearcher:      certsSearcher,
-			G8sClient:          config.G8sClient,
-			HostAWSConfig:      hostAWSConfig,
-			HostAWSClients:     awsHostClients,
+			CertsSearcher: certsSearcher,
+			G8sClient:     config.G8sClient,
+			HostAWSConfig: awsclient.Config{
+				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
+				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
+				SessionToken:    config.HostAWSConfig.SessionToken,
+				Region:          config.HostAWSConfig.Region,
+			},
+			HostAWSClients:     controlPlaneAWSClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
 			RandomKeysSearcher: randomKeysSearcher,
@@ -332,10 +314,15 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV23 *controller.ResourceSet
 	{
 		c := v23.ClusterResourceSetConfig{
-			CertsSearcher:      certsSearcher,
-			G8sClient:          config.G8sClient,
-			HostAWSConfig:      hostAWSConfig,
-			HostAWSClients:     awsHostClients,
+			CertsSearcher: certsSearcher,
+			G8sClient:     config.G8sClient,
+			HostAWSConfig: awsclient.Config{
+				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
+				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
+				SessionToken:    config.HostAWSConfig.SessionToken,
+				Region:          config.HostAWSConfig.Region,
+			},
+			HostAWSClients:     controlPlaneAWSClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
 			RandomKeysSearcher: randomKeysSearcher,
@@ -381,10 +368,15 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV23patch1 *controller.ResourceSet
 	{
 		c := v23patch1.ClusterResourceSetConfig{
-			CertsSearcher:      certsSearcher,
-			G8sClient:          config.G8sClient,
-			HostAWSConfig:      hostAWSConfig,
-			HostAWSClients:     awsHostClients,
+			CertsSearcher: certsSearcher,
+			G8sClient:     config.G8sClient,
+			HostAWSConfig: awsclient.Config{
+				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
+				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
+				SessionToken:    config.HostAWSConfig.SessionToken,
+				Region:          config.HostAWSConfig.Region,
+			},
+			HostAWSClients:     controlPlaneAWSClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
 			RandomKeysSearcher: randomKeysSearcher,
@@ -430,10 +422,15 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSetV24 *controller.ResourceSet
 	{
 		c := v24.ClusterResourceSetConfig{
-			CertsSearcher:      certsSearcher,
-			G8sClient:          config.G8sClient,
-			HostAWSConfig:      hostAWSConfig,
-			HostAWSClients:     awsHostClients,
+			CertsSearcher:          certsSearcher,
+			ControlPlaneAWSClients: controlPlaneAWSClients,
+			G8sClient:              config.G8sClient,
+			HostAWSConfig: awsclient.Config{
+				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
+				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
+				Region:          config.HostAWSConfig.Region,
+				SessionToken:    config.HostAWSConfig.SessionToken,
+			},
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
 			RandomKeysSearcher: randomKeysSearcher,
