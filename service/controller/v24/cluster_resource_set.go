@@ -240,7 +240,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	{
 		c := bridgezone.Config{
 			HostAWSConfig: config.HostAWSConfig,
-			HostRoute53:   config.ControlPlaneAWSClients.Route53,
 			K8sClient:     config.K8sClient,
 			Logger:        config.Logger,
 
