@@ -13,6 +13,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v24/key"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/cpf/template"
+	"github.com/giantswarm/aws-operator/service/routetable"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -41,7 +42,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			StackName: aws.String(key.MainHostPostStackName(cr)),
 		}
 
-		_, err = r.cloudFormation.DescribeStacks(i)
+		_, err = cc.Client.ControlPlane.AWS.CloudFormation.DescribeStacks(i)
 		if IsNotExists(err) {
 			// fall through
 		} else if err != nil {
@@ -95,7 +96,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			TemplateBody:                aws.String(templateBody),
 		}
 
-		_, err = r.cloudFormation.CreateStack(i)
+		_, err = cc.Client.ControlPlane.AWS.CloudFormation.CreateStack(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -110,7 +111,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			StackName: aws.String(key.MainHostPostStackName(cr)),
 		}
 
-		err = r.cloudFormation.WaitUntilStackCreateComplete(i)
+		err = cc.Client.ControlPlane.AWS.CloudFormation.WaitUntilStackCreateComplete(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -127,6 +128,19 @@ func (r *Resource) newPrivateRoutes(ctx context.Context, cr v1alpha1.AWSConfig) 
 		return nil, microerror.Mask(err)
 	}
 
+	var routeTable *routetable.RouteTable
+	{
+		c := routetable.Config{
+			EC2:    cc.Client.ControlPlane.AWS.EC2,
+			Logger: r.logger,
+		}
+
+		routeTable, err = routetable.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var tenantPrivateSubnetCidrs []string
 	{
 		for _, az := range key.StatusAvailabilityZones(cr) {
@@ -136,7 +150,7 @@ func (r *Resource) newPrivateRoutes(ctx context.Context, cr v1alpha1.AWSConfig) 
 
 	var routes []template.ParamsMainRouteTablesRoute
 	for _, name := range r.routeTables {
-		id, err := r.routeTable.IDForName(ctx, name)
+		id, err := routeTable.IDForName(ctx, name)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -170,10 +184,23 @@ func (r *Resource) newPublicRoutes(ctx context.Context, cr v1alpha1.AWSConfig) (
 		return nil, microerror.Mask(err)
 	}
 
+	var routeTable *routetable.RouteTable
+	{
+		c := routetable.Config{
+			EC2:    cc.Client.ControlPlane.AWS.EC2,
+			Logger: r.logger,
+		}
+
+		routeTable, err = routetable.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var routes []template.ParamsMainRouteTablesRoute
 
 	for _, name := range r.routeTables {
-		id, err := r.routeTable.IDForName(ctx, name)
+		id, err := routeTable.IDForName(ctx, name)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

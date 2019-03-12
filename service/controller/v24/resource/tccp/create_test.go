@@ -96,10 +96,6 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 	{
 		c := Config{}
 
-		c.HostClients = &adapter.Clients{
-			EC2: &adapter.EC2ClientMock{},
-			IAM: &adapter.IAMClientMock{},
-		}
 		c.Logger = microloggertest.New()
 		c.EncrypterBackend = "kms"
 		c.G8sClient = fake.NewSimpleClientset()
@@ -112,19 +108,21 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 		}
 	}
 
-	awsClients := aws.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-		KMS: &adapter.KMSClientMock{},
-	}
-
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			ctx := context.TODO()
 			cc := controllercontext.Context{
 				Client: controllercontext.ContextClient{
+					ControlPlane: controllercontext.ContextClientControlPlane{
+						AWS: aws.Clients{
+							EC2: &adapter.EC2ClientMock{},
+							IAM: &adapter.IAMClientMock{},
+						},
+					},
 					TenantCluster: controllercontext.ContextClientTenantCluster{
-						AWS: awsClients,
+						AWS: aws.Clients{
+							KMS: &adapter.KMSClientMock{},
+						},
 					},
 				},
 			}

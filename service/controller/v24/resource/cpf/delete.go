@@ -7,11 +7,16 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
 
+	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v24/key"
 )
 
 func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
-	customObject, err := key.ToCustomObject(obj)
+	cr, err := key.ToCustomObject(obj)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -21,10 +26,10 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 		i := &cloudformation.UpdateTerminationProtectionInput{
 			EnableTerminationProtection: aws.Bool(false),
-			StackName:                   aws.String(key.MainHostPostStackName(customObject)),
+			StackName:                   aws.String(key.MainHostPostStackName(cr)),
 		}
 
-		_, err = r.cloudFormation.UpdateTerminationProtection(i)
+		_, err = cc.Client.ControlPlane.AWS.CloudFormation.UpdateTerminationProtection(i)
 		if IsDeleteInProgress(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane finalizer cloud formation stack is being deleted")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -46,10 +51,10 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the deletion of the tenant cluster's control plane finalizer cloud formation stack")
 
 		i := &cloudformation.DeleteStackInput{
-			StackName: aws.String(key.MainHostPostStackName(customObject)),
+			StackName: aws.String(key.MainHostPostStackName(cr)),
 		}
 
-		_, err = r.cloudFormation.DeleteStack(i)
+		_, err = cc.Client.ControlPlane.AWS.CloudFormation.DeleteStack(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
