@@ -1,10 +1,6 @@
 package adapter
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/iam"
-	"github.com/giantswarm/microerror"
-
 	"github.com/giantswarm/aws-operator/service/controller/v24/key"
 )
 
@@ -28,17 +24,7 @@ func (v *GuestVPCAdapter) Adapt(cfg Config) error {
 	v.PeerVPCID = key.PeerID(cfg.CustomObject)
 	v.Region = key.Region(cfg.CustomObject)
 	v.RegionARN = key.RegionARN(cfg.CustomObject)
-
-	// PeerRoleArn.
-	roleName := key.PeerAccessRoleName(cfg.CustomObject)
-	input := &iam.GetRoleInput{
-		RoleName: aws.String(roleName),
-	}
-	output, err := cfg.HostClients.IAM.GetRole(input)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	v.PeerRoleArn = *output.Role.Arn
+	v.PeerRoleArn = cfg.ControlPlanePeerRoleARN
 
 	PublicRouteTable := RouteTableName{
 		ResourceName: key.PublicRouteTableName(0),

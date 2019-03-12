@@ -29,6 +29,7 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 		},
 		ControlPlaneAccountID:           cc.Status.ControlPlane.AWSAccountID,
 		ControlPlaneNATGatewayAddresses: cc.Status.ControlPlane.NATGateway.Addresses,
+		ControlPlanePeerRoleARN:         cc.Status.ControlPlane.PeerRole.ARN,
 		ControlPlaneVPCCidr:             cc.Status.ControlPlane.VPC.CIDR,
 		CustomObject:                    customObject,
 		Clients:                         adapterClients,

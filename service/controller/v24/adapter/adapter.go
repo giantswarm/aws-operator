@@ -35,6 +35,7 @@ type Config struct {
 	APIWhitelist                    APIWhitelist
 	ControlPlaneAccountID           string
 	ControlPlaneNATGatewayAddresses []*ec2.Address
+	ControlPlanePeerRoleARN         string
 	ControlPlaneVPCCidr             string
 	CustomObject                    v1alpha1.AWSConfig
 	Clients                         Clients
