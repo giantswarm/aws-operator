@@ -8,28 +8,8 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "kubernetes",
-				Description: "Mount /var/log directory in an EBS Volume.",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "containerlinux",
-				Description: "Update CoreOS to 2023.4.0.(CVE-2019-8912).",
-				Kind:        versionbundle.KindChanged,
-			},
-			{
-				Component:   "kubernetes",
-				Description: "Use proper hostname annotation for nodes.",
-				Kind:        versionbundle.KindChanged,
-			},
-			{
-				Component:   "kubernetes",
-				Description: "Update to 1.13.4 (CVE-2019-1002100).",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "aws-operator",
-				Description: "Fix update process node termination.",
+				Component:   "TODO",
+				Description: "TODO",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
@@ -56,6 +36,6 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    "aws-operator",
-		Version: "4.8.0",
+		Version: "4.9.0",
 	}
 }
