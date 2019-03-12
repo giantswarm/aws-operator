@@ -142,16 +142,7 @@ func TestAdapterGuestMain(t *testing.T) {
 			config := Config{
 				ControlPlaneAccountID: "myHostAccountID",
 				CustomObject:          tc.customObject,
-				Clients: Clients{
-					EC2: &EC2ClientMock{},
-					IAM: &IAMClientMock{},
-					KMS: &KMSClientMock{},
-				},
-				HostClients: Clients{
-					EC2: &EC2ClientMock{},
-					IAM: &IAMClientMock{},
-				},
-				InstallationName: "myinstallation",
+				InstallationName:      "myinstallation",
 				StackState: StackState{
 					MasterImageID: "master-image-id",
 					WorkerImageID: "worker-image-id",

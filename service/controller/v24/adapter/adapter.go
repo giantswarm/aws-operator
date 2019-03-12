@@ -38,15 +38,14 @@ type Config struct {
 	ControlPlanePeerRoleARN         string
 	ControlPlaneVPCCidr             string
 	CustomObject                    v1alpha1.AWSConfig
-	Clients                         Clients
 	EncrypterBackend                string
 	GuestAccountID                  string
-	HostClients                     Clients
 	InstallationName                string
 	PublicRouteTables               string
 	Route53Enabled                  bool
 	StackState                      StackState
 	TenantClusterAccountID          string
+	TenantClusterKMSKeyARN          string
 }
 
 type Adapter struct {

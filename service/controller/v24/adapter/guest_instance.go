@@ -77,7 +77,8 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 		i.Master.PrivateSubnet = key.PrivateSubnetName(0)
 
 		c := SmallCloudconfigConfig{
-			S3URL: key.SmallCloudConfigS3URL(config.CustomObject, config.TenantClusterAccountID, key.KindMaster),
+			InstanceRole: key.KindMaster,
+			S3URL:        key.SmallCloudConfigS3URL(config.CustomObject, config.TenantClusterAccountID, key.KindMaster),
 		}
 		rendered, err := templates.Render(key.CloudConfigSmallTemplates(), c)
 		if err != nil {

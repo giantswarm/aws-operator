@@ -91,16 +91,11 @@ func Test_AdapterLaunchConfiguration_RegularFields(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
-		clients := Clients{
-			EC2: &EC2ClientMock{},
-			IAM: &IAMClientMock{},
-		}
 		a := Adapter{}
 
 		t.Run(tc.description, func(t *testing.T) {
 			cfg := Config{
 				CustomObject: tc.customObject,
-				Clients:      clients,
 				StackState: StackState{
 					WorkerDockerVolumeSizeGB: key.WorkerDockerVolumeSizeGB(tc.customObject),
 				},
@@ -143,10 +138,6 @@ func Test_AdapterLaunchConfiguration_SmallCloudConfig(t *testing.T) {
 	}
 
 	a := Adapter{}
-	clients := Clients{
-		EC2: &EC2ClientMock{},
-		IAM: &IAMClientMock{},
-	}
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
@@ -168,7 +159,6 @@ func Test_AdapterLaunchConfiguration_SmallCloudConfig(t *testing.T) {
 	}
 	cfg := Config{
 		CustomObject:           customObject,
-		Clients:                clients,
 		TenantClusterAccountID: "000000000000",
 	}
 	err := a.Guest.LaunchConfiguration.Adapt(cfg)

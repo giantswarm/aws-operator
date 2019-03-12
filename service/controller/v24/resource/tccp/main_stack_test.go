@@ -10,8 +10,6 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v24/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v24/key"
 )
@@ -61,26 +59,8 @@ func TestMainGuestTemplateGetEmptyBody(t *testing.T) {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	awsClients := aws.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-		KMS: &adapter.KMSClientMock{},
-	}
-
 	ctx := context.TODO()
-	cc := controllercontext.Context{
-		Client: controllercontext.ContextClient{
-			ControlPlane: controllercontext.ContextClientControlPlane{
-				AWS: aws.Clients{
-					EC2: &adapter.EC2ClientMock{},
-					IAM: &adapter.IAMClientMock{},
-				},
-			},
-			TenantCluster: controllercontext.ContextClientTenantCluster{
-				AWS: awsClients,
-			},
-		},
-	}
+	cc := controllercontext.Context{}
 	ctx = controllercontext.NewContext(ctx, cc)
 
 	_, err = newResource.getMainGuestTemplateBody(ctx, customObject, StackState{})
@@ -213,21 +193,7 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 	}
 
 	ctx := context.TODO()
-	cc := controllercontext.Context{
-		Client: controllercontext.ContextClient{
-			ControlPlane: controllercontext.ContextClientControlPlane{
-				AWS: aws.Clients{
-					EC2: &adapter.EC2ClientMock{},
-					IAM: &adapter.IAMClientMock{},
-				},
-			},
-			TenantCluster: controllercontext.ContextClientTenantCluster{
-				AWS: aws.Clients{
-					KMS: &adapter.KMSClientMock{},
-				},
-			},
-		},
-	}
+	cc := controllercontext.Context{}
 	ctx = controllercontext.NewContext(ctx, cc)
 
 	body, err := newResource.getMainGuestTemplateBody(ctx, customObject, stackState)
@@ -523,21 +489,7 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 	}
 
 	ctx := context.TODO()
-	cc := controllercontext.Context{
-		Client: controllercontext.ContextClient{
-			ControlPlane: controllercontext.ContextClientControlPlane{
-				AWS: aws.Clients{
-					EC2: &adapter.EC2ClientMock{},
-					IAM: &adapter.IAMClientMock{},
-				},
-			},
-			TenantCluster: controllercontext.ContextClientTenantCluster{
-				AWS: aws.Clients{
-					KMS: &adapter.KMSClientMock{},
-				},
-			},
-		},
-	}
+	cc := controllercontext.Context{}
 	ctx = controllercontext.NewContext(ctx, cc)
 
 	body, err := newResource.getMainGuestTemplateBody(ctx, customObject, stackState)
@@ -651,21 +603,7 @@ func TestMainGuestTemplateChinaRegion(t *testing.T) {
 	}
 
 	ctx := context.TODO()
-	cc := controllercontext.Context{
-		Client: controllercontext.ContextClient{
-			ControlPlane: controllercontext.ContextClientControlPlane{
-				AWS: aws.Clients{
-					EC2: &adapter.EC2ClientMock{},
-					IAM: &adapter.IAMClientMock{},
-				},
-			},
-			TenantCluster: controllercontext.ContextClientTenantCluster{
-				AWS: aws.Clients{
-					KMS: &adapter.KMSClientMock{},
-				},
-			},
-		},
-	}
+	cc := controllercontext.Context{}
 	ctx = controllercontext.NewContext(ctx, cc)
 
 	body, err := newResource.getMainGuestTemplateBody(ctx, customObject, stackState)

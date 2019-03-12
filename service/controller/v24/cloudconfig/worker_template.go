@@ -181,11 +181,6 @@ func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Enabled:      true,
 		},
 		{
-			AssetContent: cloudconfig.WorkerFormatVarLibDockerService,
-			Name:         "format-var-lib-docker.service",
-			Enabled:      true,
-		},
-		{
 			AssetContent: cloudconfig.PersistentVarLibDockerMount,
 			Name:         "var-lib-docker.mount",
 			Enabled:      true,
@@ -203,12 +198,6 @@ func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Name:         "set-hostname.service",
 			Enabled:      true,
 		},
-		{
-			AssetContent: cloudconfig.FormatVarLogService,
-			Name:         "format-var-log.service",
-			Enabled:      true,
-		},
-		// Mount log EBS volume.
 		{
 			AssetContent: cloudconfig.EphemeralVarLogMount,
 			Name:         "var-log.mount",

@@ -51,13 +51,11 @@ func TestAdapterRecordSetsRegularFields(t *testing.T) {
 		},
 	}
 
-	clients := Clients{}
 	for _, tc := range testCases {
 		a := Adapter{}
 		t.Run(tc.description, func(t *testing.T) {
 			cfg := Config{
 				CustomObject:   tc.customObject,
-				Clients:        clients,
 				Route53Enabled: tc.route53Enabled,
 			}
 			err := a.Guest.RecordSets.Adapt(cfg)

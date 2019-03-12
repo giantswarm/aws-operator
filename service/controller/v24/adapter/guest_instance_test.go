@@ -25,10 +25,6 @@ func Test_Adapter_Instance_RegularFields(t *testing.T) {
 		{
 			Description: "case 0 basic matching, all fields present",
 			Config: Config{
-				Clients: Clients{
-					EC2: &EC2ClientMock{},
-					IAM: &IAMClientMock{},
-				},
 				CustomObject: v1alpha1.AWSConfig{
 					Spec: v1alpha1.AWSConfigSpec{
 						Cluster: v1alpha1.Cluster{
@@ -105,10 +101,6 @@ func Test_Adapter_Instance_SmallCloudConfig(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.Description, func(t *testing.T) {
-			clients := Clients{
-				EC2: &EC2ClientMock{},
-				IAM: &IAMClientMock{},
-			}
 			customObject := v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
@@ -138,7 +130,6 @@ func Test_Adapter_Instance_SmallCloudConfig(t *testing.T) {
 				},
 			}
 			cfg := Config{
-				Clients:      clients,
 				CustomObject: customObject,
 				StackState: StackState{
 					MasterCloudConfigVersion: "foo",

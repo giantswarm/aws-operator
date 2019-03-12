@@ -280,16 +280,6 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Enabled:      true,
 		},
 		{
-			AssetContent: cloudconfig.MasterFormatVarLibDockerService,
-			Name:         "format-var-lib-docker.service",
-			Enabled:      true,
-		},
-		{
-			AssetContent: cloudconfig.EphemeralVarLibDockerMount,
-			Name:         "var-lib-docker.mount",
-			Enabled:      true,
-		},
-		{
 			AssetContent: cloudconfig.DecryptKeysAssetsService,
 			Name:         "decrypt-keys-assets.service",
 			Enabled:      true,
@@ -299,22 +289,15 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Name:         "set-hostname.service",
 			Enabled:      true,
 		},
-		// Format etcd EBS volume.
 		{
-			AssetContent: cloudconfig.FormatEtcdVolume,
-			Name:         "format-etcd-ebs.service",
+			AssetContent: cloudconfig.EphemeralVarLibDockerMount,
+			Name:         "var-lib-docker.mount",
 			Enabled:      true,
 		},
 		// Mount etcd EBS volume.
 		{
 			AssetContent: cloudconfig.MountEtcdVolume,
 			Name:         "var-lib-etcd.mount",
-			Enabled:      true,
-		},
-		// Format log EBS volume.
-		{
-			AssetContent: cloudconfig.FormatVarLogService,
-			Name:         "format-var-log.service",
 			Enabled:      true,
 		},
 		// Mount log EBS volume.

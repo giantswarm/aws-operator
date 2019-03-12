@@ -28,10 +28,15 @@ type ContextStatusControlPlaneVPC struct {
 
 type ContextStatusTenantCluster struct {
 	AWSAccountID           string
-	TCCP                   ContextStatusTenantClusterTCCP
 	EncryptionKey          string
 	HostedZoneNameServers  string
+	KMS                    ContextStatusTenantClusterKMS
+	TCCP                   ContextStatusTenantClusterTCCP
 	VPCPeeringConnectionID string
+}
+
+type ContextStatusTenantClusterKMS struct {
+	KeyARN string
 }
 
 type ContextStatusTenantClusterTCCP struct {
