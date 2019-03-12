@@ -369,8 +369,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var cpiResource controller.Resource
 	{
 		c := cpi.Config{
-			CloudFormation: config.ControlPlaneAWSClients.CloudFormation,
-			Logger:         config.Logger,
+			Logger: config.Logger,
 
 			InstallationName: config.InstallationName,
 		}

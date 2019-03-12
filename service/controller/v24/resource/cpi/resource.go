@@ -16,8 +16,7 @@ const (
 )
 
 type Config struct {
-	CloudFormation CloudFormation
-	Logger         micrologger.Logger
+	Logger micrologger.Logger
 
 	InstallationName string
 }
@@ -26,23 +25,18 @@ type Config struct {
 // Initializer. This was formerly known as the host pre stack. We manage a
 // dedicated CF stack for the IAM role and VPC Peering setup.
 type Resource struct {
-	cloudFormation CloudFormation
-	logger         micrologger.Logger
+	logger micrologger.Logger
 
 	installationName string
 }
 
 func New(config Config) (*Resource, error) {
-	if config.CloudFormation == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.CloudFormation must not be empty", config)
-	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
 	r := &Resource{
-		cloudFormation: config.CloudFormation,
-		logger:         config.Logger,
+		logger: config.Logger,
 
 		installationName: config.InstallationName,
 	}

@@ -22,6 +22,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	if err != nil {
 		return microerror.Mask(err)
 	}
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane initializer CF stack")
@@ -30,7 +34,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			StackName: aws.String(key.MainHostPreStackName(cr)),
 		}
 
-		_, err = r.cloudFormation.DescribeStacks(i)
+		_, err = cc.Client.ControlPlane.AWS.CloudFormation.DescribeStacks(i)
 		if IsNotExists(err) {
 			// fall through
 		} else if err != nil {
@@ -82,7 +86,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			TemplateBody:                aws.String(templateBody),
 		}
 
-		_, err = r.cloudFormation.CreateStack(i)
+		_, err = cc.Client.ControlPlane.AWS.CloudFormation.CreateStack(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -97,7 +101,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			StackName: aws.String(key.MainHostPreStackName(cr)),
 		}
 
-		err = r.cloudFormation.WaitUntilStackCreateComplete(i)
+		err = cc.Client.ControlPlane.AWS.CloudFormation.WaitUntilStackCreateComplete(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
