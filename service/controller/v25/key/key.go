@@ -10,6 +10,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
+	"github.com/giantswarm/aws-operator/service/controller/v22/key"
 	"github.com/giantswarm/aws-operator/service/controller/v25/templates/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v25/templates/cloudformation/tccp"
 )
@@ -431,6 +432,16 @@ func PrivateSubnetName(idx int) string {
 	return fmt.Sprintf("PrivateSubnet%02d", idx)
 }
 
+func PrivateSubnetNames(cr v1alpha1.AWSConfig) []string {
+	var names []string
+
+	for i := 0; i < StatusAvailabilityZoneCount(cr); i++ {
+		names = append(names, key.PrivateSubnetName(i))
+	}
+
+	return names
+}
+
 func PublicSubnetCIDR(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.VPC.PublicSubnetCIDR
 }
@@ -533,6 +544,20 @@ func SpecAvailabilityZones(customObject v1alpha1.AWSConfig) int {
 
 func StatusAvailabilityZones(customObject v1alpha1.AWSConfig) []v1alpha1.AWSConfigStatusAWSAvailabilityZone {
 	return customObject.Status.AWS.AvailabilityZones
+}
+
+func StatusAvailabilityZoneCount(cr v1alpha1.AWSConfig) int {
+	return len(key.StatusAvailabilityZones(cr))
+}
+
+func StatusAvailabilityZoneNames(cr v1alpha1.AWSConfig) []string {
+	var names []string
+
+	for _, a := range key.StatusAvailabilityZones(cr) {
+		names = append(names, a.Name)
+	}
+
+	return names
 }
 
 // StatusNetworkCIDR returns the allocated tenant cluster subnet CIDR.

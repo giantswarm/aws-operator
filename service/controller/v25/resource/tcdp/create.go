@@ -2,6 +2,7 @@ package tcdp
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -10,7 +11,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/v25/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v25/key"
-	"github.com/giantswarm/aws-operator/service/controller/v25/resource/cpi/template"
+	"github.com/giantswarm/aws-operator/service/controller/v25/resource/tcdp/template"
 )
 
 const (
@@ -56,13 +57,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		// TODO
 		var params *template.ParamsMain
 		{
-			iamRoles, err := r.newIAMRolesParams(ctx, cr)
+			autoScalingGroup, err := r.newAutoScalingGroup(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 
 			params = &template.ParamsMain{
-				IAMRoles: iamRoles,
+				AutoScalingGroup: autoScalingGroup,
 			}
 		}
 
@@ -113,22 +114,79 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) newIAMRolesParams(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainIAMRoles, error) {
+func (r *Resource) newAutoScalingGroup(ctx context.Context, cr v1alpha1.AWSConfig) (*template.AutoScalingGroup, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	iamRoles := &template.ParamsMainIAMRoles{
-		PeerAccessRoleName: key.PeerAccessRoleName(cr),
-		Tenant: template.ParamsMainIAMRolesTenant{
-			AWS: template.ParamsMainIAMRolesTenantAWS{
-				Account: template.ParamsMainIAMRolesTenantAWSAccount{
-					ID: cc.Status.TenantCluster.AWSAccountID,
-				},
-			},
+	mindDesiredNodes := minDesiredWorkers(key.ScalingMin(cr), key.ScalingMax(cr), cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity)
+
+	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
+		ASG: template.ParamsMainAutoScalingGroupASG{
+			DesiredCapacity: minDesiredNodes,
+			MaxSize:         key.ScalingMax(cr),
+			MinSize:         key.ScalingMin(cr),
+			Type:            key.KindWorker,
 		},
+		AvailabilityZones: key.StatusAvailabilityZoneNames(cr),
+		Cluster: template.ParamsMainAutoScalingGroupCluster{
+			ID: key.ClusterID(cr),
+		},
+		HealthCheckGracePeriod: 10,
+		MaxBatchSize:           workerCountRatio(mindDesiredNodes, 0.3),
+		MinInstancesInService:  workerCountRatio(mindDesiredNodes, 0.7),
+		RollingUpdatePauseTime: "PT15M",
+		Subnets:                key.PrivateSubnetNames(cr),
 	}
 
-	return iamRoles, nil
+	return autoScalingGroup, nil
+}
+
+func workerCountRatio(workers int, ratio float32) string {
+	value := float32(workers) * ratio
+	rounded := int(value + 0.5)
+
+	if rounded == 0 {
+		rounded = 1
+	}
+
+	return strconv.Itoa(rounded)
+}
+
+// minDesiredWorkers calculates appropriate minimum value to be set for ASG
+// Desired value and to be used for computation of workerCountRatio.
+//
+// When cluster-autoscaler has scaled cluster and ASG's Desired value is higher
+// than minimum number of instances allowed for that ASG, then it makes sense to
+// consider Desired value as minimum number of running instances for further
+// operational computations.
+//
+// Example:
+// Initially ASG has minimum of 3 workers and maximum of 10. Due to amount of
+// workload deployed on workers, cluster-autoscaler has scaled current Desired
+// number of instances to 5. Therefore it makes sense to consider 5 as minimum
+// number of nodes also when working on batch updates on ASG instances.
+//
+// Example 2:
+// When end user is scaling cluster and adding restrictions to its size, it
+// might be that initial ASG configuration is following:
+// 		- Min: 3
+//		- Max: 10
+// 		- Desired: 10
+//
+// Now end user decides that it must be scaled down so maximum size is decreased
+// to 7. When desired number of instances is temporarily bigger than maximum
+// number of instances, it must be fixed to be maximum number of instances.
+//
+func minDesiredWorkers(minWorkers, maxWorkers, statusDesiredCapacity int) int {
+	if statusDesiredCapacity > maxWorkers {
+		return maxWorkers
+	}
+
+	if statusDesiredCapacity > minWorkers {
+		return statusDesiredCapacity
+	}
+
+	return minWorkers
 }
