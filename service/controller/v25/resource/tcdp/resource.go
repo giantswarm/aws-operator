@@ -1,4 +1,4 @@
-package cpi
+package tcdp
 
 import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -12,7 +12,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "cpiv25"
+	Name = "tcdpv25"
 )
 
 type Config struct {
@@ -21,9 +21,8 @@ type Config struct {
 	InstallationName string
 }
 
-// Resource implements the CPI resource, which stands for Control Plane
-// Initializer. This was formerly known as the host pre stack. We manage a
-// dedicated CF stack for the IAM role and VPC Peering setup.
+// Resource implements the TCDP resource, which stands for Tenant Cluster Data
+// Plane. We manage a dedicated Cloud Formation stack for each node pool.
 type Resource struct {
 	logger micrologger.Logger
 
