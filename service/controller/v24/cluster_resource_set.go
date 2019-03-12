@@ -500,7 +500,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var vpcCIDRResource controller.Resource
 	{
 		c := vpccidr.Config{
-			EC2:    config.ControlPlaneAWSClients.EC2,
 			Logger: config.Logger,
 		}
 
