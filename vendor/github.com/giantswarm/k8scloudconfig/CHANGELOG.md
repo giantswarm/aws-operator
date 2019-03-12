@@ -21,6 +21,10 @@ version directory, and  then changes are introduced.
 - Update calico to 3.5.1.
 - Add fine-grained Audit Policy
 
+## [v4.0.1] 
+### Changed
+- Update kubernetes to 1.12.6 CVE-2019-1002100
+
 ## [v3.8.0] WIP
 - Update kubernetes to 1.12.6 CVE-2019-1002100
 
