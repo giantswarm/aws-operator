@@ -25,9 +25,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v23"
 	v23adapter "github.com/giantswarm/aws-operator/service/controller/v23/adapter"
 	v23cloudconfig "github.com/giantswarm/aws-operator/service/controller/v23/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v23patch1"
-	v23patch1adapter "github.com/giantswarm/aws-operator/service/controller/v23patch1/adapter"
-	v23patch1cloudconfig "github.com/giantswarm/aws-operator/service/controller/v23patch1/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v24"
 	v24adapter "github.com/giantswarm/aws-operator/service/controller/v24/adapter"
 	v24cloudconfig "github.com/giantswarm/aws-operator/service/controller/v24/cloudconfig"
@@ -365,60 +362,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
-	var resourceSetV23patch1 *controller.ResourceSet
-	{
-		c := v23patch1.ClusterResourceSetConfig{
-			CertsSearcher: certsSearcher,
-			G8sClient:     config.G8sClient,
-			HostAWSConfig: awsclient.Config{
-				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
-				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
-				SessionToken:    config.HostAWSConfig.SessionToken,
-				Region:          config.HostAWSConfig.Region,
-			},
-			HostAWSClients:     controlPlaneAWSClients,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			RandomKeysSearcher: randomKeysSearcher,
-
-			AccessLogsExpiration:       config.AccessLogsExpiration,
-			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
-			DeleteLoggingBucket:        config.DeleteLoggingBucket,
-			EncrypterBackend:           config.EncrypterBackend,
-			GuestAvailabilityZones:     config.GuestAWSConfig.AvailabilityZones,
-			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
-			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
-			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
-			GuestUpdateEnabled:         config.GuestUpdateEnabled,
-			PodInfraContainerImage:     config.PodInfraContainerImage,
-			Route53Enabled:             config.Route53Enabled,
-			IgnitionPath:               config.IgnitionPath,
-			IncludeTags:                config.IncludeTags,
-			InstallationName:           config.InstallationName,
-			IPAMNetworkRange:           config.IPAMNetworkRange,
-			OIDC: v23patch1cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			APIWhitelist: v23patch1adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
-			},
-			ProjectName:       config.ProjectName,
-			PublicRouteTables: config.RouteTables,
-			RegistryDomain:    config.RegistryDomain,
-			SSOPublicKey:      config.SSOPublicKey,
-			VaultAddress:      config.VaultAddress,
-		}
-
-		resourceSetV23patch1, err = v23patch1.NewClusterResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var resourceSetV24 *controller.ResourceSet
 	{
 		c := v24.ClusterResourceSetConfig{
@@ -476,7 +419,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		resourceSetV22,
 		resourceSetV22patch1,
 		resourceSetV23,
-		resourceSetV23patch1,
 		resourceSetV24,
 	}
 

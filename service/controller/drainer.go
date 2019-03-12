@@ -17,7 +17,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v22"
 	"github.com/giantswarm/aws-operator/service/controller/v22patch1"
 	"github.com/giantswarm/aws-operator/service/controller/v23"
-	"github.com/giantswarm/aws-operator/service/controller/v23patch1"
 	"github.com/giantswarm/aws-operator/service/controller/v24"
 )
 
@@ -198,28 +197,6 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
-	var v23patch1ResourceSet *controller.ResourceSet
-	{
-		c := v23patch1.DrainerResourceSetConfig{
-			G8sClient: config.G8sClient,
-			HostAWSConfig: awsclient.Config{
-				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
-				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
-				SessionToken:    config.HostAWSConfig.SessionToken,
-				Region:          config.HostAWSConfig.Region,
-			},
-			K8sClient: config.K8sClient,
-			Logger:    config.Logger,
-
-			GuestUpdateEnabled: config.GuestUpdateEnabled,
-			ProjectName:        config.ProjectName,
-		}
-		v23patch1ResourceSet, err = v23patch1.NewDrainerResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var v24ResourceSet *controller.ResourceSet
 	{
 		c := v24.DrainerResourceSetConfig{
@@ -248,7 +225,6 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		v22ResourceSet,
 		v22patch1ResourceSet,
 		v23ResourceSet,
-		v23patch1ResourceSet,
 		v24ResourceSet,
 	}
 
