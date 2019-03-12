@@ -18,10 +18,6 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 		return "", microerror.Mask(err)
 	}
 
-	adapterClients := adapter.Clients{
-		KMS: cc.Client.TenantCluster.AWS.KMS,
-	}
-
 	cfg := adapter.Config{
 		APIWhitelist: adapter.APIWhitelist{
 			Enabled:    r.apiWhiteList.Enabled,
@@ -32,7 +28,6 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 		ControlPlanePeerRoleARN:         cc.Status.ControlPlane.PeerRole.ARN,
 		ControlPlaneVPCCidr:             cc.Status.ControlPlane.VPC.CIDR,
 		CustomObject:                    customObject,
-		Clients:                         adapterClients,
 		EncrypterBackend:                r.encrypterBackend,
 		InstallationName:                r.installationName,
 		PublicRouteTables:               r.publicRouteTables,
@@ -59,6 +54,7 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 			VersionBundleVersion: stackState.VersionBundleVersion,
 		},
 		TenantClusterAccountID: cc.Status.TenantCluster.AWSAccountID,
+		TenantClusterKMSKeyARN: cc.Status.TenantCluster.KMS.KeyARN,
 	}
 
 	adp, err := adapter.NewGuest(cfg)

@@ -36,6 +36,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/encryptionkey"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/ipam"
+	"github.com/giantswarm/aws-operator/service/controller/v24/resource/kmskeyarn"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/loadbalancer"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/migration"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/namespace"
@@ -233,6 +234,20 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		ipamResource, err = ipam.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var kmsKeyARNResource controller.Resource
+	{
+		c := kmskeyarn.Config{
+			Logger: config.Logger,
+
+			EncrypterBackend: config.EncrypterBackend,
+		}
+
+		kmsKeyARNResource, err = kmskeyarn.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -553,6 +568,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	resources := []controller.Resource{
 		accountIDResource,
 		natGatewayAddressesResource,
+		kmsKeyARNResource,
 		peerRoleARNResource,
 		vpcCIDRResource,
 		stackOutputResource,
