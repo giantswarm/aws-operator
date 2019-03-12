@@ -22,7 +22,6 @@ const (
 
 type Config struct {
 	HostAWSConfig clientaws.Config
-	HostRoute53   *route53.Route53
 	K8sClient     kubernetes.Interface
 	Logger        micrologger.Logger
 
@@ -120,9 +119,6 @@ type Resource struct {
 func New(config Config) (*Resource, error) {
 	if reflect.DeepEqual(clientaws.Config{}, config.HostAWSConfig) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSConfig must not be empty", config)
-	}
-	if config.HostRoute53 == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostRoute53 must not be empty", config)
 	}
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
