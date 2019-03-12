@@ -41,7 +41,6 @@ type Config struct {
 	Clients                         Clients
 	EncrypterBackend                string
 	GuestAccountID                  string
-	HostClients                     Clients
 	InstallationName                string
 	PublicRouteTables               string
 	Route53Enabled                  bool

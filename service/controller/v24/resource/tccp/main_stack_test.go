@@ -70,12 +70,6 @@ func TestMainGuestTemplateGetEmptyBody(t *testing.T) {
 	ctx := context.TODO()
 	cc := controllercontext.Context{
 		Client: controllercontext.ContextClient{
-			ControlPlane: controllercontext.ContextClientControlPlane{
-				AWS: aws.Clients{
-					EC2: &adapter.EC2ClientMock{},
-					IAM: &adapter.IAMClientMock{},
-				},
-			},
 			TenantCluster: controllercontext.ContextClientTenantCluster{
 				AWS: awsClients,
 			},
@@ -215,12 +209,6 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 	ctx := context.TODO()
 	cc := controllercontext.Context{
 		Client: controllercontext.ContextClient{
-			ControlPlane: controllercontext.ContextClientControlPlane{
-				AWS: aws.Clients{
-					EC2: &adapter.EC2ClientMock{},
-					IAM: &adapter.IAMClientMock{},
-				},
-			},
 			TenantCluster: controllercontext.ContextClientTenantCluster{
 				AWS: aws.Clients{
 					KMS: &adapter.KMSClientMock{},
@@ -525,12 +513,6 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 	ctx := context.TODO()
 	cc := controllercontext.Context{
 		Client: controllercontext.ContextClient{
-			ControlPlane: controllercontext.ContextClientControlPlane{
-				AWS: aws.Clients{
-					EC2: &adapter.EC2ClientMock{},
-					IAM: &adapter.IAMClientMock{},
-				},
-			},
 			TenantCluster: controllercontext.ContextClientTenantCluster{
 				AWS: aws.Clients{
 					KMS: &adapter.KMSClientMock{},
@@ -653,12 +635,6 @@ func TestMainGuestTemplateChinaRegion(t *testing.T) {
 	ctx := context.TODO()
 	cc := controllercontext.Context{
 		Client: controllercontext.ContextClient{
-			ControlPlane: controllercontext.ContextClientControlPlane{
-				AWS: aws.Clients{
-					EC2: &adapter.EC2ClientMock{},
-					IAM: &adapter.IAMClientMock{},
-				},
-			},
 			TenantCluster: controllercontext.ContextClientTenantCluster{
 				AWS: aws.Clients{
 					KMS: &adapter.KMSClientMock{},

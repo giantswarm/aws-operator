@@ -34,13 +34,9 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 		CustomObject:                    customObject,
 		Clients:                         adapterClients,
 		EncrypterBackend:                r.encrypterBackend,
-		HostClients: adapter.Clients{
-			EC2: cc.Client.ControlPlane.AWS.EC2,
-			IAM: cc.Client.ControlPlane.AWS.IAM,
-		},
-		InstallationName:  r.installationName,
-		PublicRouteTables: r.publicRouteTables,
-		Route53Enabled:    r.route53Enabled,
+		InstallationName:                r.installationName,
+		PublicRouteTables:               r.publicRouteTables,
+		Route53Enabled:                  r.route53Enabled,
 		StackState: adapter.StackState{
 			Name: stackState.Name,
 

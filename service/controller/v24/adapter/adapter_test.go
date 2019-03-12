@@ -147,10 +147,6 @@ func TestAdapterGuestMain(t *testing.T) {
 					IAM: &IAMClientMock{},
 					KMS: &KMSClientMock{},
 				},
-				HostClients: Clients{
-					EC2: &EC2ClientMock{},
-					IAM: &IAMClientMock{},
-				},
 				InstallationName: "myinstallation",
 				StackState: StackState{
 					MasterImageID: "master-image-id",
