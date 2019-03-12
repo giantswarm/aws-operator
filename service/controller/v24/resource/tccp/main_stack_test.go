@@ -23,7 +23,6 @@ func testConfig() Config {
 	c.G8sClient = fake.NewSimpleClientset()
 	c.GuestPrivateSubnetMaskBits = 25
 	c.GuestPublicSubnetMaskBits = 25
-	c.HostClients = &adapter.Clients{}
 	c.InstallationName = "myinstallation"
 	c.Logger = microloggertest.New()
 
@@ -57,10 +56,6 @@ func TestMainGuestTemplateGetEmptyBody(t *testing.T) {
 	customObject := v1alpha1.AWSConfig{}
 
 	c := testConfig()
-	c.HostClients = &adapter.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-	}
 	newResource, err := New(c)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -204,10 +199,6 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 	}
 
 	cfg := testConfig()
-	cfg.HostClients = &adapter.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-	}
 	cfg.AdvancedMonitoringEC2 = true
 	cfg.Route53Enabled = true
 	newResource, err := New(cfg)
@@ -215,18 +206,13 @@ func TestMainGuestTemplateExistingFields(t *testing.T) {
 		t.Fatalf("unexpected error %v", err)
 	}
 
-	awsClients := aws.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-		KMS: &adapter.KMSClientMock{},
-		ELB: &adapter.ELBClientMock{},
-	}
-
 	ctx := context.TODO()
 	cc := controllercontext.Context{
 		Client: controllercontext.ContextClient{
 			TenantCluster: controllercontext.ContextClientTenantCluster{
-				AWS: awsClients,
+				AWS: aws.Clients{
+					KMS: &adapter.KMSClientMock{},
+				},
 			},
 		},
 	}
@@ -518,28 +504,19 @@ func TestMainGuestTemplateRoute53Disabled(t *testing.T) {
 	}
 
 	cfg := testConfig()
-	cfg.HostClients = &adapter.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-	}
 	cfg.Route53Enabled = false
 	newResource, err := New(cfg)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
 
-	awsClients := aws.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-		KMS: &adapter.KMSClientMock{},
-		ELB: &adapter.ELBClientMock{},
-	}
-
 	ctx := context.TODO()
 	cc := controllercontext.Context{
 		Client: controllercontext.ContextClient{
 			TenantCluster: controllercontext.ContextClientTenantCluster{
-				AWS: awsClients,
+				AWS: aws.Clients{
+					KMS: &adapter.KMSClientMock{},
+				},
 			},
 		},
 	}
@@ -649,28 +626,19 @@ func TestMainGuestTemplateChinaRegion(t *testing.T) {
 	}
 
 	cfg := testConfig()
-	cfg.HostClients = &adapter.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-	}
 	cfg.Route53Enabled = false
 	newResource, err := New(cfg)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
 
-	awsClients := aws.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-		KMS: &adapter.KMSClientMock{},
-		ELB: &adapter.ELBClientMock{},
-	}
-
 	ctx := context.TODO()
 	cc := controllercontext.Context{
 		Client: controllercontext.ContextClient{
 			TenantCluster: controllercontext.ContextClientTenantCluster{
-				AWS: awsClients,
+				AWS: aws.Clients{
+					KMS: &adapter.KMSClientMock{},
+				},
 			},
 		},
 	}

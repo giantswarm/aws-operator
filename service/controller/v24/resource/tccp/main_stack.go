@@ -19,7 +19,6 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 	}
 
 	adapterClients := adapter.Clients{
-		IAM: cc.Client.TenantCluster.AWS.IAM,
 		KMS: cc.Client.TenantCluster.AWS.KMS,
 	}
 
@@ -28,15 +27,16 @@ func (r *Resource) getMainGuestTemplateBody(ctx context.Context, customObject v1
 			Enabled:    r.apiWhiteList.Enabled,
 			SubnetList: r.apiWhiteList.SubnetList,
 		},
-		ControlPlaneAccountID: cc.Status.ControlPlane.AWSAccountID,
-		ControlPlaneVPCCidr:   cc.Status.ControlPlane.VPC.CIDR,
-		CustomObject:          customObject,
-		Clients:               adapterClients,
-		EncrypterBackend:      r.encrypterBackend,
-		HostClients:           *r.hostClients,
-		InstallationName:      r.installationName,
-		PublicRouteTables:     r.publicRouteTables,
-		Route53Enabled:        r.route53Enabled,
+		ControlPlaneAccountID:           cc.Status.ControlPlane.AWSAccountID,
+		ControlPlaneNATGatewayAddresses: cc.Status.ControlPlane.NATGateway.Addresses,
+		ControlPlanePeerRoleARN:         cc.Status.ControlPlane.PeerRole.ARN,
+		ControlPlaneVPCCidr:             cc.Status.ControlPlane.VPC.CIDR,
+		CustomObject:                    customObject,
+		Clients:                         adapterClients,
+		EncrypterBackend:                r.encrypterBackend,
+		InstallationName:                r.installationName,
+		PublicRouteTables:               r.publicRouteTables,
+		Route53Enabled:                  r.route53Enabled,
 		StackState: adapter.StackState{
 			Name: stackState.Name,
 

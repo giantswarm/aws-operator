@@ -193,7 +193,11 @@ func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Name:         "nvme-set-timeouts.service",
 			Enabled:      true,
 		},
-		// Mount log EBS volume.
+		{
+			AssetContent: cloudconfig.SetHostname,
+			Name:         "set-hostname.service",
+			Enabled:      true,
+		},
 		{
 			AssetContent: cloudconfig.EphemeralVarLogMount,
 			Name:         "var-log.mount",

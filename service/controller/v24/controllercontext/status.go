@@ -1,5 +1,7 @@
 package controllercontext
 
+import "github.com/aws/aws-sdk-go/service/ec2"
+
 type ContextStatus struct {
 	ControlPlane  ContextStatusControlPlane
 	TenantCluster ContextStatusTenantCluster
@@ -7,7 +9,17 @@ type ContextStatus struct {
 
 type ContextStatusControlPlane struct {
 	AWSAccountID string
+	NATGateway   ContextStatusControlPlaneNATGateway
+	PeerRole     ContextStatusControlPlanePeerRole
 	VPC          ContextStatusControlPlaneVPC
+}
+
+type ContextStatusControlPlaneNATGateway struct {
+	Addresses []*ec2.Address
+}
+
+type ContextStatusControlPlanePeerRole struct {
+	ARN string
 }
 
 type ContextStatusControlPlaneVPC struct {

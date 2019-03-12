@@ -26,24 +26,26 @@
 package adapter
 
 import (
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 )
 
 type Config struct {
-	APIWhitelist           APIWhitelist
-	ControlPlaneAccountID  string
-	ControlPlaneVPCCidr    string
-	CustomObject           v1alpha1.AWSConfig
-	Clients                Clients
-	EncrypterBackend       string
-	GuestAccountID         string
-	HostClients            Clients
-	InstallationName       string
-	PublicRouteTables      string
-	Route53Enabled         bool
-	StackState             StackState
-	TenantClusterAccountID string
+	APIWhitelist                    APIWhitelist
+	ControlPlaneAccountID           string
+	ControlPlaneNATGatewayAddresses []*ec2.Address
+	ControlPlanePeerRoleARN         string
+	ControlPlaneVPCCidr             string
+	CustomObject                    v1alpha1.AWSConfig
+	Clients                         Clients
+	EncrypterBackend                string
+	GuestAccountID                  string
+	InstallationName                string
+	PublicRouteTables               string
+	Route53Enabled                  bool
+	StackState                      StackState
+	TenantClusterAccountID          string
 }
 
 type Adapter struct {

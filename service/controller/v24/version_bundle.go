@@ -19,6 +19,11 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "kubernetes",
+				Description: "Use proper hostname annotation for nodes.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "kubernetes",
 				Description: "Update to 1.13.4 (CVE-2019-1002100).",
 				Kind:        versionbundle.KindAdded,
 			},

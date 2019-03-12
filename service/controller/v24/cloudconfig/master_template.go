@@ -285,6 +285,11 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Enabled:      true,
 		},
 		{
+			AssetContent: cloudconfig.SetHostname,
+			Name:         "set-hostname.service",
+			Enabled:      true,
+		},
+		{
 			AssetContent: cloudconfig.EphemeralVarLibDockerMount,
 			Name:         "var-lib-docker.mount",
 			Enabled:      true,

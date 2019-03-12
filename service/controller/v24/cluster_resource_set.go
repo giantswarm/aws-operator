@@ -39,6 +39,8 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/loadbalancer"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/migration"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/namespace"
+	"github.com/giantswarm/aws-operator/service/controller/v24/resource/natgatewayaddresses"
+	"github.com/giantswarm/aws-operator/service/controller/v24/resource/peerrolearn"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/service"
@@ -46,7 +48,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/vpccidr"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/workerasgname"
-	"github.com/giantswarm/aws-operator/service/routetable"
 )
 
 const (
@@ -150,19 +151,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		return nil, microerror.Maskf(invalidConfigError, "unknown encrypter backend %q", config.EncrypterBackend)
 	}
 
-	var routeTableService *routetable.RouteTable
-	{
-		c := routetable.Config{
-			EC2:    config.ControlPlaneAWSClients.EC2,
-			Logger: config.Logger,
-		}
-
-		routeTableService, err = routetable.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var cloudConfig *cloudconfig.CloudConfig
 	{
 		c := cloudconfig.Config{
@@ -186,7 +174,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	{
 		c := accountid.Config{
 			Logger: config.Logger,
-			STS:    config.ControlPlaneAWSClients.STS,
 		}
 
 		accountIDResource, err = accountid.New(c)
@@ -255,7 +242,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	{
 		c := bridgezone.Config{
 			HostAWSConfig: config.HostAWSConfig,
-			HostRoute53:   config.ControlPlaneAWSClients.Route53,
 			K8sClient:     config.K8sClient,
 			Logger:        config.Logger,
 
@@ -343,11 +329,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			},
 			EncrypterRoleManager: encrypterRoleManager,
 			G8sClient:            config.G8sClient,
-			HostClients: &adapter.Clients{
-				EC2: config.ControlPlaneAWSClients.EC2,
-				IAM: config.ControlPlaneAWSClients.IAM,
-			},
-			Logger: config.Logger,
+			Logger:               config.Logger,
 
 			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
 			EncrypterBackend:           config.EncrypterBackend,
@@ -372,9 +354,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var cpfResource controller.Resource
 	{
 		c := cpf.Config{
-			CloudFormation: config.ControlPlaneAWSClients.CloudFormation,
-			Logger:         config.Logger,
-			RouteTable:     routeTableService,
+			Logger: config.Logger,
 
 			EncrypterBackend: config.EncrypterBackend,
 			InstallationName: config.InstallationName,
@@ -391,8 +371,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var cpiResource controller.Resource
 	{
 		c := cpi.Config{
-			CloudFormation: config.ControlPlaneAWSClients.CloudFormation,
-			Logger:         config.Logger,
+			Logger: config.Logger,
 
 			InstallationName: config.InstallationName,
 		}
@@ -416,6 +395,32 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		namespaceResource, err = toCRUDResource(config.Logger, ops)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var natGatewayAddressesResource controller.Resource
+	{
+		c := natgatewayaddresses.Config{
+			Logger: config.Logger,
+
+			Installation: config.InstallationName,
+		}
+
+		natGatewayAddressesResource, err = natgatewayaddresses.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var peerRoleARNResource controller.Resource
+	{
+		c := peerrolearn.Config{
+			Logger: config.Logger,
+		}
+
+		peerRoleARNResource, err = peerrolearn.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -523,7 +528,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var vpcCIDRResource controller.Resource
 	{
 		c := vpccidr.Config{
-			EC2:    config.ControlPlaneAWSClients.EC2,
 			Logger: config.Logger,
 		}
 
@@ -548,6 +552,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 	resources := []controller.Resource{
 		accountIDResource,
+		natGatewayAddressesResource,
+		peerRoleARNResource,
 		vpcCIDRResource,
 		stackOutputResource,
 		workerASGNameResource,

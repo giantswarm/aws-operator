@@ -111,7 +111,6 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 			cfg := Config{
 				CustomObject: tc.customObject,
 				Clients:      Clients{},
-				HostClients:  Clients{},
 			}
 			err := a.Guest.AutoScalingGroup.Adapt(cfg)
 			if tc.expectedError && err == nil {
