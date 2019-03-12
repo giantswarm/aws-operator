@@ -4,6 +4,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 )
 
@@ -196,7 +198,7 @@ func TestAdapterSecurityGroupsKubernetesAPIRules(t *testing.T) {
 		customObject           v1alpha1.AWSConfig
 		apiWhitelistingEnabled bool
 		apiWhitelistSubnets    string
-		elasticIPs             []string
+		elasticIPs             []*ec2.Address
 		hostClusterCIDR        string
 		expectedError          bool
 		expectedRules          []securityGroupRule
@@ -391,9 +393,9 @@ func TestAdapterSecurityGroupsKubernetesAPIRules(t *testing.T) {
 				},
 			},
 			apiWhitelistingEnabled: true,
-			elasticIPs: []string{
-				"21.1.136.42",
-				"21.2.136.84",
+			elasticIPs: []*ec2.Address{
+				{PublicIp: aws.String("21.1.136.42")},
+				{PublicIp: aws.String("21.2.136.84")},
 			},
 			hostClusterCIDR: "10.0.0.0/16",
 			expectedError:   false,
@@ -447,9 +449,9 @@ func TestAdapterSecurityGroupsKubernetesAPIRules(t *testing.T) {
 			},
 			apiWhitelistingEnabled: true,
 			apiWhitelistSubnets:    "212.145.136.84/32,192.168.1.1/24",
-			elasticIPs: []string{
-				"21.1.136.42",
-				"21.2.136.84",
+			elasticIPs: []*ec2.Address{
+				{PublicIp: aws.String("21.1.136.42")},
+				{PublicIp: aws.String("21.2.136.84")},
 			},
 			hostClusterCIDR: "10.0.0.0/16",
 			expectedError:   false,
@@ -495,21 +497,15 @@ func TestAdapterSecurityGroupsKubernetesAPIRules(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		hostClients := Clients{
-			EC2: &EC2ClientMock{
-				elasticIPs: tc.elasticIPs,
-			},
-		}
-
 		t.Run(tc.description, func(t *testing.T) {
 			cfg := Config{
 				APIWhitelist: APIWhitelist{
 					Enabled:    tc.apiWhitelistingEnabled,
 					SubnetList: tc.apiWhitelistSubnets,
 				},
-				CustomObject: tc.customObject,
-				Clients:      Clients{},
-				HostClients:  hostClients,
+				Clients:                         Clients{},
+				ControlPlaneNATGatewayAddresses: tc.elasticIPs,
+				CustomObject:                    tc.customObject,
 			}
 
 			rules, err := getKubernetesAPIRules(cfg, tc.hostClusterCIDR)

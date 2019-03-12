@@ -39,6 +39,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/loadbalancer"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/migration"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/namespace"
+	"github.com/giantswarm/aws-operator/service/controller/v24/resource/natgatewayaddresses"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/peerrolearn"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/s3object"
@@ -399,6 +400,20 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var natGatewayAddressesResource controller.Resource
+	{
+		c := natgatewayaddresses.Config{
+			Logger: config.Logger,
+
+			Installation: config.InstallationName,
+		}
+
+		natGatewayAddressesResource, err = natgatewayaddresses.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var peerRoleARNResource controller.Resource
 	{
 		c := peerrolearn.Config{
@@ -537,8 +552,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 	resources := []controller.Resource{
 		accountIDResource,
-		vpcCIDRResource,
+		natGatewayAddressesResource,
 		peerRoleARNResource,
+		vpcCIDRResource,
 		stackOutputResource,
 		workerASGNameResource,
 		asgStatusResource,
