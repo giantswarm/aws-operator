@@ -7,8 +7,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v24/key"
+	"github.com/giantswarm/aws-operator/service/controller/v25/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v25/key"
 )
 
 func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {

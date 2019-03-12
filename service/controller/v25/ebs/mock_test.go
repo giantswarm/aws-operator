@@ -5,7 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/v24/key"
+	"github.com/giantswarm/aws-operator/service/controller/v25/key"
 )
 
 type EC2ClientMock struct {

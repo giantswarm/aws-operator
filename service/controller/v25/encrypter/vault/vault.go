@@ -18,8 +18,8 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v24/key"
+	"github.com/giantswarm/aws-operator/service/controller/v25/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v25/key"
 )
 
 const (

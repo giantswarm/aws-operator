@@ -9,7 +9,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v25/controllercontext"
 )
 
 func Test_Resource_Cloudformation_newCreate(t *testing.T) {

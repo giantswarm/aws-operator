@@ -7,12 +7,12 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
-	"github.com/giantswarm/aws-operator/service/controller/v24/key"
+	"github.com/giantswarm/aws-operator/service/controller/v25/key"
 )
 
 const (
 	// Name is the identifier of the resource.
-	Name = "s3bucketv24"
+	Name = "s3bucketv25"
 	// LifecycleLoggingBucketID is the Lifecycle ID for the logging bucket
 	LifecycleLoggingBucketID = "ExpirationLogs"
 )

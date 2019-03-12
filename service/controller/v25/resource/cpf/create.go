@@ -9,10 +9,10 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
-	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v24/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/v24/key"
-	"github.com/giantswarm/aws-operator/service/controller/v24/resource/cpf/template"
+	"github.com/giantswarm/aws-operator/service/controller/v25/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v25/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v25/key"
+	"github.com/giantswarm/aws-operator/service/controller/v25/resource/cpf/template"
 	"github.com/giantswarm/aws-operator/service/routetable"
 )
 

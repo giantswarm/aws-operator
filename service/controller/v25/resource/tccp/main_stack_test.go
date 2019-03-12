@@ -10,8 +10,8 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v24/key"
+	"github.com/giantswarm/aws-operator/service/controller/v25/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v25/key"
 )
 
 func testConfig() Config {

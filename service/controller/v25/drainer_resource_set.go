@@ -1,4 +1,4 @@
-package v24
+package v25
 
 import (
 	"context"
@@ -12,13 +12,13 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v24/credential"
-	"github.com/giantswarm/aws-operator/service/controller/v24/key"
-	"github.com/giantswarm/aws-operator/service/controller/v24/resource/drainer"
-	"github.com/giantswarm/aws-operator/service/controller/v24/resource/drainfinisher"
-	"github.com/giantswarm/aws-operator/service/controller/v24/resource/stackoutput"
-	"github.com/giantswarm/aws-operator/service/controller/v24/resource/workerasgname"
+	"github.com/giantswarm/aws-operator/service/controller/v25/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v25/credential"
+	"github.com/giantswarm/aws-operator/service/controller/v25/key"
+	"github.com/giantswarm/aws-operator/service/controller/v25/resource/drainer"
+	"github.com/giantswarm/aws-operator/service/controller/v25/resource/drainfinisher"
+	"github.com/giantswarm/aws-operator/service/controller/v25/resource/stackoutput"
+	"github.com/giantswarm/aws-operator/service/controller/v25/resource/workerasgname"
 )
 
 type DrainerResourceSetConfig struct {
