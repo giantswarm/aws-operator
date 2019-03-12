@@ -21,7 +21,6 @@ type Config struct {
 	EncrypterBackend string
 	InstallationName string
 	Route53Enabled   bool
-	RouteTables      []string
 }
 
 // Resource implements the CPF resource, which stands for Control Plane
@@ -33,7 +32,6 @@ type Resource struct {
 	encrypterBackend string
 	installationName string
 	route53Enabled   bool
-	routeTables      []string
 }
 
 func New(config Config) (*Resource, error) {
@@ -44,9 +42,6 @@ func New(config Config) (*Resource, error) {
 	if config.EncrypterBackend == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.EncrypterBackend must not be empty", config)
 	}
-	if config.RouteTables == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.RouteTables must not be empty", config)
-	}
 
 	r := &Resource{
 		logger: config.Logger,
@@ -54,7 +49,6 @@ func New(config Config) (*Resource, error) {
 		encrypterBackend: config.EncrypterBackend,
 		installationName: config.InstallationName,
 		route53Enabled:   config.Route53Enabled,
-		routeTables:      config.RouteTables,
 	}
 
 	return r, nil
