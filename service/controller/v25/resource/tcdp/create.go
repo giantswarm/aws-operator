@@ -54,7 +54,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's data plane cloud formation stack")
 
-		// TODO
 		var params *template.ParamsMain
 		{
 			autoScalingGroup, err := r.newAutoScalingGroup(ctx, cr)
