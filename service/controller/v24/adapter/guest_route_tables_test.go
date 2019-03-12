@@ -63,10 +63,6 @@ func TestAdapterRouteTablesRegularFields(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		hostClients := Clients{
-			EC2: &EC2ClientMock{},
-		}
-
 		a := Adapter{}
 
 		t.Run(tc.description, func(t *testing.T) {
@@ -74,7 +70,6 @@ func TestAdapterRouteTablesRegularFields(t *testing.T) {
 				ControlPlaneVPCCidr: tc.expectedHostClusterCIDR,
 				CustomObject:        tc.customObject,
 				Clients:             Clients{},
-				HostClients:         hostClients,
 			}
 			err := a.Guest.RouteTables.Adapt(cfg)
 			if tc.expectedError && err == nil {
