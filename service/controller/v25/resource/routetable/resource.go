@@ -78,8 +78,7 @@ func (r *Resource) addRouteTableMappingsToContext(ctx context.Context) error {
 		return nil
 	}
 
-	// We do not have a cached VPC CIDR for the requested VPC ID. So we look it
-	// up.
+	// We do not have the cached mappings, so we look them up.
 	var mappings map[string]string
 	for _, name := range r.names {
 		id, err := r.lookup(ctx, cc.Client.ControlPlane.AWS.EC2, name)
