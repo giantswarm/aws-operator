@@ -9,8 +9,6 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/micrologger/microloggertest"
-
-	"github.com/giantswarm/aws-operator/service/controller/v24/adapter"
 )
 
 func Test_Resource_Cloudformation_GetCloudFormationTags(t *testing.T) {
@@ -59,10 +57,6 @@ func Test_Resource_Cloudformation_GetCloudFormationTags(t *testing.T) {
 
 	c.EncrypterBackend = "kms"
 	c.G8sClient = fake.NewSimpleClientset()
-	c.HostClients = &adapter.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-	}
 	c.Logger = microloggertest.New()
 
 	for _, tc := range testCases {

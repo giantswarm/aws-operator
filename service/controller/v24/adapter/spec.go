@@ -1,11 +1,5 @@
 package adapter
 
-import (
-	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/aws/aws-sdk-go/service/iam"
-	"github.com/aws/aws-sdk-go/service/kms"
-)
-
 const (
 	// asgMaxBatchSizeRatio is the % of instances to be updated during a
 	// rolling update.
@@ -55,12 +49,6 @@ type APIWhitelist struct {
 	SubnetList string
 }
 
-type Clients struct {
-	EC2 EC2Client
-	IAM IAMClient
-	KMS KMSClient
-}
-
 type Hydrater func(config Config) error
 
 // TODO we copy this because of a circular import issue with the cloudformation
@@ -98,32 +86,9 @@ type StackState struct {
 	VersionBundleVersion string
 }
 
-// EC2Client describes the methods required to be implemented by a EC2 AWS
-// client.
-type EC2Client interface {
-	DescribeAddresses(*ec2.DescribeAddressesInput) (*ec2.DescribeAddressesOutput, error)
-	DescribeSecurityGroups(*ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error)
-	DescribeSubnets(*ec2.DescribeSubnetsInput) (*ec2.DescribeSubnetsOutput, error)
-	DescribeRouteTables(*ec2.DescribeRouteTablesInput) (*ec2.DescribeRouteTablesOutput, error)
-	DescribeVpcs(*ec2.DescribeVpcsInput) (*ec2.DescribeVpcsOutput, error)
-	DescribeVpcPeeringConnections(*ec2.DescribeVpcPeeringConnectionsInput) (*ec2.DescribeVpcPeeringConnectionsOutput, error)
-}
-
-// IAMClient describes the methods required to be implemented by a IAM AWS
-// client.
-type IAMClient interface {
-	GetUser(*iam.GetUserInput) (*iam.GetUserOutput, error)
-	GetRole(*iam.GetRoleInput) (*iam.GetRoleOutput, error)
-}
-
-// KMSClient describes the methods required to be implemented by a KMS AWS
-// client.
-type KMSClient interface {
-	DescribeKey(*kms.DescribeKeyInput) (*kms.DescribeKeyOutput, error)
-}
-
 // SmallCloudconfigConfig represents the data structure required for executing
 // the small cloudconfig template.
 type SmallCloudconfigConfig struct {
-	S3URL string
+	InstanceRole string
+	S3URL        string
 }

@@ -11,7 +11,6 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
 	"github.com/giantswarm/operatorkit/controller/resource/metricsresource"
 	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
 	"github.com/giantswarm/randomkeys"
@@ -22,10 +21,8 @@ import (
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/v24/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v24/cloudconfig"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v24/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v24/credential"
-	"github.com/giantswarm/aws-operator/service/controller/v24/ebs"
 	"github.com/giantswarm/aws-operator/service/controller/v24/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v24/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/controller/v24/encrypter/vault"
@@ -39,9 +36,12 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/encryptionkey"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/ipam"
+	"github.com/giantswarm/aws-operator/service/controller/v24/resource/kmskeyarn"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/loadbalancer"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/migration"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/namespace"
+	"github.com/giantswarm/aws-operator/service/controller/v24/resource/natgatewayaddresses"
+	"github.com/giantswarm/aws-operator/service/controller/v24/resource/peerrolearn"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/service"
@@ -49,7 +49,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/vpccidr"
 	"github.com/giantswarm/aws-operator/service/controller/v24/resource/workerasgname"
-	"github.com/giantswarm/aws-operator/service/routetable"
 )
 
 const (
@@ -60,13 +59,13 @@ const (
 )
 
 type ClusterResourceSetConfig struct {
-	CertsSearcher      certs.Interface
-	G8sClient          versioned.Interface
-	HostAWSClients     aws.Clients
-	HostAWSConfig      aws.Config
-	K8sClient          kubernetes.Interface
-	Logger             micrologger.Logger
-	RandomKeysSearcher randomkeys.Interface
+	CertsSearcher          certs.Interface
+	ControlPlaneAWSClients aws.Clients
+	G8sClient              versioned.Interface
+	HostAWSConfig          aws.Config
+	K8sClient              kubernetes.Interface
+	Logger                 micrologger.Logger
+	RandomKeysSearcher     randomkeys.Interface
 
 	AccessLogsExpiration       int
 	AdvancedMonitoringEC2      bool
@@ -76,7 +75,6 @@ type ClusterResourceSetConfig struct {
 	GuestPrivateSubnetMaskBits int
 	GuestPublicSubnetMaskBits  int
 	GuestSubnetMaskBits        int
-	GuestUpdateEnabled         bool
 	IncludeTags                bool
 	IgnitionPath               string
 	InstallationName           string
@@ -97,28 +95,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
-	}
-
-	if config.HostAWSConfig.AccessKeyID == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSConfig.AccessKeyID must not be empty", config)
-	}
-	if config.HostAWSConfig.AccessKeySecret == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSConfig.AccessKeySecret must not be empty", config)
-	}
-	if config.HostAWSConfig.Region == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSConfig.Region must not be empty", config)
-	}
-	if config.HostAWSClients.CloudFormation == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSClients.CloudFormation must not be empty", config)
-	}
-	if config.HostAWSClients.EC2 == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSClients.EC2 must not be empty", config)
-	}
-	if config.HostAWSClients.IAM == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSClients.IAM must not be empty", config)
-	}
-	if config.HostAWSClients.Route53 == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostAWSClients.Route53 must not be empty", config)
 	}
 
 	if config.GuestSubnetMaskBits < minAllocatedSubnetMaskBits {
@@ -176,19 +152,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		return nil, microerror.Maskf(invalidConfigError, "unknown encrypter backend %q", config.EncrypterBackend)
 	}
 
-	var routeTableService *routetable.RouteTable
-	{
-		c := routetable.Config{
-			EC2:    config.HostAWSClients.EC2,
-			Logger: config.Logger,
-		}
-
-		routeTableService, err = routetable.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var cloudConfig *cloudconfig.CloudConfig
 	{
 		c := cloudconfig.Config{
@@ -212,7 +175,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	{
 		c := accountid.Config{
 			Logger: config.Logger,
-			STS:    config.HostAWSClients.STS,
 		}
 
 		accountIDResource, err = accountid.New(c)
@@ -277,11 +239,24 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var kmsKeyARNResource controller.Resource
+	{
+		c := kmskeyarn.Config{
+			Logger: config.Logger,
+
+			EncrypterBackend: config.EncrypterBackend,
+		}
+
+		kmsKeyARNResource, err = kmskeyarn.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var bridgeZoneResource controller.Resource
 	{
 		c := bridgezone.Config{
 			HostAWSConfig: config.HostAWSConfig,
-			HostRoute53:   config.HostAWSClients.Route53,
 			K8sClient:     config.K8sClient,
 			Logger:        config.Logger,
 
@@ -369,11 +344,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			},
 			EncrypterRoleManager: encrypterRoleManager,
 			G8sClient:            config.G8sClient,
-			HostClients: &adapter.Clients{
-				EC2: config.HostAWSClients.EC2,
-				IAM: config.HostAWSClients.IAM,
-			},
-			Logger: config.Logger,
+			Logger:               config.Logger,
 
 			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
 			EncrypterBackend:           config.EncrypterBackend,
@@ -398,9 +369,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var cpfResource controller.Resource
 	{
 		c := cpf.Config{
-			CloudFormation: config.HostAWSClients.CloudFormation,
-			Logger:         config.Logger,
-			RouteTable:     routeTableService,
+			Logger: config.Logger,
 
 			EncrypterBackend: config.EncrypterBackend,
 			InstallationName: config.InstallationName,
@@ -417,8 +386,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var cpiResource controller.Resource
 	{
 		c := cpi.Config{
-			CloudFormation: config.HostAWSClients.CloudFormation,
-			Logger:         config.Logger,
+			Logger: config.Logger,
 
 			InstallationName: config.InstallationName,
 		}
@@ -442,6 +410,32 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		namespaceResource, err = toCRUDResource(config.Logger, ops)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var natGatewayAddressesResource controller.Resource
+	{
+		c := natgatewayaddresses.Config{
+			Logger: config.Logger,
+
+			Installation: config.InstallationName,
+		}
+
+		natGatewayAddressesResource, err = natgatewayaddresses.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var peerRoleARNResource controller.Resource
+	{
+		c := peerrolearn.Config{
+			Logger: config.Logger,
+		}
+
+		peerRoleARNResource, err = peerrolearn.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -549,7 +543,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var vpcCIDRResource controller.Resource
 	{
 		c := vpccidr.Config{
-			EC2:    config.HostAWSClients.EC2,
 			Logger: config.Logger,
 		}
 
@@ -574,6 +567,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 	resources := []controller.Resource{
 		accountIDResource,
+		natGatewayAddressesResource,
+		kmsKeyARNResource,
+		peerRoleARNResource,
 		vpcCIDRResource,
 		stackOutputResource,
 		workerASGNameResource,
@@ -629,11 +625,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	}
 
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
-		if config.GuestUpdateEnabled {
-			updateallowedcontext.SetUpdateAllowed(ctx)
-		}
-
-		var awsClient aws.Clients
+		var tenantClusterAWSClients aws.Clients
 		{
 			arn, err := credential.GetARN(config.K8sClient, obj)
 			if err != nil {
@@ -642,40 +634,21 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			c := config.HostAWSConfig
 			c.RoleARN = arn
 
-			awsClient, err = aws.NewClients(c)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-		}
-
-		var ebsService ebs.Interface
-		{
-			c := ebs.Config{
-				Client: awsClient.EC2,
-				Logger: config.Logger,
-			}
-			ebsService, err = ebs.New(c)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-		}
-
-		var cloudFormationService *cloudformationservice.CloudFormation
-		{
-			c := cloudformationservice.Config{
-				Client: awsClient.CloudFormation,
-			}
-
-			cloudFormationService, err = cloudformationservice.New(c)
+			tenantClusterAWSClients, err = aws.NewClients(c)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
 		}
 
 		c := controllercontext.Context{
-			AWSClient:      awsClient,
-			CloudFormation: *cloudFormationService,
-			EBSService:     ebsService,
+			Client: controllercontext.ContextClient{
+				ControlPlane: controllercontext.ContextClientControlPlane{
+					AWS: config.ControlPlaneAWSClients,
+				},
+				TenantCluster: controllercontext.ContextClientTenantCluster{
+					AWS: tenantClusterAWSClients,
+				},
+			},
 		}
 		ctx = controllercontext.NewContext(ctx, c)
 

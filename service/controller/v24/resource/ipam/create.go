@@ -252,7 +252,7 @@ func getVPCSubnets(ctx context.Context) ([]net.IPNet, error) {
 		return nil, microerror.Mask(err)
 	}
 
-	out, err := cc.AWSClient.EC2.DescribeSubnets(nil)
+	out, err := cc.Client.TenantCluster.AWS.EC2.DescribeSubnets(nil)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}

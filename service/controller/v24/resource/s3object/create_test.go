@@ -170,11 +170,15 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			c := controllercontext.Context{
-				AWSClient: awsClients,
-			}
 			ctx := context.TODO()
-			ctx = controllercontext.NewContext(ctx, c)
+			cc := controllercontext.Context{
+				Client: controllercontext.ContextClient{
+					TenantCluster: controllercontext.ContextClientTenantCluster{
+						AWS: awsClients,
+					},
+				},
+			}
+			ctx = controllercontext.NewContext(ctx, cc)
 
 			result, err := newResource.newCreateChange(ctx, tc.obj, tc.currentState, tc.desiredState)
 			if err != nil {

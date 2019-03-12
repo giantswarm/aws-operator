@@ -39,7 +39,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				&workerASGName,
 			},
 		}
-		o, err := cc.AWSClient.AutoScaling.DescribeAutoScalingGroups(i)
+		o, err := cc.Client.TenantCluster.AWS.AutoScaling.DescribeAutoScalingGroups(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}

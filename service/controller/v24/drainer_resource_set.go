@@ -7,13 +7,11 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
 	"github.com/giantswarm/operatorkit/controller/resource/metricsresource"
 	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v24/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v24/credential"
 	"github.com/giantswarm/aws-operator/service/controller/v24/key"
@@ -24,14 +22,14 @@ import (
 )
 
 type DrainerResourceSetConfig struct {
-	G8sClient     versioned.Interface
-	HostAWSConfig aws.Config
-	K8sClient     kubernetes.Interface
-	Logger        micrologger.Logger
+	ControlPlaneAWSClients aws.Clients
+	G8sClient              versioned.Interface
+	HostAWSConfig          aws.Config
+	K8sClient              kubernetes.Interface
+	Logger                 micrologger.Logger
 
-	GuestUpdateEnabled bool
-	ProjectName        string
-	Route53Enabled     bool
+	ProjectName    string
+	Route53Enabled bool
 }
 
 func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.ResourceSet, error) {
@@ -131,11 +129,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 	}
 
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
-		if config.GuestUpdateEnabled {
-			updateallowedcontext.SetUpdateAllowed(ctx)
-		}
-
-		var awsClient aws.Clients
+		var tenantClusterAWSClients aws.Clients
 		{
 			arn, err := credential.GetARN(config.K8sClient, obj)
 			if err != nil {
@@ -144,29 +138,23 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 			c := config.HostAWSConfig
 			c.RoleARN = arn
 
-			awsClient, err = aws.NewClients(c)
+			tenantClusterAWSClients, err = aws.NewClients(c)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
 		}
 
-		var cloudFormationService *cloudformationservice.CloudFormation
-		{
-			c := cloudformationservice.Config{
-				Client: awsClient.CloudFormation,
-			}
-
-			cloudFormationService, err = cloudformationservice.New(c)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
+		cc := controllercontext.Context{
+			Client: controllercontext.ContextClient{
+				ControlPlane: controllercontext.ContextClientControlPlane{
+					AWS: config.ControlPlaneAWSClients,
+				},
+				TenantCluster: controllercontext.ContextClientTenantCluster{
+					AWS: tenantClusterAWSClients,
+				},
+			},
 		}
-
-		c := controllercontext.Context{
-			AWSClient:      awsClient,
-			CloudFormation: *cloudFormationService,
-		}
-		ctx = controllercontext.NewContext(ctx, c)
+		ctx = controllercontext.NewContext(ctx, cc)
 
 		return ctx, nil
 	}

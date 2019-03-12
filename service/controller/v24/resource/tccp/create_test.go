@@ -9,8 +9,6 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v24/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
 )
 
@@ -96,10 +94,6 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 	{
 		c := Config{}
 
-		c.HostClients = &adapter.Clients{
-			EC2: &adapter.EC2ClientMock{},
-			IAM: &adapter.IAMClientMock{},
-		}
 		c.Logger = microloggertest.New()
 		c.EncrypterBackend = "kms"
 		c.G8sClient = fake.NewSimpleClientset()
@@ -112,16 +106,11 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 		}
 	}
 
-	awsClients := aws.Clients{
-		EC2: &adapter.EC2ClientMock{},
-		IAM: &adapter.IAMClientMock{},
-		KMS: &adapter.KMSClientMock{},
-	}
-
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			ctx := context.TODO()
-			ctx = controllercontext.NewContext(ctx, controllercontext.Context{AWSClient: awsClients})
+			cc := controllercontext.Context{}
+			ctx = controllercontext.NewContext(ctx, cc)
 
 			result, err := newResource.newCreateChange(ctx, tc.obj, tc.currentState, tc.desiredState)
 			if err != nil {

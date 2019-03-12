@@ -47,7 +47,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			},
 		}
 
-		o, err := cc.AWSClient.AutoScaling.DescribeAutoScalingGroups(i)
+		o, err := cc.Client.TenantCluster.AWS.AutoScaling.DescribeAutoScalingGroups(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -169,7 +169,7 @@ func (r *Resource) privateDNSForInstance(ctx context.Context, instanceID string)
 		return "", microerror.Mask(err)
 	}
 
-	o, err := cc.AWSClient.EC2.DescribeInstances(i)
+	o, err := cc.Client.TenantCluster.AWS.EC2.DescribeInstances(i)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
 
@@ -31,13 +32,18 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			return microerror.Mask(err)
 		}
 
+		err = r.disableMasterTerminationProtection(ctx, key.MasterInstanceName(customObject))
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
 		stackName := aws.String(key.MainGuestStackName(customObject))
 
 		updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
 			EnableTerminationProtection: aws.Bool(false),
 			StackName:                   stackName,
 		}
-		_, err = cc.AWSClient.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
+		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
 		if IsDeleteInProgress(err) {
 			// fall through
 		} else if IsNotExists(err) {
@@ -48,7 +54,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			i := &cloudformation.DeleteStackInput{
 				StackName: stackName,
 			}
-			_, err = cc.AWSClient.CloudFormation.DeleteStack(i)
+			_, err = cc.Client.TenantCluster.AWS.CloudFormation.DeleteStack(i)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -65,6 +71,59 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting the guest cluster main stack")
 	}
+
+	return nil
+}
+
+func (r *Resource) disableMasterTerminationProtection(ctx context.Context, masterInstanceName string) error {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	r.logger.LogCtx(ctx, "level", "debug", "message", "disabling master instance termination protection")
+
+	i := &ec2.DescribeInstancesInput{
+		Filters: []*ec2.Filter{
+			{
+				Name: aws.String("tag:Name"),
+				Values: []*string{
+					aws.String(masterInstanceName),
+				},
+			},
+		},
+	}
+	o, err := cc.Client.TenantCluster.AWS.EC2.DescribeInstances(i)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	if len(o.Reservations) != 1 {
+		return microerror.Maskf(executionFailedError, "expected one reservation for master instance, got %d", len(o.Reservations))
+	}
+
+	for _, reservation := range o.Reservations {
+
+		if len(reservation.Instances) != 1 {
+			return microerror.Maskf(executionFailedError, "expected one master instance, got %d", len(reservation.Instances))
+		}
+
+		for _, instance := range reservation.Instances {
+			i := &ec2.ModifyInstanceAttributeInput{
+				DisableApiTermination: &ec2.AttributeBooleanValue{
+					Value: aws.Bool(false),
+				},
+				InstanceId: aws.String(*instance.InstanceId),
+			}
+
+			_, err = cc.Client.TenantCluster.AWS.EC2.ModifyInstanceAttribute(i)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+	}
+
+	r.logger.LogCtx(ctx, "level", "debug", "message", "disabled master instance termination protection")
 
 	return nil
 }

@@ -4,10 +4,6 @@ import (
 	"context"
 
 	"github.com/giantswarm/microerror"
-
-	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	cloudformationservice "github.com/giantswarm/aws-operator/service/controller/v24/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v24/ebs"
 )
 
 type contextKey string
@@ -15,10 +11,9 @@ type contextKey string
 const controllerKey contextKey = "controller"
 
 type Context struct {
-	AWSClient      awsclient.Clients
-	CloudFormation cloudformationservice.CloudFormation
-	EBSService     ebs.Interface
-
+	// Client holds the client implementations used for several tenant cluster
+	// specific actions.
+	Client ContextClient
 	// Status holds the data used to communicate between controller's
 	// resources. It can be edited in place as Context is stored as
 	// a pointer within context.Context.
