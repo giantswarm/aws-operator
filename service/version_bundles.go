@@ -7,6 +7,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v22patch1"
 	"github.com/giantswarm/aws-operator/service/controller/v23"
 	"github.com/giantswarm/aws-operator/service/controller/v24"
+	"github.com/giantswarm/aws-operator/service/controller/v25"
 )
 
 // NewVersionBundles returns the array of version bundles defined for the
@@ -18,6 +19,7 @@ func NewVersionBundles() []versionbundle.Bundle {
 	versionBundles = append(versionBundles, v22patch1.VersionBundle())
 	versionBundles = append(versionBundles, v23.VersionBundle())
 	versionBundles = append(versionBundles, v24.VersionBundle())
+	versionBundles = append(versionBundles, v25.VersionBundle())
 
 	return versionBundles
 }
