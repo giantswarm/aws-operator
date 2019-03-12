@@ -60,12 +60,16 @@ func (r *Resource) addKMSKeyARNToContext(ctx context.Context, cr v1alpha1.AWSCon
 	}
 
 	if r.encrypterBackend == encrypter.KMSBackend {
+		a := fmt.Sprintf("alias/%s", key.ClusterID(cr))
+
 		i := &kms.DescribeKeyInput{
-			KeyId: aws.String(fmt.Sprintf("alias/%s", key.ClusterID(cr))),
+			KeyId: aws.String(a),
 		}
 
 		o, err := cc.Client.TenantCluster.AWS.KMS.DescribeKey(i)
-		if err != nil {
+		if IsNotFound(err) {
+			return microerror.Maskf(notFoundError, a)
+		} else if err != nil {
 			return microerror.Mask(err)
 		}
 
