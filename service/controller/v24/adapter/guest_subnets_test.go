@@ -129,12 +129,10 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 
 	for _, tc := range testCases {
 		a := Adapter{}
-		clients := Clients{}
 
 		t.Run(tc.name, func(t *testing.T) {
 			cfg := Config{
 				CustomObject: tc.customObject,
-				Clients:      clients,
 			}
 
 			err := a.Guest.Subnets.Adapt(cfg)

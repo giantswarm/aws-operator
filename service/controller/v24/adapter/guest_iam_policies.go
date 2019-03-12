@@ -1,13 +1,6 @@
 package adapter
 
 import (
-	"fmt"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/kms"
-	"github.com/giantswarm/microerror"
-
-	"github.com/giantswarm/aws-operator/service/controller/v24/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v24/key"
 )
 
@@ -37,21 +30,7 @@ func (i *GuestIAMPoliciesAdapter) Adapt(cfg Config) error {
 	i.WorkerProfileName = key.InstanceProfileName(cfg.CustomObject, key.KindWorker)
 	i.WorkerRoleName = key.RoleName(cfg.CustomObject, key.KindWorker)
 	i.RegionARN = key.RegionARN(cfg.CustomObject)
-
-	// KMSKeyARN
-	if cfg.EncrypterBackend == encrypter.KMSBackend {
-		keyAlias := fmt.Sprintf("alias/%s", clusterID)
-		input := &kms.DescribeKeyInput{
-			KeyId: aws.String(keyAlias),
-		}
-		output, err := cfg.Clients.KMS.DescribeKey(input)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		i.KMSKeyARN = *output.KeyMetadata.Arn
-	}
-
-	// S3Bucket
+	i.KMSKeyARN = cfg.TenantClusterKMSKeyARN
 	i.S3Bucket = key.BucketName(cfg.CustomObject, cfg.TenantClusterAccountID)
 
 	return nil

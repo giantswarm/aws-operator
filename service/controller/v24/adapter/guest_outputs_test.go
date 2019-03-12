@@ -16,7 +16,6 @@ func Test_CloudFormation_Adapter_Outputs_MasterCloudConfigVersion(t *testing.T) 
 		{
 			Description: "master CloudConfig version should match the hardcoded value",
 			Config: Config{
-				Clients:      Clients{},
 				CustomObject: v1alpha1.AWSConfig{},
 				StackState: StackState{
 					MasterCloudConfigVersion: "foo",
@@ -52,7 +51,6 @@ func Test_CloudFormation_Adapter_Outputs_WorkerCloudConfigVersion(t *testing.T) 
 		{
 			Description: "worker CloudConfig version should match the hardcoded value",
 			Config: Config{
-				Clients:      Clients{},
 				CustomObject: v1alpha1.AWSConfig{},
 				StackState: StackState{
 					WorkerCloudConfigVersion: "foo",

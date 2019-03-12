@@ -152,7 +152,6 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 			cfg := Config{
 				ControlPlaneVPCCidr: "10.0.0.0/16",
 				CustomObject:        tc.customObject,
-				Clients:             Clients{},
 			}
 			err := a.Guest.SecurityGroups.Adapt(cfg)
 			if tc.expectedError && err == nil {
@@ -498,7 +497,6 @@ func TestAdapterSecurityGroupsKubernetesAPIRules(t *testing.T) {
 					Enabled:    tc.apiWhitelistingEnabled,
 					SubnetList: tc.apiWhitelistSubnets,
 				},
-				Clients:                         Clients{},
 				ControlPlaneNATGatewayAddresses: tc.elasticIPs,
 				CustomObject:                    tc.customObject,
 			}
