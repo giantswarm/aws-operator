@@ -8,14 +8,14 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
-	"github.com/giantswarm/aws-operator/service/controller/v24/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/v24/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/v24/key"
+	"github.com/giantswarm/aws-operator/service/controller/v25/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v25/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v25/key"
 )
 
 const (
 	// Name is the identifier of the resource.
-	Name = "tccpv24"
+	Name = "tccpv25"
 )
 
 type AWSConfig struct {

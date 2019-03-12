@@ -9,9 +9,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 
-	cf "github.com/giantswarm/aws-operator/service/controller/v24/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/v24/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v24/key"
+	cf "github.com/giantswarm/aws-operator/service/controller/v25/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v25/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v25/key"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
