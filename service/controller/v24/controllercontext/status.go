@@ -7,7 +7,12 @@ type ContextStatus struct {
 
 type ContextStatusControlPlane struct {
 	AWSAccountID string
+	PeerRole     ContextStatusControlPlanePeerRole
 	VPC          ContextStatusControlPlaneVPC
+}
+
+type ContextStatusControlPlanePeerRole struct {
+	ARN string
 }
 
 type ContextStatusControlPlaneVPC struct {
