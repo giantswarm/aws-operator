@@ -10,7 +10,6 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v22/key"
 	"github.com/giantswarm/aws-operator/service/controller/v25/templates/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v25/templates/cloudformation/tccp"
 )
@@ -436,7 +435,7 @@ func PrivateSubnetNames(cr v1alpha1.AWSConfig) []string {
 	var names []string
 
 	for i := 0; i < StatusAvailabilityZoneCount(cr); i++ {
-		names = append(names, key.PrivateSubnetName(i))
+		names = append(names, PrivateSubnetName(i))
 	}
 
 	return names
@@ -547,13 +546,13 @@ func StatusAvailabilityZones(customObject v1alpha1.AWSConfig) []v1alpha1.AWSConf
 }
 
 func StatusAvailabilityZoneCount(cr v1alpha1.AWSConfig) int {
-	return len(key.StatusAvailabilityZones(cr))
+	return len(StatusAvailabilityZones(cr))
 }
 
 func StatusAvailabilityZoneNames(cr v1alpha1.AWSConfig) []string {
 	var names []string
 
-	for _, a := range key.StatusAvailabilityZones(cr) {
+	for _, a := range StatusAvailabilityZones(cr) {
 		names = append(names, a.Name)
 	}
 
