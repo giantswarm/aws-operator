@@ -89,5 +89,6 @@ type StackState struct {
 // SmallCloudconfigConfig represents the data structure required for executing
 // the small cloudconfig template.
 type SmallCloudconfigConfig struct {
-	S3URL string
+	InstanceRole string
+	S3URL        string
 }
