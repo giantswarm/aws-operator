@@ -1,3 +1,5 @@
+// NOTE this package is deprecated. As soon as v24 is gone, we can drop this
+// package.
 package vpccidr
 
 import (
