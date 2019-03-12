@@ -128,16 +128,11 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		clients := Clients{
-			EC2: &EC2ClientMock{},
-			IAM: &IAMClientMock{},
-		}
 		a := Adapter{}
 
 		t.Run(tc.description, func(t *testing.T) {
 			cfg := Config{
 				CustomObject: tc.customObject,
-				Clients:      clients,
 			}
 			err := a.Guest.LoadBalancers.Adapt(cfg)
 

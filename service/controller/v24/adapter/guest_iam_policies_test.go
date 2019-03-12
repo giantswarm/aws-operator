@@ -34,16 +34,11 @@ func TestAdapterIamPoliciesRegularFields(t *testing.T) {
 		},
 	}
 
-	clients := Clients{
-		KMS: &KMSClientMock{},
-		IAM: &IAMClientMock{},
-	}
 	for _, tc := range testCases {
 		a := Adapter{}
 		t.Run(tc.description, func(t *testing.T) {
 			cfg := Config{
 				CustomObject: tc.customObject,
-				Clients:      clients,
 			}
 			err := a.Guest.IAMPolicies.Adapt(cfg)
 			if err != nil {
@@ -77,79 +72,6 @@ func TestAdapterIamPoliciesRegularFields(t *testing.T) {
 	}
 }
 
-func TestAdapterIamPoliciesKMSKeyARN(t *testing.T) {
-	t.Parallel()
-	testCases := []struct {
-		description       string
-		customObject      v1alpha1.AWSConfig
-		expectedKMSKeyARN string
-		expectedError     bool
-		encrypterBackend  string
-	}{
-		{
-			description: "basic matching, all fields present",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: defaultCluster,
-				},
-			},
-			expectedKMSKeyARN: "alias/test-cluster",
-			encrypterBackend:  "kms",
-		},
-		{
-			description: "error check",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: defaultCluster,
-				},
-			},
-			expectedError:    true,
-			encrypterBackend: "kms",
-		},
-		{
-			description: "vault backend",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: defaultCluster,
-				},
-			},
-			expectedKMSKeyARN: "",
-			encrypterBackend:  "vault",
-		},
-	}
-	for _, tc := range testCases {
-		a := Adapter{}
-		t.Run(tc.description, func(t *testing.T) {
-			clients := Clients{
-				IAM: &IAMClientMock{},
-				KMS: &KMSClientMock{
-					keyARN:  tc.expectedKMSKeyARN,
-					isError: tc.expectedError,
-				},
-			}
-			cfg := Config{
-				EncrypterBackend: tc.encrypterBackend,
-				CustomObject:     tc.customObject,
-				Clients:          clients,
-			}
-			err := a.Guest.IAMPolicies.Adapt(cfg)
-			if tc.expectedError && err == nil {
-				t.Errorf("expected error didn't happen")
-			}
-
-			if !tc.expectedError {
-				if err != nil {
-					t.Errorf("unexpected error %v", err)
-				}
-
-				if a.Guest.IAMPolicies.KMSKeyARN != tc.expectedKMSKeyARN {
-					t.Errorf("unexpected KMSKeyARN, got %q, want %q", a.Guest.IAMPolicies.KMSKeyARN, tc.expectedKMSKeyARN)
-				}
-			}
-		})
-	}
-}
-
 func TestAdapterIamPoliciesS3Bucket(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
@@ -173,13 +95,8 @@ func TestAdapterIamPoliciesS3Bucket(t *testing.T) {
 	for _, tc := range testCases {
 		a := Adapter{}
 		t.Run(tc.description, func(t *testing.T) {
-			clients := Clients{
-				KMS: &KMSClientMock{},
-				IAM: &IAMClientMock{},
-			}
 			cfg := Config{
 				CustomObject:           tc.customObject,
-				Clients:                clients,
 				TenantClusterAccountID: tc.accountID,
 			}
 			err := a.Guest.IAMPolicies.Adapt(cfg)

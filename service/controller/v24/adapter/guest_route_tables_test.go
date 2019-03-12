@@ -69,7 +69,6 @@ func TestAdapterRouteTablesRegularFields(t *testing.T) {
 			cfg := Config{
 				ControlPlaneVPCCidr: tc.expectedHostClusterCIDR,
 				CustomObject:        tc.customObject,
-				Clients:             Clients{},
 			}
 			err := a.Guest.RouteTables.Adapt(cfg)
 			if tc.expectedError && err == nil {
