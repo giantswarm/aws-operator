@@ -1,4 +1,4 @@
-package cpi
+package tcdp
 
 import (
 	"context"
@@ -28,31 +28,32 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane initializer CF stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's data plane cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
 			StackName: aws.String(key.MainHostPreStackName(cr)),
 		}
 
-		_, err = cc.Client.ControlPlane.AWS.CloudFormation.DescribeStacks(i)
+		_, err = cc.Client.TenantCluster.AWS.CloudFormation.DescribeStacks(i)
 		if IsNotExists(err) {
 			// fall through
 		} else if err != nil {
 			return microerror.Mask(err)
 		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane initializer CF stack already exists")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's data plane cloud formation stack already exists")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 			return nil
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane initializer CF stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's data plane cloud formation stack")
 	}
 
 	var templateBody string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane initializer CF stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's data plane cloud formation stack")
 
+		// TODO
 		var params *template.ParamsMain
 		{
 			iamRoles, err := r.newIAMRolesParams(ctx, cr)
@@ -70,11 +71,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computed the template of the tenant cluster's control plane initializer CF stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "computed the template of the tenant cluster's data plane cloud formation stack")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the creation of the tenant cluster's control plane initializer CF stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the creation of the tenant cluster's data plane cloud formation stack")
 
 		i := &cloudformation.CreateStackInput{
 			Capabilities: []*string{
@@ -86,27 +87,27 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			TemplateBody:                aws.String(templateBody),
 		}
 
-		_, err = cc.Client.ControlPlane.AWS.CloudFormation.CreateStack(i)
+		_, err = cc.Client.TenantCluster.AWS.CloudFormation.CreateStack(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the creation of the tenant cluster's control plane initializer CF stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the creation of the tenant cluster's data plane cloud formation stack")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for the creation of the tenant cluster's control plane initializer CF stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for the creation of the tenant cluster's data plane cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
 			StackName: aws.String(key.MainHostPreStackName(cr)),
 		}
 
-		err = cc.Client.ControlPlane.AWS.CloudFormation.WaitUntilStackCreateComplete(i)
+		err = cc.Client.TenantCluster.AWS.CloudFormation.WaitUntilStackCreateComplete(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "waited for the creation of the tenant cluster's control plane initializer CF stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "waited for the creation of the tenant cluster's data plane cloud formation stack")
 	}
 
 	return nil
