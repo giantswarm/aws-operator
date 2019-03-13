@@ -19,7 +19,11 @@ const TemplateMainAutoScalingGroup = `
       LaunchConfigurationName: !Ref NodePoolLaunchConfiguration
       LoadBalancerNames:
         - !Ref IngressLoadBalancer
-      HealthCheckGracePeriod: {{ .AutoScalingGroup.HealthCheckGracePeriod }}
+
+      # 10 seconds after a new node comes into service, the ASG checks the new
+      # instance's health.
+      HealthCheckGracePeriod: 10
+
       MetricsCollection:
         - Granularity: "1Minute"
       Tags:
@@ -34,11 +38,16 @@ const TemplateMainAutoScalingGroup = `
           PropagateAtLaunch: false
     UpdatePolicy:
       AutoScalingRollingUpdate:
-        # minimum amount of instances that must always be running during a rolling update
+
+        # Minimum amount of nodes that must always be running during a rolling
+        # update.
         MinInstancesInService: {{ .AutoScalingGroup.MinInstancesInService }}
-        # only do a rolling update of this amount of instances max
+
+        # Maximum amount of nodes being rolled at the same time.
         MaxBatchSize: {{ .AutoScalingGroup.MaxBatchSize }}
-        # after creating a new instance, pause operations on the ASG for this amount of time
-        PauseTime: {{ .AutoScalingGroup.RollingUpdatePauseTime }}
+
+        # After creating a new instance, pause the rolling update on the ASG for
+        # 15 minutes.
+        PauseTime: PT15M
 {{end}}
 `

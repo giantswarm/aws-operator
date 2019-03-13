@@ -146,14 +146,12 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr v1alpha1.AWSConfi
 		Cluster: template.ParamsMainAutoScalingGroupCluster{
 			ID: key.ClusterID(cr),
 		},
-		DesiredCapacity:        minDesiredNodes,
-		HealthCheckGracePeriod: 10,
-		MaxBatchSize:           workerCountRatio(mindDesiredNodes, 0.3),
-		MaxSize:                key.ScalingMax(cr),
-		MinInstancesInService:  workerCountRatio(mindDesiredNodes, 0.7),
-		MinSize:                key.ScalingMin(cr),
-		RollingUpdatePauseTime: "PT15M",
-		Subnets:                key.PrivateSubnetNames(cr),
+		DesiredCapacity:       minDesiredNodes,
+		MaxBatchSize:          workerCountRatio(mindDesiredNodes, 0.3),
+		MaxSize:               key.ScalingMax(cr),
+		MinInstancesInService: workerCountRatio(mindDesiredNodes, 0.7),
+		MinSize:               key.ScalingMin(cr),
+		Subnets:               key.PrivateSubnetNames(cr),
 	}
 
 	return autoScalingGroup, nil
