@@ -10,5 +10,4 @@ type ParamsMain struct {
 	RouteTables         *ParamsMainRouteTables
 	SecurityGroups      *ParamsMainSecurityGroups
 	Subnets             *ParamsMainSubnets
-	VPC                 *ParamsMainVPC
 }

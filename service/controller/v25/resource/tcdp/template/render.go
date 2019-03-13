@@ -17,7 +17,6 @@ func Render(v interface{}) (string, error) {
 		TemplateMainRouteTables,
 		TemplateMainSecurityGroups,
 		TemplateMainSubnets,
-		TemplateMainVPC,
 	}
 
 	s, err := templates.Render(l, v)
