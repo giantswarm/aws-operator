@@ -70,12 +70,17 @@ func (r *Resource) addRouteTableMappingsToContext(ctx context.Context) error {
 
 	// We check if we have all mappings cached for the configured route table
 	// names. If we find all information, we return them.
-	if len(r.mappings) == len(r.names) {
+	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding cached route table mappings")
-		cc.Status.ControlPlane.RouteTable.Mappings = r.mappings
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found cached route table mappings")
 
-		return nil
+		if len(r.mappings) == len(r.names) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "found cached route table mappings")
+			cc.Status.ControlPlane.RouteTable.Mappings = r.mappings
+
+			return nil
+		} else {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find cached route table mappings")
+		}
 	}
 
 	// We do not have the cached mappings, so we look them up.
