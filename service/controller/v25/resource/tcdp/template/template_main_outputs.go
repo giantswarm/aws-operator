@@ -2,7 +2,6 @@ package template
 
 const TemplateMainOutputs = `
 {{define "outputs"}}
-Outputs:
   CloudConfigVersion:
     Value: {{ .Outputs.CloudConfig.Version }}
   DockerVolumeSizeGB:

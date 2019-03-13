@@ -1,21 +1,16 @@
 package template
 
 type ParamsMainAutoScalingGroup struct {
-	ASG                    ParamsMainAutoScalingGroupASG
 	AvailabilityZones      []string
 	Cluster                ParamsMainAutoScalingGroupCluster
+	DesiredCapacity        int
 	HealthCheckGracePeriod int
 	MaxBatchSize           string
+	MaxSize                int
 	MinInstancesInService  string
+	MinSize                int
 	RollingUpdatePauseTime string
 	Subnets                []string
-}
-
-type ParamsMainAutoScalingGroupASG struct {
-	DesiredCapacity int
-	MaxSize         int
-	MinSize         int
-	Type            string
 }
 
 type ParamsMainAutoScalingGroupCluster struct {

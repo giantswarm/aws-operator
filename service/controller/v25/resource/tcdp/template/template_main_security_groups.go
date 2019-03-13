@@ -2,10 +2,10 @@ package template
 
 const TemplateMainSecurityGroups = `
 {{define "security_groups" }}
-  SecurityGroup:
+  NodePoolSecurityGroup:
     Type: AWS::EC2::SecurityGroups
     Properties:
-      GroupDescription: {{ .SecurityGroups.SecurityGroupName }}
+      GroupDescription: General Node Pool Security Group For Basic Traffic Rules.
       VpcId: !Ref VPC
       SecurityGroupIngress:
 
@@ -44,30 +44,24 @@ const TemplateMainSecurityGroups = `
         ToPort: 10301
         CidrIp: {{ .SecurityGroups.ControlPlane.VPC.CIDR }}
 
+			# Allow traffic from the ingress security group to 443 for ingress-controller.
       -
-        IpProtocol: {{ .Protocol }}
-        FromPort: {{ .Port }}
-        ToPort: {{ .Port }}
-        SourceSecurityGroupId: !Ref {{ .SourceSecurityGroup }}
+        IpProtocol: tcp
+        FromPort: 30011
+        ToPort: 30011
+        SourceSecurityGroupId: !Ref IngressSecurityGroup
+
+			# Allow traffic from the ingress security group to 80 for ingress-controller.
+      -
+        IpProtocol: tcp
+        FromPort: 30010
+        ToPort: 30010
+        SourceSecurityGroupId: !Ref IngressSecurityGroup
+
       Tags:
+        - Key: Cluster
+          Value:  {{ .SecurityGroups.Cluster.ID }}
         - Key: Name
-          Value:  {{ .SecurityGroups.SecurityGroupName }}
+          Value:  NodePoolSecurityGroup
 {{ end }}
 `
-
-
-
-
-
-		{
-			Description:         "Allow traffic from the ingress security group to the ingress controller port 443.",
-			Port:                key.IngressControllerSecurePort(customObject),
-			Protocol:            tcpProtocol,
-			SourceSecurityGroup: ingressSecurityGroupName,
-		},
-		{
-			Description:         "Allow traffic from the ingress security group to the ingress controller port 80.",
-			Port:                key.IngressControllerInsecurePort(customObject),
-			Protocol:            tcpProtocol,
-			SourceSecurityGroup: ingressSecurityGroupName,
-		},

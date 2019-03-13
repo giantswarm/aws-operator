@@ -2,7 +2,9 @@ package tcdp
 
 import (
 	"context"
+	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -68,9 +70,19 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			if err != nil {
 				return microerror.Mask(err)
 			}
+			securityGroups, err := r.newSecurityGroups(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			subnets, err := r.newSubnets(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
+			}
 
 			params = &template.ParamsMain{
 				AutoScalingGroup: autoScalingGroup,
+				SecurityGroups:   securityGroups,
+				Subnets:          subnets,
 			}
 		}
 
@@ -130,19 +142,16 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr v1alpha1.AWSConfi
 	mindDesiredNodes := minDesiredWorkers(key.ScalingMin(cr), key.ScalingMax(cr), cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity)
 
 	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
-		ASG: template.ParamsMainAutoScalingGroupASG{
-			DesiredCapacity: minDesiredNodes,
-			MaxSize:         key.ScalingMax(cr),
-			MinSize:         key.ScalingMin(cr),
-			Type:            key.KindWorker,
-		},
 		AvailabilityZones: key.StatusAvailabilityZoneNames(cr),
 		Cluster: template.ParamsMainAutoScalingGroupCluster{
 			ID: key.ClusterID(cr),
 		},
+		DesiredCapacity:        minDesiredNodes,
 		HealthCheckGracePeriod: 10,
 		MaxBatchSize:           workerCountRatio(mindDesiredNodes, 0.3),
+		MaxSize:                key.ScalingMax(cr),
 		MinInstancesInService:  workerCountRatio(mindDesiredNodes, 0.7),
+		MinSize:                key.ScalingMin(cr),
 		RollingUpdatePauseTime: "PT15M",
 		Subnets:                key.PrivateSubnetNames(cr),
 	}
@@ -150,15 +159,40 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr v1alpha1.AWSConfi
 	return autoScalingGroup, nil
 }
 
-func workerCountRatio(workers int, ratio float32) string {
-	value := float32(workers) * ratio
-	rounded := int(value + 0.5)
-
-	if rounded == 0 {
-		rounded = 1
+func (r *Resource) newSecurityGroups(ctx context.Context, cr v1alpha1.AWSConfig) (*template.SecurityGroups, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
 	}
 
-	return strconv.Itoa(rounded)
+	securityGroups := &template.ParamsMainSecurityGroups{
+		Cluster: template.ParamsMainSecurityGroupsCluster{
+			ID: key.ClusterID(cr),
+		},
+		ControlPlane: template.ParamsMainSecurityGroupsControlPlane{
+			VPC: template.ParamsMainSecurityGroupsControlPlaneVPC{
+				CIDR: cc.Status.ControlPlane.VPC.CIDR,
+			},
+		},
+	}
+
+	return securityGroups, nil
+}
+
+func (r *Resource) newSubnets(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainSubnets, error) {
+	var subnets *template.ParamsMainSubnets
+
+	for _, a := range key.StatusNodePoolAvailabilityZones(cr) {
+		s := template.ParamsMainSubnetsSubnet{
+			AvailabilityZone: a.Name,
+			CIDR:             a.Subnet.CIDR,
+			Name:             subnetNameWithAvailabilityZone(a.Name),
+		}
+
+		subnets = append(subnets, s)
+	}
+
+	return subnets, nil
 }
 
 // minDesiredWorkers calculates appropriate minimum value to be set for ASG
@@ -196,4 +230,19 @@ func minDesiredWorkers(minWorkers, maxWorkers, statusDesiredCapacity int) int {
 	}
 
 	return minWorkers
+}
+
+func subnetNameWithAvailabilityZone(a string) string {
+	return fmt.Sprintf("NodePoolSubnet-%s", strings.ToUpper(a))
+}
+
+func workerCountRatio(workers int, ratio float32) string {
+	value := float32(workers) * ratio
+	rounded := int(value + 0.5)
+
+	if rounded == 0 {
+		rounded = 1
+	}
+
+	return strconv.Itoa(rounded)
 }
