@@ -75,7 +75,8 @@ func New(config Config) (*Service, error) {
 
 			Address:   config.Viper.GetString(config.Flag.Service.Kubernetes.Address),
 			InCluster: config.Viper.GetBool(config.Flag.Service.Kubernetes.InCluster),
-			TLS: k8srestconfig.TLSClientConfig{
+			KubeConfig: config.Viper.GetString(config.Flag.Service.Kubernetes.KubeConfig),
+			TLS: k8srestconfig.ConfigTLS{
 				CAFile:  config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CAFile),
 				CrtFile: config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.CrtFile),
 				KeyFile: config.Viper.GetString(config.Flag.Service.Kubernetes.TLS.KeyFile),
