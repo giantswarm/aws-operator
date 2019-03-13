@@ -136,7 +136,7 @@ func (r *Resource) newPrivateRoutes(ctx context.Context, cr v1alpha1.AWSConfig) 
 
 	var routes []template.ParamsMainRouteTablesRoute
 
-	for id, name := range cc.Status.ControlPlane.RouteTable.Mappings {
+	for name, id := range cc.Status.ControlPlane.RouteTable.Mappings {
 		for _, cidrBlock := range tenantPrivateSubnetCidrs {
 			route := template.ParamsMainRouteTablesRoute{
 				RouteTableName: name,
@@ -168,7 +168,7 @@ func (r *Resource) newPublicRoutes(ctx context.Context, cr v1alpha1.AWSConfig) (
 
 	var routes []template.ParamsMainRouteTablesRoute
 
-	for id, name := range cc.Status.ControlPlane.RouteTable.Mappings {
+	for name, id := range cc.Status.ControlPlane.RouteTable.Mappings {
 		route := template.ParamsMainRouteTablesRoute{
 			RouteTableName: name,
 			RouteTableID:   id,
