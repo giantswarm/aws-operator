@@ -35,11 +35,19 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			StackName: aws.String(key.MainHostPreStackName(cr)),
 		}
 
-		_, err = cc.Client.TenantCluster.AWS.CloudFormation.DescribeStacks(i)
+		o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStacks(i)
 		if IsNotExists(err) {
 			// fall through
+
 		} else if err != nil {
 			return microerror.Mask(err)
+
+		} else if len(o.Stacks) != 1 {
+			return microerror.Maskf(executionFailedError, "expected one stack, got %d", len(o.Stacks))
+
+		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateFailed {
+			return microerror.Maskf(executionFailedError, "expected successful status, got %#q", o.Stacks[0].StackStatus)
+
 		} else {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's data plane cloud formation stack already exists")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")

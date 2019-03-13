@@ -1,4 +1,4 @@
-package vpccidr
+package routetable
 
 import (
 	"github.com/giantswarm/microerror"

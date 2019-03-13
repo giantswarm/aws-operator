@@ -2,14 +2,17 @@ package vpccidr
 
 import (
 	"context"
+	"fmt"
+	"sync"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/v25/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v25/key"
-	"github.com/giantswarm/aws-operator/service/vpccidr"
 )
 
 const (
@@ -22,6 +25,11 @@ type Config struct {
 
 type Resource struct {
 	logger micrologger.Logger
+
+	// cidrs is a mapping of vpcs IDs and CIDRs, where the key is the ID
+	// and the value is the CIDR.
+	cidrs map[string]string
+	mutex sync.Mutex
 }
 
 func New(config Config) (*Resource, error) {
@@ -31,6 +39,9 @@ func New(config Config) (*Resource, error) {
 
 	r := &Resource{
 		logger: config.Logger,
+
+		cidrs: map[string]string{},
+		mutex: sync.Mutex{},
 	}
 
 	return r, nil
@@ -46,25 +57,73 @@ func (r *Resource) addVPCCIDRToContext(ctx context.Context, cr v1alpha1.AWSConfi
 		return microerror.Mask(err)
 	}
 
-	var vpcCIDRService *vpccidr.VPCCIDR
 	{
-		c := vpccidr.Config{
-			EC2:    cc.Client.ControlPlane.AWS.EC2,
-			Logger: r.logger,
-		}
-
-		vpcCIDRService, err = vpccidr.New(c)
+		cidr, err := r.lookup(ctx, cc.Client.ControlPlane.AWS.EC2, key.PeerID(cr))
 		if err != nil {
 			return microerror.Mask(err)
 		}
-	}
 
-	cidr, err := vpcCIDRService.Lookup(ctx, key.PeerID(cr))
-	if err != nil {
-		return microerror.Mask(err)
+		cc.Status.ControlPlane.VPC.CIDR = cidr
 	}
-
-	cc.Status.ControlPlane.VPC.CIDR = cidr
 
 	return nil
+}
+
+func (r *Resource) lookup(ctx context.Context, client EC2, vpc string) (string, error) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
+	// We check if we have a VPC CIDR cached for the requested VPC ID. If we find
+	// one, we return the result.
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding cached vpc cidr for %#q", vpc))
+
+		cidr, ok := r.cidrs[vpc]
+		if ok {
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found cached vpc cidr %#q for %#q", cidr, vpc))
+			return cidr, nil
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find cached vpc cidr for %#q", vpc))
+	}
+
+	// We do not have a cached VPC CIDR for the requested VPC ID. So we look it
+	// up.
+	var cidr string
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding vpc cidr for %#q", vpc))
+
+		i := &ec2.DescribeVpcsInput{
+			Filters: []*ec2.Filter{
+				{
+					Name: aws.String("vpc-id"),
+					Values: []*string{
+						aws.String(vpc),
+					},
+				},
+			},
+		}
+
+		o, err := client.DescribeVpcs(i)
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
+		if len(o.Vpcs) != 1 {
+			return "", microerror.Maskf(executionFailedError, "expected one vpc, got %d", len(o.Vpcs))
+		}
+
+		cidr = *o.Vpcs[0].CidrBlock
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found vpc cidr %#q for %#q", cidr, vpc))
+	}
+
+	// At this point we found a VPC CIDR and can cache it using the requested VPC
+	// ID.
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("caching vpc cidr %#q for %#q", cidr, vpc))
+		r.cidrs[vpc] = cidr
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("cached vpc cidr %#q for %#q", cidr, vpc))
+	}
+
+	return cidr, nil
 }
