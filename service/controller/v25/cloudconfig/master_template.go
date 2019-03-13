@@ -229,8 +229,9 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 	var fileAssets []k8scloudconfig.FileAsset
 
+	data := e.templateData()
+
 	for _, fm := range filesMeta {
-		data := e.templateData()
 		c, err := k8scloudconfig.RenderFileAssetContent(fm.AssetContent, data)
 		if err != nil {
 			return nil, microerror.Mask(err)
