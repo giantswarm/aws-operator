@@ -101,7 +101,7 @@ required = [
   name = "github.com/giantswarm/micrologger"
 
 [[constraint]]
-  branch = "master"
+  branch = "kubeconfig"
   name = "github.com/giantswarm/operatorkit"
 
 [[constraint]]
@@ -109,11 +109,11 @@ required = [
   name = "github.com/giantswarm/randomkeys"
 
 [[constraint]]
-  branch = "master"
+  branch = "kubeconfig"
   name = "github.com/giantswarm/statusresource"
 
 [[constraint]]
-  branch = "master"
+  branch = "kubeconfig"
   name = "github.com/giantswarm/tenantcluster"
 
 [[constraint]]
