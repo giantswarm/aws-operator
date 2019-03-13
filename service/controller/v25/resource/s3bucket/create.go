@@ -111,6 +111,26 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			}
 		}
 
+		{
+			i := &s3.PutBucketEncryptionInput{
+				Bucket: aws.String(bucketInput.Name),
+				ServerSideEncryptionConfiguration: &s3.ServerSideEncryptionConfiguration{
+					Rules: []*s3.ServerSideEncryptionRule{
+						&s3.ServerSideEncryptionRule{
+							ApplyServerSideEncryptionByDefault: &s3.ServerSideEncryptionByDefault{
+								SSEAlgorithm: aws.String("AES256"),
+							},
+						},
+					},
+				},
+			}
+
+			_, err = cc.Client.TenantCluster.AWS.S3.PutBucketEncryption(i)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created S3 bucket %#q", bucketInput.Name))
 	}
 
