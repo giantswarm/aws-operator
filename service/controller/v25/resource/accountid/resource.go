@@ -27,11 +27,11 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	newResource := &Resource{
+	r := &Resource{
 		logger: config.Logger,
 	}
 
-	return newResource, nil
+	return r, nil
 }
 
 func (r *Resource) Name() string {
