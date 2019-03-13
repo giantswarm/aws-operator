@@ -4,8 +4,6 @@
 
 The aws-operator manages Kubernetes clusters running on AWS.
 
-
-
 ## Getting Project
 
 Download the latest release:
