@@ -136,11 +136,10 @@ func (r *Resource) newPrivateRoutes(ctx context.Context, cr v1alpha1.AWSConfig) 
 
 	var routes []template.ParamsMainRouteTablesRoute
 
-	for name, id := range cc.Status.ControlPlane.RouteTable.Mappings {
+	for _, id := range cc.Status.ControlPlane.RouteTable.Mappings {
 		for _, cidrBlock := range tenantPrivateSubnetCidrs {
 			route := template.ParamsMainRouteTablesRoute{
-				RouteTableName: name,
-				RouteTableID:   id,
+				RouteTableID: id,
 				// Requester CIDR block, we create the peering connection from the
 				// tenant's private subnets.
 				CidrBlock: cidrBlock,
@@ -168,10 +167,9 @@ func (r *Resource) newPublicRoutes(ctx context.Context, cr v1alpha1.AWSConfig) (
 
 	var routes []template.ParamsMainRouteTablesRoute
 
-	for name, id := range cc.Status.ControlPlane.RouteTable.Mappings {
+	for _, id := range cc.Status.ControlPlane.RouteTable.Mappings {
 		route := template.ParamsMainRouteTablesRoute{
-			RouteTableName: name,
-			RouteTableID:   id,
+			RouteTableID: id,
 			// Requester CIDR block, we create the peering connection from the
 			// tenant's CIDR for being able to access Vault's ELB.
 			CidrBlock: key.StatusNetworkCIDR(cr),
