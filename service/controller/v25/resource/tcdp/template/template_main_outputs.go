@@ -2,7 +2,7 @@ package template
 
 const TemplateMainOutputs = `
 {{ define "outputs" }}
-  ASGID:
+  AutoScalingGroupName:
     Value: !Ref NodePoolAutoScalingGroup
   CloudConfigVersion:
     Value: {{ .Outputs.CloudConfig.Version }}

@@ -161,6 +161,7 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr v1alpha1.AWSConfi
 		MaxSize:               key.ScalingMax(cr),
 		MinInstancesInService: workerCountRatio(mindDesiredNodes, 0.7),
 		MinSize:               key.ScalingMin(cr),
+		Name: asgName(cr),
 		Subnets:               key.PrivateSubnetNames(cr),
 	}
 
@@ -326,6 +327,10 @@ func (r *Resource) newSubnets(ctx context.Context, cr v1alpha1.AWSConfig) (*temp
 	return subnets, nil
 }
 
+func asgName(cr v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("asg-%s-tcdp", key.ClusterID(a))
+}
+
 // minDesiredWorkers calculates appropriate minimum value to be set for ASG
 // Desired value and to be used for computation of workerCountRatio.
 //
@@ -368,7 +373,7 @@ func routeTableAssociationNameWithAvailabilityZone(a string) string {
 }
 
 func stackName(cr v1alpha1.AWSConfig) string {
-	return fmt.Sprintf("cluster-%s-tcdp", strings.ToUpper(a))
+	return fmt.Sprintf("cluster-%s-tcdp", key.ClusterID(a))
 }
 
 func subnetNameWithAvailabilityZone(a string) string {

@@ -8,6 +8,7 @@ type ParamsMainAutoScalingGroup struct {
 	MaxSize               int
 	MinInstancesInService string
 	MinSize               int
+	Name                  string
 	Subnets               []string
 }
 

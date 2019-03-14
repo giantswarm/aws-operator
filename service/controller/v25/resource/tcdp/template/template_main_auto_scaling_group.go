@@ -28,7 +28,7 @@ const TemplateMainAutoScalingGroup = `
         - Granularity: "1Minute"
       Tags:
         - Key: Name
-          Value: NodePoolAutoScalingGroup
+          Value: {{ .AutoScalingGroup.Name }}
           PropagateAtLaunch: true
         - Key: k8s.io/cluster-autoscaler/enabled
           Value: true
