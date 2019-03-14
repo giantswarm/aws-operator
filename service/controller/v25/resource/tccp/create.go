@@ -21,7 +21,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 	}
 
 	if stackInput.StackName != nil {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "creating the guest cluster main stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "creating the tenant cluster main stack")
 
 		cc, err := controllercontext.FromContext(ctx)
 		if err != nil {
@@ -57,7 +57,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			// We waited longer than we wanted to get a reasonable result and be sure
 			// the stack got properly created. We skip here and try again on the next
 			// resync.
-			r.logger.LogCtx(ctx, "level", "debug", "message", "guest cluster main stack creation is not complete")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "tenant cluster main stack creation is not complete")
 			resourcecanceledcontext.SetCanceled(ctx)
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
 
@@ -66,7 +66,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			// There might be cases in which AWS is not fast enough to create the
 			// resources we want to watch. We skip here and try again on the next
 			// resync.
-			r.logger.LogCtx(ctx, "level", "debug", "message", "guest cluster main stack creation is not complete")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "tenant cluster main stack creation is not complete")
 			resourcecanceledcontext.SetCanceled(ctx)
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
 
@@ -77,9 +77,9 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "created the guest cluster main stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "created the tenant cluster main stack")
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not creating the guest cluster main stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not creating the tenant cluster main stack")
 	}
 
 	return nil
@@ -99,11 +99,11 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		return cloudformation.CreateStackInput{}, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the guest cluster main stack has to be created")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the tenant cluster main stack has to be created")
 
 	var createState cloudformation.CreateStackInput
 	if currentStackState.Name == "" || desiredStackState.Name != currentStackState.Name {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack has to be created")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster main stack has to be created")
 
 		var mainTemplate string
 		mainTemplate, err := r.getMainGuestTemplateBody(ctx, customObject, desiredStackState)
@@ -128,7 +128,7 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 			TimeoutInMinutes: aws.Int64(defaultCreationTimeout),
 		}
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack does not have to be created")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster main stack does not have to be created")
 	}
 
 	return createState, nil
