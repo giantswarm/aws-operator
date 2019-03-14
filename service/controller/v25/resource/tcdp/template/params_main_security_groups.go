@@ -1,13 +1,8 @@
 package template
 
 type ParamsMainSecurityGroups struct {
-	Cluster       ParamsMainSecurityGroupsCluster
 	ControlPlane  ParamsMainSecurityGroupsControlPlane
 	TenantCluster ParamsMainSecurityGroupsTenantCluster
-}
-
-type ParamsMainSecurityGroupsCluster struct {
-	ID string
 }
 
 type ParamsMainSecurityGroupsControlPlane struct {

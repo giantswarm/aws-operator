@@ -59,9 +59,7 @@ const TemplateMainSecurityGroups = `
         SourceSecurityGroupId: !Ref IngressSecurityGroup
 
       Tags:
-        - Key: Cluster
-          Value:  {{ .SecurityGroups.Cluster.ID }}
         - Key: Name
-          Value:  NodePoolSecurityGroup
+          Value: NodePoolSecurityGroup
 {{ end }}
 `

@@ -7,19 +7,25 @@ const TemplateMainLaunchConfiguration = `
     Properties:
       ImageId: {{ .LaunchConfiguration.Instance.Image }}
       SecurityGroups:
-      - !Ref SecurityGroup
+      - !Ref NodePoolSecurityGroup
       InstanceType: {{ .LaunchConfiguration.Instance.Type }}
-      InstanceMonitoring: {{ .LaunchConfiguration.InstanceMonitoring }}
-      IamInstanceProfile: !Ref InstanceProfile
+      InstanceMonitoring: {{ .LaunchConfiguration.Instance.Monitoring }}
+      IamInstanceProfile: !Ref NodePoolInstanceProfile
       BlockDeviceMappings:
-      {{ range .LaunchConfiguration.BlockDeviceMappings }}
-      - DeviceName: "{{ .DeviceName }}"
+
+      - DeviceName: /dev/xvdh
         Ebs:
-          DeleteOnTermination: {{ .DeleteOnTermination }}
-          VolumeSize: {{ .Volume.Size }}
-          VolumeType: {{ .Volume.Type }}
-      {{ end }}
-      AssociatePublicIpAddress: {{ .LaunchConfiguration.AssociatePublicIPAddress }}
+          DeleteOnTermination: true
+          VolumeSize: {{ .LaunchConfiguration.BlockDeviceMappings.Docker.Volume.Size }}
+          VolumeType: gp2
+
+      - DeviceName: /dev/xvdf
+        Ebs:
+          DeleteOnTermination: true
+          VolumeSize: {{ .LaunchConfiguration.BlockDeviceMappings.Logging.Volume.Size }}
+          VolumeType: gp2
+
+      AssociatePublicIpAddress: false
       UserData: {{ .LaunchConfiguration.SmallCloudConfig }}
 {{ end }}
 `

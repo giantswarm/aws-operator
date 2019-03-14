@@ -62,5 +62,9 @@ const TemplateMainIAMPolicies = `
               - "ecr:ListImages"
               - "ecr:BatchGetImage"
             Resource: "*"
+
+  # TODO
+  NodePoolInstanceProfile
+
 {{ end }}
 `
