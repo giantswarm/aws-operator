@@ -58,24 +58,24 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	stackName := key.MainGuestStackName(customObject)
 
-	// In order to compute the current state of the guest cluster's cloud
+	// In order to compute the current state of the tenant cluster's cloud
 	// formation stack we have to describe the CF stacks and lookup the right
 	// stack. We dispatch our custom StackState structure and enrich it with all
 	// information necessary to reconcile the cloudformation resource.
 	var stackOutputs []*cloudformation.Output
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the guest cluster main stack outputs in the AWS API")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster main stack outputs in the AWS API")
 
 		var stackStatus string
 		stackOutputs, stackStatus, err = cloudFormation.DescribeOutputsAndStatus(stackName)
 		if cf.IsStackNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster main stack outputs in the AWS API")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack does not exist")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster main stack outputs in the AWS API")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster main stack does not exist")
 			return StackState{}, nil
 
 		} else if cf.IsOutputsNotAccessible(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the guest cluster main stack outputs in the AWS API")
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the guest cluster main stack has status '%s'", stackStatus))
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster main stack outputs in the AWS API")
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster main stack has status '%s'", stackStatus))
 			if key.IsDeleted(customObject) {
 				// Keep finalizers to as long as we don't
 				// encounter IsStackNotFound.
@@ -91,7 +91,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			return StackState{}, microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found the guest cluster main stack outputs in the AWS API")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster main stack outputs in the AWS API")
 	}
 
 	var currentState StackState
