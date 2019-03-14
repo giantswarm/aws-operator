@@ -16,8 +16,6 @@ const Outputs = `
     Value: {{ .Guest.Outputs.Master.Instance.Type }}
   MasterCloudConfigVersion:
     Value: {{ .Guest.Outputs.Master.CloudConfig.Version }}
-  PrivateRouteTableID:
-    Value: !Ref PrivateRouteTable
   VPCID:
     Value: !Ref VPC
   VPCPeeringConnectionID:
