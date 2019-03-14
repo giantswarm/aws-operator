@@ -3,16 +3,31 @@ package template
 type ParamsMainSubnets []ParamsMainSubnetsSubnet
 
 type ParamsMainSubnetsSubnet struct {
-	AvailabilityZone string
-	CIDR             string
-	Name             string
-	TenantCluster    ParamsMainSubnetsSubnetTenantCluster
+	AvailabilityZone      string
+	CIDR                  string
+	Name                  string
+	RouteTableAssociation ParamsMainSubnetsSubnetRouteTableAssociation
+	TCCP                  ParamsMainSubnetsSubnetTCCP
 }
 
-type ParamsMainSubnetsSubnetTenantCluster struct {
-	VPC ParamsMainSubnetsSubnetTenantClusterVPC
+type ParamsMainSubnetsSubnetRouteTableAssociation struct {
+	Name string
 }
 
-type ParamsMainSubnetsSubnetTenantClusterVPC struct {
+type ParamsMainSubnetsSubnetTCCP struct {
+	Subnet ParamsMainSubnetsSubnetTCCPSubnet
+	VPC    ParamsMainSubnetsSubnetTCCPVPC
+}
+
+type ParamsMainSubnetsSubnetTCCPSubnet struct {
+	ID         string
+	RouteTable ParamsMainSubnetsSubnetTCCPSubnetRouteTable
+}
+
+type ParamsMainSubnetsSubnetTCCPSubnetRouteTable struct {
+	ID string
+}
+
+type ParamsMainSubnetsSubnetTCCPVPC struct {
 	ID string
 }

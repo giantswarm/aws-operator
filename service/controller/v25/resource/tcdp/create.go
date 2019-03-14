@@ -232,8 +232,17 @@ func (r *Resource) newSubnets(ctx context.Context, cr v1alpha1.AWSConfig) (*temp
 			AvailabilityZone: a.Name,
 			CIDR:             a.Subnet.CIDR,
 			Name:             subnetNameWithAvailabilityZone(a.Name),
-			TenantCluster: template.ParamsMainSubnetsSubnetTenantCluster{
-				VPC: template.ParamsMainSubnetsSubnetTenantClusterVPC{
+			RouteTableAssociation: template.ParamsMainSubnetsSubnetRouteTableAssociation{
+				Name: routeTableAssociationNameWithAvailabilityZone(a.Name),
+			},
+			TCCP: template.ParamsMainSubnetsSubnetTCCP{
+				Subnet: template.ParamsMainSubnetsSubnetTCCPSubnet{
+					ID: todo,
+					RouteTable: template.ParamsMainSubnetsSubnetTCCPSubnetRouteTable{
+						ID: todo,
+					},
+				},
+				VPC: template.ParamsMainSubnetsSubnetTCCPVPC{
 					ID: cc.Status.TenantCluster.VPC.ID,
 				},
 			},
@@ -280,6 +289,10 @@ func minDesiredWorkers(minWorkers, maxWorkers, statusDesiredCapacity int) int {
 	}
 
 	return minWorkers
+}
+
+func routeTableAssociationNameWithAvailabilityZone(a string) string {
+	return fmt.Sprintf("NodePoolRouteTableAssociation-%s", strings.ToUpper(a))
 }
 
 func stackName(cr v1alpha1.AWSConfig) string {
