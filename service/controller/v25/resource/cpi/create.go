@@ -28,7 +28,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane initializer CF stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane initializer cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
 			StackName: aws.String(key.MainHostPreStackName(cr)),
@@ -54,12 +54,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane initializer CF stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane initializer cloud formation stack")
 	}
 
 	var templateBody string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane initializer CF stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane initializer cloud formation stack")
 
 		var params *template.ParamsMain
 		{
@@ -78,11 +78,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computed the template of the tenant cluster's control plane initializer CF stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "computed the template of the tenant cluster's control plane initializer cloud formation stack")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the creation of the tenant cluster's control plane initializer CF stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the creation of the tenant cluster's control plane initializer cloud formation stack")
 
 		i := &cloudformation.CreateStackInput{
 			Capabilities: []*string{
@@ -99,11 +99,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the creation of the tenant cluster's control plane initializer CF stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the creation of the tenant cluster's control plane initializer cloud formation stack")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for the creation of the tenant cluster's control plane initializer CF stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for the creation of the tenant cluster's control plane initializer cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
 			StackName: aws.String(key.MainHostPreStackName(cr)),
@@ -114,7 +114,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "waited for the creation of the tenant cluster's control plane initializer CF stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "waited for the creation of the tenant cluster's control plane initializer cloud formation stack")
 	}
 
 	return nil

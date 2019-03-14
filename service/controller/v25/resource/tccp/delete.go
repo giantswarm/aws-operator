@@ -25,7 +25,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	}
 
 	if stackStateToDelete.Name != "" {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting the guest cluster main stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting the tenant cluster main stack")
 
 		cc, err := controllercontext.FromContext(ctx)
 		if err != nil {
@@ -66,10 +66,10 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 				}
 			}
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", "deleted the guest cluster main stack")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "deleted the tenant cluster main stack")
 		}
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting the guest cluster main stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting the tenant cluster main stack")
 	}
 
 	return nil
@@ -150,7 +150,7 @@ func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desir
 		Name: currentStackState.Name,
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "found the guest cluster main stack that has to be deleted")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster main stack that has to be deleted")
 
 	return deleteState, nil
 }
