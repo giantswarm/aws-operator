@@ -70,6 +70,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			if err != nil {
 				return microerror.Mask(err)
 			}
+			lifecycleHooks, err := r.newLifecycleHooks(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
+			}
 			outputs, err := r.newOutputs(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
@@ -85,6 +89,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 			params = &template.ParamsMain{
 				AutoScalingGroup: autoScalingGroup,
+				LifecycleHooks:   lifecycleHooks,
 				Outputs:          outputs,
 				SecurityGroups:   securityGroups,
 				Subnets:          subnets,
@@ -160,6 +165,10 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr v1alpha1.AWSConfi
 	}
 
 	return autoScalingGroup, nil
+}
+
+func (r *Resource) newLifecycleHooks(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainLifecycleHooks, error) {
+	return &template.ParamsMainLifecycleHooks{}, nil
 }
 
 func (r *Resource) newOutputs(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainOutputs, error) {

@@ -3,7 +3,7 @@ package template
 const TemplateMainAutoScalingGroup = `
 {{define "auto_scaling_group"}}
   NodePoolAutoScalingGroup:
-    Type: "AWS::AutoScaling::AutoScalingGroup"
+    Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
       {{- range $s := .AutoScalingGroup.Subnets }}

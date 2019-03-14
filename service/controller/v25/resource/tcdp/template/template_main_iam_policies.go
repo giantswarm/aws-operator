@@ -3,7 +3,7 @@ package template
 const TemplateMainIAMPolicies = `
 {{define "iam_policies"}}
   Role:
-    Type: "AWS::IAM::Role"
+    Type: AWS::IAM::Role
     Properties:
       RoleName: {{ .IAMPolicies.RoleName }}
       AssumeRolePolicyDocument:

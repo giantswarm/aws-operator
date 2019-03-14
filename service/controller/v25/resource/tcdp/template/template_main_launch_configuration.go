@@ -2,14 +2,13 @@ package template
 
 const TemplateMainLaunchConfiguration = `
 {{define "launch_configuration"}}
-  {{ .LaunchConfiguration.ASGType }}LaunchConfiguration:
-    Type: "AWS::AutoScaling::LaunchConfiguration"
-    Description: {{ .LaunchConfiguration.ASGType }} launch configuration
+  NodePoolLaunchConfiguration:
+    Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
-      ImageId: {{ .LaunchConfiguration.ImageID }}
+      ImageId: {{ .LaunchConfiguration.Instance.Image }}
       SecurityGroups:
       - !Ref SecurityGroup
-      InstanceType: {{ .LaunchConfiguration.InstanceType }}
+      InstanceType: {{ .LaunchConfiguration.Instance.Type }}
       InstanceMonitoring: {{ .LaunchConfiguration.InstanceMonitoring }}
       IamInstanceProfile: !Ref InstanceProfile
       BlockDeviceMappings:
@@ -17,8 +16,8 @@ const TemplateMainLaunchConfiguration = `
       - DeviceName: "{{ .DeviceName }}"
         Ebs:
           DeleteOnTermination: {{ .DeleteOnTermination }}
-          VolumeSize: {{ .VolumeSize }}
-          VolumeType: {{ .VolumeType }}
+          VolumeSize: {{ .Volume.Size }}
+          VolumeType: {{ .Volume.Type }}
       {{ end }}
       AssociatePublicIpAddress: {{ .LaunchConfiguration.AssociatePublicIPAddress }}
       UserData: {{ .LaunchConfiguration.SmallCloudConfig }}
