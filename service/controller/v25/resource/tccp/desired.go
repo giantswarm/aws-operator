@@ -16,7 +16,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 
 	var mainStack StackState
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computing desired state for the guest cluster main stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "computing desired state for the tenant cluster main stack")
 
 		imageID, err := key.ImageID(customObject)
 		if err != nil {
@@ -54,7 +54,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			VersionBundleVersion: key.VersionBundleVersion(customObject),
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computed desired state for the guest cluster main stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "computed desired state for the tenant cluster main stack")
 	}
 
 	return mainStack, nil
