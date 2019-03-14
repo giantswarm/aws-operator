@@ -14,7 +14,7 @@ const TemplateMainSubnets = `
         Value: {{ .Name }}
       - Key: "kubernetes.io/role/elb"
         Value: "1"
-      VpcId: !Ref VPC
+      VpcId: {{ .TenantCluster.VPC.ID }}
   {{ end }}
 {{ end }}
 `

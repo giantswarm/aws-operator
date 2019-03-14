@@ -172,12 +172,22 @@ func (r *Resource) newSecurityGroups(ctx context.Context, cr v1alpha1.AWSConfig)
 				CIDR: cc.Status.ControlPlane.VPC.CIDR,
 			},
 		},
+		TenantCluster: template.ParamsMainSecurityGroupsTenantCluster{
+			VPC: template.ParamsMainSecurityGroupsTenantClusterVPC{
+				ID: cc.Status.TenantCluster.VPC.ID,
+			},
+		},
 	}
 
 	return securityGroups, nil
 }
 
 func (r *Resource) newSubnets(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainSubnets, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	var subnets *template.ParamsMainSubnets
 
 	for _, a := range key.StatusNodePoolAvailabilityZones(cr) {
@@ -185,6 +195,11 @@ func (r *Resource) newSubnets(ctx context.Context, cr v1alpha1.AWSConfig) (*temp
 			AvailabilityZone: a.Name,
 			CIDR:             a.Subnet.CIDR,
 			Name:             subnetNameWithAvailabilityZone(a.Name),
+			TenantCluster: template.ParamsMainSubnetsSubnetTenantCluster{
+				VPC: template.ParamsMainSubnetsSubnetTenantClusterVPC{
+					ID: cc.Status.TenantCluster.VPC.ID,
+				},
+			},
 		}
 
 		subnets = append(subnets, s)

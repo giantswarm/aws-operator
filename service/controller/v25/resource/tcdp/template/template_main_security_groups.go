@@ -6,7 +6,7 @@ const TemplateMainSecurityGroups = `
     Type: AWS::EC2::SecurityGroups
     Properties:
       GroupDescription: General Node Pool Security Group For Basic Traffic Rules.
-      VpcId: !Ref VPC
+      VpcId: {{ .SecurityGroups.TenantCluster.VPC.ID }}
       SecurityGroupIngress:
 
       # Allow traffic from control plane CIDR to 22 for SSH access.

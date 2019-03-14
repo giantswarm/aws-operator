@@ -1,8 +1,9 @@
 package template
 
 type ParamsMainSecurityGroups struct {
-	Cluster      ParamsMainSecurityGroupsCluster
-	ControlPlane ParamsMainSecurityGroupsControlPlane
+	Cluster       ParamsMainSecurityGroupsCluster
+	ControlPlane  ParamsMainSecurityGroupsControlPlane
+	TenantCluster ParamsMainSecurityGroupsTenantCluster
 }
 
 type ParamsMainSecurityGroupsCluster struct {
@@ -15,4 +16,12 @@ type ParamsMainSecurityGroupsControlPlane struct {
 
 type ParamsMainSecurityGroupsControlPlaneVPC struct {
 	CIDR string
+}
+
+type ParamsMainSecurityGroupsTenantCluster struct {
+	VPC ParamsMainSecurityGroupsTenantClusterVPC
+}
+
+type ParamsMainSecurityGroupsTenantClusterVPC struct {
+	ID string
 }
