@@ -1,18 +1,18 @@
 package template
 
 const TemplateMainAutoScalingGroup = `
-{{define "auto_scaling_group"}}
+{{ define "auto_scaling_group" }}
   NodePoolAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
       {{- range $s := .AutoScalingGroup.Subnets }}
         - !Ref {{ $s }}
-      {{end}}
+      {{ end }}
       AvailabilityZones:
       {{- range $az := .AutoScalingGroup.AvailabilityZones }}
         - {{ $az }}
-      {{end}}
+      {{ end }}
       DesiredCapacity: {{ .AutoScalingGroup.DesiredCapacity }}
       MinSize: {{ .AutoScalingGroup.MinSize }}
       MaxSize: {{ .AutoScalingGroup.MaxSize }}
@@ -49,5 +49,5 @@ const TemplateMainAutoScalingGroup = `
         # After creating a new instance, pause the rolling update on the ASG for
         # 15 minutes.
         PauseTime: PT15M
-{{end}}
+{{ end }}
 `

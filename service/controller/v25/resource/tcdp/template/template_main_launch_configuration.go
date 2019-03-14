@@ -1,7 +1,7 @@
 package template
 
 const TemplateMainLaunchConfiguration = `
-{{define "launch_configuration"}}
+{{ define "launch_configuration" }}
   NodePoolLaunchConfiguration:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
@@ -21,5 +21,5 @@ const TemplateMainLaunchConfiguration = `
       {{ end }}
       AssociatePublicIpAddress: {{ .LaunchConfiguration.AssociatePublicIPAddress }}
       UserData: {{ .LaunchConfiguration.SmallCloudConfig }}
-{{end}}
+{{ end }}
 `

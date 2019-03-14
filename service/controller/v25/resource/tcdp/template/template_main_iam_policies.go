@@ -1,7 +1,7 @@
 package template
 
 const TemplateMainIAMPolicies = `
-{{define "iam_policies"}}
+{{ define "iam_policies" }}
   Role:
     Type: AWS::IAM::Role
     Properties:
