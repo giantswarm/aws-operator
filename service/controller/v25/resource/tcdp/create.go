@@ -201,9 +201,6 @@ func (r *Resource) newSecurityGroups(ctx context.Context, cr v1alpha1.AWSConfig)
 	}
 
 	securityGroups := &template.ParamsMainSecurityGroups{
-		Cluster: template.ParamsMainSecurityGroupsCluster{
-			ID: key.ClusterID(cr),
-		},
 		ControlPlane: template.ParamsMainSecurityGroupsControlPlane{
 			VPC: template.ParamsMainSecurityGroupsControlPlaneVPC{
 				CIDR: cc.Status.ControlPlane.VPC.CIDR,
@@ -212,6 +209,30 @@ func (r *Resource) newSecurityGroups(ctx context.Context, cr v1alpha1.AWSConfig)
 		TenantCluster: template.ParamsMainSecurityGroupsTenantCluster{
 			VPC: template.ParamsMainSecurityGroupsTenantClusterVPC{
 				ID: cc.Status.TenantCluster.VPC.ID,
+			},
+		},
+	}
+
+	return securityGroups, nil
+}
+
+func (r *Resource) newSubnets(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainSubnets, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var subnets *template.ParamsMainSubnets
+
+	for _, a := range key.StatusNodePoolAvailabilityZones(cr) {
+		s := template.ParamsMainSubnetsSubnet{
+			AvailabilityZone: a.Name,
+			CIDR:             a.Subnet.CIDR,
+			Name:             subnetNameWithAvailabilityZone(a.Name),
+			TenantCluster: template.ParamsMainSubnetsSubnetTenantCluster{
+				VPC: template.ParamsMainSubnetsSubnetTenantClusterVPC{
+					ID: cc.Status.TenantCluster.VPC.ID,
+				},
 			},
 		},
 	}
@@ -292,7 +313,7 @@ func minDesiredWorkers(minWorkers, maxWorkers, statusDesiredCapacity int) int {
 }
 
 func routeTableAssociationNameWithAvailabilityZone(a string) string {
-	return fmt.Sprintf("NodePoolRouteTableAssociation-%s", strings.ToUpper(a))
+	return fmt.Sprintf("NodePool-Subnet-RouteTableAssociation-%s", strings.ToUpper(a))
 }
 
 func stackName(cr v1alpha1.AWSConfig) string {
@@ -300,7 +321,7 @@ func stackName(cr v1alpha1.AWSConfig) string {
 }
 
 func subnetNameWithAvailabilityZone(a string) string {
-	return fmt.Sprintf("NodePoolSubnet-%s", strings.ToUpper(a))
+	return fmt.Sprintf("NodePool-Subnet-%s", strings.ToUpper(a))
 }
 
 func workerCountRatio(workers int, ratio float32) string {
