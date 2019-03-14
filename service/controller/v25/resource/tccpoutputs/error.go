@@ -1,4 +1,4 @@
-package stackoutput
+package tccpoutputs
 
 import "github.com/giantswarm/microerror"
 
