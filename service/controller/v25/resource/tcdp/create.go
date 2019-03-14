@@ -200,6 +200,57 @@ func (r *Resource) newSecurityGroups(ctx context.Context, cr v1alpha1.AWSConfig)
 		return nil, microerror.Mask(err)
 	}
 
+	mindDesiredNodes := minDesiredWorkers(key.ScalingMin(cr), key.ScalingMax(cr), cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity)
+
+	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
+		AvailabilityZones: key.StatusAvailabilityZoneNames(cr),
+		Cluster: template.ParamsMainAutoScalingGroupCluster{
+			ID: key.ClusterID(cr),
+		},
+		DesiredCapacity:       minDesiredNodes,
+		MaxBatchSize:          workerCountRatio(mindDesiredNodes, 0.3),
+		MaxSize:               key.ScalingMax(cr),
+		MinInstancesInService: workerCountRatio(mindDesiredNodes, 0.7),
+		MinSize:               key.ScalingMin(cr),
+		Subnets:               key.PrivateSubnetNames(cr),
+	}
+
+	return autoScalingGroup, nil
+}
+
+func (r *Resource) newLifecycleHooks(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainLifecycleHooks, error) {
+	return &template.ParamsMainLifecycleHooks{}, nil
+}
+
+func (r *Resource) newOutputs(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainOutputs, error) {
+	imageID, err := key.ImageID(cr)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	outputs := &template.ParamsMainOutputs{
+		CloudConfig: template.ParamsMainOutputsCloudConfig{
+			Version: key.CloudConfigVersion,
+		},
+		DockerVolumeSizeGB: strconv.Itoa(key.WorkerDockerVolumeSizeGB(cr)),
+		Instance: template.ParamsMainOutputsInstance{
+			Image: imageID,
+			Type:  key.WorkerInstanceType(cr),
+		},
+		VersionBundle: template.ParamsMainOutputsVersionBundle{
+			Version: key.VersionBundleVersion(cr),
+		},
+	}
+
+	return outputs, nil
+}
+
+func (r *Resource) newSecurityGroups(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainSecurityGroups, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	securityGroups := &template.ParamsMainSecurityGroups{
 		ControlPlane: template.ParamsMainSecurityGroupsControlPlane{
 			VPC: template.ParamsMainSecurityGroupsControlPlaneVPC{
