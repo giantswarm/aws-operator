@@ -46,8 +46,8 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/service"
-	"github.com/giantswarm/aws-operator/service/controller/v25/resource/stackoutput"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/tccp"
+	"github.com/giantswarm/aws-operator/service/controller/v25/resource/tccpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/vpccidr"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/workerasgname"
 )
@@ -367,6 +367,20 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var tccpOutputsResource controller.Resource
+	{
+		c := tccpoutputs.Config{
+			Logger: config.Logger,
+
+			Route53Enabled: config.Route53Enabled,
+		}
+
+		tccpOutputsResource, err = tccpoutputs.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var cpfResource controller.Resource
 	{
 		c := cpf.Config{
@@ -540,20 +554,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var stackOutputResource controller.Resource
-	{
-		c := stackoutput.Config{
-			Logger: config.Logger,
-
-			Route53Enabled: config.Route53Enabled,
-		}
-
-		stackOutputResource, err = stackoutput.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var vpcCIDRResource controller.Resource
 	{
 		c := vpccidr.Config{
@@ -586,7 +586,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		peerRoleARNResource,
 		routeTableResource,
 		vpcCIDRResource,
-		stackOutputResource,
+		tccpOutputsResource,
 		workerASGNameResource,
 		asgStatusResource,
 		statusResource,

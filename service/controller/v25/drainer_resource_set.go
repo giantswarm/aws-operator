@@ -17,7 +17,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v25/key"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/drainer"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/drainfinisher"
-	"github.com/giantswarm/aws-operator/service/controller/v25/resource/stackoutput"
+	"github.com/giantswarm/aws-operator/service/controller/v25/resource/tccpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/workerasgname"
 )
 
@@ -61,15 +61,15 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var stackOutputResource controller.Resource
+	var tccpOutputsResource controller.Resource
 	{
-		c := stackoutput.Config{
+		c := tccpoutputs.Config{
 			Logger: config.Logger,
 
 			Route53Enabled: config.Route53Enabled,
 		}
 
-		stackOutputResource, err = stackoutput.New(c)
+		tccpOutputsResource, err = tccpoutputs.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -89,7 +89,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 	}
 
 	resources := []controller.Resource{
-		stackOutputResource,
+		tccpOutputsResource,
 		workerASGNameResource,
 		drainerResource,
 		drainFinisherResource,
