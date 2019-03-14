@@ -47,6 +47,9 @@ const (
 	// LogDeliveryURI is used for setting the correct ACL in the access log bucket
 	LogDeliveryURI = "uri=http://acs.amazonaws.com/groups/s3/LogDelivery"
 
+	// S3BucketEncryptionAlgorithm is used to determine which algorithm use S3 to encrypt buckets.
+	S3BucketEncryptionAlgorithm = "AES256"
+
 	InstanceIDAnnotation = "aws-operator.giantswarm.io/instance"
 
 	chinaAWSCliContainerRegistry   = "docker://registry-intl.cn-shanghai.aliyuncs.com/giantswarm/awscli:latest"

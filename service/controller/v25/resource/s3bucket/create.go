@@ -118,7 +118,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 					Rules: []*s3.ServerSideEncryptionRule{
 						&s3.ServerSideEncryptionRule{
 							ApplyServerSideEncryptionByDefault: &s3.ServerSideEncryptionByDefault{
-								SSEAlgorithm: aws.String("AES256"),
+								SSEAlgorithm: aws.String(key.S3BucketEncryptionAlgorithm),
 							},
 						},
 					},
