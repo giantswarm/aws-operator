@@ -120,10 +120,10 @@
   revision = "0926d9b7c5419173936b4556411a103bdf8d5966"
 
 [[projects]]
-  branch = "kubeconfig"
+  branch = "master"
   name = "github.com/giantswarm/operatorkit"
   packages = ["client/k8srestconfig"]
-  revision = "031a73d98e0a1d566b231919c97cbd823a5d3729"
+  revision = "67aba158b01a7eb22405c4a5ad643853f29cb5f3"
 
 [[projects]]
   branch = "master"
@@ -651,6 +651,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c73833cf20f79dfaf8d663fd1123d1344c017b2ba1e518bd43bb7e9730fa770e"
+  inputs-digest = "d8456b307c32575306c0f682893b7d20fd30266d5223af1670521501e4b60f31"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -381,7 +381,7 @@
   revision = "5a0784e0ee23c5b732c0d15023ac3dce8aef145a"
 
 [[projects]]
-  branch = "kubeconfig"
+  branch = "master"
   name = "github.com/giantswarm/operatorkit"
   packages = [
     "client/k8scrdclient",
@@ -400,7 +400,7 @@
     "informer",
     "informer/collector"
   ]
-  revision = "031a73d98e0a1d566b231919c97cbd823a5d3729"
+  revision = "67aba158b01a7eb22405c4a5ad643853f29cb5f3"
 
 [[projects]]
   branch = "master"
@@ -412,16 +412,16 @@
   revision = "7ce5c5accc2e7896575fac81721e1218a966a380"
 
 [[projects]]
-  branch = "kubeconfig"
+  branch = "master"
   name = "github.com/giantswarm/statusresource"
   packages = ["."]
-  revision = "84a841b701e4910370dac278cc1e4155e01a46b9"
+  revision = "e518a9fc5c68ee7801041390edef8f87346a0cef"
 
 [[projects]]
-  branch = "kubeconfig"
+  branch = "master"
   name = "github.com/giantswarm/tenantcluster"
   packages = ["."]
-  revision = "5728e9e2c4c771f3b71423117be9857d6aa7006e"
+  revision = "5393d99231d18bd6613ee5a2a0b7664e588f726a"
 
 [[projects]]
   branch = "master"
@@ -1239,6 +1239,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "30378792dafb1fd40522693386cbb6af9a46a8474babc92724b27a629cfff538"
+  inputs-digest = "c284c14c732e347e3baabf59f6279f120b5ad50ef0b8784db61feed6e7aae253"
   solver-name = "gps-cdcl"
   solver-version = 1
