@@ -4,7 +4,7 @@ package template
 type ParamsMain struct {
 	AutoScalingGroup    *ParamsMainAutoScalingGroup
 	IAMPolicies         *ParamsMainIAMPolicies
-	LaunchConfiguration *ParamsMainLaunchConfig
+	LaunchConfiguration *ParamsMainLaunchConfiguration
 	LifecycleHooks      *ParamsMainLifecycleHooks
 	Outputs             *ParamsMainOutputs
 	SecurityGroups      *ParamsMainSecurityGroups

@@ -1,33 +1,35 @@
 package template
 
-type ParamsMainSubnets []ParamsMainSubnetsSubnet
+type ParamsMainSubnets struct {
+	List []ParamsMainSubnetsListItem
+}
 
-type ParamsMainSubnetsSubnet struct {
+type ParamsMainSubnetsListItem struct {
 	AvailabilityZone      string
 	CIDR                  string
 	Name                  string
-	RouteTableAssociation ParamsMainSubnetsSubnetRouteTableAssociation
-	TCCP                  ParamsMainSubnetsSubnetTCCP
+	RouteTableAssociation ParamsMainSubnetsListItemRouteTableAssociation
+	TCCP                  ParamsMainSubnetsListItemTCCP
 }
 
-type ParamsMainSubnetsSubnetRouteTableAssociation struct {
+type ParamsMainSubnetsListItemRouteTableAssociation struct {
 	Name string
 }
 
-type ParamsMainSubnetsSubnetTCCP struct {
-	Subnet ParamsMainSubnetsSubnetTCCPSubnet
-	VPC    ParamsMainSubnetsSubnetTCCPVPC
+type ParamsMainSubnetsListItemTCCP struct {
+	Subnet ParamsMainSubnetsListItemTCCPSubnet
+	VPC    ParamsMainSubnetsListItemTCCPVPC
 }
 
-type ParamsMainSubnetsSubnetTCCPSubnet struct {
+type ParamsMainSubnetsListItemTCCPSubnet struct {
 	ID         string
-	RouteTable ParamsMainSubnetsSubnetTCCPSubnetRouteTable
+	RouteTable ParamsMainSubnetsListItemTCCPSubnetRouteTable
 }
 
-type ParamsMainSubnetsSubnetTCCPSubnetRouteTable struct {
+type ParamsMainSubnetsListItemTCCPSubnetRouteTable struct {
 	ID string
 }
 
-type ParamsMainSubnetsSubnetTCCPVPC struct {
+type ParamsMainSubnetsListItemTCCPVPC struct {
 	ID string
 }

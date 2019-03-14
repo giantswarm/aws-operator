@@ -70,6 +70,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			if err != nil {
 				return microerror.Mask(err)
 			}
+			launchConfiguration, err := r.newLaunchConfiguration(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
+			}
 			lifecycleHooks, err := r.newLifecycleHooks(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
@@ -88,11 +92,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			}
 
 			params = &template.ParamsMain{
-				AutoScalingGroup: autoScalingGroup,
-				LifecycleHooks:   lifecycleHooks,
-				Outputs:          outputs,
-				SecurityGroups:   securityGroups,
-				Subnets:          subnets,
+				AutoScalingGroup:    autoScalingGroup,
+				LaunchConfiguration: launchConfiguration,
+				LifecycleHooks:      lifecycleHooks,
+				Outputs:             outputs,
+				SecurityGroups:      securityGroups,
+				Subnets:             subnets,
 			}
 		}
 
@@ -143,13 +148,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) newAutoScalingGroup(ctx context.Context, cr v1alpha1.AWSConfig) (*template.AutoScalingGroup, error) {
+func (r *Resource) newAutoScalingGroup(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainAutoScalingGroup, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	mindDesiredNodes := minDesiredWorkers(key.ScalingMin(cr), key.ScalingMax(cr), cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity)
+	minDesiredNodes := minDesiredWorkers(key.ScalingMin(cr), key.ScalingMax(cr), cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity)
 
 	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
 		AvailabilityZones: key.StatusAvailabilityZoneNames(cr),
@@ -157,66 +162,44 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr v1alpha1.AWSConfi
 			ID: key.ClusterID(cr),
 		},
 		DesiredCapacity:       minDesiredNodes,
-		MaxBatchSize:          workerCountRatio(mindDesiredNodes, 0.3),
+		MaxBatchSize:          workerCountRatio(minDesiredNodes, 0.3),
 		MaxSize:               key.ScalingMax(cr),
-		MinInstancesInService: workerCountRatio(mindDesiredNodes, 0.7),
+		MinInstancesInService: workerCountRatio(minDesiredNodes, 0.7),
 		MinSize:               key.ScalingMin(cr),
-		Name: asgName(cr),
+		Name:                  asgName(cr),
 		Subnets:               key.PrivateSubnetNames(cr),
 	}
 
 	return autoScalingGroup, nil
 }
 
-func (r *Resource) newLifecycleHooks(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainLifecycleHooks, error) {
-	return &template.ParamsMainLifecycleHooks{}, nil
-}
-
-func (r *Resource) newOutputs(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainOutputs, error) {
+func (r *Resource) newLaunchConfiguration(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainLaunchConfiguration, error) {
 	imageID, err := key.ImageID(cr)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	outputs := &template.ParamsMainOutputs{
-		CloudConfig: template.ParamsMainOutputsCloudConfig{
-			Version: key.CloudConfigVersion,
+	launchConfiguration := &template.ParamsMainLaunchConfiguration{
+		BlockDeviceMapping: template.ParamsMainLaunchConfigurationBlockDeviceMapping{
+			Docker: template.ParamsMainLaunchConfigurationBlockDeviceMappingDocker{
+				Volume: template.ParamsMainLaunchConfigurationBlockDeviceMappingDockerVolume{
+					Size: key.WorkerDockerVolumeSizeGB(cr),
+				},
+			},
+			Logging: template.ParamsMainLaunchConfigurationBlockDeviceMappingLogging{
+				Volume: template.ParamsMainLaunchConfigurationBlockDeviceMappingLoggingVolume{
+					Size: 100,
+				},
+			},
 		},
-		DockerVolumeSizeGB: strconv.Itoa(key.WorkerDockerVolumeSizeGB(cr)),
-		Instance: template.ParamsMainOutputsInstance{
-			Image: imageID,
-			Type:  key.WorkerInstanceType(cr),
-		},
-		VersionBundle: template.ParamsMainOutputsVersionBundle{
-			Version: key.VersionBundleVersion(cr),
+		Instance: template.ParamsMainLaunchConfigurationInstance{
+			Image:      imageID,
+			Monitoring: r.instanceMonitoring,
+			Type:       key.WorkerInstanceType(cr),
 		},
 	}
 
-	return outputs, nil
-}
-
-func (r *Resource) newSecurityGroups(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainSecurityGroups, error) {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	mindDesiredNodes := minDesiredWorkers(key.ScalingMin(cr), key.ScalingMax(cr), cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity)
-
-	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
-		AvailabilityZones: key.StatusAvailabilityZoneNames(cr),
-		Cluster: template.ParamsMainAutoScalingGroupCluster{
-			ID: key.ClusterID(cr),
-		},
-		DesiredCapacity:       minDesiredNodes,
-		MaxBatchSize:          workerCountRatio(mindDesiredNodes, 0.3),
-		MaxSize:               key.ScalingMax(cr),
-		MinInstancesInService: workerCountRatio(mindDesiredNodes, 0.7),
-		MinSize:               key.ScalingMin(cr),
-		Subnets:               key.PrivateSubnetNames(cr),
-	}
-
-	return autoScalingGroup, nil
+	return launchConfiguration, nil
 }
 
 func (r *Resource) newLifecycleHooks(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainLifecycleHooks, error) {
@@ -277,58 +260,34 @@ func (r *Resource) newSubnets(ctx context.Context, cr v1alpha1.AWSConfig) (*temp
 	var subnets *template.ParamsMainSubnets
 
 	for _, a := range key.StatusNodePoolAvailabilityZones(cr) {
-		s := template.ParamsMainSubnetsSubnet{
+		s := template.ParamsMainSubnetsListItem{
 			AvailabilityZone: a.Name,
 			CIDR:             a.Subnet.CIDR,
 			Name:             subnetNameWithAvailabilityZone(a.Name),
-			TenantCluster: template.ParamsMainSubnetsSubnetTenantCluster{
-				VPC: template.ParamsMainSubnetsSubnetTenantClusterVPC{
-					ID: cc.Status.TenantCluster.VPC.ID,
-				},
-			},
-		},
-	}
-
-	return securityGroups, nil
-}
-
-func (r *Resource) newSubnets(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainSubnets, error) {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	var subnets *template.ParamsMainSubnets
-
-	for _, a := range key.StatusNodePoolAvailabilityZones(cr) {
-		s := template.ParamsMainSubnetsSubnet{
-			AvailabilityZone: a.Name,
-			CIDR:             a.Subnet.CIDR,
-			Name:             subnetNameWithAvailabilityZone(a.Name),
-			RouteTableAssociation: template.ParamsMainSubnetsSubnetRouteTableAssociation{
+			RouteTableAssociation: template.ParamsMainSubnetsListItemRouteTableAssociation{
 				Name: routeTableAssociationNameWithAvailabilityZone(a.Name),
 			},
-			TCCP: template.ParamsMainSubnetsSubnetTCCP{
-				Subnet: template.ParamsMainSubnetsSubnetTCCPSubnet{
+			TCCP: template.ParamsMainSubnetsListItemTCCP{
+				Subnet: template.ParamsMainSubnetsListItemTCCPSubnet{
 					ID: todo,
-					RouteTable: template.ParamsMainSubnetsSubnetTCCPSubnetRouteTable{
+					RouteTable: template.ParamsMainSubnetsListItemTCCPSubnetRouteTable{
 						ID: todo,
 					},
 				},
-				VPC: template.ParamsMainSubnetsSubnetTCCPVPC{
+				VPC: template.ParamsMainSubnetsListItemTCCPVPC{
 					ID: cc.Status.TenantCluster.VPC.ID,
 				},
 			},
 		}
 
-		subnets = append(subnets, s)
+		subnets.List = append(subnets.List, s)
 	}
 
 	return subnets, nil
 }
 
 func asgName(cr v1alpha1.AWSConfig) string {
-	return fmt.Sprintf("asg-%s-tcdp", key.ClusterID(a))
+	return fmt.Sprintf("asg-%s-tcdp", key.ClusterID(cr))
 }
 
 // minDesiredWorkers calculates appropriate minimum value to be set for ASG
@@ -373,7 +332,7 @@ func routeTableAssociationNameWithAvailabilityZone(a string) string {
 }
 
 func stackName(cr v1alpha1.AWSConfig) string {
-	return fmt.Sprintf("cluster-%s-tcdp", key.ClusterID(a))
+	return fmt.Sprintf("cluster-%s-tcdp", key.ClusterID(cr))
 }
 
 func subnetNameWithAvailabilityZone(a string) string {

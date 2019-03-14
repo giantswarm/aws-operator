@@ -18,7 +18,8 @@ const (
 type Config struct {
 	Logger micrologger.Logger
 
-	InstallationName string
+	InstallationName   string
+	InstanceMonitoring bool
 }
 
 // Resource implements the TCDP resource, which stands for Tenant Cluster Data
@@ -26,7 +27,8 @@ type Config struct {
 type Resource struct {
 	logger micrologger.Logger
 
-	installationName string
+	installationName   string
+	instanceMonitoring bool
 }
 
 func New(config Config) (*Resource, error) {
@@ -34,10 +36,15 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
+	if config.InstallationName == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
+	}
+
 	r := &Resource{
 		logger: config.Logger,
 
-		installationName: config.InstallationName,
+		installationName:   config.InstallationName,
+		instanceMonitoring: config.InstanceMonitoring,
 	}
 
 	return r, nil
