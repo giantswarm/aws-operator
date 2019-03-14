@@ -70,6 +70,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			if err != nil {
 				return microerror.Mask(err)
 			}
+			outputs, err := r.newOutputs(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
+			}
 			securityGroups, err := r.newSecurityGroups(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
@@ -81,6 +85,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 			params = &template.ParamsMain{
 				AutoScalingGroup: autoScalingGroup,
+				Outputs:          outputs,
 				SecurityGroups:   securityGroups,
 				Subnets:          subnets,
 			}
@@ -102,7 +107,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				aws.String(capabilityNamesIAM),
 			},
 			EnableTerminationProtection: aws.Bool(key.EnableTerminationProtection),
-			StackName:                   aws.String(key.MainHostPreStackName(cr)),
+			StackName:                   aws.String(stackName(cr)),
 			Tags:                        r.getCloudFormationTags(cr),
 			TemplateBody:                aws.String(templateBody),
 		}
@@ -157,7 +162,30 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr v1alpha1.AWSConfi
 	return autoScalingGroup, nil
 }
 
-func (r *Resource) newSecurityGroups(ctx context.Context, cr v1alpha1.AWSConfig) (*template.SecurityGroups, error) {
+func (r *Resource) newOutputs(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainOutputs, error) {
+	imageID, err := key.ImageID(cr)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	outputs := &template.ParamsMainOutputs{
+		CloudConfig: template.ParamsMainOutputsCloudConfig{
+			Version: key.CloudConfigVersion,
+		},
+		DockerVolumeSizeGB: strconv.Itoa(key.WorkerDockerVolumeSizeGB(cr)),
+		Instance: template.ParamsMainOutputsInstance{
+			Image: imageID,
+			Type:  key.WorkerInstanceType(cr),
+		},
+		VersionBundle: template.ParamsMainOutputsVersionBundle{
+			Version: key.VersionBundleVersion(cr),
+		},
+	}
+
+	return outputs, nil
+}
+
+func (r *Resource) newSecurityGroups(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainSecurityGroups, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -243,6 +271,10 @@ func minDesiredWorkers(minWorkers, maxWorkers, statusDesiredCapacity int) int {
 	}
 
 	return minWorkers
+}
+
+func stackName(cr v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("cluster-%s-tcdp", strings.ToUpper(a))
 }
 
 func subnetNameWithAvailabilityZone(a string) string {

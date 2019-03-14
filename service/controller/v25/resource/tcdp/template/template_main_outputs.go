@@ -2,24 +2,17 @@ package template
 
 const TemplateMainOutputs = `
 {{define "outputs"}}
+  ASGID:
+    Value: !Ref NodePoolAutoScalingGroup
   CloudConfigVersion:
     Value: {{ .Outputs.CloudConfig.Version }}
   DockerVolumeSizeGB:
     Value: {{ .Outputs.DockerVolumeSizeGB }}
-  {{ if .Outputs.Route53Enabled }}
-  HostedZoneNameServers:
-    Value: !Join [ ',', !GetAtt 'HostedZone.NameServers' ]
-  {{ end }}
-  {{ .Outputs.ASG.Key }}:
-    Value: !Ref {{ .Outputs.ASG.Ref }}
-  ImageID:
-    Value: {{ .Outputs.ImageID }}
+  InstanceImage:
+    Value: {{ .Outputs.Instance.Image }}
   InstanceType:
-    Value: {{ .Outputs.InstanceType }}
+    Value: {{ .Outputs.Instance.Type }}
   VersionBundleVersion:
-    Value:
-      Ref: VersionBundleVersionParameter
-  VPCPeeringConnectionID:
-    Value: !Ref VPCPeeringConnection
+    Value: {{ .Outputs.VersionBundle.Version }}
 {{end}}
 `

@@ -687,7 +687,6 @@ func WorkerInstanceType(customObject v1alpha1.AWSConfig) string {
 
 	if len(customObject.Spec.AWS.Workers) > 0 {
 		instanceType = customObject.Spec.AWS.Workers[0].InstanceType
-
 	}
 
 	return instanceType
