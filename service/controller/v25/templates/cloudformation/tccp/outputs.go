@@ -16,14 +16,14 @@ const Outputs = `
     Value: {{ .Guest.Outputs.Master.Instance.Type }}
   MasterCloudConfigVersion:
     Value: {{ .Guest.Outputs.Master.CloudConfig.Version }}
-  {{ .Guest.Outputs.Worker.ASG.Key }}:
-    Value: !Ref {{ .Guest.Outputs.Worker.ASG.Ref }}
   PrivateRouteTableID:
     Value: !Ref PrivateRouteTable
   VPCID:
     Value: !Ref VPC
   VPCPeeringConnectionID:
     Value: !Ref VPCPeeringConnection
+  WorkerASGName:
+    Value: !Ref {{ .Guest.Outputs.Worker.ASG.Ref }}
   WorkerDockerVolumeSizeGB:
     Value: {{ .Guest.Outputs.Worker.DockerVolumeSizeGB }}
   WorkerImageID:
