@@ -56,15 +56,12 @@ const (
 
 const (
 	DockerVolumeResourceNameKey   = "DockerVolumeResourceName"
-	HostedZoneNameServers         = "HostedZoneNameServers"
 	MasterImageIDKey              = "MasterImageID"
 	MasterInstanceResourceNameKey = "MasterInstanceResourceName"
 	MasterInstanceTypeKey         = "MasterInstanceType"
 	MasterInstanceMonitoring      = "Monitoring"
 	MasterCloudConfigVersionKey   = "MasterCloudConfigVersion"
 	VersionBundleVersionKey       = "VersionBundleVersion"
-	VPCPeeringConnectionIDKey     = "VPCPeeringConnectionID"
-	WorkerASGKey                  = "WorkerASGName"
 	WorkerCountKey                = "WorkerCount"
 	WorkerMaxKey                  = "WorkerMax"
 	WorkerMinKey                  = "WorkerMin"

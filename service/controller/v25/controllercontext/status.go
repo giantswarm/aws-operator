@@ -40,6 +40,7 @@ type ContextStatusTenantCluster struct {
 	HostedZoneNameServers  string
 	KMS                    ContextStatusTenantClusterKMS
 	TCCP                   ContextStatusTenantClusterTCCP
+	VPC                    ContextStatusTenantClusterVPC
 	VPCPeeringConnectionID string
 }
 
@@ -49,4 +50,8 @@ type ContextStatusTenantClusterKMS struct {
 
 type ContextStatusTenantClusterTCCP struct {
 	ASG ContextStatusTenantClusterTCCPASG
+}
+
+type ContextStatusTenantClusterVPC struct {
+	ID string
 }
