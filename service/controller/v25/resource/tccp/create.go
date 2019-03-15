@@ -106,7 +106,7 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster main stack has to be created")
 
 		var mainTemplate string
-		mainTemplate, err := r.getMainGuestTemplateBody(ctx, customObject, desiredStackState)
+		mainTemplate, err := r.newTemplateBody(ctx, customObject, desiredStackState)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
