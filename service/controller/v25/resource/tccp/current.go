@@ -3,9 +3,7 @@ package tccp
 import (
 	"context"
 	"fmt"
-	"strconv"
 
-	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
@@ -16,7 +14,7 @@ import (
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
-	customObject, err := key.ToCustomObject(obj)
+	cr, err := key.ToCustomObject(obj)
 	if err != nil {
 		return StackState{}, microerror.Mask(err)
 	}
@@ -45,7 +43,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding tenant subnet in CR status")
 
-		if key.StatusNetworkCIDR(customObject) == "" {
+		if key.StatusNetworkCIDR(cr) == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find tenant subnet in CR status")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			resourcecanceledcontext.SetCanceled(ctx)
@@ -56,18 +54,15 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found tenant subnet in CR status")
 	}
 
-	stackName := key.MainGuestStackName(customObject)
-
 	// In order to compute the current state of the tenant cluster's cloud
 	// formation stack we have to describe the CF stacks and lookup the right
 	// stack. We dispatch our custom StackState structure and enrich it with all
 	// information necessary to reconcile the cloudformation resource.
-	var stackOutputs []*cloudformation.Output
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster main stack outputs in the AWS API")
 
 		var stackStatus string
-		stackOutputs, stackStatus, err = cloudFormation.DescribeOutputsAndStatus(stackName)
+		_, stackStatus, err := cloudFormation.DescribeOutputsAndStatus(key.MainGuestStackName(cr))
 		if cf.IsStackNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster main stack outputs in the AWS API")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster main stack does not exist")
@@ -76,14 +71,16 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		} else if cf.IsOutputsNotAccessible(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster main stack outputs in the AWS API")
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster main stack has status '%s'", stackStatus))
-			if key.IsDeleted(customObject) {
+
+			if key.IsDeleted(cr) {
 				// Keep finalizers to as long as we don't
 				// encounter IsStackNotFound.
 				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
 				finalizerskeptcontext.SetKept(ctx)
+			} else {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+				resourcecanceledcontext.SetCanceled(ctx)
 			}
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			resourcecanceledcontext.SetCanceled(ctx)
 
 			return StackState{}, nil
 
@@ -96,74 +93,21 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	var currentState StackState
 	{
-		dockerVolumeResourceName, err := cloudFormation.GetOutputValue(stackOutputs, key.DockerVolumeResourceNameKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-
-		masterImageID, err := cloudFormation.GetOutputValue(stackOutputs, key.MasterImageIDKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-		masterInstanceResourceName, err := cloudFormation.GetOutputValue(stackOutputs, key.MasterInstanceResourceNameKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-		masterInstanceType, err := cloudFormation.GetOutputValue(stackOutputs, key.MasterInstanceTypeKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-		masterCloudConfigVersion, err := cloudFormation.GetOutputValue(stackOutputs, key.MasterCloudConfigVersionKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-
-		workerCloudConfigVersion, err := cloudFormation.GetOutputValue(stackOutputs, key.WorkerCloudConfigVersionKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-		var workerDockerVolumeSizeGB int
-		{
-			v, err := cloudFormation.GetOutputValue(stackOutputs, key.WorkerDockerVolumeSizeKey)
-			if err != nil {
-				return StackState{}, microerror.Mask(err)
-			}
-
-			workerDockerVolumeSizeGB, err = strconv.Atoi(v)
-			if err != nil {
-				return StackState{}, microerror.Mask(err)
-			}
-		}
-		workerImageID, err := cloudFormation.GetOutputValue(stackOutputs, key.WorkerImageIDKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-		workerInstanceType, err := cloudFormation.GetOutputValue(stackOutputs, key.WorkerInstanceTypeKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-
-		versionBundleVersion, err := cloudFormation.GetOutputValue(stackOutputs, key.VersionBundleVersionKey)
-		if err != nil {
-			return StackState{}, microerror.Mask(err)
-		}
-
 		currentState = StackState{
-			Name: stackName,
+			Name: key.MainGuestStackName(cr),
 
-			DockerVolumeResourceName: dockerVolumeResourceName,
+			DockerVolumeResourceName:   cc.Status.TenantCluster.MasterInstance.DockerVolumeResourceName,
+			MasterImageID:              cc.Status.TenantCluster.MasterInstance.Image,
+			MasterInstanceResourceName: cc.Status.TenantCluster.MasterInstance.ResourceName,
+			MasterInstanceType:         cc.Status.TenantCluster.MasterInstance.Type,
+			MasterCloudConfigVersion:   cc.Status.TenantCluster.MasterInstance.CloudConfigVersion,
 
-			MasterImageID:              masterImageID,
-			MasterInstanceResourceName: masterInstanceResourceName,
-			MasterInstanceType:         masterInstanceType,
-			MasterCloudConfigVersion:   masterCloudConfigVersion,
+			WorkerCloudConfigVersion: cc.Status.TenantCluster.WorkerInstance.CloudConfigVersion,
+			WorkerDockerVolumeSizeGB: cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB,
+			WorkerImageID:            cc.Status.TenantCluster.WorkerInstance.Image,
+			WorkerInstanceType:       cc.Status.TenantCluster.WorkerInstance.Type,
 
-			WorkerCloudConfigVersion: workerCloudConfigVersion,
-			WorkerDockerVolumeSizeGB: workerDockerVolumeSizeGB,
-			WorkerImageID:            workerImageID,
-			WorkerInstanceType:       workerInstanceType,
-
-			VersionBundleVersion: versionBundleVersion,
+			VersionBundleVersion: cc.Status.TenantCluster.VersionBundleVersion,
 		}
 	}
 
