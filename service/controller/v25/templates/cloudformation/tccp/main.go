@@ -4,6 +4,8 @@ const Main = `
 {{define "main"}}
 AWSTemplateFormatVersion: 2010-09-09
 Description: Tenant Cluster Control Plane Cloud Formation Stack.
+Outputs:
+  {{template "outputs" .}}
 Parameters:
   VersionBundleVersionParameter:
     Type: String
@@ -22,6 +24,5 @@ Resources:
   {{template "lifecycle_hooks" .}}
   {{template "autoscaling_group" .}}
   {{template "record_sets" .}}
-{{template "outputs" .}}
 {{end}}
 `

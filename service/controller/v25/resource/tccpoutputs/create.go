@@ -14,6 +14,13 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v25/key"
 )
 
+const (
+	HostedZoneNameServersKey  = "HostedZoneNameServers"
+	VPCIDKey                  = "VPCID"
+	VPCPeeringConnectionIDKey = "VPCPeeringConnectionID"
+	WorkerASGNameKey          = "WorkerASGName"
+)
+
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	cr, err := key.ToCustomObject(obj)
 	if err != nil {
@@ -63,7 +70,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	if r.route53Enabled {
-		v, err := cloudFormation.GetOutputValue(outputs, key.HostedZoneNameServers)
+		v, err := cloudFormation.GetOutputValue(outputs, HostedZoneNameServersKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -71,7 +78,28 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, key.VPCPeeringConnectionIDKey)
+		v, err := cloudFormation.GetOutputValue(outputs, VPCIDKey)
+		if cf.IsOutputNotFound(err) {
+			// TODO this exception is necessary for clusters upgrading from v24 to
+			// v25. The code can be cleaned up in v26 and the controller context value
+			// assignment can be managed like the other examples below.
+			//
+			//     https://github.com/giantswarm/giantswarm/issues/5570
+			//
+			v, err := searchVPCID(cc.Client.TenantCluster.AWS.EC2, key.ClusterID(cr))
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			cc.Status.TenantCluster.VPC.ID = v
+		} else if err != nil {
+			return microerror.Mask(err)
+		} else {
+			cc.Status.TenantCluster.VPC.ID = v
+		}
+	}
+
+	{
+		v, err := cloudFormation.GetOutputValue(outputs, VPCPeeringConnectionIDKey)
 		if cf.IsOutputNotFound(err) {
 			// TODO this exception is necessary for clusters upgrading from v23 to
 			// v24. The code can be cleaned up in v25 and the controller context value
@@ -92,7 +120,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, key.WorkerASGKey)
+		v, err := cloudFormation.GetOutputValue(outputs, WorkerASGNameKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -102,7 +130,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func searchPeeringConnectionID(client EC2, id string) (string, error) {
+func searchPeeringConnectionID(client EC2, clusterID string) (string, error) {
 	var peeringID string
 	{
 		i := &ec2.DescribeVpcPeeringConnectionsInput{
@@ -116,7 +144,7 @@ func searchPeeringConnectionID(client EC2, id string) (string, error) {
 				{
 					Name: aws.String("tag:Name"),
 					Values: []*string{
-						aws.String(id),
+						aws.String(clusterID),
 					},
 				},
 			},
@@ -134,4 +162,32 @@ func searchPeeringConnectionID(client EC2, id string) (string, error) {
 	}
 
 	return peeringID, nil
+}
+
+func searchVPCID(client EC2, clusterID string) (string, error) {
+	var vpcID string
+	{
+		i := &ec2.DescribeVpcsInput{
+			Filters: []*ec2.Filter{
+				{
+					Name: aws.String("tag:Name"),
+					Values: []*string{
+						aws.String(clusterID),
+					},
+				},
+			},
+		}
+
+		o, err := client.DescribeVpcs(i)
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
+		if len(o.Vpcs) != 1 {
+			return "", microerror.Maskf(executionFailedError, "expected one vpc, got %d", len(o.Vpcs))
+		}
+
+		vpcID = *o.Vpcs[0].VpcId
+	}
+
+	return vpcID, nil
 }

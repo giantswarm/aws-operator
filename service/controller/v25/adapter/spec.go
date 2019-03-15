@@ -58,8 +58,6 @@ type Hydrater func(config Config) error
 type StackState struct {
 	Name string
 
-	HostedZoneNameServers string
-
 	DockerVolumeResourceName   string
 	MasterImageID              string
 	MasterInstanceType         string

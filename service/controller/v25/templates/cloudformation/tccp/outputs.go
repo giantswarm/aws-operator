@@ -2,34 +2,34 @@ package tccp
 
 const Outputs = `
 {{define "outputs"}}
-{{- $v := .Guest.Outputs }}
-Outputs:
   DockerVolumeResourceName:
-    Value: {{ $v.Master.DockerVolume.ResourceName }}
-  {{ if $v.Route53Enabled }}
+    Value: {{ .Guest.Outputs.Master.DockerVolume.ResourceName }}
+  {{ if .Guest.Outputs.Route53Enabled }}
   HostedZoneNameServers:
     Value: !Join [ ',', !GetAtt 'HostedZone.NameServers' ]
   {{ end }}
   MasterImageID:
-    Value: {{ $v.Master.ImageID }}
+    Value: {{ .Guest.Outputs.Master.ImageID }}
   MasterInstanceResourceName:
-    Value: {{ $v.Master.Instance.ResourceName }}
+    Value: {{ .Guest.Outputs.Master.Instance.ResourceName }}
   MasterInstanceType:
-    Value: {{ $v.Master.Instance.Type }}
+    Value: {{ .Guest.Outputs.Master.Instance.Type }}
   MasterCloudConfigVersion:
-    Value: {{ $v.Master.CloudConfig.Version }}
-  {{ $v.Worker.ASG.Key }}:
-    Value: !Ref {{ $v.Worker.ASG.Ref }}
+    Value: {{ .Guest.Outputs.Master.CloudConfig.Version }}
+  VPCID:
+    Value: !Ref VPC
   VPCPeeringConnectionID:
     Value: !Ref VPCPeeringConnection
+  WorkerASGName:
+    Value: !Ref {{ .Guest.Outputs.Worker.ASG.Ref }}
   WorkerDockerVolumeSizeGB:
-    Value: {{ $v.Worker.DockerVolumeSizeGB }}
+    Value: {{ .Guest.Outputs.Worker.DockerVolumeSizeGB }}
   WorkerImageID:
-    Value: {{ $v.Worker.ImageID }}
+    Value: {{ .Guest.Outputs.Worker.ImageID }}
   WorkerInstanceType:
-    Value: {{ $v.Worker.InstanceType }}
+    Value: {{ .Guest.Outputs.Worker.InstanceType }}
   WorkerCloudConfigVersion:
-    Value: {{ $v.Worker.CloudConfig.Version }}
+    Value: {{ .Guest.Outputs.Worker.CloudConfig.Version }}
   VersionBundleVersion:
     Value:
       Ref: VersionBundleVersionParameter
