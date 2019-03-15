@@ -22,6 +22,14 @@ const (
 	Name = "tccpv25"
 )
 
+const (
+	namedIAMCapability = "CAPABILITY_NAMED_IAM"
+
+	// versionBundleVersionParameterKey is the key name of the Cloud Formation
+	// parameter that sets the version bundle version.
+	versionBundleVersionParameterKey = "VersionBundleVersionParameter"
+)
+
 type AWSConfig struct {
 	AccessKeyID     string
 	AccessKeySecret string
@@ -177,19 +185,6 @@ func toCreateStackInput(v interface{}) (awscloudformation.CreateStackInput, erro
 	return createStackInput, nil
 }
 
-func toDeleteStackInput(v interface{}) (awscloudformation.DeleteStackInput, error) {
-	if v == nil {
-		return awscloudformation.DeleteStackInput{}, nil
-	}
-
-	deleteStackInput, ok := v.(awscloudformation.DeleteStackInput)
-	if !ok {
-		return awscloudformation.DeleteStackInput{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", deleteStackInput, v)
-	}
-
-	return deleteStackInput, nil
-}
-
 func toStackState(v interface{}) (StackState, error) {
 	if v == nil {
 		return StackState{}, nil
@@ -201,17 +196,4 @@ func toStackState(v interface{}) (StackState, error) {
 	}
 
 	return stackState, nil
-}
-
-func toUpdateStackInput(v interface{}) (awscloudformation.UpdateStackInput, error) {
-	if v == nil {
-		return awscloudformation.UpdateStackInput{}, nil
-	}
-
-	updateStackInput, ok := v.(awscloudformation.UpdateStackInput)
-	if !ok {
-		return awscloudformation.UpdateStackInput{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", updateStackInput, v)
-	}
-
-	return updateStackInput, nil
 }
