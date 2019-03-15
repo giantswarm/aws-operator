@@ -115,7 +115,7 @@ func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 }
 
 func (r *Resource) computeUpdateState(ctx context.Context, cr v1alpha1.AWSConfig, stackState StackState) (cloudformation.UpdateStackInput, error) {
-	mainTemplate, err := r.getMainGuestTemplateBody(ctx, cr, stackState)
+	mainTemplate, err := r.newTemplateBody(ctx, cr, stackState)
 	if err != nil {
 		return cloudformation.UpdateStackInput{}, microerror.Mask(err)
 	}

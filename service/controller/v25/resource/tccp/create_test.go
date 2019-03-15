@@ -126,3 +126,25 @@ func Test_Resource_Cloudformation_newCreate(t *testing.T) {
 		})
 	}
 }
+
+func statusWithAllocatedSubnet(cidr string, azs []string) v1alpha1.AWSConfigStatus {
+	var statusAZs []v1alpha1.AWSConfigStatusAWSAvailabilityZone
+	for _, az := range azs {
+		statusAZs = append(statusAZs, v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+			Name: az,
+		})
+	}
+
+	status := v1alpha1.AWSConfigStatus{
+		AWS: v1alpha1.AWSConfigStatusAWS{
+			AvailabilityZones: statusAZs,
+		},
+		Cluster: v1alpha1.StatusCluster{
+			Network: v1alpha1.StatusClusterNetwork{
+				CIDR: cidr,
+			},
+		},
+	}
+
+	return status
+}
