@@ -13,7 +13,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v25/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v25/key"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/cpf/template"
-	"github.com/giantswarm/aws-operator/service/routetable"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -42,11 +41,19 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			StackName: aws.String(key.MainHostPostStackName(cr)),
 		}
 
-		_, err = cc.Client.ControlPlane.AWS.CloudFormation.DescribeStacks(i)
+		o, err := cc.Client.ControlPlane.AWS.CloudFormation.DescribeStacks(i)
 		if IsNotExists(err) {
 			// fall through
+
 		} else if err != nil {
 			return microerror.Mask(err)
+
+		} else if len(o.Stacks) != 1 {
+			return microerror.Maskf(executionFailedError, "expected one stack, got %d", len(o.Stacks))
+
+		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateFailed {
+			return microerror.Maskf(executionFailedError, "expected successful status, got %#q", o.Stacks[0].StackStatus)
+
 		} else {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane finalizer cloud formation stack already exists")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -128,19 +135,6 @@ func (r *Resource) newPrivateRoutes(ctx context.Context, cr v1alpha1.AWSConfig) 
 		return nil, microerror.Mask(err)
 	}
 
-	var routeTable *routetable.RouteTable
-	{
-		c := routetable.Config{
-			EC2:    cc.Client.ControlPlane.AWS.EC2,
-			Logger: r.logger,
-		}
-
-		routeTable, err = routetable.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var tenantPrivateSubnetCidrs []string
 	{
 		for _, az := range key.StatusAvailabilityZones(cr) {
@@ -149,16 +143,11 @@ func (r *Resource) newPrivateRoutes(ctx context.Context, cr v1alpha1.AWSConfig) 
 	}
 
 	var routes []template.ParamsMainRouteTablesRoute
-	for _, name := range r.routeTables {
-		id, err := routeTable.IDForName(ctx, name)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
 
+	for _, id := range cc.Status.ControlPlane.RouteTable.Mappings {
 		for _, cidrBlock := range tenantPrivateSubnetCidrs {
 			route := template.ParamsMainRouteTablesRoute{
-				RouteTableName: name,
-				RouteTableID:   id,
+				RouteTableID: id,
 				// Requester CIDR block, we create the peering connection from the
 				// tenant's private subnets.
 				CidrBlock: cidrBlock,
@@ -184,30 +173,11 @@ func (r *Resource) newPublicRoutes(ctx context.Context, cr v1alpha1.AWSConfig) (
 		return nil, microerror.Mask(err)
 	}
 
-	var routeTable *routetable.RouteTable
-	{
-		c := routetable.Config{
-			EC2:    cc.Client.ControlPlane.AWS.EC2,
-			Logger: r.logger,
-		}
-
-		routeTable, err = routetable.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var routes []template.ParamsMainRouteTablesRoute
 
-	for _, name := range r.routeTables {
-		id, err := routeTable.IDForName(ctx, name)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
+	for _, id := range cc.Status.ControlPlane.RouteTable.Mappings {
 		route := template.ParamsMainRouteTablesRoute{
-			RouteTableName: name,
-			RouteTableID:   id,
+			RouteTableID: id,
 			// Requester CIDR block, we create the peering connection from the
 			// tenant's CIDR for being able to access Vault's ELB.
 			CidrBlock: key.StatusNetworkCIDR(cr),

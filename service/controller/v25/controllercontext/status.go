@@ -10,12 +10,20 @@ type ContextStatus struct {
 type ContextStatusControlPlane struct {
 	AWSAccountID string
 	NATGateway   ContextStatusControlPlaneNATGateway
+	RouteTable   ContextStatusControlPlaneRouteTable
 	PeerRole     ContextStatusControlPlanePeerRole
 	VPC          ContextStatusControlPlaneVPC
 }
 
 type ContextStatusControlPlaneNATGateway struct {
 	Addresses []*ec2.Address
+}
+
+type ContextStatusControlPlaneRouteTable struct {
+	// Mappings are key value pairs of control plane route table names and their
+	// IDs, where the map keys are route table names and the map values are route
+	// table IDs. The mapping is managed by the routetable resource.
+	Mappings map[string]string
 }
 
 type ContextStatusControlPlanePeerRole struct {

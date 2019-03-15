@@ -44,7 +44,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	}
 
 	if stackStateToUpdate.Name != "" {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "updating the guest cluster main stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "updating the tenant cluster main stack")
 
 		if stackStateToUpdate.ShouldUpdate && !stackStateToUpdate.ShouldScale {
 			{
@@ -89,9 +89,9 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "updated the guest cluster main stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "updated the tenant cluster main stack")
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not updating the guest cluster main stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not updating the tenant cluster main stack")
 	}
 
 	return nil
@@ -155,13 +155,13 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 
 	// We enable/disable updates in order to enable them our test installations
 	// but disable them in production installations. That is useful until we have
-	// full confidence in updating guest clusters. Note that updates also manage
+	// full confidence in updating tenant clusters. Note that updates also manage
 	// scaling at the same time to be more efficient.
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the guest cluster main stack has to be updated")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the tenant cluster main stack has to be updated")
 
 		if shouldUpdate(currentStackState, desiredStackState) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack has to be updated")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster main stack has to be updated")
 
 			updateStackInput, err := r.computeUpdateState(ctx, cr, desiredStackState)
 			if err != nil {
@@ -177,7 +177,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 
 			return updateState, nil
 		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack does not have to be updated")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster main stack does not have to be updated")
 		}
 	}
 
@@ -190,7 +190,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 	// master node. This is why we set the desired state of the master instance
 	// resource name to the current state below.
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the guest cluster main stack has to be scaled")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the tenant cluster main stack has to be scaled")
 
 		shouldScale, err := r.shouldScale(ctx, cr, currentStackState, desiredStackState)
 		if err != nil {
@@ -198,7 +198,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		}
 
 		if shouldScale {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack has to be scaled")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster main stack has to be scaled")
 
 			desiredStackState.MasterInstanceResourceName = currentStackState.MasterInstanceResourceName
 			desiredStackState.DockerVolumeResourceName = currentStackState.DockerVolumeResourceName
@@ -217,15 +217,15 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 
 			return updateState, nil
 		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the guest cluster main stack does not have to be scaled")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster main stack does not have to be scaled")
 		}
 	}
 
 	return StackState{}, nil
 }
 
-// shouldScale determines whether the reconciled guest cluster should be scaled.
-// A guest cluster is only allowed to scale in case nothing but the worker count
+// shouldScale determines whether the reconciled tenant cluster should be scaled.
+// A tenant cluster is only allowed to scale in case nothing but the worker count
 // changes. In case anything else changes as well, scaling is not allowed, since
 // any other changes should be covered by general updates, which is a separate
 // step.
@@ -279,8 +279,8 @@ func (r *Resource) shouldScale(ctx context.Context, cr v1alpha1.AWSConfig, curre
 	return false, nil
 }
 
-// shouldUpdate determines whether the reconciled guest cluster should be
-// updated. A guest cluster is only allowed to update in the following cases.
+// shouldUpdate determines whether the reconciled tenant cluster should be
+// updated. A tenant cluster is only allowed to update in the following cases.
 //
 //     The instance type of master nodes changes (indicates updates).
 //     The instance type of worker nodes changes (indicates updates).

@@ -6,7 +6,6 @@ type ParamsMainRouteTables struct {
 }
 
 type ParamsMainRouteTablesRoute struct {
-	RouteTableName   string
 	RouteTableID     string
 	CidrBlock        string
 	PeerConnectionID string

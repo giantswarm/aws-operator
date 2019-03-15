@@ -42,11 +42,12 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/namespace"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/natgatewayaddresses"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/peerrolearn"
+	"github.com/giantswarm/aws-operator/service/controller/v25/resource/routetable"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/service"
-	"github.com/giantswarm/aws-operator/service/controller/v25/resource/stackoutput"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/tccp"
+	"github.com/giantswarm/aws-operator/service/controller/v25/resource/tccpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/vpccidr"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/workerasgname"
 )
@@ -366,6 +367,20 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var tccpOutputsResource controller.Resource
+	{
+		c := tccpoutputs.Config{
+			Logger: config.Logger,
+
+			Route53Enabled: config.Route53Enabled,
+		}
+
+		tccpOutputsResource, err = tccpoutputs.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var cpfResource controller.Resource
 	{
 		c := cpf.Config{
@@ -374,7 +389,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			EncrypterBackend: config.EncrypterBackend,
 			InstallationName: config.InstallationName,
 			Route53Enabled:   config.Route53Enabled,
-			RouteTables:      strings.Split(config.RouteTables, ","),
 		}
 
 		cpfResource, err = cpf.New(c)
@@ -436,6 +450,20 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		peerRoleARNResource, err = peerrolearn.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var routeTableResource controller.Resource
+	{
+		c := routetable.Config{
+			Logger: config.Logger,
+
+			Names: strings.Split(config.RouteTables, ","),
+		}
+
+		routeTableResource, err = routetable.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -526,20 +554,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var stackOutputResource controller.Resource
-	{
-		c := stackoutput.Config{
-			Logger: config.Logger,
-
-			Route53Enabled: config.Route53Enabled,
-		}
-
-		stackOutputResource, err = stackoutput.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var vpcCIDRResource controller.Resource
 	{
 		c := vpccidr.Config{
@@ -570,8 +584,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		natGatewayAddressesResource,
 		kmsKeyARNResource,
 		peerRoleARNResource,
+		routeTableResource,
 		vpcCIDRResource,
-		stackOutputResource,
+		tccpOutputsResource,
 		workerASGNameResource,
 		asgStatusResource,
 		statusResource,
