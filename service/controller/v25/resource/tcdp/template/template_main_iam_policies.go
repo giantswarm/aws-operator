@@ -2,7 +2,7 @@ package template
 
 const TemplateMainIAMPolicies = `
 {{ define "iam_policies" }}
-  Role:
+  NodePoolRole:
     Type: AWS::IAM::Role
     Properties:
       RoleName: {{ .IAMPolicies.RoleName }}
@@ -13,12 +13,13 @@ const TemplateMainIAMPolicies = `
           Principal:
             Service: {{ .IAMPolicies.EC2ServiceDomain }}
           Action: "sts:AssumeRole"
-  RolePolicy:
+
+  NodePoolRolePolicy:
     Type: "AWS::IAM::Policy"
     Properties:
       PolicyName: {{ .IAMPolicies.PolicyName }}
       Roles:
-        - Ref: "Role"
+        - Ref: "NodePoolRole"
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -33,11 +34,13 @@ const TemplateMainIAMPolicies = `
           - Effect: "Allow"
             Action: "ec2:DetachVolume"
             Resource: "*"
-{{ if .IAMPolicies.KMSKeyARN }}
+
+          {{ if .IAMPolicies.KMSKeyARN }}
           - Effect: "Allow"
             Action: "kms:Decrypt"
             Resource: "{{ .IAMPolicies.KMSKeyARN }}"
-{{ end }}
+          {{ end }}
+
           - Effect: "Allow"
             Action:
               - "s3:GetBucketLocation"
@@ -63,8 +66,11 @@ const TemplateMainIAMPolicies = `
               - "ecr:BatchGetImage"
             Resource: "*"
 
-  # TODO
   NodePoolInstanceProfile
-
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      InstanceProfileName: {{ .IAMPolicies.ProfileName }}
+      Roles:
+        - Ref: "NodePoolRole"
 {{ end }}
 `
