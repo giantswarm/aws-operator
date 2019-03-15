@@ -160,7 +160,12 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the tenant cluster main stack has to be updated")
 
-		if shouldUpdate(currentStackState, desiredStackState) {
+		shouldUpdate, err := r.shouldUpdate(ctx, cr)
+		if err != nil {
+			return StackState{}, microerror.Mask(err)
+		}
+
+		if shouldUpdate {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster main stack has to be updated")
 
 			updateStackInput, err := r.computeUpdateState(ctx, cr, desiredStackState)
@@ -264,11 +269,11 @@ func (r *Resource) shouldScale(ctx context.Context, cr v1alpha1.AWSConfig, curre
 		return false, nil
 	}
 	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MaxSize != key.ScalingMax(cr) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "scaling due to scaling.max")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "scaling due to scaling max")
 		return true, nil
 	}
 	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MinSize != key.ScalingMin(cr) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "scaling due to scaling.min")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "scaling due to scaling min")
 		return true, nil
 	}
 	if currentState.VersionBundleVersion != desiredState.VersionBundleVersion {
@@ -287,21 +292,30 @@ func (r *Resource) shouldScale(ctx context.Context, cr v1alpha1.AWSConfig, curre
 //     The size of a docker volume for worker nodes changes.
 //     The version bundle version changes (indicates updates).
 //
-func shouldUpdate(currentState, desiredState StackState) bool {
-	if currentState.MasterInstanceType != desiredState.MasterInstanceType {
-		return true
-	}
-	if currentState.WorkerDockerVolumeSizeGB != desiredState.WorkerDockerVolumeSizeGB {
-		return true
-	}
-	if currentState.WorkerInstanceType != desiredState.WorkerInstanceType {
-		return true
-	}
-	if currentState.VersionBundleVersion != desiredState.VersionBundleVersion {
-		return true
+func (r *Resource) shouldUpdate(ctx context.Context, cr v1alpha1.AWSConfig) (bool, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return false, microerror.Mask(err)
 	}
 
-	return false
+	if cc.Status.TenantCluster.MasterInstance.Type != key.MasterInstanceType(cr) {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "updating due to master instance type")
+		return true, nil
+	}
+	if cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB != key.WorkerDockerVolumeSizeGB(cr) {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "updating due to worker instance docker volume size")
+		return true, nil
+	}
+	if cc.Status.TenantCluster.WorkerInstance.Type != key.WorkerInstanceType(cr) {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "updating due to worker instance type")
+		return true, nil
+	}
+	if cc.Status.TenantCluster.VersionBundleVersion != key.VersionBundleVersion(cr) {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "updating due to version bundle version")
+		return true, nil
+	}
+
+	return false, nil
 }
 
 // Terminates the master instance of the cluster.
