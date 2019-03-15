@@ -51,7 +51,7 @@ const (
 
 	chinaAWSCliContainerRegistry   = "docker://registry-intl.cn-shanghai.aliyuncs.com/giantswarm/awscli:latest"
 	defaultAWSCliContainerRegistry = "quay.io/coreos/awscli:025a357f05242fdad6a81e8a6b520098aa65a600"
-	defaultDockerVolumeSizeGB      = 100
+	defaultDockerVolumeSizeGB      = "100"
 )
 
 const (
@@ -657,7 +657,7 @@ func WorkerCount(customObject v1alpha1.AWSConfig) int {
 // WorkerDockerVolumeSizeGB returns size of a docker volume configured for
 // worker nodes. If there are no workers in custom object, 0 is returned as
 // size.
-func WorkerDockerVolumeSizeGB(customObject v1alpha1.AWSConfig) int {
+func WorkerDockerVolumeSizeGB(customObject v1alpha1.AWSConfig) string {
 	if len(customObject.Spec.AWS.Workers) <= 0 {
 		return defaultDockerVolumeSizeGB
 	}
@@ -666,7 +666,7 @@ func WorkerDockerVolumeSizeGB(customObject v1alpha1.AWSConfig) int {
 		return defaultDockerVolumeSizeGB
 	}
 
-	return customObject.Spec.AWS.Workers[0].DockerVolumeSizeGB
+	return strconv.Itoa(customObject.Spec.AWS.Workers[0].DockerVolumeSizeGB)
 }
 
 func WorkerImageID(customObject v1alpha1.AWSConfig) string {

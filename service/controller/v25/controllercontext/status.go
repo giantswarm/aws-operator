@@ -39,13 +39,24 @@ type ContextStatusTenantCluster struct {
 	EncryptionKey          string
 	HostedZoneNameServers  string
 	KMS                    ContextStatusTenantClusterKMS
+	MasterInstance         ContextStatusTenantClusterMasterInstance
 	TCCP                   ContextStatusTenantClusterTCCP
+	VersionBundleVersion   string
 	VPC                    ContextStatusTenantClusterVPC
 	VPCPeeringConnectionID string
+	WorkerInstance         ContextStatusTenantClusterWorkerInstance
 }
 
 type ContextStatusTenantClusterKMS struct {
 	KeyARN string
+}
+
+type ContextStatusTenantClusterMasterInstance struct {
+	DockerVolumeResourceName string
+	Image                    string
+	ResourceName             string
+	Type                     string
+	CloudConfigVersion       string
 }
 
 type ContextStatusTenantClusterTCCP struct {
@@ -54,4 +65,11 @@ type ContextStatusTenantClusterTCCP struct {
 
 type ContextStatusTenantClusterVPC struct {
 	ID string
+}
+
+type ContextStatusTenantClusterWorkerInstance struct {
+	DockerVolumeSizeGB string
+	CloudConfigVersion string
+	Image              string
+	Type               string
 }

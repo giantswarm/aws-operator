@@ -834,7 +834,7 @@ func Test_WorkerDockerVolumeSizeGB(t *testing.T) {
 	tests := []struct {
 		name         string
 		customObject v1alpha1.AWSConfig
-		expectedSize int
+		expectedSize string
 	}{
 		{
 			name: "case 0: worker with 350GB docker volume",
@@ -849,7 +849,7 @@ func Test_WorkerDockerVolumeSizeGB(t *testing.T) {
 					},
 				},
 			},
-			expectedSize: 350,
+			expectedSize: "350",
 		},
 		{
 			name: "case 1: no workers",
@@ -860,7 +860,7 @@ func Test_WorkerDockerVolumeSizeGB(t *testing.T) {
 					},
 				},
 			},
-			expectedSize: 100,
+			expectedSize: "100",
 		},
 		{
 			name: "case 2: missing field for worker",
@@ -873,7 +873,7 @@ func Test_WorkerDockerVolumeSizeGB(t *testing.T) {
 					},
 				},
 			},
-			expectedSize: 100,
+			expectedSize: "100",
 		},
 	}
 
@@ -882,7 +882,7 @@ func Test_WorkerDockerVolumeSizeGB(t *testing.T) {
 			sz := WorkerDockerVolumeSizeGB(tc.customObject)
 
 			if sz != tc.expectedSize {
-				t.Fatalf("Expected worker docker volume size  %d but was %d", tc.expectedSize, sz)
+				t.Fatalf("Expected worker docker volume size  %s but was %s", tc.expectedSize, sz)
 			}
 		})
 	}
