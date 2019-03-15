@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
 
 	"github.com/giantswarm/aws-operator/service/controller/v25/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v25/key"
@@ -32,9 +33,13 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateTerminationProtection(i)
 		if IsDeleteInProgress(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's data plane cloud formation stack is being deleted")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
+			r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+			finalizerskeptcontext.SetKept(ctx)
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
+
 		} else if IsNotExists(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's data plane cloud formation stack does not exist")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
