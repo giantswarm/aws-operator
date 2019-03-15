@@ -157,13 +157,11 @@ func mainError() error {
 	daemonCommand.PersistentFlags().String(f.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.SubnetList, "", "Subnet list for guest cluster k8s API whitelisting.")
 
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.Address, "http://127.0.0.1:6443", "Address used to connect to Kubernetes. When empty in-cluster config is created.")
-	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.BearerToken, "", "Token (if needed for Kubernetes authentication).")
 	daemonCommand.PersistentFlags().Bool(f.Service.Kubernetes.InCluster, false, "Whether to use the in-cluster config to authenticate with Kubernetes.")
-	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.Password, "", "Password (if Kubernetes cluster is using basic authentication.")
+	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.KubeConfig, "", "KubeConfig used to connect to Kubernetes. When empty other settings are used.")
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.CAFile, "", "Certificate authority file path to use to authenticate with Kubernetes.")
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.CrtFile, "", "Certificate file path to use to authenticate with Kubernetes.")
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.KeyFile, "", "Key file path to use to authenticate with Kubernetes.")
-	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.Username, "", "Username (if the Kubernetes cluster is using basic authentication).")
 
 	newCommand.CobraCommand().Execute()
 

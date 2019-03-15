@@ -22,8 +22,8 @@
 [[projects]]
   name = "github.com/Masterminds/sprig"
   packages = ["."]
-  revision = "b1fe2752acccf8c3d7f8a1e7c75c7ae7d83a1975"
-  version = "v2.18.0"
+  revision = "9f8fceff796fb9f4e992cd2bece016be0121ab74"
+  version = "2.19.0"
 
 [[projects]]
   name = "github.com/cenkalti/backoff"
@@ -38,7 +38,7 @@
     "digestset",
     "reference"
   ]
-  revision = "0d3efadf0154c2b8a4e7b6621fff9809655cc580"
+  revision = "6d62eb1d4a3515399431b713fde3ce5a9b40e8d5"
 
 [[projects]]
   branch = "master"
@@ -72,7 +72,7 @@
     "pkg/clientset/versioned/typed/provider/v1alpha1",
     "pkg/clientset/versioned/typed/release/v1alpha1"
   ]
-  revision = "f7142f26f519703d5b2543338a05ed3f606dea5b"
+  revision = "db49342c89a63379fffd096e826190d4d5a09512"
 
 [[projects]]
   branch = "master"
@@ -90,13 +90,13 @@
   branch = "master"
   name = "github.com/giantswarm/errors"
   packages = ["guest"]
-  revision = "d4c171b8af43355ae5cb35bfd63a24aae3fbcc16"
+  revision = "f6706eb80f388ce182dcee855eab59c5eb872119"
 
 [[projects]]
   branch = "master"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
-  revision = "8b2aa2e7ebec773dcf8e02e9e34c8085ef08697f"
+  revision = "72611db89eeb829055cdee2640b06ea725d5600d"
 
 [[projects]]
   branch = "master"
@@ -123,7 +123,7 @@
   branch = "master"
   name = "github.com/giantswarm/operatorkit"
   packages = ["client/k8srestconfig"]
-  revision = "07c6a937025573b73339f7b33ec5605f7f4a7b3a"
+  revision = "67aba158b01a7eb22405c4a5ad643853f29cb5f3"
 
 [[projects]]
   branch = "master"
@@ -182,8 +182,8 @@
     "ptypes/duration",
     "ptypes/timestamp"
   ]
-  revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
-  version = "v1.2.0"
+  revision = "c823c79ea1570fb5ff454033735a8e68575d1d0f"
+  version = "v1.3.0"
 
 [[projects]]
   branch = "master"
@@ -200,8 +200,8 @@
 [[projects]]
   name = "github.com/google/uuid"
   packages = ["."]
-  revision = "9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8"
-  version = "v1.1.0"
+  revision = "0cd6bf5da1e1c83f8b45653022c74f71af0538a4"
+  version = "v1.1.1"
 
 [[projects]]
   name = "github.com/googleapis/gnostic"
@@ -292,6 +292,12 @@
   version = "v1.2.1"
 
 [[projects]]
+  name = "github.com/spf13/pflag"
+  packages = ["."]
+  revision = "298182f68c66c05229eb03ac171abe6e309ee79a"
+  version = "v1.0.3"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = [
@@ -299,7 +305,7 @@
     "scrypt",
     "ssh/terminal"
   ]
-  revision = "a4c6cb3142f211c99e4bf4cd769535b29a9b616f"
+  revision = "8dd112bcdc25174059e45e07517d9fc663123347"
 
 [[projects]]
   branch = "master"
@@ -314,7 +320,7 @@
     "internal/timeseries",
     "trace"
   ]
-  revision = "3a22650c66bd7f4fb6d1e8072ffd7b75c8a27898"
+  revision = "16b79f2e4e95ea23b2bf9903c9809ff7b013ce85"
 
 [[projects]]
   branch = "master"
@@ -323,13 +329,13 @@
     ".",
     "internal"
   ]
-  revision = "4b83411ed2b36bd4e3302e9b1d3c973fb1ba24db"
+  revision = "e64efc72b421e893cbf63f17ba2221e7d6d0b0f3"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sync"
   packages = ["errgroup"]
-  revision = "37e7f081c4d4c64e13b10787722085407fe5d15f"
+  revision = "e225da77a7e68af35c70ccbf71af2b83e6acac3c"
 
 [[projects]]
   branch = "master"
@@ -338,7 +344,7 @@
     "unix",
     "windows"
   ]
-  revision = "90b0e4468f9980bf79a2290394adaf7f045c5d24"
+  revision = "584f3b12f43e1e55248c90e84804777009eed0a4"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -385,7 +391,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "082222b4a5c572e33e82ee9162d1352c7cf38682"
+  revision = "5fe7a883aa19554f42890211544aa549836af7b7"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -423,8 +429,8 @@
     "status",
     "tap"
   ]
-  revision = "a02b0774206b209466313a0b525d2c738fe407eb"
-  version = "v1.18.0"
+  revision = "2fdaae294f38ed9a121193c51ec99fecd3b13eb7"
+  version = "v1.19.0"
 
 [[projects]]
   name = "gopkg.in/inf.v0"
@@ -588,7 +594,11 @@
     "plugin/pkg/client/auth/exec",
     "rest",
     "rest/watch",
+    "tools/auth",
+    "tools/clientcmd",
     "tools/clientcmd/api",
+    "tools/clientcmd/api/latest",
+    "tools/clientcmd/api/v1",
     "tools/metrics",
     "tools/portforward",
     "tools/reference",
@@ -597,6 +607,7 @@
     "util/cert",
     "util/connrotation",
     "util/flowcontrol",
+    "util/homedir",
     "util/integer"
   ]
   revision = "6bf63545bd0257ed9e701ad95307ffa51b4407c0"

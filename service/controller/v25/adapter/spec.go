@@ -10,7 +10,7 @@ const (
 	// defaultEBSVolumeMountPoint is the path for mounting the EBS volume.
 	defaultEBSVolumeMountPoint = "/dev/xvdh"
 	// defaultEBSVolumeSize is expressed in GB.
-	defaultEBSVolumeSize = 100
+	defaultEBSVolumeSize = "100"
 	// defaultEBSVolumeType is the EBS volume type.
 	defaultEBSVolumeType = "gp2"
 	// rollingUpdatePauseTime is how long to pause ASG operations after creating
@@ -58,8 +58,6 @@ type Hydrater func(config Config) error
 type StackState struct {
 	Name string
 
-	HostedZoneNameServers string
-
 	DockerVolumeResourceName   string
 	MasterImageID              string
 	MasterInstanceType         string
@@ -75,8 +73,8 @@ type StackState struct {
 	// version should be used here ever.
 	WorkerCloudConfigVersion string
 	WorkerDesired            int
-	WorkerDockerVolumeSizeGB int
-	WorkerLogVolumeSizeGB    int
+	WorkerDockerVolumeSizeGB string
+	WorkerLogVolumeSizeGB    string
 	WorkerImageID            string
 	WorkerInstanceMonitoring bool
 	WorkerInstanceType       string

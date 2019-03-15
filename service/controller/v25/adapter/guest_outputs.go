@@ -1,8 +1,6 @@
 package adapter
 
 import (
-	"strconv"
-
 	"github.com/giantswarm/aws-operator/service/controller/v25/key"
 )
 
@@ -21,10 +19,9 @@ func (a *GuestOutputsAdapter) Adapt(config Config) error {
 	a.Master.Instance.Type = config.StackState.MasterInstanceType
 	a.Master.CloudConfig.Version = config.StackState.MasterCloudConfigVersion
 
-	a.Worker.ASG.Key = key.WorkerASGKey
 	a.Worker.ASG.Ref = key.WorkerASGRef
 	a.Worker.CloudConfig.Version = config.StackState.WorkerCloudConfigVersion
-	a.Worker.DockerVolumeSizeGB = strconv.Itoa(config.StackState.WorkerDockerVolumeSizeGB)
+	a.Worker.DockerVolumeSizeGB = config.StackState.WorkerDockerVolumeSizeGB
 	a.Worker.ImageID = config.StackState.WorkerImageID
 	a.Worker.InstanceType = config.StackState.WorkerInstanceType
 
@@ -62,7 +59,6 @@ type GuestOutputsAdapterWorker struct {
 }
 
 type GuestOutputsAdapterWorkerASG struct {
-	Key string
 	Ref string
 }
 

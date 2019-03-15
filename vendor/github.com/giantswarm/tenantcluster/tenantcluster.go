@@ -154,7 +154,7 @@ func (g *TenantCluster) newRestConfig(ctx context.Context, clusterID, apiDomain 
 
 			Address:   apiDomain,
 			InCluster: false,
-			TLS: k8srestconfig.TLSClientConfig{
+			TLS: k8srestconfig.ConfigTLS{
 				CAData:  tls.CA,
 				CrtData: tls.Crt,
 				KeyData: tls.Key,

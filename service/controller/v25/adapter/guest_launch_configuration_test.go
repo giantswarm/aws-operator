@@ -45,7 +45,7 @@ func Test_AdapterLaunchConfiguration_RegularFields(t *testing.T) {
 				{
 					DeleteOnTermination: true,
 					DeviceName:          defaultEBSVolumeMountPoint,
-					VolumeSize:          250,
+					VolumeSize:          "250",
 					VolumeType:          defaultEBSVolumeType,
 				},
 				{

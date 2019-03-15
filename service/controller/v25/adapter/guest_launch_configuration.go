@@ -2,6 +2,7 @@ package adapter
 
 import (
 	"encoding/base64"
+	"strconv"
 
 	"github.com/giantswarm/microerror"
 
@@ -23,7 +24,7 @@ type GuestLaunchConfigAdapter struct {
 type BlockDeviceMapping struct {
 	DeleteOnTermination bool
 	DeviceName          string
-	VolumeSize          int
+	VolumeSize          string
 	VolumeType          string
 }
 
@@ -33,12 +34,40 @@ func (l *GuestLaunchConfigAdapter) Adapt(config Config) error {
 	l.WorkerImageID = config.StackState.WorkerImageID
 	l.WorkerAssociatePublicIPAddress = false
 
-	if config.StackState.WorkerDockerVolumeSizeGB <= 0 {
-		config.StackState.WorkerDockerVolumeSizeGB = defaultEBSVolumeSize
+	{
+		cur := config.StackState.WorkerDockerVolumeSizeGB
+		def := defaultEBSVolumeSize
+
+		if cur == "" {
+			cur = "0"
+		}
+
+		curi, err := strconv.Atoi(cur)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if curi <= 0 {
+			config.StackState.WorkerDockerVolumeSizeGB = def
+		}
 	}
 
-	if config.StackState.WorkerLogVolumeSizeGB <= 0 {
-		config.StackState.WorkerLogVolumeSizeGB = defaultEBSVolumeSize
+	{
+		cur := config.StackState.WorkerLogVolumeSizeGB
+		def := defaultEBSVolumeSize
+
+		if cur == "" {
+			cur = "0"
+		}
+
+		curi, err := strconv.Atoi(cur)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if curi <= 0 {
+			config.StackState.WorkerLogVolumeSizeGB = def
+		}
 	}
 
 	l.WorkerBlockDeviceMappings = []BlockDeviceMapping{
