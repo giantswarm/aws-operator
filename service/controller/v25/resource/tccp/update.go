@@ -74,6 +74,11 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 				}
 			}
 
+			err = r.disableMasterTerminationProtection(ctx, key.MasterInstanceName(cr))
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
 			{
 				err := r.terminateOldMasterInstance(ctx, obj)
 				if err != nil {
