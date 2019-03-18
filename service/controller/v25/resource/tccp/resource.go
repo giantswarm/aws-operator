@@ -12,6 +12,7 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/v25/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v25/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v25/detection"
 	"github.com/giantswarm/aws-operator/service/controller/v25/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v25/key"
 	"github.com/giantswarm/aws-operator/service/controller/v25/templates"
@@ -41,12 +42,15 @@ type AWSConfig struct {
 // Config represents the configuration used to create a new cloudformation
 // resource.
 type Config struct {
-	APIWhitelist         adapter.APIWhitelist
+	APIWhitelist adapter.APIWhitelist
+	// EncrypterRoleManager manages role encryption. This can be supported by
+	// different implementations and thus is optional.
 	EncrypterRoleManager encrypter.RoleManager
 	G8sClient            versioned.Interface
 	Logger               micrologger.Logger
 
 	AdvancedMonitoringEC2      bool
+	Detection                  *detection.Detection
 	EncrypterBackend           string
 	GuestPrivateSubnetMaskBits int
 	GuestPublicSubnetMaskBits  int
@@ -63,6 +67,7 @@ type Resource struct {
 	logger               micrologger.Logger
 
 	encrypterBackend           string
+	detection                  *detection.Detection
 	guestPrivateSubnetMaskBits int
 	guestPublicSubnetMaskBits  int
 	installationName           string
@@ -73,6 +78,9 @@ type Resource struct {
 
 // New creates a new configured cloudformation resource.
 func New(config Config) (*Resource, error) {
+	if config.Detection == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Detection must not be empty", config)
+	}
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
@@ -89,6 +97,7 @@ func New(config Config) (*Resource, error) {
 
 	r := &Resource{
 		apiWhiteList:         config.APIWhitelist,
+		detection:            config.Detection,
 		encrypterRoleManager: config.EncrypterRoleManager,
 		g8sClient:            config.G8sClient,
 		logger:               config.Logger,

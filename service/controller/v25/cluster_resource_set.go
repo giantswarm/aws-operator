@@ -23,6 +23,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v25/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/v25/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v25/credential"
+	"github.com/giantswarm/aws-operator/service/controller/v25/detection"
 	"github.com/giantswarm/aws-operator/service/controller/v25/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v25/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/controller/v25/encrypter/vault"
@@ -167,6 +168,18 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		cloudConfig, err = cloudconfig.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var detectionService *detection.Detection
+	{
+		c := detection.Config{
+			Logger: config.Logger,
+		}
+
+		detectionService, err = detection.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -348,6 +361,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			Logger:               config.Logger,
 
 			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
+			Detection:                  detectionService,
 			EncrypterBackend:           config.EncrypterBackend,
 			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
 			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
