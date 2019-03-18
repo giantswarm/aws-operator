@@ -1,4 +1,4 @@
-package subnet
+package tccpsubnet
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
-func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
+func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	err := r.addSubnetsToContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
