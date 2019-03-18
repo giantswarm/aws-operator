@@ -105,11 +105,11 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 	if currentStackState.Name == "" || desiredStackState.Name != currentStackState.Name {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster main stack has to be created")
 
-		var mainTemplate string
 		mainTemplate, err := r.newTemplateBody(ctx, customObject, desiredStackState)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
+
 		createState = cloudformation.CreateStackInput{
 			// CAPABILITY_NAMED_IAM is required for creating worker policy IAM roles.
 			Capabilities: []*string{
@@ -125,7 +125,7 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 			StackName:        aws.String(desiredStackState.Name),
 			Tags:             r.getCloudFormationTags(customObject),
 			TemplateBody:     aws.String(mainTemplate),
-			TimeoutInMinutes: aws.Int64(defaultCreationTimeout),
+			TimeoutInMinutes: aws.Int64(20),
 		}
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster main stack does not have to be created")
