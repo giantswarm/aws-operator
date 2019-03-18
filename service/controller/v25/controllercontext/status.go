@@ -60,7 +60,9 @@ type ContextStatusTenantClusterMasterInstance struct {
 }
 
 type ContextStatusTenantClusterTCCP struct {
-	ASG ContextStatusTenantClusterTCCPASG
+	ASG         ContextStatusTenantClusterTCCPASG
+	RouteTables []*ec2.RouteTable
+	Subnets     []*ec2.Subnet
 }
 
 type ContextStatusTenantClusterVPC struct {
