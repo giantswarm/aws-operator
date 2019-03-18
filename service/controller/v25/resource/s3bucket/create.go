@@ -12,6 +12,11 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v25/key"
 )
 
+const (
+	// S3BucketEncryptionAlgorithm is used to determine which algorithm use S3 to encrypt buckets.
+	S3BucketEncryptionAlgorithm = "AES256"
+)
+
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
 	customObject, err := key.ToCustomObject(obj)
 	if err != nil {
@@ -106,6 +111,26 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			}
 
 			_, err = cc.Client.TenantCluster.AWS.S3.PutBucketLogging(i)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+
+		{
+			i := &s3.PutBucketEncryptionInput{
+				Bucket: aws.String(bucketInput.Name),
+				ServerSideEncryptionConfiguration: &s3.ServerSideEncryptionConfiguration{
+					Rules: []*s3.ServerSideEncryptionRule{
+						&s3.ServerSideEncryptionRule{
+							ApplyServerSideEncryptionByDefault: &s3.ServerSideEncryptionByDefault{
+								SSEAlgorithm: aws.String(S3BucketEncryptionAlgorithm),
+							},
+						},
+					},
+				},
+			}
+
+			_, err = cc.Client.TenantCluster.AWS.S3.PutBucketEncryption(i)
 			if err != nil {
 				return microerror.Mask(err)
 			}
