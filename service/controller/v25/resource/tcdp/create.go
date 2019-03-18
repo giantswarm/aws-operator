@@ -70,6 +70,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			if err != nil {
 				return microerror.Mask(err)
 			}
+			iamPolicies, err := r.newIAMPolicies(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
+			}
 			launchConfiguration, err := r.newLaunchConfiguration(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
@@ -93,6 +97,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 			params = &template.ParamsMain{
 				AutoScalingGroup:    autoScalingGroup,
+				IAMPolicies:         iamPolicies,
 				LaunchConfiguration: launchConfiguration,
 				LifecycleHooks:      lifecycleHooks,
 				Outputs:             outputs,
@@ -173,6 +178,25 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr v1alpha1.AWSConfi
 	return autoScalingGroup, nil
 }
 
+func (r *Resource) newIAMPolicies(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainIAMPolicies, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	iamPolicies := &template.ParamsMainIAMPolicies{
+		EC2ServiceDomain: key.EC2ServiceDomain(cr),
+		KMSKeyARN:        cc.Status.TenantCluster.KMS.KeyARN,
+		NodePool: template.ParamsMainIAMPoliciesNodePool{
+			ID: "todo",
+		},
+		RegionARN: key.RegionARN(cr),
+		S3Bucket:  key.BucketName(cr, cc.Status.TenantCluster.AWSAccountID),
+	}
+
+	return iamPolicies, nil
+}
+
 func (r *Resource) newLaunchConfiguration(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainLaunchConfiguration, error) {
 	imageID, err := key.ImageID(cr)
 	if err != nil {
@@ -216,7 +240,7 @@ func (r *Resource) newOutputs(ctx context.Context, cr v1alpha1.AWSConfig) (*temp
 		CloudConfig: template.ParamsMainOutputsCloudConfig{
 			Version: key.CloudConfigVersion,
 		},
-		DockerVolumeSizeGB: strconv.Itoa(key.WorkerDockerVolumeSizeGB(cr)),
+		DockerVolumeSizeGB: key.WorkerDockerVolumeSizeGB(cr),
 		Instance: template.ParamsMainOutputsInstance{
 			Image: imageID,
 			Type:  key.WorkerInstanceType(cr),
@@ -263,9 +287,9 @@ func (r *Resource) newSubnets(ctx context.Context, cr v1alpha1.AWSConfig) (*temp
 		s := template.ParamsMainSubnetsListItem{
 			AvailabilityZone: a.Name,
 			CIDR:             a.Subnet.CIDR,
-			Name:             subnetNameWithAvailabilityZone(a.Name),
+			NameSuffix:       strings.ToUpper(a.Name),
 			RouteTableAssociation: template.ParamsMainSubnetsListItemRouteTableAssociation{
-				Name: routeTableAssociationNameWithAvailabilityZone(a.Name),
+				NameSuffix: strings.ToUpper(a.Name),
 			},
 			TCCP: template.ParamsMainSubnetsListItemTCCP{
 				Subnet: template.ParamsMainSubnetsListItemTCCPSubnet{
@@ -327,16 +351,8 @@ func minDesiredWorkers(minWorkers, maxWorkers, statusDesiredCapacity int) int {
 	return minWorkers
 }
 
-func routeTableAssociationNameWithAvailabilityZone(a string) string {
-	return fmt.Sprintf("NodePool-Subnet-RouteTableAssociation-%s", strings.ToUpper(a))
-}
-
 func stackName(cr v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("cluster-%s-tcdp", key.ClusterID(cr))
-}
-
-func subnetNameWithAvailabilityZone(a string) string {
-	return fmt.Sprintf("NodePool-Subnet-%s", strings.ToUpper(a))
 }
 
 func workerCountRatio(workers int, ratio float32) string {

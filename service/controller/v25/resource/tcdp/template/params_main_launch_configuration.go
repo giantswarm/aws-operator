@@ -21,7 +21,7 @@ type ParamsMainLaunchConfigurationBlockDeviceMappingDocker struct {
 }
 
 type ParamsMainLaunchConfigurationBlockDeviceMappingDockerVolume struct {
-	Size int
+	Size string
 }
 
 type ParamsMainLaunchConfigurationBlockDeviceMappingLogging struct {

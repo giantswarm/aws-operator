@@ -3,7 +3,7 @@ package template
 const TemplateMainSubnets = `
 {{ define "subnets" }}
   {{ range .Subnets.List }}
-  {{ .Name }}:
+  Subnet-{{ .NameSuffix }}:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: {{ .AvailabilityZone }}
@@ -16,7 +16,7 @@ const TemplateMainSubnets = `
         Value: "1"
       VpcId: {{ .TCCP.VPC.ID }}
 
-  {{ .RouteTableAssociation.Name }}:
+  RouteTableAssociation-{{ .RouteTableAssociation.NameSuffix }}:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: {{ .TCCP.Subnet.RouteTable.ID }}

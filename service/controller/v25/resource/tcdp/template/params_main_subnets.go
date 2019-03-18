@@ -7,13 +7,13 @@ type ParamsMainSubnets struct {
 type ParamsMainSubnetsListItem struct {
 	AvailabilityZone      string
 	CIDR                  string
-	Name                  string
+	NameSuffix            string
 	RouteTableAssociation ParamsMainSubnetsListItemRouteTableAssociation
 	TCCP                  ParamsMainSubnetsListItemTCCP
 }
 
 type ParamsMainSubnetsListItemRouteTableAssociation struct {
-	Name string
+	NameSuffix string
 }
 
 type ParamsMainSubnetsListItemTCCP struct {

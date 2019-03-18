@@ -5,7 +5,7 @@ const TemplateMainIAMPolicies = `
   NodePoolRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: {{ .IAMPolicies.RoleName }}
+      RoleName: role-{{ .IAMPolicies.NodePool.ID }}
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -17,7 +17,7 @@ const TemplateMainIAMPolicies = `
   NodePoolRolePolicy:
     Type: "AWS::IAM::Policy"
     Properties:
-      PolicyName: {{ .IAMPolicies.PolicyName }}
+      PolicyName: policy-{{ .IAMPolicies.NodePool.ID }}
       Roles:
         - Ref: "NodePoolRole"
       PolicyDocument:
@@ -69,7 +69,7 @@ const TemplateMainIAMPolicies = `
   NodePoolInstanceProfile
     Type: "AWS::IAM::InstanceProfile"
     Properties:
-      InstanceProfileName: {{ .IAMPolicies.ProfileName }}
+      InstanceProfileName: profile-{{ .IAMPolicies.NodePool.ID }}
       Roles:
         - Ref: "NodePoolRole"
 {{ end }}
