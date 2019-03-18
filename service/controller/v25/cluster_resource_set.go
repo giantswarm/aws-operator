@@ -350,18 +350,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var tccpSubnetResource controller.Resource
-	{
-		c := tccpsubnet.Config{
-			Logger: config.Logger,
-		}
-
-		tccpSubnetResource, err = tccpsubnet.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var tccpResource controller.Resource
 	{
 		c := tccp.Config{
@@ -403,6 +391,18 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		tccpOutputsResource, err = tccpoutputs.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpSubnetResource controller.Resource
+	{
+		c := tccpsubnet.Config{
+			Logger: config.Logger,
+		}
+
+		tccpSubnetResource, err = tccpsubnet.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

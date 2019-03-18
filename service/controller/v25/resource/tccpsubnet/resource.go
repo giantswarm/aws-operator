@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -12,7 +13,7 @@ import (
 )
 
 const (
-	Name = "subnetv25"
+	Name = "tccpsubnetv25"
 )
 
 type Config struct {
@@ -39,10 +40,17 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) addSubnetsToContext(ctx context.Context) error {
+func (r *Resource) addSubnetsToContext(ctx context.Context, cr v1alpha1.AWSConfig) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
+	}
+
+	// The tenant cluster VPC is a requirement to find its associated subnets and
+	// route tables. In case the VPC ID is not yet tracked in the controller
+	// context we return an error and cause the resource to be canceled.
+	if cc.Status.TenantCluster.VPC.ID == "" {
+		return microerror.Mask(vpcNotFoundError)
 	}
 
 	{
