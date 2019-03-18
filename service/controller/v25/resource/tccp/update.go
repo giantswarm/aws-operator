@@ -165,7 +165,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the tenant cluster main stack has to be updated")
 
-		shouldUpdate, err := r.shouldUpdate(ctx, cr)
+		shouldUpdate, err := r.detection.ShouldUpdate(ctx, cr)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
@@ -202,7 +202,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the tenant cluster main stack has to be scaled")
 
-		shouldScale, err := r.shouldScale(ctx, cr)
+		shouldScale, err := r.detection.ShouldScale(ctx, cr)
 		if err != nil {
 			return StackState{}, microerror.Mask(err)
 		}
@@ -232,63 +232,6 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 	}
 
 	return StackState{}, nil
-}
-
-// shouldScale determines whether the reconciled tenant cluster should be scaled.
-// A tenant cluster is only allowed to scale in case nothing but the worker count
-// changes. In case anything else changes as well, scaling is not allowed, since
-// any other changes should be covered by general updates, which is a separate
-// step.
-func (r *Resource) shouldScale(ctx context.Context, cr v1alpha1.AWSConfig) (bool, error) {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return false, microerror.Mask(err)
-	}
-
-	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MaxSize != key.ScalingMax(cr) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "scaling due to scaling max")
-		return true, nil
-	}
-	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MinSize != key.ScalingMin(cr) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "scaling due to scaling min")
-		return true, nil
-	}
-
-	return false, nil
-}
-
-// shouldUpdate determines whether the reconciled tenant cluster should be
-// updated. A tenant cluster is only allowed to update in the following cases.
-//
-//     The instance type of master nodes changes (indicates updates).
-//     The instance type of worker nodes changes (indicates updates).
-//     The size of a docker volume for worker nodes changes.
-//     The version bundle version changes (indicates updates).
-//
-func (r *Resource) shouldUpdate(ctx context.Context, cr v1alpha1.AWSConfig) (bool, error) {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return false, microerror.Mask(err)
-	}
-
-	if cc.Status.TenantCluster.MasterInstance.Type != key.MasterInstanceType(cr) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "updating due to master instance type")
-		return true, nil
-	}
-	if cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB != key.WorkerDockerVolumeSizeGB(cr) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "updating due to worker instance docker volume size")
-		return true, nil
-	}
-	if cc.Status.TenantCluster.WorkerInstance.Type != key.WorkerInstanceType(cr) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "updating due to worker instance type")
-		return true, nil
-	}
-	if cc.Status.TenantCluster.VersionBundleVersion != key.VersionBundleVersion(cr) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "updating due to version bundle version")
-		return true, nil
-	}
-
-	return false, nil
 }
 
 // Terminates the master instance of the cluster.
