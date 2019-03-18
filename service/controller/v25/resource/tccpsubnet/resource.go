@@ -2,6 +2,7 @@ package tccpsubnet
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -70,6 +71,11 @@ func (r *Resource) addSubnetsToContext(ctx context.Context, cr v1alpha1.AWSConfi
 			return microerror.Mask(err)
 		}
 
+		fmt.Printf("\n")
+		fmt.Printf("route tables\n")
+		fmt.Printf("    %#v\n", o.RouteTables)
+		fmt.Printf("\n")
+
 		cc.Status.TenantCluster.TCCP.RouteTables = o.RouteTables
 	}
 
@@ -89,6 +95,11 @@ func (r *Resource) addSubnetsToContext(ctx context.Context, cr v1alpha1.AWSConfi
 		if err != nil {
 			return microerror.Mask(err)
 		}
+
+		fmt.Printf("\n")
+		fmt.Printf("subnets\n")
+		fmt.Printf("    %#v\n", o.Subnets)
+		fmt.Printf("\n")
 
 		cc.Status.TenantCluster.TCCP.Subnets = o.Subnets
 	}
