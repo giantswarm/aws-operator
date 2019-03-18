@@ -5,7 +5,7 @@ const TemplateMainIAMPolicies = `
   NodePoolRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: role-{{ .IAMPolicies.NodePool.ID }}
+      RoleName: gs-cluster-{{ .IAMPolicies.Cluster.ID }}-role-{{ .IAMPolicies.NodePool.ID }}
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -17,7 +17,7 @@ const TemplateMainIAMPolicies = `
   NodePoolRolePolicy:
     Type: "AWS::IAM::Policy"
     Properties:
-      PolicyName: policy-{{ .IAMPolicies.NodePool.ID }}
+      PolicyName: gs-cluster-{{ .IAMPolicies.Cluster.ID }}-policy-{{ .IAMPolicies.NodePool.ID }}
       Roles:
         - Ref: "NodePoolRole"
       PolicyDocument:
@@ -69,7 +69,7 @@ const TemplateMainIAMPolicies = `
   NodePoolInstanceProfile
     Type: "AWS::IAM::InstanceProfile"
     Properties:
-      InstanceProfileName: profile-{{ .IAMPolicies.NodePool.ID }}
+      InstanceProfileName: gs-cluster-{{ .IAMPolicies.Cluster.ID }}-profile-{{ .IAMPolicies.NodePool.ID }}
       Roles:
         - Ref: "NodePoolRole"
 {{ end }}

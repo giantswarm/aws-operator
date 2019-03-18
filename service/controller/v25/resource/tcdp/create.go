@@ -185,10 +185,13 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr v1alpha1.AWSConfig) (*
 	}
 
 	iamPolicies := &template.ParamsMainIAMPolicies{
+		Cluster: template.ParamsMainIAMPoliciesCluster{
+			ID: key.ClusterID(cr),
+		},
 		EC2ServiceDomain: key.EC2ServiceDomain(cr),
 		KMSKeyARN:        cc.Status.TenantCluster.KMS.KeyARN,
 		NodePool: template.ParamsMainIAMPoliciesNodePool{
-			ID: "todo",
+			ID: nodePoolID(cr),
 		},
 		RegionARN: key.RegionARN(cr),
 		S3Bucket:  key.BucketName(cr, cc.Status.TenantCluster.AWSAccountID),
@@ -349,6 +352,13 @@ func minDesiredWorkers(minWorkers, maxWorkers, statusDesiredCapacity int) int {
 	}
 
 	return minWorkers
+}
+
+// TODO for the tenant cluster migration we simply hard code something here.
+// Once we are clear with the reconcilable types for the node pools we have to
+// generate the types according to the node pools with the hardcoded ID below.
+func nodePoolID(cr v1alpha1.AWSConfig) string {
+	return "pb6m9"
 }
 
 func stackName(cr v1alpha1.AWSConfig) string {
