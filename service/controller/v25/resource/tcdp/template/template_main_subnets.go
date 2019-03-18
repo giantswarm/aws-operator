@@ -11,7 +11,7 @@ const TemplateMainSubnets = `
       MapPublicIpOnLaunch: false
       Tags:
       - Key: Name
-        Value: {{ .Name }}
+        Value: Subnet-{{ .NameSuffix }}
       - Key: "kubernetes.io/role/elb"
         Value: "1"
       VpcId: {{ .TCCP.VPC.ID }}

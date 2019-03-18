@@ -54,7 +54,8 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) getCloudFormationTags(customObject v1alpha1.AWSConfig) []*cloudformation.Tag {
-	tags := key.ClusterTags(customObject, r.installationName)
+func (r *Resource) getCloudFormationTags(cr v1alpha1.AWSConfig) []*cloudformation.Tag {
+	tags := key.ClusterTags(cr, r.installationName)
+	tags["giantswarm.io/node-pool"] = nodePoolID(cr)
 	return awstags.NewCloudFormation(tags)
 }
