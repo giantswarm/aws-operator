@@ -98,7 +98,7 @@ func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment Volu
 	}
 
 	if shutdown && wait {
-		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for instance %#q being stopped", attachment.InstanceID))
+		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for instance %#q to stop", attachment.InstanceID))
 
 		i := &ec2.DescribeInstancesInput{
 			InstanceIds: []*string{
@@ -111,7 +111,7 @@ func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment Volu
 			return microerror.Mask(err)
 		}
 
-		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for instance %#q being stopped", attachment.InstanceID))
+		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for instance %#q to stop", attachment.InstanceID))
 	}
 
 	{
