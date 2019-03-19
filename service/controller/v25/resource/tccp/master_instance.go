@@ -21,8 +21,6 @@ func (r *Resource) searchMasterInstanceID(ctx context.Context, cr v1alpha1.AWSCo
 
 	var instanceID string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding master instance ID for %#q", key.MasterInstanceName(cr)))
-
 		i := &ec2.DescribeInstancesInput{
 			Filters: []*ec2.Filter{
 				{
@@ -45,6 +43,9 @@ func (r *Resource) searchMasterInstanceID(ctx context.Context, cr v1alpha1.AWSCo
 			return "", microerror.Mask(err)
 		}
 
+		if len(o.Reservations) == 0 {
+			return "", microerror.Maskf(notExistsError, "master instance")
+		}
 		if len(o.Reservations) != 1 {
 			return "", microerror.Maskf(executionFailedError, "expected one master instance, got %d", len(o.Reservations))
 		}
@@ -53,8 +54,6 @@ func (r *Resource) searchMasterInstanceID(ctx context.Context, cr v1alpha1.AWSCo
 		}
 
 		instanceID = *o.Reservations[0].Instances[0].InstanceId
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found master instance ID %#q for %#q", instanceID, key.MasterInstanceName(cr)))
 	}
 
 	return instanceID, nil
@@ -66,9 +65,21 @@ func (r *Resource) terminateMasterInstance(ctx context.Context, cr v1alpha1.AWSC
 		return microerror.Mask(err)
 	}
 
-	instanceID, err := r.searchMasterInstanceID(ctx, cr)
-	if err != nil {
-		return microerror.Mask(err)
+	var instanceID string
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding master instance ID")
+
+		instanceID, err = r.searchMasterInstanceID(ctx, cr)
+		if IsNotExists(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find master instance ID")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "master instance does not exist")
+			return nil
+
+		} else if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found master instance ID %#q", instanceID))
 	}
 
 	{
