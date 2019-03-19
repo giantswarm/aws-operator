@@ -49,6 +49,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/service"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/tccpoutputs"
+	"github.com/giantswarm/aws-operator/service/controller/v25/resource/tccpsubnet"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/vpccidr"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/workerasgname"
 )
@@ -395,6 +396,18 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var tccpSubnetResource controller.Resource
+	{
+		c := tccpsubnet.Config{
+			Logger: config.Logger,
+		}
+
+		tccpSubnetResource, err = tccpsubnet.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var cpfResource controller.Resource
 	{
 		c := cpf.Config{
@@ -601,6 +614,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		routeTableResource,
 		vpcCIDRResource,
 		tccpOutputsResource,
+		tccpSubnetResource,
 		workerASGNameResource,
 		asgStatusResource,
 		statusResource,
