@@ -15,43 +15,61 @@ import (
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
-	stackInput, err := toCreateStackInput(createChange)
+	cr, err := key.ToCustomObject(obj)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	stackStateToCreate, err := toStackState(createChange)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	if stackInput.StackName != nil {
+	if stackStateToCreate.Name != "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "creating the tenant cluster main stack")
 
-		cc, err := controllercontext.FromContext(ctx)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
 		if r.encrypterBackend == encrypter.VaultBackend {
-			customObject, err := key.ToCustomObject(obj)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			err = r.encrypterRoleManager.EnsureCreatedAuthorizedIAMRoles(ctx, customObject)
+			err = r.encrypterRoleManager.EnsureCreatedAuthorizedIAMRoles(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 		}
 
-		_, err = cc.Client.TenantCluster.AWS.CloudFormation.CreateStack(&stackInput)
-		if IsAlreadyExists(err) {
-			// fall through
-		} else if err != nil {
-			return microerror.Mask(err)
+		{
+			i := &cloudformation.CreateStackInput{
+				// CAPABILITY_NAMED_IAM is required for creating worker policy IAM roles.
+				Capabilities: []*string{
+					aws.String(namedIAMCapability),
+				},
+				EnableTerminationProtection: aws.Bool(key.EnableTerminationProtection),
+				Parameters: []*cloudformation.Parameter{
+					{
+						ParameterKey:   aws.String(versionBundleVersionParameterKey),
+						ParameterValue: aws.String(key.VersionBundleVersion(cr)),
+					},
+				},
+				StackName:        aws.String(key.MainGuestStackName(cr)),
+				Tags:             r.getCloudFormationTags(cr),
+				TemplateBody:     aws.String(stackStateToCreate.Template),
+				TimeoutInMinutes: aws.Int64(20),
+			}
+
+			_, err = cc.Client.TenantCluster.AWS.CloudFormation.CreateStack(i)
+			if IsAlreadyExists(err) {
+				// fall through
+			} else if err != nil {
+				return microerror.Mask(err)
+			}
 		}
 
 		ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 		defer cancel()
 
 		err = cc.Client.TenantCluster.AWS.CloudFormation.WaitUntilStackCreateCompleteWithContext(ctx, &cloudformation.DescribeStacksInput{
-			StackName: stackInput.StackName,
+			StackName: aws.String(key.MainGuestStackName(cr)),
 		})
 		if ctx.Err() == context.DeadlineExceeded {
 			// We waited longer than we wanted to get a reasonable result and be sure
@@ -86,7 +104,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 }
 
 func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	customObject, err := key.ToCustomObject(obj)
+	cr, err := key.ToCustomObject(obj)
 	if err != nil {
 		return cloudformation.CreateStackInput{}, microerror.Mask(err)
 	}
@@ -101,31 +119,18 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the tenant cluster main stack has to be created")
 
-	var createState cloudformation.CreateStackInput
+	var createState StackState
 	if currentStackState.Name == "" || desiredStackState.Name != currentStackState.Name {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster main stack has to be created")
 
-		mainTemplate, err := r.newTemplateBody(ctx, customObject, desiredStackState)
+		templateBody, err := r.newTemplateBody(ctx, cr, desiredStackState)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 
-		createState = cloudformation.CreateStackInput{
-			// CAPABILITY_NAMED_IAM is required for creating worker policy IAM roles.
-			Capabilities: []*string{
-				aws.String(namedIAMCapability),
-			},
-			EnableTerminationProtection: aws.Bool(key.EnableTerminationProtection),
-			Parameters: []*cloudformation.Parameter{
-				{
-					ParameterKey:   aws.String(versionBundleVersionParameterKey),
-					ParameterValue: aws.String(key.VersionBundleVersion(customObject)),
-				},
-			},
-			StackName:        aws.String(desiredStackState.Name),
-			Tags:             r.getCloudFormationTags(customObject),
-			TemplateBody:     aws.String(mainTemplate),
-			TimeoutInMinutes: aws.Int64(20),
+		createState = StackState{
+			Name:     desiredStackState.Name,
+			Template: templateBody,
 		}
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster main stack does not have to be created")

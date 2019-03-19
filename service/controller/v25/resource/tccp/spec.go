@@ -1,10 +1,12 @@
 package tccp
 
-import "github.com/aws/aws-sdk-go/service/cloudformation"
-
 // StackState is the state representation on which the resource methods work.
 type StackState struct {
-	Name string
+	Name     string
+	Template string
+
+	// NOTE everything below is deprecated. We try to cleanup the state being
+	// dispatched between resource operations.
 
 	DockerVolumeResourceName   string
 	MasterImageID              string
@@ -21,8 +23,6 @@ type StackState struct {
 	WorkerImageID            string
 	WorkerInstanceMonitoring bool
 	WorkerInstanceType       string
-
-	UpdateStackInput cloudformation.UpdateStackInput
 
 	VersionBundleVersion string
 }

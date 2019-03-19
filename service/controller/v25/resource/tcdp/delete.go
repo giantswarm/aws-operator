@@ -38,6 +38,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			finalizerskeptcontext.SetKept(ctx)
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
 			return nil
 
 		} else if IsNotExists(err) {
@@ -45,6 +46,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 			return nil
+
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
