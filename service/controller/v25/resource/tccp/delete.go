@@ -8,6 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
+	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
 	"github.com/giantswarm/aws-operator/service/controller/v25/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v25/encrypter"
@@ -15,7 +17,11 @@ import (
 )
 
 func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
-	customObject, err := key.ToCustomObject(obj)
+	cr, err := key.ToCustomObject(obj)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -25,48 +31,66 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	}
 
 	if stackStateToDelete.Name != "" {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting the tenant cluster main stack")
-
-		cc, err := controllercontext.FromContext(ctx)
+		err = r.disableMasterTerminationProtection(ctx, key.MasterInstanceName(cr))
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		err = r.disableMasterTerminationProtection(ctx, key.MasterInstanceName(customObject))
-		if err != nil {
-			return microerror.Mask(err)
-		}
+		{
+			r.logger.LogCtx(ctx, "level", "debug", "message", "disabling the termination protection of the tenant cluster's control plane cloud formation stack")
 
-		stackName := aws.String(key.MainGuestStackName(customObject))
-
-		updateTerminationProtection := &cloudformation.UpdateTerminationProtectionInput{
-			EnableTerminationProtection: aws.Bool(false),
-			StackName:                   stackName,
-		}
-		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateTerminationProtection(updateTerminationProtection)
-		if IsDeleteInProgress(err) {
-			// fall through
-		} else if IsNotExists(err) {
-			// fall through
-		} else if err != nil {
-			return microerror.Mask(err)
-		} else {
-			i := &cloudformation.DeleteStackInput{
-				StackName: stackName,
+			i := &cloudformation.UpdateTerminationProtectionInput{
+				EnableTerminationProtection: aws.Bool(false),
+				StackName:                   aws.String(key.MainGuestStackName(cr)),
 			}
+
+			_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateTerminationProtection(i)
+			if IsDeleteInProgress(err) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane cloud formation stack is being deleted")
+
+				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+				finalizerskeptcontext.SetKept(ctx)
+
+				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+				resourcecanceledcontext.SetCanceled(ctx)
+
+				return nil
+
+			} else if IsNotExists(err) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane cloud formation stack does not exist")
+
+				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+				resourcecanceledcontext.SetCanceled(ctx)
+
+				return nil
+
+			} else if err != nil {
+				return microerror.Mask(err)
+			}
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "disabled the termination protection of the tenant cluster's control plane cloud formation stack")
+		}
+
+		{
+			r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the deletion of the tenant cluster's control plane cloud formation stack")
+
+			i := &cloudformation.DeleteStackInput{
+				StackName: aws.String(key.MainGuestStackName(cr)),
+			}
+
 			_, err = cc.Client.TenantCluster.AWS.CloudFormation.DeleteStack(i)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 
 			if r.encrypterBackend == encrypter.VaultBackend {
-				err = r.encrypterRoleManager.EnsureDeletedAuthorizedIAMRoles(ctx, customObject)
+				err = r.encrypterRoleManager.EnsureDeletedAuthorizedIAMRoles(ctx, cr)
 				if err != nil {
 					return microerror.Mask(err)
 				}
 			}
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", "deleted the tenant cluster main stack")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "requested the deletion of the tenant cluster's control plane cloud formation stack")
 		}
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting the tenant cluster main stack")
@@ -83,27 +107,32 @@ func (r *Resource) disableMasterTerminationProtection(ctx context.Context, maste
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "disabling master instance termination protection")
 
-	i := &ec2.DescribeInstancesInput{
-		Filters: []*ec2.Filter{
-			{
-				Name: aws.String("tag:Name"),
-				Values: []*string{
-					aws.String(masterInstanceName),
+	var reservations []*ec2.Reservation
+	{
+		i := &ec2.DescribeInstancesInput{
+			Filters: []*ec2.Filter{
+				{
+					Name: aws.String("tag:Name"),
+					Values: []*string{
+						aws.String(masterInstanceName),
+					},
 				},
 			},
-		},
-	}
-	o, err := cc.Client.TenantCluster.AWS.EC2.DescribeInstances(i)
-	if err != nil {
-		return microerror.Mask(err)
+		}
+
+		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeInstances(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if len(o.Reservations) != 1 {
+			return microerror.Maskf(executionFailedError, "expected one reservation for master instance, got %d", len(o.Reservations))
+		}
+
+		reservations = o.Reservations
 	}
 
-	if len(o.Reservations) != 1 {
-		return microerror.Maskf(executionFailedError, "expected one reservation for master instance, got %d", len(o.Reservations))
-	}
-
-	for _, reservation := range o.Reservations {
-
+	for _, reservation := range reservations {
 		if len(reservation.Instances) != 1 {
 			return microerror.Maskf(executionFailedError, "expected one master instance, got %d", len(reservation.Instances))
 		}
