@@ -2,12 +2,10 @@ package tccp
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
 
@@ -74,12 +72,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 				}
 			}
 
-			err = r.disableMasterTerminationProtection(ctx, key.MasterInstanceName(cr))
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			err = r.terminateOldMasterInstance(ctx, cr)
+			err = r.terminateMasterInstance(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -90,8 +83,8 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 		{
 			i := &cloudformation.UpdateStackInput{
 				Capabilities: []*string{
-					// CAPABILITY_NAMED_IAM is required for updating IAM roles (worker
-					// policy).
+					// CAPABILITY_NAMED_IAM is required for updating worker policy IAM
+					// roles.
 					aws.String(namedIAMCapability),
 				},
 				Parameters: []*cloudformation.Parameter{
@@ -225,82 +218,4 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 	}
 
 	return StackState{}, nil
-}
-
-// Terminates the master instance of the cluster.
-//
-// To detect the old master instance we find the instance by its name and
-// the instance state "stopped". Within the upgrade process the master first
-// gets stopped and its volumes get detached. This function makes sure that
-// the stopped instance is also terminated.
-func (r *Resource) terminateOldMasterInstance(ctx context.Context, cr v1alpha1.AWSConfig) error {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	instanceName := key.MasterInstanceName(cr)
-
-	var instanceID string
-	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding master instance ID for %#q", instanceName))
-
-		i := &ec2.DescribeInstancesInput{
-			Filters: []*ec2.Filter{
-				{
-					Name: aws.String("tag:Name"),
-					Values: []*string{
-						aws.String(instanceName),
-					},
-				},
-				{
-					Name: aws.String("instance-state-name"),
-					Values: []*string{
-						aws.String("stopped"),
-					},
-				},
-				{
-					Name: aws.String("tag:giantswarm.io/cluster"),
-					Values: []*string{
-						aws.String(key.ClusterID(cr)),
-					},
-				},
-			},
-		}
-
-		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeInstances(i)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		if len(o.Reservations) != 1 {
-			return microerror.Maskf(executionFailedError, "expected one master instance, got %d", len(o.Reservations))
-		}
-		if len(o.Reservations[0].Instances) != 1 {
-			return microerror.Maskf(executionFailedError, "expected one master instance, got %d", len(o.Reservations[0].Instances))
-		}
-
-		instanceID = *o.Reservations[0].Instances[0].InstanceId
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found master instance ID %#q for %#q", instanceID, instanceName))
-	}
-
-	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminating master instance %#q", instanceID))
-
-		i := &ec2.TerminateInstancesInput{
-			InstanceIds: []*string{
-				aws.String(instanceID),
-			},
-		}
-
-		_, err := cc.Client.TenantCluster.AWS.EC2.TerminateInstances(i)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminated master instance %#q", instanceID))
-	}
-
-	return nil
 }

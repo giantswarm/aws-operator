@@ -5,7 +5,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
@@ -31,7 +30,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	}
 
 	if stackStateToDelete.Name != "" {
-		err = r.disableMasterTerminationProtection(ctx, key.MasterInstanceName(cr))
+		err = r.terminateMasterInstance(ctx, cr)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -95,64 +94,6 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting the tenant cluster main stack")
 	}
-
-	return nil
-}
-
-func (r *Resource) disableMasterTerminationProtection(ctx context.Context, masterInstanceName string) error {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", "disabling master instance termination protection")
-
-	var reservations []*ec2.Reservation
-	{
-		i := &ec2.DescribeInstancesInput{
-			Filters: []*ec2.Filter{
-				{
-					Name: aws.String("tag:Name"),
-					Values: []*string{
-						aws.String(masterInstanceName),
-					},
-				},
-			},
-		}
-
-		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeInstances(i)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		if len(o.Reservations) != 1 {
-			return microerror.Maskf(executionFailedError, "expected one reservation for master instance, got %d", len(o.Reservations))
-		}
-
-		reservations = o.Reservations
-	}
-
-	for _, reservation := range reservations {
-		if len(reservation.Instances) != 1 {
-			return microerror.Maskf(executionFailedError, "expected one master instance, got %d", len(reservation.Instances))
-		}
-
-		for _, instance := range reservation.Instances {
-			i := &ec2.ModifyInstanceAttributeInput{
-				DisableApiTermination: &ec2.AttributeBooleanValue{
-					Value: aws.Bool(false),
-				},
-				InstanceId: aws.String(*instance.InstanceId),
-			}
-
-			_, err = cc.Client.TenantCluster.AWS.EC2.ModifyInstanceAttribute(i)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-		}
-	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", "disabled master instance termination protection")
 
 	return nil
 }
