@@ -79,19 +79,35 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 				return microerror.Mask(err)
 			}
 
-			{
-				err := r.terminateOldMasterInstance(ctx, obj)
-				if err != nil {
-					return microerror.Mask(err)
-				}
+			err = r.terminateOldMasterInstance(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
 			}
 		}
 
 		// Once the etcd volume is cleaned up and the master instance is down we can
 		// go ahead to let CloudFormation do its job.
-		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateStack(&stackStateToUpdate.UpdateStackInput)
-		if err != nil {
-			return microerror.Mask(err)
+		{
+			i := &cloudformation.UpdateStackInput{
+				Capabilities: []*string{
+					// CAPABILITY_NAMED_IAM is required for updating IAM roles (worker
+					// policy).
+					aws.String(namedIAMCapability),
+				},
+				Parameters: []*cloudformation.Parameter{
+					{
+						ParameterKey:   aws.String(versionBundleVersionParameterKey),
+						ParameterValue: aws.String(key.VersionBundleVersion(cr)),
+					},
+				},
+				StackName:    aws.String(stackStateToUpdate.Name),
+				TemplateBody: aws.String(stackStateToUpdate.Template),
+			}
+
+			_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateStack(i)
+			if err != nil {
+				return microerror.Mask(err)
+			}
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "updated the tenant cluster main stack")
@@ -117,31 +133,6 @@ func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 	patch.SetUpdateChange(update)
 
 	return patch, nil
-}
-
-func (r *Resource) computeUpdateState(ctx context.Context, cr v1alpha1.AWSConfig, stackState StackState) (cloudformation.UpdateStackInput, error) {
-	mainTemplate, err := r.newTemplateBody(ctx, cr, stackState)
-	if err != nil {
-		return cloudformation.UpdateStackInput{}, microerror.Mask(err)
-	}
-
-	updateStackInput := cloudformation.UpdateStackInput{
-		Capabilities: []*string{
-			// CAPABILITY_NAMED_IAM is required for updating IAM roles (worker
-			// policy).
-			aws.String(namedIAMCapability),
-		},
-		Parameters: []*cloudformation.Parameter{
-			{
-				ParameterKey:   aws.String(versionBundleVersionParameterKey),
-				ParameterValue: aws.String(key.VersionBundleVersion(cr)),
-			},
-		},
-		StackName:    aws.String(stackState.Name),
-		TemplateBody: aws.String(mainTemplate),
-	}
-
-	return updateStackInput, nil
 }
 
 func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
@@ -173,16 +164,17 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		if shouldUpdate {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster main stack has to be updated")
 
-			updateStackInput, err := r.computeUpdateState(ctx, cr, desiredStackState)
+			templateBody, err := r.newTemplateBody(ctx, cr, desiredStackState)
 			if err != nil {
 				return StackState{}, microerror.Mask(err)
 			}
 
 			updateState := StackState{
-				Name:             desiredStackState.Name,
-				ShouldScale:      false,
-				ShouldUpdate:     true,
-				UpdateStackInput: updateStackInput,
+				Name:     desiredStackState.Name,
+				Template: templateBody,
+
+				ShouldScale:  false,
+				ShouldUpdate: true,
 			}
 
 			return updateState, nil
@@ -213,16 +205,17 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 			desiredStackState.MasterInstanceResourceName = currentStackState.MasterInstanceResourceName
 			desiredStackState.DockerVolumeResourceName = currentStackState.DockerVolumeResourceName
 
-			updateStackInput, err := r.computeUpdateState(ctx, cr, desiredStackState)
+			templateBody, err := r.newTemplateBody(ctx, cr, desiredStackState)
 			if err != nil {
 				return StackState{}, microerror.Mask(err)
 			}
 
 			updateState := StackState{
-				Name:             desiredStackState.Name,
-				ShouldScale:      true,
-				ShouldUpdate:     false,
-				UpdateStackInput: updateStackInput,
+				Name:     desiredStackState.Name,
+				Template: templateBody,
+
+				ShouldScale:  true,
+				ShouldUpdate: false,
 			}
 
 			return updateState, nil
@@ -240,24 +233,17 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 // the instance state "stopped". Within the upgrade process the master first
 // gets stopped and its volumes get detached. This function makes sure that
 // the stopped instance is also terminated.
-func (r *Resource) terminateOldMasterInstance(ctx context.Context, obj interface{}) error {
-	var result *ec2.DescribeInstancesOutput
-
-	cr, err := key.ToCustomObject(obj)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	instanceName := key.MasterInstanceName(cr)
-	instanceState := "stopped"
-
+func (r *Resource) terminateOldMasterInstance(ctx context.Context, cr v1alpha1.AWSConfig) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
+	instanceName := key.MasterInstanceName(cr)
+
+	var instanceID string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding master instance with name %#q in state %#q", instanceName, instanceState))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding master instance ID for %#q", instanceName))
 
 		i := &ec2.DescribeInstancesInput{
 			Filters: []*ec2.Filter{
@@ -270,7 +256,7 @@ func (r *Resource) terminateOldMasterInstance(ctx context.Context, obj interface
 				{
 					Name: aws.String("instance-state-name"),
 					Values: []*string{
-						aws.String(instanceState),
+						aws.String("stopped"),
 					},
 				},
 				{
@@ -282,48 +268,38 @@ func (r *Resource) terminateOldMasterInstance(ctx context.Context, obj interface
 			},
 		}
 
-		result, err = cc.Client.TenantCluster.AWS.EC2.DescribeInstances(i)
+		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeInstances(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		if len(result.Reservations) > 1 {
-			return microerror.Maskf(executionFailedError, "expected at most one master instance with name %#q in state %#q but got %d", instanceName, instanceState, len(result.Reservations))
+		if len(o.Reservations) != 1 {
+			return microerror.Maskf(executionFailedError, "expected one master instance, got %d", len(o.Reservations))
+		}
+		if len(o.Reservations[0].Instances) != 1 {
+			return microerror.Maskf(executionFailedError, "expected one master instance, got %d", len(o.Reservations[0].Instances))
 		}
 
-		if len(result.Reservations) < 1 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find master instance with name %#q in state %#q", instanceName, instanceState))
-			return nil
-		}
+		instanceID = *o.Reservations[0].Instances[0].InstanceId
 
-		if len(result.Reservations[0].Instances) > 1 {
-			return microerror.Maskf(executionFailedError, "expected at most one master instance with name %#q in state %#q but got %d", instanceName, instanceState, len(result.Reservations))
-		}
-
-		if len(result.Reservations[0].Instances) < 1 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find master instance with state `stopped` and name %#q", key.MasterInstanceName(cr)))
-			return nil
-		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found master instance with name %#q in state %#q", instanceName, instanceState))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found master instance ID %#q for %#q", instanceID, instanceName))
 	}
 
 	{
-		instanceID := *result.Reservations[0].Instances[0].InstanceId
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminating master instance with ID %#q", instanceID))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminating master instance %#q", instanceID))
 
 		i := &ec2.TerminateInstancesInput{
 			InstanceIds: []*string{
 				aws.String(instanceID),
 			},
 		}
+
 		_, err := cc.Client.TenantCluster.AWS.EC2.TerminateInstances(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminated master instance with ID %#q", instanceID))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminated master instance %#q", instanceID))
 	}
 
 	return nil
