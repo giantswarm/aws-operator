@@ -353,22 +353,16 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var tccpResource controller.Resource
 	{
 		c := tccp.Config{
-			APIWhitelist: adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
-			},
+			APIWhitelist:         config.APIWhitelist,
 			EncrypterRoleManager: encrypterRoleManager,
-			G8sClient:            config.G8sClient,
 			Logger:               config.Logger,
 
-			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
-			Detection:                  detectionService,
-			EncrypterBackend:           config.EncrypterBackend,
-			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
-			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
-			InstallationName:           config.InstallationName,
-			PublicRouteTables:          config.RouteTables,
-			Route53Enabled:             config.Route53Enabled,
+			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
+			Detection:             detectionService,
+			EncrypterBackend:      config.EncrypterBackend,
+			InstallationName:      config.InstallationName,
+			PublicRouteTables:     config.RouteTables,
+			Route53Enabled:        config.Route53Enabled,
 		}
 
 		ops, err := tccp.New(c)
