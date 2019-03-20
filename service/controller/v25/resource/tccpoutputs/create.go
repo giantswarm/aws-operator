@@ -5,11 +5,10 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 
-	cf "github.com/giantswarm/aws-operator/service/controller/v25/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v25/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/v25/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v25/key"
 )
@@ -31,30 +30,30 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	var cloudFormation *cf.CloudFormation
+	var cloudFormation *cloudformation.CloudFormation
 	{
-		c := cf.Config{
+		c := cloudformation.Config{
 			Client: cc.Client.TenantCluster.AWS.CloudFormation,
 		}
 
-		cloudFormation, err = cf.New(c)
+		cloudFormation, err = cloudformation.New(c)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 	}
 
-	var outputs []*cloudformation.Output
+	var outputs []cloudformation.Output
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster cloud formation stack outputs")
 
 		o, s, err := cloudFormation.DescribeOutputsAndStatus(key.MainGuestStackName(cr))
-		if cf.IsStackNotFound(err) {
+		if cloudformation.IsStackNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster cloud formation stack outputs")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster cloud formation stack does not exist")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 
-		} else if cf.IsOutputsNotAccessible(err) {
+		} else if cloudformation.IsOutputsNotAccessible(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster cloud formation stack outputs")
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster main cloud formation stack output values are not accessible due to stack status %#q", s))
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -135,7 +134,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	{
 		v, err := cloudFormation.GetOutputValue(outputs, VPCIDKey)
-		if cf.IsOutputNotFound(err) {
+		if cloudformation.IsOutputNotFound(err) {
 			// TODO this exception is necessary for clusters upgrading from v24 to
 			// v25. The code can be cleaned up in v26 and the controller context value
 			// assignment can be managed like the other examples below.
@@ -156,7 +155,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	{
 		v, err := cloudFormation.GetOutputValue(outputs, VPCPeeringConnectionIDKey)
-		if cf.IsOutputNotFound(err) {
+		if cloudformation.IsOutputNotFound(err) {
 			// TODO this exception is necessary for clusters upgrading from v23 to
 			// v24. The code can be cleaned up in v25 and the controller context value
 			// assignment can be managed like the other examples below.

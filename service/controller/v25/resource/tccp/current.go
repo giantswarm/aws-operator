@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
-	cf "github.com/giantswarm/aws-operator/service/controller/v25/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/v25/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/v25/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v25/key"
 )
@@ -23,13 +23,13 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return StackState{}, microerror.Mask(err)
 	}
 
-	var cloudFormation *cf.CloudFormation
+	var cloudFormation *cloudformation.CloudFormation
 	{
-		c := cf.Config{
+		c := cloudformation.Config{
 			Client: cc.Client.TenantCluster.AWS.CloudFormation,
 		}
 
-		cloudFormation, err = cf.New(c)
+		cloudFormation, err = cloudformation.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -63,12 +63,12 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 		var stackStatus string
 		_, stackStatus, err := cloudFormation.DescribeOutputsAndStatus(key.MainGuestStackName(cr))
-		if cf.IsStackNotFound(err) {
+		if cloudformation.IsStackNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster main stack outputs in the AWS API")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster main stack does not exist")
 			return StackState{}, nil
 
-		} else if cf.IsOutputsNotAccessible(err) {
+		} else if cloudformation.IsOutputsNotAccessible(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster main stack outputs in the AWS API")
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster main stack has status '%s'", stackStatus))
 
