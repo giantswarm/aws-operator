@@ -35,17 +35,17 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// allocate it and the CloudFormation resource cannot proceed. We cancel here
 	// and wait for the CIDR to be available in the CR status.
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding tenant subnet in CR status")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane network cidr")
 
 		if key.StatusNetworkCIDR(cr) == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find tenant subnet in CR status")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane network cidr")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			resourcecanceledcontext.SetCanceled(ctx)
 
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found tenant subnet in CR status")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane network cidr")
 	}
 
 	{
@@ -228,7 +228,7 @@ func (r *Resource) ensureStack(ctx context.Context, cr v1alpha1.AWSConfig, templ
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "updating the tenant cluster main stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring the tenant cluster's control plane cloud formation stack")
 
 		i := &cloudformation.UpdateStackInput{
 			Capabilities: []*string{
@@ -251,7 +251,7 @@ func (r *Resource) ensureStack(ctx context.Context, cr v1alpha1.AWSConfig, templ
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "updated the tenant cluster main stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured the tenant cluster's control plane cloud formation stack")
 	}
 
 	return nil
