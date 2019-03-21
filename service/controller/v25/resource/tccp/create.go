@@ -52,7 +52,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(key.MainHostPreStackName(cr)),
+			StackName: aws.String(key.MainGuestStackName(cr)),
 		}
 
 		o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStacks(i)
@@ -286,7 +286,7 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 			PublicRouteTables:               r.publicRouteTables,
 			Route53Enabled:                  r.route53Enabled,
 			StackState: adapter.StackState{
-				Name: key.MainHostPreStackName(cr),
+				Name: key.MainGuestStackName(cr),
 
 				DockerVolumeResourceName:   tp.DockerVolumeResourceName,
 				MasterImageID:              im,
