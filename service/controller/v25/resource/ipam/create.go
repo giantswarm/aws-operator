@@ -189,7 +189,12 @@ func getAWSConfigSubnets(g8sClient versioned.Interface) ([]net.IPNet, error) {
 
 	var results []net.IPNet
 	for _, ac := range awsConfigList.Items {
-		_, n, err := net.ParseCIDR(key.StatusNetworkCIDR(ac))
+		cidr := key.StatusNetworkCIDR(ac)
+		if cidr == "" {
+			continue
+		}
+
+		_, n, err := net.ParseCIDR(cidr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
