@@ -28,6 +28,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	// When the TCCP cloud formation stack is transitioning, it means it is
+	// updating in most cases. We do not want to interfere with the current
+	// process and stop here. We will then check on the next reconciliation loop
+	// and continue eventually.
 	{
 		if cc.Status.TenantCluster.TCCP.IsTransitioning {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane cloud formation stack is in transitioning state")
@@ -79,41 +83,40 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateFailed {
 			return microerror.Maskf(executionFailedError, "expected successful status, got %#q", o.Stacks[0].StackStatus)
+		}
 
-		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane cloud formation stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane cloud formation stack")
+	}
 
-			{
-				update, err := r.detection.ShouldUpdate(ctx, cr)
-				if err != nil {
-					return microerror.Mask(err)
-				}
+	{
+		update, err := r.detection.ShouldUpdate(ctx, cr)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 
-				if update {
-					err = r.updateStack(ctx, cr)
-					if err != nil {
-						return microerror.Mask(err)
-					}
-
-					return nil
-				}
+		if update {
+			err = r.updateStack(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
 			}
 
-			{
-				scale, err := r.detection.ShouldScale(ctx, cr)
-				if err != nil {
-					return microerror.Mask(err)
-				}
+			return nil
+		}
+	}
 
-				if scale {
-					err = r.scaleStack(ctx, cr)
-					if err != nil {
-						return microerror.Mask(err)
-					}
+	{
+		scale, err := r.detection.ShouldScale(ctx, cr)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 
-					return nil
-				}
+		if scale {
+			err = r.scaleStack(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
 			}
+
+			return nil
 		}
 	}
 
