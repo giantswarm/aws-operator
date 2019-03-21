@@ -7,7 +7,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
-	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
 	"github.com/giantswarm/aws-operator/service/controller/v25/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v25/encrypter"
@@ -45,14 +44,12 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			finalizerskeptcontext.SetKept(ctx)
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			resourcecanceledcontext.SetCanceled(ctx)
 
 			return nil
 
 		} else if IsNotExists(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane cloud formation stack does not exist")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			resourcecanceledcontext.SetCanceled(ctx)
 
 			return nil
 

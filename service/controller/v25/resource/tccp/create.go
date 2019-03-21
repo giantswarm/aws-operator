@@ -8,7 +8,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/v22/ebs"
@@ -29,6 +28,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	{
+		if cc.Status.TenantCluster.TCCP.IsTransitioning {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane cloud formation stack is in transitioning state")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+	}
+
 	// The IPAM resource is executed before the CloudFormation resource in order
 	// to allocate a free IP range for the tenant subnet. This CIDR is put into
 	// the CR status. In case it is missing, the IPAM resource did not yet
@@ -40,9 +47,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		if key.StatusNetworkCIDR(cr) == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane network cidr")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			resourcecanceledcontext.SetCanceled(ctx)
-
-			return microerror.Mask(err)
+			return nil
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane network cidr")
