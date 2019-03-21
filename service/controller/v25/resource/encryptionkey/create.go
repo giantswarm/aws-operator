@@ -26,6 +26,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	// For some obscure reasons the encryption key is not immediately available
+	// when creating it. On each cluster creation we saw the retry resource
+	// kicking in once because of a not found error. To prevent the error, instead
+	// we backoff silently upfront where we know we have to.
 	var encryptionKey string
 	{
 		o := func() error {
