@@ -70,6 +70,24 @@ func (l *GuestLaunchConfigAdapter) Adapt(config Config) error {
 		}
 	}
 
+	{
+		cur := config.StackState.WorkerKubeletVolumeSizeGB
+		def := defaultEBSVolumeSize
+
+		if cur == "" {
+			cur = "0"
+		}
+
+		curi, err := strconv.Atoi(cur)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if curi <= 0 {
+			config.StackState.WorkerKubeletVolumeSizeGB = def
+		}
+	}
+
 	l.WorkerBlockDeviceMappings = []BlockDeviceMapping{
 		{
 			DeleteOnTermination: true,
@@ -81,6 +99,12 @@ func (l *GuestLaunchConfigAdapter) Adapt(config Config) error {
 			DeleteOnTermination: true,
 			DeviceName:          logEBSVolumeMountPoint,
 			VolumeSize:          config.StackState.WorkerLogVolumeSizeGB,
+			VolumeType:          defaultEBSVolumeType,
+		},
+		{
+			DeleteOnTermination: true,
+			DeviceName:          kubeletEBSVolumeMountPoint,
+			VolumeSize:          config.StackState.WorkerKubeletVolumeSizeGB,
 			VolumeType:          defaultEBSVolumeType,
 		},
 	}
