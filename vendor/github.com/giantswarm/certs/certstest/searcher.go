@@ -11,6 +11,10 @@ func NewSearcher() *Searcher {
 	return &Searcher{}
 }
 
+func (s *Searcher) SearchAppOperator(clusterID string) (certs.AppOperator, error) {
+	return certs.AppOperator{}, nil
+}
+
 func (s *Searcher) SearchCluster(clusterID string) (certs.Cluster, error) {
 	return certs.Cluster{}, nil
 }
