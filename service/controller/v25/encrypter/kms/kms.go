@@ -44,7 +44,7 @@ func NewEncrypter(c *EncrypterConfig) (*Encrypter, error) {
 	return kms, nil
 }
 
-func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) error {
+func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr v1alpha1.AWSConfig) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -54,7 +54,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 	{
 		e.logger.LogCtx(ctx, "level", "debug", "message", "finding out encryption key")
 
-		_, err := e.describeKey(ctx, customObject)
+		_, err := e.describeKey(ctx, cr)
 		if IsKeyNotFound(err) {
 			e.logger.LogCtx(ctx, "level", "debug", "message", "did not find encryption key")
 
@@ -80,7 +80,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 		e.logger.LogCtx(ctx, "level", "debug", "message", "deleting old encryption key alias")
 
 		in := &kms.DeleteAliasInput{
-			AliasName: aws.String(keyAlias(customObject)),
+			AliasName: aws.String(keyAlias(cr)),
 		}
 
 		_, err = cc.Client.TenantCluster.AWS.KMS.DeleteAlias(in)
@@ -95,7 +95,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 	{
 		e.logger.LogCtx(ctx, "level", "debug", "message", "creating encryption key")
 
-		tags := key.ClusterTags(customObject, e.installationName)
+		tags := key.ClusterTags(cr, e.installationName)
 
 		// TODO already created case should be handled here. Otherwise there is a
 		// chance alias wasn't created yet and EncryptionKey will tell there is no
@@ -140,7 +140,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 		e.logger.LogCtx(ctx, "level", "debug", "message", "creating encryption key alias")
 
 		in := &kms.CreateAliasInput{
-			AliasName:   aws.String(keyAlias(customObject)),
+			AliasName:   aws.String(keyAlias(cr)),
 			TargetKeyId: keyID,
 		}
 
@@ -155,7 +155,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 	return nil
 }
 
-func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) error {
+func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, cr v1alpha1.AWSConfig) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -166,7 +166,7 @@ func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, customObject
 		e.logger.LogCtx(ctx, "level", "debug", "message", "finding out encryption key")
 
 		// TODO we should search by tags here in case alias failed to create and cluster was deleted early. Issue: https://github.com/giantswarm/giantswarm/issues/4262.
-		out, err := e.describeKey(ctx, customObject)
+		out, err := e.describeKey(ctx, cr)
 		if IsKeyNotFound(err) || IsKeyScheduledForDeletion(err) {
 			e.logger.LogCtx(ctx, "level", "debug", "message", "did not find encryption key")
 			e.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -214,8 +214,8 @@ func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, customObject
 	return nil
 }
 
-func (k *Encrypter) EncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {
-	out, err := k.describeKey(ctx, customObject)
+func (k *Encrypter) EncryptionKey(ctx context.Context, cr v1alpha1.AWSConfig) (string, error) {
+	out, err := k.describeKey(ctx, cr)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -251,14 +251,14 @@ func (e *Encrypter) IsKeyNotFound(err error) bool {
 	return IsKeyNotFound(err) || IsKeyScheduledForDeletion(err)
 }
 
-func (k *Encrypter) describeKey(ctx context.Context, customObject v1alpha1.AWSConfig) (*kms.DescribeKeyOutput, error) {
+func (k *Encrypter) describeKey(ctx context.Context, cr v1alpha1.AWSConfig) (*kms.DescribeKeyOutput, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
 	input := &kms.DescribeKeyInput{
-		KeyId: aws.String(keyAlias(customObject)),
+		KeyId: aws.String(keyAlias(cr)),
 	}
 
 	out, err := cc.Client.TenantCluster.AWS.KMS.DescribeKey(input)

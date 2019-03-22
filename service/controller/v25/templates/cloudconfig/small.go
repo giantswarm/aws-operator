@@ -30,7 +30,17 @@ const Small = `{
           "label": "log",
           "format": "xfs"
         }
-      }{{ if eq .InstanceRole "master" -}},
+      }{{ if eq .InstanceRole "worker" -}},
+      {
+        "name": "kubelet",
+        "mount": {
+          "device": "/dev/xvdg",
+          "wipeFilesystem": true,
+          "label": "kubelet",
+          "format": "xfs"
+        }
+      }
+      {{- end }}{{ if eq .InstanceRole "master" -}},
       {
         "name": "etcd",
         "mount": {
@@ -40,7 +50,7 @@ const Small = `{
           "format": "ext4"
         }
       }
-	  {{- end }}
+    {{- end }}
     ]
   }
 }
