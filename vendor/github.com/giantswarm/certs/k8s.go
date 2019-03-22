@@ -36,6 +36,7 @@ func (c Cert) String() string {
 // These constants used as Cert parsing a secret received from the API.
 const (
 	APICert                Cert = "api"
+	AppOperatorAPICert     Cert = "app-operator-api"
 	CalicoEtcdClientCert   Cert = "calico-etcd-client"
 	ClusterOperatorAPICert Cert = "cluster-operator-api"
 	EtcdCert               Cert = "etcd"
@@ -49,6 +50,7 @@ const (
 // AllCerts lists all certificates that can be created by cert-operator.
 var AllCerts = []Cert{
 	APICert,
+	AppOperatorAPICert,
 	CalicoEtcdClientCert,
 	ClusterOperatorAPICert,
 	EtcdCert,

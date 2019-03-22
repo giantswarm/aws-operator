@@ -12,6 +12,10 @@ type Cluster struct {
 	Worker           TLS
 }
 
+type AppOperator struct {
+	APIServer TLS
+}
+
 type ClusterOperator struct {
 	APIServer TLS
 }
