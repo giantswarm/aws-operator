@@ -9,7 +9,6 @@ import (
 type APIExtensionsAWSConfigE2EConfig struct {
 	CommonDomain         string
 	ClusterName          string
-	SSHPublicKey         string
 	VersionBundleVersion string
 
 	AWS APIExtensionsAWSConfigE2EConfigAWS
@@ -40,9 +39,6 @@ func NewAPIExtensionsAWSConfigE2E(config APIExtensionsAWSConfigE2EConfig) (strin
 	}
 	if config.ClusterName == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.ClusterName must not be empty", config)
-	}
-	if config.SSHPublicKey == "" {
-		return "", microerror.Maskf(invalidConfigError, "%T.SSHPublicKey must not be empty", config)
 	}
 	if config.VersionBundleVersion == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.VersionBundleVersion must not be empty", config)

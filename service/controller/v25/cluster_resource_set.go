@@ -357,20 +357,15 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			EncrypterRoleManager: encrypterRoleManager,
 			Logger:               config.Logger,
 
-			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
-			Detection:             detectionService,
-			EncrypterBackend:      config.EncrypterBackend,
-			InstallationName:      config.InstallationName,
-			PublicRouteTables:     config.RouteTables,
-			Route53Enabled:        config.Route53Enabled,
+			Detection:          detectionService,
+			EncrypterBackend:   config.EncrypterBackend,
+			InstallationName:   config.InstallationName,
+			InstanceMonitoring: config.AdvancedMonitoringEC2,
+			PublicRouteTables:  config.RouteTables,
+			Route53Enabled:     config.Route53Enabled,
 		}
 
-		ops, err := tccp.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		tccpResource, err = toCRUDResource(config.Logger, ops)
+		tccpResource, err = tccp.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

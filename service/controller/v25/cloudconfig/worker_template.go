@@ -204,6 +204,11 @@ func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Name:         "var-log.mount",
 			Enabled:      true,
 		},
+		{
+			AssetContent: cloudconfig.EphemeralVarLibKubeletMount,
+			Name:         "var-lib-kubelet.mount",
+			Enabled:      true,
+		},
 	}
 
 	var newUnits []k8scloudconfig.UnitAsset

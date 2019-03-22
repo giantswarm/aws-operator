@@ -18,6 +18,8 @@ const (
 	rollingUpdatePauseTime = "PT15M"
 	// logEBSVolumeMountPoint is the path for mounting the log EBS volume
 	logEBSVolumeMountPoint = "/dev/xvdf"
+	// kubeletEBSVolumeMountPoint is the path for mounting the log EBS volume
+	kubeletEBSVolumeMountPoint = "/dev/xvdg"
 
 	// Subnet keys
 	subnetDescription = "description"
@@ -71,15 +73,16 @@ type StackState struct {
 	// TODO the cloud config versions shouldn't be injected here. These should
 	// actually always only be the ones the operator has hard coded. No other
 	// version should be used here ever.
-	WorkerCloudConfigVersion string
-	WorkerDesired            int
-	WorkerDockerVolumeSizeGB string
-	WorkerLogVolumeSizeGB    string
-	WorkerImageID            string
-	WorkerInstanceMonitoring bool
-	WorkerInstanceType       string
-	WorkerMax                int
-	WorkerMin                int
+	WorkerCloudConfigVersion  string
+	WorkerDesired             int
+	WorkerDockerVolumeSizeGB  string
+	WorkerLogVolumeSizeGB     string
+	WorkerKubeletVolumeSizeGB string
+	WorkerImageID             string
+	WorkerInstanceMonitoring  bool
+	WorkerInstanceType        string
+	WorkerMax                 int
+	WorkerMin                 int
 
 	VersionBundleVersion string
 }

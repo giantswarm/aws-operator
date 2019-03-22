@@ -153,6 +153,15 @@ func (c *Client) DeleteRelease(ctx context.Context, releaseName string, options 
 // As a first step, it checks if Tiller is already ready, in which case it
 // returns early.
 func (c *Client) EnsureTillerInstalled(ctx context.Context) error {
+	return c.EnsureTillerInstalledWithValues(ctx, []string{})
+}
+
+// EnsureTillerInstalledWithValues installs Tiller by creating its deployment
+// and waiting for it to start. A service account and cluster role binding are
+// also created. As a first step, it checks if Tiller is already ready, in
+// which case it returns early. Values can be provided to pass through to Tiller
+// and overwrite its deployment.
+func (c *Client) EnsureTillerInstalledWithValues(ctx context.Context, values []string) error {
 	// Check if Tiller is already present and return early if so.
 	{
 		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding if tiller is installed in namespace %#q", c.tillerNamespace))
@@ -286,6 +295,7 @@ func (c *Client) EnsureTillerInstalled(ctx context.Context) error {
 		MaxHistory:                   defaultMaxHistory,
 		Namespace:                    c.tillerNamespace,
 		ServiceAccount:               tillerPodName,
+		Values:                       values,
 	}
 
 	// Install the tiller deployment in the tenant cluster.
@@ -299,7 +309,7 @@ func (c *Client) EnsureTillerInstalled(ctx context.Context) error {
 		if err != nil {
 			return microerror.Mask(err)
 		}
-	} else {
+	} else if installTiller && upgradeTiller {
 		return microerror.Maskf(executionFailedError, "invalid state cannot both install and upgrade tiller")
 	}
 

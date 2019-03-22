@@ -29,11 +29,11 @@ func New(config Config) (*CloudFormation, error) {
 // DescribeOutputsAndStatus returns stack outputs, stack status and error. The
 // stack status is returned when the error is nil or the error is matched by
 // IsOutputsNotAccessible.
-func (c *CloudFormation) DescribeOutputsAndStatus(stackName string) ([]*cloudformation.Output, string, error) {
+func (c *CloudFormation) DescribeOutputsAndStatus(stackName string) ([]Output, string, error) {
 	// At first we fetch the CF stack state by describing it via the AWS golang
 	// SDK. We are interested in the stack outputs and the stack status, since
 	// this tells us if we are able to access outputs at all.
-	var stackOutputs []*cloudformation.Output
+	var stackOutputs []Output
 	var stackStatus string
 	{
 		i := &cloudformation.DescribeStacksInput{
@@ -47,11 +47,11 @@ func (c *CloudFormation) DescribeOutputsAndStatus(stackName string) ([]*cloudfor
 			return nil, "", microerror.Mask(err)
 		}
 
-		if len(o.Stacks) > 1 {
+		if len(o.Stacks) != 1 {
 			return nil, "", microerror.Maskf(tooManyStacksError, "expected 1 stack, got %d", len(o.Stacks))
 		}
 
-		stackOutputs = o.Stacks[0].Outputs
+		stackOutputs = toOutputs(o.Stacks[0].Outputs)
 		stackStatus = *o.Stacks[0].StackStatus
 	}
 
@@ -83,12 +83,27 @@ func (c *CloudFormation) DescribeOutputsAndStatus(stackName string) ([]*cloudfor
 	return stackOutputs, stackStatus, nil
 }
 
-func (c *CloudFormation) GetOutputValue(outputs []*cloudformation.Output, key string) (string, error) {
+func (c *CloudFormation) GetOutputValue(outputs []Output, key string) (string, error) {
 	for _, o := range outputs {
-		if *o.OutputKey == key {
-			return *o.OutputValue, nil
+		if o.OutputKey == key {
+			return o.OutputValue, nil
 		}
 	}
 
 	return "", microerror.Maskf(outputNotFoundError, "stack output value for key '%s'", key)
+}
+
+func toOutputs(outputs []*cloudformation.Output) []Output {
+	var newOutputs []Output
+
+	for _, o := range outputs {
+		n := Output{
+			OutputKey:   *o.OutputKey,
+			OutputValue: *o.OutputValue,
+		}
+
+		newOutputs = append(newOutputs, n)
+	}
+
+	return newOutputs
 }
