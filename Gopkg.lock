@@ -250,7 +250,7 @@
     "pkg/clientset/versioned/typed/release/v1alpha1/fake",
   ]
   pruneopts = "UT"
-  revision = "db49342c89a63379fffd096e826190d4d5a09512"
+  revision = "ea4d65a465b38b893cf39d930b73d10453cef050"
 
 [[projects]]
   branch = "master"
@@ -313,7 +313,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:04b7ac469ebb6672b0e05304f6b42e1a4405299d9e3d7e9e86abc27c4206d0d2"
+  digest = "1:ba24bc2aa78dc460f171b67ef46f65f88653e2089ece74df3521d03b7fdc8c1a"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
     "internal/render",
@@ -321,7 +321,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "a30d02cb034c0bbb6c162af06ea950e988c889b7"
+  revision = "01d00a35fdcebfadddfd63267f106615fe044421"
 
 [[projects]]
   branch = "master"
@@ -619,12 +619,12 @@
   version = "v1.3.1"
 
 [[projects]]
-  branch = "master"
   digest = "1:0bfbe13936953a98ae3cfe8ed6670d396ad81edf069a806d2f6515d7bb6950df"
   name = "github.com/google/btree"
   packages = ["."]
   pruneopts = "UT"
   revision = "4030bb1f1f0c35b30ca7009e9ebd06849dd45306"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -632,7 +632,7 @@
   name = "github.com/google/go-github"
   packages = ["github"]
   pruneopts = "UT"
-  revision = "a627c9f2b45bda1e367a0241649807445a4fc0a8"
+  revision = "fc51e0a08ebd23dfaa8cacd77444a8ca57df151f"
 
 [[projects]]
   digest = "1:a63cff6b5d8b95638bfe300385d93b2a6d9d687734b863da8e09dc834510a690"
@@ -1139,7 +1139,7 @@
     "protobuf/field_mask",
   ]
   pruneopts = "UT"
-  revision = "5fe7a883aa19554f42890211544aa549836af7b7"
+  revision = "e79c0c59cdb5e117ef82a6f885294df3d74065d5"
 
 [[projects]]
   digest = "1:a0bdff6a1dd68e7fa6edbffe3bef8e061db79543975d1c53afcae3a8d8a6c445"

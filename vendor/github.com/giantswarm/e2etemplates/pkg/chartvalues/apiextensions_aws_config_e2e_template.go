@@ -3,7 +3,6 @@ package chartvalues
 const apiExtensionsAWSConfigE2ETemplate = `commonDomain: {{ .CommonDomain }}
 clusterName: {{ .ClusterName }}
 clusterVersion: v_0_1_0
-sshPublicKey: {{ .SSHPublicKey }}
 versionBundleVersion: {{ .VersionBundleVersion }}
 aws:
   networkCIDR: {{ .AWS.NetworkCIDR }}
