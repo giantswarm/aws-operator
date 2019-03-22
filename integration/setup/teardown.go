@@ -9,13 +9,14 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/integration/env"
 )
 
-func teardown(ctx context.Context, config Config) error {
+func teardown(ctx context.Context, clusterID string, config Config) error {
 	var err error
 	var errors []error
 
@@ -35,6 +36,14 @@ func teardown(ctx context.Context, config Config) error {
 				config.Logger.LogCtx(ctx, "level", "error", "message", fmt.Sprintf("failed to delete release %#q", release), "stack", fmt.Sprintf("%#v", err))
 				errors = append(errors, microerror.Mask(err))
 			}
+		}
+	}
+
+	{
+		err = ensureBastionHostDeleted(ctx, clusterID, config)
+		if err != nil {
+			config.Logger.LogCtx(ctx, "level", "error", "message", "failed to delete bastion host", "stack", fmt.Sprintf("%#v", err))
+			errors = append(errors, microerror.Mask(err))
 		}
 	}
 
@@ -150,6 +159,62 @@ func startStackDeletion(ctx context.Context, config Config, stackName string) er
 	_, err := config.AWSClient.CloudFormation.DeleteStack(in)
 	if err != nil {
 		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
+func ensureBastionHostDeleted(ctx context.Context, clusterID string, config Config) error {
+	var err error
+
+	var instanceID string
+	{
+		i := &ec2.DescribeInstancesInput{
+			Filters: []*ec2.Filter{
+				{
+					Name: aws.String("giantswarm.io/cluster"),
+					Values: []*string{
+						aws.String(clusterID),
+					},
+				},
+				{
+					Name: aws.String("giantswarm.io/instance"),
+					Values: []*string{
+						aws.String("e2e-bastion"),
+					},
+				},
+			},
+		}
+
+		o, err := config.AWSClient.EC2.DescribeInstances(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if len(o.Reservations) == 0 {
+			return microerror.Maskf(notExistsError, "master instance")
+		}
+		if len(o.Reservations) != 1 {
+			return microerror.Maskf(executionFailedError, "expected one master instance, got %d", len(o.Reservations))
+		}
+		if len(o.Reservations[0].Instances) != 1 {
+			return microerror.Maskf(executionFailedError, "expected one master instance, got %d", len(o.Reservations[0].Instances))
+		}
+
+		instanceID = *o.Reservations[0].Instances[0].InstanceId
+	}
+
+	{
+		i := &ec2.TerminateInstancesInput{
+			InstanceIds: []*string{
+				aws.String(instanceID),
+			},
+		}
+
+		_, err = config.AWSClient.EC2.TerminateInstances(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
 	return nil

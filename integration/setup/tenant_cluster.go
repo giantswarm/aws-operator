@@ -10,6 +10,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/release"
@@ -183,12 +184,29 @@ func ensureAWSConfigInstalled(ctx context.Context, id string, config Config) err
 		return microerror.Mask(err)
 	}
 
+	go func() {
+		o := func() error {
+			err = ensureBastionHostCreated(ctx, id, config)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			return nil
+		}
+		b := backoff.NewMaxRetries(30, 1*time.Minute)
+		n := backoff.NewNotifier(config.Logger, ctx)
+
+		err := backoff.RetryNotify(o, b, n)
+		if err != nil {
+			config.Logger.LogCtx(ctx, "level", "error", "message", err.Error())
+		}
+	}()
+
 	var values string
 	{
 		c := chartvalues.APIExtensionsAWSConfigE2EConfig{
 			CommonDomain:         env.CommonDomain(),
 			ClusterName:          id,
-			SSHPublicKey:         env.IDRSAPub(),
 			VersionBundleVersion: env.VersionBundleVersion(),
 
 			AWS: chartvalues.APIExtensionsAWSConfigE2EConfigAWS{
@@ -291,6 +309,128 @@ func ensureCertConfigsInstalled(ctx context.Context, id string, config Config) e
 	err = config.Release.EnsureInstalled(ctx, key.CertsReleaseName(id), release.NewStableChartInfo("e2esetup-certs-chart"), values, config.Release.Condition().SecretExists(ctx, "default", fmt.Sprintf("%s-api", id)))
 	if err != nil {
 		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
+func ensureBastionHostCreated(ctx context.Context, clusterID string, config Config) error {
+	var err error
+
+	var securityGroupID string
+	{
+		i := &ec2.DescribeSecurityGroupsInput{
+			Filters: []*ec2.Filter{
+				{
+					Name:   aws.String("giantswarm.io/cluster"),
+					Values: []*string{aws.String(clusterID)},
+				},
+				{
+					Name:   aws.String("aws:cloudformation:logical-id"),
+					Values: []*string{aws.String("WorkerSecurityGroup")},
+				},
+			},
+		}
+
+		o, err := config.AWSClient.EC2.DescribeSecurityGroups(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		if len(o.SecurityGroups) != 1 {
+			return microerror.Maskf(executionFailedError, "expected one security group, got %d", len(o.SecurityGroups))
+		}
+
+		securityGroupID = *o.SecurityGroups[0].GroupId
+	}
+
+	var subnetID string
+	{
+		i := &ec2.DescribeSubnetsInput{
+			Filters: []*ec2.Filter{
+				{
+					Name:   aws.String("giantswarm.io/cluster"),
+					Values: []*string{aws.String(clusterID)},
+				},
+				{
+					Name:   aws.String("aws:cloudformation:logical-id"),
+					Values: []*string{aws.String("PublicSubnet")},
+				},
+			},
+		}
+
+		o, err := config.AWSClient.EC2.DescribeSubnets(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		if len(o.Subnets) != 1 {
+			return microerror.Maskf(executionFailedError, "expected one subnet, got %d", len(o.Subnets))
+		}
+
+		subnetID = *o.Subnets[0].SubnetId
+	}
+
+	{
+		i := &ec2.RunInstancesInput{
+			ImageId:      aws.String("ami-015e6cb33a709348e"),
+			InstanceType: aws.String("t2.micro"),
+			MaxCount:     aws.Int64(1),
+			MinCount:     aws.Int64(1),
+			NetworkInterfaces: []*ec2.InstanceNetworkInterfaceSpecification{
+				{
+					AssociatePublicIpAddress: aws.Bool(true),
+				},
+			},
+			SecurityGroupIds: []*string{
+				aws.String(securityGroupID),
+			},
+			SubnetId: aws.String(subnetID),
+			TagSpecifications: []*ec2.TagSpecification{
+				{
+					ResourceType: aws.String("instance"),
+					Tags: []*ec2.Tag{
+						{
+							Key:   aws.String("giantswarm.io/cluster"),
+							Value: aws.String(clusterID),
+						},
+						{
+							Key:   aws.String("giantswarm.io/instance"),
+							Value: aws.String("e2e-bastion"),
+						},
+					},
+				},
+			},
+			UserData: aws.String(`
+				{
+				  "ignition": {
+				    "config": {},
+				    "timeouts": {},
+				    "version": "2.1.0"
+				  },
+				  "networkd": {},
+				  "passwd": {
+				    "users": [
+				      {
+				        "groups": [
+				          "sudo",
+				          "docker"
+				        ],
+				        "name": "xh3b4sd",
+				        "sshAuthorizedKeys": [
+				          "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQClCCgsKl7+mQwD+giN6OEruV1ur/prpWXfyGHJyGGQkROZA3IcrpmRPWmKKXpCaW+G8lcb9DXD/K7/rNAh+4hpsfvCUs8u0mJ6u4El/8dcRTQaZUdLX8q3AZZ38gmk+yZz241x7LGd05D4H+aq9sVdtbcAepINUJyZ7p3yXTfCYwHC7QMYiuRFKMaUHY50shFhSYdD9TCEFtH2ybPi1/WOCX6gf90f6O0Ivo7tzwtYGV8ToIa2nO+CqwlIRiGqEy4/g9h1gCPDvgcLZmok74V6mH12whNdMDyJyuT8S1dLwNiKoYkvMbcUkpE0O/0LBCg+SsHVHmgnsNx9t0hUg8iR xh3b4sd"
+				        ]
+				      }
+				    ]
+				  },
+				  "storage": {},
+				  "systemd": {}
+				}
+			`),
+		}
+
+		_, err = config.AWSClient.EC2.RunInstances(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
 	return nil

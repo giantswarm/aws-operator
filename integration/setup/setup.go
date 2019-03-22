@@ -58,7 +58,7 @@ func Setup(m *testing.M, config Config) {
 		}
 
 		if !env.CircleCI() {
-			err := teardown(ctx, config)
+			err := teardown(ctx, env.ClusterID(), config)
 			if err != nil {
 				// teardown errors are logged inside the function.
 				v = 1
