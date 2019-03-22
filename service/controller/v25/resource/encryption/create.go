@@ -1,4 +1,4 @@
-package encryptionkey
+package encryption
 
 import (
 	"context"
@@ -30,8 +30,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// when creating it. On each cluster creation we saw the retry resource
 	// kicking in once because of a not found error. To prevent the error, instead
 	// we backoff silently upfront where we know we have to.
-	var encryptionKey string
 	{
+		var encryptionKey string
+
 		o := func() error {
 			encryptionKey, err = r.encrypter.EncryptionKey(ctx, cr)
 			if err != nil {
@@ -46,9 +47,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		if err != nil {
 			return microerror.Mask(err)
 		}
-	}
 
-	cc.Status.TenantCluster.EncryptionKey = encryptionKey
+		cc.Status.TenantCluster.Encryption.Key = encryptionKey
+	}
 
 	return nil
 }

@@ -25,7 +25,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 		return "", microerror.Mask(err)
 	}
 
-	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, c.encrypter, cc.Status.TenantCluster.EncryptionKey, clusterKeys)
+	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, c.encrypter, cc.Status.TenantCluster.Encryption.Key, clusterKeys)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -35,7 +35,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 		be := baseExtension{
 			customObject:  customObject,
 			encrypter:     c.encrypter,
-			encryptionKey: cc.Status.TenantCluster.EncryptionKey,
+			encryptionKey: cc.Status.TenantCluster.Encryption.Key,
 		}
 
 		params = k8scloudconfig.DefaultParams()

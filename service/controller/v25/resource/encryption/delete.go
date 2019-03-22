@@ -1,4 +1,4 @@
-package encryptionkey
+package encryption
 
 import (
 	"context"
