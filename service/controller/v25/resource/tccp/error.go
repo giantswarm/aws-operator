@@ -35,7 +35,12 @@ var alreadyTerminatedError = &microerror.Error{
 	Kind: "alreadyTerminatedError",
 }
 
-// IsAlreadyTerminated asserts alreadyTerminatedError.
+// IsAlreadyTerminated asserts alreadyTerminatedError. Here we also check for
+// the AWS error code IncorrectInstanceState. The AWS errors might look like the
+// following example.
+//
+//     IncorrectInstanceState: The instance 'i-0b26c88f3546aefee' must be in a 'running', 'pending', 'stopping' or 'stopped' state for this operation.
+//
 func IsAlreadyTerminated(err error) bool {
 	c := microerror.Cause(err)
 
