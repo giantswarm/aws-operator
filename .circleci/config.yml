@@ -250,12 +250,12 @@ workflows:
 #      - e2eTestWIPMasterClusterState:
 #          requires:
 #            - master
-      - e2eTestCurPRClusterState:
-          requires:
-            - pr
-      - e2eTestWIPPRClusterState:
-          requires:
-            - pr
+#     - e2eTestCurPRClusterState:
+#         requires:
+#           - pr
+#     - e2eTestWIPPRClusterState:
+#         requires:
+#           - pr
 
 
 
@@ -265,12 +265,12 @@ workflows:
 #      - e2eTestWIPMasterDraining:
 #          requires:
 #            - master
-      - e2eTestCurPRDraining:
-          requires:
-            - pr
-      - e2eTestWIPPRDraining:
-          requires:
-            - pr
+#     - e2eTestCurPRDraining:
+#         requires:
+#           - pr
+#     - e2eTestWIPPRDraining:
+#         requires:
+#           - pr
 
 
 
@@ -295,12 +295,12 @@ workflows:
 #      - e2eTestWIPMasterRecreateCluster:
 #          requires:
 #            - master
-      - e2eTestCurPRRecreateCluster:
-          requires:
-            - pr
-      - e2eTestWIPPRRecreateCluster:
-          requires:
-            - pr
+#     - e2eTestCurPRRecreateCluster:
+#         requires:
+#           - pr
+#     - e2eTestWIPPRRecreateCluster:
+#         requires:
+#           - pr
 
 
 
@@ -310,12 +310,12 @@ workflows:
 #      - e2eTestWIPMasterScaling:
 #          requires:
 #            - master
-      - e2eTestCurPRScaling:
-          requires:
-            - pr
-      - e2eTestWIPPRScaling:
-          requires:
-            - pr
+#     - e2eTestCurPRScaling:
+#         requires:
+#           - pr
+#     - e2eTestWIPPRScaling:
+#         requires:
+#           - pr
 
 
 
