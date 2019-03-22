@@ -38,6 +38,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			finalizerskeptcontext.SetKept(ctx)
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
 			return nil
 
 		} else if IsNotExists(err) {
@@ -45,6 +46,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 			return nil
+
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
@@ -65,6 +67,9 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the deletion of the tenant cluster's control plane finalizer cloud formation stack")
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+		finalizerskeptcontext.SetKept(ctx)
 	}
 
 	return nil

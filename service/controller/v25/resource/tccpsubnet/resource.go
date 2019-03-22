@@ -49,7 +49,7 @@ func (r *Resource) addSubnetsToContext(ctx context.Context, cr v1alpha1.AWSConfi
 	// The tenant cluster VPC is a requirement to find its associated subnets and
 	// route tables. In case the VPC ID is not yet tracked in the controller
 	// context we return an error and cause the resource to be canceled.
-	if cc.Status.TenantCluster.VPC.ID == "" {
+	if cc.Status.TenantCluster.TCCP.VPC.ID == "" {
 		return microerror.Mask(vpcNotFoundError)
 	}
 
@@ -59,7 +59,7 @@ func (r *Resource) addSubnetsToContext(ctx context.Context, cr v1alpha1.AWSConfi
 				{
 					Name: aws.String("vpc-id"),
 					Values: []*string{
-						aws.String(cc.Status.TenantCluster.VPC.ID),
+						aws.String(cc.Status.TenantCluster.TCCP.VPC.ID),
 					},
 				},
 			},
@@ -79,7 +79,7 @@ func (r *Resource) addSubnetsToContext(ctx context.Context, cr v1alpha1.AWSConfi
 				{
 					Name: aws.String("vpc-id"),
 					Values: []*string{
-						aws.String(cc.Status.TenantCluster.VPC.ID),
+						aws.String(cc.Status.TenantCluster.TCCP.VPC.ID),
 					},
 				},
 			},
