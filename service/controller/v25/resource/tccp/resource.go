@@ -184,7 +184,12 @@ func (r *Resource) terminateMasterInstance(ctx context.Context, cr v1alpha1.AWSC
 		}
 
 		_, err = cc.Client.TenantCluster.AWS.EC2.ModifyInstanceAttribute(i)
-		if err != nil {
+		if IsAlreadyTerminated(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not disable termination protection for master instance %#q", instanceID))
+			r.logger.LogCtx(ctx, "level", "debug", "message", "master instance is already terminated")
+			return nil
+
+		} else if err != nil {
 			return microerror.Mask(err)
 		}
 
