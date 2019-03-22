@@ -374,7 +374,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:12ca67bb5769214fd0a65b7a6d2e9fb7b54366a5fbbeb2884fef94dd3e5cdac1"
+  digest = "1:33cb6cc9f640eb30fdc6da4deb53eb6363a7391824854b28034c10c368e968ba"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
@@ -384,7 +384,7 @@
     "v_4_1_1",
   ]
   pruneopts = "T"
-  revision = "c50bfbcb9f86cbdc2843ac181c7762ef9f77d72f"
+  revision = "02b55c1e9b332f40ef5e0c5636a74fb9f6a23e0d"
 
 [[projects]]
   branch = "master"
@@ -926,7 +926,7 @@
     "xfs",
   ]
   pruneopts = "UT"
-  revision = "40f3c57fb1983891f95378042bd0bfd590f52384"
+  revision = "55ae3d9d557340b5bc24cd8aa5f6fa2c2ab31352"
 
 [[projects]]
   digest = "1:3e39bafd6c2f4bf3c76c3bfd16a2e09e016510ad5db90dc02b88e2f565d6d595"
@@ -1039,7 +1039,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "1272bf9dcd53ea65c09668fb4c76e65deb740072"
+  revision = "addf6b3196f61cd44ce5a76657913698c73479d0"
 
 [[projects]]
   branch = "master"
@@ -1065,14 +1065,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:012ffea19e0c7f3bf69652ba71b42c8ffa9929ad53f8a1d50534b279cfd7a34f"
+  digest = "1:6b3e6ddcebac95be1d690dbd53b5aa2e520715becb7e521bb526ccf3b4c53c15"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "f7bb7a8bee54210937e93ec56d007d892c1f0580"
+  revision = "f49334f85ddcf0f08d7fb6dd7363e9e6d6b777eb"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
