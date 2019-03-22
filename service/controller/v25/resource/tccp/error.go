@@ -3,6 +3,7 @@ package tccp
 import (
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
 )
@@ -24,6 +25,28 @@ func IsAlreadyExists(err error) bool {
 	}
 
 	if c == alreadyExistsError {
+		return true
+	}
+
+	return false
+}
+
+var alreadyTerminatedError = &microerror.Error{
+	Kind: "alreadyTerminatedError",
+}
+
+// IsAlreadyTerminated asserts alreadyTerminatedError.
+func IsAlreadyTerminated(err error) bool {
+	c := microerror.Cause(err)
+
+	aerr, ok := c.(awserr.Error)
+	if ok {
+		if aerr.Code() == "IncorrectInstanceState" {
+			return true
+		}
+	}
+
+	if c == alreadyTerminatedError {
 		return true
 	}
 
