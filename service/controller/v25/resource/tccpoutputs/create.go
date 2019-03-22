@@ -146,11 +146,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			if err != nil {
 				return microerror.Mask(err)
 			}
-			cc.Status.TenantCluster.VPC.ID = v
+			cc.Status.TenantCluster.TCCP.VPC.ID = v
 		} else if err != nil {
 			return microerror.Mask(err)
 		} else {
-			cc.Status.TenantCluster.VPC.ID = v
+			cc.Status.TenantCluster.TCCP.VPC.ID = v
 		}
 	}
 
@@ -167,11 +167,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			if err != nil {
 				return microerror.Mask(err)
 			}
-			cc.Status.TenantCluster.VPCPeeringConnectionID = v
+			cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID = v
 		} else if err != nil {
 			return microerror.Mask(err)
 		} else {
-			cc.Status.TenantCluster.VPCPeeringConnectionID = v
+			cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID = v
 		}
 	}
 
