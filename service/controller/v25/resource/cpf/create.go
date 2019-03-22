@@ -25,7 +25,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		if cc.Status.TenantCluster.VPCPeeringConnectionID == "" {
+		if cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the VPC Peering Connection ID in the controller context")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
@@ -151,7 +151,7 @@ func (r *Resource) newPrivateRoutes(ctx context.Context, cr v1alpha1.AWSConfig) 
 				CidrBlock: cidrBlock,
 				// The peer connection id is fetched from the cloud formation stack
 				// outputs in the stackoutput resource.
-				PeerConnectionID: cc.Status.TenantCluster.VPCPeeringConnectionID,
+				PeerConnectionID: cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
 			}
 
 			routes = append(routes, route)
@@ -181,7 +181,7 @@ func (r *Resource) newPublicRoutes(ctx context.Context, cr v1alpha1.AWSConfig) (
 			CidrBlock: key.StatusNetworkCIDR(cr),
 			// The peer connection id is fetched from the cloud formation stack
 			// outputs in the stackoutput resource.
-			PeerConnectionID: cc.Status.TenantCluster.VPCPeeringConnectionID,
+			PeerConnectionID: cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
 		}
 
 		routes = append(routes, route)

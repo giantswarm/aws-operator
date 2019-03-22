@@ -35,16 +35,14 @@ type ContextStatusControlPlaneVPC struct {
 }
 
 type ContextStatusTenantCluster struct {
-	AWSAccountID           string
-	EncryptionKey          string
-	HostedZoneNameServers  string
-	KMS                    ContextStatusTenantClusterKMS
-	MasterInstance         ContextStatusTenantClusterMasterInstance
-	TCCP                   ContextStatusTenantClusterTCCP
-	VersionBundleVersion   string
-	VPC                    ContextStatusTenantClusterVPC
-	VPCPeeringConnectionID string
-	WorkerInstance         ContextStatusTenantClusterWorkerInstance
+	AWSAccountID          string
+	EncryptionKey         string
+	HostedZoneNameServers string
+	KMS                   ContextStatusTenantClusterKMS
+	MasterInstance        ContextStatusTenantClusterMasterInstance
+	TCCP                  ContextStatusTenantClusterTCCP
+	VersionBundleVersion  string
+	WorkerInstance        ContextStatusTenantClusterWorkerInstance
 }
 
 type ContextStatusTenantClusterKMS struct {
@@ -64,10 +62,12 @@ type ContextStatusTenantClusterTCCP struct {
 	IsTransitioning bool
 	RouteTables     []*ec2.RouteTable
 	Subnets         []*ec2.Subnet
+	VPC             ContextStatusTenantClusterTCCPVPC
 }
 
-type ContextStatusTenantClusterVPC struct {
-	ID string
+type ContextStatusTenantClusterTCCPVPC struct {
+	ID                  string
+	PeeringConnectionID string
 }
 
 type ContextStatusTenantClusterWorkerInstance struct {
