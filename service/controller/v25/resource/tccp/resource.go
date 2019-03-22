@@ -173,23 +173,23 @@ func (r *Resource) terminateMasterInstance(ctx context.Context, cr v1alpha1.AWSC
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found master instance ID %#q", instanceID))
 	}
 
-	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("disabling termination protection for master instance %#q", instanceID))
-
-		i := &ec2.ModifyInstanceAttributeInput{
-			DisableApiTermination: &ec2.AttributeBooleanValue{
-				Value: aws.Bool(false),
-			},
-			InstanceId: aws.String(instanceID),
-		}
-
-		_, err = cc.Client.TenantCluster.AWS.EC2.ModifyInstanceAttribute(i)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("disabled termination protection for master instance %#q", instanceID))
-	}
+	//{
+	//	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("disabling termination protection for master instance %#q", instanceID))
+	//
+	//	i := &ec2.ModifyInstanceAttributeInput{
+	//		DisableApiTermination: &ec2.AttributeBooleanValue{
+	//			Value: aws.Bool(false),
+	//		},
+	//		InstanceId: aws.String(instanceID),
+	//	}
+	//
+	//	_, err = cc.Client.TenantCluster.AWS.EC2.ModifyInstanceAttribute(i)
+	//	if err != nil {
+	//		return microerror.Mask(err)
+	//	}
+	//
+	//	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("disabled termination protection for master instance %#q", instanceID))
+	//}
 
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminating master instance %#q", instanceID))
