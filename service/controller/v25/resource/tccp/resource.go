@@ -2,19 +2,19 @@ package tccp
 
 import (
 	"context"
+	"fmt"
 
-	awscloudformation "github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/v25/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/v25/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v25/detection"
 	"github.com/giantswarm/aws-operator/service/controller/v25/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v25/key"
-	"github.com/giantswarm/aws-operator/service/controller/v25/templates"
 )
 
 const (
@@ -47,12 +47,12 @@ type Config struct {
 	EncrypterRoleManager encrypter.RoleManager
 	Logger               micrologger.Logger
 
-	AdvancedMonitoringEC2      bool
 	Detection                  *detection.Detection
 	EncrypterBackend           string
 	GuestPrivateSubnetMaskBits int
 	GuestPublicSubnetMaskBits  int
 	InstallationName           string
+	InstanceMonitoring         bool
 	PublicRouteTables          string
 	Route53Enabled             bool
 }
@@ -63,12 +63,12 @@ type Resource struct {
 	encrypterRoleManager encrypter.RoleManager
 	logger               micrologger.Logger
 
-	encrypterBackend  string
-	detection         *detection.Detection
-	installationName  string
-	monitoring        bool
-	publicRouteTables string
-	route53Enabled    bool
+	encrypterBackend   string
+	detection          *detection.Detection
+	installationName   string
+	instanceMonitoring bool
+	publicRouteTables  string
+	route53Enabled     bool
 }
 
 // New creates a new configured cloudformation resource.
@@ -90,11 +90,11 @@ func New(config Config) (*Resource, error) {
 		encrypterRoleManager: config.EncrypterRoleManager,
 		logger:               config.Logger,
 
-		encrypterBackend:  config.EncrypterBackend,
-		installationName:  config.InstallationName,
-		monitoring:        config.AdvancedMonitoringEC2,
-		publicRouteTables: config.PublicRouteTables,
-		route53Enabled:    config.Route53Enabled,
+		encrypterBackend:   config.EncrypterBackend,
+		installationName:   config.InstallationName,
+		instanceMonitoring: config.InstanceMonitoring,
+		publicRouteTables:  config.PublicRouteTables,
+		route53Enabled:     config.Route53Enabled,
 	}
 
 	return r, nil
@@ -104,75 +104,109 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) getCloudFormationTags(customObject v1alpha1.AWSConfig) []*awscloudformation.Tag {
-	tags := key.ClusterTags(customObject, r.installationName)
-	return awstags.NewCloudFormation(tags)
-}
-
-func (r *Resource) newTemplateBody(ctx context.Context, customObject v1alpha1.AWSConfig, stackState StackState) (string, error) {
+func (r *Resource) searchMasterInstanceID(ctx context.Context, cr v1alpha1.AWSConfig) (string, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
-	cfg := adapter.Config{
-		APIWhitelist:                    r.apiWhiteList,
-		ControlPlaneAccountID:           cc.Status.ControlPlane.AWSAccountID,
-		ControlPlaneNATGatewayAddresses: cc.Status.ControlPlane.NATGateway.Addresses,
-		ControlPlanePeerRoleARN:         cc.Status.ControlPlane.PeerRole.ARN,
-		ControlPlaneVPCCidr:             cc.Status.ControlPlane.VPC.CIDR,
-		CustomObject:                    customObject,
-		EncrypterBackend:                r.encrypterBackend,
-		InstallationName:                r.installationName,
-		PublicRouteTables:               r.publicRouteTables,
-		Route53Enabled:                  r.route53Enabled,
-		StackState: adapter.StackState{
-			Name: stackState.Name,
+	var instanceID string
+	{
+		i := &ec2.DescribeInstancesInput{
+			Filters: []*ec2.Filter{
+				{
+					Name: aws.String("tag:Name"),
+					Values: []*string{
+						aws.String(key.MasterInstanceName(cr)),
+					},
+				},
+				{
+					Name: aws.String("tag:giantswarm.io/cluster"),
+					Values: []*string{
+						aws.String(key.ClusterID(cr)),
+					},
+				},
+			},
+		}
 
-			DockerVolumeResourceName:   stackState.DockerVolumeResourceName,
-			MasterImageID:              stackState.MasterImageID,
-			MasterInstanceResourceName: stackState.MasterInstanceResourceName,
-			MasterInstanceType:         stackState.MasterInstanceType,
-			MasterCloudConfigVersion:   stackState.MasterCloudConfigVersion,
-			MasterInstanceMonitoring:   stackState.MasterInstanceMonitoring,
+		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeInstances(i)
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
 
-			WorkerCloudConfigVersion: stackState.WorkerCloudConfigVersion,
-			WorkerDesired:            cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity,
-			WorkerDockerVolumeSizeGB: stackState.WorkerDockerVolumeSizeGB,
-			WorkerImageID:            stackState.WorkerImageID,
-			WorkerInstanceMonitoring: stackState.WorkerInstanceMonitoring,
-			WorkerInstanceType:       stackState.WorkerInstanceType,
-			WorkerMax:                cc.Status.TenantCluster.TCCP.ASG.MaxSize,
-			WorkerMin:                cc.Status.TenantCluster.TCCP.ASG.MinSize,
+		if len(o.Reservations) == 0 {
+			return "", microerror.Maskf(notExistsError, "master instance")
+		}
+		if len(o.Reservations) != 1 {
+			return "", microerror.Maskf(executionFailedError, "expected one master instance, got %d", len(o.Reservations))
+		}
+		if len(o.Reservations[0].Instances) != 1 {
+			return "", microerror.Maskf(executionFailedError, "expected one master instance, got %d", len(o.Reservations[0].Instances))
+		}
 
-			VersionBundleVersion: stackState.VersionBundleVersion,
-		},
-		TenantClusterAccountID: cc.Status.TenantCluster.AWSAccountID,
-		TenantClusterKMSKeyARN: cc.Status.TenantCluster.KMS.KeyARN,
+		instanceID = *o.Reservations[0].Instances[0].InstanceId
 	}
 
-	adp, err := adapter.NewGuest(cfg)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	rendered, err := templates.Render(key.CloudFormationGuestTemplates(), adp)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	return rendered, nil
+	return instanceID, nil
 }
 
-func toStackState(v interface{}) (StackState, error) {
-	if v == nil {
-		return StackState{}, nil
+func (r *Resource) terminateMasterInstance(ctx context.Context, cr v1alpha1.AWSConfig) error {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
 	}
 
-	stackState, ok := v.(StackState)
-	if !ok {
-		return StackState{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", stackState, v)
+	var instanceID string
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding master instance ID")
+
+		instanceID, err = r.searchMasterInstanceID(ctx, cr)
+		if IsNotExists(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find master instance ID")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "master instance does not exist")
+			return nil
+
+		} else if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found master instance ID %#q", instanceID))
 	}
 
-	return stackState, nil
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("disabling termination protection for master instance %#q", instanceID))
+
+		i := &ec2.ModifyInstanceAttributeInput{
+			DisableApiTermination: &ec2.AttributeBooleanValue{
+				Value: aws.Bool(false),
+			},
+			InstanceId: aws.String(instanceID),
+		}
+
+		_, err = cc.Client.TenantCluster.AWS.EC2.ModifyInstanceAttribute(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("disabled termination protection for master instance %#q", instanceID))
+	}
+
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminating master instance %#q", instanceID))
+
+		i := &ec2.TerminateInstancesInput{
+			InstanceIds: []*string{
+				aws.String(instanceID),
+			},
+		}
+
+		_, err := cc.Client.TenantCluster.AWS.EC2.TerminateInstances(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminated master instance %#q", instanceID))
+	}
+
+	return nil
 }

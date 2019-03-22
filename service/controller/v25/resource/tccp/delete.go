@@ -6,16 +6,14 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
-	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
 	"github.com/giantswarm/aws-operator/service/controller/v25/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/v25/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/v25/key"
 )
 
-func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
+func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	cr, err := key.ToCustomObject(obj)
 	if err != nil {
 		return microerror.Mask(err)
@@ -24,103 +22,65 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	stackStateToDelete, err := toStackState(deleteChange)
+
+	err = r.terminateMasterInstance(ctx, cr)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	if stackStateToDelete.Name != "" {
-		err = r.terminateMasterInstance(ctx, cr)
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "disabling the termination protection of the tenant cluster's control plane cloud formation stack")
+
+		i := &cloudformation.UpdateTerminationProtectionInput{
+			EnableTerminationProtection: aws.Bool(false),
+			StackName:                   aws.String(key.MainGuestStackName(cr)),
+		}
+
+		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateTerminationProtection(i)
+		if IsDeleteInProgress(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane cloud formation stack is being deleted")
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+			finalizerskeptcontext.SetKept(ctx)
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
+			return nil
+
+		} else if IsNotExists(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane cloud formation stack does not exist")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
+			return nil
+
+		} else if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "disabled the termination protection of the tenant cluster's control plane cloud formation stack")
+	}
+
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the deletion of the tenant cluster's control plane cloud formation stack")
+
+		i := &cloudformation.DeleteStackInput{
+			StackName: aws.String(key.MainGuestStackName(cr)),
+		}
+
+		_, err = cc.Client.TenantCluster.AWS.CloudFormation.DeleteStack(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		{
-			r.logger.LogCtx(ctx, "level", "debug", "message", "disabling the termination protection of the tenant cluster's control plane cloud formation stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the deletion of the tenant cluster's control plane cloud formation stack")
+	}
 
-			i := &cloudformation.UpdateTerminationProtectionInput{
-				EnableTerminationProtection: aws.Bool(false),
-				StackName:                   aws.String(key.MainGuestStackName(cr)),
-			}
-
-			_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateTerminationProtection(i)
-			if IsDeleteInProgress(err) {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane cloud formation stack is being deleted")
-
-				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
-				finalizerskeptcontext.SetKept(ctx)
-
-				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-				resourcecanceledcontext.SetCanceled(ctx)
-
-				return nil
-
-			} else if IsNotExists(err) {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane cloud formation stack does not exist")
-
-				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-				resourcecanceledcontext.SetCanceled(ctx)
-
-				return nil
-
-			} else if err != nil {
-				return microerror.Mask(err)
-			}
-
-			r.logger.LogCtx(ctx, "level", "debug", "message", "disabled the termination protection of the tenant cluster's control plane cloud formation stack")
+	if r.encrypterBackend == encrypter.VaultBackend {
+		err = r.encrypterRoleManager.EnsureDeletedAuthorizedIAMRoles(ctx, cr)
+		if err != nil {
+			return microerror.Mask(err)
 		}
-
-		{
-			r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the deletion of the tenant cluster's control plane cloud formation stack")
-
-			i := &cloudformation.DeleteStackInput{
-				StackName: aws.String(key.MainGuestStackName(cr)),
-			}
-
-			_, err = cc.Client.TenantCluster.AWS.CloudFormation.DeleteStack(i)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			if r.encrypterBackend == encrypter.VaultBackend {
-				err = r.encrypterRoleManager.EnsureDeletedAuthorizedIAMRoles(ctx, cr)
-				if err != nil {
-					return microerror.Mask(err)
-				}
-			}
-
-			r.logger.LogCtx(ctx, "level", "debug", "message", "requested the deletion of the tenant cluster's control plane cloud formation stack")
-		}
-	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting the tenant cluster main stack")
 	}
 
 	return nil
-}
-
-func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*controller.Patch, error) {
-	deleteChange, err := r.newDeleteChange(ctx, obj, currentState, desiredState)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	patch := controller.NewPatch()
-	patch.SetDeleteChange(deleteChange)
-
-	return patch, nil
-}
-
-func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	currentStackState, err := toStackState(currentState)
-	if err != nil {
-		return StackState{}, microerror.Mask(err)
-	}
-
-	deleteState := StackState{
-		Name: currentStackState.Name,
-	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster main stack that has to be deleted")
-
-	return deleteState, nil
 }

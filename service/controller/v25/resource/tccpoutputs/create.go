@@ -57,6 +57,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster cloud formation stack outputs")
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster main cloud formation stack output values are not accessible due to stack status %#q", s))
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			cc.Status.TenantCluster.TCCP.IsTransitioning = true
 			return nil
 
 		} else if err != nil {
