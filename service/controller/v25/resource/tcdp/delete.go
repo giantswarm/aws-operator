@@ -67,6 +67,9 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the deletion of the tenant cluster's data plane cloud formation stack")
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+		finalizerskeptcontext.SetKept(ctx)
 	}
 
 	return nil
