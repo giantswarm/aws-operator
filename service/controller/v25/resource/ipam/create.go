@@ -32,7 +32,7 @@ func init() {
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	var err error
 
-	var customResource v1alpha1.AWSConfig
+	var cr v1alpha1.AWSConfig
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "fetching latest version of custom resource")
 
@@ -45,48 +45,17 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		customResource = *newObj
+		cr = *newObj
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "fetchted latest version of custom resource")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "fetched latest version of custom resource")
 	}
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if subnet needs to be allocated for cluster")
 
-	if key.StatusNetworkCIDR(customResource) == "" {
-		// TODO remove the status checks for older clusters when all tenant clusters
-		// are upgraded to this version and have subnet allocation in their Status
-		// field.
-		//
-		//     https://github.com/giantswarm/giantswarm/issues/4192
-		//
+	if key.StatusNetworkCIDR(cr) == "" {
 		var statusAZs []v1alpha1.AWSConfigStatusAWSAvailabilityZone
 		var subnetCIDR net.IPNet
-		if customResource.ClusterStatus().HasUpdatingCondition() || customResource.ClusterStatus().HasUpdatedCondition() {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "reusing allocated cluster CIDR")
-
-			statusAZs = []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
-				{
-					Name: key.AvailabilityZone(customResource),
-					Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
-						Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
-							CIDR: key.PrivateSubnetCIDR(customResource),
-						},
-						Public: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
-							CIDR: key.PublicSubnetCIDR(customResource),
-						},
-					},
-				},
-			}
-
-			_, c, err := net.ParseCIDR(key.CIDR(customResource))
-			if err != nil {
-				return microerror.Mask(err)
-			}
-			subnetCIDR = *c
-
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("reused allocated cluster CIDR %#q", subnetCIDR))
-
-		} else {
+		{
 			r.logger.LogCtx(ctx, "level", "debug", "message", "allocating cluster subnet CIDR")
 
 			subnetCIDR, err = r.allocateSubnet(ctx)
@@ -94,7 +63,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				return microerror.Mask(err)
 			}
 
-			randomAZs, err := r.selectRandomAZs(key.SpecAvailabilityZones(customResource))
+			randomAZs, err := r.selectRandomAZs(key.SpecAvailabilityZones(cr))
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -113,10 +82,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		{
 			r.logger.LogCtx(ctx, "level", "debug", "message", "updating CR status")
 
-			customResource.Status.Cluster.Network.CIDR = subnetCIDR.String()
-			customResource.Status.AWS.AvailabilityZones = statusAZs
+			cr.Status.Cluster.Network.CIDR = subnetCIDR.String()
+			cr.Status.AWS.AvailabilityZones = statusAZs
 
-			_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(customResource.Namespace).UpdateStatus(&customResource)
+			_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(cr.Namespace).UpdateStatus(&cr)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -222,17 +191,7 @@ func getAWSConfigSubnets(g8sClient versioned.Interface) ([]net.IPNet, error) {
 	for _, ac := range awsConfigList.Items {
 		cidr := key.StatusNetworkCIDR(ac)
 		if cidr == "" {
-			// To prevent race condition when pre-v19 and v19+ clusters are
-			// created within short period of time and v19+ CR gets picked
-			// first. The pre-v19 CR might not have Status section yet.
-			//
-			// TODO: When AWSConfig.Spec.AWS.VPC.CIDR field is not used
-			// anymore, it (and correspondingly this branch) should be
-			// removed.
-			cidr = key.CIDR(ac)
-			if cidr == "" {
-				continue
-			}
+			continue
 		}
 
 		_, n, err := net.ParseCIDR(cidr)
