@@ -1,4 +1,4 @@
-package encryptionkey
+package encryption
 
 import (
 	"github.com/giantswarm/microerror"
@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	name = "encryptionkeyv25"
+	name = "encryptionv25"
 )
 
 type Config struct {

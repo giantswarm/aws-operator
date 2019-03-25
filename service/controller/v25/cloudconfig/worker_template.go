@@ -28,7 +28,7 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 		be := baseExtension{
 			customObject:  customObject,
 			encrypter:     c.encrypter,
-			encryptionKey: cc.Status.TenantCluster.EncryptionKey,
+			encryptionKey: cc.Status.TenantCluster.Encryption.Key,
 		}
 
 		// Default registry, kubernetes, etcd images etcd.
