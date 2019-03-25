@@ -4,6 +4,7 @@ package setup
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"time"
@@ -410,7 +411,7 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 					},
 				},
 			},
-			UserData: aws.String(`
+			UserData: aws.String(base64.StdEncoding.EncodeToString([]byte(`
 				{
 				  "ignition": {
 				    "config": {},
@@ -435,7 +436,7 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 				  "storage": {},
 				  "systemd": {}
 				}
-			`),
+			`))),
 		}
 
 		_, err = config.AWSClient.EC2.RunInstances(i)
