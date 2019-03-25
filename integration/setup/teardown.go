@@ -169,16 +169,18 @@ func ensureBastionHostDeleted(ctx context.Context, clusterID string, config Conf
 
 	var instanceID string
 	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "finding bastion instance id")
+
 		i := &ec2.DescribeInstancesInput{
 			Filters: []*ec2.Filter{
 				{
-					Name: aws.String("giantswarm.io/cluster"),
+					Name: aws.String("tag:giantswarm.io/cluster"),
 					Values: []*string{
 						aws.String(clusterID),
 					},
 				},
 				{
-					Name: aws.String("giantswarm.io/instance"),
+					Name: aws.String("tag:giantswarm.io/instance"),
 					Values: []*string{
 						aws.String("e2e-bastion"),
 					},
@@ -202,9 +204,13 @@ func ensureBastionHostDeleted(ctx context.Context, clusterID string, config Conf
 		}
 
 		instanceID = *o.Reservations[0].Instances[0].InstanceId
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found bastion instance id %#q", instanceID))
 	}
 
 	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "terminating bastion instance")
+
 		i := &ec2.TerminateInstancesInput{
 			InstanceIds: []*string{
 				aws.String(instanceID),
@@ -215,6 +221,8 @@ func ensureBastionHostDeleted(ctx context.Context, clusterID string, config Conf
 		if err != nil {
 			return microerror.Mask(err)
 		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "terminated bastion instance")
 	}
 
 	return nil

@@ -319,14 +319,16 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 
 	var securityGroupID string
 	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "waiting for worker security group")
+
 		i := &ec2.DescribeSecurityGroupsInput{
 			Filters: []*ec2.Filter{
 				{
-					Name:   aws.String("giantswarm.io/cluster"),
+					Name:   aws.String("tag:giantswarm.io/cluster"),
 					Values: []*string{aws.String(clusterID)},
 				},
 				{
-					Name:   aws.String("aws:cloudformation:logical-id"),
+					Name:   aws.String("tag:aws:cloudformation:logical-id"),
 					Values: []*string{aws.String("WorkerSecurityGroup")},
 				},
 			},
@@ -341,18 +343,22 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 		}
 
 		securityGroupID = *o.SecurityGroups[0].GroupId
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for worker security group %#q", securityGroupID))
 	}
 
 	var subnetID string
 	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "waiting for public subnet")
+
 		i := &ec2.DescribeSubnetsInput{
 			Filters: []*ec2.Filter{
 				{
-					Name:   aws.String("giantswarm.io/cluster"),
+					Name:   aws.String("tag:giantswarm.io/cluster"),
 					Values: []*string{aws.String(clusterID)},
 				},
 				{
-					Name:   aws.String("aws:cloudformation:logical-id"),
+					Name:   aws.String("tag:aws:cloudformation:logical-id"),
 					Values: []*string{aws.String("PublicSubnet")},
 				},
 			},
@@ -367,9 +373,13 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 		}
 
 		subnetID = *o.Subnets[0].SubnetId
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for public subnet %#q", subnetID))
 	}
 
 	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "creating bastion instance")
+
 		i := &ec2.RunInstancesInput{
 			ImageId:      aws.String("ami-015e6cb33a709348e"),
 			InstanceType: aws.String("t2.micro"),
@@ -431,6 +441,8 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 		if err != nil {
 			return microerror.Mask(err)
 		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "created bastion instance")
 	}
 
 	return nil
