@@ -22,8 +22,9 @@ type AWSOperatorConfigProvider struct {
 }
 
 type AWSOperatorConfigProviderAWS struct {
-	Encrypter string
-	Region    string
+	Encrypter       string
+	Region          string
+	RouteTableNames string
 }
 
 type AWSOperatorConfigSecret struct {

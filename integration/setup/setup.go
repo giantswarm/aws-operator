@@ -77,8 +77,9 @@ func installAWSOperator(ctx context.Context, config Config) error {
 		c := chartvalues.AWSOperatorConfig{
 			Provider: chartvalues.AWSOperatorConfigProvider{
 				AWS: chartvalues.AWSOperatorConfigProviderAWS{
-					Encrypter: "kms",
-					Region:    env.AWSRegion(),
+					Encrypter:       "kms",
+					Region:          env.AWSRegion(),
+					RouteTableNames: env.AWSRouteTable0() + "," + env.AWSRouteTable1(),
 				},
 			},
 			Secret: chartvalues.AWSOperatorConfigSecret{
