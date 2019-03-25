@@ -388,12 +388,13 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 			NetworkInterfaces: []*ec2.InstanceNetworkInterfaceSpecification{
 				{
 					AssociatePublicIpAddress: aws.Bool(true),
+					DeviceIndex:              aws.Int64(0),
+					Groups: []*string{
+						aws.String(securityGroupID),
+					},
+					SubnetId: aws.String(subnetID),
 				},
 			},
-			SecurityGroupIds: []*string{
-				aws.String(securityGroupID),
-			},
-			SubnetId: aws.String(subnetID),
 			TagSpecifications: []*ec2.TagSpecification{
 				{
 					ResourceType: aws.String("instance"),
