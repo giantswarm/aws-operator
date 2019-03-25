@@ -34,10 +34,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/cpf"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/cpi"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/ebsvolume"
-	"github.com/giantswarm/aws-operator/service/controller/v25/resource/encryptionkey"
+	"github.com/giantswarm/aws-operator/service/controller/v25/resource/encryption"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/ipam"
-	"github.com/giantswarm/aws-operator/service/controller/v25/resource/kmskeyarn"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/loadbalancer"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/migration"
 	"github.com/giantswarm/aws-operator/service/controller/v25/resource/namespace"
@@ -211,14 +210,14 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var encryptionKeyResource controller.Resource
+	var encryptionResource controller.Resource
 	{
-		c := encryptionkey.Config{
+		c := encryption.Config{
 			Encrypter: encrypterObject,
 			Logger:    config.Logger,
 		}
 
-		encryptionKeyResource, err = encryptionkey.New(c)
+		encryptionResource, err = encryption.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -249,20 +248,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		ipamResource, err = ipam.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var kmsKeyARNResource controller.Resource
-	{
-		c := kmskeyarn.Config{
-			Logger: config.Logger,
-
-			EncrypterBackend: config.EncrypterBackend,
-		}
-
-		kmsKeyARNResource, err = kmskeyarn.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -598,7 +583,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	resources := []controller.Resource{
 		accountIDResource,
 		natGatewayAddressesResource,
-		kmsKeyARNResource,
 		peerRoleARNResource,
 		routeTableResource,
 		vpcCIDRResource,
@@ -610,7 +594,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		migrationResource,
 		ipamResource,
 		bridgeZoneResource,
-		encryptionKeyResource,
+		encryptionResource,
 		s3BucketResource,
 		s3ObjectResource,
 		loadBalancerResource,

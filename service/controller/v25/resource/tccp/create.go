@@ -315,7 +315,7 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 				VersionBundleVersion: key.VersionBundleVersion(cr),
 			},
 			TenantClusterAccountID: cc.Status.TenantCluster.AWSAccountID,
-			TenantClusterKMSKeyARN: cc.Status.TenantCluster.KMS.KeyARN,
+			TenantClusterKMSKeyARN: cc.Status.TenantCluster.Encryption.Key,
 		}
 
 		a, err := adapter.NewGuest(c)

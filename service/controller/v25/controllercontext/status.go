@@ -36,17 +36,16 @@ type ContextStatusControlPlaneVPC struct {
 
 type ContextStatusTenantCluster struct {
 	AWSAccountID          string
-	EncryptionKey         string
+	Encryption            ContextStatusTenantClusterEncryption
 	HostedZoneNameServers string
-	KMS                   ContextStatusTenantClusterKMS
 	MasterInstance        ContextStatusTenantClusterMasterInstance
 	TCCP                  ContextStatusTenantClusterTCCP
 	VersionBundleVersion  string
 	WorkerInstance        ContextStatusTenantClusterWorkerInstance
 }
 
-type ContextStatusTenantClusterKMS struct {
-	KeyARN string
+type ContextStatusTenantClusterEncryption struct {
+	Key string
 }
 
 type ContextStatusTenantClusterMasterInstance struct {
