@@ -57,7 +57,7 @@ func Test_AdapterLaunchConfiguration_RegularFields(t *testing.T) {
 				{
 					DeleteOnTermination: true,
 					DeviceName:          kubeletEBSVolumeMountPoint,
-					VolumeSize:          defaultEBSVolumeSize,
+					VolumeSize:          "250",
 					VolumeType:          defaultEBSVolumeType,
 				},
 			},

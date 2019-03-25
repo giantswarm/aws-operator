@@ -70,24 +70,6 @@ func (l *GuestLaunchConfigAdapter) Adapt(config Config) error {
 		}
 	}
 
-	{
-		cur := config.StackState.WorkerKubeletVolumeSizeGB
-		def := defaultEBSVolumeSize
-
-		if cur == "" {
-			cur = "0"
-		}
-
-		curi, err := strconv.Atoi(cur)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		if curi <= 0 {
-			config.StackState.WorkerKubeletVolumeSizeGB = def
-		}
-	}
-
 	l.WorkerBlockDeviceMappings = []BlockDeviceMapping{
 		{
 			DeleteOnTermination: true,
@@ -104,7 +86,10 @@ func (l *GuestLaunchConfigAdapter) Adapt(config Config) error {
 		{
 			DeleteOnTermination: true,
 			DeviceName:          kubeletEBSVolumeMountPoint,
-			VolumeSize:          config.StackState.WorkerKubeletVolumeSizeGB,
+			// TL;DR; kubelet volume same size as docker volume 
+			// this is a temporary solution that should stay around until Node Pools story is ready.
+			// See here for furhter info https://github.com/giantswarm/giantswarm/issues/5582#issuecomment-476170597
+			VolumeSize:          config.StackState.WorkerDockerVolumeSizeGB,
 			VolumeType:          defaultEBSVolumeType,
 		},
 	}

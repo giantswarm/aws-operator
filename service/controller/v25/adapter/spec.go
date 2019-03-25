@@ -77,7 +77,6 @@ type StackState struct {
 	WorkerDesired             int
 	WorkerDockerVolumeSizeGB  string
 	WorkerLogVolumeSizeGB     string
-	WorkerKubeletVolumeSizeGB string
 	WorkerImageID             string
 	WorkerInstanceMonitoring  bool
 	WorkerInstanceType        string
