@@ -83,8 +83,8 @@ func (l *GuestLaunchConfigAdapter) Adapt(config Config) error {
 			VolumeSize:          config.StackState.WorkerLogVolumeSizeGB,
 			VolumeType:          defaultEBSVolumeType,
 		},
-		{	
-			// TL;DR; kubelet volume same size as docker volume 
+		{
+			// TL;DR; kubelet volume same size as docker volume
 			// this is a temporary solution that should stay around until Node Pools story is ready.
 			// See here for furhter info https://github.com/giantswarm/giantswarm/issues/5582#issuecomment-476170597
 			DeleteOnTermination: true,
