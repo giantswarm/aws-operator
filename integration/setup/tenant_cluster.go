@@ -401,20 +401,53 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 	}
 
 	{
-		config.Logger.LogCtx(ctx, "level", "debug", "message", "updating bastion security group to allow ssh access")
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "tagging bastion security group")
 
-		i := &ec2.UpdateSecurityGroupRuleDescriptionsIngressInput{
-			GroupId: aws.String(bastionSecurityGroupID),
-			IpPermissions: []*ec2.IpPermission{
+		i := &ec2.CreateTagsInput{
+			Resources: []*string{
+				aws.String(bastionSecurityGroupID),
+			},
+			Tags: []*ec2.Tag{
 				{
-					FromPort:   aws.Int64(-1),
-					IpProtocol: aws.String("tcp"),
-					ToPort:     aws.Int64(22),
+					Key:   aws.String("Name"),
+					Value: aws.String(clusterID + "-bastion"),
+				},
+				{
+					Key:   aws.String("giantswarm.io/cluster"),
+					Value: aws.String(clusterID),
 				},
 			},
 		}
 
-		_, err = config.AWSClient.EC2.UpdateSecurityGroupRuleDescriptionsIngress(i)
+		_, err = config.AWSClient.EC2.CreateTags(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "tagged bastion security group")
+	}
+
+	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "updating bastion security group to allow ssh access")
+
+		i := &ec2.AuthorizeSecurityGroupIngressInput{
+			GroupId: aws.String(bastionSecurityGroupID),
+			IpPermissions: []*ec2.IpPermission{
+				{
+					FromPort:   aws.Int64(22),
+					IpProtocol: aws.String("tcp"),
+					IpRanges: []*ec2.IpRange{
+						{
+							CidrIp:      aws.String("0.0.0.0/0"),
+							Description: aws.String("Allow SSH access from everywhere to port 22."),
+						},
+					},
+					ToPort: aws.Int64(22),
+				},
+			},
+		}
+
+		_, err = config.AWSClient.EC2.AuthorizeSecurityGroupIngress(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -493,7 +526,9 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 			return microerror.Mask(err)
 		}
 
-		ip := *o.Instances[0].PublicIpAddress
+		//ip := *o.Instances[0].PublicIpAddress
+		fmt.Printf("len(*o.Instances): %#v\n", len(o.Instances))
+		ip := "todo"
 
 		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created bastion instance %#q", ip))
 	}
