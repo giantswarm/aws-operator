@@ -318,7 +318,39 @@ func ensureCertConfigsInstalled(ctx context.Context, id string, config Config) e
 func ensureBastionHostCreated(ctx context.Context, clusterID string, config Config) error {
 	var err error
 
-	var securityGroupID string
+	var subnetID string
+	var vpcID string
+	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "waiting for public subnet and vpc")
+
+		i := &ec2.DescribeSubnetsInput{
+			Filters: []*ec2.Filter{
+				{
+					Name:   aws.String("tag:giantswarm.io/cluster"),
+					Values: []*string{aws.String(clusterID)},
+				},
+				{
+					Name:   aws.String("tag:aws:cloudformation:logical-id"),
+					Values: []*string{aws.String("PublicSubnet")},
+				},
+			},
+		}
+
+		o, err := config.AWSClient.EC2.DescribeSubnets(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		if len(o.Subnets) != 1 {
+			return microerror.Maskf(executionFailedError, "expected one subnet, got %d", len(o.Subnets))
+		}
+
+		subnetID = *o.Subnets[0].SubnetId
+		vpcID = *o.Subnets[0].VpcId
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for public subnet %#q and vpc %#q", subnetID, vpcID))
+	}
+
+	var workerSecurityGroupID string
 	{
 		config.Logger.LogCtx(ctx, "level", "debug", "message", "waiting for worker security group")
 
@@ -343,39 +375,51 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 			return microerror.Maskf(executionFailedError, "expected one security group, got %d", len(o.SecurityGroups))
 		}
 
-		securityGroupID = *o.SecurityGroups[0].GroupId
+		workerSecurityGroupID = *o.SecurityGroups[0].GroupId
 
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for worker security group %#q", securityGroupID))
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for worker security group %#q", workerSecurityGroupID))
 	}
 
-	var subnetID string
+	var bastionSecurityGroupID string
 	{
-		config.Logger.LogCtx(ctx, "level", "debug", "message", "waiting for public subnet")
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "creating bastion security group")
 
-		i := &ec2.DescribeSubnetsInput{
-			Filters: []*ec2.Filter{
+		i := &ec2.CreateSecurityGroupInput{
+			Description: aws.String("Allow SSH access from everywhere to port 22."),
+			GroupName:   aws.String(clusterID + "-bastion"),
+			VpcId:       aws.String(vpcID),
+		}
+
+		o, err := config.AWSClient.EC2.CreateSecurityGroup(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		bastionSecurityGroupID = *o.GroupId
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created bastion security group %#q", bastionSecurityGroupID))
+	}
+
+	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "updating bastion security group to allow ssh access")
+
+		i := &ec2.UpdateSecurityGroupRuleDescriptionsIngressInput{
+			GroupId: aws.String(bastionSecurityGroupID),
+			IpPermissions: []*ec2.IpPermission{
 				{
-					Name:   aws.String("tag:giantswarm.io/cluster"),
-					Values: []*string{aws.String(clusterID)},
-				},
-				{
-					Name:   aws.String("tag:aws:cloudformation:logical-id"),
-					Values: []*string{aws.String("PublicSubnet")},
+					FromPort:   aws.Int64(-1),
+					IpProtocol: aws.String("tcp"),
+					ToPort:     aws.Int64(22),
 				},
 			},
 		}
 
-		o, err := config.AWSClient.EC2.DescribeSubnets(i)
+		_, err = config.AWSClient.EC2.UpdateSecurityGroupRuleDescriptionsIngress(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		if len(o.Subnets) != 1 {
-			return microerror.Maskf(executionFailedError, "expected one subnet, got %d", len(o.Subnets))
-		}
 
-		subnetID = *o.Subnets[0].SubnetId
-
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for public subnet %#q", subnetID))
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "updated bastion security group to allow ssh access")
 	}
 
 	{
@@ -391,7 +435,8 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 					AssociatePublicIpAddress: aws.Bool(true),
 					DeviceIndex:              aws.Int64(0),
 					Groups: []*string{
-						aws.String(securityGroupID),
+						aws.String(bastionSecurityGroupID),
+						aws.String(workerSecurityGroupID),
 					},
 					SubnetId: aws.String(subnetID),
 				},
@@ -400,6 +445,10 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 				{
 					ResourceType: aws.String("instance"),
 					Tags: []*ec2.Tag{
+						{
+							Key:   aws.String("Name"),
+							Value: aws.String(clusterID + "-bastion"),
+						},
 						{
 							Key:   aws.String("giantswarm.io/cluster"),
 							Value: aws.String(clusterID),
@@ -439,12 +488,14 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 			`))),
 		}
 
-		_, err = config.AWSClient.EC2.RunInstances(i)
+		o, err := config.AWSClient.EC2.RunInstances(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		config.Logger.LogCtx(ctx, "level", "debug", "message", "created bastion instance")
+		ip := *o.Instances[0].PublicIpAddress
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created bastion instance %#q", ip))
 	}
 
 	return nil
