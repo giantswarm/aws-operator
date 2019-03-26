@@ -714,3 +714,112 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 
 	return nil
 }
+
+func ensureBastionHostDeleted(ctx context.Context, clusterID string, config Config) error {
+	var err error
+
+	var instanceID string
+	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "finding bastion instance id")
+
+		i := &ec2.DescribeInstancesInput{
+			Filters: []*ec2.Filter{
+				{
+					Name: aws.String("tag:giantswarm.io/cluster"),
+					Values: []*string{
+						aws.String(clusterID),
+					},
+				},
+				{
+					Name: aws.String("tag:giantswarm.io/instance"),
+					Values: []*string{
+						aws.String("e2e-bastion"),
+					},
+				},
+			},
+		}
+
+		o, err := config.AWSClient.EC2.DescribeInstances(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if len(o.Reservations) == 0 {
+			return microerror.Maskf(notExistsError, "master instance")
+		}
+		if len(o.Reservations) != 1 {
+			return microerror.Maskf(executionFailedError, "expected one master instance, got %d", len(o.Reservations))
+		}
+		if len(o.Reservations[0].Instances) != 1 {
+			return microerror.Maskf(executionFailedError, "expected one master instance, got %d", len(o.Reservations[0].Instances))
+		}
+
+		instanceID = *o.Reservations[0].Instances[0].InstanceId
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found bastion instance id %#q", instanceID))
+	}
+
+	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "terminating bastion instance")
+
+		i := &ec2.TerminateInstancesInput{
+			InstanceIds: []*string{
+				aws.String(instanceID),
+			},
+		}
+
+		_, err = config.AWSClient.EC2.TerminateInstances(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "terminated bastion instance")
+	}
+
+	var bastionSecurityGroupID string
+	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "finding for bastion security group")
+
+		i := &ec2.DescribeSecurityGroupsInput{
+			Filters: []*ec2.Filter{
+				{
+					Name:   aws.String("tag:Name"),
+					Values: []*string{aws.String(clusterID + "-bastion")},
+				},
+				{
+					Name:   aws.String("tag:giantswarm.io/cluster"),
+					Values: []*string{aws.String(clusterID)},
+				},
+			},
+		}
+
+		o, err := config.AWSClient.EC2.DescribeSecurityGroups(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		if len(o.SecurityGroups) != 1 {
+			return microerror.Maskf(executionFailedError, "expected one security group, got %d", len(o.SecurityGroups))
+		}
+
+		bastionSecurityGroupID = *o.SecurityGroups[0].GroupId
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found bastion security group %#q", bastionSecurityGroupID))
+	}
+
+	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "deleting bastion security group")
+
+		i := &ec2.DeleteSecurityGroupInput{
+			GroupId: aws.String(bastionSecurityGroupID),
+		}
+
+		_, err = config.AWSClient.EC2.DeleteSecurityGroup(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "deleted bastion security group")
+	}
+
+	return nil
+}
