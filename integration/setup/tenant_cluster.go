@@ -83,8 +83,9 @@ func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config, w
 				return nil
 			}
 			b := backoff.NewMaxRetries(10, 1*time.Minute)
+			n := backoff.NewNotifier(config.Logger, ctx)
 
-			err := backoff.Retry(o, b)
+			err := backoff.RetryNotify(o, b, n)
 			if err != nil {
 				config.Logger.LogCtx(ctx, "level", "error", "message", err.Error())
 			}
@@ -146,9 +147,10 @@ func crExistsCondition(ctx context.Context, config Config, crd *apiextensionsv1b
 
 			return nil
 		}
-		b := backoff.NewExponential(5*time.Minute, 5*time.Second)
+		b := backoff.NewExponential(5*time.Minute, 1*time.Minute)
+		n := backoff.NewNotifier(config.Logger, ctx)
 
-		err := backoff.Retry(o, b)
+		err := backoff.RetryNotify(o, b, n)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -188,9 +190,10 @@ func crNotFoundCondition(ctx context.Context, config Config, crd *apiextensionsv
 
 			return microerror.Maskf(stillExistsError, "CR %#q in namespace %#q", crName, crNamespace)
 		}
-		b := backoff.NewExponential(60*time.Minute, 1*time.Minute)
+		b := backoff.NewExponential(60*time.Minute, 5*time.Minute)
+		n := backoff.NewNotifier(config.Logger, ctx)
 
-		err := backoff.Retry(o, b)
+		err := backoff.RetryNotify(o, b, n)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -216,8 +219,9 @@ func ensureAWSConfigInstalled(ctx context.Context, id string, config Config) err
 			return nil
 		}
 		b := backoff.NewMaxRetries(10, 1*time.Minute)
+		n := backoff.NewNotifier(config.Logger, ctx)
 
-		err := backoff.Retry(o, b)
+		err := backoff.RetryNotify(o, b, n)
 		if err != nil {
 			config.Logger.LogCtx(ctx, "level", "error", "message", err.Error())
 		}
@@ -789,7 +793,7 @@ func ensureBastionHostDeleted(ctx context.Context, clusterID string, config Conf
 
 	var bastionSecurityGroupID string
 	{
-		config.Logger.LogCtx(ctx, "level", "debug", "message", "finding for bastion security group")
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "finding bastion security group")
 
 		i := &ec2.DescribeSecurityGroupsInput{
 			Filters: []*ec2.Filter{
