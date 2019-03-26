@@ -244,33 +244,33 @@ workflows:
 
 
 
-#      - e2eTestCurMasterClusterState:
-#          requires:
-#            - master
-#      - e2eTestWIPMasterClusterState:
-#          requires:
-#            - master
-     - e2eTestCurPRClusterState:
-         requires:
-           - pr
-     - e2eTestWIPPRClusterState:
-         requires:
-           - pr
+#     - e2eTestCurMasterClusterState:
+#         requires:
+#           - master
+#     - e2eTestWIPMasterClusterState:
+#         requires:
+#           - master
+      - e2eTestCurPRClusterState:
+          requires:
+            - pr
+      - e2eTestWIPPRClusterState:
+          requires:
+            - pr
 
 
 
-#      - e2eTestCurMasterDraining:
-#          requires:
-#            - master
-#      - e2eTestWIPMasterDraining:
-#          requires:
-#            - master
-     - e2eTestCurPRDraining:
-         requires:
-           - pr
-     - e2eTestWIPPRDraining:
-         requires:
-           - pr
+#     - e2eTestCurMasterDraining:
+#         requires:
+#           - master
+#     - e2eTestWIPMasterDraining:
+#         requires:
+#           - master
+      - e2eTestCurPRDraining:
+          requires:
+            - pr
+      - e2eTestWIPPRDraining:
+          requires:
+            - pr
 
 
 
@@ -280,48 +280,48 @@ workflows:
 #     - e2eTestWIPMasterIPAM:
 #         requires:
 #           - master
-     - e2eTestCurPRIPAM:
-         requires:
-           - pr
-     - e2eTestWIPPRIPAM:
-         requires:
-           - pr
+      - e2eTestCurPRIPAM:
+          requires:
+            - pr
+      - e2eTestWIPPRIPAM:
+          requires:
+            - pr
 
 
 
-#      - e2eTestCurMasterRecreateCluster:
-#          requires:
-#            - master
-#      - e2eTestWIPMasterRecreateCluster:
-#          requires:
-#            - master
-     - e2eTestCurPRRecreateCluster:
-         requires:
-           - pr
-     - e2eTestWIPPRRecreateCluster:
-         requires:
-           - pr
+#     - e2eTestCurMasterRecreateCluster:
+#         requires:
+#           - master
+#     - e2eTestWIPMasterRecreateCluster:
+#         requires:
+#           - master
+      - e2eTestCurPRRecreateCluster:
+          requires:
+            - pr
+      - e2eTestWIPPRRecreateCluster:
+          requires:
+            - pr
 
 
 
-#      - e2eTestCurMasterScaling:
-#          requires:
-#            - master
-#      - e2eTestWIPMasterScaling:
-#          requires:
-#            - master
-     - e2eTestCurPRScaling:
-         requires:
-           - pr
-     - e2eTestWIPPRScaling:
-         requires:
-           - pr
+#     - e2eTestCurMasterScaling:
+#         requires:
+#           - master
+#     - e2eTestWIPMasterScaling:
+#         requires:
+#           - master
+      - e2eTestCurPRScaling:
+          requires:
+            - pr
+      - e2eTestWIPPRScaling:
+          requires:
+            - pr
 
 
 
-#      - e2eTestCurMasterUpdate:
-#          requires:
-#          - master
+#     - e2eTestCurMasterUpdate:
+#         requires:
+#         - master
       - e2eTestCurPRUpdate:
           requires:
           - pr
