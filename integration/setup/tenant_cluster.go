@@ -695,20 +695,12 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 			`))),
 		}
 
-		o, err := config.AWSClient.EC2.RunInstances(i)
+		_, err := config.AWSClient.EC2.RunInstances(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		//ip := *o.Instances[0].PublicIpAddress
-		fmt.Printf("len(*o.Instances): %#v\n", len(o.Instances))
-		fmt.Printf("o.Instances[0].PublicIpAddress: %#v\n", o.Instances[0].PublicIpAddress)
-		if o.Instances[0].PublicIpAddress != nil {
-			fmt.Printf("*o.Instances[0].PublicIpAddress: %#v\n", *o.Instances[0].PublicIpAddress)
-		}
-		ip := "todo"
-
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created bastion instance %#q", ip))
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "created bastion instance")
 	}
 
 	return nil
