@@ -15,7 +15,7 @@ import (
 	"github.com/giantswarm/aws-operator/integration/env"
 )
 
-func teardown(ctx context.Context, clusterID string, config Config) error {
+func teardown(ctx context.Context, config Config) error {
 	var err error
 	var errors []error
 
