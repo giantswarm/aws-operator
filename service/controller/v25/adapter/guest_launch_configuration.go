@@ -70,6 +70,24 @@ func (l *GuestLaunchConfigAdapter) Adapt(config Config) error {
 		}
 	}
 
+	{
+		cur := config.StackState.WorkerKubeletVolumeSizeGB
+		def := defaultEBSVolumeSize
+
+		if cur == "" {
+			cur = "0"
+		}
+
+		curi, err := strconv.Atoi(cur)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if curi <= 0 {
+			config.StackState.WorkerKubeletVolumeSizeGB = def
+		}
+	}
+
 	l.WorkerBlockDeviceMappings = []BlockDeviceMapping{
 		{
 			DeleteOnTermination: true,
@@ -89,7 +107,7 @@ func (l *GuestLaunchConfigAdapter) Adapt(config Config) error {
 			// See here for furhter info https://github.com/giantswarm/giantswarm/issues/5582#issuecomment-476170597
 			DeleteOnTermination: true,
 			DeviceName:          kubeletEBSVolumeMountPoint,
-			VolumeSize:          config.StackState.WorkerDockerVolumeSizeGB,
+			VolumeSize:          config.StackState.WorkerKubeletVolumeSizeGB,
 			VolumeType:          defaultEBSVolumeType,
 		},
 	}
